@@ -1,0 +1,4 @@
+
+class Fieldinteger < Fieldtext
+
+end

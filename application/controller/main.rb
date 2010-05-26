@@ -13,14 +13,15 @@ module XYZ
   class MainController < Controller
 
     # TBD instead having class AppController < Controller would be equaivalent to asserting map /xyz/app (when insider xyz namespace)
-    layout do |path,wish| 
+=begin    layout do |path,wish| 
       if wish == "html"
         path == "actset__main" or path == "swoop" ? nil : :default
       end
     end
-
+=end
     def index
-      
+#      layout :test
+print "This is a test of the main ctrllr index"      
     end
 
     #TBD: might refactor other actions to use this

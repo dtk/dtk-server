@@ -34,6 +34,8 @@ module R8
 end
 
 R8::Config[:application_name] = "application"
+R8::Config[:default_language] = "en.us"
+R8::Config[:default_template] = "default.template.erubis"
 
 #Database related config params
 R8::Config[:database] = Hash.new

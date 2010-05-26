@@ -1,3 +1,5 @@
-if __FILE__ == $0
-  # TODO Generated stub
+
+module XYZ
+  class LibraryController < Controller
+  end
 end

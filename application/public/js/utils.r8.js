@@ -1,6 +1,6 @@
 
 if(typeof R8=="undefined" || !R8) {
-	var R8={};
+	var R8= new R8();
 }
 
 if (!R8.utils) {
@@ -11,8 +11,10 @@ if (!R8.utils) {
 	R8.utils = function(){
 		return {
 
-			//this is a temp place holder until figuring things out to build routing string
-			coreActions : {'as':1,'list':1,'display':1,'edit':1,'import':1,'export':1},
+			/*
+			 * This is the global YUI variable to be used
+			 */
+			Y : new YUI({base:'js/yui3x/build/'}).use('dd', 'node'),
 
 			/*
 			 * This function takes a name/value pair json object and return a name=value&name2=value2 string
@@ -24,8 +26,6 @@ if (!R8.utils) {
 				var firstPass = false;
 
 				for(name in jsonVar) {
-					if(typeof(R8.utils.coreActions[name]) != 'undefined') continue;
-
 					if(firstPass == true) returnStr += "&";
 					returnStr += name+"="+jsonVar[name];
 					firstPass = true;

@@ -1,8 +1,7 @@
 
 if(typeof R8 === "undefined" || !R8) {
-	var R8={};
-	var R8={};
-	R8.config={};
+	var R8 = function(){};
+	R8.config = function(){};
 }
 
 if (!R8.ctrl) {
@@ -12,6 +11,9 @@ if (!R8.ctrl) {
 	 */
 	R8.ctrl = function(){
 		return {
+			init : function() {
+				//init goes here
+			},
 
 			//TODO: should the request handling and page updating be handled by core or R8.ctrl?
 			request: function(args, successFunction) {
@@ -28,10 +30,7 @@ if (!R8.ctrl) {
 				else
 					var successReturnFunction = R8.ctrl.updatePage;
 
-				baseURI = 'actset/main';
-				(params == '') ? requestStr = baseURI : requestStr = baseURI + '?' + params;
-
-				YAHOO.util.Connect.asyncRequest('POST', requestStr, {
+				YAHOO.util.Connect.asyncRequest('POST', 'index.php', {
 					success: successReturnFunction,
 					failure: R8.ctrl.failure
 				}, params);
@@ -50,7 +49,7 @@ if (!R8.ctrl) {
 
 			updatePage: function(responseObj) {
 				eval("var response =" + responseObj.responseText);
-console.log(response);
+
 				//reset the callbacks array after execution
 				R8.ctrl.tplCallbacks = new Array();
 
@@ -58,8 +57,8 @@ console.log(response);
 					R8.ctrl.setJSConfig(response['jsConfig']);
 				}
 
-				for(var i in response['actset_list']) {
-					var responseItem = response['actset_list'][i];
+				for(var i in response['ra_list']) {
+					var responseItem = response['ra_list'][i];
 
 					if (R8.utils.isDefined(response[responseItem]['cssIncludes']))
 						R8.ctrl.processCSSIncludes(response[responseItem]['cssIncludes']);

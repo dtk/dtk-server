@@ -33,9 +33,17 @@ module R8
   Config = Hash.new
 end
 
+#Application defaults
 R8::Config[:application_name] = "application"
 R8::Config[:default_language] = "en.us"
 R8::Config[:default_template] = "default.template.erubis"
+
+#Application paths.., these should be set/written by templating engine on every call
+R8::Config[:base_uri] = "http://localhost:7000"
+R8::Config[:public_js_root] = R8::Config[:base_uri] + "/public/js"
+R8::Config[:public_css_root] = R8::Config[:base_uri] + "/public/css"
+R8::Config[:public_images_root] = R8::Config[:base_uri] + "/public/images"
+
 
 #Database related config params
 R8::Config[:database] = Hash.new

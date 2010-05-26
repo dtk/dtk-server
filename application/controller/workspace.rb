@@ -1,5 +1,3 @@
-
-
 module XYZ
   class WorkspaceController < Controller
 

@@ -46,14 +46,15 @@ module XYZ
           x == y
         end
       end
+
       # fn below used to make sure that all hash keys  are symbols
       #TBD: make a more efficient one that just updates hash just where appropriate
       def ret_hash_assignments(hash)
-	ret = {}
-        hash.each_pair{|k,v|
-	  ret[k.to_sym] = v.kind_of?(Hash) ? ret_hash_assignments(v) : v
-	}
-	ret
+        ret = {}
+        hash.each_pair{ |k,v|
+          ret[k.to_sym] = v.kind_of?(Hash) ? ret_hash_assignments(v) : v
+        }
+        ret
       end
       def marshal_to_wire(obj)
         ::Marshal.dump(obj)

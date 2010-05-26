@@ -1,5 +1,5 @@
 
-require File.expand_path('fields/field.base.rb', File.dirname(__FILE__))
+require File.expand_path(UTILS_DIR+'internal/fields/field.base.rb')
 
 class FieldR8
 

@@ -25,25 +25,24 @@ module XYZ
       scalars[:ref].to_s + (scalars[:ref_num] ? "-" + scalars[:ref_num].to_s : "")
     end
 
-    def self.create(server_host="localhost")
-      #TBD: hardwired for postgres
-      db_type = 'postgres'
-      require File.expand_path('db/adapters/' + db_type , File.dirname(__FILE__))
-      db_class = XYZ.const_get db_type.capitalize
-      return db_class.new(server_host)
+    def self.create(db_params)
+      require File.expand_path('db/adapters/' + db_params[:type] , File.dirname(__FILE__))
+      db_class = XYZ.const_get db_params[:type].capitalize
+      return db_class.new(db_params)
     end
 
     #TBD: collpase withg related functions in Aux
     def self.ret_json_hash(raw_value) 
       begin
         ret_keys_as_symbols(JSON.parse(raw_value))
-       rescue Exception
-	#primarily to handle scalars
+      rescue Exception
+        #primarily to handle scalars
         raw_value
       end
     end
 
-   private
+  private
+ 
     def self.ret_keys_as_symbols(obj)
       return obj.map{|x|ret_keys_as_symbols(x)} if obj.kind_of?(Array)
       return obj unless obj.kind_of?(Hash)
@@ -55,6 +54,7 @@ module XYZ
     def db_fetch(sql,*args,&block)
       @db.fetch(sql,*args,&block)
     end        
+
     def db_run(sql,opts={})
       @db.run(sql,opts)
     end        
@@ -64,28 +64,33 @@ module XYZ
         (parent_db_rel[:table].to_s + "_id").to_sym :
         (parent_db_rel[:schema].to_s + "_" + parent_db_rel[:table].to_s + "_id").to_sym 
     end
-  end 
-  class DBRel < Hash
-    def initialize(x)
-      super()
-      if x.kind_of?(Hash)
-        x.each_pair{|k,v|self[k.to_sym] = v}
-      else
-	self[:schema] = :public
-	self[:table] = x.to_sym
-      end
-    end
-    def [](x)
-      super(x.to_sym)
-    end
-    def []=(x,y)
-      super(x.to_sym,y)
-    end
+  end
 
-    def schema_table_symbol(table_alias=nil)
-      table_no_alias =  self[:schema] == :public ? 
-        self[:table] : (self[:schema].to_s +  "__" + self[:table].to_s).to_sym 
-      return table_no_alias if table_alias.nil?
+class DBRel < Hash
+  def initialize(x)
+    super()
+    
+    if x.kind_of?(Hash)
+        x.each_pair{|k,v|self[k.to_sym] = v}
+    else
+      self[:schema] = :public
+      self[:table] = x.to_sym
+    end
+  end
+
+  def [](x)
+    super(x.to_sym)
+  end
+
+  def []=(x,y)
+    super(x.to_sym,y)
+  end
+
+  def schema_table_symbol(table_alias=nil)
+    table_no_alias =  self[:schema] == :public ? 
+    self[:table] : (self[:schema].to_s +  "__" + self[:table].to_s).to_sym 
+
+    return table_no_alias if table_alias.nil?
       (table_no_alias.to_s + "___" +  table_alias.to_s).to_sym
     end
   end

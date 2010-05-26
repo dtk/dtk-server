@@ -1,4 +1,4 @@
-require File.expand_path('models',  File.dirname(__FILE__))
+require File.expand_path('model',  File.dirname(__FILE__))
 
 module XYZ
   class Component < Model

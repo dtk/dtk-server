@@ -1,9 +1,9 @@
 module XYZ
   class Postgres < DB
-    def initialize(server_host="localhost")
+    def initialize(db_params)
       super()
       ##TBD: hard coded db and credentials
-      @db = Sequel.postgres('db_main', :user => 'postgres',  :host => server_host)
+      @db = Sequel.postgres(db_params[:name], :user => db_params[:user],  :host => db_params[:hostname])
     end
 
     def setup_infrastructure_extras()
@@ -22,7 +22,7 @@ module XYZ
       "nextval('#{seq_qualified_name}'::regclass)"
     end
 
-   protected     
+  protected     
 
     def create_function_zzz_ret_id?() 
       o =  ID_TYPES[:id] # fn output
@@ -67,6 +67,7 @@ module XYZ
       @db.create_trigger(db_rel.schema_table_symbol,trigger_name,trigger_fn,opts)
       nil
     end
+
     def trigger_exists?(db_rel,trigger_name)
       x = ret_schema_and_table(db_rel)
       query = "SELECT count(*) FROM pg_trigger t, pg_class r, pg_namespace s
@@ -74,6 +75,7 @@ module XYZ
 	       t.tgname = '#{trigger_name}' AND r.relname = '#{x[:table].to_s}' AND s.nspname = '#{x[:schema].to_s}'"
       db_fetch(query) {|r| return r[:count] == 1 ? true : nil}
     end
+
     def create_trigger?(db_rel,trigger_name,trigger_fn,opts={})
       create_trigger(db_rel,trigger_name,trigger_fn,opts) if !trigger_exists?(db_rel,trigger_name)
       nil
@@ -83,6 +85,7 @@ module XYZ
       db_run "CREATE SCHEMA #{schema_name.to_s}"
       nil
     end
+
     def schema_exists?(schema_name)
       @db.from(:pg_namespace).where(:nspname => schema_name.to_s).empty? ?  nil : true
     end
@@ -91,9 +94,11 @@ module XYZ
       @db.create_language(language_name)
       nil
     end
+ 
     def language_exists?(language_name)
       @db.from(:pg_language).where(:lanname => language_name.to_s).empty? ?  nil : true
     end
+
     def create_language?(language_name)
       create_language(language_name) if !language_exists?(language_name)
       nil
@@ -106,6 +111,7 @@ module XYZ
                   pg_proc.pronamespace = pg_namespace.oid"
        db_fetch(query) {|r| return r[:count] == 1 ? true : nil}
     end
+
     def create_function(db_fn,definition,opts={})
       @db.create_function(fully_qualified_fn_name(db_fn),definition,opts)
       nil
@@ -150,7 +156,8 @@ module XYZ
             9223372036854775807 
           when :bigint
             9223372036854775807
-	end    
+      	end
+
       raise ErrorNotImplemented.new("sequence for type #{type.to_s}") if max_value.nil?
 
       seq_qualified_name = fully_qualified_fn_name(seq_name)
@@ -179,11 +186,15 @@ module XYZ
     def fully_qualified_fn_name(fn)
       fn.kind_of?(Hash) ? (fn[:schema].to_s +  "." + fn[:fn].to_s) : fn
     end
-   public
+
+  public
+    
     def fully_qualified_rel_name(rel)
       rel.kind_of?(Hash) ? (rel[:schema].to_s +  "." + rel[:table].to_s) : rel
     end
-   private
+
+  private
+
     def ret_schema_and_table(rel)
       rel.kind_of?(Hash) ? rel : {:schema => :public, :table => rel}
     end
@@ -192,5 +203,3 @@ module XYZ
     end
   end
 end
-
-

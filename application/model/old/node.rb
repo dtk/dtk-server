@@ -5,10 +5,6 @@ module XYZ
     class << self
       def up()
         has_ancestor_field()
-        
-        column :architecture :varchar, :size => 10 #e.g., 'i386'
-        column :manifest :varchar #e.g.,rnp-chef-server-0816-ubuntu-910-x86_32
-        column :image_size :integer
         many_to_one :library,:deployment,:project
         one_to_many :attribute, :node_interface
       end

@@ -2,8 +2,7 @@ module XYZ
   class Postgres < DB
     def initialize(db_params)
       super()
-      ##TBD: hard coded db and credentials
-      @db = Sequel.postgres(db_params[:name], :user => db_params[:user],  :host => db_params[:hostname])
+      @db = Sequel.postgres(db_params[:name], :user => db_params[:user],  :host => db_params[:hostname], :password => db_params[:pass])
     end
 
     def setup_infrastructure_extras()

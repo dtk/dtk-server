@@ -28,7 +28,7 @@ user_lang = R8::Config[:default_language] = "en.us"
 
 # Here goes your database connection and options:
 require SYSTEM_DIR + 'db'
-DB = XYZ::DB.create(R8::Config[:database])
+DBinstance = XYZ::DB.create(R8::Config[:database])
 
 #removing memory caching for now, doesnt seem like it should be included here
 #require SYSTEM_DIR + '/cache'

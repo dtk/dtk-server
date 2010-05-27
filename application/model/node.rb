@@ -5,6 +5,8 @@ module XYZ
     class << self
       def up()
         has_ancestor_field()
+        column :architecture :varchar, :size => 10
+        column :manifest :varchar
         many_to_one :library,:deployment,:project
         one_to_many :attribute, :node_interface
       end

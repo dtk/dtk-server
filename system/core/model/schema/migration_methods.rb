@@ -54,6 +54,7 @@ module XYZ
     end
 
    private
+
     module Local
       def self.ret_relation_type(klass)
         Aux.underscore(Aux.demodulize(klass.to_s)).to_sym

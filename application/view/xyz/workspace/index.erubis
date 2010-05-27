@@ -22,6 +22,9 @@
 <script type="text/javascript" src="http://yui.yahooapis.com/combo?3.0.0/build/yui/yui-min.js&3.0.0/build/loader/loader-min.js"></script>
 -->
 
+<!--Temp Usage of jQuery for eval purposes -->
+<script src="http://code.jquery.com/jquery-latest.min.js"></script>
+
 <script type="text/javascript" src="<%= @public_js_root %>/ctrl.r8.js"></script>
 <script type="text/javascript" src="<%= @public_js_root %>/canvas.r8.js"></script>
 <script type="text/javascript" src="<%= @public_js_root %>/templating.r8.js"></script>
@@ -50,7 +53,7 @@
 		</div>
 		<div id="sliderbar">
 			<div class="slider-top"></div>
-			<div id="sliderwrapper" style="display: none; width:100%; height: 86px;">
+			<div id="sliderwrapper">
 				<div id="lbutton"></div>
 				<div id="slidecontainer">
 					<div id="slider"></div>

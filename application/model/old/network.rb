@@ -3,9 +3,7 @@ module XYZ
     set_relation_name(:network,:partition)
     class << self
       def up()
-        column :is_deployed, :boolean
-        column :is_internet, :boolean #TBD might replace with :type
-        many_to_one :library,:project
+        many_to_one :library,:deployment,:project
       end
     end
   end
@@ -14,10 +12,9 @@ module XYZ
     set_relation_name(:network,:gateway)
     class << self
       def up()
-        column :is_deployed, :boolean
         foreign_key :network_partition1_id, :network_partition, FK_CASCADE_OPT
         foreign_key :network_partition2_id, :network_partition, FK_CASCADE_OPT
-        many_to_one :library,:project
+        many_to_one :library,:deployment,:project
       end
     end
   end

@@ -5,11 +5,11 @@ module XYZ
     class << self
       def up()
         has_ancestor_field()
-        
+        column :is_deployed, :boolean        
         column :architecture, :varchar, :size => 10 #e.g., 'i386'
         column :manifest, :varchar #e.g.,rnp-chef-server-0816-ubuntu-910-x86_32
         column :image_size, :numeric, :size=>[6, 4] #in gigs
-        many_to_one :library,:deployment,:project
+        many_to_one :library,:project
         one_to_many :attribute, :node_interface
       end
 
@@ -66,7 +66,7 @@ module XYZ
       def up()
         foreign_key :node_id, :node, FK_CASCADE_OPT
         foreign_key :component_id, :component, FK_CASCADE_OPT
-        many_to_one :library, :deployment, :project
+        many_to_one :library, :project
       end
 
       ##### Actions
@@ -131,7 +131,7 @@ module XYZ
     set_relation_name(:node,:node_group)
     class << self
       def up()
-        many_to_one :library, :project, :deployment
+        many_to_one :library, :project
       end
 
       ##### Actions
@@ -144,7 +144,7 @@ module XYZ
       def up()
 	foreign_key :node_id, :node, FK_CASCADE_OPT
 	foreign_key :node_group_id, :node_group, FK_CASCADE_OPT
-        many_to_one :library, :project, :deployment
+        many_to_one :library, :project
       end
 
       ##### Actions

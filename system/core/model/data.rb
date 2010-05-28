@@ -47,6 +47,13 @@ module XYZ
       @db.create_from_hash(factory_id_handle,hash,clone_helper,opts)
     end
 
+    def create_multiple_children_from_hash(id_handle,hash,clone_helper=nil,opts={})
+      hash.each do |ref,obj|
+        factory_id_handle = get_factory_id_handle(id_handle,ref)
+        create_from_hash(factory_id_handle,obj,clone_helper,opts)
+      end
+    end
+
     def update_instance(id_handle,scalar_assignments,opts={})
       @db.update_instance(id_handle,scalar_assignments,opts)
     end

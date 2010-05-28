@@ -9,12 +9,11 @@ module XYZ
 
       #### actions
       def create(name,c,opts={})
-        project_id_handle = create_simple_instance?("/project/#{name}",c,opts)
-        hash_content = {:network_partition => {:internet => {}}} 
-        hash_content.each do |ref,obj|
-          factory_id_handle = get_factory_id_handle(project_id_handle,ref)
-          create_from_hash(factory_id_handle,obj)
-        end
+        uri = "/project/#{name}"
+        raise Error.new("Project #{name} exists already") if exists? IDHandle[:c => c,:uri => uri]
+        project_id_handle = create_simple_instance?(uri,c,opts)
+        hash = {:network_partition => {:internet => {:is_internet => true}}} 
+        create_multiple_children_from_hash(project_id_handle,hash)
       end
 
       def encapsulate_elements_in_project(project_id_handle,new_component_uri,opts={})

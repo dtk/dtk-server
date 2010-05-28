@@ -249,6 +249,7 @@ print "This is a test of the main ctrllr index"
       error_405 unless request.get?
       uri = "/" + uri_array.join("/")
       opts = ret_parsed_query_string()
+      opts[:no_hrefs] = true;opts[:depth]=:deep;opts[:no_null_cols]=true
       href_prefix = "http://" + http_host() + "/list" 
       c = ret_session_context_id()
       @title = uri

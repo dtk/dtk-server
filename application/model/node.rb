@@ -6,6 +6,7 @@ module XYZ
       def up()
         has_ancestor_field()
         column :is_deployed, :boolean        
+        column vendor_attributes, :json
         column :architecture, :varchar, :size => 10 #e.g., 'i386'
         column :manifest, :varchar #e.g.,rnp-chef-server-0816-ubuntu-910-x86_32
         column :image_size, :numeric, :size=>[6, 4] #in gigs
@@ -100,7 +101,7 @@ module XYZ
   	column :info, :json #TBD: temp into we decide exactly what structure we want
         foreign_key :network_partition_id, :network_partition, FK_CASCADE_OPT
         many_to_one :node
-        one_to_many :node_interface_address
+        one_to_many :network_address
       end
 
       ##### Actions
@@ -108,22 +109,6 @@ module XYZ
   end
 end
 
-#TBD: may move
-module XYZ
-  class NodeInterfaceAddress < Model
-    set_relation_name(:node,:interface_address)
-    class << self
-      def up()
-	column :address, :varchar, :size => 30
-        column :family, :varchar, :size => 10
-  	column :info, :json #TBD for unstructuctured
-        many_to_one :node_interface
-      end
-
-      ##### Actions
-    end
-  end
-end
 
 #TBD: may move
 module XYZ

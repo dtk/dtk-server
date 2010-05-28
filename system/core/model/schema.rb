@@ -12,15 +12,12 @@ module XYZ
 
       def set_db_for_all_models(db)
         models.each{|model| model.set_db(db)}
+        #infra tables
+        ContextTable.set_db(db)
+        IDInfoTable.set_db(db)
       end
 
       def setup_infrastructure_tables?(db)
-        ContextTable.set_db(db)
-        IDInfoTable.set_db(db)
-
-        #If production no need to set up tables
-        return nil if Config[:production]
-
         ContextTable.create?()
         ContextTable.create_default_contexts?()
 
@@ -32,14 +29,21 @@ module XYZ
       def migrate_all_models(direction)
         # order is important
         concrete_models = models.reject {|m| m.top?}
-        concrete_models.each{|model| 
-        model.create_column_defs_common_fields?(direction) unless Config[:production]}
+        concrete_models.each do |model| 
+          model.create_column_defs_common_fields?(direction) 
+        end
         concrete_models.each{|model| model.apply_migration_defs(direction)}
         concrete_models.each{|model| model.set_global_db_rel_info()}
-        concrete_models.each{|model| 
-        model.create_column_defs_specific_fields?(direction) unless Config[:production]}
-        concrete_models.each{|model| 
-        model.create_associations?(direction) unless Config[:production]}
+        concrete_models.each do |model| 
+          model.create_column_defs_specific_fields?(direction) 
+        end
+        concrete_models.each{|model|model.create_associations?(direction)}
+      end
+
+      def initialize_all_models(db)
+        set_db_for_all_models(db)
+        concrete_models = models.reject {|m| m.top?}
+        concrete_models.each{|model| model.set_global_db_rel_info()}
       end
 
      #######

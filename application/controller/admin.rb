@@ -5,10 +5,9 @@ module XYZ
 
     #TODO: figure out proper place/naming for function calls for db install/setup steps
     def dbrebuild
-      #Better encapsulate where case on whetehr production set (meaning that don't need to recreate tables)
-      #associate DBinstance with all models
+      #associate database handle DBInstance with all models
       Model.set_db_for_all_models(DBinstance)
-      
+
       #setup infra tables if they don't exist already
       Model.setup_infrastructure_tables?(DBinstance)
       

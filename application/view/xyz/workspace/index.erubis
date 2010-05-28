@@ -33,7 +33,7 @@
 <script type="text/javascript" src="<%= @public_js_root %>/workspace.r8.js"></script>
 <script type="text/javascript" src="<%= @public_js_root %>/utils.r8.js"></script>
 <script type="text/javascript" src="<%= @public_js_root %>/component.r8.js"></script>
-<script type="text/javascript" src="<%= @public_js_root %>/toolbar.r8.js"></script>
+<script type="text/javascript" src="<%= @public_js_root %>/maintoolbar.r8.js"></script>
 
 <script type="text/javascript">
 </script>
@@ -43,11 +43,11 @@
 	<body style="background: repeat-x url(<%= @public_images_root %>/workspace/page-bg.jpg) scroll left top #4E87A7;" onload="R8.ctrl.init(); R8.Workspace.loadWorkspace();">
 	<div style=" width: 1200px; margin: 0 auto 0 auto;">
 		<div id="toolbar">
-			<a href="javascript:R8.Toolbar.toggleSlider();">Toggle</a>
+			<a href="javascript:R8.MainToolbar.toggleSlider();">Toggle</a>
 			<div class="tbar_search"">
-				<form id="tbar_search_form" onsubmit="R8.Toolbar.search(); return false;">
+				<form id="tbar_search_form" onsubmit="R8.MainToolbar.search(); return false;">
 					<input onfocus="if(this.value =='Search') {this.value='';}" type="text" value="Search" id="sq" name="sq" title="Enter Search Term"/>
-					<input class="tbar_search_submit" onclick="R8.Toolbar.search();" type="button" title="Search" value=""/>
+					<input class="tbar_search_submit" onclick="R8.MainToolbar.search();" type="button" title="Search" value=""/>
 				</form>
 			</div>
 		</div>

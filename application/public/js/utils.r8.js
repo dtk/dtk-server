@@ -1,7 +1,7 @@
 
-if(typeof R8=="undefined" || !R8) {
-	var R8= new R8();
-}
+//if(typeof R8=="undefined" || !R8) {
+//	var R8= new R8();
+//}
 
 if (!R8.utils) {
 
@@ -15,6 +15,11 @@ if (!R8.utils) {
 			 * This is the global YUI variable to be used
 			 */
 			Y : new YUI({base:'js/yui3x/build/'}).use('dd', 'node'),
+
+			/*
+			 * This is the global jQuery variable to be used
+			 */
+			$ : jQuery,
 
 			/*
 			 * This function takes a name/value pair json object and return a name=value&name2=value2 string

@@ -6,7 +6,7 @@ module XYZ
     class << self 
       def up()
         #no table specfic fields (yet)
-        one_to_many :component, :node,:assoc_node_component, :component_def, :node_group, :node_group_member, :attribute_link, :network_partition, :network_gateway, :region,:assoc_region_network_partition
+        one_to_many :component, :node,:assoc_node_component, :component_def, :node_group, :node_group_member, :attribute_link, :network_partition, :network_gateway, :region,:assoc_region_network
       end
 
       ##### Actions

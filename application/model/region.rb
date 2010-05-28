@@ -4,7 +4,7 @@ module XYZ
     class << self
       def up()
         column :vendor_attributes, :json
-        column :is_deployed, :boolean
+        column :is_deployed, :boolean, :default => false
         column :type, :varchar, :size => 25 #type is availability_zone, datacenter, vdc
         one_to_many :region
         many_to_one :library,:project,:region
@@ -12,7 +12,7 @@ module XYZ
     end
   end
   #TBD: do not include association between region gateway and network region of node since this is inferede through theer connection to a network partition; this also allows for more advanced models where node or gateway spans two differnt regions
-  class AssocRegionNetworkPartion < Model
+  class AssocRegionNetwork < Model
     set_relation_name(:region,:assoc_network_partition)
     class << self
       def up()

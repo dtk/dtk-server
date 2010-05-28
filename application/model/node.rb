@@ -5,7 +5,7 @@ module XYZ
     class << self
       def up()
         has_ancestor_field()
-        column :is_deployed, :boolean        
+        column :is_deployed, :boolean, :default => false
         column :vendor_attributes, :json
         column :architecture, :varchar, :size => 10 #e.g., 'i386'
         column :manifest, :varchar #e.g.,rnp-chef-server-0816-ubuntu-910-x86_32

@@ -3,10 +3,10 @@ module XYZ
     set_relation_name(:network,:partition)
     class << self
       def up()
-        column :is_deployed, :boolean
-        column :is_internet, :boolean #TBD might replace with :type
+        column :is_deployed, :boolean, :default => false
+        column :is_internet, :boolean, :default => false #TBD might replace with :type
         many_to_one :library,:project
-        one_to_many :network_address, :network_address_access_point
+        one_to_many :network_address, :address_access_point
       end
     end
   end
@@ -16,7 +16,7 @@ module XYZ
     class << self
       def up()
         column :vendor_attributes, :json
-        column :is_deployed, :boolean
+        column :is_deployed, :boolean, :default => false
         foreign_key :network_partition1_id, :network_partition, FK_CASCADE_OPT
         foreign_key :network_partition2_id, :network_partition, FK_CASCADE_OPT
         many_to_one :library,:project
@@ -38,7 +38,7 @@ module XYZ
     end
   end
 
-  class NetworkAddressAccessPoint < Model
+  class AddressAccessPoint < Model
     set_relation_name(:network,:address_access_point)
     class << self
       def up()

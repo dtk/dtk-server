@@ -43,16 +43,16 @@ module XYZ
       def initialize_all_models(db)
         set_db_for_all_models(db)
         concrete_models = models.reject {|m| m.top?}
+        concrete_models.each{|model| model.apply_migration_defs(:up)}
         concrete_models.each{|model| model.set_global_db_rel_info()}
       end
-
      #######
      protected
 
       def create_column_defs_common_fields?(direction)
         create_table_common_fields?(@db_rel) if direction == :up
       end
-      
+
       def apply_migration_defs(direction)
         case direction
           when :up

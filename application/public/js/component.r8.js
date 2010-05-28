@@ -1,6 +1,3 @@
-if(typeof(R8)=="undefined" || !R8) {
-	var R8= new R8();
-}
 
 if (!R8.Component) {
 

@@ -23,8 +23,9 @@
 -->
 
 <!--Temp Usage of jQuery for eval purposes -->
-<script src="http://code.jquery.com/jquery-latest.min.js"></script>
+<script src="http://code.jquery.com/jquery-latest.js"></script>
 
+<script type="text/javascript" src="<%= @public_js_root %>/r8.js"></script>
 <script type="text/javascript" src="<%= @public_js_root %>/ctrl.r8.js"></script>
 <script type="text/javascript" src="<%= @public_js_root %>/canvas.r8.js"></script>
 <script type="text/javascript" src="<%= @public_js_root %>/templating.r8.js"></script>

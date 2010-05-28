@@ -1,13 +1,4 @@
 
-if(typeof R8 === "undefined" || !R8) {
-	var R8 = function(){};
-}
-
-//(function() {
-//	R8 = function(){}
-//	window.R8 = R8;
-//})();
-
 if (!R8.ctrl) {
 
 	/*

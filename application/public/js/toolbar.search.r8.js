@@ -1,4 +1,4 @@
 
-R8.Toolbar.prototype.search = function() {
+R8.MainToolbar.prototype.search = function() {
 	console.log('f this');
 }();

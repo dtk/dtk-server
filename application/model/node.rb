@@ -1,6 +1,7 @@
 require File.expand_path('model',  File.dirname(__FILE__))
 module XYZ
   class Node < Model
+    @@providers ||= Hash.new
     set_relation_name(:node,:node)
     class << self
       def up()
@@ -15,6 +16,14 @@ module XYZ
       end
 
       ##### Actions
+      def discover(provider_type)
+         unless @@providers[provider_type]
+           require File.expand_path("cloud_providers/#{provider_type}/node", File.dirname(__FILE__))
+           base_class = XYZ::CloudProvider.const_get provider_type.to_s.capitalize
+           @@providers[provider_type] = base_class.const_get "Node" 
+         end
+         @@providers[provider_type].discover()
+      end
 
       def get_node_attribute_values(id_handle,opts={})
 	c = id_handle[:c]

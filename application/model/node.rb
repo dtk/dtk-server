@@ -16,13 +16,13 @@ module XYZ
       end
 
       ##### Actions
-      def discover(provider_type)
+      def discover_and_update(provider_type,filter={})
          unless @@providers[provider_type]
            require File.expand_path("cloud_providers/#{provider_type}/node", File.dirname(__FILE__))
            base_class = XYZ::CloudProvider.const_get provider_type.to_s.capitalize
            @@providers[provider_type] = base_class.const_get "Node" 
          end
-         @@providers[provider_type].discover()
+         @@providers[provider_type].discover_and_update(filter)
       end
 
       def get_node_attribute_values(id_handle,opts={})

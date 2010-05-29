@@ -2,6 +2,12 @@
 
 module XYZ
   class NodeController < Controller
+    def discover_and_update_ec2
+      filters = Hash.new
+      #TBD: needs a project id handle to indicate where to store
+      Node.discover_and_update(:ec2,filters)
+      "discover ec2"
+    end
 
     def list
       #get all active (or appropriate status) ubuntu servers

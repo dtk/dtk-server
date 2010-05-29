@@ -16,7 +16,7 @@ module XYZ
     class << self
       def up()
         column :vendor_attributes, :json
-        column :vendor_key, :json
+        column :vendor_key, :varchar
         column :is_federated, :boolean, :default => false
         column :is_deployed, :boolean, :default => false
         foreign_key :network_partition1_id, :network_partition, FK_CASCADE_OPT
@@ -31,7 +31,7 @@ module XYZ
     set_relation_name(:network,:address)
     class << self
       def up()
-        column :vendor_key, :json
+        column :vendor_key, :varchar
         column :is_federated, :boolean, :default => false
 	column :address, :varchar, :size => 30
         column :family, :varchar, :size => 10

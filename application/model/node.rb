@@ -7,7 +7,7 @@ module XYZ
       def up()
         has_ancestor_field()
         column :vendor_attributes, :json
-        column :vendor_key, :json
+        column :vendor_key, :varchar
         column :is_federated, :boolean, :default => false
         column :is_deployed, :boolean, :default => false
         column :architecture, :varchar, :size => 10 #e.g., 'i386'
@@ -18,8 +18,9 @@ module XYZ
       end
 
       ##### Actions
-      def discover_and_update(provider_type,filter={})
-        provider_class_object(provider_type).discover_and_update(filter)
+      def discover_and_update(container_id_handle,provider_type,filter={})
+        raise Error.new("container with (#{container_id_handle}) not found") unless exists? container_id_handle 	
+        provider_class_object(provider_type).discover_and_update(container_id_handle,filter)
       end
 
       def get_node_attribute_values(id_handle,opts={})

@@ -1,15 +1,17 @@
 require File.expand_path('model',  File.dirname(__FILE__))
 module XYZ
   class Node < Model
-    @@providers ||= Hash.new
+    extend ClassMixinVendorExtensions
     set_relation_name(:node,:node)
     class << self
       def up()
         has_ancestor_field()
-        column :is_deployed, :boolean, :default => false
         column :vendor_attributes, :json
+        column :vendor_key, :json
+        column :is_federated, :boolean, :default => false
+        column :is_deployed, :boolean, :default => false
         column :architecture, :varchar, :size => 10 #e.g., 'i386'
-        column :manifest, :varchar #e.g.,rnp-chef-server-0816-ubuntu-910-x86_32
+       #TBD: in vendor specfic now column :manifest, :varchar #e.g.,rnp-chef-server-0816-ubuntu-910-x86_32
         column :image_size, :numeric, :size=>[6, 4] #in gigs
         many_to_one :library,:project
         one_to_many :attribute, :node_interface
@@ -17,12 +19,7 @@ module XYZ
 
       ##### Actions
       def discover_and_update(provider_type,filter={})
-         unless @@providers[provider_type]
-           require File.expand_path("cloud_providers/#{provider_type}/node", File.dirname(__FILE__))
-           base_class = XYZ::CloudProvider.const_get provider_type.to_s.capitalize
-           @@providers[provider_type] = base_class.const_get "Node" 
-         end
-         @@providers[provider_type].discover_and_update(filter)
+        provider_class_object(provider_type).discover_and_update(filter)
       end
 
       def get_node_attribute_values(id_handle,opts={})

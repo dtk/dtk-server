@@ -2,7 +2,20 @@
 #################
 #TBD: will seperate into seperate files
 #TBD: looks like much shared on relationship between Library, Project, and Deployment (they are all containers; so might refactor as one object that has type)
+
 module XYZ
+  module ClassMixinVendorExtensions
+    @@vendor_class_objects ||= Hash.new
+    def provider_class_object(provider_type)
+      @@vendor_class_objects[self] ||= Hash.new
+      return @@vendor_class_objects[self][provider_type] if @@vendor_class_objects[self][provider_type]
+      obj_class = Aux.demodulize(self.to_s)
+      require File.expand_path("cloud_providers/#{provider_type}/#{Aux.underscore(obj_class)}", File.dirname(__FILE__))
+      base_class = XYZ::CloudProvider.const_get provider_type.to_s.capitalize
+      @@vendor_class_objects[self][provider_type] = base_class.const_get obj_class
+    end
+  end
+
   #TBD: re-examine whether current scheme is best way to implement relationship between model top, specfic model classes and the XYZ::model utility class
   class Object < Model
     extend ImportObject

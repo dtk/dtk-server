@@ -4,9 +4,23 @@ module XYZ
     module Ec2
       class Node < Top 
         def self.discover_and_update(filter={})
-          require 'pp'
-          pp connection().servers_all()
-          #TBD: next put in has from and call up to from hash; need attributes that are id test
+          nodes = connection().servers_all()
+          require 'pp'; pp nodes
+=begin
+TBD: logic to put in 
+         nodes.each do |n|
+           id_handle = find_object(n)
+           if id_handle
+             update_object(id_handle,n)
+           else
+             create_object(n)
+           end
+         end
+=end
+        end
+       private
+        def unique_keys
+          [:image_id]
         end
       end
     end

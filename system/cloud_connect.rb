@@ -10,8 +10,7 @@ module XYZ
       end
 
       def servers_all()
-        #TBD: return a hash
-        @connection.servers.all
+        @connection.servers.all.map{|x|x.attributes}
       end
     end
   end

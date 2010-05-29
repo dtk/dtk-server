@@ -19,6 +19,7 @@ CORE_BASE_PATH  = File.expand_path(SYSTEM_DIR+'/core', File.dirname(__FILE__)) +
 
 require SYSTEM_DIR + 'view.r8.rb'
 require SYSTEM_DIR + 'template.r8.rb'
+require SYSTEM_DIR + 'cloud_connect.rb'
 require UTILS_DIR + 'internal/log.rb'
 
 #TODO: should load application strings here

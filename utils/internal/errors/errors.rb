@@ -49,7 +49,19 @@ module XYZ
       end
     end
   end
-
+  class ErrorUserInputNeeded < Error
+    def initialize(needed_inputs)
+      super()
+      @needed_inputs = needed_inputs
+    end
+    def to_s()
+      ret = "following inputs are needed:\n"
+      @needed_inputs.each do |k,v|
+        ret << "  #{k}: type=#{v[:type]}; description=#{v[:description]}\n"
+      end
+      ret
+    end
+  end
   class ErrorAMQP < Error
     def to_s()
       "AMQP error"

@@ -47,7 +47,7 @@ R8::Config[:public_images_root] = R8::Config[:base_uri] + "/images"
 
 #Database related config params
 R8::Config[:database] = Hash.new
-R8::Config[:database][:hostname] = "localhost"
+R8::Config[:database][:hostname] = "127.0.0.1"
 R8::Config[:database][:user] = "postgres"
 R8::Config[:database][:pass] = "bosco"
 R8::Config[:database][:name] = "db_main"

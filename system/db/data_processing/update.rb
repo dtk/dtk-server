@@ -17,7 +17,7 @@ module XYZ
     
       def update(relation_type,c,scalar_assigns,where_clause={})
 	db_rel = DB_REL_DEF[relation_type]
-	ds = dataset(db_rel).where(where_clause.merge({CONTEXT_ID => c}))
+	ds = dataset(db_rel).where(SQL.and(where_clause,{CONTEXT_ID => c}))
 	#TBD: check that valid assigns
 	modify_to_reflect_special_processing!(scalar_assigns,db_rel)
 	ds.update(scalar_assigns)

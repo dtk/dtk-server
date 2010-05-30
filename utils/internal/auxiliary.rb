@@ -6,12 +6,23 @@ module XYZ
       return nil if x.nil?
       ~x
     end
-    def self.or(x,y)
+    def self.or(*args)
+      ret = nil
+      args.reverse.each{|x|ret = or_aux(x,ret)}
+      ret
+    end
+    def self.and(*args)
+      ret = nil
+      args.reverse.each{|x|ret = and_aux(x,ret)}
+      ret
+    end
+   private
+    def self.or_aux(x,y)
       return y if x.nil? or (x.kind_of?(Hash) and x.empty?)
       return x if y.nil? or (y.kind_of?(Hash) and y.empty?)
       x | y
     end
-    def self.and(x,y)
+    def self.and_aux(x,y)
       return y if x.nil? or (x.kind_of?(Hash) and x.empty?)
       return x if y.nil? or (y.kind_of?(Hash) and y.empty?)
       x & y

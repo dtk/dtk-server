@@ -48,8 +48,9 @@ module XYZ
             Object.create_multiple_children_from_hash(container_id_handle,
                      {relation_type() => {ref(vendor_attr_hash) => obj}})
           end
-          def update_object(container_id_handle,attr_hash,vendor_attr_hash)
+          def update_object(container_id_handle,vendor_attr_hash)
             return nil if should_federate()
+            #TBD: needs to be written
           end
           def find_object(container_id_handle,vendor_attr_hash)
             where_clause = {:vendor_key => vendor_key_value(vendor_attr_hash)}

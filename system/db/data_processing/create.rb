@@ -141,7 +141,7 @@ module XYZ
       end
 
       def compute_ref_num(db_rel,ref,c,constraints={})
-	ds =  dataset(db_rel).where(constraints.merge({:ref => ref.to_s, CONTEXT_ID => c}))
+	ds =  dataset(db_rel).where(SQL.and(constraints,{:ref => ref.to_s, CONTEXT_ID => c}))
      	return nil if ds.empty?()
 	max = ds.max(:ref_num)
 	## empty means that only one exists so return 2; otherwise return max+1

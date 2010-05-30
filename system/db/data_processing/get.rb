@@ -21,7 +21,7 @@ module XYZ
 	parent_id_info = IDInfoTable.get_row_from_id_handle(parent_id_handle)
         parent_fk_col = ret_parent_id_field_name(parent_id_info[:db_rel],DB_REL_DEF[relation_type])
         get_objects(relation_type,parent_id_handle[:c],
-              where_clause.merge({parent_fk_col => parent_id_info[:id]}))
+                    SQL.and(where_clause,{parent_fk_col => parent_id_info[:id]}))
       end
 
       #TBD: convert so where clause could be hash or string       
@@ -30,7 +30,7 @@ module XYZ
 	db_rel = DB_REL_DEF[relation_type]
 	parent_id_info = IDInfoTable.get_row_from_id_handle(parent_id_handle)
         parent_fk_col = ret_parent_id_field_name(parent_id_info[:db_rel],db_rel)
-        w = where_clause.merge({parent_fk_col => parent_id_info[:id],CONTEXT_ID => c})
+        w = SQL.and(where_clause,{parent_fk_col => parent_id_info[:id],CONTEXT_ID => c})
 	ds = dataset(db_rel).select(:id).where(w)
         ds.all.map{|raw_hash|
 	  IDInfoTable.ret_guid_from_db_id(raw_hash[:id],db_rel[:relation_type])

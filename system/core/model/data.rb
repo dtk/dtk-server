@@ -39,6 +39,10 @@ module XYZ
       @db.delete_instance(id_handle,opts)
     end
 
+    def delete_instances(where_clause=nil,opts={})
+      @db.delete_instances(where_clause,opts)
+    end
+
     def create_simple_instance?(new_uri,c,opts={})
       @db.create_simple_instance?(new_uri,c,opts)
     end

@@ -7,7 +7,7 @@
 require 'rubygems'
 require 'ramaze'
 require 'json'
-
+require 'yaml'
 
 require 'config/config.rb'
 

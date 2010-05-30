@@ -255,7 +255,11 @@ print "This is a test of the main ctrllr index"
       href_prefix = "http://" + http_host() + "/list" 
       c = ret_session_context_id()
       @title = uri
-      @results = Object.get_instance_or_factory(IDHandle[:c => c,:uri => uri],href_prefix,opts)
+      objs = Object.get_instance_or_factory(IDHandle[:c => c,:uri => uri],href_prefix,opts)
+      return @results = objs
+require 'pp'; pp objs
+#      def get_objects_wrt_parent(relation_type,parent_id_handle,where_clause={})
+      @results = objs.map{|o|o.object_slice([:id,:vendor_attributes])}
     end
 
     # the string returned at the end of the function is used as the html body

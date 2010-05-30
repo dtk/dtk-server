@@ -11,8 +11,8 @@ module XYZ
           end
          private
           #below is effectively dsl
-          def base_attr_fn
-            lambda{|v|{:node_interface => {"eth0" => {}}}}
+          def base_attr_fn(v)
+            {:node_interface => {"eth0" => {}}}
           end
           def unique_key_fields
             [:id]

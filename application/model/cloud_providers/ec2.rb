@@ -11,19 +11,19 @@ module XYZ
           def sync_with_discovered(container_id_handle,vendor_attr_hash_list)
             marked = Array.new
             vendor_attr_hash_list.each do |vendor_attr_hash|
-              sync_with_discovered_aux(container_id_handle,vendor_attr_hash,base_attr_fn,marked)
+              sync_with_discovered_aux(container_id_handle,vendor_attr_hash,marked)
             end
             delete_unmarked(container_id_handle,marked)
           end
 
          private
-          def sync_with_discovered_aux(container_id_handle,vendor_attr_hash,base_attr_fn,marked)
+          def sync_with_discovered_aux(container_id_handle,vendor_attr_hash,marked)
             marked << vendor_key_value(vendor_attr_hash)
             id_handle = find_object(container_id_handle,vendor_attr_hash)
             if id_handle
-              update_object(id_handle,vendor_attr_hash,base_attr_fn)
+              update_object(id_handle,vendor_attr_hash)
             else
-              create_object(container_id_handle,vendor_attr_hash,base_attr_fn)
+              create_object(container_id_handle,vendor_attr_hash)
             end
           end
         
@@ -37,13 +37,13 @@ module XYZ
             Object.delete_instances_wrt_parent(relation_type(),container_id_handle,where_clause)
           end
 
-          def create_object(container_id_handle,vendor_attr_hash,base_attr_fn)
+          def create_object(container_id_handle,vendor_attr_hash)
             obj = {:vendor_key => vendor_key_value(vendor_attr_hash)}
             if should_federate()
                obj.merge! :is_federated => true
             else 
                obj.merge! :vendor_attributes => vendor_attr_hash
-               obj.merge! base_attr_fn.call(vendor_attr_hash)
+               obj.merge! base_attr_fn(vendor_attr_hash)
             end
             Object.create_multiple_children_from_hash(container_id_handle,
                      {relation_type() => {ref(vendor_attr_hash) => obj}})

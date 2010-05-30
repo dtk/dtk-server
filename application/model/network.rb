@@ -6,7 +6,6 @@ module XYZ
         column :is_deployed, :boolean, :default => false
         column :is_internet, :boolean, :default => false #TBD might replace with :type
         many_to_one :library,:project
-        one_to_many :network_address, :address_access_point
       end
     end
   end
@@ -27,28 +26,15 @@ module XYZ
     end
   end
 
-  class NetworkAddress < Model
-    set_relation_name(:network,:address)
-    class << self
-      def up()
-        column :vendor_key, :varchar
-        column :is_federated, :boolean, :default => false
-	column :address, :varchar, :size => 30
-        column :family, :varchar, :size => 10
-  	column :info, :json #TBD for unstructuctured
-        many_to_one :node_interface, :network_partition
-      end
-      ##### Actions
-    end
-  end
-
+  #TBD: might move AddressAccessPoint to node or own model file
   class AddressAccessPoint < Model
     set_relation_name(:network,:address_access_point)
     class << self
       def up()
-        foreign_key :network_address_id, :network_address, FK_CASCADE_OPT
-        foreign_key :node_id, :node, FK_CASCADE_OPT
-        many_to_one :network_partition
+        column :network_address, :json #e.g., {:family : "ipv4, :address : "10.4.5.7"} allow family: "dns" :address"
+        column :type, :varchar, :size => 25 #internet,local ..
+        foreign_key :network_partitione_id, :network_partition, FK_CASCADE_OPT
+        many_to_one :node
       end
       ##### Actions
     end

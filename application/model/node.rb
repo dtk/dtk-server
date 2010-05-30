@@ -14,7 +14,7 @@ module XYZ
        #TBD: in vendor specfic now column :manifest, :varchar #e.g.,rnp-chef-server-0816-ubuntu-910-x86_32
         column :image_size, :numeric, :size=>[6, 4] #in gigs
         many_to_one :library,:project
-        one_to_many :attribute, :node_interface
+        one_to_many :attribute, :node_interface, :address_access_point
       end
 
       ##### Actions
@@ -105,10 +105,11 @@ module XYZ
     set_relation_name(:node,:interface)
     class << self
       def up()
-  	column :info, :json #TBD: temp into we decide exactly what structure we want
+  	column :type, :varchar, :size => 25 #ethernet, vlan, ...
+        column :address, :json #e.g., {:family : "ipv4, :address : "10.4.5.7", "mask" : 255.255.255.0"}
         foreign_key :network_partition_id, :network_partition, FK_CASCADE_OPT
-        many_to_one :node
-        one_to_many :network_address
+        many_to_one :node, :node_interface
+        one_to_many :node_interface
       end
 
       ##### Actions

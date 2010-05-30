@@ -19,9 +19,9 @@ module XYZ
          private
           def sync_with_discovered_aux(container_id_handle,vendor_attr_hash,marked)
             marked << vendor_key_value(vendor_attr_hash)
-            id_handle = find_object(container_id_handle,vendor_attr_hash)
+            id_handle = find_object_id_handle(container_id_handle,vendor_attr_hash)
             if id_handle
-              update_object(id_handle,vendor_attr_hash)
+              update_object(container_id_handle,id_handle,vendor_attr_hash)
             else
               create_object(container_id_handle,vendor_attr_hash)
             end
@@ -48,13 +48,18 @@ module XYZ
             Object.create_multiple_children_from_hash(container_id_handle,
                      {relation_type() => {ref(vendor_attr_hash) => obj}})
           end
-          def update_object(container_id_handle,vendor_attr_hash)
+
+          def update_object(container_id_handle,id_handle,vendor_attr_hash)
             return nil if should_federate()
-            #TBD: needs to be written
+            #TBD: just stub; real version should keep same id
+            Object.delete_instance(id_handle)
+            create_object(container_id_handle,vendor_attr_hash)
           end
-          def find_object(container_id_handle,vendor_attr_hash)
+
+          def find_object_id_handle(container_id_handle,vendor_attr_hash)
             where_clause = {:vendor_key => vendor_key_value(vendor_attr_hash)}
-            Object.get_object_ids_wrt_parent(relation_type(),container_id_handle,where_clause).first
+            id = Object.get_object_ids_wrt_parent(relation_type(),container_id_handle,where_clause).first
+            id ? IDHandle[:guid => id,:c => container_id_handle[:c]] : nil
           end
 
           def vendor_key_value(vendor_attr_hash)

@@ -28,6 +28,17 @@ module XYZ
           end
         
           def delete_unmarked(container_id_handle,marked)
+            marked_disjunction = nil
+            marked.each do |vk|
+              if marked_disjunction
+                marked_disjunction = marked_disjunction | {:vendor_key => vk}
+              else
+                marked_disjunction = {:vendor_key => vk}
+              end
+            end
+            where_clause = marked_disjunction ? ~ marked_disjunction : nil
+
+            Object.delete_instances_wrt_parent(relation_type(),container_id_handle,where_clause)
           end
 
           def create_object(container_id_handle,vendor_attr_hash,base_attr_fn)

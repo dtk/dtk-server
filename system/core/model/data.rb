@@ -39,8 +39,8 @@ module XYZ
       @db.delete_instance(id_handle,opts)
     end
 
-    def delete_instances(where_clause=nil,opts={})
-      @db.delete_instances(where_clause,opts)
+    def delete_instances_wrt_parent(relation_type,parent_id_handle,where_clause=nil,opts={})
+      @db.delete_instances_wrt_parent(relation_type,parent_id_handle,where_clause,opts)
     end
 
     def create_simple_instance?(new_uri,c,opts={})

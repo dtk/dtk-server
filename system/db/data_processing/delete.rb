@@ -12,10 +12,12 @@ module XYZ
 	nil
       end
 
-      def delete_instances(c,where_clause=nil,opts={}) #TBD: if include opts would be for example whether containers are deleted
-	#TBD: best practices says that one stores all resources that were present and return 200 if was to support idempotent delete
-        filter = {CONTEXT_ID => c}.merge(where_clause || {})
-	ds = dataset(id_info[:db_rel]).filter(filter)
+      def delete_instances_wrt_parent(relation_type,parent_id_handle,where_clause=nil,opts={}) 
+        parent_id_info = IDInfoTable.get_row_from_id_handle(parent_id_handle)
+        parent_fk_col = ret_parent_id_field_name(parent_id_info[:db_rel],DB_REL_DEF[relation_type])
+        c = parent_id_handle[:c]
+        filter = {CONTEXT_ID => c} & {parent_fk_col => parent_id_info[:id]} & (where_clause || {})
+	ds = dataset(DB_REL_DEF[relation_type]).filter(filter)
 	ds.delete
 	nil
       end

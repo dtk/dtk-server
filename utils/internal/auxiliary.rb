@@ -1,5 +1,23 @@
 require 'pp'
 module XYZ
+  ##relies on Sequel overwriting ~ | and &
+  module SQL
+    def self.not(x)
+      return nil if x.nil?
+      ~x
+    end
+    def self.or(x,y)
+      return y if x.nil? or (x.kind_of?(Hash) and x.empty?)
+      return x if y.nil? or (y.kind_of?(Hash) and y.empty?)
+      x | y
+    end
+    def self.and(x,y)
+      return y if x.nil? or (x.kind_of?(Hash) and x.empty?)
+      return x if y.nil? or (y.kind_of?(Hash) and y.empty?)
+      x & y
+    end
+  end  
+
   class Aux
     class << self
       def pp_form(obj)

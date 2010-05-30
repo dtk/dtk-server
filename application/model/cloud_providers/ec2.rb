@@ -30,13 +30,9 @@ module XYZ
           def delete_unmarked(container_id_handle,marked)
             marked_disjunction = nil
             marked.each do |vk|
-              if marked_disjunction
-                marked_disjunction = marked_disjunction | {:vendor_key => vk}
-              else
-                marked_disjunction = {:vendor_key => vk}
-              end
+              marked_disjunction = SQL.or(marked_disjunction,{:vendor_key => vk})
             end
-            where_clause = marked_disjunction ? ~ marked_disjunction : nil
+            where_clause = SQL.not(marked_disjunction)
 
             Object.delete_instances_wrt_parent(relation_type(),container_id_handle,where_clause)
           end

@@ -16,7 +16,8 @@ module XYZ
         parent_id_info = IDInfoTable.get_row_from_id_handle(parent_id_handle)
         parent_fk_col = ret_parent_id_field_name(parent_id_info[:db_rel],DB_REL_DEF[relation_type])
         c = parent_id_handle[:c]
-        filter = {CONTEXT_ID => c} & {parent_fk_col => parent_id_info[:id]} & (where_clause || {})
+        filter = SQL.and({CONTEXT_ID => c},
+                         SQL.and({parent_fk_col => parent_id_info[:id]},where_clause || {}))
 	ds = dataset(DB_REL_DEF[relation_type]).filter(filter)
 	ds.delete
 	nil

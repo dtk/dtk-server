@@ -17,6 +17,13 @@ module XYZ
         one_to_many :attribute, :node_interface, :address_access_point
       end
 
+      def vendor_attributes(attr_list)
+        [:vendor_attributes]
+      end
+      def is_vendor_subobject?(relation_type)
+        false
+      end
+
       ##### Actions
       def discover_and_update(container_id_handle,provider_type,filter={})
         raise Error.new("container with (#{container_id_handle}) not found") unless exists? container_id_handle 	

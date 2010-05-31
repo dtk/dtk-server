@@ -123,6 +123,11 @@ module XYZ
       super()
       replace(x)
     end
+    def object_slice(slice_keys)
+      ret = {}
+      slice_keys.each{|k| ret[k] = self[k] if self[k]}
+      ret
+    end
   end
 end
 

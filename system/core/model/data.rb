@@ -143,12 +143,6 @@ module XYZ
       self.class.get_object_ids_wrt_parent(child_relation_type,id_handle)
     end
 
-    def object_slice(slice_keys)
-      ret = {}
-      slice_keys.each{|k| ret[k] = self[k]}
-      ret
-    end
-
     def to_s()
      return "UNKNOWN" if self[:display_name].nil?
      self[:display_name]

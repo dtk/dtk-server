@@ -96,16 +96,16 @@ module XYZ
 	
 	#case on whether want summary for children or all their attributes
 	if opts[:depth] == :deep or opts[:depth] == :scalar_detail	
-	  children_id_infos.each{|id_info|
-	  qualified_ref = id_info.ret_qualified_ref()
-	  hash[qualified_ref] = get_instance(href_prefix,id_info,false,opts)
-	  }
+	  children_id_infos.each do |id_info|
+	    qualified_ref = id_info.ret_qualified_ref()
+	    hash[qualified_ref] = get_instance(href_prefix,id_info,false,opts)
+	  end
 	else
   	  # get links to all children 
-	  children_id_infos.each{|id_info| 
+	  children_id_infos.each do |id_info| 
 	    key,value = RestContent.ret_instance_summary(id_info,href_prefix,opts)
 	    hash[key] = value
-	  }
+	  end
 	end
 	opts[:object_form] ? RefObjectPairs.new(hash) : hash
       end
@@ -123,14 +123,16 @@ module XYZ
   
 	#get refs to the child table objects (through getting there factories)
 	if opts[:depth] != :scalar_detail 
-	  child_list = DB_REL_DEF[id_info[:relation_type]][:one_to_many]
-	  if !child_list.nil?
-	    child_list.each{|child_type|
+          db_rel = DB_REL_DEF[id_info[:relation_type]]
+	  child_list = db_rel[:one_to_many]
+	  unless child_list.nil?
+	    child_list.each do |child_type|
+              next if opts[:vendor_attrs_only] and not db_rel[:model_class].is_vendor_subobject?(child_type)
 	      factory_uri = RestURI.ret_factory_uri(id_info[:uri],child_type)
 	      factory_id_info = IDInfoTable.get_row_from_uri(factory_uri,id_info[:c])
 	      factory_content = get_factory(href_prefix,factory_id_info,opts)
 	      hash[child_type] = factory_content unless factory_content.empty?
-	    }
+	    end
 	  end
 	end
         if opts[:object_form]
@@ -152,6 +154,7 @@ module XYZ
       def ret_dataset_with_scalar_columns(db_rel,opts={})
   	cols_hash = db_rel[:columns]
         select_cols = cols_hash.nil? ? [] : cols_hash.keys 
+        select_cols = db_rel[:model_class].vendor_attributes(select_cols) if opts[:vendor_attrs_only]        
 	select_cols.concat([:id,:description,:ref,:ref_num])
 
 	# first we use select; for rest we use select_more; that is why display_name not in var slect_cols

@@ -10,6 +10,15 @@ module XYZ
   module ModelSchema
       include MigrationMethods
 
+      #gets over written for classes with vendor attributes
+      def vendor_attributes(attr_list)
+       attr_list
+      end
+      #gets over written for classes that restrict children
+      def is_vendor_subobject?(relation_type)
+        true
+      end
+
       def set_db_for_all_models(db)
         models.each{|model| model.set_db(db)}
         #infra tables

@@ -10,5 +10,7 @@ module XYZ
     extend ModelDataClassMixins
     include ModelDataInstanceMixins
   end
+  class RefObjectPairs < HashObject
+  end
 end
 

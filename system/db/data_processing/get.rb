@@ -92,7 +92,7 @@ module XYZ
         hash = opts[:no_hrefs] ? {} : RestContent.ret_link(:self,factory_id_info[:uri],href_prefix) 
 	hash[:display_name] = "Factory for #{factory_id_info[:relation_type]}" unless opts[:no_hrefs]
         children_id_infos = IDInfoTable.get_factory_children_rows(factory_id_info)
-	return hash if children_id_infos.nil?
+	return opts[:object_form] ? RefObjectPairs.new(hash) : hash if children_id_infos.nil?
 	
 	#case on whether want summary for children or all their attributes
 	if opts[:depth] == :deep or opts[:depth] == :scalar_detail	
@@ -107,7 +107,7 @@ module XYZ
 	    hash[key] = value
 	  }
 	end
-	hash
+	opts[:object_form] ? RefObjectPairs.new(hash) : hash
       end
 
       def get_instance(href_prefix,id_info,is_top_level=true,opts={})
@@ -133,9 +133,12 @@ module XYZ
 	    }
 	  end
 	end
-        obj_or_hash = opts[:object_form] ? DB_REL_DEF[id_info[:relation_type]][:model_class].new(hash,id_info[:c],id_info[:relation_type]) : hash
-	is_top_level ? {id_info.ret_qualified_ref() => obj_or_hash} : obj_or_hash
-
+        if opts[:object_form]
+          obj = DB_REL_DEF[id_info[:relation_type]][:model_class].new(hash,id_info[:c],id_info[:relation_type]) 
+	  is_top_level ? RefObjectPairs.new({id_info.ret_qualified_ref() => obj}) : obj
+         else
+	  is_top_level ? {id_info.ret_qualified_ref() => hash} : hash
+         end
       end
 
       def get_scalar_values_given_id_info(id_info,opts={})

@@ -13,7 +13,7 @@ module XYZ
         column :architecture, :varchar, :size => 10 #e.g., 'i386'
        #TBD: in vendor specfic now column :manifest, :varchar #e.g.,rnp-chef-server-0816-ubuntu-910-x86_32
         column :image_size, :numeric, :size=>[6, 4] #in gigs
-        foreign_key :discovery_context_id, :discovery_context, FK_SET_NULL_OPT
+        foreign_key :data_source_id, :data_source, FK_SET_NULL_OPT
         many_to_one :library,:project
         one_to_many :attribute, :node_interface, :address_access_point
       end

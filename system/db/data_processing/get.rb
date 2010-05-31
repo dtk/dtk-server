@@ -133,7 +133,9 @@ module XYZ
 	    }
 	  end
 	end
-	is_top_level ? {id_info.ret_qualified_ref() => hash} : hash
+        obj_or_hash = opts[:object_form] ? DB_REL_DEF[id_info[:relation_type]][:model_class].new(hash,id_info[:c],id_info[:relation_type]) : hash
+	is_top_level ? {id_info.ret_qualified_ref() => obj_or_hash} : obj_or_hash
+
       end
 
       def get_scalar_values_given_id_info(id_info,opts={})

@@ -7,22 +7,19 @@ module XYZ
       opts[:no_hrefs] ||= true
       opts[:depth] ||= :deep
       opts[:no_null_cols] = true
+      opts[:object_form] = true
       href_prefix = "http://" + http_host() + "/list" 
       c = ret_session_context_id()
       @title = uri
-=begin
-	id_info = IDInfoTable.get_row_from_id_handle id_handle,  :raise_error => true 
-
-	#check if instance or factory
-	return get_factory(href_prefix,id_info,opts) if id_info[:is_factory]
-
-	get_instance(href_prefix,id_info,true,opts)      
-=end
-objs = Object.get_instance_or_factory(IDHandle[:c => c,:uri => uri],href_prefix,opts)
-      return @results = objs
+      id_handle = IDHandle[:c => c,:uri => uri]
+      objs = Object.get_instance_or_factory(IDHandle[:c => c,:uri => uri],href_prefix,opts)
 require 'pp'; pp objs
-#      def get_objects_wrt_parent(relation_type,parent_id_handle,where_clause={})
-      @results = objs.map{|o|o.object_slice([:id,:vendor_attributes])}
+      if opts[:vendor_attrs_only]
+#        opts = objs.map{|o|o.object_slice([:id,:vendor_attributes])}      
+      elsif opts[:normalized_attrs_only]
+       #TBD
+      end
+      @results = objs
     end
   end
 end

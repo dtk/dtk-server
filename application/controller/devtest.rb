@@ -14,9 +14,6 @@ module XYZ
       objs = Object.get_instance_or_factory(IDHandle[:c => c,:uri => uri],href_prefix,opts)
 require 'pp'; pp objs
       #TBD: implement :normalized_attrs_only flag
-      #if federated then have object modle return the stored (inventory key variables) and
-      #then make a call to bring in the federated variables
-      #TBD: look at changing federated field to be a list so one can indicate only certain vars are federated
       @results = objs
     end
   end

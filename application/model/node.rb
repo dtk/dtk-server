@@ -8,7 +8,6 @@ module XYZ
         has_ancestor_field()
         column :vendor_attributes, :json
         column :vendor_key, :varchar
-        column :is_federated, :boolean, :default => false
         column :is_deployed, :boolean, :default => false
         column :architecture, :varchar, :size => 10 #e.g., 'i386'
        #TBD: in vendor specfic now column :manifest, :varchar #e.g.,rnp-chef-server-0816-ubuntu-910-x86_32

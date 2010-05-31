@@ -32,10 +32,6 @@ module XYZ
           def name_fields
             [:id]
           end
-          #TBD: whether should federate might be more granular than just on a class level
-          def should_federate
-            false
-          end
         end
       end
     end

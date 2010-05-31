@@ -39,18 +39,14 @@ module XYZ
 
           def create_object(container_id_handle,vendor_attr_hash)
             obj = {:vendor_key => vendor_key_value(vendor_attr_hash)}
-            if should_federate()
-               obj.merge! :is_federated => true
-            else 
-               obj.merge! :vendor_attributes => vendor_attr_hash
-               obj.merge! base_attr_fn(vendor_attr_hash)
-            end
+            obj.merge! :vendor_attributes => vendor_attr_hash
+            obj.merge! base_attr_fn(vendor_attr_hash)
+
             Object.create_multiple_children_from_hash(container_id_handle,
                      {relation_type() => {ref(vendor_attr_hash) => obj}})
           end
 
           def update_object(container_id_handle,id_handle,vendor_attr_hash)
-            return nil if should_federate()
             #TBD: just stub; real version should keep same id
             Object.delete_instance(id_handle)
             create_object(container_id_handle,vendor_attr_hash)

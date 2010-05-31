@@ -62,8 +62,11 @@ module XYZ
             id ? IDHandle[:guid => id,:c => container_id_handle[:c]] : nil
           end
 
+          def cloud_provide_type()
+            self.to_s =~ %r{^.+::.+::(.+)::.+$} ? Aux.underscore($1).to_sym : :generic
+          end
           def vendor_key_value(vendor_attr_hash)
-            unique_key_fields().map{|k|vendor_attr_hash[k]}.inspect
+            ([cloud_provide_type().to_s] + unique_key_fields().map{|k|vendor_attr_hash[k]}).inspect
           end
           def ref(vendor_attr_hash)
             name_fields().map{|k|vendor_attr_hash[k]}.join("-")

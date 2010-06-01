@@ -2,7 +2,7 @@ require File.expand_path("../ec2", File.dirname(__FILE__))
 module XYZ
   module CloudProvider
     module Ec2
-      class Node < Top 
+      class Node < Ec2::Top 
         class << self
           def discover_and_update(container_id_handle,filter={})
             nodes = connection().servers_all()
@@ -43,3 +43,4 @@ module XYZ
     end
   end
 end
+

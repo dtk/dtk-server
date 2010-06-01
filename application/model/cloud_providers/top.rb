@@ -1,6 +1,5 @@
 module XYZ
   module CloudProvider
-    module Ec2
       class Top
         class << self
           def connection()
@@ -76,4 +75,4 @@ module XYZ
       end
     end
   end
-end
+

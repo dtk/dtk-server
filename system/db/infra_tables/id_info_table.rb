@@ -150,6 +150,18 @@ module XYZ
 	  nil
 	end
         
+        def get_factory_id_handle(parent_id_handle,relation_type)
+          parent_uri = parent_id_handle[:uri]
+          if parent_uri.nil?
+            parent_id_info = get_row_from_id_handle(parent_id_handle)
+            return nil if parent_id_info.nil?
+            parent_uri = parent_id_info[:uri]
+          end
+
+          factory_uri = RestURI.ret_factory_uri(parent_uri,relation_type)
+          IDHandle[:c => parent_id_handle[:c], :uri => factory_uri]
+        end
+
 	def get_factory_children_rows(factory_id_info)
 	  parent_id = factory_id_info[:parent_id]
 	  rt = factory_id_info[:relation_type] ? factory_id_info[:relation_type].to_s : nil

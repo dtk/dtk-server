@@ -127,7 +127,7 @@ module XYZ
 	  child_list = db_rel[:one_to_many]
 	  unless child_list.nil?
 	    child_list.each do |child_type|
-              next if opts[:vendor_attrs_only] and not db_rel[:model_class].is_vendor_subobject?(child_type)
+              next if opts[:ds_attrs_only] and not db_rel[:model_class].is_ds_subobject?(child_type)
 	      factory_uri = RestURI.ret_factory_uri(id_info[:uri],child_type)
 	      factory_id_info = IDInfoTable.get_row_from_uri(factory_uri,id_info[:c])
 	      factory_content = get_factory(href_prefix,factory_id_info,opts)
@@ -154,7 +154,7 @@ module XYZ
       def ret_dataset_with_scalar_columns(db_rel,opts={})
   	cols_hash = db_rel[:columns]
         select_cols = cols_hash.nil? ? [] : cols_hash.keys 
-        select_cols = db_rel[:model_class].vendor_attributes(select_cols) if opts[:vendor_attrs_only]        
+        select_cols = db_rel[:model_class].ds_attributes(select_cols) if opts[:ds_attrs_only]        
 	select_cols.concat([:id,:description,:ref,:ref_num])
 
 	# first we use select; for rest we use select_more; that is why display_name not in var slect_cols

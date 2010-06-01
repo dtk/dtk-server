@@ -13,8 +13,8 @@ module XYZ
         if id_info[:is_factory]
 	  create_from_hash_with_factory(id_info[:c],id_info[:uri],hash,clone_helper,opts) 
         else
-          hash.map{|ref,child_hash|
-            factory_id_handle = get_factory_id_handle(id_handle,ref)
+          hash.map{|relation_type,child_hash|
+            factory_id_handle = IDInfoTable.get_factory_id_handle(id_handle,relation_type)
             create_from_hash_with_factory(factory_id_handle[:c],factory_id_handle[:uri],child_hash,clone_helper,opts)
           }.flatten
         end

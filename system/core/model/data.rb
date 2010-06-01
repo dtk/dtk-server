@@ -52,16 +52,7 @@ module XYZ
     end
 
     def get_factory_id_handle(parent_id_handle,relation_type=nil)
-      relation_type ||= @relation_type
-      unless parent_uri = parent_id_handle[:uri]
-        parent_id_info = IDInfoTable.get_row_from_id_handle(parent_id_handle)
-  
-        return nil if parent_id_info.nil?
-        parent_uri = parent_id_info[:uri]
-      end
-
-      factory_uri = RestURI.ret_factory_uri(parent_uri,relation_type)
-      IDHandle[:c => parent_id_handle[:c], :uri => factory_uri]
+      IDInfoTable.get_factory_id_handle(parent_id_handle,relation_type || @relation_type)
     end
 
     def get_child_id_handle_from_qualified_ref(factory_id_handle,qualified_ref)

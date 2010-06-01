@@ -3,7 +3,7 @@ module XYZ
     set_relation_name(:region,:region)
     class << self
       def up()
-        column :vendor_attributes, :json
+        column :ds_attributes, :json
         column :is_deployed, :boolean, :default => false
         column :type, :varchar, :size => 25 #type is availability_zone, datacenter, vdc
         one_to_many :region

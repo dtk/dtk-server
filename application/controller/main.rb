@@ -258,8 +258,7 @@ print "This is a test of the main ctrllr index"
       objs = Object.get_instance_or_factory(IDHandle[:c => c,:uri => uri],href_prefix,opts)
       return @results = objs
 require 'pp'; pp objs
-#      def get_objects_wrt_parent(relation_type,parent_id_handle,where_clause={})
-      @results = objs.map{|o|o.object_slice([:id,:vendor_attributes])}
+      @results = objs
     end
 
     # the string returned at the end of the function is used as the html body

@@ -14,8 +14,8 @@ module XYZ
     set_relation_name(:network,:gateway)
     class << self
       def up()
-        column :vendor_attributes, :json
-        column :vendor_key, :varchar
+        column :ds_attributes, :json
+        column :ds_key, :varchar
         column :is_deployed, :boolean, :default => false
         foreign_key :network_partition1_id, :network_partition, FK_CASCADE_OPT
         foreign_key :network_partition2_id, :network_partition, FK_CASCADE_OPT

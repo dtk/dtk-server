@@ -1,26 +1,26 @@
 require File.expand_path('model',  File.dirname(__FILE__))
 module XYZ
   class Node < Model
-    extend ClassMixinVendorExtensions
+    extend ClassMixinDataSourceExtensions
     set_relation_name(:node,:node)
     class << self
       def up()
         has_ancestor_field()
-        column :vendor_attributes, :json
-        column :vendor_key, :varchar
+        column :ds_attributes, :json
+        column :ds_key, :varchar
         column :is_deployed, :boolean, :default => false
         column :architecture, :varchar, :size => 10 #e.g., 'i386'
-       #TBD: in vendor specfic now column :manifest, :varchar #e.g.,rnp-chef-server-0816-ubuntu-910-x86_32
+       #TBD: in dta source specfic now column :manifest, :varchar #e.g.,rnp-chef-server-0816-ubuntu-910-x86_32
         column :image_size, :numeric, :size=>[6, 4] #in gigs
         foreign_key :data_source_id, :data_source, FK_SET_NULL_OPT
         many_to_one :library,:project
         one_to_many :attribute, :node_interface, :address_access_point
       end
 
-      def vendor_attributes(attr_list)
-        [:vendor_attributes]
+      def ds_attributes(attr_list)
+        [:ds_attributes]
       end
-      def is_vendor_subobject?(relation_type)
+      def is_ds_subobject?(relation_type)
         false
       end
 

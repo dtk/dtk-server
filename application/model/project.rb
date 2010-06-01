@@ -12,9 +12,9 @@ module XYZ
       def create(name,c,opts={})
         uri = "/project/#{name}"
         raise Error.new("Project #{name} exists already") if exists? IDHandle[:c => c,:uri => uri]
-        project_id_handle = create_simple_instance?(uri,c,opts)
+        project_uri = create_simple_instance?(uri,c,opts)
         hash = {:network_partition => {"internet" => {:is_internet => true}}} 
-        create_from_hash(project_id_handle,hash)
+        create_from_hash(IDHandle[:c => c, :uri => project_uri],hash)
       end
 
       def encapsulate_elements_in_project(project_id_handle,new_component_uri,opts={})

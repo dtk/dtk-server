@@ -10,12 +10,12 @@ module XYZ
   module ModelSchema
       include MigrationMethods
 
-      #gets over written for classes with vendor attributes
-      def vendor_attributes(attr_list)
+      #gets over written for classes with data source attributes
+      def ds_attributes(attr_list)
        attr_list
       end
       #gets over written for classes that restrict children
-      def is_vendor_subobject?(relation_type)
+      def is_ds_subobject?(relation_type)
         true
       end
 

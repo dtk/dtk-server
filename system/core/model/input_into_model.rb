@@ -23,7 +23,10 @@ module XYZ
         new_prefixes = create_from_hash(factory_id_handle,obj)
         prefixes.push(*new_prefixes).uniq!
       end
-      update_with_id_values(refs,c,prefixes)
+      unless refs.empty?
+        container_id_info = IDInfoTable.get_row_from_id_handle(container_id_handle)
+        update_with_id_values(refs,c,prefixes,container_id_info[:uri])
+      end
     end
    private
     def remove_refs_and_return_refs!(obj,refs,path="")
@@ -39,20 +42,20 @@ module XYZ
         end 
       end
     end  
-    def update_with_id_values(refs,c,prefixes)
+    def update_with_id_values(refs,c,prefixes,container_uri)
       refs.each_pair do |fk_rel_uri_x,info|
         fk_rel_uri = ret_rebased_uri(fk_rel_uri_x ,prefixes)
 	fk_rel_id_handle = IDHandle[:c => c, :uri => fk_rel_uri]
 	info.each_pair do |col,ref_uri_x|
-          ref_uri = ret_rebased_uri(ref_uri_x,prefixes)
+          ref_uri = ret_rebased_uri(ref_uri_x,prefixes,container_uri)
 	  ref_id_info = get_row_from_id_handle(IDHandle[:c => c, :uri => ref_uri])
-	  raise Error.new("In import cannot find object with uri #{ref_uri}") unless ref_id_info[:id]
+	  raise Error.new("In import_into_model cannot find object with uri #{ref_uri}") unless ref_id_info[:id]
 	  update_instance(fk_rel_id_handle,{col.to_sym =>  ref_id_info[:id]})	  
         end
       end
     end
 
-    def ret_rebased_uri(uri_x,prefixes)
+    def ret_rebased_uri(uri_x,prefixes,container_uri=nil)
       relation_type_string = stripped_uri = ref = nil
       if uri_x =~ %r{^/(.+?)/(.+?)(/.+$)} 
          relation_type_string = $1
@@ -82,6 +85,8 @@ module XYZ
       }
       return prefix_matches[0] + stripped_uri if prefix_matches.size == 1
       raise Error.new("not handling case where not exact, but or more prfix matches") if prefix_matches.size  > 1
+      #if container_uri is non null then uri_x can be wrt container_uri and this is assumed to be the case if reach here
+      return container_uri + uri_x if container_uri
       raise Error 
     end
 

@@ -32,7 +32,7 @@ module XYZ
       def up()
         column :network_address, :json #e.g., {:family : "ipv4, :address : "10.4.5.7"} allow family: "dns" :address"
         column :type, :varchar, :size => 25 #internet,local ..
-        foreign_key :network_partitione_id, :network_partition, FK_CASCADE_OPT
+        foreign_key :network_partition_id, :network_partition, FK_CASCADE_OPT
         many_to_one :node
       end
       ##### Actions

@@ -8,12 +8,13 @@ module XYZ
       end
 
       #### actions
+      #TBD: stub
       def create(name,c,opts={})
         uri = "/project/#{name}"
         raise Error.new("Project #{name} exists already") if exists? IDHandle[:c => c,:uri => uri]
         project_id_handle = create_simple_instance?(uri,c,opts)
         hash = {:network_partition => {"internet" => {:is_internet => true}}} 
-        create_multiple_children_from_hash(project_id_handle,hash)
+        create_from_hash(project_id_handle,hash)
       end
 
       def encapsulate_elements_in_project(project_id_handle,new_component_uri,opts={})

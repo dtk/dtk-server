@@ -43,21 +43,6 @@ module XYZ
       @db.delete_instances_wrt_parent(relation_type,parent_id_handle,where_clause,opts)
     end
 
-    def create_simple_instance?(new_uri,c,opts={})
-      @db.create_simple_instance?(new_uri,c,opts)
-    end
-
-    def create_from_hash(factory_id_handle,hash,clone_helper=nil,opts={})
-      @db.create_from_hash(factory_id_handle,hash,clone_helper,opts)
-    end
-
-    def create_multiple_children_from_hash(id_handle,hash,clone_helper=nil,opts={})
-      hash.each do |ref,obj|
-        factory_id_handle = get_factory_id_handle(id_handle,ref)
-        create_from_hash(factory_id_handle,obj,clone_helper,opts)
-      end
-    end
-
     def update_instance(id_handle,scalar_assignments,opts={})
       @db.update_instance(id_handle,scalar_assignments,opts)
     end
@@ -66,7 +51,8 @@ module XYZ
       @db.update_from_hash_assignments(id_handle,hash_assigns,opts)
     end
 
-    def get_factory_id_handle(parent_id_handle,relation_type)
+    def get_factory_id_handle(parent_id_handle,relation_type=nil)
+      relation_type ||= @relation_type
       unless parent_uri = parent_id_handle[:uri]
         parent_id_info = IDInfoTable.get_row_from_id_handle(parent_id_handle)
   

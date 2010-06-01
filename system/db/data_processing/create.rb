@@ -6,66 +6,30 @@ module XYZ
     module DataProcessingCreate
       #creates a new instance w/ref_num bumped if needed
       #TBD: may want opt that says just create leaf nodes and error if intermediate objects do not exist	
-      def create_from_hash(factory_id_handle,hash,clone_helper=nil,opts={})
-        #TBD: must check that factory_id_handle is an existing factory
-        factory_uri = factory_id_handle[:uri]
- 	c = factory_id_handle[:c]
-        new_uris = []
-        hash.each{|ref,assignments| 
-	  new_uri = create_instance(factory_uri,ref,assignments,c,clone_helper,opts)
-	  Log.info("created #{new_uri}")		   
-	  new_uris.push(new_uri)
-        }
-	new_uris
-      end
+      def create_from_hash(id_handle,hash,clone_helper=nil,opts={})
+	id_info = IDInfoTable.get_row_from_id_handle id_handle, :raise_error => true 
 
-      #TBD: whether refine or remove (useful now for testing)
-      #does not create a new instance w/ref_num bumped
-      #if keep will rewrite so it is better combined with create_instance
-      def create_simple_instance?(new_uri,c,opts={})
-        # no-op  if exists already
-        id_info_row = IDInfoTable.get_row_from_id_handle({:c => c, :uri => new_uri})
-	if id_info_row
-	  guid = IDInfoTable.ret_guid_from_db_id(id_info_row[:id],id_info_row[:relation_type])
-	  return IDHandle[:c => c, :guid => guid]
-        end
-
-	qualified_ref,factory_uri = RestURI.parse_instance_uri(new_uri)
-        relation_type,parent_uri = RestURI.parse_factory_uri(factory_uri) 
-        db_rel = DB_REL_DEF[relation_type]
-
-	#break into ref and ref_num
-	ref = nil; ref_num = nil
-	if qualified_ref =~ %r{(.+)-([0-9]+$)}
-	  ref = $1;ref_num = $2.to_i
-	else
-	  ref = qualified_ref
-        end
-
-	scalar_assignments = {:ref => ref.to_s, :ref_num => ref_num}
-
-	new_id = nil
-	parent_id = nil
-	parent_relation_type = nil
-       	if parent_uri == "/" ## if top level object
-	  new_id = insert_into_db(c,db_rel,scalar_assignments)
+	#check if instance or factory
+        if id_info[:is_factory]
+	  create_from_hash_with_factory(id_info[:c],id_info[:uri],hash,clone_helper,opts) 
         else
-	  parent_id_info = IDInfoTable.get_row_from_uri parent_uri,c,:raise_error => true 
-	  parent_id = parent_id_info[:id]
-	  parent_relation_type = parent_id_info[:relation_type]
-
-	  parent_id_field = ret_parent_id_field_name(parent_id_info[:db_rel],db_rel)
-	  new_id = insert_into_db(c,db_rel,scalar_assignments.merge({parent_id_field => parent_id_info[:id]}))
-	end              
-
-	#need to fill in extra columns in associated uri table entry
-	IDInfoTable.update_instance(db_rel,new_id,new_uri,relation_type,parent_id,parent_relation_type)
-	create_factory_uris_and_contained_objects(new_uri,new_id,relation_type,{},c)
-	
-	IDHandle[:c => c, :guid => IDInfoTable.ret_guid_from_db_id(new_id,relation_type)]
+          hash.map{|ref,child_hash|
+            factory_id_handle = get_factory_id_handle(id_handle,ref)
+            create_from_hash_with_factory(factory_id_handle[:c],factory_id_handle[:uri],child_hash,clone_helper,opts)
+          }.flatten
+        end
       end
 
      private
+      def create_from_hash_with_factory(c,factory_uri,hash,clone_helper=nil,opts={})
+        new_uris = Array.new
+        hash.each do |ref,assignments| 
+	  new_uri = create_instance(factory_uri,ref,assignments,c,clone_helper,opts)
+	  Log.info("created #{new_uri}")		   
+	  new_uris << new_uri
+        end
+	new_uris
+      end
 
       def create_instance(factory_uri,ref,assignments,c,clone_helper=nil,opts={})
         relation_type,parent_uri = RestURI.parse_factory_uri(factory_uri) 

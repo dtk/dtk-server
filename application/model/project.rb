@@ -12,7 +12,7 @@ module XYZ
         uri = "/project/#{name}"
         raise Error.new("Project #{name} exists already") if exists? IDHandle[:c => c,:uri => uri]
         project_id_handle = create_simple_instance?(uri,c,opts)
-        hash = {:network_partition => {:internet => {:is_internet => true}}} 
+        hash = {:network_partition => {"internet" => {:is_internet => true}}} 
         create_multiple_children_from_hash(project_id_handle,hash)
       end
 

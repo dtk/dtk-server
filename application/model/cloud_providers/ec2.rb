@@ -40,10 +40,12 @@ module XYZ
           def create_object(container_id_handle,vendor_attr_hash)
             obj = {:vendor_key => vendor_key_value(vendor_attr_hash)}
             obj.merge! :vendor_attributes => vendor_attr_hash
-            obj.merge! base_attr_fn(vendor_attr_hash)
+            obj.merge! normalize(vendor_attr_hash)
 
-            Object.create_multiple_children_from_hash(container_id_handle,
-                     {relation_type() => {ref(vendor_attr_hash) => obj}})
+            Object.input_into_model(container_id_handle,{relation_type() => {ref(vendor_attr_hash) => obj}})
+
+     #       Object.create_multiple_children_from_hash(container_id_handle,
+      #               {relation_type() => {ref(vendor_attr_hash) => obj}})
           end
 
           def update_object(container_id_handle,id_handle,vendor_attr_hash)

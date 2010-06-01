@@ -9,7 +9,7 @@ module XYZ
   class Model < HashObject 
     extend ModelSchema
     extend ModelDataClassMixins
-    extend InputIntoModelClassMixin
+    extend InputIntoModelClassMixins
     include ModelDataInstanceMixins
   end
   class RefObjectPairs < HashObject

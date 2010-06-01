@@ -1,45 +1,55 @@
 module XYZ
-  module InputIntoModelClassMixin
-    #not idempotent
-    def input_into_model(target_id_handle,hash_content)
-      c = target_id_handle[:c]
-      refs={}
-      remove_refs_and_return_refs!(hash_content,refs)
+  module InputIntoModelClassMixins
+
+    def assoc_key(key)
+      "*" + key.to_s
+    end
+    def is_assoc_key?(key)
+      key.kind_of?(String) & key[0,1] == "*"
+    end
+    def removed_assoc_mark(key)
+      is_assoc_key?(key) ? key[1,key.size-1] : key
+    end 
+
+    #hash_with_assocs has form {obj1_type => ..,obj2_type => ...}
+    def input_into_model(container_id_handle,hash_with_assocs)
+      c = container_id_handle[:c]
+      refs = Hash.new
+      remove_refs_and_return_refs!(hash_with_assocs,refs)
 
       prefixes = []
-      #hash_content has form {obj1_type => ..,obj2_type => ...}
-      hash_content.each{|relation_type,obj|
-	factory_id_handle = get_factory_id_handle(target_id_handle,relation_type.to_sym)
+      hash_with_assocs.each do |relation_type,obj|
+	factory_id_handle = get_factory_id_handle(container_id_handle,relation_type.to_sym)
         new_prefixes = create_from_hash(factory_id_handle,obj)
         prefixes.push(*new_prefixes).uniq!
-      }
+      end
       update_with_id_values(refs,c,prefixes)
     end
    private
     def remove_refs_and_return_refs!(obj,refs,path="")
-      obj.each_pair{|k,v|
+      obj.each_pair do |k,v|
         if v.kind_of?(Hash) 
-	  remove_refs_and_return_refs!(v,refs,path + "/" + k)	    
+	  remove_refs_and_return_refs!(v,refs,path + "/" + k.to_s)	    
         elsif v.kind_of?(Array)
 	  next
-        elsif k[0,1] == "*" 
+        elsif is_assoc_key?(k)
 	  refs[path] ||= {}
-	  refs[path][k[1,v.size-1]] = v 
+	  refs[path][removed_assoc_mark(k)] = v 
 	  obj.delete(k)
         end 
-      }
+      end
     end  
     def update_with_id_values(refs,c,prefixes)
-      refs.each_pair{|fk_rel_uri_x,info|
+      refs.each_pair do |fk_rel_uri_x,info|
         fk_rel_uri = ret_rebased_uri(fk_rel_uri_x ,prefixes)
 	fk_rel_id_handle = IDHandle[:c => c, :uri => fk_rel_uri]
-	info.each_pair{|col,ref_uri_x|
+	info.each_pair do |col,ref_uri_x|
           ref_uri = ret_rebased_uri(ref_uri_x,prefixes)
 	  ref_id_info = get_row_from_id_handle(IDHandle[:c => c, :uri => ref_uri])
 	  raise Error.new("In import cannot find object with uri #{ref_uri}") unless ref_id_info[:id]
 	  update_instance(fk_rel_id_handle,{col.to_sym =>  ref_id_info[:id]})	  
-        }
-      }
+        end
+      end
     end
 
     def ret_rebased_uri(uri_x,prefixes)

@@ -1,6 +1,5 @@
 module XYZ
-  module CloudProvider
-    class Top
+  class DataSourceAdapter
       class << self
         def sync_with_discovered(container_id_handle,ds_attr_hash_list)
           marked = Array.new
@@ -51,11 +50,11 @@ module XYZ
           id ? IDHandle[:guid => id,:c => container_id_handle[:c]] : nil
         end
 
-        def cloud_provide_type()
+        def ds_type()
           self.to_s =~ %r{^.+::.+::(.+)::.+$} ? Aux.underscore($1).to_sym : :generic
         end
         def ds_key_value(ds_attr_hash)
-          ([cloud_provide_type().to_s] + unique_key_fields().map{|k|ds_attr_hash[k]}).inspect
+          ([ds_type().to_s] + unique_key_fields().map{|k|ds_attr_hash[k]}).inspect
         end
         def ref(ds_attr_hash)
           name_fields().map{|k|ds_attr_hash[k]}.join("-")
@@ -65,7 +64,6 @@ module XYZ
         end
       end
     end
-  end
 end
 
 

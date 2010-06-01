@@ -10,8 +10,9 @@ module XYZ
       @@ds_class_objects[self] ||= Hash.new
       return @@ds_class_objects[self][provider_type] if @@ds_class_objects[self][provider_type]
       obj_class = Aux.demodulize(self.to_s)
-      require File.expand_path("cloud_providers/#{provider_type}/#{Aux.underscore(obj_class)}", File.dirname(__FILE__))
-      base_class = XYZ::CloudProvider.const_get provider_type.to_s.capitalize
+      obj_type = Aux.underscore(obj_class)
+      require File.expand_path("#{obj_type}/#{provider_type}_#{obj_type}", File.dirname(__FILE__))
+      base_class = DSAdapter.const_get provider_type.to_s.capitalize
       @@ds_class_objects[self][provider_type] = base_class.const_get obj_class
     end
   end

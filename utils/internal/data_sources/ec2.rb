@@ -1,8 +1,8 @@
-require File.expand_path("top", File.dirname(__FILE__))
+require File.expand_path("data_source_adapter", File.dirname(__FILE__))
 module XYZ
-  module CloudProvider
-    module Ec2
-      class Top < CloudProvider::Top
+  module DSAdapter
+    class Ec2
+      class Top < DataSourceAdapter
         class << self
           def connection()
             @@connection ||= CloudConnect::EC2.new

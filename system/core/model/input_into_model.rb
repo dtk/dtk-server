@@ -5,7 +5,7 @@ module XYZ
       "*" + key.to_s
     end
     def is_assoc_key?(key)
-      key.kind_of?(String) & key[0,1] == "*"
+      key.kind_of?(String) and key[0,1] == "*"
     end
     def removed_assoc_mark(key)
       is_assoc_key?(key) ? key[1,key.size-1] : key

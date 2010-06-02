@@ -31,6 +31,17 @@ module XYZ
 
   class Aux
     class << self
+      def nested_value(hash,path)
+        nested_value_private(hash,path.dup)
+      end
+     private
+      def nested_value_private(hash,path)
+        return nil unless hash.kind_of?(Hash)
+        return nil unless hash.has_key?(f = path.shift)
+        return hash[f] if path.length == 0
+        nested_value_private(hash[f],path)
+      end
+     public
       def pp_form(obj)
         x = ""
         PP.pp obj, x

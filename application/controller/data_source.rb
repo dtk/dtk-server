@@ -1,5 +1,4 @@
 module XYZ
-  
   class DataSourceController < Controller
     #TBD: just test hard wired to ec2 and
     def create__ec2(*uri_array)

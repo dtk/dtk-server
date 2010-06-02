@@ -1,16 +1,14 @@
 module XYZ
   class DevtestController < Controller
     def discover_and_update_nodes(*uri_array)
-=begin
-need to refactor
       c = ret_session_context_id()
       ds_type = uri_array.pop.to_sym
-      container_id_handle = IDHandle[:c => c, :uri => "/" + uri_array.join("/")]
-      #TBD stub
-      data_source = DataSource.find_or_create(container_id_handle,ds_type.to_s)
-      Node.discover_and_update(container_id_handle,ds_type,data_source)
+      container_uri = "/" + uri_array.join("/")
+      ds_object_uri =  "#{container_uri}/data_source/#{ds_type}/data_source_object/node"
+      ds_object_id_handle = IDHandle[:c => c, :uri => ds_object_uri]
+      ds_object_obj = Object.get_object(IDHandle[:c => c, :uri => ds_object_uri])
+      ds_object_obj.discover_and_update()
       "discover and update nodes from #{ds_type}"
-=end
     end
 
     def list(*uri_array)

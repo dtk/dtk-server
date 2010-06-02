@@ -135,6 +135,16 @@ module XYZ
       @relation_type
     end
 
+   protected
+    def get_parent_object(opts={})
+      self.class.get_parent_object(id_handle,opts)
+    end
+
+    def id_handle()
+      raise Error.new("id_handle not stored with object") if @id_handle.nil?
+      @id_handle
+    end
+
    private
 
     def ret_id_handle_from_db_id(db_id,relation_type)
@@ -143,15 +153,6 @@ module XYZ
 
     def get_object_from_db_id(db_id,relation_type,opts={})
       self.class.get_object(ret_id_handle_from_db_id(db_id,relation_type))
-    end
-
-    def get_parent_object(opts={})
-      self.class.get_parent_object(id_handle,opts)
-    end
-   
-    def id_handle()
-      raise Error.new("id_handle not stored with object") if @id_handle.nil?
-      @id_handle
     end
   end
   #End ModelDataInstanceMixins

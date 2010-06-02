@@ -49,6 +49,12 @@ module XYZ
       end
 
       ## Taken from Sequel
+      def camelize(str,first_letter_in_uppercase = :upper)
+        s = str.gsub(/\/(.?)/){|x| "::#{x[-1..-1].upcase unless x == '/'}"}.gsub(/(^|_)(.)/){|x| x[-1..-1].upcase}
+       s[0...1] = s[0...1].downcase unless first_letter_in_uppercase == :upper
+       s
+      end
+
       def underscore(str)
         str.gsub(/::/, '/').gsub(/([A-Z]+)([A-Z][a-z])/,'\1_\2').
         gsub(/([a-z\d])([A-Z])/,'\1_\2').tr("-", "_").downcase

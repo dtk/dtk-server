@@ -14,12 +14,20 @@ module XYZ
       end
       #actions
 
-      def find_or_create(container_handle_id,ref,hash_content={})
+      #TBD: stub now; fil in defaults if dont have paramters
+      Data_source_defaults = {:filter => {:types => [:node]}}
+      def create(container_handle_id,ref,hash_content={})
         factory_id_handle = get_factory_id_handle(container_handle_id)
-        #since passing ref for qualified_ref param assuming that ref is unique 
         id_handle = get_child_id_handle_from_qualified_ref(factory_id_handle,ref)
-        exists?(id_handle) ? get_object(id_handle) :  
-          create_from_hash(container_handle_id, {:data_source => {ref => hash_content}})
+        raise Error.new("data source #{ref} exists already") if exists? id_handle
+
+        hash_with_defaults = Hash.new
+        [:filter,:source_handle,:update_policy,:polling_policy,:objects_location].each do |key|
+          v = hash_content[key] || Data_source_defaults[key] 
+          hash_with_defaults[key] = v if v
+        end
+        create_from_hash(container_handle_id, {:data_source => {ref => hash_with_defaults}})
+        container_handle_id
       end
     end
   end

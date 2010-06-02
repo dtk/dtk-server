@@ -2,14 +2,6 @@
 
 module XYZ
   class NodeController < Controller
-    def discover_and_update(*uri_array)
-      c = ret_session_context_id()
-      provider_type = uri_array.pop.to_sym
-      container_id_handle = IDHandle[:c => c, :uri => "/" + uri_array.join("/")]
-      filters = Hash.new #TBD stub
-      Node.discover_and_update(container_id_handle,provider_type,filters)
-      "discover and update ec2"
-    end
 
     def list
       #get all active (or appropriate status) ubuntu servers

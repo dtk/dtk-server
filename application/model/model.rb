@@ -6,14 +6,14 @@
 module XYZ
   module ClassMixinDataSourceExtensions
     @@ds_class_objects ||= Hash.new
-    def provider_class_object(provider_type)
+    def ds_class_object(ds_type)
       @@ds_class_objects[self] ||= Hash.new
-      return @@ds_class_objects[self][provider_type] if @@ds_class_objects[self][provider_type]
+      return @@ds_class_objects[self][ds_type] if @@ds_class_objects[self][ds_type]
       obj_class = Aux.demodulize(self.to_s)
       obj_type = Aux.underscore(obj_class)
-      require File.expand_path("#{obj_type}/#{provider_type}_#{obj_type}", File.dirname(__FILE__))
-      base_class = DSAdapter.const_get provider_type.to_s.capitalize
-      @@ds_class_objects[self][provider_type] = base_class.const_get obj_class
+      require File.expand_path("#{obj_type}/#{ds_type}_#{obj_type}", File.dirname(__FILE__))
+      base_class = DSAdapter.const_get ds_type.to_s.capitalize
+      @@ds_class_objects[self][ds_type] = base_class.const_get obj_class
     end
   end
 

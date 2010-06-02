@@ -25,9 +25,10 @@ module XYZ
       end
 
       ##### Actions
-      def discover_and_update(container_id_handle,provider_type,filter={})
+      #TBD: probably move higher
+      def discover_and_update(container_id_handle,ds_type,ds_object)
         raise Error.new("container with (#{container_id_handle}) not found") unless exists? container_id_handle 	
-        provider_class_object(provider_type).discover_and_update(container_id_handle,filter)
+        ds_class_object(ds_type).discover_and_update(container_id_handle,ds_object)
       end
 
       def get_node_attribute_values(id_handle,opts={})

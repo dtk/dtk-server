@@ -13,14 +13,14 @@ module XYZ
         many_to_one :project
       end
       #actions
-=begin
+
       def find_or_create(container_handle_id,ref,hash_content={})
         factory_id_handle = get_factory_id_handle(container_handle_id)
         #since passing ref for qualified_ref param assuming that ref is unique 
         id_handle = get_child_id_handle_from_qualified_ref(factory_id_handle,ref)
-        return get_object(id_handle) if exists? id_handle
+        exists?(id_handle) ? get_object(id_handle) :  
+          create_from_hash(container_handle_id, {:data_source => {ref => hash_content}})
       end
-=end        
     end
   end
 end

@@ -20,7 +20,7 @@ module XYZ
       end
      private
       #TBD: stub
-      DS_defaults = {:data_source_object => {"node" => {},"image" => {}}}
+      DS_defaults = Hash.new
       def fill_in_defaults(hash_content)
         hash_with_defaults = Hash.new
         [:source_handle,:data_source_object].each do |k|

@@ -1,18 +1,20 @@
-require DATA_SOURCE_ADAPTERS_DIR + 'ec2'
+require DATA_SOURCE_ADAPTERS_DIR + 'chef'
 module XYZ
   module DSAdapter
-    class Ec2
-      class Node < Ec2::Top 
+    class Chef
+      class Component < Chef::Top 
         class << self
           def discover_and_update(container_id_handle,ds_object)
-            #TBD: make use of params on ds_object; it can subsume container_id_handle
+=begin
             nodes = connection().servers_all()
             require 'pp'; pp nodes
             sync_with_discovered(container_id_handle,nodes)
+=end
           end
          private
           #TBD below is effectively dsl; may make more declarative using data integration dsl
           def normalize(v)
+=begin
             node_addr = v[:private_ip_address] ?
             {:family => "ipv4", :address => v[:private_ip_address]} : nil
             node_interface = {:node_interface => {"eth0" => {"type" => "ethernet"}.merge(node_addr ? {:address => node_addr} : {})}}
@@ -20,7 +22,9 @@ module XYZ
             addr_aps.merge!(Local.addr_access_point(v[:dns_name],"dns","internet","internet"))
             ret = node_interface.merge(addr_aps.empty? ? {} : {:address_access_point => addr_aps})
             #TBD: including local ip and dns plus and hookup to security groups 
+=end
           end
+=begin
           module Local
             def self.addr_access_point(addr,family,type,network_partition)
               if addr 
@@ -39,6 +43,7 @@ module XYZ
           def name_fields
             [:id]
           end
+=end
         end
       end
     end

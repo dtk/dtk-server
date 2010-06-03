@@ -63,7 +63,7 @@ module XYZ
       #TBD: logic to override if @objects_location set
       default_container_obj = get_parent_object().get_parent_object()
       placement_id_handle = default_container_obj.id_handle
-      @ds_object_adapter_class.discover_and_update(placement_id_handle,self[:ds_object])
+      @ds_object_adapter_class.discover_and_update(placement_id_handle,self)
     end
 
     #helper fns

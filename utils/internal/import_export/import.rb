@@ -3,8 +3,12 @@ module XYZ
   module ImportObject
     #not idempotent
     def import_objects_from_file(target_id_handle,json_file)
-      raise Error.new("Target given (#{target_id_handle}) does not exist") unless exists? target_id_handle 
       raise Error.new("file given #{json_file} does not exist") unless File.exists?(json_file)
+      unless exists? target_id_handle 
+        #TBD: assumption is that target_id_handle is in uri form
+        create_simple_instance?(target_id_handle[:uri],target_id_handle[:c])
+      end
+
       hash_content = nil
       File.open(json_file) do |f| 
         begin

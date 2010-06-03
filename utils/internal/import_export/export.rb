@@ -4,8 +4,7 @@ module XYZ
     #not idempotent
     def export_objects_to_file(target_id_handle,json_file)
       target_id_info = get_row_from_id_handle(target_id_handle)
-      raise Error.new("Target given (#{target_id_handle}) does not exist") if target_id_info.nil?
-      
+      raise Error.new("Target given (#{target_id_handle}) does not exist") unless target_id_info
       prefix = nil
       if target_id_info[:uri] =~ %r{(^/.+?/.+?)/.+$}
         prefix = $1 

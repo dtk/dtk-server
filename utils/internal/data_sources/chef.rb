@@ -18,7 +18,7 @@ module XYZ
           end
           def initialize_chef_connection()
             ::Chef::Config.from_file("/root/.chef/knife.rb") #TBD: stub; will replace by passing in relavant paramters
-            ::Chef::Log.level(ENV.has_key?("LOG_LEVEL") ? ENV["LOG_LEVEL"].to_sym : ::Chef::Config[:log_level])
+            ::Chef::Log.level(::Chef::Config[:log_level])
             ::Mixlib::Authentication::Log.logger = ::Chef::Log.logger
             ::Chef::REST.new(::Chef::Config[:chef_server_url], ::Chef::Config[:node_name],::Chef::Config[:client_key])
           end

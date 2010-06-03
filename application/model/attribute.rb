@@ -1,18 +1,6 @@
 require File.expand_path('model',  File.dirname(__FILE__))
 
 module XYZ
-  class AttributeDef < Model
-    set_relation_name(:attribute,:attribute_def)
-
-    class << self
-      def up()
-
-        many_to_one :component_def
-      end
-    end
-  end
-
-  #TBD: for efficiency think want to cache some virtual column calls 
   class Attribute < Model
     set_relation_name(:attribute,:attribute)
     class << self
@@ -41,7 +29,6 @@ module XYZ
 
         #if component attribute then hash with component and node(s) associated with it 
         virtual_column :assoc_components_on_nodes  
-        foreign_key :attribute_def_id, :attribute_def, FK_CASCADE_OPT
         many_to_one :component, :node
       end
     end

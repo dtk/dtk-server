@@ -9,12 +9,22 @@ module XYZ
           def object_paths
             %w{/cookbooks /cookbooks/$1/metadata}
           end
-          def filter_attributes
-            %w{name display_name description chef_recipe attributes}
+
+          def maps_to_multiple_objects(v)
+            return nil if v["recipes"].nil?
+            ret = Array.new
+            v["recipes"].each do |recipe_name,description|
+              ret << {recipe_name => {"name" => recipe_name, "description" => description}}
+            end
+            ret
           end
-          def normalize(v)
+
+          def filter_attributes
+            %w{name recipes display_name description chef_recipe attributes}
+          end
+          def normalize(v,multiple_info=nil)
             ret =
-	      {:display_name => v["display_name"] ? v["display_name"] : v["name"],
+	      {:display_name => multiple_info["description"] || v["display_name"] || v["name"],
 	       :description => v["description"],
 	       :external_type => "chef_recipe",
                :external_cmp_ref => v["name"]} 
@@ -36,7 +46,8 @@ module XYZ
 	         attrs[ref][k.to_sym] = av[k] if av[k]
                end
 	       attrs[ref][:value_asserted] = av["default"] if av["default"]
-	       attrs[ref][:external_attr_ref] = recipe_ref.to_s
+	       attrs[ref][:external_attr_ref] = "recipe[#{multiple_info["name"]}]"
+
 	       attrs[ref][:semantic_type] = av["semantic_type"].to_json if av["semantic_type"]
 	       attrs[ref][:data_type] = data_type
 	    end
@@ -44,12 +55,6 @@ module XYZ
             ret
           end
 
-          def unique_key_fields
-            ["name"]
-          end
-          def name_fields
-            ["name"]
-          end
         end
       end
     end

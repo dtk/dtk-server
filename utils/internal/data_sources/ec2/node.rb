@@ -10,7 +10,7 @@ module XYZ
             %w{/servers/all}
           end
 
-          def normalize(v)
+          def normalize(v,multiple_info_hash=nil)
             node_addr = v[:private_ip_address] ?
             {:family => "ipv4", :address => v[:private_ip_address]} : nil
             node_interface = {:node_interface => {"eth0" => {"type" => "ethernet"}.merge(node_addr ? {:address => node_addr} : {})}}

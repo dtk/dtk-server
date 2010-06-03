@@ -12,6 +12,9 @@ module XYZ
           end
          private
           #TBD below is effectively dsl; may make more declarative using data integration dsl
+        def filter_attributes
+          %w{name display_name description chef_recipe attributes}
+        end
           def normalize(v)
             ret =
 	      {:display_name => v["display_name"] ? v["display_name"] : v["name"],

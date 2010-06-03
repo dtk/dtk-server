@@ -4,12 +4,21 @@ module XYZ
         def sync_with_discovered(container_id_handle,ds_attr_hash_list)
           marked = Array.new
           ds_attr_hash_list.each do |ds_attr_hash|
-            sync_with_discovered_aux(container_id_handle,ds_attr_hash,marked)
+            sync_with_discovered_aux(container_id_handle,filter(ds_attr_hash),marked)
           end
           delete_unmarked(container_id_handle,marked)
         end
 
        private
+       #gets overwritten for non trivial filter
+        def filter_attributes()
+          nil
+        end
+
+        def filter(ds_attr_hash)
+         return ds_attr_hash if filter_attributes().nil?
+         HashObject.object_slice(ds_attr_hash,filter_attributes())
+        end
         def sync_with_discovered_aux(container_id_handle,ds_attr_hash,marked)
           marked << ds_key_value(ds_attr_hash)
           id_handle = find_object_id_handle(container_id_handle,ds_attr_hash)

@@ -140,10 +140,13 @@ module XYZ
       super()
       replace(x)
     end
-    def object_slice(slice_keys)
+    def self.object_slice(hash,slice_keys)
       ret = {}
-      slice_keys.each{|k| ret[k] = self[k] if self[k]}
+      slice_keys.each{|k| ret[k] = hash[k] if hash[k]}
       ret
+    end
+    def object_slice(slice_keys)
+      HashObject.object_slice(self,slice_keys)
     end
   end
 end

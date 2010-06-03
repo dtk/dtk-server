@@ -5,45 +5,55 @@ module XYZ
       class Component < Chef::Top 
         class << self
           def discover_and_update(container_id_handle,ds_object)
-=begin
-            nodes = connection().servers_all()
-            require 'pp'; pp nodes
-            sync_with_discovered(container_id_handle,nodes)
-=end
+            #cookbooks = get_cookbook_list()
+            cookbooks = %w{pg_pool postgresql}
+            component_templates = cookbooks.map{|cb|cb.get_cookbook_metadata()}
+            sync_with_discovered(container_id_handle,component_templates)
           end
          private
           #TBD below is effectively dsl; may make more declarative using data integration dsl
           def normalize(v)
-=begin
-            node_addr = v[:private_ip_address] ?
-            {:family => "ipv4", :address => v[:private_ip_address]} : nil
-            node_interface = {:node_interface => {"eth0" => {"type" => "ethernet"}.merge(node_addr ? {:address => node_addr} : {})}}
-            addr_aps = Local.addr_access_point(v[:ip_address],"ipv4","internet","internet")
-            addr_aps.merge!(Local.addr_access_point(v[:dns_name],"dns","internet","internet"))
-            ret = node_interface.merge(addr_aps.empty? ? {} : {:address_access_point => addr_aps})
-            #TBD: including local ip and dns plus and hookup to security groups 
-=end
-          end
-=begin
-          module Local
-            def self.addr_access_point(addr,family,type,network_partition)
-              if addr 
-                attrs = {:type => type,:network_address => {:family => family, :address => addr}}
-                attrs.merge!({Object.assoc_key(:network_partition_id) => "/network_partition/#{network_partition}"}) if network_partition
-                {"#{type}_#{family}" => attrs}
-              else
-                {}
-              end
-            end
+            ret =
+	      {:display_name => v["display_name"] ? v["display_name"] : v["name"],
+	       :description => v["description"],
+	       :external_type => "chef_recipe",
+               :external_cmp_ref => v["name"]} 
+
+	    (v["attributes"]||[]).each do |recipe_ref,av|
+	       #to strip of recipe name prefix if that is the case
+	       ref_imploded = recipe_ref.split("/")
+	       attr_ref = ((ref_imploded[0] == v["name"] and ref_imploded.size > 1) ? 
+	         ref_imploded[1..ref_imploded.size-1].join("/") : recipe_ref).to_sym
+	       data_type = case av["type"]
+	         when "hash", "array"
+	           "json"
+	         else
+	           av["type"]
+	       end
+               ret[attr_ref] ||= Hash.new
+	       ret[attr_ref][ref] = {
+	         :display_name => av["display_name"],
+	         :value_asserted => av["default"],
+                 :constraints => av["constraints"],
+	         :external_attr_ref => recipe_ref.to_s,
+	         :port_type => av["port_type"],
+	         :semantic_type => av["semantic_type"] ?  av["semantic_type"].to_json : nil,
+	         :data_type => data_type,
+	         :display_name => av["display_name"],
+	         :description => av["description"],
+	         :default => av["default"],
+                 :constraints => av["constraints"]
+              }
+	    end
+            ret
           end
 
           def unique_key_fields
-            [:id]
+            [:name]
           end
           def name_fields
-            [:id]
+            [:name]
           end
-=end
         end
       end
     end

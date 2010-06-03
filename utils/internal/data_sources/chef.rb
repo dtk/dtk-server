@@ -8,11 +8,20 @@ module XYZ
     class Chef
       class Top < DataSourceAdapter
         class << self
+         def get_cookbook_list()
+           get_rest("cookbooks")
+         end
+         def get_cookbook_metadata(cookbook_name)
+           r = get_rest("cookbooks/#{cookbook_name}")
+           return nil if r.nil?
+           r["metadata"]
+         end
+
+         private
           def get_rest(item)
             rest_results = connection().get_rest(item)
             rest_results ? rest_results.to_hash : nil
           end
-         private
           def connection()
             @@connection ||=  initialize_chef_connection()
           end

@@ -10,6 +10,16 @@ module XYZ
       ds_object_obj.discover_and_update()
       "discover and update nodes from #{ds_type}"
     end
+    def discover_and_update_components(*uri_array)
+      c = ret_session_context_id()
+      ds_type = uri_array.pop.to_sym
+      container_uri = "/" + uri_array.join("/")
+      ds_object_uri =  "#{container_uri}/data_source/#{ds_type}/data_source_object/component"
+      ds_object_id_handle = IDHandle[:c => c, :uri => ds_object_uri]
+      ds_object_obj = Object.get_object(IDHandle[:c => c, :uri => ds_object_uri])
+      ds_object_obj.discover_and_update()
+      "discover and update components from #{ds_type}"
+    end
 
     def list(*uri_array)
       error_405 unless request.get?

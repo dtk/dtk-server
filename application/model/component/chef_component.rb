@@ -19,10 +19,11 @@ module XYZ
 	       :external_type => "chef_recipe",
                :external_cmp_ref => v["name"]} 
 
+            attrs = Hash.new
 	    (v["attributes"]||[]).each do |recipe_ref,av|
 	       #to strip of recipe name prefix if that is the case
 	       ref_imploded = recipe_ref.split("/")
-	       attr_ref = ((ref_imploded[0] == v["name"] and ref_imploded.size > 1) ? 
+	       ref = ((ref_imploded[0] == v["name"] and ref_imploded.size > 1) ? 
 	         ref_imploded[1..ref_imploded.size-1].join("/") : recipe_ref).to_sym
 	       data_type = case av["type"]
 	         when "hash", "array"
@@ -30,15 +31,16 @@ module XYZ
 	         else
 	           av["type"]
 	       end
-               ret[attr_ref] ||= Hash.new
+               attrs[ref] ||= Hash.new
                %w{constraints port_type display_name description constraints}.each do |k|
-	         ret[attr_ref][k.to_sym] = av[k] if av[k]
+	         attrs[ref][k.to_sym] = av[k] if av[k]
                end
-	       ret[attr_ref][:value_asserted] = av["default"] if av["default"]
-	       ret[attr_ref][:external_attr_ref] = recipe_ref.to_s
-	       ret[attr_ref][:semantic_type] = av["semantic_type"].to_json if av["semantic_type"]
-	      ret[attr_ref][:data_type] = data_type
+	       attrs[ref][:value_asserted] = av["default"] if av["default"]
+	       attrs[ref][:external_attr_ref] = recipe_ref.to_s
+	       attrs[ref][:semantic_type] = av["semantic_type"].to_json if av["semantic_type"]
+	       attrs[ref][:data_type] = data_type
 	    end
+            ret[:attribute] = attrs
             ret
           end
 

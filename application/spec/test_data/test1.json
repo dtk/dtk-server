@@ -1,73 +1,4 @@
 { 
-  "component_def": {
-    "pg_pool": {
-      "attribute_def": {
-        "sap_ref": {
-          "is_array": true,
-          "semantic_type": {
-            "sap": {
-              "is_array": true,
-              "type": "postgresql"
-            }
-          },
-          "data_type": "json",
-          "description": "Pg_Pool Service Access Point",
-          "display_name": "Pg_Pool SAP",
-          "external_attr_ref": "pg_pool/sap_ref",
-          "hidden" : false,
-          "port_type": "output"
-        }
-      },
-      "display_name": "pg_pool",
-      "external_cmp_ref": "pg_pool::set_params",
-      "external_type": "chef_recipe"
-    },
-    "postgresql": {
-      "attribute_def": {
-        "dir": {
-          "default": "/etc/postgresql/8.3/main",
-          "data_type": "string",
-          "description": "Location of the PostgreSQL databases",
-          "display_name": "PostgreSQL Directory",
-          "hidden" : false,
-          "external_attr_ref": "postgresql/dir"
-        },
-        "sap": {
-          "semantic_type": {
-            "sap": {
-              "type": "postgresql"
-            }
-          },
-          "data_type": "json",
-          "description": "PostgreSQL Service Access Point",
-          "display_name": "PostgreSQL SAP",
-          "hidden" : true,
-          "port_type": "both"
-        },
-        "sap_config": {
-          "semantic_type": {
-            "sap_config": {
-              "type": "postgresql"
-            }
-          },
-          "default": {
-              "network": {
-                "port": 5432
-              }
-          },
-          "data_type": "json",
-          "description": "PostgreSQL Service Access Point configuration",
-          "display_name": "PostgreSQL SAP Config",
-          "hidden" : false,
-          "external_attr_ref": "postgresql/sap_config",
-          "port_type": "input"
-        }
-      },
-      "display_name": "postgresql",
-      "external_cmp_ref": "postgresql::server",
-      "external_type": "chef_recipe"
-    }
-  },
   "network_partition" : {
     "tier1" : {
     }
@@ -84,7 +15,6 @@
             "display_name": "Node IP address"
          }
       }
-
     },
     "pg": {
       "node_interface" : {
@@ -113,16 +43,27 @@
       "*node_id": "/node/pg"
     }
   },
-
   "component": {
     "bundle": {
       "component": {
         "pg_pool": {
+          "external_cmp_ref": "pg_pool::set_params",
+          "external_type": "chef_recipe",
           "description": "Installs and configures pg_pool",
-          "*component_def_id": "/component_def/pg_pool",
           "display_name": "pg_pool",
           "attribute": {
             "sap_ref": {
+              "is_array": true,
+              "semantic_type": {
+                "sap": {
+                  "is_array": true,
+                  "type": "postgresql"
+                }
+              },
+              "data_type": "json",
+              "external_attr_ref": "pg_pool/sap_ref",
+              "hidden" : false,
+              "port_type": "output",
 	      "required" : true,
               "function": {
                 "predefined": {
@@ -130,78 +71,123 @@
                   "parameters" : "all"
                 }
               },
-              "*attribute_def_id": "/component_def/pg_pool/attribute_def/sap_ref",
               "display_name": "Pg_Pool SAP"
             }
           }
         },
         "postgresql-2": {
           "description": "Installs and configures postgresql for clients or servers",
-	  "*component_def_id": "/component_def/postgresql",
           "display_name": "postgresql-2",
+          "external_cmp_ref": "postgresql::server",
+          "external_type": "chef_recipe",
           "attribute": {
             "sap": {
+              "semantic_type": {
+                "sap": {
+                  "type": "postgresql"
+                }
+              },
+              "data_type": "json",
+              "hidden" : true,
+              "port_type": "both",
               "function": {
                 "predefined": {
                   "name": "sap_from_config_and_ip",
                   "parameters" : ["1","2"]
                 }
               },
-              "display_name": "PostgreSQL SAP",
-	      "*attribute_def_id": "/component_def/postgresql/attribute_def/sap"
-            },
-            "sap_config": {
-              "value_asserted": {
+              "display_name": "PostgreSQL SAP"
+             },
+             "sap_config": {
+               "semantic_type": {
+                 "sap_config": {
+                   "type": "postgresql"
+                 }
+               },
+               "data_type": "json",
+                "description": "PostgreSQL Service Access Point configuration",
+                "display_name": "PostgreSQL SAP Config",
+                "hidden" : false,
+                "external_attr_ref": "postgresql/sap_config",
+                "port_type": "input",
+                "value_asserted": {
                   "network": {
                     "port": 5432
                   }
-              },
-	      "required" : true,
-              "display_name": "PostgreSQL SAP",
-	      "*attribute_def_id": "/component_def/postgresql/attribute_def/sap_config"
-            },
-            "dir": {
-              "required" : true,
-	      "value_asserted": "/etc/postgresql/8.3/main",
-              "display_name": "PostgreSQL Directory",
-	      "*attribute_def_id": "/component_def/postgresql/attribute_def/dir"
+                },
+	        "required" : true,
+                "display_name": "PostgreSQL SAP"
+	      },
+              "dir": {
+                "data_type": "string",
+                "description": "Location of the PostgreSQL databases",
+                "display_name": "PostgreSQL Directory",
+                "hidden" : false,
+                "external_attr_ref": "postgresql/dir",
+                "required" : true,
+	        "value_asserted": "/etc/postgresql/8.3/main",
+                "display_name": "PostgreSQL Directory"
+              }
             }
-          }
-        },
-        "postgresql": {
-          "description": "Installs and configures postgresql for clients or servers",
-          "*component_def_id": "/component_def/postgresql",
-          "display_name": "postgresql",
-          "attribute": {
-            "sap": {
-              "function": {
-                "predefined": {
-                  "name": "sap_from_config_and_ip",
-                  "parameters" : ["1","2"]
-                }
+          },
+          "postgresql": {
+            "description": "Installs and configures postgresql for clients or servers",
+            "display_name": "postgresql",
+            "external_cmp_ref": "postgresql::server",
+            "external_type": "chef_recipe",
+            "attribute": {
+              "sap": {
+                "semantic_type": {
+                  "sap": {
+                    "type": "postgresql"
+                  }
+                },
+                "data_type": "json",
+                "description": "PostgreSQL Service Access Point",
+                "display_name": "PostgreSQL SAP",
+                "hidden" : true,
+                "port_type": "both",
+                "function": {
+                  "predefined": {
+                    "name": "sap_from_config_and_ip",
+                    "parameters" : ["1","2"]
+                  }
+                },
+                "display_name": "PostgreSQL SAP"
               },
-              "display_name": "PostgreSQL SAP",
-	      "*attribute_def_id": "/component_def/postgresql/attribute_def/sap"
-            },
-            "sap_config": {
-	      "required" : true,
-  	      "value_asserted": {
+              "sap_config": {
+                "semantic_type": {
+                  "sap_config": {
+                    "type": "postgresql"
+                  }
+                },
+                "data_type": "json",
+                "description": "PostgreSQL Service Access Point configuration",
+                "display_name": "PostgreSQL SAP Config",
+                "hidden" : false,
+                "external_attr_ref": "postgresql/sap_config",
+                "port_type": "input",
+	        "required" : true,
+  	        "value_asserted": {
                   "network": {
                     "port": 5432
                   }
+                },
+                "display_name": "PostgreSQL SAP"
               },
-              "display_name": "PostgreSQL SAP",
-	      "*attribute_def_id": "/component_def/postgresql/attribute_def/sap_config"
-            },
-            "dir": {
-	      "required" : true,
-              "value_asserted": "/etc/postgresql/8.3/main",
-              "display_name": "PostgreSQL Directory",
-	      "*attribute_def_id": "/component_def/postgresql/attribute_def/dir"
+              "dir": {
+                "data_type": "string",
+                "description": "Location of the PostgreSQL databases",
+                "display_name": "PostgreSQL Directory",
+                "hidden" : false,
+                "external_attr_ref": "postgresql/dir",
+	        "required" : true,
+                "value_asserted": "/etc/postgresql/8.3/main",
+                "display_name": "PostgreSQL Directory"
+              }
             }
           }
-        }
-      },
+       },
       "display_name": "bundle",
       "attribute_link": {
         "sap_ref__sap": {
@@ -244,3 +230,8 @@
     }
   }
 }
+
+
+
+
+

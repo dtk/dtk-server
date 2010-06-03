@@ -6,18 +6,24 @@ module XYZ
       raise Error.new("Target given (#{target_id_handle}) does not exist") unless exists? target_id_handle 
       raise Error.new("file given #{json_file} does not exist") unless File.exists?(json_file)
       hash_content = nil
-      File.open(json_file){|f| 
+      File.open(json_file) do |f| 
         begin
 	  json = f.read
          rescue Exception => err
           raise Error.new("error reading file (#{json_file}): #{err}")
-         end
-         begin
-           hash_content = JSON.parse(json)
-          rescue Exception
-           raise Error.new("file (#{json_file} has json parsing error")
-         end
-      }
+        end
+        begin
+          hash_content = JSON.parse(json)
+         rescue Exception => err
+          #use pure json to find parsing error
+          require 'json/pure'
+          begin 
+            JSON::Pure::Parser.new(json).parse
+           rescue Exception => detailed_err
+            raise Error.new("file (#{json_file} has json parsing error: #{detailed_err}")
+          end
+        end
+      end
       input_into_model(target_id_handle,hash_content)
     end
   end

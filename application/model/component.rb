@@ -6,6 +6,8 @@ module XYZ
     class << self
       def up()
         has_ancestor_field()
+        column :ds_attributes, :json
+        column :ds_key, :varchar
         column :external_type, :varchar
         column :external_cmp_ref, :varchar
         column :uri, :varchar

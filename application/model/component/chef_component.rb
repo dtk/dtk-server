@@ -6,8 +6,8 @@ module XYZ
         class << self
           def discover_and_update(container_id_handle,ds_object)
             #cookbooks = get_cookbook_list()
-            cookbooks = %w{pg_pool postgresql}
-            component_templates = cookbooks.map{|cb|cb.get_cookbook_metadata()}
+            cookbooks = %w{pg_pool postgresql} #stub
+            component_templates = cookbooks.map{|cb|get_cookbook_metadata(cb)}
             sync_with_discovered(container_id_handle,component_templates)
           end
          private
@@ -31,28 +31,22 @@ module XYZ
 	           av["type"]
 	       end
                ret[attr_ref] ||= Hash.new
-	       ret[attr_ref][ref] = {
-	         :display_name => av["display_name"],
-	         :value_asserted => av["default"],
-                 :constraints => av["constraints"],
-	         :external_attr_ref => recipe_ref.to_s,
-	         :port_type => av["port_type"],
-	         :semantic_type => av["semantic_type"] ?  av["semantic_type"].to_json : nil,
-	         :data_type => data_type,
-	         :display_name => av["display_name"],
-	         :description => av["description"],
-	         :default => av["default"],
-                 :constraints => av["constraints"]
-              }
+               %w{constraints port_type display_name description constraints}.each do |k|
+	         ret[attr_ref][k.to_sym] = av[k] if av[k]
+               end
+	       ret[attr_ref][:value_asserted] = av["default"] if av["default"]
+	       ret[attr_ref][:external_attr_ref] = recipe_ref.to_s
+	       ret[attr_ref][:semantic_type] = av["semantic_type"].to_json if av["semantic_type"]
+	      ret[attr_ref][:data_type] = data_type
 	    end
             ret
           end
 
           def unique_key_fields
-            [:name]
+            ["name"]
           end
           def name_fields
-            [:name]
+            ["name"]
           end
         end
       end

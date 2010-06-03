@@ -1,20 +1,17 @@
-require DATA_SOURCE_ADAPTERS_DIR + 'chef'
+require File.expand_path("chef", File.dirname(__FILE__))
 module XYZ
   module DSAdapter
     class Chef
       class Component < Chef::Top 
         class << self
-          def discover_and_update(container_id_handle,ds_object)
-            #cookbooks = get_cookbook_list()
-            cookbooks = %w{pg_pool postgresql} #stub
-            component_templates = cookbooks.map{|cb|get_cookbook_metadata(cb)}
-            sync_with_discovered(container_id_handle,component_templates)
-          end
          private
           #TBD below is effectively dsl; may make more declarative using data integration dsl
-        def filter_attributes
-          %w{name display_name description chef_recipe attributes}
-        end
+          def object_paths
+            %w{/cookbooks /cookbooks/$1/metadata}
+          end
+          def filter_attributes
+            %w{name display_name description chef_recipe attributes}
+          end
           def normalize(v)
             ret =
 	      {:display_name => v["display_name"] ? v["display_name"] : v["name"],
@@ -26,8 +23,8 @@ module XYZ
 	    (v["attributes"]||[]).each do |recipe_ref,av|
 	       #to strip of recipe name prefix if that is the case
 	       ref_imploded = recipe_ref.split("/")
-	       ref = ((ref_imploded[0] == v["name"] and ref_imploded.size > 1) ? 
-	         ref_imploded[1..ref_imploded.size-1].join("/") : recipe_ref).to_sym
+	       ref = (ref_imploded[0] == v["name"] and ref_imploded.size > 1) ? 
+	         ref_imploded[1..ref_imploded.size-1].join("/") : recipe_ref
 	       data_type = case av["type"]
 	         when "hash", "array"
 	           "json"

@@ -1,4 +1,3 @@
-require File.expand_path("data_source_adapter", File.dirname(__FILE__))
 require 'chef/rest'
 require 'chef/config'
 require 'mixlib/authentication'
@@ -8,15 +7,16 @@ module XYZ
     class Chef
       class Top < DataSourceAdapter
         class << self
-         def get_cookbook_list()
-           get_rest("cookbooks")
-         end
-         def get_cookbook_metadata(cookbook_name)
-           r = get_rest("cookbooks/#{cookbook_name}")
-           return nil if r.nil?
-           r["metadata"]
-         end
-
+          def get(object_path)
+            if object_path =~ %r{^/cookbooks$}
+              # get_rest("cookbooks")
+              %w{pg_pool postgresql} #stub
+            elsif object_path =~ %r{^/cookbooks/([A-Z0-9a-z_-]+)/metadata$}
+              cookbook_name = $1
+              r = get_rest("cookbooks/#{cookbook_name}")
+              r ? r["metadata"] : nil
+            end
+          end
          private
           def get_rest(item)
             rest_results = connection().get_rest(item)

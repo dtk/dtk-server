@@ -73,9 +73,7 @@ module XYZ
       raise Error.new(":ds_type should be in hash_scalar_values") if hash_scalar_values[:ds_type].nil?
       obj_type = hash_scalar_values[:obj_type].to_s
       ds_type = hash_scalar_values[:ds_type].to_s
-      require File.expand_path("#{obj_type}/#{ds_type}_#{obj_type}", File.dirname(__FILE__))
-      base_class = DSAdapter.const_get Aux.camelize(ds_type)
-      @ds_object_adapter_class = base_class.const_get Aux.camelize(obj_type)
+      @ds_object_adapter_class = DataSourceAdapter.load_and_ret_adapter_class(obj_type,ds_type)
     end   
     class << self
       DS_object_defaults = {}

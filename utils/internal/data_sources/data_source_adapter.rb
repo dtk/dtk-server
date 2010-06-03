@@ -1,10 +1,22 @@
 module XYZ
   class DataSourceAdapter
       class << self
-        def sync_with_discovered(container_id_handle,ds_attr_hash_list)
+        def load_and_ret_adapter_class(obj_type,ds_type)
+          require File.expand_path("#{ds_type}/#{obj_type}", File.dirname(__FILE__))
+          base_class = DSAdapter.const_get Aux.camelize(ds_type)
+          base_class.const_get Aux.camelize(obj_type)
+        end
+
+        def discover_and_update(container_id_handle,ds_object)
           marked = Array.new
-          ds_attr_hash_list.each do |ds_attr_hash|
-            sync_with_discovered_aux(container_id_handle,filter(ds_attr_hash),marked)
+          if object_paths.size == 1
+            ds_attr_hash = get(object_paths[0])
+            discover_and_update_aux(container_id_handle,filter(ds_attr_hash),marked) if ds_attr_hash
+          elsif object_paths.size == 2
+            (get(object_paths[0])||[]).each do |obj_ref|
+              ds_attr_hash = get(object_paths[1].gsub(%r{\$1},obj_ref))
+              discover_and_update_aux(container_id_handle,filter(ds_attr_hash),marked) if ds_attr_hash
+            end
           end
           delete_unmarked(container_id_handle,marked)
         end
@@ -19,7 +31,7 @@ module XYZ
          return ds_attr_hash if filter_attributes().nil?
          HashObject.object_slice(ds_attr_hash,filter_attributes())
         end
-        def sync_with_discovered_aux(container_id_handle,ds_attr_hash,marked)
+        def discover_and_update_aux(container_id_handle,ds_attr_hash,marked)
           marked << ds_key_value(ds_attr_hash)
           id_handle = find_object_id_handle(container_id_handle,ds_attr_hash)
           if id_handle

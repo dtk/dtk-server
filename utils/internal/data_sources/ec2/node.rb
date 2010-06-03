@@ -1,17 +1,15 @@
-require DATA_SOURCE_ADAPTERS_DIR + 'ec2'
+require File.expand_path("ec2", File.dirname(__FILE__))
 module XYZ
   module DSAdapter
     class Ec2
       class Node < Ec2::Top 
         class << self
-          def discover_and_update(container_id_handle,ds_object)
-            #TBD: make use of params on ds_object; it can subsume container_id_handle
-            nodes = connection().servers_all()
-            require 'pp'; pp nodes
-            sync_with_discovered(container_id_handle,nodes)
-          end
          private
           #TBD below is effectively dsl; may make more declarative using data integration dsl
+          def object_paths
+            %w{/servers/all}
+          end
+
           def normalize(v)
             node_addr = v[:private_ip_address] ?
             {:family => "ipv4", :address => v[:private_ip_address]} : nil

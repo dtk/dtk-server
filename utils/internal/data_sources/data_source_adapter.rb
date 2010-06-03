@@ -10,8 +10,9 @@ module XYZ
         def discover_and_update(container_id_handle,ds_object)
           marked = Array.new
           if object_paths.size == 1
-            ds_attr_hash = get(object_paths[0])
-            discover_and_update_aux(container_id_handle,filter(ds_attr_hash),marked) if ds_attr_hash
+            (get(object_paths[0])||[]).each do |ds_attr_hash|
+              discover_and_update_aux(container_id_handle,filter(ds_attr_hash),marked) if ds_attr_hash
+            end
           elsif object_paths.size == 2
             (get(object_paths[0])||[]).each do |obj_ref|
               ds_attr_hash = get(object_paths[1].gsub(%r{\$1},obj_ref))

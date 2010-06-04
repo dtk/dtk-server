@@ -38,10 +38,10 @@ module XYZ
 	scalar_assigns
       end
 
-
+      #THese are only changeable columns
       def ret_scalar_assignments(assignments,db_rel)
         ret = {}
-        assignments.each_pair{|k,v| ret[k] = v if ret_table_column_info(k,db_rel)}
+        assignments.each_pair{|k,v| ret[k] = v if ret_table_column_info(k,db_rel) or [:description,:display_name].include?(k)}
         ret
       end	
       def ret_object_assignments(assignments,db_rel)

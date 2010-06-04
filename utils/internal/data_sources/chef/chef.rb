@@ -7,6 +7,26 @@ module XYZ
     class Chef
       class Top < DataSourceAdapter
         class << self
+          def get_list__component()
+             # get_rest("cookbooks")
+            %w{pg_pool postgresql} #stub
+          end
+          def get_objects__component(name)
+            r = get_rest("cookbooks/#{cookbook_name}")
+            ret = Array.new
+            return ret if r.nil?
+            metadata = r["metadata"]
+            return ret if metadata.nil?
+            if r["recipes"]
+               r["recipes"].each do |recipe_name,description|
+                 ret << {"metadata" => metadata, "name" => recipe_name, "description" => description}
+               end
+            else
+              ret << {"metadata" => metadata, "name" => metadata["name"], "description" => metadata["description"]}
+            end
+            ret
+          end
+
           def get(object_path)
             if object_path =~ %r{^/cookbooks$}
               # get_rest("cookbooks")

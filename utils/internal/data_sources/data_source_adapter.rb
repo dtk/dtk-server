@@ -1,10 +1,19 @@
 module XYZ
   class DataSourceAdapter
       class << self
-        def load_and_ret_adapter_class(obj_type,ds_type)
-          require File.expand_path("#{ds_type}/#{obj_type}", File.dirname(__FILE__))
+        def load_and_ret_adapter_class(ds_object)
+          obj_type = ds_object[:obj_type].to_s
+          ds_type = ds_object[:ds_type].to_s
+          src = ds_object[:source_obj_type] ? ds_object[:source_obj_type].to_s : nil 
+          rel_path = "#{ds_type}/#{obj_type}#{src ? "__" + src : ""}"
+          require File.expand_path(rel_path, File.dirname(__FILE__))
           base_class = DSAdapter.const_get Aux.camelize(ds_type)
-          base_class.const_get Aux.camelize(obj_type)
+          ret = base_class.const_get Aux.camelize("#{obj_type}#{src ? "_" + src : ""}")
+
+          ret.set_attr_on_class(:obj_type,obj_type)
+          ret.set_attr_on_class(:ds_type,ds_type)
+          ret.set_attr_on_class(:source_obj_type,src)
+          ret
         end
 
         def discover_and_update(container_id_handle,ds_object)
@@ -19,32 +28,43 @@ module XYZ
           delete_unmarked(container_id_handle,marked)
         end
 
+        def set_attr_on_class(attr,val)
+          #could have used attr_writer (Module) if it was not private 
+          instance_eval("def #{attr}=(#{attr}); @#{attr}=#{attr};end")
+          send("#{attr}=".to_sym,val)
+        end
+
        private
        #filter applied when into put in ds_attribute bag gets overwritten for non trivial filter
         def filter(ds_attr_hash)
           ds_attr_hash
         end
 
-        def object_type()
-          relation_type().to_s()
-        end
-
+        
         def uses_multiple_level_iteration()
-          self.method("get_objects__#{object_type}").arity == 1
+          self.method(get_objects()).arity == 1
         end
 
         def multiple_level_iteration(container_id_handle,marked)
-          send("get_list__#{object_type}".to_sym).each() do |source_name|
-            send("get_objects__#{object_type}".to_sym,source_name).each do |ds_attr_hash|
+          send(get_list()).each() do |source_name|
+            send(get_objects(),source_name).each do |ds_attr_hash|
               discover_and_update_item(container_id_handle,ds_attr_hash,marked) 
             end
           end
         end
 
         def single_level_iteration(container_id_handle,marked)
-          send("get_objects__#{object_type}".to_sym).each do |ds_attr_hash|
+          send(get_objects()).each do |ds_attr_hash|
             discover_and_update_item(container_id_handle,ds_attr_hash,marked) 
           end
+        end
+
+        def get_list()
+          "get_list__#{@obj_type}".to_sym
+        end
+        def get_objects()
+          s = @source_obj_type 
+          "get_objects__#{@obj_type}#{s ? "__" + s : ""}".to_sym
         end
 
 
@@ -89,20 +109,19 @@ module XYZ
           id ? IDHandle[:guid => id,:c => container_id_handle[:c]] : nil
         end
 
-        def ds_type()
-          self.to_s =~ %r{^.+::.+::(.+)::.+$} ? Aux.underscore($1).to_sym : :generic
+        def relation_type
+          @obj_type.to_sym
         end
+
         def ds_key_value(ds_attr_hash)
           relative_unique_key = unique_keys(ds_attr_hash)
-          ([ds_type().to_s] + relative_unique_key).inspect
+          ([@ds_type] + relative_unique_key).inspect
         end
 
         def ref(ds_attr_hash)
           relative_distinguished_name(ds_attr_hash)
         end
-        def relation_type
-          Aux.underscore(Aux.demodulize(self.to_s)).to_sym
-        end
+
       end
     end
 end

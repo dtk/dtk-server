@@ -1,3 +1,4 @@
+#TBD: should be moved to core/model
 #TBD: just skeleton of more complex set of lasses; which wil factored in what, how, where: what objects to gather, how to do it and where to put them in the project
 module XYZ
   class DataSource < Model
@@ -73,9 +74,7 @@ module XYZ
       super(hash_scalar_values,c,relation_type)
       raise Error.new(":obj_type should be in hash_scalar_values") if hash_scalar_values[:obj_type].nil?
       raise Error.new(":ds_type should be in hash_scalar_values") if hash_scalar_values[:ds_type].nil?
-      obj_type = hash_scalar_values[:obj_type].to_s
-      ds_type = hash_scalar_values[:ds_type].to_s
-      @ds_object_adapter_class = DataSourceAdapter.load_and_ret_adapter_class(obj_type,ds_type)
+      @ds_object_adapter_class = DataSourceAdapter.load_and_ret_adapter_class(self)
     end   
     class << self
       DS_object_defaults = {}

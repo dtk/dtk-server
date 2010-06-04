@@ -5,7 +5,7 @@ module XYZ
     class Ec2
       class Top < DataSourceAdapter
         class << self
-          def get_objects__node()
+          def get_objects__node__instance()
             ret = conn().servers_all()
             #resolve flavor info
             #TBD: this this is very static this may be cached somewhere; would like to write

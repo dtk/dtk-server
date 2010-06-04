@@ -3,10 +3,8 @@ module XYZ
     class Ec2
       class Top < DataSourceAdapter
         class << self
-          def get(object_path)
-            if object_path =~ %r{^/servers/all$}
-              connection().servers_all()
-            end
+          def get_objects__node()
+            connection().servers_all()
           end
          private
           def connection()

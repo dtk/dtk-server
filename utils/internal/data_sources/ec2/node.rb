@@ -29,7 +29,7 @@ module XYZ
           end
 
           def unique_keys(v,ds_context=nil)
-            [:instance v[:id]]
+            [:instance,v[:id]]
           end
           def relative_distinguished_name(v)
             v[:id]

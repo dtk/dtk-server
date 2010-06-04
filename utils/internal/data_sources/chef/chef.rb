@@ -29,11 +29,11 @@ module XYZ
 
          private
           def get_rest(item)
-            rest_results = connection().get_rest(item)
+            rest_results = conn().get_rest(item)
             rest_results ? rest_results.to_hash : nil
           end
-          def connection()
-            @@connection ||=  initialize_chef_connection()
+          def conn()
+            @@conn ||=  initialize_chef_connection()
           end
           def initialize_chef_connection()
             ::Chef::Config.from_file("/root/.chef/knife.rb") #TBD: stub; will replace by passing in relavant paramters

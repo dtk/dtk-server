@@ -20,9 +20,9 @@ module XYZ
         end
 
        private
-       #gets overwritten for non trivial filter
-        def filter_attribute_list()
-          nil
+       #filter applied when into put in ds_attribute bag gets overwritten for non trivial filter
+        def filter(ds_attr_hash)
+          ds_attr_hash
         end
 
         def object_type()
@@ -47,10 +47,6 @@ module XYZ
           end
         end
 
-        def filter(ds_attr_hash)
-         return ds_attr_hash if filter_attribute_list().nil?
-         HashObject.object_slice(ds_attr_hash,filter_attribute_list())
-        end
 
         def discover_and_update_item(container_id_handle,ds_attr_hash,marked)
           return nil if ds_attr_hash.nil?
@@ -97,12 +93,12 @@ module XYZ
           self.to_s =~ %r{^.+::.+::(.+)::.+$} ? Aux.underscore($1).to_sym : :generic
         end
         def ds_key_value(ds_attr_hash)
-          unique_key_flds = unique_key_fields().map{|k|ds_attr_hash[k]}
-          ([ds_type().to_s] + unique_key_flds).inspect
+          relative_unique_key = unique_keys(ds_attr_hash)
+          ([ds_type().to_s] + relative_unique_key).inspect
         end
 
         def ref(ds_attr_hash)
-          name_fields().map{|k|ds_attr_hash[k]}.join("-")
+          relative_distinguished_name(ds_attr_hash)
         end
         def relation_type
           Aux.underscore(Aux.demodulize(self.to_s)).to_sym

@@ -6,16 +6,17 @@ module XYZ
         class << self
          private
           #TBD below is effectively dsl; may make more declarative using data integration dsl
-          def unique_key_fields()
-            ["name"]
+          def unique_keys(v,ds_context=nil)
+            [v["name"]]
           end
 
-          def name_fields()
-            ["name"]
+          def relative_distinguished_name(v)
+            v["name"]
           end
 
-          def filter_attribute_list
-            %w{name display_name description chef_recipe attributes}
+          def filter(v)
+            attrs = %w{name display_name description chef_recipe attributes}
+            HashObject.object_slice(v["metadata"],attrs)
           end
           def normalize(v)
             m = v["metadata"]

@@ -7,7 +7,7 @@ module XYZ
          private
           #TBD below is effectively dsl; may make more declarative using data integration dsl
 
-          def normalize(v)
+          def normalize(v,ds_context=nil)
             node_addr = v[:private_ip_address] ?
             {:family => "ipv4", :address => v[:private_ip_address]} : nil
             node_interface = {:node_interface => {"eth0" => {"type" => "ethernet"}.merge(node_addr ? {:address => node_addr} : {})}}
@@ -28,11 +28,11 @@ module XYZ
             end
           end
 
-          def unique_key_fields
-            [:id]
+          def unique_keys(v,ds_context=nil)
+            [:instance v[:id]]
           end
-          def name_fields
-            [:id]
+          def relative_distinguished_name(v)
+            v[:id]
           end
         end
       end

@@ -6,11 +6,8 @@ module XYZ
         class << self
          private
           #TBD below is effectively dsl; may make more declarative using data integration dsl
-          def object_paths
-            %w{/servers/all}
-          end
 
-          def normalize(v,multiple_info_hash=nil)
+          def normalize(v)
             node_addr = v[:private_ip_address] ?
             {:family => "ipv4", :address => v[:private_ip_address]} : nil
             node_interface = {:node_interface => {"eth0" => {"type" => "ethernet"}.merge(node_addr ? {:address => node_addr} : {})}}

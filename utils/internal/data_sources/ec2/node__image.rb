@@ -5,10 +5,12 @@ module XYZ
       class NodeImage < Ec2::Top 
         class << self
          private
+
           #TBD below is effectively dsl; may make more declarative using data integration dsl
           def unique_keys(v)
             [:image,v[:id]]
           end
+
           def relative_distinguished_name(v)
             v[:id]
           end

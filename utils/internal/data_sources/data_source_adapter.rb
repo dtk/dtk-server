@@ -11,6 +11,7 @@ module XYZ
            rescue Exception
             raise Error.new("Adapter file to process object #{obj_type} for data source #{ds_type} #{src ? "(using source object #{src}) " : ""} does not exist")
           end
+
           base_class = DSAdapter.const_get Aux.camelize(ds_type)
           ret = base_class.const_get Aux.camelize("#{obj_type}#{src ? "_" + src : ""}")
 
@@ -39,10 +40,12 @@ module XYZ
         end
 
        private
+
        #filter applied when into put in ds_attribute bag gets overwritten for non trivial filter
         def filter(ds_attr_hash)
           ds_attr_hash
         end
+
         #normalize gets ovewritten if have any generic properties
         def normalize(ds_attr_hash)
           {}

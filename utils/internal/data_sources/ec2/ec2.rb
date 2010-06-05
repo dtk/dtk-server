@@ -5,6 +5,7 @@ module XYZ
     class Ec2
       class Top < DataSourceAdapter
         class << self
+
           def get_objects__node__instance()
             ret = conn().servers_all()
             #TBD: this this is very static this may be cached somewhere; would like to write
@@ -28,10 +29,13 @@ module XYZ
             end
             images.values()
           end
+
          private
+
           def conn()
             @@conn ||= CloudConnect::EC2.new
           end
+
           #TBD: general fn that probably should be moved to Aux
           class Cache
             def initialize()
@@ -43,6 +47,7 @@ module XYZ
               @cached[id] = block.call(id)
             end
           end
+
         end
       end
     end

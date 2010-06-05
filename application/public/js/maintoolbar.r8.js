@@ -16,22 +16,33 @@ if (!R8.MainToolbar) {
 				tools : {},
 
 				//this stores the list of currently loaded main toolbar sets
-				toolbar_sets : [],
+				tool_sets : {},
 				//this stores teh list of currently loaded items that are referenced in sets
-				toolbar_items : [],
-
+				tools : {},
 			}
 		}();
 	})(R8);
 }
 
-var testTool = {
-	name: 'ssh',
-	def: function() { console.log('GOT IT!!!'); }
+var plugin = {
+	name: 'monitoring',
+	creator: 'R8',
+	description: 'A psuedo test plugin-in to manage monitoring on nodes',
+	moverIcon: 'someicon.png',
+	clickIcon: 'someicno.png',
+	activeIcon: 'someicon.png',
+	def: {
+		open: function() {
+			console.log('should open the plugin');
+		},
+		help: function() {
+			console.log('Should show help');
+		}
+	}
 }
 
-R8.MainToolbar.addTool(testTool);
-R8.MainToolbar.tools.ssh();
+R8.MainToolbar.addTool(plugin);
+R8.MainToolbar.tools['monitoring'].help();
 
 
 //console.log(R8.MainToolbar.tools.prototype);

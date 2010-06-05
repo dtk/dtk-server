@@ -19,6 +19,9 @@ module XYZ
       def flavor_get(id)
         hash_form(@conn.flavors.get(id))
       end
+      def image_get(id)
+        hash_form(@conn.images.get(id))
+      end
     end
   end
 end

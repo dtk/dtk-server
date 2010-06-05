@@ -6,7 +6,11 @@ module XYZ
           ds_type = ds_object[:ds_type].to_s
           src = ds_object[:source_obj_type] ? ds_object[:source_obj_type].to_s : nil 
           rel_path = "#{ds_type}/#{obj_type}#{src ? "__" + src : ""}"
-          require File.expand_path(rel_path, File.dirname(__FILE__))
+          begin 
+            require File.expand_path(rel_path, File.dirname(__FILE__))
+           rescue Exception
+            raise Error.new("Adapter file to process object #{obj_type} for data source #{ds_type} #{src ? "(using source object #{src}) " : ""} does not exist")
+          end
           base_class = DSAdapter.const_get Aux.camelize(ds_type)
           ret = base_class.const_get Aux.camelize("#{obj_type}#{src ? "_" + src : ""}")
 
@@ -39,8 +43,11 @@ module XYZ
         def filter(ds_attr_hash)
           ds_attr_hash
         end
+        #normalize gets ovewritten if have any generic properties
+        def normalize(ds_attr_hash)
+          {}
+        end
 
-        
         def uses_multiple_level_iteration()
           self.method(get_objects()).arity == 1
         end

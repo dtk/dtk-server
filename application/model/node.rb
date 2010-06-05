@@ -7,7 +7,8 @@ module XYZ
       def up()
         has_ancestor_field()
         column :ds_attributes, :json
-        column :ds_key, :varchar
+        column :ds_key, :varchar, :size => 25
+        column :ds_source, :varchar, :size => 25
         column :is_deployed, :boolean, :default => false
         column :architecture, :varchar, :size => 10 #e.g., 'i386'
        #TBD: in dta source specfic now column :manifest, :varchar #e.g.,rnp-chef-server-0816-ubuntu-910-x86_32

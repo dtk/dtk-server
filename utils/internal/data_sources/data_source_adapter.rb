@@ -92,7 +92,7 @@ module XYZ
             marked_disjunction = SQL.or(marked_disjunction,{:ds_key => ds_key})
           end
           where_clause = SQL.not(marked_disjunction)
-
+          where_clause = SQL.and(where_clause,:ds_source => @source_obj_type) if @source_obj_type
           Object.delete_instances_wrt_parent(relation_type(),container_id_handle,where_clause)
         end
 
@@ -100,7 +100,7 @@ module XYZ
           obj = {:ds_key => ds_key_value(ds_attr_hash)}
           obj.merge! :ds_attributes => filter(ds_attr_hash)
           obj.merge! normalize(ds_attr_hash)
-
+          obj.merge!({:ds_source => @source_obj_type}) if @source_obj_type
           Object.input_into_model(container_id_handle,{relation_type() => {ref(ds_attr_hash) => obj}})
         end
 

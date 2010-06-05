@@ -6,7 +6,6 @@ module XYZ
         class << self
          private
           #TBD below is effectively dsl; may make more declarative using data integration dsl
-
           def normalize(v)
             node_addr = v[:private_ip_address] ?
             {:family => "ipv4", :address => v[:private_ip_address]} : nil

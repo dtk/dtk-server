@@ -125,7 +125,7 @@ module XYZ
 
         def ds_key_value(ds_attr_hash)
           relative_unique_key = unique_keys(ds_attr_hash)
-          ([@ds_type] + relative_unique_key).inspect
+          ([@ds_type.to_sym] + relative_unique_key).inspect
         end
 
         def ref(ds_attr_hash)

@@ -66,7 +66,7 @@ module XYZ
       #TBD: logic to override if @objects_location set
       default_container_obj = get_parent_object().get_parent_object()
       placement_id_handle = default_container_obj.id_handle
-      @ds_object_adapter_class.discover_and_update(placement_id_handle,self)
+      @ds_object_adapter.discover_and_update(placement_id_handle,self)
     end
 
     #helper fns
@@ -74,7 +74,7 @@ module XYZ
       super(hash_scalar_values,c,relation_type)
       raise Error.new(":obj_type should be in hash_scalar_values") if hash_scalar_values[:obj_type].nil?
       raise Error.new(":ds_type should be in hash_scalar_values") if hash_scalar_values[:ds_type].nil?
-      @ds_object_adapter_class = DataSourceAdapter.load_and_ret_adapter_class(self)
+      @ds_object_adapter = DataSourceAdapter.load_and_create_adapter(self)
     end   
     class << self
       DS_object_defaults = {}

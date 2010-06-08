@@ -6,10 +6,12 @@ module XYZ
       src = ds_object[:source_obj_type] ? ds_object[:source_obj_type].to_s : nil 
       rel_path = "#{ds_name}/#{obj_type}#{src ? "__" + src : ""}"
       begin 
-        require File.expand_path(rel_path, File.dirname(__FILE__))
-       rescue Exception
-        #TBD: error can be syntax error in files dynmically loading so case to determine
-        raise Error.new("Adapter file to process object #{obj_type} for data source #{ds_name} #{src ? "(using source object #{src}) " : ""} does not exist")
+        file_path = File.expand_path(rel_path, File.dirname(__FILE__)) 
+        require file_path
+       rescue Exception => e 
+        
+        raise Error.new("Adapter file to process object #{obj_type} for data source #{ds_name} #{src ? "(using source object #{src}) " : ""} does not exist") unless File.exists?(file_path + ".rb")
+        raise e
       end
 
       base_class = DSAdapter.const_get Aux.camelize(ds_name)

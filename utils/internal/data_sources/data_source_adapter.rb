@@ -102,16 +102,16 @@ module XYZ
       qualified_key(relative_unique_key)
     end
 
-    def qualified_key(relative_unique_key)
-      ([@ds_name.to_sym] + relative_unique_key).inspect
+    def qualified_key(relative_unique_key,ds_name=nil)
+      ([(ds_name||@ds_name).to_sym] + relative_unique_key).inspect
     end
 
     def ref(ds_attr_hash)
       relative_distinguished_name(ds_attr_hash)
     end
 
-    def find_foreign_key_id(obj_type,relative_unique_key)
-      where_clause = {:ds_key => qualified_key(relative_unique_key)}
+    def find_foreign_key_id(obj_type,relative_unique_key,ds_name=nil)
+      where_clause = {:ds_key => qualified_key(relative_unique_key,ds_name)}
       Object.get_object_ids_wrt_parent(relation_type(obj_type),@container_id_handle,where_clause).first
      end
   end

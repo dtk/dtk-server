@@ -24,7 +24,6 @@ module XYZ
       @title = uri
       id_handle = IDHandle[:c => c,:uri => uri]
       objs = Object.get_instance_or_factory(IDHandle[:c => c,:uri => uri],href_prefix,opts)
-require 'pp'; pp objs
       #TBD: implement :normalized_attrs_only flag
       @results = objs
     end

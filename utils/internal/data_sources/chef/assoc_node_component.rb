@@ -13,8 +13,10 @@ module XYZ
         end
 
         def normalize(v)
-     require 'pp'; pp [:find_foreign_key_id,find_foreign_key_id(:component,[v["recipe_name"]])]
-          {}
+           #TND: :node_id is building in assumption that node_name matches ec2 name
+           #This is just a stub; we need a more principlaed way to handle cross model correlation
+          {:node_id => find_foreign_key_id(:node,[v["node_name"]],:ec2),
+            :component_id => find_foreign_key_id(:component,[v["recipe_name"]])}
         end
       end
     end

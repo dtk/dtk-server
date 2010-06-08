@@ -6,6 +6,11 @@
           "obj_type": "component",
           "ds_name": "chef",
           "display_name": "component"
+        },
+        "assoc_node_component": {
+          "obj_type": "assoc_node_component",
+          "ds_name": "chef",
+          "display_name": "assoc_node_component"
         }
       },
       "ds_name": "chef",

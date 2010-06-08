@@ -19,7 +19,7 @@ module XYZ
         def get_objects__assoc_node_component(&block)
           get_node_recipe_assocs().each do |node_name,recipes|
             recipes.each do |recipe|
-              ds_attr_hash = {:node_name => node_name, :recipe_name => recipe}
+              ds_attr_hash = {"node_name" => node_name, "recipe_name" => recipe}
               block.call(ds_attr_hash)
             end
           end

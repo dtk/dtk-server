@@ -35,8 +35,10 @@ module XYZ
           (m["attributes"]||[]).each do |recipe_ref,av|
             #to strip of recipe name prefix if that is the case
             ref_imploded = recipe_ref.split("/")
-            ref = (ref_imploded[0] == m["name"] and ref_imploded.size > 1) ? 
+            ref_x = (ref_imploded[0] == m["name"] and ref_imploded.size > 1) ? 
                 ref_imploded[1..ref_imploded.size-1].join("/") : recipe_ref
+            ref = ref_x.gsub(/\//,"__")
+            external_attr_ref = "node[#{m["name"]}][#{ref_x.gsub(/\//,"][")}]"
 
             data_type = case av["type"]
               when "hash", "array"
@@ -50,7 +52,7 @@ module XYZ
               attrs[ref][k.to_sym] = av[k] if av[k]
             end
             attrs[ref][:value_asserted] = av["default"] if av["default"]
-            attrs[ref][:external_attr_ref] = "node[#{m["name"]}][#{ref}]"
+            attrs[ref][:external_attr_ref] = external_attr_ref
             attrs[ref][:semantic_type] = av["semantic_type"].to_json if av["semantic_type"]
             attrs[ref][:data_type] = data_type
           end

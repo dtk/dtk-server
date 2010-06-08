@@ -19,9 +19,9 @@ module XYZ
         def get_cookbook_names()
           # get_rest("cookbooks")
           #%w{pg_pool postgresql} 
-          #stub that just gets recipes that are used
-          get_node_recipe_assocs().values.uniq
-        end
+          #stub that just gets cookbooks from run list; it actually has recipes so can pass this in too
+          get_node_recipe_assocs().values.flatten.map{|x|x.gsub(/::.+$/,"")}.uniq
+         end
 
         def get_recipes_assoc_cookbook(cookbook_name)
           r = get_rest("cookbooks/#{cookbook_name}")
@@ -44,7 +44,7 @@ module XYZ
         def get_node_recipe_assocs()
           recipes = Hash.new
           (get_search_results("node?q=*:*",false)||[]).map do |node|
-            recipes[node[:name]] = node.run_list.recipes
+            recipes[node.name] = node.run_list.recipes
           end
           recipes
         end
@@ -64,14 +64,7 @@ module XYZ
         def get_rest(item,convert_to_hash=true)
           raw_rest_results = conn().get_rest(item)
           return raw_rest_results unless convert_to_hash
-          case raw_rest_results.class
-            when ::Chef::Node
-              raw_rest_results.to_hash
-            when NilClass
-              nil
-            else
-             raise Error.new("Unexpected type returned by get_rest: #{raw_rest_results.class.to_s}")
-          end
+          raw_rest_results.kind_of?(::Chef::Node) ? raw_rest_results.to_hash : raw_rest_results
         end
 
         def conn()

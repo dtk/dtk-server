@@ -1,19 +1,19 @@
 module XYZ
   class DataSourceAdapter
-    def self.load_and_create_adapter(ds_object)
+    def self.create(ds_object)
       obj_type = ds_object[:obj_type].to_s
-      ds_type = ds_object[:ds_type].to_s
+      ds_name = ds_object[:ds_name].to_s
       src = ds_object[:source_obj_type] ? ds_object[:source_obj_type].to_s : nil 
-      rel_path = "#{ds_type}/#{obj_type}#{src ? "__" + src : ""}"
+      rel_path = "#{ds_name}/#{obj_type}#{src ? "__" + src : ""}"
       begin 
         require File.expand_path(rel_path, File.dirname(__FILE__))
        rescue Exception
-        raise Error.new("Adapter file to process object #{obj_type} for data source #{ds_type} #{src ? "(using source object #{src}) " : ""} does not exist")
+        raise Error.new("Adapter file to process object #{obj_type} for data source #{ds_name} #{src ? "(using source object #{src}) " : ""} does not exist")
       end
 
-      base_class = DSAdapter.const_get Aux.camelize(ds_type)
+      base_class = DSAdapter.const_get Aux.camelize(ds_name)
       adaper_class = base_class.const_get Aux.camelize("#{obj_type}#{src ? "_" + src : ""}")
-      adaper_class.new(obj_type,ds_type,src)
+      adaper_class.new(obj_type,ds_name,src)
     end
 
     def discover_and_update(container_id_handle,ds_object)
@@ -29,9 +29,9 @@ module XYZ
     end
 
    private
-    def initialize(obj_type,ds_type,source_obj_type)
+    def initialize(obj_type,ds_name,source_obj_type)
       @obj_type = obj_type
-      @ds_type = ds_type
+      @ds_name = ds_name
       @source_obj_type = source_obj_type
     end
 
@@ -118,7 +118,7 @@ module XYZ
 
     def ds_key_value(ds_attr_hash)
       relative_unique_key = unique_keys(ds_attr_hash)
-      ([@ds_type.to_sym] + relative_unique_key).inspect
+      ([@ds_name.to_sym] + relative_unique_key).inspect
     end
 
     def ref(ds_attr_hash)

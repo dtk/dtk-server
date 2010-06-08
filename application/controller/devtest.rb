@@ -6,7 +6,7 @@ module XYZ
       container_uri = "/" + uri_array.join("/")
       ds_uri =  "#{container_uri}/data_source/#{ds_type}"
       ds_id_handle = IDHandle[:c => c, :uri => ds_uri]
-      ds_object_objs = Object.get_objects_wrt_parent(:data_source_object,ds_id_handle)
+      ds_object_objs = Object.get_objects_wrt_parent(:data_source_entry,ds_id_handle)
       raise Error.new("cannot find any #{ds_type} data source objects in #{container_uri}") if ds_object_objs.empty?
       ds_object_objs.each{|x|x.discover_and_update()}
       "discover and update nodes from #{ds_type}"

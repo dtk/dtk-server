@@ -5,10 +5,10 @@ module XYZ
     set_relation_name(:data_source,:data_source)
     class << self
       def up()
-        column :ds_type, :varchar, :size => 25 
+        column :ds_name, :varchar, :size => 25 
         column :source_handle, :json
         many_to_one :project,:library
-        one_to_many :data_source_object
+        one_to_many :data_source_entry
       end
     end
     #actions
@@ -27,7 +27,7 @@ module XYZ
     #helper fns
     class << self
       DS_defaults = Hash.new #TBD: stub
-      def fill_in_defaults(ds_type,hash_content)
+      def fill_in_defaults(ds_name,hash_content)
         hash_with_defaults = Hash.new
         [:source_handle,:data_source_object].each do |k|
           v = hash_content[k] || DS_defaults[k]
@@ -36,19 +36,19 @@ module XYZ
         if hash_with_defaults[:data_source_object]
           hash_with_defaults[:data_source_object].each do |obj_type,child_hash_content|
              hash_with_defaults[:data_source_object][obj_type.to_s] = 
-              DataSourceObject.fill_in_defaults(ds_type,obj_type.to_sym,child_hash_content)
+              DataSourceObject.fill_in_defaults(ds_name,obj_type.to_sym,child_hash_content)
           end
         end
-        hash_with_defaults[:ds_type] = ds_type.to_s
+        hash_with_defaults[:ds_name] = ds_name.to_s
         hash_with_defaults
       end
     end
   end
-  class DataSourceObject < Model
-    set_relation_name(:data_source,:object)
+  class DataSourceEntry < Model
+    set_relation_name(:data_source,:entry)
     class << self
       def up()
-        column :ds_type, :varchar, :size => 25 #TBD: just passed in for convenient access; 'inherited' from its conatiner
+        column :ds_name, :varchar, :size => 25 #TBD: just passed in for convenient access; 'inherited' from its conatiner
         column :obj_type, :varchar, :size => 25 
         #used when multiple source objects can map to same normaized object such as for ec2 image and instance both map to node
         column :source_obj_type, :varchar, :size => 25 
@@ -73,18 +73,18 @@ module XYZ
     def initialize(hash_scalar_values,c,relation_type)
       super(hash_scalar_values,c,relation_type)
       raise Error.new(":obj_type should be in hash_scalar_values") if hash_scalar_values[:obj_type].nil?
-      raise Error.new(":ds_type should be in hash_scalar_values") if hash_scalar_values[:ds_type].nil?
-      @ds_object_adapter = DataSourceAdapter.load_and_create_adapter(self)
+      raise Error.new(":ds_name should be in hash_scalar_values") if hash_scalar_values[:ds_name].nil?
+      @ds_object_adapter = DataSourceAdapter.create(self)
     end   
     class << self
       DS_object_defaults = {}
-      def fill_in_defaults(ds_type,obj_type,hash_content)
+      def fill_in_defaults(ds_name,obj_type,hash_content)
         hash_with_defaults = Hash.new
         [:filter,:update_policy,:polling_policy,:objects_location].each do |key|
-          v = hash_content[key] || Aux.nested_value(DS_object_defaults,[ds_type,key ])
+          v = hash_content[key] || Aux.nested_value(DS_object_defaults,[ds_name,key ])
           hash_with_defaults[key] = v if v
         end
-        hash_with_defaults[:ds_type] = ds_type.to_s
+        hash_with_defaults[:ds_name] = ds_name.to_s
         hash_with_defaults[:obj_type] = obj_type.to_s
         hash_with_defaults
       end

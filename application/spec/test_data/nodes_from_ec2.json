@@ -1,245 +1,29 @@
 {
   "network_partition": {
     "internet": {
-      "is_internet": true,
       "is_deployed": false,
+      "is_internet": true,
       "display_name": "internet"
     }
   },
   "data_source": {
     "ec2": {
-      "ds_type": "ec2",
-      "data_source_object": {
-        "node": {
-          "ds_type": "ec2",
+      "data_source_entry": {
+        "node_image": {
           "obj_type": "node",
-          "display_name": "node"
+          "ds_name": "ec2",
+          "source_obj_type": "image",
+          "display_name": "node_image"
         },
-        "security_group": {
-          "ds_type": "ec2",
-          "obj_type": "security_group",
-          "display_name": "security_group"
+        "node_instance": {
+          "obj_type": "node",
+          "ds_name": "ec2",
+          "source_obj_type": "instance",
+          "display_name": "node_instance"
         }
       },
+      "ds_name": "ec2",
       "display_name": "ec2"
-    }
-  },
-  "node": {
-    "i-37dd8c5c": {
-      "node_interface": {
-        "eth0": {
-          "type": "ethernet",
-          "display_name": "eth0"
-        }
-      },
-      "ds_attributes": {
-        "ami_launch_index": 0,
-        "root_device_name": null,
-        "monitoring": false,
-        "private_ip_address": null,
-        "private_dns_name": null,
-        "dns_name": null,
-        "kernel_id": "aki-fd15f694",
-        "block_device_mapping": [
-          {
-            "status": "attached",
-            "attachTime": "Tue May 11 17:36:42 UTC 2010",
-            "volumeId": "vol-375ee45e",
-            "deviceName": "/dev/sda1",
-            "deleteOnTermination": true
-          }
-        ],
-        "state": "stopped",
-        "root_device_type": "ebs",
-        "created_at": "Wed May 26 14:48:17 UTC 2010",
-        "ramdisk_id": "ari-7b739e12",
-        "groups": [
-          "basic",
-          "default"
-        ],
-        "ip_address": null,
-        "flavor_id": "m1.large",
-        "product_codes": [
-
-        ],
-        "reason": null,
-        "image_id": "ami-b722cdde",
-        "user_data": null,
-        "id": "i-37dd8c5c",
-        "key_name": "rich-east",
-        "availability_zone": "us-east-1a"
-      },
-      "is_deployed": false,
-      "ds_key": "[\"ec2\", \"i-37dd8c5c\"]",
-      "display_name": "i-37dd8c5c"
-    },
-    "i-2f5b7a44": {
-      "node_interface": {
-        "eth0": {
-          "type": "ethernet",
-          "display_name": "eth0"
-        }
-      },
-      "ds_attributes": {
-        "ami_launch_index": 0,
-        "root_device_name": null,
-        "monitoring": false,
-        "private_ip_address": null,
-        "private_dns_name": null,
-        "dns_name": null,
-        "kernel_id": "aki-5f15f636",
-        "block_device_mapping": [
-          {
-            "status": "attached",
-            "attachTime": "Wed May 19 20:33:31 UTC 2010",
-            "volumeId": "vol-f1be3f98",
-            "deviceName": "/dev/sda1",
-            "deleteOnTermination": true
-          }
-        ],
-        "state": "stopped",
-        "root_device_type": "ebs",
-        "created_at": "Thu May 27 14:53:53 UTC 2010",
-        "ramdisk_id": "ari-d5709dbc",
-        "groups": [
-          "basic",
-          "default"
-        ],
-        "ip_address": null,
-        "flavor_id": "m1.small",
-        "product_codes": [
-
-        ],
-        "reason": null,
-        "image_id": "ami-693ad300",
-        "user_data": null,
-        "id": "i-2f5b7a44",
-        "key_name": "rich-east",
-        "availability_zone": "us-east-1a"
-      },
-      "is_deployed": false,
-      "ds_key": "[\"ec2\", \"i-2f5b7a44\"]",
-      "display_name": "i-2f5b7a44"
-    },
-    "i-254b684e": {
-      "node_interface": {
-        "eth0": {
-          "type": "ethernet",
-          "display_name": "eth0"
-        }
-      },
-      "ds_attributes": {
-        "ami_launch_index": 0,
-        "root_device_name": null,
-        "monitoring": false,
-        "private_ip_address": null,
-        "private_dns_name": null,
-        "dns_name": null,
-        "kernel_id": "aki-5f15f636",
-        "block_device_mapping": [
-          {
-            "status": "attached",
-            "attachTime": "Thu May 20 16:12:21 UTC 2010",
-            "volumeId": "vol-8fd959e6",
-            "deviceName": "/dev/sda1",
-            "deleteOnTermination": true
-          }
-        ],
-        "state": "stopped",
-        "root_device_type": "ebs",
-        "created_at": "Thu May 20 16:12:16 UTC 2010",
-        "ramdisk_id": "ari-d5709dbc",
-        "groups": [
-          "basic",
-          "default"
-        ],
-        "ip_address": null,
-        "flavor_id": "m1.small",
-        "product_codes": [
-
-        ],
-        "reason": null,
-        "image_id": "ami-693ad300",
-        "user_data": null,
-        "id": "i-254b684e",
-        "key_name": "rich-east",
-        "availability_zone": "us-east-1a"
-      },
-      "is_deployed": false,
-      "ds_key": "[\"ec2\", \"i-254b684e\"]",
-      "display_name": "i-254b684e"
-    },
-    "i-63775608": {
-      "node_interface": {
-        "eth0": {
-          "type": "ethernet",
-          "address": {
-            "address": "10.254.81.175",
-            "family": "ipv4"
-          },
-          "display_name": "eth0"
-        }
-      },
-      "ds_attributes": {
-        "ami_launch_index": 0,
-        "root_device_name": null,
-        "monitoring": false,
-        "private_ip_address": "10.254.81.175",
-        "private_dns_name": "domU-12-31-39-00-4E-45.compute-1.internal",
-        "dns_name": "ec2-184-73-34-173.compute-1.amazonaws.com",
-        "kernel_id": "aki-5f15f636",
-        "block_device_mapping": [
-          {
-            "status": "attached",
-            "attachTime": "Wed May 19 19:10:59 UTC 2010",
-            "volumeId": "vol-75b6371c",
-            "deviceName": "/dev/sda1",
-            "deleteOnTermination": true
-          }
-        ],
-        "state": "running",
-        "root_device_type": "ebs",
-        "created_at": "Thu Jun 03 15:08:42 UTC 2010",
-        "ramdisk_id": "ari-d5709dbc",
-        "groups": [
-          "basic",
-          "default"
-        ],
-        "ip_address": "184.73.34.173",
-        "flavor_id": "m1.small",
-        "product_codes": [
-
-        ],
-        "reason": null,
-        "image_id": "ami-bf3ad3d6",
-        "user_data": null,
-        "id": "i-63775608",
-        "key_name": "rich-east",
-        "availability_zone": "us-east-1a"
-      },
-      "address_access_point": {
-        "internet_dns": {
-          "type": "internet",
-          "*network_partition_id": "/network_partition/internet",
-          "network_address": {
-            "address": "ec2-184-73-34-173.compute-1.amazonaws.com",
-            "family": "dns"
-          },
-          "display_name": "internet_dns"
-        },
-        "internet_ipv4": {
-          "type": "internet",
-          "*network_partition_id": "/network_partition/internet",
-          "network_address": {
-            "address": "184.73.34.173",
-            "family": "ipv4"
-          },
-          "display_name": "internet_ipv4"
-        }
-      },
-      "is_deployed": false,
-      "ds_key": "[\"ec2\", \"i-63775608\"]",
-      "display_name": "i-63775608"
     }
   }
 }

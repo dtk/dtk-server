@@ -17,7 +17,7 @@ module XYZ
       c = ret_session_context_id()
       ds_type = uri_array.pop.to_sym
       container_uri = "/" + uri_array.join("/")
-      ds_object_uri =  "#{container_uri}/data_source/#{ds_type}/data_source_object/component"
+      ds_object_uri =  "#{container_uri}/data_source/#{ds_type}/data_source_entry/component"
       ds_object_id_handle = IDHandle[:c => c, :uri => ds_object_uri]
       ds_object_obj = Object.get_object(IDHandle[:c => c, :uri => ds_object_uri])
       raise Error.new("cannot find any #{ds_type} data source objects in #{container_uri}") if ds_object_obj.nil?

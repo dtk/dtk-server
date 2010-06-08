@@ -1,0 +1,15 @@
+{
+  "data_source": {
+    "chef": {
+      "data_source_entry": {
+        "component": {
+          "obj_type": "component",
+          "ds_name": "chef",
+          "display_name": "component"
+        }
+      },
+      "ds_name": "chef",
+      "display_name": "chef"
+    }
+  }
+}

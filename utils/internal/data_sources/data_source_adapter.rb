@@ -8,6 +8,7 @@ module XYZ
       begin 
         require File.expand_path(rel_path, File.dirname(__FILE__))
        rescue Exception
+        #TBD: error can be syntax error in files dynmically loading so case to determine
         raise Error.new("Adapter file to process object #{obj_type} for data source #{ds_name} #{src ? "(using source object #{src}) " : ""} does not exist")
       end
 
@@ -18,13 +19,7 @@ module XYZ
 
     def discover_and_update(container_id_handle,ds_object)
       marked = Array.new
-
-      if uses_multiple_level_iteration()
-        multiple_level_iteration(container_id_handle,marked)
-      else
-        single_level_iteration(container_id_handle,marked)
-      end
-          
+      get_and_update_objects(container_id_handle,marked)          
       delete_unmarked(container_id_handle,marked)
     end
 
@@ -45,30 +40,11 @@ module XYZ
       {}
     end
 
-    def uses_multiple_level_iteration()
-      self.method(get_objects()).arity == 1
-    end
-
-    def multiple_level_iteration(container_id_handle,marked)
-      send(get_list()).each() do |source_name|
-        send(get_objects(),source_name).each do |ds_attr_hash|
-          discover_and_update_item(container_id_handle,ds_attr_hash,marked) 
-        end
-      end
-    end
-
-    def single_level_iteration(container_id_handle,marked)
-      send(get_objects()).each do |ds_attr_hash|
+    def  get_and_update_objects(container_id_handle,marked)          
+      method_name = "get_objects__#{@obj_type}#{@source_obj_type ? "__" + @source_obj_type : ""}".to_sym
+      send(method_name) do |ds_attr_hash|
         discover_and_update_item(container_id_handle,ds_attr_hash,marked) 
       end
-    end
-
-    def get_list()
-      "get_list__#{@obj_type}".to_sym
-    end
-    def get_objects()
-      src = @source_obj_type 
-      "get_objects__#{@obj_type}#{src ? "__" + src : ""}".to_sym
     end
 
     def discover_and_update_item(container_id_handle,ds_attr_hash,marked)

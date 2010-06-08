@@ -6,16 +6,22 @@ module XYZ
   module DSAdapter
     class Chef
       class Top < DataSourceAdapter
-#TODO: Whats the diff between get_objects and get_list?
-#TODO: Is there a design benefit to have the get list component a this level and not in the 
-#      specific adapter file?
 
-        def get_list__component()
+        def get_objects__component(&block)
+          get_cookbook_names().each do |cookbook_name|
+            get_recipes_assoc_cookbook(cookbook_name).each do |ds_attr_hash|
+              block.call(ds_attr_hash)
+            end
+          end
+        end
+
+       private
+        def get_cookbook_names()
           # get_rest("cookbooks")
           %w{pg_pool postgresql} #stub
         end
 
-        def get_objects__component(cookbook_name)
+        def get_recipes_assoc_cookbook(cookbook_name)
           r = get_rest("cookbooks/#{cookbook_name}")
           ret = Array.new
           return ret if r.nil?
@@ -33,15 +39,11 @@ module XYZ
           ret
         end
 
-       private
-
         def get_rest(item)
           rest_results = conn().get_rest(item)
           rest_results ? rest_results.to_hash : nil
         end
-#TODO: There is quite the mix of really short/abreviated names, and really verbose/descriptive ones
-#TODO: What are the dependencies of the chef files that are being used to communicate to teh server?
-#      Want to be mindful of this running on windows
+
         def conn()
           @@conn ||=  initialize_chef_connection()
         end
@@ -57,4 +59,5 @@ module XYZ
     end
   end
 end
+
 

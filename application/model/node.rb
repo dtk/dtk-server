@@ -76,6 +76,8 @@ module XYZ
     set_relation_name(:node,:assoc_node_component)
     class << self
       def up()
+        column :ds_attributes, :json
+        column :ds_key, :varchar
         foreign_key :node_id, :node, FK_CASCADE_OPT
         foreign_key :component_id, :component, FK_CASCADE_OPT
         many_to_one :library, :project

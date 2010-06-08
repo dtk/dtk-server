@@ -7,9 +7,19 @@ module XYZ
     class Chef
       class Top < DataSourceAdapter
 
+
         def get_objects__component(&block)
           get_cookbook_names().each do |cookbook_name|
             get_recipes_assoc_cookbook(cookbook_name).each do |ds_attr_hash|
+              block.call(ds_attr_hash)
+            end
+          end
+        end
+
+        def get_objects__assoc_node_component(&block)
+          get_node_recipe_assocs().each do |node_name,recipes|
+            recipes.each do |recipe|
+              ds_attr_hash = {:node_name => node_name, :recipe_name => recipe}
               block.call(ds_attr_hash)
             end
           end

@@ -87,30 +87,6 @@ module XYZ
   #instance mixins
   module ModelDataInstanceMixins
 
-    attr_reader :relation_type
-
-    def initialize(hash_scalar_values,c,relation_type)
-      return nil if hash_scalar_values.nil?
-
-      super(hash_scalar_values)
-
-      @c = c
-      @relation_type = relation_type
-      @id_handle = 
-        if hash_scalar_values[:id]
-          ret_id_handle_from_db_id(hash_scalar_values[:id],relation_type)
-        elsif hash_scalar_values[:uri]
-          IDHandle[:c =>c, :uri => hash_scalar_values[:uri]]
-        else
-          nil
-        end
-    end
-
-    def [](x)
-      return send(x) if self.class.is_virtual_column?(x)
-      super(x)
-    end
-
     def update(scalar_assignments,opts={})
       scalar_assignments.each{|k,v| self[k] = v}
       self.class.update_instance(id_handle,scalar_assignments,opts)

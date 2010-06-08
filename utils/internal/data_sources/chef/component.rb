@@ -6,7 +6,7 @@ module XYZ
        private
 
         #TBD below is effectively dsl; may make more declarative using data integration dsl
-        def unique_keys(v,ds_context=nil)
+        def unique_keys(v)
           [v["name"]]
         end
 

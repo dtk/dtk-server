@@ -4,6 +4,7 @@ module XYZ
       obj_type = ds_object[:obj_type].to_s
       ds_name = ds_object[:ds_name].to_s
       src = ds_object[:source_obj_type] ? ds_object[:source_obj_type].to_s : nil 
+      c = ds_object.c
       rel_path = "#{ds_name}/#{obj_type}#{src ? "__" + src : ""}"
       begin 
         file_path = File.expand_path(rel_path, File.dirname(__FILE__)) 
@@ -16,7 +17,7 @@ module XYZ
 
       base_class = DSAdapter.const_get Aux.camelize(ds_name)
       adaper_class = base_class.const_get Aux.camelize("#{obj_type}#{src ? "_" + src : ""}")
-      adaper_class.new(obj_type,ds_name,src)
+      adaper_class.new(c,obj_type,ds_name,src)
     end
 
     def discover_and_update(container_id_handle,ds_object)
@@ -26,7 +27,8 @@ module XYZ
     end
 
    private
-    def initialize(obj_type,ds_name,source_obj_type)
+    def initialize(c,obj_type,ds_name,source_obj_type)
+      @c = c
       @obj_type = obj_type
       @ds_name = ds_name
       @source_obj_type = source_obj_type
@@ -90,8 +92,8 @@ module XYZ
       id ? IDHandle[:guid => id,:c => container_id_handle[:c]] : nil
     end
 
-    def relation_type
-      @obj_type.to_sym
+    def relation_type(obj_type = nil)
+      (obj_type || @obj_type).to_sym
     end
 
     def ds_key_value(ds_attr_hash)
@@ -101,6 +103,10 @@ module XYZ
 
     def ref(ds_attr_hash)
       relative_distinguished_name(ds_attr_hash)
+    end
+
+    def find_foreign_key_id(obj_type,ds_attr_hash)
+      Object.get_objects(relation_type(obj_type),@c,where_clause)      
     end
   end
 end

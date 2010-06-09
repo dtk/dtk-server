@@ -1,15 +1,41 @@
 module XYZ
   class DSLTop
    private
+    #top level "conditionals"
+    def self.if_exists(condition,&block)
+      context = self.new(Condition.new(:if_exists,condition))
+      context.instance_eval(&block) 
+    end
+
+    def self.no_conditions(&block)
+      context = self.new(Condition.new(:no_conditions))
+      context.instance_eval(&block) 
+    end
+
+    #can appear in top level
+    def self.source()
+      Source.new()
+    end
+
+    #sub commands
+    def target()
+      matching_cond_index = class_rules.keys.find{|cond|cond == @condition}
+      class_rules[matching_cond_index || @condition]
+    end
+
+    def source()
+      self.class.source()
+    end
+
+    def fn(func_name_or_def,*args)
+      Function.new(func_name_or_def,args)
+    end
+ 
+    ################
     #TBD: move to Aux
     #auto vivification trick from http://t-a-w.blogspot.com/2006/07/autovivification-in-ruby.html
     def self.create_auto_vivification_hash()
       Hash.new {|h,k| h[k] = Hash.new(&h.default_proc)}
-    end
-
-    def self.if_exists(condition,&block)
-      context = self.new(Condition.new(:if_exists,condition))
-      context.instance_eval(&block) 
     end
 
     def initialize(condition=nil)
@@ -23,25 +49,15 @@ module XYZ
       @class_rules
     end
 
-    def target()
-      class_rules[@condition]
-    end
-
-    def self.source()
-      Source.new()
-    end
-    def source()
-      self.class.source()
-    end
-
-    def fn(func_name_or_def,*args)
-      Function.new(func_name_or_def,args)
-    end
-
     class Condition
+     attr_reader :relation,:condition
      def initialize(relation=:no_condition,condition=nil)
        @relation = relation
        @condition = condition 
+     end
+
+     def ==(x)
+       @relation == x.relation and @condition == x.condition
      end
     end
 
@@ -85,9 +101,19 @@ module XYZ
     require 'pp'; pp class_rules
   end
   class Leaf2 < DSLTop
+    @class_rules ||= create_auto_vivification_hash()
+    no_conditions do
+      target[:test4] = fn(:test_fn,source[:private_ip_address],1,2)
+    end
    pp class_rules
   end
   class SampleLeafClass < DSLTop
+   no_conditions do
+     target[:test5] = fn(:test5,source[:private_ip_address],1,2)
+   end
+    if_exists(source[:private_ip_address]) do
+      target[:test6][:type] = "test6"
+    end
    pp class_rules
   end
 end

@@ -7,7 +7,6 @@ module XYZ
     class Chef
       class Top < DataSourceAdapter
 
-
         def get_objects__component(&block)
           get_cookbook_names().each do |cookbook_name|
             get_recipes_assoc_cookbook(cookbook_name).each do |ds_attr_hash|
@@ -20,15 +19,20 @@ module XYZ
           get_node_recipe_assocs().each do |node_name,recipes|
             recipes.each do |recipe|
               ds_attr_hash = {"node_name" => node_name, "recipe_name" => recipe}
+  #TBD: to be used to load in variable values node_attributes = get_node_attributes(node_name)
+  #or insted may have discover and update on attributes
               block.call(ds_attr_hash)
             end
           end
         end
 
        private
+        def get_node_attributes(node_name)
+          get_rest("nodes/#{node_name}",false)
+        end
+
         def get_cookbook_names()
           # get_rest("cookbooks")
-          #%w{pg_pool postgresql} 
           #stub that just gets cookbooks from run list; it actually has recipes so can pass this in too
           get_node_recipe_assocs().values.flatten.map{|x|x.gsub(/::.+$/,"")}.uniq
          end
@@ -61,7 +65,7 @@ module XYZ
 
         def get_node_recipes(node_name)
           node = get_rest("nodes/#{node_name}",false)
-         node ? node.run_list.recipes : nil
+          node ? node.run_list.recipes : nil
         end
 
         def get_search_results(search_string,convert_to_hash=true)

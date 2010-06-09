@@ -1,4 +1,59 @@
+
 require File.expand_path("ec2", File.dirname(__FILE__))
+=begin
+Test code for new DSL
+class TestDSL
+  #auto vivification trick from http://t-a-w.blogspot.com/2006/07/autovivification-in-ruby.html
+  @@rules ||= Hash.new {|h,k| h[k] = Hash.new(&h.default_proc)}
+  def self.if_exists(condition,&block)
+    context = self.new(Condition.new(:if_exists,condition))
+    context.instance_eval(&block) 
+  end
+
+  def initialize(condition=nil)
+    @condition = condition
+  end
+  def target()
+    @@rules[@condition]
+  end
+
+  def self.source()
+    Source.new()
+  end
+  def source()
+    self.class.source()
+  end
+
+  class Condition
+   def initialize(relation=:no_condition,condition=nil)
+     @relation = relation
+     @condition = condition 
+   end
+  end
+
+  class Source < String
+    def initialize()
+      replace('source')
+    end
+
+    def [](a)
+      replace("#{self}[#{a}]")
+      self
+    end
+  end
+end
+
+class TestDSL
+  if_exists(source[:private_ip_address]) do
+    target[:eth0][:type] = 'ethernet' 
+    target[:eth0][:family] = 'ipv4' 
+    target[:eth0][:address] =  source[:private_ip_address] 
+  end
+  #debug statement to print the result of the pasring
+  require 'pp'; pp @@rules
+end
+
+=end
 
 module XYZ
   module DSAdapter

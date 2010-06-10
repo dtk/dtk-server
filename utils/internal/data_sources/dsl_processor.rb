@@ -4,22 +4,27 @@ module XYZ
   class DSLTop
     def self.apply(source_obj)
       #TBD: ignoring conditions
-      test = Hash.new
-      class_rules.each do |cond,assigns|
-        assigns.each do |lhs,rhs|
-          test[lhs] = apply_to_term(rhs,source_obj) 
+      #TBD stub
+      target_obj = Aux.create_auto_vivification_hash()
+      class_rules.each do |cond,top_level_assign|
+        top_level_assign.each do |attr,assign|
+          self.process_assignment(target_obj,attr,assign,source_obj) 
         end
       end
-      test
+      target_obj
     end
 
-    def self.apply_to_term(term,source_obj) 
-      if term.kind_of?(Source)
-        term.apply(source_obj)
-      elsif term.kind_of?(Function)
-        term.apply(source_obj)
+    def self.process_assignment(target_obj,attr,assign,source_obj) 
+      if assign.kind_of?(Source)
+        target_obj[attr] = assign.apply(source_obj)
+      elsif assign.kind_of?(Function)
+        target_obj[attr] = assign.apply(source_obj)
+      elsif assign.kind_of?(Hash)
+        assign.each do |nested_attr,nested_assign|
+          process_assignment(target_obj[attr],nested_attr,nested_assign,source_obj)
+        end
       else
-        term
+       target_obj[attr] = assign
       end
     end
 
@@ -56,10 +61,6 @@ module XYZ
  
     ################
     #TBD: move to Aux
-    #auto vivification trick from http://t-a-w.blogspot.com/2006/07/autovivification-in-ruby.html
-    def self.create_auto_vivification_hash()
-      Hash.new {|h,k| h[k] = Hash.new(&h.default_proc)}
-    end
 
     def initialize(condition=nil)
       @condition = condition
@@ -69,7 +70,7 @@ module XYZ
       self.class.class_rules
     end
     def self.class_rules()
-      @class_rules ||= create_auto_vivification_hash()
+      @class_rules ||= Aux.create_auto_vivification_hash()
     end
     
     class Condition
@@ -114,11 +115,21 @@ module XYZ
       end
       
       def apply(source_obj)
-        evaluated_args = @args.map{|term|DSLTop.apply_to_term(term,source_obj)}
+        evaluated_args = @args.map{|term|apply_to_term(term,source_obj)}
         if @function_name 
           send(@function_name,*evaluated_args)
         elsif @function_ref
           @function_ref.call(*evaluated_args)
+        end
+      end
+     private
+      def apply_to_term(term,source_obj)
+        if term.kind_of?(Source)
+          term.apply(source_obj)
+        elsif term.kind_of?(Function)
+          term.apply(source_obj)
+        else
+          term
         end
       end
     end
@@ -150,9 +161,10 @@ module XYZ
       target[:eth0][:type] = 'ethernet' 
       target[:eth0][:family] = 'ipv4' 
       target[:eth0][:address] =  source[:private_ip_address] 
+      target[:a][:b][:c] = fn(lambda{|x,y|x+y},source[:count],4)
     end
   end
   pp "----------------------------"
-  source_obj = {:private_ip_address => "10.22.2.3"}
+  source_obj = {:private_ip_address => "10.22.2.3", :count => 8}
   pp SampleLeafClass3.apply(source_obj)
 end

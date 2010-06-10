@@ -31,9 +31,16 @@ module XYZ
 
   class Aux
     class << self
+      #TBD: might better related nested and auto vivfication
       def nested_value(hash,path)
         nested_value_private(hash,path.dup)
       end
+
+    #auto vivification trick from http://t-a-w.blogspot.com/2006/07/autovivification-in-ruby.html
+    def create_auto_vivification_hash()
+      Hash.new {|h,k| h[k] = Hash.new(&h.default_proc)}
+    end
+
      private
       def nested_value_private(hash,path)
         return nil unless hash.kind_of?(Hash)

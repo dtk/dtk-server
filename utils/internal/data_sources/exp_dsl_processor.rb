@@ -42,8 +42,7 @@ module XYZ
 
     #sub commands
     def target()
-      matching_cond_index = class_rules.keys.find{|cond|cond == @condition}
-      class_rules[matching_cond_index || @condition]
+      class_rules[@condition]
     end
 
     def source()
@@ -55,11 +54,6 @@ module XYZ
     end
  
     ################
-    #TBD: move to Aux
-    #auto vivification trick from http://t-a-w.blogspot.com/2006/07/autovivification-in-ruby.html
-    def self.create_auto_vivification_hash()
-      Hash.new {|h,k| h[k] = Hash.new(&h.default_proc)}
-    end
 
     def initialize(condition=nil)
       @condition = condition
@@ -69,19 +63,33 @@ module XYZ
       self.class.class_rules
     end
     def self.class_rules()
-      @class_rules ||= create_auto_vivification_hash()
+      @class_rules ||= Hash.new(Assignment.new)
     end
     
-    class Condition
-     attr_reader :relation,:condition
-     def initialize(relation=:no_condition,condition=nil)
-       @relation = relation
-       @condition = condition 
-     end
+    class Assignment
+      def initialize()
+        @target_path = Array.new
+        @source = nil
+      end
+      def [](a)
+        @target_path << a
+        self
+      end
+      def <(source)
+       @source = source
+      end
+    end
 
-     def ==(x)
-       @relation == x.relation and @condition == x.condition
-     end
+    class Condition
+      attr_reader :relation,:condition
+      def initialize(relation=:no_condition,condition=nil)
+        @relation = relation
+        @condition = condition 
+      end
+
+      def ==(x)
+        @relation == x.relation and @condition == x.condition
+      end
     end
 
     class Source 
@@ -129,23 +137,25 @@ end
 module XYZ
   class SampleLeafClass < DSLTop
     if_exists(source[:private_ip_address]) do
-      target[:eth0][:type] = 'ethernet' 
-      target[:eth0][:family] = 'ipv4' 
-      target[:eth0][:address] =  source[:private_ip_address] 
-      target[:test1] = fn(:test_fn,source[:private_ip_address],1,2)
-      target[:test2] = fn(lambda{|x,y|x+y},source[:private_ip_address],1)
-      target[:test3] = fn(lambda{|x,y|x+y},source[:private_ip_address],fn(:nested,1))
+      target[:eth0][:type] < 'ethernet' 
+      target[:eth0][:family] < 'ipv4' 
+      target[:eth0][:address] <  source[:private_ip_address] 
+      target[:test1] < fn(:test_fn,source[:private_ip_address],1,2)
+      target[:test2] < fn(lambda{|x,y|x+y},source[:private_ip_address],1)
+      target[:test3] < fn(lambda{|x,y|x+y},source[:private_ip_address],fn(:nested,1))
     end
     #debug statement to print the result of the pasring
     require 'pp'; pp class_rules
   end
   class Leaf2 < DSLTop
     no_conditions do
-      target[:test4] = fn(:test_fn,source["foo"][:private_ip_address],1,2)
+      target[:test4] < fn(:test_fn,source["foo"][:private_ip_address],1,2)
     end
    pp class_rules
   end
+=begin
   class SampleLeafClass3 < DSLTop
+    @class_rules ||= create_auto_vivification_hash()
     if_exists(source[:private_ip_address]) do
       target[:eth0][:type] = 'ethernet' 
       target[:eth0][:family] = 'ipv4' 
@@ -155,4 +165,5 @@ module XYZ
   pp "----------------------------"
   source_obj = {:private_ip_address => "10.22.2.3"}
   pp SampleLeafClass3.apply(source_obj)
+=end
 end

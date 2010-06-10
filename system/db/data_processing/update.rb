@@ -35,13 +35,31 @@ module XYZ
       end
 
       def update_from_hash_from_factory_id(factory_id_info,assigns,opts={})
+        delete_not_matching = assigns.kind_of?(DBUpdateCWAHash)
 	c = factory_id_info[:c]
+        child_id_info_list = Array.new
 	#each assigns key should be qualified ref wrt factory_id
-        assigns.each_pair{|qualified_ref,child_assigns|
+        assigns.each_pair do |qualified_ref,child_assigns|
 	  child_uri = RestURI.ret_child_uri_from_qualified_ref(factory_id_info[:uri],qualified_ref)
-	  child_id_info = IDInfoTable.get_row_from_id_handle IDHandle[:c => c, :uri => child_uri], :raise_error => true
-	  update_from_hash_from_instance_id(child_id_info,child_assigns,opts)
-	}
+	  child_id_info = IDInfoTable.get_row_from_id_handle IDHandle[:c => c, :uri => child_uri]
+          if child_id_info
+	    update_from_hash_from_instance_id(child_id_info,child_assigns,opts)
+            child_id_info << child_id_info if delete_not_matching
+          else
+           #TBD: create from hash
+          end
+	end
+        delete_not_matching_children(child_id_info_list,opts) if delete_not_matching
+      end
+
+      def delete_not_matching_children(child_id_info_list,opts={})
+        return nil if child_id_info_list.empty?
+        #each element in list wil have same parent, relation_type and c
+        child = child_id_info_list.first
+        parent_id_handle = IDHandle[:c => child[:c], :id => child[:parent_id]]
+        relation_type = child[:relation_type]
+        where_clause = SQL.not(SQL.and(*child_id_info_list.map{|ch|ch[:id]}))
+        delete_instances_wrt_parent(relation_type,parent_id_handle,where_clause,opts)        
       end
 
       def update_from_hash_from_instance_id(id_info,assigns,opts={})

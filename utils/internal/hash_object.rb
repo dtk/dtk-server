@@ -41,5 +41,6 @@ module XYZ
   #Used to indicate that the keys of the has (with correspond to refs with a factory parent)
   #are comprehensive meaning that when do an update all non matching refs are deleted
   class DBUpdateCWAHash < DBUpdateHash 
+    #TBD: if only CWA for objects that meet a subset of conditiosn may put qualification in as attribiute here; it would be a sql string
   end 
 end

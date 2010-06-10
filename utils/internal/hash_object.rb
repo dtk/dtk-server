@@ -14,7 +14,7 @@ module XYZ
       end
       #auto vivification trick from http://t-a-w.blogspot.com/2006/07/autovivification-in-ruby.html
       def create_with_auto_vivification()
-        HashObject.new{|h,k| h[k] = HashObject.new(&h.default_proc)}
+        self.new{|h,k| h[k] = self.new(&h.default_proc)}
       end
 
       def object_slice(hash,slice_keys)
@@ -35,4 +35,11 @@ module XYZ
       end
     end
   end
+  #Used as input to db update from hash 
+  class DBUpdateHash < HashObject
+  end 
+  #Used to indicate that the keys of the has (with correspond to refs with a factory parent)
+  #are comprehensive meaning that when do an update all non matching refs are deleted
+  class DBUpdateCWAHash < DBUpdateHash 
+  end 
 end

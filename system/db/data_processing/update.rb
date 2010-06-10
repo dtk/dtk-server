@@ -35,7 +35,7 @@ module XYZ
       end
 
       def update_from_hash_from_factory_id(factory_id_info,assigns,opts={})
-        delete_not_matching = assigns.kind_of?(DBUpdateCWAHash)
+        delete_not_matching = assigns.is_comprehensive?
 	c = factory_id_info[:c]
         child_id_info_list = Array.new
 	#each assigns key should be qualified ref wrt factory_id
@@ -46,19 +46,22 @@ module XYZ
 	    update_from_hash_from_instance_id(child_id_info,child_assigns,opts)
             child_id_info << child_id_info if delete_not_matching
           else
-           #TBD: create from hash
+            factory_id_handle = IDHandle[:c => c, :guid => factory_id_info[:id]] 
+            create_from_hash(factory_id_handle,child_assigns,opts)
           end
 	end
-        delete_not_matching_children(child_id_info_list,opts) if delete_not_matching
+        delete_not_matching_children(child_id_info_list,assigns,opts) if delete_not_matching
       end
 
-      def delete_not_matching_children(child_id_info_list,opts={})
+      def delete_not_matching_children(child_id_info_list,assigns,opts={})
+        #TBD: not to fix; semantics of this being empty should be to delete everyting from parent -> need parent info
         return nil if child_id_info_list.empty?
         #each element in list wil have same parent, relation_type and c
         child = child_id_info_list.first
-        parent_id_handle = IDHandle[:c => child[:c], :id => child[:parent_id]]
+        parent_id_handle = IDHandle[:c => child[:c], :guid => child[:parent_id]]
         relation_type = child[:relation_type]
         where_clause = SQL.not(SQL.and(*child_id_info_list.map{|ch|ch[:id]}))
+        where_clause = SQL.and(where_clause,assigns.contraints) unless assigns.contraints.empty?
         delete_instances_wrt_parent(relation_type,parent_id_handle,where_clause,opts)        
       end
 

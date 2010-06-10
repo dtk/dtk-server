@@ -47,7 +47,7 @@ module XYZ
       @db.update_instance(id_handle,scalar_assignments,opts)
     end
 
-    def update_from_hash_assignments(id_handle,hash_assigns,opts)
+    def update_from_hash_assignments(id_handle,hash_assigns,opts={})
       @db.update_from_hash_assignments(id_handle,hash_assigns,opts)
     end
 

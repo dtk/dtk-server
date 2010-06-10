@@ -1,12 +1,17 @@
 module XYZ
   class HashObject < Hash
-    def initialize(initial_val=nil,&block)
+    def initialize(initial_val=nil,convert_initial=false,&block)
       block ? super(&block) : super()
-      replace(initial_val) if initial_val
+      if initial_val
+        replace(convert_initial ? convert_nested_hashes(initial_val) : initial_val)
+      end
     end
 
     def object_slice(slice_keys)
       self.class.object_slice(self,slice_keys)
+    end
+    def is_comprehensive?()
+      false
     end
     class << self
       def [](x)
@@ -33,14 +38,35 @@ module XYZ
         return hash[f] if path.length == 0
         nested_value_private(hash[f],path)
       end
+
+      def convert_nested_hashes(hash)
+        any_nested_hash = hash.detect{|k,v|v.is_kind_of?(Hash)}
+        return hash unless any_nested_hash
+        ret = self.new()
+        hash.each{|k,v| ret[k] = v.is_kind_of?(Hash) ? convert_nested_hashes(v) : v}
+        ret  
+      end
     end
   end
   #Used as input to db update from hash 
   class DBUpdateHash < HashObject
-  end 
-  #Used to indicate that the keys of the has (with correspond to refs with a factory parent)
-  #are comprehensive meaning that when do an update all non matching refs are deleted
-  class DBUpdateCWAHash < DBUpdateHash 
-    #TBD: if only CWA for objects that meet a subset of conditiosn may put qualification in as attribiute here; it would be a sql string
+    attr_reader :constraints
+    def initialize(initial_val=nil,&block)
+      super
+      #if non null means when update done then delete all with respect to parent meeting constraints
+      #no contrainst captured by {} 
+      @constraints = nil
+    end
+    def is_comprehensive?()
+      @constraints ? true : nil
+    end    
+    def mark_as_comprehensive()
+      @constraints ||= {}
+    end
+    def set_constraints(constraints)
+      @constraints = constraints
+    end
   end 
 end
+
+

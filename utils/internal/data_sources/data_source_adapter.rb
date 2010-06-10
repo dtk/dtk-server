@@ -57,7 +57,7 @@ module XYZ
       marked << ds_key_value(ds_attr_hash)
       id_handle = find_object_id_handle(container_id_handle,ds_attr_hash)
       if id_handle
-        update_object(container_id_handle,id_handle,ds_attr_hash)
+        update_object(container_id_handle,ds_attr_hash)
       else
         create_object(container_id_handle,ds_attr_hash)
       end
@@ -74,17 +74,32 @@ module XYZ
     end
 
     def create_object(container_id_handle,ds_attr_hash)
+      hash_assigns = ret_hash_assigns(container_id_handle,ds_attr_hash,:create)
+      Object.input_into_model(container_id_handle,hash_assigns)
+    end
+
+    def update_object(container_id_handle,ds_attr_hash)
+      hash_assigns = ret_hash_assigns(container_id_handle,ds_attr_hash,:update)
+      Object.update_from_hash_assignments(id_handle,hash_assigns)
+    end
+=begin   
+    def ret_ret_hash_assigns(container_id_handle,ds_attr_hash)
       obj = {:ds_key => ds_key_value(ds_attr_hash)}
       obj.merge! :ds_attributes => filter(ds_attr_hash)
       obj.merge! normalize(ds_attr_hash)
       obj.merge!({:ds_source => @source_obj_type}) if @source_obj_type
-      Object.input_into_model(container_id_handle,{relation_type() => {ref(ds_attr_hash) => obj}})
+      {relation_type() => {ref(ds_attr_hash) => obj}})
     end
-
-    def update_object(container_id_handle,id_handle,ds_attr_hash)
-      #TBD: just stub; real version should keep same id
-      Object.delete_instance(id_handle)
-      create_object(container_id_handle,ds_attr_hash)
+=end
+    def ret_ret_hash_assigns(container_id_handle,ds_attr_hash,calling_fn)
+      wrap = calling_fn == :update
+      obj = normalize(ds_attr_hash)
+      obj = DBUpdateHash.new(obj,true) if wrap
+      obj.merge! :ds_attributes => filter(ds_attr_hash)
+      obj.merge! :ds_key => ds_key_value(ds_attr_hash)
+      obj.merge!({:ds_source => @source_obj_type}) if @source_obj_type
+      ret = {relation_type() => {ref(ds_attr_hash) => obj}}
+      wrap ? DBUpdateHash.new(ret,true) : ret
     end
 
     def find_object_id_handle(container_id_handle,ds_attr_hash)

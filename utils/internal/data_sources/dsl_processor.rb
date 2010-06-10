@@ -1,11 +1,11 @@
 #TBD: temp for testing
-require "../auxiliary.rb"
+require "../hash_object.rb"
 module XYZ
   class DSLTop
     def self.apply(source_obj)
       #TBD: ignoring conditions
       #TBD stub
-      target_obj = Aux.create_auto_vivification_hash()
+      target_obj = HashObject.create_with_auto_vivification()
       class_rules.each do |cond,top_level_assign|
         top_level_assign.each do |attr,assign|
           self.process_assignment(target_obj,attr,assign,source_obj) 
@@ -60,8 +60,6 @@ module XYZ
     end
  
     ################
-    #TBD: move to Aux
-
     def initialize(condition=nil)
       @condition = condition
     end
@@ -70,7 +68,7 @@ module XYZ
       self.class.class_rules
     end
     def self.class_rules()
-      @class_rules ||= Aux.create_auto_vivification_hash()
+      @class_rules ||= HashObject.create_with_auto_vivification()
     end
     
     class Condition
@@ -96,7 +94,7 @@ module XYZ
       end
 
       def apply(source_obj)
-        Aux.nested_value(source_obj,@path)
+        HashObject.nested_value(source_obj,@path)
       end
 
       #TBD: just for debugging

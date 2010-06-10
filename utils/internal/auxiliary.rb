@@ -1,4 +1,3 @@
-require 'pp'
 module XYZ
   ##relies on Sequel overwriting ~ | and &
   module SQL
@@ -31,25 +30,8 @@ module XYZ
 
   class Aux
     class << self
-      #TBD: might better related nested and auto vivfication
-      def nested_value(hash,path)
-        nested_value_private(hash,path.dup)
-      end
-
-    #auto vivification trick from http://t-a-w.blogspot.com/2006/07/autovivification-in-ruby.html
-    def create_auto_vivification_hash()
-      Hash.new {|h,k| h[k] = Hash.new(&h.default_proc)}
-    end
-
-     private
-      def nested_value_private(hash,path)
-        return nil unless hash.kind_of?(Hash)
-        return nil unless hash.has_key?(f = path.shift)
-        return hash[f] if path.length == 0
-        nested_value_private(hash[f],path)
-      end
-     public
       def pp_form(obj)
+        require 'pp'
         x = ""
         PP.pp obj, x
         x
@@ -136,24 +118,6 @@ module XYZ
           item
         end
       end
-    end
-  end
-
-  class HashObject < Hash
-    def self.[](x)
-      new(x)
-    end
-    def initialize(x)
-      super()
-      replace(x)
-    end
-    def self.object_slice(hash,slice_keys)
-      ret = {}
-      slice_keys.each{|k| ret[k] = hash[k] if hash[k]}
-      ret
-    end
-    def object_slice(slice_keys)
-      HashObject.object_slice(self,slice_keys)
     end
   end
 end

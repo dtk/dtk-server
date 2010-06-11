@@ -17,8 +17,6 @@ module XYZ
     #coverts hashes that are not a HashObject or a child of HashObject
     def convert_nested_hashes(hash)
       return hash if hash.kind_of?(HashObject)
-      any_nested_hash = hash.detect{|k,v|v.kind_of?(Hash) and not v.kind_of?(HashObject)}
-      return hash unless any_nested_hash
       ret = self.class.new()
       hash.each{|k,v| ret[k] = (v.kind_of?(Hash) and not v.kind_of?(HashObject)) ? convert_nested_hashes(v) : v}
       ret  

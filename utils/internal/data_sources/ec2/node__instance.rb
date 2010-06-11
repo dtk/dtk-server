@@ -8,7 +8,7 @@ module XYZ
         #TBD below is effectively dsl; may make more declarative using data integration dsl
         def normalize(v)
           node_addr = v[:private_ip_address] ? {:family => "ipv4", :address => v[:private_ip_address]} : nil
-          address = node_addr ? DBUpdateHash.new({:address => node_node_addr}) : {}
+          address = node_addr ? DBUpdateHash.new({:address => node_addr}) : {}
           node_interface = {:node_interface => {"eth0" => {"type" => "ethernet"}.merge(address)}}
           addr_aps = addr_access_point(v[:ip_address],"ipv4","internet","internet")
           addr_aps.merge!(addr_access_point(v[:dns_name],"dns","internet","internet"))

@@ -10,7 +10,7 @@ module XYZ
     def object_slice(slice_keys)
       self.class.object_slice(self,slice_keys)
     end
-    def is_comprehensive?()
+    def is_complete?()
       false
     end
    private
@@ -60,11 +60,15 @@ module XYZ
       #no contrainst captured by {} 
       @constraints = nil
     end
-    def is_comprehensive?()
+    def is_complete?()
       @constraints ? true : nil
     end    
-    def mark_as_comprehensive()
-      @constraints ||= {}
+    def mark_as_complete(constraints=nil)
+      if constraints
+        @constraints = constraints
+      else 
+        @constraints ||= {}
+      end
       self
     end
     def set_constraints(constraints)

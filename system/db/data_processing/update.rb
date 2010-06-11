@@ -34,7 +34,7 @@ module XYZ
       end
 
       def update_from_hash_from_factory_id(factory_id_info,assigns,opts={})
-        delete_not_matching = (assigns.kind_of?(HashObject) and assigns.is_comprehensive?)
+        delete_not_matching = (assigns.kind_of?(HashObject) and assigns.is_complete?)
 	c = factory_id_info[:c]
         child_id_list = Array.new
 	#each assigns key should be qualified ref wrt factory_id

@@ -5,7 +5,7 @@ module XYZ
     def self.apply(source_obj)
       #TBD: ignoring conditions
       #TBD stub
-      target_obj = HashObject.create_with_auto_vivification()
+      target_obj = DBUpdateHash.create_with_auto_vivification()
       class_rules.each do |cond,top_level_assign|
         top_level_assign.each do |attr,assign|
           self.process_assignment(target_obj,attr,assign,source_obj) 
@@ -58,6 +58,10 @@ module XYZ
     def fn(func_name_or_def,*args)
       Function.new(func_name_or_def,args)
     end
+
+    def complete_for(trgt,constraints=nil)
+      trgt.mark_as_complete(constraints)
+    end
  
     ################
     def initialize(condition=nil)
@@ -68,7 +72,7 @@ module XYZ
       self.class.class_rules
     end
     def self.class_rules()
-      @class_rules ||= HashObject.create_with_auto_vivification()
+      @class_rules ||= DBUpdateHash.create_with_auto_vivification()
     end
     
     class Condition
@@ -136,33 +140,30 @@ end
 
 #TBD: below is temporary test code
 module XYZ
-  class SampleLeafClass < DSLTop
-    if_exists(source[:private_ip_address]) do
-      target[:eth0][:type] = 'ethernet' 
-      target[:eth0][:family] = 'ipv4' 
-      target[:eth0][:address] =  source[:private_ip_address] 
-      target[:test1] = fn(:test_fn,source[:private_ip_address],1,2)
-      target[:test2] = fn(lambda{|x,y|x+y},source[:private_ip_address],1)
-      target[:test3] = fn(lambda{|x,y|x+y},source[:private_ip_address],fn(:nested,1))
-    end
-    #debug statement to print the result of the pasring
-    require 'pp'; pp class_rules
-  end
-  class Leaf2 < DSLTop
+  class  Ec3NodeInstance < DSLTop
     no_conditions do
-      target[:test4] = fn(:test_fn,source["foo"][:private_ip_address],1,2)
-    end
-   pp class_rules
-  end
-  class SampleLeafClass3 < DSLTop
-    if_exists(source[:private_ip_address]) do
+      #TBD: allow complete_for to be top level; related to multiple conditionals poiting to same element
+      complete_for target, :ds_source => :instance
       target[:eth0][:type] = 'ethernet' 
       target[:eth0][:family] = 'ipv4' 
       target[:eth0][:address] =  source[:private_ip_address] 
-      target[:a][:b][:c] = fn(lambda{|x,y|x+y},source[:count],4)
     end
+    if_exists(source[:ip_address]) do
+      #TBD: may introduce (use term scope or prefix) c
+      # scope[:address_access_point] do 
+      #   target[:type] = "internet"
+      # end
+      complete_for target[:address_access_point]
+
+      prefix = target["internet_ipv4"][:address_access_point]
+      prefix[:type] = "internet"
+      prefix[:ip_address][:family] = "ipv4"
+      prefix[:ip_address][:address] = source[:ip_address]
+      prefix[:network_partition_id] = fn(:foreign_key,["/network_partition/internet"])
+    end
+    require 'pp' ; pp class_rules
   end
-  pp "----------------------------"
-  source_obj = {:private_ip_address => "10.22.2.3", :count => 8}
-  pp SampleLeafClass3.apply(source_obj)
+#  pp "----------------------------"
+ # source_obj = {:private_ip_address => "10.22.2.3", :count => 8}
+ # pp SampleLeafClass3.apply(source_obj)
 end

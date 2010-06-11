@@ -5,6 +5,28 @@ module XYZ
     class Ec2
       class NodeInstance < Ec2::Top 
        private
+        no_conditions do
+         #TBD: allow complete_for to be top level; related to multiple conditionals poiting to same element
+          complete_for target, :ds_source => :instance
+          target[:eth0][:type] = 'ethernet' 
+          target[:eth0][:family] = 'ipv4' 
+          target[:eth0][:address] =  source[:private_ip_address] 
+        end
+        if_exists(source[:ip_address]) do
+          #TBD: may introduce (use term scope or prefix) c
+          # scope[:address_access_point] do 
+          #   target[:type] = "internet"
+          # end
+          complete_for target[:address_access_point]
+
+          prefix = target["internet_ipv4"][:address_access_point]
+          prefix[:type] = "internet"
+          prefix[:ip_address][:family] = "ipv4"
+          prefix[:ip_address][:address] = source[:ip_address]
+          #TBD: may allow form foreign_key[prefix] = "/network_partition/internet"
+          foreign_key["internet_ipv4"][:address_access_point][:network_partition_id] = "/network_partition/internet"
+        end
+        require 'pp'; pp class_rules
         #TBD below is effectively dsl; may make more declarative using data integration dsl
         def normalize(v)
           node_addr = v[:private_ip_address] ? {:family => "ipv4", :address => v[:private_ip_address]} : nil

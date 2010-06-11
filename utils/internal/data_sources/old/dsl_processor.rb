@@ -1,6 +1,7 @@
+require '../hash_object'
 module XYZ
-  module DataTranslationClassMixin
-    def apply(source_obj)
+  class DSLTop
+    def self.apply(source_obj)
       #TBD: ignoring conditions
       #TBD stub
       target_obj = DBUpdateHash.create_with_auto_vivification()
@@ -12,7 +13,7 @@ module XYZ
       target_obj
     end
 
-    def process_assignment(target_obj,attr,assign,source_obj) 
+    def self.process_assignment(target_obj,attr,assign,source_obj) 
       if assign.kind_of?(Source)
         target_obj[attr] = assign.apply(source_obj)
       elsif assign.kind_of?(Function)
@@ -26,62 +27,68 @@ module XYZ
       end
     end
 
-    #can appear in top level 
-    def source()
-      Source.new()
-    end
-    def class_rules()
-      @class_rules ||= DBUpdateHash.create_with_auto_vivification()
-    end
-
    private
     #top level "conditionals"
-    def if_exists(condition,&block)
-      context = Context.new(self,:if_exists,condition)
+    def self.if_exists(condition,&block)
+      c = Condition.new(:if_exists,condition)
+      context = self.new(Condition.new(:if_exists,condition))
       context.instance_eval(&block) 
     end
 
-    def no_conditions(&block)
-      context = Context.new(self,:no_conditions)
+    def self.no_conditions(&block)
+      context = self.new(Condition.new(:no_conditions))
       context.instance_eval(&block) 
     end
 
-    class Context
+    #can appear in top level
+    def self.source()
+      Source.new()
+    end
+
+    #sub commands
+    def target()
+      matching_cond_index = class_rules.keys.find{|cond|cond == @condition}
+      class_rules[matching_cond_index || @condition]
+    end
+
+    def foreign_key()
+      target().mark_as_foreign_key() 
+    end
+
+    def source()
+      self.class.source()
+    end
+
+    def fn(func_name_or_def,*args)
+      Function.new(func_name_or_def,args)
+    end
+
+    def complete_for(trgt,constraints=nil)
+      trgt.mark_as_complete(constraints)
+    end
+ 
+    ################
+    def initialize(condition=nil)
+      @condition = condition
+    end
+
+    def class_rules()
+      self.class.class_rules
+    end
+    def self.class_rules()
+      @class_rules ||= DBUpdateHash.create_with_auto_vivification()
+    end
+    
+    class Condition
      attr_reader :relation,:condition
-     def initialize(parent,relation=:no_condition,condition=nil)
-       @parent = parent
+     def initialize(relation=:no_condition,condition=nil)
        @relation = relation
        @condition = condition 
      end
-      #sub commands
-      def target()
-        matching_cond_index = class_rules.keys.find{|cond|cond == @condition}
-        class_rules[matching_cond_index || @condition]
-      end
 
-      def foreign_key()
-        target().mark_as_foreign_key() 
-      end
-
-      def source()
-        @parent.source()
-      end
-
-      def fn(func_name_or_def,*args)
-        Function.new(func_name_or_def,args)
-      end
-
-      def complete_for(trgt,constraints=nil)
-        trgt.mark_as_complete(constraints)
-      end
-     private
-      def class_rules()
-        @parent.class_rules
-      end
-
-      def ==(x)
-        @relation == x.relation and @condition == x.condition
-      end
+     def ==(x)
+       @relation == x.relation and @condition == x.condition
+     end
     end
 
     class Source 
@@ -133,17 +140,9 @@ module XYZ
       end
     end
   end
-=begin
-  module DataTranslationInstanceMixin
-    ################
-    def initialize(condition=nil)
-      @condition = condition
-    end
-  end
-=end
 end
 
-=begin
+
 #TBD: below is temporary test code
 module XYZ
   class  Ec3NodeInstance < DSLTop
@@ -174,4 +173,4 @@ module XYZ
     pp apply(source_obj)
   end
 end
-=end
+

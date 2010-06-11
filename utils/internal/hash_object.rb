@@ -13,6 +13,15 @@ module XYZ
     def is_comprehensive?()
       false
     end
+   private
+    def convert_nested_hashes(hash)
+      any_nested_hash = hash.detect{|k,v|v.kind_of?(Hash)}
+      return hash unless any_nested_hash
+      ret = self.class.new()
+      hash.each{|k,v| ret[k] = v.kind_of?(Hash) ? convert_nested_hashes(v) : v}
+      ret  
+    end
+   public
     class << self
       def [](x)
         new(x)
@@ -39,19 +48,13 @@ module XYZ
         nested_value_private(hash[f],path)
       end
 
-      def convert_nested_hashes(hash)
-        any_nested_hash = hash.detect{|k,v|v.is_kind_of?(Hash)}
-        return hash unless any_nested_hash
-        ret = self.new()
-        hash.each{|k,v| ret[k] = v.is_kind_of?(Hash) ? convert_nested_hashes(v) : v}
-        ret  
-      end
+
     end
   end
   #Used as input to db update from hash 
   class DBUpdateHash < HashObject
     attr_reader :constraints
-    def initialize(initial_val=nil,&block)
+    def initialize(initial_val=nil,convert_initial=false,&block)
       super
       #if non null means when update done then delete all with respect to parent meeting constraints
       #no contrainst captured by {} 

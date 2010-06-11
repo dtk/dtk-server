@@ -80,7 +80,7 @@ module XYZ
 
     def update_object(container_id_handle,ds_attr_hash)
       hash_assigns = ret_hash_assigns(container_id_handle,ds_attr_hash,:update)
-      Object.update_from_hash_assignments(id_handle,hash_assigns)
+      Object.update_from_hash_assignments(container_id_handle,hash_assigns)
     end
 =begin   
     def ret_ret_hash_assigns(container_id_handle,ds_attr_hash)
@@ -91,7 +91,7 @@ module XYZ
       {relation_type() => {ref(ds_attr_hash) => obj}})
     end
 =end
-    def ret_ret_hash_assigns(container_id_handle,ds_attr_hash,calling_fn)
+    def ret_hash_assigns(container_id_handle,ds_attr_hash,calling_fn)
       wrap = calling_fn == :update
       obj = normalize(ds_attr_hash)
       obj = DBUpdateHash.new(obj,true) if wrap

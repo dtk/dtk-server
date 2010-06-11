@@ -35,7 +35,7 @@ module XYZ
       end
 
       def update_from_hash_from_factory_id(factory_id_info,assigns,opts={})
-        delete_not_matching = assigns.is_comprehensive?
+        delete_not_matching = (assigns.kind_of?(HashObject) and assigns.is_comprehensive?)
 	c = factory_id_info[:c]
         child_id_info_list = Array.new
 	#each assigns key should be qualified ref wrt factory_id
@@ -44,10 +44,10 @@ module XYZ
 	  child_id_info = IDInfoTable.get_row_from_id_handle IDHandle[:c => c, :uri => child_uri]
           if child_id_info
 	    update_from_hash_from_instance_id(child_id_info,child_assigns,opts)
-            child_id_info << child_id_info if delete_not_matching
+            child_id_info_list << child_id_info if delete_not_matching
           else
             factory_id_handle = IDHandle[:c => c, :uri => factory_id_info[:uri]] 
-            create_from_hash(factory_id_handle,child_assigns,opts)
+            r=create_from_hash(factory_id_handle,{qualified_ref => child_assigns},opts)
             #TBD: need here to put new item on child_id_info_list
           end
 	end
@@ -62,7 +62,7 @@ module XYZ
         parent_id_handle = IDHandle[:c => child[:c], :guid => child[:parent_id]]
         relation_type = child[:relation_type]
         where_clause = SQL.not(SQL.and(*child_id_info_list.map{|ch|ch[:id]}))
-        where_clause = SQL.and(where_clause,assigns.contraints) unless assigns.contraints.empty?
+        where_clause = SQL.and(where_clause,assigns.constraints) unless assigns.constraints.empty?
         delete_instances_wrt_parent(relation_type,parent_id_handle,where_clause,opts)        
       end
 

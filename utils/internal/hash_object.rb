@@ -65,9 +65,11 @@ module XYZ
     end    
     def mark_as_comprehensive()
       @constraints ||= {}
+      self
     end
     def set_constraints(constraints)
       @constraints = constraints
+      self
     end
   end 
 end

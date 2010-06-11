@@ -12,7 +12,7 @@ module XYZ
           node_interface = {:node_interface => {"eth0" => {"type" => "ethernet"}.merge(address)}}
           addr_aps = addr_access_point(v[:ip_address],"ipv4","internet","internet")
           addr_aps.merge!(addr_access_point(v[:dns_name],"dns","internet","internet"))
-          address_access_point = addr_aps.empty? ? {} : DBUpdateHash.new({:address_access_point => addr_aps})
+          address_access_point = addr_aps.empty? ? {} : (DBUpdateHash.new({:address_access_point => addr_aps})).mark_as_comprehensive
           node_interface.merge(address_access_point)
           #TBD: including local ip and dns plus and hookup to security groups
         end

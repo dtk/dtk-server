@@ -51,6 +51,10 @@ module XYZ
       class_rules[matching_cond_index || @condition]
     end
 
+    def foreign_key()
+      target().mark_as_foreign_key() 
+    end
+
     def source()
       self.class.source()
     end
@@ -99,11 +103,6 @@ module XYZ
 
       def apply(source_obj)
         HashObject.nested_value(source_obj,@path)
-      end
-
-      #TBD: just for debugging
-      def to_s()
-        "source[#{@path.join("][")}]"
       end
     end
     class Function
@@ -164,7 +163,8 @@ module XYZ
       prefix[:type] = "internet"
       prefix[:ip_address][:family] = "ipv4"
       prefix[:ip_address][:address] = source[:ip_address]
-      prefix[:network_partition_id] = fn(:foreign_key,"/network_partition/internet")
+      #TBD: may allow form foreign_key[prefix] = "/network_partition/internet"
+      foreign_key["internet_ipv4"][:address_access_point][:network_partition_id] = "/network_partition/internet"
     end
     require 'pp' ; pp class_rules
     pp "----------------------------"

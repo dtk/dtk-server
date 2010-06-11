@@ -124,6 +124,11 @@ module XYZ
           @function_ref.call(*evaluated_args)
         end
       end
+      #predefined functions
+      def foreign_key(uri)
+        #stub
+        "*" + uri
+      end
      private
       def apply_to_term(term,source_obj)
         if term.kind_of?(Source)
@@ -159,11 +164,11 @@ module XYZ
       prefix[:type] = "internet"
       prefix[:ip_address][:family] = "ipv4"
       prefix[:ip_address][:address] = source[:ip_address]
-      prefix[:network_partition_id] = fn(:foreign_key,["/network_partition/internet"])
+      prefix[:network_partition_id] = fn(:foreign_key,"/network_partition/internet")
     end
     require 'pp' ; pp class_rules
+    pp "----------------------------"
+    source_obj = {:private_ip_address => "10.22.2.3", :ip_address => "64.95.15.1"}
+    pp apply(source_obj)
   end
-#  pp "----------------------------"
- # source_obj = {:private_ip_address => "10.22.2.3", :count => 8}
- # pp SampleLeafClass3.apply(source_obj)
 end

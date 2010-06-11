@@ -46,8 +46,9 @@ module XYZ
 	    update_from_hash_from_instance_id(child_id_info,child_assigns,opts)
             child_id_info << child_id_info if delete_not_matching
           else
-            factory_id_handle = IDHandle[:c => c, :guid => factory_id_info[:id]] 
+            factory_id_handle = IDHandle[:c => c, :uri => factory_id_info[:uri]] 
             create_from_hash(factory_id_handle,child_assigns,opts)
+            #TBD: need here to put new item on child_id_info_list
           end
 	end
         delete_not_matching_children(child_id_info_list,assigns,opts) if delete_not_matching

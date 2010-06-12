@@ -35,32 +35,31 @@ module XYZ
     end
 
    private
-    #top level "conditionals"
-    def if_exists(condition,&block)
-      context = Context.new(self,:if_exists,condition)
-      context.instance_eval(&block) 
-    end
-
-    def no_conditions(&block)
+    def definitions(&block)
       context = Context.new(self,:no_conditions)
       context.instance_eval(&block) 
     end
 
     class Context
-     attr_reader :relation,:condition
-     def initialize(parent,relation=:no_condition,condition=nil)
-       @parent = parent
-       @relation = relation
-       @condition = condition 
-     end
+      attr_reader :relation,:condition
+      def initialize(parent,relation=:no_condition,condition=nil)
+        @parent = parent
+        @relation = relation
+        @condition = condition 
+      end
+      #top level "conditionals"
+      def if_exists(condition,&block)
+        context = Context.new(self,:if_exists,condition)
+        context.instance_eval(&block) 
+      end
       #sub commands
       def target()
         matching_cond_index = class_rules.keys.find{|cond|cond == self}
         class_rules[matching_cond_index || self]
       end
 
-      def foreign_key()
-        target().mark_as_foreign_key() 
+      def foreign_key(uri)
+        ForeignKey.new(uri)
       end
 
       def source()
@@ -77,7 +76,7 @@ module XYZ
       def ==(x)
         @relation == x.relation and @condition == x.condition
       end
-     private
+
       def class_rules()
         @parent.class_rules
       end
@@ -95,6 +94,11 @@ module XYZ
 
       def apply(source_obj)
         HashObject.nested_value(source_obj,@path)
+      end
+    end
+    class ForeignKey < String
+      def initialize(uri)
+        replace(uri)
       end
     end
     class Function

@@ -59,15 +59,10 @@ module XYZ
       #if non null means when update done then delete all with respect to parent meeting constraints
       #no contrainst captured by {} 
       @constraints = nil
-      @is_foreign_key = false
     end
     def is_complete?()
       @constraints ? true : nil
     end    
-    def mark_as_foreign_key()
-      @is_foreign_key = false
-      self
-    end
 
     def mark_as_complete(constraints=nil)
       if constraints

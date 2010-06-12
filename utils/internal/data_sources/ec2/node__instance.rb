@@ -1,5 +1,7 @@
-require File.expand_path("../../hash_object", File.dirname(__FILE__))
-require File.expand_path("../data_source_adapter", File.dirname(__FILE__))
+#require File.expand_path("../../hash_object", File.dirname(__FILE__))
+#require File.expand_path("../data_source_adapter", File.dirname(__FILE__))
+require "/root/R8Server/application/app"
+#TBD above all temp for testing
 require File.expand_path("ec2", File.dirname(__FILE__))
 
 module XYZ

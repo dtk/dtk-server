@@ -17,6 +17,8 @@ module XYZ
         target_obj[attr] = assign.apply(source_obj)
       elsif assign.kind_of?(Function)
         target_obj[attr] = assign.apply(source_obj)
+      elsif assign.kind_of?(ForeignKey)
+        target_obj[Object.assoc_key(attr)] = assign
       elsif assign.kind_of?(Hash)
         assign.each do |nested_attr,nested_assign|
           process_assignment(target_obj[attr],nested_attr,nested_assign,source_obj)
@@ -38,6 +40,7 @@ module XYZ
     def definitions(&block)
       context = Context.new(self,:no_conditions)
       context.instance_eval(&block) 
+      class_rules.freeze
     end
 
     class Context

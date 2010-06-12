@@ -6,27 +6,29 @@ module XYZ
       target_obj = DBUpdateHash.create_with_auto_vivification()
       class_rules.each do |cond,top_level_assign|
         top_level_assign.each do |attr,assign,constraints|
-require 'pp'; pp constraints
-
-          self.process_assignment(target_obj,attr,assign,source_obj) 
+          self.process_assignment(target_obj,attr,assign,constraints,source_obj) 
         end
       end
       target_obj
     end
 
-    def process_assignment(target_obj,attr,assign,source_obj) 
+    def process_assignment(target_obj,attr,assign,constraints,source_obj) 
+      target_attr = target_obj[attr]
       if assign.kind_of?(Source)
         target_obj[attr] = assign.apply(source_obj)
       elsif assign.kind_of?(Function)
         target_obj[attr] = assign.apply(source_obj)
       elsif assign.kind_of?(ForeignKey)
-        target_obj[Object.assoc_key(attr)] = assign
+        target_attr = target_obj[Object.assoc_key(attr)] = assign
       elsif assign.kind_of?(Hash)
-        assign.each do |nested_attr,nested_assign|
-          process_assignment(target_obj[attr],nested_attr,nested_assign,source_obj)
+        assign.each do |nested_attr,nested_assign,nested_constraints|
+          process_assignment(target_obj[attr],nested_attr,nested_assign,nested_constraints,source_obj)
         end
       else
        target_obj[attr] = assign
+      end
+      if constraints
+        target_obj[attr].set_constraints(constraints) 
       end
     end
 

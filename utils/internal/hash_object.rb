@@ -60,6 +60,10 @@ module XYZ
       #no contrainst captured by {} 
       @constraints = nil
     end
+    def each(&block) 
+      super{|k,v|block.call(k,v,@constraints)}
+    end
+
     def is_complete?()
       @constraints ? true : nil
     end    

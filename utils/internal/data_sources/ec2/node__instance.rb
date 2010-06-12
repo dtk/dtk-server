@@ -10,20 +10,20 @@ module XYZ
       class NodeInstance < Ec2::Top 
        private
         definitions do
-          #TBD: allow complete_for to be top level; related to multiple conditionals pointing to same element
-          complete_for target, :ds_source => :instance
-          target[:eth0][:type] = 'ethernet' 
-          target[:eth0][:family] = 'ipv4' 
-          target[:eth0][:address] =  source[:private_ip_address] 
+          #TBD source_complete_for target, :ds_source => :instance
+          source_complete_for target[:node_interface]
+          prefix = target[:node_interface]
+          prefix[:eth0][:type] = 'ethernet' 
+          prefix[:eth0][:family] = 'ipv4' 
+          prefix[:eth0][:address] =  source[:private_ip_address] 
 
           if_exists(source[:ip_address]) do
             #TBD: may introduce (use term scope or prefix) c
             # scope[:address_access_point] do 
-            #   target[:type] = "internet"
+            #   scoped_target[:type] = "internet"
             # end
-            complete_for target[:address_access_point]
-
-            prefix = target["internet_ipv4"][:address_access_point]
+            source_complete_for target[:address_access_point]
+            prefix = target[:address_access_point]["internet_ipv4"]
             prefix[:type] = "internet"
             prefix[:ip_address][:family] = "ipv4"
             prefix[:ip_address][:address] = source[:ip_address]

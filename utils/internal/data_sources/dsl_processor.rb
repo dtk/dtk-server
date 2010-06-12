@@ -5,7 +5,9 @@ module XYZ
       #TBD stub
       target_obj = DBUpdateHash.create_with_auto_vivification()
       class_rules.each do |cond,top_level_assign|
-        top_level_assign.each do |attr,assign|
+        top_level_assign.each do |attr,assign,constraints|
+require 'pp'; pp constraints
+
           self.process_assignment(target_obj,attr,assign,source_obj) 
         end
       end
@@ -73,7 +75,7 @@ module XYZ
         Function.new(func_name_or_def,args)
       end
 
-      def complete_for(trgt,constraints=nil)
+      def source_complete_for(trgt,constraints=nil)
         trgt.mark_as_complete(constraints)
       end
       def ==(x)
@@ -154,8 +156,8 @@ end
 module XYZ
   class  Ec3NodeInstance < DSLTop
     no_conditions do
-      #TBD: allow complete_for to be top level; related to multiple conditionals poiting to same element
-      complete_for target, :ds_source => :instance
+      #TBD: allow source_complete_for to be top level; related to multiple conditionals poiting to same element
+      source_complete_for target, :ds_source => :instance
       target[:eth0][:type] = 'ethernet' 
       target[:eth0][:family] = 'ipv4' 
       target[:eth0][:address] =  source[:private_ip_address] 
@@ -165,7 +167,7 @@ module XYZ
       # scope[:address_access_point] do 
       #   target[:type] = "internet"
       # end
-      complete_for target[:address_access_point]
+      source_complete_for target[:address_access_point]
 
       prefix = target["internet_ipv4"][:address_access_point]
       prefix[:type] = "internet"

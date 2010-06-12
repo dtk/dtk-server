@@ -9,17 +9,16 @@ module XYZ
           self.process_assignment(target_obj,attr,assign,constraints,source_obj) 
         end
       end
-      target_obj
+      target_obj.freeze
     end
 
     def process_assignment(target_obj,attr,assign,constraints,source_obj) 
-      target_attr = target_obj[attr]
       if assign.kind_of?(Source)
         target_obj[attr] = assign.apply(source_obj)
       elsif assign.kind_of?(Function)
         target_obj[attr] = assign.apply(source_obj)
       elsif assign.kind_of?(ForeignKey)
-        target_attr = target_obj[Object.assoc_key(attr)] = assign
+        target_obj[Object.assoc_key(attr)] = assign
       elsif assign.kind_of?(Hash)
         assign.each do |nested_attr,nested_assign,nested_constraints|
           process_assignment(target_obj[attr],nested_attr,nested_assign,nested_constraints,source_obj)
@@ -27,9 +26,7 @@ module XYZ
       else
        target_obj[attr] = assign
       end
-      if constraints
-        target_obj[attr].set_constraints(constraints) 
-      end
+      target_obj.set_constraints(constraints) if constraints
     end
 
     #can appear in top level 

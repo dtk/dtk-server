@@ -55,8 +55,8 @@ module XYZ
      end
       #sub commands
       def target()
-        matching_cond_index = class_rules.keys.find{|cond|cond == @condition}
-        class_rules[matching_cond_index || @condition]
+        matching_cond_index = class_rules.keys.find{|cond|cond == self}
+        class_rules[matching_cond_index || self]
       end
 
       def foreign_key()
@@ -74,13 +74,12 @@ module XYZ
       def complete_for(trgt,constraints=nil)
         trgt.mark_as_complete(constraints)
       end
+      def ==(x)
+        @relation == x.relation and @condition == x.condition
+      end
      private
       def class_rules()
         @parent.class_rules
-      end
-
-      def ==(x)
-        @relation == x.relation and @condition == x.condition
       end
     end
 

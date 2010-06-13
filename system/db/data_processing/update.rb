@@ -56,9 +56,9 @@ module XYZ
       end
 
       def delete_not_matching_children(child_id_list,factory_id_info,assigns,opts={})
-        parent_id_handle = IDHandle[:c => child[:c], :guid => factory_id_info[:parent_id]]
+        parent_id_handle = IDHandle[:c => factory_id_info[:c], :guid => factory_id_info[:parent_id]]
         relation_type = factory_id_info[:relation_type]
-        where_clause = child_id_list.empty? ? nil : SQL.not(SQL.and(*child_id_list))
+        where_clause = child_id_list.empty? ? nil : SQL.not(SQL.and(*child_id_list.map{|id|{:id=>id}}))
         where_clause = SQL.and(where_clause,assigns.constraints) unless assigns.constraints.empty?
         delete_instances_wrt_parent(relation_type,parent_id_handle,where_clause,opts)        
       end

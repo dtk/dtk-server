@@ -62,12 +62,14 @@ module XYZ
     end
         
     def delete_unmarked(container_id_handle,marked)
+      constraints = self.class.top_level_completeness_constraints
+      return nil if constraints.nil?
       marked_disjunction = nil
       marked.each do |ds_key|
         marked_disjunction = SQL.or(marked_disjunction,{:ds_key => ds_key})
       end
       where_clause = SQL.not(marked_disjunction)
-      where_clause = SQL.and(where_clause,:ds_source => @source_obj_type) if @source_obj_type
+      where_clause = SQL.and(where_clause,constraints) if contraints
       Object.delete_instances_wrt_parent(relation_type(),container_id_handle,where_clause)
     end
 
@@ -80,26 +82,6 @@ module XYZ
       hash_assigns = ret_hash_assigns(container_id_handle,ds_attr_hash,:update)
       Object.update_from_hash_assignments(container_id_handle,hash_assigns)
     end
-=begin   
-    def ret_ret_hash_assigns(container_id_handle,ds_attr_hash)
-      obj = {:ds_key => ds_key_value(ds_attr_hash)}
-      obj.merge! :ds_attributes => filter(ds_attr_hash)
-      obj.merge! normalize(ds_attr_hash)
-      obj.merge!({:ds_source => @source_obj_type}) if @source_obj_type
-      {relation_type() => {ref(ds_attr_hash) => obj}})
-    end
-
-    def ret_hash_assigns(container_id_handle,ds_attr_hash,calling_fn)
-      wrap = calling_fn == :update
-      obj = self.class.normalize(ds_attr_hash)
-      obj = DBUpdateHash.new(obj,true) if wrap
-      obj.merge! :ds_attributes => filter(ds_attr_hash)
-      obj.merge! :ds_key => ds_key_value(ds_attr_hash)
-      obj.merge!({:ds_source => @source_obj_type}) if @source_obj_type
-      ret = {relation_type() => {ref(ds_attr_hash) => obj}}
-      wrap ? DBUpdateHash.new(ret,true) : ret
-    end
-=end
       
     def ret_hash_assigns(container_id_handle,ds_attr_hash,calling_fn)
       obj = self.class.normalize(ds_attr_hash)

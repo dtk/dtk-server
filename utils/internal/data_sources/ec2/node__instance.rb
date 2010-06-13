@@ -10,7 +10,8 @@ module XYZ
       class NodeInstance < Ec2::Top 
        private
         definitions do
-          #TBD source_complete_for target, :ds_source => :instance
+          source_complete_for_entire_target :ds_source => @source_obj_type if @source_obj_type
+
           source_complete_for target[:node_interface]
           prefix = target[:node_interface]
           prefix[:eth0][:type] = 'ethernet' 

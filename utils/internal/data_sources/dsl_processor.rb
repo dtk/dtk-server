@@ -10,7 +10,6 @@ module XYZ
           self.process_assignment(target_obj,attr,assign,constraints,source_obj) 
         end
       end
-      #TBD: do we want to have istead target_obj.freeze or freeze after the merge
       target_obj
     end
 
@@ -31,12 +30,17 @@ module XYZ
       target_obj.set_constraints(constraints) if constraints
     end
 
-    #can appear in top level 
-    def source()
-      Source.new()
-    end
+
+    #can class vars 
     def class_rules()
       @class_rules ||= DBUpdateHash.create_with_auto_vivification()
+    end
+    
+    def top_level_completeness_constraints() 
+      @top_level_completeness_constraints ||= nil
+    end
+    def set_entire_target_is_complete(constraints={})
+      @top_level_completeness_constraints = constraints
     end
 
    private
@@ -69,11 +73,15 @@ module XYZ
       end
 
       def source()
-        @parent.source()
+        Source.new()
       end
 
       def fn(func_name_or_def,*args)
         Function.new(func_name_or_def,args)
+      end
+
+      def source_complete_for_entire_target(constraints={})
+        @parent.set_entire_target_is_complete(constraints)
       end
 
       def source_complete_for(trgt,constraints=nil)

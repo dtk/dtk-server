@@ -42,12 +42,8 @@ module XYZ
       ds_attr_hash
     end
 
-    #normalize gets ovewritten if have any generic properties
-    def normalize(ds_attr_hash)
-      {}
-    end
 
-    def  get_and_update_objects(container_id_handle,marked)          
+    def get_and_update_objects(container_id_handle,marked)          
       method_name = "get_objects__#{@obj_type}#{@source_obj_type ? "__" + @source_obj_type : ""}".to_sym
       send(method_name) do |ds_attr_hash|
         discover_and_update_item(container_id_handle,ds_attr_hash,marked) 
@@ -95,7 +91,7 @@ module XYZ
 =end
     def ret_hash_assigns(container_id_handle,ds_attr_hash,calling_fn)
       wrap = calling_fn == :update
-      obj = normalize(ds_attr_hash)
+      obj = self.class.normalize(ds_attr_hash)
       obj = DBUpdateHash.new(obj,true) if wrap
       obj.merge! :ds_attributes => filter(ds_attr_hash)
       obj.merge! :ds_key => ds_key_value(ds_attr_hash)

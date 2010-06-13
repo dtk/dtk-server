@@ -1,6 +1,7 @@
 module XYZ
   module DataTranslationClassMixin
-    def apply(source_obj)
+    #Gets overwritten if no dsl
+    def normalize(source_obj)
       #TBD: ignoring conditions
       #TBD stub
       target_obj = DBUpdateHash.create_with_auto_vivification()
@@ -9,6 +10,7 @@ module XYZ
           self.process_assignment(target_obj,attr,assign,constraints,source_obj) 
         end
       end
+      #TBD: do we want to have istead target_obj.freeze or freeze after the merge
       target_obj
     end
 

@@ -26,8 +26,8 @@ module XYZ
             source_complete_for target[:address_access_point]
             prefix = target[:address_access_point]["internet_ipv4"]
             prefix[:type] = "internet"
-            prefix[:ip_address][:family] = "ipv4"
-            prefix[:ip_address][:address] = source[:ip_address]
+            prefix[:network_address][:family] = "ipv4"
+            prefix[:network_address][:address] = source[:ip_address]
             prefix[:network_partition_id] = foreign_key "/network_partition/internet"
           end
         end

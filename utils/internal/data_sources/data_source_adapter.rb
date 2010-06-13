@@ -88,7 +88,7 @@ module XYZ
       obj.merge!({:ds_source => @source_obj_type}) if @source_obj_type
       {relation_type() => {ref(ds_attr_hash) => obj}})
     end
-=end
+
     def ret_hash_assigns(container_id_handle,ds_attr_hash,calling_fn)
       wrap = calling_fn == :update
       obj = self.class.normalize(ds_attr_hash)
@@ -98,6 +98,18 @@ module XYZ
       obj.merge!({:ds_source => @source_obj_type}) if @source_obj_type
       ret = {relation_type() => {ref(ds_attr_hash) => obj}}
       wrap ? DBUpdateHash.new(ret,true) : ret
+    end
+=end
+      
+    def ret_hash_assigns(container_id_handle,ds_attr_hash,calling_fn)
+      obj = self.class.normalize(ds_attr_hash)
+      obj[:ds_attributes] = filter(ds_attr_hash)
+      obj[:ds_key] = ds_key_value(ds_attr_hash)
+      obj[:ds_source] = @source_obj_type if @source_obj_type      
+      ret = DBUpdateHash.create_with_auto_vivification()
+      #TBD: determine and then set if needed whether ret[relation_type] is complete
+      ret[relation_type()][ref(ds_attr_hash)]= obj
+      ret.freeze
     end
 
     def find_object_id_handle(container_id_handle,ds_attr_hash)

@@ -37,6 +37,8 @@ module XYZ
     pp normalized
         #TBD below is effectively dsl; may make more declarative using data integration dsl
         def normalize(v)
+         self.class.apply(v)
+=begin
           node_addr = v[:private_ip_address] ? {:family => "ipv4", :address => v[:private_ip_address]} : nil
           address = node_addr ? DBUpdateHash.new({:address => node_addr}) : {}
           node_interface = {:node_interface => {"eth0" => {"type" => "ethernet"}.merge(address)}}
@@ -55,6 +57,7 @@ module XYZ
           else
             {}
           end
+=end
         end
 
         def unique_keys(v)

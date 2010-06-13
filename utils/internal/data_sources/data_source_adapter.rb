@@ -2,7 +2,6 @@ require File.expand_path('dsl_processor', File.dirname(__FILE__))
 module XYZ
   class DataSourceAdapter
     extend DataTranslationClassMixin
-#    include DataTranslationInstanceMixin
     def self.create(ds_object)
       obj_type = ds_object[:obj_type].to_s
       ds_name = ds_object[:ds_name].to_s

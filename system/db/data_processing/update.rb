@@ -46,10 +46,12 @@ module XYZ
           if child_id_info
 	    update_from_hash_from_instance_id(child_id_info,child_assigns,opts)
           else
-            factory_id_handle = IDHandle[:c => c, :uri => factory_id_info[:uri]] 
-            new_uris = new_uris + create_from_hash(factory_id_handle,{qualified_ref => child_assigns})
-            #new_uris wil just have one element
-            child_id_info = IDInfoTable.get_row_from_id_handle IDHandle[:c => c, :uri => new_uris.first]
+            unless assigns.kind_of?(HashObject) and assigns.donot_extend
+              factory_id_handle = IDHandle[:c => c, :uri => factory_id_info[:uri]] 
+              new_uris = new_uris + create_from_hash(factory_id_handle,{qualified_ref => child_assigns})
+              #new_uris wil just have one element
+              child_id_info = IDInfoTable.get_row_from_id_handle IDHandle[:c => c, :uri => new_uris.first]
+            end
           end
           child_id_list << child_id_info[:id] if delete_not_matching
 

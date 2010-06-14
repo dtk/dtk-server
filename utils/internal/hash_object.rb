@@ -13,6 +13,9 @@ module XYZ
     def is_complete?()
       false
     end
+    def donot_extend()
+      false
+    end
    private
     #coverts hashes that are not a HashObject or a child of HashObject
     def convert_nested_hashes(hash)
@@ -59,7 +62,7 @@ module XYZ
       #if non null means when update done then delete all with respect to parent meeting constraints
       #no contraints captured by {} 
       @constraints = nil
-      @donot_extend = nil
+      @donot_extend = false
     end
     def each(&block) 
       super{|k,v|block.call(k,v,@constraints)}

@@ -39,7 +39,7 @@ module XYZ
 
     def update_with_id_values(refs,c,prefixes,container_uri)
       refs.each_pair do |fk_rel_uri_x,info|
-        fk_rel_uri = ret_rebased_uri(fk_rel_uri_x ,prefixes)
+        fk_rel_uri = ret_rebased_uri(fk_rel_uri_x ,prefixes,container_uri)
 	fk_rel_id_handle = IDHandle[:c => c, :uri => fk_rel_uri]
 	info.each_pair do |col,ref_uri_x|
           ref_uri = ret_rebased_uri(ref_uri_x,prefixes,container_uri)

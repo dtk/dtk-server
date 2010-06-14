@@ -25,9 +25,9 @@ module XYZ
       #TBD: might set in initialization this object can only be associated with one container id
       @container_id_handle = container_id_handle
       marked = Array.new
-      get_and_update_objects(container_id_handle,marked)          
-      source_complete = true #stub
-      delete_unmarked(container_id_handle,marked) if source_complete
+      context = Hash.new
+      get_and_update_objects(container_id_handle,marked,context)          
+      delete_unmarked(container_id_handle,marked,context)
     end
 
    private
@@ -44,8 +44,9 @@ module XYZ
     end
 
 
-    def get_and_update_objects(container_id_handle,marked)          
+    def get_and_update_objects(container_id_handle,marked,context)          
       method_name = "get_objects__#{@obj_type}#{@source_obj_type ? "__" + @source_obj_type : ""}".to_sym
+      context[:source_is_complete] = true
       send(method_name) do |source_obj|
         discover_and_update_item(container_id_handle,source_obj,marked) 
       end
@@ -62,7 +63,9 @@ module XYZ
       end
     end
         
-    def delete_unmarked(container_id_handle,marked)
+    #TBD: see if can refactor and have this subsumed by logic in db update
+    def delete_unmarked(container_id_handle,marked,context)
+      return nil unless context[:source_is_complete]
       constraints = self.class.top_level_completeness_constraints
       return nil if constraints.nil?
       marked_disjunction = nil
@@ -70,7 +73,7 @@ module XYZ
         marked_disjunction = SQL.or(marked_disjunction,{:ds_key => ds_key})
       end
       where_clause = SQL.not(marked_disjunction)
-      where_clause = SQL.and(where_clause,constraints) if contraints
+      where_clause = SQL.and(where_clause,constraints) unless contraints.empty?
       Object.delete_instances_wrt_parent(relation_type(),container_id_handle,where_clause)
     end
 

@@ -1,16 +1,19 @@
 module XYZ
   module DataTranslationClassMixin
-    #Gets overwritten if no dsl
+    #Should be overwritten if no dsl
     def normalize(source_obj)
-      #TBD: ignoring conditions
-      #TBD stub
       target_obj = DBUpdateHash.create_with_auto_vivification()
-      class_rules.each do |cond,top_level_assign|
+      class_rules.each do |condition,top_level_assign|
         top_level_assign.each do |attr,assign,constraints|
-          self.process_assignment(target_obj,attr,assign,constraints,source_obj) 
+          if condition.evaluate_condition(source_obj)
+            self.process_assignment(target_obj,attr,assign,constraints,source_obj) 
+          end
         end
       end
       target_obj
+    end
+
+    def evaluate_condition(condition)
     end
 
     def process_assignment(target_obj,attr,assign,constraints,source_obj) 
@@ -93,6 +96,12 @@ module XYZ
 
       def class_rules()
         @parent.class_rules
+      end
+
+      def evaluate_condition(source_obj)
+        return true if @relation == :no_conditions
+        return @condition.apply(source_obj) if @relation == :if_exists
+        raise Error.new("condition #{relation} does not exist")
       end
     end
 

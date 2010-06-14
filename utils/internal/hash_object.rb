@@ -53,13 +53,13 @@ module XYZ
   end
   #Used as input to db update from hash 
   class DBUpdateHash < HashObject
-    attr_reader :constraints
+    attr_reader :constraints, :donot_extend
     def initialize(initial_val=nil,convert_initial=false,&block)
       super
       #if non null means when update done then delete all with respect to parent meeting constraints
       #no contraints captured by {} 
       @constraints = nil
-      @cannot_extend = nil
+      @donot_extend = nil
     end
     def each(&block) 
       super{|k,v|block.call(k,v,@constraints)}

@@ -18,11 +18,13 @@ module XYZ
           prefix[:eth0][:family] = 'ipv4' 
           prefix[:eth0][:address] =  source[:private_ip_address] 
 
+          source_complete_for target[:address_access_point]
           if_exists(source[:ip_address]) do
             #TBD: may introduce (use term scope or prefix) c
             # scope[:address_access_point] do 
             #   scoped_target[:type] = "internet"
             # end
+            #TBD: modify so that if have source_complete_for at top level do not need it in nested level
             source_complete_for target[:address_access_point]
             prefix = target[:address_access_point]["internet_ipv4"]
             prefix[:type] = "internet"

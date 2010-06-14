@@ -2,18 +2,16 @@ module XYZ
   module DataTranslationClassMixin
     #Should be overwritten if no dsl
     def normalize(source_obj)
+require 'pp'; pp source_obj
       target_obj = DBUpdateHash.create_with_auto_vivification()
       class_rules.each do |condition,top_level_assign|
-        top_level_assign.each do |attr,assign,constraints|
-          if condition.evaluate_condition(source_obj)
+        if condition.evaluate_condition(source_obj)
+          top_level_assign.each do |attr,assign,constraints|
             self.process_assignment(target_obj,attr,assign,constraints,source_obj) 
           end
         end
       end
       target_obj
-    end
-
-    def evaluate_condition(condition)
     end
 
     def process_assignment(target_obj,attr,assign,constraints,source_obj) 
@@ -24,8 +22,14 @@ module XYZ
       elsif assign.kind_of?(ForeignKey)
         target_obj[Object.assoc_key(attr)] = assign
       elsif assign.kind_of?(Hash)
-        assign.each do |nested_attr,nested_assign,nested_constraints|
-          process_assignment(target_obj[attr],nested_attr,nested_assign,nested_constraints,source_obj)
+        #include empty hash if there are contraints associated with it (this wil serve to delet all
+        # its peers; only including this conditionally is for optimization
+        if assign.empty?
+          target_obj[attr] = assign if constraints
+        else
+          assign.each do |nested_attr,nested_assign,nested_constraints|
+            process_assignment(target_obj[attr],nested_attr,nested_assign,nested_constraints,source_obj)
+          end
         end
       else
        target_obj[attr] = assign

@@ -38,26 +38,26 @@ module XYZ
     end
 
     #filter applied when into put in ds_attribute bag gets overwritten for non trivial filter
-    def filter(ds_attr_hash)
-      ds_attr_hash
+    def filter(source_obj)
+      source_obj
     end
 
 
     def get_and_update_objects(container_id_handle,marked)          
       method_name = "get_objects__#{@obj_type}#{@source_obj_type ? "__" + @source_obj_type : ""}".to_sym
-      send(method_name) do |ds_attr_hash|
-        discover_and_update_item(container_id_handle,ds_attr_hash,marked) 
+      send(method_name) do |source_obj|
+        discover_and_update_item(container_id_handle,source_obj,marked) 
       end
     end
 
-    def discover_and_update_item(container_id_handle,ds_attr_hash,marked)
-      return nil if ds_attr_hash.nil?
-      marked << ds_key_value(ds_attr_hash)
-      id_handle = find_object_id_handle(container_id_handle,ds_attr_hash)
+    def discover_and_update_item(container_id_handle,source_obj,marked)
+      return nil if source_obj.nil?
+      marked << ds_key_value(source_obj)
+      id_handle = find_object_id_handle(container_id_handle,source_obj)
       if id_handle
-        update_object(container_id_handle,ds_attr_hash)
+        update_object(container_id_handle,source_obj)
       else
-        create_object(container_id_handle,ds_attr_hash)
+        create_object(container_id_handle,source_obj)
       end
     end
         
@@ -73,29 +73,33 @@ module XYZ
       Object.delete_instances_wrt_parent(relation_type(),container_id_handle,where_clause)
     end
 
-    def create_object(container_id_handle,ds_attr_hash)
-      hash_assigns = ret_hash_assigns(container_id_handle,ds_attr_hash,:create)
+    def create_object(container_id_handle,source_obj)
+      hash_assigns = ret_hash_assigns(container_id_handle,source_obj,:create)
       Object.input_into_model(container_id_handle,hash_assigns)
     end
 
-    def update_object(container_id_handle,ds_attr_hash)
-      hash_assigns = ret_hash_assigns(container_id_handle,ds_attr_hash,:update)
+    def update_object(container_id_handle,source_obj)
+      hash_assigns = ret_hash_assigns(container_id_handle,source_obj,:update)
       Object.update_from_hash_assignments(container_id_handle,hash_assigns)
     end
       
-    def ret_hash_assigns(container_id_handle,ds_attr_hash,calling_fn)
-      obj = self.class.normalize(ds_attr_hash)
-      obj[:ds_attributes] = filter(ds_attr_hash)
-      obj[:ds_key] = ds_key_value(ds_attr_hash)
+    def ret_hash_assigns(container_id_handle,source_obj,calling_fn)
+      obj = self.class.normalize(source_obj)
+      obj[:ds_attributes] = filter(source_obj)
+      obj[:ds_key] = ds_key_value(source_obj)
       obj[:ds_source] = @source_obj_type if @source_obj_type      
       ret = DBUpdateHash.create_with_auto_vivification()
-      #TBD: determine and then set if needed whether ret[relation_type] is complete
-      ret[relation_type()][ref(ds_attr_hash)]= obj
+      ret[relation_type()][ref(source_obj)]= obj
+      #to apply completness assumption the source_obj must als be complete
+      top_level_cnstrs = self.class.top_level_completeness_constraints
+      if top_level_cnstrs and source_obj.kind_of?(DBUpdateHash) and source_obj.constraints
+        ret.set_constraints(SQL.and(top_level_cnstrs,source_obj.constraints))
+      end
       ret.freeze
     end
 
-    def find_object_id_handle(container_id_handle,ds_attr_hash)
-      where_clause = {:ds_key => ds_key_value(ds_attr_hash)}
+    def find_object_id_handle(container_id_handle,source_obj)
+      where_clause = {:ds_key => ds_key_value(source_obj)}
       id = Object.get_object_ids_wrt_parent(relation_type(),container_id_handle,where_clause).first
       id ? IDHandle[:guid => id,:c => container_id_handle[:c]] : nil
     end
@@ -104,8 +108,8 @@ module XYZ
       (obj_type || @obj_type).to_sym
     end
 
-    def ds_key_value(ds_attr_hash)
-      relative_unique_key = unique_keys(ds_attr_hash)
+    def ds_key_value(source_obj)
+      relative_unique_key = unique_keys(source_obj)
       qualified_key(relative_unique_key)
     end
 
@@ -113,8 +117,8 @@ module XYZ
       ([(ds_name||@ds_name).to_sym] + relative_unique_key).inspect
     end
 
-    def ref(ds_attr_hash)
-      relative_distinguished_name(ds_attr_hash)
+    def ref(source_obj)
+      relative_distinguished_name(source_obj)
     end
 
     def find_foreign_key_id(obj_type,relative_unique_key,ds_name=nil)

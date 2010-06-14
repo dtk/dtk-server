@@ -57,8 +57,9 @@ module XYZ
     def initialize(initial_val=nil,convert_initial=false,&block)
       super
       #if non null means when update done then delete all with respect to parent meeting constraints
-      #no contrainst captured by {} 
+      #no contraints captured by {} 
       @constraints = nil
+      @cannot_extend = nil
     end
     def each(&block) 
       super{|k,v|block.call(k,v,@constraints)}

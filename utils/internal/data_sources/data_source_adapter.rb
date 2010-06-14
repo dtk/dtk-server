@@ -78,16 +78,16 @@ module XYZ
     end
 
     def create_object(container_id_handle,source_obj)
-      hash_assigns = ret_hash_assigns(container_id_handle,source_obj,:create)
-      Object.input_into_model(container_id_handle,hash_assigns)
+      db_update_hash = ret_db_update_hash(container_id_handle,source_obj)
+      Object.input_into_model(container_id_handle,db_update_hash)
     end
 
     def update_object(container_id_handle,source_obj)
-      hash_assigns = ret_hash_assigns(container_id_handle,source_obj,:update)
-      Object.update_from_hash_assignments(container_id_handle,hash_assigns)
+      db_update_hash = ret_db_update_hash(container_id_handle,source_obj)
+      Object.update_from_hash_assignments(container_id_handle,db_update_hash)
     end
       
-    def ret_hash_assigns(container_id_handle,source_obj,calling_fn)
+    def ret_db_update_hash(container_id_handle,source_obj)
       obj = self.class.normalize(source_obj)
       obj[:ds_attributes] = filter(source_obj)
       obj[:ds_key] = ds_key_value(source_obj)

@@ -26,7 +26,8 @@ module XYZ
       @container_id_handle = container_id_handle
       marked = Array.new
       get_and_update_objects(container_id_handle,marked)          
-      delete_unmarked(container_id_handle,marked)
+      source_complete = true #stub
+      delete_unmarked(container_id_handle,marked) if source_complete
     end
 
    private
@@ -90,11 +91,6 @@ module XYZ
       obj[:ds_source] = @source_obj_type if @source_obj_type      
       ret = DBUpdateHash.create_with_auto_vivification()
       ret[relation_type()][ref(source_obj)]= obj
-      #to apply completness assumption the source_obj must als be complete
-      top_level_cnstrs = self.class.top_level_completeness_constraints
-      if top_level_cnstrs and source_obj.kind_of?(DBUpdateHash) and source_obj.constraints
-        ret.set_constraints(SQL.and(top_level_cnstrs,source_obj.constraints))
-      end
       ret.freeze
     end
 

@@ -9,6 +9,7 @@ module XYZ
 	update_instance_from_id_info(id_info,scalar_assigns,opts)
       end
 
+      #returns list of created uris
       def update_from_hash_assignments(id_handle,hash_assigns,opts={})
 	id_info = IDInfoTable.get_row_from_id_handle id_handle, :raise_error => true 
 	return update_from_hash_from_factory_id(id_info,hash_assigns,opts) if id_info[:is_factory]
@@ -34,6 +35,7 @@ module XYZ
       end
 
       def update_from_hash_from_factory_id(factory_id_info,assigns,opts={})
+        new_uris = Array.new
         delete_not_matching = (assigns.kind_of?(HashObject) and assigns.is_complete?)
 	c = factory_id_info[:c]
         child_id_list = Array.new
@@ -45,7 +47,7 @@ module XYZ
 	    update_from_hash_from_instance_id(child_id_info,child_assigns,opts)
           else
             factory_id_handle = IDHandle[:c => c, :uri => factory_id_info[:uri]] 
-            new_uris = create_from_hash(factory_id_handle,{qualified_ref => child_assigns})
+            new_uris = new_uris + create_from_hash(factory_id_handle,{qualified_ref => child_assigns})
             #new_uris wil just have one element
             child_id_info = IDInfoTable.get_row_from_id_handle IDHandle[:c => c, :uri => new_uris.first]
           end
@@ -53,6 +55,7 @@ module XYZ
 
 	end
         delete_not_matching_children(child_id_list,factory_id_info,assigns,opts) if delete_not_matching
+        new_uris
       end
 
       def delete_not_matching_children(child_id_list,factory_id_info,assigns,opts={})
@@ -64,16 +67,18 @@ module XYZ
       end
 
       def update_from_hash_from_instance_id(id_info,assigns,opts={})
-	db_rel = DB_REL_DEF[id_info[:relation_type]]
+	new_uris = Array.new
+        db_rel = DB_REL_DEF[id_info[:relation_type]]
 	scalar_assigns = ret_scalar_assignments(assigns,db_rel)
 	update_instance_from_id_info(id_info,scalar_assigns,opts)
 
 	obj_assigns = ret_object_assignments(assigns,db_rel)
-	obj_assigns.each_pair{ |relation_type,child_assigns|
+	obj_assigns.each_pair do |relation_type,child_assigns|
 	  factory_uri = RestURI.ret_factory_uri(id_info[:uri],relation_type)
 	  factory_id_info = IDInfoTable.get_row_from_id_handle IDHandle[:c => c, :uri => factory_uri], :raise_error => true	 
-          update_from_hash_from_factory_id(factory_id_info,child_assigns,opts)
-        }
+          new_uris = new_uris + update_from_hash_from_factory_id(factory_id_info,child_assigns,opts)
+        end
+        new_uris
       end
     end
   end

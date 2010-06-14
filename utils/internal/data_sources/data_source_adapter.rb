@@ -55,13 +55,20 @@ module XYZ
     def discover_and_update_item(container_id_handle,source_obj,marked)
       return nil if source_obj.nil?
       marked << ds_key_value(source_obj)
-      id_handle = find_object_id_handle(container_id_handle,source_obj)
-      if id_handle
-        update_object(container_id_handle,source_obj)
-      else
-        create_object(container_id_handle,source_obj)
-      end
+      db_update_hash = ret_db_update_hash(container_id_handle,source_obj)
+      Object.input_into_model(container_id_handle,db_update_hash)
     end
+
+    def ret_db_update_hash(container_id_handle,source_obj)
+      obj = self.class.normalize(source_obj)
+      obj[:ds_attributes] = filter(source_obj)
+      obj[:ds_key] = ds_key_value(source_obj)
+      obj[:ds_source] = @source_obj_type if @source_obj_type      
+      ret = DBUpdateHash.create_with_auto_vivification()
+      ret[relation_type()][ref(source_obj)]= obj
+      ret.freeze
+    end
+
         
     #TBD: see if can refactor and have this subsumed by logic in db update
     def delete_unmarked(container_id_handle,marked,context)
@@ -75,32 +82,6 @@ module XYZ
       where_clause = SQL.not(marked_disjunction)
       where_clause = SQL.and(where_clause,constraints) unless contraints.empty?
       Object.delete_instances_wrt_parent(relation_type(),container_id_handle,where_clause)
-    end
-
-    def create_object(container_id_handle,source_obj)
-      db_update_hash = ret_db_update_hash(container_id_handle,source_obj)
-      Object.input_into_model(container_id_handle,db_update_hash)
-    end
-
-    def update_object(container_id_handle,source_obj)
-      db_update_hash = ret_db_update_hash(container_id_handle,source_obj)
-      Object.update_from_hash_assignments(container_id_handle,db_update_hash)
-    end
-      
-    def ret_db_update_hash(container_id_handle,source_obj)
-      obj = self.class.normalize(source_obj)
-      obj[:ds_attributes] = filter(source_obj)
-      obj[:ds_key] = ds_key_value(source_obj)
-      obj[:ds_source] = @source_obj_type if @source_obj_type      
-      ret = DBUpdateHash.create_with_auto_vivification()
-      ret[relation_type()][ref(source_obj)]= obj
-      ret.freeze
-    end
-
-    def find_object_id_handle(container_id_handle,source_obj)
-      where_clause = {:ds_key => ds_key_value(source_obj)}
-      id = Object.get_object_ids_wrt_parent(relation_type(),container_id_handle,where_clause).first
-      id ? IDHandle[:guid => id,:c => container_id_handle[:c]] : nil
     end
 
     def relation_type(obj_type = nil)

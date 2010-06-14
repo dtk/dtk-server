@@ -11,18 +11,11 @@ module XYZ
       is_assoc_key?(key) ? key[1,key.size-1] : key
     end 
 
-    #hash_with_assocs has form {obj1_type => ..,obj2_type => ...}
     def input_into_model(container_id_handle,hash_with_assocs)
       c = container_id_handle[:c]
       refs = Hash.new
-      remove_refs_and_return_refs!(hash_with_assocs,refs)
-
-      prefixes = []
-      hash_with_assocs.each do |relation_type,obj|
-	factory_id_handle = get_factory_id_handle(container_id_handle,relation_type.to_sym)
-        new_prefixes = create_from_hash(factory_id_handle,obj)
-        prefixes.push(*new_prefixes).uniq!
-      end
+      hash_assigns = remove_refs_and_return_refs!(hash_with_assocs,refs)
+      prefixes = update_from_hash_assignments(container_id_handle,hash_assigns)
       unless refs.empty?
         container_id_info = IDInfoTable.get_row_from_id_handle(container_id_handle)
         update_with_id_values(refs,c,prefixes,container_id_info[:uri])
@@ -41,7 +34,9 @@ module XYZ
 	  obj.delete(k)
         end 
       end
+      obj
     end  
+
     def update_with_id_values(refs,c,prefixes,container_uri)
       refs.each_pair do |fk_rel_uri_x,info|
         fk_rel_uri = ret_rebased_uri(fk_rel_uri_x ,prefixes)

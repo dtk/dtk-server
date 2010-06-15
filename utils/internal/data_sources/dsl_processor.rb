@@ -20,6 +20,8 @@ require 'pp'; pp target_obj
         target_obj[attr] = assign.apply(source_obj)
       elsif assign.kind_of?(Function)
         target_obj[attr] = assign.apply(source_obj)
+      elsif assign.kind_of?(Definition)
+        process_assignment(target_obj,attr,assign.item,source_obj)
       elsif assign.kind_of?(ForeignKey)
         target_obj[Object.assoc_key(attr)] = assign
       elsif assign.kind_of?(Hash)
@@ -94,6 +96,10 @@ require 'pp'; pp target_obj
         @parent.set_entire_target_is_complete(constraints)
       end
 
+      def definition(item)
+        Definition.new(item)
+      end
+
       def source_complete_for(trgt,constraints=nil)
         trgt.mark_as_complete(constraints)
       end
@@ -109,6 +115,19 @@ require 'pp'; pp target_obj
         return true if @relation == :no_conditions
         return @condition.apply(source_obj) if @relation == :if_exists
         raise Error.new("condition #{relation} does not exist")
+      end
+    end
+
+    #TBD: is there a better way to do this
+    #motivation for putting this in is to avoid having to have var = ..source.; var,dup in all refs 
+    # because if haev two references to same source they "would update each otehr without this
+    class Definition
+      attr_reader :item
+      def initialize(item)
+        @item = item
+      end
+      def [](a)
+       item.kind_of?(Source) ? item.dup[a] : item[a]
       end
     end
 
@@ -164,6 +183,8 @@ require 'pp'; pp target_obj
           term.apply(source_obj)
         elsif term.kind_of?(Function)
           term.apply(source_obj)
+        elsif term.kind_of?(Definition)
+          apply_to_term(term.item,source_obj)
         else
           term
         end

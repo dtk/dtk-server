@@ -55,7 +55,6 @@ module XYZ
       return nil if source_obj.nil?
       marked << ds_key_value(source_obj)
       db_update_hash = ret_db_update_hash(container_id_handle,source_obj)
-require 'pp'; pp db_update_hash 
       Object.input_into_model(container_id_handle,db_update_hash)
     end
 

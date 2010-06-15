@@ -22,7 +22,7 @@ require 'pp'; pp source_obj
       elsif assign.kind_of?(ForeignKey)
         target_obj[Object.assoc_key(attr)] = assign
       elsif assign.kind_of?(Hash)
-        constraints = assign.kind_of?(DBUpdateHash) ? assign.constraints : nil
+        constraints = (assign.kind_of?(DBUpdateHash) ? assign.constraints : nil)
         target_obj.set_constraints(constraints) if constraints
         #include empty hash if there are contraints associated with it (this wil serve to delet all
         # its peers; only including this conditionally is for optimization

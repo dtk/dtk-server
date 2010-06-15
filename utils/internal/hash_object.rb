@@ -64,9 +64,6 @@ module XYZ
       @constraints = nil
       @donot_extend = false
     end
-    def each(&block) 
-      super{|k,v|block.call(k,v,@constraints)}
-    end
 
     def is_complete?()
       @constraints ? true : nil

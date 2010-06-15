@@ -6,15 +6,15 @@ require 'pp'; pp source_obj
       target_obj = DBUpdateHash.create_with_auto_vivification()
       class_rules.each do |condition,top_level_assign|
         if condition.evaluate_condition(source_obj)
-          top_level_assign.each do |attr,assign,constraints|
-            self.process_assignment(target_obj,attr,assign,constraints,source_obj) 
+          top_level_assign.each do |attr,assign|
+            self.process_assignment(target_obj,attr,assign,source_obj) 
           end
         end
       end
       target_obj
     end
 
-    def process_assignment(target_obj,attr,assign,constraints,source_obj) 
+    def process_assignment(target_obj,attr,assign,source_obj) 
       if assign.kind_of?(Source)
         target_obj[attr] = assign.apply(source_obj)
       elsif assign.kind_of?(Function)
@@ -22,19 +22,20 @@ require 'pp'; pp source_obj
       elsif assign.kind_of?(ForeignKey)
         target_obj[Object.assoc_key(attr)] = assign
       elsif assign.kind_of?(Hash)
+        constraints = assign.kind_of?(DBUpdateHash) ? assign.constraints : nil
+        target_obj.set_constraints(constraints) if constraints
         #include empty hash if there are contraints associated with it (this wil serve to delet all
         # its peers; only including this conditionally is for optimization
         if assign.empty?
           target_obj[attr] = assign if constraints
         else
-          assign.each do |nested_attr,nested_assign,nested_constraints|
-            process_assignment(target_obj[attr],nested_attr,nested_assign,nested_constraints,source_obj)
+          assign.each do |nested_attr,nested_assign|
+            process_assignment(target_obj[attr],nested_attr,nested_assign,source_obj)
           end
         end
       else
        target_obj[attr] = assign
       end
-      target_obj.set_constraints(constraints) if constraints
     end
 
 

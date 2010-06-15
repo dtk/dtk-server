@@ -7,7 +7,7 @@ require 'pp'; pp source_obj
       class_rules.each do |condition,top_level_assign|
         if condition.evaluate_condition(source_obj)
           top_level_assign.each do |attr,assign|
-            self.process_assignment(target_obj,attr,assign,source_obj) 
+            process_assignment(target_obj,attr,assign,source_obj) 
           end
         end
       end
@@ -22,6 +22,7 @@ require 'pp'; pp source_obj
       elsif assign.kind_of?(ForeignKey)
         target_obj[Object.assoc_key(attr)] = assign
       elsif assign.kind_of?(Hash)
+        #TBD: use of paranthesis below may be needed because of possible Ruby parser bug
         constraints = (assign.kind_of?(DBUpdateHash) ? assign.constraints : nil)
         target_obj.set_constraints(constraints) if constraints
         #include empty hash if there are contraints associated with it (this wil serve to delet all

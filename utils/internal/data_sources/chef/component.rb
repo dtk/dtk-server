@@ -14,6 +14,10 @@ module XYZ
            target[:external_type] = "chef_recipe"
            target[:external_cmp_ref] = fn(lambda{|name|"recipe[#{name}]"},name)
 
+           prefix = target[:attributes] 
+           each(metadata["attributes"]) do |recipe_ref,av|
+             prefix[recipe_ref] = {}
+           end
 =begin
           attrs = Hash.new
           (m["attributes"]||[]).each do |recipe_ref,av|

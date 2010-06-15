@@ -111,6 +111,10 @@ require 'pp'; pp target_obj
         @parent.class_rules
       end
 
+      def each(item,&block)
+        target[:iterator] = Function.new(lambda{|sources,&block|sources.each{|s|block.call(s)}},item,&block)
+      end
+
       def evaluate_condition(source_obj)
         return true if @relation == :no_conditions
         return @condition.apply(source_obj) if @relation == :if_exists

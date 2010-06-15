@@ -111,10 +111,11 @@ module XYZ
       @relation_type
     end
 
-   protected
     def get_parent_object(opts={})
       self.class.get_parent_object(id_handle,opts)
     end
+
+   protected
 
     def id_handle()
       raise Error.new("id_handle not stored with object") if @id_handle.nil?

@@ -17,7 +17,7 @@ module XYZ
 
       base_class = DSAdapter.const_get Aux.camelize(ds_name)
       adaper_class = base_class.const_get Aux.camelize("#{obj_type}#{src ? "_" + src : ""}")
-      adaper_class.new(obj_type,ds_name,src)
+      adaper_class.new(ds_object)
     end
 
     def discover_and_update(container_id_handle,ds_object)
@@ -30,11 +30,13 @@ module XYZ
     end
 
    private
-    def initialize(obj_type,ds_name,source_obj_type)
+    def initialize(ds_object)
+      @ds_object = ds_object
+      @parent_ds_object = ds_object.get_parent_object()
       @container_id_handle = nil
-      @obj_type = obj_type
-      @ds_name = ds_name
-      @source_obj_type = source_obj_type
+      @obj_type = ds_object[:obj_type].to_s
+      @ds_name = ds_object[:ds_name].to_s
+      @source_obj_type = ds_object[:source_obj_type] ? ds_object[:source_obj_type].to_s : nil
     end
 
     #filter applied when into put in ds_attribute bag gets overwritten for non trivial filter

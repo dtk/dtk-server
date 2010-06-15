@@ -14,7 +14,7 @@ module XYZ
            target[:external_type] = "chef_recipe"
            target[:external_cmp_ref] = fn(lambda{|name|"recipe[#{name}]"},name)
 
-           nested_definition :attributes, source["attributes"]
+#           nested_definition :attributes, source["attributes"]
 
 =begin
           attrs = Hash.new
@@ -48,21 +48,22 @@ module XYZ
         end
 
         #TBD below is effectively dsl; may make more declarative using data integration dsl
-        def unique_keys(v)
-          [v["name"]]
+        def unique_keys(source_hash)
+          [source_hash["name"]]
         end
 
-#Is v 'value'?
-        def relative_distinguished_name(v)
-          v["name"]
+        def relative_distinguished_name(source_hash)
+          source_hash["name"]
         end
-
-#Whats going on here?
-        def filter(v)
+=begin
+        def filter(source_hash)
           attrs = %w{name display_name description chef_recipe attributes}
-          HashObject.object_slice(v["metadata"],attrs)
+          HashObject.object_slice(source_hash["metadata"],attrs)
         end
-
+=end
+        def filter(source_hash)
+          HashObject.new()
+        end
       end
     end
   end

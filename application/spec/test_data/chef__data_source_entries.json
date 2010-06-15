@@ -5,7 +5,14 @@
         "component": {
           "obj_type": "component",
           "ds_name": "chef",
-          "display_name": "component"
+          "display_name": "component",
+          "data_source_entry": {
+            "component_attribute": {
+              "obj_type": "attribute",
+              "ds_name": "chef",
+              "display_name": "component_attribute"
+            }
+          }
         },
         "assoc_node_component": {
           "obj_type": "assoc_node_component",

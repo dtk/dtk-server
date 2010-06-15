@@ -14,14 +14,8 @@ module XYZ
            target[:external_type] = "chef_recipe"
            target[:external_cmp_ref] = fn(lambda{|name|"recipe[#{name}]"},name)
 
-           prefix = target[:attributes] 
-    
-           #TBD: think this may not work because dynamically generating attributes once 
-           #class rules should be frozen; one alternative is to generate in speerate attribute rule class
-           #issue there may be knowing id of parent; however probably can use relative paths like in foreign keys and only generate attributs once is parent is created 
-           each(metadata["attributes"]) do |recipe_ref,av|
-             prefix[recipe_ref] = {} #test stub
-           end
+           nested_definition :attributes, source["attributes"]
+
 =begin
           attrs = Hash.new
           (m["attributes"]||[]).each do |recipe_ref,av|

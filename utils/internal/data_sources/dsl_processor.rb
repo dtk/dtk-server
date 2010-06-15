@@ -2,7 +2,6 @@ module XYZ
   module DataTranslationClassMixin
     #Should be overwritten if no dsl
     def normalize(source_obj)
-require 'pp'; pp source_obj
       target_obj = DBUpdateHash.create_with_auto_vivification()
       class_rules.each do |condition,top_level_assign|
         if condition.evaluate_condition(source_obj)
@@ -11,6 +10,8 @@ require 'pp'; pp source_obj
           end
         end
       end
+require 'pp'; pp target_obj
+
       target_obj
     end
 
@@ -112,8 +113,12 @@ require 'pp'; pp source_obj
     end
 
     class Source 
-      def initialize()
-        @path = Array.new
+      def initialize(path=nil)
+        @path = path ? Array.new(path) : Array.new
+      end
+
+      def dup() 
+        self.class.new(@path)
       end
 
       def [](a)

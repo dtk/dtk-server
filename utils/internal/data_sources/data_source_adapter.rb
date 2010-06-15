@@ -79,7 +79,7 @@ module XYZ
         marked_disjunction = SQL.or(marked_disjunction,{:ds_key => ds_key})
       end
       where_clause = SQL.not(marked_disjunction)
-      where_clause = SQL.and(where_clause,constraints) unless contraints.empty?
+      where_clause = SQL.and(where_clause,constraints) unless constraints.empty?
       Object.delete_instances_wrt_parent(relation_type(),container_id_handle,where_clause)
     end
 

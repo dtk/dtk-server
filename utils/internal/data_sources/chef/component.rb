@@ -4,33 +4,17 @@ module XYZ
     class Chef
       class Component < Chef::Top 
        private
+         definitions do
+           source_complete_for_entire_target
+           metadata = source["metadata"]
+           #TBD: need to clean up to remove the dups
+           name = fn(lambda{|x,y,z|x||y||z},source["name"],metadata.dup["display_name"],metadata.dup["name"])
+           target[:display_name] = name
+           target[:description] = source["description"]
+           target[:external_type] = "chef_recipe"
+           target[:external_cmp_ref] = fn(lambda{|name|"recipe[#{name}]"},name)
 
-        #TBD below is effectively dsl; may make more declarative using data integration dsl
-        def unique_keys(v)
-          [v["name"]]
-        end
-
-#Is v 'value'?
-        def relative_distinguished_name(v)
-          v["name"]
-        end
-
-#Whats going on here?
-        def filter(v)
-          attrs = %w{name display_name description chef_recipe attributes}
-          HashObject.object_slice(v["metadata"],attrs)
-        end
-
-        def normalize(v)
-          m = v["metadata"]
-          name = v["name"] || m["display_name"] || m["name"]
-          ret = {
-            :display_name => name,
-            :description => v["description"],
-            :external_type => "chef_recipe",
-            :external_cmp_ref => "recipe[#{name}]"
-          }
-
+=begin
           attrs = Hash.new
           (m["attributes"]||[]).each do |recipe_ref,av|
             #to strip of recipe name prefix if that is the case
@@ -58,7 +42,25 @@ module XYZ
           end
           ret[:attribute] = attrs
           ret
+=end
         end
+
+        #TBD below is effectively dsl; may make more declarative using data integration dsl
+        def unique_keys(v)
+          [v["name"]]
+        end
+
+#Is v 'value'?
+        def relative_distinguished_name(v)
+          v["name"]
+        end
+
+#Whats going on here?
+        def filter(v)
+          attrs = %w{name display_name description chef_recipe attributes}
+          HashObject.object_slice(v["metadata"],attrs)
+        end
+
       end
     end
   end

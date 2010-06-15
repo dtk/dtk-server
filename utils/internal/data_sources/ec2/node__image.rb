@@ -4,7 +4,9 @@ module XYZ
     class Ec2
       class NodeImage < Ec2::Top 
        private
-        #TBD below is effectively dsl; may make more declarative using data integration dsl
+        definitions do
+          source_complete_for_entire_target :ds_source => @source_obj_type if @source_obj_type
+        end
         def unique_keys(v)
           [:image,v[:id]]
         end

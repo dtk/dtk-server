@@ -1,7 +1,3 @@
-#require File.expand_path("../../hash_object", File.dirname(__FILE__))
-#require File.expand_path("../data_source_adapter", File.dirname(__FILE__))
-require "/root/R8Server/application/app"
-#TBD above all temp for testing
 require File.expand_path("ec2", File.dirname(__FILE__))
 
 module XYZ
@@ -11,6 +7,7 @@ module XYZ
        private
         definitions do
           source_complete_for_entire_target :ds_source => @source_obj_type if @source_obj_type
+          target[:image_size] = source[:flavor][:ram]
 
           source_complete_for target[:node_interface]
           prefix = target[:node_interface]
@@ -24,8 +21,6 @@ module XYZ
             # scope[:address_access_point] do 
             #   scoped_target[:type] = "internet"
             # end
-            #TBD: modify so that if have source_complete_for at top level do not need it in nested level
-            source_complete_for target[:address_access_point]
             prefix = target[:address_access_point]["internet_ipv4"]
             prefix[:type] = "internet"
             prefix[:network_address][:family] = "ipv4"

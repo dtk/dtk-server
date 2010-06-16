@@ -1,8 +1,7 @@
-require File.expand_path("chef", File.dirname(__FILE__))
 module XYZ
-  module DSAdapter
+  module DSNormalizer
     class Chef
-      class Attribute < Chef::Top 
+      class Attribute < Top
          definitions do
            target[:external_attr_ref] = "stub" #"node[#{m["name"]}][#{ref_x.gsub(/\//,"][")}]"
            #TBD: put insomething like target[:external_attr_ref] = fn(lambda{|name,ref|"node[#{name}][#{ref.gsub(/\//,"][")}]"},source_parent["name"],source[])

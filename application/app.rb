@@ -16,7 +16,6 @@ APPLICATION_DIR = File.expand_path('../' + R8::Config[:application_name], File.d
 UTILS_DIR = File.expand_path('../utils', File.dirname(__FILE__)) + "/"
 SYSTEM_DIR = File.expand_path('../system', File.dirname(__FILE__)) + "/"
 CORE_BASE_PATH  = File.expand_path(SYSTEM_DIR+'/core', File.dirname(__FILE__)) + "/"
-DATA_SOURCE_ADAPTERS_DIR = UTILS_DIR + 'internal/data_sources/'
 require SYSTEM_DIR + 'view.r8.rb'
 require SYSTEM_DIR + 'template.r8.rb'
 require UTILS_DIR + 'internal/log.rb'

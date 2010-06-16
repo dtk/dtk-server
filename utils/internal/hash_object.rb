@@ -56,6 +56,7 @@ module XYZ
     end
   end
   #Used as input to db update from hash 
+  #TBD: put in DSUpdateHash which same but does not have donot extend
   class DBUpdateHash < HashObject
     attr_reader :constraints, :donot_extend
     def initialize(initial_val=nil,convert_initial=false,&block)

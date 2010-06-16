@@ -1,5 +1,4 @@
-#TBD: should be moved to core/model
-#TBD: just skeleton of more complex set of lasses; which wil factored in what, how, where: what objects to gather, how to do it and where to put them in the project
+#require UTILS_DIR + 'internal/data_sources/data_source_adapter'
 module XYZ
   class DataSource < Model
     set_relation_name(:data_source,:data_source)
@@ -47,6 +46,7 @@ module XYZ
   class DataSourceEntry < Model
     attr_reader :ds_object_adapter
     set_relation_name(:data_source,:entry)
+    include DataSourceAdapterInstanceMixin
     class << self
       def up()
         column :ds_name, :varchar, :size => 25 #TBD: just passed in for convenient access; 'inherited' from its conatiner
@@ -65,7 +65,7 @@ module XYZ
     end
     #actions
     def discover_and_update()
-      @ds_object_adapter.discover_and_update()
+      discover_and_update_private()
     end
 
     #helper fns
@@ -76,8 +76,9 @@ module XYZ
       #default is to place in container that the data source root sets in
       #TBD: logic to override if @objects_location set
       default_container_obj = get_parent_object().get_parent_object()
-      placement_id_handle = default_container_obj.id_handle
-      @ds_object_adapter = DataSourceAdapter.create(self,placement_id_handle)
+      @container_id_handle = default_container_obj.id_handle
+      @ds_object_adapter_class = load_ds_adapter_class()
+      @parent_ds_object = get_parent_object()
     end   
     class << self
       DS_object_defaults = {}

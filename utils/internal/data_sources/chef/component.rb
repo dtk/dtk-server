@@ -1,8 +1,7 @@
-require File.expand_path("chef", File.dirname(__FILE__))
 module XYZ
-  module DSAdapter
+  module DSNormalizer
     class Chef
-      class Component < Chef::Top 
+      class Component < Top
          definitions do
            source_complete_for_entire_target
            #TBD: current solution needed '= definition' or using dup every time refer to defined var like 'emtadata'; is there a better way (i.e., more transparant) to do this
@@ -37,4 +36,3 @@ module XYZ
     end
   end
 end
-

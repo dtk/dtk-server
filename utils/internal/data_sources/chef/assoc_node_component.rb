@@ -1,8 +1,7 @@
-require File.expand_path("chef", File.dirname(__FILE__))
 module XYZ
-  module DSAdapter
+  module DSNormalizer
     class Chef
-      class AssocNodeComponent < Chef::Top 
+      class AssocNodeComponent < Top 
        private
         def unique_keys(v)
           [v["node_name"],v["recipe_name"]]

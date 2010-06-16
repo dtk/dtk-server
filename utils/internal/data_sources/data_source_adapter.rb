@@ -1,27 +1,20 @@
-require File.expand_path('dsl_processor', File.dirname(__FILE__))
 module XYZ
-  class DataSourceAdapter
-    extend DataTranslationClassMixin
-
-    def self.create(ds_object,container_id_handle)
-      obj_type = ds_object[:obj_type].to_s
-      ds_name = ds_object[:ds_name].to_s
-      src = ds_object[:source_obj_type] ? ds_object[:source_obj_type].to_s : nil 
-      rel_path = "#{ds_name}/#{obj_type}#{src ? "__" + src : ""}"
+  module DataSourceAdapterInstanceMixin
+    def load_ds_adapter_class()
+      rel_path = "#{ds_name()}/#{obj_type()}#{source_obj_type() ? "__" + source_obj_type() : ""}"
       begin 
         file_path = File.expand_path(rel_path, File.dirname(__FILE__)) 
         require file_path
        rescue Exception => e 
-        raise Error.new("Adapter file to process object #{obj_type} for data source #{ds_name} #{src ? "(using source object #{src}) " : ""} does not exist") unless File.exists?(file_path + ".rb")
+        raise Error.new("Adapter file to process object #{obj_type()} for data source #{ds_name()} #{source_obj_type() ? "(using source object #{source_obj_type()}) " : ""} does not exist") unless File.exists?(file_path + ".rb")
         raise e
       end
 
-      base_class = DSAdapter.const_get Aux.camelize(ds_name)
-      adaper_class = base_class.const_get Aux.camelize("#{obj_type}#{src ? "_" + src : ""}")
-      adaper_class.new(ds_object,container_id_handle)
+      base_class = DSNormalizer.const_get Aux.camelize(ds_name())
+      base_class.const_get Aux.camelize("#{obj_type()}#{source_obj_type() ? "_" + source_obj_type() : ""}")
     end
-
-    def discover_and_update()
+   private
+    def discover_and_update_private()
       marked = Array.new
       context = Hash.new
       get_and_update_objects(@container_id_handle,marked,context)          
@@ -71,13 +64,14 @@ module XYZ
       end
     end
 
-    def initialize(ds_object,container_id_handle)
-      @ds_object = ds_object
-      @parent_ds_object = ds_object.get_parent_object()
-      @container_id_handle = container_id_handle
-      @obj_type = ds_object[:obj_type].to_s
-      @ds_name = ds_object[:ds_name].to_s
-      @source_obj_type = ds_object[:source_obj_type] ? ds_object[:source_obj_type].to_s : nil
+    def obj_type()
+      self[:obj_type].to_s
+    end
+    def ds_name()
+      self[:ds_name].to_s
+    end
+    def source_obj_type()
+      self[:source_obj_type] ? self[:source_obj_type].to_s : nil
     end
 
     #filter applied when into put in ds_attribute bag gets overwritten for non trivial filter
@@ -87,7 +81,7 @@ module XYZ
 
 
     def get_and_update_objects(container_id_handle,marked,context)          
-      method_name = "get_objects__#{@obj_type}#{@source_obj_type ? "__" + @source_obj_type : ""}".to_sym
+      method_name = "get_objects__#{obj_type()}#{source_obj_type() ? "__" + source_obj_type() : ""}".to_sym
       context[:source_is_complete] = true
       send(method_name) do |source_obj|
         discover_and_update_item(container_id_handle,source_obj,marked) 
@@ -105,7 +99,7 @@ module XYZ
       obj = normalize(source_obj)
       obj[:ds_attributes] = filter(source_obj)
       obj[:ds_key] = ds_key_value(source_obj)
-      obj[:ds_source] = @source_obj_type if @source_obj_type      
+      obj[:ds_source] = source_obj_type() if source_obj_type()      
       ret = DBUpdateHash.create_with_auto_vivification()
       ret[relation_type()][ref(source_obj)]= obj
       ret.freeze
@@ -126,8 +120,8 @@ module XYZ
       Object.delete_instances_wrt_parent(relation_type(),container_id_handle,where_clause)
     end
 
-    def relation_type(obj_type = nil)
-      (obj_type || @obj_type).to_sym
+    def relation_type(obj_type_override = nil)
+      (obj_type_override || obj_type()).to_sym
     end
 
     def ds_key_value(source_obj)
@@ -135,8 +129,8 @@ module XYZ
       qualified_key(relative_unique_key)
     end
 
-    def qualified_key(relative_unique_key,ds_name=nil)
-      ([(ds_name||@ds_name).to_sym] + relative_unique_key).inspect
+    def qualified_key(relative_unique_key,ds_name_override=nil)
+      ([(ds_name_override||ds_name()).to_sym] + relative_unique_key).inspect
     end
 
     def ref(source_obj)

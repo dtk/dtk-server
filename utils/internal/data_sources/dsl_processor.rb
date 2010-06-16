@@ -1,23 +1,25 @@
 module XYZ
-  module DataTranslationClassMixin
-    #can class vars 
-    def class_rules()
-      @class_rules ||= DBUpdateHash.create_with_auto_vivification()
-    end
+  module DSNormalizer
+    class Top
+      class << self
+        def class_rules()
+        @class_rules ||= DBUpdateHash.create_with_auto_vivification()
+       end
     
-    def top_level_completeness_constraints() 
-      @top_level_completeness_constraints ||= nil
-    end
-    def set_entire_target_is_complete(constraints={})
-      @top_level_completeness_constraints = constraints
-    end
+       #TBD: this get deprecated
+       def top_level_completeness_constraints() 
+        @top_level_completeness_constraints ||= nil
+       end
+       def set_entire_target_is_complete(constraints={})
+        @top_level_completeness_constraints = constraints
+       end
+     private
 
-   private
-
-    def definitions(&block)
-      context = Context.new(self,:no_conditions)
-      context.instance_eval(&block) 
-      class_rules.freeze
+      def definitions(&block)
+        context = Context.new(self,:no_conditions)
+        context.instance_eval(&block) 
+        class_rules.freeze
+      end
     end
   end
   class Context
@@ -175,5 +177,6 @@ module XYZ
       end
     end
   end
+end
 end
 

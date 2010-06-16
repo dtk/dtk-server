@@ -28,7 +28,6 @@ module XYZ
       delete_unmarked(@container_id_handle,marked,context)
     end
 
-   private
     #Should be overwritten if no dsl
     def normalize(source_obj)
       target_obj = DBUpdateHash.create_with_auto_vivification()
@@ -42,6 +41,7 @@ module XYZ
       target_obj
     end
 
+   private
     def process_assignment(target_obj,attr,assign,source_obj) 
       if assign.kind_of?(Source)
         target_obj[attr] = assign.apply(source_obj)
@@ -50,7 +50,7 @@ module XYZ
       elsif assign.kind_of?(Definition)
         process_assignment(target_obj,attr,assign.item,source_obj)
       elsif assign.kind_of?(NestedDefinition)
-        assign.normalize(source_obj,@ds_object)
+        require 'pp'; pp assign.normalize(source_obj,@ds_object)
       elsif assign.kind_of?(ForeignKey)
         target_obj[Object.assoc_key(attr)] = assign
       elsif assign.kind_of?(Hash)

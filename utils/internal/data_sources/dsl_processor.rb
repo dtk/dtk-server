@@ -88,7 +88,9 @@ module XYZ
     def normalize(source_obj,parent_ds_object)
       #TBD: how to avoid this db call
       ds_object = parent_ds_object.get_directly_contained_objects(:data_source_entry,{:obj_type=>@obj_type.to_s}).first
-      require 'pp'; pp [ds_object,@source_attributes.apply(source_obj)]
+      ds_adapter = ds_object ? ds_object.ds_object_adapter : nil
+      raise Error.new("cannot find data source adapter for nested definition") if ds_adapter.nil?
+      ds_adapter.normalize(@source_attributes.apply(source_obj))
     end
   end    
 

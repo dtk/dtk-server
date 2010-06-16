@@ -45,6 +45,7 @@ module XYZ
     end
   end
   class DataSourceEntry < Model
+    attr_reader :ds_object_adapter
     set_relation_name(:data_source,:entry)
     class << self
       def up()

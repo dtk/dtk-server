@@ -28,6 +28,20 @@ module XYZ
     end
 
    private
+    #Should be overwritten if no dsl
+    def normalize(source_obj)
+      target_obj = DBUpdateHash.create_with_auto_vivification()
+      self.class.class_rules.each do |condition,top_level_assign|
+        if condition.evaluate_condition(source_obj)
+          top_level_assign.each do |attr,assign|
+            self.class.process_assignment(target_obj,attr,assign,source_obj) 
+          end
+        end
+      end
+      target_obj
+    end
+
+
     def initialize(ds_object,container_id_handle)
       @ds_object = ds_object
       @parent_ds_object = ds_object.get_parent_object()
@@ -59,7 +73,7 @@ module XYZ
     end
 
     def ret_db_update_hash(container_id_handle,source_obj)
-      obj = self.class.normalize(source_obj)
+      obj = normalize(source_obj)
       obj[:ds_attributes] = filter(source_obj)
       obj[:ds_key] = ds_key_value(source_obj)
       obj[:ds_source] = @source_obj_type if @source_obj_type      

@@ -1,20 +1,5 @@
 module XYZ
   module DataTranslationClassMixin
-    #Should be overwritten if no dsl
-    def normalize(source_obj)
-      target_obj = DBUpdateHash.create_with_auto_vivification()
-      class_rules.each do |condition,top_level_assign|
-        if condition.evaluate_condition(source_obj)
-          top_level_assign.each do |attr,assign|
-            process_assignment(target_obj,attr,assign,source_obj) 
-          end
-        end
-      end
-#require 'pp'; pp target_obj
-
-      target_obj
-    end
-
     def process_assignment(target_obj,attr,assign,source_obj) 
       if assign.kind_of?(Source)
         target_obj[attr] = assign.apply(source_obj)
@@ -57,6 +42,7 @@ module XYZ
     end
 
    private
+
     def definitions(&block)
       context = Context.new(self,:no_conditions)
       context.instance_eval(&block) 

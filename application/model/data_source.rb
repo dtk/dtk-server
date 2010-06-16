@@ -64,10 +64,6 @@ module XYZ
     end
     #actions
     def discover_and_update()
-      #default is to place in conatiner that the data source root sets in
-      #TBD: logic to override if @objects_location set
-#      default_container_obj = get_parent_object().get_parent_object()
- #     placement_id_handle = default_container_obj.id_handle
       @ds_object_adapter.discover_and_update()
     end
 

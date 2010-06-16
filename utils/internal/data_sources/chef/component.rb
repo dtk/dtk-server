@@ -14,7 +14,7 @@ module XYZ
            target[:external_type] = "chef_recipe"
            target[:external_cmp_ref] = fn(lambda{|name|"recipe[#{name}]"},name)
 
-           nested_definition :attributes, source["metadata"]["attributes"]
+           nested_definition :attribute, source["metadata"]["attributes"]
 
 =begin
           attrs = Hash.new

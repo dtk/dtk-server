@@ -38,8 +38,8 @@ module XYZ
       class_rules[matching_cond_index || self]
     end
 
-    def nested_definition(factory_name,source_attributes)
-      target[factory_name] = NestedDefinition.new(factory_name,source_attributes,@parent)
+    def nested_definition(obj_type,source_attributes)
+      target[obj_type] = NestedDefinition.new(obj_type,source_attributes)
     end
 
     def foreign_key(uri)
@@ -81,13 +81,14 @@ module XYZ
   end
 
   class NestedDefinition
-    def initialize(factory_name,source_attributes,parent_adapter)
-      @parent_adapter = parent_adapter
-      @factory_name = factory_name
+    def initialize(obj_type,source_attributes)
+      @obj_type = obj_type
       @source_attributes = source_attributes
     end
-    def normalize(source_obj)
-      require 'pp'; pp [@parent_adapter.class,@source_attributes.apply(source_obj)]
+    def normalize(source_obj,parent_ds_object)
+      #TBD: how to avoid this db call
+      ds_object = parent_ds_object.get_directly_contained_objects(:data_source_entry,{:obj_type=>@obj_type.to_s}).first
+      require 'pp'; pp [ds_object,@source_attributes.apply(source_obj)]
     end
   end    
 

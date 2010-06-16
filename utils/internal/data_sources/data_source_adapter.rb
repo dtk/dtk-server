@@ -2,7 +2,7 @@ require File.expand_path('dsl_processor', File.dirname(__FILE__))
 module XYZ
   class DataSourceAdapter
     extend DataTranslationClassMixin
-#    include DataTranslationInstanceMixin
+
     def self.create(ds_object,container_id_handle)
       obj_type = ds_object[:obj_type].to_s
       ds_name = ds_object[:ds_name].to_s
@@ -50,7 +50,7 @@ module XYZ
       elsif assign.kind_of?(Definition)
         process_assignment(target_obj,attr,assign.item,source_obj)
       elsif assign.kind_of?(NestedDefinition)
-        assign.normalize(source_obj)
+        assign.normalize(source_obj,@ds_object)
       elsif assign.kind_of?(ForeignKey)
         target_obj[Object.assoc_key(attr)] = assign
       elsif assign.kind_of?(Hash)

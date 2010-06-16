@@ -92,8 +92,12 @@ module XYZ
       self.class.update_instance(id_handle,scalar_assignments,opts)
     end
 
-    def get_directly_contained_object_ids(child_relation_type)
-      self.class.get_object_ids_wrt_parent(child_relation_type,id_handle)
+    def get_directly_contained_objects(child_relation_type,where_clause={})
+      self.class.get_objects_wrt_parent(child_relation_type,id_handle,where_clause)
+    end
+
+    def get_directly_contained_object_ids(child_relation_type,where_clause={})
+      self.class.get_object_ids_wrt_parent(child_relation_type,id_handle,where_clause)
     end
 
     def to_s()

@@ -1,34 +1,5 @@
 module XYZ
   module DataTranslationClassMixin
-    def process_assignment(target_obj,attr,assign,source_obj) 
-      if assign.kind_of?(Source)
-        target_obj[attr] = assign.apply(source_obj)
-      elsif assign.kind_of?(Function)
-        target_obj[attr] = assign.apply(source_obj)
-      elsif assign.kind_of?(Definition)
-        process_assignment(target_obj,attr,assign.item,source_obj)
-      elsif assign.kind_of?(NestedDefinition)
-        assign.normalize(source_obj)
-      elsif assign.kind_of?(ForeignKey)
-        target_obj[Object.assoc_key(attr)] = assign
-      elsif assign.kind_of?(Hash)
-        #TBD: use of paranthesis below may be needed because of possible Ruby parser bug
-        constraints = (assign.kind_of?(DBUpdateHash) ? assign.constraints : nil)
-        target_obj.set_constraints(constraints) if constraints
-        #include empty hash if there are contraints associated with it (this wil serve to delet all
-        # its peers; only including this conditionally is for optimization
-        if assign.empty?
-          target_obj[attr] = assign if constraints
-        else
-          assign.each do |nested_attr,nested_assign|
-            process_assignment(target_obj[attr],nested_attr,nested_assign,source_obj)
-          end
-        end
-      else
-       target_obj[attr] = assign
-      end
-    end
-
     #can class vars 
     def class_rules()
       @class_rules ||= DBUpdateHash.create_with_auto_vivification()
@@ -48,152 +19,149 @@ module XYZ
       context.instance_eval(&block) 
       class_rules.freeze
     end
-
-    class Context
-      attr_reader :relation,:condition
-      def initialize(parent,relation=:no_condition,condition=nil)
-        @parent = parent
-        @relation = relation
-        @condition = condition 
-      end
-      #top level "conditionals"
-      def if_exists(condition,&block)
-        context = Context.new(self,:if_exists,condition)
-        context.instance_eval(&block) 
-      end
-      #sub commands
-      def target()
-        matching_cond_index = class_rules.keys.find{|cond|cond == self}
-        class_rules[matching_cond_index || self]
-      end
-
-      def nested_definition(factory_name,source_attributes)
-        target[factory_name] = NestedDefinition.new(factory_name,source_attributes,@parent)
-      end
-
-      def foreign_key(uri)
-        ForeignKey.new(uri)
-      end
-
-      def source()
-        Source.new()
-      end
-
-      def fn(func_name_or_def,*args)
-        Function.new(func_name_or_def,args)
-      end
-
-      def source_complete_for_entire_target(constraints={})
-        @parent.set_entire_target_is_complete(constraints)
-      end
-
-      def definition(item)
-        Definition.new(item)
-      end
-
-      def source_complete_for(trgt,constraints=nil)
-        trgt.mark_as_complete(constraints)
-      end
-      def ==(x)
-        @relation == x.relation and @condition == x.condition
-      end
-
-      def class_rules()
-        @parent.class_rules
-      end
-
-      def each(item,&block)
-        target[:iterator] = Function.new(lambda{|sources,&block|sources.each{|s|block.call(s)}},item,&block)
-      end
-
-      def evaluate_condition(source_obj)
-        return true if @relation == :no_conditions
-        return @condition.apply(source_obj) if @relation == :if_exists
-        raise Error.new("condition #{relation} does not exist")
-      end
+  end
+  class Context
+    attr_reader :relation,:condition
+    def initialize(parent,relation=:no_condition,condition=nil)
+      @parent = parent
+      @relation = relation
+      @condition = condition 
+    end
+    #top level "conditionals"
+    def if_exists(condition,&block)
+      context = Context.new(self,:if_exists,condition)
+      context.instance_eval(&block) 
+    end
+    #sub commands
+    def target()
+      matching_cond_index = class_rules.keys.find{|cond|cond == self}
+      class_rules[matching_cond_index || self]
     end
 
-    class NestedDefinition
-      def initialize(factory_name,source_attributes,parent_adapter)
-        @parent_adapter = parent_adapter
-        @factory_name = factory_name
-        @source_attributes = source_attributes
-      end
-      def normalize(source_obj)
-        require 'pp'; pp [@parent_adapter.class,@source_attributes.apply(source_obj)]
-      end
-    end    
-
-    #TBD: is there a better way to do this
-    #motivation for putting this in is to avoid having to have var = ..source.; var,dup in all refs 
-    # because if haev two references to same source they "would update each otehr without this
-    class Definition
-      attr_reader :item
-      def initialize(item)
-        @item = item
-      end
-      def [](a)
-       item.kind_of?(Source) ? item.dup[a] : item[a]
-      end
+    def nested_definition(factory_name,source_attributes)
+      target[factory_name] = NestedDefinition.new(factory_name,source_attributes,@parent)
     end
 
-    class Source 
-      def initialize(path=nil)
-        @path = path ? Array.new(path) : Array.new
-      end
-
-      def dup() 
-        self.class.new(@path)
-      end
-
-      def [](a)
-        @path << a
-        self
-      end
-
-      def apply(source_obj)
-        HashObject.nested_value(source_obj,@path)
-      end
+    def foreign_key(uri)
+      ForeignKey.new(uri)
     end
-    class ForeignKey < String
-      def initialize(uri)
-        replace(uri)
-      end
+
+    def source()
+      Source.new()
     end
-    class Function
-      def initialize(func_name_or_def,*args)
-        if func_name_or_def.kind_of?(String) or func_name_or_def.kind_of?(Symbol)
-          @function_name = func_name_or_def.to_sym
-        else #should be a lambda function
-          @function_ref = func_name_or_def
-        end
-        @args = args.first
+
+    def fn(func_name_or_def,*args)
+      Function.new(func_name_or_def,args)
+    end
+
+    def source_complete_for_entire_target(constraints={})
+      @parent.set_entire_target_is_complete(constraints)
+    end
+
+    def definition(item)
+      Definition.new(item)
+    end
+
+    def source_complete_for(trgt,constraints=nil)
+      trgt.mark_as_complete(constraints)
+    end
+    def ==(x)
+      @relation == x.relation and @condition == x.condition
+    end
+
+    def class_rules()
+      @parent.class_rules
+    end
+
+    def evaluate_condition(source_obj)
+      return true if @relation == :no_conditions
+      return @condition.apply(source_obj) if @relation == :if_exists
+      raise Error.new("condition #{relation} does not exist")
+    end
+  end
+
+  class NestedDefinition
+    def initialize(factory_name,source_attributes,parent_adapter)
+      @parent_adapter = parent_adapter
+      @factory_name = factory_name
+      @source_attributes = source_attributes
+    end
+    def normalize(source_obj)
+      require 'pp'; pp [@parent_adapter.class,@source_attributes.apply(source_obj)]
+    end
+  end    
+
+  #TBD: is there a better way to do this
+  #motivation for putting this in is to avoid having to have var = ..source.; var,dup in all refs 
+  # because if haev two references to same source they "would update each otehr without this
+  class Definition
+    attr_reader :item
+    def initialize(item)
+      @item = item
+    end
+    def [](a)
+     item.kind_of?(Source) ? item.dup[a] : item[a]
+    end
+  end
+
+  class Source 
+    def initialize(path=nil)
+      @path = path ? Array.new(path) : Array.new
+    end
+
+    def dup() 
+      self.class.new(@path)
+    end
+
+    def [](a)
+      @path << a
+      self
+    end
+
+    def apply(source_obj)
+      HashObject.nested_value(source_obj,@path)
+    end
+  end
+
+  class ForeignKey < String
+    def initialize(uri)
+      replace(uri)
+    end
+  end
+
+  class Function
+    def initialize(func_name_or_def,*args)
+      if func_name_or_def.kind_of?(String) or func_name_or_def.kind_of?(Symbol)
+        @function_name = func_name_or_def.to_sym
+      else #should be a lambda function
+        @function_ref = func_name_or_def
       end
+      @args = args.first
+    end
       
-      def apply(source_obj)
-        evaluated_args = @args.map{|term|apply_to_term(term,source_obj)}
-        if @function_name 
-          send(@function_name,*evaluated_args)
-        elsif @function_ref
-          @function_ref.call(*evaluated_args)
-        end
+    def apply(source_obj)
+      evaluated_args = @args.map{|term|apply_to_term(term,source_obj)}
+      if @function_name 
+        send(@function_name,*evaluated_args)
+      elsif @function_ref
+        @function_ref.call(*evaluated_args)
       end
-      #predefined functions
-      def foreign_key(uri)
-        #stub
-        "*" + uri
-      end
-     private
-      def apply_to_term(term,source_obj)
-        if term.kind_of?(Source)
-          term.apply(source_obj)
-        elsif term.kind_of?(Function)
-          term.apply(source_obj)
-        elsif term.kind_of?(Definition)
-          apply_to_term(term.item,source_obj)
-        else
-          term
-        end
+    end
+    #predefined functions
+    def foreign_key(uri)
+      #stub
+      "*" + uri
+    end
+   private
+    def apply_to_term(term,source_obj)
+      if term.kind_of?(Source)
+        term.apply(source_obj)
+      elsif term.kind_of?(Function)
+        term.apply(source_obj)
+      elsif term.kind_of?(Definition)
+        apply_to_term(term.item,source_obj)
+      else
+        term
       end
     end
   end

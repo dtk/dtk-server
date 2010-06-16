@@ -2,6 +2,7 @@ require File.expand_path('dsl_processor', File.dirname(__FILE__))
 module XYZ
   class DataSourceAdapter
     extend DataTranslationClassMixin
+#    include DataTranslationInstanceMixin
     def self.create(ds_object,container_id_handle)
       obj_type = ds_object[:obj_type].to_s
       ds_name = ds_object[:ds_name].to_s
@@ -34,13 +35,41 @@ module XYZ
       self.class.class_rules.each do |condition,top_level_assign|
         if condition.evaluate_condition(source_obj)
           top_level_assign.each do |attr,assign|
-            self.class.process_assignment(target_obj,attr,assign,source_obj) 
+            process_assignment(target_obj,attr,assign,source_obj) 
           end
         end
       end
       target_obj
     end
 
+    def process_assignment(target_obj,attr,assign,source_obj) 
+      if assign.kind_of?(Source)
+        target_obj[attr] = assign.apply(source_obj)
+      elsif assign.kind_of?(Function)
+        target_obj[attr] = assign.apply(source_obj)
+      elsif assign.kind_of?(Definition)
+        process_assignment(target_obj,attr,assign.item,source_obj)
+      elsif assign.kind_of?(NestedDefinition)
+        assign.normalize(source_obj)
+      elsif assign.kind_of?(ForeignKey)
+        target_obj[Object.assoc_key(attr)] = assign
+      elsif assign.kind_of?(Hash)
+        #TBD: use of paranthesis below may be needed because of possible Ruby parser bug
+        constraints = (assign.kind_of?(DBUpdateHash) ? assign.constraints : nil)
+        target_obj.set_constraints(constraints) if constraints
+        #include empty hash if there are contraints associated with it (this wil serve to delet all
+        # its peers; only including this conditionally is for optimization
+        if assign.empty?
+          target_obj[attr] = assign if constraints
+        else
+          assign.each do |nested_attr,nested_assign|
+            process_assignment(target_obj[attr],nested_attr,nested_assign,source_obj)
+          end
+        end
+      else
+       target_obj[attr] = assign
+      end
+    end
 
     def initialize(ds_object,container_id_handle)
       @ds_object = ds_object

@@ -50,7 +50,9 @@ module XYZ
       elsif assign.kind_of?(Definition)
         process_assignment(target_obj,attr,assign.item,source_obj)
       elsif assign.kind_of?(NestedDefinition)
-        require 'pp'; pp assign.normalize(source_obj,@ds_object)
+        require 'pp'; 
+         x = assign.normalize(source_obj,@ds_object)
+         pp x
       elsif assign.kind_of?(ForeignKey)
         target_obj[Object.assoc_key(attr)] = assign
       elsif assign.kind_of?(Hash)

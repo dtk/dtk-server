@@ -20,13 +20,14 @@ module XYZ
             recipes.each do |recipe|
               ds_attr_hash = {"node_name" => node_name, "recipe_name" => recipe}
   #TBD: to be used to load in variable values node_attributes = get_node_attributes(node_name)
-  #or insted may have discover and update on attributes
+  #or instead may have discover and update on attributes
               block.call(ds_attr_hash)
             end
           end
         end
 
        private
+        #TBD: may not be needed
         def get_node_attributes(node_name)
           get_rest("nodes/#{node_name}",false)
         end

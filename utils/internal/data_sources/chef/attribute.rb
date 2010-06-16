@@ -3,7 +3,6 @@ module XYZ
   module DSAdapter
     class Chef
       class Attribute < Chef::Top 
-       private
          definitions do
            target[:external_attr_ref] = "stub" #"node[#{m["name"]}][#{ref_x.gsub(/\//,"][")}]"
            target[:data_type] = fn(lambda{|x|case x;when "hash", "array"; "json"; else x; end},source[:type])
@@ -20,14 +19,15 @@ module XYZ
           [relative_distinguished_name(source_hash)]
         end
 
-        def relative_distinguished_name(source_hash)
+        def relative_distinguished_name(source_hash,ref)
+          #TBD: just test how to deal with ref
           #TBD: assume if attr_ref.split("/").size > 1 then first is cookbookname
-          ref_imploded = source_hash["ref"].split("/")
-          return ref_imploded.first unless ref_imploded.size > 1 
-          ref_imploded.shift.join("__")
+          ref_imploded = ref.split("/")
+          return "default" unless ref_imploded.size > 1 
+          ref_imploded[1..ref_imploded.size-1].join("__")
         end
 
-        def filter(v)
+        def filter(source_hash)
           HashObject.new()
         end
       end

@@ -90,7 +90,14 @@ module XYZ
       ds_object = parent_ds_object.get_directly_contained_objects(:data_source_entry,{:obj_type=>@obj_type.to_s}).first
       ds_adapter = ds_object ? ds_object.ds_object_adapter : nil
       raise Error.new("cannot find data source adapter for nested definition") if ds_adapter.nil?
-      ds_adapter.normalize(@source_attributes.apply(source_obj))
+      #TBD: need to set appropriate flags on whetehr golden store
+      ret = DBUpdateHash.new()
+      @source_attributes.apply(source_obj).each do |ref,attrs|
+        #TBD: just test how to deal with ref
+        key = ds_adapter.relative_distinguished_name(attrs,ref)
+        ret[key] = ds_adapter.normalize(attrs)
+      end
+      ret
     end
   end    
 

@@ -4,7 +4,6 @@ module XYZ
   module DSAdapter
     class Ec2
       class NodeInstance < Ec2::Top 
-       private
         #TBD: could write 'lint checker that makes sure that target indexes correspond to schema described in models
         definitions do
           source_complete_for_entire_target :ds_source => @source_obj_type 

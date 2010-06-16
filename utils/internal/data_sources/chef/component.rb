@@ -3,7 +3,6 @@ module XYZ
   module DSAdapter
     class Chef
       class Component < Chef::Top 
-       private
          definitions do
            source_complete_for_entire_target
            #TBD: current solution needed '= definition' or using dup every time refer to defined var like 'emtadata'; is there a better way (i.e., more transparant) to do this

@@ -44,14 +44,15 @@ module XYZ
         nested_value_private(hash,path.dup)
       end
      private
+      # "*" in path means just take whatever is next (assuming singleton; otehrwise takes first
       def nested_value_private(hash,path)
         return nil unless hash.kind_of?(Hash)
-        return nil unless hash.has_key?(f = path.shift)
+        f = path.shift
+        f = hash.keys.first if f == "*"
+        return nil unless hash.has_key?(f)
         return hash[f] if path.length == 0
         nested_value_private(hash[f],path)
       end
-
-
     end
   end
   #Used as input to db update from hash 

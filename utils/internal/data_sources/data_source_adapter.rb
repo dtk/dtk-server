@@ -1,5 +1,21 @@
 module XYZ
   module DataSourceAdapterInstanceMixin
+    #Should be overwritten if no dsl
+    def normalize(source_obj)
+      target_obj = DBUpdateHash.create_with_auto_vivification()
+      @ds_object_adapter_class.class_rules.each do |condition,top_level_assign|
+        if condition.evaluate_condition(source_obj)
+          top_level_assign.each do |attr,assign|
+            process_assignment(target_obj,attr,assign,source_obj) 
+          end
+        end
+      end
+      target_obj
+    end
+
+    def relative_distinguished_name(source_obj)
+      @ds_object_adapter_class.relative_distinguished_name(source_obj)
+    end
    private
     def load_ds_adapter_class()
       rel_path = "#{ds_name()}/#{obj_type()}#{source_obj_type() ? "__" + source_obj_type() : ""}"
@@ -32,30 +48,16 @@ module XYZ
       ret.freeze
     end
 
-    #Should be overwritten if no dsl
-    def normalize(source_obj)
-      target_obj = DBUpdateHash.create_with_auto_vivification()
-      @ds_object_adapter_class.each do |condition,top_level_assign|
-        if condition.evaluate_condition(source_obj)
-          top_level_assign.each do |attr,assign|
-            process_assignment(target_obj,attr,assign,source_obj) 
-          end
-        end
-      end
-      target_obj
-    end
-
-   private
     def process_assignment(target_obj,attr,assign,source_obj) 
-      if assign.kind_of?(Source)
+      if assign.kind_of?(DSNormalizer::Source)
         target_obj[attr] = assign.apply(source_obj)
-      elsif assign.kind_of?(Function)
+      elsif assign.kind_of?(DSNormalizer::Function)
         target_obj[attr] = assign.apply(source_obj)
-      elsif assign.kind_of?(Definition)
+      elsif assign.kind_of?(DSNormalizer::Definition)
         process_assignment(target_obj,attr,assign.item,source_obj)
-      elsif assign.kind_of?(NestedDefinition)
-        target_obj[attr] = assign.normalize(source_obj,@ds_object)
-      elsif assign.kind_of?(ForeignKey)
+      elsif assign.kind_of?(DSNormalizer::NestedDefinition)
+        target_obj[attr] = assign.normalize(source_obj,self)
+      elsif assign.kind_of?(DSNormalizer::ForeignKey)
         target_obj[Object.assoc_key(attr)] = assign
       elsif assign.kind_of?(Hash)
         #TBD: use of paranthesis below may be needed because of possible Ruby parser bug
@@ -99,7 +101,7 @@ module XYZ
     end
 
     def ds_key_value(source_obj)
-      relative_unique_key = unique_keys(source_obj)
+      relative_unique_key = @ds_object_adapter_class.unique_keys(source_obj)
       qualified_key(relative_unique_key)
     end
 

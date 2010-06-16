@@ -90,14 +90,13 @@ module XYZ
     def normalize(source_objs,parent_ds_object)
       #TBD: how to avoid this db call
       ds_object = parent_ds_object.get_directly_contained_objects(:data_source_entry,{:obj_type=>@obj_type.to_s}).first
-      ds_adapter = ds_object ? ds_object.ds_object_adapter : nil
-      raise Error.new("cannot find data source adapter for nested definition") if ds_adapter.nil?
+      raise Error.new("cannot find data source adapter for nested definition") if ds_object.nil?
       #TBD: need to set appropriate flags on whetehr golden store
       ret = DBUpdateHash.new()
       @source_attributes.apply(source_objs).each do |ref,attrs|
         child_source_hash = {ref => attrs}        
-        key = ds_adapter.relative_distinguished_name(child_source_hash)
-        ret[key] = ds_adapter.normalize(child_source_hash)
+        key = ds_object.relative_distinguished_name(child_source_hash)
+        ret[key] = ds_object.normalize(child_source_hash)
       end
       ret
     end

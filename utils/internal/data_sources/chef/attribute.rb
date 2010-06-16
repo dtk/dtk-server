@@ -5,12 +5,13 @@ module XYZ
       class Attribute < Chef::Top 
          definitions do
            target[:external_attr_ref] = "stub" #"node[#{m["name"]}][#{ref_x.gsub(/\//,"][")}]"
-           target[:data_type] = fn(lambda{|x|case x;when "hash", "array"; "json"; else x; end},source[:type])
+           #TBD: put insomething like target[:external_attr_ref] = fn(lambda{|name,ref|"node[#{name}][#{ref.gsub(/\//,"][")}]"},source_parent["name"],source[])
+           target[:data_type] = fn(lambda{|x|case x;when "hash", "array"; "json"; else x; end},source[][:type])
            #TBD: have form that is no assignment if source is null
            %w{port_type display_name description constraints}.each do |k|
-             target[k.to_sym] = source[k]
+             target[k.to_sym] = source[][k]
            end
-           target[:value_asserted] = source["default"] 
+           target[:value_asserted] = source[]["default"] 
            #TBD: put back in target[:semantic_type] = av["semantic_type"].to_json if av["semantic_type"]
          end
 
@@ -19,9 +20,9 @@ module XYZ
           [relative_distinguished_name(source_hash)]
         end
 
-        def relative_distinguished_name(source_hash,ref)
-          #TBD: just test how to deal with ref
+        def relative_distinguished_name(source_hash)
           #TBD: assume if attr_ref.split("/").size > 1 then first is cookbookname
+          ref = source_hash.keys.first
           ref_imploded = ref.split("/")
           return "default" unless ref_imploded.size > 1 
           ref_imploded[1..ref_imploded.size-1].join("__")

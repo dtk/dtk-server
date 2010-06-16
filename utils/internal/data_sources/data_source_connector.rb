@@ -1,8 +1,8 @@
 module XYZ
   module DSConnector
     class Top
-      def self.get_objects(&block)
-        method_name = "get_objects__#{obj_type()}#{source_obj_type() ? "__" + source_obj_type() : ""}".to_sym
+      def self.get_objects(obj_type,source_obj_type,&block)
+        method_name = "get_objects__#{obj_type}#{source_obj_type ? "__" + source_obj_type : ""}".to_sym
         send(method_name){|source_obj|block.call(source_obj)}
       end
     end
@@ -19,11 +19,10 @@ module XYZ
         raise e
       end
 
-      base_class = DSConnector.const_get Aux.camelize(ds_name())
-      @ds_connector_class = base_class.const_get Aux.camelize(ds_name())
+      @ds_connector_class = DSConnector.const_get Aux.camelize(ds_name())
     end
     def get_objects(&block)
-      @ds_connector_class.get_objects(&block)
+      @ds_connector_class.get_objects(obj_type(),source_obj_type(),&block)
     end
   end
 end

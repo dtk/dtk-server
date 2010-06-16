@@ -66,9 +66,9 @@ module XYZ
     def discover_and_update()
       #default is to place in conatiner that the data source root sets in
       #TBD: logic to override if @objects_location set
-      default_container_obj = get_parent_object().get_parent_object()
-      placement_id_handle = default_container_obj.id_handle
-      @ds_object_adapter.discover_and_update(placement_id_handle,self)
+#      default_container_obj = get_parent_object().get_parent_object()
+ #     placement_id_handle = default_container_obj.id_handle
+      @ds_object_adapter.discover_and_update()
     end
 
     #helper fns
@@ -76,7 +76,11 @@ module XYZ
       super(hash_scalar_values,c,relation_type)
       raise Error.new(":obj_type should be in hash_scalar_values") if hash_scalar_values[:obj_type].nil?
       raise Error.new(":ds_name should be in hash_scalar_values") if hash_scalar_values[:ds_name].nil?
-      @ds_object_adapter = DataSourceAdapter.create(self)
+      #default is to place in container that the data source root sets in
+      #TBD: logic to override if @objects_location set
+      default_container_obj = get_parent_object().get_parent_object()
+      placement_id_handle = default_container_obj.id_handle
+      @ds_object_adapter = DataSourceAdapter.create(self,placement_id_handle)
     end   
     class << self
       DS_object_defaults = {}

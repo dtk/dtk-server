@@ -2,7 +2,7 @@ require File.expand_path('dsl_processor', File.dirname(__FILE__))
 module XYZ
   class DataSourceAdapter
     extend DataTranslationClassMixin
-    def self.create(ds_object)
+    def self.create(ds_object,container_id_handle)
       obj_type = ds_object[:obj_type].to_s
       ds_name = ds_object[:ds_name].to_s
       src = ds_object[:source_obj_type] ? ds_object[:source_obj_type].to_s : nil 
@@ -17,23 +17,21 @@ module XYZ
 
       base_class = DSAdapter.const_get Aux.camelize(ds_name)
       adaper_class = base_class.const_get Aux.camelize("#{obj_type}#{src ? "_" + src : ""}")
-      adaper_class.new(ds_object)
+      adaper_class.new(ds_object,container_id_handle)
     end
 
-    def discover_and_update(container_id_handle,ds_object)
-      #TBD: might set in initialization this object can only be associated with one container id
-      @container_id_handle = container_id_handle
+    def discover_and_update()
       marked = Array.new
       context = Hash.new
-      get_and_update_objects(container_id_handle,marked,context)          
-      delete_unmarked(container_id_handle,marked,context)
+      get_and_update_objects(@container_id_handle,marked,context)          
+      delete_unmarked(@container_id_handle,marked,context)
     end
 
    private
-    def initialize(ds_object)
+    def initialize(ds_object,container_id_handle)
       @ds_object = ds_object
       @parent_ds_object = ds_object.get_parent_object()
-      @container_id_handle = nil
+      @container_id_handle = container_id_handle
       @obj_type = ds_object[:obj_type].to_s
       @ds_name = ds_object[:ds_name].to_s
       @source_obj_type = ds_object[:source_obj_type] ? ds_object[:source_obj_type].to_s : nil

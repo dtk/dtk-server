@@ -10,7 +10,7 @@ module XYZ
           end
         end
       end
-require 'pp'; pp target_obj
+#require 'pp'; pp target_obj
 
       target_obj
     end
@@ -22,6 +22,8 @@ require 'pp'; pp target_obj
         target_obj[attr] = assign.apply(source_obj)
       elsif assign.kind_of?(Definition)
         process_assignment(target_obj,attr,assign.item,source_obj)
+      elsif assign.kind_of?(NestedDefinition)
+        assign.normalize(source_obj)
       elsif assign.kind_of?(ForeignKey)
         target_obj[Object.assoc_key(attr)] = assign
       elsif assign.kind_of?(Hash)
@@ -41,7 +43,6 @@ require 'pp'; pp target_obj
        target_obj[attr] = assign
       end
     end
-
 
     #can class vars 
     def class_rules()
@@ -78,6 +79,10 @@ require 'pp'; pp target_obj
       def target()
         matching_cond_index = class_rules.keys.find{|cond|cond == self}
         class_rules[matching_cond_index || self]
+      end
+
+      def nested_definition(factory_name,source_attributes)
+        target[factory_name] = NestedDefinition.new(factory_name,source_attributes)
       end
 
       def foreign_key(uri)
@@ -121,6 +126,16 @@ require 'pp'; pp target_obj
         raise Error.new("condition #{relation} does not exist")
       end
     end
+
+    class NestedDefinition
+      def initialize(factory_name,source_attributes)
+        @factory_name = factory_name
+        @source_attributes = source_attributes
+      end
+      def normalize(source_obj)
+        require 'pp'; pp @source_attributes.apply(source_obj)
+      end
+    end    
 
     #TBD: is there a better way to do this
     #motivation for putting this in is to avoid having to have var = ..source.; var,dup in all refs 

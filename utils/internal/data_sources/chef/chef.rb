@@ -8,8 +8,8 @@ module XYZ
       class << self
         def get_objects__component(&block)
           get_cookbook_names().each do |cookbook_name|
-            get_recipes_assoc_cookbook(cookbook_name).each do |ds_attr_hash|
-              block.call(ds_attr_hash)
+            get_recipes_assoc_cookbook(cookbook_name).each do |ds_hash|
+              block.call(ds_hash)
             end
           end
         end
@@ -17,19 +17,19 @@ module XYZ
         def get_objects__assoc_node_component(&block)
           get_node_recipe_assocs().each do |node_name,recipes|
             recipes.each do |recipe|
-              ds_attr_hash = {"node_name" => node_name, "recipe_name" => recipe}
+              ds_hash = DataSourceUpdateHash.new({"node_name" => node_name, "recipe_name" => recipe})
   #TBD: to be used to load in variable values node_attributes = get_node_attributes(node_name)
   #or instead may have discover and update on attributes
-              block.call(ds_attr_hash)
+              block.call(ds_hash.freeze)
             end
           end
         end
 
        private
-        #TBD: may not be needed
-        def get_node_attributes(node_name)
-          get_rest("nodes/#{node_name}",false)
-        end
+        #TBD:not needed now
+        #def get_node_attributes(node_name)
+        #  get_rest("nodes/#{node_name}",false)
+        #end
 
         def get_cookbook_names()
           # get_rest("cookbooks")
@@ -47,10 +47,14 @@ module XYZ
 
           if metadata["recipes"]
              metadata["recipes"].each do |recipe_name,description|
-               ret << {"metadata" => metadata, "name" => recipe_name, "description" => description}
+               #TBD: what to construct so nested and mark attributes as complete
+              ds_hash = DataSourceUpdateHash.new({"metadata" => metadata, "name" => recipe_name, "description" => description})
+              
+              ret << ds_hash.freeze 
              end
           else
-            ret << {"metadata" => metadata, "name" => metadata["name"], "description" => metadata["description"]}
+            ds_hash = DataSourceUpdateHash.new({"metadata" => metadata, "name" => metadata["name"], "description" => metadata["description"]})
+            ret << ds_hash.freeze
           end
           ret
         end

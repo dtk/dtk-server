@@ -56,15 +56,14 @@ module XYZ
     end
   end
   #Used as input to db update from hash 
-  #TBD: put in DSUpdateHash which same but does not have donot extend
-  class DBUpdateHash < HashObject
-    attr_reader :constraints, :donot_extend
+  #Used as input to data source normalizer
+  class DataSourceUpdateHash < HashObject  
+    attr_reader :constraints
     def initialize(initial_val=nil,convert_initial=false,&block)
       super
       #if non null means when update done then delete all with respect to parent meeting constraints
       #no contraints captured by {} 
       @constraints = nil
-      @donot_extend = false
     end
 
     def is_complete?()
@@ -84,6 +83,14 @@ module XYZ
       self
     end
   end 
+
+  class DBUpdateHash < DataSourceUpdateHash
+    attr_reader :donot_extend
+    def initialize(initial_val=nil,convert_initial=false,&block)
+      super
+      @donot_extend = false
+    end
+  end
 end
 
 

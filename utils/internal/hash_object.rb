@@ -58,31 +58,47 @@ module XYZ
   #Used as input to db update from hash 
   #Used as input to data source normalizer
   class DataSourceUpdateHash < HashObject  
-    attr_reader :constraints
+
     def initialize(initial_val=nil,convert_initial=false,&block)
       super
       #if non null means when update done then delete all with respect to parent meeting constraints
       #no contraints captured by {} 
-      @constraints = nil
+      @completeness_info = nil
+    end
+
+    def constraints()
+      @completeness_info.kind_of?(HashIsComplete) ? @completeness_info.constraints : nil
     end
 
     def is_complete?()
-      @constraints ? true : nil
+      @completeness_info.kind_of?(HashIsComplete) ? true : nil
     end    
 
-    def mark_as_complete(constraints=nil)
-      if constraints
-        @constraints = constraints
-      else 
-        @constraints ||= {}
+    def mark_as_complete(constraints={})
+      if constraints.empty?
+        @completeness_info ||= HashIsComplete.new()
+      else
+        @completeness_info = HashIsComplete.new(constraints)
       end
       self
     end
+
     def set_constraints(constraints)
-      @constraints = constraints
+      @completeness_info = HashIsComplete.new(constraints)
       self
     end
   end 
+
+  class HashCompletnessInfo
+  end
+  class HashMayNotBeComplete < HashCompletnessInfo
+  end
+  class HashIsComplete < HashCompletnessInfo
+    attr_reader :constraints
+    def initialize(constraints={})
+      @constraints = constraints
+    end
+  end
 
   class DBUpdateHash < DataSourceUpdateHash
     attr_reader :donot_extend

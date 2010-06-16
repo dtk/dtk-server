@@ -13,8 +13,9 @@ module XYZ
           servers.each do |server|
             flavor = flavor_cache.get(server[:flavor_id]){|id| conn().flavor_get(id)}
             server[:flavor] = flavor if flavor
-            block.call(server)
+            block.call(DataSourceUpdateHash.new(server).freeze)
           end
+          return HashIsComplete.new({:ds_source => :instance})
         end
 
         def get_objects__node__image(&block)
@@ -26,10 +27,10 @@ module XYZ
             images[image_id] = conn().image_get(image_id) unless images[image_id]
           end
           images.values().each do |image|
-            block.call(image)
+            block.call(DataSourceUpdateHash.new(image).freeze)
           end
+          return HashMayNotBeComplete.new()
         end
-
        private
 
         def conn()

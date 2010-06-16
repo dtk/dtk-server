@@ -64,7 +64,7 @@ module XYZ
       Definition.new(item)
     end
 
-    def source_complete_for(trgt,constraints=nil)
+    def source_complete_for(trgt,constraints={})
       trgt.mark_as_complete(constraints)
     end
     def ==(x)

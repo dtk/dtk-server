@@ -82,7 +82,7 @@ module XYZ
       end
 
       def nested_definition(factory_name,source_attributes)
-        target[factory_name] = NestedDefinition.new(factory_name,source_attributes)
+        target[factory_name] = NestedDefinition.new(factory_name,source_attributes,@parent)
       end
 
       def foreign_key(uri)
@@ -128,12 +128,13 @@ module XYZ
     end
 
     class NestedDefinition
-      def initialize(factory_name,source_attributes)
+      def initialize(factory_name,source_attributes,parent_adapter)
+        @parent_adapter = parent_adapter
         @factory_name = factory_name
         @source_attributes = source_attributes
       end
       def normalize(source_obj)
-        require 'pp'; pp @source_attributes.apply(source_obj)
+        require 'pp'; pp [@parent_adapter.class,@source_attributes.apply(source_obj)]
       end
     end    
 

@@ -1,4 +1,3 @@
-#require UTILS_DIR + 'internal/data_sources/data_source_adapter'
 module XYZ
   class DataSource < Model
     set_relation_name(:data_source,:data_source)
@@ -46,7 +45,6 @@ module XYZ
   class DataSourceEntry < Model
     attr_reader :ds_object_adapter
     set_relation_name(:data_source,:entry)
-    include DataSourceAdapterInstanceMixin
     class << self
       def up()
         column :ds_name, :varchar, :size => 25 #TBD: just passed in for convenient access; 'inherited' from its conatiner
@@ -65,10 +63,18 @@ module XYZ
     end
     #actions
     def discover_and_update()
-      discover_and_update_private()
+      marked = Array.new
+      context = Hash.new
+      get_objects() do |source_obj|
+        normalize_and_update_db(@container_id_handle,source_obj,marked) 
+      end
+      delete_unmarked(@container_id_handle,marked,context)
     end
 
     #helper fns
+    include DataSourceAdapterInstanceMixin
+    include DataSourceConnectorInstanceMixin
+
     def initialize(hash_scalar_values,c,relation_type)
       super(hash_scalar_values,c,relation_type)
       raise Error.new(":obj_type should be in hash_scalar_values") if hash_scalar_values[:obj_type].nil?
@@ -77,9 +83,21 @@ module XYZ
       #TBD: logic to override if @objects_location set
       default_container_obj = get_parent_object().get_parent_object()
       @container_id_handle = default_container_obj.id_handle
-      @ds_object_adapter_class = load_ds_adapter_class()
       @parent_ds_object = get_parent_object()
+      load_ds_connector_class()
+      load_ds_adapter_class()
+
     end   
+    def obj_type()
+      self[:obj_type].to_s
+    end
+    def ds_name()
+      self[:ds_name].to_s
+    end
+    def source_obj_type()
+      self[:source_obj_type] ? self[:source_obj_type].to_s : nil
+    end
+
     class << self
       DS_object_defaults = {}
       def fill_in_defaults(ds_name,obj_type,hash_content)

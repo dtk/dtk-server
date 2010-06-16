@@ -3,10 +3,8 @@ require 'chef/config'
 require 'mixlib/authentication'
 
 module XYZ
-  module DSAdapter
-    class Chef
-      class Top < DataSourceAdapter
-
+  module DSConnector
+    class Chef < Top
         def get_objects__component(&block)
           get_cookbook_names().each do |cookbook_name|
             get_recipes_assoc_cookbook(cookbook_name).each do |ds_attr_hash|
@@ -95,7 +93,6 @@ module XYZ
         end
       end
     end
-  end
 end
 
 

@@ -1,5 +1,6 @@
 module XYZ
   module DataSourceAdapterInstanceMixin
+   private
     def load_ds_adapter_class()
       rel_path = "#{ds_name()}/#{obj_type()}#{source_obj_type() ? "__" + source_obj_type() : ""}"
       begin 
@@ -11,20 +12,30 @@ module XYZ
       end
 
       base_class = DSNormalizer.const_get Aux.camelize(ds_name())
-      base_class.const_get Aux.camelize("#{obj_type()}#{source_obj_type() ? "_" + source_obj_type() : ""}")
+      @ds_object_adapter_class = base_class.const_get Aux.camelize("#{obj_type()}#{source_obj_type() ? "_" + source_obj_type() : ""}")
     end
-   private
-    def discover_and_update_private()
-      marked = Array.new
-      context = Hash.new
-      get_and_update_objects(@container_id_handle,marked,context)          
-      delete_unmarked(@container_id_handle,marked,context)
+
+    def normalize_and_update_db(container_id_handle,source_obj,marked)
+      return nil if source_obj.nil?
+      marked << ds_key_value(source_obj)
+      db_update_hash = ret_db_update_hash(container_id_handle,source_obj)
+      Object.input_into_model(container_id_handle,db_update_hash)
+    end
+
+    def ret_db_update_hash(container_id_handle,source_obj)
+      obj = normalize(source_obj)
+      obj[:ds_attributes] = filter(source_obj)
+      obj[:ds_key] = ds_key_value(source_obj)
+      obj[:ds_source] = source_obj_type() if source_obj_type()      
+      ret = DBUpdateHash.create_with_auto_vivification()
+      ret[relation_type()][ref(source_obj)]= obj
+      ret.freeze
     end
 
     #Should be overwritten if no dsl
     def normalize(source_obj)
       target_obj = DBUpdateHash.create_with_auto_vivification()
-      self.class.class_rules.each do |condition,top_level_assign|
+      @ds_object_adapter_class.each do |condition,top_level_assign|
         if condition.evaluate_condition(source_obj)
           top_level_assign.each do |attr,assign|
             process_assignment(target_obj,attr,assign,source_obj) 
@@ -64,52 +75,15 @@ module XYZ
       end
     end
 
-    def obj_type()
-      self[:obj_type].to_s
-    end
-    def ds_name()
-      self[:ds_name].to_s
-    end
-    def source_obj_type()
-      self[:source_obj_type] ? self[:source_obj_type].to_s : nil
-    end
-
     #filter applied when into put in ds_attribute bag gets overwritten for non trivial filter
     def filter(source_obj)
       source_obj
     end
 
-
-    def get_and_update_objects(container_id_handle,marked,context)          
-      method_name = "get_objects__#{obj_type()}#{source_obj_type() ? "__" + source_obj_type() : ""}".to_sym
-      context[:source_is_complete] = true
-      send(method_name) do |source_obj|
-        discover_and_update_item(container_id_handle,source_obj,marked) 
-      end
-    end
-
-    def discover_and_update_item(container_id_handle,source_obj,marked)
-      return nil if source_obj.nil?
-      marked << ds_key_value(source_obj)
-      db_update_hash = ret_db_update_hash(container_id_handle,source_obj)
-      Object.input_into_model(container_id_handle,db_update_hash)
-    end
-
-    def ret_db_update_hash(container_id_handle,source_obj)
-      obj = normalize(source_obj)
-      obj[:ds_attributes] = filter(source_obj)
-      obj[:ds_key] = ds_key_value(source_obj)
-      obj[:ds_source] = source_obj_type() if source_obj_type()      
-      ret = DBUpdateHash.create_with_auto_vivification()
-      ret[relation_type()][ref(source_obj)]= obj
-      ret.freeze
-    end
-
-        
     #TBD: see if can refactor and have this subsumed by logic in db update
     def delete_unmarked(container_id_handle,marked,context)
       return nil unless context[:source_is_complete]
-      constraints = self.class.top_level_completeness_constraints
+      constraints = @ds_object_adapter_class.top_level_completeness_constraints
       return nil if constraints.nil?
       marked_disjunction = nil
       marked.each do |ds_key|

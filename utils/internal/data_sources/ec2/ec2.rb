@@ -1,9 +1,9 @@
 require File.expand_path("../cloud_connect.rb", File.dirname(__FILE__))
 
 module XYZ
-  module DSAdapter
-    class Ec2
-      class Top < DataSourceAdapter
+  module DSConnector
+    class Ec2 < Top
+      class << self
         def get_objects__node__instance(&block)
           servers = conn().servers_all()
           #TBD: this this is very static this may be cached somewhere; would like to write

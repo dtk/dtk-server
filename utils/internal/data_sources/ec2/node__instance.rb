@@ -1,9 +1,7 @@
-require File.expand_path("ec2", File.dirname(__FILE__))
-
 module XYZ
-  module DSAdapter
+  module DSNormalizer
     class Ec2
-      class NodeInstance < Ec2::Top 
+      class NodeInstance < Top 
         #TBD: could write 'lint checker that makes sure that target indexes correspond to schema described in models
         definitions do
           source_complete_for_entire_target :ds_source => @source_obj_type 
@@ -29,16 +27,17 @@ module XYZ
             prefix[:network_partition_id] = foreign_key "/network_partition/internet"
           end
         end
+        class << self
+          #TB: may put both these in form above
+          #target[:ds_key] = fn(:unique_keys,[:instance,v[:id]]) or
+          #target[:ds_key] = unique_keys[:instance,v[:id]]
+          def unique_keys(source_hash)
+            [:instance,source_hash[:id]]
+          end
 
-        #TB: may put both these in form above
-        #target[:ds_key] = fn(:unique_keys,[:instance,v[:id]]) or
-        #target[:ds_key] = unique_keys[:instance,v[:id]]
-        def unique_keys(v)
-          [:instance,v[:id]]
-        end
-
-        def relative_distinguished_name(v)
-          v[:id]
+          def relative_distinguished_name(source_hash)
+            source_hash[:id]
+          end
         end
       end
     end

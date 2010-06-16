@@ -64,11 +64,10 @@ module XYZ
     #actions
     def discover_and_update()
       marked = Array.new
-      context = Hash.new
-      get_objects() do |source_obj|
+      hash_completeness_info = get_objects() do |source_obj|
         normalize_and_update_db(@container_id_handle,source_obj,marked) 
       end
-      delete_unmarked(@container_id_handle,marked,context)
+      delete_unmarked(@container_id_handle,marked,hash_completeness_info)
     end
 
     #helper fns
@@ -96,6 +95,9 @@ module XYZ
     end
     def source_obj_type()
       self[:source_obj_type] ? self[:source_obj_type].to_s : nil
+    end
+    def ds_is_golden_store()
+      self[:ds_is_golden_store]
     end
 
     class << self

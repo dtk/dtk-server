@@ -12,6 +12,7 @@ module XYZ
               block.call(ds_hash)
             end
           end
+          return HashMayNotBeComplete.new()
         end
 
         def get_objects__assoc_node_component(&block)
@@ -23,6 +24,7 @@ module XYZ
               block.call(ds_hash.freeze)
             end
           end
+          return HashIsComplete.new()
         end
 
        private

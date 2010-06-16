@@ -5,14 +5,6 @@ module XYZ
         def class_rules()
         @class_rules ||= DBUpdateHash.create_with_auto_vivification()
        end
-    
-       #TBD: this get deprecated
-       def top_level_completeness_constraints() 
-        @top_level_completeness_constraints ||= nil
-       end
-       def set_entire_target_is_complete(constraints={})
-        @top_level_completeness_constraints = constraints
-       end
      private
 
       def definitions(&block)
@@ -56,17 +48,10 @@ module XYZ
       Function.new(func_name_or_def,args)
     end
 
-    def source_complete_for_entire_target(constraints={})
-      @parent.set_entire_target_is_complete(constraints)
-    end
-
     def definition(item)
       Definition.new(item)
     end
 
-    def source_complete_for(trgt,constraints={})
-      trgt.mark_as_complete(constraints)
-    end
     def ==(x)
       @relation == x.relation and @condition == x.condition
     end

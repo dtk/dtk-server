@@ -3,7 +3,6 @@ module XYZ
     class Chef
       class Component < Top
         definitions do
-          source_complete_for_entire_target
           #TBD: current solution needed '= definition' or using dup every time refer to defined var like 'emtadata'; is there a better way (i.e., more transparant) to do this
           metadata = definition source["metadata"]
           name = definition fn(lambda{|x,y,z|x||y||z},source["name"],metadata["display_name"],metadata["name"])

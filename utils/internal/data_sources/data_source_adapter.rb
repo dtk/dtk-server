@@ -82,11 +82,12 @@ module XYZ
       source_obj
     end
 
-    #TBD: see if can refactor and have this subsumed by logic in db update
-    def delete_unmarked(container_id_handle,marked,context)
-      return nil unless context[:source_is_complete]
-      constraints = @ds_object_adapter_class.top_level_completeness_constraints
-      return nil if constraints.nil?
+    #only consider complete and thus perform deletes if source is marked as compleet as designated by 
+    #hash_completeness_info and source is golden store
+    def delete_unmarked(container_id_handle,marked,hash_completeness_info)
+      return nil unless hash_completeness_info.is_complete?()
+      return nil unless ds_is_golden_store()
+      constraints = hash_completeness_info.constraints
       marked_disjunction = nil
       marked.each do |ds_key|
         marked_disjunction = SQL.or(marked_disjunction,{:ds_key => ds_key})

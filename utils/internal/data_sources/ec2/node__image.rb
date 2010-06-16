@@ -5,7 +5,6 @@ module XYZ
       class NodeImage < Top 
        private
         definitions do
-          source_complete_for_entire_target :ds_source => @source_obj_type 
         end
         class << self
           def unique_keys(v)

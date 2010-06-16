@@ -15,7 +15,7 @@ module XYZ
             server[:flavor] = flavor if flavor
             block.call(DataSourceUpdateHash.new(server).freeze)
           end
-          return HashIsComplete.new({:ds_source => :instance})
+          return HashIsComplete.new({:ds_source => "instance"})
         end
 
         def get_objects__node__image(&block)

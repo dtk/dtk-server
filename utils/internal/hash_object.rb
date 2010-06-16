@@ -67,11 +67,11 @@ module XYZ
     end
 
     def constraints()
-      @completeness_info.kind_of?(HashIsComplete) ? @completeness_info.constraints : nil
+      @completeness_info ? @completeness_info.constraints : nil
     end
 
     def is_complete?()
-      @completeness_info.kind_of?(HashIsComplete) ? true : nil
+      @completeness_info ? @completeness_info.is_complete? : nil
     end    
 
     def mark_as_complete(constraints={})
@@ -90,13 +90,24 @@ module XYZ
   end 
 
   class HashCompletnessInfo
+    def is_complete?()
+      false
+    end
+    def constraints()
+      nil
+    end
   end
   class HashMayNotBeComplete < HashCompletnessInfo
   end
   class HashIsComplete < HashCompletnessInfo
-    attr_reader :constraints
     def initialize(constraints={})
       @constraints = constraints
+    end
+    def is_complete?()
+      true
+    end
+    def constraints()
+      @constraints
     end
   end
 

@@ -63,9 +63,9 @@ module XYZ
       @parent.class_rules
     end
 
-    def evaluate_condition(source_obj)
+    def evaluate_condition(ds_hash)
       return true if @relation == :no_conditions
-      return @condition.apply(source_obj) if @relation == :if_exists
+      return @condition.apply(ds_hash) if @relation == :if_exists
       raise Error.new("condition #{relation} does not exist")
     end
   end
@@ -75,13 +75,13 @@ module XYZ
       @obj_type = obj_type
       @source_attributes = source_attributes
     end
-    def normalize(source_objs,parent_ds_object)
+    def normalize(ds_hash_list,parent_ds_object)
       #TBD: how to avoid this db call
       ds_object = parent_ds_object.get_directly_contained_objects(:data_source_entry,{:obj_type=>@obj_type.to_s}).first
       raise Error.new("cannot find data source adapter for nested definition") if ds_object.nil?
       #TBD: need to set appropriate flags on whetehr golden store
       ret = DBUpdateHash.new()
-      @source_attributes.apply(source_objs).each do |ref,attrs|
+      @source_attributes.apply(ds_hash_list).each do |ref,attrs|
         child_source_hash = {ref => attrs}        
         key = ds_object.relative_distinguished_name(child_source_hash)
         ret[key] = ds_object.normalize(child_source_hash)
@@ -117,8 +117,8 @@ module XYZ
       self
     end
 
-    def apply(source_obj)
-      HashObject.nested_value(source_obj,@path)
+    def apply(ds_hash)
+      HashObject.nested_value(ds_hash,@path)
     end
   end
 
@@ -138,8 +138,8 @@ module XYZ
       @args = args.first
     end
       
-    def apply(source_obj)
-      evaluated_args = @args.map{|term|apply_to_term(term,source_obj)}
+    def apply(ds_hash)
+      evaluated_args = @args.map{|term|apply_to_term(term,ds_hash)}
       if @function_name 
         send(@function_name,*evaluated_args)
       elsif @function_ref
@@ -152,13 +152,13 @@ module XYZ
       "*" + uri
     end
    private
-    def apply_to_term(term,source_obj)
+    def apply_to_term(term,ds_hash)
       if term.kind_of?(Source)
-        term.apply(source_obj)
+        term.apply(ds_hash)
       elsif term.kind_of?(Function)
-        term.apply(source_obj)
+        term.apply(ds_hash)
       elsif term.kind_of?(Definition)
-        apply_to_term(term.item,source_obj)
+        apply_to_term(term.item,ds_hash)
       else
         term
       end

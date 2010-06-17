@@ -13,7 +13,7 @@ module XYZ
     def is_complete?()
       false
     end
-    def donot_extend()
+    def do_not_extend()
       false
     end
    private
@@ -55,17 +55,9 @@ module XYZ
       end
     end
   end
-  #Used as input to db update from hash 
   #Used as input to data source normalizer
   class DataSourceUpdateHash < HashObject  
-
-    def initialize(initial_val=nil,convert_initial=false,&block)
-      super
-      #if non null means when update done then delete all with respect to parent meeting constraints
-      #no contraints captured by {} 
-      @completeness_info = nil
-    end
-
+    #for efficiency not initializing @completeness_info = nil
     def constraints()
       @completeness_info ? @completeness_info.constraints : nil
     end
@@ -111,11 +103,11 @@ module XYZ
     end
   end
 
+  #Used as input to db update from hash 
   class DBUpdateHash < DataSourceUpdateHash
-    attr_reader :donot_extend
-    def initialize(initial_val=nil,convert_initial=false,&block)
-      super
-      @donot_extend = false
+    #for efficiency not initializing @do_not_extend = false
+    def do_not_extend()
+      @do_not_extend ? true : false
     end
   end
 end

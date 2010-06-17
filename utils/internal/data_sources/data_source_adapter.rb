@@ -53,8 +53,6 @@ module XYZ
         target_obj[attr] = assign.apply(ds_hash)
       elsif assign.kind_of?(DSNormalizer::Function)
         target_obj[attr] = assign.apply(ds_hash)
-      elsif assign.kind_of?(DSNormalizer::Definition)
-        process_assignment(target_obj,attr,assign.item,ds_hash)
       elsif assign.kind_of?(DSNormalizer::NestedDefinition)
         target_obj[attr] = assign.normalize(ds_hash,self)
       elsif assign.kind_of?(DSNormalizer::ForeignKey)

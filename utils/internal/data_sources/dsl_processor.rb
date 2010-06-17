@@ -53,10 +53,6 @@ module XYZ
       Function.new(func_name_or_def,args,self)
     end
 
-    def definition(item)
-      Definition.new(item)
-    end
-
     def source_complete_for(trgt,constraints={})
       trgt.mark_as_complete(constraints)
     end
@@ -100,35 +96,17 @@ module XYZ
     end
   end    
 
-  #TBD: is there a better way to do this
-  #motivation for putting this in is to avoid having to have var = ..source.; var,dup in all refs 
-  # because if haev two references to same source they "would update each otehr without this
-  class Definition
-    attr_reader :item
-    def initialize(item)
-      @item = item
-    end
-    def [](a)
-     item.kind_of?(Source) ? item.dup[a] : item[a]
-    end
-  end
-
   class Source 
     def initialize(path=nil)
       @path = path ? Array.new(path) : Array.new
     end
 
-    def dup() 
-      self.class.new(@path)
-    end
-
     def [](a="*")
-      @path << a
-      self
+      self.class.new(@path +[a])
     end
 
     def apply(ds_hash)
-      HashObject.nested_value(ds_hash,@path)
+      DBUpdateHash.nested_value(ds_hash,@path)
     end
   end
 
@@ -159,19 +137,12 @@ module XYZ
         @function_ref.call(*evaluated_args)
       end
     end
-    #predefined functions
-    def foreign_key(uri)
-      #stub
-      "*" + uri
-    end
    private
     def apply_to_term(term,ds_hash)
       if term.kind_of?(Source)
         term.apply(ds_hash)
       elsif term.kind_of?(Function)
         term.apply(ds_hash)
-      elsif term.kind_of?(Definition)
-        apply_to_term(term.item,ds_hash)
       else
         term
       end

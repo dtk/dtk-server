@@ -3,9 +3,8 @@ module XYZ
     class Chef
       class Component < Top
         definitions do
-          #TBD: current solution needed '= definition' or using dup every time refer to defined var like 'emtadata'; is there a better way (i.e., more transparant) to do this
-          metadata = definition source["metadata"]
-          name = definition fn(lambda{|x,y,z|x||y||z},source["name"],metadata["display_name"],metadata["name"])
+         metadata = source["metadata"]
+         name = fn(lambda{|x,y,z|x||y||z},source["name"],metadata["display_name"],metadata["name"])
           target[:display_name] = name
           target[:description] = source["description"]
           target[:external_type] = "chef_recipe"

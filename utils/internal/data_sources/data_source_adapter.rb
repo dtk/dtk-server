@@ -80,11 +80,6 @@ module XYZ
       end
     end
 
-    #filter applied when into put in ds_attribute bag gets overwritten for non trivial filter
-    def filter(ds_hash)
-      ds_hash
-    end
-
     #only consider complete and thus perform deletes if source is marked as compleet as designated by 
     #hash_completeness_info and source is golden store
     def delete_unmarked(container_id_handle,marked,hash_completeness_info)
@@ -107,6 +102,10 @@ module XYZ
     def ds_key_value(ds_hash)
       relative_unique_key = @ds_object_adapter_class.unique_keys(ds_hash)
       qualified_key(relative_unique_key)
+    end
+    
+    def filter(ds_hash)
+      @ds_object_adapter_class.filter(ds_hash)
     end
 
     def qualified_key(relative_unique_key,ds_name_override=nil)

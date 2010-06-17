@@ -2,6 +2,11 @@ module XYZ
   module DSNormalizer
     class Top
       class << self
+        #filter applied when into put in ds_attribute bag gets overwritten for non trivial filter
+        def filter(ds_hash)
+          ds_hash
+        end
+
         def class_rules()
         @class_rules ||= DBUpdateHash.create_with_auto_vivification()
        end

@@ -15,23 +15,23 @@ module XYZ
         end
 
         class << self
-        #TBD below is effectively dsl; may make more declarative using data integration dsl
-        def unique_keys(source_hash)
-          [source_hash["name"]]
-        end
+          #TBD below is effectively dsl; may make more declarative using data integration dsl
+          def unique_keys(source_hash)
+            [source_hash["name"]]
+          end
 
-        def relative_distinguished_name(source_hash)
-          source_hash["name"]
-        end
+          def relative_distinguished_name(source_hash)
+            source_hash["name"]
+          end
 =begin
-        def filter(source_hash)
-          attrs = %w{name display_name description chef_recipe attributes}
-          HashObject.object_slice(source_hash["metadata"],attrs)
-        end
+          def filter(source_hash)
+            attrs = %w{name display_name description chef_recipe attributes}
+            DBUpdateHash.object_slice(source_hash["metadata"],attrs)
+          end
 =end
-        def filter(source_hash)
-          HashObject.new()
-        end
+          def filter(source_hash)
+            DBUpdateHash.new()
+          end
         end
       end
     end

@@ -4,17 +4,14 @@ module XYZ
       class Attribute < Top
          definitions do
            #TBD: assuming that after split first item is cookbook name
-#           target[:external_attr_ref] = source_key #"node[#{m["name"]}][#{ref_x.gsub(/\//,"][")}]"
-           target[:external_attr_ref] = fn(:external_attr_ref,source_key)
-           #"node[#{m["name"]}][#{ref_x.gsub(/\//,"][")}]"
-           #TBD: put insomething like target[:external_attr_ref] = fn(lambda{|name,ref|"node[#{name}][#{ref.gsub(/\//,"][")}]"},source_parent["name"],source[])
-           target[:data_type] = fn(lambda{|x|case x;when "hash", "array"; "json"; else x; end},source[][:type])
+           target[:external_attr_ref] = fn(lambda{|ref|"node[#{ref.gsub(/\//,"][")}]"},source_key)
+           target[:data_type] = fn(:data_type,source[]["type"])
            #TBD: have form that is no assignment if source is null
            %w{port_type display_name description constraints}.each do |k|
              target[k.to_sym] = source[][k]
            end
            target[:value_asserted] = source[]["default"] 
-           #TBD: put back in target[:semantic_type] = av["semantic_type"].to_json if av["semantic_type"]
+           target[:semantic_type] = fn(lambda{|x|x.to_json if x},source[]["semantic_type"])
          end
 
          class << self
@@ -31,12 +28,16 @@ module XYZ
           end
 
           def filter(source_hash)
-            HashObject.new()
+            DBUpdateHash.new()
           end
 
           #### defined fns
-          def external_attr_ref(ref)
-            "test[#{ref}]"
+          def data_type(type)
+            case type
+              when "hash", "array"
+                "json"
+              else type
+            end
           end
         end
       end

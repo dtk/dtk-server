@@ -7,16 +7,14 @@ module XYZ
           target[:image_size] = source[:flavor][:ram]
           target[:is_deployed] = true
 
+          source_complete_for target[:node_interface]          
           prefix = target[:node_interface]
           prefix[:eth0][:type] = 'ethernet' 
           prefix[:eth0][:family] = 'ipv4' 
           prefix[:eth0][:address] =  source[:private_ip_address] 
 
+          source_complete_for target[:address_access_point]
           if_exists(source[:ip_address]) do
-            #TBD: may introduce (use term scope or prefix) c
-            # scope[:address_access_point] do 
-            #   scoped_target[:type] = "internet"
-            # end
             prefix = target[:address_access_point]["internet_ipv4"]
             prefix[:type] = "internet"
             prefix[:network_address][:family] = "ipv4"

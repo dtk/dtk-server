@@ -52,6 +52,9 @@ module XYZ
       Definition.new(item)
     end
 
+    def source_complete_for(trgt,constraints={})
+      trgt.mark_as_complete(constraints)
+    end
     def ==(x)
       @relation == x.relation and @condition == x.condition
     end

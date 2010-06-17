@@ -23,14 +23,10 @@ module XYZ
           def relative_distinguished_name(source_hash)
             source_hash["name"]
           end
-=begin
+
           def filter(source_hash)
-            attrs = %w{name display_name description chef_recipe attributes}
+            attrs = %w{name display_name description chef_recipe}
             DBUpdateHash.object_slice(source_hash["metadata"],attrs)
-          end
-=end
-          def filter(source_hash)
-            DBUpdateHash.new()
           end
         end
       end

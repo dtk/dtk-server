@@ -7,12 +7,12 @@ module XYZ
         definitions do
         end
         class << self
-          def unique_keys(v)
-            [:image,v[:id]]
+          def unique_keys(source_hash)
+            [:image,source_hash[:id]]
           end
 
-          def relative_distinguished_name(v)
-            v[:id]
+          def relative_distinguished_name(source_hash)
+            source_hash[:id]
           end
         end
       end

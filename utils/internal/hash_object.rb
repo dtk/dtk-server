@@ -41,6 +41,7 @@ module XYZ
       end
       #TBD: might better related nested and auto vivfication
       def nested_value(hash,path)
+        return hash if path.empty?
         nested_value_private(hash,path.dup)
       end
      private

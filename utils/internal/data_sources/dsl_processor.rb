@@ -15,7 +15,7 @@ module XYZ
     end
   end
   class Context
-    attr_reader :relation,:condition
+    attr_reader :relation,:condition, :parent
     def initialize(parent,relation=:no_condition,condition=nil)
       @parent = parent
       @relation = relation
@@ -45,7 +45,7 @@ module XYZ
     end
 
     def fn(func_name_or_def,*args)
-      Function.new(func_name_or_def,args)
+      Function.new(func_name_or_def,args,self)
     end
 
     def definition(item)
@@ -55,6 +55,11 @@ module XYZ
     def source_complete_for(trgt,constraints={})
       trgt.mark_as_complete(constraints)
     end
+
+    def source_key()
+      Function.new(lambda{|x|x.keys.first},[Source.new()],self)
+    end
+
     def ==(x)
       @relation == x.relation and @condition == x.condition
     end
@@ -129,19 +134,22 @@ module XYZ
   end
 
   class Function
-    def initialize(func_name_or_def,*args)
+    def initialize(func_name_or_def,args,context_parent)
       if func_name_or_def.kind_of?(String) or func_name_or_def.kind_of?(Symbol)
         @function_name = func_name_or_def.to_sym
       else #should be a lambda function
         @function_ref = func_name_or_def
       end
-      @args = args.first
+      @args = args
+      @context_parent = context_parent
     end
       
     def apply(ds_hash)
       evaluated_args = @args.map{|term|apply_to_term(term,ds_hash)}
       if @function_name 
-        send(@function_name,*evaluated_args)
+        #resolve with respect class adapter
+        #TBD: where do we put "wired" fns; can put it in DSNormalizerTop if using this path below
+        @context_parent.parent.send(@function_name,*evaluated_args)
       elsif @function_ref
         @function_ref.call(*evaluated_args)
       end

@@ -41,8 +41,8 @@ module XYZ
       target[obj_type] = NestedDefinition.new(obj_type,source_attributes)
     end
 
-    def foreign_key(uri)
-      ForeignKey.new(uri)
+    def foreign_key(arg)
+      ForeignKey.new(arg)
     end
 
     def source()

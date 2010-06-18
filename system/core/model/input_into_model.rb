@@ -44,7 +44,7 @@ module XYZ
 	info.each_pair do |col,ref_uri_x|
           ref_uri = ret_rebased_uri(ref_uri_x,prefixes,container_uri)
 	  ref_id_info = get_row_from_id_handle(IDHandle[:c => c, :uri => ref_uri])
-	  raise Error.new("In import_into_model cannot find object with uri #{ref_uri}") unless ref_id_info[:id]
+	  raise Error.new("In import_into_model cannot find object with uri #{ref_uri}") unless ref_id_info and ref_id_info[:id]
 	  update_instance(fk_rel_id_handle,{col.to_sym =>  ref_id_info[:id]})	  
         end
       end

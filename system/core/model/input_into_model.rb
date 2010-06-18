@@ -61,8 +61,11 @@ module XYZ
           ref_uri = ret_rebased_uri(ref_uri_x,prefixes,container_uri)
 	  ref_id_info = get_row_from_id_handle(IDHandle[:c => c, :uri => ref_uri])
           unless ref_id_info and ref_id_info[:id]
-            if col.create_object_ref
+            if col.create_ref_object
+              #TBD: check whether should also populate ds_key; may not be needed because
+              #of relation between ds_key and relative distinguished name
               create_simple_instance?(ref_uri,c)
+	      ref_id_info = get_row_from_id_handle(IDHandle[:c => c, :uri => ref_uri])
             else
 	      Log.info("In import_into_model cannot find object with uri #{ref_uri}") 
               next

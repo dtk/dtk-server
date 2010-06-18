@@ -114,10 +114,13 @@ module XYZ
       relative_distinguished_name(ds_hash)
     end
 
+=begin
+TBD: may deprecate; was used initially in hard coded normalization
     def find_foreign_key_id(obj_type,relative_unique_key,ds_name=nil)
       where_clause = {:ds_key => qualified_key(relative_unique_key,ds_name)}
       Object.get_object_ids_wrt_parent(relation_type(obj_type),@container_id_handle,where_clause).first
      end
+=end
   end
 end
 

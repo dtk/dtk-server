@@ -3,8 +3,8 @@ module XYZ
     class Chef
       class AssocNodeComponent < Top 
         definitions do
-          target[:node_id] = foreign_key fn(lambda{|x|"/node/#{x}"},source["node_name"])
-          target[:component_id] = foreign_key fn(lambda{|x|"/component/#{x}"},source["recipe_name"])
+          target[:node_id] = foreign_key :node, source["node_name"]
+          target[:component_id] = foreign_key :component, source["recipe_name"]
         end
         class << self
           def unique_keys(source_hash)

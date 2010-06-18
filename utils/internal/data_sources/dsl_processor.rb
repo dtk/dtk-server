@@ -42,8 +42,8 @@ module XYZ
     end
 
     #TBD: need to fix; need to determine if use source attribute path, target attribute path and/or source ds_key to refer to foreign key
-    def foreign_key(arg)
-      ForeignKey.new(arg)
+    def foreign_key(obj_type,path)
+      ForeignKey.new(fn(lambda{|source|"/#{obj_type}/#{source}"},path))
     end
 
     def source()

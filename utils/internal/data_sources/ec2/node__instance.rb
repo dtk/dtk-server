@@ -19,7 +19,7 @@ module XYZ
             prefix[:type] = "internet"
             prefix[:network_address][:family] = "ipv4"
             prefix[:network_address][:address] = source[:ip_address]
-            prefix[:network_partition_id] = foreign_key "/network_partition/internet"
+            prefix[:network_partition_id] = foreign_key :network_partition, "internet"
           end
         end
         class << self

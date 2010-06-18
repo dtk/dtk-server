@@ -41,6 +41,7 @@ module XYZ
       target[obj_type] = NestedDefinition.new(obj_type,source_attributes)
     end
 
+    #TBD: need to fix; need to determine if use source attribute path, target attribute path and/or source ds_key to refer to foreign key
     def foreign_key(arg)
       ForeignKey.new(arg)
     end

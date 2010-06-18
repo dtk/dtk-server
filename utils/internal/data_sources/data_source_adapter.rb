@@ -56,11 +56,11 @@ module XYZ
       elsif assign.kind_of?(DSNormalizer::NestedDefinition)
         target_obj[attr] = assign.normalize(ds_hash,self)
       elsif assign.kind_of?(DSNormalizer::ForeignKey)
-        target_obj[Object.assoc_key(attr)] = assign
+        process_assignment(target_obj,Object.assoc_key(attr),assign.arg,ds_hash)
       elsif assign.kind_of?(Hash)
         #TBD: use of paranthesis below may be needed because of possible Ruby parser bug
         constraints = (assign.kind_of?(DBUpdateHash) ? assign.constraints : nil)
-        target_obj.set_constraints(constraints) if constraints
+        target_obj[attr].set_constraints(constraints) if constraints
         if assign.empty?
           #include empty hash if there are contraints associated with it (this wil serve to delet all
           # its peers; only including this conditionally is for optimization

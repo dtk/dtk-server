@@ -110,9 +110,10 @@ module XYZ
     end
   end
 
-  class ForeignKey < String
-    def initialize(uri)
-      replace(uri)
+  class ForeignKey 
+    attr_reader :arg
+    def initialize(arg)
+      @arg = arg
     end
   end
 

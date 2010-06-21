@@ -1,9 +1,9 @@
 #all this is a hack for demo integration
 
-lib = "/root/Reactor8/demo-tpl-handling/formtests/" 
+#lib = "/root/Reactor8/demo-tpl-handling/formtests/" 
 
-$: << lib unless $:.include?(lib)
-require 'config.r8.rb'
+#$: << lib unless $:.include?(lib)
+#require 'config.r8.rb'
 
 
   module R8View
@@ -12,7 +12,7 @@ require 'config.r8.rb'
   module R8
     I18N = {}
   end
-  require 'i18n/component/en.us.rb' #TBD: should be conditionally loaded
+#  require 'i18n/component/en.us.rb' #TBD: should be conditionally loaded
 
 
 module XYZ

@@ -27,5 +27,9 @@ module XYZ
       #TBD: implement :normalized_attrs_only flag
       @results = objs
     end
+
+    def testing
+      return "anything reaching this route"
+    end
   end
 end

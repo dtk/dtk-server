@@ -1,6 +1,7 @@
-#require File.expand_path('swoop_stub', File.dirname(__FILE__))
+require File.expand_path('swoop_stub', File.dirname(__FILE__))
 #require File.expand_path('frontend_integration_stub', File.dirname(__FILE__))
 
+require File.expand_path('workspace', File.dirname(__FILE__))
 
  # Default url mappings are:
 #  a controller called Main is mapped on the root of the site: /
@@ -20,8 +21,12 @@ module XYZ
     end
 =end
     def index
-#      layout :test
+      layout :test
 print "This is a test of the main ctrllr index"      
+    end
+
+    def crap
+      return "This is gaaaaaaaaaarb!!!!!"
     end
 
     #TBD: might refactor other actions to use this

@@ -4,6 +4,12 @@ module XYZ
   class NodeController < Controller
 
     def list
+      error_405 unless request.get?
+      where_clause = {} # stub
+      objs = get_objects(:node,where_clause)
+      require 'pp'; pp objs
+      @results = Hash.new
+=begin
       #get all active (or appropriate status) ubuntu servers
 
       #figure out what best paradigm is to set which object/table to query against
@@ -27,6 +33,7 @@ module XYZ
       #process the template and assign/render the output to the 'toolbar' variable assignment
       #in parent template or bundled and returned in the JSON response
       R8.Template.render(template_reference,bindings,'toolbar')
+=end
     end
   end
 end

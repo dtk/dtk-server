@@ -5,8 +5,20 @@ module XYZ
 
     def list
       error_405 unless request.get?
+
+      field_set = [
+        :id,
+        :name,
+        :os,
+        :disk,
+        :memory,
+        :source,  #amazon,local,rackspace, etc
+        :status,
+      ]
+      
       where_clause = {} # stub
       objs = get_objects(:node,where_clause)
+return objs
       require 'pp'; pp objs
       @results = Hash.new
 =begin

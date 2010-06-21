@@ -24,5 +24,10 @@ module XYZ
       #build in roles/permission checks here to filter the list
 =end
     end
+
+    def testsearch
+      "hello there, inside of testsearch"
+    end
+
   end
 end

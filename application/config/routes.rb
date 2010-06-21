@@ -7,6 +7,6 @@ module R8
 end
 
 R8::Routes[:workspace] = {
-  :template => 'workspace.template.erubis',
+  :template => 'workspace.template.tpl',
   :action_set => 'nothing yet'
 }

@@ -4,6 +4,7 @@ module XYZ
       class NodeInstance < Top 
         #TBD: could write 'lint checker that makes sure that target indexes correspond to schema described in models
         definitions do
+          target[:type] = "instance"
           target[:image_size] = source[:flavor][:ram]
           target[:is_deployed] = true
 

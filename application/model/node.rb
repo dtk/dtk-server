@@ -8,7 +8,10 @@ module XYZ
         has_ancestor_field()
         column :ds_attributes, :json
         column :ds_key, :varchar
-        column :ds_source, :varchar, :size => 25
+        column :data_source, :varchar, :size => 25
+        column :ds_source_obj_type, :varchar, :size => 25
+        column :type, :varchar, :size => 25 # instance or template
+        column :os, :varchar, :size => 25
         column :is_deployed, :boolean, :default => false
         column :architecture, :varchar, :size => 10 #e.g., 'i386'
        #TBD: in data source specfic now column :manifest, :varchar #e.g.,rnp-chef-server-0816-ubuntu-910-x86_32

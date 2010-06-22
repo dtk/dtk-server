@@ -42,7 +42,8 @@ module XYZ
       obj = normalize(ds_hash)
       obj[:ds_attributes] = filter(ds_hash)
       obj[:ds_key] = ds_key_value(ds_hash)
-      obj[:ds_source] = source_obj_type() if source_obj_type()      
+      obj[:ds_source_obj_type] = source_obj_type() if source_obj_type()      
+      obj[:data_source] = ds_name()
       ret = DBUpdateHash.create_with_auto_vivification()
       ret[relation_type()][ref(ds_hash)]= obj
       ret.freeze

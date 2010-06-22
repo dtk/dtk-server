@@ -5,6 +5,7 @@ module XYZ
       class NodeImage < Top 
        private
         definitions do
+          target[:type] = "template"
         end
         class << self
           def unique_keys(source_hash)

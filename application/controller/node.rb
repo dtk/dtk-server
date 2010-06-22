@@ -6,6 +6,7 @@ module XYZ
     def list
       error_405 unless request.get?
 
+=begin
       field_set = [
         :id,
         :name,
@@ -15,10 +16,21 @@ module XYZ
         :source,  #amazon,local,rackspace, etc
         :status,
       ]
-      
+=end   
+      field_set = [
+        :id,
+        :name,
+        :description,
+        :type,
+        :os,
+        :data_source
+      ]   
       where_clause = {} # stub
-      objs = get_objects(:node,where_clause)
-return objs
+      raw_objs = get_objects(:node,where_clause)
+      #TBD: this logic below will be folded into get_objects
+      objs = Hash.new
+      raw_objs.each{|k,v| objs[k] = HashObject.object_slice(v,field_set,{:include_null_cols => true})}
+      return objs
       require 'pp'; pp objs
       @results = Hash.new
 =begin

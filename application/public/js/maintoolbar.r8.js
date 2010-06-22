@@ -52,8 +52,8 @@ console.log('Searching for:'+queryTerm);
 						Y.on('io:success', success);
 						Y.on('io:failure', failure);
 						Y.on('io:end', console.log('finished io request'));
-//						var base_url = 'http://localhost:7000/xyz/workspace/testsearch';
-						var base_url = 'http://localhost:7000/xyz/node/list.json';
+//						var base_url = 'http://172.22.101.112:7000/xyz/workspace/testsearch';
+						var base_url = 'http://172.22.101.112:7000/xyz/node/list.json';
 						var request = Y.io(base_url, cfg);
 					});
 				},

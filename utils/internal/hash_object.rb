@@ -7,7 +7,7 @@ module XYZ
       end
     end
 
-    def object_slice(slice_keys)
+    def object_slice(slice_keys,opts={})
       self.class.object_slice(self,slice_keys)
     end
     def is_complete?()
@@ -34,9 +34,9 @@ module XYZ
         self.new{|h,k| h[k] = self.new(&h.default_proc)}
       end
 
-      def object_slice(hash,slice_keys)
+      def object_slice(hash,slice_keys,opts={})
         ret = {}
-        slice_keys.each{|k| ret[k] = hash[k] if hash[k]}
+        slice_keys.each{|k| ret[k] = hash[k] if (hash[k] or opts[:include_null_cols])}
         ret
       end
       #TBD: might better related nested and auto vivfication

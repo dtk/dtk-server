@@ -1,0 +1,37 @@
+{
+  "network_partition": {
+    "internet": {
+      "is_deployed": false,
+      "is_internet": true,
+      "display_name": "internet"
+    }
+  },
+  "node" : {
+    "i-33886f59" : {
+      "display_name" : "node x",
+      "description" : "test",
+      "ds_key": "[:ec2, :instance, \"i-33886f59\"]",
+      "ds_source_obj_type": "instance"
+    }
+  },
+  "data_source": {
+    "ec2": {
+      "data_source_entry": {
+        "node_image": {
+          "obj_type": "node",
+          "ds_name": "ec2",
+          "source_obj_type": "image",
+          "display_name": "node_image"
+        },
+        "node_instance": {
+          "obj_type": "node",
+          "ds_name": "ec2",
+          "source_obj_type": "instance",
+          "display_name": "node_instance"
+        }
+      },
+      "ds_name": "ec2",
+      "display_name": "ec2"
+    }
+  }
+}

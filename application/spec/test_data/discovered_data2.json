@@ -1,0 +1,67 @@
+{"node" : {
+  "i-33886f59": {
+    "type": "instance",
+    "data_source": "ec2",
+    "description": null,
+    "name": null,
+    "id": 2147483694,
+    "os": null
+  },
+  "ami-693ad300": {
+    "type": "template",
+    "data_source": "ec2",
+    "description": null,
+    "name": null,
+    "id": 2147483699,
+    "os": null
+  },
+  "ami-bf3ad3d6": {
+    "type": "template",
+    "data_source": "ec2",
+    "description": null,
+    "name": null,
+    "id": 2147483700,
+    "os": null
+  },
+  "i-37dd8c5c": {
+    "type": "instance",
+    "data_source": "ec2",
+    "description": null,
+    "name": null,
+    "id": 2147483702,
+    "os": null
+  },
+  "i-2f5b7a44": {
+    "type": "instance",
+    "data_source": "ec2",
+    "description": null,
+    "name": null,
+    "id": 2147483707,
+    "os": null
+  },
+  "ami-b722cdde": {
+    "type": "template",
+    "data_source": "ec2",
+    "description": null,
+    "name": null,
+    "id": 2147483701,
+    "os": null
+  },
+  "i-254b684e": {
+    "type": "instance",
+    "data_source": "ec2",
+    "description": null,
+    "name": null,
+    "id": 2147483709,
+    "os": null
+  },
+  "i-63775608": {
+    "type": "instance",
+    "data_source": "ec2",
+    "description": null,
+    "name": null,
+    "id": 2147483704,
+    "os": null
+  }
+}
+}

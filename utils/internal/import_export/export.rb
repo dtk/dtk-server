@@ -2,7 +2,7 @@ module XYZ
   #class mixin
   module ExportObject
     #not idempotent
-    def export_objects_to_file(target_id_handle,json_file)
+    def export_objects_to_file(target_id_handle,json_file,opts={})
       target_id_info = get_row_from_id_handle(target_id_handle)
       raise Error.new("Target given (#{target_id_handle}) does not exist") unless target_id_info
       prefix = nil
@@ -12,12 +12,11 @@ module XYZ
         prefix = $1
       end
       raise Error if prefix.nil?
-      objects = get_instance_or_factory(target_id_handle,nil,{
-           :depth => :deep, :no_hrefs => true, :no_ids => true, :no_top_level_scalars => true, :no_null_cols => true, :fk_as_ref => prefix}) 
+      get_objs_opts =  {:depth => :deep, :no_hrefs => true, :no_ids => true, :no_top_level_scalars => true, :no_null_cols => true, :fk_as_ref => prefix}.merge(opts)
+      objects = get_instance_or_factory(target_id_handle,nil,get_objs_opts)
 
       #stripping off "key" which would be the containing object
       hash_content = objects.values.first
-
       begin
         f = File.open(json_file,"w")
         f.puts(JSON.pretty_generate(hash_content))

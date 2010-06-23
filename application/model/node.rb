@@ -15,7 +15,9 @@ module XYZ
         column :is_deployed, :boolean, :default => false
         column :architecture, :varchar, :size => 10 #e.g., 'i386'
        #TBD: in data source specfic now column :manifest, :varchar #e.g.,rnp-chef-server-0816-ubuntu-910-x86_32
+        #TBD: experimenting whetehr better to make this actual or virtual columns
         column :image_size, :numeric, :size=>[8, 3] #in megs
+        virtual_column :disk_size #in megs
         foreign_key :data_source_id, :data_source, FK_SET_NULL_OPT
         many_to_one :library,:project
         one_to_many :attribute, :node_interface, :address_access_point
@@ -48,6 +50,13 @@ module XYZ
         ret
       end
     end
+
+    ### virtual column defs
+    # returns asserted first then derived
+    def disk_size()
+      self.class.nested_value(self[:ds_attributes],[:flavor,:disk])
+    end
+    #######
 
     def get_objects_associated_components()
       assocs = Object.get_objects(:assoc_node_component,@c,:node_id => self[:id])

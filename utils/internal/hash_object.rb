@@ -8,7 +8,7 @@ module XYZ
     end
 
     def object_slice(slice_keys,opts={})
-      self.class.object_slice(self,slice_keys)
+      self.class.object_slice(self,slice_keys,opts)
     end
     def is_complete?()
       false

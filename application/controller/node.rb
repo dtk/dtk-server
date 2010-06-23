@@ -23,6 +23,8 @@ module XYZ
         :description,
         :type,
         :os,
+        :image_size,
+        :disk_size,
         :data_source
       ]   
       where_clause = {} # stub

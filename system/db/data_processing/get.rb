@@ -156,11 +156,11 @@ module XYZ
   	cols_hash = db_rel[:columns]
         select_cols = cols_hash.nil? ? [] : cols_hash.keys 
         select_cols = db_rel[:model_class].ds_attributes(select_cols) if opts[:ds_attrs_only]        
-	select_cols.concat([:id,:description,:ref,:ref_num])
-        select_cols = select_cols & (opts[:field_set]+[:ref]) if opts[:field_set]
+	select_cols.concat([:id,:description,:display_name,:ref_num])
+        select_cols = select_cols & opts[:field_set] if opts[:field_set]
 	# first we use select; for rest we use select_more; that is why display_name not in var slect_cols
 	#TBD: might make what columns mentioned here data driven
-	ds = dataset(db_rel).select(:display_name)
+	ds = dataset(db_rel).select(:ref)
 	select_cols.each{|col| ds = ds.select_more(col)}
         ds
       end

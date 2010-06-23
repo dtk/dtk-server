@@ -18,6 +18,9 @@ module XYZ
         #TBD: experimenting whetehr better to make this actual or virtual columns
         column :image_size, :numeric, :size=>[8, 3] #in megs
         virtual_column :disk_size #in megs
+        #TBD: can these virtual columns just be inherited
+        virtual_column :parent_id
+        virtual_column :parent_path
         foreign_key :data_source_id, :data_source, FK_SET_NULL_OPT
         many_to_one :library,:project
         one_to_many :attribute, :node_interface, :address_access_point

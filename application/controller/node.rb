@@ -25,7 +25,9 @@ module XYZ
         :os,
         :image_size,
         :disk_size,
-        :data_source
+        :data_source,
+        :parent_id,
+        :parent_path
       ]   
       where_clause = {} # stub
       get_objects(:node,field_set,where_clause)

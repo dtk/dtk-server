@@ -38,8 +38,16 @@ module XYZ
       super(x)
     end
 
+    #inherited virtual coulmn defs
+    def parent_id()
+      get_parent_id_info()[:id]
+    end
+    def parent_path()
+      get_parent_id_info()[:uri]
+    end
 
   end
+
   class RefObjectPairs < HashObject
   end
 end

@@ -50,6 +50,16 @@ module XYZ
         db_rel[:model_class].new(hash,c,id_info[:relation_type])
       end
 
+      def get_parent_id_info(id_handle)
+	c = id_handle[:c]
+	id_info = IDInfoTable.get_row_from_id_handle id_handle
+	return nil if id_info.nil? 
+	return nil if id_info[:parent_id].nil?
+        parent_guid = IDInfoTable.ret_guid_from_db_id(id_info[:parent_id],id_info[:parent_relation_type])
+	parent_id_handle = IDHandle[:c => c, :guid => parent_guid]
+        IDInfoTable.get_row_from_id_handle parent_id_handle
+      end
+
       def get_parent_object(id_handle,opts={})
 	c = id_handle[:c]
 	id_info = IDInfoTable.get_row_from_id_handle id_handle,  :raise_error => opts[:raise_error]

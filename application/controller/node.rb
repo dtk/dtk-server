@@ -26,13 +26,8 @@ module XYZ
         :data_source
       ]   
       where_clause = {} # stub
-      raw_objs = get_objects(:node,where_clause)
-      #TBD: this logic below will be folded into get_objects
-      objs = Hash.new
-      raw_objs.each{|k,v| objs[k] = HashObject.object_slice(v,field_set,{:include_null_cols => true})}
-      return objs
-      require 'pp'; pp objs
-      @results = Hash.new
+      raw_objs = get_objects(:node,field_set,where_clause)
+
 =begin
       #get all active (or appropriate status) ubuntu servers
 

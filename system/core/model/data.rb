@@ -11,8 +11,8 @@ module XYZ
       @db.get_instance_scalar_values(id_handle,opts)
     end
 
-    def get_objects(relation_type,c,where_clause=nil)
-      @db.get_objects(relation_type,c,where_clause)
+    def get_objects(relation_type,c,where_clause=nil,field_set=nil)
+      @db.get_objects(relation_type,c,where_clause,field_set)
     end
 
     def get_objects_wrt_parent(relation_type,parent_id_handle,where_clause={})

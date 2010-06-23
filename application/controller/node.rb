@@ -19,14 +19,14 @@ module XYZ
 =end   
       field_set = [
         :id,
-        :name,
+        :display_name,
         :description,
         :type,
         :os,
         :data_source
       ]   
       where_clause = {} # stub
-      raw_objs = get_objects(:node,field_set,where_clause)
+      get_objects(:node,field_set,where_clause)
 
 =begin
       #get all active (or appropriate status) ubuntu servers

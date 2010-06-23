@@ -6,9 +6,10 @@ module XYZ
     module DataProcessingGet
 
       #where clause could be hash or string
-      def get_objects(relation_type,c,where_clause=nil)
+      def get_objects(relation_type,c,where_clause=nil,field_set=nil)
 	db_rel = DB_REL_DEF[relation_type]
-	ds = ret_dataset_with_scalar_columns(db_rel).filter({CONTEXT_ID => c})
+        opts = (field_set ? {:field_set => field_set} : {})
+	ds = ret_dataset_with_scalar_columns(db_rel,opts).filter({CONTEXT_ID => c})
         ds = ds.filter(where_clause) if where_clause
 	ds.all.map{|raw_hash|
           hash = process_raw_scalar_hash!(raw_hash,db_rel,c)
@@ -156,7 +157,7 @@ module XYZ
         select_cols = cols_hash.nil? ? [] : cols_hash.keys 
         select_cols = db_rel[:model_class].ds_attributes(select_cols) if opts[:ds_attrs_only]        
 	select_cols.concat([:id,:description,:ref,:ref_num])
-
+        select_cols = select_cols & (opts[:field_set]+[:ref]) if opts[:field_set]
 	# first we use select; for rest we use select_more; that is why display_name not in var slect_cols
 	#TBD: might make what columns mentioned here data driven
 	ds = dataset(db_rel).select(:display_name)

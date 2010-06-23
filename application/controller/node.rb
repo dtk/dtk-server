@@ -17,6 +17,11 @@ module XYZ
         :status,
       ]
 =end   
+
+#this will ultimately be pushed to some higher level that will probably be handled by the field sets for
+#the views
+#if empty, or not available, will fall back to default, else then to full model rep
+#still good to be able to pass in optionally
       field_set = [
         :id,
         :display_name,
@@ -30,7 +35,26 @@ module XYZ
         :parent_path
       ]   
       where_clause = {} # stub
-      get_objects(:node,field_set,where_clause)
+
+#ultimately will be very handy to have node_list and all complex vars/hashes in templates to have
+#ur functionality where if undefined it just returns '' instead of error/warning
+      node_list = get_objects(:node,field_set,where_clause)
+
+#need way to be able to define the view template to be used with complex path
+#right now all things are "components" when it comes to rendering to page, even nodes
+      layout 'component/basic_component'
+
+
+#these should automatically add the appropriate js/css file(s) to the response
+      js_include('component.r8')
+      css_include('basic-component')
+
+      #some utility function(s) to deal with object and app strings
+      #should probably take some params for view specific strings, else fall back on default
+      obj_i18n = get_object_i18n()
+
+
+
 
 =begin
       #get all active (or appropriate status) ubuntu servers

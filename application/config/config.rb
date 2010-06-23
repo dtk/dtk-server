@@ -39,7 +39,8 @@ R8::Config[:default_language] = "en.us"
 R8::Config[:default_template] = "default.template.erubis"
 
 #Application paths.., these should be set/written by templating engine on every call
-R8::Config[:base_uri] = "http://172.22.101.112:7000"
+#R8::Config[:base_uri] = "http://172.22.101.112:7000"
+R8::Config[:base_uri] = "http://localhost:7000"
 R8::Config[:public_js_root] = R8::Config[:base_uri] + "/js"
 R8::Config[:public_css_root] = R8::Config[:base_uri] + "/css"
 R8::Config[:public_images_root] = R8::Config[:base_uri] + "/images"

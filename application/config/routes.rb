@@ -10,3 +10,10 @@ R8::Routes[:workspace] = {
   :template => 'workspace.template.tpl',
   :action_set => 'nothing yet'
 }
+
+routes[:node][:list] = {
+  :template => '',
+  :alias => '',
+  :action_set => :some_action_set,
+  :field_set => :default,
+}

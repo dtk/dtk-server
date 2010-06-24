@@ -10,7 +10,8 @@ module XYZ
 	db_rel = DB_REL_DEF[relation_type]
         opts = (field_set ? {:field_set => field_set} : {})
 	ds = ret_dataset_with_scalar_columns(db_rel,opts).filter({CONTEXT_ID => c})
-        ds = ds.filter(where_clause) if where_clause
+require 'pp'; pp [:where_clause,where_clause]
+        ds = ds.filter(where_clause) if where_clause and not where_clause.empty?()
 	ds.all.map{|raw_hash|
           hash = process_raw_scalar_hash!(raw_hash,db_rel,c)
 	  db_rel[:model_class].new(hash,c,relation_type)
@@ -172,6 +173,8 @@ module XYZ
 	#TBD: might make what columns mentioned here data driven
 	ds = dataset(db_rel).select(:ref)
 	select_cols.each{|col| ds = ds.select_more(col)}
+require 'pp'; pp [:ds,ds]
+
         ds
       end
 

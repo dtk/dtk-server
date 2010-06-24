@@ -4,6 +4,7 @@ module XYZ
   class NodeController < Controller
 
     def list
+      layout :default
       error_405 unless request.get?
 
 

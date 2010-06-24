@@ -6,17 +6,6 @@ module XYZ
     def list
       error_405 unless request.get?
 
-=begin
-      field_set = [
-        :id,
-        :name,
-        :os,
-        :disk,
-        :memory,
-        :source,  #amazon,local,rackspace, etc
-        :status,
-      ]
-=end   
 
 #this will ultimately be pushed to some higher level that will probably be handled by the field sets for
 #the views
@@ -42,8 +31,8 @@ module XYZ
 
 #need way to be able to define the view template to be used with complex path
 #right now all things are "components" when it comes to rendering to page, even nodes
-     # layout 'component/basic_component'
-      return render_template("node/basic_node",{:node_list =>  node_list})
+      set_template_var(:node_list,node_list)
+      return render_template("node/basic_node")
 
 #these should automatically add the appropriate js/css file(s) to the response
       js_include('component.r8')

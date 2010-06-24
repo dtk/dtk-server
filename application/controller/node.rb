@@ -42,8 +42,8 @@ module XYZ
 
 #need way to be able to define the view template to be used with complex path
 #right now all things are "components" when it comes to rendering to page, even nodes
-      layout 'component/basic_component'
-
+     # layout 'component/basic_component'
+      return render_template("node/basic_node",{:node_list =>  node_list})
 
 #these should automatically add the appropriate js/css file(s) to the response
       js_include('component.r8')

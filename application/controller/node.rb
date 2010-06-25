@@ -4,7 +4,6 @@ module XYZ
   class NodeController < Controller
 
     def list
-      layout :default
       error_405 unless request.get?
 
 
@@ -74,3 +73,31 @@ module XYZ
     end
   end
 end
+
+=begin
+Distilled main steps from action_set hard coded for 
+
+        tpl_callback = "render_#{object_name}_#{action_name}"
+
+        r8_view = ViewR8.new(object_name,R8::I18N[object_name])
+        r8_view.render(action_name)
+
+        r8_tpl = R8Tpl::TemplateR8ForAction.new(tpl_callback,r8_view.css_require,r8_view.js_require)
+
+        action_params =  case action_name
+          when :list
+            ("#{object_name}_list").to_sym
+          when :display
+            object_name.to_sym
+          else
+            raise ErrorNotImplemented.new() 
+          end
+
+        r8_tpl.assign(action_params,node_list)
+        r8_tpl.panel_set_element_id = panel
+        r8_tpl.assign(:listStartPrev, 0)
+        r8_tpl.assign(:listStartNext, 0)
+        r8_tpl.render(r8_view.tpl_contents)
+        r8_tpl.ret_result_array()
+
+=end

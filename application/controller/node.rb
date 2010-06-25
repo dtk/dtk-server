@@ -32,14 +32,11 @@ module XYZ
         set_template_var(:node_list,node_list)
 
         action_name = "list" #TBD: automatically determine this
-        #set view automatically called when controller object created; should this 
-        #necessarily done
         
+        render_view(action_name)
+
         return render_template("node/basic_node")
 
-      #this call makes sure the latest view is rendered/up-to-date,but can probably clean things up so 
-      #behavior happens behind the scenes
-        r8_view.render(action_name)
 
         r8_tpl = R8Tpl::TemplateR8ForAction.new(tpl_callback,r8_view.css_require,r8_view.js_require)
 

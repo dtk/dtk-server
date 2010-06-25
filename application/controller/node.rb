@@ -79,24 +79,26 @@ Distilled main steps from action_set hard coded for
 
         tpl_callback = "render_#{object_name}_#{action_name}"
 
+#if view gets pushed up to higher level to hang off ctllr, instantiation can happen at higher level
         r8_view = ViewR8.new(object_name,R8::I18N[object_name])
+      #this call makes sure the latest view is rendered/up-to-date,but can probably clean things up so 
+      #behavior happens behind the scenes
         r8_view.render(action_name)
 
+#this seems setup too complex, can just instantiate template object, or just hangs on main ctrllr like
+#we discussed
         r8_tpl = R8Tpl::TemplateR8ForAction.new(tpl_callback,r8_view.css_require,r8_view.js_require)
 
-        action_params =  case action_name
-          when :list
-            ("#{object_name}_list").to_sym
-          when :display
-            object_name.to_sym
-          else
-            raise ErrorNotImplemented.new() 
-          end
+#this can probably be cleaned up.., dont need case b/c context is provided by route
+        action_params = ("#{object_name}_list").to_sym
 
+#not quite sure what was happening here, but assign should always be name=>value assignments
         r8_tpl.assign(action_params,node_list)
+
         r8_tpl.panel_set_element_id = panel
         r8_tpl.assign(:listStartPrev, 0)
         r8_tpl.assign(:listStartNext, 0)
+#can probably evolve things to just return results from render, no explicit ret_results_array needed probably
         r8_tpl.render(r8_view.tpl_contents)
         r8_tpl.ret_result_array()
 

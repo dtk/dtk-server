@@ -30,6 +30,8 @@ module XYZ
        #need way to be able to define the view template to be used with complex path
        #right now all things are "components" when it comes to rendering to page, even nodes
         set_template_var(:node_list,node_list)
+        set_template_var(:listStartPrev, 0)
+        set_template_var(:listStartNext, 0)
 
         action_name = :list #TBD: automatically determine this
         render_view(action_name)
@@ -46,8 +48,8 @@ module XYZ
         r8_tpl.assign(action_params,node_list)
 
         r8_tpl.panel_set_element_id = panel
-        r8_tpl.assign(:listStartPrev, 0)
-        r8_tpl.assign(:listStartNext, 0)
+
+
 #can probably evolve things to just return results from render, no explicit ret_results_array needed probably
         r8_tpl.render(r8_view.tpl_contents)
         r8_tpl.ret_result_array()

@@ -154,6 +154,7 @@ class ViewR8
       # TBD put pick in only if template.r8.rb prefixed by app_name app_name = 'formtests' #TBD: stubbed
       #   templateR8EditTime = File.mtime(R8::Config[:appRootPath] + @app_name + "/template.r8.rb").to_i
       #TBD: below is stub
+      return false#TBD: below is wrong so executing here
       templateR8EditTime = File.mtime("#{SYSTEM_DIR}/r8/template.r8.rb").to_i
       if(tplCacheEditTime < templateR8EditTime || tplCacheEditTime < viewMetaEditTime || tplCacheEditTime < viewTPLEditTime) then
         return false

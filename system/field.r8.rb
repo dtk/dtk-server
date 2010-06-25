@@ -1,6 +1,4 @@
-
-require File.expand_path(UTILS_DIR+'internal/fields/field.base.rb')
-
+#TBD: put under module and make as many as possible methods private
 class FieldR8
 
   def initialize(r8view_ref=nil)
@@ -23,11 +21,11 @@ class FieldR8
         if(viewType == 'edit') then fieldMeta[:name] << '[]' end
         fieldMeta[:options] = self.getFieldOptions(fieldMeta)
 #TODO: enhance this once profiles are implemented
-          require File.expand_path('fields/field.select.rb', File.dirname(__FILE__))
+          load_field_file "field.select.rb"
     end
 
 #TODO: enhance this once profiles are implemented
-    require File.expand_path('fields/field.' + fieldMeta[:type] + '.rb',File.dirname(__FILE__))
+    load_field_file "field.#{fieldMeta[:type]}.rb"
     fieldClass = 'Field' + fieldMeta[:type]
      #TBD: if wrapped in modeule M use form M.const_get
      fieldObj = Kernel.const_get(fieldClass).new(fieldMeta)
@@ -66,4 +64,14 @@ class FieldR8
     }
     return options
   end
+ private
+  def self.load_field_file(file_name)
+    require UTILS_DIR + "internal/fields/" + file_name
+  end 
+  def load_field_file(file_name)
+    self.class.load_field_file(file_name)
+  end 
+  load_field_file("field.base.rb")
 end
+
+

@@ -56,8 +56,8 @@ R8::Config[:database][:type] = "postgres"
 
 
 #these are used in view.r8.rb
-R8::Config[:appRootPath] = "/root/R8Server/application"
-R8::Config[:tplCacheRoot] = "C:/webroot/R8Server/cache/application/tplcache/"
+R8::Config[:appRootPath] = "/root/R8Server"
+R8::Config[:tplCacheRoot] = "/root/R8Server/cache/application/tplcache"
 #R8::Config[:devMode] = false
 R8::Config[:devMode] = true
 

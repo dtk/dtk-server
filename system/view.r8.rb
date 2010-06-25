@@ -6,7 +6,7 @@ class ViewR8
   def initialize(obj_name,i18n,profile=nil)
     @view_meta = nil               #hash defining an instance of a view
     @obj_name = obj_name	  #object type (a symbol)
-    @i18n = i18n
+    @i18n_hash = i18n
     # view_meta_path()            #path where the base view meta data should be located
     @override_meta_path = nil        #path where the overrides for a view should be located
 
@@ -22,7 +22,7 @@ class ViewR8
     @js_require = []
 
     #TBD: dynamically set rather than being hard-wired
-    @app_name = 'formtests' 
+    @app_name = "application" 
 
     #TODO: move these to style.config.r8 to be loaded in constructor
     @style = 
@@ -74,7 +74,9 @@ class ViewR8
     @js_require << js unless @js_require.includes(js)
   end
  private
-
+  def i18n(*path)
+    XYZ::HashObject.nested_value(@i18n_hash,path)
+  end
   # This will return the path to write the TPL cache file to
   #TODO:revisit to possibly put randomizer on filename ala smarty
   def view_tpl_cache_path()
@@ -135,7 +137,7 @@ class ViewR8
   #This function will set the class property $this->viewMetaPath to appropriate value/location
   def view_meta_path()
     #TBD: error if inputs not set
-    "#{R8::Config[:appRootPath]}/#{@app_name}/views/#{@obj_name}/meta/view.#{@profile}.#{@view_name}.json"
+    "#{R8::Config[:appRootPath]}/#{@app_name}/meta/#{@obj_name}/view.#{@profile}.#{@view_name}.json"
   end
 
   # This will check to see if the TPL view file exists and isnt stale compare to the base TPL and other factors
@@ -223,7 +225,7 @@ class ViewR8
       fieldHash.each do |fieldName,fieldMeta|
         fieldMeta[:objName] = @obj_name
         fieldMeta[:name] = fieldName
-        fieldMeta[:label] = @i18n[:default_list][fieldMeta[:name]] || fieldMeta[:name]
+        fieldMeta[:label] = i18n(:default_list,fieldMeta[:name]) || fieldMeta[:name]
         fieldMeta[:id] = fieldMeta[:name] if fieldMeta[:id].nil?
         fieldMeta[:class] = @style[:td][:list][:col] if fieldMeta[:class].nil?
         fieldMeta[:content] = fieldHandler.getField(view_type(), fieldMeta, 'tpl')
@@ -329,7 +331,7 @@ class ViewR8
             #do label
             rows[rowCount][:cols][colIndex] = {}
             if(displayLabels) then
-              rows[rowCount][:cols][colIndex][:content] = ((!@i18n[:default_edit][fieldMeta[:name].to_sym].nil?) ? @i18n[:default_edit][fieldMeta[:name].to_sym] : fieldMeta[:name])
+              rows[rowCount][:cols][colIndex][:content] = ((!i18n(:default_edit,fieldMeta[:name].to_sym).nil?) ? i18n(:default_edit,fieldMeta[:name].to_sym) : fieldMeta[:name])
             else
               rows[rowCount][:cols][colIndex][:content] = '&nbsp;'
             end
@@ -422,7 +424,7 @@ class ViewR8
             #do label
             rows[rowCount][:cols][colIndex] = {}
             if(displayLabels) then
-              rows[rowCount][:cols][colIndex][:content] = ((!@i18n[:default_edit][fieldMeta[:name].to_sym].nil?) ? @i18n[:default_edit][fieldMeta[:name].to_sym] : fieldMeta[:name])
+              rows[rowCount][:cols][colIndex][:content] = ((!i18n(:default_edit,fieldMeta[:name].to_sym).nil?) ? i18n(:default_edit,fieldMeta[:name].to_sym) : fieldMeta[:name])
             else
               rows[rowCount][:cols][colIndex][:content] = '&nbsp;'
             end

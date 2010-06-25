@@ -31,11 +31,10 @@ module XYZ
        #right now all things are "components" when it comes to rendering to page, even nodes
         set_template_var(:node_list,node_list)
 
-        action_name = "list" #TBD: automatically determine this
-        
+        action_name = :list #TBD: automatically determine this
         render_view(action_name)
 
-        return render_template("node/basic_node")
+ return render_template("node/basic_node")
 
 
         r8_tpl = R8Tpl::TemplateR8ForAction.new(tpl_callback,r8_view.css_require,r8_view.js_require)

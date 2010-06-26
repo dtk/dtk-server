@@ -44,7 +44,14 @@ module XYZ
         slice_keys.each{|k| ret[k] = hash[k] if (hash[k] or opts[:include_null_cols])}
         ret
       end
+
       #TBD: might better related nested and auto vivfication
+      #TBD: consider instaed just using
+      #class NilClass
+      #  def [](x)
+      #    nil
+      #  end
+      #end
       def nested_value(hash,path)
         return hash if path.empty?
         nested_value_private(hash,path.dup)

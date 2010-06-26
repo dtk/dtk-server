@@ -7,6 +7,11 @@ module XYZ
       end
     end
 
+    #protection if foo[x] called where foo is frozen and x does not exist
+    def [](x)
+      frozen? ? (super if has_key?(x)) : super
+    end
+
     def object_slice(slice_keys,opts={})
       self.class.object_slice(self,slice_keys,opts)
     end

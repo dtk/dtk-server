@@ -23,12 +23,22 @@ module XYZ
     end
    private
     #coverts hashes that are not a HashObject or a child of HashObject
-    def convert_nested_hashes(hash)
-      return hash if hash.kind_of?(HashObject)
-      ret = self.class.new()
-      hash.each{|k,v| ret[k] = (v.kind_of?(Hash) and not v.kind_of?(HashObject)) ? convert_nested_hashes(v) : v}
-      ret  
+    def convert_nested_hashes(obj)
+      if obj.kind_of?(HashObject)
+        obj #no encoding needed
+      elsif obj.kind_of?(Hash)
+        ret = self.class.new()
+        obj.each{|k,v| ret[k] = convert_nested_hashes(v)}
+        ret
+      elsif obj.kind_of?(Array)
+        ret = Array.new
+        obj.each{|v|ret << convert_nested_hashes(v)}
+        ret
+      else
+        obj        
+      end
     end
+
    public
     class << self
       def [](x)

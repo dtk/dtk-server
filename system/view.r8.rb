@@ -84,6 +84,14 @@ class ViewR8
     "#{R8::Config[:app_cache_root]}/view/#{@obj_name}/#{@profile}.#{@view_name}.rtpl"
   end
 
+  def object_view_tpl_path()
+    "#{R8::Config[:app_root_path]}/view/xyz/#{@obj_name}/#{@profile}.#{@view_name}.rtpl"
+  end
+
+  def core_view_tpl_path()
+    "#{R8::Config[:core_view_root]}/#{@profile}.#{@view_name}.rtpl"
+  end
+
   def css_require_path()
     "#{R8::Config[:app_cache_root]}/view/#{@obj_name}/#{@profile}.#{@view_name}.css_include.json"
   end
@@ -119,11 +127,11 @@ class ViewR8
     #TODO: figure out best way to do PHP style requires/loading of external meta hashes
     if File.exists?(view_meta_path()) then
        File.open(view_meta_path(), 'r') do |fHandle|
-	 R8View::Views[@obj_name][@profile][@view_name] = XYZ::Aux.convert_to_hash_symbol_form(fHandle.read)
+        R8View::Views[@obj_name][@profile][@view_name] = XYZ::Aux.convert_to_hash_symbol_form(fHandle.read)
        end
     elsif view_meta_path() =~ Regexp.new('(.+)\\.json')
     #TBD: temp conversion
-     rb = $1 + ".rb"
+      rb = $1 + ".rb"
       require rb
       File.open(view_meta_path(), 'w') do |fHandle|
          fHandle.write(JSON.pretty_generate(R8View::Views[@obj_name][@profile][@view_name]))
@@ -150,9 +158,9 @@ class ViewR8
 
     #TBD: ask Nate about intended semantics; modified because error if file does not exist, but clause executed
     if File.exists?(view_rtpl_cache_path) && (!R8::Config[:dev_mode].nil? || R8::Config[:dev_mode] == false) then
-      tplCacheEditTime = File.mtime(view_rtpl_cache_path).to_i
-      viewMetaEditTime = File.mtime(view_meta_path()).to_i
-      viewTPLEditTime = File.mtime(get_rtpl_path()).to_i
+      tpl_cache_edit_time = File.mtime(view_rtpl_cache_path).to_i
+      view_meta_edit_time = File.mtime(view_meta_path()).to_i
+      view_tpl_edit_time = File.mtime(get_rtpl_path()).to_i
       #adding this since rendering logic is in this file, might update it w/o changing template,
       #jsTpl should then be updated to reflect changes
       #TODO: switch this when functions moved to js compile class
@@ -160,8 +168,8 @@ class ViewR8
       #   templateR8EditTime = File.mtime(R8::Config[:app_root_path] + #{R8::Config[:application_name]} + "/template.r8.rb").to_i
       #TBD: below is stub
       return false#TBD: below is wrong so executing here
-      templateR8EditTime = File.mtime("#{SYSTEM_DIR}/r8/template.r8.rb").to_i
-      if(tplCacheEditTime < templateR8EditTime || tplCacheEditTime < viewMetaEditTime || tplCacheEditTime < viewTPLEditTime) then
+      template_r8_edit_time = File.mtime("#{SYSTEM_DIR}/r8/template.r8.rb").to_i
+      if(tpl_cache_edit_time < template_r8_edit_time || tpl_cache_edit_time < view_meta_edit_time || tpl_cache_edit_time < view_tpl_edit_time) then
         return false
       else
         return true
@@ -171,11 +179,8 @@ class ViewR8
     end
   end
 
-  def get_rtpl()
+  def get_rtpl_contents()
     ret = nil
-#R8 DEBUG
-print "$$$$$$$$$Getting rtpl in get_rtpl from :"+get_rtpl_path()+"\n"
-
     File.open(get_rtpl_path(), 'r') do |tpl_file_handle|
       ret = tpl_file_handle.read
     end
@@ -209,12 +214,13 @@ print "$$$$$$$$$Getting rtpl in get_rtpl from :"+get_rtpl_path()+"\n"
   # This will return the path to write the TPL cache file to
 #TODO: use file.io.php util funcs
   def get_rtpl_path()
-#    $overrideTPLPath = $GLOBALS['ctrl']->getAppName().'/objects/'.$this->objRef->getObjName().'/templates/'.$this->profile.'.'.$this->viewName.'.tpl';
 #TODO: figure out how to best dynamically load hash meta for base and overrides
+#    $overrideTPLPath = $GLOBALS['ctrl']->getAppName().'/objects/'.$this->objRef->getObjName().'/templates/'.$this->profile.'.'.$this->viewName.'.tpl';
+
+    object_view_path = object_view_tpl_path()
+    (File.exists?(object_view_path)) ? (return object_view_path) : (return core_view_tpl_path())
+
     return "#{R8::Config[:core_view_root]}/#{@profile}.#{@view_name}.rtpl"
-    #TBD: fix up
-    overrideTPLPath = 'some path for overrides here'
-    (File.exists?(overrideTPLPath)) ? (return overrideTPLPath) : (return view_tpl_cache_path())
   end
 
   # This function will generate the TPL cache for a view of type list
@@ -256,7 +262,7 @@ print "$$$$$$$$$Getting rtpl in get_rtpl from :"+get_rtpl_path()+"\n"
     r8TPL.assign(:iteratorVar, '{%='+objName.to_s+'%}')
     r8TPL.assign(:endTag, '{%end%}')
 
-    @tpl_contents = r8TPL.render(get_rtpl())
+    @tpl_contents = r8TPL.render(get_rtpl_contents())
     fwrite()
   end
 
@@ -372,7 +378,7 @@ print "$$$$$$$$$Getting rtpl in get_rtpl from :"+get_rtpl_path()+"\n"
     end
     r8TPL.assign(:rows, rows)
 
-    @tpl_contents = r8TPL.render(get_rtpl())
+    @tpl_contents = r8TPL.render(get_rtpl_contents())
     fwrite()
   end
 
@@ -465,7 +471,7 @@ print "$$$$$$$$$Getting rtpl in get_rtpl from :"+get_rtpl_path()+"\n"
     end
     r8TPL.assign(:rows, rows)
 
-    @tpl_contents = r8TPL.render(get_rtpl())
+    @tpl_contents = r8TPL.render(get_rtpl_contents())
     fwrite()
   end
 

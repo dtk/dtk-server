@@ -1,0 +1,25 @@
+<br/><br/>
+<div style="width: 100%;">
+	<div style="width: 100%;">
+		<div style="float: right; margin-right: 10px;">
+		<a href="javascript:R8.ctrl.request('node/list?listStart={%=listStartPrev%}');">&lt;-Prev</a>
+		&nbsp;&nbsp;&nbsp;&nbsp;
+		<a href="javascript:R8.ctrl.request('node/list?listStart={%=listStartNext%}');">Next-&gt;</a>
+		</div>
+	</div>
+	<div style="width: 100%; float: left;">
+	<table cellspacing="0" cellpadding="0" border="1" style="width: 100%;">
+	<tr id="node-list-header-row" class="">
+			<th id="display_name-th" class="r8-td-col">display_name</th>
+			<th id="description-th" class="r8-td-col">description</th>
+	</tr>
+
+	{%for node in node_list%}
+		<tr id="listRow-{%=node%}" class="{%=node[:class]%}">
+				<td id="display_name-td-{%=node%}" class="r8-td-col"><a href="javascript:R8.ctrl.request('obj=node&amp;action=display&amp;id={%=node[:id]%}');">{%=node[:display_name]%}</a></td>
+				<td id="description-td-{%=node%}" class="r8-td-col">{%=node[:description]%}</td>
+		</tr>
+	{%end%}
+	</table>
+	</div>
+</div>

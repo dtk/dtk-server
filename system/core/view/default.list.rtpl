@@ -1,0 +1,27 @@
+<br/><br/>
+<div style="width: 100%;">
+	<div style="width: 100%;">
+		<div style="float: right; margin-right: 10px;">
+		<a href="javascript:R8.ctrl.request('{%=objName%}/list?listStart={%=listStartPrevVar%}');">&lt;-Prev</a>
+		&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;
+		<a href="javascript:R8.ctrl.request('{%=objName%}/list?listStart={%=listStartNextVar%}');">Next-&gt;</a>
+		</div>
+	</div>
+	<div style="width: 100%; float: left;">
+	<table cellspacing="0" cellpadding="0" border="1" style="width: 100%;">
+	<tr id="{%=objName%}-{%=viewName%}-header-row" class="{%=thRowClass%}">
+		{%for headerCol in cols%}
+			<th id="{%=headerCol[:id]%}-th" class="{%=headerCol[:class]%}">{%=headerCol[:label]%}</th>
+		{%end%}
+	</tr>
+
+	{%=foreachHeaderContent%}
+		<tr id="listRow-{%=iteratorVar%}" class="{%=trClass%}">
+			{%for col in cols%}
+				<td id="{%=col[:id]%}-td-{%=iteratorVar%}" class="{%=col[:class]%}">{%=col[:content]%}</td>
+			{%end%}
+		</tr>
+	{%=endTag%}
+	</table>
+	</div>
+</div>

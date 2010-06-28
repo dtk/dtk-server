@@ -211,6 +211,8 @@ print "$$$$$$$$$Getting rtpl in get_rtpl from :"+get_rtpl_path()+"\n"
   def get_rtpl_path()
 #    $overrideTPLPath = $GLOBALS['ctrl']->getAppName().'/objects/'.$this->objRef->getObjName().'/templates/'.$this->profile.'.'.$this->viewName.'.tpl';
 #TODO: figure out how to best dynamically load hash meta for base and overrides
+    return "#{R8::Config[:core_view_root]}/#{@profile}.#{@view_name}.rtpl"
+    #TBD: fix up
     overrideTPLPath = 'some path for overrides here'
     (File.exists?(overrideTPLPath)) ? (return overrideTPLPath) : (return view_tpl_cache_path())
   end

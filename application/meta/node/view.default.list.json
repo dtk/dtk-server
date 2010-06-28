@@ -1,0 +1,29 @@
+{
+  "trClass": "tr-dl",
+  "hiddenFields": [
+    {
+      "id": {
+        "type": "hidden",
+        "required": true
+      }
+    }
+  ],
+  "trOddClass": "tr-dl-odd",
+  "fieldList": [
+    {
+      "display_name": {
+        "type": "text",
+        "objLink": true,
+        "objLinkView": "display",
+        "help": ""
+      }
+    },
+    {
+      "description": {
+        "type": "text",
+        "help": ""
+      }
+    }
+  ],
+  "trEvenClass": "tr-dl-even"
+}

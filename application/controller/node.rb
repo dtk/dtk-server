@@ -23,12 +23,14 @@ module XYZ
       ]   
       where_clause = {} # stub
 
-      #ultimately will be very handy to have node_list and all complex vars/hashes in templates to have
-      #ur functionality where if undefined it just returns '' instead of error/warning
        node_list = get_objects(:node,field_set,where_clause)
 
        #need way to be able to define the view template to be used with complex path
        #right now all things are "components" when it comes to rendering to page, even nodes
+
+      #ultimately will be very handy to have node_list and all complex vars/hashes in templates to have
+      #ur functionality where if undefined it just returns '' instead of error/warning
+
         set_template_var(:node_list,node_list)
         set_template_var(:listStartPrev, 0)
         set_template_var(:listStartNext, 0)

@@ -62,6 +62,7 @@ class ViewR8
       when "list"
         render_list_tpl_cache() 
     end
+    self
   end
   
   def add_to_css_require(css)

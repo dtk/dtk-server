@@ -88,12 +88,13 @@ class TemplateR8
     tplToJS(view_tpl_contents)
   end
 
-  def render(view_tpl_contents)
+  def render(view_tpl_contents,js_templating_on=jsTemplatingOn?)
 #TODO: should be populating these from global config options
     self.assign(:jsIncludePath, "jsIncludePath")
     self.assign(:siteURL, "this is a test")
 
-    if jsTemplatingOn? then
+    #if jsTemplatingOn? then
+    if js_templating_on
       renderJsTPL(view_tpl_contents)
     else
       eruby =  Erubis::Eruby.new(view_tpl_contents,:pattern=>'\{\% \%\}')

@@ -2,9 +2,9 @@
 <div style="width: 100%;">
 	<div style="width: 100%;">
 		<div style="float: right; margin-right: 10px;">
-		<a href="javascript:R8.ctrl.request('node/list?listStart={%=listStartPrev%}');">&lt;-Prev</a>
+		<a href="javascript:R8.ctrl.request('node/list?listStart={%=list_start_prev%}');">&lt;-Prev</a>
 		&nbsp;&nbsp;&nbsp;&nbsp;
-		<a href="javascript:R8.ctrl.request('node/list?listStart={%=listStartNext%}');">Next-&gt;</a>
+		<a href="javascript:R8.ctrl.request('node/list?listStart={%=list_start_next%}');">Next-&gt;</a>
 		</div>
 	</div>
 	<div style="width: 100%; float: left;">
@@ -15,9 +15,9 @@
 	</tr>
 
 	{%for node in node_list%}
-		<tr id="listRow-{%=node%}" class="{%=node[:class]%}">
-				<td id="display_name-td-{%=node%}" class="r8-td-col"><a href="javascript:R8.ctrl.request('obj=node&amp;action=display&amp;id={%=node[:id]%}');">{%=node[:display_name]%}</a></td>
-				<td id="description-td-{%=node%}" class="r8-td-col">{%=node[:description]%}</td>
+		<tr id="list_row-{%=node%}" class="{%=[:class]%}">
+				<td id="display_name-td-{%=node%}" class="r8-td-col"><a href="javascript:R8.ctrl.request('obj=&amp;action=display&amp;id={%=[:id]%}');">{%=[:display_name]%}</a></td>
+				<td id="description-td-{%=node%}" class="r8-td-col">{%=[:description]%}</td>
 		</tr>
 	{%end%}
 	</table>

@@ -14,7 +14,7 @@ views.node = {
             }
           }
       ],
-      :fieldList => [
+      :field_list => [
           {
             :display_name => {
               :type => 'text',

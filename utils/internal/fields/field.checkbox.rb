@@ -3,8 +3,8 @@ class Fieldcheckbox < Fieldbase
 
   attr_accessor :default_class
 
-  def initialize(fieldMeta)
-    super(fieldMeta)
+  def initialize(field_meta)
+    super(field_meta)
     @default_class = 'r8-checkbox'
     self.addClass(@default_class)
   end
@@ -32,7 +32,7 @@ class Fieldcheckbox < Fieldbase
    #protected function
   def getFieldEditTPL()
     return '<input type="hidden" id="' + @id + '-hidden" name="' + @name + '" value="0" />
-    <input type="checkbox" id="' + @id + '" name="' + @name + '" class="' + @class_txt + '" value="1" checked="{%=' + @obj_name + '[:' + @name + ']%}" />
+    <input type="checkbox" id="' + @id + '" name="' + @name + '" class="' + @class_txt + '" value="1" checked="{%=' + @model_name + '[:' + @name + ']%}" />
     '
   end
 
@@ -40,7 +40,7 @@ class Fieldcheckbox < Fieldbase
    #protected function
 #TODO: revisit and add leading hidden field for proper handling of unchecked form submissions
   def getFieldDisplayTPL()
-    return '<input disabled="disabled" type="checkbox" id="' + @id + '" name="' + @name + '" class="' + @class_txt + '" value="1" checked="{%=' + @obj_name + '[:' + @name + ']%}" />'
+    return '<input disabled="disabled" type="checkbox" id="' + @id + '" name="' + @name + '" class="' + @class_txt + '" value="1" checked="{%=' + @model_name + '[:' + @name + ']%}" />'
   end
 
   def getFieldDisplayHTML()
@@ -50,7 +50,7 @@ class Fieldcheckbox < Fieldbase
    # This returns the View of type list of a input for the checkbox in TPL/Smarty form
    #protected function
   def getFieldListTPL()
-    return '<input disabled="disabled" type="checkbox" id="' + @id + '" name="' + @name + '" class="' + @class_txt + '" value="1" checked="{%=' + @obj_name + '[:' + @name + ']%}" />'
+    return '<input disabled="disabled" type="checkbox" id="' + @id + '" name="' + @name + '" class="' + @class_txt + '" value="1" checked="{%=' + @model_name + '[:' + @name + ']%}" />'
   end
 
   def getFieldListHTML()

@@ -6,14 +6,14 @@ This is the base field class that all form fields derive from
 =end
 class Fieldbase
 
-  attr_accessor :name,:id,:obj_name,:value,:disabled,:classes,:field_meta,:render_mode
+  attr_accessor :name,:id,:model_name,:value,:disabled,:classes,:field_meta,:render_mode
 
-  def initialize(fieldMeta) 
-    @field_meta = fieldMeta
+  def initialize(field_meta) 
+    @field_meta = field_meta
 
     @id = (@field_meta[:id].nil? == true ? '' : @field_meta[:id].to_s)
     @name = (@field_meta[:name].nil? == true ? '' : @field_meta[:name].to_s)
-    @obj_name = (@field_meta[:objName].nil? == true ? '' : @field_meta[:objName].to_s)
+    @model_name = (@field_meta[:model_name].nil? == true ? '' : @field_meta[:model_name].to_s)
 
     @value = ''
     @disabled = false
@@ -32,12 +32,12 @@ class Fieldbase
   #     -tpl:   return field rendered in TPL/Smarty format
   #     -js:  return field rendered in Javascript format
   #     -html:  return field rendered in raw HTML format
-  def render(viewType, renderMode)
+  def render(view_type, render_mode)
     self.setClassTxt
 
-    if(renderMode != '') then @render_mode = renderMode end
+    if(render_mode != '') then @render_mode = render_mode end
 
-    case viewType.downcase
+    case view_type.downcase
       when "edit" then
         return self.getFieldEdit
       when "display" then
@@ -46,68 +46,68 @@ class Fieldbase
         return self.getFieldList
       #if getting to default then its calling a custom view
       else
-        cstmViewMethod = 'getField_'+ viewType
-        return self.send(cstmViewMethod.to_sym)
+        cstm_view_method = 'getField_'+ view_type
+        return self.send(cstm_view_method.to_sym)
     end
   end
 
   def getFieldEdit()
     case @render_mode
       when "html" then
-        fieldString = self.getFieldEditHTML()
+        field_string = self.getFieldEditHTML()
       when "js" then
-        fieldString = self.getFieldEditJS()
+        field_string = self.getFieldEditJS()
 #     when "tpl" then
       else
-        fieldString = self.getFieldEditTPL()
+        field_string = self.getFieldEditTPL()
     end
-    return fieldString
+    return field_string
   end
 
   def getFieldDisplay()
     case @render_mode
       when "html" then
-        fieldString = self.getFieldDisplayHTML
+        field_string = self.getFieldDisplayHTML
       when "js" then
-        fieldString = self.getFieldDisplayJS
+        field_string = self.getFieldDisplayJS
 #      when "tpl" then
       else
-        fieldString = self.getFieldDisplayTPL
+        field_string = self.getFieldDisplayTPL
     end
-    return fieldString
+    return field_string
   end
 
   def getFieldList()
     case @render_mode
       when "html" then
-        fieldString = self.getFieldListHTML
+        field_string = self.getFieldListHTML
       when "js" then
-        fieldString = self.getFieldListJS
+        field_string = self.getFieldListJS
 #      when "tpl" then
       else
-        fieldString = self.getFieldListTPL
+        field_string = self.getFieldListTPL
     end
-    return fieldString
+    return field_string
   end
 
-  def addClass(classToAdd)
-    @classes << classToAdd
+  def addClass(class_to_add)
+    @classes << class_to_add
   end
 
-  def removeClass(classToRemove)
-    tmpArray = []
+  def removeClass(class_to_remove)
+    tmp_array = []
 
-    @classes.each do |theclass|
-      if(theclass != classToRemove) then tmpArray << theclass end
+    @classes.each do |the_class|
+      if(the_class != class_to_remove) then tmp_array << the_class end
     end
-    @classes = tmpArray
+    @classes = tmp_array
   end
 
   def setClassTxt()
     @class_txt = ''
 
-    @classes.each do |theclass|
-        @class_txt << theclass << " "
+    @classes.each do |the_class|
+        @class_txt << the_class << " "
     end
     @class_txt.strip!
   end

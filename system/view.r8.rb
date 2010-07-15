@@ -5,7 +5,7 @@ class ViewR8
 
   def initialize(obj_name,i18n,profile=nil)
     @view_meta = nil               #hash defining an instance of a view
-    @obj_name = obj_name	  #object type (a symbol)
+    @model_name = obj_name	  #object type (a symbol)
     @i18n_hash = i18n
     # view_meta_path()            #path where the base view meta data should be located
     @override_meta_path = nil        #path where the overrides for a view should be located
@@ -43,10 +43,10 @@ class ViewR8
 
   def render(view_name)
     @view_name = view_name 
-    @form_id = "#{@obj_name}-#{@view_name}-form"
+    @form_id = "#{@model_name}-#{@view_name}-form"
     @view_meta = get_view_meta()
 
-    if viewTPLCurrent?
+    if view_tpl_current?
       @tpl_contents = get_view_tpl_cache()
       @css_require = get_css_require_from_cache()
       @js_require = get_js_require_from_cache()
@@ -82,11 +82,11 @@ class ViewR8
   # This will return the path to write the TPL cache file to
   #TODO:revisit to possibly put randomizer on filename ala smarty
   def view_tpl_cache_path()
-    "#{R8::Config[:app_cache_root]}/view/#{@obj_name}/#{@profile}.#{@view_name}.rtpl"
+    "#{R8::Config[:app_cache_root]}/view/#{@model_name}/#{@profile}.#{@view_name}.rtpl"
   end
 
   def object_view_tpl_path()
-    "#{R8::Config[:app_root_path]}/view/xyz/#{@obj_name}/#{@profile}.#{@view_name}.rtpl"
+    "#{R8::Config[:app_root_path]}/view/xyz/#{@model_name}/#{@profile}.#{@view_name}.rtpl"
   end
 
   def core_view_tpl_path()
@@ -94,11 +94,11 @@ class ViewR8
   end
 
   def css_require_path()
-    "#{R8::Config[:app_cache_root]}/view/#{@obj_name}/#{@profile}.#{@view_name}.css_include.json"
+    "#{R8::Config[:app_cache_root]}/view/#{@model_name}/#{@profile}.#{@view_name}.css_include.json"
   end
 
   def js_require_path()
-    "#{R8::Config[:app_cache_root]}/view/#{@obj_name}/#{@profile}.#{@view_name}.js_include.json"
+    "#{R8::Config[:app_cache_root]}/view/#{@model_name}/#{@profile}.#{@view_name}.js_include.json"
   end
 
   ViewTranslations = {
@@ -119,42 +119,42 @@ class ViewR8
   # TODO: should have extensible definition of viewName (ie: edit,quickEdit,editInline,etc)
   def get_view_meta()
 
-    R8View::Views[@obj_name] ||= {}
-    R8View::Views[@obj_name][@profile] ||= {}
-    R8View::Views[@obj_name][@profile][@view_name] ||= {}
+    R8View::Views[@model_name] ||= {}
+    R8View::Views[@model_name][@profile] ||= {}
+    R8View::Views[@model_name][@profile][@view_name] ||= {}
 
     #TODO: revisit to work on override possiblities and for profile handling
     #should check for all view locations, direct and override
     #TODO: figure out best way to do PHP style requires/loading of external meta hashes
     if File.exists?(view_meta_path()) then
        File.open(view_meta_path(), 'r') do |fHandle|
-        R8View::Views[@obj_name][@profile][@view_name] = XYZ::Aux.convert_to_hash_symbol_form(fHandle.read)
+        R8View::Views[@model_name][@profile][@view_name] = XYZ::Aux.convert_to_hash_symbol_form(fHandle.read)
        end
     elsif view_meta_path() =~ Regexp.new('(.+)\\.json')
     #TBD: temp conversion
       rb = $1 + ".rb"
       require rb
       File.open(view_meta_path(), 'w') do |fHandle|
-         fHandle.write(JSON.pretty_generate(R8View::Views[@obj_name][@profile][@view_name]))
+         fHandle.write(JSON.pretty_generate(R8View::Views[@model_name][@profile][@view_name]))
        end
     else
       #TODO: figure out handling of overrides
-      #      require $GLOBALS['ctrl']->getAppName().'/objects' . $this->objRef->getObjName() . '/meta/view.'.$this->profile.'.'.$this->viewName.'.php');
+      #      require $GLOBALS['ctrl']->getAppName().'/objects' . $this->objRef->getmodel_name() . '/meta/view.'.$this->profile.'.'.$this->viewName.'.php');
       # require 'some path to require'
      raise ErrorNotImplemented.new()
     end
-    R8View::Views[@obj_name][@profile][@view_name]
+    R8View::Views[@model_name][@profile][@view_name]
   end
 
   #This function will set the class property $this->viewMetaPath to appropriate value/location
   def view_meta_path()
     #TBD: error if inputs not set
-    "#{R8::Config[:sys_root_path]}/#{R8::Config[:application_name]}/meta/#{@obj_name}/view.#{@profile}.#{@view_name}.json"
-#    "#{R8::Config[:appRootPath]}meta/#{@obj_name}/view.#{@profile}.#{@view_name}.json"
+    "#{R8::Config[:sys_root_path]}/#{R8::Config[:application_name]}/meta/#{@model_name}/view.#{@profile}.#{@view_name}.json"
+#    "#{R8::Config[:appRootPath]}meta/#{@model_name}/view.#{@profile}.#{@view_name}.json"
   end
 
   # This will check to see if the TPL view file exists and isnt stale compare to the base TPL and other factors
-  def viewTPLCurrent?()
+  def view_tpl_current?()
     view_rtpl_cache_path = view_tpl_cache_path()
 
     #TBD: ask Nate about intended semantics; modified because error if file does not exist, but clause executed
@@ -169,6 +169,7 @@ class ViewR8
       #   templateR8EditTime = File.mtime(R8::Config[:app_root_path] + #{R8::Config[:application_name]} + "/template.r8.rb").to_i
       #TBD: below is stub
       return false#TBD: below is wrong so executing here
+
       template_r8_edit_time = File.mtime("#{SYSTEM_DIR}/r8/template.r8.rb").to_i
       if(tpl_cache_edit_time < template_r8_edit_time || tpl_cache_edit_time < view_meta_edit_time || tpl_cache_edit_time < view_tpl_edit_time) then
         return false
@@ -216,7 +217,7 @@ class ViewR8
 #TODO: use file.io.php util funcs
   def get_rtpl_path()
 #TODO: figure out how to best dynamically load hash meta for base and overrides
-#    $overrideTPLPath = $GLOBALS['ctrl']->getAppName().'/objects/'.$this->objRef->getObjName().'/templates/'.$this->profile.'.'.$this->viewName.'.tpl';
+#    $overrideTPLPath = $GLOBALS['ctrl']->getAppName().'/objects/'.$this->objRef->getmodel_name().'/templates/'.$this->profile.'.'.$this->viewName.'.tpl';
 
     object_view_path = object_view_tpl_path()
     (File.exists?(object_view_path)) ? (return object_view_path) : (return core_view_tpl_path())
@@ -228,40 +229,45 @@ class ViewR8
   def render_list_tpl_cache()
 #TODO: can probably move most of this function to a general function call
 #and re-use between renderViewJSCache and renderViewHTML
-    fieldHandler = FieldR8.new(self)
+    field_handler = FieldR8.new(self)
     r8TPL = R8Tpl::TemplateR8.new
     r8TPL.js_templating_on = false   #template engine should catch non JS automatically, but forcing to be sure
 
-    r8TPL.assign(:objName, @obj_name)
-    r8TPL.assign(:viewName, @view_name)
+    r8TPL.assign(:model_name, @model_name)
+    r8TPL.assign(:view_name, @view_name)
 
-    (!@view_meta[:thRowClass].nil?) ? r8TPL.assign(:thRowClass,@style[:th][:list][:row]) : r8TPL.assign(:thRowClass, @view_meta[:thRowClass])
+    (!@view_meta[:th_row_class].nil?) ? r8TPL.assign(:th_row_class,@style[:th][:list][:row]) : r8TPL.assign(:th_row_class, @view_meta[:th_row_class])
 
 #TODO: add even/odd tr class handling
-    listCols = []
-    @view_meta[:fieldList].each do |fieldHash|
-      fieldHash.each do |fieldName,fieldMeta|
-        fieldMeta[:objName] = @obj_name
-        fieldMeta[:name] = fieldName
-        fieldMeta[:label] = i18n(:default_list,fieldMeta[:name]) || fieldMeta[:name]
-        fieldMeta[:id] = fieldMeta[:name] if fieldMeta[:id].nil?
-        fieldMeta[:class] = @style[:td][:list][:col] if fieldMeta[:class].nil?
-        fieldMeta[:content] = fieldHandler.getField(view_type(), fieldMeta, 'tpl')
-        listCols << fieldMeta
+    list_cols = []
+
+#DEBUG
+print @view_meta
+print '+++++++++++++++++++++++++++\n\n'
+
+    @view_meta[:field_list].each do |field_hash|
+      field_hash.each do |field_name,field_meta|
+        field_meta[:model_name] = @model_name
+        field_meta[:name] = field_name
+        field_meta[:label] = i18n(:default_list,field_meta[:name]) || field_meta[:name]
+        field_meta[:id] = field_meta[:name] if field_meta[:id].nil?
+        field_meta[:class] = @style[:td][:list][:col] if field_meta[:class].nil?
+        field_meta[:content] = field_handler.getField(view_type(), field_meta, 'tpl')
+        list_cols << field_meta
       end
     end
 
-    objName = @obj_name
+    model_name = @model_name
     #build & assign the foreach header for the JS template
-    r8TPL.assign(:foreachHeaderContent,'{%for '+objName.to_s+' in '+ objName.to_s+'_list%}')
-    r8TPL.assign(:trClass, '{%='+obj_name.to_s+'[:class]%}')
-    r8TPL.assign(:cols, listCols);
+    r8TPL.assign(:foreach_header_content,'{%for '+model_name.to_s+' in '+ model_name.to_s+'_list%}')
+    r8TPL.assign(:tr_class, '{%='+obj_name.to_s+'[:class]%}')
+    r8TPL.assign(:cols, list_cols);
 
     #this might be temp until figuring out if template literals are possible
-    r8TPL.assign(:listStartPrevVar, '{%=listStartPrev%}')
-    r8TPL.assign(:listStartNextVar, '{%=listStartNext%}')
-    r8TPL.assign(:iteratorVar, '{%='+objName.to_s+'%}')
-    r8TPL.assign(:endTag, '{%end%}')
+    r8TPL.assign(:list_start_prev_var, '{%=list_start_prev%}')
+    r8TPL.assign(:list_start_next_var, '{%=list_start_next%}')
+    r8TPL.assign(:iterator_var, '{%='+model_name.to_s+'%}')
+    r8TPL.assign(:end_tag, '{%end%}')
 
     @tpl_contents = r8TPL.render(get_rtpl_contents())
     fwrite()
@@ -272,17 +278,17 @@ class ViewR8
 
   # This will add js calls to add each field to form validation
   def addValidation()
-    fieldHandler = FieldR8.new(self)
+    field_handler = FieldR8.new(self)
 
-    @view_meta[:fieldGroups].each do |groupNum,groupHash|
-      @view_meta[:fieldSets][groupNum][:fields].each do |fieldNum,fieldHash|
+    @view_meta[:field_groups].each do |group_num,group_hash|
+      @view_meta[:field_sets][group_num][:fields].each do |field_num,field_hash|
         next if(fieldArray.length == 0)
 
-        fieldHash.each do |fieldName,fieldMeta|
-          fieldMeta[:fieldName] = fieldName
-          if(!fieldMeta[:id].nil?) then fieldMeta[:id] = fieldMeta[:fieldName] end
-          fieldMeta[:objName] = @obj_name
-          fieldHandler.addValidation(@form_id, fieldMeta)
+        field_hash.each do |field_name,field_meta|
+          field_meta[:field_name] = field_name
+          if(!field_meta[:id].nil?) then field_meta[:id] = field_meta[:field_name] end
+          field_meta[:model_name] = @model_name
+          field_handler.addValidation(@form_id, field_meta)
         end
       end
     end
@@ -294,88 +300,88 @@ class ViewR8
   def renderEditTPLCache()
 #TODO: can probably move most of this function to a general function call
 #and re-use between renderViewJSCache and renderViewHTML
-    fieldHandler = FieldR8.new(self)
+    field_handler = FieldR8.new(self)
     r8TPL = R8Tpl::TemplateR8.new
     r8TPL.js_templating_on = false   #template engine should catch non JS automatically, but forcing to be sure
 
-    r8TPL.assign(:formId, @form_id)
-    r8TPL.assign(:formAction, @view_meta[:action])
+    r8TPL.assign(:form_id, @form_id)
+    r8TPL.assign(:form_action, @view_meta[:action])
 
-    (@view_meta[:tdLabelClass].nil?) ? tdLabelClass = @style[:td][:edit][:label] : tdLabelClass = @view_meta[:tdLabelClass]
+    (@view_meta[:td_label_class].nil?) ? td_label_class = @style[:td][:edit][:label] : td_label_class = @view_meta[:td_label_class]
 
-    (@view_meta[:tdFieldClass].nil?) ? tdFieldClass =@style[:td][:edit][:field] : tdFieldClass = @view_meta[:tdFieldClass]
+    (@view_meta[:td_field_class].nil?) ? td_field_class =@style[:td][:edit][:field] : td_field_class = @view_meta[:td_field_class]
 
     #add any form hidden fields
-    hiddenFields = []
-    @view_meta[:hiddenFields].each do |hFieldHash|
-      hFieldHash.each do |fieldName,fieldMeta|
-        fieldMeta[:name] = fieldName.to_s
-        if(fieldMeta[:id].nil?) then fieldMeta[:id] = fieldMeta[:name] end
-        hiddenFields << fieldMeta
+    hidden_fields = []
+    @view_meta[:hidden_fields].each do |hfield_hash|
+      hfield_hash.each do |field_name,field_meta|
+        field_meta[:name] = field_name.to_s
+        if(field_meta[:id].nil?) then field_meta[:id] = field_meta[:name] end
+        hidden_fields << field_meta
       end
     end
-    r8TPL.assign(:hFieldList, hiddenFields)
+    r8TPL.assign(:h_field_list, hidden_fields)
 
     rows = []
-    groupNum = 0
-    @view_meta[:fieldGroups].each do |groupHash|
-      rowCount = 0
-      displayLabels = groupHash[:displayLabels]
-      numCols = groupHash[:numCols].to_i
-      colIndex = 0
-      fieldNum = 0
-      rows[rowCount] = {}
-      rows[rowCount][:cols] = []
+    group_num = 0
+    @view_meta[:field_groups].each do |group_hash|
+      row_count = 0
+      display_labels = group_hash[:display_labels]
+      num_cols = group_hash[:num_cols].to_i
+      col_index = 0
+      field_num = 0
+      rows[row_count] = {}
+      rows[row_count][:cols] = []
 
-      groupHash[:fields].each do |fieldHash|
-        fieldNum +=1
-        rows[rowCount][:rowId] = 'g'+groupNum.to_s+'-r'+rowCount.to_s
+      group_hash[:fields].each do |field_hash|
+        field_num +=1
+        rows[row_count][:rowId] = 'g'+group_num.to_s+'-r'+row_count.to_s
         #if size is 0 then its a blank spot in the form
-        if(fieldHash.length == 0) then
-          rows[rowCount][:cols][colIndex] = {}
-          rows[rowCount][:cols][colIndex][:class] = tdLabelClass
-          rows[rowCount][:cols][colIndex][:content] = '&amp;nbsp;'
-          rows[rowCount][:cols][colIndex][:colId] = 'r'+rowCount.to_s+'-c'+colIndex.to_s+'-label'
-          colIndex+=1
-          rows[rowCount][:cols][colIndex] = {}
-          rows[rowCount][:cols][colIndex][:class] =  tdFieldClass
-          rows[rowCount][:cols][colIndex][:content] = '&amp;nbsp;'
-          rows[rowCount][:cols][colIndex][:colId] = 'r'+rowCount.to_s+'-c'+colIndex.to_s+'-field'
+        if(field_hash.length == 0) then
+          rows[row_count][:cols][col_index] = {}
+          rows[row_count][:cols][col_index][:class] = td_label_class
+          rows[row_count][:cols][col_index][:content] = '&amp;nbsp;'
+          rows[row_count][:cols][col_index][:col_id] = 'r'+row_count.to_s+'-c'+col_index.to_s+'-label'
+          col_index+=1
+          rows[row_count][:cols][col_index] = {}
+          rows[row_count][:cols][col_index][:class] =  td_field_class
+          rows[row_count][:cols][col_index][:content] = '&amp;nbsp;'
+          rows[row_count][:cols][col_index][:col_id] = 'r'+row_count.to_s+'-c'+col_index.to_s+'-field'
         else
-          fieldHash.each do |fieldName,fieldMeta|
-            fieldMeta[:name] = fieldName.to_sym
-            if(fieldMeta[:id].nil?) then fieldMeta[:id] = fieldMeta[:name] end
-            fieldMeta[:objName] = @obj_name
+          field_hash.each do |field_name,field_meta|
+            field_meta[:name] = field_name.to_sym
+            if(field_meta[:id].nil?) then field_meta[:id] = field_meta[:name] end
+            field_meta[:model_name] = @model_name
             #do label
-            rows[rowCount][:cols][colIndex] = {}
-            if(displayLabels) then
-              rows[rowCount][:cols][colIndex][:content] = ((!i18n(:default_edit,fieldMeta[:name].to_sym).nil?) ? i18n(:default_edit,fieldMeta[:name].to_sym) : fieldMeta[:name])
+            rows[row_count][:cols][col_index] = {}
+            if(display_labels) then
+              rows[row_count][:cols][col_index][:content] = ((!i18n(:default_edit,field_meta[:name].to_sym).nil?) ? i18n(:default_edit,field_meta[:name].to_sym) : field_meta[:name])
             else
-              rows[rowCount][:cols][colIndex][:content] = '&nbsp;'
+              rows[row_count][:cols][col_index][:content] = '&nbsp;'
             end
-            rows[rowCount][:cols][colIndex][:class] = tdLabelClass
-            rows[rowCount][:cols][colIndex][:colId] = fieldMeta[:name].to_s+"-label"
-            colIndex+=1
-            rows[rowCount][:cols][colIndex] = {}
+            rows[row_count][:cols][col_index][:class] = td_label_class
+            rows[row_count][:cols][col_index][:col_id] = field_meta[:name].to_s+"-label"
+            col_index+=1
+            rows[row_count][:cols][col_index] = {}
             #do field
-            rows[rowCount][:cols][colIndex][:colId] = fieldMeta[:name].to_s+"-field"
-            rows[rowCount][:cols][colIndex][:content] = fieldHandler.getField(view_type(), fieldMeta, 'tpl')
-            rows[rowCount][:cols][colIndex][:class] = tdFieldClass
+            rows[row_count][:cols][col_index][:col_id] = field_meta[:name].to_s+"-field"
+            rows[row_count][:cols][col_index][:content] = field_handler.getField(view_type(), field_meta, 'tpl')
+            rows[row_count][:cols][col_index][:class] = td_field_class
           end
         end
         #if remainder is 0 then its time to start rendering the next row, increment row, reset col
-        if(fieldNum.remainder(numCols) == 0) then
-          rowCount+=1
-          colIndex = 0
-          rows[rowCount] = {}
-          rows[rowCount][:cols] = []
+        if(field_num.remainder(num_cols) == 0) then
+          row_count+=1
+          col_index = 0
+          rows[row_count] = {}
+          rows[row_count][:cols] = []
         else 
-          colIndex+=1
+          col_index+=1
         end
         #end of field interation
       end
       #end of group interation
-      groupNum +=1
+      group_num +=1
     end
     r8TPL.assign(:rows, rows)
 
@@ -387,88 +393,88 @@ class ViewR8
   def render_display_tpl_cache()
 #TODO: can probably move most of this function to a general function call
 #and re-use between renderViewJSCache and renderViewHTML
-    fieldHandler = FieldR8.new(self)
+    field_handler = FieldR8.new(self)
     r8TPL = R8Tpl::TemplateR8.new
     r8TPL.js_templating_on = false   #template engine should catch non JS automatically, but forcing to be sure
 
     r8TPL.assign(:formId, @form_id)
     r8TPL.assign(:formAction, @view_meta[:action])
 
-    (@view_meta[:tdLabelClass].nil?) ? tdLabelClass = @style[:td][:edit][:label] : tdLabelClass = @view_meta[:tdLabelClass]
+    (@view_meta[:td_label_class].nil?) ? td_label_class = @style[:td][:edit][:label] : td_label_class = @view_meta[:td_label_class]
 
-    (@view_meta[:tdFieldClass].nil?) ? tdFieldClass =@style[:td][:edit][:field] : tdFieldClass = @view_meta[:tdFieldClass]
+    (@view_meta[:td_field_class].nil?) ? td_field_class =@style[:td][:edit][:field] : td_field_class = @view_meta[:td_field_class]
 
     #add any form hidden fields
-    hiddenFields = []
-    @view_meta[:hiddenFields].each do |hFieldHash|
-      hFieldHash.each do |fieldName,fieldMeta|
-        fieldMeta[:name] = fieldName.to_s
-        if(fieldMeta[:id].nil?) then fieldMeta[:id] = fieldMeta[:name] end
-        hiddenFields << fieldMeta
+    hidden_fields = []
+    @view_meta[:hidden_fields].each do |hfield_hash|
+      hfield_hash.each do |field_name,field_meta|
+        field_meta[:name] = field_name.to_s
+        if(field_meta[:id].nil?) then field_meta[:id] = field_meta[:name] end
+        hidden_fields << field_meta
       end
     end
-    r8TPL.assign(:hFieldList, hiddenFields)
+    r8TPL.assign(:h_field_list, hidden_fields)
 
     rows = []
-    groupNum = 0
-    @view_meta[:fieldGroups].each do |groupHash|
-      rowCount = 0
-      displayLabels = groupHash[:displayLabels]
-      numCols = groupHash[:numCols].to_i
-      colIndex = 0
-      fieldNum = 0
-      rows[rowCount] = {}
-      rows[rowCount][:cols] = []
+    group_num = 0
+    @view_meta[:field_groups].each do |group_hash|
+      row_count = 0
+      display_labels = group_hash[:display_labels]
+      num_cols = group_hash[:num_cols].to_i
+      col_index = 0
+      field_num = 0
+      rows[row_count] = {}
+      rows[row_count][:cols] = []
 
-      groupHash[:fields].each do |fieldHash|
-        fieldNum +=1
-        rows[rowCount][:rowId] = 'g'+groupNum.to_s+'-r'+rowCount.to_s
+      group_hash[:fields].each do |field_hash|
+        field_num +=1
+        rows[row_count][:rowId] = 'g'+group_num.to_s+'-r'+row_count.to_s
         #if size is 0 then its a blank spot in the form
-        if(fieldHash.length == 0) then
-          rows[rowCount][:cols][colIndex] = {}
-          rows[rowCount][:cols][colIndex][:class] = tdLabelClass
-          rows[rowCount][:cols][colIndex][:content] = '&amp;nbsp;'
-          rows[rowCount][:cols][colIndex][:colId] = 'r'+rowCount.to_s+'-c'+colIndex.to_s+'-label'
-          colIndex+=1
-          rows[rowCount][:cols][colIndex] = {}
-          rows[rowCount][:cols][colIndex][:class] =  tdFieldClass
-          rows[rowCount][:cols][colIndex][:content] = '&amp;nbsp;'
-          rows[rowCount][:cols][colIndex][:colId] = 'r'+rowCount.to_s+'-c'+colIndex.to_s+'-field'
+        if(field_hash.length == 0) then
+          rows[row_count][:cols][col_index] = {}
+          rows[row_count][:cols][col_index][:class] = td_label_class
+          rows[row_count][:cols][col_index][:content] = '&amp;nbsp;'
+          rows[row_count][:cols][col_index][:col_id] = 'r'+row_count.to_s+'-c'+col_index.to_s+'-label'
+          col_index+=1
+          rows[row_count][:cols][col_index] = {}
+          rows[row_count][:cols][col_index][:class] =  td_field_class
+          rows[row_count][:cols][col_index][:content] = '&amp;nbsp;'
+          rows[row_count][:cols][col_index][:col_id] = 'r'+row_count.to_s+'-c'+col_index.to_s+'-field'
         else
-          fieldHash.each do |fieldName,fieldMeta|
-            fieldMeta[:name] = fieldName.to_sym
-            if(fieldMeta[:id].nil?) then fieldMeta[:id] = fieldMeta[:name] end
-            fieldMeta[:objName] = @obj_name
+          field_hash.each do |field_name,field_meta|
+            field_meta[:name] = field_name.to_sym
+            if(field_meta[:id].nil?) then field_meta[:id] = field_meta[:name] end
+            field_meta[:model_name] = @model_name
             #do label
-            rows[rowCount][:cols][colIndex] = {}
-            if(displayLabels) then
-              rows[rowCount][:cols][colIndex][:content] = ((!i18n(:default_edit,fieldMeta[:name].to_sym).nil?) ? i18n(:default_edit,fieldMeta[:name].to_sym) : fieldMeta[:name])
+            rows[row_count][:cols][col_index] = {}
+            if(display_labels) then
+              rows[row_count][:cols][col_index][:content] = ((!i18n(:default_edit,field_meta[:name].to_sym).nil?) ? i18n(:default_edit,field_meta[:name].to_sym) : field_meta[:name])
             else
-              rows[rowCount][:cols][colIndex][:content] = '&nbsp;'
+              rows[row_count][:cols][col_index][:content] = '&nbsp;'
             end
-            rows[rowCount][:cols][colIndex][:class] = tdLabelClass
-            rows[rowCount][:cols][colIndex][:colId] = fieldMeta[:name].to_s+"-label"
-            colIndex+=1
-            rows[rowCount][:cols][colIndex] = {}
+            rows[row_count][:cols][col_index][:class] = td_label_class
+            rows[row_count][:cols][col_index][:col_id] = field_meta[:name].to_s+"-label"
+            col_index+=1
+            rows[row_count][:cols][col_index] = {}
             #do field
-            rows[rowCount][:cols][colIndex][:colId] = fieldMeta[:name].to_s+"-field"
-            rows[rowCount][:cols][colIndex][:content] = fieldHandler.getField(view_type(), fieldMeta, 'tpl')
-            rows[rowCount][:cols][colIndex][:class] = tdFieldClass
+            rows[row_count][:cols][col_index][:col_id] = field_meta[:name].to_s+"-field"
+            rows[row_count][:cols][col_index][:content] = field_handler.getField(view_type(), field_meta, 'tpl')
+            rows[row_count][:cols][col_index][:class] = td_field_class
           end
         end
         #if remainder is 0 then its time to start rendering the next row, increment row, reset col
-        if(fieldNum.remainder(numCols) == 0) then
-          rowCount+=1
-          colIndex = 0
-          rows[rowCount] = {}
-          rows[rowCount][:cols] = []
+        if(field_num.remainder(num_cols) == 0) then
+          row_count+=1
+          col_index = 0
+          rows[row_count] = {}
+          rows[row_count][:cols] = []
         else 
-          colIndex+=1
+          col_index+=1
         end
         #end of field interation
       end
       #end of group interation
-      groupNum +=1
+      group_num +=1
     end
     r8TPL.assign(:rows, rows)
 

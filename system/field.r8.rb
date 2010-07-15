@@ -7,43 +7,43 @@ class FieldR8
   end
 
   # This returns the contents for a provided field array and given view/render mode
-  def getField(viewType, fieldMeta, renderMode='tpl')
+  def getField(view_type, field_meta, renderMode='tpl')
     #convert any values that are symbols to strings
-    fieldMeta.each do |key,value|
-      if value.is_a?(Symbol) then fieldMeta[key] = value.to_s end
+    field_meta.each do |key,value|
+      if value.is_a?(Symbol) then field_meta[key] = value.to_s end
     end
 
-    case(fieldMeta[:type])
+    case(field_meta[:type])
       when "select","radio"
-        fieldMeta[:options] = self.getFieldOptions(fieldMeta)
+        field_meta[:options] = self.getFieldOptions(field_meta)
       when "multiselect"
         #if view of type edit add the []'s to allow for array to be returned in request for mult selects
-        if(viewType == 'edit') then fieldMeta[:name] << '[]' end
-        fieldMeta[:options] = self.getFieldOptions(fieldMeta)
+        if(view_type == 'edit') then field_meta[:name] << '[]' end
+        field_meta[:options] = self.getFieldOptions(field_meta)
 #TODO: enhance this once profiles are implemented
           load_field_file "field.select.rb"
     end
 
 #TODO: enhance this once profiles are implemented
-    load_field_file "field.#{fieldMeta[:type]}.rb"
-    fieldClass = 'Field' + fieldMeta[:type]
+    load_field_file "field.#{field_meta[:type]}.rb"
+    fieldClass = 'Field' + field_meta[:type]
      #TBD: if wrapped in modeule M use form M.const_get
-     fieldObj = Kernel.const_get(fieldClass).new(fieldMeta)
+     fieldObj = Kernel.const_get(fieldClass).new(field_meta)
      fieldObj.set_includes(@r8view_ref)
 
-    return fieldObj.render(viewType, renderMode)
+    return fieldObj.render(view_type, renderMode)
   end
 
   # This adds the js exe call for the given field meta
-  def addValidation(formId, fieldMeta)
-    (fieldMeta['required'] == true) ? required = "true" : required = "false"
+  def addValidation(formId, field_meta)
+    (field_meta['required'] == true) ? required = "true" : required = "false"
 
-    case(fieldMeta['type'])
+    case(field_meta['type'])
       when "radio"
         #classRefId used b/c styling cant be applied to radio itself so applied to reference div wrapper
-        content = 'R8.forms.addValidator("' + formId + '",{"id":"' + fieldMeta[:id] + '","classRefId":"' + fieldMeta[:id] + '-radio-wrapper","type":"' + fieldMeta[:type] + '","required":' + required + '});'
+        content = 'R8.forms.addValidator("' + formId + '",{"id":"' + field_meta[:id] + '","classRefId":"' + field_meta[:id] + '-radio-wrapper","type":"' + field_meta[:type] + '","required":' + required + '});'
       else
-        content = 'R8.forms.addValidator("' + formId + '",{"id":"' + fieldMeta[:id] + '","type":"' + fieldMeta[:type] + '","required":' + required + '});'
+        content = 'R8.forms.addValidator("' + formId + '",{"id":"' + field_meta[:id] + '","type":"' + field_meta[:type] + '","required":' + required + '});'
     end
 #    $GLOBALS['ctrl']->addJSExeScript(
 #      array(
@@ -54,7 +54,7 @@ class FieldR8
   end
 
 #TODO: clean this up when option lists are fully implemented
-  def getFieldOptions(fieldMeta)
+  def getFieldOptions(field_meta)
     options = {
 #      '' => '--None--',
       'One'=>'One',

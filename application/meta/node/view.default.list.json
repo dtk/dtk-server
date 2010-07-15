@@ -1,6 +1,6 @@
 {
-  "trClass": "tr-dl",
-  "hiddenFields": [
+  "tr_class": "tr-dl",
+  "hidden_fields": [
     {
       "id": {
         "type": "hidden",
@@ -8,8 +8,7 @@
       }
     }
   ],
-  "trOddClass": "tr-dl-odd",
-  "fieldList": [
+  "field_list": [
     {
       "display_name": {
         "type": "text",
@@ -25,5 +24,4 @@
       }
     }
   ],
-  "trEvenClass": "tr-dl-even"
 }

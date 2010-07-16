@@ -241,10 +241,6 @@ class ViewR8
 #TODO: add even/odd tr class handling
     list_cols = []
 
-#DEBUG
-print @view_meta
-print '+++++++++++++++++++++++++++\n\n'
-
     @view_meta[:field_list].each do |field_hash|
       field_hash.each do |field_name,field_meta|
         field_meta[:model_name] = @model_name

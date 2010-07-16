@@ -16,8 +16,8 @@
 
 	{%for node in node_list%}
 		<tr id="list_row-{%=node%}" class="{%=[:class]%}">
-				<td id="display_name-td-{%=node%}" class="r8-td-col"><a href="javascript:R8.ctrl.request('obj=&amp;action=display&amp;id={%=[:id]%}');">{%=[:display_name]%}</a></td>
-				<td id="description-td-{%=node%}" class="r8-td-col">{%=[:description]%}</td>
+				<td id="display_name-td-{%=node%}" class="r8-td-col"><a href="javascript:R8.ctrl.request('obj=node&amp;action=display&amp;id={%=node[:id]%}');">{%=node[:display_name]%}</a></td>
+				<td id="description-td-{%=node%}" class="r8-td-col">{%=node[:description]%}</td>
 		</tr>
 	{%end%}
 	</table>

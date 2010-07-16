@@ -1,11 +1,8 @@
 require 'chef/rest'
 require 'chef/config'
 require 'mixlib/authentication'
+require 'chef/cookbook/metadata/version'
 
-begin
-  require 'chef/cookbook/metadata/version'
- rescue Exception
-end
 
 module XYZ
   module DSConnector

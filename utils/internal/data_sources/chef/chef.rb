@@ -37,14 +37,25 @@ module XYZ
           # get_rest("cookbooks")
           #stub that just gets cookbooks from run list; it actually has recipes so can pass this in too
           get_node_recipe_assocs().values.flatten.map{|x|x.gsub(/::.+$/,"")}.uniq
-         end
+        end
+
+        def get_metadata(cookbook_name)
+          #need version number if 0.9
+          cookbook = [cookbook_name]
+          if ::Chef::VERSION.to_f >= 0.9
+            #need to get meta first
+            r = get_rest("cookbooks/#{cookbook_name}")
+            #TBD: get max, in case multiple versions; check max is ordering right
+            cookbook << r[cookbook_name].max
+          end
+          r = get_rest("cookbooks/#{cookbook.join('/')}")
+          return nil unless r
+          r.to_hash["metadata"]
+        end
 
         def get_recipes_assoc_cookbook(cookbook_name)
-          r = get_rest("cookbooks/#{cookbook_name}")
+          metadata = get_metadata(cookbook_name)
           ret = Array.new
-          return ret if r.nil?
-
-          metadata = r["metadata"]
           return ret if metadata.nil?
 
           if metadata["recipes"]

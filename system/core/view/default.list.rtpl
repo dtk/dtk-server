@@ -2,26 +2,26 @@
 <div style="width: 100%;">
 	<div style="width: 100%;">
 		<div style="float: right; margin-right: 10px;">
-		<a href="javascript:R8.ctrl.request('{%=objName%}/list?listStart={%=listStartPrevVar%}');">&lt;-Prev</a>
+		<a href="javascript:R8.ctrl.request('{%=model_name%}/list?listStart={%=list_start_prev_var%}');">&lt;-Prev</a>
 		&nbsp;&nbsp;&nbsp;&nbsp;
-		<a href="javascript:R8.ctrl.request('{%=objName%}/list?listStart={%=listStartNextVar%}');">Next-&gt;</a>
+		<a href="javascript:R8.ctrl.request('{%=model_name%}/list?listStart={%=list_start_next_var%}');">Next-&gt;</a>
 		</div>
 	</div>
 	<div style="width: 100%; float: left;">
 	<table cellspacing="0" cellpadding="0" border="1" style="width: 100%;">
-	<tr id="{%=objName%}-{%=viewName%}-header-row" class="{%=thRowClass%}">
-		{%for headerCol in cols%}
-			<th id="{%=headerCol[:id]%}-th" class="{%=headerCol[:class]%}">{%=headerCol[:label]%}</th>
+	<tr id="{%=model_name%}-{%=view_name%}-header-row" class="{%=th_row_class%}">
+		{%for header_col in cols%}
+			<th id="{%=header_col[:id]%}-th" class="{%=header_col[:class]%}">{%=header_col[:label]%}</th>
 		{%end%}
 	</tr>
 
-	{%=foreachHeaderContent%}
-		<tr id="listRow-{%=iteratorVar%}" class="{%=trClass%}">
+	{%=foreach_header_content%}
+		<tr id="list_row-{%=iterator_var%}" class="{%=tr_class%}">
 			{%for col in cols%}
-				<td id="{%=col[:id]%}-td-{%=iteratorVar%}" class="{%=col[:class]%}">{%=col[:content]%}</td>
+				<td id="{%=col[:id]%}-td-{%=iterator_var%}" class="{%=col[:class]%}">{%=col[:content]%}</td>
 			{%end%}
 		</tr>
-	{%=endTag%}
+	{%=end_tag%}
 	</table>
 	</div>
 </div>

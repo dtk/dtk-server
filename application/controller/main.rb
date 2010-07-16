@@ -22,12 +22,73 @@ module XYZ
 =end
     def index
       layout :test
-print "This is a test of the main ctrllr index"      
     end
 
-    def crap
-      return "This is gaaaaaaaaaarb!!!!!"
+    def list
+      where_clause = {} # stub
+      model = model_name.to_s
+      model_list = get_objects(model_name,where_clause)
+
+      action_name = :list #TBD: automatically determine this
+      #set the view name to the model view folder and list view
+      view_name = model+'/'+action_name.to_s
+
+#TBD: these can get pushed to higher level inside tpl.set_view
+#      view = create_and_render_view(action_name)
+#      tpl = create_template_for_action(view,action_name)
+
+      tpl.set_view(view_name)
+
+#not quite sure what was happening here, but assign should always be name=>value assignments
+      tpl.assign(model+'_list',model_list)
+      tpl.assign(:list_start_prev, 0)
+      tpl.assign(:list_start_next, 0)
+
+
+      tpl_results = tpl.render()
+      ctrl_result = {
+        :tpl_contents => tpl_results
+      }
     end
+
+    def display
+      id = retrieve_from_route
+      model = model_name.to_s
+      model_result = get_object_by_id(id,model)
+
+      action_name = :display #TBD: automatically determine this
+      #set the view name to the model view folder and list view
+      view_name = model+'/'+action_name.to_s
+      tpl.set_view(view_name)
+
+      tpl.assign(model,model_result)
+      tpl_results = tpl.render()
+      ctrl_result = {
+        :tpl_contents => tpl_results
+      }
+    end
+
+
+    def edit
+      id = retrieve_from_route
+      model = model_name.to_s
+      model_result = get_object_by_id(id,model)
+
+      action_name = :edit #TBD: automatically determine this
+      #set the view name to the model view folder and list view
+      view_name = model+'/'+action_name.to_s
+      tpl.set_view(view_name)
+
+      tpl.assign(model,model_result)
+      tpl_results = tpl.render()
+      ctrl_result = {
+        :tpl_contents => tpl_results
+      }
+    end
+
+################################################################################
+################################################################################
+################################################################################
 
     #TBD: might refactor other actions to use this
     #TBD: want to route to this, not allow direct call; how can we enforce this (maybe route with this prefix leads to unauthorized

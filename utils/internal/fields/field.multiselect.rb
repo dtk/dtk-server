@@ -3,8 +3,8 @@ class Fieldmultiselect < Fieldselect
 
   attr_accessor :default_class,:multiple
 
-  def initialize(fieldMeta)
-    super(fieldMeta)
+  def initialize(field_meta)
+    super(field_meta)
     @defaultClass = 'r8-multiselect'
     @multiple = 'multiple="multiple"'
   end
@@ -14,22 +14,22 @@ class Fieldmultiselect < Fieldselect
   def setOptions(options)
     @option_str = ''
     options.each do |value,display|
-      @option_str << '<option value="' + value + '" multiselected="{%=' + @obj_name + '[:' + @name + ']%}">' + display + '</option>'
+      @option_str << '<option value="' + value + '" multiselected="{%=' + @model_name + '[:' + @name + ']%}">' + display + '</option>'
     end
   end
 
   # This returns the View of type view for an input of type multiselect in TPL/Smarty form
   #protected function
   def getFieldDisplayTPL()
-    fieldString = '{%=' + @obj_name + '[:' + @name + ']%}'
-    return fieldString
+    field_string = '{%=' + @model_name + '[:' + @name + ']%}'
+    return field_string
   end
 
   # This returns the View of type list for an input of type multiselect in TPL/Smarty form
   #protected function
   def getFieldListTPL()
-    fieldString = '{%=' + @obj_name + '[:' + @name + ']%}'
-    return fieldString
+    field_string = '{%=' + @model_name + '[:' + @name + ']%}'
+    return field_string
   end
 
 end

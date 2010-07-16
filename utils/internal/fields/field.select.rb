@@ -3,20 +3,20 @@ class Fieldselect < Fieldbase
 
   attr_accessor :default_class,:option_str
 
-  def initialize(fieldMeta)
-    super(fieldMeta)
+  def initialize(field_meta)
+    super(field_meta)
 
     @default_class = 'r8-select'
     @option_str = ''
 
     self.addClass(@default_class)
-    self.setOptions(fieldMeta[:options])
+    self.setOptions(field_meta[:options])
   end
 
   def setOptions(options)
     @option_str = ''
     options.each do |value,display|
-      @option_str << '<option value="' + value + '" selected="{%=' + @obj_name + '[:' + @name + ']%}">' + display + '</option>'
+      @option_str << '<option value="' + value + '" selected="{%=' + @model_name + '[:' + @name + ']%}">' + display + '</option>'
     end
   end
 
@@ -38,11 +38,11 @@ class Fieldselect < Fieldbase
   def getFieldEditTPL()
     (!@multiple.nil? && @multiple != '') ? multiple = @multiple : multiple = ''
 
-    selectStr = '<select id="' + @id + '" name="' + @name + '" '+ multiple + '>'
-    selectStr << @option_str
-    selectStr << '</select>'
+    select_str = '<select id="' + @id + '" name="' + @name + '" '+ multiple + '>'
+    select_str << @option_str
+    select_str << '</select>'
 
-    return selectStr
+    return select_str
   end
 
   # This returns the View of type view for an input of type select in TPL/Smarty form
@@ -53,8 +53,8 @@ class Fieldselect < Fieldbase
 #      $multiple = $this->multiple;
 #    else $multiple = '';
 
-    fieldString = '{%=' + @obj_name + '[:' + @name + ']%}'
-    return fieldString
+    field_string = '{%=' + @model_name + '[:' + @name + ']%}'
+    return field_string
   end
 
   # This returns the View of type list for an input of type select in TPL/Smarty form
@@ -66,7 +66,7 @@ class Fieldselect < Fieldbase
 #    else multiple = ''
 #    end
 
-    fieldString = '{%=' + @obj_name + '[:' + @name + ']%}'
-    return fieldString
+    field_string = '{%=' + @model_name + '[:' + @name + ']%}'
+    return field_string
   end
 end

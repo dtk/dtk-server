@@ -2,16 +2,16 @@
 
 class Fieldcalendar < Fieldbase
 
-  attr_accessor :default_class,:read_only,:calType
+  attr_accessor :default_class,:read_only,:cal_type
 
-  def initialize(fieldMeta)
-    super(fieldMeta)
+  def initialize(field_meta)
+    super(field_meta)
     @default_class = 'r8-cal'
     self.addClass(@default_class)
     @read_only = false
 
-    (!fieldMeta['cols'].nil?) ? @columns = fieldMeta['cols'] : @columns = 40
-    (!fieldMeta['calType'].nil?) ? @cal_type = fieldMeta['calType'] : @cal_type = 'basic'
+    (!field_meta['cols'].nil?) ? @columns = field_meta['cols'] : @columns = 40
+    (!field_meta['cal_type'].nil?) ? @cal_type = field_meta['cal_type'] : @cal_type = 'basic'
 
   end
   def set_includes(r8view_ref)
@@ -67,7 +67,7 @@ class Fieldcalendar < Fieldbase
 #    );
 
     return '
-    <input type="text" id="' + @id + '" name="' + @name + '" class="' + @class_txt + '" value="{%=' + @obj_name + '[:' + @name + ']%}" ' + size + ' />
+    <input type="text" id="' + @id + '" name="' + @name + '" class="' + @class_txt + '" value="{%=' + @model_name + '[:' + @name + ']%}" ' + size + ' />
     <button type="button" id="' + btnId + '" title="' + btnTitle + '">
       <img src="core/images/calendarbutton.gif" width="18" height="18" alt="Calendar" />
     </button>
@@ -77,7 +77,7 @@ class Fieldcalendar < Fieldbase
    # This returns the View of type view for an input of type calendar in TPL/Smarty form
    #protected function
   def getFieldDisplayTPL()
-    return '{%=' + @obj_name + '[:' + @name + ']%}'
+    return '{%=' + @model_name + '[:' + @name + ']%}'
   end
 
   def getFieldDisplayHTML()
@@ -91,7 +91,7 @@ class Fieldcalendar < Fieldbase
   # This returns the View of type list for an input of type calendar in TPL/Smarty form
   #protected function
   def getFieldListTPL()
-    return '{%=' + @obj_name + '[:' + @name + ']%}'
+    return '{%=' + @model_name + '[:' + @name + ']%}'
   end
 
   def getFieldListHTML()

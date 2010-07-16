@@ -2,6 +2,11 @@ require 'chef/rest'
 require 'chef/config'
 require 'mixlib/authentication'
 
+begin
+  require 'chef/cookbook/metadata/version'
+ rescue Exception
+end
+
 module XYZ
   module DSConnector
     class Chef < Top
@@ -26,7 +31,10 @@ module XYZ
           end
           return HashIsComplete.new()
         end
-
+        
+        def chef_version()
+         ::Chef::VERSION.to_f 
+        end
        private
         #TBD:not needed now
         #def get_node_attributes(node_name)
@@ -42,7 +50,8 @@ module XYZ
         def get_metadata(cookbook_name)
           #need version number if 0.9
           cookbook = [cookbook_name]
-          if ::Chef::VERSION.to_f >= 0.9
+          if chef_version >= 0.9
+
             #need to get meta first
             r = get_rest("cookbooks/#{cookbook_name}")
             #TBD: get max, in case multiple versions; check max is ordering right
@@ -95,7 +104,8 @@ module XYZ
         def get_rest(item,convert_to_hash=true)
           raw_rest_results = conn().get_rest(item)
           return raw_rest_results unless convert_to_hash
-          raw_rest_results.kind_of?(::Chef::Node) ? raw_rest_results.to_hash : raw_rest_results
+          return raw_rest_results if raw_rest_results.kind_of?(Hash)
+          raw_rest_results.to_hash 
         end
 
         def conn()

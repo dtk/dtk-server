@@ -1,4 +1,4 @@
-require File.expand_path('swoop_stub', File.dirname(__FILE__))
+#require File.expand_path('swoop_stub', File.dirname(__FILE__))
 #require File.expand_path('frontend_integration_stub', File.dirname(__FILE__))
 
 require File.expand_path('workspace', File.dirname(__FILE__))
@@ -90,6 +90,7 @@ module XYZ
 ################################################################################
 ################################################################################
 
+=begin
     #TBD: might refactor other actions to use this
     #TBD: want to route to this, not allow direct call; how can we enforce this (maybe route with this prefix leads to unauthorized
     ACTION_HANDLER_OBJ = {
@@ -119,6 +120,7 @@ module XYZ
     ACTION_HANDLER_IS_ASYNCHRONOUS = {
 #      :import_chef_recipes => true
     }
+=end
 
     #TBD: starting to bring in new code; hard coded just for list_components
     def test__list(*uri_array)

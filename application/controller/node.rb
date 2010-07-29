@@ -57,7 +57,7 @@ module XYZ
 
       #some utility function(s) to deal with object and app strings
       #should probably take some params for view specific strings, else fall back on default
-   #   obj_i18n = get_object_i18n()
+   #   obj_i18n = get_model_i18n()
 
     end
   end

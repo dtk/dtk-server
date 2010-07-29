@@ -1,4 +1,4 @@
-require 'rubygems'
+
 require 'chef/rest'
 require 'mixlib/authentication'
 module XYZ

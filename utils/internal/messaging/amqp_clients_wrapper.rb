@@ -1,4 +1,4 @@
-require 'rubygems'
+
 require File.expand_path('msg_bus_message', File.dirname(__FILE__))
 #TBD: factor so have dynamically loaded adapters
 require 'mq'

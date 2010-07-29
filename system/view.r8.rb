@@ -89,8 +89,8 @@ class ViewR8
     "#{R8::Config[:app_root_path]}/view/xyz/#{@model_name}/#{@profile}.#{@view_name}.rtpl"
   end
 
-  def core_view_tpl_path()
-    "#{R8::Config[:core_view_root]}/#{@profile}.#{@view_name}.rtpl"
+  def system_view_tpl_path()
+    "#{R8::Config[:system_view_root]}/#{@profile}.#{@view_name}.rtpl"
   end
 
   def css_require_path()
@@ -219,10 +219,10 @@ class ViewR8
 #TODO: figure out how to best dynamically load hash meta for base and overrides
 #    $overrideTPLPath = $GLOBALS['ctrl']->getAppName().'/objects/'.$this->objRef->getmodel_name().'/templates/'.$this->profile.'.'.$this->viewName.'.tpl';
 
-    object_view_path = object_view_tpl_path()
-    (File.exists?(object_view_path)) ? (return object_view_path) : (return core_view_tpl_path())
+    model_view_path = object_view_tpl_path()
+    (File.exists?(model_view_path)) ? (return model_view_path) : (return system_view_tpl_path())
 
-    return "#{R8::Config[:core_view_root]}/#{@profile}.#{@view_name}.rtpl"
+    return "#{R8::Config[:system_view_root]}/#{@profile}.#{@view_name}.rtpl"
   end
 
   # This function will generate the TPL cache for a view of type list

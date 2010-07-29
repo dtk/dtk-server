@@ -1,9 +1,10 @@
-require 'rubygems'
+
 require 'sequel'
-require File.expand_path('db/schema_processing', File.dirname(__FILE__))
-require File.expand_path('db/data_processing', File.dirname(__FILE__))
-require File.expand_path('db/associations', File.dirname(__FILE__))
-require File.expand_path('db/infra_tables', File.dirname(__FILE__))
+#TODO: can probably get rid of internal dir, cleanup in next pass
+require File.expand_path(UTILS_DIR+'/internal/db/schema_processing', File.dirname(__FILE__))
+require File.expand_path(UTILS_DIR+'/internal/db/data_processing', File.dirname(__FILE__))
+require File.expand_path(UTILS_DIR+'/internal/db/associations', File.dirname(__FILE__))
+require File.expand_path(UTILS_DIR+'/internal/db/infra_tables', File.dirname(__FILE__))
 
 module XYZ
   class DB
@@ -26,7 +27,7 @@ module XYZ
     end
 
     def self.create(db_params)
-      require File.expand_path('db/adapters/' + db_params[:type] , File.dirname(__FILE__))
+      require File.expand_path(UTILS_DIR+'/internal/db/adapters/' + db_params[:type] , File.dirname(__FILE__))
       db_class = XYZ.const_get db_params[:type].capitalize
       return db_class.new(db_params)
     end

@@ -9,20 +9,16 @@ R8View::Views[:node] = {
           }}
       ],
       :field_list => [
-          {
-            :display_name => {
+          {:display_name => {
               :type => 'text',
               :help => '',
               :objLink => true,
               :objLinkView => 'display',
-            }
-          },
-          {
-            :description => {
+            }},
+          {:description => {
               :type => 'text',
               :help => '',
-            }
-          },
+            }},
       ]
     }
   }

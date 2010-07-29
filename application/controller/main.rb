@@ -134,6 +134,7 @@ module XYZ
       #TBD: put in rendering
     end
 
+#TODO: move out of here
     #TBD: starting to bring in new code; hard coded just for import_chef_recipes
     def action_handler__import_chef_recipes(*uri_array)
       error_405 unless request.post?
@@ -147,6 +148,8 @@ module XYZ
       redirect_uri = uri
       redirect route('list/' + redirect_uri) unless redirect_uri.nil?
     end
+
+#TODO: move out of here and modularize
 
     #TBD: this fn getting too large; will modularize 
     def action_handler(action_x,*uri_array)
@@ -263,6 +266,7 @@ module XYZ
       @results = Object.get_instance_or_factory(IDHandle[:c => c,:uri => uri],href_prefix,opts)
     end
 
+#TODO: move out of here
     def library__public
      error_405 unless request.get?
      uri = "/library/public" 
@@ -273,6 +277,7 @@ module XYZ
      @title = uri
     end
 
+#TODO: move out of here, this doesnt belong in the controller
     # for list from id  
     def list_by_guid(guid)
       error_405 unless request.get? 
@@ -294,6 +299,7 @@ module XYZ
       @results = Object.get_contained_attributes(type,IDHandle[:c => c,:uri => uri])
     end
 
+#TODO: move out of here
     #TBD: temp
     def list_node_attributes(*uri_array)
       error_405 unless request.get? 
@@ -303,6 +309,7 @@ module XYZ
       @results = Node.get_node_attribute_values(IDHandle[:c => c,:uri => uri],opts)
     end
 
+#TODO: move out of here, this seems to belong in the central model handler
     #TBD: temp
     def get_guid(*uri_array)
       error_405 unless request.get? 
@@ -311,6 +318,7 @@ module XYZ
       @results = Object.get_guid(IDHandle[:c => c,:uri => uri])
     end
 
+#Generic list example is above
     def list(*uri_array)
       error_405 unless request.get?
       uri = "/" + uri_array.join("/")
@@ -335,6 +343,8 @@ require 'pp'; pp objs
     end
   end
 end
+
+#TODO: move out of here, routes should be moved to routes config file
 
 #examples of routes
 Ramaze::Route['/list_recipes'] = '/list/library/public'

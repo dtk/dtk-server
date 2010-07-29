@@ -4,6 +4,7 @@ module XYZ
     extend ClassMixinDataSourceExtensions
     set_relation_name(:node,:node)
     class << self
+#TODO: move this out into central model, should read off of model meta data for processing
       def up()
         has_ancestor_field()
         column :ds_attributes, :json
@@ -61,12 +62,14 @@ module XYZ
     end
     #######
 
+#TODO: should this be more generic and centralized?
     def get_objects_associated_components()
       assocs = Object.get_objects(:assoc_node_component,@c,:node_id => self[:id])
       return [] if assocs.nil?
       assocs.map{|assoc|Object.get_object(IDHandle[:c=>@c,:guid => assoc[:component_id]])}
     end
 
+#TODO: should be centralized
     def get_contained_attribute_ids(opts={})
       get_directly_contained_object_ids(:attribute)||[]
     end
@@ -85,6 +88,8 @@ module XYZ
     end
   end
 end
+
+#TODO: need to cleanup and move sub models/relationships out of here
 
 module XYZ
   class AssocNodeComponent < Model

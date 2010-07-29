@@ -1,3 +1,5 @@
+#TODO: should probably just rename this to model.r8.rb and move directly into system folder
+
 #TODO: lose all of these, lose notion of schemea and data
 #db inclusion shouldnt be needed or required at this level
 require SYSTEM_DIR + 'db'

@@ -1,6 +1,7 @@
 
 
 #possible to have clean seperation of model field defs?
+
         has_ancestor_field()
         column :ds_attributes, :json
         column :ds_key, :varchar

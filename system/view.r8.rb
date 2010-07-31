@@ -3,9 +3,9 @@ require File.expand_path('field.r8.rb', File.dirname(__FILE__))
 class ViewR8
   attr_accessor :obj_name, :tpl_contents, :css_require, :js_require
 
-  def initialize(obj_name,i18n,profile=nil)
+  def initialize(model_name,i18n,profile=nil)
     @view_meta = nil               #hash defining an instance of a view
-    @model_name = obj_name	  #object type (a symbol)
+    @model_name = model_name	  #object type (a symbol)
     @i18n_hash = i18n
     # view_meta_path()            #path where the base view meta data should be located
     @override_meta_path = nil        #path where the overrides for a view should be located
@@ -20,25 +20,6 @@ class ViewR8
     @tpl_contents = nil	            #This is contents of template
     @css_require = []
     @js_require = []
-
-    #TODO: move these to style.config.r8 to be loaded in constructor
-    @style = 
-      {:td =>
-        {:edit =>
-          {:label => 'r8-label-edit',
-           :field => 'r8-field-edit'},
-         :display =>
-          {:label => 'r8-label-display',
-           :field => 'r8-field-display'},
-         :list =>
-          {:col => 'r8-td-col'}
-      },
-      :th =>
-        {:list =>
-          {:col => 'r8-th-col',
-          :row => 'r8-th-row'}
-        }
-    }
   end
 
   def render(view_name)
@@ -85,7 +66,7 @@ class ViewR8
     "#{R8::Config[:app_cache_root]}/view/#{@model_name}/#{@profile}.#{@view_name}.rtpl"
   end
 
-  def object_view_tpl_path()
+  def model_view_tpl_path()
     "#{R8::Config[:app_root_path]}/view/xyz/#{@model_name}/#{@profile}.#{@view_name}.rtpl"
   end
 
@@ -219,7 +200,7 @@ class ViewR8
 #TODO: figure out how to best dynamically load hash meta for base and overrides
 #    $overrideTPLPath = $GLOBALS['ctrl']->getAppName().'/objects/'.$this->objRef->getmodel_name().'/templates/'.$this->profile.'.'.$this->viewName.'.tpl';
 
-    model_view_path = object_view_tpl_path()
+    model_view_path = model_view_tpl_path()
     (File.exists?(model_view_path)) ? (return model_view_path) : (return system_view_tpl_path())
 
     return "#{R8::Config[:system_view_root]}/#{@profile}.#{@view_name}.rtpl"
@@ -236,8 +217,6 @@ class ViewR8
     r8TPL.assign(:model_name, @model_name)
     r8TPL.assign(:view_name, @view_name)
 
-    (!@view_meta[:th_row_class].nil?) ? r8TPL.assign(:th_row_class,@style[:th][:list][:row]) : r8TPL.assign(:th_row_class, @view_meta[:th_row_class])
-
 #TODO: add even/odd tr class handling
     list_cols = []
 
@@ -247,7 +226,7 @@ class ViewR8
         field_meta[:name] = field_name
         field_meta[:label] = i18n(:default_list,field_meta[:name]) || field_meta[:name]
         field_meta[:id] = field_meta[:name] if field_meta[:id].nil?
-        field_meta[:class] = @style[:td][:list][:col] if field_meta[:class].nil?
+        field_meta[:class] = field_meta[:class]
         field_meta[:content] = field_handler.getField(view_type(), field_meta, 'tpl')
         list_cols << field_meta
       end
@@ -257,7 +236,7 @@ class ViewR8
     #build & assign the foreach header for the JS template
     r8TPL.assign(:foreach_header_content,'{%for '+model_name.to_s+' in '+ model_name.to_s+'_list%}')
     r8TPL.assign(:tr_class, '{%='+obj_name.to_s+'[:class]%}')
-    r8TPL.assign(:cols, list_cols);
+    r8TPL.assign(:cols, list_cols)
 
     #this might be temp until figuring out if template literals are possible
     r8TPL.assign(:list_start_prev_var, '{%=list_start_prev%}')
@@ -303,9 +282,9 @@ class ViewR8
     r8TPL.assign(:form_id, @form_id)
     r8TPL.assign(:form_action, @view_meta[:action])
 
-    (@view_meta[:td_label_class].nil?) ? td_label_class = @style[:td][:edit][:label] : td_label_class = @view_meta[:td_label_class]
+    (@view_meta[:td_label_class].nil?) ? td_label_class = 'label' : td_label_class = @view_meta[:td_label_class]
 
-    (@view_meta[:td_field_class].nil?) ? td_field_class =@style[:td][:edit][:field] : td_field_class = @view_meta[:td_field_class]
+    (@view_meta[:td_field_class].nil?) ? td_field_class = 'field' : td_field_class = @view_meta[:td_field_class]
 
     #add any form hidden fields
     hidden_fields = []
@@ -396,9 +375,9 @@ class ViewR8
     r8TPL.assign(:formId, @form_id)
     r8TPL.assign(:formAction, @view_meta[:action])
 
-    (@view_meta[:td_label_class].nil?) ? td_label_class = @style[:td][:edit][:label] : td_label_class = @view_meta[:td_label_class]
+    (@view_meta[:td_label_class].nil?) ? td_label_class = 'label' : td_label_class = @view_meta[:td_label_class]
 
-    (@view_meta[:td_field_class].nil?) ? td_field_class =@style[:td][:edit][:field] : td_field_class = @view_meta[:td_field_class]
+    (@view_meta[:td_field_class].nil?) ? td_field_class = 'field' : td_field_class = @view_meta[:td_field_class]
 
     #add any form hidden fields
     hidden_fields = []
@@ -480,11 +459,11 @@ class ViewR8
 
   #writes template, js_include and css_include
   def fwrite()
-    files = 
-      {view_tpl_cache_path() => @tpl_contents,
-       css_require_path() => JSON.pretty_generate(@css_require),
-       js_require_path() => JSON.pretty_generate(@js_require)
-      }
+    files = {
+      view_tpl_cache_path() => @tpl_contents,
+      css_require_path() => JSON.pretty_generate(@css_require),
+      js_require_path() => JSON.pretty_generate(@js_require)
+    }
 
     files.each do |path, contents| 
       File.open(path, 'w') do |fHandle|

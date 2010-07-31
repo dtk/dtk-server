@@ -10,14 +10,14 @@
 	<div style="width: 100%; float: left;">
 	<table cellspacing="0" cellpadding="0" border="1" style="width: 100%;">
 	<tr id="node-list-header-row" class="">
-			<th id="display_name-th" class="r8-td-col">display_name</th>
-			<th id="description-th" class="r8-td-col">description</th>
+			<th id="display_name-th" class="">display_name</th>
+			<th id="description-th" class="">description</th>
 	</tr>
 
 	{%for node in node_list%}
 		<tr id="list_row-{%=node%}" class="{%=[:class]%}">
-				<td id="display_name-td-{%=node%}" class="r8-td-col"><a href="javascript:R8.ctrl.request('obj=node&amp;action=display&amp;id={%=node[:id]%}');">{%=node[:display_name]%}</a></td>
-				<td id="description-td-{%=node%}" class="r8-td-col">{%=node[:description]%}</td>
+				<td id="display_name-td-{%=node%}" class=""><a href="javascript:R8.ctrl.request('obj=node&amp;action=display&amp;id={%=node[:id]%}');">{%=node[:display_name]%}</a></td>
+				<td id="description-td-{%=node%}" class="">{%=node[:description]%}</td>
 		</tr>
 	{%end%}
 	</table>

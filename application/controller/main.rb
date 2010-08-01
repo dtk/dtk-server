@@ -44,10 +44,8 @@ module XYZ
       tpl.assign(:list_start_prev, 0)
       tpl.assign(:list_start_next, 0)
 
-
-      tpl_results = tpl.render()
       ctrl_result = {
-        :tpl_contents => tpl_results
+        :tpl_contents => tpl.render()
       }
     end
 
@@ -62,9 +60,9 @@ module XYZ
       tpl.set_view(view_name)
 
       tpl.assign(model,model_result)
-      tpl_results = tpl.render()
+
       ctrl_result = {
-        :tpl_contents => tpl_results
+        :tpl_contents => tpl.render()
       }
     end
 
@@ -80,9 +78,9 @@ module XYZ
       tpl.set_view(view_name)
 
       tpl.assign(model,model_result)
-      tpl_results = tpl.render()
+
       ctrl_result = {
-        :tpl_contents => tpl_results
+        :tpl_contents => tpl.render()
       }
     end
 

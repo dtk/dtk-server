@@ -36,7 +36,7 @@ class ViewR8
 
     case (view_type())
       when "edit"
-        renderEditTPLCache() 
+        render_edit_tpl_cache() 
 #       addValidation()
       when "display"
         render_display_tpl_cache()
@@ -213,13 +213,14 @@ class ViewR8
     field_handler = FieldR8.new(self)
     r8TPL = R8Tpl::TemplateR8.new
     r8TPL.js_templating_on = false   #template engine should catch non JS automatically, but forcing to be sure
+    r8TPL.set_view_dir('system')
+    r8TPL.set_view('metaview.'+@profile+'.'+@view_name,true)
 
     r8TPL.assign(:model_name, @model_name)
     r8TPL.assign(:view_name, @view_name)
+#    i18n = utils.get_model_i18n(@model_name)
 
-#TODO: add even/odd tr class handling
     list_cols = []
-
     @view_meta[:field_list].each do |field_hash|
       field_hash.each do |field_name,field_meta|
         field_meta[:model_name] = @model_name
@@ -272,13 +273,16 @@ class ViewR8
 
 
   # This function will generate the TPL cache for a view of type edit
-  def renderEditTPLCache()
+  def render_edit_tpl_cache()
 #TODO: can probably move most of this function to a general function call
 #and re-use between renderViewJSCache and renderViewHTML
     field_handler = FieldR8.new(self)
     r8TPL = R8Tpl::TemplateR8.new
     r8TPL.js_templating_on = false   #template engine should catch non JS automatically, but forcing to be sure
+    r8TPL.set_view_dir('system')
+    r8TPL.set_view('metaview.'+@profile+'.'+@view_name,true)
 
+#    i18n = utils.get_model_i18n(@model_name)
     r8TPL.assign(:form_id, @form_id)
     r8TPL.assign(:form_action, @view_meta[:action])
 
@@ -371,7 +375,10 @@ class ViewR8
     field_handler = FieldR8.new(self)
     r8TPL = R8Tpl::TemplateR8.new
     r8TPL.js_templating_on = false   #template engine should catch non JS automatically, but forcing to be sure
+    r8TPL.set_view_dir('system')
+    r8TPL.set_view('metaview.'+@profile+'.'+@view_name,true)
 
+#    i18n = utils.get_model_i18n(@model_name)
     r8TPL.assign(:formId, @form_id)
     r8TPL.assign(:formAction, @view_meta[:action])
 
@@ -510,4 +517,22 @@ class ViewR8
   #TODO: nothing here yet, must revisit when deciding to create master field class for a profile
   #that can render individual fields on the fly in the browser
   end
+
+#################BEGIN STUBS FOR UPDATED TEMPLATE/VIEW ITERATION##################
+
+  def has_meta_view(model_name,profile,view_name)
+    view_meta_path = SERVER_ROOT_DIR+'/system/'+APPLICATION+'/meta/'+model_name+'/view.'+profile+'.'+view_name+'.rb'
+    dflt_view_meta_path = SERVER_ROOT_DIR+'/system/'+APPLICATION_NAME+'/meta/'+model_name+'/view.default.'+view_name+'.rb'
+
+    if(File.exists?(view_meta_path))
+      @profile = profile
+      return true
+    elsif(File.exists?(dflt_view_meta_path))
+      @profile = @default_profile
+      return true
+    else
+      return false
+    end
+  end
+
 end

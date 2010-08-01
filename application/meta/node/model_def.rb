@@ -1,6 +1,19 @@
 
+=begin
+$model['key']['extends_base'] = 1;
+$model['key']['implements_owner'] = 1;
+
+$model['key']['fields']['status'] = array('type' => 'text', 'size' => 50, 'required' => true);
+=end
 
 #possible to have clean seperation of model field defs?
+
+model[:node] = {}
+model[:node][:has_ancestor_field] = true
+model[:node][:fields] = {}
+model[:node][:fields][:ds_attributes] = {:type => :json}
+model[:node][:fields][:ds_key] = {:type => :varchar, :size => 50}
+
 
         has_ancestor_field()
         column :ds_attributes, :json

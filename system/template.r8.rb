@@ -541,6 +541,44 @@ p '     iteratorVarRaw: '+newLoopHash[:iteratorVarRaw].to_s
     return 'var ' + jsElementVarName + '= document.createElement("' + tagName + '");'
   end
 
+##################BEGIN NEW TEMPLATE STUBS FOR VIEW HANDLING#################################
+#from_view might need some explanation, used in case of one global Template object for request
+#   used as flag then Template called within meta view cache generation where its not possible to have a metaview
+  def set_view(view_name,from_view=false)
+    profile = user.current_profile
+
+    if(strstr(view_name,'/'))
+      view_pieces = preg_split('/\//', view_name)
+      @model_name = view_pieces[0]
+      @view_name = view_pieces[1]
+    else
+      @model_name = '';
+      @view_name = view_name;
+    end
+
+    if(!from_view && ViewR8.hasMetaView(@model_name,profile,@view_name))
+      #make sure that base smarty engine knows where to look instead of default view folder
+      self.set_view_dir("model_cache")
+      if(!File.exists?(@tpl_dir+'/'+@model_name)) FileUtils.mkdir_p(@tpl_dir+'/'+@model_name,0,true)
+
+      #now make sure meta tpl cache is up to date
+      ViewR8.update_cache(@model_name,@view_name,profile)
+      @current_view = ViewR8.view_tpl_name
+    else
+#TODO: revisit when deeper into profiles, currently too messy
+      profile_tpl_name = @tpl_dir+'/'+profile+'.'+@view_name
+      default_tpl_name = @tpl_dir+'/'+@view_name
+      if(File.exists?(profile_tpl_name))
+        @current_view = @profile.'.'.@view_name
+      else
+        @current_view = @view_name
+      end
+    end
+
+    if(@model_name !='') @current_view = @model_name+'/'+@current_view
+  end
+
+
 end
 end
 ########################################################

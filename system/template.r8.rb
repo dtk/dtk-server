@@ -578,6 +578,35 @@ p '     iteratorVarRaw: '+newLoopHash[:iteratorVarRaw].to_s
     if(@model_name !='') @current_view = @model_name+'/'+@current_view
   end
 
+  def set_view_dir(view_dir_location)
+    case(view_dir_location)
+      when "system" then
+        @tpl_dir = R8::Config[:system_views_base_dir]
+      when "model" then
+        @tpl_dir = R8::Config[:views_base_dir]
+      when "model_cache" then
+        @tpl_dir = R8::Config[:meta_template_base_dir]+'/'+APPLICATION_NAME+'/views'
+      else
+        log("call to set_view_dir with no handler for name:"+view_dir_location)
+    end
+  end
+
+#some aspect of reset might be needed when implementing Template as a single instance per request by default
+  def reset
+    @current_view = ''
+    @model_name = ''
+    @view_name = ''
+    @tpl_vars = []
+  end
+
+  def fwrite_tpl(tpl_content, write_path)
+    if(write_path == '') return false
+
+    tpl_file_handle = File.open(write_path, 'w')
+    tpl_file_handle.write(tpl_content)
+    tpl_file_handle.close
+    return true
+  end
 
 end
 end

@@ -24,11 +24,18 @@ module XYZ
       layout :test
     end
 
+    ####### helper functions; make private and move to diff position in file
+    def field_set()
+      self.class.field_set()
+    end
+
+    ########
     def list
       where_clause = {} # stub
-      model = model_name.to_s
-      model_list = get_objects(model_name,where_clause)
-
+      #getting model_name by looking at self.class, (e.g., self.class can = XYZ::NodeController)
+      model = Aux.demodulize(self.class.to_s).gsub(/Controller$/,"").downcase
+      model_list = get_objects(model.to_sym,field_set,where_clause)
+      pp model_list; return
       action_name = :list #TBD: automatically determine this
       #set the view name to the model view folder and list view
       view_name = model+'/'+action_name.to_s
@@ -318,6 +325,7 @@ module XYZ
       @results = Object.get_guid(IDHandle[:c => c,:uri => uri])
     end
 
+=begin
 #Generic list example is above
     def list(*uri_array)
       error_405 unless request.get?
@@ -334,7 +342,7 @@ module XYZ
 require 'pp'; pp objs
       @results = objs
     end
-
+=end
     # the string returned at the end of the function is used as the html body
     # if there is no template for the action. if there is a template, the string
     # is silently ignored

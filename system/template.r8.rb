@@ -559,7 +559,7 @@ p '     iteratorVarRaw: '+newLoopHash[:iteratorVarRaw].to_s
     if(!from_view && ViewR8.hasMetaView(@model_name,profile,@view_name))
       #make sure that base smarty engine knows where to look instead of default view folder
       self.set_view_dir("model_cache")
-      if(!File.exists?(@tpl_dir+'/'+@model_name)) FileUtils.mkdir_p(@tpl_dir+'/'+@model_name,0,true)
+      FileUtils.mkdir_p(@tpl_dir+'/'+@model_name,0,true) unless File.exists?(@tpl_dir+'/'+@model_name) 
 
       #now make sure meta tpl cache is up to date
       ViewR8.update_cache(@model_name,@view_name,profile)
@@ -568,14 +568,14 @@ p '     iteratorVarRaw: '+newLoopHash[:iteratorVarRaw].to_s
 #TODO: revisit when deeper into profiles, currently too messy
       profile_tpl_name = @tpl_dir+'/'+profile+'.'+@view_name
       default_tpl_name = @tpl_dir+'/'+@view_name
-      if(File.exists?(profile_tpl_name))
-        @current_view = @profile.'.'.@view_name
+      if File.exists?(profile_tpl_name)
+        @current_view = "#{@profile}.#{@view_name}"
       else
         @current_view = @view_name
       end
     end
 
-    if(@model_name !='') @current_view = @model_name+'/'+@current_view
+    @current_view = @model_name+'/'+@current_view unless @model_name.empy?
   end
 
   def set_view_dir(view_dir_location)
@@ -600,7 +600,7 @@ p '     iteratorVarRaw: '+newLoopHash[:iteratorVarRaw].to_s
   end
 
   def fwrite_tpl(tpl_content, write_path)
-    if(write_path == '') return false
+    return false unless write_path.empty?
 
     tpl_file_handle = File.open(write_path, 'w')
     tpl_file_handle.write(tpl_content)

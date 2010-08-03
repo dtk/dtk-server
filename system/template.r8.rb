@@ -559,7 +559,7 @@ p '     iteratorVarRaw: '+newLoopHash[:iteratorVarRaw].to_s
     end
 
     tpl_dir = ret_view_dir("model_cache")
-    if !from_view && ViewR8.hasMetaView(@model_name,profile,@view_name)
+    if !from_view && has_meta_view?(profile)
       #make sure that base smarty engine knows where to look instead of default view folder
       FileUtils.mkdir_p("#{tpl_dir}/#{@model_name}",0,true) unless File.exists?(tpl_dir+'/'+@model_name) 
 
@@ -578,6 +578,22 @@ p '     iteratorVarRaw: '+newLoopHash[:iteratorVarRaw].to_s
     end
 
     @current_view = "#{@model_name}/#{@current_view}" unless @model_name.empty?
+  end
+
+  #TBD: should this be passed tpl_dir? amd remove #{R8::Config[:meta_template_base_dir]}/meta?
+  def has_meta_view?(profile)
+    view_meta_path = "#{R8::Config[:meta_template_base_dir]}/meta/#{@model_name}/view.#{profile}.#{@view_name}.rb"
+    if File.exists?(view_meta_path)
+     #TBD: how is this used? @profile = profile
+      return true
+    end
+    dflt_view_meta_path = "#{R8::Config[:meta_template_base_dir]}/meta/#{@model_name}/view.default.#{@view_name}.rb"  
+
+    if File.exists?(dflt_view_meta_path)
+      #TBD: how is this used? @profile = @default_profile
+      return true
+    end
+    nil
   end
 
   def ret_view_dir(view_dir_location)

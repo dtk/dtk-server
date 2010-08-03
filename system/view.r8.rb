@@ -520,19 +520,5 @@ class ViewR8
 
 #################BEGIN STUBS FOR UPDATED TEMPLATE/VIEW ITERATION##################
 
-  def has_meta_view(model_name,profile,view_name)
-    view_meta_path = SERVER_ROOT_DIR+'/system/'+APPLICATION+'/meta/'+model_name+'/view.'+profile+'.'+view_name+'.rb'
-    dflt_view_meta_path = SERVER_ROOT_DIR+'/system/'+APPLICATION_NAME+'/meta/'+model_name+'/view.default.'+view_name+'.rb'
-
-    if(File.exists?(view_meta_path))
-      @profile = profile
-      return true
-    elsif(File.exists?(dflt_view_meta_path))
-      @profile = @default_profile
-      return true
-    else
-      return false
-    end
-  end
 
 end

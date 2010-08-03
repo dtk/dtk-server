@@ -3,6 +3,16 @@
 
 require File.expand_path('workspace', File.dirname(__FILE__))
 
+#TBD: stub; will move to own file and will populate from web call
+module XYZ
+  class UserContext
+    attr_reader :current_profile
+    def initilize()
+      @current_profile = "default"
+    end
+  end
+end
+
  # Default url mappings are:
 #  a controller called Main is mapped on the root of the site: /
 #  a controller called Something is mapped on: /something
@@ -33,17 +43,18 @@ module XYZ
     def list
       where_clause = {} # stub
       #getting model_name by looking at self.class, (e.g., self.class can = XYZ::NodeController)
-      model = Aux.demodulize(self.class.to_s).gsub(/Controller$/,"").downcase
-      model_list = get_objects(model.to_sym,field_set,where_clause)
-      pp model_list; return
+      model_name = Aux.demodulize(self.class.to_s).gsub(/Controller$/,"").downcase
+      model_list = get_objects(model_name.to_sym,field_set,where_clause)
       action_name = :list #TBD: automatically determine this
       #set the view name to the model view folder and list view
-      view_name = model+'/'+action_name.to_s
+      view_name = "#{model_name}/#{action_name}"
 
 #TBD: these can get pushed to higher level inside tpl.set_view
 #      view = create_and_render_view(action_name)
 #      tpl = create_template_for_action(view,action_name)
 
+      user_context = UserContext.new #TBD: stub
+      tpl = R8Tpl::TemplateR8.new(user_context)
       tpl.set_view(view_name)
 
 #not quite sure what was happening here, but assign should always be name=>value assignments

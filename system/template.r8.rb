@@ -8,7 +8,7 @@ require 'erubis'
 module R8Tpl
 
 class TemplateR8 
-
+  
   START_TAG_REGEX = /\{%\s*/
 #  END_TAG_REGEX = /\s*.*%\}/
 #TODO: revisit when implementing if and iterators
@@ -23,30 +23,34 @@ class TemplateR8
                 :js_templating_on,
                 :root_js_element_var_name,:root_js_hash,:loop_vars,:ctrl_vars,:js_var_header
 
-  def initialize(tpl_path=nil) 
+  def initialize(user)
+    @user = user
+    @model_name = String.new
+    @view_name = String.new
+
     @js_var_header = 'tplVars'
-    @tpl_path = tpl_path
-    @tpl_contents = ''
+    @tpl_path = nil
+    @tpl_contents = String.new
     @tpl_results = nil
     @xhtml_document = nil
 
-    @js_tpl_callback = ''
-    @js_file_name = ''
+    @js_tpl_callback = String.new
+    @js_file_name = String.new
 
-    @js_cache_dir = ''
-    @js_file_write_path = ''
+    @js_cache_dir = String.new
+    @js_file_write_path = String.new
     @js_render_queue = []
-    @root_js_element_var_name = ''
+    @root_js_element_var_name = String.new
     @root_js_hash = {}
 
     @parent_ref_hash = {}
 
-    @node_render_JS = ''
-    @header_JS = ''
-    @panel_set_element_id = '' #this might not be used, js func should prob return DOM ref
+    @node_render_JS = String.new
+    @header_JS = String.new
+    @panel_set_element_id = String.new #this might not be used, js func should prob return DOM ref
 
     @num_indents = 0
-    @indent = ''
+    @indent = String.new
 
     @js_templating_on = true
     @ctrl_vars = []
@@ -544,58 +548,58 @@ p '     iteratorVarRaw: '+newLoopHash[:iteratorVarRaw].to_s
 ##################BEGIN NEW TEMPLATE STUBS FOR VIEW HANDLING#################################
 #from_view might need some explanation, used in case of one global Template object for request
 #   used as flag then Template called within meta view cache generation where its not possible to have a metaview
-  def set_view(view_name,from_view=false)
-    profile = user.current_profile
+  def set_view(view_name,from_view=nil)
+    profile = @user.current_profile
 
-    if(strstr(view_name,'/'))
-      view_pieces = preg_split('/\//', view_name)
-      @model_name = view_pieces[0]
-      @view_name = view_pieces[1]
+    if view_name.include?('/')
+      @model_name,@view_name = view_name.split("/")
     else
-      @model_name = '';
-      @view_name = view_name;
+      @model_name = String.new
+      @view_name = view_name
     end
 
-    if(!from_view && ViewR8.hasMetaView(@model_name,profile,@view_name))
+    tpl_dir = ret_view_dir("model_cache")
+pp tpl_dir
+    if !from_view && ViewR8.hasMetaView(@model_name,profile,@view_name)
       #make sure that base smarty engine knows where to look instead of default view folder
-      self.set_view_dir("model_cache")
-      FileUtils.mkdir_p(@tpl_dir+'/'+@model_name,0,true) unless File.exists?(@tpl_dir+'/'+@model_name) 
+      FileUtils.mkdir_p("#{tpl_dir}/#{@model_name}",0,true) unless File.exists?(tpl_dir+'/'+@model_name) 
 
       #now make sure meta tpl cache is up to date
       ViewR8.update_cache(@model_name,@view_name,profile)
       @current_view = ViewR8.view_tpl_name
     else
 #TODO: revisit when deeper into profiles, currently too messy
-      profile_tpl_name = @tpl_dir+'/'+profile+'.'+@view_name
-      default_tpl_name = @tpl_dir+'/'+@view_name
+      profile_tpl_name = "#{tpl_dir}/#{profile}.#{@view_name}"
+      default_tpl_name = "#{tpl_dir}/#{@view_name}"
       if File.exists?(profile_tpl_name)
-        @current_view = "#{@profile}.#{@view_name}"
+        @current_view = "#{profile}.#{@view_name}"
       else
         @current_view = @view_name
       end
     end
 
-    @current_view = @model_name+'/'+@current_view unless @model_name.empy?
+    @current_view = "#{@model_name}/#{@current_view}" unless @model_name.empty?
   end
 
-  def set_view_dir(view_dir_location)
+  def ret_view_dir(view_dir_location)
     case(view_dir_location)
       when "system" then
-        @tpl_dir = R8::Config[:system_views_base_dir]
+        R8::Config[:system_views_base_dir]
       when "model" then
-        @tpl_dir = R8::Config[:views_base_dir]
+        R8::Config[:views_base_dir]
       when "model_cache" then
-        @tpl_dir = R8::Config[:meta_template_base_dir]+'/'+APPLICATION_NAME+'/views'
+        "#{R8::Config[:meta_template_base_dir]}/meta"
       else
-        log("call to set_view_dir with no handler for name:"+view_dir_location)
+        log("call to set_view_dir with no handler for name: "+view_dir_location)
+        nil
     end
   end
 
 #some aspect of reset might be needed when implementing Template as a single instance per request by default
   def reset
-    @current_view = ''
-    @model_name = ''
-    @view_name = ''
+    @current_view = String.new
+    @model_name = String.new
+    @view_name = String.new
     @tpl_vars = []
   end
 

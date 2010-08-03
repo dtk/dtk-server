@@ -134,6 +134,36 @@ class ViewR8
 #    "#{R8::Config[:appRootPath]}meta/#{@model_name}/view.#{@profile}.#{@view_name}.json"
   end
 
+#######BEGIN STUB FOR udpate_cache
+  def update_cache(model_name,view_name,profile='default')
+    if model_name == '' || view_name == ''
+      log('error','Call to view.updateCache w/o model_name or view_name')
+      return false
+    end
+
+    @view_name = view_name
+    @model_name = model_name
+    @form_id = @model_name+"-"+@view_name+"-form"
+
+    #this will check if the view is Of Type Edit/Display/List
+    self.set_view_type()
+
+    #if not set yet, this will grab/set the meta array for given object/view_type
+    self.set_view_meta()
+    template_current = self.view_tpl_current?
+
+    case @view_type
+      when "edit" then
+        if template_current then self.renderEditTPLCache() end
+        self.add_validation()
+      when "display" then
+        if template_current then self.render_display_tpl_cache() end
+      when "list" then
+        if template_current then self.render_list_tpl_cache() end
+    end
+  end
+#################END STUB FOR UPDATE CACHE########################
+
   # This will check to see if the TPL view file exists and isnt stale compare to the base TPL and other factors
   def view_tpl_current?()
     view_rtpl_cache_path = view_tpl_cache_path()

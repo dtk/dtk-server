@@ -35,7 +35,7 @@ module R8Tpl
 
     def render()
 
-      if view_tpl_current?
+      if cache_current?
         @tpl_contents = get_view_tpl_cache()
         @css_require = get_css_require_from_cache()
         @js_require = get_js_require_from_cache()
@@ -63,16 +63,16 @@ module R8Tpl
   end
 
   def update_cache?(path)
-    template_current = view_tpl_current?
+    cache_current = cache_current?
 
-    case view_type()
+    case view_type().to_sym
       when :edit
-        renderEditTPLCache() unless template_current 
+        renderEditTPLCache() unless cache_current 
         add_validation()
       when :display
-        render_display_tpl_cache() unless template_current
+        render_display_tpl_cache() unless cache_current
       when :list
-        render_list_tpl_cache() unless template_current
+        render_list_tpl_cache() unless cache_current
     end
   end
 
@@ -82,7 +82,7 @@ module R8Tpl
     XYZ::HashObject.nested_value(@i18n_hash,path)
   end
 
-  #TODO: fold below into ret_view_path CommonMixin
+  #TODO: fold below into ret_existing_view_path CommonMixin
 
   def css_require_path()
     "#{R8::Config[:app_cache_root]}/view/#{@model_name}/#{@profile}.#{@view_name}.css_include.json"
@@ -123,10 +123,9 @@ module R8Tpl
     #TODO: figure out best way to do PHP style requires/loading of external meta hashes
     path = ret_existing_view_path(:meta)
     if path
-      File.open(path, 'r') do |fHandle|
-        R8View::Views[@model_name][@profile][@view_name] = XYZ::Aux.convert_to_hash_symbol_form(fHandle.read)
-      end
-       #TODO check if ok to remove logic wrt to json
+      hash = XYZ::Aux.convert_to_hash_symbol_form(eval(IO.read(path)))
+      R8View::Views[@model_name][@profile][@view_name] = hash
+      #TODO check if ok to remove logic wrt to json
     else
       #TODO: figure out handling of overrides
       #      require $GLOBALS['ctrl']->getAppName().'/objects' . $this->objRef->getmodel_name() . '/meta/view.'.$this->profile.'.'.$this->viewName.'.php');
@@ -138,14 +137,27 @@ module R8Tpl
 
 
   # This will check to see if the TPL view file exists and isnt stale compare to the base TPL and other factors
-  def view_tpl_current?()
-    view_rtpl_cache_path = ret_view_path(:cache)
+  def cache_current?()
+    cache_path = ret_existing_view_path(:cache)
+    return nil unless cache_path
+    meta_view_path = ret_existing_view_path(:meta)
+    raise Error.new("to generate cache appropriate meta file must exist") unless  meta_view_path
+    system_view_path = ret_existing_view_path(:system)
+    raise Error.new("to generate cache appropriate system file must exist") unless  system_view_path
 
     #TBD: ask Nate about intended semantics; modified because error if file does not exist, but clause executed
-    if File.exists?(view_rtpl_cache_path) && (!R8::Config[:dev_mode].nil? || R8::Config[:dev_mode] == false) then
-      tpl_cache_edit_time = File.mtime(view_rtpl_cache_path).to_i
-      view_meta_edit_time = File.mtime(ret_view_path(:meta_with_profile)).to_i
-      view_tpl_edit_time = File.mtime(get_rtpl_path()).to_i
+    if not R8::Config[:dev_mode].nil? or R8::Config[:dev_mode] == false
+      cache_edit_time = File.mtime(cache_path).to_i
+      meta_view_edit_time = File.mtime(meta_view_path).to_i
+      system_view_edit_time = File.mtime(system_view_path).to_i
+      cache_edit_time > meta_view_edit_time and  cache_edit_time > system_view_edit_time
+    else
+      nil #TODO: should this be true or nil?
+    end
+  end
+=begin 
+TODO: remove after making sure new logic is right
+OLD
       #adding this since rendering logic is in this file, might update it w/o changing template,
       #jsTpl should then be updated to reflect changes
       #TODO: switch this when functions moved to js compile class
@@ -164,6 +176,7 @@ module R8Tpl
       return false
     end
   end
+=end
 
   def get_rtpl_contents()
     ret = nil
@@ -199,6 +212,7 @@ module R8Tpl
 
   # This will return the path to write the TPL cache file to
 #TODO: use file.io.php util funcs
+#TODO: replace or move to commonmix
   def get_rtpl_path()
 #TODO: figure out how to best dynamically load hash meta for base and overrides
 #    $overrideTPLPath = $GLOBALS['ctrl']->getAppName().'/objects/'.$this->objRef->getmodel_name().'/templates/'.$this->profile.'.'.$this->viewName.'.tpl';
@@ -470,7 +484,7 @@ module R8Tpl
   #writes template, js_include and css_include
   def fwrite()
     files = {
-     ret_view_path(:cache) => @tpl_contents,
+     ret_existing_view_path(:cache) => @tpl_contents,
       css_require_path() => JSON.pretty_generate(@css_require),
       js_require_path() => JSON.pretty_generate(@js_require)
     }

@@ -1,9 +1,7 @@
-R8View::Views[:node] = {
-  :default => {
-    :list => {
-      :tr_class => 'tr-dl',
-      :hidden_fields => [
-          {:id => {
+{
+  :tr_class => 'tr-dl',
+  :hidden_fields => [
+         {:id => {
             :required => true,
             :type => 'hidden',
           }}
@@ -20,6 +18,5 @@ R8View::Views[:node] = {
               :help => '',
             }},
       ]
-    }
-  }
 }
+

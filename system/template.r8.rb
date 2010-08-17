@@ -569,7 +569,7 @@ p '     iteratorVarRaw: '+newLoopHash[:iteratorVarRaw].to_s
     case path_type
       when :base
         path
-      when :meta_with_profile,:meta_default
+      when :meta
         view = ViewR8.new(@model_name,@view_name,@user)
         view.update_cache?(path)
         view.view_tpl_name

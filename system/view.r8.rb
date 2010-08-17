@@ -206,6 +206,8 @@ OLD
 
     r8TPL.assign(:model_name, @model_name)
     r8TPL.assign(:view_name, @view_name)
+    #TODO: is this right?
+    r8TPL.assign(:th_row_class,  @model_name)
 #    i18n = utils.get_model_i18n(@model_name)
 
     list_cols = []
@@ -455,14 +457,14 @@ OLD
   #writes template, js_include and css_include
   def fwrite()
     files = {
-     ret_existing_view_path(:cache) => @tpl_contents,
-      css_require_path() => JSON.pretty_generate(@css_require),
-      js_require_path() => JSON.pretty_generate(@js_require)
+     ret_view_path(:cache) => @tpl_contents,
+      css_require_path() => @css_require ? JSON.pretty_generate(@css_require) : nil,
+      js_require_path() => @js_require ? JSON.pretty_generate(@js_require) : nil
     }
 
     files.each do |path, contents| 
       File.open(path, 'w') do |fHandle|
-        fHandle.write(contents)
+        fHandle.write(contents) if contents
       end
     end
   end

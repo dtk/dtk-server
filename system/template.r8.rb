@@ -93,11 +93,7 @@ module R8Tpl
       tplToJS(view_tpl_contents)
     end
 
-    def render()
-      pp self
-      {}
-    end
-    def render_old(view_tpl_contents,js_templating_on=jsTemplatingOn?)
+    def render(view_tpl_contents,js_templating_on=jsTemplatingOn?)
       #TODO: should be populating these from global config options
       self.assign(:jsIncludePath, "jsIncludePath")
       self.assign(:siteURL, "this is a test")

@@ -24,7 +24,8 @@ module XYZ
   class MainController < Controller
 
     # TBD instead having class AppController < Controller would be equaivalent to asserting map /xyz/app (when insider xyz namespace)
-=begin    layout do |path,wish| 
+=begin  
+  layout do |path,wish| 
       if wish == "html"
         path == "actset__main" or path == "swoop" ? nil : :default
       end
@@ -103,8 +104,12 @@ module XYZ
 ################################################################################
 ################################################################################
 ################################################################################
+#TODO; below are just needed for testing and will be removed later
+    ACTION_HANDLER_IS_ASYNCHRONOUS = {
+#      :import_chef_recipes => true
+    }
 
-=begin
+
     #TBD: might refactor other actions to use this
     #TBD: want to route to this, not allow direct call; how can we enforce this (maybe route with this prefix leads to unauthorized
     ACTION_HANDLER_OBJ = {
@@ -131,10 +136,8 @@ module XYZ
       :encapsulate_elements_in_project =>  :encapsulate_elements_in_project
     }
 
-    ACTION_HANDLER_IS_ASYNCHRONOUS = {
-#      :import_chef_recipes => true
-    }
-=end
+
+##################################
 
     #TBD: starting to bring in new code; hard coded just for list_components
     def test__list(*uri_array)
@@ -269,7 +272,7 @@ module XYZ
         obj.send(ACTION_HANDLER_METHOD_NAME[action] || action,*params)
       end
 
-      redirect route('list/' + redirect_uri) unless redirect_uri.nil?
+      redirect route('list_temp/' + redirect_uri) unless redirect_uri.nil?
     end
 
     #TBD: just temp; may want the rest uris to mirror the ui ones; ideally whether rest or ui request handled by same actions, difference just is in opts passed
@@ -334,9 +337,9 @@ module XYZ
       @results = Object.get_guid(IDHandle[:c => c,:uri => uri])
     end
 
-=begin
+#TODO: just temp
 #Generic list example is above
-    def list(*uri_array)
+    def list_temp(*uri_array)
       error_405 unless request.get?
       uri = "/" + uri_array.join("/")
       opts = ret_parsed_query_string()
@@ -347,11 +350,10 @@ module XYZ
       c = ret_session_context_id()
       @title = uri
       objs = Object.get_instance_or_factory(IDHandle[:c => c,:uri => uri],href_prefix,opts)
-      return @results = objs
 require 'pp'; pp objs
       @results = objs
     end
-=end
+
     # the string returned at the end of the function is used as the html body
     # if there is no template for the action. if there is a template, the string
     # is silently ignored

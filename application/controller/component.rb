@@ -1,3 +1,13 @@
-if __FILE__ == $0
-  # TODO Generated stub
+module XYZ
+  class ComponentController < MainController
+    def self.field_set()
+      [
+        :id,
+        :display_name,
+        :description,
+        :parent_id,
+        :parent_path
+      ]   
+    end
+  end
 end

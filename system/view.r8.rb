@@ -83,16 +83,6 @@ module R8Tpl
     XYZ::HashObject.nested_value(@i18n_hash,path)
   end
 
-  #TODO: fold below into ret_existing_view_path CommonMixin
-
-  def css_require_path()
-    "#{R8::Config[:app_cache_root]}/view/#{@model_name}/#{@profile}.#{@view_name}.css_include.json"
-  end
-
-  def js_require_path()
-    "#{R8::Config[:app_cache_root]}/view/#{@model_name}/#{@profile}.#{@view_name}.js_include.json"
-  end
-
   ViewTranslations = {
     :edit => 'edit',
     :quick_edit => 'edit',
@@ -188,11 +178,15 @@ OLD
   end
 
   def get_css_require_from_cache()
-    XYZ::Aux.convert_to_hash_symbol_form(IO.read(css_require_path()))
+    path = ret_existing_view_path(:css_require)
+    return nil unless path
+    XYZ::Aux.convert_to_hash_symbol_form(IO.read(path))
   end
 
   def get_js_require_from_cache()
-    XYZ::Aux.convert_to_hash_symbol_form(IO.read(js_require_path()))
+    path = ret_existing_view_path(:jss_require)
+    return nil unless path
+    XYZ::Aux.convert_to_hash_symbol_form(IO.read(path))
   end
 
   # This function will generate the TPL cache for a view of type list
@@ -459,13 +453,14 @@ OLD
   def fwrite()
     files = {
      ret_view_path(:cache) => @tpl_contents,
-      css_require_path() => @css_require ? JSON.pretty_generate(@css_require) : nil,
-      js_require_path() => @js_require ? JSON.pretty_generate(@js_require) : nil
+     ret_view_path(:css_require) => @css_require ? JSON.pretty_generate(@css_require) : nil,
+     ret_view_path(:js_require) => @js_require ? JSON.pretty_generate(@js_require) : nil
     }
 
-    files.each do |path, contents| 
-      File.open(path, 'w') do |fHandle|
-        fHandle.write(contents) if contents
+    files.each do |path, content| 
+      if content
+        FileUtils.mkdir_p(File.dirname(path)) unless File.exists?(File.dirname(path))
+        File.open(path, 'w') {|fhandle|fhandle.write(content)}
       end
     end
   end

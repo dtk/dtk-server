@@ -16,11 +16,14 @@ module R8Tpl
           "#{R8::Config[:meta_templates_root]}/#{@model_name}/view.default.#{@view_name}.rb"
         when :cache 
           "#{R8::Config[:app_cache_root]}/view/#{@model_name}/#{@profile}.#{@view_name}.rtpl"
+        when :css_require
+          "#{R8::Config[:app_cache_root]}/view/#{@model_name}/#{@profile}.#{@view_name}.css_include.json"
+        when :js_require
+          "#{R8::Config[:app_cache_root]}/view/#{@model_name}/#{@profile}.#{@view_name}.js_include.json"
         else
           log("call to ret_view_path with no handler for type: #{type}")
           nil
       end
-
     end
     #returns the appropriate view path if it exists
     def ret_existing_view_path(type)

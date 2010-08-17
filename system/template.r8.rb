@@ -562,11 +562,14 @@ p '     iteratorVarRaw: '+newLoopHash[:iteratorVarRaw].to_s
       @view_path = process_view_type(path_type,path)
       return @view_path if @view_path
     end
+    raise XYZ::Error.new("files needed to generate view for #{@model_name}/#{@view_name} are not present")
   end
 
   def process_view_type(path_type,path)
     case path_type
       when :base
+        path
+      when :system
         path
       when :meta
         view = ViewR8.new(@model_name,@view_name,@user)

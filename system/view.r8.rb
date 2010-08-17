@@ -178,12 +178,12 @@ OLD
   end
 =end
 
-  def get_rtpl_contents()
-    IO.read(get_rtpl_path())
+  def get_system_rtpl_contents()
+    IO.read(ret_existing_view_path(:system))
   end
 
   def get_view_tpl_cache()
-    IO.read(get_existing_view_path(:cache))
+    IO.read(ret_existing_view_path(:cache))
   end
 
   def get_css_require_from_cache()
@@ -194,25 +194,6 @@ OLD
     XYZ::Aux.convert_to_hash_symbol_form(IO.read(js_require_path()))
   end
 
-  # This will return the path to write the TPL cache file to
-#TODO: use file.io.php util funcs
-#TODO: better integrate with ret_existing_view_path; may alo have constructor of this object give context
-  def get_rtpl_path()
-#TODO: figure out how to best dynamically load hash meta for base and overrides
-#    $overrideTPLPath = $GLOBALS['ctrl']->getAppName().'/objects/'.$this->objRef->getmodel_name().'/templates/'.$this->profile.'.'.$this->viewName.'.tpl';
-
-    base_view_path = ret_existing_view_path(:base)
-    return base_view_path if base_view_path
-    cache_view_path = ret_existing_view_path(:cache)
-    raise XYZ::Error.new("to get rtpl path either corresponding base or cache file must be present") unless cache_view_path
-    cache_view_path
-=begin TODO shouldnt cache be returned  instead of logic below
-  (File.exists?(model_view_path)) ? (return model_view_path) : (return ret_view_path(:system))
-
-    return "#{R8::Config[:system_view_root]}/#{@profile}.#{@view_name}.rtpl"
-  end
-=end
-  end
   # This function will generate the TPL cache for a view of type list
   def render_list_tpl_cache()
 #TODO: can probably move most of this function to a general function call
@@ -252,7 +233,7 @@ OLD
     r8TPL.assign(:iterator_var, '{%='+model_name.to_s+'%}')
     r8TPL.assign(:end_tag, '{%end%}')
 
-    @tpl_contents = r8TPL.render(get_rtpl_contents())
+    @tpl_contents = r8TPL.render(get_system_rtpl_contents())
     fwrite()
   end
 
@@ -371,7 +352,7 @@ OLD
     end
     r8TPL.assign(:rows, rows)
 
-    @tpl_contents = r8TPL.render(get_rtpl_contents())
+    @tpl_contents = r8TPL.render(get_system_rtpl_contents())
     fwrite()
   end
 
@@ -467,7 +448,7 @@ OLD
     end
     r8TPL.assign(:rows, rows)
 
-    @tpl_contents = r8TPL.render(get_rtpl_contents())
+    @tpl_contents = r8TPL.render(get_system_rtpl_contents())
     fwrite()
   end
 

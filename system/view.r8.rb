@@ -9,12 +9,11 @@ module R8Tpl
       @model_name = model_name	  #object type (a symbol)
       @view_name = view_name              #viewName can be either edit,detail,list,etc
       @form_id = "#{@model_name}-#{@view_name}-form"
-      @view_type = view_name.to_sym #TODO: can view_type and view_name differ
       @user = user
       @profile = @user.current_profile || :default #profile will dictate the specific view to use/generate
       @i18n_hash = load_i18n_hash(model_name)
 
-      @view_meta = nil               #hash defining an instance of a view
+      @view_meta = nil    #hash defining an instance of a view
 
       @override_meta_path = nil        #path where the overrides for a view should be located
 
@@ -35,7 +34,6 @@ module R8Tpl
     end
 
     def render()
-      @view_meta = get_view_meta()
 
       if view_tpl_current?
         @tpl_contents = get_view_tpl_cache()
@@ -65,14 +63,9 @@ module R8Tpl
   end
 
   def update_cache?(path)
-
-    #if not set yet, this will grab/set the meta array for given object/view_type
-    #TODO: see how this is set and used
-   # self.set_view_meta()
-
     template_current = view_tpl_current?
 
-    case @view_type
+    case view_type()
       when :edit
         renderEditTPLCache() unless template_current 
         add_validation()
@@ -115,8 +108,12 @@ module R8Tpl
   end
   #if not set yet, this will grab/set the meta array for given object/viewType
   # TODO: should have extensible definition of viewName (ie: edit,quickEdit,editInline,etc)
-  def get_view_meta()
 
+
+  def view_meta()
+    @view_meta ||= get_view_meta
+  end
+  def get_view_meta()
     R8View::Views[@model_name] ||= {}
     R8View::Views[@model_name][@profile] ||= {}
     R8View::Views[@model_name][@profile][@view_name] ||= {}
@@ -124,17 +121,12 @@ module R8Tpl
     #TODO: revisit to work on override possiblities and for profile handling
     #should check for all view locations, direct and override
     #TODO: figure out best way to do PHP style requires/loading of external meta hashes
-    if File.exists?(ret_view_path(:meta_with_profile)) then
-       File.open(ret_view_path(:meta_with_profile), 'r') do |fHandle|
+    path = ret_existing_view_path(:meta)
+    if path
+      File.open(path, 'r') do |fHandle|
         R8View::Views[@model_name][@profile][@view_name] = XYZ::Aux.convert_to_hash_symbol_form(fHandle.read)
-       end
-    elsif ret_view_path(:meta_with_profile) =~ Regexp.new('(.+)\\.json')
-    #TBD: temp conversion
-      rb = $1 + ".rb"
-      require rb
-      File.open(ret_view_path(:meta_with_profile), 'w') do |fHandle|
-         fHandle.write(JSON.pretty_generate(R8View::Views[@model_name][@profile][@view_name]))
-       end
+      end
+       #TODO check if ok to remove logic wrt to json
     else
       #TODO: figure out handling of overrides
       #      require $GLOBALS['ctrl']->getAppName().'/objects' . $this->objRef->getmodel_name() . '/meta/view.'.$this->profile.'.'.$this->viewName.'.php');
@@ -232,7 +224,7 @@ module R8Tpl
 #    i18n = utils.get_model_i18n(@model_name)
 
     list_cols = []
-    @view_meta[:field_list].each do |field_hash|
+    view_meta[:field_list].each do |field_hash|
       field_hash.each do |field_name,field_meta|
         field_meta[:model_name] = @model_name
         field_meta[:name] = field_name
@@ -267,8 +259,8 @@ module R8Tpl
   def addValidation()
     field_handler = FieldR8.new(self)
 
-    @view_meta[:field_groups].each do |group_num,group_hash|
-      @view_meta[:field_sets][group_num][:fields].each do |field_num,field_hash|
+    view_meta[:field_groups].each do |group_num,group_hash|
+      view_meta[:field_sets][group_num][:fields].each do |field_num,field_hash|
         next if(fieldArray.length == 0)
 
         field_hash.each do |field_name,field_meta|
@@ -295,15 +287,15 @@ module R8Tpl
 
 #    i18n = utils.get_model_i18n(@model_name)
     r8TPL.assign(:form_id, @form_id)
-    r8TPL.assign(:form_action, @view_meta[:action])
+    r8TPL.assign(:form_action, view_meta[:action])
 
-    (@view_meta[:td_label_class].nil?) ? td_label_class = 'label' : td_label_class = @view_meta[:td_label_class]
+    (view_meta[:td_label_class].nil?) ? td_label_class = 'label' : td_label_class = view_meta[:td_label_class]
 
-    (@view_meta[:td_field_class].nil?) ? td_field_class = 'field' : td_field_class = @view_meta[:td_field_class]
+    (view_meta[:td_field_class].nil?) ? td_field_class = 'field' : td_field_class = view_meta[:td_field_class]
 
     #add any form hidden fields
     hidden_fields = []
-    @view_meta[:hidden_fields].each do |hfield_hash|
+    view_meta[:hidden_fields].each do |hfield_hash|
       hfield_hash.each do |field_name,field_meta|
         field_meta[:name] = field_name.to_s
         if(field_meta[:id].nil?) then field_meta[:id] = field_meta[:name] end
@@ -314,7 +306,7 @@ module R8Tpl
 
     rows = []
     group_num = 0
-    @view_meta[:field_groups].each do |group_hash|
+    view_meta[:field_groups].each do |group_hash|
       row_count = 0
       display_labels = group_hash[:display_labels]
       num_cols = group_hash[:num_cols].to_i
@@ -391,15 +383,15 @@ module R8Tpl
 
 #    i18n = utils.get_model_i18n(@model_name)
     r8TPL.assign(:formId, @form_id)
-    r8TPL.assign(:formAction, @view_meta[:action])
+    r8TPL.assign(:formAction, view_meta[:action])
 
-    (@view_meta[:td_label_class].nil?) ? td_label_class = 'label' : td_label_class = @view_meta[:td_label_class]
+    (view_meta[:td_label_class].nil?) ? td_label_class = 'label' : td_label_class = view_meta[:td_label_class]
 
-    (@view_meta[:td_field_class].nil?) ? td_field_class = 'field' : td_field_class = @view_meta[:td_field_class]
+    (view_meta[:td_field_class].nil?) ? td_field_class = 'field' : td_field_class = view_meta[:td_field_class]
 
     #add any form hidden fields
     hidden_fields = []
-    @view_meta[:hidden_fields].each do |hfield_hash|
+    view_meta[:hidden_fields].each do |hfield_hash|
       hfield_hash.each do |field_name,field_meta|
         field_meta[:name] = field_name.to_s
         if(field_meta[:id].nil?) then field_meta[:id] = field_meta[:name] end
@@ -410,7 +402,7 @@ module R8Tpl
 
     rows = []
     group_num = 0
-    @view_meta[:field_groups].each do |group_hash|
+    view_meta[:field_groups].each do |group_hash|
       row_count = 0
       display_labels = group_hash[:display_labels]
       num_cols = group_hash[:num_cols].to_i

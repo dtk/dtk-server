@@ -556,16 +556,10 @@ p '     iteratorVarRaw: '+newLoopHash[:iteratorVarRaw].to_s
   def set_view(path_type_to_use=nil)
     #TODO treating @model_name when it is nil or empty
     #check paths in order 
-    ordered_paths = nil
-    if path_type_to_use
-      ordered_paths = [path_type_to_use]
-    else
-      ordered_paths = [:base, :meta_with_profile]
-      ordered_paths.push(:meta_default) unless @profile == :default
-    end
+    ordered_paths = (path_type_to_use ? [path_type_to_use] : [:base, :meta])
     ordered_paths.each do |path_type|
-      path = ret_view_path(path_type)
-      next unless File.exists?(path)
+      path = ret_existing_view_path(path_type)
+      next unless path
       @view_path = process_view_type(path_type,path)
       return @view_path if @view_path
     end

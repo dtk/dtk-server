@@ -55,15 +55,14 @@ R8::Config[:database][:name] = "db_main"
 R8::Config[:database][:type] = "postgres"
 
 
-#these are used in view.r8.rb
+#these are used in template.r8.rb and view.r8.rb
 R8::Config[:sys_root_path] = "/root/R8Server"
-R8::Config[:app_root_path] = "/root/R8Server"
-R8::Config[:app_cache_root] = "/root/R8Server/cache/"+R8::Config[:application_name]
-R8::Config[:system_view_root] = R8::Config[:sys_root_path] + "/system/core/view"
-R8::Config[:meta_template_base_dir] = R8::Config[:sys_root_path] + "/application"
+R8::Config[:app_root_path] = "#{R8::Config[:sys_root_path]}/#{R8::Config[:application_name]}"
+R8::Config[:app_cache_root] = "#{R8::Config[:sys_root_path]}/cache/#{R8::Config[:application_name]}"
+R8::Config[:system_views_root] = "#{R8::Config[:sys_root_path]}/system/core/view"
+R8::Config[:meta_templates_root] = "#{R8::Config[:app_root_path]}/meta"
 R8::Config[:dev_mode] = true
 
-#these are used in template.r8.rb
-R8::Config[:js_file_write_path] = "/root/R8Server/application/public/js"
+R8::Config[:js_file_write_path] = "#{R8::Config[:app_root_path]}/public/js"
 R8::Config[:js_templating_on] = true
 

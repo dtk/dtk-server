@@ -23,10 +23,13 @@ class TemplateR8
                 :js_templating_on,
                 :root_js_element_var_name,:root_js_hash,:loop_vars,:ctrl_vars,:js_var_header
 
-  def initialize(user)
+  def initialize(model_name,view_name,user)
     @user = user
-    @model_name = String.new
-    @view_name = String.new
+    @profile = @user.current_profile
+
+    @model_name = model_name
+    @view_name = view_name
+    @view_path = nil
 
     @js_var_header = 'tplVars'
     @tpl_path = nil
@@ -92,7 +95,11 @@ class TemplateR8
     tplToJS(view_tpl_contents)
   end
 
-  def render(view_tpl_contents,js_templating_on=jsTemplatingOn?)
+def render()
+pp self
+  {}
+end
+  def render_old(view_tpl_contents,js_templating_on=jsTemplatingOn?)
 #TODO: should be populating these from global config options
     self.assign(:jsIncludePath, "jsIncludePath")
     self.assign(:siteURL, "this is a test")
@@ -548,75 +555,81 @@ p '     iteratorVarRaw: '+newLoopHash[:iteratorVarRaw].to_s
 ##################BEGIN NEW TEMPLATE STUBS FOR VIEW HANDLING#################################
 #from_view might need some explanation, used in case of one global Template object for request
 #   used as flag then Template called within meta view cache generation where its not possible to have a metaview
-  def set_view(view_name,from_view=nil)
-    profile = @user.current_profile
-
-    if view_name.include?('/')
-      @model_name,@view_name = view_name.split("/")
-    else
-      @model_name = String.new
-      @view_name = view_name
+  def set_view()
+    #TODO treating @model_name when it is nil or empty
+    #check paths in order 
+    ordered_paths = [:base, :meta_with_profile]
+    ordered_paths.push(:meta_default) unless @profile.to_s == "default"
+    ordered_paths.each do |path_type|
+      path = "#{ret_view_path(path_type)}/#{relative_path.rtpl}"
+      next unless File.exists?(path)
+      @view_path = process_view_type(path_type,path)
+      return @view_path if @view_path
     end
+  end
 
-    tpl_dir = ret_view_dir("model_cache")
-    if !from_view && has_meta_view?(profile)
+  def process_view_type(path_type,path)
+    case path_type
+      when :base
+        path
+      when :meta_with_profile,:meta_default
+        ViewR8.update_cache?(@model_name,@view_name,@profile)
+    end
+  end
+=begin
+
+    if File.exists?(
+      return @view_path = path
+    end
+    #next checks if meta view exists
+    path = "#{ret_view_dir(:meta)/#{@model_name}/#{@profile}.#{@view_name}"
+
+view.default.list.json
+    curr_view = @view_name
+    tpl_dir = ret_view_dir(:model_cache)
+
+    #next checks if meta view exists
+    #application/view/model_name/profile.view_name.[json|.rb]
+      #sees cache     
+
+    if !from_view && has_meta_view?(tpl_dir,profile)
       #make sure that base smarty engine knows where to look instead of default view folder
-      FileUtils.mkdir_p("#{tpl_dir}/#{@model_name}",0,true) unless File.exists?(tpl_dir+'/'+@model_name) 
+      FileUtils.mkdir_p("#{tpl_dir}/#{@model_name}",0,true) unless File.exists?("#{tpl_dir}/#{@model_name}")
 
       #now make sure meta tpl cache is up to date
       ViewR8.update_cache(@model_name,@view_name,profile)
-      @current_view = ViewR8.view_tpl_name
+      curr_view = ViewR8.view_tpl_name
     else
 #TODO: revisit when deeper into profiles, currently too messy
       profile_tpl_name = "#{tpl_dir}/#{profile}.#{@view_name}"
       default_tpl_name = "#{tpl_dir}/#{@view_name}"
       if File.exists?(profile_tpl_name)
-        @current_view = "#{profile}.#{@view_name}"
-      else
-        @current_view = @view_name
+        curr_view = "#{profile}.#{@view_name}"
       end
     end
 
-    @current_view = "#{@model_name}/#{@current_view}" unless @model_name.empty?
+    @current_view = @model_name.empty? ? currr_view : "#{@model_name}/#{curr_view}" 
   end
+=end
 
-  #TBD: should this be passed tpl_dir? amd remove #{R8::Config[:meta_template_base_dir]}/meta?
-  def has_meta_view?(profile)
-    view_meta_path = "#{R8::Config[:meta_template_base_dir]}/meta/#{@model_name}/view.#{profile}.#{@view_name}.rb"
-    if File.exists?(view_meta_path)
-     #TBD: how is this used? @profile = profile
-      return true
-    end
-    dflt_view_meta_path = "#{R8::Config[:meta_template_base_dir]}/meta/#{@model_name}/view.default.#{@view_name}.rb"  
-
-    if File.exists?(dflt_view_meta_path)
-      #TBD: how is this used? @profile = @default_profile
-      return true
-    end
-    nil
-  end
-
-  def ret_view_dir(view_dir_location)
-    case(view_dir_location)
-      when "system" then
-        R8::Config[:system_views_base_dir]
-      when "model" then
-        R8::Config[:views_base_dir]
-      when "model_cache" then
-        "#{R8::Config[:meta_template_base_dir]}/meta"
+  def ret_view_path(type)
+    case(type)
+      when :system 
+        R8::Config[:system_views_root]
+      when :base 
+        "#{R8::Config[:base_views_root]}/#{@model_name}/#{@profile}.#{@view_name}.rtpl"
+      when :meta_with_profile 
+        "#{R8::Config[:meta_templates_root]/#{@model_name}/view.#{@profile}.#{@view_name}.rb"
+      when :meta_default
+        "#{R8::Config[:meta_templates_root]/#{@model_name}/view.default.#{@view_name}.rb"
+      when :cache 
+        R8::Config[:app_cache_root]
       else
-        log("call to set_view_dir with no handler for name: "+view_dir_location)
+       log("call to set_view_path with no handler for type: #{type}")
         nil
     end
   end
 
-#some aspect of reset might be needed when implementing Template as a single instance per request by default
-  def reset
-    @current_view = String.new
-    @model_name = String.new
-    @view_name = String.new
-    @tpl_vars = []
-  end
 
   def fwrite_tpl(tpl_content, write_path)
     return false unless write_path.empty?

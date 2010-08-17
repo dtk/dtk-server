@@ -47,7 +47,6 @@ module XYZ
       model_list = get_objects(model_name.to_sym,field_set,where_clause)
       action_name = :list #TBD: automatically determine this
 
-
 #TBD: these can get pushed to higher level inside tpl.set_view
 #      view = create_and_render_view(action_name)
 #      tpl = create_template_for_action(view,action_name)

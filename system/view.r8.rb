@@ -67,12 +67,12 @@ module R8Tpl
     unless cache_current?
       case view_type().to_sym
         when :edit
-          renderEditTPLCache() unless cache_current 
+          render_edit_tpl_cache() 
           add_validation()
         when :display
-          render_display_tpl_cache() unless cache_current
+          render_display_tpl_cache() 
         when :list
-          render_list_tpl_cache() unless cache_current
+          render_list_tpl_cache() 
       end
     end
      ret_existing_view_path(:cache)

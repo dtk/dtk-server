@@ -62,7 +62,7 @@ module XYZ
       tpl.assign(:list_start_next, 0)
 
       ctrl_result = {
-        :tpl_contents => tpl.render()
+        :tpl_contents => tpl.render(nil,false) #nil, false args for testing
       }
     end
 

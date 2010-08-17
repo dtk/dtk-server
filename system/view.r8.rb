@@ -62,20 +62,21 @@ module R8Tpl
     @js_require << js unless @js_require.includes(js)
   end
 
-  def update_cache?(path)
-    cache_current = cache_current?
-
-    case view_type().to_sym
-      when :edit
-        renderEditTPLCache() unless cache_current 
-        add_validation()
-      when :display
-        render_display_tpl_cache() unless cache_current
-      when :list
-        render_list_tpl_cache() unless cache_current
+  #updates cache if necssary and returns the path to the cache
+  def update_cache?()
+    unless cache_current?
+      case view_type().to_sym
+        when :edit
+          renderEditTPLCache() unless cache_current 
+          add_validation()
+        when :display
+          render_display_tpl_cache() unless cache_current
+        when :list
+          render_list_tpl_cache() unless cache_current
+      end
     end
+     ret_existing_view_path(:cache)
   end
-
  private
 
   def i18n(*path)

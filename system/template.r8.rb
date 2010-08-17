@@ -93,10 +93,13 @@ module R8Tpl
       tplToJS(view_tpl_contents)
     end
 
-    def render(view_tpl_contents,js_templating_on=jsTemplatingOn?)
+    def render(view_tpl_contents=nil,js_templating_on=jsTemplatingOn?)
+      if view_tpl_contents.nil? 
+        view_tpl_contents=IO.read(@view_path)
+      end
       #TODO: should be populating these from global config options
-      self.assign(:jsIncludePath, "jsIncludePath")
-      self.assign(:siteURL, "this is a test")
+      assign(:jsIncludePath, "jsIncludePath")
+      assign(:siteURL, "this is a test")
 
       #if jsTemplatingOn? then
       if js_templating_on
@@ -567,8 +570,7 @@ p '     iteratorVarRaw: '+newLoopHash[:iteratorVarRaw].to_s
         path
       when :meta
         view = ViewR8.new(@model_name,@view_name,@user)
-        view.update_cache?(path)
-        view.view_tpl_name
+        view.update_cache?()
     end
   end
 =begin

@@ -3,15 +3,19 @@ require File.expand_path('field.r8.rb', File.dirname(__FILE__))
 class ViewR8
   attr_accessor :obj_name, :tpl_contents, :css_require, :js_require
 
-  def initialize(model_name,i18n,profile=nil)
-    @view_meta = nil               #hash defining an instance of a view
+  def initialize(model_name,view_name,profile=:default)
     @model_name = model_name	  #object type (a symbol)
-    @i18n_hash = i18n
+    @view_name = view_name              #viewName can be either edit,detail,list,etc
+    @form_id = "#{@model_name}-#{@view_name}-form"
+    @view_type = view_name.to_sym #TODO: can view_type and view_name differ
+    @profile = profile            #profile will dictate the specific view to use/generate
+    @i18n_hash = load_i18n_hash(model_name)
+
+    @view_meta = nil               #hash defining an instance of a view
+
     # view_meta_path()            #path where the base view meta data should be located
     @override_meta_path = nil        #path where the overrides for a view should be located
 
-    @profile = profile || :default   #profile will dictate the specific view to use/generate
-    @view_name = nil                 #viewName can be either edit,detail,list,etc
     # view_type()                 #tracks the type of view (edit,view,list)
     @js_cache_path = nil             #this is the path to the JS file that will process/render the view
     #view_tpl_cache_path()            #this is the cache path to write the app view tpl to
@@ -22,9 +26,15 @@ class ViewR8
     @js_require = []
   end
 
-  def render(view_name)
-    @view_name = view_name 
-    @form_id = "#{@model_name}-#{@view_name}-form"
+  def load_i18n_hash(model_name)
+    file_name = "#{R8::Config[:i18n_root]}/#{model_name}/#{R8::Config[:default_language]}.rb"
+    return eval(IO.read(file_name)) if File.exists?(file_name)
+    file_name = "#{R8::Config[:i18n_root]}/#{R8::Config[:default_language]}.rb"
+    return eval(IO.read(file_name)) if File.exists?(file_name)
+    Hash.new
+  end
+
+  def render()
     @view_meta = get_view_meta()
 
     if view_tpl_current?
@@ -54,6 +64,25 @@ class ViewR8
     @js_require << js unless @js_require.includes(js)
   end
 
+  def update_cache?(path)
+
+    #if not set yet, this will grab/set the meta array for given object/view_type
+    #TODO: see how this is set and used
+   # self.set_view_meta()
+
+    template_current = view_tpl_current?
+
+    case @view_type
+      when :edit
+        renderEditTPLCache() if template_current 
+        add_validation()
+      when :display
+        render_display_tpl_cache() if template_current
+      when :list
+        render_list_tpl_cache() if template_current
+    end
+  end
+
  private
 
   def i18n(*path)
@@ -62,10 +91,18 @@ class ViewR8
 
   # This will return the path to write the TPL cache file to
   #TODO:revisit to possibly put randomizer on filename ala smarty
-  def view_tpl_cache_path()
-    "#{R8::Config[:app_cache_root]}/view/#{@model_name}/#{@profile}.#{@view_name}.rtpl"
+  #TODO implement as mixin
+  def ret_view_path(type)
+    case(type)
+      when :cache 
+      "#{R8::Config[:app_cache_root]}/view/#{@model_name}/#{@profile}.#{@view_name}.rtpl"
+      else
+       log("call to set_view_path with no handler for type: #{type}")
+        nil
+    end
   end
 
+  #TODO: fold below into form above and unify with peer fn on template
   def model_view_tpl_path()
     "#{R8::Config[:app_root_path]}/view/xyz/#{@model_name}/#{@profile}.#{@view_name}.rtpl"
   end
@@ -134,39 +171,11 @@ class ViewR8
 #    "#{R8::Config[:appRootPath]}meta/#{@model_name}/view.#{@profile}.#{@view_name}.json"
   end
 
-#######BEGIN STUB FOR udpate_cache
-  def update_cache(model_name,view_name,profile='default')
-    if model_name == '' || view_name == ''
-      log('error','Call to view.updateCache w/o model_name or view_name')
-      return false
-    end
 
-    @view_name = view_name
-    @model_name = model_name
-    @form_id = @model_name+"-"+@view_name+"-form"
-
-    #this will check if the view is Of Type Edit/Display/List
-    self.set_view_type()
-
-    #if not set yet, this will grab/set the meta array for given object/view_type
-    self.set_view_meta()
-    template_current = self.view_tpl_current?
-
-    case @view_type
-      when "edit" then
-        if template_current then self.renderEditTPLCache() end
-        self.add_validation()
-      when "display" then
-        if template_current then self.render_display_tpl_cache() end
-      when "list" then
-        if template_current then self.render_list_tpl_cache() end
-    end
-  end
-#################END STUB FOR UPDATE CACHE########################
 
   # This will check to see if the TPL view file exists and isnt stale compare to the base TPL and other factors
   def view_tpl_current?()
-    view_rtpl_cache_path = view_tpl_cache_path()
+    view_rtpl_cache_path =ret_view_path(:cache)
 
     #TBD: ask Nate about intended semantics; modified because error if file does not exist, but clause executed
     if File.exists?(view_rtpl_cache_path) && (!R8::Config[:dev_mode].nil? || R8::Config[:dev_mode] == false) then
@@ -497,7 +506,7 @@ class ViewR8
   #writes template, js_include and css_include
   def fwrite()
     files = {
-      view_tpl_cache_path() => @tpl_contents,
+     ret_view_path(:cache) => @tpl_contents,
       css_require_path() => JSON.pretty_generate(@css_require),
       js_require_path() => JSON.pretty_generate(@js_require)
     }

@@ -8,7 +8,7 @@ module XYZ
   class UserContext
     attr_reader :current_profile
     def initialize()
-      @current_profile = "default"
+      @current_profile = :default
     end
   end
 end
@@ -46,15 +46,14 @@ module XYZ
       model_name = Aux.demodulize(self.class.to_s).gsub(/Controller$/,"").downcase
       model_list = get_objects(model_name.to_sym,field_set,where_clause)
       action_name = :list #TBD: automatically determine this
-      #set the view name to the model view folder and list view
-      view_name = "#{model_name}/#{action_name}"
+
 
 #TBD: these can get pushed to higher level inside tpl.set_view
 #      view = create_and_render_view(action_name)
 #      tpl = create_template_for_action(view,action_name)
 
       user_context = UserContext.new #TBD: stub
-      tpl = R8Tpl::TemplateR8.new(view_name,user_context)
+      tpl = R8Tpl::TemplateR8.new(model_name,action_name,user_context)
       tpl.set_view()
 
 #not quite sure what was happening here, but assign should always be name=>value assignments

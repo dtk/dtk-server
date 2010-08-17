@@ -1,9 +1,7 @@
 
-
-
 #dont know proper way to reference, but need distinction that these are strings for node object,
 #there will also be application specific strings, as well as object view specific ones
-i18n.node = {
+{
   :id => 'ID',
   :display_name => 'Name',
   :description => 'Description',

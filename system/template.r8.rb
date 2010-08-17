@@ -1,4 +1,3 @@
-
 require 'nokogiri'
 require 'erubis'
 
@@ -559,9 +558,9 @@ p '     iteratorVarRaw: '+newLoopHash[:iteratorVarRaw].to_s
     #TODO treating @model_name when it is nil or empty
     #check paths in order 
     ordered_paths = [:base, :meta_with_profile]
-    ordered_paths.push(:meta_default) unless @profile.to_s == "default"
+    ordered_paths.push(:meta_default) unless @profile == :default
     ordered_paths.each do |path_type|
-      path = "#{ret_view_path(path_type)}/#{relative_path.rtpl}"
+      path = ret_view_path(path_type)
       next unless File.exists?(path)
       @view_path = process_view_type(path_type,path)
       return @view_path if @view_path
@@ -573,7 +572,9 @@ p '     iteratorVarRaw: '+newLoopHash[:iteratorVarRaw].to_s
       when :base
         path
       when :meta_with_profile,:meta_default
-        ViewR8.update_cache?(@model_name,@view_name,@profile)
+        view = ViewR8.new(@model_name,@view_name,@profile)
+        view.update_cache?(path)
+        view.view_tpl_name
     end
   end
 =begin
@@ -612,6 +613,7 @@ view.default.list.json
   end
 =end
 
+  #TBD: make mixin so can be used for template and view
   def ret_view_path(type)
     case(type)
       when :system 
@@ -619,11 +621,9 @@ view.default.list.json
       when :base 
         "#{R8::Config[:base_views_root]}/#{@model_name}/#{@profile}.#{@view_name}.rtpl"
       when :meta_with_profile 
-        "#{R8::Config[:meta_templates_root]/#{@model_name}/view.#{@profile}.#{@view_name}.rb"
+        "#{R8::Config[:meta_templates_root]}/#{@model_name}/view.#{@profile}.#{@view_name}.rb"
       when :meta_default
-        "#{R8::Config[:meta_templates_root]/#{@model_name}/view.default.#{@view_name}.rb"
-      when :cache 
-        R8::Config[:app_cache_root]
+        "#{R8::Config[:meta_templates_root]}/#{@model_name}/view.default.#{@view_name}.rb"
       else
        log("call to set_view_path with no handler for type: #{type}")
         nil

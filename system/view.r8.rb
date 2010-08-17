@@ -130,7 +130,7 @@ module R8Tpl
       #TODO: figure out handling of overrides
       #      require $GLOBALS['ctrl']->getAppName().'/objects' . $this->objRef->getmodel_name() . '/meta/view.'.$this->profile.'.'.$this->viewName.'.php');
       # require 'some path to require'
-     raise ErrorNotImplemented.new()
+     raise XYZ::ErrorNotImplemented.new()
     end
     R8View::Views[@model_name][@profile][@view_name]
   end
@@ -141,9 +141,9 @@ module R8Tpl
     cache_path = ret_existing_view_path(:cache)
     return nil unless cache_path
     meta_view_path = ret_existing_view_path(:meta)
-    raise Error.new("to generate cache appropriate meta file must exist") unless  meta_view_path
+    raise XYZ::Error.new("to generate cache appropriate meta file must exist") unless  meta_view_path
     system_view_path = ret_existing_view_path(:system)
-    raise Error.new("to generate cache appropriate system file must exist") unless  system_view_path
+    raise XYZ::Error.new("to generate cache appropriate system file must exist") unless  system_view_path
 
     #TBD: ask Nate about intended semantics; modified because error if file does not exist, but clause executed
     if not R8::Config[:dev_mode].nil? or R8::Config[:dev_mode] == false
@@ -179,50 +179,40 @@ OLD
 =end
 
   def get_rtpl_contents()
-    ret = nil
-    File.open(get_rtpl_path(), 'r') do |tpl_file_handle|
-      ret = tpl_file_handle.read
-    end
-    ret
+    IO.read(get_rtpl_path())
   end
 
   def get_view_tpl_cache()
-    ret = nil
-    File.open(view_tpl_cache_path(), 'r') do |tpl_file_handle|
-      ret = tpl_file_handle.read
-    end
-    ret
+    IO.read(get_existing_view_path(:cache))
   end
 
   def get_css_require_from_cache()
-    ret = nil
-    File.open(css_require_path(), 'r') do |file_handle|
-      ret = XYZ::Aux.convert_to_hash_symbol_form(file_handle.read)
-    end
-    ret
+    XYZ::Aux.convert_to_hash_symbol_form(IO.read(css_require_path()))
   end
 
   def get_js_require_from_cache()
-    ret = nil
-    File.open(js_require_path(), 'r') do |file_handle|
-      ret = XYZ::Aux.convert_to_hash_symbol_form(file_handle.read)
-    end
-    ret
+    XYZ::Aux.convert_to_hash_symbol_form(IO.read(js_require_path()))
   end
 
   # This will return the path to write the TPL cache file to
 #TODO: use file.io.php util funcs
-#TODO: replace or move to commonmix
+#TODO: better integrate with ret_existing_view_path; may alo have constructor of this object give context
   def get_rtpl_path()
 #TODO: figure out how to best dynamically load hash meta for base and overrides
 #    $overrideTPLPath = $GLOBALS['ctrl']->getAppName().'/objects/'.$this->objRef->getmodel_name().'/templates/'.$this->profile.'.'.$this->viewName.'.tpl';
 
-    model_view_path = ret_view_path(:base)
-    (File.exists?(model_view_path)) ? (return model_view_path) : (return ret_view_path(:system))
+    base_view_path = ret_existing_view_path(:base)
+    return base_view_path if base_view_path
+    cache_view_path = ret_existing_view_path(:cache)
+    raise XYZ::Error.new("to get rtpl path either corresponding base or cache file must be present") unless cache_view_path
+    cache_view_path
+=begin TODO shouldnt cache be returned  instead of logic below
+  (File.exists?(model_view_path)) ? (return model_view_path) : (return ret_view_path(:system))
 
     return "#{R8::Config[:system_view_root]}/#{@profile}.#{@view_name}.rtpl"
   end
-
+=end
+  end
   # This function will generate the TPL cache for a view of type list
   def render_list_tpl_cache()
 #TODO: can probably move most of this function to a general function call

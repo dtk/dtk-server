@@ -1,151 +1,150 @@
 require 'nokogiri'
 require 'erubis'
-
+require File.expand_path('common_mixin.r8', File.dirname(__FILE__))
 #
 #
 #
 module R8Tpl
+  class TemplateR8 
+    include CommonMixin
+    START_TAG_REGEX = /\{%\s*/
+    #  END_TAG_REGEX = /\s*.*%\}/
+    #TODO: revisit when implementing if and iterators
+    END_TAG_REGEX = /\s*[\sa-zA-Z0-9_@:\[\]]*%\}/
+    CTRL_BLOCK_REGEX = /(#{START_TAG_REGEX}([a-zA-Z_@:\[\]][a-zA-Z0-9_@:\[\]'"=\>\<\|&\(\),.\s\!]*)#{END_TAG_REGEX})/m
+    #  /\{%\s*(for|if|end)\s*.*%\}/
 
-class TemplateR8 
-  
-  START_TAG_REGEX = /\{%\s*/
-#  END_TAG_REGEX = /\s*.*%\}/
-#TODO: revisit when implementing if and iterators
-  END_TAG_REGEX = /\s*[\sa-zA-Z0-9_@:\[\]]*%\}/
-  CTRL_BLOCK_REGEX = /(#{START_TAG_REGEX}([a-zA-Z_@:\[\]][a-zA-Z0-9_@:\[\]'"=\>\<\|&\(\),.\s\!]*)#{END_TAG_REGEX})/m
-  #  /\{%\s*(for|if|end)\s*.*%\}/
+    attr_accessor :tpl_path,:tpl_contents,:tpl_results,:tpl_file_handle,
+      :template_vars,:js_render_queue,:xhtml_document,:element_count,:ctrl_close_stack,
+      :indent,:num_indents,:panel_set_element_id,
+      :js_file_handle,:js_file_write_path,:js_tpl_callback,:js_file_name,:js_cache_dir,
+      :js_templating_on,
+      :root_js_element_var_name,:root_js_hash,:loop_vars,:ctrl_vars,:js_var_header
 
-  attr_accessor :tpl_path,:tpl_contents,:tpl_results,:tpl_file_handle,
-                :template_vars,:js_render_queue,:xhtml_document,:element_count,:ctrl_close_stack,
-                :indent,:num_indents,:panel_set_element_id,
-                :js_file_handle,:js_file_write_path,:js_tpl_callback,:js_file_name,:js_cache_dir,
-                :js_templating_on,
-                :root_js_element_var_name,:root_js_hash,:loop_vars,:ctrl_vars,:js_var_header
+    def initialize(model_name,view_name,user)
+      @user = user
+      @profile = @user.current_profile
 
-  def initialize(model_name,view_name,user)
-    @user = user
-    @profile = @user.current_profile
+      @model_name = model_name
+      @view_name = view_name
+      @view_path = nil
 
-    @model_name = model_name
-    @view_name = view_name
-    @view_path = nil
+      @js_var_header = 'tplVars'
+      @tpl_path = nil
+      @tpl_contents = String.new
+      @tpl_results = nil
+      @xhtml_document = nil
+      
+      @js_tpl_callback = String.new
+      @js_file_name = String.new
 
-    @js_var_header = 'tplVars'
-    @tpl_path = nil
-    @tpl_contents = String.new
-    @tpl_results = nil
-    @xhtml_document = nil
+      @js_cache_dir = String.new
+      @js_file_write_path = String.new
+      @js_render_queue = []
+      @root_js_element_var_name = String.new
+      @root_js_hash = {}
 
-    @js_tpl_callback = String.new
-    @js_file_name = String.new
+      @parent_ref_hash = {}
 
-    @js_cache_dir = String.new
-    @js_file_write_path = String.new
-    @js_render_queue = []
-    @root_js_element_var_name = String.new
-    @root_js_hash = {}
+      @node_render_JS = String.new
+      @header_JS = String.new
+      @panel_set_element_id = String.new #this might not be used, js func should prob return DOM ref
 
-    @parent_ref_hash = {}
+      @num_indents = 0
+      @indent = String.new
 
-    @node_render_JS = String.new
-    @header_JS = String.new
-    @panel_set_element_id = String.new #this might not be used, js func should prob return DOM ref
-
-    @num_indents = 0
-    @indent = String.new
-
-    @js_templating_on = true
-    @ctrl_vars = []
-    @loop_vars = []
+      @js_templating_on = true
+      @ctrl_vars = []
+      @loop_vars = []
 
     #this var is needed b/c of the way DOM rendering needs to be handled during if's, loop's
-    @ctrl_close_stack = []
+      @ctrl_close_stack = []
 
-    @element_count = 0
+      @element_count = 0
 
  
-    @template_vars = {}
+      @template_vars = {}
 
-    @template_dir = '.'
-    @compile_dir = R8::Config[:rtpl_compile_dir]
-    @cache_dir = R8::Config[:rtpl_cache_dir]
-    @js_file_write_path = R8::Config[:js_file_write_path]
+      @template_dir = '.'
+      @compile_dir = R8::Config[:rtpl_compile_dir]
+      @cache_dir = R8::Config[:rtpl_cache_dir]
+      @js_file_write_path = R8::Config[:js_file_write_path]
 
-    (R8::Config[:js_templating_on].nil?) ? @js_templating_on = true : @js_templating_on = R8::Config[:js_templating_on]
-  end
-
-  def jsTemplatingOn?
-    return @js_templating_on
-  end
-
-  def assign(name,value=nil)
-    @template_vars[name] = value
-  end
-  def setJSTplName(jsTplName)
-    @js_tpl_callback = jsTplName
-    @js_file_name = jsTplName+".js"
-  end
-
-  def jsQueuePush(type,jscontent)
-    @js_render_queue << {:type=>type,:jscontent=>jscontent}
-  end
-
-  def renderJsTPL(view_tpl_contents)
-    tplToJS(view_tpl_contents)
-  end
-
-def render()
-pp self
-  {}
-end
-  def render_old(view_tpl_contents,js_templating_on=jsTemplatingOn?)
-#TODO: should be populating these from global config options
-    self.assign(:jsIncludePath, "jsIncludePath")
-    self.assign(:siteURL, "this is a test")
-
-    #if jsTemplatingOn? then
-    if js_templating_on
-      renderJsTPL(view_tpl_contents)
-    else
-      eruby =  Erubis::Eruby.new(view_tpl_contents,:pattern=>'\{\% \%\}')
-      @tpl_results = eruby.result(@template_vars)
+      (R8::Config[:js_templating_on].nil?) ? @js_templating_on = true : @js_templating_on = R8::Config[:js_templating_on]
     end
-  end
 
-
-  def js_file_write(js_file_handle,contents)
-    js_file_handle.write(@indent + contents)
-  end
-
-#private
-  def tplXMLInit(view_tpl_contents)
-    @tpl_contents << "<div>" << self.cleanTpl(view_tpl_contents) << "</div>"
-
-    @xhtml_document = Nokogiri::XML(@tpl_contents,nil,'xml')
-    @root_js_element_var_name = @xhtml_document.root.name + '_tplRoot'
-  end
-
-  #this will escape &, <, > for xml purposes
-  def cleanTpl(str)
-    str.gsub!(/&(?!amp;)/m){|match| match+'amp;'}
-    matchStr = str
-    cleanStr = ''
-    while matches = /\{%={0,1}\s*[a-zA-Z0-9\.@:'"\(\)\|\[\]\s\=&]*\s*%\}/.match(matchStr) do
-      cleanStr << matches.pre_match
-      subbedStr = matches.to_s.gsub('>','&gt;')
-      subbedStr.gsub!('<','&lt;')
-      matchStr = matches.post_match
-      cleanStr << subbedStr
+    def jsTemplatingOn?
+      return @js_templating_on
     end
-    if(!matches.nil?) then cleanStr << matches.post_match end
-    return cleanStr
-  end
 
-  def jsTplCurrent?
-    false
-  end
+    def assign(name,value=nil)
+      @template_vars[name] = value
+    end
+    def setJSTplName(jsTplName)
+      @js_tpl_callback = jsTplName
+      @js_file_name = jsTplName+".js"
+    end
 
-  def tplToJS(view_tpl_contents)
+    def jsQueuePush(type,jscontent)
+      @js_render_queue << {:type=>type,:jscontent=>jscontent}
+    end
+
+    def renderJsTPL(view_tpl_contents)
+      tplToJS(view_tpl_contents)
+    end
+
+    def render()
+      pp self
+      {}
+    end
+    def render_old(view_tpl_contents,js_templating_on=jsTemplatingOn?)
+      #TODO: should be populating these from global config options
+      self.assign(:jsIncludePath, "jsIncludePath")
+      self.assign(:siteURL, "this is a test")
+
+      #if jsTemplatingOn? then
+      if js_templating_on
+        renderJsTPL(view_tpl_contents)
+      else
+        eruby =  Erubis::Eruby.new(view_tpl_contents,:pattern=>'\{\% \%\}')
+        @tpl_results = eruby.result(@template_vars)
+      end
+    end
+
+
+    def js_file_write(js_file_handle,contents)
+      js_file_handle.write(@indent + contents)
+    end
+
+    #private
+    def tplXMLInit(view_tpl_contents)
+      @tpl_contents << "<div>" << self.cleanTpl(view_tpl_contents) << "</div>"
+
+      @xhtml_document = Nokogiri::XML(@tpl_contents,nil,'xml')
+      @root_js_element_var_name = @xhtml_document.root.name + '_tplRoot'
+    end
+
+    #this will escape &, <, > for xml purposes
+    def cleanTpl(str)
+      str.gsub!(/&(?!amp;)/m){|match| match+'amp;'}
+      matchStr = str
+      cleanStr = ''
+      while matches = /\{%={0,1}\s*[a-zA-Z0-9\.@:'"\(\)\|\[\]\s\=&]*\s*%\}/.match(matchStr) do
+        cleanStr << matches.pre_match
+        subbedStr = matches.to_s.gsub('>','&gt;')
+        subbedStr.gsub!('<','&lt;')
+        matchStr = matches.post_match
+        cleanStr << subbedStr
+      end
+      if(!matches.nil?) then cleanStr << matches.post_match end
+      return cleanStr
+    end
+
+    def jsTplCurrent?
+      false
+    end
+
+    def tplToJS(view_tpl_contents)
     if self.jsTplCurrent?
       return nil
     end
@@ -554,11 +553,16 @@ p '     iteratorVarRaw: '+newLoopHash[:iteratorVarRaw].to_s
 ##################BEGIN NEW TEMPLATE STUBS FOR VIEW HANDLING#################################
 #from_view might need some explanation, used in case of one global Template object for request
 #   used as flag then Template called within meta view cache generation where its not possible to have a metaview
-  def set_view()
+  def set_view(path_type_to_use=nil)
     #TODO treating @model_name when it is nil or empty
     #check paths in order 
-    ordered_paths = [:base, :meta_with_profile]
-    ordered_paths.push(:meta_default) unless @profile == :default
+    ordered_paths = nil
+    if path_type_to_use
+      ordered_paths = [path_type_to_use]
+    else
+      ordered_paths = [:base, :meta_with_profile]
+      ordered_paths.push(:meta_default) unless @profile == :default
+    end
     ordered_paths.each do |path_type|
       path = ret_view_path(path_type)
       next unless File.exists?(path)
@@ -572,7 +576,7 @@ p '     iteratorVarRaw: '+newLoopHash[:iteratorVarRaw].to_s
       when :base
         path
       when :meta_with_profile,:meta_default
-        view = ViewR8.new(@model_name,@view_name,@profile)
+        view = ViewR8.new(@model_name,@view_name,@user)
         view.update_cache?(path)
         view.view_tpl_name
     end
@@ -612,25 +616,6 @@ view.default.list.json
     @current_view = @model_name.empty? ? currr_view : "#{@model_name}/#{curr_view}" 
   end
 =end
-
-  #TBD: make mixin so can be used for template and view
-  def ret_view_path(type)
-    case(type)
-      when :system 
-        R8::Config[:system_views_root]
-      when :base 
-        "#{R8::Config[:base_views_root]}/#{@model_name}/#{@profile}.#{@view_name}.rtpl"
-      when :meta_with_profile 
-        "#{R8::Config[:meta_templates_root]}/#{@model_name}/view.#{@profile}.#{@view_name}.rb"
-      when :meta_default
-        "#{R8::Config[:meta_templates_root]}/#{@model_name}/view.default.#{@view_name}.rb"
-      else
-       log("call to set_view_path with no handler for type: #{type}")
-        nil
-    end
-  end
-
-
   def fwrite_tpl(tpl_content, write_path)
     return false unless write_path.empty?
 

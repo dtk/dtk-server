@@ -271,13 +271,12 @@ OLD
     r8TPL.assign(:form_id, @form_id)
     r8TPL.assign(:form_action, view_meta[:action])
 
-    (view_meta[:td_label_class].nil?) ? td_label_class = 'label' : td_label_class = view_meta[:td_label_class]
-
-    (view_meta[:td_field_class].nil?) ? td_field_class = 'field' : td_field_class = view_meta[:td_field_class]
+    td_label_class = (view_meta[:td_label_class].nil? ? 'label' : view_meta[:td_label_class])
+    td_field_class = (view_meta[:td_field_class].nil? ? 'field' : view_meta[:td_field_class])
 
     #add any form hidden fields
     hidden_fields = []
-    view_meta[:hidden_fields].each do |hfield_hash|
+    (view_meta[:hidden_fields]||[]).each do |hfield_hash|
       hfield_hash.each do |field_name,field_meta|
         field_meta[:name] = field_name.to_s
         if(field_meta[:id].nil?) then field_meta[:id] = field_meta[:name] end
@@ -358,22 +357,22 @@ OLD
 #TODO: can probably move most of this function to a general function call
 #and re-use between renderViewJSCache and renderViewHTML
     field_handler = FieldR8.new(self)
-    r8TPL = R8Tpl::TemplateR8.new
+    r8TPL = R8Tpl::TemplateR8.new(@model_name,@view_name,@user)
     r8TPL.js_templating_on = false   #template engine should catch non JS automatically, but forcing to be sure
-    r8TPL.set_view_dir('system')
-    r8TPL.set_view('metaview.'+@profile+'.'+@view_name,true)
+#    r8TPL.set_view_dir('system')
+#    r8TPL.set_view('metaview.'+@profile+'.'+@view_name,true)
+    r8TPL.set_view(:system)
 
 #    i18n = utils.get_model_i18n(@model_name)
     r8TPL.assign(:formId, @form_id)
     r8TPL.assign(:formAction, view_meta[:action])
 
-    (view_meta[:td_label_class].nil?) ? td_label_class = 'label' : td_label_class = view_meta[:td_label_class]
-
-    (view_meta[:td_field_class].nil?) ? td_field_class = 'field' : td_field_class = view_meta[:td_field_class]
+    td_label_class = (view_meta[:td_label_class].nil? ? 'label' : view_meta[:td_label_class])
+    td_field_class = (view_meta[:td_field_class].nil? ? 'field' : view_meta[:td_field_class])
 
     #add any form hidden fields
     hidden_fields = []
-    view_meta[:hidden_fields].each do |hfield_hash|
+    (view_meta[:hidden_fields]||[]).each do |hfield_hash|
       hfield_hash.each do |field_name,field_meta|
         field_meta[:name] = field_name.to_s
         if(field_meta[:id].nil?) then field_meta[:id] = field_meta[:name] end

@@ -1,6 +1,4 @@
-R8View::Views[:component] = {
-  :default => {
-    :display => {
+{
       :action => 'index.php',
       :hidden_fields => [
         {
@@ -45,7 +43,6 @@ R8View::Views[:component] = {
             }},
         ],
       },
-    ],
-  }
-  }
+    ]
 }
+

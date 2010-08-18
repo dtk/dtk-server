@@ -62,20 +62,20 @@ module XYZ
       }
     end
 
-    def display
-      id = retrieve_from_route
-      model = model_name.to_s
-      model_result = get_object_by_id(id,model)
+    def display(id)
+      model_name = Aux.demodulize(self.class.to_s).gsub(/Controller$/,"").downcase
+      model_result = get_object_by_id(id)
 
       action_name = :display #TBD: automatically determine this
-      #set the view name to the model view folder and list view
-      view_name = model+'/'+action_name.to_s
-      tpl.set_view(view_name)
+      user_context = UserContext.new #TBD: stub
+      tpl = R8Tpl::TemplateR8.new(model_name,action_name,user_context)
+      tpl.set_view()
 
-      tpl.assign(model,model_result)
+#not quite sure what was happening here, but assign should always be name=>value assignments
+      tpl.assign("#{model_name}_display",model_result)
 
       ctrl_result = {
-        :tpl_contents => tpl.render()
+        :tpl_contents => tpl.render(nil,false) #nil, false args for testing
       }
     end
 

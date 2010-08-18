@@ -66,7 +66,6 @@ module XYZ
       model_name = Aux.demodulize(self.class.to_s).gsub(/Controller$/,"").downcase
       model_result = get_object_by_id(id)
 pp  model_result
-pp  model_result[:attribute_names]
       action_name = :display #TBD: automatically determine this
       user_context = UserContext.new #TBD: stub
       tpl = R8Tpl::TemplateR8.new(model_name,action_name,user_context)

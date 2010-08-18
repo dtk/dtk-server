@@ -1,7 +1,7 @@
 
 <button id="saveBtn" onclick="R8.forms.submit('{%=formId%}');">Save</button>
 <form id="{%=formId%}" action="{%=formAction%}">
-{%for field in hFieldList%}
+{%for field in h_field_list%}
 	<input type="hidden" name="{%=field[:name]%}" id="{%=field[:id]%}" value="{%=field[:value]%}" />
 {%end%}
 <table cellspacing="0" cellpadding="0" border="0">

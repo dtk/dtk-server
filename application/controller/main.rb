@@ -72,7 +72,7 @@ module XYZ
       tpl.set_view()
 
 #not quite sure what was happening here, but assign should always be name=>value assignments
-      tpl.assign("#{model_name}_display",model_result)
+      tpl.assign(model_name,model_result)
 
       ctrl_result = {
         :tpl_contents => tpl.render(nil,false) #nil, false args for testing

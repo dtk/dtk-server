@@ -1,7 +1,7 @@
 
 <button id="editBtn" onclick="R8.forms.submit('{%=formId%}');">Edit</button>
 <form id="{%=formId%}" action="{%=formAction%}">
-{%for field in hFieldList%}
+{%for field in h_field_list%}
 	<input type="hidden" name="{%=field[:name]%}" id="{%=field[:id]%}" value="{%=field[:value]%}" />
 {%end%}
 </form>

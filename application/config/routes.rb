@@ -24,13 +24,42 @@ routes[:model][:action] = {
 =end
 
 R8::Routes[:workspace] = {
-  :template => 'workspace',
+  :layout => 'workspace',
 }
 
-routes[:node][:list] = {
-  :template => '',
+=begin
+:layout => defines what master layout to use for the request if its an normal non-js response
+:panel => defines what partial rtpl assign var gets the contents if render type is html and not js
+          if js rendering/ajax call defines what DOM element ID gets assigned the contents,
+          if not defined, should always default to main_body
+
+:assign_type => defines how to assign/render the returned contents, either append | prepend | replace for now,
+                if not defined and there are dupes for a :panel should default to append
+
+****NOTES
+Used leading routes[:component][:display] as example, switch like the other meta to whatever is necessary to mesh
+with out-of-box ramaze routing
+
+  Need to figure out best way to pass along request params to each action, as well as any trailing route info
+    ie: request => http://siteurl.com/component/display/239439
+        should hit route component/display and execute the action set instead
+        the 239439 and any other ones should be passed on the end of each action set call by default
+=end
+routes[:component][:display] = {
+  :layout => 'default',
   :alias => '',
-  :action_set => :some_action_set,
+  :action_set => [
+    {
+      :route => 'component/list',
+      :panel => 'main_body',
+      :assign_type => 'append | prepend | replace'
+    },
+    {
+      :route => 'attribute/component_display_list',
+      :panel => 'main_body',
+      :assign_type => 'append | prepend | replace'
+    }
+  ],
 }
 
 routes[:login] = {

@@ -15,6 +15,16 @@ module XYZ
       args.reverse.each{|x|ret = and_aux(x,ret)}
       ret
     end
+    # returns [x_with_parent_id_removed,parent_id] or [x,nil] if parent_id not in list
+    #does not treat parent_id neseted in logical expression
+    def self.find_and_remove_parent_id(x)
+      return [x,nil] unless x.kind_of?(Hash)
+      return [x,nil] unless x.has_key?(:parent_id)
+      y = x.dup
+      parent_id = y.delete(:parent_id)
+      [y,parent_id]
+    end
+
    private
     def self.or_aux(x,y)
       return y if x.nil? or (x.kind_of?(Hash) and x.empty?)

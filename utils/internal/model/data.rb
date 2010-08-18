@@ -12,7 +12,13 @@ module XYZ
     end
 
     def get_objects(relation_type,c,where_clause=nil,field_set=nil)
-      @db.get_objects(relation_type,c,where_clause,field_set)
+      where_clause_x,parent_id = SQL.find_and_remove_parent_id(where_clause)
+      if parent_id
+        parent_id_handle = IDHandle[:c => c, :guid => parent_id]
+        @db.get_objects_wrt_parent(relation_type,parent_id_handle,where_clause_x)
+      else
+        @db.get_objects(relation_type,c,where_clause,field_set)
+      end
     end
 
     def get_objects_wrt_parent(relation_type,parent_id_handle,where_clause={})

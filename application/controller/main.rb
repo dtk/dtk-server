@@ -42,7 +42,8 @@ module XYZ
 
     ########
     def list
-      where_clause = {} # stub
+
+      where_clause = ret_parsed_query_string()
       #getting model_name by looking at self.class, (e.g., self.class can = XYZ::NodeController)
       model_name = Aux.demodulize(self.class.to_s).gsub(/Controller$/,"").downcase
       model_list = get_objects(model_name.to_sym,field_set,where_clause)

@@ -1,6 +1,4 @@
 {
-  :default => {
-    :display => {
       :action => 'index.php',
       :hidden_fields => [
         {
@@ -37,6 +35,14 @@
              :rows => 1,
              :cols => 40,
             }},
+            {:image_size => {
+             :type => 'text',
+             :help => '',
+             :obj_link => true,
+             :obj_link_view => 'display',
+             :rows => 1,
+             :cols => 40,
+            }},
             {:description => {
               :type => 'text',
               :help => '',
@@ -46,6 +52,5 @@
         ],
       },
     ],
-  }
-  }
 }
+

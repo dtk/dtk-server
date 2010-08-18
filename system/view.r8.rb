@@ -241,7 +241,7 @@ OLD
   def addValidation()
     field_handler = FieldR8.new(self)
 
-    view_meta[:field_groups].each do |group_num,group_hash|
+    (view_meta[:field_groups]||[]).each do |group_num,group_hash|
       view_meta[:field_sets][group_num][:fields].each do |field_num,field_hash|
         next if(fieldArray.length == 0)
 
@@ -287,7 +287,7 @@ OLD
 
     rows = []
     group_num = 0
-    view_meta[:field_groups].each do |group_hash|
+    (view_meta[:field_groups]||[]).each do |group_hash|
       row_count = 0
       display_labels = group_hash[:display_labels]
       num_cols = group_hash[:num_cols].to_i
@@ -383,7 +383,7 @@ OLD
 
     rows = []
     group_num = 0
-    view_meta[:field_groups].each do |group_hash|
+    (view_meta[:field_groups]||[]).each do |group_hash|
       row_count = 0
       display_labels = group_hash[:display_labels]
       num_cols = group_hash[:num_cols].to_i

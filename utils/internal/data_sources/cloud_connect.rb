@@ -1,5 +1,14 @@
 require 'fog'
 require 'fog/credentials'
+#TODO get Fog to correct this
+#monkey patch
+class NilClass
+  def blank?
+   nil
+  end
+end
+### end of monkey patch
+
 module XYZ
   module CloudConnect
     class Top

@@ -52,7 +52,6 @@ module XYZ
       user_context = UserContext.new #TBD: stub
       tpl = R8Tpl::TemplateR8.new(model_name,action_name,user_context)
       tpl.set_view()
-
 #not quite sure what was happening here, but assign should always be name=>value assignments
       tpl.assign("#{model_name}_list",model_list)
       tpl.assign(:list_start_prev, 0)

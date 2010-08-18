@@ -5,7 +5,7 @@
 	<input type="hidden" name="{%=field[:name]%}" id="{%=field[:id]%}" value="{%=field[:value]%}" />
 {%end%}
 </form>
-<table cellspacing="0" cellpadding="0" border="0">
+<table cellspacing="10" cellpadding="0" border="0">
 {%for row in rows%}
 	<tr id="{%=row[:rowId]%}">
 		{%for col in row[:cols]%}

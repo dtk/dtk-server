@@ -65,14 +65,14 @@ module XYZ
     def display(id)
       model_name = Aux.demodulize(self.class.to_s).gsub(/Controller$/,"").downcase
       model_result = get_object_by_id(id)
-
+pp  model_result
       action_name = :display #TBD: automatically determine this
       user_context = UserContext.new #TBD: stub
       tpl = R8Tpl::TemplateR8.new(model_name,action_name,user_context)
       tpl.set_view()
 
 #not quite sure what was happening here, but assign should always be name=>value assignments
-      tpl.assign(model_name,model_result)
+      tpl.assign(model_name.to_sym,model_result)
 
       ctrl_result = {
         :tpl_contents => tpl.render(nil,false) #nil, false args for testing

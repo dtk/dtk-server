@@ -9,12 +9,14 @@
       :field_list => [
           {:display_name => {
               :type => 'text',
+              :width => '20%',
               :help => '',
               :objLink => true,
               :objLinkView => 'display',
             }},
           {:type => {
               :type => 'text',
+              :width => '10%',
               :help => ''
             }},
           {:description => {

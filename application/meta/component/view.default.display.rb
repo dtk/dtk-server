@@ -41,6 +41,7 @@
         :rows => 1,
               :cols => 20,
             }},
+=begin
             {:attributes => {
               :type => 'text',
               :help => '',
@@ -53,6 +54,7 @@
         :rows => 10,
               :cols => 60,
             }},
+=end
             {:description => {
               :type => 'text',
               :help => '',

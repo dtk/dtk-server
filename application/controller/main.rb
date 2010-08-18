@@ -41,9 +41,10 @@ module XYZ
     end
 
     ########
-    def list
+    
+    def list(parsed_query_string=nil)
 
-      where_clause = ret_parsed_query_string()
+      where_clause = parsed_query_string || ret_parsed_query_string()
       #getting model_name by looking at self.class, (e.g., self.class can = XYZ::NodeController)
       model_name = Aux.demodulize(self.class.to_s).gsub(/Controller$/,"").downcase
       model_list = get_objects(model_name.to_sym,field_set,where_clause)
@@ -62,7 +63,7 @@ module XYZ
       }
     end
 
-    def display(id)
+    def display(id,parsed_query_string=nil)
       model_name = Aux.demodulize(self.class.to_s).gsub(/Controller$/,"").downcase
       model_result = get_object_by_id(id)
 pp  model_result
@@ -96,6 +97,32 @@ pp  model_result
         :tpl_contents => tpl.render()
       }
     end
+
+
+   def test(id)
+=begin
+     action = Ramaze::Action.create(
+        :node => NodeController,
+        :method => :list,
+        :params => [ {:type => "image"}],
+        :engine => lambda{|action, value| value })
+     action.call
+=end
+     action1 = Ramaze::Action.create(
+        :node => ComponentController,
+        :method => :display,
+        :params => [ id],
+        :engine => lambda{|action, value| value[:tpl_contents] })
+     res = action1.call
+
+     action2 = Ramaze::Action.create(
+        :node => AttributeController,
+        :method => :list,
+        :params => [{:parent_id =>id}],
+        :engine => lambda{|action, value| value[:tpl_contents] })
+     res + action2.call
+
+   end
 
 ################################################################################
 ################################################################################

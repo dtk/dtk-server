@@ -11,7 +11,7 @@
 	<table cellspacing="0" cellpadding="0" border="1" style="width: 100%;">
 	<tr id="{%=model_name%}-{%=view_name%}-header-row" class="">
 		{%for header_col in cols%}
-			<th id="{%=header_col[:id]%}-th" class="{%=header_col[:class]%}">{%=header_col[:label]%}</th>
+			<th id="{%=header_col[:id]%}-th" {%=header_col[:width]%} class="{%=header_col[:class]%}">{%=header_col[:label]%}</th>
 		{%end%}
 	</tr>
 

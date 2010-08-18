@@ -214,6 +214,7 @@ OLD
         field_meta[:id] = field_meta[:name] if field_meta[:id].nil?
         field_meta[:class] = field_meta[:class]
         field_meta[:content] = field_handler.getField(view_type(), field_meta, 'tpl')
+        field_meta[:width] = (field_meta[:width].nil? ? '' : 'width="'+field_meta[:width]+'"')
         list_cols << field_meta
       end
     end

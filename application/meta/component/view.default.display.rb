@@ -41,7 +41,13 @@
         :rows => 1,
               :cols => 20,
             }},
-            {:attribute_names => {
+            {:attributes => {
+              :type => 'text',
+              :help => '',
+        :rows => 10,
+              :cols => 60,
+            }},
+            {:service_attributes => {
               :type => 'text',
               :help => '',
         :rows => 10,

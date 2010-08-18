@@ -4,6 +4,7 @@ module XYZ
       [
         :id,
         :display_name,
+        :external_cmp_ref,
         :description,
         :parent_id,
         :parent_path

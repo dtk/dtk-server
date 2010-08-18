@@ -11,11 +11,16 @@ module XYZ
         column :external_type, :varchar
         column :external_cmp_ref, :varchar
         column :uri, :varchar
+        virtual_column :attribute_names
         many_to_one :component,:library,:project
         one_to_many :component, :attribute_link, :attribute
       end
     end
     ##### Actions
+    ### virtual column defs
+    def attribute_names()
+      get_directly_contained_objects(:attribute).map{|x|x[:external_attr_ref]}.join("\n")
+    end
 
     ###### Helper fns
     def get_contained_attribute_ids(opts={})

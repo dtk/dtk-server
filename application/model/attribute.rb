@@ -22,7 +22,6 @@ module XYZ
         column :external_attr_ref, :varchar
         virtual_column :attribute_value 
 
-        virtual_column :external_attr_ref
         #Boolean that indicates whether there is a executable script/recipe associated with the attribute
         virtual_column :executable? 
         virtual_column :unknown_in_attribute_value 

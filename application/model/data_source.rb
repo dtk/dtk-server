@@ -85,7 +85,7 @@ module XYZ
       @parent_ds_object = get_parent_object()
       load_ds_connector_class()
       load_ds_adapter_class()
-
+      @ds_connector_instance = nil #gets set subsequently so sharing can be done accross instances
     end   
     def obj_type()
       self[:obj_type].to_s

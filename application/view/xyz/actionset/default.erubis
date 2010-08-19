@@ -16,6 +16,7 @@
     <%= css 'screen'%>
   </head>
   <body>
+hello there<br/><br/>
   <%= @content %>
   </body>
 </html>

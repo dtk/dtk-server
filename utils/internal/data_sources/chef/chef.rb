@@ -11,7 +11,9 @@ module XYZ
       def initialize()
         @conn = nil
         @chef_node_cache = Hash.new
+        @chef_metadata_cache = Hash.new
       end
+
       def get_objects__component__recipe(&block)
         get_cookbook_names().each do |cookbook_name|
           get_recipes_assoc_cookbook(cookbook_name).each do |ds_hash|
@@ -20,6 +22,21 @@ module XYZ
         end
         return HashMayNotBeComplete.new()
       end
+
+      def get_objects__component__instance(&block)
+        get_node_recipe_assocs().each do |node_name,recipes|
+          recipes.each do |recipe_name|
+            node = get_node(node_name)
+            metadata = get_metadata_for_recipe(recipe_name)
+            attribute_values = find_attribute_values_and_filter_node!(metadata,node)
+            pp attribute_values
+            ds_hash = DataSourceUpdateHash.new({"metadata" => metadata, "recipe_name" => recipe_name, "node_name" => node_name, "attribute_values" => attribute_values})
+#           block.call(ds_hash)
+          end
+        end
+        return HashIsComplete.new()
+      end
+
 
       def get_objects__assoc_node_component(&block)
         get_node_recipe_assocs().each do |node_name,recipes|
@@ -48,10 +65,13 @@ module XYZ
       end
 
       def get_metadata(cookbook_name)
+        @chef_metadata_cache[cookbook_name] ||= get_metadata_aux(cookbook_name)
+      end
+
+      def get_metadata_aux(cookbook_name)
         #need version number if 0.9
         cookbook = [cookbook_name]
         if chef_version >= 0.9
-
           #need to get meta first
           r = get_rest("cookbooks/#{cookbook_name}")
           #TODO: get max, in case multiple versions; check max is ordering right
@@ -60,6 +80,14 @@ module XYZ
         r = get_rest("cookbooks/#{cookbook.join('/')}")
         return nil unless r
         r.to_hash["metadata"]
+      end
+
+      def get_metadata_for_recipe(recipe_name)
+        get_metadata(get_cookbook_name_from_recipe_name(recipe_name))
+      end
+
+      def get_cookbook_name_from_recipe_name(recipe_name)
+        recipe_name.gsub(/::.+/,"")
       end
 
       def get_recipes_assoc_cookbook(cookbook_name)
@@ -91,13 +119,13 @@ module XYZ
         (get_search_results(search_string,false)||[]).map do |node|
           @chef_node_cache[node.name] = node
         end
-        @chef_node_cache.each{|node_name,node|recipes[node_name] = node.run_list.recipes}
+        @chef_node_cache.each{|node_name,node|recipes[node_name] = recipes(node)}
         recipes
       end
 
       def get_node_recipes(node_name)
         node = get_node(node_name)
-        node ? node.run_list.recipes : nil
+        node ? recipes(node) : nil
       end
 
       def get_search_results(search_string,convert_to_hash=true)
@@ -124,6 +152,54 @@ module XYZ
 #What is mixlib?
         ::Mixlib::Authentication::Log.logger = ::Chef::Log.logger
         ::Chef::REST.new(::Chef::Config[:chef_server_url], ::Chef::Config[:node_name],::Chef::Config[:client_key])
+      end
+      class FilteredNode < HashObject
+        def name
+          self[:name]
+        end
+      end
+
+      #overwriting node value for memory mgmt purposes
+      def find_attribute_values_and_filter_node!(metadata,node)
+        return node[:attribute_values] unless node.kind_of?(::Chef::Node) #filtered already
+        filtered_node = FilteredNode.create_with_auto_vivification()
+        filtered_node[:name] = node.name
+        filtered_node[:attribute_meta] = metadata["attributes"] || {}
+        filtered_node[:attributes_values] = {}
+        (metadata["attributes"]||{}).keys.each do |k| 
+          attribute_path = k.split("/")
+          first = attribute_path.shift
+          value = NodeState.nested_value(node[first],attribute_path)
+          if value
+            value = value.to_hash if value.kind_of?(::Chef::Node::Attribute)
+            filtered_node[:attributes_values][k] = value
+          end
+        end
+        filtered_node.freeze
+        @chef_metadata_cache[node.name] = filtered_node
+        filtered_node[:attributes_values]
+      end
+      def recipes(node)
+        if node.kind_of?(::Chef::Node)
+          node.run_list.recipes
+        else
+          node[:recipes]
+        end
+      end
+
+      module NodeState
+        # used so dont get error when make call like node[x][y] and node[x] does not exist
+        def self.nested_value(node_attribute,path)
+          nested_value_private(node_attribute,path.dup)
+        end
+       private
+        def self.nested_value_private(node_attribute,path)
+          return nil unless node_attribute.kind_of?(::Chef::Node::Attribute)
+          return node_attribute if path.size == 0
+          return nil unless node_attribute.has_key?(f = path.shift)
+          return node_attribute[f] if path.size == 0
+          nested_value_private(node_attribute[f],path)
+        end
       end
     end
   end

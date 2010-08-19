@@ -1,5 +1,5 @@
 module XYZ
-  class DevtestController < Controller
+  class DevtestController < Controller 
     def discover_and_update(*uri_array)
       c = ret_session_context_id()
       ds_type = uri_array.shift.to_sym
@@ -27,6 +27,8 @@ module XYZ
       #TBD: implement :normalized_attrs_only flag
       @results = objs
     end
+
+##################################
 
     def testing
       return "anything reaching this route"

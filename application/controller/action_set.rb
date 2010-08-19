@@ -21,7 +21,6 @@ module XYZ
       action_processor = ActionProcessor.new(param_vals,action_set_def)
       (action_set_def[:action_set]||[]).each{|action|action_processor.process!(ret,action)}
       ret
-      "test"
     end
    private
     class ActionProcessor
@@ -30,13 +29,26 @@ module XYZ
         i = 0
         (action_set_def[:params]||[]).each do |param_name|
           @param_assigns[param_name] = param_vals[i]
-          i = i + 1
+          i = i+1
         end
       end
       def process!(ret,action)
         params = process_action_params(action[:action_params])
-        pp [:params,params]
+        node_name,method = action[:route].split("/")
+        a = Ramaze::Action.create(
+            :node => XYZ.const_get("#{node_name.capitalize}Controller"),
+            :method => method.to_sym,
+            :params => params,
+            :engine => lambda{|action, value| value[:tpl_contents] })
+        action_result = a.call
+        if ret[:tpl_contents].nil?
+          ret[:tpl_contents] = action_result
+        else
+        #TODO stub that just synactically appends
+          ret[:tpl_contents] << action_result
+        end
       end
+
       def process_action_params(raw_params)
         #short circuit if no params that need substituting
         return raw_params if @param_assigns.empty?

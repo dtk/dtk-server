@@ -12,7 +12,7 @@ module XYZ
         @conn = nil
         @chef_node_cache = Hash.new
       end
-      def get_objects__component(&block)
+      def get_objects__component__recipe(&block)
         get_cookbook_names().each do |cookbook_name|
           get_recipes_assoc_cookbook(cookbook_name).each do |ds_hash|
             block.call(ds_hash)

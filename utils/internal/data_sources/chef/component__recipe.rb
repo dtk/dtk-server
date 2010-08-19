@@ -1,10 +1,11 @@
 module XYZ
   module DSNormalizer
     class Chef
-      class Component < Top
+      class ComponentRecipe < Top
         definitions do
-         metadata = source["metadata"]
-         name = fn(lambda{|x,y,z|x||y||z},source["name"],metadata["display_name"],metadata["name"])
+          target[:type] = "template"
+          metadata = source["metadata"]
+          name = fn(lambda{|x,y,z|x||y||z},source["name"],metadata["display_name"],metadata["name"])
           target[:display_name] = name
           target[:description] = source["description"]
           target[:external_type] = "chef_recipe"
@@ -16,7 +17,7 @@ module XYZ
         class << self
           #TBD below is effectively dsl; may make more declarative using data integration dsl
           def unique_keys(source_hash)
-            [source_hash["name"]]
+            [:template,source_hash["name"]]
           end
 
           def relative_distinguished_name(source_hash)

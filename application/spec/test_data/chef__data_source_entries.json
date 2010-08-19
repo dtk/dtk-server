@@ -2,10 +2,11 @@
   "data_source": {
     "chef": {
       "data_source_entry": {
-        "component": {
+        "component_recipe": {
           "obj_type": "component",
           "ds_name": "chef",
-          "display_name": "component",
+	  "source_obj_type": "recipe",
+          "display_name": "component_recipe",
           "data_source_entry": {
             "component_attribute": {
               "obj_type": "attribute",

@@ -71,6 +71,8 @@ module R8Tpl
       @js_file_write_path = R8::Config[:js_file_write_path]
 
       (R8::Config[:js_templating_on].nil?) ? @js_templating_on = true : @js_templating_on = R8::Config[:js_templating_on]
+
+       self.set_view()
     end
 
     def jsTemplatingOn?

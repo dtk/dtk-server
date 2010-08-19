@@ -1,0 +1,27 @@
+<br/><br/>
+<div style="width: 100%;">
+	<div style="width: 100%;">
+		<div style="float: right; margin-right: 10px;">
+		<a href="javascript:R8.ctrl.request('attribute/list?listStart={%=list_start_prev%}');">&lt;-Prev</a>
+		&nbsp;&nbsp;&nbsp;&nbsp;
+		<a href="javascript:R8.ctrl.request('attribute/list?listStart={%=list_start_next%}');">Next-&gt;</a>
+		</div>
+	</div>
+	<div style="width: 100%; float: left;">
+	<table cellspacing="0" cellpadding="0" border="1" style="width: 100%;">
+	<tr id="attribute-list-header-row" class="">
+			<th id="external_attr_ref-th"  class="">external_attr_ref</th>
+			<th id="attribute_value-th"  class="">attribute_value</th>
+			<th id="description-th"  class="">description</th>
+	</tr>
+
+	{%for attribute in attribute_list%}
+		<tr id="list_row-{%=attribute%}" class="{%=[:class]%}">
+				<td id="external_attr_ref-td-{%=attribute%}" class=""><a href="/xyz/attribute/display/{%=attribute[:id]%}">{%=attribute[:external_attr_ref]%}</a></td>
+				<td id="attribute_value-td-{%=attribute%}" class="">{%=attribute[:attribute_value]%}</td>
+				<td id="description-td-{%=attribute%}" class="">{%=attribute[:description]%}</td>
+		</tr>
+	{%end%}
+	</table>
+	</div>
+</div>

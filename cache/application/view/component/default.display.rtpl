@@ -1,0 +1,23 @@
+
+<button id="editBtn" onclick="R8.forms.submit('component-display-form');">Edit</button>
+<form id="component-display-form" action="index.php">
+	<input type="hidden" name="obj" id="obj" value="component" />
+	<input type="hidden" name="action" id="action" value="save" />
+	<input type="hidden" name="id" id="id" value="" />
+</form>
+<table cellspacing="10" cellpadding="0" border="0">
+	<tr id="g0-r0">
+			<td id="" class="label">display_name</td>
+			<td id="" class="field">{%=component[:display_name]%}</td>
+	</tr>
+	<tr id="g0-r1">
+			<td id="" class="label">external_type</td>
+			<td id="" class="field">{%=component[:external_type]%}</td>
+	</tr>
+	<tr id="g0-r2">
+			<td id="" class="label">description</td>
+			<td id="" class="field">{%=component[:description]%}</td>
+	</tr>
+	<tr id="">
+	</tr>
+</table>

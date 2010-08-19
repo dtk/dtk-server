@@ -14,10 +14,9 @@
               :objLink => true,
               :objLinkView => 'display',
             }},
-          {:description => {
+         {:description => {
               :type => 'text',
               :help => '',
             }},
       ]
 }
-

@@ -1,3 +1,6 @@
+
+#TODO: should probably move all this into main controller, any reason not too?
+#should really aim to have only init,main and rest should all be controller mapped to routes
 module XYZ
   module ActionSet
     Delim = '__'

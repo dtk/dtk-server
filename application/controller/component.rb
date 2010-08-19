@@ -1,5 +1,6 @@
 module XYZ
   class ComponentController < MainController
+#TODO: move field set out of here and into meta/component/component.defs.rb file
     def self.field_set()
       [
         :id,
@@ -10,5 +11,6 @@ module XYZ
         :parent_path
       ]   
     end
+
   end
 end

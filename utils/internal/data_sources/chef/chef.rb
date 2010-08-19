@@ -3,10 +3,15 @@ require 'chef/config'
 require 'mixlib/authentication'
 require 'chef/cookbook/metadata/version'
 
-
+#TODO: written to get around deficiency that chef get node and searchbrings in full node, not partial info
+#TODO: imporve meory usage by only storing attributes that are needed
 module XYZ
   module DSConnector
     class Chef < Top
+      def initialize()
+        @conn = nil
+        @chef_node_cache = Hash.new
+      end
       def get_objects__component(&block)
         get_cookbook_names().each do |cookbook_name|
           get_recipes_assoc_cookbook(cookbook_name).each do |ds_hash|
@@ -32,10 +37,9 @@ module XYZ
          ::Chef::VERSION.to_f 
       end
      private
-      #TODO:not needed now
-      #def get_node_attributes(node_name)
-      #  get_rest("nodes/#{node_name}",false)
-      #end
+      def get_node(node_name)
+        @chef_node_cache[node_name] ||= get_rest("nodes/#{node_name}",false)
+      end
 
       def get_cookbook_names()
         # get_rest("cookbooks")
@@ -79,14 +83,20 @@ module XYZ
 
       def get_node_recipe_assocs()
         recipes = Hash.new
-        (get_search_results("node?q=*:*",false)||[]).map do |node|
-          recipes[node.name] = node.run_list.recipes
+        #TODO: may be better to make rest call per node or use chef iterator functionality
+        search_string = "node?q=*:*"
+        unless @chef_node_cache.empty?
+          search_string = "node?q="+@chef_node_cache.keys.map{|n|"NOT%20name:#{n}"}.join("%20AND%20")
         end
+        (get_search_results(search_string,false)||[]).map do |node|
+          @chef_node_cache[node.name] = node
+        end
+        @chef_node_cache.each{|node_name,node|recipes[node_name] = node.run_list.recipes}
         recipes
       end
 
       def get_node_recipes(node_name)
-        node = get_rest("nodes/#{node_name}",false)
+        node = get_node(node_name)
         node ? node.run_list.recipes : nil
       end
 
@@ -105,7 +115,7 @@ module XYZ
       end
 
       def conn()
-        @@conn ||=  initialize_chef_connection()
+        @conn ||=  initialize_chef_connection()
       end
 
       def initialize_chef_connection()

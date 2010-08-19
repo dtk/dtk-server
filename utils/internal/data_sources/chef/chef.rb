@@ -34,7 +34,7 @@ module XYZ
 #           block.call(ds_hash)
           end
         end
-        return HashIsComplete.new()
+        return HashMayNotBeComplete.new() #HashIsComplete.new()
       end
 
 

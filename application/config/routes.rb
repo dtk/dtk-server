@@ -54,14 +54,13 @@ R8::Routes[:action_set]["component/display"] = {
    {
      :route => "component/display",
      :action_params => ["$id$"],
-     :panel => "main_body",
-#      :assign_type => 'append | prepend | replace'
-     :assign_type => :replace
+     :panel => "main_body"
    },
    {
      :route => "attribute/list",
      :action_params => [{:parent_id => "$id$"}],
      :panel => "main_body",
+#      :assign_type => 'append | prepend | replace'
      :assign_type => :append 
    }
   ]

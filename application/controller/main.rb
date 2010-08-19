@@ -38,7 +38,6 @@ module XYZ
 #TODO: push this to higher level into the controller instead of being parsed here
 #getting model_name by looking at self.class, (e.g., self.class can = XYZ::NodeController)
       @model_name = Aux.demodulize(self.class.to_s).gsub(/Controller$/,"").downcase.to_sym
-#     @aciton_name = blah
     end
 
     def index
@@ -55,7 +54,6 @@ module XYZ
 
 #TODO: move parsed_query_string to controller
     def list(parsed_query_string=nil)
-
       where_clause = parsed_query_string || ret_parsed_query_string()
       model_list = get_objects(@model_name,field_set,where_clause)
 
@@ -66,8 +64,9 @@ module XYZ
       user_context = UserContext.new
       tpl = R8Tpl::TemplateR8.new(model_name,action_name,user_context)
       tpl.assign("#{@model_name.to_s}_list",model_list)
-#      tpl.assign(:list_start_prev, 0)
-#      tpl.assign(:list_start_next, 0)
+#TODO: needed to below back in so template did not barf
+      tpl.assign(:list_start_prev, 0)
+      tpl.assign(:list_start_next, 0)
 
       ctrl_result = {
         :tpl_contents => tpl.render(nil,false) #nil, false args for testing

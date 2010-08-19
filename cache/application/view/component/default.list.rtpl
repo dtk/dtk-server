@@ -1,21 +1,25 @@
 <br/><br/>
 <div style="width: 100%;">
 	<div style="width: 100%;">
+<!--
 		<div style="float: right; margin-right: 10px;">
 		<a href="javascript:R8.ctrl.request('component/list?listStart={%=list_start_prev%}');">&lt;-Prev</a>
 		&nbsp;&nbsp;&nbsp;&nbsp;
 		<a href="javascript:R8.ctrl.request('component/list?listStart={%=list_start_next%}');">Next-&gt;</a>
 		</div>
+-->
 	</div>
 	<div style="width: 100%; float: left;">
 	<table cellspacing="0" cellpadding="0" border="1" style="width: 100%;">
 	<tr id="component-list-header-row" class="">
 			<th id="display_name-th" width="20%" class="">display_name</th>
+			<th id="description-th"  class="">description</th>
 	</tr>
 
 	{%for component in component_list%}
 		<tr id="list_row-{%=component%}" class="{%=[:class]%}">
 				<td id="display_name-td-{%=component%}" class=""><a href="/xyz/component/display/{%=component[:id]%}">{%=component[:display_name]%}</a></td>
+				<td id="description-td-{%=component%}" class="">{%=component[:description]%}</td>
 		</tr>
 	{%end%}
 	</table>

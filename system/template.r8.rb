@@ -21,7 +21,7 @@ module R8Tpl
       :js_templating_on,
       :root_js_element_var_name,:root_js_hash,:loop_vars,:ctrl_vars,:js_var_header
 
-    def initialize(model_name,view_name,user)
+    def initialize(model_name,view_name,user,path_type_to_use=nil)
       @user = user
       @profile = @user.current_profile
 
@@ -72,7 +72,7 @@ module R8Tpl
 
       (R8::Config[:js_templating_on].nil?) ? @js_templating_on = true : @js_templating_on = R8::Config[:js_templating_on]
 
-       self.set_view()
+       set_view(path_type_to_use)
     end
 
     def jsTemplatingOn?

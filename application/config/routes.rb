@@ -45,21 +45,26 @@ with out-of-box ramaze routing
         should hit route component/display and execute the action set instead
         the 239439 and any other ones should be passed on the end of each action set call by default
 =end
-R8::Routes[:component][:display] = {
+R8::Routes[:action_set]["component/display"] = {
   :layout => 'default',
   :alias => '',
-  :action_set => [
-    {
-      :route => 'component/list',
-      :panel => 'main_body',
-      :assign_type => 'append | prepend | replace'
-    },
-    {
-      :route => 'attribute/component_display_list',
-      :panel => 'main_body',
-      :assign_type => 'append | prepend | replace'
-    }
-  ],
+  :params => [:id],
+  :action_set => 
+  [
+   {
+     :route => "component/display",
+     :action_params => ["$id$"],
+     :panel => "main_body",
+#      :assign_type => 'append | prepend | replace'
+     :assign_type => :replace
+   },
+   {
+     :route => "attribute/list",
+     :action_params => [{:parent_id => "$id$"}],
+     :panel => "main_body",
+     :assign_type => :append 
+   }
+  ]
 }
 
 R8::Routes[:login] = {

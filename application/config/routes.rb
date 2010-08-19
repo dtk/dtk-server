@@ -3,7 +3,7 @@
 #      and action_set's to be used for a given route
 
 module R8
-  Routes = Hash.new
+  Routes = XYZ::HashObject.create_with_auto_vivification()
 end
 =begin
 #alias and action set should not be defined together
@@ -45,7 +45,7 @@ with out-of-box ramaze routing
         should hit route component/display and execute the action set instead
         the 239439 and any other ones should be passed on the end of each action set call by default
 =end
-routes[:component][:display] = {
+R8::Routes[:component][:display] = {
   :layout => 'default',
   :alias => '',
   :action_set => [
@@ -62,6 +62,8 @@ routes[:component][:display] = {
   ],
 }
 
-routes[:login] = {
+R8::Routes[:login] = {
   :alias => 'user/login',
 }
+R8::Routes.freeze
+

@@ -9,9 +9,12 @@ require 'ramaze'
 require 'json'
 require 'yaml'
 
-require File.expand_path('config/config.rb',File.dirname(__FILE__))
-
 require File.expand_path('../utils/utils', File.dirname(__FILE__))
+#utils needed in config file
+require File.expand_path('config/config.rb',File.dirname(__FILE__))
+require File.expand_path('config/routes.rb',File.dirname(__FILE__))
+
+
 APPLICATION_DIR = File.expand_path('../' + R8::Config[:application_name], File.dirname(__FILE__))
 UTILS_DIR = File.expand_path('../utils', File.dirname(__FILE__))
 SYSTEM_DIR = File.expand_path('../system', File.dirname(__FILE__))

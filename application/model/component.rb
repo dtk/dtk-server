@@ -11,30 +11,12 @@ module XYZ
         column :external_type, :varchar
         column :external_cmp_ref, :varchar
         column :uri, :varchar
-        virtual_column :attributes
-        virtual_column :service_attributes
         many_to_one :component,:library,:project
         one_to_many :component, :attribute_link, :attribute
       end
     end
     ##### Actions
     ### virtual column defs
-    def attributes()
-      attributes = get_directly_contained_objects(:attribute)
-      avp = attributes.reject{|a|a[:external_attr_ref] =~ /_service/}.map{|a|[a[:external_attr_ref],a[:attribute_value]]}
-      #TBD: seperate structured form, which is convereted to print-form
-      avp.map{|a|a[1] ? "#{a[0]}=#{a[1].to_s}" : a[0]}.join("\n")
-    end
-
-    def service_attributes()
-      attributes = get_directly_contained_objects(:attribute)
-      avp = attributes.reject{|a|not a[:external_attr_ref] =~ /_service/}.map do |a|
-        a[:external_attr_ref] =~ /_service\](.+)$/
-        ["service#{$1}",a[:attribute_value]]
-      end
-      #TBD: seperate structured form, which is convereted to print-form
-      avp.map{|a|a[1] ? "#{a[0]}=#{a[1].to_s}" : a[0]}.join("\n")
-    end
 
     ###### Helper fns
     def get_contained_attribute_ids(opts={})

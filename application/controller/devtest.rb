@@ -8,6 +8,10 @@ module XYZ
       ds_id_handle = IDHandle[:c => c, :uri => ds_uri]
       ds_object_objs = Object.get_objects_wrt_parent(:data_source_entry,ds_id_handle)
       raise Error.new("cannot find any #{ds_type} data source objects in #{container_uri}") if ds_object_objs.empty?
+      #so that cache can be shared accross different ds_object_objs
+      #TODO make more sophisticated
+      common_ds_connectors = Hash.new 
+      ds_object_objs.each{|x|x.set_and_share_ds_connector!(common_ds_connectors)}
       ds_object_objs.each{|x|x.discover_and_update()}
       "discover and update from #{ds_type}"
     end

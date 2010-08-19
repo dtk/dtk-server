@@ -8,6 +8,11 @@ module XYZ
     end
   end
   module DataSourceConnectorInstanceMixin
+    def set_and_share_ds_connector!(common_ds_connectors)
+      common_ds_connectors[@ds_connector_class] ||= @ds_connector_class.new
+      @ds_connector_instance = common_ds_connectors[@ds_connector_class]
+    end
+
    private
     def load_ds_connector_class()
       rel_path = "#{ds_name()}/#{ds_name()}"
@@ -21,8 +26,9 @@ module XYZ
 
       @ds_connector_class = DSConnector.const_get Aux.camelize(ds_name())
     end
+
     def get_objects(&block)
-      @ds_connector_class.new.get_objects(obj_type(),source_obj_type(),&block)
+      @ds_connector_instance.get_objects(obj_type(),source_obj_type(),&block)
     end
   end
 end

@@ -4,7 +4,8 @@ module XYZ
       class AssocNodeComponent < Top 
         definitions do
           target[:node_id] = foreign_key :node, source["node_name"]
-          target[:component_id] = foreign_key :component, source["recipe_name"]
+          component_ref = fn(lambda{|x,y|x+ "__" + y},source["node_name"],source["recipe_name"])
+          target[:component_id] = foreign_key :component, component_ref
         end
         class << self
           def unique_keys(source_hash)

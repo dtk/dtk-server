@@ -1,0 +1,4 @@
+.tmp*
+cache/
+testignore/
+application/config/config.rb

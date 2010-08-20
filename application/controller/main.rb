@@ -82,7 +82,7 @@ module XYZ
       action_name = :display
 #TODO: stub
       user_context = UserContext.new
-      tpl = R8Tpl::TemplateR8.new(@model_name.to_s,action_name,user_context)
+      tpl = R8Tpl::TemplateR8.new(@model_name,action_name,user_context)
       tpl.assign(@model_name,model_result)
 
       ctrl_result = {

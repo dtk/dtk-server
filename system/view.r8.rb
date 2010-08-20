@@ -356,11 +356,8 @@ OLD
 #TODO: can probably move most of this function to a general function call
 #and re-use between renderViewJSCache and renderViewHTML
     field_handler = FieldR8.new(self)
-    r8TPL = R8Tpl::TemplateR8.new(@model_name,@view_name,@user)
+    r8TPL = R8Tpl::TemplateR8.new(@model_name,@view_name,@user,:system)
     r8TPL.js_templating_on = false   #template engine should catch non JS automatically, but forcing to be sure
-#    r8TPL.set_view_dir('system')
-#    r8TPL.set_view('metaview.'+@profile+'.'+@view_name,true)
-    r8TPL.set_view(:system)
 
 #    i18n = utils.get_model_i18n(@model_name)
     r8TPL.assign(:formId, @form_id)

@@ -26,7 +26,6 @@ module XYZ
 end
 
 
-
 #need to rework/architect as needed, this is from first test pass
 
 module R8
@@ -56,7 +55,8 @@ R8::Config[:database][:type] = "postgres"
 
 
 #these are used in template.r8.rb and view.r8.rb
-R8::Config[:sys_root_path] = "C:/webroot/R8Server" #"/root/R8Server"
+R8::Config[:sys_root_path] = "C:/webroot/R8Server"
+#R8::Config[:sys_root_path] = "/root/R8Server"
 R8::Config[:app_root_path] = "#{R8::Config[:sys_root_path]}/#{R8::Config[:application_name]}"
 R8::Config[:app_cache_root] = "#{R8::Config[:sys_root_path]}/cache/#{R8::Config[:application_name]}"
 R8::Config[:system_views_root] = "#{R8::Config[:sys_root_path]}/system/view"

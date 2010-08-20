@@ -1,4 +1,4 @@
-
+require File.expand_path('user_specific.rb',  File.dirname(__FILE__))
 module XYZ 
   class Config 
     @@configuration = {} unless defined?(@@configuration)
@@ -56,7 +56,8 @@ R8::Config[:database][:type] = "postgres"
 
 #these are used in template.r8.rb and view.r8.rb
 #R8::Config[:sys_root_path] = "C:/webroot/R8Server"
-R8::Config[:sys_root_path] = "/root/R8Server"
+
+R8::Config[:sys_root_path] = R8::UserSpecfic::Root
 R8::Config[:app_root_path] = "#{R8::Config[:sys_root_path]}/#{R8::Config[:application_name]}"
 R8::Config[:app_cache_root] = "#{R8::Config[:sys_root_path]}/cache/#{R8::Config[:application_name]}"
 R8::Config[:system_views_root] = "#{R8::Config[:sys_root_path]}/system/view"

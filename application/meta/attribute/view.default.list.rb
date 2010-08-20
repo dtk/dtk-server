@@ -7,11 +7,15 @@
           }}
       ],
       :field_list => [
-          {:external_attr_ref => {
+          {:display_name => {
               :type => 'text',
               :help => '',
               :objLink => true,
               :objLinkView => 'display',
+            }},
+          {:external_attr_ref => {
+              :type => 'text',
+              :help => '',
             }},
           {:attribute_value => {
               :type => 'text',

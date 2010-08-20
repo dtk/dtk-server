@@ -3,12 +3,14 @@ require 'chef/config'
 require 'mixlib/authentication'
 require 'chef/cookbook/metadata/version'
 require  File.expand_path('mixins/metadata', File.dirname(__FILE__))
+require  File.expand_path('mixins/assembly', File.dirname(__FILE__))
 #TODO: written to get around deficiency that chef get node and searchbrings in full node, not partial info
 #TODO: improve meory usage by only storing attributes that are needed
 module XYZ
   module DSConnector
     class Chef < Top
       include ChefMixinMetadata
+      include ChefMixinAssembly
       def initialize()
         @conn = nil
         @chef_node_cache = Hash.new 
@@ -28,7 +30,6 @@ module XYZ
       def get_objects__component__instance(&block)
         get_node_recipe_assocs().each do |node_name,recipes|
           recipes.each do |recipe_name|
-pp get_component_services_info(recipe_name)
             node = get_node(node_name)
             metadata = get_metadata_for_recipe(recipe_name)
             attr_values_and_metadata = get_attr_values_and_metadata(recipe_name,node,metadata)
@@ -71,8 +72,14 @@ pp get_component_services_info(recipe_name)
         get_node_recipe_assocs().values.flatten.map{|x|x.gsub(/::.+$/,"")}.uniq
       end
 
-      def get_metadata(cookbook_name)
-        @chef_metadata_cache[cookbook_name] ||= get_metadata_aux(cookbook_name)
+      #if recipe_name is given then looks for additional metadata associated with recipe
+      def get_metadata(cookbook_name,recipe_name=nil)
+        metadata = @chef_metadata_cache[cookbook_name] ||= get_metadata_aux(cookbook_name)
+       return metadata unless recipe_name
+        metadata[:services] ||= Hash.new
+       return metadata if metadata[:services].has_key?(recipe_name)
+        metadata[:services][recipe_name] = get_component_services_info(recipe_name,metadata)
+        metadata
       end
 
       def get_metadata_aux(cookbook_name)
@@ -90,7 +97,7 @@ pp get_component_services_info(recipe_name)
       end
 
       def get_metadata_for_recipe(recipe_name)
-        get_metadata(get_cookbook_name_from_recipe_name(recipe_name))
+        get_metadata(get_cookbook_name_from_recipe_name(recipe_name),recipe_name)
       end
 
       def get_cookbook_name_from_recipe_name(recipe_name)
@@ -162,10 +169,23 @@ pp get_component_services_info(recipe_name)
       end
 
       def get_attr_values_and_metadata(recipe_name,node,metadata)
+        metadata["services"].each_value do |v|
+          v.each do |x|
+            pp [:canonical_service_name, x[:canonical_service_name]]
+            service_params = HashObject.create_with_auto_vivification()
+            (x["params"]||{}).each{|k,v|
+              pp [:kv, {k => v}]
+              normalize_attribute_values(service_params,{k => v},node)
+            }
+            pp [:params,service_params.freeze]
+          end
+        end       
+#.first.map {|x|x["params"]}.compact
+
         @attr_values_and_metadata[node.name] ||= Hash.new
         return @attr_values_and_metadata[node.name][recipe_name] if @attr_values_and_metadata[node.name][recipe_name]
         attr_values_and_metadata = Hash.new
-        (metadata["attributes"]||{}).each.each do |attr_name,attr_metadata| 
+        (metadata["attributes"]||{}).each do |attr_name,attr_metadata| 
           attr_values_and_metadata[attr_name] = attr_metadata.dup
           attribute_path = attr_name.split("/")
           first = attribute_path.shift
@@ -180,20 +200,6 @@ pp get_component_services_info(recipe_name)
 
       def recipes(node)
         node.run_list ? node.run_list.recipes : nil
-      end
-      module NodeState
-        # used so dont get error when make call like node[x][y] and node[x] does not exist
-        def self.nested_value(node_attribute,path)
-          nested_value_private(node_attribute,path.dup)
-        end
-       private
-        def self.nested_value_private(node_attribute,path)
-          return nil unless node_attribute.kind_of?(::Chef::Node::Attribute)
-          return node_attribute if path.size == 0
-          return nil unless node_attribute.has_key?(f = path.shift)
-          return node_attribute[f] if path.size == 0
-          nested_value_private(node_attribute[f],path)
-        end
       end
     end
   end

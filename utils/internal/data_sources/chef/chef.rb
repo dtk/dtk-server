@@ -2,12 +2,13 @@ require 'chef/rest'
 require 'chef/config'
 require 'mixlib/authentication'
 require 'chef/cookbook/metadata/version'
-
+require  File.expand_path('mixins/metadata', File.dirname(__FILE__))
 #TODO: written to get around deficiency that chef get node and searchbrings in full node, not partial info
-#TODO: imporve meory usage by only storing attributes that are needed
+#TODO: improve meory usage by only storing attributes that are needed
 module XYZ
   module DSConnector
     class Chef < Top
+      include ChefMixinMetadata
       def initialize()
         @conn = nil
         @chef_node_cache = Hash.new 
@@ -27,6 +28,7 @@ module XYZ
       def get_objects__component__instance(&block)
         get_node_recipe_assocs().each do |node_name,recipes|
           recipes.each do |recipe_name|
+pp get_component_services_info(recipe_name)
             node = get_node(node_name)
             metadata = get_metadata_for_recipe(recipe_name)
             attr_values_and_metadata = get_attr_values_and_metadata(recipe_name,node,metadata)

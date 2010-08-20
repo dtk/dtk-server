@@ -31,7 +31,7 @@ module XYZ
         obj.each{|k,v| ret[k] = convert_nested_hashes(v)}
         ret
       elsif obj.kind_of?(Array)
-        ret = Array.new
+        ret = ArrayObject.new
         obj.each{|v|ret << convert_nested_hashes(v)}
         ret
       else

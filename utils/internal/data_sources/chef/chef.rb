@@ -12,13 +12,13 @@ module XYZ
         @conn = nil
         @chef_node_cache = Hash.new 
         @chef_metadata_cache = Hash.new
-        @attribute_values = Hash.new
+        @attr_values_and_metadata = Hash.new
       end
 
       def get_objects__component__recipe(&block)
         get_cookbook_names().each do |cookbook_name|
           get_recipes_assoc_cookbook(cookbook_name).each do |ds_hash|
-            block.call(ds_hash)
+           block.call(ds_hash)
           end
         end
         return HashMayNotBeComplete.new()
@@ -29,10 +29,9 @@ module XYZ
           recipes.each do |recipe_name|
             node = get_node(node_name)
             metadata = get_metadata_for_recipe(recipe_name)
-            attribute_values = get_attribute_values(recipe_name,node,metadata)
-            pp attribute_values
-            ds_hash = DataSourceUpdateHash.new({"metadata" => metadata, "recipe_name" => recipe_name, "node_name" => node_name, "attribute_values" => attribute_values})
-#           block.call(ds_hash)
+            attr_values_and_metadata = get_attr_values_and_metadata(recipe_name,node,metadata)
+            ds_hash = DataSourceUpdateHash.new({"metadata" => metadata.merge({"attributes" => attr_values_and_metadata}), "recipe_name" => recipe_name, "node_name" => node_name})
+           block.call(ds_hash)
           end
         end
         return HashMayNotBeComplete.new() #HashIsComplete.new()
@@ -160,20 +159,21 @@ module XYZ
         ::Chef::REST.new(::Chef::Config[:chef_server_url], ::Chef::Config[:node_name],::Chef::Config[:client_key])
       end
 
-      def get_attribute_values(recipe_name,node,metadata)
-        @attribute_values[node.name] ||= Hash.new
-        return @attribute_values[node.name][recipe_name] if @attribute_values[node.name][recipe_name]
-        attribute_values = Hash.new
-        (metadata["attributes"]||{}).keys.each do |k| 
-          attribute_path = k.split("/")
+      def get_attr_values_and_metadata(recipe_name,node,metadata)
+        @attr_values_and_metadata[node.name] ||= Hash.new
+        return @attr_values_and_metadata[node.name][recipe_name] if @attr_values_and_metadata[node.name][recipe_name]
+        attr_values_and_metadata = Hash.new
+        (metadata["attributes"]||{}).each.each do |attr_name,attr_metadata| 
+          attr_values_and_metadata[attr_name] = attr_metadata.dup
+          attribute_path = attr_name.split("/")
           first = attribute_path.shift
           value = NodeState.nested_value(node[first],attribute_path)
           if value
             value = value.to_hash if value.kind_of?(::Chef::Node::Attribute)
-            attribute_values[k] = value
+            attr_values_and_metadata[attr_name]["value"] = value
           end
         end
-        @attribute_values[node.name][recipe_name] = attribute_values
+        @attr_values_and_metadata[node.name][recipe_name] = attr_values_and_metadata
       end
 
       def recipes(node)

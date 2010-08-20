@@ -19,7 +19,14 @@
           "obj_type": "component",
           "ds_name": "chef",
 	  "source_obj_type": "instance",
-          "display_name": "component_recipe"
+          "display_name": "component_instance",
+          "data_source_entry": {
+            "component_attribute": {
+              "obj_type": "attribute",
+              "ds_name": "chef",
+              "display_name": "component_attribute"
+            }
+          }
         },
         "assoc_node_component": {
           "obj_type": "assoc_node_component",

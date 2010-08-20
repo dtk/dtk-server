@@ -10,8 +10,8 @@ module XYZ
            %w{port_type display_name description constraints}.each do |k|
              target[k.to_sym] = source[][k]
            end
-           target[:value_asserted] = source[]["default"] 
-           target[:semantic_type] = fn(lambda{|x|x.to_json if x},source[]["semantic_type"])
+          target[:value_asserted] = fn(lambda{|x,y|x||y},source[]["value"],source[]["default"])
+          target[:semantic_type] = fn(lambda{|x|x.to_json if x},source[]["semantic_type"])
          end
 
          class << self

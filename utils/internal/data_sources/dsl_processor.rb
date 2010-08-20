@@ -88,7 +88,7 @@ module XYZ
       raise Error.new("cannot find data source adapter for nested definition") if ds_object.nil?
       #TBD: need to set appropriate flags on whetehr golden store
       ret = DBUpdateHash.new()
-      @source_attributes.apply(ds_hash_list).each do |ref,attrs|
+      (@source_attributes.apply(ds_hash_list)||{}).each do |ref,attrs|
         child_source_hash = {ref => attrs}        
         key = ds_object.relative_distinguished_name(child_source_hash)
         ret[key] = ds_object.normalize(child_source_hash)

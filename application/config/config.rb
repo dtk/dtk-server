@@ -1,4 +1,7 @@
-require File.expand_path('user_specific.rb',  File.dirname(__FILE__))
+#require File.expand_path('user_specific.rb',  File.dirname(__FILE__))
+
+require File.expand_path('environment_config.rb',  File.dirname(__FILE__))
+
 module XYZ 
   class Config 
     @@configuration = {} unless defined?(@@configuration)
@@ -35,14 +38,14 @@ end
 #Application defaults
 R8::Config[:application_name] = "application"
 R8::Config[:default_language] = "en.us"
-R8::Config[:default_template] = "default.template.rtpl"
+R8::Config[:default_layout] = "default"
 
 #Application paths.., these should be set/written by templating engine on every call
 #R8::Config[:base_uri] = "http://172.22.101.112:7000"
-R8::Config[:base_uri] = "http://localhost:7000"
-R8::Config[:public_js_root] = R8::Config[:base_uri] + "/js"
-R8::Config[:public_css_root] = R8::Config[:base_uri] + "/css"
-R8::Config[:public_images_root] = R8::Config[:base_uri] + "/images"
+R8::Config[:base_uri] = R8::EnvironmentConfig::Base_Uri
+R8::Config[:base_js_uri] = R8::Config[:base_uri] + "/js"
+R8::Config[:base_css_uri] = R8::Config[:base_uri] + "/css"
+R8::Config[:base_images_uri] = R8::Config[:base_uri] + "/images"
 
 
 #Database related config params
@@ -57,7 +60,7 @@ R8::Config[:database][:type] = "postgres"
 #these are used in template.r8.rb and view.r8.rb
 #R8::Config[:sys_root_path] = "C:/webroot/R8Server"
 
-R8::Config[:sys_root_path] = R8::UserSpecfic::Root
+R8::Config[:sys_root_path] = R8::EnvironmentConfig::System_Root_Dir
 R8::Config[:app_root_path] = "#{R8::Config[:sys_root_path]}/#{R8::Config[:application_name]}"
 R8::Config[:app_cache_root] = "#{R8::Config[:sys_root_path]}/cache/#{R8::Config[:application_name]}"
 R8::Config[:system_views_root] = "#{R8::Config[:sys_root_path]}/system/view"
@@ -66,5 +69,5 @@ R8::Config[:i18n_root] = "#{R8::Config[:app_root_path]}/i18n"
 R8::Config[:dev_mode] = true
 
 R8::Config[:js_file_write_path] = "#{R8::Config[:app_root_path]}/public/js"
-R8::Config[:js_templating_on] = true
+R8::Config[:js_templating_on] = false
 

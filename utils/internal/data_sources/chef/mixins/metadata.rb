@@ -1,11 +1,10 @@
 module XYZ
   module DSConnector
    module ChefMixinMetadata # TODO unify with code in R8Cookbook
-     def get_component_services_info(recipe_name)
+     def get_component_services_info(recipe_name,cookbook_meta)
        ret = ArrayObject.new
-       cookbook_name = recipe_name.gsub(/::.+/,"")
-       cookbook_meta = get_metadata(cookbook_name)
        return ret unless cookbook_meta
+       cookbook_name = recipe_name.gsub(/::.+/,"")
        meta = (eval($1) if cookbook_meta["long_description"] =~ /__(.+)__/m) #/m because there may be internal line breaks 
        (meta||[]).each do |meta_service_info|
          base_info = get_service_info(recipe_name,meta_service_info)

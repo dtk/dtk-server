@@ -24,7 +24,38 @@ module XYZ
       action_processor = ActionProcessor.new(param_vals,action_set_def)
       (action_set_def[:action_set]||[]).each{|action|action_processor.process!(ret,action)}
       ret
+
+#### TODO: replace and enacapsulate elsewhere; hard wire calling of action set layout
+      ### should we create a R8Template to handle production of layout template?
+      layout = action_set_def[:layout] || "default"
+      layout_path = "#{R8::Config[:app_root_path]}/view/#{layout}.layout.rtpl"
+      layout_tpl_contents=IO.read(layout_path) #TODO check file exists
+      eruby =  Erubis::Eruby.new(layout_tpl_contents,:pattern=>'\{\% \%\}')
+
+      #TODO had to create new class ActionSetInclude; where should it be populated from
+      action_set_includes = ActionSetInclude.new
+      #action_set_includes.css_includes = ..
+      # ....
+      #TODO hard wired in knowledge of panels; this should eb automatically driven by :panel in action sets
+      template_vars = 
+        {
+        "_app".to_sym => action_set_includes,
+        :main_menu => "",
+        :left_col => "",
+        :main_body => ret[:tpl_contents]
+      }
+      eruby.result(template_vars)
     end
+    class ActionSetInclude
+      attr_accessor :css_includes, :js_includes, :base_uri
+      def initialize()
+        @css_includes = []
+        @js_includes = []
+        @base_uri = ""
+      end
+    end
+#####TODO end of stubbed fn for action set layouts
+
    private
     class ActionProcessor
       def initialize(param_vals,action_set_def)

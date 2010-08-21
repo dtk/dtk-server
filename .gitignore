@@ -1,3 +1,4 @@
 .tmp*
 cache/
 application/config/config.rb
+application/config/environment_config.rb

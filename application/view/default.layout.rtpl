@@ -1,0 +1,36 @@
+<html>
+  <head>
+    <title>Example Layout</title>
+
+	{%for css_include in _app.css_includes%}
+		<link rel="stylesheet" type="text/css" href="{%=_app.base_css_uri%}/example.css" />
+	{%end%}
+  </head>
+
+  <body>
+	<div id="example_url">
+<!--//TODO: should be a application var set on every render that contains application strings and key var values-->
+		<a href="{%=_app.base_uri%}/node/list">Node List</a>
+	</div>
+	<div id="page_container" style="height: 100%; width: 100%">
+		<div id="test_menu" style="width:100%; height: 30 px; border: 1px solid blue;">
+			{%=main_menu%}
+		</div>
+		<div id="left_col" style="height: 100%; width:300px; border: 1px solid black; float: left;">
+			{%=left_col%}
+		</div>
+		<div id="main_body" style="height: 100%; width: 600px; border: 1px solid red; float: left;">
+			{%=main_body%}
+		</div>
+	</div>
+  </body>
+
+<div id="js_include_container">
+	{%for js_include in _app.js_includes%}
+		<script type="text/javascript" src="{%=_app.base_js_uri%}/example.js"></script>
+	{%end%}
+</div>
+</html>
+
+
+

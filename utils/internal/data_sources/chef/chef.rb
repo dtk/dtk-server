@@ -190,16 +190,15 @@ module XYZ
       def is_service_check?(attr_name)
         attr_name =~ Regexp.new("/_service/")
       end
-      def add_service_attributes!(attr_values_and_metadata,services_list,node)
+      def add_service_attributes!(attr_info,services_list,node)
         return nil unless services_list
         services_list.each_value do |services|
           services.each do |service|
             service_name = service[:canonical_service_name]
             next unless service_name
-            attr_name = "_service/#{service_name}"
-            service_params = attr_values_and_metadata[attr_name]["value"]
             (service["params"]||{}).each do |k,v|
-              normalize_attribute_values(service_params,{k => v},node)
+              attr_index = "_service/#{service_name}/#{k}"
+              normalize_attribute_values(attr_info[attr_index],{"value" => v},node)
             end
           end
         end       

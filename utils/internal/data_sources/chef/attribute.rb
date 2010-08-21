@@ -4,7 +4,7 @@ module XYZ
       class Attribute < Top
          definitions do
            #TBD: assuming that after split first item is cookbook name
-           target[:external_attr_ref] = fn(lambda{|ref|"node[#{ref.gsub(/\//,"][")}]"},source_key)
+           target[:external_attr_ref] = fn(:external_attr_ref,source)
            target[:data_type] = fn(:data_type,source[]["type"])
            #TBD: have form that is no assignment if source is null
            %w{port_type display_name description constraints}.each do |k|
@@ -20,11 +20,7 @@ module XYZ
            end
 
            def relative_distinguished_name(source_hash)
-            #TBD: assuming that after split first item is cookbook name
-            ref = source_hash.keys.first
-            ref_imploded = ref.split("/")
-            return "default" unless ref_imploded.size > 1 
-            ref_imploded[1..ref_imploded.size-1].join("__")
+             external_attr_ref(source_hash)
           end
 
           def filter(source_hash)
@@ -32,6 +28,14 @@ module XYZ
           end
 
           #### defined fns
+          def external_attr_ref(source_hash)
+             ref = source_hash.keys.first
+             if ref.first =~ /^_service/
+               "service[#{ref.gsub(/^_service\//,"").gsub(/\//,"][")}]"
+             else
+               "node[#{ref.gsub(/\//,"][")}]"
+             end
+          end
           def data_type(type)
             case type
               when "hash", "array"

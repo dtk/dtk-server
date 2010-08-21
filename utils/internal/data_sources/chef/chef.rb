@@ -169,23 +169,11 @@ module XYZ
       end
 
       def get_attr_values_and_metadata(recipe_name,node,metadata)
-        metadata["services"].each_value do |v|
-          v.each do |x|
-            pp [:canonical_service_name, x[:canonical_service_name]]
-            service_params = HashObject.create_with_auto_vivification()
-            (x["params"]||{}).each{|k,v|
-              pp [:kv, {k => v}]
-              normalize_attribute_values(service_params,{k => v},node)
-            }
-            pp [:params,service_params.freeze]
-          end
-        end       
-#.first.map {|x|x["params"]}.compact
-
         @attr_values_and_metadata[node.name] ||= Hash.new
         return @attr_values_and_metadata[node.name][recipe_name] if @attr_values_and_metadata[node.name][recipe_name]
-        attr_values_and_metadata = Hash.new
+        attr_values_and_metadata = HashObject.create_with_auto_vivification()
         (metadata["attributes"]||{}).each do |attr_name,attr_metadata| 
+          next if is_service_check?(attr_name)
           attr_values_and_metadata[attr_name] = attr_metadata.dup
           attribute_path = attr_name.split("/")
           first = attribute_path.shift
@@ -195,7 +183,26 @@ module XYZ
             attr_values_and_metadata[attr_name]["value"] = value
           end
         end
-        @attr_values_and_metadata[node.name][recipe_name] = attr_values_and_metadata
+        add_service_attributes!(attr_values_and_metadata,metadata["services"],node)
+        @attr_values_and_metadata[node.name][recipe_name] = attr_values_and_metadata.freeze
+      end
+
+      def is_service_check?(attr_name)
+        attr_name =~ Regexp.new("/_service/")
+      end
+      def add_service_attributes!(attr_values_and_metadata,services_list,node)
+        return nil unless services_list
+        services_list.each_value do |services|
+          services.each do |service|
+            service_name = service[:canonical_service_name]
+            next unless service_name
+            attr_name = "_service/#{service_name}"
+            service_params = attr_values_and_metadata[attr_name]["value"]
+            (service["params"]||{}).each do |k,v|
+              normalize_attribute_values(service_params,{k => v},node)
+            end
+          end
+        end       
       end
 
       def recipes(node)

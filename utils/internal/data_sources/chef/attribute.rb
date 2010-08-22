@@ -2,17 +2,17 @@ module XYZ
   module DSNormalizer
     class Chef
       class Attribute < Top
-         definitions do
-           #TBD: assuming that after split first item is cookbook name
-           target[:external_attr_ref] = fn(:external_attr_ref,source)
-           target[:data_type] = fn(:data_type,source[]["type"])
-           #TBD: have form that is no assignment if source is null
-           %w{port_type display_name description constraints}.each do |k|
-             target[k.to_sym] = source[][k]
-           end
+        definitions do
+          #TBD: assuming that after split first item is cookbook name
+          target[:external_attr_ref] = fn(:external_attr_ref,source)
+          target[:data_type] = fn(:data_type,source[]["type"])
+          #TBD: have form that is no assignment if source is null
+          %w{port_type description constraints}.each do |k|
+            target[k.to_sym] = source[][k]
+          end
           target[:value_asserted] = fn(lambda{|x,y|x||y},source[]["value"],source[]["default"])
           target[:semantic_type] = fn(lambda{|x|x.to_json if x},source[]["semantic_type"])
-         end
+        end
 
          class << self
            def unique_keys(source_hash)

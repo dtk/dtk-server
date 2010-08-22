@@ -18,6 +18,7 @@ module XYZ
       #getting model_name by looking at self.class, (e.g., self.class can = XYZ::NodeController)
       model_name = Aux.demodulize(self.class.to_s).gsub(/Controller$/,"").downcase
       model_list = get_objects(model_name.to_sym,field_set,where_clause)
+
       action_name = :list #TODO: automatically determine this
 
       user_context = UserContext.new #TODO: stub

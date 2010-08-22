@@ -85,8 +85,10 @@ print "No route config defined for:"+route_key
           end
         }
 
+        layout = action_set_def[:layout] || R8::Config[:default_layout]
+        layout_name = layout+'.layout'
 #        action_set_includes = ActionSetInclude.new
-        self.include_css('example')
+        self.include_css(layout_name)
         self.include_js('example')
         _app = {}
         _app[:js_includes] = @js_includes
@@ -104,8 +106,7 @@ print "No route config defined for:"+route_key
         }
 
 #TODO:need to use our tmeplating
-        layout = action_set_def[:layout] || R8::Config[:default_layout]
-        layout_path = "#{R8::Config[:app_root_path]}/view/#{layout}.layout.rtpl"
+        layout_path = "#{R8::Config[:app_root_path]}/view/#{layout_name}.rtpl"
         layout_tpl_contents = IO.read(layout_path) #TODO check file exists
         eruby =  Erubis::Eruby.new(layout_tpl_contents,:pattern=>'\{\% \%\}')
 

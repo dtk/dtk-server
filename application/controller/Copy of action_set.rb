@@ -2,8 +2,6 @@
 #TODO: move all this into main controller
 #should aim to have only main and rest should all be controller mapped to models/routes
 
-#TODO: right now all results are passed back up and set in @content in the views/xyz/actionset/default.erubis
-
 module XYZ
   module ActionSet
     Delim = '__'
@@ -36,84 +34,48 @@ print "No route config defined for:"+route_key
 #pp [:call_params,call_params]
     end
 
-    def call_action(action,action_proc)
-      params = action_proc.process_action_params(action[:action_params])
-      model,method = action[:route].split("/")
+    def call_action(action,action_processor)
+      model_name,method = action[:route].split("/")
+      params = action_processor.process_action_params(action[:action_params])
       a = Ramaze::Action.create(
           :node => XYZ.const_get("#{model.capitalize}Controller"),
           :method => method.to_sym,
           :params => params,
-          :engine => lambda{|action, value| value })
+          :engine => lambda{|action, value| value[:tpl_contents] })
+
       return a.call
     end
 
     def run_action_set(action_set_def,call_params)
-#TODO: get rid of action processor and just integrate into controller
+        ret = {:tpl_contents => nil}
         action_processor = ActionProcessor.new(call_params,action_set_def)
 
-        regions_content = {}
-
-        #Execute each of the actions in the action_set and set the returned content
+        ctrl_result = ''
         (action_set_def[:action_set] || []).each{ |action|
-          ctrl_result = self.call_action(action,action_processor)
-
-          #set the appropriate panel to render results to
-          if !ctrl_result[:panel].nil? then panel = ctrl_result[:panel].to_sym
-          elsif !action[:panel].nil? then panel = action[:panel].to_sym
-          else panel = :main_body
-          end
-
-          #set the appropriate render assignment type (append | prepend | replace)
-          if !ctrl_result[:assign_type].nil? then assign_type = ctrl_result[:assign_type]
-          elsif !action[:assign_type].nil? then assign_type = action[:assign_type]
-          else assign_type = :append
-          end
-
-          case assign_type
-            when :append then
-              (regions_content[panel].nil?) ? 
-                  regions_content[panel] = ctrl_result[:tpl_contents] : 
-                  regions_content[panel] << ctrl_result[:tpl_contents]
-            when :replace then
-              regions_content[panel] = ctrl_result[:tpl_contents]
-            when :prepend then
-              if(regions_content[panel].nil?) then regions_content[panel] = ctrl_result[:tpl_contents]
-              else
-                tmp_contents = regions_content[panel]
-                regions_content[panel] = ctrl_result[:tpl_contents] + tmp_contents
-              end
-          end
+          ctrl_result << self.call_action(action,action_processor)
         }
 
-#        action_set_includes = ActionSetInclude.new
-        self.include_css('example')
-        self.include_js('example')
-        _app = {}
-        _app[:js_includes] = @js_includes
-        _app[:css_includes] = @css_includes
-        _app[:base_uri] = R8::Config[:base_uri]
-
-        template_vars = {
-          :_app => _app,
-          :main_menu => '',
-          :left_col => ''
-        }
-
-        regions_content.each { |key,value|
-          template_vars[key] = value
-        }
-
-#TODO:need to use our tmeplating
+  #### TODO: replace and enacapsulate elsewhere; hard wire calling of action set layout
+        ### should we create a R8Template to handle production of layout template?
         layout = action_set_def[:layout] || R8::Config[:default_layout]
         layout_path = "#{R8::Config[:app_root_path]}/view/#{layout}.layout.rtpl"
         layout_tpl_contents = IO.read(layout_path) #TODO check file exists
         eruby =  Erubis::Eruby.new(layout_tpl_contents,:pattern=>'\{\% \%\}')
-
-#TODO: template_vars need to be vivification style so errors are not thrown for unassigned template vars
+  
+        #TODO had to create new class ActionSetInclude; where should it be populated from
+        action_set_includes = ActionSetInclude.new
+        #action_set_includes.css_includes = ..
+  
+  #TODO: hard wired in knowledge of panels; this should eb automatically driven by :panel in action sets
+        template_vars = {
+          "_app".to_sym => action_set_includes,
+          :main_menu => "",
+          :left_col => "",
+          :main_body => ctrl_result
+        }
         return eruby.result(template_vars)
     end
 
-=begin
     class ActionSetInclude
       attr_accessor :css_includes, :js_includes, :base_uri
       def initialize()
@@ -122,9 +84,8 @@ print "No route config defined for:"+route_key
         @base_uri = ""
       end
     end
-=end
 
-#TODO: move the param stuff into main controller
+#####TODO end of stubbed fn for action set layouts
 
    private
     class ActionProcessor
@@ -137,14 +98,17 @@ print "No route config defined for:"+route_key
         end
       end
 
-      def process!(ret,action)
+      def process!(action)
+        model_name,method = action[:route].split("/")
         params = process_action_params(action[:action_params])
-        node_name,method = action[:route].split("/")
         a = Ramaze::Action.create(
-            :node => XYZ.const_get("#{node_name.capitalize}Controller"),
+            :node => XYZ.const_get("#{model.capitalize}Controller"),
             :method => method.to_sym,
             :params => params,
             :engine => lambda{|action, value| value[:tpl_contents] })
+
+        return a.call
+=begin
         action_result = a.call
         if ret[:tpl_contents].nil?
           ret[:tpl_contents] = action_result
@@ -152,6 +116,7 @@ print "No route config defined for:"+route_key
         #TODO stub that just synactically appends
           ret[:tpl_contents] << action_result
         end
+=end
       end
 
       def process_action_params(raw_params)

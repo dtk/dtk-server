@@ -7,9 +7,10 @@ require File.expand_path('workspace', File.dirname(__FILE__))
 module XYZ
   class UserContext
     attr_reader :current_profile
+
     def initialize()
       @current_profile = :default
-    end
+   end
   end
 end
 
@@ -31,13 +32,16 @@ module XYZ
       end
     end
 =end
-    attr_accessor :model_name
+    attr_accessor :model_name,:css_includes,:js_includes,:base_uri
 
     def initialize()
       super
 #TODO: push this to higher level into the controller instead of being parsed here
 #getting model_name by looking at self.class, (e.g., self.class can = XYZ::NodeController)
       @model_name = Aux.demodulize(self.class.to_s).gsub(/Controller$/,"").downcase.to_sym
+      @css_includes = []
+      @js_includes = []
+      @base_uri = ""
     end
 
     def index
@@ -50,7 +54,18 @@ module XYZ
       self.class.field_set()
     end
 
-    ########
+#TODO: add check to see if user agent specific CSS exists (ie: ie8,ff3,safari4,etc)
+    def include_css(css_name)
+      @css_includes << R8::Config[:base_css_uri] + '/' + css_name + '.css'
+    end
+
+    def include_js(js_name)
+      @js_includes << R8::Config[:base_js_uri] + '/' + js_name + '.js'
+    end
+
+#######################################################
+#########MAIN ACTION DEFS
+#######################################################
 
 #TODO: move parsed_query_string to controller
     def list(parsed_query_string=nil)

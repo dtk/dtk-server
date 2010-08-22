@@ -45,7 +45,7 @@ with out-of-box ramaze routing
         should hit route component/display and execute the action set instead
         the 239439 and any other ones should be passed on the end of each action set call by default
 =end
-R8::Routes[:action_set]["component/display"] = {
+R8::Routes["component/display"] = {
   :layout => 'default',
   :alias => '',
   :params => [:id],

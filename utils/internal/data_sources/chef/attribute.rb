@@ -10,7 +10,8 @@ module XYZ
           %w{port_type description constraints}.each do |k|
             target[k.to_sym] = source[][k]
           end
-          target[:value_asserted] = fn(lambda{|x,y|x||y},source[]["value"],source[]["default"])
+#         target[:value_asserted] = fn(lambda{|x,y|x||y},source[]["value"],source[]["default"])
+          target[:value_asserted] = fn(:value_asserted,source)
           target[:semantic_type] = fn(lambda{|x|x.to_json if x},source[]["semantic_type"])
         end
 
@@ -36,6 +37,14 @@ module XYZ
                "node[#{ref.gsub(/\//,"][")}]"
              end
           end
+
+         def value_asserted(source_hash)
+           vals = source_hash.values.first
+           return nil unless vals
+           value_asserted = vals["value"]||vals["default"]
+           return nil unless value_asserted
+           (value_asserted.kind_of?(Hash) or value_asserted.kind_of?(Array)) ? JSON.pretty_generate(value_asserted) : value_asserted
+         end
           def data_type(type)
             case type
               when "hash", "array"

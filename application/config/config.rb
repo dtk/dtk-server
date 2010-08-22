@@ -60,6 +60,7 @@ R8::Config[:database][:type] = "postgres"
 #these are used in template.r8.rb and view.r8.rb
 #R8::Config[:sys_root_path] = "C:/webroot/R8Server"
 
+#TODO: eventually cleanup to be more consise of use between root, path,dir, etc
 R8::Config[:sys_root_path] = R8::EnvironmentConfig::System_Root_Dir
 R8::Config[:app_root_path] = "#{R8::Config[:sys_root_path]}/#{R8::Config[:application_name]}"
 R8::Config[:app_cache_root] = "#{R8::Config[:sys_root_path]}/cache/#{R8::Config[:application_name]}"
@@ -67,6 +68,9 @@ R8::Config[:system_views_root] = "#{R8::Config[:sys_root_path]}/system/view"
 R8::Config[:meta_templates_root] = "#{R8::Config[:app_root_path]}/meta"
 R8::Config[:i18n_root] = "#{R8::Config[:app_root_path]}/i18n"
 R8::Config[:dev_mode] = true
+
+R8::Config[:js_file_dir] = "#{R8::Config[:app_root_path]}/public/js"
+R8::Config[:css_file_dir] = "#{R8::Config[:app_root_path]}/public/css"
 
 R8::Config[:js_file_write_path] = "#{R8::Config[:app_root_path]}/public/js"
 R8::Config[:js_templating_on] = false

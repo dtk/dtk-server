@@ -93,7 +93,15 @@ module XYZ
         end
         r = get_rest("cookbooks/#{cookbook.join('/')}")
         return nil unless r
-        r.to_hash["metadata"]
+        remove_subsuming_attributes!(r.to_hash["metadata"])
+      end
+
+      def remove_subsuming_attributes!(metadata)
+        return metadata unless metadata and metadata["attributes"]
+        keys = metadata["attributes"].keys
+        return metadata if keys.empty?
+        metadata["attributes"].reject!{|k,v| keys.find{|k2| k2 =~ Regexp.new("^#{k}.")}}
+        metadata
       end
 
       def get_metadata_for_recipe(recipe_name)
@@ -203,6 +211,7 @@ module XYZ
           end
         end       
       end
+
 
       def recipes(node)
         node.run_list ? node.run_list.recipes : nil

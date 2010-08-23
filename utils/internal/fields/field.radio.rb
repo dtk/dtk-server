@@ -10,26 +10,26 @@ class Fieldradio < Fieldbase
     @options = []
     @option_str = ''
 
-    self.addClass(@default_class)
+    self.add_class(@default_class)
     @options = field_meta[:options]
   end
 
   # This returns the Edit View of a radio HTML form element
   #protected function
-  def getFieldEditHTML()
+  def get_field_edit_html()
     return '<HTML NOT IMPLEMENTED YET>'
   end
 
   # This returns the Edit View of a input of type radio in Javascript form
   #protected function
-  def getFieldEditJS()
+  def get_field_edit_js()
 #TODO: add JS rendering when generating JS fields class for client side rendering
     return '<JS NOT IMPLEMENT YET>'
   end
 
   # This returns the View of type edit for an input of type radio in TPL/Smarty form
   #protected function
-  def getFieldEditTPL()
+  def get_field_edit_rtpl()
     radio_str = ''
     num_options = @options.length
     count = 0
@@ -47,14 +47,14 @@ class Fieldradio < Fieldbase
 
   # This returns the View of type view for an input of type radio in TPL/Smarty form
   #protected function
-  def getFieldDisplayTPL()
+  def get_field_display_rtpl()
     field_string = '{%=' + @model_name + '[:' + @name + ']%}'
     return field_string
   end
 
   # This returns the View of type list for an input of type radio in TPL/Smarty form
   #protected function
-  def getFieldListTPL()
+  def get_field_list_rtpl()
     field_string = '{%=' + @model_name + '[:' + @name + ']%}'
     return field_string
   end

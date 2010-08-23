@@ -8,13 +8,13 @@ class Fieldpercentage < Fieldtext
 
   # This returns the View of a input of type text in TPL/Smarty form
   #protected function
-  def getFieldDisplayTextTPL()
+  def get_field_display_text_rtpl()
     return '{%=' + @model_name + '[:' + @name + ']%}%'
   end
 
   # This returns the View of type list for a field of type text in TPL/Smarty form
   #protected function
-  def getFieldListTextTPL()
+  def get_field_list_text_rtpl()
 #        'objLink' => true,
 #        'objLinkView' => 'view',
 

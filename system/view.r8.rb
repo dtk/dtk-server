@@ -211,7 +211,7 @@ OLD
         field_meta[:label] = i18n(:default_list,field_meta[:name]) || field_meta[:name]
         field_meta[:id] = field_meta[:name] if field_meta[:id].nil?
         field_meta[:class] = field_meta[:class]
-        field_meta[:content] = field_handler.getField(view_type(), field_meta, 'tpl')
+        field_meta[:content] = field_handler.get_field(view_type(), field_meta, 'tpl')
         field_meta[:width] = (field_meta[:width].nil? ? '' : 'width="'+field_meta[:width]+'"')
         list_cols << field_meta
       end
@@ -327,7 +327,7 @@ OLD
             rows[row_count][:cols][col_index] = {}
             #do field
             rows[row_count][:cols][col_index][:col_id] = field_meta[:name].to_s+"-field"
-            rows[row_count][:cols][col_index][:content] = field_handler.getField(view_type(), field_meta, 'tpl')
+            rows[row_count][:cols][col_index][:content] = field_handler.get_field(view_type(), field_meta, 'tpl')
             rows[row_count][:cols][col_index][:class] = td_field_class
           end
         end
@@ -420,7 +420,7 @@ OLD
             rows[row_count][:cols][col_index] = {}
             #do field
             rows[row_count][:cols][col_index][:col_id] = field_meta[:name].to_s+"-field"
-            rows[row_count][:cols][col_index][:content] = field_handler.getField(view_type(), field_meta, 'tpl')
+            rows[row_count][:cols][col_index][:content] = field_handler.get_field(view_type(), field_meta, 'tpl')
             rows[row_count][:cols][col_index][:class] = td_field_class
           end
         end

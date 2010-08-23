@@ -9,11 +9,11 @@ class Fieldselect < Fieldbase
     @default_class = 'r8-select'
     @option_str = ''
 
-    self.addClass(@default_class)
-    self.setOptions(field_meta[:options])
+    self.add_class(@default_class)
+    self.set_options(field_meta[:options])
   end
 
-  def setOptions(options)
+  def set_options(options)
     @option_str = ''
     options.each do |value,display|
       @option_str << '<option value="' + value + '" selected="{%=' + @model_name + '[:' + @name + ']%}">' + display + '</option>'
@@ -22,20 +22,20 @@ class Fieldselect < Fieldbase
 
   # This returns the Edit View of a select HTML form element
   #protected function
-  def getFieldEditHTML()
+  def get_field_edit_html()
     return '<HTML NOT IMPLEMENTED YET>'
   end
 
   # This returns the Edit View of a input of type select in Javascript form
   #protected function
-  def getFieldEditJS()
+  def get_field_edit_js()
 #TODO: add JS rendering when generating JS fields class for client side rendering
     return '<JS NOT IMPLEMENT YET>'
   end
 
   # This returns the View of type edit for an input of type select in TPL/Smarty form
   #protected function
-  def getFieldEditTPL()
+  def get_field_edit_rtpl()
     (!@multiple.nil? && @multiple != '') ? multiple = @multiple : multiple = ''
 
     select_str = '<select id="' + @id + '" name="' + @name + '" '+ multiple + '>'
@@ -47,7 +47,7 @@ class Fieldselect < Fieldbase
 
   # This returns the View of type view for an input of type select in TPL/Smarty form
   #protected function
-  def getFieldDisplayTPL()
+  def get_field_display_rtpl()
 #TODO: revisit when implementing save/display of multiselct values
 #    if(isset($this->multiple) && $this->multiple != '')
 #      $multiple = $this->multiple;
@@ -59,7 +59,7 @@ class Fieldselect < Fieldbase
 
   # This returns the View of type list for an input of type select in TPL/Smarty form
   #protected function
-  def getFieldListTPL()
+  def get_field_list_rtpl()
 #TODO: revisit when implementing save/display of multiselct values
 #    if(!@multiple.nil? && @multiple != '') then
 #      multiple = @multiple

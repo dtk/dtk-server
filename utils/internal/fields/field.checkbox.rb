@@ -6,12 +6,12 @@ class Fieldcheckbox < Fieldbase
   def initialize(field_meta)
     super(field_meta)
     @default_class = 'r8-checkbox'
-    self.addClass(@default_class)
+    self.add_class(@default_class)
   end
 
    # This returns the Edit View of a input of type checkbox HTML form,
    #protected function
-  def getFieldEditHTML()
+  def get_field_edit_html()
     if(!@value.nil? && (@value == '1' || @value == 1)) then
       checked = 'checked="1"'
     else
@@ -22,7 +22,7 @@ class Fieldcheckbox < Fieldbase
 
    # This returns the Edit View of a input of type text in Javascript form
    #protected function
-  def getFieldEditJS()
+  def get_field_edit_js()
 #TODO: add JS rendering when generating JS fields class for client side rendering
     return '<JS NOT IMPLEMENT YET>'
   end
@@ -30,7 +30,7 @@ class Fieldcheckbox < Fieldbase
    # This returns the View of type edit of a input for the checkbox in TPL/Smarty form
 #TODO: revisit and add leading hidden field for proper handling of unchecked form submissions
    #protected function
-  def getFieldEditTPL()
+  def get_field_edit_rptl()
     return '<input type="hidden" id="' + @id + '-hidden" name="' + @name + '" value="0" />
     <input type="checkbox" id="' + @id + '" name="' + @name + '" class="' + @class_txt + '" value="1" checked="{%=' + @model_name + '[:' + @name + ']%}" />
     '
@@ -39,25 +39,25 @@ class Fieldcheckbox < Fieldbase
    # This returns the View of type view of a input for the checkbox in TPL/Smarty form
    #protected function
 #TODO: revisit and add leading hidden field for proper handling of unchecked form submissions
-  def getFieldDisplayTPL()
+  def get_field_display_rtpl()
     return '<input disabled="disabled" type="checkbox" id="' + @id + '" name="' + @name + '" class="' + @class_txt + '" value="1" checked="{%=' + @model_name + '[:' + @name + ']%}" />'
   end
 
-  def getFieldDisplayHTML()
+  def get_field_display_html()
     return '<HTML Display NOT IMPLEMENTED YET>'
   end
 
    # This returns the View of type list of a input for the checkbox in TPL/Smarty form
    #protected function
-  def getFieldListTPL()
+  def get_field_list_rtpl()
     return '<input disabled="disabled" type="checkbox" id="' + @id + '" name="' + @name + '" class="' + @class_txt + '" value="1" checked="{%=' + @model_name + '[:' + @name + ']%}" />'
   end
 
-  def getFieldListHTML()
+  def get_field_list_html()
     return '<HTML LIST NOT IMPLEMENTED YET>'
   end
 
-  def getFieldListJS()
+  def get_field_list_js()
     return '<JS LIST NOT IMPLEMENTED YET>'
   end
 

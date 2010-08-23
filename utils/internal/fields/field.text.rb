@@ -15,91 +15,91 @@ class Fieldtext < Fieldbase
     @auto_expand = false
     @drag_expand = false
 
-    self.addClass(@default_class)
+    self.add_class(@default_class)
 
     if(!field_meta[:rows].nil?) then @rows = field_meta[:rows] end
     if(!field_meta[:cols].nil?) then @columns = field_meta[:cols] end
   end
 
-  def getFieldEdit()
+  def get_field_edit()
     #if rows not greater then 1 its a normal type="text", else its a textarea
     if(@rows <=1) then
       case(@render_mode)
         when "html"
-          field_string = self.getFieldEditTextHTML()
+          field_string = self.get_field_edit_text_html()
         when "js"
-          field_string = self.getFieldEditTextJS()
-        when "tpl"
-          field_string = self.getFieldEditTextTPL()
+          field_string = self.get_field_edit_text_js()
+        when "rtpl"
+          field_string = self.get_field_edit_text_rtpl()
         else
-          field_string = self.getFieldEditTextTPL()
+          field_string = self.get_field_edit_text_rtpl()
       end
     else
       case(@render_mode)
         when "html"
-          field_string = self.getFieldEditTextAreaHTML()
+          field_string = self.get_field_edit_text_area_html()
         when "js"
-          field_string = self.getFieldEditTextAreaJS()
-        when "tpl"
-          field_string = self.getFieldEditTextAreaTPL()
+          field_string = self.get_field_edit_textarea_js()
+        when "rtpl"
+          field_string = self.get_field_edit_textarea_rtpl()
         else
-          field_string = self.getFieldEditTextAreaTPL()
+          field_string = self.get_field_edit_textarea_rtpl()
       end
     end
     return field_string
   end
 
-  def getFieldDisplay()
+  def get_field_display()
     #if rows not greater then 1 its a normal type="text", else its a textarea
     if(@rows <=1) then
       case(@render_mode)
         when "html"
-          field_string = self.getFieldDisplayTextHTML()
+          field_string = self.get_field_display_text_html()
         when "js"
-          field_string = self.getFieldDisplayTextJS()
-        when "tpl"
-          field_string = self.getFieldDisplayTextTPL()
+          field_string = self.get_field_display_text_js()
+        when "rtpl"
+          field_string = self.get_field_display_text_rtpl()
         else
-          field_string = self.getFieldDisplayTextTPL()
+          field_string = self.get_field_display_text_rtpl()
       end
     else
       case(@render_mode)
         when "html"
-          field_string = self.getFieldDisplayTextAreaHTML()
+          field_string = self.get_field_display_textarea_html()
         when "js"
-          field_string = self.getFieldDisplayTextAreaJS()
-        when "tpl"
-          field_string = self.getFieldDisplayTextAreaTPL()
+          field_string = self.get_field_display_textarea_js()
+        when "rtpl"
+          field_string = self.get_field_display_textarea_rtpl()
         else
-          field_string = self.getFieldDisplayTextAreaTPL()
+          field_string = self.get_field_display_textarea_rtpl()
       end
     end
     return field_string
   end
 
-  def getFieldList()
+  def get_field_list()
     #if rows not greater then 1 its a normal type="text", else its a textarea
     if(@rows <=1) then
       case(@render_mode)
         when "html"
-          field_string = self.getFieldListTextHTML()
+          field_string = self.get_field_list_text_html()
         when "js"
-          field_string = self.getFieldListTextJS()
-        when "tpl"
-          field_string = self.getFieldListTextTPL()
+          field_string = self.get_field_list_text_js()
+        when "rtpl"
+          field_string = self.get_field_list_text_rtpl()
         else
-          field_string = self.getFieldListTextTPL()
+          field_string = self.get_field_list_text_rtpl()
       end
     else
       case(@render_mode)
         when "html"
-          field_string = self.getFieldListTextAreaHTML()
+          field_string = self.get_field_list_textarea_html()
         when "js"
-          field_string = self.getFieldListTextAreaJS()
-        when "tpl"
-          field_string = self.getFieldListTextAreaTPL();
+          field_string = self.get_field_list_textarea_js()
+        when "rtpl"
+          field_string = self.get_field_list_textarea_rtpl();
         else
-          field_string = self.getFieldListTextAreaTPL();
+          field_string = self.get_field_list_textarea_rtpl();
       end
     end
     return field_string
@@ -107,7 +107,7 @@ class Fieldtext < Fieldbase
 
   # This returns the Edit View of a input of type text in HTML form
   #protected function
-  def getFieldEditTextHTML()
+  def get_field_edit_text_html()
     (@columns >=1) ? size = 'size="' + @columns.to_s + '"' : size = ''
 
     return '<input type="text" id="' + @id + '" name="' + @name + '" class="' + @class_txt + '" value="' + @value + '" ' + size + ' />'
@@ -115,7 +115,7 @@ class Fieldtext < Fieldbase
 
   # This returns the Edit View of a input of type text in Javascript form
   #protected function
-  def getFieldEditTextJS()
+  def get_field_edit_text_js()
 #TODO: add JS rendering when generating JS fields class for client side rendering
     (@columns >=1) ? size = 'size="' + @columns.to_s + '"' : size = '' 
 
@@ -124,7 +124,7 @@ class Fieldtext < Fieldbase
 
   # This returns the View of type edit for an field of type text in TPL/Smarty form
   #protected function
-  def getFieldEditTextTPL()
+  def get_field_edit_text_rtpl()
     (@columns >=1) ? size = 'size="' + @columns.to_s + '"' : size = ''
 
     return '<input type="text" id="' + @id + '" name="' + @name + '" class="' + @class_txt + '" value="{%=' + @model_name + '[:' + @name + ']%}" ' + size + ' />'
@@ -132,13 +132,13 @@ class Fieldtext < Fieldbase
 
   # This returns the View of a input of type text in TPL/Smarty form
   #protected function
-  def getFieldDisplayTextTPL()
+  def get_field_display_text_rtpl()
     return '{%=' + @model_name + '[:' + @name + ']%}'
   end
 
   # This returns the View of type list for a field of type text in TPL/Smarty form
   #protected function
-  def getFieldListTextTPL()
+  def get_field_list_text_rtpl()
 #        'objLink' => true,
 #        'objLinkView' => 'view',
 
@@ -164,7 +164,7 @@ class Fieldtext < Fieldbase
 
   # This returns the Edit View of a textarea in HTML form
   #protected function
-  def getFieldEditTextAreaHTML()
+  def get_field_edit_textarea_html()
     (@columns >=1) ? cols = ' cols="' + @columns.to_s + '"' : cols = ' '
 
     (@rows >=1) ? rows = ' rows="' + @rows.to_s + '"' : rows = ' rows="1"'
@@ -176,7 +176,7 @@ class Fieldtext < Fieldbase
 
   # This returns the Edit View of a textarea in Javascript form
   #protected function
-  def getFieldEditTextAreaJS()
+  def get_field_edit_textarea_js()
 #TODO: add JS rendering when generating JS fields class for client side rendering
     (@columns >=1) ? cols = ' cols="' + @columns.to_s + '"' : cols = ''
     (@rows >=1) ? rows = 'rows="' + @rows.to_s + '"' : rows = ' rows="1"'
@@ -186,7 +186,7 @@ class Fieldtext < Fieldbase
 
   # This returns the Edit View of a textarea in TPL/Smarty form
   #protected function
-  def getFieldEditTextAreaTPL()
+  def get_field_edit_textarea_rtpl()
     (@columns >=1) ? cols = ' cols="' + @columns.to_s + '"' : cols = ' '
     (@rows >=1) ? rows = ' rows="' + @rows.to_s + '"' : rows = ' rows="1"'
 #TODO: re-examin how to set rows and cols, right now its coded into the element string and not in a smarty variable
@@ -196,7 +196,7 @@ class Fieldtext < Fieldbase
 
   # This returns the View of a textarea in TPL/Smarty form
   #protected function
-  def getFieldDisplayTextAreaTPL()
+  def get_field_display_textarea_rtpl()
     (@columns >=1) ? cols = ' cols="' + @columns.to_s + '"' : cols = ' '
     (@rows >=1) ? rows = ' rows="' + @rows.to_s + '"' : rows = ' rows="1"'
 
@@ -206,7 +206,7 @@ class Fieldtext < Fieldbase
 
   # This returns the View of a textarea in TPL/Smarty form
   #protected function
-  def getFieldListTextAreaTPL()
+  def get_field_list_textarea_rtpl()
     return '{%=model[row_num][:' + @name + ']%}'
   end
 

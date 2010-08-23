@@ -19,31 +19,32 @@ class Fieldbase
     @disabled = false
   
     @classes = []           #array of CSS classes to add by default
-    @class_txt = ''         #the string for the class="classNames" text
+    @class_txt = ''         #the string for the class="class_names" text
   
-    @render_mode = 'tpl'     #tpl will render smarty style output, also 'html' available for raw html
-    @r8view_ref = nil # pointer to calling view; used to pass back css includes
+    @render_mode = 'rtpl'   #rtpl will render erubis style output, also 'html' available for raw html
+    @r8_view_ref = nil       # pointer to calling view; used to pass back css includes
   end
-  def set_includes(r8view_ref)
-    @r8view_ref = r8view_ref
+
+  def set_includes(r8_view_ref)
+    @r8_view_ref = r8_view_ref
   end
   
   #  The view mode represents how to render the field for a given user interaction
-  #     -tpl:   return field rendered in TPL/Smarty format
+  #     -rtpl:   return field rendered in RTPL/Erubis format
   #     -js:  return field rendered in Javascript format
   #     -html:  return field rendered in raw HTML format
   def render(view_type, render_mode)
-    self.setClassTxt
+    self.set_class_txt
 
     if(render_mode != '') then @render_mode = render_mode end
 
     case view_type.downcase
       when "edit" then
-        return self.getFieldEdit
+        return self.get_field_edit
       when "display" then
-        return self.getFieldDisplay
+        return self.get_field_display
       when "list" then
-        return self.getFieldList
+        return self.get_field_list
       #if getting to default then its calling a custom view
       else
         cstm_view_method = 'getField_'+ view_type
@@ -51,46 +52,46 @@ class Fieldbase
     end
   end
 
-  def getFieldEdit()
+  def get_field_edit()
     case @render_mode
       when "html" then
-        field_string = self.getFieldEditHTML()
+        field_string = self.get_field_edit_html()
       when "js" then
-        field_string = self.getFieldEditJS()
+        field_string = self.get_field_edit_js()
 #     when "tpl" then
       else
-        field_string = self.getFieldEditTPL()
+        field_string = self.get_field_edit_rtpl()
     end
     return field_string
   end
 
-  def getFieldDisplay()
+  def get_field_display()
     case @render_mode
       when "html" then
-        field_string = self.getFieldDisplayHTML
+        field_string = self.get_field_display_html
       when "js" then
-        field_string = self.getFieldDisplayJS
+        field_string = self.get_field_display_js
 #      when "tpl" then
       else
-        field_string = self.getFieldDisplayTPL
+        field_string = self.get_field_display_rtpl
     end
     return field_string
   end
 
-  def getFieldList()
+  def get_field_list()
     case @render_mode
       when "html" then
-        field_string = self.getFieldListHTML
+        field_string = self.get_field_list_html
       when "js" then
-        field_string = self.getFieldListJS
+        field_string = self.get_field_list_js
 #      when "tpl" then
       else
-        field_string = self.getFieldListTPL
+        field_string = self.get_field_list_rtpl
     end
     return field_string
   end
 
-  def addClass(class_to_add)
+  def add_class(class_to_add)
     @classes << class_to_add
   end
 
@@ -103,7 +104,7 @@ class Fieldbase
     @classes = tmp_array
   end
 
-  def setClassTxt()
+  def set_class_txt()
     @class_txt = ''
 
     @classes.each do |the_class|

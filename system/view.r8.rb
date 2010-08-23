@@ -297,7 +297,7 @@ OLD
 
       group_hash[:fields].each do |field_hash|
         field_num +=1
-        rows[row_count][:rowId] = 'g'+group_num.to_s+'-r'+row_count.to_s
+        rows[row_count][:row_id] = 'g'+group_num.to_s+'-r'+row_count.to_s
         #if size is 0 then its a blank spot in the form
         if(field_hash.length == 0) then
           rows[row_count][:cols][col_index] = {}
@@ -390,7 +390,7 @@ OLD
 
       group_hash[:fields].each do |field_hash|
         field_num +=1
-        rows[row_count][:rowId] = 'g'+group_num.to_s+'-r'+row_count.to_s
+        rows[row_count][:row_id] = 'g'+group_num.to_s+'-r'+row_count.to_s
         #if size is 0 then its a blank spot in the form
         if(field_hash.length == 0) then
           rows[row_count][:cols][col_index] = {}

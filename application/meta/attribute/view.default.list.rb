@@ -13,15 +13,7 @@
               :objLink => true,
               :objLinkView => 'display',
             }},
-          {:external_attr_ref => {
-              :type => 'text',
-              :help => '',
-            }},
           {:attribute_value => {
-              :type => 'text',
-              :help => '',
-            }},
-          {:description => {
               :type => 'text',
               :help => '',
             }},

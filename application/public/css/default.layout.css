@@ -22,6 +22,12 @@ body input textarea select {
 	color: #444444;
 }
 
+h1 {
+	font-size: 2.0em;
+	font-weight: bold;
+	color:#444444;
+}
+
 #page_container {
 	width: 888px;
 	min-height: 600px;
@@ -38,11 +44,12 @@ body input textarea select {
 }
 
 #main_body {
-	width: 100%;
+	width: 80%;
 	height: 100%;
 	float: left;
 	border-left: 1px solid #AACCEE;
 	background: none repeat scroll 0 0 #FFFFFF;
+	padding: 5px 20px;
 }
 
 a {
@@ -66,7 +73,7 @@ a {
 
 #menu_container li {
 	float: left;
-	background-color: #F4FAFA;
+	background-color: #E9F4FF;
 	border: 1px solid #AACCEE;
 	float: left;
 	list-style: none outside none;
@@ -88,3 +95,92 @@ a {
 	cursor: pointer;
 	text-decoration: none;
 }
+
+/*----------Display View-------------*/
+
+table.display th {
+	background-color:#DDDDDD;
+	border-bottom: 1px solid #999999;
+	color:#444444;
+	padding:5px;
+	text-align:left;
+}
+
+table.display {
+	border-top: 1px solid #999999;
+	border-bottom: 1px solid #999999;
+	border-collapse:collapse;
+	width:100%;
+}
+
+table.display td {
+	padding: 5px;
+}
+
+table.display td.label {
+	width: 35%;
+	vertical-align: top;
+	font-weight: bold;
+	width: 35%;
+}
+
+/*-----------------------------*/
+
+table.edit th {
+	background-color: #DDDDDD;
+	border-bottom: 1px solid #999999;
+	color: #444444;
+	padding: 5px;
+	text-align:left;
+}
+
+table.edit {
+	border-top: 1px solid #999999;
+	border-bottom: 1px solid #999999;
+	border-collapse:collapse;
+	width:100%;
+}
+
+table.edit td {
+	padding:5px;
+}
+table.edit td.label {
+	width: 15%;
+	vertical-align: top;
+	font-weight: bold;
+}
+
+/*------------------------*/
+
+table.list th {
+	background-color: #DDDDDD;
+	border-bottom: 1px solid #999999;
+	color: #444444;
+	padding: 5px;
+	text-align:left;
+}
+
+table.list {
+	border-top: 1px solid #999999;
+/*	border-bottom:2px solid #999999;*/
+	border-collapse: collapse;
+	width: 100%;
+}
+
+table.list td {
+	padding: 5px;
+}
+
+table.list tr:hover {
+	background-color: #E9F4FF;
+	border-top: 1px solid #AACCEE;
+	border-bottom: 1px solid #AACCEE;
+}
+
+table.list tr.odd {
+	background-color: #EEEEEE;
+}
+
+
+/*-------------------------------------*/
+

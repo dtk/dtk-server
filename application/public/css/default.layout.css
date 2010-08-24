@@ -5,10 +5,6 @@
 
 body {
 /*	background: url("../images/bg.jpg") repeat-x scroll left top #4E87A7;*/
-	height: 100%;
-	margin: 0;
-	padding: 0;
-
 	font-family: "lucida grande","Segoe UI",arial,verdana,"lucida sans unicode",tahoma,sans-serif;
 	font-size: 8pt;
 	font-weight: normal;
@@ -30,26 +26,22 @@ h1 {
 
 #page_container {
 	width: 888px;
-	min-height: 600px;
 	padding: 5px 0 0;
 	margin: 30px auto 10px auto;
-	height: 100%;
 }
 
 #left_col {
 	width: 198px;
-	height: 100%;
 	float: left;
 	background: none repeat scroll 0 0 #FFFFFF;
 }
 
 #main_body {
-	width: 80%;
-	height: 100%;
-	float: left;
-	border-left: 1px solid #AACCEE;
 	background: none repeat scroll 0 0 #FFFFFF;
-	padding: 5px 20px;
+	padding: 10px 50px;
+	border-left: 1px solid #AACCEE;
+	border-bottom: 1px solid #AACCEE;
+	width: 100%;
 }
 
 a {
@@ -144,6 +136,7 @@ table.edit {
 table.edit td {
 	padding:5px;
 }
+
 table.edit td.label {
 	width: 15%;
 	vertical-align: top;
@@ -175,6 +168,11 @@ table.list tr:hover {
 	background-color: #E9F4FF;
 	border-top: 1px solid #AACCEE;
 	border-bottom: 1px solid #AACCEE;
+	padding: 1px;
+}
+
+table.list tr a {
+	text-decoration: none;
 }
 
 table.list tr.odd {

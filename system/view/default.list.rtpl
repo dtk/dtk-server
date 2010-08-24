@@ -1,15 +1,15 @@
 <br/><br/>
 <div style="width: 100%;">
-	<div style="width: 100%;">
 <!--
+	<div style="width: 100%;">
 		<div style="float: right; margin-right: 10px;">
 		<a href="javascript:R8.ctrl.request('{%=model_name%}/list?listStart={%=list_start_prev_var%}');">&lt;-Prev</a>
 		&nbsp;&nbsp;&nbsp;&nbsp;
 		<a href="javascript:R8.ctrl.request('{%=model_name%}/list?listStart={%=list_start_next_var%}');">Next-&gt;</a>
 		</div>
--->
 	</div>
-	<div style="width: 100%; float: left;">
+-->
+	<div>
 	<table class="list">
 	<tr id="{%=model_name%}-{%=view_name%}-header-row">
 		{%for header_col in cols%}

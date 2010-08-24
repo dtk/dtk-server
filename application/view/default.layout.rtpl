@@ -10,8 +10,8 @@
 <body>
 <div id="page_container">
 
-	<div id="menu_container" class="clearfix">
-		<ul class="clearfix">
+	<div id="menu_container">
+		<ul>
 			<li class="selected"><a href="{%=_app[:base_uri]%}/xyz/home">Home</a></li>
 			<li class=""><a href="{%=_app[:base_uri]%}/xyz/workspace">Workspace</a></li>
 			<li class=""><a href="{%=_app[:base_uri]%}/xyz/node/list">Nodes</a></li>

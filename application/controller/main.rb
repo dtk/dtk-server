@@ -10,6 +10,7 @@ module XYZ
 
     def initialize()
       @current_profile = :default
+
    end
   end
 end
@@ -23,15 +24,37 @@ end
 
 module XYZ
   class MainController < Controller
+    layout :layout_default_with_header
 
-    # TODO instead having class AppController < Controller would be equaivalent to asserting map /xyz/app (when insider xyz namespace)
-=begin  
-  layout do |path,wish| 
-      if wish == "html"
-        path == "actset__main" or path == "swoop" ? nil : :default
-      end
+    def layout_default
+      "#{@ctrl_result[:tpl_contents]}"
     end
-=end
+
+    #TODO Nate, this is just stub; assume that contents of most of this should be in teh layout itself
+    def layout_default_with_header
+"<?xml version='1.0' ?>
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.1//EN'
+  'http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+  <head>
+    <title>Get Values</title>
+    <meta http-equiv='Content-Script-Type' content='text/javascript' />
+    <meta http-equiv='Content-Style-Type' content='text/css' />
+    <meta http-equiv='Content-Type' content='text/html; charset=utf-8' />
+    <meta http-equiv='expires' content='0' />
+    <meta name='description' content='Description for search engines' />
+    <meta name='generator' content=Ramaze #{Ramaze::VERSION} />
+    <meta name='keywords' content='Ramaze, Your own keywords' />
+    <meta name='author' content='Max Mustermann' />
+    <meta name='date' content=#{Time.now.iso8601} />
+    <%= css 'screen'%>
+  </head>
+  <body>
+  #{layout_default}
+  </body>
+</html>"
+    end
+
     attr_accessor :model_name,:css_includes,:js_includes,:base_uri
 
     def initialize()
@@ -39,9 +62,10 @@ module XYZ
 #TODO: push this to higher level into the controller instead of being parsed here
 #getting model_name by looking at self.class, (e.g., self.class can = XYZ::NodeController)
       @model_name = Aux.demodulize(self.class.to_s).gsub(/Controller$/,"").downcase.to_sym
-      @css_includes = []
-      @js_includes = []
-      @base_uri = ""
+      @css_includes = Array.new
+      @js_includes = Array.new
+      @base_uri = String.new
+      @ctrl_result = Hash.new
     end
 
     def index
@@ -82,9 +106,7 @@ module XYZ
       tpl.assign(:list_start_prev, 0)
       tpl.assign(:list_start_next, 0)
 
-      ctrl_result = {
-        :tpl_contents => tpl.render(nil,false) #nil, false args for testing
-      }
+      @ctrl_result[:tpl_contents] = tpl.render(nil,false) #nil, false args for testing
     end
 
 #TODO: id and parsed query string shouldnt be passed, id should be available from route string
@@ -97,10 +119,7 @@ module XYZ
       user_context = UserContext.new #TODO: stub
       tpl = R8Tpl::TemplateR8.new("#{@model_name}/#{action_name}",user_context)
       tpl.assign(@model_name,model_result)
-
-      ctrl_result = {
-        :tpl_contents => tpl.render(nil,false) #nil, false args for testing
-      }
+      @ctrl_result[:tpl_contents] = tpl.render(nil,false) #nil, false args for testing
     end
 
 
@@ -114,10 +133,7 @@ module XYZ
       user_context = UserContext.new #TODO: stub
       tpl = R8Tpl::TemplateR8.new("#{@model_name}/#{action_name}",user_context)
       tpl.assign(@model_name,model_result)
-
-      ctrl_result = {
-        :tpl_contents => tpl.render(nil,false) #nil, false args for testing
-      }
+      @ctrl_result[:tpl_contents] = tpl.render(nil,false) #nil, false args for testing
     end
 
 

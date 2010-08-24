@@ -10,6 +10,7 @@ module XYZ
   end
 
   class ActionsetController < MainController
+    layout :layout_default
     def process(*route)
       route_key = String.new
       route_segments = route.dup
@@ -21,7 +22,7 @@ module XYZ
       call_params = route_segments.dup
 
       if R8::Routes[route_key] and R8::Routes[route_key][:action_set]
-        return run_action_set(R8::Routes[route_key],call_params)
+        @ctrl_result[:tpl_contents] = run_action_set(R8::Routes[route_key],call_params)
       else
         raise Error.new ("No route config defined for #{route_key}")
       end
@@ -105,7 +106,8 @@ module XYZ
         user_context = UserContext.new #TODO: stub
         tpl = R8Tpl::TemplateR8.new(layout_name,user_context,:layout)
         template_vars.each{|k,v|tpl.assign(k.to_sym,v)}
-        tpl.render(nil,false) #nil, false args for testing
+x=        tpl.render(nil,false) #nil, false args for testing
+x
     end
 
 #TODO: move the param stuff into main controller

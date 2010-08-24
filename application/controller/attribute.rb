@@ -26,10 +26,7 @@ module XYZ
       tpl.assign("#{model_name}_list",model_list)
       tpl.assign(:list_start_prev, 0)
       tpl.assign(:list_start_next, 0)
-
-      ctrl_result = {
-        :tpl_contents => tpl.render(nil,false) #nil, false args for testing
-      }
+      @ctrl_result[:tpl_contents] = tpl.render(nil,false) #nil, false args for testing
     end
   end
 end

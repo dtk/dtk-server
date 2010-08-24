@@ -10,7 +10,7 @@ module XYZ
   end
 
   class ActionsetController < MainController
-    layout :layout_default
+    layout :bundle_and_return
     def process(*route)
       route_key = String.new
       route_segments = route.dup
@@ -22,17 +22,44 @@ module XYZ
       call_params = route_segments.dup
 
       if R8::Routes[route_key] and R8::Routes[route_key][:action_set]
-        @ctrl_result[:tpl_contents] = run_action_set(R8::Routes[route_key],call_params)
+        @action_set_def = R8::Routes[route_key]
+        run_action_set(call_params)
       else
+        #TODO: shouldnt raise error if action not found, should just execute single controller as normal
         raise Error.new ("No route config defined for #{route_key}")
       end
+    end
 
-#TODO: shouldnt raise error if action not found, should just execute single controller as normal
-#      raise Error.new("No route config defined for: #{route_key}") unless action_set_def
+    def run_action_set(call_params)
+#TODO: get rid of action processor and just integrate into controller
+      action_processor = ActionProcessor.new(call_params,@action_set_def)
 
-#TODO: move pp into some sort of dev class that will hold dev like tools
-#pp [:action_set_def,action_set_def]
-#pp [:call_params,call_params]
+      #Execute each of the actions in the action_set and set the returned content
+      (@action_set_def[:action_set] || []).each do |action|
+        ctrl_result = call_action(action,action_processor)
+
+        #set the appropriate panel to render results to
+        panel = (ctrl_result[:panel] || action[:panel] || :main_body).to_sym
+
+        #set the appropriate render assignment type (append | prepend | replace)
+        assign_type = (ctrl_result[:assign_type] || action[:assign_type] || :append).to_sym
+
+        case assign_type
+          when :append 
+            (@regions_content[panel].nil?) ? 
+            @regions_content[panel] = ctrl_result[:tpl_contents] : 
+              @regions_content[panel] << ctrl_result[:tpl_contents]
+          when :replace 
+            @regions_content[panel] = ctrl_result[:tpl_contents]
+          when :prepend 
+            if(@regions_content[panel].nil?) 
+              @regions_content[panel] = ctrl_result[:tpl_contents]
+            else
+              tmp_contents = @regions_content[panel]
+              @regions_content[panel] = ctrl_result[:tpl_contents] + tmp_contents
+            end
+          end  
+      end
     end
 
     def call_action(action,action_proc)
@@ -46,69 +73,6 @@ module XYZ
       return a.call
     end
 
-    def run_action_set(action_set_def,call_params)
-#TODO: get rid of action processor and just integrate into controller
-        action_processor = ActionProcessor.new(call_params,action_set_def)
-
-        regions_content = {}
-
-        #Execute each of the actions in the action_set and set the returned content
-        (action_set_def[:action_set] || []).each{ |action|
-          ctrl_result = self.call_action(action,action_processor)
-
-          #set the appropriate panel to render results to
-          if !ctrl_result[:panel].nil? then panel = ctrl_result[:panel].to_sym
-          elsif !action[:panel].nil? then panel = action[:panel].to_sym
-          else panel = :main_body
-          end
-
-          #set the appropriate render assignment type (append | prepend | replace)
-          if !ctrl_result[:assign_type].nil? then assign_type = ctrl_result[:assign_type]
-          elsif !action[:assign_type].nil? then assign_type = action[:assign_type]
-          else assign_type = :append
-          end
-
-          case assign_type
-            when :append then
-              (regions_content[panel].nil?) ? 
-                  regions_content[panel] = ctrl_result[:tpl_contents] : 
-                  regions_content[panel] << ctrl_result[:tpl_contents]
-            when :replace then
-              regions_content[panel] = ctrl_result[:tpl_contents]
-            when :prepend then
-              if(regions_content[panel].nil?) then regions_content[panel] = ctrl_result[:tpl_contents]
-              else
-                tmp_contents = regions_content[panel]
-                regions_content[panel] = ctrl_result[:tpl_contents] + tmp_contents
-              end
-          end
-        }
-
-        layout = action_set_def[:layout] || R8::Config[:default_layout]
-        layout_name = "#{layout}.layout"
-        include_css(layout_name)
-        include_js('example')
-
-        #set templaet vars
-        _app = {}
-        _app[:js_includes] = @js_includes
-        _app[:css_includes] = @css_includes
-        _app[:base_uri] = R8::Config[:base_uri]
-        template_vars = {
-          :_app => _app,
-          :main_menu => '',
-          :left_col => ''
-        }
-        regions_content.each { |key,value|
-          template_vars[key] = value
-        }
-
-        user_context = UserContext.new #TODO: stub
-        tpl = R8Tpl::TemplateR8.new(layout_name,user_context,:layout)
-        template_vars.each{|k,v|tpl.assign(k.to_sym,v)}
-x=        tpl.render(nil,false) #nil, false args for testing
-x
-    end
 
 #TODO: move the param stuff into main controller
 

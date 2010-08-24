@@ -65,7 +65,37 @@ module XYZ
       @css_includes = Array.new
       @js_includes = Array.new
       @base_uri = String.new
+      @regions_content = Hash.new
+      @action_set_def = Hash.new
+      #TODO: below just temp
       @ctrl_result = Hash.new
+    end
+
+    def bundle_and_return
+      layout = @action_set_def[:layout] || R8::Config[:default_layout]
+      layout_name = "#{layout}.layout"
+      include_css(layout_name)
+      include_js('example')
+
+        #set templaet vars
+        _app = {}
+        _app[:js_includes] = @js_includes
+        _app[:css_includes] = @css_includes
+        _app[:base_uri] = R8::Config[:base_uri]
+        template_vars = {
+          :_app => _app,
+          :main_menu => '',
+          :left_col => ''
+        }
+        @regions_content.each { |key,value|
+          template_vars[key] = value
+        }
+
+        user_context = UserContext.new #TODO: stub
+        tpl = R8Tpl::TemplateR8.new(layout_name,user_context,:layout)
+        template_vars.each{|k,v|tpl.assign(k.to_sym,v)}
+x=        tpl.render(nil,false) #nil, false args for testing
+x
     end
 
     def index

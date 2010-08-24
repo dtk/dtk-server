@@ -159,7 +159,6 @@ table.list {
 	border-top: 1px solid #999999;
 	border-collapse: collapse;
 	width: 100%;
-	display: block;
 }
 
 table.list th {

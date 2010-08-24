@@ -26,7 +26,6 @@ h1 {
 
 #page_container {
 	width: 888px;
-	padding: 5px 0 0;
 	margin: 30px auto 10px auto;
 }
 
@@ -38,7 +37,6 @@ h1 {
 
 #main_body {
 	background: none repeat scroll 0 0 #FFFFFF;
-	padding: 10px 50px;
 	border-left: 1px solid #AACCEE;
 	border-bottom: 1px solid #AACCEE;
 	width: 100%;
@@ -90,12 +88,9 @@ a {
 
 /*----------Display View-------------*/
 
-table.display th {
-	background-color:#DDDDDD;
-	border-bottom: 1px solid #999999;
-	color:#444444;
-	padding:5px;
-	text-align:left;
+.display_container {
+	padding: 10px 20px;
+	position: relative;
 }
 
 table.display {
@@ -103,6 +98,14 @@ table.display {
 	border-bottom: 1px solid #999999;
 	border-collapse:collapse;
 	width:100%;
+}
+
+table.display th {
+	background-color:#DDDDDD;
+	border-bottom: 1px solid #999999;
+	color:#444444;
+	padding:5px;
+	text-align:left;
 }
 
 table.display td {
@@ -116,14 +119,9 @@ table.display td.label {
 	width: 35%;
 }
 
-/*-----------------------------*/
-
-table.edit th {
-	background-color: #DDDDDD;
-	border-bottom: 1px solid #999999;
-	color: #444444;
-	padding: 5px;
-	text-align:left;
+/*--------Edit View------------*/
+.edit_container {
+	padding: 10px 20px;
 }
 
 table.edit {
@@ -131,6 +129,14 @@ table.edit {
 	border-bottom: 1px solid #999999;
 	border-collapse:collapse;
 	width:100%;
+}
+
+table.edit th {
+	background-color: #DDDDDD;
+	border-bottom: 1px solid #999999;
+	color: #444444;
+	padding: 5px;
+	text-align:left;
 }
 
 table.edit td {
@@ -143,7 +149,18 @@ table.edit td.label {
 	font-weight: bold;
 }
 
-/*------------------------*/
+/*----------List View------------*/
+
+.list_container {
+	padding: 10px 20px;
+}
+
+table.list {
+	border-top: 1px solid #999999;
+	border-collapse: collapse;
+	width: 100%;
+	display: block;
+}
 
 table.list th {
 	background-color: #DDDDDD;
@@ -153,22 +170,16 @@ table.list th {
 	text-align:left;
 }
 
-table.list {
-	border-top: 1px solid #999999;
-/*	border-bottom:2px solid #999999;*/
-	border-collapse: collapse;
-	width: 100%;
-}
-
-table.list td {
+table.list tr td {
 	padding: 5px;
+	border-top: 1px solid #FFFFFF;
+	border-bottom: 1px solid #FFFFFF;
 }
 
-table.list tr:hover {
+table.list tr:hover td {
 	background-color: #E9F4FF;
 	border-top: 1px solid #AACCEE;
 	border-bottom: 1px solid #AACCEE;
-	padding: 1px;
 }
 
 table.list tr a {

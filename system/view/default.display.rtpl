@@ -1,16 +1,18 @@
 
-<button id="editBtn" onclick="R8.forms.submit('{%=formId%}');">Edit</button>
-<form id="{%=formId%}" action="{%=formAction%}">
-{%for field in h_field_list%}
-	<input type="hidden" name="{%=field[:name]%}" id="{%=field[:id]%}" value="{%=field[:value]%}" />
-{%end%}
-</form>
-<table class="display">
-{%for row in rows%}
-	<tr id="{%=row[:row_id]%}">
-		{%for col in row[:cols]%}
-			<td id="{%=col[:col_id]%}" class="{%=col[:class]%}">{%=col[:content]%}</td>
-		{%end%}
-	</tr>
-{%end%}
-</table>
+<div class="display_container">
+	<button id="editBtn" onclick="R8.forms.submit('{%=formId%}');">Edit</button>
+	<form id="{%=formId%}" action="{%=formAction%}">
+	{%for field in h_field_list%}
+		<input type="hidden" name="{%=field[:name]%}" id="{%=field[:id]%}" value="{%=field[:value]%}" />
+	{%end%}
+	</form>
+	<table class="display">
+	{%for row in rows%}
+		<tr id="{%=row[:row_id]%}">
+			{%for col in row[:cols]%}
+				<td id="{%=col[:col_id]%}" class="{%=col[:class]%}">{%=col[:content]%}</td>
+			{%end%}
+		</tr>
+	{%end%}
+	</table>
+</div>

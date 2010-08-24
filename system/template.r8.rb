@@ -21,12 +21,18 @@ module R8Tpl
       :js_templating_on,
       :root_js_element_var_name,:root_js_hash,:loop_vars,:ctrl_vars,:js_var_header
 
-    def initialize(model_name,view_name,user,path_type_to_use=nil)
+    def initialize(relative_distinguished_view_path,user,path_type_to_use=nil)
       @user = user
       @profile = @user.current_profile
 
-      @model_name = model_name
-      @view_name = view_name
+      @model_name = @view_name = String.new
+      rdn = relative_distinguished_view_path.split("/")
+      if rdn.size == 2
+        @model_name,@view_name = rdn
+      else
+        @view_name = rdn.first
+      end
+
       @view_path = nil
 
       @js_var_header = 'tplVars'
@@ -572,6 +578,8 @@ p '     iteratorVarRaw: '+newLoopHash[:iteratorVarRaw].to_s
       when :base
         path
       when :system
+        path
+      when :layout
         path
       when :meta
         view = ViewR8.new(@model_name,@view_name,@user)

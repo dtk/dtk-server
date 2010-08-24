@@ -22,7 +22,7 @@ module XYZ
       action_name = :list #TODO: automatically determine this
 
       user_context = UserContext.new #TODO: stub
-      tpl = R8Tpl::TemplateR8.new(model_name,action_name,user_context)
+      tpl = R8Tpl::TemplateR8.new("#{model_name}/#{action_name}",user_context)
       tpl.assign("#{model_name}_list",model_list)
       tpl.assign(:list_start_prev, 0)
       tpl.assign(:list_start_next, 0)

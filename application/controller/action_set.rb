@@ -20,13 +20,11 @@ module XYZ
       route_segments.shift
       call_params = route_segments.dup
 
-      if(R8::Routes[route_key][:action_set]) then
-        return self.run_action_set(R8::Routes[route_key],call_params)
+      if R8::Routes[route_key] and R8::Routes[route_key][:action_set]
+        return run_action_set(R8::Routes[route_key],call_params)
       else
-print "No route config defined for:"+route_key
+        raise Error.new ("No route config defined for #{route_key}")
       end
-
-#      action_set_def = R8::Routes[route_key]
 
 #TODO: shouldnt raise error if action not found, should just execute single controller as normal
 #      raise Error.new("No route config defined for: #{route_key}") unless action_set_def
@@ -86,44 +84,29 @@ print "No route config defined for:"+route_key
         }
 
         layout = action_set_def[:layout] || R8::Config[:default_layout]
-        layout_name = layout+'.layout'
-#        action_set_includes = ActionSetInclude.new
-        self.include_css(layout_name)
-        self.include_js('example')
+        layout_name = "#{layout}.layout"
+        include_css(layout_name)
+        include_js('example')
+
+        #set templaet vars
         _app = {}
         _app[:js_includes] = @js_includes
         _app[:css_includes] = @css_includes
         _app[:base_uri] = R8::Config[:base_uri]
-
         template_vars = {
           :_app => _app,
           :main_menu => '',
           :left_col => ''
         }
-
         regions_content.each { |key,value|
           template_vars[key] = value
         }
 
-#TODO:need to use our tmeplating
-        layout_path = "#{R8::Config[:app_root_path]}/view/#{layout_name}.rtpl"
-        layout_tpl_contents = IO.read(layout_path) #TODO check file exists
-        eruby =  Erubis::Eruby.new(layout_tpl_contents,:pattern=>'\{\% \%\}')
-
-#TODO: template_vars need to be vivification style so errors are not thrown for unassigned template vars
-        return eruby.result(template_vars)
+        user_context = UserContext.new #TODO: stub
+        tpl = R8Tpl::TemplateR8.new(layout_name,user_context,:layout)
+        template_vars.each{|k,v|tpl.assign(k.to_sym,v)}
+        tpl.render(nil,false) #nil, false args for testing
     end
-
-=begin
-    class ActionSetInclude
-      attr_accessor :css_includes, :js_includes, :base_uri
-      def initialize()
-        @css_includes = []
-        @js_includes = []
-        @base_uri = ""
-      end
-    end
-=end
 
 #TODO: move the param stuff into main controller
 

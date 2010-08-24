@@ -16,6 +16,9 @@ module R8Tpl
           "#{R8::Config[:meta_templates_root]}/#{@model_name}/view.default.#{@view_name}.rb"
         when :cache 
           "#{R8::Config[:app_cache_root]}/view/#{@model_name}/#{@profile}.#{@view_name}.rtpl"
+        when :layout
+           #TODO: see if profile is used to qualify
+          "#{R8::Config[:app_root_path]}/view/#{@view_name}.rtpl"
         when :css_require
           "#{R8::Config[:app_cache_root]}/view/#{@model_name}/#{@profile}.#{@view_name}.css_include.json"
         when :js_require

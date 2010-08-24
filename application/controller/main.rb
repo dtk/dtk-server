@@ -75,9 +75,8 @@ module XYZ
 #TODO: automatically determine this
       action_name = :list
 
-#TODO: stub
-      user_context = UserContext.new
-      tpl = R8Tpl::TemplateR8.new(model_name,action_name,user_context)
+      user_context = UserContext.new #TODO: stub
+      tpl = R8Tpl::TemplateR8.new("#{@model_name}/#{action_name}",user_context)
       tpl.assign("#{@model_name.to_s}_list",model_list)
 #TODO: needed to below back in so template did not barf
       tpl.assign(:list_start_prev, 0)
@@ -95,9 +94,8 @@ module XYZ
 
 #TODO: automatically determine this
       action_name = :display
-#TODO: stub
-      user_context = UserContext.new
-      tpl = R8Tpl::TemplateR8.new(@model_name,action_name,user_context)
+      user_context = UserContext.new #TODO: stub
+      tpl = R8Tpl::TemplateR8.new("#{@model_name}/#{action_name}",user_context)
       tpl.assign(@model_name,model_result)
 
       ctrl_result = {
@@ -113,9 +111,8 @@ module XYZ
 
 #TODO: automatically determine this
       action_name = :edit
-#TODO: stub
-      user_context = UserContext.new
-      tpl = R8Tpl::TemplateR8.new(@model_name.to_s,action_name,user_context)
+      user_context = UserContext.new #TODO: stub
+      tpl = R8Tpl::TemplateR8.new("#{@model_name}/#{action_name}",user_context)
       tpl.assign(@model_name,model_result)
 
       ctrl_result = {

@@ -1,1 +1,3 @@
+
+This shouldnt b here, calls still routed through the standard templating before being output<br/>
 <%= @content %>

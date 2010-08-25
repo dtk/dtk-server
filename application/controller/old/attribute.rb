@@ -27,8 +27,10 @@ module XYZ
       tpl.assign(:list_start_prev, 0)
       tpl.assign(:list_start_next, 0)
 
-      tpl_contents = tpl.render(nil,false)
-      ret_single_action(tpl_contents)
+      return {
+        :tpl_contents => tpl.render(nil,false)
+      }
+#      bundle_single_action(tpl)
     end
   end
 end

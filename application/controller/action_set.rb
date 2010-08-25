@@ -16,44 +16,28 @@ module XYZ
       route_segments.shift
       call_params = route_segments.dup
 
-      #if a config is defined for route, use values from config
-      if R8::Routes[route_key]
-        @layout = R8::Routes[route_key][:layout] || R8::Config[:default_layout]
+      @layout = (R8::Routes[route_key] ? R8::Routes[route_key][:layout] : nil) || R8::Config[:default_layout]
 
-        if R8::Routes[route_key][:action_set]
-#TODO: remove action set def once action processor is cleared out
-          @action_set_def = R8::Routes[route_key]
-          run_action_set(R8::Routes[route_key][:action_set],call_params)
-        else
-#TODO: create an action set of length one and run it
+      #if a config is defined for route, use values from config
+      if R8::Routes[route_key] and R8::Routes[route_key][:action_set]
+        #TODO: remove action set def once action processor is cleared out
+        @action_set_def = R8::Routes[route_key]
+        run_action_set(R8::Routes[route_key][:action_set],call_params)
+      else #create an action set of length one and run it
+        #TODO: need to fix this up;
           route_cfg = R8::Routes[route_key]
-          panel = route_cfg[:panel] || :main_body
-          assign_type = route_cfg[:assign_type] || :append
+          panel = (route_cfg ? route_cfg[:panel] : nil) || :main_body
+          assign_type = (route_cfg ? route_cfg[:assign_type] : nil) || :append
 
           action_set = Array.new
           action_set << {
-            :route => route_key,
-#            :action_params => ["$id$"],
+            :route => route_key, #TODO: not clear how this is used; it is not used in run_action_set
+#            :action_params => ["$id$"], Need mechanism to pass in parameters
             :panel => panel,
             :assign_type => assign_type,
           }
           run_action_set(action_set,call_params)
-
-          raise Error.new("No route config defined for #{route_key}")
-        end
-      else
-#TODO: create an action set of length one and run it
-      #else no config set, go with defaults
-           action_set = Array.new
-           action_set << {
-             :route => route_key,
-#             :action_params => ["$id$"],
-             :panel => "main_body",
-             :assign_type => :append,
-           }
-          run_action_set(action_set,call_params)
       end
-
     end
 
 #TODO: this function should probably just take an action set to run
@@ -64,7 +48,8 @@ module XYZ
 
       #Execute each of the actions in the action_set and set the returned content
       (action_set || []).each do |action|
-        ctrl_result = call_action(action,action_processor)
+        ctrl_result = Hash.new
+        ctrl_result[:tpl_contents] = call_action(action,action_processor)
 
         #set the appropriate panel to render results to
         ctrl_result[:panel] = (ctrl_result[:panel] || action[:panel] || :main_body).to_sym

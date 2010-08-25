@@ -1,122 +1,9 @@
-#require File.expand_path('swoop_stub', File.dirname(__FILE__))
-#require File.expand_path('frontend_integration_stub', File.dirname(__FILE__))
 
-require File.expand_path('workspace', File.dirname(__FILE__))
-
-#TODO: stub; will move to own file and will populate from web call
-module XYZ
-  class UserContext
-    attr_reader :current_profile
-
-    def initialize()
-      @current_profile = :default
-
-   end
-  end
-end
-
- # Default url mappings are:
-#  a controller called Main is mapped on the root of the site: /
-#  a controller called Something is mapped on: /something
-# If you want to override this, add a line like this inside the class
-#  map '/otherurl'
-# this will force the controller to be mounted on: /otherurl
 
 module XYZ
   class MainController < Controller
-    layout :bundle_and_return
 
     attr_accessor :model_name,:css_includes,:js_includes,:base_uri
-
-    def initialize()
-      super
-#TODO: push this to higher level into the controller instead of being parsed here
-#getting model_name by looking at self.class, (e.g., self.class can = XYZ::NodeController)
-      @model_name = Aux.demodulize(self.class.to_s).gsub(/Controller$/,"").downcase.to_sym
-      @css_includes = Array.new
-      @js_includes = Array.new
-      @base_uri = String.new
-      @regions_content = Hash.new
-      @action_set_def = Hash.new
-      @user_context = nil
-
-      @layout = String.new
-      @ctrl_results = Array.new
-    end
-
-    def bundle_and_return
-      layout_name = "#{@layout}.layout"
-
-#TODO: leave these here until pushing examples into route config or ctrl
-      include_css(layout_name)
-      include_js('example')
-
-      @ctrl_results.each { |ctrl_result|
-        assign_type = ctrl_result[:assign_type]
-        panel = ctrl_result[:panel]
-        content = ctrl_result[:tpl_contents]
-
-        case assign_type
-          when :append 
-            (@regions_content[panel].nil?) ? 
-            @regions_content[panel] = content : 
-              @regions_content[panel] << content
-          when :replace 
-            @regions_content[panel] = content
-          when :prepend 
-            if(@regions_content[panel].nil?) 
-              @regions_content[panel] = content
-            else
-              tmp_contents = @regions_content[panel]
-              @regions_content[panel] = content + tmp_contents
-            end
-        end
-
-        if !ctrl_result[:js_includes].nil?
-          ctrl_result[:js_includes].each { |js_include| include_js(js_include) }
-        end
-        if !ctrl_result[:css_includes].nil?
-          ctrl_result[:css_includes].each { |css_include| include_css(css_include) }
-        end
-
-#TODO: process js_exe_scripts
-      }
-
-#pp @regions_content
-
-#TODO: get things cleaned up after implemented :json/js responses
-      response_type = :html
-      if response_type == :html
-        #set template vars
-        _app = {
-          :js_includes => @js_includes,
-          :css_includes => @css_includes,
-          :base_uri => R8::Config[:base_uri]
-        }
-        template_vars = {
-          :_app => _app,
-          :main_menu => String.new,
-          :left_col => String.new
-        }
-
-        @regions_content.each { |key,value|
-          template_vars[key] = value
-        }
-        ##end set template vars
-
-  #TODO: what is :layout for in the class sig?
-        tpl = R8Tpl::TemplateR8.new(layout_name,@user_context,:layout)
-        template_vars.each{|k,v|tpl.assign(k.to_sym,v)}
-        return tpl.render(nil,false) #nil, false args for testing
-      else
-        #do some json related activities here
-      end
-    end
-
-    #TODO: alternatively calling fn can call render itself and pass in teh results of caling a render on the template object
-    def bundle_single_action(tpl)
-      @regions_content[:main_body] = tpl.render(nil,false) #nil, false args for testing 
-    end
 
     def index
       layout :test
@@ -156,10 +43,8 @@ module XYZ
       tpl.assign(:list_start_prev, 0)
       tpl.assign(:list_start_next, 0)
 
-      return {
-        :tpl_contents => tpl.render(nil,false)
-      }
-#      bundle_single_action(tpl)
+      tpl_contents = tpl.render(nil,false)
+      ret_single_action(tpl_contents)
     end
 
 #TODO: id and parsed query string shouldnt be passed, id should be available from route string
@@ -173,10 +58,8 @@ module XYZ
       tpl = R8Tpl::TemplateR8.new("#{@model_name}/#{action_name}",@user_context)
       tpl.assign(@model_name,model_result)
 
-      return {
-        :tpl_contents => tpl.render(nil,false)
-      }
-#      bundle_single_action(tpl)
+      tpl_contents = tpl.render(nil,false)
+      ret_single_action(tpl_contents)
     end
 
 
@@ -190,11 +73,8 @@ module XYZ
       @user_context = UserContext.new #TODO: stub
       tpl = R8Tpl::TemplateR8.new("#{@model_name}/#{action_name}",@user_context)
       tpl.assign(@model_name,model_result)
-
-      return {
-        :tpl_contents => tpl.render(nil,false)
-      }
-#      bundle_single_action(tpl)
+      tpl_contents = tpl.render(nil,false)
+      ret_single_action(tpl_contents)
     end
 
 

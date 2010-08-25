@@ -26,7 +26,11 @@ module XYZ
       tpl.assign("#{model_name}_list",model_list)
       tpl.assign(:list_start_prev, 0)
       tpl.assign(:list_start_next, 0)
-      bundle_single_action(tpl)
+
+      return {
+        :tpl_contents => tpl.render(nil,false)
+      }
+#      bundle_single_action(tpl)
     end
   end
 end

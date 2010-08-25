@@ -9,6 +9,7 @@ module XYZ
   end
 
   class ActionsetController < MainController
+
     def process(*route)
       @user_context = UserContext.new #TODO: stub
       route_key = String.new
@@ -20,44 +21,63 @@ module XYZ
       route_segments.shift
       call_params = route_segments.dup
 
-      if R8::Routes[route_key] and R8::Routes[route_key][:action_set]
-        @action_set_def = R8::Routes[route_key]
-        run_action_set(call_params)
+      #if a config is defined for route, use values from config
+      if R8::Routes[route_key]
+        @layout = R8::Routes[route_key][:layout] || R8::Config[:default_layout]
+
+        if R8::Routes[route_key][:action_set]
+#TODO: remove action set def once action processor is cleared out
+          @action_set_def = R8::Routes[route_key]
+          run_action_set(R8::Routes[route_key][:action_set],call_params)
+        else
+#TODO: create an action set of length one and run it
+          route_cfg = R8::Routes[route_key]
+          panel = route_cfg[:panel] || :main_body
+          assign_type = route_cfg[:assign_type] || :append
+
+          action_set = Array.new
+          action_set << {
+            :route => route_key,
+#            :action_params => ["$id$"],
+            :panel => panel,
+            :assign_type => assign_type,
+          }
+          run_action_set(action_set,call_params)
+
+          raise Error.new("No route config defined for #{route_key}")
+        end
       else
-        #TODO: shouldnt raise error if action not found, should just execute single controller as normal
-        raise Error.new("No route config defined for #{route_key}")
+#TODO: create an action set of length one and run it
+      #else no config set, go with defaults
+           action_set = Array.new
+           action_set << {
+             :route => route_key,
+#             :action_params => ["$id$"],
+             :panel => "main_body",
+             :assign_type => :append,
+           }
+          run_action_set(action_set,call_params)
       end
+
     end
 
-    def run_action_set(call_params)
+#TODO: this function should probably just take an action set to run
+#call_params should probably be processed in controller and set to be accessible by others during the call
+    def run_action_set(action_set,call_params)
 #TODO: get rid of action processor and just integrate into controller
       action_processor = ActionProcessor.new(call_params,@action_set_def)
 
       #Execute each of the actions in the action_set and set the returned content
-      (@action_set_def[:action_set] || []).each do |action|
+      (action_set || []).each do |action|
         ctrl_result = call_action(action,action_processor)
 
         #set the appropriate panel to render results to
-        panel = (ctrl_result[:panel] || action[:panel] || :main_body).to_sym
+        ctrl_result[:panel] = (ctrl_result[:panel] || action[:panel] || :main_body).to_sym
 
         #set the appropriate render assignment type (append | prepend | replace)
-        assign_type = (ctrl_result[:assign_type] || action[:assign_type] || :append).to_sym
+        ctrl_result[:assign_type] = (ctrl_result[:assign_type] || action[:assign_type] || :append).to_sym
 
-        case assign_type
-          when :append 
-            (@regions_content[panel].nil?) ? 
-            @regions_content[panel] = ctrl_result : 
-              @regions_content[panel] << ctrl_result
-          when :replace 
-            @regions_content[panel] = ctrl_result
-          when :prepend 
-            if(@regions_content[panel].nil?) 
-              @regions_content[panel] = ctrl_result
-            else
-              tmp_contents = @regions_content[panel]
-              @regions_content[panel] = ctrl_result + tmp_contents
-            end
-          end  
+        @ctrl_results << ctrl_result
       end
     end
 

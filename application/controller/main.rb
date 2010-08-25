@@ -39,35 +39,78 @@ module XYZ
       @regions_content = Hash.new
       @action_set_def = Hash.new
       @user_context = nil
+
+      @layout = String.new
+      @ctrl_results = Array.new
     end
 
     def bundle_and_return
-      layout = @action_set_def[:layout] || R8::Config[:default_layout]
-      layout_name = "#{layout}.layout"
+      layout_name = "#{@layout}.layout"
+
+#TODO: leave these here until pushing examples into route config or ctrl
       include_css(layout_name)
-      #TODO: does below belong here?
       include_js('example')
 
-      #set template vars
-      _app = 
-        { 
-        :js_includes => @js_includes,
-        :css_includes => @css_includes,
-        :base_uri => R8::Config[:base_uri]
-      }
-      template_vars = {
-        :_app => _app,
-        :main_menu => String.new,
-        :left_col => String.new
-      }
-      @regions_content.each { |key,value|
-        template_vars[key] = value
-      }
-      ##end set template vars
+      @ctrl_results.each { |ctrl_result|
+        assign_type = ctrl_result[:assign_type]
+        panel = ctrl_result[:panel]
+        content = ctrl_result[:tpl_contents]
 
-      tpl = R8Tpl::TemplateR8.new(layout_name,@user_context,:layout)
-      template_vars.each{|k,v|tpl.assign(k.to_sym,v)}
-      tpl.render(nil,false) #nil, false args for testing
+        case assign_type
+          when :append 
+            (@regions_content[panel].nil?) ? 
+            @regions_content[panel] = content : 
+              @regions_content[panel] << content
+          when :replace 
+            @regions_content[panel] = content
+          when :prepend 
+            if(@regions_content[panel].nil?) 
+              @regions_content[panel] = content
+            else
+              tmp_contents = @regions_content[panel]
+              @regions_content[panel] = content + tmp_contents
+            end
+        end
+
+        if !ctrl_result[:js_includes].nil?
+          ctrl_result[:js_includes].each { |js_include| include_js(js_include) }
+        end
+        if !ctrl_result[:css_includes].nil?
+          ctrl_result[:css_includes].each { |css_include| include_css(css_include) }
+        end
+
+#TODO: process js_exe_scripts
+      }
+
+#pp @regions_content
+
+#TODO: get things cleaned up after implemented :json/js responses
+      response_type = :html
+      if response_type == :html
+        #set template vars
+        _app = {
+          :js_includes => @js_includes,
+          :css_includes => @css_includes,
+          :base_uri => R8::Config[:base_uri]
+        }
+        template_vars = {
+          :_app => _app,
+          :main_menu => String.new,
+          :left_col => String.new
+        }
+
+        @regions_content.each { |key,value|
+          template_vars[key] = value
+        }
+        ##end set template vars
+
+  #TODO: what is :layout for in the class sig?
+        tpl = R8Tpl::TemplateR8.new(layout_name,@user_context,:layout)
+        template_vars.each{|k,v|tpl.assign(k.to_sym,v)}
+        return tpl.render(nil,false) #nil, false args for testing
+      else
+        #do some json related activities here
+      end
     end
 
     #TODO: alternatively calling fn can call render itself and pass in teh results of caling a render on the template object
@@ -113,7 +156,10 @@ module XYZ
       tpl.assign(:list_start_prev, 0)
       tpl.assign(:list_start_next, 0)
 
-      bundle_single_action(tpl)
+      return {
+        :tpl_contents => tpl.render(nil,false)
+      }
+#      bundle_single_action(tpl)
     end
 
 #TODO: id and parsed query string shouldnt be passed, id should be available from route string
@@ -126,7 +172,11 @@ module XYZ
       @user_context = UserContext.new #TODO: stub
       tpl = R8Tpl::TemplateR8.new("#{@model_name}/#{action_name}",@user_context)
       tpl.assign(@model_name,model_result)
-      bundle_single_action(tpl)
+
+      return {
+        :tpl_contents => tpl.render(nil,false)
+      }
+#      bundle_single_action(tpl)
     end
 
 
@@ -140,7 +190,11 @@ module XYZ
       @user_context = UserContext.new #TODO: stub
       tpl = R8Tpl::TemplateR8.new("#{@model_name}/#{action_name}",@user_context)
       tpl.assign(@model_name,model_result)
-      bundle_single_action(tpl)
+
+      return {
+        :tpl_contents => tpl.render(nil,false)
+      }
+#      bundle_single_action(tpl)
     end
 
 

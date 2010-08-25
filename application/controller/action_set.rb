@@ -9,7 +9,6 @@ module XYZ
   end
 
   class ActionsetController < MainController
-    layout :bundle_and_return
     def process(*route)
       @user_context = UserContext.new #TODO: stub
       route_key = String.new

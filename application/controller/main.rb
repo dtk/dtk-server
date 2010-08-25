@@ -24,33 +24,7 @@ end
 
 module XYZ
   class MainController < Controller
-    layout :layout_default_with_header
-
-
-    #TODO Nate, this is just stub; assume that contents of most of this should be in teh layout itself
-    def layout_default_with_header
-"<?xml version='1.0' ?>
-<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.1//EN'
-  'http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd'>
-<html xmlns='http://www.w3.org/1999/xhtml'>
-  <head>
-    <title>Get Values</title>
-    <meta http-equiv='Content-Script-Type' content='text/javascript' />
-    <meta http-equiv='Content-Style-Type' content='text/css' />
-    <meta http-equiv='Content-Type' content='text/html; charset=utf-8' />
-    <meta http-equiv='expires' content='0' />
-    <meta name='description' content='Description for search engines' />
-    <meta name='generator' content=Ramaze #{Ramaze::VERSION} />
-    <meta name='keywords' content='Ramaze, Your own keywords' />
-    <meta name='author' content='Max Mustermann' />
-    <meta name='date' content=#{Time.now.iso8601} />
-    <%= css 'screen'%>
-  </head>
-  <body>
-  #{@ctrl_result[:tpl_contents]}
-  </body>
-</html>"
-    end
+    layout :bundle_and_return
 
     attr_accessor :model_name,:css_includes,:js_includes,:base_uri
 
@@ -65,8 +39,6 @@ module XYZ
       @regions_content = Hash.new
       @action_set_def = Hash.new
       @user_context = nil
-      #TODO: below just temp
-      @ctrl_result = Hash.new
     end
 
     def bundle_and_return
@@ -96,6 +68,10 @@ module XYZ
       tpl = R8Tpl::TemplateR8.new(layout_name,@user_context,:layout)
       template_vars.each{|k,v|tpl.assign(k.to_sym,v)}
       tpl.render(nil,false) #nil, false args for testing
+    end
+
+    def bundle_single_action(tpl)
+      @regions_content[:main_body] = tpl.render(nil,false) #nil, false args for testing 
     end
 
     def index
@@ -136,7 +112,7 @@ module XYZ
       tpl.assign(:list_start_prev, 0)
       tpl.assign(:list_start_next, 0)
 
-      @ctrl_result[:tpl_contents] = tpl.render(nil,false) #nil, false args for testing
+      bundle_single_action(tpl)
     end
 
 #TODO: id and parsed query string shouldnt be passed, id should be available from route string
@@ -149,7 +125,7 @@ module XYZ
       @user_context = UserContext.new #TODO: stub
       tpl = R8Tpl::TemplateR8.new("#{@model_name}/#{action_name}",@user_context)
       tpl.assign(@model_name,model_result)
-      @ctrl_result[:tpl_contents] = tpl.render(nil,false) #nil, false args for testing
+      bundle_single_action(tpl)
     end
 
 
@@ -163,7 +139,7 @@ module XYZ
       @user_context = UserContext.new #TODO: stub
       tpl = R8Tpl::TemplateR8.new("#{@model_name}/#{action_name}",@user_context)
       tpl.assign(@model_name,model_result)
-      @ctrl_result[:tpl_contents] = tpl.render(nil,false) #nil, false args for testing
+      bundle_single_action(tpl)
     end
 
 

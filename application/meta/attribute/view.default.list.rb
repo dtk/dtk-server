@@ -14,7 +14,7 @@
               :objLinkView => 'display',
             }},
           {:attribute_value => {
-              :type => 'text',
+              :type => 'hash',
               :help => '',
             }},
       ]

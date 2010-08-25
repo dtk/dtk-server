@@ -27,12 +27,12 @@ class Fieldhash < Fieldbase
   end
 
   def get_field_display_rtpl()
-    field_string = '{%=' + @model_name + '[:' + @name + ']%}'
+    field_string = '{%=' + @model_name + '[:' + @name + '].inspect%}'
     return field_string
   end
 
   def get_field_list_rtpl()
-    field_string = '{%=' + @model_name + '[:' + @name + ']%}'
+    field_string = '{%=' + @model_name + '[:' + @name + '].inspect%}'
     return field_string
   end
 

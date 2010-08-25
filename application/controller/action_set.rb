@@ -1,4 +1,3 @@
-
 #TODO: move all this into main controller
 #should aim to have only main and rest should all be controller mapped to models/routes
 
@@ -26,7 +25,7 @@ module XYZ
         run_action_set(call_params)
       else
         #TODO: shouldnt raise error if action not found, should just execute single controller as normal
-        raise Error.new ("No route config defined for #{route_key}")
+        raise Error.new("No route config defined for #{route_key}")
       end
     end
 
@@ -47,16 +46,16 @@ module XYZ
         case assign_type
           when :append 
             (@regions_content[panel].nil?) ? 
-            @regions_content[panel] = ctrl_result[:tpl_contents] : 
-              @regions_content[panel] << ctrl_result[:tpl_contents]
+            @regions_content[panel] = ctrl_result : 
+              @regions_content[panel] << ctrl_result
           when :replace 
-            @regions_content[panel] = ctrl_result[:tpl_contents]
+            @regions_content[panel] = ctrl_result
           when :prepend 
             if(@regions_content[panel].nil?) 
-              @regions_content[panel] = ctrl_result[:tpl_contents]
+              @regions_content[panel] = ctrl_result
             else
               tmp_contents = @regions_content[panel]
-              @regions_content[panel] = ctrl_result[:tpl_contents] + tmp_contents
+              @regions_content[panel] = ctrl_result + tmp_contents
             end
           end  
       end
@@ -94,13 +93,13 @@ module XYZ
             :node => XYZ.const_get("#{node_name.capitalize}Controller"),
             :method => method.to_sym,
             :params => params,
-            :engine => lambda{|action, value| value[:tpl_contents] })
+            :engine => lambda{|action, value| value })
         action_result = a.call
-        if ret[:tpl_contents].nil?
-          ret[:tpl_contents] = action_result
+        if ret.nil?
+          ret = action_result
         else
         #TODO stub that just synactically appends
-          ret[:tpl_contents] << action_result
+          ret << action_result
         end
       end
 

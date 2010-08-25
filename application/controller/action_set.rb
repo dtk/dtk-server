@@ -11,6 +11,7 @@ module XYZ
   class ActionsetController < MainController
     layout :bundle_and_return
     def process(*route)
+      @user_context = UserContext.new #TODO: stub
       route_key = String.new
       route_segments = route.dup
       until route_segments.first == ActionSet::Delim

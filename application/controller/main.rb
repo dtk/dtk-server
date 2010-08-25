@@ -26,9 +26,6 @@ module XYZ
   class MainController < Controller
     layout :layout_default_with_header
 
-    def layout_default
-      "#{@ctrl_result[:tpl_contents]}"
-    end
 
     #TODO Nate, this is just stub; assume that contents of most of this should be in teh layout itself
     def layout_default_with_header
@@ -50,7 +47,7 @@ module XYZ
     <%= css 'screen'%>
   </head>
   <body>
-  #{layout_default}
+  #{@ctrl_result[:tpl_contents]}
   </body>
 </html>"
     end
@@ -67,6 +64,7 @@ module XYZ
       @base_uri = String.new
       @regions_content = Hash.new
       @action_set_def = Hash.new
+      @user_context = nil
       #TODO: below just temp
       @ctrl_result = Hash.new
     end
@@ -75,27 +73,29 @@ module XYZ
       layout = @action_set_def[:layout] || R8::Config[:default_layout]
       layout_name = "#{layout}.layout"
       include_css(layout_name)
+      #TODO: does below belong here?
       include_js('example')
 
-        #set templaet vars
-        _app = {}
-        _app[:js_includes] = @js_includes
-        _app[:css_includes] = @css_includes
-        _app[:base_uri] = R8::Config[:base_uri]
-        template_vars = {
-          :_app => _app,
-          :main_menu => '',
-          :left_col => ''
-        }
-        @regions_content.each { |key,value|
-          template_vars[key] = value
-        }
+      #set template vars
+      _app = 
+        { 
+        :js_includes => @js_includes,
+        :css_includes => @css_includes,
+        :base_uri => R8::Config[:base_uri]
+      }
+      template_vars = {
+        :_app => _app,
+        :main_menu => String.new,
+        :left_col => String.new
+      }
+      @regions_content.each { |key,value|
+        template_vars[key] = value
+      }
+      ##end set template vars
 
-        user_context = UserContext.new #TODO: stub
-        tpl = R8Tpl::TemplateR8.new(layout_name,user_context,:layout)
-        template_vars.each{|k,v|tpl.assign(k.to_sym,v)}
-x=        tpl.render(nil,false) #nil, false args for testing
-x
+      tpl = R8Tpl::TemplateR8.new(layout_name,@user_context,:layout)
+      template_vars.each{|k,v|tpl.assign(k.to_sym,v)}
+      tpl.render(nil,false) #nil, false args for testing
     end
 
     def index
@@ -129,8 +129,8 @@ x
 #TODO: automatically determine this
       action_name = :list
 
-      user_context = UserContext.new #TODO: stub
-      tpl = R8Tpl::TemplateR8.new("#{@model_name}/#{action_name}",user_context)
+      @user_context = UserContext.new #TODO: stub
+      tpl = R8Tpl::TemplateR8.new("#{@model_name}/#{action_name}",@user_context)
       tpl.assign("#{@model_name.to_s}_list",model_list)
 #TODO: needed to below back in so template did not barf
       tpl.assign(:list_start_prev, 0)
@@ -146,8 +146,8 @@ x
 
 #TODO: automatically determine this
       action_name = :display
-      user_context = UserContext.new #TODO: stub
-      tpl = R8Tpl::TemplateR8.new("#{@model_name}/#{action_name}",user_context)
+      @user_context = UserContext.new #TODO: stub
+      tpl = R8Tpl::TemplateR8.new("#{@model_name}/#{action_name}",@user_context)
       tpl.assign(@model_name,model_result)
       @ctrl_result[:tpl_contents] = tpl.render(nil,false) #nil, false args for testing
     end
@@ -160,8 +160,8 @@ x
 
 #TODO: automatically determine this
       action_name = :edit
-      user_context = UserContext.new #TODO: stub
-      tpl = R8Tpl::TemplateR8.new("#{@model_name}/#{action_name}",user_context)
+      @user_context = UserContext.new #TODO: stub
+      tpl = R8Tpl::TemplateR8.new("#{@model_name}/#{action_name}",@user_context)
       tpl.assign(@model_name,model_result)
       @ctrl_result[:tpl_contents] = tpl.render(nil,false) #nil, false args for testing
     end

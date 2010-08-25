@@ -23,15 +23,16 @@ module XYZ
         #TODO: remove action set def once action processor is cleared out
         @action_set_def = R8::Routes[route_key]
         run_action_set(R8::Routes[route_key][:action_set],call_params)
-      else #create an action set of length one and run it
+      elsif R8::Routes[route_key] #create an action set of length one and run it
         #TODO: need to fix this up;
           route_cfg = R8::Routes[route_key]
           panel = (route_cfg ? route_cfg[:panel] : nil) || :main_body
           assign_type = (route_cfg ? route_cfg[:assign_type] : nil) || :append
+          route = (route_cfg ? route_cfg[:route] : nil) || route_key
 
           action_set = Array.new
           action_set << {
-            :route => route_key, #TODO: not clear how this is used; it is not used in run_action_set
+            :route => route,
 #            :action_params => ["$id$"], Need mechanism to pass in parameters
             :panel => panel,
             :assign_type => assign_type,
@@ -49,7 +50,7 @@ module XYZ
       #Execute each of the actions in the action_set and set the returned content
       (action_set || []).each do |action|
         ctrl_result = Hash.new
-        ctrl_result[:tpl_contents] = call_action(action,action_processor)
+        ctrl_result = call_action(action,action_processor)
 
         #set the appropriate panel to render results to
         ctrl_result[:panel] = (ctrl_result[:panel] || action[:panel] || :main_body).to_sym
@@ -85,7 +86,7 @@ module XYZ
           i = i+1
         end
       end
-
+=begin
       def process!(ret,action)
         params = process_action_params(action[:action_params])
         node_name,method = action[:route].split("/")
@@ -102,7 +103,7 @@ module XYZ
           ret << action_result
         end
       end
-
+=end
       def process_action_params(raw_params)
         #short circuit if no params that need substituting
         return raw_params if @param_assigns.empty?

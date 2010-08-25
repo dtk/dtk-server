@@ -81,7 +81,7 @@ module R8Tpl
        set_view(path_type_to_use)
     end
 
-    def jsTemplatingOn?
+    def js_templating_on?
       return @js_templating_on
     end
 
@@ -101,7 +101,7 @@ module R8Tpl
       tplToJS(view_tpl_contents)
     end
 
-    def render(view_tpl_contents=nil,js_templating_on=jsTemplatingOn?)
+    def render(view_tpl_contents=nil,js_templating_on=js_templating_on?)
       if view_tpl_contents.nil? 
         view_tpl_contents=IO.read(@view_path)
       end
@@ -109,12 +109,17 @@ module R8Tpl
       assign(:jsIncludePath, "jsIncludePath")
       assign(:siteURL, "this is a test")
 
-      #if jsTemplatingOn? then
+      #if js_templating_on? then
       if js_templating_on
+#TODO: add smarts to create proper hash object to be returned to browser as json
         renderJsTPL(view_tpl_contents)
       else
         eruby =  Erubis::Eruby.new(view_tpl_contents,:pattern=>'\{\% \%\}')
         @tpl_results = eruby.result(@template_vars)
+
+        return {
+          :tpl_contents => @tpl_results
+        }
       end
     end
 
@@ -161,13 +166,13 @@ module R8Tpl
     #add local var ref for document object
     jsQueuePush('functionbody', "var doc = document;")
     createRootNode()
-    renderJSDOMTree(@xhtml_document.root.children,@root_js_hash)
+    render_js_dom_tree(@xhtml_document.root.children,@root_js_hash)
     setJSAddContentsToPage()
     jsQueuePush('functionclose', "}")
     writeJSToFile()
   end
 
-  def renderJSDOMTree(nodeList, parentNode=nil)
+  def render_js_dom_tree(nodeList, parentNode=nil)
     for node in nodeList do
         if !node.cdata?
           newJSNode = {
@@ -190,11 +195,11 @@ module R8Tpl
 
           childrenNodeList = node.children
           if childrenNodeList.length > 0
-            self.renderJSDOMTree(childrenNodeList, newJSNode)
+            self.render_js_dom_tree(childrenNodeList, newJSNode)
           end
 
           #if there are children recurse down the tree
-#          childrenNodeList.length > 0 ? self.renderJSDOMTree(childrenNodeList, newJSNode) : return
+#          childrenNodeList.length > 0 ? self.render_js_dom_tree(childrenNodeList, newJSNode) : return
 
           #this is here by itself b/c of methodology of rendering DOM and appending children AFTER all sub children done
           if !parentNode.nil? && !node.cdata? && newJSNode[:elementType] != 'text'

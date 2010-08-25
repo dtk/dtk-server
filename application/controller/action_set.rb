@@ -3,7 +3,7 @@ module XYZ
     Delim = '__'
   end
 
-  class ActionsetController < MainController
+  class ActionsetController < Controller
 
     def process(*route)
       @user_context = UserContext.new #TODO: stub

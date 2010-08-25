@@ -1,5 +1,5 @@
 module XYZ
-  class AttributeController < MainController
+  class AttributeController < Controller
 #TODO: move field set definition into meta/attribute/attribute.def.rb
     def self.field_set()
       [
@@ -18,9 +18,8 @@ module XYZ
       model_list = get_objects(@model_name.to_sym,field_set,where_clause)
 
       action_name = :list #TODO: automatically determine this
-
-      user_context = UserContext.new #TODO: stub
-      tpl = R8Tpl::TemplateR8.new("#{@model_name}/#{action_name}",user_context)
+      set_user_context()
+      tpl = R8Tpl::TemplateR8.new("#{@model_name}/#{action_name}",@user_context)
       tpl.assign("#{@model_name}_list",model_list)
       tpl.assign(:list_start_prev, 0)
       tpl.assign(:list_start_next, 0)

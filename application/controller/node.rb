@@ -1,5 +1,5 @@
 module XYZ
-  class NodeController < MainController
+  class NodeController < Controller
     def self.field_set()
       [
         :id,

@@ -11,71 +11,15 @@ module XYZ
 
 #TODO: field sets shouldnt be read independently of the model
     ####### helper functions; make private and move to diff position in file
-    def field_set()
-      self.class.field_set()
-    end
 
 #TODO: add check to see if user agent specific CSS exists (ie: ie8,ff3,safari4,etc)
-    def include_css(css_name)
-      @css_includes << R8::Config[:base_css_uri] + '/' + css_name + '.css'
-    end
 
-    def include_js(js_name)
-      @js_includes << R8::Config[:base_js_uri] + '/' + js_name + '.js'
-    end
 
 #######################################################
 #########MAIN ACTION DEFS
 #######################################################
 
 #TODO: move parsed_query_string to controller
-    def list(parsed_query_string=nil)
-      where_clause = parsed_query_string || ret_parsed_query_string()
-      model_list = get_objects(@model_name,field_set,where_clause)
-
-#TODO: automatically determine this
-      action_name = :list
-
-      @user_context = UserContext.new #TODO: stub
-      tpl = R8Tpl::TemplateR8.new("#{@model_name}/#{action_name}",@user_context)
-      tpl.assign("#{@model_name.to_s}_list",model_list)
-#TODO: needed to below back in so template did not barf
-      tpl.assign(:list_start_prev, 0)
-      tpl.assign(:list_start_next, 0)
-
-      tpl_contents = tpl.render(nil,false)
-      ret_single_action(tpl_contents)
-    end
-
-#TODO: id and parsed query string shouldnt be passed, id should be available from route string
-    def display(id,parsed_query_string=nil)
-#how does it know what object to get?
-      model_result = get_object_by_id(id)
-
-#TODO: automatically determine this
-      action_name = :display
-      @user_context = UserContext.new #TODO: stub
-      tpl = R8Tpl::TemplateR8.new("#{@model_name}/#{action_name}",@user_context)
-      tpl.assign(@model_name,model_result)
-
-      tpl_contents = tpl.render(nil,false)
-      ret_single_action(tpl_contents)
-    end
-
-
-    def edit
-#      id = retrieve_from_route
-#how does it know what object to get?
-      model_result = get_object_by_id(id)
-
-#TODO: automatically determine this
-      action_name = :edit
-      @user_context = UserContext.new #TODO: stub
-      tpl = R8Tpl::TemplateR8.new("#{@model_name}/#{action_name}",@user_context)
-      tpl.assign(@model_name,model_result)
-      tpl_contents = tpl.render(nil,false)
-      ret_single_action(tpl_contents)
-    end
 
 
 ################################################################################

@@ -1,5 +1,5 @@
 module XYZ
-  class ComponentController < MainController
+  class ComponentController < Controller
 #TODO: move field set out of here and into meta/component/component.defs.rb file
     def self.field_set()
       [

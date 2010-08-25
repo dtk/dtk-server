@@ -70,6 +70,7 @@ module XYZ
       tpl.render(nil,false) #nil, false args for testing
     end
 
+    #TODO: alternatively calling fn can call render itself and pass in teh results of caling a render on the template object
     def bundle_single_action(tpl)
       @regions_content[:main_body] = tpl.render(nil,false) #nil, false args for testing 
     end

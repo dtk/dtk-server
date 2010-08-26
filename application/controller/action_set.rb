@@ -58,7 +58,7 @@ module XYZ
     def call_action(action)
       params = process_action_params(action[:action_params])
       model,method = action[:route].split("/")
-      method ||= :default
+      method ||= :index
       a = Ramaze::Action.create(
           :node => XYZ.const_get("#{model.capitalize}Controller"),
           :method => method.to_sym,

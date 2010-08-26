@@ -6,6 +6,8 @@ module XYZ
 
     def index
       print "reached from /workspace\n"
+      #TODO: temp so the code does not bump out in process
+      Hash.new
     end
 
     def list

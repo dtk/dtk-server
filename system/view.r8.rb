@@ -4,7 +4,7 @@ module R8Tpl
   class ViewR8
     include CommonMixin
     attr_accessor :obj_name, :tpl_contents, :css_require, :js_require
-
+    Views = Hash.new
     def initialize(model_name,view_name,user)
       @model_name = model_name	  #object type (a symbol)
       @view_name = view_name              #viewName can be either edit,detail,list,etc
@@ -105,9 +105,9 @@ module R8Tpl
     @view_meta ||= get_view_meta
   end
   def get_view_meta()
-    R8View::Views[@model_name] ||= {}
-    R8View::Views[@model_name][@profile] ||= {}
-    R8View::Views[@model_name][@profile][@view_name] ||= {}
+    Views[@model_name] ||= {}
+    Views[@model_name][@profile] ||= {}
+    Views[@model_name][@profile][@view_name] ||= {}
 
     #TODO: revisit to work on override possiblities and for profile handling
     #should check for all view locations, direct and override
@@ -115,7 +115,7 @@ module R8Tpl
     path = ret_existing_view_path(:meta)
     if path
       hash = XYZ::Aux.convert_to_hash_symbol_form(eval(IO.read(path)))
-      R8View::Views[@model_name][@profile][@view_name] = hash
+      Views[@model_name][@profile][@view_name] = hash
       #TODO check if ok to remove logic wrt to json
     else
       #TODO: figure out handling of overrides
@@ -123,7 +123,7 @@ module R8Tpl
       # require 'some path to require'
      raise XYZ::ErrorNotImplemented.new()
     end
-    R8View::Views[@model_name][@profile][@view_name]
+    Views[@model_name][@profile][@view_name]
   end
 
 
@@ -263,8 +263,6 @@ OLD
     field_handler = FieldR8.new(self)
     r8TPL = R8Tpl::TemplateR8.new("#{@model_name}/#{@view_name}",@user,:system)
     r8TPL.js_templating_on = false   #template engine should catch non JS automatically, but forcing to be sure
-    r8TPL.set_view_dir('system')
-    r8TPL.set_view('metaview.'+@profile+'.'+@view_name,true)
 
 #    i18n = utils.get_model_i18n(@model_name)
     r8TPL.assign(:form_id, @form_id)

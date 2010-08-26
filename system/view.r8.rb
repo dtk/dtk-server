@@ -45,7 +45,7 @@ module R8Tpl
       case (view_type())
       when "edit"
         render_edit_tpl_cache() 
-        #       addValidation()
+        #       add_validation()
       when "display"
         render_display_tpl_cache()
       when "list"
@@ -237,7 +237,7 @@ OLD
   # If the template/cache/path do not exist or is stale it will generate a new one
 
   # This will add js calls to add each field to form validation
-  def addValidation()
+  def add_validation()
     field_handler = FieldR8.new(self)
 
     (view_meta[:field_groups]||[]).each do |group_num,group_hash|
@@ -255,7 +255,6 @@ OLD
   end
 
 
-
   # This function will generate the TPL cache for a view of type edit
   def render_edit_tpl_cache()
 #TODO: can probably move most of this function to a general function call
@@ -265,8 +264,8 @@ OLD
     r8TPL.js_templating_on = false   #template engine should catch non JS automatically, but forcing to be sure
 
 #    i18n = utils.get_model_i18n(@model_name)
-    r8TPL.assign(:form_id, @form_id)
-    r8TPL.assign(:form_action, view_meta[:action])
+    r8TPL.assign(:formId, @form_id)
+    r8TPL.assign(:formAction, view_meta[:action])
 
     td_label_class = (view_meta[:td_label_class].nil? ? 'label' : view_meta[:td_label_class])
     td_field_class = (view_meta[:td_field_class].nil? ? 'field' : view_meta[:td_field_class])

@@ -1,6 +1,5 @@
-
-<button id="saveBtn" onclick="R8.forms.submit('{%=formId%}');">Save</button>
-<form id="{%=formId%}" action="{%=formAction%}">
+<form id="attribute-edit-form" action="{%='../save/{'+'%=attribute[:id]%'+'}'%}" method="post" enctype="multipart/form-data">
+<input type="submit" value="Save"/>
 {%for field in h_field_list%}
 	<input type="hidden" name="{%=field[:name]%}" id="{%=field[:id]%}" value="{%=field[:value]%}" />
 {%end%}

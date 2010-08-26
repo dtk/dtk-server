@@ -75,7 +75,7 @@ R8::Routes["component/display"] = {
 #TODO: if ordered after the controller classes have been added can automatically discover models
 existing_keys = R8::Routes.keys
 %w{component attribute node}.each do |model|
-  %w{list display edit}.each do |action|
+  %w{list display edit save}.each do |action|
     route = "#{model}/#{action}"
     R8::Routes[route] = Hash.new unless existing_keys.include?(route)
   end

@@ -68,7 +68,7 @@ module R8Tpl
       case view_type().to_sym
         when :edit
           render_edit_tpl_cache() 
-          add_validation()
+#          add_validation()
         when :display
           render_display_tpl_cache() 
         when :list

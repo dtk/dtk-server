@@ -73,7 +73,7 @@ R8::Routes["component/display"] = {
 }
 #Routes that correspond to singleton
 #TODO: may be able to autoamtically discover these routes
-%w{component/list attribute/list node/list node/display}. each do |route|
+%w{component/list attribute/list attribute/display node/list node/display}. each do |route|
   R8::Routes[route] = Hash.new
 end
 

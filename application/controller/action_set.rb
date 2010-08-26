@@ -22,12 +22,15 @@ module XYZ
       if action_set_def[:action_set]
         run_action_set(action_set_def[:action_set])
       else #create an action set of length one and run it
+        action_params = action_set_params 
+        query_string = ret_parsed_query_string()
+        action_params << query_string unless query_string.empty?
         action_set = 
           [{
              :route => action_set_def[:route] || route_key,
              :panel => action_set_def[:panel] || :main_body,
              :assign_type => action_set_def[:assign_type] || :append,
-             :action_params => action_set_params
+             :action_params => action_params 
            }]
         run_action_set(action_set)
       end

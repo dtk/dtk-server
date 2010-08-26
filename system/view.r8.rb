@@ -275,13 +275,14 @@ OLD
     (view_meta[:hidden_fields]||[]).each do |hfield_hash|
       hfield_hash.each do |field_name,field_meta|
         field_meta[:name] = field_name.to_s
-        if(field_meta[:id].nil?) then field_meta[:id] = field_meta[:name] end
+        field_meta[:id] ||= field_meta[:name]
+        field_meta[:value] ||= "{%=attribute[:#{field_name}]%}"
         hidden_fields << field_meta
       end
     end
     r8TPL.assign(:h_field_list, hidden_fields)
 
-    rows = []
+    rows = Array.new
     group_num = 0
     (view_meta[:field_groups]||[]).each do |group_hash|
       row_count = 0
@@ -289,39 +290,35 @@ OLD
       num_cols = group_hash[:num_cols].to_i
       col_index = 0
       field_num = 0
-      rows[row_count] = {}
-      rows[row_count][:cols] = []
+      rows[row_count] = Hash.new
+      rows[row_count][:cols] = Array.new
 
       group_hash[:fields].each do |field_hash|
         field_num +=1
         rows[row_count][:row_id] = 'g'+group_num.to_s+'-r'+row_count.to_s
         #if size is 0 then its a blank spot in the form
-        if(field_hash.length == 0) then
-          rows[row_count][:cols][col_index] = {}
+        if field_hash.length == 0
+          rows[row_count][:cols][col_index] = Hash.new
           rows[row_count][:cols][col_index][:class] = td_label_class
           rows[row_count][:cols][col_index][:content] = '&amp;nbsp;'
           rows[row_count][:cols][col_index][:col_id] = 'r'+row_count.to_s+'-c'+col_index.to_s+'-label'
           col_index+=1
-          rows[row_count][:cols][col_index] = {}
+          rows[row_count][:cols][col_index] = Hash.new
           rows[row_count][:cols][col_index][:class] =  td_field_class
           rows[row_count][:cols][col_index][:content] = '&amp;nbsp;'
           rows[row_count][:cols][col_index][:col_id] = 'r'+row_count.to_s+'-c'+col_index.to_s+'-field'
         else
           field_hash.each do |field_name,field_meta|
             field_meta[:name] = field_name.to_sym
-            if(field_meta[:id].nil?) then field_meta[:id] = field_meta[:name] end
+            field_meta[:id] ||= field_meta[:name] 
             field_meta[:model_name] = @model_name
             #do label
-            rows[row_count][:cols][col_index] = {}
-            if(display_labels) then
-              rows[row_count][:cols][col_index][:content] = ((!i18n(:default_edit,field_meta[:name].to_sym).nil?) ? i18n(:default_edit,field_meta[:name].to_sym) : field_meta[:name])
-            else
-              rows[row_count][:cols][col_index][:content] = '&nbsp;'
-            end
+            rows[row_count][:cols][col_index] = Hash.new
+            rows[row_count][:cols][col_index][:content] = display_labels ? (i18n(:default_edit,field_meta[:name].to_sym) || field_meta[:name]) : '&nbsp;'
             rows[row_count][:cols][col_index][:class] = td_label_class
             rows[row_count][:cols][col_index][:col_id] = field_meta[:name].to_s+"-label"
             col_index+=1
-            rows[row_count][:cols][col_index] = {}
+            rows[row_count][:cols][col_index] = Hash.new
             #do field
             rows[row_count][:cols][col_index][:col_id] = field_meta[:name].to_s+"-field"
             rows[row_count][:cols][col_index][:content] = field_handler.get_field(view_type(), field_meta, 'tpl')

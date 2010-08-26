@@ -1,4 +1,4 @@
-<form id="attribute-edit-form" action="{%='../save/{'+'%=attribute[:id]%'+'}'%}" method="post" enctype="multipart/form-data">
+<form id="attribute-edit-form" action="../save/" method="post" enctype="multipart/form-data">
 <input type="submit" value="Save"/>
 {%for field in h_field_list%}
 	<input type="hidden" name="{%=field[:name]%}" id="{%=field[:id]%}" value="{%=field[:value]%}" />

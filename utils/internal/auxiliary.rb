@@ -132,3 +132,13 @@ module XYZ
   end
 end
 
+#for being able to determine the method name in teh function call
+module Kernel
+private
+   def this_method
+     caller[0] =~ /`([^']*)'/ and $1
+   end
+   def this_parent_method
+     caller[1] =~ /`([^']*)'/ and $1
+   end
+end

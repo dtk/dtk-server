@@ -1,7 +1,6 @@
 module XYZ
   class ActionsetController < Controller
     def process(*route)
-      set_user_context()
       
       #seperate route in 'route_key' (e.g., object/action, object) and its params 'action_set_params'
       route_key = String.new

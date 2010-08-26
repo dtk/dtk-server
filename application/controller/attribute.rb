@@ -15,12 +15,12 @@ module XYZ
 
     def component_display(parsed_query_string=nil)
       where_clause = parsed_query_string || ret_parsed_query_string()
-      model_list = get_objects(@model_name.to_sym,field_set,where_clause)
+      model_list = get_objects(model_name().to_sym,field_set,where_clause)
 
       #TODO: should we be using default action name
       action_name = :list
-      tpl = R8Tpl::TemplateR8.new("#{@model_name}/#{action_name}",user_context())
-      tpl.assign("#{@model_name}_list",model_list)
+      tpl = R8Tpl::TemplateR8.new("#{model_name()}/#{action_name}",user_context())
+      tpl.assign("#{model_name()}_list",model_list)
       tpl.assign(:list_start_prev, 0)
       tpl.assign(:list_start_next, 0)
 

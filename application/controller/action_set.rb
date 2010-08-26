@@ -1,16 +1,10 @@
 module XYZ
   class ActionsetController < Controller
     def process(*route)
-      
       #seperate route in 'route_key' (e.g., object/action, object) and its params 'action_set_params'
-      route_key = String.new
-      route_segments = route.dup
-      until route_segments.first == ActionSet::Delim
-        route_key << route_segments.shift << "/"
-      end
-      route_key.chop!
-      route_segments.shift
-      action_set_params = route_segments
+      #first two (or single items make up route_key; the rest are params
+      route_key = route[0..1].join("/")
+      action_set_params = route[2..route.size-1]||[]
 
       action_set_def = R8::Routes[route_key] || Hash.new
       @action_set_param_map = ret_action_set_param_map(action_set_def,action_set_params)
@@ -35,9 +29,6 @@ module XYZ
       end
     end
    private
-    module ActionSet
-      Delim = '__'
-    end
     def run_action_set(action_set)
       #Execute each of the actions in the action_set and set the returned content
       (action_set || []).each do |action|
@@ -102,14 +93,11 @@ module XYZ
 
 #TODO: lets finally kill off the xyz and move route loading into some sort of initialize or route setup call
   #enter the routes defined in config into Ramaze
-  (R8::Routes || []).each_key do |route|
-    Ramaze::Route["/xyz/#{route}"] = lambda{ |path, request|
-      #TODO logic emploeyd uses keys in R8::Routes to split paramaters from mdethod/action
-      # is there simple way which we can have simple routing role that just prepends process?
-      if path =~ Regexp.new("^/xyz/#{route}")
-        path.gsub(Regexp.new("^/xyz/#{route}"),"/xyz/actionset/process/#{route}/#{ActionSet::Delim}")
+
+    Ramaze::Route["route_to_actionset"] = lambda{ |path, request|
+      if path =~ Regexp.new("^/xyz")
+        path.gsub(Regexp.new("^/xyz"),"/xyz/actionset/process")
       end
     }
-    end
   end
 end

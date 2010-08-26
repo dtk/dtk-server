@@ -45,6 +45,12 @@ with out-of-box ramaze routing
         should hit route component/display and execute the action set instead
         the 239439 and any other ones should be passed on the end of each action set call by default
 =end
+
+
+R8::Routes[:login] = {
+  :alias => 'user/login',
+}
+#Routes that correspond to (non-trivial action sets)
 R8::Routes["component/display"] = {
   :layout => 'default',
   :alias => '',
@@ -55,10 +61,8 @@ R8::Routes["component/display"] = {
      :route => "component/display",
      :action_params => ["$id$"],
      :panel => "main_body"
-#     :assign_type => :append 
    },
    {
-#     :route => "attribute/list",
      :route => "attribute/component_display",
      :action_params => [{:parent_id => "$id$"}],
      :panel => "main_body",
@@ -67,9 +71,11 @@ R8::Routes["component/display"] = {
    }
   ]
 }
+#Routes that correspond to singleton
+#TODO: may be able to autoamtically discover these routes
+%w{component/list attribute/list node/list node/display}. each do |route|
+  R8::Routes[route] = Hash.new
+end
 
-R8::Routes[:login] = {
-  :alias => 'user/login',
-}
 R8::Routes.freeze
 

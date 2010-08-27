@@ -443,7 +443,7 @@ OLD
   #writes template, js_include and css_include
   def fwrite()
     files = {
-     ret_view_path(:cache) => @tpl_contents,
+     ret_view_path(:cache) => @tpl_contents[:tpl_contents],
      ret_view_path(:css_require) => @css_require ? JSON.pretty_generate(@css_require) : nil,
      ret_view_path(:js_require) => @js_require ? JSON.pretty_generate(@js_require) : nil
     }

@@ -127,7 +127,10 @@ class Fieldtext < Fieldbase
   def get_field_edit_text_rtpl()
     (@columns >=1) ? size = 'size="' + @columns.to_s + '"' : size = ''
 
-    return '<input type="text" id="' + @id + '" name="' + @name + '" class="' + @class_txt + '" value="{%=' + @model_name + '[:' + @name + ']%}" ' + size + ' />'
+    if @disabled == true then disabled = 'disabled="disabled"'
+    else disabled = '' end
+
+    return '<input type="text" '+ disabled + ' id="' + @id + '" name="' + @name + '" class="' + @class_txt + '" value="{%=' + @model_name + '[:' + @name + ']%}" ' + size + ' />'
   end
 
   # This returns the View of a input of type text in TPL/Smarty form

@@ -58,6 +58,7 @@
              :help => '',
              :rows => 1,
              :cols => 40,
+             :read_only => true,
             }},
             {:semantic_type => {
              :type => 'text',

@@ -16,7 +16,7 @@ class Fieldbase
     @model_name = (@field_meta[:model_name].nil? == true ? '' : @field_meta[:model_name].to_s)
 
     @value = ''
-    @disabled = false
+    @disabled = (@field_meta[:read_only] || false)
   
     @classes = []           #array of CSS classes to add by default
     @class_txt = ''         #the string for the class="class_names" text

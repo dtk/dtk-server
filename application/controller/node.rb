@@ -2,16 +2,16 @@ module XYZ
   class NodeController < Controller
     def self.field_set()
       [
-        :id,
-        :display_name,
-        :description,
-        :type,
-        :os,
-        :image_size,
-        :disk_size,
-        :data_source,
-        :parent_id,
-        :parent_path
+       :id,
+       :display_name,
+       :description,
+       :type,
+       :os,
+       :image_size,
+       :disk_size,
+       :data_source,
+       :parent_id,
+#       :parent_path #commented out because expensive second call to db
       ]   
     end
 =begin

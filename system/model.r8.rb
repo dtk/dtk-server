@@ -41,9 +41,12 @@ module XYZ
 
     #inherited virtual coulmn defs
     def parent_id()
+      return id_handle()[:guid] if id_handle() and id_handle()[:guid] #short circuit 
       get_parent_id_info()[:id]
     end
+
     def parent_path()
+      return id_handle()[:uri] if id_handle() and id_handle()[:uri] #short circuit 
       get_parent_id_info()[:uri]
     end
 

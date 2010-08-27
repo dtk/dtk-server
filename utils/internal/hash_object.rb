@@ -50,8 +50,11 @@ module XYZ
       end
 
       def object_slice(hash,slice_keys,opts={})
-        ret = {}
-        slice_keys.each{|k| ret[k] = hash[k] if (hash[k] or opts[:include_null_cols])}
+        ret = Hash.new
+        slice_keys.each do |k|
+          val = hash[k]
+          ret[k] = val if (val or opts[:include_null_cols])
+        end
         ret
       end
 

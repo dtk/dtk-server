@@ -211,10 +211,8 @@ module XYZ
 	       DBRel[:schema => :public, :table => unformated_row[:relation_name].to_sym]]
         end        
         def get_minimal_row_from_id_handle(id_handle)
-return nil# need to debug
           return nil unless id_handle[:model_name] and id_handle[:guid] and id_handle[:c]
-puts "shorcut used"
-          IDInfoRow[CONTEXT_ID => id_handle[:c],:id => id_handle[:guid],:relation_name => id_handle[:model_name]]
+          IDInfoRow[CONTEXT_ID => id_handle[:c],:id => id_handle[:guid],:relation_type => id_handle[:model_name]]
         end
 	def ds()
 	  raise Error.new("db has not been set for #{self.to_s}") if @db.nil?

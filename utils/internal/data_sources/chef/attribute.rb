@@ -10,6 +10,8 @@ module XYZ
           %w{port_type description constraints}.each do |k|
             target[k.to_sym] = source[][k]
           end
+          target[:output_variable] = source[]["calculated"]
+          target[:required] = fn(:required,source[]["required"])
           target[:value_asserted] = fn(lambda{|x,y|x||y},source[]["value"],source[]["default"])
           target[:semantic_type] = fn(lambda{|x|x.to_json if x},source[]["semantic_type"])
         end
@@ -35,6 +37,12 @@ module XYZ
              else
                "node[#{ref.gsub(/\//,"][")}]"
              end
+          end
+          def required(required_value)
+            return nil if required_value.nil?
+            return true if %w{true required}.include?(required_value.to_s)
+            return false if %w{false recommended optional}.include?(required_value.to_s)
+            nil
           end
           def data_type(type)
             case type

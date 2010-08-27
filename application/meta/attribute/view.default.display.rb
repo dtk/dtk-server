@@ -47,6 +47,12 @@
              :rows => 1,
              :cols => 40,
             }},
+            {:required => {
+             :type => 'string',
+             :help => '',
+             :rows => 1,
+             :cols => 40,
+            }},
             {:data_type => {
              :type => 'text',
              :help => '',

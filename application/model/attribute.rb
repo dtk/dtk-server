@@ -10,14 +10,19 @@ module XYZ
         column :value_derived, :json
         column :function, :json
         column :propagation_type, :varchar, :size => 20, :default => "immediate" #whether a propagated new value should be immediately set or whether it needs to go through approval, etc
-        column :constraints, :varchar
         column :required, :boolean #whether required for this attribute to have a value inorder to execute actions for parent component; TBD: may be indexed by action
 
+        #TBD: do we want to factor output vars out and treat differently
+        column :output_variable, :boolean # set to true if as a result of recipe execution var gets computed
+
+        #TODO: may unify the fields below and treat them all as types of constraints, which could be intersected, unioned, etc
         column :data_type, :varchar, :size => 25
         #TBD: whether to explicitly have an array or put this in data type or seamntic_type
         column :is_array, :boolean, :default => false
         column :semantic_type, :json
-        column :hidden, :boolean, :default => false
+        column :constraints, :varchar
+
+        #TODO this probably does not belond here column :hidden, :boolean, :default => false
         column :port_type, :varchar, :size => 10 # null means no port; otherwise input or output
         column :external_attr_ref, :varchar
         virtual_column :attribute_value 

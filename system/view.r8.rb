@@ -356,6 +356,7 @@ OLD
 #    i18n = utils.get_model_i18n(@model_name)
     r8TPL.assign(:formId, @form_id)
     r8TPL.assign(:formAction, view_meta[:action])
+    r8TPL.assign(:editId, "{%=#{@model_name}[:id]%}")
 
     td_label_class = (view_meta[:td_label_class].nil? ? 'label' : view_meta[:td_label_class])
     td_field_class = (view_meta[:td_field_class].nil? ? 'field' : view_meta[:td_field_class])
@@ -365,7 +366,8 @@ OLD
     (view_meta[:hidden_fields]||[]).each do |hfield_hash|
       hfield_hash.each do |field_name,field_meta|
         field_meta[:name] = field_name.to_s
-        if(field_meta[:id].nil?) then field_meta[:id] = field_meta[:name] end
+        field_meta[:id] ||= field_meta[:name]
+        field_meta[:value] ||= "{%=#{@model_name}[:#{field_name}]%}"
         hidden_fields << field_meta
       end
     end

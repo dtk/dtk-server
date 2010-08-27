@@ -1,7 +1,7 @@
 
 <div class="display_container">
-	<button id="editBtn" onclick="R8.forms.submit('{%=formId%}');">Edit</button>
-	<form id="{%=formId%}" action="{%=formAction%}">
+	<form id="{%=formId%}" action="../edit/{%=editId%}" method="get">
+	<input type="submit" value="Edit"/>
 	{%for field in h_field_list%}
 		<input type="hidden" name="{%=field[:name]%}" id="{%=field[:id]%}" value="{%=field[:value]%}" />
 	{%end%}

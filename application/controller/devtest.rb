@@ -21,7 +21,8 @@ module XYZ
       common_ds_connectors = Hash.new 
       ds_object_objs.each{|x|x.set_and_share_ds_connector!(common_ds_connectors)}
       ds_object_objs.each{|x|x.discover_and_update()}
-      @content = "discover and update from #{ds_type}"
+      puts "discover and update from #{ds_type}"
+      Hash.new
     end
 
     def list(*uri_array)

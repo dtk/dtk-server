@@ -276,7 +276,7 @@ OLD
       hfield_hash.each do |field_name,field_meta|
         field_meta[:name] = field_name.to_s
         field_meta[:id] ||= field_meta[:name]
-        field_meta[:value] ||= "{%=attribute[:#{field_name}]%}"
+        field_meta[:value] ||= "{%=#{@model_name}[:#{field_name}]%}"
         hidden_fields << field_meta
       end
     end

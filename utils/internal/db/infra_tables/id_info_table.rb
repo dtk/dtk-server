@@ -9,6 +9,7 @@ module XYZ
       raise_has_illegal_form(x) unless self[:c] = x[:c]
       if x[:guid]
         self[:guid]= x[:guid].to_i
+        self[:model_name] = x[:model_name].to_sym if x[:model_name]
       elsif x[:uri]
         self[:uri]= x[:uri]
       else
@@ -91,6 +92,8 @@ module XYZ
 
       ###### DataProcessing
 	def get_row_from_id_handle(id_handle,opts={})
+          ret = get_minimal_row_from_id_handle(id_handle) if opts[:short_circuit_for_minimal_row]
+          return ret if ret
 	  c = id_handle[:c]
 	  return get_row_from_uri(id_handle[:uri],c,opts) if id_handle[:uri]
 	  return get_row_from_guid(id_handle[:guid],c,opts) if id_handle[:guid]
@@ -207,7 +210,12 @@ module XYZ
 	       DBRel[:schema => $1.to_sym, :table => $2.to_sym] : 
 	       DBRel[:schema => :public, :table => unformated_row[:relation_name].to_sym]]
         end        
-
+        def get_minimal_row_from_id_handle(id_handle)
+return nil# need to debug
+          return nil unless id_handle[:model_name] and id_handle[:guid] and id_handle[:c]
+puts "shorcut used"
+          IDInfoRow[CONTEXT_ID => id_handle[:c],:id => id_handle[:guid],:relation_name => id_handle[:model_name]]
+        end
 	def ds()
 	  raise Error.new("db has not been set for #{self.to_s}") if @db.nil?
 	  @db.dataset(ID_INFO_TABLE)

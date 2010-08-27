@@ -41,7 +41,7 @@ module XYZ
 
       def get_object(id_handle,opts={})
 	c = id_handle[:c]
-	id_info = IDInfoTable.get_row_from_id_handle id_handle,  :raise_error => opts[:raise_error]
+	id_info = IDInfoTable.get_row_from_id_handle id_handle, :raise_error => opts[:raise_error], :short_circuit_for_minimal_row => true
 	return nil if id_info.nil? 
 
         return nil unless hash = get_scalar_values_given_id_info(id_info,opts)

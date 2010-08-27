@@ -48,7 +48,7 @@
              :cols => 40,
             }},
             {:required => {
-             :type => 'string',
+             :type => 'text',
              :help => '',
              :rows => 1,
              :cols => 40,

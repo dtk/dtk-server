@@ -105,11 +105,7 @@ module R8Tpl
       if view_tpl_contents.nil? 
         view_tpl_contents=IO.read(@view_path)
       end
-      #TODO: should be populating these from global config options
-      assign(:jsIncludePath, "jsIncludePath")
-      assign(:siteURL, "this is a test")
 
-      #if js_templating_on? then
       if js_templating_on
 #TODO: add smarts to create proper hash object to be returned to browser as json
         renderJsTPL(view_tpl_contents)

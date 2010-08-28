@@ -1,10 +1,8 @@
 require File.expand_path('field.r8.rb', File.dirname(__FILE__))
 require File.expand_path('common_mixin.r8', File.dirname(__FILE__))
-require File.expand_path('utility.r8', File.dirname(__FILE__))
 module R8Tpl
   class ViewR8
     include CommonMixin
-    include Utility::I18n
     attr_accessor :obj_name, :tpl_contents, :css_require, :js_require
     Views = Hash.new
     def initialize(model_name,view_name,user)
@@ -13,7 +11,7 @@ module R8Tpl
       @form_id = "#{@model_name}-#{@view_name}-form"
       @user = user
       @profile = @user.current_profile || :default #profile will dictate the specific view to use/generate
-      @i18n = get_model_i18n(model_name,user)
+      @i18n = load_model_i18n(model_name)
 
       @view_meta = nil    #hash defining an instance of a view
 
@@ -25,6 +23,14 @@ module R8Tpl
       @tpl_contents = nil	            #This is contents of template
       @css_require = []
       @js_require = []
+    end
+
+    def load_model_i18n(model_name)
+      file_name = "#{R8::Config[:i18n_base_dir]}/#{model_name}/#{R8::Config[:default_language]}.rb"
+      return eval(IO.read(file_name)) if File.exists?(file_name)
+#      file_name = "#{R8::Config[:i18n_base_dir]}/#{R8::Config[:default_language]}.rb"
+#      return eval(IO.read(file_name)) if File.exists?(file_name)
+      Hash.new
     end
 
     def render()
@@ -73,12 +79,8 @@ module R8Tpl
   end
  private
 
-  #TBD: may move this to utility.r8
   def i18n(*path)
-    #TODO: looks like to get to work currently needto strip off first element
-    term = path.dup
-    term.shift
-    XYZ::HashObject.nested_value(@i18n,term)
+    XYZ::HashObject.nested_value(@i18n,path)
   end
 
   ViewTranslations = {
@@ -207,13 +209,12 @@ OLD
         field_meta[:model_name] = @model_name
         field_meta[:name] = field_name
 
-        if @i18n[(field_meta[:name].to_s+'_'+@view_name.to_s).to_sym] 
-          field_meta[:label] = '{%=_'+@model_name.to_s+'[:i18n][:'+field_meta[:name].to_s+'_'+@view_name.to_s + ']%}'
-        elsif @i18n[field_meta[:name].to_sym]
-          field_meta[:label] = '{%=_'+@model_name.to_s+'[:i18n][:'+field_meta[:name].to_s+']%}'
+        if @i18n[('lbl_'+field_meta[:name]+'_'+@view_name).to_sym] 
+          field_meta[:label] = '{%=_'+@model_name+'.i18n[:'+'lbl_'+field_meta[:name]+'_'+@view_name +'%}'
+        elsif @i18n[('lbl_'+field_meta[:name]).to_sym]
+          field_meta[:label] = '{%=_'+@model_name+'.i18n[:'+'lbl_'+field_meta[:name]+'%}'
         else
-          field_meta[:label] = field_meta[:name]
-        end
+          field_meta[:label] = field_meta[:name].to_s
 
         field_meta[:id] = field_meta[:name] if field_meta[:id].nil?
         field_meta[:class] = field_meta[:class]

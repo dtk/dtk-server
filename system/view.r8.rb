@@ -1,8 +1,10 @@
 require File.expand_path('field.r8.rb', File.dirname(__FILE__))
 require File.expand_path('common_mixin.r8', File.dirname(__FILE__))
+require File.expand_path('utility.r8', File.dirname(__FILE__))
 module R8Tpl
   class ViewR8
     include CommonMixin
+    include Utility::I18n
     attr_accessor :obj_name, :tpl_contents, :css_require, :js_require
     Views = Hash.new
     def initialize(model_name,view_name,user)
@@ -11,7 +13,7 @@ module R8Tpl
       @form_id = "#{@model_name}-#{@view_name}-form"
       @user = user
       @profile = @user.current_profile || :default #profile will dictate the specific view to use/generate
-      @i18n_hash = load_i18n_hash(model_name)
+      @i18n_hash = load_i18n_hash(model_name,user)
 
       @view_meta = nil    #hash defining an instance of a view
 
@@ -23,14 +25,6 @@ module R8Tpl
       @tpl_contents = nil	            #This is contents of template
       @css_require = []
       @js_require = []
-    end
-
-    def load_i18n_hash(model_name)
-      file_name = "#{R8::Config[:i18n_root]}/#{model_name}/#{R8::Config[:default_language]}.rb"
-      return eval(IO.read(file_name)) if File.exists?(file_name)
-      file_name = "#{R8::Config[:i18n_root]}/#{R8::Config[:default_language]}.rb"
-      return eval(IO.read(file_name)) if File.exists?(file_name)
-      Hash.new
     end
 
     def render()
@@ -79,6 +73,7 @@ module R8Tpl
   end
  private
 
+  #TBD: may move this to utility.r8
   def i18n(*path)
     XYZ::HashObject.nested_value(@i18n_hash,path)
   end

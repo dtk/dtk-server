@@ -40,6 +40,7 @@
              :help => '',
              :rows => 1,
              :cols => 40,
+             :read_only => true,
             }},
             {:value_asserted => {
              :type => 'text',

@@ -41,6 +41,12 @@
         :rows => 1,
               :cols => 20,
             }},
+            {:external_cmp_ref => {
+              :type => 'text',
+              :help => '',
+        :rows => 1,
+              :cols => 20,
+            }},
             {:description => {
               :type => 'text',
               :help => '',

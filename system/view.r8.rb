@@ -202,6 +202,7 @@ OLD
 #    i18n = utils.get_model_i18n(@model_name)
 
     list_cols = []
+
     view_meta[:field_list].each do |field_hash|
       field_hash.each do |field_name,field_meta|
         field_meta[:model_name] = @model_name
@@ -320,7 +321,19 @@ OLD
             field_meta[:model_name] = @model_name
             #do label
             rows[row_count][:cols][col_index] = Hash.new
-            rows[row_count][:cols][col_index][:content] = display_labels ? (i18n(:default_edit,field_meta[:name].to_sym) || field_meta[:name]) : '&nbsp;'
+
+            if display_labels
+              if @i18n[(field_meta[:name].to_s+'_'+@view_name.to_s).to_sym] 
+                rows[row_count][:cols][col_index][:content] = '{%=_'+@model_name.to_s+'[:i18n][:'+field_meta[:name].to_s+'_'+@view_name.to_s + ']%}'
+              elsif @i18n[field_meta[:name].to_sym]
+                rows[row_count][:cols][col_index][:content] = '{%=_'+@model_name.to_s+'[:i18n][:'+field_meta[:name].to_s+']%}'
+              else
+                rows[row_count][:cols][col_index][:content] = field_meta[:name]
+              end
+            else
+              rows[row_count][:cols][col_index][:content] = '&nbsp;'
+            end
+
             rows[row_count][:cols][col_index][:class] = td_label_class
             rows[row_count][:cols][col_index][:col_id] = field_meta[:name].to_s+"-label"
             col_index+=1
@@ -409,13 +422,22 @@ OLD
             field_meta[:name] = field_name.to_sym
             if(field_meta[:id].nil?) then field_meta[:id] = field_meta[:name] end
             field_meta[:model_name] = @model_name
-            #do label
+
             rows[row_count][:cols][col_index] = {}
-            if(display_labels) then
-              rows[row_count][:cols][col_index][:content] = ((!i18n(:default_edit,field_meta[:name].to_sym).nil?) ? i18n(:default_edit,field_meta[:name].to_sym) : field_meta[:name])
+
+            #do label
+            if display_labels
+              if @i18n[(field_meta[:name].to_s+'_'+@view_name.to_s).to_sym] 
+                rows[row_count][:cols][col_index][:content] = '{%=_'+@model_name.to_s+'[:i18n][:'+field_meta[:name].to_s+'_'+@view_name.to_s + ']%}'
+              elsif @i18n[field_meta[:name].to_sym]
+                rows[row_count][:cols][col_index][:content] = '{%=_'+@model_name.to_s+'[:i18n][:'+field_meta[:name].to_s+']%}'
+              else
+                rows[row_count][:cols][col_index][:content] = field_meta[:name]
+              end
             else
               rows[row_count][:cols][col_index][:content] = '&nbsp;'
             end
+
             rows[row_count][:cols][col_index][:class] = td_label_class
             rows[row_count][:cols][col_index][:col_id] = field_meta[:name].to_s+"-label"
             col_index+=1

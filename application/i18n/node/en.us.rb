@@ -11,5 +11,7 @@
   :disk_size => 'Disk Size',
   :data_source => 'Data Source',
   :parent_id => 'PARENT_ID',
-  :parent_path => 'PARENT_PATH'
+  :parent_path => 'PARENT_PATH',
+
+  :description_list => 'Descr'
 }

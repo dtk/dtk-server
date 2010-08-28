@@ -122,7 +122,9 @@ table.display td.label {
 /*--------Edit View------------*/
 .edit_container {
 	padding: 10px 20px;
+	position: relative;
 }
+
 
 table.edit {
 	border-top: 1px solid #999999;

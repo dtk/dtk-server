@@ -75,7 +75,10 @@ module R8Tpl
 
   #TBD: may move this to utility.r8
   def i18n(*path)
-    XYZ::HashObject.nested_value(@i18n_hash,path)
+    #TODO: looks like to get to work currently needto strip off first element
+    term = path.dup
+    term.shift
+    XYZ::HashObject.nested_value(@i18n_hash,term)
   end
 
   ViewTranslations = {

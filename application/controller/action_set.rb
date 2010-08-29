@@ -36,15 +36,28 @@ module XYZ
       #Execute each of the actions in the action_set and set the returned content
       (action_set || []).each do |action|
         ctrl_result = Hash.new
-        ctrl_result = call_action(action)
+        result = call_action(action)
 
-        #set the appropriate panel to render results to
-        ctrl_result[:panel] = (ctrl_result[:panel] || action[:panel] || :main_body).to_sym
+        #if a hash is returned, turn make result an array list of one
+        (result.class == Hash) ? ctrl_result[:content] = [result] : ctrl_result = result
 
-        #set the appropriate render assignment type (append | prepend | replace)
-        ctrl_result[:assign_type] = (ctrl_result[:assign_type] || action[:assign_type] || :append).to_sym
+        #for each piece of content set by controller result,make sure panel and assign type is set
+        ctrl_result[:content].each_with_index do |item,index|
+          #set the appropriate panel to render results to
+          ctrl_result[:content][index][:panel] = (ctrl_result[:content][index][:panel] || action[:panel] || :main_body).to_sym
 
-        @ctrl_results << ctrl_result
+          #set the appropriate render assignment type (append | prepend | replace)
+          ctrl_result[:content][index][:assign_type] = (ctrl_result[:content][index][:assign_type] || action[:assign_type] || :append).to_sym
+        end
+
+        ctrl_result[:js_includes] = ret_js_includes()
+        ctrl_result[:css_includes] = ret_js_includes()
+
+        model,method = action[:route].split("/")
+        method ||= :index
+        action_namespace = "#{R8::Config[:application_name]}_#{model}_#{method}".to_sym
+        @ctrl_results[action_namespace] = ctrl_result
+        @ctrl_results[:as_run_list] << action_namespace
       end
     end
 

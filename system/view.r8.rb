@@ -178,19 +178,21 @@ OLD
   def get_css_require_from_cache()
     path = ret_existing_view_path(:css_require)
     return nil unless path
+#TODO: collapse Aux and Utils together into whatever it will be called
     XYZ::Aux.convert_to_hash_symbol_form(IO.read(path))
   end
 
   def get_js_require_from_cache()
     path = ret_existing_view_path(:jss_require)
     return nil unless path
+#TODO: collapse Aux and Utils together into whatever it will be called
     XYZ::Aux.convert_to_hash_symbol_form(IO.read(path))
   end
 
   # This function will generate the TPL cache for a view of type list
   def render_list_tpl_cache()
 #TODO: can probably move most of this function to a general function call
-#and re-use between renderViewJSCache and renderViewHTML
+#and re-use between render_view_js_cache and renderViewHTML
     field_handler = FieldR8.new(self)
     r8TPL = R8Tpl::TemplateR8.new("#{@model_name}/#{@view_name}",@user,:system)
     r8TPL.js_templating_on = false   #template engine should catch non JS automatically, but forcing to be sure
@@ -265,7 +267,7 @@ OLD
   # This function will generate the TPL cache for a view of type edit
   def render_edit_tpl_cache()
 #TODO: can probably move most of this function to a general function call
-#and re-use between renderViewJSCache and renderViewHTML
+#and re-use between render_view_js_cache and renderViewHTML
     field_handler = FieldR8.new(self)
     r8TPL = R8Tpl::TemplateR8.new("#{@model_name}/#{@view_name}",@user,:system)
     r8TPL.js_templating_on = false   #template engine should catch non JS automatically, but forcing to be sure
@@ -367,7 +369,7 @@ OLD
   # This function will generate the TPL cache for a view of type display
   def render_display_tpl_cache()
 #TODO: can probably move most of this function to a general function call
-#and re-use between renderViewJSCache and renderViewHTML
+#and re-use between render_view_js_cache and renderViewHTML
     field_handler = FieldR8.new(self)
     r8TPL = R8Tpl::TemplateR8.new("#{@model_name}/#{@view_name}",@user,:system)
     r8TPL.js_templating_on = false   #template engine should catch non JS automatically, but forcing to be sure
@@ -471,7 +473,7 @@ OLD
   #writes template, js_include and css_include
   def fwrite()
     files = {
-     ret_view_path(:cache) => @tpl_contents[:tpl_contents],
+     ret_view_path(:cache) => @tpl_contents,
      ret_view_path(:css_require) => @css_require ? JSON.pretty_generate(@css_require) : nil,
      ret_view_path(:js_require) => @js_require ? JSON.pretty_generate(@js_require) : nil
     }
@@ -486,7 +488,7 @@ OLD
 
   # This will return the path for the JS cache file
 #TODO: revisit once randomizer js template naming is going a-la smarty caches
-  def getViewJSCachePath()
+  def get_view_js_cache_path()
     if @js_cache_path.nil?
       @js_cache_path = "#{R8::Config[:js_file_write_path]}/#{@profile}.#{@view_name}.js"
     end
@@ -497,10 +499,10 @@ OLD
 #TODO: make sure to return and rewrite after adding util/generic file access function
 #ex: should transparently check for either local file, or AWS, CDN, etc
   def viewJSCurrent()
-    if(File.exists?(getViewJSCachePath())) then
+    if(File.exists?(get_view_js_cache_path())) then
 #TODO: make sure to return and rewrite after adding util/generic file access function
 #ex: should transparently check for either local file, or AWS, CDN, etc
-      jsCacheEditTime = File.mtime(getViewJSCachePath()).to_i
+      jsCacheEditTime = File.mtime(get_view_js_cache_path()).to_i
       tplCacheEditTime = File.mtime(view_tpl_cache_path()).to_i
       #adding this since rendering logic is in this file, might update it w/o changing template,
       #jsTpl should then be updated to reflect changes
@@ -518,7 +520,7 @@ OLD
   end
 
   # This function will generate the js cache for the form
-  def renderViewJSCache()
+  def render_view_js_cache()
   #TODO: nothing here yet, must revisit when deciding to create master field class for a profile
   #that can render individual fields on the fly in the browser
   end

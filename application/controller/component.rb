@@ -21,7 +21,7 @@ module XYZ
       _model_var[:i18n] = get_model_i18n(model_name().to_s,user_context())
       tpl.assign("_#{model_name().to_s}",_model_var)
 
-      return tpl.render()
+      return {:content => tpl.render()}
     end
 
 

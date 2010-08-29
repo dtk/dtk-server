@@ -7,6 +7,7 @@ require File.expand_path('common_mixin.r8', File.dirname(__FILE__))
 module R8Tpl
   class TemplateR8 
     include CommonMixin
+
     START_TAG_REGEX = /\{%\s*/
     #  END_TAG_REGEX = /\s*.*%\}/
     #TODO: revisit when implementing if and iterators
@@ -88,6 +89,7 @@ module R8Tpl
     def assign(name,value=nil)
       @template_vars[name] = value
     end
+
     def set_js_tpl_name(js_tpl_name)
       @js_tpl_callback = js_tpl_name
       @js_file_name = js_tpl_name+".js"
@@ -103,22 +105,21 @@ module R8Tpl
     end
 
     def render(view_tpl_contents=nil,js_templating_on=js_templating_on?)
-      if view_tpl_contents.nil? 
+      if view_tpl_contents.nil?
         view_tpl_contents=IO.read(@view_path)
       end
 
       if js_templating_on?
-#TODO: add smarts to create proper hash object to be returned to browser as json
-        return {
-          :testing => render_js_tpl(view_tpl_contents)
-        }
+        tpl_result = Hash.new
+        tpl_result[:template_vars] = @template_vars
+        tpl_result[:src] = render_js_tpl(view_tpl_contents)
+        tpl_result[:template_callback] = @js_tpl_callback
+        return tpl_result
       else
         eruby =  Erubis::Eruby.new(view_tpl_contents,:pattern=>'\{\% \%\}')
         @tpl_results = eruby.result(@template_vars)
 
-        return {
-          :tpl_contents => @tpl_results
-        }
+        return @tpl_results
       end
     end
 
@@ -163,9 +164,9 @@ module R8Tpl
     js_queue_push('functionheader', "function " + @js_tpl_callback + "(" + @js_var_header + ",renderType) {")
     #add local var ref for document object
     js_queue_push('functionbody', "var doc = document;")
-    createRootNode()
+    create_root_node()
     render_js_dom_tree(@xhtml_document.root.children,@root_js_hash)
-    setJSAddContentsToPage()
+    set_js_add_contents_to_page()
     js_queue_push('functionclose', "}")
     write_js_to_file()
   end
@@ -184,11 +185,11 @@ module R8Tpl
 
           #if the node has value contents its a text node and process said contents
           if newJSNode[:elementType] == 'text'
-            self.processNodeText(newJSNode[:value],!parentNode.nil? ? parentNode[:jsElementVarName] : '', newJSNode[:elementType])
+            self.process_node_text(newJSNode[:value],!parentNode.nil? ? parentNode[:jsElementVarName] : '', newJSNode[:elementType])
           else
-            self.js_queue_push('node', self.createElementJS(newJSNode[:elementType],newJSNode[:jsElementVarName]))
+            self.js_queue_push('node', self.create_element_js(newJSNode[:elementType],newJSNode[:jsElementVarName]))
             @element_count += 1
-            self.addAttributes(node,newJSNode)
+            self.add_attributes(node,newJSNode)
           end
 
           childrenNodeList = node.children
@@ -201,7 +202,7 @@ module R8Tpl
 
           #this is here by itself b/c of methodology of rendering DOM and appending children AFTER all sub children done
           if !parentNode.nil? && !node.cdata? && newJSNode[:elementType] != 'text'
-            self.appendChildJS(parentNode[:jsElementVarName],parentNode[:elementType], newJSNode[:jsElementVarName], newJSNode[:elementType])
+            self.append_child_js(parentNode[:jsElementVarName],parentNode[:elementType], newJSNode[:jsElementVarName], newJSNode[:elementType])
           end
 
           #make this check _dev or _production mode
@@ -218,36 +219,36 @@ module R8Tpl
     end
   end
 
-  def addAttributes(node,newJSNode)
+  def add_attributes(node,newJSNode)
     for attr in node.attribute_nodes do
-      self.addAttrJS(newJSNode[:jsElementVarName],newJSNode[:elementType], attr.name, attr.content)
+      self.add_attr_js(newJSNode[:jsElementVarName],newJSNode[:elementType], attr.name, attr.content)
     end
   end
 
-  def clearIndentation()
+  def clear_indentation()
     @indent = ''
   end
 
-  def handleIndentation(jsLine)
-    case jsLine[:type]
+  def handle_indentation(js_line)
+    case js_line[:type]
       when "functionheader" then
           @num_indents +=1
       when "forloopheader","ifheader","xhtmlAttrHead" then
-          self.setIndentation()
+          self.set_indentation()
           @num_indents += 1
       when "functionclose","forloopclose","ifclose","end","xhtmlAttrClose" then
           @num_indents -= 1
-          self.setIndentation()
+          self.set_indentation()
       when "xhtmlAttrElse","elsif" then
           @num_indents -= 1
-          self.setIndentation()
+          self.set_indentation()
           @num_indents += 1
       else
-          self.setIndentation()
+          self.set_indentation()
     end
   end
 
-  def setIndentation()
+  def set_indentation()
     i = 0
     while i < @num_indents do
       @indent << "\t"
@@ -259,27 +260,27 @@ module R8Tpl
     js_cache_file_path = @js_file_write_path + "/" + @js_file_name
 
     File.open(js_cache_file_path, 'w') do |js_file_handle|
-      for jsLine in @js_render_queue do
-        clearIndentation()
-        handleIndentation(jsLine)
+      for js_line in @js_render_queue do
+        clear_indentation()
+        handle_indentation(js_line)
 
         #jsItem[:jscontent] can be single entry or array of jscontent to be written
         #right now only textspans will have multiple entries
-        if jsLine[:jscontent].class == Array
-           for jsContentItem in jsLine[:jscontent] do
+        if js_line[:jscontent].class == Array
+           for jsContentItem in js_line[:jscontent] do
              js_file_write(js_file_handle,jsContentItem + "\n")
-             js_file_write(js_file_handle,"\n") if jsLine[:type] == 'comment'
+             js_file_write(js_file_handle,"\n") if js_line[:type] == 'comment'
            end
         else
-          js_file_write(js_file_handle,jsLine[:jscontent].to_s + "\n")
-          js_file_handle.write("\n") if jsLine[:type] == 'comment'
+          js_file_write(js_file_handle,js_line[:jscontent].to_s + "\n")
+          js_file_handle.write("\n") if js_line[:type] == 'comment'
         end
       end
     end
-    return js_cache_file_path
+    return @js_file_name
   end
 
-  def createRootNode()
+  def create_root_node()
     newJSNode = {
       :jsElementVarName => @xhtml_document.root.name + '_tplRoot',
       :elementType => @xhtml_document.root.name,
@@ -288,23 +289,23 @@ module R8Tpl
       :attributes => []
     }
     @root_js_hash = newJSNode
-    self.js_queue_push('node', self.createElementJS(newJSNode[:elementType],newJSNode[:jsElementVarName]))
-    self.addAttributes(@xhtml_document.root,newJSNode)
+    self.js_queue_push('node', self.create_element_js(newJSNode[:elementType],newJSNode[:jsElementVarName]))
+    self.add_attributes(@xhtml_document.root,newJSNode)
   end
 
 #should probably move the appending out of the templating and just have js return DOM ref to JS ctrlr
-  def setJSAddContentsToPage()
+  def set_js_add_contents_to_page()
     self.js_queue_push('ifheader', "if(R8.utils.isUndefined(renderType) || renderType !='append') {")
     self.js_queue_push('renderClear','doc.getElementById("' + @panel_set_element_id + '").innerHTML="";')
     self.js_queue_push('ifclose', '}')
     self.js_queue_push('pageAdd','doc.getElementById("' + @panel_set_element_id + '").appendChild(' + @root_js_element_var_name + ');')
   end
 
-  def createElementJS(elemName,jsElementVarName)
+  def create_element_js(elemName,jsElementVarName)
     return 'var ' + jsElementVarName + '= document.createElement("' + elemName + '");'
   end
 
-  def addAttrJS(jsElementVarName, elementType, attrName, attrValue)
+  def add_attr_js(jsElementVarName, elementType, attrName, attrValue)
     elementType.downcase!
     attrName.downcase!
     processedAttrName = self.check_for_tpl_vars(attrName)
@@ -351,7 +352,7 @@ module R8Tpl
     end
   end
 
-  def appendChildJS(parentJSElementVarName,parentElementType,childJSElementVarName,childElementType)
+  def append_child_js(parentJSElementVarName,parentElementType,childJSElementVarName,childElementType)
     childElementType.downcase!
     parentElementType.downcase!
     case parentElementType
@@ -366,7 +367,7 @@ module R8Tpl
     end
   end
 
-  def processNodeText(nodeText,parentVarName,parentNodeType)
+  def process_node_text(nodeText,parentVarName,parent_node_type)
     nodeText.strip!
     while matches = CTRL_BLOCK_REGEX.match(nodeText) do
 =begin
@@ -378,49 +379,49 @@ p "After Matched Value(s):"+matches.post_match
       if matches.pre_match.length > 0
         matches.pre_match.strip!
         if matches.pre_match != ''
-          self.setTextSpanJS(matches.pre_match, parentNodeType, parentVarName)
+          self.set_text_span_js(matches.pre_match, parent_node_type, parentVarName)
         end
       end
 
       #process tpl control match js
-      self.handleTplCtrl(matches.to_s)
+      self.handle_tpl_ctrl(matches.to_s)
 
       nodeText = matches.post_match
       nodeText.strip!
     end
-    (nodeText != '' && !nodeText.nil?) ? self.setTextSpanJS(nodeText, parentNodeType, parentVarName) : nil
+    (nodeText != '' && !nodeText.nil?) ? self.set_text_span_js(nodeText, parent_node_type, parentVarName) : nil
   end
 
-  def setTextSpanJS(text,parentNodeType, parentVarName='', spanClass='')
+  def set_text_span_js(text,parent_node_type, parentVarName='', spanClass='')
     parentVarName.downcase!
     #option & textarea elements dont like their contents wrapped in <span> so use var.innerHTML=text
     transformedTxt = self.check_for_tpl_vars(text)
     if(transformedTxt == text) then transformedTxt = '"'+transformedTxt+'"' end
 
-    case parentNodeType
+    case parent_node_type
       when "option", "textarea" then
-        self.js_queue_push('innerHTML', self.retSetInnerHTMLJS(parentVarName,transformedTxt))
+        self.js_queue_push('innerHTML', self.ret_set_inner_html_js(parentVarName,transformedTxt))
       else
         #add a unique number to the textspan js varname to avoid conflicts
         txtSpanNum = @js_render_queue.length.to_s
         jsVarName = 'txtSpan' + txtSpanNum
         jscontentArray = []
-        jscontentArray << self.retCreateElementJS('span', jsVarName)
+        jscontentArray << self.ret_create_element_js('span', jsVarName)
         if spanClass !=''
           #call to newly created func getJSSetClass
         end
-        jscontentArray << self.retSetInnerHTMLJS(jsVarName, transformedTxt)
+        jscontentArray << self.ret_set_inner_html_js(jsVarName, transformedTxt)
         self.js_queue_push('textspan', jscontentArray)
 
         #if parent name = '' it should be a cntrl statement, else its text that should be appended
         if parentVarName != ''
-          self.appendChildJS(parentVarName, '', jsVarName, 'span')
+          self.append_child_js(parentVarName, '', jsVarName, 'span')
         end
     end
 
   end
 
-  def handleTplCtrl(matchResult)
+  def handle_tpl_ctrl(matchResult)
 #R8 DEBUG
 #p 'Going to process ctrl statement:  '+matchResult
 #    ctrlRegex = /\{%\s*(for|if|end)(.*)%\}/
@@ -431,7 +432,7 @@ p "After Matched Value(s):"+matches.post_match
 #TODO:switch this to push onto @ctrl_stack (see php class line 599)
         self.js_queue_push('forloopclose', '}')
       else
-        self.getLoopCtrlJS(matches[1])
+        self.get_loop_ctrl_js(matches[1])
     end
 #R8 DEBUG
 =begin
@@ -441,7 +442,7 @@ p '    Match '+m.to_s+': '+matches[m]
 =end
   end
 
-  def getLoopCtrlJS(ctrlStr)
+  def get_loop_ctrl_js(ctrlStr)
     newLoopHash = {}
     ctrlPieces = ctrlStr.split(' ')
     case ctrlPieces[0]
@@ -552,14 +553,14 @@ p '     iteratorVarRaw: '+newLoopHash[:iteratorVarRaw].to_s
     returnText == '' ? (return varText) : (return returnText)
   end
 
-  def retSetInnerHTMLJS(jsElementVarName, innerContent='')
+  def ret_set_inner_html_js(jsElementVarName, innerContent='')
 #TODO: should make a config option to strip whitespace or not
 #    innerContent.strip!
     retVar = jsElementVarName + '.innerHTML = ' + innerContent + ';'
     return retVar
   end
 
-  def retCreateElementJS(tagName, jsElementVarName)
+  def ret_create_element_js(tagName, jsElementVarName)
     return 'var ' + jsElementVarName + '= document.createElement("' + tagName + '");'
   end
 

@@ -35,7 +35,7 @@ module R8Tpl
 
       @view_path = nil
 
-      @js_var_header = 'tplVars'
+      @js_var_header = 'tpl_vars'
       @tpl_path = nil
       @tpl_contents = String.new
       @tpl_results = nil
@@ -67,7 +67,6 @@ module R8Tpl
       @ctrl_close_stack = []
 
       @element_count = 0
-
  
       @template_vars = {}
 
@@ -78,6 +77,7 @@ module R8Tpl
 
       (R8::Config[:js_templating_on].nil?) ? @js_templating_on = true : @js_templating_on = R8::Config[:js_templating_on]
 
+#TODO: think of better terminology then path_type_to_use
        set_view(path_type_to_use)
     end
 
@@ -88,17 +88,18 @@ module R8Tpl
     def assign(name,value=nil)
       @template_vars[name] = value
     end
-    def setJSTplName(jsTplName)
-      @js_tpl_callback = jsTplName
-      @js_file_name = jsTplName+".js"
+    def set_js_tpl_name(js_tpl_name)
+      @js_tpl_callback = js_tpl_name
+      @js_file_name = js_tpl_name+".js"
+      @js_templating_on = true
     end
 
-    def jsQueuePush(type,jscontent)
+    def js_queue_push(type,jscontent)
       @js_render_queue << {:type=>type,:jscontent=>jscontent}
     end
 
-    def renderJsTPL(view_tpl_contents)
-      tplToJS(view_tpl_contents)
+    def render_js_tpl(view_tpl_contents)
+      tpl_to_js(view_tpl_contents)
     end
 
     def render(view_tpl_contents=nil,js_templating_on=js_templating_on?)
@@ -106,9 +107,11 @@ module R8Tpl
         view_tpl_contents=IO.read(@view_path)
       end
 
-      if js_templating_on
+      if js_templating_on?
 #TODO: add smarts to create proper hash object to be returned to browser as json
-        renderJsTPL(view_tpl_contents)
+        return {
+          :testing => render_js_tpl(view_tpl_contents)
+        }
       else
         eruby =  Erubis::Eruby.new(view_tpl_contents,:pattern=>'\{\% \%\}')
         @tpl_results = eruby.result(@template_vars)
@@ -119,21 +122,20 @@ module R8Tpl
       end
     end
 
-
     def js_file_write(js_file_handle,contents)
       js_file_handle.write(@indent + contents)
     end
 
     #private
-    def tplXMLInit(view_tpl_contents)
-      @tpl_contents << "<div>" << self.cleanTpl(view_tpl_contents) << "</div>"
+    def tpl_xml_init(view_tpl_contents)
+      @tpl_contents << "<div>" << self.clean_tpl(view_tpl_contents) << "</div>"
 
       @xhtml_document = Nokogiri::XML(@tpl_contents,nil,'xml')
       @root_js_element_var_name = @xhtml_document.root.name + '_tplRoot'
     end
 
     #this will escape &, <, > for xml purposes
-    def cleanTpl(str)
+    def clean_tpl(str)
       str.gsub!(/&(?!amp;)/m){|match| match+'amp;'}
       matchStr = str
       cleanStr = ''
@@ -148,24 +150,24 @@ module R8Tpl
       return cleanStr
     end
 
-    def jsTplCurrent?
+    def js_tpl_current?
       false
     end
 
-    def tplToJS(view_tpl_contents)
-    if self.jsTplCurrent?
+    def tpl_to_js(view_tpl_contents)
+    if self.js_tpl_current?
       return nil
     end
 
-    tplXMLInit(view_tpl_contents)
-    jsQueuePush('functionheader', "function " + @js_tpl_callback + "(" + @js_var_header + ",renderType) {")
+    tpl_xml_init(view_tpl_contents)
+    js_queue_push('functionheader', "function " + @js_tpl_callback + "(" + @js_var_header + ",renderType) {")
     #add local var ref for document object
-    jsQueuePush('functionbody', "var doc = document;")
+    js_queue_push('functionbody', "var doc = document;")
     createRootNode()
     render_js_dom_tree(@xhtml_document.root.children,@root_js_hash)
     setJSAddContentsToPage()
-    jsQueuePush('functionclose', "}")
-    writeJSToFile()
+    js_queue_push('functionclose', "}")
+    write_js_to_file()
   end
 
   def render_js_dom_tree(nodeList, parentNode=nil)
@@ -184,7 +186,7 @@ module R8Tpl
           if newJSNode[:elementType] == 'text'
             self.processNodeText(newJSNode[:value],!parentNode.nil? ? parentNode[:jsElementVarName] : '', newJSNode[:elementType])
           else
-            self.jsQueuePush('node', self.createElementJS(newJSNode[:elementType],newJSNode[:jsElementVarName]))
+            self.js_queue_push('node', self.createElementJS(newJSNode[:elementType],newJSNode[:jsElementVarName]))
             @element_count += 1
             self.addAttributes(node,newJSNode)
           end
@@ -205,12 +207,12 @@ module R8Tpl
           #make this check _dev or _production mode
           #this is temporary, maybe have a general function for adding comments
           if !node.cdata? && newJSNode[:elementType] != 'text'
-            self.jsQueuePush('comment',"//end rendering for element " + newJSNode[:jsElementVarName])
+            self.js_queue_push('comment',"//end rendering for element " + newJSNode[:jsElementVarName])
           end
 
           if @ctrl_close_stack.length > 0
             tmpArray = @ctrl_close_stack.pop
-            self.jsQueuePush(tmpArray[:type], tmpArray[:jsContent])
+            self.js_queue_push(tmpArray[:type], tmpArray[:jsContent])
           end
         end
     end
@@ -253,8 +255,10 @@ module R8Tpl
     end
   end
 
-  def writeJSToFile()
-    File.open(@js_file_write_path + "/" + @js_file_name, 'w') do |js_file_handle|
+  def write_js_to_file()
+    js_cache_file_path = @js_file_write_path + "/" + @js_file_name
+
+    File.open(js_cache_file_path, 'w') do |js_file_handle|
       for jsLine in @js_render_queue do
         clearIndentation()
         handleIndentation(jsLine)
@@ -272,6 +276,7 @@ module R8Tpl
         end
       end
     end
+    return js_cache_file_path
   end
 
   def createRootNode()
@@ -283,16 +288,16 @@ module R8Tpl
       :attributes => []
     }
     @root_js_hash = newJSNode
-    self.jsQueuePush('node', self.createElementJS(newJSNode[:elementType],newJSNode[:jsElementVarName]))
+    self.js_queue_push('node', self.createElementJS(newJSNode[:elementType],newJSNode[:jsElementVarName]))
     self.addAttributes(@xhtml_document.root,newJSNode)
   end
 
 #should probably move the appending out of the templating and just have js return DOM ref to JS ctrlr
   def setJSAddContentsToPage()
-    self.jsQueuePush('ifheader', "if(R8.utils.isUndefined(renderType) || renderType !='append') {")
-    self.jsQueuePush('renderClear','doc.getElementById("' + @panel_set_element_id + '").innerHTML="";')
-    self.jsQueuePush('ifclose', '}')
-    self.jsQueuePush('pageAdd','doc.getElementById("' + @panel_set_element_id + '").appendChild(' + @root_js_element_var_name + ');')
+    self.js_queue_push('ifheader', "if(R8.utils.isUndefined(renderType) || renderType !='append') {")
+    self.js_queue_push('renderClear','doc.getElementById("' + @panel_set_element_id + '").innerHTML="";')
+    self.js_queue_push('ifclose', '}')
+    self.js_queue_push('pageAdd','doc.getElementById("' + @panel_set_element_id + '").appendChild(' + @root_js_element_var_name + ');')
   end
 
   def createElementJS(elemName,jsElementVarName)
@@ -302,47 +307,47 @@ module R8Tpl
   def addAttrJS(jsElementVarName, elementType, attrName, attrValue)
     elementType.downcase!
     attrName.downcase!
-    processedAttrName = self.checkForTPLVars(attrName)
-    processedAttrValue = self.checkForTPLVars(attrValue)
+    processedAttrName = self.check_for_tpl_vars(attrName)
+    processedAttrValue = self.check_for_tpl_vars(attrValue)
     if processedAttrValue == attrValue then processedAttrValue = '"' + processedAttrValue + '"' end
 
     case attrName
       when "checked" then
         if(elementType == 'input') then
-          self.jsQueuePush('xhtmlAttrHead', 'if('+jsElementVarName+'.type==="checkbox") {')
-          self.jsQueuePush('ifheader', 'if('+processedAttrValue+' === 1 || '+processedAttrValue+' === "1") {')
-          self.jsQueuePush('xhtmlAttrBody', jsElementVarName+'.'+processedAttrName+' = true;')
-          self.jsQueuePush('elseif', '} else {')
-          self.jsQueuePush('xhtmlAttrBody', jsElementVarName+'.'+processedAttrName+' = false;')
-          self.jsQueuePush('ifclose', '}')
-          self.jsQueuePush('elseif', '} else if('+jsElementVarName+'.type==="radio") {')
-          self.jsQueuePush('ifheader', 'if('+jsElementVarName+'.value === '+processedAttrValue+') {')
-          self.jsQueuePush('xhtmlAttrBody', jsElementVarName+'.'+processedAttrName+' = true;')
-          self.jsQueuePush('ifclose', '}')
-          self.jsQueuePush('xhtmlAttrClose', '}')
+          self.js_queue_push('xhtmlAttrHead', 'if('+jsElementVarName+'.type==="checkbox") {')
+          self.js_queue_push('ifheader', 'if('+processedAttrValue+' === 1 || '+processedAttrValue+' === "1") {')
+          self.js_queue_push('xhtmlAttrBody', jsElementVarName+'.'+processedAttrName+' = true;')
+          self.js_queue_push('elseif', '} else {')
+          self.js_queue_push('xhtmlAttrBody', jsElementVarName+'.'+processedAttrName+' = false;')
+          self.js_queue_push('ifclose', '}')
+          self.js_queue_push('elseif', '} else if('+jsElementVarName+'.type==="radio") {')
+          self.js_queue_push('ifheader', 'if('+jsElementVarName+'.value === '+processedAttrValue+') {')
+          self.js_queue_push('xhtmlAttrBody', jsElementVarName+'.'+processedAttrName+' = true;')
+          self.js_queue_push('ifclose', '}')
+          self.js_queue_push('xhtmlAttrClose', '}')
         else
-          self.jsQueuePush('attribute', jsElementVarName+'.setAttribute("'+processedAttrName+'","'+processedAttrValue+'");')
+          self.js_queue_push('attribute', jsElementVarName+'.setAttribute("'+processedAttrName+'","'+processedAttrValue+'");')
         end
       when "selected" then
         if(elementType == 'option') then
-          self.jsQueuePush('xhtmlAttrHead', 'if('+processedAttrValue+' === '+jsElementVarName+'.value) {')
-          self.jsQueuePush('xhtmlAttrBody', jsElementVarName+'.selected = true;')
-          self.jsQueuePush('xhtmlAttrClose', '}')
+          self.js_queue_push('xhtmlAttrHead', 'if('+processedAttrValue+' === '+jsElementVarName+'.value) {')
+          self.js_queue_push('xhtmlAttrBody', jsElementVarName+'.selected = true;')
+          self.js_queue_push('xhtmlAttrClose', '}')
         end
       when "multiselected" then
         if(elementType == 'option') then
           processedAttrValue.gsub!('[]', '')
-          self.jsQueuePush('forloopheader', 'for(var '+jsElementVarName+'Value in '+processedAttrValue+') {')
-          self.jsQueuePush('xhtmlAttrHead', 'if('+processedAttrValue+'['+jsElementVarName+'Value] === '+jsElementVarName+'.value) {')
-          self.jsQueuePush('xhtmlAttrBody', jsElementVarName+'.selected = true;')
-          self.jsQueuePush('xhtmlAttrClose', '}')
-          self.jsQueuePush('forloopclose', '}')
+          self.js_queue_push('forloopheader', 'for(var '+jsElementVarName+'Value in '+processedAttrValue+') {')
+          self.js_queue_push('xhtmlAttrHead', 'if('+processedAttrValue+'['+jsElementVarName+'Value] === '+jsElementVarName+'.value) {')
+          self.js_queue_push('xhtmlAttrBody', jsElementVarName+'.selected = true;')
+          self.js_queue_push('xhtmlAttrClose', '}')
+          self.js_queue_push('forloopclose', '}')
         end
       when "compact","declare","readonly","disabled","defer","ismap","nohref","noshade","nowrap","multiple","noresize" then
-          self.jsQueuePush('attribute', jsElementVarName + '.setAttribute("' + processedAttrName + '",' + processedAttrValue + ');')
+          self.js_queue_push('attribute', jsElementVarName + '.setAttribute("' + processedAttrName + '",' + processedAttrValue + ');')
       else
-#          self.jsQueuePush('attribute', jsElementVarName + '.setAttribute("' + self.checkForTPLVars(attrName) + '","' + self.checkForTPLVars(attrValue) + '");')
-          self.jsQueuePush('attribute', jsElementVarName + '.setAttribute("' + processedAttrName + '",' + processedAttrValue + ');')
+#          self.js_queue_push('attribute', jsElementVarName + '.setAttribute("' + self.check_for_tpl_vars(attrName) + '","' + self.check_for_tpl_vars(attrValue) + '");')
+          self.js_queue_push('attribute', jsElementVarName + '.setAttribute("' + processedAttrName + '",' + processedAttrValue + ');')
     end
   end
 
@@ -352,12 +357,12 @@ module R8Tpl
     case parentElementType
       when "select" then
         if childElementType == 'option'
-          self.jsQueuePush('appendChild',parentJSElementVarName + '.add('+childJSElementVarName+');')
+          self.js_queue_push('appendChild',parentJSElementVarName + '.add('+childJSElementVarName+');')
         else
-          self.jsQueuePush('appendChild',parentJSElementVarName + '.appendChild('+childJSElementVarName+');')
+          self.js_queue_push('appendChild',parentJSElementVarName + '.appendChild('+childJSElementVarName+');')
         end
       else
-          self.jsQueuePush('appendChild',parentJSElementVarName + '.appendChild('+childJSElementVarName+');')
+          self.js_queue_push('appendChild',parentJSElementVarName + '.appendChild('+childJSElementVarName+');')
     end
   end
 
@@ -389,12 +394,12 @@ p "After Matched Value(s):"+matches.post_match
   def setTextSpanJS(text,parentNodeType, parentVarName='', spanClass='')
     parentVarName.downcase!
     #option & textarea elements dont like their contents wrapped in <span> so use var.innerHTML=text
-    transformedTxt = self.checkForTPLVars(text)
+    transformedTxt = self.check_for_tpl_vars(text)
     if(transformedTxt == text) then transformedTxt = '"'+transformedTxt+'"' end
 
     case parentNodeType
       when "option", "textarea" then
-        self.jsQueuePush('innerHTML', self.retSetInnerHTMLJS(parentVarName,transformedTxt))
+        self.js_queue_push('innerHTML', self.retSetInnerHTMLJS(parentVarName,transformedTxt))
       else
         #add a unique number to the textspan js varname to avoid conflicts
         txtSpanNum = @js_render_queue.length.to_s
@@ -405,7 +410,7 @@ p "After Matched Value(s):"+matches.post_match
           #call to newly created func getJSSetClass
         end
         jscontentArray << self.retSetInnerHTMLJS(jsVarName, transformedTxt)
-        self.jsQueuePush('textspan', jscontentArray)
+        self.js_queue_push('textspan', jscontentArray)
 
         #if parent name = '' it should be a cntrl statement, else its text that should be appended
         if parentVarName != ''
@@ -424,7 +429,7 @@ p "After Matched Value(s):"+matches.post_match
     case matches[1].strip
       when 'end' then
 #TODO:switch this to push onto @ctrl_stack (see php class line 599)
-        self.jsQueuePush('forloopclose', '}')
+        self.js_queue_push('forloopclose', '}')
       else
         self.getLoopCtrlJS(matches[1])
     end
@@ -467,17 +472,17 @@ p '     iteratorVarRaw: '+newLoopHash[:iteratorVarRaw].to_s
         iteratorVar = varParser.js_var_string
 
         jsContent = "for(var " + ctrlVarName + " in " + iteratorVar + ") { "
-        self.jsQueuePush('forloopheader', jsContent)
+        self.js_queue_push('forloopheader', jsContent)
       when 'if' then
         ifels_parser = R8Tpl::IfElsExpressionParser.new(ctrlStr,@js_var_header,@ctrl_vars)
         ifels_parser.process
         jsContent = 'if ('+ifels_parser.js_expression_string+') {'
-        self.jsQueuePush('ifheader', jsContent)
+        self.js_queue_push('ifheader', jsContent)
       when 'elsif'
         ifels_parser = R8Tpl::IfElsExpressionParser.new(ctrlStr,@js_var_header,@ctrl_vars)
         ifels_parser.process
         jsContent = 'elseif ('+ifels_parser.js_expression_string+') {'
-        self.jsQueuePush('elsifheader', jsContent)
+        self.js_queue_push('elsifheader', jsContent)
       when /\?:styleregex/ then
       else
         addLoopIndexVar = false
@@ -515,12 +520,12 @@ p '     iteratorVarRaw: '+newLoopHash[:iteratorVarRaw].to_s
         iteratorVar = varParser.js_var_string
 
         jsContent = "for(var " + ctrlVarName + " in " + iteratorVar + ") { "
-        self.jsQueuePush('forloopheader', jsContent)
+        self.js_queue_push('forloopheader', jsContent)
     #end else in case ctrlPieces[0] block
     end
   end
 
-  def checkForTPLVars(varText, clean=false)
+  def check_for_tpl_vars(varText, clean=false)
     varRegex = /(\{%=\s*)([a-zA-Z_@:][a-zA-Z0-9_@\.:\[\]'"]+)(\s*%\})/
     varPostMatchText = varText
     returnText = ''

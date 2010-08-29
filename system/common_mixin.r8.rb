@@ -5,9 +5,10 @@ module R8Tpl
     def ret_view_path(type)
       case(type)
         when :system 
-          "#{R8::Config[:system_views_root]}/#{@profile}.#{@view_name}.rtpl"
+          "#{R8::Config[:system_views_dir]}/#{@profile}.#{@view_name}.rtpl"
         when :base 
-          "#{R8::Config[:base_views_root]}/#{@model_name}/#{@profile}.#{@view_name}.rtpl"
+          test = "#{R8::Config[:base_views_dir]}/#{@model_name}/#{@profile}.#{@view_name}.rtpl"
+          return test
         when :meta
           #first see if there is a meta template for specfic profile type; if not look for default;
           path = Helper::ret_if_exists("#{R8::Config[:meta_templates_root]}/#{@model_name}/view.#{@profile}.#{@view_name}.rb")

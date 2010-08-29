@@ -1,6 +1,9 @@
 module XYZ
   class ActionsetController < Controller
     def process(*route)
+
+      @json_response = true if ajax_request?
+
       #seperate route in 'route_key' (e.g., object/action, object) and its params 'action_set_params'
       #first two (or single items make up route_key; the rest are params
       route_key = route[0..1].join("/")

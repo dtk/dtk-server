@@ -1,4 +1,46 @@
 
+function testingjson() {
+/*
+	var key_query_term = document.getElementById('key_qt').value;
+	var filterElem = document.getElementById('keyFilter'); 
+	var key_filter = filterElem[filterElem.selectedIndex].value;
+*/
+	YUI().use('io','io-base', function(Y) {
+
+		var cfg = {
+			method: "GET",
+//			data: 'key_qt='+key_query_term + '&key_filter=' + key_filter
+		};
+
+		var success = function(ioId, o) {
+			if(o.responseText !== undefined) {
+//				eval("var response =" + o.responseText);
+				console.log(o.responseText);
+//				document.getElementById('composeKeyResults').innerHTML = response.actions[0].tpl_contents;
+			} else {
+				console.log('respnose is undefined');
+			}
+		};
+			var failure = function(ioId, o) {
+			if(o.responseText !== undefined) {
+				console.log(o.responseText);
+			} else {
+				console.log('respnose is undefined');
+			}
+		};
+
+//		Y.on('io:start', console.log('starting io request.....'));
+		Y.on('io:success', success);
+		Y.on('io:failure', failure);
+//		Y.on('io:end', console.log('finished io request'));
+//		var request_url = base_url+'/application/compose_keys_search';
+		var request_url = 'http://localhost:7000/xyz/component/testjsoncall';
+		var request = Y.io(request_url, cfg);
+	});
+}
+
+
+R8 = {}
 if (!R8.ctrl) {
 
 	/*

@@ -71,5 +71,9 @@ R8::Routes["component/display"] = {
   ]
 }
 
+R8::Routes["component/testjsonlayout"] = {
+  :layout => 'testjson'
+}
+
 R8::Routes.freeze
 

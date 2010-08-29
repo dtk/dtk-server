@@ -14,11 +14,11 @@ module XYZ
     end
 
     def testjsonlayout
-      tpl = R8Tpl::TemplateR8.new('component/testjson',user_context(request))
+      tpl = R8Tpl::TemplateR8.new('component/testjson',user_context())
       tpl.assign(:testing, 'Testing')
 
       _model_var = {}
-      _model_var[:i18n] = get_model_i18n(model_name().to_s,user_context(request))
+      _model_var[:i18n] = get_model_i18n(model_name().to_s,user_context())
       tpl.assign("_#{model_name().to_s}",_model_var)
 
       return tpl.render()
@@ -26,12 +26,12 @@ module XYZ
 
 
     def testjsoncall
-      tpl = R8Tpl::TemplateR8.new('component/testjson',user_context(request))
+      tpl = R8Tpl::TemplateR8.new('component/testjson',user_context())
       tpl.set_js_tpl_name('testjson')
       tpl.assign(:testing, 'Testing')
 
       _model_var = {}
-      _model_var[:i18n] = get_model_i18n(model_name().to_s,user_context(request))
+      _model_var[:i18n] = get_model_i18n(model_name().to_s,user_context())
       tpl.assign("_#{model_name().to_s}",_model_var)
 
       return tpl.render()

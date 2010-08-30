@@ -26,7 +26,7 @@ module XYZ
 
 
     def testjsoncall
-      tpl = R8Tpl::TemplateR8.new('component/testjson',user_context())
+      tpl = R8Tpl::TemplateR8.new('component/testjsoncall',user_context())
       tpl.set_js_tpl_name('testjson')
       tpl.assign(:testing, 'Testing')
 

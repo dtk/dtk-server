@@ -48,10 +48,13 @@ module XYZ
 
           #set the appropriate render assignment type (append | prepend | replace)
           ctrl_result[:content][index][:assign_type] = (ctrl_result[:content][index][:assign_type] || action[:assign_type] || :append).to_sym
+
+          #set js with base cache uri path
+          ctrl_result[:content][index][:src] = "#{R8::Config[:base_js_cache_uri]}/#{ctrl_result[:content][index][:src]}" if !ctrl_result[:content][index][:src].nil?            
         end
 
         ctrl_result[:js_includes] = ret_js_includes()
-        ctrl_result[:css_includes] = ret_js_includes()
+        ctrl_result[:css_includes] = ret_css_includes()
 
         model,method = action[:route].split("/")
         method ||= :index

@@ -1,21 +1,21 @@
 
-if (!R8.utils) {
+if (!R8.Utils) {
 
 	/*
 	 * This is the utility r8 js class, more to be added
 	 */
-	R8.utils = function(){
+	R8.Utils = function(){
 		return {
 
 			/*
 			 * This is the global YUI variable to be used
 			 */
-			Y : new YUI({base:'js/yui3x/build/'}).use('dd', 'node'),
+//			Y : new YUI({base:'js/yui3x/build/'}).use('dd', 'node'),
 
 			/*
 			 * This is the global jQuery variable to be used
 			 */
-			$ : jQuery,
+//			$ : jQuery,
 
 			/*
 			 * This function takes a name/value pair json object and return a name=value&name2=value2 string
@@ -35,31 +35,31 @@ if (!R8.utils) {
 			},
 
 			/*
-			 * Wrapper function to YUI YAHOO.lang.trim function
+			 * Wrapper function to YUI().Lang.trim function
 			 */
 			trim: function(inputVar) {
-				return YAHOO.lang.trim(inputVar);
+				return YUI().Lang.trim(inputVar);
 			},
 
 			/*
-			 * Wrapper function to YUI YAHOO.lang.isUndefined
+			 * Wrapper function to YUI().Lang.isUndefined
 			 */
 			isUndefined: function(inputVar) {
-				return YAHOO.lang.isUndefined(inputVar);
+				return YUI().Lang.isUndefined(inputVar);
 			},
 
 			/*
-			 * Wrapper function to invers YUI YAHOO.lang.isUndefined
+			 * Wrapper function to invers YUI().Lang.isUndefined
 			 */
 			isDefined: function(inputVar) {
-				return !YAHOO.lang.isUndefined(inputVar);
+				return !YUI().Lang.isUndefined(inputVar);
 			},
 
 			/*
-			 * Wrapper function to YUI YAHOO.lang.isValue
+			 * Wrapper function to YUI().Lang.isValue
 			 */
 			isValue: function(inputVar) {
-				return YAHOO.lang.isValue(inputVar);
+				return YUI().Lang.isValue(inputVar);
 			},
 
 			/*
@@ -95,14 +95,14 @@ if (!R8.utils) {
 			},
 
 			/*
-			 * Wrapper function to YUI YAHOO.lang.isString
+			 * Wrapper function to YUI().Lang.isString
 			 */
 			isString: function(inputVar) {
-				return YAHOO.lang.isString(inputVar);
+				return YUI().Lang.isString(inputVar);
 			},
 
 			/*
-			 * Wrapper function to YUI YAHOO.lang.later
+			 * Wrapper function to YUI().Lang.later
 			 * 
 			 * @param time			Execution time in milliseconds
 			 * @param obj			Object context to call func from
@@ -113,7 +113,7 @@ if (!R8.utils) {
 			 * @return Returns Variable that can be used to .cancel() execution
 			 */
 			schedule: function(time, obj, func, inputData, repeatExec) {
-				return YAHOO.lang.later(time, obj, func, inputData, repeatExec);
+				return YUI().Lang.later(time, obj, func, inputData, repeatExec);
 			},
 		}
 	}();

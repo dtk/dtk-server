@@ -10,7 +10,7 @@ module XYZ
         :description,
         :parent_id,
         :parent_path
-      ]   
+      ]
     end
 
     def component_display(parsed_query_string=nil)

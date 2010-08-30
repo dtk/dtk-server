@@ -44,6 +44,7 @@ R8::Config[:default_layout] = "default"
 #R8::Config[:base_uri] = "http://172.22.101.112:7000"
 R8::Config[:base_uri] = R8::EnvironmentConfig::Base_Uri
 R8::Config[:base_js_uri] = R8::Config[:base_uri] + "/js"
+R8::Config[:base_js_cache_uri] = R8::Config[:base_uri] + "/js/cache"
 R8::Config[:base_css_uri] = R8::Config[:base_uri] + "/css"
 R8::Config[:base_images_uri] = R8::Config[:base_uri] + "/images"
 

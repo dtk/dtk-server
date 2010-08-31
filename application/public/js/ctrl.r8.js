@@ -46,6 +46,9 @@ function testingjson() {
 
 if(typeof(R8) === 'undefined') R8 = {}
 
+//TODO: figure out how best to implement the template handling class
+R8.Rtpl = {}
+
 if (!R8.Ctrl) {
 
 	/*
@@ -60,7 +63,7 @@ if (!R8.Ctrl) {
 			//TODO: should the request handling and page updating be handled by core or R8.Ctrl?
 			call: function(route, args, callBacks) {
 
-				if(typeof(args) === 'object') var req_params = R8.utils.json2Str(args);
+				if(typeof(args) === 'object') var req_params = R8.Utils.json2Str(args);
 				else if(typeof(args) === 'undefined') var req_params = ''; 
 				else var req_params = args;
 
@@ -128,7 +131,8 @@ if (!R8.Ctrl) {
 			},
 
 			updatePage: function(ioId, responseObj) {
-				eval("var response =" + responseObj.responseText);
+				eval("R8.Ctrl.callResults[ioId] =" + responseObj.responseText);
+				var response = R8.Ctrl.callResults[ioId];
 
 				//reset the callbacks array after execution
 				R8.Ctrl.tplCallbacks = new Array();
@@ -139,37 +143,44 @@ if (!R8.Ctrl) {
 				}
 
 				for(var i in response['as_run_list']) {
-					var responseItem = response['as_run_list'][i];
+					var actionItem = response['as_run_list'][i];
 
-					if (R8.Utils.isDefined(response[responseItem]['css_includes']))
-						R8.Ctrl.processCSSIncludes(response[responseItem]['css_includes']);
+					if (R8.Utils.isDefined(response[actionItem]['css_includes']))
+						R8.Ctrl.processCSSIncludes(ioId);
 
-					if (R8.Utils.isDefined(response[responseItem]['js_includes'])) {
-						R8.Ctrl.processJSIncludes(response[responseItem]['js_includes'],response[responseItem]['content']);
+					if (R8.Utils.isDefined(response[actionItem]['js_includes'])) {
+						R8.Ctrl.processJSIncludes(ioId,actionItem);
 					}
+
+//TODO: research best practices for efficient setTimeout quick calls
+					var setContentCallback = function() { R8.Ctrl.setCallContent(ioId,actionItem); }
+					setTimeout(setContentCallback,50);
+continue;
 //TODO: revisit if this call should be here in this order of execution
 
 //					R8.Ctrl.runJSTemplates();
-					if(!R8.utils.isUndefined(response[responseItem]['content']) && response[responseItem]['content'].length > 0)
-						R8.Ctrl.setResponseContent(response[responseItem]['content']);
+//					if(!R8.Utils.isUndefined(response[responseItem]['content']) && response[responseItem]['content'].length > 0)
+//						R8.Ctrl.setCallContent(response[responseItem]['content']);
 
 					//TODO: work on framework for script handling on server side,
 					//currently have addJSExeScript in ctrl and race_priority to track race conditions
-					if(R8.utils.isDefined(response[responseItem]['script']) && response[responseItem]['script'] != '')
+					if(R8.Utils.isDefined(response[responseItem]['script']) && response[responseItem]['script'] != '')
 						R8.Ctrl.processExeScripts(response[responseItem]['script']);
 
 //TODO: this will most likely be removed after changes in response bundle
-//					if(!R8.utils.isUndefined(response[responseItem]['data']) && response[responseItem]['data'].length > 0)
+//					if(!R8.Utils.isUndefined(response[responseItem]['data']) && response[responseItem]['data'].length > 0)
 //						R8.Ctrl.setResponseData(response[responseItem]['data']);
 
 //TODO: errors not currently supported under R8 setup, need to add devtools first
-//					if (!R8.utils.isUndefined(response[responseItem]['errors']) && response[responseItem]['errors'].length > 0)
+//					if (!R8.Utils.isUndefined(response[responseItem]['errors']) && response[responseItem]['errors'].length > 0)
 //						R8.Ctrl.setResponseErrors(response[responseItem]['errors']);
 				}
+
 			},
 
-			processCSSIncludes: function(cssIncludes) {
+			processCSSIncludes: function(ioId) {
 				var cssSrc='',cssScriptElem='';
+				var cssIncludes = R8.Ctrl.callResults[ioId]['css_includes'];
 
 				for (var i in cssIncludes) {
 					cssSrc = cssIncludes[i];
@@ -188,11 +199,36 @@ if (!R8.Ctrl) {
 
 			},
 
-			processJSIncludes: function(scriptIncludes,contentList) {
+			testing: function() {
+				return 'asdfasdfaf';
+			},
+
+			processJSIncludes: function(ioId,actionName) {
+				var contentList = R8.Ctrl.callResults[ioId][actionName]['content'];
+				var scriptIncludes = R8.Ctrl.callResults[ioId][actionName]['js_includes'];
 
 				for(index in contentList) {
-					if(typeof(contentList[index]) === 'object' && contentList[index]['src'] != '')
-						scriptIncludes[scriptIncludes.length] = contentList[index]['src'];
+					if(typeof(contentList[index]) === 'object' && contentList[index]['src'] != '') {
+						YUI().use(function(Y) {
+							var url = contentList[index]['src'];
+							obj = Y.Get.script(url, {
+								onSuccess: function() {
+									var template_callback = contentList[index]['template_callback'];
+									contentList[index]['content'] = R8.Rtpl[template_callback](contentList[index]['template_vars']);
+/*
+									YUI().use("json", function (Y) {
+										R8.Ctrl.addScriptIncludeToCache(contentList[index]['src']);
+										var template_vars_str = Y.JSON.stringify(contentList[index]['template_vars']);
+										var template_callback = contentList[index]['template_callback']; 
+//										R8.Ctrl.jsTplContent[template_callback] = eval(template_callback+"("+template_vars_str+");");
+									});
+*/
+								}
+							});
+						});
+					}
+//					if(typeof(contentList[index]) === 'object' && contentList[index]['src'] != '')
+//						scriptIncludes[scriptIncludes.length] = contentList[index]['src'];
 				}				
 
 				var scriptSrc='';
@@ -271,7 +307,7 @@ if (!R8.Ctrl) {
 					jsScriptElem.type = "text/javascript";
 					var renderType = '';
 
-					if(R8.utils.isUndefined(R8.Ctrl.tplCallbacks[i]['renderType'])) renderType = 'clear';
+					if(R8.Utils.isUndefined(R8.Ctrl.tplCallbacks[i]['renderType'])) renderType = 'clear';
 					else renderType = R8.Ctrl.tplCallbacks[i]['renderType'];
 
 					//eval the templateVars to make the JSON txt valid when used in the TPL
@@ -290,46 +326,83 @@ console.log("Its an object:" + R8.Ctrl.tplCallbacks[i]['templateVars']);
 				}
 			},
 
-			setResponseContent: function(contentList) {
+			setContentFromJSTpl: function(contentItem) {
+				var template_vars_str = '';
+				YUI().use("json", function (Y) {
+					var template_vars_str = Y.JSON.stringify(contentItem['template_vars']);
+					var tpl_content = eval(contentItem['template_callback']+"("+template_vars_str+");");
+console.log(tpl_content);
+return tpl_content;
+				});
+			},
+
+			callContentReady : function(ioId,actionItem) {
+				var contentList = R8.Ctrl.callResults[ioId][actionItem]['content'];
+				for(index in contentList) {
+					if(R8.Utils.isDefined(contentList[index]['content'])) continue;
+					else return false;
+				}				
+				R8.Ctrl.callResults[ioId]['content_ready'] = true;
+				return true;
+			},
+
+			setCallContent: function(ioId,actionItem) {
+				if(!R8.Ctrl.callContentReady(ioId,actionItem)) {
+					var setContentCallback = function() { R8.Ctrl.setCallContent(ioId,actionItem); }
+					setTimeout(setContentCallback,50);
+					return;
+				}
+
+				var contentList = R8.Ctrl.callResults[ioId][actionItem]['content'];
 				var doc = document;
-					for(i in contentList) {
-						if(R8.Utils.isDefined(contentList[i]['content']))
-							var content = contentList[i]['content'];
-						else
-							var content = R8.Utils.getContentFromJSTpl(contentList[i]);
+				var panelsContent = {};
+//console.log(contentList);
+				for(i in contentList) {
+					if(R8.Utils.isDefined(contentList[i]['content'])) 
+						var content = contentList[i]['content'];
+					else {
+//						var content = R8.Ctrl.getContentJSTpl(contentList[i]);
+						var content = 'crap';
+						var template_callback = contentList[i]['template_callback'];
+//						var content = R8.Ctrl.jsTplContent[template_callback];
+//						while(typeof(content) === 'undefined') {
+//							content = R8.Ctrl.jsTplContent[template_callback];
+//						}
+					}
 
-						var panel = content['panel'];
-						var assign_type = content['assign_type'];
+					var panel = contentList[i]['panel'];
+					var assign_type = contentList[i]['assign_type'];
 
-						switch(assign_type) {
-							case "append":
-								if(!R8.Utils.isDefined(panels_content[panel])) {
-									panelsContent[panel] = content;
-								} else {
-									panelsContent[panel] += content;
-								}
-								break;
-							case "replace":
+					switch(assign_type) {
+						case "append":
+							if(!R8.Utils.isDefined(panelsContent[panel])) {
 								panelsContent[panel] = content;
-								break;
-							case "prepend":
-								if(!R8.Utils.isDefined(panels_content[panel])) {
-									panelsContent[panel] = content
-								} else {
-									tmp_contents = panelsContent[panel]
-									panelsContent[panel] = content + tmp_contents
-								}
-								break;
-						}
+							} else {
+								panelsContent[panel] += content;
+							}
+							break;
+						case "replace":
+							panelsContent[panel] = content;
+							break;
+						case "prepend":
+							if(!R8.Utils.isDefined(panels_content[panel])) {
+								panelsContent[panel] = content
+							} else {
+								tmp_contents = panelsContent[panel]
+								panelsContent[panel] = content + tmp_contents
+							}
+							break;
 					}
-					for(panel in panelsContent) {
-						doc.getElementById(panel).innerHTML = panelsContent[panel];
-					}
+				}
+				for(panel in panelsContent) {
+					doc.getElementById(panel).innerHTML = panelsContent[panel];
+				}
 			},
 
-			setResponseData: function(dataList) {
+//TODO: probably remove this, doesnt look like it will be used with new style rendering
+//			setResponseData: function(dataList) {
 				//TODO: add stuff here when ready
-			},
+//			},
 
 			//TODO: fine tune error handling, have some scenarios
 			//	1) Collect 1 or more errors and append to a panel (login example)
@@ -421,7 +494,9 @@ console.log("Its an object:" + R8.Ctrl.tplCallbacks[i]['templateVars']);
 			/*
 			 * This stores all the content by panel from the call response
 			 */
-			panelsContent : {}
+			callResults : {},
+
+			jsTplContent : {}
 		}
 	}();
 }

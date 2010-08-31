@@ -132,7 +132,7 @@ module R8Tpl
       @tpl_contents << "<div>" << self.clean_tpl(view_tpl_contents) << "</div>"
 
       @xhtml_document = Nokogiri::XML(@tpl_contents,nil,'xml')
-      @root_js_element_var_name = @xhtml_document.root.name + '_tplRoot'
+      @root_js_element_var_name = @xhtml_document.root.name + '_tplroot'
     end
 
     #this will escape &, <, > for xml purposes
@@ -161,7 +161,9 @@ module R8Tpl
     end
 
     tpl_xml_init(view_tpl_contents)
-    js_queue_push('functionheader', "function " + @js_tpl_callback + "(" + @js_var_header + ",renderType) {")
+#    js_queue_push('functionheader', "function " + @js_tpl_callback + "(" + @js_var_header + ",renderType) {")
+#    js_queue_push('functionheader', "function " + @js_tpl_callback + "(" + @js_var_header + ") {")
+    js_queue_push('functionheader', "R8.Rtpl['" + @js_tpl_callback + "'] = function(" + @js_var_header + ") {")
     #add local var ref for document object
     js_queue_push('functionbody', "var doc = document;")
     create_root_node()
@@ -282,7 +284,7 @@ module R8Tpl
 
   def create_root_node()
     newJSNode = {
-      :jsElementVarName => @xhtml_document.root.name + '_tplRoot',
+      :jsElementVarName => @xhtml_document.root.name + '_tplroot',
       :elementType => @xhtml_document.root.name,
       :type => @xhtml_document.root.type,         #do mapping from nokogiri constants to tpl elem types
       :value => @xhtml_document.root.content == '' ? '' : @xhtml_document.root.content,
@@ -295,10 +297,11 @@ module R8Tpl
 
 #should probably move the appending out of the templating and just have js return DOM ref to JS ctrlr
   def set_js_add_contents_to_page()
-    self.js_queue_push('ifheader', "if(R8.utils.isUndefined(renderType) || renderType !='append') {")
-    self.js_queue_push('renderClear','doc.getElementById("' + @panel_set_element_id + '").innerHTML="";')
-    self.js_queue_push('ifclose', '}')
-    self.js_queue_push('pageAdd','doc.getElementById("' + @panel_set_element_id + '").appendChild(' + @root_js_element_var_name + ');')
+#    self.js_queue_push('ifheader', "if(R8.utils.isUndefined(renderType) || renderType !='append') {")
+#    self.js_queue_push('renderClear','doc.getElementById("' + @panel_set_element_id + '").innerHTML="";')
+#    self.js_queue_push('ifclose', '}')
+#    self.js_queue_push('pageAdd','doc.getElementById("' + @panel_set_element_id + '").appendChild(' + @root_js_element_var_name + ');')
+    self.js_queue_push('contentReturn','return ' + @root_js_element_var_name + '.innerHTML;')
   end
 
   def create_element_js(elemName,jsElementVarName)

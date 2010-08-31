@@ -130,7 +130,6 @@ module R8Tpl
     #private
     def tpl_xml_init(view_tpl_contents)
       @tpl_contents << "<div>" << self.clean_tpl(view_tpl_contents) << "</div>"
-
       @xhtml_document = Nokogiri::XML(@tpl_contents,nil,'xml')
       @root_js_element_var_name = @xhtml_document.root.name + '_tplroot'
     end
@@ -144,10 +143,13 @@ module R8Tpl
         cleanStr << matches.pre_match
         subbedStr = matches.to_s.gsub('>','&gt;')
         subbedStr.gsub!('<','&lt;')
+        subbedStr.gsub!('&','&amp;')
         matchStr = matches.post_match
         cleanStr << subbedStr
       end
-      if(!matches.nil?) then cleanStr << matches.post_match end
+#      if(!matches.nil?) then cleanStr << matches.post_match end
+      cleanStr << matchStr
+
       return cleanStr
     end
 
@@ -175,6 +177,11 @@ module R8Tpl
 
   def render_js_dom_tree(nodeList, parentNode=nil)
     for node in nodeList do
+#R8 DEBUG
+pp node.name.downcase
+pp node.content
+p"++++++++++++++++++++"
+p"++++++++++++++++++++"
         if !node.cdata?
           newJSNode = {
             :jsElementVarName => node.name + @element_count.to_s,

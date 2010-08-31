@@ -17,7 +17,8 @@
 </head>
 
 <body>
-<input type="button" onclick="testingjson();" value="Test JSON Response"/>
+<input type="button" onclick="R8.Ctrl.call('component/testjshello');" value="Test Hello"/><br/>
+<input type="button" onclick="R8.Ctrl.call('component/testjsgoodbye');" value="Test Goodbye"/><br/>
 <br/>
 <div id="page_container">
 	<div id="menu_container">

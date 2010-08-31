@@ -154,7 +154,7 @@ if (!R8.Ctrl) {
 
 //TODO: research best practices for efficient setTimeout quick calls
 					var setContentCallback = function() { R8.Ctrl.setCallContent(ioId,actionItem); }
-					setTimeout(setContentCallback,50);
+					setTimeout(setContentCallback,20);
 continue;
 //TODO: revisit if this call should be here in this order of execution
 
@@ -349,7 +349,7 @@ return tpl_content;
 			setCallContent: function(ioId,actionItem) {
 				if(!R8.Ctrl.callContentReady(ioId,actionItem)) {
 					var setContentCallback = function() { R8.Ctrl.setCallContent(ioId,actionItem); }
-					setTimeout(setContentCallback,50);
+					setTimeout(setContentCallback,20);
 					return;
 				}
 

@@ -8,7 +8,12 @@ require File.expand_path('schema/migration_methods', File.dirname(__FILE__))
 module XYZ
   #class methods
   module ModelSchema
-      include MigrationMethods
+    Fieldsets = Hash.new
+    def field_set(model_name)
+      Fieldsets[model_name] ||= DB_REL_DEF[model_name][:columns].keys + COMMON_REL_COLUMNS.keys
+    end
+
+    include MigrationMethods
 
       #gets over written for classes with data source attributes
       def ds_attributes(attr_list)
@@ -101,18 +106,6 @@ module XYZ
 
       def create_table_common_fields?(db_rel)
         create_schema_for_db_rel?(db_rel)
-
-        #TBD: may figure out better way to do this
-        COMMON_REL_COLUMNS.update({
-          CONTEXT_ID => {:type => ID_TYPES[:context_id]},
-          :id => {:type =>  ID_TYPES[:id]},
-          :local_id => {:type => ID_TYPES[:local_id]},
-          :ref => {:type => :string},
-          :ref_num => {:type => :integer},
-          :description => {:type => :string},
-          :display_name => {:type => :string}
-        })
-
         seq_ref = @db.ret_sequence_ref(TOP_LOCAL_ID_SEQ)
         @db.create_table?(db_rel) do
           foreign_key CONTEXT_ID, CONTEXT_TABLE.schema_table_symbol, FK_CASCADE_OPT.merge({:null => false,:type =>  ID_TYPES[:context_id]})

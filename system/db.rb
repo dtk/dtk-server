@@ -109,6 +109,15 @@ class DBRel < Hash
   FK_CASCADE_OPT = {:on_delete => :cascade, :on_update => :cascade}
   FK_SET_NULL_OPT = {:on_delete => :set_null, :on_update => :set_null}
   DB_REL_DEF = {}
-  COMMON_REL_COLUMNS = {}
+  COMMON_REL_COLUMNS = 
+  {
+  CONTEXT_ID => {:type => ID_TYPES[:context_id]},
+  :id => {:type =>  ID_TYPES[:id]},
+  :local_id => {:type => ID_TYPES[:local_id]},
+  :ref => {:type => :string},
+  :ref_num => {:type => :integer},
+  :description => {:type => :string},
+  :display_name => {:type => :string}
+}
 end
 

@@ -19,7 +19,6 @@ module R8Tpl
       end
 
      private
-
       Cache = Hash.new
       def set_and_ret_cache(model_name,language,content)
         Cache[model_name] ||= Hash.new
@@ -28,3 +27,6 @@ module R8Tpl
     end
   end
 end
+
+
+

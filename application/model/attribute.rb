@@ -28,11 +28,11 @@ module XYZ
         virtual_column :attribute_value 
 
         #Boolean that indicates whether there is a executable script/recipe associated with the attribute
-        virtual_column :executable? 
-        virtual_column :unknown_in_attribute_value 
+        virtual_column :executable?, :hidden => true
+        virtual_column :unknown_in_attribute_value , :hidden => true
 
         #if component attribute then hash with component and node(s) associated with it 
-        virtual_column :assoc_components_on_nodes  
+        virtual_column :assoc_components_on_nodes, :dependencies => [:component]  
         many_to_one :component, :node
       end
     end
@@ -69,14 +69,14 @@ module XYZ
     def unknown_in_attribute_value()
       attr_value = attribute_value()
       return true if attr_value.nil?
-      return nil unless is_array
+      return nil unless self[:is_array]
       return nil unless attr_value.kind_of?(Array) #TBD: this should be error      
       attr_value.each{|v| return true if v.nil?}
       return nil
     end
 
     def executable?()
-      external_attr_ref().nil? ? false : true
+      self[:external_attr_ref].nil? ? false : true
     end
 
     def assoc_components_on_nodes()

@@ -88,7 +88,7 @@ module XYZ
     end
 
     def is_virtual_column?(x)
-      @virtual_columns[x]
+      @db_rel[:virtual_columns].has_key?(x)
     end
   end
   #End ModelDataClassMixins

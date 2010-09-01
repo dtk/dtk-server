@@ -7,8 +7,8 @@ module XYZ
 #TODO: move this out into central model, should read off of model meta data for processing
       def up()
         has_ancestor_field()
-        column :ds_attributes, :json
-        column :ds_key, :varchar
+        column :ds_attributes, :json, :hidden => true
+        column :ds_key, :varchar, :hidden => true
         column :data_source, :varchar, :size => 25
         column :ds_source_obj_type, :varchar, :size => 25
         column :type, :varchar, :size => 25 # instance or template
@@ -20,8 +20,8 @@ module XYZ
         column :image_size, :numeric, :size=>[8, 3] #in megs
         virtual_column :disk_size #in megs
         #TBD: can these virtual columns just be inherited
-        virtual_column :parent_id
-        virtual_column :parent_path
+        virtual_column :parent_id, :dependencies => [:library,:project] #TODO does not distinguish between OR and AND dependencies
+        virtual_column :parent_path, :dependencies => [:library,:project]
         foreign_key :data_source_id, :data_source, FK_SET_NULL_OPT
         many_to_one :library,:project
         one_to_many :attribute, :node_interface, :address_access_point

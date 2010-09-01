@@ -17,45 +17,28 @@ if (!R8.MainToolbar) {
 					if(this.slider_status=='closed') this.toggleSlider();
 
 					if(basicSearch == true) {
-						var queryTerm = 'name=' + sboxElem.value;
+						var queryTerm = 'sq=' + sboxElem.value;
 console.log('Searching for:'+queryTerm);
-						this.searchNodes(queryTerm);
+//(route, args, callBacks) {
+					var callbacks = {
+						'io:start':R8.MainToolbar.startSearch(),
+						'io:end':R8.MainToolbar.endSearch()
+					};
+					R8.Ctrl.call('workspace/search',queryTerm,callbacks);
+
+//						this.searchNodes(queryTerm);
 					}
 				},
 
+				startSearch : function(ioId,arguments) {
+console.log('....Started Search');
+				},
+
+				endSearch : function(ioId,arguments) {
+console.log('....Finished Search');
+				},
+
 				searchNodes: function(queryTerm) {
-					YUI().use('io','io-base', function(Y) {
-
-						var cfg = {
-							method: "GET",
-							data: queryTerm
-						};
-
-						var success = function(ioId, o) {
-							if(o.responseText !== undefined) {
-								eval("var response =" + o.responseText);
-//								console.log(o.responseText);
-								console.log(response);
-							} else {
-								console.log('respnose is undefined');
-							}
-						};
-				 		var failure = function(ioId, o) {
-							if(o.responseText !== undefined) {
-								console.log(o.responseText);
-							} else {
-								console.log('respnose is undefined');
-							}
-						};
-				
-						Y.on('io:start', console.log('starting io request.....'));
-						Y.on('io:success', success);
-						Y.on('io:failure', failure);
-						Y.on('io:end', console.log('finished io request'));
-//						var base_url = 'http://172.22.101.112:7000/xyz/workspace/testsearch';
-						var base_url = 'http://localhost:7000/xyz/node/list.json';
-						var request = Y.io(base_url, cfg);
-					});
 				},
 
 				addSet : function(setObj) {

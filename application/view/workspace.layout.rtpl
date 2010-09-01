@@ -46,7 +46,7 @@
 			<a href="javascript:R8.MainToolbar.toggleSlider();">Toggle</a>
 			<div class="tbar_search"">
 				<form id="tbar_search_form" onsubmit="R8.MainToolbar.search(); return false;">
-					<input onfocus="if(this.value =='Search') {this.value='';}" type="text" value="Search" id="sq" name="sq" title="Enter Search Term"/>
+					<input onfocus="if(this.value =='Search') this.value='';" onblur="if(this.value==='') this.value='Search';" type="text" value="Search" id="sq" name="sq" title="Enter Search Term"/>
 					<input class="tbar_search_submit" onclick="R8.MainToolbar.search();" type="button" title="Search" value=""/>
 				</form>
 			</div>

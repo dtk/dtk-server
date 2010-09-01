@@ -71,40 +71,35 @@ if (!R8.Ctrl) {
 //				if(typeof(R8.devtools) === 'undefined')
 //					params += "&devToolsLoaded=0";
 
-//TODO: cleanup and extend once implementing all callbacks not just success
-				if (typeof(callBacks) !== 'undefined') {
-					var successReturnFunction = successFunction;
-				} else {
-					var successReturnFunction = R8.Ctrl.updatePage;
-				}
-
 				YUI().use('io','io-base', function(Y) {
 					var cfg = {
-						method: "GET",
+						method: "POST",
 						data: req_params
 					};
-					var success = function(ioId, o) {
-						if(o.responseText !== undefined) {
-//							eval("var response =" + o.responseText);
-//							console.log(o.responseText);
-//							document.getElementById('composeKeyResults').innerHTML = response.actions[0].tpl_contents;
-						} else {
-							console.log('respnose is undefined');
+					if (typeof(callBacks) !== 'undefined') {
+						for(callback in callBacks) {
+							switch(callback) {
+								case "io:start":
+									Y.on('io:start', callBacks[callback]);
+									break;
+								case "io:success":
+									Y.on('io:success', callBacks[callback]);
+									break;
+								case "io:failure":
+									Y.on('io:failure', callBacks[callback]);
+									break;
+								case "io:end":
+									Y.on('io:end', callBacks[callback]);
+									break;
+							}
 						}
-					};
-						var failure = function(ioId, o) {
-						if(o.responseText !== undefined) {
-							console.log(o.responseText);
-						} else {
-							console.log('respnose is undefined');
-						}
-					};
+						if(!R8.Utils.isDefined(callBacks['io:success']))
+							Y.on('io:success', R8.Ctrl.updatePage);
+					} else {
+						Y.on('io:success', R8.Ctrl.updatePage);
+					}
 
-			//		Y.on('io:start', console.log('starting io request.....'));
-					Y.on('io:success', successReturnFunction);
-					Y.on('io:failure', failure);
-			//		Y.on('io:end', console.log('finished io request'));
-			//		var request_url = base_url+'/application/compose_keys_search';
+
 //TODO: revisit when config is implemented
 					var request_url = 'http://localhost:7000/xyz/'+route;
 					var request = Y.io(request_url, cfg);

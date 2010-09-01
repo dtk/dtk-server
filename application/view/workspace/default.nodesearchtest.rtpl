@@ -1,0 +1,14 @@
+
+<div style="height:92px; width: {%=slide_width%}px;">
+	{%for node in node_list%}
+	<div id="{%=node[:id]%}" class="basic-component component" style="float: left; margin: 0 5px;">
+		<div class="basic-tl-corner corner"></div>
+		<div class="header"></div>
+		<div class="basic-tr-corner corner"></div>
+		<div id="{%=node[:id]%}-body" class="body">{%=node[:display_name]%}</div>
+		<div class="basic-bl-corner corner"></div>
+		<div class="footer"></div>
+		<div class="basic-br-corner corner"></div>
+	</div>
+	{%end%}
+</div>

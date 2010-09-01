@@ -7,8 +7,8 @@ module XYZ
       def up()
         has_ancestor_field()
         column :type, :varchar, :size => 25 # instance | template | composite
-        column :ds_attributes, :json
-        column :ds_key, :varchar
+        column :ds_attributes, :json, :hidden => true
+        column :ds_key, :varchar, :hidden => true
         column :external_type, :varchar
         column :external_cmp_ref, :varchar
         column :uri, :varchar

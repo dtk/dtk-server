@@ -2,7 +2,7 @@ module XYZ
   class AttributeController < Controller
     def component_display(parsed_query_string=nil)
       where_clause = parsed_query_string || ret_parsed_query_string()
-      model_list = get_objects(model_name().to_sym,field_set,where_clause)
+      model_list = get_objects(model_name().to_sym,where_clause,field_set())
 
       #TODO: should we be using default action name
       action_name = :list

@@ -8,11 +8,15 @@ require File.expand_path('schema/migration_methods', File.dirname(__FILE__))
 module XYZ
   #class methods
   module ModelSchema
-    Fieldsets = Hash.new
     def field_set(model_name)
-      Fieldsets[model_name] ||= DB_REL_DEF[model_name][:columns].keys + COMMON_REL_COLUMNS.keys
+      Fieldsets[model_name] ||= non_hidden_columns(DB_REL_DEF[model_name][:columns]) + non_hidden_columns(COMMON_REL_COLUMNS)
     end
-
+   private
+    Fieldsets = Hash.new    
+    def non_hidden_columns(cols_def)
+      cols_def.reject{|k,v| v and v[:hidden]}.keys
+    end
+   public
     include MigrationMethods
 
       #gets over written for classes with data source attributes

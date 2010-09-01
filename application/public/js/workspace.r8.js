@@ -67,6 +67,7 @@ console.log('registering port:'+portElemID);
 					R8.Canvas.renderConnector(c);
 				}
 */
+				R8.MainToolbar.init();
 			},
 
 			activeTool : 'selection',

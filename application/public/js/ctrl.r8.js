@@ -91,6 +91,9 @@ if (!R8.Ctrl) {
 								case "io:end":
 									Y.on('io:end', callBacks[callback]);
 									break;
+								case "io:renderComplete":
+									this.onRenderComplete = callBacks[callback];
+									break;
 							}
 						}
 						if(!R8.Utils.isDefined(callBacks['io:success']))
@@ -392,6 +395,10 @@ return tpl_content;
 				for(panel in panelsContent) {
 					doc.getElementById(panel).innerHTML = panelsContent[panel];
 				}
+				if(this.onRenderComplete != null) {
+					this.onRenderComplete();
+					this.onRenderComplete = null;
+				}
 			},
 
 //TODO: probably remove this, doesnt look like it will be used with new style rendering
@@ -491,7 +498,8 @@ return tpl_content;
 			 */
 			callResults : {},
 
-			jsTplContent : {}
+			jsTplContent : {},
+			onRenderComplete : null,
 		}
 	}();
 }

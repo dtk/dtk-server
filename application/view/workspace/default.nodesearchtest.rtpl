@@ -1,5 +1,5 @@
 
-<div style="height:92px; width: {%=slide_width%}px;">
+<div id="slide_bar" style="height:92px; width: {%=slide_width%}px;">
 	{%for node in node_list%}
 	<div id="{%=node[:id]%}" class="basic-component component" style="float: left; margin: 0 5px;">
 		<div class="basic-tl-corner corner"></div>

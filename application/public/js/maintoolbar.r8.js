@@ -4,6 +4,8 @@ if (!R8.MainToolbar) {
 	(function(R8) {
 		R8.MainToolbar = function(options) {
 			return {
+				init : function() {},
+
 				toggleSlider: function(){
 					R8.Utils.$("#sliderbar").slideToggle(100);
 					var slider_display = document.getElementById('sliderbar').style.display;
@@ -18,27 +20,77 @@ if (!R8.MainToolbar) {
 
 					if(basicSearch == true) {
 						var queryTerm = 'sq=' + sboxElem.value;
-console.log('Searching for:'+queryTerm);
-//(route, args, callBacks) {
-					var callbacks = {
-						'io:start':R8.MainToolbar.startSearch(),
-						'io:end':R8.MainToolbar.endSearch()
-					};
-					R8.Ctrl.call('workspace/search',queryTerm,callbacks);
-
-//						this.searchNodes(queryTerm);
+						var callbacks = {
+							'io:start':R8.MainToolbar.startSearch(),
+							'io:end':R8.MainToolbar.endSearch(),
+							'io:renderComplete':this.initSlider(),
+						};
+						R8.Ctrl.call('workspace/search',queryTerm,callbacks);
 					}
 				},
 
 				startSearch : function(ioId,arguments) {
-console.log('....Started Search');
 				},
 
 				endSearch : function(ioId,arguments) {
-console.log('....Finished Search');
 				},
 
 				searchNodes: function(queryTerm) {
+				},
+
+				initSlider: function() {
+					if(document.getElementById('slide_bar') == null) {
+						var initSliderCallback = function() { R8.MainToolbar.initSlider(); }
+						setTimeout(initSliderCallback,100);
+						return;
+					}
+					YUI().use('anim', function(Y) {
+						var slideBarNode = Y.one('#slide_bar');
+						var anim = new Y.Anim({
+							node: slideBarNode,
+							duration: 0.3,
+						});
+						anim.on('end',function(){ R8.MainToolbar.sliderInMotion = false;});
+					
+						var slideLeft = function(e) {
+							if(R8.MainToolbar.sliderInMotion) return;
+							else R8.MainToolbar.sliderInMotion = true;
+					
+							anim.set('to', { xy: [slideBarNode.getX()-510, slideBarNode.getY()] });
+							anim.run();
+						};
+						var slideRight = function(e) {
+							if(R8.MainToolbar.sliderInMotion) return;
+							else R8.MainToolbar.sliderInMotion = true;
+					
+							anim.set('to', { xy: [slideBarNode.getX()+510, slideBarNode.getY()] });
+							anim.run();
+						};
+
+						Y.one('#lbutton').on('click', slideLeft);
+						Y.one('#rbutton').on('click', slideRight);
+
+						YUI().use("node", function(Y) {
+							R8.MainToolbar.sliderKeyPress = Y.get('document').on("keypress", function(e) {
+								var key = {
+									'code': e.keyCode,
+									'char': String.fromCharCode(e.keyCode),
+									'dir_code' : 0,
+									'alt': e.altKey,
+									'ctrl': e.ctrlKey,
+									'shift': e.shiftKey
+								};
+								if (e.keyCode == 37) {
+									slideLeft();
+									e.halt();
+								} else if(e.keyCode == 39) {
+									slideRight();
+									e.halt();
+								}
+							});
+						});
+
+					});
 				},
 
 				addSet : function(setObj) {
@@ -54,7 +106,9 @@ console.log('....Finished Search');
 				//this stores teh list of currently loaded items that are referenced in sets
 				tools : {},
 
-				slider_status: 'closed'
+				slider_status: 'closed',
+				sliderInMotion : false,
+				sliderKeyPress : null,
 			}
 		}();
 	})(R8);
@@ -79,6 +133,4 @@ var plugin = {
 
 R8.MainToolbar.addTool(plugin);
 R8.MainToolbar.tools['monitoring'].help();
-
-
 //console.log(R8.MainToolbar.tools.prototype);

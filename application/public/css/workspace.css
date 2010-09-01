@@ -58,7 +58,7 @@
 
 #slidecontainer {
 	height: 92px;
-	width: 1142px;
+	width: 1135px;
 	float: left;
 /*	border: 1px solid green;*/
 /*	margin: 3px 3px 3px 3px;*/
@@ -79,17 +79,19 @@
 }
 
 #lbutton {
-/*	background: no-repeat url(../images/workspace/l-arrow-thumb-nail.png);*/
+	background: no-repeat url(../images/workspace/slider-l-arrow.png);
 	float: left;
 	width: 25px;
 	height: 100%;
+	margin-left: 5px;
 }
 
 #rbutton {
-/*	background: no-repeat url(../images/workspace/r-arrow-thumb-nail.png);*/
+	background: no-repeat url(../images/workspace/slider-r-arrow.png);
 	float: right;
 	width: 25px;
 	height: 100%;
+	margin-right: 5px;
 }
 
 #wspaceContainer {

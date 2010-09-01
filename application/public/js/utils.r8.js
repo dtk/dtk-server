@@ -11,11 +11,12 @@ if (!R8.Utils) {
 			 * This is the global YUI variable to be used
 			 */
 //			Y : new YUI({base:'js/yui3x/build/'}).use('dd', 'node'),
+			Y : new YUI().use('dd', 'node'),
 
 			/*
 			 * This is the global jQuery variable to be used
 			 */
-//			$ : jQuery,
+			$ : jQuery,
 
 			/*
 			 * This function takes a name/value pair json object and return a name=value&name2=value2 string
@@ -70,7 +71,7 @@ if (!R8.Utils) {
 					var digit = inputVal.charAt(i);
 //TODO: revisit to check for number seperator from config instead of hardcoding
 					if(digit == ",") continue;
-					if (!R8.utils.isDigit(digit)) return false;
+					if (!R8.Utils.isDigit(digit)) return false;
 				}
 				return true;
 			},
@@ -83,7 +84,7 @@ if (!R8.Utils) {
 					var digit = inputVal.charAt(i);
 //TODO: revisit to check for number seperator from config instead of hardcoding
 					if(digit == "," || digit == ".") continue;
-					if (!R8.utils.isDigit(digit)) return false;
+					if (!R8.Utils.isDigit(digit)) return false;
 				}
 				return true;
 			},

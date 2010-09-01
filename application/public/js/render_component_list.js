@@ -111,7 +111,7 @@ function render_component_list(tplVars,renderType) {
 	div_tplRoot.appendChild(div2);
 	//end rendering for element div2
 
-	if(R8.utils.isUndefined(renderType) || renderType !='append') {
+	if(R8.Utils.isUndefined(renderType) || renderType !='append') {
 		doc.getElementById("leftColPanel").innerHTML="";
 	}
 	doc.getElementById("leftColPanel").appendChild(div_tplRoot);

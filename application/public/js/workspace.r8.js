@@ -21,10 +21,10 @@ if (!R8.Workspace) {
 			loadWorkspace: function(wSpaceID){
 				this.workspaceElem = document.getElementById('mainWorkspace');
 
-				this.nodeRef = R8.utils.Y.one(this.workspaceElem);
-				R8.utils.Y.delegate('click',this.updateSelectedElements,this.nodeRef,'.component, .connector');
-				R8.utils.Y.delegate('click',this.clearSelectedElements,'body','#mainWorkspace');
-				R8.utils.Y.delegate('mousedown',this.checkMouseDownEvent,'body','#mainWorkspace');
+				this.nodeRef = R8.Utils.Y.one(this.workspaceElem);
+				R8.Utils.Y.delegate('click',this.updateSelectedElements,this.nodeRef,'.component, .connector');
+				R8.Utils.Y.delegate('click',this.clearSelectedElements,'body','#mainWorkspace');
+				R8.Utils.Y.delegate('mousedown',this.checkMouseDownEvent,'body','#mainWorkspace');
 
 //TODO: right now hardcoding assignment from demoData.r8.js
 				this.components = workspaceComponents;
@@ -79,8 +79,8 @@ console.log('registering port:'+portElemID);
 				if(R8.Workspace.activeTool === 'selection') {
 					R8.Workspace.selectionStartX = e.pageX;
 					R8.Workspace.selectionStartY = e.pageY;
-					R8.Workspace.selectionDragEvent = R8.utils.Y.one('#mainWorkspace').on('mousemove', R8.Workspace.updateSelectionRegion);
-					R8.Workspace.selectionMouseUpEvent = R8.utils.Y.one('#mainWorkspace').on('mouseup', R8.Workspace.handleSelectionMouseUp);
+					R8.Workspace.selectionDragEvent = R8.Utils.Y.one('#mainWorkspace').on('mousemove', R8.Workspace.updateSelectionRegion);
+					R8.Workspace.selectionMouseUpEvent = R8.Utils.Y.one('#mainWorkspace').on('mouseup', R8.Workspace.handleSelectionMouseUp);
 				}
 			},
 
@@ -108,7 +108,7 @@ console.log('registering port:'+portElemID);
 				else
 					boxStyles['top'] = R8.Workspace.selectionStartY + 'px';
 
-				R8.utils.Y.one(R8.Workspace.selectionBoxElem).setStyles(boxStyles);
+				R8.Utils.Y.one(R8.Workspace.selectionBoxElem).setStyles(boxStyles);
 			},
 			handleSelectionMouseUp : function(e) {
 				R8.Workspace.selectionDragEvent.detach();
@@ -128,22 +128,22 @@ console.log('registering port:'+portElemID);
 			addDragDrop : function() {
 				var a = arguments;
 				if(typeof(a[0]) === 'object') {
-					var compNode = R8.utils.Y.one(a[0]);
+					var compNode = R8.Utils.Y.one(a[0]);
 					var compID = compNode.get('id');
 				} else if(typeof(a[0]) === 'string') {
 					var compID = a[0];
-					var compNode = R8.utils.Y.one('#'+compID);
+					var compNode = R8.Utils.Y.one('#'+compID);
 				}
 
 				//Selector of the node to make draggable
 //				compNode.on('mousedown', this.updateClickFocus,compNode);
 
-				var dd = new R8.utils.Y.DD.Drag({
+				var dd = new R8.Utils.Y.DD.Drag({
 					node: '#'+compID,
 				});
 				dd.on('drag:start',function(){
 					R8.Workspace.clearSelectedElements();
-					R8.utils.Y.one('#'+compID).addClass('compFocus');
+					R8.Utils.Y.one('#'+compID).addClass('compFocus');
 					R8.Workspace.selectedElements[compID] = R8.Workspace.components[compID];
 				});
 				dd.on('drag:drag',function(){
@@ -178,7 +178,7 @@ console.log('registering port:'+portElemID);
 					//if ctrl no held then clear all currently selected
 					if(e.ctrlKey == false) R8.Workspace.clearSelectedElements();
 					R8.Workspace.selectedElements[e.currentTarget.get('id')] = R8.Workspace.components[e.currentTarget.get('id')];
-					var tempObj = R8.utils.Y.one('#'+e.currentTarget.get('id'));
+					var tempObj = R8.Utils.Y.one('#'+e.currentTarget.get('id'));
 					tempObj.addClass('compFocus');
 					e.stopImmediatePropagation();
 				}
@@ -193,7 +193,7 @@ console.log('registering port:'+portElemID);
 			 */
 			clearSelectedElements : function() {
 				for(var elemID in R8.Workspace.selectedElements) {
-					R8.utils.Y.one('#'+R8.Workspace.selectedElements[elemID].id).removeClass('compFocus');
+					R8.Utils.Y.one('#'+R8.Workspace.selectedElements[elemID].id).removeClass('compFocus');
 				}
 				R8.Workspace.selectedElements = {};
 			},
@@ -209,13 +209,13 @@ console.log('registering port:'+portElemID);
 //TODO: figure out how to handle groups for drop zones
 				var groups = ['test'];
 
-				var dragDelegate = new R8.utils.Y.DD.Delegate({
+				var dragDelegate = new R8.Utils.Y.DD.Delegate({
 						cont:'#'+compElemID,
 						nodes:'.available',
 						groups: groups
 						}
 					);
-				dragDelegate.dd.plug(R8.utils.Y.Plugin.DDProxy, {
+				dragDelegate.dd.plug(R8.Utils.Y.Plugin.DDProxy, {
 					borderStyle: false,
 					moveOnEnd: false
 				});
@@ -226,7 +226,7 @@ console.log('registering port:'+portElemID);
 					p.setAttribute('class', n.getAttribute('class'));
 					this.dd.addToGroup(groups);
 
-					var drop = new R8.utils.Y.DD.Drop({
+					var drop = new R8.Utils.Y.DD.Drop({
 						node: '#comp1-north-0',
 						groups: groups
 					});
@@ -238,16 +238,16 @@ console.log('registering port:'+portElemID);
 				});
 				dragDelegate.on('drag:drophit', function(e) {
 //					wireConnected = true;
-					var wireCanvas = R8.utils.Y.one('#wireCanvas');
-					R8.utils.Y.one('#mainWorkspace').removeChild(wireCanvas);
+					var wireCanvas = R8.Utils.Y.one('#wireCanvas');
+					R8.Utils.Y.one('#mainWorkspace').removeChild(wireCanvas);
 					delete(wireCanvas);
 					R8.Workspace.createConnector(this.get('currentNode').get('id'),e.drop.get('node').get('id'));
 //					console.log('Gyeah!! Hit Target Yo!');
 				});
 
 				dragDelegate.on('drag:dropmiss', function(e) {
-					var wireCanvas = R8.utils.Y.one('#wireCanvas');
-					R8.utils.Y.one('#mainWorkspace').removeChild(wireCanvas);
+					var wireCanvas = R8.Utils.Y.one('#wireCanvas');
+					R8.Utils.Y.one('#mainWorkspace').removeChild(wireCanvas);
 					delete(wireCanvas);
 					console.log('drop miss');
 				});
@@ -282,8 +282,8 @@ console.log('registering port:'+portElemID);
 
 				R8.Canvas.renderConnector(tempConnectorID);
 
-				var startNode = R8.utils.Y.one('#'+startElemID);
-				var endNode = R8.utils.Y.one('#'+endElemID);
+				var startNode = R8.Utils.Y.one('#'+startElemID);
+				var endNode = R8.Utils.Y.one('#'+endElemID);
 				startNode.removeClass('available');
 				startNode.addClass('connected');
 				endNode.removeClass('available');

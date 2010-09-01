@@ -64,17 +64,17 @@ if (!R8.Canvas) {
 
 				if (tempCanvas != null) {
 					tempCanvas.getContext('2d').clearRect(0, 0, tempCanvas.width, tempCanvas.height);
-					var canvasNode = R8.utils.Y.one('#' + canvasID);
+					var canvasNode = R8.Utils.Y.one('#' + canvasID);
 				} else {
-					var canvasNode = new R8.utils.Y.Node.create('<canvas>');
+					var canvasNode = new R8.Utils.Y.Node.create('<canvas>');
 					canvasNode.setAttribute('id', canvasID);
-					R8.utils.Y.one('#mainWorkspace').appendChild(canvasNode);
+					R8.Utils.Y.one('#mainWorkspace').appendChild(canvasNode);
 				}
 				delete (tempCanvas);
 				//---------------------------------------------------------------------
 	
-				var startElemNode = R8.utils.Y.one('#' + startElemID);
-				var endElemNode = R8.utils.Y.one('#' + endElemID);
+				var startElemNode = R8.Utils.Y.one('#' + startElemID);
+				var endElemNode = R8.Utils.Y.one('#' + endElemID);
 				var startElemXY = startElemNode.getXY();
 				var endElemXY = endElemNode.getXY();
 
@@ -875,11 +875,11 @@ if (!R8.Canvas) {
 				var wireCanvasElem = document.getElementById(canvasID);
 				//if null it doesnt exist so add to DOM
 				if(wireCanvasElem === null) {
-					var canvasElem = new R8.utils.Y.Node.create('<canvas>');
+					var canvasElem = new R8.Utils.Y.Node.create('<canvas>');
 					canvasElem.setAttribute('id',canvasID);
-					R8.utils.Y.one('#mainWorkspace').appendChild(canvasElem);
+					R8.Utils.Y.one('#mainWorkspace').appendChild(canvasElem);
 				} else {
-					var canvasElem = R8.utils.Y.one('#'+canvasID);
+					var canvasElem = R8.Utils.Y.one('#'+canvasID);
 					var width = canvasElem.get('width');
 					var height = canvasElem.get('height');
 					document.getElementById(canvasID).getContext('2d').clearRect(0,0,width,height);

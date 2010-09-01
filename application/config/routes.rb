@@ -22,10 +22,6 @@ routes[:model][:action] = {
 }
 =end
 
-R8::Routes[:workspace] = {
-  :layout => 'workspace',
-}
-
 =begin
 :layout => defines what master layout to use for the request if its an normal non-js response
 :panel => defines what partial rtpl assign var gets the contents if render type is html and not js
@@ -73,6 +69,10 @@ R8::Routes["component/display"] = {
 
 R8::Routes["component/testjsonlayout"] = {
   :layout => 'testjson'
+}
+
+R8::Routes["workspace"] = {
+  :layout => 'workspace'
 }
 
 R8::Routes.freeze

@@ -93,7 +93,7 @@ function render_component_display(tplVars,renderType) {
 	div_tplRoot.appendChild(table5);
 	//end rendering for element table5
 
-	if(R8.utils.isUndefined(renderType) || renderType !='append') {
+	if(R8.Utils.isUndefined(renderType) || renderType !='append') {
 		doc.getElementById("appBodyPanel").innerHTML="";
 	}
 	doc.getElementById("appBodyPanel").appendChild(div_tplRoot);

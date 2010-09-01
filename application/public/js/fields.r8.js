@@ -1,10 +1,10 @@
 
-if (!R8.fields) {
+if (!R8.Fields) {
 
 	/*
 	 * This is the field handling r8 js class, more to be added
 	 */
-	R8.fields = function() {
+	R8.Fields = function() {
 		return {
 			registerCal: function(fieldId, btnId, calId) {
 				var dialog,calendar;
@@ -170,9 +170,9 @@ if (!R8.fields) {
 			validateText : function(validator) {
 				var fieldValid = true;
 
-				fieldValid = R8.fields.validateBase(validator);
+				fieldValid = R8.Fields.validateBase(validator);
 				if(fieldValid) {
-					if(R8.utils.isDefined(validator["maxLength"])) {
+					if(R8.Utils.isDefined(validator["maxLength"])) {
 						//nothing here yet
 					}
 				}
@@ -181,15 +181,15 @@ if (!R8.fields) {
 			validateInteger : function(validator) {
 				var fieldValid = true;
 
-				fieldValid = R8.fields.validateBase(validator);
+				fieldValid = R8.Fields.validateBase(validator);
 				if(fieldValid) {
-					if(!R8.utils.isInteger(document.getElementById(validator["id"]).value)) {
+					if(!R8.Utils.isInteger(document.getElementById(validator["id"]).value)) {
 						fieldValid = false;
 						//TODO: i18N
 						validator["errorMsg"] = "Must be a whole number";
 					}
-					if(fieldValid) R8.fields.clearFieldErrors(validator);
-					else R8.fields.addFieldErrors(validator);
+					if(fieldValid) R8.Fields.clearFieldErrors(validator);
+					else R8.Fields.addFieldErrors(validator);
 
 					return fieldValid;
 				}
@@ -198,15 +198,15 @@ if (!R8.fields) {
 			validateFloat : function(validator) {
 				var fieldValid = true;
 
-				fieldValid = R8.fields.validateBase(validator);
+				fieldValid = R8.Fields.validateBase(validator);
 				if(fieldValid) {
-					if(!R8.utils.isFloat(document.getElementById(validator["id"]).value)) {
+					if(!R8.Utils.isFloat(document.getElementById(validator["id"]).value)) {
 						fieldValid = false;
 						//TODO: i18N
 						validator["errorMsg"] = "Must be a whole or decimal number";
 					}
-					if(fieldValid) R8.fields.clearFieldErrors(validator);
-					else R8.fields.addFieldErrors(validator);
+					if(fieldValid) R8.Fields.clearFieldErrors(validator);
+					else R8.Fields.addFieldErrors(validator);
 
 					return fieldValid;
 				}
@@ -224,8 +224,8 @@ if (!R8.fields) {
 						validator["errorMsg"] = "Must have a value";
 					}
 				}
-				if(fieldValid) R8.fields.clearFieldErrors(validator);
-				else R8.fields.addFieldErrors(validator);
+				if(fieldValid) R8.Fields.clearFieldErrors(validator);
+				else R8.Fields.addFieldErrors(validator);
 
 				return fieldValid;
 			},
@@ -247,15 +247,15 @@ if (!R8.fields) {
 						validator["errorMsg"] = "Must have a value";
 					}
 				}
-				if(fieldValid) R8.fields.clearFieldErrors(validator);
-				else R8.fields.addFieldErrors(validator);
+				if(fieldValid) R8.Fields.clearFieldErrors(validator);
+				else R8.Fields.addFieldErrors(validator);
 
 				return fieldValid;
 			},
 			validateCalendar : function(validator) {
 				var fieldValid = true;
 
-				fieldValid = R8.fields.validateBase(validator);
+				fieldValid = R8.Fields.validateBase(validator);
 
 				return fieldValid;
 			},
@@ -279,8 +279,8 @@ if (!R8.fields) {
 						validator["errorMsg"] = "Must have a value";
 					}
 				}
-				if(fieldValid) R8.fields.clearFieldErrors(validator);
-				else R8.fields.addFieldErrors(validator);
+				if(fieldValid) R8.Fields.clearFieldErrors(validator);
+				else R8.Fields.addFieldErrors(validator);
 
 				return fieldValid;
 			},
@@ -298,14 +298,14 @@ if (!R8.fields) {
 					//TODO: i18N
 					validator["errorMsg"] = "Must have a value";
 				}
-				if(fieldValid) R8.fields.clearFieldErrors(validator);
-				else R8.fields.addFieldErrors(validator);
+				if(fieldValid) R8.Fields.clearFieldErrors(validator);
+				else R8.Fields.addFieldErrors(validator);
 
 				return fieldValid;
 			},
 
 			clearFieldErrors : function(validator) {
-				if(R8.utils.isDefined(validator["classRefId"]))
+				if(R8.Utils.isDefined(validator["classRefId"]))
 					var inputElem = document.getElementById(validator["classRefId"]);
 				else
 					var inputElem = document.getElementById(validator["id"]);
@@ -326,7 +326,7 @@ if (!R8.fields) {
 //TODO: LOOK up about using displey none/block and reflow from velocity
 
 			addFieldErrors : function(validator) {
-				if(R8.utils.isDefined(validator["classRefId"]))
+				if(R8.Utils.isDefined(validator["classRefId"]))
 					var inputElem = document.getElementById(validator["classRefId"]);
 				else
 					var inputElem = document.getElementById(validator["id"]);

@@ -5,7 +5,7 @@ if (!R8.MainToolbar) {
 		R8.MainToolbar = function(options) {
 			return {
 				toggleSlider: function(){
-					R8.utils.$("#sliderbar").slideToggle(100);
+					R8.Utils.$("#sliderbar").slideToggle(100);
 					var slider_display = document.getElementById('sliderbar').style.display;
 					if(slider_display.toLowerCase() == 'block') this.slider_status = 'open';
 					else this.slider_status = 'closed';
@@ -89,7 +89,7 @@ var plugin = {
 			console.log('should open the plugin');
 		},
 		help: function() {
-			console.log('Should show help');
+//			console.log('Should show help');
 		}
 	}
 }

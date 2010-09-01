@@ -2,24 +2,24 @@ if(typeof R8=="undefined" || !R8) {
 	var R8={};
 }
 
-if (!R8.devtools) {
+if (!R8.Devtools) {
 
 	/*
 	 * This is the deveveloper Tools r8 js class, more to be added
 	 */
-	R8.devtools = function(){
+	R8.Devtools = function(){
 		return {
 			toggleWindow: function(){
-				if (R8.devtools.windowOpen == false) {
+				if (R8.Devtools.windowOpen == false) {
 					var attributes = {
 						height: {from: 32,to: 325,unit: 'px'}
 					};
-					R8.devtools.windowOpen = true;
+					R8.Devtools.windowOpen = true;
 				} else {
 					var attributes = {
 						height: {from: 325,to: 32,unit: 'px'}
 					};
-					R8.devtools.windowOpen = false;
+					R8.Devtools.windowOpen = false;
 				}
 				var anim = new YAHOO.util.Anim('devToolsWrapper', attributes, 0.3);
 				anim.animate();
@@ -27,35 +27,35 @@ if (!R8.devtools) {
 			},
 
 			timerStart: function(timerName) {
-				var numTimers = R8.devtools.timers.length, 
+				var numTimers = R8.Devtools.timers.length, 
 					timerCount = 0,
 					startTime = new Date().valueOf();
 
-				if(R8.utils.isDefined(R8.devtools.timers[timerName]))
-					R8.devtools.timers[timerName]["start"] = startTime;
+				if(R8.Utils.isDefined(R8.Devtools.timers[timerName]))
+					R8.Devtools.timers[timerName]["start"] = startTime;
 				else
-					R8.devtools.timers[timerName] = R8.devtools.getTimerObj(startTime,null);
+					R8.Devtools.timers[timerName] = R8.Devtools.getTimerObj(startTime,null);
 
 				return;
 			},
 
 			timerStop: function(timerName) {
-				var numTimers = R8.devtools.timers.length,
+				var numTimers = R8.Devtools.timers.length,
 					stopTop = new Date().valueOf(),
 					timerCount = 0;
 
-				if(R8.utils.isUndefined(R8.devtools.timers[timerName]))
+				if(R8.Utils.isUndefined(R8.Devtools.timers[timerName]))
 					return false;
 				else
-					R8.devtools.timers[timerName]["end"] = stopTime;
+					R8.Devtools.timers[timerName]["end"] = stopTime;
 
 				return;
 			},
 
 			getElapsedTime: function(timerName) {
-				var numTimers = R8.devtools.timers.length,
+				var numTimers = R8.Devtools.timers.length,
 					timerCount = 0,
-					elapsedTime = R8.devtools.timers[timerName]["end"] - R8.devtools.timers[timerName]["start"];
+					elapsedTime = R8.Devtools.timers[timerName]["end"] - R8.Devtools.timers[timerName]["start"];
 
 				if (elapsedTime >= 1000) {
 					elapsedTime = elapsedTime / 1000;

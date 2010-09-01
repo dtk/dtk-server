@@ -168,7 +168,7 @@ function render_component_list(tplVars,renderType) {
 		var txtSpan132= document.createElement("span");
 		txtSpan132.innerHTML = tplVars['component_list'][component]['description'];
 		div_tplroot.appendChild(txtSpan132);
-		if(R8.utils.isUndefined(renderType) || renderType !='append') {
+		if(R8.Utils.isUndefined(renderType) || renderType !='append') {
 			doc.getElementById("mainBodyPanel").innerHTML="";
 		}
 		doc.getElementById("mainBodyPanel").appendChild(div_tplRoot);

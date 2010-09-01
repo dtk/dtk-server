@@ -35,9 +35,9 @@ if (!R8.Component) {
 			renderPorts : function() {
 				var a = arguments;
 				if(typeof(a[0]) === 'object') {
-					var compNode = R8.utils.Y.one(a[0]);
+					var compNode = R8.Utils.Y.one(a[0]);
 				} else if(typeof(a[0]) === 'string') {
-					var compNode = R8.utils.Y.one('#' + a[0]);
+					var compNode = R8.Utils.Y.one('#' + a[0]);
 				}
 				var compID = compNode.get('id');
 				var compNodeRegion = compNode.get('region');
@@ -63,7 +63,7 @@ if (!R8.Component) {
 					var portNodeID = compID + '-north-' + R8.Workspace.components[compID].availPorts.north[port].id;
 					var portClass = R8.Workspace.components[compID].availPorts.north[port].type + '-port';
 					portObjs[portNodeID] = {};
-					var portNode = new R8.utils.Y.Node.create('<div>');
+					var portNode = new R8.Utils.Y.Node.create('<div>');
 					portNode.setAttribute('id',portNodeID);
 					portNode.addClass(portClass + ' available');
 					compNode.appendChild(portNode);
@@ -81,7 +81,7 @@ if (!R8.Component) {
 				count = 0;
 				var prevLeft = 0;
 				for(var portNodeID in portObjs) {
-					var portNode = R8.utils.Y.one('#'+portNodeID);
+					var portNode = R8.Utils.Y.one('#'+portNodeID);
 					var top = -1*(portObjs[portNodeID].hOffset);
 					if (count == 0) {
 						var left = (compNodeWidth - (totalPortWidth + (numSpacers * portSpacer))) / 2;
@@ -114,7 +114,7 @@ if (!R8.Component) {
 					var portNodeID = compID + '-south-' + R8.Workspace.components[compID].availPorts.south[port].id;
 					var portClass = R8.Workspace.components[compID].availPorts.south[port].type + '-port';
 					portObjs[portNodeID] = {};
-					var portNode = new R8.utils.Y.Node.create('<div>');
+					var portNode = new R8.Utils.Y.Node.create('<div>');
 					portNode.setAttribute('id',portNodeID);
 					portNode.addClass(portClass + ' available');
 					compNode.appendChild(portNode);
@@ -132,7 +132,7 @@ if (!R8.Component) {
 				count = 0;
 				var prevLeft = 0;
 				for(var portNodeID in portObjs) {
-					var portNode = R8.utils.Y.one('#'+portNodeID);
+					var portNode = R8.Utils.Y.one('#'+portNodeID);
 					var top = compNodeHeight - portObjs[portNodeID].hOffset;
 					if (count == 0) {
 						var left = (compNodeWidth - (totalPortWidth + (numSpacers * portSpacer))) / 2;
@@ -164,7 +164,7 @@ if (!R8.Component) {
 					var portNodeID = compID + '-west-' + R8.Workspace.components[compID].availPorts.west[port].id;
 					var portClass = R8.Workspace.components[compID].availPorts.west[port].type + '-port';
 					portObjs[portNodeID] = {};
-					var portNode = new R8.utils.Y.Node.create('<div>');
+					var portNode = new R8.Utils.Y.Node.create('<div>');
 					portNode.setAttribute('id',portNodeID);
 					portNode.addClass(portClass + ' available');
 					compNode.appendChild(portNode);
@@ -182,7 +182,7 @@ if (!R8.Component) {
 				count = 0;
 				var prevTop = 0;
 				for(var portNodeID in portObjs) {
-					var portNode = R8.utils.Y.one('#'+portNodeID);
+					var portNode = R8.Utils.Y.one('#'+portNodeID);
 					var left = -1*(portObjs[portNodeID].wOffset);
 					if (count == 0) {
 						var top = (compNodeHeight - (totalPortHeight + (numSpacers * portSpacer))) / 2;
@@ -215,7 +215,7 @@ if (!R8.Component) {
 					var portNodeID = compID + '-east-' + R8.Workspace.components[compID].availPorts.east[port].id;
 					var portClass = R8.Workspace.components[compID].availPorts.east[port].type + '-port';
 					portObjs[portNodeID] = {};
-					var portNode = new R8.utils.Y.Node.create('<div>');
+					var portNode = new R8.Utils.Y.Node.create('<div>');
 					portNode.setAttribute('id',portNodeID);
 					portNode.addClass(portClass + ' available');
 					compNode.appendChild(portNode);
@@ -233,7 +233,7 @@ if (!R8.Component) {
 				count = 0;
 				var prevTop = 0;
 				for(var portNodeID in portObjs) {
-					var portNode = R8.utils.Y.one('#'+portNodeID);
+					var portNode = R8.Utils.Y.one('#'+portNodeID);
 					var left = compNodeWidth - portObjs[portNodeID].wOffset;
 					if (count == 0) {
 						var top = (compNodeHeight - (totalPortHeight + (numSpacers * portSpacer))) / 2;

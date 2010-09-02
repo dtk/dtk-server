@@ -177,11 +177,6 @@ module R8Tpl
 
   def render_js_dom_tree(nodeList, parentNode=nil)
     for node in nodeList do
-#R8 DEBUG
-pp node.name.downcase
-pp node.content
-p"++++++++++++++++++++"
-p"++++++++++++++++++++"
         if !node.cdata?
           newJSNode = {
             :jsElementVarName => node.name + @element_count.to_s,

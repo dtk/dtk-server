@@ -6,9 +6,8 @@ module XYZ
     module DataProcessingGet
 
       #where clause could be hash or string
-      def get_objects(relation_type,c,where_clause=nil,field_set=nil)
+      def get_objects(relation_type,c,where_clause=nil,opts={})
 	db_rel = DB_REL_DEF[relation_type]
-        opts = (field_set ? {:field_set => field_set} : {})
         filter = SQL.and({CONTEXT_ID => c},where_clause)
 	ds = ret_dataset_with_scalar_columns(db_rel,opts).filter(filter)
 	ds.all.map{|raw_hash|
@@ -18,15 +17,16 @@ module XYZ
       end
 
       #TBD: convert so where clause could be hash or string
-      def get_objects_wrt_parent(relation_type,parent_id_handle,where_clause={})
+      def get_objects_wrt_parent(relation_type,parent_id_handle,where_clause=nil,opts={})
 	parent_id_info = IDInfoTable.get_row_from_id_handle(parent_id_handle)
         parent_fk_col = ret_parent_id_field_name(parent_id_info[:db_rel],DB_REL_DEF[relation_type])
         get_objects(relation_type,parent_id_handle[:c],
-                    SQL.and(where_clause,{parent_fk_col => parent_id_info[:id]}))
+                    SQL.and(where_clause,{parent_fk_col => parent_id_info[:id]}),
+                    opts)
       end
 
       #TBD: convert so where clause could be hash or string       
-      def get_object_ids_wrt_parent(relation_type,parent_id_handle,where_clause={})
+      def get_object_ids_wrt_parent(relation_type,parent_id_handle,where_clause=nil)
 	c = parent_id_handle[:c]
 	db_rel = DB_REL_DEF[relation_type]
 	parent_id_info = IDInfoTable.get_row_from_id_handle(parent_id_handle)

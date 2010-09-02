@@ -11,21 +11,27 @@ module XYZ
       @db.get_instance_scalar_values(id_handle,opts)
     end
 
-    def get_objects(relation_type,c,where_clause=nil,field_set=nil)
+    def update_from_hash(id_handle,hash,opts)
+      # Aux.ret_hash_assignments makes sure all hash keys are symbols
+      hash_assigns = Aux.ret_hash_assignments(hash)
+      update_from_hash_assignments(id_handle,hash_assigns,opts)
+    end
+
+    def get_objects(relation_type,c,where_clause=nil,opts={})
       where_clause_x,parent_id = SQL.find_and_remove_parent_id(where_clause)
       if parent_id
         parent_id_handle = IDHandle[:c => c, :guid => parent_id]
-        @db.get_objects_wrt_parent(relation_type,parent_id_handle,where_clause_x)
+        @db.get_objects_wrt_parent(relation_type,parent_id_handle,where_clause_x,opts)
       else
-        @db.get_objects(relation_type,c,where_clause,field_set)
+        @db.get_objects(relation_type,c,where_clause,opts)
       end
     end
 
-    def get_objects_wrt_parent(relation_type,parent_id_handle,where_clause={})
+    def get_objects_wrt_parent(relation_type,parent_id_handle,where_clause=nil,opts={})
       @db.get_objects_wrt_parent(relation_type,parent_id_handle,where_clause)
     end
 
-    def get_object_ids_wrt_parent(relation_type,parent_id_handle,where_clause={})
+    def get_object_ids_wrt_parent(relation_type,parent_id_handle,where_clause=nil)
       @db.get_object_ids_wrt_parent(relation_type,parent_id_handle,where_clause)
     end
 

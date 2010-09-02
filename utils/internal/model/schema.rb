@@ -85,6 +85,8 @@ module XYZ
       end
 
       def set_db_for_all_models(db)
+        Model.set_db(db)
+        #TODO: see if we can remove needing to link all children of Model
         models.each{|model| model.set_db(db)}
         #infra tables
         ContextTable.set_db(db)

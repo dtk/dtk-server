@@ -36,13 +36,6 @@ module XYZ
         create_simple_instance?(new_uri,c,opts)
       end
 
-      #idempotent
-      def update_from_hash(id_handle,hash,opts)
-	# Aux.ret_hash_assignments makes sure all hash keys are symbols
-        hash_assigns = Aux.ret_hash_assignments(hash)
-        update_from_hash_assignments(id_handle,hash_assigns,opts)
-      end
-
       #not idempotent
       def clone(id_handle,target_id_handle,relation_type,clone_helper=nil,opts={})
         clone_helper = CloneHelper.new(@db) if no_clone_helper_provided = clone_helper.nil?

@@ -1,4 +1,4 @@
-#TODO: depecate this whole set of fns and use update instead
+#TODO: need to refactor to make more efficient
 require 'sequel'
 
 module XYZ

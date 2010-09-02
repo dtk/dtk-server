@@ -6,6 +6,12 @@
 		<input type="hidden" name="{%=field[:name]%}" id="{%=field[:id]%}" value="{%=field[:value]%}" />
 	{%end%}
 	</form>
+	<form id="{%=formId%}" action="../clone/{%=editId%}" method="post" enctype="multipart/form-data">
+	<input type="submit" value="Clone"/>
+	{%h_field_list.reject{|f|f[:id]=="id"}.each do |field|%}
+		<input type="hidden" name="{%=field[:name]%}" id="{%=field[:id]%}" value="{%=field[:value]%}" />
+	{%end%}
+	</form>
 	<table class="display">
 	{%for row in rows%}
 		<tr id="{%=row[:row_id]%}">

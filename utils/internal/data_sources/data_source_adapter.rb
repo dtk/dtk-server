@@ -35,7 +35,7 @@ module XYZ
       return nil if ds_hash.nil?
       marked << ds_key_value(ds_hash)
       db_update_hash = ret_db_update_hash(container_id_handle,ds_hash)
-      Object.input_into_model(container_id_handle,db_update_hash)
+      Model.input_into_model(container_id_handle,db_update_hash)
     end
 
     def ret_db_update_hash(container_id_handle,ds_hash)

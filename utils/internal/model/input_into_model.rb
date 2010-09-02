@@ -52,7 +52,7 @@ module XYZ
       end
       obj
     end  
-
+   
     def update_with_id_values(fks,c,prefixes,container_uri)
       fks.each_pair do |fk_rel_uri_x,info|
         fk_rel_uri = ret_rebased_uri(fk_rel_uri_x ,prefixes,container_uri)

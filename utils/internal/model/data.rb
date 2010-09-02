@@ -11,10 +11,8 @@ module XYZ
       @db.get_instance_scalar_values(id_handle,opts)
     end
 
-    def update_from_hash(id_handle,hash,opts)
-      # Aux.ret_hash_assignments makes sure all hash keys are symbols
-      hash_assigns = Aux.ret_hash_assignments(hash)
-      update_from_hash_assignments(id_handle,hash_assigns,opts)
+    def update_from_hash_assignments(id_handle,hash_assigns,opts={})
+      @db.update_from_hash_assignments(id_handle,hash_assigns,opts)
     end
 
     def get_objects(relation_type,c,where_clause=nil,opts={})
@@ -60,10 +58,6 @@ module XYZ
 
     def update_instance(id_handle,scalar_assignments,opts={})
       @db.update_instance(id_handle,scalar_assignments,opts)
-    end
-
-    def update_from_hash_assignments(id_handle,hash_assigns,opts={})
-      @db.update_from_hash_assignments(id_handle,hash_assigns,opts)
     end
 
     def get_factory_id_handle(parent_id_handle,relation_type=nil)

@@ -1,4 +1,4 @@
-#TODO: depecate this whole set of fns and use update instead
+
 require 'sequel'
 
 module XYZ
@@ -29,49 +29,6 @@ module XYZ
 	  new_uris << new_uri
         end
 	new_uris
-      end
-
-      def new_create_instance(parent_id_handle,relation_type,ref,assignments,clone_helper=nil,opts={})
-        db_rel = DB_REL_DEF[relation_type]
-
-	scalar_assignments = ret_scalar_assignments(assignments,db_rel)
-	obj_assignments = ret_object_assignments(assignments,db_rel)
-
-	#adding assignments that can be computed at this point indep. of case on parent_uri
-	scalar_assignments.merge!({:ref => ref.to_s})
-	old_id = scalar_assignments[:id]
-	modify_to_reflect_special_processing!(scalar_assignments,db_rel,opts)
-
-	############# processing scalar columns by inserting a row in db_rel
-	new_id = nil
-	parent_id = nil
-
-        parent_id_info = IDInfoTable.get_row_from_id_handle parent_id_handle, :raise_error => opts[:raise_error], :short_circuit_for_minimal_row => true
-        parent_relation_type = parent_id_info[:relation_type]
-       	if parent_relation_type == :top
-          ref_num = compute_ref_num(db_rel,ref,c)          	  
-	  #TBD check that the assignments are legal, or trap
-	  new_id = insert_into_db(c,db_rel,scalar_assignments.merge({:ref_num => ref_num}))
-        else
-	  parent_id = parent_id_info[:id]
-
-	  parent_id_field = ret_parent_id_field_name(parent_id_info[:db_rel],db_rel)
-          ref_num = compute_ref_num db_rel,ref,c,parent_id_field => parent_id
-	  new_id = insert_into_db(c,db_rel,scalar_assignments.merge({:ref_num => ref_num,parent_id_field => parent_id_info[:id]}))
-	end              
-
-	raise Error.new("error while inserting element") if new_id.nil?
-	clone_helper.update(c,db_rel,old_id,new_id,scalar_assignments) if clone_helper
-
-	new_uri  = RestURI::ret_new_uri(factory_uri,ref,ref_num)
-
-	#need to fill in extra columns in associated uri table entry
-	IDInfoTable.update_instance(db_rel,new_id,new_uri,relation_type,parent_id,parent_relation_type)
-	############# processing scalar columns by inserting a row in db_rel
-
-	create_factory_uris_and_contained_objects(new_uri,new_id,relation_type,obj_assignments,c,clone_helper,opts)
-	
-	new_uri
       end
 
       def create_instance(factory_uri,ref,assignments,c,clone_helper=nil,opts={})
@@ -117,8 +74,6 @@ module XYZ
 	
 	new_uri
       end
-
-
 
 
       def create_factory_uris_and_contained_objects(uri,id,relation_type,obj_assignments,c,clone_helper=nil,opts={})

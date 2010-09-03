@@ -7,8 +7,7 @@ module R8Tpl
         when :system 
           "#{R8::Config[:system_views_dir]}/#{@profile}.#{@view_name}.rtpl"
         when :base 
-          test = "#{R8::Config[:base_views_dir]}/#{@model_name}/#{@profile}.#{@view_name}.rtpl"
-          return test
+          return "#{R8::Config[:base_views_dir]}/#{@model_name}/#{@profile}.#{@view_name}.rtpl"
         when :meta
           #first see if there is a meta template for specfic profile type; if not look for default;
           path = Helper::ret_if_exists("#{R8::Config[:meta_templates_root]}/#{@model_name}/view.#{@profile}.#{@view_name}.rb")

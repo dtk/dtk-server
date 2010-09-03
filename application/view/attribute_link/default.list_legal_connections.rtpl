@@ -1,0 +1,23 @@
+<br/><br/>
+<div class="list_container">
+<!--
+	<div style="width: 100%;">
+		<div style="float: right; margin-right: 10px;">
+		<a href="javascript:R8.ctrl.request('attribute_link/list?listStart={%=list_start_prev%}');">&lt;-Prev</a>
+		&nbsp;&nbsp;&nbsp;&nbsp;
+		<a href="javascript:R8.ctrl.request('attribute_link/list?listStart={%=list_start_next%}');">Next-&gt;</a>
+		</div>
+	</div>
+-->
+	<div>
+	<table class="list">
+
+	{%for attribute_link in attribute_link_list%}
+		<tr id="list_row-{%=attribute_link%}" class="{%=[:class]%}">
+				<td id="display_name-td-{%=attribute_link%}" class=""><a href="/xyz/attribute_link/display/{%=attribute_link[:id]%}">{%=attribute_link[:display_name]%}</a></td>
+				<td id="attribute_link_value-td-{%=attribute_link%}" class="">{%=attribute_link[:attribute_link_value].inspect%}</td>
+		</tr>
+	{%end%}
+	</table>
+	</div>
+</div>

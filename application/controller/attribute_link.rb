@@ -2,7 +2,7 @@
 module XYZ
   class Attribute_linkController < Controller
     def list_legal_connections(project_name,parsed_query_string=nil) #stub for parent_id/model_name
-      opts = parsed_query_string ||{}
+      opts = {:depth => :deep}
       parent_id = nil
       #TODO stub to get project id from project name
       parent_uri = "/project/#{project_name}"

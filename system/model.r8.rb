@@ -5,6 +5,7 @@
 require File.expand_path(UTILS_DIR+'/internal/model/create_objects', File.dirname(__FILE__))
 require File.expand_path(UTILS_DIR+'/internal/model/schema', File.dirname(__FILE__))
 require File.expand_path(UTILS_DIR+'/internal/model/input_into_model', File.dirname(__FILE__))
+require File.expand_path(UTILS_DIR+'/internal/model/clone', File.dirname(__FILE__))
 require File.expand_path(UTILS_DIR+'/internal/model/data', File.dirname(__FILE__))
 
 module XYZ
@@ -13,6 +14,7 @@ module XYZ
     #TBD: refactoring: below is old to be refactored; above is refactored
     extend ModelSchema
     extend ModelDataClassMixins
+    extend CloneClassMixins
     extend InputIntoModelClassMixins
     include ModelDataInstanceMixins
 

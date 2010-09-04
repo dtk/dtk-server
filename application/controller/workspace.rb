@@ -42,7 +42,7 @@ module XYZ
        :ref
       ]
  
-      node_list = get_objects(:node,where_clause,field_set)
+      node_list = get_objects(:node,where_clause,{:field_set => field_set})
 
       tpl = R8Tpl::TemplateR8.new("workspace/nodesearchtest",user_context())
       tpl.set_js_tpl_name('nodesearchtest')

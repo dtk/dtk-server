@@ -13,14 +13,25 @@ module XYZ
       ###end of stub
       where_clause = {:parent_id => parent_id}
 
-      component_ds = Model.get_objects(:component,c,where_clause,{:return_just_sequel_dataset => true,:field_set => [:id,:external_cmp_ref]}).from_self(:alias => :component)
-      attribute_ds = Model.get_objects(:attribute,c,nil,{:return_just_sequel_dataset => true,:field_set => [:id,:external_attr_ref,:component_component_id]})
+      component_ds = Model.get_objects_just_sequel_dataset(:component,c,where_clause,{:field_set => [:id,:external_cmp_ref]}).from_self(:alias => :component)
+      attribute_ds = Model.get_objects_just_sequel_dataset(:attribute,c,nil,{:field_set => [:id,:external_attr_ref,:component_component_id]}).from_self(:alias => :attribute)
 
-      attribute_link_ds = Model.get_objects(:attribute_link,c,nil,{:return_just_sequel_dataset => true})
+      attribute_link_ds = Model.get_objects_just_sequel_dataset(:attribute_link,c)
 #     pp component_ds.from_self.join_table(:inner,attribute_ds,{:component_component_id => :id}).all
-      ds= component_ds.graph(attribute_ds,{:component_component_id => :id},{:join_type => :inner}).graph(:attribute__link,{:input_id => :id})
+#      ds= component_ds.graph(attribute_ds,{:component_component_id => :id},{:join_type => :inner}).graph(:attribute__link,{:input_id => :id})
+      ds= component_ds.graph(attribute_ds,{:component_component_id => :id},{:join_type => :inner,:table_alias => :attribute}).graph(attribute_link_ds,{:input_id => :id},{:table_alias => :attribute_link}).where({:attribute_link__id => nil})
+
       puts ds.sql
       pp ds.all
+=begin
+look at wrapping in XYZ::SQL calls that take an ordered list where each element is
+one that takes <relation_type>,where,field_set
+
+the other that wraps graph and then applies both "sides" of results through 
+          hash = process_raw_scalar_hash!(raw_hash,db_rel,c)
+what about?
+	  db_rel[:model_class].new(hash,c,relation_type)
+=end
 
       model_list = get_objects(:component,where_clause,opts)
 

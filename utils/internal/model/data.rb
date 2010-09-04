@@ -24,6 +24,9 @@ module XYZ
         @db.get_objects(relation_type,c,where_clause,opts)
       end
     end
+    def get_objects_just_sequel_dataset(relation_type,c,where_clause=nil,opts={})
+      get_objects(relation_type,c,where_clause,opts.merge({:return_just_sequel_dataset => true}))
+    end
 
     def get_objects_wrt_parent(relation_type,parent_id_handle,where_clause=nil,opts={})
       @db.get_objects_wrt_parent(relation_type,parent_id_handle,where_clause)

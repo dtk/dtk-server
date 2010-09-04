@@ -10,16 +10,8 @@ module XYZ
 	db_rel = DB_REL_DEF[relation_type]
         filter = SQL.and({CONTEXT_ID => c},where_clause)
 	ds = ret_dataset_with_scalar_columns(db_rel,opts).filter(filter)
-=begin
-test to experiment with sequel join/graph syntax
-        join_ds = ret_dataset_with_scalar_columns(DB_REL_DEF[:attribute],{:field_set => [:external_attr_ref,:component_component_id]}).from_self(:attribute)
 
-        q = ds.from_self(:component).graph(join_ds,{:component_component_id => :id},
-puts q.sql
-pp [:test, q.all]
-=end
-
-
+        return ds if opts[:return_just_sequel_dataset]
 	ds.all.map{|raw_hash|
           hash = process_raw_scalar_hash!(raw_hash,db_rel,c)
 	  db_rel[:model_class].new(hash,c,relation_type)
@@ -183,9 +175,7 @@ pp [:test, q.all]
           select_cols.concat([:id,:ref,:description,:display_name,:ref_num])
         end
 
-	ds = dataset(db_rel).select(select_cols.shift)
-	select_cols.each{|col| ds = ds.select_more(col)}
-        ds
+	dataset(db_rel).select(*select_cols)
       end
 
       def process_raw_scalar_hash!(hash,db_rel,c,opts={})

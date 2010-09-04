@@ -10,6 +10,16 @@ module XYZ
 	db_rel = DB_REL_DEF[relation_type]
         filter = SQL.and({CONTEXT_ID => c},where_clause)
 	ds = ret_dataset_with_scalar_columns(db_rel,opts).filter(filter)
+=begin
+test to experiment with sequel join/graph syntax
+        join_ds = ret_dataset_with_scalar_columns(DB_REL_DEF[:attribute],{:field_set => [:external_attr_ref,:component_component_id]}).from_self(:attribute)
+
+        q = ds.from_self(:component).graph(join_ds,{:component_component_id => :id},
+puts q.sql
+pp [:test, q.all]
+=end
+
+
 	ds.all.map{|raw_hash|
           hash = process_raw_scalar_hash!(raw_hash,db_rel,c)
 	  db_rel[:model_class].new(hash,c,relation_type)
@@ -163,14 +173,17 @@ module XYZ
       end
        
       def ret_dataset_with_scalar_columns(db_rel,opts={})
-  	cols_hash = db_rel[:columns]
-        select_cols = cols_hash.nil? ? [] : cols_hash.keys 
-        select_cols = db_rel[:model_class].ds_attributes(select_cols) if opts[:ds_attrs_only]        
-	select_cols.concat([:id,:description,:display_name,:ref_num])
-        select_cols = select_cols & opts[:field_set] if opts[:field_set]
-	# first we use select; for rest we use select_more; that is why display_name not in var slect_cols
-	#TBD: might make what columns mentioned here data driven
-	ds = dataset(db_rel).select(:ref)
+        #if opts[:field_set] then this is taken as is as the selected columns 
+        select_cols = nil
+        if opts[:field_set]
+          select_cols = opts[:field_set]
+        else
+          select_cols = (db_rel[:columns]||{}).keys 
+          select_cols = db_rel[:model_class].ds_attributes(select_cols) if opts[:ds_attrs_only]        
+          select_cols.concat([:id,:ref,:description,:display_name,:ref_num])
+        end
+
+	ds = dataset(db_rel).select(select_cols.shift)
 	select_cols.each{|col| ds = ds.select_more(col)}
         ds
       end

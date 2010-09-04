@@ -13,11 +13,14 @@ module XYZ
       ###end of stub
       where_clause = {:parent_id => parent_id}
 
-      component_ds = Model.get_objects(:component,c,where_clause,{:return_just_sequel_dataset => true,:field_set => [:id,:external_cmp_ref]})
+      component_ds = Model.get_objects(:component,c,where_clause,{:return_just_sequel_dataset => true,:field_set => [:id,:external_cmp_ref]}).from_self(:alias => :component)
       attribute_ds = Model.get_objects(:attribute,c,nil,{:return_just_sequel_dataset => true,:field_set => [:id,:external_attr_ref,:component_component_id]})
 
-     pp component_ds.from_self.join_table(:inner,attribute_ds,{:component_component_id => :id}).all
-     ## pp component_ds.from_self.graph(attribute_ds,{:component_component_id => :id}).all
+      attribute_link_ds = Model.get_objects(:attribute_link,c,nil,{:return_just_sequel_dataset => true})
+#     pp component_ds.from_self.join_table(:inner,attribute_ds,{:component_component_id => :id}).all
+      ds= component_ds.graph(attribute_ds,{:component_component_id => :id},{:join_type => :inner}).graph(:attribute__link,{:input_id => :id})
+      puts ds.sql
+      pp ds.all
 
       model_list = get_objects(:component,where_clause,opts)
 

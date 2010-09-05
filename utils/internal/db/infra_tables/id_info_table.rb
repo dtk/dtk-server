@@ -110,7 +110,12 @@ module XYZ
 	  unformated_row = ds.first
 	  format_row(unformated_row)
         end
- 
+
+        def get_id_from_id_handle(id_handle)
+          return db_id_from_guid(id_handle[:guid]) if id_handle[:guid]
+          r = get_row_from_id_handle(id_handle)
+          r ? r[:id] : nil
+        end
        
       private 
        def get_row_from_guid(guid,c,opts)
@@ -212,8 +217,9 @@ module XYZ
         end        
         def get_minimal_row_from_id_handle(id_handle)
           return nil unless id_handle[:model_name] and id_handle[:guid] and id_handle[:c]
-          IDInfoRow[CONTEXT_ID => id_handle[:c],:id => id_handle[:guid],:relation_type => id_handle[:model_name]]
+          IDInfoRow[CONTEXT_ID => id_handle[:c],:id => db_id_from_guid(id_handle[:guid]),:relation_type => id_handle[:model_name]]
         end
+       
 	def ds()
 	  raise Error.new("db has not been set for #{self.to_s}") if @db.nil?
 	  @db.dataset(ID_INFO_TABLE)

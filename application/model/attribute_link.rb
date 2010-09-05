@@ -11,7 +11,35 @@ module XYZ
         many_to_one :project, :library, :deployment, :component
       end
 
-      #TBD: many of these fns may get moved to utils area (as class mixins)
+      ### "Model fns"
+      def get_legal_connections(parent_id_handle)
+        c = parent_id_handle[:c]
+        parent_id = IDInfoTable.get_id_from_id_handle(parent_id_handle)
+        where_clause = {:parent_id => parent_id}        
+        component_ds = get_objects_just_sequel_dataset(:component,c,where_clause,{:field_set => [:id,:external_cmp_ref]}).from_self(:alias => :component)
+        attribute_ds = Model.get_objects_just_sequel_dataset(:attribute,c,nil,{:field_set => [:id,:external_attr_ref,:component_component_id]}).from_self(:alias => :attribute)
+
+        attribute_link_ds = Model.get_objects_just_sequel_dataset(:attribute_link,c).from_self(:alias => :attribute_link)
+#     pp component_ds.from_self.join_table(:inner,attribute_ds,{:component_component_id => :id}).all
+#      ds= component_ds.graph(attribute_ds,{:component_component_id => :id},{:join_type => :inner}).graph(:attribute__link,{:input_id => :id})
+        ds= component_ds.graph(attribute_ds,{:component_component_id => :id},{:join_type => :inner,:table_alias => :attribute}).graph(attribute_link_ds,{:input_id => :id},{:table_alias => :attribute_link}).where({:attribute_link__id => nil})
+
+        puts ds.sql
+        ds.all
+=begin
+look at wrapping in XYZ::SQL calls that take an ordered list where each element is
+one that takes <relation_type>,where,field_set
+
+the other that wraps graph and then applies both "sides" of results through 
+          hash = process_raw_scalar_hash!(raw_hash,db_rel,c)
+what about?
+	  db_rel[:model_class].new(hash,c,relation_type)
+=end
+
+      end
+
+      def get_legal_connections_wrt_endpoint(attribute_id_handle,parent_id_handle)
+      end
       ##### Actions
 
       def create(target_id_handle,input_id_handle,output_id_handle,href_prefix,opts={})

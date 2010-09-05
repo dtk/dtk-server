@@ -1,4 +1,3 @@
-require File.expand_path('model',  File.dirname(__FILE__))
 module XYZ
   class Node < Model
     extend ClassMixinDataSourceExtensions

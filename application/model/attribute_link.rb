@@ -1,0 +1,79 @@
+module XYZ
+  class AttributeLink < Model
+    set_relation_name(:attribute,:link)
+
+    class << self
+      def up()
+        foreign_key :input_id, :attribute, FK_CASCADE_OPT
+        foreign_key :output_id, :attribute, FK_CASCADE_OPT
+        column :label, :text, :default => "1"
+        has_ancestor_field()
+        many_to_one :project, :library, :deployment, :component
+      end
+
+      #TBD: many of these fns may get moved to utils area (as class mixins)
+      ##### Actions
+
+      def create(target_id_handle,input_id_handle,output_id_handle,href_prefix,opts={})
+        raise Error.new("Target location (#{target_id_handle}) does not exist") unless exists? target_id_handle
+
+        input_obj = Object.get_object(input_id_handle)
+        raise Error.new("Input endpoint does not exist") if input_obj.nil?
+        i_ref = input_obj.get_qualified_ref
+
+        output_obj = Object.get_object(output_id_handle)
+        raise Error.new("Output endpoint does not exist") if output_obj.nil?
+        o_ref = output_obj.get_qualified_ref
+
+        link_content = {:input_id => input_obj[:id],:output_id => output_obj[:id]}
+        link_ref = (i_ref.to_s + "_" + o_ref.to_s).to_sym
+
+        factory_id_handle = get_factory_id_handle(target_id_handle,:attribute_link)
+        link_uris = create_from_hash(factory_id_handle,{link_ref => link_content})
+        fn = ret_function_if_can_determine(input_obj,output_obj)
+        output_obj.check_and_set_derived_rel_from_link_fn!(fn)
+        link_uris
+      end
+
+      #returns function if can determine from semantic type of input and output
+      #throws an error if finds a mismatch
+      def ret_function_if_can_determine(input_obj,output_obj)
+        i_sem = input_obj[:semantic_type]
+        return nil if i_sem.nil?
+        o_sem = output_obj[:semantic_type]
+        return nil if o_sem.nil?
+
+        #TBD: haven't put in any rules if they have different seamntic types
+        return nil unless i_sem.keys.first == o_sem.keys.first      
+      
+        sem_type = i_sem.keys.first
+        ret_function_endpoints_same_type(i_sem[sem_type],o_sem[sem_type])
+      end
+
+    private
+
+      def ret_function_endpoints_same_type(i,o)
+        #TBD: more robust is allowing for example output to be "database", which matches with "postgresql" and also to have version info, etc
+        raise Error.new("mismatched input and output types") unless i[:type] == o[:type]
+        return :equal if !i[:is_array] and !o[:is_array]
+        return :equal if i[:is_array] and o[:is_array]
+        return :concat if !i[:is_array] and o[:is_array]
+        raise Error.new("mismatched input and output types") if i[:is_array] and !o[:is_array]
+        nil
+      end
+    end
+
+    ##instance fns
+    def get_input_attribute(opts={})
+      return nil if self[:input_id].nil?
+      get_object_from_db_id(self[:input_id],:attribute)
+    end
+
+    def get_output_attribute(opts={})
+      return nil if self[:output_id].nil?
+      get_object_from_db_id(self[:output_id],:attribute)
+    end
+  end
+  # END Attribute class definition
+end
+

@@ -1,5 +1,3 @@
-require File.expand_path('model',  File.dirname(__FILE__))
-
 module XYZ
   class Component < Model
     set_relation_name(:component,:component)

@@ -3,6 +3,7 @@
 #can we just move all this into the core model object itself?
 module XYZ
   module ModelDataClassMixins
+    
     def get_instance_or_factory(id_handle,href_prefix=nil,opts={})
       @db.get_instance_or_factory(id_handle,href_prefix,opts)
     end
@@ -11,10 +12,11 @@ module XYZ
       @db.get_instance_scalar_values(id_handle,opts)
     end
 
+=begin
     def update_from_hash_assignments(id_handle,hash_assigns,opts={})
       @db.update_from_hash_assignments(id_handle,hash_assigns,opts)
     end
-
+=end
     def get_objects(relation_type,c,where_clause=nil,opts={})
       where_clause_x,parent_id = SQL.find_and_remove_parent_id(where_clause)
       if parent_id

@@ -10,6 +10,11 @@ require File.expand_path(UTILS_DIR+'/internal/model/data', File.dirname(__FILE__
 
 module XYZ
   class Model < HashObject 
+
+    class << self
+      expose_methods_from_internal_object :db, [:update_from_hash_assignments]
+    end
+
     extend CreateObjectsClassMixins
     #TBD: refactoring: below is old to be refactored; above is refactored
     extend ModelSchema

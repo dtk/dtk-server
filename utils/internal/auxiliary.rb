@@ -144,6 +144,7 @@ private
 end
 
 ###for more succinctly handling pattern where class exposes methods on an internal object
+
 class Class
   def expose_all_methods_from_internal_object(innervar)
     method_def = "def method_missing(method,*args);@#{innervar}.send(method,*args);end"  
@@ -157,6 +158,7 @@ class Class
     class_eval(method_def)
   end
 end
+
  
 
 

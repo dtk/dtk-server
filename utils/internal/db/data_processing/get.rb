@@ -52,6 +52,13 @@ module XYZ
         db_rel[:model_class].new(hash,c,id_info[:relation_type])
       end
 
+      def process_raw_db_row!(row,model_handle,opts={})
+        c = model_handle[:c]
+        relation_type = model_handle[:model_name]
+        return row unless c and relation_type and DB_REL_DEF[relation_type]
+        process_raw_scalar_hash!(row,DB_REL_DEF[relation_type],c,opts)
+      end
+
       def get_parent_id_info(id_handle)
 	c = id_handle[:c]
 	id_info = IDInfoTable.get_row_from_id_handle id_handle

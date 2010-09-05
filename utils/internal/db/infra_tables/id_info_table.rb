@@ -1,9 +1,24 @@
 module XYZ
   #TBD: should this class  be in this file or instead somewhere else
-  class IDHandle < Hash
+  module CommonMixin
     def self.[](x)
       new(x)
     end
+    def [](x)
+      super(x.to_sym)
+    end
+
+    def to_s
+      self[:guid] ? "guid=#{self[:guid].to_s}" : "uri=#{self[:uri]}"
+    end
+   private
+    def raise_has_illegal_form(x)
+      raise Error.new("#{x.inspect} has incorrect form to be an id handle")
+    end
+  end
+
+  class IDHandle < Hash
+    include CommonMixin
     def initialize(x)
       super()
       raise_has_illegal_form(x) unless self[:c] = x[:c]
@@ -17,16 +32,15 @@ module XYZ
       end
       freeze
     end
-    def [](x)
-      super(x.to_sym)
-    end
+  end
 
-    def to_s
-      self[:guid] ? "guid=#{self[:guid].to_s}" : "uri=#{self[:uri]}"
-    end
-   private
-    def raise_has_illegal_form(x)
-     raise Error.new("#{x.inspect} has incorrect form to be an id handle")
+  class ModelHandle < Hash
+    def initialize(x)
+      super()
+      raise_has_illegal_form(x) unless self[:c] = x[:c]
+      raise_has_illegal_form(x) unless x[:model_name]
+      self[:model_name] = x[:model_name].to_sym
+      freeze
     end
   end
 

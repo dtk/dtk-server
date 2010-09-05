@@ -144,7 +144,7 @@ private
 end
 
 ###for more succinctly handling pattern where class exposes methods on an internal object
-
+#TODO: must be careful in not aserted this twice for same class also cant be used for two different internal vars
 class Class
   def expose_all_methods_from_internal_object(innervar)
     method_def = "def method_missing(method,*args);@#{innervar}.send(method,*args);end"  

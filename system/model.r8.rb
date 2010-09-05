@@ -12,7 +12,9 @@ module XYZ
   class Model < HashObject 
 
     class << self
-      expose_methods_from_internal_object :db, [:update_from_hash_assignments]
+      expose_methods_from_internal_object :db, %w{update_from_hash_assignments get_instance_or_factory get_instance_scalar_values get_objects_wrt_parent get_object_ids_wrt_parent get_object get_parent_object get_parent_id_info exists? delete_instance delete_instances_wrt_parent update_instance} 
+
+      #TODO: put these in if needed get_instance_or_factory get_instance_scalar_values
     end
 
     extend CreateObjectsClassMixins

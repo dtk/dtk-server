@@ -1,22 +1,5 @@
-
-#TODO: does this need to have all these 1-to-1 referneces to the function calls?
-#can we just move all this into the core model object itself?
 module XYZ
   module ModelDataClassMixins
-    
-    def get_instance_or_factory(id_handle,href_prefix=nil,opts={})
-      @db.get_instance_or_factory(id_handle,href_prefix,opts)
-    end
-
-    def get_instance_scalar_values(id_handle,opts={})
-      @db.get_instance_scalar_values(id_handle,opts)
-    end
-
-=begin
-    def update_from_hash_assignments(id_handle,hash_assigns,opts={})
-      @db.update_from_hash_assignments(id_handle,hash_assigns,opts)
-    end
-=end
     def get_objects(relation_type,c,where_clause=nil,opts={})
       where_clause_x,parent_id = SQL.find_and_remove_parent_id(where_clause)
       if parent_id
@@ -26,43 +9,9 @@ module XYZ
         @db.get_objects(relation_type,c,where_clause,opts)
       end
     end
+
     def get_objects_just_sequel_dataset(relation_type,c,where_clause=nil,opts={})
       get_objects(relation_type,c,where_clause,opts.merge({:return_just_sequel_dataset => true}))
-    end
-
-    def get_objects_wrt_parent(relation_type,parent_id_handle,where_clause=nil,opts={})
-      @db.get_objects_wrt_parent(relation_type,parent_id_handle,where_clause)
-    end
-
-    def get_object_ids_wrt_parent(relation_type,parent_id_handle,where_clause=nil)
-      @db.get_object_ids_wrt_parent(relation_type,parent_id_handle,where_clause)
-    end
-
-    def get_object(id_handle,opts={})
-      @db.get_object(id_handle,opts)
-    end
-
-    def get_parent_object(id_handle,opts={})
-      @db.get_parent_object(id_handle,opts)
-    end
-    def get_parent_id_info(id_handle)
-      @db.get_parent_id_info(id_handle)
-    end
-
-    def exists?(id_handle)
-      @db.exists?(id_handle)
-    end
-
-    def delete_instance(id_handle,opts={})
-      @db.delete_instance(id_handle,opts)
-    end
-
-    def delete_instances_wrt_parent(relation_type,parent_id_handle,where_clause=nil,opts={})
-      @db.delete_instances_wrt_parent(relation_type,parent_id_handle,where_clause,opts)
-    end
-
-    def update_instance(id_handle,scalar_assignments,opts={})
-      @db.update_instance(id_handle,scalar_assignments,opts)
     end
 
     def get_factory_id_handle(parent_id_handle,relation_type=nil)

@@ -29,7 +29,7 @@ module XYZ
         raw_result_set = ds.all
         raw_result_set.each do |raw_row|
           row = Hash.new
-          [:component,:attribute,:attribute_link].each do |model_name|
+          raw_row.each_key do |model_name|
             next unless raw_row[model_name]
 =begin
 TODO Need variant of process_raw_db_row! that for examplek allows omited fields 

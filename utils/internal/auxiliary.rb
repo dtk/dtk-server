@@ -151,6 +151,9 @@ class Class
     class_eval(method_def)
   end
 
+#TODO: reqwrite to instead of using method missing, explicitly add methods
+#this will also solve problem cited above (i.e., cant have two assignments for same class
+#TODO: consider variant where third argument passed which is lambda indicating how to transform inputs before applying to interval method var
   def expose_methods_from_internal_object(innervar,methods_to_expose)
     method_str = "[#{methods_to_expose.map{|x|":#{x}"}.join(",")}]"
     no_method_err_str = 'NoMethodError.new("#{self.class.to_s}##{method}")'

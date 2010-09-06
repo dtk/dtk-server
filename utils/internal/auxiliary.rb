@@ -1,3 +1,26 @@
+
+###for more succinctly handling pattern where class exposes methods on an internal object
+class Class
+  #TODO: consider variant where third argument passed which is lambda indicating how to 
+  #transform inputs before applying to interval method var
+  def expose_methods_from_internal_object(innervar,methods_to_expose,opts={})
+    methods_to_expose.each do |m| 
+      method_def = 
+        if opts[:post_hook]
+          "def #{m}(*args);#{opts[:post_hook]}(@#{innervar}.#{m}(*args));end"
+        else
+          "def #{m}(*args);@#{innervar}.#{m}(*args);end"
+        end
+      class_eval(method_def)
+    end
+  end
+
+  def expose_all_methods_from_internal_object(innervar)
+    method_def = "def method_missing(method,*args);@#{innervar}.send(method,*args);end"  
+    class_eval(method_def)
+  end
+end
+
 module XYZ
   ##relies on Sequel overwriting ~ | and &
   module SQL
@@ -26,13 +49,28 @@ module XYZ
       return x if y.nil? or (y.kind_of?(Hash) and y.empty?)
       x & y
     end
+
+    module DatatsetGraphMixin
+      def graph(join_type,right_ds,join_conditions)
+        Graph.new(@sequel_ds.graph(right_ds.sequel_ds,join_conditions,{:join_type => join_type, :table_alias => right_ds.relation_type}))
+      end
+    end
+
     class Dataset
-      attr_reader :sequel_ds
-      def initialize(sequel_ds)
+      include DatatsetGraphMixin
+      #TODO: needed to fully qualify Dataset; could this constraint be removed? by chaging expose?
+      expose_methods_from_internal_object :sequel_ds, %w{where}, :post_hook => "XYZ::SQL::Dataset.new"
+      attr_reader :relation_type, :sequel_ds
+      def initialize(relation_type,sequel_ds)
+        @relation_type = relation_type
         @sequel_ds = sequel_ds
       end
     end
+
     class Graph
+      include DatatsetGraphMixin
+      #TODO: needed to fully qualify Dataset; could this constraint be removed? by chaging expose?
+      expose_methods_from_internal_object :sequel_ds, %w{where},:post_hook => "XYZ::SQL::Graph.new"
       def initialize(sequel_ds)
         @sequel_ds = sequel_ds
       end
@@ -159,19 +197,7 @@ private
    end
 end
 
-###for more succinctly handling pattern where class exposes methods on an internal object
-class Class
-  #TODO: consider variant where third argument passed which is lambda indicating how to 
-  #transform inputs before applying to interval method var
-  def expose_methods_from_internal_object(innervar,methods_to_expose)
-    methods_to_expose.each{|m|class_eval("def #{m}(*args);@#{innervar}.#{m}(*args);end")}
-  end
 
-  def expose_all_methods_from_internal_object(innervar)
-    method_def = "def method_missing(method,*args);@#{innervar}.send(method,*args);end"  
-    class_eval(method_def)
-  end
-end
 
  
 

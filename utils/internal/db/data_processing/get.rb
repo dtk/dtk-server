@@ -21,7 +21,7 @@ module XYZ
         filter = SQL.and({CONTEXT_ID => c},where_clause)
 	ds = ret_dataset_with_scalar_columns(db_rel,opts).filter(filter)
 
-        return SQL::Dataset.new(ds.from_self(:alias => relation_type)) if opts[:return_just_sequel_dataset]
+        return SQL::Dataset.new(relation_type,ds.from_self(:alias => relation_type)) if opts[:return_just_sequel_dataset]
 
 	ds.all.map do |raw_hash|
           hash = process_raw_scalar_hash!(raw_hash,db_rel)

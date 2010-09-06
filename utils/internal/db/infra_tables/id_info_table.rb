@@ -110,7 +110,7 @@ module XYZ
           return ret if ret
 	  c = id_handle[:c]
 	  return get_row_from_uri(id_handle[:uri],c,opts) if id_handle[:uri]
-	  return get_row_from_guid(id_handle[:guid],c,opts) if id_handle[:guid]
+	  return get_row_from_guid(id_handle[:guid],opts) if id_handle[:guid]
 	  raise Error.new("no uri or guid given") if opts[:raise_error]	
           nil
         end
@@ -131,10 +131,9 @@ module XYZ
           r ? r[:id] : nil
         end
        
-      private 
-       def get_row_from_guid(guid,c,opts)
-          #NOTE: contingent on id scheme where id uniquely picks out row
-          ds = ds().where(ID_INFO_TABLE[:id] => db_id_from_guid(guid), CONTEXT_ID => c)
+        def get_row_from_guid(guid,opts={})
+          #NOTE: contingent on id scheme where guid uniquely picks out row
+          ds = ds().where(ID_INFO_TABLE[:id] => db_id_from_guid(guid))
 	   if ds.empty?
             raise ErrorNotFound.new(:guid,guid) if opts[:raise_error]
             return nil
@@ -145,7 +144,6 @@ module XYZ
 	  format_row(unformated_row)
         end
 
-       public
         def update_instance(db_rel,id,uri,relation_type,parent_id_x,parent_relation_type)
 	  #  to fill in uri ##TBD: this is split between trigger, which creates it and this code which updates it; may better encapsulate 
 	  parent_id = parent_id_x ? parent_id_x : 0

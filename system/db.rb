@@ -22,7 +22,7 @@ module XYZ
     include RestURI unless included_modules.include?(RestURI)
 
     def self.ret_qualified_ref_from_scalars(scalars)
-      raise Error if scalars[:ref].nil? 
+      return nil if scalars[:ref].nil? 
       scalars[:ref].to_s + (scalars[:ref_num] ? "-" + scalars[:ref_num].to_s : "")
     end
 

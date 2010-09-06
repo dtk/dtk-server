@@ -36,6 +36,25 @@ module XYZ
       return x if y.nil? or (y.kind_of?(Hash) and y.empty?)
       x & y
     end
+    class Graph
+      def initialize(sequel_ds)
+        @sequel_ds = sequel_ds
+      end
+      def all()
+        ret = Array.new
+        raw_result_set = @sequel_ds.all
+        raw_result_set.each do |raw_row|
+          row = Hash.new
+          raw_row.each_key do |model_name|
+            next unless raw_row[model_name]
+            Model.process_raw_db_row!(raw_row[model_name],model_name)
+            raw_row[model_name].each{|k,v|row["#{model_name}__#{k}"] = v} 
+          end
+          ret << row unless row.empty?
+        end
+        ret
+      end
+    end
   end  
 
   class Aux
@@ -144,20 +163,15 @@ private
 end
 
 ###for more succinctly handling pattern where class exposes methods on an internal object
-#TODO: must be careful in not aserted this twice for same class also cant be used for two different internal vars
 class Class
-  def expose_all_methods_from_internal_object(innervar)
-    method_def = "def method_missing(method,*args);@#{innervar}.send(method,*args);end"  
-    class_eval(method_def)
+  #TODO: consider variant where third argument passed which is lambda indicating how to 
+  #transform inputs before applying to interval method var
+  def expose_methods_from_internal_object(innervar,methods_to_expose)
+    methods_to_expose.each{|m|class_eval("def #{m}(*args);@#{innervar}.#{m}(*args);end")}
   end
 
-#TODO: reqwrite to instead of using method missing, explicitly add methods
-#this will also solve problem cited above (i.e., cant have two assignments for same class
-#TODO: consider variant where third argument passed which is lambda indicating how to transform inputs before applying to interval method var
-  def expose_methods_from_internal_object(innervar,methods_to_expose)
-    method_str = "[#{methods_to_expose.map{|x|":#{x}"}.join(",")}]"
-    no_method_err_str = 'NoMethodError.new("#{self.class.to_s}##{method}")'
-    method_def = "def method_missing(method,*args);raise #{no_method_err_str} unless #{method_str}.include?(method);@#{innervar}.send(method,*args);end"  
+  def expose_all_methods_from_internal_object(innervar)
+    method_def = "def method_missing(method,*args);@#{innervar}.send(method,*args);end"  
     class_eval(method_def)
   end
 end

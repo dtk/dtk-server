@@ -25,21 +25,7 @@ module XYZ
         ds= component_ds.graph(attribute_ds,{:component_component_id => :id},{:join_type => :inner,:table_alias => :attribute}).graph(attribute_link_ds,{:input_id => :id},{:table_alias => :attribute_link}).where({:attribute_link__id => nil})
 
         puts ds.sql
-        ret = Array.new
-        raw_result_set = ds.all
-        raw_result_set.each do |raw_row|
-          row = Hash.new
-          raw_row.each_key do |model_name|
-            next unless raw_row[model_name]
-=begin
-TODO Need variant of process_raw_db_row! that for examplek allows omited fields 
-            process_raw_db_row!(raw_row[model_name],ModelHandle[:c => c, :model_name => model_name])
-=end
-            raw_row[model_name].each{|k,v|row["#{model_name}__#{k}"] = v} 
-          end
-          ret << row unless row.empty?
-        end
-        ret
+        SQL::Graph.new(ds).all()
 =begin
 look at wrapping in XYZ::SQL calls that take an ordered list where each element is
 one that takes <relation_type>,where,field_set

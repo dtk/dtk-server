@@ -13,7 +13,7 @@ module XYZ
 
         return ds if opts[:return_just_sequel_dataset]
 	ds.all.map{|raw_hash|
-          hash = process_raw_scalar_hash!(raw_hash,db_rel,c)
+          hash = process_raw_scalar_hash!(raw_hash,db_rel)
 	  db_rel[:model_class].new(hash,c,relation_type)
         }
       end
@@ -39,7 +39,12 @@ module XYZ
 	  IDInfoTable.ret_guid_from_db_id(raw_hash[:id],db_rel[:relation_type])
 	}
       end
-  
+
+      def process_raw_db_row!(row,model_name,opts={})
+        relation_type = model_name
+        return row unless relation_type and DB_REL_DEF[relation_type]
+        process_raw_scalar_hash!(row,DB_REL_DEF[relation_type],opts)
+      end
 
       def get_object(id_handle,opts={})
 	c = id_handle[:c]
@@ -50,13 +55,6 @@ module XYZ
         
         db_rel = DB_REL_DEF[id_info[:relation_type]]
         db_rel[:model_class].new(hash,c,id_info[:relation_type])
-      end
-
-      def process_raw_db_row!(row,model_handle,opts={})
-        c = model_handle[:c]
-        relation_type = model_handle[:model_name]
-        return row unless c and relation_type and DB_REL_DEF[relation_type]
-        process_raw_scalar_hash!(row,DB_REL_DEF[relation_type],c,opts)
       end
 
       def get_parent_id_info(id_handle)
@@ -167,7 +165,7 @@ module XYZ
 	db_rel = DB_REL_DEF[id_info[:relation_type]]
 	ds = ret_dataset_with_scalar_columns(db_rel,opts)
         hash = ds.where(:id => id_info[:id]).first
-	process_raw_scalar_hash!(hash,db_rel,id_info[:c],opts)
+	process_raw_scalar_hash!(hash,db_rel,opts)
 	hash
       end
        
@@ -185,7 +183,7 @@ module XYZ
 	dataset(db_rel).select(*select_cols)
       end
 
-      def process_raw_scalar_hash!(hash,db_rel,c,opts={})
+      def process_raw_scalar_hash!(hash,db_rel,opts={})
 	cols_info = db_rel[:columns]
 
         #process the table specfic columns
@@ -197,9 +195,7 @@ module XYZ
 	        if opts[:fk_as_ref].nil?
 	          hash[col] = guid
 	        else
-	           fk_id_info = IDInfoTable.get_row_from_id_handle(
-	                          IDHandle[:c => c, :guid => guid])
-               
+	           fk_id_info = IDInfoTable.get_row_from_guid(guid)               
                    hash.delete(col)
                    #add a "*" form if opts[:fk_as_ref] is prefix
 		   if fk_id_info[:uri] =~ Regexp.new("^#{opts[:fk_as_ref].to_s}(/.+$)")
@@ -216,12 +212,13 @@ module XYZ
 
         #common fields
 	# fill in default display name if not there
-	hash[:display_name] ||= DB.ret_qualified_ref_from_scalars(hash)
+        qualified_ref = DB.ret_qualified_ref_from_scalars(hash)
+	hash[:display_name] ||= qualified_ref if qualified_ref
 	
 	#fill in id unless :no_ids specified
 	if opts[:no_ids]
 	  hash.delete(:id)
-        else
+        elsif hash[:id]
 	  hash[:id] = IDInfoTable.ret_guid_from_db_id(hash[:id],db_rel[:relation_type])
         end
 

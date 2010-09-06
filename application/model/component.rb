@@ -19,14 +19,18 @@ module XYZ
 
     ###### Helper fns
     def get_contained_attribute_ids(opts={})
-      nested_cmps = self.class.get_objects_wrt_parent(:component,id_handle)
+      parent_id = IDInfoTable.get_id_from_id_handle(id_handle)
+      nested_cmps = get_objects(ModelHandle.new(id_handle[:c],:component),nil,:parent_id => parent_id)
+
       (get_directly_contained_object_ids(:attribute)||[]) +
       (nested_cmps||[]).map{|cmp|cmp.get_contained_attribute_ids(opts)}.flatten()
     end
 
     #type can be :asserted, :derived or :value
     def get_contained_attribute_values(type,opts={})
-      nested_cmps = self.class.get_objects_wrt_parent(:component,id_handle)
+      parent_id = IDInfoTable.get_id_from_id_handle(id_handle)
+      nested_cmps = get_objects(ModelHandle.new(id_handle[:c],:component),nil,:parent_id => parent_id)
+
       ret = Hash.new
       (nested_cmps||[]).each do |cmp|
 	values = cmp.get_contained_attribute_values(type,opts)
@@ -41,7 +45,9 @@ module XYZ
     end
 
     def get_direct_attribute_values(type,opts={})
-      attr_val_array = self.class.get_objects_wrt_parent(:attribute,id_handle)
+      parent_id = IDInfoTable.get_id_from_id_handle(id_handle)
+      attr_val_array = Model.get_objects(ModelHandle.new(c,:attribute),nil,:parent_id => parent_id)
+
       return nil if attr_val_array.nil?
       return nil if attr_val_array.empty?
       ret = {}
@@ -55,9 +61,9 @@ module XYZ
     end
 
     def get_objects_associated_nodes()
-      assocs = Object.get_objects(:assoc_node_component,@c,:component_id => self[:id])
+      assocs = Model.get_objects(ModelHandle.new(@c,:assoc_node_component),:component_id => self[:id])
       return Array.new if assocs.nil?
-      assocs.map{|assoc|Object.get_object(IDHandle[:c=>@c,:guid => assoc[:node_id]])}
+      assocs.map{|assoc|Model.get_object(IDHandle[:c=>@c,:guid => assoc[:node_id]])}
     end
   end
 end

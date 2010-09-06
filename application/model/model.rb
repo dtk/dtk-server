@@ -36,10 +36,12 @@ module XYZ
         create_simple_instance?(new_uri,c,opts)
       end
 
+      #TODO: rewrite using join querey
 
       def get_contained_attribute_ids(id_handle,opts={})
-        cmps = get_objects_wrt_parent(:component,id_handle)
-        nodes = get_objects_wrt_parent(:node,id_handle)
+        parent_id = IDInfoTable.get_id_from_id_handle(id_handle)
+        cmps = get_objects(ModelHandle.new(:c,:component),nil,:parent_id => parent_id)
+        nodes = get_objects(ModelHandle.new(:c,:node),nil,:parent_id => parent_id)
         (cmps||[]).map{|cmp|cmp.get_contained_attribute_ids(opts)}.flatten() +
         (nodes||[]).map{|node|node.get_contained_attribute_ids(opts)}.flatten()
       end
@@ -48,7 +50,10 @@ module XYZ
       #type can be :asserted, :derived or :value
       def get_contained_attributes(type,id_handle,opts={})
         ret = {}
-        cmps = get_objects_wrt_parent(:component,id_handle)
+
+        parent_id = IDInfoTable.get_id_from_id_handle(id_handle)
+        cmps = get_objects(ModelHandle.new(:c,:component),nil,:parent_id => parent_id)
+        nodes = get_objects(ModelHandle.new(:c,:node),nil,:parent_id => parent_id)
 
         cmps.each{|cmp|
           values = cmp.get_contained_attribute_values(type,opts)
@@ -58,8 +63,6 @@ module XYZ
             ret[:component][cmp.get_qualified_ref.to_sym] = values 
           end
         }
-
-        nodes = get_objects_wrt_parent(:node,id_handle)
 
         nodes.each{|node|
       	  values = node.get_direct_attribute_values(type,opts)

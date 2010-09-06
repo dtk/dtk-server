@@ -12,7 +12,7 @@ module XYZ
   class Model < HashObject 
 
     class << self
-      expose_methods_from_internal_object :db, %w{update_from_hash_assignments update_instance get_instance_or_factory get_instance_scalar_values get_objects_wrt_parent get_object_ids_wrt_parent get_object get_parent_object get_parent_id_info exists? create_from_hash delete_instance delete_instances_wrt_parent process_raw_db_row!}
+      expose_methods_from_internal_object :db, %w{update_from_hash_assignments update_instance get_instance_or_factory get_instance_scalar_values get_objects get_objects_just_dataset get_object_ids_wrt_parent get_object get_parent_object get_parent_id_info exists? create_from_hash delete_instance delete_instances_wrt_parent process_raw_db_row!}
 
       #TODO: put these in if needed get_instance_or_factory get_instance_scalar_values
     end

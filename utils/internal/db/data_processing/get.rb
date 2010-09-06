@@ -4,27 +4,33 @@ require 'sequel'
 module XYZ
   class DB
     module DataProcessingGet
-
       #where clause could be hash or string
-      def get_objects(relation_type,c,where_clause=nil,opts={})
-	db_rel = DB_REL_DEF[relation_type]
+      def get_objects(model_handle,where_clause=nil,opts={})
+        c = model_handle[:c]
+        relation_type =  model_handle[:model_name]
+
+        #special processing if parent_id given
+        parent_id = opts[:parent_id]
+        if parent_id
+          parent_id_info = IDInfoTable.get_row_from_guid(parent_id)
+          parent_fk_col = ret_parent_id_field_name(parent_id_info[:db_rel],DB_REL_DEF[relation_type])
+          where_clause = SQL.and(where_clause,{parent_fk_col => parent_id_info[:id]})
+        end
+
+        db_rel = DB_REL_DEF[relation_type]
         filter = SQL.and({CONTEXT_ID => c},where_clause)
 	ds = ret_dataset_with_scalar_columns(db_rel,opts).filter(filter)
 
-        return ds if opts[:return_just_sequel_dataset]
-	ds.all.map{|raw_hash|
+        return SQL::Dataset.new(ds.from_self(:alias => relation_type)) if opts[:return_just_sequel_dataset]
+
+	ds.all.map do |raw_hash|
           hash = process_raw_scalar_hash!(raw_hash,db_rel)
 	  db_rel[:model_class].new(hash,c,relation_type)
-        }
+        end
       end
 
-      #TBD: convert so where clause could be hash or string
-      def get_objects_wrt_parent(relation_type,parent_id_handle,where_clause=nil,opts={})
-	parent_id_info = IDInfoTable.get_row_from_id_handle(parent_id_handle)
-        parent_fk_col = ret_parent_id_field_name(parent_id_info[:db_rel],DB_REL_DEF[relation_type])
-        get_objects(relation_type,parent_id_handle[:c],
-                    SQL.and(where_clause,{parent_fk_col => parent_id_info[:id]}),
-                    opts)
+      def get_objects_just_dataset(model_handle,where_clause=nil,opts={})
+        get_objects(model_handle,where_clause,opts.merge({:return_just_sequel_dataset => true}))
       end
 
       #TBD: convert so where clause could be hash or string       

@@ -15,16 +15,12 @@ module XYZ
       def get_legal_connections(parent_id_handle)
         c = parent_id_handle[:c]
         parent_id = IDInfoTable.get_id_from_id_handle(parent_id_handle)
-        where_clause = {:parent_id => parent_id}        
-        component_ds = get_objects_just_sequel_dataset(:component,c,where_clause,{:field_set => [:id,:external_cmp_ref]}).from_self(:alias => :component)
-        attribute_ds = Model.get_objects_just_sequel_dataset(:attribute,c,nil,{:field_set => [:id,:external_attr_ref,:component_component_id]}).from_self(:alias => :attribute)
+        component_ds = get_objects_just_dataset(ModelHandle.new(c,:component),nil,{:parent_id => parent_id,:field_set => [:id,:external_cmp_ref]})
+        attribute_ds = get_objects_just_dataset(ModelHandle.new(c,:attribute),nil,{:field_set => [:id,:external_attr_ref,:component_component_id]})
 
-        attribute_link_ds = Model.get_objects_just_sequel_dataset(:attribute_link,c).from_self(:alias => :attribute_link)
-#     pp component_ds.from_self.join_table(:inner,attribute_ds,{:component_component_id => :id}).all
-#      ds= component_ds.graph(attribute_ds,{:component_component_id => :id},{:join_type => :inner}).graph(:attribute__link,{:input_id => :id})
-        ds= component_ds.graph(attribute_ds,{:component_component_id => :id},{:join_type => :inner,:table_alias => :attribute}).graph(attribute_link_ds,{:input_id => :id},{:table_alias => :attribute_link}).where({:attribute_link__id => nil})
+        attribute_link_ds = get_objects_just_dataset(ModelHandle.new(c,:attribute_link))
+        ds= component_ds.sequel_ds.graph(attribute_ds.sequel_ds,{:component_component_id => :id},{:join_type => :inner,:table_alias => :attribute}).graph(attribute_link_ds.sequel_ds,{:input_id => :id},{:table_alias => :attribute_link}).where({:attribute_link__id => nil})
 
-        puts ds.sql
         SQL::Graph.new(ds).all()
 =begin
 look at wrapping in XYZ::SQL calls that take an ordered list where each element is

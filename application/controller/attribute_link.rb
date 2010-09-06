@@ -2,7 +2,6 @@
 module XYZ
   class Attribute_linkController < Controller
     def list_legal_connections(project_name,parsed_query_string=nil) #stub for parent_id/model_name
-      opts = {:depth => :deep}
       parent_id = nil
       #TODO stub to get project id from project name
       parent_uri = "/project/#{project_name}"
@@ -14,8 +13,7 @@ module XYZ
 
       pp AttributeLink.get_legal_connections(IDHandle[:c => c, :guid => parent_id])
 
-      where_clause = {:parent_id => parent_id}
-      model_list = get_objects(:component,where_clause,opts)
+      model_list = get_objects(:component,nil,:parent_id => parent_id)
 
       tpl = R8Tpl::TemplateR8.new("#{model_name()}/#{default_action_name()}",user_context())
       tpl.assign("#{model_name().to_s}_list",model_list)

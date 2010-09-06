@@ -37,7 +37,7 @@ module XYZ
 
     ###### helper fns
     def check_and_set_derived_relation!()
-      ingress_objects = Object.get_objects(:attribute_link,id_handle[:c],:output_id => self[:id])
+      ingress_objects = Model.get_objects(ModelHandle.new(id_handle[:c],:attribute_link),:output_id => self[:id])
       return nil if ingress_objects.nil?
       ingress_objects.each{ |input_obj|
         fn = AttributeLink::ret_function_if_can_determine(input_obj,self)
@@ -96,7 +96,7 @@ module XYZ
     def get_object_attribute_def()
       return nil if self[:attribute_def_id].nil?
       guid = IDInfoTable.ret_guid_from_db_id(self[:attribute_def_id],:attribute_def)
-      Object.get_object(IDHandle[:c => id_handle[:c], :guid => guid])
+      Model.get_object(IDHandle[:c => id_handle[:c], :guid => guid, :model_name => :attribute])
     end
   end
 end

@@ -63,9 +63,9 @@ module XYZ
 
 #TODO: should this be more generic and centralized?
     def get_objects_associated_components()
-      assocs = Object.get_objects(:assoc_node_component,@c,:node_id => self[:id])
+      assocs = Model.get_objects(ModelHandle.new(@c,:assoc_node_component),:node_id => self[:id])
       return [] if assocs.nil?
-      assocs.map{|assoc|Object.get_object(IDHandle[:c=>@c,:guid => assoc[:component_id]])}
+      assocs.map{|assoc|Model.get_object(IDHandle[:c=>@c,:guid => assoc[:component_id]])}
     end
 
 #TODO: should be centralized
@@ -74,7 +74,8 @@ module XYZ
     end
 
     def get_direct_attribute_values(type,opts={})
-      attr_val_array = self.class.get_objects_wrt_parent(:attribute,id_handle)
+      parent_id = IDInfoTable.get_id_from_id_handle(id_handle)
+      attr_val_array = Model.get_objects(ModelHandle.new(@c,:attribute),nil,:parent_id => parent_id)
       return nil if attr_val_array.nil?
       return nil if attr_val_array.empty?
       hash_values = {}

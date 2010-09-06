@@ -1,9 +1,6 @@
 module XYZ
   #TBD: should this class  be in this file or instead somewhere else
   module CommonMixin
-    def self.[](x)
-      new(x)
-    end
     def [](x)
       super(x.to_sym)
     end
@@ -32,14 +29,17 @@ module XYZ
       end
       freeze
     end
+
+    def self.[](x)
+      new(x)
+    end
   end
 
   class ModelHandle < Hash
-    def initialize(x)
+    def initialize(c,model_name)
       super()
-      raise_has_illegal_form(x) unless self[:c] = x[:c]
-      raise_has_illegal_form(x) unless x[:model_name]
-      self[:model_name] = x[:model_name].to_sym
+      self[:c] = c
+      self[:model_name] = model_name.to_sym
       freeze
     end
   end
@@ -125,12 +125,6 @@ module XYZ
 	  format_row(unformated_row)
         end
 
-        def get_id_from_id_handle(id_handle)
-          return db_id_from_guid(id_handle[:guid]) if id_handle[:guid]
-          r = get_row_from_id_handle(id_handle)
-          r ? r[:id] : nil
-        end
-       
         def get_row_from_guid(guid,opts={})
           #NOTE: contingent on id scheme where guid uniquely picks out row
           ds = ds().where(ID_INFO_TABLE[:id] => db_id_from_guid(guid))
@@ -138,12 +132,17 @@ module XYZ
             raise ErrorNotFound.new(:guid,guid) if opts[:raise_error]
             return nil
           end
-
 	  return nil if ds.empty?
 	  unformated_row = ds.first
 	  format_row(unformated_row)
         end
 
+        def get_id_from_id_handle(id_handle)
+          return db_id_from_guid(id_handle[:guid]) if id_handle[:guid]
+          r = get_row_from_id_handle(id_handle)
+          r ? r[:id] : nil
+        end
+       
         def update_instance(db_rel,id,uri,relation_type,parent_id_x,parent_relation_type)
 	  #  to fill in uri ##TBD: this is split between trigger, which creates it and this code which updates it; may better encapsulate 
 	  parent_id = parent_id_x ? parent_id_x : 0

@@ -1,18 +1,5 @@
 module XYZ
   module ModelDataClassMixins
-    def get_objects(relation_type,c,where_clause=nil,opts={})
-      where_clause_x,parent_id = SQL.find_and_remove_parent_id(where_clause)
-      if parent_id
-        parent_id_handle = IDHandle[:c => c, :guid => parent_id]
-        @db.get_objects_wrt_parent(relation_type,parent_id_handle,where_clause_x,opts)
-      else
-        @db.get_objects(relation_type,c,where_clause,opts)
-      end
-    end
-
-    def get_objects_just_sequel_dataset(relation_type,c,where_clause=nil,opts={})
-      get_objects(relation_type,c,where_clause,opts.merge({:return_just_sequel_dataset => true}))
-    end
 
     def get_factory_id_handle(parent_id_handle,relation_type=nil)
       IDInfoTable.get_factory_id_handle(parent_id_handle,relation_type || @relation_type)
@@ -55,11 +42,12 @@ module XYZ
       self.class.update_instance(id_handle,scalar_assignments,opts)
     end
 
-    def get_directly_contained_objects(child_relation_type,where_clause={})
-      self.class.get_objects_wrt_parent(child_relation_type,id_handle,where_clause)
+    def get_directly_contained_objects(child_relation_type,where_clause=nil)
+      parent_id = IDInfoTable.get_id_from_id_handle(id_handle)
+      self.class.get_objects(ModelHandle.new(id_handle[:c],child_relation_type),where_clause,:parent_id => parent_id)
     end
 
-    def get_directly_contained_object_ids(child_relation_type,where_clause={})
+    def get_directly_contained_object_ids(child_relation_type,where_clause=nil)
       self.class.get_object_ids_wrt_parent(child_relation_type,id_handle,where_clause)
     end
 

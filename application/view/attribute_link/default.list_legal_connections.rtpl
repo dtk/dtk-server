@@ -10,13 +10,30 @@
 	</div>
 -->
 	<div>
-	<table class="list">
+	<form id="component-display-form" action="../save" method="post" enctype="multipart/form-data">
+           <input type="submit" value="Create Link"/>
+	   <input type="hidden" name="parent_id" id="parent_id" value="{%=parent_id%}" />
+	   <input type="hidden" name="parent_model_name" id="parent_model_name" value="{%=parent_model_name%}" />
+	   <input type="hidden" name="model_name" id="model_name" value="attribute_link" />
+	   <input type="hidden" name="name" id="name" value="attribute_link" />
+           <input type="text"  id="input_id" name="input_id" class="r8-text" size="40" />
+           <input type="text"  id="output_id" name="output_id" class="r8-text" size="40" />
+        </form>
 
-	{%for attribute_link in attribute_link_list%}
-		<tr id="list_row-{%=attribute_link%}" class="{%=[:class]%}">
-				<td id="display_name-td-{%=attribute_link%}" class=""><a href="/xyz/attribute_link/display/{%=attribute_link[:id]%}">{%=attribute_link[:display_name]%}</a></td>
-				<td id="attribute_link_value-td-{%=attribute_link%}" class="">{%=attribute_link[:attribute_link_value].inspect%}</td>
-		</tr>
+	<table class="list">
+	<tr id="attribute-list-header-row">
+  	  <th id="component_name-th"  class="">Component Name</th>
+	  <th id="attribute_name-th"  class="">Attribute Name</th>
+	  <th id="attribute_id-th"  class="">Attribute Id</th>
+        </tr>
+
+	{%for a in attribute_links%}
+	{%id = a["attribute__id"]%}
+        <tr id="list_row-{%=id%}" class="">
+	  <td id="component_name-{%=id%}" class="">{%=a["component__external_cmp_ref"]%}</td>
+	  <td id="attribute_name-{%=id%}" class="">{%=a["attribute__external_attr_ref"]%}</td>
+	  <td id="attribute_id-{%=id%}" class="">{%=id%}</td>
+        </tr>			       
 	{%end%}
 	</table>
 	</div>

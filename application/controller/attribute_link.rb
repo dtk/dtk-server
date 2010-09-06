@@ -5,19 +5,18 @@ module XYZ
       parent_id = nil
       #TODO stub to get project id from project name
       parent_uri = "/project/#{project_name}"
-
+      parent_model_name = :project
       c = ret_session_context_id()
       Model.create_simple_instance?(parent_uri,c)
       parent_id = ret_id_from_uri(parent_uri)
       ###end of stub
 
-      pp AttributeLink.get_legal_connections(IDHandle[:c => c, :guid => parent_id])
-
-      model_list = get_objects(:component,nil,:parent_id => parent_id)
+      attribute_links = AttributeLink.get_legal_connections(IDHandle[:c => c, :guid => parent_id])
 
       tpl = R8Tpl::TemplateR8.new("#{model_name()}/#{default_action_name()}",user_context())
-      tpl.assign("#{model_name().to_s}_list",model_list)
-      #TODO: needed to below back in so template did not barf
+      tpl.assign(:attribute_links,attribute_links)
+      tpl.assign(:parent_id,parent_id)
+      tpl.assign(:parent_model_name,parent_model_name)
       tpl.assign(:list_start_prev, 0)
       tpl.assign(:list_start_next, 0)
       _model_var = {}

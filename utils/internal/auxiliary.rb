@@ -7,7 +7,8 @@ class Class
     methods_to_expose.each do |m| 
       method_def = 
         if opts[:post_hook]
-          "def #{m}(*args);#{opts[:post_hook]}(@#{innervar}.#{m}(*args));end"
+#          "def #{m}(*args);#{opts[:post_hook]}(@#{innervar}.#{m}(*args));end"
+          "def #{m}(*args);#{opts[:post_hook]}.call(@#{innervar}.#{m}(*args));end"
         else
           "def #{m}(*args);@#{innervar}.#{m}(*args);end"
         end
@@ -51,19 +52,29 @@ module XYZ
     end
 
     module DatatsetGraphMixin
+      attr_reader :model_name_list, :sequel_ds
       def graph(join_type,right_ds,join_conditions)
-        Graph.new(@sequel_ds.graph(right_ds.sequel_ds,join_conditions,{:join_type => join_type, :table_alias => right_ds.relation_type}))
+        right_ds_model_name = right_ds.model_name
+        #TBD check whetehr model_name repeats
+        model_name_list = @model_name_list + right_ds.model_name_list
+        sequel_graph = @sequel_ds.graph(right_ds.sequel_ds,join_conditions,{:join_type => join_type, :table_alias => right_ds_model_name})
+        Graph.new(sequel_graph,model_name_list)
+      end
+      def model_name()
+        @model_name_list.first[:ref]
+      end
+      def model_name_info(model_name,num=0)
+        {:ref => model_name, :ref_num => num}
       end
     end
 
     class Dataset
       include DatatsetGraphMixin
       #TODO: needed to fully qualify Dataset; could this constraint be removed? by chaging expose?
-      expose_methods_from_internal_object :sequel_ds, %w{where}, :post_hook => "XYZ::SQL::Dataset.new"
+      expose_methods_from_internal_object :sequel_ds, %w{where}, :post_hook => "lambda{|x|XYZ::SQL::Dataset.new(model_name,x)}"
       expose_methods_from_internal_object :sequel_ds, %w{sql}
-      attr_reader :relation_type, :sequel_ds
-      def initialize(relation_type,sequel_ds)
-        @relation_type = relation_type
+      def initialize(model_name,sequel_ds)
+        @model_name_list = [model_name_info(model_name)]
         @sequel_ds = sequel_ds
       end
     end
@@ -71,10 +82,11 @@ module XYZ
     class Graph
       include DatatsetGraphMixin
       #TODO: needed to fully qualify Dataset; could this constraint be removed? by chaging expose?
-      expose_methods_from_internal_object :sequel_ds, %w{where},:post_hook => "XYZ::SQL::Graph.new"
+      expose_methods_from_internal_object :sequel_ds, %w{where}, :post_hook => "lambda{|x|XYZ::SQL::Graph.new(x,@model_name_list)}"
       expose_methods_from_internal_object :sequel_ds, %w{sql}
-      def initialize(sequel_ds)
+      def initialize(sequel_ds,model_name_list)
         @sequel_ds = sequel_ds
+        @model_name_list = model_name_list
       end
       def all()
         ret = Array.new

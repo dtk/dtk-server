@@ -7,7 +7,6 @@ class Class
     methods_to_expose.each do |m| 
       method_def = 
         if opts[:post_hook]
-#          "def #{m}(*args);#{opts[:post_hook]}(@#{innervar}.#{m}(*args));end"
           "def #{m}(*args);#{opts[:post_hook]}.call(@#{innervar}.#{m}(*args));end"
         else
           "def #{m}(*args);@#{innervar}.#{m}(*args);end"
@@ -52,19 +51,21 @@ module XYZ
     end
 
     module DatatsetGraphMixin
-      attr_reader :model_name_list, :sequel_ds
+      attr_reader :model_name_info, :sequel_ds
       def graph(join_type,right_ds,join_conditions)
         right_ds_model_name = right_ds.model_name
-        #TBD check whetehr model_name repeats
-        model_name_list = @model_name_list + right_ds.model_name_list
-        sequel_graph = @sequel_ds.graph(right_ds.sequel_ds,join_conditions,{:join_type => join_type, :table_alias => right_ds_model_name})
-        Graph.new(sequel_graph,model_name_list)
+        #check whetehr model_name repeats
+        new_ref =  1 + (@model_name_info.find_all{|x|x[:ref] == right_ds_model_name}.map{|y|y[:ref_num]}.max || 0)
+        model_name_info = @model_name_info + model_name_info_for_ds(right_ds_model_name,new_ref)
+        table_alias = new_ref == 1 ? right_ds_model_name : "#{right_ds_model_name}__#{new_ref.to_s}" 
+        sequel_graph = @sequel_ds.graph(right_ds.sequel_ds,join_conditions,{:join_type => join_type, :table_alias => table_alias})
+        Graph.new(sequel_graph,model_name_info)
       end
       def model_name()
-        @model_name_list.first[:ref]
+        @model_name_info.first[:ref]
       end
-      def model_name_info(model_name,num=0)
-        {:ref => model_name, :ref_num => num}
+      def model_name_info_for_ds(model_name,num=1)
+        [{:ref => model_name, :ref_num => num}]
       end
     end
 
@@ -74,7 +75,7 @@ module XYZ
       expose_methods_from_internal_object :sequel_ds, %w{where}, :post_hook => "lambda{|x|XYZ::SQL::Dataset.new(model_name,x)}"
       expose_methods_from_internal_object :sequel_ds, %w{sql}
       def initialize(model_name,sequel_ds)
-        @model_name_list = [model_name_info(model_name)]
+        @model_name_info = model_name_info_for_ds(model_name)
         @sequel_ds = sequel_ds
       end
     end
@@ -82,11 +83,11 @@ module XYZ
     class Graph
       include DatatsetGraphMixin
       #TODO: needed to fully qualify Dataset; could this constraint be removed? by chaging expose?
-      expose_methods_from_internal_object :sequel_ds, %w{where}, :post_hook => "lambda{|x|XYZ::SQL::Graph.new(x,@model_name_list)}"
+      expose_methods_from_internal_object :sequel_ds, %w{where}, :post_hook => "lambda{|x|XYZ::SQL::Graph.new(x,@model_name_info)}"
       expose_methods_from_internal_object :sequel_ds, %w{sql}
-      def initialize(sequel_ds,model_name_list)
+      def initialize(sequel_ds,model_name_info)
         @sequel_ds = sequel_ds
-        @model_name_list = model_name_list
+        @model_name_info = model_name_info
       end
       def all()
         ret = Array.new

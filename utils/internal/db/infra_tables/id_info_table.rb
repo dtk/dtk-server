@@ -105,6 +105,12 @@ module XYZ
       ##### end: Initial data
 
       ###### DataProcessing
+        def get_rows_just_dataset(c)
+          SQL::Dataset.new(ID_INFO_TABLE[:table],ds().select(CONTEXT_ID,ID_INFO_TABLE[:id],ID_INFO_TABLE[:parent_id],:uri).where(CONTEXT_ID => c))
+        end
+        def join_condition()
+          {:relation_id => :id}
+        end
 	def get_row_from_id_handle(id_handle,opts={})
           ret = get_minimal_row_from_id_handle(id_handle) if opts[:short_circuit_for_minimal_row]
           return ret if ret

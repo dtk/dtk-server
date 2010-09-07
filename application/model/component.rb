@@ -10,6 +10,7 @@ module XYZ
         column :external_type, :varchar
         column :external_cmp_ref, :varchar
         column :uri, :varchar
+        virtual_column :parent_name
         many_to_one :component,:library,:project
         one_to_many :component, :attribute_link, :attribute
       end

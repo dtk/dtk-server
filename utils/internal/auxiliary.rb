@@ -60,6 +60,7 @@ module XYZ
       include DatatsetGraphMixin
       #TODO: needed to fully qualify Dataset; could this constraint be removed? by chaging expose?
       expose_methods_from_internal_object :sequel_ds, %w{where}, :post_hook => "XYZ::SQL::Dataset.new"
+      expose_methods_from_internal_object :sequel_ds, %w{sql}
       attr_reader :relation_type, :sequel_ds
       def initialize(relation_type,sequel_ds)
         @relation_type = relation_type
@@ -71,6 +72,7 @@ module XYZ
       include DatatsetGraphMixin
       #TODO: needed to fully qualify Dataset; could this constraint be removed? by chaging expose?
       expose_methods_from_internal_object :sequel_ds, %w{where},:post_hook => "XYZ::SQL::Graph.new"
+      expose_methods_from_internal_object :sequel_ds, %w{sql}
       def initialize(sequel_ds)
         @sequel_ds = sequel_ds
       end
@@ -198,6 +200,14 @@ private
 end
 
 
+#####
+#for debug
+module XYZ
+  def self.debug_pp(x)
+    pp x
+    x
+  end
+end
 
  
 

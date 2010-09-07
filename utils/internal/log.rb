@@ -23,6 +23,7 @@ module XYZ
     end
     def self.debug_pp(obj, out = $stdout)
       out << Aux::pp_form(obj)
+      obj
     end
    private
     def self.format(msg)

@@ -199,16 +199,3 @@ private
    end
 end
 
-
-#####
-#for debug
-module XYZ
-  def self.debug_pp(x)
-    pp x
-    x
-  end
-end
-
- 
-
-

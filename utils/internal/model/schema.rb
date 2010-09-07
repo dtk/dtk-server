@@ -10,7 +10,7 @@ module XYZ
   #TODO partition into public and private
   module ModelSchema
     def field_set(model_name)
-      Fieldsets[model_name] ||= non_hidden_columns(DB_REL_DEF[model_name][:columns]) + non_hidden_columns(COMMON_REL_COLUMNS) + virtual_columns_in_fieldset(DB_REL_DEF[model_name][:virtual_columns])
+      Fieldsets[model_name] ||= non_hidden_columns(DB_REL_DEF[model_name][:columns]) + non_hidden_columns(COMMON_REL_COLUMNS) + virtual_columns_in_fieldset(DB_REL_DEF[model_name][:virtual_columns]) + many_to_one_cols(DB_REL_DEF[model_name])
     end
 
     Fieldsets = Hash.new    
@@ -21,6 +21,10 @@ module XYZ
     #TODO expirementing with this; this will lead to all depdency columns having null value
     def virtual_columns_in_fieldset(cols_def)
       cols_def.reject{|k,v| v and (v[:hidden] || v[:dependencies])}.keys
+    end
+
+    def many_to_one_cols(db_rel)
+      (db_rel[:many_to_one]||[]).map{|p|DB.ret_parent_id_field_name(DB_REL_DEF[p],db_rel)}
     end
 
     def set_relation_as_top()

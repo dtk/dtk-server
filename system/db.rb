@@ -41,7 +41,15 @@ module XYZ
         raw_value
       end
     end
-
+    
+    def self.ret_parent_id_field_name(parent_db_rel,db_rel)
+      parent_db_rel[:schema] == db_rel[:schema] ?
+        (parent_db_rel[:table].to_s + "_id").to_sym :
+        (parent_db_rel[:schema].to_s + "_" + parent_db_rel[:table].to_s + "_id").to_sym 
+    end
+    def ret_parent_id_field_name(parent_db_rel,db_rel)
+      self.class.ret_parent_id_field_name(parent_db_rel,db_rel)
+    end
   private
  
     def self.ret_keys_as_symbols(obj)
@@ -59,12 +67,6 @@ module XYZ
     def db_run(sql,opts={})
       @db.run(sql,opts)
     end        
-
-    def ret_parent_id_field_name(parent_db_rel,db_rel)
-      parent_db_rel[:schema] == db_rel[:schema] ?
-        (parent_db_rel[:table].to_s + "_id").to_sym :
-        (parent_db_rel[:schema].to_s + "_" + parent_db_rel[:table].to_s + "_id").to_sym 
-    end
   end
 
 class DBRel < Hash

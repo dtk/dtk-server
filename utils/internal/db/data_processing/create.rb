@@ -20,6 +20,19 @@ module XYZ
         end
       end
 
+      def create_simple_instance?(new_uri,c,opts={})
+        return new_uri if exists? IDHandle[:uri => new_uri, :c => c]
+        ref,factory_uri = RestURI.parse_instance_uri(new_uri)
+
+        #create parent if does not exists and this is recursive create
+        if opts[:recursive_create]
+          relation_type,parent_uri = RestURI.parse_factory_uri(factory_uri)
+          create_simple_instance?(parent_uri,c,opts) unless parent_uri == "/" or exists? IDHandle[:uri => parent_uri, :c => c]
+        end
+
+        create_from_hash(IDHandle[:c => c, :uri => factory_uri],{ref => {}}).first
+      end
+
      private
       def create_from_hash_with_factory(c,factory_uri,hash,clone_helper=nil,opts={})
         new_uris = Array.new

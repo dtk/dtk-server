@@ -10,7 +10,7 @@
 	</div>
 -->
 	<div>
-	<form id="component-display-form" action="../save" method="post" enctype="multipart/form-data">
+	<form id="component-display-form" action="/xyz/attribute_link/save" method="post" enctype="multipart/form-data">
            <input type="submit" value="Create Link"/>
 	   <input type="hidden" name="parent_id" id="parent_id" value="{%=parent_id%}" />
 	   <input type="hidden" name="parent_model_name" id="parent_model_name" value="{%=parent_model_name%}" />

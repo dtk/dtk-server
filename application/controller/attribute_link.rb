@@ -1,11 +1,13 @@
 
 module XYZ
   class Attribute_linkController < Controller
-    def list_legal_connections(project_name,parsed_query_string=nil) #stub for parent_id/model_name
+    def list_legal_connections(*parent_uri_array) #TODO stub
       parent_id = nil
+
       #TODO stub to get project id from project name
-      parent_uri = "/project/#{project_name}"
-      parent_model_name = :project
+      parent_uri = "/" + parent_uri_array.join("/")
+      ref,factory_uri =  RestURI.parse_instance_uri(parent_uri)
+      parent_model_name = RestURI.parse_factory_uri(factory_uri)
       c = ret_session_context_id()
       Model.create_simple_instance?(parent_uri,c)
       parent_id = ret_id_from_uri(parent_uri)

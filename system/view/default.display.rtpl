@@ -12,8 +12,7 @@
 	{%h_field_list.reject{|f|f[:id]=="id"}.each do |field|%}
 		<input type="hidden" name="{%=field[:name]%}" id="{%=field[:id]%}" value="{%=field[:value]%}" />
 	{%end%}
-        <input type="text"  id="target_name" name="target_name" class="r8-text" size="40" />
-        <input type="hidden"  id="target_model_name" name="target_model_name" value="project"/>
+        <input type="text"  id="target_uri" name="target_uri" class="r8-text" size="40" />
 	</form>
 	<table class="display">
 	{%for row in rows%}

@@ -28,10 +28,10 @@
         </tr>
 
 	{%for a in attribute_links%}
-	{%id = a["attribute__id"]%}
+	{%id = a[:attribute][:id]%}
         <tr id="list_row-{%=id%}" class="">
-	  <td id="component_name-{%=id%}" class="">{%=a["component__external_cmp_ref"]%}</td>
-	  <td id="attribute_name-{%=id%}" class="">{%=a["attribute__external_attr_ref"]%}</td>
+	  <td id="component_name-{%=id%}" class="">{%=a[:external_cmp_ref]%}</td>
+	  <td id="attribute_name-{%=id%}" class="">{%=a[:attribute][:external_attr_ref]%}</td>
 	  <td id="attribute_id-{%=id%}" class="">{%=id%}</td>
         </tr>			       
 	{%end%}

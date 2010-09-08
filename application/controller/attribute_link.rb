@@ -14,7 +14,6 @@ module XYZ
       ###end of stub
 
       attribute_links = AttributeLink.get_legal_connections(IDHandle[:c => c, :guid => parent_id])
-
       tpl = R8Tpl::TemplateR8.new("#{model_name()}/#{default_action_name()}",user_context())
       tpl.assign(:attribute_links,attribute_links)
       tpl.assign(:parent_id,parent_id)

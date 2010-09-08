@@ -61,18 +61,22 @@ module XYZ
       end
     end
 
-    class ModelNameInfo < Hash
-      def initialize(model_name,num=1)
-        self[:ref] = model_name.to_sym
-        self[:ref_num] = num
+    class ModelNameInfo 
+      attr_reader :model_name,:ref_num
+      def initialize(model_name,ref_num=1)
+        @model_name = model_name.to_sym
+        @ref_num = ref_num
       end
       def ret_qualified_model_name()
-        (self[:ref_num] == 1 ? "#{self[:ref]}" : "#{self[:ref]}#{self[:ref_num].to_s}").to_sym
+        (@ref_num == 1 ? @model_name : "#{@model_name}#{@ref_num.to_s}").to_sym
+      end
+      def model_name()
+        @model_name
       end
       def create_unique(existing_name_info)
         #check whether model_name is in existing_name_info if so bump up by 1
-        new_ref_num =  1 + (existing_name_info.find_all{|x|x[:ref] == self[:ref]}.map{|y|y[:ref_num]}.max || 0)
-        ModelNameInfo.new(self[:ref],new_ref_num)
+        new_ref_num =  1 + (existing_name_info.find_all{|x|x.model_name == @model_name}.map{|y|y.ref_num}.max || 0)
+        ModelNameInfo.new(@model_name,new_ref_num)
       end
     end
 
@@ -97,17 +101,22 @@ module XYZ
         @model_name_info = model_name_info
       end
       def all()
-        ret = Array.new
-        raw_result_set = @sequel_ds.all
-        raw_result_set.each do |raw_row|
-          row = Hash.new
-          @model_name_info.each do |m|
+        #TODO may be more efficient if flatten by use something like Model.db.db[@sequel_ds.sql].all
+        # this avoids needing to reanchor each from primary table (which should be bulk of info
+        ret = @sequel_ds.all
+        
+        #pull first element from under top level key
+        primary_model_name = @model_name_info.first.model_name() 
+        rest_model_indexes = @model_name_info[1..@model_name_info.size-1]
+        ret.each do |row|
+          primary_cols = row.delete(primary_model_name)
+          Model.process_raw_db_row!(primary_cols,primary_model_name)
+          primary_cols.each{|k,v|row[k] = v}
+          rest_model_indexes.each do |m|
             model_index = m.ret_qualified_model_name()
-            next unless raw_row[model_index]
-            Model.process_raw_db_row!(raw_row[model_index],model_index)
-            raw_row[model_index].each{|k,v|row["#{model_index}__#{k}"] = v} 
+            next unless row[model_index]
+            Model.process_raw_db_row!(row[model_index],m.model_name)
           end
-          ret << row unless row.empty?
         end
         ret
       end

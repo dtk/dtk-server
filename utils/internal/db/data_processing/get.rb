@@ -179,7 +179,7 @@ module XYZ
         #if opts[:field_set] then this is taken as is as the selected columns 
         select_cols = nil
         if opts[:field_set]
-          select_cols = opts[:field_set]
+          select_cols = opts[:field_set] & Model::FieldSet.all_actual(db_rel[:relation_type])
         else
           select_cols = (db_rel[:columns]||{}).keys 
           select_cols = db_rel[:model_class].ds_attributes(select_cols) if opts[:ds_attrs_only]        

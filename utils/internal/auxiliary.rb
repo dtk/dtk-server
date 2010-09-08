@@ -53,19 +53,26 @@ module XYZ
     module DatatsetGraphMixin
       attr_reader :model_name_info, :sequel_ds
       def graph(join_type,right_ds,join_conditions)
-        right_ds_model_name = right_ds.model_name
-        #check whetehr model_name repeats
-        new_ref =  1 + (@model_name_info.find_all{|x|x[:ref] == right_ds_model_name}.map{|y|y[:ref_num]}.max || 0)
-        model_name_info = @model_name_info + model_name_info_for_ds(right_ds_model_name,new_ref)
-        table_alias = new_ref == 1 ? right_ds_model_name : "#{right_ds_model_name}__#{new_ref.to_s}" 
+        new_model_name_info = right_ds.model_name_info.first.create_unique(@model_name_info)
+        model_name_info = @model_name_info + [new_model_name_info]
+        table_alias = new_model_name_info.ret_qualified_model_name()
         sequel_graph = @sequel_ds.graph(right_ds.sequel_ds,join_conditions,{:join_type => join_type, :table_alias => table_alias})
         Graph.new(sequel_graph,model_name_info)
       end
-      def model_name()
-        @model_name_info.first[:ref]
+    end
+
+    class ModelNameInfo < Hash
+      def initialize(model_name,num=1)
+        self[:ref] = model_name
+        self[:ref_num] = num
       end
-      def model_name_info_for_ds(model_name,num=1)
-        [{:ref => model_name, :ref_num => num}]
+      def ret_qualified_model_name()
+        self[:ref_num] == 1 ? self[:ref] : "#{self[:ref]}__#{self[:ref_num].to_s}" 
+      end
+      def create_unique(existing_name_info)
+        #check whether model_name is in existing_name_info if so bump up by 1
+        new_ref_num =  1 + (existing_name_info.find_all{|x|x[:ref] == self[:ref]}.map{|y|y[:ref_num]}.max || 0)
+        ModelNameInfo.new(self[:ref],new_ref_num)
       end
     end
 
@@ -75,7 +82,7 @@ module XYZ
       expose_methods_from_internal_object :sequel_ds, %w{where}, :post_hook => "lambda{|x|XYZ::SQL::Dataset.new(model_name,x)}"
       expose_methods_from_internal_object :sequel_ds, %w{sql}
       def initialize(model_name,sequel_ds)
-        @model_name_info = model_name_info_for_ds(model_name)
+        @model_name_info = [ModelNameInfo.new(model_name)]
         @sequel_ds = sequel_ds
       end
     end
@@ -91,14 +98,14 @@ module XYZ
       end
       def all()
         ret = Array.new
-        puts @sequel_ds
         raw_result_set = @sequel_ds.all
         raw_result_set.each do |raw_row|
           row = Hash.new
-          raw_row.each_key do |model_name|
-            next unless raw_row[model_name]
-            Model.process_raw_db_row!(raw_row[model_name],model_name)
-            raw_row[model_name].each{|k,v|row["#{model_name}__#{k}"] = v} 
+          @model_name_info.each do |m|
+            model_index = m.ret_qualified_model_name()
+            next unless raw_row[model_index]
+            Model.process_raw_db_row!(raw_row[model_index],model_index)
+            raw_row[model_index].each{|k,v|row["#{model_index}__#{k}"] = v} 
           end
           ret << row unless row.empty?
         end

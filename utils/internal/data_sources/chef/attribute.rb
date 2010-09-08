@@ -5,6 +5,7 @@ module XYZ
         definitions do
           #TBD: assuming that after split first item is cookbook name
           target[:external_attr_ref] = fn(:external_attr_ref,source)
+          target[:display_name] = fn(:external_attr_ref,source)
           target[:data_type] = fn(:data_type,source[]["type"])
           #TBD: have form that is no assignment if source is null
           %w{port_type description constraints}.each do |k|

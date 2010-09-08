@@ -25,7 +25,7 @@ module XYZ
 
 	ds.all.map do |raw_hash|
           hash = process_raw_scalar_hash!(raw_hash,db_rel)
-	  db_rel[:model_class].new(hash,c,relation_type)
+          opts[:return_as_hash] ? hash : db_rel[:model_class].new(hash,c,relation_type)
         end
       end
 

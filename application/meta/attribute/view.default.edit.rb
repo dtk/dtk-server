@@ -5,7 +5,7 @@
           :model => {
             :required => true,
             :type => 'hidden',
-            :value => 'node',
+            :value => 'attribute',
           },
         },
         {

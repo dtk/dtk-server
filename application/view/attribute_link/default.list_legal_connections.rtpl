@@ -14,7 +14,7 @@
            <input type="submit" value="Create Link"/>
 	   <input type="hidden" name="parent_id" id="parent_id" value="{%=parent_id%}" />
 	   <input type="hidden" name="parent_model_name" id="parent_model_name" value="{%=parent_model_name%}" />
-	   <input type="hidden" name="model_name" id="model_name" value="attribute_link" />
+	   <input type="hidden" name="model" id="model" value="attribute_link" />
 	   <input type="hidden" name="name" id="name" value="attribute_link" />
            <input type="text"  id="input_id" name="input_id" class="r8-text" size="40" />
            <input type="text"  id="output_id" name="output_id" class="r8-text" size="40" />

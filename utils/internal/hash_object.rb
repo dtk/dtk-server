@@ -49,6 +49,7 @@ module XYZ
         self.new{|h,k| h[k] = self.new(&h.default_proc)}
       end
 
+      #TODO: may deprecate this one below
       def object_slice(hash,slice_keys,opts={})
         ret = Hash.new
         slice_keys.each do |k|

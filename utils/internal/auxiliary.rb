@@ -125,6 +125,15 @@ module XYZ
 
   class Aux
     class << self
+      def fill_in_virtual_columns!(hash,model_name,slice_keys,opts={})
+        #keys in slice_keys no in hash should be virtual columns
+        (slice_keys - hash.keys).each do |k|
+          fn = Model::FieldSet.virtual_column_lambda_fn(model_name,k)
+          hash[k] = fn.call(hash) if fn
+        end
+        hash
+      end
+
       def pp_form(obj)
         require 'pp'
         x = ""

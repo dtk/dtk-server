@@ -6,6 +6,7 @@ module XYZ
        private
         definitions do
           target[:type] = "image"
+          target[:display_name] = source[:id]
         end
         class << self
           def unique_keys(source_hash)

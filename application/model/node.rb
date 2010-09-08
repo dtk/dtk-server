@@ -17,10 +17,8 @@ module XYZ
        #TBD: in data source specfic now column :manifest, :varchar #e.g.,rnp-chef-server-0816-ubuntu-910-x86_32
         #TBD: experimenting whetehr better to make this actual or virtual columns
         column :image_size, :numeric, :size=>[8, 3] #in megs
-        virtual_column :disk_size #in megs
+        virtual_column :disk_size,:fn => lambda{|h|nested_value(h[:ds_attributes],[:flavor,:disk])} #in megs
         #TBD: can these virtual columns just be inherited
-        virtual_column :parent_id, :dependencies => [:library,:project] #TODO does not distinguish between OR and AND dependencies
-        virtual_column :parent_path, :dependencies => [:library,:project]
         foreign_key :data_source_id, :data_source, FK_SET_NULL_OPT
         many_to_one :library,:project
         one_to_many :attribute, :node_interface, :address_access_point

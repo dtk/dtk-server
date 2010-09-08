@@ -5,6 +5,7 @@ module XYZ
         #TBD: could write 'lint checker that makes sure that target indexes correspond to schema described in models
         definitions do
           target[:type] = "instance"
+          target[:display_name] = source[:id]
           target[:image_size] = source[:flavor][:ram]
           target[:is_deployed] = true
 

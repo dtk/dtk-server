@@ -63,11 +63,11 @@ module XYZ
 
     class ModelNameInfo < Hash
       def initialize(model_name,num=1)
-        self[:ref] = model_name
+        self[:ref] = model_name.to_sym
         self[:ref_num] = num
       end
       def ret_qualified_model_name()
-        self[:ref_num] == 1 ? self[:ref] : "#{self[:ref]}__#{self[:ref_num].to_s}" 
+        (self[:ref_num] == 1 ? "#{self[:ref]}" : "#{self[:ref]}#{self[:ref_num].to_s}").to_sym
       end
       def create_unique(existing_name_info)
         #check whether model_name is in existing_name_info if so bump up by 1

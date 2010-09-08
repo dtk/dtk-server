@@ -17,7 +17,8 @@ module XYZ
       #TODO: put these in if needed get_instance_or_factory get_instance_scalar_values
     end
     #TBD: refactoring: below is old to be refactored; above is refactored
-    extend ModelSchema
+    extend ModelSchemaClassMixins
+    include ModelSchemaInstanceMixins
     extend ModelDataClassMixins
     extend CloneClassMixins
     extend InputIntoModelClassMixins

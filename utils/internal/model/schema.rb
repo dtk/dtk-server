@@ -38,7 +38,6 @@ module XYZ
             end
           end
           ret.empty? ? nil : ret
-Log.debug_pp(ret)
         end
        private
 

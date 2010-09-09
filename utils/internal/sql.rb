@@ -16,6 +16,11 @@ module XYZ
       args.reverse.each{|x|ret = and_aux(x,ret)}
       ret
     end
+    module WhereCondition
+      def self.like(l,r)
+        Sequel::SQL::StringExpression.like(l,r)
+      end
+    end
    private
     def self.or_aux(x,y)
       return y if x.nil? or (x.kind_of?(Hash) and x.empty?)

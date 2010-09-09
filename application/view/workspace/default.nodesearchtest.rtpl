@@ -1,7 +1,7 @@
 
 <div id="slide_bar" style="height:92px; width: {%=slide_width%}px;">
 	{%for node in node_list%}
-	<div class="avail_item basic-component" style="position: relative; float: left; margin: 0 5px;">
+	<div class="avail_item basic-component" style="position:relative; float: left; margin: 0 5px; z-index: 100;">
 	<div id="item_{%=node[:id]%}" data-id="{%=node[:id]%}" data-model-name="{%=node[:model_name]%}" class="basic-component component">
 		<div class="basic-tl-corner corner"></div>
 		<div class="header"></div>

@@ -108,14 +108,15 @@
 #wspaceHeader {
 	height: 13px;
 	width: 100%;
-	position: absolute;
-	z-index: 999;
+	position: relative;
+	z-index: 99;
 }
 
 #wsh-l-corner {
 	height: 13px;
 	width: 13px;
 	float: left;
+	position: relative;
 	background: no-repeat url(../images/workspace/l-xpand-corner.png);
 }
 #wsh-center {
@@ -123,11 +124,13 @@
 	height: 13px;
 	background: repeat-x url(../images/workspace/xpand-center-bg.png);
 	float: left;
+	position: relative;
 }
 #wsh-r-corner {
 	height: 13px;
 	width: 13px;
 	float: left;
+	position: relative;
 	background: no-repeat url(../images/workspace/r-xpand-corner.png);
 }
 
@@ -147,27 +150,27 @@
 	background-color: #b7fb15;
 	opacity: 0.5;
 	filter: alpha(opacity=50);
-	z-index: 9999;
+	z-index: 98;
 }
 
 .dragWire {
 	position: absolute;
-	z-index: 500;
+	z-index: 100;
 	border: 1px solid blue;
 }
 
 .fullBezier-basic {
-	position: relative;
+	position: absolute;
 	z-index: 0;
 /*	border: 1px solid red;*/
 }
 
 .compFocus {
-	z-index: 999;
+	z-index: 97;
 }
 
 .compBlur {
-	z-index: 20;
+	z-index: 1;
 }
 
 .southConnectors {

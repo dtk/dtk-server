@@ -171,7 +171,7 @@ function testing(){
 			drag.setAttribute('class', c.getAttribute('class'));
 			this.dd.addToGroup('workspace_drop');
 			drag.setStyles({
-				opacity: .5
+				opacity: .5,
 			});
 		});
 		/*
@@ -194,22 +194,22 @@ function testing(){
 			var item_id = drag.getAttribute('data-id');
 			var model_name = drag.getAttribute('data-model-name');
 
-//			var dropCloneNode = Y.one('#item_'+item_id).cloneNode(true);
 			var dragChild = drag.get('children').item(0).cloneNode(true);
 			var d = new Date();
 			var new_comp_id = d.getTime();
+			dragChild.set('id','wi_'+new_comp_id);
 
-			dragChild.set('id',new_comp_id);
-			dragChild.setStyles({'top':'0px','left':'0px'});
+			var wspaceElem = R8.Utils.Y.one('#mainWorkspace');
+			var wspaceXY = wspaceElem.getXY();
+			var dragXY = drag.getXY();
+			var dragLeft = dragXY[0] - (wspaceXY[0]);
+			var dragTop = dragXY[1] - (wspaceXY[1]);
+			dragChild.setStyles({'top':dragTop+'px','left':dragLeft+'px'});
 			drop.append(dragChild);
-
-			//		var drop_id = drop.get('id');
-			//		var drag_id = dragChild.get('id');
-			//		console.log('Drop Id:'+drop_id+'     Drag ID:'+drag_id);
 		});
 	});
 }
-
+/*
 YUI().use('node', function(Y){
 	var docNode = Y.one(document);
 	docNode.on('click',function(e){
@@ -218,3 +218,4 @@ YUI().use('node', function(Y){
 		console.log('Mouse is at X:'+mouseX+'  Y:'+mouseY);
 	});
 });
+*/

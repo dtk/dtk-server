@@ -26,7 +26,7 @@ module XYZ
 
           def filter(source_hash)
             attrs = %w{name display_name description chef_recipe}
-            DBUpdateHash.object_slice(source_hash["metadata"],attrs)
+            Aux.create_object_slice(source_hash["metadata"],attrs)
           end
         end
       end

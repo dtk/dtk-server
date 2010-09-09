@@ -125,6 +125,16 @@ module XYZ
 
   class Aux
     class << self
+      
+      def create_object_slice(hash,slice_keys,opts={})
+        ret = Hash.new
+        slice_keys.each do |k|
+          val = hash[k]
+          ret[k] = val if (val or opts[:include_null_cols])
+        end
+        ret
+      end
+
       def fill_in_virtual_columns!(hash,model_name,slice_keys,opts={})
         #keys in slice_keys no in hash should be virtual columns
         (slice_keys - hash.keys).each do |k|

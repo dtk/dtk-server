@@ -12,9 +12,6 @@ module XYZ
       frozen? ? (super if has_key?(x)) : super
     end
 
-    def object_slice(slice_keys,opts={})
-      self.class.object_slice(self,slice_keys,opts)
-    end
     def is_complete?()
       false
     end
@@ -47,16 +44,6 @@ module XYZ
       #auto vivification trick from http://t-a-w.blogspot.com/2006/07/autovivification-in-ruby.html
       def create_with_auto_vivification()
         self.new{|h,k| h[k] = self.new(&h.default_proc)}
-      end
-
-      #TODO: may deprecate this one below
-      def object_slice(hash,slice_keys,opts={})
-        ret = Hash.new
-        slice_keys.each do |k|
-          val = hash[k]
-          ret[k] = val if (val or opts[:include_null_cols])
-        end
-        ret
       end
 
       #TBD: might better related nested and auto vivfication

@@ -52,6 +52,9 @@ module XYZ
         process_raw_scalar_hash!(row,DB_REL_DEF[relation_type],opts)
       end
 
+      #TODO: deprecate (writing in terms of get_objects with :id => id; in eitehr case
+      # want to support nested object gets using eager loading
+      # also need to take into account support of rest calls
       def get_object(id_handle,opts={})
 	c = id_handle[:c]
 	id_info = IDInfoTable.get_row_from_id_handle id_handle, :raise_error => opts[:raise_error], :short_circuit_for_minimal_row => true

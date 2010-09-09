@@ -36,6 +36,12 @@
           :rows => 1,
           :cols => 20,
         }},
+      {:parent_name => {
+          :type => 'text',
+          :help => '',
+          :rows => 1,
+          :cols => 20,
+        }},
       {:type => {
           :type => 'text',
           :help => '',

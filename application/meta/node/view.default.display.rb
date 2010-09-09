@@ -35,6 +35,11 @@
              :rows => 1,
              :cols => 40,
             }},
+            {:parent_name => {
+              :type => 'text',
+              :width => '20%',
+              :help => '',
+            }},
             {:image_size => {
              :type => 'text',
              :help => '',

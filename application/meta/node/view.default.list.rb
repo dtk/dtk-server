@@ -7,6 +7,11 @@
           }}
       ],
       :field_list => [
+          {:parent_name => {
+              :type => 'text',
+              :width => '20%',
+              :help => '',
+            }},
           {:display_name => {
               :type => 'text',
               :width => '20%',

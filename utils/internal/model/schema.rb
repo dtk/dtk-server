@@ -23,13 +23,13 @@ module XYZ
         def related_columns(field_set,model_name_x)
           model_name = model_name_x.to_sym
           return nil if field_set.nil?
-          virtual_columns = DB_REL_DEF[model_name][:virtual_columns]
-          return nil unless virtual_columns
+          return nil unless vcolumns = DB_REL_DEF[model_name][:virtual_columns]
           ret = Hash.new
           field_set.each do |f|
-            virtual_col_info = virtual_columns[f] 
-            next unless virtual_col_info and virtual_col_info[:dependencies]
-            virtual_col_info[:dependencies].each do |model_name,info|
+            next unless vcol_info = vcolumns[f] 
+            #special case is :possible_parents
+            next unless deps = convert_to_dependencies(model_name,vcol_info[:possible_parents]) || vcol_info[:dependencies]
+            deps.each do |model_name,info|
               if ret[model_name]
                 update_matching_dep_table!(ret,model_name,info)
               else 
@@ -38,8 +38,22 @@ module XYZ
             end
           end
           ret.empty? ? nil : ret
+Log.debug_pp(ret)
         end
        private
+
+        def convert_to_dependencies(model_name,possible_parents)
+          return nil if possible_parents.nil?
+          #TODO: migh make geenral utility fn with inject Aux.hash_map
+          possible_parents.inject({}) do |h,o|
+            fk_col = DB.ret_parent_id_field_name(DB_REL_DEF[o],DB_REL_DEF[model_name])
+            val = {
+              :join_cond=>{:id=>"#{model_name}__#{fk_col}".to_sym},
+              :cols=>[:id, :display_name, :ref, :ref_num]}
+            h.merge(o => val)
+          end
+        end
+
         def update_matching_dep_table!(ret,model_name,new_info)
           #TODO: validate whether == works on nested hashes
           if ret[model_name][:join_cond] == info[:join_cond]

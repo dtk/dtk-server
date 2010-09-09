@@ -17,6 +17,7 @@ module XYZ
        #TBD: in data source specfic now column :manifest, :varchar #e.g.,rnp-chef-server-0816-ubuntu-910-x86_32
         #TBD: experimenting whetehr better to make this actual or virtual columns
         column :image_size, :numeric, :size=>[8, 3] #in megs
+        virtual_column :parent_name, :possible_parents => [:library,:project]
         virtual_column :disk_size #in megs
         #TBD: can these virtual columns just be inherited
         foreign_key :data_source_id, :data_source, FK_SET_NULL_OPT
@@ -57,6 +58,12 @@ module XYZ
     def disk_size()
       self.class.nested_value(self[:ds_attributes],[:flavor,:disk])
     end
+    def parent_name()
+      return "library/#{self[:library][:display_name]}" if self[:library] and self[:library][:display_name]
+      return "project/#{self[:project][:display_name]}" if self[:project] and self[:project][:display_name]
+      nil
+    end
+ 
     #######
 
 #TODO: should this be more generic and centralized?

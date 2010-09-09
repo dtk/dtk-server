@@ -10,18 +10,7 @@ module XYZ
         column :external_type, :varchar
         column :external_cmp_ref, :varchar
         column :uri, :varchar
-
-        #TODO: special case by just doing :possible_parents => [:component,:library,:project] as 
-        #short hand for below
-        dep_cols = [:id,:display_name,:ref,:ref_num]
-        dep = Hash.new
-        [:component,:library,:project].each do |p|
-          fk_col = {:component => :component_id,:library => :library_library_id,:project => :project_project_id}[p]
-          join_cond = {:id => "component__#{fk_col}".to_sym}
-          dep[p] = {:cols => dep_cols, :join_cond => join_cond}
-        end
-        virtual_column :parent_name, :dependencies => dep
-
+        virtual_column :parent_name, :possible_parents => [:component,:library,:project]
         many_to_one :component,:library,:project
         one_to_many :component, :attribute_link, :attribute
       end

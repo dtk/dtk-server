@@ -23,7 +23,7 @@ module XYZ
         #TODO this probably does not belond here column :hidden, :boolean, :default => false
         column :port_type, :varchar, :size => 10 # null means no port; otherwise input or output
         column :external_attr_ref, :varchar
-        virtual_column :attribute_value, :fn => lambda{|h|h[:value_asserted] || h[:value_derived]}
+        virtual_column :attribute_value
 
         #Boolean that indicates whether there is a executable script/recipe associated with the attribute
         virtual_column :executable?, :hidden => true
@@ -63,9 +63,6 @@ module XYZ
     # returns asserted first then derived
     def attribute_value()
       self[:value_asserted] || self[:value_derived]
-    end
-    def attribute_value()
-      
     end
 
     def unknown_in_attribute_value()

@@ -20,13 +20,6 @@ module XYZ
           Fieldsets[:all_actual][model_name] ||= DB_REL_DEF[model_name][:columns].keys + COMMON_REL_COLUMNS.keys + many_to_one_cols(DB_REL_DEF[model_name])
         end
 
-        def virtual_column_lambda_fn(model_name_x,col)
-          model_name = model_name_x.to_sym
-          vc = DB_REL_DEF[model_name][:virtual_columns]
-          return nil unless vc
-          (vc[col]||{})[:fn]
-        end
-
         def related_columns(field_set,model_name_x)
           model_name = model_name_x.to_sym
           return nil if field_set.nil?

@@ -57,7 +57,7 @@ module XYZ
         model_name_info = @model_name_info + [new_model_name_info]
         table_alias = new_model_name_info.ret_qualified_model_name()
         sequel_graph = @sequel_ds.graph(right_ds.sequel_ds,join_conditions,{:join_type => join_type, :table_alias => table_alias})
-        Graph.new(sequel_graph,model_name_info)
+        Graph.new(sequel_graph,model_name_info,@c)
       end
     end
 
@@ -70,9 +70,6 @@ module XYZ
       def ret_qualified_model_name()
         (@ref_num == 1 ? @model_name : "#{@model_name}#{@ref_num.to_s}").to_sym
       end
-      def model_name()
-        @model_name
-      end
       def create_unique(existing_name_info)
         #check whether model_name is in existing_name_info if so bump up by 1
         new_ref_num =  1 + (existing_name_info.find_all{|x|x.model_name == @model_name}.map{|y|y.ref_num}.max || 0)
@@ -83,32 +80,40 @@ module XYZ
     class Dataset
       include DatatsetGraphMixin
       #TODO: needed to fully qualify Dataset; could this constraint be removed? by chaging expose?
-      expose_methods_from_internal_object :sequel_ds, %w{where}, :post_hook => "lambda{|x|XYZ::SQL::Dataset.new(model_name,x)}"
+      post_hook = "lambda{|x|XYZ::SQL::Dataset.new(model_handle,x)}"
+      expose_methods_from_internal_object :sequel_ds, %w{where}, :post_hook => post_hook
       expose_methods_from_internal_object :sequel_ds, %w{sql}
-      def initialize(model_name,sequel_ds)
-        @model_name_info = [ModelNameInfo.new(model_name)]
+      def initialize(model_handle,sequel_ds)
+        @model_name_info = [ModelNameInfo.new(model_handle[:model_name])]
         @sequel_ds = sequel_ds
+        @c = model_handle[:c]
+      end
+      def model_handle()
+        ModelHandle.new(@c,model_name_info.first.model_name)
       end
     end
 
     class Graph
       include DatatsetGraphMixin
       #TODO: needed to fully qualify Dataset; could this constraint be removed? by chaging expose?
-      expose_methods_from_internal_object :sequel_ds, %w{where}, :post_hook => "lambda{|x|XYZ::SQL::Graph.new(x,@model_name_info)}"
+      expose_methods_from_internal_object :sequel_ds, %w{where}, :post_hook => "lambda{|x|XYZ::SQL::Graph.new(x,@model_name_info,@c)}"
       expose_methods_from_internal_object :sequel_ds, %w{sql}
-      def initialize(sequel_ds,model_name_info)
+      def initialize(sequel_ds,model_name_info,c)
         @sequel_ds = sequel_ds
         @model_name_info = model_name_info
+        @c = c
       end
+
       def all()
         #TODO may be more efficient if flatten by use something like Model.db.db[@sequel_ds.sql].all
         # this avoids needing to reanchor each from primary table (which should be bulk of info
-        ret = @sequel_ds.all
-        
+        #alterantive look at capability of Sequel to pass in row processing block
+
         #pull first element from under top level key
         primary_model_name = @model_name_info.first.model_name() 
         rest_model_indexes = @model_name_info[1..@model_name_info.size-1]
-        ret.each do |row|
+        ret = ArrayObject.new
+        @sequel_ds.all.each do |row|
           primary_cols = row.delete(primary_model_name)
           Model.process_raw_db_row!(primary_cols,primary_model_name)
           primary_cols.each{|k,v|row[k] = v}
@@ -117,6 +122,7 @@ module XYZ
             next unless row[model_index]
             Model.process_raw_db_row!(row[model_index],m.model_name)
           end
+          ret << DB_REL_DEF[primary_model_name][:model_class].new(row,@c,primary_model_name)
         end
         ret
       end
@@ -133,15 +139,6 @@ module XYZ
           ret[k] = val if (val or opts[:include_null_cols])
         end
         ret
-      end
-
-      def fill_in_virtual_columns!(hash,model_name,slice_keys,opts={})
-        #keys in slice_keys no in hash should be virtual columns
-        (slice_keys - hash.keys).each do |k|
-          fn = Model::FieldSet.virtual_column_lambda_fn(model_name,k)
-          hash[k] = fn.call(hash) if fn
-        end
-        hash
       end
 
       def pp_form(obj)

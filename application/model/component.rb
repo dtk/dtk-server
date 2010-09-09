@@ -20,7 +20,7 @@ module XYZ
           join_cond = {:id => "component__#{fk_col}".to_sym}
           dep[p] = {:cols => dep_cols, :join_cond => join_cond}
         end
-        virtual_column :parent_name, :dependencies => dep, :fn => lambda{|h|parent_name(h)}
+        virtual_column :parent_name, :dependencies => dep
 
         many_to_one :component,:library,:project
         one_to_many :component, :attribute_link, :attribute
@@ -28,10 +28,10 @@ module XYZ
     end
     ##### Actions
     ### virtual column defs
-    def self.parent_name(this)
-      return "library/#{this[:library][:display_name]}" if this[:library] and this[:library][:display_name]
-      return "project/#{this[:project][:display_name]}" if this[:project] and this[:project][:display_name]
-      return "component/#{this[:component2][:display_name]}" if this[:component2] and this[:component2][:display_name]
+    def parent_name()
+      return "library/#{self[:library][:display_name]}" if self[:library] and self[:library][:display_name]
+      return "project/#{self[:project][:display_name]}" if self[:project] and self[:project][:display_name]
+      return "component/#{self[:component2][:display_name]}" if self[:component2] and self[:component2][:display_name]
       nil
     end
     ###### Helper fns

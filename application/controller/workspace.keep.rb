@@ -42,8 +42,9 @@ module XYZ
        :ref
       ]
  
-      node_list = get_objects(:node,where_clause,{:field_set => field_set})
-      node_list.each_with_index {|node,index| node_list[index][:model_name] = 'node'}
+      field_set=Model.field_set(:component)
+      opts = {:field_set => field_set}
+      node_list = get_objects(:node,where_clause,opts)
 
       tpl = R8Tpl::TemplateR8.new("workspace/nodesearchtest",user_context())
       tpl.set_js_tpl_name('nodesearchtest')

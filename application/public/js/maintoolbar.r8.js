@@ -28,6 +28,21 @@ if (!R8.MainToolbar) {
 						R8.Ctrl.call('workspace/search',queryTerm,callbacks);
 					}
 				},
+				addComponent: function(obj_id) {
+					var sboxElem = document.getElementById('sq');
+
+					if(this.slider_status=='closed') this.toggleSlider();
+
+					if(basicSearch == true) {
+						var queryTerm = 'sq=' + sboxElem.value;
+						var callbacks = {
+							'io:start':R8.MainToolbar.startSearch(),
+							'io:end':R8.MainToolbar.endSearch(),
+							'io:renderComplete':this.initSlider(),
+						};
+						R8.Ctrl.call('workspace/search',queryTerm,callbacks);
+					}
+				},
 
 				startSearch : function(ioId,arguments) {
 				},
@@ -44,6 +59,9 @@ if (!R8.MainToolbar) {
 						setTimeout(initSliderCallback,100);
 						return;
 					}
+
+testing();
+
 					YUI().use('anim', function(Y) {
 						var slideBarNode = Y.one('#slide_bar');
 						var anim = new Y.Anim({
@@ -134,3 +152,69 @@ var plugin = {
 R8.MainToolbar.addTool(plugin);
 R8.MainToolbar.tools['monitoring'].help();
 //console.log(R8.MainToolbar.tools.prototype);
+function testing(){
+	YUI().use('dd-delegate', 'dd-proxy', 'dd-drop','dd-drop-plugin','node', function(Y){
+		var compDDel = new Y.DD.Delegate({
+			cont: '#slide_bar',
+//			nodes: 'div.component',
+			nodes: 'div.avail_item',
+			dragMode: 'intersect'
+		});
+		
+		compDDel.dd.plug(Y.Plugin.DDProxy, {
+			moveOnEnd: false,
+			cloneNode: true
+		});
+
+		compDDel.on('drag:start', function(e){
+			var drag = this.get('dragNode'), c = this.get('currentNode');
+			drag.setAttribute('class', c.getAttribute('class'));
+			this.dd.addToGroup('workspace_drop');
+			drag.setStyles({
+				opacity: .5
+			});
+		});
+		/*
+		 //setup the drop targets for the keys in the layout
+		 var keyDropList = Y.Node.all('#layoutTable li');
+		 keyDropList.each(function(keyNode, index) {
+		 availKeysDDel.createDrop(keyNode,['layout_drop']);
+		 });
+		 */
+//		var testnode = Y.one('#mainWorkspace');
+//console.log(testnode);
+//		compDDel.createDrop(Y.one('#mainWorkspace'), ['workspace_drop']);
+//console.log('asdfasdfasdfasdfasdf');
+
+		var drop = Y.one('#mainWorkspace').plug(Y.Plugin.Drop);
+		drop.drop.addToGroup(['workspace_drop']);
+
+		compDDel.on('drag:drophit', function(e){
+			var drop = e.drop.get('node'), drag = this.get('dragNode');
+			var item_id = drag.getAttribute('data-id');
+			var model_name = drag.getAttribute('data-model-name');
+
+//			var dropCloneNode = Y.one('#item_'+item_id).cloneNode(true);
+			var dragChild = drag.get('children').item(0).cloneNode(true);
+			var d = new Date();
+			var new_comp_id = d.getTime();
+
+			dragChild.set('id',new_comp_id);
+			dragChild.setStyles({'top':'0px','left':'0px'});
+			drop.append(dragChild);
+
+			//		var drop_id = drop.get('id');
+			//		var drag_id = dragChild.get('id');
+			//		console.log('Drop Id:'+drop_id+'     Drag ID:'+drag_id);
+		});
+	});
+}
+
+YUI().use('node', function(Y){
+	var docNode = Y.one(document);
+	docNode.on('click',function(e){
+		var mouseX = e.clientX;
+		var mouseY = e.clientY;
+		console.log('Mouse is at X:'+mouseX+'  Y:'+mouseY);
+	});
+});

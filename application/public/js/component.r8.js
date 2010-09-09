@@ -268,8 +268,22 @@ if (!R8.Component) {
 			
 			//	renderPort('comp1-south','comp2-north','xyz','fullBezier',this);
 				for(c in R8.Workspace.components[compID].connectors) {
-					R8.Canvas.renderConnector(c);
+					R8.Canvas.renderLink(c);
 				}
+			},
+
+			/*
+			 * This takes in a the ID of a port DOM element on the page and returns its X,Y
+			 * position in context of the workspace which is offset by its component size
+			 */
+			getPortXY : function(portId) {
+				var portElem = R8.Utils.Y.one('#'+portId);
+				var portXY = portElem.getXY();
+				var wspaceElem = R8.Utils.Y.one('#mainWorkspace');
+				var wspaceXY = wspaceElem.getXY();
+
+				var returnXY = [(portXY[0]-wspaceXY[0]),(portXY[1]-wspaceXY[1])]
+				return returnXY;
 			}
 		}
 	}();

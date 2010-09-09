@@ -29,14 +29,14 @@ if (!R8.Canvas) {
 			},
 
 			/**
-			 * renderConnector will draw a connection between to points on a workspace.
+			 * renderLink will draw a connection between to points on a workspace.
 			 * It is overloaded will either take just input of a connectionID, or startNodeID,endNodeID,connectorType
 			 * @method renderConnector
 			 * @param {string} startNodeID DOM ElementID to start rendering the connector from
 			 * @param {string} endNodeID DOM ElementID to finish rendering the connector to
 			 * @param {string} connectorType Type of connection to render, Available are fullBezier,startBezier,endBezier,Line,RightAngle
 			 */
-			renderConnector: function(){
+			renderLink: function(){
 				var a = arguments;
 				var ctrlPtBaseValue = 100;
 				//this use case is for creating new connector on the fly
@@ -72,11 +72,15 @@ if (!R8.Canvas) {
 				}
 				delete (tempCanvas);
 				//---------------------------------------------------------------------
-	
+
 				var startElemNode = R8.Utils.Y.one('#' + startElemID);
 				var endElemNode = R8.Utils.Y.one('#' + endElemID);
-				var startElemXY = startElemNode.getXY();
-				var endElemXY = endElemNode.getXY();
+//				var startElemXY = startElemNode.getXY();
+//				var endElemXY = endElemNode.getXY();
+
+				//DEBUG
+				var startElemXY = R8.Component.getPortXY(startElemID);
+				var endElemXY = R8.Component.getPortXY(endElemID);
 
 				//get offset for 1/2 start and end node height/widths
 				var endElemRegion = endElemNode.get('region');
@@ -184,7 +188,6 @@ if (!R8.Canvas) {
 							}
 							break;
 						case 'west':
-
 							if(endConnectorFacing == 'east') var canvasActualWidth = canvasBaseWidth + (2*ctrlXPtOffset);
 							else var canvasActualWidth = canvasBaseWidth + ctrlXPtOffset;
 

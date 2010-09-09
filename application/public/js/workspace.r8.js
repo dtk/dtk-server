@@ -54,19 +54,18 @@ console.log('registering port:'+portElemID);
 //*****TODO: rework and FLATTEN how ports are stored under components, should be completely flat
 					for(var p in this.components[c].availPorts) {
 					}
-
 				}
 
 //TODO: render all connectors on page after rendering components/nodes/groups, etc
 				this.connectors = workspaceConnectors;
-/*
+
 				for(var c in this.connectors) {
 					var startElemID = this.connectors[c].startElement.connectElemID;
 					var endElemID = this.connectors[c].endElements[0].connectElemID;
 					var connectionType = this.connectors[c].type;
-					R8.Canvas.renderConnector(c);
+					R8.Canvas.renderLink(c);
 				}
-*/
+
 				R8.MainToolbar.init();
 			},
 
@@ -76,6 +75,7 @@ console.log('registering port:'+portElemID);
 			selectionStartX : 0,
 			selectionStartY : 0,
 			selectionBoxElem : null,
+
 			checkMouseDownEvent : function(e) {
 				if(R8.Workspace.activeTool === 'selection') {
 					R8.Workspace.selectionStartX = e.pageX;
@@ -281,7 +281,7 @@ console.log('registering port:'+portElemID);
 					}]
 				};
 
-				R8.Canvas.renderConnector(tempConnectorID);
+				R8.Canvas.renderLink(tempConnectorID);
 
 				var startNode = R8.Utils.Y.one('#'+startElemID);
 				var endNode = R8.Utils.Y.one('#'+endElemID);

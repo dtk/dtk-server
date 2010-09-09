@@ -170,7 +170,7 @@ module R8Tpl
     js_queue_push('functionbody', "var doc = document;")
     create_root_node()
     render_js_dom_tree(@xhtml_document.root.children,@root_js_hash)
-    set_js_add_contents_to_page()
+    set_js_return()
     js_queue_push('functionclose', "}")
     write_js_to_file()
   end
@@ -298,7 +298,7 @@ module R8Tpl
   end
 
 #should probably move the appending out of the templating and just have js return DOM ref to JS ctrlr
-  def set_js_add_contents_to_page()
+  def set_js_return()
 #    self.js_queue_push('ifheader', "if(R8.utils.isUndefined(renderType) || renderType !='append') {")
 #    self.js_queue_push('renderClear','doc.getElementById("' + @panel_set_element_id + '").innerHTML="";')
 #    self.js_queue_push('ifclose', '}')

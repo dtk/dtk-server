@@ -158,7 +158,7 @@ function testing(){
 			cont: '#slide_bar',
 //			nodes: 'div.component',
 			nodes: 'div.avail_item',
-			dragMode: 'intersect'
+			dragMode: 'intersect',
 		});
 		
 		compDDel.dd.plug(Y.Plugin.DDProxy, {

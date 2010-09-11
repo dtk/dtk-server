@@ -20,7 +20,10 @@ module XYZ
 
     def search
       search_query = request.params['sq']
-      where_clause = {}
+      where_clause = {:display_name => search_query}
+      if where_clause
+        where_clause = where_clause.inject(nil){|h,o|SQL.and(h,SQL::WhereCondition.like(o[0],"#{o[1]}%"))}
+      end
       field_set = [
        :type,
        :ds_source_obj_type,

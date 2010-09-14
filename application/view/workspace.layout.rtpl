@@ -59,10 +59,26 @@ R8.config['base_uri'] = '{%=_app[:base_uri]%}/xyz';
 			</div>
 			<div id="cmdbar-tabcontainer">
 				<div id="cmdbar-tabs">
-					<div id="cmdbar-main-tab">
+					<div id="cmdbar-output-tab" class="tab-active" style="z-index: 510;">
+						<div class="sel-lcap-active"></div>
+						<div class="sel-body-active" style="width: 80px;">Cmd Output</div>
+						<div class="sel-rcap-active">
+							<div id="cmdbar-output-tab-close" class="close-tab"></div>
+						</div>
+					</div>
+					<div id="cmdbar-node-tab" class="tab" style="z-index: 509;">
 						<div class="sel-lcap"></div>
-						<div class="sel-body">Cmd Results</div>
-						<div class="sel-rcap"></div>
+						<div class="sel-body" style="width: 40px;">Nodes</div>
+						<div class="sel-rcap">
+							<div id="cmdbar-node-tab-close" class="close-tab"></div>
+						</div>
+					</div>
+					<div id="cmdbar-components-tab" class="tab" style="z-index: 508;">
+						<div class="sel-lcap"></div>
+						<div class="sel-body" style="width: 80px;">Components</div>
+						<div class="sel-rcap">
+							<div id="cmdbar-component-tab-close" class="close-tab"></div>
+						</div>
 					</div>
 				</div>
 			</div>

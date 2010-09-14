@@ -37,7 +37,25 @@ if (!R8.Workspace) {
 					windowNode.on('resize',R8.Workspace.resizeWorkspace);
 				});
 				this.setupViewspace();
+				this.setupCmdbarTabs();
 				this.loadWorkspace();
+			},
+
+			setupCmdbarTabs : function() {
+				YUI().use('node','event',function(Y){
+					var outputTabElem = Y.one('#cmdbar-output-tab-close');
+					var nodeTabElem = Y.one('#cmdbar-node-tab-close');
+					var componentTabElem = Y.one('#cmdbar-component-tab-close');
+
+					outputTabElem.on('mouseover', function(e){ this.addClass('hover'); });
+					outputTabElem.on('mouseleave', function(e){ this.removeClass('hover'); });
+
+					nodeTabElem.on('mouseover', function(e){ this.addClass('hover'); });
+					nodeTabElem.on('mouseleave', function(e){ this.removeClass('hover'); });
+
+					componentTabElem.on('mouseover', function(e){ this.addClass('hover'); });
+					componentTabElem.on('mouseleave', function(e){ this.removeClass('hover'); });
+				});
 			},
 
 			setupViewspace : function() {

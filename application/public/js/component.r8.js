@@ -279,7 +279,7 @@ if (!R8.Component) {
 			getPortXY : function(portId) {
 				var portElem = R8.Utils.Y.one('#'+portId);
 				var portXY = portElem.getXY();
-				var wspaceElem = R8.Utils.Y.one('#mainWorkspace');
+				var wspaceElem = R8.Utils.Y.one('#viewspace');
 				var wspaceXY = wspaceElem.getXY();
 
 				var returnXY = [(portXY[0]-wspaceXY[0]),(portXY[1]-wspaceXY[1])]

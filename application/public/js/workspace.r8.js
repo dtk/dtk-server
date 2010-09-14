@@ -6,12 +6,70 @@ if (!R8.Workspace) {
 	 */
 	R8.Workspace = function(){
 		return {
+			viewPortRegion : null,
+			pageContainerElem : null,
+
+			toolbarElem : null,
+			toolbarHeight : null,
+
+			wspaceContainerElem : null,
+
+			commandbarElem : null,
+
+			viewspaceAnim : null,
+			viewspaceDD : null,
 
 			//DOM element reference for workspace container DIV
-			workspaceElem : null,
+			viewspaceElem : null,
 
-			//Y Node reference Object for the workspaceElem
+			//Y Node reference Object for the viewspaceElem
 			nodeRef : null,
+
+			init : function() {
+				this.pageContainerElem = R8.Utils.Y.one('#page-container');
+				this.toolbarElem = R8.Utils.Y.one('#toolbar');
+				this.wspaceContainerElem = R8.Utils.Y.one('#wspace-container');
+				this.commandbarElem = R8.Utils.Y.one('#commandbar');
+
+				this.resizeWorkspace();
+				YUI().use('node','event',function(Y){
+					var windowNode = Y.one(window);
+					windowNode.on('resize',R8.Workspace.resizeWorkspace);
+				});
+				this.setupViewspace();
+				this.loadWorkspace();
+			},
+
+			setupViewspace : function() {
+				YUI().use('anim', function(Y){
+					R8.Workspace.viewspaceAnim = new Y.Anim({
+						node: '#viewspace',
+						duration: 0.3,
+					});
+				});
+				this.toggleHandTool();
+			},
+			resizeWorkspace : function(e) {
+				R8.Workspace.viewPortRegion = R8.Workspace.pageContainerElem.get('viewportRegion');
+				var vportHeight = R8.Workspace.viewPortRegion['height'];
+				var vportWidth = R8.Workspace.viewPortRegion['width'];
+				var height = "",width="";
+				var margin = 2;
+				(vportHeight < 500) ? vportHeight = (500-margin) : null;
+				(vportWidth < 500) ? vportWidth = (500-margin) : null;
+				height = (vportHeight-margin)+"px";
+				width = (vportWidth-margin)+"px";
+
+				R8.Workspace.pageContainerElem.setStyles({'height': height,'width':width});
+
+				var toolbarRegion = R8.Workspace.toolbarElem.get('region');
+				var commandbarRegion = R8.Workspace.commandbarElem.get('region');
+				var wspaceRegion = R8.Workspace.wspaceContainerElem.get('region');
+				var wspaceHeight = vportHeight - (toolbarRegion['height']+commandbarRegion['height']) - margin;
+//console.log(toolbarRegion);
+				R8.Workspace.wspaceContainerElem.setStyles({'height': wspaceHeight});
+				R8.Workspace.toolbarHeight = toolbarRegion['height'];
+			},
 
 			/*
 			 * Load a given workspace or create a new empty one
@@ -19,12 +77,14 @@ if (!R8.Workspace) {
 			 * @param {string} wSpaceID ID corresponding to a given workspace to load, if empty/null create empty space
 			 */
 			loadWorkspace: function(wSpaceID){
-				this.workspaceElem = document.getElementById('mainWorkspace');
 
-				this.nodeRef = R8.Utils.Y.one(this.workspaceElem);
+//return;
+				this.viewspaceElem = document.getElementById('viewspace');
+
+				this.nodeRef = R8.Utils.Y.one(this.viewspaceElem);
 				R8.Utils.Y.delegate('click',this.updateSelectedElements,this.nodeRef,'.component, .connector');
-				R8.Utils.Y.delegate('click',this.clearSelectedElements,'body','#mainWorkspace');
-				R8.Utils.Y.delegate('mousedown',this.checkMouseDownEvent,'body','#mainWorkspace');
+				R8.Utils.Y.delegate('click',this.clearSelectedElements,'body','#viewspace');
+				R8.Utils.Y.delegate('mousedown',this.checkMouseDownEvent,'body','#viewspace');
 
 //TODO: right now hardcoding assignment from demoData.r8.js
 				this.components = workspaceComponents;
@@ -33,7 +93,7 @@ if (!R8.Workspace) {
 //TODO: add logic in to retrieve workspace info based on ID
 				for(var c in this.components) {
 					var comp = R8.Component.render(this.components[c]);
-					this.workspaceElem.appendChild(comp);
+					this.viewspaceElem.appendChild(comp);
 					this.addDragDrop(comp);
 					R8.Component.renderPorts(comp);
 
@@ -69,6 +129,26 @@ console.log('registering port:'+portElemID);
 				R8.MainToolbar.init();
 			},
 
+			toggleHandTool : function() {
+				YUI().use('dd-drag', function(Y) {
+					R8.Workspace.viewspaceDD = new Y.DD.Drag({
+						node: '#viewspace'
+					});
+					R8.Workspace.viewspaceDD.on('drag:end',function(e){
+						var viewspaceElem = Y.one('#viewspace');
+						var top = viewspaceElem.getStyle('top');
+						var left = viewspaceElem.getStyle('left');
+						top = top.replace('px','');
+						left = left.replace('px','');
+
+						if (top > 0 || left > 0) {
+							R8.Workspace.viewspaceAnim.set('to',{xy:[0,R8.Workspace.toolbarHeight]});
+							R8.Workspace.viewspaceAnim.run();
+						}
+					});
+				});
+			},
+
 			activeTool : 'selection',
 			selectionDragEvent : null,
 			selectionMouseUpEvent : null,
@@ -80,8 +160,8 @@ console.log('registering port:'+portElemID);
 				if(R8.Workspace.activeTool === 'selection') {
 					R8.Workspace.selectionStartX = e.pageX;
 					R8.Workspace.selectionStartY = e.pageY;
-					R8.Workspace.selectionDragEvent = R8.Utils.Y.one('#mainWorkspace').on('mousemove', R8.Workspace.updateSelectionRegion);
-					R8.Workspace.selectionMouseUpEvent = R8.Utils.Y.one('#mainWorkspace').on('mouseup', R8.Workspace.handleSelectionMouseUp);
+					R8.Workspace.selectionDragEvent = R8.Utils.Y.one('#viewspace').on('mousemove', R8.Workspace.updateSelectionRegion);
+					R8.Workspace.selectionMouseUpEvent = R8.Utils.Y.one('#viewspace').on('mouseup', R8.Workspace.handleSelectionMouseUp);
 				}
 			},
 
@@ -96,7 +176,7 @@ console.log('registering port:'+portElemID);
 					R8.Workspace.selectionBoxElem = document.createElement('div');
 					R8.Workspace.selectionBoxElem.setAttribute('class','selectionBox');
 					R8.Workspace.selectionBoxElem.setAttribute('id','selectionBox');
-					R8.Workspace.workspaceElem.appendChild(R8.Workspace.selectionBoxElem);
+					R8.Workspace.viewspaceElem.appendChild(R8.Workspace.selectionBoxElem);
 				}
 
 				if(mouseX < R8.Workspace.selectionStartX)
@@ -115,7 +195,7 @@ console.log('registering port:'+portElemID);
 				R8.Workspace.selectionDragEvent.detach();
 				R8.Workspace.selectionMouseUpEvent.detach();
 				if (R8.Workspace.selectionBoxElem) {
-					R8.Workspace.workspaceElem.removeChild(R8.Workspace.selectionBoxElem);
+					R8.Workspace.viewspaceElem.removeChild(R8.Workspace.selectionBoxElem);
 					R8.Workspace.selectionBoxElem = null;
 				}
 			},
@@ -240,7 +320,7 @@ console.log('registering port:'+portElemID);
 				dragDelegate.on('drag:drophit', function(e) {
 //					wireConnected = true;
 					var wireCanvas = R8.Utils.Y.one('#wireCanvas');
-					R8.Utils.Y.one('#mainWorkspace').removeChild(wireCanvas);
+					R8.Utils.Y.one('#viewspace').removeChild(wireCanvas);
 					delete(wireCanvas);
 					R8.Workspace.createConnector(this.get('currentNode').get('id'),e.drop.get('node').get('id'));
 //					console.log('Gyeah!! Hit Target Yo!');
@@ -248,7 +328,7 @@ console.log('registering port:'+portElemID);
 
 				dragDelegate.on('drag:dropmiss', function(e) {
 					var wireCanvas = R8.Utils.Y.one('#wireCanvas');
-					R8.Utils.Y.one('#mainWorkspace').removeChild(wireCanvas);
+					R8.Utils.Y.one('#viewspace').removeChild(wireCanvas);
 					delete(wireCanvas);
 					console.log('drop miss');
 				});

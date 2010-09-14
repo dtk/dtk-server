@@ -68,7 +68,7 @@ if (!R8.Canvas) {
 				} else {
 					var canvasNode = new R8.Utils.Y.Node.create('<canvas>');
 					canvasNode.setAttribute('id', canvasID);
-					R8.Utils.Y.one('#mainWorkspace').appendChild(canvasNode);
+					R8.Utils.Y.one('#viewspace').appendChild(canvasNode);
 				}
 				delete (tempCanvas);
 				//---------------------------------------------------------------------
@@ -880,7 +880,7 @@ if (!R8.Canvas) {
 				if(wireCanvasElem === null) {
 					var canvasElem = new R8.Utils.Y.Node.create('<canvas>');
 					canvasElem.setAttribute('id',canvasID);
-					R8.Utils.Y.one('#mainWorkspace').appendChild(canvasElem);
+					R8.Utils.Y.one('#viewspace').appendChild(canvasElem);
 				} else {
 					var canvasElem = R8.Utils.Y.one('#'+canvasID);
 					var width = canvasElem.get('width');

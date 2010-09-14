@@ -1,95 +1,10 @@
-#page-container {
-	position: absolute;
-	border: 1px solid red;
-	min-height:500px;
-	min-width: 500px;
-}
 
 #toolbar {
-	position: relative;
 	width: 100%;
 	height: 40px;
 	min-width: 500px;
 	background: repeat-x url(../images/workspace/tbar-bg.png);
 /*	border: 1px solid black;*/
-}
-
-#commandbar {
-	position: relative;
-	width: 100%;
-	height: 40px;
-	min-width: 500px;
-	background: repeat-x url(../images/workspace/cmdbar-bg.png);
-/*	border: 1px solid black;*/
-}
-
-#wspace-container {
-	position: relative;
-	width: 100%;
-	height: 450px;
-/*	border-right: 1px solid #638DCD;*/
-	overflow: hidden;
-}
-
-#cmdbar-tabcontainer {
-	position: absolute;
-	height:20px;
-	width: 100%;
-	bottom: 0;
-	z-index: 500;
-}
-
-#cmdbar-tabs {
-	margin-right: 15px;
-	height: 20px;
-	position: relative;
-	float: right;
-}
-
-#cmdbar-main-tab {
-	height: 20px;
-}
-
-#cmdbar-tabs .sel-lcap {
-	position: relative;
-	float:left;
-	height: 20px;
-	width: 4px;
-	background: no-repeat url(../images/workspace/cmdbar-tab-sel-lcap.png);	
-}
-#cmdbar-tabs .sel-body {
-	position: relative;
-	float:left;
-	width: 100px;
-	height: 20px;
-	background: repeat-x url(../images/workspace/cmdbar-tab-sel-bg.png);	
-}
-#cmdbar-tabs .sel-rcap {
-	position: relative;
-	float:left;
-	height: 20px;
-	width: 20px;
-	background: no-repeat url(../images/workspace/cmdbar-tab-sel-rcap.png);
-}
-
-.cmdbar-input-wrapper {
-	background:#FFFFFF none repeat scroll 0 0;
-	border:1px solid #ACBABD;
-	font-size:115.9%;
-	float:left;
-	margin: 4px 0 0 5px;
-	padding:0.2em 0.2em 1em;
-}
-
-.cmdbar-input-wrapper input {
-	border: 0 none;
-	height:1.4em;
-	line-height:1.2em;
-	margin:0 0 -0.8em;
-	padding:0.2em 0.64em 0 0.44em;
-	width:35em;
-	font-size: 100%;
-	float: left;
 }
 
 .tbar_search {
@@ -179,6 +94,17 @@
 	margin-right: 5px;
 }
 
+#wspaceContainer {
+	top: -100px;
+	position: inherit;
+	width: 100%;
+	height: 100%;	
+	min-height:500px;
+	min-width: 500px;
+	border-right: 1px solid #638DCD;
+	overflow: hidden;
+}
+
 #wspaceHeader {
 	height: 13px;
 	width: 100%;
@@ -208,30 +134,12 @@
 	background: no-repeat url(../images/workspace/r-xpand-corner.png);
 }
 
-#page-container {
-	width: 100%;
-	height: 100%;
-	position: absolute;
-	display: block;
-}
-
-#workspace-wrapper {
+.mainWorkspace {
 	width: 100%;
 	height: 100%;
 	position: relative;
 	background: url(../images/workspace/wspace-bg-3.png);
 	display: block;
-}
-
-.viewspace {
-	width: 1500px;
-	height: 1500px;
-	top: 0px;
-	left: 0px;
-	position: relative;
-	background: url(../images/workspace/wspace-bg-3.png);
-	display: block;
-	border: 1px solid green;
 }
 
 .selectionBox {

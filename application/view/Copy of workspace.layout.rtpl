@@ -42,10 +42,10 @@ R8.config['base_uri'] = '{%=_app[:base_uri]%}/xyz';
 
 </head>
 
-	<body onload="R8.Workspace.init();">
-	<div id="page-container" style="margin: 0 auto 0 auto;">
+	<body style="background: repeat-x url({%=_app[:base_images_uri]%}/workspace/page-bg.jpg) scroll left top #4E87A7;" onload="R8.Ctrl.init(); R8.Workspace.loadWorkspace();">
+	<div style=" width: 1200px; margin: 0 auto 0 auto;">
 		<div id="toolbar">
-			&nbsp;&nbsp;<a href="javascript:R8.MainToolbar.toggleSlider();">Toggle</a>
+			<a href="javascript:R8.MainToolbar.toggleSlider();">Toggle</a>
 			<div class="tbar_search"">
 				<form id="tbar_search_form" onsubmit="R8.MainToolbar.search(); return false;">
 					<input onfocus="if(this.value =='Search') this.value='';" onblur="if(this.value==='') this.value='Search';" type="text" value="Search" id="sq" name="sq" title="Enter Search Term"/>
@@ -53,25 +53,24 @@ R8.config['base_uri'] = '{%=_app[:base_uri]%}/xyz';
 				</form>
 			</div>
 		</div>
-		<div id="wspace-container">
-			<div id="workspace" class="workspace">
-				<div id="viewspace" class="viewspace"></div>
-			</div>
-			<div id="cmdbar-tabcontainer">
-				<div id="cmdbar-tabs">
-					<div id="cmdbar-main-tab">
-						<div class="sel-lcap"></div>
-						<div class="sel-body">Cmd Results</div>
-						<div class="sel-rcap"></div>
-					</div>
+		<div id="sliderbar">
+			<div class="slider-top"></div>
+			<div id="sliderwrapper">
+				<div id="lbutton"></div>
+				<div id="slidecontainer">
+					<div id="slider"></div>
 				</div>
+				<div id="rbutton"></div>
 			</div>
+			<div class="slider-btm"></div>
 		</div>
-		<div id="commandbar">
-			<div class="cmdbar-input-wrapper">
-				<form id="cmdbar_input_form">
-					<input onfocus="if(this.value =='$:') this.value='';" onblur="if(this.value==='') this.value='$:';" type="text" value="$:" id="cmd" name="cmd" title="Enter Command"/>
-				</form>
+		<div id="wspaceContainer">
+			<div id="mainWorkspace" class="mainWorkspace">
+				<div id="wspaceHeader">
+					<div id="wsh-l-corner"></div>
+					<div id="wsh-center"></div>
+					<div id="wsh-r-corner"></div>
+				</div>
 			</div>
 		</div>
 	</div>

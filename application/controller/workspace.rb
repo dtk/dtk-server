@@ -19,11 +19,6 @@ module XYZ
     end
 
     def search
-      search_query = request.params['sq']
-      where_clause = {:display_name => search_query}
-      if where_clause
-        where_clause = where_clause.inject(nil){|h,o|SQL.and(h,SQL::WhereCondition.like(o[0],"#{o[1]}%"))}
-      end
       field_set = [
        :type,
        :ds_source_obj_type,
@@ -44,15 +39,29 @@ module XYZ
        :id,
        :ref
       ]
+
+pp request.params
+      model_name = request.params['model_name']
+      search_query = request.params['sq']
+
+      where_clause = {}
+      request.params.each do |name,value|
+        (field_set.include?(name.to_sym)) ? where_clause[name.to_sym] = value : nil;
+      end
+
+#      where_clause = {:display_name => search_query}
+      if where_clause
+        where_clause = where_clause.inject(nil){|h,o|SQL.and(h,SQL::WhereCondition.like(o[0],"#{o[1]}%"))}
+      end
  
-      node_list = get_objects(:node,where_clause,{:field_set => field_set})
-      node_list.each_with_index {|node,index| node_list[index][:model_name] = 'node'}
+      model_list = get_objects(model_name.to_sym,where_clause,{:field_set => field_set})
+      model_list.each_with_index {|node,index| model_list[index][:model_name] = model_name}
 
       tpl = R8Tpl::TemplateR8.new("workspace/nodesearchtest",user_context())
       tpl.set_js_tpl_name('nodesearchtest')
-      tpl.assign('node_list',node_list)
+      tpl.assign('node_list',model_list)
 
-      slide_width = 170*node_list.size
+      slide_width = 170*model_list.size
       tpl.assign('slide_width',slide_width)
       #TODO: needed to below back in so template did not barf
  # }

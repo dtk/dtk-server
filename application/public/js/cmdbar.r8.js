@@ -349,8 +349,12 @@ return;
 								case "node":
 									this.tabDef['name'] = 'node-search';
 									this.tabDef['i18n'] = 'Node Search';
+									var queryTerm = 'model_name=node';
 									break;
 								case "component":
+									this.tabDef['name'] = 'component-search';
+									this.tabDef['i18n'] = 'Component Search';
+									var queryTerm = 'model_name=component';
 									break;
 								case "blah":
 									break;
@@ -369,7 +373,6 @@ return;
 							R8.Cmdbar.changeTabFocus(tabIndex);
 							if(!R8.Cmdbar.tabsPaneOpen) R8.Cmdbar.toggleTabs();
 
-							var queryTerm = '';
 							for(term in qList) {
 								if(queryTerm !='') queryTerm +='&';
 								queryTerm += qList[term]['name']+'='+qList[term]['value'];

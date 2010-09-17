@@ -26,17 +26,28 @@
 	position: relative;
 	width: 100%;
 	height: 450px;
-/*	border-right: 1px solid #638DCD;*/
 	overflow: hidden;
+}
+
+#cmdbar-tab-content-wrapper {
+	width:100%;
+	display: none;
+	height: 100px;
+	background-color: #B6B6B6;
+/*	border: 3px solid #e4e4e2;*/
 }
 
 #cmdbar-tabcontainer {
 	position: absolute;
-	height:26px;
 	width: 100%;
 	bottom: 0;
 	z-index: 500;
 	border-bottom: 1px solid #bfbfbd;
+}
+
+#cmdbar-tabs-wrapper {
+	height:26px;
+	width: 100%;
 }
 
 #cmdbar-tabs {
@@ -57,55 +68,46 @@
 	background: no-repeat url(../images/workspace/close-red-x.png);	
 }
 
-#cmdbar-tabs .tab-active {
-	position: relative;
-	float: left;
-	height: 26px;
-	margin-top: 1px;
+#cmdbar-tabs .tab.active {
 }
 
-#cmdbar-tabs .sel-lcap-active {
-	float:left;
-	height: 26px;
-	width: 24px;
+#cmdbar-tabs .tab.active .lcap {
 	background: no-repeat url(../images/workspace/cmdbar-tab-sel-lcap2.png);	
 }
 
-#cmdbar-tabs .sel-body-active {
-	float:left;
-	height: 26px;
-	font-weight: bold;
-	padding: 5px 0 0 0;
+#cmdbar-tabs .tab.active .body {
 	background: repeat-x url(../images/workspace/cmdbar-tab-sel-bg2.png);
 }
-#cmdbar-tabs .sel-rcap-active {
-	float:left;
-	height: 26px;
-	width: 30px;
+#cmdbar-tabs .tab.active .rcap {
 	background: no-repeat url(../images/workspace/cmdbar-tab-sel-rcap2.png);
 }
 
 #cmdbar-tabs .tab {
 	position: relative;
 	height: 26px;
-	margin: 1px 0 0 -15px;
+	margin-top: 1px;
 	float: left;
+	cursor: pointer;
 }
 
-#cmdbar-tabs .sel-lcap {
+#cmdbar-tabs .tab.not-first {
+	margin-left: -15px;
+}
+
+#cmdbar-tabs .lcap {
 	float:left;
 	height: 26px;
 	width: 24px;
 	background: no-repeat url(../images/workspace/cmdbar-tab-lcap2.png);	
 }
-#cmdbar-tabs .sel-body {
+#cmdbar-tabs .body {
 	float:left;
 	height: 26px;
 	font-weight: bold;
 	padding: 5px 0 0 0;
 	background: repeat-x url(../images/workspace/cmdbar-tab-bg2.png);
 }
-#cmdbar-tabs .sel-rcap {
+#cmdbar-tabs .rcap {
 	float:left;
 	height: 26px;
 	width: 30px;

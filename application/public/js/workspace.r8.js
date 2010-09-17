@@ -37,25 +37,8 @@ if (!R8.Workspace) {
 					windowNode.on('resize',R8.Workspace.resizeWorkspace);
 				});
 				this.setupViewspace();
-				this.setupCmdbarTabs();
+				R8.Cmdbar.init();
 				this.loadWorkspace();
-			},
-
-			setupCmdbarTabs : function() {
-				YUI().use('node','event',function(Y){
-					var outputTabElem = Y.one('#cmdbar-output-tab-close');
-					var nodeTabElem = Y.one('#cmdbar-node-tab-close');
-					var componentTabElem = Y.one('#cmdbar-component-tab-close');
-
-					outputTabElem.on('mouseover', function(e){ this.addClass('hover'); });
-					outputTabElem.on('mouseleave', function(e){ this.removeClass('hover'); });
-
-					nodeTabElem.on('mouseover', function(e){ this.addClass('hover'); });
-					nodeTabElem.on('mouseleave', function(e){ this.removeClass('hover'); });
-
-					componentTabElem.on('mouseover', function(e){ this.addClass('hover'); });
-					componentTabElem.on('mouseleave', function(e){ this.removeClass('hover'); });
-				});
 			},
 
 			setupViewspace : function() {
@@ -160,7 +143,9 @@ console.log('registering port:'+portElemID);
 						left = left.replace('px','');
 
 						if (top > 0 || left > 0) {
-							R8.Workspace.viewspaceAnim.set('to',{xy:[0,R8.Workspace.toolbarHeight]});
+							top > 0 ? top = 0 : null;
+							left > 0 ? left = 0 : null;
+							R8.Workspace.viewspaceAnim.set('to',{xy:[left,top]});
 							R8.Workspace.viewspaceAnim.run();
 						}
 					});

@@ -190,7 +190,7 @@ function testing(){
 			drag.setAttribute('class', c.getAttribute('class'));
 			this.dd.addToGroup('workspace_drop');
 			drag.setStyles({
-				opacity: .3,
+				opacity: .5,
 			});
 		});
 		/*
@@ -205,7 +205,7 @@ function testing(){
 //		compDDel.createDrop(Y.one('#mainWorkspace'), ['workspace_drop']);
 //console.log('asdfasdfasdfasdfasdf');
 
-		var drop = Y.one('#mainWorkspace').plug(Y.Plugin.Drop);
+		var drop = Y.one('#viewspace').plug(Y.Plugin.Drop);
 		drop.drop.addToGroup(['workspace_drop']);
 
 		compDDel.on('drag:drophit', function(e){
@@ -218,7 +218,7 @@ function testing(){
 			var new_comp_id = d.getTime();
 			dragChild.set('id','wi_'+new_comp_id);
 
-			var wspaceElem = R8.Utils.Y.one('#mainWorkspace');
+			var wspaceElem = R8.Utils.Y.one('#viewspace');
 			var wspaceXY = wspaceElem.getXY();
 			var dragXY = drag.getXY();
 			var dragLeft = dragXY[0] - (wspaceXY[0]);

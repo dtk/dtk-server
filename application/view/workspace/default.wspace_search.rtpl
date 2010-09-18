@@ -1,12 +1,12 @@
 
-<div id="slide_bar" style="height:92px; width: {%=slide_width%}px;">
-	{%for node in node_list%}
+<div id="{%=model_name%}-search-slide-bar" style="height:92px; width: {%=slide_width%}px;">
+	{%for model in model_list%}
 	<div class="avail_item basic-component" style="position:relative; float: left; margin: 0 5px; z-index: 100;">
-	<div id="item_{%=node[:id]%}" data-id="{%=node[:id]%}" data-model-name="{%=node[:model_name]%}" class="basic-component component">
+	<div id="item_{%=model[:id]%}" data-id="{%=model[:id]%}" data-model-name="{%=model[:model_name]%}" class="basic-component component">
 		<div class="basic-tl-corner corner"></div>
 		<div class="header"></div>
 		<div class="basic-tr-corner corner"></div>
-		<div id="{%=node[:id]%}-body" class="body">{%=node[:display_name]%}</div>
+		<div id="{%=model[:id]%}-body" class="body">{%=model[:display_name]%}</div>
 		<div class="basic-bl-corner corner"></div>
 		<div class="footer"></div>
 		<div class="basic-br-corner corner"></div>

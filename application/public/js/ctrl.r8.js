@@ -132,7 +132,8 @@ if (!R8.Ctrl) {
 			updatePage: function(ioId, responseObj) {
 				eval("R8.Ctrl.callResults[ioId] =" + responseObj.responseText);
 				var response = R8.Ctrl.callResults[ioId];
-console.log(response);
+//DEBUG
+//console.log(response);
 				//reset the callbacks array after execution
 				R8.Ctrl.tplCallbacks = new Array();
 

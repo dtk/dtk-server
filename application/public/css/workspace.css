@@ -162,7 +162,7 @@
 	float: left;
 }
 
-#sliderbar {
+.slider {
 /*	z-index: 500;*/
 /*	position: absolute;*/
 	display:none;
@@ -183,7 +183,7 @@
 	background: repeat-x url(../images/workspace/slider-btm-bg.png);
 }
 
-#slidecontainer {
+.slide-list-container {
 	height: 92px;
 	width: 1135px;
 	float: left;
@@ -192,7 +192,7 @@
 	overflow: hidden;
 }
 
-#sliderwrapper {
+.slider-wrapper {
 /*	display: none; */
 	width:100%; 
 	height: 86px;

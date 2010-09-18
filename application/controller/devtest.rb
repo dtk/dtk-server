@@ -14,7 +14,7 @@ module XYZ
       container_uri = "/" + uri_array.join("/")
       ds_uri =  "#{container_uri}/data_source/#{ds_type}"
       parent_id = ret_id_from_uri(ds_uri)
-      
+      raise Error.new("cannot find #{ds_uri}") if parent_id.nil?
       ds_object_objs = Model.get_objects(ModelHandle.new(c,:data_source_entry), nil, :parent_id => parent_id)
       raise Error.new("cannot find any #{ds_type} data source objects in #{container_uri}") if ds_object_objs.empty?
       #so that cache can be shared accross different ds_object_objs

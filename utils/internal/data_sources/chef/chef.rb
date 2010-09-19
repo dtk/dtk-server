@@ -14,7 +14,8 @@ module XYZ
       def initialize()
         @conn = nil
         @chef_node_cache = Hash.new 
-        @chef_metadata_cache = Hash.new
+        @cookbook_metadata_cache = Hash.new
+        @recipe_service_info_cache =  Hash.new
         @attr_values_and_metadata = Hash.new
       end
 
@@ -72,14 +73,18 @@ module XYZ
         get_node_recipe_assocs().values.flatten.map{|x|x.gsub(/::.+$/,"")}.uniq
       end
 
-      #if recipe_name is given then looks for additional metadata associated with recipe
-      def get_metadata(cookbook_name,recipe_name=nil)
-        metadata = @chef_metadata_cache[cookbook_name] ||= get_metadata_aux(cookbook_name)
-       return metadata unless recipe_name
-        metadata[:services] ||= Hash.new
-       return metadata if metadata[:services].has_key?(recipe_name)
-        metadata[:services][recipe_name] = get_component_services_info(recipe_name,metadata)
-        metadata
+      def get_cookbook_recipes_metadata(cookbook_name)
+        (get_metadata_for_cookbook(cookbook_name)||{})["recipes"]
+      end
+
+      def get_metadata_for_recipe(recipe_name)
+        cookbook_metadata = get_metadata_for_cookbook(get_cookbook_name_from_recipe_name(recipe_name))
+        @recipe_service_info_cache[recipe_name] ||= get_component_services_info(recipe_name,cookbook_metadata)
+        cookbook_metadata.merge("services" => @recipe_service_info_cache[recipe_name])
+      end
+
+      def get_metadata_for_cookbook(cookbook_name)
+       @cookbook_metadata_cache[cookbook_name] ||= get_metadata_aux(cookbook_name)
       end
 
       def get_metadata_aux(cookbook_name)
@@ -104,27 +109,23 @@ module XYZ
         metadata
       end
 
-      def get_metadata_for_recipe(recipe_name)
-        get_metadata(get_cookbook_name_from_recipe_name(recipe_name),recipe_name)
-      end
 
       def get_cookbook_name_from_recipe_name(recipe_name)
         recipe_name.gsub(/::.+/,"")
       end
 
       def get_recipes_assoc_cookbook(cookbook_name)
-        metadata = get_metadata(cookbook_name)
         ret = Array.new
-        return ret if metadata.nil?
-
-        if metadata["recipes"]
-          metadata["recipes"].each do |recipe_name,description|
+        recipes = get_cookbook_recipes_metadata(cookbook_name)
+        if recipes
+          recipes.each do |recipe_name,description|
+            metadata = get_metadata_for_recipe(recipe_name)
             #TODO: what to construct so nested and mark attributes as complete
             ds_hash = DataSourceUpdateHash.new({"metadata" => metadata, "name" => recipe_name, "description" => description})
-              
             ret << ds_hash.freeze 
           end
         else
+          metadata = get_metadata_for_cookbook(cookbook_name)
           ds_hash = DataSourceUpdateHash.new({"metadata" => metadata, "name" => metadata["name"], "description" => metadata["description"]})
           ret << ds_hash.freeze
         end
@@ -198,20 +199,17 @@ module XYZ
       def is_service_check?(attr_name)
         attr_name =~ Regexp.new("/_service/")
       end
-      def add_service_attributes!(attr_info,services_list,node)
-        return nil unless services_list
-        services_list.each_value do |services|
-          services.each do |service|
-            service_name = service[:canonical_service_name]
-            next unless service_name
-            (service["params"]||{}).each do |k,v|
-              attr_index = "_service/#{service_name}/#{k}"
-              normalize_attribute_values(attr_info[attr_index],{"value" => v},node)
-            end
+      def add_service_attributes!(attr_info,services,node)
+        return nil unless services
+        services.each do |service|
+          service_name = service[:canonical_service_name]
+          next unless service_name
+          (service["params"]||{}).each do |k,v|
+            attr_index = "_service/#{service_name}/#{k}"
+            normalize_attribute_values(attr_info[attr_index],{"value" => v},node)
           end
-        end       
+        end
       end
-
 
       def recipes(node)
         node.run_list ? node.run_list.recipes : nil

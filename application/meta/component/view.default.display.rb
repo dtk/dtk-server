@@ -66,6 +66,12 @@
           :rows => 1,
           :cols => 20,
         }},
+      {:services => {
+          :type => 'text',
+          :help => '',
+          :rows => 1,
+          :cols => 20,
+        }},
      ],
    },
   ]

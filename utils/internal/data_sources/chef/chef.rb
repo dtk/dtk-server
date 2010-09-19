@@ -80,7 +80,7 @@ module XYZ
       def get_metadata_for_recipe(recipe_name)
         cookbook_metadata = get_metadata_for_cookbook(get_cookbook_name_from_recipe_name(recipe_name))
         @recipe_service_info_cache[recipe_name] ||= get_component_services_info(recipe_name,cookbook_metadata)
-        cookbook_metadata.merge("services" => @recipe_service_info_cache[recipe_name])
+        cookbook_metadata.merge("services_info" => @recipe_service_info_cache[recipe_name])
       end
 
       def get_metadata_for_cookbook(cookbook_name)
@@ -120,6 +120,7 @@ module XYZ
         if recipes
           recipes.each do |recipe_name,description|
             metadata = get_metadata_for_recipe(recipe_name)
+pp get_to_monitor_items(metadata)
             #TODO: what to construct so nested and mark attributes as complete
             ds_hash = DataSourceUpdateHash.new({"metadata" => metadata, "name" => recipe_name, "description" => description})
             ret << ds_hash.freeze 
@@ -130,6 +131,13 @@ module XYZ
           ret << ds_hash.freeze
         end
         ret
+      end
+
+      def get_to_monitor_items(metadata)
+        (metadata["services_info"]||[]).map{|s|(s[:conditions]||[]).map{|c|c[:to_monitor].map do |x|
+              x.merge({:service_name => s[:canonical_service_name],:condition_name => c[:name],:condition_description => c[:description]})
+            end
+          }}.flatten
       end
 
       def get_node_recipe_assocs()
@@ -192,16 +200,16 @@ module XYZ
             attr_values_and_metadata[attr_name]["value"] = value
           end
         end
-        add_service_attributes!(attr_values_and_metadata,metadata["services"],node)
+        add_service_attributes!(attr_values_and_metadata,metadata["services_info"],node)
         @attr_values_and_metadata[node.name][recipe_name] = attr_values_and_metadata.freeze
       end
 
       def is_service_check?(attr_name)
         attr_name =~ Regexp.new("/_service/")
       end
-      def add_service_attributes!(attr_info,services,node)
-        return nil unless services
-        services.each do |service|
+      def add_service_attributes!(attr_info,services_info,node)
+        return nil unless services_info
+        services_info.each do |service|
           service_name = service[:canonical_service_name]
           next unless service_name
           (service["params"]||{}).each do |k,v|

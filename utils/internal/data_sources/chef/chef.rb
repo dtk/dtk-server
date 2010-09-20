@@ -33,6 +33,7 @@ module XYZ
           recipes.each do |recipe_name|
             node = get_node(node_name)
             metadata = get_metadata_for_recipe(recipe_name)
+            next unless metadata
             attr_values_and_metadata = get_attr_values_and_metadata(recipe_name,node,metadata)
             ds_hash = DataSourceUpdateHash.new({"metadata" => metadata.merge({"attributes" => attr_values_and_metadata}), "recipe_name" => recipe_name, "node_name" => node_name})
            block.call(ds_hash)
@@ -54,9 +55,6 @@ module XYZ
         return HashIsComplete.new()
       end
         
-      def chef_version()
-         ::Chef::VERSION.to_f 
-      end
      private
       def get_node(node_name)
         @chef_node_cache[node_name] ||= filter_to_only_relevant(get_rest("nodes/#{node_name}",false))
@@ -79,6 +77,7 @@ module XYZ
 
       def get_metadata_for_recipe(recipe_name)
         cookbook_metadata = get_metadata_for_cookbook(get_cookbook_name_from_recipe_name(recipe_name))
+        return nil if cookbook_metadata.nil?
         @recipe_service_info_cache[recipe_name] ||= get_component_services_info(recipe_name,cookbook_metadata)
         cookbook_metadata.merge("services_info" => @recipe_service_info_cache[recipe_name])
       end
@@ -90,11 +89,12 @@ module XYZ
       def get_metadata_aux(cookbook_name)
         #need version number if 0.9
         cookbook = [cookbook_name]
-        if chef_version >= 0.9
+        if ChefVersion.current >= ChefVersion["0.9.0"]
           #need to get meta first
           r = get_rest("cookbooks/#{cookbook_name}")
-          #TODO: get max, in case multiple versions; check max is ordering right
-          cookbook << r[cookbook_name].max
+          return nil unless r
+          #get max, in case multiple versions
+          cookbook << r[cookbook_name].map{|x|ChefVersion[x]}.max.chef_version
         end
         r = get_rest("cookbooks/#{cookbook.join('/')}")
         return nil unless r
@@ -119,16 +119,25 @@ module XYZ
         recipes = get_cookbook_recipes_metadata(cookbook_name)
         if recipes
           recipes.each do |recipe_name,description|
+pp cookbook_name
+if cookbook_name =~ /hadoop_cloudera_c3_228/
+x=1
+end
+
             metadata = get_metadata_for_recipe(recipe_name)
+puts '------------------------'
 pp get_to_monitor_items(metadata)
+puts '------------------------'
             #TODO: what to construct so nested and mark attributes as complete
             ds_hash = DataSourceUpdateHash.new({"metadata" => metadata, "name" => recipe_name, "description" => description})
             ret << ds_hash.freeze 
           end
         else
           metadata = get_metadata_for_cookbook(cookbook_name)
-          ds_hash = DataSourceUpdateHash.new({"metadata" => metadata, "name" => metadata["name"], "description" => metadata["description"]})
-          ret << ds_hash.freeze
+          if metadata
+            ds_hash = DataSourceUpdateHash.new({"metadata" => metadata, "name" => metadata["name"], "description" => metadata["description"]})
+            ret << ds_hash.freeze
+          end
         end
         ret
       end
@@ -167,7 +176,13 @@ pp get_to_monitor_items(metadata)
       end
 
       def get_rest(item,convert_to_hash=true)
-        raw_rest_results = conn().get_rest(item)
+        raw_rest_results = nil
+        begin 
+          raw_rest_results = conn().get_rest(item)
+         rescue Exception => e
+          Log.debug_pp [:error,e]
+        end
+        return raw_rest_results if raw_rest_results.nil?
         return raw_rest_results unless convert_to_hash
         return raw_rest_results if raw_rest_results.kind_of?(Hash)
         raw_rest_results.to_hash 
@@ -221,6 +236,33 @@ pp get_to_monitor_items(metadata)
 
       def recipes(node)
         node.run_list ? node.run_list.recipes : nil
+      end
+
+      class ChefVersion
+        attr_reader :chef_version
+        def initialize(chef_version=::Chef::VERSION)
+          @chef_version = chef_version
+        end
+        def self.current()
+          ChefVersion.new
+        end
+        def self.[](chef_version)
+          ChefVersion.new(chef_version)
+        end
+
+        def <=>(cv)
+          #assume form is "x.y.z"
+          v1 = self.chef_version.split(".").map{|x|x.to_i}
+          v2 = cv.chef_version.split(".").map{|x|x.to_i}
+          for i in 0..2
+            ret = v1[i] <=> v2[i]
+            return ret unless ret == 0
+          end
+          return 0
+        end
+        def >=(cv)
+          (self <=>(cv)) >= 0
+        end
       end
     end
   end

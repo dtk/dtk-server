@@ -14,7 +14,8 @@ module XYZ
       def initialize()
         @conn = nil
         @chef_node_cache = Hash.new 
-        @chef_metadata_cache = Hash.new
+        @cookbook_metadata_cache = Hash.new
+        @recipe_service_info_cache =  Hash.new
         @attr_values_and_metadata = Hash.new
       end
 
@@ -32,6 +33,7 @@ module XYZ
           recipes.each do |recipe_name|
             node = get_node(node_name)
             metadata = get_metadata_for_recipe(recipe_name)
+            next unless metadata
             attr_values_and_metadata = get_attr_values_and_metadata(recipe_name,node,metadata)
             ds_hash = DataSourceUpdateHash.new({"metadata" => metadata.merge({"attributes" => attr_values_and_metadata}), "recipe_name" => recipe_name, "node_name" => node_name})
            block.call(ds_hash)
@@ -53,9 +55,6 @@ module XYZ
         return HashIsComplete.new()
       end
         
-      def chef_version()
-         ::Chef::VERSION.to_f 
-      end
      private
       def get_node(node_name)
         @chef_node_cache[node_name] ||= filter_to_only_relevant(get_rest("nodes/#{node_name}",false))
@@ -72,24 +71,30 @@ module XYZ
         get_node_recipe_assocs().values.flatten.map{|x|x.gsub(/::.+$/,"")}.uniq
       end
 
-      #if recipe_name is given then looks for additional metadata associated with recipe
-      def get_metadata(cookbook_name,recipe_name=nil)
-        metadata = @chef_metadata_cache[cookbook_name] ||= get_metadata_aux(cookbook_name)
-       return metadata unless recipe_name
-        metadata[:services] ||= Hash.new
-       return metadata if metadata[:services].has_key?(recipe_name)
-        metadata[:services][recipe_name] = get_component_services_info(recipe_name,metadata)
-        metadata
+      def get_cookbook_recipes_metadata(cookbook_name)
+        (get_metadata_for_cookbook(cookbook_name)||{})["recipes"]
+      end
+
+      def get_metadata_for_recipe(recipe_name)
+        cookbook_metadata = get_metadata_for_cookbook(get_cookbook_name_from_recipe_name(recipe_name))
+        return nil if cookbook_metadata.nil?
+        @recipe_service_info_cache[recipe_name] ||= get_component_services_info(recipe_name,cookbook_metadata)
+        cookbook_metadata.merge("services_info" => @recipe_service_info_cache[recipe_name])
+      end
+
+      def get_metadata_for_cookbook(cookbook_name)
+       @cookbook_metadata_cache[cookbook_name] ||= get_metadata_aux(cookbook_name)
       end
 
       def get_metadata_aux(cookbook_name)
         #need version number if 0.9
         cookbook = [cookbook_name]
-        if chef_version >= 0.9
+        if ChefVersion.current >= ChefVersion["0.9.0"]
           #need to get meta first
           r = get_rest("cookbooks/#{cookbook_name}")
-          #TODO: get max, in case multiple versions; check max is ordering right
-          cookbook << r[cookbook_name].max
+          return nil unless r
+          #get max, in case multiple versions
+          cookbook << r[cookbook_name].map{|x|ChefVersion[x]}.max.chef_version
         end
         r = get_rest("cookbooks/#{cookbook.join('/')}")
         return nil unless r
@@ -104,31 +109,40 @@ module XYZ
         metadata
       end
 
-      def get_metadata_for_recipe(recipe_name)
-        get_metadata(get_cookbook_name_from_recipe_name(recipe_name),recipe_name)
-      end
 
       def get_cookbook_name_from_recipe_name(recipe_name)
         recipe_name.gsub(/::.+/,"")
       end
 
       def get_recipes_assoc_cookbook(cookbook_name)
-        metadata = get_metadata(cookbook_name)
         ret = Array.new
-        return ret if metadata.nil?
-
-        if metadata["recipes"]
-          metadata["recipes"].each do |recipe_name,description|
+        recipes = get_cookbook_recipes_metadata(cookbook_name)
+        if recipes
+          recipes.each do |recipe_name,description|
+            metadata = get_metadata_for_recipe(recipe_name)
+puts '------------------------'
+pp recipe_name
+pp get_to_monitor_items(metadata)
+puts '------------------------'
             #TODO: what to construct so nested and mark attributes as complete
             ds_hash = DataSourceUpdateHash.new({"metadata" => metadata, "name" => recipe_name, "description" => description})
-              
             ret << ds_hash.freeze 
           end
         else
-          ds_hash = DataSourceUpdateHash.new({"metadata" => metadata, "name" => metadata["name"], "description" => metadata["description"]})
-          ret << ds_hash.freeze
+          metadata = get_metadata_for_cookbook(cookbook_name)
+          if metadata
+            ds_hash = DataSourceUpdateHash.new({"metadata" => metadata, "name" => metadata["name"], "description" => metadata["description"]})
+            ret << ds_hash.freeze
+          end
         end
         ret
+      end
+
+      def get_to_monitor_items(metadata)
+        (metadata["services_info"]||[]).map{|s|(s[:conditions]||[]).map{|c|c[:to_monitor].map do |x|
+              x.merge({:service_name => s[:canonical_service_name],:condition_name => c[:name],:condition_description => c[:description]})
+            end
+          }}.flatten
       end
 
       def get_node_recipe_assocs()
@@ -158,7 +172,13 @@ module XYZ
       end
 
       def get_rest(item,convert_to_hash=true)
-        raw_rest_results = conn().get_rest(item)
+        raw_rest_results = nil
+        begin 
+          raw_rest_results = conn().get_rest(item)
+         rescue Exception => e
+          Log.debug_pp [:error,e]
+        end
+        return raw_rest_results if raw_rest_results.nil?
         return raw_rest_results unless convert_to_hash
         return raw_rest_results if raw_rest_results.kind_of?(Hash)
         raw_rest_results.to_hash 
@@ -191,30 +211,54 @@ module XYZ
             attr_values_and_metadata[attr_name]["value"] = value
           end
         end
-        add_service_attributes!(attr_values_and_metadata,metadata["services"],node)
+        add_service_attributes!(attr_values_and_metadata,metadata["services_info"],node)
         @attr_values_and_metadata[node.name][recipe_name] = attr_values_and_metadata.freeze
       end
 
       def is_service_check?(attr_name)
         attr_name =~ Regexp.new("/_service/")
       end
-      def add_service_attributes!(attr_info,services_list,node)
-        return nil unless services_list
-        services_list.each_value do |services|
-          services.each do |service|
-            service_name = service[:canonical_service_name]
-            next unless service_name
-            (service["params"]||{}).each do |k,v|
-              attr_index = "_service/#{service_name}/#{k}"
-              normalize_attribute_values(attr_info[attr_index],{"value" => v},node)
-            end
+      def add_service_attributes!(attr_info,services_info,node)
+        return nil unless services_info
+        services_info.each do |service|
+          service_name = service[:canonical_service_name]
+          next unless service_name
+          (service["params"]||{}).each do |k,v|
+            attr_index = "_service/#{service_name}/#{k}"
+            normalize_attribute_values(attr_info[attr_index],{"value" => v},node)
           end
-        end       
+        end
       end
-
 
       def recipes(node)
         node.run_list ? node.run_list.recipes : nil
+      end
+
+      class ChefVersion
+        attr_reader :chef_version
+        def initialize(chef_version=::Chef::VERSION)
+          @chef_version = chef_version
+        end
+        def self.current()
+          ChefVersion.new
+        end
+        def self.[](chef_version)
+          ChefVersion.new(chef_version)
+        end
+
+        def <=>(cv)
+          #assume form is "x.y.z"
+          v1 = self.chef_version.split(".").map{|x|x.to_i}
+          v2 = cv.chef_version.split(".").map{|x|x.to_i}
+          for i in 0..2
+            ret = v1[i] <=> v2[i]
+            return ret unless ret == 0
+          end
+          return 0
+        end
+        def >=(cv)
+          (self <=>(cv)) >= 0
+        end
       end
     end
   end

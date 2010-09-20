@@ -10,6 +10,7 @@ module XYZ
           target[:description] = source["description"]
           target[:external_type] = "chef_recipe"
           target[:external_cmp_ref] = fn(lambda{|name|"recipe[#{name}]"},name)
+          target[:services] = source["metadata"]["services"]
 
           nested_definition :attribute, source["metadata"]["attributes"]
         end

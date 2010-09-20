@@ -120,12 +120,10 @@ module XYZ
         if recipes
           recipes.each do |recipe_name,description|
             metadata = get_metadata_for_recipe(recipe_name)
-puts '------------------------'
-pp recipe_name
-pp get_to_monitor_items(metadata)
-puts '------------------------'
+            monitoring_items = get_monitoring_items(metadata)
+            attributes =  metadata ?  metadata["attributes"] : nil
             #TODO: what to construct so nested and mark attributes as complete
-            ds_hash = DataSourceUpdateHash.new({"metadata" => metadata, "name" => recipe_name, "description" => description})
+            ds_hash = DataSourceUpdateHash.new({"attributes" => attributes, "monitoring_items" => monitoring_items, "recipe_name" => recipe_name, "description" => description})
             ret << ds_hash.freeze 
           end
         else
@@ -138,11 +136,16 @@ puts '------------------------'
         ret
       end
 
-      def get_to_monitor_items(metadata)
-        (metadata["services_info"]||[]).map{|s|(s[:conditions]||[]).map{|c|c[:to_monitor].map do |x|
-              x.merge({:service_name => s[:canonical_service_name],:condition_name => c[:name],:condition_description => c[:description]})
+      def get_monitoring_items(metadata)
+        return nil unless metadata
+        ret = (metadata["services_info"]||[]).map{|s|(s[:conditions]||[]).map{|c|c[:to_monitor].map do |x|
+              x.merge({:service_name => s[:canonical_service_name],
+                        :condition_name => c[:name],
+                        :condition_description => c[:description],
+                        :enabled => true})
             end
           }}.flatten
+        ret.empty? ? nil : ret
       end
 
       def get_node_recipe_assocs()

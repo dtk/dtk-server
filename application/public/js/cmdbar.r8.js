@@ -55,7 +55,7 @@ if (!R8.Cmdbar) {
 					if(typeof(this.loadedTabs[newTabIndex]['contentLoader']) !='undefined') {
 						this.loadedTabs[newTabIndex]['contentLoader']();
 					}
-//					this.loadedTabs[newTabIndex]['elem'] = R8.Utils.Y.one('#cmdbar-'+R8.Cmdbar.loadedTabs[newTabIndex]['name']+'-tab');
+//					this.loadedTabs[newTabIndex]['node'] = R8.Utils.Y.one('#cmdbar-'+R8.Cmdbar.loadedTabs[newTabIndex]['name']+'-tab');
 
 					return newTabIndex;
 				},
@@ -75,11 +75,11 @@ if (!R8.Cmdbar) {
 //console.log('Index is:'+i);
 					YUI().use('node','event',function(Y){
 						//process the tab element and related events
-//						R8.Cmdbar.loadedTabs[i]['elem'] = Y.one('#cmdbar-'+R8.Cmdbar.loadedTabs[i]['name']+'-tab');
+//						R8.Cmdbar.loadedTabs[i]['node'] = Y.one('#cmdbar-'+R8.Cmdbar.loadedTabs[i]['name']+'-tab');
 						R8.Cmdbar.loadedTabs[i]['contentElem'] = Y.one('#cmdbar-'+R8.Cmdbar.loadedTabs[i]['name']+'-tab-content');
-						R8.Cmdbar.loadedTabs[i]['elem'] = Y.one('#cmdbar-'+R8.Cmdbar.loadedTabs[i]['name']+'-tab');
+						R8.Cmdbar.loadedTabs[i]['node'] = Y.one('#cmdbar-'+R8.Cmdbar.loadedTabs[i]['name']+'-tab');
 
-						R8.Cmdbar.loadedTabs[i]['events']['tabClick'] = R8.Cmdbar.loadedTabs[i]['elem'].on('click',function(e){
+						R8.Cmdbar.loadedTabs[i]['events']['tabClick'] = R8.Cmdbar.loadedTabs[i]['node'].on('click',function(e){
 							e.halt();
 							R8.Cmdbar.changeTabFocus(e.currentTarget.getAttribute('data-tabindex'));
 						});
@@ -127,19 +127,22 @@ if (!R8.Cmdbar) {
 
 					for(tab in R8.Cmdbar.loadedTabs) {
 						if(tab == index) {
-							R8.Cmdbar.loadedTabs[tab]['elem'].addClass('active');
-							R8.Cmdbar.loadedTabs[tab]['elem'].setStyles({'zIndex': 510});
+							R8.Cmdbar.loadedTabs[tab]['node'].addClass('active');
+							R8.Cmdbar.loadedTabs[tab]['node'].setStyles({'zIndex': 510});
 							R8.Cmdbar.loadedTabs[tab]['status'] = 'active';
 							R8.Cmdbar.loadedTabs[tab]['contentElem'].setStyle('display','block');
 
 							if(R8.Cmdbar.loadedTabs.length == 1)
-								R8.Cmdbar.loadedTabs[tab]['elem'].removeClass('not-first');
+								R8.Cmdbar.loadedTabs[tab]['node'].removeClass('not-first');
+
+							R8.Cmdbar.loadedTabs[tab].focus();
 						} else {
-							R8.Cmdbar.loadedTabs[tab]['elem'].removeClass('active');
+							R8.Cmdbar.loadedTabs[tab]['node'].removeClass('active');
 							R8.Cmdbar.loadedTabs[tab]['status'] = '';
-							R8.Cmdbar.loadedTabs[tab]['elem'].setStyles({'zIndex': zIndex});
-							R8.Cmdbar.loadedTabs[tab]['contentElem'].setStyle('display','none');
+							R8.Cmdbar.loadedTabs[tab]['node'].setStyles({'zIndex': zIndex});
+//							R8.Cmdbar.loadedTabs[tab]['contentElem'].setStyle('display','none');
 							zIndex--;
+							R8.Cmdbar.loadedTabs[tab].blur();
 						}
 					}
 				},
@@ -275,7 +278,7 @@ return;
 				},
 
 				cmdr : {
-					'elem' : null,
+					'node' : null,
 					'queue' : [],
 					'qIndex' : 0,
 					'events': {},
@@ -305,7 +308,7 @@ return;
 						'name':'output',
 						'i18n':'Cmd Output',
 						'status':'active',
-						'elem':null,
+						'node':null,
 						'events':{},
 //						'closeElem':null,
 //						'closeMoEvent':null,
@@ -316,7 +319,7 @@ return;
 						'name':'node',
 						'i18n':'Nodes',
 						'status':'',
-						'elem':null,
+						'node':null,
 						'events':{},
 						'contentLoader': function(){
 								var contentFraming = '<div class="slider-top"></div>';
@@ -338,7 +341,7 @@ return;
 						'name':'component',
 						'i18n':'Components',
 						'status':'',
-						'elem':null,
+						'node':null,
 						'events':{},
 						'contentLoader': function(){
 								var contentFraming = '<div class="slider-top"></div>';
@@ -375,7 +378,7 @@ return;
 					'search' : {
 						'cmdSubmit':function(cmdList) {
 							var qList = [],numCmds = cmdList.length;
-//console.log(cmdList);
+
 							for(i=1;i<numCmds;i++) {
 								if(cmdList[i] == ' ') continue;
 								var qtParts = cmdList[i].split('=');
@@ -384,12 +387,6 @@ return;
 								qList.push(queryTerm);
 							}
 
-//figure out way to make models pluggable to search in clean manner
-//console.log(this.tabDef);
-//							var tabDef = R8.Utils.Y.clone(this.tabDef);
-
-//console.log(tabDef);
-//return;
 							switch(cmdList[0]) {
 								case "node":
 									var tabName = 'node-search';
@@ -409,7 +406,7 @@ return;
 //TODO: need to port all maintoolbar stuff over to tab definition
 //								R8.Cmdbar.loadedTabs[tabIndex].clearContent();
 								var tabIndex = R8.Cmdbar.getTabIndexByName(tabName);
-								R8.MainToolbar.clearSlider();
+								R8.Cmdbar.loadedTabs[tabIndex].clearSlider();
 							} else {
 								var newTab = R8.Cmdbar.cloneTabObj(this.tabDef);
 								newTab.name = tabName;
@@ -434,13 +431,10 @@ return;
 						},
 
 						'tabDef': {
-							'test' : function() {
-								console.log('Test from inside main test def');
-							},
-							'name':'search',
+							'name':'',
 							'i18n':'',
 							'status':'',
-							'elem':null,
+							'node':null,
 							'events':{},
 							'contentLoader': function() {
 									var name = this.name;
@@ -468,8 +462,31 @@ return;
 									};
 									R8.Workspace.addResizeCallback(resizeCallback);
 							},
-							'tabFocusCallback': function() {
-									console.log('Just got focus on the node tab....');
+
+							'focus': function() {
+								var tIndex = R8.Cmdbar.getTabIndexByName(this.name);
+
+								YUI().use("node", function(Y) {
+									R8.Cmdbar.loadedTabs[tIndex]['events']['slider_key_press'] = Y.get('document').on("keypress", function(e) {
+										if (e.keyCode == 37) {
+											R8.Cmdbar.loadedTabs[tIndex].slideLeft();
+			//								e.halt();
+										} else if(e.keyCode == 39) {
+											R8.Cmdbar.loadedTabs[tIndex].slideRight();
+			//								e.halt();
+										}
+									});
+								});
+							},
+
+							'blur' : function() {
+								var tIndex = R8.Cmdbar.getTabIndexByName(this.name);
+//DEBUG
+console.log('Blurring for:'+this.name);
+console.log(R8.Cmdbar.loadedTabs[tIndex]['events']);
+								if(typeof(R8.Cmdbar.loadedTabs[tIndex]['events']['slider_key_press']) != 'undefined') {
+									R8.Cmdbar.loadedTabs[tIndex]['events']['slider_key_press'].detach();
+								}
 							},
 
 							'clearContent':function() {},
@@ -477,6 +494,8 @@ return;
 							deleteCleanup : function() {
 								var nodeId = '#'+this.name+'-list-container';
 								R8.Workspace.cancelResizeCallback(nodeId);
+								this.sliderAnim = null;
+								this.slideBarNode = null;
 							},
 
 							//------------Search Specific Functions/Callbacks---------
@@ -486,69 +505,74 @@ return;
 							endSearch : function(ioId,arguments) {
 							},
 
+							clearSlider : function() {
+								if(this.slideBarNode === null) return;
+console.log('Going to clear everything out...');
+								this.events['slider_anim'].detach();
+								delete(this.events['slider_anim']);
+								this.events['lbtn_click'].detach();
+								delete(this.events['lbtn_click']);
+								this.events['rbtn_click'].detach();
+								delete(this.events['rbtn_click']);
+
+//TODO: figure out why slider_key_press throws undefined error after a 2nd search is run
+								this.events['slider_key_press'].detach();
+								delete (this.events['slider_key_press']);
+
+								this.sliderAnim = null;
+								this.slideBarNode = null;
+								this.sliderSetup = false;
+								document.getElementById(this.name+'-list-container').innerHTML = '';
+							},
+
 							initSlider: function() {
-//console.log('Inside of initSilider..'+this.name+'-slider');
-//console.log(this);
 								var tIndex = R8.Cmdbar.getTabIndexByName(this.name);
-								if(document.getElementById(this.name+'-slider') == null) {
+								var tabName = this.name;
+								if(document.getElementById(this.name+'-slide-bar') == null) {
 									var initSliderCallback = function() { R8.Cmdbar.loadedTabs[tIndex].initSlider(); }
 									setTimeout(initSliderCallback,100);
 									return;
 								}
 //			testing();
-								YUI().use('anim', this.setupSliderAnim);
-//								R8.MainToolbar.sliderSetup = true;
+								YUI().use('anim', function(Y){
+									R8.Cmdbar.loadedTabs[tIndex].setupSliderAnim(Y,tIndex);
+								});
+								this.sliderSetup = true;
 							},
 
-							setupSliderAnim : function(Y) {
-//DEBUG
-//console.log(Y);
-return;
-								R8.MainToolbar.sliderBarNode = Y.one('#'+this.name+'slide-bar');
-								R8.MainToolbar.sliderAnim = new Y.Anim({
-									node: R8.MainToolbar.sliderBarNode,
+							setupSliderAnim : function(Y,tIndex) {
+								var name = R8.Cmdbar.loadedTabs[tIndex]['name'];
+								R8.Cmdbar.loadedTabs[tIndex].slideBarNode = Y.one('#'+name+'-slide-bar');
+								R8.Cmdbar.loadedTabs[tIndex].sliderAnim = new Y.Anim({
+									node: R8.Cmdbar.loadedTabs[tIndex].slideBarNode,
 									duration: 0.3,
 								});
-								R8.MainToolbar.sliderEvents['slider_anim'] = R8.MainToolbar.sliderAnim.on('end',function(){ R8.MainToolbar.sliderInMotion = false;});
-			
-								var slideLeft = function(e) {
-									if(R8.MainToolbar.sliderInMotion) return;
-									else R8.MainToolbar.sliderInMotion = true;
-								
-									R8.MainToolbar.sliderAnim.set('to', { xy: [R8.MainToolbar.sliderBarNode.getX()-510, R8.MainToolbar.sliderBarNode.getY()] });
-									R8.MainToolbar.sliderAnim.run();
-								};
-								var slideRight = function(e) {
-									if(R8.MainToolbar.sliderInMotion) return;
-									else R8.MainToolbar.sliderInMotion = true;
-									//TODO: figure out how to make the x param dynamic based on component width					
-									R8.MainToolbar.sliderAnim.set('to', { xy: [R8.MainToolbar.sliderBarNode.getX()+510, R8.MainToolbar.sliderBarNode.getY()] });
-									R8.MainToolbar.sliderAnim.run();
-								};
-
-								R8.MainToolbar.sliderEvents['lbtn_click'] = Y.one('#lbutton').on('click', slideLeft);
-								R8.MainToolbar.sliderEvents['rbtn_click'] = Y.one('#rbutton').on('click', slideRight);
-
-								YUI().use("node", function(Y) {
-									R8.MainToolbar.sliderEvents['slider_key_press'] = Y.get('document').on("keypress", function(e) {
-										var key = {
-											'code': e.keyCode,
-											'char': String.fromCharCode(e.keyCode),
-											'dir_code' : 0,
-											'alt': e.altKey,
-											'ctrl': e.ctrlKey,
-											'shift': e.shiftKey
-										};
-										if (e.keyCode == 37) {
-											slideLeft();
-			//								e.halt();
-										} else if(e.keyCode == 39) {
-											slideRight();
-			//								e.halt();
-										}
-									});
-								});
+//TODO: fix bug around non uniqueness on l/r buttons for scrolling
+								R8.Cmdbar.loadedTabs[tIndex]['events']['slider_anim'] = R8.Cmdbar.loadedTabs[tIndex].sliderAnim.on('end',function(){ R8.Cmdbar.loadedTabs[tIndex].sliderInMotion = false;});
+								R8.Cmdbar.loadedTabs[tIndex]['events']['lbtn_click'] = Y.one('#lbutton').on('click', R8.Cmdbar.loadedTabs[tIndex].slideLeft);
+								R8.Cmdbar.loadedTabs[tIndex]['events']['rbtn_click'] = Y.one('#rbutton').on('click', R8.Cmdbar.loadedTabs[tIndex].slideRight);
 							},
+							slideLeft : function(e) {
+								var tIndex = R8.Cmdbar.getTabIndexByName(this.name);
+								if(R8.Cmdbar.loadedTabs[tIndex].sliderInMotion) return;
+								else R8.Cmdbar.loadedTabs[tIndex].sliderInMotion = true;
+								
+								R8.Cmdbar.loadedTabs[tIndex].sliderAnim.set('to', { xy: [R8.Cmdbar.loadedTabs[tIndex].slideBarNode.getX()-510, R8.Cmdbar.loadedTabs[tIndex].slideBarNode.getY()] });
+								R8.Cmdbar.loadedTabs[tIndex].sliderAnim.run();
+							},
+							slideRight : function(e) {
+								var tIndex = R8.Cmdbar.getTabIndexByName(this.name);
+								if(R8.Cmdbar.loadedTabs[tIndex].sliderInMotion) return;
+								else R8.Cmdbar.loadedTabs[tIndex].sliderInMotion = true;
+								//TODO: figure out how to make the x param dynamic based on component width					
+								R8.Cmdbar.loadedTabs[tIndex].sliderAnim.set('to', { xy: [R8.Cmdbar.loadedTabs[tIndex].slideBarNode.getX()+510, R8.Cmdbar.loadedTabs[tIndex].slideBarNode.getY()] });
+								R8.Cmdbar.loadedTabs[tIndex].sliderAnim.run();
+							},
+
+							slideBarNode : null,
+							sliderAnim : null,
+							sliderInMotion : false,
+							sliderSetup : false,
 						},
 						//end tabDef
 					}

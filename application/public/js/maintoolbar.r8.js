@@ -125,7 +125,6 @@ testing();
 					R8.MainToolbar.sliderBarNode = null;
 					R8.MainToolbar.sliderSetup = false;
 					document.getElementById('slidecontainer').innerHTML = '';
-console.log('Done Clearing shite out!!!!');
 				},
 
 				addSet : function(setObj) {

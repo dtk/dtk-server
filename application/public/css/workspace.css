@@ -185,7 +185,7 @@
 
 .slide-list-container {
 	height: 92px;
-	width: 1135px;
+/*	width: 1135px;*/
 	float: left;
 /*	border: 1px solid green;*/
 /*	margin: 3px 3px 3px 3px;*/
@@ -210,7 +210,7 @@
 	float: left;
 	width: 25px;
 	height: 100%;
-	margin-left: 5px;
+	margin-left: 4px;
 }
 
 #rbutton {
@@ -218,7 +218,7 @@
 	float: right;
 	width: 25px;
 	height: 100%;
-	margin-right: 5px;
+	margin-right: 4px;
 }
 
 #wspaceHeader {

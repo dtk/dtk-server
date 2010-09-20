@@ -70,6 +70,20 @@ if (!R8.Workspace) {
 //console.log(toolbarRegion);
 				R8.Workspace.wspaceContainerElem.setStyles({'height': wspaceHeight});
 				R8.Workspace.toolbarHeight = toolbarRegion['height'];
+
+				for(rcId in R8.Workspace.resizeCallbacks) {
+					var nodeObj = R8.Utils.Y.one(R8.Workspace.resizeCallbacks[rcId]['nodeId']);
+					var newDimensions = R8.Workspace.resizeCallbacks[rcId]['lambda'](vportHeight,vportWidth);
+					nodeObj.setStyles(newDimensions);
+				}
+			},
+
+			addResizeCallback : function(callback) {
+				R8.Workspace.resizeCallbacks[callback['nodeId']] = callback;
+			},
+
+			cancelResizeCallback : function(callbackId) {
+				delete(R8.Workspace.resizeCallbacks[callbackId]);
 			},
 
 			/*
@@ -396,7 +410,9 @@ console.log('registering port:'+portElemID);
 			/*
 			 * Collection of selected/focused elements for the given workspace
 			 */
-			selectedElements : {}
+			selectedElements : {},
+			
+			resizeCallbacks : {},
 		}
 	}();
 }

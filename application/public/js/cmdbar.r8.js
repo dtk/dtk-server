@@ -113,6 +113,7 @@ if (!R8.Cmdbar) {
 								R8.Cmdbar.loadedTabs[tabIndex]['events'][event].detach();
 								delete(R8.Cmdbar.loadedTabs[tabIndex]['events'][event]);
 							}
+							R8.Cmdbar.loadedTabs[tabIndex]['deleteCleanup']();
 							R8.Cmdbar.deleteTabs(tabIndex);
 							if(R8.Cmdbar.loadedTabs.length == 1) {
 								R8.Cmdbar.changeTabFocus(0);
@@ -256,7 +257,7 @@ if (!R8.Cmdbar) {
 							if(this.cmdr['queue'][curIndex]['parsedCmd'][i] == ' ') continue;
 							cmdList.push(this.cmdr['queue'][curIndex]['parsedCmd'][i]);
 						}
-						this.cmdHandlers[cmdAction].actionSubmit(cmdList);
+						this.cmdHandlers[cmdAction].cmdSubmit(cmdList);
 					}
 //DEBUG
 return;
@@ -361,13 +362,18 @@ return;
 
 //				cmdHandlers : {},
 				cmdHandlers : {
+					'hello' : {
+						'cmdSubmit' : function(cmdList) {
+							alert('Hello '+cmdList[0]+'!!!!');
+						}
+					},
 					't' : {
-						'actionSubmit' : function(cmdList) {
+						'cmdSubmit' : function(cmdList) {
 							R8.Cmdbar.toggleTabs();
 						}
 					},
 					'search' : {
-						'actionSubmit':function(cmdList) {
+						'cmdSubmit':function(cmdList) {
 							var qList = [],numCmds = cmdList.length;
 //console.log(cmdList);
 							for(i=1;i<numCmds;i++) {
@@ -438,10 +444,11 @@ return;
 							'events':{},
 							'contentLoader': function() {
 									var name = this.name;
+									var width = R8.Workspace.viewPortRegion['width'] - 65;
 									var contentFraming = '<div class="slider-top"></div>';
 									contentFraming += '<div id="'+name+'-slider-wrapper" class="slider-wrapper">';
 									contentFraming += '<div id="lbutton"></div>';
-									contentFraming += '<div id="'+name+'-list-container" class="slide-list-container">';
+									contentFraming += '<div id="'+name+'-list-container" class="slide-list-container" style="width: '+width+'px;">';
 									contentFraming += '<div id="'+name+'-slider"></div>';
 									contentFraming += '</div>';
 									contentFraming += '<div id="rbutton"></div>';
@@ -451,11 +458,26 @@ return;
 									document.getElementById('cmdbar-'+this.name+'-tab-content').innerHTML = contentFraming;
 //DEBUG
 //console.log('Just Loaded content for tab:'+this.name);
+									var nodeId = '#'+name+'-list-container';
+									var resizeCallback = {
+										'nodeId' : nodeId,
+										'lambda' : function(height,width) {
+											var width = width - 65;
+											return {'width':width};
+										}
+									};
+									R8.Workspace.addResizeCallback(resizeCallback);
 							},
 							'tabFocusCallback': function() {
 									console.log('Just got focus on the node tab....');
 							},
+
 							'clearContent':function() {},
+
+							deleteCleanup : function() {
+								var nodeId = '#'+this.name+'-list-container';
+								R8.Workspace.cancelResizeCallback(nodeId);
+							},
 
 							//------------Search Specific Functions/Callbacks---------
 							startSearch : function(ioId,arguments) {

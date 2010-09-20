@@ -19,7 +19,7 @@ module XYZ
     end
 
     def search
-pp request.params
+#pp request.params
       model_name = request.params['model_name']
       field_set = default_field_set(model_name.to_sym)
 #      search_query = request.params['sq']

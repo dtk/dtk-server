@@ -140,7 +140,7 @@ if (!R8.Cmdbar) {
 							R8.Cmdbar.loadedTabs[tab]['node'].removeClass('active');
 							R8.Cmdbar.loadedTabs[tab]['status'] = '';
 							R8.Cmdbar.loadedTabs[tab]['node'].setStyles({'zIndex': zIndex});
-//							R8.Cmdbar.loadedTabs[tab]['contentElem'].setStyle('display','none');
+							R8.Cmdbar.loadedTabs[tab]['contentElem'].setStyle('display','none');
 							zIndex--;
 							R8.Cmdbar.loadedTabs[tab].blur();
 						}
@@ -482,8 +482,8 @@ return;
 							'blur' : function() {
 								var tIndex = R8.Cmdbar.getTabIndexByName(this.name);
 //DEBUG
-console.log('Blurring for:'+this.name);
-console.log(R8.Cmdbar.loadedTabs[tIndex]['events']);
+//console.log('Blurring for:'+this.name);
+//console.log(R8.Cmdbar.loadedTabs[tIndex]['events']);
 								if(typeof(R8.Cmdbar.loadedTabs[tIndex]['events']['slider_key_press']) != 'undefined') {
 									R8.Cmdbar.loadedTabs[tIndex]['events']['slider_key_press'].detach();
 								}
@@ -507,7 +507,8 @@ console.log(R8.Cmdbar.loadedTabs[tIndex]['events']);
 
 							clearSlider : function() {
 								if(this.slideBarNode === null) return;
-console.log('Going to clear everything out...');
+//DEBUG
+//console.log('Going to clear everything out...');
 								this.events['slider_anim'].detach();
 								delete(this.events['slider_anim']);
 								this.events['lbtn_click'].detach();
@@ -533,11 +534,78 @@ console.log('Going to clear everything out...');
 									setTimeout(initSliderCallback,100);
 									return;
 								}
-//			testing();
+								this.setupDD();
+
 								YUI().use('anim', function(Y){
 									R8.Cmdbar.loadedTabs[tIndex].setupSliderAnim(Y,tIndex);
 								});
 								this.sliderSetup = true;
+							},
+
+							setupDD : function() {
+								var name = this.name;
+								var tIndex = R8.Cmdbar.getTabIndexByName(name);
+								YUI().use('dd-delegate', 'dd-proxy', 'dd-drop','dd-drop-plugin','node', function(Y){
+									R8.Cmdbar.loadedTabs[tIndex].compDDel = new Y.DD.Delegate({
+										cont: '#'+name+'-slide-bar',
+							//			nodes: 'div.component',
+										nodes: 'div.avail_item',
+										dragMode: 'intersect',
+									});
+									
+									R8.Cmdbar.loadedTabs[tIndex].compDDel.dd.plug(Y.Plugin.DDProxy, {
+										moveOnEnd: false,
+										cloneNode: true
+									});
+
+									R8.Cmdbar.loadedTabs[tIndex].compDDel.on('drag:start', function(e){
+										var drag = this.get('dragNode'), c = this.get('currentNode');
+										drag.setAttribute('class', c.getAttribute('class'));
+										this.dd.addToGroup('workspace_drop');
+										drag.setStyles({
+											opacity: .5,
+											zIndex: 1000
+										});
+									});
+									/*
+									 //setup the drop targets for the keys in the layout
+									 var keyDropList = Y.Node.all('#layoutTable li');
+									 keyDropList.each(function(keyNode, index) {
+									 availKeysDDel.createDrop(keyNode,['layout_drop']);
+									 });
+									 */
+							//		var testnode = Y.one('#mainWorkspace');
+							//console.log(testnode);
+							//		compDDel.createDrop(Y.one('#mainWorkspace'), ['workspace_drop']);
+							//console.log('asdfasdfasdfasdfasdf');
+							
+									R8.Cmdbar.loadedTabs[tIndex].drop = Y.one('#viewspace').plug(Y.Plugin.Drop);
+									R8.Cmdbar.loadedTabs[tIndex].drop.drop.addToGroup(['workspace_drop']);
+//TODO: come back and add in clean up of DD objects and events
+									R8.Cmdbar.loadedTabs[tIndex].compDDel.on('drag:drophit', function(e){
+										var drop = e.drop.get('node'), drag = this.get('dragNode');
+										var item_id = drag.getAttribute('data-id');
+										var model_name = drag.getAttribute('data-model-name');
+							
+										var dragChild = drag.get('children').item(0).cloneNode(true);
+										var d = new Date();
+										var new_comp_id = d.getTime();
+										dragChild.set('id','wi_'+new_comp_id);
+							
+										var wspaceElem = R8.Utils.Y.one('#viewspace');
+										var wspaceXY = wspaceElem.getXY();
+										var dragXY = drag.getXY();
+										var dragLeft = dragXY[0] - (wspaceXY[0]);
+										var dragTop = dragXY[1] - (wspaceXY[1]);
+										dragChild.setStyles({'top':dragTop+'px','left':dragLeft+'px'});
+										drop.append(dragChild);
+
+										var modelName = dragChild.getAttribute('data-model-name');
+										var modelId = dragChild.getAttribute('data-id');
+										var ui = {'top':dragTop,'left':dragLeft};
+										R8.Workspace.addItemToViewSpace(modelName,modelId,ui);
+									});
+								});
 							},
 
 							setupSliderAnim : function(Y,tIndex) {
@@ -564,7 +632,7 @@ console.log('Going to clear everything out...');
 								var tIndex = R8.Cmdbar.getTabIndexByName(this.name);
 								if(R8.Cmdbar.loadedTabs[tIndex].sliderInMotion) return;
 								else R8.Cmdbar.loadedTabs[tIndex].sliderInMotion = true;
-								//TODO: figure out how to make the x param dynamic based on component width					
+//TODO: figure out how to make the x param dynamic based on component width
 								R8.Cmdbar.loadedTabs[tIndex].sliderAnim.set('to', { xy: [R8.Cmdbar.loadedTabs[tIndex].slideBarNode.getX()+510, R8.Cmdbar.loadedTabs[tIndex].slideBarNode.getY()] });
 								R8.Cmdbar.loadedTabs[tIndex].sliderAnim.run();
 							},

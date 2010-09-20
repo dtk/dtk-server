@@ -392,6 +392,34 @@ console.log('registering port:'+portElemID);
 				R8.Workspace.components[endCompID].connectors[tempConnectorID] = R8.Workspace.connectors[tempConnectorID];
 			},
 
+			addItemToViewSpace : function(model_name,model_id,ui) {
+
+				YUI().use("json", function (Y) {
+					var uiStr = Y.JSON.stringify(ui);
+				});
+
+				var queryTerm = 'target_model_name=project&target_id=2147483649';
+				queryTerm += '&redirect='+model_name+'/wspace_display'
+				var callbacks = {
+					'io:success' : R8.Workspace.addItemSuccess,
+					'io:failure' : R8.Workspace.addItemFailure,
+				};
+
+				R8.Ctrl.call(model_name+'/clone/'+model_id,queryTerm,callbacks);
+			},
+
+			addItemSuccess : function(ioId,responseObj) {
+//				eval("R8.Ctrl.callResults[ioId] =" + responseObj.responseText);
+//				eval("var response =" + responseObj.responseText);
+
+console.log(responseObj.responseText);
+
+			},
+
+			addItemFailure : function(ioId,responseObj) {
+console.log('call to add item to workspace failed.....');
+			},
+
 			/*
 			 * Collection of active connectors for the given workspace
 			 */

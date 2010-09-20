@@ -1,0 +1,12 @@
+
+	<div class="basic-component" style="position:relative;">
+	<div id="item_{%=node[:id]%}" data-id="{%=node[:id]%}" data-model-name="{%=node[:model_name]%}" class="basic-component component">
+		<div class="basic-tl-corner corner"></div>
+		<div class="header"></div>
+		<div class="basic-tr-corner corner"></div>
+		<div id="{%=node[:id]%}-body" class="body">{%=node[:display_name]%}</div>
+		<div class="basic-bl-corner corner"></div>
+		<div class="footer"></div>
+		<div class="basic-br-corner corner"></div>
+	</div>
+	</div>

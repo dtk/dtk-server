@@ -10,10 +10,9 @@ module XYZ
         column :external_type, :varchar
         column :external_cmp_ref, :varchar
         column :uri, :varchar
-        column :monitoring_items, :json
         virtual_column :parent_name, :possible_parents => [:component,:library,:project]
         many_to_one :component,:library,:project
-        one_to_many :component, :attribute_link, :attribute
+        one_to_many :component, :attribute_link, :attribute, :monitoring_item
       end
     end
     ##### Actions

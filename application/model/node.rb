@@ -22,7 +22,7 @@ module XYZ
         #TBD: can these virtual columns just be inherited
         foreign_key :data_source_id, :data_source, FK_SET_NULL_OPT
         many_to_one :library,:project
-        one_to_many :attribute, :node_interface, :address_access_point
+        one_to_many :attribute, :node_interface, :address_access_point, :monitoring_item
       end
 
       def ds_attributes(attr_list)

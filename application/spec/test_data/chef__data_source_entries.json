@@ -12,6 +12,11 @@
               "obj_type": "attribute",
               "ds_name": "chef",
               "display_name": "component_attribute"
+            },
+            "component_monitoring_item": {
+              "obj_type": "monitoring_item",
+              "ds_name": "chef",
+              "display_name": "component_monitoring_item"
             }
           }
         },

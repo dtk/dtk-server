@@ -18,21 +18,21 @@ module XYZ
         end
 
          class << self
-           def unique_keys(source_hash)
-            [relative_distinguished_name(source_hash)]
+           def unique_keys(source)
+            [relative_distinguished_name(source)]
            end
 
-           def relative_distinguished_name(source_hash)
-             external_attr_ref(source_hash)
+           def relative_distinguished_name(source)
+             external_attr_ref(source)
           end
 
-          def filter(source_hash)
+          def filter(source)
             DBUpdateHash.new()
           end
 
           #### defined fns
-          def external_attr_ref(source_hash)
-             ref = source_hash.keys.first
+          def external_attr_ref(source)
+             ref = source.keys.first
              if ref.first =~ /^_service/
                "service[#{ref.gsub(/^_service\//,"").gsub(/\//,"][")}]"
              else

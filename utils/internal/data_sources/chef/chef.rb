@@ -137,15 +137,16 @@ module XYZ
       end
 
       def get_monitoring_items(metadata)
-        return nil unless metadata
-        ret = (metadata["services_info"]||[]).map{|s|(s[:conditions]||[]).map{|c|c[:to_monitor].map do |x|
-              x.merge({:service_name => s[:canonical_service_name],
+        ret = Hash.new
+        return ret unless metadata
+        (metadata["services_info"]||[]).map{|s|(s[:conditions]||[]).map{|c|c[:to_monitor].map{|x|
+              next unless x[:name]
+              ret[x[:name]] = x.merge({:service_name => s[:canonical_service_name],
                         :condition_name => c[:name],
                         :condition_description => c[:description],
                         :enabled => true})
-            end
-          }}.flatten
-        ret.empty? ? nil : ret
+            }}}
+        ret
       end
 
       def get_node_recipe_assocs()

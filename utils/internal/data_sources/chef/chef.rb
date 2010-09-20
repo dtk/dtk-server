@@ -119,13 +119,9 @@ module XYZ
         recipes = get_cookbook_recipes_metadata(cookbook_name)
         if recipes
           recipes.each do |recipe_name,description|
-pp cookbook_name
-if cookbook_name =~ /hadoop_cloudera_c3_228/
-x=1
-end
-
             metadata = get_metadata_for_recipe(recipe_name)
 puts '------------------------'
+pp recipe_name
 pp get_to_monitor_items(metadata)
 puts '------------------------'
             #TODO: what to construct so nested and mark attributes as complete

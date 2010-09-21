@@ -6,15 +6,15 @@ module XYZ
           #TBD: assuming that after split first item is cookbook name
           target[:external_attr_ref] = fn(:external_attr_ref,source)
           target[:display_name] = fn(:external_attr_ref,source)
-          target[:data_type] = fn(:data_type,source[]["type"])
+          target[:data_type] = fn(:data_type,source["type"])
           #TBD: have form that is no assignment if source is null
           %w{port_type description constraints}.each do |k|
-            target[k.to_sym] = source[][k]
+            target[k.to_sym] = source[k]
           end
-          target[:output_variable] = source[]["calculated"]
-          target[:required] = fn(:required,source[]["required"])
-          target[:value_asserted] = fn(lambda{|x,y|x||y},source[]["value"],source[]["default"])
-          target[:semantic_type] = fn(lambda{|x|x.to_json if x},source[]["semantic_type"])
+          target[:output_variable] = source["calculated"]
+          target[:required] = fn(:required,source["required"])
+          target[:value_asserted] = fn(lambda{|x,y|x||y},source["value"],source[]["default"])
+          target[:semantic_type] = fn(lambda{|x|x.to_json if x},source["semantic_type"])
         end
 
          class << self
@@ -32,8 +32,8 @@ module XYZ
 
           #### defined fns
           def external_attr_ref(source)
-             ref = source.keys.first
-             if ref.first =~ /^_service/
+             ref = source[:ref]
+             if ref =~ /^_service/
                "service[#{ref.gsub(/^_service\//,"").gsub(/\//,"][")}]"
              else
                "node[#{ref.gsub(/\//,"][")}]"

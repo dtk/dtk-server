@@ -233,7 +233,6 @@ pp [:reached____________________]
       end
 
       def add_scafolding_attributes!(attr_info,metadata,node=nil)
-return nil if node.nil?
         services_info = metadata["services_info"]
         return nil unless services_info
         services_info.each do |service|
@@ -241,16 +240,12 @@ return nil if node.nil?
           next unless service_name
           (service["params"]||{}).each do |k,v|
             attr_index = "_service/#{service_name}/#{k}"
-            normalize_attribute_values_node_or_metadata(attr_info[attr_index],{"value" => v},node)
+            if node
+              normalize_attribute_values(attr_info[attr_index],{"value" => v},node)
+            else
+              normalize_attribute_values(attr_info[attr_index],{"value" => v},node,metadata)
+            end
           end
-        end
-      end
-
-      def normalize_attribute_values_node_or_metadata(target,attr_val_hash,node_or_metadata)
-        if node_or_metadata.kind_of?(::Chef::Node)
-          normalize_attribute_values(target,attr_val_hash,node_or_metadata)
-        else
-          pp [target,attr_val_hash,node_or_metadata]
         end
       end
 

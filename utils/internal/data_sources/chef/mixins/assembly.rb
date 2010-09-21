@@ -1,19 +1,19 @@
 module XYZ
   module DSConnector
     module ChefMixinAssembly # TODO unify with code in R8Cookbook
-      def normalize_attribute_values(target,attr_val_hash,node)
+      def normalize_attribute_values(target,attr_val_hash,node,metadata=nil)
         attr_val_hash.each do |key,value|
           if value.kind_of?(Hash) 
             if value["external_ref"]
-              target[key] = process_external_ref(value["external_ref"],node)
+              target[key] = process_external_ref(value["external_ref"],node,metadata)
             else 
-              normalize_attribute_values(target[key],value,node)
+              normalize_attribute_values(target[key],value,node,metadata)
             end
           elsif value.kind_of?(Array)
             target[key] = value.map do |child|
               if child.kind_of?(Hash) 
                 child_target = HashObject.create_with_auto_vivification()
-                normalize_attribute_values(child_target,child,node)
+                normalize_attribute_values(child_target,child,node,metadata)
               else
                 child 
               end
@@ -25,7 +25,7 @@ module XYZ
         target
       end
 
-      def process_external_ref(external_ref,node=nil)
+      def process_external_ref(external_ref,node=nil,metadata=nil)
         return nil unless external_ref
         case external_ref["type"].to_sym
         when :chef_search
@@ -35,7 +35,7 @@ module XYZ
         when :chef_node
           process_external_ref__chef_node(external_ref)
         when :chef_attribute
-          process_external_ref__chef_attribute(external_ref,node)
+          process_external_ref__chef_attribute(external_ref,node,metadata)
         else
           raise Error.new("not implemented yet")
         end
@@ -56,10 +56,16 @@ module XYZ
         raise Error.new("external reference (#{external_ref["ref"]}) has incorrect syntax")
       end
 
-      def process_external_ref__chef_attribute(external_ref,node)
+      def process_external_ref__chef_attribute(external_ref,node,metadata)
         if external_ref["ref"] =~ %r{^node\[(.+)\]$}
           path = $1.split("][")
-          return NodeState.nested_value(node[path[0]],path[1..path.size-1])
+          if node
+            return NodeState.nested_value(node[path[0]],path[1..path.size-1])
+          else
+            return nil unless metadata and metadata["attributes"]
+            attr_info = metadata["attributes"][path.join("/")]
+            return attr_info ? attr_info["default"] : nil
+          end
         end
         raise Error.new("external reference (#{external_ref["ref"]}) has incorrect syntax")
       end

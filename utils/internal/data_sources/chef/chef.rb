@@ -232,7 +232,9 @@ module XYZ
           service_name = service[:canonical_service_name]
           next unless service_name
           (service["params"]||{}).each do |k,v|
-            attr_index = "_service/#{service_name}/#{k}"
+            attr_index = "#{metadata["name"]}/#{k}"
+            attr_info[attr_index][:service_name] = service_name
+            attr_info[attr_index][:port_type] = attr_info["port_type"] if attr_info.has_key?("port_type")
             if node
               normalize_attribute_values(attr_info[attr_index],{"value" => v},node)
             else

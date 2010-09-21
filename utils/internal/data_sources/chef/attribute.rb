@@ -5,7 +5,7 @@ module XYZ
         definitions do
           #TBD: assuming that after split first item is cookbook name
           target[:external_attr_ref] = fn(:external_attr_ref,source)
-          target[:display_name] = fn(:external_attr_ref,source)
+          target[:display_name] = fn(:relative_distinguished_name,source)
           target[:data_type] = fn(:data_type,source["type"])
           #TBD: have form that is no assignment if source is null
           %w{port_type description constraints}.each do |k|
@@ -22,23 +22,27 @@ module XYZ
             [relative_distinguished_name(source)]
            end
 
+
+           def filter(source)
+             DBUpdateHash.new()
+           end
+
            def relative_distinguished_name(source)
-             external_attr_ref(source)
-          end
+             prefix = source[:service_name] ? "port" : "var"
+             prefix+name_suffix(source)
+           end
 
-          def filter(source)
-            DBUpdateHash.new()
-          end
-
-          #### defined fns
+          #### defined and helper fns
           def external_attr_ref(source)
-             ref = source[:ref]
-             if ref =~ /^_service/
-               "service[#{ref.gsub(/^_service\//,"").gsub(/\//,"][")}]"
-             else
-               "node[#{ref.gsub(/\//,"][")}]"
-             end
+            prefix = source[:service_name] ? "service[#{source[:service_name]}]" : "node[#{source[:ref].split("/").first}]"
+            prefix+name_suffix(source)
           end
+          
+          def name_suffix(source)
+            x = source[:ref].split("/");x.shift
+            "[#{x.join("][")}]"
+          end
+          
           def required(required_value)
             return nil if required_value.nil?
             return true if %w{true required}.include?(required_value.to_s)

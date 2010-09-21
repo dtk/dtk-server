@@ -45,23 +45,16 @@ module XYZ
       def get_recipes_assoc_cookbook(cookbook_name)
         ret = Array.new
         recipes = get_cookbook_recipes_metadata(cookbook_name)
-        if recipes
-          recipes.each do |recipe_name,description|
-            metadata = get_metadata_for_recipe(recipe_name)
-            next unless metadata
-            monitoring_items = get_monitoring_items(metadata)
-            attributes =  get_attributes_with_values(recipe_name,metadata)
-            #TODO: what to construct so nested and mark attributes as complete
-            ds_hash = DataSourceUpdateHash.new({"attributes" => attributes, "monitoring_items" => monitoring_items, "recipe_name" => recipe_name, "description" => description})
-            ret << ds_hash.freeze 
-          end
-        else #TODO can this be reached
-pp [:reached____________________]
-          metadata = get_metadata_for_cookbook(cookbook_name)
-          if metadata
-            ds_hash = DataSourceUpdateHash.new({"metadata" => metadata, "name" => metadata["name"], "description" => metadata["description"]})
-            ret << ds_hash.freeze
-          end
+        return ret unless recipes
+
+        recipes.each do |recipe_name,description|
+          metadata = get_metadata_for_recipe(recipe_name)
+          next unless metadata
+          monitoring_items = get_monitoring_items(metadata)
+          attributes =  get_attributes_with_values(recipe_name,metadata)
+          #TODO: what to construct so nested and mark attributes as complete
+          ds_hash = DataSourceUpdateHash.new({"attributes" => attributes, "monitoring_items" => monitoring_items, "recipe_name" => recipe_name, "description" => description})
+          ret << ds_hash.freeze 
         end
         ret
       end

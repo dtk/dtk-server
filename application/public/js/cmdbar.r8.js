@@ -365,6 +365,13 @@ return;
 
 //				cmdHandlers : {},
 				cmdHandlers : {
+					'ricardo' : {
+						cmdSubmit : function(cmdList) {
+
+							var newvalue = cmdList[0] + 10;
+							alert(newvalue);
+						}
+					},
 					'hello' : {
 						'cmdSubmit' : function(cmdList) {
 							alert('Hello '+cmdList[0]+'!!!!');
@@ -398,6 +405,11 @@ return;
 									var tabI18n = 'Component Search';
 									var queryTerm = 'model_name=component';
 									break;
+								case "attribute":
+									var tabName = 'attribute-search';
+									var tabI18n = 'Attr Search';
+									var queryTerm = 'model_name=attribute';
+									break;
 								case "blah":
 									break;
 							}
@@ -422,10 +434,14 @@ return;
 								if(queryTerm !='') queryTerm +='&';
 								queryTerm += qList[term]['name']+'='+qList[term]['value'];
 							}
+							var tabName = this.name;
+							var renderCompleteCallback = function() {
+								R8.Cmdbar.loadedTabs[tabIndex].initSlider(R8.Cmdbar.loadedTabs[tabIndex].name);
+							}
 							var callbacks = {
-								'io:start' : R8.Cmdbar.loadedTabs[tabIndex].startSearch(),
-								'io:end' : R8.Cmdbar.loadedTabs[tabIndex].endSearch(),
-								'io:renderComplete' : R8.Cmdbar.loadedTabs[tabIndex].initSlider(),
+								'io:start' : R8.Cmdbar.loadedTabs[tabIndex].startSearch,
+								'io:end' : R8.Cmdbar.loadedTabs[tabIndex].endSearch,
+								'io:renderComplete' : renderCompleteCallback,
 							};
 							R8.Ctrl.call('workspace/search',queryTerm,callbacks);
 						},
@@ -526,20 +542,19 @@ return;
 								document.getElementById(this.name+'-list-container').innerHTML = '';
 							},
 
-							initSlider: function() {
-								var tIndex = R8.Cmdbar.getTabIndexByName(this.name);
-								var tabName = this.name;
-								if(document.getElementById(this.name+'-slide-bar') == null) {
-									var initSliderCallback = function() { R8.Cmdbar.loadedTabs[tIndex].initSlider(); }
+							initSlider: function(tabName) {
+								var tIndex = R8.Cmdbar.getTabIndexByName(tabName);
+								if(document.getElementById(tabName+'-slide-bar') == null) {
+									var initSliderCallback = function() { R8.Cmdbar.loadedTabs[tIndex].initSlider(tabName); }
 									setTimeout(initSliderCallback,100);
 									return;
 								}
-								this.setupDD();
+								R8.Cmdbar.loadedTabs[tIndex].setupDD();
 
 								YUI().use('anim', function(Y){
 									R8.Cmdbar.loadedTabs[tIndex].setupSliderAnim(Y,tIndex);
 								});
-								this.sliderSetup = true;
+								R8.Cmdbar.loadedTabs[tIndex].sliderSetup = true;
 							},
 
 							setupDD : function() {
@@ -600,10 +615,7 @@ return;
 										dragChild.setStyles({'top':dragTop+'px','left':dragLeft+'px'});
 										drop.append(dragChild);
 
-										var modelName = dragChild.getAttribute('data-model-name');
-										var modelId = dragChild.getAttribute('data-id');
-										var ui = {'top':dragTop,'left':dragLeft};
-										R8.Workspace.addItemToViewSpace(modelName,modelId,ui);
+										R8.Workspace.addItemToViewSpace(dragChild,dragTop,dragLeft);
 									});
 								});
 							},

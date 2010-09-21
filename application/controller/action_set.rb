@@ -25,7 +25,7 @@ module XYZ
           [{
              :route => action_set_def[:route] || route_key,
              :panel => action_set_def[:panel] || :main_body,
-             :assign_type => action_set_def[:assign_type] || :append,
+             :assign_type => action_set_def[:assign_type] || :replace,
              :action_params => action_params 
            }]
         run_action_set(action_set)
@@ -41,16 +41,20 @@ module XYZ
         #if a hash is returned, turn make result an array list of one
         (result.class == Hash) ? ctrl_result[:content] = [result] : ctrl_result = result
 
+        panel_content_track = {}
         #for each piece of content set by controller result,make sure panel and assign type is set
         ctrl_result[:content].each_with_index do |item,index|
           #set the appropriate panel to render results to
-          ctrl_result[:content][index][:panel] = (ctrl_result[:content][index][:panel] || action[:panel] || :main_body).to_sym
+          panel_name = (ctrl_result[:content][index][:panel] || action[:panel] || :main_body).to_sym
+          panel_content_track[panel_name] ? panel_content_track[panel_name] +=1 : panel_content_track[panel_name] = 1
+          ctrl_result[:content][index][:panel] = panel_name
 
+          (panel_content_track[panel_name] == 1) ? dflt_assign_type = :replace : dflt_assign_type = :append
           #set the appropriate render assignment type (append | prepend | replace)
-          ctrl_result[:content][index][:assign_type] = (ctrl_result[:content][index][:assign_type] || action[:assign_type] || :append).to_sym
+          ctrl_result[:content][index][:assign_type] = (ctrl_result[:content][index][:assign_type] || action[:assign_type] || dflt_assign_type).to_sym
 
           #set js with base cache uri path
-          ctrl_result[:content][index][:src] = "#{R8::Config[:base_js_cache_uri]}/#{ctrl_result[:content][index][:src]}" if !ctrl_result[:content][index][:src].nil?            
+          ctrl_result[:content][index][:src] = "#{R8::Config[:base_js_cache_uri]}/#{ctrl_result[:content][index][:src]}" if !ctrl_result[:content][index][:src].nil?
         end
 
         ctrl_result[:js_includes] = ret_js_includes()

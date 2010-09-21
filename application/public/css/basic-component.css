@@ -7,7 +7,7 @@
 
 .component {
 	position: absolute;
-	z-index: 20;
+	z-index: 10;
 }
 
 #slider .basic-component {

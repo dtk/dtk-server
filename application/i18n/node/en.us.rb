@@ -12,6 +12,6 @@
   :data_source => 'Data Source',
   :parent_id => 'PARENT_ID',
   :parent_path => 'PARENT_PATH',
-
+  :parent_name => 'Parent Name',
   :description_list => 'Descr'
 }

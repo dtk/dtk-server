@@ -64,7 +64,7 @@ if (!R8.Ctrl) {
 			call: function(route, args, callBacks) {
 
 				if(typeof(args) === 'object') var req_params = R8.Utils.json2Str(args);
-				else if(typeof(args) === 'undefined') var req_params = ''; 
+				else if(typeof(args) === 'undefined') var req_params = '';
 				else var req_params = args;
 
 				//if devToolsJs is available the app should be loaded once
@@ -92,7 +92,7 @@ if (!R8.Ctrl) {
 									Y.on('io:end', callBacks[callback]);
 									break;
 								case "io:renderComplete":
-									this.onRenderComplete = callBacks[callback];
+									R8.Ctrl.onRenderComplete = callBacks[callback];
 									break;
 							}
 						}
@@ -210,6 +210,8 @@ continue;
 				for(index in contentList) {
 					if(typeof(contentList[index]) === 'object' && contentList[index]['src'] != '') {
 						YUI().use(function(Y) {
+//DEBUG
+//console.log(contentList[index]);
 							var url = contentList[index]['src'];
 							obj = Y.Get.script(url, {
 								onSuccess: function() {
@@ -318,7 +320,6 @@ continue;
 						R8.Ctrl.tplCallbacks[i]['templateVars'] = eval("(" + R8.Ctrl.tplCallbacks[i]['templateVars'] + ")");
 					}
 					else {
-console.log("Its an object:" + R8.Ctrl.tplCallbacks[i]['templateVars']);
 					}
 
 					jsScriptElem.text = R8.Ctrl.tplCallbacks[i]['tplCallback']+"(R8.Ctrl.tplCallbacks["+i+"]['templateVars'],'"+renderType+"');";
@@ -331,8 +332,7 @@ console.log("Its an object:" + R8.Ctrl.tplCallbacks[i]['templateVars']);
 				YUI().use("json", function (Y) {
 					var template_vars_str = Y.JSON.stringify(contentItem['template_vars']);
 					var tpl_content = eval(contentItem['template_callback']+"("+template_vars_str+");");
-console.log(tpl_content);
-return tpl_content;
+					return tpl_content;
 				});
 			},
 
@@ -362,7 +362,7 @@ return tpl_content;
 						var content = contentList[i]['content'];
 					else {
 //						var content = R8.Ctrl.getContentJSTpl(contentList[i]);
-						var content = 'crap';
+						var content = 'no content';
 						var template_callback = contentList[i]['template_callback'];
 //						var content = R8.Ctrl.jsTplContent[template_callback];
 //						while(typeof(content) === 'undefined') {
@@ -375,28 +375,37 @@ return tpl_content;
 
 					switch(assign_type) {
 						case "append":
+/*
 							if(!R8.Utils.isDefined(panelsContent[panel])) {
 								panelsContent[panel] = content;
 							} else {
 								panelsContent[panel] += content;
 							}
+*/
+//							panelsContent[panel] += content;
+							R8.Utils.Y.one('#'+panel).append(content);
 							break;
 						case "replace":
-							panelsContent[panel] = content;
+//							panelsContent[panel] = content;
+							R8.Utils.Y.one('#'+panel).set('innerHTML',content);
 							break;
 						case "prepend":
-							if(!R8.Utils.isDefined(panels_content[panel])) {
+/*							if(!R8.Utils.isDefined(panels_content[panel])) {
 								panelsContent[panel] = content
 							} else {
 								tmp_contents = panelsContent[panel]
 								panelsContent[panel] = content + tmp_contents
 							}
+*/
+							R8.Utils.Y.one('#'+panel).prepend(content);
 							break;
 					}
 				}
+/*
 				for(panel in panelsContent) {
 					doc.getElementById(panel).innerHTML = panelsContent[panel];
 				}
+*/
 				if(this.onRenderComplete != null) {
 					this.onRenderComplete();
 					this.onRenderComplete = null;

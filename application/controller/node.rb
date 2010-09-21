@@ -15,7 +15,7 @@ pp node
       _node_vars = {}
       _node_vars[:i18n] = get_model_i18n("node",user_context())
       tpl.assign("_node",_node_vars)
-
+pp tpl.render()
       return {:content => tpl.render()}
     end
 

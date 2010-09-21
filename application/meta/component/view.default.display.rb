@@ -66,12 +66,6 @@
           :rows => 1,
           :cols => 20,
         }},
-      {:monitoring_items => {
-          :type => 'hash',
-          :help => '',
-          :rows => 1,
-          :cols => 20,
-        }},
      ],
    },
   ]

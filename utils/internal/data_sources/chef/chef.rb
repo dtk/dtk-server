@@ -16,7 +16,21 @@ module XYZ
         @chef_node_cache = Hash.new 
         @cookbook_metadata_cache = Hash.new
         @recipe_service_info_cache =  Hash.new
-        @attr_values_and_metadata = Hash.new
+       @attributes_with_values = Hash.new
+      end
+
+      def get_objects__component__instance(&block)
+        get_node_recipe_assocs().each do |node_name,recipes|
+          recipes.each do |recipe_name|
+            node = get_node(node_name)
+            metadata = get_metadata_for_recipe(recipe_name)
+            next unless metadata
+            attributes = get_attributes_with_values(recipe_name,metadata,node)
+            ds_hash = DataSourceUpdateHash.new({"attributes" => attributes, "recipe_name" => recipe_name, "node_name" => node_name})
+            block.call(ds_hash)
+          end
+        end
+        return HashMayNotBeComplete.new() #HashIsComplete.new()
       end
 
       def get_objects__component__recipe(&block)
@@ -28,18 +42,28 @@ module XYZ
         return HashMayNotBeComplete.new()
       end
 
-      def get_objects__component__instance(&block)
-        get_node_recipe_assocs().each do |node_name,recipes|
-          recipes.each do |recipe_name|
-            node = get_node(node_name)
+      def get_recipes_assoc_cookbook(cookbook_name)
+        ret = Array.new
+        recipes = get_cookbook_recipes_metadata(cookbook_name)
+        if recipes
+          recipes.each do |recipe_name,description|
             metadata = get_metadata_for_recipe(recipe_name)
             next unless metadata
-            attributes = get_attributes_with_values(recipe_name,node,metadata)
-            ds_hash = DataSourceUpdateHash.new({"attributes" => attributes, "recipe_name" => recipe_name, "node_name" => node_name})
-            block.call(ds_hash)
+            monitoring_items = get_monitoring_items(metadata)
+            attributes =  get_attributes_with_values(recipe_name,metadata)
+            #TODO: what to construct so nested and mark attributes as complete
+            ds_hash = DataSourceUpdateHash.new({"attributes" => attributes, "monitoring_items" => monitoring_items, "recipe_name" => recipe_name, "description" => description})
+            ret << ds_hash.freeze 
+          end
+        else #TODO can this be reached
+pp [:reached____________________]
+          metadata = get_metadata_for_cookbook(cookbook_name)
+          if metadata
+            ds_hash = DataSourceUpdateHash.new({"metadata" => metadata, "name" => metadata["name"], "description" => metadata["description"]})
+            ret << ds_hash.freeze
           end
         end
-        return HashMayNotBeComplete.new() #HashIsComplete.new()
+        ret
       end
 
 
@@ -114,28 +138,6 @@ module XYZ
         recipe_name.gsub(/::.+/,"")
       end
 
-      def get_recipes_assoc_cookbook(cookbook_name)
-        ret = Array.new
-        recipes = get_cookbook_recipes_metadata(cookbook_name)
-        if recipes
-          recipes.each do |recipe_name,description|
-            metadata = get_metadata_for_recipe(recipe_name)
-            monitoring_items = get_monitoring_items(metadata)
-            attributes =  metadata ?  metadata["attributes"] : nil
-            #TODO: what to construct so nested and mark attributes as complete
-            ds_hash = DataSourceUpdateHash.new({"attributes" => attributes, "monitoring_items" => monitoring_items, "recipe_name" => recipe_name, "description" => description})
-            ret << ds_hash.freeze 
-          end
-        else
-          metadata = get_metadata_for_cookbook(cookbook_name)
-          if metadata
-            ds_hash = DataSourceUpdateHash.new({"metadata" => metadata, "name" => metadata["name"], "description" => metadata["description"]})
-            ret << ds_hash.freeze
-          end
-        end
-        ret
-      end
-
       def get_monitoring_items(metadata)
         ret = Hash.new
         return ret unless metadata
@@ -200,33 +202,46 @@ module XYZ
         ::Chef::REST.new(::Chef::Config[:chef_server_url], ::Chef::Config[:node_name],::Chef::Config[:client_key])
       end
 
-      def get_attributes_with_values(recipe_name,node,metadata)
-        @attr_values_and_metadata[node.name] ||= Hash.new
-        return @attr_values_and_metadata[node.name][recipe_name] if @attr_values_and_metadata[node.name][recipe_name]
-        attr_values_and_metadata = HashObject.create_with_auto_vivification()
-        (metadata["attributes"]||{}).each do |attr_name,attr_metadata| 
-          next if is_scafolding_attribute?(attr_name)
-          attr_values_and_metadata[attr_name] = attr_metadata.dup
-          attribute_path = attr_name.split("/")
-          first = attribute_path.shift
-          value = NodeState.nested_value(node[first],attribute_path)
-          if value
-            value = value.to_hash if value.kind_of?(::Chef::Node::Attribute)
-            attr_values_and_metadata[attr_name]["value"] = value
-          end
-        end
-        add_scafolding_attributes!(attr_values_and_metadata,metadata["services_info"],node)
-        @attr_values_and_metadata[node.name][recipe_name] = attr_values_and_metadata.freeze
+      #if node is nil means that getting info just from metadata
+      def get_attributes_with_values(recipe_name,metadata,node=nil)
+        index = node ? node.name : :recipe
+        @attributes_with_values[index] ||= Hash.new
+        @attributes_with_values[index][recipe_name] ||= get_attributes_with_values_aux(recipe_name,metadata,node)
       end
 
-      def add_scafolding_attributes!(attr_info,services_info,node_or_metadata)
+      def get_attributes_with_values_aux(recipe_name,metadata,node=nil)
+        ret = HashObject.create_with_auto_vivification()
+        (metadata["attributes"]||{}).each do |attr_name,attr_metadata| 
+          next if is_scafolding_attribute?(attr_name)
+          ret[attr_name] = attr_metadata.dup
+          value = get_attribute_value(attr_name,attr_metadata,node)
+          ret[attr_name]["value"] = value if value
+        end
+        add_scafolding_attributes!(ret,metadata,node)
+        ret.freeze
+      end
+
+      def get_attribute_value(attr_name,attr_metadata,node=nil)
+        if node.nil?
+          return attr_metadata["default"]
+        end
+
+        attribute_path = attr_name.split("/")
+        first = attribute_path.shift
+        value = NodeState.nested_value(node[first],attribute_path)
+        value.kind_of?(::Chef::Node::Attribute) ? value.to_hash : value
+      end
+
+      def add_scafolding_attributes!(attr_info,metadata,node=nil)
+return nil if node.nil?
+        services_info = metadata["services_info"]
         return nil unless services_info
         services_info.each do |service|
           service_name = service[:canonical_service_name]
           next unless service_name
           (service["params"]||{}).each do |k,v|
             attr_index = "_service/#{service_name}/#{k}"
-            normalize_attribute_values_node_or_metadata(attr_info[attr_index],{"value" => v},node_or_metadata)
+            normalize_attribute_values_node_or_metadata(attr_info[attr_index],{"value" => v},node)
           end
         end
       end

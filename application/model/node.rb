@@ -10,9 +10,9 @@ module XYZ
         column :ds_key, :varchar, :hidden => true
         column :data_source, :varchar, :size => 25
         column :ds_source_obj_type, :varchar, :size => 25
-        column :type, :varchar, :size => 25 # instance or template
+        column :type, :varchar, :size => 15, :default => "instance" # instance or template
         column :os, :varchar, :size => 25
-        column :is_deployed, :boolean, :default => false
+        column :is_deployed, :boolean
         column :architecture, :varchar, :size => 10 #e.g., 'i386'
        #TBD: in data source specfic now column :manifest, :varchar #e.g.,rnp-chef-server-0816-ubuntu-910-x86_32
         #TBD: experimenting whetehr better to make this actual or virtual columns

@@ -29,8 +29,8 @@ module XYZ
           relation_type,parent_uri = RestURI.parse_factory_uri(factory_uri)
           create_simple_instance?(parent_uri,c,opts) unless parent_uri == "/" or exists? IDHandle[:uri => parent_uri, :c => c]
         end
-
-        create_from_hash(IDHandle[:c => c, :uri => factory_uri],{ref => {}}).first
+        assignments = opts[:set_display_name] ? {:display_name => ref} : {}
+        create_from_hash(IDHandle[:c => c, :uri => factory_uri],{ref => assignments}).first
       end
 
      private

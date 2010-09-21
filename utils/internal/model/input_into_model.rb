@@ -64,7 +64,7 @@ module XYZ
             if col.create_ref_object
               #TBD: check whether should also populate ds_key; may not be needed because
               #of relation between ds_key and relative distinguished name
-              create_simple_instance?(ref_uri,c)
+              create_simple_instance?(ref_uri,c,:set_display_name => true)
 	      ref_id_info = get_row_from_id_handle(IDHandle[:c => c, :uri => ref_uri])
             else
 	      Log.info("In import_into_model cannot find object with uri #{ref_uri}") 

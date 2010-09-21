@@ -6,6 +6,7 @@ module XYZ
        private
         definitions do
           target[:type] = "image"
+          target[:is_deployed] = true
           target[:display_name] = source[:id]
         end
         class << self

@@ -21,7 +21,7 @@ module XYZ
         column :constraints, :varchar
 
         #TODO this probably does not belond here column :hidden, :boolean, :default => false
-        column :port_type, :varchar, :size => 10 # null means no port; otherwise input or output
+        column :port_type, :varchar, :size => 10 # null means no port; otherwise "input", "output", or "either"
         column :external_attr_ref, :varchar
         virtual_column :attribute_value
 

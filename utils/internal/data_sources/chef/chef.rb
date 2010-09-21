@@ -34,9 +34,9 @@ module XYZ
             node = get_node(node_name)
             metadata = get_metadata_for_recipe(recipe_name)
             next unless metadata
-            attr_values_and_metadata = get_attr_values_and_metadata(recipe_name,node,metadata)
-            ds_hash = DataSourceUpdateHash.new({"metadata" => metadata.merge({"attributes" => attr_values_and_metadata}), "recipe_name" => recipe_name, "node_name" => node_name})
-           block.call(ds_hash)
+            attributes = get_attributes_with_values(recipe_name,node,metadata)
+            ds_hash = DataSourceUpdateHash.new({"attributes" => attributes, "recipe_name" => recipe_name, "node_name" => node_name})
+            block.call(ds_hash)
           end
         end
         return HashMayNotBeComplete.new() #HashIsComplete.new()
@@ -200,12 +200,12 @@ module XYZ
         ::Chef::REST.new(::Chef::Config[:chef_server_url], ::Chef::Config[:node_name],::Chef::Config[:client_key])
       end
 
-      def get_attr_values_and_metadata(recipe_name,node,metadata)
+      def get_attributes_with_values(recipe_name,node,metadata)
         @attr_values_and_metadata[node.name] ||= Hash.new
         return @attr_values_and_metadata[node.name][recipe_name] if @attr_values_and_metadata[node.name][recipe_name]
         attr_values_and_metadata = HashObject.create_with_auto_vivification()
         (metadata["attributes"]||{}).each do |attr_name,attr_metadata| 
-          next if is_service_check?(attr_name)
+          next if is_scafolding_attribute?(attr_name)
           attr_values_and_metadata[attr_name] = attr_metadata.dup
           attribute_path = attr_name.split("/")
           first = attribute_path.shift
@@ -215,22 +215,27 @@ module XYZ
             attr_values_and_metadata[attr_name]["value"] = value
           end
         end
-        add_service_attributes!(attr_values_and_metadata,metadata["services_info"],node)
+        add_scafolding_attributes!(attr_values_and_metadata,metadata["services_info"],node)
         @attr_values_and_metadata[node.name][recipe_name] = attr_values_and_metadata.freeze
       end
 
-      def is_service_check?(attr_name)
-        attr_name =~ Regexp.new("/_service/")
-      end
-      def add_service_attributes!(attr_info,services_info,node)
+      def add_scafolding_attributes!(attr_info,services_info,node_or_metadata)
         return nil unless services_info
         services_info.each do |service|
           service_name = service[:canonical_service_name]
           next unless service_name
           (service["params"]||{}).each do |k,v|
             attr_index = "_service/#{service_name}/#{k}"
-            normalize_attribute_values(attr_info[attr_index],{"value" => v},node)
+            normalize_attribute_values_node_or_metadata(attr_info[attr_index],{"value" => v},node_or_metadata)
           end
+        end
+      end
+
+      def normalize_attribute_values_node_or_metadata(target,attr_val_hash,node_or_metadata)
+        if node_or_metadata.kind_of?(::Chef::Node)
+          normalize_attribute_values(target,attr_val_hash,node_or_metadata)
+        else
+          pp [target,attr_val_hash,node_or_metadata]
         end
       end
 

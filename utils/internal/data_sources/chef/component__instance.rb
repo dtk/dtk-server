@@ -4,7 +4,6 @@ module XYZ
       class ComponentInstance < Top
         definitions do
           target[:type] = "instance"
-          metadata = source["metadata"]
           recipe_name = source["recipe_name"]
           name = fn(lambda{|x,y|x+ "__" + y},source["node_name"],recipe_name)
           target[:display_name] = name
@@ -12,7 +11,7 @@ module XYZ
           target[:external_type] = "chef_recipe"
           target[:external_cmp_ref] = fn(lambda{|recipe_name|"recipe[#{recipe_name}]"},recipe_name)
 
-          nested_definition :attribute, source["metadata"]["attributes"]
+          nested_definition :attribute, source["attributes"]
         end
 
         class << self

@@ -28,6 +28,11 @@ module XYZ
      end
 
      private
+     #TODO: in process of migrating from treatment of transform attributes as service attributes to scafolding attributes
+     def is_scafolding_attribute?(attr_name)
+       attr_name =~ Regexp.new("/_service/")
+     end
+
      def set_attribute_info(target,attr,attr_info,cookbook_name,recipe_name,service_name) 
        return nil unless attr_info["is_service_attribute"]
        transform = attr_info["transform"]

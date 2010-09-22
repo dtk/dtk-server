@@ -35,10 +35,18 @@ module XYZ
       end
  
       model_list = get_objects(model_name.to_sym,where_clause)
-      model_list.each_with_index {|node,index| model_list[index][:model_name] = model_name}
+      model_list.each_with_index do |model,index|
+        model_list[index][:model_name] = model_name
+          model_list[index][:ui].nil? ? model_list[index][:ui] = {} : nil
+          model_list[index][:ui][:images].nil? ? model_list[index][:ui][:images] = {} : nil
 
-      tpl = R8Tpl::TemplateR8.new("workspace/wspace_search",user_context())
-      tpl.set_js_tpl_name('wspace_search')
+          !model_list[index][:ui][:images][:tnail].nil? ? img_value = '<img src="' << R8::Config[:base_images_uri] << '/' << model_name << 'Icons/'<< model_list[index][:ui][:images][:tnail] <<'"/>' : img_value = ""
+          model_list[index][:img_value] = img_value
+ pp model_list[index][:img_value]
+      end
+
+      tpl = R8Tpl::TemplateR8.new("workspace/wspace_search_#{model_name}",user_context())
+      tpl.set_js_tpl_name("wspace_search_#{model_name}")
       tpl.assign('model_list',model_list)
 
       slide_width = 170*model_list.size

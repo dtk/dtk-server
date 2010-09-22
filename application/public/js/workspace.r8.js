@@ -94,12 +94,13 @@ if (!R8.Workspace) {
 			loadWorkspace: function(wSpaceID){
 
 //return;
-				this.viewspaceElem = document.getElementById('viewspace');
+				R8.Workspace.viewspaceElem = document.getElementById('viewspace');
 
-				this.nodeRef = R8.Utils.Y.one(this.viewspaceElem);
-				R8.Utils.Y.delegate('click',this.updateSelectedElements,this.nodeRef,'.component, .connector');
-				R8.Utils.Y.delegate('click',this.clearSelectedElements,'body','#viewspace');
-				R8.Utils.Y.delegate('mousedown',this.checkMouseDownEvent,'body','#viewspace');
+				R8.Workspace.viewSpaceNode = R8.Utils.Y.one(R8.Workspace.viewspaceElem);
+
+				R8.Workspace.events['item_click'] = R8.Utils.Y.delegate('click',R8.Workspace.updateSelectedElements,R8.Workspace.viewSpaceNode,'.component, .connector');
+				R8.Workspace.events['vspace_click'] = R8.Utils.Y.delegate('click',R8.Workspace.clearSelectedElements,'body','#viewspace');
+				R8.Workspace.events['vspace_mdown'] = R8.Utils.Y.delegate('mousedown',R8.Workspace.checkMouseDownEvent,'body','#viewspace');
 
 //TODO: right now hardcoding assignment from demoData.r8.js
 				this.components = workspaceComponents;
@@ -453,6 +454,7 @@ console.log('registering port:'+portElemID);
 console.log('call to add item to workspace failed.....');
 			},
 
+			events : {},
 			/*
 			 * Collection of active connectors for the given workspace
 			 */

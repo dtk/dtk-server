@@ -1,6 +1,5 @@
 
-	<div id="vi_{%=node[:id]%}" class="basic-component compFocus" style="position:relative; top: {%=node[:ui][:top]%}px; left: {%=node[:ui][:left]%}px;">
-	<div id="item_{%=node[:id]%}" data-id="{%=node[:id]%}" data-model-name="{%=node[:model_name]%}" class="basic-component component">
+	<div id="vi_{%=node[:id]%}" data-id="{%=node[:id]%}" data-model-name="node" class="basic-component component" style="top: {%=node[:ui][:top]%}px; left: {%=node[:ui][:left]%}px;">
 		<div class="basic-tl-corner corner"></div>
 		<div class="header"></div>
 		<div class="basic-tr-corner corner"></div>
@@ -8,5 +7,4 @@
 		<div class="basic-bl-corner corner"></div>
 		<div class="footer"></div>
 		<div class="basic-br-corner corner"></div>
-	</div>
 	</div>

@@ -1,8 +1,8 @@
 /* blue component: #73c0ef */
 
-.basic-component {
-	width: 160px;
-	height: 80px;
+.comp-component {
+	width: 120px;
+	height: 60px;
 }
 
 .yui3-dd-dragging {
@@ -14,12 +14,18 @@
 	z-index: 10;
 }
 
-#slider .basic-component {
-	margin: 5px 5px;
+.comp-img {
+	height: 60px;
+	width: 90px;
+	margin: auto;
+}
+
+#slider .comp-component {
+	margin: 10px 5px;
 /*	position: relative;*/
 }
 
-.basic-component .corner {
+.comp-component .corner {
 	height: 13px;
 	width: 13px;
 	background-image: url(../images/workspace/basic-comp-corners.png);
@@ -30,45 +36,45 @@
 	background-image: url(../images/workspace/basic-comp-corners-focus.png);
 }
 
-.basic-tl-corner {
+.comp-tl-corner {
 }
-.basic-tr-corner {
+.comp-tr-corner {
 	background-position: 0px -13px;
 }
-.basic-bl-corner {
+.comp-bl-corner {
 	background-position: 0px -39px;
 }
-.basic-br-corner {
+.comp-br-corner {
 	background-position: 0px -26px;
 }
 
-.basic-component .header {
+.comp-component .comp-header {
 	background-color: #73C0EF;
-	width: 134px;
+	width: 94px;
 	height: 11px;
 	float: left;
 	font-size: 11px;
 	border-top: solid 2px black;
 }
 
-.compFocus .header {
+.compFocus .comp-header {
 	border-top: solid 2px #E84423;
 }
 
-.basic-component .footer {
+.comp-component .comp-footer {
 	background-color: #73C0EF;
-	width: 134px;
+	width: 94px;
 	height: 11px;
 	float: left;
 	border-bottom: solid 2px black;
 }
-.compFocus .footer {
+.compFocus .comp-footer {
 	border-bottom: solid 2px #E84423;
 }
 
-.basic-component .body {
+.comp-component .comp-body {
 	background-color: #73C0EF;
-	width: 156px;
+	width: 116px;
 	height: 54px;
 	float: left;
 	border-left: solid 2px black;
@@ -76,7 +82,7 @@
 	text-align: center;
 }
 
-.compFocus .body {
+.compFocus .comp-body {
 	border-left: solid 2px #E84423;
 	border-right: solid 2px #E84423;
 }

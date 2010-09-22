@@ -48,6 +48,13 @@ module XYZ
        end
      end
 
+     def ret_normalized_transform_info(transform)
+       ret = HashObject.create_with_auto_vivification()
+       set_attribute_transform_info(ret,0,transform)
+       ret.freeze
+       ret.has_key?(0) ? ret[0] : nil
+     end
+
      def set_attribute_transform_info(target,key,transform)
        if transform.kind_of?(Hash)
          if transform.keys.include?("__ref")

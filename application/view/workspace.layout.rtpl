@@ -7,6 +7,9 @@
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/workspace.css" />
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/basic-component.css" />
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/comp-component.css" />
+{%for css_include in _app[:css_includes]%}
+	<link rel="stylesheet" type="text/css" href="{%=css_include%}" />
+{%end%}
 
 
 <!-- JS 
@@ -36,6 +39,8 @@
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/utils.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/component.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/maintoolbar.r8.js"></script>
+
+
 
 <script type="text/javascript">
 R8.config = {};
@@ -76,5 +81,12 @@ R8.config['base_uri'] = '{%=_app[:base_uri]%}/xyz';
 				&nbsp;&nbsp;<a href="javascript:R8.Cmdbar.toggleTabs();">Toggle</a>
 		</div>
 	</div>
+
+	<div id="js_include_container">
+		{%for js_include in _app[:js_includes]%}
+			<script type="text/javascript" src="{%=js_include%}"></script>
+		{%end%}
+	</div>
+
 	</body>
 </html>

@@ -2,6 +2,10 @@ module XYZ
   class WorkspaceController < Controller
 
     def index
+#TODO: make call to load the users/system already in use plugins,cmds,etc
+      include_js('plugins/search.cmdhandler')
+pp @js_includes
+pp 'going to return from workspace index action'
       return {:content=>''}
     end
 

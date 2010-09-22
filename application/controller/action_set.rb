@@ -23,10 +23,10 @@ module XYZ
         action_params << query_string unless query_string.empty?
         action_set = 
           [{
-             :route => action_set_def[:route] || route_key,
-             :panel => action_set_def[:panel] || :main_body,
-             :assign_type => action_set_def[:assign_type] || :replace,
-             :action_params => action_params 
+              :route => action_set_def[:route] || route_key,
+              :panel => action_set_def[:panel] || :main_body,
+              :assign_type => action_set_def[:assign_type] || :replace,
+              :action_params => action_params,
            }]
         run_action_set(action_set)
       end
@@ -77,6 +77,7 @@ module XYZ
           :method => method.to_sym,
           :params => params,
           :engine => lambda{|action, value| value })
+
       return a.call
     end
 

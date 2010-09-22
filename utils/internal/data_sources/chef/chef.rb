@@ -204,23 +204,21 @@ module XYZ
 
       def get_attributes_with_values_aux(recipe_name,metadata,node=nil)
         ret = HashObject.create_with_auto_vivification()
-        (metadata["attributes"]||{}).each do |attr_name,attr_metadata| 
-#TODO testing
-       if is_scafolding_attribute?(attr_name)
-x=1
-       end
+        (metadata["attributes"]||{}).each do |raw_attr_name,attr_metadata| 
+          attr_name,service_name = get_attribute_and_service_names(raw_attr_name)
           ret[attr_name] = attr_metadata.dup
-#TODO: for testing port type
-port_type = ["","input","output"][attr_name[0].modulo(3)]
- ret[attr_name][:port_type] = port_type unless port_type.empty?
-##############
+          ret[attr_name]["service_name"] = service_name if service_name
+          #TODO: for testing port type
+          #port_type = ["","input","output"][attr_name[0].modulo(3)]
+          # ret[attr_name][:port_type] = port_type unless port_type.empty?
+          ##############
           value = get_attribute_value(attr_name,attr_metadata,node)
           ret[attr_name]["value"] = value if value
         end
-        add_scafolding_attributes!(ret,metadata,node)
+#        add_scafolding_attributes!(ret,metadata,node)
         ret.freeze
       end
-
+    
       def get_attribute_value(attr_name,attr_metadata,node=nil)
         if node.nil?
           return attr_metadata["default"]

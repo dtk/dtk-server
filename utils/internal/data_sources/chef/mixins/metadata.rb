@@ -27,10 +27,14 @@ module XYZ
        ret
      end
 
-     private
-     #TODO: in process of migrating from treatment of transform attributes as service attributes to scafolding attributes
-     def is_scafolding_attribute?(attr_name)
-       attr_name =~ Regexp.new("/_service/")
+    private
+      #returns [(normalized)attr_name,service_name]
+     def get_attribute_and_service_names(attr_name)
+       if attr_name =~ Regexp.new("^(.+)/_service/(.+?)/(.+)$")
+         ["#{$1}/#{$3}",$2]
+       else 
+         [attr_name,nil] 
+       end
      end
 
      def set_attribute_info(target,attr,attr_info,cookbook_name,recipe_name,service_name) 

@@ -34,6 +34,19 @@ module XYZ
         false
       end
 
+
+      #TODO: quick hack
+      def get_wspace_display(id_handle)
+        c = id_handle[:c]
+        node_id = IDInfoTable.get_id_from_id_handle(id_handle)
+        node = get_objects(ModelHandle.new(c,:node),{:id => node_id}).first
+
+        assoc_node_component_ds = get_objects_just_dataset(ModelHandle.new(c,:assoc_node_component),{:node_id => node_id})
+        component_ds = get_objects_just_dataset(ModelHandle.new(c,:component),nil,{:field_set => Model::FieldSet.default(:component)})
+        assoc_comps = assoc_node_component_ds.graph(:inner,component_ds,{:id => :component_id}).all
+        node.merge(:component => assoc_comps.inject({}){|h,o|h.merge(o[:component][:id] => o[:component])})
+      end
+
       ##### Actions
 
       def get_node_attribute_values(id_handle,opts={})

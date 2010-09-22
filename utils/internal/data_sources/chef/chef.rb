@@ -205,7 +205,9 @@ module XYZ
       def get_attributes_with_values_aux(recipe_name,metadata,node=nil)
         ret = HashObject.create_with_auto_vivification()
         (metadata["attributes"]||{}).each do |attr_name,attr_metadata| 
-          next if is_scafolding_attribute?(attr_name)
+       if is_scafolding_attribute?(attr_name)
+x=1
+       end
           ret[attr_name] = attr_metadata.dup
           value = get_attribute_value(attr_name,attr_metadata,node)
           ret[attr_name]["value"] = value if value

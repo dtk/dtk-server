@@ -52,7 +52,7 @@ module XYZ
        ret = HashObject.create_with_auto_vivification()
        set_attribute_transform_info(ret,0,transform)
        ret.freeze
-       ret.has_key?(0) ? ret[0] : nil
+       ret[0]
      end
 
      def set_attribute_transform_info(target,key,transform)

@@ -242,7 +242,7 @@ module XYZ
         end
         ret.freeze
         #TODO: need to detrmien when value is actually {} as opposed to nil
-        ret.has_key?("value") ? ret["value"] : nil
+        ret["value"] 
       end
 #        {"external_ref"=>{"type"=>"chef_attribute", "ref"=>"node[hadoop][jmxremote][password]"}}
  #       {"__ref"=>"node[hadoop][jmxremote][password]"}

@@ -115,9 +115,12 @@ module XYZ
         end
         r = get_rest("cookbooks/#{cookbook.join('/')}")
         return nil unless r
-        remove_subsuming_attributes!(r.to_hash["metadata"])
+        ret=process_raw_metadata!(r.to_hash["metadata"])
+        remove_subsuming_attributes!(ret)
       end
 
+
+      #removes attributes like foo when teher also exists foo/k1, foo/k2
       def remove_subsuming_attributes!(metadata)
         return metadata unless metadata and metadata["attributes"]
         keys = metadata["attributes"].keys
@@ -190,7 +193,7 @@ module XYZ
       def initialize_chef_connection()
         ::Chef::Config.from_file("/root/.chef/knife.rb") #TODO: stub; will replace by passing in relavant paramters
         ::Chef::Log.level(::Chef::Config[:log_level])
-#What is mixlib?
+        #Mixlib::Authentication is a gem provided vy Opscode
         ::Mixlib::Authentication::Log.logger = ::Chef::Log.logger
         ::Chef::REST.new(::Chef::Config[:chef_server_url], ::Chef::Config[:node_name],::Chef::Config[:client_key])
       end

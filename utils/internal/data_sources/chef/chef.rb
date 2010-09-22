@@ -209,8 +209,10 @@ module XYZ
           ret[attr_name] = attr_metadata.dup
           ret[attr_name]["service_name"] = service_name if service_name
           #TODO: for testing port type
-          #port_type = ["","input","output"][attr_name[0].modulo(3)]
-          # ret[attr_name][:port_type] = port_type unless port_type.empty?
+          unless (metadata["attributes"]||{}).find{|a,m|m["port_type"]}
+            port_type = ["","input","output"][attr_name[0].modulo(3)]
+            ret[attr_name][:port_type] = port_type unless port_type.empty?
+          end
           ##############
           set_attribute_value(ret,attr_name,attr_metadata,metadata,node)
         end

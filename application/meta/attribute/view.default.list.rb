@@ -13,6 +13,10 @@
               :objLink => true,
               :objLinkView => 'display',
             }},
+          {:port_type => {
+              :type => 'text',
+              :help => '',
+            }},
           {:attribute_value => {
               :type => 'hash',
               :help => '',

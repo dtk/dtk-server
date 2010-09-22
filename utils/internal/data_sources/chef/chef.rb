@@ -212,58 +212,37 @@ module XYZ
           #port_type = ["","input","output"][attr_name[0].modulo(3)]
           # ret[attr_name][:port_type] = port_type unless port_type.empty?
           ##############
-          value = get_attribute_value(attr_name,attr_metadata,metadata,node)
-          ret[attr_name]["value"] = value if value
+          set_attribute_value(ret,attr_name,attr_metadata,metadata,node)
         end
-#         add_scafolding_attributes!(ret,metadata,node)
         ret.freeze
       end
     
-      def get_attribute_value(attr_name,attr_metadata,metadata,node=nil)
-        return get_service_attribute_value(attr_name,attr_metadata,metadata,node) if attr_metadata["is_service_attribute"]
-        if node.nil?
-          return attr_metadata["default"]
-        end
-
-        attribute_path = attr_name.split("/")
-        first = attribute_path.shift
-        value = NodeState.nested_value(node[first],attribute_path)
-        value.kind_of?(::Chef::Node::Attribute) ? value.to_hash : value
-      end
-
-      def get_service_attribute_value(attr_name,attr_metadata,metadata,node=nil)
-        return nil unless attr_metadata["transform"]
-        transform = ret_normalized_transform_info(attr_metadata["transform"])
-        ret = HashObject.create_with_auto_vivification()
-        if node
-          normalize_attribute_values(ret,{"value" => transform},node)
-        else
-          normalize_attribute_values(ret,{"value" => transform},node,metadata)
-        end
-        ret.freeze
-        #TODO: need to detrmien when value is actually {} as opposed to nil
-        ret["value"] 
-      end
-#        {"external_ref"=>{"type"=>"chef_attribute", "ref"=>"node[hadoop][jmxremote][password]"}}
- #       {"__ref"=>"node[hadoop][jmxremote][password]"}
-
-      def add_scafolding_attributes!(attr_info,metadata,node=nil)
-        services_info = metadata["services_info"]
-        return nil unless services_info
-        services_info.each do |service|
-          service_name = service[:canonical_service_name]
-          next unless service_name
-          (service["params"]||{}).each do |k,v|
-            attr_index = "#{metadata["name"]}/#{k}"
-            attr_info[attr_index][:service_name] = service_name
-            attr_info[attr_index][:port_type] = attr_info["port_type"] if attr_info.has_key?("port_type")
-            if node
-              normalize_attribute_values(attr_info[attr_index],{"value" => v},node)
-            else
-              normalize_attribute_values(attr_info[attr_index],{"value" => v},node,metadata)
-            end
+      def set_attribute_value(ret,attr_name,attr_metadata,metadata,node=nil)
+        return set_service_attribute_value(ret,attr_name,attr_metadata,metadata,node) if attr_metadata["is_service_attribute"]
+        value =
+          if node.nil?
+            attr_metadata["default"]
+          else
+            attribute_path = attr_name.split("/")
+            first = attribute_path.shift
+            value_x = NodeState.nested_value(node[first],attribute_path)
+            value_x.kind_of?(::Chef::Node::Attribute) ? value_x.to_hash : value_x
           end
+        ret[attr_name]["value"] = value if value
+        value
+      end
+
+      def set_service_attribute_value(ret,attr_name,attr_metadata,metadata,node=nil)
+        return nil unless attr_metadata["transform"]
+        #  e.g., transform  {"__ref"=>"node[hadoop][jmxremote][password]"} to
+        #        {"external_ref"=>{"type"=>"chef_attribute", "ref"=>"node[hadoop][jmxremote][password]"}}
+        transform = ret_normalized_transform_info(attr_metadata["transform"])
+        if node
+          normalize_attribute_values(ret[attr_name],{"value" => transform},node)
+        else
+          normalize_attribute_values(ret[attr_name],{"value" => transform},node,metadata)
         end
+        ret[attr_name].has_key?("value") ? ret[attr_name]["value"] : nil
       end
 
       def recipes(node)

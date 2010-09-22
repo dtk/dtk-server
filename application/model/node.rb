@@ -44,7 +44,19 @@ module XYZ
         assoc_node_component_ds = get_objects_just_dataset(ModelHandle.new(c,:assoc_node_component),{:node_id => node_id})
         component_ds = get_objects_just_dataset(ModelHandle.new(c,:component),nil,{:field_set => Model::FieldSet.default(:component)})
         assoc_comps = assoc_node_component_ds.graph(:inner,component_ds,{:id => :component_id}).all
-        node.merge(:component => assoc_comps.inject({}){|h,o|h.merge(o[:component][:id] => o[:component])})
+
+#        node.merge(:component => assoc_comps.inject({}){|h,o|h.merge(o[:component][:id] => o[:component])})
+        components = HashObject.new
+        assoc_comps.each do |o|
+          component = o[:component]
+          where_clause = SQL.or({:port_type => "input"},{:port_type => "output"})
+          opts = {:field_set => Model::FieldSet.default(:attribute),:parent_id => component[:id]}
+          attributes = get_objects(ModelHandle.new(c,:attribute),where_clause,opts)
+          component[:attribute] = Hash.new
+          attributes.each{|attr|component[:attribute][attr[:id]] = attr}
+          components[component[:id]] = component
+        end 
+        node.merge(:component => components)
       end
 
       ##### Actions

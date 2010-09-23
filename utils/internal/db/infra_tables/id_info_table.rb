@@ -45,6 +45,14 @@ module XYZ
   end
 
   class IDInfoRow < Hash
+    def ret_id_handle()
+      IDHandle[CONTEXT_ID => self[CONTEXT_ID], :guid => IDInfoTable::ret_guid_from_id_info(self)]
+    end
+
+    def ret_db_id()
+      IDInfoTable::db_id_from_guid(IDInfoTable::ret_guid_from_id_info(self))
+    end
+
     def self.[](x)
       new(x)
     end
@@ -198,7 +206,7 @@ module XYZ
 
 	#### map the db representation of id to guid form
 	# currently set so to reflect that a db id is a guid; other possibilities are when guid is id_db_relation + db_id
-       private
+
 	def db_id_from_guid(guid)
 	  guid.to_i
 	end

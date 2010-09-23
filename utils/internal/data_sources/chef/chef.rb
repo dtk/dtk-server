@@ -45,7 +45,7 @@ module XYZ
            block.call(ds_hash)
           end
         end
-        return HashMayNotBeComplete.new()
+        return HashIsComplete.new() #HashMayNotBeComplete.new()
       end
 
       def get_recipes_assoc_cookbook(cookbook_name)

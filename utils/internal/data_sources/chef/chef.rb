@@ -107,7 +107,7 @@ module XYZ
         cookbook_metadata = get_metadata_for_cookbook(get_cookbook_name_from_recipe_name(recipe_name))
         return nil if cookbook_metadata.nil?
         @recipe_service_info_cache[recipe_name] ||= get_component_services_info(recipe_name,cookbook_metadata)
-        basic_type = (cookbook_metadata["basic_types"]||{})[get_unqualified_recipe_name(recipe_name)]
+        basic_type = (cookbook_metadata["basic_types"]||{})[recipe_name]
         cookbook_metadata.merge({"services_info" => @recipe_service_info_cache[recipe_name],"basic_type" => basic_type})
       end
 
@@ -147,10 +147,6 @@ module XYZ
         recipe_name.gsub(/::.+/,"")
       end
 
-      def get_unqualified_recipe_name(recipe_name)
-        recipe_name =~ /.+::(.+)/ ? $1 : recipe_name
-      end
-          
       def get_monitoring_items(metadata)
         ret = Hash.new
         return ret unless metadata
@@ -225,6 +221,8 @@ module XYZ
       def get_attributes_with_values_aux(recipe_name,metadata,node=nil)
         ret = HashObject.create_with_auto_vivification()
         (metadata["attributes"]||{}).each do |raw_attr_name,attr_metadata| 
+          recipes = attr_metadata["recipes"]||[]
+          next unless recipes.empty? or recipes.include?(recipe_name)
           attr_name,service_name = get_attribute_and_service_names(raw_attr_name)
           ret[attr_name] = attr_metadata.dup
           ret[attr_name]["service_name"] = service_name if service_name

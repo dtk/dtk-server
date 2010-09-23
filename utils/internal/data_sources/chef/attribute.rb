@@ -8,7 +8,7 @@ module XYZ
           target[:display_name] = fn(:relative_distinguished_name,source)
           target[:data_type] = fn(:data_type,source["type"])
           #TBD: have form that is no assignment if source is null
-          %w{port_type description constraints}.each do |k|
+          %w{port_type semantic_type description constraints}.each do |k|
             target[k.to_sym] = source[k]
           end
           target[:output_variable] = source["calculated"]

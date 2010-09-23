@@ -23,19 +23,20 @@ class Fieldhash < Fieldbase
   def get_field_edit_rtpl()
     rows = 10
     cols = 50
-    value = "{%=lambda{|a|a.kind_of?(String) ? a : JSON.pretty_generate(a)}.call(#{@model_name}[:#{@name}])%}"
+    value = hash_to_string_fn() 
     field_string =  '<textarea id="' + @id + '" name="' + @name + '" class="' + @class_txt + '" rows=' + rows.to_s +  ' cols=' + cols.to_s + '>' + value + '</textarea>'
     return field_string
   end
 
   def get_field_display_rtpl()
-    field_string = "{%=lambda{|a|a.kind_of?(String) ? a : JSON.pretty_generate(a)}.call(#{@model_name}[:#{@name}])%}"
-    return field_string
+    return hash_to_string_fn()
   end
 
   def get_field_list_rtpl()
-    field_string = "{%=lambda{|a|a.kind_of?(String) ? a : JSON.pretty_generate(a)}.call(#{@model_name}[:#{@name}])%}"
-    return field_string
+    return hash_to_string_fn()
   end
-
+ private
+  def hash_to_string_fn()
+    "{%=lambda{|a|(a.kind_of?(String) ? a : JSON.pretty_generate(a)) if a}.call(#{@model_name}[:#{@name}])%}"
+  end
 end

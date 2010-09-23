@@ -1,48 +1,33 @@
-/* blue component: #73c0ef */
+/* blue node: #73c0ef */
 
-.basic-component-wrapper {
-	width: 90px;
-	height: 50px;
-}
-
-.basic-component {
-	width: 90px;
-	height: 50px;
-	border: 2px solid black;
-	background-color: #73C0EF;
-	cursor: pointer;
+.basic-node {
+	width: 160px;
+	height: 80px;
 }
 
 .yui3-dd-dragging {
 	cursor: move;
 }
 
-.component {
+.node {
 	position: absolute;
 	z-index: 10;
 }
 
-.basic-img {
-	height: 40px;
-	width: 80px;
-	margin: 5px;
-	float:left;
-}
-
-#slider .basic-component {
-	margin: 10px 5px;
+#slider .basic-node {
+	margin: 5px 5px;
 /*	position: relative;*/
 }
 
-.basic-component .corner {
+.basic-node .corner {
 	height: 13px;
 	width: 13px;
-	background-image: url(../images/workspace/basic-basic-corners.png);
+	background-image: url(../images/workspace/basic-node-corners.png);
 	background-repeat: no-repeat;
 	float: left;
 }
 .focus .corner {
-	background-image: url(../images/workspace/basic-basic-corners-focus.png);
+	background-image: url(../images/workspace/basic-node-corners-focus.png);
 }
 
 .basic-tl-corner {
@@ -57,47 +42,41 @@
 	background-position: 0px -26px;
 }
 
-.basic-component .basic-header {
+.basic-node .header {
 	background-color: #73C0EF;
-	width: 94px;
+	width: 134px;
 	height: 11px;
 	float: left;
 	font-size: 11px;
 	border-top: solid 2px black;
 }
 
-.focus .basic-header {
+.focus .header {
 	border-top: solid 2px #E84423;
 }
 
-.basic-component .basic-footer {
+.basic-node .footer {
 	background-color: #73C0EF;
-	width: 94px;
+	width: 134px;
 	height: 11px;
 	float: left;
 	border-bottom: solid 2px black;
 }
-.focus .basic-footer {
+.focus .footer {
 	border-bottom: solid 2px #E84423;
 }
 
-.basic-component .basic-body {
-/*	background-color: #73C0EF;*/
-	width: 90px;
-	height: 50px;
-	text-align: center;
+.basic-node .body {
+	background-color: #73C0EF;
+	width: 156px;
+	height: 54px;
 	float: left;
+	border-left: solid 2px black;
+	border-right: solid 2px black;
+	text-align: center;
 }
 
-.basic-component .basic-body-2 {
-/*	background-color: #73C0EF;*/
-	width: 70px;
-	height: 50px;
-	text-align: center;
-	float: left;
-}
-
-.focus .basic-body {
+.focus .body {
 	border-left: solid 2px #E84423;
 	border-right: solid 2px #E84423;
 }

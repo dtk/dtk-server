@@ -71,11 +71,8 @@ if (!R8.Cmdbar) {
 				},
 
 				registerTabEvents : function(i) {
-//console.log('Going to register events for tab:'+R8.Cmdbar.loadedTabs[i]['name']);
-//console.log('Index is:'+i);
 					YUI().use('node','event',function(Y){
 						//process the tab element and related events
-//						R8.Cmdbar.loadedTabs[i]['node'] = Y.one('#cmdbar-'+R8.Cmdbar.loadedTabs[i]['name']+'-tab');
 						R8.Cmdbar.loadedTabs[i]['contentElem'] = Y.one('#cmdbar-'+R8.Cmdbar.loadedTabs[i]['name']+'-tab-content');
 						R8.Cmdbar.loadedTabs[i]['node'] = Y.one('#cmdbar-'+R8.Cmdbar.loadedTabs[i]['name']+'-tab');
 
@@ -86,8 +83,6 @@ if (!R8.Cmdbar) {
 
 						//process the close region element and related events
 						R8.Cmdbar.loadedTabs[i]['closeElem'] = Y.one('#cmdbar-'+R8.Cmdbar.loadedTabs[i]['name']+'-tab-close');
-//console.log('Close Elem...');
-//console.log(R8.Cmdbar.loadedTabs[i]['closeElem']);
 						R8.Cmdbar.loadedTabs[i]['events']['closeMoEvent'] = R8.Cmdbar.loadedTabs[i]['closeElem'].on('mouseover', function(e){
 							e.halt();
 							e.currentTarget.addClass('hover');
@@ -262,19 +257,6 @@ if (!R8.Cmdbar) {
 						}
 						this.cmdHandlers[cmdAction].cmdSubmit(cmdList);
 					}
-//DEBUG
-return;
-/*
-					R8.Cmdbar.changeTabFocus(1);
-					R8.MainToolbar.clearSlider();
-					var queryTerm = '';
-					var callbacks = {
-						'io:start':R8.MainToolbar.startSearch(),
-						'io:end':R8.MainToolbar.endSearch(),
-						'io:renderComplete':R8.MainToolbar.initSlider(),
-					};
-					R8.Ctrl.call('workspace/search',queryTerm,callbacks);
-*/
 				},
 
 				cmdr : {

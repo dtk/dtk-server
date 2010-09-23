@@ -6,7 +6,8 @@
 <!--//TODO: revisit to variablize the path of the founcation css-->
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/workspace.css" />
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/basic-component.css" />
-<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/comp-component.css" />
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/basic-node.css" />
+
 {%for css_include in _app[:css_includes]%}
 	<link rel="stylesheet" type="text/css" href="{%=css_include%}" />
 {%end%}

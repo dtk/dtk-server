@@ -102,6 +102,9 @@ if (!R8.Workspace) {
 				R8.Workspace.events['vspace_click'] = R8.Utils.Y.delegate('click',R8.Workspace.clearSelectedElements,'body','#viewspace');
 				R8.Workspace.events['vspace_mdown'] = R8.Utils.Y.delegate('mousedown',R8.Workspace.checkMouseDownEvent,'body','#viewspace');
 
+				R8.MainToolbar.init();
+return;
+
 //TODO: right now hardcoding assignment from demoData.r8.js
 				this.components = workspaceComponents;
 				this.ports = workspacePorts;
@@ -141,8 +144,6 @@ console.log('registering port:'+portElemID);
 					var connectionType = this.connectors[c].type;
 					R8.Canvas.renderLink(c);
 				}
-
-				R8.MainToolbar.init();
 			},
 
 			toggleHandTool : function() {
@@ -242,7 +243,7 @@ console.log('registering port:'+portElemID);
 				});
 				dd.on('drag:start',function(){
 					R8.Workspace.clearSelectedElements();
-					R8.Utils.Y.one('#'+compID).addClass('compFocus');
+					R8.Utils.Y.one('#'+compID).addClass('focus');
 					R8.Workspace.selectedElements[compID] = R8.Workspace.components[compID];
 				});
 				dd.on('drag:drag',function(){
@@ -278,7 +279,7 @@ console.log('registering port:'+portElemID);
 					if(e.ctrlKey == false) R8.Workspace.clearSelectedElements();
 					R8.Workspace.selectedElements[e.currentTarget.get('id')] = R8.Workspace.components[e.currentTarget.get('id')];
 					var tempObj = R8.Utils.Y.one('#'+e.currentTarget.get('id'));
-					tempObj.addClass('compFocus');
+					tempObj.addClass('focus');
 					e.stopImmediatePropagation();
 				}
 				return;
@@ -292,7 +293,7 @@ console.log('registering port:'+portElemID);
 			 */
 			clearSelectedElements : function() {
 				for(var elemID in R8.Workspace.selectedElements) {
-					R8.Utils.Y.one('#'+R8.Workspace.selectedElements[elemID].id).removeClass('compFocus');
+					R8.Utils.Y.one('#'+R8.Workspace.selectedElements[elemID].id).removeClass('focus');
 				}
 				R8.Workspace.selectedElements = {};
 			},
@@ -406,18 +407,35 @@ console.log('registering port:'+portElemID);
 
 				YUI().use("json", function (Y) {
 					var uiStr = Y.JSON.stringify(ui);
-					var queryTerm = 'target_model_name=project&target_id=2147483649&ui='+uiStr;
-					queryTerm += '&redirect='+modelName+'/wspace_display'
+					var queryParams = 'target_model_name=project&target_id=2147483649&ui='+uiStr;
+//					queryParams += '&redirect='+modelName+'/wspace_display';
+					queryParams += '&model_redirect='+modelName+'&action_redirect=wspace_display&id_redirect=*id';
 
-					
 					var completeCallback = function() {
 						R8.Workspace.setupNewItem(cleanupId);
 					}
 					var callbacks = {
 						'io:renderComplete' : completeCallback
 					};
-					R8.Ctrl.call(modelName+'/clone/'+modelId,queryTerm,callbacks);
+					R8.Ctrl.call(modelName+'/clone/'+modelId,queryParams,callbacks);
 				});
+			},
+
+			addComponentToContainer : function(componentId,containerNode) {
+				var modelName = containerNode.getAttribute('data-model-name');
+				var modelId = containerNode.get('id');
+				modelId = modelId.replace('vi_','');
+				var queryParams = 'target_model_name='+modelName+'&target_id='+modelId;
+				queryParams += '&model_redirect='+modelName+'&action_redirect=wspace_display&id_redirect='+modelId;
+
+				var completeCallback = function() {
+					R8.Workspace.setupNewItem(cleanupId);
+				}
+				var callbacks = {
+					'io:renderComplete' : completeCallback
+				};
+//				R8.Ctrl.call('component/clone/'+componentId,queryParams,callbacks);
+				R8.Ctrl.call('component/clone/'+componentId,queryParams);
 			},
 
 			setupNewItem : function(cleanupId) {
@@ -430,7 +448,7 @@ console.log('registering port:'+portElemID);
 				var itemChildren = viewspaceNode.get('children');
 				var newItemNode = itemChildren.item(itemChildren.size()-1);
 				var newItemId = newItemNode.get('id');
-//console.log(newItemNode);
+
 				R8.Workspace.addViewSpaceItem(newItemNode);
 				R8.Workspace.addDragDrop(newItemId);
 			},

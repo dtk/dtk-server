@@ -1,8 +1,8 @@
 
 <div id="{%=model_name%}-search-slide-bar" style="height:92px; width: {%=slide_width%}px;">
 	{%for model in model_list%}
-	<div class="avail_node basic-node" style="position:relative; float: left; margin: 0 5px; z-index: 100;">
-		<div id="item_{%=model[:id]%}" data-id="{%=model[:id]%}" data-model-name="{%=model[:model_name]%}" class="basic-node node">
+	<div class="avail_item basic-component" style="position:relative; float: left; margin: 0 5px; z-index: 100;">
+		<div id="item_{%=model[:id]%}" data-id="{%=model[:id]%}" data-model-name="{%=model[:model_name]%}" class="basic-component component">
 			<div class="basic-tl-corner corner"></div>
 			<div class="header"></div>
 			<div class="basic-tr-corner corner"></div>

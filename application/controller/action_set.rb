@@ -63,7 +63,7 @@ module XYZ
         model,method = action[:route].split("/")
         method ||= :index
         action_namespace = "#{R8::Config[:application_name]}_#{model}_#{method}".to_sym
-pp [:ctrl_result,ctrl_result]
+
         @ctrl_results[action_namespace] = ctrl_result
         @ctrl_results[:as_run_list] << action_namespace
       end
@@ -74,11 +74,14 @@ pp [:ctrl_result,ctrl_result]
       model,method = action[:route].split("/")
       method ||= :index
       a = Ramaze::Action.create(
-       :node => XYZ.const_get("#{model.capitalize}Controller"),
-       :method => method.to_sym,
-       :params => params,
-       :engine => lambda{|action, value| value },
-       :variables => {:js_includes => @js_includes}
+        :node => XYZ.const_get("#{model.capitalize}Controller"),
+        :method => method.to_sym,
+        :params => params,
+        :engine => lambda{|action, value| value },
+        :variables => {
+          :js_includes => @js_includes,
+          :css_includes => @css_includes
+        }
        )
       return a.call
     end

@@ -1,15 +1,8 @@
 /* blue component: #73c0ef */
 
-.comp-component-wrapper {
+.basic-component {
 	width: 160px;
-	height: 50px;
-}
-
-.comp-component {
-	width: 160px;
-	height: 50px;
-	border: 2px solid black;
-	background-color: #73C0EF;
+	height: 80px;
 }
 
 .yui3-dd-dragging {
@@ -21,19 +14,12 @@
 	z-index: 10;
 }
 
-.comp-img {
-	height: 40px;
-	width: 80px;
-	margin: 5px;
-	float:left;
-}
-
-#slider .comp-component {
-	margin: 10px 5px;
+#slider .basic-component {
+	margin: 5px 5px;
 /*	position: relative;*/
 }
 
-.comp-component .corner {
+.basic-component .corner {
 	height: 13px;
 	width: 13px;
 	background-image: url(../images/workspace/basic-comp-corners.png);
@@ -44,50 +30,53 @@
 	background-image: url(../images/workspace/basic-comp-corners-focus.png);
 }
 
-.comp-tl-corner {
+.basic-tl-corner {
 }
-.comp-tr-corner {
+.basic-tr-corner {
 	background-position: 0px -13px;
 }
-.comp-bl-corner {
+.basic-bl-corner {
 	background-position: 0px -39px;
 }
-.comp-br-corner {
+.basic-br-corner {
 	background-position: 0px -26px;
 }
 
-.comp-component .comp-header {
+.basic-component .header {
 	background-color: #73C0EF;
-	width: 94px;
+	width: 134px;
 	height: 11px;
 	float: left;
 	font-size: 11px;
 	border-top: solid 2px black;
 }
 
-.compFocus .comp-header {
+.compFocus .header {
 	border-top: solid 2px #E84423;
 }
 
-.comp-component .comp-footer {
+.basic-component .footer {
 	background-color: #73C0EF;
-	width: 94px;
+	width: 134px;
 	height: 11px;
 	float: left;
 	border-bottom: solid 2px black;
 }
-.compFocus .comp-footer {
+.compFocus .footer {
 	border-bottom: solid 2px #E84423;
 }
 
-.comp-component .comp-body {
-/*	background-color: #73C0EF;*/
-	width: 80px;
-	height: 40px;
+.basic-component .body {
+	background-color: #73C0EF;
+	width: 156px;
+	height: 54px;
+	float: left;
+	border-left: solid 2px black;
+	border-right: solid 2px black;
 	text-align: center;
 }
 
-.compFocus .comp-body {
+.compFocus .body {
 	border-left: solid 2px #E84423;
 	border-right: solid 2px #E84423;
 }

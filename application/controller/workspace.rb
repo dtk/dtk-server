@@ -4,8 +4,6 @@ module XYZ
     def index
 #TODO: make call to load the users/system already in use plugins,cmds,etc
       include_js('plugins/search.cmdhandler')
-pp @js_includes
-pp 'going to return from workspace index action'
       return {:content=>''}
     end
 
@@ -41,12 +39,15 @@ pp 'going to return from workspace index action'
       model_list = get_objects(model_name.to_sym,where_clause)
       model_list.each_with_index do |model,index|
         model_list[index][:model_name] = model_name
+          body_value = ''
           model_list[index][:ui].nil? ? model_list[index][:ui] = {} : nil
           model_list[index][:ui][:images].nil? ? model_list[index][:ui][:images] = {} : nil
 
-          !model_list[index][:ui][:images][:tnail].nil? ? img_value = '<img src="' << R8::Config[:base_images_uri] << '/' << model_name << 'Icons/'<< model_list[index][:ui][:images][:tnail] <<'"/>' : img_value = ""
-          model_list[index][:img_value] = img_value
- pp model_list[index][:img_value]
+         !model_list[index][:ui][:images][:tnail].nil? ? img_value = '<img title="' << model_list[index][:display_name] << '"' << 'src="' << R8::Config[:base_images_uri] << '/' << model_name << 'Icons/'<< model_list[index][:ui][:images][:tnail] <<'"/>' : img_value = ""
+          body_value = img_value
+          
+          body_value == '' ? body_value = model_list[index][:display_name] : nil
+          model_list[index][:body_value] = body_value
       end
 
       tpl = R8Tpl::TemplateR8.new("workspace/wspace_search_#{model_name}",user_context())

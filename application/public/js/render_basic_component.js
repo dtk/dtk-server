@@ -1,9 +1,9 @@
 
 
-R8.Templating.render_basic_component = function(templateVars) {
+R8.Templating.render_basic_node = function(templateVars) {
 	var compDiv = document.createElement('div');
 	compDiv.setAttribute('id',templateVars['id']);
-	compDiv.setAttribute('class', templateVars['template']+'-component component');
+	compDiv.setAttribute('class', templateVars['template']+'-node node');
 	compDiv.setAttribute('style','top:'+templateVars['top']+'px; left:'+templateVars['left']+'px;');
 
 	var tlCorner = document.createElement('div');

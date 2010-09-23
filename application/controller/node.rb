@@ -12,6 +12,9 @@ module XYZ
 pp node
       tpl.assign(:node,node)
 
+      num_components = node[:component].length
+      tpl.assign(:num_components,num_components)
+
       _node_vars = {}
       _node_vars[:i18n] = get_model_i18n("node",user_context())
       tpl.assign("_node",_node_vars)
@@ -22,7 +25,6 @@ pp node
 
       return tpl_result
     end
-
   
   end
 end

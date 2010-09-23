@@ -42,7 +42,7 @@
              :cols => 40,
             }},
             {:value_asserted => {
-             :type => 'text',
+             :type => 'hash',
              :help => '',
              :rows => 1,
              :cols => 40,

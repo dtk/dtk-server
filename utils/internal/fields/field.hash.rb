@@ -21,18 +21,20 @@ class Fieldhash < Fieldbase
   end
 
   def get_field_edit_rtpl()
-    rows = "6"
-    cols = "30"
-    return '<textarea id="' + @id + '" name="' + @name + '" class="' + @class_txt + '" ' + rows +  ' ' + cols + '>' + @value + '</textarea>'
+    rows = 10
+    cols = 50
+    value = "{%=lambda{|a|a.kind_of?(String) ? a : JSON.pretty_generate(a)}.call(#{@model_name}[:#{@name}])%}"
+    field_string =  '<textarea id="' + @id + '" name="' + @name + '" class="' + @class_txt + '" rows=' + rows.to_s +  ' cols=' + cols.to_s + '>' + value + '</textarea>'
+    return field_string
   end
 
   def get_field_display_rtpl()
-    field_string = '{%=' + @model_name + '[:' + @name + '].inspect%}'
+    field_string = "{%=lambda{|a|a.kind_of?(String) ? a : JSON.pretty_generate(a)}.call(#{@model_name}[:#{@name}])%}"
     return field_string
   end
 
   def get_field_list_rtpl()
-    field_string = '{%=' + @model_name + '[:' + @name + '].inspect%}'
+    field_string = "{%=lambda{|a|a.kind_of?(String) ? a : JSON.pretty_generate(a)}.call(#{@model_name}[:#{@name}])%}"
     return field_string
   end
 

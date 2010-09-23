@@ -28,7 +28,7 @@ module XYZ
             values = {
               "recipe_name" => recipe_name, 
               "node_name" => node_name,
-              "basic_type" => metadata[:basic_type]
+              "basic_type" => metadata["basic_type"]
             }
 
             attributes = get_attributes_with_values(recipe_name,metadata,node)
@@ -59,7 +59,7 @@ module XYZ
           values = {
             "recipe_name" => recipe_name, 
             "description" => description,
-            "basic_type" => metadata[:basic_type]
+            "basic_type" => metadata["basic_type"]
           }
           monitoring_items = get_monitoring_items(metadata)
           attributes =  get_attributes_with_values(recipe_name,metadata)
@@ -107,8 +107,8 @@ module XYZ
         cookbook_metadata = get_metadata_for_cookbook(get_cookbook_name_from_recipe_name(recipe_name))
         return nil if cookbook_metadata.nil?
         @recipe_service_info_cache[recipe_name] ||= get_component_services_info(recipe_name,cookbook_metadata)
-        basic_type = (cookbook_metadata[:basic_types]||{})[get_unqualified_recipe_name(recipe_name)]
-        cookbook_metadata.merge({"services_info" => @recipe_service_info_cache[recipe_name],:basic_type => basic_type})
+        basic_type = (cookbook_metadata["basic_types"]||{})[get_unqualified_recipe_name(recipe_name)]
+        cookbook_metadata.merge({"services_info" => @recipe_service_info_cache[recipe_name],"basic_type" => basic_type})
       end
 
       def get_metadata_for_cookbook(cookbook_name)
@@ -231,7 +231,7 @@ module XYZ
           #TODO: for testing port type
           unless (metadata["attributes"]||{}).find{|a,m|m["port_type"]}
             port_type = ["","input","output"][attr_name[0].modulo(3)]
-            ret[attr_name][:port_type] = port_type unless port_type.empty?
+            ret[attr_name]["port_type"] = port_type unless port_type.empty?
           end
           ##############
           set_attribute_value(ret,attr_name,attr_metadata,metadata,node)

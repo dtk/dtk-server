@@ -4,6 +4,7 @@ module XYZ
       class ComponentRecipe < Top
         definitions do
           target[:type] = "template"
+          target[:basic_type] = source["basic_type"]
           name = source["recipe_name"]
           target[:display_name] = name
           target[:description] = source["description"]

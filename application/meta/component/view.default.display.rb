@@ -48,6 +48,12 @@
           :rows => 1,
           :cols => 20,
         }},
+      {:basic_type => {
+          :type => 'text',
+          :help => '',
+          :rows => 1,
+          :cols => 20,
+        }},
       {:external_type => {
           :type => 'text',
           :help => '',

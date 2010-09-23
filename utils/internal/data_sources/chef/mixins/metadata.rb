@@ -2,15 +2,13 @@ module XYZ
   module DSConnector
    module ChefMixinMetadata # TODO unify with code in R8Cookbook
 
-     SpecialMetaAttribute = "_meta_info"
-     SpecialMetaFields = %w{basic_types}
+     SpecialMetaAttribute = "_meta_info".to_sym
+     SpecialMetaFields = [:basic_types]
      def process_raw_metadata!(metadata)
-       special = (metadata["attributes"]||{})[SpecialMetaAttribute]
+       special = (metadata[:attributes]||{})[SpecialMetaAttribute]
        return metadata unless special
        SpecialMetaFields.each do |f|
          r = special.delete(f)
-pp [f,r] if r
-
          metadata[f] = r if r
        end
        metadata

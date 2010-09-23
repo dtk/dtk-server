@@ -25,8 +25,14 @@ module XYZ
             node = get_node(node_name)
             metadata = get_metadata_for_recipe(recipe_name)
             next unless metadata
+            values = {
+              "recipe_name" => recipe_name, 
+              "node_name" => node_name,
+              "basic_type" => metadata[:basic_type]
+            }
+
             attributes = get_attributes_with_values(recipe_name,metadata,node)
-            ds_hash = DataSourceUpdateHash.new({"attributes" => attributes, "recipe_name" => recipe_name, "node_name" => node_name})
+            ds_hash = DataSourceUpdateHash.new(values.merge({"attributes" => attributes}))
             block.call(ds_hash)
           end
         end
@@ -50,10 +56,15 @@ module XYZ
         recipes.each do |recipe_name,description|
           metadata = get_metadata_for_recipe(recipe_name)
           next unless metadata
+          values = {
+            "recipe_name" => recipe_name, 
+            "description" => description,
+            "basic_type" => metadata[:basic_type]
+          }
           monitoring_items = get_monitoring_items(metadata)
           attributes =  get_attributes_with_values(recipe_name,metadata)
           #TODO: what to construct so nested and mark attributes as complete
-          ds_hash = DataSourceUpdateHash.new({"attributes" => attributes, "monitoring_items" => monitoring_items, "recipe_name" => recipe_name, "description" => description})
+          ds_hash = DataSourceUpdateHash.new(values.merge({"attributes" => attributes, "monitoring_items" => monitoring_items}))
           ret << ds_hash.freeze 
         end
         ret
@@ -96,7 +107,8 @@ module XYZ
         cookbook_metadata = get_metadata_for_cookbook(get_cookbook_name_from_recipe_name(recipe_name))
         return nil if cookbook_metadata.nil?
         @recipe_service_info_cache[recipe_name] ||= get_component_services_info(recipe_name,cookbook_metadata)
-        cookbook_metadata.merge("services_info" => @recipe_service_info_cache[recipe_name])
+        basic_type = (cookbook_metadata[:basic_types]||{})[get_unqualified_recipe_name(recipe_name)]
+        cookbook_metadata.merge({"services_info" => @recipe_service_info_cache[recipe_name],:basic_type => basic_type})
       end
 
       def get_metadata_for_cookbook(cookbook_name)
@@ -113,6 +125,7 @@ module XYZ
           #get max, in case multiple versions
           cookbook << r[cookbook_name].map{|x|ChefVersion[x]}.max.chef_version
         end
+
         r = get_rest("cookbooks/#{cookbook.join('/')}")
         return nil unless r
         ret=process_raw_metadata!(r.to_hash["metadata"])
@@ -134,6 +147,10 @@ module XYZ
         recipe_name.gsub(/::.+/,"")
       end
 
+      def get_unqualified_recipe_name(recipe_name)
+        recipe_name =~ /.+::(.+)/ ? $1 : recipe_name
+      end
+          
       def get_monitoring_items(metadata)
         ret = Hash.new
         return ret unless metadata

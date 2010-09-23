@@ -4,6 +4,7 @@ module XYZ
       class ComponentInstance < Top
         definitions do
           target[:type] = "instance"
+          target[:basic_type] = source["basic_type"]
           recipe_name = source["recipe_name"]
           name = fn(lambda{|x,y|x+ "__" + y},source["node_name"],recipe_name)
           target[:display_name] = name

@@ -7,10 +7,8 @@ module XYZ
      def process_raw_metadata!(metadata)
        special = (metadata["attributes"]||{})[SpecialMetaAttribute]
        return metadata unless special
-       SpecialMetaFields.each do |f|
-         r = special.delete(f)
-         metadata[f] = r if r
-       end
+       SpecialMetaFields.each{|f|metadata[f] = special[f]}
+       metadata["attributes"].delete(SpecialMetaAttribute)
        metadata
      end
 

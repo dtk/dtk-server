@@ -1,5 +1,5 @@
 {
-      :action => 'index.php',
+      :action => '',
       :hidden_fields => [
         {
           :model => {

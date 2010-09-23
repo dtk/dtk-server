@@ -427,7 +427,7 @@ console.log('registering port:'+portElemID);
 				modelId = modelId.replace('vi_','');
 				var queryParams = 'target_model_name='+modelName+'&target_id='+modelId;
 				queryParams += '&model_redirect='+modelName+'&action_redirect=wspace_display&id_redirect='+modelId;
-
+console.log("QueryParams:"+queryParams);
 				var completeCallback = function() {
 					R8.Workspace.setupNewItem(cleanupId);
 				}

@@ -5,7 +5,7 @@
           :model => {
             :required => true,
             :type => 'hidden',
-            :value => 'node',
+            :value => 'attribute',
           },
         },
         {
@@ -35,13 +35,7 @@
              :rows => 1,
              :cols => 40,
             }},
-            {:input_id => {
-             :type => 'text',
-             :help => '',
-             :rows => 1,
-             :cols => 40,
-            }},
-            {:output_id => {
+            {:description => {
               :type => 'text',
               :help => '',
               :rows => 1,

@@ -19,7 +19,7 @@ module XYZ
         column :image_size, :numeric, :size=>[8, 3] #in megs
         column :operational_status, :varchar, :size => 50
         column :ui, :json
-        virtual_column :parent_name, :possible_parents => [:library,:project]
+        virtual_column :parent_name, :possible_parents => [:library,:datacenter,:project]
         virtual_column :disk_size #in megs
         #TBD: can these virtual columns just be inherited
         foreign_key :data_source_id, :data_source, FK_SET_NULL_OPT
@@ -88,6 +88,7 @@ module XYZ
     end
     def parent_name()
       return "library/#{self[:library][:display_name]}" if self[:library] and self[:library][:display_name]
+      return "datacenter/#{self[:datacenter][:display_name]}" if self[:datacenter] and self[:datacenter][:display_name]
       return "project/#{self[:project][:display_name]}" if self[:project] and self[:project][:display_name]
       nil
     end

@@ -5,7 +5,7 @@ module XYZ
       def up()
         column :ds_name, :varchar, :size => 25 
         column :source_handle, :json
-        many_to_one :project,:library
+        many_to_one :library, :datacenter, :project
         one_to_many :data_source_entry
       end
     end

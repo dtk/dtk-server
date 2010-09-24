@@ -4,7 +4,7 @@ module XYZ
     class << self
       def up()
         # no table specific columns (yet)
-        one_to_many :component, :node, :assoc_node_component, :node_group, :node_group_member, :attribute_link, :network_partition, :network_gateway
+        one_to_many :data_source, :component, :node, :assoc_node_component, :node_group, :node_group_member, :attribute_link, :network_partition, :network_gateway
       end
     
       #### actions

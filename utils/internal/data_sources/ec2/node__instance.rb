@@ -6,6 +6,7 @@ module XYZ
         definitions do
           target[:type] = "instance"
           target[:display_name] = source[:id]
+          target[:operational_status] = source[:state]
           target[:image_size] = source[:flavor][:ram]
           target[:is_deployed] = true
 

@@ -1,7 +1,7 @@
 <html>
 <head>
 
-<link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/combo?3.1.0/build/cssreset/reset-min.css&3.1.0/build/cssfonts/fonts-min.css">
+<link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/combo?3.1.0/build/cssreset/reset.css&3.1.0/build/cssfonts/fonts.css">
 
 <!--//TODO: revisit to variablize the path of the founcation css-->
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/workspace.css" />
@@ -14,17 +14,17 @@
 
 
 <!-- JS 
-<script type="text/javascript" src="http://yui.yahooapis.com/combo?3.1.0/build/yui/yui-min.js&3.1.0/build/oop/oop-min.js&3.1.0/build/dom/dom-min.js&3.1.0/build/event-custom/event-custom-min.js&3.1.0/build/event/event-min.js&3.1.0/build/pluginhost/pluginhost-min.js&3.1.0/build/node/node-min.js&3.1.0/build/querystring/querystring-stringify-simple-min.js&3.1.0/build/queue-promote/queue-promote-min.js&3.1.0/build/datatype/datatype-xml-min.js&3.1.0/build/io/io-min.js&3.1.0/build/attribute/attribute-min.js&3.1.0/build/base/base-min.js&3.1.0/build/dd/dd-min.js"></script>
+<script type="text/javascript" src="http://yui.yahooapis.com/combo?3.1.0/build/yui/yui.js&3.1.0/build/oop/oop.js&3.1.0/build/dom/dom.js&3.1.0/build/event-custom/event-custom.js&3.1.0/build/event/event.js&3.1.0/build/pluginhost/pluginhost.js&3.1.0/build/node/node.js&3.1.0/build/querystring/querystring-stringify-simple.js&3.1.0/build/queue-promote/queue-promote.js&3.1.0/build/datatype/datatype-xml.js&3.1.0/build/io/io.js&3.1.0/build/attribute/attribute.js&3.1.0/build/base/base.js&3.1.0/build/dd/dd.js"></script>
 -->
 
 <!-- JS -->
-<script type="text/javascript" src="http://yui.yahooapis.com/combo?3.1.0/build/yui/yui-min.js&3.1.0/build/oop/oop-min.js&3.1.0/build/event-custom/event-custom-min.js&3.1.0/build/dom/dom-min.js&3.1.0/build/event/event-min.js&3.1.0/build/pluginhost/pluginhost-min.js&3.1.0/build/node/node-min.js&3.1.0/build/attribute/attribute-base-min.js&3.1.0/build/base/base-min.js&3.1.0/build/anim/anim-min.js&3.1.0/build/dd/dd-min.js&3.1.0/build/querystring/querystring-stringify-simple-min.js&3.1.0/build/queue-promote/queue-promote-min.js&3.1.0/build/datatype/datatype-xml-min.js&3.1.0/build/io/io-min.js"></script>
+<script type="text/javascript" src="http://yui.yahooapis.com/combo?3.1.0/build/yui/yui.js&3.1.0/build/oop/oop.js&3.1.0/build/event-custom/event-custom.js&3.1.0/build/dom/dom.js&3.1.0/build/event/event.js&3.1.0/build/pluginhost/pluginhost.js&3.1.0/build/node/node.js&3.1.0/build/attribute/attribute-base.js&3.1.0/build/base/base.js&3.1.0/build/anim/anim.js&3.1.0/build/dd/dd.js&3.1.0/build/querystring/querystring-stringify-simple.js&3.1.0/build/queue-promote/queue-promote.js&3.1.0/build/datatype/datatype-xml.js&3.1.0/build/io/io.js"></script>
 <!-- JS -->
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/demoData.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/demoData2.r8.js"></script>
 
 <!--
-<script type="text/javascript" src="http://yui.yahooapis.com/combo?3.0.0/build/yui/yui-min.js&3.0.0/build/loader/loader-min.js"></script>
+<script type="text/javascript" src="http://yui.yahooapis.com/combo?3.0.0/build/yui/yui.js&3.0.0/build/loader/loader.js"></script>
 -->
 
 <!--Temp Usage of jQuery for eval purposes -->
@@ -49,7 +49,7 @@ R8.config['base_uri'] = '{%=_app[:base_uri]%}/xyz';
 
 </head>
 
-	<body onload="R8.Workspace.init();">
+	<body onload="R8.Workspace.init();" class="yui3-skin-sam  yui-skin-sam">
 	<div id="page-container" style="margin: 0 auto 0 auto;">
 		<div id="toolbar">
 			&nbsp;&nbsp;<a href="javascript:R8.MainToolbar.toggleSlider();">Toggle</a>

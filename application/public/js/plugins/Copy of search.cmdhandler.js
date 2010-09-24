@@ -191,13 +191,11 @@ R8.Cmdbar.cmdHandlers['search'] = {
 						
 					R8.Cmdbar.loadedTabs[tIndex].compDDel.dd.plug(Y.Plugin.DDProxy, {
 						moveOnEnd: false,
-						borderStyle: false,
-//						cloneNode: true
+						cloneNode: true
 					});
-
+						
 					R8.Cmdbar.loadedTabs[tIndex].compDDel.on('drag:start', function(e){
 						var drag = this.get('dragNode'), c = this.get('currentNode');
-						drag.set('innerHTML',c.get('innerHTML'));
 						drag.setAttribute('class', c.getAttribute('class'));
 						this.dd.addToGroup('viewspace_drop');
 						drag.setStyles({
@@ -408,28 +406,26 @@ R8.Cmdbar.cmdHandlers['search'] = {
 
 					R8.Cmdbar.loadedTabs[tIndex].compDDel.dd.plug(Y.Plugin.DDProxy, {
 						moveOnEnd: false,
-						borderStyle: false,
-//						cloneNode: true
+						cloneNode: true
 					});
 
 					R8.Cmdbar.loadedTabs[tIndex].compDDel.on('drag:start', function(e){
 						var drag = this.get('dragNode'), c = this.get('currentNode');
-						drag.set('innerHTML',c.get('innerHTML'));
 						drag.setAttribute('class', c.getAttribute('class'));
 						this.dd.addToGroup('node_drop');
 						drag.setStyles({
 							opacity: .5,
-						});
-
-						//create all the drop targets for each node in the viewspace
-						R8.Cmdbar.loadedTabs[tIndex].dropList = Y.all('#viewspace div.node');
-
-//TODO: revisit to look into necessity of unplugging drops on the target nodes
-						R8.Cmdbar.loadedTabs[tIndex].dropList.each(function(){
-							this.plug(Y.Plugin.Drop);
-							this.drop.addToGroup(['node_drop']);
+							zIndex: 1000
 						});
 					});
+
+					//create all the drop targets for each node in the viewspace
+					R8.Cmdbar.loadedTabs[tIndex].dropList = Y.all('#viewspace div.node');
+					R8.Cmdbar.loadedTabs[tIndex].dropList.each(function(){
+						this.plug(Y.Plugin.Drop);
+						this.drop.addToGroup(['node_drop']);
+					});
+//					R8.Cmdbar.loadedTabs[tIndex].dropList
 
 					//TODO: come back and add in clean up of DD objects and events
 					R8.Cmdbar.loadedTabs[tIndex].compDDel.on('drag:drophit', function(e){
@@ -485,6 +481,9 @@ R8.Cmdbar.cmdHandlers['search'] = {
 			sliderAnim: null,
 			sliderInMotion: false,
 			sliderSetup: false,
+			
+			//TODO: this is temp until can figure out workaround for YUI DD Delegate issue with overflow
+			sliderDDList : [],
 		},
 		//end node tabDef
 	}

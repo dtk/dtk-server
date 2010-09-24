@@ -47,25 +47,28 @@ module XYZ
 	  child_id_info = IDInfoTable.get_row_from_id_handle IDHandle[:c => c, :uri => child_uri]
           if child_id_info
 	    update_from_hash_from_instance_id(child_id_info,child_assigns,opts)
+            child_id_list << child_id_info[:id] if delete_not_matching
           else
             unless assigns.kind_of?(HashObject) and assigns.do_not_extend
               factory_id_handle = IDHandle[:c => c, :uri => factory_id_info[:uri]] 
               new_uris = new_uris + create_from_hash(factory_id_handle,{qualified_ref => child_assigns})
-              #new_uris wil just have one element
-              child_id_info = IDInfoTable.get_row_from_id_handle IDHandle[:c => c, :uri => new_uris.first]
             end
           end
-          child_id_list << child_id_info[:id] if delete_not_matching
 
 	end
-        delete_not_matching_children(child_id_list,factory_id_info,assigns,opts) if delete_not_matching
+        if delete_not_matching
+          #at this point child_list will just have existing items; need to add new items
+          new_child_ids = new_uris.map{|uri| IDHandle[:c => c, :uri => uri].get_id()}
+          child_id_list = child_id_list + new_child_ids
+          delete_not_matching_children(child_id_list,factory_id_info,assigns,opts) 
+        end
         new_uris
       end
 
       def delete_not_matching_children(child_id_list,factory_id_info,assigns,opts={})
         parent_id_handle = IDHandle[:c => factory_id_info[:c], :guid => factory_id_info[:parent_id]]
         relation_type = factory_id_info[:relation_type]
-        where_clause = child_id_list.empty? ? nil : SQL.not(SQL.and(*child_id_list.map{|id|{:id=>id}}))
+        where_clause = child_id_list.empty? ? nil : SQL.not(SQL.or(*child_id_list.map{|id|{:id=>id}}))
         where_clause = SQL.and(where_clause,assigns.constraints) unless assigns.constraints.empty?
         delete_instances_wrt_parent(relation_type,parent_id_handle,where_clause,opts)        
       end

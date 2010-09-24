@@ -30,9 +30,8 @@ module XYZ
               "node_name" => node_name,
               "basic_type" => metadata["basic_type"]
             }
-
             attributes = get_attributes_with_values(recipe_name,metadata,node)
-            ds_hash = DataSourceUpdateHash.new(values.merge({"attributes" => attributes}))
+            ds_hash = DataSourceUpdateHash.new(values.merge({"attribute" => attributes}))
             block.call(ds_hash)
           end
         end
@@ -42,7 +41,7 @@ module XYZ
       def get_objects__component__recipe(&block)
         get_cookbook_names().each do |cookbook_name|
           get_recipes_assoc_cookbook(cookbook_name).each do |ds_hash|
-           block.call(ds_hash)
+            block.call(ds_hash)
           end
         end
         return HashIsComplete.new() #HashMayNotBeComplete.new()
@@ -63,7 +62,6 @@ module XYZ
           }
           monitoring_items = get_monitoring_items(metadata)
           attributes =  get_attributes_with_values(recipe_name,metadata)
-          #TODO: what to construct so nested and mark attributes as complete
           ds_hash = DataSourceUpdateHash.new(values.merge({"attributes" => attributes, "monitoring_items" => monitoring_items}))
           ret << ds_hash.freeze 
         end
@@ -73,8 +71,8 @@ module XYZ
 
       def get_objects__assoc_node_component(&block)
         get_node_recipe_assocs().each do |node_name,recipes|
-          recipes.each do |recipe|
-            ds_hash = DataSourceUpdateHash.new({"node_name" => node_name, "recipe_name" => recipe})
+          recipes.each do |recipe_name|
+            ds_hash = DataSourceUpdateHash.new({"node_name" => node_name, "recipe_name" => recipe_name})
   #TODO: to be used to load in variable values node_attributes = get_node_attributes(node_name)
   #or instead may have discover and update on attributes
             block.call(ds_hash.freeze)
@@ -219,7 +217,7 @@ module XYZ
       end
 
       def get_attributes_with_values_aux(recipe_name,metadata,node=nil)
-        ret = HashObject.create_with_auto_vivification()
+        ret = DataSourceUpdateHash.create_with_auto_vivification()
         (metadata["attributes"]||{}).each do |raw_attr_name,attr_metadata| 
           recipes = attr_metadata["recipes"]||[]
           next unless recipes.empty? or recipes.include?(recipe_name)
@@ -234,6 +232,7 @@ module XYZ
           ##############
           set_attribute_value(ret,attr_name,attr_metadata,metadata,node)
         end
+        
         ret.freeze
       end
     

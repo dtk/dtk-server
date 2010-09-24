@@ -86,13 +86,13 @@ module XYZ
       #TBD: how to avoid this db call
       ds_object = parent_ds_object.get_directly_contained_objects(:data_source_entry,{:obj_type=>@obj_type.to_s}).first
       raise Error.new("cannot find data source adapter for nested definition") if ds_object.nil?
-      #TBD: need to set appropriate flags on whetehr golden store
       ret = DBUpdateHash.new()
       (@source_attributes.apply(ds_hash_list)||{}).each do |ref,child_source_hash_x|
         child_source_hash = child_source_hash_x.merge(:ref => ref)
         key = ds_object.relative_distinguished_name(child_source_hash)
         ret[key] = ds_object.normalize(child_source_hash)
       end
+      ret.mark_as_complete if ds_object[:ds_is_golden_store]
       ret
     end
   end    

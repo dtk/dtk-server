@@ -16,6 +16,11 @@ module XYZ
 
   class IDHandle < Hash
     include CommonMixin
+
+    def get_id()
+      IDInfoTable.get_row_from_id_handle(self,:short_circuit_for_minimal_row => true)[:id]
+    end
+
     def initialize(x)
       super()
       raise_has_illegal_form(x) unless self[:c] = x[:c]

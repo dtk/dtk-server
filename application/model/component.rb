@@ -14,7 +14,7 @@ module XYZ
         column :uri, :varchar
         column :ui, :json
         virtual_column :parent_name, :possible_parents => [:component,:library,:project]
-        many_to_one :component,:library,:project
+        many_to_one :component, :library, :datacenter, :project
         one_to_many :component, :attribute_link, :attribute, :monitoring_item
       end
     end

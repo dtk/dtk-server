@@ -8,7 +8,7 @@ module XYZ
         foreign_key :output_id, :attribute, FK_CASCADE_OPT
         column :label, :text, :default => "1"
         has_ancestor_field()
-        many_to_one :project, :library, :deployment, :component
+        many_to_one :library, :datacenter, :component, :project
       end
 
       ### "Model fns"

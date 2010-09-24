@@ -55,7 +55,7 @@ module XYZ
     ACTION_HANDLER_OBJ = {
       :import_chef_recipes => Library,
       :clone_component => Object,
-      :discover_nodes => Deployment,
+      :discover_nodes => Datacenter,
       :update_from_hash => Object,
       :create_attribute_link => AttributeLink,
       :create_node_component_assoc => AssocNodeComponent,
@@ -148,10 +148,10 @@ module XYZ
           redirect_uri = request[:target_project_uri]
         when :discover_nodes
           params = [
-            IDHandle[:c => c,:uri => request[:deployment_uri]],
+            IDHandle[:c => c,:uri => request[:datacenter_uri]],
             request[:discover_mode_info]
           ]
-          redirect_uri = request[:deployment_uri]
+          redirect_uri = request[:datacenter_uri]
         when :create_attribute_link
           params = [
             IDHandle[:c => c, :uri => request[:target_uri]],

@@ -23,7 +23,7 @@ module XYZ
         virtual_column :disk_size #in megs
         #TBD: can these virtual columns just be inherited
         foreign_key :data_source_id, :data_source, FK_SET_NULL_OPT
-        many_to_one :library,:project
+        many_to_one :library, :datacenter, :project
         one_to_many :attribute, :node_interface, :address_access_point, :monitoring_item
       end
 
@@ -133,7 +133,7 @@ module XYZ
         column :ds_key, :varchar
         foreign_key :node_id, :node, FK_CASCADE_OPT
         foreign_key :component_id, :component, FK_CASCADE_OPT
-        many_to_one :library, :project
+        many_to_one :library, :datacenter, :project
       end
 
       ##### Actions
@@ -183,7 +183,7 @@ module XYZ
     set_relation_name(:node,:node_group)
     class << self
       def up()
-        many_to_one :library, :project
+        many_to_one :library, :datacenter, :project
       end
 
       ##### Actions
@@ -196,7 +196,7 @@ module XYZ
       def up()
 	foreign_key :node_id, :node, FK_CASCADE_OPT
 	foreign_key :node_group_id, :node_group, FK_CASCADE_OPT
-        many_to_one :library, :project
+        many_to_one :library, :datacenter, :project
       end
 
       ##### Actions

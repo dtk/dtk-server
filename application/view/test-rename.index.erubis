@@ -74,9 +74,9 @@ asdfasdfasdfasdfasdf<br/>
 
 <form method="post" action="<%= route('action_handler/discover_nodes') %>">
   <fieldset>
-    <legend>To discover nodes in deployment</legend>
-    <label for="form-title1">Deployment Uri</label>
-    <input id="form-title1" name="deployment_uri" type="text" />
+    <legend>To discover nodes in datacenter</legend>
+    <label for="form-title1">Datacenter Uri</label>
+    <input id="form-title1" name="datacenter_uri" type="text" />
     <input type="submit" value="Discover" />
   </fieldset>
 </form>

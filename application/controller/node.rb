@@ -9,8 +9,12 @@ module XYZ
 #      node = get_object_by_id(id)
  #     node.delete(:image_size)
       node = Node.get_wspace_display(IDHandle[:c => c, :guid => id])
-pp node
+
+#TODO: temp hack to stub things out
+node[:operational_status] = 'good'
+
       tpl.assign(:node,node)
+      tpl.assign(:base_images_uri,R8::Config[:base_images_uri])
 
       num_components = node[:component].length
       tpl.assign(:num_components,num_components)

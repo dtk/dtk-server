@@ -4,7 +4,7 @@ module XYZ
     def index
 #TODO: make call to load the users/system already in use plugins,cmds,etc
       include_js('plugins/search.cmdhandler')
-      add_js_exe("alert('Testing, testing.., 1.., 2..., 3');")
+#      add_js_exe("alert('Testing, testing.., 1.., 2..., 3');")
       return {:content=>''}
     end
 

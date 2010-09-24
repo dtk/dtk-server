@@ -33,7 +33,7 @@ class Fieldselect < Fieldbase
     return '<JS NOT IMPLEMENT YET>'
   end
 
-  # This returns the View of type edit for an input of type select in TPL/Smarty form
+  # This returns the View of type edit for an input of type select in rtpl form
   #protected function
   def get_field_edit_rtpl()
     (!@multiple.nil? && @multiple != '') ? multiple = @multiple : multiple = ''
@@ -66,7 +66,7 @@ class Fieldselect < Fieldbase
 #    else multiple = ''
 #    end
 
-    field_string = '{%=' + @model_name + '[:' + @name + ']%}'
+    field_string = '{%=' + @model_name + '[:' + @name + '_display]%}'
     return field_string
   end
 end

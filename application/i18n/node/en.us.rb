@@ -13,5 +13,7 @@
   :parent_id => 'PARENT_ID',
   :parent_path => 'PARENT_PATH',
   :parent_name => 'Parent Name',
-  :description_list => 'Descr'
+  :description_list => 'Descr',
+  :operational_status => 'Operational Status',
+  :operational_status_list => 'Op Status'
 }

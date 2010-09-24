@@ -35,6 +35,10 @@
              :rows => 1,
              :cols => 40,
             }},
+            {:operational_status => {
+             :type => 'select',
+             :help => '',
+            }},
             {:image_size => {
              :type => 'text',
              :help => '',

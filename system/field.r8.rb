@@ -1,5 +1,9 @@
 #TBD: put under module and make as many as possible methods private
+require File.expand_path('utility.r8', File.dirname(__FILE__))
+
+module R8Tpl
 class FieldR8
+  include Utility::I18n
 
   def initialize(r8_view_ref=nil)
     @r8_view_ref = r8_view_ref
@@ -15,7 +19,7 @@ class FieldR8
 
     case(field_meta[:type])
       when "select","radio"
-        field_meta[:options] = self.getFieldOptions(field_meta)
+        field_meta[:options] = self.get_field_options(field_meta)
       when "multiselect"
         #if view of type edit add the []'s to allow for array to be returned in request for mult selects
         if(view_type == 'edit') then field_meta[:name] << '[]' end
@@ -36,14 +40,14 @@ class FieldR8
 
   # This adds the js exe call for the given field meta
   def add_validation(formId, field_meta)
-    (field_meta['required'] == true) ? required = "true" : required = "false"
+    (field_meta[:required] == true) ? required = "true" : required = "false"
 
-    case(field_meta['type'])
-      when "radio"
+    case(field_meta[:type])
+      when "radio","select"
         #classRefId used b/c styling cant be applied to radio itself so applied to reference div wrapper
-        content = 'R8.forms.addValidator("' + formId + '",{"id":"' + field_meta[:id] + '","classRefId":"' + field_meta[:id] + '-radio-wrapper","type":"' + field_meta[:type] + '","required":' + required + '});'
+#        content = 'R8.forms.addValidator("' + formId + '",{"id":"' + field_meta[:id] + '","classRefId":"' + field_meta[:id] + '-radio-wrapper","type":"' + field_meta[:type] + '","required":' + required + '});'
       else
-        content = 'R8.forms.addValidator("' + formId + '",{"id":"' + field_meta[:id] + '","type":"' + field_meta[:type] + '","required":' + required + '});'
+#        content = 'R8.forms.addValidator("' + formId + '",{"id":"' + field_meta[:id] + '","type":"' + field_meta[:type] + '","required":' + required + '});'
     end
 #    $GLOBALS['ctrl']->addJSExeScript(
 #      array(
@@ -54,14 +58,19 @@ class FieldR8
   end
 
 #TODO: clean this up when option lists are fully implemented
-  def getFieldOptions(field_meta)
+  def get_field_options(field_meta)
+    options_lists = get_model_options(field_meta[:model_name])
+#TODO: decide if list should just be key'd off of name, or a :options value?
+    options = options_lists[field_meta[:name].to_sym]
+=begin
     options = {
 #      '' => '--None--',
-      'One'=>'One',
-      'Two'=>'Two',
-      'Three'=>'Three',
-      'Four'=>'Four',
+      'inactive' => 'One',
+      'warning' => 'Two',
+      'error' => 'Three',
+      'good' => 'Four',
     }
+=end
     return options
   end
  private
@@ -74,4 +83,4 @@ class FieldR8
   load_field_file("field.base.rb")
 end
 
-
+end

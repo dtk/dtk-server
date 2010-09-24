@@ -4,6 +4,14 @@ module XYZ
     def index
 #TODO: make call to load the users/system already in use plugins,cmds,etc
       include_js('plugins/search.cmdhandler')
+      add_js_exe("alert('Testing, testing.., 1.., 2..., 3');")
+      return {:content=>''}
+    end
+
+    def loadproject(id,parsed_query_string=nil)
+#TODO: make call to load the users/system already in use plugins,cmds,etc
+      include_js('plugins/search.cmdhandler')
+
       return {:content=>''}
     end
 

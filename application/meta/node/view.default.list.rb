@@ -19,6 +19,11 @@
               :objLink => true,
               :objLinkView => 'display',
             }},
+          {:operational_status => {
+              :type => 'select',
+              :width => '10%',
+              :help => ''
+            }},
           {:type => {
               :type => 'text',
               :width => '10%',

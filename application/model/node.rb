@@ -17,6 +17,7 @@ module XYZ
        #TBD: in data source specfic now column :manifest, :varchar #e.g.,rnp-chef-server-0816-ubuntu-910-x86_32
         #TBD: experimenting whetehr better to make this actual or virtual columns
         column :image_size, :numeric, :size=>[8, 3] #in megs
+        column :operational_status, :varchar, :size => 50
         column :ui, :json
         virtual_column :parent_name, :possible_parents => [:library,:project]
         virtual_column :disk_size #in megs

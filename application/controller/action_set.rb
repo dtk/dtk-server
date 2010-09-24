@@ -59,6 +59,7 @@ module XYZ
 
         ctrl_result[:js_includes] = ret_js_includes()
         ctrl_result[:css_includes] = ret_css_includes()
+        ctrl_result[:js_exe_list] = ret_js_exe_list()
 
         model,method = action[:route].split("/")
         method ||= :index
@@ -80,7 +81,8 @@ module XYZ
         :engine => lambda{|action, value| value },
         :variables => {
           :js_includes => @js_includes,
-          :css_includes => @css_includes
+          :css_includes => @css_includes,
+          :js_exe_list => @js_exe_list
         }
        )
       return a.call

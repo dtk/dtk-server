@@ -35,6 +35,10 @@
              :rows => 1,
              :cols => 40,
             }},
+            {:operational_status => {
+             :type => 'select',
+             :help => '',
+            }},
             {:parent_name => {
               :type => 'text',
               :width => '20%',

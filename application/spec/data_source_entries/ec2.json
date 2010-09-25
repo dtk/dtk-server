@@ -20,6 +20,12 @@
           "ds_name": "ec2",
           "source_obj_type": "instance",
           "display_name": "node_instance"
+        },
+        "node_instance": {
+          "obj_type": "network_partition",
+          "ds_name": "ec2",
+          "source_obj_type": "security_group",
+          "display_name": "network_partition"
         }
       },
       "ds_name": "ec2",

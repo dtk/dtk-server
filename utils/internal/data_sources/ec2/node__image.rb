@@ -17,12 +17,12 @@ module XYZ
           #TODO: what about hooking up to network when clone
         end
         class << self
-          def unique_keys(source_hash)
-            [:image,source_hash[:id]]
+          def unique_keys(source)
+            [:image,source[:id]]
           end
 
-          def relative_distinguished_name(source_hash)
-            source_hash[:id]
+          def relative_distinguished_name(source)
+            source[:id]
           end
         end
       end

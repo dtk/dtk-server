@@ -3,6 +3,7 @@ module XYZ
     set_relation_name(:network,:partition)
     class << self
       def up()
+        column :ds_key, :varchar, :hidden => true
         column :is_deployed, :boolean, :default => false
         column :is_internet, :boolean, :default => false #TBD might replace with :type
         many_to_one :library, :datacenter, :project

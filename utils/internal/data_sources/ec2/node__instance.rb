@@ -34,12 +34,12 @@ module XYZ
           #TB: may put both these in form above
           #target[:ds_key] = fn(:unique_keys,[:instance,v[:id]]) or
           #target[:ds_key] = unique_keys[:instance,v[:id]]
-          def unique_keys(source_hash)
-            [:instance,source_hash[:id]]
+          def unique_keys(source)
+            [:instance,source[:id]]
           end
 
-          def relative_distinguished_name(source_hash)
-            source_hash[:id]
+          def relative_distinguished_name(source)
+            source[:id]
           end
         end
       end

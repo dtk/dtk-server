@@ -33,7 +33,16 @@ module XYZ
         end
         return HashMayNotBeComplete.new()
       end
-      private
+
+      def get_objects__network_partition__security_group(&block)
+        security_groups = conn().security_groups_all()
+        #TODO: use cache so can provide for populating also network gateways
+        security_groups.each do |security_group|
+          block.call(DataSourceUpdateHash.new(security_group).freeze)
+        end
+        return HashIsComplete.new()
+      end
+     private
 
       def conn()
         @@conn ||= CloudConnect::EC2.new

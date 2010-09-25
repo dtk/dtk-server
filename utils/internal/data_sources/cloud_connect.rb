@@ -25,6 +25,11 @@ module XYZ
       def servers_all()
         @conn.servers.all.map{|x|hash_form(x)}
       end
+
+      def security_groups_all()
+        @conn.security_groups.all.map{|x|hash_form(x)}
+      end
+
       def flavor_get(id)
         hash_form(@conn.flavors.get(id))
       end

@@ -1,6 +1,14 @@
 module XYZ
   class Monitoring_itemController < Controller
     def component_display(parsed_query_string=nil)
+      component_or_node_display(parsed_query_string)
+    end
+    def node_display(parsed_query_string=nil)
+      component_or_node_display(parsed_query_string)
+    end
+   private
+    #helper fn
+    def component_or_node_display(parsed_query_string=nil)
       where_clause = parsed_query_string || ret_parsed_query_string()
       parent_id = where_clause.delete(:parent_id)
       opts = Hash.new

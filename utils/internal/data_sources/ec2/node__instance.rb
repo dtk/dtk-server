@@ -1,7 +1,9 @@
+require  File.expand_path('mixins/monitoring_items', File.dirname(__FILE__))
 module XYZ
   module DSNormalizer
     class Ec2
       class NodeInstance < Top 
+        extend MonitoringItemsClassMixin
         #TBD: could write 'lint checker that makes sure that target indexes correspond to schema described in models
         definitions do
           target[:type] = "instance"
@@ -9,6 +11,9 @@ module XYZ
           target[:operational_status] = source[:state]
           target[:image_size] = source[:flavor][:ram]
           target[:is_deployed] = true
+
+          source_complete_for target[:monitoring_item]
+          target[:monitoring_item] = fn(:default_node_monitoring_items)
 
           source_complete_for target[:node_interface]          
           prefix = target[:node_interface]

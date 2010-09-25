@@ -73,6 +73,26 @@ R8::Routes["component/display"] = {
   ]
 }
 
+R8::Routes["node/display"] = {
+  :layout => 'default',
+  :alias => '',
+  :params => [:id],
+  :action_set => 
+  [
+   {
+     :route => "node/display",
+     :action_params => ["$id$"],
+     :panel => "main_body"
+   },
+   {
+     :route => "monitoring_item/node_display",
+     :action_params => [{:parent_id => "$id$"}],
+     :panel => "main_body",
+     :assign_type => :append 
+   }
+  ]
+}
+
 R8::Routes["component/testjsonlayout"] = {
   :layout => 'testjson'
 }

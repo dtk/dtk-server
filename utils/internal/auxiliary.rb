@@ -23,6 +23,9 @@ end
 
 module XYZ
   class Aux
+    class Cache < Hash
+    end
+
     class << self
       def create_object_slice(hash,slice_keys,opts={})
         ret = Hash.new
@@ -124,6 +127,7 @@ module XYZ
     end
   end
 end
+
 
 #for being able to determine the method name in the function call
 module Kernel

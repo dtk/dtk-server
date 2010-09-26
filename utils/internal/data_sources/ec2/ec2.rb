@@ -4,16 +4,19 @@ require File.expand_path("mixins/security_group", File.dirname(__FILE__))
 module XYZ
   module DSConnector
     class Ec2 < Top
+      def initialize()
+        super
+        @flavor_cache = Aux::Cache.new
+        @network_partition_cache = Aux::Cache.new
+      end
+
       include Ec2SecurityGroupInstanceMixin
       def get_objects__node__instance(&block)
         servers = conn().servers_all()
-        #TODO: this this is very static this may be cached somewhere; would like to write
-        #pattern where info cached and refreshed only when needed
-        #resolve flavor info
-        flavor_cache = Cache.new
         servers.each do |server|
-          flavor = flavor_cache.get(server[:flavor_id]){|id| conn().flavor_get(id)}
+          flavor = (@flavor_cache[server[:flavor_id]] ||= conn().flavor_get(id))
           server[:flavor] = flavor if flavor
+pp [server[:name],get_server_network_partition(server)]
           block.call(DataSourceUpdateHash.new(server).freeze)
         end
         return HashIsComplete.new({:ds_source_obj_type => "instance"})
@@ -37,8 +40,7 @@ module XYZ
       end
 
       def get_objects__network_partition__security_group(&block)
-        #TODO: use cache so can provide for populating also network gateways
-        get_network_partitions.each do |network_partition_ds|
+        get_network_partitions.each_value do |network_partition_ds|
           block.call(network_partition_ds)
         end
         return HashIsComplete.new()
@@ -51,6 +53,7 @@ module XYZ
 
       #TODO: may be able to remove now or put in constructor that this is instance fn
       #TODO: general fn that probably should be moved to Aux
+=begin
       class Cache
         def initialize()
           @cached = Hash.new
@@ -61,6 +64,7 @@ module XYZ
           @cached[id] = block.call(id)
         end
       end
+=end
     end
   end
 end       

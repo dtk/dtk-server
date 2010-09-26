@@ -1,8 +1,10 @@
 require File.expand_path("../cloud_connect.rb", File.dirname(__FILE__))
+require File.expand_path("mixins/security_group", File.dirname(__FILE__))
 
 module XYZ
   module DSConnector
     class Ec2 < Top
+      include Ec2SecurityGroupInstanceMixin
       def get_objects__node__instance(&block)
         servers = conn().servers_all()
         #TODO: this this is very static this may be cached somewhere; would like to write
@@ -35,10 +37,9 @@ module XYZ
       end
 
       def get_objects__network_partition__security_group(&block)
-        security_groups = conn().security_groups_all()
         #TODO: use cache so can provide for populating also network gateways
-        security_groups.each do |security_group|
-          block.call(DataSourceUpdateHash.new(security_group).freeze)
+        get_network_partitions.each do |network_partition_ds|
+          block.call(network_partition_ds)
         end
         return HashIsComplete.new()
       end

@@ -21,7 +21,7 @@
           "source_obj_type": "instance",
           "display_name": "node_instance"
         },
-        "node_instance": {
+        "network_partition": {
           "obj_type": "network_partition",
           "ds_name": "ec2",
           "source_obj_type": "security_group",

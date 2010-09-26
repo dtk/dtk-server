@@ -14,9 +14,10 @@ module XYZ
       def get_objects__node__instance(&block)
         servers = conn().servers_all()
         servers.each do |server|
-          flavor = (@flavor_cache[server[:flavor_id]] ||= conn().flavor_get(id))
+          flavor = get_flavor(server)
           server[:flavor] = flavor if flavor
-pp [server[:name],get_server_network_partition(server)]
+          interface_network_partition = get_server_network_partition(server)
+pp [server[:id],get_server_network_partition(server)]
           block.call(DataSourceUpdateHash.new(server).freeze)
         end
         return HashIsComplete.new({:ds_source_obj_type => "instance"})
@@ -51,20 +52,11 @@ pp [server[:name],get_server_network_partition(server)]
         @@conn ||= CloudConnect::EC2.new
       end
 
-      #TODO: may be able to remove now or put in constructor that this is instance fn
-      #TODO: general fn that probably should be moved to Aux
-=begin
-      class Cache
-        def initialize()
-          @cached = Hash.new
-        end
-        def get(id,&block)
-          return nil if id.nil?
-          return @cached[id] if @cached[id]
-          @cached[id] = block.call(id)
-        end
+      def get_flavor(server)
+        flavor_id = server[:flavor_id]
+        return nil if flavor_id.nil?
+        @flavor_cache[flavor_id] ||= conn().flavor_get(flavor_id)
       end
-=end
     end
   end
 end       

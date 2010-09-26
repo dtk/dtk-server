@@ -25,10 +25,12 @@ module XYZ
           singletons = get_unfettered_security_groups()
           network_partition_names = ret_all_possible_group_names(singletons.map{|sg|sg[:name]})
 
-          network_partition_names.inject(DataSourceUpdateHash.new) do |h,name|
+          ret = DataSourceUpdateHash.new
+          network_partition_names.each do |name|
             network_partition = {:name => name} #TODO stub for putting more information in
-            {h[name] => network_partition}
-          end.freeze
+            ret[name] = network_partition
+          end
+          ret
         end
 
         def get_server_network_partition(server_interface_groups,network_partitions)

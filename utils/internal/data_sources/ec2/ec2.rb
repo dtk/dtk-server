@@ -8,11 +8,12 @@ module XYZ
         super
         @flavor_cache = Aux::Cache.new
         @network_partition_cache = Aux::Cache.new
+        @server_cache =  Aux::Cache.new
       end
 
       include Ec2SecurityGroupInstanceMixin
       def get_objects__node__instance(&block)
-        servers = conn().servers_all()
+        servers = get_servers()
         servers.each do |server|
           flavor = get_flavor(server)
           server[:flavor] = flavor if flavor
@@ -25,7 +26,7 @@ pp [server[:id],get_server_network_partition(server)]
 
       def get_objects__node__image(&block)
         #TODO: stubbed so that just brings in images currently used
-        servers = conn().servers_all()
+        servers = get_servers()
         images = Hash.new
         servers.each do |server|
           image_id = server[:image_id]
@@ -45,6 +46,9 @@ pp [server[:id],get_server_network_partition(server)]
           block.call(network_partition_ds)
         end
         return HashIsComplete.new()
+      end
+      def get_servers()
+        @server_cache[:servers] ||= conn().servers_all()
       end
      private
 

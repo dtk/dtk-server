@@ -2,12 +2,12 @@ module XYZ
   module DSConnector
     module Ec2SecurityGroupInstanceMixin
       def get_network_partitions()
-        @network_partition_cache[:network_partions] ||= Local.new(conn()).get_network_partitions()
+        @network_partition_cache[:network_partions] ||= Local.new(self).get_network_partitions()
       end
 
       def get_server_network_partition(server)
         return nil unless server[:groups] and not server[:groups].empty? 
-        Local.new(conn()).get_server_network_partition(server[:groups],get_network_partitions())
+        Local.new(self).get_server_network_partition(server[:groups],get_network_partitions())
       end
 
       class NetworkPartitionDSHash < DataSourceUpdateHash
@@ -18,12 +18,11 @@ module XYZ
       
       #internal fns for mixin
       class Local
-        def initialize(conn)
-          @conn = conn
+        def initialize(parent)
+          @parent = parent
         end
         def get_network_partitions()
-          singletons = get_unfettered_security_groups()
-          network_partition_names = ret_all_possible_group_names(singletons.map{|sg|sg[:name]})
+          network_partition_names = get_network_partition_refs()
 
           ret = DataSourceUpdateHash.new
           network_partition_names.each do |name|
@@ -38,26 +37,32 @@ module XYZ
         end
 
        private
-        def get_unfettered_security_groups()
-          security_groups = @conn.security_groups_all()
-          security_groups.reject{|sg|not is_unfettered_security_group?(sg)}
+
+        def get_network_partition_refs()
+          ret = Array.new
+          @parent.get_servers().each do |server|
+            groups = server[:groups]
+            next unless groups and not groups.empty?
+            name = ret_aggregate_name_from_group_list(groups)
+            ret << name unless ret.include?(name)
+          end
+          ret
         end
 
-        #using aggregate group names, rather than singletons to fit with the network partition model
-        def ret_all_possible_group_names(singleton_names)
-          ret_combinations(singleton_names.sort)
+        def conn()
+          @parent.conn()
         end
 
-        def ret_combinations(sorted_list)
-          return sorted_list if sorted_list.size < 2
-          rest = ret_combinations(sorted_list[1..sorted_list.size-1])
-          rest.map{|x|"#{sorted_list.first.to_s}#{"__"}#{x}"} + rest
-        end
         def ret_aggregate_name_from_group_list(group_name_list)
           group_name_list.sort.join("__")
         end
 
         #determines whether security group allows unfettered connectivity between its members
+        #TODO: factor this in
+        def get_unfettered_security_groups()
+          security_groups = conn().security_groups_all()
+          security_groups.reject{|sg|not is_unfettered_security_group?(sg)}
+        end
         def is_unfettered_security_group?(security_group)
           rules =  security_group[:ip_permissions]
           return nil unless rules

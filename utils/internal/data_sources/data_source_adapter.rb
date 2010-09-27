@@ -40,7 +40,7 @@ module XYZ
 
     def ret_db_update_hash(container_id_handle,ds_hash)
       obj = normalize(ds_hash)
-      obj[:ds_attributes] = filter(ds_hash)
+      obj[:ds_attributes] = filter_raw_source_objects(ds_hash)
       obj[:ds_key] = ds_key_value(ds_hash)
       obj[:ds_source_obj_type] = source_obj_type() if source_obj_type()      
       obj[:data_source] = ds_name()
@@ -103,8 +103,8 @@ module XYZ
       qualified_key(relative_unique_key)
     end
     
-    def filter(ds_hash)
-      @ds_object_adapter_class.filter(ds_hash)
+    def filter_raw_source_objects(ds_hash)
+      @ds_object_adapter_class.filter_raw_source_objects(ds_hash)
     end
 
     def qualified_key(relative_unique_key,ds_name_override=nil)

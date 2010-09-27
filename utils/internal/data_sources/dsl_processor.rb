@@ -3,7 +3,7 @@ module XYZ
     class Top
       class << self
         #filter applied when into put in ds_attribute bag gets overwritten for non trivial filter
-        def filter(ds_hash)
+        def filter_raw_source_objects(ds_hash)
           ds_hash
         end
 

@@ -85,6 +85,11 @@ R8::Routes["node/display"] = {
      :panel => "main_body"
    },
    {
+     :route => "node_interface/list",
+     :action_params => [{:parent_id => "$id$"}],
+     :panel => "main_body"
+   },
+   {
      :route => "monitoring_item/node_display",
      :action_params => [{:parent_id => "$id$"}],
      :panel => "main_body",

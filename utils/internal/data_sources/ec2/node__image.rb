@@ -12,9 +12,12 @@ module XYZ
 
           source_complete_for target[:monitoring_item]
           target[:monitoring_item] = fn(:default_node_monitoring_items)
+          
+          source_complete_for target[:node_interface]          
+          prefix = target[:node_interface]
+          prefix[:eth0][:type] = 'ethernet' 
+          prefix[:eth0][:family] = 'ipv4' 
 
-          #TODO: need to also get the assumed node interface attributes
-          #TODO: what about hooking up to network when clone
         end
         class << self
           def unique_keys(source)
@@ -24,6 +27,7 @@ module XYZ
           def relative_distinguished_name(source)
             source[:id]
           end
+
         end
       end
     end

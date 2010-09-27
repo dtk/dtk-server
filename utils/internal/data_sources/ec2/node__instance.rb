@@ -32,15 +32,19 @@ module XYZ
           end
         end
         class << self
-          #TB: may put both these in form above
-          #target[:ds_key] = fn(:unique_keys,[:instance,v[:id]]) or
-          #target[:ds_key] = unique_keys[:instance,v[:id]]
           def unique_keys(source)
             [:instance,source[:id]]
           end
 
           def relative_distinguished_name(source)
             source[:id]
+          end
+          
+          def filter_raw_source_objects(source)
+            ret = DBUpdateHash.new
+            #TODO: make this data driven from model -> dependent on what is needed for virtual columns
+            [:groups, :flavor].each{|k|ret[k] = source[k] if source[k]}
+            ret
           end
         end
       end

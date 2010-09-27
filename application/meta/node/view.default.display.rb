@@ -58,6 +58,9 @@
               :rows => 1,
               :cols => 40,
             }},
+            {:ec2_security_groups => {
+              :type => 'hash',
+            }},
         ],
       },
     ],

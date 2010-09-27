@@ -15,10 +15,6 @@ module XYZ
       def get_objects__node__instance(&block)
         servers = get_servers()
         servers.each do |server|
-          flavor = get_flavor(server)
-          server[:flavor] = flavor if flavor
-          interface_network_partition = get_server_network_partition(server)
-pp [server[:id],get_server_network_partition(server)]
           block.call(DataSourceUpdateHash.new(server).freeze)
         end
         return HashIsComplete.new({:ds_source_obj_type => "instance"})
@@ -47,10 +43,20 @@ pp [server[:id],get_server_network_partition(server)]
         end
         return HashIsComplete.new()
       end
+
       def get_servers()
-        @server_cache[:servers] ||= conn().servers_all()
+        @server_cache[:servers] ||= get_servers_aux()
       end
      private
+      def get_servers_aux()
+        ret = conn().servers_all()
+        ret.each do |server|
+          server[:flavor] = get_flavor(server)
+          server[:network_partition_ref] = get_network_partition_ref(server)
+          pp [:network_partition_ref, server[:id], server[:network_partition_ref]]
+        end
+        ret
+      end
 
       def conn()
         @@conn ||= CloudConnect::EC2.new

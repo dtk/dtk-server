@@ -53,7 +53,6 @@ module XYZ
         ret.each do |server|
           server[:flavor] = get_flavor(server)
           server[:network_partition_ref] = get_network_partition_ref(server)
-          pp [:network_partition_ref, server[:id], server[:network_partition_ref]]
         end
         ret
       end

@@ -20,7 +20,7 @@ module XYZ
           prefix[:eth0][:type] = 'ethernet' 
           prefix[:eth0][:family] = 'ipv4' 
           prefix[:eth0][:address] =  source[:private_ip_address] 
-#          prefix[:eth0][:network_partition_id] = foreign_key :network_interface, source[:network_partition_ref]
+          prefix[:eth0][:network_partition_id] = foreign_key :network_partition, source[:network_partition_ref]
 
           source_complete_for target[:address_access_point]
           if_exists(source[:ip_address]) do

@@ -7,6 +7,8 @@
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/workspace.css" />
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/basic-component.css" />
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/basic-node.css" />
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/basic-group.css" />
+
 
 {%for css_include in _app[:css_includes]%}
 	<link rel="stylesheet" type="text/css" href="{%=css_include%}" />
@@ -62,7 +64,39 @@ R8.config['base_uri'] = '{%=_app[:base_uri]%}/xyz';
 		</div>
 		<div id="wspace-container">
 			<div id="workspace" class="workspace">
-				<div id="viewspace" class="viewspace"></div>
+				<div id="viewspace" class="viewspace">
+
+
+
+	<div id="group_01" data-id="01" data-model-name="group" class="basic-group group" style="position: relative; top: 100px; left: 100px; height: 120px; width: 856px;">
+		<div class="basic-l-col">
+			<div class="basic-tl-corner corner green"></div>
+			<div class="basic-l-col-body green"></div>
+			<div class="basic-bl-corner corner green"></div>
+		</div>
+		<div id="body_01" class="basic-body green" style="height: 116px; width: 592px;">
+			<div style="height: 15px; width: 100%; float: left;">
+				<h1>App Tier</h1>
+			</div>
+		</div>
+		<div id="elastic_01" class="elastic" style="height: 120px;">
+			<div class="elastic-header"></div>
+			<div class="elastic-body" style="height:108px;"></div>
+			<div class="elastic-footer"></div>
+		</div>
+		<div id="elastic_01" class="elastic-node-body" style="height: 116px; width: 196px;"></div>
+		<div class="basic-r-col">
+			<div class="basic-tr-corner corner green"></div>
+			<div class="basic-r-col-body green"></div>
+			<div class="basic-br-corner corner green"></div>
+		</div>
+	</div>
+
+
+
+
+
+				</div>
 			</div>
 			<div id="cmdbar-tabcontainer">
 				<div id="cmdbar-tabs-wrapper">
@@ -78,7 +112,6 @@ R8.config['base_uri'] = '{%=_app[:base_uri]%}/xyz';
 					<input onfocus="if(this.value =='$:') this.value='';" onblur="if(this.value==='') this.value='$:';" type="text" value="$:" id="cmd" name="cmd" title="Enter Command"/>
 				</form>
 			</div>
-				&nbsp;&nbsp;<a href="javascript:R8.Cmdbar.toggleTabs();">Toggle</a>
 		</div>
 	</div>
 

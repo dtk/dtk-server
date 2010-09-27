@@ -8,8 +8,8 @@
 .basic-component {
 	width: 90px;
 	height: 50px;
-	border: 2px solid black;
-	background-color: #73C0EF;
+/*	border: 2px solid black;*/
+/*	background-color: #45556A;*/
 	cursor: pointer;
 }
 
@@ -35,32 +35,32 @@
 }
 
 .basic-component .corner {
-	height: 13px;
-	width: 13px;
-	background-image: url(../images/workspace/basic-basic-corners.png);
+	height: 5px;
+	width: 5px;
+	background-image: url(../images/component/basic-corners-01.png);
 	background-repeat: no-repeat;
 	float: left;
 }
 .focus .corner {
-	background-image: url(../images/workspace/basic-basic-corners-focus.png);
+	background-image: url(../images/component/basic-corners-01-focus.png);
 }
 
-.basic-tl-corner {
+.basic-component .basic-tl-corner {
 }
-.basic-tr-corner {
-	background-position: 0px -13px;
+.basic-component .basic-tr-corner {
+	background-position: 0px -5px;
 }
-.basic-bl-corner {
-	background-position: 0px -39px;
+.basic-component .basic-bl-corner {
+	background-position: 0px -15px;
 }
-.basic-br-corner {
-	background-position: 0px -26px;
+.basic-component .basic-br-corner {
+	background-position: 0px -10px;
 }
 
 .basic-component .basic-header {
-	background-color: #73C0EF;
-	width: 94px;
-	height: 11px;
+	background-color: #45556A;
+	width: 80px;
+	height: 3px;
 	float: left;
 	font-size: 11px;
 	border-top: solid 2px black;
@@ -71,23 +71,54 @@
 }
 
 .basic-component .basic-footer {
-	background-color: #73C0EF;
-	width: 94px;
-	height: 11px;
+	background-color: #45556A;
+	width: 80px;
+	height: 3px;
 	float: left;
+	font-size: 11px;
 	border-bottom: solid 2px black;
 }
 .focus .basic-footer {
 	border-bottom: solid 2px #E84423;
 }
 
-.basic-component .basic-body {
-/*	background-color: #73C0EF;*/
-	width: 90px;
+.basic-component .basic-l-col {
+	float: left;
 	height: 50px;
-	text-align: center;
+	width: 5px;
+}
+.basic-component .basic-r-col {
+	float: right;
+	height: 50px;
+	width: 5px;
+}
+.basic-component .basic-l-col-body {
+	width: 3px;
+	height: 40px;
+	border-left: 2px solid black;
+	background-color: #45556A;
 	float: left;
 }
+.basic-component .basic-r-col-body {
+	width: 3px;
+	height: 40px;
+	border-right: 2px solid black;
+	background-color: #45556A;
+	float: left;
+}
+
+.basic-component .basic-body {
+	background-color: #45556A;
+	width: 80px;
+	height: 46px;
+	text-align: center;
+	float: left;
+	border-top: 2px solid black;
+	border-bottom: 2px solid black;
+}
+
+
+/*------------Trash---------------------*/
 
 .basic-component .basic-body-2 {
 /*	background-color: #73C0EF;*/

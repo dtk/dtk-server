@@ -1,0 +1,113 @@
+/* blue group: #73c0ef */
+
+.basic-group-wrapper {
+	width: 90px;
+	height: 50px;
+}
+
+.basic-group {
+}
+
+.yui3-dd-dragging {
+	cursor: move;
+}
+
+.group {
+	position: absolute;
+	z-index: 10;
+}
+
+/*-------Corners-----------*/
+
+.basic-group .corner {
+	height: 9px;
+	width: 9px;
+	background-repeat: no-repeat;
+	float: left;
+	background-image: url(../images/group/basic-corners-02.png);
+}
+
+.focus .corner {
+	background-image: url(../images/group/basic-corners-01-focus.png);
+}
+
+.basic-group .basic-tl-corner {
+}
+.basic-group .basic-tr-corner {
+	background-position: 0px -9px;
+}
+.basic-group .basic-br-corner {
+	background-position: 0px -18px;
+}
+.basic-group .basic-bl-corner {
+	background-position: 0px -27px;
+}
+
+/*----------------------------*/
+
+
+.basic-group .basic-l-col {
+	float: left;
+	height: 120px;
+	width: 9px;
+}
+.basic-group .basic-r-col {
+	float: right;
+	height: 120px;
+	width: 9px;
+}
+
+.basic-group .basic-l-col-body {
+	width: 7px;
+	height: 102px;
+	border-left: 2px solid black;
+	background-color: #7EB75C;
+	float: left;
+}
+.basic-group .basic-r-col-body {
+	width: 7px;
+	height: 102px;
+	border-right: 2px solid black;
+	float: left;
+	background-color: #7EB75C;
+}
+
+.basic-group .basic-body {
+	float: left;
+	border-top: 2px solid black;
+	border-bottom: 2px solid black;
+	background-color: #7EB75C;
+}
+
+/*--------Elastic-----------*/
+
+.basic-group .elastic-node-body {
+	float: left;
+	border-top: 2px solid black;
+	border-bottom: 2px solid black;
+	background-color: #7EB75C;
+}
+
+.basic-group .elastic {
+	width: 50px;
+	float: left;
+}
+
+.basic-group .elastic-header {
+	height: 6px;
+	width: 50px;
+	background-image: url(../images/group/elastic-01.png);
+}
+
+.basic-group .elastic-footer {
+	height: 6px;
+	width: 50px;
+	background-image: url(../images/group/elastic-01.png);
+	background-position: 0px -6px;
+}
+
+.basic-group .elastic-body {
+	width: 50px;
+	background-image: url(../images/group/elastic-01-bg.png);
+	background-repeat: repeat-y;
+}

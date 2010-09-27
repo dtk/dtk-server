@@ -74,11 +74,11 @@ R8.Cmdbar.cmdHandlers['search'] = {
 				var width = R8.Workspace.viewPortRegion['width'] - 65;
 				var contentFraming = '<div class="slider-top"></div>';
 				contentFraming += '<div id="' + name + '-slider-wrapper" class="slider-wrapper">';
-				contentFraming += '<div id="lbutton"></div>';
+				contentFraming += '<div id="' + name + '-lbutton" class="lbutton"></div>';
 				contentFraming += '<div id="' + name + '-list-container" class="slide-list-container" style="width: ' + width + 'px;">';
 				contentFraming += '<div id="' + name + '-slider"></div>';
 				contentFraming += '</div>';
-				contentFraming += '<div id="rbutton"></div>';
+				contentFraming += '<div id="' + name + '-rbutton" class="rbutton"></div>';
 				contentFraming += '</div>';
 				contentFraming += '<div class="slider-btm"></div>';
 				document.getElementById('cmdbar-' + this.name + '-tab-content').innerHTML = contentFraming;
@@ -245,16 +245,14 @@ R8.Cmdbar.cmdHandlers['search'] = {
 				R8.Cmdbar.loadedTabs[tIndex]['events']['slider_anim'] = R8.Cmdbar.loadedTabs[tIndex].sliderAnim.on('end', function(){
 					R8.Cmdbar.loadedTabs[tIndex].sliderInMotion = false;
 				});
-				R8.Cmdbar.loadedTabs[tIndex]['events']['lbtn_click'] = Y.one('#lbutton').on('click', R8.Cmdbar.loadedTabs[tIndex].slideLeft);
-				R8.Cmdbar.loadedTabs[tIndex]['events']['rbtn_click'] = Y.one('#rbutton').on('click', R8.Cmdbar.loadedTabs[tIndex].slideRight);
+				R8.Cmdbar.loadedTabs[tIndex]['events']['lbtn_click'] = Y.on('click', R8.Cmdbar.loadedTabs[tIndex].slideLeft,'#' + name + '-lbutton',R8.Cmdbar.loadedTabs[tIndex]);
+				R8.Cmdbar.loadedTabs[tIndex]['events']['rbtn_click'] = Y.on('click', R8.Cmdbar.loadedTabs[tIndex].slideRight,'#' + name + '-rbutton',R8.Cmdbar.loadedTabs[tIndex]);
 			},
 			slideLeft: function(e){
 				var tIndex = R8.Cmdbar.getTabIndexByName(this.name);
-				if (R8.Cmdbar.loadedTabs[tIndex].sliderInMotion) 
-					return;
-				else 
-					R8.Cmdbar.loadedTabs[tIndex].sliderInMotion = true;
-					
+				if (R8.Cmdbar.loadedTabs[tIndex].sliderInMotion) return;
+				else R8.Cmdbar.loadedTabs[tIndex].sliderInMotion = true;
+
 				R8.Cmdbar.loadedTabs[tIndex].sliderAnim.set('to', {
 					xy: [R8.Cmdbar.loadedTabs[tIndex].slideBarNode.getX() - 510, R8.Cmdbar.loadedTabs[tIndex].slideBarNode.getY()]
 				});
@@ -262,11 +260,10 @@ R8.Cmdbar.cmdHandlers['search'] = {
 			},
 			slideRight: function(e){
 				var tIndex = R8.Cmdbar.getTabIndexByName(this.name);
-				if (R8.Cmdbar.loadedTabs[tIndex].sliderInMotion) 
-					return;
-				else 
-					R8.Cmdbar.loadedTabs[tIndex].sliderInMotion = true;
-				//TODO: figure out how to make the x param dynamic based on component width
+				if (R8.Cmdbar.loadedTabs[tIndex].sliderInMotion) return;
+				else R8.Cmdbar.loadedTabs[tIndex].sliderInMotion = true;
+
+//TODO: figure out how to make the x param dynamic based on component width
 				R8.Cmdbar.loadedTabs[tIndex].sliderAnim.set('to', {
 					xy: [R8.Cmdbar.loadedTabs[tIndex].slideBarNode.getX() + 510, R8.Cmdbar.loadedTabs[tIndex].slideBarNode.getY()]
 				});
@@ -290,11 +287,11 @@ R8.Cmdbar.cmdHandlers['search'] = {
 				var width = R8.Workspace.viewPortRegion['width'] - 65;
 				var contentFraming = '<div class="slider-top"></div>';
 				contentFraming += '<div id="' + name + '-slider-wrapper" class="slider-wrapper">';
-				contentFraming += '<div id="lbutton"></div>';
+				contentFraming += '<div id="' + name + '-lbutton" class="lbutton"></div>';
 				contentFraming += '<div id="' + name + '-list-container" class="slide-list-container" style="width: ' + width + 'px;">';
 				contentFraming += '<div id="' + name + '-slider"></div>';
 				contentFraming += '</div>';
-				contentFraming += '<div id="rbutton"></div>';
+				contentFraming += '<div id="' + name + '-rbutton" class="rbutton"></div>';
 				contentFraming += '</div>';
 				contentFraming += '<div class="slider-btm"></div>';
 				document.getElementById('cmdbar-' + this.name + '-tab-content').innerHTML = contentFraming;
@@ -402,41 +399,45 @@ R8.Cmdbar.cmdHandlers['search'] = {
 					R8.Cmdbar.loadedTabs[tIndex].compDDel = new Y.DD.Delegate({
 						cont: '#' + name + '-slide-bar',
 						nodes: 'div.avail_component',
-//						nodes: 'div.comp-body',
 	//					dragMode: 'intersect',
 					});
-
 					R8.Cmdbar.loadedTabs[tIndex].compDDel.dd.plug(Y.Plugin.DDProxy, {
 						moveOnEnd: false,
 						borderStyle: false,
 //						cloneNode: true
 					});
-
+R8.Cmdbar.loadedTabs[tIndex].compDDel.dd.addToGroup('node_drop');
 					R8.Cmdbar.loadedTabs[tIndex].compDDel.on('drag:start', function(e){
 						var drag = this.get('dragNode'), c = this.get('currentNode');
 						drag.set('innerHTML',c.get('innerHTML'));
 						drag.setAttribute('class', c.getAttribute('class'));
-						this.dd.addToGroup('node_drop');
+//						this.dd.addToGroup('node_drop');
 						drag.setStyles({
-							opacity: .5,
+							opacity: .7,
 						});
+
 
 						//create all the drop targets for each node in the viewspace
 						R8.Cmdbar.loadedTabs[tIndex].dropList = Y.all('#viewspace div.node');
 
 //TODO: revisit to look into necessity of unplugging drops on the target nodes
 						R8.Cmdbar.loadedTabs[tIndex].dropList.each(function(){
-							this.plug(Y.Plugin.Drop);
-							this.drop.addToGroup(['node_drop']);
+var id = this.get('id');
+console.log(this);
+console.log(R8.Workspace.components[id]['node']);
+//console.log(R8.Workspace.components[id]['node'].drop.inGroup(['node_drop']));
+//							this.plug(Y.Plugin.Drop);
+//							this.drop.addToGroup(['node_drop']);
 						});
 					});
 
 					//TODO: come back and add in clean up of DD objects and events
 					R8.Cmdbar.loadedTabs[tIndex].compDDel.on('drag:drophit', function(e){
 						var drop = e.drop.get('node'), compNode = this.get('dragNode').get('children').item(0);
-						var component_id = compNode.get('id')
+						var component_id = compNode.get('id');
 						component_id = component_id.replace('component_','');
-
+console.log('Going to call addComponentToContainer...');
+return;
 						R8.Workspace.addComponentToContainer(component_id,drop);
 					});
 				});
@@ -453,8 +454,8 @@ R8.Cmdbar.cmdHandlers['search'] = {
 				R8.Cmdbar.loadedTabs[tIndex]['events']['slider_anim'] = R8.Cmdbar.loadedTabs[tIndex].sliderAnim.on('end', function(){
 					R8.Cmdbar.loadedTabs[tIndex].sliderInMotion = false;
 				});
-				R8.Cmdbar.loadedTabs[tIndex]['events']['lbtn_click'] = Y.one('#lbutton').on('click', R8.Cmdbar.loadedTabs[tIndex].slideLeft);
-				R8.Cmdbar.loadedTabs[tIndex]['events']['rbtn_click'] = Y.one('#rbutton').on('click', R8.Cmdbar.loadedTabs[tIndex].slideRight);
+				R8.Cmdbar.loadedTabs[tIndex]['events']['lbtn_click'] = Y.on('click', R8.Cmdbar.loadedTabs[tIndex].slideLeft,'#'+name+'-lbutton',R8.Cmdbar.loadedTabs[tIndex]);
+				R8.Cmdbar.loadedTabs[tIndex]['events']['rbtn_click'] = Y.on('click', R8.Cmdbar.loadedTabs[tIndex].slideRight,'#'+name+'-rbutton',R8.Cmdbar.loadedTabs[tIndex]);
 			},
 			slideLeft: function(e){
 				var tIndex = R8.Cmdbar.getTabIndexByName(this.name);

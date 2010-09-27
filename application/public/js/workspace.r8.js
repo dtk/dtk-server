@@ -422,20 +422,47 @@ console.log('registering port:'+portElemID);
 			},
 
 			addComponentToContainer : function(componentId,containerNode) {
-				var modelName = containerNode.getAttribute('data-model-name');
+				var modelName = containerNode.getAttribute('data-model');
 				var modelId = containerNode.get('id');
 				modelId = modelId.replace('vi_','');
 				var queryParams = 'target_model_name='+modelName+'&target_id='+modelId;
 				queryParams += '&model_redirect='+modelName+'&action_redirect=wspace_display&id_redirect='+modelId;
-console.log("QueryParams:"+queryParams);
+
+				containerNode.setAttribute('data-status','pending_delete');
+
 				var completeCallback = function() {
-					R8.Workspace.setupNewItem(cleanupId);
+					R8.Workspace.refreshItem(modelId);
 				}
 				var callbacks = {
 					'io:renderComplete' : completeCallback
 				};
-//				R8.Ctrl.call('component/clone/'+componentId,queryParams,callbacks);
-				R8.Ctrl.call('component/clone/'+componentId,queryParams);
+				containerNode.setAttribute('data-status','pending_delete');
+				R8.Ctrl.call('component/clone/'+componentId,queryParams,callbacks);
+//				R8.Ctrl.call('component/clone/'+componentId,queryParams);
+			},
+
+			refreshItem : function(itemId) {
+				itemId = 'vi_'+itemId;
+				var viewspaceNode = R8.Utils.Y.one('#viewspace');
+				var itemChildren = viewspaceNode.get('children');
+				itemChildren.each(function(){
+					if(this.get('id') == itemId && this.getAttribute('data-status') == 'pending_delete') {
+						this.purge(true);
+						this.remove();
+						delete (this);
+						R8.Workspace.components[itemId] = {};
+					} else {
+						var dataModel = this.getAttribute('data-model');
+						var status = this.getAttribute('data-status');
+
+						if (dataModel == 'node' && status == 'pending_setup') {
+							R8.Workspace.addViewSpaceItem(this);
+							this.setAttribute('data-status', 'added');
+							R8.Workspace.addDragDrop(this.get('id'));
+							this.setAttribute('data-status', 'dd-ready');
+						}
+					}
+				});
 			},
 
 			setupNewItem : function(cleanupId) {
@@ -446,18 +473,43 @@ console.log("QueryParams:"+queryParams);
 
 				var viewspaceNode = R8.Utils.Y.one('#viewspace');
 				var itemChildren = viewspaceNode.get('children');
-				var newItemNode = itemChildren.item(itemChildren.size()-1);
-				var newItemId = newItemNode.get('id');
+				itemChildren.each(function(){
+					var dataModel = this.getAttribute('data-model');
+					var status = this.getAttribute('data-status');
 
-				R8.Workspace.addViewSpaceItem(newItemNode);
-				R8.Workspace.addDragDrop(newItemId);
+					if(dataModel == 'node' && status == 'pending_setup') {
+						R8.Workspace.addViewSpaceItem(this);
+						this.setAttribute('data-status','added');
+						R8.Workspace.addDragDrop(this.get('id'));
+						this.setAttribute('data-status','dd-ready');
+					}
+				});
 			},
-
+//TODO: revisit to turn components into a [viewspace][item] style
 			addViewSpaceItem : function(node) {
 				var nodeId = node.get('id');
-				R8.Workspace.components[nodeId] = {
-					'id':nodeId,
-				};
+				var modelName = node.getAttribute('data-model');
+				var dropGroupName = modelName + '_drop';
+//TODO: probably pull the drop registration into its own function once more functionality is added
+//console.log('Going to add node to drop group:'+dropGroupName);
+//console.log(node);
+				YUI().use('dd-drop-plugin', function(Y){
+//					node.plug(R8.Utils.Y.Plugin.Drop);
+					node.plug(Y.Plugin.Drop);
+					node.drop.addToGroup([dropGroupName]);
+					node.drop.on('drop:enter',function(e){
+console.log('Over drop target....');
+console.log(e);
+					});
+					node.drop.on('drop:hit',function(e){
+console.log('I guess I am hitting this now!!!!');
+					});
+
+					R8.Workspace.components[nodeId] = {
+						'id':nodeId,
+						'node':node
+					};
+				});
 			},
 
 			addItemSuccess : function(ioId,responseObj) {

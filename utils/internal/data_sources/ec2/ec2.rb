@@ -17,7 +17,8 @@ module XYZ
         servers.each do |server|
           block.call(DataSourceUpdateHash.new(server).freeze)
         end
-        return HashIsComplete.new({:ds_source_obj_type => "instance"})
+        #TODO: qualify that comes from ec2 or chef-ec2
+        return HashIsComplete.new({:type => "instance"}) #TODO; this prunes chef dicovred instances that no longer exist
       end
 
       def get_objects__node__image(&block)
@@ -34,7 +35,8 @@ module XYZ
         images.values().each do |image|
           block.call(DataSourceUpdateHash.new(image).freeze)
         end
-        return HashMayNotBeComplete.new()
+        #TODO: qualify that comes from ec2
+        return HashIsComplete.new({:type => "image"})
       end
 
       def get_objects__network_partition__security_group(&block)

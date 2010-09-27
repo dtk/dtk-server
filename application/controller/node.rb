@@ -29,7 +29,6 @@ node[:operational_status] = 'good'
 
       return tpl_result
     end
-  
   end
 end
 

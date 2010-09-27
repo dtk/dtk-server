@@ -31,11 +31,11 @@ module XYZ
               "basic_type" => metadata["basic_type"]
             }
             attributes = get_attributes_with_values(recipe_name,metadata,node)
-            ds_hash = DataSourceUpdateHash.new(values.merge({"attribute" => attributes}))
+            ds_hash = DataSourceUpdateHash.new(values.merge({"attributes" => attributes}))
             block.call(ds_hash)
           end
         end
-        return HashMayNotBeComplete.new() #HashIsComplete.new()
+        return HashIsComplete.new({:type => "instance"}) #HashMayNotBeComplete.new() 
       end
 
       def get_objects__component__recipe(&block)
@@ -44,7 +44,7 @@ module XYZ
             block.call(ds_hash)
           end
         end
-        return HashIsComplete.new() #HashMayNotBeComplete.new()
+        return HashIsComplete.new({:type => "template"}) #HashMayNotBeComplete.new()
       end
 
       def get_recipes_assoc_cookbook(cookbook_name)

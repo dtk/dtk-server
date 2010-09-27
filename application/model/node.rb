@@ -5,7 +5,7 @@ module XYZ
 #TODO: move this out into central model, should read off of model meta data for processing
     def self.up()
       has_ancestor_field()
-      column :ds_attributes, :json, :hidden => true
+      column :ds_attributes, :json
       column :ds_key, :varchar, :hidden => true
       column :data_source, :varchar, :size => 25
       column :ds_source_obj_type, :varchar, :size => 25

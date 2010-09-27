@@ -105,11 +105,11 @@
       "operational_status": "stopped",
       "ds_attributes": {
         "flavor": {
-          "cores": 1,
-          "bits": 32,
           "ram": 1740.8,
           "disk": 160,
+          "cores": 1,
           "name": "Small Instance",
+          "bits": 32,
           "id": "m1.small"
         },
         "groups": [
@@ -173,11 +173,11 @@
       "operational_status": "stopped",
       "ds_attributes": {
         "flavor": {
-          "cores": 1,
-          "bits": 32,
           "ram": 1740.8,
           "disk": 160,
+          "cores": 1,
           "name": "Small Instance",
+          "bits": 32,
           "id": "m1.small"
         },
         "groups": [
@@ -226,218 +226,6 @@
       "is_deployed": true,
       "ds_source_obj_type": "instance"
     },
-    "i-17e9dd7d": {
-      "type": "instance",
-      "display_name": "i-17e9dd7d"
-    },
-    "i-b04bf4da": {
-      "type": "instance",
-      "display_name": "i-b04bf4da"
-    },
-    "i-fb486291": {
-      "data_source": "ec2",
-      "type": "instance",
-      "image_size": "0.17408E4",
-      "node_interface": {
-        "eth0": {
-          "type": "ethernet",
-          "display_name": "eth0",
-          "*network_partition_id": "/network_partition/basic__default"
-        }
-      },
-      "display_name": "i-fb486291",
-      "operational_status": "stopped",
-      "ds_attributes": {
-        "flavor": {
-          "cores": 1,
-          "bits": 32,
-          "ram": 1740.8,
-          "disk": 160,
-          "name": "Small Instance",
-          "id": "m1.small"
-        },
-        "groups": [
-          "basic",
-          "default"
-        ]
-      },
-      "monitoring_item": {
-        "check_ping": {
-          "display_name": "check_ping",
-          "enabled": true,
-          "description": "ping"
-        },
-        "check_mem": {
-          "display_name": "check_mem",
-          "enabled": true,
-          "description": "Free Memory"
-        },
-        "check_local_procs": {
-          "display_name": "check_local_procs",
-          "enabled": true,
-          "description": "Processes"
-        },
-        "check_all_disks": {
-          "display_name": "check_all_disks",
-          "enabled": true,
-          "description": "Free Space All Disks"
-        },
-        "check_memory_profiler": {
-          "display_name": "check_memory_profiler",
-          "enabled": true,
-          "description": "Memory Profiler"
-        },
-        "check_iostat": {
-          "display_name": "check_iostat",
-          "enabled": true,
-          "description": "Iostat"
-        },
-        "check_ssh": {
-          "display_name": "check_ssh",
-          "enabled": true,
-          "description": "SSH"
-        }
-      },
-      "ds_key": "[:ec2, :instance, \"i-fb486291\"]",
-      "is_deployed": true,
-      "ds_source_obj_type": "instance"
-    },
-    "i-c1b527ab": {
-      "data_source": "ec2",
-      "type": "instance",
-      "image_size": "0.17408E4",
-      "node_interface": {
-        "eth0": {
-          "type": "ethernet",
-          "display_name": "eth0",
-          "*network_partition_id": "/network_partition/basic__default"
-        }
-      },
-      "display_name": "i-c1b527ab",
-      "operational_status": "stopped",
-      "ds_attributes": {
-        "flavor": {
-          "cores": 1,
-          "bits": 32,
-          "ram": 1740.8,
-          "disk": 160,
-          "name": "Small Instance",
-          "id": "m1.small"
-        },
-        "groups": [
-          "basic",
-          "default"
-        ]
-      },
-      "monitoring_item": {
-        "check_ping": {
-          "display_name": "check_ping",
-          "enabled": true,
-          "description": "ping"
-        },
-        "check_mem": {
-          "display_name": "check_mem",
-          "enabled": true,
-          "description": "Free Memory"
-        },
-        "check_local_procs": {
-          "display_name": "check_local_procs",
-          "enabled": true,
-          "description": "Processes"
-        },
-        "check_all_disks": {
-          "display_name": "check_all_disks",
-          "enabled": true,
-          "description": "Free Space All Disks"
-        },
-        "check_memory_profiler": {
-          "display_name": "check_memory_profiler",
-          "enabled": true,
-          "description": "Memory Profiler"
-        },
-        "check_iostat": {
-          "display_name": "check_iostat",
-          "enabled": true,
-          "description": "Iostat"
-        },
-        "check_ssh": {
-          "display_name": "check_ssh",
-          "enabled": true,
-          "description": "SSH"
-        }
-      },
-      "ds_key": "[:ec2, :instance, \"i-c1b527ab\"]",
-      "is_deployed": true,
-      "ds_source_obj_type": "instance"
-    },
-    "i-374b945d": {
-      "data_source": "ec2",
-      "type": "instance",
-      "image_size": "0.17408E4",
-      "node_interface": {
-        "eth0": {
-          "type": "ethernet",
-          "display_name": "eth0",
-          "*network_partition_id": "/network_partition/basic__default"
-        }
-      },
-      "display_name": "i-374b945d",
-      "operational_status": "stopped",
-      "ds_attributes": {
-        "flavor": {
-          "cores": 1,
-          "bits": 32,
-          "ram": 1740.8,
-          "disk": 160,
-          "name": "Small Instance",
-          "id": "m1.small"
-        },
-        "groups": [
-          "basic",
-          "default"
-        ]
-      },
-      "monitoring_item": {
-        "check_ping": {
-          "display_name": "check_ping",
-          "enabled": true,
-          "description": "ping"
-        },
-        "check_mem": {
-          "display_name": "check_mem",
-          "enabled": true,
-          "description": "Free Memory"
-        },
-        "check_local_procs": {
-          "display_name": "check_local_procs",
-          "enabled": true,
-          "description": "Processes"
-        },
-        "check_all_disks": {
-          "display_name": "check_all_disks",
-          "enabled": true,
-          "description": "Free Space All Disks"
-        },
-        "check_memory_profiler": {
-          "display_name": "check_memory_profiler",
-          "enabled": true,
-          "description": "Memory Profiler"
-        },
-        "check_iostat": {
-          "display_name": "check_iostat",
-          "enabled": true,
-          "description": "Iostat"
-        },
-        "check_ssh": {
-          "display_name": "check_ssh",
-          "enabled": true,
-          "description": "SSH"
-        }
-      },
-      "ds_key": "[:ec2, :instance, \"i-374b945d\"]",
-      "is_deployed": true,
-      "ds_source_obj_type": "instance"
-    },
     "ami-6743ae0e": {
       "data_source": "ec2",
       "type": "image",
@@ -451,27 +239,27 @@
       "ds_attributes": {
         "state": "available",
         "type": "machine",
+        "root_device_name": "/dev/sda1",
+        "owner_id": "063491364108",
+        "kernel_id": "aki-5f15f636",
+        "location": "063491364108/ubuntu-9.10-karmic-server-i386-20100121",
         "block_device_mapping": [
           {
-            "snapshotId": "snap-5d6f2234",
-            "deviceName": "/dev/sda1",
             "deleteOnTermination": "true",
-            "volumeSize": "15"
+            "volumeSize": "15",
+            "snapshotId": "snap-5d6f2234",
+            "deviceName": "/dev/sda1"
           }
         ],
         "root_device_type": "ebs",
+        "platform": null,
         "is_public": true,
         "ramdisk_id": "ari-d5709dbc",
-        "location": "063491364108/ubuntu-9.10-karmic-server-i386-20100121",
+        "architecture": "i386",
+        "id": "ami-6743ae0e",
         "product_codes": [
 
-        ],
-        "root_device_name": "/dev/sda1",
-        "platform": null,
-        "architecture": "i386",
-        "owner_id": "063491364108",
-        "id": "ami-6743ae0e",
-        "kernel_id": "aki-5f15f636"
+        ]
       },
       "monitoring_item": {
         "check_ping": {
@@ -527,27 +315,27 @@
       "ds_attributes": {
         "state": "available",
         "type": "machine",
+        "root_device_name": "/dev/sda1",
+        "owner_id": "411986592491",
+        "kernel_id": "aki-5f15f636",
+        "location": "411986592491/rnp-chef-09-6-ubuntu-910-x86_32",
         "block_device_mapping": [
           {
-            "snapshotId": "snap-caa459a1",
-            "deviceName": "/dev/sda1",
             "deleteOnTermination": "true",
-            "volumeSize": "15"
+            "volumeSize": "15",
+            "snapshotId": "snap-caa459a1",
+            "deviceName": "/dev/sda1"
           }
         ],
         "root_device_type": "ebs",
+        "platform": null,
         "is_public": false,
         "ramdisk_id": "ari-d5709dbc",
-        "location": "411986592491/rnp-chef-09-6-ubuntu-910-x86_32",
+        "architecture": "i386",
+        "id": "ami-06c72c6f",
         "product_codes": [
 
-        ],
-        "root_device_name": "/dev/sda1",
-        "platform": null,
-        "architecture": "i386",
-        "owner_id": "411986592491",
-        "id": "ami-06c72c6f",
-        "kernel_id": "aki-5f15f636"
+        ]
       },
       "monitoring_item": {
         "check_ping": {
@@ -590,13 +378,217 @@
       "is_deployed": true,
       "ds_source_obj_type": "image"
     },
-    "i-e7b0848d": {
+    "i-17e9dd7d": {
       "type": "instance",
-      "display_name": "i-e7b0848d"
+      "display_name": "i-17e9dd7d"
     },
-    "i-69381003": {
+    "i-fb486291": {
+      "data_source": "ec2",
       "type": "instance",
-      "display_name": "i-69381003"
+      "image_size": "0.17408E4",
+      "node_interface": {
+        "eth0": {
+          "type": "ethernet",
+          "display_name": "eth0",
+          "*network_partition_id": "/network_partition/basic__default"
+        }
+      },
+      "display_name": "i-fb486291",
+      "operational_status": "stopped",
+      "ds_attributes": {
+        "flavor": {
+          "ram": 1740.8,
+          "disk": 160,
+          "cores": 1,
+          "name": "Small Instance",
+          "bits": 32,
+          "id": "m1.small"
+        },
+        "groups": [
+          "basic",
+          "default"
+        ]
+      },
+      "monitoring_item": {
+        "check_ping": {
+          "display_name": "check_ping",
+          "enabled": true,
+          "description": "ping"
+        },
+        "check_mem": {
+          "display_name": "check_mem",
+          "enabled": true,
+          "description": "Free Memory"
+        },
+        "check_local_procs": {
+          "display_name": "check_local_procs",
+          "enabled": true,
+          "description": "Processes"
+        },
+        "check_all_disks": {
+          "display_name": "check_all_disks",
+          "enabled": true,
+          "description": "Free Space All Disks"
+        },
+        "check_memory_profiler": {
+          "display_name": "check_memory_profiler",
+          "enabled": true,
+          "description": "Memory Profiler"
+        },
+        "check_iostat": {
+          "display_name": "check_iostat",
+          "enabled": true,
+          "description": "Iostat"
+        },
+        "check_ssh": {
+          "display_name": "check_ssh",
+          "enabled": true,
+          "description": "SSH"
+        }
+      },
+      "ds_key": "[:ec2, :instance, \"i-fb486291\"]",
+      "is_deployed": true,
+      "ds_source_obj_type": "instance"
+    },
+    "i-b04bf4da": {
+      "type": "instance",
+      "display_name": "i-b04bf4da"
+    },
+    "i-374b945d": {
+      "data_source": "ec2",
+      "type": "instance",
+      "image_size": "0.17408E4",
+      "node_interface": {
+        "eth0": {
+          "type": "ethernet",
+          "display_name": "eth0",
+          "*network_partition_id": "/network_partition/basic__default"
+        }
+      },
+      "display_name": "i-374b945d",
+      "operational_status": "stopped",
+      "ds_attributes": {
+        "flavor": {
+          "ram": 1740.8,
+          "disk": 160,
+          "cores": 1,
+          "name": "Small Instance",
+          "bits": 32,
+          "id": "m1.small"
+        },
+        "groups": [
+          "basic",
+          "default"
+        ]
+      },
+      "monitoring_item": {
+        "check_ping": {
+          "display_name": "check_ping",
+          "enabled": true,
+          "description": "ping"
+        },
+        "check_mem": {
+          "display_name": "check_mem",
+          "enabled": true,
+          "description": "Free Memory"
+        },
+        "check_local_procs": {
+          "display_name": "check_local_procs",
+          "enabled": true,
+          "description": "Processes"
+        },
+        "check_all_disks": {
+          "display_name": "check_all_disks",
+          "enabled": true,
+          "description": "Free Space All Disks"
+        },
+        "check_memory_profiler": {
+          "display_name": "check_memory_profiler",
+          "enabled": true,
+          "description": "Memory Profiler"
+        },
+        "check_iostat": {
+          "display_name": "check_iostat",
+          "enabled": true,
+          "description": "Iostat"
+        },
+        "check_ssh": {
+          "display_name": "check_ssh",
+          "enabled": true,
+          "description": "SSH"
+        }
+      },
+      "ds_key": "[:ec2, :instance, \"i-374b945d\"]",
+      "is_deployed": true,
+      "ds_source_obj_type": "instance"
+    },
+    "i-c1b527ab": {
+      "data_source": "ec2",
+      "type": "instance",
+      "image_size": "0.17408E4",
+      "node_interface": {
+        "eth0": {
+          "type": "ethernet",
+          "display_name": "eth0",
+          "*network_partition_id": "/network_partition/basic__default"
+        }
+      },
+      "display_name": "i-c1b527ab",
+      "operational_status": "stopped",
+      "ds_attributes": {
+        "flavor": {
+          "ram": 1740.8,
+          "disk": 160,
+          "cores": 1,
+          "name": "Small Instance",
+          "bits": 32,
+          "id": "m1.small"
+        },
+        "groups": [
+          "basic",
+          "default"
+        ]
+      },
+      "monitoring_item": {
+        "check_ping": {
+          "display_name": "check_ping",
+          "enabled": true,
+          "description": "ping"
+        },
+        "check_mem": {
+          "display_name": "check_mem",
+          "enabled": true,
+          "description": "Free Memory"
+        },
+        "check_local_procs": {
+          "display_name": "check_local_procs",
+          "enabled": true,
+          "description": "Processes"
+        },
+        "check_all_disks": {
+          "display_name": "check_all_disks",
+          "enabled": true,
+          "description": "Free Space All Disks"
+        },
+        "check_memory_profiler": {
+          "display_name": "check_memory_profiler",
+          "enabled": true,
+          "description": "Memory Profiler"
+        },
+        "check_iostat": {
+          "display_name": "check_iostat",
+          "enabled": true,
+          "description": "Iostat"
+        },
+        "check_ssh": {
+          "display_name": "check_ssh",
+          "enabled": true,
+          "description": "SSH"
+        }
+      },
+      "ds_key": "[:ec2, :instance, \"i-c1b527ab\"]",
+      "is_deployed": true,
+      "ds_source_obj_type": "instance"
     },
     "i-97bb8ffd": {
       "data_source": "ec2",
@@ -613,11 +605,11 @@
       "operational_status": "stopped",
       "ds_attributes": {
         "flavor": {
-          "cores": 1,
-          "bits": 32,
           "ram": 1740.8,
           "disk": 160,
+          "cores": 1,
           "name": "Small Instance",
+          "bits": 32,
           "id": "m1.small"
         },
         "groups": [
@@ -666,81 +658,13 @@
       "is_deployed": true,
       "ds_source_obj_type": "instance"
     },
-    "i-b5c5f1df": {
+    "i-e7b0848d": {
       "type": "instance",
-      "display_name": "i-b5c5f1df"
+      "display_name": "i-e7b0848d"
     },
-    "i-afcd95c5": {
+    "i-69381003": {
       "type": "instance",
-      "display_name": "i-afcd95c5"
-    },
-    "i-656e580f": {
-      "data_source": "ec2",
-      "type": "instance",
-      "image_size": "0.17408E4",
-      "node_interface": {
-        "eth0": {
-          "type": "ethernet",
-          "display_name": "eth0",
-          "*network_partition_id": "/network_partition/basic__default"
-        }
-      },
-      "display_name": "i-656e580f",
-      "operational_status": "stopped",
-      "ds_attributes": {
-        "flavor": {
-          "cores": 1,
-          "bits": 32,
-          "ram": 1740.8,
-          "disk": 160,
-          "name": "Small Instance",
-          "id": "m1.small"
-        },
-        "groups": [
-          "basic",
-          "default"
-        ]
-      },
-      "monitoring_item": {
-        "check_ping": {
-          "display_name": "check_ping",
-          "enabled": true,
-          "description": "ping"
-        },
-        "check_mem": {
-          "display_name": "check_mem",
-          "enabled": true,
-          "description": "Free Memory"
-        },
-        "check_local_procs": {
-          "display_name": "check_local_procs",
-          "enabled": true,
-          "description": "Processes"
-        },
-        "check_all_disks": {
-          "display_name": "check_all_disks",
-          "enabled": true,
-          "description": "Free Space All Disks"
-        },
-        "check_memory_profiler": {
-          "display_name": "check_memory_profiler",
-          "enabled": true,
-          "description": "Memory Profiler"
-        },
-        "check_iostat": {
-          "display_name": "check_iostat",
-          "enabled": true,
-          "description": "Iostat"
-        },
-        "check_ssh": {
-          "display_name": "check_ssh",
-          "enabled": true,
-          "description": "SSH"
-        }
-      },
-      "ds_key": "[:ec2, :instance, \"i-656e580f\"]",
-      "is_deployed": true,
-      "ds_source_obj_type": "instance"
+      "display_name": "i-69381003"
     },
     "i-33886f59": {
       "data_source": "ec2",
@@ -769,11 +693,11 @@
       },
       "ds_attributes": {
         "flavor": {
-          "cores": 1,
-          "bits": 32,
           "ram": 1740.8,
           "disk": 160,
+          "cores": 1,
           "name": "Small Instance",
+          "bits": 32,
           "id": "m1.small"
         },
         "groups": [
@@ -822,15 +746,7 @@
       "is_deployed": true,
       "ds_source_obj_type": "instance"
     },
-    "i-79c39f13": {
-      "type": "instance",
-      "display_name": "i-79c39f13"
-    },
-    "i-dfcb12b5": {
-      "type": "instance",
-      "display_name": "i-dfcb12b5"
-    },
-    "i-335f0059": {
+    "i-656e580f": {
       "data_source": "ec2",
       "type": "instance",
       "image_size": "0.17408E4",
@@ -841,15 +757,15 @@
           "*network_partition_id": "/network_partition/basic__default"
         }
       },
-      "display_name": "i-335f0059",
+      "display_name": "i-656e580f",
       "operational_status": "stopped",
       "ds_attributes": {
         "flavor": {
-          "cores": 1,
-          "bits": 32,
           "ram": 1740.8,
           "disk": 160,
+          "cores": 1,
           "name": "Small Instance",
+          "bits": 32,
           "id": "m1.small"
         },
         "groups": [
@@ -894,77 +810,17 @@
           "description": "SSH"
         }
       },
-      "ds_key": "[:ec2, :instance, \"i-335f0059\"]",
+      "ds_key": "[:ec2, :instance, \"i-656e580f\"]",
       "is_deployed": true,
       "ds_source_obj_type": "instance"
     },
-    "i-bd39e2d7": {
-      "data_source": "ec2",
+    "i-b5c5f1df": {
       "type": "instance",
-      "image_size": "0.17408E4",
-      "node_interface": {
-        "eth0": {
-          "type": "ethernet",
-          "display_name": "eth0",
-          "*network_partition_id": "/network_partition/basic__default"
-        }
-      },
-      "display_name": "i-bd39e2d7",
-      "operational_status": "stopped",
-      "ds_attributes": {
-        "flavor": {
-          "cores": 1,
-          "bits": 32,
-          "ram": 1740.8,
-          "disk": 160,
-          "name": "Small Instance",
-          "id": "m1.small"
-        },
-        "groups": [
-          "basic",
-          "default"
-        ]
-      },
-      "monitoring_item": {
-        "check_ping": {
-          "display_name": "check_ping",
-          "enabled": true,
-          "description": "ping"
-        },
-        "check_mem": {
-          "display_name": "check_mem",
-          "enabled": true,
-          "description": "Free Memory"
-        },
-        "check_local_procs": {
-          "display_name": "check_local_procs",
-          "enabled": true,
-          "description": "Processes"
-        },
-        "check_all_disks": {
-          "display_name": "check_all_disks",
-          "enabled": true,
-          "description": "Free Space All Disks"
-        },
-        "check_memory_profiler": {
-          "display_name": "check_memory_profiler",
-          "enabled": true,
-          "description": "Memory Profiler"
-        },
-        "check_iostat": {
-          "display_name": "check_iostat",
-          "enabled": true,
-          "description": "Iostat"
-        },
-        "check_ssh": {
-          "display_name": "check_ssh",
-          "enabled": true,
-          "description": "SSH"
-        }
-      },
-      "ds_key": "[:ec2, :instance, \"i-bd39e2d7\"]",
-      "is_deployed": true,
-      "ds_source_obj_type": "instance"
+      "display_name": "i-b5c5f1df"
+    },
+    "i-afcd95c5": {
+      "type": "instance",
+      "display_name": "i-afcd95c5"
     },
     "ami-bf3ad3d6": {
       "data_source": "ec2",
@@ -979,27 +835,27 @@
       "ds_attributes": {
         "state": "available",
         "type": "machine",
+        "root_device_name": "/dev/sda1",
+        "owner_id": "411986592491",
+        "kernel_id": "aki-5f15f636",
+        "location": "411986592491/rnp-chef-server-0816-ubuntu-910-x86_32",
         "block_device_mapping": [
           {
-            "snapshotId": "snap-324cdb5a",
-            "deviceName": "/dev/sda1",
             "deleteOnTermination": "true",
-            "volumeSize": "15"
+            "volumeSize": "15",
+            "snapshotId": "snap-324cdb5a",
+            "deviceName": "/dev/sda1"
           }
         ],
         "root_device_type": "ebs",
+        "platform": null,
         "is_public": false,
         "ramdisk_id": "ari-d5709dbc",
-        "location": "411986592491/rnp-chef-server-0816-ubuntu-910-x86_32",
+        "architecture": "i386",
+        "id": "ami-bf3ad3d6",
         "product_codes": [
 
-        ],
-        "root_device_name": "/dev/sda1",
-        "platform": null,
-        "architecture": "i386",
-        "owner_id": "411986592491",
-        "id": "ami-bf3ad3d6",
-        "kernel_id": "aki-5f15f636"
+        ]
       },
       "monitoring_item": {
         "check_ping": {
@@ -1055,27 +911,27 @@
       "ds_attributes": {
         "state": "available",
         "type": "machine",
+        "root_device_name": "/dev/sda1",
+        "owner_id": "411986592491",
+        "kernel_id": "aki-5f15f636",
+        "location": "411986592491/rnp-chef-0816-ubuntu-910-x86_32",
         "block_device_mapping": [
           {
-            "snapshotId": "snap-3c57c054",
-            "deviceName": "/dev/sda1",
             "deleteOnTermination": "true",
-            "volumeSize": "15"
+            "volumeSize": "15",
+            "snapshotId": "snap-3c57c054",
+            "deviceName": "/dev/sda1"
           }
         ],
         "root_device_type": "ebs",
+        "platform": null,
         "is_public": false,
         "ramdisk_id": "ari-d5709dbc",
-        "location": "411986592491/rnp-chef-0816-ubuntu-910-x86_32",
+        "architecture": "i386",
+        "id": "ami-693ad300",
         "product_codes": [
 
-        ],
-        "root_device_name": "/dev/sda1",
-        "platform": null,
-        "architecture": "i386",
-        "owner_id": "411986592491",
-        "id": "ami-693ad300",
-        "kernel_id": "aki-5f15f636"
+        ]
       },
       "monitoring_item": {
         "check_ping": {
@@ -1118,157 +974,153 @@
       "is_deployed": true,
       "ds_source_obj_type": "image"
     },
+    "i-bd39e2d7": {
+      "data_source": "ec2",
+      "type": "instance",
+      "image_size": "0.17408E4",
+      "node_interface": {
+        "eth0": {
+          "type": "ethernet",
+          "display_name": "eth0",
+          "*network_partition_id": "/network_partition/basic__default"
+        }
+      },
+      "display_name": "i-bd39e2d7",
+      "operational_status": "stopped",
+      "ds_attributes": {
+        "flavor": {
+          "ram": 1740.8,
+          "disk": 160,
+          "cores": 1,
+          "name": "Small Instance",
+          "bits": 32,
+          "id": "m1.small"
+        },
+        "groups": [
+          "basic",
+          "default"
+        ]
+      },
+      "monitoring_item": {
+        "check_ping": {
+          "display_name": "check_ping",
+          "enabled": true,
+          "description": "ping"
+        },
+        "check_mem": {
+          "display_name": "check_mem",
+          "enabled": true,
+          "description": "Free Memory"
+        },
+        "check_local_procs": {
+          "display_name": "check_local_procs",
+          "enabled": true,
+          "description": "Processes"
+        },
+        "check_all_disks": {
+          "display_name": "check_all_disks",
+          "enabled": true,
+          "description": "Free Space All Disks"
+        },
+        "check_memory_profiler": {
+          "display_name": "check_memory_profiler",
+          "enabled": true,
+          "description": "Memory Profiler"
+        },
+        "check_iostat": {
+          "display_name": "check_iostat",
+          "enabled": true,
+          "description": "Iostat"
+        },
+        "check_ssh": {
+          "display_name": "check_ssh",
+          "enabled": true,
+          "description": "SSH"
+        }
+      },
+      "ds_key": "[:ec2, :instance, \"i-bd39e2d7\"]",
+      "is_deployed": true,
+      "ds_source_obj_type": "instance"
+    },
+    "i-335f0059": {
+      "data_source": "ec2",
+      "type": "instance",
+      "image_size": "0.17408E4",
+      "node_interface": {
+        "eth0": {
+          "type": "ethernet",
+          "display_name": "eth0",
+          "*network_partition_id": "/network_partition/basic__default"
+        }
+      },
+      "display_name": "i-335f0059",
+      "operational_status": "stopped",
+      "ds_attributes": {
+        "flavor": {
+          "ram": 1740.8,
+          "disk": 160,
+          "cores": 1,
+          "name": "Small Instance",
+          "bits": 32,
+          "id": "m1.small"
+        },
+        "groups": [
+          "basic",
+          "default"
+        ]
+      },
+      "monitoring_item": {
+        "check_ping": {
+          "display_name": "check_ping",
+          "enabled": true,
+          "description": "ping"
+        },
+        "check_mem": {
+          "display_name": "check_mem",
+          "enabled": true,
+          "description": "Free Memory"
+        },
+        "check_local_procs": {
+          "display_name": "check_local_procs",
+          "enabled": true,
+          "description": "Processes"
+        },
+        "check_all_disks": {
+          "display_name": "check_all_disks",
+          "enabled": true,
+          "description": "Free Space All Disks"
+        },
+        "check_memory_profiler": {
+          "display_name": "check_memory_profiler",
+          "enabled": true,
+          "description": "Memory Profiler"
+        },
+        "check_iostat": {
+          "display_name": "check_iostat",
+          "enabled": true,
+          "description": "Iostat"
+        },
+        "check_ssh": {
+          "display_name": "check_ssh",
+          "enabled": true,
+          "description": "SSH"
+        }
+      },
+      "ds_key": "[:ec2, :instance, \"i-335f0059\"]",
+      "is_deployed": true,
+      "ds_source_obj_type": "instance"
+    },
+    "i-79c39f13": {
+      "type": "instance",
+      "display_name": "i-79c39f13"
+    },
+    "i-dfcb12b5": {
+      "type": "instance",
+      "display_name": "i-dfcb12b5"
+    },
     "i-59d58d33": {
       "type": "instance",
       "display_name": "i-59d58d33"
-    },
-    "i-2fb68345": {
-      "type": "instance",
-      "display_name": "i-2fb68345"
-    },
-    "i-871863ed": {
-      "type": "instance",
-      "display_name": "i-871863ed"
-    },
-    "i-11d8497b": {
-      "type": "instance",
-      "display_name": "i-11d8497b"
-    },
-    "i-9bad8cf1": {
-      "data_source": "ec2",
-      "type": "instance",
-      "image_size": "0.17408E4",
-      "node_interface": {
-        "eth0": {
-          "type": "ethernet",
-          "display_name": "eth0",
-          "*network_partition_id": "/network_partition/basic__default"
-        }
-      },
-      "display_name": "i-9bad8cf1",
-      "operational_status": "stopped",
-      "ds_attributes": {
-        "flavor": {
-          "cores": 1,
-          "bits": 32,
-          "ram": 1740.8,
-          "disk": 160,
-          "name": "Small Instance",
-          "id": "m1.small"
-        },
-        "groups": [
-          "basic",
-          "default"
-        ]
-      },
-      "monitoring_item": {
-        "check_ping": {
-          "display_name": "check_ping",
-          "enabled": true,
-          "description": "ping"
-        },
-        "check_mem": {
-          "display_name": "check_mem",
-          "enabled": true,
-          "description": "Free Memory"
-        },
-        "check_local_procs": {
-          "display_name": "check_local_procs",
-          "enabled": true,
-          "description": "Processes"
-        },
-        "check_all_disks": {
-          "display_name": "check_all_disks",
-          "enabled": true,
-          "description": "Free Space All Disks"
-        },
-        "check_memory_profiler": {
-          "display_name": "check_memory_profiler",
-          "enabled": true,
-          "description": "Memory Profiler"
-        },
-        "check_iostat": {
-          "display_name": "check_iostat",
-          "enabled": true,
-          "description": "Iostat"
-        },
-        "check_ssh": {
-          "display_name": "check_ssh",
-          "enabled": true,
-          "description": "SSH"
-        }
-      },
-      "ds_key": "[:ec2, :instance, \"i-9bad8cf1\"]",
-      "is_deployed": true,
-      "ds_source_obj_type": "instance"
-    },
-    "i-c5f5afaf": {
-      "data_source": "ec2",
-      "type": "instance",
-      "image_size": "0.17408E4",
-      "node_interface": {
-        "eth0": {
-          "type": "ethernet",
-          "display_name": "eth0",
-          "*network_partition_id": "/network_partition/basic__default"
-        }
-      },
-      "display_name": "i-c5f5afaf",
-      "operational_status": "stopped",
-      "ds_attributes": {
-        "flavor": {
-          "cores": 1,
-          "bits": 32,
-          "ram": 1740.8,
-          "disk": 160,
-          "name": "Small Instance",
-          "id": "m1.small"
-        },
-        "groups": [
-          "basic",
-          "default"
-        ]
-      },
-      "monitoring_item": {
-        "check_ping": {
-          "display_name": "check_ping",
-          "enabled": true,
-          "description": "ping"
-        },
-        "check_mem": {
-          "display_name": "check_mem",
-          "enabled": true,
-          "description": "Free Memory"
-        },
-        "check_local_procs": {
-          "display_name": "check_local_procs",
-          "enabled": true,
-          "description": "Processes"
-        },
-        "check_all_disks": {
-          "display_name": "check_all_disks",
-          "enabled": true,
-          "description": "Free Space All Disks"
-        },
-        "check_memory_profiler": {
-          "display_name": "check_memory_profiler",
-          "enabled": true,
-          "description": "Memory Profiler"
-        },
-        "check_iostat": {
-          "display_name": "check_iostat",
-          "enabled": true,
-          "description": "Iostat"
-        },
-        "check_ssh": {
-          "display_name": "check_ssh",
-          "enabled": true,
-          "description": "SSH"
-        }
-      },
-      "ds_key": "[:ec2, :instance, \"i-c5f5afaf\"]",
-      "is_deployed": true,
-      "ds_source_obj_type": "instance"
     },
     "i-2f5b7a44": {
       "data_source": "ec2",
@@ -1285,11 +1137,11 @@
       "operational_status": "stopped",
       "ds_attributes": {
         "flavor": {
-          "cores": 1,
-          "bits": 32,
           "ram": 1740.8,
           "disk": 160,
+          "cores": 1,
           "name": "Small Instance",
+          "bits": 32,
           "id": "m1.small"
         },
         "groups": [
@@ -1351,27 +1203,27 @@
       "ds_attributes": {
         "state": "available",
         "type": "machine",
+        "root_device_name": "/dev/sda1",
+        "owner_id": "411986592491",
+        "kernel_id": "aki-5f15f636",
+        "location": "411986592491//rnp-chef-09-8-ubuntu-910-x86_32",
         "block_device_mapping": [
           {
-            "snapshotId": "snap-1cfdda77",
-            "deviceName": "/dev/sda1",
             "deleteOnTermination": "true",
-            "volumeSize": "15"
+            "volumeSize": "15",
+            "snapshotId": "snap-1cfdda77",
+            "deviceName": "/dev/sda1"
           }
         ],
         "root_device_type": "ebs",
+        "platform": null,
         "is_public": false,
         "ramdisk_id": "ari-d5709dbc",
-        "location": "411986592491//rnp-chef-09-8-ubuntu-910-x86_32",
+        "architecture": "i386",
+        "id": "ami-28ee1b41",
         "product_codes": [
 
-        ],
-        "root_device_name": "/dev/sda1",
-        "platform": null,
-        "architecture": "i386",
-        "owner_id": "411986592491",
-        "id": "ami-28ee1b41",
-        "kernel_id": "aki-5f15f636"
+        ]
       },
       "monitoring_item": {
         "check_ping": {
@@ -1414,13 +1266,153 @@
       "is_deployed": true,
       "ds_source_obj_type": "image"
     },
-    "i-0502796f": {
+    "i-2fb68345": {
       "type": "instance",
-      "display_name": "i-0502796f"
+      "display_name": "i-2fb68345"
     },
-    "i-ef1b4385": {
+    "i-c5f5afaf": {
+      "data_source": "ec2",
       "type": "instance",
-      "display_name": "i-ef1b4385"
+      "image_size": "0.17408E4",
+      "node_interface": {
+        "eth0": {
+          "type": "ethernet",
+          "display_name": "eth0",
+          "*network_partition_id": "/network_partition/basic__default"
+        }
+      },
+      "display_name": "i-c5f5afaf",
+      "operational_status": "stopped",
+      "ds_attributes": {
+        "flavor": {
+          "ram": 1740.8,
+          "disk": 160,
+          "cores": 1,
+          "name": "Small Instance",
+          "bits": 32,
+          "id": "m1.small"
+        },
+        "groups": [
+          "basic",
+          "default"
+        ]
+      },
+      "monitoring_item": {
+        "check_ping": {
+          "display_name": "check_ping",
+          "enabled": true,
+          "description": "ping"
+        },
+        "check_mem": {
+          "display_name": "check_mem",
+          "enabled": true,
+          "description": "Free Memory"
+        },
+        "check_local_procs": {
+          "display_name": "check_local_procs",
+          "enabled": true,
+          "description": "Processes"
+        },
+        "check_all_disks": {
+          "display_name": "check_all_disks",
+          "enabled": true,
+          "description": "Free Space All Disks"
+        },
+        "check_memory_profiler": {
+          "display_name": "check_memory_profiler",
+          "enabled": true,
+          "description": "Memory Profiler"
+        },
+        "check_iostat": {
+          "display_name": "check_iostat",
+          "enabled": true,
+          "description": "Iostat"
+        },
+        "check_ssh": {
+          "display_name": "check_ssh",
+          "enabled": true,
+          "description": "SSH"
+        }
+      },
+      "ds_key": "[:ec2, :instance, \"i-c5f5afaf\"]",
+      "is_deployed": true,
+      "ds_source_obj_type": "instance"
+    },
+    "i-9bad8cf1": {
+      "data_source": "ec2",
+      "type": "instance",
+      "image_size": "0.17408E4",
+      "node_interface": {
+        "eth0": {
+          "type": "ethernet",
+          "display_name": "eth0",
+          "*network_partition_id": "/network_partition/basic__default"
+        }
+      },
+      "display_name": "i-9bad8cf1",
+      "operational_status": "stopped",
+      "ds_attributes": {
+        "flavor": {
+          "ram": 1740.8,
+          "disk": 160,
+          "cores": 1,
+          "name": "Small Instance",
+          "bits": 32,
+          "id": "m1.small"
+        },
+        "groups": [
+          "basic",
+          "default"
+        ]
+      },
+      "monitoring_item": {
+        "check_ping": {
+          "display_name": "check_ping",
+          "enabled": true,
+          "description": "ping"
+        },
+        "check_mem": {
+          "display_name": "check_mem",
+          "enabled": true,
+          "description": "Free Memory"
+        },
+        "check_local_procs": {
+          "display_name": "check_local_procs",
+          "enabled": true,
+          "description": "Processes"
+        },
+        "check_all_disks": {
+          "display_name": "check_all_disks",
+          "enabled": true,
+          "description": "Free Space All Disks"
+        },
+        "check_memory_profiler": {
+          "display_name": "check_memory_profiler",
+          "enabled": true,
+          "description": "Memory Profiler"
+        },
+        "check_iostat": {
+          "display_name": "check_iostat",
+          "enabled": true,
+          "description": "Iostat"
+        },
+        "check_ssh": {
+          "display_name": "check_ssh",
+          "enabled": true,
+          "description": "SSH"
+        }
+      },
+      "ds_key": "[:ec2, :instance, \"i-9bad8cf1\"]",
+      "is_deployed": true,
+      "ds_source_obj_type": "instance"
+    },
+    "i-871863ed": {
+      "type": "instance",
+      "display_name": "i-871863ed"
+    },
+    "i-11d8497b": {
+      "type": "instance",
+      "display_name": "i-11d8497b"
     },
     "i-07af096d": {
       "data_source": "ec2",
@@ -1437,11 +1429,11 @@
       "operational_status": "stopped",
       "ds_attributes": {
         "flavor": {
-          "cores": 1,
-          "bits": 32,
           "ram": 1740.8,
           "disk": 160,
+          "cores": 1,
           "name": "Small Instance",
+          "bits": 32,
           "id": "m1.small"
         },
         "groups": [
@@ -1490,6 +1482,14 @@
       "is_deployed": true,
       "ds_source_obj_type": "instance"
     },
+    "i-0502796f": {
+      "type": "instance",
+      "display_name": "i-0502796f"
+    },
+    "i-ef1b4385": {
+      "type": "instance",
+      "display_name": "i-ef1b4385"
+    },
     "i-63775608": {
       "data_source": "ec2",
       "type": "instance",
@@ -1505,11 +1505,11 @@
       "operational_status": "stopped",
       "ds_attributes": {
         "flavor": {
-          "cores": 1,
-          "bits": 32,
           "ram": 1740.8,
           "disk": 160,
+          "cores": 1,
           "name": "Small Instance",
+          "bits": 32,
           "id": "m1.small"
         },
         "groups": [
@@ -1593,29 +1593,8 @@
         "monitoring_items": {
         },
         "attributes": {
-          "hadoop_cloudera_c3/jmxremote_port": {
-            "type": "string",
-            "recipes": [
-
-            ],
-            "transform": {
-              "__ref": "node[hadoop][jmxremote][namenode][port]"
-            },
-            "value": null,
-            "port_type": "output",
-            "required": "optional",
-            "is_service_attribute": true,
-            "service_name": "hadoop_namenode",
-            "choice": [
-
-            ],
-            "calculated": false
-          },
           "hadoop_cloudera_c3/jmxremote_password": {
             "type": "string",
-            "recipes": [
-
-            ],
             "transform": {
               "__ref": "node[hadoop][jmxremote][password]"
             },
@@ -1624,10 +1603,31 @@
             "required": "optional",
             "is_service_attribute": true,
             "service_name": "hadoop_namenode",
-            "choice": [
+            "calculated": false,
+            "recipes": [
 
             ],
-            "calculated": false
+            "choice": [
+
+            ]
+          },
+          "hadoop_cloudera_c3/jmxremote_port": {
+            "type": "string",
+            "transform": {
+              "__ref": "node[hadoop][jmxremote][namenode][port]"
+            },
+            "value": null,
+            "port_type": "output",
+            "required": "optional",
+            "is_service_attribute": true,
+            "service_name": "hadoop_namenode",
+            "calculated": false,
+            "recipes": [
+
+            ],
+            "choice": [
+
+            ]
           }
         },
         "basic_type": null,
@@ -1643,26 +1643,6 @@
     },
     "i-07af096d__redis": {
       "display_name": "i-07af096d__redis"
-    },
-    "i-c1b527ab__java_sun": {
-      "display_name": "i-c1b527ab__java_sun"
-    },
-    "nagios": {
-      "type": "template",
-      "display_name": "nagios",
-      "ds_attributes": {
-        "recipe_name": "nagios",
-        "monitoring_items": {
-        },
-        "attributes": {
-        },
-        "basic_type": null,
-        "description": "Empty, use one of the other recipes"
-      },
-      "ds_key": "[:chef, :template, \"nagios\"]",
-      "external_type": "chef_recipe",
-      "external_cmp_ref": "recipe[nagios]",
-      "description": "Empty, use one of the other recipes"
     },
     "postgresql::client": {
       "type": "template",
@@ -1689,18 +1669,18 @@
           "postgresql/dir": {
             "type": "string",
             "display_name": "PostgreSQL Directory",
-            "recipes": [
-
-            ],
             "value": "/etc/postgresql/8.3/main",
             "port_type": "input",
             "required": "optional",
+            "calculated": false,
             "default": "/etc/postgresql/8.3/main",
             "description": "Location of the PostgreSQL databases",
-            "choice": [
+            "recipes": [
 
             ],
-            "calculated": false
+            "choice": [
+
+            ]
           }
         },
         "basic_type": null,
@@ -1710,6 +1690,40 @@
       "external_type": "chef_recipe",
       "external_cmp_ref": "recipe[postgresql::client]",
       "description": "Installs postgresql client package(s)"
+    },
+    "i-c1b527ab__java_sun": {
+      "type": "instance",
+      "display_name": "i-c1b527ab__java_sun",
+      "ds_attributes": {
+        "recipe_name": "java_sun",
+        "attributes": {
+        },
+        "node_name": "i-c1b527ab",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-c1b527ab\", \"java_sun\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[java_sun]"
+    },
+    "nagios": {
+      "type": "template",
+      "display_name": "nagios",
+      "ds_attributes": {
+        "recipe_name": "nagios",
+        "monitoring_items": {
+        },
+        "attributes": {
+        },
+        "basic_type": null,
+        "description": "Empty, use one of the other recipes"
+      },
+      "ds_key": "[:chef, :template, \"nagios\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[nagios]",
+      "description": "Empty, use one of the other recipes"
+    },
+    "i-e7b0848d__collectd::server": {
+      "display_name": "i-e7b0848d__collectd::server"
     },
     "nagios::server": {
       "type": "template",
@@ -1729,49 +1743,737 @@
       "description": "Installs and configures a nagios server"
     },
     "i-bd39e2d7__mysql::server2": {
-      "display_name": "i-bd39e2d7__mysql::server2"
+      "type": "instance",
+      "display_name": "i-bd39e2d7__mysql::server2",
+      "attribute": {
+        "var[bind_address]": {
+          "is_array": false,
+          "display_name": "var[bind_address]",
+          "propagation_type": "immediate",
+          "required": false,
+          "external_attr_ref": "node[mysql][bind_address]",
+          "output_variable": false,
+          "data_type": "string",
+          "description": "Address that mysqld should listen on",
+          "value_asserted": "10.254.185.190"
+        },
+        "var[tunable][key_buffer]": {
+          "is_array": false,
+          "display_name": "var[tunable][key_buffer]",
+          "propagation_type": "immediate",
+          "required": false,
+          "external_attr_ref": "node[mysql][tunable][key_buffer]",
+          "output_variable": false,
+          "data_type": "string",
+          "value_asserted": "250M"
+        },
+        "var[tunable][back_log]": {
+          "is_array": false,
+          "display_name": "var[tunable][back_log]",
+          "propagation_type": "immediate",
+          "required": false,
+          "external_attr_ref": "node[mysql][tunable][back_log]",
+          "output_variable": false,
+          "data_type": "string",
+          "value_asserted": "128"
+        },
+        "var[tunable][max_connections]": {
+          "is_array": false,
+          "display_name": "var[tunable][max_connections]",
+          "propagation_type": "immediate",
+          "required": false,
+          "external_attr_ref": "node[mysql][tunable][max_connections]",
+          "output_variable": false,
+          "data_type": "string",
+          "value_asserted": "800"
+        },
+        "var[tunable][wait_timeout]": {
+          "is_array": false,
+          "display_name": "var[tunable][wait_timeout]",
+          "propagation_type": "immediate",
+          "required": false,
+          "external_attr_ref": "node[mysql][tunable][wait_timeout]",
+          "output_variable": false,
+          "data_type": "string",
+          "value_asserted": "180"
+        },
+        "port[monitor_user_id]": {
+          "is_array": false,
+          "display_name": "port[monitor_user_id]",
+          "propagation_type": "immediate",
+          "required": false,
+          "external_attr_ref": "service[mysql_server][monitor_user_id]",
+          "output_variable": false,
+          "data_type": "string",
+          "value_asserted": "root"
+        },
+        "var[server_root_password]": {
+          "is_array": false,
+          "display_name": "var[server_root_password]",
+          "propagation_type": "immediate",
+          "required": false,
+          "external_attr_ref": "node[mysql][server_root_password]",
+          "output_variable": false,
+          "data_type": "string",
+          "description": "Randomly generated password for the mysqld root user",
+          "value_asserted": "tempt5"
+        },
+        "var[tunable][max_heap_table_size]": {
+          "is_array": false,
+          "display_name": "var[tunable][max_heap_table_size]",
+          "propagation_type": "immediate",
+          "required": false,
+          "external_attr_ref": "node[mysql][tunable][max_heap_table_size]",
+          "output_variable": false,
+          "data_type": "string",
+          "value_asserted": "32M"
+        },
+        "var[tunable][net_write_timeout]": {
+          "is_array": false,
+          "display_name": "var[tunable][net_write_timeout]",
+          "propagation_type": "immediate",
+          "required": false,
+          "external_attr_ref": "node[mysql][tunable][net_write_timeout]",
+          "output_variable": false,
+          "data_type": "string",
+          "value_asserted": "30"
+        },
+        "var[datadir]": {
+          "is_array": false,
+          "display_name": "var[datadir]",
+          "propagation_type": "immediate",
+          "required": false,
+          "external_attr_ref": "node[mysql][datadir]",
+          "output_variable": false,
+          "data_type": "string",
+          "description": "Location of mysql databases",
+          "value_asserted": "/var/lib/mysql"
+        },
+        "var[tunable][net_read_timeout]": {
+          "is_array": false,
+          "display_name": "var[tunable][net_read_timeout]",
+          "propagation_type": "immediate",
+          "required": false,
+          "external_attr_ref": "node[mysql][tunable][net_read_timeout]",
+          "output_variable": false,
+          "data_type": "string",
+          "value_asserted": "30"
+        },
+        "var[ec2_path]": {
+          "is_array": false,
+          "display_name": "var[ec2_path]",
+          "propagation_type": "immediate",
+          "required": false,
+          "external_attr_ref": "node[mysql][ec2_path]",
+          "output_variable": false,
+          "data_type": "string",
+          "description": "Location of mysql directory on EC2 instance EBS volumes",
+          "value_asserted": "/mnt/mysql"
+        },
+        "port[db_info]": {
+          "is_array": false,
+          "display_name": "port[db_info]",
+          "propagation_type": "immediate",
+          "required": false,
+          "external_attr_ref": "service[mysql_server][db_info]",
+          "output_variable": false,
+          "data_type": "string",
+          "value_asserted": [
+            {
+              "database": "mysql",
+              "password": "tempt5",
+              "username": "root"
+            }
+          ]
+        },
+        "var[tunable][table_cache]": {
+          "is_array": false,
+          "display_name": "var[tunable][table_cache]",
+          "propagation_type": "immediate",
+          "required": false,
+          "external_attr_ref": "node[mysql][tunable][table_cache]",
+          "output_variable": false,
+          "data_type": "string",
+          "value_asserted": "128"
+        }
+      },
+      "ds_attributes": {
+        "recipe_name": "mysql::server2",
+        "attributes": {
+          "mysql/db_info": {
+            "type": "string",
+            "transform": [
+              {
+                "database": "mysql",
+                "password": {
+                  "__ref": "node[mysql][server_root_password]"
+                },
+                "username": "root"
+              }
+            ],
+            "value": [
+              {
+                "database": "mysql",
+                "password": "tempt5",
+                "username": "root"
+              }
+            ],
+            "required": "optional",
+            "is_service_attribute": true,
+            "service_name": "mysql_server",
+            "monitoring_input": "true",
+            "calculated": false,
+            "recipes": [
+              "mysql::server",
+              "mysql::server2"
+            ],
+            "choice": [
+
+            ]
+          },
+          "mysql/ec2_path": {
+            "type": "string",
+            "display_name": "MySQL EC2 Path",
+            "value": "/mnt/mysql",
+            "required": "optional",
+            "calculated": false,
+            "default": "/mnt/mysql",
+            "description": "Location of mysql directory on EC2 instance EBS volumes",
+            "recipes": [
+              "mysql::server",
+              "mysql::server2"
+            ],
+            "choice": [
+
+            ]
+          },
+          "mysql/monitor_user_id": {
+            "type": "string",
+            "transform": "root",
+            "value": "root",
+            "required": "optional",
+            "is_service_attribute": true,
+            "service_name": "mysql_server",
+            "monitoring_input": "true",
+            "calculated": false,
+            "recipes": [
+              "mysql::server",
+              "mysql::server2"
+            ],
+            "choice": [
+
+            ]
+          },
+          "mysql/tunable/wait_timeout": {
+            "type": "string",
+            "display_name": "MySQL Tunable Wait Timeout",
+            "value": "180",
+            "required": "optional",
+            "calculated": false,
+            "default": "180",
+            "recipes": [
+              "mysql::server",
+              "mysql::server2"
+            ],
+            "choice": [
+
+            ]
+          },
+          "mysql/tunable/key_buffer": {
+            "type": "string",
+            "display_name": "MySQL Tuntable Key Buffer",
+            "value": "250M",
+            "required": "optional",
+            "calculated": false,
+            "default": "250M",
+            "recipes": [
+              "mysql::server",
+              "mysql::server2"
+            ],
+            "choice": [
+
+            ]
+          },
+          "mysql/tunable/back_log": {
+            "type": "string",
+            "display_name": "MySQL Tunable Back Log",
+            "value": "128",
+            "required": "optional",
+            "calculated": false,
+            "default": "128",
+            "recipes": [
+              "mysql::server",
+              "mysql::server2"
+            ],
+            "choice": [
+
+            ]
+          },
+          "mysql/tunable/net_write_timeout": {
+            "type": "string",
+            "display_name": "MySQL Tunable Net Write Timeout",
+            "value": "30",
+            "required": "optional",
+            "calculated": false,
+            "default": "30",
+            "recipes": [
+              "mysql::server",
+              "mysql::server2"
+            ],
+            "choice": [
+
+            ]
+          },
+          "mysql/tunable/max_heap_table_size": {
+            "type": "string",
+            "display_name": "MySQL Tunable Max Heap Table Size",
+            "value": "32M",
+            "required": "optional",
+            "calculated": false,
+            "default": "32M",
+            "recipes": [
+              "mysql::server",
+              "mysql::server2"
+            ],
+            "choice": [
+
+            ]
+          },
+          "mysql/tunable/net_read_timeout": {
+            "type": "string",
+            "display_name": "MySQL Tunable Net Read Timeout",
+            "value": "30",
+            "required": "optional",
+            "calculated": false,
+            "default": "30",
+            "recipes": [
+              "mysql::server",
+              "mysql::server2"
+            ],
+            "choice": [
+
+            ]
+          },
+          "mysql/bind_address": {
+            "type": "string",
+            "display_name": "MySQL Bind Address",
+            "value": "10.254.185.190",
+            "required": "optional",
+            "calculated": false,
+            "default": "ipaddress",
+            "description": "Address that mysqld should listen on",
+            "recipes": [
+              "mysql::server",
+              "mysql::server2"
+            ],
+            "choice": [
+
+            ]
+          },
+          "mysql/tunable/max_connections": {
+            "type": "string",
+            "display_name": "MySQL Tunable Max Connections",
+            "value": "800",
+            "required": "optional",
+            "calculated": false,
+            "default": "800",
+            "recipes": [
+              "mysql::server",
+              "mysql::server2"
+            ],
+            "choice": [
+
+            ]
+          },
+          "mysql/datadir": {
+            "type": "string",
+            "display_name": "MySQL Data Directory",
+            "value": "/var/lib/mysql",
+            "required": "optional",
+            "calculated": false,
+            "default": "/var/lib/mysql",
+            "description": "Location of mysql databases",
+            "recipes": [
+              "mysql::server",
+              "mysql::server2"
+            ],
+            "choice": [
+
+            ]
+          },
+          "mysql/tunable/table_cache": {
+            "type": "string",
+            "display_name": "MySQL Tunable Table Cache",
+            "value": "128",
+            "required": "optional",
+            "calculated": false,
+            "default": "128",
+            "recipes": [
+              "mysql::server",
+              "mysql::server2"
+            ],
+            "choice": [
+
+            ]
+          },
+          "mysql/server_root_password": {
+            "type": "string",
+            "display_name": "MySQL Server Root Password",
+            "value": "tempt5",
+            "required": "optional",
+            "calculated": false,
+            "description": "Randomly generated password for the mysqld root user",
+            "recipes": [
+              "mysql::server",
+              "mysql::server2"
+            ],
+            "choice": [
+
+            ]
+          }
+        },
+        "node_name": "i-bd39e2d7",
+        "basic_type": "service"
+      },
+      "basic_type": "service",
+      "ds_key": "[:chef, :instance, \"i-bd39e2d7\", \"mysql::server2\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[mysql::server2]"
     },
     "i-bd39e2d7__rabbitmq": {
-      "display_name": "i-bd39e2d7__rabbitmq"
+      "type": "instance",
+      "display_name": "i-bd39e2d7__rabbitmq",
+      "attribute": {
+        "port[sap]": {
+          "is_array": false,
+          "display_name": "port[sap]",
+          "propagation_type": "immediate",
+          "required": false,
+          "external_attr_ref": "service[rabbitmq][sap]",
+          "output_variable": false,
+          "data_type": "string",
+          "value_asserted": [
+            {
+              "type": "inet",
+              "protocol": "tcp",
+              "port": 5672
+            }
+          ]
+        },
+        "var[branch_tag]": {
+          "is_array": false,
+          "display_name": "var[branch_tag]",
+          "propagation_type": "immediate",
+          "required": false,
+          "external_attr_ref": "node[rabbitmq][branch_tag]",
+          "output_variable": false,
+          "data_type": "string",
+          "description": "The RabbitMQ tag/branch name.  The default is default, the latest qa'd branch."
+        },
+        "var[stomp][branch_tag]": {
+          "is_array": false,
+          "display_name": "var[stomp][branch_tag]",
+          "propagation_type": "immediate",
+          "required": false,
+          "external_attr_ref": "node[rabbitmq][stomp][branch_tag]",
+          "output_variable": false,
+          "data_type": "string",
+          "description": "The RabbitMQ-stomp adapter tag/branch name.  The default is default, the latest qa'd branch."
+        }
+      },
+      "ds_attributes": {
+        "recipe_name": "rabbitmq",
+        "attributes": {
+          "rabbitmq/stomp/branch_tag": {
+            "type": "string",
+            "display_name": "RabbitMQ-stomp adapter tag/branch name",
+            "required": "optional",
+            "calculated": false,
+            "default": "default",
+            "description": "The RabbitMQ-stomp adapter tag/branch name.  The default is default, the latest qa'd branch.",
+            "recipes": [
+
+            ],
+            "choice": [
+
+            ]
+          },
+          "rabbitmq/branch_tag": {
+            "type": "string",
+            "display_name": "RabbitMQ tag/branch name",
+            "required": "optional",
+            "calculated": false,
+            "default": "default",
+            "description": "The RabbitMQ tag/branch name.  The default is default, the latest qa'd branch.",
+            "recipes": [
+
+            ],
+            "choice": [
+
+            ]
+          },
+          "rabbitmq/sap": {
+            "type": "string",
+            "transform": [
+              {
+                "type": "inet",
+                "protocol": "tcp",
+                "port": 5672
+              }
+            ],
+            "value": [
+              {
+                "type": "inet",
+                "protocol": "tcp",
+                "port": 5672
+              }
+            ],
+            "is_service_attribute": true,
+            "required": "optional",
+            "service_name": "rabbitmq",
+            "calculated": false,
+            "recipes": [
+
+            ],
+            "choice": [
+
+            ]
+          }
+        },
+        "node_name": "i-bd39e2d7",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-bd39e2d7\", \"rabbitmq\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[rabbitmq]"
     },
     "i-7550141f__chef_aux": {
-      "display_name": "i-7550141f__chef_aux"
-    },
-    "i-e7b0848d__collectd::server": {
-      "display_name": "i-e7b0848d__collectd::server"
+      "type": "instance",
+      "display_name": "i-7550141f__chef_aux",
+      "ds_attributes": {
+        "recipe_name": "chef_aux",
+        "attributes": {
+        },
+        "node_name": "i-7550141f",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-7550141f\", \"chef_aux\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[chef_aux]"
     },
     "i-afcd95c5__hadoop_cloudera_c3::conf_pseudo": {
-      "display_name": "i-afcd95c5__hadoop_cloudera_c3::conf_pseudo"
-    },
-    "i-0502796f__nagios::client": {
-      "display_name": "i-0502796f__nagios::client"
-    },
-    "i-ef1b4385__collectd::client": {
-      "display_name": "i-ef1b4385__collectd::client"
-    },
-    "i-2fb68345__collectd::server": {
-      "display_name": "i-2fb68345__collectd::server"
+      "type": "instance",
+      "display_name": "i-afcd95c5__hadoop_cloudera_c3::conf_pseudo",
+      "attribute": {
+        "port[jmxremote_port]": {
+          "is_array": false,
+          "display_name": "port[jmxremote_port]",
+          "propagation_type": "immediate",
+          "required": false,
+          "port_type": "output",
+          "external_attr_ref": "service[hadoop_namenode][jmxremote_port]",
+          "output_variable": false,
+          "data_type": "string",
+          "value_asserted": "1618"
+        },
+        "port[jmxremote_password]": {
+          "is_array": false,
+          "display_name": "port[jmxremote_password]",
+          "propagation_type": "immediate",
+          "required": false,
+          "port_type": "output",
+          "external_attr_ref": "service[hadoop_namenode][jmxremote_password]",
+          "output_variable": false,
+          "data_type": "string",
+          "value_asserted": "QED"
+        }
+      },
+      "ds_attributes": {
+        "recipe_name": "hadoop_cloudera_c3::conf_pseudo",
+        "attributes": {
+          "hadoop_cloudera_c3/jmxremote_password": {
+            "type": "string",
+            "transform": {
+              "__ref": "node[hadoop][jmxremote][password]"
+            },
+            "value": "QED",
+            "port_type": "output",
+            "required": "optional",
+            "is_service_attribute": true,
+            "service_name": "hadoop_namenode",
+            "calculated": false,
+            "recipes": [
+
+            ],
+            "choice": [
+
+            ]
+          },
+          "hadoop_cloudera_c3/jmxremote_port": {
+            "type": "string",
+            "transform": {
+              "__ref": "node[hadoop][jmxremote][namenode][port]"
+            },
+            "value": 1618,
+            "port_type": "output",
+            "required": "optional",
+            "is_service_attribute": true,
+            "service_name": "hadoop_namenode",
+            "calculated": false,
+            "recipes": [
+
+            ],
+            "choice": [
+
+            ]
+          }
+        },
+        "node_name": "i-afcd95c5",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-afcd95c5\", \"hadoop_cloudera_c3::conf_pseudo\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[hadoop_cloudera_c3::conf_pseudo]"
     },
     "i-374b945d__hadoop::conf_pseudo": {
-      "display_name": "i-374b945d__hadoop::conf_pseudo"
+      "type": "instance",
+      "display_name": "i-374b945d__hadoop::conf_pseudo",
+      "ds_attributes": {
+        "recipe_name": "hadoop::conf_pseudo",
+        "attributes": {
+        },
+        "node_name": "i-374b945d",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-374b945d\", \"hadoop::conf_pseudo\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[hadoop::conf_pseudo]"
     },
     "i-bd39e2d7__nagios::client": {
-      "display_name": "i-bd39e2d7__nagios::client"
+      "type": "instance",
+      "display_name": "i-bd39e2d7__nagios::client",
+      "ds_attributes": {
+        "recipe_name": "nagios::client",
+        "attributes": {
+        },
+        "node_name": "i-bd39e2d7",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-bd39e2d7\", \"nagios::client\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[nagios::client]"
     },
     "i-c1b527ab__nagios::client": {
-      "display_name": "i-c1b527ab__nagios::client"
+      "type": "instance",
+      "display_name": "i-c1b527ab__nagios::client",
+      "ds_attributes": {
+        "recipe_name": "nagios::client",
+        "attributes": {
+        },
+        "node_name": "i-c1b527ab",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-c1b527ab\", \"nagios::client\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[nagios::client]"
+    },
+    "i-0502796f__nagios::client": {
+      "type": "instance",
+      "display_name": "i-0502796f__nagios::client",
+      "ds_attributes": {
+        "recipe_name": "nagios::client",
+        "attributes": {
+        },
+        "node_name": "i-0502796f",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-0502796f\", \"nagios::client\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[nagios::client]"
+    },
+    "i-ef1b4385__collectd::client": {
+      "type": "instance",
+      "display_name": "i-ef1b4385__collectd::client",
+      "ds_attributes": {
+        "recipe_name": "collectd::client",
+        "attributes": {
+        },
+        "node_name": "i-ef1b4385",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-ef1b4385\", \"collectd::client\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[collectd::client]"
     },
     "i-c1b527ab__chef_aux": {
-      "display_name": "i-c1b527ab__chef_aux"
+      "type": "instance",
+      "display_name": "i-c1b527ab__chef_aux",
+      "ds_attributes": {
+        "recipe_name": "chef_aux",
+        "attributes": {
+        },
+        "node_name": "i-c1b527ab",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-c1b527ab\", \"chef_aux\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[chef_aux]"
     },
     "i-11d8497b__nagios::client": {
-      "display_name": "i-11d8497b__nagios::client"
+      "type": "instance",
+      "display_name": "i-11d8497b__nagios::client",
+      "ds_attributes": {
+        "recipe_name": "nagios::client",
+        "attributes": {
+        },
+        "node_name": "i-11d8497b",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-11d8497b\", \"nagios::client\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[nagios::client]"
+    },
+    "i-2fb68345__collectd::server": {
+      "type": "instance",
+      "display_name": "i-2fb68345__collectd::server",
+      "ds_attributes": {
+        "recipe_name": "collectd::server",
+        "attributes": {
+        },
+        "node_name": "i-2fb68345",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-2fb68345\", \"collectd::server\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[collectd::server]"
     },
     "i-374b945d__hadoop": {
-      "display_name": "i-374b945d__hadoop"
+      "type": "instance",
+      "display_name": "i-374b945d__hadoop",
+      "ds_attributes": {
+        "recipe_name": "hadoop",
+        "attributes": {
+        },
+        "node_name": "i-374b945d",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-374b945d\", \"hadoop\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[hadoop]"
     },
     "i-dfcb12b5__hadoop": {
-      "display_name": "i-dfcb12b5__hadoop"
+      "type": "instance",
+      "display_name": "i-dfcb12b5__hadoop",
+      "ds_attributes": {
+        "recipe_name": "hadoop",
+        "attributes": {
+        },
+        "node_name": "i-dfcb12b5",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-dfcb12b5\", \"hadoop\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[hadoop]"
     },
     "nagios::client": {
       "type": "template",
@@ -1789,9 +2491,6 @@
       "external_type": "chef_recipe",
       "external_cmp_ref": "recipe[nagios::client]",
       "description": "Installs and configures a nagios client with nrpe"
-    },
-    "i-c5f5afaf__collectd::server": {
-      "display_name": "i-c5f5afaf__collectd::server"
     },
     "mysql::server": {
       "type": "template",
@@ -1967,113 +2666,17 @@
               "db_info",
               "monitor_user_id"
             ],
-            "applicability_conditions": [
-              "lambda{|p|p[:db_info] and p[:db_info].find{|x|x[:username] == p[:monitor_user_id]}}"
-            ],
             "service_name": "mysql_server",
             "name": "mysql_basic_health",
-            "condition_name": null
+            "condition_name": null,
+            "applicability_conditions": [
+              "lambda{|p|p[:db_info] and p[:db_info].find{|x|x[:username] == p[:monitor_user_id]}}"
+            ]
           }
         },
         "attributes": {
-          "mysql/tunable/net_read_timeout": {
-            "type": "string",
-            "display_name": "MySQL Tunable Net Read Timeout",
-            "recipes": [
-              "mysql::server",
-              "mysql::server2"
-            ],
-            "value": "30",
-            "required": "optional",
-            "default": "30",
-            "choice": [
-
-            ],
-            "calculated": false
-          },
-          "mysql/bind_address": {
-            "type": "string",
-            "display_name": "MySQL Bind Address",
-            "recipes": [
-              "mysql::server",
-              "mysql::server2"
-            ],
-            "value": "ipaddress",
-            "required": "optional",
-            "default": "ipaddress",
-            "description": "Address that mysqld should listen on",
-            "choice": [
-
-            ],
-            "calculated": false
-          },
-          "mysql/tunable/max_connections": {
-            "type": "string",
-            "display_name": "MySQL Tunable Max Connections",
-            "recipes": [
-              "mysql::server",
-              "mysql::server2"
-            ],
-            "value": "800",
-            "required": "optional",
-            "default": "800",
-            "choice": [
-
-            ],
-            "calculated": false
-          },
-          "mysql/datadir": {
-            "type": "string",
-            "display_name": "MySQL Data Directory",
-            "recipes": [
-              "mysql::server",
-              "mysql::server2"
-            ],
-            "value": "/var/lib/mysql",
-            "required": "optional",
-            "default": "/var/lib/mysql",
-            "description": "Location of mysql databases",
-            "choice": [
-
-            ],
-            "calculated": false
-          },
-          "mysql/tunable/table_cache": {
-            "type": "string",
-            "display_name": "MySQL Tunable Table Cache",
-            "recipes": [
-              "mysql::server",
-              "mysql::server2"
-            ],
-            "value": "128",
-            "required": "optional",
-            "default": "128",
-            "choice": [
-
-            ],
-            "calculated": false
-          },
-          "mysql/server_root_password": {
-            "type": "string",
-            "display_name": "MySQL Server Root Password",
-            "recipes": [
-              "mysql::server",
-              "mysql::server2"
-            ],
-            "required": "optional",
-            "description": "Randomly generated password for the mysqld root user",
-            "choice": [
-
-            ],
-            "calculated": false
-          },
           "mysql/db_info": {
             "type": "string",
-            "recipes": [
-              "mysql::server",
-              "mysql::server2"
-            ],
-            "monitoring_input": "true",
             "transform": [
               {
                 "database": "mysql",
@@ -2093,118 +2696,214 @@
             "required": "optional",
             "is_service_attribute": true,
             "service_name": "mysql_server",
+            "monitoring_input": "true",
+            "calculated": false,
+            "recipes": [
+              "mysql::server",
+              "mysql::server2"
+            ],
             "choice": [
 
-            ],
-            "calculated": false
+            ]
           },
           "mysql/ec2_path": {
             "type": "string",
             "display_name": "MySQL EC2 Path",
+            "value": "/mnt/mysql",
+            "required": "optional",
+            "calculated": false,
+            "default": "/mnt/mysql",
+            "description": "Location of mysql directory on EC2 instance EBS volumes",
             "recipes": [
               "mysql::server",
               "mysql::server2"
             ],
-            "value": "/mnt/mysql",
-            "required": "optional",
-            "default": "/mnt/mysql",
-            "description": "Location of mysql directory on EC2 instance EBS volumes",
             "choice": [
 
-            ],
-            "calculated": false
+            ]
           },
           "mysql/monitor_user_id": {
             "type": "string",
-            "recipes": [
-              "mysql::server",
-              "mysql::server2"
-            ],
-            "monitoring_input": "true",
             "transform": "root",
             "value": "root",
             "required": "optional",
             "is_service_attribute": true,
             "service_name": "mysql_server",
+            "monitoring_input": "true",
+            "calculated": false,
+            "recipes": [
+              "mysql::server",
+              "mysql::server2"
+            ],
             "choice": [
 
-            ],
-            "calculated": false
+            ]
           },
           "mysql/tunable/wait_timeout": {
             "type": "string",
             "display_name": "MySQL Tunable Wait Timeout",
+            "value": "180",
+            "required": "optional",
+            "calculated": false,
+            "default": "180",
             "recipes": [
               "mysql::server",
               "mysql::server2"
             ],
-            "value": "180",
-            "required": "optional",
-            "default": "180",
             "choice": [
 
-            ],
-            "calculated": false
+            ]
           },
           "mysql/tunable/key_buffer": {
             "type": "string",
             "display_name": "MySQL Tuntable Key Buffer",
+            "value": "250M",
+            "required": "optional",
+            "calculated": false,
+            "default": "250M",
             "recipes": [
               "mysql::server",
               "mysql::server2"
             ],
-            "value": "250M",
-            "required": "optional",
-            "default": "250M",
             "choice": [
 
-            ],
-            "calculated": false
+            ]
           },
           "mysql/tunable/back_log": {
             "type": "string",
             "display_name": "MySQL Tunable Back Log",
+            "value": "128",
+            "required": "optional",
+            "calculated": false,
+            "default": "128",
             "recipes": [
               "mysql::server",
               "mysql::server2"
             ],
-            "value": "128",
-            "required": "optional",
-            "default": "128",
             "choice": [
 
-            ],
-            "calculated": false
+            ]
           },
           "mysql/tunable/net_write_timeout": {
             "type": "string",
             "display_name": "MySQL Tunable Net Write Timeout",
+            "value": "30",
+            "required": "optional",
+            "calculated": false,
+            "default": "30",
             "recipes": [
               "mysql::server",
               "mysql::server2"
             ],
-            "value": "30",
-            "required": "optional",
-            "default": "30",
             "choice": [
 
-            ],
-            "calculated": false
+            ]
           },
           "mysql/tunable/max_heap_table_size": {
             "type": "string",
             "display_name": "MySQL Tunable Max Heap Table Size",
+            "value": "32M",
+            "required": "optional",
+            "calculated": false,
+            "default": "32M",
             "recipes": [
               "mysql::server",
               "mysql::server2"
             ],
-            "value": "32M",
-            "required": "optional",
-            "default": "32M",
             "choice": [
 
+            ]
+          },
+          "mysql/tunable/net_read_timeout": {
+            "type": "string",
+            "display_name": "MySQL Tunable Net Read Timeout",
+            "value": "30",
+            "required": "optional",
+            "calculated": false,
+            "default": "30",
+            "recipes": [
+              "mysql::server",
+              "mysql::server2"
             ],
-            "calculated": false
+            "choice": [
+
+            ]
+          },
+          "mysql/bind_address": {
+            "type": "string",
+            "display_name": "MySQL Bind Address",
+            "value": "ipaddress",
+            "required": "optional",
+            "calculated": false,
+            "default": "ipaddress",
+            "description": "Address that mysqld should listen on",
+            "recipes": [
+              "mysql::server",
+              "mysql::server2"
+            ],
+            "choice": [
+
+            ]
+          },
+          "mysql/tunable/max_connections": {
+            "type": "string",
+            "display_name": "MySQL Tunable Max Connections",
+            "value": "800",
+            "required": "optional",
+            "calculated": false,
+            "default": "800",
+            "recipes": [
+              "mysql::server",
+              "mysql::server2"
+            ],
+            "choice": [
+
+            ]
+          },
+          "mysql/datadir": {
+            "type": "string",
+            "display_name": "MySQL Data Directory",
+            "value": "/var/lib/mysql",
+            "required": "optional",
+            "calculated": false,
+            "default": "/var/lib/mysql",
+            "description": "Location of mysql databases",
+            "recipes": [
+              "mysql::server",
+              "mysql::server2"
+            ],
+            "choice": [
+
+            ]
+          },
+          "mysql/tunable/table_cache": {
+            "type": "string",
+            "display_name": "MySQL Tunable Table Cache",
+            "value": "128",
+            "required": "optional",
+            "calculated": false,
+            "default": "128",
+            "recipes": [
+              "mysql::server",
+              "mysql::server2"
+            ],
+            "choice": [
+
+            ]
+          },
+          "mysql/server_root_password": {
+            "type": "string",
+            "display_name": "MySQL Server Root Password",
+            "required": "optional",
+            "calculated": false,
+            "description": "Randomly generated password for the mysqld root user",
+            "recipes": [
+              "mysql::server",
+              "mysql::server2"
+            ],
+            "choice": [
+
+            ]
           }
         },
         "basic_type": "service",
@@ -2254,9 +2953,6 @@
         "attributes": {
           "mysql/sap_ref": {
             "type": "string",
-            "recipes": [
-              "mysql::client_app1"
-            ],
             "semantic_type": {
               "sap_ref": {
                 "application": "sql::mysql"
@@ -2266,11 +2962,14 @@
             "required": "optional",
             "is_service_attribute": true,
             "service_name": "mysql_server",
+            "calculated": false,
             "description": "Service access point reference",
+            "recipes": [
+              "mysql::client_app1"
+            ],
             "choice": [
 
-            ],
-            "calculated": false
+            ]
           }
         },
         "basic_type": "application",
@@ -2456,113 +3155,17 @@
               "db_info",
               "monitor_user_id"
             ],
-            "applicability_conditions": [
-              "lambda{|p|p[:db_info] and p[:db_info].find{|x|x[:username] == p[:monitor_user_id]}}"
-            ],
             "service_name": "mysql_server",
             "name": "mysql_basic_health",
-            "condition_name": null
+            "condition_name": null,
+            "applicability_conditions": [
+              "lambda{|p|p[:db_info] and p[:db_info].find{|x|x[:username] == p[:monitor_user_id]}}"
+            ]
           }
         },
         "attributes": {
-          "mysql/tunable/net_read_timeout": {
-            "type": "string",
-            "display_name": "MySQL Tunable Net Read Timeout",
-            "recipes": [
-              "mysql::server",
-              "mysql::server2"
-            ],
-            "value": "30",
-            "required": "optional",
-            "default": "30",
-            "choice": [
-
-            ],
-            "calculated": false
-          },
-          "mysql/bind_address": {
-            "type": "string",
-            "display_name": "MySQL Bind Address",
-            "recipes": [
-              "mysql::server",
-              "mysql::server2"
-            ],
-            "value": "ipaddress",
-            "required": "optional",
-            "default": "ipaddress",
-            "description": "Address that mysqld should listen on",
-            "choice": [
-
-            ],
-            "calculated": false
-          },
-          "mysql/tunable/max_connections": {
-            "type": "string",
-            "display_name": "MySQL Tunable Max Connections",
-            "recipes": [
-              "mysql::server",
-              "mysql::server2"
-            ],
-            "value": "800",
-            "required": "optional",
-            "default": "800",
-            "choice": [
-
-            ],
-            "calculated": false
-          },
-          "mysql/datadir": {
-            "type": "string",
-            "display_name": "MySQL Data Directory",
-            "recipes": [
-              "mysql::server",
-              "mysql::server2"
-            ],
-            "value": "/var/lib/mysql",
-            "required": "optional",
-            "default": "/var/lib/mysql",
-            "description": "Location of mysql databases",
-            "choice": [
-
-            ],
-            "calculated": false
-          },
-          "mysql/tunable/table_cache": {
-            "type": "string",
-            "display_name": "MySQL Tunable Table Cache",
-            "recipes": [
-              "mysql::server",
-              "mysql::server2"
-            ],
-            "value": "128",
-            "required": "optional",
-            "default": "128",
-            "choice": [
-
-            ],
-            "calculated": false
-          },
-          "mysql/server_root_password": {
-            "type": "string",
-            "display_name": "MySQL Server Root Password",
-            "recipes": [
-              "mysql::server",
-              "mysql::server2"
-            ],
-            "required": "optional",
-            "description": "Randomly generated password for the mysqld root user",
-            "choice": [
-
-            ],
-            "calculated": false
-          },
           "mysql/db_info": {
             "type": "string",
-            "recipes": [
-              "mysql::server",
-              "mysql::server2"
-            ],
-            "monitoring_input": "true",
             "transform": [
               {
                 "database": "mysql",
@@ -2582,118 +3185,214 @@
             "required": "optional",
             "is_service_attribute": true,
             "service_name": "mysql_server",
+            "monitoring_input": "true",
+            "calculated": false,
+            "recipes": [
+              "mysql::server",
+              "mysql::server2"
+            ],
             "choice": [
 
-            ],
-            "calculated": false
+            ]
           },
           "mysql/ec2_path": {
             "type": "string",
             "display_name": "MySQL EC2 Path",
+            "value": "/mnt/mysql",
+            "required": "optional",
+            "calculated": false,
+            "default": "/mnt/mysql",
+            "description": "Location of mysql directory on EC2 instance EBS volumes",
             "recipes": [
               "mysql::server",
               "mysql::server2"
             ],
-            "value": "/mnt/mysql",
-            "required": "optional",
-            "default": "/mnt/mysql",
-            "description": "Location of mysql directory on EC2 instance EBS volumes",
             "choice": [
 
-            ],
-            "calculated": false
+            ]
           },
           "mysql/monitor_user_id": {
             "type": "string",
-            "recipes": [
-              "mysql::server",
-              "mysql::server2"
-            ],
-            "monitoring_input": "true",
             "transform": "root",
             "value": "root",
             "required": "optional",
             "is_service_attribute": true,
             "service_name": "mysql_server",
+            "monitoring_input": "true",
+            "calculated": false,
+            "recipes": [
+              "mysql::server",
+              "mysql::server2"
+            ],
             "choice": [
 
-            ],
-            "calculated": false
+            ]
           },
           "mysql/tunable/wait_timeout": {
             "type": "string",
             "display_name": "MySQL Tunable Wait Timeout",
+            "value": "180",
+            "required": "optional",
+            "calculated": false,
+            "default": "180",
             "recipes": [
               "mysql::server",
               "mysql::server2"
             ],
-            "value": "180",
-            "required": "optional",
-            "default": "180",
             "choice": [
 
-            ],
-            "calculated": false
+            ]
           },
           "mysql/tunable/key_buffer": {
             "type": "string",
             "display_name": "MySQL Tuntable Key Buffer",
+            "value": "250M",
+            "required": "optional",
+            "calculated": false,
+            "default": "250M",
             "recipes": [
               "mysql::server",
               "mysql::server2"
             ],
-            "value": "250M",
-            "required": "optional",
-            "default": "250M",
             "choice": [
 
-            ],
-            "calculated": false
+            ]
           },
           "mysql/tunable/back_log": {
             "type": "string",
             "display_name": "MySQL Tunable Back Log",
+            "value": "128",
+            "required": "optional",
+            "calculated": false,
+            "default": "128",
             "recipes": [
               "mysql::server",
               "mysql::server2"
             ],
-            "value": "128",
-            "required": "optional",
-            "default": "128",
             "choice": [
 
-            ],
-            "calculated": false
+            ]
           },
           "mysql/tunable/net_write_timeout": {
             "type": "string",
             "display_name": "MySQL Tunable Net Write Timeout",
+            "value": "30",
+            "required": "optional",
+            "calculated": false,
+            "default": "30",
             "recipes": [
               "mysql::server",
               "mysql::server2"
             ],
-            "value": "30",
-            "required": "optional",
-            "default": "30",
             "choice": [
 
-            ],
-            "calculated": false
+            ]
           },
           "mysql/tunable/max_heap_table_size": {
             "type": "string",
             "display_name": "MySQL Tunable Max Heap Table Size",
+            "value": "32M",
+            "required": "optional",
+            "calculated": false,
+            "default": "32M",
             "recipes": [
               "mysql::server",
               "mysql::server2"
             ],
-            "value": "32M",
-            "required": "optional",
-            "default": "32M",
             "choice": [
 
+            ]
+          },
+          "mysql/tunable/net_read_timeout": {
+            "type": "string",
+            "display_name": "MySQL Tunable Net Read Timeout",
+            "value": "30",
+            "required": "optional",
+            "calculated": false,
+            "default": "30",
+            "recipes": [
+              "mysql::server",
+              "mysql::server2"
             ],
-            "calculated": false
+            "choice": [
+
+            ]
+          },
+          "mysql/bind_address": {
+            "type": "string",
+            "display_name": "MySQL Bind Address",
+            "value": "ipaddress",
+            "required": "optional",
+            "calculated": false,
+            "default": "ipaddress",
+            "description": "Address that mysqld should listen on",
+            "recipes": [
+              "mysql::server",
+              "mysql::server2"
+            ],
+            "choice": [
+
+            ]
+          },
+          "mysql/tunable/max_connections": {
+            "type": "string",
+            "display_name": "MySQL Tunable Max Connections",
+            "value": "800",
+            "required": "optional",
+            "calculated": false,
+            "default": "800",
+            "recipes": [
+              "mysql::server",
+              "mysql::server2"
+            ],
+            "choice": [
+
+            ]
+          },
+          "mysql/datadir": {
+            "type": "string",
+            "display_name": "MySQL Data Directory",
+            "value": "/var/lib/mysql",
+            "required": "optional",
+            "calculated": false,
+            "default": "/var/lib/mysql",
+            "description": "Location of mysql databases",
+            "recipes": [
+              "mysql::server",
+              "mysql::server2"
+            ],
+            "choice": [
+
+            ]
+          },
+          "mysql/tunable/table_cache": {
+            "type": "string",
+            "display_name": "MySQL Tunable Table Cache",
+            "value": "128",
+            "required": "optional",
+            "calculated": false,
+            "default": "128",
+            "recipes": [
+              "mysql::server",
+              "mysql::server2"
+            ],
+            "choice": [
+
+            ]
+          },
+          "mysql/server_root_password": {
+            "type": "string",
+            "display_name": "MySQL Server Root Password",
+            "required": "optional",
+            "calculated": false,
+            "description": "Randomly generated password for the mysqld root user",
+            "recipes": [
+              "mysql::server",
+              "mysql::server2"
+            ],
+            "choice": [
+
+            ]
           }
         },
         "basic_type": "service",
@@ -2716,16 +3415,88 @@
       "description": "Installs packages required for mysql servers w/o manual intervention"
     },
     "i-17e9dd7d__collectd::server": {
-      "display_name": "i-17e9dd7d__collectd::server"
+      "type": "instance",
+      "display_name": "i-17e9dd7d__collectd::server",
+      "ds_attributes": {
+        "recipe_name": "collectd::server",
+        "attributes": {
+        },
+        "node_name": "i-17e9dd7d",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-17e9dd7d\", \"collectd::server\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[collectd::server]"
+    },
+    "i-c5f5afaf__collectd::server": {
+      "type": "instance",
+      "display_name": "i-c5f5afaf__collectd::server",
+      "ds_attributes": {
+        "recipe_name": "collectd::server",
+        "attributes": {
+        },
+        "node_name": "i-c5f5afaf",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-c5f5afaf\", \"collectd::server\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[collectd::server]"
     },
     "i-7550141f__java_sun": {
-      "display_name": "i-7550141f__java_sun"
+      "type": "instance",
+      "display_name": "i-7550141f__java_sun",
+      "ds_attributes": {
+        "recipe_name": "java_sun",
+        "attributes": {
+        },
+        "node_name": "i-7550141f",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-7550141f\", \"java_sun\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[java_sun]"
     },
     "i-69381003__collectd::client": {
-      "display_name": "i-69381003__collectd::client"
+      "type": "instance",
+      "display_name": "i-69381003__collectd::client",
+      "ds_attributes": {
+        "recipe_name": "collectd::client",
+        "attributes": {
+        },
+        "node_name": "i-69381003",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-69381003\", \"collectd::client\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[collectd::client]"
     },
     "i-59d58d33__chef_aux": {
-      "display_name": "i-59d58d33__chef_aux"
+      "type": "instance",
+      "display_name": "i-59d58d33__chef_aux",
+      "ds_attributes": {
+        "recipe_name": "chef_aux",
+        "attributes": {
+        },
+        "node_name": "i-59d58d33",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-59d58d33\", \"chef_aux\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[chef_aux]"
+    },
+    "i-fb486291__chef_aux": {
+      "type": "instance",
+      "display_name": "i-fb486291__chef_aux",
+      "ds_attributes": {
+        "recipe_name": "chef_aux",
+        "attributes": {
+        },
+        "node_name": "i-fb486291",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-fb486291\", \"chef_aux\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[chef_aux]"
     },
     "rabbitmq::edge": {
       "type": "template",
@@ -2778,38 +3549,35 @@
           "rabbitmq/stomp/branch_tag": {
             "type": "string",
             "display_name": "RabbitMQ-stomp adapter tag/branch name",
+            "value": "default",
+            "required": "optional",
+            "calculated": false,
+            "default": "default",
+            "description": "The RabbitMQ-stomp adapter tag/branch name.  The default is default, the latest qa'd branch.",
             "recipes": [
 
             ],
-            "value": "default",
-            "required": "optional",
-            "default": "default",
-            "description": "The RabbitMQ-stomp adapter tag/branch name.  The default is default, the latest qa'd branch.",
             "choice": [
 
-            ],
-            "calculated": false
+            ]
           },
           "rabbitmq/branch_tag": {
             "type": "string",
             "display_name": "RabbitMQ tag/branch name",
+            "value": "default",
+            "required": "optional",
+            "calculated": false,
+            "default": "default",
+            "description": "The RabbitMQ tag/branch name.  The default is default, the latest qa'd branch.",
             "recipes": [
 
             ],
-            "value": "default",
-            "required": "optional",
-            "default": "default",
-            "description": "The RabbitMQ tag/branch name.  The default is default, the latest qa'd branch.",
             "choice": [
 
-            ],
-            "calculated": false
+            ]
           },
           "rabbitmq/sap": {
             "type": "string",
-            "recipes": [
-
-            ],
             "transform": [
               {
                 "type": "inet",
@@ -2824,13 +3592,16 @@
                 "port": 5672
               }
             ],
-            "required": "optional",
             "is_service_attribute": true,
+            "required": "optional",
             "service_name": "rabbitmq",
-            "choice": [
+            "calculated": false,
+            "recipes": [
 
             ],
-            "calculated": false
+            "choice": [
+
+            ]
           }
         },
         "basic_type": null,
@@ -2840,9 +3611,6 @@
       "external_type": "chef_recipe",
       "external_cmp_ref": "recipe[rabbitmq::edge]",
       "description": "Set up RabbitMQ from source mercurial repository."
-    },
-    "i-fb486291__chef_aux": {
-      "display_name": "i-fb486291__chef_aux"
     },
     "mysql::client": {
       "type": "template",
@@ -2863,19 +3631,82 @@
       "description": "Installs packages required for mysql clients using run_action magic"
     },
     "i-fb486291__hadoop_cloudera_c3::conf_pseudo": {
-      "display_name": "i-fb486291__hadoop_cloudera_c3::conf_pseudo"
-    },
-    "i-ef1b4385__chef_aux": {
-      "display_name": "i-ef1b4385__chef_aux"
-    },
-    "i-b5c5f1df__collectd::server": {
-      "display_name": "i-b5c5f1df__collectd::server"
+      "type": "instance",
+      "display_name": "i-fb486291__hadoop_cloudera_c3::conf_pseudo",
+      "attribute": {
+        "port[jmxremote_port]": {
+          "is_array": false,
+          "display_name": "port[jmxremote_port]",
+          "propagation_type": "immediate",
+          "required": false,
+          "port_type": "output",
+          "external_attr_ref": "service[hadoop_namenode][jmxremote_port]",
+          "output_variable": false,
+          "data_type": "string"
+        },
+        "port[jmxremote_password]": {
+          "is_array": false,
+          "display_name": "port[jmxremote_password]",
+          "propagation_type": "immediate",
+          "required": false,
+          "port_type": "output",
+          "external_attr_ref": "service[hadoop_namenode][jmxremote_password]",
+          "output_variable": false,
+          "data_type": "string"
+        }
+      },
+      "ds_attributes": {
+        "recipe_name": "hadoop_cloudera_c3::conf_pseudo",
+        "attributes": {
+          "hadoop_cloudera_c3/jmxremote_password": {
+            "type": "string",
+            "transform": {
+              "__ref": "node[hadoop][jmxremote][password]"
+            },
+            "value": null,
+            "port_type": "output",
+            "required": "optional",
+            "is_service_attribute": true,
+            "service_name": "hadoop_namenode",
+            "calculated": false,
+            "recipes": [
+
+            ],
+            "choice": [
+
+            ]
+          },
+          "hadoop_cloudera_c3/jmxremote_port": {
+            "type": "string",
+            "transform": {
+              "__ref": "node[hadoop][jmxremote][namenode][port]"
+            },
+            "value": null,
+            "port_type": "output",
+            "required": "optional",
+            "is_service_attribute": true,
+            "service_name": "hadoop_namenode",
+            "calculated": false,
+            "recipes": [
+
+            ],
+            "choice": [
+
+            ]
+          }
+        },
+        "node_name": "i-fb486291",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-fb486291\", \"hadoop_cloudera_c3::conf_pseudo\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[hadoop_cloudera_c3::conf_pseudo]"
     },
     "i-33886f59__nagios::client": {
       "display_name": "i-33886f59__nagios::client"
     },
-    "i-b04bf4da__collectd::client": {
-      "display_name": "i-b04bf4da__collectd::client"
+    "i-b5c5f1df__collectd::server": {
+      "display_name": "i-b5c5f1df__collectd::server"
     },
     "hadoop::hive": {
       "type": "template",
@@ -2894,8 +3725,106 @@
       "external_cmp_ref": "recipe[hadoop::hive]",
       "description": "Installs hadoop's hive package"
     },
+    "i-ef1b4385__chef_aux": {
+      "type": "instance",
+      "display_name": "i-ef1b4385__chef_aux",
+      "ds_attributes": {
+        "recipe_name": "chef_aux",
+        "attributes": {
+        },
+        "node_name": "i-ef1b4385",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-ef1b4385\", \"chef_aux\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[chef_aux]"
+    },
+    "i-b04bf4da__collectd::client": {
+      "type": "instance",
+      "display_name": "i-b04bf4da__collectd::client",
+      "ds_attributes": {
+        "recipe_name": "collectd::client",
+        "attributes": {
+        },
+        "node_name": "i-b04bf4da",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-b04bf4da\", \"collectd::client\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[collectd::client]"
+    },
     "i-59d58d33__hadoop_cloudera_c3::conf_pseudo": {
-      "display_name": "i-59d58d33__hadoop_cloudera_c3::conf_pseudo"
+      "type": "instance",
+      "display_name": "i-59d58d33__hadoop_cloudera_c3::conf_pseudo",
+      "attribute": {
+        "port[jmxremote_port]": {
+          "is_array": false,
+          "display_name": "port[jmxremote_port]",
+          "propagation_type": "immediate",
+          "required": false,
+          "port_type": "output",
+          "external_attr_ref": "service[hadoop_namenode][jmxremote_port]",
+          "output_variable": false,
+          "data_type": "string",
+          "value_asserted": "1618"
+        },
+        "port[jmxremote_password]": {
+          "is_array": false,
+          "display_name": "port[jmxremote_password]",
+          "propagation_type": "immediate",
+          "required": false,
+          "port_type": "output",
+          "external_attr_ref": "service[hadoop_namenode][jmxremote_password]",
+          "output_variable": false,
+          "data_type": "string"
+        }
+      },
+      "ds_attributes": {
+        "recipe_name": "hadoop_cloudera_c3::conf_pseudo",
+        "attributes": {
+          "hadoop_cloudera_c3/jmxremote_password": {
+            "type": "string",
+            "transform": {
+              "__ref": "node[hadoop][jmxremote][password]"
+            },
+            "value": null,
+            "port_type": "output",
+            "required": "optional",
+            "is_service_attribute": true,
+            "service_name": "hadoop_namenode",
+            "calculated": false,
+            "recipes": [
+
+            ],
+            "choice": [
+
+            ]
+          },
+          "hadoop_cloudera_c3/jmxremote_port": {
+            "type": "string",
+            "transform": {
+              "__ref": "node[hadoop][jmxremote][namenode][port]"
+            },
+            "value": 1618,
+            "port_type": "output",
+            "required": "optional",
+            "is_service_attribute": true,
+            "service_name": "hadoop_namenode",
+            "calculated": false,
+            "recipes": [
+
+            ],
+            "choice": [
+
+            ]
+          }
+        },
+        "node_name": "i-59d58d33",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-59d58d33\", \"hadoop_cloudera_c3::conf_pseudo\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[hadoop_cloudera_c3::conf_pseudo]"
     },
     "hadoop::conf_pseudo": {
       "type": "template",
@@ -2915,22 +3844,244 @@
       "description": "Installs hadoop-conf-pseudo and enables hadoop services"
     },
     "i-871863ed__hadoop_cloudera_c2::conf_pseudo": {
-      "display_name": "i-871863ed__hadoop_cloudera_c2::conf_pseudo"
+      "type": "instance",
+      "display_name": "i-871863ed__hadoop_cloudera_c2::conf_pseudo",
+      "attribute": {
+        "port[jmxremote_port]": {
+          "is_array": false,
+          "display_name": "port[jmxremote_port]",
+          "propagation_type": "immediate",
+          "required": false,
+          "port_type": "output",
+          "external_attr_ref": "service[hadoop_namenode][jmxremote_port]",
+          "output_variable": false,
+          "data_type": "string",
+          "value_asserted": "1618"
+        },
+        "port[jmxremote_password]": {
+          "is_array": false,
+          "display_name": "port[jmxremote_password]",
+          "propagation_type": "immediate",
+          "required": false,
+          "port_type": "output",
+          "external_attr_ref": "service[hadoop_namenode][jmxremote_password]",
+          "output_variable": false,
+          "data_type": "string",
+          "value_asserted": "tempt5"
+        }
+      },
+      "ds_attributes": {
+        "recipe_name": "hadoop_cloudera_c2::conf_pseudo",
+        "attributes": {
+          "hadoop_cloudera_c2/jmxremote_password": {
+            "type": "string",
+            "transform": {
+              "__ref": "node[hadoop][jmxremote][password]"
+            },
+            "value": "tempt5",
+            "port_type": "output",
+            "is_service_attribute": true,
+            "required": "optional",
+            "service_name": "hadoop_namenode",
+            "calculated": false,
+            "recipes": [
+
+            ],
+            "choice": [
+
+            ]
+          },
+          "hadoop_cloudera_c2/jmxremote_port": {
+            "type": "string",
+            "transform": {
+              "__ref": "node[hadoop][jmxremote][namenode][port]"
+            },
+            "value": 1618,
+            "port_type": "output",
+            "is_service_attribute": true,
+            "required": "optional",
+            "service_name": "hadoop_namenode",
+            "calculated": false,
+            "recipes": [
+
+            ],
+            "choice": [
+
+            ]
+          }
+        },
+        "node_name": "i-871863ed",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-871863ed\", \"hadoop_cloudera_c2::conf_pseudo\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[hadoop_cloudera_c2::conf_pseudo]"
     },
     "i-b04bf4da__nagios::client": {
-      "display_name": "i-b04bf4da__nagios::client"
+      "type": "instance",
+      "display_name": "i-b04bf4da__nagios::client",
+      "ds_attributes": {
+        "recipe_name": "nagios::client",
+        "attributes": {
+        },
+        "node_name": "i-b04bf4da",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-b04bf4da\", \"nagios::client\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[nagios::client]"
     },
     "i-79c39f13__collectd": {
-      "display_name": "i-79c39f13__collectd"
+      "type": "instance",
+      "display_name": "i-79c39f13__collectd",
+      "ds_attributes": {
+        "recipe_name": "collectd",
+        "attributes": {
+        },
+        "node_name": "i-79c39f13",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-79c39f13\", \"collectd\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[collectd]"
     },
     "i-b04bf4da__hadoop_cloudera_c3::conf_pseudo": {
-      "display_name": "i-b04bf4da__hadoop_cloudera_c3::conf_pseudo"
+      "type": "instance",
+      "display_name": "i-b04bf4da__hadoop_cloudera_c3::conf_pseudo",
+      "attribute": {
+        "port[jmxremote_port]": {
+          "is_array": false,
+          "display_name": "port[jmxremote_port]",
+          "propagation_type": "immediate",
+          "required": false,
+          "port_type": "output",
+          "external_attr_ref": "service[hadoop_namenode][jmxremote_port]",
+          "output_variable": false,
+          "data_type": "string",
+          "value_asserted": "1618"
+        },
+        "port[jmxremote_password]": {
+          "is_array": false,
+          "display_name": "port[jmxremote_password]",
+          "propagation_type": "immediate",
+          "required": false,
+          "port_type": "output",
+          "external_attr_ref": "service[hadoop_namenode][jmxremote_password]",
+          "output_variable": false,
+          "data_type": "string",
+          "value_asserted": "QED"
+        }
+      },
+      "ds_attributes": {
+        "recipe_name": "hadoop_cloudera_c3::conf_pseudo",
+        "attributes": {
+          "hadoop_cloudera_c3/jmxremote_password": {
+            "type": "string",
+            "transform": {
+              "__ref": "node[hadoop][jmxremote][password]"
+            },
+            "value": "QED",
+            "port_type": "output",
+            "required": "optional",
+            "is_service_attribute": true,
+            "service_name": "hadoop_namenode",
+            "calculated": false,
+            "recipes": [
+
+            ],
+            "choice": [
+
+            ]
+          },
+          "hadoop_cloudera_c3/jmxremote_port": {
+            "type": "string",
+            "transform": {
+              "__ref": "node[hadoop][jmxremote][namenode][port]"
+            },
+            "value": 1618,
+            "port_type": "output",
+            "required": "optional",
+            "is_service_attribute": true,
+            "service_name": "hadoop_namenode",
+            "calculated": false,
+            "recipes": [
+
+            ],
+            "choice": [
+
+            ]
+          }
+        },
+        "node_name": "i-b04bf4da",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-b04bf4da\", \"hadoop_cloudera_c3::conf_pseudo\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[hadoop_cloudera_c3::conf_pseudo]"
     },
     "i-dfcb12b5__hadoop::conf_pseudo": {
-      "display_name": "i-dfcb12b5__hadoop::conf_pseudo"
+      "type": "instance",
+      "display_name": "i-dfcb12b5__hadoop::conf_pseudo",
+      "ds_attributes": {
+        "recipe_name": "hadoop::conf_pseudo",
+        "attributes": {
+        },
+        "node_name": "i-dfcb12b5",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-dfcb12b5\", \"hadoop::conf_pseudo\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[hadoop::conf_pseudo]"
     },
     "i-07af096d__nagios::client": {
       "display_name": "i-07af096d__nagios::client"
+    },
+    "postgresql::server": {
+      "type": "template",
+      "display_name": "postgresql::server",
+      "attribute": {
+        "var[dir]": {
+          "is_array": false,
+          "display_name": "var[dir]",
+          "propagation_type": "immediate",
+          "required": false,
+          "port_type": "input",
+          "external_attr_ref": "node[postgresql][dir]",
+          "output_variable": false,
+          "data_type": "string",
+          "description": "Location of the PostgreSQL databases",
+          "value_asserted": "/etc/postgresql/8.3/main"
+        }
+      },
+      "ds_attributes": {
+        "recipe_name": "postgresql::server",
+        "monitoring_items": {
+        },
+        "attributes": {
+          "postgresql/dir": {
+            "type": "string",
+            "display_name": "PostgreSQL Directory",
+            "value": "/etc/postgresql/8.3/main",
+            "port_type": "input",
+            "required": "optional",
+            "calculated": false,
+            "default": "/etc/postgresql/8.3/main",
+            "description": "Location of the PostgreSQL databases",
+            "recipes": [
+
+            ],
+            "choice": [
+
+            ]
+          }
+        },
+        "basic_type": null,
+        "description": "Installs postgresql server packages, templates"
+      },
+      "ds_key": "[:chef, :template, \"postgresql::server\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[postgresql::server]",
+      "description": "Installs postgresql server packages, templates"
     },
     "redis": {
       "type": "template",
@@ -2980,9 +4131,6 @@
         "attributes": {
           "redis/sap": {
             "type": "string",
-            "recipes": [
-
-            ],
             "transform": [
               {
                 "type": "inet",
@@ -3002,10 +4150,13 @@
             "required": "optional",
             "is_service_attribute": true,
             "service_name": "redis_service",
-            "choice": [
+            "calculated": false,
+            "recipes": [
 
             ],
-            "calculated": false
+            "choice": [
+
+            ]
           }
         },
         "basic_type": null,
@@ -3027,54 +4178,18 @@
       "description": "Installs/Configures redis"
     },
     "i-69381003__java_sun": {
-      "display_name": "i-69381003__java_sun"
-    },
-    "postgresql::server": {
-      "type": "template",
-      "display_name": "postgresql::server",
-      "attribute": {
-        "var[dir]": {
-          "is_array": false,
-          "display_name": "var[dir]",
-          "propagation_type": "immediate",
-          "required": false,
-          "port_type": "input",
-          "external_attr_ref": "node[postgresql][dir]",
-          "output_variable": false,
-          "data_type": "string",
-          "description": "Location of the PostgreSQL databases",
-          "value_asserted": "/etc/postgresql/8.3/main"
-        }
-      },
+      "type": "instance",
+      "display_name": "i-69381003__java_sun",
       "ds_attributes": {
-        "recipe_name": "postgresql::server",
-        "monitoring_items": {
-        },
+        "recipe_name": "java_sun",
         "attributes": {
-          "postgresql/dir": {
-            "type": "string",
-            "display_name": "PostgreSQL Directory",
-            "recipes": [
-
-            ],
-            "value": "/etc/postgresql/8.3/main",
-            "port_type": "input",
-            "required": "optional",
-            "default": "/etc/postgresql/8.3/main",
-            "description": "Location of the PostgreSQL databases",
-            "choice": [
-
-            ],
-            "calculated": false
-          }
         },
-        "basic_type": null,
-        "description": "Installs postgresql server packages, templates"
+        "node_name": "i-69381003",
+        "basic_type": null
       },
-      "ds_key": "[:chef, :template, \"postgresql::server\"]",
+      "ds_key": "[:chef, :instance, \"i-69381003\", \"java_sun\"]",
       "external_type": "chef_recipe",
-      "external_cmp_ref": "recipe[postgresql::server]",
-      "description": "Installs postgresql server packages, templates"
+      "external_cmp_ref": "recipe[java_sun]"
     },
     "i-07af096d__mysql::server2": {
       "display_name": "i-07af096d__mysql::server2"
@@ -3085,8 +4200,81 @@
     "i-0502796f__hadoop_cloudera_c3_228::conf_pseudo": {
       "display_name": "i-0502796f__hadoop_cloudera_c3_228::conf_pseudo"
     },
+    "i-656e580f__collectd::server": {
+      "display_name": "i-656e580f__collectd::server"
+    },
     "i-ef1b4385__hadoop_cloudera_c3::conf_pseudo": {
-      "display_name": "i-ef1b4385__hadoop_cloudera_c3::conf_pseudo"
+      "type": "instance",
+      "display_name": "i-ef1b4385__hadoop_cloudera_c3::conf_pseudo",
+      "attribute": {
+        "port[jmxremote_port]": {
+          "is_array": false,
+          "display_name": "port[jmxremote_port]",
+          "propagation_type": "immediate",
+          "required": false,
+          "port_type": "output",
+          "external_attr_ref": "service[hadoop_namenode][jmxremote_port]",
+          "output_variable": false,
+          "data_type": "string",
+          "value_asserted": "1618"
+        },
+        "port[jmxremote_password]": {
+          "is_array": false,
+          "display_name": "port[jmxremote_password]",
+          "propagation_type": "immediate",
+          "required": false,
+          "port_type": "output",
+          "external_attr_ref": "service[hadoop_namenode][jmxremote_password]",
+          "output_variable": false,
+          "data_type": "string"
+        }
+      },
+      "ds_attributes": {
+        "recipe_name": "hadoop_cloudera_c3::conf_pseudo",
+        "attributes": {
+          "hadoop_cloudera_c3/jmxremote_password": {
+            "type": "string",
+            "transform": {
+              "__ref": "node[hadoop][jmxremote][password]"
+            },
+            "value": null,
+            "port_type": "output",
+            "required": "optional",
+            "is_service_attribute": true,
+            "service_name": "hadoop_namenode",
+            "calculated": false,
+            "recipes": [
+
+            ],
+            "choice": [
+
+            ]
+          },
+          "hadoop_cloudera_c3/jmxremote_port": {
+            "type": "string",
+            "transform": {
+              "__ref": "node[hadoop][jmxremote][namenode][port]"
+            },
+            "value": 1618,
+            "port_type": "output",
+            "required": "optional",
+            "is_service_attribute": true,
+            "service_name": "hadoop_namenode",
+            "calculated": false,
+            "recipes": [
+
+            ],
+            "choice": [
+
+            ]
+          }
+        },
+        "node_name": "i-ef1b4385",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-ef1b4385\", \"hadoop_cloudera_c3::conf_pseudo\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[hadoop_cloudera_c3::conf_pseudo]"
     },
     "hadoop_cloudera_c3::conf_pseudo": {
       "type": "template",
@@ -3116,27 +4304,6 @@
       "ds_attributes": {
         "recipe_name": "hadoop_cloudera_c3::conf_pseudo",
         "monitoring_items": {
-          "check_hadoop_namenode_remotely": {
-            "condition_description": "this service should be accessible over tcp",
-            "enabled": true,
-            "service_name": "hadoop_namenode",
-            "name": "check_hadoop_namenode_remotely",
-            "condition_name": "accessible_over_tcp"
-          },
-          "check_hadoop_datanode_remotely": {
-            "condition_description": "this service should be accessible over tcp",
-            "enabled": true,
-            "service_name": "hadoop_datanode",
-            "name": "check_hadoop_datanode_remotely",
-            "condition_name": "accessible_over_tcp"
-          },
-          "check_hadoop_dfs": {
-            "condition_description": "a hadoop dfs report is available",
-            "enabled": true,
-            "service_name": "hadoop_namenode",
-            "name": "check_hadoop_dfs",
-            "condition_name": null
-          },
           "check_hadoop_namenode_jmx": {
             "condition_description": "jmx attributes are monitored",
             "enabled": true,
@@ -3167,32 +4334,32 @@
             "service_name": "hadoop_namenode",
             "name": "check_hadoop_namenode_jmx",
             "condition_name": null
+          },
+          "check_hadoop_namenode_remotely": {
+            "condition_description": "this service should be accessible over tcp",
+            "enabled": true,
+            "service_name": "hadoop_namenode",
+            "name": "check_hadoop_namenode_remotely",
+            "condition_name": "accessible_over_tcp"
+          },
+          "check_hadoop_datanode_remotely": {
+            "condition_description": "this service should be accessible over tcp",
+            "enabled": true,
+            "service_name": "hadoop_datanode",
+            "name": "check_hadoop_datanode_remotely",
+            "condition_name": "accessible_over_tcp"
+          },
+          "check_hadoop_dfs": {
+            "condition_description": "a hadoop dfs report is available",
+            "enabled": true,
+            "service_name": "hadoop_namenode",
+            "name": "check_hadoop_dfs",
+            "condition_name": null
           }
         },
         "attributes": {
-          "hadoop_cloudera_c3/jmxremote_port": {
-            "type": "string",
-            "recipes": [
-
-            ],
-            "transform": {
-              "__ref": "node[hadoop][jmxremote][namenode][port]"
-            },
-            "value": null,
-            "port_type": "output",
-            "required": "optional",
-            "is_service_attribute": true,
-            "service_name": "hadoop_namenode",
-            "choice": [
-
-            ],
-            "calculated": false
-          },
           "hadoop_cloudera_c3/jmxremote_password": {
             "type": "string",
-            "recipes": [
-
-            ],
             "transform": {
               "__ref": "node[hadoop][jmxremote][password]"
             },
@@ -3201,10 +4368,31 @@
             "required": "optional",
             "is_service_attribute": true,
             "service_name": "hadoop_namenode",
-            "choice": [
+            "calculated": false,
+            "recipes": [
 
             ],
-            "calculated": false
+            "choice": [
+
+            ]
+          },
+          "hadoop_cloudera_c3/jmxremote_port": {
+            "type": "string",
+            "transform": {
+              "__ref": "node[hadoop][jmxremote][namenode][port]"
+            },
+            "value": null,
+            "port_type": "output",
+            "required": "optional",
+            "is_service_attribute": true,
+            "service_name": "hadoop_namenode",
+            "calculated": false,
+            "recipes": [
+
+            ],
+            "choice": [
+
+            ]
           }
         },
         "basic_type": null,
@@ -3234,7 +4422,18 @@
       "description": "Installs hadoop-conf-pseudo and enables hadoop services"
     },
     "i-afcd95c5__nagios::client": {
-      "display_name": "i-afcd95c5__nagios::client"
+      "type": "instance",
+      "display_name": "i-afcd95c5__nagios::client",
+      "ds_attributes": {
+        "recipe_name": "nagios::client",
+        "attributes": {
+        },
+        "node_name": "i-afcd95c5",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-afcd95c5\", \"nagios::client\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[nagios::client]"
     },
     "rabbitmq::default": {
       "type": "template",
@@ -3287,38 +4486,35 @@
           "rabbitmq/stomp/branch_tag": {
             "type": "string",
             "display_name": "RabbitMQ-stomp adapter tag/branch name",
+            "value": "default",
+            "required": "optional",
+            "calculated": false,
+            "default": "default",
+            "description": "The RabbitMQ-stomp adapter tag/branch name.  The default is default, the latest qa'd branch.",
             "recipes": [
 
             ],
-            "value": "default",
-            "required": "optional",
-            "default": "default",
-            "description": "The RabbitMQ-stomp adapter tag/branch name.  The default is default, the latest qa'd branch.",
             "choice": [
 
-            ],
-            "calculated": false
+            ]
           },
           "rabbitmq/branch_tag": {
             "type": "string",
             "display_name": "RabbitMQ tag/branch name",
+            "value": "default",
+            "required": "optional",
+            "calculated": false,
+            "default": "default",
+            "description": "The RabbitMQ tag/branch name.  The default is default, the latest qa'd branch.",
             "recipes": [
 
             ],
-            "value": "default",
-            "required": "optional",
-            "default": "default",
-            "description": "The RabbitMQ tag/branch name.  The default is default, the latest qa'd branch.",
             "choice": [
 
-            ],
-            "calculated": false
+            ]
           },
           "rabbitmq/sap": {
             "type": "string",
-            "recipes": [
-
-            ],
             "transform": [
               {
                 "type": "inet",
@@ -3333,13 +4529,16 @@
                 "port": 5672
               }
             ],
-            "required": "optional",
             "is_service_attribute": true,
+            "required": "optional",
             "service_name": "rabbitmq",
-            "choice": [
+            "calculated": false,
+            "recipes": [
 
             ],
-            "calculated": false
+            "choice": [
+
+            ]
           }
         },
         "basic_type": null,
@@ -3368,25 +4567,140 @@
       "description": "Installs Sun Java using preseed to accept terms"
     },
     "i-11d8497b__java": {
-      "display_name": "i-11d8497b__java"
-    },
-    "i-656e580f__collectd::server": {
-      "display_name": "i-656e580f__collectd::server"
-    },
-    "i-9bad8cf1__postgresql::server": {
-      "display_name": "i-9bad8cf1__postgresql::server"
+      "type": "instance",
+      "display_name": "i-11d8497b__java",
+      "ds_attributes": {
+        "recipe_name": "java",
+        "attributes": {
+        },
+        "node_name": "i-11d8497b",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-11d8497b\", \"java\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[java]"
     },
     "i-33886f59__collectd::client": {
       "display_name": "i-33886f59__collectd::client"
     },
+    "i-9bad8cf1__postgresql::server": {
+      "type": "instance",
+      "display_name": "i-9bad8cf1__postgresql::server",
+      "attribute": {
+        "var[dir]": {
+          "is_array": false,
+          "display_name": "var[dir]",
+          "propagation_type": "immediate",
+          "required": false,
+          "port_type": "input",
+          "external_attr_ref": "node[postgresql][dir]",
+          "output_variable": false,
+          "data_type": "string",
+          "description": "Location of the PostgreSQL databases",
+          "value_asserted": "/etc/postgresql/8.4/main"
+        }
+      },
+      "ds_attributes": {
+        "recipe_name": "postgresql::server",
+        "attributes": {
+          "postgresql/dir": {
+            "type": "string",
+            "display_name": "PostgreSQL Directory",
+            "value": "/etc/postgresql/8.4/main",
+            "port_type": "input",
+            "required": "optional",
+            "calculated": false,
+            "default": "/etc/postgresql/8.3/main",
+            "description": "Location of the PostgreSQL databases",
+            "recipes": [
+
+            ],
+            "choice": [
+
+            ]
+          }
+        },
+        "node_name": "i-9bad8cf1",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-9bad8cf1\", \"postgresql::server\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[postgresql::server]"
+    },
     "i-bd39e2d7__redis": {
-      "display_name": "i-bd39e2d7__redis"
+      "type": "instance",
+      "display_name": "i-bd39e2d7__redis",
+      "attribute": {
+        "port[sap]": {
+          "is_array": false,
+          "display_name": "port[sap]",
+          "propagation_type": "immediate",
+          "required": false,
+          "external_attr_ref": "service[redis_service][sap]",
+          "output_variable": false,
+          "data_type": "string",
+          "value_asserted": [
+            {
+              "type": "inet",
+              "protocol": "tcp",
+              "port": "6379"
+            }
+          ]
+        }
+      },
+      "ds_attributes": {
+        "recipe_name": "redis",
+        "attributes": {
+          "redis/sap": {
+            "type": "string",
+            "transform": [
+              {
+                "type": "inet",
+                "protocol": "tcp",
+                "port": {
+                  "__ref": "node[redis][port]"
+                }
+              }
+            ],
+            "value": [
+              {
+                "type": "inet",
+                "protocol": "tcp",
+                "port": "6379"
+              }
+            ],
+            "required": "optional",
+            "is_service_attribute": true,
+            "service_name": "redis_service",
+            "calculated": false,
+            "recipes": [
+
+            ],
+            "choice": [
+
+            ]
+          }
+        },
+        "node_name": "i-bd39e2d7",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-bd39e2d7\", \"redis\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[redis]"
     },
     "i-afcd95c5__chef_aux": {
-      "display_name": "i-afcd95c5__chef_aux"
-    },
-    "i-c5f5afaf__hadoop_cloudera_c3::conf_pseudo": {
-      "display_name": "i-c5f5afaf__hadoop_cloudera_c3::conf_pseudo"
+      "type": "instance",
+      "display_name": "i-afcd95c5__chef_aux",
+      "ds_attributes": {
+        "recipe_name": "chef_aux",
+        "attributes": {
+        },
+        "node_name": "i-afcd95c5",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-afcd95c5\", \"chef_aux\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[chef_aux]"
     },
     "java": {
       "type": "template",
@@ -3405,11 +4719,107 @@
       "external_cmp_ref": "recipe[java]",
       "description": "Installs openjdk to provide Java"
     },
-    "i-871863ed__nagios::client": {
-      "display_name": "i-871863ed__nagios::client"
+    "i-c5f5afaf__hadoop_cloudera_c3::conf_pseudo": {
+      "type": "instance",
+      "display_name": "i-c5f5afaf__hadoop_cloudera_c3::conf_pseudo",
+      "attribute": {
+        "port[jmxremote_port]": {
+          "is_array": false,
+          "display_name": "port[jmxremote_port]",
+          "propagation_type": "immediate",
+          "required": false,
+          "port_type": "output",
+          "external_attr_ref": "service[hadoop_namenode][jmxremote_port]",
+          "output_variable": false,
+          "data_type": "string",
+          "value_asserted": "1618"
+        },
+        "port[jmxremote_password]": {
+          "is_array": false,
+          "display_name": "port[jmxremote_password]",
+          "propagation_type": "immediate",
+          "required": false,
+          "port_type": "output",
+          "external_attr_ref": "service[hadoop_namenode][jmxremote_password]",
+          "output_variable": false,
+          "data_type": "string",
+          "value_asserted": "QED"
+        }
+      },
+      "ds_attributes": {
+        "recipe_name": "hadoop_cloudera_c3::conf_pseudo",
+        "attributes": {
+          "hadoop_cloudera_c3/jmxremote_password": {
+            "type": "string",
+            "transform": {
+              "__ref": "node[hadoop][jmxremote][password]"
+            },
+            "value": "QED",
+            "port_type": "output",
+            "required": "optional",
+            "is_service_attribute": true,
+            "service_name": "hadoop_namenode",
+            "calculated": false,
+            "recipes": [
+
+            ],
+            "choice": [
+
+            ]
+          },
+          "hadoop_cloudera_c3/jmxremote_port": {
+            "type": "string",
+            "transform": {
+              "__ref": "node[hadoop][jmxremote][namenode][port]"
+            },
+            "value": 1618,
+            "port_type": "output",
+            "required": "optional",
+            "is_service_attribute": true,
+            "service_name": "hadoop_namenode",
+            "calculated": false,
+            "recipes": [
+
+            ],
+            "choice": [
+
+            ]
+          }
+        },
+        "node_name": "i-c5f5afaf",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-c5f5afaf\", \"hadoop_cloudera_c3::conf_pseudo\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[hadoop_cloudera_c3::conf_pseudo]"
     },
     "i-bd39e2d7__chef_aux": {
-      "display_name": "i-bd39e2d7__chef_aux"
+      "type": "instance",
+      "display_name": "i-bd39e2d7__chef_aux",
+      "ds_attributes": {
+        "recipe_name": "chef_aux",
+        "attributes": {
+        },
+        "node_name": "i-bd39e2d7",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-bd39e2d7\", \"chef_aux\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[chef_aux]"
+    },
+    "i-871863ed__nagios::client": {
+      "type": "instance",
+      "display_name": "i-871863ed__nagios::client",
+      "ds_attributes": {
+        "recipe_name": "nagios::client",
+        "attributes": {
+        },
+        "node_name": "i-871863ed",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-871863ed\", \"nagios::client\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[nagios::client]"
     },
     "ntp": {
       "type": "template",
@@ -3477,33 +4887,46 @@
         "monitoring_items": {
         },
         "attributes": {
-          "ntp/servers": {
-            "type": "array",
-            "display_name": "NTP Servers",
+          "ntp/is_server": {
+            "type": "string",
+            "display_name": "NTP Is Server?",
+            "value": "false",
+            "port_type": "output",
+            "required": "optional",
+            "calculated": false,
+            "default": "false",
+            "description": "Set to true if this is an NTP server",
             "recipes": [
 
             ],
+            "choice": [
+
+            ]
+          },
+          "ntp/servers": {
+            "type": "array",
+            "display_name": "NTP Servers",
             "value": [
               "0.us.pool.ntp.org",
               "1.us.pool.ntp.org"
             ],
             "port_type": "output",
             "required": "optional",
+            "calculated": false,
             "default": [
               "0.us.pool.ntp.org",
               "1.us.pool.ntp.org"
             ],
             "description": "Array of servers we should talk to",
-            "choice": [
-
-            ],
-            "calculated": false
-          },
-          "ntp/ntp/sap": {
-            "type": "string",
             "recipes": [
 
             ],
+            "choice": [
+
+            ]
+          },
+          "ntp/ntp/sap": {
+            "type": "string",
             "transform": [
               {
                 "type": "inet",
@@ -3519,45 +4942,32 @@
               }
             ],
             "port_type": "output",
-            "required": "optional",
             "is_service_attribute": true,
+            "required": "optional",
             "service_name": "ntp_server",
-            "choice": [
+            "calculated": false,
+            "recipes": [
 
             ],
-            "calculated": false
+            "choice": [
+
+            ]
           },
           "ntp/service": {
             "type": "string",
             "display_name": "NTP Service",
-            "recipes": [
-
-            ],
             "value": "ntp",
             "port_type": "output",
             "required": "optional",
+            "calculated": false,
             "default": "ntp",
             "description": "Name of the NTP service",
-            "choice": [
-
-            ],
-            "calculated": false
-          },
-          "ntp/is_server": {
-            "type": "string",
-            "display_name": "NTP Is Server?",
             "recipes": [
 
             ],
-            "value": "false",
-            "port_type": "output",
-            "required": "optional",
-            "default": "false",
-            "description": "Set to true if this is an NTP server",
             "choice": [
 
-            ],
-            "calculated": false
+            ]
           }
         },
         "basic_type": null,
@@ -3569,10 +4979,35 @@
       "description": "Installs and configures ntp either as a server or client"
     },
     "i-b04bf4da__chef_aux": {
-      "display_name": "i-b04bf4da__chef_aux"
+      "type": "instance",
+      "display_name": "i-b04bf4da__chef_aux",
+      "ds_attributes": {
+        "recipe_name": "chef_aux",
+        "attributes": {
+        },
+        "node_name": "i-b04bf4da",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-b04bf4da\", \"chef_aux\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[chef_aux]"
+    },
+    "i-97bb8ffd__collectd::server": {
+      "display_name": "i-97bb8ffd__collectd::server"
     },
     "i-871863ed__chef_aux": {
-      "display_name": "i-871863ed__chef_aux"
+      "type": "instance",
+      "display_name": "i-871863ed__chef_aux",
+      "ds_attributes": {
+        "recipe_name": "chef_aux",
+        "attributes": {
+        },
+        "node_name": "i-871863ed",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-871863ed\", \"chef_aux\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[chef_aux]"
     },
     "mysql::server_ec2": {
       "type": "template",
@@ -3608,15 +5043,6 @@
       "external_cmp_ref": "recipe[chef_aux]",
       "description": ""
     },
-    "i-97bb8ffd__collectd::server": {
-      "display_name": "i-97bb8ffd__collectd::server"
-    },
-    "i-0502796f__chef_aux": {
-      "display_name": "i-0502796f__chef_aux"
-    },
-    "i-c5f5afaf__chef_aux": {
-      "display_name": "i-c5f5afaf__chef_aux"
-    },
     "hadoop::doc": {
       "type": "template",
       "display_name": "hadoop::doc",
@@ -3633,9 +5059,6 @@
       "external_type": "chef_recipe",
       "external_cmp_ref": "recipe[hadoop::doc]",
       "description": "Installs hadoop documentation"
-    },
-    "i-b04bf4da__ganglia_data_collector": {
-      "display_name": "i-b04bf4da__ganglia_data_collector"
     },
     "hadoop": {
       "type": "template",
@@ -3654,11 +5077,75 @@
       "external_cmp_ref": "recipe[hadoop]",
       "description": "Installs hadoop from Cloudera's repo"
     },
+    "i-b04bf4da__ganglia_data_collector": {
+      "type": "instance",
+      "display_name": "i-b04bf4da__ganglia_data_collector",
+      "ds_attributes": {
+        "recipe_name": "ganglia_data_collector",
+        "attributes": {
+        },
+        "node_name": "i-b04bf4da",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-b04bf4da\", \"ganglia_data_collector\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[ganglia_data_collector]"
+    },
+    "i-0502796f__chef_aux": {
+      "type": "instance",
+      "display_name": "i-0502796f__chef_aux",
+      "ds_attributes": {
+        "recipe_name": "chef_aux",
+        "attributes": {
+        },
+        "node_name": "i-0502796f",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-0502796f\", \"chef_aux\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[chef_aux]"
+    },
+    "i-c5f5afaf__chef_aux": {
+      "type": "instance",
+      "display_name": "i-c5f5afaf__chef_aux",
+      "ds_attributes": {
+        "recipe_name": "chef_aux",
+        "attributes": {
+        },
+        "node_name": "i-c5f5afaf",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-c5f5afaf\", \"chef_aux\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[chef_aux]"
+    },
     "i-374b945d__hudson": {
-      "display_name": "i-374b945d__hudson"
+      "type": "instance",
+      "display_name": "i-374b945d__hudson",
+      "ds_attributes": {
+        "recipe_name": "hudson",
+        "attributes": {
+        },
+        "node_name": "i-374b945d",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-374b945d\", \"hudson\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[hudson]"
     },
     "i-335f0059__collectd::server": {
-      "display_name": "i-335f0059__collectd::server"
+      "type": "instance",
+      "display_name": "i-335f0059__collectd::server",
+      "ds_attributes": {
+        "recipe_name": "collectd::server",
+        "attributes": {
+        },
+        "node_name": "i-335f0059",
+        "basic_type": null
+      },
+      "ds_key": "[:chef, :instance, \"i-335f0059\", \"collectd::server\"]",
+      "external_type": "chef_recipe",
+      "external_cmp_ref": "recipe[collectd::server]"
     },
     "rabbitmq::edge_stomp": {
       "type": "template",
@@ -3711,38 +5198,35 @@
           "rabbitmq/stomp/branch_tag": {
             "type": "string",
             "display_name": "RabbitMQ-stomp adapter tag/branch name",
+            "value": "default",
+            "required": "optional",
+            "calculated": false,
+            "default": "default",
+            "description": "The RabbitMQ-stomp adapter tag/branch name.  The default is default, the latest qa'd branch.",
             "recipes": [
 
             ],
-            "value": "default",
-            "required": "optional",
-            "default": "default",
-            "description": "The RabbitMQ-stomp adapter tag/branch name.  The default is default, the latest qa'd branch.",
             "choice": [
 
-            ],
-            "calculated": false
+            ]
           },
           "rabbitmq/branch_tag": {
             "type": "string",
             "display_name": "RabbitMQ tag/branch name",
+            "value": "default",
+            "required": "optional",
+            "calculated": false,
+            "default": "default",
+            "description": "The RabbitMQ tag/branch name.  The default is default, the latest qa'd branch.",
             "recipes": [
 
             ],
-            "value": "default",
-            "required": "optional",
-            "default": "default",
-            "description": "The RabbitMQ tag/branch name.  The default is default, the latest qa'd branch.",
             "choice": [
 
-            ],
-            "calculated": false
+            ]
           },
           "rabbitmq/sap": {
             "type": "string",
-            "recipes": [
-
-            ],
             "transform": [
               {
                 "type": "inet",
@@ -3757,13 +5241,16 @@
                 "port": 5672
               }
             ],
-            "required": "optional",
             "is_service_attribute": true,
+            "required": "optional",
             "service_name": "rabbitmq",
-            "choice": [
+            "calculated": false,
+            "recipes": [
 
             ],
-            "calculated": false
+            "choice": [
+
+            ]
           }
         },
         "basic_type": null,
@@ -3799,9 +5286,9 @@
         "recipe_name": "redis",
         "node_name": "i-07af096d"
       },
+      "ds_key": "[:chef, \"i-07af096d\", \"redis\"]",
       "*node_id": "/node/i-07af096d",
-      "*component_id": "/component/i-07af096d__redis",
-      "ds_key": "[:chef, \"i-07af096d\", \"redis\"]"
+      "*component_id": "/component/i-07af096d__redis"
     },
     "i-07af096d__chef_aux": {
       "display_name": "i-07af096d__chef_aux",
@@ -3809,9 +5296,9 @@
         "recipe_name": "chef_aux",
         "node_name": "i-07af096d"
       },
+      "ds_key": "[:chef, \"i-07af096d\", \"chef_aux\"]",
       "*node_id": "/node/i-07af096d",
-      "*component_id": "/component/i-07af096d__chef_aux",
-      "ds_key": "[:chef, \"i-07af096d\", \"chef_aux\"]"
+      "*component_id": "/component/i-07af096d__chef_aux"
     },
     "i-2fb68345__collectd::server": {
       "display_name": "i-2fb68345__collectd::server",
@@ -3819,9 +5306,9 @@
         "recipe_name": "collectd::server",
         "node_name": "i-2fb68345"
       },
+      "ds_key": "[:chef, \"i-2fb68345\", \"collectd::server\"]",
       "*node_id": "/node/i-2fb68345",
-      "*component_id": "/component/i-2fb68345__collectd::server",
-      "ds_key": "[:chef, \"i-2fb68345\", \"collectd::server\"]"
+      "*component_id": "/component/i-2fb68345__collectd::server"
     },
     "i-79c39f13__collectd": {
       "display_name": "i-79c39f13__collectd",
@@ -3829,9 +5316,9 @@
         "recipe_name": "collectd",
         "node_name": "i-79c39f13"
       },
+      "ds_key": "[:chef, \"i-79c39f13\", \"collectd\"]",
       "*node_id": "/node/i-79c39f13",
-      "*component_id": "/component/i-79c39f13__collectd",
-      "ds_key": "[:chef, \"i-79c39f13\", \"collectd\"]"
+      "*component_id": "/component/i-79c39f13__collectd"
     },
     "i-c5f5afaf__collectd::server": {
       "display_name": "i-c5f5afaf__collectd::server",
@@ -3839,9 +5326,9 @@
         "recipe_name": "collectd::server",
         "node_name": "i-c5f5afaf"
       },
+      "ds_key": "[:chef, \"i-c5f5afaf\", \"collectd::server\"]",
       "*node_id": "/node/i-c5f5afaf",
-      "*component_id": "/component/i-c5f5afaf__collectd::server",
-      "ds_key": "[:chef, \"i-c5f5afaf\", \"collectd::server\"]"
+      "*component_id": "/component/i-c5f5afaf__collectd::server"
     },
     "i-871863ed__nagios::client": {
       "display_name": "i-871863ed__nagios::client",
@@ -3849,9 +5336,9 @@
         "recipe_name": "nagios::client",
         "node_name": "i-871863ed"
       },
+      "ds_key": "[:chef, \"i-871863ed\", \"nagios::client\"]",
       "*node_id": "/node/i-871863ed",
-      "*component_id": "/component/i-871863ed__nagios::client",
-      "ds_key": "[:chef, \"i-871863ed\", \"nagios::client\"]"
+      "*component_id": "/component/i-871863ed__nagios::client"
     },
     "i-11d8497b__nagios::client": {
       "display_name": "i-11d8497b__nagios::client",
@@ -3859,9 +5346,9 @@
         "recipe_name": "nagios::client",
         "node_name": "i-11d8497b"
       },
+      "ds_key": "[:chef, \"i-11d8497b\", \"nagios::client\"]",
       "*node_id": "/node/i-11d8497b",
-      "*component_id": "/component/i-11d8497b__nagios::client",
-      "ds_key": "[:chef, \"i-11d8497b\", \"nagios::client\"]"
+      "*component_id": "/component/i-11d8497b__nagios::client"
     },
     "i-59d58d33__hadoop_cloudera_c3::conf_pseudo": {
       "display_name": "i-59d58d33__hadoop_cloudera_c3::conf_pseudo",
@@ -3869,9 +5356,9 @@
         "recipe_name": "hadoop_cloudera_c3::conf_pseudo",
         "node_name": "i-59d58d33"
       },
+      "ds_key": "[:chef, \"i-59d58d33\", \"hadoop_cloudera_c3::conf_pseudo\"]",
       "*node_id": "/node/i-59d58d33",
-      "*component_id": "/component/i-59d58d33__hadoop_cloudera_c3::conf_pseudo",
-      "ds_key": "[:chef, \"i-59d58d33\", \"hadoop_cloudera_c3::conf_pseudo\"]"
+      "*component_id": "/component/i-59d58d33__hadoop_cloudera_c3::conf_pseudo"
     },
     "i-656e580f__collectd::server": {
       "display_name": "i-656e580f__collectd::server",
@@ -3879,9 +5366,9 @@
         "recipe_name": "collectd::server",
         "node_name": "i-656e580f"
       },
+      "ds_key": "[:chef, \"i-656e580f\", \"collectd::server\"]",
       "*node_id": "/node/i-656e580f",
-      "*component_id": "/component/i-656e580f__collectd::server",
-      "ds_key": "[:chef, \"i-656e580f\", \"collectd::server\"]"
+      "*component_id": "/component/i-656e580f__collectd::server"
     },
     "i-17e9dd7d__collectd::server": {
       "display_name": "i-17e9dd7d__collectd::server",
@@ -3889,9 +5376,9 @@
         "recipe_name": "collectd::server",
         "node_name": "i-17e9dd7d"
       },
+      "ds_key": "[:chef, \"i-17e9dd7d\", \"collectd::server\"]",
       "*node_id": "/node/i-17e9dd7d",
-      "*component_id": "/component/i-17e9dd7d__collectd::server",
-      "ds_key": "[:chef, \"i-17e9dd7d\", \"collectd::server\"]"
+      "*component_id": "/component/i-17e9dd7d__collectd::server"
     },
     "i-07af096d__mysql::server2": {
       "display_name": "i-07af096d__mysql::server2",
@@ -3899,9 +5386,9 @@
         "recipe_name": "mysql::server2",
         "node_name": "i-07af096d"
       },
+      "ds_key": "[:chef, \"i-07af096d\", \"mysql::server2\"]",
       "*node_id": "/node/i-07af096d",
-      "*component_id": "/component/i-07af096d__mysql::server2",
-      "ds_key": "[:chef, \"i-07af096d\", \"mysql::server2\"]"
+      "*component_id": "/component/i-07af096d__mysql::server2"
     },
     "i-c5f5afaf__hadoop_cloudera_c3::conf_pseudo": {
       "display_name": "i-c5f5afaf__hadoop_cloudera_c3::conf_pseudo",
@@ -3909,9 +5396,9 @@
         "recipe_name": "hadoop_cloudera_c3::conf_pseudo",
         "node_name": "i-c5f5afaf"
       },
+      "ds_key": "[:chef, \"i-c5f5afaf\", \"hadoop_cloudera_c3::conf_pseudo\"]",
       "*node_id": "/node/i-c5f5afaf",
-      "*component_id": "/component/i-c5f5afaf__hadoop_cloudera_c3::conf_pseudo",
-      "ds_key": "[:chef, \"i-c5f5afaf\", \"hadoop_cloudera_c3::conf_pseudo\"]"
+      "*component_id": "/component/i-c5f5afaf__hadoop_cloudera_c3::conf_pseudo"
     },
     "i-335f0059__collectd::server": {
       "display_name": "i-335f0059__collectd::server",
@@ -3919,9 +5406,9 @@
         "recipe_name": "collectd::server",
         "node_name": "i-335f0059"
       },
+      "ds_key": "[:chef, \"i-335f0059\", \"collectd::server\"]",
       "*node_id": "/node/i-335f0059",
-      "*component_id": "/component/i-335f0059__collectd::server",
-      "ds_key": "[:chef, \"i-335f0059\", \"collectd::server\"]"
+      "*component_id": "/component/i-335f0059__collectd::server"
     },
     "i-afcd95c5__hadoop_cloudera_c3::conf_pseudo": {
       "display_name": "i-afcd95c5__hadoop_cloudera_c3::conf_pseudo",
@@ -3929,9 +5416,9 @@
         "recipe_name": "hadoop_cloudera_c3::conf_pseudo",
         "node_name": "i-afcd95c5"
       },
+      "ds_key": "[:chef, \"i-afcd95c5\", \"hadoop_cloudera_c3::conf_pseudo\"]",
       "*node_id": "/node/i-afcd95c5",
-      "*component_id": "/component/i-afcd95c5__hadoop_cloudera_c3::conf_pseudo",
-      "ds_key": "[:chef, \"i-afcd95c5\", \"hadoop_cloudera_c3::conf_pseudo\"]"
+      "*component_id": "/component/i-afcd95c5__hadoop_cloudera_c3::conf_pseudo"
     },
     "i-97bb8ffd__collectd::server": {
       "display_name": "i-97bb8ffd__collectd::server",
@@ -3939,9 +5426,9 @@
         "recipe_name": "collectd::server",
         "node_name": "i-97bb8ffd"
       },
+      "ds_key": "[:chef, \"i-97bb8ffd\", \"collectd::server\"]",
       "*node_id": "/node/i-97bb8ffd",
-      "*component_id": "/component/i-97bb8ffd__collectd::server",
-      "ds_key": "[:chef, \"i-97bb8ffd\", \"collectd::server\"]"
+      "*component_id": "/component/i-97bb8ffd__collectd::server"
     },
     "i-e7b0848d__collectd::server": {
       "display_name": "i-e7b0848d__collectd::server",
@@ -3949,9 +5436,9 @@
         "recipe_name": "collectd::server",
         "node_name": "i-e7b0848d"
       },
+      "ds_key": "[:chef, \"i-e7b0848d\", \"collectd::server\"]",
       "*node_id": "/node/i-e7b0848d",
-      "*component_id": "/component/i-e7b0848d__collectd::server",
-      "ds_key": "[:chef, \"i-e7b0848d\", \"collectd::server\"]"
+      "*component_id": "/component/i-e7b0848d__collectd::server"
     },
     "i-fb486291__hadoop_cloudera_c3::conf_pseudo": {
       "display_name": "i-fb486291__hadoop_cloudera_c3::conf_pseudo",
@@ -3959,9 +5446,9 @@
         "recipe_name": "hadoop_cloudera_c3::conf_pseudo",
         "node_name": "i-fb486291"
       },
+      "ds_key": "[:chef, \"i-fb486291\", \"hadoop_cloudera_c3::conf_pseudo\"]",
       "*node_id": "/node/i-fb486291",
-      "*component_id": "/component/i-fb486291__hadoop_cloudera_c3::conf_pseudo",
-      "ds_key": "[:chef, \"i-fb486291\", \"hadoop_cloudera_c3::conf_pseudo\"]"
+      "*component_id": "/component/i-fb486291__hadoop_cloudera_c3::conf_pseudo"
     },
     "i-c1b527ab__chef_aux": {
       "display_name": "i-c1b527ab__chef_aux",
@@ -3969,9 +5456,9 @@
         "recipe_name": "chef_aux",
         "node_name": "i-c1b527ab"
       },
+      "ds_key": "[:chef, \"i-c1b527ab\", \"chef_aux\"]",
       "*node_id": "/node/i-c1b527ab",
-      "*component_id": "/component/i-c1b527ab__chef_aux",
-      "ds_key": "[:chef, \"i-c1b527ab\", \"chef_aux\"]"
+      "*component_id": "/component/i-c1b527ab__chef_aux"
     },
     "i-7550141f__chef_aux": {
       "display_name": "i-7550141f__chef_aux",
@@ -3979,9 +5466,9 @@
         "recipe_name": "chef_aux",
         "node_name": "i-7550141f"
       },
+      "ds_key": "[:chef, \"i-7550141f\", \"chef_aux\"]",
       "*node_id": "/node/i-7550141f",
-      "*component_id": "/component/i-7550141f__chef_aux",
-      "ds_key": "[:chef, \"i-7550141f\", \"chef_aux\"]"
+      "*component_id": "/component/i-7550141f__chef_aux"
     },
     "i-ef1b4385__collectd::client": {
       "display_name": "i-ef1b4385__collectd::client",
@@ -3989,9 +5476,9 @@
         "recipe_name": "collectd::client",
         "node_name": "i-ef1b4385"
       },
+      "ds_key": "[:chef, \"i-ef1b4385\", \"collectd::client\"]",
       "*node_id": "/node/i-ef1b4385",
-      "*component_id": "/component/i-ef1b4385__collectd::client",
-      "ds_key": "[:chef, \"i-ef1b4385\", \"collectd::client\"]"
+      "*component_id": "/component/i-ef1b4385__collectd::client"
     },
     "i-11d8497b__java": {
       "display_name": "i-11d8497b__java",
@@ -3999,9 +5486,9 @@
         "recipe_name": "java",
         "node_name": "i-11d8497b"
       },
+      "ds_key": "[:chef, \"i-11d8497b\", \"java\"]",
       "*node_id": "/node/i-11d8497b",
-      "*component_id": "/component/i-11d8497b__java",
-      "ds_key": "[:chef, \"i-11d8497b\", \"java\"]"
+      "*component_id": "/component/i-11d8497b__java"
     },
     "i-bd39e2d7__rabbitmq": {
       "display_name": "i-bd39e2d7__rabbitmq",
@@ -4009,9 +5496,9 @@
         "recipe_name": "rabbitmq",
         "node_name": "i-bd39e2d7"
       },
+      "ds_key": "[:chef, \"i-bd39e2d7\", \"rabbitmq\"]",
       "*node_id": "/node/i-bd39e2d7",
-      "*component_id": "/component/i-bd39e2d7__rabbitmq",
-      "ds_key": "[:chef, \"i-bd39e2d7\", \"rabbitmq\"]"
+      "*component_id": "/component/i-bd39e2d7__rabbitmq"
     },
     "i-bd39e2d7__chef_aux": {
       "display_name": "i-bd39e2d7__chef_aux",
@@ -4019,9 +5506,9 @@
         "recipe_name": "chef_aux",
         "node_name": "i-bd39e2d7"
       },
+      "ds_key": "[:chef, \"i-bd39e2d7\", \"chef_aux\"]",
       "*node_id": "/node/i-bd39e2d7",
-      "*component_id": "/component/i-bd39e2d7__chef_aux",
-      "ds_key": "[:chef, \"i-bd39e2d7\", \"chef_aux\"]"
+      "*component_id": "/component/i-bd39e2d7__chef_aux"
     },
     "i-dfcb12b5__hadoop::conf_pseudo": {
       "display_name": "i-dfcb12b5__hadoop::conf_pseudo",
@@ -4029,9 +5516,9 @@
         "recipe_name": "hadoop::conf_pseudo",
         "node_name": "i-dfcb12b5"
       },
+      "ds_key": "[:chef, \"i-dfcb12b5\", \"hadoop::conf_pseudo\"]",
       "*node_id": "/node/i-dfcb12b5",
-      "*component_id": "/component/i-dfcb12b5__hadoop::conf_pseudo",
-      "ds_key": "[:chef, \"i-dfcb12b5\", \"hadoop::conf_pseudo\"]"
+      "*component_id": "/component/i-dfcb12b5__hadoop::conf_pseudo"
     },
     "i-afcd95c5__chef_aux": {
       "display_name": "i-afcd95c5__chef_aux",
@@ -4039,9 +5526,9 @@
         "recipe_name": "chef_aux",
         "node_name": "i-afcd95c5"
       },
+      "ds_key": "[:chef, \"i-afcd95c5\", \"chef_aux\"]",
       "*node_id": "/node/i-afcd95c5",
-      "*component_id": "/component/i-afcd95c5__chef_aux",
-      "ds_key": "[:chef, \"i-afcd95c5\", \"chef_aux\"]"
+      "*component_id": "/component/i-afcd95c5__chef_aux"
     },
     "i-b04bf4da__nagios::client": {
       "display_name": "i-b04bf4da__nagios::client",
@@ -4049,9 +5536,9 @@
         "recipe_name": "nagios::client",
         "node_name": "i-b04bf4da"
       },
+      "ds_key": "[:chef, \"i-b04bf4da\", \"nagios::client\"]",
       "*node_id": "/node/i-b04bf4da",
-      "*component_id": "/component/i-b04bf4da__nagios::client",
-      "ds_key": "[:chef, \"i-b04bf4da\", \"nagios::client\"]"
+      "*component_id": "/component/i-b04bf4da__nagios::client"
     },
     "i-b04bf4da__hadoop_cloudera_c3::conf_pseudo": {
       "display_name": "i-b04bf4da__hadoop_cloudera_c3::conf_pseudo",
@@ -4059,9 +5546,9 @@
         "recipe_name": "hadoop_cloudera_c3::conf_pseudo",
         "node_name": "i-b04bf4da"
       },
+      "ds_key": "[:chef, \"i-b04bf4da\", \"hadoop_cloudera_c3::conf_pseudo\"]",
       "*node_id": "/node/i-b04bf4da",
-      "*component_id": "/component/i-b04bf4da__hadoop_cloudera_c3::conf_pseudo",
-      "ds_key": "[:chef, \"i-b04bf4da\", \"hadoop_cloudera_c3::conf_pseudo\"]"
+      "*component_id": "/component/i-b04bf4da__hadoop_cloudera_c3::conf_pseudo"
     },
     "i-b04bf4da__chef_aux": {
       "display_name": "i-b04bf4da__chef_aux",
@@ -4069,9 +5556,9 @@
         "recipe_name": "chef_aux",
         "node_name": "i-b04bf4da"
       },
+      "ds_key": "[:chef, \"i-b04bf4da\", \"chef_aux\"]",
       "*node_id": "/node/i-b04bf4da",
-      "*component_id": "/component/i-b04bf4da__chef_aux",
-      "ds_key": "[:chef, \"i-b04bf4da\", \"chef_aux\"]"
+      "*component_id": "/component/i-b04bf4da__chef_aux"
     },
     "i-07af096d__nagios::server": {
       "display_name": "i-07af096d__nagios::server",
@@ -4079,9 +5566,9 @@
         "recipe_name": "nagios::server",
         "node_name": "i-07af096d"
       },
+      "ds_key": "[:chef, \"i-07af096d\", \"nagios::server\"]",
       "*node_id": "/node/i-07af096d",
-      "*component_id": "/component/i-07af096d__nagios::server",
-      "ds_key": "[:chef, \"i-07af096d\", \"nagios::server\"]"
+      "*component_id": "/component/i-07af096d__nagios::server"
     },
     "i-07af096d__ntp": {
       "display_name": "i-07af096d__ntp",
@@ -4089,9 +5576,9 @@
         "recipe_name": "ntp",
         "node_name": "i-07af096d"
       },
+      "ds_key": "[:chef, \"i-07af096d\", \"ntp\"]",
       "*node_id": "/node/i-07af096d",
-      "*component_id": "/component/i-07af096d__ntp",
-      "ds_key": "[:chef, \"i-07af096d\", \"ntp\"]"
+      "*component_id": "/component/i-07af096d__ntp"
     },
     "i-0502796f__nagios::client": {
       "display_name": "i-0502796f__nagios::client",
@@ -4099,9 +5586,9 @@
         "recipe_name": "nagios::client",
         "node_name": "i-0502796f"
       },
+      "ds_key": "[:chef, \"i-0502796f\", \"nagios::client\"]",
       "*node_id": "/node/i-0502796f",
-      "*component_id": "/component/i-0502796f__nagios::client",
-      "ds_key": "[:chef, \"i-0502796f\", \"nagios::client\"]"
+      "*component_id": "/component/i-0502796f__nagios::client"
     },
     "i-bd39e2d7__mysql::server2": {
       "display_name": "i-bd39e2d7__mysql::server2",
@@ -4109,9 +5596,9 @@
         "recipe_name": "mysql::server2",
         "node_name": "i-bd39e2d7"
       },
+      "ds_key": "[:chef, \"i-bd39e2d7\", \"mysql::server2\"]",
       "*node_id": "/node/i-bd39e2d7",
-      "*component_id": "/component/i-bd39e2d7__mysql::server2",
-      "ds_key": "[:chef, \"i-bd39e2d7\", \"mysql::server2\"]"
+      "*component_id": "/component/i-bd39e2d7__mysql::server2"
     },
     "i-69381003__java_sun": {
       "display_name": "i-69381003__java_sun",
@@ -4119,9 +5606,9 @@
         "recipe_name": "java_sun",
         "node_name": "i-69381003"
       },
+      "ds_key": "[:chef, \"i-69381003\", \"java_sun\"]",
       "*node_id": "/node/i-69381003",
-      "*component_id": "/component/i-69381003__java_sun",
-      "ds_key": "[:chef, \"i-69381003\", \"java_sun\"]"
+      "*component_id": "/component/i-69381003__java_sun"
     },
     "i-fb486291__chef_aux": {
       "display_name": "i-fb486291__chef_aux",
@@ -4129,9 +5616,9 @@
         "recipe_name": "chef_aux",
         "node_name": "i-fb486291"
       },
+      "ds_key": "[:chef, \"i-fb486291\", \"chef_aux\"]",
       "*node_id": "/node/i-fb486291",
-      "*component_id": "/component/i-fb486291__chef_aux",
-      "ds_key": "[:chef, \"i-fb486291\", \"chef_aux\"]"
+      "*component_id": "/component/i-fb486291__chef_aux"
     },
     "i-374b945d__hudson": {
       "display_name": "i-374b945d__hudson",
@@ -4139,9 +5626,9 @@
         "recipe_name": "hudson",
         "node_name": "i-374b945d"
       },
+      "ds_key": "[:chef, \"i-374b945d\", \"hudson\"]",
       "*node_id": "/node/i-374b945d",
-      "*component_id": "/component/i-374b945d__hudson",
-      "ds_key": "[:chef, \"i-374b945d\", \"hudson\"]"
+      "*component_id": "/component/i-374b945d__hudson"
     },
     "i-07af096d__nagios::client": {
       "display_name": "i-07af096d__nagios::client",
@@ -4149,9 +5636,9 @@
         "recipe_name": "nagios::client",
         "node_name": "i-07af096d"
       },
+      "ds_key": "[:chef, \"i-07af096d\", \"nagios::client\"]",
       "*node_id": "/node/i-07af096d",
-      "*component_id": "/component/i-07af096d__nagios::client",
-      "ds_key": "[:chef, \"i-07af096d\", \"nagios::client\"]"
+      "*component_id": "/component/i-07af096d__nagios::client"
     },
     "i-0502796f__hadoop_cloudera_c3_228::conf_pseudo": {
       "display_name": "i-0502796f__hadoop_cloudera_c3_228::conf_pseudo",
@@ -4159,9 +5646,9 @@
         "recipe_name": "hadoop_cloudera_c3_228::conf_pseudo",
         "node_name": "i-0502796f"
       },
+      "ds_key": "[:chef, \"i-0502796f\", \"hadoop_cloudera_c3_228::conf_pseudo\"]",
       "*node_id": "/node/i-0502796f",
-      "*component_id": "/component/i-0502796f__hadoop_cloudera_c3_228::conf_pseudo",
-      "ds_key": "[:chef, \"i-0502796f\", \"hadoop_cloudera_c3_228::conf_pseudo\"]"
+      "*component_id": "/component/i-0502796f__hadoop_cloudera_c3_228::conf_pseudo"
     },
     "i-c5f5afaf__chef_aux": {
       "display_name": "i-c5f5afaf__chef_aux",
@@ -4169,9 +5656,9 @@
         "recipe_name": "chef_aux",
         "node_name": "i-c5f5afaf"
       },
+      "ds_key": "[:chef, \"i-c5f5afaf\", \"chef_aux\"]",
       "*node_id": "/node/i-c5f5afaf",
-      "*component_id": "/component/i-c5f5afaf__chef_aux",
-      "ds_key": "[:chef, \"i-c5f5afaf\", \"chef_aux\"]"
+      "*component_id": "/component/i-c5f5afaf__chef_aux"
     },
     "i-afcd95c5__nagios::client": {
       "display_name": "i-afcd95c5__nagios::client",
@@ -4179,9 +5666,9 @@
         "recipe_name": "nagios::client",
         "node_name": "i-afcd95c5"
       },
+      "ds_key": "[:chef, \"i-afcd95c5\", \"nagios::client\"]",
       "*node_id": "/node/i-afcd95c5",
-      "*component_id": "/component/i-afcd95c5__nagios::client",
-      "ds_key": "[:chef, \"i-afcd95c5\", \"nagios::client\"]"
+      "*component_id": "/component/i-afcd95c5__nagios::client"
     },
     "i-c1b527ab__nagios::client": {
       "display_name": "i-c1b527ab__nagios::client",
@@ -4189,9 +5676,9 @@
         "recipe_name": "nagios::client",
         "node_name": "i-c1b527ab"
       },
+      "ds_key": "[:chef, \"i-c1b527ab\", \"nagios::client\"]",
       "*node_id": "/node/i-c1b527ab",
-      "*component_id": "/component/i-c1b527ab__nagios::client",
-      "ds_key": "[:chef, \"i-c1b527ab\", \"nagios::client\"]"
+      "*component_id": "/component/i-c1b527ab__nagios::client"
     },
     "i-c1b527ab__java_sun": {
       "display_name": "i-c1b527ab__java_sun",
@@ -4199,9 +5686,9 @@
         "recipe_name": "java_sun",
         "node_name": "i-c1b527ab"
       },
+      "ds_key": "[:chef, \"i-c1b527ab\", \"java_sun\"]",
       "*node_id": "/node/i-c1b527ab",
-      "*component_id": "/component/i-c1b527ab__java_sun",
-      "ds_key": "[:chef, \"i-c1b527ab\", \"java_sun\"]"
+      "*component_id": "/component/i-c1b527ab__java_sun"
     },
     "i-59d58d33__chef_aux": {
       "display_name": "i-59d58d33__chef_aux",
@@ -4209,9 +5696,9 @@
         "recipe_name": "chef_aux",
         "node_name": "i-59d58d33"
       },
+      "ds_key": "[:chef, \"i-59d58d33\", \"chef_aux\"]",
       "*node_id": "/node/i-59d58d33",
-      "*component_id": "/component/i-59d58d33__chef_aux",
-      "ds_key": "[:chef, \"i-59d58d33\", \"chef_aux\"]"
+      "*component_id": "/component/i-59d58d33__chef_aux"
     },
     "i-bd39e2d7__nagios::client": {
       "display_name": "i-bd39e2d7__nagios::client",
@@ -4219,9 +5706,9 @@
         "recipe_name": "nagios::client",
         "node_name": "i-bd39e2d7"
       },
+      "ds_key": "[:chef, \"i-bd39e2d7\", \"nagios::client\"]",
       "*node_id": "/node/i-bd39e2d7",
-      "*component_id": "/component/i-bd39e2d7__nagios::client",
-      "ds_key": "[:chef, \"i-bd39e2d7\", \"nagios::client\"]"
+      "*component_id": "/component/i-bd39e2d7__nagios::client"
     },
     "i-b04bf4da__collectd::client": {
       "display_name": "i-b04bf4da__collectd::client",
@@ -4229,9 +5716,9 @@
         "recipe_name": "collectd::client",
         "node_name": "i-b04bf4da"
       },
+      "ds_key": "[:chef, \"i-b04bf4da\", \"collectd::client\"]",
       "*node_id": "/node/i-b04bf4da",
-      "*component_id": "/component/i-b04bf4da__collectd::client",
-      "ds_key": "[:chef, \"i-b04bf4da\", \"collectd::client\"]"
+      "*component_id": "/component/i-b04bf4da__collectd::client"
     },
     "i-ef1b4385__hadoop_cloudera_c3::conf_pseudo": {
       "display_name": "i-ef1b4385__hadoop_cloudera_c3::conf_pseudo",
@@ -4239,9 +5726,9 @@
         "recipe_name": "hadoop_cloudera_c3::conf_pseudo",
         "node_name": "i-ef1b4385"
       },
+      "ds_key": "[:chef, \"i-ef1b4385\", \"hadoop_cloudera_c3::conf_pseudo\"]",
       "*node_id": "/node/i-ef1b4385",
-      "*component_id": "/component/i-ef1b4385__hadoop_cloudera_c3::conf_pseudo",
-      "ds_key": "[:chef, \"i-ef1b4385\", \"hadoop_cloudera_c3::conf_pseudo\"]"
+      "*component_id": "/component/i-ef1b4385__hadoop_cloudera_c3::conf_pseudo"
     },
     "i-bd39e2d7__redis": {
       "display_name": "i-bd39e2d7__redis",
@@ -4249,9 +5736,9 @@
         "recipe_name": "redis",
         "node_name": "i-bd39e2d7"
       },
+      "ds_key": "[:chef, \"i-bd39e2d7\", \"redis\"]",
       "*node_id": "/node/i-bd39e2d7",
-      "*component_id": "/component/i-bd39e2d7__redis",
-      "ds_key": "[:chef, \"i-bd39e2d7\", \"redis\"]"
+      "*component_id": "/component/i-bd39e2d7__redis"
     },
     "i-dfcb12b5__hadoop": {
       "display_name": "i-dfcb12b5__hadoop",
@@ -4259,9 +5746,9 @@
         "recipe_name": "hadoop",
         "node_name": "i-dfcb12b5"
       },
+      "ds_key": "[:chef, \"i-dfcb12b5\", \"hadoop\"]",
       "*node_id": "/node/i-dfcb12b5",
-      "*component_id": "/component/i-dfcb12b5__hadoop",
-      "ds_key": "[:chef, \"i-dfcb12b5\", \"hadoop\"]"
+      "*component_id": "/component/i-dfcb12b5__hadoop"
     },
     "i-33886f59__nagios::client": {
       "display_name": "i-33886f59__nagios::client",
@@ -4269,9 +5756,9 @@
         "recipe_name": "nagios::client",
         "node_name": "i-33886f59"
       },
+      "ds_key": "[:chef, \"i-33886f59\", \"nagios::client\"]",
       "*node_id": "/node/i-33886f59",
-      "*component_id": "/component/i-33886f59__nagios::client",
-      "ds_key": "[:chef, \"i-33886f59\", \"nagios::client\"]"
+      "*component_id": "/component/i-33886f59__nagios::client"
     },
     "i-69381003__collectd::client": {
       "display_name": "i-69381003__collectd::client",
@@ -4279,9 +5766,9 @@
         "recipe_name": "collectd::client",
         "node_name": "i-69381003"
       },
+      "ds_key": "[:chef, \"i-69381003\", \"collectd::client\"]",
       "*node_id": "/node/i-69381003",
-      "*component_id": "/component/i-69381003__collectd::client",
-      "ds_key": "[:chef, \"i-69381003\", \"collectd::client\"]"
+      "*component_id": "/component/i-69381003__collectd::client"
     },
     "i-ef1b4385__chef_aux": {
       "display_name": "i-ef1b4385__chef_aux",
@@ -4289,9 +5776,9 @@
         "recipe_name": "chef_aux",
         "node_name": "i-ef1b4385"
       },
+      "ds_key": "[:chef, \"i-ef1b4385\", \"chef_aux\"]",
       "*node_id": "/node/i-ef1b4385",
-      "*component_id": "/component/i-ef1b4385__chef_aux",
-      "ds_key": "[:chef, \"i-ef1b4385\", \"chef_aux\"]"
+      "*component_id": "/component/i-ef1b4385__chef_aux"
     },
     "i-9bad8cf1__postgresql::server": {
       "display_name": "i-9bad8cf1__postgresql::server",
@@ -4299,9 +5786,9 @@
         "recipe_name": "postgresql::server",
         "node_name": "i-9bad8cf1"
       },
+      "ds_key": "[:chef, \"i-9bad8cf1\", \"postgresql::server\"]",
       "*node_id": "/node/i-9bad8cf1",
-      "*component_id": "/component/i-9bad8cf1__postgresql::server",
-      "ds_key": "[:chef, \"i-9bad8cf1\", \"postgresql::server\"]"
+      "*component_id": "/component/i-9bad8cf1__postgresql::server"
     },
     "i-33886f59__collectd::client": {
       "display_name": "i-33886f59__collectd::client",
@@ -4309,9 +5796,9 @@
         "recipe_name": "collectd::client",
         "node_name": "i-33886f59"
       },
+      "ds_key": "[:chef, \"i-33886f59\", \"collectd::client\"]",
       "*node_id": "/node/i-33886f59",
-      "*component_id": "/component/i-33886f59__collectd::client",
-      "ds_key": "[:chef, \"i-33886f59\", \"collectd::client\"]"
+      "*component_id": "/component/i-33886f59__collectd::client"
     },
     "i-374b945d__hadoop::conf_pseudo": {
       "display_name": "i-374b945d__hadoop::conf_pseudo",
@@ -4319,9 +5806,9 @@
         "recipe_name": "hadoop::conf_pseudo",
         "node_name": "i-374b945d"
       },
+      "ds_key": "[:chef, \"i-374b945d\", \"hadoop::conf_pseudo\"]",
       "*node_id": "/node/i-374b945d",
-      "*component_id": "/component/i-374b945d__hadoop::conf_pseudo",
-      "ds_key": "[:chef, \"i-374b945d\", \"hadoop::conf_pseudo\"]"
+      "*component_id": "/component/i-374b945d__hadoop::conf_pseudo"
     },
     "i-374b945d__hadoop": {
       "display_name": "i-374b945d__hadoop",
@@ -4329,9 +5816,9 @@
         "recipe_name": "hadoop",
         "node_name": "i-374b945d"
       },
+      "ds_key": "[:chef, \"i-374b945d\", \"hadoop\"]",
       "*node_id": "/node/i-374b945d",
-      "*component_id": "/component/i-374b945d__hadoop",
-      "ds_key": "[:chef, \"i-374b945d\", \"hadoop\"]"
+      "*component_id": "/component/i-374b945d__hadoop"
     },
     "i-0502796f__chef_aux": {
       "display_name": "i-0502796f__chef_aux",
@@ -4339,9 +5826,9 @@
         "recipe_name": "chef_aux",
         "node_name": "i-0502796f"
       },
+      "ds_key": "[:chef, \"i-0502796f\", \"chef_aux\"]",
       "*node_id": "/node/i-0502796f",
-      "*component_id": "/component/i-0502796f__chef_aux",
-      "ds_key": "[:chef, \"i-0502796f\", \"chef_aux\"]"
+      "*component_id": "/component/i-0502796f__chef_aux"
     },
     "i-871863ed__hadoop_cloudera_c2::conf_pseudo": {
       "display_name": "i-871863ed__hadoop_cloudera_c2::conf_pseudo",
@@ -4349,9 +5836,9 @@
         "recipe_name": "hadoop_cloudera_c2::conf_pseudo",
         "node_name": "i-871863ed"
       },
+      "ds_key": "[:chef, \"i-871863ed\", \"hadoop_cloudera_c2::conf_pseudo\"]",
       "*node_id": "/node/i-871863ed",
-      "*component_id": "/component/i-871863ed__hadoop_cloudera_c2::conf_pseudo",
-      "ds_key": "[:chef, \"i-871863ed\", \"hadoop_cloudera_c2::conf_pseudo\"]"
+      "*component_id": "/component/i-871863ed__hadoop_cloudera_c2::conf_pseudo"
     },
     "i-871863ed__chef_aux": {
       "display_name": "i-871863ed__chef_aux",
@@ -4359,9 +5846,9 @@
         "recipe_name": "chef_aux",
         "node_name": "i-871863ed"
       },
+      "ds_key": "[:chef, \"i-871863ed\", \"chef_aux\"]",
       "*node_id": "/node/i-871863ed",
-      "*component_id": "/component/i-871863ed__chef_aux",
-      "ds_key": "[:chef, \"i-871863ed\", \"chef_aux\"]"
+      "*component_id": "/component/i-871863ed__chef_aux"
     },
     "i-b5c5f1df__collectd::server": {
       "display_name": "i-b5c5f1df__collectd::server",
@@ -4369,9 +5856,9 @@
         "recipe_name": "collectd::server",
         "node_name": "i-b5c5f1df"
       },
+      "ds_key": "[:chef, \"i-b5c5f1df\", \"collectd::server\"]",
       "*node_id": "/node/i-b5c5f1df",
-      "*component_id": "/component/i-b5c5f1df__collectd::server",
-      "ds_key": "[:chef, \"i-b5c5f1df\", \"collectd::server\"]"
+      "*component_id": "/component/i-b5c5f1df__collectd::server"
     },
     "i-b04bf4da__ganglia_data_collector": {
       "display_name": "i-b04bf4da__ganglia_data_collector",
@@ -4379,9 +5866,9 @@
         "recipe_name": "ganglia_data_collector",
         "node_name": "i-b04bf4da"
       },
+      "ds_key": "[:chef, \"i-b04bf4da\", \"ganglia_data_collector\"]",
       "*node_id": "/node/i-b04bf4da",
-      "*component_id": "/component/i-b04bf4da__ganglia_data_collector",
-      "ds_key": "[:chef, \"i-b04bf4da\", \"ganglia_data_collector\"]"
+      "*component_id": "/component/i-b04bf4da__ganglia_data_collector"
     },
     "i-7550141f__java_sun": {
       "display_name": "i-7550141f__java_sun",
@@ -4389,9 +5876,9 @@
         "recipe_name": "java_sun",
         "node_name": "i-7550141f"
       },
+      "ds_key": "[:chef, \"i-7550141f\", \"java_sun\"]",
       "*node_id": "/node/i-7550141f",
-      "*component_id": "/component/i-7550141f__java_sun",
-      "ds_key": "[:chef, \"i-7550141f\", \"java_sun\"]"
+      "*component_id": "/component/i-7550141f__java_sun"
     }
   }
 }

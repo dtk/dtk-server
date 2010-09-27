@@ -135,6 +135,23 @@ module XYZ
       Aux.underscore(Aux.demodulize(klass.to_s)).to_sym
     end
 
+    #common defs for data source attributes
+    def ds_column_defs(*names)
+      names.each{|n|ds_column_def(n)}
+    end
+    def ds_column_def(name)
+      if name == :ds_attributes
+        column :ds_attributes, :json
+      elsif  name == :ds_key
+        #:default => '' so when do 'prune inventory' this column not null
+        column :ds_key, :varchar, :default => '', :hidden => true 
+      elsif  name == :data_source
+        column :data_source, :varchar, :size => 25
+      elsif  name == :ds_source_obj_type
+        column :ds_source_obj_type, :varchar, :size => 25
+      end
+    end
+
     include MigrationMethods
 
       #gets over written for classes with data source attributes

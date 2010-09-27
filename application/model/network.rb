@@ -3,7 +3,7 @@ module XYZ
     set_relation_name(:network,:partition)
     class << self
       def up()
-        column :ds_key, :varchar, :hidden => true
+        ds_column_defs :ds_key
         column :is_deployed, :boolean, :default => false
         column :is_internet, :boolean, :default => false #TBD might replace with :type
         many_to_one :library, :datacenter, :project
@@ -15,8 +15,7 @@ module XYZ
     set_relation_name(:network,:gateway)
     class << self
       def up()
-        column :ds_attributes, :json
-        column :ds_key, :varchar
+        ds_column_defs :ds_attributes, :ds_key
         column :is_deployed, :boolean, :default => false
         foreign_key :network_partition1_id, :network_partition, FK_CASCADE_OPT
         foreign_key :network_partition2_id, :network_partition, FK_CASCADE_OPT

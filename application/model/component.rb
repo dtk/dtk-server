@@ -4,11 +4,10 @@ module XYZ
     class << self
       def up()
         has_ancestor_field()
+        ds_column_defs :ds_attributes, :ds_key
         column :type, :varchar, :size => 15 # instance | template | composite
         column :basic_type, :varchar, :size => 15 # service | package | language | ..
         column :version, :varchar, :size => 25 # version of underlying component (not chef recipe .... version)
-        column :ds_attributes, :json, :hidden => true
-        column :ds_key, :varchar, :hidden => true
         column :external_type, :varchar
         column :external_cmp_ref, :varchar
         column :uri, :varchar

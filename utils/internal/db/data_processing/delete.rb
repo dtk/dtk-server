@@ -18,6 +18,9 @@ module XYZ
         c = parent_id_handle[:c]
         filter = SQL.and({CONTEXT_ID => c},{parent_fk_col => parent_id_info[:id]},where_clause || {})
 	ds = dataset(DB_REL_DEF[relation_type]).filter(filter)
+        #Debugging
+        #ds.select(:ref,:id).all.each{|obj|Log.info("deleting object with ref #{obj[:ref]} and id #{obj[:id]}")}
+        ######
 	ds.delete
 	nil
       end

@@ -5,10 +5,8 @@ module XYZ
 #TODO: move this out into central model, should read off of model meta data for processing
     def self.up()
       has_ancestor_field()
-      column :ds_attributes, :json
-      column :ds_key, :varchar, :hidden => true
-      column :data_source, :varchar, :size => 25
-      column :ds_source_obj_type, :varchar, :size => 25
+      ds_column_defs :ds_attributes, :ds_key, :data_source, :ds_source_obj_type
+
       column :type, :varchar, :size => 15, :default => "instance" # instance or template
       column :os, :varchar, :size => 25
       column :is_deployed, :boolean
@@ -134,8 +132,7 @@ module XYZ
   class AssocNodeComponent < Model
     set_relation_name(:node,:assoc_node_component)
     def self.up()
-      column :ds_attributes, :json
-      column :ds_key, :varchar
+      ds_column_defs :ds_attributes, :ds_key
       foreign_key :node_id, :node, FK_CASCADE_OPT
       foreign_key :component_id, :component, FK_CASCADE_OPT
       many_to_one :library, :datacenter, :project

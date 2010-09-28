@@ -27,6 +27,30 @@ module XYZ
     end
 
     class << self
+      def hash_from_file_with_json(file_name)
+        return nil unless File.exists?(file_name)
+        ret = nil
+        File.open(file_name) do |f|
+          begin
+            json = f.read
+          rescue Exception => err
+            raise Error.new("error reading file (#{data_file_path}): #{err}")
+          end
+          begin
+            ret = JSON.parse(json)
+           rescue Exception => err
+            #use pure json to find parsing error
+            require 'json/pure'
+            begin 
+              JSON::Pure::Parser.new(json).parse
+             rescue Exception => detailed_err
+              raise Error.new("file (#{file_name} has json parsing error: #{detailed_err}")
+            end
+          end
+        end
+        ret
+      end
+
       def create_object_slice(hash,slice_keys,opts={})
         ret = Hash.new
         slice_keys.each do |k|

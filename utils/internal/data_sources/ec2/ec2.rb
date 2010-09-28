@@ -39,7 +39,7 @@ module XYZ
         return HashIsComplete.new({:type => "image"})
       end
 
-      def get_objects__network_partition__security_group(&block)
+      def get_objects__network_partition(&block)
         get_network_partitions.each_value do |network_partition_ds|
           block.call(network_partition_ds)
         end

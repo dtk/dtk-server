@@ -23,7 +23,7 @@ module XYZ
         file_path = File.expand_path(rel_path, File.dirname(__FILE__)) 
         require file_path
        rescue Exception => e 
-        raise Error.new("Adapter file to process object #{obj_type()} for data source #{ds_name()} #{source_obj_type() ? "(using source object #{source_obj_type()}) " : ""} does not exist") unless File.exists?(file_path + ".rb")
+        raise Error.new("Adapter file (#{file_path}.rb) to process object #{obj_type()} for data source #{ds_name()} #{source_obj_type() ? "(using source object #{source_obj_type()}) " : ""} does not exist") unless File.exists?(file_path + ".rb")
         raise e
       end
 

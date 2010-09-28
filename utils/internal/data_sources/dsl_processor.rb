@@ -7,6 +7,11 @@ module XYZ
           ds_hash
         end
 
+        #default unique_key; can be overwritten
+        def unique_keys(ds_hash)
+          [relative_distinguished_name(ds_hash)]
+        end
+
         def class_rules()
         @class_rules ||= DBUpdateHash.create_with_auto_vivification()
        end

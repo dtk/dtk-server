@@ -23,7 +23,7 @@ module XYZ
            end
 
 
-           def filter(source)
+           def filter_raw_source_objects(source)
              DBUpdateHash.new()
            end
 

@@ -6,7 +6,7 @@ module XYZ
     def self.up()
       has_ancestor_field()
       ds_column_defs :ds_attributes, :ds_key, :data_source, :ds_source_obj_type
-
+      column :tag,  :varchar
       column :type, :varchar, :size => 15, :default => "instance" # instance or template
       column :os, :varchar, :size => 25
       column :is_deployed, :boolean

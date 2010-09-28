@@ -35,6 +35,10 @@
              :rows => 1,
              :cols => 40,
             }},
+            {:tag => {
+             :type => 'text',
+             :help => '',
+            }},
             {:operational_status => {
              :type => 'select',
              :help => '',

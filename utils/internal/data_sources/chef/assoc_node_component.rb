@@ -8,12 +8,12 @@ module XYZ
           target[:component_id] = foreign_key :component, component_ref
         end
         class << self
-          def unique_keys(source_hash)
-            [source_hash["node_name"],source_hash["recipe_name"]]
+          def unique_keys(source)
+            [source["node_name"],source["recipe_name"]]
           end
 
-          def relative_distinguished_name(source_hash)
-            source_hash["node_name"] + "__" + source_hash["recipe_name"]
+          def relative_distinguished_name(source)
+            source["node_name"] + "__" + source["recipe_name"]
           end
         end
       end

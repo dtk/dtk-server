@@ -37,6 +37,11 @@
           "obj_type": "assoc_node_component",
           "ds_name": "chef",
           "display_name": "assoc_node_component"
+        },
+        "node": {
+          "obj_type": "node",
+          "ds_name": "chef",
+          "display_name": "node"
         }
       },
       "ds_name": "chef",

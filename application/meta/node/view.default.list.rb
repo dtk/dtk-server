@@ -19,6 +19,11 @@
               :objLink => true,
               :objLinkView => 'display',
             }},
+          {:tag => {
+              :type => 'text',
+              :width => '20%',
+              :help => ''
+            }},
           {:operational_status => {
               :type => 'select',
               :width => '10%',
@@ -28,10 +33,6 @@
               :type => 'text',
               :width => '10%',
               :help => ''
-            }},
-          {:description => {
-              :type => 'text',
-              :help => '',
             }},
       ]
 }

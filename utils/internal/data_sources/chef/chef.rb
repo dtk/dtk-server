@@ -13,10 +13,10 @@ module XYZ
       include ChefMixinAssembly
       def initialize()
         @conn = nil
-        @chef_node_cache = Hash.new 
-        @cookbook_metadata_cache = Hash.new
-        @recipe_service_info_cache =  Hash.new
-       @attributes_with_values = Hash.new
+        @chef_node_cache = Aux::Cache.new 
+        @cookbook_metadata_cache = Aux::Cache.new
+        @recipe_service_info_cache =  Aux::Cache.new
+        @attributes_with_values = Aux::Cache.new
       end
 
       def get_objects__component__instance(&block)
@@ -47,6 +47,29 @@ module XYZ
         return HashIsComplete.new({:type => "template"}) #HashMayNotBeComplete.new()
       end
 
+      def get_objects__node(&block)
+        get_nodes().each do |node_name,node|
+          node_attributes = %{node_display_name}
+          ds_hash = node_attributes.inject(DataSourceUpdateHash.new({"node_name" => node_name})){|h,k|h.merge(k => node[k])}
+          block.call(ds_hash.freeze)
+        end
+        return HashMayNotBeComplete.new()
+      end
+
+      def get_objects__assoc_node_component(&block)
+        get_node_recipe_assocs().each do |node_name,recipes|
+          recipes.each do |recipe_name|
+            ds_hash = DataSourceUpdateHash.new({"node_name" => node_name, "recipe_name" => recipe_name})
+  #TODO: to be used to load in variable values node_attributes = get_node_attributes(node_name)
+  #or instead may have discover and update on attributes
+            block.call(ds_hash.freeze)
+          end
+        end
+        return HashIsComplete.new()
+      end
+
+     private        
+
       def get_recipes_assoc_cookbook(cookbook_name)
         ret = Array.new
         recipes = get_cookbook_recipes_metadata(cookbook_name)
@@ -68,23 +91,34 @@ module XYZ
         ret
       end
 
-
-      def get_objects__assoc_node_component(&block)
-        get_node_recipe_assocs().each do |node_name,recipes|
-          recipes.each do |recipe_name|
-            ds_hash = DataSourceUpdateHash.new({"node_name" => node_name, "recipe_name" => recipe_name})
-  #TODO: to be used to load in variable values node_attributes = get_node_attributes(node_name)
-  #or instead may have discover and update on attributes
-            block.call(ds_hash.freeze)
-          end
-        end
-        return HashIsComplete.new()
-      end
-        
-     private
       def get_node(node_name)
         @chef_node_cache[node_name] ||= filter_to_only_relevant(get_rest("nodes/#{node_name}",false))
       end
+
+      def get_nodes()
+        #TODO: may be better to make rest call per node or use chef iterator functionality
+        #TODO": this is increemntal yupdate; wil wil be in context where this is needed?
+        search_string = "node?q=*:*"
+        unless @chef_node_cache.empty?
+          search_string = "node?q="+@chef_node_cache.keys.map{|n|"NOT%20name:#{n}"}.join("%20AND%20")
+        end
+        (get_search_results(search_string,false)||[]).map do |node|
+          @chef_node_cache[node.name] = node
+        end
+        @chef_node_cache
+      end
+
+      def get_node_recipe_assocs()
+        recipes = Hash.new
+        get_nodes().each{|node_name,node|recipes[node_name] = recipes(node)}
+        recipes
+      end
+
+      def get_node_recipes(node_name)
+        node = get_node(node_name)
+        node ? recipes(node) : nil
+      end
+
 
       #TODO: stub
       def filter_to_only_relevant(node)
@@ -158,25 +192,7 @@ module XYZ
         ret
       end
 
-      def get_node_recipe_assocs()
-        recipes = Hash.new
-        #TODO: may be better to make rest call per node or use chef iterator functionality
-        search_string = "node?q=*:*"
-        unless @chef_node_cache.empty?
-          search_string = "node?q="+@chef_node_cache.keys.map{|n|"NOT%20name:#{n}"}.join("%20AND%20")
-        end
-        (get_search_results(search_string,false)||[]).map do |node|
-          @chef_node_cache[node.name] = node
-        end
-        @chef_node_cache.each{|node_name,node|recipes[node_name] = recipes(node)}
-        recipes
-      end
-
-      def get_node_recipes(node_name)
-        node = get_node(node_name)
-        node ? recipes(node) : nil
-      end
-
+      
       def get_search_results(search_string,convert_to_hash=true)
         search_results = get_rest("search/#{search_string}",false)
         return nil if search_results.nil?

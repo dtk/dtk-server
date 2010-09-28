@@ -6,7 +6,7 @@ if (!R8.MainToolbar) {
 			return {
 				init : function() {
 //					autocomplete('sq',{'delay':100,'uri':'http://yahoo.com','callback':R8.MainToolbar.search});
-					autocomplete('sq',{'delay':2000,'uri':'http://yahoo.com','callback':ac_request});
+//					autocomplete('sq',{'delay':2000,'uri':'http://yahoo.com','callback':ac_request});
 				},
 
 				toggleSlider: function(){

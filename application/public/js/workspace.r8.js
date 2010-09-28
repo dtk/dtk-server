@@ -9,12 +9,12 @@ if (!R8.Workspace) {
 			viewPortRegion : null,
 			pageContainerElem : null,
 
-			toolbarElem : null,
-			toolbarHeight : null,
+			topbarElem : null,
+			topbarHeight : null,
+			cmdbarElem : null,
 
 			wspaceContainerElem : null,
 
-			commandbarElem : null,
 
 			viewspaceAnim : null,
 			viewspaceDD : null,
@@ -27,9 +27,9 @@ if (!R8.Workspace) {
 
 			init : function() {
 				this.pageContainerElem = R8.Utils.Y.one('#page-container');
-				this.toolbarElem = R8.Utils.Y.one('#toolbar');
+				this.topbarElem = R8.Utils.Y.one('#topbar');
 				this.wspaceContainerElem = R8.Utils.Y.one('#wspace-container');
-				this.commandbarElem = R8.Utils.Y.one('#commandbar');
+				this.cmdbarElem = R8.Utils.Y.one('#cmdbar');
 
 				this.resizeWorkspace();
 				YUI().use('node','event',function(Y){
@@ -63,13 +63,13 @@ if (!R8.Workspace) {
 
 				R8.Workspace.pageContainerElem.setStyles({'height': height,'width':width});
 
-				var toolbarRegion = R8.Workspace.toolbarElem.get('region');
-				var commandbarRegion = R8.Workspace.commandbarElem.get('region');
+				var topbarRegion = R8.Workspace.topbarElem.get('region');
+				var cmdbarRegion = R8.Workspace.cmdbarElem.get('region');
 				var wspaceRegion = R8.Workspace.wspaceContainerElem.get('region');
-				var wspaceHeight = vportHeight - (toolbarRegion['height']+commandbarRegion['height']) - margin;
+				var wspaceHeight = vportHeight - (topbarRegion['height']+cmdbarRegion['height']) - margin;
 //console.log(toolbarRegion);
 				R8.Workspace.wspaceContainerElem.setStyles({'height': wspaceHeight});
-				R8.Workspace.toolbarHeight = toolbarRegion['height'];
+				R8.Workspace.topbarHeight = topbarRegion['height'];
 
 				for(rcId in R8.Workspace.resizeCallbacks) {
 					var nodeObj = R8.Utils.Y.one(R8.Workspace.resizeCallbacks[rcId]['nodeId']);
@@ -94,13 +94,13 @@ if (!R8.Workspace) {
 			loadWorkspace: function(wSpaceID){
 
 //return;
-				R8.Workspace.viewspaceElem = document.getElementById('viewspace');
+//				R8.Workspace.viewspaceElem = document.getElementById('viewspace');
 
-				R8.Workspace.viewSpaceNode = R8.Utils.Y.one(R8.Workspace.viewspaceElem);
+				R8.Workspace.viewSpaceNode = R8.Utils.Y.one('#viewspace');
 
-				R8.Workspace.events['item_click'] = R8.Utils.Y.delegate('click',R8.Workspace.updateSelectedElements,R8.Workspace.viewSpaceNode,'.component, .connector');
-				R8.Workspace.events['vspace_click'] = R8.Utils.Y.delegate('click',R8.Workspace.clearSelectedElements,'body','#viewspace');
-				R8.Workspace.events['vspace_mdown'] = R8.Utils.Y.delegate('mousedown',R8.Workspace.checkMouseDownEvent,'body','#viewspace');
+				R8.Workspace.events['item_click'] = R8.Utils.Y.delegate('click',R8.Workspace.updateSelectedItems,R8.Workspace.viewSpaceNode,'.node, .connector');
+				R8.Workspace.events['vspace_click'] = R8.Utils.Y.delegate('click',R8.Workspace.clearSelectedItems,'body','#viewspace');
+//				R8.Workspace.events['vspace_mdown'] = R8.Utils.Y.delegate('mousedown',R8.Workspace.checkMouseDownEvent,'body','#viewspace');
 
 				R8.MainToolbar.init();
 return;
@@ -168,7 +168,8 @@ console.log('registering port:'+portElemID);
 				});
 			},
 
-			activeTool : 'selection',
+//			activeTool : 'selection',
+			activeTool : '',
 			selectionDragEvent : null,
 			selectionMouseUpEvent : null,
 			selectionStartX : 0,
@@ -220,82 +221,97 @@ console.log('registering port:'+portElemID);
 			},
 
 			/*
-			 * addDragDrop will make a component drag/droppable on a workspace
-			 * @method addDragDrop
+			 * addDrag will make a component drag/droppable on a workspace
+			 * @method addDrag
 			 * @param {string} 	componentID The DOM ID for the component to add drag drop capabilities to
 			 * @param {DOM Elem}	Node Object to add drag drop capabilities to
 			 */
-			addDragDrop : function() {
-				var a = arguments;
-//TODO: revisit, should cleanup/remove the object check
-				if(typeof(a[0]) === 'object') {
-					var compNode = R8.Utils.Y.one(a[0]);
-					var compID = compNode.get('id');
-				} else if(typeof(a[0]) === 'string') {
-					var compID = a[0];
-					var compNode = R8.Utils.Y.one('#'+compID);
-				}
-				//Selector of the node to make draggable
-//				compNode.on('mousedown', this.updateClickFocus,compNode);
+			addDrag : function(itemId) {
+				var vsContext = this.getVspaceContext();
 
-				var dd = new R8.Utils.Y.DD.Drag({
-					node: '#'+compID,
+				YUI().use('dd-drag','dd-plugin',function(Y){
+					R8.Workspace.viewspaces[vsContext]['items'][itemId]['drag'] = new Y.DD.Drag({
+						node: '#'+itemId
+					});
+					R8.Workspace.viewspaces[vsContext]['items'][itemId]['drag'].on('drag:start',function(){
+						R8.Workspace.clearSelectedItems();
+						var node = this.get('node');
+						var nodeId = node.get('id');
+						node.addClass('focus');
+//TODO: revisit, using {} for selected items in case have to enrich data pts around selected items down road
+						R8.Workspace.viewspaces[vsContext]['selectedItems'][nodeId] = '1';
+					});
+					R8.Workspace.viewspaces[vsContext]['items'][itemId]['drag'].on('drag:drag',function(){
+//TODO: update refreschConnectors with new viewspace object usage
+//						R8.Component.refreshConnectors(this.get('node').get('id'));
+					});
+					R8.Workspace.viewspaces[vsContext]['items'][itemId]['node'].setAttribute('data-status','dd-ready');
 				});
-				dd.on('drag:start',function(){
-					R8.Workspace.clearSelectedElements();
-					R8.Utils.Y.one('#'+compID).addClass('focus');
-					R8.Workspace.selectedElements[compID] = R8.Workspace.components[compID];
-				});
-				dd.on('drag:drag',function(){
-					R8.Component.refreshConnectors(this.get('node').get('id'));
-				});
-
-				//add the dd object to the page components list
-				R8.Workspace.components[compID].ddObj = dd;
 			},
 
 			/*
-			 * removeDragDrop will take away a components drag/droppable capabilites on a workspace
-			 * @method removeDragDrop
+			 * removeDrag will take away a components drag/droppable capabilites on a workspace
+			 * @method removeDrag
 			 * @param {string} 	componentID The DOM ID for the component to remove drag drop capabilities from
 			 * @param {Node}	Node Object to remove drag drop capabilities from
 			 */
-			removeDragDrop: function(componentID){
+			removeDrag: function(itemId){
 			},
 
-			/*
-			 * Add an item to the workspace (component,connector,etc)
-			 */
-			add : function() {
-				//stuff to be added here
+			addDrop : function(itemId) {
+				var vsContext = this.getVspaceContext();
+				var modelName = R8.Workspace.viewspaces[vsContext]['items'][itemId]['node'].getAttribute('data-model');
+				var dropGroupName = modelName + '_drop';
+//TODO: probably pull the drop registration into its own function once more functionality is added
+//console.log('Going to add node to drop group:'+dropGroupName);
+//console.log(node);
+				YUI().use('dd-drop', function(Y){
+//					node.plug(R8.Utils.Y.Plugin.Drop);
+					R8.Workspace.viewspaces[vsContext]['items'][itemId]['drop'] = new Y.DD.Drop({
+						node: '#'+itemId
+					});
+					R8.Workspace.viewspaces[vsContext]['items'][itemId]['drop'].addToGroup([dropGroupName]);
+					R8.Workspace.viewspaces[vsContext]['items'][itemId]['drop'].on('drop:enter',function(e){
+console.log('Over drop target....');
+console.log(e);
+					});
+					R8.Workspace.viewspaces[vsContext]['items'][itemId]['drop'].on('drop:hit',function(e){
+console.log('I guess I am hitting this now!!!!');
+					});
+				});
 			},
 
-			updateSelectedElements : function(e) {
-				if(typeof(R8.Workspace.components[e.currentTarget.get('id')]) === 'undefined') {
-					R8.Workspace.clearSelectedElements();
+			updateSelectedItems : function(e) {
+				var vsContext = R8.Workspace.getVspaceContext();
+				var itemId = e.currentTarget.get('id');
+				if(typeof(R8.Workspace.viewspaces[vsContext]['items'][itemId]) === 'undefined') {
+					R8.Workspace.clearSelectedItems();
 					return;
 				} else {
 					//if ctrl no held then clear all currently selected
-					if(e.ctrlKey == false) R8.Workspace.clearSelectedElements();
-					R8.Workspace.selectedElements[e.currentTarget.get('id')] = R8.Workspace.components[e.currentTarget.get('id')];
-					var tempObj = R8.Utils.Y.one('#'+e.currentTarget.get('id'));
-					tempObj.addClass('focus');
+					if(e.ctrlKey == false) R8.Workspace.clearSelectedItems();
+//TODO: temp setting to 1 until figuring out if need to enhance
+					R8.Workspace.viewspaces[vsContext]['selectedItems'][itemId] = '1';
+					R8.Workspace.viewspaces[vsContext]['items'][itemId]['node'].addClass('focus');
+
 					e.stopImmediatePropagation();
 				}
 				return;
 			},
 
 			/*
-			 * clearSelectedElements removes styling from any selectedElements
-			 * @method clearSelectedElements
+			 * clearSelectedItems removes styling from any selectedElements
+			 * @method clearSelectedItems
 			 * @param {Evt} e Event object passed from event firing
 			 * @param {String} clickEventTarget String indicating if being called from which workspace event
 			 */
-			clearSelectedElements : function() {
-				for(var elemID in R8.Workspace.selectedElements) {
-					R8.Utils.Y.one('#'+R8.Workspace.selectedElements[elemID].id).removeClass('focus');
+			clearSelectedItems : function(e) {
+				var vsContext = R8.Workspace.getVspaceContext();
+console.log('Inside of clearSelectedItems...');
+				for(var itemId in R8.Workspace.viewspaces[vsContext]['selectedItems']) {
+					R8.Workspace.viewspaces[vsContext]['items'][itemId]['node'].removeClass('focus');
 				}
-				R8.Workspace.selectedElements = {};
+				R8.Workspace.viewspaces[vsContext]['selectedItems'] = {};
 			},
 
 			/*
@@ -393,6 +409,10 @@ console.log('registering port:'+portElemID);
 				R8.Workspace.components[startCompID].connectors[tempConnectorID] = R8.Workspace.connectors[tempConnectorID];
 				R8.Workspace.components[endCompID].connectors[tempConnectorID] = R8.Workspace.connectors[tempConnectorID];
 			},
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 			addItemToViewSpace : function(clonedNode) {
 				var cleanupId = clonedNode.get('id');
@@ -444,26 +464,25 @@ console.log('registering port:'+portElemID);
 			refreshItem : function(itemId) {
 				itemId = 'vi_'+itemId;
 				var viewspaceNode = R8.Utils.Y.one('#viewspace');
+				var vspaceContext = R8.Workspace.getVspaceContext();
 				var itemChildren = viewspaceNode.get('children');
 				itemChildren.each(function(){
 					if(this.get('id') == itemId && this.getAttribute('data-status') == 'pending_delete') {
 						this.purge(true);
 						this.remove();
 						delete (this);
-						R8.Workspace.components[itemId] = {};
+						R8.Workspace.viewspaces[vspaceContext]['items'][itemId] = {};
 					} else {
 						var dataModel = this.getAttribute('data-model');
 						var status = this.getAttribute('data-status');
 
 						if (dataModel == 'node' && status == 'pending_setup') {
-							R8.Workspace.addViewSpaceItem(this);
-							this.setAttribute('data-status', 'added');
-							R8.Workspace.addDragDrop(this.get('id'));
-							this.setAttribute('data-status', 'dd-ready');
+							R8.Workspace.regNewItem(this.get('id'));
 						}
 					}
 				});
 			},
+
 
 			setupNewItem : function(cleanupId) {
 				var cleanupNode = R8.Utils.Y.one('#'+cleanupId);
@@ -478,38 +497,28 @@ console.log('registering port:'+portElemID);
 					var status = this.getAttribute('data-status');
 
 					if(dataModel == 'node' && status == 'pending_setup') {
-						R8.Workspace.addViewSpaceItem(this);
-						this.setAttribute('data-status','added');
-						R8.Workspace.addDragDrop(this.get('id'));
-						this.setAttribute('data-status','dd-ready');
+						R8.Workspace.regNewItem(this.get('id'));
+
+//						R8.Workspace.addViewSpaceItem(this);
+//						this.setAttribute('data-status','added');
+//						R8.Workspace.addDragDrop(this.get('id'));
+//						this.setAttribute('data-status','dd-ready');
 					}
 				});
 			},
-//TODO: revisit to turn components into a [viewspace][item] style
-			addViewSpaceItem : function(node) {
-				var nodeId = node.get('id');
-				var modelName = node.getAttribute('data-model');
-				var dropGroupName = modelName + '_drop';
-//TODO: probably pull the drop registration into its own function once more functionality is added
-//console.log('Going to add node to drop group:'+dropGroupName);
-//console.log(node);
-				YUI().use('dd-drop-plugin', function(Y){
-//					node.plug(R8.Utils.Y.Plugin.Drop);
-					node.plug(Y.Plugin.Drop);
-					node.drop.addToGroup([dropGroupName]);
-					node.drop.on('drop:enter',function(e){
-console.log('Over drop target....');
-console.log(e);
-					});
-					node.drop.on('drop:hit',function(e){
-console.log('I guess I am hitting this now!!!!');
-					});
 
-					R8.Workspace.components[nodeId] = {
-						'id':nodeId,
-						'node':node
-					};
-				});
+//TODO: revisit to turn components into a [viewspace][item] style
+			regNewItem : function(itemId) {
+				var vsContext = R8.Workspace.getVspaceContext();
+				var node = R8.Utils.Y.one('#'+itemId);
+				var nodeId = node.get('id');
+				R8.Workspace.viewspaces[vsContext]['items'][nodeId] = {
+					'node' : node
+				}
+				R8.Workspace.viewspaces[vsContext]['items'][nodeId]['node'].setAttribute('data-status', 'added');
+//				R8.Workspace.setupViewSpaceItem(nodeId);
+				R8.Workspace.addDrag(itemId);
+				R8.Workspace.addDrop(itemId);
 			},
 
 			addItemSuccess : function(ioId,responseObj) {
@@ -522,6 +531,22 @@ console.log('I guess I am hitting this now!!!!');
 
 			addItemFailure : function(ioId,responseObj) {
 console.log('call to add item to workspace failed.....');
+			},
+
+
+//-------------------------------------------------------------
+
+
+			viewspaces : {},
+//TODO: revisit when fully implementing multiple viewspaces
+			getVspaceContext : function() {
+				if (typeof(R8.Workspace.viewspaces['vspace1']) == 'undefined') {
+					R8.Workspace.viewspaces['vspace1'] = {
+						'items' : {},
+						'selectedItems' : {}
+					};
+				}
+				return 'vspace1';
 			},
 
 			events : {},
@@ -543,8 +568,8 @@ console.log('call to add item to workspace failed.....');
 			/*
 			 * Collection of selected/focused elements for the given workspace
 			 */
-			selectedElements : {},
-			
+//			selectedElements : {},
+
 			resizeCallbacks : {},
 		}
 	}();

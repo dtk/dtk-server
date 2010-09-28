@@ -71,33 +71,23 @@ R8.Cmdbar.cmdHandlers['search'] = {
 			'events': {},
 			'contentLoader': function(){
 				var name = this.name;
-				var width = R8.Workspace.viewPortRegion['width'] - 37;
-//				var contentFraming = '<div class="slider-top"></div>';
-				var contentFraming = '<div id="' + name + '-slider-wrapper" class="slider-wrapper">';
-				contentFraming += 	'<div id="' + name + '-lbutton" class="lbutton"></div>';
-				contentFraming += 	'<div id="slider-l-shade">';
-				contentFraming +=		'<div class="top"></div>';
-				contentFraming += 		'<div class="body"></div>';
-				contentFraming += 		'<div class="bottom"></div>';
-				contentFraming += 	'</div>';
-				contentFraming += 	'<div id="' + name + '-list-container" class="slide-list-container" style="width: ' + width + 'px;">';
-				contentFraming += 		'<div id="' + name + '-slider"></div>';
-				contentFraming += 	'</div>';
-				contentFraming += 	'<div id="slider-r-shade">';
-				contentFraming +=		'<div class="top"></div>';
-				contentFraming += 		'<div class="body"></div>';
-				contentFraming += 		'<div class="bottom"></div>';
-				contentFraming += 	'</div>';
-				contentFraming += 	'<div id="' + name + '-rbutton" class="rbutton"></div>';
+				var width = R8.Workspace.viewPortRegion['width'] - 65;
+				var contentFraming = '<div class="slider-top"></div>';
+				contentFraming += '<div id="' + name + '-slider-wrapper" class="slider-wrapper">';
+				contentFraming += '<div id="' + name + '-lbutton" class="lbutton"></div>';
+				contentFraming += '<div id="' + name + '-list-container" class="slide-list-container" style="width: ' + width + 'px;">';
+				contentFraming += '<div id="' + name + '-slider"></div>';
 				contentFraming += '</div>';
-//				contentFraming += '<div class="slider-btm"></div>';
+				contentFraming += '<div id="' + name + '-rbutton" class="rbutton"></div>';
+				contentFraming += '</div>';
+				contentFraming += '<div class="slider-btm"></div>';
 				document.getElementById('cmdbar-' + this.name + '-tab-content').innerHTML = contentFraming;
 					
 				var nodeId = '#' + name + '-list-container';
 				var resizeCallback = {
 					'nodeId': nodeId,
 					'lambda': function(height, width){
-						var width = width - 37;
+						var width = width - 65;
 						return {
 							'width': width
 						};

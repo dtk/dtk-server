@@ -41,7 +41,7 @@
 	background-repeat: no-repeat;
 	float: left;
 }
-.focus .corner {
+.basic-component .focus .corner {
 	background-image: url(../images/component/basic-corners-01-focus.png);
 }
 

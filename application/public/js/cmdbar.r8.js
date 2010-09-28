@@ -143,7 +143,7 @@ if (!R8.Cmdbar) {
 				},
 
 				toggleTabs : function() {
-					R8.Utils.$("#cmdbar-tab-content-wrapper").slideToggle(200);
+					R8.Utils.$("#cmdbar-tab-content-wrapper").slideToggle(250);
 					if(R8.Cmdbar.tabsPaneOpen) R8.Cmdbar.tabsPaneOpen = false;
 					else R8.Cmdbar.tabsPaneOpen = true;
 /*

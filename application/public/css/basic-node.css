@@ -26,7 +26,7 @@
 	background-repeat: no-repeat;
 	float: left;
 }
-.focus .corner {
+.basic-node.focus .corner {
 	background-image: url(../images/workspace/basic-node-corners-focus.png);
 }
 

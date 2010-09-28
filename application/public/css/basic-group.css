@@ -27,7 +27,7 @@
 	background-image: url(../images/group/basic-corners-02.png);
 }
 
-.focus .corner {
+.basic-group .focus .corner {
 	background-image: url(../images/group/basic-corners-01-focus.png);
 }
 
@@ -89,25 +89,25 @@
 }
 
 .basic-group .elastic {
-	width: 50px;
+	width: 38px;
 	float: left;
 }
 
 .basic-group .elastic-header {
 	height: 6px;
-	width: 50px;
-	background-image: url(../images/group/elastic-01.png);
+	width: 38px;
+	background-image: url(../images/group/elastic-03.png);
 }
 
 .basic-group .elastic-footer {
 	height: 6px;
-	width: 50px;
-	background-image: url(../images/group/elastic-01.png);
+	width: 38px;
+	background-image: url(../images/group/elastic-03.png);
 	background-position: 0px -6px;
 }
 
 .basic-group .elastic-body {
-	width: 50px;
-	background-image: url(../images/group/elastic-01-bg.png);
+	width: 38px;
+	background-image: url(../images/group/elastic-03-bg.png);
 	background-repeat: repeat-y;
 }

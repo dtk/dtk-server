@@ -8,6 +8,8 @@
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/basic-component.css" />
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/basic-node.css" />
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/basic-group.css" />
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/topbar.css" />
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/cmdbar.css" />
 
 
 {%for css_include in _app[:css_includes]%}
@@ -53,14 +55,9 @@ R8.config['base_uri'] = '{%=_app[:base_uri]%}/xyz';
 
 	<body onload="R8.Workspace.init();" class="yui3-skin-sam  yui-skin-sam">
 	<div id="page-container" style="margin: 0 auto 0 auto;">
-		<div id="toolbar">
-			&nbsp;&nbsp;<a href="javascript:R8.MainToolbar.toggleSlider();">Toggle</a>
-			<div class="tbar_search"">
-				<form id="tbar_search_form" onsubmit="R8.MainToolbar.search(); return false;">
-					<input onfocus="if(this.value =='Search') this.value='';" onblur="if(this.value==='') this.value='Search';" type="text" value="Search" id="sq" name="sq" title="Enter Search Term"/>
-					<input class="tbar_search_submit" onclick="R8.MainToolbar.search();" type="button" title="Search" value=""/>
-				</form>
-			</div>
+		<div id="topbar">
+			<div id="toolbar-wrapper"></div>
+			<div id="wspace-context-wrapper"></div>
 		</div>
 		<div id="wspace-container">
 			<div id="workspace" class="workspace">
@@ -68,7 +65,7 @@ R8.config['base_uri'] = '{%=_app[:base_uri]%}/xyz';
 
 
 
-	<div id="group_01" data-id="01" data-model-name="group" class="basic-group group" style="position: relative; top: 100px; left: 100px; height: 120px; width: 856px;">
+	<div id="group_01" data-id="01" data-model-name="group" class="basic-group group" style="position: relative; top: 100px; left: 100px; height: 120px; width: 844px;">
 		<div class="basic-l-col">
 			<div class="basic-tl-corner corner green"></div>
 			<div class="basic-l-col-body green"></div>
@@ -106,7 +103,7 @@ R8.config['base_uri'] = '{%=_app[:base_uri]%}/xyz';
 				<div id="cmdbar-tab-content-wrapper"></div>
 			</div>
 		</div>
-		<div id="commandbar">
+		<div id="cmdbar">
 			<div class="cmdbar-input-wrapper">
 				<form id="cmdbar_input_form" onsubmit="R8.Cmdbar.submit(); return false;">
 					<input onfocus="if(this.value =='$:') this.value='';" onblur="if(this.value==='') this.value='$:';" type="text" value="$:" id="cmd" name="cmd" title="Enter Command"/>

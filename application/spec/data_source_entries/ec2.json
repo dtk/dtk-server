@@ -6,6 +6,13 @@
       "display_name": "internet"
     }
   },
+  "node_group": {
+    "all_instances" : {
+      "display_name": "all_instances",
+      "dynamic_membership_sql" : {"type" : "instance"}
+    }
+  },
+ 
   "data_source": {
     "ec2": {
       "data_source_entry": {

@@ -13,7 +13,7 @@
               :objLink => true,
               :objLinkView => 'display',
             }},
-          {:address => {
+          {:member_id_list => {
               :type => 'hash',
               :help => '',
             }},

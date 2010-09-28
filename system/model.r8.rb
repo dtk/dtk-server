@@ -28,12 +28,10 @@ module XYZ
       else
         ls_opts = opts.merge :field_set => field_set
         graph_ds = get_objects_just_dataset(model_handle,where_clause,ls_opts)
-        related_columns.each do |mod,join_array|
-          join_array.each do |join_info|
-            rs_opts = (join_info[:cols] ? {:field_set => join_info[:cols]} : {}).merge :return_as_hash => true
-            right_ds = get_objects_just_dataset(ModelHandle.new(c,mod),nil,rs_opts)
-            graph_ds = graph_ds.graph(:left_outer,right_ds,join_info[:join_cond])
-          end
+        related_columns.each do |join_info|
+          rs_opts = (join_info[:cols] ? {:field_set => join_info[:cols]} : {}).merge :return_as_hash => true
+          right_ds = get_objects_just_dataset(ModelHandle.new(c,join_info[:model_name]),nil,rs_opts)
+          graph_ds = graph_ds.graph(:left_outer,right_ds,join_info[:join_cond])
         end
         ret = graph_ds.all
       end

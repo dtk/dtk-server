@@ -20,6 +20,7 @@
 			<li class=""><a href="{%=_app[:base_uri]%}/xyz/node/list">Nodes</a></li>
 			<li class=""><a href="{%=_app[:base_uri]%}/xyz/component/list">Components</a></li>
 			<li class=""><a href="{%=_app[:base_uri]%}/xyz/attribute/list">Attributes</a></li>
+			<li class=""><a href="{%=_app[:base_uri]%}/xyz/node_group/list">Groups</a></li>
 		</ul>
 	</div>
 

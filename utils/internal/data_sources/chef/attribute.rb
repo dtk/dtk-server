@@ -18,11 +18,6 @@ module XYZ
         end
 
          class << self
-           def unique_keys(source)
-            [relative_distinguished_name(source)]
-           end
-
-
            def filter_raw_source_objects(source)
              DBUpdateHash.new()
            end

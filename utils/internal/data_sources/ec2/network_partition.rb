@@ -7,10 +7,6 @@ module XYZ
           target[:description] = source[:description]
         end
         class << self
-          def unique_keys(source)
-            [source[:name]]
-          end
-
           def relative_distinguished_name(source)
             source[:name]
           end

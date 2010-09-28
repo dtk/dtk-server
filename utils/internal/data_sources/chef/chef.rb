@@ -11,7 +11,7 @@ module XYZ
     class Chef < Top
       include ChefMixinMetadata
       include ChefMixinAssembly
-      def initialize()
+      def initialize_extra()
         @conn = nil
         @chef_node_cache = Aux::Cache.new 
         @cookbook_metadata_cache = Aux::Cache.new
@@ -49,8 +49,13 @@ module XYZ
 
       def get_objects__node(&block)
         get_nodes().each do |node_name,node|
-          node_attributes = %{node_display_name}
-          ds_hash = node_attributes.inject(DataSourceUpdateHash.new({"node_name" => node_name})){|h,k|h.merge(k => node[k])}
+          node_attributes = %{node_display_name,lsb}
+          ds_hash = DataSourceUpdateHash.new({"node_name" => node_name})
+          node_attributes.each do |attr|
+            next unless value = node[attr]
+            ds_hash[attr] = value.respond_to?(to_hash) ? value.to_hash : value
+          end
+
           block.call(ds_hash.freeze)
         end
         return HashMayNotBeComplete.new()

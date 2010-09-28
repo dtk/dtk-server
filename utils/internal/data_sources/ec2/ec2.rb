@@ -4,8 +4,7 @@ require File.expand_path("mixins/security_group", File.dirname(__FILE__))
 module XYZ
   module DSConnector
     class Ec2 < Top
-      def initialize()
-        super
+      def initialize_extra()
         @flavor_cache = Aux::Cache.new
         @network_partition_cache = Aux::Cache.new
         @server_cache =  Aux::Cache.new

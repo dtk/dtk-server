@@ -1,6 +1,14 @@
 module XYZ
   module DSConnector
     class Top
+      def initialize(container_uri)
+        @container_uri = container_uri
+        initialize_extra()
+      end
+      #this can be overwritten
+      def initialize_extra()
+      end
+
       def get_objects(obj_type,source_obj_type,&block)
         method_name = "get_objects__#{obj_type}#{source_obj_type ? "__" + source_obj_type : ""}".to_sym
         send(method_name){|source_obj|block.call(source_obj)}
@@ -8,9 +16,10 @@ module XYZ
     end
   end
   module DataSourceConnectorInstanceMixin
-    def set_and_share_ds_connector!(common_ds_connectors)
-      common_ds_connectors[@ds_connector_class] ||= @ds_connector_class.new
-      @ds_connector_instance = common_ds_connectors[@ds_connector_class]
+    def set_and_share_ds_connector!(common_ds_connectors,container_uri)
+      common_ds_connectors[container_uri] ||=  Hash.new
+      common_ds_connectors[container_uri][@ds_connector_class] ||= @ds_connector_class.new(container_uri)
+      @ds_connector_instance = common_ds_connectors[container_uri][@ds_connector_class]
     end
 
    private

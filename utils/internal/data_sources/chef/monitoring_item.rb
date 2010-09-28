@@ -7,10 +7,6 @@ module XYZ
         end
 
          class << self
-           def unique_keys(source)
-             [relative_distinguished_name(source)]
-           end
-
            def relative_distinguished_name(source)
              source[:ref]
            end

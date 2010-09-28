@@ -31,7 +31,7 @@ module XYZ
     def search
 #pp request.params
       model_name = request.params['model_name']
-      field_set = default_field_set(model_name.to_sym)
+      field_set = Model::FieldSet.default(model_name.to_sym)
 #      search_query = request.params['sq']
 
       where_clause = {}

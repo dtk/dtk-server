@@ -1,6 +1,4 @@
-
 require 'sequel'
-
 module XYZ
   class DB
     module DataProcessingGet

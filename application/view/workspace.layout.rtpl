@@ -65,13 +65,13 @@ R8.config['base_uri'] = '{%=_app[:base_uri]%}/xyz';
 
 
 
-	<div id="group_01" data-id="01" data-model-name="group" class="basic-group group" style="position: relative; top: 100px; left: 100px; height: 120px; width: 844px;">
-		<div class="basic-l-col">
-			<div class="basic-tl-corner corner green"></div>
-			<div class="basic-l-col-body green"></div>
-			<div class="basic-bl-corner corner green"></div>
+	<div id="group_01" data-id="01" data-model-name="group" class="basic-group group blue" style="position: relative; top: 100px; left: 100px; height: 120px; width: 840px;">
+		<div class="l-col">
+			<div class="corner tl"></div>
+			<div class="body"></div>
+			<div class="corner bl"></div>
 		</div>
-		<div id="body_01" class="basic-body green" style="height: 116px; width: 592px;">
+		<div id="body_01" class="main-body" style="height: 116px; width: 592px;">
 			<div style="height: 15px; width: 100%; float: left;">
 				<h1>App Tier</h1>
 			</div>
@@ -82,10 +82,10 @@ R8.config['base_uri'] = '{%=_app[:base_uri]%}/xyz';
 			<div class="elastic-footer"></div>
 		</div>
 		<div id="elastic_01" class="elastic-node-body" style="height: 116px; width: 196px;"></div>
-		<div class="basic-r-col">
-			<div class="basic-tr-corner corner green"></div>
-			<div class="basic-r-col-body green"></div>
-			<div class="basic-br-corner corner green"></div>
+		<div class="r-col">
+			<div class="corner tr"></div>
+			<div class="body"></div>
+			<div class="corner br"></div>
 		</div>
 	</div>
 

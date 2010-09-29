@@ -261,7 +261,10 @@ console.log('registering port:'+portElemID);
 			addDrop : function(itemId) {
 				var vsContext = this.getVspaceContext();
 				var modelName = R8.Workspace.viewspaces[vsContext]['items'][itemId]['node'].getAttribute('data-model');
-				var dropGroupName = modelName + '_drop';
+				var dropGroupName = 'dg-'+modelName;
+
+				R8.Workspace.viewspaces[vsContext]['items'][itemId]['node'].addClass(dropGroupName)
+return;
 //TODO: probably pull the drop registration into its own function once more functionality is added
 //console.log('Going to add node to drop group:'+dropGroupName);
 //console.log(node);
@@ -270,7 +273,7 @@ console.log('registering port:'+portElemID);
 					R8.Workspace.viewspaces[vsContext]['items'][itemId]['drop'] = new Y.DD.Drop({
 						node: '#'+itemId
 					});
-					R8.Workspace.viewspaces[vsContext]['items'][itemId]['drop'].addToGroup([dropGroupName]);
+//					R8.Workspace.viewspaces[vsContext]['items'][itemId]['drop'].addToGroup([dropGroupName]);
 					R8.Workspace.viewspaces[vsContext]['items'][itemId]['drop'].on('drop:enter',function(e){
 console.log('Over drop target....');
 console.log(e);
@@ -307,7 +310,6 @@ console.log('I guess I am hitting this now!!!!');
 			 */
 			clearSelectedItems : function(e) {
 				var vsContext = R8.Workspace.getVspaceContext();
-console.log('Inside of clearSelectedItems...');
 				for(var itemId in R8.Workspace.viewspaces[vsContext]['selectedItems']) {
 					R8.Workspace.viewspaces[vsContext]['items'][itemId]['node'].removeClass('focus');
 				}

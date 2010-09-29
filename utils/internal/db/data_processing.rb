@@ -20,7 +20,7 @@ module XYZ
       end
      private
 
-      def modify_to_reflect_special_processing!(scalar_assigns,db_rel,opts={})
+      def modify_to_reflect_special_processing!(scalar_assigns,db_rel,sql_operation,opts={})
         if opts[:shift_id_to_ancestor] and db_rel[:has_ancestor_field]
 	  scalar_assigns[:ancestor_id] = scalar_assigns[:id]
         end
@@ -29,11 +29,13 @@ module XYZ
           scalar_assigns.delete(:id)
         end
 
-	scalar_assigns.each_pair{|k,v|
+	scalar_assigns.each_pair do |k,v|
 	  if (v.kind_of?(Hash) or v.kind_of?(Array)) and json_table_column?(k,db_rel) 
 	    scalar_assigns[k] = JSON.generate(v).to_s 
+          elsif v.respond_to?(:to_sequel)
+            scalar_assigns[k] = v.to_sequel(k,sql_operation)
           end
-        }
+        end
 
 	scalar_assigns
       end

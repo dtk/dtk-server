@@ -22,7 +22,7 @@ module XYZ
 	db_rel = DB_REL_DEF[relation_type]
 	ds = dataset(db_rel).where(SQL.and(where_clause,{CONTEXT_ID => c}))
 	#TBD: check that valid assigns
-	modify_to_reflect_special_processing!(scalar_assigns,db_rel)
+	modify_to_reflect_special_processing!(scalar_assigns,db_rel,:update)
 	ds.update(scalar_assigns)
       end
      private
@@ -32,7 +32,7 @@ module XYZ
 	db_rel = DB_REL_DEF[id_info[:relation_type]]
 	ds = dataset(db_rel).where(:id => id_info[:id])
 	#TBD: check that valid assigns
-	modify_to_reflect_special_processing!(scalar_assigns,db_rel,opts)
+	modify_to_reflect_special_processing!(scalar_assigns,db_rel,:update,opts)
 	ds.update(scalar_assigns)
       end
 

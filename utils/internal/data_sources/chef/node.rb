@@ -4,7 +4,10 @@ module XYZ
       class Node < Top 
         definitions do
           target[:display_name] = source["node_name"]
-        #  target[:tag] = source["node_display_name"] TODO need construct to capture that this takes effect only if target[:tag] is not already set
+          target[:tag] = if_unset(source["node_display_name"]) 
+          if_exists(source["lsb"]) do
+            target["os"] = source["lsb"]["description"]
+          end
         end
         class << self
           def relative_distinguished_name(source)

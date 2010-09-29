@@ -12,7 +12,8 @@ module XYZ
         return HashMayNotBeComplete.new() unless hash
 
         hash.each do |ref,info|
-          block.call(DataSourceUpdateHash.new(info.merge({"ref" => ref})))
+          qualified_ref = "#{@container_uri}/#{ref}"
+          block.call(DataSourceUpdateHash.new(info.merge({"ref" => ref,"qualified_ref" => qualified_ref})))
         end
         HashMayNotBeComplete.new() 
       end

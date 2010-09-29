@@ -2,6 +2,7 @@ module XYZ
   ##relies on Sequel overwriting ~ | and &
   #TODO: maybe otehr syntax to get around problems with these characters in ruby 1.9
   module SQL
+    ## Booelan expressions
     def self.not(x)
       return nil if x.nil?
       ~x
@@ -16,6 +17,26 @@ module XYZ
       args.reverse.each{|x|ret = and_aux(x,ret)}
       ret
     end
+
+    ##### Sequel functions
+    #coalesce returns first non null
+    def self.coalesce(*args)
+      #translates to case when not arg[0] is null then  arg[0] ... else null end
+      args.map{|x|[~{x => nil},x]}.case(nil)
+    end
+
+    ######
+    #Objects that get translated to sql terms when being processed in a db/data_processing fn
+    class SetIfUnset 
+      def initialize(val)
+        @val = val
+      end
+      def to_sequel(col,sql_operation)
+        #sql_operation will be :update or :insert
+        sql_operation == :update ? SQL.coalesce(col,@val) : @val
+      end
+    end
+    #####
     module WhereCondition
       def self.like(l,r)
         Sequel::SQL::StringExpression.like(l,r)

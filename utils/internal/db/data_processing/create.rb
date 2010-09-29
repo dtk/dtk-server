@@ -53,7 +53,7 @@ module XYZ
 	#adding assignments that can be computed at this point indep. of case on parent_uri
 	scalar_assignments.merge!({:ref => ref.to_s})
 	old_id = scalar_assignments[:id]
-	modify_to_reflect_special_processing!(scalar_assignments,db_rel,opts)
+	modify_to_reflect_special_processing!(scalar_assignments,db_rel,:insert,opts)
 
 	############# processing scalar columns by inserting a row in db_rel
 	new_id = nil
@@ -97,7 +97,7 @@ module XYZ
 	#adding assignments that can be computed at this point indep. of case on parent_uri
 	scalar_assignments.merge!({:ref => ref.to_s})
 	old_id = scalar_assignments[:id]
-	modify_to_reflect_special_processing!(scalar_assignments,db_rel,opts)
+	modify_to_reflect_special_processing!(scalar_assignments,db_rel,:insert,opts)
 
 	############# processing scalar columns by inserting a row in db_rel
 	new_id = nil

@@ -55,6 +55,10 @@ module XYZ
       Source.new()
     end
 
+    def if_unset(arg)
+      SetIfUnset.new(arg,self)
+    end
+
     def fn(func_name_or_def,*args)
       Function.new(func_name_or_def,args,self)
     end
@@ -150,9 +154,17 @@ module XYZ
         term.apply(ds_hash)
       elsif term.kind_of?(Function)
         term.apply(ds_hash)
+      elsif term.kind_of?(SQL::SetIfUnset)
+        term
       else
         term
       end
+    end
+  end
+
+  class SetIfUnset < Function
+    def initialize(arg,context_parent)
+      super(lambda{|arg|SQL::SetIfUnset.new(arg)},[arg],context_parent)
     end
   end
 end

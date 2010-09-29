@@ -7,6 +7,10 @@ module XYZ
           target[:tag] = source["tag"]
         end
          class << self
+            def unique_keys(source)
+              [source["qualified_ref"]]
+            end
+
            def relative_distinguished_name(source)
              source["ref"]
            end

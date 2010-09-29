@@ -45,6 +45,7 @@ module XYZ
 
   class NodeGroupMember < Model
     set_relation_name(:node,:node_group_member)
+    column :is_elastic_node, :boolean, :default => false
     def self.up()
       foreign_key :node_id, :node, FK_CASCADE_OPT
       foreign_key :node_group_id, :node_group, FK_CASCADE_OPT

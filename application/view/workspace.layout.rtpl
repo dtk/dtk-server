@@ -65,7 +65,7 @@ R8.config['base_uri'] = '{%=_app[:base_uri]%}/xyz';
 
 
 
-	<div id="group_01" data-id="01" data-model-name="group" class="basic-group group blue" style="position: relative; top: 100px; left: 100px; height: 120px; width: 840px;">
+	<div id="group_01" data-id="01" data-model-name="group" class="basic-group group green" style="position: relative; top: 100px; left: 100px; height: 120px; width: 840px;">
 		<div class="l-col">
 			<div class="corner tl"></div>
 			<div class="body"></div>

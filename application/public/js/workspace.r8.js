@@ -427,14 +427,14 @@ console.log('I guess I am hitting this now!!!!');
 
 				var ui = {'top':top,'left':left};
 
-				YUI().use("json", function (Y) {
+				YUI().use("json", function(Y) {
 					var uiStr = Y.JSON.stringify(ui);
 					var queryParams = 'target_model_name=project&target_id=2147483649&ui='+uiStr;
 //					queryParams += '&redirect='+modelName+'/wspace_display';
 					queryParams += '&model_redirect='+modelName+'&action_redirect=wspace_display&id_redirect=*id';
 
-					var completeCallback = function() {
-						R8.Workspace.setupNewItem(cleanupId);
+					var completeCallback = function(){
+						R8.Workspace.setupNewItems();
 					}
 					var callbacks = {
 						'io:renderComplete' : completeCallback
@@ -448,7 +448,8 @@ console.log('I guess I am hitting this now!!!!');
 				var modelId = containerNode.get('id');
 				modelId = modelId.replace('vi_','');
 				var queryParams = 'target_model_name='+modelName+'&target_id='+modelId;
-				queryParams += '&model_redirect='+modelName+'&action_redirect=wspace_display&id_redirect='+modelId;
+//				queryParams += '&model_redirect='+modelName+'&action_redirect=wspace_display&id_redirect='+modelId;
+				queryParams += '&model_redirect='+modelName+'&action_redirect=wspace_refresh&id_redirect='+modelId;
 
 				containerNode.setAttribute('data-status','pending_delete');
 
@@ -458,9 +459,9 @@ console.log('I guess I am hitting this now!!!!');
 				var callbacks = {
 					'io:renderComplete' : completeCallback
 				};
-				containerNode.setAttribute('data-status','pending_delete');
-				R8.Ctrl.call('component/clone/'+componentId,queryParams,callbacks);
-//				R8.Ctrl.call('component/clone/'+componentId,queryParams);
+//				containerNode.setAttribute('data-status','pending_delete');
+//				R8.Ctrl.call('component/clone/'+componentId,queryParams,callbacks);
+				R8.Ctrl.call('component/clone/'+componentId,queryParams);
 			},
 
 			refreshItem : function(itemId) {
@@ -485,22 +486,32 @@ console.log('I guess I am hitting this now!!!!');
 				});
 			},
 
-
-			setupNewItem : function(cleanupId) {
-				var cleanupNode = R8.Utils.Y.one('#'+cleanupId);
-				cleanupNode.purge(true);
-				cleanupNode.remove();
-				delete(cleanupNode);
-
+			setupNewItems : function() {
 				var viewspaceNode = R8.Utils.Y.one('#viewspace');
 				var itemChildren = viewspaceNode.get('children');
 				itemChildren.each(function(){
 					var dataModel = this.getAttribute('data-model');
 					var status = this.getAttribute('data-status');
 
+					if(status == 'pending_delete') {
+						R8.Workspace.pendingDelete[this.get('id')] = {
+							'top':this.getStyle('top'),
+							'left':this.getStyle('left')
+						}
+					}
 					if(dataModel == 'node' && status == 'pending_setup') {
+						var top = this.getStyle('top');
+						var left = this.getStyle('left');
+						for(item in R8.Workspace.pendingDelete) {
+							if(R8.Workspace.pendingDelete[item]['top'] == top && R8.Workspace.pendingDelete[item]['left'] == left) {
+								var cleanupNode = R8.Utils.Y.one('#'+item);
+								cleanupNode.purge(true);
+								cleanupNode.remove();
+								delete(cleanupNode);
+								delete(R8.Workspace.pendingDelete[item]);
+							}
+						}					
 						R8.Workspace.regNewItem(this.get('id'));
-
 //						R8.Workspace.addViewSpaceItem(this);
 //						this.setAttribute('data-status','added');
 //						R8.Workspace.addDragDrop(this.get('id'));
@@ -565,7 +576,7 @@ console.log('call to add item to workspace failed.....');
 			/*
 			 * Collection of active elements for the given workspace
 			 */
-			components: {},
+//			components: {},
 
 			/*
 			 * Collection of selected/focused elements for the given workspace
@@ -573,6 +584,8 @@ console.log('call to add item to workspace failed.....');
 //			selectedElements : {},
 
 			resizeCallbacks : {},
+
+			pendingDelete : {},
 		}
 	}();
 }

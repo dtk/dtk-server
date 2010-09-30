@@ -225,9 +225,8 @@ R8.Cmdbar.cmdHandlers['search'] = {
 						var model_name = drag.getAttribute('data-model-name');
 							
 						var dragChild = drag.get('children').item(0).cloneNode(true);
-						var d = new Date();
-						var new_comp_id = d.getTime();
-						dragChild.set('id', 'wi_' + new_comp_id);
+						var new_comp_id = Y.guid();
+						dragChild.set('id', new_comp_id);
 							
 						var wspaceElem = R8.Utils.Y.one('#viewspace');
 						var wspaceXY = wspaceElem.getXY();
@@ -239,11 +238,12 @@ R8.Cmdbar.cmdHandlers['search'] = {
 							'left': dragLeft + 'px'
 						});
 						drop.append(dragChild);
+						dragChild.setAttribute('data-status','pending_delete');
 						R8.Workspace.addItemToViewSpace(dragChild, dragTop, dragLeft);
 					});
 				});
 			},
-				
+
 			setupSliderAnim: function(Y, tIndex){
 				var name = R8.Cmdbar.loadedTabs[tIndex]['name'];
 				R8.Cmdbar.loadedTabs[tIndex].slideBarNode = Y.one('#' + name + '-slide-bar');
@@ -335,7 +335,7 @@ R8.Cmdbar.cmdHandlers['search'] = {
 					});
 				});
 			},
-				
+
 			'blur': function(){
 				var tIndex = R8.Cmdbar.getTabIndexByName(this.name);
 				//DEBUG
@@ -345,24 +345,24 @@ R8.Cmdbar.cmdHandlers['search'] = {
 					R8.Cmdbar.loadedTabs[tIndex]['events']['slider_key_press'].detach();
 				}
 			},
-				
+
 			'clearContent': function(){
 			},
-				
+
 			deleteCleanup: function(){
 				var nodeId = '#' + this.name + '-list-container';
 				R8.Workspace.cancelResizeCallback(nodeId);
 				this.sliderAnim = null;
 				this.slideBarNode = null;
 			},
-				
+
 			//------------Search Specific Functions/Callbacks---------
 			startSearch: function(ioId, arguments){
 			},
-				
+
 			endSearch: function(ioId, arguments){
 			},
-				
+
 			clearSlider: function(){
 				if (this.slideBarNode === null) 
 					return;
@@ -384,7 +384,7 @@ R8.Cmdbar.cmdHandlers['search'] = {
 				this.sliderSetup = false;
 				document.getElementById(this.name + '-list-container').innerHTML = '';
 			},
-				
+
 			initSlider: function(tabName){
 				var tIndex = R8.Cmdbar.getTabIndexByName(tabName);
 				if (document.getElementById(tabName + '-slide-bar') == null) {
@@ -406,7 +406,6 @@ R8.Cmdbar.cmdHandlers['search'] = {
 				var name = this.name;
 				var tIndex = R8.Cmdbar.getTabIndexByName(name);
 
-//				YUI().use('dd-delegate', 'dd-proxy', 'dd-drop', 'dd-drop-plugin', 'node', function(Y){
 				YUI().use('dd-delegate', 'dd-proxy', 'node', 'dd-drop-plugin', function(Y){
 					R8.Cmdbar.loadedTabs[tIndex].compDDel = new Y.DD.Delegate({
 						cont: '#' + name + '-slide-bar',
@@ -416,63 +415,48 @@ R8.Cmdbar.cmdHandlers['search'] = {
 					R8.Cmdbar.loadedTabs[tIndex].compDDel.dd.plug(Y.Plugin.DDProxy, {
 						moveOnEnd: false,
 						borderStyle: false,
-//						cloneNode: true
 					});
 
-					//R8.Cmdbar.loadedTabs[tIndex].compDDel.dd.addToGroup('node_drop');
-
-						var dropGroup = 'dg-node';
-						var dropList = Y.all('#viewspace div.'+dropGroup);
+					var dropGroup = 'dg-node';
+					var dropList = Y.all('#viewspace div.'+dropGroup);
 						dropList.each(function(){
 							var drop = new Y.DD.Drop({node:this});
 							drop.on('drop:enter',function(e){ console.log('entered drop element!!!');});
-							drop.on('drop:hit',function(e){ console.log('hit drop element!!!');});
+							drop.on('drop:hit',function(e){
+								var dropNode = e.drop.get('node');
+								var compNode = e.drag.get('dragNode').get('children').item(0);
+								var component_id = compNode.get('id');
+								component_id = component_id.replace('component_','');
+								R8.Workspace.addComponentToContainer(component_id,dropNode);
+							});
 						});
+
+					R8.Cmdbar.loadedTabs[tIndex].compDDel.on('drag:mouseDown', function(e){
+						var dropGroup = 'dg-node';
+						var dropList = Y.all('#viewspace div.'+dropGroup);
+						dropList.each(function(){
+							if(!this.hasClass('yui3-dd-drop')) {
+								var drop = new Y.DD.Drop({node:this});
+								drop.on('drop:enter',function(e){ console.log('entered drop element!!!');});
+								drop.on('drop:hit',function(e){
+									var dropNode = e.drop.get('node');
+									var compNode = e.drag.get('dragNode').get('children').item(0);
+									var component_id = compNode.get('id');
+									component_id = component_id.replace('component_','');
+									R8.Workspace.addComponentToContainer(component_id,dropNode);
+								});
+							}
+						});
+					});
 
 					R8.Cmdbar.loadedTabs[tIndex].compDDel.on('drag:start', function(e){
-						var dropGroup = 'dg-node';
-						var dropList = Y.all('#viewspace div.'+dropGroup);
-						dropList.each(function(){
-							var drop = new Y.DD.Drop({node:this});
-							drop.on('drop:enter',function(e){ console.log('entered drop element!!!');});
-							drop.on('drop:hit',function(e){ console.log('hit drop element!!!');});
-						});
-
 						var drag = this.get('dragNode'), c = this.get('currentNode');
 						drag.set('innerHTML',c.get('innerHTML'));
 						drag.setAttribute('class', c.getAttribute('class'));
-//						this.dd.addToGroup('node_drop');
 						drag.setStyles({
-							opacity: .7,
+							opacity: .6,
 						});
-
-/*
-						//create all the drop targets for each node in the viewspace
-						R8.Cmdbar.loadedTabs[tIndex].dropList = Y.all('#viewspace div.node');
-
-//TODO: revisit to look into necessity of unplugging drops on the target nodes
-						R8.Cmdbar.loadedTabs[tIndex].dropList.each(function(){
-//var id = this.get('id');
-//console.log(this);
-//var vsContext = R8.Workspace.getVspaceContext();
-//console.log(R8.Workspace.viewspaces[vsContext]['items'][id]['drop'].inGroup(['node_drop']));
-//console.log(R8.Workspace.components[id]['node'].drop.inGroup(['node_drop']));
-//							this.plug(Y.Plugin.Drop);
-//							this.drop.addToGroup(['node_drop']);
-						});
-*/
 					});
-/*
-					//TODO: come back and add in clean up of DD objects and events
-					R8.Cmdbar.loadedTabs[tIndex].compDDel.on('drag:drophit', function(e){
-						var drop = e.drop.get('node'), compNode = this.get('dragNode').get('children').item(0);
-						var component_id = compNode.get('id');
-						component_id = component_id.replace('component_','');
-console.log('Going to call addComponentToContainer...');
-return;
-						R8.Workspace.addComponentToContainer(component_id,drop);
-					});
-*/
 				});
 			},
 				

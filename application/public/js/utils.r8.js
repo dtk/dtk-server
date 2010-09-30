@@ -116,6 +116,17 @@ if (!R8.Utils) {
 			schedule: function(time, obj, func, inputData, repeatExec) {
 				return YUI().Lang.later(time, obj, func, inputData, repeatExec);
 			},
+
+			cloneObj : function(o) {
+				if(typeof(o) != 'object') return o;
+				if(o == null) return o;
+
+				var newO = new Object();
+
+				for(var i in o) newO[i] = R8.Utils.cloneObj(o[i]);
+				return newO;
+			},
+
 		}
 	}();
 

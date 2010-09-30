@@ -107,6 +107,16 @@ if (!R8.Ctrl) {
 //					var request_url = 'http://localhost:7000/xyz/'+route;
 					var request_url = R8.config['base_uri']+'/'+route;
 					var request = Y.io(request_url, cfg);
+					var ioId = request['id'];
+					R8.Ctrl.callResults[ioId] = {
+						'request' : request
+					};
+
+					if(R8.Ctrl.onRenderComplete != null) {
+						R8.Ctrl.callResults[ioId]['onRenderComplete'] = R8.Ctrl.onRenderComplete;
+						R8.Ctrl.onRenderComplete = null;
+					}
+//console.log(request);
 				});
 
 //TODO: old version of YUI, YUI3 now used, remove eventually
@@ -130,8 +140,8 @@ if (!R8.Ctrl) {
 			},
 
 			updatePage: function(ioId, responseObj) {
-				eval("R8.Ctrl.callResults[ioId] =" + responseObj.responseText);
-				var response = R8.Ctrl.callResults[ioId];
+				eval("R8.Ctrl.callResults[ioId]['response'] =" + responseObj.responseText);
+				var response = R8.Ctrl.callResults[ioId]['response'];
 //DEBUG
 //console.log(response);
 				//reset the callbacks array after execution
@@ -180,7 +190,7 @@ continue;
 
 			processCSSIncludes: function(ioId) {
 				var cssSrc='',cssScriptElem='';
-				var cssIncludes = R8.Ctrl.callResults[ioId]['css_includes'];
+				var cssIncludes = R8.Ctrl.callResults[ioId]['response']['css_includes'];
 
 				for (var i in cssIncludes) {
 					cssSrc = cssIncludes[i];
@@ -204,8 +214,8 @@ continue;
 			},
 
 			processJSIncludes: function(ioId,actionName) {
-				var contentList = R8.Ctrl.callResults[ioId][actionName]['content'];
-				var scriptIncludes = R8.Ctrl.callResults[ioId][actionName]['js_includes'];
+				var contentList = R8.Ctrl.callResults[ioId]['response'][actionName]['content'];
+				var scriptIncludes = R8.Ctrl.callResults[ioId]['response'][actionName]['js_includes'];
 
 				for(index in contentList) {
 					if(typeof(contentList[index]) === 'object' && contentList[index]['src'] != '') {
@@ -337,12 +347,12 @@ continue;
 			},
 
 			callContentReady : function(ioId,actionItem) {
-				var contentList = R8.Ctrl.callResults[ioId][actionItem]['content'];
+				var contentList = R8.Ctrl.callResults[ioId]['response'][actionItem]['content'];
 				for(index in contentList) {
 					if(R8.Utils.isDefined(contentList[index]['content'])) continue;
 					else return false;
 				}				
-				R8.Ctrl.callResults[ioId]['content_ready'] = true;
+				R8.Ctrl.callResults[ioId]['response']['content_ready'] = true;
 				return true;
 			},
 
@@ -353,7 +363,7 @@ continue;
 					return;
 				}
 
-				var contentList = R8.Ctrl.callResults[ioId][actionItem]['content'];
+				var contentList = R8.Ctrl.callResults[ioId]['response'][actionItem]['content'];
 				var doc = document;
 				var panelsContent = {};
 //console.log(contentList);
@@ -406,9 +416,8 @@ continue;
 					doc.getElementById(panel).innerHTML = panelsContent[panel];
 				}
 */
-				if(this.onRenderComplete != null) {
-					this.onRenderComplete();
-					this.onRenderComplete = null;
+				if(this.callResults[ioId]['onRenderComplete'] != null) {
+					this.callResults[ioId]['onRenderComplete']();
 				}
 			},
 

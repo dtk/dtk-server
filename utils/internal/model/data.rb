@@ -17,7 +17,7 @@ module XYZ
     end
 
 
-    #TBD: encapsulate with other fns that make assumption about guid to id relationship
+    #TODO: encapsulate with other fns that make assumption about guid to id relationship
     def get_row_from_id_handle(id_handle,opts={})
       IDInfoTable.get_row_from_id_handle(id_handle,opts)
     end
@@ -84,7 +84,7 @@ module XYZ
    private
 
     def ret_id_handle_from_db_id(db_id,relation_type)
-      IDHandle[:c => @c, :guid => IDInfoTable.ret_guid_from_db_id(db_id,relation_type)]
+      IDHandle[:c => @c, :id => db_id, :model_name => relation_type]
     end
 
     def get_object_from_db_id(db_id,relation_type,opts={})

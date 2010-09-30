@@ -92,13 +92,6 @@ module XYZ
           raise Error.new("unexpected parent of attribute")
       end 
     end    
-
-    #######
-    def get_object_attribute_def()
-      return nil if self[:attribute_def_id].nil?
-      guid = IDInfoTable.ret_guid_from_db_id(self[:attribute_def_id],:attribute_def)
-      Model.get_object(IDHandle[:c => id_handle[:c], :guid => guid, :model_name => :attribute])
-    end
   end
 end
 

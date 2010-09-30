@@ -5,10 +5,23 @@ module XYZ
       def up()
         column :ds_name, :varchar, :size => 25 
         column :source_handle, :json
+        column :last_collection_timestamp, :timestamp #last time when data source collection completed
         many_to_one :library, :datacenter, :project
         one_to_many :data_source_entry
       end
     end
+
+    ### virtual column defs
+    #######################
+    ### object access functions
+
+    def self.set_collection_complete(id_handle)
+      update_from_hash_assignments(id_handle,{:last_collection_timestamp => Time.now})
+    end
+
+    #######################
+
+    #TODO: see what below we want to keep
     #actions
     class << self
       def create(container_handle_id,ref,hash_content={})

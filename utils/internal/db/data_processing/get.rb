@@ -30,6 +30,15 @@ module XYZ
         get_objects(model_handle,where_clause,opts.merge({:return_just_sequel_dataset => true}))
       end
 
+      #TODO: may be able to optimze seeing that curerntly uses get_objects
+      def get_object(id_handle,opts={})
+	c = id_handle[:c]
+	id_info = IDInfoTable.get_row_from_id_handle id_handle, :raise_error => opts[:raise_error], :short_circuit_for_minimal_row => true
+	return unless id_info and id_info[:id]
+        get_objects(ModelHandle.new(c,id_info[:relation_type]),{:id => id_info[:id]},opts).first
+      end
+
+
       #TBD: convert so where clause could be hash or string       
       def get_object_ids_wrt_parent(relation_type,parent_id_handle,where_clause=nil)
 	c = parent_id_handle[:c]
@@ -49,44 +58,18 @@ module XYZ
         process_raw_scalar_hash!(row,DB_REL_DEF[relation_type],opts)
       end
 
-      
-      def get_object(id_handle,opts={})
-	c = id_handle[:c]
-	id_info = IDInfoTable.get_row_from_id_handle id_handle, :raise_error => opts[:raise_error], :short_circuit_for_minimal_row => true
-	return unless id_info and id_info[:id]
-        get_objects(ModelHandle.new(c,id_info[:relation_type]),{:id => id_info[:id]},opts).first
-      end
-
-        
-      #TODO: below should be deprecated in favor of using above
-      # want to support nested object gets using eager loading
-      # also need to take into account support of rest calls
-      def get_object_deprecate(id_handle,opts={})
-	c = id_handle[:c]
-	id_info = IDInfoTable.get_row_from_id_handle id_handle, :raise_error => opts[:raise_error], :short_circuit_for_minimal_row => true
-	return nil if id_info.nil? 
-
-        return nil unless hash = get_scalar_values_given_id_info(id_info,opts)
-        
-        db_rel = DB_REL_DEF[id_info[:relation_type]]
-        db_rel[:model_class].new(hash,c,id_info[:relation_type])
-      end
-
       def get_parent_id_info(id_handle)
 	c = id_handle[:c]
 	id_info = IDInfoTable.get_row_from_id_handle id_handle
-	return nil if id_info.nil? 
-	return nil if id_info[:parent_id].nil?
-        parent_guid = IDInfoTable.ret_guid_from_db_id(id_info[:parent_id],id_info[:parent_relation_type])
-	parent_id_handle = IDHandle[:c => c, :guid => parent_guid]
+	return nil unless id_info and id_info[:parent_id] 
+	parent_id_handle = IDHandle[:c => c, :id => id_info[:parent_id], :model_name => id_info[:parent_relation_type]]
         IDInfoTable.get_row_from_id_handle parent_id_handle
       end
 
       def get_parent_object(id_handle,opts={})
 	c = id_handle[:c]
 	id_info = IDInfoTable.get_row_from_id_handle id_handle,  :raise_error => opts[:raise_error]
-	return nil if id_info.nil? 
-	return nil if id_info[:parent_id].nil?
+	return nil unless id_info and id_info[:parent_id] 
 	parent_id_handle = IDHandle[:c => c, :id => id_info[:parent_id], :model_name => id_info[:parent_relation_type]]
         get_object(parent_id_handle,opts)
       end

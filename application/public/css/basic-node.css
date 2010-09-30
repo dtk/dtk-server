@@ -1,12 +1,8 @@
 /* blue node: #73c0ef */
 
 .basic-node {
-	width: 160px;
-	height: 80px;
-}
-
-.yui3-dd-dragging {
-	cursor: move;
+	height: 60px;
+	width: 120px;
 }
 
 .node {
@@ -14,72 +10,105 @@
 	z-index: 10;
 }
 
-#slider .basic-node {
-	margin: 5px 5px;
-/*	position: relative;*/
-}
+/*-------Corners-----------*/
 
 .basic-node .corner {
-	height: 13px;
-	width: 13px;
-	background-image: url(../images/workspace/basic-node-corners.png);
+	height: 7px;
+	width: 7px;
 	background-repeat: no-repeat;
 	float: left;
 }
-.basic-node.focus .corner {
-	background-image: url(../images/workspace/basic-node-corners-focus.png);
+.basic-node.blue .corner {
+	background-image: url(../images/node/basic-corners-blue.png);
 }
 
-.basic-tl-corner {
+.basic-node .corner.tl {
 }
-.basic-tr-corner {
-	background-position: 0px -13px;
+.basic-node .corner.tr {
+	background-position: 0px -7px;
 }
-.basic-bl-corner {
-	background-position: 0px -39px;
+.basic-node .corner.br {
+	background-position: 0px -14px;
 }
-.basic-br-corner {
-	background-position: 0px -26px;
+.basic-node .corner.bl {
+	background-position: 0px -21px;
 }
 
-.basic-node .header {
-	background-color: #73C0EF;
-	width: 134px;
-	height: 11px;
+.basic-node.focus .corner.tl {
+	background-position: -7px 0px;
+}
+.basic-node.focus .corner.tr {
+	background-position: -7px -7px;
+}
+.basic-node.focus .corner.br {
+	background-position: -7px -14px;
+}
+.basic-node.focus .corner.bl {
+	background-position: -7px -21px;
+}
+
+/*----------------------------*/
+
+
+.basic-node .l-col {
 	float: left;
-	font-size: 11px;
-	border-top: solid 2px black;
+	height: 60px;
+	width: 7px;
+}
+.basic-node .r-col {
+	float: right;
+	height: 60px;
+	width: 7px;
 }
 
-.focus .header {
-	border-top: solid 2px #E84423;
-}
-
-.basic-node .footer {
-	background-color: #73C0EF;
-	width: 134px;
-	height: 11px;
+.basic-node .l-col-body {
+	width: 5px;
+	height: 46px;
+	border-left: 2px solid black;
 	float: left;
-	border-bottom: solid 2px black;
 }
-.focus .footer {
-	border-bottom: solid 2px #E84423;
+.basic-node.focus .l-col-body {
+	border-left: 2px solid #C80000;
+}
+
+.basic-node.blue .l-col-body {
+	background-color: #A8C6ED;
+}
+
+.basic-node .r-col-body {
+	width: 5px;
+	height: 46px;
+	border-right: 2px solid black;
+	float: left;
+}
+.basic-node.focus .r-col-body {
+	border-right: 2px solid #C80000;
+}
+
+.basic-node .r-col-body {
+	background-color: #A8C6ED;
+}
+.basic-node.focus .r-col-body {
+	background-color: #A8C6ED;
 }
 
 .basic-node .body {
-	background-color: #73C0EF;
-	width: 156px;
-	height: 54px;
 	float: left;
-	border-left: solid 2px black;
-	border-right: solid 2px black;
-	text-align: center;
+	border-top: 2px solid black;
+	border-bottom: 2px solid black;
+	width: 106px;
+	height: 56px;
+}
+.basic-node.focus .body {
+	border-top: 2px solid #C80000;
+	border-bottom: 2px solid #C80000;
 }
 
-.focus .body {
-	border-left: solid 2px #E84423;
-	border-right: solid 2px #E84423;
+.basic-node.blue .body {
+	background-color: #A8C6ED;
 }
+
+/*----------------Port-----------------*/
 
 .basic-port {
 	position: absolute;

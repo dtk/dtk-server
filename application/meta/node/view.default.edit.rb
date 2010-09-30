@@ -39,6 +39,10 @@
              :type => 'select',
              :help => '',
             }},
+           {:ec2_security_groups => {
+             :type => 'hash',
+             :help => '',
+            }},
             {:image_size => {
              :type => 'text',
              :help => '',

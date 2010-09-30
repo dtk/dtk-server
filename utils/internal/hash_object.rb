@@ -12,13 +12,45 @@ module XYZ
       frozen? ? (super if has_key?(x)) : super
     end
 
+    def nested_value(*path)
+      return self if path.empty?
+      self.class.nested_value_private!(self,path.dup)
+    end
+
     def is_complete?()
       false
     end
     def do_not_extend()
       false
     end
+
+    class << self
+      def [](x)
+        new(x)
+      end
+      #auto vivification trick from http://t-a-w.blogspot.com/2006/07/autovivification-in-ruby.html
+      def create_with_auto_vivification()
+        self.new{|h,k| h[k] = self.new(&h.default_proc)}
+      end
+
+      def nested_value(hash,path)
+        return hash if path.empty?
+        nested_value_private!(hash,path.dup)
+      end
+
+      def set_nested_value!(hash,path,val)
+        if path.size == 0
+          #TODO this should be error
+        elsif path.size == 1
+          hash[path.first] = val
+        else
+          hash[path.first] ||= Hash.new
+          set_nested_value!(hash[path.first],path[1..path.size-1],val)
+        end
+      end
+    end
    private
+
     #coverts hashes that are not a HashObject or a child of HashObject
     def convert_nested_hashes(obj)
       if obj.kind_of?(HashObject)
@@ -36,39 +68,20 @@ module XYZ
       end
     end
 
-   public
     class << self
-      def [](x)
-        new(x)
-      end
-      #auto vivification trick from http://t-a-w.blogspot.com/2006/07/autovivification-in-ruby.html
-      def create_with_auto_vivification()
-        self.new{|h,k| h[k] = self.new(&h.default_proc)}
-      end
-
-      #TBD: might better related nested and auto vivfication
-      #TBD: consider instaed just using
-      #class NilClass
-      #  def [](x)
-      #    nil
-      #  end
-      #end
-      def nested_value(hash,path)
-        return hash if path.empty?
-        nested_value_private(hash,path.dup)
-      end
-     private
       # "*" in path means just take whatever is next (assuming singleton; otehrwise takes first
-      def nested_value_private(hash,path)
+      # marked by "!" since it updates the path parameter
+      def nested_value_private!(hash,path)
         return nil unless hash.kind_of?(Hash)
         f = path.shift
         f = hash.keys.first if f == "*"
         return nil unless hash.has_key?(f)
         return hash[f] if path.length == 0
-        nested_value_private(hash[f],path)
+        nested_value_private!(hash[f],path)
       end
     end
   end
+
   #Used as input to data source normalizer
   class DataSourceUpdateHash < HashObject  
     #for efficiency not initializing @completeness_info = nil

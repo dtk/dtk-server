@@ -115,8 +115,8 @@ module XYZ
       self.class.new(@path +[a])
     end
 
-    def apply(ds_hash)
-      DBUpdateHash.nested_value(ds_hash,@path)
+    def apply(hash)
+      HashObject.nested_value(hash,@path)
     end
   end
 

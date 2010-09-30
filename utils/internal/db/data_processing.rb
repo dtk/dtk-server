@@ -44,6 +44,7 @@ module XYZ
 
       #if any virtual columns need to remove and populate the actual table 
       def modify_for_virtual_columns!(scalar_assigns,db_rel,sql_operation,id_handle)
+        #TODO: see if can leevrage FieldSet
         return nil unless db_rel[:virtual_columns]
         cols = scalar_assigns.keys()
         virtual_col_defs = db_rel[:virtual_columns].reject{|k,v|not cols.include?(k)}
@@ -68,28 +69,18 @@ module XYZ
             Log.info("no path definition for virtual column #{virtual_col}") if ret.nil?
             next
           end
-          set_nested_value(scalar_assigns,path,vc_val)
+          HashObject.set_nested_value!(scalar_assigns,path,vc_val)
         end
         scalar_assigns
       end
 
-      def set_nested_value(hash,path,val)
-        if path.size == 0
-          #TODO this should be error
-        elsif path.size == 1
-          hash[path.first] = val
-        else
-          hash[path.first] ||= Hash.new
-          set_nested_value(hash[path.first],path[1..path.size-1],val)
-        end
-      end
-
-
       #TODO: update to reflect that virtual columns can be set
       #These are only changeable columns
       def ret_scalar_assignments(assignments,db_rel)
-        ret = {}
-        assignments.each_pair{|k,v| ret[k] = v if ret_table_column_info(k,db_rel) or [:description, :display_name].include?(k)}
+        ret = Hash.new
+        real_cols = Model::FieldSet.all_real(db_rel[:relation_type])
+        assignments.each_pair{|k,v| ret[k] = v if real_cols.include?(k)}
+ #       assignments.each_pair{|k,v| ret[k] = v if ret_table_column_info(k,db_rel) or [:description, :display_name].include?(k)}
         ret
       end	
       def ret_object_assignments(assignments,db_rel)

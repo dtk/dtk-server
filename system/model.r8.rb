@@ -16,29 +16,6 @@ module XYZ
       expose_methods_from_internal_object :db, %w{update_from_hash_assignments update_instance get_instance_or_factory get_instance_scalar_values get_objects get_objects_just_dataset get_object_ids_wrt_parent get_object get_parent_object get_parent_id_info exists? create_from_hash create_simple_instance? delete_instance delete_instances_wrt_parent process_raw_db_row!}
     end
 
-    def self.get_objects_and_related_objects(model_handle,where_clause={},opts={})
-      c = model_handle[:c]
-      model_name = model_handle[:model_name]
-      field_set = opts[:field_set] || FieldSet.default(model_name)
-      #returns any related tables that must be joined in (by looking at virtual coumns)
-      related_columns = FieldSet.related_columns(field_set,model_name)
-      ret = nil
-      unless related_columns
-        ret = get_objects(model_handle,where_clause,opts)
-      else
-        ls_opts = opts.merge :field_set => field_set
-        graph_ds = get_objects_just_dataset(model_handle,where_clause,ls_opts)
-        related_columns.each do |join_info|
-          rs_opts = (join_info[:cols] ? {:field_set => join_info[:cols]} : {}).merge :return_as_hash => true
-          right_ds = get_objects_just_dataset(ModelHandle.new(c,join_info[:model_name]),nil,rs_opts)
-          graph_ds = graph_ds.graph(:left_outer,right_ds,join_info[:join_cond])
-        end
-        ret = graph_ds.all
-      end
-      ret
-    end
-
-
     include FieldSetInstanceMixin
     extend CloneClassMixins
     extend InputIntoModelClassMixins
@@ -66,9 +43,41 @@ module XYZ
         end
     end
 
+
+    def self.get_objects_and_related_objects(model_handle,where_clause={},opts={})
+      c = model_handle[:c]
+      model_name = model_handle[:model_name]
+      field_set = opts[:field_set] || FieldSet.default(model_name)
+      #returns any related tables that must be joined in (by looking at virtual coumns)
+      related_columns = FieldSet.related_columns(field_set,model_name)
+      ret = nil
+      unless related_columns
+        ret = get_objects(model_handle,where_clause,opts)
+      else
+        ls_opts = opts.merge :field_set => field_set
+        graph_ds = get_objects_just_dataset(model_handle,where_clause,ls_opts)
+        related_columns.each do |join_info|
+          rs_opts = (join_info[:cols] ? {:field_set => join_info[:cols]} : {}).merge :return_as_hash => true
+          right_ds = get_objects_just_dataset(ModelHandle.new(c,join_info[:model_name]),nil,rs_opts)
+          graph_ds = graph_ds.graph(:left_outer,right_ds,join_info[:join_cond])
+        end
+        ret = graph_ds.all
+      end
+      ret
+    end
+
     def [](x)
-      return send(x) if self.class.is_virtual_column?(x)
-      super(x)
+      vc_info = ret_info_if_is_virtual_column(x)
+      if vc_info
+        #first check if it has an explicit path; otherwise look for fn
+        vc_info[:path] ? nested_value(*vc_info[:path]) : send(x) 
+      else
+        super(x)
+      end
+    end
+
+    def ret_info_if_is_virtual_column(col)
+      (self.class.db_rel[:virtual_columns]||{})[col]
     end
 
     #inherited virtual coulmn defs

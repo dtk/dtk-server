@@ -2,14 +2,22 @@ module XYZ
   module FieldSetInstanceMixin
     module FieldSet
       class << self
+        #TODO rewrite in term sof private fns below
         def default(model_name_x)
           model_name = model_name_x.to_sym
           Fieldsets[:default][model_name] ||= non_hidden_columns(DB_REL_DEF[model_name][:columns]) + non_hidden_columns(COMMON_REL_COLUMNS) + virtual_columns_in_fieldset(DB_REL_DEF[model_name][:virtual_columns]) + many_to_one_cols(DB_REL_DEF[model_name])
         end
 
-        def all_actual(model_name_x)
+        def all_real(model_name_x)
           model_name = model_name_x.to_sym
-          Fieldsets[:all_actual][model_name] ||= DB_REL_DEF[model_name][:columns].keys + COMMON_REL_COLUMNS.keys + many_to_one_cols(DB_REL_DEF[model_name])
+          db_rel = DB_REL_DEF[model_name]
+          Fieldsets[:all_real][model_name] ||=  real_cols(db_rel) + many_to_one_cols(db_rel)
+        end
+
+        def all_settable(model_name_x)
+          model_name = model_name_x.to_sym
+          db_rel = DB_REL_DEF[model_name]
+          Fieldsets[:all_settable][model_name] ||= real_cols(db_rel) + many_to_one_cols(db_rel) + virtual_settable_cols(db_rel)
         end
 
         def related_columns(field_set,model_name_x)
@@ -41,8 +49,9 @@ module XYZ
           end
         end
 
-        #TBD: may insteaad put in DB_REL_DEF
-        Fieldsets = {:default => Hash.new,:all_actual => Hash.new}    
+        #TBD: may instead put in DB_REL_DEF
+        Fieldsets = Hash.new
+        [:default, :all_settable, :all_real].each{|k|Fieldsets[k] = Hash.new}
 
         def non_hidden_columns(cols_def)
           cols_def.reject{|k,v| v and v[:hidden]}.keys
@@ -51,8 +60,15 @@ module XYZ
         def virtual_columns_in_fieldset(cols_def)
           cols_def.reject{|k,v| v and v[:hidden]}.keys
         end
+
+        def real_cols(db_rel)
+          db_rel[:columns].keys + COMMON_REL_COLUMNS.keys
+        end
         def many_to_one_cols(db_rel)
           (db_rel[:many_to_one]||[]).map{|p|DB.ret_parent_id_field_name(DB_REL_DEF[p],db_rel)}
+        end
+        def virtual_settable_cols(db_rel)
+          (db_rel[:virtual_columns]||[]).map{|vc,vc_info|vc if vc_info[:path]}.compact 
         end
       end
     end

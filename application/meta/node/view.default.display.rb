@@ -39,6 +39,10 @@
              :type => 'text',
              :help => '',
             }},
+            {:os=> {
+             :type => 'text',
+             :help => '',
+            }},
             {:operational_status => {
              :type => 'select',
              :help => '',

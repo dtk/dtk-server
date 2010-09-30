@@ -114,11 +114,11 @@ module XYZ
     end
 
     class << self
-      DS_object_defaults = {}
+      DS_object_defaults = HashObject.new
       def fill_in_defaults(ds_name,obj_type,hash_content)
         hash_with_defaults = Hash.new
         [:filter,:update_policy,:polling_policy,:objects_location].each do |key|
-          v = hash_content[key] || Aux.nested_value(DS_object_defaults,[ds_name,key ])
+          v = hash_content[key] || DS_object_defaults.nested_value([ds_name,key])
           hash_with_defaults[key] = v if v
         end
         hash_with_defaults[:ds_name] = ds_name.to_s

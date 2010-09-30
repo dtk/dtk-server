@@ -26,6 +26,8 @@ module XYZ
       @db_rel[:virtual_columns] = {}
       @db_rel[:model_class] = self
     end
+    
+    attr_reader :db_rel
 
     def many_to_one(*target_relation_types)
       @db_rel[:many_to_one] = target_relation_types

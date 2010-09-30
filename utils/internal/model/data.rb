@@ -28,9 +28,6 @@ module XYZ
       IDHandle[:c => c, :uri => child_uri]
     end
 
-    def is_virtual_column?(x)
-      @db_rel[:virtual_columns].has_key?(x)
-    end
   end
   #End ModelDataClassMixins
 

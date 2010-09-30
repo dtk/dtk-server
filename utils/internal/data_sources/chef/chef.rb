@@ -49,11 +49,11 @@ module XYZ
 
       def get_objects__node(&block)
         get_nodes().each do |node_name,node|
-          node_attributes = %{node_display_name,lsb}
+          node_attributes = %w{node_display_name lsb}
           ds_hash = DataSourceUpdateHash.new({"node_name" => node_name})
           node_attributes.each do |attr|
             next unless value = node[attr]
-            ds_hash[attr] = value.respond_to?(to_hash) ? value.to_hash : value
+            ds_hash[attr] = value.respond_to?(:to_hash) ? value.to_hash : value
           end
 
           block.call(ds_hash.freeze)

@@ -18,7 +18,8 @@ module XYZ
       column :ui, :json
       virtual_column :parent_name, :possible_parents => [:library,:datacenter,:project]
       virtual_column :disk_size, :path => [:ds_attributes,:flavor,:disk] #in megs
-      virtual_column :ec2_security_groups, :json #TODO how to have this conditionally "show up"
+      #TODO how to have this conditionally "show up"
+      virtual_column :ec2_security_groups, :path => [:ds_attributes,:groups] 
 
       foreign_key :data_source_id, :data_source, FK_SET_NULL_OPT
       many_to_one :library, :datacenter, :project
@@ -31,12 +32,6 @@ module XYZ
       return "datacenter/#{self[:datacenter][:display_name]}" if self[:datacenter] and self[:datacenter][:display_name]
       return "project/#{self[:project][:display_name]}" if self[:project] and self[:project][:display_name]
       nil
-    end
-    def disk_size()
-      self.class.nested_value(self[:ds_attributes],[:flavor,:disk])
-    end
-    def ec2_security_groups()
-     self.class.nested_value(self[:ds_attributes],[:groups])
     end
     #######################
     #object access functions

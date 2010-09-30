@@ -1,4 +1,3 @@
-
 require 'sequel'
 
 module XYZ
@@ -21,7 +20,7 @@ module XYZ
       def update(relation_type,c,scalar_assigns,where_clause={})
 	db_rel = DB_REL_DEF[relation_type]
 	ds = dataset(db_rel).where(SQL.and(where_clause,{CONTEXT_ID => c}))
-	#TBD: check that valid assigns
+	#TODO: check that valid assigns
 	modify_to_reflect_special_processing!(scalar_assigns,db_rel,:update)
 	ds.update(scalar_assigns)
       end
@@ -31,8 +30,9 @@ module XYZ
 	return nil if scalar_assigns.empty?
 	db_rel = DB_REL_DEF[id_info[:relation_type]]
 	ds = dataset(db_rel).where(:id => id_info[:id])
-	#TBD: check that valid assigns
-	modify_to_reflect_special_processing!(scalar_assigns,db_rel,:update,opts)
+	#TODO: check that valid assigns
+        id_handle = IDHandle[:id_info => id_info]
+	modify_to_reflect_special_processing!(scalar_assigns,db_rel,:update,opts.merge({:id_handle => id_handle}))
 	ds.update(scalar_assigns)
       end
 
@@ -73,6 +73,7 @@ module XYZ
         delete_instances_wrt_parent(relation_type,parent_id_handle,where_clause,opts)        
       end
 
+      #TODO: make more efficient by allowing a multiple insert/update
       def update_from_hash_from_instance_id(id_info,assigns,opts={})
 	new_uris = Array.new
         db_rel = DB_REL_DEF[id_info[:relation_type]]

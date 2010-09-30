@@ -6,7 +6,6 @@ module XYZ
       def get_objects(model_handle,where_clause=nil,opts={})
         c = model_handle[:c]
         relation_type =  model_handle[:model_name]
-
         #special processing if parent_id given
         parent_id = opts[:parent_id]
         if parent_id
@@ -50,10 +49,19 @@ module XYZ
         process_raw_scalar_hash!(row,DB_REL_DEF[relation_type],opts)
       end
 
-      #TODO: deprecate (writing in terms of get_objects with :id => id; in eitehr case
+      
+      def get_object(id_handle,opts={})
+	c = id_handle[:c]
+	id_info = IDInfoTable.get_row_from_id_handle id_handle, :raise_error => opts[:raise_error], :short_circuit_for_minimal_row => true
+	return unless id_info and id_info[:id]
+        get_objects(ModelHandle.new(c,id_info[:relation_type]),{:id => id_info[:id]},opts).first
+      end
+
+        
+      #TODO: below should be deprecated in favor of using above
       # want to support nested object gets using eager loading
       # also need to take into account support of rest calls
-      def get_object(id_handle,opts={})
+      def get_object_deprecate(id_handle,opts={})
 	c = id_handle[:c]
 	id_info = IDInfoTable.get_row_from_id_handle id_handle, :raise_error => opts[:raise_error], :short_circuit_for_minimal_row => true
 	return nil if id_info.nil? 
@@ -79,8 +87,7 @@ module XYZ
 	id_info = IDInfoTable.get_row_from_id_handle id_handle,  :raise_error => opts[:raise_error]
 	return nil if id_info.nil? 
 	return nil if id_info[:parent_id].nil?
-        parent_guid = IDInfoTable.ret_guid_from_db_id(id_info[:parent_id],id_info[:parent_relation_type])
-	parent_id_handle = IDHandle[:c => c, :guid => parent_guid]
+	parent_id_handle = IDHandle[:c => c, :id => id_info[:parent_id], :model_name => id_info[:parent_relation_type]]
         get_object(parent_id_handle,opts)
       end
 

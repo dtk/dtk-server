@@ -23,8 +23,23 @@ module XYZ
 
     def initialize(x)
       super()
+      if x[:id_info]
+        id_info = x[:id_info]
+        if id_info[:c] and id_info[:relation_type] and id_info[:id]
+          model_name = id_info[:relation_type]
+          self[:guid] = IDInfoTable.ret_guid_from_db_id(id_info[:id],model_name)
+          self[:model_name] = model_name
+          return freeze
+        end
+      end
+
       raise_has_illegal_form(x) unless self[:c] = x[:c]
-      if x[:guid]
+
+      if x[:id] and x[:model_name]
+        model_name = x[:model_name].to_sym
+        self[:guid] = IDInfoTable.ret_guid_from_db_id(x[:id],model_name)
+        self[:model_name] = model_name
+      elsif x[:guid]
         self[:guid]= x[:guid].to_i
         self[:model_name] = x[:model_name].to_sym if x[:model_name]
       elsif x[:uri]

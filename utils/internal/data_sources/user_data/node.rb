@@ -5,6 +5,7 @@ module XYZ
         definitions do
           target[:display_name] = source["ref"]
           target[:tag] = source["tag"]
+          target[:disk_size] = source["disk_size"]
         end
          class << self
             def unique_keys(source)

@@ -17,8 +17,8 @@ module XYZ
       column :operational_status, :varchar, :size => 50
       column :ui, :json
       virtual_column :parent_name, :possible_parents => [:library,:datacenter,:project]
-      virtual_column :disk_size #in megs
-      virtual_column :ec2_security_groups, :json #TODO how to haev this conditionally "show up"
+      virtual_column :disk_size, :path => [:ds_attributes,:flavor,:disk] #in megs
+      virtual_column :ec2_security_groups, :json #TODO how to have this conditionally "show up"
 
       foreign_key :data_source_id, :data_source, FK_SET_NULL_OPT
       many_to_one :library, :datacenter, :project

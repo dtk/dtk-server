@@ -16,10 +16,12 @@ module XYZ
       tgt_factory_id_handle = get_factory_id_handle(target_id_handle,relation_type)
       raise Error.new("clone target (#{target_id_handle}) not found") if tgt_factory_id_handle.nil?
 
-      new_uris = create_from_hash(tgt_factory_id_handle,obj, clone_helper,opts.merge({:shift_id_to_ancestor => true}))
+      new_uri = create_from_hash(tgt_factory_id_handle,obj, clone_helper,opts.merge({:shift_id_to_ancestor => true})).first
       clone_helper.set_foreign_keys_to_right_values() if no_clone_helper_provided
 
-      new_uris
+      new_id = IDHandle[:c => id_handle[:c], :uri => new_uri].get_id()
+      Log.info("created new object with uri #{new_uri} and id #{new_id}") if new_id
+      new_id
     end
   end
 end

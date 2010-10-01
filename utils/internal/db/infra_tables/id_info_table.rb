@@ -18,7 +18,7 @@ module XYZ
     include CommonMixin
 
     def get_id()
-      IDInfoTable.get_row_from_id_handle(self,:short_circuit_for_minimal_row => true)[:id]
+      (IDInfoTable.get_row_from_id_handle(self,:short_circuit_for_minimal_row => true)||{})[:id]
     end
 
     def initialize(x)

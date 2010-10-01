@@ -44,7 +44,7 @@ module XYZ
 
       #if any virtual columns need to remove and populate the actual table 
       def modify_for_virtual_columns!(scalar_assigns,db_rel,sql_operation,id_handle)
-        #TODO: see if can leevrage FieldSet
+        #TODO: see if can leverage FieldSet
         return nil unless db_rel[:virtual_columns]
         cols = scalar_assigns.keys()
         virtual_col_defs = db_rel[:virtual_columns].reject{|k,v|not cols.include?(k)}
@@ -79,8 +79,7 @@ module XYZ
       def ret_scalar_assignments(assignments,db_rel)
         ret = Hash.new
         real_cols = Model::FieldSet.all_real(db_rel[:relation_type])
-        assignments.each_pair{|k,v| ret[k] = v if real_cols.include?(k)}
- #       assignments.each_pair{|k,v| ret[k] = v if ret_table_column_info(k,db_rel) or [:description, :display_name].include?(k)}
+        assignments.each_pair{|k,v| ret[k] = v if real_cols.include?(k.to_sym)}
         ret
       end	
       def ret_object_assignments(assignments,db_rel)

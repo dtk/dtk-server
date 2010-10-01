@@ -47,7 +47,7 @@ module XYZ
       def new_create_instance(parent_id_handle,relation_type,ref,assignments,clone_helper=nil,opts={})
         db_rel = DB_REL_DEF[relation_type]
 
-	scalar_assignments = ret_scalar_assignments(assignments,db_rel)
+	scalar_assignments = ret_settable_scalar_assignments(assignments,db_rel)
 	obj_assignments = ret_object_assignments(assignments,db_rel)
 
 	#adding assignments that can be computed at this point indep. of case on parent_uri
@@ -91,7 +91,7 @@ module XYZ
         relation_type,parent_uri = RestURI.parse_factory_uri(factory_uri) 
         db_rel = DB_REL_DEF[relation_type]
 
-	scalar_assignments = ret_scalar_assignments(assignments,db_rel)
+	scalar_assignments = ret_settable_scalar_assignments(assignments,db_rel)
 	obj_assignments = ret_object_assignments(assignments,db_rel)
 
 	#adding assignments that can be computed at this point indep. of case on parent_uri

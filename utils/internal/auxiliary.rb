@@ -112,8 +112,8 @@ module XYZ
         end
       end
 
+      #TODO; remove and instaed make sue the data_processing fns look for columns that could be strings
       # fn below used to make sure that all hash keys  are symbols
-      #TBD: make a more efficient one that just updates hash just where appropriate
       def ret_hash_assignments(hash)
         ret = {}
         hash.each_pair{ |k,v|

@@ -26,6 +26,7 @@ module XYZ
       if x[:id_info]
         id_info = x[:id_info]
         if id_info[:c] and id_info[:relation_type] and id_info[:id]
+          self[:c] = id_info[:c]
           model_name = id_info[:relation_type]
           self[:guid] = IDInfoTable.ret_guid_from_db_id(id_info[:id],model_name)
           self[:model_name] = model_name

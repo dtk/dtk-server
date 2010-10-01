@@ -62,7 +62,7 @@ module XYZ
         end
 
         #delete virtual columns from scalar_assigns and appropriately set real column
-        virtual_columns.each_key do |vc|
+        virtual_col_defs.each_key do |vc|
           vc_val = scalar_assigns.delete(vc)
           path = virtual_col_defs[vc][:path]
           unless path
@@ -74,18 +74,22 @@ module XYZ
         scalar_assigns
       end
 
-      #TODO: update to reflect that virtual columns can be set
-      #These are only changeable columns
-      def ret_scalar_assignments(assignments,db_rel)
+      def ret_settable_scalar_assignments(assignments,db_rel)
         ret = Hash.new
-        real_cols = Model::FieldSet.all_real(db_rel[:relation_type])
-        assignments.each_pair{|k,v| ret[k] = v if real_cols.include?(k.to_sym)}
+        settable_scalar_cols = Model::FieldSet.all_settable_scalar(db_rel[:relation_type])
+        assignments.each_pair do |k,v| 
+          next unless settable_scalar_cols.include?(k.to_sym)
+          ret[k] = v 
+        end
         ret
       end	
+      
       def ret_object_assignments(assignments,db_rel)
-	ret = {}
-	assignments.each_pair{|k,v| ret[k] = v if table_child_object?(k,db_rel) and 
-	                      (v.kind_of?(Hash) or v.kind_of?(Array))}
+	ret = Hash.new
+	assignments.each_pair do |k,v| 
+          next unless (db_rel[:one_to_many]||[]).include?(k.to_sym) and (v.kind_of?(Hash) or v.kind_of?(Array))
+          ret[k] = v
+        end
         ret
       end	
 
@@ -97,11 +101,6 @@ module XYZ
       def json_table_column?(col,db_rel)
 	return nil unless col_info = ret_table_column_info(col,db_rel)
 	col_info[:type] == :json
-      end
-
-      def table_child_object?(col,db_rel)
-	return nil if db_rel[:one_to_many].nil?
-	db_rel[:one_to_many].include?(col.to_sym)
       end
     end
   end

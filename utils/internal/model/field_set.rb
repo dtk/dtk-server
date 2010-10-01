@@ -2,22 +2,28 @@ module XYZ
   module FieldSetInstanceMixin
     module FieldSet
       class << self
-        #TODO rewrite in term sof private fns below
         def default(model_name_x)
-          model_name = model_name_x.to_sym
-          Fieldsets[:default][model_name] ||= non_hidden_columns(DB_REL_DEF[model_name][:columns]) + non_hidden_columns(COMMON_REL_COLUMNS) + virtual_columns_in_fieldset(DB_REL_DEF[model_name][:virtual_columns]) + many_to_one_cols(DB_REL_DEF[model_name])
+          ret_cols(model_name_x,:default) do |db_rel|
+            non_hidden_columns(db_rel[:columns]) + non_hidden_columns(COMMON_REL_COLUMNS) + virtual_columns_in_fieldset(db_rel[:virtual_columns]) + many_to_one_cols(db_rel)
+          end
         end
 
         def all_real(model_name_x)
-          model_name = model_name_x.to_sym
-          db_rel = DB_REL_DEF[model_name]
-          Fieldsets[:all_real][model_name] ||=  real_cols(db_rel) + many_to_one_cols(db_rel)
+          ret_cols(model_name_x,:all_real) do |db_rel|
+            real_cols(db_rel) + many_to_one_cols(db_rel)
+          end
         end
 
         def all_settable(model_name_x)
-          model_name = model_name_x.to_sym
-          db_rel = DB_REL_DEF[model_name]
-          Fieldsets[:all_settable][model_name] ||= real_cols(db_rel) + many_to_one_cols(db_rel) + virtual_settable_cols(db_rel)
+          ret_cols(model_name_x,:all_settabler) do |db_rel|
+            real_cols(db_rel) + many_to_one_cols(db_rel) + virtual_settable_cols(db_rel)
+          end
+        end
+
+        def all_settable_scalar(model_name_x)
+          ret_cols(model_name_x,:all_settable_scalar) do |db_rel|
+            real_cols(db_rel) + virtual_settable_cols(db_rel)
+          end
         end
 
         def related_columns(field_set,model_name_x)
@@ -36,6 +42,15 @@ module XYZ
         end
        private
 
+        def ret_cols(model_name_x,col_type,&block)
+          model_name = model_name_x.to_sym
+          db_rel = DB_REL_DEF[model_name]
+          Fieldsets[col_type] ||= Hash.new
+          col_info = Fieldsets[col_type]
+          return col_info[model_name] if col_info[model_name]
+          col_info[model_name] = block.call(db_rel)
+        end
+
         def convert_to_dependencies(model_name,possible_parents)
           return nil if possible_parents.nil?
           #TODO: migh make geenral utility fn with inject Aux.hash_map
@@ -51,7 +66,6 @@ module XYZ
 
         #TBD: may instead put in DB_REL_DEF
         Fieldsets = Hash.new
-        [:default, :all_settable, :all_real].each{|k|Fieldsets[k] = Hash.new}
 
         def non_hidden_columns(cols_def)
           cols_def.reject{|k,v| v and v[:hidden]}.keys

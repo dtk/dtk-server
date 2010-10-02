@@ -34,7 +34,26 @@ module XYZ
       nil
     end
     #######################
-    #object access functions
+    #object processing and access functions
+    def self.clone_post_copy_hook(new_id_handle,target_id_handle,copy_target_id_handle)
+      if new_id_handle[:model_name] == :component
+        clone_post_copy_hook_component(new_id_handle,target_id_handle,copy_target_id_handle)
+      end
+    end
+
+    def self.clone_post_copy_hook_component(new_id_handle,target_id_handle,copy_target_id_handle)
+      p 'Have to create node and component associations....'
+      ref = "assoc_node_component", #TODO stub
+      create_hash = {
+        :assoc_node_component => {
+          ref => {
+            :node_id => target_id_handle.get_id(),
+            :component_id => new_id_handle.get_id()
+          }
+        }
+      }
+      create_from_hash(copy_target_id_handle,create_hash)
+    end
 
     #TODO: quick hack
     def self.get_wspace_display(id_handle)

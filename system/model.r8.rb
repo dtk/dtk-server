@@ -14,6 +14,10 @@ module XYZ
     class << self
       attr_reader :db
       expose_methods_from_internal_object :db, %w{update_from_hash_assignments update_instance get_instance_or_factory get_instance_scalar_values get_objects get_objects_just_dataset get_object_ids_wrt_parent get_object get_parent_object get_parent_id_info exists? create_from_hash create_simple_instance? delete_instance delete_instances_wrt_parent process_raw_db_row!}
+
+      def model_class(model_name)
+        XYZ.const_get Aux.camelize model_name.to_s
+      end
     end
 
     include FieldSetInstanceMixin

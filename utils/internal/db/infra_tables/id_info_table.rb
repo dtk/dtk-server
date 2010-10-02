@@ -45,6 +45,7 @@ module XYZ
         self[:model_name] = x[:model_name].to_sym if x[:model_name]
       elsif x[:uri]
         self[:uri]= x[:uri]
+        self[:model_name] = x[:model_name].to_sym if x[:model_name]
       else
 	raise_has_illegal_form(x) 
       end

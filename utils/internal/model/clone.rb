@@ -10,12 +10,8 @@ module XYZ
     end
 
    protected
-    #the copy target can differ from the target, e.g., when cloning component onto node; clone target is parent of node
+    #ovreride to handle case where actual copy target diffeernt from target specfied in clone operation
     def ret_copy_target_id_handle(id_handle,target_id_handle)
-      if target_id_handle[:model_name] == :node and id_handle[:model_name] == :component
-        parent_id_info = Model.get_parent_id_info(target_id_handle)
-        return parent_id_info.ret_id_handle()
-      end
       target_id_handle
     end
 

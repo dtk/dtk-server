@@ -59,7 +59,6 @@ module XYZ
       :discover_nodes => Datacenter,
       :update_from_hash => Object,
       :create_attribute_link => AttributeLink,
-      :create_node_component_assoc => AssocNodeComponent,
       :create_simple => Object,
       :delete => Object,
       :encapsulate_elements_in_project => Project

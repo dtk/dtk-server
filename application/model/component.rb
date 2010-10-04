@@ -12,8 +12,8 @@ module XYZ
         column :external_cmp_ref, :varchar
         column :uri, :varchar
         column :ui, :json
-        virtual_column :parent_name, :possible_parents => [:component,:library,:datacenter,:project]
-        many_to_one :component, :library, :datacenter, :project
+        virtual_column :parent_name, :possible_parents => [:component,:library,:node,:node_group,:project]
+        many_to_one :component, :library, :node, :node_group, :project
         one_to_many :component, :attribute_link, :attribute, :monitoring_item
       end
     end
@@ -21,8 +21,9 @@ module XYZ
     ### virtual column defs
     def parent_name()
       return "library/#{self[:library][:display_name]}" if self[:library] and self[:library][:display_name]
-      return "datacenter/#{self[:datacenter][:display_name]}" if self[:datacenter] and self[:datacenter][:display_name]
-      return "component/#{self[:component2][:display_name]}" if self[:component2] and self[:component2][:display_name]
+      return "node_group/#{self[:node_group][:display_name]}" if self[:node_group] and self[:node_group][:display_name]
+      return "node/#{self[:node][:display_name]}" if self[:node] and self[:node][:display_name]
+      return "component/#{self[:component][:display_name]}" if self[:component2] and self[:component2][:display_name]
       return "project/#{self[:project][:display_name]}" if self[:project] and self[:project][:display_name]
       nil
     end

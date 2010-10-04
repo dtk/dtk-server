@@ -19,23 +19,19 @@ module XYZ
         @attributes_with_values = Aux::Cache.new
       end
 
-      def get_objects__component__instance(&block)
-        get_node_recipe_assocs().each do |node_name,recipes|
-          recipes.each do |recipe_name|
-            node = get_node(node_name)
-            metadata = get_metadata_for_recipe(recipe_name)
-            next unless metadata
-            values = {
-              "recipe_name" => recipe_name, 
-              "node_name" => node_name,
-              "basic_type" => metadata["basic_type"]
-            }
-            attributes = get_attributes_with_values(recipe_name,metadata,node)
-            ds_hash = DataSourceUpdateHash.new(values.merge({"attributes" => attributes}))
-            block.call(ds_hash)
+      def get_objects__node(&block)
+        get_nodes().each do |node_name,node|
+          node_properties = %w{node_display_name lsb}
+          ds_hash = DataSourceUpdateHash.new({"node_name" => node_name})
+          node_properties.each do |attr|
+            next unless value = node[attr]
+            ds_hash[attr] = value.respond_to?(:to_hash) ? value.to_hash : value
           end
+          ds_hash.merge!({"components" => get_node_components(node)})
+
+          block.call(ds_hash.freeze)
         end
-        return HashIsComplete.new({:type => "instance"}) #HashMayNotBeComplete.new() 
+        return HashMayNotBeComplete.new()
       end
 
       def get_objects__component__recipe(&block)
@@ -47,33 +43,22 @@ module XYZ
         return HashIsComplete.new({:type => "template"}) #HashMayNotBeComplete.new()
       end
 
-      def get_objects__node(&block)
-        get_nodes().each do |node_name,node|
-          node_attributes = %w{node_display_name lsb}
-          ds_hash = DataSourceUpdateHash.new({"node_name" => node_name})
-          node_attributes.each do |attr|
-            next unless value = node[attr]
-            ds_hash[attr] = value.respond_to?(:to_hash) ? value.to_hash : value
-          end
-
-          block.call(ds_hash.freeze)
-        end
-        return HashMayNotBeComplete.new()
-      end
-
-      def get_objects__assoc_node_component(&block)
-        get_node_recipe_assocs().each do |node_name,recipes|
-          recipes.each do |recipe_name|
-            ds_hash = DataSourceUpdateHash.new({"node_name" => node_name, "recipe_name" => recipe_name})
-  #TODO: to be used to load in variable values node_attributes = get_node_attributes(node_name)
-  #or instead may have discover and update on attributes
-            block.call(ds_hash.freeze)
-          end
-        end
-        return HashIsComplete.new()
-      end
-
      private        
+      def get_node_components(node)
+        ret = DataSourceUpdateHash.new
+        (recipes(node)||[]).each do |recipe_name|
+          metadata = get_metadata_for_recipe(recipe_name)
+          next unless metadata
+          ref = recipe_name
+          values = {
+            "basic_type" => metadata["basic_type"]
+          }
+          attributes = get_attributes_with_values(recipe_name,metadata,node)
+          ret[ref] = DataSourceUpdateHash.new(values.merge({"attributes" => attributes}))
+        end
+        return ret
+      end
+
 
       def get_recipes_assoc_cookbook(cookbook_name)
         ret = Array.new

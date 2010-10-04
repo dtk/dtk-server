@@ -23,7 +23,7 @@ module XYZ
 
       foreign_key :data_source_id, :data_source, FK_SET_NULL_OPT
       many_to_one :library, :datacenter, :project
-      one_to_many :attribute, :node_interface, :address_access_point, :monitoring_item
+      one_to_many :attribute, :component, :node_interface, :address_access_point, :monitoring_item
     end
 
     ### virtual column defs
@@ -35,25 +35,6 @@ module XYZ
     end
     #######################
     #object processing and access functions
-    def self.clone_post_copy_hook(new_id_handle,target_id_handle,copy_target_id_handle)
-      if new_id_handle[:model_name] == :component
-        clone_post_copy_hook_component(new_id_handle,target_id_handle,copy_target_id_handle)
-      end
-    end
-
-    def self.clone_post_copy_hook_component(new_id_handle,target_id_handle,copy_target_id_handle)
-      p 'Have to create node and component associations....'
-      ref = "assoc_node_component", #TODO stub
-      create_hash = {
-        :assoc_node_component => {
-          ref => {
-            :node_id => target_id_handle.get_id(),
-            :component_id => new_id_handle.get_id()
-          }
-        }
-      }
-      create_from_hash(copy_target_id_handle,create_hash)
-    end
 
     #TODO: quick hack
     def self.get_wspace_display(id_handle)
@@ -61,21 +42,11 @@ module XYZ
       node_id = IDInfoTable.get_id_from_id_handle(id_handle)
       node = get_objects(ModelHandle.new(c,:node),{:id => node_id}).first
 
-      assoc_node_component_ds = get_objects_just_dataset(ModelHandle.new(c,:assoc_node_component),{:node_id => node_id})
-      component_ds = get_objects_just_dataset(ModelHandle.new(c,:component),nil,{:field_set => Model::FieldSet.default(:component)})
-      assoc_comps = assoc_node_component_ds.graph(:inner,component_ds,{:id => :component_id}).all
-
-      #        node.merge(:component => assoc_comps.inject({}){|h,o|h.merge(o[:component][:id] => o[:component])})
-      components = HashObject.new
-      assoc_comps.each do |o|
-        component = o[:component]
-        where_clause = SQL.or({:port_type => "input"},{:port_type => "output"})
-        opts = {:field_set => Model::FieldSet.default(:attribute),:parent_id => component[:id]}
-        attributes = get_objects(ModelHandle.new(c,:attribute),where_clause,opts)
-        component[:attribute] = Hash.new
-        attributes.each{|attr|component[:attribute][attr[:id]] = attr}
-        components[component[:id]] = component
-      end 
+      component_ds = get_objects_just_dataset(ModelHandle.new(c,:component),{:node_node_id => node_id})
+      attr_where_clause = SQL.or({:port_type => "input"},{:port_type => "output"})
+      attr_fs = (Model::FieldSet.default(:attribute) + [:component_component_id]).uniq
+      attribute_ds = get_objects_just_dataset(ModelHandle.new(c,:attribute),attr_where_clause,{:field_set => attr_fs})
+      components = component_ds.graph(:left_outer,attribute_ds,{:component_component_id => :id}).all
       node.merge(:component => components)
     end
     #######################
@@ -91,7 +62,7 @@ module XYZ
 
 
       ##### Actions
-
+#TODO: need tp fix up below
       def self.get_node_attribute_values(id_handle,opts={})
 	c = id_handle[:c]
         node_obj = get_object(id_handle,opts)
@@ -139,45 +110,6 @@ module XYZ
     end
   end
 end
-
-#TODO: need to cleanup and move sub models/relationships out of here
-
-module XYZ
-  class AssocNodeComponent < Model
-    set_relation_name(:node,:assoc_node_component)
-    def self.up()
-      ds_column_defs :ds_attributes, :ds_key
-      foreign_key :node_id, :node, FK_CASCADE_OPT
-      foreign_key :component_id, :component, FK_CASCADE_OPT
-      many_to_one :library, :datacenter, :project
-    end
-    ### virtual column defs
-    #######################
-    ### object access functions
-    #######################
-
-
-#TODO: deprecate below
-    ##### Actions
-    def self.create(target_id_handle,node_id_handle,component_id_handle,href_prefix,opts={})
-      raise Error.new("Target location (#{target_id_handle}) does not exist") unless exists? target_id_handle
-      node =  get_instance_scalar_values(node_id_handle,opts)
-      raise Error.new("Node (#{node_id_handle}) does not exist") if node.nil?
-
-      component =  get_instance_scalar_values(component_id_handle,opts)
-      raise Error.new("Component (#{component_id_handle} does not exist") if component.nil?
-
-      node_attrs = node[n_ref = node.keys.first]
-      component_attrs = component[c_ref = component.keys.first]
-      assoc_content = {:node_id => node_attrs[:id],:component_id => component_attrs[:id]}
-      assoc_ref = (n_ref.to_s + "__" + c_ref.to_s).to_sym
-
-      factory_id_handle = get_factory_id_handle(target_id_handle,:assoc_node_component)
-      create_from_hash(factory_id_handle,{assoc_ref => assoc_content})
-    end
-  end
-end
-
 
 module XYZ
   class NodeInterface < Model

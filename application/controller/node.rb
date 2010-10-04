@@ -8,7 +8,7 @@ module XYZ
       tpl.set_js_tpl_name('node_wspace_display')
 #      node = get_object_by_id(id)
  #     node.delete(:image_size)
-      node = Node.get_wspace_display(IDHandle[:c => c, :guid => id])
+      node = Node.get_wspace_display(IDHandle[:c => c, :guid => id, :model_name => :node])
 
 #TODO: temp hack to stub things out
 node[:operational_status] = 'good'

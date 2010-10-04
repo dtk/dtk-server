@@ -15,6 +15,7 @@ module XYZ
         ]
 
       many_to_one :library, :datacenter, :project
+      one_to_many :component
     end
 
     ### virtual column defs
@@ -71,18 +72,4 @@ module XYZ
     ### object access functions
     #######################
   end
-
-  class AssocNodeGroupComponent < Model
-    set_relation_name(:node,:assoc_group_component)
-    def self.up()
-      foreign_key :node_group_id, :node_group, FK_CASCADE_OPT
-      foreign_key :component_id, :component, FK_CASCADE_OPT
-      many_to_one :library, :datacenter, :project
-    end
-
-    ### virtual column defs
-    #######################
-    ### object access functions
-    #######################
-    end
 end

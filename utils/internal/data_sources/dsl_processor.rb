@@ -94,7 +94,7 @@ module XYZ
     def normalize(ds_hash_list,parent_ds_object)
       #TBD: how to avoid this db call
       ds_object = parent_ds_object.get_directly_contained_objects(:data_source_entry,{:obj_type=>@obj_type.to_s}).first
-      raise Error.new("cannot find data source adapter for nested definition") if ds_object.nil?
+      raise Error.new("cannot find data source adapter for nested definition for #{@obj_type.to_s}") if ds_object.nil?
       ret = DBUpdateHash.new()
       (@source_attributes.apply(ds_hash_list)||{}).each do |ref,child_source_hash_x|
         child_source_hash = child_source_hash_x.merge(:ref => ref)

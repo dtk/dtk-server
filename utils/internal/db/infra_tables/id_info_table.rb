@@ -45,7 +45,14 @@ module XYZ
         self[:model_name] = x[:model_name].to_sym if x[:model_name]
       elsif x[:uri]
         self[:uri]= x[:uri]
-        self[:model_name] = x[:model_name].to_sym if x[:model_name]
+        if x[:model_name]
+          self[:model_name] = x[:model_name].to_sym if x[:model_name]          
+        else
+          #TODO: cleanup; probably removing id_handle staht can be factory ids
+          unless x[:is_factory]
+            self[:model_name] = RestURI.ret_relation_type_from_instance_uri(x[:uri])
+          end
+        end
       else
 	raise_has_illegal_form(x) 
       end
@@ -214,7 +221,7 @@ module XYZ
           end
 
           factory_uri = RestURI.ret_factory_uri(parent_uri,relation_type)
-          IDHandle[:c => parent_id_handle[:c], :uri => factory_uri]
+          IDHandle[:c => parent_id_handle[:c], :uri => factory_uri, :is_factory => true]
         end
 
 	def get_factory_children_rows(factory_id_info)

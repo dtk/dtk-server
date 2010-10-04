@@ -50,7 +50,7 @@ module XYZ
             child_id_list << child_id_info[:id] if delete_not_matching
           else
             unless assigns.kind_of?(HashObject) and assigns.do_not_extend
-              factory_id_handle = IDHandle[:c => c, :uri => factory_id_info[:uri]] 
+              factory_id_handle = IDHandle[:c => c, :uri => factory_id_info[:uri], :is_factory => true] 
               new_uris = new_uris + create_from_hash(factory_id_handle,{qualified_ref => child_assigns})
             end
           end
@@ -83,7 +83,7 @@ module XYZ
 	obj_assigns = ret_object_assignments(assigns,db_rel)
 	obj_assigns.each_pair do |relation_type,child_assigns|
 	  factory_uri = RestURI.ret_factory_uri(id_info[:uri],relation_type)
-	  factory_id_info = IDInfoTable.get_row_from_id_handle IDHandle[:c => c, :uri => factory_uri], :raise_error => true	 
+	  factory_id_info = IDInfoTable.get_row_from_id_handle IDHandle[:c => c, :uri => factory_uri, :is_factory => true], :raise_error => true	 
           new_uris = new_uris + update_from_hash_from_factory_id(factory_id_info,child_assigns,opts)
         end
         new_uris

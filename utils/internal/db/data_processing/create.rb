@@ -30,7 +30,7 @@ module XYZ
           create_simple_instance?(parent_uri,c,opts) unless parent_uri == "/" or exists? IDHandle[:uri => parent_uri, :c => c]
         end
         assignments = opts[:set_display_name] ? {:display_name => ref} : {}
-        create_from_hash(IDHandle[:c => c, :uri => factory_uri],{ref => assignments}).first
+        create_from_hash(IDHandle[:c => c, :uri => factory_uri, :is_factory => true],{ref => assignments}).first
       end
 
      private

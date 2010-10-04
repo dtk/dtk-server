@@ -20,6 +20,13 @@ module XYZ
           [$2,$1] : nil
       end
 
+      def ret_relation_type_from_instance_uri(instance_uri)
+        instance_ref,factory_uri = parse_instance_uri(instance_uri)
+        return nil if factory_uri.nil?
+        relation_type,parent_uri = parse_factory_uri(factory_uri)
+        relation_type
+      end
+
       def ret_factory_uri(parent_uri,relation_type)
         parent_uri + "/" + relation_type.to_s
       end

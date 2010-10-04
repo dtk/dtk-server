@@ -24,9 +24,20 @@ module XYZ
     end
 
     #######################
-    ### object access functions
+    ### object procssing and access functions
+    def self.clone_post_copy_hook(new_id_handle,target_id_handle)
+      c = new_id_handle[:c]
+      #TODO using get_instance_or_factory becaus eit can get deep object; shoudl unify with get_object( 
+      obj_on_node_group = get_instance_or_factory(new_id_handle,nil,{:depth => :deep, :no_hrefs => true})
+      #clone to all members
+      node_group_obj = get_objects_and_related_objects(ModelHandle.new(c,:node_group),{:id => target_id_handle.get_id()}).first
+      (node_group_obj||{})[:member_id_list].each do |node_id|
+        clone(new_id_handle,IDHandle[:c => c,:model_name => :node,:id=> node_id],{},{:source_obj => obj_on_node_group})
+      end
+    end
     #######################
-    #need to overwrite this fn because special processing to handle :dynamic_membership_sql
+
+    #needed to overwrite this fn because special processing to handle :dynamic_membership_sql
     def self.get_objects_and_related_objects(model_handle,where_clause={},opts={})
       #break into two parts; one with explicit links and the other with :dynamic_membership_sql non null
       static_group = super(model_handle,SQL.and(where_clause,{:dynamic_membership_sql => nil}),opts)

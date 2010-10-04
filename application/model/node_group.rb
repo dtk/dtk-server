@@ -28,11 +28,30 @@ module XYZ
     def self.clone_post_copy_hook(new_id_handle,target_id_handle)
       c = new_id_handle[:c]
       obj_on_node_group = get_object_deep(new_id_handle)
-      #clone to all members
+      #clone component(deep) on to all members
+      #TODO: for efficiency handle by less sql operations
       node_group_obj = get_object(target_id_handle)
       (node_group_obj||{})[:member_id_list].each do |node_id|
+        #TODO: need processing that checks if component already on node for components that can only be once on node
         clone(new_id_handle,IDHandle[:c => c,:model_name => :node,:id=> node_id],{},{:source_obj => obj_on_node_group})
       end
+      #put in attribute links
+      node_cmp_wc = {:ancestor_id => new_id_handle.get_id()}
+      node_cmp_fs = {:field_set => [:id]}
+      node_cmp_ds = get_objects_just_dataset(ModelHandle.new(c,:component),node_cmp_wc,node_cmp_fs)
+
+      node_attr_fs = {:field_set => [:component_component_id,:id,:ref]}
+      node_attr_ds = get_objects_just_dataset(ModelHandle.new(c,:attribute),nil,node_attr_fs)
+
+      group_attr_wc = {:component_component_id => new_id_handle.get_id()}
+      group_attr_fs = {:field_set => [:id,:ref]}
+      group_attr_ds = get_objects_just_dataset(ModelHandle.new(c,:attribute),group_attr_wc,group_attr_fs)
+
+      graph = node_cmp_ds.graph(:inner,node_attr_ds,{:component_component_id => :id}).graph(:inner,group_attr_ds,{:ref => :ref})
+      select = graph.select('attribute_link',:attribute2__id,:attribute__id)
+      create_from_select(ModelHandle.new(c,:attribute_link),[:ref,:input_id,:output_id],select)
+      #TODO: links for monitor_items
+
     end
     #######################
 

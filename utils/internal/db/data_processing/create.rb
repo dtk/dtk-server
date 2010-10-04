@@ -20,6 +20,15 @@ module XYZ
         end
       end
 
+      def create_from_select(model_handle,columns,select,opts={})
+        db_rel = DB_REL_DEF[model_handle[:model_name]]
+        if columns.include?(:c)
+          dataset(db_rel).import(columns,select.sequel_ds)
+        else
+          dataset(db_rel).import(columns + [:c],select.sequel_ds.select_more(model_handle[:c]))
+        end
+      end
+
       def create_simple_instance?(new_uri,c,opts={})
         return new_uri if exists? IDHandle[:uri => new_uri, :c => c]
         ref,factory_uri = RestURI.parse_instance_uri(new_uri)

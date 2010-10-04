@@ -7,6 +7,7 @@ module XYZ
         ds_column_defs :ds_attributes, :ds_key
         column :type, :varchar, :size => 15 # instance | template | composite
         column :basic_type, :varchar, :size => 15 # service | package | language | ..
+        column :only_one_per_node, :boolean, :default => true
         column :version, :varchar, :size => 25 # version of underlying component (not chef recipe .... version)
         column :external_type, :varchar
         column :external_cmp_ref, :varchar

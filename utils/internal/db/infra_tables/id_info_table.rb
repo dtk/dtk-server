@@ -21,6 +21,10 @@ module XYZ
       (IDInfoTable.get_row_from_id_handle(self,:short_circuit_for_minimal_row => true)||{})[:id]
     end
 
+    def ret_model_handle()
+      ModelHandle.new(self[:c],self[:model_name])
+    end
+
     def initialize(x)
       super()
       if x[:id_info]
@@ -75,9 +79,14 @@ module XYZ
 
   class IDInfoRow < Hash
     def ret_id_handle()
-      IDHandle[CONTEXT_ID => self[CONTEXT_ID], :guid => IDInfoTable::ret_guid_from_id_info(self)]
+      IDHandle[CONTEXT_ID => self[CONTEXT_ID], :guid => IDInfoTable::ret_guid_from_id_info(self), :model_name => self[:relation_type]]
     end
 
+    def ret_model_handle()
+      ModelHandle.new(self[CONTEXT_ID],self[:relation_type])
+    end
+
+    #TOTO rename to ret_id()
     def ret_db_id()
       IDInfoTable::db_id_from_guid(IDInfoTable::ret_guid_from_id_info(self))
     end

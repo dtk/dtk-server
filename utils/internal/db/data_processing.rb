@@ -57,7 +57,7 @@ module XYZ
             Log.info("id handle shoudl not be nil")
             next
           end
-          object = get_object(id_handle,{:field_set => real_cols})
+          object = get_object_scalar_columns(id_handle,{:field_set => real_cols})
           object.each{|k,v| scalar_assigns[k] = v}
         end
 

@@ -2,8 +2,7 @@ module XYZ
   module CloneClassMixins
 
     def clone(id_handle,target_id_handle,override_attrs={},opts={})
-      #TODO unify with new functions taht uses joins
-      source_obj = opts[:source_obj] || get_instance_or_factory(id_handle,nil,{:depth => :deep, :no_hrefs => true})
+      source_obj = opts[:source_obj] || get_object_deep(id_handle)
       raise Error.new("clone source (#{id_handle}) not found") if source_obj.nil? 
       set_model_specfic_override_attrs!(override_attrs,source_obj)
       new_id_handle = clone_copy(id_handle,source_obj,target_id_handle,override_attrs,opts)

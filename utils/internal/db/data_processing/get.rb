@@ -3,7 +3,7 @@ module XYZ
   class DB
     module DataProcessingGet
       #where clause could be hash or string
-      def get_objects(model_handle,where_clause=nil,opts={})
+      def get_objects_scalar_columns(model_handle,where_clause=nil,opts={})
         c = model_handle[:c]
         relation_type =  model_handle[:model_name]
         #special processing if parent_id given
@@ -27,15 +27,15 @@ module XYZ
       end
 
       def get_objects_just_dataset(model_handle,where_clause=nil,opts={})
-        get_objects(model_handle,where_clause,opts.merge({:return_just_sequel_dataset => true}))
+        get_objects_scalar_columns(model_handle,where_clause,opts.merge({:return_just_sequel_dataset => true}))
       end
 
       #TODO: may be able to optimze seeing that curerntly uses get_objects
-      def get_object(id_handle,opts={})
+      def get_object_scalar_columns(id_handle,opts={})
 	c = id_handle[:c]
 	id_info = IDInfoTable.get_row_from_id_handle id_handle, :raise_error => opts[:raise_error], :short_circuit_for_minimal_row => true
 	return unless id_info and id_info[:id]
-        get_objects(ModelHandle.new(c,id_info[:relation_type]),{:id => id_info[:id]},opts).first
+        get_objects_scalar_columns(ModelHandle.new(c,id_info[:relation_type]),{:id => id_info[:id]},opts).first
       end
 
 
@@ -71,7 +71,7 @@ module XYZ
 	id_info = IDInfoTable.get_row_from_id_handle id_handle,  :raise_error => opts[:raise_error]
 	return nil unless id_info and id_info[:parent_id] 
 	parent_id_handle = IDHandle[:c => c, :id => id_info[:parent_id], :model_name => id_info[:parent_relation_type]]
-        get_object(parent_id_handle,opts)
+        get_object_scalar_columns(parent_id_handle,opts)
       end
 
 

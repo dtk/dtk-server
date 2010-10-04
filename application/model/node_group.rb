@@ -27,10 +27,9 @@ module XYZ
     ### object procssing and access functions
     def self.clone_post_copy_hook(new_id_handle,target_id_handle)
       c = new_id_handle[:c]
-      #TODO using get_instance_or_factory becaus eit can get deep object; shoudl unify with get_object( 
-      obj_on_node_group = get_instance_or_factory(new_id_handle,nil,{:depth => :deep, :no_hrefs => true})
+      obj_on_node_group = get_object_deep(new_id_handle)
       #clone to all members
-      node_group_obj = get_objects_and_related_objects(ModelHandle.new(c,:node_group),{:id => target_id_handle.get_id()}).first
+      node_group_obj = get_object(target_id_handle)
       (node_group_obj||{})[:member_id_list].each do |node_id|
         clone(new_id_handle,IDHandle[:c => c,:model_name => :node,:id=> node_id],{},{:source_obj => obj_on_node_group})
       end
@@ -38,19 +37,20 @@ module XYZ
     #######################
 
     #needed to overwrite this fn because special processing to handle :dynamic_membership_sql
-    def self.get_objects_and_related_objects(model_handle,where_clause={},opts={})
+    def self.get_objects(model_handle,where_clause={},opts={})
       #break into two parts; one with explicit links and the other with :dynamic_membership_sql non null
       static_group = super(model_handle,SQL.and(where_clause,{:dynamic_membership_sql => nil}),opts)
-      static_group + get_objects_and_related_objects_dyanmic(model_handle,where_clause,opts)
+      static_group + get_objects_dynamic(model_handle,where_clause,opts)
     end
    private
 
-    def self.get_objects_and_related_objects_dyanmic(model_handle,where_clause={},opts={})
+    def self.get_objects_dynamic(model_handle,where_clause={},opts={})
       #TODO: make more efficient
       c = model_handle[:c]
-      groups_info = get_objects(model_handle,SQL.and(where_clause,SQL.and(where_clause,SQL.not(:dynamic_membership_sql => nil))),
+      #importnat bloe wthat  Model.get_objects called, not get_objects
+      groups_info = Model.get_objects(model_handle,SQL.and(where_clause,SQL.and(where_clause,SQL.not(:dynamic_membership_sql => nil))),
                                 opts.merge(:field_set => [:id,:display_name,:dynamic_membership_sql]))
-      groups_info.map{|group|group.merge :node => get_objects(ModelHandle.new(c,:node),group[:dynamic_membership_sql])}
+      groups_info.map{|group|group.merge :node => Model.get_objects(ModelHandle.new(c,:node),group[:dynamic_membership_sql])}
         
     end
   end

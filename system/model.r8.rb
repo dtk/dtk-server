@@ -13,7 +13,7 @@ module XYZ
   class Model < HashObject 
     class << self
       attr_reader :db
-      expose_methods_from_internal_object :db, %w{update_from_hash_assignments update_instance get_instance_or_factory get_instance_scalar_values get_objects get_objects_just_dataset get_object_ids_wrt_parent get_object get_parent_object get_parent_id_info exists? create_from_hash create_simple_instance? delete_instance delete_instances_wrt_parent process_raw_db_row!}
+      expose_methods_from_internal_object :db, %w{update_from_hash_assignments update_instance get_instance_or_factory get_instance_scalar_values get_objects_just_dataset get_object_ids_wrt_parent get_parent_object get_parent_id_info exists? create_from_hash create_simple_instance? delete_instance delete_instances_wrt_parent process_raw_db_row!}
 
       def model_class(model_name)
         XYZ.const_get Aux.camelize model_name.to_s
@@ -48,7 +48,7 @@ module XYZ
     end
 
 
-    def self.get_objects_and_related_objects(model_handle,where_clause={},opts={})
+    def self.get_objects(model_handle,where_clause={},opts={})
       c = model_handle[:c]
       model_name = model_handle[:model_name]
       field_set = opts[:field_set] || FieldSet.default(model_name)
@@ -56,18 +56,30 @@ module XYZ
       related_columns = FieldSet.related_columns(field_set,model_name)
       ret = nil
       unless related_columns
-        ret = get_objects(model_handle,where_clause,opts)
+        ret = @db.get_objects_scalar_columns(model_handle,where_clause,opts)
       else
         ls_opts = opts.merge :field_set => field_set
         graph_ds = get_objects_just_dataset(model_handle,where_clause,ls_opts)
         related_columns.each do |join_info|
           rs_opts = (join_info[:cols] ? {:field_set => join_info[:cols]} : {}).merge :return_as_hash => true
-          right_ds = get_objects_just_dataset(ModelHandle.new(c,join_info[:model_name]),nil,rs_opts)
+          right_ds = @db.get_objects_just_dataset(ModelHandle.new(c,join_info[:model_name]),nil,rs_opts)
           graph_ds = graph_ds.graph(:left_outer,right_ds,join_info[:join_cond])
         end
         ret = graph_ds.all
       end
       ret
+    end
+
+
+    def self.get_object(id_handle,opts={})
+      c = id_handle[:c]
+      id_info = IDInfoTable.get_row_from_id_handle id_handle, :raise_error => opts[:raise_error], :short_circuit_for_minimal_row => true
+      return unless id_info and id_info[:id]
+      get_objects(ModelHandle.new(c,id_info[:relation_type]),{:id => id_info[:id]},opts).first
+    end
+
+    def self.get_object_deep(id_handle,opts={})
+      @db.get_instance_or_factory(id_handle,nil,opts.merge({:depth => :deep, :no_hrefs => true}))
     end
 
     def [](x)

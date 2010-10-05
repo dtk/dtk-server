@@ -1,22 +1,19 @@
-/* blue group: #73c0ef */
-
-.basic-group-wrapper {
-	width: 90px;
-	height: 50px;
-}
 
 .basic-group {
-	position: relative;
-	height: 108px;
+	position: absolute;
 }
 
+.basic-group.medium {
+	height: 118px;
+	width: 606px;
+}
 .yui3-dd-dragging {
 	cursor: move;
 }
 
 .group {
 	position: absolute;
-	z-index: 10;
+	z-index: 5;
 }
 
 /*-------Corners-----------*/
@@ -73,37 +70,51 @@
 	width: 7px;
 }
 
-.basic-group .l-col .body {
+.basic-group.medium .l-col .l-col-body {
 	width: 5px;
 	height: 104px;
 	border-left: 2px solid black;
 	float: left;
 }
-.basic-group.green .l-col .body {
+.basic-group.focus .l-col .l-col-body {
+	border-left: 2px solid #C80000;
+}
+
+.basic-group.green .l-col .l-col-body {
 	background-color: #7EB75C;
 }
-.basic-group.blue .l-col .body {
+.basic-group.blue .l-col .l-col-body {
 	background-color: #A8C6ED;
 }
 
-.basic-group .r-col .body {
+.basic-group.medium .r-col .r-col-body {
 	width: 5px;
 	height: 104px;
 	border-right: 2px solid black;
 	float: left;
 }
-.basic-group.green .r-col .body {
+
+.basic-group.focus .r-col .r-col-body {
+	border-right: 2px solid #C80000;
+}
+
+.basic-group.green .r-col .r-col-body {
 	background-color: #7EB75C;
 }
-.basic-group.blue .r-col .body {
+.basic-group.blue .r-col .r-col-body {
 	background-color: #A8C6ED;
 }
 
-.basic-group .body.medium {
+.basic-group.medium .body {
 	float: left;
 	border-top: 2px solid black;
 	border-bottom: 2px solid black;
 	height: 114px; width: 422px;
+}
+
+.basic-group.focus .body {
+	border-top: 2px solid #C80000;
+	border-bottom: 2px solid #C80000;
 }
 
 .basic-group.green .body {
@@ -117,9 +128,17 @@
 
 .basic-group .elastic-node-body {
 	float: left;
+	height: 114px;
+	width: 132px;
 	border-top: 2px solid black;
 	border-bottom: 2px solid black;
 }
+
+.basic-group.focus .elastic-node-body {
+	border-top: 2px solid #C80000;
+	border-bottom: 2px solid #C80000;
+}
+
 .basic-group.green .elastic-node-body {
 	background-color: #7EB75C;
 }
@@ -139,6 +158,9 @@
 .basic-group.green .elastic-header {
 	background-image: url(../images/group/elastic-green.png);
 }
+.basic-group.green.focus .elastic-header {
+	background-position: -38px 0px;
+}
 .basic-group.blue .elastic-header {
 	background-image: url(../images/group/elastic-blue.png);
 }
@@ -151,6 +173,10 @@
 .basic-group.green .elastic-footer {
 	background-image: url(../images/group/elastic-green.png);
 }
+.basic-group.green.focus .elastic-footer {
+	background-position: -38px -6px;
+}
+
 .basic-group.blue .elastic-footer {
 	background-image: url(../images/group/elastic-blue.png);
 }
@@ -177,7 +203,6 @@
 	z-index: 1;
 	position: absolute;
 	background-color: #FFFFFF;
-/*	border: 1px solid #A8C6ED;*/
 	margin-left: 2px;
 }
 .slide-container-header {
@@ -278,3 +303,158 @@
 	height: 5px;
 }
 
+/*------------Drop Shadow---------*/
+
+.basic-group.medium .drop-shadow-group {
+	height: 118px;
+	width: 606px;
+	margin: 4px 0 0 4px;
+}
+
+.group.yui3-dd-dragging {
+	margin: -7px 0 0 -7px;
+}
+.basic-group.yui3-dd-dragging .item {
+	margin: -7px 0 0 -7px;
+}
+
+.basic-group .ds-corner {
+	height: 7px;
+	width: 7px;
+	background-repeat: no-repeat;
+	float: left;
+}
+
+.basic-group .ds-corner {
+	background-image: url(../images/node/basic-corners-shadow.png);
+}
+
+.basic-group .ds-corner.tr {
+	background-position: 0px -7px;
+}
+.basic-group .ds-corner.br {
+	background-position: 0px -14px;
+}
+.basic-group .ds-corner.bl {
+	background-position: 0px -21px;
+}
+
+.basic-group.medium .ds-l-col {
+	float: left;
+	height: 108px;
+	width: 7px;
+}
+.basic-group.medium .ds-r-col {
+	float: right;
+	height: 108px;
+	width: 7px;
+}
+
+.basic-group.medium .drop-shadow-group .ds-l-col-body {
+	width: 7px;
+	height: 104px;
+	float: left;
+	background-image: url(../images/node/basic-col-shadow-bg.png);
+	background-repeat: repeat-y;
+}
+
+
+.basic-group.medium .drop-shadow-group .ds-r-col-body {
+	width: 7px;
+	height: 104px;
+	float: left;
+	background-image: url(../images/node/basic-col-shadow-bg.png);
+	background-repeat: repeat-y;
+	background-position: -7px 0px;
+}
+
+.basic-group.medium .drop-shadow-group .ds-body {
+	float: left;
+	width: 422px;
+	height: 104px;
+}
+.basic-group.medium .drop-shadow-group .ds-body .header {
+	float: left;
+	width: 422px;
+	height: 7px;
+	background-image: url(../images/node/basic-header-shadow-bg.png);
+	background-repeat: repeat-x;
+}
+.basic-group.medium .drop-shadow-group .ds-body .footer {
+	float: left;
+	width: 422px;
+	height: 7px;
+	background-image: url(../images/node/basic-header-shadow-bg.png);
+	background-repeat: repeat-x;
+	background-position: 0px -7px;
+}
+
+.basic-group.medium .drop-shadow-group .ds-body .main-body {
+	float: left;
+	width: 422px;
+	height: 104px;
+	background-image: url(../images/node/basic-body-shadow-bg.png);
+	background-repeat: repeat;
+}
+
+/*---------Shadow Elastic------*/
+.basic-group.medium .drop-shadow-group .elastic-ds-body {
+	float: left;
+	width: 38px;
+	height: 118px;
+}
+
+.basic-group.medium .drop-shadow-group .elastic-ds-body .header {
+	float: left;
+	width: 38px;
+	height: 6px;
+	background-image: url(../images/group/elastic-shadow.png);
+	background-repeat: no-repeat;
+}
+.basic-group.medium .drop-shadow-group .elastic-ds-body .footer {
+	float: left;
+	width: 38px;
+	height: 6px;
+	background-image: url(../images/group/elastic-shadow.png);
+	background-repeat: no-repeat;
+	background-position: 0px -6px;
+}
+
+.basic-group.medium .drop-shadow-group .elastic-ds-body .main-body {
+	float: left;
+	width: 38px;
+	height: 106px;
+	background-image: url(../images/node/basic-body-shadow-bg.png);
+	background-repeat: repeat;
+}
+
+/*----------Shadow Elastic Node--------*/
+
+.basic-group.medium .drop-shadow-group .elastic-node-ds-body {
+	float: left;
+	width: 132px;
+	height: 118px;
+}
+.basic-group.medium .drop-shadow-group .elastic-node-ds-body .header {
+	float: left;
+	width: 132px;
+	height: 7px;
+	background-image: url(../images/node/basic-header-shadow-bg.png);
+	background-repeat: repeat-x;
+}
+.basic-group.medium .drop-shadow-group .elastic-node-ds-body .footer {
+	float: left;
+	width: 132px;
+	height: 7px;
+	background-image: url(../images/node/basic-header-shadow-bg.png);
+	background-repeat: repeat-x;
+	background-position: 0px -7px;
+}
+
+.basic-group.medium .drop-shadow-group .elastic-node-ds-body .main-body {
+	float: left;
+	width: 132px;
+	height: 104px;
+	background-image: url(../images/node/basic-body-shadow-bg.png);
+	background-repeat: repeat;
+}

@@ -387,17 +387,29 @@ console.log('Have a drop hit for node!!!!');
 				contentFraming += '</div>';
 				document.getElementById('cmdbar-' + this.name + '-tab-content').innerHTML = contentFraming;
 					
-				var nodeId = '#' + name + '-list-container';
-				var resizeCallback = {
-					'nodeId': nodeId,
+				var wrapperId = '#' + name + '-slide-wrapper';
+				var wrapperResizeCallback = {
+					'nodeId': wrapperId,
 					'lambda': function(height, width){
-						var width = width - 65;
+						var width = width - 40;
 						return {
 							'width': width
 						};
 					}
 				};
-				R8.Workspace.addResizeCallback(resizeCallback);
+				R8.Workspace.addResizeCallback(wrapperResizeCallback);
+
+				var sliderId = '#' + name + '-list-container';
+				var sliderResizeCallback = {
+					'nodeId': sliderId,
+					'lambda': function(height, width){
+						var width = width - 44;
+						return {
+							'width': width
+						};
+					}
+				};
+				R8.Workspace.addResizeCallback(sliderResizeCallback);
 			},
 				
 			'focus': function(){
@@ -484,8 +496,7 @@ console.log('Have a drop hit for node!!!!');
 			setupDD: function(){
 				var name = this.name;
 				var tIndex = R8.Cmdbar.getTabIndexByName(name);
-//DEBUG
-console.log('Setting up DD for:'+name+'  at index:'+tIndex);
+
 				YUI().use('dd-delegate', 'dd-proxy', 'node', 'dd-drop-plugin', function(Y){
 					R8.Cmdbar.loadedTabs[tIndex].compDDel = new Y.DD.Delegate({
 						cont: '#' + name + '-slide-bar',
@@ -503,15 +514,13 @@ console.log('Setting up DD for:'+name+'  at index:'+tIndex);
 							if(!this.hasClass('yui3-dd-drop')) {
 								var drop = new Y.DD.Drop({node:this});
 								drop.addToGroup([dropGroup]);
-								drop.on('drop:enter',function(e){ console.log('entered drop element!!!');});
+								drop.on('drop:enter',function(e){
+								});
 								drop.on('drop:hit',function(e){
 									var dropNode = e.drop.get('node');
 									var compNode = e.drag.get('dragNode').get('children').item(0);
-									var componentId = compNode.get('data-id');
-//									componentId = componentId.replace('component_','');
-console.log(e);
-console.log('ComponentId:'+componentId);
-//									R8.Workspace.addComponentToContainer(componentId,dropNode);
+									var componentId = compNode.getAttribute('data-id');
+									R8.Workspace.addComponentToContainer(componentId,dropNode);
 								});
 							}
 						});

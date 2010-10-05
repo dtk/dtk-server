@@ -1,11 +1,11 @@
-		<div id="vi_{%=node[:id]%}" class="item-wrapper basic-item medium blue" data-status="pending_setup" data-id="{%=node[:id]%}" data-model="{%=node[:model_name]%}" style="top: {%=node[:ui][:top]%}px; left: {%=node[:ui][:left]%}px;">
-			<div id="node_{%=node[:id]%}" data-id="{%=node[:id]%}" data-model="{%=node[:model_name]%}" class="item node">
+		<div id="item_{%=node[:id]%}_wrapper" class="item-wrapper basic-item medium blue" data-status="pending_setup" data-id="{%=node[:id]%}" data-model="{%=node[:model_name]%}" style="top: {%=node[:ui][:top]%}px; left: {%=node[:ui][:left]%}px;">
+			<div id="item_{%=node[:id]%}" data-id="{%=node[:id]%}" data-model="{%=node[:model_name]%}" class="item node">
 				<div class="l-col">
 					<div class="corner tl"></div>
 					<div class="l-col-body"></div>
 					<div class="corner bl"></div>
 				</div>
-				<div id="{%=node[:id]%}-body" class="body">
+				<div id="body-{%=node[:id]%}" class="body">
 					{%=node[:display_name]%}<br/><br/>{%=num_components%}&nbsp;Component(s)&nbsp;&nbsp;
 					<img src="{%=base_images_uri%}/workspace/node-status-{%=node[:operational_status]%}.png"/>
 				</div>

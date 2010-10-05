@@ -447,7 +447,7 @@ console.log('I guess I am hitting this now!!!!');
 
 			addComponentToContainer : function(componentId,containerNode) {
 				var modelName = containerNode.getAttribute('data-model');
-				var modelId = containerNode.get('data-id');
+				var modelId = containerNode.getAttribute('data-id');
 
 				var queryParams = 'target_model_name='+modelName+'&target_id='+modelId;
 //				queryParams += '&model_redirect='+modelName+'&action_redirect=wspace_display&id_redirect='+modelId;
@@ -506,7 +506,7 @@ console.log('To Group:'+groupId);
 							'left':this.getStyle('left')
 						}
 					}
-					if(dataModel == 'node' && status == 'pending_setup') {
+					if((dataModel == 'node' || dataModel == 'group') && status == 'pending_setup') {
 						var top = this.getStyle('top');
 						var left = this.getStyle('left');
 						for(item in R8.Workspace.pendingDelete) {

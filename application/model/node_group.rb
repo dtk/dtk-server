@@ -35,6 +35,7 @@ module XYZ
         #TODO: need processing that checks if component already on node for components that can only be once on node
         clone(new_id_handle,IDHandle[:c => c,:model_name => :node,:id=> node_id],{},{:source_obj => obj_on_node_group})
       end
+      #TODO: neeed to set the children derived value to the value of node group attributes; see if really explicitly need links
       #put in attribute links
       node_cmp_wc = {:ancestor_id => new_id_handle.get_id()}
       node_cmp_fs = {:field_set => [:id]}

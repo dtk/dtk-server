@@ -19,14 +19,6 @@ module XYZ
     end
     ##### Actions
     ### virtual column defs
-    def parent_name()
-      return "library/#{self[:library][:display_name]}" if self[:library] and self[:library][:display_name]
-      return "node_group/#{self[:node_group][:display_name]}" if self[:node_group] and self[:node_group][:display_name]
-      return "node/#{self[:node][:display_name]}" if self[:node] and self[:node][:display_name]
-      return "component/#{self[:component][:display_name]}" if self[:component2] and self[:component2][:display_name]
-      return "project/#{self[:project][:display_name]}" if self[:project] and self[:project][:display_name]
-      nil
-    end
     ###### Helper fns
     def get_contained_attribute_ids(opts={})
       parent_id = IDInfoTable.get_id_from_id_handle(id_handle)

@@ -29,15 +29,17 @@ module XYZ
     end
 
     ### virtual column defs
-    def parent_name()
-      return "library/#{self[:library][:display_name]}" if self[:library] and self[:library][:display_name]
-      return "datacenter/#{self[:datacenter][:display_name]}" if self[:datacenter] and self[:datacenter][:display_name]
-      return "project/#{self[:project][:display_name]}" if self[:project] and self[:project][:display_name]
-      nil
-    end
     #######################
     #object processing and access functions
-
+    def self.set_model_specific_override_attrs!(override_attrs,source_attr,ref)
+      if source_attr[:type] == "image"
+        override_attrs[:type] = "instance"
+        override_attrs[:display_name] = "i-#{override_attrs[:display_name]||ref}"
+        override_attrs[:ref] = "i-#{ref}"
+        override_attrs[:external_ref] = ()
+      end
+    end
+    
     #TODO: quick hack
     def self.get_wspace_display(id_handle)
       c = id_handle[:c]

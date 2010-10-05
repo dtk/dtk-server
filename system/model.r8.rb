@@ -1,6 +1,3 @@
-#TODO: should probably just rename this to model.r8.rb and move directly into system folder
-
-
 require File.expand_path(UTILS_DIR+'/internal/model/field_set', File.dirname(__FILE__))
 require File.expand_path(UTILS_DIR+'/internal/model/input_into_model', File.dirname(__FILE__))
 require File.expand_path(UTILS_DIR+'/internal/model/clone', File.dirname(__FILE__))
@@ -85,8 +82,10 @@ module XYZ
     def [](x)
       vc_info = ret_info_if_is_virtual_column(x)
       if vc_info
-        #first check if it has an explicit path; otherwise look for fn
-        vc_info[:path] ? nested_value(*vc_info[:path]) : send(x) 
+        #first check if it has an explicit path or possible parents defined; otherwise look for fn
+        return nested_value(*vc_info[:path]) if vc_info[:path]
+        return ret_parent_name(vc_info[:possible_parents]) if vc_info[:possible_parents] and x == :parent_name
+        send(x) 
       else
         super(x)
       end
@@ -94,6 +93,11 @@ module XYZ
 
     def ret_info_if_is_virtual_column(col)
       (self.class.db_rel[:virtual_columns]||{})[col]
+    end
+
+    def ret_parent_name(possible_parents)
+      possible_parents.each{|p|return "library/#{self[p][:display_name]}" if self[p] and self[p][:display_name]}
+      nil
     end
 
     #inherited virtual coulmn defs

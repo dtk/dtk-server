@@ -71,28 +71,29 @@ R8.Cmdbar.cmdHandlers['search'] = {
 			'events': {},
 			'contentLoader': function(){
 				var name = this.name;
-				var width = R8.Workspace.viewPortRegion['width'] - 37;
-//				var contentFraming = '<div class="slider-top"></div>';
-				var contentFraming = '<div id="' + name + '-slider-wrapper" class="slider-wrapper">';
+				var width = R8.Workspace.viewPortRegion['width'] - 40;
+				var slideContainerWidth = width - 4;
+
+				var contentFraming = '<div id="' + name + '-slider-wrapper" class="slide-wrapper" style="width: ' + width + 'px; margin-top: 10px;">';
 				contentFraming += 	'<div id="' + name + '-lbutton" class="lbutton"></div>';
-				contentFraming += 	'<div id="slider-l-shade">';
-				contentFraming +=		'<div class="top"></div>';
-				contentFraming += 		'<div class="body"></div>';
-				contentFraming += 		'<div class="bottom"></div>';
+				contentFraming += 	'<div class="slide-l-shade">';
+				contentFraming +=		'<div class="shade-top"></div>';
+				contentFraming += 		'<div class="shade-body"></div>';
+				contentFraming += 		'<div class="shade-bottom"></div>';
 				contentFraming += 	'</div>';
-				contentFraming += 	'<div id="' + name + '-list-container" class="slide-list-container" style="width: ' + width + 'px;">';
+				contentFraming += 	'<div id="' + name + '-list-container" class="slide-container" style="width: ' + slideContainerWidth + 'px;">';
+				contentFraming +=		'<div class="slide-container-header"></div>';
 				contentFraming += 		'<div id="' + name + '-slider"></div>';
 				contentFraming += 	'</div>';
-				contentFraming += 	'<div id="slider-r-shade">';
-				contentFraming +=		'<div class="top"></div>';
-				contentFraming += 		'<div class="body"></div>';
-				contentFraming += 		'<div class="bottom"></div>';
+				contentFraming += 	'<div class="slide-r-shade">';
+				contentFraming +=		'<div class="shade-top"></div>';
+				contentFraming += 		'<div class="shade-body"></div>';
+				contentFraming += 		'<div class="shade-bottom"></div>';
 				contentFraming += 	'</div>';
 				contentFraming += 	'<div id="' + name + '-rbutton" class="rbutton"></div>';
 				contentFraming += '</div>';
-//				contentFraming += '<div class="slider-btm"></div>';
 				document.getElementById('cmdbar-' + this.name + '-tab-content').innerHTML = contentFraming;
-					
+
 				var nodeId = '#' + name + '-list-container';
 				var resizeCallback = {
 					'nodeId': nodeId,
@@ -122,8 +123,8 @@ R8.Cmdbar.cmdHandlers['search'] = {
 					});
 				});
 			},
-				
-			'blur': function(){
+
+			blur: function(){
 				var tIndex = R8.Cmdbar.getTabIndexByName(this.name);
 				//DEBUG
 				//console.log('Blurring for:'+this.name);
@@ -132,24 +133,24 @@ R8.Cmdbar.cmdHandlers['search'] = {
 					R8.Cmdbar.loadedTabs[tIndex]['events']['slider_key_press'].detach();
 				}
 			},
-				
-			'clearContent': function(){
+
+			clearContent: function(){
 			},
-				
+
 			deleteCleanup: function(){
 				var nodeId = '#' + this.name + '-list-container';
 				R8.Workspace.cancelResizeCallback(nodeId);
 				this.sliderAnim = null;
 				this.slideBarNode = null;
 			},
-				
+
 			//------------Search Specific Functions/Callbacks---------
 			startSearch: function(ioId, arguments){
 			},
-				
+
 			endSearch: function(ioId, arguments){
 			},
-				
+
 			clearSlider: function(){
 				if (this.slideBarNode === null) 
 					return;
@@ -182,27 +183,26 @@ R8.Cmdbar.cmdHandlers['search'] = {
 					return;
 				}
 				R8.Cmdbar.loadedTabs[tIndex].setupDD();
-					
+
 				YUI().use('anim', function(Y){
 					R8.Cmdbar.loadedTabs[tIndex].setupSliderAnim(Y, tIndex);
 				});
 				R8.Cmdbar.loadedTabs[tIndex].sliderSetup = true;
 			},
-				
+
 			setupDD: function(){
 				var name = this.name;
 				var tIndex = R8.Cmdbar.getTabIndexByName(name);
+
 				YUI().use('dd-delegate', 'dd-proxy', 'dd-drop', 'dd-drop-plugin', 'node', function(Y){
 					R8.Cmdbar.loadedTabs[tIndex].compDDel = new Y.DD.Delegate({
 						cont: '#' + name + '-slide-bar',
-						nodes: 'div.avail_node',
-	//					dragMode: 'intersect',
+						nodes: 'div.node-drag',
 					});
-						
+
 					R8.Cmdbar.loadedTabs[tIndex].compDDel.dd.plug(Y.Plugin.DDProxy, {
 						moveOnEnd: false,
 						borderStyle: false,
-//						cloneNode: true
 					});
 
 					R8.Cmdbar.loadedTabs[tIndex].compDDel.on('drag:start', function(e){
@@ -215,32 +215,90 @@ R8.Cmdbar.cmdHandlers['search'] = {
 							zIndex: 1000
 						});
 					});
-						
-					R8.Cmdbar.loadedTabs[tIndex].drop = Y.one('#viewspace').plug(Y.Plugin.Drop);
-					R8.Cmdbar.loadedTabs[tIndex].drop.drop.addToGroup(['viewspace_drop']);
+
+					R8.Cmdbar.loadedTabs[tIndex].compDDel.on('drag:mouseDown', function(e){
+						var dropGroup = 'dg-node';
+
+						var vspaceNode = Y.one('#viewspace');
+						if (!vspaceNode.hasClass('yui3-dd-drop')) {
+							var vspaceDrop = new Y.DD.Drop({
+								node: vspaceNode
+							});
+							vspaceDrop.addToGroup([dropGroup]);
+
+							vspaceDrop.on('drop:enter', function(e){
+							});
+							vspaceDrop.on('drop:hit', function(e){
+								var drop = e.drop.get('node');
+								var dragClone = e.drag.get('dragNode').get('children').item(0);
+								var new_comp_id = Y.guid();
+								dragClone.set('id', new_comp_id);
+		
+								var vspaceElem = R8.Utils.Y.one('#viewspace');
+								var vspaceXY = vspaceElem.getXY();
+								var dragXY = dragClone.getXY();
+								var dragRegion = dragClone.get('region');
+								var dragLeft = dragXY[0] - (vspaceXY[0]);
+								var dragTop = dragXY[1] - (vspaceXY[1]);
+
+								dragClone.setStyles({
+									'top': dragTop + 'px',
+									'left': dragLeft + 'px'
+								});
+								drop.append(dragClone);
+								dragClone.setAttribute('data-status','pending_delete');
+								R8.Workspace.addItemToViewSpace(dragClone);
+							});
+						}
+
+						var dropList = Y.all('#viewspace div.'+dropGroup);
+						dropList.each(function(){
+							if(!this.hasClass('yui3-dd-drop')) {
+								var drop = new Y.DD.Drop({node:this});
+								drop.addToGroup([dropGroup]);
+								drop.on('drop:enter',function(e){ console.log('entered drop element!!!');});
+								drop.on('drop:hit',function(e){
+									var group = e.drop.get('node');
+									var groupId = group.getAttribute('data-id');
+									var dragNode = e.drag.get('dragNode').get('children').item(0);
+									var nodeId = dragNode.getAttribute('data-id');
+
+									R8.Workspace.addNodesToGroup([nodeId],groupId);
+								});
+							}
+						});
+					});
+
+//					R8.Cmdbar.loadedTabs[tIndex].drop.drop.addToGroup(['viewspace_drop']);
 					//TODO: come back and add in clean up of DD objects and events
+/*
 					R8.Cmdbar.loadedTabs[tIndex].compDDel.on('drag:drophit', function(e){
 						var drop = e.drop.get('node'), drag = this.get('dragNode');
-						var item_id = drag.getAttribute('data-id');
-						var model_name = drag.getAttribute('data-model-name');
-							
+//						var item_id = drag.getAttribute('data-id');
+//						var model_name = drag.getAttribute('data-model');
+//DEBUG
+console.log('Have a drop hit for node!!!!');
 						var dragChild = drag.get('children').item(0).cloneNode(true);
 						var new_comp_id = Y.guid();
 						dragChild.set('id', new_comp_id);
-							
+
 						var wspaceElem = R8.Utils.Y.one('#viewspace');
 						var wspaceXY = wspaceElem.getXY();
 						var dragXY = drag.getXY();
+						var dragRegion = drag.get('region');
 						var dragLeft = dragXY[0] - (wspaceXY[0]);
 						var dragTop = dragXY[1] - (wspaceXY[1]);
+
 						dragChild.setStyles({
 							'top': dragTop + 'px',
 							'left': dragLeft + 'px'
 						});
 						drop.append(dragChild);
 						dragChild.setAttribute('data-status','pending_delete');
-						R8.Workspace.addItemToViewSpace(dragChild, dragTop, dragLeft);
+//						R8.Workspace.addItemToViewSpace(dragChild, dragTop, dragLeft);
+						R8.Workspace.addItemToViewSpace(dragChild);
 					});
+*/
 				});
 			},
 
@@ -294,16 +352,27 @@ R8.Cmdbar.cmdHandlers['search'] = {
 			'events': {},
 			'contentLoader': function(){
 				var name = this.name;
-				var width = R8.Workspace.viewPortRegion['width'] - 65;
-				var contentFraming = '<div class="slider-top"></div>';
-				contentFraming += '<div id="' + name + '-slider-wrapper" class="slider-wrapper">';
-				contentFraming += '<div id="' + name + '-lbutton" class="lbutton"></div>';
-				contentFraming += '<div id="' + name + '-list-container" class="slide-list-container" style="width: ' + width + 'px;">';
-				contentFraming += '<div id="' + name + '-slider"></div>';
+				var width = R8.Workspace.viewPortRegion['width'] - 40;
+				var slideContainerWidth = width - 4;
+
+				var contentFraming = '<div id="' + name + '-slider-wrapper" class="slide-wrapper" style="width: ' + width + 'px; margin-top: 10px;">';
+				contentFraming += 	'<div id="' + name + '-lbutton" class="lbutton"></div>';
+				contentFraming += 	'<div class="slide-l-shade">';
+				contentFraming +=		'<div class="shade-top"></div>';
+				contentFraming += 		'<div class="shade-body"></div>';
+				contentFraming += 		'<div class="shade-bottom"></div>';
+				contentFraming += 	'</div>';
+				contentFraming += 	'<div id="' + name + '-list-container" class="slide-container" style="width: ' + slideContainerWidth + 'px;">';
+				contentFraming +=		'<div class="slide-container-header"></div>';
+				contentFraming += 		'<div id="' + name + '-slider"></div>';
+				contentFraming += 	'</div>';
+				contentFraming += 	'<div class="slide-r-shade">';
+				contentFraming +=		'<div class="shade-top"></div>';
+				contentFraming += 		'<div class="shade-body"></div>';
+				contentFraming += 		'<div class="shade-bottom"></div>';
+				contentFraming += 	'</div>';
+				contentFraming += 	'<div id="' + name + '-rbutton" class="rbutton"></div>';
 				contentFraming += '</div>';
-				contentFraming += '<div id="' + name + '-rbutton" class="rbutton"></div>';
-				contentFraming += '</div>';
-				contentFraming += '<div class="slider-btm"></div>';
 				document.getElementById('cmdbar-' + this.name + '-tab-content').innerHTML = contentFraming;
 					
 				var nodeId = '#' + name + '-list-container';
@@ -338,9 +407,7 @@ R8.Cmdbar.cmdHandlers['search'] = {
 
 			'blur': function(){
 				var tIndex = R8.Cmdbar.getTabIndexByName(this.name);
-				//DEBUG
-				//console.log('Blurring for:'+this.name);
-				//console.log(R8.Cmdbar.loadedTabs[tIndex]['events']);
+
 				if (typeof(R8.Cmdbar.loadedTabs[tIndex]['events']['slider_key_press']) != 'undefined') {
 					R8.Cmdbar.loadedTabs[tIndex]['events']['slider_key_press'].detach();
 				}
@@ -405,45 +472,34 @@ R8.Cmdbar.cmdHandlers['search'] = {
 			setupDD: function(){
 				var name = this.name;
 				var tIndex = R8.Cmdbar.getTabIndexByName(name);
-
+//DEBUG
+console.log('Setting up DD for:'+name+'  at index:'+tIndex);
 				YUI().use('dd-delegate', 'dd-proxy', 'node', 'dd-drop-plugin', function(Y){
 					R8.Cmdbar.loadedTabs[tIndex].compDDel = new Y.DD.Delegate({
 						cont: '#' + name + '-slide-bar',
-						nodes: 'div.avail_component',
-	//					dragMode: 'intersect',
+						nodes: 'div.component-drag',
 					});
 					R8.Cmdbar.loadedTabs[tIndex].compDDel.dd.plug(Y.Plugin.DDProxy, {
 						moveOnEnd: false,
 						borderStyle: false,
 					});
 
-					var dropGroup = 'dg-node';
-					var dropList = Y.all('#viewspace div.'+dropGroup);
-						dropList.each(function(){
-							var drop = new Y.DD.Drop({node:this});
-							drop.on('drop:enter',function(e){ console.log('entered drop element!!!');});
-							drop.on('drop:hit',function(e){
-								var dropNode = e.drop.get('node');
-								var compNode = e.drag.get('dragNode').get('children').item(0);
-								var component_id = compNode.get('id');
-								component_id = component_id.replace('component_','');
-								R8.Workspace.addComponentToContainer(component_id,dropNode);
-							});
-						});
-
 					R8.Cmdbar.loadedTabs[tIndex].compDDel.on('drag:mouseDown', function(e){
-						var dropGroup = 'dg-node';
+						var dropGroup = 'dg-component';
 						var dropList = Y.all('#viewspace div.'+dropGroup);
 						dropList.each(function(){
 							if(!this.hasClass('yui3-dd-drop')) {
 								var drop = new Y.DD.Drop({node:this});
+								drop.addToGroup([dropGroup]);
 								drop.on('drop:enter',function(e){ console.log('entered drop element!!!');});
 								drop.on('drop:hit',function(e){
 									var dropNode = e.drop.get('node');
 									var compNode = e.drag.get('dragNode').get('children').item(0);
-									var component_id = compNode.get('id');
-									component_id = component_id.replace('component_','');
-									R8.Workspace.addComponentToContainer(component_id,dropNode);
+									var componentId = compNode.get('data-id');
+//									componentId = componentId.replace('component_','');
+console.log(e);
+console.log('ComponentId:'+componentId);
+//									R8.Workspace.addComponentToContainer(componentId,dropNode);
 								});
 							}
 						});
@@ -453,8 +509,9 @@ R8.Cmdbar.cmdHandlers['search'] = {
 						var drag = this.get('dragNode'), c = this.get('currentNode');
 						drag.set('innerHTML',c.get('innerHTML'));
 						drag.setAttribute('class', c.getAttribute('class'));
+						this.dd.addToGroup('dg-component');
 						drag.setStyles({
-							opacity: .6,
+							opacity: .5,
 						});
 					});
 				});

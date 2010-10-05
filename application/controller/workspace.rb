@@ -51,7 +51,7 @@ module XYZ
           model_list[index][:ui].nil? ? model_list[index][:ui] = {} : nil
           model_list[index][:ui][:images].nil? ? model_list[index][:ui][:images] = {} : nil
 
-         !model_list[index][:ui][:images][:tnail].nil? ? img_value = '<img title="' << model_list[index][:display_name] << '"' << 'src="' << R8::Config[:base_images_uri] << '/' << model_name << 'Icons/'<< model_list[index][:ui][:images][:tnail] <<'"/>' : img_value = ""
+         !model_list[index][:ui][:images][:tnail].nil? ? img_value = '<div class="img_wrapper"><img title="' << model_list[index][:display_name] << '"' << 'src="' << R8::Config[:base_images_uri] << '/' << model_name << 'Icons/'<< model_list[index][:ui][:images][:tnail] <<'"/></div>' : img_value = ""
           body_value = img_value
           
           body_value == '' ? body_value = model_list[index][:display_name] : nil

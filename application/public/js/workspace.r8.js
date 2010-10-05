@@ -98,7 +98,8 @@ if (!R8.Workspace) {
 
 				R8.Workspace.viewSpaceNode = R8.Utils.Y.one('#viewspace');
 
-				R8.Workspace.events['item_click'] = R8.Utils.Y.delegate('click',R8.Workspace.updateSelectedItems,R8.Workspace.viewSpaceNode,'.node, .connector');
+				R8.Workspace.events['item_click'] = R8.Utils.Y.delegate('click',R8.Workspace.updateSelectedItems,R8.Workspace.viewSpaceNode,'.item-wrapper, .connector');
+//				R8.Workspace.events['item_click'] = R8.Utils.Y.delegate('click',function(){console.log('clicked item');},R8.Workspace.viewSpaceNode,'.item, .connector');
 				R8.Workspace.events['vspace_click'] = R8.Utils.Y.delegate('click',R8.Workspace.clearSelectedItems,'body','#viewspace');
 //				R8.Workspace.events['vspace_mdown'] = R8.Utils.Y.delegate('mousedown',R8.Workspace.checkMouseDownEvent,'body','#viewspace');
 
@@ -261,7 +262,8 @@ console.log('registering port:'+portElemID);
 			addDrop : function(itemId) {
 				var vsContext = this.getVspaceContext();
 				var modelName = R8.Workspace.viewspaces[vsContext]['items'][itemId]['node'].getAttribute('data-model');
-				var dropGroupName = 'dg-'+modelName;
+//				var dropGroupName = 'dg-'+modelName;
+				var dropGroupName = 'dg-component';
 
 				R8.Workspace.viewspaces[vsContext]['items'][itemId]['node'].addClass(dropGroupName)
 return;
@@ -418,7 +420,7 @@ console.log('I guess I am hitting this now!!!!');
 
 			addItemToViewSpace : function(clonedNode) {
 				var cleanupId = clonedNode.get('id');
-				var modelName = clonedNode.getAttribute('data-model-name');
+				var modelName = clonedNode.getAttribute('data-model');
 				var modelId = clonedNode.getAttribute('data-id');
 				var top = clonedNode.getStyle('top');
 				var left = clonedNode.getStyle('left');
@@ -445,8 +447,8 @@ console.log('I guess I am hitting this now!!!!');
 
 			addComponentToContainer : function(componentId,containerNode) {
 				var modelName = containerNode.getAttribute('data-model');
-				var modelId = containerNode.get('id');
-				modelId = modelId.replace('vi_','');
+				var modelId = containerNode.get('data-id');
+
 				var queryParams = 'target_model_name='+modelName+'&target_id='+modelId;
 //				queryParams += '&model_redirect='+modelName+'&action_redirect=wspace_display&id_redirect='+modelId;
 				queryParams += '&model_redirect='+modelName+'&action_redirect=wspace_refresh&id_redirect='+modelId;
@@ -464,8 +466,13 @@ console.log('I guess I am hitting this now!!!!');
 				R8.Ctrl.call('component/clone/'+componentId,queryParams);
 			},
 
+			addNodesToGroup : function(nodeList,groupId) {
+console.log('Going to add nodes:'+nodeList);
+console.log('To Group:'+groupId);
+			},
+
 			refreshItem : function(itemId) {
-				itemId = 'vi_'+itemId;
+				itemId = 'item_'+itemId;
 				var viewspaceNode = R8.Utils.Y.one('#viewspace');
 				var vspaceContext = R8.Workspace.getVspaceContext();
 				var itemChildren = viewspaceNode.get('children');
@@ -510,7 +517,7 @@ console.log('I guess I am hitting this now!!!!');
 								delete(cleanupNode);
 								delete(R8.Workspace.pendingDelete[item]);
 							}
-						}					
+						}
 						R8.Workspace.regNewItem(this.get('id'));
 //						R8.Workspace.addViewSpaceItem(this);
 //						this.setAttribute('data-status','added');

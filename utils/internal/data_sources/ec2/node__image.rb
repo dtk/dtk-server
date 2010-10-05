@@ -9,7 +9,7 @@ module XYZ
           target[:type] = "image"
           target[:is_deployed] = true
           target[:display_name] = source[:id]
-
+          target[:external_ref] = fn(:external_ref,source[:id])
           source_complete_for target[:monitoring_item]
           target[:monitoring_item] = fn(:default_node_monitoring_items)
           
@@ -26,6 +26,9 @@ module XYZ
 
           def relative_distinguished_name(source)
             source[:id]
+          end
+          def external_ref(image_id)
+            {"type" => "ec2_image", "image_id" => image_id}
           end
 
         end

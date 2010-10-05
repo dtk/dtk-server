@@ -4,7 +4,7 @@ module XYZ
       class Attribute < Top
         definitions do
           #TBD: assuming that after split first item is cookbook name
-          target[:external_attr_ref] = fn(:external_attr_ref,source)
+          target[:external_ref] = fn(:external_ref,source)
           target[:display_name] = fn(:relative_distinguished_name,source)
           target[:data_type] = fn(:data_type,source["type"])
           #TBD: have form that is no assignment if source is null
@@ -28,11 +28,17 @@ module XYZ
            end
 
           #### defined and helper fns
-          def external_attr_ref(source)
+          def external_ref(source)
             prefix = source[:service_name] ? "service[#{source[:service_name]}]" : "node[#{source[:ref].split("/").first}]"
-            prefix+name_suffix(source)
+            path = prefix+name_suffix(source)
+
+            if source[:service_name]
+              {:type => "service_attribute", "path" => path}
+            else
+              {:type => "chef_attribute", "path" => path}
+            end
           end
-          
+
           def name_suffix(source)
             x = source[:ref].split("/");x.shift
             "[#{x.join("][")}]"

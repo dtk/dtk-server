@@ -35,8 +35,8 @@
              :rows => 1,
              :cols => 40,
             }},
-            {:external_attr_ref => {
-             :type => 'text',
+            {:external_ref => {
+             :type => 'hash',
              :help => '',
              :rows => 1,
              :cols => 40,

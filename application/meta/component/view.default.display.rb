@@ -54,14 +54,8 @@
           :rows => 1,
           :cols => 20,
         }},
-      {:external_type => {
-          :type => 'text',
-          :help => '',
-          :rows => 1,
-          :cols => 20,
-        }},
-      {:external_cmp_ref => {
-          :type => 'text',
+      {:external_ref => {
+          :type => 'hash',
           :help => '',
           :rows => 1,
           :cols => 20,

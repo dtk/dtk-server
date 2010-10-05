@@ -15,8 +15,8 @@ module XYZ
       def get_legal_connections(parent_id_handle)
         c = parent_id_handle[:c]
         parent_id = IDInfoTable.get_id_from_id_handle(parent_id_handle)
-        component_ds = get_objects_just_dataset(ModelHandle.new(c,:component),nil,{:parent_id => parent_id,:field_set => [:id,:external_cmp_ref]})
-        attribute_ds = get_objects_just_dataset(ModelHandle.new(c,:attribute),nil,{:field_set => [:id,:external_attr_ref,:component_component_id]})
+        component_ds = get_objects_just_dataset(ModelHandle.new(c,:component),nil,{:parent_id => parent_id,:field_set => [:id,:external_ref]})
+        attribute_ds = get_objects_just_dataset(ModelHandle.new(c,:attribute),nil,{:field_set => [:id,:external_ref,:component_component_id]})
 
         attribute_link_ds = get_objects_just_dataset(ModelHandle.new(c,:attribute_link))
         component_ds.graph(:inner,attribute_ds,{:component_component_id => :id}).graph(:left_outer,attribute_link_ds,{:input_id => :id}).where({:attribute_link__id => nil}).all

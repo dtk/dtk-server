@@ -60,7 +60,13 @@ module XYZ
       Aux.underscore(Aux.demodulize(klass.to_s)).to_sym
     end
 
-    #common defs for data source attributes
+    #------common column defs -----------
+    #for external refs
+    def external_ref_column_defs()
+      column :external_ref, :json
+    end
+
+    #for data source attributes
     def ds_column_defs(*names)
       names.each{|n|ds_column_def(n)}
     end
@@ -68,7 +74,7 @@ module XYZ
       if name == :ds_attributes
         column :ds_attributes, :json
       elsif  name == :ds_key
-        #:default => '' so when do 'prune inventory' this column not null
+        #TODO: should this be commented out?: :default => '' so when do 'prune inventory' this column not null
         column :ds_key, :varchar, :default => '', :hidden => true 
       elsif  name == :data_source
         column :data_source, :varchar, :size => 25
@@ -76,7 +82,7 @@ module XYZ
         column :ds_source_obj_type, :varchar, :size => 25
       end
     end
-
+    #------common column defs -----------
     include MigrationMethods
 
       #gets over written for classes with data source attributes

@@ -6,9 +6,11 @@ module XYZ
     def self.up()
       has_ancestor_field()
       ds_column_defs :ds_attributes, :ds_key, :data_source, :ds_source_obj_type
+      external_ref_column_defs()
       column :tag,  :varchar
       column :type, :varchar, :size => 15, :default => "instance" # instance or template
       column :os, :varchar, :size => 25
+      #TODO: is_deployed may just be a virtual column that tests if :external_ref is null
       column :is_deployed, :boolean
       column :architecture, :varchar, :size => 10 #e.g., 'i386'
       #TBD: in data source specfic now column :manifest, :varchar #e.g.,rnp-chef-server-0816-ubuntu-910-x86_32
@@ -74,8 +76,8 @@ module XYZ
 	  ret[:component]||= {}
 	  cmp_ref = cmp.get_qualified_ref.to_sym
 	  ret[:component][cmp_ref] = 
-	    cmp[:external_cmp_ref] ? {:external_cmp_ref => cmp[:external_cmp_ref]} : {}
-	  values = cmp.get_direct_attribute_values(:value,{:attr_include => [:external_attr_ref]})
+	    cmp[:external_ref] ? {:external_ref => cmp[:external_ref]} : {}
+	  values = cmp.get_direct_attribute_values(:value,{:attr_include => [:external_ref]})
 	  ret[:component][cmp_ref][:attribute] = values if values 
         }
         ret

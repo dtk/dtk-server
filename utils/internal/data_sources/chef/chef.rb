@@ -5,7 +5,7 @@ require 'chef/cookbook/metadata/version'
 require  File.expand_path('mixins/metadata', File.dirname(__FILE__))
 require  File.expand_path('mixins/assembly', File.dirname(__FILE__))
 #TODO: written to get around deficiency that chef get node and searchbrings in full node, not partial info
-#TODO: improve meory usage by only storing attributes that are needed
+#TODO: improve memory usage by only storing attributes that are needed
 module XYZ
   module DSConnector
     class Chef < Top
@@ -51,7 +51,8 @@ module XYZ
           next unless metadata
           ref = recipe_name
           values = {
-            "basic_type" => metadata["basic_type"]
+            "basic_type" => metadata["basic_type"],
+            "node_name" => node.name
           }
           attributes = get_attributes_with_values(recipe_name,metadata,node)
           ret[ref] = DataSourceUpdateHash.new(values.merge({"attributes" => attributes}))

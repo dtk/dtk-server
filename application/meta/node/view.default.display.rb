@@ -39,6 +39,10 @@
              :type => 'text',
              :help => '',
             }},
+            {:external_ref => {
+             :type => 'hash',
+             :help => '',
+            }},
             {:os=> {
              :type => 'text',
              :help => '',

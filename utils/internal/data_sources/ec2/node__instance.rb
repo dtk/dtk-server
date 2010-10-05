@@ -8,6 +8,7 @@ module XYZ
         definitions do
           target[:type] = "instance"
           target[:display_name] = source[:id]
+          target[:external_ref] = fn(:external_ref,source[:id])
           target[:operational_status] = source[:state]
           target[:image_size] = source[:flavor][:ram]
           target[:is_deployed] = true
@@ -40,6 +41,10 @@ module XYZ
             source[:id]
           end
           
+          def external_ref(instance_id)
+            {"type" => "ec2_instance", "instance_id" => instance_id}
+          end
+
           def filter_raw_source_objects(source)
             ret = DBUpdateHash.new
             #TODO: make this data driven from model -> dependent on what is needed for virtual columns

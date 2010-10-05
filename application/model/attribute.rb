@@ -3,7 +3,7 @@ module XYZ
     set_relation_name(:attribute,:attribute)
     class << self
       def up()
-        #TBD: first stage of recagctoring (combing attr and attr def); next is going all attrs to see which ones are needed or could be generalized
+        external_ref_column_defs()
         column :value_asserted, :json
         column :value_derived, :json
         column :function, :json
@@ -22,7 +22,6 @@ module XYZ
 
         #TODO this probably does not belond here column :hidden, :boolean, :default => false
         column :port_type, :varchar, :size => 10 # null means no port; otherwise "input", "output", or "either"
-        column :external_attr_ref, :varchar
         virtual_column :attribute_value
 
         #Boolean that indicates whether there is a executable script/recipe associated with the attribute
@@ -75,7 +74,7 @@ module XYZ
     end
 
     def executable?()
-      self[:external_attr_ref].nil? ? false : true
+      self[:external_ref].nil? ? false : true
     end
 
     def assoc_components_on_nodes()

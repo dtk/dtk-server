@@ -2,7 +2,7 @@
 {
   :display_name => 'Name',
   :attribute_value => 'Value',
-  :external_attr_ref => 'External Attr Reference',
+  :external_ref => 'External Attr Reference',
   :value_asserted => 'Value Asserted',
   :required => 'Required',
   :data_type => 'Data Type',
@@ -11,7 +11,7 @@
   :contstraints => 'Constraints',
   :description => 'Description',
 
-  :external_attr_ref => 'Ext Attr Ref',
+  :external_ref => 'Ext Attr Ref',
   :required_list => 'Req',
   :description_list => 'Descr',
 }

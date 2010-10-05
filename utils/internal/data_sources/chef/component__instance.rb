@@ -7,8 +7,7 @@ module XYZ
           target[:basic_type] = source["basic_type"]
           target[:display_name] = source[:ref]
           target[:description] = source["description"]
-          target[:external_type] = "chef_recipe"
-          target[:external_cmp_ref] = fn(lambda{|recipe_name|"recipe[#{recipe_name}]"},source[:ref])
+          target[:external_ref] = fn(:external_ref,source[:ref],source["node_name"])
 
           nested_definition :attribute, source["attributes"]
         end
@@ -22,6 +21,9 @@ module XYZ
             source[:ref]
           end
 
+          def external_ref(recipe_name,node_name)
+            {"type" => "chef_recipe_instance", "recipe_name" => recipe_name, "node_name" => node_name} 
+          end
         end
       end
     end

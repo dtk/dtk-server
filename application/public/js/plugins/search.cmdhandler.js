@@ -74,7 +74,7 @@ R8.Cmdbar.cmdHandlers['search'] = {
 				var width = R8.Workspace.viewPortRegion['width'] - 40;
 				var slideContainerWidth = width - 4;
 
-				var contentFraming = '<div id="' + name + '-slider-wrapper" class="slide-wrapper" style="width: ' + width + 'px; margin-top: 10px;">';
+				var contentFraming = '<div id="' + name + '-slide-wrapper" class="slide-wrapper" style="width: ' + width + 'px; margin-top: 10px;">';
 				contentFraming += 	'<div id="' + name + '-lbutton" class="lbutton"></div>';
 				contentFraming += 	'<div class="slide-l-shade">';
 				contentFraming +=		'<div class="shade-top"></div>';
@@ -94,17 +94,29 @@ R8.Cmdbar.cmdHandlers['search'] = {
 				contentFraming += '</div>';
 				document.getElementById('cmdbar-' + this.name + '-tab-content').innerHTML = contentFraming;
 
-				var nodeId = '#' + name + '-list-container';
-				var resizeCallback = {
-					'nodeId': nodeId,
+				var wrapperId = '#' + name + '-slide-wrapper';
+				var wrapperResizeCallback = {
+					'nodeId': wrapperId,
 					'lambda': function(height, width){
-						var width = width - 37;
+						var width = width - 40;
 						return {
 							'width': width
 						};
 					}
 				};
-				R8.Workspace.addResizeCallback(resizeCallback);
+				R8.Workspace.addResizeCallback(wrapperResizeCallback);
+
+				var sliderId = '#' + name + '-list-container';
+				var sliderResizeCallback = {
+					'nodeId': sliderId,
+					'lambda': function(height, width){
+						var width = width - 44;
+						return {
+							'width': width
+						};
+					}
+				};
+				R8.Workspace.addResizeCallback(sliderResizeCallback);
 			},
 				
 			'focus': function(){
@@ -355,7 +367,7 @@ console.log('Have a drop hit for node!!!!');
 				var width = R8.Workspace.viewPortRegion['width'] - 40;
 				var slideContainerWidth = width - 4;
 
-				var contentFraming = '<div id="' + name + '-slider-wrapper" class="slide-wrapper" style="width: ' + width + 'px; margin-top: 10px;">';
+				var contentFraming = '<div id="' + name + '-slide-wrapper" class="slide-wrapper" style="width: ' + width + 'px; margin-top: 10px;">';
 				contentFraming += 	'<div id="' + name + '-lbutton" class="lbutton"></div>';
 				contentFraming += 	'<div class="slide-l-shade">';
 				contentFraming +=		'<div class="shade-top"></div>';

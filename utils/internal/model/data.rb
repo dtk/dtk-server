@@ -67,10 +67,6 @@ module XYZ
       self.class.get_parent_object(id_handle,opts)
     end
 
-    def get_parent_id_info()
-      self.class.get_parent_id_info(id_handle)
-    end
-
    protected
 
     def id_handle()

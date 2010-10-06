@@ -39,6 +39,25 @@ module XYZ
         override_attrs[:external_ref] = ()
       end
     end
+
+    def self.clone_post_copy_hook(new_id_handle,target_id_handle,opts={})
+      c = new_id_handle[:c]
+      #use parent pending change id as parent; otehrwise use target's parent
+      p_id = opts[:parent_pending_change_item_id]
+      parent_id_handle = p_id ? IDHandle[:c => c, :id => p_id, :model_name => :pending_change_item] :
+        target_id_handle.get_parent_id_handle()
+      ref = "pending_change_item"
+      create_hash = {
+        :pending_change_item => {
+          ref => {
+            :display_name => ref,
+            :change => "new_component",
+            :component_id => new_id_handle.get_id()
+          }
+        }
+      }
+      create_from_hash(parent_id_handle,create_hash)
+    end
     
     #TODO: quick hack
     def self.get_wspace_display(id_handle)

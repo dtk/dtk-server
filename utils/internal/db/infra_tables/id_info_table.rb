@@ -21,6 +21,18 @@ module XYZ
       (IDInfoTable.get_row_from_id_handle(self,:short_circuit_for_minimal_row => true)||{})[:id]
     end
 
+    def get_parent_id_handle()
+      c = self[:c]
+      id_info = IDInfoTable.get_row_from_id_handle(self)
+      return nil unless id_info and id_info[:parent_id] 
+      IDHandle[:c => c, :id => id_info[:parent_id], :model_name => id_info[:parent_relation_type]]
+    end
+
+    def get_parent_id_info()
+      parent_id_handle = get_parent_id_handle()
+      IDInfoTable.get_row_from_id_handle parent_id_handle
+    end
+
     def ret_model_handle()
       ModelHandle.new(self[:c],self[:model_name])
     end

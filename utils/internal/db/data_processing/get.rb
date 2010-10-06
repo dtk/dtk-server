@@ -58,19 +58,8 @@ module XYZ
         process_raw_scalar_hash!(row,DB_REL_DEF[relation_type],opts)
       end
 
-      def get_parent_id_info(id_handle)
-	c = id_handle[:c]
-	id_info = IDInfoTable.get_row_from_id_handle id_handle
-	return nil unless id_info and id_info[:parent_id] 
-	parent_id_handle = IDHandle[:c => c, :id => id_info[:parent_id], :model_name => id_info[:parent_relation_type]]
-        IDInfoTable.get_row_from_id_handle parent_id_handle
-      end
-
       def get_parent_object(id_handle,opts={})
-	c = id_handle[:c]
-	id_info = IDInfoTable.get_row_from_id_handle id_handle,  :raise_error => opts[:raise_error]
-	return nil unless id_info and id_info[:parent_id] 
-	parent_id_handle = IDHandle[:c => c, :id => id_info[:parent_id], :model_name => id_info[:parent_relation_type]]
+	parent_id_handle = id_handle.get_parent_id_handle()
         get_object_scalar_columns(parent_id_handle,opts)
       end
 

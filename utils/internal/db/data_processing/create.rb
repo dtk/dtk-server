@@ -5,7 +5,7 @@ module XYZ
   class DB
     module DataProcessingCreate
       #creates a new instance w/ref_num bumped if needed
-      #TBD: may want opt that says just create leaf nodes and error if intermediate objects do not exist	
+      #TODO: make more efficient by reducing or elimintaing calss to id table as well as using bulk inserts
       def create_from_hash(id_handle,hash,clone_helper=nil,opts={})
 	id_info = IDInfoTable.get_row_from_id_handle id_handle, :raise_error => true 
 
@@ -44,13 +44,13 @@ module XYZ
 
      private
       def create_from_hash_with_factory(c,factory_uri,hash,clone_helper=nil,opts={})
-        new_uris = Array.new
+        ret = Array.new
         hash.each do |ref,assignments| 
-	  new_uri = create_instance(factory_uri,ref,assignments,c,clone_helper,opts)
-	  Log.info("created #{new_uri}")		   
-	  new_uris << new_uri
+	  new_item = create_instance(factory_uri,ref,assignments,c,clone_helper,opts)
+	  Log.info("created new object: uri=#{new_item[:uri]}; id=#{new_item[:id]}")		   
+	  ret << new_item
         end
-	new_uris
+	ret
       end
 
       def create_instance(factory_uri,ref,assignments,c,clone_helper=nil,opts={})
@@ -101,11 +101,8 @@ module XYZ
 
 	create_factory_uris_and_contained_objects(new_uri,new_id,relation_type,obj_assignments,c,clone_helper,opts)
 	
-	new_uri
+	{:uri => new_uri, :id => new_id}
       end
-
-
-
 
       def create_factory_uris_and_contained_objects(uri,id,relation_type,obj_assignments,c,clone_helper=nil,opts={})
 	db_rel = DB_REL_DEF[relation_type]

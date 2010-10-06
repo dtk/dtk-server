@@ -51,7 +51,8 @@ module XYZ
           else
             unless assigns.kind_of?(HashObject) and assigns.do_not_extend
               factory_id_handle = IDHandle[:c => c, :uri => factory_id_info[:uri], :is_factory => true] 
-              new_uris = new_uris + create_from_hash(factory_id_handle,{qualified_ref => child_assigns})
+              create_uris = create_from_hash(factory_id_handle,{qualified_ref => child_assigns}).map{|r|r[:uri]}
+              new_uris = new_uris + create_uris
             end
           end
 

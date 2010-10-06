@@ -25,7 +25,7 @@ module XYZ
       def get_legal_connections_wrt_endpoint(attribute_id_handle,parent_id_handle)
       end
       ##### Actions
-
+=begin TODO: needs fixing up or removal
       def create(target_id_handle,input_id_handle,output_id_handle,href_prefix,opts={})
         raise Error.new("Target location (#{target_id_handle}) does not exist") unless exists? target_id_handle
 
@@ -41,12 +41,12 @@ module XYZ
         link_ref = (i_ref.to_s + "_" + o_ref.to_s).to_sym
 
         factory_id_handle = get_factory_id_handle(target_id_handle,:attribute_link)
-        link_uris = create_from_hash(factory_id_handle,{link_ref => link_content})
+        link_ids = create_from_hash(factory_id_handle,{link_ref => link_content})
         fn = ret_function_if_can_determine(input_obj,output_obj)
         output_obj.check_and_set_derived_rel_from_link_fn!(fn)
-        link_uris
+        link_ids
       end
-
+=end
       #returns function if can determine from semantic type of input and output
       #throws an error if finds a mismatch
       def ret_function_if_can_determine(input_obj,output_obj)

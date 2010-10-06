@@ -25,15 +25,17 @@ module XYZ
 
     #######################
     ### object procssing and access functions
-    def self.clone_post_copy_hook(new_id_handle,target_id_handle)
+    def self.clone_post_copy_hook(new_id_handle,target_id_handle,opts={})
       c = new_id_handle[:c]
+      new_pending_id = create_pending_change_item(new_id_handle,target_id_handle)
       obj_on_node_group = get_object_deep(new_id_handle)
       #clone component(deep) on to all members
-      #TODO: for efficiency handle by less sql operations
+      #TODO: for efficiency handle by bulk sql operations
+      child_clone_opts = {:source_obj => obj_on_node_group, :parent_pending_change_item_id => new_pending_id}
       node_group_obj = get_object(target_id_handle)
       (node_group_obj||{})[:member_id_list].each do |node_id|
         #TODO: need processing that checks if component already on node for components that can only be once on node
-        clone(new_id_handle,IDHandle[:c => c,:model_name => :node,:id=> node_id],{},{:source_obj => obj_on_node_group})
+        clone(new_id_handle,IDHandle[:c => c,:model_name => :node,:id=> node_id],{},child_clone_opts)
       end
       #TODO: neeed to set the children derived value to the value of node group attributes; see if really explicitly need links
       #put in attribute links
@@ -53,6 +55,21 @@ module XYZ
       create_from_select(ModelHandle.new(c,:attribute_link),[:ref,:input_id,:output_id],select)
       #TODO: links for monitor_items
 
+    end
+
+    def self.create_pending_change_item(new_id_handle,target_id_handle)
+      parent_id_handle = target_id_handle.get_parent_id_handle()
+      ref = "pending_change_item"
+      create_hash = {
+        :pending_change_item => {
+          ref => {
+            :display_name => ref,
+            :change => "new_component",
+            :component_id => new_id_handle.get_id()
+          }
+        }
+      }
+      create_from_hash(parent_id_handle,create_hash).map{|x|x[:id]}.first
     end
     #######################
 

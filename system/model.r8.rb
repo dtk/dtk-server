@@ -10,7 +10,7 @@ module XYZ
   class Model < HashObject 
     class << self
       attr_reader :db
-      expose_methods_from_internal_object :db, %w{update_from_hash_assignments update_instance get_instance_or_factory get_instance_scalar_values get_objects_just_dataset get_object_ids_wrt_parent get_parent_object get_parent_id_info exists? create_from_select create_from_hash create_simple_instance? delete_instance delete_instances_wrt_parent process_raw_db_row!}
+      expose_methods_from_internal_object :db, %w{update_from_hash_assignments update_instance get_instance_or_factory get_instance_scalar_values get_objects_just_dataset get_object_ids_wrt_parent get_parent_object exists? create_from_select create_from_hash create_simple_instance? delete_instance delete_instances_wrt_parent process_raw_db_row!}
 
       def model_class(model_name)
         XYZ.const_get Aux.camelize model_name.to_s
@@ -96,19 +96,19 @@ module XYZ
     end
 
     def ret_parent_name(possible_parents)
-      possible_parents.each{|p|return "library/#{self[p][:display_name]}" if self[p] and self[p][:display_name]}
+      possible_parents.each{|p|return "#{p}/#{self[p][:display_name]}" if self[p] and self[p][:display_name]}
       nil
     end
 
     #inherited virtual coulmn defs
     def parent_id()
       return id_handle()[:guid] if id_handle() and id_handle()[:guid] #short circuit 
-      get_parent_id_info()[:id]
+      id_handle().get_parent_id_info()[:id]
     end
 
     def parent_path()
       return id_handle()[:uri] if id_handle() and id_handle()[:uri] #short circuit 
-      get_parent_id_info()[:uri]
+      id_handle().get_parent_id_info()[:uri]
     end
 
   end

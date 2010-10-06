@@ -32,11 +32,12 @@ module XYZ
       #TBD: may make task event; or may always conditionally happened to task or log
       Log.info("#{child_id_handle[:uri] || "recipe"} exists already\n")
     else
+=begin TODO: old needs to modify or remove
             cmp_def_uri = create_from_hash(cmp_def_fctr_id_handle,cmp_def_obj).first
       cmp_uri = create_from_hash(cmp_fctr_id_handle,cmp_obj).first
             Component.link_component_to_def(IDHandle[:c => c, :uri => cmp_uri], 
                                       IDHandle[:c => c, :uri => cmp_def_uri])
-
+=end
       opts[:task].add_event("added recipe #{cookbook_name}") if opts[:task]
     end
   end

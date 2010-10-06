@@ -7,7 +7,7 @@ module XYZ
       process_override_attributes!(source_obj,override_attrs)
       new_id_handle = clone_copy(id_handle,source_obj,target_id_handle,opts)
       #calling with respect to target
-      model_class(target_id_handle[:model_name]).clone_post_copy_hook(new_id_handle,target_id_handle)
+      model_class(target_id_handle[:model_name]).clone_post_copy_hook(new_id_handle,target_id_handle,opts)
       return new_id_handle.get_id()
     end
 
@@ -17,7 +17,7 @@ module XYZ
     end
 
     # to be optionally overwritten by object representing the target
-    def clone_post_copy_hook(new_id_handle,target_id_handle)
+    def clone_post_copy_hook(new_id_handle,target_id_handle,opts={})
     end
 
    private
@@ -50,12 +50,10 @@ module XYZ
       raise Error.new("clone target (#{target_id_handle}) not found") if tgt_factory_id_handle.nil?
 
       create_opts = opts.merge({:shift_id_to_ancestor => true,:sync_display_name_with_ref => true})
-      new_uri = create_from_hash(tgt_factory_id_handle,source_obj, clone_helper, create_opts).first
+      new_item = create_from_hash(tgt_factory_id_handle,source_obj, clone_helper, create_opts).first
       clone_helper.set_foreign_keys_to_right_values() if no_clone_helper_provided
 
-      new_id_handle = IDHandle[:c => id_handle[:c], :uri => new_uri, :model_name => id_handle[:model_name]]
-      Log.info("created new object with uri #{new_uri} and id #{new_id_handle.get_id()}") 
-      new_id_handle
+      IDHandle[:c => id_handle[:c], :id => new_item[:id], :model_name => id_handle[:model_name]]
     end
   end
 end

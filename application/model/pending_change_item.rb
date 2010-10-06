@@ -2,7 +2,7 @@ module XYZ
   class PendingChangeItem < Model
     set_relation_name(:pending_change,:item)
     def self.up()
-      column :transaction, :int #TODO may introduce transaction object and make this a foreign key
+      column :transaction, :int, :default => 1 #TODO may introduce transaction object and make this a foreign key
       column :change, :json # gives detail about teh change
 
       #one oif thse wil be non null and point to object being changed or added

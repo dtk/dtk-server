@@ -10,17 +10,10 @@ module XYZ
       end
 
       ##### Actions
-      def create(c=nil) #c == nil means "no task"
-	return Task.new(nil,nil) if c.nil?
-	uri = create_from_hash(IDHandle[:c => c, :uri => "/task"],{:task => {}}).first
-	Task.new(c,uri)	
-      end  
+      #TODO: removed def create(c=nil)
     end
 
     #Instance methods
-    def initialize(c,task_uri)
-      super({:c => c, :uri => task_uri},c,:task)
-    end
 
     def has_error?()
       self[:has_error] 

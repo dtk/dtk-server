@@ -14,6 +14,12 @@ module XYZ
           end
         end
 
+        def all_real_scalar(model_name_x)
+          ret_cols(model_name_x,:all_real_scalar) do |db_rel|
+            real_cols(db_rel) 
+          end
+        end
+
         def all_settable(model_name_x)
           ret_cols(model_name_x,:all_settabler) do |db_rel|
             real_cols(db_rel) + many_to_one_cols(db_rel) + virtual_settable_cols(db_rel)

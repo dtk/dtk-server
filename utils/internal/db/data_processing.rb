@@ -18,6 +18,9 @@ module XYZ
       def dataset(db_rel,table_alias=nil)
         @db.from(db_rel.schema_table_symbol(table_alias)) 
       end
+      def empty_dataset()
+        @db.dataset()
+      end
      private
 
       def modify_to_reflect_special_processing!(scalar_assigns,db_rel,sql_operation,opts={})

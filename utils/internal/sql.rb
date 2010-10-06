@@ -56,7 +56,7 @@ module XYZ
 
     module DatatsetGraphMixin
       attr_reader :model_name_info, :sequel_ds
-      def graph(join_type,right_ds,join_conditions)
+      def graph(join_type,right_ds,join_conditions=true)
         new_model_name_info = right_ds.model_name_info.first.create_unique(@model_name_info)
         model_name_info = @model_name_info + [new_model_name_info]
         table_alias = new_model_name_info.ret_qualified_model_name()
@@ -108,6 +108,21 @@ module XYZ
       end
       def model_handle()
         ModelHandle.new(@c,model_name)
+      end
+    end
+
+    #creates a table dataset from rows, which is array with each element being a hash; each row has same keys
+    class ArrayDataset < Dataset
+      def initialize(db,rows,aliaz)
+        #TODO: articicial setting of ModelHandle
+        model_handle = ModelHandle.new(0, aliaz)
+        empty_sequel_ds = db.empty_dataset()
+        sequel_ds = nil
+        rows.each do |row|
+          sequel_select = empty_sequel_ds.select(*row.map{|x|{x[1] => x[0]}})
+          sequel_ds = sequel_ds ? sequel_ds.union(sequel_select,{:all => true}) : sequel_select
+        end
+        super(model_handle,sequel_ds.from_self({:alias => aliaz}))
       end
     end
 

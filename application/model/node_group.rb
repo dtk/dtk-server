@@ -27,8 +27,31 @@ module XYZ
     ### object procssing and access functions
     def self.clone_post_copy_hook(new_id_handle,target_id_handle,opts={})
       c = new_id_handle[:c]
+      #create a change pending item associated with component created on the node group adn returns its id (so it can be
+      # used as parent to change items for components on all the node groups memebrs
+      parent_pending_id = create_pending_change_item(new_id_handle,target_id_handle)
+
+      #first create all the components on nodes that are members of the  node_group
+      node_group_obj = get_object(target_id_handle)
+      member_id_list = node_group_obj[:member_id_list]
+      return nil unless  member_id_list and not member_id_list.empty?
+
+      #TODO: abstract adn encas[pulate pattern below which copies to a set from a source object
+      parent_ds = SQL::ArrayDataset.new(db,member_id_list.map{|x|{:node_node_id => x}},:parent)
+      source_component_wc = {:id => new_id_handle.get_id()}
+      cols_to_copy = FieldSet.all_real_scalar(:component) - [:id,:local_id]
+      source_component_fs = {:field_set =>  cols_to_copy - [:node_node_id]}
+      source_component_ds = get_objects_just_dataset(ModelHandle.new(c,:component),source_component_wc,source_component_fs)
+      graph = parent_ds.graph(:inner,source_component_ds)
+      select = graph.select(*cols_to_copy)
+      create_from_select(ModelHandle.new(c,:component),cols_to_copy,select)
+    end
+
+    def self.old_clone_post_copy_hook(new_id_handle,target_id_handle,opts={})
+      c = new_id_handle[:c]
       
-      #parent_pending_id is the parent to which the paending objects created for each member node is created under
+      #create a change pending item associated with component created on the node group adn returns its id (so it can be
+      # used as parent to change items for components on all the node groups memebrs
       parent_pending_id = create_pending_change_item(new_id_handle,target_id_handle)
       
       #the component object with its attributes on node group is cloned onto teh node group members; its attribute values must first be changed to null out

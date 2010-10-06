@@ -4,11 +4,29 @@ class Class
   #TODO: consider variant where third argument passed which is lambda indicating how to 
   #transform inputs before applying to interval method var
   def expose_methods_from_internal_object(innervar,methods_to_expose,opts={})
+    return expose_methods_with_benchmark(innervar,methods_to_expose,opts) if opts[:benchmark]
     methods_to_expose.each do |m| 
       method_def = 
         if opts[:post_hook]
           "def #{m}(*args);#{opts[:post_hook]}.call(@#{innervar}.#{m}(*args));end"
         else
+          "def #{m}(*args);@#{innervar}.#{m}(*args);end"
+        end
+      class_eval(method_def) 
+    end
+  end
+
+  #TODO: cleanup; just for testing; no benchmarking if post hook
+  def expose_methods_with_benchmark(innervar,methods_to_expose,opts={})
+    require 'benchmark'
+    b = opts[:benchmark]
+    methods_to_expose.each do |m| 
+      method_def = 
+        if opts[:post_hook]
+          "def #{m}(*args);#{opts[:post_hook]}.call(@#{innervar}.#{m}(*args));end"
+        elsif b == :all or (b.respond_to?(:include?) and b.include?(m))
+            "def #{m}(*args);x=nil;puts '---#{m}----------------';puts Benchmark.measure{x=@#{innervar}.#{m}(*args)};puts '--------------------';x;end"
+       else
           "def #{m}(*args);@#{innervar}.#{m}(*args);end"
         end
       class_eval(method_def)

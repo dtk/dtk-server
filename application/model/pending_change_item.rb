@@ -3,6 +3,7 @@ module XYZ
     set_relation_name(:pending_change,:item)
     def self.up()
       column :transaction, :int, :default => 1 #TODO may introduce transaction object and make this a foreign key
+      column :relative_order_order, :int, :default => 1 #relative with respect to parent
       column :change, :json # gives detail about teh change
 
       #one oif thse wil be non null and point to object being changed or added

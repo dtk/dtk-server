@@ -27,17 +27,25 @@ module XYZ
     ### object procssing and access functions
     def self.clone_post_copy_hook(new_id_handle,target_id_handle,opts={})
       c = new_id_handle[:c]
-      new_pending_id = create_pending_change_item(new_id_handle,target_id_handle)
-      obj_on_node_group = get_object_deep(new_id_handle)
-      #clone component(deep) on to all members
-      #TODO: for efficiency handle by bulk sql operations
-      child_clone_opts = {:source_obj => obj_on_node_group, :parent_pending_change_item_id => new_pending_id}
+      
+      #parent_pending_id is the parent to which the paending objects created for each member node is created under
+      parent_pending_id = create_pending_change_item(new_id_handle,target_id_handle)
+      
+      #the component object with its attributes on node group is cloned onto teh node group members; its attribute values must first be changed to null out
+      #:value_asserted and set :value_derived 
+      component_obj = get_object_deep(new_id_handle)
+      #component_obj is of form {ref => {... :attribute => {ref1 => {:value_asserted =>,,}}...}}
+      attrs = component_obj.values.first[:attribute].each_value do |attr_assigns|
+        attr_assigns[:value_derived] = attr_assigns.delete(:value_asserted)
+      end
+
+      child_clone_opts = {:source_obj => component_obj, :parent_pending_change_item_id => parent_pending_id}
       node_group_obj = get_object(target_id_handle)
+      #TODO: for efficiency handle by bulk sql operations
       (node_group_obj||{})[:member_id_list].each do |node_id|
         #TODO: need processing that checks if component already on node for components that can only be once on node
         clone(new_id_handle,IDHandle[:c => c,:model_name => :node,:id=> node_id],{},child_clone_opts)
       end
-      #TODO: neeed to set the children derived value to the value of node group attributes; see if really explicitly need links
       #put in attribute links
       node_cmp_wc = {:ancestor_id => new_id_handle.get_id()}
       node_cmp_fs = {:field_set => [:id]}

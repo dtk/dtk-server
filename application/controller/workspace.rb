@@ -6,6 +6,7 @@ module XYZ
       include_js('plugins/search.cmdhandler')
 #TODO: remove this after fully getting viewspaces going
       add_js_exe("R8.Workspace.setupNewItems();")
+      add_js_exe("R8.Toolbar.init({node:'group-01',tools:['quicksearch']});")
       return {:content=>''}
     end
 

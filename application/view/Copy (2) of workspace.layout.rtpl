@@ -80,6 +80,15 @@ R8.config['base_uri'] = '{%=_app[:base_uri]%}/xyz';
 							<div id="group-01-toolbar-main" class="item-toolbar-main">
 								<div class="tb-l-cap"></div>
 								<div id="group-01-tb-body" class="tb-body">
+									<div id="group-01-details" class="tool-button">
+										<div id="group-01-details-tool" class="tool item-details"></div>
+									</div>
+									<div id="group-01-details" class="tool-button">
+										<div id="group-01-quick-search-tool" class="tool item-quicksearch"></div>
+									</div>
+									<div id="group-01-details" class="tool-button">
+										<div id="group-01-elastic-tool" class="tool item-elastic"></div>
+									</div>
 								</div>
 								<div class="tb-r-cap"></div>
 							</div>

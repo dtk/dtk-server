@@ -4,7 +4,7 @@
 }
 
 .basic-group.medium {
-	height: 118px;
+	height: 124px;
 	width: 606px;
 }
 .yui3-dd-dragging {
@@ -61,18 +61,18 @@
 
 .basic-group .l-col {
 	float: left;
-	height: 118px;
+	height: 124px;
 	width: 7px;
 }
 .basic-group .r-col {
 	float: right;
-	height: 118px;
+	height: 124px;
 	width: 7px;
 }
 
 .basic-group.medium .l-col .l-col-body {
 	width: 5px;
-	height: 104px;
+	height: 110px;
 	border-left: 2px solid black;
 	float: left;
 }
@@ -89,7 +89,7 @@
 
 .basic-group.medium .r-col .r-col-body {
 	width: 5px;
-	height: 104px;
+	height: 110px;
 	border-right: 2px solid black;
 	float: left;
 }
@@ -105,11 +105,19 @@
 	background-color: #A8C6ED;
 }
 
+/*-------------------*/
+
+.basic-group.medium .group-bar {
+	height: 30px;
+	width: 100%;
+	float: left;
+}
+
 .basic-group.medium .body {
 	float: left;
 	border-top: 2px solid black;
 	border-bottom: 2px solid black;
-	height: 114px; width: 422px;
+	height: 120px; width: 422px;
 }
 
 .basic-group.focus .body {
@@ -128,7 +136,7 @@
 
 .basic-group .elastic-node-body {
 	float: left;
-	height: 114px;
+	height: 120px;
 	width: 132px;
 	border-top: 2px solid black;
 	border-bottom: 2px solid black;
@@ -146,7 +154,8 @@
 	background-color: #A8C6ED;
 }
 
-.basic-group .elastic {
+.basic-group.medium .elastic {
+	height: 124px;
 	width: 38px;
 	float: left;
 }
@@ -181,10 +190,12 @@
 	background-image: url(../images/group/elastic-blue.png);
 }
 
-.basic-group .elastic-body {
+.basic-group.medium .elastic-body {
 	width: 38px;
 	background-repeat: repeat-y;
+	height:112px;
 }
+
 .basic-group.green .elastic-body {
 	background-image: url(../images/group/elastic-bg-green.png);
 }
@@ -306,13 +317,13 @@
 /*------------Drop Shadow---------*/
 
 .basic-group.medium .drop-shadow-group {
-	height: 118px;
+	height: 124px;
 	width: 606px;
 	margin: 4px 0 0 4px;
 }
 
 .group.yui3-dd-dragging {
-	margin: -7px 0 0 -7px;
+/*	margin: -7px 0 0 -7px;*/
 }
 .basic-group.yui3-dd-dragging .item {
 	margin: -7px 0 0 -7px;
@@ -341,18 +352,18 @@
 
 .basic-group.medium .ds-l-col {
 	float: left;
-	height: 108px;
+	height: 114px;
 	width: 7px;
 }
 .basic-group.medium .ds-r-col {
 	float: right;
-	height: 108px;
+	height: 114px;
 	width: 7px;
 }
 
 .basic-group.medium .drop-shadow-group .ds-l-col-body {
 	width: 7px;
-	height: 104px;
+	height: 110px;
 	float: left;
 	background-image: url(../images/node/basic-col-shadow-bg.png);
 	background-repeat: repeat-y;
@@ -361,7 +372,7 @@
 
 .basic-group.medium .drop-shadow-group .ds-r-col-body {
 	width: 7px;
-	height: 104px;
+	height: 110px;
 	float: left;
 	background-image: url(../images/node/basic-col-shadow-bg.png);
 	background-repeat: repeat-y;
@@ -371,7 +382,7 @@
 .basic-group.medium .drop-shadow-group .ds-body {
 	float: left;
 	width: 422px;
-	height: 104px;
+	height: 110px;
 }
 .basic-group.medium .drop-shadow-group .ds-body .header {
 	float: left;
@@ -392,7 +403,7 @@
 .basic-group.medium .drop-shadow-group .ds-body .main-body {
 	float: left;
 	width: 422px;
-	height: 104px;
+	height: 110px;
 	background-image: url(../images/node/basic-body-shadow-bg.png);
 	background-repeat: repeat;
 }
@@ -401,7 +412,7 @@
 .basic-group.medium .drop-shadow-group .elastic-ds-body {
 	float: left;
 	width: 38px;
-	height: 118px;
+	height: 124px;
 }
 
 .basic-group.medium .drop-shadow-group .elastic-ds-body .header {
@@ -423,7 +434,7 @@
 .basic-group.medium .drop-shadow-group .elastic-ds-body .main-body {
 	float: left;
 	width: 38px;
-	height: 106px;
+	height: 112px;
 	background-image: url(../images/node/basic-body-shadow-bg.png);
 	background-repeat: repeat;
 }
@@ -433,7 +444,7 @@
 .basic-group.medium .drop-shadow-group .elastic-node-ds-body {
 	float: left;
 	width: 132px;
-	height: 118px;
+	height: 124px;
 }
 .basic-group.medium .drop-shadow-group .elastic-node-ds-body .header {
 	float: left;
@@ -454,7 +465,24 @@
 .basic-group.medium .drop-shadow-group .elastic-node-ds-body .main-body {
 	float: left;
 	width: 132px;
-	height: 104px;
+	height: 110px;
 	background-image: url(../images/node/basic-body-shadow-bg.png);
 	background-repeat: repeat;
 }
+
+/*-------------*/
+
+.basic-group.medium .name-wrapper {
+	height: 30px;
+	width: 150px;
+	float: left;
+}
+
+.basic-group.medium .toolbar-wrapper {
+	height: 30px;
+	width: 256px;
+	margin-right: 16px;
+	float: left;
+	overflow: hidden;
+}
+

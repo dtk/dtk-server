@@ -277,6 +277,7 @@ return;
 					});
 //					R8.Workspace.viewspaces[vsContext]['items'][itemId]['drop'].addToGroup([dropGroupName]);
 					R8.Workspace.viewspaces[vsContext]['items'][itemId]['drop'].on('drop:enter',function(e){
+//DEBUG
 console.log('Over drop target....');
 console.log(e);
 					});
@@ -467,6 +468,7 @@ console.log('I guess I am hitting this now!!!!');
 			},
 
 			addNodesToGroup : function(nodeList,groupId) {
+//DEBUG
 console.log('Going to add nodes:'+nodeList);
 console.log('To Group:'+groupId);
 			},

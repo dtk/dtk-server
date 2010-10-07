@@ -45,6 +45,35 @@ module XYZ
         return HashIsComplete.new()
       end
 
+      def get_objects__node_group(&block)
+        get_network_partitions.each_key do |ref|
+          security_groups = security_groups_from_network_partition_ref(ref)
+          values = {
+            :ref => node_group_ref(ref),
+            :display_name => "ec2 security groups [#{security_groups.join(",")}]",
+            :security_groups => security_groups
+          }
+          block.call(DataSourceUpdateHash.new(values))
+        end
+        return HashMayNotBeComplete.new()
+      end
+
+      def get_objects__node_group_member(&block)
+        #TODO: using now explict links to node group; should dynamic sql be used instead?
+        get_servers().each do |server|
+          next unless server[:network_partition_ref]
+          node_ref = server[:id]
+          node_group_ref = node_group_ref(server[:network_partition_ref])
+          values = {
+            :ref => "#{node_group_ref}--#{node_ref}",
+            :node_ref => node_ref,
+            :node_group_ref => node_group_ref
+          }
+          block.call(DataSourceUpdateHash.new(values))
+        end
+        return HashMayNotBeComplete.new()
+      end
+
       def get_servers()
         @server_cache[:servers] ||= get_servers_aux()
       end
@@ -56,6 +85,10 @@ module XYZ
           server[:network_partition_ref] = get_network_partition_ref(server)
         end
         ret
+      end
+
+      def node_group_ref(network_partition_ref)
+        "ec2_sg_#{network_partition_ref}"
       end
 
       def conn()

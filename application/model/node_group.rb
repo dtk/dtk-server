@@ -3,6 +3,8 @@ module XYZ
     set_relation_name(:node,:node_group)
     def self.up()
       column :dynamic_membership_sql, :json #sql where clause that picks out node members and means to ignore memebrship assocs
+      #TODO: this might be omitted or annoated indicating that this can be one to many and shoudl be transformed
+      # from flattened out form; may also leevrage mechanism that gets children with bulk get
       virtual_column :member_id_list, :dependencies => 
         [
          {:model_name => :node_group_member,
@@ -10,7 +12,8 @@ module XYZ
            :cols=>[:id, :display_name, :ref, :ref_num, :node_id, :node_group_id]
          },
          {:model_name => :node,
-           :join_cond=>{:id => :node_id}
+           :join_cond=>{:id => :node_id},
+           :cols=>[:id, :display_name]
          }
         ]
 
@@ -123,15 +126,34 @@ pp      Aux::benchmark("multi insert using import"){test1(new_id_handle,member_i
     #needed to overwrite this fn because special processing to handle :dynamic_membership_sql
     def self.get_objects(model_handle,where_clause={},opts={})
       #break into two parts; one with explicit links and the other with :dynamic_membership_sql non null
-      static_group = super(model_handle,SQL.and(where_clause,{:dynamic_membership_sql => nil}),opts)
-      static_group + get_objects_dynamic(model_handle,where_clause,opts)
+      static = get_objects_static(model_handle,where_clause,opts) 
+      dynamic = get_objects_dynamic(model_handle,where_clause,opts)
+      static + dynamic
     end
    private
+
+    def self.get_objects_static(model_handle,where_clause={},opts={})
+      #Model.get_objects returns flattened out; need to nest
+      #important that Model.get_objects called, not get_objects
+      static_group_flat = Model.get_objects(model_handle,SQL.and(where_clause,{:dynamic_membership_sql => nil}),opts)
+      return static_group_flat if static_group_flat.empty?
+      cache = Hash.new
+      static_group_flat.each do |el|
+        node = el.delete(:node)
+        if cache[el[:id]]
+          cache[el[:id]][:node] << node
+        else
+          cache[el[:id]] = el
+          cache[el[:id]][:node] = [node]
+        end
+      end
+      cache.values
+    end
 
     def self.get_objects_dynamic(model_handle,where_clause={},opts={})
       #TODO: make more efficient
       c = model_handle[:c]
-      #importnat bloe wthat  Model.get_objects called, not get_objects
+      #important that Model.get_objects called, not get_objects
       groups_info = Model.get_objects(model_handle,SQL.and(where_clause,SQL.and(where_clause,SQL.not(:dynamic_membership_sql => nil))),
                                 opts.merge(:field_set => [:id,:display_name,:dynamic_membership_sql]))
       groups_info.map{|group|group.merge :node => Model.get_objects(ModelHandle.new(c,:node),group[:dynamic_membership_sql])}
@@ -141,8 +163,8 @@ pp      Aux::benchmark("multi insert using import"){test1(new_id_handle,member_i
 
   class NodeGroupMember < Model
     set_relation_name(:node,:node_group_member)
-    column :is_elastic_node, :boolean, :default => false
     def self.up()
+      column :is_elastic_node, :boolean, :default => false
       foreign_key :node_id, :node, FK_CASCADE_OPT
       foreign_key :node_group_id, :node_group, FK_CASCADE_OPT
       many_to_one :library, :datacenter, :project

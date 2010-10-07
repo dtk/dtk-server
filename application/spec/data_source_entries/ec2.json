@@ -32,6 +32,16 @@
           "obj_type": "network_partition",
           "ds_name": "ec2",
           "display_name": "network_partition"
+        },
+        "node_group": {
+          "obj_type": "node_group",
+          "ds_name": "ec2",
+          "display_name": "node_group"
+        },
+        "node_group_member": {
+          "obj_type": "node_group_member",
+          "ds_name": "ec2",
+          "display_name": "node_group_member"
         }
       },
       "ds_name": "ec2",

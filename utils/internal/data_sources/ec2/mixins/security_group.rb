@@ -10,6 +10,10 @@ module XYZ
         server[:groups].sort.join("__")
       end
 
+      def security_groups_from_network_partition_ref(ref)
+        ref.split("__")
+      end
+
       #internal fns for mixin
       class Local
         def initialize(parent)

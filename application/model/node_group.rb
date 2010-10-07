@@ -3,20 +3,7 @@ module XYZ
     set_relation_name(:node,:node_group)
     def self.up()
       column :dynamic_membership_sql, :json #sql where clause that picks out node members and means to ignore memebrship assocs
-      #TODO: this might be omitted or annoated indicating that this can be one to many and shoudl be transformed
-      # from flattened out form; may also leevrage mechanism that gets children with bulk get
-      virtual_column :member_id_list, :dependencies => 
-        [
-         {:model_name => :node_group_member,
-           :join_cond=>{:node_group_id => :id},
-           :cols=>[:id, :display_name, :ref, :ref_num, :node_id, :node_group_id]
-         },
-         {:model_name => :node,
-           :join_cond=>{:id => :node_id},
-           :cols=>[:id, :display_name]
-         }
-        ]
-
+      virtual_column :member_id_list
       many_to_one :library, :datacenter, :project
       one_to_many :component
     end
@@ -126,25 +113,30 @@ pp      Aux::benchmark("multi insert using import"){test1(new_id_handle,member_i
     #needed to overwrite this fn because special processing to handle :dynamic_membership_sql
     def self.get_objects(model_handle,where_clause={},opts={})
       #break into two parts; one with explicit links and the other with :dynamic_membership_sql non null
-      static = get_objects_static(model_handle,where_clause,opts) 
+      static = get_objects_static(model_handle,where_clause,opts)
       dynamic = get_objects_dynamic(model_handle,where_clause,opts)
       static + dynamic
     end
    private
-
     def self.get_objects_static(model_handle,where_clause={},opts={})
-      #Model.get_objects returns flattened out; need to nest
+      c = model_handle[:c]
       #important that Model.get_objects called, not get_objects
-      static_group_flat = Model.get_objects(model_handle,SQL.and(where_clause,{:dynamic_membership_sql => nil}),opts)
-      return static_group_flat if static_group_flat.empty?
+      #below returns just scalar attributes
+      ng = Model.get_objects(model_handle,SQL.and(where_clause,{:dynamic_membership_sql => nil}),opts)
+      return ng if ng.empty?
+      #TODO: encapsulate this pattern to nest multiple matches; might have a variant of graph that does this
+      ng_member_wc = SQL.or(*ng.map{|x|{:node_group_id => x[:id]}})
+      ng_member_fs = {:field_set => [:node_group_id,:node_id]}
+      ng_members = Model.get_objects(ModelHandle.new(c,:node_group_member),ng_member_wc,ng_member_fs)
       cache = Hash.new
-      static_group_flat.each do |el|
-        node = el.delete(:node)
-        if cache[el[:id]]
-          cache[el[:id]][:node] << node
+      ng_members.each do |el|
+        #TODO: may change teh model class contsructors to take a model class
+        node_obj = Node.new({:id => el[:node_id]},c,:node)
+        if cache[el[:node_group_id]]
+          cache[el[:node_group_id]][:node] << node_obj
         else
-          cache[el[:id]] = el
-          cache[el[:id]][:node] = [node]
+          cache[el[:node_group_id]] = ng.find{|x|x[:id] == el[:node_group_id]}
+          cache[el[:node_group_id]][:node] = [node_obj]
         end
       end
       cache.values

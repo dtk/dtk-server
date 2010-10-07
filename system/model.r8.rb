@@ -81,6 +81,8 @@ module XYZ
     end
 
     def [](x)
+      real_hash = super(x) 
+      return real_hash if real_hash 
       vc_info = ret_info_if_is_virtual_column(x)
       if vc_info
         #first check if it has an explicit path or possible parents defined; otherwise look for fn
@@ -88,7 +90,7 @@ module XYZ
         return ret_parent_name(vc_info[:possible_parents]) if vc_info[:possible_parents] and x == :parent_name
         send(x) 
       else
-        super(x)
+        nil
       end
     end
 

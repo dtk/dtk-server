@@ -16,12 +16,6 @@
   "data_source": {
     "ec2": {
       "data_source_entry": {
-        "node_image": {
-          "obj_type": "node",
-          "ds_name": "ec2",
-          "source_obj_type": "image",
-          "display_name": "node_image"
-        },
         "node_instance": {
           "obj_type": "node",
           "ds_name": "ec2",

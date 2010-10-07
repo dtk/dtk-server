@@ -67,8 +67,8 @@ module XYZ
 
       component_ds = get_objects_just_dataset(ModelHandle.new(c,:component),{:node_node_id => node_id})
       attr_where_clause = SQL.or({:port_type => "input"},{:port_type => "output"})
-      attr_fs = (Model::FieldSet.default(:attribute) + [:component_component_id]).uniq
-      attribute_ds = get_objects_just_dataset(ModelHandle.new(c,:attribute),attr_where_clause,{:field_set => attr_fs})
+      attr_fs = Model::FieldSet.default(:attribute).add_cols(:component_component_id)
+      attribute_ds = get_objects_just_dataset(ModelHandle.new(c,:attribute),attr_where_clause,FieldSet.opt(attr_fs))
       components = component_ds.graph(:left_outer,attribute_ds,{:component_component_id => :id}).all
       node.merge(:component => components)
     end

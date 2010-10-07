@@ -51,15 +51,15 @@ module XYZ
       model_name = model_handle[:model_name]
       field_set = opts[:field_set] || FieldSet.default(model_name)
       #returns any related tables that must be joined in (by looking at virtual coumns)
-      related_columns = FieldSet.related_columns(field_set,model_name)
+      related_columns = field_set.related_columns(model_name)
       ret = nil
       unless related_columns
         ret = @db.get_objects_scalar_columns(model_handle,where_clause,opts)
       else
-        ls_opts = opts.merge :field_set => field_set
+        ls_opts = opts.merge(FieldSet.opt(field_set))
         graph_ds = get_objects_just_dataset(model_handle,where_clause,ls_opts)
         related_columns.each do |join_info|
-          rs_opts = (join_info[:cols] ? {:field_set => join_info[:cols]} : {}).merge :return_as_hash => true
+          rs_opts = (join_info[:cols] ? FieldSet.opt(FieldSet.new(join_info[:cols])) : {}).merge :return_as_hash => true
           right_ds = @db.get_objects_just_dataset(ModelHandle.new(c,join_info[:model_name]),nil,rs_opts)
           graph_ds = graph_ds.graph(:left_outer,right_ds,join_info[:join_cond])
         end

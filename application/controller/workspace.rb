@@ -38,7 +38,7 @@ module XYZ
 
       where_clause = {}
       request.params.each do |name,value|
-        (field_set.include?(name.to_sym)) ? where_clause[name.to_sym] = value : nil;
+        (field_set.include_col?(name.to_sym)) ? where_clause[name.to_sym] = value : nil;
       end
 
 #      where_clause = {:display_name => search_query}

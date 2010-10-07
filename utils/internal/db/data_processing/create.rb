@@ -20,7 +20,8 @@ module XYZ
         end
       end
 
-      def create_from_select(model_handle,columns,select,opts={})
+      def create_from_select(model_handle,field_set,select,opts={})
+        columns = field_set.cols
         db_rel = DB_REL_DEF[model_handle[:model_name]]
         if columns.include?(:c)
           dataset(db_rel).import(columns,select.sequel_ds)

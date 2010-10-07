@@ -32,11 +32,11 @@ pp      Aux::benchmark("multi insert using import"){test1(new_id_handle,member_i
       #TODO: abstract adn encas[pulate pattern below which copies to a set from a source object
       parent_ds = SQL::ArrayDataset.new(db,member_id_list.map{|x|{:node_node_id => x}},:parent)
       source_component_wc = {:id => new_id_handle.get_id()}
-      cols_to_copy = FieldSet.all_real_scalar(:component) - [:id,:local_id]
-      source_component_fs = {:field_set =>  cols_to_copy - [:node_node_id]}
+      field_set_to_copy = FieldSet.all_real_scalar(:component).remove_cols(:id,:local_id)
+      source_component_fs = FieldSet.opt(field_set_to_copy.remove_cols(:node_node_id))
       source_component_ds = get_objects_just_dataset(ModelHandle.new(c,:component),source_component_wc,source_component_fs)
       graph = parent_ds.graph(:inner,source_component_ds)
-      create_from_select(ModelHandle.new(c,:component),cols_to_copy,graph.select(*cols_to_copy))
+      create_from_select(ModelHandle.new(c,:component),field_set_to_copy,graph.select(*field_set_to_copy.cols))
       #TODO: now need to insert in top.id+_info table
     end
 
@@ -45,11 +45,11 @@ pp      Aux::benchmark("multi insert using import"){test1(new_id_handle,member_i
       #TODO: abstract adn encas[pulate pattern below which copies to a set from a source object
       parent_ds = SQL::ArrayDataset.new(db,member_id_list.map{|x|{:node_node_id => x}},:parent)
       source_component_wc = {:id => new_id_handle.get_id()}
-      cols_to_copy = FieldSet.all_real_scalar(:component) - [:id,:local_id]
-      source_component_fs = {:field_set =>  cols_to_copy - [:node_node_id]}
+      field_set_to_copy = FieldSet.all_real_scalar(:component).remove_cols(:id,:local_id)
+      source_component_fs = FieldSet.opt(field_set_to_copy.remove_cols(:node_node_id))
       source_component_ds = get_objects_just_dataset(ModelHandle.new(c,:component),source_component_wc,source_component_fs)
       graph = parent_ds.graph(:inner,source_component_ds)
-      create_from_select(ModelHandle.new(c,:component),cols_to_copy,graph.select(*cols_to_copy))
+      create_from_select(ModelHandle.new(c,:component),field_set_to_copy,graph.select(*field_set_to_copy.cols))
       #TODO: now need to insert in top.id+_info table
     end
 
@@ -77,19 +77,19 @@ pp      Aux::benchmark("multi insert using import"){test1(new_id_handle,member_i
       end
       #put in attribute links
       node_cmp_wc = {:ancestor_id => new_id_handle.get_id()}
-      node_cmp_fs = {:field_set => [:id]}
+      node_cmp_fs = FieldSet.opt([:id])
       node_cmp_ds = get_objects_just_dataset(ModelHandle.new(c,:component),node_cmp_wc,node_cmp_fs)
 
-      node_attr_fs = {:field_set => [:component_component_id,:id,:ref]}
+      node_attr_fs = FieldSet.opt([:component_component_id,:id,:ref])
       node_attr_ds = get_objects_just_dataset(ModelHandle.new(c,:attribute),nil,node_attr_fs)
 
       group_attr_wc = {:component_component_id => new_id_handle.get_id()}
-      group_attr_fs = {:field_set => [:id,:ref]}
+      group_attr_fs = FieldSet.opt([:id,:ref])
       group_attr_ds = get_objects_just_dataset(ModelHandle.new(c,:attribute),group_attr_wc,group_attr_fs)
 
       graph = node_cmp_ds.graph(:inner,node_attr_ds,{:component_component_id => :id}).graph(:inner,group_attr_ds,{:ref => :ref})
       select = graph.select('attribute_link',:attribute2__id,:attribute__id)
-      create_from_select(ModelHandle.new(c,:attribute_link),[:ref,:input_id,:output_id],select)
+      create_from_select(ModelHandle.new(c,:attribute_link),FieldSet.new([:ref,:input_id,:output_id]),select)
       #TODO: links for monitor_items
 
     end
@@ -126,7 +126,7 @@ pp      Aux::benchmark("multi insert using import"){test1(new_id_handle,member_i
       return ng if ng.empty?
       #TODO: encapsulate this pattern to nest multiple matches; might have a variant of graph that does this
       ng_member_wc = SQL.or(*ng.map{|x|{:node_group_id => x[:id]}})
-      ng_member_fs = {:field_set => [:node_group_id,:node_id]}
+      ng_member_fs = FieldSet.opt([:node_group_id,:node_id])
       ng_members = Model.get_objects(ModelHandle.new(c,:node_group_member),ng_member_wc,ng_member_fs)
       cache = Hash.new
       ng_members.each do |el|
@@ -147,7 +147,7 @@ pp      Aux::benchmark("multi insert using import"){test1(new_id_handle,member_i
       c = model_handle[:c]
       #important that Model.get_objects called, not get_objects
       groups_info = Model.get_objects(model_handle,SQL.and(where_clause,SQL.and(where_clause,SQL.not(:dynamic_membership_sql => nil))),
-                                opts.merge(:field_set => [:id,:display_name,:dynamic_membership_sql]))
+                                opts.merge(FieldSet.opt([:id,:display_name,:dynamic_membership_sql])))
       groups_info.map{|group|group.merge :node => Model.get_objects(ModelHandle.new(c,:node),group[:dynamic_membership_sql])}
         
     end

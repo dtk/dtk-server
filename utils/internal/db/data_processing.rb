@@ -60,7 +60,7 @@ module XYZ
             Log.info("id handle shoudl not be nil")
             next
           end
-          object = get_object_scalar_columns(id_handle,{:field_set => real_cols})
+          object = get_object_scalar_columns(id_handle,FieldSet.opt(real_cols))
           object.each{|k,v| scalar_assigns[k] = v}
         end
 
@@ -81,7 +81,7 @@ module XYZ
         ret = Hash.new
         settable_scalar_cols = Model::FieldSet.all_settable_scalar(db_rel[:relation_type])
         assignments.each_pair do |k,v| 
-          next unless settable_scalar_cols.include?(k.to_sym)
+          next unless settable_scalar_cols.include_col?(k.to_sym)
           ret[k] = v 
         end
         ret

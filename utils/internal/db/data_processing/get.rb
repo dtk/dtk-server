@@ -160,7 +160,7 @@ module XYZ
         #if opts[:field_set] then this is taken as is as the selected columns 
         select_cols = nil
         if opts[:field_set]
-          select_cols = opts[:field_set] & Model::FieldSet.all_real(db_rel[:relation_type])
+          select_cols = (opts[:field_set] & Model::FieldSet.all_real(db_rel[:relation_type])).cols
         else
           #TODO : change below to be in terms of a FieldSet call
           select_cols = (db_rel[:columns]||{}).keys 

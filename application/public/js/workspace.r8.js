@@ -541,6 +541,48 @@ console.log('To Group:'+groupId);
 //				R8.Workspace.setupViewSpaceItem(nodeId);
 				R8.Workspace.addDrag(itemId);
 				R8.Workspace.addDrop(itemId);
+				R8.Workspace.setupMinMax(itemId);
+			},
+
+			setupMinMax : function(itemId) {
+				var minMaxId = itemId+'-minmax-large';
+				var minMaxNode = R8.Utils.Y.one('#'+minMaxId);
+
+				if(typeof(minMaxNode) != 'undefined') {
+					minMaxNode.on('mouseover',function(e,itemId){
+						e.currentTarget.setStyle('backgroundPosition','-16px 0px');
+					},this,itemId);
+					minMaxNode.on('mouseout',function(e,itemId){
+						e.currentTarget.setStyle('backgroundPosition','0px 0px');
+					},this,itemId);
+					minMaxNode.on('click',function(e,itemId){
+						R8.Utils.Y.one('#'+itemId+'-large').setStyle('display','none');
+						R8.Utils.Y.one('#'+itemId+'-medium').setStyle('display','block');
+						var itemNode = R8.Utils.Y.one('#'+itemId);
+						itemNode.addClass('medium');
+						itemNode.removeClass('large');
+					},this,itemId);
+				}
+
+				//setup medium minmax
+				var minMaxId = itemId+'-minmax-medium';
+				var minMaxNode = R8.Utils.Y.one('#'+minMaxId);
+
+				if(typeof(minMaxNode) != 'undefined') {
+					minMaxNode.on('mouseover',function(e,itemId){
+						e.currentTarget.setStyle('backgroundPosition','-16px -16px');
+					},this,itemId);
+					minMaxNode.on('mouseout',function(e,itemId){
+						e.currentTarget.setStyle('backgroundPosition','0px -16px');
+					},this,itemId);
+					minMaxNode.on('click',function(e,itemId){
+						R8.Utils.Y.one('#'+itemId+'-medium').setStyle('display','none');
+						R8.Utils.Y.one('#'+itemId+'-large').setStyle('display','block');
+						var itemNode = R8.Utils.Y.one('#'+itemId);
+						itemNode.addClass('large');
+						itemNode.removeClass('medium');
+					},this,itemId);
+				}
 			},
 
 			addItemSuccess : function(ioId,responseObj) {

@@ -1,4 +1,4 @@
-.basic-group.medium .item-toolbar {
+.basic-item.group.large .item-toolbar {
 	height: 60px;
 	width: 256px;
 	float: left;
@@ -7,7 +7,7 @@
 	top: -30px;
 }
 
-.basic-group.medium .item-toolbar-main {
+.basic-item.group.large .item-toolbar-main {
 	height: 30px;
 	width: 100%;
 	margin-top: 2px;
@@ -24,33 +24,34 @@
 	padding: 4px;
 }
 
-.basic-group.medium .toolbar-wrapper .tb-l-cap {
+.basic-item.group.large .toolbar-wrapper .tb-l-cap {
 	float: left;
 	width: 3px;
 	height: 24px;
-	background-image: url(../images/toolbar/l-endcap.png);
+	background-image: url(../images/toolbar/l-endcap-02.png);
 	background-repeat: no-repeat;
 }
-.basic-group.green .toolbar-wrapper .tb-l-cap {
+.basic-item.group.green .toolbar-wrapper .tb-l-cap {
 	background-position: 0px 0px;
 }
-.basic-group.medium .toolbar-wrapper .tb-body {
+.basic-item.group.large .toolbar-wrapper .tb-body {
 	float: left;
-	width: 239px;
+	width: 175px;
 	height: 22px;
 }
-.basic-group.green .toolbar-wrapper .tb-body {
+.basic-item.group.green .toolbar-wrapper .tb-body {
 	border-top: 1px solid #A8C298;
 	border-bottom: 1px solid #A8C298;
+	background-color: #A8C298;
 }
-.basic-group.medium .toolbar-wrapper .tb-r-cap {
+.basic-item.group.large .toolbar-wrapper .tb-r-cap {
 	float: left;
 	width: 14px;
 	height: 24px;
 	background-image: url(../images/toolbar/r-endcap.png);
 	background-repeat: no-repeat;
 }
-.basic-group.green .toolbar-wrapper .tb-r-cap {
+.basic-item.group.green .toolbar-wrapper .tb-r-cap {
 	background-position: 0px 0px;
 }
 

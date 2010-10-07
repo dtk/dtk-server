@@ -1,12 +1,22 @@
 
-.basic-group {
+.basic-item.group {
 	position: absolute;
 }
 
-.basic-group.medium {
+.basic-item.group.large {
 	height: 124px;
 	width: 606px;
 }
+.basic-item.group.large .item-display {
+	height: 124px;
+	width: 606px;
+	position: absolute;
+}
+.basic-item.group.large .item-shadow {
+	height: 124px;
+	width: 606px;
+}
+
 .yui3-dd-dragging {
 	cursor: move;
 }
@@ -18,123 +28,117 @@
 
 /*-------Corners-----------*/
 
-.basic-group .corner {
+/*
+.basic-item.group .corner {
 	height: 7px;
 	width: 7px;
 	background-repeat: no-repeat;
 	float: left;
 }
-.basic-group.green .corner {
-	background-image: url(../images/group/basic-corners-green.png);
-}
-.basic-group.blue .corner {
-	background-image: url(../images/group/basic-corners-blue.png);
-}
 
-
-.basic-group .corner.tl {
+.basic-item.group .corner.tl {
 }
-.basic-group .corner.tr {
+.basic-item.group .corner.tr {
 	background-position: 0px -7px;
 }
-.basic-group .corner.br {
+.basic-item.group .corner.br {
 	background-position: 0px -14px;
 }
-.basic-group .corner.bl {
+.basic-item.group .corner.bl {
 	background-position: 0px -21px;
 }
-.basic-group.focus .corner.tl {
+.basic-item.group.focus .corner.tl {
 	background-position: -7px 0px;
 }
-.basic-group.focus .corner.tr {
+.basic-item.group.focus .corner.tr {
 	background-position: -7px -7px;
 }
-.basic-group.focus .corner.br {
+.basic-item.group.focus .corner.br {
 	background-position: -7px -14px;
 }
-.basic-group.focus .corner.bl {
+.basic-item.group.focus .corner.bl {
 	background-position: -7px -21px;
 }
-
+*/
 /*----------------------------*/
 
 
-.basic-group .l-col {
+.basic-item.group .l-col {
 	float: left;
 	height: 124px;
 	width: 7px;
 }
-.basic-group .r-col {
+.basic-item.group .r-col {
 	float: right;
 	height: 124px;
 	width: 7px;
 }
 
-.basic-group.medium .l-col .l-col-body {
+.basic-item.group.large .l-col .l-col-body {
 	width: 5px;
 	height: 110px;
 	border-left: 2px solid black;
 	float: left;
 }
-.basic-group.focus .l-col .l-col-body {
+.basic-item.group.focus .l-col .l-col-body {
 	border-left: 2px solid #C80000;
 }
 
-.basic-group.green .l-col .l-col-body {
+.basic-item.group.green .l-col .l-col-body {
 	background-color: #7EB75C;
 }
-.basic-group.blue .l-col .l-col-body {
+.basic-item.group.blue .l-col .l-col-body {
 	background-color: #A8C6ED;
 }
 
-.basic-group.medium .r-col .r-col-body {
+.basic-item.group.large .r-col .r-col-body {
 	width: 5px;
 	height: 110px;
 	border-right: 2px solid black;
 	float: left;
 }
 
-.basic-group.focus .r-col .r-col-body {
+.basic-item.group.focus .r-col .r-col-body {
 	border-right: 2px solid #C80000;
 }
 
-.basic-group.green .r-col .r-col-body {
+.basic-item.group.green .r-col .r-col-body {
 	background-color: #7EB75C;
 }
-.basic-group.blue .r-col .r-col-body {
+.basic-item.group.blue .r-col .r-col-body {
 	background-color: #A8C6ED;
 }
 
 /*-------------------*/
 
-.basic-group.medium .group-bar {
+.basic-item.group.large .group-bar {
 	height: 30px;
 	width: 100%;
 	float: left;
 }
 
-.basic-group.medium .body {
+.basic-item.group.large .body {
 	float: left;
 	border-top: 2px solid black;
 	border-bottom: 2px solid black;
 	height: 120px; width: 422px;
 }
 
-.basic-group.focus .body {
+.basic-item.group.focus .body {
 	border-top: 2px solid #C80000;
 	border-bottom: 2px solid #C80000;
 }
 
-.basic-group.green .body {
+.basic-item.group.green .body {
 	background-color: #7EB75C;
 }
-.basic-group.blue .body {
+.basic-item.group.blue .body {
 	background-color: #A8C6ED;
 }
 
 /*--------Elastic-----------*/
 
-.basic-group .elastic-node-body {
+.basic-item.group .elastic-node-body {
 	float: left;
 	height: 120px;
 	width: 132px;
@@ -142,64 +146,68 @@
 	border-bottom: 2px solid black;
 }
 
-.basic-group.focus .elastic-node-body {
+.basic-item.group .enb-header {
+	height: 20px;
+	width: 132px;
+}
+.basic-item.group.focus .elastic-node-body {
 	border-top: 2px solid #C80000;
 	border-bottom: 2px solid #C80000;
 }
 
-.basic-group.green .elastic-node-body {
+.basic-item.group.green .elastic-node-body {
 	background-color: #7EB75C;
 }
-.basic-group.blue .elastic-node-body {
+.basic-item.group.blue .elastic-node-body {
 	background-color: #A8C6ED;
 }
 
-.basic-group.medium .elastic {
+.basic-item.group.large .elastic {
 	height: 124px;
 	width: 38px;
 	float: left;
 }
 
-.basic-group .elastic-header {
+.basic-item.group .elastic-header {
 	height: 6px;
 	width: 38px;
 }
-.basic-group.green .elastic-header {
+.basic-item.group.green .elastic-header {
 	background-image: url(../images/group/elastic-green.png);
 }
-.basic-group.green.focus .elastic-header {
+.basic-item.group.green.focus .elastic-header {
 	background-position: -38px 0px;
 }
-.basic-group.blue .elastic-header {
+.basic-item.group.blue .elastic-header {
 	background-image: url(../images/group/elastic-blue.png);
 }
 
-.basic-group .elastic-footer {
+.basic-item.group .elastic-footer {
 	height: 6px;
 	width: 38px;
 	background-position: 0px -6px;
 }
-.basic-group.green .elastic-footer {
+.basic-item.group.green .elastic-footer {
 	background-image: url(../images/group/elastic-green.png);
 }
-.basic-group.green.focus .elastic-footer {
+.basic-item.group.green.focus .elastic-footer {
 	background-position: -38px -6px;
 }
 
-.basic-group.blue .elastic-footer {
+.basic-item.group.blue .elastic-footer {
 	background-image: url(../images/group/elastic-blue.png);
 }
 
-.basic-group.medium .elastic-body {
+.basic-item.group.large .elastic-body {
 	width: 38px;
 	background-repeat: repeat-y;
 	height:112px;
 }
 
-.basic-group.green .elastic-body {
+.basic-item.group.green .elastic-body {
 	background-image: url(../images/group/elastic-bg-green.png);
 }
-.basic-group.blue .elastic-body {
+.basic-item.group.blue .elastic-body {
 	background-image: url(../images/group/elastic-bg-blue.png);
 }
 
@@ -316,7 +324,7 @@
 
 /*------------Drop Shadow---------*/
 
-.basic-group.medium .drop-shadow-group {
+.basic-item.group.large .drop-shadow {
 	height: 124px;
 	width: 606px;
 	margin: 4px 0 0 4px;
@@ -325,43 +333,43 @@
 .group.yui3-dd-dragging {
 /*	margin: -7px 0 0 -7px;*/
 }
-.basic-group.yui3-dd-dragging .item {
+.basic-item.group.yui3-dd-dragging .item {
 	margin: -7px 0 0 -7px;
 }
 
-.basic-group .ds-corner {
+.basic-item.group .ds-corner {
 	height: 7px;
 	width: 7px;
 	background-repeat: no-repeat;
 	float: left;
 }
 
-.basic-group .ds-corner {
+.basic-item.group .ds-corner {
 	background-image: url(../images/node/basic-corners-shadow.png);
 }
 
-.basic-group .ds-corner.tr {
+.basic-item.group .ds-corner.tr {
 	background-position: 0px -7px;
 }
-.basic-group .ds-corner.br {
+.basic-item.group .ds-corner.br {
 	background-position: 0px -14px;
 }
-.basic-group .ds-corner.bl {
+.basic-item.group .ds-corner.bl {
 	background-position: 0px -21px;
 }
 
-.basic-group.medium .ds-l-col {
+.basic-item.group.large .ds-l-col {
 	float: left;
 	height: 114px;
 	width: 7px;
 }
-.basic-group.medium .ds-r-col {
+.basic-item.group.large .ds-r-col {
 	float: right;
 	height: 114px;
 	width: 7px;
 }
 
-.basic-group.medium .drop-shadow-group .ds-l-col-body {
+.basic-item.group.large .drop-shadow .ds-l-col-body {
 	width: 7px;
 	height: 110px;
 	float: left;
@@ -370,7 +378,7 @@
 }
 
 
-.basic-group.medium .drop-shadow-group .ds-r-col-body {
+.basic-item.group.large .drop-shadow .ds-r-col-body {
 	width: 7px;
 	height: 110px;
 	float: left;
@@ -379,19 +387,19 @@
 	background-position: -7px 0px;
 }
 
-.basic-group.medium .drop-shadow-group .ds-body {
+.basic-item.group.large .drop-shadow .ds-body {
 	float: left;
 	width: 422px;
 	height: 110px;
 }
-.basic-group.medium .drop-shadow-group .ds-body .header {
+.basic-item.group.large .drop-shadow .ds-body .header {
 	float: left;
 	width: 422px;
 	height: 7px;
 	background-image: url(../images/node/basic-header-shadow-bg.png);
 	background-repeat: repeat-x;
 }
-.basic-group.medium .drop-shadow-group .ds-body .footer {
+.basic-item.group.large .drop-shadow .ds-body .footer {
 	float: left;
 	width: 422px;
 	height: 7px;
@@ -400,7 +408,7 @@
 	background-position: 0px -7px;
 }
 
-.basic-group.medium .drop-shadow-group .ds-body .main-body {
+.basic-item.group.large .drop-shadow .ds-body .main-body {
 	float: left;
 	width: 422px;
 	height: 110px;
@@ -409,20 +417,20 @@
 }
 
 /*---------Shadow Elastic------*/
-.basic-group.medium .drop-shadow-group .elastic-ds-body {
+.basic-item.group.large .drop-shadow .elastic-ds-body {
 	float: left;
 	width: 38px;
 	height: 124px;
 }
 
-.basic-group.medium .drop-shadow-group .elastic-ds-body .header {
+.basic-item.group.large .drop-shadow .elastic-ds-body .header {
 	float: left;
 	width: 38px;
 	height: 6px;
 	background-image: url(../images/group/elastic-shadow.png);
 	background-repeat: no-repeat;
 }
-.basic-group.medium .drop-shadow-group .elastic-ds-body .footer {
+.basic-item.group.large .drop-shadow .elastic-ds-body .footer {
 	float: left;
 	width: 38px;
 	height: 6px;
@@ -431,7 +439,7 @@
 	background-position: 0px -6px;
 }
 
-.basic-group.medium .drop-shadow-group .elastic-ds-body .main-body {
+.basic-item.group.large .drop-shadow .elastic-ds-body .main-body {
 	float: left;
 	width: 38px;
 	height: 112px;
@@ -441,19 +449,19 @@
 
 /*----------Shadow Elastic Node--------*/
 
-.basic-group.medium .drop-shadow-group .elastic-node-ds-body {
+.basic-item.group.large .drop-shadow .elastic-node-ds-body {
 	float: left;
 	width: 132px;
 	height: 124px;
 }
-.basic-group.medium .drop-shadow-group .elastic-node-ds-body .header {
+.basic-item.group.large .drop-shadow .elastic-node-ds-body .header {
 	float: left;
 	width: 132px;
 	height: 7px;
 	background-image: url(../images/node/basic-header-shadow-bg.png);
 	background-repeat: repeat-x;
 }
-.basic-group.medium .drop-shadow-group .elastic-node-ds-body .footer {
+.basic-item.group.large .drop-shadow .elastic-node-ds-body .footer {
 	float: left;
 	width: 132px;
 	height: 7px;
@@ -462,7 +470,7 @@
 	background-position: 0px -7px;
 }
 
-.basic-group.medium .drop-shadow-group .elastic-node-ds-body .main-body {
+.basic-item.group.large .drop-shadow .elastic-node-ds-body .main-body {
 	float: left;
 	width: 132px;
 	height: 110px;
@@ -472,13 +480,13 @@
 
 /*-------------*/
 
-.basic-group.medium .name-wrapper {
+.basic-item.group.large .name-wrapper {
 	height: 30px;
 	width: 150px;
 	float: left;
 }
 
-.basic-group.medium .toolbar-wrapper {
+.basic-item.group.large .toolbar-wrapper {
 	height: 30px;
 	width: 256px;
 	margin-right: 16px;

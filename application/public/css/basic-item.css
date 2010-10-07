@@ -21,6 +21,11 @@
 	width: 120px;
 }
 
+.basic-item.medium .header {
+	height: 20px;
+	width: 46px;
+}
+
 /*-------Corners-----------*/
 
 .basic-item .corner {
@@ -38,13 +43,13 @@
 }
 
 .basic-item.blue .corner {
-	background-image: url(../images/node/basic-corners-blue.png);
+	background-image: url(../images/item/basic-corners-blue.png);
 }
 .basic-item.green .corner {
-	background-image: url(../images/node/basic-corners-green.png);
+	background-image: url(../images/item/basic-corners-green.png);
 }
 .basic-item.red-trans .corner {
-	background-image: url(../images/node/basic-corners-red-trans.png);
+	background-image: url(../images/item/basic-corners-red-trans.png);
 }
 
 .basic-item .corner.tl {
@@ -254,4 +259,18 @@
 	height: 40px;
 	width: 80px;
 	margin: 10px auto;
+}
+
+/*-------Minmax----------*/
+
+.minmax {
+	height: 16px;
+	width: 16px;
+	float: right;
+	margin: 2px 0;
+	background-image: url(../images/item/minmax.png);
+	background-repeat: no-repeat;
+}
+.minmax.max {
+	background-position: 0px -16px;
 }

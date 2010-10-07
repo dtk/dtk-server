@@ -85,6 +85,7 @@ module XYZ
       end
 
       def exists?(id_handle)
+        return true if id_handle.is_top?
         IDInfoTable.get_row_from_id_handle(id_handle) ? true : nil
       end
 

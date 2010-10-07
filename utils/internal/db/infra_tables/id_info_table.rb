@@ -37,6 +37,10 @@ module XYZ
       ModelHandle.new(self[:c],self[:model_name])
     end
 
+    def is_top?()
+      self[:uri] == "/"
+    end
+
     def initialize(x)
       super()
       if x[:id_info]

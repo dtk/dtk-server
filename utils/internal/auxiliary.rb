@@ -1,50 +1,19 @@
 
-###for more succinctly handling pattern where class exposes methods on an internal object
-class Class
-  #TODO: consider variant where third argument passed which is lambda indicating how to 
-  #transform inputs before applying to interval method var
-  def expose_methods_from_internal_object(innervar,methods_to_expose,opts={})
-    return expose_methods_with_benchmark(innervar,methods_to_expose,opts) if opts[:benchmark]
-    methods_to_expose.each do |m| 
-      method_def = 
-        if opts[:post_hook]
-          "def #{m}(*args);#{opts[:post_hook]}.call(@#{innervar}.#{m}(*args));end"
-        else
-          "def #{m}(*args);@#{innervar}.#{m}(*args);end"
-        end
-      class_eval(method_def) 
-    end
-  end
-
-  #TODO: cleanup; just for testing; no benchmarking if post hook
-  def expose_methods_with_benchmark(innervar,methods_to_expose,opts={})
-    require 'benchmark'
-    b = opts[:benchmark]
-    methods_to_expose.each do |m| 
-      method_def = 
-        if opts[:post_hook]
-          "def #{m}(*args);#{opts[:post_hook]}.call(@#{innervar}.#{m}(*args));end"
-        elsif b == :all or (b.respond_to?(:include?) and b.include?(m))
-            "def #{m}(*args);x=nil;puts '---#{m}----------------';puts Benchmark.measure{x=@#{innervar}.#{m}(*args)};puts '--------------------';x;end"
-       else
-          "def #{m}(*args);@#{innervar}.#{m}(*args);end"
-        end
-      class_eval(method_def)
-    end
-  end
-
-  def expose_all_methods_from_internal_object(innervar)
-    method_def = "def method_missing(method,*args);@#{innervar}.send(method,*args);end"  
-    class_eval(method_def)
-  end
-end
-
 module XYZ
   class Aux
     class Cache < Hash
     end
 
     class << self
+      def benchmark(name,&block)
+        require 'benchmark'
+        puts "------------- #{name} ----------------"
+        ret = nil
+        puts Benchmark.measure{ret=block.call}
+        puts "---------end: #{name} ----------------\n\n"
+        ret
+      end
+
       def hash_from_file_with_json(file_name)
         return nil unless File.exists?(file_name)
         ret = nil
@@ -170,6 +139,46 @@ module XYZ
   end
 end
 
+###for more succinctly handling pattern where class exposes methods on an internal object
+class Class
+  #TODO: consider variant where third argument passed which is lambda indicating how to 
+  #transform inputs before applying to interval method var
+  def expose_methods_from_internal_object(innervar,methods_to_expose,opts={})
+    return expose_methods_with_benchmark(innervar,methods_to_expose,opts) if opts[:benchmark]
+    methods_to_expose.each do |m| 
+      method_def = 
+        if opts[:post_hook]
+          "def #{m}(*args);#{opts[:post_hook]}.call(@#{innervar}.#{m}(*args));end"
+        else
+          "def #{m}(*args);@#{innervar}.#{m}(*args);end"
+        end
+      class_eval(method_def) 
+    end
+  end
+
+  #TODO: just for testing; 
+
+  def expose_methods_with_benchmark(innervar,methods_to_expose,opts={})
+    b = opts[:benchmark]
+    methods_to_expose.each do |m| 
+      exec = "@#{innervar}.#{m}(*args)"
+      exec = "XYZ::Aux.benchmark('#{m}'){#{exec}}" if b == :all or (b.respond_to?(:include?) and b.include?(m))
+      method_def = 
+        if opts[:post_hook]
+          #TODO: whethether benchmark shoudl include post_hook
+          "def #{m}(*args);#{opts[:post_hook]}.call(#{exec});end"
+        else
+          "def #{m}(*args);#{exec};end"
+        end
+      class_eval(method_def)
+    end
+  end
+
+  def expose_all_methods_from_internal_object(innervar)
+    method_def = "def method_missing(method,*args);@#{innervar}.send(method,*args);end"  
+    class_eval(method_def)
+  end
+end
 
 #for being able to determine the method name in the function call
 module Kernel

@@ -32,20 +32,7 @@ pp      Aux::benchmark("multi insert using import"){test1(new_id_handle,member_i
       #TODO: abstract adn encas[pulate pattern below which copies to a set from a source object
       parent_ds = SQL::ArrayDataset.new(db,member_id_list.map{|x|{:node_node_id => x}},:parent)
       source_component_wc = {:id => new_id_handle.get_id()}
-      field_set_to_copy = FieldSet.all_real_scalar(:component).remove_cols(:id,:local_id)
-      source_component_fs = FieldSet.opt(field_set_to_copy.remove_cols(:node_node_id))
-      source_component_ds = get_objects_just_dataset(ModelHandle.new(c,:component),source_component_wc,source_component_fs)
-      graph = parent_ds.graph(:inner,source_component_ds)
-      create_from_select(ModelHandle.new(c,:component),field_set_to_copy,graph.select(*field_set_to_copy.cols))
-      #TODO: now need to insert in top.id+_info table
-    end
-
-    def self.test2(new_id_handle,member_id_list)
-      c = new_id_handle[:c]
-      #TODO: abstract adn encas[pulate pattern below which copies to a set from a source object
-      parent_ds = SQL::ArrayDataset.new(db,member_id_list.map{|x|{:node_node_id => x}},:parent)
-      source_component_wc = {:id => new_id_handle.get_id()}
-      field_set_to_copy = FieldSet.all_real_scalar(:component).remove_cols(:id,:local_id)
+      field_set_to_copy = FieldSet.all_real(:component).remove_cols(:id,:local_id,:node_node_group_id)
       source_component_fs = FieldSet.opt(field_set_to_copy.remove_cols(:node_node_id))
       source_component_ds = get_objects_just_dataset(ModelHandle.new(c,:component),source_component_wc,source_component_fs)
       graph = parent_ds.graph(:inner,source_component_ds)

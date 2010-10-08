@@ -22,13 +22,27 @@ module XYZ
 
       def create_from_select(model_handle,field_set,select,opts={})
         columns = field_set.cols
-        db_rel = DB_REL_DEF[model_handle[:model_name]]
-        if columns.include?(:c)
-          dataset(db_rel).import(columns,select.sequel_ds)
-        else
-          dataset(db_rel).import(columns + [:c],select.sequel_ds.select_more(model_handle[:c]))
+        sequel_select = select.sequel_ds
+        unless columns.include?(:c)
+          columns << :c
+          sequel_select = sequel_select.select_more(model_handle[:c])
         end
+        db_rel = DB_REL_DEF[model_handle[:model_name]]
+        dataset(db_rel).import(columns,sequel_select)
       end
+
+      def create_from_select_expirement(model_handle,field_set,select,opts={})
+        columns = field_set.cols
+        sequel_select = select.sequel_ds
+        unless columns.include?(:c)
+          columns << :c
+          sequel_select = sequel_select.select_more(model_handle[:c])
+        end
+        db_rel = DB_REL_DEF[model_handle[:model_name]]
+        values = sequel_select.ungraphed.all
+        dataset(db_rel).multi_insert(values)
+      end
+
 
       def create_simple_instance?(new_uri,c,opts={})
         return new_uri if exists? IDHandle[:uri => new_uri, :c => c]

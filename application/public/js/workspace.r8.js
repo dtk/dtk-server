@@ -548,7 +548,7 @@ console.log('To Group:'+groupId);
 				var minMaxId = itemId+'-minmax-large';
 				var minMaxNode = R8.Utils.Y.one('#'+minMaxId);
 
-				if(typeof(minMaxNode) != 'undefined') {
+				if(minMaxNode != null) {
 					minMaxNode.on('mouseover',function(e,itemId){
 						e.currentTarget.setStyle('backgroundPosition','-16px 0px');
 					},this,itemId);
@@ -562,13 +562,11 @@ console.log('To Group:'+groupId);
 						itemNode.addClass('medium');
 						itemNode.removeClass('large');
 					},this,itemId);
-				}
 
-				//setup medium minmax
-				var minMaxId = itemId+'-minmax-medium';
-				var minMaxNode = R8.Utils.Y.one('#'+minMaxId);
+					//setup medium minmax
+					var minMaxId = itemId+'-minmax-medium';
+					var minMaxNode = R8.Utils.Y.one('#'+minMaxId);
 
-				if(typeof(minMaxNode) != 'undefined') {
 					minMaxNode.on('mouseover',function(e,itemId){
 						e.currentTarget.setStyle('backgroundPosition','-16px -16px');
 					},this,itemId);

@@ -36,7 +36,7 @@ pp      Aux::benchmark("multi insert"){test1(new_id_handle,member_id_list)}
       source_component_fs = FieldSet.opt(field_set_to_copy.remove_cols(:node_node_id))
       source_component_ds = get_objects_just_dataset(ModelHandle.new(c,:component),source_component_wc,source_component_fs)
       graph = parent_ds.graph(:inner,source_component_ds)
-      create_from_select(ModelHandle.new(c,:component),field_set_to_copy,graph.select(*field_set_to_copy.cols))
+      create_from_select(ModelHandle.new(c,:component,:node),field_set_to_copy,graph.select(*field_set_to_copy.cols))
       #TODO: now need to insert in top.id+_info table
     end
 
@@ -76,6 +76,7 @@ pp      Aux::benchmark("multi insert"){test1(new_id_handle,member_id_list)}
 
       graph = node_cmp_ds.graph(:inner,node_attr_ds,{:component_component_id => :id}).graph(:inner,group_attr_ds,{:ref => :ref})
       select = graph.select('attribute_link',:attribute2__id,:attribute__id)
+      #TODO: must also put in parent_relation
       create_from_select(ModelHandle.new(c,:attribute_link),FieldSet.new([:ref,:input_id,:output_id]),select)
       #TODO: links for monitor_items
 

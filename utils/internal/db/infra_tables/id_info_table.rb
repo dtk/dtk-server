@@ -85,11 +85,18 @@ module XYZ
   end
 
   class ModelHandle < Hash
-    def initialize(c,model_name)
+    def initialize(c,model_name,parent_model_name=nil)
       super()
       self[:c] = c
       self[:model_name] = model_name.to_sym
+      self[:parent_model_name] = parent_model_name.to_sym if parent_model_name
       freeze
+    end
+    
+    #TODO: may remove DB.ret_parent_id_field_name and reroot all calls to this fn and variant that takes parent_model_name as arg
+    def parent_id_field_name()
+      return nil unless self[:parent_model_name]
+      DB.ret_parent_id_field_name(DB_REL_DEF[self[:parent_model_name]],DB_REL_DEF[self[:model_name]])
     end
   end
 

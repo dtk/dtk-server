@@ -31,13 +31,19 @@ module XYZ
         ds = dataset(db_rel)
 
         #fn tries to return ids depending on whether db adater supports returning_id
-        if ds.respond_to?(:insert_returning_sql)
-          ret = Array.new
-          sql = ds.insert_returning_sql(:id,columns,sequel_select)
-          fetch_raw_sql(sql){|row| ret << row[:id]}
-          ret
+        parent_id_field_name = model_handle.parent_id_field_name()
+        if ds.respond_to?(:insert_returning_sql) and parent_id_field_name
+          returning_ids = Array.new
+          sql = ds.insert_returning_sql([:id,parent_id_field_name],columns,sequel_select)
+          fetch_raw_sql(sql){|row| returning_ids << row}
+          #TODO: stub for updating the id_table
+          pp returning_ids
+
+          returning_ids.map{|row|row[:id]}
         else
           dataset(db_rel).import(columns,sequel_select)
+          #TODO: need to get ids and set 
+          raise Error.new("have not implemented create_from_select when db adapter does not support insert_returning_sql or parent_id_field_name not set")
           nil
         end
       end

@@ -24,7 +24,7 @@ module XYZ
       node_group_obj = get_object(target_id_handle)
       member_id_list = node_group_obj[:member_id_list]
       return nil unless  member_id_list and not member_id_list.empty?
-pp      Aux::benchmark("multi insert using import"){test1(new_id_handle,member_id_list)}
+pp      Aux::benchmark("multi insert"){test1(new_id_handle,member_id_list)}
     end
 
     def self.test1(new_id_handle,member_id_list)

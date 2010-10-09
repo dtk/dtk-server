@@ -21,7 +21,11 @@ module XYZ
       def empty_dataset()
         @db.dataset()
       end
+
      private
+      def fetch_raw_sql(sql,&block)
+        @db.fetch(sql,&block)
+      end
 
       def modify_to_reflect_special_processing!(scalar_assigns,db_rel,sql_operation,opts={})
         if opts[:shift_id_to_ancestor] and db_rel[:has_ancestor_field]

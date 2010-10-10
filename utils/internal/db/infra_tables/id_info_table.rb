@@ -229,6 +229,7 @@ module XYZ
         end
 
         def update_instances(model_handle,returning_cols)
+          return nil if returning_cols.empty?
           parent_id_field_name = model_handle.parent_id_field_name()
           pairs_ds =  SQL::ArrayDataset.new(@db,returning_cols.map{|y|{:pair_id => y[:id], :pair_parent_id => y[parent_id_field_name]}},:pairs).sequel_ds
           parent_ds =  {ds().select(:relation_id.as(:prt_relation_id),:relation_type.as(:prt_relation_type), :uri.as(:prt_uri)) => :parents}

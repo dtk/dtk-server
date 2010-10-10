@@ -21,29 +21,42 @@ module XYZ
       end
 
       def create_from_select(model_handle,field_set,select,opts={})
+        duplicate_refs = opts[:duplicate_refs] || :allow #other alternatives: #:no_check | :error_on_dup | :filter_dups
+
         columns = field_set.cols
         sequel_select = select.sequel_ds
+        #add :c if not present
         unless columns.include?(:c)
           columns << :c
           sequel_select = sequel_select.select_more(model_handle[:c])
         end
-        db_rel = DB_REL_DEF[model_handle[:model_name]]
-        ds = dataset(db_rel)
 
+        #modify sequel_select to reflect duplicate_refs setting
+        ds = dataset(DB_REL_DEF[model_handle[:model_name]])
+        parent_id_col = model_handle.parent_id_field_name()
+ 
+duplicate_refs = :no_check #: stub
+       case duplicate_refs
+          when :no_check 
+            #no op
+          when :filter_dups
+            match_cols = [:c,:ref,parent_id_col]
+            sequel_select = sequel_select.join_table(:left_outer,ds.select(*match_cols),match_cols,{:table_alias => :existing}).where({:existing__c => nil})
+        end
+ 
         #fn tries to return ids depending on whether db adater supports returning_id
-        parent_id_field_name = model_handle.parent_id_field_name()
-        if ds.respond_to?(:insert_returning_sql) and parent_id_field_name
+        if ds.respond_to?(:insert_returning_sql) and parent_id_col
           returning_ids = Array.new
-          sql = ds.insert_returning_sql([:id,parent_id_field_name],columns,sequel_select)
+          sql = ds.insert_returning_sql([:id,parent_id_col],columns,sequel_select)
           fetch_raw_sql(sql){|row| returning_ids << row}
           #TODO: stub for updating the id_table
           pp returning_ids
           IDInfoTable.update_instances(model_handle,returning_ids)
           returning_ids.map{|row|row[:id]}
         else
-          dataset(db_rel).import(columns,sequel_select)
+          ds.import(columns,sequel_select)
           #TODO: need to get ids and set 
-          raise Error.new("have not implemented create_from_select when db adapter does not support insert_returning_sql or parent_id_field_name not set")
+          raise Error.new("have not implemented create_from_select when db adapter does not support insert_returning_sql or parent_id_col not set")
           nil
         end
       end
@@ -71,60 +84,7 @@ module XYZ
         end
 	ret
       end
-=begin
-      #uses sequel import to adds a set of rows to a table
-      #parent_ids, not single parent to add same think to multiple points such as what happens when cloning to node_group
-actually might do this by first adding all the components, getting their ids and then adding all the attributes; need to match set of ids to 
-component refs in source obj; so for components adding same thing to nodes given by ids/uris; for each need to match with new id;
-can do this with a query or a return on insert
 
-      #multiple_assignments is array of form [{:parent_relation_type => .., parent_ids => [...],{ref1 => {...}, ref2 => [...]
-      def create_instances(model_handle,multiple_assignments,clone_helper=nil,opts={})
-        c = model_handle[:c]
-        db_rel = DB_REL_DEF[relation_type]
-
-	scalar_assignments = ret_settable_scalar_assignments(assignments,db_rel)
-	obj_assignments = ret_object_assignments(assignments,db_rel)
-
-	#adding assignments that can be computed at this point indep. of case on parent_uri
-	scalar_assignments.merge!({:ref => ref.to_s})
-	old_id = scalar_assignments[:id]
-	modify_to_reflect_special_processing!(scalar_assignments,db_rel,:insert,opts)
-
-	############# processing scalar columns by inserting a row in db_rel
-	new_id = nil
-	parent_id = parent_id_handle.get_id()
-	parent_relation_type =  parent_id_handle[:model_name]
-       	if parent_relation_type == :top ## if top level object
-          ref_num = compute_ref_num(db_rel,ref,c)          	  
-	  #TBD check that the assignments are legal, or trap
-	  new_id = insert_into_db(c,db_rel,scalar_assignments.merge({:ref_num => ref_num}))
-        else
-	  parent_id_field = ret_parent_id_field_name(DB_REL_DEF[parent_relation_type],db_rel)
-          ref_num = compute_ref_num db_rel,ref,c,parent_id_field => parent_id
-
-          merge_attrs = {:ref_num => ref_num,parent_id_field => parent_id_info[:id]}
-          #TODO: may fold into  modify_to_reflect_special_processing!, but that require sref_num be computed before this call
-          if opts[:sync_display_name_with_ref] and ref_num and ref_num > 1
-            merge_attrs.merge!(:display_name => "#{ref}-#{ref_num.to_s}")
-          end
-	  new_id = insert_into_db(c,db_rel,scalar_assignments.merge(merge_attrs))
-	end              
-
-	raise Error.new("error while inserting element") if new_id.nil?
-	clone_helper.update(c,db_rel,old_id,new_id,scalar_assignments) if clone_helper
-
-	new_uri  = RestURI::ret_new_uri(factory_uri,ref,ref_num)
-
-	#need to fill in extra columns in associated uri table entry
-	IDInfoTable.update_instance(db_rel,new_id,new_uri,relation_type,parent_id,parent_relation_type)
-	############# processing scalar columns by inserting a row in db_rel
-
-	create_factory_uris_and_contained_objects(new_uri,new_id,relation_type,obj_assignments,c,clone_helper,opts)
-	
-	{:uri => new_uri, :id => new_id}
-      end
-=end
       def create_instance(factory_uri,ref,assignments,c,clone_helper=nil,opts={})
         relation_type,parent_uri = RestURI.parse_factory_uri(factory_uri) 
         db_rel = DB_REL_DEF[relation_type]

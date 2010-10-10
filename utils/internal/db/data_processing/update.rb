@@ -24,6 +24,7 @@ module XYZ
 	modify_to_reflect_special_processing!(scalar_assigns,db_rel,:update)
 	ds.update(scalar_assigns)
       end
+
      private
 
       def update_instance_from_id_info(id_info,scalar_assigns,opts={})

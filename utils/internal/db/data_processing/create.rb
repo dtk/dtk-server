@@ -38,7 +38,7 @@ module XYZ
           fetch_raw_sql(sql){|row| returning_ids << row}
           #TODO: stub for updating the id_table
           pp returning_ids
-
+          IDInfoTable.update_instances(model_handle,returning_ids)
           returning_ids.map{|row|row[:id]}
         else
           dataset(db_rel).import(columns,sequel_select)

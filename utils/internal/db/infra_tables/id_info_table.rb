@@ -177,9 +177,11 @@ module XYZ
         def get_rows_just_dataset(c)
           SQL::Dataset.new(ID_INFO_TABLE[:table],ds().select(CONTEXT_ID,ID_INFO_TABLE[:id],ID_INFO_TABLE[:parent_id],:uri).where(CONTEXT_ID => c))
         end
+
         def join_condition()
           {:relation_id => :id}
         end
+
 	def get_row_from_id_handle(id_handle,opts={})
           ret = get_minimal_row_from_id_handle(id_handle) if opts[:short_circuit_for_minimal_row]
           return ret if ret
@@ -217,6 +219,27 @@ module XYZ
           r = get_row_from_id_handle(id_handle)
           r ? r[:id] : nil
         end
+
+        def update_instances(model_handle,returning_ids)
+          parent_id_field_name = model_handle.parent_id_field_name()
+          pairs_sequel_ds =  SQL::ArrayDataset.new(@db,returning_ids.map{|y|{:id => y[:id], :parent_id => y[parent_id_field_name]}},:pairs).sequel_ds
+          parent_info_sequel_ds = pairs_sequel_ds.join_table(:inner,ds(),{:relation_id => :parent_id})
+          update_ds = ds(parent_info_sequel_ds).where(:id_info__relation_id => :t1__id)
+          #TBD: still need to update uri
+          #TBD: update changes select column
+          update_ds.update({
+             :id_info__relation_type => model_handle[:model_name].to_s,
+             :id_info__parent_id => :pairs__parent_id, 
+             :id_info__parent_relation_type => :t1__relation_type})
+        end
+
+        def old_update_instances(model_handle,returning_ids)
+          parent_id_field_name = model_handle.parent_id_field_name()
+          pairs_ds =  SQL::ArrayDataset.new(@db,returning_ids.map{|y|{:id => y[:id], :parent_id => y[parent_id_field_name]}},:pairs)
+          update_ds = ds(:t1,ds(:parents),pairs_ds.sequel_ds).where(:parents__relation_id => :pairs__relation_id, :t1__relation => :pairs__id)
+          update_ds.update(:parent_id => :pairs__parent_id)
+        end
+
        
         def update_instance(db_rel,id,uri,relation_type,parent_id_x,parent_relation_type)
 	  #  to fill in uri ##TBD: this is split between trigger, which creates it and this code which updates it; may better encapsulate 
@@ -301,15 +324,15 @@ module XYZ
 	       DBRel[:schema => $1.to_sym, :table => $2.to_sym] : 
 	       DBRel[:schema => :public, :table => unformated_row[:relation_name].to_sym]]
         end        
+
         def get_minimal_row_from_id_handle(id_handle)
           return nil unless id_handle[:model_name] and id_handle[:guid] and id_handle[:c]
           IDInfoRow[CONTEXT_ID => id_handle[:c],:id => db_id_from_guid(id_handle[:guid]),:relation_type => id_handle[:model_name]]
         end
        
-	def ds()
-	  raise Error.new("db has not been set for #{self.to_s}") if @db.nil?
-	  @db.dataset(ID_INFO_TABLE)
+	def ds(*from_clauses)
+          @db.dataset(ID_INFO_TABLE,nil,*from_clauses)
         end
+      end
     end
-  end
 end

@@ -15,9 +15,12 @@ module XYZ
       include DataProcessingDelete unless included_modules.include?(DataProcessingDelete)
       include DataProcessingUpdate unless included_modules.include?(DataProcessingUpdate)
 
-      def dataset(db_rel,table_alias=nil)
-        @db.from(db_rel.schema_table_symbol(table_alias)) 
+      def dataset(db_rel,table_alias=nil,*from_clauses)
+        tbl = db_rel.schema_table_symbol(table_alias)
+        return @db.from(tbl) if from_clauses.empty? #shortcut
+        @db.from(*([tbl]+from_clauses))
       end
+
       def empty_dataset()
         @db.dataset()
       end

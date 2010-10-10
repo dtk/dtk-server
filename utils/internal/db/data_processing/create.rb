@@ -21,7 +21,7 @@ module XYZ
       end
 
       def create_from_select(model_handle,field_set,select,opts={})
-        duplicate_refs = opts[:duplicate_refs] || :allow #other alternatives: #:no_check | :error_on_dup | :filter_dups
+        duplicate_refs = opts[:duplicate_refs] || :allow #other alternatives: #:no_check | :error_on_duplicate | :filter_duplicates
 
         columns = field_set.cols
         sequel_select = select.sequel_ds
@@ -37,19 +37,27 @@ module XYZ
  
 duplicate_refs = :no_check #: stub
        case duplicate_refs
-          when :no_check 
-            #no op
-          when :filter_dups
-            match_cols = [:c,:ref,parent_id_col]
-            sequel_select = sequel_select.join_table(:left_outer,ds.select(*match_cols),match_cols,{:table_alias => :existing}).where({:existing__c => nil})
-        end
- 
+        when :no_check 
+         #no op
+        when :filter_duplicates
+         match_cols = [:c,:ref,parent_id_col]
+         sequel_select = sequel_select.join_table(:left_outer,ds.select(*match_cols),match_cols,{:table_alias => :existing}).where({:existing__c => nil})
+        when :error_on_duplicate
+          match_cols = [:c,:ref,parent_id_col]
+         #TODO: not right yet
+    pp sequel_select.join_table(:inner,ds.select(*match_cols),match_cols,{:table_alias => :existing}).count
+        when  :allow
+          #TODO: not right yet
+          match_cols = [:c,:ref,parent_id_col]
+          pp sequel_select.join_table(:left_outer,ds.select(*match_cols),match_cols,{:table_alias => :existing}).group(*match_cols).select(*(match_cols+[:MAX.sql_function(:ref_num)])).ungraphed.all
+       end
+
+
         #fn tries to return ids depending on whether db adater supports returning_id
         if ds.respond_to?(:insert_returning_sql) and parent_id_col
           returning_ids = Array.new
           sql = ds.insert_returning_sql([:id,parent_id_col],columns,sequel_select)
           fetch_raw_sql(sql){|row| returning_ids << row}
-          #TODO: stub for updating the id_table
           pp returning_ids
           IDInfoTable.update_instances(model_handle,returning_ids)
           returning_ids.map{|row|row[:id]}

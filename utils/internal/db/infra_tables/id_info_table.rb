@@ -5,6 +5,14 @@ module XYZ
       super(x.to_sym)
     end
 
+    def newIH(x)
+      IDHandle.new(self.merge(x))
+    end
+    def newMH(x)
+      vals = [:c,:model_name,:parent_model_name].inject({}){|h,k|h.merge({k => self[k]})}
+      ModelHandle.new(vals.merge(x))
+    end
+
     def to_s
       self[:guid] ? "guid=#{self[:guid].to_s}" : "uri=#{self[:uri]}"
     end
@@ -220,24 +228,18 @@ module XYZ
           r ? r[:id] : nil
         end
 
-        def update_instances(model_handle,returning_ids)
+        def update_instances(model_handle,returning_cols)
           parent_id_field_name = model_handle.parent_id_field_name()
-          pairs_sequel_ds =  SQL::ArrayDataset.new(@db,returning_ids.map{|y|{:id => y[:id], :parent_id => y[parent_id_field_name]}},:pairs).sequel_ds
-          parent_info_sequel_ds = pairs_sequel_ds.join_table(:inner,ds(),{:relation_id => :parent_id})
-          update_ds = ds(parent_info_sequel_ds).where(:id_info__relation_id => :t1__id)
-          #TBD: still need to update uri
-          #TBD: update changes select column
-          update_ds.update({
-             :id_info__relation_type => model_handle[:model_name].to_s,
-             :id_info__parent_id => :pairs__parent_id, 
-             :id_info__parent_relation_type => :t1__relation_type})
-        end
+          pairs_ds =  SQL::ArrayDataset.new(@db,returning_cols.map{|y|{:pair_id => y[:id], :pair_parent_id => y[parent_id_field_name]}},:pairs).sequel_ds
+          parent_ds =  {ds().select(:relation_id.as(:prt_relation_id),:relation_type.as(:prt_relation_type), :uri.as(:prt_uri)) => :parents}
 
-        def old_update_instances(model_handle,returning_ids)
-          parent_id_field_name = model_handle.parent_id_field_name()
-          pairs_ds =  SQL::ArrayDataset.new(@db,returning_ids.map{|y|{:id => y[:id], :parent_id => y[parent_id_field_name]}},:pairs)
-          update_ds = ds(:t1,ds(:parents),pairs_ds.sequel_ds).where(:parents__relation_id => :pairs__relation_id, :t1__relation => :pairs__id)
-          update_ds.update(:parent_id => :pairs__parent_id)
+          update_ds = ds_with_from(parent_ds).join(pairs_ds,{:pair_parent_id => :parents__prt_relation_id}).where({:pair_id => :relation_id})
+
+          update_ds.update({
+             :uri => (:prt_uri.sql_string + "/#{model_handle[:model_name]}/") + :ref,
+             :relation_type => model_handle[:model_name].to_s,
+             :parent_id => :pair_parent_id, 
+             :parent_relation_type => :prt_relation_type})
         end
 
        
@@ -330,7 +332,10 @@ module XYZ
           IDInfoRow[CONTEXT_ID => id_handle[:c],:id => db_id_from_guid(id_handle[:guid]),:relation_type => id_handle[:model_name]]
         end
        
-	def ds(*from_clauses)
+	def ds()
+          @db.dataset(ID_INFO_TABLE)
+        end
+	def ds_with_from(*from_clauses)
           @db.dataset(ID_INFO_TABLE,nil,*from_clauses)
         end
       end

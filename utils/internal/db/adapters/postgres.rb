@@ -5,6 +5,17 @@ module XYZ
       @db = Sequel.postgres(db_params[:name], :user => db_params[:user],  :host => db_params[:hostname], :password => db_params[:pass])
     end
 
+    def ret_array_dataset(rows)
+      ds = @db.dataset()
+      sql = String.new
+      cols = rows.first.keys()
+      cols.each do |col|
+        sql << "," unless sql.empty?
+        sql << " unnest(ARRAY[#{rows.map{|row|ds.literal(row[col])}.join(",")}]) as #{col}"
+      end
+      ds.select(::Sequel::LiteralString.new(sql))
+    end
+
     def setup_infrastructure_extras()
       create_language?(:plpgsql) # needed for triggers
       create_function_zzz_ret_id?()

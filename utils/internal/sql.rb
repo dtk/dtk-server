@@ -114,13 +114,18 @@ module XYZ
     #creates a table dataset from rows, which is array with each element being a hash; each row has same keys
     class ArrayDataset < Dataset
       def initialize(db,rows,aliaz)
-        #TODO: articicial setting of ModelHandle
+        return nil if rows.empty?
+        #TODO: artficicial setting of ModelHandle
         model_handle = ModelHandle.new(0, aliaz)
         empty_sequel_ds = db.empty_dataset()
         sequel_ds = nil
-        rows.each do |row|
-          sequel_select = empty_sequel_ds.select(*row.map{|x|{x[1] => x[0]}})
-          sequel_ds = sequel_ds ? sequel_ds.union(sequel_select,{:all => true}) : sequel_select
+        if db.respond_to?(:ret_array_dataset)
+          sequel_ds = db.ret_array_dataset(rows)
+        else
+          rows.each do |row|
+            sequel_select = empty_sequel_ds.select(*row.map{|x|{x[1] => x[0]}})
+            sequel_ds = sequel_ds ? sequel_ds.union(sequel_select,{:all => true}) : sequel_select
+          end
         end
         super(model_handle,sequel_ds.from_self({:alias => aliaz}))
       end

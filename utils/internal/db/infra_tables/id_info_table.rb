@@ -5,12 +5,13 @@ module XYZ
       super(x.to_sym)
     end
 
-    def newIH(x)
+    def createIH(x)
       IDHandle.new(self.merge(x))
     end
-    def newMH(x)
+    def createMH(x)
       vals = [:c,:model_name,:parent_model_name].inject({}){|h,k|h.merge({k => self[k]})}
-      ModelHandle.new(vals.merge(x))
+      vals.merge!(x)
+      ModelHandle.new(vals[:c],vals[:model_name],vals[:parent_model_name])
     end
 
     def to_s

@@ -23,21 +23,37 @@ module XYZ
       #first create all the components on nodes that are members of the  node_group
       node_group_obj = get_object(target_id_handle)
       member_id_list = node_group_obj[:member_id_list]
-      return nil unless  member_id_list and not member_id_list.empty?
+      return nil unless member_id_list and not member_id_list.empty?
 pp      Aux::benchmark("multi insert"){test1(new_id_handle,member_id_list)}
     end
 
-    def self.test1(new_id_handle,member_id_list)
-      c = new_id_handle[:c]
+    def self.test1(source_id_handle,member_id_list)
       #TODO: abstract adn encas[pulate pattern below which copies to a set from a source object
-      parent_ds = SQL::ArrayDataset.new(db,member_id_list.map{|x|{:node_node_id => x}},:parent)
-      source_component_wc = {:id => new_id_handle.get_id()}
-      field_set_to_copy = FieldSet.all_real(:component).remove_cols(:id,:local_id,:node_node_group_id)
-      source_component_fs = FieldSet.opt(field_set_to_copy.remove_cols(:node_node_id))
-      source_component_ds = get_objects_just_dataset(ModelHandle.new(c,:component),source_component_wc,source_component_fs)
+      model_name = source_id_handle[:model_name]
+
+      source_parent_model_name = :node_group #TODO: hardwired
+      source_model_handle = source_id_handle.createMH(:parent_model_name => source_parent_model_name)
+      source_parent_id_col = source_model_handle.parent_id_field_name()
+
+      target_parent_model_name = :node #TODO: hardwired
+      target_model_handle = source_id_handle.createMH(:parent_model_name => target_parent_model_name)
+      target_parent_id_col = target_model_handle.parent_id_field_name()
+
+      parent_ds = SQL::ArrayDataset.new(db,member_id_list.map{|x|{target_parent_id_col => x}},:parent)
+
+      source_component_wc = {:id => source_id_handle.get_id()}
+      field_set_to_copy = FieldSet.all_real(model_name).remove_cols(*([:id,:local_id]+[source_parent_id_col]))
+      source_component_fs = FieldSet.opt(field_set_to_copy.remove_cols(target_parent_id_col))
+      source_component_ds = get_objects_just_dataset(source_model_handle,source_component_wc,source_component_fs)
+
       graph = parent_ds.graph(:inner,source_component_ds)
-      create_from_select(ModelHandle.new(c,:component,:node),field_set_to_copy,graph.select(*field_set_to_copy.cols))
-      #TODO: now need to insert in top.id+_info table
+      
+      dups_allowed_for_cmp = false #TODO stub
+      create_opts = {:duplicate_refs => dups_allowed_for_cmp ? :allow : :prune_duplicates}
+      new_node_cmp_ids = create_from_select(target_model_handle,field_set_to_copy,graph.select(*field_set_to_copy.cols),create_opts)
+
+      #clone attribuutes
+      #generalize to clone all children
     end
 
     def self.old_clone_post_copy_hook(new_id_handle,target_id_handle,opts={})

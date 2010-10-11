@@ -21,7 +21,7 @@ module XYZ
       end
 
       def create_from_select(model_handle,field_set,select,opts={})
-        duplicate_refs = opts[:duplicate_refs] || :allow #other alternatives: #:no_check | :error_on_duplicate | :filter_duplicates
+        duplicate_refs = opts[:duplicate_refs] || :allow #other alternatives: #:no_check | :error_on_duplicate | :prune_duplicates
 
         columns = field_set.cols
         sequel_select = select.sequel_ds
@@ -38,7 +38,7 @@ module XYZ
        case duplicate_refs
         when :no_check 
          #no op
-        when :filter_duplicates
+        when :prune_duplicates
          match_cols = [:c,:ref,parent_id_col]
          sequel_select = sequel_select.join_table(:left_outer,ds.select(*match_cols),match_cols,{:table_alias => :existing}).where({:existing__c => nil})
         when :error_on_duplicate

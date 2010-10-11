@@ -31,11 +31,10 @@ module XYZ
           sequel_select = sequel_select.select_more(model_handle[:c])
         end
 
-        #modify sequel_select to reflect duplicate_refs setting
+        #modify sequel_select and columns (its order) to reflect duplicate_refs setting
         ds = dataset(DB_REL_DEF[model_handle[:model_name]])
         parent_id_col = model_handle.parent_id_field_name()
- 
-duplicate_refs = :no_check #: stub
+        match_cols = [:c,:ref,parent_id_col]
        case duplicate_refs
         when :no_check 
          #no op
@@ -43,15 +42,19 @@ duplicate_refs = :no_check #: stub
          match_cols = [:c,:ref,parent_id_col]
          sequel_select = sequel_select.join_table(:left_outer,ds.select(*match_cols),match_cols,{:table_alias => :existing}).where({:existing__c => nil})
         when :error_on_duplicate
-          match_cols = [:c,:ref,parent_id_col]
          #TODO: not right yet
-    pp sequel_select.join_table(:inner,ds.select(*match_cols),match_cols,{:table_alias => :existing}).count
-        when  :allow
-          #TODO: not right yet
-          match_cols = [:c,:ref,parent_id_col]
-          pp sequel_select.join_table(:left_outer,ds.select(*match_cols),match_cols,{:table_alias => :existing}).group(*match_cols).select(*(match_cols+[:MAX.sql_function(:ref_num)])).ungraphed.all
-       end
+         duplicate_count = sequel_select.join_table(:inner,ds.select(*match_cols),match_cols,{:table_alias => :existing}).count
+         if duplicate_count > 0
+           #TODO: make this a specfic error 
+           raise Error.new("found #{duplicate_count.to_s} duplicates")
+         end
+        when :allow
+          max_ref_nums_ds = sequel_select.join_table(:left_outer,ds.select(*match_cols),match_cols,{:table_alias => :existing}).group(*match_cols).select(*(match_cols+[:MAX.sql_function(:ref_num)])).ungraphed
 
+         sequel_select = sequel_select.join(max_ref_nums_ds,match_cols).select(*(columns-[:ref_num])).select_more({{:max => nil} => 1}.case(:max+1).as(:ref_num))
+         #re order to make ref_num last
+         columns << columns.delete(:ref_num)
+       end
 
         #fn tries to return ids depending on whether db adater supports returning_id
         if ds.respond_to?(:insert_returning_sql) and parent_id_col

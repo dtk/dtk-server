@@ -20,41 +20,41 @@ module XYZ
         end
       end
 
-      def create_from_select(model_handle,field_set,select,opts={})
+      #TODO need to treat :sync_display_name_with_ref
+      def create_from_select(model_handle,field_set,select_ds,override_attrs={},opts={})
         duplicate_refs = opts[:duplicate_refs] || :allow #other alternatives: #:no_check | :error_on_duplicate | :prune_duplicates
 
         columns = field_set.cols
-        sequel_select = select.sequel_ds
         #add :c if not present
-        unless columns.include?(:c)
-          columns << :c
-          sequel_select = sequel_select.select_more(model_handle[:c])
-        end
+        columns << :c unless columns.include?(:c)
+        #handle overrides
+        select_columns = columns.map{|col|override_attrs[col] ? {override_attrs[col] => col} : col}
+
+        sequel_select = select_ds.sequel_ds.select(*select_columns)
 
         #modify sequel_select and columns (its order) to reflect duplicate_refs setting
-        ds = dataset(DB_REL_DEF[model_handle[:model_name]])
         parent_id_col = model_handle.parent_id_field_name()
         match_cols = [:c,:ref,parent_id_col]
-       case duplicate_refs
-        when :no_check 
-         #no op
-        when :prune_duplicates
-         match_cols = [:c,:ref,parent_id_col]
-         sequel_select = sequel_select.join_table(:left_outer,ds.select(*match_cols),match_cols,{:table_alias => :existing}).where({:existing__c => nil})
-        when :error_on_duplicate
-         #TODO: not right yet
-         duplicate_count = sequel_select.join_table(:inner,ds.select(*match_cols),match_cols,{:table_alias => :existing}).count
-         if duplicate_count > 0
-           #TODO: make this a specfic error 
-           raise Error.new("found #{duplicate_count.to_s} duplicates")
-         end
-        when :allow
+        ds = dataset(DB_REL_DEF[model_handle[:model_name]])
+        case duplicate_refs
+         when :no_check 
+          #no op
+         when :prune_duplicates
+          sequel_select = sequel_select.join_table(:left_outer,ds.select(*match_cols),match_cols,{:table_alias => :existing}).where({:existing__c => nil})
+         when :error_on_duplicate
+          #TODO: not right yet
+          duplicate_count = sequel_select.join_table(:inner,ds.select(*match_cols),match_cols,{:table_alias => :existing}).count
+          if duplicate_count > 0
+            #TODO: make this a specfic error 
+            raise Error.new("found #{duplicate_count.to_s} duplicates")
+          end
+         when :allow
           max_ref_nums_ds = sequel_select.join_table(:left_outer,ds.select(*match_cols),match_cols,{:table_alias => :existing}).group(*match_cols).select(*(match_cols+[:MAX.sql_function(:ref_num)])).ungraphed
 
-         sequel_select = sequel_select.join(max_ref_nums_ds,match_cols).select(*(columns-[:ref_num])).select_more({{:max => nil} => 1}.case(:max+1).as(:ref_num))
-         #re order to make ref_num last
-         columns << columns.delete(:ref_num)
-       end
+          sequel_select = sequel_select.join(max_ref_nums_ds,match_cols).select(*(columns-[:ref_num])).select_more({{:max => nil} => 1}.case(:max+1).as(:ref_num))
+          #re order to make ref_num last
+          columns << columns.delete(:ref_num)
+        end
 
         #fn tries to return ids depending on whether db adater supports returning_id
         if ds.respond_to?(:insert_returning_sql) and parent_id_col

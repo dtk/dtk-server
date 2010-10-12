@@ -8,9 +8,10 @@ module XYZ
     def createIH(x)
       IDHandle.new(self.merge(x))
     end
-    def createMH(x)
+    def createMH(x={})
+      parent_model_name = get_parent_model_name()
       vals = [:c,:model_name,:parent_model_name].inject({}){|h,k|h.merge({k => self[k]})}
-      vals.merge!(x)
+      vals.merge!(:parent_model_name => parent_model_name).merge!(x)
       ModelHandle.new(vals[:c],vals[:model_name],vals[:parent_model_name])
     end
 
@@ -91,6 +92,10 @@ module XYZ
     def self.[](x)
       new(x)
     end
+   private
+    def get_parent_model_name()
+      self[:parent_model_name] || get_parent_id_handle()[:model_name]
+    end
   end
 
   class ModelHandle < Hash
@@ -106,6 +111,10 @@ module XYZ
     def parent_id_field_name()
       return nil unless self[:parent_model_name]
       DB.ret_parent_id_field_name(DB_REL_DEF[self[:parent_model_name]],DB_REL_DEF[self[:model_name]])
+    end
+   private
+    def get_parent_model_name()
+      self[:parent_model_name]
     end
   end
 

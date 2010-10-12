@@ -61,7 +61,6 @@ module XYZ
           returning_ids = Array.new
           sql = ds.insert_returning_sql([:id,parent_id_col],columns,sequel_select)
           fetch_raw_sql(sql){|row| returning_ids << row}
-          pp returning_ids
           IDInfoTable.update_instances(model_handle,returning_ids)
           returning_ids.map{|row|row[:id]}
         else

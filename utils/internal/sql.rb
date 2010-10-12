@@ -113,8 +113,13 @@ module XYZ
 
     #creates a table dataset from rows, which is array with each element being a hash; each row has same keys
     class ArrayDataset < Dataset
-      def initialize(db,rows,aliaz)
+      def self.create(db,rows,aliaz)
         return nil if rows.empty?
+        ArrayDataset.new(db,rows,aliaz)
+      end
+     private
+      def initialize(db,rows,aliaz)
+        raise Error.new("ArrayDataset.new called with rows being empty") if rows.empty?
         #TODO: artficicial setting of ModelHandle
         model_handle = ModelHandle.new(0, aliaz)
         empty_sequel_ds = db.empty_dataset()

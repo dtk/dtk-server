@@ -107,6 +107,7 @@ module XYZ
   end
 
   class ModelHandle < Hash
+    include CommonMixin
     def initialize(c,model_name,parent_model_name=nil)
       super()
       self[:c] = c

@@ -9,16 +9,6 @@ module XYZ
       return new_id_handle.get_id()
     end
 
-    def deprecate_clone(id_handle,target_id_handle,override_attrs={},opts={})
-      source_obj = opts[:source_obj] || get_object_deep(id_handle)
-      raise Error.new("clone source (#{id_handle}) not found") if source_obj.nil? 
-      process_override_attributes!(source_obj,override_attrs)
-      new_id_handle = deprecate_clone_copy(id_handle,source_obj,target_id_handle,opts)
-      #calling with respect to target
-      model_class(target_id_handle[:model_name]).clone_post_copy_hook(new_id_handle,target_id_handle,opts)
-      return new_id_handle.get_id()
-    end
-
    protected
     # to be optionally overwritten by object representing the source
     def add_model_specific_override_attrs!(override_attrs)
@@ -56,16 +46,41 @@ module XYZ
 
       select_ds = targets_ds.graph(:inner,source_ds)
       dups_allowed_for_cmp = true #TODO stub
-      create_opts = {:duplicate_refs => dups_allowed_for_cmp ? :allow : :prune_duplicates, :sync_display_name_with_ref => true}
+      create_opts = {:duplicate_refs => dups_allowed_for_cmp ? :allow : :prune_duplicates}
       create_override_attrs = override_attrs.merge(:ancestor_id => source_id_handle.get_id()) 
       new_ids = create_from_select(target_model_handle,field_set_to_copy,select_ds,create_override_attrs,create_opts)
       return Array.new if new_ids.empty?
-      ret = new_ids.map{|id|source_id_handle.createIH({:id => id,:parent_model_name => target_parent_model_name})}
-
+      new_id_handles = new_ids.map{|id|source_id_handle.createIH({:id => id,:parent_model_name => target_parent_model_name})}
       
-      #TODO: iterate overall all children
-      ret.first.get_children_model_handles.each{|child_model_handle|pp child_model_handle}
-      ret
+      #iterate over all children objects
+      new_id_handles.first.get_children_model_handles.each do |child_model_handle|
+        clone_copy_child_objects(child_model_handle,source_id_handle,new_id_handles)
+      end
+      new_id_handles
+    end
+
+    def clone_copy_child_objects(child_model_handle,base_id_handle,targets)
+      #TODO: facttor back in clone_helper
+      child_model_name = child_model_handle[:model_name]
+      child_parent_id_col = child_model_handle.parent_id_field_name()
+
+      targets_wc = targets.map{|id_handle|{child_parent_id_col => id_handle.get_id()}}
+      targets_ds = SQL::ArrayDataset.create(db,targets_wc,:target)
+
+      field_set_to_copy = Model::FieldSet.all_real(child_model_name).remove_cols(:id,:local_id)
+      child_wc = {child_parent_id_col => base_id_handle.get_id()}
+      child_fs = Model::FieldSet.opt(field_set_to_copy.remove_cols(child_parent_id_col))
+      child_ds = get_objects_just_dataset(child_model_handle,child_wc,child_fs)
+
+      select_ds = targets_ds.graph(:inner,child_ds)
+      create_opts = {:duplicate_refs => :no_check}
+      create_override_attrs = {} #TODO; stub; old was override_attrs.merge(:ancestor_id => child_id_handle.get_id()) 
+      new_ids = create_from_select(child_model_handle,field_set_to_copy,select_ds,create_override_attrs,create_opts)
+      return Array.new if new_ids.empty?
+      new_id_handles = new_ids.map{|id|child_model_handle.createIH({:id => id})}
+      
+      #NOTE: iterate over all all children children think can recursively call clone_copy_child_objects if change base_id_handle to base_id_handles
+      new_id_handles
     end
   end
 end

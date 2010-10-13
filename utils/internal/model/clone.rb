@@ -1,6 +1,5 @@
 module XYZ
   module CloneClassMixins
-
     def clone(id_handle,target_id_handle,override_attrs={},opts={})
       add_model_specific_override_attrs!(override_attrs)
       new_id_handle = clone_copy(id_handle,[target_id_handle],override_attrs,opts).first
@@ -30,23 +29,6 @@ module XYZ
     end
 
    private
-    #modifies object being copied source_obj if needed
-    def deprecate_process_override_attributes!(source_obj,override_attrs)
-      #source_obj is of form {ref => {attr1 => val1, ...}}
-      ref = source_obj.keys.first
-      source_attrs = source_obj.values.first
-
-      #cloned object source object type specfic processing
-      set_model_specific_override_attrs!(override_attrs,source_attrs,ref)
-
-      #if override_attrs has key :ref then that means to reroot to another ref
-      new_ref = override_attrs.delete(:ref)
-      if new_ref
-        source_obj[new_ref] = source_obj.delete(source_obj.keys.first)
-      end
-      #subsititue in override attributes
-      override_attrs.each {|field,value| source_attrs[field] = value}
-    end
 
     #copy part of clone
     #targets is a list of id_handles, each with same model_name 
@@ -78,25 +60,12 @@ module XYZ
       create_override_attrs = override_attrs.merge(:ancestor_id => source_id_handle.get_id()) 
       new_ids = create_from_select(target_model_handle,field_set_to_copy,select_ds,create_override_attrs,create_opts)
       return Array.new if new_ids.empty?
+      ret = new_ids.map{|id|source_id_handle.createIH({:id => id,:parent_model_name => target_parent_model_name})}
+
+      
       #TODO: iterate overall all children
-
-      new_ids.map{|id|source_id_handle.createIH({:id => id,:parent_model_name => target_parent_model_name})}
-    end
-
-    def deprecate_clone_copy(id_handle,source_obj,target_id_handle,opts)
-      relation_type = id_handle[:model_name]
-#      clone_helper = CloneHelper.new(@db) if no_clone_helper_provided = clone_helper.nil?
-      no_clone_helper_provided = true
-      clone_helper = CloneHelper.new(@db) 
-
-      tgt_factory_id_handle = get_factory_id_handle(target_id_handle,relation_type)
-      raise Error.new("clone target (#{target_id_handle}) not found") if tgt_factory_id_handle.nil?
-
-      create_opts = opts.merge({:shift_id_to_ancestor => true,:sync_display_name_with_ref => true})
-      new_item = create_from_hash(tgt_factory_id_handle,source_obj, clone_helper, create_opts).first
-      clone_helper.set_foreign_keys_to_right_values() if no_clone_helper_provided
-
-      IDHandle[:c => id_handle[:c], :id => new_item[:id], :model_name => id_handle[:model_name]]
+      ret.first.get_children_model_handles.each{|child_model_handle|pp child_model_handle}
+      ret
     end
   end
 end

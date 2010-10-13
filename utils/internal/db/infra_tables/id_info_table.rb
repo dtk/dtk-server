@@ -15,10 +15,22 @@ module XYZ
       ModelHandle.new(vals[:c],vals[:model_name],vals[:parent_model_name])
     end
 
+    def get_children_model_handles()
+      get_children_model_names().map{|child_model_name|ModelHandle.new(self[:c],child_model_name,self[:model_name])}
+    end
+
     def to_s
-      self[:guid] ? "guid=#{self[:guid].to_s}" : "uri=#{self[:uri]}"
+      model_name = "model_name=#{self[:model_name]||"UNKNOWN"}"
+      uri_or_guid = self[:guid] ? "guid=#{self[:guid].to_s}" : "uri=#{self[:uri]}"
+      "#{model_name}; #{uri_or_guid}"
     end
    private
+    def get_children_model_names()
+      db_rel[:one_to_many]||[]
+    end
+    def db_rel()
+      DB_REL_DEF[self[:model_name]]
+    end
     def raise_has_illegal_form(x)
       raise Error.new("#{x.inspect} has incorrect form to be an id handle")
     end
@@ -41,10 +53,6 @@ module XYZ
     def get_parent_id_info()
       parent_id_handle = get_parent_id_handle()
       IDInfoTable.get_row_from_id_handle parent_id_handle
-    end
-
-    def ret_model_handle()
-      ModelHandle.new(self[:c],self[:model_name])
     end
 
     def is_top?()
@@ -121,10 +129,6 @@ module XYZ
   class IDInfoRow < Hash
     def ret_id_handle()
       IDHandle[CONTEXT_ID => self[CONTEXT_ID], :guid => IDInfoTable::ret_guid_from_id_info(self), :model_name => self[:relation_type]]
-    end
-
-    def ret_model_handle()
-      ModelHandle.new(self[CONTEXT_ID],self[:relation_type])
     end
 
     #TOTO rename to ret_id()

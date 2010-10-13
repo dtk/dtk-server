@@ -31,13 +31,13 @@ module XYZ
     ### virtual column defs
     #######################
     #object processing and access functions
-    def self.set_model_specific_override_attrs!(override_attrs,source_attr,ref)
-      if source_attr[:type] == "image"
-        override_attrs[:type] = "instance"
-        override_attrs[:display_name] = "i-#{override_attrs[:display_name]||ref}"
-        override_attrs[:ref] = "i-#{ref}"
-        override_attrs[:external_ref] = ()
-      end
+    def self.add_model_specific_override_attrs!(override_attrs)
+      #TODO: case on whether cloning an image or a instance
+      override_attrs[:type] = "instance"
+#      override_attrs[:display_name] = proc{(["i-",:ref,"-",:ref_num.cast(:text)].sql_string_join).as(:display_name)}
+      override_attrs[:display_name] = proc{(["i-",:ref,"-",{{:max => nil} => 1}.case(:max+1).cast(:text)].sql_string_join).as(:display_name)}
+#      override_attrs[:display_name] = proc{(["i-",:ref].sql_string_join).as(:display_name)}
+      override_attrs[:external_ref] = "{}"
     end
 
     def self.clone_post_copy_hook(new_id_handle,target_id_handle,opts={})

@@ -2,8 +2,9 @@ module XYZ
   module CloneClassMixins
 
     def clone(id_handle,target_id_handle,override_attrs={},opts={})
+      add_model_specific_override_attrs!(override_attrs)
       new_id_handle = clone_copy(id_handle,[target_id_handle],override_attrs,opts).first
-      return nil unless new_id_handle
+      raise Error.new("cannot clone") unless new_id_handle
       #calling with respect to target
       model_class(target_id_handle[:model_name]).clone_post_copy_hook(new_id_handle,target_id_handle,opts)
       return new_id_handle.get_id()
@@ -21,7 +22,7 @@ module XYZ
 
    protected
     # to be optionally overwritten by object representing the source
-    def set_model_specific_override_attrs!(override_attrs,source_attrs,ref)
+    def add_model_specific_override_attrs!(override_attrs)
     end
 
     # to be optionally overwritten by object representing the target
@@ -30,7 +31,7 @@ module XYZ
 
    private
     #modifies object being copied source_obj if needed
-    def process_override_attributes!(source_obj,override_attrs)
+    def deprecate_process_override_attributes!(source_obj,override_attrs)
       #source_obj is of form {ref => {attr1 => val1, ...}}
       ref = source_obj.keys.first
       source_attrs = source_obj.values.first
@@ -72,7 +73,7 @@ module XYZ
       source_ds = get_objects_just_dataset(source_model_handle,source_wc,source_fs)
 
       select_ds = targets_ds.graph(:inner,source_ds)
-      dups_allowed_for_cmp = false #TODO stub
+      dups_allowed_for_cmp = true #TODO stub
       create_opts = {:duplicate_refs => dups_allowed_for_cmp ? :allow : :prune_duplicates, :sync_display_name_with_ref => true}
       create_override_attrs = override_attrs.merge(:ancestor_id => source_id_handle.get_id()) 
       new_ids = create_from_select(target_model_handle,field_set_to_copy,select_ds,create_override_attrs,create_opts)

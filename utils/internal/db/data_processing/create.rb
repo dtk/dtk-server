@@ -27,6 +27,70 @@ module XYZ
         columns = field_set.cols
         #add :c if not present
         columns << :c unless columns.include?(:c)
+
+        #modify sequel_select and overrides to reflect duplicate_refs setting
+        sequel_select = select_ds.sequel_ds
+        overrides = override_attrs.dup
+        
+        parent_id_col = model_handle.parent_id_field_name()
+        match_cols = [:c,:ref,parent_id_col]
+        ds = dataset(DB_REL_DEF[model_handle[:model_name]])
+        case duplicate_refs
+         when :no_check 
+          #no op
+         when :prune_duplicates
+          sequel_select = sequel_select.join_table(:left_outer,ds.select(*match_cols),match_cols,{:table_alias => :existing}).where({:existing__c => nil})
+         when :error_on_duplicate
+          #TODO: not right yet
+          duplicate_count = sequel_select.join_table(:inner,ds.select(*match_cols),match_cols,{:table_alias => :existing}).count
+          if duplicate_count > 0
+            #TODO: make this a specfic error 
+            raise Error.new("found #{duplicate_count.to_s} duplicates")
+          end
+         when :allow
+          ds_to_group =  sequel_select.join_table(:left_outer,ds.select(*(match_cols+[:ref_num])),match_cols,{:table_alias => :existing})
+          max_ref_nums_ds = ds_to_group.group(*match_cols).select(*(match_cols+[:MAX.sql_function(:existing__ref_num)])).ungraphed
+          sequel_select = sequel_select.join(max_ref_nums_ds,match_cols)
+          overrides[:ref_num] = {{:max => nil} => 1}.case(:max+1)
+        end
+
+        #process overrides
+        sequel_select_with_cols = sequel_select.select
+        columns.each do |col|
+          ovr = overrides[col]  
+          sequel_select_with_cols =
+            if ovr
+              if ovr.kind_of?(Proc)
+                sequel_select_with_cols.select_more(&ovr)
+              else
+                sequel_select_with_cols.select_more(ovr => col)
+              end
+            else
+              sequel_select_with_cols.select_more(col)
+            end
+        end
+
+        #fn tries to return ids depending on whether db adater supports returning_id
+        if ds.respond_to?(:insert_returning_sql) and parent_id_col
+          returning_ids = Array.new
+          sql = ds.insert_returning_sql([:id,parent_id_col],columns,sequel_select_with_cols)
+          fetch_raw_sql(sql){|row| returning_ids << row}
+          IDInfoTable.update_instances(model_handle,returning_ids)
+          returning_ids.map{|row|row[:id]}
+        else
+          ds.import(columns,sequel_select_with_cols)
+          #TODO: need to get ids and set 
+          raise Error.new("have not implemented create_from_select when db adapter does not support insert_returning_sql or parent_id_col not set")
+          nil
+        end
+      end
+
+      def deprecate_create_from_select(model_handle,field_set,select_ds,override_attrs={},opts={})
+        duplicate_refs = opts[:duplicate_refs] || :allow #other alternatives: #:no_check | :error_on_duplicate | :prune_duplicates
+
+        columns = field_set.cols
+        #add :c if not present
+        columns << :c unless columns.include?(:c)
         #handle overrides
         select_columns = columns.map{|col|override_attrs[col] ? {override_attrs[col] => col} : col}
 

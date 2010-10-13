@@ -34,7 +34,7 @@ module XYZ
     def self.add_model_specific_override_attrs!(override_attrs)
       #TODO: case on whether cloning an image or a instance
       override_attrs[:type] = "instance"
-      override_attrs[:display_name] = proc{(["i-",:ref,{{:ref_num => nil} => ""}.case(["-",:ref_num.cast(:text)].sql_string_join)].sql_string_join).as(:display_name)}
+      override_attrs[:display_name] = SQL::ColRef.string_concat{|o|["i-",o.qualified_ref]}
       override_attrs[:external_ref] = "{}"
     end
 

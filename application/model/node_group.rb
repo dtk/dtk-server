@@ -12,14 +12,9 @@ module XYZ
     def member_id_list()
       (self[:node]||[]).map{|n|n[:id]}
     end
-
     #######################
     ### object procssing and access functions
     #object processing and access functions
-    def self.add_model_specific_override_attrs!(override_attrs)
-      override_attrs[:display_name] = SQL::ColRef.qualified_ref
-    end
-
     def self.clone_post_copy_hook(new_id_handle,target_id_handle,opts={})
 
       #create a change pending item associated with component created on the node group adn returns its id (so it can be
@@ -56,103 +51,6 @@ module XYZ
       create_from_select(ModelHandle.new(c,:attribute_link),FieldSet.new([:ref,:input_id,:output_id]),select)
       #TODO: links for monitor_items
 =end
-    end
-
-    def self.old_clone_post_copy_hook(new_id_handle,target_id_handle,opts={})
-      #create a change pending item associated with component created on the node group adn returns its id (so it can be
-      # used as parent to change items for components on all the node groups memebrs
-      parent_pending_id = create_pending_change_item(new_id_handle,target_id_handle)
-
-      #first create all the components on nodes that are members of the  node_group
-      node_group_obj = get_object(target_id_handle)
-      member_id_list = node_group_obj[:member_id_list]
-      return nil unless member_id_list and not member_id_list.empty?
-      Aux::benchmark("multi insert"){test1(new_id_handle,member_id_list)}
-    end
-
-    def self.test1(source_id_handle,member_id_list)
-      #TODO: abstract adn encas[pulate pattern below which copies to a set from a source object
-      model_name = source_id_handle[:model_name]
-
-      source_parent_model_name = :node_group #TODO: hardwired
-      source_model_handle = source_id_handle.createMH(:parent_model_name => source_parent_model_name)
-      source_parent_id_col = source_model_handle.parent_id_field_name()
-
-      target_parent_model_name = :node #TODO: hardwired
-      target_model_handle = source_id_handle.createMH(:parent_model_name => target_parent_model_name)
-      target_parent_id_col = target_model_handle.parent_id_field_name()
-
-      parent_ds = SQL::ArrayDataset.create(db,member_id_list.map{|x|{target_parent_id_col => x}},:parent)
-
-      source_wc = {:id => source_id_handle.get_id()}
-      field_set_to_copy = FieldSet.all_real(model_name).remove_cols(*([:id,:local_id]+[source_parent_id_col]))
-      source_fs = FieldSet.opt(field_set_to_copy.remove_cols(target_parent_id_col))
-      source_ds = get_objects_just_dataset(source_model_handle,source_wc,source_fs)
-
-      graph = parent_ds.graph(:inner,source_ds)
-      
-      dups_allowed_for_cmp = false #TODO stub
-      create_opts = {:duplicate_refs => dups_allowed_for_cmp ? :allow : :prune_duplicates}
-      new_ids = create_from_select(target_model_handle,field_set_to_copy,graph.select(*field_set_to_copy.cols),create_opts)
-      return new_ids if new_ids.empty?
-
-      #clone attribuutes
-      #generalize to clone all children
-      child_model_name = :attribute #TODO: hardwired
-      child_model_handle = source_id_handle.createMH(:model_name => child_model_name, :parent_model_name => model_name)
-      child_parent_id_col = child_model_handle.parent_id_field_name()
-
-      child_parent_ds = SQL::ArrayDataset.create(db,new_ids.map{|id|{child_parent_id_col => id}},:parent)
-
-      child_source_wc = {child_parent_id_col => source_id_handle.get_id()}
-      field_set_to_copy = FieldSet.all_real(child_model_name).remove_cols(:id,:local_id)
-      child_source_fs = FieldSet.opt(field_set_to_copy.remove_cols(child_parent_id_col))
-      child_source_ds = get_objects_just_dataset(child_model_handle,child_source_wc,child_source_fs)
-      graph = child_parent_ds.graph(:inner,child_source_ds)
-      create_opts = {:duplicate_refs => :no_check}
-      create_from_select(child_model_handle,field_set_to_copy,graph.select(*field_set_to_copy.cols),create_opts)
-    end
-
-    def self.old_clone_post_copy_hook(new_id_handle,target_id_handle,opts={})
-      c = new_id_handle[:c]
-      
-      #create a change pending item associated with component created on the node group adn returns its id (so it can be
-      # used as parent to change items for components on all the node groups memebrs
-      parent_pending_id = create_pending_change_item(new_id_handle,target_id_handle)
-      
-      #the component object with its attributes on node group is cloned onto teh node group members; its attribute values must first be changed to null out
-      #:value_asserted and set :value_derived 
-      component_obj = get_object_deep(new_id_handle)
-      #component_obj is of form {ref => {... :attribute => {ref1 => {:value_asserted =>,,}}...}}
-      attrs = component_obj.values.first[:attribute].each_value do |attr_assigns|
-        attr_assigns[:value_derived] = attr_assigns.delete(:value_asserted)
-      end
-
-      child_clone_opts = {:source_obj => component_obj, :parent_pending_change_item_id => parent_pending_id}
-      node_group_obj = get_object(target_id_handle)
-      #TODO: for efficiency handle by bulk sql operations
-      (node_group_obj||{})[:member_id_list].each do |node_id|
-        #TODO: need processing that checks if component already on node for components that can only be once on node
-        clone(new_id_handle,IDHandle[:c => c,:model_name => :node,:id=> node_id],{},child_clone_opts)
-      end
-      #put in attribute links
-      node_cmp_wc = {:ancestor_id => new_id_handle.get_id()}
-      node_cmp_fs = FieldSet.opt([:id])
-      node_cmp_ds = get_objects_just_dataset(ModelHandle.new(c,:component),node_cmp_wc,node_cmp_fs)
-
-      node_attr_fs = FieldSet.opt([:component_component_id,:id,:ref])
-      node_attr_ds = get_objects_just_dataset(ModelHandle.new(c,:attribute),nil,node_attr_fs)
-
-      group_attr_wc = {:component_component_id => new_id_handle.get_id()}
-      group_attr_fs = FieldSet.opt([:id,:ref])
-      group_attr_ds = get_objects_just_dataset(ModelHandle.new(c,:attribute),group_attr_wc,group_attr_fs)
-
-      graph = node_cmp_ds.graph(:inner,node_attr_ds,{:component_component_id => :id}).graph(:inner,group_attr_ds,{:ref => :ref})
-      select = graph.select('attribute_link',:attribute2__id,:attribute__id)
-      #TODO: must also put in parent_relation
-      create_from_select(ModelHandle.new(c,:attribute_link),FieldSet.new([:ref,:input_id,:output_id]),select)
-      #TODO: links for monitor_items
-
     end
 
     def self.create_pending_change_item(new_id_handle,target_id_handle)

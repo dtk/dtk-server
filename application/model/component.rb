@@ -19,6 +19,13 @@ module XYZ
     end
     ##### Actions
     ### virtual column defs
+    #######################
+    ### object procssing and access functions
+    #object processing and access functions
+    def self.add_model_specific_override_attrs!(override_attrs)
+      override_attrs[:display_name] = SQL::ColRef.qualified_ref
+    end
+
     ###### Helper fns
     def get_contained_attribute_ids(opts={})
       parent_id = IDInfoTable.get_id_from_id_handle(id_handle)

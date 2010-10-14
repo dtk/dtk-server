@@ -22,16 +22,17 @@ module XYZ
 
     #copy part of clone
     #targets is a list of id_handles, each with same model_name 
-    def clone_copy(source_id_handle,targets,override_attrs={},opts={})
-      #TODO: facttor back in clone_helper
+    def clone_copy(source_id_handle,targets,recursive_override_attrs={},opts={})
+      #TODO: facttor back in functionality that clone_helper provided for non-parent foreign keys that may point to what is cloned
       return Array.new if targets.empty?
 
       source_model_name = source_id_handle[:model_name]
-      target_parent_model_name = targets.first[:model_name]
-
       source_model_handle = source_id_handle.createMH()
       source_parent_id_col = source_model_handle.parent_id_field_name()
 
+      override_attrs = ret_real_columns(source_model_handle,recursive_override_attrs)
+
+      target_parent_model_name = targets.first[:model_name]
       target_model_handle = source_id_handle.createMH(:parent_model_name => target_parent_model_name)
       target_parent_id_col = target_model_handle.parent_id_field_name()
 
@@ -55,12 +56,13 @@ module XYZ
       
       #iterate over all children objects
       new_id_handles.first.get_children_model_handles.each do |child_model_handle|
-        clone_copy_child_objects(child_model_handle,source_id_handle,new_id_handles)
+        child_override_attrs = ret_child_override_attrs(child_model_handle,recursive_override_attrs)
+        clone_copy_child_objects(child_model_handle,source_id_handle,new_id_handles,child_override_attrs)
       end
       new_id_handles
     end
 
-    def clone_copy_child_objects(child_model_handle,base_id_handle,targets)
+    def clone_copy_child_objects(child_model_handle,base_id_handle,targets,recursive_override_attrs={})
       #TODO: facttor back in clone_helper
       child_model_name = child_model_handle[:model_name]
       child_parent_id_col = child_model_handle.parent_id_field_name()
@@ -75,13 +77,21 @@ module XYZ
 
       select_ds = targets_ds.graph(:inner,child_ds)
       create_opts = {:duplicate_refs => :no_check}
-      create_override_attrs = {} #TODO; stub; old was override_attrs.merge(:ancestor_id => child_id_handle.get_id()) 
+      create_override_attrs = ret_real_columns(child_model_handle,recursive_override_attrs)
       new_ids = create_from_select(child_model_handle,field_set_to_copy,select_ds,create_override_attrs,create_opts)
       return Array.new if new_ids.empty?
       new_id_handles = new_ids.map{|id|child_model_handle.createIH({:id => id})}
       
       #NOTE: iterate over all all children children think can recursively call clone_copy_child_objects if change base_id_handle to base_id_handles
       new_id_handles
+    end
+
+    def ret_child_override_attrs(child_model_handle,recursive_override_attrs)
+      recursive_override_attrs[(child_model_handle[:model_name])]||{}
+    end
+    def ret_real_columns(model_handle,recursive_override_attrs)
+      fs = Model::FieldSet.all_real(model_handle[:model_name])
+      recursive_override_attrs.reject{|k,v| not fs.include_col?(k)}
     end
   end
 end

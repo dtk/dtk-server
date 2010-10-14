@@ -15,6 +15,10 @@ module XYZ
 
     #######################
     ### object procssing and access functions
+    #object processing and access functions
+    def self.add_model_specific_override_attrs!(override_attrs)
+      override_attrs[:display_name] = SQL::ColRef.qualified_ref
+    end
 
     def self.clone_post_copy_hook(new_id_handle,target_id_handle,opts={})
 
@@ -25,8 +29,13 @@ module XYZ
       node_group_obj = get_object(target_id_handle)
       targets = ((node_group_obj||{})[:member_id_list]||[]).map{|node_id|target_id_handle.createIH({:model_name => :node,:id=> node_id})}
       return Array.new if  targets.empty?
-      override_attrs={} #TODO: stub should to capture override fro children
-      new_cmp_ids = clone_copy(new_id_handle,targets)
+      recursive_override_attrs={
+        :attribute => {
+          :value_derived => :value_asserted,
+          :value_asserted => nil
+        }
+      }
+      new_cmp_ids = clone_copy(new_id_handle,targets,recursive_override_attrs)
 
 =begin
       #put in attribute links

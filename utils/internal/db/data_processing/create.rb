@@ -55,7 +55,8 @@ module XYZ
         end
 
         #process overrides
-        sequel_select_with_cols = sequel_select.from_self.select(*columns.map{|col|overrides[col] ? {overrides[col] => col} : col})
+        # using has_key? to take into account nil value
+        sequel_select_with_cols = sequel_select.from_self.select(*columns.map{|col|overrides.has_key?(col) ? {overrides[col] => col} : col})
 
         #fn tries to return ids depending on whether db adater supports returning_id
         if ds.respond_to?(:insert_returning_sql) and parent_id_col

@@ -22,38 +22,54 @@ module XYZ
 
       def create_from_select(model_handle,field_set,select_ds,override_attrs={},opts={})
         duplicate_refs = opts[:duplicate_refs] || :allow #other alternatives: #:no_check | :error_on_duplicate | :prune_duplicates
-
         columns = field_set.cols
         #add :c if not present
         columns << :c unless columns.include?(:c)
 
+        parent_id_col = model_handle.parent_id_field_name()
+
+        overrides = override_attrs.dup
+
+        ds = dataset(DB_REL_DEF[model_handle[:model_name]])
+
         #modify sequel_select to reflect duplicate_refs setting
         sequel_select = select_ds.sequel_ds.ungraphed
-        overrides = override_attrs.dup
-        
-        parent_id_col = model_handle.parent_id_field_name()
-        match_cols = [:c,:ref,parent_id_col]
-        ds = dataset(DB_REL_DEF[model_handle[:model_name]])
-        #TODO: put in logic taht checks for a ref override if so remove it and uses it here
-        case duplicate_refs
-         when :no_check 
-          #no op
-         when :prune_duplicates
-          sequel_select = sequel_select.join_table(:left_outer,ds.select(*match_cols),match_cols,{:table_alias => :existing}).where({:existing__c => nil})
-         when :error_on_duplicate
-          #TODO: not right yet
-          duplicate_count = sequel_select.join_table(:inner,ds.select(*match_cols),match_cols,{:table_alias => :existing}).count
-          if duplicate_count > 0
-            #TODO: make this a specfic error 
-            raise Error.new("found #{duplicate_count.to_s} duplicates")
+        unless duplicate_refs == :no_check
+          select_on_match_cols =  match_cols = [:c,:ref,parent_id_col]
+          match_ds = ds.select(*select_on_match_cols)
+          match_ds_with_ref_num = match_ds.select_more(:ref_num)
+          columns_for_allow = columns.dup
+          #need special processing of ref override; need to modify match_cols and select_on_match_cols
+          #TODO: if ref_override not working right yet
+          ref_override =  overrides.delete(:ref)
+          if ref_override
+            select_on_match_cols = [:c,{ref_override => :ref}, parent_id_col]
+            match_ds = ds.select(select_on_match_cols).from_self
+            match_ds_with_ref_num = ds.select(*(select_on_match_cols+[:ref_num])).from_self
+            columns_for_allow.delete(:ref)
+            columns_for_allow << {ref_override => :ref}
           end
-         when :allow
-          ds_to_group = sequel_select.join_table(:inner,ds.select(*(match_cols+[:ref_num])),match_cols,{:table_alias => :existing})
-          max_col = SQL::ColRef.max{|o|o.coalesce(:existing__ref_num,1)}
-          max_ref_num_ds = ds_to_group.group(*match_cols).select(*(match_cols + [max_col]))
-          ref_num_col = {SQL::ColRef.case{[[{:max => nil},nil],:max+1]} => :ref_num}
-          sequel_select = sequel_select.select(*([ref_num_col]+columns-[:ref_num])).join_table(:left_outer,max_ref_num_ds,match_cols)
+
+          case duplicate_refs
+           when :prune_duplicates
+            sequel_select = sequel_select.join_table(:left_outer,match_ds,match_cols,{:table_alias => :existing}).where({:existing__c => nil})
+           when :error_on_duplicate
+            #TODO: not right yet
+            duplicate_count = sequel_select.join_table(:inner,match_ds,match_cols,{:table_alias => :existing}).count
+            if duplicate_count > 0
+              #TODO: make this a specfic error 
+              raise Error.new("found #{duplicate_count.to_s} duplicates")
+            end
+           when :allow
+            ds_to_group = sequel_select.join_table(:inner,match_ds_with_ref_num,match_cols,{:table_alias => :existing})
+            max_col = SQL::ColRef.max{|o|o.coalesce(:existing__ref_num,1)}
+            max_ref_num_ds = ds_to_group.group(*match_cols).select(*(select_on_match_cols + [max_col]))
+            ref_num_col = {SQL::ColRef.case{[[{:max => nil},nil],:max+1]} => :ref_num}
+#            sequel_select = sequel_select.select(*([ref_num_col]+columns-[:ref_num])).join_table(:left_outer,max_ref_num_ds,match_cols)
+            sequel_select = sequel_select.select(*([ref_num_col]+columns_for_allow-[:ref_num])).join_table(:left_outer,max_ref_num_ds,match_cols)
+          end
         end
+
 
         #process overrides
         # using has_key? to take into account nil value

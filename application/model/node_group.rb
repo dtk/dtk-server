@@ -15,7 +15,41 @@ module XYZ
 
     #######################
     ### object procssing and access functions
+
     def self.clone_post_copy_hook(new_id_handle,target_id_handle,opts={})
+
+      #create a change pending item associated with component created on the node group adn returns its id (so it can be
+      # used as parent to change items for components on all the node groups memebrs
+      parent_pending_id = create_pending_change_item(new_id_handle,target_id_handle)
+      
+      node_group_obj = get_object(target_id_handle)
+      targets = ((node_group_obj||{})[:member_id_list]||[]).map{|node_id|target_id_handle.createIH({:model_name => :node,:id=> node_id})}
+      return Array.new if  targets.empty?
+      override_attrs={} #TODO: stub should to capture override fro children
+      new_cmp_ids = clone_copy(new_id_handle,targets)
+
+=begin
+      #put in attribute links
+      node_cmp_wc = {:ancestor_id => new_id_handle.get_id()}
+      node_cmp_fs = FieldSet.opt([:id])
+      node_cmp_ds = get_objects_just_dataset(ModelHandle.new(c,:component),node_cmp_wc,node_cmp_fs)
+
+      node_attr_fs = FieldSet.opt([:component_component_id,:id,:ref])
+      node_attr_ds = get_objects_just_dataset(ModelHandle.new(c,:attribute),nil,node_attr_fs)
+
+      group_attr_wc = {:component_component_id => new_id_handle.get_id()}
+      group_attr_fs = FieldSet.opt([:id,:ref])
+      group_attr_ds = get_objects_just_dataset(ModelHandle.new(c,:attribute),group_attr_wc,group_attr_fs)
+
+      graph = node_cmp_ds.graph(:inner,node_attr_ds,{:component_component_id => :id}).graph(:inner,group_attr_ds,{:ref => :ref})
+      select = graph.select('attribute_link',:attribute2__id,:attribute__id)
+      #TODO: must also put in parent_relation
+      create_from_select(ModelHandle.new(c,:attribute_link),FieldSet.new([:ref,:input_id,:output_id]),select)
+      #TODO: links for monitor_items
+=end
+    end
+
+    def self.old_clone_post_copy_hook(new_id_handle,target_id_handle,opts={})
       #create a change pending item associated with component created on the node group adn returns its id (so it can be
       # used as parent to change items for components on all the node groups memebrs
       parent_pending_id = create_pending_change_item(new_id_handle,target_id_handle)

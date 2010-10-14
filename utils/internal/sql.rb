@@ -19,11 +19,29 @@ module XYZ
       ret
     end
 
-    ##### Sequel functions
+
+    #TODO: move to SQL::ColRef
     #coalesce returns first non null
-    def self.coalesce(*args)
-      #translates to case when not arg[0] is null then  arg[0] ... else null end
-      args.map{|x|[~{x => nil},x]}.case(nil)
+    #####
+    ##### Sequel functions and column refs
+    module ColRef
+      def self.string_concat(*args,&block)
+        return block.call(self).to_a.sql_string_join if block
+        return String.new if args.empty? 
+        args.sql_string_join
+      end
+      def self.coalesce(*args)
+        #translates to case when not arg[0] is null then  arg[0] ... else null end
+        args.map{|x|[~{x => nil},x]}.case(nil)
+      end
+
+      def self.max(arg=nil,&block)
+        return max(block.call(self)) if block
+        :Max.sql_function(arg)
+      end
+      def self.qualified_ref()
+        [:ref,[[{:ref_num => nil},""]].case(["-",:ref_num.cast(:text)].sql_string_join)].sql_string_join
+      end
     end
 
     ######
@@ -34,24 +52,10 @@ module XYZ
       end
       def to_sequel(col,sql_operation)
         #sql_operation will be :update or :insert
-        sql_operation == :update ? SQL.coalesce(col,@val) : @val
+        sql_operation == :update ? SQL::ColRef.coalesce(col,@val) : @val
       end
     end
-
-    #####
-    module ColRef
-      def self.string_concat(*args,&block)
-        if block
-          return block.call(self).to_a.sql_string_join
-        end
-        return String.new if args.empty? 
-        args.sql_string_join
-      end
-      def self.qualified_ref()
-        [:ref,[[{:ref_num => nil},""]].case(["-",:ref_num.cast(:text)].sql_string_join)].sql_string_join
-      end
-    end
-
+    ######
     module WhereCondition
       def self.like(l,r)
         Sequel::SQL::StringExpression.like(l,r)

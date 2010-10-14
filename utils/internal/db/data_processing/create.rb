@@ -48,8 +48,8 @@ module XYZ
           end
          when :allow
           ds_to_group = sequel_select.join_table(:inner,ds.select(*(match_cols+[:ref_num])),match_cols,{:table_alias => :existing})
-          #RODO remove direct call to coalesce ref and replace with sql::ColRef
-          max_ref_num_ds = ds_to_group.group(*match_cols).select(*match_cols){max(coalesce(:existing__ref_num,1))}
+          max_col = SQL::ColRef.max{|o|o.coalesce(:existing__ref_num,1)}
+          max_ref_num_ds = ds_to_group.group(*match_cols).select(*(match_cols + [max_col]))
           ref_num_col = {[[{:max => nil},nil]].case(:max+1) => :ref_num}
           sequel_select = sequel_select.select(*([ref_num_col]+columns-[:ref_num])).join_table(:left_outer,max_ref_num_ds,match_cols)
         end

@@ -48,26 +48,14 @@ module XYZ
           end
          when :allow
           ds_to_group = sequel_select.join_table(:inner,ds.select(*(match_cols+[:ref_num])),match_cols,{:table_alias => :existing})
+          #RODO remove direct call to coalesce ref and replace with sql::ColRef
           max_ref_num_ds = ds_to_group.group(*match_cols).select(*match_cols){max(coalesce(:existing__ref_num,1))}
           ref_num_col = {[[{:max => nil},nil]].case(:max+1) => :ref_num}
           sequel_select = sequel_select.select(*([ref_num_col]+columns-[:ref_num])).join_table(:left_outer,max_ref_num_ds,match_cols)
         end
 
         #process overrides
-        sequel_select_with_cols = sequel_select.from_self
-        columns.each do |col|
-          ovr = overrides[col]  
-          sequel_select_with_cols =
-            if ovr
-              if ovr.kind_of?(Proc)
-                sequel_select_with_cols.select_more(&ovr)
-              else
-                sequel_select_with_cols.select_more(ovr => col)
-              end
-            else
-              sequel_select_with_cols.select_more(col)
-            end
-        end
+        sequel_select_with_cols = sequel_select.from_self.select(*columns.map{|col|overrides[col] ? {overrides[col] => col} : col})
 
         #fn tries to return ids depending on whether db adater supports returning_id
         if ds.respond_to?(:insert_returning_sql) and parent_id_col

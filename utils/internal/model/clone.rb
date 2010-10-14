@@ -40,7 +40,8 @@ module XYZ
 
       source_wc = {:id => source_id_handle.get_id()}
 
-      field_set_to_copy = Model::FieldSet.all_real(source_model_name).remove_cols(*([:id,:local_id]+[source_parent_id_col]))
+      remove_cols = (source_parent_id_col == target_parent_id_col ? [:id,:local_id] : [:id,:local_id,source_parent_id_col])
+      field_set_to_copy = Model::FieldSet.all_real(source_model_name).remove_cols(*remove_cols)
       source_fs = Model::FieldSet.opt(field_set_to_copy.remove_cols(target_parent_id_col))
       source_ds = get_objects_just_dataset(source_model_handle,source_wc,source_fs)
 

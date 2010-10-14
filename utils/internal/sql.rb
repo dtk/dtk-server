@@ -25,7 +25,13 @@ module XYZ
     #####
     ##### Sequel functions and column refs
     module ColRef
-      def self.string_concat(*args,&block)
+      #block contains expression that is evaluated to array; each element but last is pair [condition,val]; last is "elee value
+      def self.case(&block)
+        case_array = block.call(self)
+        else_case = case_array.pop
+        case_array.case(else_case)
+      end
+      def self.concat(*args,&block)
         return block.call(self).to_a.sql_string_join if block
         return String.new if args.empty? 
         args.sql_string_join

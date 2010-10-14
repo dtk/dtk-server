@@ -5,7 +5,7 @@ module XYZ
       super(x.to_sym)
     end
 
-    def createIH(x)
+    def createIDH(x)
       IDHandle.new(self.merge(x))
     end
     def createMH(x={})

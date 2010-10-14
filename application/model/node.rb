@@ -8,7 +8,7 @@ module XYZ
       ds_column_defs :ds_attributes, :ds_key, :data_source, :ds_source_obj_type
       external_ref_column_defs()
       column :tag,  :varchar
-      column :type, :varchar, :size => 15, :default => "instance" # instance or template
+      column :type, :varchar, :size => 15, :default => "instance" # | "image" | "staged"
       column :os, :varchar, :size => 25
       #TODO: is_deployed may just be a virtual column that tests if :external_ref is null
       column :is_deployed, :boolean
@@ -32,17 +32,15 @@ module XYZ
     #######################
     #object processing and access functions
     def self.add_model_specific_override_attrs!(override_attrs)
-      #TODO: case on whether cloning an image or a instance
-      override_attrs[:type] = "instance"
-      override_attrs[:display_name] = SQL::ColRef.string_concat{|o|["i-",o.qualified_ref]}
-      override_attrs[:external_ref] = "{}"
+      override_attrs[:type] = "staged"
+      override_attrs[:display_name] = SQL::ColRef.concat{|o|["s-",o.qualified_ref]}
+      override_attrs[:external_ref] = nil
     end
 
     def self.clone_post_copy_hook(new_id_handle,target_id_handle,opts={})
-      c = new_id_handle[:c]
       #use parent pending change id as parent; otehrwise use target's parent
       p_id = opts[:parent_pending_change_item_id]
-      parent_id_handle = p_id ? IDHandle[:c => c, :id => p_id, :model_name => :pending_change_item] :
+      parent_id_handle = p_id ? new_id_handle.createIDH({:id => p_id, :model_name => :pending_change_item}) :
         target_id_handle.get_parent_id_handle()
       ref = "pending_change_item"
       create_hash = {

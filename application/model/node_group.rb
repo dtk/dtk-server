@@ -22,7 +22,7 @@ module XYZ
       parent_pending_id = create_pending_change_item(new_id_handle,target_id_handle)
       
       node_group_obj = get_object(target_id_handle)
-      targets = ((node_group_obj||{})[:member_id_list]||[]).map{|node_id|target_id_handle.createIH({:model_name => :node,:id=> node_id})}
+      targets = ((node_group_obj||{})[:member_id_list]||[]).map{|node_id|target_id_handle.createIDH({:model_name => :node,:id=> node_id})}
       return Array.new if  targets.empty?
       recursive_override_attrs={
         :attribute => {

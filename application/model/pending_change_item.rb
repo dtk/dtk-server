@@ -20,11 +20,11 @@ module XYZ
     #object processing and access functions
     #######################
     def self.create_item(new_id_handle,parent_id_handle)
-      reate_items(new_id_handle.to_a,parent_id_handle).first
+      create_items([new_id_handle],parent_id_handle).first
     end
     def self.create_items(new_id_handles,parent_id_handle)
       return nil if new_id_handles.empty?
-      model_handle = parent_id_handle.createMH({:model_name => :pending_change_item, :parent_model_name => parent_idh[:model_name]})
+      model_handle = parent_id_handle.createMH({:model_name => :pending_change_item, :parent_model_name => parent_id_handle[:model_name]})
       object_model_name = new_id_handles.first[:model_name]
       object_id_col = "#{object_model_name}_id".to_sym
       parent_id = parent_id_handle.get_id()

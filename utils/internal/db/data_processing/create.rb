@@ -33,41 +33,31 @@ module XYZ
         ds = dataset(DB_REL_DEF[model_handle[:model_name]])
 
         #modify sequel_select to reflect duplicate_refs setting
-        sequel_select = left_match_ds = select_ds.sequel_ds.ungraphed
-        right_match_ds = ds #.select(:c,:ref, parent_id_col)
+        sequel_select = select_ds.sequel_ds.ungraphed
         unless duplicate_refs == :no_check
           match_cols = [:c,:ref,parent_id_col]
           #need special processing of ref override; need to modify match_cols and select_on_match_cols
-          ref_col = :ref
           ref_override =  overrides.delete(:ref)
           if ref_override
-            ref_col = {ref_override => :ref} 
-            sequel_select = sequel_select.select(*((columns - [:ref])+[ref_col])).from_self
+            sequel_select = sequel_select.select(*((columns - [:ref])+[{ref_override => :ref}])).from_self
           end
 
           case duplicate_refs
            when :prune_duplicates
-            sequel_select = sequel_select.join_table(:left_outer,right_match_ds,match_cols,{:table_alias => :existing}).where({:existing__c => nil})
+            sequel_select = sequel_select.join_table(:left_outer,ds,match_cols,{:table_alias => :existing}).where({:existing__c => nil})
            when :error_on_duplicate
             #TODO: not right yet
-            duplicate_count = sequel_select.join_table(:inner,right_match_ds,match_cols).count
+            duplicate_count = sequel_select.join_table(:inner,ds,match_cols).count
             if duplicate_count > 0
               #TODO: make this a specfic error 
               raise Error.new("found #{duplicate_count.to_s} duplicates")
             end
            when :allow
-            ds_to_group = sequel_select.join_table(:inner,right_match_ds,match_cols,{:table_alias => :existing})
+            ds_to_group = sequel_select.join_table(:inner,ds,match_cols,{:table_alias => :existing})
             max_col = SQL::ColRef.max{|o|o.coalesce(:existing__ref_num,1)}
             max_ref_num_ds = ds_to_group.group(*match_cols).select(*(match_cols+[max_col]))
             ref_num_col = {SQL::ColRef.case{[[{:max => nil},nil],:max+1]} => :ref_num}
             sequel_select = sequel_select.select(*([ref_num_col]+columns-[:ref_num])).join_table(:left_outer,max_ref_num_ds,match_cols)
-=begin
-            ds_to_group = left_match_ds.join_table(:inner,right_match_ds.select_more(:ref_num),match_cols,{:table_alias => :existing})
-            max_col = SQL::ColRef.max{|o|o.coalesce(:existing__ref_num,1)}
-            max_ref_num_ds = ds_to_group.group(*match_cols).select(*(match_cols+[max_col]))
-            ref_num_col = {SQL::ColRef.case{[[{:max => nil},nil],:max+1]} => :ref_num}
-            sequel_select = sequel_select.select(*([ref_num_col]+columns-[:ref_num])).join_table(:left_outer,max_ref_num_ds,match_cols)
-=end
           end
         end
 

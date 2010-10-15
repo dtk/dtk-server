@@ -1,5 +1,5 @@
 module XYZ
-  class ProjectController < Controller
+  class DatacenterController < Controller
     def create(name)
       c = ret_session_context_id()
       Project.create(name,c)

@@ -22,7 +22,7 @@
               :help => '',
               :action_seperator => '&nbsp;|&nbsp;',
               :action_list => [
-                {:route => 'workspace/loadproject/{%=project[:id]%}',:label=>'load'}
+                {:route => 'workspace/loaddatacenter/{%=datacenter[:id]%}',:label=>'load'}
               ]
             }},
       ]

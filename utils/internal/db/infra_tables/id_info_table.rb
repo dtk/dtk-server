@@ -15,15 +15,26 @@ module XYZ
       ModelHandle.new(vals[:c],vals[:model_name],vals[:parent_model_name])
     end
 
+    def create_childMH(child_model_name)
+      ModelHandle.new(self[:c],child_model_name,self[:model_name])
+    end
     def get_children_model_handles()
       get_children_model_names().map{|child_model_name|ModelHandle.new(self[:c],child_model_name,self[:model_name])}
     end
 
     def to_s
       model_name = "model_name=#{self[:model_name]||"UNKNOWN"}"
-      uri_or_guid = self[:guid] ? "guid=#{self[:guid].to_s}" : "uri=#{self[:uri]}"
-      "#{model_name}; #{uri_or_guid}"
+      uri_or_guid = 
+        if kind_of?(IDHandle)
+          self[:guid] ? "; guid=#{self[:guid].to_s}" : "; uri=#{self[:uri]}"
+        else
+          ""
+        end
+      parent_model_name =  self[:parent_model_name] ? "; parent_model_name = #{self[:parent_model_name]}" : ""
+          
+      "#{model_name}#{uri_or_guid}#{parent_model_name}"
     end
+
    private
     def get_children_model_names()
       db_rel[:one_to_many]||[]
@@ -61,6 +72,7 @@ module XYZ
 
     def initialize(x)
       super()
+      #TODO: cleanup to take into account of this can be factory and whether enforce this must has model_name and perant_model_nmae
       if x[:id_info]
         id_info = x[:id_info]
         if id_info[:c] and id_info[:relation_type] and id_info[:id]
@@ -77,15 +89,11 @@ module XYZ
       if x[:id] and x[:model_name]
         model_name = x[:model_name].to_sym
         self[:guid] = IDInfoTable.ret_guid_from_db_id(x[:id],model_name)
-        self[:model_name] = model_name
       elsif x[:guid]
         self[:guid]= x[:guid].to_i
-        self[:model_name] = x[:model_name].to_sym if x[:model_name]
       elsif x[:uri]
         self[:uri]= x[:uri]
-        if x[:model_name]
-          self[:model_name] = x[:model_name].to_sym if x[:model_name]          
-        else
+        unless x[:model_name]
           #TODO: cleanup; probably removing id_handle staht can be factory ids
           unless x[:is_factory]
             self[:model_name] = RestURI.ret_relation_type_from_instance_uri(x[:uri])
@@ -94,6 +102,8 @@ module XYZ
       else
 	raise_has_illegal_form(x) 
       end
+      self[:model_name] = x[:model_name].to_sym if x[:model_name]
+      self[:parent_model_name] = x[:parent_model_name].to_sym if x[:parent_model_name]
       freeze
     end
 

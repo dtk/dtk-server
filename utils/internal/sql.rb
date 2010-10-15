@@ -29,7 +29,8 @@ module XYZ
         case_array.case(else_case)
       end
       def self.concat(*args,&block)
-        return block.call(self).to_a.sql_string_join if block
+        #TODO: make sure to_a does not have side effect like falttening hashs inside
+        return block.call(self).sql_string_join if block
         return String.new if args.empty? 
         args.sql_string_join
       end

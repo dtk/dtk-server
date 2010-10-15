@@ -19,9 +19,6 @@ module XYZ
       ret
     end
 
-
-    #TODO: move to SQL::ColRef
-    #coalesce returns first non null
     #####
     ##### Sequel functions and column refs
     module ColRef
@@ -138,7 +135,7 @@ module XYZ
 
     #creates a table dataset from rows, which is array with each element being a hash; each row has same keys
     class ArrayDataset < Dataset
-      def self.create(db,rows,aliaz)
+      def self.create(db,rows,aliaz=:t1)
         return nil if rows.empty?
         ArrayDataset.new(db,rows,aliaz)
       end

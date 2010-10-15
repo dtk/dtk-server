@@ -18,5 +18,24 @@ module XYZ
     #######################
     #object processing and access functions
     #######################
+    def self.create(new_idhs,target_idh)
+      return nil if new_idhs.empty?
+      parent_idh = target_idh.get_parent_id_handle()
+      pending_item_mh = target_idh.createMH({:model_name => :pending_item, :parent_model_name => parent_idh[:model_name]})
+      model_name = new_idhs.first[:model_name]
+      object_id_col = "#{model_name}_id".to_sym
+      change = "new_#{model_name}"
+      ref_prefix = "pending_change_item"
+      i=0
+      rows = new_idhs.map do |idh| 
+        ref = "#{ref_prefix}#{(i+=1).to_s}"
+        id = idh.get_id()
+        {:ref => ref,
+          :display_name => "change(#{id.to_s})",
+          object_id_col => id
+        }
+      end
+      create_from_rows(pending_item_mh,rows,parent_idh)
+    end
   end
 end

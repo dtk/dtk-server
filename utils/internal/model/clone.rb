@@ -36,8 +36,8 @@ module XYZ
       target_model_handle = source_id_handle.createMH(:parent_model_name => target_parent_model_name)
       target_parent_id_col = target_model_handle.parent_id_field_name()
 
-      targets_wc = targets.map{|id_handle|{target_parent_id_col => id_handle.get_id()}}
-      targets_ds = SQL::ArrayDataset.create(db,targets_wc,:target)
+      targets_rows = targets.map{|id_handle|{target_parent_id_col => id_handle.get_id()}}
+      targets_ds = SQL::ArrayDataset.create(db,targets_rows,:target)
 
       source_wc = {:id => source_id_handle.get_id()}
 

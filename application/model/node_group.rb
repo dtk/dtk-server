@@ -30,7 +30,7 @@ module XYZ
           :value_asserted => nil
         }
       }
-      new_cmp_ids = clone_copy(new_id_handle,targets,recursive_override_attrs)
+      new_cmp_id_handles = clone_copy(new_id_handle,targets,recursive_override_attrs)
 
 =begin
       #put in attribute links

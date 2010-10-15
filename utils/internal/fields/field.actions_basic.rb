@@ -15,7 +15,7 @@ class Fieldactions_basic < Fieldbase
       label = '{%=_' << @model_name << '[:i18n][:' << action[:label] << ']%}'
 
       (!action[:target].nil? && action[:target] !='') ? target = 'target="' + action[:target] + '"' : target = ''
-      field_string << '<a href="' << R8::Config[:base_uri] << '/' << action[:route] << '"' << target << '>' << label << '</a>'
+      field_string << '<a href="' << R8::Config[:base_uri] << '/xyz/' << action[:route] << '"' << target << '>' << label << '</a>'
     end
 
     return field_string

@@ -59,7 +59,7 @@ R8.config['base_uri'] = '{%=_app[:base_uri]%}/xyz';
 	<div id="page-container" style="margin: 0 auto 0 auto;">
 		<div id="topbar">
 			<div id="toolbar-wrapper"></div>
-			<div id="wspace-context-wrapper"></div>
+			<div id="wspace-context-wrapper"><a href="{%=_app[:base_uri]%}/xyz/node/list">Main</a></div>
 		</div>
 		<div id="wspace-container">
 			<div id="workspace" class="workspace">

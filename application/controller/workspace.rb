@@ -10,10 +10,19 @@ module XYZ
       return {:content=>''}
     end
 
-    def loadproject(id,parsed_query_string=nil)
+    def loaddatacenter(id,parsed_query_string=nil)
 #TODO: make call to load the users/system already in use plugins,cmds,etc
       include_js('plugins/search.cmdhandler')
 
+=begin
+#TODO: make this generic to load all items for a viewspace, not just loaddatacenter
+      #retrieve the nodes
+      node_list = get_objects(node_name.to_sym,where_clause)
+
+      tpl = R8Tpl::TemplateR8.new("node/wspace_list",user_context())
+      tpl.set_js_tpl_name("node_wspace_list")
+      tpl.assign('node_list',node_list)
+=end
       return {:content=>''}
     end
 

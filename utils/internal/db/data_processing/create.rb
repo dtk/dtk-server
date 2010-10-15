@@ -23,17 +23,18 @@ module XYZ
       def create_from_select(model_handle,field_set,select_ds,override_attrs={},opts={})
         duplicate_refs = opts[:duplicate_refs] || :allow #other alternatives: #:no_check | :error_on_duplicate | :prune_duplicates
         columns = field_set.cols
+        sequel_select = select_ds.sequel_ds.ungraphed
         #add :c if not present
-        columns << :c unless columns.include?(:c)
-
+        unless columns.include?(:c)
+          sequel_select = sequel_select.select(*columns).select_more(model_handle[:c] => :c).from_self
+          columns << :c
+        end
         parent_id_col = model_handle.parent_id_field_name()
 
         overrides = override_attrs.dup
 
         ds = dataset(DB_REL_DEF[model_handle[:model_name]])
-
         #modify sequel_select to reflect duplicate_refs setting
-        sequel_select = select_ds.sequel_ds.ungraphed
         unless duplicate_refs == :no_check
           match_cols = [:c,:ref,parent_id_col]
           #need special processing of ref override; need to modify match_cols and select_on_match_cols
@@ -72,7 +73,7 @@ module XYZ
           sql = ds.insert_returning_sql([:id,parent_id_col],columns,sequel_select_with_cols)
           fetch_raw_sql(sql){|row| returning_ids << row}
           IDInfoTable.update_instances(model_handle,returning_ids)
-          returning_ids.map{|row|row[:id]}
+          returning_ids.map{|row|model_handle.createIDH(:id => row[:id])}
         else
           ds.import(columns,sequel_select_with_cols)
           #TODO: need to get ids and set 

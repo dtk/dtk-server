@@ -47,10 +47,12 @@ module XYZ
 
     def self.create_from_rows(model_handle,rows,parent_idh,opts={})
       parent_assignment = {model_handle.parent_id_field_name() => parent_idh.get_id()}
+      #TODO: need to do any needed special processing for column types
       rows_with_parent = rows.map{|row|row.merge(parent_assignment)}
       select_ds = SQL::ArrayDataset.create(db,rows_with_parent)
       override_attrs = {}
       create_opts = {} #TODO: stub
+      field_set = FieldSet.new(rows.first.keys)
       create_from_select(model_handle,field_set,select_ds,override_attrs,create_opts)
     end
 

@@ -19,7 +19,8 @@ module XYZ
 
       #create a change pending item associated with component created on the node group adn returns its id (so it can be
       # used as parent to change items for components on all the node groups memebrs
-      parent_pending_id = create_pending_change_item(new_id_handle,target_id_handle)
+#      parent_pending_id = create_pending_change_item(new_id_handle,target_id_handle)
+      parent_pending_id = PendingChangeItem.create_items([new_id_handle],target_id_handle)
       
       node_group_obj = get_object(target_id_handle)
       targets = ((node_group_obj||{})[:member_id_list]||[]).map{|node_id|target_id_handle.createIDH({:model_name => :node,:id=> node_id})}

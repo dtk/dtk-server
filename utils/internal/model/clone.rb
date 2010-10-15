@@ -50,9 +50,8 @@ module XYZ
       dups_allowed_for_cmp = true #TODO stub
       create_opts = {:duplicate_refs => dups_allowed_for_cmp ? :allow : :prune_duplicates}
       create_override_attrs = override_attrs.merge(:ancestor_id => source_id_handle.get_id()) 
-      new_ids = create_from_select(target_model_handle,field_set_to_copy,select_ds,create_override_attrs,create_opts)
-      return Array.new if new_ids.empty?
-      new_id_handles = new_ids.map{|id|source_id_handle.createIDH({:id => id,:parent_model_name => target_parent_model_name})}
+      new_id_handles = create_from_select(target_model_handle,field_set_to_copy,select_ds,create_override_attrs,create_opts)
+      return new_id_handles if new_id_handles.empty?
       
       #iterate over all children objects
       new_id_handles.first.get_children_model_handles.each do |child_model_handle|
@@ -78,9 +77,8 @@ module XYZ
       select_ds = targets_ds.graph(:inner,child_ds)
       create_opts = {:duplicate_refs => :no_check}
       create_override_attrs = ret_real_columns(child_model_handle,recursive_override_attrs)
-      new_ids = create_from_select(child_model_handle,field_set_to_copy,select_ds,create_override_attrs,create_opts)
-      return Array.new if new_ids.empty?
-      new_id_handles = new_ids.map{|id|child_model_handle.createIDH({:id => id})}
+      new_id_handles = create_from_select(child_model_handle,field_set_to_copy,select_ds,create_override_attrs,create_opts)
+      return new_id_handles if new_id_handles.empty?
       
       #NOTE: iterate over all all children children think can recursively call clone_copy_child_objects if change base_id_handle to base_id_handles
       new_id_handles

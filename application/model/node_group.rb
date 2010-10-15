@@ -19,8 +19,8 @@ module XYZ
 
       #create a change pending item associated with component created on the node group adn returns its id (so it can be
       # used as parent to change items for components on all the node groups memebrs
-#      parent_pending_id = create_pending_change_item(new_id_handle,target_id_handle)
-      parent_pending_id = PendingChangeItem.create_items([new_id_handle],target_id_handle)
+      parent_pending_id_handle = target_id_handle.get_parent_id_handle()
+      pending_id_handle = PendingChangeItem.create_item(new_id_handle,parent_pending_id_handle)
       
       node_group_obj = get_object(target_id_handle)
       targets = ((node_group_obj||{})[:member_id_list]||[]).map{|node_id|target_id_handle.createIDH({:model_name => :node,:id=> node_id})}
@@ -32,7 +32,8 @@ module XYZ
         }
       }
       new_cmp_id_handles = clone_copy(new_id_handle,targets,recursive_override_attrs)
-
+      #create pending_change items for all the components created on teh nodes
+      PendingChangeItem.create_items(new_cmp_id_handles,parent_pending_id_handle)
 =begin
       #put in attribute links
       node_cmp_wc = {:ancestor_id => new_id_handle.get_id()}
@@ -52,21 +53,6 @@ module XYZ
       create_from_select(ModelHandle.new(c,:attribute_link),FieldSet.new([:ref,:input_id,:output_id]),select)
       #TODO: links for monitor_items
 =end
-    end
-
-    def self.create_pending_change_item(new_id_handle,target_id_handle)
-      parent_id_handle = target_id_handle.get_parent_id_handle()
-      ref = "pending_change_item"
-      create_hash = {
-        :pending_change_item => {
-          ref => {
-            :display_name => ref,
-            :change => "new_component",
-            :component_id => new_id_handle.get_id()
-          }
-        }
-      }
-      create_from_hash(parent_id_handle,create_hash).map{|x|x[:id]}.first
     end
     #######################
 

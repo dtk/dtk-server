@@ -7,6 +7,7 @@ module XYZ
       column :change, :json # gives detail about teh change
 
       #one oif thse wil be non null and point to object being changed or added
+      foreign_key :node_id, :attribute, FK_CASCADE_OPT
       foreign_key :attribute_id, :attribute, FK_CASCADE_OPT
       foreign_key :component_id, :component, FK_CASCADE_OPT
 
@@ -18,15 +19,17 @@ module XYZ
     #######################
     #object processing and access functions
     #######################
-    def self.create_items(new_id_handles,target_id_handle)
+    def self.create_item(new_id_handle,parent_id_handle)
+      reate_items(new_id_handle.to_a,parent_id_handle).first
+    end
+    def self.create_items(new_id_handles,parent_id_handle)
       return nil if new_id_handles.empty?
-      parent_idh = target_id_handle.get_parent_id_handle()
-      pending_item_mh = target_id_handle.createMH({:model_name => :pending_change_item, :parent_model_name => parent_idh[:model_name]})
-      model_name = new_id_handles.first[:model_name]
-      object_id_col = "#{model_name}_id".to_sym
-      parent_id = parent_idh.get_id()
-      parent_id_col = pending_item_mh.parent_id_field_name()
-      change = "new_#{model_name}"
+      model_handle = parent_id_handle.createMH({:model_name => :pending_change_item, :parent_model_name => parent_idh[:model_name]})
+      object_model_name = new_id_handles.first[:model_name]
+      object_id_col = "#{object_model_name}_id".to_sym
+      parent_id = parent_id_handle.get_id()
+      parent_id_col = model_handle.parent_id_field_name()
+      change = "new_#{object_model_name}"
       ref_prefix = "pending_change_item"
       i=0
       rows = new_id_handles.map do |idh| 
@@ -38,7 +41,7 @@ module XYZ
           parent_id_col => parent_id
         }
       end
-      create_from_rows(pending_item_mh,rows,parent_idh)
+      create_from_rows(model_handle,rows,parent_id_handle)
     end
   end
 end

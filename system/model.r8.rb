@@ -80,7 +80,6 @@ module XYZ
       ret
     end
 
-
     def self.get_object(id_handle,opts={})
       c = id_handle[:c]
       id_info = IDInfoTable.get_row_from_id_handle id_handle, :raise_error => opts[:raise_error], :short_circuit_for_minimal_row => true

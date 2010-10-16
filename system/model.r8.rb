@@ -64,7 +64,6 @@ module XYZ
       related_columns = field_set.related_columns(model_name)
       ret = nil
       unless related_columns
-        #TODO: need to put order logic in get_objects_scalar_columns
         ret = @db.get_objects_scalar_columns(model_handle,where_clause,opts)
       else
         ls_opts = opts.merge(FieldSet.opt(field_set))
@@ -74,7 +73,7 @@ module XYZ
           right_ds = @db.get_objects_just_dataset(ModelHandle.new(c,join_info[:model_name]),nil,rs_opts)
           graph_ds = graph_ds.graph(:left_outer,right_ds,join_info[:join_cond])
         end
-        graph_ds = process_ordering_for_get_object(graph_ds,opts[:order_by]) if opts[:order_by]
+        graph_ds = graph_ds.order(opts[:order_by]) if opts[:order_by]
         ret = graph_ds.all
       end
       ret
@@ -123,17 +122,6 @@ module XYZ
     def parent_path()
       return id_handle()[:uri] if id_handle() and id_handle()[:uri] #short circuit 
       id_handle().get_parent_id_info()[:uri]
-    end
-    #TBD: more fns should b
-    def self.process_ordering_for_get_object(graph_ds,order_by)
-      ret = graph_ds
-      order_by.each do |order_by_el|
-        #TBD: check that it is legal field
-        next unless order_by_el[:field]
-        dir = order_by_el[:order] == "DESC" ? "DESC" : "ASC"
-        ret = ret.order(order_by_el[:field],dir)
-      end
-      ret
     end
   end
 

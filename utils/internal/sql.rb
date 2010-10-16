@@ -175,8 +175,8 @@ module XYZ
         @c = c
       end
 
-      def order(col,dir="ASC")
-        sequel_ds = (dir == "ASC" ? @sequel_ds.order(col) : @sequel_ds.reverse_order(col))
+      def order(order_by_opt)
+        sequel_ds = DB.ret_order_added_to_dataset(@sequel_ds,order_by_opt)
         Graph.new(sequel_ds,@model_name_info,@c)
       end
 

@@ -21,6 +21,18 @@ module XYZ
     include Associations unless included_modules.include?(Associations)
     include RestURI unless included_modules.include?(RestURI)
 
+    def self.ret_order_added_to_dataset(ds,order_by_opt)
+      ret = ds
+      order_by_opt.each do |order_by_el|
+        #TBD: check that it is legal field
+        col = order_by_el[:field]
+        next unless col
+        dir = order_by_el[:order] == "DESC" ? "DESC" : "ASC"
+        ret = dir == "ASC" ? ds.order(col) : ds.reverse_order(col)
+      end
+      ret
+    end
+
     def self.ret_qualified_ref_from_scalars(scalars)
       return nil if scalars[:ref].nil? 
       scalars[:ref].to_s + (scalars[:ref_num] ? "-" + scalars[:ref_num].to_s : "")

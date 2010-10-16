@@ -24,7 +24,6 @@ module XYZ
     #targets is a list of id_handles, each with same model_name 
     def clone_copy(source_id_handle,targets,recursive_override_attrs={},opts={})
       #TODO: facttor back in functionality that clone_helper provided for non-parent foreign keys that may point to what is cloned
-      #TODO: in this fn and helper one see if can substitute join_table for graph
       return Array.new if targets.empty?
 
       source_model_name = source_id_handle[:model_name]
@@ -47,7 +46,7 @@ module XYZ
       source_fs = Model::FieldSet.opt(field_set_to_copy.remove_cols(target_parent_id_col))
       source_ds = get_objects_just_dataset(source_model_handle,source_wc,source_fs)
 
-      select_ds = targets_ds.graph(:inner,source_ds)
+      select_ds = targets_ds.join_table(:inner,source_ds)
       dups_allowed_for_cmp = true #TODO stub
       create_opts = {:duplicate_refs => dups_allowed_for_cmp ? :allow : :prune_duplicates}
       create_override_attrs = override_attrs.merge(:ancestor_id => source_id_handle.get_id()) 
@@ -75,7 +74,7 @@ module XYZ
       child_fs = Model::FieldSet.opt(field_set_to_copy.remove_cols(child_parent_id_col))
       child_ds = get_objects_just_dataset(child_model_handle,child_wc,child_fs)
 
-      select_ds = targets_ds.graph(:inner,child_ds)
+      select_ds = targets_ds.join_table(:inner,child_ds)
       create_opts = {:duplicate_refs => :no_check}
       create_override_attrs = ret_real_columns(child_model_handle,recursive_override_attrs)
       new_id_handles = create_from_select(child_model_handle,field_set_to_copy,select_ds,create_override_attrs,create_opts)

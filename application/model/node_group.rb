@@ -100,7 +100,7 @@ module XYZ
       #below returns just scalar attributes
       ng = Model.get_objects(model_handle,SQL.and(where_clause,{:dynamic_membership_sql => nil}),opts)
       return ng if ng.empty?
-      #TODO: encapsulate this pattern to nest multiple matches; might have a variant of graph that does this
+      #TODO: encapsulate this pattern to nest multiple matches; might have a variant of join_table that does this
       ng_member_wc = SQL.or(*ng.map{|x|{:node_group_id => x[:id]}})
       ng_member_fs = FieldSet.opt([:node_group_id,:node_id])
       ng_members = Model.get_objects(ModelHandle.new(c,:node_group_member),ng_member_wc,ng_member_fs)

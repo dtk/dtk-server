@@ -52,9 +52,9 @@ module XYZ
       return node_cmp_id_handles if node_cmp_id_handles.empty?
 
       #create pending_change items for all the components created on the nodes; the
-      #pending change item generated for the node group component is tehir parents
+      #pending change item generated for the node group component is their parents
       PendingChangeItem.create_items(node_cmp_id_handles,pending_id_handle)
-=begin
+
       #put in attribute links, linking attributes attached to component ng_cmp_id_handle
 
       node_cmp_mh = node_cmp_id_handles.first.createMH
@@ -72,19 +72,24 @@ module XYZ
       group_attr_fs = FieldSet.opt([:id,:ref])
       group_attr_ds = get_objects_just_dataset(attr_mh,group_attr_wc,group_attr_fs)
 
-      #TODO: must make sure not adding same ref/parent pair twice
-      ref = "attribute_link"
-      i1_ds = node_cmp_ds.select({"attribute_link" => :ref},{:input__id => :input_id},{:output__id => :output_id})
+      #attribute link has same parent as node_group
+      attr_link_mh = node_group_id_handle.create_peerMH(:attribute_link)
+      attr_link_parent_id_handle = node_group_id_handle.get_parent_id_handle()
+      attr_link_parent_col = attr_link_mh.parent_id_field_name()
+      ref_prefix = "attribute_link:"
+      i1_ds = node_cmp_ds.select(
+         {SQL::ColRef.concat(ref_prefix,:input__id.cast(:text),"-",:output__id.cast(:text)) => :ref},
+         {attr_link_parent_id_handle.get_id() => attr_link_parent_col},
+         {:input__id => :input_id},
+         {:output__id => :output_id})
       first_join_ds = i1_ds.join_table(:inner,node_attr_ds,{attr_parent_col => :id},{:table_alias => :input})
       attr_link_ds = first_join_ds.join_table(:inner,group_attr_ds,[:ref],{:table_alias => :output})
 
-      #attribute link has same parent as node_group
-      attr_link_mh = node_group_id_handle.create_peerMH(:attribute_link)
-      attr_link_fs = FieldSet.new([:ref,:input_id,:output_id])
+      attr_link_fs = FieldSet.new([:ref,attr_link_parent_col,:input_id,:output_id])
       override_attrs = {}
       create_from_select(attr_link_mh,attr_link_fs,attr_link_ds,override_attrs,{:duplicate_refs => :no_check})
       #TODO: links for monitor_items
-=end
+
     end
     #######################
 

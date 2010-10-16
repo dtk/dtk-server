@@ -62,7 +62,6 @@ module XYZ
           end
         end
 
-
         #process overrides
         # using has_key? to take into account nil value
         sequel_select_with_cols = sequel_select.from_self.select(*columns.map{|col|overrides.has_key?(col) ? {overrides[col] => col} : col})

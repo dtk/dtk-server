@@ -74,7 +74,7 @@ module XYZ
       self[:uri] == "/"
     end
 
-    def initialize(x)
+    def initialize(x,opts={})
       super()
       #TODO: cleanup to take into account of this can be factory and whether enforce this must has model_name and perant_model_nmae
       if x[:id_info]
@@ -84,6 +84,7 @@ module XYZ
           model_name = id_info[:relation_type]
           self[:guid] = IDInfoTable.ret_guid_from_db_id(id_info[:id],model_name)
           self[:model_name] = model_name
+          self[:parent_model_name] = get_parent_id_handle()[:model_name] if opts[:set_parent_model_name]
           return freeze
         end
       end
@@ -108,6 +109,7 @@ module XYZ
       end
       self[:model_name] = x[:model_name].to_sym if x[:model_name]
       self[:parent_model_name] = x[:parent_model_name].to_sym if x[:parent_model_name]
+      self[:parent_model_name] ||= get_parent_id_handle()[:model_name] if opts[:set_parent_model_name]
       freeze
     end
 

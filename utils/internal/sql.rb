@@ -167,12 +167,17 @@ module XYZ
     class Graph
       include DatatsetGraphMixin
       #TODO: needed to fully qualify Dataset; could this constraint be removed? by chaging expose?
-      expose_methods_from_internal_object :sequel_ds, %w{where select}, :post_hook => "lambda{|x|XYZ::SQL::Graph.new(x,@model_name_info,@c)}"
+      expose_methods_from_internal_object :sequel_ds, %w{where select }, :post_hook => "lambda{|x|XYZ::SQL::Graph.new(x,@model_name_info,@c)}"
       expose_methods_from_internal_object :sequel_ds, %w{sql}
       def initialize(sequel_ds,model_name_info,c)
         @sequel_ds = sequel_ds
         @model_name_info = model_name_info
         @c = c
+      end
+
+      def order(col,dir="ASC")
+        sequel_ds = (dir == "ASC" ? @sequel_ds.order(col) : @sequel_ds.reverse_order(col))
+        Graph.new(sequel_ds,@model_name_info,@c)
       end
 
       def all()

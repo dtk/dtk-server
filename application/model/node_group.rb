@@ -38,7 +38,7 @@ module XYZ
     end
    private
 
-    def self.clone_post_copy_hook_component(cmp_id_handle,node_group_id_handle,pending_id_handle,opts={})
+    def self.clone_post_copy_hook_component(ng_cmp_id_handle,node_group_id_handle,pending_id_handle,opts={})
       node_group_obj = get_object(node_group_id_handle)
       targets = ((node_group_obj||{})[:member_id_list]||[]).map{|node_id|node_group_id_handle.createIDH({:model_name => :node,:id=> node_id})}
       return Array.new if  targets.empty?
@@ -48,35 +48,41 @@ module XYZ
           :value_asserted => nil
         }
       }
-      new_cmp_id_handles = clone_copy(cmp_id_handle,targets,recursive_override_attrs)
-      return new_cmp_id_handles if new_cmp_id_handles.empty?
+      node_cmp_id_handles = clone_copy(ng_cmp_id_handle,targets,recursive_override_attrs)
+      return node_cmp_id_handles if node_cmp_id_handles.empty?
 
       #create pending_change items for all the components created on the nodes; the
       #pending change item generated for the node group component is tehir parents
-      PendingChangeItem.create_items(new_cmp_id_handles,pending_id_handle)
-=begin                                 
-      parent_id_handle = node_group_id_handle.get_parent_id_handle()
+      PendingChangeItem.create_items(node_cmp_id_handles,pending_id_handle)
+=begin
+      #put in attribute links, linking attributes attached to component ng_cmp_id_handle
 
-      #put in attribute links, linking attributes attached to component cmp_id_handle
-      node_cmp_mh = new_cmp_id_handles.first.createMH(:model_name => :component)
-      node_cmp_wc = {:ancestor_id => cmp_id_handle.get_id()}
+      node_cmp_mh = node_cmp_id_handles.first.createMH
+      node_cmp_wc = {:ancestor_id => ng_cmp_id_handle.get_id()}
       node_cmp_fs = FieldSet.opt([:id])
       node_cmp_ds = get_objects_just_dataset(node_cmp_mh,node_cmp_wc,node_cmp_fs)
 
-      node_attr_mh = node_cmp_mh.create_childMH(:attribute)
-      node_attr_fs = FieldSet.opt([:component_component_id,:id,:ref])
-      node_attr_ds = get_objects_just_dataset(node_attr_mh,nil,node_attr_fs)
+      attr_mh = node_cmp_mh.create_childMH(:attribute)
 
-      group_attr_wc = {:component_component_id => cmp_id_handle.get_id()}
+      attr_parent_col = attr_mh.parent_id_field_name()
+      node_attr_fs = FieldSet.opt([attr_parent_col,:id,:ref])
+      node_attr_ds = get_objects_just_dataset(attr_mh,nil,node_attr_fs)
+
+      group_attr_wc = {attr_parent_col => ng_cmp_id_handle.get_id()}
       group_attr_fs = FieldSet.opt([:id,:ref])
-      group_attr_ds = get_objects_just_dataset(ModelHandle.new(c,:attribute),group_attr_wc,group_attr_fs)
+      group_attr_ds = get_objects_just_dataset(attr_mh,group_attr_wc,group_attr_fs)
 
-      graph = node_cmp_ds.graph(:inner,node_attr_ds,{:component_component_id => :id}).graph(:inner,group_attr_ds,{:ref => :ref})
-      attr_link_ds = graph.select('attribute_link',:attribute2__id,:attribute__id)
-      #TODO: must also put in parent_relation
-      attr_link_mh = parent_id_handle.create_childMH(:attribute_link)
+      #TODO: must make sure not adding same ref/parent pair twice
+      ref = "attribute_link"
+      i1_ds = node_cmp_ds.select({"attribute_link" => :ref},{:input__id => :input_id},{:output__id => :output_id})
+      first_join_ds = i1_ds.join_table(:inner,node_attr_ds,{attr_parent_col => :id},{:table_alias => :input})
+      attr_link_ds = first_join_ds.join_table(:inner,group_attr_ds,[:ref],{:table_alias => :output})
+
+      #attribute link has same parent as node_group
+      attr_link_mh = node_group_id_handle.create_peerMH(:attribute_link)
       attr_link_fs = FieldSet.new([:ref,:input_id,:output_id])
-      create_from_select(attr_link_mh,attr_link_fs,attr_link_ds,{:duplicate_refs => :no_check}
+      override_attrs = {}
+      create_from_select(attr_link_mh,attr_link_fs,attr_link_ds,override_attrs,{:duplicate_refs => :no_check})
       #TODO: links for monitor_items
 =end
     end

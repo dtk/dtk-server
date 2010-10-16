@@ -108,12 +108,18 @@ module XYZ
       include DatatsetGraphMixin
       #TODO: needed to fully qualify Dataset; could this constraint be removed? by chaging expose?
       post_hook = "lambda{|x|XYZ::SQL::Dataset.new(model_handle,x)}"
-      expose_methods_from_internal_object :sequel_ds, %w{where}, :post_hook => post_hook
+      expose_methods_from_internal_object :sequel_ds, %w{where select}, :post_hook => post_hook
       expose_methods_from_internal_object :sequel_ds, %w{sql}
       def initialize(model_handle,sequel_ds)
         @model_name_info = [ModelNameInfo.new(model_handle[:model_name])]
         @sequel_ds = sequel_ds
         @c = model_handle[:c]
+      end
+
+      def join_table(join_type,right_ds,join_conditions=true,opts={})
+        sequel_join = @sequel_ds.join_table(join_type,right_ds.sequel_ds,join_conditions,opts)
+        model_handle = ModelHandle.new(@c,:join_table)
+        Dataset.new(model_handle,sequel_join)
       end
 
       def all()
@@ -136,15 +142,14 @@ module XYZ
 
     #creates a table dataset from rows, which is array with each element being a hash; each row has same keys
     class ArrayDataset < Dataset
-      def self.create(db,rows,aliaz=:t1)
+      def self.create(db,rows,model_handle)
         return nil if rows.empty?
-        ArrayDataset.new(db,rows,aliaz)
+        ArrayDataset.new(db,rows,model_handle)
       end
      private
-      def initialize(db,rows,aliaz)
+      def initialize(db,rows,model_handle)
         raise Error.new("ArrayDataset.new called with rows being empty") if rows.empty?
-        #TODO: artficicial setting of ModelHandle
-        model_handle = ModelHandle.new(0, aliaz)
+        aliaz = model_handle[:model_name]
         empty_sequel_ds = db.empty_dataset()
         sequel_ds = nil
         if db.respond_to?(:ret_array_dataset)

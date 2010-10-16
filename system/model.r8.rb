@@ -49,7 +49,7 @@ module XYZ
       parent_assignment = {model_handle.parent_id_field_name() => parent_idh.get_id()}
       #TODO: need to do any needed special processing for column types
       rows_with_parent = rows.map{|row|row.merge(parent_assignment)}
-      select_ds = SQL::ArrayDataset.create(db,rows_with_parent)
+      select_ds = SQL::ArrayDataset.create(db,rows_with_parent,ModelHandle.new(model_handle[:c],:array_dataset))
       override_attrs = {}
       create_opts = {} #TODO: stub
       field_set = FieldSet.new(rows.first.keys)

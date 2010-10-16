@@ -24,6 +24,7 @@ module XYZ
     #targets is a list of id_handles, each with same model_name 
     def clone_copy(source_id_handle,targets,recursive_override_attrs={},opts={})
       #TODO: facttor back in functionality that clone_helper provided for non-parent foreign keys that may point to what is cloned
+      #TODO: in this fn and helper one see if can substitute join_table for graph
       return Array.new if targets.empty?
 
       source_model_name = source_id_handle[:model_name]
@@ -37,7 +38,7 @@ module XYZ
       target_parent_id_col = target_model_handle.parent_id_field_name()
 
       targets_rows = targets.map{|id_handle|{target_parent_id_col => id_handle.get_id()}}
-      targets_ds = SQL::ArrayDataset.create(db,targets_rows,:target)
+      targets_ds = SQL::ArrayDataset.create(db,targets_rows,ModelHandle.new(source_id_handle[:c],:target))
 
       source_wc = {:id => source_id_handle.get_id()}
 
@@ -67,7 +68,7 @@ module XYZ
       child_parent_id_col = child_model_handle.parent_id_field_name()
 
       targets_wc = targets.map{|id_handle|{child_parent_id_col => id_handle.get_id()}}
-      targets_ds = SQL::ArrayDataset.create(db,targets_wc,:target)
+      targets_ds = SQL::ArrayDataset.create(db,targets_wc,ModelHandle.new(base_id_handle[:c],:target))
 
       field_set_to_copy = Model::FieldSet.all_real(child_model_name).remove_cols(:id,:local_id)
       child_wc = {child_parent_id_col => base_id_handle.get_id()}

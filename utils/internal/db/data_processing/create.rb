@@ -23,7 +23,7 @@ module XYZ
       def create_from_select(model_handle,field_set,select_ds,override_attrs={},opts={})
         duplicate_refs = opts[:duplicate_refs] || :allow #other alternatives: #:no_check | :error_on_duplicate | :prune_duplicates
         columns = field_set.cols
-        sequel_select = select_ds.sequel_ds.ungraphed
+        sequel_select = select_ds.sequel_ds.ungraphed.from_self #ungraphed and from_self just to be safe
         #add :c if not present
         unless columns.include?(:c)
           sequel_select = sequel_select.select(*columns).select_more(model_handle[:c] => :c).from_self

@@ -1,4 +1,14 @@
 <br/><br/>
+
+<form id="search-form" action="{%=base_uri%}/xyz/{%=model_name%}/list" method="post" enctype="multipart/form-data">
+<input type="submit" value="Search"/>
+<table border="0">
+	<tr>
+		<td>Name</td><td><input type="text" size="30" name="display_name"/></td>
+	</tr>
+</table>
+</form>
+
 <div class="list_container">
 <!--
 	<div style="width: 100%;">

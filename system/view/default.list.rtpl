@@ -10,15 +10,15 @@
 </form>
 
 <div class="list_container">
-<!--
+
 	<div style="width: 100%;">
 		<div style="float: right; margin-right: 10px;">
-		<a href="javascript:R8.ctrl.request('{%=model_name%}/list?listStart={%=list_start_prev_var%}');">&lt;-Prev</a>
+		<a href="{%=base_uri%}/xyz/{%=model_name%}/list?query_params={'start':'{%=list_start_prev_var%}'}">Prev</a>
 		&nbsp;&nbsp;&nbsp;&nbsp;
-		<a href="javascript:R8.ctrl.request('{%=model_name%}/list?listStart={%=list_start_next_var%}');">Next-&gt;</a>
+		<a href="{%=base_uri%}/xyz/{%=model_name%}/list?query_params={'start':'{%=list_start_next_var%}'}">Next</a>
 		</div>
 	</div>
--->
+
 	<div>
 	<table class="list">
 	<tr id="{%=model_name%}-{%=view_name%}-header-row">

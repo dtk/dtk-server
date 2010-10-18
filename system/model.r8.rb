@@ -73,7 +73,7 @@ module XYZ
           right_ds = @db.get_objects_just_dataset(ModelHandle.new(c,join_info[:model_name]),nil,rs_opts)
           graph_ds = graph_ds.graph(:left_outer,right_ds,join_info[:join_cond])
         end
-        graph_ds = graph_ds.order(opts[:order_by]) if opts[:order_by]
+        graph_ds = graph_ds.paging_and_order(opts)
         ret = graph_ds.all
       end
       ret

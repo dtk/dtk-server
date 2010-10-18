@@ -175,8 +175,8 @@ module XYZ
         @c = c
       end
 
-      def order(order_by_opt)
-        sequel_ds = DB.ret_order_added_to_dataset(@sequel_ds,order_by_opt)
+      def paging_and_order(opts)
+        sequel_ds = DB.ret_paging_and_order_added_to_dataset(@sequel_ds,opts)
         Graph.new(sequel_ds,@model_name_info,@c)
       end
 

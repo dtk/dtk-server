@@ -21,14 +21,25 @@ module XYZ
     include Associations unless included_modules.include?(Associations)
     include RestURI unless included_modules.include?(RestURI)
 
-    def self.ret_order_added_to_dataset(ds,order_by_opt)
+    def self.ret_paging_and_order_added_to_dataset(ds,opts)
       ret = ds
-      order_by_opt.each do |order_by_el|
-        #TBD: check that it is legal field
-        col = order_by_el[:field]
-        next unless col
-        dir = order_by_el[:order] == "DESC" ? "DESC" : "ASC"
-        ret = dir == "ASC" ? ds.order(col) : ds.reverse_order(col)
+      order_by_opts = opts[:order_by]
+      if order_by_opts
+        order_by_opts.each do |order_by_el|
+          #TBD: check that it is legal field
+          col = order_by_el[:field]
+          next unless col
+          dir = order_by_el[:order] == "DESC" ? "DESC" : "ASC"
+          ret = dir == "ASC" ? ds.order(col) : ds.reverse_order(col)
+        end
+      end
+      paging_opts =  opts[:page]
+      if paging_opts
+        if paging_opts[:limit] and  paging_opts[:start]
+          ret = ret.limit(paging_opts[:limit],paging_opts[:start])
+        elsif paging_opts[:limit]
+          ret = ret.limit(paging_opts[:limit])
+        end
       end
       ret
     end

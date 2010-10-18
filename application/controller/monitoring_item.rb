@@ -25,7 +25,7 @@ module XYZ
       tpl.assign("#{model_name()}_list",model_list)
       tpl.assign(:list_start_prev, 0)
       tpl.assign(:list_start_next, 0)
-
+      tpl.assign(:_app,_app)
       return {:content => tpl.render()}
     end
   end

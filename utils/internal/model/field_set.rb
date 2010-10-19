@@ -1,10 +1,13 @@
+require File.expand_path('field_search_pattern', File.dirname(__FILE__))
 module XYZ
   module FieldSetInstanceMixin
     class FieldSet
+      extend FieldSearchPatternInstanceMixin
       attr_reader :cols
       #TODO: so fieldset can be more advanced than array of scalrs; can have netsed structure
-      def initialize(cols=Array.new)
-       @cols = cols 
+      def initialize(cols=Array.new,field_search_pattern=nil)
+        @cols = cols 
+        @field_search_pattern = field_search_pattern
       end
 
       def include_col?(col)
@@ -38,6 +41,10 @@ module XYZ
         ret.empty? ? nil : ret
       end
 
+      def ret_where_clause_for_search_string(name_value_pairs)
+        @field_search_pattern ? @field_search_pattern.ret_where_clause_for_search_string(name_value_pairs) : {}
+      end          
+
       #field set in option list
       def self.opt(x)
         field_set = 
@@ -50,6 +57,7 @@ module XYZ
           end
         {:field_set => field_set}
       end
+
      private
       def convert_to_dependencies(model_name,possible_parents)
         return nil if possible_parents.nil?
@@ -95,6 +103,12 @@ module XYZ
           end
         end
 
+        def real_cols_with_types(model_name)
+          db_rel = DB_REL_DEF[model_name]
+          db_rel_cols = db_rel[:columns].inject({}){|h,kv|h.merge(kv[0] => kv[1][:type])}
+          COMMON_REL_COLUMNS.inject(db_rel_cols){|h,kv|h.merge(kv[0] => kv[1][:type])}
+        end
+
        private
 
         def ret_fieldset(model_name_x,col_type,&block)
@@ -103,7 +117,7 @@ module XYZ
           Fieldsets[col_type] ||= Hash.new
           col_info = Fieldsets[col_type]
           return col_info[model_name] if col_info[model_name]
-          col_info[model_name] = FieldSet.new(block.call(db_rel))
+          col_info[model_name] = FieldSet.new(block.call(db_rel),FieldSearchPattern.new(model_name,self))
         end
 
         #TBD: may instead put in DB_REL_DEF

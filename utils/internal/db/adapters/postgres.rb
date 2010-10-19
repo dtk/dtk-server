@@ -20,7 +20,7 @@ module XYZ
       sql = ds.update_sql(update_set_clause)
       sql << " RETURNING " + returning_list.map do |x| 
         if x.kind_of?(Hash) 
-          @db.literal(x.keys.first).as(x.values.first)
+          "#{@db.literal(x.keys.first)} AS #{x.values.first}"
         else
           @db.literal(x)
         end

@@ -34,6 +34,28 @@ module XYZ
         many_to_one :component, :node
       end
     end
+    ### virtual column defs
+    def member_id_list()
+      (self[:node]||[]).map{|n|n[:id]}
+    end
+    #######################
+    ### object procssing and access functions
+
+    def self.update_from_hash_assignments(id_handle,hash_assigns,opts={})
+      Model.update_from_hash_assignments(id_handle,hash_assigns,opts)
+      changed_values = hash_assigns #TODO: stub to check if actual changes (in contrast to hahs_assignment that sets to same value
+      return nil if changed_values.empty?
+      pending_item_parent_idh = id_handle.get_top_container_id_handle(:datacenter)
+      pending_id_handle = PendingChangeItem.create_item(id_handle,pending_item_parent_idh)
+      propagate_changes([AttributeChange.new(id_handle,changed_values,pending_id_handle)]) if pending_id_handle
+    end
+
+    def self.propagate_changes(attr_changes) 
+      new_changes = AttributeLink.propagate_over_directly_conn_links(attr_changes)
+    end
+
+
+    ##TODO: need to go over each one below to see what we still should use
 
     ###### helper fns
     def check_and_set_derived_relation!()

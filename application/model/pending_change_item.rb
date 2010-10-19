@@ -12,7 +12,7 @@ module XYZ
       foreign_key :component_id, :component, FK_CASCADE_OPT
 
       #NOTE: may have here who, when
-      many_to_one :datacenter, :pending_change_item, :library, :project #TODO: library and project just included temporarily for testing
+      many_to_one :datacenter, :pending_change_item
       one_to_many :pending_change_item #nested items show when one change triggers other changes
     end
     ### virtual column defs
@@ -22,8 +22,9 @@ module XYZ
     def self.create_item(new_id_handle,parent_id_handle)
       create_items([new_id_handle],parent_id_handle).first
     end
+
     def self.create_items(new_id_handles,parent_id_handle)
-      return nil if new_id_handles.empty?
+      return nil if new_id_handles.empty? or  parent_id_handle.nil?
       model_handle = parent_id_handle.createMH({:model_name => :pending_change_item, :parent_model_name => parent_id_handle[:model_name]})
       object_model_name = new_id_handles.first[:model_name]
       object_id_col = "#{object_model_name}_id".to_sym
@@ -42,6 +43,14 @@ module XYZ
         }
       end
       create_from_rows(model_handle,rows,parent_id_handle)
+    end
+  end
+  class AttributeChange 
+    attr_reader :id_handle,:changed_values,:pending_id_handle
+    def initialize(id_handle,changed_values,pending_id_handle)
+      @id_handle = id_handle
+      @changed_values = changed_values
+      @pending_id_handle = pending_id_handle
     end
   end
 end

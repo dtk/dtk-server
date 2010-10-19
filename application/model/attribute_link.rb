@@ -2,29 +2,39 @@ module XYZ
   class AttributeLink < Model
     set_relation_name(:attribute,:link)
 
-    class << self
-      def up()
-        foreign_key :input_id, :attribute, FK_CASCADE_OPT
-        foreign_key :output_id, :attribute, FK_CASCADE_OPT
-        column :label, :text, :default => "1"
-        has_ancestor_field()
-        many_to_one :library, :datacenter, :component, :project
-      end
+    def self.up()
+      foreign_key :input_id, :attribute, FK_CASCADE_OPT
+      foreign_key :output_id, :attribute, FK_CASCADE_OPT
+      column :label, :text, :default => "1"
+      has_ancestor_field()
+      many_to_one :library, :datacenter, :component, :project
+    end
 
-      ### "Model fns"
-      def get_legal_connections(parent_id_handle)
-        c = parent_id_handle[:c]
-        parent_id = IDInfoTable.get_id_from_id_handle(parent_id_handle)
-        component_ds = get_objects_just_dataset(ModelHandle.new(c,:component),nil,{:parent_id => parent_id}.merge(FieldSet.opt([:id,:external_ref])))
-        attribute_ds = get_objects_just_dataset(ModelHandle.new(c,:attribute),nil,FieldSet.opt([:id,:external_ref,:component_component_id]))
+    #######################
+    ### object procssing and access functions
+    def self.propagate_over_directly_conn_links(attr_changes)
+      #build up pattern that traces from root id_handles in changes pending to directly connected links
+      return Array.new if attr_changes.empty?
+      attr_link_mh = attr_changes.first.id_handle.createMH(:model_name => :attribute_link)
+      attr_link_wc = SQL.or(*attr_changes.map{|change|{:input_id => change.id_handle.get_id()}})
+      attr_link_fs = FieldSet.opt([:output_id])
+      attr_link_ds = get_objects_just_dataset(attr_link_mh,attr_link_wc,attr_link_fs)
+    end
 
-        attribute_link_ds = get_objects_just_dataset(ModelHandle.new(c,:attribute_link))
-        component_ds.graph(:inner,attribute_ds,{:component_component_id => :id}).graph(:left_outer,attribute_link_ds,{:input_id => :id}).where({:attribute_link__id => nil}).all
-      end
+    def self.get_legal_connections(parent_id_handle)
+      c = parent_id_handle[:c]
+      parent_id = IDInfoTable.get_id_from_id_handle(parent_id_handle)
+      component_ds = get_objects_just_dataset(ModelHandle.new(c,:component),nil,{:parent_id => parent_id}.merge(FieldSet.opt([:id,:external_ref])))
+      attribute_ds = get_objects_just_dataset(ModelHandle.new(c,:attribute),nil,FieldSet.opt([:id,:external_ref,:component_component_id]))
 
-      def get_legal_connections_wrt_endpoint(attribute_id_handle,parent_id_handle)
-      end
-      ##### Actions
+      attribute_link_ds = get_objects_just_dataset(ModelHandle.new(c,:attribute_link))
+      component_ds.graph(:inner,attribute_ds,{:component_component_id => :id}).graph(:left_outer,attribute_link_ds,{:input_id => :id}).where({:attribute_link__id => nil}).all
+    end
+
+    def self.get_legal_connections_wrt_endpoint(attribute_id_handle,parent_id_handle)
+    end
+
+    ##### Actions
 =begin TODO: needs fixing up or removal
       def create(target_id_handle,input_id_handle,output_id_handle,href_prefix,opts={})
         raise Error.new("Target location (#{target_id_handle}) does not exist") unless exists? target_id_handle
@@ -49,6 +59,7 @@ module XYZ
 =end
       #returns function if can determine from semantic type of input and output
       #throws an error if finds a mismatch
+    class << self
       def ret_function_if_can_determine(input_obj,output_obj)
         i_sem = input_obj[:semantic_type]
         return nil if i_sem.nil?

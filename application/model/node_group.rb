@@ -14,13 +14,14 @@ module XYZ
     end
     #######################
     ### object procssing and access functions
-    #object processing and access functions
     def self.clone_post_copy_hook(new_id_handle,target_id_handle,opts={})
 
       #create a change pending item associated with component created on the node group adn returns its id (so it can be
       # used as parent to change items for components on all the node groups memebrs
-      parent_id_handle = target_id_handle.get_parent_id_handle()
-      pending_id_handle = PendingChangeItem.create_item(new_id_handle,parent_id_handle)
+      #get_top_container_id_handle(:datacenter) will return nil if top is not a datacenter which wil in turn make PendingChangeItem
+      #a no-op; this is desired only having pending objects in datacenter, not library
+      pending_item_parent_idh = target_id_handle.get_top_container_id_handle(:datacenter)
+      pending_id_handle = PendingChangeItem.create_item(new_id_handle,pending_item_parent_idh)
       case new_id_handle[:model_name]
        when :component
         clone_post_copy_hook_component(new_id_handle,target_id_handle,pending_id_handle,opts)
@@ -82,8 +83,8 @@ module XYZ
          {attr_link_parent_id_handle.get_id() => attr_link_parent_col},
          {:input__id => :input_id},
          {:output__id => :output_id})
-      first_join_ds = i1_ds.join_table(:inner,node_attr_ds,{attr_parent_col => :id},{:table_alias => :input})
-      attr_link_ds = first_join_ds.join_table(:inner,group_attr_ds,[:ref],{:table_alias => :output})
+      first_join_ds = i1_ds.join_table(:inner,node_attr_ds,{attr_parent_col => :id},{:table_alias => :output})
+      attr_link_ds = first_join_ds.join_table(:inner,group_attr_ds,[:ref],{:table_alias => :input})
 
       attr_link_fs = FieldSet.new([:ref,attr_link_parent_col,:input_id,:output_id])
       override_attrs = {}

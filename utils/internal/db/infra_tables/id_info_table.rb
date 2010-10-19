@@ -58,11 +58,25 @@ module XYZ
       (IDInfoTable.get_row_from_id_handle(self,:short_circuit_for_minimal_row => true)||{})[:id]
     end
 
+    def get_uri()
+      self[:uri] || IDInfoTable.get_row_from_id_handle(self)[:uri]
+    end
+
     def get_parent_id_handle()
       c = self[:c]
       id_info = IDInfoTable.get_row_from_id_handle(self)
       return nil unless id_info and id_info[:parent_id] 
       IDHandle[:c => c, :id => id_info[:parent_id], :model_name => id_info[:parent_relation_type]]
+    end
+
+    #returns nil if model_name given and top does not mactch it
+    def get_top_container_id_handle(model_name=nil)
+      uri = get_uri()
+      top_model_name = RestURI.ret_top_container_relation_type(uri)
+      return nil if model_name and not model_name == top_model_name
+      c = self[:c]
+      top_container_uri = RestURI.ret_top_container_uri(uri)
+      IDHandle[:c => c, :model_name => top_model_name, :uri => top_container_uri]
     end
 
     def get_parent_id_info()

@@ -20,6 +20,15 @@ module XYZ
           [$2,$1] : nil
       end
 
+      def ret_top_container_relation_type(uri)
+        uri =~ %r{^/([^/]+)}
+        $1.to_sym
+      end
+      def ret_top_container_uri(uri)
+        uri =~ %r{^(/[^/]+/[^/]+)/}
+        $1
+      end
+
       def ret_relation_type_from_instance_uri(instance_uri)
         instance_ref,factory_uri = parse_instance_uri(instance_uri)
         return nil if factory_uri.nil?

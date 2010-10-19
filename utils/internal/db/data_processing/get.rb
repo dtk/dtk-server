@@ -158,6 +158,8 @@ module XYZ
        
       def ret_dataset_with_scalar_columns(db_rel,opts={})
         #if opts[:field_set] then this is taken as is as the selected columns 
+        return dataset(db_rel) if opts[:field_set] and opts[:field_set].kind_of?(Model::FieldSetAll)
+
         select_cols = nil
         if opts[:field_set]
           select_cols = (opts[:field_set] & Model::FieldSet.all_real(db_rel[:relation_type])).cols

@@ -3,6 +3,20 @@ require 'sequel'
 module XYZ
   class DB
     module DataProcessingUpdate
+
+      def update_from_select(model_handle,field_set,select_ds,opts={})
+        columns = field_set.cols
+        #TODO: right now need to hardwire to t1 for this to work; although alias set with this var; adding where clause puts t1 in
+        select_prefix = :t1
+        update_table_prefix = :update_table
+#        sequel_select = select_ds.sequel_ds.ungraphed.from_self(:alias => select_prefix) #ungraphed and from_self just to be safe
+        sequel_select = select_ds.sequel_ds.ungraphed.from_self #ungraphed and from_self just to be safe
+        db_rel = DB_REL_DEF[model_handle[:model_name]]
+        update_ds = dataset(db_rel,update_table_prefix,sequel_select).where("#{update_table_prefix}__id".to_sym => "#{select_prefix}__id".to_sym)
+        update_set_clause = columns.inject({}){|hash,col| hash.merge(col => "#{select_prefix}__#{col}".to_sym)}
+        update_ds.update(update_set_clause)
+      end
+
       #TODO Enable short circuit that conditionally avoids IDInfoTable
       #returns list of created uris
       def update_from_hash_assignments(id_handle,hash_assigns,opts={})

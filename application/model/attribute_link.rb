@@ -24,11 +24,12 @@ module XYZ
       output_attr_mh = attr_link_mh.createMH(:model_name => :attribute)
       #condition is to prune out attributes on output side that have asserted values
       output_attr_wc = {:value_asserted => nil}
-      output_attr_fs = FieldSet.opt([:id,:value_derived])
+      output_attr_fs = FieldSet.opt([:c,:id,:value_derived])
       output_attr_ds = get_objects_just_dataset(output_attr_mh,output_attr_wc,output_attr_fs)
 
       join_cond = {:id => :output_id}
       attrs_to_change_ds = attr_link_ds.join_table(:inner,output_attr_ds,join_cond)
+      update_from_select(output_attr_mh,FieldSet.new([:value_derived]),attrs_to_change_ds)
       nil
     end
 

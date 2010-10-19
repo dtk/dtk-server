@@ -14,13 +14,17 @@ module XYZ
           basic_type = @col_basic_types[name]
           next unless basic_type
           new_el = 
-            case basic_type
-             when :string
-              SQL::WhereCondition.like(name,"#{value}%")
-             when :numeric
-              process_numeric(name,value)
-             when :boolean
-              {name => (value == 1 or value == "1") ? true : false}
+            if value == "UNSET"
+              {name => nil}
+            else
+              case basic_type
+               when :string
+                SQL::WhereCondition.like(name,"#{value}%")
+               when :numeric
+                process_numeric(name,value)
+               when :boolean
+                {name => (value == 1 or value == "1") ? true : false}
+              end
           end
           ret = SQL.and(ret,new_el)
         end

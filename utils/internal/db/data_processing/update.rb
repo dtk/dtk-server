@@ -14,7 +14,19 @@ module XYZ
         db_rel = DB_REL_DEF[model_handle[:model_name]]
         update_ds = dataset(db_rel,update_table_prefix,sequel_select).where("#{update_table_prefix}__id".to_sym => "#{select_prefix}__id".to_sym)
         update_set_clause = columns.inject({}){|hash,col| hash.merge(col => "#{select_prefix}__#{col}".to_sym)}
-        update_ds.update(update_set_clause)
+
+        unless opts[:returning_list] 
+          update_ds.update(update_set_clause)
+          return nil
+        end
+        unless respond_to?(:update_returning_sql)
+          raise Error.new("have not implemented update_from_select with returning opt")
+        end
+        ret_list_prefixed = opts[:returning_list].map{|x|x.kind_of?(Hash) ? {"#{select_prefix}__#{x.keys.first}".to_sym => x.values.first} : "#{select_prefix}__#{x}".to_sym}
+        sql = update_returning_sql(update_ds,update_set_clause,ret_list_prefixed)
+        ret = Array.new
+        fetch_raw_sql(sql){|row| ret << row}
+        ret
       end
 
       #TODO Enable short circuit that conditionally avoids IDInfoTable

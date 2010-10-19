@@ -34,7 +34,7 @@ module XYZ
 
       first_join_ds = input_attr_ds.select({:id => :input_id},{:value_asserted => :value_derived}).from_self.join_table(:inner,attr_link_ds,[:input_id]) 
       attrs_to_change_ds = first_join_ds.join_table(:inner,output_attr_ds,{:id => :output_id})
-      update_from_select(output_attr_mh,FieldSet.new([:value_derived]),attrs_to_change_ds)
+pp      x=update_from_select(output_attr_mh,FieldSet.new([:value_derived]),attrs_to_change_ds, {:returning_list => [:id,:value_derived]})
       nil
     end
 

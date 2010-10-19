@@ -16,6 +16,18 @@ module XYZ
       ds.select(::Sequel::LiteralString.new(sql))
     end
 
+    def update_returning_sql(ds,update_set_clause,returning_list)
+      sql = ds.update_sql(update_set_clause)
+      sql << " RETURNING " + returning_list.map do |x| 
+        if x.kind_of?(Hash) 
+          @db.literal(x.keys.first).as(x.values.first)
+        else
+          @db.literal(x)
+        end
+      end.join(",")
+      sql
+    end
+
     def setup_infrastructure_extras()
       create_language?(:plpgsql) # needed for triggers
       create_function_zzz_ret_id?()

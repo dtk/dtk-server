@@ -22,18 +22,18 @@ class FieldR8
         field_meta[:options] = self.get_field_options(field_meta)
       when "multiselect"
         #if view of type edit add the []'s to allow for array to be returned in request for mult selects
-        if(view_type == 'edit') then field_meta[:name] << '[]' end
-        field_meta[:options] = self.getFieldOptions(field_meta)
+        field_meta[:options] = self.get_field_options(field_meta)
+        if(view_type == 'edit' || view_type == 'search') then field_meta[:name] << '[]' end
 #TODO: enhance this once profiles are implemented
-          load_field_file "field.select.rb"
+        load_field_file "field.select.rb"
     end
 
 #TODO: enhance this once profiles are implemented
     load_field_file "field.#{field_meta[:type]}.rb"
     fieldClass = 'Field' + field_meta[:type]
-     #TBD: if wrapped in modeule M use form M.const_get
-     field_obj = Kernel.const_get(fieldClass).new(field_meta)
-     field_obj.set_includes(@r8_view_ref)
+#TBD: if wrapped in modeule M use form M.const_get
+    field_obj = Kernel.const_get(fieldClass).new(field_meta)
+    field_obj.set_includes(@r8_view_ref)
 
     return field_obj.render(view_type, renderMode)
   end
@@ -62,6 +62,7 @@ class FieldR8
     options_lists = get_model_options(field_meta[:model_name])
 #TODO: decide if list should just be key'd off of name, or a :options value?
     options = options_lists[field_meta[:name].to_sym]
+
 =begin
     options = {
 #      '' => '--None--',

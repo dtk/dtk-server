@@ -1,6 +1,14 @@
 <br/><br/>
 
-{%=search_content%}
+<form id="{%=model_name%}-search-form" action="{%=base_uri%}/xyz/{%=model_name%}/list" method="post" enctype="multipart/form-data">
+<input type="submit" value="Search"/>
+<input type="hidden" name="query_params" id="query_params" value=""/>
+<table border="0">
+	<tr>
+		<td>Name</td><td><input type="text" size="30" name="display_name" value=""/></td>
+	</tr>
+</table>
+</form>
 
 <div class="list_container">
 
@@ -11,7 +19,7 @@
 		<a href="javascript:R8.Search.page('{%=model_name%}',{%=list_start_next_var%});">Next</a>
 		</div>
 	</div>
-
+	
 	<div>
 	<table class="list">
 	<tr id="{%=model_name%}-{%=view_name%}-header-row">

@@ -45,9 +45,11 @@ class Fieldbase
         return self.get_field_display
       when "list" then
         return self.get_field_list
+      when "search" then
+        return (defined? self.get_field_search) ? self.get_field_search : self.get_field_edit
       #if getting to default then its calling a custom view
       else
-        cstm_view_method = 'getField_'+ view_type
+        cstm_view_method = 'get_field_'+ view_type
         return self.send(cstm_view_method.to_sym)
     end
   end
@@ -58,7 +60,7 @@ class Fieldbase
         field_string = self.get_field_edit_html()
       when "js" then
         field_string = self.get_field_edit_js()
-#     when "tpl" then
+#     when "rtpl" then
       else
         field_string = self.get_field_edit_rtpl()
     end

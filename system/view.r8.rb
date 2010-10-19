@@ -206,6 +206,7 @@ OLD
 
     r8TPL.assign(:model_name, @model_name)
     r8TPL.assign(:base_uri, '{%=_app[:base_uri]%}')
+    r8TPL.assign(:search_content,'{%=search_content%}')
     r8TPL.assign(:view_name, @view_name)
     #TODO: is this right?
     r8TPL.assign(:th_row_class,  @model_name)
@@ -494,15 +495,14 @@ OLD
     end
   end
 
-  # This function will generate the TPL cache for a view of type edit
   def render_search_tpl_cache()
-#TODO: can probably move most of this function to a general function call
-#and re-use between render_view_js_cache and renderViewHTML
     field_handler = FieldR8.new(self)
     r8TPL = R8Tpl::TemplateR8.new("#{@model_name}/#{@view_name}",@user,:system)
     r8TPL.js_templating_on = false   #template engine should catch non JS automatically, but forcing to be sure
 
 #    i18n = utils.get_model_i18n(@model_name)
+    r8TPL.assign(:model_name, @model_name)
+    r8TPL.assign(:base_uri, '{%=_app[:base_uri]%}')
     r8TPL.assign(:formId, @form_id)
     r8TPL.assign(:formAction, view_meta[:action])
 
@@ -572,7 +572,7 @@ OLD
             rows[row_count][:cols][col_index] = Hash.new
             #do field
             rows[row_count][:cols][col_index][:col_id] = field_meta[:name].to_s+"-field"
-            rows[row_count][:cols][col_index][:content] = field_handler.get_field(view_type(), field_meta, 'tpl')
+            rows[row_count][:cols][col_index][:content] = field_handler.get_field(view_type(), field_meta, 'rtpl')
             rows[row_count][:cols][col_index][:class] = td_field_class
           end
         end

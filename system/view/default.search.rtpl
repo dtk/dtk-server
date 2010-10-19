@@ -1,0 +1,17 @@
+<div class="search_container">
+	<form id="{%=model_name%}-search-form" action="{%=base_uri%}/xyz/{%=model_name%}/list" method="post" enctype="multipart/form-data">
+	<input type="submit" value="Search"/>
+	{%for field in h_field_list%}
+		<input type="hidden" name="{%=field[:name]%}" id="{%=field[:id]%}" value="{%=field[:value]%}" />
+	{%end%}
+	<table class="edit">
+	{%for row in rows%}
+		<tr id="{%=row[:rowId]%}">
+			{%for col in row[:cols]%}
+				<td id="{%=col[:colId]%}" class="{%=col[:class]%}">{%=col[:content]%}</td>
+			{%end%}
+		</tr>
+	{%end%}
+	</table>
+	</form>
+</div>

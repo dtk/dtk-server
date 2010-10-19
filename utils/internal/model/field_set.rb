@@ -3,8 +3,8 @@ module XYZ
     class FieldSet
       attr_reader :cols
       #TODO: so fieldset can be more advanced than array of scalrs; can have netsed structure
-      def initialize(cols)
-       @cols = cols || Array.new
+      def initialize(cols=Array.new)
+       @cols = cols 
       end
 
       def include_col?(col)
@@ -40,7 +40,14 @@ module XYZ
 
       #field set in option list
       def self.opt(x)
-        field_set = x.kind_of?(Array) ? FieldSet.new(x) : x
+        field_set = 
+          if x.kind_of?(Symbol) and x == :all
+            FieldSetAll.new()
+          elsif x.kind_of?(Array) 
+            FieldSet.new(x) 
+          else
+            x
+          end
         {:field_set => field_set}
       end
      private
@@ -119,6 +126,21 @@ module XYZ
         def virtual_settable_cols(db_rel)
           (db_rel[:virtual_columns]||[]).map{|vc,vc_info|vc if vc_info[:path]}.compact 
         end
+      end
+    end
+    class FieldSetAll < FieldSet
+      def initalize()
+        super(Array.new)
+      end
+      def include_col?(col)
+        true
+      end
+      def add_cols(*cols)
+      end
+      def remove_cols(*cols)
+      end
+      def &(field_set)
+        FieldSet.new(field_set.cols)
       end
     end
   end

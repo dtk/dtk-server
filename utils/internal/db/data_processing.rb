@@ -25,10 +25,16 @@ module XYZ
         @db.dataset()
       end
 
+      def convert_from_object_to_db_form!(model_handle,scalar_assigns,sql_operation,opts={})
+        db_rel = DB_REL_DEF[model_handle[:model_name]]
+        modify_to_reflect_special_processing!(scalar_assigns,db_rel,sql_operation,opts)
+      end
+
      private
       def fetch_raw_sql(sql,&block)
         @db.fetch(sql,&block)
       end
+
 
       def modify_to_reflect_special_processing!(scalar_assigns,db_rel,sql_operation,opts={})
         if opts[:shift_id_to_ancestor] and db_rel[:has_ancestor_field]

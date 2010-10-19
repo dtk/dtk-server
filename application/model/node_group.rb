@@ -54,7 +54,8 @@ module XYZ
 
       #create pending_change items for all the components created on the nodes; the
       #pending change item generated for the node group component is their parents
-      PendingChangeItem.create_items(node_cmp_id_handles,pending_id_handle)
+      new_items = node_cmp_id_handles.map{|idh|{:new_item => idh, :parent => pending_id_handle}}
+      PendingChangeItem.create_items(new_items)
 
       #put in attribute links, linking attributes attached to component ng_cmp_id_handle
 

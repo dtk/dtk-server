@@ -46,10 +46,10 @@ module XYZ
     end
   end
   class AttributeChange 
-    attr_reader :id_handle,:changed_values,:pending_id_handle
-    def initialize(id_handle,changed_values,pending_id_handle)
+    attr_reader :id_handle,:changed_value,:pending_id_handle
+    def initialize(id_handle,changed_value,pending_id_handle)
       @id_handle = id_handle
-      @changed_values = changed_values
+      @changed_value = changed_value
       @pending_id_handle = pending_id_handle
     end
   end

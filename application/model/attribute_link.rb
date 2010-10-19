@@ -12,13 +12,24 @@ module XYZ
 
     #######################
     ### object procssing and access functions
-    def self.propagate_over_directly_conn_links(attr_changes)
+    def self.propagate_over_dir_conn_equality_links(attr_changes)
       #build up pattern that traces from root id_handles in changes pending to directly connected links
       return Array.new if attr_changes.empty?
+      #first put in relation that traces along attribute link from output matching an idhandle in changes to inputs
       attr_link_mh = attr_changes.first.id_handle.createMH(:model_name => :attribute_link)
       attr_link_wc = SQL.or(*attr_changes.map{|change|{:input_id => change.id_handle.get_id()}})
       attr_link_fs = FieldSet.opt([:output_id])
       attr_link_ds = get_objects_just_dataset(attr_link_mh,attr_link_wc,attr_link_fs)
+
+      output_attr_mh = attr_link_mh.createMH(:model_name => :attribute)
+      #condition is to prune out attributes on output side that have asserted values
+      output_attr_wc = {:value_asserted => nil}
+      output_attr_fs = FieldSet.opt([:id,:value_derived])
+      output_attr_ds = get_objects_just_dataset(output_attr_mh,output_attr_wc,output_attr_fs)
+
+      join_cond = {:id => :output_id}
+      attrs_to_change_ds = attr_link_ds.join_table(:inner,output_attr_ds,join_cond)
+      nil
     end
 
     def self.get_legal_connections(parent_id_handle)

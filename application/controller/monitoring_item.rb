@@ -26,6 +26,7 @@ module XYZ
       tpl.assign(:list_start_prev, 0)
       tpl.assign(:list_start_next, 0)
       tpl.assign(:_app,_app)
+      tpl.assign(:search_content, nil)
       return {:content => tpl.render()}
     end
   end

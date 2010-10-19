@@ -18,7 +18,7 @@ module XYZ
              when :string
               SQL::WhereCondition.like(name,"#{value}%")
              when :numeric
-              {name => value}
+              process_numeric(name,value)
              when :boolean
               {name => (value == 1 or value == "1") ? true : false}
           end
@@ -26,6 +26,21 @@ module XYZ
         end
       end
      private
+      def process_numeric(name,value)
+        #TODO: may encapsulate undet SQL class
+        if value =~ /^<=(.+)$/
+          name.to_s.lit <= $1
+        elsif value =~ /^>=(.+)$/
+          name.to_s.lit >= $1
+        elsif value =~ /^<(.+)$/
+          name.to_s.lit < $1
+        elsif value =~ /^>(.+)$/
+          name.to_s.lit > $1
+        else
+          {name => value}
+        end
+      end
+
       ColumnTypeCache = Hash.new
       BasicTypeMapping = {
         :string => :string,

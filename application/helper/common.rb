@@ -40,8 +40,45 @@ module Ramaze::Helper
 
     #request parsing fns
     def ret_order_by_list()
+      #TODO: case on request_method_is_post?()
+      #TODO: filter fields to make sure real fields or treat virtual columns
+      query_params = ret_query_params_in_request()
+      return nil unless (query_params||{})["order_by"]
+      query_params["order_by"].map{|x|{:field => x["field"].to_sym, :order => x["order"]}}
+    end
+
+#TODO: just for testing
+TestOveride = 10# nil
+    LimitDefault = 20
+    NumModelItemsDefault = 10000
+    def ret_paging_info()
+      #TODO: case on request_method_is_post?()
+      #TODO: might be taht query is optimzied by not having start being 0 included
+      query_params = ret_query_params_in_request()
+#TODO: just for testing
+if TestOveride and (query_params||{})["start"].nil?
+  return {:start => 0, :limit => TestOveride, :num_model_items => NumModelItemsDefault}
+end
+      return nil unless query_params
+      return nil unless query_params["start"] or query_params["limit"]
+      start = (query_params["start"]||0).to_i
+      limit = (query_params["limit"] || R8::Config[:page_limit] || LimitDefault).to_i
+#TODO: just for testing
+limit = TestOveride if TestOveride 
+      num_model_items = (query_params["num_model_items"] || NumModelItemsDefault)
+      {:start => start, :limit => limit, :num_model_items => num_model_items}
+    end
+
+    def ret_query_params_in_request()
+      json_form = (ret_request_params()||{})["query_params"]
+      return nil if json_form.nil? or json_form.empty?
+      #TODO: temp hack to convert from ' to " in query params
+      JSON.parse(json_form.gsub(/'/,'"'))
+    end
+
+    def ret_request_params()
       return nil unless request_method_is_post?()
-      JSON.parse(request.params["query_params"])["order_by"] if request.params["query_params"] and not request.params["query_params"].empty?
+      return request.params
     end
 
     def request_method_is_get?()
@@ -60,10 +97,22 @@ module Ramaze::Helper
       tpl.assign(:_app,app_common())
       set_template_order_columns!(tpl)
     end
-    
-    def set_template_order_columns!(tpl,order_by_list=nil,field_set=Model::FieldSet.default(model_name()))
 
-      order_by_hash = (order_by_list||[]).inject({}){|h,o|h.merge(o["field"] => o["order"])}
+    def set_template_paging_info!(tpl,paging_info)
+      if paging_info.nil?
+        tpl.assign(:list_start_prev, 0)
+        tpl.assign(:list_start_next, 0)
+        return nil
+      end
+      start = paging_info[:start]; limit = paging_info[:limit]; num_model_items = paging_info[:num_model_items] 
+      start_prev = ((start - limit) < 0) ? 0 : (start-limit)
+      tpl.assign(:list_start_prev, start_prev)
+      start_next = ((start + limit) > num_model_items) ? nil : (start+limit)
+      tpl.assign(:list_start_next, start_next)
+    end
+
+    def set_template_order_columns!(tpl,order_by_list=nil,field_set=Model::FieldSet.default(model_name()))
+      order_by_hash = (order_by_list||[]).inject({}){|h,o|h.merge(o[:field] => o[:order])}
       field_set.cols.each do |field|
         sort_order = 'ASC'
         ort_class = ''

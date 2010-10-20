@@ -162,7 +162,7 @@ module XYZ
 
         select_cols = nil
         if opts[:field_set]
-          select_cols = (opts[:field_set] & Model::FieldSet.all_real(db_rel[:relation_type])).cols
+          select_cols = opts[:field_set].only_including(Model::FieldSet.all_real(db_rel[:relation_type])).cols
         else
           #TODO : change below to be in terms of a FieldSet call
           select_cols = (db_rel[:columns]||{}).keys 

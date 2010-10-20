@@ -27,6 +27,7 @@ module XYZ
 
       def convert_from_object_to_db_form!(model_handle,scalar_assigns,sql_operation,opts={})
         db_rel = DB_REL_DEF[model_handle[:model_name]]
+        return nil unless db_rel #to take into account model_name can be an artificial one, for example for array datasets 
         modify_to_reflect_special_processing!(scalar_assigns,db_rel,sql_operation,opts)
       end
 

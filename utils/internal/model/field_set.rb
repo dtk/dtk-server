@@ -22,6 +22,11 @@ module XYZ
         FieldSet.new(@cols - cols)
       end
 
+      #difference between only_including and & is not sysmetric and provides for items in self which are form {col => alias}
+      def only_including(field_set)
+        FieldSet.new(@cols.reject{|col| not field_set.cols.include?(col.kind_of?(Hash) ? col.keys.first : col)})
+      end
+
       def &(field_set)
         FieldSet.new(@cols & field_set.cols)
       end

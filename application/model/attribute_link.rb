@@ -33,17 +33,21 @@ module XYZ
       output_attr_mh = attr_link_mh.createMH(:model_name => :attribute)
       #condition is to prune out attributes on output side that have asserted values
       output_attr_wc = {:value_asserted => nil}
-      output_attr_fs = FieldSet.opt([:id])
+      output_attr_fs = FieldSet.opt([:id,{:value_derived => :old_val}])
       output_attr_ds = get_objects_just_dataset(output_attr_mh,output_attr_wc,output_attr_fs)
 
       first_join_ds = input_attr_ds.select({:id => :input_id},{:value_asserted => :value_derived},:pending_id).from_self.join_table(:inner,attr_link_ds,[:input_id]) 
       attrs_to_change_ds = first_join_ds.join_table(:inner,output_attr_ds,{:id => :output_id})
-      update_ret = update_from_select(output_attr_mh,FieldSet.new([:value_derived]),attrs_to_change_ds, {:returning_list => [:id,:pending_id]})
+      returning_cols = {:returning_cols => [:id,:pending_id,:old_val,{:value_derived => :new_val}]}
+      update_ret = update_from_select(output_attr_mh,FieldSet.new([:value_derived]),attrs_to_change_ds,returning_cols)
 
-      #create teh new pending changes
+      #create the new pending changes
       parent_pending_mh = attr_changes.first.pending_id_handle.createMH()
       args_for_pending_changes  = update_ret.map do |r|
-        {:new_item => attr_mh.createIDH(:guid => r[:id]), :parent => parent_pending_mh.createIDH(:guid => r[:pending_id])}
+        {:new_item => attr_mh.createIDH(:guid => r[:id]), 
+          :parent => parent_pending_mh.createIDH(:guid => r[:pending_id]),
+          :change => {:old => r[:old_val], :new => r[:new_val]}
+        }
       end
       PendingChangeItem.create_items(args_for_pending_changes)
     end

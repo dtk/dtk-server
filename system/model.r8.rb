@@ -46,26 +46,14 @@ module XYZ
     end
 
     def self.create_from_rows(model_handle,rows,opts={})
-      select_ds = SQL::ArrayDataset.create(db,rows,ModelHandle.new(model_handle[:c],:array_dataset))
+      opts = opts[:convert] ? {:convert_for_create => true} : {}
+      select_ds = SQL::ArrayDataset.create(db,rows,model_handle,opts)
       override_attrs = {}
       create_opts = {} #TODO: stub
       field_set = FieldSet.new(rows.first.keys)
       create_from_select(model_handle,field_set,select_ds,override_attrs,create_opts)
     end
 
-=begin
-     TODO: may remove
-    def self.create_from_rows(model_handle,rows,parent_idh,opts={})
-      parent_assignment = {model_handle.parent_id_field_name() => parent_idh.get_id()}
-      #TODO: need to do any needed special processing for column types
-      rows_with_parent = rows.map{|row|row.merge(parent_assignment)}
-      select_ds = SQL::ArrayDataset.create(db,rows_with_parent,ModelHandle.new(model_handle[:c],:array_dataset))
-      override_attrs = {}
-      create_opts = {} #TODO: stub
-      field_set = FieldSet.new(rows.first.keys)
-      create_from_select(model_handle,field_set,select_ds,override_attrs,create_opts)
-    end
-=end
     def self.get_objects(model_handle,where_clause={},opts={})
       c = model_handle[:c]
       model_name = model_handle[:model_name]

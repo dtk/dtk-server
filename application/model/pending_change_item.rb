@@ -19,8 +19,10 @@ module XYZ
     #######################
     #object processing and access functions
     #######################
-    def self.create_item(new_id_handle,parent_id_handle)
-      create_items([{:new_item => new_id_handle, :parent => parent_id_handle}]).first
+    def self.create_item(new_id_handle,parent_id_handle,change=nil)
+      new_item = {:new_item => new_id_handle, :parent => parent_id_handle}
+      new_item.merge!(:change => change) if change
+      create_items([new_item]).first
     end
     #assoumption is that all parents are of same type and all changed items of same type
     def self.create_items(new_items)
@@ -37,13 +39,15 @@ module XYZ
         ref = "#{ref_prefix}#{(i+=1).to_s}"
         id = item[:new_item].get_id()
         parent_id = item[:parent].get_id()
-        {:ref => ref,
+        hash = {
+          :ref => ref,
           :display_name => "change(#{id.to_s})",
           object_id_col => id,
           parent_id_col => parent_id
         }
+        item[:change] ? hash.merge(:change => item[:change]) : hash
       end
-      create_from_rows(model_handle,rows)
+      create_from_rows(model_handle,rows,{:convert => true})
     end
   end
   class AttributeChange 

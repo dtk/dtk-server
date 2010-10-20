@@ -145,7 +145,7 @@ module XYZ
       def self.create(db,rows,model_handle,opts={})
         return nil if rows.empty?
         if opts[:convert_for_update] or opts[:convert_for_create]
-          sql_operation = opts[:convert_for_update] ? :update : :xreate
+          sql_operation = opts[:convert_for_update] ? :update : :create
           rows.each{|row| db.convert_from_object_to_db_form!(model_handle,row,sql_operation)}
         end
         ArrayDataset.new(db,rows,model_handle)

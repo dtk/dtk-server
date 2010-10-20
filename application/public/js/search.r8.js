@@ -4,8 +4,8 @@ if (!R8.Search) {
 		R8.Search = function() {
 			return {
 
-				page : function(model_name,start) {
-					var searchForm = document.getElementById(model_name+'-search-form');
+				page : function(modelName,start) {
+					var searchForm = document.getElementById(modelName+'-search-form');
 					var queryParamsElem = R8.Utils.Y.one('#query_params');
 					var query_params = {'start':start};
 
@@ -15,8 +15,21 @@ if (!R8.Search) {
 					});
 				},
 
-				sort : function() {
-					
+				sort : function(modelName,field,order) {
+					var searchForm = document.getElementById(modelName+'-search-form');
+					var queryParamsElem = R8.Utils.Y.one('#query_params');
+					var currentStartElem = R8.Utils.Y.one('#'+modelName+'_current_start');
+
+					var query_params = {
+							'start':currentStartElem.get('value'),
+							'order_by':{}
+						};
+					query_params['order_by'][field] = order;
+
+					YUI().use("json", function(Y) {
+						queryParamsElem.set('value',Y.JSON.stringify(query_params));
+						searchForm.submit();
+					});
 				}
 			}
 		}();

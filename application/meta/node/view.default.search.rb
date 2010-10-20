@@ -15,6 +15,13 @@
       },
     },
     {
+      :node_current_start => {
+        :required => false,
+        :type => 'hidden',
+        :value => '{%=node_current_start%}',
+      },
+    },
+    {
       :query_params => {
         :required => true,
         :type => 'hidden',

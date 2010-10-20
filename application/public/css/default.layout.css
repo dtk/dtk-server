@@ -162,6 +162,12 @@ table.edit td.label {
 	margin: 5px 0 0 5px;
 	cursor: pointer;
 }
+.sort_arrow.desc {
+	background-position: -8px 0px;
+}
+.sort_arrow.asc {
+	background-position: -16px 0px;
+}
 
 .list_container {
 	padding: 10px 20px;

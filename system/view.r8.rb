@@ -234,6 +234,7 @@ OLD
 
         #might move later, putting sorting code here
         field_meta[:sort_call] = "onclick=\"R8.Search.sort('#{@model_name}','#{field_name}','{%=#{field_name}_order%}');\""
+        field_meta[:sort_class] = "{%=#{field_name}_order_class%}"
         list_cols << field_meta
       end
     end

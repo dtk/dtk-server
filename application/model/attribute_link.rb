@@ -17,7 +17,7 @@ module XYZ
       return Array.new if attr_changes.empty?
       attr_mh = attr_changes.first.id_handle.createMH(:model_name => :attribute)
 
-      id_val_pairs = attr_changes.map{|change| {:id => change.id_handle.get_id(),:value_asserted => change.changed_value, :pending_change_item_id => change.pending_id_handle.get_id()}}
+      id_val_pairs = attr_changes.map{|change| {:id => change.id_handle.get_id(),:value_asserted => change.changed_value, :pending_id => change.pending_id_handle.get_id()}}
       input_attr_ds = SQL::ArrayDataset.create(db,id_val_pairs,attr_mh,{:convert_for_update => true})
 
       #first put in relation that traces along attribute link from output matching an idhandle in changes to inputs
@@ -32,10 +32,16 @@ module XYZ
       output_attr_fs = FieldSet.opt([:id])
       output_attr_ds = get_objects_just_dataset(output_attr_mh,output_attr_wc,output_attr_fs)
 
-      first_join_ds = input_attr_ds.select({:id => :input_id},{:value_asserted => :value_derived},:pending_change_item_id).from_self.join_table(:inner,attr_link_ds,[:input_id]) 
+      first_join_ds = input_attr_ds.select({:id => :input_id},{:value_asserted => :value_derived},:pending_id).from_self.join_table(:inner,attr_link_ds,[:input_id]) 
       attrs_to_change_ds = first_join_ds.join_table(:inner,output_attr_ds,{:id => :output_id})
-      pp      x=update_from_select(output_attr_mh,FieldSet.new([:value_derived]),attrs_to_change_ds, {:returning_list => [{:id => :attribute_id},:pending_change_item_id]})
-      nil
+      update_ret = update_from_select(output_attr_mh,FieldSet.new([:value_derived]),attrs_to_change_ds, {:returning_list => [:id,:pending_id]})
+
+      #create teh new pending changes
+      parent_pending_mh = attr_changes.first.pending_id_handle.createMH()
+      args_for_pending_changes  = update_ret.map do |r|
+        {:new_item => attr_mh.createIDH(:guid => r[:id]), :parent => parent_pending_mh.createIDH(:guid => r[:pending_id])}
+      end
+      PendingChangeItem.create_items(args_for_pending_changes)
     end
 
     def self.get_legal_connections(parent_id_handle)

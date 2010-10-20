@@ -22,9 +22,8 @@ if (!R8.Search) {
 
 					var query_params = {
 							'start':currentStartElem.get('value'),
-							'order_by':{}
+							'order_by':[{'field':field,'order':order}]
 						};
-					query_params['order_by'][field] = order;
 
 					YUI().use("json", function(Y) {
 						queryParamsElem.set('value',Y.JSON.stringify(query_params));

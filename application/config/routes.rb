@@ -99,6 +99,26 @@ R8::Routes["node/display"] = {
   ]
 }
 
+R8::Routes["pending_change_item/display"] = {
+  :layout => 'default',
+  :alias => '',
+  :params => [:id],
+  :action_set => 
+  [
+   {
+     :route => "pending_change_item/display",
+     :action_params => ["$id$"],
+     :panel => "main_body"
+   },
+   {
+     :route => "pending_change_item/list",
+     :action_params => [{:parent_id => "$id$"}],
+     :panel => "main_body",
+     :assign_type => :append 
+   }
+  ]
+}
+
 R8::Routes["component/testjsonlayout"] = {
   :layout => 'testjson'
 }

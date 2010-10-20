@@ -107,7 +107,13 @@ module XYZ
     end
 
     def ret_parent_name(possible_parents)
-      possible_parents.each{|p|return "#{p}/#{self[p][:display_name]}" if self[p] and self[p][:display_name]}
+      #one complication is if parent is same type as self then looking for "p2", rather than p; this is due
+      #to how we got around problem of having unique table names when joining table to itself
+      #TODO: is it better to see if can change the joining to not have teh "2" suffix
+      possible_parents.each do |p|
+        parent_obj = self[relation_type == p ? "#{p}2".to_sym : p]
+        return "#{p}/#{parent_obj[:display_name]}" if parent_obj and parent_obj[:display_name]
+      end
       nil
     end
 

@@ -6,12 +6,13 @@ module XYZ
       column :relative_order_order, :int, :default => 1 #relative with respect to parent
       column :change, :json # gives detail about teh change
 
-      #one oif thse wil be non null and point to object being changed or added
+      #one of thse wil be non null and point to object being changed or added
       foreign_key :node_id, :attribute, FK_CASCADE_OPT
       foreign_key :attribute_id, :attribute, FK_CASCADE_OPT
       foreign_key :component_id, :component, FK_CASCADE_OPT
+      #TODO: may have here who, when
 
-      #NOTE: may have here who, when
+      virtual_column :parent_name, :possible_parents => [:datacenter, :pending_change_item]
       many_to_one :datacenter, :pending_change_item
       one_to_many :pending_change_item #nested items show when one change triggers other changes
     end

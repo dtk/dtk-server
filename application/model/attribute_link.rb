@@ -13,8 +13,12 @@ module XYZ
     #######################
     ### object procssing and access functions
     def self.propagate_over_dir_conn_equality_links(attr_changes)
-      #build up pattern that traces from root id_handles in changes pending to directly connected links
       return Array.new if attr_changes.empty?
+      #build up pattern that traces from root id_handles in changes pending to directly connected links
+      # link tracing would look like
+      # attribute(id_val_pairs).as(a1)([:value_asserted,:pending_id])--(input_id)attribute_link(output_id)--attribute.as(a2)([:id]).where(:value_asserted => nil))
+      #return a1[:value_asserted.as(:value_derived),:pending_id],a2[:id]
+
       attr_mh = attr_changes.first.id_handle.createMH(:model_name => :attribute)
 
       id_val_pairs = attr_changes.map{|change| {:id => change.id_handle.get_id(),:value_asserted => change.changed_value, :pending_id => change.pending_id_handle.get_id()}}

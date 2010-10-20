@@ -14,6 +14,13 @@
         :value => 'list',
       },
     },
+    {
+      :query_params => {
+        :required => true,
+        :type => 'hidden',
+        :value => '',
+      },
+    },
   ],
   :field_groups => [
     {

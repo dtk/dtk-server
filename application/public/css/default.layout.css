@@ -153,6 +153,16 @@ table.edit td.label {
 
 /*----------List View------------*/
 
+.sort_arrow {
+	width:8px;
+	height: 10px;
+	background-image: url("../images/sort_arrows.png");
+	background-repeat: no-repeat;
+	float: left;
+	margin: 5px 0 0 5px;
+	cursor: pointer;
+}
+
 .list_container {
 	padding: 10px 20px;
 }

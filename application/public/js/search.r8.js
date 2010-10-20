@@ -14,6 +14,10 @@ if (!R8.Search) {
 						searchForm.submit();
 					});
 				},
+
+				sort : function() {
+					
+				}
 			}
 		}();
 	})(R8);

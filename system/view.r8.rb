@@ -231,6 +231,9 @@ OLD
         field_meta[:class] = field_meta[:class]
         field_meta[:content] = field_handler.get_field(view_type(), field_meta, 'tpl')
         field_meta[:width] = (field_meta[:width].nil? ? '' : 'width="'+field_meta[:width]+'"')
+
+        #might move later, putting sorting code here
+        field_meta[:sort_call] = "onclick=\"R8.Search.sort('#{@model_name}','#{field_name}','{%=#{field_name}_order%}');\""
         list_cols << field_meta
       end
     end

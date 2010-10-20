@@ -16,7 +16,7 @@
 	<table class="list">
 	<tr id="{%=model_name%}-{%=view_name%}-header-row">
 		{%for header_col in cols%}
-			<th id="{%=header_col[:id]%}-th" {%=header_col[:width]%} class="{%=header_col[:class]%}">{%=header_col[:label]%}</th>
+			<th id="{%=header_col[:id]%}-th" {%=header_col[:width]%} class="{%=header_col[:class]%}"><div style="float: left; cursor: pointer;">{%=header_col[:label]%}</div><div id="{%=header_col[:name]%}" {%=header_col[:sort_call]%} class="sort_arrow"></div></th>
 		{%end%}
 	</tr>
 

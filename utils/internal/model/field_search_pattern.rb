@@ -5,8 +5,8 @@ module XYZ
         @col_basic_types = ColumnTypeCache[model_name] ||= field_set_class.real_cols_with_types(model_name).inject({}){|h,nt|h.merge(nt[0] => BasicTypeMapping[nt[1]])}
       end
       def ret_where_clause_for_search_string(name_value_pairs)
-        name_value_pairs.inject({}) do |ret,nv|
-          name_x,value = nv
+        ret = nil
+        name_value_pairs.each do |name_x,value|
           name = name_x.to_sym
           #ignore if empty 
           next if value.empty?
@@ -28,6 +28,7 @@ module XYZ
           end
           ret = SQL.and(ret,new_el)
         end
+        ret
       end
      private
       def process_numeric(name,value)

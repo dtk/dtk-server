@@ -20,11 +20,11 @@ module XYZ
       # used as parent to change items for components on all the node groups memebrs
       #get_top_container_id_handle(:datacenter) will return nil if top is not a datacenter which wil in turn make PendingChangeItem
       #a no-op; this is desired only having pending objects in datacenter, not library
-      pending_item_parent_idh = target_id_handle.get_top_container_id_handle(:datacenter)
-      pending_id_handle = PendingChangeItem.create_item(new_id_handle,pending_item_parent_idh)
+      action_parent_idh = target_id_handle.get_top_container_id_handle(:datacenter)
+      action_id_handle = Action.create_pending_change_item(new_id_handle,action_parent_idh)
       case new_id_handle[:model_name]
        when :component
-        clone_post_copy_hook_component(new_id_handle,target_id_handle,pending_id_handle,opts)
+        clone_post_copy_hook_component(new_id_handle,target_id_handle,action_id_handle,opts)
        else
         raise Error.new("clone_post_copy_hook to node_group from #{new_id_handle[:model_name]} not implemented yet")
       end
@@ -39,7 +39,7 @@ module XYZ
     end
    private
 
-    def self.clone_post_copy_hook_component(ng_cmp_id_handle,node_group_id_handle,pending_id_handle,opts={})
+    def self.clone_post_copy_hook_component(ng_cmp_id_handle,node_group_id_handle,action_id_handle,opts={})
       node_group_obj = get_object(node_group_id_handle)
       targets = ((node_group_obj||{})[:member_id_list]||[]).map{|node_id|node_group_id_handle.createIDH({:model_name => :node,:id=> node_id})}
       return Array.new if  targets.empty?
@@ -54,8 +54,8 @@ module XYZ
 
       #create pending_change items for all the components created on the nodes; the
       #pending change item generated for the node group component is their parents
-      new_items = node_cmp_id_handles.map{|idh|{:new_item => idh, :parent => pending_id_handle}}
-      PendingChangeItem.create_items(new_items)
+      new_items = node_cmp_id_handles.map{|idh|{:new_item => idh, :parent => action_id_handle}}
+      Action.create_pending_change_items(new_items)
 
       #put in attribute links, linking attributes attached to component ng_cmp_id_handle
 

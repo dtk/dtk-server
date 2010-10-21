@@ -43,8 +43,8 @@ module XYZ
     end
 
     def self.clone_post_copy_hook(new_id_handle,target_id_handle,opts={})
-      parent_pending_id_handle = target_id_handle.get_parent_id_handle()
-      PendingChangeItem.create_item(new_id_handle,parent_pending_id_handle)
+      parent_action_id_handle = target_id_handle.get_parent_id_handle()
+      Action.create_pending_change_item(new_id_handle,parent_action_id_handle)
     end
     
     #TODO: quick hack

@@ -45,6 +45,8 @@ module XYZ
         hash = {
           :ref => ref,
           :display_name => "change(#{id.to_s})",
+          :state => "pending",
+          :type => "state-change",
           object_id_col => id,
           parent_id_col => parent_id
         }

@@ -48,9 +48,9 @@ module XYZ
       #if asserted value is changed then propagate 
       changed_value = hash_assigns[:value_asserted] #TODO: check whether asserted value accually is different
       return nil if changed_value.nil?
-      pending_item_parent_idh = id_handle.get_top_container_id_handle(:datacenter)
-      pending_id_handle = PendingChangeItem.create_item(id_handle,pending_item_parent_idh)
-      propagate_changes([AttributeChange.new(id_handle,changed_value,pending_id_handle)]) if pending_id_handle
+      action_parent_idh = id_handle.get_top_container_id_handle(:datacenter)
+      action_id_handle = Action.create_pending_change_item(id_handle,action_parent_idh)
+      propagate_changes([AttributeChange.new(id_handle,changed_value,action_id_handle)]) if action_id_handle
     end
 
     def self.propagate_changes(attr_changes) 

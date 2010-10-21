@@ -99,19 +99,19 @@ R8::Routes["node/display"] = {
   ]
 }
 
-R8::Routes["pending_change_item/display"] = {
+R8::Routes["action/display"] = {
   :layout => 'default',
   :alias => '',
   :params => [:id],
   :action_set => 
   [
    {
-     :route => "pending_change_item/display",
+     :route => "action/display",
      :action_params => ["$id$"],
      :panel => "main_body"
    },
    {
-     :route => "pending_change_item/list",
+     :route => "action/list",
      :action_params => [{:parent_id => "$id$"}],
      :panel => "main_body",
      :assign_type => :append 

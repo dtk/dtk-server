@@ -21,7 +21,7 @@
 			<li class=""><a href="{%=_app[:base_uri]%}/xyz/component/list">Components</a></li>
 			<li class=""><a href="{%=_app[:base_uri]%}/xyz/attribute/list">Attributes</a></li>
 			<li class=""><a href="{%=_app[:base_uri]%}/xyz/node_group/list">Groups</a></li>
-			<li class=""><a href="{%=_app[:base_uri]%}/xyz/pending_change_item/list">Pending Changes</a></li>
+			<li class=""><a href="{%=_app[:base_uri]%}/xyz/action/list">Actions</a></li>
 		</ul>
 	</div>
 

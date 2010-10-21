@@ -3,7 +3,9 @@ module XYZ
     set_relation_name(:action,:action)
     def self.up()
       column :state, :varchar, :size => 15, :default => "pending" # | "executing" | "completed"
-      column :type, :varchar, :size => 20# "state-change" | "one-time-action" | ..
+      column :mode, :varchar, :size => 15, :default => "declarative" # | "procedural"
+      column :type, :varchar, :size => 25# "setting" | "delete" | "deploy-node" | "install-component" | "patch-component" | "procedure" | .. 
+      column :object_type, :varchar, :size => 15 # "attribute" | "node" | "component"
       column :transaction, :int, :default => 1 #TODO may introduce transaction object and make this a foreign key
       column :relative_order_order, :int, :default => 1 #relative with respect to parent
       column :change, :json # gives detail about the change
@@ -35,7 +37,17 @@ module XYZ
       object_model_name = new_items.first[:new_item][:model_name]
       object_id_col = "#{object_model_name}_id".to_sym
       parent_id_col = model_handle.parent_id_field_name()
-      change = "new_#{object_model_name}"
+      type = 
+        case object_model_name
+          when :attribute then "setting"
+          when :component then "install-component"
+          else raise ErrorNotImplemented.new("when object type is #{object_model_name}")
+      end 
+      display_name = 
+        case object_model_name
+          when :attribute then "setting-attribute"
+          when :component then "install-component"
+      end 
       ref_prefix = "action"
       i=0
       rows = new_items.map do |item| 
@@ -44,9 +56,11 @@ module XYZ
         parent_id = item[:parent].get_id()
         hash = {
           :ref => ref,
-          :display_name => "change(#{id.to_s})",
+          :display_name => display_name,
           :state => "pending",
-          :type => "state-change",
+          :mode => "declarative",
+          :type => type,
+          :object_type => object_model_name.to_s,
           object_id_col => id,
           parent_id_col => parent_id
         }

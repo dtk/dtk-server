@@ -14,7 +14,7 @@ module XYZ
           basic_type = @col_basic_types[name]
           next unless basic_type
           new_el = 
-            if value == "UNSET"
+            if value.nil? or value == "UNSET" 
               {name => nil}
             else
               case basic_type

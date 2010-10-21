@@ -39,13 +39,13 @@ module Ramaze::Helper
     end
 
     #request parsing fns
-    def ret_where_clause(field_set)
+    def ret_where_clause(field_set=Model::FieldSet.all_real(model_name()))
       #TODO: cleanup so dont have to treat get with explict query string, creation action (which sets @parsed_query_string)
       # and post differently
       if request_method_is_get?()
+        return @parsed_query_string.reject{|k,v|k == :parent_id} if @parsed_query_string
         explicit_qs = ret_parsed_query_string()
-        return field_set.ret_where_clause_for_search_string(explicit_qs.reject{|k,v|k == :parent_id}) if explicit_qs
-        return @parsed_query_string ? @parsed_query_string.reject{|k,v|k == :parent_id} : nil
+        return explicit_qs ? field_set.ret_where_clause_for_search_string(explicit_qs.reject{|k,v|k == :parent_id}) : nil
       end
       #then its a post
       request_params = ret_request_params()
@@ -164,6 +164,7 @@ limit = TestOveride if TestOveride
     end
 
     def set_template_order_columns!(tpl,order_by_list=nil,field_set=Model::FieldSet.default(model_name()))
+      #TODO: should default field set by default or all real
       order_by_hash = (order_by_list||[]).inject({}){|h,o|h.merge(o[:field] => o[:order])}
       field_set.cols.each do |field|
         sort_order = 'ASC'

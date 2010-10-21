@@ -20,7 +20,7 @@ module XYZ
 
   class ErrorNotImplemented < Error
     def initialize(msg="NotImplemented error")
-      super(msg,:NotImplemented)
+      super("in #{this_parent_parent_method}: #{msg}",:NotImplemented)
     end
   end
 

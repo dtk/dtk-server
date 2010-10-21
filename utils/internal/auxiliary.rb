@@ -189,5 +189,8 @@ private
    def this_parent_method
      caller[1] =~ /`([^']*)'/ and $1
    end
+   def this_parent_parent_method
+     caller[2] =~ /`([^']*)'/ and $1
+   end
 end
 

@@ -39,8 +39,25 @@ module Ramaze::Helper
     end
 
     #request parsing fns
+    def ret_where_clause(field_set)
+      if request_method_is_get?()
+        return @parsed_query_string ? @parsed_query_string.reject{|k,v|k == :parent_id} : nil
+      end
+      #then its a post
+      request_params = ret_request_params()
+      return nil unless request_params
+      field_set.ret_where_clause_for_search_string(request_params.reject{|k,v|k == :parent_id})
+    end
+    def ret_parent_id()
+      if request_method_is_get?()
+        (@parsed_query_string||{})[:parent_id]
+      else
+        (ret_request_params()||{})[:parent_id]
+      end
+    end
+
     def ret_order_by_list()
-      #TODO: case on request_method_is_post?()
+      #TODO: handle case when this is a get
       #TODO: filter fields to make sure real fields or treat virtual columns
       query_params = ret_query_params_in_request()
       return nil unless (query_params||{})["order_by"]

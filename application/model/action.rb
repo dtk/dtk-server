@@ -2,9 +2,11 @@ module XYZ
   class Action < Model
     set_relation_name(:action,:action)
     def self.up()
+      column :state, :varchar, :size => 15, :default => "pending" # | "executing" | "completed"
+      column :type, :varchar, :size => 20# "state-change" | "one-time-action" | ..
       column :transaction, :int, :default => 1 #TODO may introduce transaction object and make this a foreign key
       column :relative_order_order, :int, :default => 1 #relative with respect to parent
-      column :change, :json # gives detail about teh change
+      column :change, :json # gives detail about the change
 
       #one of thse wil be non null and point to object being changed or added
       foreign_key :node_id, :attribute, FK_CASCADE_OPT
@@ -20,13 +22,13 @@ module XYZ
     #######################
     #object processing and access functions
     #######################
-    def self.create_item(new_id_handle,parent_id_handle,change=nil)
+    def self.create_pending_change_item(new_id_handle,parent_id_handle,change=nil)
       new_item = {:new_item => new_id_handle, :parent => parent_id_handle}
       new_item.merge!(:change => change) if change
-      create_items([new_item]).first
+      create_pending_change_items([new_item]).first
     end
     #assoumption is that all parents are of same type and all changed items of same type
-    def self.create_items(new_items)
+    def self.create_pending_change_items(new_items)
       return nil if new_items.empty? 
       parent_model_name = new_items.first[:parent][:model_name]
       model_handle = new_items.first[:parent].createMH({:model_name => :action, :parent_model_name => parent_model_name})

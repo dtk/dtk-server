@@ -30,7 +30,7 @@ module XYZ
     def list(*uri_array)
       error_405 unless request.get?
       uri = "/" + uri_array.join("/")
-      opts = ret_parsed_query_string()
+      opts = ret_parsed_query_string_from_uri()
       opts[:no_hrefs] ||= true
       opts[:depth] ||= :deep
       opts[:no_null_cols] = true
@@ -81,7 +81,7 @@ module XYZ
       error_405 unless request.get?
       action = ViewAction::ListObjects
       uri = "/" + uri_array.join("/")
-      http_opts = ret_parsed_query_string()
+      http_opts = ret_parsed_query_string_from_uri()
       href_prefix = "http://" + http_host() + "/list"
       c = ret_session_context_id()
       
@@ -95,7 +95,7 @@ module XYZ
       error_405 unless request.post?
       action = :import_chef_recipes
       uri = request[:library_uri]
-      opts = ret_parsed_query_string()
+      opts = ret_parsed_query_string_from_uri()
       href_prefix = "http://" + http_host() + "/list"
       c = ret_session_context_id()
       result_array = ActionSet::ImportChefRecipes.dispatch_actions(c,uri,request,href_prefix,opts)
@@ -111,7 +111,7 @@ module XYZ
       error_405 unless request.post?
       action = action_x.to_sym
       uri = "/" + uri_array.join("/")
-      opts = ret_parsed_query_string()
+      opts = ret_parsed_query_string_from_uri()
       href_prefix = "http://" + http_host() + "/list"
       c = ret_session_context_id()
 
@@ -215,7 +215,7 @@ module XYZ
     def rest(*uri_array)
       error_405 unless request.get?
       uri = "/" + uri_array.join("/")
-      opts = ret_parsed_query_string()
+      opts = ret_parsed_query_string_from_uri()
       href_prefix = "http://" + http_host() + "/rest"
       c = ret_session_context_id()
       @results = Object.get_instance_or_factory(IDHandle[:c => c,:uri => uri],href_prefix,opts)
@@ -225,7 +225,7 @@ module XYZ
     def library__public
      error_405 unless request.get?
      uri = "/library/public" 
-     opts = ret_parsed_query_string()
+     opts = ret_parsed_query_string_from_uri()
      href_prefix = "http://" + http_host() + "/list"
      c = ret_session_context_id()
      @results = Object.get_instance_or_factory(IDHandle[:c => c,:uri => uri],href_prefix,opts)
@@ -237,7 +237,7 @@ module XYZ
     def list_by_guid(guid)
       error_405 unless request.get? 
       href_prefix = "http://" + http_host() + "/list" 
-      opts = ret_parsed_query_string()
+      opts = ret_parsed_query_string_from_uri()
       c = ret_session_context_id()
       @title = "List from Guid"
       @results = Object.get_instance_or_factory(IDHandle[:c => c,:guid => guid],href_prefix,opts)
@@ -247,7 +247,7 @@ module XYZ
     def list_contained_attributes(*uri_array)
       error_405 unless request.get? 
       uri = "/" + uri_array.join("/")
-      opts = ret_parsed_query_string()
+      opts = ret_parsed_query_string_from_uri()
       type = opts[:value_type] || :value
       error_405 unless [:derived,:asserted,:value].include?(type)
       c = ret_session_context_id()
@@ -259,7 +259,7 @@ module XYZ
     def list_node_attributes(*uri_array)
       error_405 unless request.get? 
       uri = "/" + uri_array.join("/")
-      opts = ret_parsed_query_string()
+      opts = ret_parsed_query_string_from_uri()
       c = ret_session_context_id()
       @results = Node.get_node_attribute_values(IDHandle[:c => c,:uri => uri],opts)
     end

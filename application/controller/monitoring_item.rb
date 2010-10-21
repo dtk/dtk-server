@@ -9,8 +9,10 @@ module XYZ
    private
     #helper fn
     def component_or_node_display(parsed_query_string=nil)
-      where_clause = parsed_query_string || ret_parsed_query_string()
-      parent_id = where_clause.delete(:parent_id)
+      @parsed_query_string = parsed_query_string
+      where_clause = ret_where_clause()
+      parent_id = ret_parent_id()
+
       opts = Hash.new
       opts.merge!(:parent_id => parent_id) if parent_id
       model_list = get_objects(model_name().to_sym,where_clause,opts)

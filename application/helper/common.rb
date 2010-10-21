@@ -40,24 +40,12 @@ module Ramaze::Helper
 
     #request parsing fns
     def ret_where_clause(field_set=Model::FieldSet.all_real(model_name()))
-      #TODO: cleanup so dont have to treat get with explict query string, creation action (which sets @parsed_query_string)
-      # and post differently
-      if request_method_is_get?()
-        return @parsed_query_string.reject{|k,v|k == :parent_id} if @parsed_query_string
-        explicit_qs = ret_parsed_query_string()
-        return explicit_qs ? field_set.ret_where_clause_for_search_string(explicit_qs.reject{|k,v|k == :parent_id}) : nil
-      end
-      #then its a post
-      request_params = ret_request_params()
-      return nil unless request_params
-      field_set.ret_where_clause_for_search_string(request_params.reject{|k,v|k == :parent_id})
+      hash = ret_hash_for_where_clause()
+      hash ? field_set.ret_where_clause_for_search_string(hash.reject{|k,v|k == :parent_id}) : nil
     end
+
     def ret_parent_id()
-      if request_method_is_get?()
-        (@parsed_query_string||{})[:parent_id]
-      else
-        (ret_request_params()||{})[:parent_id]
-      end
+      (ret_hash_for_where_clause()||{})[:parent_id]
     end
 
     def ret_order_by_list()
@@ -102,8 +90,21 @@ limit = TestOveride if TestOveride
       JSON.parse(json_form.gsub(/'/,'"'))
     end
 
+
+    def ret_hash_for_where_clause()
+      request_method_is_get?() ? ret_parsed_query_string_when_get() : ret_request_params()
+    end
+
+    def ret_parsed_query_string_when_get()
+      explicit_qs = ret_parsed_query_string_from_uri()
+      return @parsed_query_string if explicit_qs.nil? or explicit_qs.empty?
+      return explicit_qs if @parsed_query_string.nil? or @parsed_query_string.empty?
+      @parsed_query_string 
+    end
+
+
     #TODO needs refinement
-    def ret_parsed_query_string()
+    def ret_parsed_query_string_from_uri()
       ret = Hash.new
       query_string = ret_query_string()
       return ret unless query_string

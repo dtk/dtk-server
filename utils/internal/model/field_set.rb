@@ -110,8 +110,9 @@ module XYZ
 
         def real_cols_with_types(model_name)
           db_rel = DB_REL_DEF[model_name]
-          db_rel_cols = db_rel[:columns].inject({}){|h,kv|h.merge(kv[0] => kv[1][:type])}
-          COMMON_REL_COLUMNS.inject(db_rel_cols){|h,kv|h.merge(kv[0] => kv[1][:type])}
+          ret = db_rel[:columns].inject({}){|h,kv|h.merge(kv[0] => kv[1][:type])}
+          ret = COMMON_REL_COLUMNS.inject(ret){|h,kv|h.merge(kv[0] => kv[1][:type])}
+          many_to_one_cols(db_rel).inject(ret){|h,k|h.merge(k => ID_TYPES[:id])}
         end
 
        private

@@ -4,7 +4,7 @@ module XYZ
     def self.up()
       column :state, :varchar, :size => 15, :default => "pending" # | "executing" | "completed"
       column :mode, :varchar, :size => 15, :default => "declarative" # | "procedural"
-      column :type, :varchar, :size => 25# "setting" | "delete" | "deploy-node" | "install-component" | "patch-component" | "procedure" | .. 
+      column :type, :varchar, :size => 25# "setting" | "delete" | "deploy-node" | "install-component" | "patch-component" | "upgare-component" | "rollback-component" | "procedure" | .. 
       column :object_type, :varchar, :size => 15 # "attribute" | "node" | "component"
       column :transaction, :int, :default => 1 #TODO may introduce transaction object and make this a foreign key
       column :relative_order_order, :int, :default => 1 #relative with respect to parent

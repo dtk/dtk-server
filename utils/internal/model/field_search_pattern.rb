@@ -9,7 +9,7 @@ module XYZ
         name_value_pairs.each do |name_x,value|
           name = name_x.to_sym
           #ignore if empty 
-          next if value.empty?
+          next if (value and value.empty?)
           #ignore unless column has a basic type
           basic_type = @col_basic_types[name]
           next unless basic_type

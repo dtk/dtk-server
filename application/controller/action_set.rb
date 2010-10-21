@@ -19,7 +19,7 @@ module XYZ
         run_action_set(action_set_def[:action_set])
       else #create an action set of length one and run it
         action_params = action_set_params 
-        query_string = ret_parsed_query_string()
+        query_string = ret_parsed_query_string_from_uri()
         action_params << query_string unless query_string.empty?
         action_set = 
           [{

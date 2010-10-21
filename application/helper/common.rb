@@ -40,7 +40,11 @@ module Ramaze::Helper
 
     #request parsing fns
     def ret_where_clause(field_set)
+      #TODO: cleanup so dont have to treat get with explict query string, creation action (which sets @parsed_query_string)
+      # and post differently
       if request_method_is_get?()
+        explicit_qs = ret_parsed_query_string()
+        return field_set.ret_where_clause_for_search_string(explicit_qs.reject{|k,v|k == :parent_id}) if explicit_qs
         return @parsed_query_string ? @parsed_query_string.reject{|k,v|k == :parent_id} : nil
       end
       #then its a post
@@ -65,7 +69,7 @@ module Ramaze::Helper
     end
 
 #TODO: just for testing
-TestOveride = 10# nil
+TestOveride = 100# nil
     LimitDefault = 20
     NumModelItemsDefault = 10000
     def ret_paging_info()
@@ -86,11 +90,43 @@ limit = TestOveride if TestOveride
       {:start => start, :limit => limit, :num_model_items => num_model_items}
     end
 
+    def ret_model_for_list_search(field_set)
+      request_params = ret_request_params()||{}
+      field_set.cols.inject({}){|ret,field|ret.merge(field => request_params[field]||'')}
+    end
+
     def ret_query_params_in_request()
       json_form = (ret_request_params()||{})["query_params"]
       return nil if json_form.nil? or json_form.empty?
       #TODO: temp hack to convert from ' to " in query params
       JSON.parse(json_form.gsub(/'/,'"'))
+    end
+
+    #TODO needs refinement
+    def ret_parsed_query_string()
+      ret = Hash.new
+      query_string = ret_query_string()
+      return ret unless query_string
+      #TBD: not yet looking for errors in the query string
+      query_string.scan(%r{([/A-Za-z0-9_]+)=([/A-Za-z0-9_]+)}) do
+        key = $1.to_sym
+        value = $2
+        if value == "true" 
+          ret[key] = true
+        elsif value == "false"
+          ret[key] = false
+        elsif value =~ /^[0-9]+$/
+          ret[key] = value #should be converted into an integer
+        else
+          ret[key] = value
+       #TODO find where value shoudl be sym   ret[key] = value.to_sym
+        end #TBD: not complete; for example not for decimals
+      end
+      ret
+    end
+
+    def ret_query_string()
+      request.env["QUERY_STRING"]
     end
 
     def ret_request_params()
@@ -104,7 +140,6 @@ limit = TestOveride if TestOveride
     def request_method_is_post?()
       request.env["REQUEST_METHOD"] == "POST"
     end
-
 
     #R8 functions
     def set_template_defaults_for_list!(tpl)

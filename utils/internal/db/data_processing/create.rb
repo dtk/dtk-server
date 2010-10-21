@@ -69,10 +69,10 @@ module XYZ
         #fn tries to return ids depending on whether db adater supports returning_id
         if ds.respond_to?(:insert_returning_sql) and parent_id_col
           returning_ids = Array.new
-          sql = ds.insert_returning_sql([:id,parent_id_col],columns,sequel_select_with_cols)
+          sql = ds.insert_returning_sql([:id,:display_name,parent_id_col],columns,sequel_select_with_cols)
           fetch_raw_sql(sql){|row| returning_ids << row}
           IDInfoTable.update_instances(model_handle,returning_ids)
-          returning_ids.map{|row|model_handle.createIDH(:id => row[:id])}
+          returning_ids.map{|row|model_handle.createIDH(:id => row[:id], :display_name => row[:display_name])}
         else
           ds.import(columns,sequel_select_with_cols)
           #TODO: need to get ids and set 

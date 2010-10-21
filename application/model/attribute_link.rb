@@ -16,6 +16,7 @@ module XYZ
       return Array.new if attr_changes.empty?
       #build up pattern that traces from root id_handles in changes pending to directly connected links
       # link tracing would look like
+      #TODO: below outdated after actual links updated
       # attribute(id_val_pairs).as(a1)([:value_asserted,:action_id])--(input_id)attribute_link(output_id)--attribute.as(a2)([:id]).where(:value_asserted => nil))
       #return a1[:value_asserted.as(:value_derived),:action_id],a2[:id]
 
@@ -33,18 +34,18 @@ module XYZ
       output_attr_mh = attr_link_mh.createMH(:model_name => :attribute)
       #condition is to prune out attributes on output side that have asserted values
       output_attr_wc = {:value_asserted => nil}
-      output_attr_fs = FieldSet.opt([:id,{:value_derived => :old_val}])
+      output_attr_fs = FieldSet.opt([:id,:display_name,{:value_derived => :old_val}])
       output_attr_ds = get_objects_just_dataset(output_attr_mh,output_attr_wc,output_attr_fs)
 
       first_join_ds = input_attr_ds.select({:id => :input_id},{:value_asserted => :value_derived},:action_id).from_self.join_table(:inner,attr_link_ds,[:input_id]) 
       attrs_to_change_ds = first_join_ds.join_table(:inner,output_attr_ds,{:id => :output_id})
-      returning_cols = {:returning_cols => [:id,:action_id,:old_val,{:value_derived => :new_val}]}
+      returning_cols = {:returning_cols => [:id,:display_name,:action_id,:old_val,{:value_derived => :new_val}]}
       update_ret = update_from_select(output_attr_mh,FieldSet.new([:value_derived]),attrs_to_change_ds,returning_cols)
 
       #create the new pending changes
       parent_action_mh = attr_changes.first.action_id_handle.createMH()
       args_for_pending_changes  = update_ret.map do |r|
-        {:new_item => attr_mh.createIDH(:guid => r[:id]), 
+        {:new_item => attr_mh.createIDH(:guid => r[:id], :display_name => r[:display_name]), 
           :parent => parent_action_mh.createIDH(:guid => r[:action_id]),
           :change => {:old => r[:old_val], :new => r[:new_val]}
         }

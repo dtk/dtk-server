@@ -14,7 +14,8 @@ module Ramaze::Helper
 
     def update_from_hash(id,hash)
       opts = Hash.new
-      model_class(model_name).update_from_hash_assignments(id_handle(id),Aux.ret_hash_assignments(hash),opts)
+      idh = id_handle(id,model_name(),hash["display_name"])
+      model_class(model_name).update_from_hash_assignments(idh,Aux.ret_hash_assignments(hash),opts)
     end
 
     def create_from_hash(parent_id_handle,hash)
@@ -23,9 +24,11 @@ module Ramaze::Helper
       new_id
     end
 
-    def id_handle(id,i_model_name=model_name())
+    def id_handle(id,i_model_name=model_name(),display_name=nil)
       c = ret_session_context_id()
-      IDHandle.new({:c => c,:guid => id.to_i, :model_name => i_model_name.to_sym},{:set_parent_model_name => true})
+      hash = {:c => c,:guid => id.to_i, :model_name => i_model_name.to_sym}
+      hash.merge!(:display_name => display_name) if display_name
+      IDHandle.new(hash,{:set_parent_model_name => true})
     end
 
     def top_id_handle()

@@ -43,17 +43,19 @@ module XYZ
           when :component then "install-component"
           else raise ErrorNotImplemented.new("when object type is #{object_model_name}")
       end 
-      display_name = 
+      display_name_prefix = 
         case object_model_name
           when :attribute then "setting-attribute"
           when :component then "install-component"
       end 
+      
       ref_prefix = "action"
       i=0
       rows = new_items.map do |item| 
         ref = "#{ref_prefix}#{(i+=1).to_s}"
         id = item[:new_item].get_id()
         parent_id = item[:parent].get_id()
+        display_name = display_name_prefix + (item[:new_item][:display_name] ? "(#{item[:new_item][:display_name]})" : "")
         hash = {
           :ref => ref,
           :display_name => display_name,

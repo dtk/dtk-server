@@ -14,11 +14,16 @@ module XYZ
       include DataProcessingGet unless included_modules.include?(DataProcessingGet)
       include DataProcessingDelete unless included_modules.include?(DataProcessingDelete)
       include DataProcessingUpdate unless included_modules.include?(DataProcessingUpdate)
-
+      
       def dataset(db_rel,table_alias=nil,*from_clauses)
         tbl = db_rel.schema_table_symbol(table_alias)
         return @db.from(tbl) if from_clauses.empty? #shortcut
         @db.from(*([tbl]+from_clauses))
+      end
+      def self.sequel_table_name(model_name,table_alias=nil)
+        db_rel = DB_REL_DEF[model_name]
+        return nil unless db_rel
+        db_rel.schema_table_symbol(table_alias)
       end
 
       def empty_dataset()

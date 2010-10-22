@@ -18,6 +18,10 @@ module XYZ
       out << "debug: "
       out << format(msg)
     end
+    def self.error(msg, out = $stdout)
+      out << "error: "
+      out << format(msg)
+    end
     def self.info_pp(obj, out = $stdout)
       out << Aux::pp_form(obj)
     end

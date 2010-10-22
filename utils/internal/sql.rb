@@ -167,7 +167,6 @@ module XYZ
         super(model_handle,sequel_ds.from_self({:alias => aliaz}))
       end
     end
-
     class Graph
       include DatatsetGraphMixin
       #TODO: needed to fully qualify Dataset; could this constraint be removed? by chaging expose?

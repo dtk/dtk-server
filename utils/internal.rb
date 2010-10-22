@@ -1,5 +1,6 @@
 require File.expand_path('internal/auxiliary', File.dirname(__FILE__))
 require File.expand_path('internal/sql', File.dirname(__FILE__))
+require File.expand_path('internal/dataset_from_search_pattern', File.dirname(__FILE__))
 require File.expand_path('internal/hash_object', File.dirname(__FILE__))
 require File.expand_path('internal/array_object', File.dirname(__FILE__))
 require File.expand_path('internal/rest_uri', File.dirname(__FILE__))

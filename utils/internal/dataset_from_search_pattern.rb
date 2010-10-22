@@ -10,8 +10,13 @@ module XYZ
       end
       private
       def ret_sequel_ds_from_hash!(ds,hash_dataset)
-        ds = ret_sequel_ds_with_relation!(ds,hash_dataset)
-        return nil unless ds
+        ds_add = ret_sequel_ds_with_relation(ds,hash_dataset)
+        return ds unless ds_add; ds = ds_add
+        
+        ds_add = ret_sequel_ds_with_columns(ds,hash_dataset)
+        return ds unless ds_add; ds = ds_add
+
+        ds_add = ret_sequel_ds_with_filters(ds,hash_dataset)
       end
 
       def ret_sequel_ds_with_relation(ds,hash_dataset)
@@ -21,9 +26,30 @@ module XYZ
         sql_tbl_name = DB.self.sequel_table_name(model_name)
         unless sql_tbl_name
           Log.error("illegal relation given #{relation_str}") 
-          retrun nil
+          return nil
         end
         ds.from(sql_tbl_name)
+      end
+
+      def ret_sequel_ds_with_columns(ds,hash_dataset)
+        columns = find(:columns,hash_dataset)
+        #form will be an array with each term either token or {:foo => :alias}; 
+        #TODO: right now only treating col as string or term
+        sequel_cols = columns.map do |col| 
+          if col.kind_of?(Symbol) or col.kind_of?(String)
+            convert_symbol(col)
+          elsif col.kind_of?(Hash) and col.size = 1
+            {convert_symbol(col.its_key) => convert_symbol(col.its_value)}
+          else
+            raise ErrorNotImplemented.new("json col with form #{col.inspect}") 
+          end
+        end
+        ds.select(*sequel_cols)
+      end
+
+      def ret_sequel_ds_with_filters(ds,hash_dataset)
+        filter = find(:filters,hash_dataset)
+        return nil unless filter
       end
 
       def find(type,hash_dataset)
@@ -38,6 +64,12 @@ module XYZ
       def its_value(key_value)
         return nil unless key_value.kind_of?(Hash)
         key_value.values.first
+      end
+
+      #converts if symbol still in string form; otehrwise keeps as string
+      def convert_symbol(term_in_json)
+        return term_in_json if term_in_json.kind_of?(Symbol)
+        term_in_json =~ /^:/ ? term_in_json[1..term_in_json.size-1].to_sym : term_in_json 
       end
     end
   end

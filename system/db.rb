@@ -16,6 +16,23 @@ module XYZ
       @c = 2 # TBD for testing hard wiring context
     end
 
+    def self.sequel_table_name(model_name,table_alias=nil)
+      db_rel = DB_REL_DEF[model_name]
+      return nil unless db_rel
+      db_rel.schema_table_symbol(table_alias)
+    end
+
+    def dataset(db_rel,table_alias=nil,*from_clauses)
+      tbl = db_rel.schema_table_symbol(table_alias)
+      return @db.from(tbl) if from_clauses.empty? #shortcut
+      @db.from(*([tbl]+from_clauses))
+    end
+
+    def empty_dataset()
+      @db.dataset()
+    end
+
+
     include SchemaProcessing unless included_modules.include?(SchemaProcessing)
     include DataProcessing unless included_modules.include?(DataProcessing)
     include Associations unless included_modules.include?(Associations)

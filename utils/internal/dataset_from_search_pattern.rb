@@ -21,8 +21,8 @@ module XYZ
       def ret_sequel_ds_with_relation(ds,hash_search)
         relation_str = find(:relation,hash_search)
         return nil unless relation_str
-        model_name = relation_str.to_sym
-        sql_tbl_name = DB.self.sequel_table_name(model_name)
+        model_name = convert_symbol(relation_str)
+        sql_tbl_name = DB.sequel_table_name(model_name)
         unless sql_tbl_name
           Log.error("illegal relation given #{relation_str}") 
           return nil
@@ -51,20 +51,19 @@ module XYZ
         return ds unless filter
 
         #TODO: just treating some subset of patterns
-        sequel_where_clause =
-          if filter.kind_of?(Array)
-            op,args = get_op_and_args(filter)
-            raise ErrorPatternNotImplemented.new(:filter_operation,op) unless op == :and
+        if filter.kind_of?(Array)
+          op,args = get_op_and_args(filter)
+          raise ErrorPatternNotImplemented.new(:filter_operation,op) unless (op == :and)
+          sequel_where_clause = and_list = args.map do |el|
+            el_op,el_args = get_op_and_args(el)
             #TODO: just treating eq
-            and_list = filter.map do |el|
-              el_op,el_args = get_op_and_args(el) 
-              raise ErrorPatternNotImplemented.new(:equal_op,el) unless el_op == :eq and el_args.size == 2
-              {convert_symbol(args[0]) => convert_symbol(args[1])}
-            end
-            SQL.and(*and_list)
-          else
-            raise ErrorPatternNotImplemented.new(:filter,filter)
+            raise ErrorPatternNotImplemented.new(:equal_op,el) unless (el_op == :eq and el_args.size == 2)
+            {convert_symbol(el_args[0]) => convert_symbol(el_args[1])}
           end
+          SQL.and(*and_list)
+        else
+          raise ErrorPatternNotImplemented.new(:filter,filter)
+        end
         ds.where(sequel_where_clause)
       end
 
@@ -75,7 +74,7 @@ module XYZ
 
       def ret_key(key_value)
         return nil unless key_value.kind_of?(Hash)
-        key_value.keys.first.to_sym
+        convert_symbol(key_value.keys.first)
       end
       def ret_value(key_value)
         return nil unless key_value.kind_of?(Hash)
@@ -90,19 +89,18 @@ module XYZ
 
       #converts if symbol still in string form; otehrwise keeps as string
       def convert_symbol(term_in_json)
-        return term_in_json if term_in_json.kind_of?(Symbol)
-        raise ErrorParsing.new(:symbol,term_in_json) unless term_in_json.kind_of?(String)
-        return term_in_json 
-        term_in_json =~ /^:/ ? term_in_json[1..term_in_json.size-1].to_sym : term_in_json 
+        #complexity due to handle case where have form :":columns"
+        raise ErrorParsing.new(:symbol,term_in_json) unless term_in_json.kind_of?(String) or term_in_json.kind_of?(Symbol)
+        term_in_json.to_s.gsub(/^[:]+/,'').to_sym 
       end
 
       class ErrorParsing < Error
-        def initialize(type,obj)
+        def initialize(type,object)
           super("parsing item #{type} is not supported; it has form: #{object.inspect}")
         end
       end
       class ErrorPatternNotImplemented < ErrorNotImplemented
-        def initialize(type,obj)
+        def initialize(type,object)
           super("parsing item #{type} is not supported; it has form: #{object.inspect}")
         end
       end

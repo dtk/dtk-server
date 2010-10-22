@@ -15,21 +15,6 @@ module XYZ
       include DataProcessingDelete unless included_modules.include?(DataProcessingDelete)
       include DataProcessingUpdate unless included_modules.include?(DataProcessingUpdate)
       
-      def dataset(db_rel,table_alias=nil,*from_clauses)
-        tbl = db_rel.schema_table_symbol(table_alias)
-        return @db.from(tbl) if from_clauses.empty? #shortcut
-        @db.from(*([tbl]+from_clauses))
-      end
-      def self.sequel_table_name(model_name,table_alias=nil)
-        db_rel = DB_REL_DEF[model_name]
-        return nil unless db_rel
-        db_rel.schema_table_symbol(table_alias)
-      end
-
-      def empty_dataset()
-        @db.dataset()
-      end
-
       def convert_from_object_to_db_form!(model_handle,scalar_assigns,sql_operation,opts={})
         db_rel = DB_REL_DEF[model_handle[:model_name]]
         return nil unless db_rel #to take into account model_name can be an artificial one, for example for array datasets 

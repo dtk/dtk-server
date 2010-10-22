@@ -1,28 +1,25 @@
 module XYZ
   module SQL
     class DataSetSearchPattern < Dataset
-      def initialize(db,model_handle,json_search)
-        sequel_ds = ret_sequel_ds_from_json(db.dataset(),json_search)
-        super(model_handle,sequel_ds)
+      class << self
+      def create_dataset_from_hash(db,model_handle,hash_search)
+        sequel_ds = ret_sequel_ds_from_hash(db.empty_dataset(),hash_search)
+        sequel_ds ? self.new(model_handle,sequel_ds) : nil
       end
-
-      def ret_sequel_ds_from_json(ds,json_search)
-        ret_sequel_ds_from_hash!(ds,SON.parse(json_search))
-      end
-
-      def ret_sequel_ds_from_hash(ds,hash_dataset)
-        ds_add = ret_sequel_ds_with_relation(ds,hash_dataset)
-        return ds unless ds_add; ds = ds_add
-        
-        ds_add = ret_sequel_ds_with_columns(ds,hash_dataset)
-        return ds unless ds_add; ds = ds_add
-
-        ds_add = ret_sequel_ds_with_filter(ds,hash_dataset)
-      end
-
      private
-      def ret_sequel_ds_with_relation(ds,hash_dataset)
-        relation_str = find(:relation,hash_dataset)
+
+      def ret_sequel_ds_from_hash(ds,hash_search)
+        ds_add = ret_sequel_ds_with_relation(ds,hash_search)
+        return nil unless ds_add; ds = ds_add
+        
+        ds_add = ret_sequel_ds_with_columns(ds,hash_search)
+        return nil unless ds_add; ds = ds_add
+
+        ret_sequel_ds_with_filter(ds,hash_search)
+      end
+
+      def ret_sequel_ds_with_relation(ds,hash_search)
+        relation_str = find(:relation,hash_search)
         return nil unless relation_str
         model_name = relation_str.to_sym
         sql_tbl_name = DB.self.sequel_table_name(model_name)
@@ -33,15 +30,15 @@ module XYZ
         ds.from(sql_tbl_name)
       end
 
-      def ret_sequel_ds_with_columns(ds,hash_dataset)
-        columns = find(:columns,hash_dataset)
+      def ret_sequel_ds_with_columns(ds,hash_search)
+        columns = find(:columns,hash_search)
         #form will be an array with each term either token or {:foo => :alias}; 
         #TODO: right now only treating col as string or term
         sequel_cols = columns.map do |col| 
           if col.kind_of?(Symbol) or col.kind_of?(String)
             convert_symbol(col)
           elsif col.kind_of?(Hash) and col.size = 1
-            {convert_symbol(col.its_key) => convert_symbol(col.its_value)}
+            {convert_symbol(ret_key(col)) => convert_symbol(ret_value(col))}
           else
             raise ErrorPatternNotImplemented.new(:column,col)
           end
@@ -49,8 +46,8 @@ module XYZ
         ds.select(*sequel_cols)
       end
 
-      def ret_sequel_ds_with_filter(ds,hash_dataset)
-        filter = find(:filter,hash_dataset)
+      def ret_sequel_ds_with_filter(ds,hash_search)
+        filter = find(:filter,hash_search)
         return ds unless filter
 
         #TODO: just treating some subset of patterns
@@ -71,16 +68,16 @@ module XYZ
         ds.where(sequel_where_clause)
       end
 
-      def find(type,hash_dataset)
-        key_val = hash_dataset.find{|obj|obj.its_key() == type}
-        key_val ? its_value(key_val) : nil
+      def find(type,hash_search)
+        key_val = hash_search.find{|obj|ret_key(obj) == type}
+        key_val ? ret_value(key_val) : nil
       end
 
-      def its_key(key_value)
+      def ret_key(key_value)
         return nil unless key_value.kind_of?(Hash)
         key_value.keys.first.to_sym
       end
-      def its_value(key_value)
+      def ret_value(key_value)
         return nil unless key_value.kind_of?(Hash)
         key_value.values.first
       end
@@ -111,4 +108,5 @@ module XYZ
       end
     end
   end
+end
 end

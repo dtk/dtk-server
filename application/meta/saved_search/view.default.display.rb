@@ -31,7 +31,13 @@
             {:search => {
              :type => 'hash',
              :help => '',
-             :rows => 1,
+             :rows => 5,
+             :cols => 40,
+            }},
+            {:search_result => {
+             :type => 'hash',
+             :help => '',
+             :rows => 5,
              :cols => 40,
             }},
         ],

@@ -5,13 +5,12 @@ module XYZ
         sequel_ds = ret_sequel_ds_from_json(db.dataset(),json_search)
         super(model_handle,sequel_ds)
       end
-     private
 
       def ret_sequel_ds_from_json(ds,json_search)
         ret_sequel_ds_from_hash!(ds,SON.parse(json_search))
       end
 
-      def ret_sequel_ds_from_hash!(ds,hash_dataset)
+      def ret_sequel_ds_from_hash(ds,hash_dataset)
         ds_add = ret_sequel_ds_with_relation(ds,hash_dataset)
         return ds unless ds_add; ds = ds_add
         
@@ -21,6 +20,7 @@ module XYZ
         ds_add = ret_sequel_ds_with_filters(ds,hash_dataset)
       end
 
+     private
       def ret_sequel_ds_with_relation(ds,hash_dataset)
         relation_str = find(:relation,hash_dataset)
         return nil unless relation_str
@@ -52,10 +52,19 @@ module XYZ
       def ret_sequel_ds_with_filters(ds,hash_dataset)
         filters = find(:filters,hash_dataset)
         return ds unless filter
+
         #TODO: just treating some subset of patterns
         sequel_where_clause =
-          if filters.kind_of?(Hash)
-            filters.inject({}){|h.kv|h.merge(convert_symbol(kv[0]) => convert_symbol(kv[1]))}
+          if filters.kind_of?(Array)
+            op,args = get_op_and_args(filters)
+            raise ErrorPatternNotImplemented.new(:filter_operation,op) unless op == :and
+            #TODO: just treating eq
+            and_list = filters.map do |el|
+              el_op,el_args = get_op_and_args(el) 
+              raise ErrorPatternNotImplemented.new(:equal_op,el) unless el_op == :eq and el_args.size == 2
+              {convert_symbol(args[0]) => convert_symbol(args[1])}
+            end
+            SQL.and(*and_list)
           else
             raise ErrorPatternNotImplemented.new(:filters,filters)
           end
@@ -76,13 +85,24 @@ module XYZ
         key_value.values.first
       end
 
+      #return op in symbol form and args
+      def get_op_and_args(expr)
+        raise ErrorParsing.new(:expression,expr) unless expr.kind_of?(Array)
+        [convert_symbol(expr.first),expr[1..expr.size-1]]
+      end
+
       #converts if symbol still in string form; otehrwise keeps as string
       def convert_symbol(term_in_json)
         return term_in_json if term_in_json.kind_of?(Symbol)
+        raise ErrorParsing.new(:symbol,term_in_json) unless term_in_json.kind_of?(String)
+        return term_in_json 
         term_in_json =~ /^:/ ? term_in_json[1..term_in_json.size-1].to_sym : term_in_json 
       end
 
       class ErrorParsing < Error
+        def initialize(type,obj)
+          super("parsing item #{type} is not supported; it has form: #{object.inspect}")
+        end
       end
       class ErrorPatternNotImplemented < ErrorNotImplemented
         def initialize(type,obj)

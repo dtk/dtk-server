@@ -1,0 +1,18 @@
+{
+  "library": {
+    "test": {
+      "saved_search": {
+        "search1" : {	
+	  "display_name" : "stopped Ubuntu 9.10 nodes",
+           "search" : [
+               {":columns" : [":display_name"]},
+               {":relation" : ":node"},
+               {":filter" : [":and", [":eq", ":os", "Ubuntu 9.10"],
+                                     [":eq", ":operational_status", "stopped"]]}
+	     ]
+           }
+        }	
+      }
+    }
+ } 
+

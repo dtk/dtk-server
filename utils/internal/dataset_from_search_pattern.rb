@@ -17,7 +17,7 @@ module XYZ
         ds_add = ret_sequel_ds_with_columns(ds,hash_dataset)
         return ds unless ds_add; ds = ds_add
 
-        ds_add = ret_sequel_ds_with_filters(ds,hash_dataset)
+        ds_add = ret_sequel_ds_with_filter(ds,hash_dataset)
       end
 
      private
@@ -49,24 +49,24 @@ module XYZ
         ds.select(*sequel_cols)
       end
 
-      def ret_sequel_ds_with_filters(ds,hash_dataset)
-        filters = find(:filters,hash_dataset)
+      def ret_sequel_ds_with_filter(ds,hash_dataset)
+        filter = find(:filter,hash_dataset)
         return ds unless filter
 
         #TODO: just treating some subset of patterns
         sequel_where_clause =
-          if filters.kind_of?(Array)
-            op,args = get_op_and_args(filters)
+          if filter.kind_of?(Array)
+            op,args = get_op_and_args(filter)
             raise ErrorPatternNotImplemented.new(:filter_operation,op) unless op == :and
             #TODO: just treating eq
-            and_list = filters.map do |el|
+            and_list = filter.map do |el|
               el_op,el_args = get_op_and_args(el) 
               raise ErrorPatternNotImplemented.new(:equal_op,el) unless el_op == :eq and el_args.size == 2
               {convert_symbol(args[0]) => convert_symbol(args[1])}
             end
             SQL.and(*and_list)
           else
-            raise ErrorPatternNotImplemented.new(:filters,filters)
+            raise ErrorPatternNotImplemented.new(:filter,filter)
           end
         ds.where(sequel_where_clause)
       end

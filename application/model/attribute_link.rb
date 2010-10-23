@@ -39,8 +39,8 @@ module XYZ
 
       first_join_ds = input_attr_ds.select({:id => :input_id},{:value_asserted => :value_derived},:action_id).from_self.join_table(:inner,attr_link_ds,[:input_id]) 
       attrs_to_change_ds = first_join_ds.join_table(:inner,output_attr_ds,{:id => :output_id})
-      returning_cols = {:returning_cols => [:id,:display_name,:action_id,:old_val,{:value_derived => :new_val}]}
-      update_ret = update_from_select(output_attr_mh,FieldSet.new([:value_derived]),attrs_to_change_ds,returning_cols)
+      returning_cols_opts = {:returning_cols => [:id,:display_name,:action_id,:old_val,{:value_derived => :new_val}]}
+      update_ret = update_from_select(output_attr_mh,FieldSet.new([:value_derived]),attrs_to_change_ds,returning_cols_opts)
 
       #create the new pending changes
       parent_action_mh = attr_changes.first.action_id_handle.createMH()

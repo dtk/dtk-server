@@ -7,6 +7,7 @@ module XYZ
       column :type, :varchar, :size => 25# "setting" | "delete" | "deploy-node" | "install-component" | "patch-component" | "upgare-component" | "rollback-component" | "procedure" | .. 
       column :object_type, :varchar, :size => 15 # "attribute" | "node" | "component"
       column :transaction, :int, :default => 1 #TODO may introduce transaction object and make this a foreign key
+      #TODO: change below to more general json field about ordering
       column :relative_order_order, :int, :default => 1 #relative with respect to parent
       column :change, :json # gives detail about the change
 
@@ -16,9 +17,8 @@ module XYZ
       foreign_key :component_id, :component, FK_CASCADE_OPT
       #TODO: may have here who, when
 
-      virtual_column :parent_name, :possible_parents => [:datacenter, :action]
       many_to_one :datacenter, :action
-      one_to_many :action #nested items show when one change triggers other changes
+      one_to_many :action #that is for decomposition #todo: what about for ordering
     end
     ### virtual column defs
     #######################

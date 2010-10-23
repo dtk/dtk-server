@@ -7,7 +7,7 @@
           }}
       ],
       :field_list => [
-          {:parent_name => {
+                      {:object_type => {
               :type => 'text',
               :help => '',
             }},

@@ -14,6 +14,15 @@ module XYZ
         ret
       end
 
+      def ret_key(key_value)
+        return nil unless key_value.kind_of?(Hash)
+        key_value.keys.first
+      end
+      def ret_value(key_value)
+        return nil unless key_value.kind_of?(Hash)
+        key_value.values.first
+      end
+
       def hash_from_file_with_json(file_name)
         return nil unless File.exists?(file_name)
         ret = nil

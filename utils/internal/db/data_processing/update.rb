@@ -3,7 +3,6 @@ require 'sequel'
 module XYZ
   class DB
     module DataProcessingUpdate
-
       def update_from_select(model_handle,field_set,select_ds,opts={})
         columns = field_set.cols
         #TODO: right now need to hardwire to t1 for this to work; although alias set with this var; adding where clause puts t1 in
@@ -22,7 +21,7 @@ module XYZ
         unless respond_to?(:update_returning_sql)
           raise Error.new("have not implemented update_from_select with returning opt")
         end
-        ret_list_prefixed = opts[:returning_cols].map{|x|x.kind_of?(Hash) ? {"#{select_prefix}__#{x.keys.first}".to_sym => x.values.first} : "#{select_prefix}__#{x}".to_sym}
+        ret_list_prefixed = opts[:returning_cols].map{|x|x.kind_of?(Hash) ? {"#{select_prefix}__#{Aux::ret_key(x)}".to_sym => Aux::ret_value(x)} : "#{select_prefix}__#{x}".to_sym}
         sql = update_returning_sql(update_ds,update_set_clause,ret_list_prefixed)
         ret = Array.new
         fetch_raw_sql(sql){|row| ret << row}

@@ -38,7 +38,7 @@ module XYZ
           if col.kind_of?(Symbol) or col.kind_of?(String)
             ret_symbol(col)
           elsif col.kind_of?(Hash) and col.size = 1
-            {ret_symbol(ret_key(col)) => ret_symbol(ret_value(col))}
+            {ret_symbol(ret_symbol_key(col)) => ret_symbol(Aux::ret_value(col))}
           else
             raise ErrorPatternNotImplemented.new(:column,col)
           end
@@ -68,17 +68,8 @@ module XYZ
       end
 
       def find(type,hash_search)
-        key_val = hash_search.find{|obj|ret_key(obj) == type}
-        key_val ? ret_value(key_val) : nil
-      end
-
-      def ret_key(key_value)
-        return nil unless key_value.kind_of?(Hash)
-        ret_symbol(key_value.keys.first)
-      end
-      def ret_value(key_value)
-        return nil unless key_value.kind_of?(Hash)
-        key_value.values.first
+        key_val = hash_search.find{|obj|ret_symbol_key(obj) == type}
+        key_val ? Aux::ret_value(key_val) : nil
       end
 
       #return op in symbol form and args
@@ -99,6 +90,10 @@ module XYZ
         return term_in_json.to_s.gsub(/^[:]+/,'').to_sym if term_in_json.kind_of?(Symbol)
         return $1.to_sym if (term_in_json.kind_of?(String) and term_in_json =~ /^[:]+(.+)/)
         term_in_json
+      end
+
+      def ret_symbol_key(obj)
+        ret_symbol(Aux::ret_key(obj))
       end
 
       class ErrorParsing < Error

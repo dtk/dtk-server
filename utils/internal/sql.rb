@@ -131,6 +131,11 @@ module XYZ
         ret
       end
 
+      #for debugging
+      def ppsql()
+        @sequel_ds.sql.gsub(/"/,'')
+      end
+
      private
       def model_name()
         model_name_info.first.model_name

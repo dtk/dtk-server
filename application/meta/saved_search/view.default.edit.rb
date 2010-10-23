@@ -1,11 +1,11 @@
 {
-      :action => '',
+      :action => 'index.php',
       :hidden_fields => [
         {
           :model => {
             :required => true,
             :type => 'hidden',
-            :value => 'datacenter',
+            :value => 'saved_search',
           },
         },
         {
@@ -35,10 +35,10 @@
              :rows => 1,
              :cols => 40,
             }},
-            {:description => {
-              :type => 'text',
+            {:search => {
+              :type => 'hash',
               :help => '',
-              :rows => 1,
+              :rows => 10,
               :cols => 40,
             }},
         ],

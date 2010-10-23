@@ -21,7 +21,7 @@ module XYZ
       def ret_sequel_ds_with_relation(ds,hash_search)
         relation_str = find(:relation,hash_search)
         return nil unless relation_str
-        model_name = convert_symbol(relation_str)
+        model_name = ret_symbol(relation_str)
         sql_tbl_name = DB.sequel_table_name(model_name)
         unless sql_tbl_name
           Log.error("illegal relation given #{relation_str}") 
@@ -36,9 +36,9 @@ module XYZ
         #TODO: right now only treating col as string or term
         sequel_cols = columns.map do |col| 
           if col.kind_of?(Symbol) or col.kind_of?(String)
-            convert_symbol(col)
+            ret_symbol(col)
           elsif col.kind_of?(Hash) and col.size = 1
-            {convert_symbol(ret_key(col)) => convert_symbol(ret_value(col))}
+            {ret_symbol(ret_key(col)) => ret_symbol(ret_value(col))}
           else
             raise ErrorPatternNotImplemented.new(:column,col)
           end
@@ -58,7 +58,7 @@ module XYZ
             el_op,el_args = get_op_and_args(el)
             #TODO: just treating eq
             raise ErrorPatternNotImplemented.new(:equal_op,el) unless (el_op == :eq and el_args.size == 2)
-            {convert_symbol(el_args[0]) => convert_symbol(el_args[1])}
+            {ret_scalar(el_args[0]) => ret_scalar(el_args[1])}
           end
           SQL.and(*and_list)
         else
@@ -74,7 +74,7 @@ module XYZ
 
       def ret_key(key_value)
         return nil unless key_value.kind_of?(Hash)
-        convert_symbol(key_value.keys.first)
+        ret_symbol(key_value.keys.first)
       end
       def ret_value(key_value)
         return nil unless key_value.kind_of?(Hash)
@@ -84,14 +84,21 @@ module XYZ
       #return op in symbol form and args
       def get_op_and_args(expr)
         raise ErrorParsing.new(:expression,expr) unless expr.kind_of?(Array)
-        [convert_symbol(expr.first),expr[1..expr.size-1]]
+        [ret_symbol(expr.first),expr[1..expr.size-1]]
       end
 
       #converts if symbol still in string form; otehrwise keeps as string
-      def convert_symbol(term_in_json)
+      def ret_symbol(term_in_json)
+        raise ErrorParsing.new(:symbol,term_in_json) if [Array,Hash].detect{|t|term_in_json.kind_of?(t)}
         #complexity due to handle case where have form :":columns"
-        raise ErrorParsing.new(:symbol,term_in_json) unless term_in_json.kind_of?(String) or term_in_json.kind_of?(Symbol)
         term_in_json.to_s.gsub(/^[:]+/,'').to_sym 
+      end
+      def ret_scalar(term_in_json)
+        raise ErrorParsing.new(:symbol,term_in_json) if [Array,Hash].detect{|t|term_in_json.kind_of?(t)}
+        #complexity due to handle case where have form :":columns"
+        return term_in_json.to_s.gsub(/^[:]+/,'').to_sym if term_in_json.kind_of?(Symbol)
+        return $1.to_sym if (term_in_json.kind_of?(String) and term_in_json =~ /^[:]+(.+)/)
+        term_in_json
       end
 
       class ErrorParsing < Error

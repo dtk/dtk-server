@@ -8,6 +8,13 @@
       },
     },
     {
+      :id => {
+        :required => true,
+        :type => 'hidden',
+        :value => '{%=saved_search[:id]%}',
+      },
+    },
+    {
       :action => {
         :required => true,
         :type => 'hidden',
@@ -22,7 +29,7 @@
       },
     },
     {
-      :query_params => {
+      :saved_search => {
         :required => true,
         :type => 'hidden',
         :value => '',

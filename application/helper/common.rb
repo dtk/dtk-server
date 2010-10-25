@@ -54,9 +54,9 @@ module Ramaze::Helper
     def ret_order_by_list()
       #TODO: handle case when this is a get
       #TODO: filter fields to make sure real fields or treat virtual columns
-      query_params = ret_query_params_in_request()
-      return nil unless (query_params||{})["order_by"]
-      query_params["order_by"].map{|x|{:field => x["field"].to_sym, :order => x["order"]}}
+      saved_search = ret_saved_search_in_request()
+      return nil unless (saved_search||{})["order_by"]
+      saved_search["order_by"].map{|x|{:field => x["field"].to_sym, :order => x["order"]}}
     end
 
 #TODO: just for testing
@@ -66,18 +66,18 @@ TestOveride = 100# nil
     def ret_paging_info()
       #TODO: case on request_method_is_post?()
       #TODO: might be taht query is optimzied by not having start being 0 included
-      query_params = ret_query_params_in_request()
+      saved_search = ret_saved_search_in_request()
 #TODO: just for testing
-if TestOveride and (query_params||{})["start"].nil?
+if TestOveride and (saved_search||{})["start"].nil?
   return {:start => 0, :limit => TestOveride, :num_model_items => NumModelItemsDefault}
 end
-      return nil unless query_params
-      return nil unless query_params["start"] or query_params["limit"]
-      start = (query_params["start"]||0).to_i
-      limit = (query_params["limit"] || R8::Config[:page_limit] || LimitDefault).to_i
+      return nil unless saved_search
+      return nil unless saved_search["start"] or saved_search["limit"]
+      start = (saved_search["start"]||0).to_i
+      limit = (saved_search["limit"] || R8::Config[:page_limit] || LimitDefault).to_i
 #TODO: just for testing
 limit = TestOveride if TestOveride 
-      num_model_items = (query_params["num_model_items"] || NumModelItemsDefault)
+      num_model_items = (saved_search["num_model_items"] || NumModelItemsDefault)
       {:start => start, :limit => limit, :num_model_items => num_model_items}
     end
 
@@ -86,8 +86,8 @@ limit = TestOveride if TestOveride
       field_set.cols.inject({}){|ret,field|ret.merge(field => request_params[field]||'')}
     end
 
-    def ret_query_params_in_request()
-      json_form = (ret_request_params()||{})["query_params"]
+    def ret_saved_search_in_request()
+      json_form = (ret_request_params()||{})["saved_search"]
       return nil if json_form.nil? or json_form.empty?
       #TODO: temp hack to convert from ' to " in query params
       JSON.parse(json_form.gsub(/'/,'"'))

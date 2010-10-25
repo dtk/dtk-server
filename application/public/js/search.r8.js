@@ -6,29 +6,35 @@ if (!R8.Search) {
 
 				page : function(modelName,start) {
 					var searchForm = document.getElementById(modelName+'-search-form');
-					var queryParamsElem = R8.Utils.Y.one('#query_params');
-					var query_params = {'start':start};
+					var savedSearchElem = R8.Utils.Y.one('#saved_search');
+					var saved_search = {'start':start};
 
 					YUI().use("json", function(Y) {
-						queryParamsElem.set('value',Y.JSON.stringify(query_params));
+						savedSearchElem.set('value',Y.JSON.stringify(saved_search));
 						searchForm.submit();
 					});
 				},
 
 				sort : function(modelName,field,order) {
 					var searchForm = document.getElementById(modelName+'-search-form');
-					var queryParamsElem = R8.Utils.Y.one('#query_params');
+					var savedSearchElem = R8.Utils.Y.one('#saved_search');
 					var currentStartElem = R8.Utils.Y.one('#'+modelName+'_current_start');
 
-					var query_params = {
+					var saved_search = {
 							'start':currentStartElem.get('value'),
 							'order_by':[{'field':field,'order':order}]
 						};
 
 					YUI().use("json", function(Y) {
-						queryParamsElem.set('value',Y.JSON.stringify(query_params));
+						savedSearchElem.set('value',Y.JSON.stringify(saved_search));
 						searchForm.submit();
 					});
+				},
+				
+				toggleSearch : function(modelName) {
+					var spElem = R8.Utils.Y.one('#'+modelName+'-search-panel');
+
+					(spElem.getStyle('display') == 'none') ? spElem.setStyle('display','block') : spElem.setStyle('display','none');
 				}
 			}
 		}();

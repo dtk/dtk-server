@@ -57,7 +57,7 @@ a {
 #menu_container ul {
 	float: left;
 	padding: 0;
-	margin: -2px 0 0 100px;
+	margin: -2px 0 0 10px;
 	position: relative;
 }
 
@@ -171,6 +171,7 @@ table.edit td.label {
 
 .list_container {
 	padding: 10px 20px;
+	margin: 30px 0 0 0;
 }
 
 table.list {
@@ -210,3 +211,111 @@ table.list tr.odd {
 
 /*-------------------------------------*/
 
+
+/*----------Search-------------*/
+
+.search-container {
+	height: 30px;
+	width: 887px;
+	border-bottom: 1px solid #AACCEE;
+	position: absolute;
+	z-index: 10;
+}
+
+.search-container .drop-shadow {
+	position: absolute;
+	z-index: 0;
+}
+
+.saved-search-categories {
+	float: left;
+	width: 100px;
+}
+
+.saved-search-cat {
+	width: 100px;
+	height: 25px;
+	font-size: 14px;
+	font-weight: bold;
+	cursor: pointer;
+}
+.saved-search-cat .label {
+	margin: 3px 5px;;
+	float: right;
+}
+
+.saved-search-cat.selected {
+	background-color: #AACCEE;
+}
+
+/*------------Drop Shadow---------*/
+
+.search-container .drop-shadow {
+	height: 60px;
+	width: 120px;
+	margin: 4px 0 0 4px;
+}
+
+.search-container .ds-corner {
+	background-image: url(../images/node/basic-corners-shadow.png);
+}
+
+.search-container .ds-l-col {
+	float: left;
+	height: 60px;
+	width: 7px;
+}
+.search-container .ds-r-col {
+	float: right;
+	height: 60px;
+	width: 7px;
+}
+
+.search-container .drop-shadow .ds-l-col-body {
+	width: 7px;
+	height: 46px;
+	float: left;
+	background-image: url(../images/node/basic-col-shadow-bg.png);
+	background-repeat: repeat-y;
+}
+
+
+.search-container .drop-shadow .ds-r-col-body {
+	width: 7px;
+	height: 46px;
+	float: left;
+	background-image: url(../images/node/basic-col-shadow-bg.png);
+	background-repeat: repeat-y;
+	background-position: -7px 0px;
+}
+
+.search-container .drop-shadow .ds-body {
+	float: left;
+	width: 106px;
+	height: 60px;
+}
+.search-container .drop-shadow .ds-body .header {
+	float: left;
+	width: 106px;
+	height: 7px;
+	background-image: url(../images/node/basic-header-shadow-bg.png);
+	background-repeat: repeat-x;
+}
+.search-container .drop-shadow .ds-body .footer {
+	float: left;
+	width: 106px;
+	height: 7px;
+	background-image: url(../images/node/basic-header-shadow-bg.png);
+	background-repeat: repeat-x;
+	background-position: 0px -7px;
+}
+
+.search-container .drop-shadow .ds-body .main-body {
+	float: left;
+	width: 106px;
+	height: 46px;
+	background-image: url(../images/node/basic-body-shadow-bg.png);
+	background-repeat: repeat;
+}
+
+/*---------------*/

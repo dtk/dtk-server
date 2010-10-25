@@ -1,38 +1,41 @@
 module XYZ
   class Attribute < Model
     set_relation_name(:attribute,:attribute)
-    class << self
-      def up()
-        external_ref_column_defs()
-        column :value_asserted, :json
-        column :value_derived, :json
-        column :function, :json
-        column :propagation_type, :varchar, :size => 20, :default => "immediate" #whether a propagated new value should be immediately set or whether it needs to go through approval, etc
-        column :required, :boolean #whether required for this attribute to have a value inorder to execute actions for parent component; TBD: may be indexed by action
+    def self.up()
+      external_ref_column_defs()
+      column :value_asserted, :json
+      column :value_derived, :json
+      column :value_actual, :json
+      column :is_settable, :boolean, :default => true
+      column :needs_validation, :boolean, :default => false #indicates whether when action executed to set attribute validation is needed before can set actual to desired value
+      column :function, :json
+      #TBD: may remove  :propagation_type
+      column :propagation_type, :varchar, :size => 20, :default => "immediate" #whether a propagated new value should be immediately set or whether it needs to go through approval, etc
+      column :required, :boolean #whether required for this attribute to have a value inorder to execute actions for parent component; TBD: may be indexed by action
 
-        #TBD: do we want to factor output vars out and treat differently
-        column :output_variable, :boolean # set to true if as a result of recipe execution var gets computed
+      #TBD: do we want to factor output vars out and treat differently
+      column :output_variable, :boolean # set to true if as a result of recipe execution var gets computed
 
-        #TODO: may unify the fields below and treat them all as types of constraints, which could be intersected, unioned, etc
-        column :data_type, :varchar, :size => 25
-        #TBD: whether to explicitly have an array or put this in data type or seamntic_type
-        column :is_array, :boolean, :default => false
-        column :semantic_type, :json
-        column :constraints, :varchar
+      #TODO: may unify the fields below and treat them all as types of constraints, which could be intersected, unioned, etc
+      column :data_type, :varchar, :size => 25
+      #TBD: whether to explicitly have an array or put this in data type or seamntic_type
+      column :is_array, :boolean, :default => false
+      column :semantic_type, :json
+      column :constraints, :varchar
 
-        #TODO this probably does not belond here column :hidden, :boolean, :default => false
-        column :port_type, :varchar, :size => 10 # null means no port; otherwise "input", "output", or "either"
-        virtual_column :attribute_value
+      #TODO this probably does not belond here column :hidden, :boolean, :default => false
+      column :port_type, :varchar, :size => 10 # null means no port; otherwise "input", "output", or "either"
+      #TODO: may rename attribute_value to desired_value
+      virtual_column :attribute_value
 
-        #Boolean that indicates whether there is a executable script/recipe associated with the attribute
-        virtual_column :executable?, :hidden => true
-        virtual_column :unknown_in_attribute_value , :hidden => true
+      #Boolean that indicates whether there is a executable script/recipe associated with the attribute
+      virtual_column :executable?, :hidden => true
+      virtual_column :unknown_in_attribute_value , :hidden => true
 
-        #if component attribute then hash with component and node(s) associated with it 
-        #TODO remove or rewrite
+      #if component attribute then hash with component and node(s) associated with it 
+      #TODO remove or rewrite
       #  virtual_column :assoc_components_on_nodes
-        many_to_one :component, :node
-      end
+      many_to_one :component, :node
     end
     ### virtual column defs
     def member_id_list()
@@ -45,8 +48,10 @@ module XYZ
       Model.update_from_hash_assignments(id_handle,hash_assigns,opts)
       #TODO: should this functionality below be called from within Attribute.update_from_hash_assignments or instead be called
       # from ahigher level fn?
-      #if asserted value is changed then propagate 
-      changed_value = hash_assigns[:value_asserted] #TODO: check whether asserted value accually is different
+      #if there is an actual change then set up actions to make the change; check whetehr there is an actual change is by 
+      # comparing asserted value to attribute_actual; actual change is if attribute_actual is not null (meaning it has been set) and 
+      #different from changed_value 
+      changed_value = hash_assigns[:value_asserted] #TODO: check whether actual change
       return nil if changed_value.nil?
       action_parent_idh = id_handle.get_top_container_id_handle(:datacenter)
       return nil unless action_parent_idh #this would happend if top container is not a datacenter TODO: see if this should be "trapped" at higher level

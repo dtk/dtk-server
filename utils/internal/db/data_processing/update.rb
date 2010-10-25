@@ -52,6 +52,23 @@ module XYZ
 
      private
 
+      def update_given_sequel_dataset(id_info,update_ds,update_set_clause,opts={})
+        unless opts[:returning_cols] 
+          update_ds.update(update_set_clause)
+          return nil
+        end
+        unless respond_to?(:update_returning_sql)
+          raise Error.new("have not implemented update_from_select with returning opt")
+        end
+        ret_list_prefixed = opts[:returning_cols].map{|x|x.kind_of?(Hash) ? {"#{select_prefix}__#{Aux::ret_key(x)}".to_sym => Aux::ret_value(x)} : "#{select_prefix}__#{x}".to_sym}
+        sql = update_returning_sql(update_ds,update_set_clause,ret_list_prefixed)
+        ret = Array.new
+        fetch_raw_sql(sql){|row| ret << row}
+        db_rel = DB_REL_DEF[id_info[:relation_type]]
+	modify_to_reflect_special_processing!(ret,db_rel,:update)
+        ret
+      end
+
       def update_instance_from_id_info(id_info,scalar_assigns,opts={})
 	return nil if scalar_assigns.empty?
 	db_rel = DB_REL_DEF[id_info[:relation_type]]

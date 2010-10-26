@@ -4,7 +4,7 @@
       "saved_search": {
         "search1" : {	
 	  "display_name" : "stopped Ubuntu 9.10 nodes",
-           "search" : [
+           "search_pattern" : [
                {":columns" : [":display_name"]},
                {":relation" : ":node"},
                {":filter" : [":and", [":eq", ":os", "Ubuntu 9.10"],

@@ -23,9 +23,9 @@ module XYZ
     def self.create_from_input(input_hash,c)
       raise Error.new("search object is ill-formed") unless is_valid?(input_hash)
       hash = {
-        "id" => input_hash["id"],
-        "display_name" => input_hash["name"],
-        "search_pattern" => input_hash["search_pattern"]
+        :id => input_hash["id"],
+        :display_name => input_hash["name"],
+        :search_pattern => input_hash["search_pattern"]
       }
       ret = SearchObject.new(hash,c,:search_pattern)
       ret.should_save = input_hash["save"]
@@ -59,6 +59,9 @@ module XYZ
 
     def name()
       self[:display_name]
+    end
+    def search_pattern()
+      self[:search_pattern]
     end
   end
 end

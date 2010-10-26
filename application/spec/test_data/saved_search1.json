@@ -1,7 +1,7 @@
 {
   "library": {
     "test": {
-      "saved_search": {
+      "search_object": {
         "search1" : {	
 	  "display_name" : "stopped Ubuntu 9.10 nodes",
            "search_pattern" : [

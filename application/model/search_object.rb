@@ -27,12 +27,11 @@ module XYZ
         :display_name => input_hash["name"],
         :search_pattern => input_hash["search_pattern"]
       }
-      ret = SearchObject.new(hash,c,:search_pattern)
+      ret = SearchObject.new(hash,c)
       ret.should_save = input_hash["save"]
       ret
     end
 
-    #TODO: some of these fns should be geenric model fns
     def save?()
       should_save
     end
@@ -41,10 +40,12 @@ module XYZ
       (id and not search_pattern) ? true : nil
     end
 
+    #TODO: some of these fns should be geenric model fns
     def update!()
       raise Error.new("cannot update without an id") unless id()
-      saved_object = self.class.get_objects(model_handle,{:id => id()})
-      raise Error.new("cannot fidn saved search with id (#{search_object.id.to_s}") unless saved_object
+      saved_object = self.class.get_objects(model_handle,{:id => id()}).first
+      raise Error.new("cannot find saved search with id (#{id.to_s})") unless saved_object
+      saved_object.each{|k,v| self[k] = v}
     end
 
     def self.is_valid?(input_hash)

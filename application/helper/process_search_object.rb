@@ -6,7 +6,8 @@ module Ramaze::Helper
     def ret_search_object_in_request()
 
 if model_name == :node
-      hash = {"id" => 2147483992}
+                  
+  hash = {"id" => 2147483992}
 else
 hash = request_method_is_post?() ? ret_hash_search_object_in_post() : ret_hash_search_object_in_get()
 end

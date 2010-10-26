@@ -5,7 +5,7 @@
           :model => {
             :required => true,
             :type => 'hidden',
-            :value => 'saved_search',
+            :value => 'search_object',
           },
         },
         {

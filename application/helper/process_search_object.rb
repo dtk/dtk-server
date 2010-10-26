@@ -4,8 +4,15 @@ module Ramaze::Helper
    private
     #fns that get _search_object
     def ret_search_object_in_request()
-      hash = request_method_is_post?() ? ret_hash_search_object_in_post() : ret_hash_search_object_in_get()
-      hash ? SearchObject.new(hash) : nil
+
+if model_name == :node
+      hash = {"id" => 2147483992}
+else
+hash = request_method_is_post?() ? ret_hash_search_object_in_post() : ret_hash_search_object_in_get()
+end
+
+#      hash = request_method_is_post?() ? ret_hash_search_object_in_post() : ret_hash_search_object_in_get()
+      hash ? SearchObject.create_from_input(hash,ret_session_context_id()) : nil
     end
 
     def ret_hash_search_object_in_get()
@@ -17,33 +24,7 @@ module Ramaze::Helper
     end
 
     ###
-    class SearchObject 
-      def initialize(hash)
-        @id = hash["id"]
-        @name = hash["name"]
-        @search_pattern = hash["search_pattern"] ? SearchString.new(hash["search_pattern"]) : nil
-        @save = hash["save"]
-        raise Error.new("search object is ill-formed") unless is_valid?
-      end
-      
-      def save?()
-        save  
-      end
-      def needs_to_be_retrieved?()
-        (id and not search_pattern) ? true : nil
-      end
-
-      def update!(saved_search_obj)
-        @search_pattern = saved_search_obj["search_pattern"]
-        @name = saved_search_obj["display_name"]
-      end
-
-      attr_reader :id, :name, :search_pattern, :save
-     private
-      def is_valid?()
-        #TODO: can do finer grain validation
-        (id or search_pattern) ? true : nil
-      end
+=begin
 
       class SearchString
         def initialize(hash)
@@ -60,5 +41,6 @@ module Ramaze::Helper
         end
       end
     end
+=end
   end
 end

@@ -8,8 +8,8 @@ module Ramaze::Helper
       model_class(model_name).get_objects(ModelHandle.new(c,model_name),where_clause,opts)
     end
 
-    def get_object_by_id(id)
-      get_objects(model_name,{:id => id}).first
+    def get_object_by_id(id,model_name_x=model_name())
+      get_objects(model_name_x,{:id => id}).first
     end
 
     def update_from_hash(id,hash)

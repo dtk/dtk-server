@@ -45,6 +45,10 @@ module XYZ
         end
     end
 
+    def model_handle()
+      ModelHandle.new(@c,@relation_type)
+    end
+
     def self.create_from_rows(model_handle,rows,opts={})
       opts = opts[:convert] ? {:convert_for_create => true} : {}
       select_ds = SQL::ArrayDataset.create(db,rows,model_handle,opts)

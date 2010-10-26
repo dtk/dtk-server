@@ -68,8 +68,8 @@ module XYZ
       end
 
       def find(type,hash_search)
-        key_val = hash_search.find{|obj|ret_symbol_key(obj) == type}
-        key_val ? Aux::ret_value(key_val) : nil
+        pair = hash_search.find{|k,v|ret_symbol(k) == type}
+        pair ? pair[1] : nil
       end
 
       #return op in symbol form and args

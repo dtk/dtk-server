@@ -4,12 +4,12 @@
       "search_object": {
         "search1" : {	
 	  "display_name" : "stopped Ubuntu 9.10 nodes",
-           "search_pattern" : [
-               {":columns" : [":display_name"]},
-               {":relation" : ":node"},
-               {":filter" : [":and", [":eq", ":os", "Ubuntu 9.10"],
-                                     [":eq", ":operational_status", "stopped"]]}
-	     ]
+           "search_pattern" : 
+               {":columns" : [":display_name"],
+                ":relation" : ":node",
+                ":filter" : [":and", [":eq", ":os", "Ubuntu 9.10"],
+                                     [":eq", ":operational_status", "stopped"]]
+	     }
            }
         }	
       }

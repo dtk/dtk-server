@@ -72,7 +72,7 @@ module XYZ
       related_columns = field_set.related_columns(model_name)
       ret = nil
       unless related_columns
-        ret = @db.get_objects_scalar_columns(model_handle,where_clause,opts)
+        ret = dataset.all
       else
         ls_opts = opts.merge(FieldSet.opt(field_set))
         graph_ds = dataset.from_self(:alias => model_handle[:model_name])

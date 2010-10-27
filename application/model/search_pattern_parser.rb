@@ -7,7 +7,7 @@ module XYZ
 
     def field_set()
       #TBD: stub; must take out non scalars
-      (self[:columns] ? FieldSet.new(self[:columns]) : nil) || (relation.kind_of?(Symbol) ? FieldSet.default(relation) : nil)
+      (self[:columns] ? Model::FieldSet.new(self[:columns]) : nil) || (relation.kind_of?(Symbol) ? Model::FieldSet.default(relation) : nil)
     end
 
     def find_key(type)

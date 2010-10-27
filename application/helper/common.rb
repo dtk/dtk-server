@@ -42,12 +42,11 @@ module Ramaze::Helper
     end
 
     #request parsing fns
-=begin deprecating
+#TODO: may deprecat; befoe so would have to remove from call in some list views in display
     def ret_where_clause(field_set=Model::FieldSet.all_real(model_name()))
       hash = ret_hash_for_where_clause()
       hash ? field_set.ret_where_clause_for_search_string(hash.reject{|k,v|k == :parent_id}) : nil
     end
-=end
 
     def ret_parent_id()
       (ret_hash_for_where_clause()||{})[:parent_id]

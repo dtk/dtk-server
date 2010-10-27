@@ -15,7 +15,11 @@ module R8Tpl
           return nil if @profile.to_sym == :default
           "#{R8::Config[:meta_templates_root]}/#{@model_name}/view.default.#{@view_name}.rb"
         when :cache 
+          if @saved_search_ref
+            "#{R8::Config[:app_cache_root]}/view/saved_search/#{@profile}.#{@saved_search_ref}.rtpl"
+          else
           "#{R8::Config[:app_cache_root]}/view/#{@model_name}/#{@profile}.#{@view_name}.rtpl"
+          end
         when :layout
            #TODO: see if profile is used to qualify
           "#{R8::Config[:app_root_path]}/view/#{@view_name}.rtpl"

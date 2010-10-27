@@ -27,9 +27,16 @@ module R8Tpl
       @profile = @user.current_profile
 
       @model_name = @view_name = String.new
+      @saved_search_ref = nil
       rdn = relative_distinguished_view_path.split("/")
+      #TODO: fidn better way to determine isa_saved_search
       if rdn.size == 2
-        @model_name,@view_name = rdn
+        if rdn[0] == "saved_search"
+          @saved_search_ref = rdn[1]
+          path_type_to_use ||= :cache
+        else
+          @model_name,@view_name = rdn
+        end
       else
         @view_name = rdn.first
       end
@@ -78,7 +85,8 @@ module R8Tpl
 
       (R8::Config[:js_templating_on].nil?) ? @js_templating_on = true : @js_templating_on = R8::Config[:js_templating_on]
 
-#TODO: think of better terminology then path_type_to_use
+
+        #TODO: think of better terminology then path_type_to_use
        set_view(path_type_to_use)
     end
 
@@ -587,52 +595,20 @@ p '     iteratorVarRaw: '+newLoopHash[:iteratorVarRaw].to_s
 
   def process_view_type(path_type,path)
     case path_type
-      when :base
-        path
-      when :system
-        path
-      when :layout
-        path
-      when :meta
-        view = ViewR8.new(@model_name,@view_name,@user)
-        view.update_cache?()
-    end
+     when :base
+      path
+     when :system
+      path
+     when :layout
+      path
+     when :meta
+      view = ViewR8.new(@model_name,@view_name,@user)
+      view.update_cache?()
+     when :cache
+      path
+     end
   end
-=begin
 
-    if File.exists?(
-      return @view_path = path
-    end
-    #next checks if meta view exists
-    path = "#{ret_view_dir(:meta)/#{@model_name}/#{@profile}.#{@view_name}"
-
-view.default.list.json
-    curr_view = @view_name
-    tpl_dir = ret_view_dir(:model_cache)
-
-    #next checks if meta view exists
-    #application/view/model_name/profile.view_name.[json|.rb]
-      #sees cache     
-
-    if !from_view && has_meta_view?(tpl_dir,profile)
-      #make sure that base smarty engine knows where to look instead of default view folder
-      FileUtils.mkdir_p("#{tpl_dir}/#{@model_name}",0,true) unless File.exists?("#{tpl_dir}/#{@model_name}")
-
-      #now make sure meta tpl cache is up to date
-      ViewR8.update_cache(@model_name,@view_name,profile)
-      curr_view = ViewR8.view_tpl_name
-    else
-#TODO: revisit when deeper into profiles, currently too messy
-      profile_tpl_name = "#{tpl_dir}/#{profile}.#{@view_name}"
-      default_tpl_name = "#{tpl_dir}/#{@view_name}"
-      if File.exists?(profile_tpl_name)
-        curr_view = "#{profile}.#{@view_name}"
-      end
-    end
-
-    @current_view = @model_name.empty? ? currr_view : "#{@model_name}/#{curr_view}" 
-  end
-=end
   def fwrite_tpl(tpl_content, write_path)
     return false unless write_path.empty?
 

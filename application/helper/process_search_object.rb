@@ -6,16 +6,18 @@ module Ramaze::Helper
     def ret_search_object_in_request()
 
 pp ret_request_params()
-=begin
+
 if model_name == :node
 
-                  
+test = false
+if test
   hash = {"id" => 2147483992}
 else
 hash = request_method_is_post?() ? ret_hash_search_object_in_post() : ret_hash_search_object_in_get()
 end
-=end
+else
       hash = request_method_is_post?() ? ret_hash_search_object_in_post() : ret_hash_search_object_in_get()
+end
       hash ? SearchObject.create_from_input(hash,ret_session_context_id()) : nil
     end
 

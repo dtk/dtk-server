@@ -101,7 +101,7 @@ function toggleSearchAttr(e) {
 	var parentNode = clickedAttr.get('parentNode');
 	var attrList = parentNode.get('children');
 	attrList.each(function() {
-		if(this.get('id') != clickedAttrId && this.get('id') != 'spacer') {
+		if(this.get('id') != clickedAttrId) {
 			this.removeClass('selected');
 
 			var attrId = this.get('id');
@@ -536,6 +536,28 @@ function getFilterFieldOptions(params) {
 	return availFieldsElem;
 }
 
+function runSearch(searchId,save) {
+	var save = (typeof(save) == 'undefined') ? false : save;
+
+	var sNameElem = document.getElementById('search_name');
+	if(save && sNameElem.value == '') {
+		alert('Saved searches must have a name');
+		return;
+	}
+
+	var searchObj = getSearchObj(searchId);
+	searchObj['name'] = sNameElem.value;
+	searchObj['save'] = (save == true) ? 'true' : 'false';
+
+	YUI().use("json", function (Y) {
+		var searchObjJsonStr = Y.JSON.stringify(searchObj);
+
+		var ssObjElem = document.getElementById('saved-search-obj');
+		ssObjElem.value = searchObjJsonStr;
+		document.getElementById('saved-search-form').submit();
+	});
+}
+
 </script>
 <div class="search-container">
 	<div style="height: 30px; width: 800px; float: left; background-color: #FFFFFF;">
@@ -554,90 +576,107 @@ function getFilterFieldOptions(params) {
 		</div>
 	</div>
 	<div id="{%=model_name%}-search-panel" style="display: none; float:left; width: 887px; background-color: #DDDDDD;">
-		<div id="{%=model_name%}-search-attrs" class="saved-search-categories">
+		<div id="" class="saved-search-l-pane">
 			<div id="spacer" style="height: 40px; width: 100px;"></div>
-			<div id="old-search-attr" class="saved-search-cat selected"><div class="label">Old</div></div>
-			<div id="filters-search-attr" class="saved-search-cat"><div class="label">Filters</div></div>
-			<div id="ordering-search-attr" class="saved-search-cat"><div class="label">Ordering</div></div>
-		</div>
-		<div id="old-search-attr-body" style="float: left; width: 780px;">
-			<form id="{%=model_name%}-search-form" action="{%=base_uri%}/xyz/{%=model_name%}/list" method="post" enctype="multipart/form-data">
-			<div style="margin-left: 5px;">
-				<input type="submit" value="Search"/>&nbsp;&nbsp;&nbsp;&nbsp;
-				<b>Save with Given Name:</b><input type="text" size="25" id="{%=model_name%}_search_name" name="{%=model_name%}_search_name" value=""/>
+			<div id="{%=model_name%}-search-attrs" class="saved-search-categories">
+				<div id="filters-search-attr" class="saved-search-cat"><div class="label">Filters</div></div>
+				<div id="ordering-search-attr" class="saved-search-cat"><div class="label">Ordering</div></div>
+				<div id="old-search-attr" class="saved-search-cat selected"><div class="label">Old</div></div>
 			</div>
-			{%for field in h_field_list%}
-				<input type="hidden" name="{%=field[:name]%}" id="{%=field[:id]%}" value="{%=field[:value]%}" />
-			{%end%}
-			<table class="edit">
-			{%for row in rows%}
-				<tr id="{%=row[:rowId]%}">
-					{%for col in row[:cols]%}
-						<td id="{%=col[:colId]%}" class="{%=col[:class]%}">{%=col[:content]%}</td>
+		</div>
+		<div id="" class="saved-search-r-pane">
+			<div id="" class="saved-search-header">
+				<form id="saved-search-form" action="{%=base_uri%}/xyz/{%=model_name%}/list" method="post" enctype="multipart/form-data">
+				<input type="hidden" name="search" id="saved-search-obj" value=""/>
+				&nbsp;&nbsp;
+				<input type="button" value="Run" style="margin-top: 2px;" onclick="runSearch('');"/>
+				<input type="button" value="Run & Save" style="margin-top: 2px;" onclick="runSearch('',true);"/>
+				Name&nbsp;<input type="text" id="search_name" name="search_name" value="" size="25" style="margin-top: 2px;"/>
+				</form>
+			</div>
+			<div id="saved-search-attr-wrapper" class="saved-search-attr-wrapper">
+				<div id="old-search-attr-body" style="float: left; width: 780px;">
+					<form id="{%=model_name%}-search-form" action="{%=base_uri%}/xyz/{%=model_name%}/list" method="post" enctype="multipart/form-data">
+					<div style="margin-left: 5px;">
+						<input type="submit" value="Search"/>&nbsp;&nbsp;&nbsp;&nbsp;
+						<b>Save with Given Name:</b><input type="text" size="25" id="{%=model_name%}_search_name" name="{%=model_name%}_search_name" value=""/>
+					</div>
+					{%for field in h_field_list%}
+						<input type="hidden" name="{%=field[:name]%}" id="{%=field[:id]%}" value="{%=field[:value]%}" />
 					{%end%}
-				</tr>
-			{%end%}
-			</table>
-			</form>
-		</div>
-		<div id="filters-search-attr-body" class="search-attr-body">
-			<div class="search-filter-wrapper">
-				<div class="filter-header">
-					<div style="margin: 0 auto;">
-						Filter List
-						<div class="search-add-filter" onclick="renderFilterEdit('{%=model_name%}');"></div>
-					</div>
+					<table class="edit">
+					{%for row in rows%}
+						<tr id="{%=row[:rowId]%}">
+							{%for col in row[:cols]%}
+								<td id="{%=col[:colId]%}" class="{%=col[:class]%}">{%=col[:content]%}</td>
+							{%end%}
+						</tr>
+					{%end%}
+					</table>
+					</form>
 				</div>
-				<div id="{%=model_name%}-filter-list" class="filter-list">
-<!--
-					<div id="filter0X" class="search-filter">
-						<div class="search-filter-value">Display Name Equals 'foo'</div>
-						<div class="search-remove-filter"></div>
-					</div>
--->
-				</div>
-			</div>
-			<div style="float: left; height: 150px; width: 5px; background-color: #AACCEE"></div>
-			<div style="float: left; height: 150px; width: 475px; background-color: #FFFFFF;">
-				<div style="width: 475px; height: 30px; border-bottom: 1px solid #AACCEE;">
-					<div style="font-weight: bold; font-size: 13px">Filter Details</div>
-				</div>
-				<div id="tempId-filter-edit-wrapper" style="width: 475px; height: 119px;">
-				</div>
-<!--
-				<div id="filter01-params">
-					<div style="width: 100%;">
-						<div style="margin: 10px 0 10px 5px; width: 100%;">
-							<div style="float: left;">
-							<select id="filter01-field" name="filter01-field" data-model="{%=model_name%}" onchange="updateFilterField(this.id,this.options[this.selectedIndex].value);">
-								<option value="display_name">Display Name</option>
-								<option value="operational_status">Op Status</option>
-								<option value="image_size">Image Size</option>
-							</select>
-							</div>
-							<div style="float: left;">
-							<select id="filter01-operator" name="filter01-filter"  data-model="{%=model_name%}" data-field="" onchange="updateFilterOperator(this.id);">
-								<option value="match-prefix">Starts With</option>
-								<option value="eq">Equals</option>
-								<option value="contains">Contains</option>
-								<option value="regex">Matches Regex</option>
-							</select>
-							</div>
-							<div id="{%=model_name%}-sf-condition-wrapper" style="float: left;">
-								<input id="filter01-condition" name="filter01-condition" type="text" size="25" value=""/>
+				<div id="filters-search-attr-body" class="search-attr-body">
+					<div class="search-filter-wrapper">
+						<div class="filter-header">
+							<div style="margin: 0 auto;">
+								Filter List
+								<div class="search-add-filter" onclick="renderFilterEdit('{%=model_name%}');"></div>
 							</div>
 						</div>
+						<div id="{%=model_name%}-filter-list" class="filter-list">
+		<!--
+							<div id="filter0X" class="search-filter">
+								<div class="search-filter-value">Display Name Equals 'foo'</div>
+								<div class="search-remove-filter"></div>
+							</div>
+		-->
+						</div>
 					</div>
-					<br/><br/>
-					<div style="float: left; bottom: 0px; margin-left: 5px;">
-						<input type="button" value="Save" onclick="saveFilter('filter01');"/>
+					<div style="float: left; height: 100%; width: 5px; background-color: #AACCEE"></div>
+					<div style="float: left; height: 100%; width: 482px; background-color: #FFFFFF;">
+						<div style="width: 100%; height: 30px; border-bottom: 1px solid #AACCEE;">
+							<div style="font-weight: bold; font-size: 13px">Filter Details</div>
+						</div>
+						<div id="tempId-filter-edit-wrapper" style="width: 100%; height: 100%;">
+						</div>
+		<!--
+						<div id="filter01-params">
+							<div style="width: 100%;">
+								<div style="margin: 10px 0 10px 5px; width: 100%;">
+									<div style="float: left;">
+									<select id="filter01-field" name="filter01-field" data-model="{%=model_name%}" onchange="updateFilterField(this.id,this.options[this.selectedIndex].value);">
+										<option value="display_name">Display Name</option>
+										<option value="operational_status">Op Status</option>
+										<option value="image_size">Image Size</option>
+									</select>
+									</div>
+									<div style="float: left;">
+									<select id="filter01-operator" name="filter01-filter"  data-model="{%=model_name%}" data-field="" onchange="updateFilterOperator(this.id);">
+										<option value="match-prefix">Starts With</option>
+										<option value="eq">Equals</option>
+										<option value="contains">Contains</option>
+										<option value="regex">Matches Regex</option>
+									</select>
+									</div>
+									<div id="{%=model_name%}-sf-condition-wrapper" style="float: left;">
+										<input id="filter01-condition" name="filter01-condition" type="text" size="25" value=""/>
+									</div>
+								</div>
+							</div>
+							<br/><br/>
+							<div style="float: left; bottom: 0px; margin-left: 5px;">
+								<input type="button" value="Save" onclick="saveFilter('filter01');"/>
+							</div>
+						</div>
+		-->
 					</div>
 				</div>
--->
+				<div id="ordering-search-attr-body" class="search-attr-body">
+					ORDER BY
+				</div>
 			</div>
+			<!--END SAVED SEARCH ATTR WRAPPER-->
 		</div>
-		<div id="ordering-search-attr-body" class="search-attr-body">
-			ORDER BY
-		</div>
+		<!--END SAVED SEARCH RIGHT PANE-->
 	</div>
 </div>

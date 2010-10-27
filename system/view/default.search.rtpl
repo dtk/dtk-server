@@ -81,9 +81,9 @@ var searchId = 'foo';
 			}
 		}
 	});
-	var modelName = searchObj['search_pattern']['relation'];
+	var modelName = searchObj['search_pattern'][':relation'];
 
-	filterDef = searchObj['search_pattern']['filter'][filterIndex+1];
+	filterDef = searchObj['search_pattern'][':filter'][filterIndex+1];
 	var fieldName = filterDef[1].replace(':','');
 
 	renderFilterEdit(modelName,filterId,filterDef);
@@ -193,10 +193,12 @@ function getConditionInput(params) {
 
 				var selected = false;
 
-				if(typeof(filterDef) !='undefined' && filterDef[2] instanceof Array) {
-					(in_array(filterDef[2],option)) ? selected = true : selected = false;
-				} else if(typeof(filterDef) !='undefined' && filterDef[2] instanceof String) {
-					(filterDef[2] == option) ? selected = true : selected = false;
+				if(typeof(filterDef) !='undefined') {
+					if(filterDef[2] instanceof Array) {
+						(in_array(filterDef[2],option)) ? selected = true : selected = false;
+					} else {
+						(filterDef[2] == option) ? selected = true : selected = false;
+					}
 				}
 				inputElem.options[numOptions] = new Option(availOptions[option],option,false,selected);
 			}
@@ -264,12 +266,12 @@ var devTestSearchObj = {
 	'id':'',
 	'name':'foobar',
 	'search_pattern': {
-		'columns':[],
-		'relation':'node',
-		'filter':[
+		':columns':[],
+		':relation':'node',
+		':filter':[
 		],
-		'order_by':[],
-		'paging':''
+		':order_by':[],
+		':paging':''
 	},
 	'save':'true'
 };
@@ -286,17 +288,17 @@ function setSearchObj(searchId,searchObj) {
 function pushFilters(searchId,filterDefs) {
 	var searchDef = getSearchObj(searchId);
 
-	if(devTestSearchObj['search_pattern']['filter'].length == 0) devTestSearchObj['search_pattern']['filter'].push(":and"); 
+	if(devTestSearchObj['search_pattern'][':filter'].length == 0) devTestSearchObj['search_pattern'][':filter'].push(":and"); 
 
 	for(filter in filterDefs) {
-		devTestSearchObj['search_pattern']['filter'].push(filterDefs[filter]);
+		devTestSearchObj['search_pattern'][':filter'].push(filterDefs[filter]);
 	}
 }
 
 function updateExistingFilter(searchId,filterIndex,filterDef) {
 	var searchDef = getSearchObj(searchId);
-//	searchDef['search_pattern']['filter'][filterIndex+1] = filterDef;
-	devTestSearchObj['search_pattern']['filter'][filterIndex+1] = filterDef;
+//	searchDef['search_pattern'][':filter'][filterIndex+1] = filterDef;
+	devTestSearchObj['search_pattern'][':filter'][filterIndex+1] = filterDef;
 }
 
 function saveFilter(filterId) {

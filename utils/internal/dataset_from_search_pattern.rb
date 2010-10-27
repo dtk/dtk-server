@@ -1,4 +1,3 @@
-#TODO: refactor to take into account that search_object has been parsed already
 module XYZ
   module SQL
     class DataSetSearchPattern < Dataset
@@ -43,11 +42,23 @@ module XYZ
         end
         
         def ret_sequel_ds_with_columns(ds,search_pattern,model_handle)
+          model_name = model_handle[:model_name]
           columns = search_pattern.find_key(:columns)
           #form will be an array with each term either token or {:foo => :alias}; 
           unpruned_field_set =  Model::FieldSet.new(columns)
-          pruned_field_set =  unpruned_field_set.only_including(Model::FieldSet.all_real_scalar(model_handle[:model_name]))
-          ds.select(*(pruned_field_set.cols))
+          processed_field_set =  unpruned_field_set.only_including(Model::FieldSet.all_real_scalar(model_name))
+
+          related_columns = unpruned_field_set.related_columns(model_name)
+          if related_columns and not related_columns.empty?
+            cols_to_add = related_columns.map do |r|
+              qualified_col = r[:join_cond].values.first
+              #strip off model_name__ prefix and discard non matching prefixes
+              (qualified_col =~ Regexp.new("^(.+)__(.+)$")) ? ($1.to_sym == model_name ? $2 : nil) : qualified_col  
+            end.compact
+            processed_field_set.add_cols(*cols_to_add)
+          end
+
+          ds.select(*(processed_field_set.cols))
         end
 
         def ret_sequel_ds_with_filter(ds,search_pattern)
@@ -55,51 +66,24 @@ module XYZ
           return ds unless filter
 
           #TODO: just treating some subset of patterns
-          if filter.kind_of?(Array)
-            op,args = get_op_and_args(filter)
-            raise ErrorPatternNotImplemented.new(:filter_operation,op) unless (op == :and)
-            sequel_where_clause = and_list = args.map do |el|
-              el_op,el_args = get_op_and_args(el)
-              #TODO: just treating eq
-              raise ErrorPatternNotImplemented.new(:equal_op,el) unless (el_op == :eq and el_args.size == 2)
-              {ret_scalar(el_args[0]) => ret_scalar(el_args[1])}
-            end
-            SQL.and(*and_list)
-          else
-            raise ErrorPatternNotImplemented.new(:filter,filter)
+          op,args = get_op_and_args(filter)
+          raise ErrorPatternNotImplemented.new(:filter_operation,op) unless (op == :and)
+          and_list = args.map do |el|
+            el_op,el_args = get_op_and_args(el)
+            #TODO: just treating eq
+            raise ErrorPatternNotImplemented.new(:equal_op,el) unless (el_op == :eq and el_args.size == 2)
+            {el_args[0] => el_args[1]}
           end
+          sequel_where_clause = SQL.and(*and_list)
           ds.where(sequel_where_clause)
         end
 
         #return op in symbol form and args
         def get_op_and_args(expr)
           raise ErrorParsing.new(:expression,expr) unless expr.kind_of?(Array)
-          [ret_symbol(expr.first),expr[1..expr.size-1]]
+          [expr.first,expr[1..expr.size-1]]
         end
 
-        #converts if symbol still in string form; otehrwise keeps as string
-        def ret_symbol(term_in_json)
-          raise ErrorParsing.new(:symbol,term_in_json) if [Array,Hash].detect{|t|term_in_json.kind_of?(t)}
-          #complexity due to handle case where have form :":columns"
-          term_in_json.to_s.gsub(/^[:]+/,'').to_sym 
-        end
-        def ret_scalar(term_in_json)
-          raise ErrorParsing.new(:symbol,term_in_json) if [Array,Hash].detect{|t|term_in_json.kind_of?(t)}
-          #complexity due to handle case where have form :":columns"
-          return term_in_json.to_s.gsub(/^[:]+/,'').to_sym if term_in_json.kind_of?(Symbol)
-          return $1.to_sym if (term_in_json.kind_of?(String) and term_in_json =~ /^[:]+(.+)/)
-          term_in_json
-        end
-
-        def ret_symbol_key(obj)
-          ret_symbol(Aux::ret_key(obj))
-        end
-
-        class ErrorParsing < Error
-          def initialize(type,object)
-            super("parsing item #{type} is not supported; it has form: #{object.inspect}")
-          end
-        end
         class ErrorPatternNotImplemented < ErrorNotImplemented
           def initialize(type,object)
             super("parsing item #{type} is not supported; it has form: #{object.inspect}")

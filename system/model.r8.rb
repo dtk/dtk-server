@@ -74,6 +74,7 @@ module XYZ
       unless related_columns
         ret = dataset.all
       else
+        opts = {} #TODO: stub
         ls_opts = opts.merge(FieldSet.opt(field_set))
         graph_ds = dataset.from_self(:alias => model_handle[:model_name])
         related_columns.each do |join_info|

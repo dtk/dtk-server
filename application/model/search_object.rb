@@ -58,7 +58,10 @@ module XYZ
       self[:search_pattern]
     end
     
-    #TODO: might use some varaint on expose_methods_from_internal_object 
+    #TODO: might use some variant on expose_methods_from_internal_object 
+    def create_list_view_meta_hash()
+      search_pattern ? search_pattern.create_list_view_meta_hash() : nil
+    end
     def field_set()
       search_pattern ? search_pattern.field_set() : nil
     end

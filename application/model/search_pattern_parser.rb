@@ -1,3 +1,5 @@
+#TODO: should this be in model subdirectory"
+require File.expand_path(UTILS_DIR+'/internal/generate_list_meta_view')
 module XYZ
   class SearchPattern < HashObject
     def initialize(hash_search_pattern)
@@ -21,13 +23,17 @@ module XYZ
       self[:paging]
     end
 
+    def create_list_view_meta_hash()
+      #TODO: this is very simple; this will be enhanced
+      generate_list_meta_view(columns,relation)
+    end
    private
+    include GenerateListMetaView
 
     def find_key_from_input(type,hash_input)
       pair = hash_input.find{|k,v|ret_symbol(k) == type}
       pair ? pair[1] : nil
     end
-
 
     def relation()
       self[:relation]

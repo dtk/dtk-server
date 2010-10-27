@@ -131,6 +131,10 @@ module XYZ
         ret
       end
 
+      def model_handle()
+        ModelHandle.new(@c,model_name)
+      end
+
       #for debugging
       def ppsql()
         @sequel_ds.sql.gsub(/"/,'')
@@ -139,9 +143,6 @@ module XYZ
      private
       def model_name()
         model_name_info.first.model_name
-      end
-      def model_handle()
-        ModelHandle.new(@c,model_name)
       end
     end
 

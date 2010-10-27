@@ -25,23 +25,5 @@ end
     end
 
     ###
-=begin
-
-      class SearchString
-        def initialize(hash)
-          @columns = hash[key_in_search_pattern(:columns)]
-          @relation = hash[key_in_search_pattern(:relation)]
-          @filter = hash[key_in_search_pattern(:filter)]
-          @order_by = hash[key_in_search_pattern(:order_by)]
-          @paging = hash[key_in_search_pattern(:paging)]
-        end
-       private
-        attr_reader :columns, :relation, :filter, :order_by, :paging
-        def key_in_search_pattern(symbol)
-          ":#{symbol}"
-        end
-      end
-    end
-=end
   end
 end

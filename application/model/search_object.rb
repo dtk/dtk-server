@@ -1,23 +1,20 @@
+require File.expand_path('search_pattern_parser', File.dirname(__FILE__))
+
 module XYZ
   class SearchObject < Model
     set_relation_name(:search,:object)
     def self.up()
       column :search_pattern, :json
       many_to_one :library
-      #TODO: for testing
-      virtual_column :search_result
     end
 
     ### virtual column defs
+    #helper fns
 
-    def search_result()
-      #TODO: hacked model handle
-      ds = SQL::DataSetSearchPattern.create_dataset_from_hash(self.class.db,model_handle,self[:search_pattern])
-      #TODO: hack because ds.all not working right
-      ds ? ds.sequel_ds.all : nil
+    def create_dataset()
+      SQL::DataSetSearchPattern.create_dataset_from_search_object(self)
     end  
 
-    #helper fns
     attr_accessor :should_save
 
     def self.create_from_input(input_hash,c)
@@ -25,7 +22,7 @@ module XYZ
       hash = {
         :id => input_hash["id"],
         :display_name => input_hash["name"],
-        :search_pattern => input_hash["search_pattern"]
+        :search_pattern => input_hash["search_pattern"] ? SearchPattern.new(input_hash["search_pattern"]) : nil
       }
       ret = SearchObject.new(hash,c)
       ret.should_save = input_hash["save"]
@@ -45,7 +42,7 @@ module XYZ
       raise Error.new("cannot update without an id") unless id()
       saved_object = self.class.get_objects(model_handle,{:id => id()}).first
       raise Error.new("cannot find saved search with id (#{id.to_s})") unless saved_object
-      saved_object.each{|k,v| self[k] = v}
+      saved_object.each{|k,v| self[k] = k.nil? ? nil : (k == :search_pattern ? SearchPattern.new(v) : v)}
     end
 
     def self.is_valid?(input_hash)
@@ -53,6 +50,18 @@ module XYZ
       (input_hash["id"] or input_hash["search_pattern"]) ? true : nil
     end
 
+    def db()
+      self.class.db()
+    end
+
+    def search_pattern()
+      self[:search_pattern]
+    end
+    
+    def field_set()
+      search_pattern ? search_pattern.field_set() : nil
+    end
+    
    private
     def id()
       @id_handle ? @id_handle.get_id() : nil
@@ -60,9 +69,6 @@ module XYZ
 
     def name()
       self[:display_name]
-    end
-    def search_pattern()
-      self[:search_pattern]
     end
   end
 end

@@ -63,6 +63,31 @@ module XYZ
       create_from_select(model_handle,field_set,select_ds,override_attrs,create_opts)
     end
 
+    def self.get_objects_from_search_object(search_object)
+      dataset = search_object.create_dataset
+      model_handle = dataset.model_handle()
+      model_name = model_handle[:model_name]
+      field_set = search_object.field_set()
+      #returns any related tables that must be joined in (by looking at virtual coumns)
+      related_columns = field_set.related_columns(model_name)
+      ret = nil
+      unless related_columns
+        ret = @db.get_objects_scalar_columns(model_handle,where_clause,opts)
+      else
+        ls_opts = opts.merge(FieldSet.opt(field_set))
+        graph_ds = dataset.from_self(:alias => model_handle[:model_name])
+        related_columns.each do |join_info|
+          rs_opts = (join_info[:cols] ? FieldSet.opt(FieldSet.new(join_info[:cols])) : {}).merge :return_as_hash => true
+          right_ds = @db.get_objects_just_dataset(model_handle.createMH(:model_name => join_info[:model_name]),nil,rs_opts)
+          graph_ds = graph_ds.graph(:left_outer,right_ds,join_info[:join_cond])
+        end
+        graph_ds = graph_ds.paging_and_order(opts)
+        ret = graph_ds.all
+      end
+      ret
+    end
+
+    #TODO: deprecate below
     def self.get_objects(model_handle,where_clause={},opts={})
       c = model_handle[:c]
       model_name = model_handle[:model_name]

@@ -14,6 +14,13 @@ module XYZ
       find_key_from_input(type,self)
     end
 
+    def order_by()
+      self[:order_by]
+    end
+    def paging()
+      self[:paging]
+    end
+
    private
 
     def find_key_from_input(type,hash_input)

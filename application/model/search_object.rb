@@ -58,10 +58,17 @@ module XYZ
       self[:search_pattern]
     end
     
+    #TODO: might use some varaint on expose_methods_from_internal_object 
     def field_set()
       search_pattern ? search_pattern.field_set() : nil
     end
-    
+    def order_by()
+      search_pattern ? search_pattern.order_by() : nil
+    end
+    def paging()
+      search_pattern ? search_pattern.paging() : nil
+    end
+
     def id()
       @id_handle ? @id_handle.get_id() : nil
     end

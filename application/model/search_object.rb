@@ -62,10 +62,10 @@ module XYZ
       search_pattern ? search_pattern.field_set() : nil
     end
     
-   private
     def id()
       @id_handle ? @id_handle.get_id() : nil
     end
+   private
 
     def name()
       self[:display_name]

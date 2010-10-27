@@ -64,7 +64,8 @@ module XYZ
       end
 
       ## Taken from Sequel
-      def camelize(str,first_letter_in_uppercase = :upper)
+      def camelize(str_x,first_letter_in_uppercase = :upper)
+        str = str_x.to_s
         s = str.gsub(/\/(.?)/){|x| "::#{x[-1..-1].upcase unless x == '/'}"}.gsub(/(^|_)(.)/){|x| x[-1..-1].upcase}
        s[0...1] = s[0...1].downcase unless first_letter_in_uppercase == :upper
        s

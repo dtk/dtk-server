@@ -6,6 +6,7 @@ module Ramaze::Helper
     def ret_search_object_in_request()
 
 if model_name == :node
+pp ret_request_params()
                   
   hash = {"id" => 2147483992}
 else

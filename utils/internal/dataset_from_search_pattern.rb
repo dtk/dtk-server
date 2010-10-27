@@ -1,3 +1,4 @@
+#TODO: refactor to take into account that search_object has been parsed already
 module XYZ
   module SQL
     class DataSetSearchPattern < Dataset
@@ -6,66 +7,51 @@ module XYZ
           db = search_object.db
           search_pattern = search_object.search_pattern
 
-          sequel_ds = ret_sequel_ds_from_hash(db.empty_dataset(),search_pattern)
-
           relation_in_search_pattern = search_pattern.find_key(:relation)
+          mh_in_search_pattern = search_object.model_handle.createMH(:model_name => relation_in_search_pattern) 
+
           unless [String,Symbol].find{|t|relation_in_search_pattern.kind_of?(t)}
             raise ErrorNotImplemented.new("search pattern with relation #{relation_in_search_pattern.inspect}")
           end
-          relation_in_search_pattern =  ret_symbol(relation_in_search_pattern)
           raise Error.new("illegal model name (#{relation_in_search_pattern}) in search pattern") unless DB_REL_DEF[relation_in_search_pattern]
 
-          mh_in_search_pattern = search_object.model_handle.createMH(:model_name => relation_in_search_pattern) 
+          sequel_ds = ret_sequel_ds_from_hash(db.empty_dataset(),search_pattern,mh_in_search_pattern)
+
           sequel_ds ? self.new(mh_in_search_pattern,sequel_ds) : nil
         end
 
-        def find(type,hash_search_pattern)
-          pair = hash_search_pattern.find{|k,v|ret_symbol(k) == type}
-          pair ? pair[1] : nil
-        end
-
-        
        private
-        def ret_sequel_ds_from_hash(ds,hash_search_pattern)
-          ds_add = ret_sequel_ds_with_relation(ds,hash_search_pattern)
+        def ret_sequel_ds_from_hash(ds,search_pattern,model_handle)
+          ds_add = ret_sequel_ds_with_relation(ds,search_pattern)
           return nil unless ds_add; ds = ds_add
         
-          ds_add = ret_sequel_ds_with_columns(ds,hash_search_pattern)
+          ds_add = ret_sequel_ds_with_columns(ds,search_pattern,model_handle)
           return nil unless ds_add; ds = ds_add
 
-          ret_sequel_ds_with_filter(ds,hash_search_pattern)
+          ret_sequel_ds_with_filter(ds,search_pattern)
         end
 
-        def ret_sequel_ds_with_relation(ds,hash_search_pattern)
-          relation_str = find(:relation,hash_search_pattern)
-          return nil unless relation_str
-          model_name = ret_symbol(relation_str)
-          sql_tbl_name = DB.sequel_table_name(model_name)
+        def ret_sequel_ds_with_relation(ds,search_pattern)
+          relation = search_pattern.find_key(:relation)
+          raise ErrorPatternNotImplemented.new(:relation,relation) unless relation.kind_of?(Symbol)
+          sql_tbl_name = DB.sequel_table_name(relation)
           unless sql_tbl_name
-            Log.error("illegal relation given #{relation_str}") 
+            Log.error("illegal relation given #{relation}") 
             return nil
           end
           ds.from(sql_tbl_name)
         end
         
-        def ret_sequel_ds_with_columns(ds,hash_search_pattern)
-          columns = find(:columns,hash_search_pattern)
+        def ret_sequel_ds_with_columns(ds,search_pattern,model_handle)
+          columns = search_pattern.find_key(:columns)
           #form will be an array with each term either token or {:foo => :alias}; 
-          #TODO: right now only treating col as string or term
-          sequel_cols = columns.map do |col| 
-            if col.kind_of?(Symbol) or col.kind_of?(String)
-              ret_symbol(col)
-            elsif col.kind_of?(Hash) and col.size = 1
-              {ret_symbol(ret_symbol_key(col)) => ret_symbol(Aux::ret_value(col))}
-            else
-              raise ErrorPatternNotImplemented.new(:column,col)
-            end
-          end
-          ds.select(*sequel_cols)
+          unpruned_field_set =  Model::FieldSet.new(columns)
+          pruned_field_set =  unpruned_field_set.only_including(Model::FieldSet.all_real_scalar(model_handle[:model_name]))
+          ds.select(*(pruned_field_set.cols))
         end
 
-        def ret_sequel_ds_with_filter(ds,hash_search_pattern)
-          filter = find(:filter,hash_search_pattern)
+        def ret_sequel_ds_with_filter(ds,search_pattern)
+          filter = search_pattern.find_key(:filter)
           return ds unless filter
 
           #TODO: just treating some subset of patterns

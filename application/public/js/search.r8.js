@@ -3,6 +3,9 @@ if (!R8.Search) {
 	(function(R8) {
 		R8.Search = function() {
 			return {
+				tester : function(modelName) {
+console.log(field_list);
+				},
 
 				page : function(modelName,start) {
 					var searchForm = document.getElementById(modelName+'-search-form');

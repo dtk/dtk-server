@@ -248,6 +248,64 @@ table.list tr.odd {
 	background-color: #AACCEE;
 }
 
+.search-attr-body {
+	display: none;
+	float: left;
+	width: 780px;
+	height: 150px;
+	border-left: 5px solid #AACCEE;
+	border-top: 5px solid #AACCEE;
+	border-bottom: 5px solid #AACCEE;
+}
+
+.search-filter-wrapper {
+	width: 300px;
+	height: 150px;
+	background-color: #FFFFFF;
+	float: left;
+}
+
+.filter-header {
+	height: 30px;
+	width: 100%;
+	text-align: center;
+	font-weight: bold;
+	font-size: 13px;
+	border-bottom: 1px solid #AACCEE;
+}
+
+.filter-list {
+	width: 100%;
+	height: 120px;
+	overflow-y: scroll;
+	font-size: 11px;
+}
+
+.search-remove-filter {
+	background-image: url(../images/close-button.png);
+	height: 16px;
+	width: 16px;
+	float: right;
+}
+.search-add-filter {
+	background-image: url(../images/plus-button.png);
+	height: 16px;
+	width: 16px;
+	float: right;
+	margin: 6px 10px 0 0;
+}
+
+.search-filter-value {
+	float: left;
+}
+
+.search-filter {
+	float: right;
+	border: 1px solid #AACCEE;
+	margin: 5px;
+	width: 95%;
+	cursor: pointer;
+}
 /*------------Drop Shadow---------*/
 
 .search-container .drop-shadow {

@@ -11,7 +11,8 @@
       :id => {
         :required => true,
         :type => 'hidden',
-        :value => '{%=saved_search[:id]%}',
+        :value => '{%=saved_search_id%}',
+#        :value => '{%=saved_search[:id]%}',
       },
     },
     {

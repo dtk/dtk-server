@@ -19,6 +19,9 @@ module XYZ
     def order_by()
       self[:order_by]
     end
+    def relation()
+      self[:relation]
+    end
     def paging()
       self[:paging]
     end
@@ -35,9 +38,6 @@ module XYZ
       pair ? pair[1] : nil
     end
 
-    def relation()
-      self[:relation]
-    end
     def columns()
       self[:columns]
     end
@@ -59,7 +59,7 @@ module XYZ
 
     def ret_columns(hash_input)
       columns = find_key_from_input(:columns,hash_input)
-      raise ErrorParsing.new(:columns,columns) unless columns.kind_of?(Array) and not columns.empty? 
+      raise ErrorParsing.new(:columns,columns) unless columns.kind_of?(Array)
       #form will be an array with each term either token or {:foo => :alias}; 
       #TODO: right now only treating col as string or term
       columns.map do |col| 

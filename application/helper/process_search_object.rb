@@ -41,7 +41,8 @@ end
     end
 
     def ret_hash_search_object_in_post()
-      (ret_request_params()||{})["search"]
+      json = (ret_request_params()||{})["search"]
+      json ? JSON.parse(json) : nil
     end
 
     ###

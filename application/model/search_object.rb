@@ -62,7 +62,10 @@ module XYZ
       return nil unless saved_search_model_name() and saved_search_ref()
       view_meta_hash = search_pattern ? search_pattern.create_list_view_meta_hash() : nil
       raise Error.new("cannot create list_view meta hash") unless view_meta_hash
-      view = R8Tpl::ViewR8.new(saved_search_model_name(),saved_search_ref(),user,view_meta_hash)
+      is_saved_search = true
+
+      raise ErrorNotImplemented.new("when search_pattern.relation is of type #{search_pattern.relation.class}") unless search_pattern.relation.kind_of?(Symbol)
+      view = R8Tpl::ViewR8.new(search_pattern.relation,saved_search_ref(),user,is_saved_search,view_meta_hash)
       view.update_cache_for_saved_search?()
     end
 

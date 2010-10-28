@@ -71,6 +71,7 @@ module XYZ
       #returns any related tables that must be joined in (by looking at virtual coumns)
       related_columns = field_set.related_columns(model_name)
       ret = nil
+pp dataset.ppsql
       unless related_columns
         ret = dataset.all
       else
@@ -93,6 +94,7 @@ module XYZ
       c = model_handle[:c]
       model_name = model_handle[:model_name]
       field_set = opts[:field_set] || FieldSet.default(model_name)
+
       #returns any related tables that must be joined in (by looking at virtual coumns)
       related_columns = field_set.related_columns(model_name)
       ret = nil

@@ -26,6 +26,7 @@ module R8Tpl
       @user = user
       @profile = @user.current_profile
 
+      #TODO: clean up
       @model_name = @view_name = String.new
       @saved_search_ref = nil
       rdn = relative_distinguished_view_path.split("/")

@@ -7,12 +7,13 @@ module R8Tpl
     include CommonMixin
     include Utility::I18n
     attr_accessor :obj_name, :tpl_contents, :css_require, :js_require
-    def initialize(model_name,view_name,user,view_meta_hash=nil)
+    def initialize(model_name,view_name,user,is_saved_search=false,view_meta_hash=nil)
 
+      #TODO: clean up
       @model_name = model_name
       @saved_search_ref = nil
       @view_name = view_name
-      if model_name == :saved_search
+      if is_saved_search
         @saved_search_ref = view_name
         @view_name = :list #TODO: should not be hard-wired
       end

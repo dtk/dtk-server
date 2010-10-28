@@ -1,4 +1,4 @@
 module XYZ
-  class Saved_searchController < Controller
+  class Search_objectController < Controller
   end
 end

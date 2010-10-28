@@ -22,7 +22,7 @@
 			<li class=""><a href="{%=_app[:base_uri]%}/xyz/attribute/list">Attributes</a></li>
 			<li class=""><a href="{%=_app[:base_uri]%}/xyz/node_group/list">Groups</a></li>
 			<li class=""><a href="{%=_app[:base_uri]%}/xyz/action/list">Actions</a></li>
-			<li class=""><a href="{%=_app[:base_uri]%}/xyz/saved_search/list">Saved Searches</a></li>
+			<li class=""><a href="{%=_app[:base_uri]%}/xyz/search_object/list">Saved Searches</a></li>
 		</ul>
 	</div>
 

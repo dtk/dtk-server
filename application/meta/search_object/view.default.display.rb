@@ -5,7 +5,7 @@
           :model => {
             :required => true,
             :type => 'hidden',
-            :value => 'action',
+            :value => 'search_object',
           },
         },
         {
@@ -28,13 +28,7 @@
              :rows => 1,
              :cols => 40,
             }},
-            {:search => {
-             :type => 'hash',
-             :help => '',
-             :rows => 5,
-             :cols => 40,
-            }},
-            {:search_result => {
+            {:search_pattern => {
              :type => 'hash',
              :help => '',
              :rows => 5,

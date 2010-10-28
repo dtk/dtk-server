@@ -13,6 +13,10 @@
               :objLink => true,
               :objLinkView => 'display',
             }},
+          {:id => {
+              :type => 'integer',
+              :help => '',
+            }},
       ]
 }
 

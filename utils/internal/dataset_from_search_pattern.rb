@@ -44,6 +44,12 @@ module XYZ
         def ret_sequel_ds_with_columns(ds,search_pattern,model_handle)
           model_name = model_handle[:model_name]
           columns = search_pattern.find_key(:columns)
+
+          if columns.nil?
+            return ds
+           #TODO: refine return ds.select(*Model::FieldSet.default(model_name).cols)
+          end
+
           #form will be an array with each term either token or {:foo => :alias}; 
           unpruned_field_set =  Model::FieldSet.new(columns)
           processed_field_set =  unpruned_field_set.only_including(Model::FieldSet.all_real_scalar(model_name))

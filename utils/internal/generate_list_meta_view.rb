@@ -24,7 +24,7 @@ module XYZ
       
       def self.field_list(columns,relation)
         fieldset_types = Model::FieldSet.real_cols_with_types(relation) || []
-        columns.map do |col|
+        (columns||Model::FieldSet.default(relation).cols).map do |col|
           {col => {
               :type => ui_datatype(col,fieldset_types),
               :help => ""

@@ -1,4 +1,5 @@
-#TODO: should this be in model subdirectory"
+#TODO: should this be in model subdirectory?
+#TODO: is theer any advatange to this being a sub class of a Hash?
 require File.expand_path(UTILS_DIR+'/internal/generate_list_meta_view')
 module XYZ
   class SearchPattern < HashObject
@@ -9,7 +10,11 @@ module XYZ
 
     def field_set()
       #TBD: stub; must take out non scalars
-      (self[:columns] ? Model::FieldSet.new(self[:columns]) : nil) || (relation.kind_of?(Symbol) ? Model::FieldSet.default(relation) : nil)
+      (columns ? Model::FieldSet.new(columns) : nil) || (relation.kind_of?(Symbol) ? Model::FieldSet.default(relation) : nil)
+    end
+
+    def is_default_view?()
+      (columns.nil? and filter.nil? and relation.kind_of?(Symbol)) ? true : nil
     end
 
     def find_key(type)
@@ -59,6 +64,7 @@ module XYZ
 
     def ret_columns(hash_input)
       columns = find_key_from_input(:columns,hash_input)
+      return nil if columns.nil? or columns.empty?
       raise ErrorParsing.new(:columns,columns) unless columns.kind_of?(Array)
       #form will be an array with each term either token or {:foo => :alias}; 
       #TODO: right now only treating col as string or term
@@ -75,7 +81,7 @@ module XYZ
 
     def ret_filter(hash_input)
       filter = find_key_from_input(:filter,hash_input)
-      return nil unless filter
+      return nil if filter.nil? or filter.empty?
 
       #TODO: just treating some subset of patterns
       ret = Array.new

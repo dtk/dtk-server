@@ -31,7 +31,9 @@ module XYZ
     end
 
     def should_save?
-      (save_flag or search_pattern) ? true : nil
+      return nil unless search_pattern
+      return true if save_flag
+      not search_pattern.is_default_view?()
     end
 
     def save()
@@ -75,7 +77,9 @@ module XYZ
     
     def create_and_save_list_view_in_cache?(user)
       #TODO: needs refinement
-      return nil unless saved_search_model_name() and saved_search_ref()
+      return nil unless search_pattern
+      return nil if search_pattern.is_default_view?()
+
       view_meta_hash = search_pattern ? search_pattern.create_list_view_meta_hash() : nil
       raise Error.new("cannot create list_view meta hash") unless view_meta_hash
       is_saved_search = true
@@ -115,7 +119,7 @@ module XYZ
     end
 
     def self.nil_if_empty(x)
-      (x.nil? or x.empty?) ? nil : x
+      (x.respond_to?(:empty?) and x.empty?) ? nil : x
     end
   end
 end

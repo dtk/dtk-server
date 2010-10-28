@@ -7,28 +7,18 @@ module Ramaze::Helper
 
 pp ret_request_params()
 
-if model_name == :node
-
-test = false
-if test
-  hash = {"id" => 2147483992}
-else
-hash = request_method_is_post?() ? ret_hash_search_object_in_post() : ret_hash_search_object_in_get()
-end
-else
       hash = request_method_is_post?() ? ret_hash_search_object_in_post() : ret_hash_search_object_in_get()
-end
+#  hash = {"id" => 2147483992}
+
       hash ? SearchObject.create_from_input(hash,ret_session_context_id()) : nil
-    end
+   end
 
  
    def ret_hash_search_object_in_get()
      #TODO: stub; incomplete
-     columns = Model::FieldSet.default(model_name()).cols
      filter = ret_filter_when_get()
      hash_search_pattern = {
-       :relation => model_name(),
-       :columns => columns
+       :relation => model_name()
      }
      hash_search_pattern.merge!(:filter => filter) if filter
      {"search_pattern" => hash_search_pattern}

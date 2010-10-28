@@ -34,6 +34,7 @@ module R8Tpl
         if rdn[0] == "saved_search"
           @saved_search_ref = rdn[1]
           path_type_to_use ||= :cache
+          @view_name = :list #TODO: should not be hard-wired
         else
           @model_name,@view_name = rdn
         end

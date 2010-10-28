@@ -7,16 +7,23 @@ module R8Tpl
     include CommonMixin
     include Utility::I18n
     attr_accessor :obj_name, :tpl_contents, :css_require, :js_require
-    Views = Hash.new
-    def initialize(model_name,view_name,user)
-      @model_name = model_name	  #object type (a symbol)
-      @view_name = view_name              #viewName can be either edit,detail,list,etc
+    def initialize(model_name,view_name,user,view_meta_hash=nil)
+
+      @model_name = model_name
+      @saved_search_ref = nil
+      @view_name = view_name
+      if model_name == :saved_search
+        @saved_search_ref = view_name
+        @view_name = :list #TODO: should not be hard-wired
+      end
+
       @form_id = "#{@model_name}-#{@view_name}-form"
       @user = user
       @profile = @user.current_profile || :default #profile will dictate the specific view to use/generate
       @i18n = get_model_i18n(model_name,user)
 
-      @view_meta = nil    #hash defining an instance of a view
+      #if set non null then will not try to find path and pull from file
+      @view_meta = view_meta_hash    #hash defining an instance of a view
 
       @override_meta_path = nil        #path where the overrides for a view should be located
 
@@ -28,8 +35,35 @@ module R8Tpl
       @js_require = []
     end
 
-    def render()
 
+    def update_cache_for_saved_search?()
+      #TODO: stub that only updates iff does not exist
+      existing_cache = ret_existing_view_path(:cache)
+      return existing_cache if existing_cache
+
+      render_list_tpl_cache()
+      ret_existing_view_path(:cache)
+    end
+
+    #updates cache if necssary and returns the path to the cache
+    def update_cache?()
+      unless cache_current?
+        case view_type().to_sym
+         when :edit
+          render_edit_tpl_cache() 
+          #          add_validation()
+         when :display
+          render_display_tpl_cache() 
+         when :list
+          render_list_tpl_cache() 
+         when :search
+          render_search_tpl_cache() 
+        end
+      end
+      ret_existing_view_path(:cache)
+    end
+
+    def render()
       if cache_current?
         @tpl_contents = get_view_tpl_cache()
         @css_require = get_css_require_from_cache()
@@ -59,26 +93,10 @@ module R8Tpl
     @js_require << js unless @js_require.includes(js)
   end
 
-  #updates cache if necssary and returns the path to the cache
-  def update_cache?()
-    unless cache_current?
-      case view_type().to_sym
-        when :edit
-          render_edit_tpl_cache() 
-#          add_validation()
-        when :display
-          render_display_tpl_cache() 
-        when :list
-          render_list_tpl_cache() 
-        when :search
-          render_search_tpl_cache() 
-      end
-    end
-     ret_existing_view_path(:cache)
-  end
+
  private
 
-  #TBD: may move this to utility.r8
+  #TODO: may move this to utility.r8
   def i18n(*path)
     #TODO: looks like to get to work currently needto strip off first element
     term = path.dup
@@ -92,35 +110,30 @@ module R8Tpl
     :list_edit_in_place => 'edit',
     :display => 'display',
     :hover => 'display',
+    :saved_search => 'list',
     :list => 'list',
     :related_panel => 'list',
     :search => 'search'
   }
 
   def view_type()
-    #TBD: error if @view_name is not set
     ViewTranslations[@view_name.to_sym]
   end
+
   #if not set yet, this will grab/set the meta array for given object/viewType
   # TODO: should have extensible definition of viewName (ie: edit,quickEdit,editInline,etc)
-
-
   def view_meta()
     @view_meta ||= get_view_meta
   end
 
   def get_view_meta()
-    Views[@model_name] ||= {}
-    Views[@model_name][@profile] ||= {}
-    Views[@model_name][@profile][@view_name] ||= {}
-
     #TODO: revisit to work on override possiblities and for profile handling
     #should check for all view locations, direct and override
     #TODO: figure out best way to do PHP style requires/loading of external meta hashes
     path = ret_existing_view_path(:meta)
+    
     if path
-      hash = XYZ::Aux.convert_to_hash_symbol_form(eval(IO.read(path)))
-      Views[@model_name][@profile][@view_name] = hash
+      XYZ::Aux.convert_to_hash_symbol_form(eval(IO.read(path)))
       #TODO check if ok to remove logic wrt to json
     else
       #TODO: figure out handling of overrides
@@ -128,7 +141,6 @@ module R8Tpl
       # require 'some path to require'
      raise XYZ::ErrorNotImplemented.new()
     end
-    Views[@model_name][@profile][@view_name]
   end
 
 
@@ -141,7 +153,7 @@ module R8Tpl
     system_view_path = ret_existing_view_path(:system)
     raise XYZ::Error.new("to generate cache appropriate system file must exist") unless  system_view_path
 
-    #TBD: ask Nate about intended semantics; modified because error if file does not exist, but clause executed
+    #TODO: ask Nate about intended semantics; modified because error if file does not exist, but clause executed
     if not R8::Config[:dev_mode].nil? or R8::Config[:dev_mode] == false
       cache_edit_time = File.mtime(cache_path).to_i
       meta_view_edit_time = File.mtime(meta_view_path).to_i
@@ -151,28 +163,7 @@ module R8Tpl
       nil #TODO: should this be true or nil?
     end
   end
-=begin 
-TODO: remove after making sure new logic is right
-OLD
-      #adding this since rendering logic is in this file, might update it w/o changing template,
-      #jsTpl should then be updated to reflect changes
-      #TODO: switch this when functions moved to js compile class
-      # TBD put pick in only if template.r8.rb prefixed by app_name app_name = 'formtests' #TBD: stubbed
-      #   templateR8EditTime = File.mtime(R8::Config[:app_root_path] + #{R8::Config[:application_name]} + "/template.r8.rb").to_i
-      #TBD: below is stub
-      return false#TBD: below is wrong so executing here
 
-      template_r8_edit_time = File.mtime("#{SYSTEM_DIR}/r8/template.r8.rb").to_i
-      if(tpl_cache_edit_time < template_r8_edit_time || tpl_cache_edit_time < view_meta_edit_time || tpl_cache_edit_time < view_tpl_edit_time) then
-        return false
-      else
-        return true
-      end
-    else
-      return false
-    end
-  end
-=end
 
   def get_system_rtpl_contents()
     IO.read(ret_existing_view_path(:system))

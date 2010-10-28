@@ -37,8 +37,7 @@ module XYZ
       (id and not search_pattern) ? true : nil
     end
 
-    #TODO: some of these fns should be geenric model fns
-    def update!()
+    def update_from_saved_object!()
       raise Error.new("cannot update without an id") unless id()
       saved_object = self.class.get_objects(model_handle,{:id => id()}).first
       raise Error.new("cannot find saved search with id (#{id.to_s})") unless saved_object
@@ -58,10 +57,15 @@ module XYZ
       self[:search_pattern]
     end
     
-    #TODO: might use some variant on expose_methods_from_internal_object 
-    def create_list_view_meta_hash()
-      search_pattern ? search_pattern.create_list_view_meta_hash() : nil
+    def create_and_save_list_view_in_cache?(user)
+      #TODO: needs refinement
+      return nil unless saved_search_model_name() and saved_search_ref()
+      view_meta_hash = search_pattern ? search_pattern.create_list_view_meta_hash() : nil
+      raise Error.new("cannot create list_view meta hash") unless view_meta_hash
+      view = R8Tpl::ViewR8.new(saved_search_model_name(),saved_search_ref(),user,view_meta_hash)
+      view.update_cache_for_saved_search?()
     end
+
     def field_set()
       search_pattern ? search_pattern.field_set() : nil
     end
@@ -75,10 +79,22 @@ module XYZ
     def id()
       @id_handle ? @id_handle.get_id() : nil
     end
-   private
-
     def name()
       self[:display_name]
     end
+
+    def saved_search_template_name()
+      "#{saved_search_model_name()}/#{saved_search_ref()}" if saved_search_model_name() and saved_search_ref()
+    end
+
+   private
+
+    def saved_search_model_name()
+      :saved_search
+    end
+    def saved_search_ref()
+      id ? "ss-#{id.to_s}" : nil
+    end
+
   end
 end

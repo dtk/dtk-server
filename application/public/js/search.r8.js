@@ -250,6 +250,7 @@ console.log(devTestSearchObj['search_pattern'][':order_by']);
 					orderDef = searchObj['search_pattern'][':order_by'][orderingIndex];
 					R8.Search.renderOrderingEdit(modelName,orderId,orderDef);
 				}
+			//FIELD RELATED
 
 			}
 		}();

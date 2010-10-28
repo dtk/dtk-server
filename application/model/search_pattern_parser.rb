@@ -1,5 +1,4 @@
 #TODO: should this be in model subdirectory?
-#TODO: is theer any advatange to this being a sub class of a Hash?
 require File.expand_path(UTILS_DIR+'/internal/generate_list_meta_view')
 module XYZ
   class SearchPattern < HashObject
@@ -35,8 +34,24 @@ module XYZ
       #TODO: this is very simple; this will be enhanced
       generate_list_meta_view(columns,relation)
     end
+    
+    def ret_form_for_db()
+      process_symbols(self)
+    end
    private
     include GenerateListMetaView
+    def process_symbols(obj)
+      if obj.kind_of?(Array)
+        obj.map{|x|process_symbols(x)}
+      elsif obj.kind_of?(Hash)
+        obj.inject({}){|h,kv|h.merge(process_symbols(kv[0]) => process_symbols(kv[1]))}
+      elsif obj.kind_of?(Symbol)
+        ":#{obj}"
+      else
+        obj
+      end
+    end
+
 
     def find_key_from_input(type,hash_input)
       pair = hash_input.find{|k,v|ret_symbol(k) == type}

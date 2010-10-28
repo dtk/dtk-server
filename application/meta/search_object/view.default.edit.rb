@@ -35,7 +35,7 @@
              :rows => 1,
              :cols => 40,
             }},
-            {:search => {
+            {:search_pattern => {
               :type => 'hash',
               :help => '',
               :rows => 10,

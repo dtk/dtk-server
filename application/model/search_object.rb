@@ -38,11 +38,19 @@ module XYZ
 
     def save()
       if @id_handle
-        self.class.update_from_hash_assignments(@id_handle,self)
+        raise Error.new("saved search cannot be updated unless there is a name or search a pattern") unless search_pattern or name
+        hash_assignments = Hash.new
+        hash_assignments[:display_name] = name if name
+        hash_assignments[:search_pattern] = search_pattern.ret_form_for_db() if search_pattern
+        self.class.update_from_hash_assignments(@id_handle,hash_assignments)
       else
+        raise Error.new("saved search cannot be created if search_pattern does not exist") unless search_pattern
         #TODO: consider putting searches at top
         parent_id_handle = IDHandle[:c => @c,:uri => "/library/test", :model_name => :library] #TODO: stub
-        hash_assignments = self[:display_name] ? self : self.merge(:display_name => "search_object")
+        hash_assignments = {
+          :display_name => name || "search_object",
+          :search_pattern => search_pattern.ret_form_for_db()
+        }
         ref = hash_assignments[:display_name]
         create_hash = {:search_object => {ref => hash_assignments}}
         new_id = self.class.create_from_hash(parent_id_handle,create_hash).map{|x|x[:id]}.first

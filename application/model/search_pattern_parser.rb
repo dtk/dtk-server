@@ -115,7 +115,7 @@ module XYZ
       end
       ret
     end
-    FilterOperationsParsed = [:eq, :lt, :lte, :gt, :gte] #TODO: just partial list
+    FilterOperationsParsed = [:eq, :lt, :lte, :gt, :gte, "match-prefix".to_sym, :regex] #TODO: just partial list
 
     #return op in symbol form and args
     def get_op_and_args(expr)

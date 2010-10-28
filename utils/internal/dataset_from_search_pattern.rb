@@ -88,6 +88,10 @@ module XYZ
               el_args[0].to_s.lit > el_args[1].to_s.lit
              when :gte
               el_args[0].to_s.lit >= el_args[1].to_s.lit
+             when "match-prefix".to_sym
+              Sequel::SQL::StringExpression.like(el_args[0],"#{el_args[1]}%",{:case_insensitive=>true})
+             when :regex
+              Sequel::SQL::StringExpression.like(el_args[0],Regexp.new(el_args[1]),{:case_insensitive=>true})
              else
               raise ErrorPatternNotImplemented.new(:equal_op,el_op) 
             end

@@ -306,11 +306,18 @@ table.list tr.odd {
 	float: right;
 }
 .search-add-filter {
-	background-image: url(../images/plus-button.png);
+	background-image: url(../images/plus-button2.png);
 	height: 16px;
 	width: 16px;
 	float: right;
 	margin: 6px 10px 0 0;
+	cursor: pointer;
+}
+
+.search-add-filter.disabled {
+	background-image: url(../images/plus-button2.png);
+	background-position: -16px 0;
+	cursor: default;
 }
 
 .search-filter-value {

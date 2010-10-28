@@ -57,7 +57,11 @@ function initSearch() {
 	var scatClick = R8.Utils.Y.delegate('click',toggleSearchAttr,searchAttrs,'.saved-search-cat');
 
 	var filterList = R8.Utils.Y.one('#{%=model_name%}-filter-list');
-	var filterDblClick = R8.Utils.Y.delegate('click',loadFilter,filterList,'.search-filter');
+	var filterClick = R8.Utils.Y.delegate('click',loadFilter,filterList,'.search-filter');
+
+//TODO: change search-filter class to search-ordering
+	var orderingList = R8.Utils.Y.one('#{%=model_name%}-ordering-list');
+	var orderingClick = R8.Utils.Y.delegate('click',R8.Search.loadOrdering,orderingList,'.search-filter');
 }
 
 function loadFilter(e) {
@@ -322,7 +326,6 @@ function persistFilter(filterId,updateFilter) {
 
 	var fieldOpElem = R8.Utils.Y.one('#'+filterId+'-operator');
 	var fieldOperator = availOperators[fieldDef['type']][fieldOpElem.get('value')];
-	var test = fieldOpElem.get('value');
 
 	var fieldCondElem = R8.Utils.Y.one('#'+filterId+'-condition');
 	var fieldCondition = fieldCondElem.get('value');
@@ -497,7 +500,6 @@ function getFilterOperatorOptions(params) {
 	var availOpsElem = document.createElement('select');
 	availOpsElem.setAttribute('id',filterId+'-operator');
 	availOpsElem.setAttribute('name',filterId+'-operator');
-	availOpsElem.setAttribute('data-new-filter','true');
 	availOpsElem.setAttribute('style','vertical-align:top;');
 
 	availOpsElem.onchange = function(){
@@ -521,7 +523,6 @@ function getFilterFieldOptions(params) {
 	var availFieldsElem = document.createElement('select');
 	availFieldsElem.setAttribute('id',filterId+'-field');
 	availFieldsElem.setAttribute('name',filterId+'-field');
-	availFieldsElem.setAttribute('data-new-filter','true');
 	availFieldsElem.setAttribute('data-model',modelName);
 	availFieldsElem.setAttribute('style','vertical-align:top;');
 
@@ -678,7 +679,7 @@ function runSearch(searchId,save) {
 						<div class="filter-header">
 							<div style="margin: 0 auto;">
 								Ordering List
-								<div class="search-add-filter" onclick=""></div>
+								<div class="search-add-filter" onclick="R8.Search.renderOrderingEdit('{%=model_name%}');"></div>
 							</div>
 						</div>
 						<div id="{%=model_name%}-ordering-list" class="filter-list">

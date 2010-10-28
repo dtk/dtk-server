@@ -28,7 +28,7 @@ module XYZ
           {col => {
               :type => ui_datatype(col,fieldset_types),
               :help => ""
-            }
+            }.merge(col == :display_name ? {:objLink => true, :objLinkView => "display"} : {}) #TODO: hard coded display name as one with links
           }
         end
       end

@@ -14,8 +14,14 @@ module XYZ
         @cols.include?(col)
       end
 
+      #TODO: handle also case where col or self contains a hash
+      def add_col?(col)
+        @cols << col unless @cols.include?(col)
+      end
+
+      #TODO: fn should really be named add_cols?
       def add_cols(*cols)
-        cols.each{|col| @cols << col unless @cols.include?(col)}
+        cols.each{|col| add_col?(col)}
       end
 
       def remove_cols(*cols)

@@ -65,6 +65,8 @@ module XYZ
             processed_field_set.add_cols(*cols_to_add)
           end
 
+          #alwas include id column
+          processed_field_set.add_col?(:id)
           ds.select(*(processed_field_set.cols))
         end
 

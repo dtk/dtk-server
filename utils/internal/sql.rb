@@ -78,6 +78,11 @@ module XYZ
     end
 
     module DatatsetGraphMixin
+      #for debugging
+      def ppsql()
+        @sequel_ds.sql.gsub(/"/,'')
+      end
+
       attr_reader :model_name_info, :sequel_ds
       def graph(join_type,right_ds,join_conditions=true)
         new_model_name_info = right_ds.model_name_info.first.create_unique(@model_name_info)
@@ -133,11 +138,6 @@ module XYZ
 
       def model_handle()
         ModelHandle.new(@c,model_name)
-      end
-
-      #for debugging
-      def ppsql()
-        @sequel_ds.sql.gsub(/"/,'')
       end
 
      private

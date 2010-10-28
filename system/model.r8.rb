@@ -71,7 +71,8 @@ module XYZ
       #returns any related tables that must be joined in (by looking at virtual coumns)
       related_columns = field_set.related_columns(model_name)
       ret = nil
-pp dataset.ppsql
+pp [:wo_related_cols,dataset.ppsql]
+
       unless related_columns
         ret = dataset.all
       else
@@ -84,6 +85,7 @@ pp dataset.ppsql
           graph_ds = graph_ds.graph(:left_outer,right_ds,join_info[:join_cond])
         end
         graph_ds = graph_ds.paging_and_order(opts)
+pp [:related_cols,graph_ds.ppsql]
         ret = graph_ds.all
       end
       ret

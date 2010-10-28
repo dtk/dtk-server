@@ -15,29 +15,45 @@ module XYZ
       SQL::DataSetSearchPattern.create_dataset_from_search_object(self)
     end  
 
-    attr_accessor :should_save
+    attr_accessor :save_flag
 
     def self.create_from_input(input_hash,c)
       raise Error.new("search object is ill-formed") unless is_valid?(input_hash)
+      sp = nil_if_empty(input_hash["search_pattern"])
       hash = {
-        :id => input_hash["id"],
-        :display_name => input_hash["name"],
-        :search_pattern => input_hash["search_pattern"] ? SearchPattern.new(input_hash["search_pattern"]) : nil
+        :id => nil_if_empty(input_hash["id"]),
+        :display_name => nil_if_empty(input_hash["name"]),
+        :search_pattern => sp ? SearchPattern.new(sp) : nil
       }
       ret = SearchObject.new(hash,c)
-      ret.should_save = input_hash["save"]
+      ret.save_flag = input_hash["save"]
       ret
     end
 
-    def save?()
-      should_save
+    def should_save?
+      (save_flag or search_pattern) ? true : nil
+    end
+
+    def save()
+      if @id_handle
+        self.class.update_from_hash_assignments(@id_handle,self)
+      else
+        #TODO: consider putting searches at top
+        parent_id_handle = IDHandle[:c => @c,:uri => "/library/test", :model_name => :library] #TODO: stub
+        hash_assignments = self[:display_name] ? self : self.merge(:display_name => "search_object")
+        ref = hash_assignments[:display_name]
+        create_hash = {:search_object => {ref => hash_assignments}}
+        new_id = self.class.create_from_hash(parent_id_handle,create_hash).map{|x|x[:id]}.first
+        @id_handle = IDHandle[:c => @c, :guid => new_id, :model_name => :search_object]
+      end
+      id()
     end
 
     def needs_to_be_retrieved?()
       (id and not search_pattern) ? true : nil
     end
 
-    def update_from_saved_object!()
+    def retrieve_from_saved_object!()
       raise Error.new("cannot update without an id") unless id()
       saved_object = self.class.get_objects(model_handle,{:id => id()}).first
       raise Error.new("cannot find saved search with id (#{id.to_s})") unless saved_object
@@ -46,7 +62,7 @@ module XYZ
 
     def self.is_valid?(input_hash)
       #TODO: can do finer grain validation
-      (input_hash["id"] or input_hash["search_pattern"]) ? true : nil
+      (nil_if_empty(input_hash["id"]) or nil_if_empty(input_hash["search_pattern"])) ? true : nil
     end
 
     def db()
@@ -91,7 +107,6 @@ module XYZ
     end
 
    private
-
     def saved_search_model_name()
       :saved_search
     end
@@ -99,5 +114,8 @@ module XYZ
       id ? "ss-#{id.to_s}" : nil
     end
 
+    def self.nil_if_empty(x)
+      (x.nil? or x.empty?) ? nil : x
+    end
   end
 end

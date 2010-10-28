@@ -106,8 +106,8 @@ module XYZ
         ret << op
         args.each do |el|
           el_op,el_args = get_op_and_args(el)
-          #TODO: just treating eq
-          raise ErrorPatternNotImplemented.new(:equal_op,el) unless (el_op == :eq and el_args.size == 2)
+          raise ErrorParsing.new(:expression_arguments,el_args) unless el_args.size == 2
+          raise ErrorPatternNotImplemented.new(:filter_operation,el_op) unless FilterOperationsParsed.include?(el_op)
           ret << ([el_op] + el_args.map{|x|ret_scalar(x)})
         end
       else
@@ -115,7 +115,7 @@ module XYZ
       end
       ret
     end
-
+    FilterOperationsParsed = [:eq, :lt, :lte, :gt, :gte] #TODO: just partial list
 
     #return op in symbol form and args
     def get_op_and_args(expr)

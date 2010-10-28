@@ -1,3 +1,4 @@
+#TODO: see if can collapse or better integrate with field_search_pattern.rb
 module XYZ
   module SQL
     class DataSetSearchPattern < Dataset
@@ -76,9 +77,20 @@ module XYZ
           raise ErrorPatternNotImplemented.new(:filter_operation,op) unless (op == :and)
           and_list = args.map do |el|
             el_op,el_args = get_op_and_args(el)
-            #TODO: just treating eq
-            raise ErrorPatternNotImplemented.new(:equal_op,el) unless (el_op == :eq and el_args.size == 2)
-            {el_args[0] => el_args[1]}
+            case el_op
+             when :eq
+              {el_args[0] => el_args[1]}
+             when :lt
+              el_args[0].to_s.lit < el_args[1].to_s.lit
+             when :lte
+              el_args[0].to_s.lit <= el_args[1].to_s.lit
+             when :gt
+              el_args[0].to_s.lit > el_args[1].to_s.lit
+             when :gte
+              el_args[0].to_s.lit >= el_args[1].to_s.lit
+             else
+              raise ErrorPatternNotImplemented.new(:equal_op,el_op) 
+            end
           end
           sequel_where_clause = SQL.and(*and_list)
           ds.where(sequel_where_clause)

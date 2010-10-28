@@ -1,3 +1,4 @@
+#TODO: see if can collapse or better integrate with dataset_from_search_pattern.rb
 module XYZ
   module FieldSearchPatternInstanceMixin
     class FieldSearchPattern

@@ -581,9 +581,9 @@ function runSearch(searchId,save) {
 		<div id="" class="saved-search-l-pane">
 			<div id="spacer" style="height: 40px; width: 100px;"></div>
 			<div id="{%=model_name%}-search-attrs" class="saved-search-categories">
-				<div id="filters-search-attr" class="saved-search-cat"><div class="label">Filters</div></div>
+				<div id="filters-search-attr" class="saved-search-cat selected"><div class="label">Filters</div></div>
 				<div id="ordering-search-attr" class="saved-search-cat"><div class="label">Ordering</div></div>
-				<div id="old-search-attr" class="saved-search-cat selected"><div class="label">Old</div></div>
+				<div id="old-search-attr" class="saved-search-cat"><div class="label">Old</div></div>
 			</div>
 		</div>
 		<div id="" class="saved-search-r-pane">
@@ -597,7 +597,7 @@ function runSearch(searchId,save) {
 				</form>
 			</div>
 			<div id="saved-search-attr-wrapper" class="saved-search-attr-wrapper">
-				<div id="old-search-attr-body" style="float: left; width: 780px;">
+				<div id="old-search-attr-body" style="display:none; float: left; width: 780px;">
 					<form id="{%=model_name%}-search-form" action="{%=base_uri%}/xyz/{%=model_name%}/list" method="post" enctype="multipart/form-data">
 					<div style="margin-left: 5px;">
 						<input type="submit" value="Search"/>&nbsp;&nbsp;&nbsp;&nbsp;
@@ -617,7 +617,7 @@ function runSearch(searchId,save) {
 					</table>
 					</form>
 				</div>
-				<div id="filters-search-attr-body" class="search-attr-body">
+				<div id="filters-search-attr-body" class="search-attr-body" style="display:block;">
 					<div class="search-filter-wrapper">
 						<div class="filter-header">
 							<div style="margin: 0 auto;">
@@ -674,7 +674,24 @@ function runSearch(searchId,save) {
 					</div>
 				</div>
 				<div id="ordering-search-attr-body" class="search-attr-body">
-					ORDER BY
+					<div class="search-filter-wrapper">
+						<div class="filter-header">
+							<div style="margin: 0 auto;">
+								Ordering List
+								<div class="search-add-filter" onclick=""></div>
+							</div>
+						</div>
+						<div id="{%=model_name%}-ordering-list" class="filter-list">
+						</div>
+					</div>
+					<div style="float: left; height: 100%; width: 5px; background-color: #AACCEE"></div>
+					<div style="float: left; height: 100%; width: 482px; background-color: #FFFFFF;">
+						<div style="width: 100%; height: 30px; border-bottom: 1px solid #AACCEE;">
+							<div style="font-weight: bold; font-size: 13px">Order By Details</div>
+						</div>
+						<div id="tempId-ordering-edit-wrapper" style="width: 100%; height: 100%;">
+						</div>
+					</div>
 				</div>
 			</div>
 			<!--END SAVED SEARCH ATTR WRAPPER-->

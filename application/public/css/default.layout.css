@@ -229,7 +229,9 @@ table.list tr.odd {
 .saved-search-l-pane {
 	float: left;
 	width: 90px;
-	height: 180px;
+	height: 179px;
+	background-color: #FFFFFF;
+	border-bottom: 1px solid #AACCEE;
 }
 .saved-search-r-pane {
 	float: left;
@@ -333,72 +335,53 @@ table.list tr.odd {
 }
 /*------------Drop Shadow---------*/
 
-.search-container .drop-shadow {
-	height: 60px;
-	width: 120px;
-	margin: 4px 0 0 4px;
-}
-
-.search-container .ds-corner {
-	background-image: url(../images/node/basic-corners-shadow.png);
-}
-
-.search-container .ds-l-col {
-	float: left;
-	height: 60px;
-	width: 7px;
-}
-.search-container .ds-r-col {
+.search-rt-shadow {
 	float: right;
-	height: 60px;
-	width: 7px;
+	width: 11px;
+	height: 191px;
 }
 
-.search-container .drop-shadow .ds-l-col-body {
-	width: 7px;
-	height: 46px;
-	float: left;
-	background-image: url(../images/node/basic-col-shadow-bg.png);
+.search-rt-shadow .shadow-top-cap {
+	background-image: url(../images/search-box-shadow-corners.png);
+	background-position: 0px -11px;
+	height: 11px;
+	width: 11px;
+	margin-top: 5px;
+}
+.search-rt-shadow .shadow-rt-body {
+	background-image: url(../images/search-box-rt-body-shadow.png);
 	background-repeat: repeat-y;
+	width: 11px;
+	height: 164px;
 }
 
-
-.search-container .drop-shadow .ds-r-col-body {
-	width: 7px;
-	height: 46px;
-	float: left;
-	background-image: url(../images/node/basic-col-shadow-bg.png);
-	background-repeat: repeat-y;
-	background-position: -7px 0px;
+.search-rt-shadow .shadow-btm-cap {
+	background-image: url(../images/search-box-shadow-corners.png);
+	background-position: 0px -22px;
+	height: 11px;
+	width: 11px;
 }
 
-.search-container .drop-shadow .ds-body {
+.search-btm-shadow {
+	width: 887px;
+	height: 11px;
 	float: left;
-	width: 106px;
-	height: 60px;
 }
-.search-container .drop-shadow .ds-body .header {
+
+.search-btm-shadow .shadow-left-cap {
+	background-image: url(../images/search-box-shadow-corners.png);
+	background-position: 0px -33px;
+	height: 11px;
+	width: 11px;
+	margin-left: 5px;
 	float: left;
-	width: 106px;
-	height: 7px;
-	background-image: url(../images/node/basic-header-shadow-bg.png);
+}
+.search-btm-shadow .shadow-btm-body {
+	background-image: url(../images/search-box-btm-body-shadow.png);
 	background-repeat: repeat-x;
-}
-.search-container .drop-shadow .ds-body .footer {
+	width: 871px;
+	height: 11px;
 	float: left;
-	width: 106px;
-	height: 7px;
-	background-image: url(../images/node/basic-header-shadow-bg.png);
-	background-repeat: repeat-x;
-	background-position: 0px -7px;
-}
-
-.search-container .drop-shadow .ds-body .main-body {
-	float: left;
-	width: 106px;
-	height: 46px;
-	background-image: url(../images/node/basic-body-shadow-bg.png);
-	background-repeat: repeat;
 }
 
 /*---------------*/

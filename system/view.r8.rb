@@ -37,11 +37,7 @@ module R8Tpl
     end
 
 
-    def update_cache_for_saved_search?()
-      #TODO: stub that only updates iff does not exist
-      existing_cache = ret_existing_view_path(:cache)
-      return existing_cache if existing_cache
-
+    def update_cache_for_saved_search()
       render_list_tpl_cache()
       ret_existing_view_path(:cache)
     end

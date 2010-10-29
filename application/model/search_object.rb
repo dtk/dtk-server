@@ -17,7 +17,7 @@ module XYZ
 
     attr_accessor :save_flag
 
-    def self.create_from_input(input_hash,c)
+    def self.create_from_input_hash(input_hash,c)
       raise Error.new("search object is ill-formed") unless is_valid?(input_hash)
       sp = nil_if_empty(input_hash["search_pattern"])
       hash = {
@@ -82,8 +82,20 @@ module XYZ
     def search_pattern()
       self[:search_pattern]
     end
+
+    def self.save_list_view_in_cache(id,hash_assignments,user)
+      search_pattern_json = hash_assignments[:search_pattern]
+      return nil unless search_pattern_json
+      search_pattern = SearchPattern.new(JSON.parse(search_pattern_json))
+      view_meta_hash = search_pattern.create_list_view_meta_hash()
+      return nil unless search_pattern.relation
+      is_saved_search = true
+      view = R8Tpl::ViewR8.new(search_pattern.relation,saved_search_ref(id),user,is_saved_search,view_meta_hash)
+      view.update_cache_for_saved_search()
+    end
+
     
-    def create_and_save_list_view_in_cache?(user)
+    def save_list_view_in_cache?(user)
       #TODO: needs refinement
       return nil unless search_pattern
       return nil if search_pattern.is_default_view?()
@@ -94,7 +106,8 @@ module XYZ
 
       raise ErrorNotImplemented.new("when search_pattern.relation is of type #{search_pattern.relation.class}") unless search_pattern.relation.kind_of?(Symbol)
       view = R8Tpl::ViewR8.new(search_pattern.relation,saved_search_ref(),user,is_saved_search,view_meta_hash)
-      view.update_cache_for_saved_search?()
+      #TODO: this necssarily updates if reaches here; more sophistiacted woudl update cache file only if need to
+      view.update_cache_for_saved_search()
     end
 
     def field_set()
@@ -122,8 +135,11 @@ module XYZ
     def saved_search_model_name()
       :saved_search
     end
-    def saved_search_ref()
+    def self.saved_search_ref(id)
       id ? "ss-#{id.to_s}" : nil
+    end
+    def saved_search_ref()
+      self.class.saved_search_ref(id)
     end
 
     def self.nil_if_empty(x)

@@ -9,7 +9,17 @@
   "node_group": {
     "all_instances" : {
       "display_name": "all_instances",
-      "dynamic_membership_sql" : {"type" : "instance"}
+      "dynamic_search_pattern": {
+         ":relation": ":node",
+         ":filter": [
+	   ":and", 
+           [
+             ":eq",
+             ":type",
+             "instance"
+           ]
+         ]
+      }
     }
   },
  

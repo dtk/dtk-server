@@ -2,7 +2,8 @@ module XYZ
   class NodeGroup < Model
     set_relation_name(:node,:node_group)
     def self.up()
-      column :dynamic_membership_sql, :json #sql where clause that picks out node members and means to ignore memebrship assocs
+      #TODO: should it instaed be pointer to by pointer search_object
+      column :dynamic_search_pattern, :json #sql where clause that picks out node members and means to ignore memebrship assocs
       virtual_column :member_id_list
       many_to_one :library, :datacenter, :project
       one_to_many :component
@@ -30,9 +31,9 @@ module XYZ
       end
     end
 
-    #needed to overwrite this fn because special processing to handle :dynamic_membership_sql
+    #needed to overwrite this fn because special processing to handle :dynamic_search_pattern
     def self.get_objects(model_handle,where_clause={},opts={})
-      #break into two parts; one with explicit links and the other with :dynamic_membership_sql non null
+      #break into two parts; one with explicit links and the other with :dynamic_search_pattern non null
       static = get_objects_static(model_handle,where_clause,opts)
       dynamic = get_objects_dynamic(model_handle,where_clause,opts)
       static + dynamic
@@ -100,7 +101,7 @@ module XYZ
       c = model_handle[:c]
       #important that Model.get_objects called, not get_objects
       #below returns just scalar attributes
-      ng = Model.get_objects(model_handle,SQL.and(where_clause,{:dynamic_membership_sql => nil}),opts)
+      ng = Model.get_objects(model_handle,SQL.and(where_clause,{:dynamic_search_pattern => nil}),opts)
       return ng if ng.empty?
       #TODO: encapsulate this pattern to nest multiple matches; might have a variant of join_table that does this
       ng_member_wc = SQL.or(*ng.map{|x|{:node_group_id => x[:id]}})
@@ -121,13 +122,17 @@ module XYZ
     end
 
     def self.get_objects_dynamic(model_handle,where_clause={},opts={})
-      #TODO: make more efficient
-      c = model_handle[:c]
+      #TODO: so if can make more efficient
       #important that Model.get_objects called, not get_objects
-      groups_info = Model.get_objects(model_handle,SQL.and(where_clause,SQL.and(where_clause,SQL.not(:dynamic_membership_sql => nil))),
-                                opts.merge(FieldSet.opt([:id,:display_name,:dynamic_membership_sql])))
-      groups_info.map{|group|group.merge :node => Model.get_objects(ModelHandle.new(c,:node),group[:dynamic_membership_sql])}
-        
+      groups_info = Model.get_objects(model_handle,SQL.and(where_clause,SQL.and(where_clause,SQL.not(:dynamic_search_pattern => nil))),
+                                opts.merge(FieldSet.opt([:id,:display_name,:dynamic_search_pattern])))
+
+#      groups_info.map{|group|group.merge :node => Model.get_objects(ModelHandle.new(c,:node),group[:dynamic_search_pattern])}
+      groups_info.map do |group|
+        search_pattern =  group[:dynamic_search_pattern].merge(:columns => [:id])
+        search_object = SearchObject.create_from_input_hash({"search_pattern" => search_pattern},model_handle[:c])
+        group.merge :node => get_objects_from_search_object(search_object)
+      end
     end
   end
 

@@ -53,6 +53,11 @@
 	{%for js_include in _app[:js_includes]%}
 		<script type="text/javascript" src="{%=js_include%}"></script>
 	{%end%}
+	<script type="text/javascript">
+	{%for js_exe in _app[:js_exe_list]%}
+		{%=js_exe%}
+	{%end%}
+	</script>
 </div>
 </body>
 </html>

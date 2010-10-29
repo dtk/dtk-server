@@ -558,7 +558,7 @@ function runSearch(searchId,save) {
 	searchObj['search_pattern'][':columns'] = [];
 	var numColumns = displayColumns.options.length;
 	for(var i=0; i < numColumns; i++) {
-		searchObj['search_pattern'][':columns'].push(displayColumns.options[i].value);
+		searchObj['search_pattern'][':columns'].push(':'+displayColumns.options[i].value);
 	}
 
 	searchObj['name'] = sNameElem.value;
@@ -584,10 +584,9 @@ function runSearch(searchId,save) {
 		</div>
 		<div style="margin: 4px 0 0 10px; float: left;">
 			<select name="{%=model_name%}-saved-search">
-				<option value="foo">All Nodes</option>
-				<option value="foo">Ubuntu Machines</option>
-				<option value="foo">Good Status</option>
-				<option value="foo">Large Nodes</option>
+				{%for saved_search in _saved_search_list%}
+					<option value="{%=saved_search[:id]%}">{%=saved_search[:display_name]%}</option>
+				{%end%}
 			</select>
 		</div>
 	</div>

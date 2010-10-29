@@ -584,9 +584,7 @@ function runSearch(searchId,save) {
 		</div>
 		<div style="margin: 4px 0 0 10px; float: left;">
 			<select name="{%=model_name%}-saved-search">
-				{%for saved_search in _saved_search_list%}
-					<option value="{%=saved_search[:id]%}">{%=saved_search[:display_name]%}</option>
-				{%end%}
+				{%=saved_search_list_dropdown%}
 			</select>
 		</div>
 	</div>

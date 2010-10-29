@@ -498,6 +498,12 @@ module R8Tpl
     r8TPL.assign(:formId, @form_id)
     r8TPL.assign(:formAction, view_meta[:action])
 
+    r8TPL.assign(:saved_search_list_dropdown,'
+      {%for saved_search in _saved_search_list%}
+        <option value="{%=saved_search[:id]%}">{%=saved_search[:display_name]%}</option>
+      {%end%}
+    ')
+
     td_label_class = (view_meta[:td_label_class].nil? ? 'label' : view_meta[:td_label_class])
     td_field_class = (view_meta[:td_field_class].nil? ? 'field' : view_meta[:td_field_class])
 

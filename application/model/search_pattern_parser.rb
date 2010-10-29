@@ -110,14 +110,19 @@ module XYZ
           el_op,el_args = get_op_and_args(el)
           raise ErrorParsing.new(:expression_arguments,el_args) unless el_args.size == 2
           raise ErrorPatternNotImplemented.new(:filter_operation,el_op) unless FilterOperationsParsed.include?(el_op)
-          ret << ([el_op] + el_args.map{|x|ret_scalar(x)})
+          if el_op == :oneof
+            raise ErrorParsing.new(:argument_to_one_of,el_args[1]) unless el_args[1].kind_of?(Array)
+            ret << [el_op,ret_scalar(el_args[0]),el_args[1]]
+          else
+            ret << ([el_op] + el_args.map{|x|ret_scalar(x)})
+          end
         end
       else
         raise ErrorPatternNotImplemented.new(:filter,filter)
       end
       ret
     end
-    FilterOperationsParsed = [:eq, :lt, :lte, :gt, :gte, "match-prefix".to_sym, :regex] #TODO: just partial list
+    FilterOperationsParsed = [:eq, :lt, :lte, :gt, :gte, "match-prefix".to_sym, :regex, :oneof] #TODO: just partial list
 
     def ret_order_by(hash_input)
       order_by = find_key_from_input(:order_by,hash_input)

@@ -75,7 +75,8 @@ module XYZ
           filter = search_pattern.find_key(:filter)
           return ds unless filter
 
-          #TODO: just treating some subset of patterns
+          #TODO: just treating "and" now
+          #TODO: some below use Sequel others are wrapper SQL in sql.rb; clean up
           op,args = get_op_and_args(filter)
           raise ErrorPatternNotImplemented.new(:filter_operation,op) unless (op == :and)
           and_list = args.map do |el|
@@ -95,6 +96,8 @@ module XYZ
               Sequel::SQL::StringExpression.like(el_args[0],"#{el_args[1]}%",{:case_insensitive=>true})
              when :regex
               Sequel::SQL::StringExpression.like(el_args[0],Regexp.new(el_args[1]),{:case_insensitive=>true})
+             when :oneof
+              SQL.or(*el_args[1].map{|x|{el_args[0] => x}})
              else
               raise ErrorPatternNotImplemented.new(:equal_op,el_op) 
             end

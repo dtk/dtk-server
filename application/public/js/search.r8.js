@@ -3,7 +3,10 @@ if (!R8.Search) {
 	(function(R8) {
 		R8.Search = function() {
 			return {
-				page : function(modelName,start) {
+			        loadSearch : function(searchObj) {
+				console.log(searchObj);
+			        },
+			        page : function(modelName,start) {
 					var searchForm = document.getElementById(modelName+'-search-form');
 					var savedSearchElem = R8.Utils.Y.one('#saved_search');
 					var saved_search = {'start':start};

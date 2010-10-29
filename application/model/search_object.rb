@@ -11,6 +11,10 @@ module XYZ
     ### virtual column defs
     #helper fns
 
+    def json_search_pattern()
+      search_pattern ? JSON.generate(search_pattern) : nil
+    end
+
     def create_dataset()
       SQL::DataSetSearchPattern.create_dataset_from_search_object(self)
     end  

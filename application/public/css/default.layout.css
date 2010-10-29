@@ -300,6 +300,11 @@ table.list tr.odd {
 	overflow-y: scroll;
 	font-size: 11px;
 }
+.column-list {
+	width: 100%;
+	height: 110px;
+	font-size: 11px;
+}
 
 .search-remove-filter {
 	background-image: url(../images/close-button.png);
@@ -333,6 +338,27 @@ table.list tr.odd {
 	width: 95%;
 	cursor: pointer;
 }
+
+.arrow-square {
+	height: 16px;
+	width: 16px;
+}
+.arrow-square.blue {
+	background-image: url(../images/arrow-square-blue.png);
+}
+.arrow-square.blue.left {
+	background-position: -16px 0px;
+}
+.arrow-square.blue.right {
+	background-position: -48px 0px;
+}
+.arrow-square.blue.down {
+	background-position: 0px 0px;
+}
+.arrow-square.blue.up {
+	background-position: -32px 0px;
+}
+
 /*------------Drop Shadow---------*/
 
 .search-rt-shadow {

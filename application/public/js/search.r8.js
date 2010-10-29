@@ -249,9 +249,136 @@ console.log(devTestSearchObj['search_pattern'][':order_by']);
 					var modelName = searchObj['search_pattern'][':relation'];
 					orderDef = searchObj['search_pattern'][':order_by'][orderingIndex];
 					R8.Search.renderOrderingEdit(modelName,orderId,orderDef);
-				}
-			//FIELD RELATED
+				},
+			//COLUMN RELATED
 
+				setupColumnFields : function(modelName,searchId) {
+					var fieldDefs = getModelFieldDefs(modelName);
+					var availFieldsElem = document.getElementById(modelName+'-avail-columns');
+
+					for(field in fieldDefs) {
+						availFieldsElem.options[availFieldsElem.options.length] = new Option(fieldDefs[field]['i18n'],field,false,false);
+					}
+
+					var mvLeftElem = R8.Utils.Y.one('#'+modelName+'-columns-mv-left');
+					var mvLeftEvnt = mvLeftElem.on('click',function(e){
+						var selectedOptions = [];
+						var remainingOptions = [];
+						var availFieldsElem = document.getElementById(modelName+'-avail-columns');
+						var numOptions = availFieldsElem.options.length;
+						for(var i=0; i < numOptions; i++) {
+							if(availFieldsElem.options[i].selected == true) {
+								selectedOptions[selectedOptions.length] = {'display':availFieldsElem.options[i].innerHTML,'value':availFieldsElem.options[i].value};
+							} else {
+								remainingOptions[remainingOptions.length] = {'display':availFieldsElem.options[i].innerHTML,'value':availFieldsElem.options[i].value};
+							}
+						}
+						availFieldsElem.options.length = 0;
+						for(option in remainingOptions) {
+							availFieldsElem.options[availFieldsElem.options.length] = new Option(remainingOptions[option]['display'],remainingOptions[option]['value'],false,false);
+						}
+
+						var displayFieldsElem = document.getElementById(modelName+'-display-columns');
+						for(option in selectedOptions) {
+							displayFieldsElem.options[displayFieldsElem.options.length] = new Option(selectedOptions[option]['display'],selectedOptions[option]['value'],false,false);
+						}
+					});
+
+					var mvRightElem = R8.Utils.Y.one('#'+modelName+'-columns-mv-right');
+					var mvRightEvnt = mvRightElem.on('click',function(e){
+						var selectedOptions = [];
+						var remainingOptions = [];
+						var displayFieldsElem = document.getElementById(modelName+'-display-columns');
+						var numOptions = displayFieldsElem.options.length;
+						for(var i=0; i < numOptions; i++) {
+							if(displayFieldsElem.options[i].selected == true) {
+								selectedOptions[selectedOptions.length] = {'display':displayFieldsElem.options[i].innerHTML,'value':displayFieldsElem.options[i].value};
+							} else {
+								remainingOptions[remainingOptions.length] = {'display':displayFieldsElem.options[i].innerHTML,'value':displayFieldsElem.options[i].value};
+							}
+						}
+						displayFieldsElem.options.length = 0;
+						for(option in remainingOptions) {
+							displayFieldsElem.options[displayFieldsElem.options.length] = new Option(remainingOptions[option]['display'],remainingOptions[option]['value'],false,false);
+						}
+
+						var availFieldsElem = document.getElementById(modelName+'-avail-columns');
+						for(option in selectedOptions) {
+							availFieldsElem.options[availFieldsElem.options.length] = new Option(selectedOptions[option]['display'],selectedOptions[option]['value'],false,false);
+						}
+					});
+
+					var mvUpElem = R8.Utils.Y.one('#'+modelName+'-columns-mv-up');
+					var mvUpEvnt = mvUpElem.on('click',function(e){
+						var selectedOptions = [];
+						var remainingOptions = [];
+						var firstSelectedIndex = null;
+						var displayFieldsElem = document.getElementById(modelName+'-display-columns');
+						var numOptions = displayFieldsElem.options.length;
+						for(var i=0; i < numOptions; i++) {
+							if(displayFieldsElem.options[i].selected == true) {
+								if(firstSelectedIndex == null) firstSelectedIndex = i;
+								selectedOptions[selectedOptions.length] = {'display':displayFieldsElem.options[i].innerHTML,'value':displayFieldsElem.options[i].value,'index':i};
+							} else {
+								remainingOptions[remainingOptions.length] = {'display':displayFieldsElem.options[i].innerHTML,'value':displayFieldsElem.options[i].value,'index':i};
+							}
+						}
+
+						displayFieldsElem.options.length = 0;
+						var placedNewOrder = false;
+						for(option in remainingOptions) {
+							if(remainingOptions[option]['index'] >= (firstSelectedIndex-1) && placedNewOrder == false) {
+								for(sOption in selectedOptions) {
+									displayFieldsElem.options[displayFieldsElem.options.length] = new Option(selectedOptions[sOption]['display'], selectedOptions[sOption]['value'], false, false);
+								}
+								placedNewOrder = true;
+								selectedOptions = null;
+							}
+							displayFieldsElem.options[displayFieldsElem.options.length] = new Option(remainingOptions[option]['display'], remainingOptions[option]['value'], false, false);
+						}
+						if(selectedOptions != null) {
+							for(sOption in selectedOptions) {
+								displayFieldsElem.options[displayFieldsElem.options.length] = new Option(selectedOptions[sOption]['display'], selectedOptions[sOption]['value'], false, false);
+							}
+						}
+					});
+
+					var mvDownElem = R8.Utils.Y.one('#'+modelName+'-columns-mv-down');
+					var mvDownEvnt = mvDownElem.on('click',function(e){
+						var selectedOptions = [];
+						var remainingOptions = [];
+						var lastSelectedIndex = null;
+						var displayFieldsElem = document.getElementById(modelName+'-display-columns');
+						var numOptions = displayFieldsElem.options.length;
+						for(var i=0; i < numOptions; i++) {
+							if(displayFieldsElem.options[i].selected == true) {
+								lastSelectedIndex = i;
+								selectedOptions[selectedOptions.length] = {'display':displayFieldsElem.options[i].innerHTML,'value':displayFieldsElem.options[i].value,'index':i};
+							} else {
+								remainingOptions[remainingOptions.length] = {'display':displayFieldsElem.options[i].innerHTML,'value':displayFieldsElem.options[i].value,'index':i};
+							}
+						}
+
+						displayFieldsElem.options.length = 0;
+						var placedNewOrder = false;
+						for(option in remainingOptions) {
+							if(remainingOptions[option]['index'] > (lastSelectedIndex+1) && placedNewOrder == false) {
+								for(sOption in selectedOptions) {
+									displayFieldsElem.options[displayFieldsElem.options.length] = new Option(selectedOptions[sOption]['display'], selectedOptions[sOption]['value'], false, false);
+								}
+								placedNewOrder = true;
+								selectedOptions = null;
+							}
+							displayFieldsElem.options[displayFieldsElem.options.length] = new Option(remainingOptions[option]['display'], remainingOptions[option]['value'], false, false);
+						}
+						if(selectedOptions != null) {
+							for(sOption in selectedOptions) {
+								displayFieldsElem.options[displayFieldsElem.options.length] = new Option(selectedOptions[sOption]['display'], selectedOptions[sOption]['value'], false, false);
+							}
+						}
+					});
+
+				}
 			}
 		}();
 	})(R8);

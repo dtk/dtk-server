@@ -62,6 +62,10 @@ function initSearch() {
 //TODO: change search-filter class to search-ordering
 	var orderingList = R8.Utils.Y.one('#{%=model_name%}-ordering-list');
 	var orderingClick = R8.Utils.Y.delegate('click',R8.Search.loadOrdering,orderingList,'.search-filter');
+
+//TODO: get ID handling going
+var searchId = 'foo';
+	R8.Search.setupColumnFields('{%=model_name%}',searchId);
 }
 
 function loadFilter(e) {
@@ -548,9 +552,18 @@ function runSearch(searchId,save) {
 		return;
 	}
 
+	var displayColumns = document.getElementById('node-display-columns');
 	var searchObj = getSearchObj(searchId);
+
+	searchObj['search_pattern'][':columns'] = [];
+	var numColumns = displayColumns.options.length;
+	for(var i=0; i < numColumns; i++) {
+		searchObj['search_pattern'][':columns'].push(displayColumns.options[i].value);
+	}
+
 	searchObj['name'] = sNameElem.value;
 	searchObj['save'] = (save == true) ? 'true' : 'false';
+
 
 	YUI().use("json", function (Y) {
 		var searchObjJsonStr = Y.JSON.stringify(searchObj);
@@ -699,17 +712,38 @@ function runSearch(searchId,save) {
 				<div id="columns-search-attr-body" class="search-attr-body">
 					<div class="search-filter-wrapper">
 						<div class="filter-header">
-							<div style="margin: 0 auto;">Search Display Columns</div>
+							<div style="margin: 0 auto;  padding-top: 5px;">Node Results Display Columns</div>
 						</div>
-						<div id="{%=model_name%}-columns-list" class="filter-list">
+						<div id="{%=model_name%}-columns-list" class="column-list">
+							<div style="height: 110px; width: 32px; float: left;">
+								<div style="width: 16px; margin: 20px 7px 0 7px;">
+									<div id="{%=model_name%}-columns-mv-up" class="arrow-square blue up"></div>
+									<div id="{%=model_name%}-columns-mv-down" class="arrow-square blue down"></div>
+								</div>
+							</div>
+							<div style="height: 110px; width: 268px; float: left;">
+								<select id="{%=model_name%}-display-columns" name="{%=model_name%}-display-columns" multiple="1" style="height:110px; width: 268px;">
+								</select>
+							</div>
+						</div>
+					</div>
+
+					<div style="float: left; height: 100%; width: 5px; background-color: #AACCEE"></div>
+					<div style="float: left; height: 100%; width: 30px; background-color: #FFFFFF;">
+						<div style="width: 16px; margin: 50px 7px 0 7px;">
+							<div id="{%=model_name%}-columns-mv-left" class="arrow-square blue left"></div>
+							<div id="{%=model_name%}-columns-mv-right" class="arrow-square blue right"></div>
 						</div>
 					</div>
 					<div style="float: left; height: 100%; width: 5px; background-color: #AACCEE"></div>
-					<div style="float: left; height: 100%; width: 482px; background-color: #FFFFFF;">
-						<div style="width: 100%; height: 30px; border-bottom: 1px solid #AACCEE;">
-							<div style="font-weight: bold; font-size: 13px">Available Node Columns</div>
+
+					<div style="float: left; height: 100%; width: 447px; background-color: #FFFFFF;">
+						<div style="width: 268px; height: 30px; border-bottom: 1px solid #AACCEE; border-right: 1px solid #AACCEE;">
+							<div style="font-weight: bold; font-size: 13px; text-align: center; padding-top: 5px;">Available Node Columns</div>
 						</div>
-						<div id="tempId-columns-edit-wrapper" style="width: 100%; height: 100%;">
+						<div id="tempId-columns-edit-wrapper" style="width: 268px; height: 100%; border-right: 1px solid #AACCEE;">
+							<select id="{%=model_name%}-avail-columns" name="{%=model_name%}-avail-columns" multiple="1" style="height:110px; width: 268px;">
+							</select>
 						</div>
 					</div>
 				</div>

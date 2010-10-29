@@ -25,9 +25,9 @@ pp ret_request_params()
    end
 
    def ret_filter_when_get()
-     hash = ret_parsed_query_string_when_get() 
-     field_set = Model::FieldSet.all_real(model_name())
-     hash ? field_set.ret_where_clause_for_search_string(hash.reject{|k,v|k == :parent_id}) : nil
+     hash = (ret_parsed_query_string_when_get()||{}).reject{|k,v|k == :parent_id}
+     return nil if hash.empty?
+     [:and] + hash.map{|k,v|[:eq,k,v]}
     end
 
     def ret_hash_search_object_in_post()

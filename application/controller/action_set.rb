@@ -77,12 +77,13 @@ module XYZ
       a = Ramaze::Action.create(
         :node => XYZ.const_get("#{model.capitalize}Controller"),
         :method => method.to_sym,
-        :params => params,
+        :params => params, #TODO deprecate                        
         :engine => lambda{|action, value| value },
         :variables => {
           :js_includes => @js_includes,
           :css_includes => @css_includes,
-          :js_exe_list => @js_exe_list
+          :js_exe_list => @js_exe_list,
+          :params => params
         }
        )
       return a.call

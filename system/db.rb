@@ -38,6 +38,7 @@ module XYZ
     include Associations unless included_modules.include?(Associations)
     include RestURI unless included_modules.include?(RestURI)
 
+    #TODO: may move to dataset_from_search_pattern.rb
     def self.ret_paging_and_order_added_to_dataset(ds,opts)
       ret = ds
       order_by_opts = opts[:order_by]
@@ -50,7 +51,7 @@ module XYZ
           ret = dir == "ASC" ? ds.order(col) : ds.reverse_order(col)
         end
       end
-      paging_opts =  opts[:page]
+      paging_opts =  opts[:page] || opts[:paging] #TBD: should switch over to just paging
       if paging_opts
         if paging_opts[:limit] and  paging_opts[:start]
           ret = ret.limit(paging_opts[:limit],paging_opts[:start])

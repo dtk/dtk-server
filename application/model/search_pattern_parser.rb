@@ -69,6 +69,8 @@ module XYZ
       self[:relation] = ret_relation(hash_input)
       self[:columns] = ret_columns(hash_input)
       self[:filter] = ret_filter(hash_input)
+      self[:order_by] = ret_order_by(hash_input)
+      self[:paging] = ret_paging(hash_input)
     end
 
     def ret_relation(hash_input)
@@ -116,6 +118,30 @@ module XYZ
       ret
     end
     FilterOperationsParsed = [:eq, :lt, :lte, :gt, :gte, "match-prefix".to_sym, :regex] #TODO: just partial list
+
+    def ret_order_by(hash_input)
+      order_by = find_key_from_input(:order_by,hash_input)
+      return nil if order_by.nil? or order_by.empty?
+      raise ErrorParsing.new(:order_by,order_by) unless order_by.kind_of?(Array)
+      order_by.map do |el|
+        raise ErrorParsing.new(:order_by_element,el) unless el.kind_of?(Hash) and el.size <= 2
+        field = (el.find{|k,v|ret_symbol(k) == :field}||[nil,nil])[1]
+        raise ErrorParsing.new(:order_by_element,el) unless field 
+        order = (el.find{|k,v|ret_symbol(k) == :order}||[nil,"ASC"])[1]
+        raise ErrorParsing.new(:order_by_order_direction,order) unless ["ASC","DESC"].include?(order)
+        {:field => ret_symbol(field), :order => order}
+      end
+    end
+
+    def ret_paging(hash_input)
+      paging = find_key_from_input(:paging,hash_input)
+      return nil if paging.nil? or paging.empty?
+      raise ErrorParsing.new(:paging,paging) unless paging.kind_of?(Hash) and paging.size <= 2
+      start = (paging.find{|k,v|ret_symbol(k) == :start}||[nil,nil])[1]
+      raise ErrorParsing.new(:paging_start,paging) unless start 
+      limit = (paging.find{|k,v|ret_symbol(k) == :limit}||[nil,nil])[1]
+      {:start => start.to_i}.merge(limit ? {:limit => limit.to_i} : {})
+    end
 
     #return op in symbol form and args
     def get_op_and_args(expr)

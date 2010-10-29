@@ -28,7 +28,8 @@ module XYZ
           ds_add = ret_sequel_ds_with_columns(ds,search_pattern,model_handle)
           return nil unless ds_add; ds = ds_add
 
-          ret_sequel_ds_with_filter(ds,search_pattern)
+          ds = ret_sequel_ds_with_filter(ds,search_pattern)
+          ret_sequel_ds_with_order_by_and_paging(ds,search_pattern)
         end
 
         def ret_sequel_ds_with_relation(ds,search_pattern)
@@ -65,7 +66,7 @@ module XYZ
             processed_field_set.add_cols(*cols_to_add)
           end
 
-          #alwas include id column
+          #always include id column
           processed_field_set.add_col?(:id)
           ds.select(*(processed_field_set.cols))
         end
@@ -100,6 +101,12 @@ module XYZ
           end
           sequel_where_clause = SQL.and(*and_list)
           ds.where(sequel_where_clause)
+        end
+
+        def ret_sequel_ds_with_order_by_and_paging(ds,search_pattern)
+          order_by = search_pattern.find_key(:order_by)
+          paging = search_pattern.find_key(:paging)
+          DB.ret_paging_and_order_added_to_dataset(ds,{:order_by => order_by, :paging => paging})
         end
 
         #return op in symbol form and args

@@ -583,7 +583,7 @@ function runSearch(searchId,save) {
 			<a href="javascript:R8.Search.toggleSearch('{%=model_name%}');">Search&nbsp;&gt;&gt;</a>
 		</div>
 		<div style="margin: 4px 0 0 10px; float: left;">
-			<select name="{%=model_name%}-saved-search">
+			<select name="{%=model_name%}-saved-search" onchange="R8.Search.runSavedSearch(this.id);">
 				{%=saved_search_list_dropdown%}
 			</select>
 		</div>

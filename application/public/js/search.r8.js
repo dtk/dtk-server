@@ -3,10 +3,24 @@ if (!R8.Search) {
 	(function(R8) {
 		R8.Search = function() {
 			return {
-			        loadSearch : function(searchObj) {
-				console.log(searchObj);
-			        },
-			        page : function(modelName,start) {
+				searchObjList : {},
+
+				setSearchObj : function(searchObj) {
+					this.searchObjList[searchObj['id']] = searchObj;
+				},
+
+				runSavedSearch : function(searchId) {
+console.log(this.serchObjList[searchId]);
+return;
+					YUI().use("json", function (Y) {
+						var searchObjJsonStr = Y.JSON.stringify(this.serchObjList[searchId]);
+						var ssObjElem = document.getElementById('saved-search-obj');
+						ssObjElem.value = searchObjJsonStr;
+						document.getElementById('saved-search-form').submit();
+					});
+				},
+
+				page : function(modelName,start) {
 					var searchForm = document.getElementById(modelName+'-search-form');
 					var savedSearchElem = R8.Utils.Y.one('#saved_search');
 					var saved_search = {'start':start};
@@ -381,7 +395,7 @@ console.log(devTestSearchObj['search_pattern'][':order_by']);
 						}
 					});
 
-				}
+				},
 			}
 		}();
 	})(R8);

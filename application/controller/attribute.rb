@@ -1,12 +1,10 @@
 module XYZ
   class AttributeController < Controller
-    def list_for_component_display(parsed_query_string=nil)
-      @parsed_query_string = parsed_query_string
-      where_clause = ret_where_clause()
-      parent_id = ret_parent_id()
-      opts = Hash.new
-      opts.merge!(:parent_id => parent_id) if parent_id
-      model_list = get_objects(model_name().to_sym,where_clause,opts)
+    def list_for_component_display()
+      search_object =  ret_search_object_in_request()
+      raise Error.new("no search object in request") unless search_object
+
+      model_list = Model.get_objects_from_search_object(search_object)
 
       #TODO: should we be using default action name
       action_name = :list

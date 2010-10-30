@@ -1,21 +1,18 @@
 module XYZ
   class Monitoring_itemController < Controller
-    def list_for_component_display(parsed_query_string=nil)
-      component_or_node_display(parsed_query_string)
+    def list_for_component_display()
+      component_or_node_display()
     end
-    def node_display(parsed_query_string=nil)
-      component_or_node_display(parsed_query_string)
+    def node_display()
+      component_or_node_display()
     end
    private
     #helper fn
-    def component_or_node_display(parsed_query_string=nil)
-      @parsed_query_string = parsed_query_string
-      where_clause = ret_where_clause()
-      parent_id = ret_parent_id()
+    def component_or_node_display()
+      search_object =  ret_search_object_in_request()
+      raise Error.new("no search object in request") unless search_object
 
-      opts = Hash.new
-      opts.merge!(:parent_id => parent_id) if parent_id
-      model_list = get_objects(model_name().to_sym,where_clause,opts)
+      model_list = Model.get_objects_from_search_object(search_object)
 
       #TODO: should we be using default action name
       action_name = :list

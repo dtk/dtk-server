@@ -7,9 +7,13 @@ module Ramaze::Helper
 
 pp ret_request_params()
 
-      hash = request_method_is_post?() ? ret_hash_search_object_in_post() : ret_hash_search_object_in_get()
-#  hash = {"id" => 2147483992}
-
+      hash = if @action_set_params and not @action_set_params.empty?
+               ret_hash_search_object_in_action_set_params(@action_set_params)
+             elsif request_method_is_post?() 
+               ret_hash_search_object_in_post() 
+             else 
+               ret_hash_search_object_in_get()
+             end
       hash ? SearchObject.create_from_input_hash(hash,ret_session_context_id()) : nil
    end
 
@@ -28,6 +32,10 @@ pp ret_request_params()
      hash = (ret_parsed_query_string_when_get()||{}).reject{|k,v|k == :parent_id}
      return nil if hash.empty?
      [:and] + hash.map{|k,v|[:eq,k,v]}
+    end
+
+    def ret_hash_search_object_in_action_set_params(action_set_params)
+      action_set_params["search"]
     end
 
     def ret_hash_search_object_in_post()

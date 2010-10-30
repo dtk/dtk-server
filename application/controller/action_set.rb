@@ -8,6 +8,7 @@ module XYZ
       #first two (or single items make up route_key; the rest are params
       route_key = route[0..1].join("/")
       action_set_params = route[2..route.size-1]||[]
+      model_name = route[0].to_sym 
 
       action_set_def = R8::Routes[route_key] || Hash.new
       @action_set_param_map = ret_action_set_param_map(action_set_def,action_set_params)
@@ -16,7 +17,7 @@ module XYZ
 
       #if a config is defined for route, use values from config
       if action_set_def[:action_set]
-        run_action_set(action_set_def[:action_set])
+        run_action_set(action_set_def[:action_set],model_name)
       else #create an action set of length one and run it
         action_params = action_set_params 
         query_string = ret_parsed_query_string_from_uri()
@@ -32,11 +33,12 @@ module XYZ
       end
     end
    private
-    def run_action_set(action_set)
+    #parent_model_name only set when top leevl action decomposed as opposed to when an action set of length one is created
+    def run_action_set(action_set,parent_model_name=nil)
       #Execute each of the actions in the action_set and set the returned content
       (action_set || []).each do |action|
         ctrl_result = Hash.new
-        result = call_action(action)
+        result = call_action(action,parent_model_name)
 
         #if a hash is returned, turn make result an array list of one
         (result.class == Hash) ? ctrl_result[:content] = [result] : ctrl_result = result
@@ -70,23 +72,69 @@ module XYZ
       end
     end
 
-    def call_action(action)
-      params = process_action_params(action[:action_params])
+    def call_action(action,parent_model_name=nil)
       model,method = action[:route].split("/")
       method ||= :index
+      model_name = model.to_sym
+      processed_params = process_action_params(action[:action_params]) 
+      action_set_params = ret_search_object(processed_params,model_name,parent_model_name)
+      uri_params = ret_uri_params(processed_params)
       a = Ramaze::Action.create(
         :node => XYZ.const_get("#{model.capitalize}Controller"),
         :method => method.to_sym,
-        :params => params, #TODO deprecate                        
+        :params => uri_params,
         :engine => lambda{|action, value| value },
         :variables => {
           :js_includes => @js_includes,
           :css_includes => @css_includes,
           :js_exe_list => @js_exe_list,
-          :params => params
+          :action_set_params => action_set_params
         }
        )
       return a.call
+    end
+
+
+    def ret_search_object(processed_params,model_name,parent_model_name=nil)
+      #TODO: assume everything is just equal
+      filter_params = processed_params.select{|p|p.kind_of?(Hash)}
+      return nil if filter_params.empty?
+
+      #for processing :parent_id
+      parent_id_field_name = ModelHandle.new(ret_session_context_id(),model_name,parent_model_name).parent_id_field_name()
+      filter = [:and] + filter_params.map do |el|
+        [:eq] + el.first.map{|x| x == :parent_id ?  parent_id_field_name : x}
+      end
+      {"search" => {
+          "search_pattern" => {
+            :relation => model_name,
+            :filter => filter
+          }
+        } 
+      }
+    end
+
+    def ret_uri_params(processed_params)
+      processed_params.select{|p|not p.kind_of?(Hash)}
+    end
+
+    #does substitution of free variables in raw_params
+    def process_action_params(raw_params)
+      #short circuit if no params that need substituting
+      return raw_params if @action_set_param_map.empty?
+      if raw_params.kind_of?(Array)
+        raw_params.map{|p|process_action_params(p)}
+      elsif raw_params.kind_of?(Hash)
+        ret = Hash.new
+        raw_params.each{|k,v|ret[k] = process_action_params(v)}
+        ret
+      elsif raw_params.kind_of?(String)
+        ret = raw_params.dup
+        @action_set_param_map.each{|k,v|ret.gsub!(Regexp.new("\\$#{k}\\$"),v.to_s)}
+        ret
+      else
+        raw_params
+      end
     end
 
     def ret_action_set_param_map(action_set_def,action_set_params)
@@ -105,23 +153,6 @@ module XYZ
       ret
     end
 
-    def process_action_params(raw_params)
-      #short circuit if no params that need substituting
-      return raw_params if @action_set_param_map.empty?
-      if raw_params.kind_of?(Array)
-        raw_params.map{|p|process_action_params(p)}
-      elsif raw_params.kind_of?(Hash)
-        ret = Hash.new
-        raw_params.each{|k,v|ret[k] = process_action_params(v)}
-        ret
-      elsif raw_params.kind_of?(String)
-        ret = raw_params.dup
-        @action_set_param_map.each{|k,v|ret.gsub!(Regexp.new("\\$#{k}\\$"),v.to_s)}
-        ret
-      else
-        raw_params
-      end
-    end
 
 #TODO: lets finally kill off the xyz and move route loading into some sort of initialize or route setup call
   #enter the routes defined in config into Ramaze

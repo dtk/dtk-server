@@ -10,10 +10,8 @@ if (!R8.Search) {
 				},
 
 				runSavedSearch : function(searchId) {
-console.log(this.serchObjList[searchId]);
-return;
 					YUI().use("json", function (Y) {
-						var searchObjJsonStr = Y.JSON.stringify(this.serchObjList[searchId]);
+						var searchObjJsonStr = Y.JSON.stringify(R8.Search.searchObjList[searchId]);
 						var ssObjElem = document.getElementById('saved-search-obj');
 						ssObjElem.value = searchObjJsonStr;
 						document.getElementById('saved-search-form').submit();

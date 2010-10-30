@@ -1,6 +1,6 @@
 
 {%=search_content%}
-<div style="clear:both;">/</div>
+<div style="clear:both;"></div>
 
 <div class="list_container">
 

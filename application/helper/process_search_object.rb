@@ -4,17 +4,19 @@ module Ramaze::Helper
    private
     #fns that get _search_object
     def ret_search_object_in_request()
-
-pp ret_request_params()
-
-      hash = if @action_set_params and not @action_set_params.empty?
-               ret_hash_search_object_in_action_set_params(@action_set_params)
-             elsif request_method_is_post?() 
-               ret_hash_search_object_in_post() 
-             else 
-               ret_hash_search_object_in_get()
-             end
-      hash ? SearchObject.create_from_input_hash(hash,ret_session_context_id()) : nil
+  pp ret_request_params()
+      source = hash = nil
+      if @action_set_params and not @action_set_params.empty?
+        source = :action_set
+        hash = ret_hash_search_object_in_action_set_params(@action_set_params)
+      elsif request_method_is_post?() 
+        source = :post_request
+        hash = ret_hash_search_object_in_post() 
+      else 
+        source = :get_request
+        hash = ret_hash_search_object_in_get()
+      end
+      hash ? SearchObject.create_from_input_hash(hash,source,ret_session_context_id()) : nil
    end
 
  

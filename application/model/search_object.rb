@@ -5,6 +5,7 @@ module XYZ
     set_relation_name(:search,:object)
     def self.up()
       column :search_pattern, :json
+      column :relation, :varchar, :size => 25
       many_to_one :library
     end
 
@@ -19,9 +20,9 @@ module XYZ
       SQL::DataSetSearchPattern.create_dataset_from_search_object(self)
     end  
 
-    attr_accessor :save_flag
+    attr_accessor :save_flag, :source
 
-    def self.create_from_input_hash(input_hash,c)
+    def self.create_from_input_hash(input_hash,source,c)
       raise Error.new("search object is ill-formed") unless is_valid?(input_hash)
       sp = nil_if_empty(input_hash["search_pattern"])
       hash = {
@@ -31,29 +32,58 @@ module XYZ
       }
       ret = SearchObject.new(hash,c)
       ret.save_flag = input_hash["save"]
+      ret.source = source
       ret
     end
 
     def should_save?
       return nil unless search_pattern
       return true if save_flag
-      not search_pattern.is_default_view?()
+      not(search_pattern.is_default_view?() or source == :action_set or source == :node_group)
+    end
+
+    #TODO: better relate the three fns below; and refine them
+    def save_list_view_in_cache?(user)
+      return nil unless should_save?
+      view_meta_hash = search_pattern ? search_pattern.create_list_view_meta_hash() : nil
+      raise Error.new("cannot create list_view meta hash") unless view_meta_hash
+      is_saved_search = true
+
+      raise ErrorNotImplemented.new("when search_pattern.relation is of type #{search_pattern.relation.class}") unless search_pattern.relation.kind_of?(Symbol)
+      view = R8Tpl::ViewR8.new(search_pattern.relation,saved_search_ref(),user,is_saved_search,view_meta_hash)
+      #TODO: this necssarily updates if reaches here; more sophistiacted woudl update cache file only if need to
+      view.update_cache_for_saved_search()
+    end
+
+    def self.save_list_view_in_cache(id,hash_assignments,user)
+      search_pattern_json = hash_assignments[:search_pattern]
+      return nil unless search_pattern_json
+      search_pattern = SearchPattern.new(JSON.parse(search_pattern_json))
+      view_meta_hash = search_pattern.create_list_view_meta_hash()
+      return nil unless search_pattern.relation
+      is_saved_search = true
+      view = R8Tpl::ViewR8.new(search_pattern.relation,saved_search_ref(id),user,is_saved_search,view_meta_hash)
+      view.update_cache_for_saved_search()
     end
 
     def save()
+      search_pattern_db =  search_pattern.ret_form_for_db()
+      relation_db = (search_pattern||{})[:relation] ? search_pattern[:relation].to_s : nil
       if @id_handle
         raise Error.new("saved search cannot be updated unless there is a name or search a pattern") unless search_pattern or name
         hash_assignments = Hash.new
         hash_assignments[:display_name] = name if name
-        hash_assignments[:search_pattern] = search_pattern.ret_form_for_db() if search_pattern
+        hash_assignments[:search_pattern] =  search_pattern_db if search_pattern_db
+        hash_assignments[:relation] = relation_db if relation_db
         self.class.update_from_hash_assignments(@id_handle,hash_assignments)
       else
-        raise Error.new("saved search cannot be created if search_pattern does not exist") unless search_pattern
+        raise Error.new("saved search cannot be created if search_pattern or relation does not exist") unless search_pattern_db and relation_db
         #TODO: consider putting searches at top
         parent_id_handle = IDHandle[:c => @c,:uri => "/library/test", :model_name => :library] #TODO: stub
         hash_assignments = {
           :display_name => name || "search_object",
-          :search_pattern => search_pattern.ret_form_for_db()
+          :search_pattern => search_pattern_db,
+          :relation => relation_db
         }
         ref = hash_assignments[:display_name]
         create_hash = {:search_object => {ref => hash_assignments}}
@@ -71,7 +101,10 @@ module XYZ
       raise Error.new("cannot update without an id") unless id()
       saved_object = self.class.get_objects(model_handle,{:id => id()}).first
       raise Error.new("cannot find saved search with id (#{id.to_s})") unless saved_object
-      saved_object.each{|k,v| self[k] = k.nil? ? nil : (k == :search_pattern ? SearchPattern.new(v) : v)}
+      saved_object.each do |k,v| 
+        next unless v
+        self[k] = k == :search_pattern ? SearchPattern.new(v) : v
+      end
     end
 
     def self.is_valid?(input_hash)
@@ -85,33 +118,6 @@ module XYZ
 
     def search_pattern()
       self[:search_pattern]
-    end
-
-    def self.save_list_view_in_cache(id,hash_assignments,user)
-      search_pattern_json = hash_assignments[:search_pattern]
-      return nil unless search_pattern_json
-      search_pattern = SearchPattern.new(JSON.parse(search_pattern_json))
-      view_meta_hash = search_pattern.create_list_view_meta_hash()
-      return nil unless search_pattern.relation
-      is_saved_search = true
-      view = R8Tpl::ViewR8.new(search_pattern.relation,saved_search_ref(id),user,is_saved_search,view_meta_hash)
-      view.update_cache_for_saved_search()
-    end
-
-    
-    def save_list_view_in_cache?(user)
-      #TODO: needs refinement
-      return nil unless search_pattern
-      return nil if search_pattern.is_default_view?()
-
-      view_meta_hash = search_pattern ? search_pattern.create_list_view_meta_hash() : nil
-      raise Error.new("cannot create list_view meta hash") unless view_meta_hash
-      is_saved_search = true
-
-      raise ErrorNotImplemented.new("when search_pattern.relation is of type #{search_pattern.relation.class}") unless search_pattern.relation.kind_of?(Symbol)
-      view = R8Tpl::ViewR8.new(search_pattern.relation,saved_search_ref(),user,is_saved_search,view_meta_hash)
-      #TODO: this necssarily updates if reaches here; more sophistiacted woudl update cache file only if need to
-      view.update_cache_for_saved_search()
     end
 
     def field_set()

@@ -130,7 +130,7 @@ module XYZ
 #      groups_info.map{|group|group.merge :node => Model.get_objects(ModelHandle.new(c,:node),group[:dynamic_search_pattern])}
       groups_info.map do |group|
         search_pattern =  group[:dynamic_search_pattern].merge(:columns => [:id])
-        search_object = SearchObject.create_from_input_hash({"search_pattern" => search_pattern},model_handle[:c])
+        search_object = SearchObject.create_from_input_hash({"search_pattern" => search_pattern},:node_group,model_handle[:c])
         group.merge :node => get_objects_from_search_object(search_object)
       end
     end

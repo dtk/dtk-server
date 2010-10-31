@@ -34,11 +34,13 @@
              :rows => 1,
              :cols => 40,
             }},
-            {:change => {
+            {:old_value => {
              :type => 'hash',
              :help => '',
-             :rows => 1,
-             :cols => 40,
+            }},
+            {:new_value => {
+             :type => 'hash',
+             :help => '',
             }},
         ],
       },

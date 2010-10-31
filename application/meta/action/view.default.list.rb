@@ -17,7 +17,11 @@
               :objLink => true,
               :objLinkView => 'display',
             }},
-          {:change => {
+          {:old_value => {
+              :type => 'hash',
+              :help => '',
+            }},
+          {:new_value => {
               :type => 'hash',
               :help => '',
             }},

@@ -156,7 +156,7 @@ limit = TestOveride if TestOveride
     end
 
     def set_template_paging_info!(tpl,paging_info)
-      if paging_info.nil?
+      if paging_info.empty? or paging_info.nil?
         tpl.assign(:list_start_prev, 0)
         tpl.assign(:list_start_next, 0)
         return nil

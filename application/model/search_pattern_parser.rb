@@ -9,11 +9,11 @@ module XYZ
 
     def field_set()
       #TBD: stub; must take out non scalars
-      (columns ? Model::FieldSet.new(columns) : nil) || (relation.kind_of?(Symbol) ? Model::FieldSet.default(relation) : nil)
+      columns.empty? ? (relation.kind_of?(Symbol) ? Model::FieldSet.default(relation) : nil) : Model::FieldSet.new(columns)
     end
 
     def is_default_view?()
-      (columns.nil? and filter.nil? and relation.kind_of?(Symbol)) ? true : nil
+      (columns.empty? and filter.empty? and relation.kind_of?(Symbol)) ? true : nil
     end
 
     def find_key(type)
@@ -81,7 +81,7 @@ module XYZ
 
     def ret_columns(hash_input)
       columns = find_key_from_input(:columns,hash_input)
-      return nil if columns.nil? or columns.empty?
+      return Array.new if columns.nil? or columns.empty?
       raise ErrorParsing.new(:columns,columns) unless columns.kind_of?(Array)
       #form will be an array with each term either token or {:foo => :alias}; 
       #TODO: right now only treating col as string or term
@@ -98,7 +98,7 @@ module XYZ
 
     def ret_filter(hash_input)
       filter = find_key_from_input(:filter,hash_input)
-      return nil if filter.nil? or filter.empty?
+      return Array.new if filter.nil? or filter.empty?
 
       #TODO: just treating some subset of patterns
       ret = Array.new
@@ -126,7 +126,7 @@ module XYZ
 
     def ret_order_by(hash_input)
       order_by = find_key_from_input(:order_by,hash_input)
-      return nil if order_by.nil? or order_by.empty?
+      return Array.new if order_by.nil? or order_by.empty?
       raise ErrorParsing.new(:order_by,order_by) unless order_by.kind_of?(Array)
       order_by.map do |el|
         raise ErrorParsing.new(:order_by_element,el) unless el.kind_of?(Hash) and el.size <= 2
@@ -140,7 +140,7 @@ module XYZ
 
     def ret_paging(hash_input)
       paging = find_key_from_input(:paging,hash_input)
-      return nil if paging.nil? or paging.empty?
+      return Hash.new if paging.nil? or paging.empty?
       raise ErrorParsing.new(:paging,paging) unless paging.kind_of?(Hash) and paging.size <= 2
       start = (paging.find{|k,v|ret_symbol(k) == :start}||[nil,nil])[1]
       raise ErrorParsing.new(:paging_start,paging) unless start 

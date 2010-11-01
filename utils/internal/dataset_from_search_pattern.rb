@@ -47,7 +47,7 @@ module XYZ
           model_name = model_handle[:model_name]
           columns = search_pattern.find_key(:columns)
 
-          if columns.nil?
+          if columns.empty? 
             return ds
            #TODO: refine return ds.select(*Model::FieldSet.default(model_name).cols)
           end
@@ -73,7 +73,7 @@ module XYZ
 
         def ret_sequel_ds_with_filter(ds,search_pattern)
           filter = search_pattern.find_key(:filter)
-          return ds unless filter
+          return ds if filter.empty?
 
           #TODO: just treating "and" now
           #TODO: some below use Sequel others are wrapper SQL in sql.rb; clean up

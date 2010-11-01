@@ -37,6 +37,7 @@
 	<script src="http://code.jquery.com/jquery-latest.js"></script>
 
 	<script type="text/javascript" src="{%=_app[:base_js_uri]%}/ctrl.r8.js"></script>
+	<script type="text/javascript" src="{%=_app[:base_js_uri]%}/model.r8.js"></script>
 	<script type="text/javascript" src="{%=_app[:base_js_uri]%}/canvas.r8.js"></script>
 	<script type="text/javascript" src="{%=_app[:base_js_uri]%}/templating.r8.js"></script>
 	<script type="text/javascript" src="{%=_app[:base_js_uri]%}/render_basic_component.js"></script>

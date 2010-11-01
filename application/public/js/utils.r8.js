@@ -117,6 +117,17 @@ if (!R8.Utils) {
 				return YUI().Lang.later(time, obj, func, inputData, repeatExec);
 			},
 
+			//TODO: stub for now, figure out where to move this or change it up
+			in_array : function(arrayObj,value) {
+				var numItems = arrayObj.length;
+				for(var i = 0; i < numItems; i++) {
+					if(arrayObj[i] == value) {
+						return true;
+					}
+				}
+				return false;
+			},
+
 			cloneObj : function(o) {
 				if(typeof(o) != 'object') return o;
 				if(o == null) return o;

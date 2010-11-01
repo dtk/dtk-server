@@ -493,14 +493,17 @@ module R8Tpl
     r8TPL.js_templating_on = false   #template engine should catch non JS automatically, but forcing to be sure
 
 #    i18n = utils.get_model_i18n(@model_name)
-    r8TPL.assign(:model_name, @model_name)
+    r8TPL.assign(:model_name_literal, '{%=model_name%}')
     r8TPL.assign(:base_uri, '{%=_app[:base_uri]%}')
     r8TPL.assign(:formId, @form_id)
     r8TPL.assign(:formAction, view_meta[:action])
+    r8TPL.assign(:search_id_literal, '{%=search_id%}')
+    r8TPL.assign(:search_context_literal, '{%=search_context%}')
 
+#TODO: temp hack until more fully implemented select/dropdown fields
     r8TPL.assign(:saved_search_list_dropdown,'
       {%for saved_search in _saved_search_list%}
-        <option value="{%=saved_search[:id]%}">{%=saved_search[:display_name]%}</option>
+        <option value="{%=saved_search[:id]%}" {%=saved_search[:selected]%}>{%=saved_search[:display_name]%}</option>
       {%end%}
     ')
 

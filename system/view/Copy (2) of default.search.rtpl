@@ -52,6 +52,22 @@ var availOperators = {
 	},
 };
 
+function initSearch() {
+	var searchAttrs = R8.Utils.Y.one('#{%=model_name%}-search-attrs');
+	var scatClick = R8.Utils.Y.delegate('click',toggleSearchAttr,searchAttrs,'.saved-search-cat');
+
+	var filterList = R8.Utils.Y.one('#{%=model_name%}-filter-list');
+	var filterClick = R8.Utils.Y.delegate('click',loadFilter,filterList,'.search-filter');
+
+//TODO: change search-filter class to search-ordering
+	var orderingList = R8.Utils.Y.one('#{%=model_name%}-ordering-list');
+	var orderingClick = R8.Utils.Y.delegate('click',R8.Search.loadOrdering,orderingList,'.search-filter');
+
+//TODO: get ID handling going
+var searchId = 'foo';
+	R8.Search.setupColumnFields('{%=model_name%}',searchId);
+}
+
 function loadFilter(e) {
 	var filterId = e.currentTarget.get('id');
 //TODO: remove stub
@@ -60,7 +76,7 @@ var searchId = 'foo';
 	var filterEditWrapper = R8.Utils.Y.one('#tempId-filter-edit-wrapper');
 	filterEditWrapper.set('innerHTML','');
 
-	var filterList = R8.Utils.Y.one('#{%=model_name_literal%}-filter-list');
+	var filterList = R8.Utils.Y.one('#{%=model_name%}-filter-list');
 	var filterIndex = 0;
 	var foundIndex = false;
 	filterList.get('children').each(function(){
@@ -83,6 +99,26 @@ var searchId = 'foo';
 
 function getFilterDef(searchId,filterId) {
 	
+}
+
+function toggleSearchAttr(e) {
+	var clickedAttr = e.currentTarget;
+	var clickedAttrId = clickedAttr.get('id');
+	var clickedAttrName = clickedAttrId.replace('-search-attr','');
+
+	var parentNode = clickedAttr.get('parentNode');
+	var attrList = parentNode.get('children');
+	attrList.each(function() {
+		if(this.get('id') != clickedAttrId) {
+			this.removeClass('selected');
+
+			var attrId = this.get('id');
+			R8.Utils.Y.one('#'+attrId+'-body').setStyle('display','none');
+			var attrName = attrId.replace('-search-attr','');
+		}
+	});
+	clickedAttr.addClass('selected');
+	R8.Utils.Y.one('#'+clickedAttrId+'-body').setStyle('display','block');
 }
 
 function updateFilterField(fieldId,fieldName) {
@@ -167,7 +203,7 @@ function getConditionInput(params) {
 
 				if(typeof(filterDef) !='undefined') {
 					if(filterDef[2] instanceof Array) {
-						(R8.Utils.in_array(filterDef[2],option)) ? selected = true : selected = false;
+						(in_array(filterDef[2],option)) ? selected = true : selected = false;
 					} else {
 						(filterDef[2] == option) ? selected = true : selected = false;
 					}
@@ -185,6 +221,17 @@ function getConditionInput(params) {
 	}
 
 	return inputElem;
+}
+
+//TODO: stub for now, figure out where to move this or change it up
+function in_array(arrayObj,value) {
+	var numItems = arrayObj.length;
+	for(var i = 0; i < numItems; i++) {
+		if(arrayObj[i] == value) {
+			return true;
+		}
+	}
+	return false;
 }
 
 function getFieldOptions(optionsKey) {
@@ -350,7 +397,7 @@ var searchId = 'foo';
 		filterElem.get('children').item(0).set('innerHTML',filterStr);
 
 //TODO: centralize this as a reusable function
-		var filterList = R8.Utils.Y.one('#{%=model_name_literal%}-filter-list');
+		var filterList = R8.Utils.Y.one('#{%=model_name%}-filter-list');
 		var filterIndex = 0;
 		var foundIndex = false;
 		filterList.get('children').each(function(){
@@ -367,18 +414,11 @@ var searchId = 'foo';
 	}
 }
 
-function renderFilterEdit(modelName,searchId,searchGiud,filterDef) {
-	var filterEditWrapper = R8.Utils.Y.one('#'+searchId+'-filter-edit-wrapper');
+function renderFilterEdit(modelName,filterId,filterDef) {
+	var filterEditWrapper = R8.Utils.Y.one('#tempId-filter-edit-wrapper');
 	filterEditWrapper.set('innerHTML','');
 
 	(typeof(filterDef) !='undefined') ? fieldName = filterDef[1].replace(':','') : fieldName = null;
-
-	if(searchGuid == '') {
-		var numFilters = getFilter
-	}
-return;
-
-//	var filterId = (R8.Search.searchObjList[searchGuid
 
 	var fieldElem = getFilterFieldOptions({
 		'model_name':modelName,
@@ -390,7 +430,7 @@ return;
 	var filterId = elemId.replace('-field','');
 
 	var filterWrapper = document.createElement('div');
-	filterWrapper.setAttribute('id',searchId+'-filter-wrapper');
+	filterWrapper.setAttribute('id',filterId+'-filter-wrapper');
 	filterWrapper.setAttribute('style','float:left; width: 100%; height: 80px;');
 
 	//add field select list
@@ -416,7 +456,7 @@ return;
 	});
 	filterWrapper.appendChild(fieldConditionElem);
 
-	var filterEditWrapper = R8.Utils.Y.one('#'+searchId+'-filter-edit-wrapper');
+	var filterEditWrapper = R8.Utils.Y.one('#tempId-filter-edit-wrapper');
 	filterEditWrapper.appendChild(filterWrapper);
 
 	//add save button
@@ -538,43 +578,72 @@ function runSearch(searchId,save) {
 <div class="search-container">
 	<div style="height: 30px; width: 800px; float: left; background-color: #FFFFFF;">
 		<div style="margin: 4px 0 0 5px; float: left;">
-			<a href="javascript:R8.Search.toggleSearch('{%=search_context_literal%}');">Search&nbsp;&gt;&gt;</a>
+			<a href="javascript:initSearch();">Init</a>||
+			<a href="javascript:R8.Search.tester('{%=model_name%}');">Test</a>||
+			<a href="javascript:R8.Search.toggleSearch('{%=model_name%}');">Search&nbsp;&gt;&gt;</a>
 		</div>
 		<div style="margin: 4px 0 0 10px; float: left;">
-			<select name="{%=search_context_literal%}-saved-search" onchange="R8.Search.runSavedSearch('{%=search_context_literal%}',this.value);">
+			<select name="{%=model_name%}-saved-search" onchange="R8.Search.runSavedSearch(this.value);">
 				{%=saved_search_list_dropdown%}
 			</select>
 		</div>
 	</div>
-	<div id="{%=search_context_literal%}-search-panel" style="display: none; float:left; width: 898px;">
+	<div id="{%=model_name%}-search-panel" style="display: none; float:left; width: 898px;">
 		<div style="float:left; width: 887px; height: 180px;">
-		<div class="saved-search-l-pane">
+		<div id="" class="saved-search-l-pane">
 			<div id="spacer" style="height: 40px; width: 100px;"></div>
-			<div id="{%=search_context_literal%}-search-attrs" class="saved-search-categories">
-				<div id="{%=search_context_literal%}-filters-search-attr" class="saved-search-cat selected"><div class="label">Filters</div></div>
-				<div id="{%=search_context_literal%}-ordering-search-attr" class="saved-search-cat"><div class="label">Ordering</div></div>
-				<div id="{%=search_context_literal%}-columns-search-attr" class="saved-search-cat"><div class="label">Columns</div></div>
+			<div id="{%=model_name%}-search-attrs" class="saved-search-categories">
+				<div id="filters-search-attr" class="saved-search-cat selected"><div class="label">Filters</div></div>
+				<div id="ordering-search-attr" class="saved-search-cat"><div class="label">Ordering</div></div>
+				<div id="columns-search-attr" class="saved-search-cat"><div class="label">Columns</div></div>
+<!--				<div id="old-search-attr" class="saved-search-cat"><div class="label">Old</div></div>-->
 			</div>
 		</div>
-		<div class="saved-search-r-pane">
-			<div class="saved-search-header">
-				<form id="{%=search_context_literal%}-search-form" action="{%=base_uri%}/xyz/{%=model_name_literal%}/list" method="post" enctype="multipart/form-data">
-				<input type="hidden" name="search" id="{%=search_context_literal%}-saved-search-obj" value=""/>
+		<div id="" class="saved-search-r-pane">
+			<div id="" class="saved-search-header">
+				<form id="saved-search-form" action="{%=base_uri%}/xyz/{%=model_name%}/list" method="post" enctype="multipart/form-data">
+				<input type="hidden" name="search" id="saved-search-obj" value=""/>
 				&nbsp;&nbsp;
 				<input type="button" value="Run" style="margin-top: 2px;" onclick="runSearch('');"/>
-				Name&nbsp;<input type="text" id="{%=search_context_literal%}-search_name" name="search_name" value="" size="25" style="margin-top: 2px;"/>
+				Name&nbsp;<input type="text" id="search_name" name="search_name" value="" size="25" style="margin-top: 2px;"/>
 				</form>
 			</div>
-			<div class="saved-search-attr-wrapper">
-				<div id="{%=search_context_literal%}-filters-search-attr-body" class="search-attr-body" style="display:block;">
+			<div id="saved-search-attr-wrapper" class="saved-search-attr-wrapper">
+				<div id="old-search-attr-body" style="display:none; float: left; width: 780px;">
+					<form id="{%=model_name%}-search-form" action="{%=base_uri%}/xyz/{%=model_name%}/list" method="post" enctype="multipart/form-data">
+					<div style="margin-left: 5px;">
+						<input type="submit" value="Search"/>&nbsp;&nbsp;&nbsp;&nbsp;
+						<b>Save with Given Name:</b><input type="text" size="25" id="{%=model_name%}_search_name" name="{%=model_name%}_search_name" value=""/>
+					</div>
+					{%for field in h_field_list%}
+						<input type="hidden" name="{%=field[:name]%}" id="{%=field[:id]%}" value="{%=field[:value]%}" />
+					{%end%}
+					<table class="edit">
+					{%for row in rows%}
+						<tr id="{%=row[:rowId]%}">
+							{%for col in row[:cols]%}
+								<td id="{%=col[:colId]%}" class="{%=col[:class]%}">{%=col[:content]%}</td>
+							{%end%}
+						</tr>
+					{%end%}
+					</table>
+					</form>
+				</div>
+				<div id="filters-search-attr-body" class="search-attr-body" style="display:block;">
 					<div class="search-filter-wrapper">
 						<div class="filter-header">
 							<div style="margin: 0 auto;">
 								Filter List
-								<div class="search-add-filter" onclick="R8.Search.renderFilterEdit('{%=search_context_literal%}');"></div>
+								<div class="search-add-filter" onclick="renderFilterEdit('{%=model_name%}');"></div>
 							</div>
 						</div>
-						<div id="{%=search_context_literal%}-filter-list" class="filter-list">
+						<div id="{%=model_name%}-filter-list" class="filter-list">
+		<!--
+							<div id="filter0X" class="search-filter">
+								<div class="search-filter-value">Display Name Equals 'foo'</div>
+								<div class="search-remove-filter"></div>
+							</div>
+		-->
 						</div>
 					</div>
 					<div style="float: left; height: 100%; width: 5px; background-color: #AACCEE"></div>
@@ -582,19 +651,49 @@ function runSearch(searchId,save) {
 						<div style="width: 100%; height: 30px; border-bottom: 1px solid #AACCEE;">
 							<div style="font-weight: bold; font-size: 13px">Filter Details</div>
 						</div>
-						<div id="{%=search_context_literal%}-filter-edit-wrapper" style="width: 100%; height: 100%;">
+						<div id="tempId-filter-edit-wrapper" style="width: 100%; height: 100%;">
 						</div>
+		<!--
+						<div id="filter01-params">
+							<div style="width: 100%;">
+								<div style="margin: 10px 0 10px 5px; width: 100%;">
+									<div style="float: left;">
+									<select id="filter01-field" name="filter01-field" data-model="{%=model_name%}" onchange="updateFilterField(this.id,this.options[this.selectedIndex].value);">
+										<option value="display_name">Display Name</option>
+										<option value="operational_status">Op Status</option>
+										<option value="image_size">Image Size</option>
+									</select>
+									</div>
+									<div style="float: left;">
+									<select id="filter01-operator" name="filter01-filter"  data-model="{%=model_name%}" data-field="" onchange="updateFilterOperator(this.id);">
+										<option value="match-prefix">Starts With</option>
+										<option value="eq">Equals</option>
+										<option value="contains">Contains</option>
+										<option value="regex">Matches Regex</option>
+									</select>
+									</div>
+									<div id="{%=model_name%}-sf-condition-wrapper" style="float: left;">
+										<input id="filter01-condition" name="filter01-condition" type="text" size="25" value=""/>
+									</div>
+								</div>
+							</div>
+							<br/><br/>
+							<div style="float: left; bottom: 0px; margin-left: 5px;">
+								<input type="button" value="Save" onclick="saveFilter('filter01');"/>
+							</div>
+						</div>
+		-->
 					</div>
 				</div>
-				<div id="{%=search_context_literal%}-ordering-search-attr-body" class="search-attr-body">
+				<div id="ordering-search-attr-body" class="search-attr-body">
 					<div class="search-filter-wrapper">
 						<div class="filter-header">
 							<div style="margin: 0 auto;">
 								Ordering List
-								<div class="search-add-filter" onclick="R8.Search.renderOrderingEdit('{%=search_context_literal%}');"></div>
+								<div class="search-add-filter" onclick="R8.Search.renderOrderingEdit('{%=model_name%}');"></div>
 							</div>
 						</div>
-						<div id="{%=search_context_literal%}-ordering-list" class="filter-list">
+						<div id="{%=model_name%}-ordering-list" class="filter-list">
 						</div>
 					</div>
 					<div style="float: left; height: 100%; width: 5px; background-color: #AACCEE"></div>
@@ -602,24 +701,24 @@ function runSearch(searchId,save) {
 						<div style="width: 100%; height: 30px; border-bottom: 1px solid #AACCEE;">
 							<div style="font-weight: bold; font-size: 13px">Order By Details</div>
 						</div>
-						<div id="{%=search_context_literal%}-ordering-edit-wrapper" style="width: 100%; height: 100%;">
+						<div id="tempId-ordering-edit-wrapper" style="width: 100%; height: 100%;">
 						</div>
 					</div>
 				</div>
-				<div id="{%=search_context_literal%}-columns-search-attr-body" class="search-attr-body">
+				<div id="columns-search-attr-body" class="search-attr-body">
 					<div class="search-filter-wrapper">
 						<div class="filter-header">
 							<div style="margin: 0 auto;  padding-top: 5px;">Node Results Display Columns</div>
 						</div>
-						<div id="{%=search_context_literal%}-columns-list" class="column-list">
+						<div id="{%=model_name%}-columns-list" class="column-list">
 							<div style="height: 110px; width: 32px; float: left;">
 								<div style="width: 16px; margin: 20px 7px 0 7px;">
-									<div id="{%=search_context_literal%}-columns-mv-up" class="arrow-square blue up"></div>
-									<div id="{%=search_context_literal%}-columns-mv-down" class="arrow-square blue down"></div>
+									<div id="{%=model_name%}-columns-mv-up" class="arrow-square blue up"></div>
+									<div id="{%=model_name%}-columns-mv-down" class="arrow-square blue down"></div>
 								</div>
 							</div>
 							<div style="height: 110px; width: 268px; float: left;">
-								<select id="{%=search_context_literal%}-display-columns" name="{%=search_context_literal%}-display-columns" multiple="1" style="height:110px; width: 268px;">
+								<select id="{%=model_name%}-display-columns" name="{%=model_name%}-display-columns" multiple="1" style="height:110px; width: 268px;">
 								</select>
 							</div>
 						</div>
@@ -628,8 +727,8 @@ function runSearch(searchId,save) {
 					<div style="float: left; height: 100%; width: 5px; background-color: #AACCEE"></div>
 					<div style="float: left; height: 100%; width: 30px; background-color: #FFFFFF;">
 						<div style="width: 16px; margin: 50px 7px 0 7px;">
-							<div id="{%=search_context_literal%}-columns-mv-left" class="arrow-square blue left"></div>
-							<div id="{%=search_context_literal%}-columns-mv-right" class="arrow-square blue right"></div>
+							<div id="{%=model_name%}-columns-mv-left" class="arrow-square blue left"></div>
+							<div id="{%=model_name%}-columns-mv-right" class="arrow-square blue right"></div>
 						</div>
 					</div>
 					<div style="float: left; height: 100%; width: 5px; background-color: #AACCEE"></div>
@@ -639,7 +738,7 @@ function runSearch(searchId,save) {
 							<div style="font-weight: bold; font-size: 13px; text-align: center; padding-top: 5px;">Available Node Columns</div>
 						</div>
 						<div id="tempId-columns-edit-wrapper" style="width: 268px; height: 100%; border-right: 1px solid #AACCEE;">
-							<select id="{%=search_context_literal%}-avail-columns" name="{%=search_context_literal%}-avail-columns" multiple="1" style="height:110px; width: 268px;">
+							<select id="{%=model_name%}-avail-columns" name="{%=model_name%}-avail-columns" multiple="1" style="height:110px; width: 268px;">
 							</select>
 						</div>
 					</div>

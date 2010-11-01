@@ -1,7 +1,8 @@
 
 {%=search_content%}
-<div style="clear:both;"></div>
 
+<div style="clear:both;"></div>
+<br/><br/>
 <div class="list_container">
 
 	<div style="width: 100%; height: 25px;">

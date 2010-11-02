@@ -103,7 +103,10 @@ if (!R8.Workspace) {
 				R8.Workspace.events['vspace_click'] = R8.Utils.Y.delegate('click',R8.Workspace.clearSelectedItems,'body','#viewspace');
 //				R8.Workspace.events['vspace_mdown'] = R8.Utils.Y.delegate('mousedown',R8.Workspace.checkMouseDownEvent,'body','#viewspace');
 
-				R8.Workspace.events['item_dbl_click'] = R8.Utils.Y.delegate('dblclick',function(e){console.log('Hello DBL Click!!!');},R8.Workspace.viewSpaceNode,'.group');
+//				R8.Utils.Y.all('.group').each(function(){
+//console.log(this);
+//				});
+				R8.Workspace.events['item_dbl_click'] = R8.Utils.Y.delegate('dblclick',function(e){console.log('Hello DBL Click!!!');},R8.Workspace.viewSpaceNode,'.wspace-item');
 
 //				R8.MainToolbar.init();
 return;

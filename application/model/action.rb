@@ -10,7 +10,8 @@ module XYZ
       #TODO: change below to more general json field about ordering
       column :relative_order_order, :int, :default => 1 #relative with respect to parent
       column :change, :json # gives detail about the change
-      
+
+      virtual_column :parent_name, :possible_parents => [:datacenter,:action]
       virtual_column :old_value, :path => [:change, :old]
       virtual_column :new_value, :path => [:change, :new]
 

@@ -40,13 +40,22 @@ module XYZ
       sp = self[:search_pattern]
 
       #TODO: this is for case when get back search objects from get objects; remove when process uniformally meaning non null will always be serach pattern object
-      hash_for_json_sp = sp ? (sp.kind_of?(SearchPattern) ? sp.hash_for_json_generate() : sp) : nil 
-
+   hash_for_json_sp = sp ? (sp.kind_of?(SearchPattern) ? sp.hash_for_json_generate() : sp) : nil 
+=begin
+      hash_for_json_sp = 
+        if sp
+          unless sp.kind_of?(SearchPattern) 
+            sp = SearchPattern.new(sp)
+            end
+          sp.hash_for_json_generate()
+        end
+=end
+      hash_for_json_sp["test"] = "test"
       hash_for_json_generate = {
-        :display_name=> self[:dispaly_name],
-        :relation=> self[:relation],
-        :id=> self[:id],
-        :search_pattern => hash_for_json_sp
+        "display_name" => self[:display_name],
+        "relation" => self[:relation],
+        "id" => self[:id],
+        "search_pattern" => hash_for_json_sp
       }
       JSON.generate(hash_for_json_generate)
     end

@@ -13,9 +13,6 @@ node_group[:model_name] = 'node_group'
       tpl.assign(:node_group,node_group)
       tpl.assign(:base_images_uri,R8::Config[:base_images_uri])
 
-      num_components = node_group[:component].length
-      tpl.assign(:num_components,num_components)
-
       _node_group_vars = {}
       _node_group_vars[:i18n] = get_model_i18n("node_group",user_context())
       tpl.assign("_node_group",_node_group_vars)

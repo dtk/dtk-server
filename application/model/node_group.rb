@@ -31,6 +31,12 @@ module XYZ
       end
     end
 
+    def self.get_wspace_display(id_handle)
+      node_group_id = IDInfoTable.get_id_from_id_handle(id_handle)
+      node_group_mh = id_handle.createMH(:model_name => :node_group)
+      get_objects(node_group_mh,{:id => node_group_id}).first
+    end
+
     #needed to overwrite this fn because special processing to handle :dynamic_search_pattern
     def self.get_objects(model_handle,where_clause={},opts={})
       #break into two parts; one with explicit links and the other with :dynamic_search_pattern non null

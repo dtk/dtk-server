@@ -1,3 +1,4 @@
+#TODO: unify relation_type and model_name
 module XYZ
   #TBD: should this class  be in this file or instead somewhere else
   module CommonMixin
@@ -9,9 +10,10 @@ module XYZ
       IDHandle.new(self.merge(x))
     end
     def createMH(x={})
-      parent_model_name = get_parent_model_name()
       vals = [:c,:model_name,:parent_model_name].inject({}){|h,k|h.merge({k => self[k]})}
-      vals.merge!(:parent_model_name => parent_model_name).merge!(x)
+      vals.merge!(x)
+      vals[:parent_model_name] ||= get_parent_model_name()
+      vals[:model_name] ||= get_model_name()
       ModelHandle.new(vals[:c],vals[:model_name],vals[:parent_model_name])
     end
 
@@ -134,6 +136,10 @@ module XYZ
    private
     def get_parent_model_name()
       self[:parent_model_name] || get_parent_id_handle()[:model_name]
+    end
+
+    def get_model_name()
+      self[:model_name] || (IDInfoTable.get_row_from_id_handle(self)||{})[:relation_type]
     end
   end
 

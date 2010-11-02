@@ -49,14 +49,16 @@ module XYZ
     
     #TODO: quick hack
     def self.get_wspace_display(id_handle)
-      c = id_handle[:c]
       node_id = IDInfoTable.get_id_from_id_handle(id_handle)
-      node = get_objects(ModelHandle.new(c,:node),{:id => node_id}).first
+      node_mh = id_handle.createMH(:model_name => :node)
+      node = get_objects(node_mh,{:id => node_id}).first
 
-      component_ds = get_objects_just_dataset(ModelHandle.new(c,:component),{:node_node_id => node_id})
+      component_mh = node_mh.createMH(:model_name => :component)
+      component_ds = get_objects_just_dataset(component_mh,{:node_node_id => node_id})
       attr_where_clause = SQL.or({:port_type => "input"},{:port_type => "output"})
       attr_fs = Model::FieldSet.default(:attribute).add_cols(:component_component_id)
-      attribute_ds = get_objects_just_dataset(ModelHandle.new(c,:attribute),attr_where_clause,FieldSet.opt(attr_fs))
+      attribute_mh = node_mh.createMH(:model_name => :attribute)
+      attribute_ds = get_objects_just_dataset(attribute_mh,attr_where_clause,FieldSet.opt(attr_fs))
       components = component_ds.graph(:left_outer,attribute_ds,{:component_component_id => :id}).all
       node.merge(:component => components)
     end

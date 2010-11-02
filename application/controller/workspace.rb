@@ -87,5 +87,42 @@ module XYZ
       return tpl_result
     end
 
+    def list_items
+#pp request.params
+      model_name = 'node_group'
+      field_set = Model::FieldSet.default(model_name.to_sym)
+
+#
+      where_clause = {}
+#Should be where on all groups for parent/container foo (ie: datacenter, viewspace,etc)
+      where_clause[:parent_id] = 'foo'
+
+#      where_clause = {:display_name => search_query}
+#TODO: remove the .inject code everywhere, shouldnt have to deal with this inside controllers
+      if where_clause
+        where_clause = where_clause.inject(nil){|h,o|SQL.and(h,SQL::WhereCondition.like(o[0],"#{o[1]}%"))}
+      end
+ 
+      node_group_list = get_objects(model_name.to_sym,where_clause)
+      node_group_list.each_with_index do |node_group,index|
+        node_group_list[index][:model_name] = model_name
+          node_group_list[index][:ui].nil? ? node_group_list[index][:ui] = {} : nil
+      end
+
+      tpl = R8Tpl::TemplateR8.new("node_group/wspace_list",user_context())
+#Commented out for now to test with normal page rendering
+#      tpl.set_js_tpl_name("wspace_list_ng_#{model_name}")
+      tpl.assign('node_group_list',model_list)
+
+      _model_var = {}
+      _model_var[:i18n] = get_model_i18n(model_name,user_context())
+      tpl.assign("_#{model_name().to_s}",_model_var)
+      tpl.assign("model_name",model_name)
+
+      tpl_result = tpl.render()
+      tpl_result[:panel] = 'viewspace'
+      return tpl_result
+    end
+
   end
 end

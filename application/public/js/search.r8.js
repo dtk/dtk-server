@@ -5,6 +5,17 @@ if (!R8.Search) {
 			return {
 				searchObjList : {},
 
+				getSearchInfo : function(searchContext) {
+					var searchId = R8.Search.searchObjList[searchContext]['currentSearch'];
+					var searchObj = R8.Search.searchObjList[searchContext]['searches'][searchId];
+					var modelName = searchObj['search_pattern'][':relation'];
+					return {
+						'searchId':searchId,
+						'searchObj':searchObj,
+						'modelName':modelName
+					}
+				},
+
 				newSearchContext  : function(searchContext) {
 					this.searchObjList[searchContext] = {
 						'currentSearch':'',
@@ -13,8 +24,6 @@ if (!R8.Search) {
 				},
 
 				addSearchObj : function(searchContext,searchObj) {
-console.log(searchObj);
-return;
 					if(searchObj['id'] == 'new') {
 						searchObj['search_pattern'] = {
 							':columns':[],
@@ -36,8 +45,36 @@ return;
 				},
 
 				runSavedSearch : function(searchContext,searchId) {
-					YUI().use("json", function (Y) {
+					YUI().use("json", function(Y) {
 						var searchObjJsonStr = Y.JSON.stringify(R8.Search.searchObjList[searchContext]['searches'][searchId]);
+						var ssObjElem = document.getElementById(searchContext+'-saved-search-obj');
+						ssObjElem.value = searchObjJsonStr;
+						document.getElementById(searchContext+'-search-form').submit();
+					});
+				},
+
+				runSearch : function(searchContext) {
+					var currentSearch = R8.Search.searchObjList[searchContext]['currentSearch'];
+					if(currentSearch == 'new') {
+						R8.Search.searchObjList[searchContext]['searches'][currentSearch]['id'] = '';
+					}
+					var sNameElem = document.getElementById(searchContext+'-search_name');
+					if(sNameElem.value == '') {
+						alert('Saved searches must have a name');
+						return;
+					}
+					R8.Search.searchObjList[searchContext]['searches'][currentSearch]['name'] = sNameElem.value;
+
+					R8.Search.searchObjList[searchContext]['searches'][currentSearch]['search_pattern'][':columns'] = [];
+					var displayColumns = document.getElementById(searchContext+'-display-columns');
+					var numColumns = displayColumns.options.length;
+
+					for(var i=0; i < numColumns; i++) {
+						R8.Search.searchObjList[searchContext]['searches'][currentSearch]['search_pattern'][':columns'].push(':'+displayColumns.options[i].value);
+					}
+				
+					YUI().use("json", function (Y) {
+						var searchObjJsonStr = Y.JSON.stringify(R8.Search.searchObjList[searchContext]['searches'][currentSearch]);
 						var ssObjElem = document.getElementById(searchContext+'-saved-search-obj');
 						ssObjElem.value = searchObjJsonStr;
 						document.getElementById(searchContext+'-search-form').submit();
@@ -98,7 +135,6 @@ return;
 				},
 
 				initSearchContext : function(searchContext,searchId) {
-return;
 					this.searchObjList[searchContext]['currentSearch'] = searchId;
 					var searchObj = this.searchObjList[searchContext]['searches'][searchId];
 
@@ -114,12 +150,10 @@ return;
 
 					this.setupColumnFields(searchContext);
 					this.renderFilters(searchContext);
-//					this.renderOrderBys(searchContext);
+					this.renderOrderings(searchContext);
 
-
-//					var filters = searchObj['search_pattern'][':filters'];
-//					var order_by = searchObj['search_pattern'][':order_by'];
-//					var columns = searchObj['search_pattern'][':columns'];
+					var searchNameElem = document.getElementById(searchContext+'-search_name');
+					searchNameElem.value = this.searchObjList[searchContext]['searches'][searchId]['display_name'];
 				},
 
 				//BEGIN FILTER RELATED CODE
@@ -135,8 +169,8 @@ return;
 
 				persistFilter : function(filterId,updateFilter) {
 					var idParts = filterId.split('-');
-					var filterIndex = idParts[idParts.length-1];
-					var searchContext = filterId.replace('-'+filterIndex,'');
+					var filterIndex = idParts[idParts.length-2];
+					var searchContext = filterId.replace('-'+filterIndex+'-filter','');
 					var currentSearch = this.searchObjList[searchContext]['currentSearch'];
 					var searchObj = this.searchObjList[searchContext]['searches'][currentSearch];
 					var modelName = searchObj['search_pattern'][':relation'];
@@ -149,7 +183,7 @@ return;
 					var fieldLabel = fieldDef['i18n'];
 
 					var fieldOpElem = R8.Utils.Y.one('#'+filterId+'-operator');
-					var fieldOperator = availOperators[fieldDef['type']][fieldOpElem.get('value')];
+					var fieldOperator = R8.Search.availOperators[fieldDef['type']][fieldOpElem.get('value')];
 
 					var fieldCondElem = R8.Utils.Y.one('#'+filterId+'-condition');
 					var fieldCondition = fieldCondElem.get('value');
@@ -181,10 +215,12 @@ return;
 
 					if(typeof(updateFilter) == 'undefined' || updateFilter == false) {
 						R8.Search.pushFilters(searchContext,[filterDef]);
-						this.renderFilterDisplay(searchContext,filterDef,filterLength-1,false);
-//						R8.Search.renderFilterDisplay(searchContext,filterDef);
+						var newIndex = (filterLength <=0) ? 0 : filterLength-1;
+//						R8.Search.renderFilterDisplay(searchContext,filterDef,filterLength-1,false);
+						R8.Search.renderFilterDisplay(searchContext,filterDef,newIndex,false);
 					} else if(updateFilter == true) {
-						R8.Search.updateExistingFilter(searchContext,filterIndex,filterDef);
+						R8.Search.updateExistingFilter(searchContext,filterDef,filterIndex);
+						R8.Search.renderFilterDisplay(searchContext,filterDef,filterIndex,true);
 					}
 				},
 
@@ -199,11 +235,17 @@ return;
 					}
 				},
 
+				updateExistingFilter : function(searchContext,filterDef,filterIndex) {
+					var currentSearch = this.searchObjList[searchContext]['currentSearch'];
+					filterIndex++;
+					this.searchObjList[searchContext]['searches'][currentSearch]['search_pattern'][':filter'][filterIndex] = filterDef;
+				},
+
 				loadFilter : function(e) {
-					var filterElemId = e.currentTarget.get('id');
-					var idParts = filterElemId.split('-');
-					var filterIndex = idParts[idParts.length-1];
-					var searchContext = filterElemId.replace('-'+filterIndex,'');
+					var filterId = e.currentTarget.get('id');
+					var idParts = filterId.split('-');
+					var filterIndex = idParts[idParts.length-2];
+					var searchContext = filterId.replace('-'+filterIndex+'-filter','');
 					var currentSearch = R8.Search.searchObjList[searchContext]['currentSearch'];
 					var searchObj = R8.Search.searchObjList[searchContext]['searches'][currentSearch];
 
@@ -211,31 +253,12 @@ return;
 					filterEditWrapper.set('innerHTML','');
 
 					var filterList = R8.Utils.Y.one('#'+searchContext+'-filter-list');
-/*
-					var filterIndex = 0;
-					var foundIndex = false;
-					filterList.get('children').each(function(){
-						if(foundIndex != true) {
-							if(this.get('id') == filterId) {
-								foundIndex = true;
-							} else {
-								foundIndex = false;
-								filterIndex++;
-							}
-						}
-					});
-*/
 					var modelName = searchObj['search_pattern'][':relation'];
-console.log(searchObj['search_pattern'][':filter'][0]);
-console.log(searchObj['search_pattern'][':filter'][1]);
-//					filterIndex
-console.log('filterIndex:'+filterIndex);
-
-					filterDef = searchObj['search_pattern'][':filter'][(filterIndex+1)];
-console.log(filterDef);
+					filterIndex++;
+					filterDef = searchObj['search_pattern'][':filter'][filterIndex];
 					var fieldName = filterDef[1].replace(':','');
 				
-					R8.Search.renderFilterEdit(modelName,filterId,filterDef);
+					R8.Search.renderFilterEdit(searchContext,filterDef,filterId);
 				},
 
 				renderFilters : function(searchContext) {
@@ -249,12 +272,11 @@ console.log(filterDef);
 					}
 				},
 
-				renderFilterDisplay : function(searchContext,filterDef,filterId,updateFilter) {
+				renderFilterDisplay : function(searchContext,filterDef,filterIndex,updateFilter) {
+					var filterId = searchContext+'-'+filterIndex+'-filter';
 					var currentSearch = this.searchObjList[searchContext]['currentSearch'];
 					var searchObj = this.searchObjList[searchContext]['searches'][currentSearch];
 					var modelName = searchObj['search_pattern'][':relation'];
-//TODO: loose the :
-//					var modelName = searchObj['search_pattern']['relation'];
 					var fieldName = filterDef[1].replace(':','');
 					var fieldDef = R8.Model.getFieldDef(modelName,fieldName);
 					var fieldLabel = fieldDef['i18n'];
@@ -263,14 +285,6 @@ console.log(filterDef);
 
 					switch(filterDef[0].replace(':','')) {
 						case "oneof":
-							var valueList = [];
-							fieldCondElem.get('options').each(function(){
-								if(this.get('selected') == true) {
-									valueList[valueList.length] = this.get('value');
-								}
-							});
-							filterDef.push(valueList);
-
 							var newCondition = '';
 							for(index in fieldCondition) {
 								(newCondition !='') ? newCondition = newCondition+',' : null;
@@ -294,7 +308,8 @@ console.log(filterDef);
 
 					if(typeof(updateFilter) == 'undefined' || updateFilter == false) {
 						var filterElem = document.createElement('div');
-						filterElem.setAttribute('id',searchContext+'-'+filterId);
+//						filterElem.setAttribute('id',searchContext+'-'+filterId);
+						filterElem.setAttribute('id',filterId);
 						filterElem.setAttribute('class','search-filter');
 						filterElem.innerHTML = '\
 							<div class="search-filter-value">'+filterStr+'</div>\
@@ -304,20 +319,21 @@ console.log(filterDef);
 						var filterListElem = R8.Utils.Y.one('#'+searchContext+'-filter-list');
 						filterListElem.appendChild(filterElem);
 					} else if(updateFilter == true) {
-						var filterElem = R8.Utils.Y.one('#'+searchContext+'-'+filterId);
+//						var filterElem = R8.Utils.Y.one('#'+searchContext+'-'+filterId);
+						var filterElem = R8.Utils.Y.one('#'+filterId);
 						filterElem.get('children').item(0).set('innerHTML',filterStr);
 					}
 				},
 
 				renderFilterEdit : function(searchContext,filterDef,filterId) {
-					var searchId = this.searchObjList[searchContext]['currentSearch'];
-					var searchObj = this.searchObjList[searchContext]['searches'][searchId];
+					var searchId = R8.Search.searchObjList[searchContext]['currentSearch'];
+					var searchObj = R8.Search.searchObjList[searchContext]['searches'][searchId];
 					var modelName = searchObj['search_pattern'][':relation'];
 
 					if(typeof(filterId) == 'undefined') {
-						var filterId = searchObj['search_pattern'][':filter'].length - 1;
-						filterId = (filterId < 0) ? 0 : filterId;
-						filterId = searchContext + '-' + filterId;
+						var filterIndex = searchObj['search_pattern'][':filter'].length - 1;
+						filterIndex = (filterIndex < 0) ? 0 : filterIndex;
+						filterId = searchContext + '-' + filterIndex + '-filter';
 					}
 
 					var filterEditWrapper = R8.Utils.Y.one('#'+searchContext+'-filter-edit-wrapper');
@@ -325,7 +341,7 @@ console.log(filterDef);
 
 					(typeof(filterDef) !='undefined' && filterDef != null) ? fieldName = filterDef[1].replace(':','') : fieldName = null;
 
-					var fieldElem = this.getFilterFieldOptions({
+					var fieldElem = R8.Search.getFilterFieldOptions({
 						'model_name':modelName,
 						'field_name':fieldName,
 						'filter_id':filterId
@@ -345,7 +361,7 @@ console.log(filterDef);
 					//add field operator select list
 					(typeof(filterDef) !='undefined' && filterDef != null) ? operator = filterDef[0].replace(':','') : operator = null;
 
-					var fieldOperatorsElem = this.getFilterOperatorOptions({
+					var fieldOperatorsElem = R8.Search.getFilterOperatorOptions({
 						'field_def':fieldDef,
 						'operator':operator,
 						'filter_id':filterId
@@ -355,7 +371,7 @@ console.log(filterDef);
 					(typeof(filterDef) =='undefined' || filterDef == null) ? filterDef = null : null;
 
 					//add field condition input
-					var fieldConditionElem = getConditionInput({
+					var fieldConditionElem = R8.Search.getConditionInput({
 						'field_name':fieldElem.value,
 						'field_def':fieldDef,
 						'operator':fieldOperatorsElem.value,
@@ -387,7 +403,7 @@ console.log(filterDef);
 						R8.Search.updateFilterField(this.id,this.options[this.selectedIndex].value);
 					};
 				
-					var fieldDefs = getModelFieldDefs(modelName);
+					var fieldDefs = R8.Model.getFieldDefs(modelName);
 					for(field in fieldDefs) {
 						var selected = ((fieldName != null && typeof(fieldName) != 'undefined') && fieldName == field) ? true : false;
 						var numOptions = availFieldsElem.options.length;
@@ -537,8 +553,8 @@ console.log(filterDef);
 					var conditionElem = document.getElementById(filterId+'-condition');
 					filterWrapper.removeChild(conditionElem);
 
-					var fieldDef = getFieldDef(modelName,fieldName);
-					var inputElem = getConditionInput({
+					var fieldDef = R8.Model.getFieldDef(modelName,fieldName);
+					var inputElem = R8.Search.getConditionInput({
 						'field_name':fieldName,
 						'field_def':fieldDef,
 						'operator':operator,
@@ -551,18 +567,63 @@ console.log(filterDef);
 				//END FILTER CODE
 
 			//ORDERING RELATED
-				renderOrderingEdit : function(modelName,orderId,orderDef) {
-					var orderingEditWrapper = R8.Utils.Y.one('#tempId-ordering-edit-wrapper');
+				renderOrderings : function(searchContext) {
+					var currentSearch = this.searchObjList[searchContext]['currentSearch'];
+					var searchObj = this.searchObjList[searchContext]['searches'][currentSearch];
+					var orderings = searchObj['search_pattern'][':order_by'];
+
+					var index = 0;
+					for(order_by in orderings) {
+						this.renderOrderingDisplay(searchContext,orderings[order_by],index,false);
+						index++;
+					}
+				},
+
+				renderOrderingDisplay : function(searchContext,orderDef,orderIndex,updateOrdering) {
+					var searchInfo = R8.Search.getSearchInfo(searchContext);
+					var fieldDef = R8.Model.getFieldDef(searchInfo['modelName'],orderDef['field']);
+					var fieldLabel = fieldDef['i18n'];
+					var ordering = orderDef['order'];
+//TODO: i18n the strings
+					var orderStr = 'Order By '+fieldLabel+' '+ordering;
+					var orderId = searchContext+'-'+orderIndex+'-ordering';
+					if(typeof(updateOrdering) == 'undefined' || updateOrdering == false) {
+						var orderElem = document.createElement('div');
+						orderElem.setAttribute('id',orderId);
+						orderElem.setAttribute('class','search-filter');
+						orderElem.innerHTML = '\
+							<div class="search-filter-value">'+orderStr+'</div>\
+							<div class="search-remove-filter"></div>\
+						';
+					
+						var orderingListElem = R8.Utils.Y.one('#'+searchContext+'-ordering-list');
+						orderingListElem.appendChild(orderElem);
+					} else if(updateOrdering == true) {
+						var orderElem = R8.Utils.Y.one('#'+orderId);
+						orderElem.get('children').item(0).set('innerHTML',orderStr);
+					}
+				},
+
+				renderOrderingEdit : function(searchContext,orderDef,orderId) {
+					var searchInfo = R8.Search.getSearchInfo(searchContext);
+
+					if(typeof(orderId) == 'undefined') {
+						var orderIndex = (searchInfo['searchObj']['search_pattern'][':order_by'].length <=0) ? 
+							0 : searchInfo['searchObj']['search_pattern'][':order_by'].length;
+						orderId = searchContext + '-' + orderIndex + '-ordering';
+					}
+
+					var orderingEditWrapper = R8.Utils.Y.one('#'+searchContext+'-ordering-edit-wrapper');
 					orderingEditWrapper.set('innerHTML','');
 
 					(typeof(orderDef) !='undefined') ? fieldName = orderDef[':field'] : fieldName = null;
 
-					var fieldElem = this.getOrderingFieldOptions({
-						'model_name':modelName,
+					var fieldElem = R8.Search.getOrderingFieldOptions({
+						'model_name':searchInfo['modelName'],
 						'field_name':fieldName,
 						'order_id':orderId
 					});
-					var fieldDef = getFieldDef(modelName,fieldElem.value);
+					var fieldDef = R8.Model.getFieldDef(searchInfo['modelName'],fieldElem.value);
 					var elemId = fieldElem.getAttribute('id');
 					var orderId = elemId.replace('-field','');
 				
@@ -576,7 +637,7 @@ console.log(filterDef);
 					var orderingElem = document.createElement('select');
 					orderingElem.setAttribute('id',orderId+'-order');
 					orderingElem.setAttribute('name',orderId+'-order');
-					orderingElem.setAttribute('data-model',modelName);
+					orderingElem.setAttribute('data-model',searchInfo['modelName']);
 					orderingElem.setAttribute('style','vertical-align:top;');
 
 					var ascSelected = (typeof(orderDef) !='undefined' && orderDef[':order'] == 'ASC') ? true : false;
@@ -588,11 +649,11 @@ console.log(filterDef);
 					//add ordering options
 					orderingWrapper.appendChild(orderingElem);
 
-					var orderingEditWrapper = R8.Utils.Y.one('#tempId-ordering-edit-wrapper');
+					var orderingEditWrapper = R8.Utils.Y.one('#'+searchContext+'-ordering-edit-wrapper');
 					orderingEditWrapper.appendChild(orderingWrapper);
 
 					//add save button
-					var saveBtnElem = this.getOrderingSaveBtn(orderId);
+					var saveBtnElem = R8.Search.getOrderingSaveBtn(searchContext,orderId);
 					orderingEditWrapper.appendChild(saveBtnElem);
 				},
 
@@ -613,7 +674,7 @@ console.log(filterDef);
 						document.getElementById(orderId+'-order').selectedIndex = 0;
 					};
 				
-					var fieldDefs = getModelFieldDefs(modelName);
+					var fieldDefs = R8.Model.getFieldDefs(modelName);
 					for(field in fieldDefs) {
 						var selected = ((fieldName != null && typeof(fieldName) != 'undefined') && fieldName == field) ? true : false;
 						var numOptions = availFieldsElem.options.length;
@@ -622,21 +683,17 @@ console.log(filterDef);
 					return availFieldsElem;
 				},
 
-				getOrderingSaveBtn: function(orderId) {
-					var tempId = 'tempId-ordering-edit-wrapper';
-
+				getOrderingSaveBtn : function(searchContext,orderId) {
 					var btnWrapper = document.createElement('div');
 					btnWrapper.setAttribute('style','bottom: 0px; margin-left: 5px;');
-
+				
 					var btnElem = document.createElement('input');
 					btnElem.setAttribute('type','button');
-					btnElem.setAttribute('data-order-id',orderId);
-
 				//TODO: i18n this garb
 					btnElem.value = 'Save';
 					btnElem.onclick = function() {
-						R8.Search.saveOrdering(this.getAttribute('data-order-id'));
-						var orderingEditWrapper = R8.Utils.Y.one('#tempId-ordering-edit-wrapper');
+						R8.Search.saveOrdering(orderId);
+						var orderingEditWrapper = R8.Utils.Y.one('#'+searchContext+'-ordering-edit-wrapper');
 						orderingEditWrapper.set('innerHTML','');
 					}
 
@@ -645,7 +702,7 @@ console.log(filterDef);
 				//TODO: i18n this garb
 					cancelBtnElem.value = 'Cancel';
 					cancelBtnElem.onclick = function() {
-						var orderingEditWrapper = R8.Utils.Y.one('#tempId-ordering-edit-wrapper');
+						var orderingEditWrapper = R8.Utils.Y.one('#'+searchContext+'-ordering-edit-wrapper');
 						orderingEditWrapper.set('innerHTML','');
 					}
 
@@ -658,18 +715,22 @@ console.log(filterDef);
 					var orderElem = R8.Utils.Y.one('#'+orderId);
 
 					if(orderElem == null) {
-						this.persistOrdering(orderId);
+						R8.Search.persistOrdering(orderId);
 					} else {
-						this.persistOrdering(orderId,true);
+						R8.Search.persistOrdering(orderId,true);
 					}
 				},
 
 				persistOrdering: function(orderId,updateOrdering) {
+					var idParts = orderId.split('-');
+					var orderIndex = idParts[idParts.length-2];
+					var searchContext = orderId.replace('-'+orderIndex+'-ordering','');
+					var searchInfo = R8.Search.getSearchInfo(searchContext);
+
 					var fieldElem = R8.Utils.Y.one('#'+orderId+'-field');
-					var modelName = fieldElem.getAttribute('data-model');
 					var fieldName = fieldElem.get('value');
 
-					var fieldDef = getFieldDef(modelName,fieldName);
+					var fieldDef = R8.Model.getFieldDef(searchInfo['modelName'],fieldName);
 					var fieldLabel = fieldDef['i18n'];
 
 					var orderingElem = R8.Utils.Y.one('#'+orderId+'-order');
@@ -677,16 +738,7 @@ console.log(filterDef);
 
 					var orderDef = {":field":fieldName,":order":ordering};
 					var orderStr = 'Order By '+fieldLabel+' '+ordering;
-				/*
-				<div id="filter0X" class="search-filter">
-					<div class="search-filter-value">Display Name Equals 'foo'</div>
-					<div class="search-remove-filter"></div>
-				</div>
-				*/
-				
-				//TODO: figure out best way to handle id's
-				var searchContext = 'foo';
-				
+
 					if(typeof(updateOrdering) == 'undefined' || updateOrdering == false) {
 						var orderElem = document.createElement('div');
 						orderElem.setAttribute('id',orderId);
@@ -696,73 +748,43 @@ console.log(filterDef);
 							<div class="search-remove-filter"></div>\
 						';
 					
-						var orderingListElem = R8.Utils.Y.one('#'+modelName+'-ordering-list');
+						var orderingListElem = R8.Utils.Y.one('#'+searchContext+'-ordering-list');
 						orderingListElem.appendChild(orderElem);
 
-						this.pushOrderings(searchContext,[orderDef]);
+						R8.Search.pushOrderings(searchContext,[orderDef]);
 					} else if(updateOrdering == true) {
 						var orderElem = R8.Utils.Y.one('#'+orderId);
 						orderElem.get('children').item(0).set('innerHTML',orderStr);
 
-//TODO: centralize this as a reusable function,change id on ordering list to be search Id driven
-						var orderingList = R8.Utils.Y.one('#node-ordering-list');
-						var orderingIndex = 0;
-						var foundIndex = false;
-						orderingList.get('children').each(function(){
-							if(foundIndex != true) {
-								if(this.get('id') == orderId) {
-									foundIndex = true;
-								} else {
-									foundIndex = false;
-									orderingIndex++;
-								}
-							}
-						});
-						this.updateExistingOrdering(searchContext,orderingIndex,orderDef);
+						this.updateExistingOrdering(searchContext,orderIndex,orderDef);
 					}
 				},
 
-				updateExistingOrdering: function(searchContext,orderingIndex,orderDef) {
-					var searchDef = getSearchObj(searchContext);
-				//	searchDef['search_pattern'][':filter'][filterIndex+1] = filterDef;
-					devTestSearchObj['search_pattern'][':order_by'][orderingIndex] = orderDef;
-console.log(devTestSearchObj['search_pattern'][':order_by']);
+				updateExistingOrdering: function(searchContext,orderIndex,orderDef) {
+					var currentSearch = R8.Search.searchObjList[searchContext]['currentSearch'];
+					R8.Search.searchObjList[searchContext]['searches'][currentSearch]['search_pattern'][':order_by'][orderIndex] = orderDef;
 				},
 
 				//TODO: remove devTestSearchObj stub
 				pushOrderings: function(searchContext,orderingDefs) {
-					var searchDef = getSearchObj(searchContext);
-				
+					var currentSearch = R8.Search.searchObjList[searchContext]['currentSearch'];
 					for(order in orderingDefs) {
-						devTestSearchObj['search_pattern'][':order_by'].push(orderingDefs[order]);
+						R8.Search.searchObjList[searchContext]['searches'][currentSearch]['search_pattern'][':order_by'].push(orderingDefs[order]);
 					}
 				},
 
 				loadOrdering: function(e) {
 					var orderId = e.currentTarget.get('id');
-				//TODO: remove stub
-				var searchContext = 'foo';
-					var searchObj = getSearchObj(searchContext);
-					var orderingEditWrapper = R8.Utils.Y.one('#tempId-ordering-edit-wrapper');
+					var idParts = orderId.split('-');
+					var orderIndex = idParts[idParts.length-2];
+					var searchContext = orderId.replace('-'+orderIndex+'-ordering','');
+					var currentSearch = R8.Search.searchObjList[searchContext]['currentSearch'];
+					var searchObj = R8.Search.searchObjList[searchContext]['searches'][currentSearch];
+					var orderingEditWrapper = R8.Utils.Y.one('#'+searchContext+'-ordering-edit-wrapper');
 					orderingEditWrapper.set('innerHTML','');
 
-//TODO: use search id instead of model name
-					var orderingList = R8.Utils.Y.one('#node-ordering-list');
-					var orderingIndex = 0;
-					var foundIndex = false;
-					orderingList.get('children').each(function(){
-						if(foundIndex != true) {
-							if(this.get('id') == orderId) {
-								foundIndex = true;
-							} else {
-								foundIndex = false;
-								orderingIndex++;
-							}
-						}
-					});
-					var modelName = searchObj['search_pattern'][':relation'];
-					orderDef = searchObj['search_pattern'][':order_by'][orderingIndex];
-					R8.Search.renderOrderingEdit(modelName,orderId,orderDef);
+					orderDef = searchObj['search_pattern'][':order_by'][orderIndex];
+					R8.Search.renderOrderingEdit(searchContext,orderDef,orderId);
 				},
 			//COLUMN RELATED
 

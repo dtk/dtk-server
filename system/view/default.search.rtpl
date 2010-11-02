@@ -1,4 +1,5 @@
 <script type="text/javascript">
+/*
 var field_defs = {
 	'node' : {
 		'field_defs' :{
@@ -322,12 +323,6 @@ function persistFilter(filterId,updateFilter) {
 			break;
 	}
 	var filterStr = fieldLabel+' '+fieldOperator+' '+fieldCondition;
-/*
-<div id="filter0X" class="search-filter">
-	<div class="search-filter-value">Display Name Equals 'foo'</div>
-	<div class="search-remove-filter"></div>
-</div>
-*/
 
 //TODO: figure out best way to handle id's
 var searchId = 'foo';
@@ -533,7 +528,7 @@ function runSearch(searchId,save) {
 		document.getElementById('saved-search-form').submit();
 	});
 }
-
+*/
 </script>
 <div class="search-container">
 	<div style="height: 30px; width: 800px; float: left; background-color: #FFFFFF;">
@@ -561,7 +556,7 @@ function runSearch(searchId,save) {
 				<form id="{%=search_context_literal%}-search-form" action="{%=base_uri%}/xyz/{%=model_name_literal%}/list" method="post" enctype="multipart/form-data">
 				<input type="hidden" name="search" id="{%=search_context_literal%}-saved-search-obj" value=""/>
 				&nbsp;&nbsp;
-				<input type="button" value="Run" style="margin-top: 2px;" onclick="runSearch('');"/>
+				<input type="button" value="Run" style="margin-top: 2px;" onclick="R8.Search.runSearch('{%=search_context_literal%}');"/>
 				Name&nbsp;<input type="text" id="{%=search_context_literal%}-search_name" name="search_name" value="" size="25" style="margin-top: 2px;"/>
 				</form>
 			</div>

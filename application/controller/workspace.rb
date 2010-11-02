@@ -87,7 +87,8 @@ module XYZ
       return tpl_result
     end
 
-    def list_items
+    #TODO: datacenter_id=nil is stub
+    def list_items(datacenter_id=nil)
 #pp request.params
       model_name = 'node_group'
       field_set = Model::FieldSet.default(model_name.to_sym)

@@ -30,16 +30,16 @@ if (!R8.Search) {
 							':columns':[],
 							':filter':[],
 							':order_by':[],
-							':paging':null,
-							':relation':searchObj['search_pattern']['relation']
+							':paging': {},
+							':relation':searchObj['search_pattern'][':relation']
 						};
 					} else {
 						searchObj['search_pattern'] = {
-							':columns':searchObj['search_pattern']['columns'],
-							':filter':searchObj['search_pattern']['filter'],
-							':order_by':searchObj['search_pattern']['order_by'],
-							':paging':searchObj['search_pattern']['paging'],
-							':relation':searchObj['search_pattern']['relation']
+							':columns':searchObj['search_pattern'][':columns'],
+							':filter':searchObj['search_pattern'][':filter'],
+							':order_by':searchObj['search_pattern'][':order_by'],
+							':paging':searchObj['search_pattern'][':paging'],
+							':relation':searchObj['search_pattern'][':relation']
 						};
 					}
 					this.searchObjList[searchContext]['searches'][searchObj['id']] = searchObj;

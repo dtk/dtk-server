@@ -89,40 +89,52 @@ module XYZ
 
     #TODO: datacenter_id=nil is stub
     def list_items(datacenter_id=nil)
-#pp request.params
-      model_name = 'node_group'
-      field_set = Model::FieldSet.default(model_name.to_sym)
-
-#
-      where_clause = {}
-#Should be where on all groups for parent/container foo (ie: datacenter, viewspace,etc)
-      where_clause[:parent_id] = 'foo'
-
-#      where_clause = {:display_name => search_query}
-#TODO: remove the .inject code everywhere, shouldnt have to deal with this inside controllers
-      if where_clause
-        where_clause = where_clause.inject(nil){|h,o|SQL.and(h,SQL::WhereCondition.like(o[0],"#{o[1]}%"))}
+      if datacenter_id.nil?
+        datacenter_id = IDHandle[:c => ret_session_context_id(), :uri => "/datacenter/dc1", :model_name => :datacenter].get_id()
       end
- 
-      node_group_list = get_objects(model_name.to_sym,where_clause)
-      node_group_list.each_with_index do |node_group,index|
-        node_group_list[index][:model_name] = model_name
-          node_group_list[index][:ui].nil? ? node_group_list[index][:ui] = {} : nil
+
+      model_name = :node_group      
+      filter_params = {:parent_id => datacenter_id}
+      search_object =  ret_node_group_search_object(filter_params)
+
+      model_list = Model.get_objects_from_search_object(search_object)
+pp model_list
+
+      model_list.each_with_index do |node_group,index|
+        model_list[index][:model_name] = model_name
+          model_list[index][:ui].nil? ? model_list[index][:ui] = {} : nil
       end
 
       tpl = R8Tpl::TemplateR8.new("node_group/wspace_list",user_context())
-#Commented out for now to test with normal page rendering
-#      tpl.set_js_tpl_name("wspace_list_ng_#{model_name}")
+      tpl.set_js_tpl_name("wspace_list_ng_#{model_name}")
       tpl.assign('node_group_list',model_list)
 
       _model_var = {}
       _model_var[:i18n] = get_model_i18n(model_name,user_context())
       tpl.assign("_#{model_name().to_s}",_model_var)
       tpl.assign("model_name",model_name)
-
+      tpl.assign("num_nodes",10) #TODO stub
       tpl_result = tpl.render()
       tpl_result[:panel] = 'viewspace'
       return tpl_result
+    end
+
+    def ret_node_group_search_object(filter_params)
+      model_name = :node_group
+      parent_model_name = :datacenter
+      #for processing :parent_id
+      parent_id_field_name = ModelHandle.new(ret_session_context_id(),model_name,parent_model_name).parent_id_field_name()
+      filter = [:and] + filter_params.map do |k,v|
+        [:eq, k == :parent_id ?  parent_id_field_name : k, v]
+      end
+      hash = {
+        "search_pattern" => {
+          :relation => model_name,
+          :filter => filter,
+          :columns => [:id, :display_name]
+        }
+      } 
+      SearchObject.create_from_input_hash(hash,:workspace,ret_session_context_id())
     end
 
   end

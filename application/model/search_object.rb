@@ -36,6 +36,21 @@ module XYZ
       ret
     end
 
+    def json()
+      sp = self[:search_pattern]
+
+      #TODO: this is for case when get back search objects from get objects; remove when process uniformally meaning non null will always be serach pattern object
+      hash_for_json_sp = sp ? (sp.kind_of?(SearchPattern) ? sp.hash_for_json_generate() : sp) : nil 
+
+      hash_for_json_generate = {
+        :display_name=> self[:dispaly_name],
+        :relation=> self[:relation],
+        :id=> self[:id],
+        :search_pattern => hash_for_json_sp
+      }
+      JSON.generate(hash_for_json_generate)
+    end
+
     def should_save?
       return nil unless search_pattern
       return true if save_flag

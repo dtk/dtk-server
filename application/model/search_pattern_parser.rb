@@ -7,6 +7,13 @@ module XYZ
       pares_and_set!(hash_search_pattern)
     end
 
+
+    def hash_for_json_generate()
+      ret = process_symbols(self)
+      #TODO: would be nice to get rid of this hack
+      ret[":relation"] =  ret[":relation"] ? ret[":relation"].gsub(/^:/,"") : nil
+      ret
+    end
     def field_set()
       #TBD: stub; must take out non scalars
       columns.empty? ? (relation.kind_of?(Symbol) ? Model::FieldSet.default(relation) : nil) : Model::FieldSet.new(columns)
@@ -40,6 +47,7 @@ module XYZ
     end
    private
     include GenerateListMetaView
+
     def process_symbols(obj)
       if obj.kind_of?(Array)
         obj.map{|x|process_symbols(x)}

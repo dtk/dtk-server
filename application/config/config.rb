@@ -67,6 +67,8 @@ R8::Config[:app_root_path] = "#{R8::Config[:sys_root_path]}/#{R8::Config[:applic
 R8::Config[:app_cache_root] = "#{R8::Config[:sys_root_path]}/cache/#{R8::Config[:application_name]}"
 R8::Config[:system_views_dir] = "#{R8::Config[:sys_root_path]}/system/view"
 R8::Config[:meta_templates_root] = "#{R8::Config[:app_root_path]}/meta"
+#TODO: probably converge meta_templates references into meta_base and remove
+R8::Config[:meta_base_dir] = "#{R8::Config[:app_root_path]}/meta"
 R8::Config[:i18n_base_dir] = "#{R8::Config[:app_root_path]}/i18n"
 R8::Config[:dev_mode] = true
 

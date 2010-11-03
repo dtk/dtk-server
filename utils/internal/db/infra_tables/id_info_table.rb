@@ -71,6 +71,10 @@ module XYZ
       return nil unless id_info and id_info[:parent_id] 
       IDHandle[:c => c, :id => id_info[:parent_id], :model_name => id_info[:parent_relation_type]]
     end
+    def get_parent_id_handle_with_display_name()
+      idh = get_parent_id_handle()
+      idh.createIDH(:display_name =>  Model.get_display_name(idh))
+    end
 
     #returns nil if model_name given and top does not mactch it
     def get_top_container_id_handle(model_name=nil)

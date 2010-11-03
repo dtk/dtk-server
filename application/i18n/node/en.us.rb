@@ -15,5 +15,6 @@
   :parent_name => 'Parent Name',
   :description_list => 'Descr',
   :operational_status => 'Operational Status',
-  :operational_status_list => 'Op Status'
+  :operational_status_list => 'Op Status',
+  :tag => 'Tags'
 }

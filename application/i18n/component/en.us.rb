@@ -6,6 +6,10 @@
   :external_type => 'External Type',
   :external_ref => 'External Component Ref',
   :type => 'Type',
+  :basic_type => 'Basic Type',
+  :version => 'Version',
+  :uri => 'Uri',
+  :parent_name => 'Parent',
 
   :description_list => 'Descr',
   :external_ref_list => 'Ext Component Ref',

@@ -7,7 +7,10 @@ module XYZ
 #TODO: remove this after fully getting viewspaces going
       add_js_exe("R8.Workspace.setupNewItems();")
       add_js_exe("R8.Toolbar.init({node:'group-01',tools:['quicksearch']});")
-      return {:content=>''}
+      return {
+        :content=>'',
+        :panel=>'viewspace'
+      }
     end
 
     def loaddatacenter(id,parsed_query_string=nil)

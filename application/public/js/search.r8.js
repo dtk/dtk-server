@@ -24,7 +24,6 @@ if (!R8.Search) {
 				},
 
 				addSearchObj : function(searchContext,searchObj) {
-console.log(searchObj);
 					if(searchObj['id'] == 'new') {
 						searchObj['search_pattern'] = {
 							':columns':[],
@@ -350,7 +349,7 @@ console.log(searchObj);
 					var fieldDef = R8.Model.getFieldDef(modelName,fieldElem.value);
 					var elemId = fieldElem.getAttribute('id');
 					var filterId = elemId.replace('-field','');
-				
+
 					var filterWrapper = document.createElement('div');
 					filterWrapper.setAttribute('id',filterId+'-filter-wrapper');
 					filterWrapper.setAttribute('style','float:left; width: 100%; height: 80px;');
@@ -403,7 +402,7 @@ console.log(searchObj);
 					availFieldsElem.onchange = function(){
 						R8.Search.updateFilterField(this.id,this.options[this.selectedIndex].value);
 					};
-				
+
 					var fieldDefs = R8.Model.getFieldDefs(modelName);
 					for(field in fieldDefs) {
 						var selected = ((fieldName != null && typeof(fieldName) != 'undefined') && fieldName == field) ? true : false;

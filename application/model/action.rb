@@ -5,7 +5,8 @@ module XYZ
       column :state, :varchar, :size => 15, :default => "pending" # | "executing" | "completed"
       column :mode, :varchar, :size => 15, :default => "declarative" # | "procedural"
       column :type, :varchar, :size => 25# "setting" | "delete" | "deploy-node" | "install-component" | "patch-component" | "upgare-component" | "rollback-component" | "procedure" | .. 
-      column :object_display_name, :varchar
+      column :base_object, :json
+      #TODO; may rename
       column :object_type, :varchar, :size => 15 # "attribute" | "node" | "component"
       column :transaction, :int, :default => 1 #TODO may introduce transaction object and make this a foreign key
       #TODO: change below to more general json field about ordering
@@ -15,7 +16,6 @@ module XYZ
       virtual_column :parent_name, :possible_parents => [:datacenter,:action]
       virtual_column :old_value, :path => [:change, :old]
       virtual_column :new_value, :path => [:change, :new]
-
       #one of thse wil be non null and point to object being changed or added
       foreign_key :node_id, :attribute, FK_CASCADE_OPT
       foreign_key :attribute_id, :attribute, FK_CASCADE_OPT
@@ -62,7 +62,7 @@ module XYZ
         hash = {
           :ref => ref,
           :display_name => display_name,
-          :object_display_name => (item[:object]||{})[:display_name],
+          :base_object => item[:base_object],
           :state => "pending",
           :mode => "declarative",
           :type => type,

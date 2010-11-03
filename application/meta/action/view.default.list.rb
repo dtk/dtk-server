@@ -7,12 +7,8 @@
           }}
       ],
       :field_list => [
-         {:object_type => {
-              :type => 'text',
-              :help => '',
-            }},
-         {:object_display_name => {
-              :type => 'text',
+         {:base_object => {
+              :type => 'hash',
               :help => '',
             }},
           {:display_name => {

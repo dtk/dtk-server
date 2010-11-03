@@ -57,11 +57,13 @@ module XYZ
       #TODO any more efficient way to get action_parent_idh and parent_idh info
       action_parent_idh = id_handle.get_top_container_id_handle(:datacenter)
       return nil unless action_parent_idh #this would happend if top container is not a datacenter TODO: see if this should be "trapped" at higher level
+      parent_idh = id_handle.get_parent_id_handle_with_display_name()
+      parent_display_name = (parent_idh||{})[:display_name]
       new_item_hash = {
         :new_item => id_handle,
-        :parent => action_parent_idh,
-        :object => id_handle.get_parent_id_handle_with_display_name()
+        :parent => action_parent_idh
       }
+      new_item_hash.merge!(:base_object => {:component => parent_display_name}) if parent_display_name
       action_id_handle = Action.create_pending_change_item(new_item_hash)
       propagate_changes([AttributeChange.new(id_handle,changed_value,action_id_handle)]) if action_id_handle
     end

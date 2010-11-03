@@ -30,7 +30,7 @@ module XYZ
       new_item_hash = {
         :new_item => new_id_handle,
         :parent => action_parent_idh,
-        :object => target_id_handle.createIDH(:display_name => target_display_name)
+        :base_object => {:node_group => target_display_name}
       }
       action_id_handle = Action.create_pending_change_item(new_item_hash)
       case new_id_handle[:model_name]
@@ -76,7 +76,10 @@ module XYZ
         new_item = {:new_item => idh, :parent => action_id_handle}
         #TODO: make below call to  idh.get_parent_id()
         object_idh = targets.find{|o|o.get_id() == idh[:parent_guid]}
-        new_item.merge(object_idh ? {:object => object_idh} : {})
+        if (object_idh||{})[:display_name]
+          new_item.merge!(:base_object => {:node => object_idh[:display_name]})
+        end
+        new_item
       end
       Action.create_pending_change_items(new_items)
 

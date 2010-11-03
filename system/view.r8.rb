@@ -221,8 +221,14 @@ module R8Tpl
         field_meta[:width] = (field_meta[:width].nil? ? '' : 'width="'+field_meta[:width]+'"')
 
         #might move later, putting sorting code here
-        field_meta[:sort_call] = "onclick=\"R8.Search.sort('#{@model_name}','#{field_name}','{%=#{field_name}_order%}');\""
-        field_meta[:sort_class] = "{%=#{field_name}_order_class%}"
+        #TODO: look for better way to do find fields taht should not have sorting
+        if (field_hash.values.first||{})[:type] == "actions_basic"
+          field_meta[:sort_call] = "" 
+          field_meta[:sort_class] = "" 
+        else
+          field_meta[:sort_call] = "onclick=\"R8.Search.sort('#{@model_name}','#{field_name}','{%=#{field_name}_order%}');\""
+          field_meta[:sort_class] = "{%=#{field_name}_order_class%}"
+        end
         list_cols << field_meta
       end
     end

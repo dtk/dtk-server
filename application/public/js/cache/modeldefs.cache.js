@@ -17,8 +17,20 @@ R8.Model.fieldDefs =  {
 		'i18n' : 'Image Size',
 		'type' : 'text'
 	    }
-	},
-    }
+	}
+    },
+    'component' : {
+	'field_defs' :{
+	    'display_name': {
+		'i18n': 'Display Name',
+		'type' : 'text',
+	    },
+	    'external_ref': {
+		'i18n':'External Referance',
+		'type' : 'text',
+	    },
+	}
+    },
 }
     
 

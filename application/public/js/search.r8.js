@@ -292,18 +292,20 @@ if (!R8.Search) {
 
 					switch(filterDef[0].replace(':','')) {
 						case "oneof":
+							var optionsList = R8.Model.getFieldOptions(modelName,fieldName);
 							var newCondition = '';
 							for(index in fieldCondition) {
 								(newCondition !='') ? newCondition = newCondition+',' : null;
-								newCondition = newCondition + optionsList[fieldName][fieldCondition[index]];
+								newCondition = newCondition + optionsList[fieldCondition[index]];
 							}
 							fieldCondition = newCondition;
 							break;
 						case "eq":
 						case "match-prefix":
 						case "contains":
+							var optionsList = R8.Model.getFieldOptions(modelName,fieldName);
 							if(fieldDef['type'] == 'select') {
-								fieldCondition = "'"+optionsList[fieldName][fieldCondition]+"'";
+								fieldCondition = "'"+optionsList[fieldCondition]+"'";
 							} else {
 								fieldCondition = "'"+fieldCondition+"'";
 							}
@@ -383,7 +385,8 @@ if (!R8.Search) {
 						'field_def':fieldDef,
 						'operator':fieldOperatorsElem.value,
 						'filter_def':filterDef,
-						'filter_id':filterId
+						'filter_id':filterId,
+						'model_name':modelName
 					});
 					filterWrapper.appendChild(fieldConditionElem);
 
@@ -398,19 +401,20 @@ if (!R8.Search) {
 					var modelName = params['model_name'];
 					var fieldName = params['field_name'];
 					var filterId = params['filter_id'];
-				
+
 					filterId = (typeof(filterId) == 'undefined' || filterId == null) ? R8.Utils.Y.guid() : filterId;
 					var availFieldsElem = document.createElement('select');
 					availFieldsElem.setAttribute('id',filterId+'-field');
 					availFieldsElem.setAttribute('name',filterId+'-field');
 					availFieldsElem.setAttribute('data-model',modelName);
 					availFieldsElem.setAttribute('style','vertical-align:top;');
-				
+
 					availFieldsElem.onchange = function(){
 						R8.Search.updateFilterField(this.id,this.options[this.selectedIndex].value);
 					};
 
 					var fieldDefs = R8.Model.getFieldDefs(modelName);
+
 					for(field in fieldDefs) {
 						var selected = ((fieldName != null && typeof(fieldName) != 'undefined') && fieldName == field) ? true : false;
 						var numOptions = availFieldsElem.options.length;
@@ -431,7 +435,7 @@ if (!R8.Search) {
 					availOpsElem.setAttribute('style','vertical-align:top;');
 
 					availOpsElem.onchange = function(){
-						updateFilterOperator(this.id);
+						R8.Search.updateFilterOperator(this.id);
 					};
 
 					for(op in availOperators) {
@@ -442,12 +446,53 @@ if (!R8.Search) {
 					return availOpsElem;
 				},
 
+				updateFilterOperator : function(operatorId) {
+					var operatorElem = R8.Utils.Y.one('#'+operatorId);
+					var filterId = operatorElem.get('id').replace('-operator','');
+					var filterField = R8.Utils.Y.one('#'+filterId+'-field');
+					var modelName = filterField.getAttribute('data-model');
+					var fieldName = filterField.get('value');
+					var fieldDef = R8.Model.getFieldDef(modelName,fieldName);
+				
+					var operator = operatorElem.get('options').item(operatorElem.get('selectedIndex')).get('value');
+				
+					//reset and update the condition field
+					R8.Search.updateFilterCondition({
+						'model_name':modelName,
+						'field_name':fieldName,
+						'operator':operator,
+						'filter_id':filterId
+					});
+				},
+
+				updateFilterCondition : function(params) {
+					var filterId = params['filter_id'];
+					var modelName = params['model_name'];
+					var fieldName = params['field_name'];
+					var operator = params['operator'];
+
+					var filterWrapper = document.getElementById(filterId+'-filter-wrapper');
+					var conditionElem = document.getElementById(filterId+'-condition');
+					filterWrapper.removeChild(conditionElem);
+				
+					var fieldDef = R8.Model.getFieldDef(modelName,fieldName);
+					var inputElem = getConditionInput({
+						'field_name':fieldName,
+						'field_def':fieldDef,
+						'operator':operator,
+						'filter_id':filterId
+					});
+				
+					filterWrapper.appendChild(inputElem);
+				},
+
 				getConditionInput : function(params) {
 					var fieldName = params['field_name'];
 					var fieldDef = params['field_def'];
 					var operator = params['operator'];
 					var filterId = params['filter_id'];
 					var filterDef = params['filter_def'];
+					var modelName = params['model_name'];
 
 					switch(fieldDef['type']) {
 						case "text":
@@ -470,13 +515,13 @@ if (!R8.Search) {
 							inputElem.setAttribute('name',filterId+'-condition');
 							(multiselect == true) ? inputElem.setAttribute('multiple','1') : null;
 
-							var availOptions = getFieldOptions(fieldName);
+							var availOptions = R8.Model.getFieldOptions(modelName,fieldName);
 							for(option in availOptions) {
 								var numOptions = inputElem.options.length;
 
 								var selected = false;
 
-								if(typeof(filterDef) !='undefined') {
+								if(typeof(filterDef) !='undefined' && filterDef !=null) {
 									if(filterDef[2] instanceof Array) {
 										(R8.Utils.in_array(filterDef[2],option)) ? selected = true : selected = false;
 									} else {
@@ -565,7 +610,8 @@ if (!R8.Search) {
 						'field_name':fieldName,
 						'field_def':fieldDef,
 						'operator':operator,
-						'filter_id':filterId
+						'filter_id':filterId,
+						'model_name':modelName
 					});
 
 					filterWrapper.appendChild(inputElem);

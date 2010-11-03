@@ -47,6 +47,7 @@ module R8Tpl
         Cache[model_name][:model_defs] ||= content
       end
 
+#TODO: build role based cache versions
       def build_model_defs_js_cache()
         if(!Cache[:app])
           set_app_def()
@@ -56,13 +57,14 @@ module R8Tpl
         Cache[:app][:model_list].each do |model|
             model_defs[model] = get_model_defs(model)
         end
-        cache_str = 'R8.Model.defs='+JSON.pretty_generate(model_defs)
+        cache_str = 'R8.Model.defs='+JSON.pretty_generate(model_defs)+';'
         cache_file_name = "#{R8::Config[:js_file_write_path]}/model_defs.cache.js"
         cache_file_handle = File.open(cache_file_name, 'w')
         cache_file_handle.write(cache_str)
         cache_file_handle.close
       end
 
+#TODO: build language based cache versions
       def build_model_i18n_js_cache(user)
         if(!Cache[:app])
           set_app_def()
@@ -73,7 +75,7 @@ module R8Tpl
             model_i18n[model] = get_model_i18n(model,user)
         end
 
-        cache_str = 'R8.Model.i18n='+JSON.pretty_generate(model_i18n)
+        cache_str = 'R8.Model.i18n='+JSON.pretty_generate(model_i18n)+';'
         cache_file_name = "#{R8::Config[:js_file_write_path]}/model.i18n.cache.js"
         cache_file_handle = File.open(cache_file_name, 'w')
         cache_file_handle.write(cache_str)

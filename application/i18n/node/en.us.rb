@@ -19,6 +19,9 @@
   :tag => 'Tags',
   :ec2_security_groups => 'EC2 Sec Groups',
   :external_ref => 'External Ref',
+  :is_deployed => 'Is Deployed',
+  :architecture => 'Architecture',
+  :ui => 'UI',
 
   :external_ref_list => 'Ext Ref List'
 }

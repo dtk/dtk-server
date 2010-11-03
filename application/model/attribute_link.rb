@@ -42,15 +42,47 @@ module XYZ
       returning_cols_opts = {:returning_cols => [:id,:display_name,:action_id,:old_val,{:value_derived => :new_val}]}
       update_ret = update_from_select(output_attr_mh,FieldSet.new([:value_derived]),attrs_to_change_ds,returning_cols_opts)
 
+      attr_containers = get_attribute_containers(attr_mh,update_ret.map{|r|r[:id]})
       #create the new pending changes
       parent_action_mh = attr_changes.first.action_id_handle.createMH()
-      args_for_pending_changes  = update_ret.map do |r|
-        {:new_item => attr_mh.createIDH(:guid => r[:id], :display_name => r[:display_name]), 
+      new_item_hashes = update_ret.map do |r|
+        new_item_hash ={
+          :new_item => attr_mh.createIDH(:guid => r[:id], :display_name => r[:display_name]), 
           :parent => parent_action_mh.createIDH(:guid => r[:action_id]),
           :change => {:old => r[:old_val], :new => r[:new_val]}
         }
+        base_object = attr_containers[r[:id]]
+        new_item_hash.merge(base_object ? {:base_object => base_object} : {})
       end
-      Action.create_pending_change_items(args_for_pending_changes)
+      Action.create_pending_change_items(new_item_hashes)
+    end
+
+
+    def self.get_attribute_containers(attr_model_handle,attr_id_list)
+      #TODO: may convert to computing from search object with links
+      #TODO: can be more efficient if update from hash is able to return parent_id
+
+      attr_parent_col = :component_component_id
+      attr_wc = SQL.or(*attr_id_list.map{|id|{:id => id}})
+      attr_fs = FieldSet.opt([:id,attr_parent_col])
+      attr_ds = get_objects_just_dataset(attr_model_handle,attr_wc,attr_fs)
+
+      cmp_parent_col = :node_node_id
+      cmp_mh = attr_model_handle.createMH(:model_name => :component, :parent_model_name => :datacenter)
+      cmp_fs = FieldSet.opt([:id,:display_name,cmp_parent_col])
+      cmp_ds = get_objects_just_dataset(cmp_mh,{},cmp_fs)
+
+      ng_mh = cmp_mh.createMH(:model_name => :node)
+      ng_fs = FieldSet.opt([:id,:display_name])
+      ng_ds = get_objects_just_dataset(ng_mh,{},ng_fs)
+
+      graph_res = attr_ds.graph(:inner,cmp_ds,{:id => attr_parent_col}).graph(:inner,ng_ds,{:id => cmp_parent_col}).all
+      graph_res.inject({}) do |h,row|
+        cmp_display_name = (row[:component]||{})[:display_name]
+        ng_display_name = (row[:node]||{})[:display_name]
+        next unless cmp_display_name and ng_display_name
+        h.merge(row[:id] => {:component => {:display_name => cmp_display_name}, :node => {:display_name => ng_display_name}})
+      end
     end
 
     def self.get_legal_connections(parent_id_handle)

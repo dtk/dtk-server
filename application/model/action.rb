@@ -16,6 +16,11 @@ module XYZ
       virtual_column :parent_name, :possible_parents => [:datacenter,:action]
       virtual_column :old_value, :path => [:change, :old]
       virtual_column :new_value, :path => [:change, :new]
+
+      virtual_column :node_group, :path => [:base_object,:node_group,:display_name]
+      virtual_column :node, :path => [:base_object,:node,:display_name]
+      virtual_column :component, :path => [:base_object,:component,:display_name]
+
       #one of thse wil be non null and point to object being changed or added
       foreign_key :node_id, :attribute, FK_CASCADE_OPT
       foreign_key :attribute_id, :attribute, FK_CASCADE_OPT

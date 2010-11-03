@@ -7,8 +7,16 @@
           }}
       ],
       :field_list => [
-         {:base_object => {
-              :type => 'hash',
+         {:node_group => {
+              :type => 'text',
+              :help => '',
+            }},
+         {:node => {
+              :type => 'text',
+              :help => '',
+            }},
+         {:component => {
+              :type => 'text',
               :help => '',
             }},
           {:display_name => {

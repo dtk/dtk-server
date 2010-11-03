@@ -39,7 +39,7 @@
   ],
   :field_groups => [
     {
-      :num_cols => 2,
+      :num_cols => 3,
         :display_labels => true,
           :fields => [
             {:display_name => {

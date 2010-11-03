@@ -37,6 +37,27 @@
       },
     },
   ],
-
+  :field_groups => [
+    {
+      :num_cols => 3,
+        :display_labels => true,
+          :fields => [
+            {:display_name => {
+              :type => 'text',
+              :filter => 'starts_with',
+              :rows => 1,
+              :cols => 40,
+            }},
+            {:type => {
+              :type => 'text',
+              :filter => 'starts_with',
+            }},
+            {:basic_type => {
+              :type => 'text',
+              :filter => 'starts_with',
+            }},
+        ],
+      },
+    ],
 }
 

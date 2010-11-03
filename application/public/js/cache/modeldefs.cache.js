@@ -25,6 +25,14 @@ R8.Model.fieldDefs =  {
 		'i18n': 'Display Name',
 		'type' : 'text',
 	    },
+	    'type': {
+		'i18n': 'Type',
+		'type' : 'text',
+	    },
+	    'basic_type': {
+		'i18n': 'Basic Type',
+		'type' : 'text',
+	    },
 	    'external_ref': {
 		'i18n':'External Referance',
 		'type' : 'text',

@@ -16,5 +16,9 @@
   :description_list => 'Descr',
   :operational_status => 'Operational Status',
   :operational_status_list => 'Op Status',
-  :tag => 'Tags'
+  :tag => 'Tags',
+  :ec2_security_groups => 'EC2 Sec Groups',
+  :external_ref => 'External Ref',
+
+  :external_ref_list => 'Ext Ref List'
 }

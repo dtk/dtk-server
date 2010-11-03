@@ -73,7 +73,8 @@ module XYZ
       new_changes = AttributeLink.propagate_over_dir_conn_equality_links(attr_changes)
     end
 
-    #TODO: unify with attribute_link.get_attribute_containers(attr_model_handle,attr_id_list)
+    #TODO: replace by having virtual(s) column on attribute that returns the node and component under the attribute
+    #TODO: may have three variants dependening on whether attribute on node or whether on component on node or component on node group
     def self.get_base_object_on_node_group(id_handle)
       #TODO: may convert to computing from search object with links
       #TODO: can be more efficient if update from hash is able toi return parent_id

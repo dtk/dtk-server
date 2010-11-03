@@ -57,7 +57,8 @@ module XYZ
       Action.create_pending_change_items(new_item_hashes)
     end
 
-
+    #TODO: replace by having virtual(s) column on attribute that returns the node and component under the attribute
+    #TODO: may have three variants dependening on whether attribute on node or whether on component on node or component on node group
     def self.get_attribute_containers(attr_model_handle,attr_id_list)
       #TODO: may convert to computing from search object with links
       #TODO: can be more efficient if update from hash is able to return parent_id

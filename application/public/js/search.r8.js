@@ -128,10 +128,17 @@ if (!R8.Search) {
 					});
 				},
 
-				toggleSearch : function(modelName) {
-					var spElem = R8.Utils.Y.one('#'+modelName+'-search-panel');
+				toggleSearch : function(searchContext) {
+					var spElem = R8.Utils.Y.one('#'+searchContext+'-search-panel');
+					var expandContractElem = R8.Utils.Y.one('#'+searchContext+'-expand-contract');
 
-					(spElem.getStyle('display') == 'none') ? spElem.setStyle('display','block') : spElem.setStyle('display','none');
+					if (spElem.getStyle('display') == 'none') {
+						spElem.setStyle('display', 'block');
+						expandContractElem.addClass('expanded');
+					} else {
+						spElem.setStyle('display', 'none');
+						expandContractElem.removeClass('expanded');
+					}
 				},
 
 				initSearchContext : function(searchContext,searchId) {

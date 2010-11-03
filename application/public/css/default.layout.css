@@ -221,6 +221,19 @@ table.list tr.odd {
 	z-index: 10;
 }
 
+.expand-contract-blue {
+	height: 16px;
+	width: 16px;
+	background-image: url(../images/expand-contract-blue.png);
+	float: left;
+	margin-left: 5px;
+	cursor: pointer;
+}
+
+.expand-contract-blue.expanded {
+	background-position: -16px 0px;
+}
+
 .search-container .drop-shadow {
 	position: absolute;
 	z-index: 0;

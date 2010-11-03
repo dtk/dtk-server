@@ -532,8 +532,9 @@ function runSearch(searchId,save) {
 </script>
 <div class="search-container">
 	<div style="height: 30px; width: 800px; float: left; background-color: #FFFFFF;">
-		<div style="margin: 4px 0 0 5px; float: left;">
-			<a href="javascript:R8.Search.toggleSearch('{%=search_context_literal%}');">Search&nbsp;&gt;&gt;</a>
+		<div style="height: 30px; width: 100px; margin: 6px 0 0 10px; float: left;">
+			<div style="float: left;"><a href="javascript:R8.Search.toggleSearch('{%=search_context_literal%}');" style="text-decoration:none;">Search</a></div>
+			<div id="{%=search_context_literal%}-expand-contract" onclick="R8.Search.toggleSearch('{%=search_context_literal%}');" class="expand-contract-blue"></div>
 		</div>
 		<div style="margin: 4px 0 0 10px; float: left;">
 			{%=search_cond_literal%}

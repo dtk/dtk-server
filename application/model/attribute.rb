@@ -57,25 +57,50 @@ module XYZ
       #TODO any more efficient way to get action_parent_idh and parent_idh info
       action_parent_idh = id_handle.get_top_container_id_handle(:datacenter)
       return nil unless action_parent_idh #this would happend if top container is not a datacenter TODO: see if this should be "trapped" at higher level
-      parent_idh = id_handle.get_parent_id_handle_with_display_name()
-      parent_display_name = (parent_idh||{})[:display_name]
+      base_object = get_base_object_for_action(id_handle)
       new_item_hash = {
         :new_item => id_handle,
         :parent => action_parent_idh
       }
-      new_item_hash.merge!(:base_object => {:component => parent_display_name}) if parent_display_name
+      new_item_hash.merge!(:base_object => base_object) if base_object
       action_id_handle = Action.create_pending_change_item(new_item_hash)
       propagate_changes([AttributeChange.new(id_handle,changed_value,action_id_handle)]) if action_id_handle
     end
 
+   private
+    ###### helper fns
     def self.propagate_changes(attr_changes) 
       new_changes = AttributeLink.propagate_over_dir_conn_equality_links(attr_changes)
     end
 
+    def self.get_base_object_for_action(id_handle)
+      #TODO: may convert to computing from search object with links
+      #TODO: can be more efficient if update from hash is able toi return parent_id
+
+      attr_parent_col = :component_component_id
+      attr_wc = {:id => id_handle.get_id()}
+      attr_fs = FieldSet.opt([attr_parent_col])
+      attr_ds = get_objects_just_dataset(id_handle.createMH,attr_wc,attr_fs)
+
+      cmp_parent_col = :node_node_group_id
+      cmp_mh = id_handle.createMH(:model_name => :component, :parent_model_name => :datacenter)
+      cmp_fs = FieldSet.opt([:id,:display_name,cmp_parent_col])
+      cmp_ds = get_objects_just_dataset(cmp_mh,{},cmp_fs)
+
+      ng_mh = cmp_mh.createMH(:model_name => :node_group)
+      ng_fs = FieldSet.opt([:id,:display_name])
+      ng_ds = get_objects_just_dataset(ng_mh,{},ng_fs)
+
+      graph_res = attr_ds.graph(:inner,cmp_ds,{:id => attr_parent_col}).graph(:inner,ng_ds,{:id => cmp_parent_col}).all.first
+      return nil unless graph_res
+      cmp_display_name = (graph_res[:component]||{})[:display_name]
+      ng_display_name = (graph_res[:node_group]||{})[:display_name]
+      return nil unless cmp_display_name and ng_display_name
+      {:component => {:display_name => cmp_display_name}, :node_group => {:display_name => ng_display_name}}
+    end
 
     ##TODO: need to go over each one below to see what we still should use
 
-    ###### helper fns
     def check_and_set_derived_relation!()
       ingress_objects = Model.get_objects(ModelHandle.new(id_handle[:c],:attribute_link),:output_id => self[:id])
       return nil if ingress_objects.nil?
@@ -95,8 +120,6 @@ module XYZ
       end
       raise Error.new("mismatched link") 
     end
-
-   private
 
     ### virtual column defs
     # returns asserted first then derived

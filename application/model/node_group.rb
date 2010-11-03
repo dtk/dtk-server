@@ -84,7 +84,7 @@ module XYZ
       Action.create_pending_change_items(new_items)
 
       #put in attribute links, linking attributes attached to component ng_cmp_id_handle
-
+      #TODO: may convert to computing from search object with links
       node_cmp_mh = node_cmp_id_handles.first.createMH
       node_cmp_wc = {:ancestor_id => ng_cmp_id_handle.get_id()}
       node_cmp_fs = FieldSet.opt([:id])

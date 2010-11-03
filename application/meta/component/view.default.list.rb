@@ -22,7 +22,7 @@
        :objLinkView => 'display',
      }},
    {:type => {
-       :type => 'text',
+       :type => 'select',
        :width => '20%',
        :help => '',
      }},

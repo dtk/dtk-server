@@ -5,6 +5,7 @@ module XYZ
       column :state, :varchar, :size => 15, :default => "pending" # | "executing" | "completed"
       column :mode, :varchar, :size => 15, :default => "declarative" # | "procedural"
       column :type, :varchar, :size => 25# "setting" | "delete" | "deploy-node" | "install-component" | "patch-component" | "upgare-component" | "rollback-component" | "procedure" | .. 
+      column :object_display_name, :varchar
       column :object_type, :varchar, :size => 15 # "attribute" | "node" | "component"
       column :transaction, :int, :default => 1 #TODO may introduce transaction object and make this a foreign key
       #TODO: change below to more general json field about ordering
@@ -63,6 +64,7 @@ module XYZ
         hash = {
           :ref => ref,
           :display_name => display_name,
+          :object_display_name => (item[:object]||{})[:display_name],
           :state => "pending",
           :mode => "declarative",
           :type => type,

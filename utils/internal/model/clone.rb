@@ -35,7 +35,6 @@ module XYZ
       target_parent_model_name = targets.first[:model_name]
       target_model_handle = source_id_handle.createMH(:parent_model_name => target_parent_model_name)
       target_parent_id_col = target_model_handle.parent_id_field_name()
-
       targets_rows = targets.map{|id_handle|{target_parent_id_col => id_handle.get_id()}}
       targets_ds = SQL::ArrayDataset.create(db,targets_rows,ModelHandle.new(source_id_handle[:c],:target))
 
@@ -52,7 +51,7 @@ module XYZ
       create_override_attrs = override_attrs.merge(:ancestor_id => source_id_handle.get_id()) 
       new_id_handles = create_from_select(target_model_handle,field_set_to_copy,select_ds,create_override_attrs,create_opts)
       return new_id_handles if new_id_handles.empty?
-      
+
       #iterate over all children objects
       new_id_handles.first.get_children_model_handles.each do |child_model_handle|
         child_override_attrs = ret_child_override_attrs(child_model_handle,recursive_override_attrs)

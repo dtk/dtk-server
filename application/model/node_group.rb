@@ -5,13 +5,17 @@ module XYZ
       #TODO: should it instaed be pointer to by pointer search_object
       column :dynamic_search_pattern, :json #sql where clause that picks out node members and means to ignore memebrship assocs
       virtual_column :member_id_list
+      virtual_column :member_list
       many_to_one :library, :datacenter, :project
       one_to_many :component
     end
 
     ### virtual column defs
+    def member_list()
+      self[:node]||[]
+    end
     def member_id_list()
-      (self[:node]||[]).map{|n|n[:id]}
+      member_list.map{|n|n[:id]}
     end
     #######################
     ### object procssing and access functions
@@ -48,7 +52,8 @@ module XYZ
 
     def self.clone_post_copy_hook_component(ng_cmp_id_handle,node_group_id_handle,action_id_handle,opts={})
       node_group_obj = get_object(node_group_id_handle)
-      targets = ((node_group_obj||{})[:member_id_list]||[]).map{|node_id|node_group_id_handle.createIDH({:model_name => :node,:id=> node_id})}
+      member_list = (node_group_obj||{})[:member_list]||[]
+      targets = member_list.map{|node|node_group_id_handle.createIDH({:model_name => :node,:id=> node[:id], :display_name => node[:display_name]})}
       return Array.new if  targets.empty?
       recursive_override_attrs={
         :attribute => {
@@ -61,7 +66,12 @@ module XYZ
 
       #create pending_change items for all the components created on the nodes; the
       #pending change item generated for the node group component is their parents
-      new_items = node_cmp_id_handles.map{|idh|{:new_item => idh, :parent => action_id_handle}}
+      new_items = node_cmp_id_handles.map do |idh|
+        new_item = {:new_item => idh, :parent => action_id_handle}
+        #TODO: make below call to  idh.get_parent_id()
+        object_idh = targets.find{|o|o.get_id() == idh[:parent_guid]}
+        new_item.merge(object_idh ? {:object => object_idh} : {})
+      end
       Action.create_pending_change_items(new_items)
 
       #put in attribute links, linking attributes attached to component ng_cmp_id_handle
@@ -103,6 +113,7 @@ module XYZ
     #######################
 
    private
+    #TODO: have this bring in same fields as dynamic
     def self.get_objects_static(model_handle,where_clause={},opts={})
       c = model_handle[:c]
       #important that Model.get_objects called, not get_objects
@@ -135,7 +146,7 @@ module XYZ
 
 #      groups_info.map{|group|group.merge :node => Model.get_objects(ModelHandle.new(c,:node),group[:dynamic_search_pattern])}
       groups_info.map do |group|
-        search_pattern =  group[:dynamic_search_pattern].merge(:columns => [:id])
+        search_pattern =  group[:dynamic_search_pattern].merge(:columns => [:id,:display_name])
         search_object = SearchObject.create_from_input_hash({"search_pattern" => search_pattern},:node_group,model_handle[:c])
         group.merge :node => get_objects_from_search_object(search_object)
       end

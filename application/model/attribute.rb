@@ -55,7 +55,7 @@ module XYZ
       return nil if changed_value.nil?
       action_parent_idh = id_handle.get_top_container_id_handle(:datacenter)
       return nil unless action_parent_idh #this would happend if top container is not a datacenter TODO: see if this should be "trapped" at higher level
-      action_id_handle = Action.create_pending_change_item(id_handle,action_parent_idh)
+      action_id_handle = Action.create_pending_change_item(:new_item => id_handle,:parent => action_parent_idh)
       propagate_changes([AttributeChange.new(id_handle,changed_value,action_id_handle)]) if action_id_handle
     end
 

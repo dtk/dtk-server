@@ -29,17 +29,15 @@ module XYZ
     #######################
     #object processing and access functions
     #######################
-    def self.create_pending_change_item(new_id_handle,parent_id_handle,change=nil)
-      new_item = {:new_item => new_id_handle, :parent => parent_id_handle}
-      new_item.merge!(:change => change) if change
-      create_pending_change_items([new_item]).first
+    def self.create_pending_change_item(new_item_hash)
+      create_pending_change_items([new_item_hash]).first
     end
     #assoumption is that all parents are of same type and all changed items of same type
-    def self.create_pending_change_items(new_items)
-      return nil if new_items.empty? 
-      parent_model_name = new_items.first[:parent][:model_name]
-      model_handle = new_items.first[:parent].createMH({:model_name => :action, :parent_model_name => parent_model_name})
-      object_model_name = new_items.first[:new_item][:model_name]
+    def self.create_pending_change_items(new_item_hashes)
+      return nil if new_item_hashes.empty? 
+      parent_model_name = new_item_hashes.first[:parent][:model_name]
+      model_handle = new_item_hashes.first[:parent].createMH({:model_name => :action, :parent_model_name => parent_model_name})
+      object_model_name = new_item_hashes.first[:new_item][:model_name]
       object_id_col = "#{object_model_name}_id".to_sym
       parent_id_col = model_handle.parent_id_field_name()
       type = 
@@ -56,7 +54,7 @@ module XYZ
       
       ref_prefix = "action"
       i=0
-      rows = new_items.map do |item| 
+      rows = new_item_hashes.map do |item| 
         ref = "#{ref_prefix}#{(i+=1).to_s}"
         id = item[:new_item].get_id()
         parent_id = item[:parent].get_id()

@@ -90,6 +90,15 @@ pp [:wo_related_cols,dataset.ppsql]
       ret
     end
 
+
+    def self.get_display_name(id_handle)
+      id = id_handle.get_id()
+      return nil unless id
+      obj = @db.get_objects_scalar_columns(id_handle.createMH,{:id => id}, FieldSet.opt([:display_name])).first
+      (obj||{})[:display_name]
+    end
+
+
     #TODO: deprecate below
     def self.get_objects(model_handle,where_clause={},opts={})
       c = model_handle[:c]

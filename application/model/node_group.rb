@@ -26,7 +26,13 @@ module XYZ
       #get_top_container_id_handle(:datacenter) will return nil if top is not a datacenter which wil in turn make PendingChangeItem
       #a no-op; this is desired only having pending objects in datacenter, not library
       action_parent_idh = target_id_handle.get_top_container_id_handle(:datacenter)
-      action_id_handle = Action.create_pending_change_item(new_id_handle,action_parent_idh)
+      target_display_name = target_id_handle[:display_name]|| get_display_name(target_id_handle)
+      new_item_hash = {
+        :new_item => new_id_handle,
+        :parent => action_parent_idh,
+        :object => target_id_handle.createIDH(:display_name => target_display_name)
+      }
+      action_id_handle = Action.create_pending_change_item(new_item_hash)
       case new_id_handle[:model_name]
        when :component
         clone_post_copy_hook_component(new_id_handle,target_id_handle,action_id_handle,opts)

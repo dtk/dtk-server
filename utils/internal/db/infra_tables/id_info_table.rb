@@ -65,6 +65,7 @@ module XYZ
     end
 
     def get_parent_id_handle()
+      #TODO: short circuit if parent_guid and parent_model_name are set
       c = self[:c]
       id_info = IDInfoTable.get_row_from_id_handle(self)
       return nil unless id_info and id_info[:parent_id] 
@@ -124,7 +125,8 @@ module XYZ
 	raise_has_illegal_form(x) 
       end
       self[:model_name] = x[:model_name].to_sym if x[:model_name]
-      self[:display_name] = x[:display_name].to_sym if x[:display_name]
+      self[:display_name] = x[:display_name] if x[:display_name]
+      self[:parent_guid] = x[:parent_guid].to_i if x[:parent_guid]
       self[:parent_model_name] = x[:parent_model_name].to_sym if x[:parent_model_name]
       self[:parent_model_name] ||= get_parent_id_handle()[:model_name] if opts[:set_parent_model_name]
       freeze

@@ -72,7 +72,7 @@ module XYZ
           sql = ds.insert_returning_sql([:id,:display_name,parent_id_col],columns,sequel_select_with_cols)
           fetch_raw_sql(sql){|row| returning_ids << row}
           IDInfoTable.update_instances(model_handle,returning_ids)
-          returning_ids.map{|row|model_handle.createIDH(:id => row[:id], :display_name => row[:display_name])}
+          returning_ids.map{|row|model_handle.createIDH(:id => row[:id], :display_name => row[:display_name],:parent_guid => row[parent_id_col])}
         else
           ds.import(columns,sequel_select_with_cols)
           #TODO: need to get ids and set 

@@ -7,7 +7,11 @@
           }}
       ],
       :field_list => [
-                      {:object_type => {
+         {:object_type => {
+              :type => 'text',
+              :help => '',
+            }},
+         {:object_display_name => {
               :type => 'text',
               :help => '',
             }},

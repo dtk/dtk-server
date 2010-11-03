@@ -48,7 +48,7 @@ if (!R8.Workspace) {
 						duration: 0.3,
 					});
 				});
-				this.toggleHandTool();
+//				this.toggleHandTool();
 			},
 			resizeWorkspace : function(e) {
 				R8.Workspace.viewPortRegion = R8.Workspace.pageContainerElem.get('viewportRegion');
@@ -108,7 +108,7 @@ if (!R8.Workspace) {
 //				});
 				R8.Workspace.events['item_dbl_click'] = R8.Utils.Y.delegate('dblclick',function(e){console.log('Hello DBL Click!!!');},R8.Workspace.viewSpaceNode,'.wspace-item');
 
-//				R8.MainToolbar.init();
+				R8.MainToolbar.init();
 return;
 
 //TODO: right now hardcoding assignment from demoData.r8.js

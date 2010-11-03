@@ -24,6 +24,7 @@ if (!R8.Search) {
 				},
 
 				addSearchObj : function(searchContext,searchObj) {
+console.log(searchObj);
 					if(searchObj['id'] == 'new') {
 						searchObj['search_pattern'] = {
 							':columns':[],

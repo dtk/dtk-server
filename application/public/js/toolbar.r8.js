@@ -50,7 +50,6 @@ if (!R8.Toolbar) {
 							var targetId = e.currentTarget.get('id')+'-content';
 							var toolContent = R8.Utils.Y.one('#'+targetId);
 							toolContent.setStyles({'left':'0px'});
-
 							this.toolbarAnim.set('to', {
 								xy: [this.toolbarNode.getX(), this.toolbarNode.getY()+30]
 							});
@@ -80,15 +79,16 @@ if (!R8.Toolbar) {
 
 //					var tabHolder = document.getElementById('cmdbar-tabs');
 //					tabHolder.innerHTML += tabHTML;
-					R8.Utils.Y.one('#'+this.toolbarBodyId).append(toolHTML);
+					var toolbarNode = R8.Utils.Y.one('#'+this.toolbarBodyId);
+					toolbarNode.append(toolHTML);
 
 					if (typeof(tool['toolContent']) != 'undefined') {
 						var content = tool['toolContent']();
 						var toolContent = '<div id="' + this.nodeId + '-tool-' + tool['name'] + '-content" class="toolbar-tool-content">' + content;
 						toolContent += '<div id="' + this.nodeId + '-tool-' + tool['name'] + '-exit" class="tbar-exit"></div>';
 						toolContent += '</div>';
-						
-						R8.Utils.Y.one('#' + this.toolbarId).append(toolContent);
+
+						toolbarNode.append(toolContent);
 						
 						R8.Utils.Y.one('#' + this.nodeId + '-tool-' + tool['name'] + '-exit').on('click', function(e){
 /*

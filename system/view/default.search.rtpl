@@ -536,9 +536,11 @@ function runSearch(searchId,save) {
 			<a href="javascript:R8.Search.toggleSearch('{%=search_context_literal%}');">Search&nbsp;&gt;&gt;</a>
 		</div>
 		<div style="margin: 4px 0 0 10px; float: left;">
+			{%=search_cond_literal%}
 			<select name="{%=search_context_literal%}-saved-search" onchange="R8.Search.runSavedSearch('{%=search_context_literal%}',this.value);">
 				{%=saved_search_list_dropdown%}
 			</select>
+			{%=end_literal%}
 		</div>
 	</div>
 	<div id="{%=search_context_literal%}-search-panel" style="display: none; float:left; width: 898px;">

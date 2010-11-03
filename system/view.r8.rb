@@ -506,6 +506,9 @@ module R8Tpl
     r8TPL.assign(:search_id_literal, '{%=search_id%}')
     r8TPL.assign(:search_context_literal, '{%=search_context%}')
 
+    r8TPL.assign(:search_cond_literal,'{%if num_saved_searches > 0%}')
+    r8TPL.assign(:end_literal,'{%end%}')
+
 #TODO: temp hack until more fully implemented select/dropdown fields
     r8TPL.assign(:saved_search_list_dropdown,'
       {%for saved_search in _saved_search_list%}

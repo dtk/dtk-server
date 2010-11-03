@@ -99,11 +99,11 @@ module XYZ
       #TODO: assume everything is just equal
       filter_params = processed_params.select{|p|p.kind_of?(Hash)}
       return nil if filter_params.empty?
-pp [:debug, filter_params,processed_params]
       #for processing :parent_id
       parent_id_field_name = ModelHandle.new(ret_session_context_id(),model_name,parent_model_name).parent_id_field_name()
       filter = [:and] + filter_params.map do |el|
-        [:eq] + el.first.map{|x| x == :parent_id ?  parent_id_field_name : x}
+        raw_pair = [el.keys.first,el.values.first]
+        [:eq] +  raw_pair.map{|x| x == :parent_id ?  parent_id_field_name : x}
       end
       {"search" => {
           "search_pattern" => {

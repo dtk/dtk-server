@@ -7,5 +7,11 @@
       'warning' => 'Warning',
       'error' => 'Error',
       'good' => 'Good',
+  },
+  :type => {
+    'image' => 'Image',
+    'staged' => 'Staged',
+    'constraint' => 'Constraint',
+    'contraint-common-node' => 'Constraint-Common'
   }
 }

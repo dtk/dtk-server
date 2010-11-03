@@ -1,20 +1,20 @@
 {%for node_group in node_group_list%}
-	<div id="item_{%=node_group[:id]%}" data-status="pending_setup" data-id="{%=node_group[:id]%}" data-model="group" class="basic-item wspace-item group medium green dg-node dg-component" style="top: {%=node_group[:ui][:top]%}px; left: {%=node_group[:ui][:left]%}px;">
-		<div id="item_{%=node_group[:id]%}-large" class="item-display" style="display:none;">
-			<div id="item_{%=node_group[:id]%}-large-display" data-id="{%=node_group[:id]%}" data-model="group" class="item-display item group">
+	<div id="item-{%=node_group[:id]%}" data-status="pending_setup" data-id="{%=node_group[:id]%}" data-model="group" class="basic-item wspace-item group medium green dg-node dg-component" style="top: {%=node_group[:ui][:top]%}px; left: {%=node_group[:ui][:left]%}px;">
+		<div id="item-{%=node_group[:id]%}-large" class="item-display" style="display:none;">
+			<div id="item-{%=node_group[:id]%}-large-display" data-id="{%=node_group[:id]%}" data-model="group" class="item-display item group">
 				<div class="l-col">
 					<div class="corner tl"></div>
 					<div class="l-col-body"></div>
 					<div class="corner bl"></div>
 				</div>
-				<div id="body_{%=node_group[:id]%}" class="body">
+				<div id="body-{%=node_group[:id]%}" class="body">
 					<div class="group-bar">
-						<div id="group_{%=node_group[:id]%}-name" class="name-wrapper"><b>{%=node_group[:display_name]%}</b></div>
-						<div id="group_{%=node_group[:id]%}-toolbar-wrapper" class="toolbar-wrapper">
-							<div id="group_{%=node_group[:id]%}-toolbar" class="item-toolbar">
-								<div id="group_{%=node_group[:id]%}-toolbar-main" class="item-toolbar-main">
+						<div id="group-{%=node_group[:id]%}-name" class="name-wrapper"><b>{%=node_group[:display_name]%}</b></div>
+						<div id="group-{%=node_group[:id]%}-toolbar-wrapper" class="toolbar-wrapper">
+							<div id="group-{%=node_group[:id]%}-toolbar" class="item-toolbar">
+								<div id="group-{%=node_group[:id]%}-toolbar-main" class="item-toolbar-main">
 									<div class="tb-l-cap"></div>
-									<div id="group_{%=node_group[:id]%}-tb-body" class="tb-body">
+									<div id="group-{%=node_group[:id]%}-tb-body" class="tb-body">
 									</div>
 									<div class="tb-r-cap"></div>
 								</div>
@@ -22,16 +22,16 @@
 						</div>
 					</div>
 					<div style="height: 90px; width: 100%; float: left;">
-						<div id="group_{%=node_group[:id]%}-slider-wrapper" class="slide-wrapper">
+						<div id="group-{%=node_group[:id]%}-slider-wrapper" class="slide-wrapper">
 							<div class="group-lbutton"></div>
 							<div class="slide-l-shade">
 								<div class="shade-top"></div>
 								<div class="shade-body"></div>
 								<div class="shade-bottom"></div>
 							</div>
-							<div id="group_{%=node_group[:id]%}-list-container" class="slide-container">
+							<div id="group-{%=node_group[:id]%}-list-container" class="slide-container">
 								<div class="slide-container-header"></div>
-								<div id="group_{%=node_group[:id]%}-slider" style="margin-top: 10px; width: 390px;">
+								<div id="group-{%=node_group[:id]%}-slider" style="margin-top: 10px; width: 390px;">
 									<div class="basic-item medium red-trans" style="position: relative; float: left; margin: 0 5px 0 5px;">
 										<div class="item trans">
 											<div class="l-col">
@@ -88,14 +88,14 @@
 						</div>
 					</div>
 				</div>
-				<div id="elastic_{%=node_group[:id]%}" class="elastic">
+				<div id="elastic-{%=node_group[:id]%}" class="elastic">
 					<div class="elastic-header"></div>
 					<div class="elastic-body"></div>
 					<div class="elastic-footer"></div>
 				</div>
-				<div id="elastic_{%=node_group[:id]%}" class="elastic-node-body">
+				<div id="elastic-{%=node_group[:id]%}" class="elastic-node-body">
 					<div class="enb-header">
-						<div id="item_{%=node_group[:id]%}-minmax-large" class="minmax min"></div>
+						<div id="item-{%=node_group[:id]%}-minmax-large" class="minmax min"></div>
 					</div>
 				</div>
 				<div class="r-col">
@@ -104,7 +104,7 @@
 					<div class="corner br"></div>
 				</div>
 			</div>
-			<div id="item_{%=node_group[:id]%}-large-shadow" class="drop-shadow">
+			<div id="item-{%=node_group[:id]%}-large-shadow" class="drop-shadow">
 				<div class="ds-l-col">
 					<div class="ds-corner tl"></div>
 					<div class="ds-l-col-body"></div>
@@ -133,16 +133,16 @@
 			</div>
 		</div>
 
-		<div id="item_{%=node_group[:id]%}-medium" class="item-display" style="display:block;">
-			<div id="item_{%=node_group[:id]%}-medium" data-id="01" data-model="group" class="item-display item group">
+		<div id="item-{%=node_group[:id]%}-medium" class="item-display" style="display:block;">
+			<div id="item-{%=node_group[:id]%}-medium" data-id="01" data-model="group" class="item-display item group">
 				<div class="l-col">
 					<div class="corner tl"></div>
 					<div class="l-col-body"></div>
 					<div class="corner bl"></div>
 				</div>
-				<div id="body_{%=node_group[:id]%}-medium" class="body">
+				<div id="body-{%=node_group[:id]%}-medium" class="body">
 					<div class="medium-header">
-						<div id="item_{%=node_group[:id]%}-minmax-medium" class="minmax max"></div>
+						<div id="item-{%=node_group[:id]%}-minmax-medium" class="minmax max"></div>
 					</div>
 					{%=node_group[:display_name]%}<br/><br/>{%=num_nodes%}&nbsp;Node(s)&nbsp;&nbsp;
 				</div>
@@ -152,7 +152,7 @@
 					<div class="corner br"></div>
 				</div>
 			</div>
-			<div id="item_{%=node_group[:id]%}-medium-shadow" class="drop-shadow">
+			<div id="item-{%=node_group[:id]%}-medium-shadow" class="drop-shadow">
 				<div class="ds-l-col">
 					<div class="ds-corner tl"></div>
 					<div class="ds-l-col-body"></div>

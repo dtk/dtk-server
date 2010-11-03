@@ -100,13 +100,23 @@ module XYZ
       model_list = Model.get_objects_from_search_object(search_object)
 pp model_list
 
+      add_js_exe("R8.Workspace.setupNewItems();")
+      top = 100
+      left = 100
       model_list.each_with_index do |node_group,index|
         model_list[index][:model_name] = model_name
-          model_list[index][:ui].nil? ? model_list[index][:ui] = {} : nil
+        model_list[index][:ui].nil? ? model_list[index][:ui] = {} : nil
+        model_list[index][:ui][:top].nil? ? model_list[index][:ui][:top] = top : nil
+        model_list[index][:ui][:left].nil? ? model_list[index][:ui][:left] = left : nil
+        top = top+100
+        left = left+100
+
+        add_js_exe("R8.Toolbar.init({node:'group-#{model_list[index][:id]}',tools:['quicksearch']});")
       end
+#        add_js_exe("R8.Toolbar.init({node:'group-#{model_list[0][:id]}',tools:['quicksearch']});")
 
       tpl = R8Tpl::TemplateR8.new("node_group/wspace_list",user_context())
-      tpl.set_js_tpl_name("wspace_list_ng_#{model_name}")
+#      tpl.set_js_tpl_name("wspace_list_ng_#{model_name}")
       tpl.assign('node_group_list',model_list)
 
       _model_var = {}
@@ -114,9 +124,13 @@ pp model_list
       tpl.assign("_#{model_name().to_s}",_model_var)
       tpl.assign("model_name",model_name)
       tpl.assign("num_nodes",10) #TODO stub
-      tpl_result = tpl.render()
-      tpl_result[:panel] = 'viewspace'
-      return tpl_result
+#      tpl_result = tpl.render()
+#      tpl_result[:panel] = 'viewspace'
+#      return tpl_result
+      return {
+        :content => tpl.render(),
+        :panel => 'viewspace'
+      }
     end
 
     def ret_node_group_search_object(filter_params)

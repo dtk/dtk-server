@@ -193,7 +193,15 @@ if (!R8.Search) {
 					var fieldOperator = R8.Search.availOperators[fieldDef['type']][fieldOpElem.get('value')];
 
 					var fieldCondElem = R8.Utils.Y.one('#'+filterId+'-condition');
-					var fieldCondition = fieldCondElem.get('value');
+
+					switch(fieldDef['type']) {
+						case "boolean":
+							var fieldCondition = (fieldCondElem.get('checked') == true) ? fieldCondElem.get('value') : '0';
+							break;
+						default:
+							var fieldCondition = fieldCondElem.get('value');
+							break;
+					}
 				
 					var filterDef = [":"+fieldOpElem.get('value'),":"+fieldName];
 				
@@ -264,7 +272,7 @@ if (!R8.Search) {
 					filterIndex++;
 					filterDef = searchObj['search_pattern'][':filter'][filterIndex];
 					var fieldName = filterDef[1].replace(':','');
-				
+
 					R8.Search.renderFilterEdit(searchContext,filterDef,filterId);
 				},
 
@@ -306,6 +314,8 @@ if (!R8.Search) {
 							var optionsList = R8.Model.getFieldOptions(modelName,fieldName);
 							if(fieldDef['type'] == 'select') {
 								fieldCondition = "'"+optionsList[fieldCondition]+"'";
+							} else if(fieldDef['type'] == 'boolean') {
+								fieldCondition = (filterDef[2] == '1') ? 'Checked' : 'Unchecked';
 							} else {
 								fieldCondition = "'"+fieldCondition+"'";
 							}
@@ -427,21 +437,29 @@ if (!R8.Search) {
 					var fieldDef = params['field_def'];
 					var operator = params['operator'];
 					var filterId = params['filter_id'];
-					var availOperators = this.availOperators[fieldDef['type']];
 
-					var availOpsElem = document.createElement('select');
-					availOpsElem.setAttribute('id',filterId+'-operator');
-					availOpsElem.setAttribute('name',filterId+'-operator');
-					availOpsElem.setAttribute('style','vertical-align:top;');
-
-					availOpsElem.onchange = function(){
-						R8.Search.updateFilterOperator(this.id);
-					};
-
-					for(op in availOperators) {
-						var selected = ((operator != null && typeof(operator) != 'undefined') && operator == op) ? true : false;
-						var numOptions = availOpsElem.options.length;
-						availOpsElem.options[numOptions] = new Option(availOperators[op],op,false,selected);
+					if (fieldDef['type'] != 'boolean') {
+						var availOperators = this.availOperators[fieldDef['type']];
+						var availOpsElem = document.createElement('select');
+						availOpsElem.setAttribute('id', filterId + '-operator');
+						availOpsElem.setAttribute('name', filterId + '-operator');
+						availOpsElem.setAttribute('style', 'vertical-align:top;');
+						
+						availOpsElem.onchange = function(){
+							R8.Search.updateFilterOperator(this.id);
+						};
+						
+						for (op in availOperators) {
+							var selected = ((operator != null && typeof(operator) != 'undefined') && operator == op) ? true : false;
+							var numOptions = availOpsElem.options.length;
+							availOpsElem.options[numOptions] = new Option(availOperators[op], op, false, selected);
+						}
+					} else {
+						var availOpsElem = document.createElement('input');
+						availOpsElem.setAttribute('id', filterId + '-operator');
+						availOpsElem.setAttribute('name', filterId + '-operator');
+						availOpsElem.setAttribute('type', 'hidden');
+						availOpsElem.setAttribute('value', operator);
 					}
 					return availOpsElem;
 				},
@@ -464,7 +482,7 @@ if (!R8.Search) {
 						'filter_id':filterId
 					});
 				},
-
+/*
 				updateFilterCondition : function(params) {
 					var filterId = params['filter_id'];
 					var modelName = params['model_name'];
@@ -476,7 +494,10 @@ if (!R8.Search) {
 					filterWrapper.removeChild(conditionElem);
 				
 					var fieldDef = R8.Model.getFieldDef(modelName,fieldName);
-					var inputElem = getConditionInput({
+
+//					if(fieldDef['type'] == 'boolean') return;
+
+					var inputElem = R8.Search.getConditionInput({
 						'field_name':fieldName,
 						'field_def':fieldDef,
 						'operator':operator,
@@ -485,7 +506,7 @@ if (!R8.Search) {
 				
 					filterWrapper.appendChild(inputElem);
 				},
-
+*/
 				getConditionInput : function(params) {
 					var fieldName = params['field_name'];
 					var fieldDef = params['field_def'];
@@ -531,12 +552,26 @@ if (!R8.Search) {
 								inputElem.options[numOptions] = new Option(availOptions[option],option,false,selected);
 							}
 							break;
+						case "numeric":
 						case "integer":
 							var inputElem = document.createElement('input');
 							inputElem.setAttribute('id',filterId+'-condition');
 							inputElem.setAttribute('name',filterId+'-condition');
 							inputElem.setAttribute('type','text');
 							inputElem.setAttribute('size','25');
+
+							(filterDef != null && typeof(filterDef) !='undefined') ? inputElem.value = filterDef[2] : null;
+							break;
+						case "boolean":
+							var inputElem = document.createElement('input');
+							inputElem.setAttribute('id',filterId+'-condition');
+							inputElem.setAttribute('name',filterId+'-condition');
+							inputElem.setAttribute('type','checkbox');
+							inputElem.setAttribute('value','1');
+
+							if(filterDef != null && typeof(filterDef) != 'undefined') {
+								(filterDef[2] == 1) ? inputElem.checked=true: inputElem.checked=false;
+							}
 							break;
 					}
 					return inputElem;
@@ -575,24 +610,55 @@ if (!R8.Search) {
 					var fieldElem = R8.Utils.Y.one('#'+filterId+'-field');
 					var modelName = fieldElem.getAttribute('data-model');
 					var fieldDef = R8.Model.getFieldDef(modelName,fieldName);
-					var possibleOperators = this.availOperators[fieldDef['type']];
-					var operatorSelect = document.getElementById(filterId+'-operator');
-					operatorSelect.options.length = 0;
-					operatorSelect.setAttribute('data-field',fieldName);
-				
-					for(operator in possibleOperators) {
-						var numOptions = operatorSelect.options.length;
-						var defaultSelected = (numOptions == 0) ? true : false;
-						operatorSelect.options[numOptions] = new Option(possibleOperators[operator],operator,defaultSelected,false);
-					}
-				
+					var operatorElem = document.getElementById(filterId+'-operator');
+
 					//reset and update the condition field
-					R8.Search.updateFilterCondition({
-						'model_name':modelName,
-						'field_name':fieldName,
-						'operator':operatorSelect.options[operatorSelect.selectedIndex].value,
-						'filter_id':filterId
-					});
+					if(fieldDef['type'] != 'boolean') {
+						if (operatorElem.nodeName.toLowerCase() == 'input') {
+							var filterConditionElem = document.getElementById(filterId + '-condition');
+							var filterWrapper = document.getElementById(filterId + '-filter-wrapper');
+							filterWrapper.removeChild(operatorElem);
+							var operatorElem = document.createElement('select');
+							operatorElem.setAttribute('id', filterId + '-operator');
+							operatorElem.setAttribute('name', filterId + '-operator');
+							filterWrapper.insertBefore(operatorElem, filterConditionElem);
+						}
+						var possibleOperators = this.availOperators[fieldDef['type']];
+						var operatorSelect = document.getElementById(filterId+'-operator');
+						operatorElem.options.length = 0;
+//TODO: remove
+//						operatorSelect.setAttribute('data-field',fieldName);
+	
+						for(operator in possibleOperators) {
+							var numOptions = operatorElem.options.length;
+							var defaultSelected = (numOptions == 0) ? true : false;
+							operatorElem.options[numOptions] = new Option(possibleOperators[operator],operator,defaultSelected,false);
+						}
+
+						R8.Search.updateFilterCondition({
+							'model_name': modelName,
+							'field_name': fieldName,
+							'operator': operatorElem.options[operatorSelect.selectedIndex].value,
+							'filter_id': filterId
+						});
+					} else {
+						var filterConditionElem = document.getElementById(filterId+'-condition');
+						var filterWrapper = document.getElementById(filterId+'-filter-wrapper');
+						filterWrapper.removeChild(operatorElem);
+						var operatorElem = document.createElement('input');
+						operatorElem.setAttribute('id',filterId+'-operator');
+						operatorElem.setAttribute('name',filterId+'-operator');
+						operatorElem.setAttribute('type','hidden');
+						operatorElem.setAttribute('value','eq');
+						filterWrapper.insertBefore(operatorElem,filterConditionElem);
+
+						R8.Search.updateFilterCondition({
+							'model_name': modelName,
+							'field_name': fieldName,
+							'operator': 'eq',
+							'filter_id': filterId
+						});
+					}
 				},
 
 				updateFilterCondition : function(params) {
@@ -1000,6 +1066,14 @@ if (!R8.Search) {
 						'gte':'>=',
 						'ne':'!='
 					},
+					'numeric' : {
+						'eq':'==',
+						'lt':'<',
+						'gt':'>',
+						'lte':'<=',
+						'gte':'>=',
+						'ne':'!='
+					},
 					'select' : {
 						'eq':'Equals',
 						'oneof':'Is One Of'
@@ -1007,6 +1081,9 @@ if (!R8.Search) {
 					'multiselect' : {
 						'eq':'Equals',
 						'oneof':'Is One Of'
+					},
+					'boolean' : {
+						'eq':'Equals',
 					},
 				}
 

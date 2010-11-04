@@ -3,6 +3,11 @@
   :has_ancestor_field=>true,
   :implements_owner=>true,
   :field_defs => [
+    {:display_name=>{
+        :type=>:text,
+        :size=>50,
+      }
+    },
     {:tag=>{
         :type=>:text,
         :size=>25,
@@ -20,7 +25,7 @@
       }
     },
     {:is_deployed=>{
-        :type=>:checkbox,
+        :type=>:boolean,
       }
     },
     {:architecture=>{

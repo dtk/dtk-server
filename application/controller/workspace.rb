@@ -114,13 +114,16 @@ pp model_list
         top = top+100
         left = left+100
 
-        add_js_exe("R8.Toolbar.init({node:'group-#{model_list[index][:id]}',tools:['quicksearch']});")
+#        add_js_exe("R8.Toolbar.init({node:'group-#{model_list[index][:id]}',tools:['quicksearch']});")
       end
-#        add_js_exe("R8.Toolbar.init({node:'group-#{model_list[0][:id]}',tools:['quicksearch']});")
+        add_js_exe("R8.Toolbar.init({node:'group-#{model_list[0][:id]}',tools:['quicksearch']});")
 
       tpl = R8Tpl::TemplateR8.new("node_group/wspace_list",user_context())
 #      tpl.set_js_tpl_name("wspace_list_ng_#{model_name}")
       tpl.assign('node_group_list',model_list)
+
+#TODO: temp
+      tpl.assign('datacenter_name','dc1')
 
       _model_var = {}
       _model_var[:i18n] = get_model_i18n(model_name,user_context())

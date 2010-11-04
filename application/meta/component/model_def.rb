@@ -3,6 +3,11 @@
   :impelements_owner=>true,
   :has_ancestor_fields=>true,
   :field_defs=>[
+    {:display_name=>{
+        :type=>:text,
+        :size=>50
+      }
+    },
     {:type=>{
         :type=>:select,
         :size=>15

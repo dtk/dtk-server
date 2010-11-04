@@ -35,6 +35,7 @@
 <script src="http://code.jquery.com/jquery-latest.js"></script>
 
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/ctrl.r8.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/model.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/canvas.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/templating.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/render_basic_component.js"></script>
@@ -59,7 +60,9 @@ R8.config['base_uri'] = '{%=_app[:base_uri]%}/xyz';
 	<div id="page-container" style="margin: 0 auto 0 auto;">
 		<div id="topbar">
 			<div id="toolbar-wrapper"></div>
-			<div id="wspace-context-wrapper"><a href="{%=_app[:base_uri]%}/xyz/node/list">Main</a></div>
+			<div id="wspace-context-wrapper">
+				<a href="{%=_app[:base_uri]%}/xyz/node/list">Main</a>&nbsp;&nbsp;
+			</div>
 		</div>
 		<div id="wspace-container">
 			<div id="workspace" class="workspace">

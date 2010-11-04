@@ -10,6 +10,8 @@
   :version => 'Version',
   :uri => 'Uri',
   :parent_name => 'Parent',
+  :only_one_per_node => '1 Per Node',
+  :ui => 'UI',
 
   :description_list => 'Descr',
   :external_ref_list => 'Ext Component Ref',

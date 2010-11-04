@@ -57,7 +57,7 @@ module XYZ
       #TODO any more efficient way to get action_parent_idh and parent_idh info
       action_parent_idh = id_handle.get_top_container_id_handle(:datacenter)
       return nil unless action_parent_idh #this would happend if top container is not a datacenter TODO: see if this should be "trapped" at higher level
-      base_object = get_base_object_for_action(id_handle)
+      base_object = get_base_object_on_node_group(id_handle)
       new_item_hash = {
         :new_item => id_handle,
         :parent => action_parent_idh
@@ -73,7 +73,9 @@ module XYZ
       new_changes = AttributeLink.propagate_over_dir_conn_equality_links(attr_changes)
     end
 
-    def self.get_base_object_for_action(id_handle)
+    #TODO: replace by having virtual(s) column on attribute that returns the node and component under the attribute
+    #TODO: may have three variants dependening on whether attribute on node or whether on component on node or component on node group
+    def self.get_base_object_on_node_group(id_handle)
       #TODO: may convert to computing from search object with links
       #TODO: can be more efficient if update from hash is able toi return parent_id
 

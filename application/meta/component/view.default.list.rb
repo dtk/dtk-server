@@ -9,6 +9,9 @@
   ],
   :field_list => 
   [
+   {:created_at => {
+       :type => 'text',
+     }},
    {:parent_name => {
        :type => 'text',
        :width => '20%',

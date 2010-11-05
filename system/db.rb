@@ -146,6 +146,7 @@ class DBRel < Hash
   ID_INFO_TABLE = DBRel[:schema => TOP_SCHEMA_NAME, :table => :id_info, :id => :relation_id, :local_id => :relation_local_id,:parent_id => :parent_id, :relation_type => :id_info]
   CLONE_HELPER_TABLE = DBRel[:schema => TOP_SCHEMA_NAME, :table => :clone_helper]
   CONTEXT_TABLE = DBRel[:schema => :context, :table => :context]
+  USER_TABLE = DBRel[:schema => :user, :table => :user]
   ELEMENT_UPDATE_TRIGGER = {:schema => TOP_SCHEMA_NAME, :fn => :element_update}
 
   CONTEXT_ID = :c
@@ -153,13 +154,17 @@ class DBRel < Hash
   FK_SET_NULL_OPT = {:on_delete => :set_null, :on_update => :set_null}
   DB_REL_DEF = {:id_info => ID_INFO_TABLE} #when models walked they get put in here
   COMMON_REL_COLUMNS = {
-  CONTEXT_ID => {:type => ID_TYPES[:context_id]},
+    CONTEXT_ID => {:type => ID_TYPES[:context_id]},
     :id => {:type =>  ID_TYPES[:id]},
     :local_id => {:type => ID_TYPES[:local_id], :hidden => true},
     :ref => {:type => :string, :hidden => true},
     :ref_num => {:type => :integer, :hidden => true},
     :description => {:type => :string},
-    :display_name => {:type => :string}
+    :display_name => {:type => :string},
+    :created_at => {:type => :timestamp},
+    :updated_at => {:type => :timestamp},
+    :owner_id => {:type => ID_TYPES[:id], :hidden => true},
+    :team_id => {:type => ID_TYPES[:id], :hidden => true}
   }
 end
 

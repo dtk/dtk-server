@@ -176,6 +176,7 @@ module XYZ
 
      private
 
+      #TODO: drive off of   COMMON_REL_COLUMNS  
       def create_table_common_fields?(db_rel)
         create_schema_for_db_rel?(db_rel)
         seq_ref = @db.ret_sequence_ref(TOP_LOCAL_ID_SEQ)
@@ -187,6 +188,12 @@ module XYZ
           Integer :ref_num
           String :description
           String :display_name
+          Timestamp :created_at, :default => SQL.now
+          Timestamp :modified_at
+
+         #TODO: this and analog for tem_id should be put in instead of below foreign_key owner_id USER_TABLE.schema_table_symbol,FK_SET_NULL_OPT
+          column :owner_id, ID_TYPES[:id]
+          column :team_id, ID_TYPES[:id]
         end
 
         @db.create_table_common_extras?(db_rel)

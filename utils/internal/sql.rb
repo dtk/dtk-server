@@ -3,7 +3,7 @@ module XYZ
   ##relies on Sequel overwriting ~ | and &
   #TODO: maybe otehr syntax to get around problems with these characters in ruby 1.9
   module SQL
-    ## Booelan expressions
+    ## Booelan expressions 
     def self.not(x)
       return nil if x.nil?
       ~x
@@ -21,6 +21,10 @@ module XYZ
 
     #####
     ##### Sequel functions and column refs
+    def self.now()
+      :NOW.sql_function
+    end
+
     module ColRef
       #block contains expression that is evaluated to array; each element but last is pair [condition,val]; last is "elee value
       def self.case(&block)

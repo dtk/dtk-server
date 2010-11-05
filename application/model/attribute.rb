@@ -31,11 +31,20 @@ module XYZ
       #Boolean that indicates whether there is a executable script/recipe associated with the attribute
       virtual_column :executable?, :hidden => true
       virtual_column :unknown_in_attribute_value , :hidden => true
+      virtual_column :id_info_uri, :hidden => true, :dependencies =>
+        [
+         {   
+           :model_name => :id_info,
+           :join_cond=>{:relation_id => :attribute__id},
+           :cols=>[:relation_id,:uri]
+         }
+        ]
+      #TODO: now that have uri; may end of life teh two below
       virtual_column :base_objects_node_group, :hidden => true, :dependencies => 
         [
          {
            :model_name => :component,
-           :join_cond=>{:id=> :component_component_id},
+           :join_cond=>{:id=> :attribute__component_component_id},
            :cols=>[:id, :display_name,:node_node_group_id]
          },
          {
@@ -49,7 +58,7 @@ module XYZ
         [
          {
            :model_name => :component,
-           :join_cond=>{:id=> :component_component_id},
+           :join_cond=>{:id=> :attribute__component_component_id},
            :cols=>[:id, :display_name,:node_node_id]
          },
          {
@@ -59,14 +68,11 @@ module XYZ
          }
 
         ]
-      #if component attribute then hash with component and node(s) associated with it 
-      #TODO remove or rewrite
-      #  virtual_column :assoc_components_on_nodes
       many_to_one :component, :node
     end
     ### virtual column defs
-    def member_id_list()
-      (self[:node]||[]).map{|n|n[:id]}
+    def id_info_uri()
+      (self[:id_info]||{})[:uri]
     end
     #######################
     ### object procssing and access functions

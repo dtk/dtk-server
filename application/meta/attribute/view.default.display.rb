@@ -35,12 +35,6 @@
              :rows => 1,
              :cols => 40,
             }},
-            {:external_ref => {
-             :type => 'hash',
-             :help => '',
-             :rows => 1,
-             :cols => 40,
-            }},
             {:value_asserted => {
              :type => 'hash',
              :help => '',

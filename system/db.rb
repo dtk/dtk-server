@@ -143,7 +143,7 @@ class DBRel < Hash
   TOP_RELATION_TYPE = :"__top"
   ID_TYPES = {:id => :bigint, :local_id => :integer, :context_id => :integer}
   TOP_LOCAL_ID_SEQ = {:schema => TOP_SCHEMA_NAME, :fn => :local_id_seq}
-  ID_INFO_TABLE = DBRel[:schema => TOP_SCHEMA_NAME, :table => :id_info, :id => :relation_id, :local_id => :relation_local_id,:parent_id => :parent_id]
+  ID_INFO_TABLE = DBRel[:schema => TOP_SCHEMA_NAME, :table => :id_info, :id => :relation_id, :local_id => :relation_local_id,:parent_id => :parent_id, :relation_type => :id_info]
   CLONE_HELPER_TABLE = DBRel[:schema => TOP_SCHEMA_NAME, :table => :clone_helper]
   CONTEXT_TABLE = DBRel[:schema => :context, :table => :context]
   ELEMENT_UPDATE_TRIGGER = {:schema => TOP_SCHEMA_NAME, :fn => :element_update}
@@ -151,7 +151,7 @@ class DBRel < Hash
   CONTEXT_ID = :c
   FK_CASCADE_OPT = {:on_delete => :cascade, :on_update => :cascade}
   FK_SET_NULL_OPT = {:on_delete => :set_null, :on_update => :set_null}
-  DB_REL_DEF = {}
+  DB_REL_DEF = {:id_info => ID_INFO_TABLE} #when models walked they get put in here
   COMMON_REL_COLUMNS = {
   CONTEXT_ID => {:type => ID_TYPES[:context_id]},
     :id => {:type =>  ID_TYPES[:id]},

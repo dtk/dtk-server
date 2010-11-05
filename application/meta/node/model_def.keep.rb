@@ -2,56 +2,68 @@
 {
   :has_ancestor_field=>true,
   :implements_owner=>true,
-  :field_defs => {
-    :display_name=>{
+  :field_defs => [
+    {:display_name=>{
         :type=>:text,
         :size=>50,
+      }
     },
-    :tag=>{
-        :type=>'text',
+    {:tag=>{
+        :type=>:text,
         :size=>25,
+      }
     },
-    :type=>{
-        :type=>'select',
+    {:type=>{
+        :type=>:select,
         :size=>25,
         :default=> "instance"
+      }
     },
-    :os=>{
-        :type=>'text',
+    {:os=>{
+        :type=>:text,
         :size=>25,
+      }
     },
-    :is_deployed=>{
-        :type=>'boolean',
+    {:is_deployed=>{
+        :type=>:boolean,
+      }
     },
-    :architecture=>{
-        :type=>'text',
+    {:architecture=>{
+        :type=>:text,
         :size=>10,
+      }
     },
-    :image_size=>{
-        :type=>'numeric',
+    {:image_size=>{
+        :type=>:numeric,
         :size=>[8,3]
+      }
     },
-    :operational_status=>{
-        :type=>'select',
+    {:operational_status=>{
+        :type=>:select,
         :size=>50
+      }
     },
-    :disk_size=>{
-        :type=>'foo',
+    {:disk_size=>{
+        :type=>:foo,
+      }
     },
-    :ui=>{
-        :type=>'json',
+    {:ui=>{
+        :type=>:json,
+      }
     },
-    :parent_name=>{
-        :type=>'json',
+    {:parent_name=>{
+        :type=>:json,
         :no_column=>true
+      }
     },
-    :parent_id=>{
-        :type=>'related'
+    {:parent_id=>{
+        :type=>:related
+      }
     },
-  },
-  :relationships =>{
+  ],
+  :relationships =>[
 
-  }
+  ]
 }
 =begin
       column :ui, :json

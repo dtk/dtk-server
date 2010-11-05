@@ -30,7 +30,7 @@
               :help => ''
             }},
           {:type => {
-              :type => 'text',
+              :type => 'select',
               :width => '10%',
               :help => ''
             }},

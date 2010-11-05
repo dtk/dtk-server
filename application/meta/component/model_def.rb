@@ -2,42 +2,35 @@
 {
   :impelements_owner=>true,
   :has_ancestor_fields=>true,
-  :field_defs=>[
-    {:display_name=>{
+  :field_defs=>{
+    :display_name=>{
         :type=>:text,
         :size=>50
-      }
     },
-    {:type=>{
+    :type=>{
         :type=>:select,
         :size=>15
-      }
     },
-    {:basic_type=>{
+    :basic_type=>{
         :type=>:select,
         :size=>15
-      }
     },
-    {:only_one_per_node=>{
+    :only_one_per_node=>{
         :type=>:checkbox,
-      }
     },
-    {:version=>{
+    :version=>{
         :type=>:text,
         :size=>25,
-      }
     },
-    {:uri=>{
+    :uri=>{
         :type=>:text,
-      }
     },
-    {:ui=>{
+    :ui=>{
         :type=>:json,
-      }
     },
-  ],
-  :relationships=>[
-  ]
+  },
+  :relationships=>{
+  }
 }
 
 =begin

@@ -53,7 +53,7 @@ class Fieldselect < Fieldbase
 #      $multiple = $this->multiple;
 #    else $multiple = '';
 
-    field_string = '{%=' + @model_name + '[:' + @name + ']%}'
+    field_string = '{%=' + @model_name + '[:' + @name + '_display]%}'
     return field_string
   end
 
@@ -67,6 +67,7 @@ class Fieldselect < Fieldbase
 #    end
 
     field_string = '{%=' + @model_name + '[:' + @name + '_display]%}'
+#    field_string = '{%=_'+@model_name+'[:options_list]['+@model_name+'[:'+@name+']]%}'
     return field_string
   end
 end

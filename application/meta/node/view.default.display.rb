@@ -35,6 +35,10 @@
              :rows => 1,
              :cols => 40,
             }},
+            {:type => {
+             :type => 'select',
+             :help => '',
+            }},
             {:tag => {
              :type => 'text',
              :help => '',

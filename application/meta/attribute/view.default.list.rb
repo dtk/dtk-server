@@ -13,6 +13,13 @@
               :objLink => true,
               :objLinkView => 'display',
             }},
+          {:test1 => {
+              :type => 'text',
+          }},
+          {:test2 => {
+              :type => 'text',
+          }},
+
           {:port_type => {
               :type => 'text',
               :help => '',

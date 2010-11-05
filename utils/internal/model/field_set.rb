@@ -37,16 +37,22 @@ module XYZ
         FieldSet.new(@cols & field_set.cols)
       end
 
+      #TODO!!!: this does not work properly when two or more virtual attributes point to same column, but not tagged with same dependency def
       def related_columns(model_name_x)
         model_name = model_name_x.to_sym
         return nil if @cols.empty?
         return nil unless vcolumns = DB_REL_DEF[model_name][:virtual_columns]
         ret = Array.new
+        defs_seen = Array.new
         @cols.each do |f|
           next unless vcol_info = vcolumns[f] 
           #special case is :possible_parents
-          next unless deps = convert_to_dependencies(model_name,vcol_info[:possible_parents]) || vcol_info[:dependencies]
-          #TODO: optimize when two virtual columns join in same info with same conditions
+          deps, def_name = parse_dependencies(convert_to_dependencies(model_name,vcol_info[:possible_parents]) || vcol_info[:dependencies])
+          next unless deps
+          if def_name 
+            next if defs_seen.include?(def_name)
+            defs_seen << def_name
+          end
           ret = ret + deps
         end
         ret.empty? ? nil : ret
@@ -70,6 +76,15 @@ module XYZ
       end
 
      private
+      #used to strip off and return def name if that exists
+      #returns form [deps,def_name] where later can be null if no defs
+
+      def parse_dependencies(raw_deps)
+        return nil unless raw_deps
+        return [raw_deps,nil] if raw_deps.kind_of?(Array)
+        return [raw_deps.values.first,raw_deps.keys.first]
+      end
+
       def convert_to_dependencies(model_name,possible_parents)
         return nil if possible_parents.nil?
         #TODO: migh make geenral utility fn with inject Aux.hash_map

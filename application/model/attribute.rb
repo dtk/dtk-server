@@ -31,14 +31,19 @@ module XYZ
       #Boolean that indicates whether there is a executable script/recipe associated with the attribute
       virtual_column :executable?, :hidden => true
       virtual_column :unknown_in_attribute_value , :hidden => true
-      virtual_column :id_info_uri, :hidden => true, :dependencies =>
+      uri_dependencies = 
+        {:uri =>
         [
-         {   
+         {
            :model_name => :id_info,
            :join_cond=>{:relation_id => :attribute__id},
            :cols=>[:relation_id,:uri]
          }
         ]
+      }
+      virtual_column :id_info_uri, :hidden => true, :dependencies => uri_dependencies
+
+
       #TODO: now that have uri; may end of life teh two below
       virtual_column :base_objects_node_group, :hidden => true, :dependencies => 
         [

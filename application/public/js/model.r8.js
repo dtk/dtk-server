@@ -46,6 +46,13 @@ if (!R8.Model) {
 				initModelDefs : function() {
 					this.modelDefs = {};
 					for(modelName in this.defs) {
+						this.modelDefs[modelName] = this.defs[modelName];
+
+						for(fieldName in this.modelDefs[modelName]['field_defs']) {
+							this.modelDefs[modelName]['field_defs'][fieldName]['i18n'] = R8.Model.i18n[modelName][fieldName];
+						}
+
+/*
 						this.modelDefs[modelName] = {
 							'field_defs':{}
 						};
@@ -58,6 +65,7 @@ if (!R8.Model) {
 								this.modelDefs[modelName]['field_defs'][fieldName] = fieldDef[fieldName];
 							}
 						}
+*/
 					}
 				},
 

@@ -424,7 +424,6 @@ if (!R8.Search) {
 					};
 
 					var fieldDefs = R8.Model.getFieldDefs(modelName);
-
 					for(field in fieldDefs) {
 						var selected = ((fieldName != null && typeof(fieldName) != 'undefined') && fieldName == field) ? true : false;
 						var numOptions = availFieldsElem.options.length;

@@ -14,6 +14,8 @@ module XYZ
         update_ds = dataset(db_rel,update_table_prefix,sequel_select).where("#{update_table_prefix}__id".to_sym => "#{select_prefix}__id".to_sym)
         update_set_clause = columns.inject({}){|hash,col| hash.merge(col => "#{select_prefix}__#{col}".to_sym)}
 
+        set_updated_at!(update_set_clause)
+
         unless opts[:returning_cols] 
           update_ds.update(update_set_clause)
           return nil
@@ -51,6 +53,10 @@ module XYZ
       end
 
      private
+
+      def set_updated_at!(update_set_clause)
+        update_set_clause[:updated_at] = SQL.now unless update_set_clause[:updated_at]
+      end
 
       def update_given_sequel_dataset(id_info,update_ds,update_set_clause,opts={})
         unless opts[:returning_cols] 

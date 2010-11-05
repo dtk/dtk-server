@@ -21,6 +21,9 @@
               :type => 'hash',
               :help => '',
             }},
+          {:updated_at => {
+           :type => 'text',
+          }},
       ]
 }
 

@@ -45,7 +45,9 @@ module XYZ
             scalar_assigns[k] = v.to_sequel(k,sql_operation)
           end
         end
-
+        if sql_operation == :update
+          scalar_assigns[:updated_at] = SQL.now unless scalar_assigns[:updated_at]
+        end
 	scalar_assigns
       end
 

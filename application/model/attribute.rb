@@ -112,6 +112,7 @@ module XYZ
     end
 
     def self.get_base_objects_with_index(attr_model_handle,attr_id_list,base_model_name)
+      return Array.new if attr_id_list.empty?
       base_object_vc = "base_objects_#{base_model_name}".to_sym
       wc = SQL.or(*attr_id_list.map{|id|{:id => id}})
       fs = FieldSet.opt([:id,:component_component_id,base_object_vc])

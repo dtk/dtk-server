@@ -3,9 +3,14 @@ module XYZ
     set_relation_name(:attribute,:attribute)
     def self.up()
       external_ref_column_defs()
+
+      #columns related to the value
       column :value_asserted, :json
       column :value_derived, :json
       column :value_actual, :json
+      virtual_column :is_unset, :hidden => true, :real_columns => [:value_asserted,:value_derived]
+      virtual_column :attribute_value, :real_columns => [:value_asserted,:value_derived]
+
       column :is_settable, :boolean, :default => true
       column :required, :boolean #whether required for this attribute to have a value inorder to execute actions for parent component; TBD: may be indexed by action
 
@@ -26,11 +31,9 @@ module XYZ
       #TODO this probably does not belond here column :hidden, :boolean, :default => false
       column :port_type, :varchar, :size => 10 # null means no port; otherwise "input", "output", or "either"
       #TODO: may rename attribute_value to desired_value
-      virtual_column :attribute_value
 
       #Boolean that indicates whether there is a executable script/recipe associated with the attribute
       virtual_column :executable?, :hidden => true
-      virtual_column :unknown_in_attribute_value , :hidden => true
       uri_dependencies = 
         {:uri =>
         [

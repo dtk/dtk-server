@@ -22,7 +22,7 @@ module R8Tpl
 #          file_name = "#{R8::Config[:i18n_root]}/#{R8::Config[language]}.rb"
 #          content = eval(IO.read(file_name)) if File.exists?(file_name)
         end
-
+        content[:options_list] = Hash.new if content[:options_list].nil?
         set_and_ret_cache(model_name,language,content)
       end
 

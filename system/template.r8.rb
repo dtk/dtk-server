@@ -127,8 +127,11 @@ module R8Tpl
         return tpl_result
       else
         eruby =  Erubis::Eruby.new(view_tpl_contents,:pattern=>'\{\% \%\}')
-        @tpl_results = eruby.result(@template_vars)
-
+        begin
+          @tpl_results = eruby.result(@template_vars)
+         rescue Exception => exception
+          raise XYZ::Error.new("#{exception.inspect} using template file #{@view_path}")
+        end
         return @tpl_results
       end
     end

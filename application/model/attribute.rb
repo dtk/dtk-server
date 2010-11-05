@@ -31,7 +31,34 @@ module XYZ
       #Boolean that indicates whether there is a executable script/recipe associated with the attribute
       virtual_column :executable?, :hidden => true
       virtual_column :unknown_in_attribute_value , :hidden => true
+      virtual_column :base_objects_node_group, :hidden => true, :dependencies => 
+        [
+         {
+           :model_name => :component,
+           :join_cond=>{:id=> :component_component_id},
+           :cols=>[:id, :display_name,:node_node_group_id]
+         },
+         {
+           :model_name => :node_group,
+           :join_cond=>{:id=> :component__node_node_group_id},
+           :cols=>[:id, :display_name]
+         }
 
+        ]
+      virtual_column :base_objects_node, :hidden => true, :dependencies => 
+        [
+         {
+           :model_name => :component,
+           :join_cond=>{:id=> :component_component_id},
+           :cols=>[:id, :display_name,:node_node_id]
+         },
+         {
+           :model_name => :node,
+           :join_cond=>{:id=> :component__node_node_id},
+           :cols=>[:id, :display_name]
+         }
+
+        ]
       #if component attribute then hash with component and node(s) associated with it 
       #TODO remove or rewrite
       #  virtual_column :assoc_components_on_nodes
@@ -57,7 +84,7 @@ module XYZ
       #TODO any more efficient way to get action_parent_idh and parent_idh info
       action_parent_idh = id_handle.get_top_container_id_handle(:datacenter)
       return nil unless action_parent_idh #this would happend if top container is not a datacenter TODO: see if this should be "trapped" at higher level
-      base_object = get_base_object_on_node_group(id_handle)
+      base_object = get_base_object(id_handle,:node_group)
       new_item_hash = {
         :new_item => id_handle,
         :parent => action_parent_idh
@@ -67,39 +94,38 @@ module XYZ
       propagate_changes([AttributeChange.new(id_handle,changed_value,action_id_handle)]) if action_id_handle
     end
 
+    def self.get_base_object(attr_id_handle,base_model_name)
+      base_object_vc = "base_objects_#{base_model_name}".to_sym
+      fs = FieldSet.opt([:id,:component_component_id,base_object_vc])
+      base_object_info = get_objects(attr_id_handle.createMH,{:id => attr_id_handle.get_id()},fs).first
+      return nil unless base_object_info
+      cmp_display_name = (base_object_info[:component]||{})[:display_name]
+      ng_display_name = (base_object_info[base_model_name]||{})[:display_name]
+      return nil unless cmp_display_name and ng_display_name
+      {:component => {:display_name => cmp_display_name}, base_model_name => {:display_name => ng_display_name}}
+    end
+
+    def self.get_base_objects_with_index(attr_model_handle,attr_id_list,base_model_name)
+      base_object_vc = "base_objects_#{base_model_name}".to_sym
+      wc = SQL.or(*attr_id_list.map{|id|{:id => id}})
+      fs = FieldSet.opt([:id,:component_component_id,base_object_vc])
+      base_objects_info = get_objects(attr_model_handle,wc,fs)
+      return nil unless base_objects_info
+       base_objects_info.inject({}) do |h,row|
+        cmp_display_name = (row[:component]||{})[:display_name]
+        ng_display_name = (row[:node]||{})[:display_name]
+        next unless cmp_display_name and ng_display_name
+        h.merge(row[:id] => {:component => {:display_name => cmp_display_name}, :node => {:display_name => ng_display_name}})
+      end
+    end
+
    private
     ###### helper fns
     def self.propagate_changes(attr_changes) 
       new_changes = AttributeLink.propagate_over_dir_conn_equality_links(attr_changes)
     end
 
-    #TODO: replace by having virtual(s) column on attribute that returns the node and component under the attribute
-    #TODO: may have three variants dependening on whether attribute on node or whether on component on node or component on node group
-    def self.get_base_object_on_node_group(id_handle)
-      #TODO: may convert to computing from search object with links
-      #TODO: can be more efficient if update from hash is able toi return parent_id
 
-      attr_parent_col = :component_component_id
-      attr_wc = {:id => id_handle.get_id()}
-      attr_fs = FieldSet.opt([attr_parent_col])
-      attr_ds = get_objects_just_dataset(id_handle.createMH,attr_wc,attr_fs)
-
-      cmp_parent_col = :node_node_group_id
-      cmp_mh = id_handle.createMH(:model_name => :component, :parent_model_name => :datacenter)
-      cmp_fs = FieldSet.opt([:id,:display_name,cmp_parent_col])
-      cmp_ds = get_objects_just_dataset(cmp_mh,{},cmp_fs)
-
-      ng_mh = cmp_mh.createMH(:model_name => :node_group)
-      ng_fs = FieldSet.opt([:id,:display_name])
-      ng_ds = get_objects_just_dataset(ng_mh,{},ng_fs)
-
-      graph_res = attr_ds.graph(:inner,cmp_ds,{:id => attr_parent_col}).graph(:inner,ng_ds,{:id => cmp_parent_col}).all.first
-      return nil unless graph_res
-      cmp_display_name = (graph_res[:component]||{})[:display_name]
-      ng_display_name = (graph_res[:node_group]||{})[:display_name]
-      return nil unless cmp_display_name and ng_display_name
-      {:component => {:display_name => cmp_display_name}, :node_group => {:display_name => ng_display_name}}
-    end
 
     ##TODO: need to go over each one below to see what we still should use
 

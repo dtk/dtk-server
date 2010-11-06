@@ -16,8 +16,8 @@ module XYZ
       search_pattern ? JSON.generate(search_pattern) : nil
     end
 
-    def create_dataset()
-      SQL::DataSetSearchPattern.create_dataset_from_search_object(self)
+    def create_dataset(extra_cols=nil)
+      SQL::DataSetSearchPattern.create_dataset_from_search_object(self,extra_cols)
     end  
 
     attr_accessor :save_flag, :source

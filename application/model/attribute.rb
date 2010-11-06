@@ -9,7 +9,7 @@ module XYZ
       column :value_derived, :json
       column :value_actual, :json
       virtual_column :is_unset, :hidden => true, :real_columns => [:value_asserted,:value_derived]
-      virtual_column :attribute_value, :real_columns => [:value_asserted,:value_derived]
+      virtual_column :attribute_value, :local_dependencies => [:value_asserted,:value_derived]
 
       column :is_settable, :boolean, :default => true
       column :required, :boolean #whether required for this attribute to have a value inorder to execute actions for parent component; TBD: may be indexed by action

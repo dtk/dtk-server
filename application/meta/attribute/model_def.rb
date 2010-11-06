@@ -7,8 +7,8 @@
         :type=>:text,
         :size=>50
     },
-    :value_actual=>{
-        :type=>:text,
+    :attribute_value=>{
+        :type=>:hash,
         :size=>25,
     },
   },

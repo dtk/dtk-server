@@ -3,7 +3,7 @@ module XYZ
   module SQL
     class DataSetSearchPattern < Dataset
       class << self
-        def create_dataset_from_search_object(search_object)
+        def create_dataset_from_search_object(search_object,extra_cols=nil)
           db = search_object.db
           search_pattern = search_object.search_pattern
 
@@ -15,19 +15,19 @@ module XYZ
           end
           raise Error.new("illegal model name (#{relation_in_search_pattern}) in search pattern") unless DB_REL_DEF[relation_in_search_pattern]
 
-          sequel_ds = ret_sequel_ds_from_hash(db.empty_dataset(),search_pattern,mh_in_search_pattern)
+          sequel_ds = ret_sequel_ds_from_hash(db.empty_dataset(),search_pattern,mh_in_search_pattern,extra_cols)
 
           sequel_ds ? self.new(mh_in_search_pattern,sequel_ds) : nil
         end
 
        private
-        def ret_sequel_ds_from_hash(ds,search_pattern,model_handle)
+        def ret_sequel_ds_from_hash(ds,search_pattern,model_handle,extra_cols=nil)
           ds_add = ret_sequel_ds_with_relation(ds,search_pattern)
           return nil unless ds_add; ds = ds_add
         
-          ds_add = ret_sequel_ds_with_columns(ds,search_pattern,model_handle)
+          ds_add = ret_sequel_ds_with_columns(ds,search_pattern,model_handle,extra_cols)
           return nil unless ds_add; ds = ds_add
-
+          
           ds = ret_sequel_ds_with_filter(ds,search_pattern)
           ret_sequel_ds_with_order_by_and_paging(ds,search_pattern)
         end
@@ -43,10 +43,10 @@ module XYZ
           ds.from(sql_tbl_name)
         end
         
-        def ret_sequel_ds_with_columns(ds,search_pattern,model_handle)
+        def ret_sequel_ds_with_columns(ds,search_pattern,model_handle,extra_cols=nil)
           model_name = model_handle[:model_name]
           columns = search_pattern.find_key(:columns)
-
+          columns = columns + extra_cols if extra_cols
           if columns.empty? 
             return ds
            #TODO: refine return ds.select(*Model::FieldSet.default(model_name).cols)
@@ -63,7 +63,7 @@ module XYZ
               #strip off model_name__ prefix and discard non matching prefixes
               (qualified_col =~ Regexp.new("^(.+)__(.+)$")) ? ($1.to_sym == model_name ? $2 : nil) : qualified_col  
             end.compact
-            processed_field_set.add_cols(*cols_to_add)
+            processed_field_set = processed_field_set.with_added_cols(*cols_to_add)
           end
 
           #always include id column

@@ -21,7 +21,7 @@ module XYZ
         self
       end
 
-      def add_cols(*cols)
+      def with_added_cols(*cols)
         FieldSet.new(@model_name,(@cols + cols).uniq)
       end
 
@@ -38,9 +38,23 @@ module XYZ
         FieldSet.new(@model_name,@cols & field_set.cols)
       end
 
-      def with_related_local_columns()
-        self #stub
+      def extra_local_columns()
+        return nil unless vcolumns = (DB_REL_DEF[model_name]||{})[:virtual_columns] 
+        extra_cols = Array.new
+        @cols.each do |f|
+          field_extra_cols = parse_local_dependencies(vcolumns[f])
+          next if field_extra_cols.empty?
+          field_extra_cols.each{|col| extra_cols << col unless (extra_cols.include?(col) or @cols.include?(col))}
+        end
+        extra_cols.empty? ? nil : extra_cols
       end
+
+      def with_related_local_columns()
+        extra_local_cols = extra_local_columns()
+        return self unless extra_local_cols 
+        FieldSet.new(@model_name,@cols + extra_cols)
+      end
+
 
       #TODO!!!: this does not work properly when two or more virtual attributes point to same column, but not tagged with same dependency def
       def related_remote_column_info()
@@ -129,8 +143,14 @@ module XYZ
         return [deps.values.first,deps.keys.first]
       end
 
+      def parse_local_dependencies(virtual_col_info)
+        return [] unless virtual_col_info
+        #special case is :possible_parents
+        return convert_to_local_dependencies(virtual_col_info[:possible_parents]) if virtual_col_info[:possible_parents]
+        virtual_col_info[:local_dependencies] || []
+      end
+
       def convert_to_remote_dependencies(possible_parents)
-        #TODO: migh make geenral utility fn with inject Aux.hash_map
         possible_parents.map do |parent|
           fk_col = DB.ret_parent_id_field_name(DB_REL_DEF[parent],DB_REL_DEF[model_name])
           {
@@ -139,6 +159,10 @@ module XYZ
             :cols=>[:id, :display_name, :ref, :ref_num]
           }
         end
+      end
+
+      def convert_to_local_dependencies(possible_parents)
+        possible_parents.map{|parent|DB.ret_parent_id_field_name(DB_REL_DEF[parent],DB_REL_DEF[model_name])}
       end
 
       def self.ret_fieldset(model_name_x,col_type,&block)

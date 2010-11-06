@@ -45,9 +45,7 @@ module XYZ
         ]
       }
       virtual_column :id_info_uri, :hidden => true, :remote_dependencies => uri_remote_dependencies
-
-
-      #TODO: now that have uri; may end of life teh two below
+      #TODO: need to decide which ones to use; problem with above is that has refs not display names; and below is not efficient
       virtual_column :base_objects_node_group, :hidden => true, :remote_dependencies => 
         [
          {
@@ -76,9 +74,32 @@ module XYZ
          }
 
         ]
+      virtual_column :base_object, :hidden => true, :remote_dependencies => 
+        [
+         {
+           :model_name => :component,
+           :join_cond=>{:id=> :attribute__component_component_id},
+           :cols=>[:id, :display_name,:node_node_id,:node_node_group_id]
+         },
+         {
+           :model_name => :node,
+           :join_cond=>{:id=> :component__node_node_id},
+           :cols=>[:id, :display_name]
+         },
+         {
+           :model_name => :node_group,
+           :join_cond=>{:id=> :component__node_node_group_id},
+           :cols=>[:id, :display_name]
+         }
+
+        ]
       many_to_one :component, :node
     end
     ### virtual column defs
+    def base_object()
+      {:node_group => self[:node_group], :node => self[:node], :component => self[:component]}
+    end
+
     def id_info_uri()
       (self[:id_info]||{})[:uri]
     end

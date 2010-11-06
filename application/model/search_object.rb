@@ -28,7 +28,7 @@ module XYZ
       hash = {
         :id => nil_if_empty(input_hash["id"]),
         :display_name => nil_if_empty(input_hash["name"]),
-        :search_pattern => sp ? SearchPattern.new(sp) : nil
+        :search_pattern => sp ? SearchPattern.create(sp) : nil
       }
       ret = SearchObject.new(hash,c)
       ret.save_flag = input_hash["save"]
@@ -73,7 +73,7 @@ module XYZ
     def self.save_list_view_in_cache(id,hash_assignments,user)
       search_pattern_json = hash_assignments[:search_pattern]
       return nil unless search_pattern_json
-      search_pattern = SearchPattern.new(JSON.parse(search_pattern_json))
+      search_pattern = SearchPattern.create(JSON.parse(search_pattern_json))
       view_meta_hash = search_pattern.create_list_view_meta_hash()
       return nil unless search_pattern.relation
       is_saved_search = true
@@ -118,7 +118,7 @@ module XYZ
       raise Error.new("cannot find saved search with id (#{id.to_s})") unless saved_object
       saved_object.each do |k,v| 
         next unless v
-        self[k] = k == :search_pattern ? SearchPattern.new(v) : v
+        self[k] = k == :search_pattern ? SearchPattern.create(v) : v
       end
     end
 

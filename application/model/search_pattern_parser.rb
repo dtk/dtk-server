@@ -2,12 +2,18 @@
 require File.expand_path(UTILS_DIR+'/internal/generate_list_meta_view')
 module XYZ
   class SearchPattern < HashObject
+    def self.create(hash_search_pattern)
+      #TODO: case on whether simple or complex
+      SearchPatternSimple.new(hash_search_pattern)
+    end
+  end
+
+#TODO: add a more complex search patterm which is joins/link following of simple patterms
+  class SearchPatternSimple < SearchPattern
     def initialize(hash_search_pattern)
       super()
       pares_and_set!(hash_search_pattern)
     end
-
-
     def hash_for_json_generate()
       ret = process_symbols(self)
       #TODO: would be nice to get rid of this hack

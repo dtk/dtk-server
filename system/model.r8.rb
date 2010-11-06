@@ -64,27 +64,8 @@ module XYZ
     end
 
     def self.get_objects_from_search_object(search_object)
-
       dataset = search_object.create_dataset()
-      model_handle = dataset.model_handle()
-
-      ret = nil
-pp [:wo_related_col,dataset.ppsql]
-      related_col_info = search_object.field_set().related_remote_column_info()
-      unless related_col_info
-        ret = dataset.all
-      else
-        graph_ds = dataset.from_self(:alias => model_handle[:model_name])
-        related_col_info.each do |join_info|
-          rs_opts = (join_info[:cols] ? FieldSet.opt(join_info[:cols],join_info[:model_name]) : {}).merge :return_as_hash => true
-          right_ds = @db.get_objects_just_dataset(model_handle.createMH(:model_name => join_info[:model_name]),nil,rs_opts)
-          graph_ds = graph_ds.graph(:left_outer,right_ds,join_info[:join_cond])
-        end
-        opts = {} #TODO: stub
-        graph_ds = graph_ds.paging_and_order(opts)
-        ret = graph_ds.all
-      end
-      ret
+      dataset ? dataset.all : nil
     end
 
 

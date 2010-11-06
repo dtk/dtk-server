@@ -22,10 +22,14 @@ module XYZ
       end
 
       def with_added_cols(*cols)
-        FieldSet.new(@model_name,(@cols + cols).uniq)
+        return self if cols.empty?
+        ret_cols = @cols
+        cols.each{|col| ret_cols << col unless ret_cols.include?(col)}
+        FieldSet.new(@model_name,ret_cols)
       end
 
-      def remove_cols(*cols)
+      def with_removed_cols(*cols)
+        return self if cols.empty?
         FieldSet.new(@model_name,@cols - cols)
       end
 
@@ -204,9 +208,11 @@ module XYZ
       def include_col?(col)
         true
       end
-      def add_cols(*cols)
+      def with_added_cols(*cols)
+        self
       end
-      def remove_cols(*cols)
+      def with_removed_cols(*cols)
+        self
       end
       def &(field_set)
         FieldSet.new(field_set.model_name,field_set.cols)

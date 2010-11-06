@@ -41,8 +41,8 @@ module XYZ
       source_wc = {:id => source_id_handle.get_id()}
 
       remove_cols = (source_parent_id_col == target_parent_id_col ? [:id,:local_id] : [:id,:local_id,source_parent_id_col])
-      field_set_to_copy = Model::FieldSet.all_real(source_model_name).remove_cols(*remove_cols)
-      source_fs = Model::FieldSet.opt(field_set_to_copy.remove_cols(target_parent_id_col))
+      field_set_to_copy = Model::FieldSet.all_real(source_model_name).with_removed_cols(*remove_cols)
+      source_fs = Model::FieldSet.opt(field_set_to_copy.with_removed_cols(target_parent_id_col))
       source_ds = get_objects_just_dataset(source_model_handle,source_wc,source_fs)
 
       select_ds = targets_ds.join_table(:inner,source_ds)
@@ -68,9 +68,9 @@ module XYZ
       targets_wc = targets.map{|id_handle|{child_parent_id_col => id_handle.get_id()}}
       targets_ds = SQL::ArrayDataset.create(db,targets_wc,ModelHandle.new(base_id_handle[:c],:target))
 
-      field_set_to_copy = Model::FieldSet.all_real(child_model_name).remove_cols(:id,:local_id)
+      field_set_to_copy = Model::FieldSet.all_real(child_model_name).with_removed_cols(:id,:local_id)
       child_wc = {child_parent_id_col => base_id_handle.get_id()}
-      child_fs = Model::FieldSet.opt(field_set_to_copy.remove_cols(child_parent_id_col))
+      child_fs = Model::FieldSet.opt(field_set_to_copy.with_removed_cols(child_parent_id_col))
       child_ds = get_objects_just_dataset(child_model_handle,child_wc,child_fs)
 
       select_ds = targets_ds.join_table(:inner,child_ds)

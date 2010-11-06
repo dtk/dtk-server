@@ -65,16 +65,12 @@ module XYZ
 
     def self.get_objects_from_search_object(search_object)
 
-      base_field_set = search_object.field_set()
-      extra_cols = base_field_set.extra_local_columns()
-      related_col_info = base_field_set.related_remote_column_info()
-
-      dataset = search_object.create_dataset(extra_cols)
+      dataset = search_object.create_dataset()
       model_handle = dataset.model_handle()
 
       ret = nil
 pp [:wo_related_col,dataset.ppsql]
-
+      related_col_info = search_object.field_set().related_remote_column_info()
       unless related_col_info
         ret = dataset.all
       else

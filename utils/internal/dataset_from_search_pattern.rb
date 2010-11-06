@@ -3,7 +3,7 @@ module XYZ
   module SQL
     class DataSetSearchPattern < Dataset
       class << self
-        def create_dataset_from_search_object(search_object,extra_cols=nil)
+        def create_dataset_from_search_object(search_object)
           db = search_object.db
           search_pattern = search_object.search_pattern
 
@@ -15,17 +15,17 @@ module XYZ
           end
           raise Error.new("illegal model name (#{relation_in_search_pattern}) in search pattern") unless DB_REL_DEF[relation_in_search_pattern]
 
-          sequel_ds = ret_sequel_ds_from_hash(db.empty_dataset(),search_pattern,mh_in_search_pattern,extra_cols)
+          sequel_ds = ret_sequel_ds_from_hash(db.empty_dataset(),search_pattern,mh_in_search_pattern)
 
           sequel_ds ? self.new(mh_in_search_pattern,sequel_ds) : nil
         end
 
        private
-        def ret_sequel_ds_from_hash(ds,search_pattern,model_handle,extra_cols=nil)
+        def ret_sequel_ds_from_hash(ds,search_pattern,model_handle)
           ds_add = ret_sequel_ds_with_relation(ds,search_pattern)
           return nil unless ds_add; ds = ds_add
         
-          ds_add = ret_sequel_ds_with_columns(ds,search_pattern,model_handle,extra_cols)
+          ds_add = ret_sequel_ds_with_columns(ds,search_pattern,model_handle)
           return nil unless ds_add; ds = ds_add
           
           ds = ret_sequel_ds_with_filter(ds,search_pattern)
@@ -42,8 +42,40 @@ module XYZ
           end
           ds.from(sql_tbl_name)
         end
-        
-        def ret_sequel_ds_with_columns(ds,search_pattern,model_handle,extra_cols=nil)
+
+        def ret_sequel_ds_with_columns(ds,search_pattern,model_handle)
+          base_field_set = search_pattern.field_set()
+          model_name = model_handle[:model_name]
+          columns = base_field_set.cols
+          return ds if columns.empty? 
+
+          #first prune out all non scalar real columns
+          processed_field_set =  base_field_set.only_including(Model::FieldSet.all_real_scalar(model_name))
+
+          #compute cols_to_add by looking at both local columns and ones that are in join conditions to enable remote columns to be joined in
+          #do not have to worry about duplicayes because with_added_cols will do that
+          cols_to_add = Array.new
+
+          related_col_info = base_field_set.related_remote_column_info()
+          if related_col_info and not related_col_info.empty?
+            cols_to_add_remote = related_col_info.map do |r|
+              qualified_col = r[:join_cond].values.first
+              #strip off model_name__ prefix and discard non matching prefixes
+              (qualified_col.to_s =~ Regexp.new("^(.+)__(.+)$")) ? ($1.to_sym == model_name ? $2.to_sym : nil) : qualified_col  
+            end.compact
+            cols_to_add = cols_to_add + cols_to_add_remote
+          end
+
+          cols_to_add_local = base_field_set.extra_local_columns()
+          cols_to_add = cols_to_add + cols_to_add_local if cols_to_add_local
+
+          processed_field_set = processed_field_set.with_added_cols(*cols_to_add) 
+          #always include id column
+          processed_field_set.add_col!(:id)
+          ds.select(*(processed_field_set.cols))
+        end
+=begin        
+        def ret_sequel_ds_with_columns(ds,search_pattern,model_handle)
           model_name = model_handle[:model_name]
           columns = search_pattern.find_key(:columns)
           columns = columns + extra_cols if extra_cols
@@ -56,9 +88,9 @@ module XYZ
           unpruned_field_set =  Model::FieldSet.new(model_name,columns)
           processed_field_set =  unpruned_field_set.only_including(Model::FieldSet.all_real_scalar(model_name))
 
-          ralated_col_info = unpruned_field_set.related_remote_column_info()
-          if ralated_col_info and not ralated_col_info.empty?
-            cols_to_add = ralated_col_info.map do |r|
+          related_col_info = unpruned_field_set.related_remote_column_info()
+          if related_col_info and not related_col_info.empty?
+            cols_to_add = related_col_info.map do |r|
               qualified_col = r[:join_cond].values.first
               #strip off model_name__ prefix and discard non matching prefixes
               (qualified_col =~ Regexp.new("^(.+)__(.+)$")) ? ($1.to_sym == model_name ? $2 : nil) : qualified_col  
@@ -70,7 +102,7 @@ module XYZ
           processed_field_set.add_col!(:id)
           ds.select(*(processed_field_set.cols))
         end
-
+=end
         def ret_sequel_ds_with_filter(ds,search_pattern)
           filter = search_pattern.find_key(:filter)
           return ds if filter.empty?

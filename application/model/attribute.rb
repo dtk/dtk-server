@@ -97,7 +97,9 @@ module XYZ
     end
     ### virtual column defs
     def base_object()
-      {:node_group => self[:node_group], :node => self[:node], :component => self[:component]}
+      ret = Hash.new
+      [:node_group,:node,:component].each{|col|ret[col] = self[col] if self[col]}
+      ret
     end
 
     def id_info_uri()

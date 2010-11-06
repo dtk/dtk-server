@@ -53,12 +53,12 @@ module XYZ
           end
 
           #form will be an array with each term either token or {:foo => :alias}; 
-          unpruned_field_set =  Model::FieldSet.new(columns)
+          unpruned_field_set =  Model::FieldSet.new(model_name,columns)
           processed_field_set =  unpruned_field_set.only_including(Model::FieldSet.all_real_scalar(model_name))
 
-          related_columns = unpruned_field_set.related_columns(model_name)
-          if related_columns and not related_columns.empty?
-            cols_to_add = related_columns.map do |r|
+          ralated_col_info = unpruned_field_set.related_remote_column_info()
+          if ralated_col_info and not ralated_col_info.empty?
+            cols_to_add = ralated_col_info.map do |r|
               qualified_col = r[:join_cond].values.first
               #strip off model_name__ prefix and discard non matching prefixes
               (qualified_col =~ Regexp.new("^(.+)__(.+)$")) ? ($1.to_sym == model_name ? $2 : nil) : qualified_col  
@@ -67,7 +67,7 @@ module XYZ
           end
 
           #always include id column
-          processed_field_set.add_col?(:id)
+          processed_field_set.add_col!(:id)
           ds.select(*(processed_field_set.cols))
         end
 

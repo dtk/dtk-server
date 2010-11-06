@@ -87,17 +87,17 @@ module XYZ
       #TODO: may convert to computing from search object with links
       node_cmp_mh = node_cmp_id_handles.first.createMH
       node_cmp_wc = {:ancestor_id => ng_cmp_id_handle.get_id()}
-      node_cmp_fs = FieldSet.opt([:id])
+      node_cmp_fs = FieldSet.opt([:id],:component)
       node_cmp_ds = get_objects_just_dataset(node_cmp_mh,node_cmp_wc,node_cmp_fs)
 
       attr_mh = node_cmp_mh.create_childMH(:attribute)
 
       attr_parent_col = attr_mh.parent_id_field_name()
-      node_attr_fs = FieldSet.opt([attr_parent_col,:id,:ref])
+      node_attr_fs = FieldSet.opt([attr_parent_col,:id,:ref],:attribute)
       node_attr_ds = get_objects_just_dataset(attr_mh,nil,node_attr_fs)
 
       group_attr_wc = {attr_parent_col => ng_cmp_id_handle.get_id()}
-      group_attr_fs = FieldSet.opt([:id,:ref])
+      group_attr_fs = FieldSet.opt([:id,:ref],:attribute)
       group_attr_ds = get_objects_just_dataset(attr_mh,group_attr_wc,group_attr_fs)
 
       #attribute link has same parent as node_group
@@ -113,7 +113,7 @@ module XYZ
       first_join_ds = i1_ds.join_table(:inner,node_attr_ds,{attr_parent_col => :id},{:table_alias => :output})
       attr_link_ds = first_join_ds.join_table(:inner,group_attr_ds,[:ref],{:table_alias => :input})
 
-      attr_link_fs = FieldSet.new([:ref,attr_link_parent_col,:input_id,:output_id])
+      attr_link_fs = FieldSet.new(:attribute,[:ref,attr_link_parent_col,:input_id,:output_id])
       override_attrs = {}
       create_from_select(attr_link_mh,attr_link_fs,attr_link_ds,override_attrs,{:duplicate_refs => :no_check})
       #TODO: links for monitor_items
@@ -131,7 +131,7 @@ module XYZ
       return ng if ng.empty?
       #TODO: encapsulate this pattern to nest multiple matches; might have a variant of join_table that does this
       ng_member_wc = SQL.or(*ng.map{|x|{:node_group_id => x[:id]}})
-      ng_member_fs = FieldSet.opt([:node_group_id,:node_id])
+      ng_member_fs = FieldSet.opt([:node_group_id,:node_id],:node_group_member)
       ng_members = Model.get_objects(ModelHandle.new(c,:node_group_member),ng_member_wc,ng_member_fs)
       cache = Hash.new
       ng_members.each do |el|
@@ -151,7 +151,7 @@ module XYZ
       #TODO: so if can make more efficient
       #important that Model.get_objects called, not get_objects
       groups_info = Model.get_objects(model_handle,SQL.and(where_clause,SQL.and(where_clause,SQL.not(:dynamic_search_pattern => nil))),
-                                opts.merge(FieldSet.opt([:id,:display_name,:dynamic_search_pattern])))
+                                opts.merge(FieldSet.opt([:id,:display_name,:dynamic_search_pattern],:node_group)))
 
 #      groups_info.map{|group|group.merge :node => Model.get_objects(ModelHandle.new(c,:node),group[:dynamic_search_pattern])}
       groups_info.map do |group|

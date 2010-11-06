@@ -56,6 +56,7 @@ module XYZ
       component_mh = node_mh.createMH(:model_name => :component)
       component_ds = get_objects_just_dataset(component_mh,{:node_node_id => node_id})
       attr_where_clause = SQL.or({:port_type => "input"},{:port_type => "output"})
+      #TODO: can prune what fields included
       attr_fs = Model::FieldSet.default(:attribute).add_cols(:component_component_id)
       attribute_mh = node_mh.createMH(:model_name => :attribute)
       attribute_ds = get_objects_just_dataset(attribute_mh,attr_where_clause,FieldSet.opt(attr_fs))

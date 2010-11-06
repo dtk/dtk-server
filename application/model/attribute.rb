@@ -34,7 +34,7 @@ module XYZ
 
       #Boolean that indicates whether there is a executable script/recipe associated with the attribute
       virtual_column :executable?, :hidden => true
-      uri_dependencies = 
+      uri_remote_dependencies = 
         {:uri =>
         [
          {
@@ -44,11 +44,11 @@ module XYZ
          }
         ]
       }
-      virtual_column :id_info_uri, :hidden => true, :dependencies => uri_dependencies
+      virtual_column :id_info_uri, :hidden => true, :remote_dependencies => uri_remote_dependencies
 
 
       #TODO: now that have uri; may end of life teh two below
-      virtual_column :base_objects_node_group, :hidden => true, :dependencies => 
+      virtual_column :base_objects_node_group, :hidden => true, :remote_dependencies => 
         [
          {
            :model_name => :component,
@@ -62,7 +62,7 @@ module XYZ
          }
 
         ]
-      virtual_column :base_objects_node, :hidden => true, :dependencies => 
+      virtual_column :base_objects_node, :hidden => true, :remote_dependencies => 
         [
          {
            :model_name => :component,
@@ -110,7 +110,7 @@ module XYZ
 
     def self.get_base_object(attr_id_handle,base_model_name)
       base_object_vc = "base_objects_#{base_model_name}".to_sym
-      fs = FieldSet.opt([:id,:component_component_id,base_object_vc])
+      fs = FieldSet.opt([:id,:component_component_id,base_object_vc],:attribute)
       base_object_info = get_objects(attr_id_handle.createMH,{:id => attr_id_handle.get_id()},fs).first
       return nil unless base_object_info
       cmp_display_name = (base_object_info[:component]||{})[:display_name]
@@ -123,7 +123,7 @@ module XYZ
       return Array.new if attr_id_list.empty?
       base_object_vc = "base_objects_#{base_model_name}".to_sym
       wc = SQL.or(*attr_id_list.map{|id|{:id => id}})
-      fs = FieldSet.opt([:id,:component_component_id,base_object_vc])
+      fs = FieldSet.opt([:id,:component_component_id,base_object_vc],:attribute)
       base_objects_info = get_objects(attr_model_handle,wc,fs)
       return nil unless base_objects_info
        base_objects_info.inject({}) do |h,row|

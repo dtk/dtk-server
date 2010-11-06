@@ -59,7 +59,7 @@ module XYZ
       select_ds = SQL::ArrayDataset.create(db,rows,model_handle,opts)
       override_attrs = {}
       create_opts = {} #TODO: stub
-      field_set = FieldSet.new(rows.first.keys)
+      field_set = FieldSet.new(model_handle[:model_name],rows.first.keys)
       create_from_select(model_handle,field_set,select_ds,override_attrs,create_opts)
     end
 
@@ -67,20 +67,22 @@ module XYZ
       dataset = search_object.create_dataset
       model_handle = dataset.model_handle()
       model_name = model_handle[:model_name]
-      field_set = search_object.field_set()
-      #returns any related tables that must be joined in (by looking at virtual coumns)
-      related_columns = field_set.related_columns(model_name)
-      ret = nil
-pp [:wo_related_cols,dataset.ppsql]
 
-      unless related_columns
+      base_field_set = search_object.field_set()
+      field_set = base_field_set.with_related_local_columns()
+      related_col_info = base_field_set.related_remote_column_info()
+
+      ret = nil
+pp [:wo_related_col,dataset.ppsql]
+
+      unless related_col_info
         ret = dataset.all
       else
         opts = {} #TODO: stub
         ls_opts = opts.merge(FieldSet.opt(field_set))
         graph_ds = dataset.from_self(:alias => model_handle[:model_name])
-        related_columns.each do |join_info|
-          rs_opts = (join_info[:cols] ? FieldSet.opt(FieldSet.new(join_info[:cols])) : {}).merge :return_as_hash => true
+        related_col_info.each do |join_info|
+          rs_opts = (join_info[:cols] ? FieldSet.opt(join_info[:cols],join_info[:model_name]) : {}).merge :return_as_hash => true
           right_ds = @db.get_objects_just_dataset(model_handle.createMH(:model_name => join_info[:model_name]),nil,rs_opts)
           graph_ds = graph_ds.graph(:left_outer,right_ds,join_info[:join_cond])
         end
@@ -94,7 +96,7 @@ pp [:wo_related_cols,dataset.ppsql]
     def self.get_display_name(id_handle)
       id = id_handle.get_id()
       return nil unless id
-      obj = @db.get_objects_scalar_columns(id_handle.createMH,{:id => id}, FieldSet.opt([:display_name])).first
+      obj = @db.get_objects_scalar_columns(id_handle.createMH,{:id => id}, FieldSet.opt([:display_name],id_handle[:model_name])).first
       (obj||{})[:display_name]
     end
 
@@ -104,18 +106,19 @@ pp [:wo_related_cols,dataset.ppsql]
     def self.get_objects(model_handle,where_clause={},opts={})
       c = model_handle[:c]
       model_name = model_handle[:model_name]
-      field_set = opts[:field_set] || FieldSet.default(model_name)
 
-      #returns any related tables that must be joined in (by looking at virtual coumns)
-      related_columns = field_set.related_columns(model_name)
+      base_field_set =  opts[:field_set] || FieldSet.default(model_name)
+      field_set = opts[:field_set] ? base_field_set.with_related_local_columns() : base_field_set
+      related_col_info = base_field_set.related_remote_column_info()
+
       ret = nil
-      unless related_columns
+      unless related_col_info
         ret = @db.get_objects_scalar_columns(model_handle,where_clause,opts)
       else
         ls_opts = opts.merge(FieldSet.opt(field_set))
         graph_ds = get_objects_just_dataset(model_handle,where_clause,ls_opts)
-        related_columns.each do |join_info|
-          rs_opts = (join_info[:cols] ? FieldSet.opt(FieldSet.new(join_info[:cols])) : {}).merge :return_as_hash => true
+        related_col_info.each do |join_info|
+          rs_opts = (join_info[:cols] ? FieldSet.opt(join_info[:cols],join_info[:model_name]) : {}).merge :return_as_hash => true
           right_ds = @db.get_objects_just_dataset(ModelHandle.new(c,join_info[:model_name]),nil,rs_opts)
           graph_ds = graph_ds.graph(:left_outer,right_ds,join_info[:join_cond])
         end

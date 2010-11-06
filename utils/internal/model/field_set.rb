@@ -2,10 +2,11 @@ require File.expand_path('field_search_pattern', File.dirname(__FILE__))
 module XYZ
   module FieldSetInstanceMixin
     class FieldSet
-      extend FieldSearchPatternInstanceMixin
-      attr_reader :cols
+      include FieldSearchPatternInstanceMixin
+      attr_reader :cols, :model_name
       #TODO: so fieldset can be more advanced than array of scalrs; can have netsed structure
-      def initialize(cols=Array.new,field_search_pattern=nil)
+      def initialize(model_name,cols=Array.new,field_search_pattern=nil)
+        @model_name = model_name.to_sym
         @cols = cols 
         @field_search_pattern = field_search_pattern
       end
@@ -15,39 +16,41 @@ module XYZ
       end
 
       #TODO: handle also case where col or self contains a hash
-      def add_col?(col)
+      def add_col!(col)
         @cols << col unless @cols.include?(col)
+        self
       end
 
-      #TODO: fn should really be named add_cols?
       def add_cols(*cols)
-        cols.each{|col| add_col?(col)}
+        FieldSet.new(@model_name,(@cols + cols).uniq)
       end
 
       def remove_cols(*cols)
-        FieldSet.new(@cols - cols)
+        FieldSet.new(@model_name,@cols - cols)
       end
 
       #difference between only_including and & is not sysmetric and provides for items in self which are form {col => alias}
       def only_including(field_set)
-        FieldSet.new(@cols.reject{|col| not field_set.cols.include?(col.kind_of?(Hash) ? col.keys.first : col)})
+        FieldSet.new(@model_name,@cols.reject{|col| not field_set.cols.include?(col.kind_of?(Hash) ? col.keys.first : col)})
       end
 
       def &(field_set)
-        FieldSet.new(@cols & field_set.cols)
+        FieldSet.new(@model_name,@cols & field_set.cols)
+      end
+
+      def with_related_local_columns()
+        self #stub
       end
 
       #TODO!!!: this does not work properly when two or more virtual attributes point to same column, but not tagged with same dependency def
-      def related_columns(model_name_x)
-        model_name = model_name_x.to_sym
+      def related_remote_column_info()
         return nil if @cols.empty?
         return nil unless vcolumns = DB_REL_DEF[model_name][:virtual_columns]
         ret = Array.new
         defs_seen = Array.new
         @cols.each do |f|
           next unless vcol_info = vcolumns[f] 
-          #special case is :possible_parents
-          deps, def_name = parse_dependencies(convert_to_dependencies(model_name,vcol_info[:possible_parents]) || vcol_info[:dependencies])
+          deps, def_name = parse_remote_dependencies(vcol_info)
           next unless deps
           if def_name 
             next if defs_seen.include?(def_name)
@@ -58,35 +61,75 @@ module XYZ
         ret.empty? ? nil : ret
       end
 
+
       def ret_where_clause_for_search_string(name_value_pairs)
         @field_search_pattern ? @field_search_pattern.ret_where_clause_for_search_string(name_value_pairs) : {}
       end          
 
       #field set in option list
-      def self.opt(x)
+      def self.opt(x,model_name=nil)
         field_set = 
           if x.kind_of?(Symbol) and x == :all
             FieldSetAll.new()
           elsif x.kind_of?(Array) 
-            FieldSet.new(x) 
+            raise Error.new("model_name is not given") unless model_name
+            FieldSet.new(model_name,x) 
           else
             x
           end
         {:field_set => field_set}
       end
 
-     private
-      #used to strip off and return def name if that exists
-      #returns form [deps,def_name] where later can be null if no defs
-
-      def parse_dependencies(raw_deps)
-        return nil unless raw_deps
-        return [raw_deps,nil] if raw_deps.kind_of?(Array)
-        return [raw_deps.values.first,raw_deps.keys.first]
+      def self.default(model_name)
+        ret_fieldset(model_name,:default) do |db_rel|
+          non_hidden_columns(db_rel[:columns]) + non_hidden_columns(COMMON_REL_COLUMNS) + virtual_columns_in_fieldset(db_rel[:virtual_columns]) + many_to_one_cols(db_rel)
+        end
       end
 
-      def convert_to_dependencies(model_name,possible_parents)
-        return nil if possible_parents.nil?
+      def self.all_real(model_name)
+        ret_fieldset(model_name,:all_real) do |db_rel|
+          real_cols(db_rel) + many_to_one_cols(db_rel)
+        end
+      end
+
+      def self.all_real_scalar(model_name)
+        ret_fieldset(model_name,:all_real_scalar) do |db_rel|
+          real_cols(db_rel) 
+        end
+      end
+
+      def self.all_settable(model_name)
+        ret_fieldset(model_name,:all_settabler) do |db_rel|
+          real_cols(db_rel) + many_to_one_cols(db_rel) + virtual_settable_cols(db_rel)
+        end
+      end
+
+      def self.all_settable_scalar(model_name)
+        ret_fieldset(model_name,:all_settable_scalar) do |db_rel|
+          real_cols(db_rel) + virtual_settable_cols(db_rel)
+        end
+      end
+
+      def self.real_cols_with_types(model_name)
+        db_rel = DB_REL_DEF[model_name]
+        return nil unless db_rel
+        ret = db_rel[:columns].inject({}){|h,kv|h.merge(kv[0] => kv[1][:type])}
+        ret = COMMON_REL_COLUMNS.inject(ret){|h,kv|h.merge(kv[0] => kv[1][:type])}
+        many_to_one_cols(db_rel).inject(ret){|h,k|h.merge(k => ID_TYPES[:id])}
+      end
+
+     private
+      #returns form [deps,def_name] where later can be null if no defs
+      def parse_remote_dependencies(virtual_col_info)
+        #special case is :possible_parents
+        return [convert_to_remote_dependencies(virtual_col_info[:possible_parents]),nil] if virtual_col_info[:possible_parents]
+        deps = virtual_col_info[:remote_dependencies]
+        return nil unless deps
+        return [deps,nil] if deps.kind_of?(Array)
+        return [deps.values.first,deps.keys.first]
+      end
+
+      def convert_to_remote_dependencies(possible_parents)
         #TODO: migh make geenral utility fn with inject Aux.hash_map
         possible_parents.map do |parent|
           fk_col = DB.ret_parent_id_field_name(DB_REL_DEF[parent],DB_REL_DEF[model_name])
@@ -97,82 +140,42 @@ module XYZ
           }
         end
       end
-     public
-      class << self
-        def default(model_name_x)
-          ret_fieldset(model_name_x,:default) do |db_rel|
-            non_hidden_columns(db_rel[:columns]) + non_hidden_columns(COMMON_REL_COLUMNS) + virtual_columns_in_fieldset(db_rel[:virtual_columns]) + many_to_one_cols(db_rel)
-          end
-        end
 
-        def all_real(model_name_x)
-          ret_fieldset(model_name_x,:all_real) do |db_rel|
-            real_cols(db_rel) + many_to_one_cols(db_rel)
-          end
-        end
+      def self.ret_fieldset(model_name_x,col_type,&block)
+        model_name = model_name_x.to_sym
+        db_rel = DB_REL_DEF[model_name]
+        Fieldsets[col_type] ||= Hash.new
+        col_info = Fieldsets[col_type]
+        return col_info[model_name] if col_info[model_name]
+        col_info[model_name] = FieldSet.new(model_name,block.call(db_rel),FieldSearchPattern.new(model_name,self))
+      end
 
-        def all_real_scalar(model_name_x)
-          ret_fieldset(model_name_x,:all_real_scalar) do |db_rel|
-            real_cols(db_rel) 
-          end
-        end
+      Fieldsets = Hash.new
 
-        def all_settable(model_name_x)
-          ret_fieldset(model_name_x,:all_settabler) do |db_rel|
-            real_cols(db_rel) + many_to_one_cols(db_rel) + virtual_settable_cols(db_rel)
-          end
-        end
+      def self.non_hidden_columns(cols_def)
+        cols_def.reject{|k,v| v and v[:hidden]}.keys
+      end
 
-        def all_settable_scalar(model_name_x)
-          ret_fieldset(model_name_x,:all_settable_scalar) do |db_rel|
-            real_cols(db_rel) + virtual_settable_cols(db_rel)
-          end
-        end
+      def self.virtual_columns_in_fieldset(cols_def)
+        cols_def.reject{|k,v| v and v[:hidden]}.keys
+      end
 
-        def real_cols_with_types(model_name)
-          db_rel = DB_REL_DEF[model_name]
-          return nil unless db_rel
-          ret = db_rel[:columns].inject({}){|h,kv|h.merge(kv[0] => kv[1][:type])}
-          ret = COMMON_REL_COLUMNS.inject(ret){|h,kv|h.merge(kv[0] => kv[1][:type])}
-          many_to_one_cols(db_rel).inject(ret){|h,k|h.merge(k => ID_TYPES[:id])}
-        end
+      def self.real_cols(db_rel)
+        db_rel[:columns].keys + COMMON_REL_COLUMNS.keys
+      end
 
-       private
+      def self.many_to_one_cols(db_rel)
+        (db_rel[:many_to_one]||[]).map{|p|DB.ret_parent_id_field_name(DB_REL_DEF[p],db_rel)}
+      end
 
-        def ret_fieldset(model_name_x,col_type,&block)
-          model_name = model_name_x.to_sym
-          db_rel = DB_REL_DEF[model_name]
-          Fieldsets[col_type] ||= Hash.new
-          col_info = Fieldsets[col_type]
-          return col_info[model_name] if col_info[model_name]
-          col_info[model_name] = FieldSet.new(block.call(db_rel),FieldSearchPattern.new(model_name,self))
-        end
-
-        #TBD: may instead put in DB_REL_DEF
-        Fieldsets = Hash.new
-
-        def non_hidden_columns(cols_def)
-          cols_def.reject{|k,v| v and v[:hidden]}.keys
-        end
-
-        def virtual_columns_in_fieldset(cols_def)
-          cols_def.reject{|k,v| v and v[:hidden]}.keys
-        end
-
-        def real_cols(db_rel)
-          db_rel[:columns].keys + COMMON_REL_COLUMNS.keys
-        end
-        def many_to_one_cols(db_rel)
-          (db_rel[:many_to_one]||[]).map{|p|DB.ret_parent_id_field_name(DB_REL_DEF[p],db_rel)}
-        end
-        def virtual_settable_cols(db_rel)
-          (db_rel[:virtual_columns]||[]).map{|vc,vc_info|vc if vc_info[:path]}.compact 
-        end
+      def self.virtual_settable_cols(db_rel)
+        (db_rel[:virtual_columns]||[]).map{|vc,vc_info|vc if vc_info[:path]}.compact 
       end
     end
+
     class FieldSetAll < FieldSet
-      def initalize()
-        super(Array.new)
+      def initalize(model_name=nil)
+        super(model_name,Array.new)
       end
       def include_col?(col)
         true
@@ -182,7 +185,7 @@ module XYZ
       def remove_cols(*cols)
       end
       def &(field_set)
-        FieldSet.new(field_set.cols)
+        FieldSet.new(field_set.model_name,field_set.cols)
       end
     end
   end

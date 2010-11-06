@@ -28,19 +28,19 @@ module XYZ
       #first put in relation that traces along attribute link from output matching an idhandle in changes to inputs
       attr_link_mh = attr_changes.first.id_handle.createMH(:model_name => :attribute_link)
       attr_link_wc = nil
-      attr_link_fs = FieldSet.opt([:input_id,:output_id])
+      attr_link_fs = FieldSet.opt([:input_id,:output_id],:attribute_link)
       attr_link_ds = get_objects_just_dataset(attr_link_mh,attr_link_wc,attr_link_fs)
 
       output_attr_mh = attr_link_mh.createMH(:model_name => :attribute)
       #condition is to prune out attributes on output side that have asserted values
       output_attr_wc = {:value_asserted => nil}
-      output_attr_fs = FieldSet.opt([:id,:display_name,{:value_derived => :old_val}])
+      output_attr_fs = FieldSet.opt([:id,:display_name,{:value_derived => :old_val}],:attribute)
       output_attr_ds = get_objects_just_dataset(output_attr_mh,output_attr_wc,output_attr_fs)
 
       first_join_ds = input_attr_ds.select({:id => :input_id},{:value_asserted => :value_derived},:action_id).from_self.join_table(:inner,attr_link_ds,[:input_id]) 
       attrs_to_change_ds = first_join_ds.join_table(:inner,output_attr_ds,{:id => :output_id})
       returning_cols_opts = {:returning_cols => [:id,:display_name,:action_id,:old_val,{:value_derived => :new_val}]}
-      update_ret = update_from_select(output_attr_mh,FieldSet.new([:value_derived]),attrs_to_change_ds,returning_cols_opts)
+      update_ret = update_from_select(output_attr_mh,FieldSet.new(:attribute,[:value_derived]),attrs_to_change_ds,returning_cols_opts)
 
       base_objects = Attribute.get_base_objects_with_index(attr_mh,update_ret.map{|r|r[:id]},:node)
       #create the new pending changes
@@ -60,8 +60,8 @@ module XYZ
     def self.get_legal_connections(parent_id_handle)
       c = parent_id_handle[:c]
       parent_id = IDInfoTable.get_id_from_id_handle(parent_id_handle)
-      component_ds = get_objects_just_dataset(ModelHandle.new(c,:component),nil,{:parent_id => parent_id}.merge(FieldSet.opt([:id,:external_ref])))
-      attribute_ds = get_objects_just_dataset(ModelHandle.new(c,:attribute),nil,FieldSet.opt([:id,:external_ref,:component_component_id]))
+      component_ds = get_objects_just_dataset(ModelHandle.new(c,:component),nil,{:parent_id => parent_id}.merge(FieldSet.opt([:id,:external_ref],:component)))
+      attribute_ds = get_objects_just_dataset(ModelHandle.new(c,:attribute),nil,FieldSet.opt([:id,:external_ref,:component_component_id],:attribute))
 
       attribute_link_ds = get_objects_just_dataset(ModelHandle.new(c,:attribute_link))
       component_ds.graph(:inner,attribute_ds,{:component_component_id => :id}).graph(:left_outer,attribute_link_ds,{:input_id => :id}).where({:attribute_link__id => nil}).all

@@ -16,7 +16,12 @@ module XYZ
     end
     def field_set()
       #TBD: stub; must take out non scalars
-      columns.empty? ? (relation.kind_of?(Symbol) ? Model::FieldSet.default(relation) : nil) : Model::FieldSet.new(columns)
+      model_name = relation.kind_of?(Symbol) ? relation : nil
+      if columns.empty? 
+        model_name ? Model::FieldSet.default(model_name) : nil 
+      else
+        Model::FieldSet.new(model_name,columns)
+      end
     end
 
     def is_default_view?()

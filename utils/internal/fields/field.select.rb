@@ -16,7 +16,8 @@ class Fieldselect < Fieldbase
   def set_options(options)
     @option_str = ''
     options.each do |value,display|
-      @option_str << '<option value="' + value + '" selected="{%=' + @model_name + '[:' + @name + ']%}">' + display + '</option>'
+#      @option_str << '<option value="' + value + '" selected="{%=' + @model_name + '[:' + @name + ']%}">' + display + '</option>'
+      @option_str << '<option value="' + value + '" {%=' + @model_name + '[:' + @name + '_options_list][:'+value+'_selected]%}">' + display + '</option>'
     end
   end
 

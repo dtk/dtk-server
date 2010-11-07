@@ -3,6 +3,7 @@
 {
   :operational_status => {
       '' => 'Inactive',
+      'stopped' => 'Stopped',
       'inactive' => 'Inactive',
       'warning' => 'Warning',
       'error' => 'Error',

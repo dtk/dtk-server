@@ -36,6 +36,12 @@ module XYZ
       ret
     end
 
+    def self.create_from_field_set(field_set,c)
+      sp = {:relation => field_set.model_name, :columns => field_set.cols}
+      hash = {:search_pattern => SearchPattern.create(sp)}
+      SearchObject.new(hash,c)
+    end
+
     def json()
       sp = self[:search_pattern]
 

@@ -12,7 +12,7 @@ module XYZ
   class SearchPatternSimple < SearchPattern
     def initialize(hash_search_pattern)
       super()
-      pares_and_set!(hash_search_pattern)
+      parse_and_set!(hash_search_pattern)
     end
     def hash_for_json_generate()
       ret = process_symbols(self)
@@ -84,7 +84,7 @@ module XYZ
       self[:filter]
     end
 
-    def pares_and_set!(hash_input)
+    def parse_and_set!(hash_input)
       self[:relation] = ret_relation(hash_input)
       self[:columns] = ret_columns(hash_input)
       self[:filter] = ret_filter(hash_input)

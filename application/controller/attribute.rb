@@ -1,5 +1,11 @@
 module XYZ
   class AttributeController < Controller
+
+    def list_under_component(component_id)
+pp get_base_object_dataset(:component).ppsql
+    end
+   
+    #TODO deprecate
     def list_for_component_display()
       search_object =  ret_search_object_in_request()
       raise Error.new("no search object in request") unless search_object
@@ -17,6 +23,13 @@ module XYZ
       tpl.assign("#{model_name()}_list",model_list)
 
       return {:content => tpl.render()}
+    end
+   private
+    def get_base_object_dataset(type)
+      @ds_cache ||= Hash.new
+      return @ds_cache[type] if @ds_cache[type]
+      field_set = Model::FieldSet.new(model_name,["base_object_#{type}".to_sym])
+      @ds_cache[type] = SearchObject.create_from_field_set(field_set,ret_session_context_id()).create_dataset()
     end
   end
 end

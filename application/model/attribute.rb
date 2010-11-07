@@ -45,7 +45,20 @@ module XYZ
         ]
       }
       virtual_column :id_info_uri, :hidden => true, :remote_dependencies => uri_remote_dependencies
-      #TODO: need to decide which ones to use; problem with above is that has refs not display names; and below is not efficient
+      many_to_one :component, :node
+
+      #base_objects
+      cmp_remote_dep =  
+        [
+         {
+           :model_name => :component,
+           :join_cond=>{:id=> :attribute__component_component_id},
+           :cols=>[:id, :display_name]
+         }
+        ]
+      virtual_column :base_object_component, :type => :json, :hidden => true, :remote_dependencies => cmp_remote_dep
+
+      #TODO: fix below
       virtual_column :base_objects_node_group, :type => :json, :hidden => true, :remote_dependencies => 
         [
          {
@@ -93,7 +106,6 @@ module XYZ
          }
 
         ]
-      many_to_one :component, :node
     end
     ### virtual column defs
     def base_object()

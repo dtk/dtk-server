@@ -128,10 +128,11 @@ module XYZ
         end
       end
 
-      def self.real_cols_with_types(model_name)
+      def self.scalar_cols_with_types(model_name)
         db_rel = DB_REL_DEF[model_name]
         return nil unless db_rel
         ret = db_rel[:columns].inject({}){|h,kv|h.merge(kv[0] => kv[1][:type])}
+        ret = db_rel[:virtual_columns].inject(ret){|h,kv|h.merge(kv[1][:type] ? {kv[0] => kv[1][:type]} : {})}
         ret = COMMON_REL_COLUMNS.inject(ret){|h,kv|h.merge(kv[0] => kv[1][:type])}
         many_to_one_cols(db_rel).inject(ret){|h,k|h.merge(k => ID_TYPES[:id])}
       end

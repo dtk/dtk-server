@@ -3,7 +3,7 @@ module XYZ
   module FieldSearchPatternInstanceMixin
     class FieldSearchPattern
       def initialize(model_name,field_set_class)
-        @col_basic_types = ColumnTypeCache[model_name] ||= field_set_class.real_cols_with_types(model_name).inject({}){|h,nt|h.merge(nt[0] => BasicTypeMapping[nt[1]])}
+        @col_basic_types = ColumnTypeCache[model_name] ||= field_set_class.scalar_cols_with_types(model_name).inject({}){|h,nt|h.merge(nt[0] => BasicTypeMapping[nt[1]])}
       end
       def ret_where_clause_for_search_string(name_value_pairs)
         ret = nil

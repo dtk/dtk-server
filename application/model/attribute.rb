@@ -8,8 +8,8 @@ module XYZ
       column :value_asserted, :json
       column :value_derived, :json
       column :value_actual, :json
-      virtual_column :is_unset, :hidden => true, :real_columns => [:value_asserted,:value_derived]
-      virtual_column :attribute_value, :local_dependencies => [:value_asserted,:value_derived]
+      virtual_column :is_unset, :type => :boolean, :hidden => true, :real_columns => [:value_asserted,:value_derived]
+      virtual_column :attribute_value, :type => :json, :local_dependencies => [:value_asserted,:value_derived]
 
       column :is_settable, :boolean, :default => true
       column :required, :boolean #whether required for this attribute to have a value inorder to execute actions for parent component; TBD: may be indexed by action
@@ -33,7 +33,7 @@ module XYZ
       #TODO: may rename attribute_value to desired_value
 
       #Boolean that indicates whether there is a executable script/recipe associated with the attribute
-      virtual_column :executable?, :hidden => true
+      virtual_column :executable?, :type => :boolean, :hidden => true
       uri_remote_dependencies = 
         {:uri =>
         [
@@ -46,7 +46,7 @@ module XYZ
       }
       virtual_column :id_info_uri, :hidden => true, :remote_dependencies => uri_remote_dependencies
       #TODO: need to decide which ones to use; problem with above is that has refs not display names; and below is not efficient
-      virtual_column :base_objects_node_group, :hidden => true, :remote_dependencies => 
+      virtual_column :base_objects_node_group, :type => :json, :hidden => true, :remote_dependencies => 
         [
          {
            :model_name => :component,
@@ -60,7 +60,7 @@ module XYZ
          }
 
         ]
-      virtual_column :base_objects_node, :hidden => true, :remote_dependencies => 
+      virtual_column :base_objects_node, :type => :json, :hidden => true, :remote_dependencies => 
         [
          {
            :model_name => :component,
@@ -74,7 +74,7 @@ module XYZ
          }
 
         ]
-      virtual_column :base_object, :hidden => true, :remote_dependencies => 
+      virtual_column :base_object, :type => :json, :hidden => true, :remote_dependencies => 
         [
          {
            :model_name => :component,

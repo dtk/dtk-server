@@ -53,7 +53,8 @@ module XYZ
          {
            :model_name => :component,
            :join_cond=>{:id=> :attribute__component_component_id},
-           :cols=>[:id, :display_name,{:node_node_id => :param_node_id}]
+           :cols=>[:id, :display_name]
+#           :filter => [:and, [:eq, :node_node_id, :$node_id]]
          }
         ]
 =begin TODO: would like "link form"

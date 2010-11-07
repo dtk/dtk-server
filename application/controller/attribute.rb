@@ -5,8 +5,10 @@ module XYZ
 pp get_base_object_dataset(:component).ppsql
     end
     def list_under_node(node_id)
-pp get_base_object_dataset(:node).ppsql
-pp get_base_object_dataset(:node).where(:param_node_id => node_id.to_i).all
+ds = get_base_object_dataset(:node)
+pp ds.ppsql
+res = ds.sequel_ds.call(:select,:node_id => node_id.to_i)
+pp res
     end
    
     #TODO deprecate

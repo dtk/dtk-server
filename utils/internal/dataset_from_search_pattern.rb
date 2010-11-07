@@ -28,13 +28,13 @@ module XYZ
           graph_ds = simple_dataset.from_self(:alias => model_handle[:model_name])
           remote_col_info.each do |join_info|
             rs_opts = (join_info[:cols] ? Model::FieldSet.opt(join_info[:cols],join_info[:model_name]) : {}).merge :return_as_hash => true
-            right_ds = search_object.db.get_objects_just_dataset(model_handle.createMH(:model_name => join_info[:model_name]),nil,rs_opts)
+            filter = join_info[:filter] ? SimpleSearchPattern::ret_sequel_filter(join_info[:filter]) : nil
+            right_ds = search_object.db.get_objects_just_dataset(model_handle.createMH(:model_name => join_info[:model_name]),filter,rs_opts)
             graph_ds = graph_ds.graph(:left_outer,right_ds,join_info[:join_cond])
           end
           opts = {} #TODO: stub
           graph_ds.paging_and_order(opts)
         end
-
 
         module SimpleSearchPattern
           def self.ret_sequel_ds(ds,search_pattern,model_handle,remote_col_info=nil)
@@ -48,6 +48,38 @@ module XYZ
             ret_sequel_ds_with_order_by_and_paging(ds,search_pattern)
           end
 
+          def self.ret_sequel_filter(hash)
+            #TODO: just treating "and" now
+            #TODO: some below use Sequel others are wrapper SQL in sql.rb; clean up
+            op,args = get_op_and_args(hash)
+            raise ErrorPatternNotImplemented.new(:filter_operation,op) unless (op == :and)
+            and_list = args.map do |el|
+              el_op,el_args = get_op_and_args(el)
+              case el_op
+              when :eq
+                {el_args[0] => el_args[1]}
+              when :lt
+                el_args[0].to_s.lit < el_args[1].to_s.lit
+              when :lte
+                el_args[0].to_s.lit <= el_args[1].to_s.lit
+              when :gt
+                el_args[0].to_s.lit > el_args[1].to_s.lit
+              when :gte
+                el_args[0].to_s.lit >= el_args[1].to_s.lit
+              when "match-prefix".to_sym
+                Sequel::SQL::StringExpression.like(el_args[0],"#{el_args[1]}%",{:case_insensitive=>true})
+              when :regex
+                Sequel::SQL::StringExpression.like(el_args[0],Regexp.new(el_args[1]),{:case_insensitive=>true})
+              when :oneof
+                SQL.or(*el_args[1].map{|x|{el_args[0] => x}})
+              else
+                raise ErrorPatternNotImplemented.new(:equal_op,el_op) 
+              end
+            end
+            SQL.and(*and_list)
+          end
+
+         private
           def self.ret_sequel_ds_with_relation(ds,search_pattern)
             relation = search_pattern.find_key(:relation)
             sql_tbl_name = DB.sequel_table_name(relation)
@@ -90,37 +122,9 @@ module XYZ
           end
 
           def self.ret_sequel_ds_with_filter(ds,search_pattern)
-            filter = search_pattern.find_key(:filter)
-            return ds if filter.empty?
-
-            #TODO: just treating "and" now
-            #TODO: some below use Sequel others are wrapper SQL in sql.rb; clean up
-            op,args = get_op_and_args(filter)
-            raise ErrorPatternNotImplemented.new(:filter_operation,op) unless (op == :and)
-            and_list = args.map do |el|
-              el_op,el_args = get_op_and_args(el)
-              case el_op
-              when :eq
-                {el_args[0] => el_args[1]}
-              when :lt
-                el_args[0].to_s.lit < el_args[1].to_s.lit
-              when :lte
-                el_args[0].to_s.lit <= el_args[1].to_s.lit
-              when :gt
-                el_args[0].to_s.lit > el_args[1].to_s.lit
-              when :gte
-                el_args[0].to_s.lit >= el_args[1].to_s.lit
-              when "match-prefix".to_sym
-                Sequel::SQL::StringExpression.like(el_args[0],"#{el_args[1]}%",{:case_insensitive=>true})
-              when :regex
-                Sequel::SQL::StringExpression.like(el_args[0],Regexp.new(el_args[1]),{:case_insensitive=>true})
-              when :oneof
-                SQL.or(*el_args[1].map{|x|{el_args[0] => x}})
-              else
-                raise ErrorPatternNotImplemented.new(:equal_op,el_op) 
-              end
-            end
-            sequel_where_clause = SQL.and(*and_list)
+            filter_hash = search_pattern.find_key(:filter)
+            return ds if filter_hash.empty?
+            sequel_where_clause = ret_sequel_filter(filter_hash)
             ds.where(sequel_where_clause)
           end
 

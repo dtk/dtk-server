@@ -4,6 +4,10 @@ module XYZ
     def list_under_component(component_id)
 pp get_base_object_dataset(:component).ppsql
     end
+    def list_under_node(node_id)
+pp get_base_object_dataset(:node).ppsql
+pp get_base_object_dataset(:node).where(:param_node_id => node_id.to_i).all
+    end
    
     #TODO deprecate
     def list_for_component_display()
@@ -28,7 +32,7 @@ pp get_base_object_dataset(:component).ppsql
     def get_base_object_dataset(type)
       @ds_cache ||= Hash.new
       return @ds_cache[type] if @ds_cache[type]
-      field_set = Model::FieldSet.new(model_name,["base_object_#{type}".to_sym])
+      field_set = Model::FieldSet.new(model_name,[:display_name,"base_object_#{type}".to_sym])
       @ds_cache[type] = SearchObject.create_from_field_set(field_set,ret_session_context_id()).create_dataset()
     end
   end

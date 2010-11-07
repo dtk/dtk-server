@@ -48,15 +48,23 @@ module XYZ
       many_to_one :component, :node
 
       #base_objects
-      cmp_remote_dep =  
+      node_remote_dep = 
         [
          {
            :model_name => :component,
            :join_cond=>{:id=> :attribute__component_component_id},
-           :cols=>[:id, :display_name]
+           :cols=>[:id, :display_name,{:node_node_id => :param_node_id}]
          }
         ]
-      virtual_column :base_object_component, :type => :json, :hidden => true, :remote_dependencies => cmp_remote_dep
+=begin TODO: would like "link form"
+         {
+           :model_name => :component,
+           :link => :attribute
+           :cols=>[:id, :display_name,:node]
+         }
+=end
+
+      virtual_column :base_object_node, :type => :json, :hidden => true, :remote_dependencies => node_remote_dep
 
       #TODO: fix below
       virtual_column :base_objects_node_group, :type => :json, :hidden => true, :remote_dependencies => 

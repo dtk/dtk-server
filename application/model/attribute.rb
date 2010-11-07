@@ -57,6 +57,7 @@ module XYZ
          }
         ]
 =begin TODO: would like "link form"
+also related is allowing omission of columns mmentioned in jon condition; post processing when entering vcol def would added these in
          {
            :model_name => :component,
            :link => :attribute

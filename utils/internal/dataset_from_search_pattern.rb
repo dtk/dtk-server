@@ -50,7 +50,6 @@ module XYZ
 
           def self.ret_sequel_ds_with_relation(ds,search_pattern)
             relation = search_pattern.find_key(:relation)
-            raise ErrorPatternNotImplemented.new(:relation,relation) unless relation.kind_of?(Symbol)
             sql_tbl_name = DB.sequel_table_name(relation)
             unless sql_tbl_name
               Log.error("illegal relation given #{relation}") 

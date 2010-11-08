@@ -1,0 +1,18 @@
+<div style="clear:both;"></div>
+<br/><br/>
+<div class="list_container">
+
+	<div>
+	<table class="list">
+	<tr id="attribute-list-header-row">
+			<th id="attribute_name-th"  class=""><div id="attribute_name"></div></th>
+	</tr>
+
+	{%for attribute in attribute_list%}
+		<tr id="list_row-{%=attribute%}" class="{%=[:class]%}">
+				<td id="attribute_name-td-{%=attribute%}" class=""><a href="/xyz/attribute/display/{%=attribute[:id]%}">{%=attribute[:attribute_name]%}</a></td>
+		</tr>
+	{%end%}
+	</table>
+	</div>
+</div>

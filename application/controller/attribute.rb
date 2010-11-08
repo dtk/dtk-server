@@ -4,10 +4,16 @@ module XYZ
     def list_under_component(component_id)
 pp get_base_object_dataset(:component).ppsql
     end
+
     def list_under_node(node_id)
       base_ds = get_base_object_dataset(:node)
       ds = base_ds.where(:param_node_id => node_id.to_i).where_column_equal(:needs_to_be_set,true)
 pp ds.all
+      attribute_list = ds.all.map{|r|{:attribute_name => "#{r[:component][:display_name]}/#{r[:display_name]}", :id => r[:id]}}
+      action_name = "list_under_node"
+      tpl = R8Tpl::TemplateR8.new("#{model_name()}/#{action_name}",user_context())
+      tpl.assign("attribute_list",attribute_list)
+      return {:content => tpl.render()}
     end
    
     #TODO deprecate

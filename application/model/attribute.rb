@@ -8,10 +8,24 @@ module XYZ
       column :value_asserted, :json
       column :value_derived, :json
       column :value_actual, :json
-      virtual_column :is_unset, :type => :boolean, :hidden => true, :real_columns => [:value_asserted,:value_derived]
       virtual_column :attribute_value, :type => :json, :local_dependencies => [:value_asserted,:value_derived]
+      virtual_column :is_unset, :type => :boolean, :hidden => true, :real_columns => [:value_asserted,:value_derived]
 
-      column :is_settable, :boolean, :default => true
+      virtual_column :needs_to_be_set, :type => :boolean, :hidden => true, 
+        :local_dependencies => [:value_asserted,:value_derived,:read_only,:required], 
+        :remote_dependencies => 
+          [{
+           :model_name => :attribute_link,
+           :join_cond=>{:output_id=> :id},
+           :cols=>[:output_id]
+          }],
+          :fn => SQL.and({:attribute__value_asserted => nil},{:attribute__value_derived => nil},
+                         SQL.not(:attribute__read_only => true),
+                         {:attribute__required => true},
+                         {:attribute_link__output_id => nil})
+
+
+      column :read_only, :boolean, :default => false
       column :required, :boolean #whether required for this attribute to have a value inorder to execute actions for parent component; TBD: may be indexed by action
 
       column :function, :json
@@ -56,12 +70,22 @@ module XYZ
            :cols=>[:id, :display_name,{:node_node_id => :param_node_id}]
          }
         ]
-=begin TODO: would like "link form"
+=begin TODO: would like "search object link form"
 also related is allowing omission of columns mmentioned in jon condition; post processing when entering vcol def would added these in
-         {
-           :model_name => :component,
-           :link => :attribute
-           :cols=>[:id, :display_name,:node]
+         { {:relation => :this,
+            :columns => [],
+           },
+           {:relation => :component,
+            :columns => [:id, :display_name]
+           },
+           [
+             {:relation => :node,
+              :columns => [:id, :display_name]},
+             {:link => node_group_member,
+              :relation => :node_group,
+              :columns => [:id, :display_name]
+              }
+           ]
          }
 =end
 

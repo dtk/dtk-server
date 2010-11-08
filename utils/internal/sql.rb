@@ -68,6 +68,7 @@ module XYZ
       def self.like(l,r)
         Sequel::SQL::StringExpression.like(l,r)
       end
+
     end
    private
     def self.or_aux(x,y)
@@ -96,6 +97,20 @@ module XYZ
         sequel_graph = @sequel_ds.graph(right_ds.sequel_ds,join_conditions,{:join_type => join_type, :table_alias => table_alias})
         test = sequel_graph.call(:select,:node_id => 2147483777)
         Graph.new(sequel_graph,model_name_info,@c)
+      end
+
+      #have this in addition to where because special processing of column
+      def where_column_equal(col,value)
+        #substitue in virtual col fn if it exists
+        vcol_info = ((DB_REL_DEF[model_name]||{})[:virtual_columns]||{})[col]
+        return where(col => value) unless vcol_info
+        raise Error.new("virtual column #{col} cannot appear in where clause unless it has a fn def") unless vcol_info[:fn]
+        where(vcol_info[:fn] => value)
+      end
+
+     private
+      def model_name()
+        model_name_info.first.model_name
       end
     end
 
@@ -146,10 +161,6 @@ module XYZ
         ModelHandle.new(@c,model_name)
       end
 
-     private
-      def model_name()
-        model_name_info.first.model_name
-      end
     end
 
     #creates a table dataset from rows, which is array with each element being a hash; each row has same keys

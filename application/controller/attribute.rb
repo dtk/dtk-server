@@ -5,8 +5,9 @@ module XYZ
 pp get_base_object_dataset(:component).ppsql
     end
     def list_under_node(node_id)
-ds = get_base_object_dataset(:node)
-pp ds.where(:component__param_node_id => node_id.to_i).all
+      base_ds = get_base_object_dataset(:node)
+      ds = base_ds.where(:param_node_id => node_id.to_i).where_column_equal(:needs_to_be_set,true)
+pp ds.all
     end
    
     #TODO deprecate
@@ -32,7 +33,7 @@ pp ds.where(:component__param_node_id => node_id.to_i).all
     def get_base_object_dataset(type)
       @ds_cache ||= Hash.new
       return @ds_cache[type] if @ds_cache[type]
-      field_set = Model::FieldSet.new(model_name,[:display_name,"base_object_#{type}".to_sym])
+      field_set = Model::FieldSet.new(model_name,[:display_name,"base_object_#{type}".to_sym,:needs_to_be_set])
       @ds_cache[type] = SearchObject.create_from_field_set(field_set,ret_session_context_id()).create_dataset()
     end
   end

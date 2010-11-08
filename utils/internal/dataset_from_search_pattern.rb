@@ -118,6 +118,8 @@ module XYZ
             processed_field_set = processed_field_set.with_added_cols(*cols_to_add) 
             #always include id column
             processed_field_set.add_col!(:id)
+
+            
             ds.select(*(processed_field_set.cols))
           end
 

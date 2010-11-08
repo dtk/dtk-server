@@ -55,10 +55,12 @@ if (!R8.Search) {
 
 				runSearch : function(searchContext) {
 					var currentSearch = R8.Search.searchObjList[searchContext]['currentSearch'];
+					var sNameElem = document.getElementById(searchContext+'-search_name');
+
 					if(currentSearch == 'new') {
 						R8.Search.searchObjList[searchContext]['searches'][currentSearch]['id'] = '';
+						sNameElem.value = 'Autosaved-Stub 4 Now';
 					}
-					var sNameElem = document.getElementById(searchContext+'-search_name');
 					if(sNameElem.value == '') {
 						alert('Saved searches must have a name');
 						return;
@@ -101,30 +103,44 @@ if (!R8.Search) {
 					R8.Utils.Y.one('#'+clickedAttrId+'-body').setStyle('display','block');
 				},
 
-				page : function(modelName,start) {
-					var searchForm = document.getElementById(modelName+'-search-form');
-					var savedSearchElem = R8.Utils.Y.one('#saved_search');
-					var saved_search = {'start':start};
+				page : function(searchContext,start) {
+					var searchForm = document.getElementById(searchContext+'-search-form');
+					var currentSearchObj = R8.Search.getSearchInfo(searchContext);
+					var savedSearchElem = R8.Utils.Y.one('#'+searchContext+'-saved-search-obj');
 
-					YUI().use("json", function(Y) {
-						savedSearchElem.set('value',Y.JSON.stringify(saved_search));
-						searchForm.submit();
-					});
-				},
-
-				sort : function(modelName,field,order) {
-					var searchForm = document.getElementById(modelName+'-search-form');
-					var savedSearchElem = R8.Utils.Y.one('#saved_search');
-					var currentStartElem = R8.Utils.Y.one('#'+modelName+'_current_start');
+					var pagingElem = R8.Utils.Y.one('#'+searchContext+'-paging');
+					var orderByElem = R8.Utils.Y.one('#'+searchContext+'-order-by');
+					var order = currentSearchObj['searchObj']['search_pattern'][':order_by'];
 
 					var saved_search = {
-							'start':currentStartElem.get('value'),
+							'start': [start],
 							'order_by':[{'field':field,'order':order}]
 						};
 
 					YUI().use("json", function(Y) {
-						savedSearchElem.set('value',Y.JSON.stringify(saved_search));
-						searchForm.submit();
+						pagingElem.set('value',Y.JSON.stringify(saved_search['start']));
+						orderByElem.set('value',Y.JSON.stringify(saved_search['order_by']));
+						R8.Search.runSearch(searchContext);
+					});
+				},
+
+				sort : function(searchContext,field,order) {
+					var searchForm = document.getElementById(searchContext+'-search-form');
+					var currentSearchObj = R8.Search.getSearchInfo(searchContext);
+					var savedSearchElem = R8.Utils.Y.one('#'+searchContext+'-saved-search-obj');
+					var currentStartElem = R8.Utils.Y.one('#'+searchContext+'-current-start');
+					var orderByElem = R8.Utils.Y.one('#'+searchContext+'-order-by');
+					var pagingElem = R8.Utils.Y.one('#'+searchContext+'-paging');
+
+//TODO: Add page size from the server side in template and set just like current start
+					var saved_search = {
+							'start': [currentStartElem.get('value')],
+							'order_by':[{'field':field,'order':order}]
+						};
+					YUI().use("json", function(Y) {
+						pagingElem.set('value',Y.JSON.stringify(saved_search['start']));
+						orderByElem.set('value',Y.JSON.stringify(saved_search['order_by']));
+						R8.Search.runSearch(searchContext);
 					});
 				},
 

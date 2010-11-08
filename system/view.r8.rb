@@ -226,7 +226,7 @@ module R8Tpl
           field_meta[:sort_call] = "" 
           field_meta[:sort_class] = "" 
         else
-          field_meta[:sort_call] = "onclick=\"R8.Search.sort('#{@model_name}','#{field_name}','{%=#{field_name}_order%}');\""
+          field_meta[:sort_call] = "onclick=\"R8.Search.sort('{%=search_context%}','#{field_name}','{%=#{field_name}_order%}');\""
           field_meta[:sort_class] = "{%=#{field_name}_order_class%}"
         end
         list_cols << field_meta
@@ -240,8 +240,10 @@ module R8Tpl
     r8TPL.assign(:cols, list_cols)
 
     #this might be temp until figuring out if template literals are possible
-    r8TPL.assign(:list_start_prev_var, '{%=list_start_prev%}')
-    r8TPL.assign(:list_start_next_var, '{%=list_start_next%}')
+    r8TPL.assign(:current_start_literal, '{%=current_start%}')
+    r8TPL.assign(:search_context_literal, '{%=search_context%}')
+    r8TPL.assign(:list_start_prev_literal, '{%=list_start_prev%}')
+    r8TPL.assign(:list_start_next_literal, '{%=list_start_next%}')
     r8TPL.assign(:iterator_var, '{%='+model_name.to_s+'%}')
     r8TPL.assign(:end_tag, '{%end%}')
 
@@ -506,6 +508,7 @@ module R8Tpl
     r8TPL.assign(:search_id_literal, '{%=search_id%}')
     r8TPL.assign(:search_context_literal, '{%=search_context%}')
 
+    r8TPL.assign(:current_start_literal, '{%=current_start%}')
     r8TPL.assign(:search_cond_literal,'{%if num_saved_searches > 0%}')
     r8TPL.assign(:end_literal,'{%end%}')
 

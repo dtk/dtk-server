@@ -92,7 +92,9 @@ module XYZ
         new_model_name_info = right_ds.model_name_info.first.create_unique(@model_name_info)
         model_name_info = @model_name_info + [new_model_name_info]
         table_alias = new_model_name_info.ret_qualified_model_name()
+        #TODO: think can make more efficient by adding in :select => [cols.]] for the rs table; without that it k=looks liek sequel making a dbb call to find relavant columns for join result
         sequel_graph = @sequel_ds.graph(right_ds.sequel_ds,join_conditions,{:join_type => join_type, :table_alias => table_alias})
+        test = sequel_graph.call(:select,:node_id => 2147483777)
         Graph.new(sequel_graph,model_name_info,@c)
       end
     end

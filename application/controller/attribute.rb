@@ -6,9 +6,7 @@ pp get_base_object_dataset(:component).ppsql
     end
     def list_under_node(node_id)
 ds = get_base_object_dataset(:node)
-pp ds.ppsql
-res = ds.sequel_ds.call(:select,:node_id => node_id.to_i)
-pp res
+pp ds.where(:component__param_node_id => node_id.to_i).all
     end
    
     #TODO deprecate

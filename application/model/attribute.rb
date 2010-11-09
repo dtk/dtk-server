@@ -61,6 +61,8 @@ module XYZ
       virtual_column :id_info_uri, :hidden => true, :remote_dependencies => uri_remote_dependencies
       many_to_one :component, :node
 
+      virtual_column :qualified_attribute_name, :type => :varchar, :hidden => true #not giving dependences because assuming right base_object included in col list
+
       #base_objects
       virtual_column :base_object_node, :type => :json, :hidden => true, 
         :remote_dependencies => 
@@ -163,6 +165,7 @@ also related is allowing omission of columns mmentioned in jon condition; post p
          }
 
         ]
+
     end
     ### virtual column defs
     def base_object()
@@ -176,6 +179,16 @@ also related is allowing omission of columns mmentioned in jon condition; post p
     end
     #######################
     ### object procssing and access functions
+    def qualified_attribute_name()
+      node_or_group_name =
+        if self[:node] then self[:node][:display_name]
+        elsif self[:node_group] then self[:node_group][:display_name]
+      end
+      node_or_group_prefix = lambda{|x|x ? x+"/" : ""}.call(node_or_group_name)
+      component_name = (self[:component]||{})[:display_name]
+      component_prefix =  lambda{|x|x ? x+"/" : ""}.call(component_name)
+      "#{node_or_group_prefix}#{component_prefix}#{self[:display_name]}"
+    end
 
     def self.update_from_hash_assignments(id_handle,hash_assigns,opts={})
       Model.update_from_hash_assignments(id_handle,hash_assigns,opts)

@@ -8,9 +8,8 @@ pp get_base_object_dataset(:component).ppsql
     def list_under_node(node_id)
       base_ds = get_base_object_dataset(:node)
       ds = base_ds.where(:param_node_id => node_id.to_i).where_column_equal(:needs_to_be_set,true)
-pp ds.all
-      attribute_list = ds.all.map{|r|{:attribute_name => "#{r[:component][:display_name]}/#{r[:display_name]}", :id => r[:id]}}
-      action_name = "list_under_node"
+      attribute_list = ds.all
+      action_name = "list_qualified_attribute_name"
       tpl = R8Tpl::TemplateR8.new("#{model_name()}/#{action_name}",user_context())
       tpl.assign("attribute_list",attribute_list)
       return {:content => tpl.render()}
@@ -20,17 +19,8 @@ pp ds.all
       datacenter_id = IDHandle[:c => ret_session_context_id(), :model_name => :datacenter, :uri => "/datacenter/dc1"].get_id() unless datacenter_id
       base_ds = get_base_object_dataset(:datacenter)
       ds = base_ds.where(SQL::ColRef.coalesce(:node_group__param_datacenter_id,:node__param_datacenter_id) => datacenter_id).where_column_equal(:needs_to_be_set,true)
-pp ds.ppsql
-      attribute_list = ds.all.map do |r|
-        node_or_group_name = 
-          if r[:node] then r[:node][:display_name]
-          elsif r[:node_group] then r[:node_group][:display_name]
-        end
-        {:attribute_name => "#{node_or_group_name ? "#{node_or_group_name}/" : ""}#{r[:component][:display_name]}/#{r[:display_name]}", 
-          :id => r[:id]
-        }
-      end
-      action_name = "list_under_node"
+      attribute_list = ds.all
+      action_name = "list_qualified_attribute_name"
       tpl = R8Tpl::TemplateR8.new("#{model_name()}/#{action_name}",user_context())
       tpl.assign("attribute_list",attribute_list)
       return {:content => tpl.render()}

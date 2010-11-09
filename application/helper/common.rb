@@ -150,6 +150,7 @@ limit = TestOveride if TestOveride
     def set_template_defaults_for_list!(tpl)
       tpl.assign(:list_start_prev, 0)
       tpl.assign(:list_start_next, 0)
+      tpl.assign(:search_context, nil)
       tpl.assign(:search_content, nil)
       tpl.assign(:_app,app_common())
       set_template_order_columns!(tpl)

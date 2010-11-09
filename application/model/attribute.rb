@@ -134,41 +134,6 @@ also related is allowing omission of columns mmentioned in jon condition; post p
 =end
 
 
-
-      virtual_column :base_objects_node, :type => :json, :hidden => true, :remote_dependencies => 
-        [
-         {
-           :model_name => :component,
-           :join_cond=>{:id=> :attribute__component_component_id},
-           :cols=>[:id, :display_name,:node_node_id]
-         },
-         {
-           :model_name => :node,
-           :join_cond=>{:id=> :component__node_node_id},
-           :cols=>[:id, :display_name]
-         }
-
-        ]
-      virtual_column :base_object, :type => :json, :hidden => true, :remote_dependencies => 
-        [
-         {
-           :model_name => :component,
-           :join_cond=>{:id=> :attribute__component_component_id},
-           :cols=>[:id, :display_name,:node_node_id,:node_node_group_id]
-         },
-         {
-           :model_name => :node,
-           :join_cond=>{:id=> :component__node_node_id},
-           :cols=>[:id, :display_name]
-         },
-         {
-           :model_name => :node_group,
-           :join_cond=>{:id=> :component__node_node_group_id},
-           :cols=>[:id, :display_name]
-         }
-
-        ]
-
     end
     ### virtual column defs
     def qualified_attribute_name()
@@ -232,22 +197,6 @@ also related is allowing omission of columns mmentioned in jon condition; post p
       ds.all
     end
 
-=begin
-    def self.get_base_objects_with_index(attr_model_handle,attr_id_list,base_model_name)
-      return Array.new if attr_id_list.empty?
-      base_object_vc = "base_objects_#{base_model_name}".to_sym
-      wc = SQL.or(*attr_id_list.map{|id|{:id => id}})
-      fs = FieldSet.opt([:id,:component_component_id,base_object_vc],:attribute)
-      base_objects_info = get_objects(attr_model_handle,wc,fs)
-      return nil unless base_objects_info
-       base_objects_info.inject({}) do |h,row|
-        cmp_display_name = (row[:component]||{})[:display_name]
-        ng_display_name = (row[:node]||{})[:display_name]
-        next unless cmp_display_name and ng_display_name
-        h.merge(row[:id] => {:component => {:display_name => cmp_display_name}, :node => {:display_name => ng_display_name}})
-      end
-    end
-=end
    private
     ###### helper fns
     def self.propagate_changes(attr_changes) 

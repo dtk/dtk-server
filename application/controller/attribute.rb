@@ -2,12 +2,12 @@ module XYZ
   class AttributeController < Controller
 
     def list_under_component(component_id)
-pp get_base_object_dataset(:component).ppsql
+pp get_base_object_dataset_needs_to_be_set(:component).ppsql
     end
 
     def list_under_node(node_id)
-      base_ds = get_base_object_dataset(:node)
-      ds = base_ds.where(:param_node_id => node_id.to_i).where_column_equal(:needs_to_be_set,true)
+      base_ds = get_base_object_dataset_needs_to_be_set(:node)
+      ds = base_ds.where(:node__id => node_id.to_i).where_column_equal(:needs_to_be_set,true)
       attribute_list = ds.all
       action_name = "list_qualified_attribute_name"
       tpl = R8Tpl::TemplateR8.new("#{model_name()}/#{action_name}",user_context())
@@ -17,8 +17,8 @@ pp get_base_object_dataset(:component).ppsql
    
     def list_under_datacenter(datacenter_id=nil)
       datacenter_id = IDHandle[:c => ret_session_context_id(), :model_name => :datacenter, :uri => "/datacenter/dc1"].get_id() unless datacenter_id
-      base_ds = get_base_object_dataset(:datacenter)
-      ds = base_ds.where(SQL::ColRef.coalesce(:node_group__param_datacenter_id,:node__param_datacenter_id) => datacenter_id).where_column_equal(:needs_to_be_set,true)
+      base_ds = get_base_object_dataset_needs_to_be_set(:datacenter)
+      ds = base_ds.where(SQL::ColRef.coalesce(:node_group__datacenter_id,:node__datacenter_id) => datacenter_id).where_column_equal(:needs_to_be_set,true)
 pp ds.ppsql
       attribute_list = ds.all
       action_name = "list_qualified_attribute_name"
@@ -47,11 +47,9 @@ pp ds.ppsql
       return {:content => tpl.render()}
     end
    private
-    def get_base_object_dataset(type)
-      @ds_cache ||= Hash.new
-      return @ds_cache[type] if @ds_cache[type]
+    def get_base_object_dataset_needs_to_be_set(type)
       field_set = Model::FieldSet.new(model_name,[:display_name,"base_object_#{type}".to_sym,:needs_to_be_set])
-      @ds_cache[type] = SearchObject.create_from_field_set(field_set,ret_session_context_id()).create_dataset()
+      SearchObject.create_from_field_set(field_set,ret_session_context_id()).create_dataset()
     end
   end
 end

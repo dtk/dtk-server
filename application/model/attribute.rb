@@ -70,7 +70,26 @@ module XYZ
          {
            :model_name => :component,
            :join_cond=>{:id=> :attribute__component_component_id},
-           :cols=>[:id, :display_name,{:node_node_id => :param_node_id}]
+           :cols=>[:id, :display_name,:node_node_id]
+         },
+         {
+           :model_name => :node,
+           :join_cond=>{:id=> :component__node_node_id},
+           :cols=>[:id, :display_name]
+         }
+        ]
+      virtual_column :base_object_node_group, :type => :json, :hidden => true, 
+        :remote_dependencies => 
+        [
+         {
+           :model_name => :component,
+           :join_cond=>{:id=> :attribute__component_component_id},
+           :cols=>[:id, :display_name,:node_node_group_id]
+         },
+         {
+           :model_name => :node_group,
+           :join_cond=>{:id=> :component__node_node_group_id},
+           :cols=>[:id, :display_name]
          }
         ]
 
@@ -85,12 +104,12 @@ module XYZ
          {
            :model_name => :node,
            :join_cond=>{:id=> :component__node_node_id},
-           :cols=>[:id, :display_name, {:datacenter_datacenter_id => :param_datacenter_id}]
+           :cols=>[:id, :display_name, {:datacenter_datacenter_id => :datacenter_id}]
          },
          {
            :model_name => :node_group,
            :join_cond=>{:id=> :component__node_node_group_id},
-           :cols=>[:id, :display_name, {:datacenter_datacenter_id => :param_datacenter_id}]
+           :cols=>[:id, :display_name, {:datacenter_datacenter_id => :datacenter_id}]
          }
         ]
 
@@ -115,21 +134,6 @@ also related is allowing omission of columns mmentioned in jon condition; post p
 =end
 
 
-      #TODO: deprecate or fix below
-      virtual_column :base_objects_node_group, :type => :json, :hidden => true, :remote_dependencies => 
-        [
-         {
-           :model_name => :component,
-           :join_cond=>{:id=> :attribute__component_component_id},
-           :cols=>[:id, :display_name,:node_node_group_id]
-         },
-         {
-           :model_name => :node_group,
-           :join_cond=>{:id=> :component__node_node_group_id},
-           :cols=>[:id, :display_name]
-         }
-
-        ]
 
       virtual_column :base_objects_node, :type => :json, :hidden => true, :remote_dependencies => 
         [
@@ -204,7 +208,7 @@ also related is allowing omission of columns mmentioned in jon condition; post p
       #TODO any more efficient way to get action_parent_idh and parent_idh info
       action_parent_idh = id_handle.get_top_container_id_handle(:datacenter)
       return nil unless action_parent_idh #this would happend if top container is not a datacenter TODO: see if this should be "trapped" at higher level
-      base_object = get_base_object(id_handle,:node_group)
+      base_object = get_attribute_with_base_object(id_handle,:node_group)
       new_item_hash = {
         :new_item => id_handle,
         :parent => action_parent_idh
@@ -214,15 +218,11 @@ also related is allowing omission of columns mmentioned in jon condition; post p
       propagate_changes([AttributeChange.new(id_handle,changed_value,action_id_handle)]) if action_id_handle
     end
 
-    def self.get_base_object(attr_id_handle,base_model_name)
-      base_object_vc = "base_objects_#{base_model_name}".to_sym
-      fs = FieldSet.opt([:id,:component_component_id,base_object_vc],:attribute)
-      base_object_info = get_objects(attr_id_handle.createMH,{:id => attr_id_handle.get_id()},fs).first
-      return nil unless base_object_info
-      cmp_display_name = (base_object_info[:component]||{})[:display_name]
-      ng_display_name = (base_object_info[base_model_name]||{})[:display_name]
-      return nil unless cmp_display_name and ng_display_name
-      {:component => {:display_name => cmp_display_name}, base_model_name => {:display_name => ng_display_name}}
+    def self.get_attribute_with_base_object(attr_id_handle,base_model_name)
+      field_set = FieldSet.new(:attribute,[:id,:display_name,"base_object_#{base_model_name}".to_sym])
+      filter = {:id => attr_id_handle.get_id()}
+      ds = SearchObject.create_from_field_set(field_set,attr_id_handle[:c],filter).create_dataset()
+      ds.all.first
     end
 
     def self.get_base_objects_with_index(attr_model_handle,attr_id_list,base_model_name)

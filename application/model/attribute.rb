@@ -62,7 +62,8 @@ module XYZ
       many_to_one :component, :node
 
       #base_objects
-      node_remote_dep = 
+      virtual_column :base_object_node, :type => :json, :hidden => true, 
+        :remote_dependencies => 
         [
          {
            :model_name => :component,
@@ -70,6 +71,44 @@ module XYZ
            :cols=>[:id, :display_name,{:node_node_id => :param_node_id}]
          }
         ]
+
+      virtual_column :base_object_datacenter, :type => :json, :hidden => true, 
+        :remote_dependencies => 
+        [
+         {
+           :model_name => :component,
+           :join_cond=>{:id=> :attribute__component_component_id},
+           :cols=>[:id, :display_name,:node_node_id]
+         },
+         {
+           :model_name => :node,
+           :join_cond=>{:id=> :component__node_node_id},
+           :cols=>[:id, :display_name, {:datacenter_datacenter_id => :param_datacenter_id}]
+         },
+         {
+           :model_name => :node_group,
+           :join_cond=>{:id=> :component__node_node_id},
+           :cols=>[:id, :display_name, {:datacenter_datacenter_id => :param_datacenter_id}]
+         }
+        ]
+
+
+      #TODO: fix below
+      virtual_column :base_objects_node_group, :type => :json, :hidden => true, :remote_dependencies => 
+        [
+         {
+           :model_name => :component,
+           :join_cond=>{:id=> :attribute__component_component_id},
+           :cols=>[:id, :display_name,:node_node_group_id]
+         },
+         {
+           :model_name => :node_group,
+           :join_cond=>{:id=> :component__node_node_group_id},
+           :cols=>[:id, :display_name]
+         }
+
+        ]
+
 =begin TODO: would like "search object link form"
 also related is allowing omission of columns mmentioned in jon condition; post processing when entering vcol def would added these in
          { {:relation => :this,
@@ -89,23 +128,8 @@ also related is allowing omission of columns mmentioned in jon condition; post p
          }
 =end
 
-      virtual_column :base_object_node, :type => :json, :hidden => true, :remote_dependencies => node_remote_dep
 
-      #TODO: fix below
-      virtual_column :base_objects_node_group, :type => :json, :hidden => true, :remote_dependencies => 
-        [
-         {
-           :model_name => :component,
-           :join_cond=>{:id=> :attribute__component_component_id},
-           :cols=>[:id, :display_name,:node_node_group_id]
-         },
-         {
-           :model_name => :node_group,
-           :join_cond=>{:id=> :component__node_node_group_id},
-           :cols=>[:id, :display_name]
-         }
 
-        ]
       virtual_column :base_objects_node, :type => :json, :hidden => true, :remote_dependencies => 
         [
          {

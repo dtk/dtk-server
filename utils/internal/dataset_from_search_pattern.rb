@@ -72,6 +72,8 @@ module XYZ
                 Sequel::SQL::StringExpression.like(el_args[0],Regexp.new(el_args[1]),{:case_insensitive=>true})
               when :oneof
                 SQL.or(*el_args[1].map{|x|{el_args[0] => x}})
+              when :boolean_eq
+                el_args[1].to_s == "0" ? SQL.not(el_args[0]) : el_args[0] 
               else
                 raise ErrorPatternNotImplemented.new(:equal_op,el_op) 
               end

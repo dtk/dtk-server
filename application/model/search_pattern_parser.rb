@@ -141,7 +141,7 @@ module XYZ
       end
       ret
     end
-    FilterOperationsParsed = [:eq, :lt, :lte, :gt, :gte, "match-prefix".to_sym, :regex, :oneof] #TODO: just partial list
+    FilterOperationsParsed = [:eq, :lt, :lte, :gt, :gte, "match-prefix".to_sym, :regex, :oneof, :boolean_eq] #TODO: just partial list
 
     def ret_order_by(hash_input)
       order_by = find_key_from_input(:order_by,hash_input)
@@ -170,6 +170,8 @@ module XYZ
     #return op in symbol form and args
     def get_op_and_args(expr)
       raise ErrorParsing.new(:expression,expr) unless expr.kind_of?(Array)
+#TODO hack until booeln eq fixed
+return [:boolean_eq,expr[1..expr.size-1]] if expr.first.to_s == ":"
       [ret_symbol(expr.first),expr[1..expr.size-1]]
     end
 

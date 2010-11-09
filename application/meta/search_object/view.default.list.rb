@@ -7,6 +7,9 @@
           }}
       ],
       :field_list => [
+          {:relation => {
+             :type => 'text'
+          }},
           {:display_name => {
               :type => 'text',
               :help => '',

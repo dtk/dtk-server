@@ -10,9 +10,6 @@
         :type=>:text,
         :size=>50
     },
-    :attribute_value=>{
-        :type=>:json,
-    },
     :read_only=>{
         :type=>:boolean,
     },

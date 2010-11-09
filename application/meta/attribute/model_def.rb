@@ -13,7 +13,7 @@
     :attribute_value=>{
         :type=>:json,
     },
-    :base_object=>{
+    :required=>{
         :type=>:json,
     },
   },

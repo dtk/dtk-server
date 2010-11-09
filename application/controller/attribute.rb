@@ -19,6 +19,7 @@ pp get_base_object_dataset(:component).ppsql
       datacenter_id = IDHandle[:c => ret_session_context_id(), :model_name => :datacenter, :uri => "/datacenter/dc1"].get_id() unless datacenter_id
       base_ds = get_base_object_dataset(:datacenter)
       ds = base_ds.where(SQL::ColRef.coalesce(:node_group__param_datacenter_id,:node__param_datacenter_id) => datacenter_id).where_column_equal(:needs_to_be_set,true)
+pp ds.ppsql
       attribute_list = ds.all
       action_name = "list_qualified_attribute_name"
       tpl = R8Tpl::TemplateR8.new("#{model_name()}/#{action_name}",user_context())

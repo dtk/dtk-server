@@ -16,7 +16,7 @@ module XYZ
         :remote_dependencies => 
           [{
            :model_name => :attribute_link,
-           :join_cond=>{:output_id=> :id},
+           :join_cond=>{:output_id=> :attribute__id},
            :cols=>[:output_id]
           }],
           :fn => SQL.and({:attribute__value_asserted => nil},{:attribute__value_derived => nil},
@@ -80,7 +80,7 @@ module XYZ
          {
            :model_name => :component,
            :join_cond=>{:id=> :attribute__component_component_id},
-           :cols=>[:id, :display_name,:node_node_id]
+           :cols=>[:id, :display_name,:node_node_id,:node_node_group_id]
          },
          {
            :model_name => :node,
@@ -89,13 +89,33 @@ module XYZ
          },
          {
            :model_name => :node_group,
-           :join_cond=>{:id=> :component__node_node_id},
+           :join_cond=>{:id=> :component__node_node_group_id},
            :cols=>[:id, :display_name, {:datacenter_datacenter_id => :param_datacenter_id}]
          }
         ]
 
+=begin TODO: would like "search object link form"
+also related is allowing omission of columns mmentioned in jon condition; post processing when entering vcol def would added these in
+         { {:relation => :this
+           },
+           {:relation => :component,
+            :columns => [:id, :display_name]
+           },
+           [
+             {:relation => :node,
+              :columns => [:id, :display_name],
+              :params => [:datacenter_id]
+             },
+             {:relation => :node_group,
+              :columns => [:id, :display_name],
+              :params => [:datacenter_id]
+              }
+           ]
+         }
+=end
 
-      #TODO: fix below
+
+      #TODO: deprecate or fix below
       virtual_column :base_objects_node_group, :type => :json, :hidden => true, :remote_dependencies => 
         [
          {
@@ -110,27 +130,6 @@ module XYZ
          }
 
         ]
-
-=begin TODO: would like "search object link form"
-also related is allowing omission of columns mmentioned in jon condition; post processing when entering vcol def would added these in
-         { {:relation => :this,
-            :columns => [],
-           },
-           {:relation => :component,
-            :columns => [:id, :display_name]
-           },
-           [
-             {:relation => :node,
-              :columns => [:id, :display_name]},
-             {:link => node_group_member,
-              :relation => :node_group,
-              :columns => [:id, :display_name]
-              }
-           ]
-         }
-=end
-
-
 
       virtual_column :base_objects_node, :type => :json, :hidden => true, :remote_dependencies => 
         [

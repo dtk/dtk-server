@@ -49,10 +49,10 @@ module XYZ
           end
 
           def self.ret_sequel_filter(hash)
-            #TODO: just treating "and" now
+            #TODO: just treating "and" and "or" now
             #TODO: some below use Sequel others are wrapper SQL in sql.rb; clean up
             op,args = get_op_and_args(hash)
-            raise ErrorPatternNotImplemented.new(:filter_operation,op) unless (op == :and)
+            raise ErrorPatternNotImplemented.new(:filter_operation,op) unless [:and,:or].include?(op)
             and_list = args.map do |el|
               el_op,el_args = get_op_and_args(el)
               case el_op
@@ -78,7 +78,14 @@ module XYZ
                 raise ErrorPatternNotImplemented.new(:equal_op,el_op) 
               end
             end
-            SQL.and(*and_list)
+            case op
+              when :and
+                SQL.and(*and_list)
+              when :or
+                SQL.or(*and_list)
+              else
+                raise Error.new("unexpected operator #{op}")
+            end
           end
 
          private

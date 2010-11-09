@@ -220,11 +220,19 @@ also related is allowing omission of columns mmentioned in jon condition; post p
 
     def self.get_attribute_with_base_object(attr_id_handle,base_model_name)
       field_set = FieldSet.new(:attribute,[:id,:display_name,"base_object_#{base_model_name}".to_sym])
-      filter = {:id => attr_id_handle.get_id()}
+      filter = [:and,[:eq,:id,attr_id_handle.get_id()]]
       ds = SearchObject.create_from_field_set(field_set,attr_id_handle[:c],filter).create_dataset()
       ds.all.first
     end
 
+    def self.get_attributes_with_base_objects(attr_model_handle,attr_id_list,base_model_name)
+      field_set = FieldSet.new(:attribute,[:id,:display_name,"base_object_#{base_model_name}".to_sym])
+      filter = [:or] + attr_id_list.map{|id|[:eq,:id,id]}
+      ds = SearchObject.create_from_field_set(field_set,attr_model_handle[:c],filter).create_dataset()
+      ds.all
+    end
+
+=begin
     def self.get_base_objects_with_index(attr_model_handle,attr_id_list,base_model_name)
       return Array.new if attr_id_list.empty?
       base_object_vc = "base_objects_#{base_model_name}".to_sym
@@ -239,7 +247,7 @@ also related is allowing omission of columns mmentioned in jon condition; post p
         h.merge(row[:id] => {:component => {:display_name => cmp_display_name}, :node => {:display_name => ng_display_name}})
       end
     end
-
+=end
    private
     ###### helper fns
     def self.propagate_changes(attr_changes) 

@@ -38,7 +38,7 @@ module XYZ
 
     def self.create_from_field_set(field_set,c,filter=nil)
       sp = {:relation => field_set.model_name, :columns => field_set.cols}
-      sp.merge!(filter) if filter
+      sp.merge!(:filter => filter) if filter
       hash = {:search_pattern => SearchPattern.create(sp)}
       SearchObject.new(hash,c)
     end

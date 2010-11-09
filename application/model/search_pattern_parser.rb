@@ -123,7 +123,7 @@ module XYZ
       ret = Array.new
       if filter.kind_of?(Array)
         op,args = get_op_and_args(filter)
-        raise ErrorPatternNotImplemented.new(:filter_operation,op) unless (op == :and)
+        raise ErrorPatternNotImplemented.new(:filter_operation,op) unless [:and,:or].include?(op)
         ret << op
         args.each do |el|
           el_op,el_args = get_op_and_args(el)

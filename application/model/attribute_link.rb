@@ -42,7 +42,8 @@ module XYZ
       returning_cols_opts = {:returning_cols => [:id,:display_name,:action_id,:old_val,{:value_derived => :new_val}]}
       update_ret = update_from_select(output_attr_mh,FieldSet.new(:attribute,[:value_derived]),attrs_to_change_ds,returning_cols_opts)
 
-      base_objects = Attribute.get_base_objects_with_index(attr_mh,update_ret.map{|r|r[:id]},:node)
+      attrs_with_base_objects = Attribute.get_attributes_with_base_objects(attr_mh,update_ret.map{|r|r[:id]},:node)
+      indexed_attrs_with__base_objects = attrs_with_base_objects.inject({}){|h,row|h.merge(row[:id] => row)}
       #create the new pending changes
       parent_action_mh = attr_changes.first.action_id_handle.createMH()
       new_item_hashes = update_ret.map do |r|
@@ -51,7 +52,7 @@ module XYZ
           :parent => parent_action_mh.createIDH(:guid => r[:action_id]),
           :change => {:old => r[:old_val], :new => r[:new_val]}
         }
-        base_object = base_objects[r[:id]]
+        base_object = indexed_attrs_with__base_objects[r[:id]]
         new_item_hash.merge(base_object ? {:base_object => base_object} : {})
       end
       Action.create_pending_change_items(new_item_hashes)

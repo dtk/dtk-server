@@ -13,8 +13,11 @@
     :attribute_value=>{
         :type=>:json,
     },
+    :read_only=>{
+        :type=>:boolean,
+    },
     :required=>{
-        :type=>:json,
+        :type=>:boolean,
     },
   },
   :relationships=>{

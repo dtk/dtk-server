@@ -131,6 +131,8 @@ module XYZ
         concrete_models = models.reject {|m| m.top?}
         concrete_models.each{|model| model.apply_migration_defs(:up)}
         concrete_models.each{|model| model.set_global_db_rel_info()}
+        #returns model_names
+        concrete_models.map{|klass|ret_relation_type(klass)}
       end
      #######
      protected

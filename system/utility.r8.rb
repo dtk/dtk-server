@@ -1,9 +1,13 @@
 module R8Tpl
   module Utility
     module I18n
-      def get_model_i18n(model_name,user)
-        user_language = nil #TODO: stub to pull (if it exists language from user object
-        language = user_language || R8::Config[:default_language]
+      def build_js_model_caches(user=nil)
+        build_model_defs_js_cache()
+        build_model_i18n_js_cache(user)
+      end
+
+      def get_model_i18n(model_name,user=nil)
+        language = (user and user.respond_to?(:language)) ? user.language : R8::Config[:default_language]
         return Cache[model_name][language] if (Cache[model_name] and Cache[model_name][language])
 
         content = Hash.new
@@ -26,9 +30,8 @@ module R8Tpl
         set_and_ret_cache(model_name,language,content)
       end
 
-      def get_model_options(model_name)
-        user_language = nil #TODO: stub to pull (if it exists language from user object
-        language = user_language || R8::Config[:default_language]
+      def get_model_options(model_name,user=nil)
+        language = (user and user.respond_to?(:language)) ? user.language : R8::Config[:default_language]
         return Cache[model_name][language][:options_list] if (Cache[model_name] and Cache[model_name][language] and Cache[model_name][language][:options_list])
 
         return nil
@@ -47,11 +50,10 @@ module R8Tpl
         Cache[model_name][:model_defs] ||= content
       end
 
+
 #TODO: build role based cache versions
       def build_model_defs_js_cache()
-        if(!Cache[:app])
-          set_app_def()
-        end
+        set_app_def() unless Cache[:app]
 
         model_defs = Hash.new
         Cache[:app][:model_list].each do |model|
@@ -59,16 +61,12 @@ module R8Tpl
         end
         cache_str = 'R8.Model.defs='+JSON.pretty_generate(model_defs)+';'
         cache_file_name = "#{R8::Config[:js_file_write_path]}/model_defs.cache.js"
-        cache_file_handle = File.open(cache_file_name, 'w')
-        cache_file_handle.write(cache_str)
-        cache_file_handle.close
+        File.open(cache_file_name, 'w') {|fhandle|fhandle.write(cache_str)}
       end
 
 #TODO: build language based cache versions
       def build_model_i18n_js_cache(user)
-        if(!Cache[:app])
-          set_app_def()
-        end
+        set_app_def() unless Cache[:app]
 
         model_i18n = Hash.new
         Cache[:app][:model_list].each do |model|
@@ -77,9 +75,7 @@ module R8Tpl
 
         cache_str = 'R8.Model.i18n='+JSON.pretty_generate(model_i18n)+';'
         cache_file_name = "#{R8::Config[:js_file_write_path]}/model.i18n.cache.js"
-        cache_file_handle = File.open(cache_file_name, 'w')
-        cache_file_handle.write(cache_str)
-        cache_file_handle.close
+        File.open(cache_file_name, 'w') {|fhandle|fhandle.write(cache_str)}
       end
 
       def set_app_def()

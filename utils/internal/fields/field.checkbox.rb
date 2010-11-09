@@ -12,8 +12,9 @@ class Fieldcheckbox < Fieldbase
    # This returns the Edit View of a input of type checkbox HTML form,
    #protected function
   def get_field_edit_html()
-    if(!@value.nil? && (@value == '1' || @value == 1)) then
-      checked = 'checked="1"'
+#    if(!@value.nil? && (@value == '1' || @value == 1)) then
+    if(!@value.nil? && @value == true) then
+      checked = 'checked="true"'
     else
       checked = ''
     end
@@ -31,8 +32,8 @@ class Fieldcheckbox < Fieldbase
 #TODO: revisit and add leading hidden field for proper handling of unchecked form submissions
    #protected function
   def get_field_edit_rptl()
-    return '<input type="hidden" id="' + @id + '-hidden" name="' + @name + '" value="0" />
-    <input type="checkbox" id="' + @id + '" name="' + @name + '" class="' + @class_txt + '" value="1" checked="{%=' + @model_name + '[:' + @name + ']%}" />
+    return '<input type="hidden" id="' + @id + '-hidden" name="' + @name + '" value="false" />
+    <input type="checkbox" id="' + @id + '" name="' + @name + '" class="' + @class_txt + '" value="true" {%=' + @model_name + '[:' + @name + '_checked]%}" />
     '
   end
 
@@ -40,7 +41,7 @@ class Fieldcheckbox < Fieldbase
    #protected function
 #TODO: revisit and add leading hidden field for proper handling of unchecked form submissions
   def get_field_display_rtpl()
-    return '<input disabled="disabled" type="checkbox" id="' + @id + '" name="' + @name + '" class="' + @class_txt + '" value="1" checked="{%=' + @model_name + '[:' + @name + ']%}" />'
+    return '<input disabled="disabled" type="checkbox" id="' + @id + '" name="' + @name + '" class="' + @class_txt + '" value="true" {%=' + @model_name + '[:' + @name + '_checked]%}" />'
   end
 
   def get_field_display_html()

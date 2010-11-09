@@ -59,7 +59,6 @@ if (!R8.Search) {
 
 					if(currentSearch == 'new') {
 						R8.Search.searchObjList[searchContext]['searches'][currentSearch]['id'] = '';
-						sNameElem.value = 'Autosaved-Stub 4 Now';
 					}
 					if(sNameElem.value == '') {
 						alert('Saved searches must have a name');
@@ -212,7 +211,7 @@ if (!R8.Search) {
 
 					switch(fieldDef['type']) {
 						case "boolean":
-							var fieldCondition = (fieldCondElem.get('checked') == true) ? fieldCondElem.get('value') : '0';
+							var fieldCondition = (fieldCondElem.get('checked') == true) ? true : false;
 							break;
 						default:
 							var fieldCondition = fieldCondElem.get('value');
@@ -331,7 +330,7 @@ if (!R8.Search) {
 							if(fieldDef['type'] == 'select') {
 								fieldCondition = "'"+optionsList[fieldCondition]+"'";
 							} else if(fieldDef['type'] == 'boolean') {
-								fieldCondition = (filterDef[2] == '1') ? 'Checked' : 'Unchecked';
+								fieldCondition = (filterDef[2] == true) ? 'Checked' : 'Unchecked';
 							} else {
 								fieldCondition = "'"+fieldCondition+"'";
 							}
@@ -582,10 +581,10 @@ if (!R8.Search) {
 							inputElem.setAttribute('id',filterId+'-condition');
 							inputElem.setAttribute('name',filterId+'-condition');
 							inputElem.setAttribute('type','checkbox');
-							inputElem.setAttribute('value','1');
+							inputElem.setAttribute('value',true);
 
 							if(filterDef != null && typeof(filterDef) != 'undefined') {
-								(filterDef[2] == 1) ? inputElem.checked=true: inputElem.checked=false;
+								(filterDef[2] == true) ? inputElem.checked=true: inputElem.checked=false;
 							}
 							break;
 					}

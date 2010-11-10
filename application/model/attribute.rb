@@ -31,8 +31,6 @@ module XYZ
       column :required, :boolean #whether required for this attribute to have a value inorder to execute actions for parent component; TBD: may be indexed by action
 
       column :function, :json
-      #TBD: may remove  :propagation_type
-      column :propagation_type, :varchar, :size => 20, :default => "immediate" #whether a propagated new value should be immediately set or whether it needs to go through approval, etc
 
       #TBD: do we want to factor output vars out and treat differently
       column :output_variable, :boolean # set to true if as a result of recipe execution var gets computed

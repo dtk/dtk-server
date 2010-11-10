@@ -13,17 +13,16 @@ module XYZ
           raise Error.new("illegal model name (#{relation_in_search_pattern}) in search pattern") unless DB_REL_DEF[relation_in_search_pattern]
 
           remote_col_info = search_object.field_set().related_remote_column_info()
-          sequel_ds = SimpleSearchPattern::ret_sequel_ds(search_object.db.empty_dataset(),search_pattern,mh_in_search_pattern,remote_col_info)
+          vcol_fns = Hash.new
+          sequel_ds = SimpleSearchPattern::ret_sequel_ds(search_object.db.empty_dataset(),search_pattern,mh_in_search_pattern,remote_col_info,vcol_fns)
           return nil unless sequel_ds
           process_local_and_remote_dependencies(search_object,self.new(mh_in_search_pattern,sequel_ds),remote_col_info)
         end
 
        private
-        def process_local_and_remote_dependencies(search_object,simple_dataset,remote_col_info=nil)
+        def process_local_and_remote_dependencies(search_object,simple_dataset,remote_col_info=nil,vcol_fns=nil)
           model_handle = simple_dataset.model_handle()
-          pp [:wo_related_col,simple_dataset.ppsql]
-
-          return simple_dataset unless remote_col_info
+          return simple_dataset unless (remote_col_info or vcol_fns)
 
           graph_ds = simple_dataset.from_self(:alias => model_handle[:model_name])
           remote_col_info.each do |join_info|
@@ -37,25 +36,28 @@ module XYZ
         end
 
         module SimpleSearchPattern
-          def self.ret_sequel_ds(ds,search_pattern,model_handle,remote_col_info=nil)
+          def self.ret_sequel_ds(ds,search_pattern,model_handle,remote_col_info=nil,vcol_fns=nil)
             ds_add = ret_sequel_ds_with_relation(ds,search_pattern)
             return nil unless ds_add; ds = ds_add
         
             ds_add = ret_sequel_ds_with_columns(ds,search_pattern,model_handle,remote_col_info)
             return nil unless ds_add; ds = ds_add
           
-            ds = ret_sequel_ds_with_filter(ds,search_pattern,model_handle)
+            ds = ret_sequel_ds_with_filter(ds,search_pattern,model_handle,vcol_fns)
             ret_sequel_ds_with_order_by_and_paging(ds,search_pattern)
           end
 
-          def self.ret_sequel_filter(hash,model_handle)
+          #if vcol_fn is passed in, it will be a hash and after this fn called it will have all the vicols with fns
+          def self.ret_sequel_filter(hash,model_handle,vcol_fn=nil)
             #TODO: just treating "and" and "or" now
             #TODO: some below use Sequel others are wrapper SQL in sql.rb; clean up
             op,args = get_op_and_args(hash)
             raise ErrorPatternNotImplemented.new(:filter_operation,op) unless [:and,:or].include?(op)
-            and_list = args.map do |el|
-              el_op,el_args = get_filter_condition_op_and_args(el,model_handle)
-              case el_op
+            and_list = Array.new
+            args.each do |el|
+              el_op,el_args = get_filter_condition_op_and_args!(vcol_fn,el,model_handle)
+              next if el_op.nil? #this can happen if el has a vcol in it
+              and_list << case el_op
                when :eq
                 if el_args[1].kind_of?(TrueClass)
                   el_args[0]
@@ -82,6 +84,7 @@ module XYZ
                 raise ErrorPatternNotImplemented.new(:equal_op,el_op) 
               end
             end
+            return nil if and_list.empty?
             case op
               when :and
                 SQL.and(*and_list)
@@ -136,10 +139,11 @@ module XYZ
             ds.select(*(processed_field_set.cols))
           end
 
-          def self.ret_sequel_ds_with_filter(ds,search_pattern,model_handle)
+          def self.ret_sequel_ds_with_filter(ds,search_pattern,model_handle,vcol_fns=nil)
             filter_hash = search_pattern.find_key(:filter)
             return ds if filter_hash.empty?
-            sequel_where_clause = ret_sequel_filter(filter_hash,model_handle)
+            sequel_where_clause = ret_sequel_filter(filter_hash,model_handle,vcol_fns)
+            return ds unless sequel_where_clause
             ds.where(sequel_where_clause)
           end
 
@@ -154,6 +158,31 @@ module XYZ
             raise ErrorParsing.new(:expression,expr) unless expr.kind_of?(Array)
             [expr.first,expr[1..expr.size-1]]
           end
+
+          # it returns cols and also adds hash elements for vcolumns that have fn defs
+          def self.get_filter_condition_op_and_args!(vcol_fns,expr,model_handle)
+            raise ErrorParsing.new(:expression,expr) unless expr.kind_of?(Array)
+            new_vcol_fns = has_virtual_column_with_fn_def?(expr,model_handle)
+            return [expr.first,expr[1..expr.size-1]] unless new_vcol_fns
+            raise Error.new("virtual column used in context not supported") unless vcol_fns
+            vcol_fns.merge!(new_vcol_fns)
+            nil
+          end
+
+          # check if virtual column and if so substitute fn def if it exists
+          def self.has_virtual_column_with_fn_def?(expr,model_handle)
+            vcols = model_handle.get_virtual_columns()
+            ret = Hash.new
+            expr[1..expr.size-1].each do |el|
+              next unless el.kind_of?(Symbol)
+              next unless vcols[el]
+              fn = vcols[el][:local_fn]
+              raise Error.new("Cannot have virtual column #{el} in filter unless there is a local fn def for it") unless fn
+              ret[el] = {:fn => fn, :expr => expr}
+            end
+            ret.empty? ? nil : ret
+          end
+=begin
           def self.get_filter_condition_op_and_args(expr,model_handle)
             raise ErrorParsing.new(:expression,expr) unless expr.kind_of?(Array)
             vcolumns = model_handle.get_virtual_columns()
@@ -168,7 +197,7 @@ module XYZ
             raise Error.new("Cannot have virtual column #{el} in filter unless there is a local fn def for it") unless fn
             fn
           end
-
+=end
           class ErrorPatternNotImplemented < ErrorNotImplemented
             def initialize(type,object)
               super("parsing item #{type} is not supported; it has form: #{object.inspect}")

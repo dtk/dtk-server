@@ -175,6 +175,8 @@ if (!R8.Search) {
 					this.renderOrderings(searchContext);
 
 					var searchNameElem = document.getElementById(searchContext+'-search_name');
+console.log(this.searchObjList[searchContext]['searches'][searchId]);
+//searchNameElem.value = 'blah';
 					searchNameElem.value = this.searchObjList[searchContext]['searches'][searchId]['display_name'];
 				},
 
@@ -714,9 +716,9 @@ if (!R8.Search) {
 
 				renderOrderingDisplay : function(searchContext,orderDef,orderIndex,updateOrdering) {
 					var searchInfo = R8.Search.getSearchInfo(searchContext);
-					var fieldDef = R8.Model.getFieldDef(searchInfo['modelName'],orderDef['field']);
+					var fieldDef = R8.Model.getFieldDef(searchInfo['modelName'],orderDef[':field'].replace(':',''));
 					var fieldLabel = fieldDef['i18n'];
-					var ordering = orderDef['order'];
+					var ordering = orderDef[':order'];
 //TODO: i18n the strings
 					var orderStr = 'Order By '+fieldLabel+' '+ordering;
 					var orderId = searchContext+'-'+orderIndex+'-ordering';
@@ -923,11 +925,13 @@ if (!R8.Search) {
 
 				setupColumnFields : function(searchContext) {
 					var searchId = this.searchObjList[searchContext]['currentSearch'];
+
 					if(searchId =='new') {
-						var columns = this.searchObjList[searchContext]['searches'][searchId]['search_pattern'][':columns'] = [];						
+						var columns = this.searchObjList[searchContext]['searches'][searchId]['search_pattern'][':columns'] = [];
 					} else {
 						var columns = this.searchObjList[searchContext]['searches'][searchId]['search_pattern'][':columns'];
 					}
+
 					var searchObj = this.searchObjList[searchContext]['searches'][searchId];
 					var modelName = searchObj['search_pattern'][':relation'].replace(':','');
 //TODO: why are new search objects passed with no : while existing ones have it?
@@ -938,7 +942,7 @@ if (!R8.Search) {
 					var displayColumns = [];
 
 					for(field in fieldDefs) {
-						if (columns != null && R8.Utils.in_array(columns, field)) {
+						if (columns != null && R8.Utils.in_array(columns, ":"+field)) {
 							displayColumns.push(field);
 							displayFieldsElem.options[displayFieldsElem.options.length] = new Option(fieldDefs[field]['i18n'], field, false, false);
 						} else {

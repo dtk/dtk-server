@@ -71,11 +71,13 @@ module XYZ
         [
          {
            :model_name => :component,
+           :join_type => :inner,
            :join_cond=>{:id=> :attribute__component_component_id},
            :cols=>[:id, :display_name,:node_node_id]
          },
          {
            :model_name => :node,
+           :join_type => :inner,
            :join_cond=>{:id=> :component__node_node_id},
            :cols=>[:id, :display_name]
          }
@@ -85,11 +87,13 @@ module XYZ
         [
          {
            :model_name => :component,
+           :join_type => :inner,
            :join_cond=>{:id=> :attribute__component_component_id},
            :cols=>[:id, :display_name,:node_node_group_id]
          },
          {
            :model_name => :node_group,
+           :join_type => :inner,
            :join_cond=>{:id=> :component__node_node_group_id},
            :cols=>[:id, :display_name]
          }
@@ -100,18 +104,17 @@ module XYZ
         [
          {
            :model_name => :component,
+           :join_type => :inner,
            :join_cond=>{:id=> :attribute__component_component_id},
            :cols=>[:id, :display_name,:node_node_id,:node_node_group_id]
          },
          {
            :model_name => :node,
-           :join_type => :left_outer,
            :join_cond=>{:id=> :component__node_node_id},
            :cols=>[:id, :display_name, {:datacenter_datacenter_id => :datacenter_id}]
          },
          {
            :model_name => :node_group,
-           :join_type => :left_outer,
            :join_cond=>{:id=> :component__node_node_group_id},
            :cols=>[:id, :display_name, {:datacenter_datacenter_id => :datacenter_id}]
          }

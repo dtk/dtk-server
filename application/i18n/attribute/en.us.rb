@@ -10,7 +10,7 @@
   :port_type => 'Port Type',
   :contstraints => 'Constraints',
   :description => 'Description',
-
+  :needs_to_be_set => "Needs to be set",
   :external_ref => 'Ext Attr Ref',
   :required_list => 'Req',
   :description_list => 'Descr',

@@ -9,7 +9,7 @@ module XYZ
       column :value_derived, :json
       column :value_actual, :json
       virtual_column :attribute_value, :type => :json, :local_dependencies => [:value_asserted,:value_derived]
-      virtual_column :is_unset, :type => :boolean, :hidden => true, :real_columns => [:value_asserted,:value_derived]
+      virtual_column :is_unset, :type => :boolean, :hidden => true, :local_dependencies => [:value_asserted,:value_derived]
 
       virtual_column :needs_to_be_set, :type => :boolean, :hidden => true, 
         :local_dependencies => [:value_asserted,:value_derived,:read_only,:required], 

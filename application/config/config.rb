@@ -52,6 +52,7 @@ R8::Config[:base_images_uri] = R8::Config[:base_uri] + "/images"
 #Database related config params
 R8::Config[:database] = Hash.new
 R8::Config[:database][:hostname] = "127.0.0.1"
+#R8::Config[:database][:hostname] = "ec2-174-129-28-204.compute-1.amazonaws.com"
 R8::Config[:database][:user] = "postgres"
 R8::Config[:database][:pass] = "bosco"
 R8::Config[:database][:name] = "db_main"

@@ -12,7 +12,8 @@
   :parent_name => 'Parent',
   :only_one_per_node => '1 Per Node',
   :ui => 'UI',
-
+  :updated_at => 'Date Modified',
+  :created_at => 'Date Created',
   :description_list => 'Descr',
   :external_ref_list => 'Ext Component Ref',
 }

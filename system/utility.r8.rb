@@ -7,7 +7,7 @@ module R8Tpl
       end
 
       def get_model_i18n(model_name,user=nil)
-        language = (user and user.respond_to?(:language)) ? user.language : R8::Config[:default_language]
+        language = ((user and user.respond_to?(:language)) ? user.language : nil) || R8::Config[:default_language]
         return Cache[model_name][language] if (Cache[model_name] and Cache[model_name][language])
 
         content = Hash.new
@@ -31,7 +31,7 @@ module R8Tpl
       end
 
       def get_model_options(model_name,user=nil)
-        language = (user and user.respond_to?(:language)) ? user.language : R8::Config[:default_language]
+        language = ((user and user.respond_to?(:language)) ? user.language : nil) || R8::Config[:default_language]
         return Cache[model_name][language][:options_list] if (Cache[model_name] and Cache[model_name][language] and Cache[model_name][language][:options_list])
 
         return nil

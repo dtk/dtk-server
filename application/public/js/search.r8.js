@@ -175,8 +175,6 @@ if (!R8.Search) {
 					this.renderOrderings(searchContext);
 
 					var searchNameElem = document.getElementById(searchContext+'-search_name');
-console.log(this.searchObjList[searchContext]['searches'][searchId]);
-//searchNameElem.value = 'blah';
 					searchNameElem.value = this.searchObjList[searchContext]['searches'][searchId]['display_name'];
 				},
 
@@ -931,7 +929,7 @@ console.log(this.searchObjList[searchContext]['searches'][searchId]);
 					} else {
 						var columns = this.searchObjList[searchContext]['searches'][searchId]['search_pattern'][':columns'];
 					}
-
+console.log(columns);
 					var searchObj = this.searchObjList[searchContext]['searches'][searchId];
 					var modelName = searchObj['search_pattern'][':relation'].replace(':','');
 //TODO: why are new search objects passed with no : while existing ones have it?
@@ -941,6 +939,19 @@ console.log(this.searchObjList[searchContext]['searches'][searchId]);
 					var displayFieldsElem = document.getElementById(searchContext+'-display-columns');
 					var displayColumns = [];
 
+					for(index in columns) {
+						var field = columns[index].replace(':','');
+						displayColumns.push(field);
+						displayFieldsElem.options[displayFieldsElem.options.length] = new Option(fieldDefs[field]['i18n'], field, false, false);
+					}
+
+					for(field in fieldDefs) {
+						if (!R8.Utils.in_array(columns, ":"+field)) {
+							availFieldsElem.options[availFieldsElem.options.length] = new Option(fieldDefs[field]['i18n'], field, false, false);
+						}
+					}
+
+/*
 					for(field in fieldDefs) {
 						if (columns != null && R8.Utils.in_array(columns, ":"+field)) {
 							displayColumns.push(field);
@@ -949,7 +960,7 @@ console.log(this.searchObjList[searchContext]['searches'][searchId]);
 							availFieldsElem.options[availFieldsElem.options.length] = new Option(fieldDefs[field]['i18n'], field, false, false);
 						}
 					}
-
+*/
 					var mvLeftElem = R8.Utils.Y.one('#'+searchContext+'-columns-mv-left');
 					var mvLeftEvnt = mvLeftElem.on('click',function(e,searchContext){
 						var selectedOptions = [];

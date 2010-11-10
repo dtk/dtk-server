@@ -160,6 +160,7 @@ module XYZ
           fk_col = DB.ret_parent_id_field_name(DB_REL_DEF[parent],DB_REL_DEF[model_name])
           {
             :model_name => parent,
+            :join_type => :left_outer,
             :join_cond=>{:id=>"#{model_name}__#{fk_col}".to_sym},
             :cols=>[:id, :display_name, :ref, :ref_num]
           }

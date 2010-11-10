@@ -17,6 +17,7 @@ module XYZ
         :remote_dependencies => 
           [{
            :model_name => :attribute_link,
+           :join_type=>:left_outer,
            :join_cond=>{:output_id=> :attribute__id},
            :cols=>[:output_id]
           }],
@@ -104,11 +105,13 @@ module XYZ
          },
          {
            :model_name => :node,
+           :join_type => :left_outer,
            :join_cond=>{:id=> :component__node_node_id},
            :cols=>[:id, :display_name, {:datacenter_datacenter_id => :datacenter_id}]
          },
          {
            :model_name => :node_group,
+           :join_type => :left_outer,
            :join_cond=>{:id=> :component__node_node_group_id},
            :cols=>[:id, :display_name, {:datacenter_datacenter_id => :datacenter_id}]
          }

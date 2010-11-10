@@ -30,7 +30,7 @@ module XYZ
             rs_opts = (join_info[:cols] ? Model::FieldSet.opt(join_info[:cols],join_info[:model_name]) : {}).merge :return_as_hash => true
             filter = join_info[:filter] ? SimpleSearchPattern::ret_sequel_filter(join_info[:filter],join_info[:model_name]) : nil
             right_ds = search_object.db.get_objects_just_dataset(model_handle.createMH(:model_name => join_info[:model_name]),filter,rs_opts)
-            graph_ds = graph_ds.graph(:left_outer,right_ds,join_info[:join_cond])
+            graph_ds = graph_ds.graph(join_info[:join_type]||:inner,right_ds,join_info[:join_cond])
           end
           opts = {} #TODO: stub
           graph_ds.paging_and_order(opts)

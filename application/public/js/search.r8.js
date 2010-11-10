@@ -64,7 +64,7 @@ if (!R8.Search) {
 						alert('Saved searches must have a name');
 						return;
 					}
-					R8.Search.searchObjList[searchContext]['searches'][currentSearch]['name'] = sNameElem.value;
+					R8.Search.searchObjList[searchContext]['searches'][currentSearch]['dispaly_name'] = sNameElem.value;
 
 					R8.Search.searchObjList[searchContext]['searches'][currentSearch]['search_pattern'][':columns'] = [];
 					var displayColumns = document.getElementById(searchContext+'-display-columns');
@@ -73,7 +73,7 @@ if (!R8.Search) {
 					for(var i=0; i < numColumns; i++) {
 						R8.Search.searchObjList[searchContext]['searches'][currentSearch]['search_pattern'][':columns'].push(':'+displayColumns.options[i].value);
 					}
-				
+
 					YUI().use("json", function (Y) {
 						var searchObjJsonStr = Y.JSON.stringify(R8.Search.searchObjList[searchContext]['searches'][currentSearch]);
 						var ssObjElem = document.getElementById(searchContext+'-saved-search-obj');
@@ -929,7 +929,7 @@ if (!R8.Search) {
 					} else {
 						var columns = this.searchObjList[searchContext]['searches'][searchId]['search_pattern'][':columns'];
 					}
-console.log(columns);
+
 					var searchObj = this.searchObjList[searchContext]['searches'][searchId];
 					var modelName = searchObj['search_pattern'][':relation'].replace(':','');
 //TODO: why are new search objects passed with no : while existing ones have it?

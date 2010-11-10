@@ -1,9 +1,13 @@
+
 if (!R8.Toolbar) {
 
-	(function(R8) {
+//	(function(R8) {
 		R8.Toolbar = function(options) {
 			return {
+				foo : null,
 				init : function(options) {
+this.foo = options.foo;
+return;
 					if(typeof(options['node']) == 'undefined') return false;
 
 					this.nodeId = options['node'];
@@ -91,13 +95,13 @@ if (!R8.Toolbar) {
 						toolbarNode.append(toolContent);
 						
 						R8.Utils.Y.one('#' + this.nodeId + '-tool-' + tool['name'] + '-exit').on('click', function(e){
-/*
-							var targetId = e.currentTarget.get('id') + '-content';
-							var toolContent = R8.Utils.Y.one('#' + targetId);
-							toolContent.setStyles({
-								'left': '0px'
-							});
-*/
+
+//							var targetId = e.currentTarget.get('id') + '-content';
+//							var toolContent = R8.Utils.Y.one('#' + targetId);
+//							toolContent.setStyles({
+//								'left': '0px'
+//							});
+
 							this.toolbarAnim.set('to', {
 								xy: [this.toolbarNode.getX(), this.toolbarNode.getY() - 30]
 							});
@@ -145,6 +149,14 @@ if (!R8.Toolbar) {
 					}
 				}
 			}
-		}();
-	})(R8);
+		};
+//	})(R8);
 }
+
+var tbar1 = R8.Toolbar();
+var tbar2 = R8.Toolbar();
+tbar1.init({'foo':'tbar1'});
+tbar2.init({'foo':'tbar2'});
+
+console.log('tbar1.foo:'+tbar1.foo);
+

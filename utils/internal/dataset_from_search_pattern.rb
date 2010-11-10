@@ -28,7 +28,7 @@ module XYZ
           graph_ds = simple_dataset.from_self(:alias => model_handle[:model_name])
           remote_col_info.each do |join_info|
             rs_opts = (join_info[:cols] ? Model::FieldSet.opt(join_info[:cols],join_info[:model_name]) : {}).merge :return_as_hash => true
-            filter = join_info[:filter] ? SimpleSearchPattern::ret_sequel_filter(join_info[:filter]) : nil
+            filter = join_info[:filter] ? SimpleSearchPattern::ret_sequel_filter(join_info[:filter],join_info[:model_name]) : nil
             right_ds = search_object.db.get_objects_just_dataset(model_handle.createMH(:model_name => join_info[:model_name]),filter,rs_opts)
             graph_ds = graph_ds.graph(:left_outer,right_ds,join_info[:join_cond])
           end
@@ -44,17 +44,17 @@ module XYZ
             ds_add = ret_sequel_ds_with_columns(ds,search_pattern,model_handle,remote_col_info)
             return nil unless ds_add; ds = ds_add
           
-            ds = ret_sequel_ds_with_filter(ds,search_pattern)
+            ds = ret_sequel_ds_with_filter(ds,search_pattern,model_handle)
             ret_sequel_ds_with_order_by_and_paging(ds,search_pattern)
           end
 
-          def self.ret_sequel_filter(hash)
+          def self.ret_sequel_filter(hash,model_handle)
             #TODO: just treating "and" and "or" now
             #TODO: some below use Sequel others are wrapper SQL in sql.rb; clean up
             op,args = get_op_and_args(hash)
             raise ErrorPatternNotImplemented.new(:filter_operation,op) unless [:and,:or].include?(op)
             and_list = args.map do |el|
-              el_op,el_args = get_op_and_args(el)
+              el_op,el_args = get_filter_condition_op_and_args(el,model_handle)
               case el_op
                when :eq
                 if el_args[1].kind_of?(TrueClass)
@@ -136,10 +136,10 @@ module XYZ
             ds.select(*(processed_field_set.cols))
           end
 
-          def self.ret_sequel_ds_with_filter(ds,search_pattern)
+          def self.ret_sequel_ds_with_filter(ds,search_pattern,model_handle)
             filter_hash = search_pattern.find_key(:filter)
             return ds if filter_hash.empty?
-            sequel_where_clause = ret_sequel_filter(filter_hash)
+            sequel_where_clause = ret_sequel_filter(filter_hash,model_handle)
             ds.where(sequel_where_clause)
           end
 
@@ -153,6 +153,20 @@ module XYZ
           def self.get_op_and_args(expr)
             raise ErrorParsing.new(:expression,expr) unless expr.kind_of?(Array)
             [expr.first,expr[1..expr.size-1]]
+          end
+          def self.get_filter_condition_op_and_args(expr,model_handle)
+            raise ErrorParsing.new(:expression,expr) unless expr.kind_of?(Array)
+            vcolumns = model_handle.get_virtual_columns()
+            [expr.first,expr[1..expr.size-1].map{|el|process_if_column(el,vcolumns)}]
+          end
+
+          # check if virtual column and if so substitute fn def if it exists
+          def self.process_if_column(el,vcolumns)
+            return el unless el.kind_of?(Symbol)
+            return el unless vcolumns[el]
+            fn = vcolumns[el][:local_fn]
+            raise Error.new("Cannot have virtual column #{el} in filter unless there is a local fn def for it") unless fn
+            fn
           end
 
           class ErrorPatternNotImplemented < ErrorNotImplemented

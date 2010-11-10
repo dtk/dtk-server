@@ -158,7 +158,15 @@ module XYZ
       self[:parent_model_name] = parent_model_name.to_sym if parent_model_name
       freeze
     end
-    
+
+    def get_virtual_columns()
+      DB_REL_DEF[self[:model_name]][:virtual_columns]
+    end
+
+    def get_columns()
+      DB_REL_DEF[self[:model_name]][:columns]
+    end
+
     #TODO: may remove DB.ret_parent_id_field_name and reroot all calls to this fn and variant that takes parent_model_name as arg
     def parent_id_field_name()
       return nil unless self[:parent_model_name]

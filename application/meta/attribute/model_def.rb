@@ -6,6 +6,9 @@
     :updated_at=>{
         :type=>:json,
     },
+    :attribute_value=>{
+        :type=>:text,
+    },
     :display_name=>{
         :type=>:text,
         :size=>50

@@ -64,7 +64,7 @@ if (!R8.Search) {
 						alert('Saved searches must have a name');
 						return;
 					}
-					R8.Search.searchObjList[searchContext]['searches'][currentSearch]['dispaly_name'] = sNameElem.value;
+					R8.Search.searchObjList[searchContext]['searches'][currentSearch]['display_name'] = sNameElem.value;
 
 					R8.Search.searchObjList[searchContext]['searches'][currentSearch]['search_pattern'][':columns'] = [];
 					var displayColumns = document.getElementById(searchContext+'-display-columns');

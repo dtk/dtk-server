@@ -27,7 +27,7 @@ module XYZ
       sp = nil_if_empty(input_hash["search_pattern"])
       hash = {
         :id => nil_if_empty(input_hash["id"]),
-        :display_name => nil_if_empty(input_hash["name"]),
+        :display_name => nil_if_empty(input_hash["search_name"]), #TODO: temp until fixed
         :search_pattern => sp ? SearchPattern.create(sp) : nil
       }
       ret = SearchObject.new(hash,c)

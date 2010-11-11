@@ -10,6 +10,8 @@ module XYZ
       column :value_actual, :json
       virtual_column :attribute_value, :type => :json, :local_dependencies => [:value_asserted,:value_derived],
         :sql_fn => SQL::ColRef.coalesce(:value_asserted,:value_derived)
+
+      column :type_link_attached, :varchar, :size => 10 #"input" | "output" | or nil  
       virtual_column :is_unset, :type => :boolean, :hidden => true, :local_dependencies => [:value_asserted,:value_derived]
 
       virtual_column :needs_to_be_set, :type => :boolean, :hidden => true, 
@@ -27,27 +29,21 @@ module XYZ
                          {:attribute_link__output_id => nil})
 
 
-      column :read_only, :boolean, :default => false
+      column :read_only, :boolean, :default => false #variable is autaomtcally set
       column :required, :boolean #whether required for this attribute to have a value inorder to execute actions for parent component; TBD: may be indexed by action
 
       column :function, :json
-
-      #TBD: do we want to factor output vars out and treat differently
-      column :output_variable, :boolean # set to true if as a result of recipe execution var gets computed
 
       #TODO: may unify the fields below and treat them all as types of constraints, which could be intersected, unioned, etc
       column :data_type, :varchar, :size => 25
       #TBD: whether to explicitly have an array or put this in data type or seamntic_type
       column :is_array, :boolean, :default => false
       column :semantic_type, :json
-      column :constraints, :varchar
 
       #TODO this probably does not belond here column :hidden, :boolean, :default => false
       column :port_type, :varchar, :size => 10 # null means no port; otherwise "input", "output", or "either"
       #TODO: may rename attribute_value to desired_value
 
-      #Boolean that indicates whether there is a executable script/recipe associated with the attribute
-      virtual_column :executable?, :type => :boolean, :hidden => true
       uri_remote_dependencies = 
         {:uri =>
         [
@@ -245,10 +241,6 @@ also related is allowing omission of columns mmentioned in jon condition; post p
       return nil unless attr_value.kind_of?(Array) #TBD: this should be error      
       attr_value.each{|v| return true if v.nil?}
       return nil
-    end
-
-    def executable?()
-      self[:external_ref].nil? ? false : true
     end
 
     def assoc_components_on_nodes()

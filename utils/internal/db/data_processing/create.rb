@@ -67,18 +67,25 @@ module XYZ
         sequel_select_with_cols = sequel_select.from_self.select(*columns.map{|col|overrides.has_key?(col) ? {overrides[col] => col} : col})
 
         #fn tries to return ids depending on whether db adater supports returning_id
+        ret = nil
         if ds.respond_to?(:insert_returning_sql) and parent_id_col
           returning_ids = Array.new
-          sql = ds.insert_returning_sql([:id,:display_name,parent_id_col],columns,sequel_select_with_cols)
+          returning_sql_cols = [:id,:display_name,parent_id_col] + (opts[:returning_sql_cols] || [])
+          sql = ds.insert_returning_sql(returning_sql_cols,columns,sequel_select_with_cols)
           fetch_raw_sql(sql){|row| returning_ids << row}
           IDInfoTable.update_instances(model_handle,returning_ids)
-          returning_ids.map{|row|model_handle.createIDH(:id => row[:id], :display_name => row[:display_name],:parent_guid => row[parent_id_col])}
+          ret = 
+            if opts[:returning_sql_cols]
+              returning_ids
+            else
+              returning_ids.map{|row|model_handle.createIDH(:id => row[:id], :display_name => row[:display_name],:parent_guid => row[parent_id_col])}
+          end
         else
           ds.import(columns,sequel_select_with_cols)
           #TODO: need to get ids and set 
           raise Error.new("have not implemented create_from_select when db adapter does not support insert_returning_sql or parent_id_col not set")
-          nil
         end
+        ret
       end
 
       def create_simple_instance?(new_uri,c,opts={})

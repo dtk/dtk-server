@@ -16,6 +16,7 @@ module XYZ
       return Array.new if attr_changes.empty?
       #build up pattern that traces from root id_handles in changes pending to directly connected links
       # link tracing would look like
+      #TODO: rewrite using a search object
       #TODO: below outdated after actual links updated
       # attribute(id_val_pairs).as(a1)([:value_asserted,:action_id])--(input_id)attribute_link(output_id)--attribute.as(a2)([:id]).where(:value_asserted => nil))
       #return a1[:value_asserted.as(:value_derived),:action_id],a2[:id]

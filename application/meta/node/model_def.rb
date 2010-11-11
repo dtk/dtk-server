@@ -36,7 +36,7 @@
         :size=>50
     },
     :disk_size=>{
-        :type=>'foo',
+        :type=>'numeric',
     },
     :ui=>{
         :type=>'json',

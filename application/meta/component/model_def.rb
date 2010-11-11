@@ -16,7 +16,7 @@
         :size=>15
     },
     :only_one_per_node=>{
-        :type=>:checkbox,
+        :type=>:boolean,
     },
     :version=>{
         :type=>:text,

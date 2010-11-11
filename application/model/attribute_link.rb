@@ -12,6 +12,17 @@ module XYZ
 
     #######################
     ### object procssing and access functions
+
+    def self.update_type_link_attached(attr_link_mh,type,new_link_info)
+      attr_mh = attr_link_mh.createMH(:model_name => :attribute)
+      index = "#{type}_id".to_sym
+#      select_wc = SQL.or(*new_link_info.map{|r|{:id => r[index]}})
+      select_wc = SQL.in(:id,new_link_info.map{|r|r[index]})
+      select_fs = FieldSet.opt([:id,{type.to_s => :type_link_attached}],:attribute)
+      select_ds = get_objects_just_dataset(attr_mh,select_wc,select_fs)
+      update_from_select(attr_mh,FieldSet.new(:attribute,[:type_link_attached]),select_ds)
+    end
+
     def self.propagate_over_dir_conn_equality_links(attr_changes)
       return Array.new if attr_changes.empty?
       #build up pattern that traces from root id_handles in changes pending to directly connected links

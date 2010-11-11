@@ -116,10 +116,12 @@ module XYZ
       attr_link_fs = FieldSet.new(:attribute,[:ref,attr_link_parent_col,:input_id,:output_id])
       override_attrs = {}
             
+      #TODO: encapsulate all this under attribute link
       opts = {:duplicate_refs => :no_check,:returning_sql_cols => [:input_id,:output_id]} 
       new_link_info = create_from_select(attr_link_mh,attr_link_fs,attr_link_ds,override_attrs,opts)
-
-
+      AttributeLink.update_type_link_attached(attr_link_mh,:input,new_link_info)
+      AttributeLink.update_type_link_attached(attr_link_mh,:output,new_link_info)
+      
       #TODO: links for monitor_items
       nil
     end

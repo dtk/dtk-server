@@ -7,6 +7,9 @@
         :type=>:text,
         :size=>50
     },
+    :parent_name=>{
+        :type=>:text
+    },
     :type=>{
         :type=>:select,
         :size=>15

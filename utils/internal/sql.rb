@@ -8,6 +8,9 @@ module XYZ
       return nil if x.nil?
       ~x
     end
+    def self.in(col,array)
+      {col => array}
+    end
     def self.or(*args)
       ret = nil
       args.reverse.each{|x|ret = or_aux(x,ret)}

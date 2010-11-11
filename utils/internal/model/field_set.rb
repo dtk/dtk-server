@@ -33,9 +33,9 @@ module XYZ
         FieldSet.new(@model_name,@cols - cols)
       end
 
-      #difference between only_including and & is not sysmetric and provides for items in self which are form {col => alias}
+      #difference between only_including and & is not sysmetric and provides for items in self which are form {alias => col}
       def only_including(field_set)
-        FieldSet.new(@model_name,@cols.reject{|col| not field_set.cols.include?(col.kind_of?(Hash) ? col.keys.first : col)})
+        FieldSet.new(@model_name,@cols.reject{|col| not field_set.cols.include?(col.kind_of?(Hash) ? col.values.first : col)})
       end
 
       def &(field_set)

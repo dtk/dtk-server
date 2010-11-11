@@ -148,7 +148,7 @@ module XYZ
       end
 
       def add_graph_aliases(aliases)
-        Dataset.new(model_handle,@sequel_ds.select_more(*aliases.map{|col,alias_info|{alias_info[2] => col}}))
+        Dataset.new(model_handle,@sequel_ds.select(*@sequel_ds.columns + aliases.map{|col,alias_info|{alias_info[2] => col}}))
       end
 
       def paging_and_order(opts)

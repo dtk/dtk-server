@@ -116,8 +116,8 @@ module XYZ
     end
 
     def [](x)
-      real_hash = super(x) 
-      return real_hash if real_hash 
+      #TODO: make more efficient by calling Hash::[] rather than HashObject::[]
+      return super(x) if has_key?(x)
       vc_info = ret_info_if_is_virtual_column(x)
       if vc_info
         #first check if it has an explicit path or possible parents defined; otherwise look for fn

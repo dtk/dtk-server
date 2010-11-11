@@ -118,14 +118,20 @@ if (!R8.Utils) {
 			},
 
 			//TODO: stub for now, figure out where to move this or change it up
-			in_array : function(arrayObj,value) {
+			inArray : function(arrayObj,value) {
+				value = (value instanceof Array) ? value : [value];
+
+				var ret_value = false;
 				var numItems = arrayObj.length;
 				for(var i = 0; i < numItems; i++) {
-					if(arrayObj[i] == value) {
-						return true;
+					for(item in value) {
+						if(arrayObj[i] == value[item]) {
+							ret_value = true;
+							i = numItems+1;
+						}
 					}
 				}
-				return false;
+				return ret_value;
 			},
 
 			cloneObj : function(o) {

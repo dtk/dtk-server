@@ -40,13 +40,15 @@
     },
     :ui=>{
         :type=>'json',
+        :omit => ['list','display','edit','filter','order_by']
     },
     :parent_name=>{
         :type=>'json',
         :no_column=>true
     },
     :parent_id=>{
-        :type=>'related'
+        :type=>'related',
+        :omit => ['all']
     },
   },
   :relationships =>{

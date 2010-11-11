@@ -69,8 +69,24 @@ if (!R8.Model) {
 					}
 				},
 
-				getFieldOptions : function(modelName,fieldName) {
+				getFieldOptions: function(modelName,fieldName) {
 					return this.i18n[modelName]['options_list'][fieldName];
+				},
+
+				isListable: function(fieldDef) {
+					return (typeof(fieldDef['omit']) == 'undefined' || !R8.Utils.inArray(fieldDef['omit'],['list','all'])) ? true : false;
+				},
+
+				isOrderable: function(fieldDef) {
+					return (typeof(fieldDef['omit']) == 'undefined' || !R8.Utils.inArray(fieldDef['omit'],['order_by','all'])) ? true : false;
+				},
+
+				isEditable: function(fieldDef) {
+					return (typeof(fieldDef['omit']) == 'undefined' || !R8.Utils.inArray(fieldDef['omit'],['edit','all'])) ? true : false;
+				},
+
+				isDisplayable: function(fieldDef) {
+					return (typeof(fieldDef['omit']) == 'undefined' || !R8.Utils.inArray(fieldDef['omit'],['display','all'])) ? true : false;
 				},
 
 				fieldDefs : {

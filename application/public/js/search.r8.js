@@ -440,6 +440,8 @@ if (!R8.Search) {
 
 					var fieldDefs = R8.Model.getFieldDefs(modelName);
 					for(field in fieldDefs) {
+						if(!R8.Model.isListable(fieldDefs[field])) continue;
+
 						var selected = ((fieldName != null && typeof(fieldName) != 'undefined') && fieldName == field) ? true : false;
 						var numOptions = availFieldsElem.options.length;
 						availFieldsElem.options[numOptions] = new Option(fieldDefs[field]['i18n'],field,false,selected);
@@ -558,7 +560,7 @@ if (!R8.Search) {
 
 								if(typeof(filterDef) !='undefined' && filterDef !=null) {
 									if(filterDef[2] instanceof Array) {
-										(R8.Utils.in_array(filterDef[2],option)) ? selected = true : selected = false;
+										(R8.Utils.inArray(filterDef[2],option)) ? selected = true : selected = false;
 									} else {
 										(filterDef[2] == option) ? selected = true : selected = false;
 									}
@@ -809,6 +811,8 @@ if (!R8.Search) {
 				
 					var fieldDefs = R8.Model.getFieldDefs(modelName);
 					for(field in fieldDefs) {
+						if(!R8.Model.isOrderable(fieldDefs[field])) continue;
+
 						var selected = ((fieldName != null && typeof(fieldName) != 'undefined') && fieldName == field) ? true : false;
 						var numOptions = availFieldsElem.options.length;
 						availFieldsElem.options[numOptions] = new Option(fieldDefs[field]['i18n'],field,false,selected);
@@ -946,14 +950,16 @@ if (!R8.Search) {
 					}
 
 					for(field in fieldDefs) {
-						if (!R8.Utils.in_array(columns, ":"+field)) {
+						if(!R8.Model.isListable(fieldDefs[field])) continue;
+
+						if (!R8.Utils.inArray(columns, ":"+field)) {
 							availFieldsElem.options[availFieldsElem.options.length] = new Option(fieldDefs[field]['i18n'], field, false, false);
 						}
 					}
 
 /*
 					for(field in fieldDefs) {
-						if (columns != null && R8.Utils.in_array(columns, ":"+field)) {
+						if (columns != null && R8.Utils.inArray(columns, ":"+field)) {
 							displayColumns.push(field);
 							displayFieldsElem.options[displayFieldsElem.options.length] = new Option(fieldDefs[field]['i18n'], field, false, false);
 						} else {

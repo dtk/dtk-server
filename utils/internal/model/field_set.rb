@@ -42,10 +42,11 @@ module XYZ
         FieldSet.new(@model_name,@cols & field_set.cols)
       end
 
-      def extra_local_columns()
+      def extra_local_columns(vcol_sql_fns=nil)
         return nil unless vcolumns = (DB_REL_DEF[model_name]||{})[:virtual_columns] 
         extra_cols = Array.new
-        @cols.each do |f|
+        cols = vcol_sql_fns ? (@cols + vcol_sql_fns.keys) : @cols
+        cols.each do |f|
           field_extra_cols = parse_local_dependencies(vcolumns[f])
           next if field_extra_cols.empty?
           field_extra_cols.each{|col| extra_cols << col unless (extra_cols.include?(col) or @cols.include?(col))}

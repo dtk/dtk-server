@@ -15,7 +15,7 @@ module XYZ
           sequel_filter,vcol_sql_fns = SimpleSearchPattern::ret_sequel_filter_and_vcol_sql_fns(search_pattern,mh_in_search_pattern)
 
           remote_col_info = search_object.related_remote_column_info(vcol_sql_fns)
-          sequel_ds = SimpleSearchPattern::ret_sequel_ds(search_object.db.empty_dataset(),search_pattern,sequel_filter,mh_in_search_pattern,remote_col_info)
+          sequel_ds = SimpleSearchPattern::ret_sequel_ds(search_object.db.empty_dataset(),search_pattern,sequel_filter,mh_in_search_pattern,remote_col_info,vcol_sql_fns)
           return nil unless sequel_ds
           process_local_and_remote_dependencies(search_object,self.new(mh_in_search_pattern,sequel_ds),remote_col_info,vcol_sql_fns)
         end
@@ -45,11 +45,11 @@ module XYZ
         end
 
         module SimpleSearchPattern
-          def self.ret_sequel_ds(ds,search_pattern,sequel_filter,model_handle,remote_col_info=nil)
+          def self.ret_sequel_ds(ds,search_pattern,sequel_filter,model_handle,remote_col_info=nil,vcol_sql_fns=nil)
             ds_add = ret_sequel_ds_with_relation(ds,search_pattern)
             return nil unless ds_add; ds = ds_add
         
-            ds_add = ret_sequel_ds_with_columns(ds,search_pattern,model_handle,remote_col_info)
+            ds_add = ret_sequel_ds_with_columns(ds,search_pattern,model_handle,remote_col_info,vcol_sql_fns)
             return nil unless ds_add; ds = ds_add
           
             ds = ret_sequel_ds_with_filter(ds,sequel_filter)
@@ -123,7 +123,7 @@ module XYZ
             ds.from(sql_tbl_name)
           end
 
-          def self.ret_sequel_ds_with_columns(ds,search_pattern,model_handle,remote_col_info=nil)
+          def self.ret_sequel_ds_with_columns(ds,search_pattern,model_handle,remote_col_info=nil,vcol_sql_fns=nil)
             base_field_set = search_pattern.field_set()
             model_name = model_handle[:model_name]
             columns = base_field_set.cols
@@ -145,7 +145,7 @@ module XYZ
               cols_to_add = cols_to_add + cols_to_add_remote
             end
 
-            cols_to_add_local = base_field_set.extra_local_columns()
+            cols_to_add_local = base_field_set.extra_local_columns(vcol_sql_fns)
             cols_to_add = cols_to_add + cols_to_add_local if cols_to_add_local
 
             processed_field_set = processed_field_set.with_added_cols(*cols_to_add) 

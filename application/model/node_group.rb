@@ -118,7 +118,7 @@ module XYZ
             
       opts = {:duplicate_refs => :no_check,:returning_sql_cols => [:input_id,:output_id]} 
       new_link_info = create_from_select(attr_link_mh,attr_link_fs,attr_link_ds,override_attrs,opts)
-      pp [:foo,x] #TODO: stub to update type_link_attached
+
 
       #TODO: links for monitor_items
       nil

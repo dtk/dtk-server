@@ -147,6 +147,13 @@ module XYZ
         Dataset.new(model_handle,sequel_join)
       end
 
+      def paging_and_order(opts)
+        any_change = {}
+        sequel_ds = DB.ret_paging_and_order_added_to_dataset(@sequel_ds,opts,any_change)
+        return self unless any_change[:changed]
+        Dataset.new(model_handle(),sequel_ds)
+      end
+
       def all()
         ret = ArrayObject.new
         @sequel_ds.all.map do |row|
@@ -201,7 +208,9 @@ module XYZ
       end
 
       def paging_and_order(opts)
-        sequel_ds = DB.ret_paging_and_order_added_to_dataset(@sequel_ds,opts)
+        any_change = {}
+        sequel_ds = DB.ret_paging_and_order_added_to_dataset(@sequel_ds,opts,any_change)
+        return self unless any_change[:changed]
         Graph.new(sequel_ds,@model_name_info,@c)
       end
 

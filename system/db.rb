@@ -39,10 +39,11 @@ module XYZ
     include RestURI unless included_modules.include?(RestURI)
 
     #TODO: may move to dataset_from_search_pattern.rb
-    def self.ret_paging_and_order_added_to_dataset(ds,opts)
+    def self.ret_paging_and_order_added_to_dataset(ds,opts,any_change={})
       ret = ds
       order_by_opts = opts[:order_by]
       if order_by_opts
+        any_change[:changed] = true
         order_by_opts.each do |order_by_el|
           #TBD: check that it is legal field
           col = order_by_el[:field]
@@ -53,6 +54,7 @@ module XYZ
       end
       paging_opts =  opts[:page] || opts[:paging] #TBD: should switch over to just paging
       if paging_opts
+        any_change[:changed] = true
         if paging_opts[:limit] and  paging_opts[:start]
           ret = ret.limit(paging_opts[:limit],paging_opts[:start])
         elsif paging_opts[:limit]

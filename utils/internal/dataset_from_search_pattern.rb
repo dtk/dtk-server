@@ -16,20 +16,28 @@ module XYZ
           vcol_fns = Hash.new
           sequel_ds = SimpleSearchPattern::ret_sequel_ds(search_object.db.empty_dataset(),search_pattern,mh_in_search_pattern,remote_col_info,vcol_fns)
           return nil unless sequel_ds
-          process_local_and_remote_dependencies(search_object,self.new(mh_in_search_pattern,sequel_ds),remote_col_info)
+          process_local_and_remote_dependencies(search_object,self.new(mh_in_search_pattern,sequel_ds),remote_col_info,vcol_fns)
         end
 
        private
         def process_local_and_remote_dependencies(search_object,simple_dataset,remote_col_info=nil,vcol_fns=nil)
           model_handle = simple_dataset.model_handle()
-          return simple_dataset unless (remote_col_info or vcol_fns)
+          unless remote_col_info or not vcol_fns.empty?
+            opts = {} #TODO: stub
+            return simple_dataset.paging_and_order(opts)
+          end
 
           graph_ds = simple_dataset.from_self(:alias => model_handle[:model_name])
-          remote_col_info.each do |join_info|
+          (remote_col_info||[]).each do |join_info|
             rs_opts = (join_info[:cols] ? Model::FieldSet.opt(join_info[:cols],join_info[:model_name]) : {}).merge :return_as_hash => true
             filter = join_info[:filter] ? SimpleSearchPattern::ret_sequel_filter(join_info[:filter],join_info[:model_name]) : nil
             right_ds = search_object.db.get_objects_just_dataset(model_handle.createMH(:model_name => join_info[:model_name]),filter,rs_opts)
             graph_ds = graph_ds.graph(join_info[:join_type]||:left_outer,right_ds,join_info[:join_cond])
+          end
+          if not vcol_fns.empty?
+            cols = graph_ds.sequel_ds.columns + vcol_fns.map{|vcol,vcol_info|{vcol_info[:fn] => vcol}}
+            wc = SimpleSearchPattern::ret_sequel_filter([:and] + vcol_fns.map{|vcol,vcol_info|vcol_info[:expr]},model_handle)
+            graph_ds = graph_ds.select(*cols).from_self.where(wc)
           end
           opts = {} #TODO: stub
           graph_ds.paging_and_order(opts)
@@ -47,7 +55,7 @@ module XYZ
             ret_sequel_ds_with_order_by_and_paging(ds,search_pattern)
           end
 
-          #if vcol_fn is passed in, it will be a hash and after this fn called it will have all the vicols with fns
+          #if vcol_fn is passed is nil then this wil not do any special processing on virtual columns; otehrwise it wil take out virtual columns and append unto this hash
           def self.ret_sequel_filter(hash,model_handle,vcol_fn=nil)
             #TODO: just treating "and" and "or" now
             #TODO: some below use Sequel others are wrapper SQL in sql.rb; clean up
@@ -155,16 +163,14 @@ module XYZ
 
           #return op in symbol form and args
           def self.get_op_and_args(expr)
-            raise ErrorParsing.new(:expression,expr) unless expr.kind_of?(Array)
             [expr.first,expr[1..expr.size-1]]
           end
 
           # it returns cols and also adds hash elements for vcolumns that have fn defs
           def self.get_filter_condition_op_and_args!(vcol_fns,expr,model_handle)
-            raise ErrorParsing.new(:expression,expr) unless expr.kind_of?(Array)
+            return get_op_and_args(expr) unless vcol_fns 
             new_vcol_fns = has_virtual_column_with_fn_def?(expr,model_handle)
-            return [expr.first,expr[1..expr.size-1]] unless new_vcol_fns
-            raise Error.new("virtual column used in context not supported") unless vcol_fns
+            return get_op_and_args(expr) unless new_vcol_fns
             vcol_fns.merge!(new_vcol_fns)
             nil
           end

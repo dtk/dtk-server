@@ -1,6 +1,6 @@
 .tmp*
 cache/
-application/r8server.log
+application/r8server.log*
 application/config/config.rb
 application/config/environment_config.rb
 application/public/js/cache/

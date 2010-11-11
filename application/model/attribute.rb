@@ -77,7 +77,7 @@ module XYZ
            :model_name => :node,
            :join_type => :inner,
            :join_cond=>{:id=> :component__node_node_id},
-           :cols=>[:id, :display_name]
+           :cols=>[:id, :display_name, {:id => :param_node_id}]
          }
         ]
       virtual_column :base_object_node_group, :type => :json, :hidden => true, 
@@ -93,7 +93,7 @@ module XYZ
            :model_name => :node_group,
            :join_type => :inner,
            :join_cond=>{:id=> :component__node_node_group_id},
-           :cols=>[:id, :display_name]
+           :cols=>[:id, :display_name, {:id => :param_node_group_id}]
          }
         ]
 
@@ -109,12 +109,12 @@ module XYZ
          {
            :model_name => :node,
            :join_cond=>{:id=> :component__node_node_id},
-           :cols=>[:id, :display_name, {:datacenter_datacenter_id => :datacenter_id}]
+           :cols=>[:id, :display_name, {:datacenter_datacenter_id => :param_node_datacenter_id}]
          },
          {
            :model_name => :node_group,
            :join_cond=>{:id=> :component__node_node_group_id},
-           :cols=>[:id, :display_name, {:datacenter_datacenter_id => :datacenter_id}]
+           :cols=>[:id, :display_name, {:datacenter_datacenter_id => :param_node_group_datacenter_id}]
          }
         ]
 

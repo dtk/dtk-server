@@ -9,7 +9,7 @@ module XYZ
       column :value_derived, :json
       column :value_actual, :json
       virtual_column :attribute_value, :type => :json, :local_dependencies => [:value_asserted,:value_derived],
-        :fn => SQL::ColRef.coalesce(:value_asserted,:value_derived)
+        :sql_fn => SQL::ColRef.coalesce(:value_asserted,:value_derived)
       virtual_column :is_unset, :type => :boolean, :hidden => true, :local_dependencies => [:value_asserted,:value_derived]
 
       virtual_column :needs_to_be_set, :type => :boolean, :hidden => true, 
@@ -21,7 +21,7 @@ module XYZ
            :join_cond=>{:output_id=> :attribute__id},
            :cols=>[:output_id]
           }],
-          :fn => SQL.and({:attribute__value_asserted => nil},{:attribute__value_derived => nil},
+          :sql_fn => SQL.and({:attribute__value_asserted => nil},{:attribute__value_derived => nil},
                          SQL.not(:attribute__read_only => true),
                          {:attribute__required => true},
                          {:attribute_link__output_id => nil})

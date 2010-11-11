@@ -12,17 +12,18 @@ module XYZ
 
           raise Error.new("illegal model name (#{relation_in_search_pattern}) in search pattern") unless DB_REL_DEF[relation_in_search_pattern]
 
-          remote_col_info = search_object.field_set().related_remote_column_info()
-          vcol_fns = Hash.new
-          sequel_ds = SimpleSearchPattern::ret_sequel_ds(search_object.db.empty_dataset(),search_pattern,mh_in_search_pattern,remote_col_info,vcol_fns)
+          sequel_filter,vcol_sql_fns = SimpleSearchPattern::ret_sequel_filter_and_vcol_sql_fns(search_pattern,mh_in_search_pattern)
+
+          remote_col_info = search_object.related_remote_column_info(vcol_sql_fns)
+          sequel_ds = SimpleSearchPattern::ret_sequel_ds(search_object.db.empty_dataset(),search_pattern,sequel_filter,mh_in_search_pattern,remote_col_info)
           return nil unless sequel_ds
-          process_local_and_remote_dependencies(search_object,self.new(mh_in_search_pattern,sequel_ds),remote_col_info,vcol_fns)
+          process_local_and_remote_dependencies(search_object,self.new(mh_in_search_pattern,sequel_ds),remote_col_info,vcol_sql_fns)
         end
 
        private
-        def process_local_and_remote_dependencies(search_object,simple_dataset,remote_col_info=nil,vcol_fns=nil)
+        def process_local_and_remote_dependencies(search_object,simple_dataset,remote_col_info=nil,vcol_sql_fns=nil)
           model_handle = simple_dataset.model_handle()
-          unless remote_col_info or not vcol_fns.empty?
+          unless remote_col_info or vcol_sql_fns
             opts = {} #TODO: stub
             return simple_dataset.paging_and_order(opts)
           end
@@ -34,9 +35,9 @@ module XYZ
             right_ds = search_object.db.get_objects_just_dataset(model_handle.createMH(:model_name => join_info[:model_name]),filter,rs_opts)
             graph_ds = graph_ds.graph(join_info[:join_type]||:left_outer,right_ds,join_info[:join_cond])
           end
-          if not vcol_fns.empty?
-            wc = SimpleSearchPattern::ret_sequel_filter([:and] + vcol_fns.map{|vcol,vcol_info|vcol_info[:expr]},model_handle)
-            vcol_values = vcol_fns.map{|vcol,vcol_info|{:column => vcol, :value => vcol_info[:fn]}}
+          if vcol_sql_fns 
+            wc = SimpleSearchPattern::ret_sequel_filter([:and] + vcol_sql_fns.map{|vcol,vcol_info|vcol_info[:expr]},model_handle)
+            vcol_values = vcol_sql_fns.map{|vcol,vcol_info|{:column => vcol, :value => vcol_info[:sql_fn]}}
             graph_ds = graph_ds.add_virtual_column_aliases(vcol_values).from_self.where(wc)
           end
           opts = {} #TODO: stub
@@ -44,26 +45,34 @@ module XYZ
         end
 
         module SimpleSearchPattern
-          def self.ret_sequel_ds(ds,search_pattern,model_handle,remote_col_info=nil,vcol_fns=nil)
+          def self.ret_sequel_ds(ds,search_pattern,sequel_filter,model_handle,remote_col_info=nil)
             ds_add = ret_sequel_ds_with_relation(ds,search_pattern)
             return nil unless ds_add; ds = ds_add
         
             ds_add = ret_sequel_ds_with_columns(ds,search_pattern,model_handle,remote_col_info)
             return nil unless ds_add; ds = ds_add
           
-            ds = ret_sequel_ds_with_filter(ds,search_pattern,model_handle,vcol_fns)
+            ds = ret_sequel_ds_with_filter(ds,sequel_filter)
             ret_sequel_ds_with_order_by_and_paging(ds,search_pattern)
           end
 
-          #if vcol_fn is passed is nil then this wil not do any special processing on virtual columns; otehrwise it wil take out virtual columns and append unto this hash
-          def self.ret_sequel_filter(hash,model_handle,vcol_fn=nil)
+          def self.ret_sequel_filter_and_vcol_sql_fns(search_pattern,model_handle)
+            filter_hash = search_pattern.find_key(:filter)
+            return nil if filter_hash.empty?
+            vcol_sql_fns = Hash.new
+            sequel_filter = ret_sequel_filter(filter_hash,model_handle,vcol_sql_fns)
+            return [sequel_filter,vcol_sql_fns.empty? ? nil : vcol_sql_fns]
+          end
+
+          #if vcol_sql_fns is passed is nil then this wil not do any special processing on virtual columns; otehrwise it wil take out virtual columns and append unto this filter_hash
+          def self.ret_sequel_filter(filter_hash,model_handle,vcol_sql_fns=nil)
             #TODO: just treating "and" and "or" now
             #TODO: some below use Sequel others are wrapper SQL in sql.rb; clean up
-            op,args = get_op_and_args(hash)
+            op,args = get_op_and_args(filter_hash)
             raise ErrorPatternNotImplemented.new(:filter_operation,op) unless [:and,:or].include?(op)
             and_list = Array.new
             args.each do |el|
-              el_op,el_args = get_filter_condition_op_and_args!(vcol_fn,el,model_handle)
+              el_op,el_args = get_filter_condition_op_and_args!(vcol_sql_fns,el,model_handle)
               next if el_op.nil? #this can happen if el has a vcol in it
               and_list << case el_op
                when :eq
@@ -147,12 +156,8 @@ module XYZ
             ds.select(*(processed_field_set.cols))
           end
 
-          def self.ret_sequel_ds_with_filter(ds,search_pattern,model_handle,vcol_fns=nil)
-            filter_hash = search_pattern.find_key(:filter)
-            return ds if filter_hash.empty?
-            sequel_where_clause = ret_sequel_filter(filter_hash,model_handle,vcol_fns)
-            return ds unless sequel_where_clause
-            ds.where(sequel_where_clause)
+          def self.ret_sequel_ds_with_filter(ds,sequel_filter)
+            sequel_filter ? ds.where(sequel_filter) : ds
           end
 
           def self.ret_sequel_ds_with_order_by_and_paging(ds,search_pattern)
@@ -167,11 +172,11 @@ module XYZ
           end
 
           # it returns cols and also adds hash elements for vcolumns that have fn defs
-          def self.get_filter_condition_op_and_args!(vcol_fns,expr,model_handle)
-            return get_op_and_args(expr) unless vcol_fns 
-            new_vcol_fns = has_virtual_column_with_fn_def?(expr,model_handle)
-            return get_op_and_args(expr) unless new_vcol_fns
-            vcol_fns.merge!(new_vcol_fns)
+          def self.get_filter_condition_op_and_args!(vcol_sql_fns,expr,model_handle)
+            return get_op_and_args(expr) unless vcol_sql_fns 
+            new_vcol_sql_fns = has_virtual_column_with_fn_def?(expr,model_handle)
+            return get_op_and_args(expr) unless new_vcol_sql_fns
+            vcol_sql_fns.merge!(new_vcol_sql_fns)
             nil
           end
 
@@ -182,9 +187,9 @@ module XYZ
             expr[1..expr.size-1].each do |el|
               next unless el.kind_of?(Symbol)
               next unless vcols[el]
-              fn = vcols[el][:fn]
+              fn = vcols[el][:sql_fn]
               raise Error.new("Cannot have virtual column #{el} in filter unless there is a local fn def for it") unless fn
-              ret[el] = {:fn => fn, :expr => expr}
+              ret[el] = {:sql_fn => fn, :expr => expr}
             end
             ret.empty? ? nil : ret
           end

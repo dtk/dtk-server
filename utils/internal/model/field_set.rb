@@ -61,12 +61,13 @@ module XYZ
 
 
       #TODO!!!: this does not work properly when two or more virtual attributes point to same column, but not tagged with same dependency def
-      def related_remote_column_info()
+      def related_remote_column_info(vcol_sql_fns=nil)
         return nil if @cols.empty?
         return nil unless vcolumns = DB_REL_DEF[model_name][:virtual_columns]
         ret = Array.new
         defs_seen = Array.new
-        @cols.each do |f|
+        cols = vcol_sql_fns ? (@cols + vcol_sql_fns.keys) : @cols
+        cols.each do |f|
           next unless vcol_info = vcolumns[f] 
           deps, def_name = parse_remote_dependencies(vcol_info)
           next unless deps

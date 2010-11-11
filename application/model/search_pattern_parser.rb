@@ -20,6 +20,11 @@ module XYZ
       ret[":relation"] =  ret[":relation"] ? ret[":relation"].gsub(/^:/,"") : nil
       ret
     end
+
+    def related_remote_column_info(vcol_sql_fns=nil)
+      field_set().related_remote_column_info(vcol_sql_fns)
+    end
+
     def field_set()
       #TBD: stub; must take out non scalars
       model_name = relation.kind_of?(Symbol) ? relation : nil

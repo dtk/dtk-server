@@ -103,8 +103,8 @@ module XYZ
         #substitue in virtual col fn if it exists
         vcol_info = ((DB_REL_DEF[model_name]||{})[:virtual_columns]||{})[col]
         return where(col => value) unless vcol_info
-        raise Error.new("virtual column #{col} cannot appear in where clause unless it has a fn def") unless vcol_info[:fn]
-        where(vcol_info[:fn] => value)
+        raise Error.new("virtual column #{col} cannot appear in where clause unless it has a fn def") unless vcol_info[:sql_fn]
+        where(vcol_info[:sql_fn] => value)
       end
 
      private

@@ -142,6 +142,9 @@ module XYZ
       self[:search_pattern]
     end
 
+    def related_remote_column_info(vcol_sql_fns=nil)
+      search_pattern ? search_pattern.related_remote_column_info(vcol_sql_fns) : nil
+    end
     def field_set()
       search_pattern ? search_pattern.field_set() : nil
     end

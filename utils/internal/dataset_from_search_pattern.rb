@@ -35,11 +35,9 @@ module XYZ
             graph_ds = graph_ds.graph(join_info[:join_type]||:left_outer,right_ds,join_info[:join_cond])
           end
           if not vcol_fns.empty?
-#            cols = graph_ds.sequel_ds.columns + vcol_fns.map{|vcol,vcol_info|{vcol_info[:fn] => vcol}}
             wc = SimpleSearchPattern::ret_sequel_filter([:and] + vcol_fns.map{|vcol,vcol_info|vcol_info[:expr]},model_handle)
-#            graph_ds = graph_ds.select(*cols).from_self.where(wc)
-            graph_aliases = vcol_fns.inject({}){|h,vc|h.merge(vc[0] => [model_handle[:model_name],vc[0],vc[1][:fn]])}
-            graph_ds = graph_ds.add_graph_aliases(graph_aliases).from_self.where(wc)
+            vcol_values = vcol_fns.map{|vcol,vcol_info|{:column => vcol, :value => vcol_info[:fn]}}
+            graph_ds = graph_ds.add_virtual_column_aliases(vcol_values).from_self.where(wc)
           end
           opts = {} #TODO: stub
           graph_ds.paging_and_order(opts)

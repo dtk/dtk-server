@@ -147,8 +147,9 @@ module XYZ
         Dataset.new(model_handle,sequel_join)
       end
 
-      def add_graph_aliases(aliases)
-        Dataset.new(model_handle,@sequel_ds.select(*@sequel_ds.columns + aliases.map{|col,alias_info|{alias_info[2] => col}}))
+      def add_virtual_column_aliases(vcol_values)
+        vcol_aliases = vcol_values.map{|vc|{vc[:value] => vc[:column]}}
+        Dataset.new(model_handle,@sequel_ds.select(*@sequel_ds.columns + vcol_aliases))
       end
 
       def paging_and_order(opts)
@@ -203,7 +204,7 @@ module XYZ
     class Graph
       include DatatsetGraphMixin
       #TODO: needed to fully qualify Dataset; could this constraint be removed? by chaging expose?
-      expose_methods_from_internal_object :sequel_ds, %w{where select add_graph_aliases from_self}, :post_hook => "lambda{|x|XYZ::SQL::Graph.new(x,@model_name_info,@c)}"
+      expose_methods_from_internal_object :sequel_ds, %w{where select from_self}, :post_hook => "lambda{|x|XYZ::SQL::Graph.new(x,@model_name_info,@c)}"
       expose_methods_from_internal_object :sequel_ds, %w{sql}
       def initialize(sequel_ds,model_name_info,c)
         @sequel_ds = sequel_ds
@@ -216,6 +217,11 @@ module XYZ
         sequel_ds = DB.ret_paging_and_order_added_to_dataset(@sequel_ds,opts,any_change)
         return self unless any_change[:changed]
         Graph.new(sequel_ds,@model_name_info,@c)
+      end
+
+      def add_virtual_column_aliases(vcol_values)
+        graph_aliases = vcol_values.inject({}){|h,vc|h.merge(vc[:column] => [model_name,vc[:column],vc[:value]])}
+        Graph.new(@sequel_ds.add_graph_aliases(graph_aliases),@model_name_info,@c)
       end
 
       def all()

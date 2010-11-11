@@ -9,6 +9,9 @@
     :attribute_value=>{
         :type=>:text,
     },
+    :needs_to_be_set=>{
+        :type=>:boolean,
+    },
     :display_name=>{
         :type=>:text,
         :size=>50

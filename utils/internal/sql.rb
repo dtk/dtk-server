@@ -89,12 +89,12 @@ module XYZ
       end
 
       attr_reader :model_name_info, :sequel_ds
-      def graph(join_type,right_ds,join_conditions=true)
+      def graph(join_type,right_ds,join_conditions=true,opts={})
         new_model_name_info = right_ds.model_name_info.first.create_unique(@model_name_info)
         model_name_info = @model_name_info + [new_model_name_info]
         table_alias = new_model_name_info.ret_qualified_model_name()
         #TODO: think can make more efficient by adding in :select => [cols.]] for the rs table; without that it looks like sequel making a db call to find relevant columns for join result
-        sequel_graph = @sequel_ds.graph(right_ds.sequel_ds,join_conditions,{:join_type => join_type, :table_alias => table_alias})
+        sequel_graph = @sequel_ds.graph(right_ds.sequel_ds,join_conditions,opts.merge(:join_type => join_type, :table_alias => table_alias))
         Graph.new(sequel_graph,model_name_info,@c)
       end
 
@@ -199,7 +199,7 @@ module XYZ
     class Graph
       include DatatsetGraphMixin
       #TODO: needed to fully qualify Dataset; could this constraint be removed? by chaging expose?
-      expose_methods_from_internal_object :sequel_ds, %w{where select }, :post_hook => "lambda{|x|XYZ::SQL::Graph.new(x,@model_name_info,@c)}"
+      expose_methods_from_internal_object :sequel_ds, %w{where select from_self}, :post_hook => "lambda{|x|XYZ::SQL::Graph.new(x,@model_name_info,@c)}"
       expose_methods_from_internal_object :sequel_ds, %w{sql}
       def initialize(sequel_ds,model_name_info,c)
         @sequel_ds = sequel_ds

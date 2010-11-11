@@ -182,28 +182,13 @@ module XYZ
             expr[1..expr.size-1].each do |el|
               next unless el.kind_of?(Symbol)
               next unless vcols[el]
-              fn = vcols[el][:local_fn]
+              fn = vcols[el][:fn]
               raise Error.new("Cannot have virtual column #{el} in filter unless there is a local fn def for it") unless fn
               ret[el] = {:fn => fn, :expr => expr}
             end
             ret.empty? ? nil : ret
           end
-=begin
-          def self.get_filter_condition_op_and_args(expr,model_handle)
-            raise ErrorParsing.new(:expression,expr) unless expr.kind_of?(Array)
-            vcolumns = model_handle.get_virtual_columns()
-            [expr.first,expr[1..expr.size-1].map{|el|process_if_column(el,vcolumns)}]
-          end
 
-          # check if virtual column and if so substitute fn def if it exists
-          def self.process_if_column(el,vcolumns)
-            return el unless el.kind_of?(Symbol)
-            return el unless vcolumns[el]
-            fn = vcolumns[el][:local_fn]
-            raise Error.new("Cannot have virtual column #{el} in filter unless there is a local fn def for it") unless fn
-            fn
-          end
-=end
           class ErrorPatternNotImplemented < ErrorNotImplemented
             def initialize(type,object)
               super("parsing item #{type} is not supported; it has form: #{object.inspect}")

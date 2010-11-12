@@ -152,10 +152,10 @@ also related is allowing omission of columns mmentioned in jon condition; post p
           end
           return false
         end
-        Log.error("msimatch between object #{obj.inspect} and pattern #{pattern}")
+        Log.error("mismatch between object #{obj.inspect} and pattern #{pattern}")
       elsif obj.kind_of?(Hash)
         if pattern[":array".to_sym]
-          Log.error("msimatch between object #{obj.inspect} and pattern #{pattern}")
+          Log.error("mismatch between object #{obj.inspect} and pattern #{pattern}")
           return nil
         end
         pattern.each do |k,v|
@@ -167,7 +167,7 @@ also related is allowing omission of columns mmentioned in jon condition; post p
         end
         return false
       else
-        Log.error("msimatch between object #{obj.inspect} and pattern #{pattern}")
+        Log.error("mismatch between object #{obj.inspect} and pattern #{pattern}")
       end
       nil
     end

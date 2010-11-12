@@ -12,30 +12,25 @@ module XYZ
         :sql_fn => SQL::ColRef.coalesce(:value_asserted,:value_derived)
 
       column :type_link_attached, :varchar, :size => 10 #"input" | "output" | or nil  
-      virtual_column :is_unset, :type => :boolean, :hidden => true, :local_dependencies => [:value_asserted,:value_derived]
+      virtual_column :is_unset, :type => :boolean, :hidden => true, :local_dependencies => [:value_asserted,:value_derived,:data_type,:schema_if_json]
 
       virtual_column :needs_to_be_set, :type => :boolean, :hidden => true, 
-        :local_dependencies => [:value_asserted,:value_derived,:read_only,:required], 
-        :remote_dependencies => 
-          [{
-           :model_name => :attribute_link,
-           :join_type=>:left_outer,
-           :join_cond=>{:output_id=> :attribute__id},
-           :cols=>[:output_id]
-          }],
-          :sql_fn => SQL.and({:attribute__value_asserted => nil},{:attribute__value_derived => nil},
-                         SQL.not(:attribute__read_only => true),
-                         {:attribute__required => true},
-                         {:attribute_link__output_id => nil})
+        :local_dependencies => [:value_asserted,:value_derived,:read_only,:required,:type_link_attached], 
+        :sql_fn => SQL.and({:attribute__value_asserted => nil},{:attribute__value_derived => nil},
+                           SQL.not(:attribute__read_only => true),
+                           {:attribute__required => true},
+                           {:attribute__type_link_attached => nil})
 
-
-      column :read_only, :boolean, :default => false #variable is autaomtcally set
-      column :required, :boolean #whether required for this attribute to have a value inorder to execute actions for parent component; TBD: may be indexed by action
+      column :read_only, :boolean, :default => false #true means variable is automtcally set
+      #TODO: does this have a default
+      column :required, :boolean, :default => true #whether required for this attribute to have a value inorder to execute actions for parent component; TBD: may be indexed by action
 
       column :function, :json
 
       #TODO: may unify the fields below and treat them all as types of constraints, which could be intersected, unioned, etc
       column :data_type, :varchar, :size => 25
+      column :schema_if_json, :json
+
       #TBD: whether to explicitly have an array or put this in data type or seamntic_type
       column :is_array, :boolean, :default => false
       column :semantic_type, :json
@@ -55,6 +50,8 @@ module XYZ
         ]
       }
       virtual_column :id_info_uri, :hidden => true, :remote_dependencies => uri_remote_dependencies
+
+      virtual_column :parent_name, :possible_parents => [:component,:node]
       many_to_one :component, :node
 
       virtual_column :qualified_attribute_name, :type => :varchar, :hidden => true #not giving dependences because assuming right base_object included in col list
@@ -137,6 +134,44 @@ also related is allowing omission of columns mmentioned in jon condition; post p
 
     end
     ### virtual column defs
+    def is_unset()
+      return true if attribute_value().nil?
+      return false unless self[:data_type] == "json"
+      return nil unless (self[:schema_if_json]||{})[":required".to_sym]
+      Attribute.does_not_have_required_fields?(attribute_value(),self[:schema_if_json][":required".to_sym]) 
+    end
+
+    def self.does_not_have_required_fields?(obj,pattern)
+      if obj.kind_of?(Array)
+        array_pat = pattern[":array".to_sym]
+        if array_pat
+          return true if obj.empty? 
+          obj.each do |el|
+            ret = does_not_have_required_fields?(el,array_pat)
+            return ret if ret.nil? or ret.kind_of?(TrueClass)
+          end
+          return false
+        end
+        Log.error("msimatch between object #{obj.inspect} and pattern #{pattern}")
+      elsif obj.kind_of?(Hash)
+        if pattern[":array".to_sym]
+          Log.error("msimatch between object #{obj.inspect} and pattern #{pattern}")
+          return nil
+        end
+        pattern.each do |k,v|
+          el = obj[k]
+          return true unless el
+          next if v.kind_of?(TrueClass)
+          ret = does_not_have_required_fields?(el,v)
+          return ret if ret.nil? or ret.kind_of?(TrueClass)
+        end
+        return false
+      else
+        Log.error("msimatch between object #{obj.inspect} and pattern #{pattern}")
+      end
+      nil
+    end
+
     def qualified_attribute_name()
       node_or_group_name =
         if self[:node] then self[:node][:display_name]

@@ -35,12 +35,11 @@
              :rows => 1,
              :cols => 40,
             }},
-            {:external_ref => {
+            {:schema_if_json => {
              :type => 'hash',
              :help => '',
              :rows => 1,
              :cols => 20,
-             :read_only => true,
             }},
             {:value_asserted => {
              :type => 'hash',

@@ -12,9 +12,15 @@
     :needs_to_be_set=>{
         :type=>:boolean,
     },
+    :is_unset=>{
+        :type=>:boolean,
+    },
     :display_name=>{
         :type=>:text,
         :size=>50
+    },
+    :parent_name=>{
+        :type=>:text,
     },
     :read_only=>{
         :type=>:boolean,

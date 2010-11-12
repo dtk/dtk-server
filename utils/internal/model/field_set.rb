@@ -35,7 +35,8 @@ module XYZ
 
       #difference between only_including and & is not sysmetric and provides for items in self which are form {alias => col}
       def only_including(field_set)
-        FieldSet.new(@model_name,@cols.reject{|col| not field_set.cols.include?(col.kind_of?(Hash) ? col.values.first : col)})
+        #TODO: right now not checking non scalar
+        FieldSet.new(@model_name,@cols.reject{|col| col.kind_of?(Symbol) and not field_set.cols.include?(col)})
       end
 
       def &(field_set)

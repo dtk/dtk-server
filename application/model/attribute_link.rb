@@ -12,15 +12,45 @@ module XYZ
 
     #######################
     ### object procssing and access functions
+    def self.link_attributes(node_group_id_handle,ng_cmp_id_handle,node_cmp_id_handles)
+      #TODO: rename params so not specfic to node groups
+      #TODO: may convert to computing from search object with links
+      node_cmp_mh = node_cmp_id_handles.first.createMH
+      node_cmp_wc = {:ancestor_id => ng_cmp_id_handle.get_id()}
+      node_cmp_fs = FieldSet.opt([:id],:component)
+      node_cmp_ds = get_objects_just_dataset(node_cmp_mh,node_cmp_wc,node_cmp_fs)
 
-    def self.update_type_link_attached(attr_link_mh,type,new_link_info)
-      attr_mh = attr_link_mh.createMH(:model_name => :attribute)
-      index = "#{type}_id".to_sym
-#      select_wc = SQL.or(*new_link_info.map{|r|{:id => r[index]}})
-      select_wc = SQL.in(:id,new_link_info.map{|r|r[index]})
-      select_fs = FieldSet.opt([:id,{type.to_s => :type_link_attached}],:attribute)
-      select_ds = get_objects_just_dataset(attr_mh,select_wc,select_fs)
-      update_from_select(attr_mh,FieldSet.new(:attribute,[:type_link_attached]),select_ds)
+      attr_mh = node_cmp_mh.create_childMH(:attribute)
+
+      attr_parent_col = attr_mh.parent_id_field_name()
+      node_attr_fs = FieldSet.opt([attr_parent_col,:id,:ref],:attribute)
+      node_attr_ds = get_objects_just_dataset(attr_mh,nil,node_attr_fs)
+
+      group_attr_wc = {attr_parent_col => ng_cmp_id_handle.get_id()}
+      group_attr_fs = FieldSet.opt([:id,:ref],:attribute)
+      group_attr_ds = get_objects_just_dataset(attr_mh,group_attr_wc,group_attr_fs)
+
+      #attribute link has same parent as node_group
+      attr_link_mh = node_group_id_handle.create_peerMH(:attribute_link)
+      attr_link_parent_id_handle = node_group_id_handle.get_parent_id_handle()
+      attr_link_parent_col = attr_link_mh.parent_id_field_name()
+      ref_prefix = "attribute_link:"
+      i1_ds = node_cmp_ds.select(
+         {SQL::ColRef.concat(ref_prefix,:input__id.cast(:text),"-",:output__id.cast(:text)) => :ref},
+         {attr_link_parent_id_handle.get_id() => attr_link_parent_col},
+         {:input__id => :input_id},
+         {:output__id => :output_id})
+      first_join_ds = i1_ds.join_table(:inner,node_attr_ds,{attr_parent_col => :id},{:table_alias => :output})
+      attr_link_ds = first_join_ds.join_table(:inner,group_attr_ds,[:ref],{:table_alias => :input})
+
+      attr_link_fs = FieldSet.new(:attribute,[:ref,attr_link_parent_col,:input_id,:output_id])
+      override_attrs = {}
+            
+      #TODO: encapsulate all this under attribute link
+      opts = {:duplicate_refs => :no_check,:returning_sql_cols => [:input_id,:output_id]} 
+      new_link_info = create_from_select(attr_link_mh,attr_link_fs,attr_link_ds,override_attrs,opts)
+      update_type_link_attached(attr_link_mh,:input,new_link_info)
+      update_type_link_attached(attr_link_mh,:output,new_link_info)
     end
 
     def self.propagate_over_dir_conn_equality_links(attr_changes)
@@ -81,6 +111,15 @@ module XYZ
     end
 
     def self.get_legal_connections_wrt_endpoint(attribute_id_handle,parent_id_handle)
+    end
+   private
+    def self.update_type_link_attached(attr_link_mh,type,new_link_info)
+      attr_mh = attr_link_mh.createMH(:model_name => :attribute)
+      index = "#{type}_id".to_sym
+      select_wc = SQL.in(:id,new_link_info.map{|r|r[index]})
+      select_fs = FieldSet.opt([:id,{type.to_s => :type_link_attached}],:attribute)
+      select_ds = get_objects_just_dataset(attr_mh,select_wc,select_fs)
+      update_from_select(attr_mh,FieldSet.new(:attribute,[:type_link_attached]),select_ds)
     end
 
     ##### Actions

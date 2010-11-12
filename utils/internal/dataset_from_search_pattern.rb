@@ -23,11 +23,14 @@ module XYZ
        private
         def process_local_and_remote_dependencies(search_object,simple_dataset,remote_col_info=nil,vcol_sql_fns=nil)
           model_handle = simple_dataset.model_handle()
-          unless remote_col_info or vcol_sql_fns
+          base_field_set = search_object.field_set()
+          vcol_sql_fns_just_in_col = base_field_set.vcol_sql_fns_for_just_columns(vcol_sql_fns)
+          unless remote_col_info or vcol_sql_fns or vcol_sql_fns_just_in_col
             opts = {} #TODO: stub
             return simple_dataset.paging_and_order(opts)
           end
 
+          #join in any needed tables
           graph_ds = simple_dataset.from_self(:alias => model_handle[:model_name])
           (remote_col_info||[]).each do |join_info|
             rs_opts = (join_info[:cols] ? Model::FieldSet.opt(join_info[:cols],join_info[:model_name]) : {}).merge :return_as_hash => true
@@ -35,10 +38,13 @@ module XYZ
             right_ds = search_object.db.get_objects_just_dataset(model_handle.createMH(:model_name => join_info[:model_name]),filter,rs_opts)
             graph_ds = graph_ds.graph(join_info[:join_type]||:left_outer,right_ds,join_info[:join_cond])
           end
-          if vcol_sql_fns 
-            wc = SimpleSearchPattern::ret_sequel_filter([:and] + vcol_sql_fns.map{|vcol,vcol_info|vcol_info[:expr]},model_handle)
-            vcol_values = vcol_sql_fns.map{|vcol,vcol_info|{:column => vcol, :value => vcol_info[:sql_fn]}}
-            graph_ds = graph_ds.add_virtual_column_aliases(vcol_values).from_self.where(wc)
+
+          #add any global columns or glocal where clauses
+          if vcol_sql_fns or vcol_sql_fns_just_in_col
+            wc = vcol_sql_fns ? SimpleSearchPattern::ret_sequel_filter([:and] + vcol_sql_fns.map{|vcol,vcol_info|vcol_info[:expr]},model_handle) : nil
+            vcol_values = ((vcol_sql_fns||{}).merge(vcol_sql_fns_just_in_col||{})).map{|vcol,vcol_info|{:column => vcol, :value => vcol_info[:sql_fn]}}
+            graph_ds = graph_ds.add_virtual_column_aliases(vcol_values)
+            graph_ds = graph_ds.from_self.where(wc) if wc 
           end
           opts = {} #TODO: stub
           graph_ds.paging_and_order(opts)
@@ -133,7 +139,7 @@ module XYZ
             processed_field_set =  base_field_set.only_including(Model::FieldSet.all_real_scalar(model_name))
 
             #compute cols_to_add by looking at both local columns and ones that are in join conditions to enable remote columns to be joined in
-            #do not have to worry about duplicayes because with_added_cols will do that
+            #do not have to worry about duplicates because with_added_cols will do that
             cols_to_add = Array.new
 
             if remote_col_info and not remote_col_info.empty?
@@ -145,6 +151,7 @@ module XYZ
               cols_to_add = cols_to_add + cols_to_add_remote
             end
 
+            #this fn only adds real columns neededd by base_field set or vcol_sql_fns (vcols with alias processed in process_local_and_remote_dependencies
             cols_to_add_local = base_field_set.extra_local_columns(vcol_sql_fns)
             cols_to_add = cols_to_add + cols_to_add_local if cols_to_add_local
 

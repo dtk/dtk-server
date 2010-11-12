@@ -8,36 +8,36 @@ module XYZ
       column :value_asserted, :json
       column :value_derived, :json
       column :value_actual, :json
+      #TODO: may rename attribute_value to desired_value
       virtual_column :attribute_value, :type => :json, :local_dependencies => [:value_asserted,:value_derived],
         :sql_fn => SQL::ColRef.coalesce(:value_asserted,:value_derived)
 
-      column :type_link_attached, :varchar, :size => 10 #"input" | "output" | or nil  
+
+      #columns related to the data/semantic type
+      column :data_type, :varchar, :size => 25
+      column :schema_if_json, :json
+      column :semantic_type, :json
+      column :read_only, :boolean, :default => false #true means variable is automtcally set
+      #TODO: does this have a default
+      column :required, :boolean, :default => true #whether required for this attribute to have a value inorder to execute actions for parent component; TODO: may be indexed by action
+      #setting on port type contrains whether a link can be connecetd to teh attribute
+      column :port_type, :varchar, :size => 10 # null means no port; otherwise "input", "output", or "either"
+
+
+      #columns related to links
+      column :input_link_attached, :boolean, :default => false, :hidden => true
+      column :output_link_attached, :boolean, :default => false,  :hidden => true
+      column :function, :json
+
+
       virtual_column :is_unset, :type => :boolean, :hidden => true, :local_dependencies => [:value_asserted,:value_derived,:data_type,:schema_if_json]
 
       virtual_column :needs_to_be_set, :type => :boolean, :hidden => true, 
-        :local_dependencies => [:value_asserted,:value_derived,:read_only,:required,:type_link_attached], 
+        :local_dependencies => [:value_asserted,:value_derived,:read_only,:required,:input_link_attached,:output_link_attached], 
         :sql_fn => SQL.and({:attribute__value_asserted => nil},{:attribute__value_derived => nil},
-                           SQL.not(:attribute__read_only => true),
-                           {:attribute__required => true},
-                           {:attribute__type_link_attached => nil})
-
-      column :read_only, :boolean, :default => false #true means variable is automtcally set
-      #TODO: does this have a default
-      column :required, :boolean, :default => true #whether required for this attribute to have a value inorder to execute actions for parent component; TBD: may be indexed by action
-
-      column :function, :json
-
-      #TODO: may unify the fields below and treat them all as types of constraints, which could be intersected, unioned, etc
-      column :data_type, :varchar, :size => 25
-      column :schema_if_json, :json
-
-      #TBD: whether to explicitly have an array or put this in data type or seamntic_type
-      column :is_array, :boolean, :default => false
-      column :semantic_type, :json
-
-      #TODO this probably does not belond here column :hidden, :boolean, :default => false
-      column :port_type, :varchar, :size => 10 # null means no port; otherwise "input", "output", or "either"
-      #TODO: may rename attribute_value to desired_value
+                           SQL.not(:attribute__read_only),
+                           :attribute__required,
+                           SQL.not(:attribute__output_link_attached))
 
       uri_remote_dependencies = 
         {:uri =>

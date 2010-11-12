@@ -79,6 +79,7 @@ module XYZ
 
     #TODO: deprecate or write in terms of get_objects_from_search_object
     #may do so by having constructor for search object that takes model_handle and filter
+    #TODO: this fn is limited in how ir deals with vcols on column list;
     def self.get_objects(model_handle,where_clause={},opts={})
       c = model_handle[:c]
       model_name = model_handle[:model_name]

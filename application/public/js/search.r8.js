@@ -291,7 +291,23 @@ if (!R8.Search) {
 					R8.Search.renderFilterEdit(searchContext,filterDef,filterId);
 				},
 
-				renderFilters : function(searchContext) {
+				removeFilter: function(e) {
+					var filterId = e.currentTarget.ancestor().get('id');
+					var filterNode = R8.Utils.Y.one('#'+filterId);
+					var idParts = filterId.split('-');
+					var filterIndex = idParts[idParts.length-2];
+					var searchContext = filterId.replace('-'+filterIndex+'-filter','');
+					var currentSearch = R8.Search.searchObjList[searchContext]['currentSearch'];
+					var searchObj = R8.Search.searchObjList[searchContext]['searches'][currentSearch];
+
+					R8.Utils.arrayRemove(searchObj['search_pattern'][':filter'],parseInt(filterIndex+1));
+					filterNode.purge(true);
+					filterNode.remove();
+					e.stopImmediatePropagation();
+					return;
+				},
+
+				renderFilters: function(searchContext) {
 					var currentSearch = this.searchObjList[searchContext]['currentSearch'];
 					var searchObj = this.searchObjList[searchContext]['searches'][currentSearch];
 					var filter = searchObj['search_pattern'][':filter'];
@@ -302,7 +318,7 @@ if (!R8.Search) {
 					}
 				},
 
-				renderFilterDisplay : function(searchContext,filterDef,filterIndex,updateFilter) {
+				renderFilterDisplay: function(searchContext,filterDef,filterIndex,updateFilter) {
 					var filterId = searchContext+'-'+filterIndex+'-filter';
 					var currentSearch = this.searchObjList[searchContext]['currentSearch'];
 					var searchObj = this.searchObjList[searchContext]['searches'][currentSearch];
@@ -357,6 +373,9 @@ if (!R8.Search) {
 						var filterElem = R8.Utils.Y.one('#'+filterId);
 						filterElem.get('children').item(0).set('innerHTML',filterStr);
 					}
+
+					var filterElemDelete = R8.Utils.Y.one('#'+filterId+' .search-remove-filter');
+					filterElemDelete.on('click',R8.Search.removeFilter);
 				},
 
 				renderFilterEdit : function(searchContext,filterDef,filterId) {
@@ -737,6 +756,9 @@ if (!R8.Search) {
 						var orderElem = R8.Utils.Y.one('#'+orderId);
 						orderElem.get('children').item(0).set('innerHTML',orderStr);
 					}
+
+					var orderElemDelete = R8.Utils.Y.one('#'+orderId+' .search-remove-ordering');
+					orderElemDelete.on('click',R8.Search.removeOrdering);
 				},
 
 				renderOrderingEdit : function(searchContext,orderDef,orderId) {
@@ -923,9 +945,26 @@ if (!R8.Search) {
 					orderDef = searchObj['search_pattern'][':order_by'][orderIndex];
 					R8.Search.renderOrderingEdit(searchContext,orderDef,orderId);
 				},
+
+				removeOrdering: function(e) {
+					var orderId = e.currentTarget.ancestor().get('id');
+					var orderNode = R8.Utils.Y.one('#'+filterId);
+					var idParts = filterId.split('-');
+					var orderIndex = idParts[idParts.length-2];
+					var searchContext = filterId.replace('-'+filterIndex+'-ordering','');
+					var currentSearch = R8.Search.searchObjList[searchContext]['currentSearch'];
+					var searchObj = R8.Search.searchObjList[searchContext]['searches'][currentSearch];
+
+					R8.Utils.arrayRemove(searchObj['search_pattern'][':filter'],parseInt(filterIndex));
+					orderNode.purge(true);
+					orderNode.remove();
+					e.stopImmediatePropagation();
+					return;
+				},
+
 			//COLUMN RELATED
 
-				setupColumnFields : function(searchContext) {
+				setupColumnFields: function(searchContext) {
 					var searchId = this.searchObjList[searchContext]['currentSearch'];
 
 					if(searchId =='new') {
@@ -1036,7 +1075,7 @@ if (!R8.Search) {
 						for(option in remainingOptions) {
 							if(remainingOptions[option]['index'] >= (firstSelectedIndex-1) && placedNewOrder == false) {
 								for(sOption in selectedOptions) {
-									displayFieldsElem.options[displayFieldsElem.options.length] = new Option(selectedOptions[sOption]['display'], selectedOptions[sOption]['value'], false, false);
+									displayFieldsElem.options[displayFieldsElem.options.length] = new Option(selectedOptions[sOption]['display'], selectedOptions[sOption]['value'], false, true);
 								}
 								placedNewOrder = true;
 								selectedOptions = null;
@@ -1071,7 +1110,7 @@ if (!R8.Search) {
 						for(option in remainingOptions) {
 							if(remainingOptions[option]['index'] > (lastSelectedIndex+1) && placedNewOrder == false) {
 								for(sOption in selectedOptions) {
-									displayFieldsElem.options[displayFieldsElem.options.length] = new Option(selectedOptions[sOption]['display'], selectedOptions[sOption]['value'], false, false);
+									displayFieldsElem.options[displayFieldsElem.options.length] = new Option(selectedOptions[sOption]['display'], selectedOptions[sOption]['value'], false, true);
 								}
 								placedNewOrder = true;
 								selectedOptions = null;

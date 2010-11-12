@@ -11,7 +11,7 @@ if (!R8.Utils) {
 			 * This is the global YUI variable to be used
 			 */
 //			Y : new YUI({base:'js/yui3x/build/'}).use('dd', 'node'),
-			Y : new YUI().use('dd', 'node'),
+			Y: new YUI().use('dd', 'node'),
 
 			/*
 			 * This is the global jQuery variable to be used
@@ -91,7 +91,7 @@ if (!R8.Utils) {
 
 			/*
 			 */
-			isDigit : function(digit) {
+			isDigit: function(digit) {
 				return ((digit >= "0") && (digit <= "9"));
 			},
 
@@ -118,7 +118,7 @@ if (!R8.Utils) {
 			},
 
 			//TODO: stub for now, figure out where to move this or change it up
-			inArray : function(arrayObj,value) {
+			inArray: function(arrayObj,value) {
 				value = (value instanceof Array) ? value : [value];
 
 				var ret_value = false;
@@ -134,7 +134,7 @@ if (!R8.Utils) {
 				return ret_value;
 			},
 
-			cloneObj : function(o) {
+			cloneObj: function(o) {
 				if(typeof(o) != 'object') return o;
 				if(o == null) return o;
 
@@ -144,7 +144,25 @@ if (!R8.Utils) {
 				return newO;
 			},
 
+			/*
+			 * 	Remove the second tab
+			 *	   deleteTabs(1);
+			 *  Remove the second-to-last item from the array
+			 *     deleteTabs(-2);
+			 *  Remove the second and third items from the array
+			 *     deleteTabs(1,2);
+			 *  Remove the last and second-to-last items from the array
+			 *     deleteTabs(-2,-1);
+			*/
+			arrayRemove: function(arrayObj,from,to) {
+				from = parseInt(from);
+				to = parseInt(to);
+
+				var rest = arrayObj.slice((to || from) + 1 || arrayObj.length);
+				arrayObj.length = from < 0 ? arrayObj.length + from : from;
+				arrayObj.push.apply(arrayObj, rest);
+			}
+
 		}
 	}();
-
 }

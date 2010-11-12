@@ -142,6 +142,7 @@ module XYZ
         @model_name_info = [ModelNameInfo.new(model_handle[:model_name])]
         @sequel_ds = sequel_ds
         @c = model_handle[:c]
+        @filter_post_processing = nil #this is used for vcols in a conjunctive filter where theer is no vcol_sql fn; after all called this filters (it is a charachteristic fn
       end
 
       def join_table(join_type,right_ds,join_conditions=true,opts={})

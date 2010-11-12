@@ -35,12 +35,6 @@
              :rows => 1,
              :cols => 40,
             }},
-            {:schema_if_json => {
-             :type => 'hash',
-             :help => '',
-             :rows => 1,
-             :cols => 20,
-            }},
             {:value_asserted => {
              :type => 'hash',
              :help => '',
@@ -58,7 +52,6 @@
              :help => '',
              :rows => 1,
              :cols => 40,
-             :read_only => true,
             }},
             {:semantic_type => {
              :type => 'text',

@@ -15,8 +15,7 @@ module XYZ
 
       #columns related to the data/semantic type
       column :data_type, :varchar, :size => 25
-      column :schema_if_json, :json
-      column :semantic_type, :json
+      column :semantic_type, :json #points to structural info for a json varr #TODO: should this be a varchar instead; may need another field which is a pointer for attributes that are free form hashs w/o a seamntic type
       column :read_only, :boolean, :default => false #true means variable is automtcally set
       #TODO: does this have a default
       column :required, :boolean, :default => true #whether required for this attribute to have a value inorder to execute actions for parent component; TODO: may be indexed by action
@@ -30,7 +29,7 @@ module XYZ
       column :function, :json
 
 
-      virtual_column :is_unset, :type => :boolean, :hidden => true, :local_dependencies => [:value_asserted,:value_derived,:data_type,:schema_if_json]
+      virtual_column :is_unset, :type => :boolean, :hidden => true, :local_dependencies => [:value_asserted,:value_derived,:data_type,:semantic_type]
 
       virtual_column :needs_to_be_set, :type => :boolean, :hidden => true, 
         :local_dependencies => [:value_asserted,:value_derived,:read_only,:required,:input_link_attached,:output_link_attached], 
@@ -135,41 +134,13 @@ also related is allowing omission of columns mmentioned in jon condition; post p
     end
     ### virtual column defs
     def is_unset()
+      #care must be takedn so this is three-valued
       return true if attribute_value().nil?
       return false unless self[:data_type] == "json"
-      return nil unless (self[:schema_if_json]||{})[":required".to_sym]
-      Attribute.does_not_have_required_fields?(attribute_value(),self[:schema_if_json][":required".to_sym]) 
-    end
-
-    def self.does_not_have_required_fields?(obj,pattern)
-      if obj.kind_of?(Array)
-        array_pat = pattern[":array".to_sym]
-        if array_pat
-          return true if obj.empty? 
-          obj.each do |el|
-            ret = does_not_have_required_fields?(el,array_pat)
-            return ret if ret.nil? or ret.kind_of?(TrueClass)
-          end
-          return false
-        end
-        Log.error("mismatch between object #{obj.inspect} and pattern #{pattern}")
-      elsif obj.kind_of?(Hash)
-        if pattern[":array".to_sym]
-          Log.error("mismatch between object #{obj.inspect} and pattern #{pattern}")
-          return nil
-        end
-        pattern.each do |k,v|
-          el = obj[k]
-          return true unless el
-          next if v.kind_of?(TrueClass)
-          ret = does_not_have_required_fields?(el,v)
-          return ret if ret.nil? or ret.kind_of?(TrueClass)
-        end
-        return false
-      else
-        Log.error("mismatch between object #{obj.inspect} and pattern #{pattern}")
-      end
-      nil
+      return nil unless self[:semantic_type]
+      has_req_fields = AttributeComplexType.has_required_fields_given_semantic_type?(attribute_value(),self[:semantic_type])
+      return nil if has_req_fields.nil?
+      has_req_fields ? false : true
     end
 
     def qualified_attribute_name()

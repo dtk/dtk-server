@@ -16,7 +16,9 @@ pp get_base_object_dataset_needs_to_be_set(:component).ppsql
       ds = ds.where(:param_node_id => node_id.to_i) if node_id
 
       attribute_list = ds.all
-attribute_list.first[:qualified_attribute_name_under_node]
+      AttributeComplexType.flatten_attribute_list(attribute_list).each do |x|
+        pp x[:qualified_attribute_name_under_node]
+      end
       action_name = "list_qualified_attribute_name"
       tpl = R8Tpl::TemplateR8.new("#{model_name()}/#{action_name}",user_context())
       tpl.assign("attribute_list",attribute_list)

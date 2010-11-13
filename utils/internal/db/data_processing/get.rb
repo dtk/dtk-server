@@ -178,6 +178,7 @@ module XYZ
 	dataset(db_rel).select(*select_cols)
       end
 
+      #TODO!!! need to determine if this will be passed materialized virtual columns in which case we need to reformulate their types
       def process_raw_scalar_hash!(hash,db_rel,opts={})
 	cols_info = db_rel[:columns]
 

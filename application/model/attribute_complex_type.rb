@@ -130,7 +130,7 @@ module XYZ
     end
 
     def self.flatten_attribute_when_scalar!(ret,value_obj,attr,pattern,top_level)
-      if value_obj[:data_type] == pattern.to_s and top_level
+      if attr[:data_type] == pattern.to_s and top_level
         ret << attr
       else
         ret << attr.merge(:attribute_value => value_obj,:data_type => pattern.to_s)
@@ -143,13 +143,13 @@ module XYZ
       return flatten_attribute_when_mismatch!(ret,value_obj,attr,pattern,top_level) unless array_pat
 
       if value_obj.empty? 
-        ret << top_level ? attr : attr.merge(:attribute_value => value_obj)
+        ret << (top_level ? attr : attr.merge(:attribute_value => value_obj))
         return nil
       end
 
       value_obj.each_with_index do |child_val_obj,i|
         child_attr = attr.merge(:display_name => "#{attr[:display_name]}[#{i.to_s}]")
-        flatten_attribute!(ret,child_val_obj,child_attr)
+        flatten_attribute!(ret,child_val_obj,child_attr,array_pat)
       end
       nil
     end
@@ -160,20 +160,21 @@ module XYZ
       #only if keys in pattern completely line up with keys in val object  
       val_keys = value_obj.keys
       pat_keys = pattern.keys
-      unless val_keys.size == pat_keys.size and val_keys.to_s.sort == pat_keys.to_s.sort 
+      unless val_keys.size == pat_keys.size and val_keys.map{|x|x.to_s}.sort == pat_keys.sort 
         return flatten_attribute_when_mismatch!(ret,value_obj,attr,pattern,top_level)
       end
       
       value_obj.each do |k,child_val_obj|
         child_attr = attr.merge(:display_name => "#{attr[:display_name]}[#{k}]")
-        flatten_attribute!(ret,child_val_obj,child_attr)
+        child_pattern = pattern[k.to_s]
+        flatten_attribute!(ret,child_val_obj,child_attr,child_pattern)
       end
       nil
     end
 
     def self.flatten_attribute_when_mismatch!(ret,value_obj,attr,pattern,top_level)
       Log.error("mismatch between object #{value_obj.inspect} and pattern #{pattern}")
-      ret << top_level ? attr : attr.merge(:attribute_value => value_obj)
+      ret << (top_level ? attr : attr.merge(:attribute_value => value_obj))
       nil
     end
   end

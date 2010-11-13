@@ -10,34 +10,20 @@ pp get_base_object_dataset_needs_to_be_set(:component).ppsql
 
     def list_under_node(node_id=nil)
       filter = nil
-      cols = [:id,:display_name,:base_object_node,:needs_to_be_set,:attribute_value,:data_type,:semantic_type]
+      cols = [:id,:display_name,:base_object_node,:needs_to_be_set,:value_actual,:value_derived,:data_type,:semantic_type]
       field_set = Model::FieldSet.new(model_name,cols)
       ds = SearchObject.create_from_field_set(field_set,ret_session_context_id(),filter).create_dataset()
       ds = ds.where(:param_node_id => node_id.to_i) if node_id
 
-      attribute_list = ds.all
-      AttributeComplexType.flatten_attribute_list(attribute_list).each do |x|
-        pp x[:qualified_attribute_name_under_node]
-      end
+      raw_attribute_list = ds.all
+      attribute_list = AttributeComplexType.flatten_attribute_list(raw_attribute_list)
       action_name = "list_qualified_attribute_name"
       tpl = R8Tpl::TemplateR8.new("#{model_name()}/#{action_name}",user_context())
       tpl.assign("attribute_list",attribute_list)
       return {:content => tpl.render()}
     end
    
-    def deprecate_list_under_node(node_id)
-#      base_ds = get_base_object_dataset_needs_to_be_set(:node)
-#      ds = base_ds.where(:node__id => node_id.to_i).where_column_equal(:needs_to_be_set,true)
-
-      filter = [:and,[:eq,:needs_to_be_set,true]] #:eq,:node__id,node_id.to_i]
-      ds = get_base_object_dataset_needs_to_be_set(:node,filter).where(:param_node_id => node_id.to_i)
-      attribute_list = ds.all
-      action_name = "list_qualified_attribute_name"
-      tpl = R8Tpl::TemplateR8.new("#{model_name()}/#{action_name}",user_context())
-      tpl.assign("attribute_list",attribute_list)
-      return {:content => tpl.render()}
-    end
-   
+    
     def list_under_datacenter(datacenter_id=nil)
       datacenter_id = IDHandle[:c => ret_session_context_id(), :model_name => :datacenter, :uri => "/datacenter/dc1"].get_id() unless datacenter_id
 

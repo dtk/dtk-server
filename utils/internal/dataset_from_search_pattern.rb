@@ -102,7 +102,7 @@ module XYZ
                when :regex
                 Sequel::SQL::StringExpression.like(el_args[0],Regexp.new(el_args[1]),{:case_insensitive=>true})
                when :oneof
-                SQL.or(*el_args[1].map{|x|{el_args[0] => x}})
+                SQL.in(el_args[0],el_args[1])
                else
                 raise ErrorPatternNotImplemented.new(:equal_op,el_op) 
               end

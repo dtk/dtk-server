@@ -22,10 +22,12 @@ module XYZ
       #setting on port type contrains whether a link can be connecetd to teh attribute
       column :port_type, :varchar, :size => 10 # null means no port; otherwise "input", "output", or "either"
 
-
       #columns related to links
       column :input_link_attached, :boolean, :default => false, :hidden => true
       column :output_link_attached, :boolean, :default => false,  :hidden => true
+      #TODO: conv above to following to facilite fn indxes with arrays
+      #column :num_attached_input_links, :integer, :default => 0, :hidden => true
+      #column :num_attached_output_links, :integer, :default => 0, :hidden => true
 
       virtual_column :is_unset, :type => :boolean, :hidden => true, :local_dependencies => [:value_asserted,:value_derived,:data_type,:semantic_type]
 
@@ -128,6 +130,22 @@ also related is allowing omission of columns mmentioned in jon condition; post p
            ]
          }
 =end
+      virtual_column :linked_attributes, :type => :json, :hidden => true, 
+        :remote_dependencies => 
+        [
+         {
+           :model_name => :attribute_link,
+           :join_type => :inner,
+           :join_cond=>{:input_id=> :attribute__id},
+           :cols=>[:input_id,:output_id,:function,:function_index]
+         },
+         {
+           :model_name => :attribute,
+           :join_type => :inner,
+           :join_cond=>{:id=> :attribute_link__output_id},
+           :cols=>[:id, :value_asserted,:value_derived]
+         }
+        ]
 
 
     end
@@ -218,10 +236,8 @@ also related is allowing omission of columns mmentioned in jon condition; post p
    private
     ###### helper fns
     def self.propagate_changes(attr_changes) 
-      new_changes = AttributeLink.propagate_over_dir_conn_equality_links(attr_changes)
+      new_changes = AttributeLink.propagate_when_eq_links(attr_changes)
     end
-
-
 
     ##TODO: need to go over each one below to see what we still should use
 

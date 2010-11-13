@@ -57,7 +57,7 @@ module XYZ
       update_type_link_attached(attr_link_mh,:output,new_link_info)
     end
 
-    def self.propagate_over_dir_conn_equality_links(attr_changes)
+    def self.propagate_when_eq_links(attr_changes)
       return Array.new if attr_changes.empty?
       #build up pattern that traces from root id_handles in changes pending to directly connected links
       # link tracing would look like
@@ -65,6 +65,7 @@ module XYZ
       #TODO: below outdated after actual links updated
       # attribute(id_val_pairs).as(a1)([:value_asserted,:action_id])--(input_id)attribute_link(output_id)--attribute.as(a2)([:id]).where(:value_asserted => nil))
       #return a1[:value_asserted.as(:value_derived),:action_id],a2[:id]
+#TODO: temp debug propagate(attr_changes.map{|x|x.id_handle})
 
       attr_mh = attr_changes.first.id_handle.createMH(:model_name => :attribute)
 
@@ -102,6 +103,18 @@ module XYZ
         new_item_hash.merge(base_object ? {:base_object => base_object} : {})
       end
       Action.create_pending_change_items(new_item_hashes)
+    end
+    #TODO: below will subsume above
+    def self.propagate(input_attr_id_handles)
+      return Array.new if input_attr_id_handles.empty?
+      c = input_attr_id_handles.first[:c]
+      field_set = Model::FieldSet.new(:attribute,[:id,:value_asserted,:value_derived,:linked_attributes])
+      filter = [:and, [:oneof, :attribute__id, input_attr_id_handles.map{|idh|idh.get_id()}]]
+      #TODO subsititue with below that removes attribute son output side that ahs asserted values
+      ds = SearchObject.create_from_field_set(field_set,c,filter).create_dataset()
+      #wc = {:attribute2__value_asserted => nil}
+      #ds = SearchObject.create_from_field_set(field_set,c,filter).create_dataset().where(wc)
+      pp ds.all.first
     end
 
     def self.get_legal_connections(parent_id_handle)

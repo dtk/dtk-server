@@ -26,8 +26,6 @@ module XYZ
       #columns related to links
       column :input_link_attached, :boolean, :default => false, :hidden => true
       column :output_link_attached, :boolean, :default => false,  :hidden => true
-      column :function, :json
-
 
       virtual_column :is_unset, :type => :boolean, :hidden => true, :local_dependencies => [:value_asserted,:value_derived,:data_type,:semantic_type]
 
@@ -134,6 +132,10 @@ also related is allowing omission of columns mmentioned in jon condition; post p
 
     end
     ### virtual column defs
+    def attribute_value()
+      self[:value_asserted] || self[:value_derived]
+    end
+
     def is_unset()
       #care must be takedn so this is three-valued
       return true if attribute_value().nil?
@@ -245,9 +247,6 @@ also related is allowing omission of columns mmentioned in jon condition; post p
 
     ### virtual column defs
     # returns asserted first then derived
-    def attribute_value()
-      self[:value_asserted] || self[:value_derived]
-    end
 
     def unknown_in_attribute_value()
       attr_value = attribute_value()

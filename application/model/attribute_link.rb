@@ -5,6 +5,9 @@ module XYZ
     def self.up()
       foreign_key :input_id, :attribute, FK_CASCADE_OPT
       foreign_key :output_id, :attribute, FK_CASCADE_OPT
+      column :function, :json, :default => "eq"
+      column :function_index, :json
+      #TODO: may deprecate and subsume in function
       column :label, :text, :default => "1"
       has_ancestor_field()
       many_to_one :library, :datacenter, :component, :project
@@ -12,7 +15,7 @@ module XYZ
 
     #######################
     ### object procssing and access functions
-    def self.link_attributes(node_group_id_handle,ng_cmp_id_handle,node_cmp_id_handles)
+    def self.link_attributes_using_eq(node_group_id_handle,ng_cmp_id_handle,node_cmp_id_handles)
       #TODO: rename params so not specfic to node groups
       #TODO: may convert to computing from search object with links
       node_cmp_mh = node_cmp_id_handles.first.createMH
@@ -39,11 +42,12 @@ module XYZ
          {SQL::ColRef.concat(ref_prefix,:input__id.cast(:text),"-",:output__id.cast(:text)) => :ref},
          {attr_link_parent_id_handle.get_id() => attr_link_parent_col},
          {:input__id => :input_id},
-         {:output__id => :output_id})
+         {:output__id => :output_id},
+         {"eq" => :function})
       first_join_ds = i1_ds.join_table(:inner,node_attr_ds,{attr_parent_col => :id},{:table_alias => :output})
       attr_link_ds = first_join_ds.join_table(:inner,group_attr_ds,[:ref],{:table_alias => :input})
 
-      attr_link_fs = FieldSet.new(:attribute,[:ref,attr_link_parent_col,:input_id,:output_id])
+      attr_link_fs = FieldSet.new(:attribute,[:ref,attr_link_parent_col,:input_id,:output_id,:function])
       override_attrs = {}
             
       #TODO: encapsulate all this under attribute link

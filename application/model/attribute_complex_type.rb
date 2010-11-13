@@ -33,6 +33,8 @@ module XYZ
 
    private
     #TODO: stub
+    #TODO: should unify Required and data type and view also data types as optional or possibly incomplete to allow gamut from compleetly
+    #specified to un specfied
     Required = 
       {
       "sap_config" => {
@@ -115,7 +117,11 @@ module XYZ
       end
       nil
     end
-
+    #TODO: fix up so pattern can be omitted or partial; if omitted then just follow hash structure; can also have json data type means stop 
+    #flattening
+    #TODO: add "index that will be used to tie unravvled attribute back to the base object and make sure
+    #base object in the attribute
+    #TODO: also if value is null but pattern, then follow the pattern to fleh out with nulls
     def self.flatten_attribute!(ret,value_obj,attr,pattern,top_level=false)
       if not pattern.kind_of?(Hash)
         flatten_attribute_when_scalar!(ret,value_obj,attr,pattern,top_level)

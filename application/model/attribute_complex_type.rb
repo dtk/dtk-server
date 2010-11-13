@@ -121,7 +121,7 @@ module XYZ
     #flattening
     #TODO: add "index that will be used to tie unravvled attribute back to the base object and make sure
     #base object in the attribute
-    #TODO: also if value is null but pattern, then follow the pattern to fleh out with nulls
+    #TODO: also if value is null but pattern, then follow the pattern to flesh out with nulls
     def self.flatten_attribute!(ret,value_obj,attr,pattern,top_level=false)
       if not pattern.kind_of?(Hash)
         flatten_attribute_when_scalar!(ret,value_obj,attr,pattern,top_level)
@@ -162,7 +162,7 @@ module XYZ
    
     def self.flatten_attribute_when_hash!(ret,value_obj,attr,pattern,top_level)
       return flatten_attribute_when_mismatch!(ret,value_obj,attr,pattern,top_level) if pattern[:array]
-
+      #TODO: change so if difference in keys, you add union (providing nulls when pattern has column but ob doesnt)
       #only if keys in pattern completely line up with keys in val object  
       val_keys = value_obj.keys
       pat_keys = pattern.keys

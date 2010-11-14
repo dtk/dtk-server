@@ -149,9 +149,9 @@ module XYZ
     def self.update_type_link_attached(attr_link_mh,type,new_link_info)
       attr_mh = attr_link_mh.createMH(:model_name => :attribute)
       index = "#{type}_id".to_sym
-      field_to_update = "#{type}_link_attached".to_sym
+      field_to_update = "num_attached_#{type}_links".to_sym
       select_wc = SQL.in(:id,new_link_info.map{|r|r[index]})
-      select_fs = FieldSet.opt([:id,{true => field_to_update}],:attribute)
+      select_fs = FieldSet.opt([:id,{SQL::ColRef.sum(field_to_update,1) => field_to_update}],:attribute)
       select_ds = get_objects_just_dataset(attr_mh,select_wc,select_fs)
       update_from_select(attr_mh,FieldSet.new(:attribute,[field_to_update]),select_ds)
     end

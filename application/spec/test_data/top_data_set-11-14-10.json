@@ -3,92 +3,92 @@
     "dc1": {
       "node_group_member": {
         "ec2_sg_basic__default--i-bd39e2d7": {
-          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "is_elastic_node": false,
+          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "*node_id": "/node/i-bd39e2d7",
           "display_name": "ec2_sg_basic__default--i-bd39e2d7"
         },
         "ec2_sg_basic__default--i-335f0059": {
-          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "is_elastic_node": false,
+          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "*node_id": "/node/i-335f0059",
           "display_name": "ec2_sg_basic__default--i-335f0059"
         },
         "ec2_sg_basic__default--i-374b945d": {
-          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "is_elastic_node": false,
+          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "*node_id": "/node/i-374b945d",
           "display_name": "ec2_sg_basic__default--i-374b945d"
         },
         "ec2_sg_basic__default--i-fb486291": {
-          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "is_elastic_node": false,
+          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "*node_id": "/node/i-fb486291",
           "display_name": "ec2_sg_basic__default--i-fb486291"
         },
         "ec2_sg_basic__default--i-33886f59": {
-          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "is_elastic_node": false,
+          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "*node_id": "/node/i-33886f59",
           "display_name": "ec2_sg_basic__default--i-33886f59"
         },
         "ec2_sg_basic__default--i-97bb8ffd": {
-          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "is_elastic_node": false,
+          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "*node_id": "/node/i-97bb8ffd",
           "display_name": "ec2_sg_basic__default--i-97bb8ffd"
         },
         "ec2_sg_basic__default--i-2f5b7a44": {
-          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "is_elastic_node": false,
+          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "*node_id": "/node/i-2f5b7a44",
           "display_name": "ec2_sg_basic__default--i-2f5b7a44"
         },
         "ec2_sg_basic__default--i-07af096d": {
-          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "is_elastic_node": false,
+          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "*node_id": "/node/i-07af096d",
           "display_name": "ec2_sg_basic__default--i-07af096d"
         },
         "ec2_sg_basic__default--i-9bad8cf1": {
-          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "is_elastic_node": false,
+          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "*node_id": "/node/i-9bad8cf1",
           "display_name": "ec2_sg_basic__default--i-9bad8cf1"
         },
         "ec2_sg_basic__default--i-4fc62e25": {
-          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "is_elastic_node": false,
+          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "*node_id": "/node/i-4fc62e25",
           "display_name": "ec2_sg_basic__default--i-4fc62e25"
         },
         "ec2_sg_basic__default--i-c5f5afaf": {
-          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "is_elastic_node": false,
+          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "*node_id": "/node/i-c5f5afaf",
           "display_name": "ec2_sg_basic__default--i-c5f5afaf"
         },
         "ec2_sg_basic__default--i-7550141f": {
-          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "is_elastic_node": false,
+          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "*node_id": "/node/i-7550141f",
           "display_name": "ec2_sg_basic__default--i-7550141f"
         },
         "ec2_sg_basic__default--i-c1b527ab": {
-          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "is_elastic_node": false,
+          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "*node_id": "/node/i-c1b527ab",
           "display_name": "ec2_sg_basic__default--i-c1b527ab"
         },
         "ec2_sg_basic__default--i-63775608": {
-          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "is_elastic_node": false,
+          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "*node_id": "/node/i-63775608",
           "display_name": "ec2_sg_basic__default--i-63775608"
         },
         "ec2_sg_basic__default--i-656e580f": {
-          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "is_elastic_node": false,
+          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "*node_id": "/node/i-656e580f",
           "display_name": "ec2_sg_basic__default--i-656e580f"
         }
@@ -223,8 +223,8 @@
             "flavor": {
               "ram": 1740.8,
               "disk": 160,
-              "name": "Small Instance",
               "cores": 1,
+              "name": "Small Instance",
               "id": "m1.small",
               "bits": 32
             },
@@ -295,8 +295,8 @@
             "flavor": {
               "ram": 1740.8,
               "disk": 160,
-              "name": "Small Instance",
               "cores": 1,
+              "name": "Small Instance",
               "id": "m1.small",
               "bits": 32
             },
@@ -392,8 +392,8 @@
             "flavor": {
               "ram": 1740.8,
               "disk": 160,
-              "name": "Small Instance",
               "cores": 1,
+              "name": "Small Instance",
               "id": "m1.small",
               "bits": 32
             },
@@ -500,8 +500,8 @@
             "flavor": {
               "ram": 1740.8,
               "disk": 160,
-              "name": "Small Instance",
               "cores": 1,
+              "name": "Small Instance",
               "id": "m1.small",
               "bits": 32
             },
@@ -608,8 +608,8 @@
             "flavor": {
               "ram": 1740.8,
               "disk": 160,
-              "name": "Small Instance",
               "cores": 1,
+              "name": "Small Instance",
               "id": "m1.small",
               "bits": 32
             },
@@ -635,8 +635,8 @@
               "type": "instance",
               "attribute": {
                 "port[jmxremote_port]": {
-                  "input_link_attached": false,
-                  "output_link_attached": false,
+                  "num_attached_input_links": 0,
+                  "num_attached_output_links": 0,
                   "read_only": false,
                   "external_ref": {
                     "type": "service_attribute",
@@ -648,8 +648,8 @@
                   "port_type": "output"
                 },
                 "port[jmxremote_password]": {
-                  "input_link_attached": false,
-                  "output_link_attached": false,
+                  "num_attached_input_links": 0,
+                  "num_attached_output_links": 0,
                   "read_only": false,
                   "external_ref": {
                     "type": "service_attribute",
@@ -733,8 +733,8 @@
             "flavor": {
               "ram": 1740.8,
               "disk": 160,
-              "name": "Small Instance",
               "cores": 1,
+              "name": "Small Instance",
               "id": "m1.small",
               "bits": 32
             },
@@ -805,8 +805,8 @@
             "flavor": {
               "ram": 1740.8,
               "disk": 160,
-              "name": "Small Instance",
               "cores": 1,
+              "name": "Small Instance",
               "id": "m1.small",
               "bits": 32
             },
@@ -889,8 +889,8 @@
             "flavor": {
               "ram": 1740.8,
               "disk": 160,
-              "name": "Small Instance",
               "cores": 1,
+              "name": "Small Instance",
               "id": "m1.small",
               "bits": 32
             },
@@ -961,8 +961,8 @@
             "flavor": {
               "ram": 1740.8,
               "disk": 160,
-              "name": "Small Instance",
               "cores": 1,
+              "name": "Small Instance",
               "id": "m1.small",
               "bits": 32
             },
@@ -1048,8 +1048,8 @@
             "flavor": {
               "ram": 1740.8,
               "disk": 160,
-              "name": "Small Instance",
               "cores": 1,
+              "name": "Small Instance",
               "id": "m1.small",
               "bits": 32
             },
@@ -1065,8 +1065,8 @@
               "attribute": {
                 "var[bind_address]": {
                   "description": "Address that mysqld should listen on",
-                  "input_link_attached": false,
-                  "output_link_attached": false,
+                  "num_attached_input_links": 0,
+                  "num_attached_output_links": 0,
                   "read_only": false,
                   "external_ref": {
                     "type": "chef_attribute",
@@ -1078,8 +1078,8 @@
                   "required": true
                 },
                 "var[tunable][key_buffer]": {
-                  "input_link_attached": false,
-                  "output_link_attached": false,
+                  "num_attached_input_links": 0,
+                  "num_attached_output_links": 0,
                   "read_only": false,
                   "external_ref": {
                     "type": "chef_attribute",
@@ -1090,9 +1090,29 @@
                   "value_asserted": "250M",
                   "required": true
                 },
+                "port[sap]": {
+                  "value_derived": [
+                    {
+                      "type": "inet",
+                      "port": 3306,
+                      "protocol": "tcp"
+                    }
+                  ],
+                  "num_attached_input_links": 0,
+                  "num_attached_output_links": 0,
+                  "read_only": false,
+                  "external_ref": {
+                    "type": "service_attribute",
+                    "path": "service[mysql_server][sap_config]"
+                  },
+                  "data_type": "json",
+                  "display_name": "port[sap]",
+                  "semantic_type": "sap",
+                  "required": true
+                },
                 "var[tunable][back_log]": {
-                  "input_link_attached": false,
-                  "output_link_attached": false,
+                  "num_attached_input_links": 0,
+                  "num_attached_output_links": 0,
                   "read_only": false,
                   "external_ref": {
                     "type": "chef_attribute",
@@ -1104,8 +1124,8 @@
                   "required": true
                 },
                 "var[tunable][max_connections]": {
-                  "input_link_attached": false,
-                  "output_link_attached": false,
+                  "num_attached_input_links": 0,
+                  "num_attached_output_links": 0,
                   "read_only": false,
                   "external_ref": {
                     "type": "chef_attribute",
@@ -1117,8 +1137,8 @@
                   "required": true
                 },
                 "var[tunable][wait_timeout]": {
-                  "input_link_attached": false,
-                  "output_link_attached": false,
+                  "num_attached_input_links": 0,
+                  "num_attached_output_links": 0,
                   "read_only": false,
                   "external_ref": {
                     "type": "chef_attribute",
@@ -1130,8 +1150,8 @@
                   "required": true
                 },
                 "port[monitor_user_id]": {
-                  "input_link_attached": false,
-                  "output_link_attached": false,
+                  "num_attached_input_links": 0,
+                  "num_attached_output_links": 0,
                   "read_only": false,
                   "external_ref": {
                     "type": "service_attribute",
@@ -1144,8 +1164,8 @@
                 },
                 "var[server_root_password]": {
                   "description": "Randomly generated password for the mysqld root user",
-                  "input_link_attached": false,
-                  "output_link_attached": false,
+                  "num_attached_input_links": 0,
+                  "num_attached_output_links": 0,
                   "read_only": false,
                   "external_ref": {
                     "type": "chef_attribute",
@@ -1157,8 +1177,8 @@
                   "required": true
                 },
                 "var[tunable][max_heap_table_size]": {
-                  "input_link_attached": false,
-                  "output_link_attached": false,
+                  "num_attached_input_links": 0,
+                  "num_attached_output_links": 0,
                   "read_only": false,
                   "external_ref": {
                     "type": "chef_attribute",
@@ -1170,8 +1190,8 @@
                   "required": true
                 },
                 "var[tunable][net_write_timeout]": {
-                  "input_link_attached": false,
-                  "output_link_attached": false,
+                  "num_attached_input_links": 0,
+                  "num_attached_output_links": 0,
                   "read_only": false,
                   "external_ref": {
                     "type": "chef_attribute",
@@ -1184,8 +1204,8 @@
                 },
                 "var[datadir]": {
                   "description": "Location of mysql databases",
-                  "input_link_attached": false,
-                  "output_link_attached": false,
+                  "num_attached_input_links": 0,
+                  "num_attached_output_links": 0,
                   "read_only": false,
                   "external_ref": {
                     "type": "chef_attribute",
@@ -1197,8 +1217,8 @@
                   "required": true
                 },
                 "var[tunable][net_read_timeout]": {
-                  "input_link_attached": false,
-                  "output_link_attached": false,
+                  "num_attached_input_links": 0,
+                  "num_attached_output_links": 0,
                   "read_only": false,
                   "external_ref": {
                     "type": "chef_attribute",
@@ -1211,8 +1231,8 @@
                 },
                 "var[ec2_path]": {
                   "description": "Location of mysql directory on EC2 instance EBS volumes",
-                  "input_link_attached": false,
-                  "output_link_attached": false,
+                  "num_attached_input_links": 0,
+                  "num_attached_output_links": 0,
                   "read_only": false,
                   "external_ref": {
                     "type": "chef_attribute",
@@ -1224,8 +1244,8 @@
                   "required": true
                 },
                 "port[db_info]": {
-                  "input_link_attached": false,
-                  "output_link_attached": false,
+                  "num_attached_input_links": 0,
+                  "num_attached_output_links": 0,
                   "read_only": false,
                   "external_ref": {
                     "type": "service_attribute",
@@ -1243,29 +1263,9 @@
                   ],
                   "required": true
                 },
-                "port[sap]": {
-                  "input_link_attached": false,
-                  "output_link_attached": false,
-                  "read_only": false,
-                  "external_ref": {
-                    "type": "service_attribute",
-                    "path": "service[mysql_server][sap_config]"
-                  },
-                  "data_type": "json",
-                  "display_name": "port[sap]",
-                  "semantic_type": "sap",
-                  "value_derived": [
-                    {
-                      "type": "inet",
-                      "port": 3306,
-                      "protocol": "tcp"
-                    }
-                  ],
-                  "required": true
-                },
                 "var[tunable][table_cache]": {
-                  "input_link_attached": false,
-                  "output_link_attached": false,
+                  "num_attached_input_links": 0,
+                  "num_attached_output_links": 0,
                   "read_only": false,
                   "external_ref": {
                     "type": "chef_attribute",
@@ -1313,8 +1313,8 @@
               "type": "instance",
               "attribute": {
                 "port[sap_config]": {
-                  "input_link_attached": false,
-                  "output_link_attached": false,
+                  "num_attached_input_links": 0,
+                  "num_attached_output_links": 0,
                   "read_only": false,
                   "external_ref": {
                     "type": "service_attribute",
@@ -1345,9 +1345,22 @@
             "rabbitmq": {
               "type": "instance",
               "attribute": {
+                "var[branch_tag]": {
+                  "description": "The RabbitMQ tag/branch name.  The default is default, the latest qa'd branch.",
+                  "num_attached_input_links": 0,
+                  "num_attached_output_links": 0,
+                  "read_only": false,
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[rabbitmq][branch_tag]"
+                  },
+                  "data_type": "string",
+                  "display_name": "var[branch_tag]",
+                  "required": true
+                },
                 "port[sap_config]": {
-                  "input_link_attached": false,
-                  "output_link_attached": false,
+                  "num_attached_input_links": 0,
+                  "num_attached_output_links": 0,
                   "read_only": false,
                   "external_ref": {
                     "type": "service_attribute",
@@ -1365,23 +1378,10 @@
                   ],
                   "required": true
                 },
-                "var[branch_tag]": {
-                  "description": "The RabbitMQ tag/branch name.  The default is default, the latest qa'd branch.",
-                  "input_link_attached": false,
-                  "output_link_attached": false,
-                  "read_only": false,
-                  "external_ref": {
-                    "type": "chef_attribute",
-                    "path": "node[rabbitmq][branch_tag]"
-                  },
-                  "data_type": "string",
-                  "display_name": "var[branch_tag]",
-                  "required": true
-                },
                 "var[stomp][branch_tag]": {
                   "description": "The RabbitMQ-stomp adapter tag/branch name.  The default is default, the latest qa'd branch.",
-                  "input_link_attached": false,
-                  "output_link_attached": false,
+                  "num_attached_input_links": 0,
+                  "num_attached_output_links": 0,
                   "read_only": false,
                   "external_ref": {
                     "type": "chef_attribute",
@@ -1464,8 +1464,8 @@
             "flavor": {
               "ram": 1740.8,
               "disk": 160,
-              "name": "Small Instance",
               "cores": 1,
+              "name": "Small Instance",
               "id": "m1.small",
               "bits": 32
             },
@@ -1536,8 +1536,8 @@
             "flavor": {
               "ram": 1740.8,
               "disk": 160,
-              "name": "Small Instance",
               "cores": 1,
+              "name": "Small Instance",
               "id": "m1.small",
               "bits": 32
             },
@@ -1553,8 +1553,8 @@
               "attribute": {
                 "var[dir]": {
                   "description": "Location of the PostgreSQL databases",
-                  "input_link_attached": false,
-                  "output_link_attached": false,
+                  "num_attached_input_links": 0,
+                  "num_attached_output_links": 0,
                   "read_only": false,
                   "external_ref": {
                     "type": "chef_attribute",
@@ -1639,8 +1639,8 @@
             "flavor": {
               "ram": 1740.8,
               "disk": 160,
-              "name": "Small Instance",
               "cores": 1,
+              "name": "Small Instance",
               "id": "m1.small",
               "bits": 32
             },
@@ -1677,8 +1677,8 @@
               "type": "instance",
               "attribute": {
                 "port[jmxremote_port]": {
-                  "input_link_attached": false,
-                  "output_link_attached": false,
+                  "num_attached_input_links": 0,
+                  "num_attached_output_links": 0,
                   "read_only": false,
                   "external_ref": {
                     "type": "service_attribute",
@@ -1691,8 +1691,8 @@
                   "port_type": "output"
                 },
                 "port[jmxremote_password]": {
-                  "input_link_attached": false,
-                  "output_link_attached": false,
+                  "num_attached_input_links": 0,
+                  "num_attached_output_links": 0,
                   "read_only": false,
                   "external_ref": {
                     "type": "service_attribute",
@@ -1777,8 +1777,8 @@
             "flavor": {
               "ram": 1740.8,
               "disk": 160,
-              "name": "Small Instance",
               "cores": 1,
+              "name": "Small Instance",
               "id": "m1.small",
               "bits": 32
             },
@@ -1849,8 +1849,8 @@
             "flavor": {
               "ram": 1740.8,
               "disk": 160,
-              "name": "Small Instance",
               "cores": 1,
+              "name": "Small Instance",
               "id": "m1.small",
               "bits": 32
             },
@@ -2491,8 +2491,8 @@
           },
           "attribute": {
             "port[jmxremote_port]": {
-              "input_link_attached": false,
-              "output_link_attached": false,
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
               "read_only": false,
               "external_ref": {
                 "type": "service_attribute",
@@ -2504,8 +2504,8 @@
               "port_type": "output"
             },
             "port[jmxremote_password]": {
-              "input_link_attached": false,
-              "output_link_attached": false,
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
               "read_only": false,
               "external_ref": {
                 "type": "service_attribute",
@@ -2563,8 +2563,8 @@
           "attribute": {
             "var[dir]": {
               "description": "Location of the PostgreSQL databases",
-              "input_link_attached": false,
-              "output_link_attached": false,
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
               "read_only": false,
               "external_ref": {
                 "type": "chef_attribute",
@@ -2643,8 +2643,8 @@
           "attribute": {
             "var[dir]": {
               "description": "Location of the PostgreSQL databases",
-              "input_link_attached": false,
-              "output_link_attached": false,
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
               "read_only": false,
               "external_ref": {
                 "type": "chef_attribute",
@@ -2731,17 +2731,17 @@
 
                 ]
               },
-              "mysql/bind_address": {
+              "mysql/datadir": {
                 "type": "string",
-                "description": "Address that mysqld should listen on",
-                "value": "ipaddress",
+                "description": "Location of mysql databases",
+                "value": "/var/lib/mysql",
                 "calculated": false,
-                "display_name": "MySQL Bind Address",
+                "display_name": "MySQL Data Directory",
                 "recipes": [
                   "mysql::server",
                   "mysql::server2"
                 ],
-                "default": "ipaddress",
+                "default": "/var/lib/mysql",
                 "required": "optional",
                 "choice": [
 
@@ -2931,17 +2931,17 @@
 
                 ]
               },
-              "mysql/datadir": {
+              "mysql/bind_address": {
                 "type": "string",
-                "description": "Location of mysql databases",
-                "value": "/var/lib/mysql",
+                "description": "Address that mysqld should listen on",
+                "value": "ipaddress",
                 "calculated": false,
-                "display_name": "MySQL Data Directory",
+                "display_name": "MySQL Bind Address",
                 "recipes": [
                   "mysql::server",
                   "mysql::server2"
                 ],
-                "default": "/var/lib/mysql",
+                "default": "ipaddress",
                 "required": "optional",
                 "choice": [
 
@@ -2952,8 +2952,8 @@
           "attribute": {
             "var[bind_address]": {
               "description": "Address that mysqld should listen on",
-              "input_link_attached": false,
-              "output_link_attached": false,
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
               "read_only": false,
               "external_ref": {
                 "type": "chef_attribute",
@@ -2965,8 +2965,8 @@
               "required": true
             },
             "var[tunable][key_buffer]": {
-              "input_link_attached": false,
-              "output_link_attached": false,
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
               "read_only": false,
               "external_ref": {
                 "type": "chef_attribute",
@@ -2978,8 +2978,8 @@
               "required": true
             },
             "var[tunable][back_log]": {
-              "input_link_attached": false,
-              "output_link_attached": false,
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
               "read_only": false,
               "external_ref": {
                 "type": "chef_attribute",
@@ -2991,8 +2991,8 @@
               "required": true
             },
             "var[tunable][max_connections]": {
-              "input_link_attached": false,
-              "output_link_attached": false,
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
               "read_only": false,
               "external_ref": {
                 "type": "chef_attribute",
@@ -3004,8 +3004,8 @@
               "required": true
             },
             "var[tunable][wait_timeout]": {
-              "input_link_attached": false,
-              "output_link_attached": false,
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
               "read_only": false,
               "external_ref": {
                 "type": "chef_attribute",
@@ -3017,8 +3017,8 @@
               "required": true
             },
             "port[monitor_user_id]": {
-              "input_link_attached": false,
-              "output_link_attached": false,
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
               "read_only": false,
               "external_ref": {
                 "type": "service_attribute",
@@ -3031,8 +3031,8 @@
             },
             "var[server_root_password]": {
               "description": "Randomly generated password for the mysqld root user",
-              "input_link_attached": false,
-              "output_link_attached": false,
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
               "read_only": false,
               "external_ref": {
                 "type": "chef_attribute",
@@ -3043,8 +3043,8 @@
               "required": true
             },
             "var[tunable][max_heap_table_size]": {
-              "input_link_attached": false,
-              "output_link_attached": false,
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
               "read_only": false,
               "external_ref": {
                 "type": "chef_attribute",
@@ -3056,8 +3056,8 @@
               "required": true
             },
             "var[tunable][net_write_timeout]": {
-              "input_link_attached": false,
-              "output_link_attached": false,
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
               "read_only": false,
               "external_ref": {
                 "type": "chef_attribute",
@@ -3070,8 +3070,8 @@
             },
             "var[datadir]": {
               "description": "Location of mysql databases",
-              "input_link_attached": false,
-              "output_link_attached": false,
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
               "read_only": false,
               "external_ref": {
                 "type": "chef_attribute",
@@ -3083,8 +3083,8 @@
               "required": true
             },
             "var[tunable][net_read_timeout]": {
-              "input_link_attached": false,
-              "output_link_attached": false,
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
               "read_only": false,
               "external_ref": {
                 "type": "chef_attribute",
@@ -3097,8 +3097,8 @@
             },
             "var[ec2_path]": {
               "description": "Location of mysql directory on EC2 instance EBS volumes",
-              "input_link_attached": false,
-              "output_link_attached": false,
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
               "read_only": false,
               "external_ref": {
                 "type": "chef_attribute",
@@ -3110,8 +3110,8 @@
               "required": true
             },
             "port[db_info]": {
-              "input_link_attached": false,
-              "output_link_attached": false,
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
               "read_only": false,
               "external_ref": {
                 "type": "service_attribute",
@@ -3130,8 +3130,8 @@
               "required": true
             },
             "var[tunable][table_cache]": {
-              "input_link_attached": false,
-              "output_link_attached": false,
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
               "read_only": false,
               "external_ref": {
                 "type": "chef_attribute",
@@ -3284,9 +3284,23 @@
             }
           },
           "attribute": {
+            "var[branch_tag]": {
+              "description": "The RabbitMQ tag/branch name.  The default is default, the latest qa'd branch.",
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
+              "read_only": false,
+              "external_ref": {
+                "type": "chef_attribute",
+                "path": "node[rabbitmq][branch_tag]"
+              },
+              "data_type": "string",
+              "display_name": "var[branch_tag]",
+              "value_asserted": "default",
+              "required": true
+            },
             "port[sap_config]": {
-              "input_link_attached": false,
-              "output_link_attached": false,
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
               "read_only": false,
               "external_ref": {
                 "type": "service_attribute",
@@ -3304,24 +3318,10 @@
               ],
               "required": true
             },
-            "var[branch_tag]": {
-              "description": "The RabbitMQ tag/branch name.  The default is default, the latest qa'd branch.",
-              "input_link_attached": false,
-              "output_link_attached": false,
-              "read_only": false,
-              "external_ref": {
-                "type": "chef_attribute",
-                "path": "node[rabbitmq][branch_tag]"
-              },
-              "data_type": "string",
-              "display_name": "var[branch_tag]",
-              "value_asserted": "default",
-              "required": true
-            },
             "var[stomp][branch_tag]": {
               "description": "The RabbitMQ-stomp adapter tag/branch name.  The default is default, the latest qa'd branch.",
-              "input_link_attached": false,
-              "output_link_attached": false,
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
               "read_only": false,
               "external_ref": {
                 "type": "chef_attribute",
@@ -3376,8 +3376,8 @@
           "attribute": {
             "port[sap_ref]": {
               "description": "Service access point reference",
-              "input_link_attached": false,
-              "output_link_attached": false,
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
               "read_only": false,
               "external_ref": {
                 "type": "service_attribute",
@@ -3590,9 +3590,23 @@
             }
           },
           "attribute": {
+            "var[branch_tag]": {
+              "description": "The RabbitMQ tag/branch name.  The default is default, the latest qa'd branch.",
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
+              "read_only": false,
+              "external_ref": {
+                "type": "chef_attribute",
+                "path": "node[rabbitmq][branch_tag]"
+              },
+              "data_type": "string",
+              "display_name": "var[branch_tag]",
+              "value_asserted": "default",
+              "required": true
+            },
             "port[sap_config]": {
-              "input_link_attached": false,
-              "output_link_attached": false,
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
               "read_only": false,
               "external_ref": {
                 "type": "service_attribute",
@@ -3610,24 +3624,10 @@
               ],
               "required": true
             },
-            "var[branch_tag]": {
-              "description": "The RabbitMQ tag/branch name.  The default is default, the latest qa'd branch.",
-              "input_link_attached": false,
-              "output_link_attached": false,
-              "read_only": false,
-              "external_ref": {
-                "type": "chef_attribute",
-                "path": "node[rabbitmq][branch_tag]"
-              },
-              "data_type": "string",
-              "display_name": "var[branch_tag]",
-              "value_asserted": "default",
-              "required": true
-            },
             "var[stomp][branch_tag]": {
               "description": "The RabbitMQ-stomp adapter tag/branch name.  The default is default, the latest qa'd branch.",
-              "input_link_attached": false,
-              "output_link_attached": false,
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
               "read_only": false,
               "external_ref": {
                 "type": "chef_attribute",
@@ -3724,9 +3724,23 @@
             }
           },
           "attribute": {
+            "var[branch_tag]": {
+              "description": "The RabbitMQ tag/branch name.  The default is default, the latest qa'd branch.",
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
+              "read_only": false,
+              "external_ref": {
+                "type": "chef_attribute",
+                "path": "node[rabbitmq][branch_tag]"
+              },
+              "data_type": "string",
+              "display_name": "var[branch_tag]",
+              "value_asserted": "default",
+              "required": true
+            },
             "port[sap_config]": {
-              "input_link_attached": false,
-              "output_link_attached": false,
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
               "read_only": false,
               "external_ref": {
                 "type": "service_attribute",
@@ -3744,24 +3758,10 @@
               ],
               "required": true
             },
-            "var[branch_tag]": {
-              "description": "The RabbitMQ tag/branch name.  The default is default, the latest qa'd branch.",
-              "input_link_attached": false,
-              "output_link_attached": false,
-              "read_only": false,
-              "external_ref": {
-                "type": "chef_attribute",
-                "path": "node[rabbitmq][branch_tag]"
-              },
-              "data_type": "string",
-              "display_name": "var[branch_tag]",
-              "value_asserted": "default",
-              "required": true
-            },
             "var[stomp][branch_tag]": {
               "description": "The RabbitMQ-stomp adapter tag/branch name.  The default is default, the latest qa'd branch.",
-              "input_link_attached": false,
-              "output_link_attached": false,
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
               "read_only": false,
               "external_ref": {
                 "type": "chef_attribute",
@@ -3962,8 +3962,8 @@
           },
           "attribute": {
             "port[jmxremote_port]": {
-              "input_link_attached": false,
-              "output_link_attached": false,
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
               "read_only": false,
               "external_ref": {
                 "type": "service_attribute",
@@ -3975,8 +3975,8 @@
               "port_type": "output"
             },
             "port[jmxremote_password]": {
-              "input_link_attached": false,
-              "output_link_attached": false,
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
               "read_only": false,
               "external_ref": {
                 "type": "service_attribute",
@@ -4062,17 +4062,17 @@
 
                 ]
               },
-              "mysql/bind_address": {
+              "mysql/datadir": {
                 "type": "string",
-                "description": "Address that mysqld should listen on",
-                "value": "ipaddress",
+                "description": "Location of mysql databases",
+                "value": "/var/lib/mysql",
                 "calculated": false,
-                "display_name": "MySQL Bind Address",
+                "display_name": "MySQL Data Directory",
                 "recipes": [
                   "mysql::server",
                   "mysql::server2"
                 ],
-                "default": "ipaddress",
+                "default": "/var/lib/mysql",
                 "required": "optional",
                 "choice": [
 
@@ -4261,17 +4261,17 @@
 
                 ]
               },
-              "mysql/datadir": {
+              "mysql/bind_address": {
                 "type": "string",
-                "description": "Location of mysql databases",
-                "value": "/var/lib/mysql",
+                "description": "Address that mysqld should listen on",
+                "value": "ipaddress",
                 "calculated": false,
-                "display_name": "MySQL Data Directory",
+                "display_name": "MySQL Bind Address",
                 "recipes": [
                   "mysql::server",
                   "mysql::server2"
                 ],
-                "default": "/var/lib/mysql",
+                "default": "ipaddress",
                 "required": "optional",
                 "choice": [
 
@@ -4282,8 +4282,8 @@
           "attribute": {
             "var[bind_address]": {
               "description": "Address that mysqld should listen on",
-              "input_link_attached": false,
-              "output_link_attached": false,
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
               "read_only": false,
               "external_ref": {
                 "type": "chef_attribute",
@@ -4295,8 +4295,8 @@
               "required": true
             },
             "var[tunable][key_buffer]": {
-              "input_link_attached": false,
-              "output_link_attached": false,
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
               "read_only": false,
               "external_ref": {
                 "type": "chef_attribute",
@@ -4308,8 +4308,8 @@
               "required": true
             },
             "var[tunable][back_log]": {
-              "input_link_attached": false,
-              "output_link_attached": false,
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
               "read_only": false,
               "external_ref": {
                 "type": "chef_attribute",
@@ -4321,8 +4321,8 @@
               "required": true
             },
             "var[tunable][max_connections]": {
-              "input_link_attached": false,
-              "output_link_attached": false,
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
               "read_only": false,
               "external_ref": {
                 "type": "chef_attribute",
@@ -4334,8 +4334,8 @@
               "required": true
             },
             "var[tunable][wait_timeout]": {
-              "input_link_attached": false,
-              "output_link_attached": false,
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
               "read_only": false,
               "external_ref": {
                 "type": "chef_attribute",
@@ -4347,8 +4347,8 @@
               "required": true
             },
             "port[monitor_user_id]": {
-              "input_link_attached": false,
-              "output_link_attached": false,
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
               "read_only": false,
               "external_ref": {
                 "type": "service_attribute",
@@ -4361,8 +4361,8 @@
             },
             "var[server_root_password]": {
               "description": "Randomly generated password for the mysqld root user",
-              "input_link_attached": false,
-              "output_link_attached": false,
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
               "read_only": false,
               "external_ref": {
                 "type": "chef_attribute",
@@ -4373,8 +4373,8 @@
               "required": true
             },
             "var[tunable][max_heap_table_size]": {
-              "input_link_attached": false,
-              "output_link_attached": false,
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
               "read_only": false,
               "external_ref": {
                 "type": "chef_attribute",
@@ -4386,8 +4386,8 @@
               "required": true
             },
             "var[tunable][net_write_timeout]": {
-              "input_link_attached": false,
-              "output_link_attached": false,
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
               "read_only": false,
               "external_ref": {
                 "type": "chef_attribute",
@@ -4400,8 +4400,8 @@
             },
             "var[datadir]": {
               "description": "Location of mysql databases",
-              "input_link_attached": false,
-              "output_link_attached": false,
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
               "read_only": false,
               "external_ref": {
                 "type": "chef_attribute",
@@ -4413,8 +4413,8 @@
               "required": true
             },
             "var[tunable][net_read_timeout]": {
-              "input_link_attached": false,
-              "output_link_attached": false,
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
               "read_only": false,
               "external_ref": {
                 "type": "chef_attribute",
@@ -4427,8 +4427,8 @@
             },
             "var[ec2_path]": {
               "description": "Location of mysql directory on EC2 instance EBS volumes",
-              "input_link_attached": false,
-              "output_link_attached": false,
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
               "read_only": false,
               "external_ref": {
                 "type": "chef_attribute",
@@ -4440,8 +4440,8 @@
               "required": true
             },
             "port[db_info]": {
-              "input_link_attached": false,
-              "output_link_attached": false,
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
               "read_only": false,
               "external_ref": {
                 "type": "service_attribute",
@@ -4460,8 +4460,8 @@
               "required": true
             },
             "var[tunable][table_cache]": {
-              "input_link_attached": false,
-              "output_link_attached": false,
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
               "read_only": false,
               "external_ref": {
                 "type": "chef_attribute",
@@ -4562,8 +4562,8 @@
           },
           "attribute": {
             "port[sap_config]": {
-              "input_link_attached": false,
-              "output_link_attached": false,
+              "num_attached_input_links": 0,
+              "num_attached_output_links": 0,
               "read_only": false,
               "external_ref": {
                 "type": "service_attribute",

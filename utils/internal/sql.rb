@@ -45,6 +45,9 @@ module XYZ
         #translates to case when not arg[0] is null then  arg[0] ... else null end
         args.map{|x|[~{x => nil},x]}.case(nil)
       end
+      def self.sum(x,y)
+        x.to_s.lit + y
+      end
 
       def self.max(arg=nil,&block)
         return max(block.call(self)) if block

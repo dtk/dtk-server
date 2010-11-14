@@ -23,20 +23,17 @@ module XYZ
       column :port_type, :varchar, :size => 10 # null means no port; otherwise "input", "output", or "either"
 
       #columns related to links
-      column :input_link_attached, :boolean, :default => false, :hidden => true
-      column :output_link_attached, :boolean, :default => false,  :hidden => true
-      #TODO: conv above to following to facilite fn indxes with arrays
-      #column :num_attached_input_links, :integer, :default => 0, :hidden => true
-      #column :num_attached_output_links, :integer, :default => 0, :hidden => true
+      column :num_attached_input_links, :integer, :default => 0, :hidden => true
+      column :num_attached_output_links, :integer, :default => 0, :hidden => true
 
       virtual_column :is_unset, :type => :boolean, :hidden => true, :local_dependencies => [:value_asserted,:value_derived,:data_type,:semantic_type]
 
       virtual_column :needs_to_be_set, :type => :boolean, :hidden => true, 
-        :local_dependencies => [:value_asserted,:value_derived,:read_only,:required,:input_link_attached,:output_link_attached], 
+        :local_dependencies => [:value_asserted,:value_derived,:read_only,:required,:num_attached_output_links],
         :sql_fn => SQL.and({:attribute__value_asserted => nil},{:attribute__value_derived => nil},
                            SQL.not(:attribute__read_only),
                            :attribute__required,
-                           SQL.not(:attribute__output_link_attached))
+                           {:attribute__num_attached_output_links => 0})
 
       uri_remote_dependencies = 
         {:uri =>

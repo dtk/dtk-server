@@ -65,7 +65,7 @@ module XYZ
       #TODO: below outdated after actual links updated
       # attribute(id_val_pairs).as(a1)([:value_asserted,:action_id])--(input_id)attribute_link(output_id)--attribute.as(a2)([:id]).where(:value_asserted => nil))
       #return a1[:value_asserted.as(:value_derived),:action_id],a2[:id]
-#TODO: temp debug propagate(attr_changes.map{|x|x.id_handle})
+#TODO: temp debug  propagate(attr_changes.map{|x|x.id_handle})
 
       attr_mh = attr_changes.first.id_handle.createMH(:model_name => :attribute)
 
@@ -105,17 +105,33 @@ module XYZ
       Action.create_pending_change_items(new_item_hashes)
     end
     #TODO: below will subsume above
+    #if no fn can be computable on sql side (like equal can short cuit by not having to pass through and process through ruby
     def self.propagate(input_attr_id_handles)
       return Array.new if input_attr_id_handles.empty?
-      c = input_attr_id_handles.first[:c]
+      attr_mh = input_attr_id_handles.first
       field_set = Model::FieldSet.new(:attribute,[:id,:value_asserted,:value_derived,:linked_attributes])
       filter = [:and, [:oneof, :attribute__id, input_attr_id_handles.map{|idh|idh.get_id()}]]
-      #TODO subsititue with below that removes attribute son output side that ahs asserted values
-      ds = SearchObject.create_from_field_set(field_set,c,filter).create_dataset()
-      #wc = {:attribute2__value_asserted => nil}
-      #ds = SearchObject.create_from_field_set(field_set,c,filter).create_dataset().where(wc)
-      pp ds.all.first
+      #dont propagate to attributes with asseretd values
+      wc = {:attribute2__value_asserted => nil}
+      ds = SearchObject.create_from_field_set(field_set,attr_mh[:c],filter).create_dataset().where(wc)
+      new_val_rows = ds.all.map do |row|
+        {:id => row[:attribute2][:id], 
+          :value_derived => compute_new_value(row[:attribute_link][:function],row[:attribute_link][:function_index],row[:attribute_value],row[:attribute2][:value_derived])
+        }
+      end
+      return Array.new if new_val_rows.empty?
+      update_select_ds = SQL::ArrayDataset.create(db,new_val_rows,attr_mh) 
+      update_from_select(attr_mh,FieldSet.new(:attribute,[:value_derived]),update_select_ds)
     end
+
+    def self.compute_new_value(function,function_index,attribute_value,old_value)
+      case function
+       when "eq"
+        attribute_value 
+       else
+        raise ErrorNotImplemented.new("AttributeLink.compute_new_value not implemented yet for fn #{function}")
+      end
+   end
 
     def self.get_legal_connections(parent_id_handle)
       c = parent_id_handle[:c]

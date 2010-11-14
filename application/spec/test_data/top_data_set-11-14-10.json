@@ -1059,6 +1059,27 @@
             ]
           },
           "os": "Ubuntu 9.10",
+          "attribute": {
+            "port[host][ip]": {
+              "num_attached_input_links": 1,
+              "num_attached_output_links": 0,
+              "read_only": true,
+              "data_type": "string",
+              "display_name": "port[host][ip]",
+              "semantic_type": "host_ip",
+              "required": true
+            }
+          },
+	  "attribute_link": {
+            "attribute_link:test1": {
+              "*input_id": "/node/i-bd39e2d7/attribute/port[host][ip]",
+              "*output_id": "/node/i-bd39e2d7/component/mysql::server2/attribute/port[sap]",
+              "label": "1",
+	      "function_index" : {"0" : "host"}, 
+              "function": "eq",
+              "display_name": "attribute_link:test1"
+            }
+	  },
           "component": {
             "mysql::server2": {
               "type": "instance",
@@ -1099,7 +1120,7 @@
                     }
                   ],
                   "num_attached_input_links": 0,
-                  "num_attached_output_links": 0,
+                  "num_attached_output_links": 1,
                   "read_only": false,
                   "external_ref": {
                     "type": "service_attribute",

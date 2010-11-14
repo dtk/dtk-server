@@ -135,6 +135,7 @@ module XYZ
               next if opts[:ds_attrs_only] and not db_rel[:model_class].is_ds_subobject?(child_type)
 	      factory_uri = RestURI.ret_factory_uri(id_info[:uri],child_type)
 	      factory_id_info = IDInfoTable.get_row_from_uri(factory_uri,id_info[:c])
+              next unless factory_id_info #skip if this object does not have a child of type child_type
 	      factory_content = get_factory(href_prefix,factory_id_info,opts)
 	      hash[child_type] = factory_content unless factory_content.empty?
 	    end

@@ -1,0 +1,53 @@
+{
+    "recipes": {
+      "redis": "Installs/Configures redis"
+    },
+    "conflicting": {
+    },
+    "description": "Installs/Configures redis",
+    "long_description": "__[{:recipe_names=>[\"redis\"], :conditions=>[{:description=>\"this service should be accessible over tcp\", :to_monitor=>[{:params=>[\"sap\"], :name=>\"inet_service_up\"}], :name=>\"accessible_over_tcp\"}, {:description=>\"anonymous user should be able to log into this service\", :to_monitor=>[{:params=>[\"sap\"], :name=>\"redis_basic_health\"}]}], :service_name=>\"redis_service\"}]__",
+    "providing": {
+    },
+    "attributes": {
+      "redis/_service/redis_service/sap_config": {
+        "required": "required",
+        "is_service_attribute": true,
+        "calculated": false,
+        "transform": [
+          {
+            "port": {
+              "__ref": "node[redis][port]"
+            },
+            "protocol": "tcp",
+            "type": "inet"
+          }
+        ],
+        "choice": [
+
+        ],
+        "data_type": "json",
+        "type": "string",
+        "recipes": [
+
+        ],
+        "semantic_type": "sap_config"
+      }
+    },
+    "maintainer": "Rich Pelavin",
+    "replacing": {
+    },
+    "dependencies": {
+    },
+    "maintainer_email": "ops@runa.com",
+    "groupings": {
+    },
+    "platforms": {
+    },
+    "version": "0.0.1",
+    "recommendations": {
+    },
+    "license": "Apache 2.0",
+    "name": "redis",
+    "suggestions": {
+    }
+  }

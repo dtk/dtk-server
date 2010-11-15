@@ -1,7 +1,7 @@
 service :redis_service do
   attribute "sap_config",
    :semantic_type => "sap_config",
-   :data_type => "json",
+   :type => "hash",
    :required => true,
    :transform => 
      [{"port" =>

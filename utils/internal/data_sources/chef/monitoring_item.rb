@@ -3,7 +3,7 @@ module XYZ
     class Chef
       class MonitoringItem < Top
         definitions do
-          target[:display_name] = source["name"]
+          target[:display_name] = source[:ref]
         end
 
          class << self

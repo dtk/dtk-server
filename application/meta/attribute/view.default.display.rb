@@ -54,7 +54,7 @@
              :cols => 40,
             }},
             {:semantic_type => {
-             :type => 'text',
+             :type => 'hash',
              :help => '',
              :rows => 1,
              :cols => 40,

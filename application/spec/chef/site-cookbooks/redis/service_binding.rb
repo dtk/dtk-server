@@ -1,12 +1,12 @@
 service :redis_service do
-  attribute "sap_config",
-   :semantic_type => "sap_config",
+  attribute "sap_config/inet",
+   :semantic_type => {"sap_config[inet]" => {"application" => "redis"}},
+   :port_type => "input",
+   :decription => "redis ip service access point configuration",
    :type => "hash",
-   :required => true,
-   :transform => 
+     :transform => 
      [{"port" =>
         {"__ref"=>"node[redis][port]"},
-        "protocol"=> "tcp",
-        "type"=>"inet"}]
+        "protocol"=> "tcp"}]
 end
 

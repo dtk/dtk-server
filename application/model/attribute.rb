@@ -12,13 +12,11 @@ module XYZ
       virtual_column :attribute_value, :type => :json, :local_dependencies => [:value_asserted,:value_derived],
         :sql_fn => SQL::ColRef.coalesce(:value_asserted,:value_derived)
 
-
       #columns related to the data/semantic type
       column :data_type, :varchar, :size => 25
       column :semantic_type, :json #points to structural info for a json varr #TODO: should this be a varchar instead; may need another field which is a pointer for attributes that are free form hashs w/o a seamntic type
       column :read_only, :boolean, :default => false #true means variable is automtcally set
-      #TODO: does this have a default
-      column :required, :boolean, :default => true #whether required for this attribute to have a value inorder to execute actions for parent component; TODO: may be indexed by action
+      column :required, :boolean, :default => false #whether required for this attribute to have a value inorder to execute actions for parent component; TODO: may be indexed by action
       #setting on port type contrains whether a link can be connecetd to teh attribute
       column :port_type, :varchar, :size => 10 # null means no port; otherwise "input", "output", or "either"
 

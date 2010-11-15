@@ -5,23 +5,24 @@
     "conflicting": {
     },
     "description": "Installs/Configures redis",
-    "long_description": "__[{:recipe_names=>[\"redis\"], :conditions=>[{:description=>\"this service should be accessible over tcp\", :to_monitor=>[{:params=>[\"sap\"], :name=>\"inet_service_up\"}], :name=>\"accessible_over_tcp\"}, {:description=>\"anonymous user should be able to log into this service\", :to_monitor=>[{:params=>[\"sap\"], :name=>\"redis_basic_health\"}]}], :service_name=>\"redis_service\"}]__",
+    "long_description": "__[{:recipe_names=>[\"redis\"], :service_name=>\"redis_service\", :conditions=>[{:description=>\"this service should be accessible over tcp\", :to_monitor=>[{:params=>[\"sap\"], :name=>\"inet_service_up\"}], :name=>\"accessible_over_tcp\"}, {:description=>\"anonymous user should be able to log into this service\", :to_monitor=>[{:params=>[\"sap\"], :name=>\"redis_basic_health\"}]}]}]__",
     "providing": {
     },
     "attributes": {
-      "redis/_service/redis_service/sap_config": {
-        "required": "required",
+      "redis/_service/redis_service/sap_config/inet": {
+        "required": "optional",
         "is_service_attribute": true,
+        "decription": "redis ip service access point configuration",
         "calculated": false,
         "transform": [
           {
             "port": {
               "__ref": "node[redis][port]"
             },
-            "protocol": "tcp",
-            "type": "inet"
+            "protocol": "tcp"
           }
         ],
+        "port_type": "input",
         "choice": [
 
         ],
@@ -29,7 +30,11 @@
         "recipes": [
 
         ],
-        "semantic_type": "sap_config"
+        "semantic_type": {
+          "sap_config[inet]": {
+            "application": "redis"
+          }
+        }
       }
     },
     "maintainer": "Rich Pelavin",

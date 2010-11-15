@@ -15,6 +15,7 @@ module XYZ
           
           source_complete_for target[:node_interface]          
           prefix = target[:node_interface]
+          prefix[:eth0][:display_name] = 'eth0'
           prefix[:eth0][:type] = 'ethernet' 
           prefix[:eth0][:family] = 'ipv4' 
 

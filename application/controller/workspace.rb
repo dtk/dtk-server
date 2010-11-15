@@ -103,6 +103,7 @@ module XYZ
       model_list = Model.get_objects_from_search_object(search_object)
 pp model_list
 
+#TODO: deprecate add_js_exe for run_javascript
       add_js_exe("R8.Workspace.setupNewItems();")
       top = 100
       left = 100
@@ -135,6 +136,196 @@ pp model_list
 #      return tpl_result
       return {
         :content => tpl.render(),
+        :panel => 'viewspace'
+      }
+    end
+
+    #TODO: datacenter_id=nil is stub
+    def list_items_new(datacenter_id=nil)
+      if datacenter_id.nil?
+        datacenter_id = IDHandle[:c => ret_session_context_id(), :uri => "/datacenter/dc1", :model_name => :datacenter].get_id()
+      end
+
+      datacenter = get_object_by_id(datacenter_id,:datacenter)
+pp datacenter
+      view_space = Hash.new
+      view_space = {
+        :type => 'datacenter',
+        :object => datacenter
+      }
+      v_space_obj = JSON.generate(view_space)
+      run_javascript("R8.Workspace.pushViewSpace(#{v_space_obj});")
+
+      model_name = :node_group      
+      filter_params = {:parent_id => datacenter_id}
+      search_object =  ret_node_group_search_object(filter_params)
+
+      model_list = Model.get_objects_from_search_object(search_object)
+#pp model_list
+
+      top = 100
+      left = 100
+      #--------Setup Toolbar for access each group from ACL's---------
+#        add_js_exe("R8.Toolbar.init({node:'group-#{model_list[0][:id]}',tools:['quicksearch']});")
+      user_has_toolbar_access = true
+      user_group_tool_list = Array.new
+      user_group_tool_list << 'quicksearch'
+      toolbar_def = {
+        :tools => user_group_tool_list
+      }
+
+#TODO: place holder stubs for ideas on possible future behavior
+#      UI::workspace.add_item(model_list[i])
+#      UI::workspace.render()
+      tpl = R8Tpl::TemplateR8.new("node_group/wspace_list",user_context())
+      tpl.set_js_tpl_name("wspace_list_ng_#{model_name}")
+      tpl_info = tpl.render()
+      include_js_tpl(tpl_info[:src])
+
+=begin
+{:template_vars=>{},
+ :src=>"wspace_list_ng_node_group.js",
+ :template_callback=>"wspace_list_ng_node_group"}
+=end
+
+      model_list.each_with_index do |node_group,index|
+        model_list[index][:model_name] = model_name
+        model_list[index][:ui].nil? ? model_list[index][:ui] = {} : nil
+        model_list[index][:ui][:top].nil? ? model_list[index][:ui][:top] = top : nil
+        model_list[index][:ui][:left].nil? ? model_list[index][:ui][:left] = left : nil
+        top = top+100
+        left = left+100
+
+        #--------Setup Item In Workspace---------
+#        item_def = JSON.generate(model_list[index])
+#        add_js_exe("R8.Workspace.setupItem({type:'node_group',item:#{item_def},'toolbar_def':#{toolbar_def}});")
+        #----------------------------------------
+
+#        add_js_exe("R8.Toolbar.init({node:'group-#{model_list[index][:id]}',tools:['quicksearch']});")
+      end
+
+#TODO: decide if its possible in clean manner to manage toolbar access at item level in ad-hoc ways
+#right now single toolbar def for all items in list for each type
+      #--------Add Node Group List to Workspace-----
+      items = Hash.new
+      items = {
+        :type => 'node_group',
+        :items => model_list,
+        :toobar_def => toolbar_def,
+        :tpl_callback => tpl_info[:template_callback]
+      }
+      addItemsObj = JSON.generate(items)
+      run_javascript("R8.Workspace.addItems(#{addItemsObj});")
+      #---------------------------------------------
+
+#        add_js_exe("R8.Toolbar.init({node:'group-#{model_list[0][:id]}',tools:['quicksearch']});")
+
+=begin
+      tpl.assign('node_group_list',model_list)
+
+#TODO: temp
+      tpl.assign('datacenter_name','dc1')
+
+      _model_var = {}
+      _model_var[:i18n] = get_model_i18n(model_name,user_context())
+      tpl.assign("_#{model_name().to_s}",_model_var)
+      tpl.assign("model_name",model_name)
+      tpl.assign("num_nodes",10) #TODO stub
+#      tpl_result = tpl.render()
+#      tpl_result[:panel] = 'viewspace'
+#      return tpl_result
+=end
+      return {
+        :content => '',
+        :panel => 'viewspace'
+      }
+=begin
+      return {
+        :content => tpl.render(),
+        :panel => 'viewspace'
+      }
+=end
+    end
+
+    #TODO: datacenter_id=nil is stub
+    def list_items_2(datacenter_id=nil)
+      if datacenter_id.nil?
+        datacenter_id = IDHandle[:c => ret_session_context_id(), :uri => "/datacenter/dc1", :model_name => :datacenter].get_id()
+      end
+
+      datacenter = get_object_by_id(datacenter_id,:datacenter)
+
+      view_space = Hash.new
+      view_space = {
+        :type => 'datacenter',
+        :object => datacenter
+      }
+      v_space_obj = JSON.generate(view_space)
+      run_javascript("R8.Workspace.pushViewSpace(#{v_space_obj});")
+
+      model_name = :node_group      
+      filter_params = {:parent_id => datacenter_id}
+      search_object =  ret_node_group_search_object(filter_params)
+
+      model_list = Model.get_objects_from_search_object(search_object)
+#pp model_list
+
+      #--------Setup Toolbar for access each group from ACL's---------
+#        add_js_exe("R8.Toolbar.init({node:'group-#{model_list[0][:id]}',tools:['quicksearch']});")
+      user_has_toolbar_access = true
+      user_group_tool_list = Array.new
+      user_group_tool_list << 'quicksearch'
+      toolbar_def = {
+        :tools => user_group_tool_list
+      }
+
+#TODO: place holder stubs for ideas on possible future behavior
+#      UI::workspace.add_item(model_list[i])
+#      UI::workspace.render()
+
+      tpl = R8Tpl::TemplateR8.new("node_group/wspace_display",user_context())
+      tpl.set_js_tpl_name("ng_wspace_display")
+      tpl_info = tpl.render()
+      include_js_tpl(tpl_info[:src])
+
+=begin
+{:template_vars=>{},
+ :src=>"wspace_list_ng_node_group.js",
+ :template_callback=>"wspace_list_ng_node_group"}
+=end
+
+      #--------Add Node Group List to Workspace-----
+      items = Array.new
+      top = 100
+      left = 100
+
+      model_list.each_with_index do |node_group,index|
+        model_list[index][:model_name] = model_name
+        model_list[index][:ui].nil? ? model_list[index][:ui] = {} : nil
+        model_list[index][:ui][:top].nil? ? model_list[index][:ui][:top] = top : nil
+        model_list[index][:ui][:left].nil? ? model_list[index][:ui][:left] = left : nil
+        top = top+100
+        left = left+100
+
+        item = {
+          :type => model_name,
+          :object => model_list[index],
+          :toolbar_def => toolbar_def,
+          :tpl_callback => tpl_info[:template_callback]
+        }
+        items << item
+      end
+
+#TODO: decide if its possible in clean manner to manage toolbar access at item level in ad-hoc ways
+#right now single toolbar def for all items in list for each type
+
+      addItemsObj = JSON.generate(items)
+      run_javascript("R8.Workspace.addItems(#{addItemsObj});")
+
+      #---------------------------------------------
+
+      return {
+        :content => '',
         :panel => 'viewspace'
       }
     end

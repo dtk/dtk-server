@@ -489,8 +489,11 @@
 .basic-item.group.large .toolbar-wrapper {
 	height: 30px;
 	width: 256px;
+/*	height: 28px;
+	width: 254px;*/
 	margin-right: 16px;
 	float: left;
-	overflow: hidden;
+/*	overflow: hidden;*/
+/*	border: 1px solid red;*/
 }
 

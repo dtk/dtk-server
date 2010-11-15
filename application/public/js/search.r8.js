@@ -102,7 +102,7 @@ if (!R8.Search) {
 					R8.Utils.Y.one('#'+clickedAttrId+'-body').setStyle('display','block');
 				},
 
-				page : function(searchContext,start) {
+				page: function(searchContext,start) {
 					var searchForm = document.getElementById(searchContext+'-search-form');
 					var currentSearchObj = R8.Search.getSearchInfo(searchContext);
 					var savedSearchElem = R8.Utils.Y.one('#'+searchContext+'-saved-search-obj');
@@ -123,7 +123,7 @@ if (!R8.Search) {
 					});
 				},
 
-				sort : function(searchContext,field,order) {
+				sort: function(searchContext,field,order) {
 					var searchForm = document.getElementById(searchContext+'-search-form');
 					var currentSearchObj = R8.Search.getSearchInfo(searchContext);
 					var savedSearchElem = R8.Utils.Y.one('#'+searchContext+'-saved-search-obj');
@@ -143,6 +143,28 @@ if (!R8.Search) {
 					});
 				},
 
+				setupNewSearch: function(searchContext,modelName) {
+					var newSearchExists = this.searchObjList[searchContext]['searches']['new'];
+					if(typeof(newSearchExists) != 'undefined') {
+						this.toggleSearch(searchContext);
+						return;
+					}
+
+					var searchObj = {
+							'id': 'new',
+							'display_name':'',
+							'search_pattern': {
+								':columns': [],
+								':filter': [],
+								':order_by': [],
+								':paging': {},
+								':relation': modelName
+							}
+					};
+					this.searchObjList[searchContext]['searches']['new'] = searchObj;
+					this.toggleSearch(searchContext);
+				},
+
 				toggleSearch : function(searchContext) {
 					var spElem = R8.Utils.Y.one('#'+searchContext+'-search-panel');
 					var expandContractElem = R8.Utils.Y.one('#'+searchContext+'-expand-contract');
@@ -156,7 +178,7 @@ if (!R8.Search) {
 					}
 				},
 
-				initSearchContext : function(searchContext,searchId) {
+				initSearchContext: function(searchContext,searchId) {
 					this.searchObjList[searchContext]['currentSearch'] = searchId;
 					var searchObj = this.searchObjList[searchContext]['searches'][searchId];
 
@@ -749,16 +771,16 @@ if (!R8.Search) {
 							<div class="search-filter-value">'+orderStr+'</div>\
 							<div class="search-remove-filter"></div>\
 						';
-					
+
 						var orderingListElem = R8.Utils.Y.one('#'+searchContext+'-ordering-list');
 						orderingListElem.appendChild(orderElem);
+
+						var orderElemDelete = R8.Utils.Y.one('#'+orderId+' .search-remove-filter');
+						orderElemDelete.on('click',R8.Search.removeOrdering);
 					} else if(updateOrdering == true) {
 						var orderElem = R8.Utils.Y.one('#'+orderId);
 						orderElem.get('children').item(0).set('innerHTML',orderStr);
 					}
-
-					var orderElemDelete = R8.Utils.Y.one('#'+orderId+' .search-remove-ordering');
-					orderElemDelete.on('click',R8.Search.removeOrdering);
 				},
 
 				renderOrderingEdit : function(searchContext,orderDef,orderId) {

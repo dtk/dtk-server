@@ -110,6 +110,13 @@ R8::Routes["workspace/loaddatacenter"] = {
 R8::Routes["workspace/list_items"] = {
   :layout => 'workspace'
 }
+R8::Routes["workspace/list_items_new"] = {
+  :layout => 'workspace'
+}
+
+R8::Routes["workspace/list_items_2"] = {
+  :layout => 'workspace'
+}
 
 R8::Routes.freeze
 

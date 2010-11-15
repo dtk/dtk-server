@@ -5,7 +5,8 @@
 	<div>
 	<table class="list">
 	<tr id="attribute-list-header-row">
-			<th id="qualified_attribute_name-th"  class=""><div id="qualified_attribute_name"></div></th>
+			<th id="qualified_attribute_name-th"  class="">Name</th>
+			<th id="qualified_attribute_name-th"  class="">Value</th>
 	</tr>
 
 	{%for attribute in attribute_list%}

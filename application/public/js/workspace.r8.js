@@ -5,6 +5,10 @@ if (!R8.Workspace) {
 	 * This is the utility r8 js class, more to be added
 	 */
 	R8.Workspace = function(){
+		var _viewSpaces = {},
+			_viewSpaceStack = [],
+			_currentViewSpace = null;
+
 		return {
 			viewPortRegion : null,
 			pageContainerElem : null,
@@ -602,7 +606,68 @@ console.log('call to add item to workspace failed.....');
 
 
 //-------------------------------------------------------------
+//-------------------------------------------------------------
+//-------------------------------------------------------------
 
+//TODO: add check to see if viewspace is already loaded and this is a 'refocus'
+			pushViewSpace: function(viewSpaceDef) {
+				var id = viewSpaceDef['object']['id'];
+				_viewSpaces[id] = new R8.ViewSpace(viewSpaceDef);
+				_viewSpaceStack.push(id);
+				_currentViewSpace = id;
+			},
+
+			addItems: function(items,viewSpaceId) {
+				var vSpaceId = (typeof(viewSpaceId) == 'undefined') ? _currentViewSpace : viewSpaceId;
+
+				_viewSpaces[vSpaceId].addItems(items);
+			},
+
+			setupItem: function(itemDef) {
+console.log(itemDef);
+			},
+
+			setupItemToolbar: function(toolbarDef) {
+console.log(toolbarDef);
+			},
+
+			setupItem : function(itemDef) {
+				var viewspaceNode = R8.Utils.Y.one('#viewspace');
+				var itemChildren = viewspaceNode.get('children');
+				itemChildren.each(function(){
+					var dataModel = this.getAttribute('data-model');
+					var status = this.getAttribute('data-status');
+
+					if(status == 'pending_delete') {
+						R8.Workspace.pendingDelete[this.get('id')] = {
+							'top':this.getStyle('top'),
+							'left':this.getStyle('left')
+						}
+					}
+					if((dataModel == 'node' || dataModel == 'group') && status == 'pending_setup') {
+						var top = this.getStyle('top');
+						var left = this.getStyle('left');
+						for(item in R8.Workspace.pendingDelete) {
+							if(R8.Workspace.pendingDelete[item]['top'] == top && R8.Workspace.pendingDelete[item]['left'] == left) {
+								var cleanupNode = R8.Utils.Y.one('#'+item);
+								cleanupNode.purge(true);
+								cleanupNode.remove();
+								delete(cleanupNode);
+								delete(R8.Workspace.pendingDelete[item]);
+							}
+						}
+						R8.Workspace.regNewItem(this.get('id'));
+//						R8.Workspace.addViewSpaceItem(this);
+//						this.setAttribute('data-status','added');
+//						R8.Workspace.addDragDrop(this.get('id'));
+//						this.setAttribute('data-status','dd-ready');
+					}
+				});
+			},
+
+//-------------------------------------------------------------
+//-------------------------------------------------------------
+//-------------------------------------------------------------
 
 			viewspaces : {},
 //TODO: revisit when fully implementing multiple viewspaces

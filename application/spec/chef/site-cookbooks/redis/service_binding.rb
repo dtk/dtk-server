@@ -1,6 +1,7 @@
 service :redis_service do
-  attribute "sap_config/inet",
-   :semantic_type => {"sap_config[inet]" => {"application" => "redis"}},
+  attribute "sap_config/ipv4",
+   :semantic_type => {":array" => {"sap_config[ipv4]" => {"application" => "redis"}}},
+   :type => "hash",
    :port_type => "input",
    :decription => "redis ip service access point configuration",
    :type => "hash",

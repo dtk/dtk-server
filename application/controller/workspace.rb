@@ -268,7 +268,7 @@ pp datacenter
       search_object =  ret_node_group_search_object(filter_params)
 
       model_list = Model.get_objects_from_search_object(search_object)
-#pp model_list
+pp model_list
 
       #--------Setup Toolbar for access each group from ACL's---------
 #        add_js_exe("R8.Toolbar.init({node:'group-#{model_list[0][:id]}',tools:['quicksearch']});")
@@ -320,6 +320,7 @@ pp datacenter
 #right now single toolbar def for all items in list for each type
 
       addItemsObj = JSON.generate(items)
+pp addItemsObj
       run_javascript("R8.Workspace.addItems(#{addItemsObj});")
 
       #---------------------------------------------

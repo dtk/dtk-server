@@ -4,9 +4,11 @@ module XYZ
       def normalize_attribute_values(target,attr_val_hash,node,metadata=nil)
         attr_val_hash.each do |key,value|
           if value.kind_of?(Hash) 
-            if value["external_ref"]
+            if value.has_key?("external_ref")
               target[key] = process_external_ref(value["external_ref"],node,metadata)
             else 
+              #TODO: this can be a Mash; should probably convert before hand to avoid patch below
+              target[key] ||= HashObject.create_with_auto_vivification() 
               normalize_attribute_values(target[key],value,node,metadata)
             end
           elsif value.kind_of?(Array)

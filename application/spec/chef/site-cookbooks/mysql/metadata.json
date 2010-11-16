@@ -13,6 +13,37 @@
     "providing": {
     },
     "attributes": {
+      "mysql/_service/mysql_server/sap_config/ipv4": {
+        "required": "optional",
+        "is_service_attribute": true,
+        "calculated": false,
+        "transform": [
+          {
+            "port": 3306,
+            "protocol": "tcp",
+            "binding_addr_constraints": [
+
+            ]
+          }
+        ],
+        "port_type": "input",
+        "choice": [
+
+        ],
+        "type": "hash",
+        "recipes": [
+          "mysql::server",
+          "mysql::server2"
+        ],
+        "description": "mysql ip service access point configuration",
+        "semantic_type": {
+          ":array": {
+            "sap_config[ipv4]": {
+              "application": "sql::mysql"
+            }
+          }
+        }
+      },
       "mysql/_service/mysql_server/monitor_user_id": {
         "required": "optional",
         "is_service_attribute": true,
@@ -120,40 +151,11 @@
         "choice": [
 
         ],
-        "type": "string",
-        "recipes": [
-          "mysql::server",
-          "mysql::server2"
-        ]
-      },
-      "mysql/_service/mysql_server/sap_config/inet": {
-        "required": "optional",
-        "is_service_attribute": true,
-        "calculated": false,
-        "transform": [
-          {
-            "port": 3306,
-            "protocol": "tcp",
-            "binding_addr_constraints": [
-
-            ]
-          }
-        ],
-        "port_type": "input",
-        "choice": [
-
-        ],
         "type": "hash",
         "recipes": [
           "mysql::server",
           "mysql::server2"
-        ],
-        "description": "mysql ip service access point configuration",
-        "semantic_type": {
-          "sap_config[inet]": {
-            "application": "sql::mysql"
-          }
-        }
+        ]
       },
       "mysql/tunable/back_log": {
         "required": "optional",
@@ -201,16 +203,14 @@
         "required": "optional",
         "is_service_attribute": true,
         "calculated": false,
-        "transform": [
-          {
-            "socket": "/var/run/mysqld/mysqld.sock"
-          }
-        ],
+        "transform": {
+          "socket_file": "/var/run/mysqld/mysqld.sock"
+        },
         "port_type": "input",
         "choice": [
 
         ],
-        "type": "string",
+        "type": "hash",
         "recipes": [
           "mysql::server",
           "mysql::server2"
@@ -287,7 +287,7 @@
         "choice": [
 
         ],
-        "type": "string",
+        "type": "hash",
         "recipes": [
           "mysql::client_app1"
         ],

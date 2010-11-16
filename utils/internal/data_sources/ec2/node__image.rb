@@ -19,6 +19,14 @@ module XYZ
           prefix[:eth0][:type] = 'ethernet' 
           prefix[:eth0][:family] = 'ipv4' 
 
+          source_complete_for target[:attribute]          
+          prefix = target[:attribute]["var[host_addresses][ipv4]".to_sym]
+          prefix[:display_name] = "var[host_addresses][ipv4]"
+          prefix[:read_only] = true
+          prefix[:data_type] = "json"
+          prefix[:semantic_type] = {":array" => "host_address[ipv4]"}
+          prefix[:value_derived] = [nil]
+
         end
         class << self
           def unique_keys(source)

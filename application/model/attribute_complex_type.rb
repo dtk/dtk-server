@@ -18,7 +18,7 @@ module XYZ
         if value.nil? or not attr[:data_type] == "json"
           ret << attr 
         else
-          nested_type_pat = SchemaPattern.create_from_attribute(attr)
+          nested_type_pat = SchemaPattern.create_from_semantic_type(attr[:semantic_type])
           if nested_type_pat
             top_level=true
             flatten_attribute!(ret,value,attr,nested_type_pat,top_level)
@@ -31,41 +31,6 @@ module XYZ
     end
 
    private
-
-=begin
-    def self.has_required_fields?(value_obj,pattern)
-      #care must be taken to make this three-valued
-      if value_obj.kind_of?(Array)
-        array_pat = pattern[:array]
-        if array_pat
-          #TODO: may have :array+ and :array* to distingusih whether array can be empty
-          return false if value_obj.empty? 
-          value_obj.each do |el|
-            ret = has_required_fields?(el,array_pat)
-            return ret unless ret.kind_of?(TrueClass)
-          end
-          return true
-        end
-        Log.error("mismatch between object #{value_obj.inspect} and pattern #{pattern}")
-      elsif value_obj.kind_of?(Hash)
-        if pattern[:array]
-          Log.error("mismatch between object #{value_obj.inspect} and pattern #{pattern}")
-          return nil
-        end
-        pattern.each do |k,child_pat|
-          el = value_obj[k.to_sym]
-          return false unless el
-          next if child_pat.kind_of?(TrueClass)
-          ret = has_required_fields?(el,child_pat)
-          return ret unless ret.kind_of?(TrueClass) 
-        end
-        return true
-      else
-        Log.error("mismatch between object #{value_obj.inspect} and pattern #{pattern}")
-      end
-      nil
-    end
-=end
 
     def self.has_required_fields?(value_obj,pattern)
       #care must be taken to make this three-valued
@@ -183,17 +148,24 @@ module XYZ
         semantic_type = attr[:semantic_type]
         return nil unless semantic_type
         key = semantic_type_key(semantic_type)
-        convert_initial=true
         return ComplexTypeSchema[key] if ComplexTypeSchema[key]
         return create_from_semantic_type(semantic_type) if semantic_type.kind_of?(Hash)
-        Log.error("found semantic type #{semantic_type.inspect} that does not have a nested type definition")
-        nil
       end
 
       def self.create_from_semantic_type(semantic_type)
+        return nil unless semantic_type
+        key = semantic_type_key(semantic_type)
+        return ComplexTypeSchema[key] if ComplexTypeSchema[key]
+
         ret = create_with_auto_vivification()
-        ret_schema_from_semantic_type_aux!(ret,semantic_type_key(semantic_type),semantic_type.values.first)
-        return ret.empty? ? nil : ret.freeze
+        if  semantic_type.kind_of?(Hash)
+          ret_schema_from_semantic_type_aux!(ret,key,semantic_type.values.first)
+        end
+        if ret.empty?
+        Log.error("found semantic type #{semantic_type.inspect} that does not have a nested type definition")
+          return nil
+        end
+        ret.freeze
       end
 
       def is_atomic?()

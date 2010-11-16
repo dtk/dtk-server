@@ -16,6 +16,18 @@ module XYZ
         #in library parent niode is used to link to image
         #in datacenter constraint_node_id will be null and if parent is a node it will have type instance or staged
         foreign_key :constraint_node_id, :node, FK_SET_NULL_OPT
+        
+        virtual_column :attributes, :type => :json, :hidden => true, 
+        :remote_dependencies => 
+        [
+         {
+           :model_name => :attribute,
+           :join_type => :inner,
+           :join_cond=>{:component_component_id =>:component__id},
+           :cols => [:id,:display_name,:component_component_id,:value_derived,:value_asserted]
+         }
+        ]
+
         virtual_column :parent_name, :possible_parents => [:component,:library,:node,:node_group,:project]
         many_to_one :component, :library, :node, :node_group, :project
         one_to_many :component, :attribute_link, :attribute, :monitoring_item
@@ -31,6 +43,17 @@ module XYZ
     end
 
     ###### Helper fns
+    def self.add_needed_ipv4_sap_attributes(cmp_id_handle,ipv4_host_addresses)
+      field_set = Model::FieldSet.new(:component,[:id,:attributes])
+      filter = [:and, [:eq, :component__id, cmp_id_handle.get_id()],[:eq, :basic_type,"service"]]
+      global_wc = {:attribute__display_name => "port[sap_config][ipv4]"}
+      ds = SearchObject.create_from_field_set(field_set,cmp_id_handle[:c],filter).create_dataset().where(global_wc)
+      sap_configs = ds.all
+pp [:sap_configs,sap_configs]
+      return nil if sap_configs.empty?
+    end
+
+
     def get_contained_attribute_ids(opts={})
       parent_id = IDInfoTable.get_id_from_id_handle(id_handle)
       nested_cmps = get_objects(ModelHandle.new(id_handle[:c],:component),nil,:parent_id => parent_id)

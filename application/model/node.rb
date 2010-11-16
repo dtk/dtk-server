@@ -23,6 +23,17 @@ module XYZ
       #TODO how to have this conditionally "show up"
       virtual_column :ec2_security_groups, :path => [:ds_attributes,:groups] 
 
+      virtual_column :node_attributes, :type => :json, :hidden => true, 
+      :remote_dependencies => 
+        [
+         {
+           :model_name => :attribute,
+           :join_type => :inner,
+           :join_cond=>{:node_node_id =>:node__id},
+           :cols => [:id,:display_name,:node_node_id,:value_derived,:value_asserted]
+         }
+        ]
+
       foreign_key :data_source_id, :data_source, FK_SET_NULL_OPT
       many_to_one :library, :datacenter, :project
       one_to_many :attribute, :attribute_link, :component, :node_interface, :address_access_point, :monitoring_item
@@ -43,10 +54,22 @@ module XYZ
     end
 
     def self.clone_post_copy_hook(new_id_handle,target_id_handle,opts={})
+      add_needed_ipv4_sap_attributes(new_id_handle,target_id_handle)
       parent_action_id_handle = target_id_handle.get_parent_id_handle()
       Action.create_pending_change_item(:new_item => new_id_handle, :parent => parent_action_id_handle)
     end
-    
+
+    def self.add_needed_ipv4_sap_attributes(cmp_id_handle,node_id_handle)
+      field_set = Model::FieldSet.new(:node,[:id,:node_attributes])
+      filter = [:and, [:eq, :node__id, node_id_handle.get_id()]]
+      global_wc = {:attribute__display_name => "var[host_addresses][ipv4]"}
+      ds = SearchObject.create_from_field_set(field_set,cmp_id_handle[:c],filter).create_dataset().where(global_wc)
+      ipv4_host_addresses = ds.all
+pp  [:ipv4_host_addresses,ipv4_host_addresses]
+      return nil if ipv4_host_addresses.empty?
+      Component.add_needed_ipv4_sap_attributes(cmp_id_handle,ipv4_host_addresses)
+    end
+
     #TODO: quick hack
     def self.get_wspace_display(id_handle)
       node_id = IDInfoTable.get_id_from_id_handle(id_handle)

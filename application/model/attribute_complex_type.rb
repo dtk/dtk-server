@@ -84,7 +84,7 @@ module XYZ
 
     def self.has_required_fields_when_array?(value_obj,pattern)
       unless value_obj.kind_of?(Array)
-        Log.error("mismatch between object #{value_obj.inspect} and pattern #{pattern}")
+        Log.error("mismatch between object #{value_obj.inspect} and pattern #{pattern.inspect}")
         return nil
       end
       array_body_pat, can_be_empty = pattern.parse_array()
@@ -97,8 +97,8 @@ module XYZ
     end
 
     def self.has_required_fields_when_hash?(value_obj,pattern)
-      unless value_obj.kind_of?(Array)
-        Log.error("mismatch between object #{value_obj.inspect} and pattern #{pattern}")
+      unless value_obj.kind_of?(Hash)
+        Log.error("mismatch between object #{value_obj.inspect} and pattern #{pattern.inspect}")
         return nil
       end
 

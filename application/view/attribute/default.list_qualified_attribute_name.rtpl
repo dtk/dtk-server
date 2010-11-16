@@ -12,7 +12,7 @@
 	{%for attribute in attribute_list%}
 		<tr id="list_row-{%=attribute%}" class="{%=[:class]%}">
 				<td id="qualified_attribute_name-td-{%=attribute%}" class=""><a href="/xyz/attribute/display/{%=attribute[:id]%}">{%=attribute[:qualified_attribute_name_under_node]%}</a></td>
-				<td id="attribute_value-td-{%=attribute%}" class="">{%=attribute[:attribute_value]%}</td>
+				<td id="attribute_value-td-{%=attribute%}" class="">{%=lambda{|x|(x.kind_of?(Hash) or x.kind_of?(Array)) ? JSON.generate(x) : x}.call(attribute[:attribute_value])%}</td>
 		</tr>
 	{%end%}
 	</table>

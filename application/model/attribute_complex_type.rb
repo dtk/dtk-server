@@ -23,7 +23,7 @@ module XYZ
             top_level=true
             flatten_attribute!(ret,value,attr,nested_type_pat,top_level)
           else 
-            Log.error("found semantic type #{semantic_type.inspect} that does not have a nested type definition")
+            Log.error("found semantic type #{attr[:semantic_type].inspect} that does not have a nested type definition")
             ret << attr
           end
         end

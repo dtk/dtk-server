@@ -69,47 +69,47 @@ module XYZ
 
     def self.has_required_fields?(value_obj,pattern)
       #care must be taken to make this three-valued
-return nil
-=begin
       if pattern.is_atomic?()
-        has_required_fields_when_atomic_pattern?(value_obj,pattern)
-      elsif is_array_patternpattern
-
-      if value_obj.kind_of?(Array)
-        array_pat = pattern[:array]
-      elsif array_pat
-          #TODO: may have :array+ and :array* to distingusih whether array can be empty
-          return false if value_obj.empty? 
-          value_obj.each do |el|
-            ret = has_required_fields?(el,array_pat)
-            return ret unless ret.kind_of?(TrueClass)
-          end
-          return true
-        end
-        Log.error("mismatch between object #{value_obj.inspect} and pattern #{pattern}")
-      elsif value_obj.kind_of?(Hash)
-        if pattern[:array]
-          Log.error("mismatch between object #{value_obj.inspect} and pattern #{pattern}")
-          return nil
-        end
-        pattern.each do |k,child_pat|
-          el = value_obj[k.to_sym]
-          return false unless el
-          next if child_pat.kind_of?(TrueClass)
-          ret = has_required_fields?(el,child_pat)
-          return ret unless ret.kind_of?(TrueClass) 
-        end
-        return true
+        has_required_fields_when_atomic?(value_obj,pattern)
+      elsif pattern.is_array?()
+        has_required_fields_when_array?(value_obj,pattern)
       else
-        Log.error("mismatch between object #{value_obj.inspect} and pattern #{pattern}")
+        has_required_fields_when_hash?(value_obj,pattern)
       end
-      nil
-=end
     end
-      
-    def self.has_required_fields_when_atomic_pattern?(value_obj,pattern)
+
+    def self.has_required_fields_when_atomic?(value_obj,pattern)
       (not pattern[:required]) or not value_obj.nil?
     end
+
+    def self.has_required_fields_when_array?(value_obj,pattern)
+      unless value_obj.kind_of?(Array)
+        Log.error("mismatch between object #{value_obj.inspect} and pattern #{pattern}")
+        return nil
+      end
+      array_body_pat, can_be_empty = pattern.parse_array()
+      return false if ((not can_be_empty) and value_obj.empty?)
+      value_obj.each do |el|
+        ret = has_required_fields?(el,array_body_pat)
+        return ret unless ret.kind_of?(TrueClass)
+      end
+      true
+    end
+
+    def self.has_required_fields_when_hash?(value_obj,pattern)
+      unless value_obj.kind_of?(Array)
+        Log.error("mismatch between object #{value_obj.inspect} and pattern #{pattern}")
+        return nil
+      end
+
+      pattern.each do |k,child_pat|
+        el = value_obj[k.to_sym]
+        ret = has_required_fields?(el,child_pat)
+        return ret unless ret.kind_of?(TrueClass) 
+      end
+      true
+    end
+
  
     #TODO: fix up so pattern can be omitted or partial; if omitted then just follow hash structure; can also have json data type means stop 
     #flattening
@@ -198,6 +198,16 @@ return nil
 
       def is_atomic?()
         has_key?(:type)
+      end
+      def is_array?()
+        #TODO: may have :array+ and :array* to distingusih whether array can be empty
+        keys.first == :array
+      end
+
+      #returns [array_body_pattern, whether_can_be_empty]
+      def parse_array()
+        #TODO: may have :array+ and :array* to distingusih whether array can be empty
+        [values.first,false]
       end
 
      private

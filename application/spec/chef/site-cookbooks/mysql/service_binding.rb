@@ -3,6 +3,7 @@ service :mysql_server do
     :recipes => ["mysql::server","mysql::server2"],
     :monitoring_input => "true",
     :type => "hash",
+    :semantic_type => {":array"  => "db_info"},
     :transform =>
       [{
          "username" => "root",

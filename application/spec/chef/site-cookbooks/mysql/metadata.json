@@ -155,7 +155,10 @@
         "recipes": [
           "mysql::server",
           "mysql::server2"
-        ]
+        ],
+        "semantic_type": {
+          ":array": "db_info"
+        }
       },
       "mysql/tunable/back_log": {
         "required": "optional",

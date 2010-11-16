@@ -34,25 +34,33 @@ module XYZ
     def self.ret_schema_from_attribute(attr)
       semantic_type = attr[:semantic_type]
       return nil unless semantic_type
-      unless semantic_type.kind_of?(Hash)
-        schema = NestedTypes[attr[:semantic_type]]
-        return schema if schema
-        Log.error("found semantic type #{attr[:semantic_type].inspect} that does not have a nested type definition")
-        return nil
-      end
-      ret = HashObject.create_with_auto_vivification()
-      set_schema_from_semantic_type!(ret,semantic_type)
-      ret.empty? ? nil : ret.freeze
+      key = semantic_type_key(semantic_type)
+      return NestedTypes[key] if NestedTypes[key]
+      return ret_schema_from_semantic_type(semantic_type) if semantic_type.kind_of?(Hash)
+
+      Log.error("found semantic type #{semantic_type.inspect} that does not have a nested type definition")
+      nil
     end
 
-    def self.set_schema_from_semantic_type!(ret,semantic_type)
-      if semantic_type.kind_of?(Hash)
-        key = semantic_type.keys.first.to_s
-        if key == ":array"
-          set_schema_from_semantic_type!(ret[:array],semantic_type.values.first)
-        elsif NestedTypes[key]
-          NestedTypes[key].each{|k,v|ret[k] = v}
-        end
+    def self.semantic_type_key(semantic_type)
+      ret = (semantic_type.kind_of?(Hash) ? semantic_type.keys.first : semantic_type).to_s
+      ret == ":array" ? :array : ret
+    end
+
+    def self.ret_schema_from_semantic_type(semantic_type)
+      ret = HashObject.create_with_auto_vivification()
+      ret_schema_from_semantic_type_aux!(ret,semantic_type_key(semantic_type),semantic_type.values.first)
+      return ret.empty? ? nil : ret.freeze
+    end
+
+    def self.ret_schema_from_semantic_type_aux!(ret,index,semantic_type)
+      key = semantic_type_key(semantic_type)
+      if NestedTypes[key]
+        ret[index] = NestedTypes[key]
+      elsif semantic_type.kind_of?(Hash)
+        ret_schema_from_semantic_type_aux!(ret[index],key,semantic_type.values.first)        
+      else
+        ret[index] = "json"
       end
     end
 
@@ -88,7 +96,8 @@ module XYZ
       {
       "sap_config[ipv4]" => {
         "port" => :integer,
-        "protocol" => :string
+        "protocol" => :string,
+        "binding_addr_constraints" => :json
       },
       "sap[ipv4]" => {
         "port" => :integer,

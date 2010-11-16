@@ -6,9 +6,9 @@ module XYZ
     end
     #helper fns
     def self.has_required_fields_given_semantic_type?(obj,semantic_type)
-      required_pat =  Required[semantic_type]
-      return nil unless required_pat
-      has_required_fields?(obj,required_pat)
+      pattern =  SchemaPattern.create_from_semantic_type(semantic_type)
+      return nil unless pattern
+      has_required_fields?(obj,pattern)
     end
 
     def self.flatten_attribute_list(attr_list)
@@ -18,7 +18,7 @@ module XYZ
         if value.nil? or not attr[:data_type] == "json"
           ret << attr 
         else
-          nested_type_pat = ret_schema_from_attribute(attr)
+          nested_type_pat = SchemaPattern.create_from_attribute(attr)
           if nested_type_pat
             top_level=true
             flatten_attribute!(ret,value,attr,nested_type_pat,top_level)
@@ -31,113 +31,14 @@ module XYZ
     end
 
    private
-    def self.ret_schema_from_attribute(attr)
-      semantic_type = attr[:semantic_type]
-      return nil unless semantic_type
-      key = semantic_type_key(semantic_type)
-      return NestedTypes[key] if NestedTypes[key]
-      return ret_schema_from_semantic_type(semantic_type) if semantic_type.kind_of?(Hash)
 
-      Log.error("found semantic type #{semantic_type.inspect} that does not have a nested type definition")
-      nil
-    end
-
-    def self.semantic_type_key(semantic_type)
-      ret = (semantic_type.kind_of?(Hash) ? semantic_type.keys.first : semantic_type).to_s
-      ret == ":array" ? :array : ret
-    end
-
-    def self.ret_schema_from_semantic_type(semantic_type)
-      ret = HashObject.create_with_auto_vivification()
-      ret_schema_from_semantic_type_aux!(ret,semantic_type_key(semantic_type),semantic_type.values.first)
-      return ret.empty? ? nil : ret.freeze
-    end
-
-    def self.ret_schema_from_semantic_type_aux!(ret,index,semantic_type)
-      key = semantic_type_key(semantic_type)
-      if NestedTypes[key]
-        ret[index] = NestedTypes[key]
-      elsif semantic_type.kind_of?(Hash)
-        ret_schema_from_semantic_type_aux!(ret[index],key,semantic_type.values.first)        
-      else
-        ret[index] = "json"
-      end
-    end
-
-    #TODO: stub
-    #TODO: should unify Required and data type and view also data types as optional or possibly incomplete to allow gamut from compleetly
-    #specified to un specfied
 =begin
-example 
-  "sap_config[ipv4]" => {
-        :array => {
-          "port" =>  {:required => true, :type => :integer},
-          "protocol" => {:required => true, :type => :string},
-          "binding_addresses" => {:type => :json}
-        }
-  }
-
-=end
-    Required = 
-      {
-      "sap_config" => {
-        :array => {
-          "type" =>  true,
-          "port" => true,
-          "protocol" => true
-        }
-      },
-      "sap" => {
-        :array => {
-          "type" =>  true,
-          "port" => true,
-          "protocol" => true,
-          "host" => true,
-        }
-      },
-      "db_info" => {
-        :array => {
-          "username" =>  true,
-          "database" => true,
-          "password" => true
-        }
-      }
-    }
-    NestedTypes =
-      {
-      "sap_config[ipv4]" => {
-        "port" => :integer,
-        "protocol" => :string,
-        "binding_addr_constraints" => :json
-      },
-      "sap[ipv4]" => {
-        "port" => :integer,
-        "protocol" => :string,
-        "host_address" => :string
-      },
-      "sap_ref" => {
-        "port" => :integer,
-        "protocol" => :string,
-        "host_address" => :string,
-        "socket_file" => :string
-      },
-
-      "sap[socket]" => {
-        "socket_file" => :string
-      },
-
-      "db_info" => {
-        "username" =>  :string,
-        "database" => :string,
-        "password" => :string
-      }
-    }
-
     def self.has_required_fields?(value_obj,pattern)
-      #care must be taken to make thsi three-valued
+      #care must be taken to make this three-valued
       if value_obj.kind_of?(Array)
         array_pat = pattern[:array]
         if array_pat
+          #TODO: may have :array+ and :array* to distingusih whether array can be empty
           return false if value_obj.empty? 
           value_obj.each do |el|
             ret = has_required_fields?(el,array_pat)
@@ -164,14 +65,60 @@ example
       end
       nil
     end
+=end
+
+    def self.has_required_fields?(value_obj,pattern)
+      #care must be taken to make this three-valued
+return nil
+=begin
+      if pattern.is_atomic?()
+        has_required_fields_when_atomic_pattern?(value_obj,pattern)
+      elsif is_array_patternpattern
+
+      if value_obj.kind_of?(Array)
+        array_pat = pattern[:array]
+      elsif array_pat
+          #TODO: may have :array+ and :array* to distingusih whether array can be empty
+          return false if value_obj.empty? 
+          value_obj.each do |el|
+            ret = has_required_fields?(el,array_pat)
+            return ret unless ret.kind_of?(TrueClass)
+          end
+          return true
+        end
+        Log.error("mismatch between object #{value_obj.inspect} and pattern #{pattern}")
+      elsif value_obj.kind_of?(Hash)
+        if pattern[:array]
+          Log.error("mismatch between object #{value_obj.inspect} and pattern #{pattern}")
+          return nil
+        end
+        pattern.each do |k,child_pat|
+          el = value_obj[k.to_sym]
+          return false unless el
+          next if child_pat.kind_of?(TrueClass)
+          ret = has_required_fields?(el,child_pat)
+          return ret unless ret.kind_of?(TrueClass) 
+        end
+        return true
+      else
+        Log.error("mismatch between object #{value_obj.inspect} and pattern #{pattern}")
+      end
+      nil
+=end
+    end
+      
+    def self.has_required_fields_when_atomic_pattern?(value_obj,pattern)
+      (not pattern[:required]) or not value_obj.nil?
+    end
+ 
     #TODO: fix up so pattern can be omitted or partial; if omitted then just follow hash structure; can also have json data type means stop 
     #flattening
     #TODO: add "index that will be used to tie unravvled attribute back to the base object and make sure
     #base object in the attribute
     #TODO: also if value is null but pattern, then follow the pattern to flesh out with nulls
     def self.flatten_attribute!(ret,value_obj,attr,pattern,top_level=false)
-      if not pattern.kind_of?(Hash)
-        flatten_attribute_when_scalar!(ret,value_obj,attr,pattern,top_level)
+      if pattern.is_atomic?()
+        flatten_attribute_when_atomic_pattern!(ret,value_obj,attr,pattern,top_level)
       elsif value_obj.kind_of?(Array)
         flatten_attribute_when_array!(ret,value_obj,attr,pattern,top_level)
       elsif value_obj.kind_of?(Hash)
@@ -182,11 +129,12 @@ example
       nil
     end
 
-    def self.flatten_attribute_when_scalar!(ret,value_obj,attr,pattern,top_level)
-      if attr[:data_type] == pattern.to_s and top_level
+
+    def self.flatten_attribute_when_atomic_pattern!(ret,value_obj,attr,pattern,top_level)
+      if attr[:data_type] == pattern[:type].to_s and top_level
         ret << attr
       else
-        ret << attr.merge(:attribute_value => value_obj,:data_type => pattern.to_s)
+        ret << attr.merge(:attribute_value => value_obj,:data_type => pattern[:type].to_s)
       end    
       nil
     end
@@ -229,6 +177,79 @@ example
       Log.error("mismatch between object #{value_obj.inspect} and pattern #{pattern}")
       ret << (top_level ? attr : attr.merge(:attribute_value => value_obj))
       nil
+    end
+    class SchemaPattern < HashObject
+      def self.create_from_attribute(attr)
+        semantic_type = attr[:semantic_type]
+        return nil unless semantic_type
+        key = semantic_type_key(semantic_type)
+        convert_initial=true
+        return ComplexTypeSchema[key] if ComplexTypeSchema[key]
+        return create_from_semantic_type(semantic_type) if semantic_type.kind_of?(Hash)
+        Log.error("found semantic type #{semantic_type.inspect} that does not have a nested type definition")
+        nil
+      end
+
+      def self.create_from_semantic_type(semantic_type)
+        ret = create_with_auto_vivification()
+        ret_schema_from_semantic_type_aux!(ret,semantic_type_key(semantic_type),semantic_type.values.first)
+        return ret.empty? ? nil : ret.freeze
+      end
+
+      def is_atomic?()
+        has_key?(:type)
+      end
+
+     private
+
+      def self.semantic_type_key(semantic_type)
+        ret = (semantic_type.kind_of?(Hash) ? semantic_type.keys.first : semantic_type).to_s
+        ret == ":array" ? :array : ret
+      end
+
+      def self.ret_schema_from_semantic_type_aux!(ret,index,semantic_type)
+        key = semantic_type_key(semantic_type)
+        if ComplexTypeSchema[key]
+          ret[index] = ComplexTypeSchema[key]
+        elsif semantic_type.kind_of?(Hash)
+          ret_schema_from_semantic_type_aux!(ret[index],key,semantic_type.values.first)        
+        else
+          ret[index] = {:type => "json"}
+        end
+      end
+
+      ComplexTypeSchema = self.new( 
+        {
+        "sap_config[ipv4]" => {
+          "port" =>  {:required => true, :type => :integer},
+          "protocol" => {:required => true, :type => :string},
+          "binding_addr_constraints" => {:type => :json}
+        },
+        "sap[ipv4]" => {
+          "port" => {:required => true, :type => :integer},
+          "protocol" => {:required => true, :type => :string},
+          "host_address" => {:required => true, :type => :string}
+        },
+        "sap_ref" => {
+          :or => 
+          [{
+             "port" => {:required => true, :type => :integer},
+             "protocol" => {:required => true, :type => :string},
+             "host_address" => {:required => true, :type => :string}
+           },
+           {"socket_file" => {:required => true, :type => :string}}
+          ]
+        },
+        "sap[socket]" => {
+          "socket_file" => {:required => true, :type => :string}
+        },
+
+        "db_info" => {
+          "username" => {:required => true, :type => :string},
+          "database" => {:required => true, :type => :string},
+          "password" => {:required => true, :type => :string}
+        }
+      },true)
     end
   end
 end

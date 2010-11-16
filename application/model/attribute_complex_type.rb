@@ -67,6 +67,17 @@ module XYZ
     #TODO: stub
     #TODO: should unify Required and data type and view also data types as optional or possibly incomplete to allow gamut from compleetly
     #specified to un specfied
+=begin
+example 
+  "sap_config[ipv4]" => {
+        :array => {
+          "port" =>  {:required => true, :type => :integer},
+          "protocol" => {:required => true, :type => :string},
+          "binding_addresses" => {:type => :json}
+        }
+  }
+
+=end
     Required = 
       {
       "sap_config" => {

@@ -6,7 +6,7 @@ module XYZ
     end
     #helper fns
     def self.has_required_fields_given_semantic_type?(obj,semantic_type)
-      required_pat = Required[semantic_type]
+      required_pat =  Required[semantic_type]
       return nil unless required_pat
       has_required_fields?(obj,required_pat)
     end
@@ -18,12 +18,11 @@ module XYZ
         if value.nil? or not attr[:data_type] == "json"
           ret << attr 
         else
-          nested_type_pat = NestedTypes[attr[:semantic_type]]
+          nested_type_pat = ret_schema_from_attribute(attr)
           if nested_type_pat
             top_level=true
             flatten_attribute!(ret,value,attr,nested_type_pat,top_level)
           else 
-            Log.error("found semantic type #{attr[:semantic_type].inspect} that does not have a nested type definition")
             ret << attr
           end
         end
@@ -32,6 +31,31 @@ module XYZ
     end
 
    private
+    def self.ret_schema_from_attribute(attr)
+      semantic_type = attr[:semantic_type]
+      return nil unless semantic_type
+      unless semantic_type.kind_of?(Hash)
+        schema = NestedTypes[attr[:semantic_type]]
+        return schema if schema
+        Log.error("found semantic type #{attr[:semantic_type].inspect} that does not have a nested type definition")
+        return nil
+      end
+      ret = HashObject.create_with_auto_vivification()
+      set_schema_from_semantic_type!(ret,semantic_type)
+      ret.empty? ? nil : ret.freeze
+    end
+
+    def self.set_schema_from_semantic_type!(ret,semantic_type)
+      if semantic_type.kind_of?(Hash)
+        key = semantic_type.keys.first.to_s
+        if key == ":array"
+          set_schema_from_semantic_type!(ret[:array],semantic_type.values.first)
+        elsif NestedTypes[key]
+          NestedTypes[key].each{|k,v|ret[k] = v}
+        end
+      end
+    end
+
     #TODO: stub
     #TODO: should unify Required and data type and view also data types as optional or possibly incomplete to allow gamut from compleetly
     #specified to un specfied
@@ -62,27 +86,30 @@ module XYZ
     }
     NestedTypes =
       {
-      "sap_config" => {
-        :array => {
-          "type" =>  :string,
-          "port" => :integer,
-          "protocol" => :string
-        }
+      "sap_config[ipv4]" => {
+        "port" => :integer,
+        "protocol" => :string
       },
-      "sap" => {
-        :array => {
-          "type" =>  :string,
-          "port" => :integer,
-          "protocol" => :string,
-          "host" => :string,
-        }
+      "sap[ipv4]" => {
+        "port" => :integer,
+        "protocol" => :string,
+        "host_address" => :string
       },
+      "sap_ref" => {
+        "port" => :integer,
+        "protocol" => :string,
+        "host_address" => :string,
+        "socket_file" => :string
+      },
+
+      "sap[socket]" => {
+        "socket_file" => :string
+      },
+
       "db_info" => {
-        :array => {
-          "username" =>  :string,
-          "database" => :string,
-          "password" => :string
-        }
+        "username" =>  :string,
+        "database" => :string,
+        "password" => :string
       }
     }
 

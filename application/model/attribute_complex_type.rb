@@ -75,14 +75,12 @@ module XYZ
       true
     end
 
- 
-    #TODO: fix up so pattern can be omitted or partial; if omitted then just follow hash structure; can also have json data type means stop 
-    #flattening
     #TODO: add "index that will be used to tie unravvled attribute back to the base object and make sure
     #base object in the attribute
-    #TODO: also if value is null but pattern, then follow the pattern to flesh out with nulls
     def self.flatten_attribute!(ret,value_obj,attr,pattern,top_level=false)
-      if pattern.is_atomic?()
+      if pattern.nil?
+        flatten_attribute_when_nil_pattern!(ret,value_obj,attr,top_level)
+      elsif pattern.is_atomic?()
         flatten_attribute_when_atomic_pattern!(ret,value_obj,attr,pattern,top_level)
       elsif value_obj.kind_of?(Array)
         flatten_attribute_when_array!(ret,value_obj,attr,pattern,top_level)
@@ -94,6 +92,15 @@ module XYZ
       nil
     end
 
+
+    def self.flatten_attribute_when_nil_pattern!(ret,value_obj,attr,top_level)
+      if attr[:data_type] == "json" and top_level
+        ret << attr
+      else
+        ret << attr.merge(:attribute_value => value_obj,:data_type => "json")
+      end    
+      nil
+    end
 
     def self.flatten_attribute_when_atomic_pattern!(ret,value_obj,attr,pattern,top_level)
       if attr[:data_type] == pattern[:type].to_s and top_level
@@ -119,17 +126,11 @@ module XYZ
       end
       nil
     end
-   
+
+
+    #TODO: shoudl we iterate over missiing keys pattern.keys - val_obj.keys)
     def self.flatten_attribute_when_hash!(ret,value_obj,attr,pattern,top_level)
       return flatten_attribute_when_mismatch!(ret,value_obj,attr,pattern,top_level) if pattern[:array]
-      #TODO: change so if difference in keys, you add union (providing nulls when pattern has column but ob doesnt)
-      #only if keys in pattern completely line up with keys in val object  
-      val_keys = value_obj.keys
-      pat_keys = pattern.keys
-      unless val_keys.size == pat_keys.size and val_keys.map{|x|x.to_s}.sort == pat_keys.sort 
-        return flatten_attribute_when_mismatch!(ret,value_obj,attr,pattern,top_level)
-      end
-      
       value_obj.each do |k,child_val_obj|
         child_attr = attr.merge(:display_name => "#{attr[:display_name]}[#{k}]")
         child_pattern = pattern[k.to_s]

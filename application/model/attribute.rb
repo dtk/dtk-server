@@ -248,7 +248,7 @@ also related is allowing omission of columns mmentioned in jon condition; post p
             :data_type => "json",
             :description => "mysql ip service access point configuration",
             #TODO: need the  => {"application" => service qualification)
-            :semantic_type => {":array" => "sap_config[ipv4]"},
+            :semantic_type => {":array" => "sap[ipv4]"},
             :num_attached_input_links => 2
           }
         end

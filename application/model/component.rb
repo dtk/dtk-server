@@ -43,15 +43,6 @@ module XYZ
     end
 
     ###### Helper fns
-    def self.add_needed_ipv4_sap_attributes(cmp_id_handle,ipv4_host_addresses)
-      field_set = Model::FieldSet.new(:component,[:id,:attributes])
-      filter = [:and, [:eq, :component__id, cmp_id_handle.get_id()],[:eq, :basic_type,"service"]]
-      global_wc = {:attribute__display_name => "port[sap_config][ipv4]"}
-      ds = SearchObject.create_from_field_set(field_set,cmp_id_handle[:c],filter).create_dataset().where(global_wc)
-      sap_configs = ds.all
-pp [:sap_configs,sap_configs]
-      return nil if sap_configs.empty?
-    end
 
 
     def get_contained_attribute_ids(opts={})

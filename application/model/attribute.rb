@@ -228,6 +228,36 @@ also related is allowing omission of columns mmentioned in jon condition; post p
       ds.all
     end
 
+    def self.add_needed_ipv4_sap_attributes(cmp_id_handle,ipv4_host_addresses)
+      field_set = Model::FieldSet.new(:component,[:id,:attributes])
+      filter = [:and, [:eq, :component__id, cmp_id_handle.get_id()],[:eq, :basic_type,"service"]]
+      global_wc = {:attribute__display_name => "port[sap_config][ipv4]"}
+      ds = SearchObject.create_from_field_set(field_set,cmp_id_handle[:c],filter).create_dataset().where(global_wc)
+      sap_configs = ds.all
+      return nil if sap_configs.empty?
+      new_sap_attr_rows = Array.new
+      ipv4_host_addresses.each do |ipv4_addr|
+        sap_configs.each do |sap_config|
+          value_derived = (sap_config[:attribute][:value_asserted]||sap_config[:attribute][:value_derived]).map{|x|x.merge(:host_address => ipv4_addr)}
+          new_sap_attr_rows <<  {
+            :ref => "port[sap][ipv4]",
+            :display_name => "port[sap][ipv4]", 
+            :component_component_id => sap_config[:id],
+            :value_derived => value_derived,
+            :port_type => "input",
+            :data_type => "json",
+            :description => "mysql ip service access point configuration",
+            #TODO: need the  => {"application" => service qualification)
+            :semantic_type => {":array" => "sap_config[ipv4]"},
+            :num_attached_input_links => 2
+          }
+        end
+      end
+      attr_mh = cmp_id_handle.createMH(:model_name => :attribute, :parent_model_name => :component)
+      create_from_rows(attr_mh,new_sap_attr_rows, :convert => true)
+    end
+
+
    private
     ###### helper fns
     def self.propagate_changes(attr_changes) 

@@ -94,30 +94,6 @@ module XYZ
         @sequel_ds.sql.gsub(/"/,'')
       end
 
-      def add_filter_post_processing(filter)
-        implemented = (filter.kind_of?(Array) and filter.first == :and and not filter[1..filter.size-1].find{|exp|not exp.first == :eq})
-        raise ErrorNotImplemented.new("filter_post_processing with filter #{filter.inspect}") unless implemented
-        filter_fn = filter[1..filter.size-1].map{|exp|"(#{aux(exp[1])} == #{aux(exp[2])})"}.join(" and ")
-        @filter_post_processing = lambda{|obj|eval(filter_fn)}
-      end
-
-      #TODO: make private
-      def aux(x)
-        if x.kind_of?(Symbol) 
-          "obj[:#{x}]" 
-        elsif x.kind_of?(String)
-          '"'+x+'"'
-        elsif x.kind_of?(Numeric)
-          x
-        elsif x.kind_of?(TrueClass)
-          true
-        elsif x.kind_of?(FalseClass)
-          false
-        else
-          raise Error.new("Unexpected term in post processing filter #{x.inspect}")
-        end
-      end
-
       attr_reader :model_name_info, :sequel_ds
       def graph(join_type,right_ds,join_conditions=true,opts={})
         new_model_name_info = right_ds.model_name_info.first.create_unique(@model_name_info)
@@ -143,6 +119,46 @@ module XYZ
       end
     end
 
+    module FilterPostProcessingMixin 
+      def add_filter_post_processing(filter)
+        raise ErrorPostProcFilterNotImpl.new(:filter,filter) unless (filter.kind_of?(Array) and filter.first == :and)
+        filter_fn = filter[1..filter.size-1].map{|expr|parse_expression(expr)}.join(" and ")
+        @filter_post_processing = lambda{|obj|eval(filter_fn)}
+      end
+     private
+      def parse_expression(expr)
+        raise ErrorPostProcFilterNotImpl.new(:expression,expr) unless expr.kind_of?(Array) and expr.size == 3 
+        case expr[0]
+         when :eq
+          "(#{parse_term(expr[1])} == #{parse_term(expr[2])})"
+         when "match-prefix".to_sym
+          "(#{parse_term(expr[1])} =~ /^#{expr[2]}/)"
+         else
+          raise ErrorPostProcFilterNotImpl.new(:operation,expr[0])
+        end
+      end
+      def parse_term(x)
+        if x.kind_of?(Symbol) 
+          "obj[:#{x}]" 
+        elsif x.kind_of?(String)
+          '"'+x+'"'
+        elsif x.kind_of?(Numeric)
+          x
+        elsif x.kind_of?(TrueClass)
+          true
+        elsif x.kind_of?(FalseClass)
+          false
+        else
+          raise Error.new("Unexpected term in post processing filter #{x.inspect}")
+        end
+      end
+      class ErrorPostProcFilterNotImpl < ErrorNotImplemented
+        def initialize(type,obj)
+          super("filter_post_processing with #{type} #{obj.inspect}")
+        end
+      end
+    end
+
     class ModelNameInfo 
       attr_reader :model_name,:ref_num
       def initialize(model_name,ref_num=1)
@@ -161,6 +177,7 @@ module XYZ
 
     class Dataset
       include DatatsetGraphMixin
+      include FilterPostProcessingMixin 
       #TODO: needed to fully qualify Dataset; could this constraint be removed? by chaging expose?
       post_hook = "lambda{|x|XYZ::SQL::Dataset.new(model_handle,x)}"
       expose_methods_from_internal_object :sequel_ds, %w{where select from_self}, :post_hook => post_hook
@@ -236,6 +253,7 @@ module XYZ
     end
     class Graph
       include DatatsetGraphMixin
+      include FilterPostProcessingMixin 
       #TODO: needed to fully qualify Dataset; could this constraint be removed? by chaging expose?
       expose_methods_from_internal_object :sequel_ds, %w{where select from_self}, :post_hook => "lambda{|x|XYZ::SQL::Graph.new(x,@model_name_info,@c)}"
       expose_methods_from_internal_object :sequel_ds, %w{sql}

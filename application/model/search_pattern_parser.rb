@@ -128,21 +128,29 @@ module XYZ
       ret = Array.new
       if filter.kind_of?(Array)
         op,args = get_op_and_args(filter)
-        raise ErrorPatternNotImplemented.new(:filter_operation,op) unless [:and,:or].include?(op)
+        if op.nil? or not [:and,:or].include?(op)
+          log_parsing_error_to_skip(:filter_operation,op)
+          next
+        end
         ret << op
         args.each do |el|
           el_op,el_args = get_op_and_args(el)
-          raise ErrorParsing.new(:expression_arguments,el_args) unless el_args.size == 2
-          raise ErrorPatternNotImplemented.new(:filter_operation,el_op) unless FilterOperationsParsed.include?(el_op)
+          unless el_op and el_args and el_args.size == 2 and FilterOperationsParsed.include?(el_op)
+            log_parsing_error_to_skip(:expression,el)
+            next
+          end
           if el_op == :oneof
-            raise ErrorParsing.new(:argument_to_one_of,el_args[1]) unless el_args[1].kind_of?(Array)
+            unless el_args[1].kind_of?(Array)
+              log_parsing_error_to_skip(:argument_to_one_of,el_args[1])
+              next
+            end
             ret << [el_op,ret_scalar(el_args[0]),el_args[1]]
           else
             ret << ([el_op] + el_args.map{|x|ret_scalar(x)})
           end
         end
       else
-        raise ErrorPatternNotImplemented.new(:filter,filter)
+        log_parsing_error_to_skip(:filter,filter)
       end
       ret
     end
@@ -174,7 +182,7 @@ module XYZ
 
     #return op in symbol form and args
     def get_op_and_args(expr)
-      raise ErrorParsing.new(:expression,expr) unless expr.kind_of?(Array)
+      return nil unless expr.kind_of?(Array)
       [ret_symbol(expr.first),expr[1..expr.size-1]]
     end
 
@@ -200,6 +208,9 @@ return :eq if term_in_json == ":"
       ret_symbol(Aux::ret_key(obj))
     end
 
+    def log_parsing_error_to_skip(type,object)
+      Log.error("skipping ill-formed #{type} which hash form: #{object.inspect}")
+    end
     class ErrorParsing < Error
       def initialize(type,object)
         super("parsing item #{type} is not supported; it has form: #{object.inspect}")

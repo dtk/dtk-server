@@ -6,10 +6,8 @@ if (!R8.Toolbar) {
 		var _parentNodeId = toolbarDef['parent_node_id'],
 			_parentWrapperId = _parentNodeId+'-toolbar-wrapper',
 			_parentWrapperNode = R8.Utils.Y.one('#'+_parentWrapperId),
-
 			_parentBodyId = _parentNodeId+'-large-main-body-content',
-			_parentBodyNode = R8.Utils.Y.one('#'+_parentBodyId),
-
+			_parentBodyNode = R8.Utils.Y.one('#'+_parentBodyId);
 			_bodyId = _parentNodeId+'-tb-body',
 			_bodyNode = null,
 			_toolbarNodeId = _parentNodeId+'-toolbar',
@@ -76,8 +74,8 @@ if (!R8.Toolbar) {
 						duration: 0.1
 					});
 					_toolbarAnim.on('end',function(e){
-//						var toolbarId = e.currentTarget.get('node').get('id');
 					});
+
 					_parentBodyAnim = new Y.Anim({
 						node: '#'+_parentBodyId,
 						duration: 0.1
@@ -101,21 +99,21 @@ if (!R8.Toolbar) {
 				R8.Utils.Y.delegate('click',function(e){
 						var targetId = e.currentTarget.get('id')+'-content',
 							_activeToolContentId = targetId,
-							toolId = e.currentTarget.get('id').replace(_parentNodeId+'-tool-',''),
 							toolContent = R8.Utils.Y.one('#'+_activeToolContentId);
-
-						_loadedTools[toolId].toolFocus();
+//console.log(targetId);
 
 						toolContent.setStyles({'left':'0px'});
 						_toolbarAnim.set('to', {
 							xy: [_toolbarNode.getX(), _toolbarNode.getY()+30]
 						});
-						_toolbarAnim.run();
-
+/*
 						_parentBodyAnim.set('to', {
 							xy: [_parentBodyNode.getX(), _parentBodyNode.getY()+90]
 						});
+
 						_parentBodyAnim.run();
+*/
+						_toolbarAnim.run();
 
 					},'#'+_bodyId,'.tool-button',this);
 
@@ -132,7 +130,6 @@ if (!R8.Toolbar) {
 			addTool : function(toolId) {
 				var numTools = _loadedTools.length,
 					notFirstTool = '';
-
 				_loadedTools[toolId] = new AvailableTools[toolId]({'parent_id':_parentNodeId});
 
 				(numTools > 0) ? notFirstTool = 'not-first' : notFirstTool = '';
@@ -148,6 +145,8 @@ if (!R8.Toolbar) {
 									<div id="'+_parentNodeId+'-tool-' + toolId + '-exit" class="tbar-exit"></div>\
 								</div>';
 				_toolbarNode.append(toolContent);
+
+				//add the tools content that will be shown in main body
 				_parentBodyNode.append(_loadedTools[toolId].renderToolBodyContent());
 
 				R8.Utils.Y.one('#' + _parentNodeId + '-tool-' + toolId + '-exit').on('click', function(e){
@@ -157,18 +156,10 @@ if (!R8.Toolbar) {
 						xy: [_toolbarNode.getX(), _toolbarNode.getY() - 30]
 					});
 					_toolbarAnim.run();
-
-					_parentBodyAnim.set('to', {
-						xy: [_parentBodyNode.getX(), _parentBodyNode.getY() - 90]
-					});
-					_parentBodyAnim.run();
-
 //					contentNode.setStyles({
 //						'left': '-256px'
 //					});
 				},this);
-
-				_loadedTools[toolId].init();
 			},
 
 			registerToolEvents : function(tIndex) {

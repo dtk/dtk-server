@@ -18,7 +18,7 @@ pp get_base_object_dataset_needs_to_be_set(:component).ppsql
       raw_attribute_list = ds.all
       attribute_list = AttributeComplexType.flatten_attribute_list(raw_attribute_list)
 
-      action_name = "list_qualified_attribute_name"
+      action_name = "list_qualified_attribute_name_under_node"
       tpl = R8Tpl::TemplateR8.new("#{model_name()}/#{action_name}",user_context())
       tpl.assign("attribute_list",attribute_list)
       return {:content => tpl.render()}
@@ -27,13 +27,15 @@ pp get_base_object_dataset_needs_to_be_set(:component).ppsql
     
     def list_under_datacenter(datacenter_id=nil)
       datacenter_id = IDHandle[:c => ret_session_context_id(), :model_name => :datacenter, :uri => "/datacenter/dc1"].get_id() unless datacenter_id
+      filter = nil
+      cols = [:id,:display_name,:base_object_datacenter,:needs_to_be_set,:value_actual,:value_derived,:data_type,:semantic_type]
+      field_set = Model::FieldSet.new(model_name,cols)
+      ds = SearchObject.create_from_field_set(field_set,ret_session_context_id(),filter).create_dataset()
+      ds = ds.where(SQL::ColRef.coalesce(:param_node_group_datacenter_id,:param_node_datacenter_id) => datacenter_id)
 
-#      base_ds = get_base_object_dataset_needs_to_be_set(:datacenter)
-#      ds = base_ds.where(SQL::ColRef.coalesce(:parem_node_group_datacenter_id,:param_node_datacenter_id) => datacenter_id).where_column_equal(:needs_to_be_set,true)
-      filter = [:and,[:eq,:needs_to_be_set,true]]
-      ds = get_base_object_dataset_needs_to_be_set(:datacenter,filter).where(SQL::ColRef.coalesce(:param_node_group_datacenter_id,:param_node_datacenter_id) => datacenter_id)
+      raw_attribute_list = ds.all
+      attribute_list = AttributeComplexType.flatten_attribute_list(raw_attribute_list)
 
-      attribute_list = ds.all
       action_name = "list_qualified_attribute_name"
       tpl = R8Tpl::TemplateR8.new("#{model_name()}/#{action_name}",user_context())
       tpl.assign("attribute_list",attribute_list)

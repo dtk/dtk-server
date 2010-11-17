@@ -55,27 +55,48 @@ module XYZ
             
       opts = {:duplicate_refs => :no_check,:returning_sql_cols => [:input_id,:output_id]} 
       new_link_info = create_from_select(attr_link_mh,attr_link_fs,attr_link_ds,override_attrs,opts)
+      #TODO: may write update_type_link_attached so it can do input and output togther
       update_type_link_attached(attr_link_mh,:input,new_link_info)
       update_type_link_attached(attr_link_mh,:output,new_link_info)
     end
 
-    def self.add_ipv4_sap_links(new_sap_attr_idh,sap_config_attr_idh,ipv4_host_addrs_idh)
-pp [:new_sap_attr_idh,new_sap_attr_idh]
-pp [:sap_config_attr_idh,sap_config_attr_idh]
-pp [:ipv4_host_addrs_idh,ipv4_host_addrs_idh]
-=begin
-      return nil if new_attr_sap_idhs.empty?
-      attr_mh = cmp_id_handle.createMH(:model_name => :attribute, :parent_model_name => :component)
-      create_from_rows(attr_mh,new_sap_attr_rows, :convert => true)
-=end
-
+    def self.add_ipv4_sap_links(new_sap_attr_idh,sap_config_attr_idh,ipv4_host_addrs_idh,node_idh)
+      attr_link_mh = node_idh.createMH(:model_name => :attribute_link, :parent_model_name => :node)
+      new_sap_id,sap_config_id,ipv4_id,node_id = [new_sap_attr_idh,sap_config_attr_idh,ipv4_host_addrs_idh,node_idh].map{|x|x.get_id()}
+      
+      new_link_rows =
+        [
+         {
+           :ref => "sap_config:#{sap_config_id.to_s}-#{new_sap_id}",
+           :display_name => "link:sap_config-sap",
+           :input_id => sap_config_id,
+           :output_id => new_sap_id,
+           :function => "sap_config[ipv4]",
+           :node_node_id => node_id
+         },
+         {
+           :ref => "host_address:#{ipv4_id.to_s}-#{new_sap_id}",
+           :display_name => "link:host_address-sap",
+           :input_id => ipv4_id,
+           :output_id => new_sap_id,
+           :function => "host_address[ipv4]",
+           :node_node_id => node_id
+         }
+        ]
+      create_from_rows(attr_link_mh,new_link_rows)
+      update_type_link_attached_from_ids(attr_link_mh,:input,[sap_config_id,ipv4_id])
     end
 
     def self.update_type_link_attached(attr_link_mh,type,new_link_info)
-      attr_mh = attr_link_mh.createMH(:model_name => :attribute)
       index = "#{type}_id".to_sym
+      id_list = new_link_info.map{|r|r[index]}
+      update_type_link_attached_from_ids(attr_link_mh,type,id_list)
+    end
+
+    def self.update_type_link_attached_from_ids(attr_link_mh,type,id_list)
+      attr_mh = attr_link_mh.createMH(:model_name => :attribute)
       field_to_update = "num_attached_#{type}_links".to_sym
-      select_wc = SQL.in(:id,new_link_info.map{|r|r[index]})
+      select_wc = SQL.in(:id,id_list)
       select_fs = FieldSet.opt([:id,{SQL::ColRef.sum(field_to_update,1) => field_to_update}],:attribute)
       select_ds = get_objects_just_dataset(attr_mh,select_wc,select_fs)
       update_from_select(attr_mh,FieldSet.new(:attribute,[field_to_update]),select_ds)

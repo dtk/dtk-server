@@ -30,7 +30,7 @@ module XYZ
            :model_name => :attribute,
            :join_type => :inner,
            :join_cond=>{:node_node_id =>:node__id},
-           :cols => [:id,:display_name,:node_node_id,:value_derived,:value_asserted]
+           :cols => [:id,:display_name,:node_node_id,:value_derived,:value_asserted,:semantic_type_summary]
          }
         ]
 
@@ -62,13 +62,17 @@ module XYZ
     def self.add_needed_ipv4_sap_attributes(cmp_id_handle,node_id_handle)
       field_set = Model::FieldSet.new(:node,[:id,:node_attributes])
       filter = [:and, [:eq, :node__id, node_id_handle.get_id()]]
-      global_wc = {:attribute__display_name => "var[host_addresses][ipv4]"}
+      #TDOO: might match on ref or semantic type instead
+      global_wc = {:attribute__semantic_type_summary => "host_address[ipv4]"}
       ds = SearchObject.create_from_field_set(field_set,cmp_id_handle[:c],filter).create_dataset().where(global_wc)
-      ipv4_host_addresses_info = ds.all
-      return nil if ipv4_host_addresses_info.empty?
-      ipv4_host_addresses = ipv4_host_addresses_info.first[:attribute][:value_asserted]||ipv4_host_addresses_info.first[:attribute][:value_derived]
-      new_saps = Attribute.add_needed_ipv4_sap_attributes(cmp_id_handle,ipv4_host_addresses)
-      pp [:new_saps,new_saps]
+
+      ipv4_host_addrs_info = (ds.all.first||{})[:attribute]
+      return nil unless ipv4_host_addrs_info
+      ipv4_host_addrs = ipv4_host_addrs_info[:value_asserted]||ipv4_host_addrs_info[:value_derived]
+      ipv4_host_addrs_idh = cmp_id_handle.createIDH({:guid => ipv4_host_addrs_info[:id], :model_name => :attribute, :parent_model_name => :node})
+      sap_config_attr_idh, new_sap_attr_idh = Attribute.add_needed_ipv4_sap_attributes(cmp_id_handle,ipv4_host_addrs)
+      return nil unless new_sap_attr_idh
+      AttributeLink.add_ipv4_sap_links(new_sap_attr_idh,sap_config_attr_idh,ipv4_host_addrs_idh)
     end
 
     #TODO: quick hack

@@ -14,7 +14,8 @@ module XYZ
 
       #columns related to the data/semantic type
       column :data_type, :varchar, :size => 25
-      column :semantic_type, :json #points to structural info for a json varr #TODO: should this be a varchar instead; may need another field which is a pointer for attributes that are free form hashs w/o a seamntic type
+      column :semantic_type, :json #points to structural info for a json varr 
+      column :semantic_type_summary, :varchar, :size => 25 #for efficiency optional token that summarizes info from semantic_type
       column :read_only, :boolean, :default => false #true means variable is automtcally set
       column :required, :boolean, :default => false #whether required for this attribute to have a value inorder to execute actions for parent component; TODO: may be indexed by action
       #setting on port type contrains whether a link can be connecetd to teh attribute
@@ -229,32 +230,44 @@ also related is allowing omission of columns mmentioned in jon condition; post p
     end
 
     def self.add_needed_ipv4_sap_attributes(cmp_id_handle,ipv4_host_addresses)
+      component_id = cmp_id_handle.get_id()
       field_set = Model::FieldSet.new(:component,[:id,:attributes])
-      filter = [:and, [:eq, :component__id, cmp_id_handle.get_id()],[:eq, :basic_type,"service"]]
-      global_wc = {:attribute__display_name => "port[sap_config][ipv4]"}
+      filter = [:and, [:eq, :component__id, component_id],[:eq, :basic_type,"service"]]
+      global_wc = {:attribute__semantic_type_summary => "sap_config[ipv4]"}
       ds = SearchObject.create_from_field_set(field_set,cmp_id_handle[:c],filter).create_dataset().where(global_wc)
-      sap_configs = ds.all
-      return nil if sap_configs.empty?
-      new_sap_attr_rows = Array.new
-      ipv4_host_addresses.each do |ipv4_addr|
-        sap_configs.each do |sap_config|
-          value_derived = (sap_config[:attribute][:value_asserted]||sap_config[:attribute][:value_derived]).map{|x|x.merge(:host_address => ipv4_addr)}
-          new_sap_attr_rows <<  {
-            :ref => "port[sap][ipv4]",
-            :display_name => "port[sap][ipv4]", 
-            :component_component_id => sap_config[:id],
-            :value_derived => value_derived,
-            :port_type => "input",
-            :data_type => "json",
-            :description => "mysql ip service access point configuration",
-            #TODO: need the  => {"application" => service qualification)
-            :semantic_type => {":array" => "sap[ipv4]"},
-            :num_attached_input_links => 2
-          }
+
+      #should only be one attribute matching (or none)
+      sap_config_attr = (ds.all.first||{})[:attribute]
+      return nil unless sap_config_attr
+      sap_config_attr_idh = cmp_id_handle.createIDH(:guid => sap_config_attr[:id],:model_name => :attribute, :parent_model_name => :component)
+
+      #caresian produc of sap_configs and host addreses
+      new_sap_value_list = Array.new
+      #TODO: if graph converted hased values into Model types then coud just do sap_config_attr[:attribute_value]
+      (sap_config_attr[:value_asserted]||sap_config_attr[:value_derived]).each do |sap_config|
+        ipv4_host_addresses.each do |ipv4_addr|
+          new_sap_value_list << sap_config.merge(:host_address => ipv4_addr)
         end
       end
-      attr_mh = cmp_id_handle.createMH(:model_name => :attribute, :parent_model_name => :component)
-      create_from_rows(attr_mh,new_sap_attr_rows, :convert => true)
+
+      new_sap_attr_rows =
+        [{
+          :ref => "port[sap][ipv4]",
+          :display_name => "port[sap][ipv4]", 
+          :component_component_id => component_id,
+          :value_derived => new_sap_value_list,
+          :port_type => "input",
+          :data_type => "json",
+          :description => "mysql ip service access point configuration",
+          #TODO: need the  => {"application" => service qualification)
+          :semantic_type => {":array" => "sap[ipv4]"},
+          :num_attached_input_links => 2
+         }]
+
+      attr_mh = sap_config_attr_idh.createMH()
+      new_sap_attr_idh = create_from_rows(attr_mh,new_sap_attr_rows, :convert => true).first
+      
+      [sap_config_attr_idh,new_sap_attr_idh]
     end
 
 

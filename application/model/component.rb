@@ -24,7 +24,7 @@ module XYZ
            :model_name => :attribute,
            :join_type => :inner,
            :join_cond=>{:component_component_id =>:component__id},
-           :cols => [:id,:display_name,:component_component_id,:value_derived,:value_asserted]
+           :cols => [:id,:display_name,:component_component_id,:value_derived,:value_asserted,:semantic_type_summary]
          }
         ]
 

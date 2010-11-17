@@ -25,6 +25,7 @@ module XYZ
           prefix[:read_only] = true
           prefix[:data_type] = "json"
           prefix[:semantic_type] = {":array" => "host_address[ipv4]"}
+          prefix[:semantic_type_summary] = "host_address[ipv4]"
           prefix[:value_derived] = [nil]
 
         end

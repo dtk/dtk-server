@@ -15,6 +15,7 @@ module XYZ
           target[:required] = fn(:required,source["required"])
           target[:value_asserted] = fn(lambda{|x,y|x||y},source["value"],source[]["default"])
           target[:semantic_type] = fn(lambda{|x|x.to_json if x},source["semantic_type"])
+          target[:semantic_type_summary] = fn(:semantic_type_summary,source["semantic_type"])
         end
 
          class << self
@@ -44,6 +45,14 @@ module XYZ
             "[#{x.join("][")}]"
           end
           
+          def semantic_type_summary(semantic_type)
+            return nil if semantic_type.nil?
+            return semantic_type unless semantic_type.kind_of?(Hash)
+            key = semantic_type.keys.first
+            return nil if key.empty?
+            key.to_s =~ /^:/ ? semantic_type_summary(semantic_type.values.first) : key
+          end
+
           def required(required_value)
             return nil if required_value.nil?
             return true if %w{true required}.include?(required_value.to_s)

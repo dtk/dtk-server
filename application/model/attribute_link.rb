@@ -15,6 +15,9 @@ module XYZ
 
     #######################
     ### object procssing and access functions
+
+    ##########################  add new links ##################
+
     def self.link_attributes_using_eq(node_group_id_handle,ng_cmp_id_handle,node_cmp_id_handles)
       #TODO: rename params so not specfic to node groups
       #TODO: may convert to computing from search object with links
@@ -50,12 +53,35 @@ module XYZ
       attr_link_fs = FieldSet.new(:attribute,[:ref,attr_link_parent_col,:input_id,:output_id,:function])
       override_attrs = {}
             
-      #TODO: encapsulate all this under attribute link
       opts = {:duplicate_refs => :no_check,:returning_sql_cols => [:input_id,:output_id]} 
       new_link_info = create_from_select(attr_link_mh,attr_link_fs,attr_link_ds,override_attrs,opts)
       update_type_link_attached(attr_link_mh,:input,new_link_info)
       update_type_link_attached(attr_link_mh,:output,new_link_info)
     end
+
+    def self.add_ipv4_sap_links(new_sap_attr_idh,sap_config_attr_idh,ipv4_host_addrs_idh)
+pp [:new_sap_attr_idh,new_sap_attr_idh]
+pp [:sap_config_attr_idh,sap_config_attr_idh]
+pp [:ipv4_host_addrs_idh,ipv4_host_addrs_idh]
+=begin
+      return nil if new_attr_sap_idhs.empty?
+      attr_mh = cmp_id_handle.createMH(:model_name => :attribute, :parent_model_name => :component)
+      create_from_rows(attr_mh,new_sap_attr_rows, :convert => true)
+=end
+
+    end
+
+    def self.update_type_link_attached(attr_link_mh,type,new_link_info)
+      attr_mh = attr_link_mh.createMH(:model_name => :attribute)
+      index = "#{type}_id".to_sym
+      field_to_update = "num_attached_#{type}_links".to_sym
+      select_wc = SQL.in(:id,new_link_info.map{|r|r[index]})
+      select_fs = FieldSet.opt([:id,{SQL::ColRef.sum(field_to_update,1) => field_to_update}],:attribute)
+      select_ds = get_objects_just_dataset(attr_mh,select_wc,select_fs)
+      update_from_select(attr_mh,FieldSet.new(:attribute,[field_to_update]),select_ds)
+    end
+
+    ########################## end add new links ##################
 
     def self.propagate_when_eq_links(attr_changes)
       return Array.new if attr_changes.empty?
@@ -146,15 +172,6 @@ module XYZ
     def self.get_legal_connections_wrt_endpoint(attribute_id_handle,parent_id_handle)
     end
    private
-    def self.update_type_link_attached(attr_link_mh,type,new_link_info)
-      attr_mh = attr_link_mh.createMH(:model_name => :attribute)
-      index = "#{type}_id".to_sym
-      field_to_update = "num_attached_#{type}_links".to_sym
-      select_wc = SQL.in(:id,new_link_info.map{|r|r[index]})
-      select_fs = FieldSet.opt([:id,{SQL::ColRef.sum(field_to_update,1) => field_to_update}],:attribute)
-      select_ds = get_objects_just_dataset(attr_mh,select_wc,select_fs)
-      update_from_select(attr_mh,FieldSet.new(:attribute,[field_to_update]),select_ds)
-    end
 
     ##### Actions
 =begin TODO: needs fixing up or removal

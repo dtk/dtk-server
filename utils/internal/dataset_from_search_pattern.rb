@@ -39,12 +39,19 @@ module XYZ
             graph_ds = graph_ds.graph(join_info[:join_type]||:left_outer,right_ds,join_info[:join_cond])
           end
 
-          #add any global columns or glocal where clauses
+          #add any global columns or global where clauses
           if vcol_sql_fns or vcol_sql_fns_just_in_col
-            wc = vcol_sql_fns ? SimpleSearchPattern::ret_sequel_filter([:and] + vcol_sql_fns.map{|vcol,vcol_info|vcol_info[:expr]},model_handle) : nil
-            vcol_values = ((vcol_sql_fns||{}).merge(vcol_sql_fns_just_in_col||{})).map{|vcol,vcol_info|{:column => vcol, :value => vcol_info[:sql_fn]}}
+            wc_exprs = (vcol_sql_fns||[]).map{|vcol,vcol_info| vcol_info[:sql_fn] ? vcol_info[:expr] : nil}.compact
+            wc = (wc_exprs.empty? ? nil : SimpleSearchPattern::ret_sequel_filter([:and] + wc_exprs, model_handle))
+
+            post_proc_exprs = (vcol_sql_fns||[]).map{|vcol,vcol_info| vcol_info[:sql_fn] ? nil : vcol_info[:expr]}.compact
+            post_proc_filter = (post_proc_exprs.empty? ? nil : [:and] + post_proc_exprs)
+
+            vcol_values = ((vcol_sql_fns||{}).merge(vcol_sql_fns_just_in_col||{})).map{|vcol,vcol_info|vcol_info[:sql_fn] ? {:column => vcol, :value => vcol_info[:sql_fn]} : nil}.compact
+
             graph_ds = graph_ds.add_virtual_column_aliases(vcol_values)
             graph_ds = graph_ds.from_self.where(wc) if wc 
+            graph_ds.add_filter_post_processing(post_proc_filter) if post_proc_filter
           end
           opts = {} #TODO: stub
           graph_ds.paging_and_order(opts)
@@ -195,7 +202,6 @@ module XYZ
               next unless el.kind_of?(Symbol)
               next unless vcols[el]
               fn = vcols[el][:sql_fn]
-              raise Error.new("Cannot have virtual column #{el} in filter unless there is a local fn def for it") unless fn
               ret[el] = {:sql_fn => fn, :expr => expr}
             end
             ret.empty? ? nil : ret

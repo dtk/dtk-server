@@ -182,6 +182,8 @@ module XYZ
     def ret_symbol(term_in_json)
       #TODO short circuit if parsed already
       raise ErrorParsing.new(:symbol,term_in_json) if [Array,Hash].detect{|t|term_in_json.kind_of?(t)}
+#TODO: remove patch
+return :eq if term_in_json == ":"
       #complexity due to handle case where have form :":columns"
       term_in_json.to_s.gsub(/^[:]+/,'').to_sym 
     end

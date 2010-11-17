@@ -100,11 +100,23 @@ module XYZ
         filter_fn = filter[1..filter.size-1].map{|exp|"(#{aux(exp[1])} == #{aux(exp[2])})"}.join(" and ")
         @filter_post_processing = lambda{|obj|eval(filter_fn)}
       end
-  
-      def aux(x)
-        x.kind_of?(Symbol) ? "obj[:#{x}]" : ('"'+x+'"')
-      end
 
+      #TODO: make private
+      def aux(x)
+        if x.kind_of?(Symbol) 
+          "obj[:#{x}]" 
+        elsif x.kind_of?(String)
+          '"'+x+'"'
+        elsif x.kind_of?(Numeric)
+          x
+        elsif x.kind_of?(TrueClass)
+          true
+        elsif x.kind_of?(FalseClass)
+          false
+        else
+          raise Error.new("Unexpected term in post processing filter #{x.inspect}")
+        end
+      end
 
       attr_reader :model_name_info, :sequel_ds
       def graph(join_type,right_ds,join_conditions=true,opts={})

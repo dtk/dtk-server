@@ -197,7 +197,7 @@ module XYZ
         elsif semantic_type.kind_of?(Hash)
           ret_schema_from_semantic_type_aux!(ret[index],key,semantic_type.values.first)        
         else
-          ret[index] = {:type => "json"}
+          ret[index] = SchemaPattern.new({:type => "json"})
         end
       end
 

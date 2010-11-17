@@ -94,6 +94,18 @@ module XYZ
         @sequel_ds.sql.gsub(/"/,'')
       end
 
+      def add_filter_post_processing(filter)
+        implemented = (filter.kind_of?(Array) and filter.first == :and and not filter[1..filter.size-1].find{|exp|not exp.first == :eq})
+        raise ErrorNotImplemented.new("filter_post_processing with filter #{filter.inspect}") unless implemented
+        filter_fn = filter[1..filter.size-1].map{|exp|"(#{aux(exp[1])} == #{aux(exp[2])})"}.join(" and ")
+        @filter_post_processing = lambda{|obj|eval(filter_fn)}
+      end
+  
+      def aux(x)
+        x.kind_of?(Symbol) ? "obj[:#{x}]" : ('"'+x+'"')
+      end
+
+
       attr_reader :model_name_info, :sequel_ds
       def graph(join_type,right_ds,join_conditions=true,opts={})
         new_model_name_info = right_ds.model_name_info.first.create_unique(@model_name_info)
@@ -145,7 +157,7 @@ module XYZ
         @model_name_info = [ModelNameInfo.new(model_handle[:model_name])]
         @sequel_ds = sequel_ds
         @c = model_handle[:c]
-        @filter_post_processing = nil #this is used for vcols in a conjunctive filter where theer is no vcol_sql fn; after all called this filters (it is a charachteristic fn
+        @filter_post_processing = nil 
       end
 
       def join_table(join_type,right_ds,join_conditions=true,opts={})
@@ -170,7 +182,9 @@ module XYZ
         ret = ArrayObject.new
         @sequel_ds.all.map do |row|
           Model.process_raw_db_row!(row,model_name)
-          ret << DB_REL_DEF[model_name][:model_class].new(row,@c,model_name)
+          new_row = DB_REL_DEF[model_name][:model_class].new(row,@c,model_name)
+          next if @filter_post_processing and not @filter_post_processing.call(new_row)
+          ret << new_row
         end
         ret
       end
@@ -217,6 +231,7 @@ module XYZ
         @sequel_ds = sequel_ds
         @model_name_info = model_name_info
         @c = c
+        @filter_post_processing = nil 
       end
 
       def paging_and_order(opts)
@@ -249,7 +264,9 @@ module XYZ
             next unless row[model_index]
             Model.process_raw_db_row!(row[model_index],m.model_name)
           end
-          ret << DB_REL_DEF[primary_model_name][:model_class].new(row,@c,primary_model_name)
+          new_row = DB_REL_DEF[primary_model_name][:model_class].new(row,@c,primary_model_name)
+          next if @filter_post_processing and not @filter_post_processing.call(new_row)
+          ret << new_row
         end
         ret
       end

@@ -186,7 +186,9 @@ also related is allowing omission of columns mmentioned in jon condition; post p
       attr_name = self[:display_name]
       ret = attr_name
       if cmp_name 
-        ret = (node_or_group_name ? "#{node_or_group_name}[#{cmp_name}][#{attr_name}" : "#{cmp_name}[#{attr_name}")
+        #strip what will be recipe name
+        cmp_el = cmp_name.gsub(/::.+$/,"")
+        ret = (node_or_group_name ? "#{node_or_group_name}[#{cmp_el}][#{attr_name}" : "#{cmp_el}[#{attr_name}")
         ret = ret + "]" unless ret[ret.size-1,1] == "]"
       end
       ret

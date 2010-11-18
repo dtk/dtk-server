@@ -218,7 +218,7 @@ continue;
 				var scriptIncludes = R8.Ctrl.callResults[ioId]['response'][actionName]['js_includes'];
 
 				for(index in contentList) {
-					if(typeof(contentList[index]) === 'object' && contentList[index]['src'] != '') {
+					if(typeof(contentList[index]) === 'object' && typeof(contentList[index]['src']) !='undefined' && contentList[index]['src'] != '') {
 						YUI().use(function(Y) {
 //DEBUG
 //console.log(contentList[index]);

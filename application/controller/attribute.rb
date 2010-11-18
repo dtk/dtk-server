@@ -9,6 +9,11 @@ pp get_base_object_dataset_needs_to_be_set(:component).ppsql
     end
 
     def list_under_node(node_id=nil)
+      return {
+        :content => 'Hello',
+        :panel => 'wspace-rt-panel-body'
+      }
+
       filter = nil
       cols = [:id,:display_name,:base_object_node,:needs_to_be_set,:value_actual,:value_derived,:data_type,:semantic_type]
       field_set = Model::FieldSet.new(model_name,cols)
@@ -21,6 +26,8 @@ pp get_base_object_dataset_needs_to_be_set(:component).ppsql
       action_name = "list_qualified_attribute_name_under_node"
       tpl = R8Tpl::TemplateR8.new("#{model_name()}/#{action_name}",user_context())
       tpl.assign("attribute_list",attribute_list)
+
+      
       return {:content => tpl.render()}
     end
    

@@ -48,6 +48,16 @@
 	background: no-repeat url(../images/cmdbar/close-red-x.png);	
 }
 
+.close-tab-temp {
+	position: relative;
+	float: left;
+	height: 14px;
+	width: 14px;
+	margin: 7px 0 0 3px;
+	background: no-repeat url(../images/cmdbar/close-red-x.png);	
+}
+
+
 #cmdbar-tabs .tab.active {
 	color: #1B293E;
 }

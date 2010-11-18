@@ -1,5 +1,5 @@
 	{%for node in node_list%}
-		<div id="item_{%=node[:id]%}_wrapper" class="item-wrapper basic-item medium blue" data-status="pending_setup" data-id="{%=node[:id]%}" data-model="{%=node[:model_name]%}" style="top: {%=node[:ui][:top]%}px; left: {%=node[:ui][:left]%}px;">
+		<div id="item_{%=node[:id]%}_wrapper" class="wspace-item item-wrapper basic-item medium blue" data-status="pending_setup" data-id="{%=node[:id]%}" data-model="{%=node[:model_name]%}" style="top: {%=node[:ui][:top]%}px; left: {%=node[:ui][:left]%}px;">
 			<div id="item_{%=node[:id]%}" data-id="{%=node[:id]%}" data-model="{%=node[:model_name]%}" class="item node">
 				<div class="l-col">
 					<div class="corner tl"></div>

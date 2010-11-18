@@ -74,6 +74,13 @@ R8.config['base_uri'] = '{%=_app[:base_uri]%}/xyz';
 
 				</div>
 			</div>
+			<div id="wspace-rt-panel" style="display: none; position: absolute; height: 400px; width: 250px; border: 3px solid #CCCCCC; background-color: #DDDDDD; right: 0px; top: 0px;">
+				<div id="wspace-rt-panel-topbar" style="float: left; position: relative; height: 30px; width: 100%; background-color: #FFFFFF;">
+					<div id="wspace-rt-panel-close" class="close-tab-temp"></div>
+					<div id="wspace-rt-panel-body" style="overflow: scroll; position: relative; float: left; height: 360px; width: 240px;">
+					</div>
+				</div>
+			</div>
 			<div id="cmdbar-tabcontainer">
 				<div id="cmdbar-tabs-wrapper">
 					<div id="cmdbar-tabs">

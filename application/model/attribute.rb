@@ -198,8 +198,8 @@ also related is allowing omission of columns mmentioned in jon condition; post p
     def qualified_attribute_id_aux(node_or_group_id=nil)
       cmp_id = (self[:component]||{})[:id]
       attr_id = self[:id]
-      attr_name = self[:display_name]
-      token_array = ([node_or_group_id,cmp_id,attr_id] + Aux.tokenize_bracket_name(attr_name)).compact
+      item_path = AttributeComplexType.item_path_token_array(self)
+      token_array = ([node_or_group_id,cmp_id,attr_id] + item_path).compact
       Aux.put_in_bracket_form(token_array)
     end
 

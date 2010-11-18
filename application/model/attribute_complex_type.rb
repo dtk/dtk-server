@@ -30,6 +30,14 @@ module XYZ
       ret
     end
 
+    NumericIndexDelimiter = "__indx:"
+    ComplexNameDelimiter = "/"
+    def self.item_path_token_array(attr)
+      display_name = Aux.tokenize_bracket_name(attr[:display_name]||"UNKNOWN").join(ComplexNameDelimiter)
+      return [display_name] unless attr[:item_path]
+      [display_name] + attr[:item_path].map{|indx| indx.kind_of?(Numeric) ? "#{NumericIndexDelimiter}#{indx.to_s}" : indx.to_s}
+    end
+
    private
 
     def self.has_required_fields?(value_obj,pattern)
@@ -83,11 +91,11 @@ module XYZ
       elsif pattern.is_atomic?()
         flatten_attribute_when_atomic_pattern!(ret,value_obj,attr,pattern,top_level)
       elsif value_obj.kind_of?(Array)
-        flatten_attribute_when_array!(ret,value_obj,attr,pattern,top_level)
+        flatten_attribute_when_array!(ret,value_obj,attr,pattern)
       elsif value_obj.kind_of?(Hash)
-        flatten_attribute_when_hash!(ret,value_obj,attr,pattern,top_level)
+        flatten_attribute_when_hash!(ret,value_obj,attr,pattern)
       else
-        flatten_attribute_when_mismatch!(ret,value_obj,attr,pattern,top_level)
+        flatten_attribute_when_mismatch!(ret,value_obj,attr,pattern)
       end
       nil
     end
@@ -111,17 +119,18 @@ module XYZ
       nil
     end
 
-    def self.flatten_attribute_when_array!(ret,value_obj,attr,pattern,top_level)
+    def self.flatten_attribute_when_array!(ret,value_obj,attr,pattern)
       array_pat = pattern[:array]
-      return flatten_attribute_when_mismatch!(ret,value_obj,attr,pattern,top_level) unless array_pat
+      return flatten_attribute_when_mismatch!(ret,value_obj,attr,pattern) unless array_pat
 
       if value_obj.empty? 
-        ret << (top_level ? attr : attr.merge(:attribute_value => value_obj))
+        ret << attr.merge(:attribute_value => value_obj)
         return nil
       end
 
       value_obj.each_with_index do |child_val_obj,i|
-        child_attr = attr.merge(:display_name => "#{attr[:display_name]}[#{i.to_s}]")
+        item_path = (attr[:item_path] ? (attr[:item_path] + [i]) : [attr[:display_name] ])
+        child_attr = attr.merge(:display_name => "#{attr[:display_name]}#{delim(i)}", :item_path => item_path)
         flatten_attribute!(ret,child_val_obj,child_attr,array_pat)
       end
       nil
@@ -129,21 +138,27 @@ module XYZ
 
 
     #TODO: shoudl we iterate over missiing keys pattern.keys - val_obj.keys)
-    def self.flatten_attribute_when_hash!(ret,value_obj,attr,pattern,top_level)
-      return flatten_attribute_when_mismatch!(ret,value_obj,attr,pattern,top_level) if pattern[:array]
+    def self.flatten_attribute_when_hash!(ret,value_obj,attr,pattern)
+      return flatten_attribute_when_mismatch!(ret,value_obj,attr,pattern) if pattern[:array]
       value_obj.each do |k,child_val_obj|
-        child_attr = attr.merge(:display_name => "#{attr[:display_name]}[#{k}]")
+        item_path = (attr[:item_path] ? (attr[:item_path] + [k.to_sym]) : [attr[:display_name]])
+        child_attr = attr.merge(:display_name => "#{attr[:display_name]}#{delim(k)}", :item_path => item_path)
         child_pattern = pattern[k.to_s]
         flatten_attribute!(ret,child_val_obj,child_attr,child_pattern)
       end
       nil
     end
 
-    def self.flatten_attribute_when_mismatch!(ret,value_obj,attr,pattern,top_level)
+    def self.flatten_attribute_when_mismatch!(ret,value_obj,attr,pattern)
       Log.error("mismatch between object #{value_obj.inspect} and pattern #{pattern}")
       ret << (top_level ? attr : attr.merge(:attribute_value => value_obj))
       nil
     end
+
+    def self.delim(x)
+      "[#{x.to_s}]"
+    end
+
     class SchemaPattern < HashObject
       def self.create_from_attribute(attr)
         semantic_type = attr[:semantic_type]

@@ -631,6 +631,12 @@ console.log(itemDef);
 console.log(toolbarDef);
 			},
 
+			checkViewSpaces: function() {
+for(vs in _viewSpaces) {
+	_viewSpaces[vs].test();
+}
+			},
+
 			setupItem : function(itemDef) {
 				var viewspaceNode = R8.Utils.Y.one('#viewspace');
 				var itemChildren = viewspaceNode.get('children');

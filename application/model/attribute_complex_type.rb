@@ -31,13 +31,15 @@ module XYZ
     end
 
     NumericIndexDelimiter = "__indx:"
-    ComplexNameDelimiter = "/"
+    IDDelimiter = "__id:"
     def self.item_path_token_array(attr)
-      display_name = Aux.tokenize_bracket_name(attr[:root_display_name]||attr[:display_name]||"UNKNOWN").join(ComplexNameDelimiter)
-      return [display_name] unless attr[:item_path]
-      [display_name] + attr[:item_path].map{|indx| indx.kind_of?(Numeric) ? "#{NumericIndexDelimiter}#{indx.to_s}" : indx.to_s} 
+      return nil unless attr[:item_path]
+      attr[:item_path].map{|indx| indx.kind_of?(Numeric) ? "#{NumericIndexDelimiter}#{indx.to_s}" : indx.to_s} 
     end
-
+    def self.container_id(type,id)
+      return nil if id.nil?
+      "#{IDDelimiter}#{type}:#{id.to_s}"
+    end
    private
 
     def self.has_required_fields?(value_obj,pattern)

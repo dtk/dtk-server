@@ -195,14 +195,14 @@ also related is allowing omission of columns mmentioned in jon condition; post p
       token_array = ([node_or_group_name,cmp_el] + Aux.tokenize_bracket_name(attr_name)).compact
       Aux.put_in_bracket_form(token_array)
     end
-    def qualified_attribute_id_aux(node_or_group_id=nil)
-      cmp_id = (self[:component]||{})[:id]
-      attr_id = self[:id]
-      item_path = AttributeComplexType.item_path_token_array(self)
-      token_array = ([node_or_group_id,cmp_id,attr_id] + item_path).compact
+    def qualified_attribute_id_aux(node_or_group_id_formatted=nil)
+      cmp_id_formatted = AttributeComplexType.container_id(:component,(self[:component]||{})[:id])
+      attr_id_formatted = AttributeComplexType.container_id(:attribute,self[:id])
+      item_path = AttributeComplexType.item_path_token_array(self)||[]
+      token_array = ([node_or_group_id_formatted,cmp_id_formatted,attr_id_formatted] + item_path).compact
       Aux.put_in_bracket_form(token_array)
     end
-
+    
     def self.update_from_hash_assignments(id_handle,hash_assigns,opts={})
       Model.update_from_hash_assignments(id_handle,hash_assigns,opts)
       #TODO: should this functionality below be called from within Attribute.update_from_hash_assignments or instead be called

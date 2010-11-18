@@ -364,6 +364,11 @@ if (!R8.Cmdbar) {
 							R8.Cmdbar.toggleTabs();
 						}
 					},
+					'toggle' : {
+						'cmdSubmit' : function(cmdList) {
+							R8.Cmdbar.toggleTabs();
+						}
+					},
 				}
 				//end cmdHandlers
 			}

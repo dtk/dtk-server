@@ -3,26 +3,27 @@ if(!AvailableTools['quicksearch']) {
 	AvailableTools['quicksearch'] = function(params) {
 		var _name = 'quicksearch',
 			_parentNodeId = params['parent_id'],
+
 			_formId = _parentNodeId+'-'+_name+'-form',
 			_formNode = null,
 			_cmdInputId = _parentNodeId+'-'+_name+'-cmd',
 			_cmdInputNode = null,
-			_slideContainerNodeId = _parentNodeId+'-'+_name+'-list-container',
-			_slideContainerNode = null,
+			_cmdQueue = [],
+			_qIndex = null,
+			_ongoingSearch = false,
 
-			_sliderNodeId = _parentNodeId+'-'+_name+'-slider';
+			_slideContainerNodeId = _parentNodeId+'-'+_name+'-slider-container',
+			_slideContainerNode = null,
+			_slideDistance = 0,
+			_sliderNodeId = _parentNodeId+'-'+_name+'-slider',
 			_sliderNode = null,
 			_sliderInMotion = false,
 			_sliderLBtnId = _parentNodeId+'-'+_name+'-slider-lbtn',
 			_sliderLBtnNode = null,
 			_sliderRBtnId = _parentNodeId+'-'+_name+'-slider-rbtn',
 			_sliderRBtnNode = null,
-			_sliderAnim = null,
+			_sliderAnim = null;
 
-			_cmdQueue = [],
-			_qIndex = null,
-
-			_ongoingSearch = false;
 
 		return {
 
@@ -186,24 +187,15 @@ if(!AvailableTools['quicksearch']) {
 					case "blah":
 						break;
 				}
-		
-				this.clearSlider();
 
-//				R8.Cmdbar.registerTabEvents(tabIndex);
+				this.clearSliderContent();
 
-		//TODO: needed registerTabEvents seperated out from addTab b/c of some weird timing issues or something, need to revisit and hopefully consolidate
-//				R8.Cmdbar.changeTabFocus(tabIndex);
-//				if(!R8.Cmdbar.tabsPaneOpen) R8.Cmdbar.toggleTabs();
-		
 				for(term in qList) {
 					if(queryTerm !='') queryTerm +='&';
 						queryTerm += qList[term]['name']+'='+qList[term]['value'];
 				}
 				queryTerm += '&panel_id='+_slideContainerNodeId+'&slider_id_prefix='+_parentNodeId+'-'+_name;
-//				var tabName = this.name;
-//				var renderCompleteCallback = function() {
-//					R8.Cmdbar.loadedTabs[tabIndex].initSlider(R8.Cmdbar.loadedTabs[tabIndex].name);
-//				}
+
 				var that = this;
 				var renderCompleteCallback = function() {
 					that.initSlider();
@@ -220,7 +212,6 @@ if(!AvailableTools['quicksearch']) {
 					'io:end' : endCallback,
 					'io:renderComplete' : renderCompleteCallback,
 				};
-//console.log('Query Term:'+queryTerm);
 
 				R8.Ctrl.call('workspace/search_2',queryTerm,callbacks);
 				_cmdInputNode.blur();
@@ -247,58 +238,43 @@ if(!AvailableTools['quicksearch']) {
 					return;
 				}
 
-/*				YUI().use('anim', this.setSliderAnim);
-				_sliderAnim = new Y.Anim({
-					node: _sliderNode,
-					duration: 0.3,
-				});
-*/
-				var that=this;
-				var sliderLBtnId = _sliderLBtnId;
-				YUI().use('anim', function(Y){
-					that.setSliderAnim(Y);
-					Y.on('click', that.slideLeft,'#'+sliderLBtnId);
-				});
-
-				_sliderAnim.on('end', function(e){
-console.log('done with slider animation....');
-					_sliderInMotion = false;
-				},this);
-
-//				this.setupSliderEvents();
+				_sliderNode = R8.Utils.Y.one('#'+_sliderNodeId);
+				_slideDistance = parseInt(_slideContainerNode.getStyle('width').replace('px',''));
+				this.enableSliderAnimation();
 				_sliderReady = true;
 			},
 
-			setupSliderEvents: function() {
-				R8.Utils.Y.on('click', this.slideLeft,'#'+_sliderLBtnId);
-//				_sliderLBtnNode.on('click', this.slideLeft);
-//				_sliderRBtnNode.on('click', this.slideRight);
-			},
-
-			setSliderAnim: function(Y) {
-				_sliderNode = Y.one('#' + _sliderNodeId);
-				_sliderAnim = new Y.Anim({
-					node: _sliderNode,
-					duration: 0.3,
+			enableSliderAnimation: function() {
+				var that=this;
+				YUI().use('anim', function(Y){
+					_sliderAnim = new Y.Anim({
+						node: '#'+_sliderNodeId,
+						duration: 0.3
+					});
+					_sliderAnim.on('end',function(e){
+						_sliderInMotion = false;
+					});
+					Y.on('click', that.slideLeft,'#'+_sliderLBtnId);
+					Y.on('click', that.slideRight,'#'+_sliderRBtnId);
 				});
 			},
 
-			clearSlider: function() {
+			clearSliderContent: function() {
 				_slideContainerNode.set('innerHTML','');
 			},
 
 			slideLeft: function(e){
-console.log('firing slideLeft........');
 				if (_sliderInMotion) 
 					return;
 				else 
 					_sliderInMotion = true;
-					
+
 				_sliderAnim.set('to', {
-					xy: [_sliderNode.getX() - 422, _sliderNode.getY()]
+					xy: [_sliderNode.getX() - _slideDistance, _sliderNode.getY()]
 				});
 				_sliderAnim.run();
 			},
+
 			slideRight: function(e){
 				if (_sliderInMotion) 
 					return;
@@ -307,7 +283,7 @@ console.log('firing slideLeft........');
 
 				//TODO: figure out how to make the x param dynamic based on component width
 				_sliderAnim.set('to', {
-					xy: [_sliderNode.getX() + 422, _sliderNode.getY()]
+					xy: [_sliderNode.getX() + _slideDistance, _sliderNode.getY()]
 				});
 				_sliderAnim.run();
 			},

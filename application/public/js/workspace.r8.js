@@ -110,6 +110,7 @@ if (!R8.Workspace) {
 //				R8.Utils.Y.all('.group').each(function(){
 //console.log(this);
 //				});
+/*
 				R8.Workspace.events['item_dbl_click'] = R8.Utils.Y.delegate('dblclick',function(e){
 					var node = e.currentTarget;
 					var model = node.getAttribute('data-model');
@@ -121,7 +122,7 @@ console.log('Route:'+route);
 					R8.Ctrl.call(route,'',{});
 
 				},R8.Workspace.viewSpaceNode,'.wspace-item');
-
+*/
 				R8.MainToolbar.init();
 return;
 

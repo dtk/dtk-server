@@ -135,6 +135,15 @@ module XYZ
               next if opts[:ds_attrs_only] and not db_rel[:model_class].is_ds_subobject?(child_type)
 	      factory_uri = RestURI.ret_factory_uri(id_info[:uri],child_type)
 	      factory_id_info = IDInfoTable.get_row_from_uri(factory_uri,id_info[:c])
+
+              #TODO: hack until we get rid of factory rows in id info table; this is needed because some create methods dont put in factory rows
+              if factory_id_info.nil?
+                IDInfoTable.insert_factory(child_type,factory_uri,id_info[:relation_type],id_info[:id],id_info[:c])
+                Log.info("adding factory #{factory_uri} to id info table")
+                factory_id_info = IDInfoTable.get_row_from_uri(factory_uri,id_info[:c])
+              end
+              ##end of hack
+
               next unless factory_id_info #skip if this object does not have a child of type child_type
 	      factory_content = get_factory(href_prefix,factory_id_info,opts)
 	      hash[child_type] = factory_content unless factory_content.empty?

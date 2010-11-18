@@ -1,0 +1,16 @@
+<div class="edit_container">
+	<form id="attribute-edit-form" action="../save/" method="post" enctype="multipart/form-data">
+	<input type="submit" value="Save"/>
+		<input type="hidden" name="model" id="model" value="attribute" />
+		<input type="hidden" name="action" id="action" value="save" />
+	<table class="edit">
+           {%for attribute in attribute_list%}
+	      {%name = attribute[:qualified_attribute_name_under_node]%}
+		<tr id="">
+				<td id="" class="label">{%=name%}</td>
+				<td id="" class="field"><input type="text"  id="{%=name%}" name="{%=name%}" class="r8-text" value="{%=attribute[:attribute_value]%}" size="40" /></td>
+		</tr>
+        {%end%}
+	</table>
+	</form>
+</div>

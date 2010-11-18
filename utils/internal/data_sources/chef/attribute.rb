@@ -5,7 +5,7 @@ module XYZ
         definitions do
           #TBD: assuming that after split first item is cookbook name
           target[:external_ref] = fn(:external_ref,source)
-          target[:display_name] = fn(:relative_distinguished_name,source)
+          target[:display_name] = fn(:display_name,source)
           target[:data_type] = fn(:data_type,source["type"])
           target[:is_port] = source["is_port"]
           target[:description] = source["description"]
@@ -21,12 +21,19 @@ module XYZ
              DBUpdateHash.new()
            end
 
+           #TODO" use aux fns
            def relative_distinguished_name(source)
              split = source[:ref].split("/")
              split.join("][") + (split.size == 1 ? "" : "]")
            end
 
           #### defined and helper fns
+           def display_name(source)
+             split = source[:ref].split("/")
+             split.shift if split.size > 1
+             Aux.put_in_bracket_form(split)
+           end
+
           def external_ref(source)
             prefix = source[:service_name] ? "service[#{source[:service_name]}]" : "node[#{source[:ref].split("/").first}]"
             path = prefix+name_suffix(source)

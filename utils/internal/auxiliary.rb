@@ -63,6 +63,20 @@ module XYZ
         x
       end
 
+      def tokenize_bracket_name(x)
+        x.split("[").map{|y|y.gsub(/\]/,"")}
+      end
+
+      def put_in_bracket_form(token_array)
+        if token_array.size == 1
+          token_array[0]
+        else
+          first = token_array.shift
+          "#{first}[#{token_array.join("][")}]"
+        end
+      end
+
+
       ## Taken from Sequel
       def camelize(str_x,first_letter_in_uppercase = :upper)
         str = str_x.to_s

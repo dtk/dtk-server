@@ -181,15 +181,14 @@ also related is allowing omission of columns mmentioned in jon condition; post p
     end
     #######################
     ### object procssing and access functions
+
     def qualified_attribute_name_aux(node_or_group_name=nil)
       cmp_name = (self[:component]||{})[:display_name]
+      #strip what will be recipe name
+      cmp_el = cmp_name ? cmp_name.gsub(/::.+$/,"") : nil
       attr_name = self[:display_name]
-      ret = attr_name
-      if cmp_name 
-        ret = (node_or_group_name ? "#{node_or_group_name}[#{cmp_name}][#{attr_name}" : "#{cmp_name}[#{attr_name}")
-        ret = ret + "]" unless ret[ret.size-1,1] == "]"
-      end
-      ret
+      token_array = ([node_or_group_name,cmp_el] + Aux.tokenize_bracket_name(attr_name)).compact
+      Aux.put_in_bracket_form(token_array)
     end
 
     def self.update_from_hash_assignments(id_handle,hash_assigns,opts={})

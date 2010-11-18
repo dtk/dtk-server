@@ -13,7 +13,7 @@
               :objLink => true,
               :objLinkView => 'display',
             }},
-          {:port_type => {
+          {:is_port => {
               :type => 'text',
               :help => '',
             }},

@@ -7,10 +7,8 @@ module XYZ
           target[:external_ref] = fn(:external_ref,source)
           target[:display_name] = fn(:relative_distinguished_name,source)
           target[:data_type] = fn(:data_type,source["type"])
-          #TBD: have form that is no assignment if source is null
-          %w{port_type semantic_type description constraints}.each do |k|
-            target[k.to_sym] = source[k]
-          end
+          target[:is_port] = source["is_port"]
+          target[:description] = source["description"]
           target[:output_variable] = source["calculated"]
           target[:required] = fn(:required,source["required"])
           target[:value_asserted] = fn(lambda{|x,y|x||y},source["value"],source[]["default"])
@@ -24,8 +22,8 @@ module XYZ
            end
 
            def relative_distinguished_name(source)
-             prefix = source[:service_name] ? "port" : "var"
-             prefix+name_suffix(source)
+             split = source[:ref].split("/")
+             split.join("][") + (split.size == 1 ? "" : "]")
            end
 
           #### defined and helper fns

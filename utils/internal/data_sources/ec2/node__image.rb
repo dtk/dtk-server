@@ -20,8 +20,9 @@ module XYZ
           prefix[:eth0][:family] = 'ipv4' 
 
           source_complete_for target[:attribute]          
-          prefix = target[:attribute]["var[host_addresses][ipv4]".to_sym]
-          prefix[:display_name] = "var[host_addresses][ipv4]"
+          prefix = target[:attribute]["host_addresses[ipv4]".to_sym]
+          prefix[:display_name] = "host_addresses[ipv4]"
+          prefix[:is_port] = true
           prefix[:read_only] = true
           prefix[:data_type] = "json"
           prefix[:semantic_type] = {":array" => "host_address[ipv4]"}

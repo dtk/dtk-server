@@ -18,8 +18,7 @@ module XYZ
       column :semantic_type_summary, :varchar, :size => 25 #for efficiency optional token that summarizes info from semantic_type
       column :read_only, :boolean, :default => false #true means variable is automtcally set
       column :required, :boolean, :default => false #whether required for this attribute to have a value inorder to execute actions for parent component; TODO: may be indexed by action
-      #setting on port type contrains whether a link can be connecetd to teh attribute
-      column :port_type, :varchar, :size => 10 # null means no port; otherwise "input", "output", or "either"
+      column :is_port, :boolean, :default => false
 
       #columns related to links
       column :num_attached_input_links, :integer, :default => 0, :hidden => true
@@ -182,15 +181,16 @@ also related is allowing omission of columns mmentioned in jon condition; post p
     end
     #######################
     ### object procssing and access functions
-
     def qualified_attribute_name_aux(node_or_group_name=nil)
-      component_name = (self[:component]||{})[:display_name]
-      component_el = lambda{|x|x ? "[#{x}]" : ""}.call(component_name)
-      node_or_group_el = lambda{|x|x ? "[#{x}]" : ""}.call(node_or_group_name)
-      prefix, attr_el = (self[:display_name] =~ /(.*?)(\[.*\])/; [$1,$2])
-      prefix + node_or_group_el + component_el + attr_el
+      cmp_name = (self[:component]||{})[:display_name]
+      attr_name = self[:display_name]
+      ret = attr_name
+      if cmp_name 
+        ret = (node_or_group_name ? "#{node_or_group_name}[#{cmp_name}][#{attr_name}" : "#{cmp_name}[#{attr_name}")
+        ret = ret + "]" unless ret[ret.size-1,1] == "]"
+      end
+      ret
     end
-
 
     def self.update_from_hash_assignments(id_handle,hash_assigns,opts={})
       Model.update_from_hash_assignments(id_handle,hash_assigns,opts)
@@ -252,11 +252,11 @@ also related is allowing omission of columns mmentioned in jon condition; post p
 
       new_sap_attr_rows =
         [{
-          :ref => "port[sap][ipv4]",
-          :display_name => "port[sap][ipv4]", 
+          :ref => "sap[ipv4]",
+          :display_name => "sap[ipv4]", 
           :component_component_id => component_id,
           :value_derived => new_sap_value_list,
-          :port_type => "input",
+          :is_port => true,
           :data_type => "json",
           :description => "mysql ip service access point configuration",
           #TODO: need the  => {"application" => service qualification)

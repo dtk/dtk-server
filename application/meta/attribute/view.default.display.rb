@@ -59,7 +59,7 @@
              :rows => 1,
              :cols => 40,
             }},
-            {:port_type => {
+            {:is_port => {
               :type => 'text',
               :help => '',
               :rows => 1,

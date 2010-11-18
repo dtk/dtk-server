@@ -8,7 +8,7 @@
   :required => 'Required',
   :data_type => 'Data Type',
   :semantic_type => 'Semantic Type',
-  :port_type => 'Port Type',
+  :is_port => 'Is Port',
   :description => 'Description',
   :needs_to_be_set => "Needs to be set",
   :is_unset => "Is Unset",

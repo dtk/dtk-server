@@ -33,9 +33,9 @@ module XYZ
     NumericIndexDelimiter = "__indx:"
     ComplexNameDelimiter = "/"
     def self.item_path_token_array(attr)
-      display_name = Aux.tokenize_bracket_name(attr[:display_name]||"UNKNOWN").join(ComplexNameDelimiter)
+      display_name = Aux.tokenize_bracket_name(attr[:root_display_name]||attr[:display_name]||"UNKNOWN").join(ComplexNameDelimiter)
       return [display_name] unless attr[:item_path]
-      [display_name] + attr[:item_path].map{|indx| indx.kind_of?(Numeric) ? "#{NumericIndexDelimiter}#{indx.to_s}" : indx.to_s}
+      [display_name] + attr[:item_path].map{|indx| indx.kind_of?(Numeric) ? "#{NumericIndexDelimiter}#{indx.to_s}" : indx.to_s} 
     end
 
    private
@@ -129,20 +129,27 @@ module XYZ
       end
 
       value_obj.each_with_index do |child_val_obj,i|
-        item_path = (attr[:item_path] ? (attr[:item_path] + [i]) : [attr[:display_name] ])
-        child_attr = attr.merge(:display_name => "#{attr[:display_name]}#{delim(i)}", :item_path => item_path)
+        child_attr = 
+          if attr[:item_path]
+            attr.merge(:display_name => "#{attr[:display_name]}#{delim(i)}", :item_path => attr[:item_path] + [i])
+          else
+            attr.merge(:root_display_name => attr[:display_name], :display_name => "#{attr[:display_name]}#{delim(i)}", :item_path => [i])
+        end
         flatten_attribute!(ret,child_val_obj,child_attr,array_pat)
       end
       nil
     end
 
-
     #TODO: shoudl we iterate over missiing keys pattern.keys - val_obj.keys)
     def self.flatten_attribute_when_hash!(ret,value_obj,attr,pattern)
       return flatten_attribute_when_mismatch!(ret,value_obj,attr,pattern) if pattern[:array]
       value_obj.each do |k,child_val_obj|
-        item_path = (attr[:item_path] ? (attr[:item_path] + [k.to_sym]) : [attr[:display_name]])
-        child_attr = attr.merge(:display_name => "#{attr[:display_name]}#{delim(k)}", :item_path => item_path)
+        child_attr = 
+          if attr[:item_path]
+            attr.merge(:display_name => "#{attr[:display_name]}#{delim(k)}", :item_path => attr[:item_path] + [k.to_sym])
+          else
+            attr.merge(:root_display_name => attr[:display_name], :display_name => "#{attr[:display_name]}#{delim(k)}", :item_path => [k.to_sym])
+        end
         child_pattern = pattern[k.to_s]
         flatten_attribute!(ret,child_val_obj,child_attr,child_pattern)
       end

@@ -30,7 +30,12 @@ module XYZ
            def display_name(source)
              split = source[:ref].split("/")
              split.shift if split.size > 1
-             split.join("][") + (split.size == 1 ? "" : "]")
+             if split.size == 1
+               split[0]
+             else
+               first = split.shift
+               "#{first}[#{split.join("][")}]"
+             end
            end
 
           def external_ref(source)

@@ -52,7 +52,7 @@
           },
           "ds_name": "ec2",
           "display_name": "ec2",
-          "last_collection_timestamp": "Thu Nov 18 00:33:59 +0000 2010"
+          "last_collection_timestamp": "Thu Nov 18 03:37:13 +0000 2010"
         }
       },
       "node": {
@@ -488,43 +488,6 @@
           "image_size": "0.17408E4",
           "ds_source_obj_type": "instance"
         },
-        "s-ami-6743ae0e": {
-          "type": "staged",
-          "data_source": "ec2",
-          "ds_attributes": {
-            "type": "machine",
-            "ramdisk_id": "ari-d5709dbc",
-            "state": "available",
-            "owner_id": "063491364108",
-            "product_codes": [
-
-            ],
-            "root_device_name": "/dev/sda1",
-            "kernel_id": "aki-5f15f636",
-            "block_device_mapping": [
-              {
-                "deleteOnTermination": "true",
-                "volumeSize": "15",
-                "snapshotId": "snap-5d6f2234",
-                "deviceName": "/dev/sda1"
-              }
-            ],
-            "location": "063491364108/ubuntu-9.10-karmic-server-i386-20100121",
-            "architecture": "i386",
-            "is_public": true,
-            "root_device_type": "ebs",
-            "id": "ami-6743ae0e",
-            "platform": null
-          },
-          "is_deployed": true,
-          "display_name": "s-ami-6743ae0e",
-          "ds_key": "[:ec2, :image, \"ami-6743ae0e\"]",
-          "ds_source_obj_type": "image",
-          "ui": {
-            "top": 253,
-            "left": 182
-          }
-        },
         "i-97bb8ffd": {
           "type": "instance",
           "operational_status": "stopped",
@@ -752,6 +715,437 @@
           "ds_key": "[:ec2, :instance, \"i-33886f59\"]",
           "image_size": "0.17408E4",
           "ds_source_obj_type": "instance"
+        },
+        "s-ami-06c72c6f": {
+          "type": "staged",
+          "data_source": "ec2",
+          "ds_attributes": {
+            "type": "machine",
+            "ramdisk_id": "ari-d5709dbc",
+            "state": "available",
+            "owner_id": "411986592491",
+            "product_codes": [
+
+            ],
+            "root_device_name": "/dev/sda1",
+            "kernel_id": "aki-5f15f636",
+            "block_device_mapping": [
+              {
+                "deleteOnTermination": "true",
+                "volumeSize": "15",
+                "snapshotId": "snap-caa459a1",
+                "deviceName": "/dev/sda1"
+              }
+            ],
+            "location": "411986592491/rnp-chef-09-6-ubuntu-910-x86_32",
+            "architecture": "i386",
+            "root_device_type": "ebs",
+            "is_public": false,
+            "id": "ami-06c72c6f",
+            "platform": null
+          },
+          "node_interface": {
+            "eth0": {
+              "type": "ethernet",
+              "display_name": "eth0"
+            }
+          },
+          "component": {
+            "mysql::server": {
+              "type": "template",
+              "description": "Installs packages required for mysql servers w/o manual intervention",
+              "only_one_per_node": true,
+              "ds_attributes": {
+                "ref": "mysql::server",
+                "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}",
+                "qualified_ref": "/library/test/mysql::server"
+              },
+              "attribute": {
+                "sap[ipv4]": {
+                  "value_derived": [
+                    {
+                      "port": 3306,
+                      "host_address": null,
+                      "protocol": "tcp",
+                      "binding_addr_constraints": [
+
+                      ]
+                    }
+                  ],
+                  "description": "mysql ip service access point configuration",
+                  "is_port": true,
+                  "num_attached_input_links": 2,
+                  "read_only": false,
+                  "num_attached_output_links": 0,
+                  "data_type": "json",
+                  "display_name": "sap[ipv4]",
+                  "semantic_type": {
+                    ":array": "sap[ipv4]"
+                  },
+                  "required": false
+                },
+                "mysql][tunable][net_read_timeout]": {
+                  "is_port": false,
+                  "num_attached_input_links": 0,
+                  "read_only": false,
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[mysql][tunable][net_read_timeout]"
+                  },
+                  "num_attached_output_links": 0,
+                  "data_type": "string",
+                  "display_name": "tunable[net_read_timeout]",
+                  "value_asserted": "30",
+                  "required": false
+                },
+                "mysql][tunable][wait_timeout]": {
+                  "is_port": false,
+                  "num_attached_input_links": 0,
+                  "read_only": false,
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[mysql][tunable][wait_timeout]"
+                  },
+                  "num_attached_output_links": 0,
+                  "data_type": "string",
+                  "display_name": "tunable[wait_timeout]",
+                  "value_asserted": "180",
+                  "required": false
+                },
+                "mysql][sap][socket]": {
+                  "description": "mysql unix socket service access point",
+                  "is_port": true,
+                  "num_attached_input_links": 0,
+                  "read_only": false,
+                  "external_ref": {
+                    "type": "service_attribute",
+                    "path": "service[mysql_server][sap][socket]"
+                  },
+                  "num_attached_output_links": 0,
+                  "data_type": "json",
+                  "display_name": "sap[socket]",
+                  "semantic_type": {
+                    "sap[socket]": {
+                      "application": "sql::mysql"
+                    }
+                  },
+                  "value_asserted": {
+                    "socket_file": "/var/run/mysqld/mysqld.sock"
+                  },
+                  "required": false,
+                  "semantic_type_summary": "sap[socket]"
+                },
+                "mysql][tunable][key_buffer]": {
+                  "is_port": false,
+                  "num_attached_input_links": 0,
+                  "read_only": false,
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[mysql][tunable][key_buffer]"
+                  },
+                  "num_attached_output_links": 0,
+                  "data_type": "string",
+                  "display_name": "tunable[key_buffer]",
+                  "value_asserted": "250M",
+                  "required": false
+                },
+                "mysql][ec2_path]": {
+                  "description": "Location of mysql directory on EC2 instance EBS volumes",
+                  "is_port": false,
+                  "num_attached_input_links": 0,
+                  "read_only": false,
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[mysql][ec2_path]"
+                  },
+                  "num_attached_output_links": 0,
+                  "data_type": "string",
+                  "display_name": "ec2_path",
+                  "value_asserted": "/mnt/mysql",
+                  "required": false
+                },
+                "mysql][tunable][back_log]": {
+                  "is_port": false,
+                  "num_attached_input_links": 0,
+                  "read_only": false,
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[mysql][tunable][back_log]"
+                  },
+                  "num_attached_output_links": 0,
+                  "data_type": "string",
+                  "display_name": "tunable[back_log]",
+                  "value_asserted": "128",
+                  "required": false
+                },
+                "mysql][server_root_password]": {
+                  "description": "Randomly generated password for the mysqld root user",
+                  "is_port": false,
+                  "num_attached_input_links": 0,
+                  "read_only": false,
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[mysql][server_root_password]"
+                  },
+                  "num_attached_output_links": 0,
+                  "data_type": "string",
+                  "display_name": "server_root_password",
+                  "required": false
+                },
+                "mysql][bind_address]": {
+                  "description": "Address that mysqld should listen on",
+                  "is_port": false,
+                  "num_attached_input_links": 0,
+                  "read_only": false,
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[mysql][bind_address]"
+                  },
+                  "num_attached_output_links": 0,
+                  "data_type": "string",
+                  "display_name": "bind_address",
+                  "required": false
+                },
+                "mysql][tunable][max_heap_table_size]": {
+                  "is_port": false,
+                  "num_attached_input_links": 0,
+                  "read_only": false,
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[mysql][tunable][max_heap_table_size]"
+                  },
+                  "num_attached_output_links": 0,
+                  "data_type": "string",
+                  "display_name": "tunable[max_heap_table_size]",
+                  "value_asserted": "32M",
+                  "required": false
+                },
+                "mysql][tunable][net_write_timeout]": {
+                  "is_port": false,
+                  "num_attached_input_links": 0,
+                  "read_only": false,
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[mysql][tunable][net_write_timeout]"
+                  },
+                  "num_attached_output_links": 0,
+                  "data_type": "string",
+                  "display_name": "tunable[net_write_timeout]",
+                  "value_asserted": "30",
+                  "required": false
+                },
+                "mysql][sap_config][ipv4]": {
+                  "description": "mysql ip service access point configuration",
+                  "is_port": true,
+                  "num_attached_input_links": 1,
+                  "read_only": false,
+                  "external_ref": {
+                    "type": "service_attribute",
+                    "path": "service[mysql_server][sap_config][ipv4]"
+                  },
+                  "num_attached_output_links": 0,
+                  "data_type": "json",
+                  "display_name": "sap_config[ipv4]",
+                  "semantic_type": {
+                    ":array": {
+                      "sap_config[ipv4]": {
+                        "application": "sql::mysql"
+                      }
+                    }
+                  },
+                  "value_asserted": [
+                    {
+                      "port": 3306,
+                      "protocol": "tcp",
+                      "binding_addr_constraints": [
+
+                      ]
+                    }
+                  ],
+                  "required": false,
+                  "semantic_type_summary": "sap_config[ipv4]"
+                },
+                "mysql][db_info]": {
+                  "is_port": true,
+                  "num_attached_input_links": 0,
+                  "read_only": false,
+                  "external_ref": {
+                    "type": "service_attribute",
+                    "path": "service[mysql_server][db_info]"
+                  },
+                  "num_attached_output_links": 0,
+                  "data_type": "json",
+                  "display_name": "db_info",
+                  "semantic_type": {
+                    ":array": "db_info"
+                  },
+                  "value_asserted": [
+                    {
+                      "database": "mysql",
+                      "password": null,
+                      "username": "root"
+                    }
+                  ],
+                  "required": false,
+                  "semantic_type_summary": "db_info"
+                },
+                "mysql][datadir]": {
+                  "description": "Location of mysql databases",
+                  "is_port": false,
+                  "num_attached_input_links": 0,
+                  "read_only": false,
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[mysql][datadir]"
+                  },
+                  "num_attached_output_links": 0,
+                  "data_type": "string",
+                  "display_name": "datadir",
+                  "value_asserted": "/var/lib/mysql",
+                  "required": false
+                },
+                "mysql][tunable][table_cache]": {
+                  "is_port": false,
+                  "num_attached_input_links": 0,
+                  "read_only": false,
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[mysql][tunable][table_cache]"
+                  },
+                  "num_attached_output_links": 0,
+                  "data_type": "string",
+                  "display_name": "tunable[table_cache]",
+                  "value_asserted": "128",
+                  "required": false
+                },
+                "mysql][tunable][max_connections]": {
+                  "is_port": false,
+                  "num_attached_input_links": 0,
+                  "read_only": false,
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[mysql][tunable][max_connections]"
+                  },
+                  "num_attached_output_links": 0,
+                  "data_type": "string",
+                  "display_name": "tunable[max_connections]",
+                  "value_asserted": "800",
+                  "required": false
+                },
+                "mysql][monitor_user_id]": {
+                  "description": "db userid for monitoring application to use",
+                  "is_port": true,
+                  "num_attached_input_links": 0,
+                  "read_only": false,
+                  "external_ref": {
+                    "type": "service_attribute",
+                    "path": "service[mysql_server][monitor_user_id]"
+                  },
+                  "num_attached_output_links": 0,
+                  "data_type": "string",
+                  "display_name": "monitor_user_id",
+                  "value_asserted": "root",
+                  "required": false
+                }
+              },
+              "external_ref": {
+                "type": "chef_recipe",
+                "recipe_name": "mysql::server"
+              },
+              "basic_type": "service",
+              "monitoring_item": {
+                "mysql_basic_health": {
+                  "enabled": true,
+                  "display_name": "mysql_basic_health"
+                },
+                "inet_service_up": {
+                  "enabled": true,
+                  "display_name": "inet_service_up"
+                }
+              },
+              "display_name": "mysql::server",
+              "ds_key": "[:user_data, \"/library/test/mysql::server\"]"
+            }
+          },
+          "attribute": {
+            "host_addresses[ipv4]": {
+              "value_derived": [
+                null
+              ],
+              "is_port": true,
+              "num_attached_input_links": 1,
+              "read_only": true,
+              "num_attached_output_links": 0,
+              "data_type": "json",
+              "display_name": "host_addresses[ipv4]",
+              "semantic_type": {
+                ":array": "host_address[ipv4]"
+              },
+              "required": false,
+              "semantic_type_summary": "host_address[ipv4]"
+            }
+          },
+          "is_deployed": true,
+          "monitoring_item": {
+            "check_ping": {
+              "description": "ping",
+              "enabled": true,
+              "display_name": "check_ping"
+            },
+            "check_mem": {
+              "description": "Free Memory",
+              "enabled": true,
+              "display_name": "check_mem"
+            },
+            "check_local_procs": {
+              "description": "Processes",
+              "enabled": true,
+              "display_name": "check_local_procs"
+            },
+            "check_all_disks": {
+              "description": "Free Space All Disks",
+              "enabled": true,
+              "display_name": "check_all_disks"
+            },
+            "check_memory_profiler": {
+              "description": "Memory Profiler",
+              "enabled": true,
+              "display_name": "check_memory_profiler"
+            },
+            "check_iostat": {
+              "description": "Iostat",
+              "enabled": true,
+              "display_name": "check_iostat"
+            },
+            "check_ssh": {
+              "description": "SSH",
+              "enabled": true,
+              "display_name": "check_ssh"
+            }
+          },
+          "attribute_link": {
+            "host_address:2147484004-2147484032": {
+              "*input_id": "/node/s-ami-06c72c6f/attribute/host_addresses[ipv4]",
+              "label": "1",
+              "function": "host_address[ipv4]",
+              "*output_id": "/node/s-ami-06c72c6f/component/mysql::server/attribute/sap[ipv4]",
+              "display_name": "link:host_address-sap"
+            },
+            "sap_config:2147484024-2147484032": {
+              "*input_id": "/node/s-ami-06c72c6f/component/mysql::server/attribute/mysql][sap_config][ipv4]",
+              "label": "1",
+              "function": "sap_config[ipv4]",
+              "*output_id": "/node/s-ami-06c72c6f/component/mysql::server/attribute/sap[ipv4]",
+              "display_name": "link:sap_config-sap"
+            }
+          },
+          "display_name": "s-ami-06c72c6f",
+          "ds_key": "[:ec2, :image, \"ami-06c72c6f\"]",
+          "ds_source_obj_type": "image",
+          "ui": {
+            "top": 187,
+            "left": 125
+          }
         },
         "i-335f0059": {
           "type": "instance",
@@ -1557,7 +1951,7 @@
           },
           "ds_name": "chef",
           "display_name": "chef",
-          "last_collection_timestamp": "Thu Nov 18 00:33:03 +0000 2010"
+          "last_collection_timestamp": "Thu Nov 18 03:36:41 +0000 2010"
         },
         "ec2": {
           "data_source_entry": {
@@ -1571,7 +1965,7 @@
           },
           "ds_name": "ec2",
           "display_name": "ec2",
-          "last_collection_timestamp": "Thu Nov 18 00:33:44 +0000 2010"
+          "last_collection_timestamp": "Thu Nov 18 03:36:56 +0000 2010"
         },
         "user_data": {
           "data_source_entry": {
@@ -1584,7 +1978,7 @@
           },
           "ds_name": "user_data",
           "display_name": "user_data",
-          "last_collection_timestamp": "Thu Nov 18 00:33:34 +0000 2010"
+          "last_collection_timestamp": "Thu Nov 18 03:36:45 +0000 2010"
         }
       },
       "node": {
@@ -1611,8 +2005,8 @@
             ],
             "location": "063491364108/ubuntu-9.10-karmic-server-i386-20100121",
             "architecture": "i386",
-            "is_public": true,
             "root_device_type": "ebs",
+            "is_public": true,
             "id": "ami-6743ae0e",
             "platform": null
           },
@@ -1709,8 +2103,8 @@
             ],
             "location": "411986592491/rnp-chef-09-6-ubuntu-910-x86_32",
             "architecture": "i386",
-            "is_public": false,
             "root_device_type": "ebs",
+            "is_public": false,
             "id": "ami-06c72c6f",
             "platform": null
           },
@@ -1807,8 +2201,8 @@
             ],
             "location": "411986592491/rnp-chef-server-0816-ubuntu-910-x86_32",
             "architecture": "i386",
-            "is_public": false,
             "root_device_type": "ebs",
+            "is_public": false,
             "id": "ami-bf3ad3d6",
             "platform": null
           },
@@ -1905,8 +2299,8 @@
             ],
             "location": "411986592491/rnp-chef-0816-ubuntu-910-x86_32",
             "architecture": "i386",
-            "is_public": false,
             "root_device_type": "ebs",
+            "is_public": false,
             "id": "ami-693ad300",
             "platform": null
           },
@@ -2003,8 +2397,8 @@
             ],
             "location": "411986592491/rnp-chef-09-8-ubuntu-lucid-x86_32",
             "architecture": "i386",
-            "is_public": false,
             "root_device_type": "ebs",
+            "is_public": false,
             "id": "ami-e2cc398b",
             "platform": null
           },
@@ -2101,8 +2495,8 @@
             ],
             "location": "411986592491//rnp-chef-09-8-ubuntu-910-x86_32",
             "architecture": "i386",
-            "is_public": false,
             "root_device_type": "ebs",
+            "is_public": false,
             "id": "ami-28ee1b41",
             "platform": null
           },
@@ -2199,8 +2593,8 @@
             ],
             "location": "411986592491//rnp-mcollective-node-ubuntu-910-x86_32",
             "architecture": "i386",
-            "is_public": false,
             "root_device_type": "ebs",
+            "is_public": false,
             "id": "ami-e270848b",
             "platform": null
           },
@@ -2471,7 +2865,7 @@
               },
               "num_attached_output_links": 0,
               "data_type": "json",
-              "display_name": "sap][socket]",
+              "display_name": "sap[socket]",
               "semantic_type": {
                 "sap[socket]": {
                   "application": "sql::mysql"
@@ -2493,7 +2887,7 @@
               },
               "num_attached_output_links": 0,
               "data_type": "string",
-              "display_name": "tunable][wait_timeout]",
+              "display_name": "tunable[wait_timeout]",
               "value_asserted": "180",
               "required": false
             },
@@ -2507,7 +2901,7 @@
               },
               "num_attached_output_links": 0,
               "data_type": "string",
-              "display_name": "tunable][net_read_timeout]",
+              "display_name": "tunable[net_read_timeout]",
               "value_asserted": "30",
               "required": false
             },
@@ -2536,7 +2930,7 @@
               },
               "num_attached_output_links": 0,
               "data_type": "string",
-              "display_name": "tunable][key_buffer]",
+              "display_name": "tunable[key_buffer]",
               "value_asserted": "250M",
               "required": false
             },
@@ -2564,7 +2958,7 @@
               },
               "num_attached_output_links": 0,
               "data_type": "string",
-              "display_name": "tunable][back_log]",
+              "display_name": "tunable[back_log]",
               "value_asserted": "128",
               "required": false
             },
@@ -2578,7 +2972,7 @@
               },
               "num_attached_output_links": 0,
               "data_type": "string",
-              "display_name": "tunable][max_heap_table_size]",
+              "display_name": "tunable[max_heap_table_size]",
               "value_asserted": "32M",
               "required": false
             },
@@ -2606,7 +3000,7 @@
               },
               "num_attached_output_links": 0,
               "data_type": "string",
-              "display_name": "tunable][net_write_timeout]",
+              "display_name": "tunable[net_write_timeout]",
               "value_asserted": "30",
               "required": false
             },
@@ -2645,7 +3039,7 @@
               },
               "num_attached_output_links": 0,
               "data_type": "json",
-              "display_name": "sap_config][ipv4]",
+              "display_name": "sap_config[ipv4]",
               "semantic_type": {
                 ":array": {
                   "sap_config[ipv4]": {
@@ -2705,7 +3099,7 @@
               },
               "num_attached_output_links": 0,
               "data_type": "string",
-              "display_name": "tunable][max_connections]",
+              "display_name": "tunable[max_connections]",
               "value_asserted": "800",
               "required": false
             },
@@ -2719,7 +3113,7 @@
               },
               "num_attached_output_links": 0,
               "data_type": "string",
-              "display_name": "tunable][table_cache]",
+              "display_name": "tunable[table_cache]",
               "value_asserted": "128",
               "required": false
             }
@@ -3013,7 +3407,7 @@
               },
               "num_attached_output_links": 0,
               "data_type": "string",
-              "display_name": "stomp][branch_tag]",
+              "display_name": "stomp[branch_tag]",
               "value_asserted": "default",
               "required": false
             },
@@ -3127,7 +3521,7 @@
               },
               "num_attached_output_links": 0,
               "data_type": "string",
-              "display_name": "stomp][branch_tag]",
+              "display_name": "stomp[branch_tag]",
               "value_asserted": "default",
               "required": false
             },
@@ -3202,7 +3596,7 @@
               },
               "num_attached_output_links": 0,
               "data_type": "string",
-              "display_name": "stomp][branch_tag]",
+              "display_name": "stomp[branch_tag]",
               "value_asserted": "default",
               "required": false
             },
@@ -3372,7 +3766,7 @@
               },
               "num_attached_output_links": 0,
               "data_type": "json",
-              "display_name": "sap][socket]",
+              "display_name": "sap[socket]",
               "semantic_type": {
                 "sap[socket]": {
                   "application": "sql::mysql"
@@ -3394,7 +3788,7 @@
               },
               "num_attached_output_links": 0,
               "data_type": "string",
-              "display_name": "tunable][wait_timeout]",
+              "display_name": "tunable[wait_timeout]",
               "value_asserted": "180",
               "required": false
             },
@@ -3408,7 +3802,7 @@
               },
               "num_attached_output_links": 0,
               "data_type": "string",
-              "display_name": "tunable][net_read_timeout]",
+              "display_name": "tunable[net_read_timeout]",
               "value_asserted": "30",
               "required": false
             },
@@ -3437,7 +3831,7 @@
               },
               "num_attached_output_links": 0,
               "data_type": "string",
-              "display_name": "tunable][key_buffer]",
+              "display_name": "tunable[key_buffer]",
               "value_asserted": "250M",
               "required": false
             },
@@ -3465,7 +3859,7 @@
               },
               "num_attached_output_links": 0,
               "data_type": "string",
-              "display_name": "tunable][back_log]",
+              "display_name": "tunable[back_log]",
               "value_asserted": "128",
               "required": false
             },
@@ -3479,7 +3873,7 @@
               },
               "num_attached_output_links": 0,
               "data_type": "string",
-              "display_name": "tunable][max_heap_table_size]",
+              "display_name": "tunable[max_heap_table_size]",
               "value_asserted": "32M",
               "required": false
             },
@@ -3507,7 +3901,7 @@
               },
               "num_attached_output_links": 0,
               "data_type": "string",
-              "display_name": "tunable][net_write_timeout]",
+              "display_name": "tunable[net_write_timeout]",
               "value_asserted": "30",
               "required": false
             },
@@ -3546,7 +3940,7 @@
               },
               "num_attached_output_links": 0,
               "data_type": "json",
-              "display_name": "sap_config][ipv4]",
+              "display_name": "sap_config[ipv4]",
               "semantic_type": {
                 ":array": {
                   "sap_config[ipv4]": {
@@ -3606,7 +4000,7 @@
               },
               "num_attached_output_links": 0,
               "data_type": "string",
-              "display_name": "tunable][max_connections]",
+              "display_name": "tunable[max_connections]",
               "value_asserted": "800",
               "required": false
             },
@@ -3620,7 +4014,7 @@
               },
               "num_attached_output_links": 0,
               "data_type": "string",
-              "display_name": "tunable][table_cache]",
+              "display_name": "tunable[table_cache]",
               "value_asserted": "128",
               "required": false
             }
@@ -3670,7 +4064,7 @@
               },
               "num_attached_output_links": 0,
               "data_type": "json",
-              "display_name": "sap_config][ipv4]",
+              "display_name": "sap_config[ipv4]",
               "semantic_type": {
                 ":array": {
                   "sap_config[ipv4]": {

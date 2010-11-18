@@ -49,6 +49,7 @@ module XYZ
       many_to_one :component, :node
 
       virtual_column :qualified_attribute_name_under_node, :type => :varchar, :hidden => true #TODO put in depenedncies
+      virtual_column :qualified_attribute_id_under_node, :type => :varchar, :hidden => true #TODO put in depenedncies
       virtual_column :qualified_attribute_name, :type => :varchar, :hidden => true #not giving dependences because assuming right base_object included in col list
 
       #base_objects
@@ -162,6 +163,10 @@ also related is allowing omission of columns mmentioned in jon condition; post p
     def qualified_attribute_name_under_node()
       qualified_attribute_name_aux()
     end
+    def qualified_attribute_id_under_node()
+      qualified_attribute_id_aux()
+    end
+
     def qualified_attribute_name()
       node_or_group_name =
         if self[:node] then self[:node][:display_name]
@@ -188,6 +193,13 @@ also related is allowing omission of columns mmentioned in jon condition; post p
       cmp_el = cmp_name ? cmp_name.gsub(/::.+$/,"") : nil
       attr_name = self[:display_name]
       token_array = ([node_or_group_name,cmp_el] + Aux.tokenize_bracket_name(attr_name)).compact
+      Aux.put_in_bracket_form(token_array)
+    end
+    def qualified_attribute_id_aux(node_or_group_id=nil)
+      cmp_id = (self[:component]||{})[:id]
+      attr_id = self[:id]
+      attr_name = self[:display_name]
+      token_array = ([node_or_group_id,cmp_id,attr_id] + Aux.tokenize_bracket_name(attr_name)).compact
       Aux.put_in_bracket_form(token_array)
     end
 

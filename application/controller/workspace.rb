@@ -57,7 +57,10 @@ module XYZ
       if where_clause
         where_clause = where_clause.inject(nil){|h,o|SQL.and(h,SQL::WhereCondition.like(o[0],"#{o[1]}%"))}
       end
- 
+      
+      #restrict results to belong to library
+      where_clause = SQL.and(where_clause,SQL.not(:library_library_id => nil))
+
       model_list = get_objects(model_name.to_sym,where_clause)
       model_list.each_with_index do |model,index|
         model_list[index][:model_name] = model_name

@@ -202,7 +202,13 @@ also related is allowing omission of columns mmentioned in jon condition; post p
       token_array = ([node_or_group_id_formatted,cmp_id_formatted,attr_id_formatted] + item_path).compact
       Aux.put_in_bracket_form(token_array)
     end
-    
+
+    def self.update_attributes(attr_mh,attribute_rows)
+      return Array.new if attribute_rows.empty?
+      update_select_ds = SQL::ArrayDataset.create(db,attribute_rows,attr_mh,:convert_for_update => true)
+      update_from_select(attr_mh,FieldSet.new(:attribute,[:value_asserted]),update_select_ds)
+    end
+
     def self.update_from_hash_assignments(id_handle,hash_assigns,opts={})
       Model.update_from_hash_assignments(id_handle,hash_assigns,opts)
       #TODO: should this functionality below be called from within Attribute.update_from_hash_assignments or instead be called

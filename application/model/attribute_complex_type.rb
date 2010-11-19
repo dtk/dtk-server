@@ -54,7 +54,7 @@ module XYZ
     def self.unravel_raw_post_hash_top_level!(ret,hash,type,parent_id=nil)
       pattern = Regexp.new("^#{IDDelimiter}#{type}:([0-9]+$)")
       hash.each do |k,child_hash|
-        id = (k =~ pattern;$1)
+        id = (k =~ pattern;$1 ? $1.to_i : nil)
         next unless id
         if type == :component
           unravel_raw_post_hash_top_level!(ret,child_hash,:attribute,id)
@@ -71,9 +71,8 @@ module XYZ
     def self.unravel_raw_post_hash_ret_val!(ret_val,key,obj)
       if obj.kind_of?(Hash)
         obj.each do |k,v|
-          num_index = (k =~ NumericIndexRegexp; $1)
+          num_index = (k =~ NumericIndexRegexp; $1 ? $1.to_i : nil)
           if num_index
-            num_index = num_index.to_i
             ret_val[key] ||= ArrayObject.new 
             #make sure that  ret_val[key] has enough rows
             while ret_val[key].size <= num_index

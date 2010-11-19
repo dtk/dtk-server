@@ -17,7 +17,7 @@ node[:model_name] = 'node'
       tpl.assign(:node,node)
       tpl.assign(:base_images_uri,R8::Config[:base_images_uri])
 
-      num_components = node[:component].length
+      num_components = (node[:component]||[]).map{|x|x[:id]}.uniq.size
       tpl.assign(:num_components,num_components)
 
       _node_vars = {}
@@ -47,7 +47,7 @@ node[:model_name] = 'node'
       tpl.assign(:node,node)
       tpl.assign(:base_images_uri,R8::Config[:base_images_uri])
 
-      num_components = node[:component].length
+      num_components = (node[:component]||[]).map{|x|x[:id]}.uniq.size
       tpl.assign(:num_components,num_components)
 
       _node_vars = {}

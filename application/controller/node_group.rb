@@ -16,8 +16,8 @@ module XYZ
       tpl.assign(:node_group,node_group)
       tpl.assign(:base_images_uri,R8::Config[:base_images_uri])
 
-      num_components = node_group[:component].length
-      num_nodes = node_group[:node].length
+      num_components = (node_group[:component]||[]).map{|x|x[:id]}.uniq.size
+      num_nodes = (node_group[:node]||[]).map{|x|x[:id]}.uniq.size
       tpl.assign(:num_components,num_components)
       tpl.assign(:num_nodes,num_nodes)
 

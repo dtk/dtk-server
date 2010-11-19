@@ -28,6 +28,10 @@ module XYZ
       :NOW.sql_function
     end
 
+    def self.aliased_expression(expr,aliaz)
+      Sequel::SQL::AliasedExpression.new(expr,aliaz)
+    end
+
     module ColRef
       #block contains expression that is evaluated to array; each element but last is pair [condition,val]; last is "elee value
       def self.case(&block)

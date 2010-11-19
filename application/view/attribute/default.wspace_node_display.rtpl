@@ -1,0 +1,19 @@
+<div class="wspace-rt-panel-display-container">
+	<form id="wspace-rt-panel-{%=model_name%}-display-form" method="post" enctype="multipart/form-data">
+		<input type="hidden" name="route" value="attribute/wspace_node_edit/{%=node_id%}"/>
+		<input type="button" value="Edit" onclick="R8.ViewSpace.panelSubmit('wspace-rt-panel-{%=model_name%}-display-form');"/>
+		<input type="hidden" name="model" id="model" value="{%=model_name%}" />
+
+		<table class="wspace-rt-panel-edit">
+		{%for attribute in attribute_list%}
+			<tr id="" style="margin: 3px;">
+				<td id="" class="">
+					<span style="font-weight: bold;">{%=attribute[:display_name]%}</span><br/>
+					{%=attribute[:value]%}&nbsp;
+				</td>
+			</tr>
+		{%end%}
+		</table>
+
+	</form>
+</div>

@@ -102,27 +102,27 @@ if (!R8.Workspace) {
 
 				R8.Workspace.viewSpaceNode = R8.Utils.Y.one('#viewspace');
 
-				R8.Workspace.events['item_click'] = R8.Utils.Y.delegate('click',R8.Workspace.updateSelectedItems,R8.Workspace.viewSpaceNode,'.item-wrapper, .connector');
+//				R8.Workspace.events['item_click'] = R8.Utils.Y.delegate('click',R8.Workspace.updateSelectedItems,R8.Workspace.viewSpaceNode,'.item-wrapper, .connector');
 //				R8.Workspace.events['item_click'] = R8.Utils.Y.delegate('click',function(){console.log('clicked item');},R8.Workspace.viewSpaceNode,'.item, .connector');
-				R8.Workspace.events['vspace_click'] = R8.Utils.Y.delegate('click',R8.Workspace.clearSelectedItems,'body','#viewspace');
+//				R8.Workspace.events['vspace_click'] = R8.Utils.Y.delegate('click',R8.Workspace.clearSelectedItems,'body','#viewspace');
 //				R8.Workspace.events['vspace_mdown'] = R8.Utils.Y.delegate('mousedown',R8.Workspace.checkMouseDownEvent,'body','#viewspace');
 
 //				R8.Utils.Y.all('.group').each(function(){
 //console.log(this);
 //				});
-/*
+
 				R8.Workspace.events['item_dbl_click'] = R8.Utils.Y.delegate('dblclick',function(e){
 					var node = e.currentTarget;
 					var model = node.getAttribute('data-model');
 					var id = node.getAttribute('data-id');
 					R8.Utils.Y.one('#wspace-rt-panel').setStyle('display','block');
 
-					var route = 'attribute/list_under_'+model+'/'+id;
-console.log('Route:'+route);
+					var route = 'attribute/wspace_'+model+'_display/'+id;
+
 					R8.Ctrl.call(route,'',{});
 
 				},R8.Workspace.viewSpaceNode,'.wspace-item');
-*/
+
 				R8.MainToolbar.init();
 return;
 
@@ -494,7 +494,7 @@ console.log('To Group:'+groupId);
 			},
 
 			refreshItem : function(itemId) {
-				itemId = 'item_'+itemId;
+				itemId = 'item-'+itemId;
 				var viewspaceNode = R8.Utils.Y.one('#viewspace');
 				var vspaceContext = R8.Workspace.getVspaceContext();
 				var itemChildren = viewspaceNode.get('children');
@@ -624,6 +624,7 @@ console.log('call to add item to workspace failed.....');
 			pushViewSpace: function(viewSpaceDef) {
 				var id = viewSpaceDef['object']['id'];
 				_viewSpaces[id] = new R8.ViewSpace(viewSpaceDef);
+				_viewSpaces[id].init();
 				_viewSpaceStack.push(id);
 				_currentViewSpace = id;
 			},

@@ -7,7 +7,7 @@ if (!R8.Group) {
 			_type = _def['type'],
 			_dataModel = null,
 			_status = null,
-			_node = R8.Utils.Y.one('#foo'),
+			_node = null,
 			_top = null,
 			_left = null,
 

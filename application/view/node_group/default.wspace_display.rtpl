@@ -1,5 +1,5 @@
 
-	<div id="item-{%=node_group[:id]%}" data-status="pending_setup" data-id="{%=node_group[:id]%}" data-model="group" class="basic-item wspace-item group medium green dg-node dg-component" style="top: {%=node_group[:ui][:top]%}px; left: {%=node_group[:ui][:left]%}px;">
+	<div id="item-{%=node_group[:id]%}" data-status="pending_setup" data-id="{%=node_group[:id]%}" data-model="group" class="basic-item group medium green dg-node dg-component" style="top: {%=node_group[:ui][:top]%}px; left: {%=node_group[:ui][:left]%}px;">
 		<div id="item-{%=node_group[:id]%}-large" class="item-display" style="display:none;">
 			<div id="item-{%=node_group[:id]%}-large-display" data-id="{%=node_group[:id]%}" data-model="group" class="item-display item group">
 				<div class="l-col">

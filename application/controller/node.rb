@@ -55,7 +55,7 @@ node[:model_name] = 'node'
       tpl.assign("_node",_node_vars)
 
       tpl_result = tpl.render()
-      tpl_result[:panel] = 'item_'+node[:id].to_s
+      tpl_result[:panel] = 'item-'+node[:id].to_s
 #      tpl_result[:assign_type] = 'append'
 
       return tpl_result

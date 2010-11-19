@@ -40,7 +40,8 @@ module XYZ
 
 	scalar_assigns.each_pair do |k,v|
 	  if (v.kind_of?(Hash) or v.kind_of?(Array)) and json_table_column?(k,db_rel) 
-	    scalar_assigns[k] = JSON.generate(v).to_s 
+#	    scalar_assigns[k] = JSON.generate(v).to_s 
+	    scalar_assigns[k] = SerializeToJSON.serialize(v)
           elsif v.respond_to?(:to_sequel)
             scalar_assigns[k] = v.to_sequel(k,sql_operation)
           end

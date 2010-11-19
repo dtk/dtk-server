@@ -205,8 +205,18 @@ also related is allowing omission of columns mmentioned in jon condition; post p
 
     def self.update_attributes(attr_mh,attribute_rows)
       return Array.new if attribute_rows.empty?
-      update_select_ds = SQL::ArrayDataset.create(db,attribute_rows,attr_mh,:convert_for_update => true)
-      update_from_select(attr_mh,FieldSet.new(:attribute,[:value_asserted]),update_select_ds)
+      unpruned_update_select_ds = SQL::ArrayDataset.create(db,attribute_rows,attr_mh,:convert_for_update => true)
+
+      #add qualification so that only updated values are set
+      attr_ds = get_objects_just_dataset(attr_mh,nil,FieldSet.opt([{:id => :id2},{:value_asserted => :old_value_asserted}],:attribute))
+      join_cond = SQL.and({:id => :id2},SQL.not(:value_asserted => :old_value_asserted))
+      update_select_ds =  unpruned_update_select_ds.join_table(:inner,attr_ds,join_cond)
+
+      returning_cols_opts = {:returning_cols => [:id,:value_asserted,:old_value_asserted]}
+      changed_attrs = update_from_select(attr_mh,FieldSet.new(:attribute,[:value_asserted]),update_select_ds,returning_cols_opts)
+      return nil if changed_attrs.empty?
+      #TODO: add to change actions:
+      pp [:changed_attrs,changed_attrs]
     end
 
     def self.update_from_hash_assignments(id_handle,hash_assigns,opts={})

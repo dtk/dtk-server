@@ -54,7 +54,7 @@ module XYZ
     def self.unravel_raw_post_hash_top_level!(ret,hash,type,parent_id=nil)
       pattern = Regexp.new("^#{IDDelimiter}#{type}:([0-9]+$)")
       hash.each do |k,child_hash|
-        id = (k =~ pattern;$1 ? $1.to_i : nil)
+        id = (k =~ pattern; $1 ? $1.to_i : nil)
         next unless id
         if type == :component
           unravel_raw_post_hash_top_level!(ret,child_hash,:attribute,id)

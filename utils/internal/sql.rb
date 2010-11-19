@@ -132,7 +132,7 @@ module XYZ
          when :eq
           "(#{parse_term(expr[1])} == #{parse_term(expr[2])})"
          when "match-prefix".to_sym
-          "(#{parse_term(expr[1])} =~ /^#{expr[2]}/)"
+          "(#{parse_term(expr[1])} =~ Regexp.new('^#{expr[2]}'))"
          else
           raise ErrorPostProcFilterNotImpl.new(:operation,expr[0])
         end

@@ -1,13 +1,19 @@
 
 if (!R8.Workspace) {
 
-	/*
-	 * This is the utility r8 js class, more to be added
-	 */
 	R8.Workspace = function(){
 		var _viewSpaces = {},
 			_viewSpaceStack = [],
-			_currentViewSpace = null;
+			_currentViewSpace = null,
+
+			_pageContainerId = 'page-container',
+			_pageContainerNode = null;
+
+			_toolbarId = 'wspace-toolbar',
+			_toolbarNode = null,
+
+			_contextBarId = 'wspace-context-wrapper',
+			_contextBarNode = null;
 
 		return {
 			viewPortRegion : null,
@@ -30,8 +36,15 @@ if (!R8.Workspace) {
 			nodeRef : null,
 
 			init : function() {
+				_pageContainerNode = R8.Utils.Y.one('#'+_pageContainerId);
+
+				_toolbarNode = R8.Utils.Y.one('#'+_toolbarId);
+				_contextBarNode = R8.Utils.Y.one('#'+_contextBarId);
+
+//----------------------
+
 				this.pageContainerElem = R8.Utils.Y.one('#page-container');
-				this.topbarElem = R8.Utils.Y.one('#topbar');
+				this.topbarElem = R8.Utils.Y.one('#wspace-toolbar');
 				this.wspaceContainerElem = R8.Utils.Y.one('#wspace-container');
 				this.cmdbarElem = R8.Utils.Y.one('#cmdbar');
 
@@ -115,7 +128,7 @@ if (!R8.Workspace) {
 					var node = e.currentTarget;
 					var model = node.getAttribute('data-model');
 					var id = node.getAttribute('data-id');
-					R8.Utils.Y.one('#wspace-rt-panel').setStyle('display','block');
+					R8.Workspace.Dock.show();
 
 					var route = 'attribute/wspace_'+model+'_display/'+id;
 
@@ -123,7 +136,12 @@ if (!R8.Workspace) {
 
 				},R8.Workspace.viewSpaceNode,'.wspace-item');
 
-				R8.MainToolbar.init();
+
+//------Dock setup-------------
+
+				R8.Workspace.Dock.init({'display':'none','top':_toolbarNode.get('region').bottom});
+				_pageContainerNode.append(R8.Workspace.Dock.render());
+//				R8.MainToolbar.init();
 return;
 
 //TODO: right now hardcoding assignment from demoData.r8.js
@@ -634,7 +652,7 @@ console.log('call to add item to workspace failed.....');
 
 				_viewSpaces[vSpaceId].addItems(items);
 			},
-
+/*
 			setupItem: function(itemDef) {
 console.log(itemDef);
 			},
@@ -642,7 +660,7 @@ console.log(itemDef);
 			setupItemToolbar: function(toolbarDef) {
 console.log(toolbarDef);
 			},
-
+*/
 			checkViewSpaces: function() {
 for(vs in _viewSpaces) {
 	_viewSpaces[vs].test();

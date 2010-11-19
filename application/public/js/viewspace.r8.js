@@ -107,19 +107,6 @@ if (!R8.ViewSpace) {
 
 				e.stopImmediatePropagation();
 			},
-//---------------------------------------------------
-//---------------------------------------------------
-//------------ RT PANEL METHODS ---------------------
-//---------------------------------------------------
-//---------------------------------------------------
-
-			panelSubmit: function(formId) {
-				var form = document.getElementById(formId);
-				var route = form.route.value;
-console.log('calling panel submit:'+route);
-return;
-				R8.Ctrl.call('workspace/search_2',queryTerm,callbacks);
-			},
 
 //---------------------------------------------------
 //---------------------------------------------------

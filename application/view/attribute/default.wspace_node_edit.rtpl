@@ -1,9 +1,11 @@
-<div class="wspace-rt-panel-display-container">
-	<form id="wspace-rt-panel-{%=model_name%}-edit-form" action="{%=_app[:base_uri]%}/{%=model_name%}/wspace_node_edit/" method="post" enctype="multipart/form-data">
-		<input type="submit" value="Save"/>
+<div class="wspace-dock-edit-container">
+	<form id="wspace-dock-{%=model_name%}-edit-form" action="{%=_app[:base_uri]%}/{%=model_name%}/wspace_node_edit/" method="post" enctype="multipart/form-data">
+		<input type="hidden" name="route" value="attribute/wspace_node_display/{%=node_id%}"/>
+		<input type="button" value="Save" onclick="alert('Not Implemented Yet');"/>
+		<input type="button" value="Cancel" onclick="R8.Workspace.Dock.panelSubmit('wspace-dock-{%=model_name%}-edit-form');"/>
 		<input type="hidden" name="model" id="model" value="{%=model_name%}" />
 
-		<table class="wspace-rt-panel-edit">
+		<table class="wspace-dock-edit">
 		{%for attribute in attribute_list%}
 			<tr id="">
 				<td id="" class="">

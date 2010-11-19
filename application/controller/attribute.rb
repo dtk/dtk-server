@@ -99,9 +99,13 @@ pp get_base_object_dataset_needs_to_be_set(:component).ppsql
       attribute_list = AttributeComplexType.flatten_attribute_list(raw_attribute_list)
 
       attribute_list.each_with_index do |attribute,index|
-        attribute_list[index][:display_name] = attribute[:qualified_attribute_name_under_node]
+#        attribute_list[index][:display_name] = attribute[:qualified_attribute_name_under_node]
+        name = attribute[:qualified_attribute_name_under_node].gsub('][',' ')
+        name = name.gsub('[',' ')
+        name = name.gsub(']',' ')
+        name_parts = name.split(' ')
+        attribute_list[index][:display_name] = name_parts[(name_parts.length-1)]
         attribute_list[index][:value] = attribute[:attribute_value]
-pp attribute_list[index]
       end
 
       tpl = R8Tpl::TemplateR8.new("#{model_name}/wspace_node_display",user_context())
@@ -111,7 +115,7 @@ pp attribute_list[index]
       tpl.assign(:attribute_list,attribute_list)
       return {
         :content => tpl.render(),
-        :panel => 'wspace-rt-panel-body'
+        :panel => 'wspace-dock-body'
       }
     end
 
@@ -127,9 +131,13 @@ pp attribute_list[index]
       attribute_list = AttributeComplexType.flatten_attribute_list(raw_attribute_list)
 
       attribute_list.each_with_index do |attribute,index|
-        attribute_list[index][:display_name] = attribute[:qualified_attribute_name_under_node]
+#        attribute_list[index][:display_name] = attribute[:qualified_attribute_name_under_node]
+        name = attribute[:qualified_attribute_name_under_node].gsub('][',' ')
+        name = name.gsub('[',' ')
+        name = name.gsub(']',' ')
+        name_parts = name.split(' ')
+        attribute_list[index][:display_name] = name_parts[(name_parts.length-1)]
         attribute_list[index][:value] = attribute[:attribute_value]
-pp attribute_list[index]
       end
 
       tpl = R8Tpl::TemplateR8.new("#{model_name}/wspace_node_edit",user_context())
@@ -139,7 +147,7 @@ pp attribute_list[index]
       tpl.assign(:attribute_list,attribute_list)
       return {
         :content => tpl.render(),
-        :panel => 'wspace-rt-panel-body'
+        :panel => 'wspace-dock-body'
       }
     end
 

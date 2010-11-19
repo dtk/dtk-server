@@ -42,53 +42,53 @@ module XYZ
       "#{IDDelimiter}#{type}:#{id.to_s}"
     end
 
-    def self.process_flattened_update(raw_post_hash)
+    def self.unravel_raw_post_hash(raw_post_hash)
       #TODO: case on model; assuming now it is node and looking for top level components
       type = :component
       ret = Array.new
-      process_flattened_update_top_level!(ret,raw_post_hash,type)
+      unravel_raw_post_hash_top_level!(ret,raw_post_hash,type)
       ret
     end
+
    private
-    def self.process_flattened_update_top_level!(ret,hash,type,parent_id=nil)
+    def self.unravel_raw_post_hash_top_level!(ret,hash,type,parent_id=nil)
       pattern = Regexp.new("^#{IDDelimiter}#{type}:([0-9]+$)")
       hash.each do |k,child_hash|
         id = (k =~ pattern;$1)
         next unless id
         if type == :component
-          process_flattened_update_top_level!(ret,child_hash,:attribute,id)
+          unravel_raw_post_hash_top_level!(ret,child_hash,:attribute,id)
         elsif type == :attribute
-          ret_val = HashObject.create_with_auto_vivification()
-          process_flattened_update_ret_val!(ret_val,:ret,child_hash)
-          ret_val.freeze
-          ret << {:id => id, :component_component_id  => parent_id,:value_derived => ret_val[:ret]}
+          ret_val = Hash.new
+          unravel_raw_post_hash_ret_val!(ret_val,:ret,child_hash)
+          ret << {:id => id, :component_component_id  => parent_id,:value_asserted => ret_val[:ret]}
         else
           raise Error.new("Unexpected type #{type}")
         end
       end
     end
 
-    def self.process_flattened_update_ret_val!(ret_val,key,obj)
+    def self.unravel_raw_post_hash_ret_val!(ret_val,key,obj)
       if obj.kind_of?(Hash)
         obj.each do |k,v|
           num_index = (k =~ NumericIndexRegexp; $1)
           if num_index
             num_index = num_index.to_i
-            ret_val[key] = ArrayObject.new unless ret_val.has_key?(key)
+            ret_val[key] ||= ArrayObject.new 
             #make sure that  ret_val[key] has enough rows
             while ret_val[key].size <= num_index
-              ret_val[key] << HashObject.create_with_auto_vivification() 
+              ret_val[key] << Hash.new
             end
-            process_flattened_update_ret_val!(ret_val[key],num_index,v)
+            unravel_raw_post_hash_ret_val!(ret_val[key],num_index,v)
           else
-            process_flattened_update_ret_val!(ret_val[key],k,v)
+            ret_val[key] ||= Hash.new
+            unravel_raw_post_hash_ret_val!(ret_val[key],k,v)
           end
         end
       else
         ret_val[key] = (obj.empty? ? nil : obj)
       end
     end
-
 
     def self.has_required_fields?(value_obj,pattern)
       #care must be taken to make this three-valued

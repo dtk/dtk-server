@@ -5,14 +5,28 @@
     "conflicting": {
     },
     "description": "Installs/Configures redis",
-    "long_description": "__[{:recipe_names=>[\"redis\"], :service_name=>\"redis_service\", :conditions=>[{:description=>\"this service should be accessible over tcp\", :to_monitor=>[{:params=>[\"sap\"], :name=>\"inet_service_up\"}], :name=>\"accessible_over_tcp\"}, {:description=>\"anonymous user should be able to log into this service\", :to_monitor=>[{:params=>[\"sap\"], :name=>\"redis_basic_health\"}]}]}]__",
+    "long_description": "__[{:conditions=>[{:description=>\"this service should be accessible over tcp\", :name=>\"accessible_over_tcp\", :to_monitor=>[{:params=>[\"sap\"], :name=>\"inet_service_up\"}]}, {:description=>\"anonymous user should be able to log into this service\", :to_monitor=>[{:params=>[\"sap\"], :name=>\"redis_basic_health\"}]}], :recipe_names=>[\"redis\"], :service_name=>\"redis_service\"}]__",
     "providing": {
     },
     "attributes": {
+      "_meta_info": {
+        "required": "optional",
+        "calculated": false,
+        "choice": [
+
+        ],
+        "type": "string",
+        "recipes": [
+
+        ],
+        "basic_types": {
+          "redis": "service"
+        }
+      },
       "redis/_service/redis_service/sap_config/ipv4": {
         "required": "optional",
-        "is_service_attribute": true,
         "decription": "redis ip service access point configuration",
+        "is_service_attribute": true,
         "calculated": false,
         "transform": [
           {

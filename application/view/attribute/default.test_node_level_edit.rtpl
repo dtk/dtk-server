@@ -1,7 +1,7 @@
 <div class="edit_container">
 	<form id="attribute-edit-form" action="../save_attributes/" method="post" enctype="multipart/form-data">
 	<input type="submit" value="Save"/>
-		<input type="hidden" name="model" id="model" value="attribute" />
+		<input type="hidden" name="model" id="model" value="node" />
 		<input type="hidden" name="action" id="action" value="save" />
 	<table class="edit">
            {%for attribute in attribute_list%}

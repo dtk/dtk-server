@@ -26,13 +26,16 @@ pp get_base_object_dataset_needs_to_be_set(:component).ppsql
 
     def ports_under_node(node_id=nil)
       filter = [:and,[:eq,:is_port,true],[:eq,:port_is_external,true]]
-      cols = [:id,:display_name,:base_object_node,:port_is_connected]
+      cols = [:id,:display_name,:base_object_node,:value_derived,:value_asserted]
       field_set = Model::FieldSet.new(model_name,cols)
       ds = SearchObject.create_from_field_set(field_set,ret_session_context_id(),filter).create_dataset()
       ds = ds.where(:param_node_id => node_id.to_i) if node_id
 
       port_list = ds.all
-
+      port_list.each do |el|
+        val = el[:attribute_value]
+        el[:value] = (val.kind_of?(Hash) or val.kind_of?(Array)) ? JSON.generate(val) : val
+      end
       action_name = "list_ports_under_node"
       tpl = R8Tpl::TemplateR8.new("#{model_name()}/#{action_name}",user_context())
       tpl.assign("port_list",port_list)

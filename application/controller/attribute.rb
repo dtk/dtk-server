@@ -95,31 +95,36 @@ pp get_base_object_dataset_needs_to_be_set(:component).ppsql
     end
 
     def wspace_node_display(node_id=nil)
+pp ')))))))))))))))))))))))))))))'
+pp request
+pp ')))))))))))))))))))))))))))))'
+
       filter = nil
       cols = [:id,:display_name,:base_object_node,:needs_to_be_set,:value_actual,:value_derived,:data_type,:semantic_type]
       field_set = Model::FieldSet.new(model_name,cols)
-
       ds = SearchObject.create_from_field_set(field_set,ret_session_context_id(),filter).create_dataset()
       ds = ds.where(:param_node_id => node_id.to_i) if node_id
 
       raw_attribute_list = ds.all
       attribute_list = AttributeComplexType.flatten_attribute_list(raw_attribute_list)
-
-      attribute_list.each_with_index do |attribute,index|
-#        attribute_list[index][:display_name] = attribute[:qualified_attribute_name_under_node]
-        name = attribute[:qualified_attribute_name_under_node].gsub('][',' ')
+      #add name and attr_id from :qualified_attribute_name_under_node and :qualified_attribute_id_under_node
+      attribute_list.each do |el|
+        name = el[:qualified_attribute_name_under_node].gsub('][',' ')
         name = name.gsub('[',' ')
         name = name.gsub(']',' ')
         name_parts = name.split(' ')
-        attribute_list[index][:display_name] = name_parts[(name_parts.length-1)]
-        attribute_list[index][:value] = attribute[:attribute_value]
+        el[:display_name] = name_parts[(name_parts.length-1)]
+        el[:value] = el[:attribute_value]
       end
+      #order attribute list :qualified_attribute_name_under_node 
+      ordered_attr_list = attribute_list.sort{|a,b|a[:display_name] <=> b[:display_name]}
 
-      tpl = R8Tpl::TemplateR8.new("#{model_name}/wspace_node_display",user_context())
+#      tpl = R8Tpl::TemplateR8.new("#{model_name}/wspace_node_display",user_context())
+      tpl = R8Tpl::TemplateR8.new("attribute/wspace_node_display",user_context())
       tpl.assign(:model_name,model_name)
       tpl.assign(:node_id,node_id)
       tpl.assign(:_app,app_common())
-      tpl.assign(:attribute_list,attribute_list)
+      tpl.assign(:attribute_list,ordered_attr_list)
       return {
         :content => tpl.render(),
         :panel => 'wspace-dock-body'
@@ -130,28 +135,29 @@ pp get_base_object_dataset_needs_to_be_set(:component).ppsql
       filter = nil
       cols = [:id,:display_name,:base_object_node,:needs_to_be_set,:value_actual,:value_derived,:data_type,:semantic_type]
       field_set = Model::FieldSet.new(model_name,cols)
-
       ds = SearchObject.create_from_field_set(field_set,ret_session_context_id(),filter).create_dataset()
       ds = ds.where(:param_node_id => node_id.to_i) if node_id
 
       raw_attribute_list = ds.all
       attribute_list = AttributeComplexType.flatten_attribute_list(raw_attribute_list)
-
-      attribute_list.each_with_index do |attribute,index|
-#        attribute_list[index][:display_name] = attribute[:qualified_attribute_name_under_node]
-        name = attribute[:qualified_attribute_name_under_node].gsub('][',' ')
+      #add name and attr_id from :qualified_attribute_name_under_node and :qualified_attribute_id_under_node
+      attribute_list.each do |el|
+        name = el[:qualified_attribute_name_under_node].gsub('][',' ')
         name = name.gsub('[',' ')
         name = name.gsub(']',' ')
         name_parts = name.split(' ')
-        attribute_list[index][:display_name] = name_parts[(name_parts.length-1)]
-        attribute_list[index][:value] = attribute[:attribute_value]
+        el[:display_name] = name_parts[(name_parts.length-1)]
+        el[:value] = el[:attribute_value]
       end
+      #order attribute list :qualified_attribute_name_under_node 
+      ordered_attr_list = attribute_list.sort{|a,b|a[:display_name] <=> b[:display_name]}
 
-      tpl = R8Tpl::TemplateR8.new("#{model_name}/wspace_node_edit",user_context())
+#      tpl = R8Tpl::TemplateR8.new("#{model_name}/wspace_node_edit",user_context())
+      tpl = R8Tpl::TemplateR8.new("attribute/wspace_node_edit",user_context())
       tpl.assign(:model_name,model_name)
       tpl.assign(:node_id,node_id)
       tpl.assign(:_app,app_common())
-      tpl.assign(:attribute_list,attribute_list)
+      tpl.assign(:attribute_list,ordered_attr_list)
       return {
         :content => tpl.render(),
         :panel => 'wspace-dock-body'

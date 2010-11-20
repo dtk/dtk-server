@@ -21,6 +21,12 @@ module XYZ
       args.reverse.each{|x|ret = and_aux(x,ret)}
       ret
     end
+    #takes into accout a or b can be null
+    def self.not_equal(a,b)
+      SQL.or(SQL.not(a => b),
+             SQL.and({a => nil},SQL.not(b => nil)),
+             SQL.and({b => nil},SQL.not(a => nil)))
+    end
 
     #####
     ##### Sequel functions and column refs

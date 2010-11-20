@@ -207,9 +207,10 @@ also related is allowing omission of columns mmentioned in jon condition; post p
       return Array.new if attribute_rows.empty?
       unpruned_update_select_ds = SQL::ArrayDataset.create(db,attribute_rows,attr_mh,:convert_for_update => true)
 
-      #add qualification so that only updated values are set
       attr_ds = get_objects_just_dataset(attr_mh,nil,FieldSet.opt([{:id => :id2},{:value_asserted => :old_value_asserted}],:attribute))
-      join_cond = SQL.and({:id => :id2},SQL.not(:value_asserted => :old_value_asserted))
+      #add qualification so that only updated values are set
+      join_cond = SQL.and({:id => :id2},SQL.not_equal(:value_asserted,:old_value_asserted))
+                          
       update_select_ds =  unpruned_update_select_ds.join_table(:inner,attr_ds,join_cond)
 
       returning_cols_opts = {:returning_cols => [:id,:value_asserted,:old_value_asserted]}

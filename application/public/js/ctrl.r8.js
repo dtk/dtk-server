@@ -61,7 +61,7 @@ if (!R8.Ctrl) {
 			},
 
 			//TODO: should the request handling and page updating be handled by core or R8.Ctrl?
-			call: function(route, args, callBacks) {
+			call: function(route, args, callBacks, cfg) {
 
 				if(typeof(args) === 'object') var req_params = R8.Utils.json2Str(args);
 				else if(typeof(args) === 'undefined') var req_params = '';
@@ -71,11 +71,16 @@ if (!R8.Ctrl) {
 //				if(typeof(R8.devtools) === 'undefined')
 //					params += "&devToolsLoaded=0";
 
-				YUI().use('io','io-base', function(Y) {
-					var cfg = {
-						method: "POST",
-						data: req_params
-					};
+				YUI().use('io','io-base','io-form', function(Y) {
+					if (typeof(cfg) !== 'undefined') {
+						cfg['method'] = (typeof(cfg['method']) == 'undefined') ? 'POST' : cfg['method'];
+					} else {
+						cfg = {
+							method: "POST",
+							data: req_params
+						};
+					}
+
 					if (typeof(callBacks) !== 'undefined') {
 						for(callback in callBacks) {
 							switch(callback) {
@@ -127,7 +132,7 @@ if (!R8.Ctrl) {
 				}, params);
 */
 			},
-
+/*
 			submitForm: function(formId, isUpload) {
 				var formObj = document.getElementById(formId);
 
@@ -137,6 +142,41 @@ if (!R8.Ctrl) {
 					success: R8.Ctrl.updatePage,
 					failure: R8.Ctrl.failure
 				});
+			},
+*/
+			submitForm: function() {
+				YUI().use("io-form", function(Y) {
+					// Create a configuration object for the file upload transaction.
+					// The form configuration should include two defined properties:
+					// id: This can be the ID or an object reference to the HTML form.
+					// useDisabled: Set this property to "true" to include disabled
+					//              HTML form fields, as part of the data.  By
+					//              default, disabled fields are excluded from the
+					//              serialization.
+					// The HTML form data are sent as a UTF-8 encoded key-value string.
+					var cfg = {
+						method: 'POST',
+						form: {
+							id: formObject,
+							useDisabled: true
+						}
+					};
+				
+					// Define a function to handle the response data.
+					function complete(id, o, args) {
+					  var id = id; // Transaction ID.
+					  var data = o.responseText; // Response data.
+					  var args = args[1]; // 'ipsum'.
+					};
+				
+					// Subscribe to event "io:complete", and pass an array
+					// as an argument to the event handler "complete".
+					Y.on('io:complete', complete, Y, { 'foo':'bar' });
+				
+					// Start the transaction.
+					var request = Y.io(uri, cfg);
+				});
+				
 			},
 
 			updatePage: function(ioId, responseObj) {

@@ -47,6 +47,19 @@ if(!R8.Workspace.Dock) {
 
 				R8.Ctrl.call(route,'',{});
 			},
+
+			saveAttributes: function(formId) {
+				var form = document.getElementById(formId),
+					route = form.save_route.value,
+					cfg = {
+						form: {
+							id: formId,
+							useDisabled: true
+						}
+					};
+				R8.Ctrl.call(route,'',{},cfg);
+			},
+
 		}		
 	}();
 

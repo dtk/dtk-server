@@ -1,0 +1,20 @@
+<div style="clear:both;"></div>
+<br/><br/>
+<div class="list_container">
+
+	<div>
+	<table class="list">
+	<tr id="port-list-header-row">
+			<th id="name-th"  class="">Port Name</th>
+			<th id="is_connected-th"  class="">Is Connected</th>
+	</tr>
+
+	{%for port in port_list%}
+		<tr id="list_row-{%=port%}" class="{%=[:class]%}">
+				<td id="port_name-td-{%=port%}" class=""><a href="/xyz/attribute/display/{%=port[:id]%}">{%=port[:display_name]%}</a></td>
+				<td id="is_connected-td-{%=port%}" class="">{%=port[:port_is_connected]%}</td>
+		</tr>
+	{%end%}
+	</table>
+	</div>
+</div>

@@ -24,6 +24,7 @@ module XYZ
       virtual_column :port_is_external, :type => :boolean, :hidden => true, :local_dependencies => [:is_port,:semantic_type_summary]
       column :num_attached_input_links, :integer, :default => 0, :hidden => true
       column :num_attached_output_links, :integer, :default => 0, :hidden => true
+      virtual_column :port_is_connected, :type => :boolean, :hidden => true, :local_dependencies => [:num_attached_input_links,:num_attached_output_links]
 
       virtual_column :is_unset, :type => :boolean, :hidden => true, :local_dependencies => [:value_asserted,:value_derived,:data_type,:semantic_type]
 
@@ -154,7 +155,12 @@ also related is allowing omission of columns mmentioned in jon condition; post p
     def port_is_external()
       return nil unless self[:is_port]
       return nil unless self[:semantic_type_summary]
-      return  (AttributeSemantic::Info[self[:semantic_type_summary]]||{})[:external]
+      (AttributeSemantic::Info[self[:semantic_type_summary]]||{})[:external]
+    end
+
+    def port_is_connected()
+      return nil unless self[:is_port]
+      (self[:num_attached_input_links]+self[:num_attached_output_links]) > 0
     end
 
     def is_unset()

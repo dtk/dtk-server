@@ -1,7 +1,9 @@
 <div class="wspace-dock-edit-container">
 	<form id="wspace-dock-{%=model_name%}-edit-form" action="{%=_app[:base_uri]%}/{%=model_name%}/save_attributes" method="post" enctype="multipart/form-data">
 		<input type="hidden" name="node_id" value="{%=node_id%}"/>
-		<input type="hidden" name="save_route" value="attribute/save_attributes/{%=node_id%}"/>
+		<input type="hidden" name="id" value="{%=node_id%}"/>
+		<input type="hidden" name="action" value="save"/>
+		<input type="hidden" name="save_route" value="attribute/save_attributes"/>
 		<input type="hidden" name="route" value="attribute/wspace_node_display/{%=node_id%}"/>
 		<input type="button" value="Save" onclick="R8.Workspace.Dock.saveAttributes('wspace-dock-{%=model_name%}-edit-form');"/>
 		<input type="button" value="Cancel" onclick="R8.Workspace.Dock.panelSubmit('wspace-dock-{%=model_name%}-edit-form');"/>

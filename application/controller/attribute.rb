@@ -66,10 +66,9 @@ pp get_base_object_dataset_needs_to_be_set(:component).ppsql
         }
       end
 pp link_list
-raise Error.new("havent written template")
-      action_name = "links_on_node_port
+      action_name = "list_links_on_node_ports"
       tpl = R8Tpl::TemplateR8.new("#{model_name()}/#{action_name}",user_context())
-      tpl.assign("attribute_list",link_list)
+      tpl.assign("link_list",link_list)
       return {:content => tpl.render()}
     end
 

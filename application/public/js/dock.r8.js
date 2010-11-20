@@ -42,10 +42,15 @@ if(!R8.Workspace.Dock) {
 			},
 
 			panelSubmit: function(formId) {
-				var form = document.getElementById(formId);
-				var route = form.route.value;
-
-				R8.Ctrl.call(route,'',{});
+				var form = document.getElementById(formId),
+					route = form.route.value,
+					cfg = {
+						form: {
+							id: formId,
+							useDisabled: true
+						}
+					};
+				R8.Ctrl.call(route,'',{},cfg);
 			},
 
 			saveAttributes: function(formId) {

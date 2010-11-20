@@ -102,19 +102,20 @@ pp get_base_object_dataset_needs_to_be_set(:component).ppsql
     end
 
     def wspace_node_display(node_id=nil)
+=begin
 pp ')))))))))))))))))))))))))))))'
 pp request
 pp ')))))))))))))))))))))))))))))'
-
+=end
       filter = nil
       cols = [:id,:display_name,:base_object_node,:needs_to_be_set,:value_actual,:value_derived,:data_type,:semantic_type]
       field_set = Model::FieldSet.new(model_name,cols)
       ds = SearchObject.create_from_field_set(field_set,ret_session_context_id(),filter).create_dataset()
       ds = ds.where(:param_node_id => node_id.to_i) if node_id
-
       raw_attribute_list = ds.all
       attribute_list = AttributeComplexType.flatten_attribute_list(raw_attribute_list)
       #add name and attr_id from :qualified_attribute_name_under_node and :qualified_attribute_id_under_node
+
       attribute_list.each do |el|
         name = el[:qualified_attribute_name_under_node].gsub('][',' ')
         name = name.gsub('[',' ')
@@ -148,6 +149,7 @@ pp ')))))))))))))))))))))))))))))'
       raw_attribute_list = ds.all
       attribute_list = AttributeComplexType.flatten_attribute_list(raw_attribute_list)
       #add name and attr_id from :qualified_attribute_name_under_node and :qualified_attribute_id_under_node
+
       attribute_list.each do |el|
         name = el[:qualified_attribute_name_under_node].gsub('][',' ')
         name = name.gsub('[',' ')

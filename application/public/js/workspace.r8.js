@@ -131,7 +131,9 @@ if (!R8.Workspace) {
 					R8.Workspace.Dock.show();
 
 					var route = 'attribute/wspace_'+model+'_display/'+id;
+//					var route = 'attribute/wspace_'+model+'_display';
 
+//					R8.Ctrl.call(route,'id='+id,{});
 					R8.Ctrl.call(route,'',{});
 
 				},R8.Workspace.viewSpaceNode,'.wspace-item');

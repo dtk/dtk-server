@@ -2,14 +2,13 @@
 	<form id="attribute-edit-form" action="../save_attributes/" method="post" enctype="multipart/form-data">
 	<input type="submit" value="Save"/>
 		<input type="hidden" name="model" id="model" value="node" />
+		<input type="hidden" name="id" id="id" value="{%=id%}" />
 		<input type="hidden" name="action" id="action" value="save" />
 	<table class="edit">
            {%for attribute in attribute_list%}
-	      {%name = attribute[:qualified_attribute_name_under_node]%}
-	      {%id = attribute[:qualified_attribute_id_under_node]%}
 		<tr id="">
-				<td id="" class="label">{%=name%}</td>
-				<td id="" class="field"><input type="text"  id="{%=id%}" name="{%=id%}" class="r8-text" value="{%=attribute[:attribute_value]%}" size="40" /></td>
+				<td id="" class="label">{{%=attribute[:name]%}}</td>
+				<td id="" class="field"><input type="text"  id="{%=attribute[:attr_id]%}" name="{%=attribute[:attr_id]%}" class="r8-text" value="{%=attribute[:attribute_value]%}" size="40" /></td>
 		</tr>
         {%end%}
 	</table>

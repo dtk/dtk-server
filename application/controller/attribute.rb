@@ -41,13 +41,20 @@ pp get_base_object_dataset_needs_to_be_set(:component).ppsql
 
       raw_attribute_list = ds.all
       attribute_list = AttributeComplexType.flatten_attribute_list(raw_attribute_list)
+      #add name and attr_id from :qualified_attribute_name_under_node and :qualified_attribute_id_under_node
+      attribute_list.each do |el|
+        el[:attr_id] = el[:qualified_attribute_id_under_node]
+        el[:name] = el[:qualified_attribute_name_under_node]
+      end
+      #order attribute list :qualified_attribute_name_under_node 
+      ordered_attr_list = attribute_list.sort{|a,b|a[:name] <=> b[:name]}
 
       action_name = "test_node_level_edit"
       tpl = R8Tpl::TemplateR8.new("#{model_name()}/#{action_name}",user_context())
-      tpl.assign("attribute_list",attribute_list)
+      tpl.assign("id",node_id.to_s) if node_id
+      tpl.assign("attribute_list",ordered_attr_list)
       return {:content => tpl.render()}
     end
-   
 
     
     def list_under_datacenter(datacenter_id=nil)

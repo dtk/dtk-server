@@ -34,6 +34,34 @@ module XYZ
          }
         ]
 
+      virtual_column :port_links, :type => :json, :hidden => true, 
+      :remote_dependencies => 
+        [
+         {
+           :model_name => :component,
+           :join_type => :inner,
+           :join_cond=>{:node_node_id =>:node__id},
+           :cols => [:id,:display_name,:node_node_id]
+         },
+         {
+           :model_name => :attribute,
+           :join_type => :inner,
+           :join_cond=>{:component_component_id =>:component__id},
+           :cols => [:id,:display_name,:component_component_id]
+         },
+         {
+           :model_name => :attribute_link,
+           :join_cond=>{:input_id =>:attribute__id},
+           :cols => [:id,{:output_id => :other_end_output_id},:input_id,:node_node_id]
+         },
+         {
+           :model_name => :attribute_link,
+           :join_cond=>{:output_id =>:attribute__id},
+           :cols => [:id,{:input_id => :other_end_input_id},:output_id,:node_node_id]
+         }
+        ]
+
+
       foreign_key :data_source_id, :data_source, FK_SET_NULL_OPT
       many_to_one :library, :datacenter, :project
       one_to_many :attribute, :attribute_link, :component, :node_interface, :address_access_point, :monitoring_item

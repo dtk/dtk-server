@@ -39,6 +39,38 @@ pp get_base_object_dataset_needs_to_be_set(:component).ppsql
       return {:content => tpl.render()}
     end
 
+    def links_on_node_ports(node_id=nil)
+      filter = node_id ? [:and, [:eq, :id, node_id.to_i]] : nil
+      cols = [:id,:display_name,:port_links]
+      field_set = Model::FieldSet.new(:node,cols)
+      ds = SearchObject.create_from_field_set(field_set,ret_session_context_id(),filter).create_dataset()
+      ds = ds.where(SQL.not(SQL::ColRef.coalesce(:other_end_output_id,:other_end_input_id) => nil))
+
+      raw_link_list = ds.all
+      link_list = Array.new
+      raw_link_list.each do |el|
+        component_name = el[:component][:display_name].gsub(/::.+$/,"")
+        port_name = Aux.put_in_bracket_form([component_name] + Aux.tokenize_bracket_name(el[:attribute][:display_name]))
+        internal_or_external = ((el[:attribute_link]||{})[:node_node_id].nil? and (el[:attribute_link2]||{})[:node_node_id].nil?) ? "external" : "internal"
+        other_end_id = (el[:attribute_link]||{})[:other_end_output_id]||(el[:attribute_link2]||{})[:other_end_input_id]
+        link_list << {
+          :node_id => el[:id],
+          :node_name => el[:display_name],
+          :port_id => el[:attribute][:id],
+          :port_name => port_name,
+          :internal_or_external => internal_or_external,
+          :other_end_id => other_end_id
+        }
+      end
+pp link_list
+raise Error.new("havent written template")
+      action_name = "links_on_node_port
+      tpl = R8Tpl::TemplateR8.new("#{model_name()}/#{action_name}",user_context())
+      tpl.assign("attribute_list",link_list)
+      return {:content => tpl.render()}
+    end
+
+
     def edit_under_node(node_id=nil)
       filter = nil
       cols = [:id,:display_name,:base_object_node,:needs_to_be_set,:value_actual,:value_derived,:data_type,:semantic_type]

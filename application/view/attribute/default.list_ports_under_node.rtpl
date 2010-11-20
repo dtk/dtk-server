@@ -11,7 +11,7 @@
 
 	{%for port in port_list%}
 		<tr id="list_row-{%=port%}" class="{%=[:class]%}">
-				<td id="port_name-td-{%=port%}" class=""><a href="/xyz/attribute/display/{%=port[:id]%}">{%=port[:display_name]%}</a></td>
+				<td id="port_name-td-{%=port%}" class=""><a href="/xyz/attribute/display/{%=port[:id]%}">{%=port[:qualified_attribute_name_under_node]%}</a></td>
 				<td id="is_connected-td-{%=port%}" class="">{%=port[:port_is_connected]%}</td>
 		</tr>
 	{%end%}

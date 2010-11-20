@@ -18,9 +18,10 @@ module XYZ
       column :semantic_type_summary, :varchar, :size => 25 #for efficiency optional token that summarizes info from semantic_type
       column :read_only, :boolean, :default => false #true means variable is automtcally set
       column :required, :boolean, :default => false #whether required for this attribute to have a value inorder to execute actions for parent component; TODO: may be indexed by action
-      column :is_port, :boolean, :default => false
 
       #columns related to links
+      column :is_port, :boolean, :default => false
+      virtual_column :port_is_external, :type => :boolean, :hidden => true, :local_dependencies => [:is_port,:semantic_type_summary]
       column :num_attached_input_links, :integer, :default => 0, :hidden => true
       column :num_attached_output_links, :integer, :default => 0, :hidden => true
 
@@ -148,6 +149,12 @@ also related is allowing omission of columns mmentioned in jon condition; post p
     ### virtual column defs
     def attribute_value()
       self[:value_asserted] || self[:value_derived]
+    end
+
+    def port_is_external()
+      return nil unless self[:is_port]
+      return nil unless self[:semantic_type_summary]
+      return  (AttributeSemantic::Info[self[:semantic_type_summary]]||{})[:external]
     end
 
     def is_unset()
@@ -289,6 +296,7 @@ also related is allowing omission of columns mmentioned in jon condition; post p
           :description => "mysql ip service access point configuration",
           #TODO: need the  => {"application" => service qualification)
           :semantic_type => {":array" => "sap[ipv4]"},
+          :semantic_type_summary => "sap[ipv4]",
           :num_attached_input_links => 2
          }]
 

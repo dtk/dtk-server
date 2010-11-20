@@ -304,6 +304,27 @@ module XYZ
           "password" => {:required => true, :type => :string}
         }
       },true)
+
     end
+  end
+  
+  #TODO: this related to syntactic type processing above, but may go in its own file like: attribute_semantic_type
+  module AttributeSemantic
+    #TODO: rather than external may have :internal_only
+    Info =
+      {
+      "sap_config[ipv4]" => {
+      },
+      "sap[ipv4]" => {
+        :external => true,
+      },
+      "sap_ref" => {
+      },
+      "sap[socket]" => {
+      },
+      "db_info" => {
+        :external => true,
+      }
+    }
   end
 end

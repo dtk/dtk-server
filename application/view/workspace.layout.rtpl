@@ -12,6 +12,8 @@
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/cmdbar.css" />
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/toolbar.css" />
 
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/temp-dev.css" />
+
 {%for css_include in _app[:css_includes]%}
 	<link rel="stylesheet" type="text/css" href="{%=css_include%}" />
 {%end%}
@@ -62,11 +64,14 @@ R8.config['base_uri'] = '{%=_app[:base_uri]%}/xyz';
 	<body onload="R8.Workspace.init();" class="yui3-skin-sam  yui-skin-sam">
 	<div id="page-container" style="margin: 0 auto 0 auto;">
 		<div id="wspace-toolbar">
-			<div id="toolbar-wrapper"></div>
+			<div id="toolbar-wrapper">
+				<a href="javascript:R8.Workspace.Dock.toggleMinMax();">Toggle Dock Min/Max</a>&nbsp;&nbsp;&nbsp;
+			</div>
 			<div id="wspace-context-wrapper">
 				<a href="{%=_app[:base_uri]%}/xyz/node/list">Main</a>&nbsp;&nbsp;&nbsp;
 				<a href="javascript:R8.Workspace.Dock.hide();">Hide Dock</a>&nbsp;&nbsp;&nbsp;
 				<a href="javascript:R8.Workspace.Dock.show();">Show Dock</a>&nbsp;&nbsp;&nbsp;
+				<a href="javascript:R8.Workspace.Dock.loadDockPanel('node/get_components/2147484111');">Dock Panel Test</a>&nbsp;&nbsp;&nbsp;
 			</div>
 		</div>
 		<div id="wspace-container">

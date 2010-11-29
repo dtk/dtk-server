@@ -23,5 +23,5 @@
   :architecture => 'Architecture',
   :ui => 'UI',
 
-  :external_ref_list => 'Ext Ref List'
+  :external_ref_list => 'Ext Ref List',
 }

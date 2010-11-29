@@ -61,57 +61,60 @@ if (!R8.Ctrl) {
 			},
 
 			//TODO: should the request handling and page updating be handled by core or R8.Ctrl?
-			call: function(route, args, callBacks, cfg) {
-
-				if(typeof(args) === 'object') var req_params = R8.Utils.json2Str(args);
-				else if(typeof(args) === 'undefined') var req_params = '';
-				else var req_params = args;
+//			call: function(route, args, callBacks, cfg) {
+			call: function(route, params) {
+				if(typeof(params['args']) === 'object') var req_params = R8.Utils.json2Str(params['args']);
+				else if(typeof(params['args']) === 'undefined') var req_params = '';
+				else var req_params = params['args'];
 
 				//if devToolsJs is available the app should be loaded once
 //				if(typeof(R8.devtools) === 'undefined')
 //					params += "&devToolsLoaded=0";
 
 				YUI().use('io','io-base','io-form', function(Y) {
-					if (typeof(cfg) !== 'undefined') {
-						cfg['method'] = (typeof(cfg['method']) == 'undefined') ? 'POST' : cfg['method'];
-					} else {
-						cfg = {
-							method: "POST",
-							data: req_params
-						};
+					var cfg = {};
+					if (typeof(params['cfg']) !== 'undefined') {
+						for(cfg_item in params['cfg']) {
+							cfg[cfg_item] = params['cfg'][cfg_item];
+						}
 					}
+					if(typeof(cfg['method']) == 'undefined') cfg['method'] = 'POST';
+					if(typeof(cfg['data']) == 'undefined') cfg['data'] = '';
 
-					if (typeof(callBacks) !== 'undefined') {
-						for(callback in callBacks) {
+					if (typeof(params['callbacks']) !== 'undefined') {
+
+						for(callback in params['callbacks']) {
 							switch(callback) {
 								case "io:start":
-									Y.on('io:start', callBacks[callback]);
+									Y.on('io:start', params['callbacks'][callback]);
 									break;
 								case "io:success":
-									Y.on('io:success', callBacks[callback]);
+									Y.on('io:success', params['callbacks'][callback]);
 									break;
 								case "io:failure":
-									Y.on('io:failure', callBacks[callback]);
+									Y.on('io:failure', params['callbacks'][callback]);
 									break;
 								case "io:end":
-									Y.on('io:end', callBacks[callback]);
+									Y.on('io:end', params['callbacks'][callback]);
 									break;
 								case "io:renderComplete":
-									R8.Ctrl.onRenderComplete = callBacks[callback];
+									R8.Ctrl.onRenderComplete = params['callbacks'][callback];
 									break;
 							}
 						}
-						if(!R8.Utils.isDefined(callBacks['io:success']))
+						if(!R8.Utils.isDefined(params['callbacks']['io:success']))
 							Y.on('io:success', R8.Ctrl.updatePage);
 					} else {
 						Y.on('io:success', R8.Ctrl.updatePage);
 					}
 
-
 //TODO: revisit when config is implemented
 //					var request_url = 'http://localhost:7000/xyz/'+route;
 					var request_url = R8.config['base_uri']+'/'+route;
+console.log(cfg);
 					var request = Y.io(request_url, cfg);
+//console.log('Requesting.....');
+//console.log(request);
 					var ioId = request['id'];
 					R8.Ctrl.callResults[ioId] = {
 						'request' : request
@@ -182,6 +185,7 @@ if (!R8.Ctrl) {
 			updatePage: function(ioId, responseObj) {
 				eval("R8.Ctrl.callResults[ioId]['response'] =" + responseObj.responseText);
 				var response = R8.Ctrl.callResults[ioId]['response'];
+
 //DEBUG
 //console.log(response);
 				//reset the callbacks array after execution
@@ -205,7 +209,7 @@ if (!R8.Ctrl) {
 //TODO: research best practices for efficient setTimeout quick calls
 					var setContentCallback = function() { R8.Ctrl.setCallContent(ioId,actionItem); }
 					setTimeout(setContentCallback,20);
-continue;
+
 //TODO: revisit if this call should be here in this order of execution
 
 //					R8.Ctrl.runJSTemplates();
@@ -214,8 +218,11 @@ continue;
 
 					//TODO: work on framework for script handling on server side,
 					//currently have addJSExeScript in ctrl and race_priority to track race conditions
-					if(R8.Utils.isDefined(response[responseItem]['script']) && response[responseItem]['script'] != '')
-						R8.Ctrl.processExeScripts(response[responseItem]['script']);
+
+					if(R8.Utils.isDefined(response[actionItem]['js_exe_list']) && response[actionItem]['js_exe_list'] != '')
+						R8.Ctrl.processExeScripts(response[actionItem]['js_exe_list']);
+
+continue;
 
 //TODO: this will most likely be removed after changes in response bundle
 //					if(!R8.Utils.isUndefined(response[responseItem]['data']) && response[responseItem]['data'].length > 0)
@@ -306,9 +313,10 @@ continue;
 
 				jsScriptElem.type = "text/javascript";
 				for(i in exeScripts) {
-					jsScriptElem.text += exeScripts[i]['content']+"\n";
+					jsScriptElem.text += exeScripts[i]+"\n";
 				}
-				document.getElementById('appHeadElem').appendChild(jsScriptElem);
+
+				document.getElementsByTagName('head')[0].appendChild(jsScriptElem);
 			},
 
 			addTplCallback: function(tplInfo) {
@@ -386,8 +394,9 @@ continue;
 				});
 			},
 
-			callContentReady : function(ioId,actionItem) {
+			callContentReady: function(ioId,actionItem) {
 				var contentList = R8.Ctrl.callResults[ioId]['response'][actionItem]['content'];
+
 				for(index in contentList) {
 					if(R8.Utils.isDefined(contentList[index]['content'])) continue;
 					else return false;
@@ -406,7 +415,7 @@ continue;
 				var contentList = R8.Ctrl.callResults[ioId]['response'][actionItem]['content'];
 				var doc = document;
 				var panelsContent = {};
-//console.log(contentList);
+
 				for(i in contentList) {
 					if(R8.Utils.isDefined(contentList[i]['content'])) 
 						var content = contentList[i]['content'];

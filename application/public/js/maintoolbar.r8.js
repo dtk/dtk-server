@@ -29,7 +29,14 @@ if (!R8.MainToolbar) {
 							'io:end':R8.MainToolbar.endSearch(),
 							'io:renderComplete':R8.MainToolbar.initSlider(),
 						};
-						R8.Ctrl.call('workspace/search',queryTerm,callbacks);
+
+						var params = {
+							'callbacks': callbacks,
+							'cfg': {
+								'data':queryTerm
+							}
+						};
+						R8.Ctrl.call('workspace/search',params);
 					}
 				},
 				addComponent: function(obj_id) {

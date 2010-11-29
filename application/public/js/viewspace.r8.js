@@ -83,16 +83,38 @@ if (!R8.ViewSpace) {
 				item.get('node').setAttribute('data-status','dd-ready');
 			},
 
+			getSelectedItem: function(itemId) {
+				return _selectedItems[itemId];
+			},
+			getSelectedItems: function() {
+				return _selectedItems;
+			},
+
 			addSelectedItem: function(itemId,data) {
 				_selectedItems[itemId] = data;
-				_items[itemId].get('node').setStyle('zIndex',51);
-				_items[itemId].get('node').addClass('focus');
+
+//TODO: temp hack until implementing all objects for viewspaces, not just node groups
+				if(data['model'] == 'node') {
+					var tempNode = R8.Utils.Y.one('#item-'+itemId+'-wrapper');
+					tempNode.setStyle('zIndex',51);
+					tempNode.addClass('focus');
+				} else {
+					_items[itemId].get('node').setStyle('zIndex',51);
+					_items[itemId].get('node').addClass('focus');
+				}
 			},
 
 			clearSelectedItems: function() {
 				for(itemId in _selectedItems) {
-					_items[itemId].get('node').removeClass('focus');
-					_items[itemId].get('node').setStyle('zIndex',1);
+//TODO: temp hack until implementing all objects for viewspaces, not just node groups
+					if(typeof(_items[itemId]) == 'undefined') {
+						var tempNode = R8.Utils.Y.one('#item-'+itemId+'-wrapper');
+						tempNode.setStyle('zIndex',1);
+						tempNode.removeClass('focus');
+					} else {
+						_items[itemId].get('node').removeClass('focus');
+						_items[itemId].get('node').setStyle('zIndex',1);
+					}
 					delete(_selectedItems[itemId]);
 				}
 			},

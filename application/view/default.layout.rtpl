@@ -3,6 +3,7 @@
 <title>Example Layout</title>
 
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/default.layout.css" />
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/temp-dev.css" />
 
 {%for css_include in _app[:css_includes]%}
 	<link rel="stylesheet" type="text/css" href="{%=css_include%}" />
@@ -49,7 +50,11 @@
 	<script type="text/javascript" src="{%=_app[:base_js_uri]%}/maintoolbar.r8.js"></script>
 	<script type="text/javascript" src="{%=_app[:base_js_uri]%}/search.r8.js"></script>
 
-	<script type="text/javascript" src="{%=_app[:base_js_uri]%}/toolbar.r8.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/viewspace.r8.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/group.r8.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/toolbar.r8.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/dock.r8.js"></script>
+
 
 	{%for js_include in _app[:js_includes]%}
 		<script type="text/javascript" src="{%=js_include%}"></script>

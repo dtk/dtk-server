@@ -134,15 +134,15 @@ if (!R8.Workspace) {
 //					var route = 'attribute/wspace_'+model+'_display';
 
 //					R8.Ctrl.call(route,'id='+id,{});
-					R8.Ctrl.call(route,'',{});
+					R8.Ctrl.call(route);
 
 				},R8.Workspace.viewSpaceNode,'.wspace-item');
 
 
 //------Dock setup-------------
 
-				R8.Workspace.Dock.init({'display':'none','top':_toolbarNode.get('region').bottom});
-				_pageContainerNode.append(R8.Workspace.Dock.render());
+				_pageContainerNode.append(R8.Workspace.Dock.render({'display':'block','top':_toolbarNode.get('region').bottom}));
+				R8.Workspace.Dock.init();
 //				R8.MainToolbar.init();
 return;
 
@@ -482,7 +482,13 @@ console.log('I guess I am hitting this now!!!!');
 					var callbacks = {
 						'io:renderComplete' : completeCallback
 					};
-					R8.Ctrl.call(modelName+'/clone/'+modelId,queryParams,callbacks);
+					var params = {
+						'callbacks': callbacks,
+						'cfg': {
+							'data': queryParams
+						} 
+					}
+					R8.Ctrl.call(modelName+'/clone/'+modelId,params);
 				});
 			},
 
@@ -504,7 +510,12 @@ console.log('I guess I am hitting this now!!!!');
 				};
 //				containerNode.setAttribute('data-status','pending_delete');
 //				R8.Ctrl.call('component/clone/'+componentId,queryParams,callbacks);
-				R8.Ctrl.call('component/clone/'+componentId,queryParams);
+				R8.Ctrl.call('component/clone/'+componentId,{
+					'callbacks': callbacks,
+					'cfg': {
+						'data': queryParams
+					}
+				});
 			},
 
 			addNodesToGroup : function(nodeList,groupId) {
@@ -663,6 +674,10 @@ console.log(itemDef);
 console.log(toolbarDef);
 			},
 */
+			getSelectedItems: function() {
+				return _viewSpaces[_currentViewSpace].getSelectedItems();
+			},
+
 			checkViewSpaces: function() {
 for(vs in _viewSpaces) {
 	_viewSpaces[vs].test();

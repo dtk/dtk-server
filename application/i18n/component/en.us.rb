@@ -16,4 +16,15 @@
   :created_at => 'Date Created',
   :description_list => 'Descr',
   :external_ref_list => 'Ext Component Ref',
+
+
+#------------------------------------------
+  :components => 'Components',
+  :no_attributes => 'No Attributes',
+#temp strings for component names
+  :hadoop_doc => 'Hadoop Docs',
+  :hadoop_cloudera_c3 => 'Cloudera C3',
+  :rabbitmq_edge_stomp => 'Rabbit - Stomp',
+  :mysql_server2 => 'MySQL Server 2',
+
 }

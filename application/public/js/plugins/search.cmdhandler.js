@@ -59,7 +59,15 @@ R8.Cmdbar.cmdHandlers['search'] = {
 			'io:end' : R8.Cmdbar.loadedTabs[tabIndex].endSearch,
 			'io:renderComplete' : renderCompleteCallback,
 		};
-		R8.Ctrl.call('workspace/search',queryTerm,callbacks);
+		var params = {
+			'cfg':{
+				'data': queryTerm
+			},
+			'callbacks':callbacks
+		}
+		R8.Ctrl.call('workspace/search',params);
+//TODO: remove
+//		R8.Ctrl.call('workspace/search',queryTerm,callbacks);
 	},
 
 	'tabDefs': {

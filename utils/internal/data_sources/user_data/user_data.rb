@@ -27,7 +27,8 @@ module XYZ
           qualified_ref = "#{@container_uri}/#{ref}"
           block.call(DataSourceUpdateHash.new(info.merge({"ref" => ref,"qualified_ref" => qualified_ref})))
         end
-        HashMayNotBeComplete.new() 
+        #HashMayNotBeComplete.new() TODO: so can prune what is included 
+        HashIsComplete.new()
       end
 
       def get_user_data_from_file(data_file_path)

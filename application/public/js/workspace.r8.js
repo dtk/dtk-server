@@ -500,7 +500,7 @@ console.log('I guess I am hitting this now!!!!');
 //				queryParams += '&model_redirect='+modelName+'&action_redirect=wspace_display&id_redirect='+modelId;
 				queryParams += '&model_redirect='+modelName+'&action_redirect=wspace_refresh&id_redirect='+modelId;
 
-				containerNode.setAttribute('data-status','pending_delete');
+//				containerNode.setAttribute('data-status','pending_delete');
 
 				var completeCallback = function() {
 					R8.Workspace.refreshItem(modelId);

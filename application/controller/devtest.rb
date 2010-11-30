@@ -23,8 +23,7 @@ module XYZ
       ds_object_objs.each{|x|x.set_and_share_ds_connector!(common_ds_connectors,container_uri)}
       ds_object_objs.each{|x|x.discover_and_update()}
       DataSource.set_collection_complete(IDHandle[:c => c, :uri => ds_uri])
-      puts "discover and update from #{ds_type}"
-      Hash.new
+      redirect "xyz/node/list"    #TODO: just hack where redirect is
     end
 
     def list(*uri_array)

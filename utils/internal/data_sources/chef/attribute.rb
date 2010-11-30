@@ -6,7 +6,7 @@ module XYZ
           #TBD: assuming that after split first item is cookbook name
           target[:external_ref] = fn(:external_ref,source)
           target[:display_name] = fn(:display_name,source)
-          target[:data_type] = fn(:data_type,source["type"])
+          target[:data_type] = fn(:data_type,source)
           target[:is_port] = source["is_port"]
           target[:description] = source["description"]
           target[:output_variable] = source["calculated"]
@@ -64,7 +64,9 @@ module XYZ
             return false if %w{false recommended optional}.include?(required_value.to_s)
             nil
           end
-          def data_type(type)
+          def data_type(source)
+            return source["data_type"] if source["data_type"]
+            type = source["type"]
             case type
               when "hash", "array"
                 "json"

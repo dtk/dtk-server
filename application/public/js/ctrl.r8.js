@@ -111,7 +111,7 @@ if (!R8.Ctrl) {
 //TODO: revisit when config is implemented
 //					var request_url = 'http://localhost:7000/xyz/'+route;
 					var request_url = R8.config['base_uri']+'/'+route;
-console.log(cfg);
+
 					var request = Y.io(request_url, cfg);
 //console.log('Requesting.....');
 //console.log(request);

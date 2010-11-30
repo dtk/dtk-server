@@ -3,7 +3,7 @@ if (!R8.ViewSpace) {
 
 	R8.ViewSpace = function(viewSpaceDef) {
 		var _def = viewSpaceDef,
-			_id = _def['id'],
+			_id = _def['object']['id'],
 			_type = _def['type'],
 			_items = {},
 			_node = R8.Utils.Y.one('#viewspace'),
@@ -16,6 +16,17 @@ if (!R8.ViewSpace) {
 
 			init: function() {
 				this.setupEvents();
+			},
+
+			get: function(itemToGet) {
+				switch(itemToGet) {
+					case "id":
+						return _id;
+						break;
+					case "def":
+						return _def;
+						break;
+				}
 			},
 
 			setupEvents: function() {
@@ -32,8 +43,13 @@ if (!R8.ViewSpace) {
 					switch(items[i]['type']) {
 						case "node_group":
 							this.addGroup(item);
+							break;
+						case "node":
+							this.addNode(item);
+							break;
 						case "component":
 							this.addComponent(item);
+							break;
 						default:
 							break;
 					}
@@ -92,29 +108,14 @@ if (!R8.ViewSpace) {
 
 			addSelectedItem: function(itemId,data) {
 				_selectedItems[itemId] = data;
-
-//TODO: temp hack until implementing all objects for viewspaces, not just node groups
-				if(data['model'] == 'node') {
-					var tempNode = R8.Utils.Y.one('#item-'+itemId);
-					tempNode.setStyle('zIndex',51);
-					tempNode.addClass('focus');
-				} else {
-					_items[itemId].get('node').setStyle('zIndex',51);
-					_items[itemId].get('node').addClass('focus');
-				}
+				_items[itemId].get('node').setStyle('zIndex',51);
+				_items[itemId].get('node').addClass('focus');
 			},
 
 			clearSelectedItems: function() {
 				for(itemId in _selectedItems) {
-//TODO: temp hack until implementing all objects for viewspaces, not just node groups
-					if(typeof(_items[itemId]) == 'undefined') {
-						var tempNode = R8.Utils.Y.one('#item-'+itemId);
-						tempNode.setStyle('zIndex',1);
-						tempNode.removeClass('focus');
-					} else {
-						_items[itemId].get('node').removeClass('focus');
-						_items[itemId].get('node').setStyle('zIndex',1);
-					}
+					_items[itemId].get('node').removeClass('focus');
+					_items[itemId].get('node').setStyle('zIndex',1);
 					delete(_selectedItems[itemId]);
 				}
 			},
@@ -139,6 +140,15 @@ if (!R8.ViewSpace) {
 			addGroup: function(group) {
 				var id = group['object']['id'];
 				_items[id] = new R8.Group(group,this);
+				_node.append(_items[id].render());
+				_items[id].init();
+
+				this.regNewItem(_items[id]);
+			},
+
+			addNode: function(node) {
+				var id = node['object']['id'];
+				_items[id] = new R8.Node(node,this);
 				_node.append(_items[id].render());
 				_items[id].init();
 

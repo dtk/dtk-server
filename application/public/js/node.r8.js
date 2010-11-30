@@ -38,12 +38,14 @@ if (!R8.Node) {
 
 				this.setupMinMax();
 
+//TODO: decide if nodes will have toolbars like node groups, else just plug into dock
+/*
 				if(typeof(_def['toolbar_def']) != 'undefined') {
 					_def['toolbar_def']['parent_node_id'] = this.get('node_id');
 					_toolbar = new R8.Toolbar(_def['toolbar_def']);
 					_toolbar.init();
 				}
-
+*
 /*
 				if(_status == 'pending_delete') {
 					_viewSpace.pushPendingDelete(_id,{

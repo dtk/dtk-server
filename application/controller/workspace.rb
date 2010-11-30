@@ -376,7 +376,7 @@ pp datacenter
       v_space_obj = JSON.generate(view_space)
       run_javascript("R8.Workspace.pushViewSpace(#{v_space_obj});")
 
-      model_name = :node_group      
+      model_name = :node_group
       filter_params = {:parent_id => datacenter_id}
       search_object =  ret_node_group_search_object(filter_params)
 
@@ -429,6 +429,32 @@ pp datacenter
         }
         items << item
       end
+
+      #----------------------------------------------------
+      #-------Grab nodes in the datacenter-----------------
+      #----------------------------------------------------
+      #need to augment for nodes that are in datacenter directly and not node groups
+      tpl = R8Tpl::TemplateR8.new("node/wspace_display",user_context())
+      tpl.set_js_tpl_name("node_wspace_display")
+      tpl_info = tpl.render()
+      include_js_tpl(tpl_info[:src])
+
+      model_name = :node
+      field_set = Model::FieldSet.default(model_name)
+      node_list = get_objects(model_name,{:datacenter_datacenter_id=>datacenter_id,:ds_source_obj_type=>'image'})
+#pp node_list
+      node_list.each do |node|
+        item = {
+          :type => model_name.to_s,
+          :object => node,
+          :toolbar_def => toolbar_def,
+          :tpl_callback => tpl_info[:template_callback]
+        }
+        items << item
+      end
+      #----------------------------------------------------
+      #----------------------------------------------------
+      #----------------------------------------------------
 
 #TODO: decide if its possible in clean manner to manage toolbar access at item level in ad-hoc ways
 #right now single toolbar def for all items in list for each type

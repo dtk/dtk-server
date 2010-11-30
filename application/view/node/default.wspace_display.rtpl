@@ -12,6 +12,7 @@
 						<div id="item-{%=node[:id]%}-name" class="name-wrapper"><b>{%=node[:display_name]%}</b></div>
 						<div id="item-{%=node[:id]%}-toolbar-wrapper" class="toolbar-wrapper">
 						</div>
+						<div id="item-{%=node[:id]%}-minimize-btn" class="minmax min"></div>
 					</div>
 
 <!--ITEM MAIN BODY WRAPPER -->
@@ -60,7 +61,7 @@ Some content here para tu
 					<div class="medium-header">
 						<div id="item-{%=node[:id]%}-maximize-btn" class="minmax max"></div>
 					</div>
-					{%=node[:display_name]%}<br/><br/>{%=num_nodes%}&nbsp;Node(s)&nbsp;&nbsp;
+					{%=node[:display_name]%}<br/><br/>?&nbsp;Components(s)&nbsp;&nbsp;
 				</div>
 				<div class="r-col">
 					<div class="corner tr"></div>

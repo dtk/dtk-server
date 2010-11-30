@@ -459,12 +459,17 @@ console.log('I guess I am hitting this now!!!!');
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 
-			addItemToViewSpace : function(clonedNode) {
-				var cleanupId = clonedNode.get('id');
-				var modelName = clonedNode.getAttribute('data-model');
-				var modelId = clonedNode.getAttribute('data-id');
-				var top = clonedNode.getStyle('top');
-				var left = clonedNode.getStyle('left');
+			addItemToViewSpace : function(clonedNode,viewSpaceId) {
+				var cleanupId = clonedNode.get('id'),
+					modelName = clonedNode.getAttribute('data-model'),
+					modelId = clonedNode.getAttribute('data-id'),
+					top = clonedNode.getStyle('top'),
+					left = clonedNode.getStyle('left'),
+					vspaceId = (typeof(viewSpaceId) == 'undefined') ? _currentViewSpace: viewSpaceId;
+					vspaceDef = _viewSpaces[vspaceId].get('def'),
+					vspaceId = _viewSpaces[vspaceId].get('id'),
+					vspaceType = vspaceDef['type'];
+
 				top = parseInt(top.replace('px',''));
 				left = parseInt(left.replace('px',''));
 
@@ -472,10 +477,12 @@ console.log('I guess I am hitting this now!!!!');
 
 				YUI().use("json", function(Y) {
 					var uiStr = Y.JSON.stringify(ui);
-					var queryParams = 'target_model_name=project&target_id=2147483649&ui='+uiStr;
+					var queryParams = 'target_model_name='+vspaceType+'&target_id='+vspaceId+'&ui='+uiStr;
+//					var queryParams = 'target_model_name=project&target_id=2147483649&ui='+uiStr;
 //					queryParams += '&redirect='+modelName+'/wspace_display';
 					queryParams += '&model_redirect='+modelName+'&action_redirect=wspace_display&id_redirect=*id';
-
+//console.log(queryParams);
+//return;
 					var completeCallback = function(){
 						R8.Workspace.setupNewItems();
 					}

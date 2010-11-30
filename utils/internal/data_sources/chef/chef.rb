@@ -100,9 +100,9 @@ module XYZ
       end
 
       def get_node_recipe_assocs()
-        recipes = Hash.new
-        get_nodes().each{|node_name,node|recipes[node_name] = recipes(node)}
-        recipes
+        ret = Hash.new
+        get_nodes().each{|node_name,node|ret[node_name] = recipes(node)}
+        ret
       end
 
       def get_node_recipes(node_name)
@@ -183,9 +183,10 @@ module XYZ
         ret
       end
 
-      
+      MaxRows = 1000
       def get_search_results(search_string,convert_to_hash=true)
-        search_results = get_rest("search/#{search_string}",false)
+#        search_results = get_rest("search/#{search_string}",false) TODO: check if below only works with 9.x
+        search_results = get_rest("search/#{search_string}&start=0&rows=#{MaxRows}",false)
         return nil if search_results.nil?
         return nil unless search_results["rows"]
         convert_to_hash ? search_results["rows"].map{|x|x.to_hash} : search_results["rows"]

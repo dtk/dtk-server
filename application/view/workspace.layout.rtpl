@@ -7,6 +7,7 @@
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/workspace.css" />
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/basic-component.css" />
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/basic-group.css" />
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/basic-node.css" />
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/basic-item.css" />
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/topbar.css" />
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/cmdbar.css" />
@@ -79,6 +80,100 @@ R8.config['base_uri'] = '{%=_app[:base_uri]%}/xyz';
 				<div id="viewspace" class="viewspace">
 
 					{%=viewspace%}
+
+
+
+
+	<div id="item-001" data-status="pending_setup" data-id="001" data-model="node" class="basic-item node large green dg-node dg-component" style="top: 100px; left: 100px;">
+		<div id="item-001-large" class="item-display" style="display:block;">
+			<div id="item-001-large-display" data-id="001" data-model="node" class="item-display item node">
+				<div class="l-col">
+					<div class="corner tl"></div>
+					<div class="l-col-body"></div>
+					<div class="corner bl"></div>
+				</div>
+				<div id="item-001-large-display-body" class="body">
+					<div class="item-bar">
+						<div id="item-001-name" class="name-wrapper"><b>Node Foo</b></div>
+						<div id="item-001-toolbar-wrapper" class="toolbar-wrapper">
+						</div>
+					</div>
+
+<!--ITEM MAIN BODY WRAPPER -->
+					<div id="item-001-large-main-body-wrapper" style="overflow: hidden; height: 90px; width: 422px; float: left;">
+						<div id="item-001-large-main-body-content" style="position: relative; height: 180px; width: 422px; float: left; top: -90px;">
+							<div id="item-001-large-display" style="float: left; width: 422px; height: 80px; margin-top: 5px; position: relative; top: 90px; background-color: #FFFFFF;">
+Some content here para tu
+							</div>
+						</div>
+					</div>
+
+				</div>
+				<div class="r-col">
+					<div class="corner tr"></div>
+					<div class="r-col-body"></div>
+					<div class="corner br"></div>
+				</div>
+			</div>
+			<div id="item-001-large-shadow" class="drop-shadow">
+				<div class="ds-l-col">
+					<div class="ds-corner tl"></div>
+					<div class="ds-l-col-body"></div>
+					<div class="ds-corner bl"></div>
+				</div>
+				<div class="ds-body">
+					<div class="header"></div>
+					<div class="main-body"></div>
+					<div class="footer"></div>
+				</div>
+				<div class="ds-r-col">
+					<div class="ds-corner tr"></div>
+					<div class="ds-r-col-body"></div>
+					<div class="ds-corner br"></div>
+				</div>
+			</div>
+		</div>
+
+		<div id="item-001-medium" class="item-display" style="display:none;">
+			<div id="item-001-medium-display" data-id="01" data-model="node" class="item-display item node">
+				<div class="l-col">
+					<div class="corner tl"></div>
+					<div class="l-col-body"></div>
+					<div class="corner bl"></div>
+				</div>
+				<div id="body-001-medium" class="body">
+					<div class="medium-header">
+						<div id="item-001-maximize-btn" class="minmax max"></div>
+					</div>
+					Node Foo<br/><br/>3&nbsp;Components(s)&nbsp;&nbsp;
+				</div>
+				<div class="r-col">
+					<div class="corner tr"></div>
+					<div class="r-col-body"></div>
+					<div class="corner br"></div>
+				</div>
+			</div>
+			<div id="item-001-medium-shadow" class="drop-shadow">
+				<div class="ds-l-col">
+					<div class="ds-corner tl"></div>
+					<div class="ds-l-col-body"></div>
+					<div class="ds-corner bl"></div>
+				</div>
+				<div class="ds-body">
+					<div class="header"></div>
+					<div class="main-body"></div>
+					<div class="footer"></div>
+				</div>
+				<div class="ds-r-col">
+					<div class="ds-corner tr"></div>
+					<div class="ds-r-col-body"></div>
+					<div class="ds-corner br"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
 
 				</div>
 			</div>

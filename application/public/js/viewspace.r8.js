@@ -95,7 +95,7 @@ if (!R8.ViewSpace) {
 
 //TODO: temp hack until implementing all objects for viewspaces, not just node groups
 				if(data['model'] == 'node') {
-					var tempNode = R8.Utils.Y.one('#item-'+itemId+'-wrapper');
+					var tempNode = R8.Utils.Y.one('#item-'+itemId);
 					tempNode.setStyle('zIndex',51);
 					tempNode.addClass('focus');
 				} else {
@@ -108,7 +108,7 @@ if (!R8.ViewSpace) {
 				for(itemId in _selectedItems) {
 //TODO: temp hack until implementing all objects for viewspaces, not just node groups
 					if(typeof(_items[itemId]) == 'undefined') {
-						var tempNode = R8.Utils.Y.one('#item-'+itemId+'-wrapper');
+						var tempNode = R8.Utils.Y.one('#item-'+itemId);
 						tempNode.setStyle('zIndex',1);
 						tempNode.removeClass('focus');
 					} else {

@@ -4,7 +4,7 @@ module XYZ
       class ComponentInstance < Top
         definitions do
           target[:type] = "instance"
-          target[:basic_type] = source["basic_type"]
+          target[:basic_type] = fn(:basic_type,source["basic_type"])
           target[:display_name] = source[:ref]
           target[:description] = source["description"]
           target[:external_ref] = fn(:external_ref,source[:ref],source["node_name"])
@@ -23,6 +23,10 @@ module XYZ
 
           def external_ref(recipe_name,node_name)
             {"type" => "chef_recipe_instance", "recipe_name" => recipe_name, "node_name" => node_name} 
+          end
+          def basic_type(basic_type)
+            return basic_type unless basic_type.kind_of?(Hash)
+            basic_type.keys.first
           end
         end
       end

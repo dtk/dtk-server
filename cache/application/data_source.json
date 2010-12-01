@@ -26,7 +26,10 @@
 	"java": {
           "ui": "{\"images\": {\"tnail\":\"java-01.png\",\"display\":\"java-01.png\",\"tiny\":\"\"}}"
         },
-	 "mysql::client_app1": {
+	 "mysql::master": {
+          "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}"
+        },
+	 "mysql::slave": {
           "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}"
         },
 	"mysql::client": {

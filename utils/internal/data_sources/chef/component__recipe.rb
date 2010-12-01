@@ -4,7 +4,7 @@ module XYZ
       class ComponentRecipe < Top
         definitions do
           target[:type] = "template"
-          target[:basic_type] = source["basic_type"]
+          target[:basic_type] = fn(:basic_type,source["basic_type"])
           name = source["recipe_name"]
           target[:display_name] = name
           target[:description] = source["description"]
@@ -23,6 +23,10 @@ module XYZ
           end
           def external_ref(recipe_name)
             {"type" => "chef_recipe", "recipe_name" => recipe_name}
+          end
+          def basic_type(basic_type)
+            return basic_type unless basic_type.kind_of?(Hash)
+            basic_type.keys.first
           end
         end
       end

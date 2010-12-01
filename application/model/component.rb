@@ -8,7 +8,7 @@ module XYZ
         external_ref_column_defs()
         column :type, :varchar, :size => 15 # instance | template | composite
         #TODO: is 'user" a well defined basic type?
-        column :basic_type, :varchar, :size => 15 # service | package | language | application | client | user ..
+        column :basic_type, :varchar, :size => 15 # service | package | language | application | client | feature | user ..
         column :only_one_per_node, :boolean, :default => true
         column :version, :varchar, :size => 25 # version of underlying component (not chef recipe .... version)
         column :uri, :varchar

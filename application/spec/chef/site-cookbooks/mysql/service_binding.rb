@@ -21,7 +21,6 @@ service :mysql_server do
 
   attribute "sap_config/ipv4",
     :recipes => ["mysql::server","mysql::server2"],
-    :port_type => "input",
     :type => "hash",
     :description => "mysql ip service access point configuration",
     :semantic_type => {":array" => {"sap_config[ipv4]" => {"application" => "sql::mysql"}}},
@@ -35,7 +34,6 @@ service :mysql_server do
 
   attribute "sap/socket",
     :recipes => ["mysql::server","mysql::server2"],
-    :port_type => "input",
     :description => "mysql unix socket service access point",
     :semantic_type => {"sap[socket]" => {"application" => "sql::mysql"}},
     :type => "hash",
@@ -44,12 +42,24 @@ service :mysql_server do
         "socket_file" => "/var/run/mysqld/mysqld.sock"
       }
     
-
-  attribute "sap_ref",
-    :recipes => ["mysql::client_app1"],
-    :port_type => "output",
+  attribute "master_log_ref",
+    :recipes => ["mysql::slave"],
     :required => true,
     :type => "hash",
-    :description => "mysql service access point reference for client",
+    :description => "reference for mysql slave to get master log position",
+    :semantic_type => "mysql_master_log_info"
+
+  attribute "master_log",
+    :recipes => ["mysql::master"],
+    :required => true,
+    :type => "hash",
+    :description => "master log position",
+    :semantic_type => "mysql_master_log_info"
+
+  attribute "sap_ref_to_master",
+    :recipes => ["mysql::slave"],
+    :required => true,
+    :type => "hash",
+    :description => "mysql service access point reference for slave to connect with master",
     :semantic_type => {"sap_ref" => {"application" => "sql::mysql"}}
 end

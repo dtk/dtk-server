@@ -159,9 +159,12 @@ module XYZ
       #removes attributes like foo when teher also exists foo/k1, foo/k2
       def remove_subsuming_attributes!(metadata)
         return metadata unless metadata and metadata["attributes"]
-        keys = metadata["attributes"].keys
-        return metadata if keys.empty?
-        metadata["attributes"].reject!{|k,v| keys.find{|k2| k2 =~ Regexp.new("^#{k}.")}}
+        exploded_keys = metadata["attributes"].keys.map{|x|x.split("/")}
+        return metadata if exploded_keys.empty?
+        metadata["attributes"].reject! do |k,v| 
+          ek = k.split("/")
+          exploded_keys.find{|k2| ek.size < k2.size and ek == k2[0..ek.size-1]}
+        end
         metadata
       end
 

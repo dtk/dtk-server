@@ -7,6 +7,8 @@ recipe            "mysql::server", "Installs packages required for mysql servers
 recipe            "mysql::server2", "Installs packages required for mysql servers w/o manual intervention"
 recipe            "mysql::server_ec2", "Performs EC2-specific mountpoint manipulation"
 recipe            "mysql::client_app1", "Sample client application that connects to a mysql database"
+recipe            "mysql::slave", "For extending mysql server to serve as a slave"
+recipe            "mysql::master", "For extending mysql server to serve as a master"
 
 %w{ debian ubuntu }.each do |os|
   supports os
@@ -89,7 +91,8 @@ attribute "_meta_info",
     "mysql::server" => "service", 
     "mysql::server2" => "service", 
     "mysql::client" => "package",
-    "mysql::client_app1" => "application"
+    "mysql::slave" => {"feature" => {"base_recipes" => ["mysql::server" ,"mysql::server2"]}},
+    "mysql::master" => {"feature" => {"base_recipes" => ["mysql::server" ,"mysql::server2"]}},
    }
 
 

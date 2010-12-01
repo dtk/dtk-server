@@ -4,1440 +4,13 @@
       "network_partition": {
         "internet": {
           "ds_key": "",
-          "is_internet": false,
+          "is_internet": true,
           "display_name": "internet",
           "is_deployed": false
-        },
-        "basic__default": {
-          "ds_key": "[:ec2, \"basic__default\"]",
-          "is_internet": false,
-          "display_name": "basic__default",
-          "is_deployed": false
-        }
-      },
-      "node_group_member": {
-        "ec2_sg_basic__default--i-bd39e2d7": {
-          "*node_id": "/node/i-bd39e2d7",
-          "is_elastic_node": false,
-          "display_name": "ec2_sg_basic__default--i-bd39e2d7",
-          "*node_group_id": "/node_group/ec2_sg_basic__default"
-        },
-        "ec2_sg_basic__default--i-335f0059": {
-          "*node_id": "/node/i-335f0059",
-          "is_elastic_node": false,
-          "display_name": "ec2_sg_basic__default--i-335f0059",
-          "*node_group_id": "/node_group/ec2_sg_basic__default"
-        },
-        "ec2_sg_basic__default--i-374b945d": {
-          "*node_id": "/node/i-374b945d",
-          "is_elastic_node": false,
-          "display_name": "ec2_sg_basic__default--i-374b945d",
-          "*node_group_id": "/node_group/ec2_sg_basic__default"
-        },
-        "ec2_sg_basic__default--i-b43db5d9": {
-          "*node_id": "/node/i-b43db5d9",
-          "is_elastic_node": false,
-          "display_name": "ec2_sg_basic__default--i-b43db5d9",
-          "*node_group_id": "/node_group/ec2_sg_basic__default"
-        },
-        "ec2_sg_basic__default--i-fb486291": {
-          "*node_id": "/node/i-fb486291",
-          "is_elastic_node": false,
-          "display_name": "ec2_sg_basic__default--i-fb486291",
-          "*node_group_id": "/node_group/ec2_sg_basic__default"
-        },
-        "ec2_sg_basic__default--i-33886f59": {
-          "*node_id": "/node/i-33886f59",
-          "is_elastic_node": false,
-          "display_name": "ec2_sg_basic__default--i-33886f59",
-          "*node_group_id": "/node_group/ec2_sg_basic__default"
-        },
-        "ec2_sg_basic__default--i-97bb8ffd": {
-          "*node_id": "/node/i-97bb8ffd",
-          "is_elastic_node": false,
-          "display_name": "ec2_sg_basic__default--i-97bb8ffd",
-          "*node_group_id": "/node_group/ec2_sg_basic__default"
-        },
-        "ec2_sg_basic__default--i-2f5b7a44": {
-          "*node_id": "/node/i-2f5b7a44",
-          "is_elastic_node": false,
-          "display_name": "ec2_sg_basic__default--i-2f5b7a44",
-          "*node_group_id": "/node_group/ec2_sg_basic__default"
-        },
-        "ec2_sg_basic__default--i-462efd2b": {
-          "*node_id": "/node/i-462efd2b",
-          "is_elastic_node": false,
-          "display_name": "ec2_sg_basic__default--i-462efd2b",
-          "*node_group_id": "/node_group/ec2_sg_basic__default"
-        },
-        "ec2_sg_basic__default--i-07af096d": {
-          "*node_id": "/node/i-07af096d",
-          "is_elastic_node": false,
-          "display_name": "ec2_sg_basic__default--i-07af096d",
-          "*node_group_id": "/node_group/ec2_sg_basic__default"
-        },
-        "ec2_sg_basic__default--i-9bad8cf1": {
-          "*node_id": "/node/i-9bad8cf1",
-          "is_elastic_node": false,
-          "display_name": "ec2_sg_basic__default--i-9bad8cf1",
-          "*node_group_id": "/node_group/ec2_sg_basic__default"
-        },
-        "ec2_sg_basic__default--i-4fc62e25": {
-          "*node_id": "/node/i-4fc62e25",
-          "is_elastic_node": false,
-          "display_name": "ec2_sg_basic__default--i-4fc62e25",
-          "*node_group_id": "/node_group/ec2_sg_basic__default"
-        },
-        "ec2_sg_basic__default--i-8cc517e1": {
-          "*node_id": "/node/i-8cc517e1",
-          "is_elastic_node": false,
-          "display_name": "ec2_sg_basic__default--i-8cc517e1",
-          "*node_group_id": "/node_group/ec2_sg_basic__default"
-        },
-        "ec2_sg_basic__default--i-c5f5afaf": {
-          "*node_id": "/node/i-c5f5afaf",
-          "is_elastic_node": false,
-          "display_name": "ec2_sg_basic__default--i-c5f5afaf",
-          "*node_group_id": "/node_group/ec2_sg_basic__default"
-        },
-        "ec2_sg_basic__default--i-7550141f": {
-          "*node_id": "/node/i-7550141f",
-          "is_elastic_node": false,
-          "display_name": "ec2_sg_basic__default--i-7550141f",
-          "*node_group_id": "/node_group/ec2_sg_basic__default"
-        },
-        "ec2_sg_basic__default--i-c1b527ab": {
-          "*node_id": "/node/i-c1b527ab",
-          "is_elastic_node": false,
-          "display_name": "ec2_sg_basic__default--i-c1b527ab",
-          "*node_group_id": "/node_group/ec2_sg_basic__default"
-        },
-        "ec2_sg_basic__default--i-63775608": {
-          "*node_id": "/node/i-63775608",
-          "is_elastic_node": false,
-          "display_name": "ec2_sg_basic__default--i-63775608",
-          "*node_group_id": "/node_group/ec2_sg_basic__default"
-        },
-        "ec2_sg_basic__default--i-656e580f": {
-          "*node_id": "/node/i-656e580f",
-          "is_elastic_node": false,
-          "display_name": "ec2_sg_basic__default--i-656e580f",
-          "*node_group_id": "/node_group/ec2_sg_basic__default"
-        }
-      },
-      "node": {
-        "i-4fc62e25": {
-          "monitoring_item": {
-            "check_ping": {
-              "description": "ping",
-              "display_name": "check_ping",
-              "enabled": true
-            },
-            "check_mem": {
-              "description": "Free Memory",
-              "display_name": "check_mem",
-              "enabled": true
-            },
-            "check_local_procs": {
-              "description": "Processes",
-              "display_name": "check_local_procs",
-              "enabled": true
-            },
-            "check_all_disks": {
-              "description": "Free Space All Disks",
-              "display_name": "check_all_disks",
-              "enabled": true
-            },
-            "check_memory_profiler": {
-              "description": "Memory Profiler",
-              "display_name": "check_memory_profiler",
-              "enabled": true
-            },
-            "check_iostat": {
-              "description": "Iostat",
-              "display_name": "check_iostat",
-              "enabled": true
-            },
-            "check_ssh": {
-              "description": "SSH",
-              "display_name": "check_ssh",
-              "enabled": true
-            }
-          },
-          "ds_key": "[:ec2, :instance, \"i-4fc62e25\"]",
-          "type": "instance",
-          "node_interface": {
-            "eth0": {
-              "type": "ethernet",
-              "display_name": "eth0",
-              "*network_partition_id": "/network_partition/basic__default"
-            }
-          },
-          "operational_status": "stopped",
-          "ds_source_obj_type": "instance",
-          "data_source": "ec2",
-          "display_name": "i-4fc62e25",
-          "is_deployed": true,
-          "ds_attributes": {
-            "flavor": {
-              "cores": 1,
-              "bits": 32,
-              "ram": 1740.8,
-              "disk": 160,
-              "name": "Small Instance",
-              "id": "m1.small"
-            },
-            "groups": [
-              "basic",
-              "default"
-            ]
-          },
-          "external_ref": {
-            "type": "ec2_instance",
-            "instance_id": "i-4fc62e25"
-          },
-          "image_size": "0.17408E4"
-        },
-        "i-8cc517e1": {
-          "monitoring_item": {
-            "check_ping": {
-              "description": "ping",
-              "display_name": "check_ping",
-              "enabled": true
-            },
-            "check_mem": {
-              "description": "Free Memory",
-              "display_name": "check_mem",
-              "enabled": true
-            },
-            "check_local_procs": {
-              "description": "Processes",
-              "display_name": "check_local_procs",
-              "enabled": true
-            },
-            "check_all_disks": {
-              "description": "Free Space All Disks",
-              "display_name": "check_all_disks",
-              "enabled": true
-            },
-            "check_memory_profiler": {
-              "description": "Memory Profiler",
-              "display_name": "check_memory_profiler",
-              "enabled": true
-            },
-            "check_iostat": {
-              "description": "Iostat",
-              "display_name": "check_iostat",
-              "enabled": true
-            },
-            "check_ssh": {
-              "description": "SSH",
-              "display_name": "check_ssh",
-              "enabled": true
-            }
-          },
-          "ds_key": "[:ec2, :instance, \"i-8cc517e1\"]",
-          "type": "instance",
-          "node_interface": {
-            "eth0": {
-              "type": "ethernet",
-              "display_name": "eth0",
-              "*network_partition_id": "/network_partition/basic__default"
-            }
-          },
-          "operational_status": "stopped",
-          "ds_source_obj_type": "instance",
-          "data_source": "ec2",
-          "display_name": "i-8cc517e1",
-          "is_deployed": true,
-          "ds_attributes": {
-            "flavor": {
-              "cores": 1,
-              "bits": 32,
-              "ram": 1740.8,
-              "disk": 160,
-              "name": "Small Instance",
-              "id": "m1.small"
-            },
-            "groups": [
-              "basic",
-              "default"
-            ]
-          },
-          "external_ref": {
-            "type": "ec2_instance",
-            "instance_id": "i-8cc517e1"
-          },
-          "image_size": "0.17408E4"
-        },
-        "i-7550141f": {
-          "monitoring_item": {
-            "check_ping": {
-              "description": "ping",
-              "display_name": "check_ping",
-              "enabled": true
-            },
-            "check_mem": {
-              "description": "Free Memory",
-              "display_name": "check_mem",
-              "enabled": true
-            },
-            "check_local_procs": {
-              "description": "Processes",
-              "display_name": "check_local_procs",
-              "enabled": true
-            },
-            "check_all_disks": {
-              "description": "Free Space All Disks",
-              "display_name": "check_all_disks",
-              "enabled": true
-            },
-            "check_memory_profiler": {
-              "description": "Memory Profiler",
-              "display_name": "check_memory_profiler",
-              "enabled": true
-            },
-            "check_iostat": {
-              "description": "Iostat",
-              "display_name": "check_iostat",
-              "enabled": true
-            },
-            "check_ssh": {
-              "description": "SSH",
-              "display_name": "check_ssh",
-              "enabled": true
-            }
-          },
-          "ds_key": "[:ec2, :instance, \"i-7550141f\"]",
-          "type": "instance",
-          "node_interface": {
-            "eth0": {
-              "type": "ethernet",
-              "display_name": "eth0",
-              "*network_partition_id": "/network_partition/basic__default"
-            }
-          },
-          "operational_status": "stopped",
-          "ds_source_obj_type": "instance",
-          "data_source": "ec2",
-          "display_name": "i-7550141f",
-          "is_deployed": true,
-          "ds_attributes": {
-            "flavor": {
-              "cores": 1,
-              "bits": 32,
-              "ram": 1740.8,
-              "disk": 160,
-              "name": "Small Instance",
-              "id": "m1.small"
-            },
-            "groups": [
-              "basic",
-              "default"
-            ]
-          },
-          "external_ref": {
-            "type": "ec2_instance",
-            "instance_id": "i-7550141f"
-          },
-          "image_size": "0.17408E4"
-        },
-        "i-fb486291": {
-          "monitoring_item": {
-            "check_ping": {
-              "description": "ping",
-              "display_name": "check_ping",
-              "enabled": true
-            },
-            "check_mem": {
-              "description": "Free Memory",
-              "display_name": "check_mem",
-              "enabled": true
-            },
-            "check_local_procs": {
-              "description": "Processes",
-              "display_name": "check_local_procs",
-              "enabled": true
-            },
-            "check_all_disks": {
-              "description": "Free Space All Disks",
-              "display_name": "check_all_disks",
-              "enabled": true
-            },
-            "check_memory_profiler": {
-              "description": "Memory Profiler",
-              "display_name": "check_memory_profiler",
-              "enabled": true
-            },
-            "check_iostat": {
-              "description": "Iostat",
-              "display_name": "check_iostat",
-              "enabled": true
-            },
-            "check_ssh": {
-              "description": "SSH",
-              "display_name": "check_ssh",
-              "enabled": true
-            }
-          },
-          "ds_key": "[:ec2, :instance, \"i-fb486291\"]",
-          "type": "instance",
-          "node_interface": {
-            "eth0": {
-              "type": "ethernet",
-              "display_name": "eth0",
-              "*network_partition_id": "/network_partition/basic__default"
-            }
-          },
-          "operational_status": "stopped",
-          "ds_source_obj_type": "instance",
-          "data_source": "ec2",
-          "display_name": "i-fb486291",
-          "is_deployed": true,
-          "ds_attributes": {
-            "flavor": {
-              "cores": 1,
-              "bits": 32,
-              "ram": 1740.8,
-              "disk": 160,
-              "name": "Small Instance",
-              "id": "m1.small"
-            },
-            "groups": [
-              "basic",
-              "default"
-            ]
-          },
-          "external_ref": {
-            "type": "ec2_instance",
-            "instance_id": "i-fb486291"
-          },
-          "image_size": "0.17408E4"
-        },
-        "i-c1b527ab": {
-          "monitoring_item": {
-            "check_ping": {
-              "description": "ping",
-              "display_name": "check_ping",
-              "enabled": true
-            },
-            "check_mem": {
-              "description": "Free Memory",
-              "display_name": "check_mem",
-              "enabled": true
-            },
-            "check_local_procs": {
-              "description": "Processes",
-              "display_name": "check_local_procs",
-              "enabled": true
-            },
-            "check_all_disks": {
-              "description": "Free Space All Disks",
-              "display_name": "check_all_disks",
-              "enabled": true
-            },
-            "check_memory_profiler": {
-              "description": "Memory Profiler",
-              "display_name": "check_memory_profiler",
-              "enabled": true
-            },
-            "check_iostat": {
-              "description": "Iostat",
-              "display_name": "check_iostat",
-              "enabled": true
-            },
-            "check_ssh": {
-              "description": "SSH",
-              "display_name": "check_ssh",
-              "enabled": true
-            }
-          },
-          "ds_key": "[:ec2, :instance, \"i-c1b527ab\"]",
-          "type": "instance",
-          "node_interface": {
-            "eth0": {
-              "type": "ethernet",
-              "display_name": "eth0",
-              "*network_partition_id": "/network_partition/basic__default"
-            }
-          },
-          "operational_status": "stopped",
-          "ds_source_obj_type": "instance",
-          "data_source": "ec2",
-          "display_name": "i-c1b527ab",
-          "is_deployed": true,
-          "ds_attributes": {
-            "flavor": {
-              "cores": 1,
-              "bits": 32,
-              "ram": 1740.8,
-              "disk": 160,
-              "name": "Small Instance",
-              "id": "m1.small"
-            },
-            "groups": [
-              "basic",
-              "default"
-            ]
-          },
-          "external_ref": {
-            "type": "ec2_instance",
-            "instance_id": "i-c1b527ab"
-          },
-          "image_size": "0.17408E4"
-        },
-        "i-374b945d": {
-          "monitoring_item": {
-            "check_ping": {
-              "description": "ping",
-              "display_name": "check_ping",
-              "enabled": true
-            },
-            "check_mem": {
-              "description": "Free Memory",
-              "display_name": "check_mem",
-              "enabled": true
-            },
-            "check_local_procs": {
-              "description": "Processes",
-              "display_name": "check_local_procs",
-              "enabled": true
-            },
-            "check_all_disks": {
-              "description": "Free Space All Disks",
-              "display_name": "check_all_disks",
-              "enabled": true
-            },
-            "check_memory_profiler": {
-              "description": "Memory Profiler",
-              "display_name": "check_memory_profiler",
-              "enabled": true
-            },
-            "check_iostat": {
-              "description": "Iostat",
-              "display_name": "check_iostat",
-              "enabled": true
-            },
-            "check_ssh": {
-              "description": "SSH",
-              "display_name": "check_ssh",
-              "enabled": true
-            }
-          },
-          "ds_key": "[:ec2, :instance, \"i-374b945d\"]",
-          "type": "instance",
-          "node_interface": {
-            "eth0": {
-              "type": "ethernet",
-              "display_name": "eth0",
-              "*network_partition_id": "/network_partition/basic__default"
-            }
-          },
-          "operational_status": "stopped",
-          "ds_source_obj_type": "instance",
-          "data_source": "ec2",
-          "display_name": "i-374b945d",
-          "is_deployed": true,
-          "ds_attributes": {
-            "flavor": {
-              "cores": 1,
-              "bits": 32,
-              "ram": 1740.8,
-              "disk": 160,
-              "name": "Small Instance",
-              "id": "m1.small"
-            },
-            "groups": [
-              "basic",
-              "default"
-            ]
-          },
-          "external_ref": {
-            "type": "ec2_instance",
-            "instance_id": "i-374b945d"
-          },
-          "image_size": "0.17408E4"
-        },
-        "i-97bb8ffd": {
-          "monitoring_item": {
-            "check_ping": {
-              "description": "ping",
-              "display_name": "check_ping",
-              "enabled": true
-            },
-            "check_mem": {
-              "description": "Free Memory",
-              "display_name": "check_mem",
-              "enabled": true
-            },
-            "check_local_procs": {
-              "description": "Processes",
-              "display_name": "check_local_procs",
-              "enabled": true
-            },
-            "check_all_disks": {
-              "description": "Free Space All Disks",
-              "display_name": "check_all_disks",
-              "enabled": true
-            },
-            "check_memory_profiler": {
-              "description": "Memory Profiler",
-              "display_name": "check_memory_profiler",
-              "enabled": true
-            },
-            "check_iostat": {
-              "description": "Iostat",
-              "display_name": "check_iostat",
-              "enabled": true
-            },
-            "check_ssh": {
-              "description": "SSH",
-              "display_name": "check_ssh",
-              "enabled": true
-            }
-          },
-          "ds_key": "[:ec2, :instance, \"i-97bb8ffd\"]",
-          "type": "instance",
-          "node_interface": {
-            "eth0": {
-              "type": "ethernet",
-              "display_name": "eth0",
-              "*network_partition_id": "/network_partition/basic__default"
-            }
-          },
-          "operational_status": "stopped",
-          "ds_source_obj_type": "instance",
-          "data_source": "ec2",
-          "display_name": "i-97bb8ffd",
-          "is_deployed": true,
-          "ds_attributes": {
-            "flavor": {
-              "cores": 1,
-              "bits": 32,
-              "ram": 1740.8,
-              "disk": 160,
-              "name": "Small Instance",
-              "id": "m1.small"
-            },
-            "groups": [
-              "basic",
-              "default"
-            ]
-          },
-          "external_ref": {
-            "type": "ec2_instance",
-            "instance_id": "i-97bb8ffd"
-          },
-          "image_size": "0.17408E4"
-        },
-        "i-656e580f": {
-          "monitoring_item": {
-            "check_ping": {
-              "description": "ping",
-              "display_name": "check_ping",
-              "enabled": true
-            },
-            "check_mem": {
-              "description": "Free Memory",
-              "display_name": "check_mem",
-              "enabled": true
-            },
-            "check_local_procs": {
-              "description": "Processes",
-              "display_name": "check_local_procs",
-              "enabled": true
-            },
-            "check_all_disks": {
-              "description": "Free Space All Disks",
-              "display_name": "check_all_disks",
-              "enabled": true
-            },
-            "check_memory_profiler": {
-              "description": "Memory Profiler",
-              "display_name": "check_memory_profiler",
-              "enabled": true
-            },
-            "check_iostat": {
-              "description": "Iostat",
-              "display_name": "check_iostat",
-              "enabled": true
-            },
-            "check_ssh": {
-              "description": "SSH",
-              "display_name": "check_ssh",
-              "enabled": true
-            }
-          },
-          "ds_key": "[:ec2, :instance, \"i-656e580f\"]",
-          "type": "instance",
-          "node_interface": {
-            "eth0": {
-              "type": "ethernet",
-              "display_name": "eth0",
-              "*network_partition_id": "/network_partition/basic__default"
-            }
-          },
-          "operational_status": "stopped",
-          "ds_source_obj_type": "instance",
-          "data_source": "ec2",
-          "display_name": "i-656e580f",
-          "is_deployed": true,
-          "ds_attributes": {
-            "flavor": {
-              "cores": 1,
-              "bits": 32,
-              "ram": 1740.8,
-              "disk": 160,
-              "name": "Small Instance",
-              "id": "m1.small"
-            },
-            "groups": [
-              "basic",
-              "default"
-            ]
-          },
-          "external_ref": {
-            "type": "ec2_instance",
-            "instance_id": "i-656e580f"
-          },
-          "image_size": "0.17408E4"
-        },
-        "i-33886f59": {
-          "monitoring_item": {
-            "check_ping": {
-              "description": "ping",
-              "display_name": "check_ping",
-              "enabled": true
-            },
-            "check_mem": {
-              "description": "Free Memory",
-              "display_name": "check_mem",
-              "enabled": true
-            },
-            "check_local_procs": {
-              "description": "Processes",
-              "display_name": "check_local_procs",
-              "enabled": true
-            },
-            "check_all_disks": {
-              "description": "Free Space All Disks",
-              "display_name": "check_all_disks",
-              "enabled": true
-            },
-            "check_memory_profiler": {
-              "description": "Memory Profiler",
-              "display_name": "check_memory_profiler",
-              "enabled": true
-            },
-            "check_iostat": {
-              "description": "Iostat",
-              "display_name": "check_iostat",
-              "enabled": true
-            },
-            "check_ssh": {
-              "description": "SSH",
-              "display_name": "check_ssh",
-              "enabled": true
-            }
-          },
-          "ds_key": "[:ec2, :instance, \"i-33886f59\"]",
-          "type": "instance",
-          "node_interface": {
-            "eth0": {
-              "type": "ethernet",
-              "address": "10.248.107.175",
-              "display_name": "eth0",
-              "*network_partition_id": "/network_partition/basic__default"
-            }
-          },
-          "operational_status": "running",
-          "ds_source_obj_type": "instance",
-          "address_access_point": {
-            "internet_ipv4": {
-              "type": "internet",
-              "network_address": {
-                "address": "184.73.175.145",
-                "family": "ipv4"
-              },
-              "display_name": "internet_ipv4",
-              "*network_partition_id": "/network_partition/internet"
-            }
-          },
-          "data_source": "ec2",
-          "display_name": "i-33886f59",
-          "is_deployed": true,
-          "ds_attributes": {
-            "flavor": {
-              "cores": 1,
-              "bits": 32,
-              "ram": 1740.8,
-              "disk": 160,
-              "name": "Small Instance",
-              "id": "m1.small"
-            },
-            "groups": [
-              "basic",
-              "default"
-            ]
-          },
-          "external_ref": {
-            "type": "ec2_instance",
-            "instance_id": "i-33886f59"
-          },
-          "image_size": "0.17408E4"
-        },
-        "i-335f0059": {
-          "monitoring_item": {
-            "check_ping": {
-              "description": "ping",
-              "display_name": "check_ping",
-              "enabled": true
-            },
-            "check_mem": {
-              "description": "Free Memory",
-              "display_name": "check_mem",
-              "enabled": true
-            },
-            "check_local_procs": {
-              "description": "Processes",
-              "display_name": "check_local_procs",
-              "enabled": true
-            },
-            "check_all_disks": {
-              "description": "Free Space All Disks",
-              "display_name": "check_all_disks",
-              "enabled": true
-            },
-            "check_memory_profiler": {
-              "description": "Memory Profiler",
-              "display_name": "check_memory_profiler",
-              "enabled": true
-            },
-            "check_iostat": {
-              "description": "Iostat",
-              "display_name": "check_iostat",
-              "enabled": true
-            },
-            "check_ssh": {
-              "description": "SSH",
-              "display_name": "check_ssh",
-              "enabled": true
-            }
-          },
-          "ds_key": "[:ec2, :instance, \"i-335f0059\"]",
-          "type": "instance",
-          "node_interface": {
-            "eth0": {
-              "type": "ethernet",
-              "display_name": "eth0",
-              "*network_partition_id": "/network_partition/basic__default"
-            }
-          },
-          "operational_status": "stopped",
-          "ds_source_obj_type": "instance",
-          "data_source": "ec2",
-          "display_name": "i-335f0059",
-          "is_deployed": true,
-          "ds_attributes": {
-            "flavor": {
-              "cores": 1,
-              "bits": 32,
-              "ram": 1740.8,
-              "disk": 160,
-              "name": "Small Instance",
-              "id": "m1.small"
-            },
-            "groups": [
-              "basic",
-              "default"
-            ]
-          },
-          "external_ref": {
-            "type": "ec2_instance",
-            "instance_id": "i-335f0059"
-          },
-          "image_size": "0.17408E4"
-        },
-        "i-bd39e2d7": {
-          "monitoring_item": {
-            "check_ping": {
-              "description": "ping",
-              "display_name": "check_ping",
-              "enabled": true
-            },
-            "check_mem": {
-              "description": "Free Memory",
-              "display_name": "check_mem",
-              "enabled": true
-            },
-            "check_local_procs": {
-              "description": "Processes",
-              "display_name": "check_local_procs",
-              "enabled": true
-            },
-            "check_all_disks": {
-              "description": "Free Space All Disks",
-              "display_name": "check_all_disks",
-              "enabled": true
-            },
-            "check_memory_profiler": {
-              "description": "Memory Profiler",
-              "display_name": "check_memory_profiler",
-              "enabled": true
-            },
-            "check_iostat": {
-              "description": "Iostat",
-              "display_name": "check_iostat",
-              "enabled": true
-            },
-            "check_ssh": {
-              "description": "SSH",
-              "display_name": "check_ssh",
-              "enabled": true
-            }
-          },
-          "ds_key": "[:ec2, :instance, \"i-bd39e2d7\"]",
-          "type": "instance",
-          "node_interface": {
-            "eth0": {
-              "type": "ethernet",
-              "display_name": "eth0",
-              "*network_partition_id": "/network_partition/basic__default"
-            }
-          },
-          "operational_status": "stopped",
-          "ds_source_obj_type": "instance",
-          "data_source": "ec2",
-          "display_name": "i-bd39e2d7",
-          "is_deployed": true,
-          "ds_attributes": {
-            "flavor": {
-              "cores": 1,
-              "bits": 32,
-              "ram": 1740.8,
-              "disk": 160,
-              "name": "Small Instance",
-              "id": "m1.small"
-            },
-            "groups": [
-              "basic",
-              "default"
-            ]
-          },
-          "external_ref": {
-            "type": "ec2_instance",
-            "instance_id": "i-bd39e2d7"
-          },
-          "image_size": "0.17408E4"
-        },
-        "i-b43db5d9": {
-          "monitoring_item": {
-            "check_ping": {
-              "description": "ping",
-              "display_name": "check_ping",
-              "enabled": true
-            },
-            "check_mem": {
-              "description": "Free Memory",
-              "display_name": "check_mem",
-              "enabled": true
-            },
-            "check_local_procs": {
-              "description": "Processes",
-              "display_name": "check_local_procs",
-              "enabled": true
-            },
-            "check_all_disks": {
-              "description": "Free Space All Disks",
-              "display_name": "check_all_disks",
-              "enabled": true
-            },
-            "check_memory_profiler": {
-              "description": "Memory Profiler",
-              "display_name": "check_memory_profiler",
-              "enabled": true
-            },
-            "check_iostat": {
-              "description": "Iostat",
-              "display_name": "check_iostat",
-              "enabled": true
-            },
-            "check_ssh": {
-              "description": "SSH",
-              "display_name": "check_ssh",
-              "enabled": true
-            }
-          },
-          "ds_key": "[:ec2, :instance, \"i-b43db5d9\"]",
-          "type": "instance",
-          "node_interface": {
-            "eth0": {
-              "type": "ethernet",
-              "display_name": "eth0",
-              "*network_partition_id": "/network_partition/basic__default"
-            }
-          },
-          "operational_status": "stopped",
-          "ds_source_obj_type": "instance",
-          "data_source": "ec2",
-          "display_name": "i-b43db5d9",
-          "is_deployed": true,
-          "ds_attributes": {
-            "flavor": {
-              "cores": 1,
-              "bits": 32,
-              "ram": 1740.8,
-              "disk": 160,
-              "name": "Small Instance",
-              "id": "m1.small"
-            },
-            "groups": [
-              "basic",
-              "default"
-            ]
-          },
-          "external_ref": {
-            "type": "ec2_instance",
-            "instance_id": "i-b43db5d9"
-          },
-          "image_size": "0.17408E4"
-        },
-        "i-462efd2b": {
-          "monitoring_item": {
-            "check_ping": {
-              "description": "ping",
-              "display_name": "check_ping",
-              "enabled": true
-            },
-            "check_mem": {
-              "description": "Free Memory",
-              "display_name": "check_mem",
-              "enabled": true
-            },
-            "check_local_procs": {
-              "description": "Processes",
-              "display_name": "check_local_procs",
-              "enabled": true
-            },
-            "check_all_disks": {
-              "description": "Free Space All Disks",
-              "display_name": "check_all_disks",
-              "enabled": true
-            },
-            "check_memory_profiler": {
-              "description": "Memory Profiler",
-              "display_name": "check_memory_profiler",
-              "enabled": true
-            },
-            "check_iostat": {
-              "description": "Iostat",
-              "display_name": "check_iostat",
-              "enabled": true
-            },
-            "check_ssh": {
-              "description": "SSH",
-              "display_name": "check_ssh",
-              "enabled": true
-            }
-          },
-          "ds_key": "[:ec2, :instance, \"i-462efd2b\"]",
-          "type": "instance",
-          "node_interface": {
-            "eth0": {
-              "type": "ethernet",
-              "display_name": "eth0",
-              "*network_partition_id": "/network_partition/basic__default"
-            }
-          },
-          "operational_status": "stopped",
-          "ds_source_obj_type": "instance",
-          "data_source": "ec2",
-          "display_name": "i-462efd2b",
-          "is_deployed": true,
-          "ds_attributes": {
-            "flavor": {
-              "cores": 1,
-              "bits": 32,
-              "ram": 1740.8,
-              "disk": 160,
-              "name": "Small Instance",
-              "id": "m1.small"
-            },
-            "groups": [
-              "basic",
-              "default"
-            ]
-          },
-          "external_ref": {
-            "type": "ec2_instance",
-            "instance_id": "i-462efd2b"
-          },
-          "image_size": "0.17408E4"
-        },
-        "i-9bad8cf1": {
-          "monitoring_item": {
-            "check_ping": {
-              "description": "ping",
-              "display_name": "check_ping",
-              "enabled": true
-            },
-            "check_mem": {
-              "description": "Free Memory",
-              "display_name": "check_mem",
-              "enabled": true
-            },
-            "check_local_procs": {
-              "description": "Processes",
-              "display_name": "check_local_procs",
-              "enabled": true
-            },
-            "check_all_disks": {
-              "description": "Free Space All Disks",
-              "display_name": "check_all_disks",
-              "enabled": true
-            },
-            "check_memory_profiler": {
-              "description": "Memory Profiler",
-              "display_name": "check_memory_profiler",
-              "enabled": true
-            },
-            "check_iostat": {
-              "description": "Iostat",
-              "display_name": "check_iostat",
-              "enabled": true
-            },
-            "check_ssh": {
-              "description": "SSH",
-              "display_name": "check_ssh",
-              "enabled": true
-            }
-          },
-          "ds_key": "[:ec2, :instance, \"i-9bad8cf1\"]",
-          "type": "instance",
-          "node_interface": {
-            "eth0": {
-              "type": "ethernet",
-              "display_name": "eth0",
-              "*network_partition_id": "/network_partition/basic__default"
-            }
-          },
-          "operational_status": "stopped",
-          "ds_source_obj_type": "instance",
-          "data_source": "ec2",
-          "display_name": "i-9bad8cf1",
-          "is_deployed": true,
-          "ds_attributes": {
-            "flavor": {
-              "cores": 1,
-              "bits": 32,
-              "ram": 1740.8,
-              "disk": 160,
-              "name": "Small Instance",
-              "id": "m1.small"
-            },
-            "groups": [
-              "basic",
-              "default"
-            ]
-          },
-          "external_ref": {
-            "type": "ec2_instance",
-            "instance_id": "i-9bad8cf1"
-          },
-          "image_size": "0.17408E4"
-        },
-        "i-c5f5afaf": {
-          "monitoring_item": {
-            "check_ping": {
-              "description": "ping",
-              "display_name": "check_ping",
-              "enabled": true
-            },
-            "check_mem": {
-              "description": "Free Memory",
-              "display_name": "check_mem",
-              "enabled": true
-            },
-            "check_local_procs": {
-              "description": "Processes",
-              "display_name": "check_local_procs",
-              "enabled": true
-            },
-            "check_all_disks": {
-              "description": "Free Space All Disks",
-              "display_name": "check_all_disks",
-              "enabled": true
-            },
-            "check_memory_profiler": {
-              "description": "Memory Profiler",
-              "display_name": "check_memory_profiler",
-              "enabled": true
-            },
-            "check_iostat": {
-              "description": "Iostat",
-              "display_name": "check_iostat",
-              "enabled": true
-            },
-            "check_ssh": {
-              "description": "SSH",
-              "display_name": "check_ssh",
-              "enabled": true
-            }
-          },
-          "ds_key": "[:ec2, :instance, \"i-c5f5afaf\"]",
-          "type": "instance",
-          "node_interface": {
-            "eth0": {
-              "type": "ethernet",
-              "display_name": "eth0",
-              "*network_partition_id": "/network_partition/basic__default"
-            }
-          },
-          "operational_status": "stopped",
-          "ds_source_obj_type": "instance",
-          "data_source": "ec2",
-          "display_name": "i-c5f5afaf",
-          "is_deployed": true,
-          "ds_attributes": {
-            "flavor": {
-              "cores": 1,
-              "bits": 32,
-              "ram": 1740.8,
-              "disk": 160,
-              "name": "Small Instance",
-              "id": "m1.small"
-            },
-            "groups": [
-              "basic",
-              "default"
-            ]
-          },
-          "external_ref": {
-            "type": "ec2_instance",
-            "instance_id": "i-c5f5afaf"
-          },
-          "image_size": "0.17408E4"
-        },
-        "i-2f5b7a44": {
-          "monitoring_item": {
-            "check_ping": {
-              "description": "ping",
-              "display_name": "check_ping",
-              "enabled": true
-            },
-            "check_mem": {
-              "description": "Free Memory",
-              "display_name": "check_mem",
-              "enabled": true
-            },
-            "check_local_procs": {
-              "description": "Processes",
-              "display_name": "check_local_procs",
-              "enabled": true
-            },
-            "check_all_disks": {
-              "description": "Free Space All Disks",
-              "display_name": "check_all_disks",
-              "enabled": true
-            },
-            "check_memory_profiler": {
-              "description": "Memory Profiler",
-              "display_name": "check_memory_profiler",
-              "enabled": true
-            },
-            "check_iostat": {
-              "description": "Iostat",
-              "display_name": "check_iostat",
-              "enabled": true
-            },
-            "check_ssh": {
-              "description": "SSH",
-              "display_name": "check_ssh",
-              "enabled": true
-            }
-          },
-          "ds_key": "[:ec2, :instance, \"i-2f5b7a44\"]",
-          "type": "instance",
-          "node_interface": {
-            "eth0": {
-              "type": "ethernet",
-              "display_name": "eth0",
-              "*network_partition_id": "/network_partition/basic__default"
-            }
-          },
-          "operational_status": "stopped",
-          "ds_source_obj_type": "instance",
-          "data_source": "ec2",
-          "display_name": "i-2f5b7a44",
-          "is_deployed": true,
-          "ds_attributes": {
-            "flavor": {
-              "cores": 1,
-              "bits": 32,
-              "ram": 1740.8,
-              "disk": 160,
-              "name": "Small Instance",
-              "id": "m1.small"
-            },
-            "groups": [
-              "basic",
-              "default"
-            ]
-          },
-          "external_ref": {
-            "type": "ec2_instance",
-            "instance_id": "i-2f5b7a44"
-          },
-          "image_size": "0.17408E4"
-        },
-        "i-07af096d": {
-          "monitoring_item": {
-            "check_ping": {
-              "description": "ping",
-              "display_name": "check_ping",
-              "enabled": true
-            },
-            "check_mem": {
-              "description": "Free Memory",
-              "display_name": "check_mem",
-              "enabled": true
-            },
-            "check_local_procs": {
-              "description": "Processes",
-              "display_name": "check_local_procs",
-              "enabled": true
-            },
-            "check_all_disks": {
-              "description": "Free Space All Disks",
-              "display_name": "check_all_disks",
-              "enabled": true
-            },
-            "check_memory_profiler": {
-              "description": "Memory Profiler",
-              "display_name": "check_memory_profiler",
-              "enabled": true
-            },
-            "check_iostat": {
-              "description": "Iostat",
-              "display_name": "check_iostat",
-              "enabled": true
-            },
-            "check_ssh": {
-              "description": "SSH",
-              "display_name": "check_ssh",
-              "enabled": true
-            }
-          },
-          "ds_key": "[:ec2, :instance, \"i-07af096d\"]",
-          "type": "instance",
-          "node_interface": {
-            "eth0": {
-              "type": "ethernet",
-              "display_name": "eth0",
-              "*network_partition_id": "/network_partition/basic__default"
-            }
-          },
-          "operational_status": "stopped",
-          "ds_source_obj_type": "instance",
-          "data_source": "ec2",
-          "display_name": "i-07af096d",
-          "is_deployed": true,
-          "ds_attributes": {
-            "flavor": {
-              "cores": 1,
-              "bits": 32,
-              "ram": 1740.8,
-              "disk": 160,
-              "name": "Small Instance",
-              "id": "m1.small"
-            },
-            "groups": [
-              "basic",
-              "default"
-            ]
-          },
-          "external_ref": {
-            "type": "ec2_instance",
-            "instance_id": "i-07af096d"
-          },
-          "image_size": "0.17408E4"
-        },
-        "i-63775608": {
-          "monitoring_item": {
-            "check_ping": {
-              "description": "ping",
-              "display_name": "check_ping",
-              "enabled": true
-            },
-            "check_mem": {
-              "description": "Free Memory",
-              "display_name": "check_mem",
-              "enabled": true
-            },
-            "check_local_procs": {
-              "description": "Processes",
-              "display_name": "check_local_procs",
-              "enabled": true
-            },
-            "check_all_disks": {
-              "description": "Free Space All Disks",
-              "display_name": "check_all_disks",
-              "enabled": true
-            },
-            "check_memory_profiler": {
-              "description": "Memory Profiler",
-              "display_name": "check_memory_profiler",
-              "enabled": true
-            },
-            "check_iostat": {
-              "description": "Iostat",
-              "display_name": "check_iostat",
-              "enabled": true
-            },
-            "check_ssh": {
-              "description": "SSH",
-              "display_name": "check_ssh",
-              "enabled": true
-            }
-          },
-          "ds_key": "[:ec2, :instance, \"i-63775608\"]",
-          "type": "instance",
-          "node_interface": {
-            "eth0": {
-              "type": "ethernet",
-              "display_name": "eth0",
-              "*network_partition_id": "/network_partition/basic__default"
-            }
-          },
-          "operational_status": "stopped",
-          "ds_source_obj_type": "instance",
-          "data_source": "ec2",
-          "display_name": "i-63775608",
-          "is_deployed": true,
-          "ds_attributes": {
-            "flavor": {
-              "cores": 1,
-              "bits": 32,
-              "ram": 1740.8,
-              "disk": 160,
-              "name": "Small Instance",
-              "id": "m1.small"
-            },
-            "groups": [
-              "basic",
-              "default"
-            ]
-          },
-          "external_ref": {
-            "type": "ec2_instance",
-            "instance_id": "i-63775608"
-          },
-          "image_size": "0.17408E4"
         }
       },
       "data_source": {
         "ec2": {
-          "last_collection_timestamp": "Wed Dec 01 02:58:39 +0000 2010",
           "display_name": "ec2",
           "data_source_entry": {
             "node_group_member": {
@@ -1470,10 +43,6 @@
         }
       },
       "node_group": {
-        "ec2_sg_basic__default": {
-          "description": "Group corresponding to ec2 security groups [basic,default]",
-          "display_name": "ec2 security groups [basic,default]"
-        },
         "all_instances": {
           "dynamic_search_pattern": {
             ":relation": ":node",
@@ -1564,31 +133,31 @@
           "is_deployed": true,
           "ds_attributes": {
             "type": "machine",
-            "owner_id": "411986592491",
-            "product_codes": [
-
-            ],
-            "state": "available",
-            "root_device_name": "/dev/sda1",
-            "kernel_id": "aki-5f15f636",
-            "flavor": {
-              "disk": null
-            },
             "block_device_mapping": [
               {
-                "deleteOnTermination": "true",
-                "volumeSize": "15",
                 "snapshotId": "snap-caa459a1",
-                "deviceName": "/dev/sda1"
+                "deviceName": "/dev/sda1",
+                "deleteOnTermination": "true",
+                "volumeSize": "15"
               }
             ],
             "root_device_type": "ebs",
-            "location": "411986592491/rnp-chef-09-6-ubuntu-910-x86_32",
-            "architecture": "i386",
+            "owner_id": "411986592491",
+            "state": "available",
             "is_public": false,
+            "flavor": {
+              "disk": null
+            },
+            "ramdisk_id": "ari-d5709dbc",
+            "location": "411986592491/rnp-chef-09-6-ubuntu-910-x86_32",
+            "product_codes": [
+
+            ],
+            "architecture": "i386",
             "id": "ami-06c72c6f",
+            "root_device_name": "/dev/sda1",
             "platform": null,
-            "ramdisk_id": "ari-d5709dbc"
+            "kernel_id": "aki-5f15f636"
           },
           "external_ref": {
             "type": "ec2_image",
@@ -1596,8 +165,8 @@
           },
           "ui": {
             "images": {
-              "tiny": "",
               "tnail": "ubuntu.png",
+              "tiny": "",
               "display": "ubuntu.png"
             }
           }
@@ -1672,31 +241,31 @@
           "is_deployed": true,
           "ds_attributes": {
             "type": "machine",
-            "owner_id": "411986592491",
-            "product_codes": [
-
-            ],
-            "state": "available",
-            "root_device_name": "/dev/sda1",
-            "kernel_id": "aki-5f15f636",
-            "flavor": {
-              "disk": null
-            },
             "block_device_mapping": [
               {
-                "deleteOnTermination": "true",
-                "volumeSize": "15",
                 "snapshotId": "snap-d6bf91bd",
-                "deviceName": "/dev/sda1"
+                "deviceName": "/dev/sda1",
+                "deleteOnTermination": "true",
+                "volumeSize": "15"
               }
             ],
             "root_device_type": "ebs",
-            "location": "411986592491/rnp-chef-09-8-ubuntu-lucid-x86_32",
-            "architecture": "i386",
+            "owner_id": "411986592491",
+            "state": "available",
             "is_public": false,
+            "flavor": {
+              "disk": null
+            },
+            "ramdisk_id": "ari-d5709dbc",
+            "location": "411986592491/rnp-chef-09-8-ubuntu-lucid-x86_32",
+            "product_codes": [
+
+            ],
+            "architecture": "i386",
             "id": "ami-e2cc398b",
+            "root_device_name": "/dev/sda1",
             "platform": null,
-            "ramdisk_id": "ari-d5709dbc"
+            "kernel_id": "aki-5f15f636"
           },
           "external_ref": {
             "type": "ec2_image",
@@ -1704,8 +273,8 @@
           },
           "ui": {
             "images": {
-              "tiny": "",
               "tnail": "ubuntu.png",
+              "tiny": "",
               "display": "ubuntu.png"
             }
           }
@@ -1713,7 +282,7 @@
       },
       "data_source": {
         "chef": {
-          "last_collection_timestamp": "Wed Dec 01 02:58:12 +0000 2010",
+          "last_collection_timestamp": "Wed Dec 01 21:03:40 +0000 2010",
           "display_name": "chef",
           "data_source_entry": {
             "component_recipe": {
@@ -1741,7 +310,7 @@
           "ds_name": "chef"
         },
         "ec2": {
-          "last_collection_timestamp": "Wed Dec 01 02:58:24 +0000 2010",
+          "last_collection_timestamp": "Wed Dec 01 21:03:57 +0000 2010",
           "display_name": "ec2",
           "data_source_entry": {
             "node_image": {
@@ -1755,7 +324,7 @@
           "ds_name": "ec2"
         },
         "user_data": {
-          "last_collection_timestamp": "Wed Dec 01 02:58:45 +0000 2010",
+          "last_collection_timestamp": "Wed Dec 01 21:04:16 +0000 2010",
           "display_name": "user_data",
           "data_source_entry": {
             "component": {
@@ -1786,14 +355,14 @@
             "ui": "{\"images\": {\"tnail\":\"hadoop-pig.png\",\"display\":\"hadoop-pig.png\",\"tiny\":\"\"}}"
           },
           "external_ref": {
-            "recipe_name": "hadoop::pig",
-            "type": "chef_recipe"
+            "type": "chef_recipe",
+            "recipe_name": "hadoop::pig"
           },
           "only_one_per_node": true,
           "ui": {
             "images": {
-              "tiny": "",
               "tnail": "hadoop-pig.png",
+              "tiny": "",
               "display": "hadoop-pig.png"
             }
           }
@@ -1837,14 +406,14 @@
             "ui": "{\"images\": {\"tnail\":\"cloudera.png\",\"display\":\"cloudera.png\",\"tiny\":\"\"}}"
           },
           "external_ref": {
-            "recipe_name": "hadoop_cloudera_c3",
-            "type": "chef_recipe"
+            "type": "chef_recipe",
+            "recipe_name": "hadoop_cloudera_c3"
           },
           "only_one_per_node": true,
           "ui": {
             "images": {
-              "tiny": "",
               "tnail": "cloudera.png",
+              "tiny": "",
               "display": "cloudera.png"
             }
           }
@@ -1877,15 +446,77 @@
             "ui": "{\"images\": {\"tnail\":\"postgres.png\",\"display\":\"postgres.png\",\"tiny\":\"\"}}"
           },
           "external_ref": {
-            "recipe_name": "postgresql::server",
-            "type": "chef_recipe"
+            "type": "chef_recipe",
+            "recipe_name": "postgresql::server"
           },
           "only_one_per_node": true,
           "ui": {
             "images": {
-              "tiny": "",
               "tnail": "postgres.png",
+              "tiny": "",
               "display": "postgres.png"
+            }
+          }
+        },
+        "mysql::slave": {
+          "ds_key": "[:user_data, \"/library/test/mysql::slave\"]",
+          "type": "template",
+          "description": "For extending mysql server to serve as a slave",
+          "attribute": {
+            "mysql][sap_ref_to_master]": {
+              "semantic_type": {
+                "sap_ref": {
+                  "application": "sql::mysql"
+                }
+              },
+              "description": "mysql service access point reference for slave to connect with master",
+              "required": true,
+              "semantic_type_summary": "sap_ref",
+              "read_only": false,
+              "is_port": true,
+              "display_name": "sap_ref_to_master",
+              "external_ref": {
+                "type": "service_attribute",
+                "path": "service[mysql_server][sap_ref_to_master]"
+              },
+              "num_attached_input_links": 0,
+              "data_type": "json",
+              "num_attached_output_links": 0
+            },
+            "mysql][master_log_ref]": {
+              "semantic_type": "\"mysql_master_log_info\"",
+              "description": "reference for mysql slave to get master log position",
+              "required": true,
+              "semantic_type_summary": "mysql_master_log_info",
+              "read_only": false,
+              "is_port": true,
+              "display_name": "master_log_ref",
+              "external_ref": {
+                "type": "service_attribute",
+                "path": "service[mysql_server][master_log_ref]"
+              },
+              "num_attached_input_links": 0,
+              "data_type": "json",
+              "num_attached_output_links": 0
+            }
+          },
+          "display_name": "mysql::slave",
+          "ds_attributes": {
+            "qualified_ref": "/library/test/mysql::slave",
+            "ref": "mysql::slave",
+            "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}"
+          },
+          "external_ref": {
+            "type": "chef_recipe",
+            "recipe_name": "mysql::slave"
+          },
+          "basic_type": "feature",
+          "only_one_per_node": true,
+          "ui": {
+            "images": {
+              "tnail": "mysql.png",
+              "tiny": "",
+              "display": "mysql.png"
             }
           }
         },
@@ -1917,14 +548,14 @@
             "ui": "{\"images\": {\"tnail\":\"postgres.png\",\"display\":\"postgres.png\",\"tiny\":\"\"}}"
           },
           "external_ref": {
-            "recipe_name": "postgresql::client",
-            "type": "chef_recipe"
+            "type": "chef_recipe",
+            "recipe_name": "postgresql::client"
           },
           "only_one_per_node": true,
           "ui": {
             "images": {
-              "tiny": "",
               "tnail": "postgres.png",
+              "tiny": "",
               "display": "postgres.png"
             }
           }
@@ -1940,14 +571,14 @@
             "ui": "{\"images\": {\"tnail\":\"hadoop-hive.png\",\"display\":\"hadoop-hive.png\",\"tiny\":\"\"}}"
           },
           "external_ref": {
-            "recipe_name": "hadoop::hive",
-            "type": "chef_recipe"
+            "type": "chef_recipe",
+            "recipe_name": "hadoop::hive"
           },
           "only_one_per_node": true,
           "ui": {
             "images": {
-              "tiny": "",
               "tnail": "hadoop-hive.png",
+              "tiny": "",
               "display": "hadoop-hive.png"
             }
           }
@@ -1963,14 +594,14 @@
             "ui": "{\"images\": {\"tnail\":\"nagios.png\",\"display\":\"nagios.png\",\"tiny\":\"\"}}"
           },
           "external_ref": {
-            "recipe_name": "nagios",
-            "type": "chef_recipe"
+            "type": "chef_recipe",
+            "recipe_name": "nagios"
           },
           "only_one_per_node": true,
           "ui": {
             "images": {
-              "tiny": "",
               "tnail": "nagios.png",
+              "tiny": "",
               "display": "nagios.png"
             }
           }
@@ -1986,61 +617,15 @@
             "ui": "{\"images\": {\"tnail\":\"java-01.png\",\"display\":\"java-01.png\",\"tiny\":\"\"}}"
           },
           "external_ref": {
-            "recipe_name": "java",
-            "type": "chef_recipe"
+            "type": "chef_recipe",
+            "recipe_name": "java"
           },
           "only_one_per_node": true,
           "ui": {
             "images": {
-              "tiny": "",
               "tnail": "java-01.png",
-              "display": "java-01.png"
-            }
-          }
-        },
-        "mysql::client_app1": {
-          "ds_key": "[:user_data, \"/library/test/mysql::client_app1\"]",
-          "type": "template",
-          "description": "Sample client application that connects to a mysql database",
-          "attribute": {
-            "mysql][sap_ref]": {
-              "semantic_type": {
-                "sap_ref": {
-                  "application": "sql::mysql"
-                }
-              },
-              "description": "mysql service access point reference for client",
-              "required": true,
-              "semantic_type_summary": "sap_ref",
-              "read_only": false,
-              "is_port": true,
-              "display_name": "sap_ref",
-              "external_ref": {
-                "type": "service_attribute",
-                "path": "service[mysql_server][sap_ref]"
-              },
-              "num_attached_input_links": 0,
-              "data_type": "json",
-              "num_attached_output_links": 0
-            }
-          },
-          "display_name": "mysql::client_app1",
-          "ds_attributes": {
-            "qualified_ref": "/library/test/mysql::client_app1",
-            "ref": "mysql::client_app1",
-            "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}"
-          },
-          "external_ref": {
-            "recipe_name": "mysql::client_app1",
-            "type": "chef_recipe"
-          },
-          "basic_type": "application",
-          "only_one_per_node": true,
-          "ui": {
-            "images": {
               "tiny": "",
-              "tnail": "mysql.png",
-              "display": "mysql.png"
+              "display": "java-01.png"
             }
           }
         },
@@ -2055,15 +640,15 @@
             "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}"
           },
           "external_ref": {
-            "recipe_name": "mysql::client",
-            "type": "chef_recipe"
+            "type": "chef_recipe",
+            "recipe_name": "mysql::client"
           },
           "basic_type": "package",
           "only_one_per_node": true,
           "ui": {
             "images": {
-              "tiny": "",
               "tnail": "mysql.png",
+              "tiny": "",
               "display": "mysql.png"
             }
           }
@@ -2079,14 +664,14 @@
             "ui": "{\"images\": {\"tnail\":\"java-01.png\",\"display\":\"java-01.png\",\"tiny\":\"\"}}"
           },
           "external_ref": {
-            "recipe_name": "java_sun",
-            "type": "chef_recipe"
+            "type": "chef_recipe",
+            "recipe_name": "java_sun"
           },
           "only_one_per_node": true,
           "ui": {
             "images": {
-              "tiny": "",
               "tnail": "java-01.png",
+              "tiny": "",
               "display": "java-01.png"
             }
           }
@@ -2102,14 +687,14 @@
             "ui": "{\"images\": {\"tnail\":\"hadoop.png\",\"display\":\"hadoop.png\",\"tiny\":\"\"}}"
           },
           "external_ref": {
-            "recipe_name": "hadoop",
-            "type": "chef_recipe"
+            "type": "chef_recipe",
+            "recipe_name": "hadoop"
           },
           "only_one_per_node": true,
           "ui": {
             "images": {
-              "tiny": "",
               "tnail": "hadoop.png",
+              "tiny": "",
               "display": "hadoop.png"
             }
           }
@@ -2177,14 +762,14 @@
             "ui": "{\"images\": {\"tnail\":\"rabbitmq.png\",\"display\":\"rabbitmq.png\",\"tiny\":\"\"}}"
           },
           "external_ref": {
-            "recipe_name": "rabbitmq::edge",
-            "type": "chef_recipe"
+            "type": "chef_recipe",
+            "recipe_name": "rabbitmq::edge"
           },
           "only_one_per_node": true,
           "ui": {
             "images": {
-              "tiny": "",
               "tnail": "rabbitmq.png",
+              "tiny": "",
               "display": "rabbitmq.png"
             }
           }
@@ -2252,15 +837,57 @@
             "ui": "{\"images\": {\"tnail\":\"rabbitmq.png\",\"display\":\"rabbitmq.png\",\"tiny\":\"\"}}"
           },
           "external_ref": {
-            "recipe_name": "rabbitmq::default",
-            "type": "chef_recipe"
+            "type": "chef_recipe",
+            "recipe_name": "rabbitmq::default"
           },
           "only_one_per_node": true,
           "ui": {
             "images": {
-              "tiny": "",
               "tnail": "rabbitmq.png",
+              "tiny": "",
               "display": "rabbitmq.png"
+            }
+          }
+        },
+        "mysql::master": {
+          "ds_key": "[:user_data, \"/library/test/mysql::master\"]",
+          "type": "template",
+          "description": "For extending mysql server to serve as a master",
+          "attribute": {
+            "mysql][master_log]": {
+              "semantic_type": "\"mysql_master_log_info\"",
+              "description": "master log position",
+              "required": true,
+              "semantic_type_summary": "mysql_master_log_info",
+              "read_only": false,
+              "is_port": true,
+              "display_name": "master_log",
+              "external_ref": {
+                "type": "service_attribute",
+                "path": "service[mysql_server][master_log]"
+              },
+              "num_attached_input_links": 0,
+              "data_type": "json",
+              "num_attached_output_links": 0
+            }
+          },
+          "display_name": "mysql::master",
+          "ds_attributes": {
+            "qualified_ref": "/library/test/mysql::master",
+            "ref": "mysql::master",
+            "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}"
+          },
+          "external_ref": {
+            "type": "chef_recipe",
+            "recipe_name": "mysql::master"
+          },
+          "basic_type": "feature",
+          "only_one_per_node": true,
+          "ui": {
+            "images": {
+              "tnail": "mysql.png",
+              "tiny": "",
+              "display": "mysql.png"
             }
           }
         },
@@ -2275,14 +902,14 @@
             "ui": "{\"images\": {\"tnail\":\"nagios.png\",\"display\":\"nagios.png\",\"tiny\":\"\"}}"
           },
           "external_ref": {
-            "recipe_name": "nagios::client",
-            "type": "chef_recipe"
+            "type": "chef_recipe",
+            "recipe_name": "nagios::client"
           },
           "only_one_per_node": true,
           "ui": {
             "images": {
-              "tiny": "",
               "tnail": "nagios.png",
+              "tiny": "",
               "display": "nagios.png"
             }
           }
@@ -2344,14 +971,14 @@
             "ui": "{\"images\": {\"tnail\":\"cloudera.png\",\"display\":\"cloudera.png\",\"tiny\":\"\"}}"
           },
           "external_ref": {
-            "recipe_name": "hadoop_cloudera_c3::conf_pseudo",
-            "type": "chef_recipe"
+            "type": "chef_recipe",
+            "recipe_name": "hadoop_cloudera_c3::conf_pseudo"
           },
           "only_one_per_node": true,
           "ui": {
             "images": {
-              "tiny": "",
               "tnail": "cloudera.png",
+              "tiny": "",
               "display": "cloudera.png"
             }
           }
@@ -2411,16 +1038,79 @@
             "ui": "{\"images\": {\"tnail\":\"user.png\",\"display\":\"user.png\",\"tiny\":\"\"}}"
           },
           "external_ref": {
-            "recipe_name": "user_account",
-            "type": "chef_recipe"
+            "type": "chef_recipe",
+            "recipe_name": "user_account"
           },
           "basic_type": "user",
           "only_one_per_node": true,
           "ui": {
             "images": {
-              "tiny": "",
               "tnail": "user.png",
+              "tiny": "",
               "display": "user.png"
+            }
+          }
+        },
+        "redis": {
+          "monitoring_item": {
+            "inet_service_up": {
+              "display_name": "inet_service_up",
+              "enabled": true
+            },
+            "redis_basic_health": {
+              "display_name": "redis_basic_health",
+              "enabled": true
+            }
+          },
+          "ds_key": "[:user_data, \"/library/test/redis\"]",
+          "type": "template",
+          "description": "Installs/Configures redis",
+          "attribute": {
+            "redis][sap_config][ipv4]": {
+              "semantic_type": {
+                ":array": {
+                  "sap_config[ipv4]": {
+                    "application": "redis"
+                  }
+                }
+              },
+              "value_asserted": [
+                {
+                  "port": null,
+                  "protocol": "tcp"
+                }
+              ],
+              "required": false,
+              "semantic_type_summary": "sap_config[ipv4]",
+              "read_only": false,
+              "is_port": true,
+              "display_name": "sap_config[ipv4]",
+              "external_ref": {
+                "type": "service_attribute",
+                "path": "service[redis_service][sap_config][ipv4]"
+              },
+              "num_attached_input_links": 0,
+              "data_type": "json",
+              "num_attached_output_links": 0
+            }
+          },
+          "display_name": "redis",
+          "ds_attributes": {
+            "qualified_ref": "/library/test/redis",
+            "ref": "redis",
+            "ui": "{\"images\": {\"tnail\":\"redis.png\",\"display\":\"redis.png\",\"tiny\":\"\"}}"
+          },
+          "external_ref": {
+            "type": "chef_recipe",
+            "recipe_name": "redis"
+          },
+          "basic_type": "service",
+          "only_one_per_node": true,
+          "ui": {
+            "images": {
+              "tnail": "redis.png",
+              "tiny": "",
+              "display": "redis.png"
             }
           }
         },
@@ -2710,79 +1400,16 @@
             "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}"
           },
           "external_ref": {
-            "recipe_name": "mysql::server",
-            "type": "chef_recipe"
+            "type": "chef_recipe",
+            "recipe_name": "mysql::server"
           },
           "basic_type": "service",
           "only_one_per_node": true,
           "ui": {
             "images": {
-              "tiny": "",
               "tnail": "mysql.png",
-              "display": "mysql.png"
-            }
-          }
-        },
-        "redis": {
-          "monitoring_item": {
-            "inet_service_up": {
-              "display_name": "inet_service_up",
-              "enabled": true
-            },
-            "redis_basic_health": {
-              "display_name": "redis_basic_health",
-              "enabled": true
-            }
-          },
-          "ds_key": "[:user_data, \"/library/test/redis\"]",
-          "type": "template",
-          "description": "Installs/Configures redis",
-          "attribute": {
-            "redis][sap_config][ipv4]": {
-              "semantic_type": {
-                ":array": {
-                  "sap_config[ipv4]": {
-                    "application": "redis"
-                  }
-                }
-              },
-              "value_asserted": [
-                {
-                  "port": null,
-                  "protocol": "tcp"
-                }
-              ],
-              "required": false,
-              "semantic_type_summary": "sap_config[ipv4]",
-              "read_only": false,
-              "is_port": true,
-              "display_name": "sap_config[ipv4]",
-              "external_ref": {
-                "type": "service_attribute",
-                "path": "service[redis_service][sap_config][ipv4]"
-              },
-              "num_attached_input_links": 0,
-              "data_type": "json",
-              "num_attached_output_links": 0
-            }
-          },
-          "display_name": "redis",
-          "ds_attributes": {
-            "qualified_ref": "/library/test/redis",
-            "ref": "redis",
-            "ui": "{\"images\": {\"tnail\":\"redis.png\",\"display\":\"redis.png\",\"tiny\":\"\"}}"
-          },
-          "external_ref": {
-            "recipe_name": "redis",
-            "type": "chef_recipe"
-          },
-          "basic_type": "service",
-          "only_one_per_node": true,
-          "ui": {
-            "images": {
               "tiny": "",
-              "tnail": "redis.png",
-              "display": "redis.png"
+              "display": "mysql.png"
             }
           }
         },
@@ -2797,14 +1424,14 @@
             "ui": "{\"images\": {\"tnail\":\"hadoop.png\",\"display\":\"hadoop.png\",\"tiny\":\"\"}}"
           },
           "external_ref": {
-            "recipe_name": "hadoop::doc",
-            "type": "chef_recipe"
+            "type": "chef_recipe",
+            "recipe_name": "hadoop::doc"
           },
           "only_one_per_node": true,
           "ui": {
             "images": {
-              "tiny": "",
               "tnail": "hadoop.png",
+              "tiny": "",
               "display": "hadoop.png"
             }
           }
@@ -2820,14 +1447,14 @@
             "ui": "{\"images\": {\"tnail\":\"nagios.png\",\"display\":\"nagios.png\",\"tiny\":\"\"}}"
           },
           "external_ref": {
-            "recipe_name": "nagios::server",
-            "type": "chef_recipe"
+            "type": "chef_recipe",
+            "recipe_name": "nagios::server"
           },
           "only_one_per_node": true,
           "ui": {
             "images": {
-              "tiny": "",
               "tnail": "nagios.png",
+              "tiny": "",
               "display": "nagios.png"
             }
           }

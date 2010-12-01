@@ -44,9 +44,6 @@
 	"rabbitmq::default": {
           "ui": "{\"images\": {\"tnail\":\"rabbitmq.png\",\"display\":\"rabbitmq.png\",\"tiny\":\"\"}}"
         },
-	"mysql::server_ec2": {
-          "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}"
-        },
 	"nagios::client": {
           "ui": "{\"images\": {\"tnail\":\"nagios.png\",\"display\":\"nagios.png\",\"tiny\":\"\"}}"
         },

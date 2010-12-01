@@ -63,6 +63,8 @@ module XYZ
 
       model_list = get_objects(model_name.to_sym,where_clause)
       model_list.each_with_index do |model,index|
+pp '---------------------------------'
+pp model
         model_list[index][:model_name] = model_name
           body_value = ''
           model_list[index][:ui].nil? ? model_list[index][:ui] = {} : nil

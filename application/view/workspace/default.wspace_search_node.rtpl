@@ -10,7 +10,7 @@
 					<div class="l-col-body"></div>
 					<div class="corner bl"></div>
 				</div>
-				<div id="body_{%=model[:id]%}" class="body">{%=model[:display_name]%}</div>
+				<div id="body_{%=model[:id]%}" class="body">{%=model[:body_value]%}</div>
 				<div class="r-col">
 					<div class="corner tr"></div>
 					<div class="r-col-body"></div>

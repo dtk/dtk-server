@@ -480,7 +480,8 @@ console.log('I guess I am hitting this now!!!!');
 					var queryParams = 'target_model_name='+vspaceType+'&target_id='+vspaceId+'&ui='+uiStr;
 //					var queryParams = 'target_model_name=project&target_id=2147483649&ui='+uiStr;
 //					queryParams += '&redirect='+modelName+'/wspace_display';
-					queryParams += '&model_redirect='+modelName+'&action_redirect=wspace_display&id_redirect=*id';
+//					queryParams += '&model_redirect='+modelName+'&action_redirect=wspace_display&id_redirect=*id';
+					queryParams += '&model_redirect='+modelName+'&action_redirect=wspace_display_2&id_redirect=*id';
 //console.log(queryParams);
 //return;
 					var completeCallback = function(){

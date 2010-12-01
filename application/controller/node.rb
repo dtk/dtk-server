@@ -80,6 +80,7 @@ p 'Panel IS:'+tpl_result[:panel]
 #        component[:onclick] = "R8.Workspace.Dock.loadDockPanel('node/get_components/2147484111');"
       end
 
+      return {} if component_list.empty?
       component_list[0][:css_class] = 'first'
       component_list[component_list.length-1][:css_class] = 'last'
 

@@ -30,8 +30,9 @@ pp get_base_object_dataset_needs_to_be_set(:component).ppsql
       field_set = Model::FieldSet.new(model_name,cols)
       ds = SearchObject.create_from_field_set(field_set,ret_session_context_id(),filter).create_dataset()
       ds = ds.where(:param_node_id => node_id.to_i) if node_id
-
+pp [:sql_query,ds.ppsql]
       port_list = ds.all
+pp [:port_list,port_list]
       port_list.each do |el|
         val = el[:attribute_value]
         el[:value] = (val.kind_of?(Hash) or val.kind_of?(Array)) ? JSON.generate(val) : val

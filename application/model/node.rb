@@ -74,10 +74,7 @@ module XYZ
       override_attrs[:type] = "staged"
 
       override_attrs[:ref] = SQL::ColRef.concat("s-",:ref)
-      override_attrs[:display_name] = SQL::ColRef.qualified_ref
-      #a possible replacement for 2 above
-      # override_attrs[:display_name] = SQL::ColRef.concat{|o|["s-",o.qualified_ref]}
-
+      override_attrs[:display_name] = SQL::ColRef.concat{|o|["s-",:display_name,o.case{[[{:ref_num=> nil},""],o.concat("-",:ref_num)]}]}
       override_attrs[:external_ref] = nil
     end
 

@@ -319,6 +319,7 @@ module XYZ
         :external => true,
       },
       "sap_ref" => {
+        :external => true
       },
       "sap[socket]" => {
       },

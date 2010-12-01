@@ -673,6 +673,13 @@ console.log('call to add item to workspace failed.....');
 
 				_viewSpaces[vSpaceId].addItems(items);
 			},
+
+			renderItemPorts: function(itemId,ports,viewSpaceId) {
+				var vSpaceId = (typeof(viewSpaceId) == 'undefined') ? _currentViewSpace : viewSpaceId;
+
+				_viewSpaces[vSpaceId].renderItemPorts(itemId,ports);
+			},
+
 /*
 			setupItem: function(itemDef) {
 console.log(itemDef);

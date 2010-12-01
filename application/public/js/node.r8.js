@@ -6,6 +6,7 @@ if (!R8.Node) {
 			_id = _def['object']['id'],
 			_type = _def['type'],
 			_dataModel = null,
+			_ports = null,
 			_status = null,
 			_node = null,
 			_top = null,
@@ -71,6 +72,34 @@ if (!R8.Node) {
 						return null;
 						break;
 				}
+			},
+
+			renderPorts: function() {
+console.log('at top of render ports.....');
+				if(_ports == null) {
+					var that = this;
+					var asynCall = function(){
+						var params = {
+							'cfg': {
+								'method': 'GET'
+							},
+							'callbacks': {'io:success':that.loadPorts}
+						};
+						R8.Ctrl.call('node/get_ports/' + _id, params);
+					}
+					setTimeout(asynCall, 1);
+//					setTimeout(this.renderPorts,200);
+					return;
+				}
+console.log('_ports doesnt equal null anymore.....');
+			},
+
+			loadPorts: function(ioId,responseObj) {
+				eval("R8.Ctrl.callResults[ioId]['response'] =" + responseObj.responseText);
+				var response = R8.Ctrl.callResults[ioId]['response'];
+				var ports = response['application_node_get_ports']['content'][0]['data'];
+console.log(ports);
+
 			},
 
 			setupMinMax: function() {

@@ -58,6 +58,10 @@ if (!R8.ViewSpace) {
 				this.purgePendingDelete();
 			},
 
+			renderItemPorts: function(itemId,ports) {
+console.log(ports);
+			},
+
 			purgePendingDelete: function() {
 				var itemChildren = _node.get('children');
 
@@ -170,6 +174,7 @@ if (!R8.ViewSpace) {
 				_items[id].init();
 
 				this.regNewItem(_items[id]);
+				_items[id].renderPorts();
 			},
 
 			refreshGroup: function(group) {

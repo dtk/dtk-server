@@ -146,6 +146,45 @@ p 'Panel IS:'+tpl_result[:panel]
       }
 =end
     end
+
+    def wspace_render_ports(id=nil)
+      filter = [:and,[:eq,:is_port,true],[:eq,:port_is_external,true]]
+      cols = [:id,:display_name,:base_object_node,:value_derived,:value_asserted]
+      field_set = Model::FieldSet.new(:attribute,cols)
+      ds = SearchObject.create_from_field_set(field_set,ret_session_context_id(),filter).create_dataset()
+      ds = ds.where(:param_node_id => id.to_i) if id
+      port_list = ds.all
+      port_list.each do |el|
+        val = el[:attribute_value]
+        el[:value] = (val.kind_of?(Hash) or val.kind_of?(Array)) ? JSON.generate(val) : val
+      end
+
+#      action_name = "list_ports_under_node"
+#      tpl = R8Tpl::TemplateR8.new("#{model_name()}/#{action_name}",user_context())
+#      tpl.assign("port_list",port_list)
+#      return {:content => tpl.render()}
+
+      ports = JSON.generate(port_list)
+      run_javascript("R8.Workspace.renderItemPorts('#{id}',#{ports});")
+
+      return {}
+    end
+
+    def get_ports(id=nil)
+      filter = [:and,[:eq,:is_port,true],[:eq,:port_is_external,true]]
+      cols = [:id,:display_name,:base_object_node,:value_derived,:value_asserted]
+      field_set = Model::FieldSet.new(:attribute,cols)
+      ds = SearchObject.create_from_field_set(field_set,ret_session_context_id(),filter).create_dataset()
+      ds = ds.where(:param_node_id => id.to_i) if id
+      port_list = ds.all
+      port_list.each do |el|
+        val = el[:attribute_value]
+        el[:value] = (val.kind_of?(Hash) or val.kind_of?(Array)) ? JSON.generate(val) : val
+      end
+
+      return {:data=>port_list}
+    end
+
   end
 end
 

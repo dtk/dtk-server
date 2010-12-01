@@ -66,11 +66,11 @@
      "node": {
        "ami-06c72c6f" : {
          "display_name": "ubuntu_karmic",
-        "ui": "{\"images\": {\"tnail\":\"ubuntu-01.png\",\"display\":\"ubuntu-01.png\",\"tiny\":\"\"}}"
+        "ui": "{\"images\": {\"tnail\":\"ubuntu.png\",\"display\":\"ubuntu.png\",\"tiny\":\"\"}}"
      },
        "ami-e2cc398b" : {
          "display_name": "ubuntu_lucid",
-        "ui": "{\"images\": {\"tnail\":\"ubuntu-01.png\",\"display\":\"ubuntu-01.png\",\"tiny\":\"\"}}"
+        "ui": "{\"images\": {\"tnail\":\"ubuntu.png\",\"display\":\"ubuntu.png\",\"tiny\":\"\"}}"
      }
     }
    }

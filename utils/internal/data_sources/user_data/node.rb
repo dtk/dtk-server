@@ -3,9 +3,10 @@ module XYZ
     class UserData
       class Node < Top 
         definitions do
-          target[:display_name] = source["ref"]
-          target[:tag] = source["tag"]
-          target[:disk_size] = source["disk_size"]
+          target[:display_name] = fn(:display_name,source)
+          %w{tag disk_size ui}.each do |key|
+            target[key.to_sym] = source[key]
+          end
         end
          class << self
             def unique_keys(source)
@@ -14,6 +15,10 @@ module XYZ
 
            def relative_distinguished_name(source)
              source["ref"]
+           end
+
+           def display_name(source)
+             source["display_name"] || source["ref"]
            end
          end
       end

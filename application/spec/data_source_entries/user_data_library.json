@@ -6,6 +6,11 @@
           "obj_type": "component",
           "ds_name": "user_data",
           "display_name": "component"
+        },
+        "node": {
+          "obj_type": "node",
+          "ds_name": "user_data",
+          "display_name": "node"
         }
       },
       "ds_name": "user_data",

@@ -1,0 +1,88 @@
+{
+ "library" : {
+   "test" : {
+     "component": {
+        "user_account": {
+          "ui": "{\"images\": {\"tnail\":\"user.png\",\"display\":\"user.png\",\"tiny\":\"\"}}"
+        },
+        "hadoop::pig": {
+          "ui": "{\"images\": {\"tnail\":\"hadoop-pig.png\",\"display\":\"hadoop-pig.png\",\"tiny\":\"\"}}"
+        },
+	"hadoop_cloudera_c3": {
+          "ui": "{\"images\": {\"tnail\":\"cloudera.png\",\"display\":\"cloudera.png\",\"tiny\":\"\"}}"
+        },
+	"postgresql::server": {
+          "ui": "{\"images\": {\"tnail\":\"postgres.png\",\"display\":\"postgres.png\",\"tiny\":\"\"}}"
+        },
+	 "postgresql::client": {
+          "ui": "{\"images\": {\"tnail\":\"postgres.png\",\"display\":\"postgres.png\",\"tiny\":\"\"}}"
+        },
+	"hadoop::hive": {
+          "ui": "{\"images\": {\"tnail\":\"hadoop-hive.png\",\"display\":\"hadoop-hive.png\",\"tiny\":\"\"}}"
+        },
+	 "nagios": {
+          "ui": "{\"images\": {\"tnail\":\"nagios.png\",\"display\":\"nagios.png\",\"tiny\":\"\"}}"
+        },
+	"java": {
+          "ui": "{\"images\": {\"tnail\":\"java-01.png\",\"display\":\"java-01.png\",\"tiny\":\"\"}}"
+        },
+	 "mysql::client_app1": {
+          "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}"
+        },
+	"mysql::client": {
+          "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}"
+	},
+	"java_sun": {
+          "ui": "{\"images\": {\"tnail\":\"java-01.png\",\"display\":\"java-01.png\",\"tiny\":\"\"}}"
+        },
+	"hadoop": {
+          "ui": "{\"images\": {\"tnail\":\"hadoop.png\",\"display\":\"hadoop.png\",\"tiny\":\"\"}}"
+        },
+	"rabbitmq::edge": {
+          "ui": "{\"images\": {\"tnail\":\"rabbitmq.png\",\"display\":\"rabbitmq.png\",\"tiny\":\"\"}}"
+        },
+	"rabbitmq::default": {
+          "ui": "{\"images\": {\"tnail\":\"rabbitmq.png\",\"display\":\"rabbitmq.png\",\"tiny\":\"\"}}"
+        },
+	"mysql::server_ec2": {
+          "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}"
+        },
+	"nagios::client": {
+          "ui": "{\"images\": {\"tnail\":\"nagios.png\",\"display\":\"nagios.png\",\"tiny\":\"\"}}"
+        },
+	"hadoop_cloudera_c3::conf_pseudo": {
+          "ui": "{\"images\": {\"tnail\":\"cloudera.png\",\"display\":\"cloudera.png\",\"tiny\":\"\"}}"
+        },
+	"mysql::server": {
+          "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}"
+        },
+	"redis": {
+          "ui": "{\"images\": {\"tnail\":\"redis.png\",\"display\":\"redis.png\",\"tiny\":\"\"}}"
+        },
+	 "hadoop::doc": {
+          "ui": "{\"images\": {\"tnail\":\"hadoop.png\",\"display\":\"hadoop.png\",\"tiny\":\"\"}}"
+        },
+	"nagios::server": {
+          "ui": "{\"images\": {\"tnail\":\"nagios.png\",\"display\":\"nagios.png\",\"tiny\":\"\"}}"
+        }
+     },
+     "node": {
+       "i-bd39e2d7": {
+        "tag": "test3 nagios client",
+	"disk_size" : 99
+     },
+       "i-33886f59" : {
+        "tag": "chef server 9.8"
+     },
+      "i-07af096d-extra" : {
+        "tag": "test2"
+     },
+       "ami-28ee1b41" : {
+         "display_name": "ubuntu_lucid",
+        "ui": "{\"images\": {\"tnail\":\"ubuntu-01.png\",\"display\":\"ubuntu-01.png\",\"tiny\":\"\"}}"
+     }
+    }
+   }
+  }
+}
+

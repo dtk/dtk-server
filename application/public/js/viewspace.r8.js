@@ -31,8 +31,8 @@ if (!R8.ViewSpace) {
 
 			setupEvents: function() {
 				_events['item_click'] = R8.Utils.Y.delegate('click',this.updateSelectedItems,_node,'.vspace-item, .connector',this);
+				_events['vspace_click'] = R8.Utils.Y.delegate('click',this.clearSelectedItems,'body','#viewspace');
 //				R8.Workspace.events['item_click'] = R8.Utils.Y.delegate('click',function(){console.log('clicked item');},R8.Workspace.viewSpaceNode,'.item, .connector');
-//				R8.Workspace.events['vspace_click'] = R8.Utils.Y.delegate('click',R8.Workspace.clearSelectedItems,'body','#viewspace');
 //				R8.Workspace.events['vspace_mdown'] = R8.Utils.Y.delegate('mousedown',R8.Workspace.checkMouseDownEvent,'body','#viewspace');
 			},
 
@@ -54,6 +54,23 @@ if (!R8.ViewSpace) {
 							break;
 					}
 				}
+
+				this.purgePendingDelete();
+			},
+
+			purgePendingDelete: function() {
+				var itemChildren = _node.get('children');
+
+				itemChildren.each(function(){
+					var dataModel = this.getAttribute('data-model');
+					var status = this.getAttribute('data-status');
+
+					if((dataModel == 'node' || dataModel == 'group') && status == 'pending_delete') {
+						this.purge(true);
+						this.remove();
+						delete(this);
+					}
+				});
 			},
 
 			regNewItem : function(item) {

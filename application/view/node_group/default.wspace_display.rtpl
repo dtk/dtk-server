@@ -72,7 +72,7 @@ Some content here para tu
 		<div id="item-{%=node_group[:id]%}-medium" class="item-display" style="display:block;">
 			<div id="item-{%=node_group[:id]%}-medium-display" data-id="01" data-model="group" class="item-display item group">
 				<div class="l-col">
-					<div class="corner tl"></div>
+					<div class="corner tl"></div>	
 					<div class="l-col-body"></div>
 					<div class="corner bl"></div>
 				</div>

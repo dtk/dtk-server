@@ -31,6 +31,33 @@ node[:model_name] = 'node'
       return tpl_result
     end
 
+    def wspace_display_2(id)
+#TODO: decide if toolbar is needed/used at node level
+      #need to augment for nodes that are in datacenter directly and not node groups
+      tpl = R8Tpl::TemplateR8.new("node/wspace_display",user_context())
+      tpl.set_js_tpl_name("node_wspace_display")
+      tpl_info = tpl.render()
+      include_js_tpl(tpl_info[:src])
+
+      field_set = Model::FieldSet.default(:node)
+      node = get_object_by_id(id,:node)
+#pp node_list
+      items = Array.new
+      item = {
+          :type => 'node',
+          :object => node,
+          :toolbar_def => {},
+          :tpl_callback => tpl_info[:template_callback]
+      }
+      items << item
+      addItemsObj = JSON.generate(items)
+      run_javascript("R8.Workspace.addItems(#{addItemsObj});")
+
+      #---------------------------------------------
+
+      return {}
+    end
+
     def wspace_refresh(id)
       c = ret_session_context_id()
       tpl = R8Tpl::TemplateR8.new("node/wspace_refresh",user_context())

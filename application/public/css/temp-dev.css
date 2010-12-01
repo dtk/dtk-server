@@ -1,4 +1,4 @@
-.ellipsis {
+.basic-item.group .body {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

@@ -64,17 +64,11 @@
         }
      },
      "node": {
-       "i-bd39e2d7": {
-        "tag": "test3 nagios client",
-	"disk_size" : 99
+       "ami-06c72c6f" : {
+         "display_name": "ubuntu_karmic",
+        "ui": "{\"images\": {\"tnail\":\"ubuntu-01.png\",\"display\":\"ubuntu-01.png\",\"tiny\":\"\"}}"
      },
-       "i-33886f59" : {
-        "tag": "chef server 9.8"
-     },
-      "i-07af096d-extra" : {
-        "tag": "test2"
-     },
-       "ami-28ee1b41" : {
+       "ami-e2cc398b" : {
          "display_name": "ubuntu_lucid",
         "ui": "{\"images\": {\"tnail\":\"ubuntu-01.png\",\"display\":\"ubuntu-01.png\",\"tiny\":\"\"}}"
      }
@@ -82,4 +76,5 @@
    }
   }
 }
+
 

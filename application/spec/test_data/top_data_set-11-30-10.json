@@ -17,112 +17,112 @@
       },
       "node_group_member": {
         "ec2_sg_basic__default--i-bd39e2d7": {
+          "*node_id": "/node/i-bd39e2d7",
           "is_elastic_node": false,
-          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "display_name": "ec2_sg_basic__default--i-bd39e2d7",
-          "*node_id": "/node/i-bd39e2d7"
+          "*node_group_id": "/node_group/ec2_sg_basic__default"
         },
         "ec2_sg_basic__default--i-335f0059": {
+          "*node_id": "/node/i-335f0059",
           "is_elastic_node": false,
-          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "display_name": "ec2_sg_basic__default--i-335f0059",
-          "*node_id": "/node/i-335f0059"
+          "*node_group_id": "/node_group/ec2_sg_basic__default"
         },
         "ec2_sg_basic__default--i-374b945d": {
+          "*node_id": "/node/i-374b945d",
           "is_elastic_node": false,
-          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "display_name": "ec2_sg_basic__default--i-374b945d",
-          "*node_id": "/node/i-374b945d"
+          "*node_group_id": "/node_group/ec2_sg_basic__default"
         },
         "ec2_sg_basic__default--i-b43db5d9": {
+          "*node_id": "/node/i-b43db5d9",
           "is_elastic_node": false,
-          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "display_name": "ec2_sg_basic__default--i-b43db5d9",
-          "*node_id": "/node/i-b43db5d9"
+          "*node_group_id": "/node_group/ec2_sg_basic__default"
         },
         "ec2_sg_basic__default--i-fb486291": {
+          "*node_id": "/node/i-fb486291",
           "is_elastic_node": false,
-          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "display_name": "ec2_sg_basic__default--i-fb486291",
-          "*node_id": "/node/i-fb486291"
+          "*node_group_id": "/node_group/ec2_sg_basic__default"
         },
         "ec2_sg_basic__default--i-33886f59": {
+          "*node_id": "/node/i-33886f59",
           "is_elastic_node": false,
-          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "display_name": "ec2_sg_basic__default--i-33886f59",
-          "*node_id": "/node/i-33886f59"
+          "*node_group_id": "/node_group/ec2_sg_basic__default"
         },
         "ec2_sg_basic__default--i-97bb8ffd": {
+          "*node_id": "/node/i-97bb8ffd",
           "is_elastic_node": false,
-          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "display_name": "ec2_sg_basic__default--i-97bb8ffd",
-          "*node_id": "/node/i-97bb8ffd"
+          "*node_group_id": "/node_group/ec2_sg_basic__default"
         },
         "ec2_sg_basic__default--i-2f5b7a44": {
+          "*node_id": "/node/i-2f5b7a44",
           "is_elastic_node": false,
-          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "display_name": "ec2_sg_basic__default--i-2f5b7a44",
-          "*node_id": "/node/i-2f5b7a44"
+          "*node_group_id": "/node_group/ec2_sg_basic__default"
         },
         "ec2_sg_basic__default--i-462efd2b": {
+          "*node_id": "/node/i-462efd2b",
           "is_elastic_node": false,
-          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "display_name": "ec2_sg_basic__default--i-462efd2b",
-          "*node_id": "/node/i-462efd2b"
+          "*node_group_id": "/node_group/ec2_sg_basic__default"
         },
         "ec2_sg_basic__default--i-07af096d": {
+          "*node_id": "/node/i-07af096d",
           "is_elastic_node": false,
-          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "display_name": "ec2_sg_basic__default--i-07af096d",
-          "*node_id": "/node/i-07af096d"
+          "*node_group_id": "/node_group/ec2_sg_basic__default"
         },
         "ec2_sg_basic__default--i-9bad8cf1": {
+          "*node_id": "/node/i-9bad8cf1",
           "is_elastic_node": false,
-          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "display_name": "ec2_sg_basic__default--i-9bad8cf1",
-          "*node_id": "/node/i-9bad8cf1"
+          "*node_group_id": "/node_group/ec2_sg_basic__default"
         },
         "ec2_sg_basic__default--i-4fc62e25": {
+          "*node_id": "/node/i-4fc62e25",
           "is_elastic_node": false,
-          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "display_name": "ec2_sg_basic__default--i-4fc62e25",
-          "*node_id": "/node/i-4fc62e25"
+          "*node_group_id": "/node_group/ec2_sg_basic__default"
         },
         "ec2_sg_basic__default--i-8cc517e1": {
+          "*node_id": "/node/i-8cc517e1",
           "is_elastic_node": false,
-          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "display_name": "ec2_sg_basic__default--i-8cc517e1",
-          "*node_id": "/node/i-8cc517e1"
+          "*node_group_id": "/node_group/ec2_sg_basic__default"
         },
         "ec2_sg_basic__default--i-c5f5afaf": {
+          "*node_id": "/node/i-c5f5afaf",
           "is_elastic_node": false,
-          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "display_name": "ec2_sg_basic__default--i-c5f5afaf",
-          "*node_id": "/node/i-c5f5afaf"
+          "*node_group_id": "/node_group/ec2_sg_basic__default"
         },
         "ec2_sg_basic__default--i-7550141f": {
+          "*node_id": "/node/i-7550141f",
           "is_elastic_node": false,
-          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "display_name": "ec2_sg_basic__default--i-7550141f",
-          "*node_id": "/node/i-7550141f"
+          "*node_group_id": "/node_group/ec2_sg_basic__default"
         },
         "ec2_sg_basic__default--i-c1b527ab": {
+          "*node_id": "/node/i-c1b527ab",
           "is_elastic_node": false,
-          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "display_name": "ec2_sg_basic__default--i-c1b527ab",
-          "*node_id": "/node/i-c1b527ab"
+          "*node_group_id": "/node_group/ec2_sg_basic__default"
         },
         "ec2_sg_basic__default--i-63775608": {
+          "*node_id": "/node/i-63775608",
           "is_elastic_node": false,
-          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "display_name": "ec2_sg_basic__default--i-63775608",
-          "*node_id": "/node/i-63775608"
+          "*node_group_id": "/node_group/ec2_sg_basic__default"
         },
         "ec2_sg_basic__default--i-656e580f": {
+          "*node_id": "/node/i-656e580f",
           "is_elastic_node": false,
-          "*node_group_id": "/node_group/ec2_sg_basic__default",
           "display_name": "ec2_sg_basic__default--i-656e580f",
-          "*node_id": "/node/i-656e580f"
+          "*node_group_id": "/node_group/ec2_sg_basic__default"
         }
       },
       "node": {
@@ -169,8 +169,8 @@
           "node_interface": {
             "eth0": {
               "type": "ethernet",
-              "*network_partition_id": "/network_partition/basic__default",
-              "display_name": "eth0"
+              "display_name": "eth0",
+              "*network_partition_id": "/network_partition/basic__default"
             }
           },
           "operational_status": "stopped",
@@ -180,12 +180,12 @@
           "is_deployed": true,
           "ds_attributes": {
             "flavor": {
+              "cores": 1,
               "bits": 32,
               "ram": 1740.8,
               "disk": 160,
               "name": "Small Instance",
-              "id": "m1.small",
-              "cores": 1
+              "id": "m1.small"
             },
             "groups": [
               "basic",
@@ -241,8 +241,8 @@
           "node_interface": {
             "eth0": {
               "type": "ethernet",
-              "*network_partition_id": "/network_partition/basic__default",
-              "display_name": "eth0"
+              "display_name": "eth0",
+              "*network_partition_id": "/network_partition/basic__default"
             }
           },
           "operational_status": "stopped",
@@ -252,12 +252,12 @@
           "is_deployed": true,
           "ds_attributes": {
             "flavor": {
+              "cores": 1,
               "bits": 32,
               "ram": 1740.8,
               "disk": 160,
               "name": "Small Instance",
-              "id": "m1.small",
-              "cores": 1
+              "id": "m1.small"
             },
             "groups": [
               "basic",
@@ -313,8 +313,8 @@
           "node_interface": {
             "eth0": {
               "type": "ethernet",
-              "*network_partition_id": "/network_partition/basic__default",
-              "display_name": "eth0"
+              "display_name": "eth0",
+              "*network_partition_id": "/network_partition/basic__default"
             }
           },
           "operational_status": "stopped",
@@ -324,12 +324,12 @@
           "is_deployed": true,
           "ds_attributes": {
             "flavor": {
+              "cores": 1,
               "bits": 32,
               "ram": 1740.8,
               "disk": 160,
               "name": "Small Instance",
-              "id": "m1.small",
-              "cores": 1
+              "id": "m1.small"
             },
             "groups": [
               "basic",
@@ -385,8 +385,8 @@
           "node_interface": {
             "eth0": {
               "type": "ethernet",
-              "*network_partition_id": "/network_partition/basic__default",
-              "display_name": "eth0"
+              "display_name": "eth0",
+              "*network_partition_id": "/network_partition/basic__default"
             }
           },
           "operational_status": "stopped",
@@ -396,12 +396,12 @@
           "is_deployed": true,
           "ds_attributes": {
             "flavor": {
+              "cores": 1,
               "bits": 32,
               "ram": 1740.8,
               "disk": 160,
               "name": "Small Instance",
-              "id": "m1.small",
-              "cores": 1
+              "id": "m1.small"
             },
             "groups": [
               "basic",
@@ -457,8 +457,8 @@
           "node_interface": {
             "eth0": {
               "type": "ethernet",
-              "*network_partition_id": "/network_partition/basic__default",
-              "display_name": "eth0"
+              "display_name": "eth0",
+              "*network_partition_id": "/network_partition/basic__default"
             }
           },
           "operational_status": "stopped",
@@ -468,12 +468,12 @@
           "is_deployed": true,
           "ds_attributes": {
             "flavor": {
+              "cores": 1,
               "bits": 32,
               "ram": 1740.8,
               "disk": 160,
               "name": "Small Instance",
-              "id": "m1.small",
-              "cores": 1
+              "id": "m1.small"
             },
             "groups": [
               "basic",
@@ -529,8 +529,8 @@
           "node_interface": {
             "eth0": {
               "type": "ethernet",
-              "*network_partition_id": "/network_partition/basic__default",
-              "display_name": "eth0"
+              "display_name": "eth0",
+              "*network_partition_id": "/network_partition/basic__default"
             }
           },
           "operational_status": "stopped",
@@ -540,12 +540,12 @@
           "is_deployed": true,
           "ds_attributes": {
             "flavor": {
+              "cores": 1,
               "bits": 32,
               "ram": 1740.8,
               "disk": 160,
               "name": "Small Instance",
-              "id": "m1.small",
-              "cores": 1
+              "id": "m1.small"
             },
             "groups": [
               "basic",
@@ -601,8 +601,8 @@
           "node_interface": {
             "eth0": {
               "type": "ethernet",
-              "*network_partition_id": "/network_partition/basic__default",
-              "display_name": "eth0"
+              "display_name": "eth0",
+              "*network_partition_id": "/network_partition/basic__default"
             }
           },
           "operational_status": "stopped",
@@ -612,12 +612,12 @@
           "is_deployed": true,
           "ds_attributes": {
             "flavor": {
+              "cores": 1,
               "bits": 32,
               "ram": 1740.8,
               "disk": 160,
               "name": "Small Instance",
-              "id": "m1.small",
-              "cores": 1
+              "id": "m1.small"
             },
             "groups": [
               "basic",
@@ -673,8 +673,8 @@
           "node_interface": {
             "eth0": {
               "type": "ethernet",
-              "*network_partition_id": "/network_partition/basic__default",
-              "display_name": "eth0"
+              "display_name": "eth0",
+              "*network_partition_id": "/network_partition/basic__default"
             }
           },
           "operational_status": "stopped",
@@ -684,12 +684,12 @@
           "is_deployed": true,
           "ds_attributes": {
             "flavor": {
+              "cores": 1,
               "bits": 32,
               "ram": 1740.8,
               "disk": 160,
               "name": "Small Instance",
-              "id": "m1.small",
-              "cores": 1
+              "id": "m1.small"
             },
             "groups": [
               "basic",
@@ -746,8 +746,8 @@
             "eth0": {
               "type": "ethernet",
               "address": "10.248.107.175",
-              "*network_partition_id": "/network_partition/basic__default",
-              "display_name": "eth0"
+              "display_name": "eth0",
+              "*network_partition_id": "/network_partition/basic__default"
             }
           },
           "operational_status": "running",
@@ -759,8 +759,8 @@
                 "address": "184.73.175.145",
                 "family": "ipv4"
               },
-              "*network_partition_id": "/network_partition/internet",
-              "display_name": "internet_ipv4"
+              "display_name": "internet_ipv4",
+              "*network_partition_id": "/network_partition/internet"
             }
           },
           "data_source": "ec2",
@@ -768,12 +768,12 @@
           "is_deployed": true,
           "ds_attributes": {
             "flavor": {
+              "cores": 1,
               "bits": 32,
               "ram": 1740.8,
               "disk": 160,
               "name": "Small Instance",
-              "id": "m1.small",
-              "cores": 1
+              "id": "m1.small"
             },
             "groups": [
               "basic",
@@ -829,8 +829,8 @@
           "node_interface": {
             "eth0": {
               "type": "ethernet",
-              "*network_partition_id": "/network_partition/basic__default",
-              "display_name": "eth0"
+              "display_name": "eth0",
+              "*network_partition_id": "/network_partition/basic__default"
             }
           },
           "operational_status": "stopped",
@@ -840,12 +840,12 @@
           "is_deployed": true,
           "ds_attributes": {
             "flavor": {
+              "cores": 1,
               "bits": 32,
               "ram": 1740.8,
               "disk": 160,
               "name": "Small Instance",
-              "id": "m1.small",
-              "cores": 1
+              "id": "m1.small"
             },
             "groups": [
               "basic",
@@ -901,8 +901,8 @@
           "node_interface": {
             "eth0": {
               "type": "ethernet",
-              "*network_partition_id": "/network_partition/basic__default",
-              "display_name": "eth0"
+              "display_name": "eth0",
+              "*network_partition_id": "/network_partition/basic__default"
             }
           },
           "operational_status": "stopped",
@@ -912,12 +912,12 @@
           "is_deployed": true,
           "ds_attributes": {
             "flavor": {
+              "cores": 1,
               "bits": 32,
               "ram": 1740.8,
               "disk": 160,
               "name": "Small Instance",
-              "id": "m1.small",
-              "cores": 1
+              "id": "m1.small"
             },
             "groups": [
               "basic",
@@ -973,8 +973,8 @@
           "node_interface": {
             "eth0": {
               "type": "ethernet",
-              "*network_partition_id": "/network_partition/basic__default",
-              "display_name": "eth0"
+              "display_name": "eth0",
+              "*network_partition_id": "/network_partition/basic__default"
             }
           },
           "operational_status": "stopped",
@@ -984,12 +984,12 @@
           "is_deployed": true,
           "ds_attributes": {
             "flavor": {
+              "cores": 1,
               "bits": 32,
               "ram": 1740.8,
               "disk": 160,
               "name": "Small Instance",
-              "id": "m1.small",
-              "cores": 1
+              "id": "m1.small"
             },
             "groups": [
               "basic",
@@ -1045,8 +1045,8 @@
           "node_interface": {
             "eth0": {
               "type": "ethernet",
-              "*network_partition_id": "/network_partition/basic__default",
-              "display_name": "eth0"
+              "display_name": "eth0",
+              "*network_partition_id": "/network_partition/basic__default"
             }
           },
           "operational_status": "stopped",
@@ -1056,12 +1056,12 @@
           "is_deployed": true,
           "ds_attributes": {
             "flavor": {
+              "cores": 1,
               "bits": 32,
               "ram": 1740.8,
               "disk": 160,
               "name": "Small Instance",
-              "id": "m1.small",
-              "cores": 1
+              "id": "m1.small"
             },
             "groups": [
               "basic",
@@ -1117,8 +1117,8 @@
           "node_interface": {
             "eth0": {
               "type": "ethernet",
-              "*network_partition_id": "/network_partition/basic__default",
-              "display_name": "eth0"
+              "display_name": "eth0",
+              "*network_partition_id": "/network_partition/basic__default"
             }
           },
           "operational_status": "stopped",
@@ -1128,12 +1128,12 @@
           "is_deployed": true,
           "ds_attributes": {
             "flavor": {
+              "cores": 1,
               "bits": 32,
               "ram": 1740.8,
               "disk": 160,
               "name": "Small Instance",
-              "id": "m1.small",
-              "cores": 1
+              "id": "m1.small"
             },
             "groups": [
               "basic",
@@ -1189,8 +1189,8 @@
           "node_interface": {
             "eth0": {
               "type": "ethernet",
-              "*network_partition_id": "/network_partition/basic__default",
-              "display_name": "eth0"
+              "display_name": "eth0",
+              "*network_partition_id": "/network_partition/basic__default"
             }
           },
           "operational_status": "stopped",
@@ -1200,12 +1200,12 @@
           "is_deployed": true,
           "ds_attributes": {
             "flavor": {
+              "cores": 1,
               "bits": 32,
               "ram": 1740.8,
               "disk": 160,
               "name": "Small Instance",
-              "id": "m1.small",
-              "cores": 1
+              "id": "m1.small"
             },
             "groups": [
               "basic",
@@ -1261,8 +1261,8 @@
           "node_interface": {
             "eth0": {
               "type": "ethernet",
-              "*network_partition_id": "/network_partition/basic__default",
-              "display_name": "eth0"
+              "display_name": "eth0",
+              "*network_partition_id": "/network_partition/basic__default"
             }
           },
           "operational_status": "stopped",
@@ -1272,12 +1272,12 @@
           "is_deployed": true,
           "ds_attributes": {
             "flavor": {
+              "cores": 1,
               "bits": 32,
               "ram": 1740.8,
               "disk": 160,
               "name": "Small Instance",
-              "id": "m1.small",
-              "cores": 1
+              "id": "m1.small"
             },
             "groups": [
               "basic",
@@ -1333,8 +1333,8 @@
           "node_interface": {
             "eth0": {
               "type": "ethernet",
-              "*network_partition_id": "/network_partition/basic__default",
-              "display_name": "eth0"
+              "display_name": "eth0",
+              "*network_partition_id": "/network_partition/basic__default"
             }
           },
           "operational_status": "stopped",
@@ -1344,12 +1344,12 @@
           "is_deployed": true,
           "ds_attributes": {
             "flavor": {
+              "cores": 1,
               "bits": 32,
               "ram": 1740.8,
               "disk": 160,
               "name": "Small Instance",
-              "id": "m1.small",
-              "cores": 1
+              "id": "m1.small"
             },
             "groups": [
               "basic",
@@ -1405,8 +1405,8 @@
           "node_interface": {
             "eth0": {
               "type": "ethernet",
-              "*network_partition_id": "/network_partition/basic__default",
-              "display_name": "eth0"
+              "display_name": "eth0",
+              "*network_partition_id": "/network_partition/basic__default"
             }
           },
           "operational_status": "stopped",
@@ -1416,12 +1416,12 @@
           "is_deployed": true,
           "ds_attributes": {
             "flavor": {
+              "cores": 1,
               "bits": 32,
               "ram": 1740.8,
               "disk": 160,
               "name": "Small Instance",
-              "id": "m1.small",
-              "cores": 1
+              "id": "m1.small"
             },
             "groups": [
               "basic",
@@ -1437,7 +1437,7 @@
       },
       "data_source": {
         "ec2": {
-          "last_collection_timestamp": "Tue Nov 30 21:59:28 +0000 2010",
+          "last_collection_timestamp": "Wed Dec 01 00:15:35 +0000 2010",
           "display_name": "ec2",
           "data_source_entry": {
             "node_group_member": {
@@ -1494,494 +1494,50 @@
   "library": {
     "test": {
       "node": {
-        "ami-6743ae0e": {
-          "monitoring_item": {
-            "check_ping": {
-              "description": "ping",
-              "display_name": "check_ping",
-              "enabled": true
-            },
-            "check_mem": {
-              "description": "Free Memory",
-              "display_name": "check_mem",
-              "enabled": true
-            },
-            "check_local_procs": {
-              "description": "Processes",
-              "display_name": "check_local_procs",
-              "enabled": true
-            },
-            "check_all_disks": {
-              "description": "Free Space All Disks",
-              "display_name": "check_all_disks",
-              "enabled": true
-            },
-            "check_memory_profiler": {
-              "description": "Memory Profiler",
-              "display_name": "check_memory_profiler",
-              "enabled": true
-            },
-            "check_iostat": {
-              "description": "Iostat",
-              "display_name": "check_iostat",
-              "enabled": true
-            },
-            "check_ssh": {
-              "description": "SSH",
-              "display_name": "check_ssh",
-              "enabled": true
-            }
-          },
-          "ds_key": "[:ec2, :image, \"ami-6743ae0e\"]",
-          "type": "image",
-          "node_interface": {
-            "eth0": {
-              "type": "ethernet",
-              "display_name": "eth0"
-            }
-          },
-          "ds_source_obj_type": "image",
-          "data_source": "ec2",
-          "attribute": {
-            "host_addresses[ipv4]": {
-              "semantic_type": {
-                ":array": "host_address[ipv4]"
-              },
-              "required": false,
-              "semantic_type_summary": "host_address[ipv4]",
-              "value_derived": [
-                null
-              ],
-              "read_only": true,
-              "is_port": true,
-              "display_name": "host_addresses[ipv4]",
-              "num_attached_input_links": 0,
-              "data_type": "json",
-              "num_attached_output_links": 0
-            }
-          },
-          "display_name": "ami-6743ae0e",
-          "is_deployed": true,
+        "i-07af096d-extra": {
+          "ds_key": "[:user_data, \"/library/test/i-07af096d-extra\"]",
+          "type": "instance",
+          "tag": "test2",
+          "data_source": "user_data",
+          "display_name": "i-07af096d-extra",
           "ds_attributes": {
-            "type": "machine",
-            "root_device_name": "/dev/sda1",
-            "kernel_id": "aki-5f15f636",
-            "owner_id": "063491364108",
-            "state": "available",
-            "block_device_mapping": [
-              {
-                "snapshotId": "snap-5d6f2234",
-                "deviceName": "/dev/sda1",
-                "deleteOnTermination": "true",
-                "volumeSize": "15"
-              }
-            ],
-            "root_device_type": "ebs",
-            "is_public": true,
-            "location": "063491364108/ubuntu-9.10-karmic-server-i386-20100121",
-            "ramdisk_id": "ari-d5709dbc",
-            "architecture": "i386",
-            "id": "ami-6743ae0e",
-            "product_codes": [
-
-            ],
-            "platform": null
-          },
-          "external_ref": {
-            "type": "ec2_image",
-            "image_id": "ami-6743ae0e"
+            "tag": "test2",
+            "qualified_ref": "/library/test/i-07af096d-extra",
+            "flavor": {
+              "disk": null
+            },
+            "ref": "i-07af096d-extra"
           }
         },
-        "ami-06c72c6f": {
-          "monitoring_item": {
-            "check_ping": {
-              "description": "ping",
-              "display_name": "check_ping",
-              "enabled": true
-            },
-            "check_mem": {
-              "description": "Free Memory",
-              "display_name": "check_mem",
-              "enabled": true
-            },
-            "check_local_procs": {
-              "description": "Processes",
-              "display_name": "check_local_procs",
-              "enabled": true
-            },
-            "check_all_disks": {
-              "description": "Free Space All Disks",
-              "display_name": "check_all_disks",
-              "enabled": true
-            },
-            "check_memory_profiler": {
-              "description": "Memory Profiler",
-              "display_name": "check_memory_profiler",
-              "enabled": true
-            },
-            "check_iostat": {
-              "description": "Iostat",
-              "display_name": "check_iostat",
-              "enabled": true
-            },
-            "check_ssh": {
-              "description": "SSH",
-              "display_name": "check_ssh",
-              "enabled": true
-            }
-          },
-          "ds_key": "[:ec2, :image, \"ami-06c72c6f\"]",
-          "type": "image",
-          "node_interface": {
-            "eth0": {
-              "type": "ethernet",
-              "display_name": "eth0"
-            }
-          },
-          "ds_source_obj_type": "image",
-          "data_source": "ec2",
-          "attribute": {
-            "host_addresses[ipv4]": {
-              "semantic_type": {
-                ":array": "host_address[ipv4]"
-              },
-              "required": false,
-              "semantic_type_summary": "host_address[ipv4]",
-              "value_derived": [
-                null
-              ],
-              "read_only": true,
-              "is_port": true,
-              "display_name": "host_addresses[ipv4]",
-              "num_attached_input_links": 0,
-              "data_type": "json",
-              "num_attached_output_links": 0
-            }
-          },
-          "display_name": "ami-06c72c6f",
-          "is_deployed": true,
+        "i-33886f59": {
+          "ds_key": "[:user_data, \"/library/test/i-33886f59\"]",
+          "type": "instance",
+          "tag": "chef server 9.8",
+          "data_source": "user_data",
+          "display_name": "i-33886f59",
           "ds_attributes": {
-            "type": "machine",
-            "root_device_name": "/dev/sda1",
-            "kernel_id": "aki-5f15f636",
-            "owner_id": "411986592491",
-            "state": "available",
-            "block_device_mapping": [
-              {
-                "snapshotId": "snap-caa459a1",
-                "deviceName": "/dev/sda1",
-                "deleteOnTermination": "true",
-                "volumeSize": "15"
-              }
-            ],
-            "root_device_type": "ebs",
-            "is_public": false,
-            "location": "411986592491/rnp-chef-09-6-ubuntu-910-x86_32",
-            "ramdisk_id": "ari-d5709dbc",
-            "architecture": "i386",
-            "id": "ami-06c72c6f",
-            "product_codes": [
-
-            ],
-            "platform": null
-          },
-          "external_ref": {
-            "type": "ec2_image",
-            "image_id": "ami-06c72c6f"
+            "tag": "chef server 9.8",
+            "qualified_ref": "/library/test/i-33886f59",
+            "flavor": {
+              "disk": null
+            },
+            "ref": "i-33886f59"
           }
         },
-        "ami-bf3ad3d6": {
-          "monitoring_item": {
-            "check_ping": {
-              "description": "ping",
-              "display_name": "check_ping",
-              "enabled": true
-            },
-            "check_mem": {
-              "description": "Free Memory",
-              "display_name": "check_mem",
-              "enabled": true
-            },
-            "check_local_procs": {
-              "description": "Processes",
-              "display_name": "check_local_procs",
-              "enabled": true
-            },
-            "check_all_disks": {
-              "description": "Free Space All Disks",
-              "display_name": "check_all_disks",
-              "enabled": true
-            },
-            "check_memory_profiler": {
-              "description": "Memory Profiler",
-              "display_name": "check_memory_profiler",
-              "enabled": true
-            },
-            "check_iostat": {
-              "description": "Iostat",
-              "display_name": "check_iostat",
-              "enabled": true
-            },
-            "check_ssh": {
-              "description": "SSH",
-              "display_name": "check_ssh",
-              "enabled": true
-            }
-          },
-          "ds_key": "[:ec2, :image, \"ami-bf3ad3d6\"]",
-          "type": "image",
-          "node_interface": {
-            "eth0": {
-              "type": "ethernet",
-              "display_name": "eth0"
-            }
-          },
-          "ds_source_obj_type": "image",
-          "data_source": "ec2",
-          "attribute": {
-            "host_addresses[ipv4]": {
-              "semantic_type": {
-                ":array": "host_address[ipv4]"
-              },
-              "required": false,
-              "semantic_type_summary": "host_address[ipv4]",
-              "value_derived": [
-                null
-              ],
-              "read_only": true,
-              "is_port": true,
-              "display_name": "host_addresses[ipv4]",
-              "num_attached_input_links": 0,
-              "data_type": "json",
-              "num_attached_output_links": 0
-            }
-          },
-          "display_name": "ami-bf3ad3d6",
-          "is_deployed": true,
+        "i-bd39e2d7": {
+          "ds_key": "[:user_data, \"/library/test/i-bd39e2d7\"]",
+          "type": "instance",
+          "tag": "test3 nagios client",
+          "data_source": "user_data",
+          "display_name": "i-bd39e2d7",
           "ds_attributes": {
-            "type": "machine",
-            "root_device_name": "/dev/sda1",
-            "kernel_id": "aki-5f15f636",
-            "owner_id": "411986592491",
-            "state": "available",
-            "block_device_mapping": [
-              {
-                "snapshotId": "snap-324cdb5a",
-                "deviceName": "/dev/sda1",
-                "deleteOnTermination": "true",
-                "volumeSize": "15"
-              }
-            ],
-            "root_device_type": "ebs",
-            "is_public": false,
-            "location": "411986592491/rnp-chef-server-0816-ubuntu-910-x86_32",
-            "ramdisk_id": "ari-d5709dbc",
-            "architecture": "i386",
-            "id": "ami-bf3ad3d6",
-            "product_codes": [
-
-            ],
-            "platform": null
-          },
-          "external_ref": {
-            "type": "ec2_image",
-            "image_id": "ami-bf3ad3d6"
-          }
-        },
-        "ami-693ad300": {
-          "monitoring_item": {
-            "check_ping": {
-              "description": "ping",
-              "display_name": "check_ping",
-              "enabled": true
+            "tag": "test3 nagios client",
+            "disk_size": 99,
+            "qualified_ref": "/library/test/i-bd39e2d7",
+            "flavor": {
+              "disk": 99
             },
-            "check_mem": {
-              "description": "Free Memory",
-              "display_name": "check_mem",
-              "enabled": true
-            },
-            "check_local_procs": {
-              "description": "Processes",
-              "display_name": "check_local_procs",
-              "enabled": true
-            },
-            "check_all_disks": {
-              "description": "Free Space All Disks",
-              "display_name": "check_all_disks",
-              "enabled": true
-            },
-            "check_memory_profiler": {
-              "description": "Memory Profiler",
-              "display_name": "check_memory_profiler",
-              "enabled": true
-            },
-            "check_iostat": {
-              "description": "Iostat",
-              "display_name": "check_iostat",
-              "enabled": true
-            },
-            "check_ssh": {
-              "description": "SSH",
-              "display_name": "check_ssh",
-              "enabled": true
-            }
-          },
-          "ds_key": "[:ec2, :image, \"ami-693ad300\"]",
-          "type": "image",
-          "node_interface": {
-            "eth0": {
-              "type": "ethernet",
-              "display_name": "eth0"
-            }
-          },
-          "ds_source_obj_type": "image",
-          "data_source": "ec2",
-          "attribute": {
-            "host_addresses[ipv4]": {
-              "semantic_type": {
-                ":array": "host_address[ipv4]"
-              },
-              "required": false,
-              "semantic_type_summary": "host_address[ipv4]",
-              "value_derived": [
-                null
-              ],
-              "read_only": true,
-              "is_port": true,
-              "display_name": "host_addresses[ipv4]",
-              "num_attached_input_links": 0,
-              "data_type": "json",
-              "num_attached_output_links": 0
-            }
-          },
-          "display_name": "ami-693ad300",
-          "is_deployed": true,
-          "ds_attributes": {
-            "type": "machine",
-            "root_device_name": "/dev/sda1",
-            "kernel_id": "aki-5f15f636",
-            "owner_id": "411986592491",
-            "state": "available",
-            "block_device_mapping": [
-              {
-                "snapshotId": "snap-3c57c054",
-                "deviceName": "/dev/sda1",
-                "deleteOnTermination": "true",
-                "volumeSize": "15"
-              }
-            ],
-            "root_device_type": "ebs",
-            "is_public": false,
-            "location": "411986592491/rnp-chef-0816-ubuntu-910-x86_32",
-            "ramdisk_id": "ari-d5709dbc",
-            "architecture": "i386",
-            "id": "ami-693ad300",
-            "product_codes": [
-
-            ],
-            "platform": null
-          },
-          "external_ref": {
-            "type": "ec2_image",
-            "image_id": "ami-693ad300"
-          }
-        },
-        "ami-e2cc398b": {
-          "monitoring_item": {
-            "check_ping": {
-              "description": "ping",
-              "display_name": "check_ping",
-              "enabled": true
-            },
-            "check_mem": {
-              "description": "Free Memory",
-              "display_name": "check_mem",
-              "enabled": true
-            },
-            "check_local_procs": {
-              "description": "Processes",
-              "display_name": "check_local_procs",
-              "enabled": true
-            },
-            "check_all_disks": {
-              "description": "Free Space All Disks",
-              "display_name": "check_all_disks",
-              "enabled": true
-            },
-            "check_memory_profiler": {
-              "description": "Memory Profiler",
-              "display_name": "check_memory_profiler",
-              "enabled": true
-            },
-            "check_iostat": {
-              "description": "Iostat",
-              "display_name": "check_iostat",
-              "enabled": true
-            },
-            "check_ssh": {
-              "description": "SSH",
-              "display_name": "check_ssh",
-              "enabled": true
-            }
-          },
-          "ds_key": "[:ec2, :image, \"ami-e2cc398b\"]",
-          "type": "image",
-          "node_interface": {
-            "eth0": {
-              "type": "ethernet",
-              "display_name": "eth0"
-            }
-          },
-          "ds_source_obj_type": "image",
-          "data_source": "ec2",
-          "attribute": {
-            "host_addresses[ipv4]": {
-              "semantic_type": {
-                ":array": "host_address[ipv4]"
-              },
-              "required": false,
-              "semantic_type_summary": "host_address[ipv4]",
-              "value_derived": [
-                null
-              ],
-              "read_only": true,
-              "is_port": true,
-              "display_name": "host_addresses[ipv4]",
-              "num_attached_input_links": 0,
-              "data_type": "json",
-              "num_attached_output_links": 0
-            }
-          },
-          "display_name": "ami-e2cc398b",
-          "is_deployed": true,
-          "ds_attributes": {
-            "type": "machine",
-            "root_device_name": "/dev/sda1",
-            "kernel_id": "aki-5f15f636",
-            "owner_id": "411986592491",
-            "state": "available",
-            "block_device_mapping": [
-              {
-                "snapshotId": "snap-d6bf91bd",
-                "deviceName": "/dev/sda1",
-                "deleteOnTermination": "true",
-                "volumeSize": "15"
-              }
-            ],
-            "root_device_type": "ebs",
-            "is_public": false,
-            "location": "411986592491/rnp-chef-09-8-ubuntu-lucid-x86_32",
-            "ramdisk_id": "ari-d5709dbc",
-            "architecture": "i386",
-            "id": "ami-e2cc398b",
-            "product_codes": [
-
-            ],
-            "platform": null
-          },
-          "external_ref": {
-            "type": "ec2_image",
-            "image_id": "ami-e2cc398b"
+            "ref": "i-bd39e2d7"
           }
         },
         "ami-28ee1b41": {
@@ -2022,7 +1578,7 @@
               "enabled": true
             }
           },
-          "ds_key": "[:ec2, :image, \"ami-28ee1b41\"]",
+          "ds_key": "[:user_data, \"/library/test/ami-28ee1b41\"]",
           "type": "image",
           "node_interface": {
             "eth0": {
@@ -2031,7 +1587,7 @@
             }
           },
           "ds_source_obj_type": "image",
-          "data_source": "ec2",
+          "data_source": "user_data",
           "attribute": {
             "host_addresses[ipv4]": {
               "semantic_type": {
@@ -2050,14 +1606,24 @@
               "num_attached_output_links": 0
             }
           },
-          "display_name": "ami-28ee1b41",
+          "display_name": "ubuntu_lucid",
           "is_deployed": true,
           "ds_attributes": {
             "type": "machine",
-            "root_device_name": "/dev/sda1",
-            "kernel_id": "aki-5f15f636",
+            "is_public": false,
             "owner_id": "411986592491",
             "state": "available",
+            "ramdisk_id": "ari-d5709dbc",
+            "flavor": {
+              "disk": null
+            },
+            "product_codes": [
+
+            ],
+            "location": "411986592491//rnp-chef-09-8-ubuntu-910-x86_32",
+            "root_device_name": "/dev/sda1",
+            "architecture": "i386",
+            "kernel_id": "aki-5f15f636",
             "block_device_mapping": [
               {
                 "snapshotId": "snap-1cfdda77",
@@ -2066,124 +1632,26 @@
                 "volumeSize": "15"
               }
             ],
-            "root_device_type": "ebs",
-            "is_public": false,
-            "location": "411986592491//rnp-chef-09-8-ubuntu-910-x86_32",
-            "ramdisk_id": "ari-d5709dbc",
-            "architecture": "i386",
             "id": "ami-28ee1b41",
-            "product_codes": [
-
-            ],
-            "platform": null
+            "platform": null,
+            "root_device_type": "ebs"
           },
           "external_ref": {
             "type": "ec2_image",
             "image_id": "ami-28ee1b41"
-          }
-        },
-        "ami-e270848b": {
-          "monitoring_item": {
-            "check_ping": {
-              "description": "ping",
-              "display_name": "check_ping",
-              "enabled": true
-            },
-            "check_mem": {
-              "description": "Free Memory",
-              "display_name": "check_mem",
-              "enabled": true
-            },
-            "check_local_procs": {
-              "description": "Processes",
-              "display_name": "check_local_procs",
-              "enabled": true
-            },
-            "check_all_disks": {
-              "description": "Free Space All Disks",
-              "display_name": "check_all_disks",
-              "enabled": true
-            },
-            "check_memory_profiler": {
-              "description": "Memory Profiler",
-              "display_name": "check_memory_profiler",
-              "enabled": true
-            },
-            "check_iostat": {
-              "description": "Iostat",
-              "display_name": "check_iostat",
-              "enabled": true
-            },
-            "check_ssh": {
-              "description": "SSH",
-              "display_name": "check_ssh",
-              "enabled": true
+          },
+          "ui": {
+            "images": {
+              "tiny": "",
+              "tnail": "ubuntu-01.png",
+              "display": "ubuntu-01.png"
             }
-          },
-          "ds_key": "[:ec2, :image, \"ami-e270848b\"]",
-          "type": "image",
-          "node_interface": {
-            "eth0": {
-              "type": "ethernet",
-              "display_name": "eth0"
-            }
-          },
-          "ds_source_obj_type": "image",
-          "data_source": "ec2",
-          "attribute": {
-            "host_addresses[ipv4]": {
-              "semantic_type": {
-                ":array": "host_address[ipv4]"
-              },
-              "required": false,
-              "semantic_type_summary": "host_address[ipv4]",
-              "value_derived": [
-                null
-              ],
-              "read_only": true,
-              "is_port": true,
-              "display_name": "host_addresses[ipv4]",
-              "num_attached_input_links": 0,
-              "data_type": "json",
-              "num_attached_output_links": 0
-            }
-          },
-          "display_name": "ami-e270848b",
-          "is_deployed": true,
-          "ds_attributes": {
-            "type": "machine",
-            "root_device_name": "/dev/sda1",
-            "kernel_id": "aki-5f15f636",
-            "owner_id": "411986592491",
-            "state": "available",
-            "block_device_mapping": [
-              {
-                "snapshotId": "snap-59a57c33",
-                "deviceName": "/dev/sda1",
-                "deleteOnTermination": "true",
-                "volumeSize": "15"
-              }
-            ],
-            "root_device_type": "ebs",
-            "is_public": false,
-            "location": "411986592491//rnp-mcollective-node-ubuntu-910-x86_32",
-            "ramdisk_id": "ari-d5709dbc",
-            "architecture": "i386",
-            "id": "ami-e270848b",
-            "product_codes": [
-
-            ],
-            "platform": null
-          },
-          "external_ref": {
-            "type": "ec2_image",
-            "image_id": "ami-e270848b"
           }
         }
       },
       "data_source": {
         "chef": {
-          "last_collection_timestamp": "Tue Nov 30 21:58:23 +0000 2010",
+          "last_collection_timestamp": "Wed Dec 01 00:14:51 +0000 2010",
           "display_name": "chef",
           "data_source_entry": {
             "component_recipe": {
@@ -2211,7 +1679,7 @@
           "ds_name": "chef"
         },
         "ec2": {
-          "last_collection_timestamp": "Tue Nov 30 21:58:47 +0000 2010",
+          "last_collection_timestamp": "Wed Dec 01 00:15:05 +0000 2010",
           "display_name": "ec2",
           "data_source_entry": {
             "node_image": {
@@ -2225,13 +1693,19 @@
           "ds_name": "ec2"
         },
         "user_data": {
-          "last_collection_timestamp": "Tue Nov 30 21:58:34 +0000 2010",
+          "last_collection_timestamp": "Wed Dec 01 00:15:17 +0000 2010",
           "display_name": "user_data",
           "data_source_entry": {
             "component": {
               "ds_is_golden_store": true,
               "display_name": "component",
               "obj_type": "component",
+              "ds_name": "user_data"
+            },
+            "node": {
+              "ds_is_golden_store": true,
+              "display_name": "node",
+              "obj_type": "node",
               "ds_name": "user_data"
             }
           },
@@ -2250,8 +1724,8 @@
             "ui": "{\"images\": {\"tnail\":\"hadoop-pig.png\",\"display\":\"hadoop-pig.png\",\"tiny\":\"\"}}"
           },
           "external_ref": {
-            "type": "chef_recipe",
-            "recipe_name": "hadoop::pig"
+            "recipe_name": "hadoop::pig",
+            "type": "chef_recipe"
           },
           "only_one_per_node": true,
           "ui": {
@@ -2301,8 +1775,8 @@
             "ui": "{\"images\": {\"tnail\":\"cloudera.png\",\"display\":\"cloudera.png\",\"tiny\":\"\"}}"
           },
           "external_ref": {
-            "type": "chef_recipe",
-            "recipe_name": "hadoop_cloudera_c3"
+            "recipe_name": "hadoop_cloudera_c3",
+            "type": "chef_recipe"
           },
           "only_one_per_node": true,
           "ui": {
@@ -2341,8 +1815,8 @@
             "ui": "{\"images\": {\"tnail\":\"postgres.png\",\"display\":\"postgres.png\",\"tiny\":\"\"}}"
           },
           "external_ref": {
-            "type": "chef_recipe",
-            "recipe_name": "postgresql::server"
+            "recipe_name": "postgresql::server",
+            "type": "chef_recipe"
           },
           "only_one_per_node": true,
           "ui": {
@@ -2381,8 +1855,8 @@
             "ui": "{\"images\": {\"tnail\":\"postgres.png\",\"display\":\"postgres.png\",\"tiny\":\"\"}}"
           },
           "external_ref": {
-            "type": "chef_recipe",
-            "recipe_name": "postgresql::client"
+            "recipe_name": "postgresql::client",
+            "type": "chef_recipe"
           },
           "only_one_per_node": true,
           "ui": {
@@ -2404,8 +1878,8 @@
             "ui": "{\"images\": {\"tnail\":\"hadoop-hive.png\",\"display\":\"hadoop-hive.png\",\"tiny\":\"\"}}"
           },
           "external_ref": {
-            "type": "chef_recipe",
-            "recipe_name": "hadoop::hive"
+            "recipe_name": "hadoop::hive",
+            "type": "chef_recipe"
           },
           "only_one_per_node": true,
           "ui": {
@@ -2427,8 +1901,8 @@
             "ui": "{\"images\": {\"tnail\":\"nagios.png\",\"display\":\"nagios.png\",\"tiny\":\"\"}}"
           },
           "external_ref": {
-            "type": "chef_recipe",
-            "recipe_name": "nagios"
+            "recipe_name": "nagios",
+            "type": "chef_recipe"
           },
           "only_one_per_node": true,
           "ui": {
@@ -2450,8 +1924,8 @@
             "ui": "{\"images\": {\"tnail\":\"java-01.png\",\"display\":\"java-01.png\",\"tiny\":\"\"}}"
           },
           "external_ref": {
-            "type": "chef_recipe",
-            "recipe_name": "java"
+            "recipe_name": "java",
+            "type": "chef_recipe"
           },
           "only_one_per_node": true,
           "ui": {
@@ -2495,8 +1969,8 @@
             "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}"
           },
           "external_ref": {
-            "type": "chef_recipe",
-            "recipe_name": "mysql::client_app1"
+            "recipe_name": "mysql::client_app1",
+            "type": "chef_recipe"
           },
           "basic_type": "application",
           "only_one_per_node": true,
@@ -2519,8 +1993,8 @@
             "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}"
           },
           "external_ref": {
-            "type": "chef_recipe",
-            "recipe_name": "mysql::client"
+            "recipe_name": "mysql::client",
+            "type": "chef_recipe"
           },
           "basic_type": "package",
           "only_one_per_node": true,
@@ -2543,8 +2017,8 @@
             "ui": "{\"images\": {\"tnail\":\"java-01.png\",\"display\":\"java-01.png\",\"tiny\":\"\"}}"
           },
           "external_ref": {
-            "type": "chef_recipe",
-            "recipe_name": "java_sun"
+            "recipe_name": "java_sun",
+            "type": "chef_recipe"
           },
           "only_one_per_node": true,
           "ui": {
@@ -2566,8 +2040,8 @@
             "ui": "{\"images\": {\"tnail\":\"hadoop.png\",\"display\":\"hadoop.png\",\"tiny\":\"\"}}"
           },
           "external_ref": {
-            "type": "chef_recipe",
-            "recipe_name": "hadoop"
+            "recipe_name": "hadoop",
+            "type": "chef_recipe"
           },
           "only_one_per_node": true,
           "ui": {
@@ -2641,8 +2115,8 @@
             "ui": "{\"images\": {\"tnail\":\"rabbitmq.png\",\"display\":\"rabbitmq.png\",\"tiny\":\"\"}}"
           },
           "external_ref": {
-            "type": "chef_recipe",
-            "recipe_name": "rabbitmq::edge"
+            "recipe_name": "rabbitmq::edge",
+            "type": "chef_recipe"
           },
           "only_one_per_node": true,
           "ui": {
@@ -2716,8 +2190,8 @@
             "ui": "{\"images\": {\"tnail\":\"rabbitmq.png\",\"display\":\"rabbitmq.png\",\"tiny\":\"\"}}"
           },
           "external_ref": {
-            "type": "chef_recipe",
-            "recipe_name": "rabbitmq::default"
+            "recipe_name": "rabbitmq::default",
+            "type": "chef_recipe"
           },
           "only_one_per_node": true,
           "ui": {
@@ -2739,8 +2213,8 @@
             "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}"
           },
           "external_ref": {
-            "type": "chef_recipe",
-            "recipe_name": "mysql::server_ec2"
+            "recipe_name": "mysql::server_ec2",
+            "type": "chef_recipe"
           },
           "only_one_per_node": true,
           "ui": {
@@ -2762,8 +2236,8 @@
             "ui": "{\"images\": {\"tnail\":\"nagios.png\",\"display\":\"nagios.png\",\"tiny\":\"\"}}"
           },
           "external_ref": {
-            "type": "chef_recipe",
-            "recipe_name": "nagios::client"
+            "recipe_name": "nagios::client",
+            "type": "chef_recipe"
           },
           "only_one_per_node": true,
           "ui": {
@@ -2831,8 +2305,8 @@
             "ui": "{\"images\": {\"tnail\":\"cloudera.png\",\"display\":\"cloudera.png\",\"tiny\":\"\"}}"
           },
           "external_ref": {
-            "type": "chef_recipe",
-            "recipe_name": "hadoop_cloudera_c3::conf_pseudo"
+            "recipe_name": "hadoop_cloudera_c3::conf_pseudo",
+            "type": "chef_recipe"
           },
           "only_one_per_node": true,
           "ui": {
@@ -2850,7 +2324,7 @@
           "attribute": {
             "user_account][username]": {
               "description": "User name",
-              "required": false,
+              "required": true,
               "read_only": false,
               "is_port": false,
               "display_name": "username",
@@ -2864,7 +2338,7 @@
             },
             "user_account][uid]": {
               "description": "User id",
-              "required": false,
+              "required": true,
               "read_only": false,
               "is_port": false,
               "display_name": "uid",
@@ -2873,7 +2347,7 @@
                 "path": "node[user_account][uid]"
               },
               "num_attached_input_links": 0,
-              "data_type": "string",
+              "data_type": "integer",
               "num_attached_output_links": 0
             },
             "user_account][gid]": {
@@ -2887,7 +2361,7 @@
                 "path": "node[user_account][gid]"
               },
               "num_attached_input_links": 0,
-              "data_type": "string",
+              "data_type": "integer",
               "num_attached_output_links": 0
             }
           },
@@ -2898,8 +2372,8 @@
             "ui": "{\"images\": {\"tnail\":\"user.png\",\"display\":\"user.png\",\"tiny\":\"\"}}"
           },
           "external_ref": {
-            "type": "chef_recipe",
-            "recipe_name": "user_account"
+            "recipe_name": "user_account",
+            "type": "chef_recipe"
           },
           "basic_type": "user",
           "only_one_per_node": true,
@@ -3112,10 +2586,10 @@
               "value_asserted": [
                 {
                   "port": 3306,
+                  "protocol": "tcp",
                   "binding_addr_constraints": [
 
-                  ],
-                  "protocol": "tcp"
+                  ]
                 }
               ],
               "required": false,
@@ -3197,8 +2671,8 @@
             "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}"
           },
           "external_ref": {
-            "type": "chef_recipe",
-            "recipe_name": "mysql::server"
+            "recipe_name": "mysql::server",
+            "type": "chef_recipe"
           },
           "basic_type": "service",
           "only_one_per_node": true,
@@ -3260,8 +2734,8 @@
             "ui": "{\"images\": {\"tnail\":\"redis.png\",\"display\":\"redis.png\",\"tiny\":\"\"}}"
           },
           "external_ref": {
-            "type": "chef_recipe",
-            "recipe_name": "redis"
+            "recipe_name": "redis",
+            "type": "chef_recipe"
           },
           "basic_type": "service",
           "only_one_per_node": true,
@@ -3284,8 +2758,8 @@
             "ui": "{\"images\": {\"tnail\":\"hadoop.png\",\"display\":\"hadoop.png\",\"tiny\":\"\"}}"
           },
           "external_ref": {
-            "type": "chef_recipe",
-            "recipe_name": "hadoop::doc"
+            "recipe_name": "hadoop::doc",
+            "type": "chef_recipe"
           },
           "only_one_per_node": true,
           "ui": {
@@ -3307,8 +2781,8 @@
             "ui": "{\"images\": {\"tnail\":\"nagios.png\",\"display\":\"nagios.png\",\"tiny\":\"\"}}"
           },
           "external_ref": {
-            "type": "chef_recipe",
-            "recipe_name": "nagios::server"
+            "recipe_name": "nagios::server",
+            "type": "chef_recipe"
           },
           "only_one_per_node": true,
           "ui": {

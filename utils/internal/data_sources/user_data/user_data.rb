@@ -15,7 +15,7 @@ module XYZ
      private
       def get_user_data_objects(type,&block)
         data_file_path = R8::Config[:app_cache_root] + "/data_source.json" #TODO: stub
-        #no op if file does not exsits
+        #no op if file does not exists
         hash_all_data = get_user_data_from_file(data_file_path)
         return HashMayNotBeComplete.new() unless hash_all_data
 

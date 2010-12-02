@@ -58,6 +58,7 @@ pp ds.all
 
       raw_link_list = ds.all
       link_list = Array.new
+pp raw_link_list
       raw_link_list.each do |el|
         component_name = el[:component][:display_name].gsub(/::.+$/,"")
         port_name = Aux.put_in_bracket_form([component_name] + Aux.tokenize_bracket_name(el[:attribute][:display_name]))
@@ -72,7 +73,7 @@ pp ds.all
           :other_end_id => other_end_id
         }
       end
-pp link_list
+
       action_name = "list_links_on_node_ports"
       tpl = R8Tpl::TemplateR8.new("#{model_name()}/#{action_name}",user_context())
       tpl.assign("link_list",link_list)

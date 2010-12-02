@@ -130,6 +130,12 @@ module XYZ
       end
     end
 
+    def self.materialize_virtual_columns!(rows,virtual_cols)
+      rows.each do |r|
+        virtual_cols.each{|vc|r[vc] = r[vc]}
+      end
+    end
+
     def ret_info_if_is_virtual_column(col)
       (self.class.db_rel[:virtual_columns]||{})[col]
     end

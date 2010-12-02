@@ -41,6 +41,15 @@ service :mysql_server do
       {
         "socket_file" => "/var/run/mysqld/mysqld.sock"
       }
+
+   attribute "sap_ref",
+    :recipes => ["mysql::client_app1"],
+    :port_type => "output",
+    :required => true,
+    :type => "hash",
+    :description => "mysql service access point reference for client",
+    :semantic_type => {"sap_ref" => {"application" => "sql::mysql"}}
+
     
   attribute "master_log_ref",
     :recipes => ["mysql::slave"],

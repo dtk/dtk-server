@@ -22,6 +22,7 @@ module XYZ
       #columns related to links
       column :is_port, :boolean, :default => false
       virtual_column :port_is_external, :type => :boolean, :hidden => true, :local_dependencies => [:is_port,:semantic_type_summary]
+      virtual_column :port_type, :type => :varchar, :hidden => true, :local_dependencies => [:is_port,:semantic_type_summary]
       column :num_attached_input_links, :integer, :default => 0, :hidden => true
       column :num_attached_output_links, :integer, :default => 0, :hidden => true
       virtual_column :port_is_connected, :type => :boolean, :hidden => true, :local_dependencies => [:num_attached_input_links,:num_attached_output_links]
@@ -156,6 +157,11 @@ also related is allowing omission of columns mmentioned in jon condition; post p
       return nil unless self[:is_port]
       return nil unless self[:semantic_type_summary]
       (AttributeSemantic::Info[self[:semantic_type_summary]]||{})[:external]
+    end
+    def port_type()
+      return nil unless self[:is_port]
+      return nil unless self[:semantic_type_summary]
+      (AttributeSemantic::Info[self[:semantic_type_summary]]||{})[:port_type]
     end
 
     def port_is_connected()

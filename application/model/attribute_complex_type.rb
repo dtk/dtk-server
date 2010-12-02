@@ -317,14 +317,16 @@ module XYZ
       },
       "sap[ipv4]" => {
         :external => true,
+        :port_type => "output"
       },
       "sap_ref" => {
-        :external => true
+        :external => true,
+        :port_type => "input"
       },
       "sap[socket]" => {
       },
       "db_info" => {
-        :external => true,
+#        :external => true,
       }
     }
   end

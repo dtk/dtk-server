@@ -32,7 +32,7 @@
 	 "mysql::slave": {
           "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}"
         },
-	"mysql::client": {
+	"mysql::client_app1": {
           "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}"
 	},
 	"java_sun": {

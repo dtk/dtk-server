@@ -132,7 +132,13 @@ module XYZ
       self[:display_name] = x[:display_name] if x[:display_name]
       self[:parent_guid] = x[:parent_guid].to_i if x[:parent_guid]
       self[:parent_model_name] = x[:parent_model_name].to_sym if x[:parent_model_name]
-      self[:parent_model_name] ||= get_parent_id_handle()[:model_name] if opts[:set_parent_model_name]
+      if opts[:set_parent_model_name]
+        unless self[:parent_model_name]
+          parent_idh = get_parent_id_handle()
+          raise Error.new("cannot find parent info from #{self.inspect}") unless parent_idh
+          self[:parent_model_name] = parent_idh[:model_name] 
+        end
+      end
       freeze
     end
 

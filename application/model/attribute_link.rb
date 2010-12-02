@@ -192,6 +192,7 @@ module XYZ
 
     def self.get_legal_connections_wrt_endpoint(attribute_id_handle,parent_id_handle)
     end
+
    private
 
     ##### Actions

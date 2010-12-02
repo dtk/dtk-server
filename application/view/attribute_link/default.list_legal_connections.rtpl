@@ -22,17 +22,18 @@
 
 	<table class="list">
 	<tr id="attribute-list-header-row">
+  	  <th id="node_name-th"  class="">Node Name</th>
   	  <th id="component_name-th"  class="">Component Name</th>
 	  <th id="attribute_name-th"  class="">Attribute Name</th>
 	  <th id="attribute_id-th"  class="">Attribute Id</th>
         </tr>
 
-	{%for a in attribute_links%}
-	{%id = a[:attribute][:id]%}
-        <tr id="list_row-{%=id%}" class="">
-	  <td id="component_name-{%=id%}" class="">{%=a[:external_ref]%}</td>
-	  <td id="attribute_name-{%=id%}" class="">{%=a[:attribute][:external_ref]%}</td>
-	  <td id="attribute_id-{%=id%}" class="">{%=id%}</td>
+	{%for a in port_list%}
+        <tr id="list_row-{%=a[:id]%}" class="">
+	  <td id="node_name-{%=a[:id]%}" class="">{%=a[:node_name]%}</td>
+	  <td id="component_name-{%=a[:id]%}" class="">{%=a[:component_name]%}</td>
+	  <td id="port_name-{%=a[:id]%}" class="">{%=a[:port_name]%}</td>
+	  <td id="attribute_id-{%=a[:id]%}" class="">{%=a[:id]%}</td>
         </tr>			       
 	{%end%}
 	</table>

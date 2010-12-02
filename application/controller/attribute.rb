@@ -18,6 +18,14 @@ pp get_base_object_dataset_needs_to_be_set(:component).ppsql
       raw_attribute_list = ds.all
       attribute_list = AttributeComplexType.flatten_attribute_list(raw_attribute_list)
 
+      cols = [:id,:display_name,:base_object_node_feature,:needs_to_be_set,:value_actual,:value_derived,:data_type,:semantic_type]
+      field_set = Model::FieldSet.new(model_name,cols)
+      ds = SearchObject.create_from_field_set(field_set,ret_session_context_id(),filter).create_dataset()
+      ds = ds.where(:param_node_id => node_id.to_i) if node_id
+      #TODO: also filter out when component is not feature
+pp ds.all
+      
+
       action_name = "list_qualified_attribute_name_under_node"
       tpl = R8Tpl::TemplateR8.new("#{model_name()}/#{action_name}",user_context())
       tpl.assign("attribute_list",attribute_list)

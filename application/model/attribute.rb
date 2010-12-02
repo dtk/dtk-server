@@ -72,6 +72,28 @@ module XYZ
            :cols=>[:id, :display_name, {:id => :param_node_id}]
          }
         ]
+      virtual_column :base_object_node_feature, :type => :json, :hidden => true, 
+        :remote_dependencies => 
+        [
+         {
+           :model_name => :component,
+           :join_type => :inner,
+           :join_cond=>{:id=> :attribute__component_component_id},
+           :cols=>[:id, :display_name,:component_id]
+         },
+         {
+           :model_name => :component,
+           :join_type => :inner,
+           :join_cond=>{:id=> :component__component_id},
+           :cols=>[:id, :display_name,:node_node_id]
+         },
+         {
+           :model_name => :node,
+           :join_type => :inner,
+           :join_cond=>{:id=> :component2__node_node_id},
+           :cols=>[:id, :display_name, {:id => :param_node_id}]
+         }
+        ]
       virtual_column :base_object_node_group, :type => :json, :hidden => true, 
         :remote_dependencies => 
         [

@@ -79,7 +79,14 @@ module XYZ
       new_id_handles = create_from_select(child_model_handle,field_set_to_copy,select_ds,create_override_attrs,create_opts)
       return new_id_handles if new_id_handles.empty?
       
-      #NOTE: iterate over all all children children think can recursively call clone_copy_child_objects if change base_id_handle to base_id_handles
+      #iterate all nested children
+      #TODO: more efficient way to do this rather than iterating over each new_id_handle
+      new_id_handles.first.get_children_model_handles.each do |child2_model_handle|
+#        child_override_attrs = ret_child_override_attrs(child2_model_handle,recursive_override_attrs)
+ #       clone_copy_child_objects(child2_model_handle,source_id_handle,new_id_handles,child_override_attrs)
+        pp [:TODO_handle_nested_child,child2_model_handle]
+      end
+
       new_id_handles
     end
 

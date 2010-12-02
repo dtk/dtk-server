@@ -137,6 +137,7 @@
 	position: absolute;
 	height: 14px;
 	width: 14px;
+	z-index: 2;
 }
 
 .basic-port.available {

@@ -190,6 +190,9 @@
 .basic-item.yui3-dd-dragging .item {
 	margin: -7px 0 0 -7px;
 }
+.basic-item.yui3-dd-dragging .port {
+	margin: -7px 0 0 -7px;
+}
 
 .basic-item .ds-corner {
 	background-image: url(../images/node/basic-corners-shadow.png);

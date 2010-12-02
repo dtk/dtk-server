@@ -309,8 +309,10 @@ module XYZ
 
           update_ds = ds_with_from(parent_ds).join(pairs_ds,{:pair_parent_id => :parents__prt_relation_id}).where({:pair_id => :relation_id})
 
+          uri = SQL::ColRef.concat{|o|[:prt_uri,"/#{model_handle[:model_name]}/",:ref,o.case{[[{:ref_num=> nil},""],o.concat("-",:ref_num)]}]}
           update_ds.update({
-             :uri => (:prt_uri.sql_string + "/#{model_handle[:model_name]}/") + :ref,
+#             :uri => (:prt_uri.sql_string + "/#{model_handle[:model_name]}/") + :ref,
+             :uri => uri,
              :relation_type => model_handle[:model_name].to_s,
              :parent_id => :pair_parent_id, 
              :parent_relation_type => :prt_relation_type})

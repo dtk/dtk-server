@@ -22,7 +22,7 @@ pp [:after_change, item_obj[:ui]]
 This is what should replace above (and clearly debug_stored_new_pos removed after testing]; initial test showed bug in incremental update
         id_index = id.to_s.to_sym
         new_pos_update = {:ui => {id_index => {:left => item[1]["pos"][0], :top => item[1]["pos"][1]}}}
-        update_from_hash(item_id.to_i,new_pos_update,model_name)
+        update_from_hash(item_id.to_i,new_pos_update,model_name, :partial_value=>true)
    pp [:debug_stored_new_pos, get_object_by_id(item[0],model_name)[:ui]]
 =end
       end

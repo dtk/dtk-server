@@ -26,8 +26,8 @@ module XYZ
         @db.fetch(sql,&block)
       end
 
-
       def modify_to_reflect_special_processing!(scalar_assigns,db_rel,sql_operation,opts={})
+      #TODO: below should be deprecated and use update from select form 
         if opts[:shift_id_to_ancestor] and db_rel[:has_ancestor_field]
 	  scalar_assigns[:ancestor_id] = scalar_assigns[:id]
         end
@@ -35,7 +35,7 @@ module XYZ
         if opts[:remove_ids] or opts[:shift_id_to_ancestor]
           scalar_assigns.delete(:id)
         end
-        
+        ## end area to be deprecated
         modify_for_virtual_columns!(scalar_assigns,db_rel,sql_operation,opts[:id_handle])
 
 	scalar_assigns.each_pair do |k,v|

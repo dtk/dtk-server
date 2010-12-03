@@ -85,7 +85,7 @@ attribute "mysql/tunable/max_heap_table_size",
   :recipes => ["mysql::server","mysql::server2"]
 
 
-###TODO may put in seprate file
+###TODO may put in seperate file
 attribute "_meta_info",
   :basic_types => {
     "mysql::server" => "service", 

@@ -35,6 +35,8 @@
 	"mysql::client_app1": {
           "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}"
 	},
+	"php::php5" : {
+	},	
 	"java_sun": {
           "ui": "{\"images\": {\"tnail\":\"java-01.png\",\"display\":\"java-01.png\",\"tiny\":\"\"}}"
         },

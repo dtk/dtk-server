@@ -33,5 +33,34 @@ module XYZ
 
       return {:content => tpl.render()}
     end
+
+    def list_on_node_ports(node_id=nil)
+      filter = node_id ? [:and, [:eq, :id, node_id.to_i]] : nil
+      cols = [:id,:display_name,:port_links]
+      field_set = Model::FieldSet.new(:node,cols)
+      ds = SearchObject.create_from_field_set(field_set,ret_session_context_id(),filter).create_dataset()
+      ds = ds.where(SQL.not(SQL::ColRef.coalesce(:other_end_output_id,:other_end_input_id) => nil))
+
+      raw_link_list = ds.all
+      link_list = Array.new
+      raw_link_list.each do |el|
+        component_name = el[:component][:display_name].gsub(/::.+$/,"")
+        port_name = Aux.put_in_bracket_form([component_name] + Aux.tokenize_bracket_name(el[:attribute][:display_name]))
+        type = (el[:attribute_link]||{})[:type]||(el[:attribute_link2]||{})[:type]
+        other_end_id = (el[:attribute_link]||{})[:other_end_output_id]||(el[:attribute_link2]||{})[:other_end_input_id]
+        link_list << {
+          :node_id => el[:id],
+          :node_name => el[:display_name],
+          :port_id => el[:attribute][:id],
+          :port_name => port_name,
+          :type => type,
+          :other_end_id => other_end_id
+        }
+      end
+
+      tpl = R8Tpl::TemplateR8.new("#{model_name()}/#{default_action_name()}",user_context())
+      tpl.assign("link_list",link_list)
+      return {:content => tpl.render()}
+    end
   end
 end

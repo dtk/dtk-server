@@ -18,6 +18,7 @@
 	   <input type="hidden" name="name" id="name" value="attribute_link" />
            <input type="text"  id="input_id" name="input_id" class="r8-text" size="40" />
            <input type="text"  id="output_id" name="output_id" class="r8-text" size="40" />
+	   <input type="hidden" name="type" id="type" value="external" />
         </form>
 
 	<table class="list">

@@ -5,6 +5,7 @@ module XYZ
     def self.up()
       foreign_key :input_id, :attribute, FK_CASCADE_OPT
       foreign_key :output_id, :attribute, FK_CASCADE_OPT
+      column :type, :varchar, :size => 25 # "internal" | "external" | "member"
       column :function, :json, :default => "eq"
       column :function_index, :json
       #TODO: may deprecate and subsume in function
@@ -17,7 +18,7 @@ module XYZ
 
     ##########################  add new links ##################
 
-    def self.link_attributes_using_eq(node_group_id_handle,ng_cmp_id_handle,node_cmp_id_handles)
+    def self.link_attributes_using_eq(node_group_id_handle,ng_cmp_id_handle,node_cmp_id_handles,type)
       #TODO: rename params so not specfic to node groups
       #TODO: may convert to computing from search object with links
       node_cmp_mh = node_cmp_id_handles.first.createMH
@@ -45,6 +46,7 @@ module XYZ
          {attr_link_parent_id_handle.get_id() => attr_link_parent_col},
          {:input__id => :input_id},
          {:output__id => :output_id},
+         {type => :type},                                 
          {"eq" => :function})
       first_join_ds = i1_ds.join_table(:inner,node_attr_ds,{attr_parent_col => :id},{:table_alias => :output})
       attr_link_ds = first_join_ds.join_table(:inner,group_attr_ds,[:ref],{:table_alias => :input})
@@ -70,6 +72,7 @@ module XYZ
            :display_name => "link:sap_config-sap",
            :input_id => sap_config_id,
            :output_id => new_sap_id,
+           :type => "internal",
            :function => "sap_config[ipv4]",
            :node_node_id => node_id
          },
@@ -78,6 +81,7 @@ module XYZ
            :display_name => "link:host_address-sap",
            :input_id => ipv4_id,
            :output_id => new_sap_id,
+           :type => "internal",
            :function => "host_address[ipv4]",
            :node_node_id => node_id
          }

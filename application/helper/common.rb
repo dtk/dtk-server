@@ -12,9 +12,13 @@ module Ramaze::Helper
       get_objects(model_name_x,{:id => id}).first
     end
 
-    def update_from_hash(id,hash)
+    def update_from_hash(id,hash,model_name)
+      model_name = model_name() if model_name.nil?
+
       opts = Hash.new
-      idh = id_handle(id,model_name(),hash["display_name"])
+      idh = id_handle(id,model_name,hash["display_name"])
+#DEBUG
+pp model_name
       model_class(model_name).update_from_hash_assignments(idh,Aux.ret_hash_assignments(hash),opts)
     end
 

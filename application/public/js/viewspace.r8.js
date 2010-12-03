@@ -7,15 +7,18 @@ if (!R8.ViewSpace) {
 			_type = _def['type'],
 			_items = {},
 			_node = R8.Utils.Y.one('#viewspace'),
+			_updateBackgroundCall = null;
 
 			_draggableItems = {},
 			_selectedItems = {},
+			_itemPosUpdateList = {},
 
 			_events = {};
 		return {
 
 			init: function() {
 				this.setupEvents();
+				this.startUpdater();
 			},
 
 			get: function(itemToGet) {
@@ -110,6 +113,18 @@ console.log(ports);
 
 						viewSpace.addSelectedItem(itemId);
 					});
+					draggableItems[itemId].on('drag:end',function(e){
+						viewSpace.clearSelectedItems();
+						var node = this.get('node'),
+							nodeId = node.get('id'),
+							nodeXY = node.getXY();
+
+						_itemPosUpdateList[itemId] = {
+							'model':_items[itemId].get('model'),
+							'pos':nodeXY
+						};
+					});
+
 /*
 					R8.Workspace.viewspaces[vsContext]['items'][itemId]['drag'].on('drag:drag',function(){
 //TODO: update refreschConnectors with new viewspace object usage
@@ -118,6 +133,45 @@ console.log(ports);
 */
 				});
 				item.get('node').setAttribute('data-status','dd-ready');
+			},
+
+			backgroundUpdater: function() {
+				var count = 0;
+				for(item in _itemPosUpdateList) {
+					count++;
+				}
+//DEBUG
+//console.log(count);
+				if (count > 0) {
+					YUI().use("json", function(Y){
+						var reqParam = 'item_list=' + Y.JSON.stringify(_itemPosUpdateList);
+						var params = {
+							'cfg': {
+								'data': reqParam
+							},
+						};
+						//R8.Ctrl.call('viewspace/update_pos/' + _id, params);
+						R8.Ctrl.call('workspace/update_pos/' + _id, params);
+					});
+				}
+
+				var that = this;
+				var fireBackgroundUpdate = function() {
+					that.backgroundUpdater();
+				}
+				_updateBackgroundCall = setTimeout(fireBackgroundUpdate,5000);
+			},
+
+			startUpdater: function() {
+				var that = this;
+				var fireBackgroundUpdate = function() {
+					that.backgroundUpdater();
+				}
+				_updateBackgroundCall = setTimeout(fireBackgroundUpdate,5000);
+			},
+
+			stopUpdater: function() {
+				clearTimeout(_updateBackgroundCall);
 			},
 
 			getSelectedItem: function(itemId) {

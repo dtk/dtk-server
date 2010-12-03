@@ -68,6 +68,9 @@ if (!R8.Node) {
 					case "node":
 						return _node;
 						break;
+					case "model":
+						return _type;
+						break;
 					default:
 						return null;
 						break;

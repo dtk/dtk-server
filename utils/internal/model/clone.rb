@@ -51,47 +51,17 @@ module XYZ
       create_override_attrs = override_attrs.merge(:ancestor_id => source_id_handle.get_id()) 
       new_ancestor_rel = create_from_select(target_model_handle,field_set_to_copy,select_ds,create_override_attrs,create_opts)
       return Array.new if new_ancestor_rel.empty?
-pp [:ancestor_rel,new_ancestor_rel]
       new_id_handles = ret_id_handles_from_create_returning_ids(target_model_handle,new_ancestor_rel)
 
       #iterate over all children objects
       new_id_handles.first.get_children_model_handles.each do |child_model_handle|
         child_override_attrs = ret_child_override_attrs(child_model_handle,recursive_override_attrs)
-        clone_copy_child_objects2(child_model_handle,new_ancestor_rel,child_override_attrs)
+        clone_copy_child_objects(child_model_handle,new_ancestor_rel,child_override_attrs)
       end
       new_id_handles
     end
 
-    def clone_copy_child_objects(child_model_handle,base_id_handle,targets,recursive_override_attrs={})
-      #TODO: facttor back in clone_helper
-      child_model_name = child_model_handle[:model_name]
-      child_parent_id_col = child_model_handle.parent_id_field_name()
-
-      targets_wc = targets.map{|id_handle|{child_parent_id_col => id_handle.get_id()}}
-      targets_ds = SQL::ArrayDataset.create(db,targets_wc,ModelHandle.new(base_id_handle[:c],:target))
-
-      field_set_to_copy = Model::FieldSet.all_real(child_model_name).with_removed_cols(:id,:local_id)
-      field_set_from_ancestor = field_set_to_copy.with_removed_cols(child_parent_id_col,:ancestor_id).with_added_cols({:id => :ancestor_id})
-      child_wc = {child_parent_id_col => base_id_handle.get_id()}
-      child_ds = get_objects_just_dataset(child_model_handle,child_wc,Model::FieldSet.opt(field_set_from_ancestor))
-
-      select_ds = targets_ds.join_table(:inner,child_ds)
-      create_opts = {:duplicate_refs => :no_check, :returning_sql_cols => [:ancestor_id]}
-      create_override_attrs = ret_real_columns(child_model_handle,recursive_override_attrs)
-      ancestor_relation = create_from_select(child_model_handle,field_set_to_copy,select_ds,create_override_attrs,create_opts)
-      return Array.new if ancestor_relation.empty?
-      new_id_handles = ret_id_handles_from_create_returning_ids(child_model_handle,ancestor_relation)
-      
-      #iterate all nested children
-      new_id_handles.first.get_children_model_handles.each do |child2_model_handle|
-       child_override_attrs = ret_child_override_attrs(child2_model_handle,recursive_override_attrs)
-        clone_copy_child_objects2(child2_model_handle,ancestor_relation,child_override_attrs)
-      end
-
-      new_id_handles
-    end
-
-    def clone_copy_child_objects2(child_model_handle,ancestor_relation,recursive_override_attrs={})
+    def clone_copy_child_objects(child_model_handle,ancestor_relation,recursive_override_attrs={})
       #TODO: factor back in clone_helper or see if can use "insert-select mechanism"
       child_model_name = child_model_handle[:model_name]
       child_parent_id_col = child_model_handle.parent_id_field_name()
@@ -114,7 +84,7 @@ pp [:ancestor_rel,new_ancestor_rel]
       #iterate all nested children
       new_id_handles.first.get_children_model_handles.each do |child2_model_handle|
        child_override_attrs = ret_child_override_attrs(child2_model_handle,recursive_override_attrs)
-        clone_copy_child_objects2(child2_model_handle,new_ancestor_rel,child_override_attrs)
+        clone_copy_child_objects(child2_model_handle,new_ancestor_rel,child_override_attrs)
       end
 
       new_id_handles

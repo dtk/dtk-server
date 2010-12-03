@@ -70,7 +70,7 @@ module XYZ
         ret = nil
         if ds.respond_to?(:insert_returning_sql) and parent_id_col
           returning_ids = Array.new
-          returning_sql_cols = [:id,:display_name,parent_id_col] + (opts[:returning_sql_cols] || [])
+          returning_sql_cols = ([:id,:display_name,parent_id_col.as(:parent_id)] + (opts[:returning_sql_cols] || [])).uniq
           sql = ds.insert_returning_sql(returning_sql_cols,columns,sequel_select_with_cols)
           fetch_raw_sql(sql){|row| returning_ids << row}
           IDInfoTable.update_instances(model_handle,returning_ids)
@@ -78,7 +78,7 @@ module XYZ
             if opts[:returning_sql_cols]
               returning_ids
             else
-              returning_ids.map{|row|model_handle.createIDH(:id => row[:id], :display_name => row[:display_name],:parent_guid => row[parent_id_col])}
+              ret_id_handles_from_create_returning_ids(model_handle,returning_ids)
           end
         else
           ds.import(columns,sequel_select_with_cols)
@@ -86,6 +86,10 @@ module XYZ
           raise Error.new("have not implemented create_from_select when db adapter does not support insert_returning_sql or parent_id_col not set")
         end
         ret
+      end
+
+      def ret_id_handles_from_create_returning_ids(model_handle,returning_ids)
+        returning_ids.map{|row|model_handle.createIDH(:id => row[:id], :display_name => row[:display_name],:parent_guid => row[:parent_id])}
       end
 
       def create_simple_instance?(new_uri,c,opts={})

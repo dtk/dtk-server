@@ -26,7 +26,7 @@ module XYZ
       column :num_attached_input_links, :integer, :default => 0, :hidden => true
       column :num_attached_output_links, :integer, :default => 0, :hidden => true
       virtual_column :port_is_connected, :type => :boolean, :hidden => true, :local_dependencies => [:num_attached_input_links,:num_attached_output_links]
-
+     
       virtual_column :is_unset, :type => :boolean, :hidden => true, :local_dependencies => [:value_asserted,:value_derived,:data_type,:semantic_type]
 
       virtual_column :needs_to_be_set, :type => :boolean, :hidden => true, 
@@ -70,6 +70,28 @@ module XYZ
            :join_type => :inner,
            :join_cond=>{:id=> :component__node_node_id},
            :cols=>[:id, :display_name, {:id => :param_node_id}]
+         }
+        ]
+      virtual_column :base_object_node_datacenter, :type => :json, :hidden => true, 
+        :remote_dependencies => 
+        [
+         {
+           :model_name => :component,
+           :join_type => :inner,
+           :join_cond=>{:id=> :attribute__component_component_id},
+           :cols=>[:id, :display_name,:node_node_id]
+         },
+         {
+           :model_name => :node,
+           :join_type => :inner,
+           :join_cond=>{:id=> :component__node_node_id},
+           :cols=>[:id, :display_name, :datacenter_datacenter_id]
+         },
+         {
+           :model_name => :datacenter,
+           :join_type => :inner,
+           :join_cond=>{:id=> :node__datacenter_datacenter_id},
+           :cols=>[:id, :display_name, {:id => :param_datacenter_id}]
          }
         ]
       virtual_column :base_object_node_feature, :type => :json, :hidden => true, 

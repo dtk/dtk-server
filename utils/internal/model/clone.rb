@@ -69,18 +69,22 @@ module XYZ
       targets_ds = SQL::ArrayDataset.create(db,targets_wc,ModelHandle.new(base_id_handle[:c],:target))
 
       field_set_to_copy = Model::FieldSet.all_real(child_model_name).with_removed_cols(:id,:local_id)
+      field_set_from_ancestor = field_set_to_copy.with_removed_cols(child_parent_id_col,:ancestor_id).with_added_cols({:id => :ancestor_id})
       child_wc = {child_parent_id_col => base_id_handle.get_id()}
-      child_fs = Model::FieldSet.opt(field_set_to_copy.with_removed_cols(child_parent_id_col))
-      child_ds = get_objects_just_dataset(child_model_handle,child_wc,child_fs)
+      child_ds = get_objects_just_dataset(child_model_handle,child_wc,Model::FieldSet.opt(field_set_from_ancestor))
 
       select_ds = targets_ds.join_table(:inner,child_ds)
-      create_opts = {:duplicate_refs => :no_check}
+      create_opts = {:duplicate_refs => :no_check, :returning_sql_cols => [:ancestor_id]}
       create_override_attrs = ret_real_columns(child_model_handle,recursive_override_attrs)
-      new_id_handles = create_from_select(child_model_handle,field_set_to_copy,select_ds,create_override_attrs,create_opts)
-      return new_id_handles if new_id_handles.empty?
+      returning_ids = create_from_select(child_model_handle,field_set_to_copy,select_ds,create_override_attrs,create_opts)
+      return Array.new if returning_ids.empty?
+pp [:returning_ids,returning_ids]
+      new_id_handles = ret_id_handles_from_create_returning_ids(child_model_handle,returning_ids)
       
       #iterate all nested children
       #TODO: more efficient way to do this rather than iterating over each new_id_handle
+      #have multiple source id handles which are obtained by following child link; can be returned by creeate from select by
+      #having child id as returning_id
       new_id_handles.first.get_children_model_handles.each do |child2_model_handle|
 #        child_override_attrs = ret_child_override_attrs(child2_model_handle,recursive_override_attrs)
  #       clone_copy_child_objects(child2_model_handle,source_id_handle,new_id_handles,child_override_attrs)

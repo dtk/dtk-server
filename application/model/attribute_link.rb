@@ -9,7 +9,6 @@ module XYZ
       column :function_index, :json
       #TODO: may deprecate and subsume in function
       column :label, :text, :default => "1"
-      has_ancestor_field()
       many_to_one :library, :datacenter, :component, :node, :project
     end
 
@@ -192,6 +191,7 @@ module XYZ
 
     def self.get_legal_connections_wrt_endpoint(attribute_id_handle,parent_id_handle)
     end
+
    private
 
     ##### Actions

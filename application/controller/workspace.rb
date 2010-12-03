@@ -1,11 +1,13 @@
 module XYZ
   class WorkspaceController < Controller
+#TODO: move to viewspace controller
     def update_pos(id)
       items_to_save = JSON.parse(request.params["item_list"])
       items_to_save.each do |item|
         item_id = item[0]
         model_name = item[1]["model"].to_sym
         item_obj = get_object_by_id(item[0],model_name)
+#DEBUG
 p '==================================================='
 pp item_obj[:ui]
         item_obj[:ui][id.to_s] = {}
@@ -13,7 +15,7 @@ pp item_obj[:ui]
         item_obj[:ui][id.to_s][:top] = item[1]["pos"][1]
 p '==================================================='
 pp item_obj
-        update_from_hash(id,item_obj,model_name)
+        update_from_hash(id.to_i,item_obj,model_name)
       end
       return {}
     end
@@ -460,8 +462,11 @@ pp datacenter
       model_name = :node
       field_set = Model::FieldSet.default(model_name)
       node_list = get_objects(model_name,{:datacenter_datacenter_id=>datacenter_id,:ds_source_obj_type=>'image'})
-#pp node_list
+
       node_list.each do |node|
+#DEBUG
+p '@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@'
+pp node
         item = {
           :type => model_name.to_s,
           :object => node,

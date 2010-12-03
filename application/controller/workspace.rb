@@ -6,15 +6,15 @@ module XYZ
       items_to_save.each do |item|
         item_id = item[0]
         model_name = item[1]["model"].to_sym
+#TODO: I wil fix up; but the update is written so you dont have explicitly get old value; it shoudl appropriately overide; I wil need to test so wil keep this form for now
         item_obj = get_object_by_id(item[0],model_name)
 #DEBUG
 p '==================================================='
-pp item_obj[:ui]
-        item_obj[:ui][id.to_s] = {}
-        item_obj[:ui][id.to_s][:left] = item[1]["pos"][0]
-        item_obj[:ui][id.to_s][:top] = item[1]["pos"][1]
+pp [:before_change,item_obj[:ui]]
+        id_index = id.to_s.to_sym #TODO: need to reaxamine fn insider update from hash that symbolizes all keys and nested keys
+        item_obj[:ui][id_index] = {:left => item[1]["pos"][0], :top => item[1]["pos"][1]}
 p '==================================================='
-pp item_obj
+pp [:after_change, item_obj[:ui]]
         update_from_hash(item_id.to_i,item_obj,model_name)
       end
       return {}

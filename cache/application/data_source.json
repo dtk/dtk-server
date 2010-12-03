@@ -2,6 +2,10 @@
  "library" : {
    "test" : {
      "component": {
+	"php::php5" : {
+	},	
+	"apache2" : {
+	},	
         "user_account": {
           "ui": "{\"images\": {\"tnail\":\"user.png\",\"display\":\"user.png\",\"tiny\":\"\"}}"
         },
@@ -35,8 +39,6 @@
 	"mysql::client_app1": {
           "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}"
 	},
-	"php::php5" : {
-	},	
 	"java_sun": {
           "ui": "{\"images\": {\"tnail\":\"java-01.png\",\"display\":\"java-01.png\",\"tiny\":\"\"}}"
         },

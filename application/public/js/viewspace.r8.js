@@ -163,7 +163,7 @@ console.log(ports);
 			},
 
 			startUpdater: function() {
-return;
+			//DEBUG return;
 				var that = this;
 				var fireBackgroundUpdate = function() {
 					that.backgroundUpdater();

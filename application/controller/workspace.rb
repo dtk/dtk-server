@@ -15,7 +15,7 @@ pp item_obj[:ui]
         item_obj[:ui][id.to_s][:top] = item[1]["pos"][1]
 p '==================================================='
 pp item_obj
-        update_from_hash(id.to_i,item_obj,model_name)
+        update_from_hash(item_id.to_i,item_obj,model_name)
       end
       return {}
     end

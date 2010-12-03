@@ -145,6 +145,7 @@ module XYZ
         case direction
           when :up
             up()
+            has_ancestor_field()
           when :down
             down()
         end
@@ -192,7 +193,6 @@ module XYZ
           String :display_name
           Timestamp :created_at, :default => SQL.now
           Timestamp :updated_at, :default => SQL.now
-
          #TODO: this and analog for tem_id should be put in instead of below foreign_key owner_id USER_TABLE.schema_table_symbol,FK_SET_NULL_OPT
           column :owner_id, ID_TYPES[:id]
           column :team_id, ID_TYPES[:id]

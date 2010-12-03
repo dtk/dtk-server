@@ -4,7 +4,6 @@ module XYZ
     set_relation_name(:node,:node)
 #TODO: move this out into central model, should read off of model meta data for processing
     def self.up()
-      has_ancestor_field()
       ds_column_defs :ds_attributes, :ds_key, :data_source, :ds_source_obj_type
       external_ref_column_defs()
       column :tag,  :varchar

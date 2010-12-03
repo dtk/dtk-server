@@ -3,7 +3,6 @@ module XYZ
     set_relation_name(:component,:component)
     class << self
       def up()
-        has_ancestor_field()
         ds_column_defs :ds_attributes, :ds_key
         external_ref_column_defs()
         column :type, :varchar, :size => 15 # instance | template | composite

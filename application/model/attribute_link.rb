@@ -6,6 +6,7 @@ module XYZ
       foreign_key :input_id, :attribute, FK_CASCADE_OPT
       foreign_key :output_id, :attribute, FK_CASCADE_OPT
       column :type, :varchar, :size => 25 # "internal" | "external" | "member"
+      column :hidden, :boolean, :default => false
       column :function, :json, :default => "eq"
       column :function_index, :json
       #TODO: may deprecate and subsume in function
@@ -51,7 +52,7 @@ module XYZ
       first_join_ds = i1_ds.join_table(:inner,node_attr_ds,{attr_parent_col => :id},{:table_alias => :output})
       attr_link_ds = first_join_ds.join_table(:inner,group_attr_ds,[:ref],{:table_alias => :input})
 
-      attr_link_fs = FieldSet.new(:attribute,[:ref,attr_link_parent_col,:input_id,:output_id,:function])
+      attr_link_fs = FieldSet.new(:attribute,[:ref,attr_link_parent_col,:input_id,:output_id,:function,:type])
       override_attrs = {}
             
       opts = {:duplicate_refs => :no_check,:returning_sql_cols => [:input_id,:output_id]} 
@@ -73,6 +74,7 @@ module XYZ
            :input_id => sap_config_id,
            :output_id => new_sap_id,
            :type => "internal",
+           :hidden => true,
            :function => "sap_config[ipv4]",
            :node_node_id => node_id
          },
@@ -82,6 +84,7 @@ module XYZ
            :input_id => ipv4_id,
            :output_id => new_sap_id,
            :type => "internal",
+           :hidden => true,
            :function => "host_address[ipv4]",
            :node_node_id => node_id
          }

@@ -51,12 +51,12 @@ module XYZ
          {
            :model_name => :attribute_link,
            :join_cond=>{:input_id =>:attribute__id},
-           :cols => [:id,:type,{:output_id => :other_end_output_id},:input_id,:node_node_id]
+           :cols => [:id,:type,:hidden,{:output_id => :other_end_output_id},:input_id,:node_node_id]
          },
          {
            :model_name => :attribute_link,
            :join_cond=>{:output_id =>:attribute__id},
-           :cols => [:id,:type,{:input_id => :other_end_input_id},:output_id,:node_node_id]
+           :cols => [:id,:type,:hidden,{:input_id => :other_end_input_id},:output_id,:node_node_id]
          }
         ]
 

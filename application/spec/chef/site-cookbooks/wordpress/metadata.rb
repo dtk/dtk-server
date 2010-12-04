@@ -65,3 +65,4 @@ attribute "wordpress/keys/nonce",
   :description => "Wordpress nonce key."
 #  :default => "randomly generated"
   
+require File.expand_path('metadata_aux.rb',::Chef::Config[:cucumber_path]);__t(__FILE__,self)

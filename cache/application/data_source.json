@@ -5,6 +5,7 @@
 	"php::php5" : {
 	},	
 	"apache2" : {
+          "ui": "{\"images\": {\"tnail\":\"apache.png\",\"display\":\"apache.png\",\"tiny\":\"\"}}"
 	},	
 	"wordpress" : {
 	},	
@@ -38,9 +39,6 @@
 	 "mysql::slave": {
           "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}"
         },
-	"mysql::client_app1": {
-          "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}"
-	},
 	"java_sun": {
           "ui": "{\"images\": {\"tnail\":\"java-01.png\",\"display\":\"java-01.png\",\"tiny\":\"\"}}"
         },

@@ -2,84 +2,85 @@
   "datacenter": {
     "dc1": {
       "attribute_link": {
-        "attribute_link:2147483976-2147483985": {
-          "type": "member",
-          "*output_id": "/node/s-ami-e2cc398b-2/component/user_account/attribute/user_account][uid]",
-          "function": "eq",
-          "*input_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][uid]",
-          "display_name": "attribute_link:2147483976-2147483985",
-          "label": "1"
-        },
-        "attribute_link:2147483976-2147483986": {
-          "type": "member",
-          "*output_id": "/node/s-ami-e2cc398b/component/user_account/attribute/user_account][uid]",
-          "function": "eq",
-          "*input_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][uid]",
-          "display_name": "attribute_link:2147483976-2147483986",
-          "label": "1"
-        },
-        "attribute_link:2147483975-2147483982": {
-          "type": "member",
-          "*output_id": "/node/s-ami-e2cc398b-2/component/user_account/attribute/user_account][username]",
-          "function": "eq",
-          "*input_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][username]",
-          "display_name": "attribute_link:2147483975-2147483982",
-          "label": "1"
-        },
-        "attribute_link:2147483976-2147483987": {
-          "type": "member",
-          "*output_id": "/node/s-ami-06c72c6f/component/user_account/attribute/user_account][uid]",
-          "function": "eq",
-          "*input_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][uid]",
-          "display_name": "attribute_link:2147483976-2147483987",
-          "label": "1"
-        },
-        "attribute_link:2147483977-2147483988": {
-          "type": "member",
-          "*output_id": "/node/s-ami-e2cc398b-2/component/user_account/attribute/user_account][gid]",
-          "function": "eq",
-          "*input_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][gid]",
-          "display_name": "attribute_link:2147483977-2147483988",
-          "label": "1"
-        },
-        "attribute_link:2147483975-2147483983": {
-          "type": "member",
-          "*output_id": "/node/s-ami-e2cc398b/component/user_account/attribute/user_account][username]",
-          "function": "eq",
-          "*input_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][username]",
-          "display_name": "attribute_link:2147483975-2147483983",
-          "label": "1"
-        },
-        "attribute_link:2147483977-2147483989": {
-          "type": "member",
-          "*output_id": "/node/s-ami-e2cc398b/component/user_account/attribute/user_account][gid]",
-          "function": "eq",
-          "*input_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][gid]",
-          "display_name": "attribute_link:2147483977-2147483989",
-          "label": "1"
-        },
-        "attribute_link:2147483975-2147483984": {
-          "type": "member",
-          "*output_id": "/node/s-ami-06c72c6f/component/user_account/attribute/user_account][username]",
-          "function": "eq",
-          "*input_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][username]",
-          "display_name": "attribute_link:2147483975-2147483984",
-          "label": "1"
-        },
-        "attribute_link:2147483977-2147483990": {
+        "attribute_link:2147483891-2147483904": {
           "type": "member",
           "*output_id": "/node/s-ami-06c72c6f/component/user_account/attribute/user_account][gid]",
+          "hidden": false,
           "function": "eq",
+          "display_name": "attribute_link:2147483891-2147483904",
           "*input_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][gid]",
-          "display_name": "attribute_link:2147483977-2147483990",
           "label": "1"
         },
-        "attribute_link": {
-          "type": "external",
-          "*output_id": "/node/s-ami-e2cc398b/component/mysql::server/attribute/sap[ipv4]",
+        "attribute_link:2147483889-2147483896": {
+          "type": "member",
+          "*output_id": "/node/s-ami-e2cc398b-2/component/user_account/attribute/user_account][username]",
+          "hidden": false,
           "function": "eq",
-          "*input_id": "/node/s-ami-e2cc398b-2/component/mysql::slave/attribute/mysql][sap_ref_to_master]",
-          "display_name": "attribute_link",
+          "display_name": "attribute_link:2147483889-2147483896",
+          "*input_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][username]",
+          "label": "1"
+        },
+        "attribute_link:2147483890-2147483899": {
+          "type": "member",
+          "*output_id": "/node/s-ami-e2cc398b-2/component/user_account/attribute/user_account][uid]",
+          "hidden": false,
+          "function": "eq",
+          "display_name": "attribute_link:2147483890-2147483899",
+          "*input_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][uid]",
+          "label": "1"
+        },
+        "attribute_link:2147483889-2147483897": {
+          "type": "member",
+          "*output_id": "/node/s-ami-e2cc398b/component/user_account/attribute/user_account][username]",
+          "hidden": false,
+          "function": "eq",
+          "display_name": "attribute_link:2147483889-2147483897",
+          "*input_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][username]",
+          "label": "1"
+        },
+        "attribute_link:2147483890-2147483900": {
+          "type": "member",
+          "*output_id": "/node/s-ami-e2cc398b/component/user_account/attribute/user_account][uid]",
+          "hidden": false,
+          "function": "eq",
+          "display_name": "attribute_link:2147483890-2147483900",
+          "*input_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][uid]",
+          "label": "1"
+        },
+        "attribute_link:2147483889-2147483898": {
+          "type": "member",
+          "*output_id": "/node/s-ami-06c72c6f/component/user_account/attribute/user_account][username]",
+          "hidden": false,
+          "function": "eq",
+          "display_name": "attribute_link:2147483889-2147483898",
+          "*input_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][username]",
+          "label": "1"
+        },
+        "attribute_link:2147483890-2147483901": {
+          "type": "member",
+          "*output_id": "/node/s-ami-06c72c6f/component/user_account/attribute/user_account][uid]",
+          "hidden": false,
+          "function": "eq",
+          "display_name": "attribute_link:2147483890-2147483901",
+          "*input_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][uid]",
+          "label": "1"
+        },
+        "attribute_link:2147483891-2147483902": {
+          "type": "member",
+          "*output_id": "/node/s-ami-e2cc398b-2/component/user_account/attribute/user_account][gid]",
+          "hidden": false,
+          "function": "eq",
+          "display_name": "attribute_link:2147483891-2147483902",
+          "*input_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][gid]",
+          "label": "1"
+        },
+        "attribute_link:2147483891-2147483903": {
+          "type": "member",
+          "*output_id": "/node/s-ami-e2cc398b/component/user_account/attribute/user_account][gid]",
+          "hidden": false,
+          "function": "eq",
+          "display_name": "attribute_link:2147483891-2147483903",
+          "*input_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][gid]",
           "label": "1"
         }
       },
@@ -94,20 +95,22 @@
       "node": {
         "s-ami-e2cc398b-2": {
           "attribute_link": {
-            "host_address:2147483878-2147483963": {
+            "host_address:2147483879-2147483994": {
               "type": "internal",
               "*output_id": "/node/s-ami-e2cc398b-2/component/mysql::server/attribute/sap[ipv4]",
+              "hidden": true,
               "function": "host_address[ipv4]",
-              "*input_id": "/node/s-ami-e2cc398b-2/attribute/host_addresses[ipv4]",
               "display_name": "link:host_address-sap",
+              "*input_id": "/node/s-ami-e2cc398b-2/attribute/host_addresses[ipv4]",
               "label": "1"
             },
-            "sap_config:2147483955-2147483963": {
+            "sap_config:2147483986-2147483994": {
               "type": "internal",
               "*output_id": "/node/s-ami-e2cc398b-2/component/mysql::server/attribute/sap[ipv4]",
+              "hidden": true,
               "function": "sap_config[ipv4]",
-              "*input_id": "/node/s-ami-e2cc398b-2/component/mysql::server/attribute/mysql][sap_config][ipv4]",
               "display_name": "link:sap_config-sap",
+              "*input_id": "/node/s-ami-e2cc398b-2/component/mysql::server/attribute/mysql][sap_config][ipv4]",
               "label": "1"
             }
           },
@@ -219,15 +222,14 @@
               "description": "Installs a user account",
               "ds_key": "[:user_data, \"/library/test/user_account\"]",
               "only_one_per_node": true,
-              "*ancestor_id": "/node_group/all_staged_nodes/component/user_account",
               "attribute": {
                 "user_account][username]": {
                   "description": "User name",
                   "num_attached_output_links": 1,
-                  "*ancestor_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][username]",
                   "required": true,
                   "read_only": false,
                   "is_port": false,
+                  "*ancestor_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][username]",
                   "display_name": "username",
                   "external_ref": {
                     "type": "chef_attribute",
@@ -239,10 +241,10 @@
                 "user_account][uid]": {
                   "description": "User id",
                   "num_attached_output_links": 1,
-                  "*ancestor_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][uid]",
                   "required": true,
                   "read_only": false,
                   "is_port": false,
+                  "*ancestor_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][uid]",
                   "display_name": "uid",
                   "external_ref": {
                     "type": "chef_attribute",
@@ -254,10 +256,10 @@
                 "user_account][gid]": {
                   "description": "User's group id",
                   "num_attached_output_links": 1,
-                  "*ancestor_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][gid]",
                   "required": false,
                   "read_only": false,
                   "is_port": false,
+                  "*ancestor_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][gid]",
                   "display_name": "gid",
                   "external_ref": {
                     "type": "chef_attribute",
@@ -267,6 +269,7 @@
                   "num_attached_input_links": 0
                 }
               },
+              "*ancestor_id": "/node_group/all_staged_nodes/component/user_account",
               "display_name": "user_account",
               "external_ref": {
                 "type": "chef_recipe",
@@ -304,12 +307,12 @@
                   "semantic_type_summary": "sap[ipv4]",
                   "value_derived": [
                     {
-                      "protocol": "tcp",
                       "port": 3306,
-                      "binding_addr_constraints": [
-
-                      ],
-                      "host_address": null
+                      "protocol": "tcp",
+                      "host_address": null,
+                      "application": {
+                        "db_created_on_server": true
+                      }
                     }
                   ],
                   "required": false,
@@ -427,20 +430,6 @@
                   "data_type": "string",
                   "num_attached_input_links": 0
                 },
-                "mysql][tunable][max_heap_table_size]": {
-                  "value_asserted": "32M",
-                  "num_attached_output_links": 0,
-                  "required": false,
-                  "read_only": false,
-                  "is_port": false,
-                  "display_name": "tunable[max_heap_table_size]",
-                  "external_ref": {
-                    "type": "chef_attribute",
-                    "path": "node[mysql][tunable][max_heap_table_size]"
-                  },
-                  "data_type": "string",
-                  "num_attached_input_links": 0
-                },
                 "mysql][bind_address]": {
                   "description": "Address that mysqld should listen on",
                   "num_attached_output_links": 0,
@@ -451,6 +440,20 @@
                   "external_ref": {
                     "type": "chef_attribute",
                     "path": "node[mysql][bind_address]"
+                  },
+                  "data_type": "string",
+                  "num_attached_input_links": 0
+                },
+                "mysql][tunable][max_heap_table_size]": {
+                  "value_asserted": "32M",
+                  "num_attached_output_links": 0,
+                  "required": false,
+                  "read_only": false,
+                  "is_port": false,
+                  "display_name": "tunable[max_heap_table_size]",
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[mysql][tunable][max_heap_table_size]"
                   },
                   "data_type": "string",
                   "num_attached_input_links": 0
@@ -480,11 +483,11 @@
                   "description": "mysql ip service access point configuration",
                   "value_asserted": [
                     {
-                      "protocol": "tcp",
                       "port": 3306,
-                      "binding_addr_constraints": [
-
-                      ]
+                      "protocol": "tcp",
+                      "application": {
+                        "db_created_on_server": true
+                      }
                     }
                   ],
                   "num_attached_output_links": 0,
@@ -617,23 +620,8 @@
           "display_name": "s-ubuntu_lucid-2",
           "ds_attributes": {
             "architecture": "i386",
-            "root_device_type": "ebs",
-            "type": "machine",
-            "state": "available",
-            "is_public": false,
-            "owner_id": "411986592491",
-            "ramdisk_id": "ari-d5709dbc",
-            "product_codes": [
-
-            ],
-            "location": "411986592491/rnp-chef-09-8-ubuntu-lucid-x86_32",
-            "flavor": {
-              "disk": null
-            },
-            "root_device_name": "/dev/sda1",
             "kernel_id": "aki-5f15f636",
-            "id": "ami-e2cc398b",
-            "platform": null,
+            "type": "machine",
             "block_device_mapping": [
               {
                 "snapshotId": "snap-d6bf91bd",
@@ -641,30 +629,47 @@
                 "deleteOnTermination": "true",
                 "volumeSize": "15"
               }
-            ]
+            ],
+            "state": "available",
+            "root_device_type": "ebs",
+            "owner_id": "411986592491",
+            "is_public": false,
+            "location": "411986592491/rnp-chef-09-8-ubuntu-lucid-x86_32",
+            "ramdisk_id": "ari-d5709dbc",
+            "flavor": {
+              "disk": null
+            },
+            "product_codes": [
+
+            ],
+            "id": "ami-e2cc398b",
+            "platform": null,
+            "root_device_name": "/dev/sda1"
           },
           "is_deployed": true,
           "ui": {
-            "top": 337,
-            "left": 655
+            "top": 301,
+            "left": 675
           }
         },
         "s-ami-06c72c6f": {
           "attribute_link": {
-            "sap_config:2147483897-2147483903": {
+            "host_address:2147483859-2147483933": {
               "type": "internal",
               "*output_id": "/node/s-ami-06c72c6f/component/apache2/attribute/sap[ipv4]",
-              "function": "sap_config[ipv4]",
-              "*input_id": "/node/s-ami-06c72c6f/component/apache2/attribute/apache2][sap_config][ipv4]",
-              "display_name": "link:sap_config-sap",
+              "hidden": true,
+              "function": "host_address[ipv4]",
+              "display_name": "link:host_address-sap",
+              "*input_id": "/node/s-ami-06c72c6f/attribute/host_addresses[ipv4]",
               "label": "1"
             },
-            "host_address:2147483858-2147483903": {
+            "sap_config:2147483927-2147483933": {
               "type": "internal",
               "*output_id": "/node/s-ami-06c72c6f/component/apache2/attribute/sap[ipv4]",
-              "function": "host_address[ipv4]",
-              "*input_id": "/node/s-ami-06c72c6f/attribute/host_addresses[ipv4]",
-              "display_name": "link:host_address-sap",
+              "hidden": true,
+              "function": "sap_config[ipv4]",
+              "display_name": "link:sap_config-sap",
+              "*input_id": "/node/s-ami-06c72c6f/component/apache2/attribute/apache2][sap_config][ipv4]",
               "label": "1"
             }
           },
@@ -851,6 +856,35 @@
                   "data_type": "string",
                   "num_attached_input_links": 0
                 },
+                "wordpress][sap_ref]": {
+                  "semantic_type": {
+                    "sap_ref": {
+                      "application": "sql::mysql"
+                    }
+                  },
+                  "description": "wordpress mysql service access point reference for client",
+                  "value_asserted": [
+                    {
+                      "port": null,
+                      "protocol": "tcp",
+                      "application": {
+                        "db_created_on_server": true
+                      }
+                    }
+                  ],
+                  "num_attached_output_links": 0,
+                  "semantic_type_summary": "sap_ref",
+                  "required": true,
+                  "read_only": false,
+                  "is_port": true,
+                  "display_name": "sap_ref",
+                  "external_ref": {
+                    "type": "service_attribute",
+                    "path": "service[wordpress][sap_ref]"
+                  },
+                  "data_type": "json",
+                  "num_attached_input_links": 0
+                },
                 "wordpress][dir]": {
                   "description": "Location to place wordpress files.",
                   "value_asserted": "/var/www",
@@ -899,15 +933,14 @@
               "description": "Installs a user account",
               "ds_key": "[:user_data, \"/library/test/user_account\"]",
               "only_one_per_node": true,
-              "*ancestor_id": "/node_group/all_staged_nodes/component/user_account",
               "attribute": {
                 "user_account][username]": {
                   "description": "User name",
                   "num_attached_output_links": 1,
-                  "*ancestor_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][username]",
                   "required": true,
                   "read_only": false,
                   "is_port": false,
+                  "*ancestor_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][username]",
                   "display_name": "username",
                   "external_ref": {
                     "type": "chef_attribute",
@@ -919,10 +952,10 @@
                 "user_account][uid]": {
                   "description": "User id",
                   "num_attached_output_links": 1,
-                  "*ancestor_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][uid]",
                   "required": true,
                   "read_only": false,
                   "is_port": false,
+                  "*ancestor_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][uid]",
                   "display_name": "uid",
                   "external_ref": {
                     "type": "chef_attribute",
@@ -934,10 +967,10 @@
                 "user_account][gid]": {
                   "description": "User's group id",
                   "num_attached_output_links": 1,
-                  "*ancestor_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][gid]",
                   "required": false,
                   "read_only": false,
                   "is_port": false,
+                  "*ancestor_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][gid]",
                   "display_name": "gid",
                   "external_ref": {
                     "type": "chef_attribute",
@@ -947,6 +980,7 @@
                   "num_attached_input_links": 0
                 }
               },
+              "*ancestor_id": "/node_group/all_staged_nodes/component/user_account",
               "display_name": "user_account",
               "external_ref": {
                 "type": "chef_recipe",
@@ -980,11 +1014,11 @@
                   "semantic_type_summary": "sap[ipv4]",
                   "value_derived": [
                     {
-                      "protocol": "tcp",
                       "ports": [
                         "80",
                         "443"
                       ],
+                      "protocol": "tcp",
                       "host_address": null
                     }
                   ],
@@ -1143,11 +1177,11 @@
                   },
                   "value_asserted": [
                     {
-                      "protocol": "tcp",
                       "ports": [
                         "80",
                         "443"
-                      ]
+                      ],
+                      "protocol": "tcp"
                     }
                   ],
                   "num_attached_output_links": 0,
@@ -1231,7 +1265,8 @@
               },
               "ds_attributes": {
                 "qualified_ref": "/library/test/apache2",
-                "ref": "apache2"
+                "ref": "apache2",
+                "ui": "{\"images\": {\"tnail\":\"apache.png\",\"display\":\"apache.png\",\"tiny\":\"\"}}"
               }
             }
           },
@@ -1257,23 +1292,8 @@
           "display_name": "s-ubuntu_karmic",
           "ds_attributes": {
             "architecture": "i386",
-            "root_device_type": "ebs",
-            "type": "machine",
-            "state": "available",
-            "is_public": false,
-            "owner_id": "411986592491",
-            "ramdisk_id": "ari-d5709dbc",
-            "product_codes": [
-
-            ],
-            "location": "411986592491/rnp-chef-09-6-ubuntu-910-x86_32",
-            "flavor": {
-              "disk": null
-            },
-            "root_device_name": "/dev/sda1",
             "kernel_id": "aki-5f15f636",
-            "id": "ami-06c72c6f",
-            "platform": null,
+            "type": "machine",
             "block_device_mapping": [
               {
                 "snapshotId": "snap-caa459a1",
@@ -1281,30 +1301,47 @@
                 "deleteOnTermination": "true",
                 "volumeSize": "15"
               }
-            ]
+            ],
+            "state": "available",
+            "root_device_type": "ebs",
+            "owner_id": "411986592491",
+            "is_public": false,
+            "location": "411986592491/rnp-chef-09-6-ubuntu-910-x86_32",
+            "ramdisk_id": "ari-d5709dbc",
+            "flavor": {
+              "disk": null
+            },
+            "product_codes": [
+
+            ],
+            "id": "ami-06c72c6f",
+            "platform": null,
+            "root_device_name": "/dev/sda1"
           },
           "is_deployed": true,
           "ui": {
-            "top": 171,
-            "left": 467
+            "top": 186,
+            "left": 530
           }
         },
         "s-ami-e2cc398b": {
           "attribute_link": {
-            "host_address:2147483868-2147483940": {
+            "host_address:2147483869-2147483971": {
               "type": "internal",
               "*output_id": "/node/s-ami-e2cc398b/component/mysql::server/attribute/sap[ipv4]",
+              "hidden": true,
               "function": "host_address[ipv4]",
-              "*input_id": "/node/s-ami-e2cc398b/attribute/host_addresses[ipv4]",
               "display_name": "link:host_address-sap",
+              "*input_id": "/node/s-ami-e2cc398b/attribute/host_addresses[ipv4]",
               "label": "1"
             },
-            "sap_config:2147483932-2147483940": {
+            "sap_config:2147483963-2147483971": {
               "type": "internal",
               "*output_id": "/node/s-ami-e2cc398b/component/mysql::server/attribute/sap[ipv4]",
+              "hidden": true,
               "function": "sap_config[ipv4]",
-              "*input_id": "/node/s-ami-e2cc398b/component/mysql::server/attribute/mysql][sap_config][ipv4]",
               "display_name": "link:sap_config-sap",
+              "*input_id": "/node/s-ami-e2cc398b/component/mysql::server/attribute/mysql][sap_config][ipv4]",
               "label": "1"
             }
           },
@@ -1377,6 +1414,40 @@
                   },
                   "data_type": "json",
                   "num_attached_input_links": 0
+                },
+                "mysql][sap_config_for_slave]": {
+                  "semantic_type": {
+                    ":array": {
+                      "sap_config[ipv4]": {
+                        "application": "sql::mysql"
+                      }
+                    }
+                  },
+                  "description": "mysql ip service access point configuration for slave",
+                  "value_asserted": [
+                    {
+                      "port": 3306,
+                      "protocol": "tcp",
+                      "application": {
+                        "database": "mysql",
+                        "password": null,
+                        "username": "slave",
+                        "db_created_on_server": false
+                      }
+                    }
+                  ],
+                  "num_attached_output_links": 0,
+                  "semantic_type_summary": "sap_config[ipv4]",
+                  "required": false,
+                  "read_only": false,
+                  "is_port": true,
+                  "display_name": "sap_config_for_slave",
+                  "external_ref": {
+                    "type": "service_attribute",
+                    "path": "service[mysql_server][sap_config_for_slave]"
+                  },
+                  "data_type": "json",
+                  "num_attached_input_links": 0
                 }
               },
               "display_name": "mysql::master",
@@ -1396,15 +1467,14 @@
               "description": "Installs a user account",
               "ds_key": "[:user_data, \"/library/test/user_account\"]",
               "only_one_per_node": true,
-              "*ancestor_id": "/node_group/all_staged_nodes/component/user_account",
               "attribute": {
                 "user_account][username]": {
                   "description": "User name",
                   "num_attached_output_links": 1,
-                  "*ancestor_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][username]",
                   "required": true,
                   "read_only": false,
                   "is_port": false,
+                  "*ancestor_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][username]",
                   "display_name": "username",
                   "external_ref": {
                     "type": "chef_attribute",
@@ -1416,10 +1486,10 @@
                 "user_account][uid]": {
                   "description": "User id",
                   "num_attached_output_links": 1,
-                  "*ancestor_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][uid]",
                   "required": true,
                   "read_only": false,
                   "is_port": false,
+                  "*ancestor_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][uid]",
                   "display_name": "uid",
                   "external_ref": {
                     "type": "chef_attribute",
@@ -1431,10 +1501,10 @@
                 "user_account][gid]": {
                   "description": "User's group id",
                   "num_attached_output_links": 1,
-                  "*ancestor_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][gid]",
                   "required": false,
                   "read_only": false,
                   "is_port": false,
+                  "*ancestor_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][gid]",
                   "display_name": "gid",
                   "external_ref": {
                     "type": "chef_attribute",
@@ -1444,6 +1514,7 @@
                   "num_attached_input_links": 0
                 }
               },
+              "*ancestor_id": "/node_group/all_staged_nodes/component/user_account",
               "display_name": "user_account",
               "external_ref": {
                 "type": "chef_recipe",
@@ -1481,12 +1552,12 @@
                   "semantic_type_summary": "sap[ipv4]",
                   "value_derived": [
                     {
-                      "protocol": "tcp",
                       "port": 3306,
-                      "binding_addr_constraints": [
-
-                      ],
-                      "host_address": null
+                      "protocol": "tcp",
+                      "host_address": null,
+                      "application": {
+                        "db_created_on_server": true
+                      }
                     }
                   ],
                   "required": false,
@@ -1657,11 +1728,11 @@
                   "description": "mysql ip service access point configuration",
                   "value_asserted": [
                     {
-                      "protocol": "tcp",
                       "port": 3306,
-                      "binding_addr_constraints": [
-
-                      ]
+                      "protocol": "tcp",
+                      "application": {
+                        "db_created_on_server": true
+                      }
                     }
                   ],
                   "num_attached_output_links": 0,
@@ -1794,23 +1865,8 @@
           "display_name": "s-ubuntu_lucid",
           "ds_attributes": {
             "architecture": "i386",
-            "root_device_type": "ebs",
-            "type": "machine",
-            "state": "available",
-            "is_public": false,
-            "owner_id": "411986592491",
-            "ramdisk_id": "ari-d5709dbc",
-            "product_codes": [
-
-            ],
-            "location": "411986592491/rnp-chef-09-8-ubuntu-lucid-x86_32",
-            "flavor": {
-              "disk": null
-            },
-            "root_device_name": "/dev/sda1",
             "kernel_id": "aki-5f15f636",
-            "id": "ami-e2cc398b",
-            "platform": null,
+            "type": "machine",
             "block_device_mapping": [
               {
                 "snapshotId": "snap-d6bf91bd",
@@ -1818,12 +1874,27 @@
                 "deleteOnTermination": "true",
                 "volumeSize": "15"
               }
-            ]
+            ],
+            "state": "available",
+            "root_device_type": "ebs",
+            "owner_id": "411986592491",
+            "is_public": false,
+            "location": "411986592491/rnp-chef-09-8-ubuntu-lucid-x86_32",
+            "ramdisk_id": "ari-d5709dbc",
+            "flavor": {
+              "disk": null
+            },
+            "product_codes": [
+
+            ],
+            "id": "ami-e2cc398b",
+            "platform": null,
+            "root_device_name": "/dev/sda1"
           },
           "is_deployed": true,
           "ui": {
-            "top": 340,
-            "left": 212
+            "top": 299,
+            "left": 409
           }
         }
       },
@@ -2017,23 +2088,8 @@
           },
           "ds_attributes": {
             "architecture": "i386",
-            "root_device_type": "ebs",
-            "type": "machine",
-            "state": "available",
-            "is_public": false,
-            "owner_id": "411986592491",
-            "ramdisk_id": "ari-d5709dbc",
-            "product_codes": [
-
-            ],
-            "location": "411986592491/rnp-chef-09-6-ubuntu-910-x86_32",
-            "flavor": {
-              "disk": null
-            },
-            "root_device_name": "/dev/sda1",
             "kernel_id": "aki-5f15f636",
-            "id": "ami-06c72c6f",
-            "platform": null,
+            "type": "machine",
             "block_device_mapping": [
               {
                 "snapshotId": "snap-caa459a1",
@@ -2041,14 +2097,29 @@
                 "deleteOnTermination": "true",
                 "volumeSize": "15"
               }
-            ]
+            ],
+            "state": "available",
+            "root_device_type": "ebs",
+            "owner_id": "411986592491",
+            "is_public": false,
+            "location": "411986592491/rnp-chef-09-6-ubuntu-910-x86_32",
+            "ramdisk_id": "ari-d5709dbc",
+            "flavor": {
+              "disk": null
+            },
+            "product_codes": [
+
+            ],
+            "id": "ami-06c72c6f",
+            "platform": null,
+            "root_device_name": "/dev/sda1"
           },
           "is_deployed": true,
           "ui": {
             "images": {
+              "tnail": "ubuntu.png",
               "tiny": "",
-              "display": "ubuntu.png",
-              "tnail": "ubuntu.png"
+              "display": "ubuntu.png"
             }
           }
         },
@@ -2125,23 +2196,8 @@
           },
           "ds_attributes": {
             "architecture": "i386",
-            "root_device_type": "ebs",
-            "type": "machine",
-            "state": "available",
-            "is_public": false,
-            "owner_id": "411986592491",
-            "ramdisk_id": "ari-d5709dbc",
-            "product_codes": [
-
-            ],
-            "location": "411986592491/rnp-chef-09-8-ubuntu-lucid-x86_32",
-            "flavor": {
-              "disk": null
-            },
-            "root_device_name": "/dev/sda1",
             "kernel_id": "aki-5f15f636",
-            "id": "ami-e2cc398b",
-            "platform": null,
+            "type": "machine",
             "block_device_mapping": [
               {
                 "snapshotId": "snap-d6bf91bd",
@@ -2149,14 +2205,29 @@
                 "deleteOnTermination": "true",
                 "volumeSize": "15"
               }
-            ]
+            ],
+            "state": "available",
+            "root_device_type": "ebs",
+            "owner_id": "411986592491",
+            "is_public": false,
+            "location": "411986592491/rnp-chef-09-8-ubuntu-lucid-x86_32",
+            "ramdisk_id": "ari-d5709dbc",
+            "flavor": {
+              "disk": null
+            },
+            "product_codes": [
+
+            ],
+            "id": "ami-e2cc398b",
+            "platform": null,
+            "root_device_name": "/dev/sda1"
           },
           "is_deployed": true,
           "ui": {
             "images": {
+              "tnail": "ubuntu.png",
               "tiny": "",
-              "display": "ubuntu.png",
-              "tnail": "ubuntu.png"
+              "display": "ubuntu.png"
             }
           }
         }
@@ -2179,9 +2250,9 @@
           },
           "ui": {
             "images": {
+              "tnail": "hadoop-pig.png",
               "tiny": "",
-              "display": "hadoop-pig.png",
-              "tnail": "hadoop-pig.png"
+              "display": "hadoop-pig.png"
             }
           }
         },
@@ -2230,9 +2301,9 @@
           },
           "ui": {
             "images": {
+              "tnail": "cloudera.png",
               "tiny": "",
-              "display": "cloudera.png",
-              "tnail": "cloudera.png"
+              "display": "cloudera.png"
             }
           }
         },
@@ -2270,9 +2341,9 @@
           },
           "ui": {
             "images": {
+              "tnail": "postgres.png",
               "tiny": "",
-              "display": "postgres.png",
-              "tnail": "postgres.png"
+              "display": "postgres.png"
             }
           }
         },
@@ -2428,6 +2499,35 @@
               "data_type": "string",
               "num_attached_input_links": 0
             },
+            "wordpress][sap_ref]": {
+              "semantic_type": {
+                "sap_ref": {
+                  "application": "sql::mysql"
+                }
+              },
+              "description": "wordpress mysql service access point reference for client",
+              "value_asserted": [
+                {
+                  "port": null,
+                  "protocol": "tcp",
+                  "application": {
+                    "db_created_on_server": true
+                  }
+                }
+              ],
+              "num_attached_output_links": 0,
+              "semantic_type_summary": "sap_ref",
+              "required": true,
+              "read_only": false,
+              "is_port": true,
+              "display_name": "sap_ref",
+              "external_ref": {
+                "type": "service_attribute",
+                "path": "service[wordpress][sap_ref]"
+              },
+              "data_type": "json",
+              "num_attached_input_links": 0
+            },
             "wordpress][dir]": {
               "description": "Location to place wordpress files.",
               "value_asserted": "/var/www",
@@ -2510,9 +2610,9 @@
           },
           "ui": {
             "images": {
+              "tnail": "mysql.png",
               "tiny": "",
-              "display": "mysql.png",
-              "tnail": "mysql.png"
+              "display": "mysql.png"
             }
           }
         },
@@ -2550,9 +2650,9 @@
           },
           "ui": {
             "images": {
+              "tnail": "postgres.png",
               "tiny": "",
-              "display": "postgres.png",
-              "tnail": "postgres.png"
+              "display": "postgres.png"
             }
           }
         },
@@ -2573,9 +2673,9 @@
           },
           "ui": {
             "images": {
+              "tnail": "hadoop-hive.png",
               "tiny": "",
-              "display": "hadoop-hive.png",
-              "tnail": "hadoop-hive.png"
+              "display": "hadoop-hive.png"
             }
           }
         },
@@ -2596,9 +2696,9 @@
           },
           "ui": {
             "images": {
+              "tnail": "nagios.png",
               "tiny": "",
-              "display": "nagios.png",
-              "tnail": "nagios.png"
+              "display": "nagios.png"
             }
           }
         },
@@ -2619,54 +2719,9 @@
           },
           "ui": {
             "images": {
+              "tnail": "java-01.png",
               "tiny": "",
-              "display": "java-01.png",
-              "tnail": "java-01.png"
-            }
-          }
-        },
-        "mysql::client_app1": {
-          "type": "template",
-          "description": "Sample client application that connects to a mysql database",
-          "ds_key": "[:user_data, \"/library/test/mysql::client_app1\"]",
-          "only_one_per_node": true,
-          "attribute": {
-            "mysql][sap_ref]": {
-              "semantic_type": {
-                "sap_ref": {
-                  "application": "sql::mysql"
-                }
-              },
-              "description": "mysql service access point reference for client",
-              "num_attached_output_links": 0,
-              "semantic_type_summary": "sap_ref",
-              "required": true,
-              "read_only": false,
-              "is_port": true,
-              "display_name": "sap_ref",
-              "external_ref": {
-                "type": "service_attribute",
-                "path": "service[mysql_server][sap_ref]"
-              },
-              "data_type": "json",
-              "num_attached_input_links": 0
-            }
-          },
-          "display_name": "mysql::client_app1",
-          "external_ref": {
-            "type": "chef_recipe",
-            "recipe_name": "mysql::client_app1"
-          },
-          "ds_attributes": {
-            "qualified_ref": "/library/test/mysql::client_app1",
-            "ref": "mysql::client_app1",
-            "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}"
-          },
-          "ui": {
-            "images": {
-              "tiny": "",
-              "display": "mysql.png",
-              "tnail": "mysql.png"
+              "display": "java-01.png"
             }
           }
         },
@@ -2687,9 +2742,9 @@
           },
           "ui": {
             "images": {
+              "tnail": "java-01.png",
               "tiny": "",
-              "display": "java-01.png",
-              "tnail": "java-01.png"
+              "display": "java-01.png"
             }
           }
         },
@@ -2704,9 +2759,9 @@
           },
           "ui": {
             "images": {
+              "tnail": "rabbitmq.png",
               "tiny": "",
-              "display": "rabbitmq.png",
-              "tnail": "rabbitmq.png"
+              "display": "rabbitmq.png"
             }
           }
         },
@@ -2721,9 +2776,9 @@
           },
           "ui": {
             "images": {
+              "tnail": "rabbitmq.png",
               "tiny": "",
-              "display": "rabbitmq.png",
-              "tnail": "rabbitmq.png"
+              "display": "rabbitmq.png"
             }
           }
         },
@@ -2744,9 +2799,9 @@
           },
           "ui": {
             "images": {
+              "tnail": "hadoop.png",
               "tiny": "",
-              "display": "hadoop.png",
-              "tnail": "hadoop.png"
+              "display": "hadoop.png"
             }
           }
         },
@@ -2772,6 +2827,40 @@
               },
               "data_type": "json",
               "num_attached_input_links": 0
+            },
+            "mysql][sap_config_for_slave]": {
+              "semantic_type": {
+                ":array": {
+                  "sap_config[ipv4]": {
+                    "application": "sql::mysql"
+                  }
+                }
+              },
+              "description": "mysql ip service access point configuration for slave",
+              "value_asserted": [
+                {
+                  "port": 3306,
+                  "protocol": "tcp",
+                  "application": {
+                    "database": "mysql",
+                    "password": null,
+                    "username": "slave",
+                    "db_created_on_server": false
+                  }
+                }
+              ],
+              "num_attached_output_links": 0,
+              "semantic_type_summary": "sap_config[ipv4]",
+              "required": false,
+              "read_only": false,
+              "is_port": true,
+              "display_name": "sap_config_for_slave",
+              "external_ref": {
+                "type": "service_attribute",
+                "path": "service[mysql_server][sap_config_for_slave]"
+              },
+              "data_type": "json",
+              "num_attached_input_links": 0
             }
           },
           "display_name": "mysql::master",
@@ -2786,9 +2875,9 @@
           },
           "ui": {
             "images": {
+              "tnail": "mysql.png",
               "tiny": "",
-              "display": "mysql.png",
-              "tnail": "mysql.png"
+              "display": "mysql.png"
             }
           }
         },
@@ -2809,9 +2898,9 @@
           },
           "ui": {
             "images": {
+              "tnail": "nagios.png",
               "tiny": "",
-              "display": "nagios.png",
-              "tnail": "nagios.png"
+              "display": "nagios.png"
             }
           }
         },
@@ -2878,9 +2967,9 @@
           },
           "ui": {
             "images": {
+              "tnail": "cloudera.png",
               "tiny": "",
-              "display": "cloudera.png",
-              "tnail": "cloudera.png"
+              "display": "cloudera.png"
             }
           }
         },
@@ -2946,9 +3035,9 @@
           },
           "ui": {
             "images": {
+              "tnail": "user.png",
               "tiny": "",
-              "display": "user.png",
-              "tnail": "user.png"
+              "display": "user.png"
             }
           }
         },
@@ -3128,11 +3217,11 @@
               },
               "value_asserted": [
                 {
-                  "protocol": "tcp",
                   "ports": [
                     "80",
                     "443"
-                  ]
+                  ],
+                  "protocol": "tcp"
                 }
               ],
               "num_attached_output_links": 0,
@@ -3201,7 +3290,15 @@
           },
           "ds_attributes": {
             "qualified_ref": "/library/test/apache2",
-            "ref": "apache2"
+            "ref": "apache2",
+            "ui": "{\"images\": {\"tnail\":\"apache.png\",\"display\":\"apache.png\",\"tiny\":\"\"}}"
+          },
+          "ui": {
+            "images": {
+              "tnail": "apache.png",
+              "tiny": "",
+              "display": "apache.png"
+            }
           }
         },
         "redis": {
@@ -3231,8 +3328,8 @@
               },
               "value_asserted": [
                 {
-                  "protocol": "tcp",
-                  "port": null
+                  "port": null,
+                  "protocol": "tcp"
                 }
               ],
               "num_attached_output_links": 0,
@@ -3261,9 +3358,9 @@
           },
           "ui": {
             "images": {
+              "tnail": "redis.png",
               "tiny": "",
-              "display": "redis.png",
-              "tnail": "redis.png"
+              "display": "redis.png"
             }
           }
         },
@@ -3469,11 +3566,11 @@
               "description": "mysql ip service access point configuration",
               "value_asserted": [
                 {
-                  "protocol": "tcp",
                   "port": 3306,
-                  "binding_addr_constraints": [
-
-                  ]
+                  "protocol": "tcp",
+                  "application": {
+                    "db_created_on_server": true
+                  }
                 }
               ],
               "num_attached_output_links": 0,
@@ -3560,9 +3657,9 @@
           },
           "ui": {
             "images": {
+              "tnail": "mysql.png",
               "tiny": "",
-              "display": "mysql.png",
-              "tnail": "mysql.png"
+              "display": "mysql.png"
             }
           }
         },
@@ -3583,9 +3680,9 @@
           },
           "ui": {
             "images": {
+              "tnail": "hadoop.png",
               "tiny": "",
-              "display": "hadoop.png",
-              "tnail": "hadoop.png"
+              "display": "hadoop.png"
             }
           }
         },
@@ -3606,9 +3703,9 @@
           },
           "ui": {
             "images": {
+              "tnail": "nagios.png",
               "tiny": "",
-              "display": "nagios.png",
-              "tnail": "nagios.png"
+              "display": "nagios.png"
             }
           }
         }
@@ -3639,7 +3736,7 @@
             }
           },
           "ds_name": "chef",
-          "last_collection_timestamp": "Sat Dec 04 18:10:41 +0000 2010",
+          "last_collection_timestamp": "Sat Dec 04 23:07:20 +0000 2010",
           "display_name": "chef"
         },
         "ec2": {
@@ -3653,7 +3750,7 @@
             }
           },
           "ds_name": "ec2",
-          "last_collection_timestamp": "Sat Dec 04 18:11:44 +0000 2010",
+          "last_collection_timestamp": "Sat Dec 04 23:07:35 +0000 2010",
           "display_name": "ec2"
         },
         "user_data": {
@@ -3672,7 +3769,7 @@
             }
           },
           "ds_name": "user_data",
-          "last_collection_timestamp": "Sat Dec 04 18:11:56 +0000 2010",
+          "last_collection_timestamp": "Sat Dec 04 23:07:42 +0000 2010",
           "display_name": "user_data"
         }
       }

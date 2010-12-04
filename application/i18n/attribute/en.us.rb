@@ -20,6 +20,7 @@
   :sap_ipv4 => 'SAP IPV4',
   :sap_config_ipv4 => 'SAP Config IPV4',
   :sap_socket => 'SAP Socket',
+  :sap_ref => 'SAP Ref',
 
 #TODO: temp until finding normal local for all attribute labels
 #JMX related
@@ -43,7 +44,8 @@
   :mysql__datadir => 'Data Dir',
   :mysql__master_log => "Master Log",
   :mysql__master_log_ref => "Master Log Ref",
-  :mysql__sap_ref_to_master => "Sap Ref to Master",
+  :mysql__sap_ref_to_master => "SAP Ref to Master",
+  :mysql__sap_config_for_slave => "SAP Config for Slave",
 
 #postgresql
   :postgresql__dir => "PostgreSQL Directory",

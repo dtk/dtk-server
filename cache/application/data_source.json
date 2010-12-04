@@ -6,6 +6,8 @@
 	},	
 	"apache2" : {
 	},	
+	"wordpress" : {
+	},	
         "user_account": {
           "ui": "{\"images\": {\"tnail\":\"user.png\",\"display\":\"user.png\",\"tiny\":\"\"}}"
         },

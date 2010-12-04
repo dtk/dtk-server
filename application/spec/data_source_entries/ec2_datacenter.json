@@ -7,8 +7,8 @@
     }
   },
   "node_group": {
-    "all_instances" : {
-      "display_name": "all_instances",
+    "all_staged_nodes" : {
+      "display_name": "all_staged_nodes",
       "dynamic_search_pattern": {
          ":relation": ":node",
          ":filter": [
@@ -16,7 +16,7 @@
            [
              ":eq",
              ":type",
-             "instance"
+             "staged"
            ]
          ]
       }

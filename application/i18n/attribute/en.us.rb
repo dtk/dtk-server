@@ -41,6 +41,10 @@
   :mysql__db_info => 'DB Info',
   :mysql__monitor_user_id => 'Monitor Usr ID',
   :mysql__datadir => 'Data Dir',
+  :mysql__master_log => "Master Log",
+  :mysql__master_log_ref => "Master Log Ref",
+  :mysql__sap_ref_to_master => "Sap Ref to Master",
+
 #postgresql
   :postgresql__dir => "PostgreSQL Directory",
 #user_account
@@ -49,17 +53,29 @@
   :user_account__gid => "User's Group ID",
 
 #apache2
- :apache2__servertokens=>"Apache Server Tokens",
- :apache2__dir=>"Apache Directory",
- :apache2__contact=>"Apache Contact",
- :apache2__serversignature=>"Apache Server Signature",
- :apache2__log_dir=>"Apache Log Directory",
- :apache2__timeout=>"Apache Timeout",
- :apache2__user=>"Apache User",
- :apache2__keepalive=>"Apache Keepalive",
- :apache2__binary=>"Apache Binary",
- :apache2__keepaliverequests=>"Apache Keepalive Requests",
- :apache2__icondir=>"Apache Icondir",
- :apache2__keepalivetimeout=>"Apache Keepalive Timeout",
- :apache2__listen_ports=>"Apache Listen Ports",
+ :apache2__servertokens=>"Server Tokens",
+ :apache2__dir=>"Directory",
+ :apache2__contact=>"Contact",
+ :apache2__serversignature=>"Server Signature",
+ :apache2__log_dir=>"Log Directory",
+ :apache2__timeout=>"Timeout",
+ :apache2__user=>"User",
+ :apache2__keepalive=>"Keepalive",
+ :apache2__binary=>"Binary",
+ :apache2__keepaliverequests=>"Keepalive Requests",
+ :apache2__icondir=>"Icondir",
+ :apache2__keepalivetimeout=>"Keepalive Timeout",
+ :apache2__listen_ports=>"Listen Ports",
+
+#wordpress
+ :wordpress__dir=>"Installation Directory",
+ :wordpress__keys_logged_in=>"Logged-in Key",
+ :wordpress__db_database=>"MySQL Database",
+ :wordpress__keys_nonce=>"Nonce Key",
+ :wordpress__db_user=>"MySQL User",
+ :wordpress__db_password=>"MySQL password",
+ :wordpress__version=>"Download Version",
+ :wordpress__keys_auth=>"Auth Key",
+ :wordpress__checksum=>"Tarball Checksum",
+ :wordpress__keys_secure_auth=>"Secure Auth Key",
 }

@@ -30,10 +30,13 @@
   :rabbitmq_edge_stomp => 'Rabbit - Stomp',
   :mysql_server2 => 'MySQL Server',
   :mysql_server => 'MySQL Server',
+  :mysql_slave => 'MySQL Slave',
+  :mysql_master => 'MySQL Master',
   :user_account => "User Account",
   :redis => "Redis",
   :apache2 => "Apache2",
   :php_php5 => "Php5",
-  :postgresql_client => "Postgres Client"
+  :postgresql_client => "Postgres Client",
+  :wordpress => "Wordpress"
 
 }

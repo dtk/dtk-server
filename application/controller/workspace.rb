@@ -6,23 +6,11 @@ module XYZ
       items_to_save.each do |item|
         item_id = item[0]
         model_name = item[1]["model"].to_sym
-
-        item_obj = get_object_by_id(item[0],model_name)
-#DEBUG
-p '==================================================='
-pp [:before_change,item_obj[:ui]]
-        id_index = id.to_s.to_sym #TODO: need to reaxamine fn insider update from hash that symbolizes all keys and nested keys
-        item_obj[:ui][id_index] = {:left => item[1]["pos"][0], :top => item[1]["pos"][1]}
-p '==================================================='
-pp [:after_change, item_obj[:ui]]
-        update_from_hash(item_id.to_i,item_obj,model_name)
-
-
-=begin
         new_pos_update = {:ui => {id => {:left => item[1]["pos"][0], :top => item[1]["pos"][1]}}}
         update_from_hash(item_id.to_i,new_pos_update,model_name, :partial_value=>true)
+#TODO: remove debug statement
         pp [:debug_stored_new_pos, get_object_by_id(item[0],model_name)[:ui]]
-=end
+
       end
       return {}
     end

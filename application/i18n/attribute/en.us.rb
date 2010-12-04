@@ -43,12 +43,12 @@
   :datadir => 'Data Dir',
 
 #user_account
-  :username => "User Name",
-  :uid => "User ID",
-  :gid => "User's Group ID",
+  :user_account__username => "User Name",
+  :user_account__uid => "User ID",
+  :user_account__gid => "User's Group ID",
 
-#apache
-  :dir => "Directory",
-  :log_dir => "Log Directory"
+#apache2
+  :apache2__dir => "Apache Directory",
+  :apache2__log_dir => "Apache Log Directory"
   
 }

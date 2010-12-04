@@ -50,16 +50,15 @@ module XYZ
 
       attribute_list.each do |attribute|
         pp '--------------------'
+        
+        pp 'component:'+component_name
         pp 'attribute:'+attribute[:display_name]
         attribute_name = attribute[:display_name].gsub('::','_')
         attribute_name = attribute_name.gsub('[','_')
         attribute_name = attribute_name.gsub(']','')
         pp 'attr name:'+attribute_name
         pp 'id:'+attribute[:id].to_s
-#       component[:label] = _node_vars[:i18n][component_name.to_sym]
-        attribute[:label] = attr_i18n[attribute_name.to_sym]
-#TODO: this is what would use for qualified names
-#          attribute[:label] = attr_i18n["#{component_name}__#{attribute_name}".to_sym]||attr_i18n[attribute_name.to_sym]
+        attribute[:label] = attr_i18n["#{component_name}__#{attribute_name}".to_sym]||attr_i18n[attribute_name.to_sym]
 
 #        component[:onclick] = "R8.Workspace.Dock.loadDockPanel('component/get_attributes/#{component[:id].to_s}');"
 #        component[:onclick] = "R8.Workspace.Dock.loadDockPanel('node/get_components/2147484111');"

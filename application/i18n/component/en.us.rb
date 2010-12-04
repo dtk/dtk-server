@@ -23,6 +23,8 @@
   :no_attributes => 'No Attributes',
 
 #temp strings for component names
+  :hadoop => 'Hadoop',
+  :hadoop_hive => 'Hadoop Hive',
   :hadoop_doc => 'Hadoop Docs',
   :hadoop_cloudera_c3 => 'Cloudera C3',
   :rabbitmq_edge_stomp => 'Rabbit - Stomp',
@@ -31,5 +33,7 @@
   :user_account => "User Account",
   :redis => "Redis",
   :apache2 => "Apache2",
-  :php_php5 => "Php5"
+  :php_php5 => "Php5",
+  :postgresql_client => "Postgres Client"
+
 }

@@ -39,12 +39,12 @@ module XYZ
     def wspace_dock_get_attributes(id)
       component = get_object_by_id(id)
       component_name = component[:display_name].gsub('::','_')
+      component_context = component[:display_name].gsub(/::.+$/,'')
 
       model_name = :attribute
       field_set = Model::FieldSet.default(model_name)
       attribute_list = get_objects(model_name,{:component_component_id=>id})
 
-#pp model_list
       component_i18n = get_model_i18n('component',user_context())
       attr_i18n = get_model_i18n('attribute',user_context())
 
@@ -58,8 +58,8 @@ module XYZ
         attribute_name = attribute_name.gsub(']','')
         pp 'attr name:'+attribute_name
         pp 'id:'+attribute[:id].to_s
-        #TODO: below is not exactly right; rather than component_name (which could be mysql::server2, mysql::server; want basically component basic type
-        attribute[:label] = attr_i18n["#{component_name}__#{attribute_name}".to_sym]||attr_i18n[attribute_name.to_sym]
+        pp "#{component_context}__#{attribute_name}".to_sym
+        attribute[:label] = attr_i18n["#{component_context}__#{attribute_name}".to_sym]||attr_i18n[attribute_name.to_sym]
 
 #        component[:onclick] = "R8.Workspace.Dock.loadDockPanel('component/get_attributes/#{component[:id].to_s}');"
 #        component[:onclick] = "R8.Workspace.Dock.loadDockPanel('node/get_components/2147484111');"

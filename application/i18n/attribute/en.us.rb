@@ -26,7 +26,7 @@
   :jmxremote_port => 'JMX Remote Port',
   :jmxremote_password => 'JMX Remote Password',
 
-#MySQl Server 
+#mysql
   :server_root_password => 'Server Root Pwrd',
   :tunable_net_read_timeout => 'Net Read Timeout',
   :tunable_wait_timeout => 'Wait Timeout',
@@ -48,7 +48,17 @@
   :user_account__gid => "User's Group ID",
 
 #apache2
-  :apache2__dir => "Apache Directory",
-  :apache2__log_dir => "Apache Log Directory"
-  
+ :apache2__servertokens=>"Apache Server Tokens",
+ :apache2__dir=>"Apache Directory",
+ :apache2__contact=>"Apache Contact",
+ :apache2__serversignature=>"Apache Server Signature",
+ :apache2__log_dir=>"Apache Log Directory",
+ :apache2__timeout=>"Apache Timeout",
+ :apache2__user=>"Apache User",
+ :apache2__keepalive=>"Apache Keepalive",
+ :apache2__binary=>"Apache Binary",
+ :apache2__keepaliverequests=>"Apache Keepalive Requests",
+ :apache2__icondir=>"Apache Icondir",
+ :apache2__keepalivetimeout=>"Apache Keepalive Timeout",
+ :apache2__listen_ports=>"Apache Listen Ports",
 }

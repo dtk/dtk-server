@@ -58,6 +58,7 @@ module XYZ
         attribute_name = attribute_name.gsub(']','')
         pp 'attr name:'+attribute_name
         pp 'id:'+attribute[:id].to_s
+        #TODO: below is not exactly right; rather than component_name (which could be mysql::server2, mysql::server; want basically component basic type
         attribute[:label] = attr_i18n["#{component_name}__#{attribute_name}".to_sym]||attr_i18n[attribute_name.to_sym]
 
 #        component[:onclick] = "R8.Workspace.Dock.loadDockPanel('component/get_attributes/#{component[:id].to_s}');"

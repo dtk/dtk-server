@@ -127,7 +127,7 @@ module XYZ
       def update_from_hash_from_instance_id(id_info,assigns,opts={})
 	new_uris = Array.new
         db_rel = DB_REL_DEF[id_info[:relation_type]]
-	scalar_assigns = ret_settable_s calar_assignments(assigns,db_rel)
+	scalar_assigns = ret_settable_scalar_assignments(assigns,db_rel)
 	update_instance_from_id_info(id_info,scalar_assigns,opts)
 
 	obj_assigns = ret_object_assignments(assigns,db_rel)

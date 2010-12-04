@@ -36,11 +36,29 @@ module XYZ
           scalar_assigns.delete(:id)
         end
         ## end area to be deprecated
+
         modify_for_virtual_columns!(scalar_assigns,db_rel,sql_operation,opts[:id_handle])
+
+        if opts[:partial_value] and opts[:id_handle]
+          #should only be applicable to an update
+          if sql_operation == :update
+            #need to get values if there are any json columns being updated and update value is array or hash
+            cols_to_get = scalar_assigns.reject{|k,v|not ((v.kind_of?(Hash) or v.kind_of?(Array)) and json_table_column?(k,db_rel))}.keys
+            unless cols_to_get.empty?
+              object = get_object_scalar_columns(opts[:id_handle],Model::FieldSet.opt(cols_to_get,opts[:id_handle][:model_name]))
+              object.each_key do |k| 
+                Aux.merge_into_json_col!(object,k,scalar_assigns[k])
+                scalar_assigns[k] = object[k]
+              end
+            end
+          else
+            Log.error("partial value should only be set for an update") unless opts[:partial_value]
+            Log.error("partial value should only be set when there is an id_handle in opts") unless opts[:id_handle]
+          end
+        end
 
 	scalar_assigns.each_pair do |k,v|
 	  if (v.kind_of?(Hash) or v.kind_of?(Array)) and json_table_column?(k,db_rel) 
-#	    scalar_assigns[k] = JSON.generate(v).to_s 
 	    scalar_assigns[k] = SerializeToJSON.serialize(v)
           elsif v.respond_to?(:to_sequel)
             scalar_assigns[k] = v.to_sequel(k,sql_operation)
@@ -51,6 +69,7 @@ module XYZ
 
 	scalar_assigns
       end
+
 
       #if any virtual columns need to remove and populate the actual table 
       def modify_for_virtual_columns!(scalar_assigns,db_rel,sql_operation,id_handle)
@@ -64,7 +83,7 @@ module XYZ
         if sql_operation == :update
           real_cols = virtual_col_defs.values.map{|vc|vc[:path].first if vc[:path]}.compact.uniq
           unless id_handle
-            Log.info("id handle shoudl not be nil")
+            Log.info("id handle should not be nil")
             next
           end
           object = get_object_scalar_columns(id_handle,Model::FieldSet.opt(real_cols,id_handle[:model_name]))

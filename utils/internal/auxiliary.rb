@@ -123,8 +123,16 @@ module XYZ
         end
       end
 
-      #TODO; remove and instaed make sue the data_processing fns look for columns that could be strings
-      # fn below used to make sure that all hash keys  are symbols
+      def merge_into_json_col!(base,key,update)
+        if update.kind_of?(Hash) and base[key].kind_of?(Hash)
+          update.each{|k,v|merge_into_json_col!(base[key],k,v)} 
+        else
+          base[key] = update
+        end
+      end
+
+      #TODO; remove and instaed make sure the data_processing fns look for columns that could be strings
+      # fn below used to make sure that all hash keys are symbols
       def ret_hash_assignments(hash)
         ret = {}
         hash.each_pair{ |k,v|

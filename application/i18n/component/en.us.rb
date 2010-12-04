@@ -16,9 +16,6 @@
   :created_at => 'Date Created',
   :description_list => 'Descr',
   :external_ref_list => 'Ext Component Ref',
-  :username => "User Name",
-  :uid => "User ID",
-  :gid => "User's Group ID",
 
 
 #------------------------------------------
@@ -31,5 +28,8 @@
   :rabbitmq_edge_stomp => 'Rabbit - Stomp',
   :mysql_server2 => 'MySQL Server',
   :mysql_server => 'MySQL Server',
-  :user_account => "User Account"
+  :user_account => "User Account",
+  :redis => "Redis",
+  :apache2 => "Apache2",
+  :php_php5 => "Php5"
 }

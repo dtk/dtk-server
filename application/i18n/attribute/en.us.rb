@@ -16,12 +16,17 @@
   :required_list => 'Req',
   :description_list => 'Descr',
 
+#generic SAP related
+  :sap_ipv4 => 'SAP IPV4',
+  :sap_config_ipv4 => 'SAP Config IPV4',
+  :sap_socket => 'SAP Socket',
+
 #TODO: temp until finding normal local for all attribute labels
-#Cloudera C3
+#JMX related
   :jmxremote_port => 'JMX Remote Port',
   :jmxremote_password => 'JMX Remote Password',
 
-#MySQl Server 2
+#MySQl Server 
   :server_root_password => 'Server Root Pwrd',
   :tunable_net_read_timeout => 'Net Read Timeout',
   :tunable_wait_timeout => 'Wait Timeout',
@@ -30,13 +35,20 @@
   :tunable_net_write_timeout => 'Net Write Timeout',
   :tunable_max_connections => 'Max Connections',
   :tunable_table_cache => 'Table Cache',
-  :sap_socket => 'SAP Socket',
   :tunable_back_log => 'Back Log',
   :ec2_path => 'EC2 Path',
   :bind_address => 'Bind Address',
   :db_info => 'DB Info',
   :monitor_user_id => 'Monitor Usr ID',
   :datadir => 'Data Dir',
-  :sap_ipv4 => 'SAP IPV4',
-  :sap_config_ipv4 => 'SAP Config IPV4',
+
+#user_account
+  :username => "User Name",
+  :uid => "User ID",
+  :gid => "User's Group ID",
+
+#apache
+  :dir => "Directory",
+  :log_dir => "Log Directory"
+  
 }

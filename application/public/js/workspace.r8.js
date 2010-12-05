@@ -670,7 +670,14 @@ console.log('call to add item to workspace failed.....');
 
 			addItems: function(items,viewSpaceId) {
 				var vSpaceId = (typeof(viewSpaceId) == 'undefined') ? _currentViewSpace : viewSpaceId;
-
+				if(!_viewSpaces[vSpaceId].isReady()) {
+					var that = this;
+					var addItemsCallAgain = function() {
+						that.addItems(items,viewSpaceId);
+					}
+					setTimeout(addItemsCallAgain,20);
+					return;
+				}
 				_viewSpaces[vSpaceId].addItems(items);
 			},
 

@@ -13,12 +13,24 @@ if (!R8.ViewSpace) {
 			_selectedItems = {},
 			_itemPosUpdateList = {},
 
+			_isReady = false,
 			_events = {};
+
 		return {
 
 			init: function() {
 				this.setupEvents();
 				this.startUpdater();
+
+				YUI().use('cookie','json', function(Y){
+					_itemPosUpdateListJSON = Y.Cookie.get("_itemPosUpdateList");
+					_itemPosUpdateList = (_itemPosUpdateListJSON == null) ? {} : Y.JSON.parse(_itemPosUpdateListJSON);
+					_isReady = true;
+				});
+			},
+
+			isReady: function() {
+				return _isReady;
 			},
 
 			get: function(itemToGet) {
@@ -60,11 +72,10 @@ if (!R8.ViewSpace) {
 					if(typeof(item['ui']) == 'undefined') continue;
 
 					var id = item['object']['id'],
-						top = item['ui']['top'],
-						left = item['ui']['left'];
+						top = (typeof(_itemPosUpdateList[id]) == 'undefined') ? item['ui']['top'] : _itemPosUpdateList[id]['pos']['top'],
+						left = (typeof(_itemPosUpdateList[id]) == 'undefined') ? item['ui']['left'] : _itemPosUpdateList[id]['pos']['left'];
 
 					_items[id].get('node').setStyles({'top':top,'left':left});
-
 				}
 
 				this.purgePendingDelete();
@@ -133,6 +144,11 @@ console.log(ports);
 							'model':_items[itemId].get('model'),
 							'pos':{'top':top,'left':left}
 						};
+
+						YUI().use('json','cookie', function(Y){
+							var _itemPosUpdateListJSON = Y.JSON.stringify(_itemPosUpdateList);
+							Y.Cookie.set("_itemPosUpdateList", _itemPosUpdateListJSON);
+						});
 					});
 
 /*
@@ -145,6 +161,13 @@ console.log(ports);
 				item.get('node').setAttribute('data-status','dd-ready');
 			},
 
+			purgeUIData: function(ioId,responseObj) {
+				_itemPosUpdateList = {};
+				YUI().use("cookie",function(Y){
+					Y.Cookie.remove('_itemPosUpdateList');
+				});
+			},
+
 			backgroundUpdater: function() {
 				var count = 0;
 				for(item in _itemPosUpdateList) {
@@ -152,6 +175,7 @@ console.log(ports);
 				}
 //DEBUG
 //console.log(count);
+				var that = this;
 				if (count > 0) {
 					YUI().use("json", function(Y){
 						var reqParam = 'item_list=' + Y.JSON.stringify(_itemPosUpdateList);
@@ -159,13 +183,15 @@ console.log(ports);
 							'cfg': {
 								'data': reqParam
 							},
+							'callbacks': {
+								'io:success':that.purgeUIData
+							}
 						};
 						//R8.Ctrl.call('viewspace/update_pos/' + _id, params);
 						R8.Ctrl.call('workspace/update_pos/' + _id, params);
 					});
 				}
 
-				var that = this;
 				var fireBackgroundUpdate = function() {
 					that.backgroundUpdater();
 				}

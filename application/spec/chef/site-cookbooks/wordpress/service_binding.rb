@@ -4,15 +4,6 @@ service :wordpress do
     :required => true,
     :type => "hash",
     :description => "wordpress mysql service access point reference for client",
-    :semantic_type => {"sap_ref" => {"application" => "sql::mysql"}},
-    :transform =>
-    [{
-       "port" => nil,
-       "protocol" => "tcp",
-       "application" => 
-       {
-         "db_created_on_server" => true
-       }
-     }]
+    :semantic_type => {"sap_ref" => {"application" => {"type" => "sql::mysql"}}}
 
 end

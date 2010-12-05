@@ -3,6 +3,7 @@
    "test" : {
      "component": {
 	"php::php5" : {
+          "ui": "{\"images\": {\"tnail\":\"php.png\",\"display\":\"php.png\",\"tiny\":\"\"}}"
 	},	
 	"apache2" : {
           "ui": "{\"images\": {\"tnail\":\"apache.png\",\"display\":\"apache.png\",\"tiny\":\"\"}}"

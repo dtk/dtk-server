@@ -144,7 +144,6 @@ console.log(ports);
 							'model':_items[itemId].get('model'),
 							'pos':{'top':top,'left':left}
 						};
-
 						YUI().use('json','cookie', function(Y){
 							var _itemPosUpdateListJSON = Y.JSON.stringify(_itemPosUpdateList);
 							Y.Cookie.set("_itemPosUpdateList", _itemPosUpdateListJSON);

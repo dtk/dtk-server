@@ -1,18 +1,4 @@
 service :mysql_server do
-  attribute "db_info",
-    :recipes => ["mysql::server","mysql::server2"],
-    :monitoring_input => "true",
-    :type => "hash",
-    :semantic_type => {":array"  => "db_info"},
-    :transform =>
-      [{
-         "username" => "root",
-         "database" => "mysql",
-         "password" => {
-           "__ref" => "node[mysql][server_root_password]"
-         }
-       }
-      ]
   attribute "monitor_user_id",
     :recipes => ["mysql::server","mysql::server2"],
     :monitoring_input => "true",
@@ -26,7 +12,7 @@ service :mysql_server do
     :semantic_type => {":array" => {"sap_config[ipv4]" => {"application" => {"type" => "sql::mysql", "db_created_on_server" => true}}}},
     :transform =>
     [{
-       "port" => 3306,
+       "port" => {"__ref" => "node[mysql][port]"},
        "protocol" => "tcp"
      }]
 
@@ -49,12 +35,11 @@ service :mysql_server do
         "sap_config[ipv4]" => {
           "application" => {
             "type" => "sql::mysql", 
-            "db_created_on_server" => false,
-            "constraints" => {}#put in contraint that this can just be attached to slave use
+            "db_created_on_server" => false
         }}}},
     :transform => 
     [{
-       "port" => 3306,
+       "port" => {"__ref" => "node[mysql][port]"},
        "protocol" => "tcp",
        "application" => {
          "username" => "slave",
@@ -62,7 +47,8 @@ service :mysql_server do
          "password" => {
            "__ref" => "node[mysql][server_root_password]" #TODO: should use replicate user
          }
-       }
+       },
+       "constraints" => {}#put in contraint that this can just be attached to slave use
      }]
 
   attribute "sap_ref_to_master",
@@ -70,7 +56,7 @@ service :mysql_server do
     :required => true,
     :type => "hash",
     :description => "mysql service access point reference for slave to connect with master",
-  :semantic_type => {"sap_ref" => {"application" => {"type" => "sql::mysql"}}}
+    :semantic_type => {"sap_ref" => {"application" => {"type" => "sql::mysql"}}}
 
     
   attribute "master_log_ref",

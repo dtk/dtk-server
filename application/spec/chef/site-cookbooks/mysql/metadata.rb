@@ -21,6 +21,12 @@ attribute "mysql/server_root_password",
   :description => "Randomly generated password for the mysqld root user",
   :recipes => ["mysql::server","mysql::server2"]
 
+attribute "mysql/port",
+  :display_name => "MySQL TCP Port",
+  :description => "MySQL Server TCP port",
+  :default=> "3306",
+  :recipes => ["mysql::server","mysql::server2"]
+
 attribute "mysql/bind_address",
   :display_name => "MySQL Bind Address",
   :description => "Address that mysqld should listen on",

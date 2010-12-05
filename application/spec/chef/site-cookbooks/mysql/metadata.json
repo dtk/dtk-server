@@ -21,7 +21,9 @@
         "calculated": false,
         "transform": [
           {
-            "port": 3306,
+            "port": {
+              "__ref": "node[mysql][port]"
+            },
             "protocol": "tcp"
           }
         ],
@@ -150,32 +152,6 @@
         "display_name": "MySQL Bind Address",
         "description": "Address that mysqld should listen on"
       },
-      "mysql/_service/mysql_server/db_info": {
-        "required": "optional",
-        "is_service_attribute": true,
-        "calculated": false,
-        "transform": [
-          {
-            "username": "root",
-            "database": "mysql",
-            "password": {
-              "__ref": "node[mysql][server_root_password]"
-            }
-          }
-        ],
-        "monitoring_input": "true",
-        "choice": [
-
-        ],
-        "type": "hash",
-        "recipes": [
-          "mysql::server",
-          "mysql::server2"
-        ],
-        "semantic_type": {
-          ":array": "db_info"
-        }
-      },
       "mysql/tunable/back_log": {
         "required": "optional",
         "calculated": false,
@@ -204,6 +180,21 @@
         ],
         "display_name": "MySQL Tunable Wait Timeout"
       },
+      "mysql/port": {
+        "required": "optional",
+        "calculated": false,
+        "choice": [
+
+        ],
+        "default": "3306",
+        "type": "string",
+        "recipes": [
+          "mysql::server",
+          "mysql::server2"
+        ],
+        "display_name": "MySQL TCP Port",
+        "description": "MySQL Server TCP port"
+      },
       "mysql/_service/mysql_server/sap_ref_to_master": {
         "required": "required",
         "is_service_attribute": true,
@@ -230,7 +221,11 @@
         "calculated": false,
         "transform": [
           {
-            "port": 3306,
+            "constraints": {
+            },
+            "port": {
+              "__ref": "node[mysql][port]"
+            },
             "protocol": "tcp",
             "application": {
               "username": "slave",
@@ -254,8 +249,6 @@
             "sap_config[ipv4]": {
               "application": {
                 "db_created_on_server": false,
-                "constraints": {
-                },
                 "type": "sql::mysql"
               }
             }

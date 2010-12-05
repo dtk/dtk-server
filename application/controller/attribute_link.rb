@@ -47,7 +47,7 @@ module XYZ
         component_name = el[:component][:display_name].gsub(/::.+$/,"")
         port_name = Aux.put_in_bracket_form([component_name] + Aux.tokenize_bracket_name(el[:attribute][:display_name]))
         type = (el[:attribute_link]||{})[:type]||(el[:attribute_link2]||{})[:type]
-        hidden = (el[:attribute_link]||{})[:hidden]||(el[:attribute_link2]||{})[:hidden]
+        hidden = (el[:attribute_link]||{})[:hidden].nil? ? (el[:attribute_link2]||{})[:hidden] : (el[:attribute_link]||{})[:hidden]
         other_end_id = (el[:attribute_link]||{})[:other_end_output_id]||(el[:attribute_link2]||{})[:other_end_input_id]
         link_list << {
           :node_id => el[:id],

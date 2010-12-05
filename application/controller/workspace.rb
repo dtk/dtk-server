@@ -3,18 +3,13 @@ module XYZ
 #TODO: move to viewspace controller
     def update_pos(id)
       items_to_save = JSON.parse(request.params["item_list"])
-      #TODO: refactor so updates in one database call using update_from_select; will need to put in logic to handle partial_values
-      #in ArrayDataset::create; may be useful to have higher level fn that update_from_rows  that take model_handle, rows with id 
-      #which in turn calls  ArrayDataset::create with opts = {:partial_value => true} and then joins in as where clause the id
-      items_to_save.each do |item|
-        item_id = item[0]
-        model_name = item[1]["model"].to_sym
-        new_pos_update = {:ui => {id => {:left => item[1]["pos"]["left"], :top => item[1]["pos"]["top"]}}}
-        update_from_hash(item_id.to_i,new_pos_update,model_name, :partial_value=>true)
-#TODO: remove debug statement
-#        pp [:debug_stored_new_pos, get_object_by_id(item[0],model_name)[:ui]]
-
-      end
+      return {} if items_to_save.empty?
+      model_name = items_to_save.first[1]["model"].to_sym
+      model_handle = ModelHandle.new(ret_session_context_id(),model_name)
+      update_rows = items_to_save.map{|item|{:id => item[0].to_i, :ui => {id => {:left => item[1]["pos"][0], :top => item[1]["pos"][1]}}}}
+      Model.update_from_rows(model_handle,update_rows,:partial_value=>true)
+ #TODO: remove debug statement
+      pp [:debug_stored_new_pos,get_objects(model_name,SQL.in(:id,items_to_save.map{|item|item[0].to_i}),Model::FieldSet.opt([:id,:ui],model_name))]
       return {}
     end
 

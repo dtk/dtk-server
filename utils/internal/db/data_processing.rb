@@ -21,6 +21,11 @@ module XYZ
         modify_to_reflect_special_processing!(scalar_assigns,db_rel,sql_operation,opts)
       end
 
+      def json_table_column?(col,db_rel)
+	return nil unless col_info = ret_table_column_info(col,db_rel)
+	col_info[:type] == :json
+      end
+
      private
       def fetch_raw_sql(sql,&block)
         @db.fetch(sql,&block)
@@ -127,10 +132,6 @@ module XYZ
 	db_rel[:columns][col.to_sym] || COMMON_REL_COLUMNS[col.to_sym]
       end
 
-      def json_table_column?(col,db_rel)
-	return nil unless col_info = ret_table_column_info(col,db_rel)
-	col_info[:type] == :json
-      end
     end
   end
 end

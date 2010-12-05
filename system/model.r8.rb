@@ -54,6 +54,13 @@ module XYZ
       ModelHandle.new(@c,@relation_type)
     end
 
+    def self.update_from_rows(model_handle,rows,opts={})
+      return nil if rows.empty?
+      array_ds = SQL::ArrayDataset.create(db,rows,model_handle,opts.merge(:convert_for_update=>true))
+      field_set = Model::FieldSet.new(model_handle[:model_name],rows.first.keys - [:id])
+      update_from_select(model_handle,field_set,array_ds)
+    end
+
     def self.create_from_rows(model_handle,rows,opts={})
       opts = opts[:convert] ? {:convert_for_create => true} : {}
       select_ds = SQL::ArrayDataset.create(db,rows,model_handle,opts)

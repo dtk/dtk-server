@@ -240,11 +240,33 @@ module XYZ
         return nil if rows.empty?
         if opts[:convert_for_update] or opts[:convert_for_create]
           sql_operation = opts[:convert_for_update] ? :update : :create
+          modify_for_partial_values!(rows,db,model_handle) if opts[:partial_value] and sql_operation == :update
           rows.each{|row| db.convert_from_object_to_db_form!(model_handle,row,sql_operation)}
         end
         ArrayDataset.new(db,rows,model_handle)
       end
      private
+      def self.modify_for_partial_values!(rows,db,model_handle)
+        #need to get values if there are any json columns being updated and update value is array or hash
+        db_rel = DB_REL_DEF[model_handle[:model_name]]
+        cols_to_get = rows.first.reject{|k,v|not ((v.kind_of?(Hash) or v.kind_of?(Array)) and db.json_table_column?(k,db_rel))}.keys
+        return nil if cols_to_get.empty?
+        unless rows.first.has_key?(:id)
+          Log.error("partial value processing can only be handled when id is on each row")
+          return nil
+        end
+        where_clause = SQL.in(:id,rows.map{|r|r[:id]})
+        objects = db.get_objects_scalar_columns(model_handle,where_clause,Model::FieldSet.opt(cols_to_get+[:id],model_handle[:model_name]))
+        indexed_rows = rows.inject({}){|h,r|h.merge(r[:id] => r)}
+        objects.each do |object|
+          id = object[:id]
+          (object.keys-[:id]).each do |k| 
+            Aux.merge_into_json_col!(object,k,indexed_rows[id][k])
+            indexed_rows[id][k] = object[k]
+          end
+        end
+      end
+      
       def initialize(db,rows,model_handle)
         raise Error.new("ArrayDataset.new called with rows being empty") if rows.empty?
         aliaz = model_handle[:model_name]

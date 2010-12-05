@@ -9,10 +9,10 @@ module XYZ
       items_to_save.each do |item|
         item_id = item[0]
         model_name = item[1]["model"].to_sym
-        new_pos_update = {:ui => {id => {:left => item[1]["pos"][0], :top => item[1]["pos"][1]}}}
+        new_pos_update = {:ui => {id => {:left => item[1]["pos"]["left"], :top => item[1]["pos"]["top"]}}}
         update_from_hash(item_id.to_i,new_pos_update,model_name, :partial_value=>true)
 #TODO: remove debug statement
-        pp [:debug_stored_new_pos, get_object_by_id(item[0],model_name)[:ui]]
+#        pp [:debug_stored_new_pos, get_object_by_id(item[0],model_name)[:ui]]
 
       end
       return {}
@@ -436,6 +436,7 @@ pp datacenter
         model_list[index][:ui].nil? ? model_list[index][:ui] = {} : nil
         model_list[index][:ui][:top].nil? ? model_list[index][:ui][:top] = top : nil
         model_list[index][:ui][:left].nil? ? model_list[index][:ui][:left] = left : nil
+
         top = top+100
         left = left+100
 
@@ -462,14 +463,12 @@ pp datacenter
       node_list = get_objects(model_name,{:datacenter_datacenter_id=>datacenter_id,:ds_source_obj_type=>'image'})
 
       node_list.each do |node|
-#DEBUG
-p '@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@'
-pp node
         item = {
           :type => model_name.to_s,
           :object => node,
           :toolbar_def => toolbar_def,
-          :tpl_callback => tpl_info[:template_callback]
+          :tpl_callback => tpl_info[:template_callback],
+          :ui => node[:ui][datacenter_id.to_sym]
         }
         items << item
       end

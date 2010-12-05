@@ -33,6 +33,7 @@ if (!R8.ViewSpace) {
 			},
 
 			setupEvents: function() {
+
 				_events['item_click'] = R8.Utils.Y.delegate('click',this.updateSelectedItems,_node,'.vspace-item, .connector',this);
 				_events['vspace_click'] = R8.Utils.Y.delegate('click',this.clearSelectedItems,'body','#viewspace');
 //				R8.Workspace.events['item_click'] = R8.Utils.Y.delegate('click',function(){console.log('clicked item');},R8.Workspace.viewSpaceNode,'.item, .connector');
@@ -56,6 +57,14 @@ if (!R8.ViewSpace) {
 						default:
 							break;
 					}
+					if(typeof(item['ui']) == 'undefined') continue;
+
+					var id = item['object']['id'],
+						top = item['ui']['top'],
+						left = item['ui']['left'];
+
+					_items[id].get('node').setStyles({'top':top,'left':left});
+
 				}
 
 				this.purgePendingDelete();
@@ -117,11 +126,12 @@ console.log(ports);
 						viewSpace.clearSelectedItems();
 						var node = this.get('node'),
 							nodeId = node.get('id'),
-							nodeXY = node.getXY();
+							top = node.getStyle('top'),
+							left = node.getStyle('left');
 
 						_itemPosUpdateList[itemId] = {
 							'model':_items[itemId].get('model'),
-							'pos':nodeXY
+							'pos':{'top':top,'left':left}
 						};
 					});
 

@@ -3,6 +3,9 @@ module XYZ
 #TODO: move to viewspace controller
     def update_pos(id)
       items_to_save = JSON.parse(request.params["item_list"])
+      #TODO: refactor so updates in one database call using update_from_select; will need to put in logic to handle partial_values
+      #in ArrayDataset::create; may be useful to have higher level fn that update_from_rows  that take model_handle, rows with id 
+      #which in turn calls  ArrayDataset::create with opts = {:partial_value => true} and then joins in as where clause the id
       items_to_save.each do |item|
         item_id = item[0]
         model_name = item[1]["model"].to_sym
@@ -144,7 +147,7 @@ pp model_list
 
 #TODO: temp
       tpl.assign('datacenter_name','dc1')
-
+2
       _model_var = {}
       _model_var[:i18n] = get_model_i18n(model_name,user_context())
       tpl.assign("_#{model_name().to_s}",_model_var)

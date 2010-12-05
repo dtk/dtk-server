@@ -8,8 +8,7 @@ module XYZ
       model_handle = ModelHandle.new(ret_session_context_id(),model_name)
       update_rows = items_to_save.map{|item|{:id => item[0].to_i, :ui => {id => {:left => item[1]["pos"][0], :top => item[1]["pos"][1]}}}}
       Model.update_from_rows(model_handle,update_rows,:partial_value=>true)
-
-#TODO: remove debug statement
+ #TODO: remove debug statement
       pp [:debug_stored_new_pos,get_objects(model_name,SQL.in(:id,items_to_save.map{|item|item[0].to_i}),Model::FieldSet.opt([:id,:ui],model_name))]
       return {}
     end
@@ -432,6 +431,7 @@ pp datacenter
         model_list[index][:ui].nil? ? model_list[index][:ui] = {} : nil
         model_list[index][:ui][:top].nil? ? model_list[index][:ui][:top] = top : nil
         model_list[index][:ui][:left].nil? ? model_list[index][:ui][:left] = left : nil
+
         top = top+100
         left = left+100
 
@@ -458,14 +458,12 @@ pp datacenter
       node_list = get_objects(model_name,{:datacenter_datacenter_id=>datacenter_id,:ds_source_obj_type=>'image'})
 
       node_list.each do |node|
-#DEBUG
-p '@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@'
-pp node
         item = {
           :type => model_name.to_s,
           :object => node,
           :toolbar_def => toolbar_def,
-          :tpl_callback => tpl_info[:template_callback]
+          :tpl_callback => tpl_info[:template_callback],
+          :ui => node[:ui][datacenter_id.to_sym]
         }
         items << item
       end

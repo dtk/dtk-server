@@ -6,6 +6,7 @@ module XYZ
       column :dynamic_search_pattern, :json #sql where clause that picks out node members and means to ignore memebrship assocs
       virtual_column :member_id_list
       virtual_column :member_list
+      column :ui, :json
       many_to_one :library, :datacenter, :project
       one_to_many :component
     end

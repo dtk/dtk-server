@@ -4,24 +4,32 @@ module XYZ
     def update_pos(ws_id)
       items_to_save = JSON.parse(request.params["item_list"])
       return {} if items_to_save.empty?
+      
+#TODO: patch that maps nil model_name to node_group
+items_to_save.values.each{|item|item["model"] ||= "node_group"}
 
-      #TODO: assuming all items have same model
-      model_name = items_to_save.values.first["model"].to_sym
-      model_handle = ModelHandle.new(ret_session_context_id(),model_name)
-      update_rows = items_to_save.map do |item_id,info|
-        {
-          :id => item_id.to_i, 
-          :ui  => {ws_id.to_s.to_sym =>
-            {:left => info["pos"]["left"].gsub(/[^0-9]+/,""),
-              :top => info["pos"]["top"].gsub(/[^0-9]+/,"")}
+      #partition into model types
+      model_names = items_to_save.values.map{|item|item["model"].to_sym}.uniq
+      model_names.each do |model_name| 
+        model_handle = ModelHandle.new(ret_session_context_id(),model_name)
+        model_items = items_to_save.reject{|item_id,info|not info["model"].to_sym == model_name}
+
+        update_rows = model_items.map do |item_id,info|
+          {
+            :id => item_id.to_i, 
+            :ui  => {ws_id.to_s.to_sym =>
+              {:left => info["pos"]["left"].gsub(/[^0-9]+/,""),
+                :top => info["pos"]["top"].gsub(/[^0-9]+/,"")}
+            }
           }
-        }
+        end
+        Model.update_from_rows(model_handle,update_rows,:partial_value=>true)
+        
+#TODO: remove debug statement
+pp [:model_name,model_name]
+pp [:model_items,model_items]
+pp [:debug_stored_new_pos,get_objects(model_name,SQL.in(:id,model_items.map{|item|item[0].to_i}),Model::FieldSet.opt([:id,:ui],model_name))]
       end
-      Model.update_from_rows(model_handle,update_rows,:partial_value=>true)
-
-      #TODO: remove debug statement
-      pp [:items_to_save, items_to_save]
-      pp [:debug_stored_new_pos,get_objects(model_name,SQL.in(:id,items_to_save.map{|item|item[0].to_i}),Model::FieldSet.opt([:id,:ui],model_name))]
       return {}
     end
 

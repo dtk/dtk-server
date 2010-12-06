@@ -40,7 +40,7 @@
           ":array": {
             "sap_config[ipv4]": {
               "application": {
-                "db_created_on_server": true,
+                "clients_provide_dbs": true,
                 "type": "sql::mysql"
               }
             }
@@ -248,7 +248,7 @@
           ":array": {
             "sap_config[ipv4]": {
               "application": {
-                "db_created_on_server": false,
+                "clients_provide_dbs": false,
                 "type": "sql::mysql"
               }
             }

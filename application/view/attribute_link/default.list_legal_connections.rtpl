@@ -25,7 +25,8 @@
 	<tr id="attribute-list-header-row">
   	  <th id="node_name-th"  class="">Node Name</th>
   	  <th id="component_name-th"  class="">Component Name</th>
-	  <th id="attribute_name-th"  class="">Attribute Name</th>
+	  <th id="port_name-th"  class="">Port Name</th>
+	  <th id="port_type-th"  class="">Port Type</th>
 	  <th id="attribute_id-th"  class="">Attribute Id</th>
         </tr>
 
@@ -34,6 +35,7 @@
 	  <td id="node_name-{%=a[:id]%}" class="">{%=a[:node_name]%}</td>
 	  <td id="component_name-{%=a[:id]%}" class="">{%=a[:component_name]%}</td>
 	  <td id="port_name-{%=a[:id]%}" class="">{%=a[:port_name]%}</td>
+	  <td id="port_type-{%=a[:id]%}" class="">{%=a[:port_type]%}</td>
 	  <td id="attribute_id-{%=a[:id]%}" class="">{%=a[:id]%}</td>
         </tr>			       
 	{%end%}

@@ -3,7 +3,7 @@ service :wordpress do
     :recipes => ["wordpress"],
     :required => true,
     :type => "hash",
-    :description => "wordpress mysql service access point reference for client",
+    :description => "wordpress mysql service access point reference",
     :semantic_type => {"sap_ref" => {"application" => {"type" => "sql::mysql"}}},
     :transform => {
       "application" => {

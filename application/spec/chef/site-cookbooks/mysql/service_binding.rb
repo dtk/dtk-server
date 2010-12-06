@@ -9,7 +9,13 @@ service :mysql_server do
     :recipes => ["mysql::server","mysql::server2"],
     :type => "hash",
     :description => "mysql ip service access point configuration",
-    :semantic_type => {":array" => {"sap_config[ipv4]" => {"application" => {"type" => "sql::mysql", "db_created_on_server" => true}}}},
+    :semantic_type => {
+      ":array" => {
+        "sap_config[ipv4]" => {
+          "application" => {
+            "type" => "sql::mysql", 
+            "clients_provide_dbs" => true
+          }}}},
     :transform =>
     [{
        "port" => {"__ref" => "node[mysql][port]"},
@@ -35,7 +41,7 @@ service :mysql_server do
         "sap_config[ipv4]" => {
           "application" => {
             "type" => "sql::mysql", 
-            "db_created_on_server" => false
+            "clients_provide_dbs" => false
         }}}},
     :transform => 
     [{

@@ -18,6 +18,7 @@ module XYZ
           :id => row[:id],
           :node_name => row[:node][:display_name],
           :component_name => row[:component][:display_name],
+          :port_type => row[:port_type],
           :port_name => row[:display_name]
         }
       end

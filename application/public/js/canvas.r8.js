@@ -872,7 +872,7 @@ if (!R8.Canvas) {
 			 * @param {Node} srcNode
 			 * @param {Node} dragNode
 			 */
-			renderDragWire : function(startElemNode,dragElemNode) {
+			renderDragWire : function(startElemNode,dragElemNode,portDef) {
 				var ctrlPtBaseValue = 100;
 				var portsList = workspacePorts;
 				var portElemID = startElemNode.get('id');
@@ -881,7 +881,7 @@ if (!R8.Canvas) {
 
 //				if(typeof(startPortObj) == 'undefined') { console.log('Failed to grab port with ID:'+portElemID); return;}
 //				var startElemFacing = startPortObj.location;
-				var startElemFacing = 'north';
+				var startElemFacing = portDef.location;
 
 				var canvasID = 'wireCanvas';
 				var wireCanvasElem = document.getElementById(canvasID);
@@ -962,8 +962,12 @@ if (!R8.Canvas) {
 						case 'south':
 							var canvasActualWidth = canvasBaseWidth;
 							var canvasActualHeight = canvasBaseHeight + ctrlYPtOffset;
-							var canvasLeft = startElemXY[0];
-							var canvasTop = startElemXY[1];
+//DEBUG
+//TODO: figure out why positioning is off by factor of the height of the toolbars
+//							var canvasLeft = startElemXY[0];
+//							var canvasTop = startElemXY[1];
+							var canvasLeft = startElemRegion['left'];
+							var canvasTop = startElemRegion['top']-60;
 
 							var startX = startElemXOffset;
 							var startY = startElemYOffset;
@@ -1048,8 +1052,12 @@ console.log('------------------');
 						case 'south':
 							var canvasActualWidth = canvasBaseWidth;
 							var canvasActualHeight = canvasBaseHeight + ctrlYPtOffset;
-							var canvasLeft = startElemXY[0];
-							var canvasTop = dragElemXY[1];
+//DEBUG
+//TODO: figure out why positioning is off by factor of the height of the toolbars
+//							var canvasLeft = startElemXY[0];
+//							var canvasTop = dragElemXY[1];
+							var canvasLeft = startElemRegion['left'];
+							var canvasTop = startElemRegion['top'] - ((canvasActualHeight - (ctrlYPtOffset + startElemYOffset))+56);
 
 							var startX = startElemXOffset;
 							var startY = canvasActualHeight - (ctrlYPtOffset + startElemYOffset);
@@ -1127,8 +1135,12 @@ console.log('------------------');
 						case 'south':
 							var canvasActualWidth = canvasBaseWidth;
 							var canvasActualHeight = canvasBaseHeight;
-							var canvasLeft = dragElemXY[0];
-							var canvasTop = startElemXY[1];
+//DEBUG
+//TODO: figure out why positioning is off by factor of the height of the toolbars
+//							var canvasLeft = dragElemXY[0];
+//							var canvasTop = startElemXY[1];
+							var canvasLeft = dragElemRegion['left'];
+							var canvasTop = startElemRegion['top']-60;
 
 							var startX = canvasActualWidth - startElemXOffset;
 							var startY = startElemYOffset;
@@ -1206,8 +1218,12 @@ console.log('------------------');
 						case 'south':
 							var canvasActualWidth = canvasBaseWidth;
 							var canvasActualHeight = canvasBaseHeight + ctrlYPtOffset;
-							var canvasLeft = dragElemXY[0];
-							var canvasTop = dragElemXY[1];
+//DEBUG
+//TODO: figure out why positioning is off by factor of the height of the toolbars
+//							var canvasLeft = dragElemXY[0];
+//							var canvasTop = dragElemXY[1];
+							var canvasLeft = dragElemRegion['left'];
+							var canvasTop = startElemRegion['top'] - ((canvasActualHeight - (ctrlYPtOffset + startElemYOffset))+56);
 
 							var startX = canvasActualWidth - startElemXOffset;
 							var startY = canvasActualHeight - (ctrlYPtOffset + startElemYOffset);

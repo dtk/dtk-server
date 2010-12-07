@@ -174,6 +174,11 @@ console.log(ports);
 				item.get('node').setAttribute('data-status','dd-ready');
 			},
 
+			getItemPortDef: function(itemId,portDefId) {
+				var pDefs = _items[itemId].get('portDefs');
+				return pDefs[portDefId];
+			},
+
 			setLink: function(id,def) {
 				_links[id] = def;
 

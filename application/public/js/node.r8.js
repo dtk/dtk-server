@@ -78,6 +78,9 @@ if (!R8.Node) {
 					case "model":
 						return _type;
 						break;
+					case "portDefs":
+						return _ports;
+						break;
 					default:
 						return null;
 						break;
@@ -144,6 +147,23 @@ if (!R8.Node) {
 				//TODO: make this some config param
 				var portSpacer = 2;
 
+
+				var numPorts = _portDefs.length,
+					northPorts = [],
+					southPorts = [];
+				for (i in _portDefs) {
+					switch(_portDefs[i]['port_type']) {
+						case "input":
+							_portDefs[i]['location'] = 'south';
+							southPorts.push(_portDefs[i]);
+							break;
+						case "output":
+							_portDefs[i]['location'] = 'north';
+							northPorts.push(_portDefs[i]);
+							break;
+					}
+				}
+
 				var count = 0;
 				var prevPortWidth = 0;
 				var prevPortHeight = 0;
@@ -151,17 +171,17 @@ if (!R8.Node) {
 				var totalPortHeight = 0;
 				var portObjs = {};
 
-
 				//------------------------------------
 				//Render North Ports
 				//------------------------------------
-				var numPorts = _portDefs.length;
-				for(i in _portDefs) {
-					var portNodeID = 'port-'+_id+'-north-' + _portDefs[i]['id'],
+				var numPorts = northPorts.length;
+				for(i in northPorts) {
+					var portNodeID = 'port-'+northPorts[i]['id'],
 						portClass = 'basic-port port',
 						portNode = new R8.Utils.Y.Node.create('<div>');
 
-					_portDefs[i]['nodeId'] = portNodeID;
+					northPorts[i]['nodeId'] = portNodeID;
+					_ports[portNodeID] = northPorts[i];
 
 					portObjs[portNodeID] = {};
 					portNode.setAttribute('id',portNodeID);
@@ -199,8 +219,6 @@ if (!R8.Node) {
 				}
 				//END Rendering North Ports
 
-				this.registerPorts2();
-return;
 				var count = 0;
 				var prevPortWidth = 0;
 				var prevPortHeight = 0;
@@ -211,19 +229,25 @@ return;
 				//------------------------------------
 				//Render South Ports
 				//------------------------------------
-				var numPorts = R8.Workspace.components[compID].availPorts.south.length;
-				for(var port in R8.Workspace.components[compID].availPorts.south) {
-					var portNodeID = compID + '-south-' + R8.Workspace.components[compID].availPorts.south[port].id;
-					var portClass = R8.Workspace.components[compID].availPorts.south[port].type + '-port';
+				var numPorts = southPorts.length;
+				for(i in southPorts) {
+					var portNodeID = 'port-'+southPorts[i]['id'],
+						portClass = 'basic-port port',
+						portNode = new R8.Utils.Y.Node.create('<div>');
+
+					southPorts[i]['nodeId'] = portNodeID;
+					_ports[portNodeID] = southPorts[i];
+
 					portObjs[portNodeID] = {};
-					var portNode = new R8.Utils.Y.Node.create('<div>');
 					portNode.setAttribute('id',portNodeID);
 					portNode.addClass(portClass + ' available');
-					compNode.appendChild(portNode);
-					var region = portNode.get('region');
+					_node.appendChild(portNode);
+
+					var portRegion = portNode.get('region');
 					portNode.setStyles({'display':'none'});
-					portObjs[portNodeID].height = region.bottom - region.top;
-					portObjs[portNodeID].width = region.right - region.left;
+
+					portObjs[portNodeID].height = portRegion.bottom - portRegion.top;
+					portObjs[portNodeID].width = portRegion.right - portRegion.left;
 					portObjs[portNodeID].wOffset = Math.floor(portObjs[portNodeID].width/2);
 					portObjs[portNodeID].hOffset = Math.floor(portObjs[portNodeID].height/2);
 
@@ -235,9 +259,9 @@ return;
 				var prevLeft = 0;
 				for(var portNodeID in portObjs) {
 					var portNode = R8.Utils.Y.one('#'+portNodeID);
-					var top = compNodeHeight - portObjs[portNodeID].hOffset;
+					var top = nodeHeight - portObjs[portNodeID].hOffset;
 					if (count == 0) {
-						var left = (compNodeWidth - (totalPortWidth + (numSpacers * portSpacer))) / 2;
+						var left = (nodeWidth - (totalPortWidth + (numSpacers * portSpacer))) / 2;
 					} else
 						var left = (prevLeft + prevPortWidth + portSpacer);
 
@@ -251,6 +275,9 @@ return;
 				}
 				//END Rendering South Ports
 
+
+				this.registerPorts2();
+return;
 				var count = 0;
 				var prevPortWidth = 0;
 				var prevPortHeight = 0;
@@ -373,7 +400,10 @@ return;
 						});
 						_portDefs[i]['drag'].on('drag:drag',function(e){
 							e.stopPropagation();
-							R8.Canvas.renderDragWire(e.currentTarget.get('node'),this.get('dragNode'));
+							var portId = e.currentTarget.get('node').get('id'),
+								portDef = _ports[portId];
+
+							R8.Canvas.renderDragWire(e.currentTarget.get('node'),this.get('dragNode'),portDef);
 						});
 						_portDefs[i]['drag'].on('drag:end',function(e){
 							e.stopPropagation();
@@ -402,6 +432,10 @@ return;
 											endNodeId = endNode.get('id');
 //										var dragNode = e.drag.get('dragNode');
 
+										var endParentId = endNode.get('parentNode').getAttribute('data-id');
+										var endPortDef = _viewSpace.getItemPortDef(endParentId,endNode.getAttribute('id'));
+										var startPortDef = _ports[startNodeId];
+
 										var startConnectorLocation = 'north';
 //										var startCompID = R8.Workspace.ports[startElemID].compID;
 										var endConnectorLocation = 'north';
@@ -417,12 +451,12 @@ return;
 											'type': connectorType,
 											'startElement': {
 												'elemID': '?',
-												'location':startConnectorLocation,
+												'location':startPortDef.location,
 												'connectElemID':startNodeId
 											},
 											'endElements': [{
 												'elemID':'?',
-												'location':endConnectorLocation,
+												'location':endPortDef.location,
 												'connectElemID':endNodeId
 											}]
 										}
@@ -471,7 +505,7 @@ return;
 			},
 
 			registerPorts: function() {
-console.log(_portDragDelegate + '    nodeid:'+_node.get('id'));
+//console.log(_portDragDelegate + '    nodeid:'+_node.get('id'));
 				YUI().use('dd-delegate', 'dd-proxy', 'dd-drop', 'dd-drop-plugin', 'node', function(Y){
 					_portDragDelegate = new Y.DD.Delegate({
 						cont: '#' + _node.get('id'),
@@ -482,7 +516,7 @@ console.log(_portDragDelegate + '    nodeid:'+_node.get('id'));
 						borderStyle: false
 					});
 					_portDragDelegate.on('drag:start', function(e) {
-console.log('starting to drag port........'+_node.get('id'));
+//console.log('starting to drag port........'+_node.get('id'));
 						e.stopPropagation();
 
 						var drag = this.get('dragNode'), c = this.get('currentNode');
@@ -496,10 +530,11 @@ console.log('starting to drag port........'+_node.get('id'));
 					});
 					_portDragDelegate.on('drag:drag', function(e) {
 						e.stopPropagation();
+console.log(this.get('currentNode'));
 						R8.Canvas.renderDragWire(this.get('currentNode'),this.get('dragNode'));
 					});
 					_portDragDelegate.on('drag:dropmiss', function(e) {
-console.log('missed port drop');
+//console.log('missed port drop');
 return;
 						var wireCanvas = R8.Utils.Y.one('#wireCanvas');
 						R8.Utils.Y.one('#viewspace').removeChild(wireCanvas);

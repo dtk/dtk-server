@@ -156,7 +156,12 @@ console.log(ports);
 							var _itemPosUpdateListJSON = Y.JSON.stringify(_itemPosUpdateList);
 							Y.Cookie.set("_itemPosUpdateList", _itemPosUpdateListJSON);
 						});
-						_items[itemId].refreshLinks();
+//TODO: revisit after cleanup, currently needed b/c on drag end, margins get updated for dropshadow so links
+//are off by several pixels
+						var delayedRefresh = function() {
+							_items[itemId].refreshLinks();
+						}
+						setTimeout(delayedRefresh,20);
 					});
 
 /*

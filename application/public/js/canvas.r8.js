@@ -51,13 +51,21 @@ if (!R8.Canvas) {
 					var canvasID = date.getTime() + '-' + Math.floor(Math.random()*20);
 				} else {
 				//this use case is for rendering pre existing connectors
-					var canvasID = a[0];
-					var startElemID = R8.Workspace.connectors[canvasID].startElement.connectElemID;
-					var startConnectorFacing = R8.Workspace.connectors[canvasID].startElement.location;
+//					var canvasID = a[0];
+					var linkDef = a[0];
+					var canvasID = linkDef['id'];
+
+//					var startElemID = R8.Workspace.connectors[canvasID].startElement.connectElemID;
+//					var startConnectorFacing = R8.Workspace.connectors[canvasID].startElement.location;
+					var startElemID = linkDef.startElement.connectElemID;
+					var startConnectorFacing = linkDef.startElement.location;
 					//assuming one endpoint for now
-					var endElemID = R8.Workspace.connectors[canvasID].endElements[0].connectElemID;
-					var connectorType = R8.Workspace.connectors[canvasID].type;
-					var endConnectorFacing = R8.Workspace.connectors[canvasID].endElements[0].location;
+//					var endElemID = R8.Workspace.connectors[canvasID].endElements[0].connectElemID;
+//					var connectorType = R8.Workspace.connectors[canvasID].type;
+//					var endConnectorFacing = R8.Workspace.connectors[canvasID].endElements[0].location;
+					var endElemID = linkDef.endElements[0].connectElemID;
+					var connectorType = linkDef.type;
+					var endConnectorFacing = linkDef.endElements[0].location;
 				}
 
 				var tempCanvas = document.getElementById(canvasID);
@@ -859,7 +867,7 @@ if (!R8.Canvas) {
 			},
 
 			/*
-			 * renderWire currently renders the connector during drag/connect activity
+			 * renderDragWire currently renders the connector during drag/connect activity
 			 * @method renderWire
 			 * @param {Node} srcNode
 			 * @param {Node} dragNode
@@ -869,10 +877,11 @@ if (!R8.Canvas) {
 				var portsList = workspacePorts;
 				var portElemID = startElemNode.get('id');
 //				var startPortObj = R8.Workspace.ports[portElemID];
-				var startPortObj = workspacePorts[portElemID];
+//				var startPortObj = workspacePorts[portElemID];
 
-				if(typeof(startPortObj) == 'undefined') { console.log('Failed to grab port with ID:'+portElemID); return;}
-				var startElemFacing = startPortObj.location;
+//				if(typeof(startPortObj) == 'undefined') { console.log('Failed to grab port with ID:'+portElemID); return;}
+//				var startElemFacing = startPortObj.location;
+				var startElemFacing = 'north';
 
 				var canvasID = 'wireCanvas';
 				var wireCanvasElem = document.getElementById(canvasID);
@@ -936,8 +945,12 @@ if (!R8.Canvas) {
 						case 'north':
 							var canvasActualWidth = canvasBaseWidth;
 							var canvasActualHeight = canvasBaseHeight + ctrlYPtOffset;
+//DEBUG
+//TODO: figure out why positioning is off by factor of the height of the toolbars
+//							var canvasLeft = startElemXY[0];
+//							var canvasTop = startElemXY[1] - ctrlYPtOffset;
 							var canvasLeft = startElemXY[0];
-							var canvasTop = startElemXY[1] - ctrlYPtOffset;
+							var canvasTop = startElemRegion['top'] - (ctrlYPtOffset+60);
 
 							var startX = startElemXOffset;
 							var startY = startElemYOffset + ctrlYPtOffset;
@@ -1017,11 +1030,16 @@ console.log('------------------');
 						case 'north':
 							var canvasActualWidth = canvasBaseWidth;
 							var canvasActualHeight = canvasBaseHeight;
-							var canvasLeft = startElemXY[0];
-							var canvasTop = dragElemXY[1];
+//							var canvasLeft = startElemXY[0];
+//							var canvasTop = dragElemXY[1];
+//DEBUG
+//TODO: figure out why positioning is off by factor of the toolbars at the top.., 25px + 35px
+							var canvasLeft = startElemRegion['left'] - 3;
+							var canvasTop = startElemRegion['top']-(canvasActualHeight+60) + elemHeightOffset;
 
 							var startX = startElemXOffset;
 							var startY = canvasActualHeight - startElemYOffset;
+
 							var cpX1 = startX;
 							var cpY1 = startY - ctrlYPtOffset;
 							var endX = canvasActualWidth - dragElemXOffset;
@@ -1092,8 +1110,12 @@ console.log('------------------');
 						case 'north':
 							var canvasActualWidth = canvasBaseWidth;
 							var canvasActualHeight = canvasBaseHeight + ctrlYPtOffset;
+//DEBUG
+//TODO: figure out why postitioning is off by factor of toolbar height..,25px+35px
+//							var canvasLeft = dragElemXY[0];
+//							var canvasTop = startElemXY[1] - ctrlYPtOffset;
 							var canvasLeft = dragElemXY[0];
-							var canvasTop = startElemXY[1] - ctrlYPtOffset;
+							var canvasTop = startElemRegion['top'] - (ctrlYPtOffset+60);
 
 							var startX = canvasActualWidth - startElemXOffset;
 							var startY = ctrlYPtOffset + startElemYOffset;
@@ -1167,8 +1189,12 @@ console.log('------------------');
 						case 'north':
 							var canvasActualWidth = canvasBaseWidth;
 							var canvasActualHeight = canvasBaseHeight;
-							var canvasLeft = dragElemXY[0];
-							var canvasTop = dragElemXY[1];
+//DEBUG
+//TODO: figure out why postitioning is off by factor of toolbar height..,25px+35px
+//							var canvasLeft = dragElemXY[0];
+//							var canvasTop = dragElemXY[1];
+							var canvasLeft = dragElemRegion['left'];
+							var canvasTop = startElemRegion['top'] - (canvasActualHeight+60) + elemHeightOffset - 3;
 
 							var startX = canvasActualWidth - startElemXOffset;
 							var startY = canvasActualHeight - startElemYOffset;

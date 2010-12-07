@@ -486,7 +486,8 @@ pp datacenter
         node[:ui][datacenter_id.to_sym].nil? ? node[:ui][datacenter_id.to_sym] = {} : nil
         node[:ui][datacenter_id.to_sym][:top].nil? ? node[:ui][datacenter_id.to_sym][:top] = top : nil
         node[:ui][datacenter_id.to_sym][:left].nil? ? node[:ui][datacenter_id.to_sym][:left] = left : nil
-
+pp node[:display_name]
+pp '))))))))))))))))))))))))))))))))))))'
         item = {
           :type => model_name.to_s,
           :object => node,

@@ -14,8 +14,9 @@ if (!R8.ViewSpace) {
 			_itemPosUpdateList = {},
 
 			_isReady = false,
-			_events = {};
+			_events = {},
 
+			_links = {};
 		return {
 
 			init: function() {
@@ -46,7 +47,7 @@ if (!R8.ViewSpace) {
 
 			setupEvents: function() {
 
-				_events['item_click'] = R8.Utils.Y.delegate('click',this.updateSelectedItems,_node,'.vspace-item, .connector',this);
+				_events['item_click'] = R8.Utils.Y.delegate('click',this.updateSelectedItems,_node,'.vspace-item',this);
 				_events['vspace_click'] = R8.Utils.Y.delegate('click',this.clearSelectedItems,'body','#viewspace');
 //				R8.Workspace.events['item_click'] = R8.Utils.Y.delegate('click',function(){console.log('clicked item');},R8.Workspace.viewSpaceNode,'.item, .connector');
 //				R8.Workspace.events['vspace_mdown'] = R8.Utils.Y.delegate('mousedown',R8.Workspace.checkMouseDownEvent,'body','#viewspace');
@@ -125,13 +126,20 @@ console.log(ports);
 					draggableItems[itemId] = new Y.DD.Drag({
 						node: '#'+item.get('node_id')
 					});
+
+					//add invalid drag items here.., right now only ports
+					draggableItems[itemId].addInvalid('.port');
+
+//TODO: seems to be causing some error
+					//setup valid handles
+//					draggableItems[itemId].addHandle('.drag-handle');
+
 					draggableItems[itemId].on('drag:start',function(){
 						viewSpace.clearSelectedItems();
-						var node = this.get('node');
-						var nodeId = node.get('id');
-						node.addClass('focus');
-
 						viewSpace.addSelectedItem(itemId);
+					});
+					draggableItems[itemId].on('drag:drag',function(){
+						_items[itemId].refreshLinks();
 					});
 					draggableItems[itemId].on('drag:end',function(e){
 						viewSpace.clearSelectedItems();
@@ -148,6 +156,7 @@ console.log(ports);
 							var _itemPosUpdateListJSON = Y.JSON.stringify(_itemPosUpdateList);
 							Y.Cookie.set("_itemPosUpdateList", _itemPosUpdateListJSON);
 						});
+						_items[itemId].refreshLinks();
 					});
 
 /*
@@ -158,6 +167,13 @@ console.log(ports);
 */
 				});
 				item.get('node').setAttribute('data-status','dd-ready');
+			},
+
+			setLink: function(id,def) {
+				_links[id] = def;
+
+				_items[_links[id]['startItemId']].addLink(id,def);
+				_items[_links[id]['endItemId']].addLink(id,def);
 			},
 
 			purgeUIData: function(ioId,responseObj) {
@@ -223,7 +239,12 @@ console.log(ports);
 				_items[itemId].get('node').addClass('focus');
 			},
 
-			clearSelectedItems: function() {
+			clearSelectedItems: function(e) {
+//DEBUG
+if (typeof(e) != 'undefined') {
+	console.log('X:' + e.clientX + '   Y:' + e.clientY);
+}
+
 				for(itemId in _selectedItems) {
 					_items[itemId].get('node').removeClass('focus');
 					_items[itemId].get('node').setStyle('zIndex',1);

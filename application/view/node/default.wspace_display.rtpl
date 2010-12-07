@@ -58,10 +58,12 @@ Some content here para tu
 					<div class="corner bl"></div>
 				</div>
 				<div id="body-{%=node[:id]%}-medium" class="body">
-					<div class="medium-header">
+					<div style="height: 20px; width: 106px;" class="medium-header">
 						<div id="item-{%=node[:id]%}-maximize-btn" class="minmax max"></div>
 					</div>
-					{%=node[:display_name]%}<br/><br/>?&nbsp;Components(s)&nbsp;&nbsp;
+					<div style="width: 106px; height: 36px;" class=".body-content .drag-handle">
+						<div style="width: 106px; text-align: center; position: absolute; bottom: 10px;">{%=node[:display_name]%}</div>
+					</div>
 				</div>
 				<div class="r-col">
 					<div class="corner tr"></div>

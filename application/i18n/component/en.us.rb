@@ -37,6 +37,7 @@
   :apache2 => "Apache2",
   :php_php5 => "Php5",
   :postgresql_client => "Postgres Client",
-  :wordpress => "Wordpress"
-
+  :wordpress => "Wordpress",
+  :nagios_client => "NRPE",
+  :nagios_server => "Nagios3 Server",
 }

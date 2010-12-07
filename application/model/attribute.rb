@@ -332,10 +332,14 @@ also related is allowing omission of columns mmentioned in jon condition; post p
       return nil unless sap_config_attr
       sap_config_attr_idh = cmp_id_handle.createIDH(:guid => sap_config_attr[:id],:model_name => :attribute, :parent_model_name => :component)
 
-      #caresian produc of sap_configs and host addreses
+      #cartesian product of sap_config(s) and host addreses
       new_sap_value_list = Array.new
-      #TODO: if graph converted hased values into Model types then coud just do sap_config_attr[:attribute_value]
-      (sap_config_attr[:value_asserted]||sap_config_attr[:value_derived]).each do |sap_config|
+      #TODO: if graph converted hased values into Model types then could just do sap_config_attr[:attribute_value]
+      values = sap_config_attr[:value_asserted]||sap_config_attr[:value_derived]
+      #values can be hash or array; determine by looking at semantic_type
+      #TODO: may use instead look up from semantic type
+      values = [values] unless values.kind_of?(Array)
+      values.each do |sap_config|
         ipv4_host_addresses.each do |ipv4_addr|
           new_sap_value_list << sap_config.merge(:host_address => ipv4_addr)
         end

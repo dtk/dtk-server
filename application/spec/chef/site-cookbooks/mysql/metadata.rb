@@ -101,6 +101,5 @@ attribute "_meta_info",
     "mysql::master" => {"feature" => {"base_recipes" => ["mysql::server" ,"mysql::server2"]}},
    }
 
-
-
 require File.expand_path('metadata_aux.rb',::Chef::Config[:cucumber_path]);__t(__FILE__,self)
+

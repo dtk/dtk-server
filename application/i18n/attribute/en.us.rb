@@ -80,4 +80,7 @@
  :wordpress__keys_auth=>"Auth Key",
  :wordpress__checksum=>"Tarball Checksum",
  :wordpress__keys_secure_auth=>"Secure Auth Key",
+#nagios
+  :nagios__monitored_client_sap_config => "SAP Config",
+  :nagios__monitor_sap_refs => "NRPE SAP Refs",
 }

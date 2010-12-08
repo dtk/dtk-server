@@ -71,6 +71,7 @@ module XYZ
       create_from_select(attr_link_mh,field_set,select_ds,override_attrs,:returning_sql_cols=> [:id])
     end
 
+    #TODO: depracte and subsume by above
     def self.link_attributes_using_eq(node_group_id_handle,ng_cmp_id_handle,node_cmp_id_handles,type)
       #TODO: rename params so not specfic to node groups
       #TODO: may convert to computing from search object with links
@@ -109,9 +110,8 @@ module XYZ
             
       opts = {:duplicate_refs => :no_check,:returning_sql_cols => [:input_id,:output_id]} 
       new_link_info = create_from_select(attr_link_mh,attr_link_fs,attr_link_ds,override_attrs,opts)
-      #TODO: may write update_type_link_attached so it can do input and output togther
-      update_type_link_attached(attr_link_mh,:input,new_link_info)
-      update_type_link_attached(attr_link_mh,:output,new_link_info)
+      #TODO: currently not putting in link_info; probably should so now if link exists already; atleast for input because
+      #can have only one link
     end
 
     def self.add_ipv4_sap_links(new_sap_attr_idh,sap_config_attr_idh,ipv4_host_addrs_idh,node_idh)
@@ -142,22 +142,7 @@ module XYZ
          }
         ]
       create_from_rows(attr_link_mh,new_link_rows)
-      update_type_link_attached_from_ids(attr_link_mh,:input,[sap_config_id,ipv4_id])
-    end
-
-    def self.update_type_link_attached(attr_link_mh,type,new_link_info)
-      index = "#{type}_id".to_sym
-      id_list = new_link_info.map{|r|r[index]}
-      update_type_link_attached_from_ids(attr_link_mh,type,id_list)
-    end
-
-    def self.update_type_link_attached_from_ids(attr_link_mh,type,id_list)
-      attr_mh = attr_link_mh.createMH(:model_name => :attribute)
-      field_to_update = "num_attached_#{type}_links".to_sym
-      select_wc = SQL.in(:id,id_list)
-      select_fs = FieldSet.opt([:id,{SQL::ColRef.sum(field_to_update,1) => field_to_update}],:attribute)
-      select_ds = get_objects_just_dataset(attr_mh,select_wc,select_fs)
-      update_from_select(attr_mh,FieldSet.new(:attribute,[field_to_update]),select_ds)
+      #TODO: check whether should update teh saps link_info
     end
 
     ########################## end add new links ##################

@@ -29,11 +29,10 @@ module XYZ
       virtual_column :is_unset, :type => :boolean, :hidden => true, :local_dependencies => [:value_asserted,:value_derived,:data_type,:semantic_type]
 
       virtual_column :needs_to_be_set, :type => :boolean, :hidden => true, 
-        :local_dependencies => [:value_asserted,:value_derived,:read_only,:required,:num_attached_output_links],
+        :local_dependencies => [:value_asserted,:value_derived,:read_only,:required],
         :sql_fn => SQL.and({:attribute__value_asserted => nil},{:attribute__value_derived => nil},
                            SQL.not(:attribute__read_only),
-                           :attribute__required,
-                           {:attribute__num_attached_output_links => 0})
+                           :attribute__required)
 
       uri_remote_dependencies = 
         {:uri =>
@@ -350,8 +349,7 @@ also related is allowing omission of columns mmentioned in jon condition; post p
           :description => "mysql ip service access point configuration",
           #TODO: need the  => {"application" => service qualification)
           :semantic_type => {":array" => "sap[ipv4]"},
-          :semantic_type_summary => "sap[ipv4]",
-          :num_attached_input_links => 2
+          :semantic_type_summary => "sap[ipv4]"
          }]
 
       attr_mh = sap_config_attr_idh.createMH()

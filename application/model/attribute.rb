@@ -24,9 +24,7 @@ module XYZ
       virtual_column :port_is_external, :type => :boolean, :hidden => true, :local_dependencies => [:is_port,:semantic_type_summary]
       virtual_column :port_type, :type => :varchar, :hidden => true, :local_dependencies => [:is_port,:semantic_type_summary]
 
-      #TODO: get rid of below and insetad put in column :link_info, :json
-      column :num_attached_input_links, :integer, :default => 0, :hidden => true
-      column :num_attached_output_links, :integer, :default => 0, :hidden => true
+      column :link_info, :json
      
       virtual_column :is_unset, :type => :boolean, :hidden => true, :local_dependencies => [:value_asserted,:value_derived,:data_type,:semantic_type]
 
@@ -362,6 +360,25 @@ also related is allowing omission of columns mmentioned in jon condition; post p
       [sap_config_attr_idh,new_sap_attr_idh]
     end
 
+    class LinkInfo
+      def initialize(link_info_attr_val)
+        @value = ret_value(link_info_attr_val)
+      end
+      def set_next_index!()
+        #TODO: stubbed now so value is just an array
+        next_index = (@value.max||0)+1
+        @value << next_index
+        next_index
+      end
+      def hash_value()
+        @value
+      end
+     private
+      def ret_value(x)
+        #TODO: stubbed now so value is just an array
+        x.nil? ? [] : x
+      end
+    end
 
    private
     ###### helper fns

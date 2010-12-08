@@ -16,12 +16,59 @@ module XYZ
 
     #######################
     ### object procssing and access functions
+    def self.create_from_hash(parent_id_handle,hash)
+      pp [:in_attribute_link_update_from_hash,parent_id_handle,hash]
+      rows = hash.values.first.values.map do |raw_row|
+        row = Aux.ret_hash_assignments(raw_row)
+        row[:input_id] = row[:input_id].to_i
+        row[:output_id] = row[:output_id].to_i
+        row
+      end
+      pp [:rows,rows]
+      create_links(parent_id_handle,rows)
+    end
 
     ##########################  add new links ##################
-    def self.create_from_hash(parent_id_handle,hash)
-      #TBD: stub
-      pp [:in_attribute_link_create_from_hash]
-      super
+    
+    def self.create_links(parent_id_handle,rows)
+      attr_link_mh = parent_id_handle.create_childMH(:attribute_link)
+      attr_mh = attr_link_mh.createMH(:model_name => :attribute)
+
+      #set the parent id and ref and make 
+      parent_col = attr_link_mh.parent_id_field_name()
+      parent_id = parent_id_handle.get_id()
+      rows.each do |row|
+        row[parent_col] ||= parent_id
+        row[:ref] = "attribute_link:#{row[:input_id]}-#{row[:output_id]}"
+      end
+
+      #TODO: make more efficient by setting attribute_link.function_index and attribute.link_info in fewer sql ops 
+      #get info needed to set attribute_link.function_index
+      attr_wc = SQL.in(:id,rows.map{|r|r[:input_id]})
+      attr_fs = FieldSet.opt([:id,:link_info],:attribute)
+      attr_ds = get_objects_just_dataset(attr_mh,attr_wc,attr_fs)
+
+      attr_link_info = attr_ds.all.inject({}){|h,r|h.merge(r[:id] => Attribute::LinkInfo.new(r[:link_info]))}
+   pp [:attr_link_info,attr_link_info]   
+
+      #set new function_index and new updated link_info
+      updated_link_info = Hash.new
+      rows.each do |row|
+        id = row[:input_id]
+        link_info = attr_link_info[id]
+        new_index = link_info.set_next_index!()
+        row[:function_index] = new_index
+        updated_link_info[id] = link_info.hash_value
+      end
+
+      #update attribute link_info
+      update_from_rows(attr_mh,updated_link_info.map{|id,link_info|{:id => id, :link_info => link_info}}) 
+
+      #create attribute_links
+      select_ds = SQL::ArrayDataset.create(db,rows,attr_link_mh,:convert_for_create => true)
+      override_attrs = {}
+      field_set = FieldSet.new(attr_link_mh[:model_name],rows.first.keys)
+      create_from_select(attr_link_mh,field_set,select_ds,override_attrs,:returning_sql_cols=> [:id])
     end
 
     def self.link_attributes_using_eq(node_group_id_handle,ng_cmp_id_handle,node_cmp_id_handles,type)

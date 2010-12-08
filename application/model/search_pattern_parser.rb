@@ -209,7 +209,7 @@ return :eq if term_in_json == ":"
     end
 
     def log_parsing_error_to_skip(type,object)
-      Log.error("skipping ill-formed #{type} which hash form: #{object.inspect}")
+      Log.error("skipping ill-formed #{type} which has form: #{object.inspect}")
     end
     class ErrorParsing < Error
       def initialize(type,object)

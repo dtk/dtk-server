@@ -69,6 +69,15 @@ module XYZ
 
       self.new(convert_hash(semantic_type))
     end
+
+    def self.find_link_function(input_sem_type,output_sem_type)
+      #TODO: stub
+      if output_sem_type.is_array? and not input_sem_type.is_array?
+        "select_one"
+      else
+        raise raise ErrorNotImplemented.new("find_link_function for input #{input_sem_type.inspect} and output #{output_sem_type.inspect}")
+      end
+    end
    private
     def self.convert_hash(item)
       return item unless item.kind_of?(Hash)

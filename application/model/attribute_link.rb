@@ -44,21 +44,29 @@ module XYZ
 
       #TODO: make more efficient by setting attribute_link.function_index and attribute.link_info in fewer sql ops 
       #get info needed to set attribute_link.function_index
-      attr_wc = SQL.in(:id,rows.map{|r|r[:input_id]})
-      attr_fs = FieldSet.opt([:id,:link_info],:attribute)
+      endpoint_ids = rows.map{|r|[r[:input_id],r[:output_id]]}.flatten.uniq
+      attr_wc = SQL.in(:id,endpoint_ids)
+      attr_fs = FieldSet.opt([:id,:link_info,:value_derived,:value_asserted,:semantic_type],:attribute)
       attr_ds = get_objects_just_dataset(attr_mh,attr_wc,attr_fs)
 
-      attr_link_info = attr_ds.all.inject({}){|h,r|h.merge(r[:id] => Attribute::LinkInfo.new(r[:link_info]))}
+      attr_link_info = attr_ds.all.inject({}) do |h,attr|
+        info = {
+          :link_info => Attribute::LinkInfo.new(attr[:link_info]),
+          :semantic_type => SemanticType.create_from_attribute(attr)
+        }
+        h.merge(attr[:id] => info)
+      end
    pp [:attr_link_info,attr_link_info]   
 
-      #set new function_index and new updated link_info
+      #set function and new function_index and new updated link_info
       updated_link_info = Hash.new
       rows.each do |row|
-        id = row[:input_id]
-        link_info = attr_link_info[id]
+        input_id = row[:input_id]
+        link_info = attr_link_info[input_id][:link_info]
         new_index = link_info.set_next_index!()
+        row[:function] = SemanticType.find_link_function(attr_link_info[input_id][:semantic_type],attr_link_info[row[:output_id]][:semantic_type])
         row[:function_index] = new_index
-        updated_link_info[id] = link_info.hash_value
+        updated_link_info[input_id] = link_info.hash_value
       end
 
       #update attribute link_info

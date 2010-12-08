@@ -39,6 +39,7 @@ module XYZ
 
     #function-specfic propagation
     def propagate_when_sap_config_ipv4()
+      #TODO: debug
       [:function,:function_index,:input_value,:input_semantic_type,:output_value,:output_semantic_type].each do |x| 
         pp [x,eval(x.to_s)]
       end

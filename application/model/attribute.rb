@@ -23,9 +23,10 @@ module XYZ
       column :is_port, :boolean, :default => false
       virtual_column :port_is_external, :type => :boolean, :hidden => true, :local_dependencies => [:is_port,:semantic_type_summary]
       virtual_column :port_type, :type => :varchar, :hidden => true, :local_dependencies => [:is_port,:semantic_type_summary]
+
+      #TODO: get rid of below and insetad put in column :link_info, :json
       column :num_attached_input_links, :integer, :default => 0, :hidden => true
       column :num_attached_output_links, :integer, :default => 0, :hidden => true
-      virtual_column :port_is_connected, :type => :boolean, :hidden => true, :local_dependencies => [:num_attached_input_links,:num_attached_output_links]
      
       virtual_column :is_unset, :type => :boolean, :hidden => true, :local_dependencies => [:value_asserted,:value_derived,:data_type,:semantic_type]
 
@@ -206,11 +207,6 @@ also related is allowing omission of columns mmentioned in jon condition; post p
       return nil unless self[:is_port]
       return nil unless self[:semantic_type_summary]
       (AttributeSemantic::Info[self[:semantic_type_summary]]||{})[:port_type]
-    end
-
-    def port_is_connected()
-      return nil unless self[:is_port]
-      (self[:num_attached_input_links]+self[:num_attached_output_links]) > 0
     end
 
     def is_unset()

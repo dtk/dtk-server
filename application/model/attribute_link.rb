@@ -110,6 +110,8 @@ module XYZ
 
     ########################## end add new links ##################
 
+    ########################## propagate changes ##################
+
     def self.propagate_when_eq_links(attr_changes)
       return Array.new if attr_changes.empty?
       #build up pattern that traces from root id_handles in changes pending to directly connected links
@@ -157,34 +159,72 @@ module XYZ
       end
       Action.create_pending_change_items(new_item_hashes)
     end
+
     #TODO: below will subsume above
     #if no fn can be computable on sql side (like equal can short cuit by not having to pass through and process through ruby
     def self.propagate(input_attr_id_handles)
       return Array.new if input_attr_id_handles.empty?
       attr_mh = input_attr_id_handles.first
-      field_set = Model::FieldSet.new(:attribute,[:id,:value_asserted,:value_derived,:linked_attributes])
+      field_set = Model::FieldSet.new(:attribute,[:id,:value_asserted,:value_derived,:semantic_type,:linked_attributes])
       filter = [:and, [:oneof, :attribute__id, input_attr_id_handles.map{|idh|idh.get_id()}]]
       #dont propagate to attributes with asseretd values
       wc = {:attribute2__value_asserted => nil}
       ds = SearchObject.create_from_field_set(field_set,attr_mh[:c],filter).create_dataset().where(wc)
       new_val_rows = ds.all.map do |row|
-        {:id => row[:attribute2][:id], 
-          :value_derived => compute_new_value(row[:attribute_link][:function],row[:attribute_link][:function_index],row[:attribute_value],row[:attribute2][:value_derived])
-        }
+        propagate_proc = PropagateProcessor.new(row[:attribute_link],row,row[:attribute2])
+        {:id => row[:attribute2][:id], :value_derived => propagate_proc.propagate()}
       end
       return Array.new if new_val_rows.empty?
       update_select_ds = SQL::ArrayDataset.create(db,new_val_rows,attr_mh) 
       update_from_select(attr_mh,FieldSet.new(:attribute,[:value_derived]),update_select_ds)
     end
 
-    def self.compute_new_value(function,function_index,attribute_value,old_value)
-      case function
-       when "eq"
-        attribute_value 
-       else
-        raise ErrorNotImplemented.new("AttributeLink.compute_new_value not implemented yet for fn #{function}")
+    class PropagateProcessor
+      def propagate()
+        case function
+        when "eq"
+          input_value_aux()
+        when "sap_config[ipv4]" 
+          propagate_when_sap_config_ipv4()
+        else
+          raise ErrorNotImplemented.new("propagate value not implemented yet for fn #{function}")
+        end
       end
-   end
+
+      def initialize(attr_link,input_attr,output_attr)
+        @function = attr_link[:function]
+        @function_index = attr_link[:function_index]
+        @input_attr = input_attr
+        @output_attr = output_attr
+      end
+     private
+      attr_reader :function,:function_index
+      def input_value()
+        @input_value ||= input_value_aux()
+      end
+      def input_value_aux()
+        @input_attr[:value_asserted]||input_attr[:value_derived]
+      end
+      def input_semantic_type()
+        @input_semantic_type ||= SemanticType.create_from_attribute(@input_attr)
+      end
+      def output_value()
+        @output_value ||= @output_attr[:value_derived]
+      end
+      def output_semantic_type()
+        @output_semantic_type ||= SemanticType.create_from_attribute(@output_attr)
+      end
+
+      #function-specfic propagation
+      def propagate_when_sap_config_ipv4()
+        [:function,:function_index,:input_value,:input_semantic_type,:output_value,:output_semantic_type].each do |x| 
+          pp [x,eval(x.to_s)]
+        end
+        raise ErrorNotImplemented.new("propagate_when_sap_config_ipv4")
+      end
+    end
+
+   ########################## end: propagate changes ##################
 
     def self.get_legal_connections(parent_id_handle)
       c = parent_id_handle[:c]

@@ -14,7 +14,7 @@ module XYZ
 
       #columns related to the data/semantic type
       column :data_type, :varchar, :size => 25
-      column :semantic_type, :json #points to structural info for a json varr 
+      column :semantic_type, :json #points to structural info for a json var 
       column :semantic_type_summary, :varchar, :size => 25 #for efficiency optional token that summarizes info from semantic_type
       column :read_only, :boolean, :default => false #true means variable is automtcally set
       column :required, :boolean, :default => false #whether required for this attribute to have a value inorder to execute actions for parent component; TODO: may be indexed by action
@@ -186,7 +186,7 @@ also related is allowing omission of columns mmentioned in jon condition; post p
            :model_name => :attribute,
            :join_type => :inner,
            :join_cond=>{:id=> :attribute_link__output_id},
-           :cols=>[:id, :value_asserted,:value_derived]
+           :cols=>[:id, :value_asserted,:value_derived,:semantic_type]
          }
         ]
 
@@ -370,7 +370,8 @@ also related is allowing omission of columns mmentioned in jon condition; post p
    private
     ###### helper fns
     def self.propagate_changes(attr_changes) 
-      new_changes = AttributeLink.propagate_when_eq_links(attr_changes)
+      new_changes = AttributeLink.propagate(attr_changes.map{|x|x.id_handle})
+#      new_changes = AttributeLink.propagate_when_eq_links(attr_changes)
     end
 
     ##TODO: need to go over each one below to see what we still should use

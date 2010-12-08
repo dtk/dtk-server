@@ -7,6 +7,8 @@ require File.expand_path('internal/array_object', File.dirname(__FILE__))
 require File.expand_path('internal/rest_uri', File.dirname(__FILE__))
 require File.expand_path('internal/serialize_to_json', File.dirname(__FILE__))
 require File.expand_path('internal/import_export', File.dirname(__FILE__))
+require File.expand_path('internal/semantic_type', File.dirname(__FILE__))
+require File.expand_path('internal/propagate_processor', File.dirname(__FILE__))
 #just load base classes; specific models dynamically loaded on need basis
 require File.expand_path('internal/data_sources', File.dirname(__FILE__))
 

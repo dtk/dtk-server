@@ -18,7 +18,7 @@ module Ramaze::Helper
     end
 
     def create_from_hash(parent_id_handle,hash)
-      new_id = Model.create_from_hash(parent_id_handle,hash).map{|x|x[:id]}.first
+      new_id = model_class(model_name).create_from_hash(parent_id_handle,hash).map{|x|x[:id]}.first
       Log.info("created new object with id #{new_id}") if new_id
       new_id
     end

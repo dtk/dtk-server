@@ -18,6 +18,11 @@ module XYZ
     ### object procssing and access functions
 
     ##########################  add new links ##################
+    def self.create_from_hash(parent_id_handle,hash)
+      #TBD: stub
+      pp [:in_attribute_link_create_from_hash]
+      super
+    end
 
     def self.link_attributes_using_eq(node_group_id_handle,ng_cmp_id_handle,node_cmp_id_handles,type)
       #TODO: rename params so not specfic to node groups

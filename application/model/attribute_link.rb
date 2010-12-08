@@ -179,51 +179,6 @@ module XYZ
       update_from_select(attr_mh,FieldSet.new(:attribute,[:value_derived]),update_select_ds)
     end
 
-    class PropagateProcessor
-      def propagate()
-        case function
-        when "eq"
-          input_value_aux()
-        when "sap_config[ipv4]" 
-          propagate_when_sap_config_ipv4()
-        else
-          raise ErrorNotImplemented.new("propagate value not implemented yet for fn #{function}")
-        end
-      end
-
-      def initialize(attr_link,input_attr,output_attr)
-        @function = attr_link[:function]
-        @function_index = attr_link[:function_index]
-        @input_attr = input_attr
-        @output_attr = output_attr
-      end
-     private
-      attr_reader :function,:function_index
-      def input_value()
-        @input_value ||= input_value_aux()
-      end
-      def input_value_aux()
-        @input_attr[:value_asserted]||input_attr[:value_derived]
-      end
-      def input_semantic_type()
-        @input_semantic_type ||= SemanticType.create_from_attribute(@input_attr)
-      end
-      def output_value()
-        @output_value ||= @output_attr[:value_derived]
-      end
-      def output_semantic_type()
-        @output_semantic_type ||= SemanticType.create_from_attribute(@output_attr)
-      end
-
-      #function-specfic propagation
-      def propagate_when_sap_config_ipv4()
-        [:function,:function_index,:input_value,:input_semantic_type,:output_value,:output_semantic_type].each do |x| 
-          pp [x,eval(x.to_s)]
-        end
-        raise ErrorNotImplemented.new("propagate_when_sap_config_ipv4")
-      end
-    end
-
    ########################## end: propagate changes ##################
 
     def self.get_legal_connections(parent_id_handle)

@@ -1,4 +1,59 @@
 module XYZ
+  class PropagateProcessor
+    def propagate()
+      #function 'eq' short circuited
+      return input_value_aux() if function == "eq"
+      hash_ret = 
+        case function
+        when "sap_config[ipv4]" 
+          propagate_when_sap_config_ipv4()
+        else
+          raise ErrorNotImplemented.new("propagate value not implemented yet for fn #{function}")
+        end
+      SerializeToJSON.serialize(hash_ret)
+    end
+
+    def initialize(attr_link,input_attr,output_attr)
+      @function = attr_link[:function]
+      @function_index = attr_link[:function_index]
+      @input_attr = input_attr
+      @output_attr = output_attr
+    end
+   private
+    attr_reader :function,:function_index
+    def input_value()
+      @input_value ||= input_value_aux()
+    end
+    def input_value_aux()
+      @input_attr[:value_asserted]||input_attr[:value_derived]
+    end
+    def input_semantic_type()
+      @input_semantic_type ||= SemanticType.create_from_attribute(@input_attr)
+    end
+    def output_value()
+      @output_value ||= @output_attr[:value_derived]
+    end
+    def output_semantic_type()
+      @output_semantic_type ||= SemanticType.create_from_attribute(@output_attr)
+    end
+
+    #function-specfic propagation
+    def propagate_when_sap_config_ipv4()
+      [:function,:function_index,:input_value,:input_semantic_type,:output_value,:output_semantic_type].each do |x| 
+        pp [x,eval(x.to_s)]
+      end
+      unless output_semantic_type().is_array? and input_semantic_type().is_array?
+        raise ErrorNotImplemented.new("propagate_when_sap_config_ipv4 when both are not arrays")
+      end
+      #cartesian product with host_address 
+      ret = Array.new
+      input_value.each do |sap_config|
+        ret += output_value.map{|output_item|sap_config.merge(:host_address => output_item[:host_address])}
+      end
+      ret
+    end
+  end
+
   module CommonSemanticTypeMixin
     def is_array?()
       #TODO: may have :array+ and :array* to distinguish whether array can be empty
@@ -6,10 +61,20 @@ module XYZ
     end
   end
   class SemanticType < HashObject
+    include CommonSemanticTypeMixin
     def self.create_from_attribute(attr)
       semantic_type = attr[:semantic_type]
       return SemanticTypeSimple.new(semantic_type) unless semantic_type.kind_of?(Hash)
-      self.new(semantic_type)
+
+      self.new(convert_hash(semantic_type))
+    end
+   private
+    def self.convert_hash(item)
+      return item unless item.kind_of?(Hash)
+      item.inject({}) do |h,kv|
+        new_key = kv[0].to_s =~ /^:(.+$)/ ? $1.to_sym : kv[0].to_s
+        h.merge(new_key =>  convert_hash(kv[1]))
+      end
     end
   end
   class SemanticTypeSimple < SemanticType
@@ -75,6 +140,7 @@ module XYZ
         ret[index] = SemanticType.new({:type => "json"})
       end
     end
+
     TranslationToSchema = self.new( 
     {
       "sap_config[ipv4]" => {

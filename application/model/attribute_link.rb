@@ -32,7 +32,8 @@ module XYZ
     
     def self.create_links(parent_id_handle,rows)
       attr_link_mh = parent_id_handle.create_childMH(:attribute_link)
-      attr_mh = attr_link_mh.createMH(:model_name => :attribute)
+      #TODO: parent model name can also be node
+      attr_mh = attr_link_mh.createMH(:model_name => :attribute,:parent_model_name=>:component)
 
       #set the parent id and ref and make 
       parent_col = attr_link_mh.parent_id_field_name()
@@ -49,22 +50,22 @@ module XYZ
       attr_fs = FieldSet.opt([:id,:link_info,:value_derived,:value_asserted,:semantic_type],:attribute)
       attr_ds = get_objects_just_dataset(attr_mh,attr_wc,attr_fs)
 
-      attr_link_info = attr_ds.all.inject({}) do |h,attr|
-        info = {
+      attr_info = attr_ds.all.inject({}) do |h,attr|
+        new_info = {
           :link_info => Attribute::LinkInfo.new(attr[:link_info]),
           :semantic_type => SemanticType.create_from_attribute(attr)
         }
-        h.merge(attr[:id] => info)
+        h.merge(attr[:id] => attr.merge(new_info))
       end
-   pp [:attr_link_info,attr_link_info]   
+   pp [:attr_info,attr_info]   
 
       #set function and new function_index and new updated link_info
       updated_link_info = Hash.new
       rows.each do |row|
         input_id = row[:input_id]
-        link_info = attr_link_info[input_id][:link_info]
+        link_info = attr_info[input_id][:link_info]
         new_index = link_info.set_next_index!()
-        row[:function] = SemanticType.find_link_function(attr_link_info[input_id][:semantic_type],attr_link_info[row[:output_id]][:semantic_type])
+        row[:function] = SemanticType.find_link_function(attr_info[input_id][:semantic_type],attr_info[row[:output_id]][:semantic_type])
         row[:function_index] = new_index
         updated_link_info[input_id] = link_info.hash_value
       end
@@ -76,8 +77,23 @@ module XYZ
       select_ds = SQL::ArrayDataset.create(db,rows,attr_link_mh,:convert_for_create => true)
       override_attrs = {}
       field_set = FieldSet.new(attr_link_mh[:model_name],rows.first.keys)
-      create_from_select(attr_link_mh,field_set,select_ds,override_attrs,:returning_sql_cols=> [:id])
+      returning_ids = create_from_select(attr_link_mh,field_set,select_ds,override_attrs,:returning_sql_cols=> [:id])
+      propagate_from_create(attr_mh,attr_info,rows)
+      returning_ids
     end
+
+    def self.propagate_from_create(attr_mh,attr_info,attr_link_rows)
+      new_val_rows = attr_link_rows.map do |attr_link_row|
+        input_attr = attr_info[attr_link_row[:input_id]]
+        output_attr = attr_info[attr_link_row[:output_id]]
+        propagate_proc = PropagateProcessor.new(attr_link_row,input_attr,output_attr)
+        {:id => output_attr[:id], :value_derived => propagate_proc.propagate()}
+      end
+      return Array.new if new_val_rows.empty?
+      update_select_ds = SQL::ArrayDataset.create(db,new_val_rows,attr_mh) 
+      update_from_select(attr_mh,FieldSet.new(:attribute,[:value_derived]),update_select_ds)
+    end
+
 
     #TODO: depracte and subsume by above
     def self.link_attributes_using_eq(node_group_id_handle,ng_cmp_id_handle,node_cmp_id_handles,type)

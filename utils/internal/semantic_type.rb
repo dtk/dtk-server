@@ -3,10 +3,16 @@ module XYZ
     def propagate()
       #function 'eq' short circuited
       return input_value_aux() if function == "eq"
+      #TODO: debug
+      [:function,:function_index,:input_value,:input_semantic_type,:output_value,:output_semantic_type].each do |x| 
+        pp [x,eval(x.to_s)]
+      end
       hash_ret = 
         case function
         when "sap_config[ipv4]" 
           propagate_when_sap_config_ipv4()
+        when "select_one"
+          propagate_when_select_one()
         else
           raise ErrorNotImplemented.new("propagate value not implemented yet for fn #{function}")
         end
@@ -39,10 +45,6 @@ module XYZ
 
     #function-specfic propagation
     def propagate_when_sap_config_ipv4()
-      #TODO: debug
-      [:function,:function_index,:input_value,:input_semantic_type,:output_value,:output_semantic_type].each do |x| 
-        pp [x,eval(x.to_s)]
-      end
       unless output_semantic_type().is_array? and input_semantic_type().is_array?
         raise ErrorNotImplemented.new("propagate_when_sap_config_ipv4 when both are not arrays")
       end
@@ -52,6 +54,11 @@ module XYZ
         ret += output_value.map{|output_item|sap_config.merge(:host_address => output_item[:host_address])}
       end
       ret
+    end
+
+    def propagate_when_select_one()
+      raise ErrorNotImplemented.new("propagate_when_select_one when input has more than one elements") if input_value().size > 1
+      input_value().first
     end
   end
 

@@ -2,21 +2,24 @@ module XYZ
   class PropagateProcessor
     def propagate()
       #function 'eq' short circuited
-      return input_value_aux() if function == "eq"
+      return {:derived_value => input_value_aux()} if function == "eq"
       #TODO: debug
-      [:function,:function_index,:input_value,:input_semantic_type,:output_value,:output_semantic_type].each do |x| 
+      [:function,:function_index,:input_value,:input_semantic_type,:output_value,:output_semantic_type,:input_link_info].each do |x| 
         pp [x,eval(x.to_s)]
       end
       hash_ret = 
         case function
-        when "sap_config[ipv4]" 
+         when "sap_config[ipv4]" 
           propagate_when_sap_config_ipv4()
-        when "select_one"
+         when "select_one"
           propagate_when_select_one()
-        else
+         when "eq_indexed"
+          propagate_when_eq_indexed()
+         else
           raise ErrorNotImplemented.new("propagate value not implemented yet for fn #{function}")
         end
-      SerializeToJSON.serialize(hash_ret)
+      hash_ret.each{|k,v|hash_ret[k] = SerializeToJSON.serialize(v)}
+      hash_ret
     end
 
     def initialize(attr_link,input_attr,output_attr)
@@ -36,6 +39,9 @@ module XYZ
     def input_semantic_type()
       @input_semantic_type ||= SemanticType.create_from_attribute(@input_attr)
     end
+    def input_link_info()
+      @input_link_info ||= @input_attr[:link_info]
+    end
     def output_value()
       @output_value ||= @output_attr[:value_derived]
     end
@@ -53,12 +59,30 @@ module XYZ
       input_value.each do |sap_config|
         ret += output_value.map{|output_item|sap_config.merge(:host_address => output_item[:host_address])}
       end
-      ret
+      {:value_derived => ret}
     end
 
     def propagate_when_select_one()
       raise ErrorNotImplemented.new("propagate_when_select_one when input has more than one elements") if input_value().size > 1
-      input_value().first
+      {:value_derived => input_value().first}
+    end
+
+    def propagate_when_eq_indexed
+      link_info = input_link_info()
+      array_pointers = link_info.array_pointers(function_index)
+      if array_pointers.nil?
+        if output_value().nil?
+          ret = (input_value||[]) + [nil]
+          link_info.update_array_pointers!(function_index,[ret.size-1])
+        else
+          new_rows = output_semantic_type().is_array? ?  output_value() : [output_value()]
+          ret = (input_value||[]) + new_rows
+          link_info.update_array_pointers!(function_index,((input_value||[]).size...ret.size).to_a)
+        end
+Debug.print_and_ret(        {:value_derived => ret,:link_info => link_info.hash_value})
+      else
+        raise ErrorNotImplemented.new("propagate_when_eq_indexed when  array_pointers non null")
+      end
     end
   end
 
@@ -78,9 +102,11 @@ module XYZ
     end
 
     def self.find_link_function(input_sem_type,output_sem_type)
-      #TODO: stub
+      #TODO: stub; should test byod is array whether types match
       if output_sem_type.is_array? and not input_sem_type.is_array?
         "select_one"
+      elsif  output_sem_type.is_array? and input_sem_type.is_array?
+        "eq_indexed"
       else
         raise raise ErrorNotImplemented.new("find_link_function for input #{input_sem_type.inspect} and output #{output_sem_type.inspect}")
       end

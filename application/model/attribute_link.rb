@@ -87,15 +87,15 @@ module XYZ
         input_attr = attr_info[attr_link_row[:input_id]]
         output_attr = attr_info[attr_link_row[:output_id]]
         propagate_proc = PropagateProcessor.new(attr_link_row,input_attr,output_attr)
-        {:id => output_attr[:id], :value_derived => propagate_proc.propagate()}
+        propagate_proc.propagate().merge(:id => output_attr[:id])
       end
       return Array.new if new_val_rows.empty?
       update_select_ds = SQL::ArrayDataset.create(db,new_val_rows,attr_mh) 
-      update_from_select(attr_mh,FieldSet.new(:attribute,[:value_derived]),update_select_ds)
+      update_from_select(attr_mh,FieldSet.new(:attribute,[:value_derived,:link_info]),update_select_ds)
     end
 
 
-    #TODO: depracte and subsume by above
+    #TODO: deprecate and subsume by above
     def self.link_attributes_using_eq(node_group_id_handle,ng_cmp_id_handle,node_cmp_id_handles,type)
       #TODO: rename params so not specfic to node groups
       #TODO: may convert to computing from search object with links
@@ -233,7 +233,7 @@ module XYZ
       ds = SearchObject.create_from_field_set(field_set,attr_mh[:c],filter).create_dataset().where(wc)
       new_val_rows = ds.all.map do |row|
         propagate_proc = PropagateProcessor.new(row[:attribute_link],row,row[:attribute2])
-        {:id => row[:attribute2][:id], :value_derived => propagate_proc.propagate()}
+        propagate_proc.propagate().merge(:id => row[:attribute2][:id])
       end
       return Array.new if new_val_rows.empty?
       update_select_ds = SQL::ArrayDataset.create(db,new_val_rows,attr_mh) 

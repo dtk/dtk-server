@@ -358,23 +358,25 @@ also related is allowing omission of columns mmentioned in jon condition; post p
       [sap_config_attr_idh,new_sap_attr_idh]
     end
 
-    class LinkInfo
+    class LinkInfo < HashObject
       def initialize(link_info_attr_val)
-        @value = ret_value(link_info_attr_val)
+        super(link_info_attr_val||{})
       end
       def set_next_index!()
-        #TODO: stubbed now so value is just an array
-        next_index = (@value.max||0)+1
-        @value << next_index
+        self[:indexes] ||= Array.new
+        next_index = (self[:indexes].max||0)+1
+        self[:indexes] << next_index
         next_index
       end
       def hash_value()
-        @value
+        self
       end
-     private
-      def ret_value(x)
-        #TODO: stubbed now so value is just an array
-        x.nil? ? [] : x
+      def array_pointers(index)
+        (self[:array_pointers]||{})[index]
+      end
+      def update_array_pointers!(index,pointers)
+        self[:array_pointers] ||= Hash.new
+        self[:array_pointers][index] = pointers
       end
     end
 

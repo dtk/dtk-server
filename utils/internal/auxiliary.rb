@@ -169,6 +169,14 @@ module XYZ
       end
     end
   end
+  class Debug
+    class << self
+      def print_and_ret(x)
+        pp x
+        x
+      end
+    end
+  end
 end
 
 ###for more succinctly handling pattern where class exposes methods on an internal object

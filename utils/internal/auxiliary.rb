@@ -131,14 +131,8 @@ module XYZ
         end
       end
 
-      #TODO; remove and instaed make sure the data_processing fns look for columns that could be strings
-      # fn below used to make sure that all hash keys are symbols
-      def ret_hash_assignments(hash)
-        ret = {}
-        hash.each_pair{ |k,v|
-          ret[k.to_sym] = v.kind_of?(Hash) ? ret_hash_assignments(v) : v
-        }
-        ret
+      def col_refs_to_keys(hash)
+        hash.inject({}){|h,kv|h.merge(kv[0].to_sym => kv[1])}
       end
       def marshal_to_wire(obj)
         ::Marshal.dump(obj)

@@ -16,10 +16,10 @@ module XYZ
 
     #######################
     ### object procssing and access functions
-    def self.create_from_hash_off(parent_id_handle,hash)
+    def self.create_from_hash_x(parent_id_handle,hash)
       pp [:in_attribute_link_update_from_hash,parent_id_handle,hash]
       rows = hash.values.first.values.map do |raw_row|
-        row = Aux.ret_hash_assignments(raw_row)
+        row = Aux.col_refs_to_keys(raw_row)
         row[:input_id] = row[:input_id].to_i
         row[:output_id] = row[:output_id].to_i
         row
@@ -87,7 +87,7 @@ module XYZ
         input_attr = attr_info[attr_link_row[:input_id]]
         output_attr = attr_info[attr_link_row[:output_id]]
         propagate_proc = PropagateProcessor.new(attr_link_row,input_attr,output_attr)
-        propagate_proc.propagate().merge(:id => output_attr[:id])
+        propagate_proc.propagate().merge(:id => input_attr[:id])
       end
       return Array.new if new_val_rows.empty?
       update_select_ds = SQL::ArrayDataset.create(db,new_val_rows,attr_mh) 

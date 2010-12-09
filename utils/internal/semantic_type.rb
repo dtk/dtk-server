@@ -31,7 +31,7 @@ module XYZ
       @input_value ||= input_value_aux()
     end
     def input_value_aux()
-      @input_attr[:value_asserted]||input_attr[:value_derived]
+      @input_attr[:value_asserted]||@input_attr[:value_derived]
     end
     def input_semantic_type()
       @input_semantic_type ||= SemanticType.create_from_attribute(@input_attr)

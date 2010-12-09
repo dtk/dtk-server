@@ -1,5 +1,5 @@
 module XYZ
-  class AttributeLink < Model
+   class AttributeLink < Model
     set_relation_name(:attribute,:link)
 
     def self.up()
@@ -16,7 +16,7 @@ module XYZ
 
     #######################
     ### object procssing and access functions
-    def self.create_from_hash(parent_id_handle,hash)
+    def self.create_from_hash_off(parent_id_handle,hash)
       pp [:in_attribute_link_update_from_hash,parent_id_handle,hash]
       rows = hash.values.first.values.map do |raw_row|
         row = Aux.ret_hash_assignments(raw_row)

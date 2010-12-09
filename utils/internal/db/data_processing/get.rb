@@ -210,7 +210,7 @@ module XYZ
                    end
 	        end
 	      elsif col_info[:type] == :json
-	        hash[col] = DB.ret_json_hash(hash[col])
+	        hash[col] = DB.ret_json_hash(hash[col],col_info)
 	      end
 	    end
 	  }

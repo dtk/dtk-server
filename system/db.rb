@@ -75,10 +75,15 @@ module XYZ
       return db_class.new(db_params)
     end
 
-    #TBD: collpase withg related functions in Aux
-    def self.ret_json_hash(raw_value) 
+    #TODO: just temp until we get rid of need to convert keys to symbols; right now default is to do so 
+    def self.ret_json_hash(raw_value,col_info)
       begin
-        ret_keys_as_symbols(JSON.parse(raw_value))
+        hash = JSON.parse(raw_value)
+        if col_info.has_key?(:ret_keys_as_symbols) and col_info[:ret_keys_as_symbols].to_s == "false" 
+          hash
+        else
+          ret_keys_as_symbols(hash)
+        end
       rescue Exception
         #primarily to handle scalars
         raw_value

@@ -363,20 +363,20 @@ also related is allowing omission of columns mmentioned in jon condition; post p
         super(link_info_attr_val||{})
       end
       def set_next_index!()
-        self[:indexes] ||= Array.new
-        next_index = (self[:indexes].max||0)+1
-        self[:indexes] << next_index
+        self["indexes"] ||= Array.new
+        next_index = (self["indexes"].max||0)+1
+        self["indexes"] << next_index
         next_index
       end
       def hash_value()
         self
       end
       def array_pointers(index)
-        (self[:array_pointers]||{})[index]
+        (self["array_pointers"]||{})[index.to_i]
       end
       def update_array_pointers!(index,pointers)
-        self[:array_pointers] ||= Hash.new
-        self[:array_pointers][index] = pointers
+        self["array_pointers"] ||= Hash.new
+        self["array_pointers"][index.to_i] = pointers.map{|x|x.to_i}
       end
     end
 

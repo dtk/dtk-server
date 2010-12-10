@@ -19,8 +19,8 @@ if (!R8.Canvas) {
 			 */
 			config : {
 				'activeConnector':[
-					{'strokeStyle':'#25A3FC','lineWidth':5,'lineCap':'round'},
-					{'strokeStyle':'#63E4FF','lineWidth':3,'lineCap':'round'}
+					{'strokeStyle':'#25A3FC','lineWidth':3,'lineCap':'round'},
+					{'strokeStyle':'#63E4FF','lineWidth':1,'lineCap':'round'}
 					],
 				'dragWire':[
 					{'strokeStyle':'#4EF7DE','lineWidth':5,'lineCap':'round'},

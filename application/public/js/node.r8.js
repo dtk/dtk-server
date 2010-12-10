@@ -465,7 +465,6 @@ return;
 												'connectElemID':endNodeId
 											}]
 										}
-										_viewSpace.setLink(tempLinkId,linkDef);
 /*
 										R8.Workspace.connectors[tempConnectorID] = {
 											'type': connectorType,
@@ -481,14 +480,40 @@ return;
 											}]
 										};
 */
-										R8.Canvas.renderLink(linkDef);
+										if((startPortDef['port_type'] == 'input' && endPortDef['port_type'] == 'output') || (startPortDef['port_type'] == 'output' && endPortDef['port_type'] == 'input')) {
+											var parent_id = _viewSpace.get('id'),
+												input_id = (startPortDef['port_type'] == 'input') ? startPortDef['id'] : endPortDef['id'],
+												output_id = (startPortDef['port_type'] == 'output') ? startPortDef['id'] : endPortDef['id'];
 
-										var startNode = R8.Utils.Y.one('#'+startNodeId);
-										var endNode = R8.Utils.Y.one('#'+endNodeId);
-										startNode.removeClass('available');
-										startNode.addClass('connected');
-										endNode.removeClass('available');
-										endNode.addClass('connected');
+											YUI().use('json','io',function(Y){
+												var successCallback = function(ioId,returnObj) {
+													parentItem.tempLinkCreateCallback(ioId,returnObj);
+												}
+												var params = {
+													'cfg': {
+														'data': 'name=attribute_link&model=attribute_link&redirect=false&parent_model_name=datacenter&parent_id='+parent_id+'&input_id='+input_id+'&output_id='+output_id
+													},
+													'callbacks': {
+														'io:success': successCallback,
+//														'io:failure': bar
+													}
+												};
+												R8.Ctrl.call('attribute_link/save',params);
+											});
+
+											_viewSpace.setLink(tempLinkId,linkDef);
+											R8.Canvas.renderLink(linkDef);
+
+											var startNode = R8.Utils.Y.one('#'+startNodeId);
+											var endNode = R8.Utils.Y.one('#'+endNodeId);
+											startNode.removeClass('available');
+											startNode.addClass('connected');
+											endNode.removeClass('available');
+											endNode.addClass('connected');
+
+										} else {
+console.log('not a valid link.., mis-matched types...');
+										}
 									});
 								}
 							});
@@ -497,6 +522,10 @@ return;
 					}
 					_portsReady = true;
 				});
+			},
+
+			tempLinkCreateCallback: function(ioId,responseObj) {
+console.log('looks like link create success...');
 			},
 
 			portsReady: function() {

@@ -38,8 +38,7 @@ module XYZ
     def list_on_node_ports(node_id=nil)
       aux_list_on_node_ports(node_id ? [node_id] : nil)
     end
-    def get_under_context_list(explicit_hash=nil)
-      hash = explicit_hash || request.params
+
 =begin
       Params
             -<query filters>
@@ -48,14 +47,50 @@ module XYZ
                           {'id':3448dkwkr5,'model':'component'}
               ]
 =end
+    def get_under_context_list(explicit_hash=nil)
+      hash = explicit_hash || request.params
+
       #TODO: ignoring query filters no
-      context_list = hash["context_list"]
-      
+      context_list = JSON.parse(hash["context_list"])
+
       raise Error.new("did not get context_list") unless context_list
       #TODO: only handling nodes
-      ids = context_list.reject{|x|not x["model"] == "node"}.map{|y|y["id"] ? y["id"].to_i : nil}.compact
-      raise Error.new("no valid ids given") if ids.empty?
-      aux_list_on_node_ports(ids)
+      item_ids = context_list.reject{|x|not x["model"] == "node"}.map{|y|y["id"] ? y["id"].to_i : nil}.compact
+      raise Error.new("no valid ids given") if item_ids.empty?
+#      aux_list_on_node_ports(ids)
+
+      filter = item_ids ? [:and, [:oneof, :id, item_ids]] : nil
+      cols = [:id,:display_name,:port_links]
+      field_set = Model::FieldSet.new(:node,cols)
+      ds = SearchObject.create_from_field_set(field_set,ret_session_context_id(),filter).create_dataset()
+      ds = ds.where(SQL.not(SQL::ColRef.coalesce(:other_end_output_id,:other_end_input_id) => nil))
+
+      raw_link_list = ds.all
+      link_list = Array.new
+      raw_link_list.each do |el|
+        component_name = el[:component][:display_name].gsub(/::.+$/,"")
+        port_name = Aux.put_in_bracket_form([component_name] + Aux.tokenize_bracket_name(el[:attribute][:display_name]))
+        type = (el[:attribute_link]||{})[:type]||(el[:attribute_link2]||{})[:type]
+        hidden = (el[:attribute_link]||{})[:hidden].nil? ? (el[:attribute_link2]||{})[:hidden] : (el[:attribute_link]||{})[:hidden]
+        other_end_id = (el[:attribute_link]||{})[:other_end_output_id]||(el[:attribute_link2]||{})[:other_end_input_id]
+        port_dir = el[:attribute_link] ? "input" : "output"
+        id = el[:attribute_link].nil? ? "" : el[:attribute_link][:id]
+        link_list << {
+          :id => id,
+          :item_id => el[:id],
+          :item_name => el[:display_name],
+          :port_id => el[:attribute][:id],
+          :port_name => port_name,
+          :type => type,
+          :port_dir => port_dir,
+          :hidden => hidden,
+          :other_end_id => other_end_id
+        }
+      end
+#DEBUG
+#pp '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
+#pp link_list
+      return {'data'=>link_list}
     end
 
     def get_under_context(explicit_hash=nil)
@@ -69,6 +104,7 @@ module XYZ
 =end
       raise Error.new("id not given") unless hash["id"]
       raise Error.new("only node type treated at this time") unless hash["model"] == "node"
+
       aux_list_on_node_ports([hash["id"].to_i])
     end
 
@@ -100,6 +136,9 @@ module XYZ
           :other_end_id => other_end_id
         }
       end
+pp '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
+pp link_list
+
       action_name = "list_on_node_ports"
       tpl = R8Tpl::TemplateR8.new("#{model_name()}/#{action_name}",user_context())
       tpl.assign("link_list",link_list)

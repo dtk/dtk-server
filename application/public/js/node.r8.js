@@ -4,6 +4,7 @@ if (!R8.Node) {
 	R8.Node = function(nodeDef,viewSpace) {
 		var _def = nodeDef,
 			_id = _def['object']['id'],
+			_object = _def['object'],
 			_type = _def['type'],
 			_dataModel = null,
 			_ports = {},
@@ -19,6 +20,7 @@ if (!R8.Node) {
 			_maximizeBtnNode = null,
 
 			_portDragDelegate = null,
+			_portsReady = false,
 			_viewSpace = viewSpace,
 			_toolbar = null,
 
@@ -78,6 +80,9 @@ if (!R8.Node) {
 					case "model":
 						return _type;
 						break;
+					case "object":
+						return _object;
+						break;
 					case "portDefs":
 						return _ports;
 						break;
@@ -119,7 +124,7 @@ if (!R8.Node) {
 				var response = R8.Ctrl.callResults[ioId]['response'];
 				_ports = response['application_node_get_ports']['content'][0]['data'];
 			},
-
+/*
 			renderPorts3: function() {
 				if(_portDefs == null) return;
 
@@ -129,7 +134,7 @@ if (!R8.Node) {
 					_ports[portId].init();
 				}
 			},
-
+*/
 			/*
 			 * renderPorts adds one or more ports to a given component
 			 * @method renderPorts
@@ -490,7 +495,12 @@ return;
 
 						});
 					}
+					_portsReady = true;
 				});
+			},
+
+			portsReady: function() {
+				return _portsReady;
 			},
 
 			addLink: function(id,def) {

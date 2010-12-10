@@ -16,7 +16,9 @@ if (!R8.ViewSpace) {
 			_isReady = false,
 			_events = {},
 
-			_links = {};
+			_links = {},
+			_linkRenderQueue = {};
+
 		return {
 
 			init: function() {
@@ -80,6 +82,52 @@ if (!R8.ViewSpace) {
 				}
 
 				this.purgePendingDelete();
+				this.retrieveLinks();
+
+			},
+
+			itemsReady: function() {
+				
+			},
+
+			retrieveLinks:function() {
+				var itemList = [];
+				for(i in _items) {
+					if(_items[i].get('model') == 'node')
+						itemList.push({'id':_items[i].get('id'),'model':_items[i].get('model')});
+				}
+				var that = this;
+				YUI().use('json',function(Y){
+					var params = {
+						'callbacks': {
+							'io:success':that.setLinks
+						},
+						'cfg': {
+							'data': 'context_list=' + Y.JSON.stringify(itemList)
+						}
+					};
+					R8.Ctrl.call('attribute_link/get_under_context_list',params);
+				});				
+			},
+
+			setLinks: function(ioId,responseObj) {
+				eval("R8.Ctrl.callResults[ioId]['response'] =" + responseObj.responseText);
+				var response = R8.Ctrl.callResults[ioId]['response'];
+				var linkList = response['application_attribute_link_get_under_context_list']['content'][0]['data'];
+				for(i in linkList) {
+					if(linkList[i]['id'] == '' || linkList[i]['hidden'] == true || linkList[i]['type'] == 'internal') continue;
+
+					_links[linkList[i]['id']] = linkList[i];
+				}
+console.log(_links);
+			},
+
+			renderLinks: function() {
+				if(_linkRenderQueue.length == 0) return;
+
+				for(i in _linkRenderQueue) {
+console.log(_linkRenderQueue[i]);
+				}
 			},
 
 			renderItemPorts: function(itemId,ports) {

@@ -23,7 +23,7 @@ pp get_base_object_dataset_needs_to_be_set(:component).ppsql
       ds = SearchObject.create_from_field_set(field_set,ret_session_context_id(),filter).create_dataset()
       ds = ds.where(:param_node_id => node_id.to_i) if node_id
       #TODO: also filter out when component is not feature
-pp ds.all
+#pp ds.all
       
 
       action_name = "list_qualified_attribute_name_under_node"

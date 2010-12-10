@@ -38,7 +38,10 @@ module XYZ
       @input_semantic_type ||= SemanticType.create_from_attribute(@input_attr)
     end
     def input_link_info()
-      @input_link_info ||= @input_attr[:link_info]
+      return @input_link_info if @input_link_info 
+      link_info = @input_attr[:link_info]
+      return nil unless link_info
+      @input_link_info = link_info.kind_of?(Attribute::LinkInfo) ? link_info : Attribute::LinkInfo.new(link_info)
     end
     def output_value()
       @output_value ||= output_value_aux()

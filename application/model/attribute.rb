@@ -184,7 +184,7 @@ also related is allowing omission of columns mmentioned in jon condition; post p
            :model_name => :attribute,
            :join_type => :inner,
            :join_cond=>{:id=> :attribute_link__input_id},
-           :cols=>[:id, :value_asserted,:value_derived,:semantic_type]
+           :cols=>[:id, :value_asserted,:value_derived,:semantic_type,:link_info]
          }
         ]
 

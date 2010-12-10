@@ -2,14 +2,15 @@ module XYZ
   class PropagateProcessor
     #propgate from output var to input var
     def propagate()
-      #function 'eq' short circuited
-      return {:derived_value => output_value_aux()} if function == "eq"
+
       #TODO: debug
       puts "---------------------------"
       [:function,:function_index,:input_value,:input_semantic_type,:output_value,:output_semantic_type,:input_link_info].each do |x| 
         pp [x,eval(x.to_s)]
       end
       puts "---------------------------"
+      #function 'eq' short circuited
+      return {:derived_value => output_value_aux(), :link_info => nil} if function == "eq"
       hash_ret = 
         case function
          when "sap_config[ipv4]" 
@@ -32,28 +33,6 @@ module XYZ
       @output_attr = output_attr
     end
    private
-    attr_reader :function,:function_index
-    def input_value()
-      @input_value ||= @input_attr[:value_derived]
-    end
-    def input_semantic_type()
-      @input_semantic_type ||= SemanticType.create_from_attribute(@input_attr)
-    end
-    def input_link_info()
-      return @input_link_info if @input_link_info 
-      link_info = @input_attr[:link_info]
-      return nil unless link_info
-      @input_link_info = link_info.kind_of?(Attribute::LinkInfo) ? link_info : Attribute::LinkInfo.new(link_info)
-    end
-    def output_value()
-      @output_value ||= output_value_aux()
-    end
-    def output_value_aux()
-      @output_attr[:value_asserted]||@output_attr[:value_derived]
-    end
-    def output_semantic_type()
-      @output_semantic_type ||= SemanticType.create_from_attribute(@output_attr)
-    end
 
     #function-specfic propagation
     def propagate_when_sap_config_ipv4()
@@ -76,24 +55,22 @@ module XYZ
         raise Error.new("propagate_when_sap_config_ipv4 does not support input scalar and output array with size > 1") if output_value.size > 1
         value = output_v.first.merge("host_address" => input_value["host_address"])
       end
-      {:value_derived => value}
+      {:value_derived => value, :link_info => nil}
     end
 
     def propagate_when_select_one()
-      raise ErrorNotImplemented.new("propagate_when_select_one when input has more than one elements") if output_value().size > 1
-      {:value_derived => input_value().first}
+      raise ErrorNotImplemented.new("propagate_when_select_one when input has more than one elements") if output_value() and output_value().size > 1
+      {:value_derived => output_value ? output_value().first : nil, :link_info => nil}
     end
 
     def propagate_when_eq_indexed()
       link_info = input_link_info()
-      link_info_changed = false
       array_pointers = link_info.array_pointers(function_index)
       new_rows = output_value().nil? ? [nil] : (output_semantic_type().is_array? ?  output_value() : [output_value()])
       value = nil
       if array_pointers.nil?
         value = (input_value||[]) + new_rows
         link_info.update_array_pointers!(function_index,((input_value||[]).size...value.size).to_a)
-        link_info_changed = true
       else
         unless array_pointers.size == new_rows.size
           raise ErrorNotImplemented.new("propagate_when_eq_indexed when number of rows spliced in changes")
@@ -111,8 +88,32 @@ module XYZ
         end
       end
 Debug.print_and_ret(
-      {:value_derived => value}.merge(link_info_changed ? {:link_info => link_info.hash_value} : {})
+      {:value_derived => value,:link_info => link_info.hash_value}
 )
+    end
+
+    #########instance var access fns
+    attr_reader :function,:function_index
+    def input_value()
+      @input_value ||= @input_attr[:value_derived]
+    end
+    def input_semantic_type()
+      @input_semantic_type ||= SemanticType.create_from_attribute(@input_attr)
+    end
+    def input_link_info()
+      return @input_link_info if @input_link_info 
+      link_info = @input_attr[:link_info]
+      return nil unless link_info
+      @input_link_info = link_info.kind_of?(Attribute::LinkInfo) ? link_info : Attribute::LinkInfo.new(link_info)
+    end
+    def output_value()
+      @output_value ||= output_value_aux()
+    end
+    def output_value_aux()
+      @output_attr[:value_asserted]||@output_attr[:value_derived]
+    end
+    def output_semantic_type()
+      @output_semantic_type ||= SemanticType.create_from_attribute(@output_attr)
     end
   end
 

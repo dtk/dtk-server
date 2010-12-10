@@ -95,7 +95,7 @@ module XYZ
       ipv4_host_addrs_idh = cmp_id_handle.createIDH({:guid => ipv4_host_addrs_info[:id], :model_name => :attribute, :parent_model_name => :node})
       sap_config_attr_idh, new_sap_attr_idh = Attribute.add_needed_ipv4_sap_attributes(cmp_id_handle,ipv4_host_addrs)
       return nil unless new_sap_attr_idh
-      AttributeLink.add_ipv4_sap_links(new_sap_attr_idh,sap_config_attr_idh,ipv4_host_addrs_idh,node_id_handle)
+      AttributeLink.create_links_ipv4_sap(new_sap_attr_idh,sap_config_attr_idh,ipv4_host_addrs_idh,node_id_handle)
     end
 
     #TODO: quick hack

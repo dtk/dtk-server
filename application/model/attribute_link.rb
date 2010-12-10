@@ -17,7 +17,7 @@ module XYZ
     #######################
     ### object processing and access functions
     ##########################  add new links ##################
-    def self.create_from_hash_X(parent_id_handle,hash)
+    def self.create_from_hash(parent_id_handle,hash)
       rows = hash.values.first.values.map do |raw_row|
         row = Aux.col_refs_to_keys(raw_row)
         row[:input_id] = row[:input_id].to_i
@@ -80,23 +80,8 @@ module XYZ
       returning_ids
     end
 
-    def self.propagate_from_create(attr_mh,attr_info,attr_link_rows)
-      new_val_rows = attr_link_rows.map do |attr_link_row|
-        input_attr = attr_info[attr_link_row[:input_id]]
-        output_attr = attr_info[attr_link_row[:output_id]]
-        propagate_proc = PropagateProcessor.new(attr_link_row,input_attr,output_attr)
-        propagate_proc.propagate().merge(:id => input_attr[:id])
-      end
-      return Array.new if new_val_rows.empty?
-      update_select_ds = SQL::ArrayDataset.create(db,new_val_rows,attr_mh) 
-      update_from_select(attr_mh,FieldSet.new(:attribute,[:value_derived,:link_info]),update_select_ds)
-    end
-
-
-    #TODO: deprecate and subsume by above
-    def self.link_attributes_using_eq(node_group_id_handle,ng_cmp_id_handle,node_cmp_id_handles,type)
-      #TODO: rename params so not specfic to node groups
-      #TODO: may convert to computing from search object with links
+     ### special purpose create links ###
+    def self.create_links_node_group_members(node_group_id_handle,ng_cmp_id_handle,node_cmp_id_handles)
       node_cmp_mh = node_cmp_id_handles.first.createMH
       node_cmp_wc = {:ancestor_id => ng_cmp_id_handle.get_id()}
       node_cmp_fs = FieldSet.opt([:id],:component)
@@ -122,21 +107,19 @@ module XYZ
          {attr_link_parent_id_handle.get_id() => attr_link_parent_col},
          {:input__id => :input_id},
          {:output__id => :output_id},
-         {type => :type},                                 
+         {"member" => :type},                                 
          {"eq" => :function})
-      first_join_ds = i1_ds.join_table(:inner,node_attr_ds,{attr_parent_col => :id},{:table_alias => :output})
-      attr_link_ds = first_join_ds.join_table(:inner,group_attr_ds,[:ref],{:table_alias => :input})
+      first_join_ds = i1_ds.join_table(:inner,node_attr_ds,{attr_parent_col => :id},{:table_alias => :input})
+      attr_link_ds = first_join_ds.join_table(:inner,group_attr_ds,[:ref],{:table_alias => :output})
 
       attr_link_fs = FieldSet.new(:attribute,[:ref,attr_link_parent_col,:input_id,:output_id,:function,:type])
       override_attrs = {}
             
       opts = {:duplicate_refs => :no_check,:returning_sql_cols => [:input_id,:output_id]} 
-      new_link_info = create_from_select(attr_link_mh,attr_link_fs,attr_link_ds,override_attrs,opts)
-      #TODO: currently not putting in link_info; probably should so now if link exists already; atleast for input because
-      #can have only one link
+      create_from_select(attr_link_mh,attr_link_fs,attr_link_ds,override_attrs,opts)
     end
 
-    def self.add_ipv4_sap_links(new_sap_attr_idh,sap_config_attr_idh,ipv4_host_addrs_idh,node_idh)
+    def self.create_links_ipv4_sap(new_sap_attr_idh,sap_config_attr_idh,ipv4_host_addrs_idh,node_idh)
       attr_link_mh = node_idh.createMH(:model_name => :attribute_link, :parent_model_name => :node)
       new_sap_id,sap_config_id,ipv4_id,node_id = [new_sap_attr_idh,sap_config_attr_idh,ipv4_host_addrs_idh,node_idh].map{|x|x.get_id()}
       
@@ -164,8 +147,21 @@ module XYZ
          }
         ]
       create_from_rows(attr_link_mh,new_link_rows)
-      #TODO: check whether should update teh saps link_info
     end
+
+     ### aux fn for creaet links ###
+    def self.propagate_from_create(attr_mh,attr_info,attr_link_rows)
+      new_val_rows = attr_link_rows.map do |attr_link_row|
+        input_attr = attr_info[attr_link_row[:input_id]]
+        output_attr = attr_info[attr_link_row[:output_id]]
+        propagate_proc = PropagateProcessor.new(attr_link_row,input_attr,output_attr)
+        propagate_proc.propagate().merge(:id => input_attr[:id])
+      end
+      return Array.new if new_val_rows.empty?
+      update_select_ds = SQL::ArrayDataset.create(db,new_val_rows,attr_mh) 
+      update_from_select(attr_mh,FieldSet.new(:attribute,[:value_derived,:link_info]),update_select_ds)
+    end
+
 
     ########################## end add new links ##################
 
@@ -190,44 +186,9 @@ module XYZ
       changed_ids = update_from_select(attr_mh,FieldSet.new(:attribute,[:value_derived]),update_select_ds,opts)
       #if no changes exit otehrwise recursively call propagate
       return nil if changed_ids.empty?
-      propagate(changed_ids.map{|r|attr_mh.createIDH(:guid => r[:id])}) #TODO: see if setting parent right?
-    end
-
-    #deprecate below once subsumed by above
-    def self.propagate_when_eq_links(attr_changes)
-      return Array.new if attr_changes.empty?
-      #build up pattern that traces from root id_handles in changes pending to directly connected links
-      # link tracing would look like
-      #TODO: rewrite using a search object
-      #TODO: below outdated after actual links updated
-      # attribute(id_val_pairs).as(a1)([:value_asserted,:action_id])--(input_id)attribute_link(output_id)--attribute.as(a2)([:id]).where(:value_asserted => nil))
-      #return a1[:value_asserted.as(:value_derived),:action_id],a2[:id]
-#TODO: temp debug  propagate(attr_changes.map{|x|x.id_handle})
-
-      attr_mh = attr_changes.first.id_handle.createMH(:model_name => :attribute)
-
-      id_val_pairs = attr_changes.map{|change| {:id => change.id_handle.get_id(),:value_asserted => change.changed_value, :action_id => change.action_id_handle.get_id()}}
-      input_attr_ds = SQL::ArrayDataset.create(db,id_val_pairs,attr_mh,{:convert_for_update => true})
-
-      #first put in relation that traces along attribute link from output matching an idhandle in changes to inputs
-      attr_link_mh = attr_changes.first.id_handle.createMH(:model_name => :attribute_link)
-      attr_link_wc = nil
-      attr_link_fs = FieldSet.opt([:input_id,:output_id],:attribute_link)
-      attr_link_ds = get_objects_just_dataset(attr_link_mh,attr_link_wc,attr_link_fs)
-
-      output_attr_mh = attr_link_mh.createMH(:model_name => :attribute)
-      #condition is to prune out attributes on output side that have asserted values
-      output_attr_wc = {:value_asserted => nil}
-      output_attr_fs = FieldSet.opt([:id,:display_name,{:value_derived => :old_val}],:attribute)
-      output_attr_ds = get_objects_just_dataset(output_attr_mh,output_attr_wc,output_attr_fs)
-
-      first_join_ds = input_attr_ds.select({:id => :input_id},{:value_asserted => :value_derived},:action_id).from_self.join_table(:inner,attr_link_ds,[:input_id]) 
-      attrs_to_change_ds = first_join_ds.join_table(:inner,output_attr_ds,{:id => :output_id})
-      returning_cols_opts = {:returning_cols => [:id,:display_name,:action_id,:old_val,{:value_derived => :new_val}]}
-      update_ret = update_from_select(output_attr_mh,FieldSet.new(:attribute,[:value_derived]),attrs_to_change_ds,returning_cols_opts)
-
-      attrs_with_base_objects = Attribute.get_attributes_with_base_objects(attr_mh,update_ret.map{|r|r[:id]},:node)
-      indexed_attrs_with__base_objects = attrs_with_base_objects.inject({}){|h,row|h.merge(row[:id] => row)}
+=begin
+  TODO: need to modify fragment I cut and paste below from deprecated fn:  propagate_when_eq_links
+  TODO: need tpo figure out what changes are recorded
       #create the new pending changes
       parent_action_mh = attr_changes.first.action_id_handle.createMH()
       new_item_hashes = update_ret.map do |r|
@@ -240,7 +201,10 @@ module XYZ
         new_item_hash.merge(base_object ? {:base_object => base_object} : {})
       end
       Action.create_pending_change_items(new_item_hashes)
+=end
+      propagate(changed_ids.map{|r|attr_mh.createIDH(:guid => r[:id])}) #TODO: see if setting parent right?
     end
+
 
    ########################## end: propagate changes ##################
 

@@ -10,7 +10,7 @@ module XYZ
       end
       puts "---------------------------"
       #function 'eq' short circuited
-      return {:derived_value => output_value_aux(), :link_info => nil} if function == "eq"
+      return {:value_derived => output_value_aux(), :link_info => nil} if function == "eq"
       hash_ret = 
         case function
          when "sap_config[ipv4]" 

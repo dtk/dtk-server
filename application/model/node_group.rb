@@ -84,7 +84,7 @@ module XYZ
       end
       Action.create_pending_change_items(new_items)
 
-      AttributeLink.link_attributes_using_eq(node_group_id_handle,ng_cmp_id_handle,node_cmp_id_handles,"member")
+      AttributeLink.create_links_node_group_members(node_group_id_handle,ng_cmp_id_handle,node_cmp_id_handles)
 
       #TODO: links for monitor_items
       nil

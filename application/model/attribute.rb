@@ -385,9 +385,9 @@ also related is allowing omission of columns mmentioned in jon condition; post p
     ###### helper fns
     def self.propagate_changes(attr_changes) 
       new_changes = AttributeLink.propagate(attr_changes.map{|x|x.id_handle})
-#      new_changes = AttributeLink.propagate_when_eq_links(attr_changes)
     end
 
+###################################################################
     ##TODO: need to go over each one below to see what we still should use
 
     def check_and_set_derived_relation!()

@@ -5,9 +5,11 @@ module XYZ
       #function 'eq' short circuited
       return {:derived_value => output_value_aux()} if function == "eq"
       #TODO: debug
+      puts "---------------------------"
       [:function,:function_index,:input_value,:input_semantic_type,:output_value,:output_semantic_type,:input_link_info].each do |x| 
         pp [x,eval(x.to_s)]
       end
+      puts "---------------------------"
       hash_ret = 
         case function
          when "sap_config[ipv4]" 
@@ -82,22 +84,35 @@ module XYZ
       {:value_derived => input_value().first}
     end
 
-    def propagate_when_eq_indexed
+    def propagate_when_eq_indexed()
       link_info = input_link_info()
+      link_info_changed = false
       array_pointers = link_info.array_pointers(function_index)
+      new_rows = output_value().nil? ? [nil] : (output_semantic_type().is_array? ?  output_value() : [output_value()])
+      value = nil
       if array_pointers.nil?
-        if output_value().nil?
-          value = (input_value||[]) + [nil]
-          link_info.update_array_pointers!(function_index,[value.size-1])
-        else
-          new_rows = output_semantic_type().is_array? ?  output_value() : [output_value()]
-          value = (input_value||[]) + new_rows
-          link_info.update_array_pointers!(function_index,((input_value||[]).size...value.size).to_a)
-        end
-Debug.print_and_ret(        {:value_derived => value,:link_info => link_info.hash_value})
+        value = (input_value||[]) + new_rows
+        link_info.update_array_pointers!(function_index,((input_value||[]).size...value.size).to_a)
+        link_info_changed = true
       else
-        raise ErrorNotImplemented.new("propagate_when_eq_indexed when  array_pointers non null")
+        unless array_pointers.size == new_rows.size
+          raise ErrorNotImplemented.new("propagate_when_eq_indexed when number of rows spliced in changes")
+        end
+        value = Array.new
+        new_rows_index = 0
+        #replace rows in array_pointers with new_rows
+        input_value.each_with_index do |row,i|
+          if array_pointers.include?(i)
+            value << new_rows[new_rows_index]
+            new_rows_index += 1
+          else
+            value << row
+          end
+        end
       end
+Debug.print_and_ret(
+      {:value_derived => value}.merge(link_info_changed ? {:link_info => link_info.hash_value} : {})
+)
     end
   end
 

@@ -372,11 +372,11 @@ also related is allowing omission of columns mmentioned in jon condition; post p
         self
       end
       def array_pointers(index)
-        (self["array_pointers"]||{})[index.to_i]
+        (self["array_pointers"]||{})[index.to_s]
       end
       def update_array_pointers!(index,pointers)
         self["array_pointers"] ||= Hash.new
-        self["array_pointers"][index.to_i] = pointers.map{|x|x.to_i}
+        self["array_pointers"][index.to_s] = pointers.map{|x|x.to_i}
       end
     end
 

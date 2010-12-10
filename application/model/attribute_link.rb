@@ -15,7 +15,8 @@ module XYZ
     end
 
     #######################
-    ### object procssing and access functions
+    ### object processing and access functions
+    ##########################  add new links ##################
     def self.create_from_hash_x(parent_id_handle,hash)
       rows = hash.values.first.values.map do |raw_row|
         row = Aux.col_refs_to_keys(raw_row)
@@ -26,7 +27,6 @@ module XYZ
       create_links(parent_id_handle,rows)
     end
 
-    ##########################  add new links ##################
     
     def self.create_links(parent_id_handle,rows)
       attr_link_mh = parent_id_handle.create_childMH(:attribute_link)
@@ -186,7 +186,11 @@ module XYZ
       end
       return Array.new if new_val_rows.empty?
       update_select_ds = SQL::ArrayDataset.create(db,new_val_rows,attr_mh) 
-      update_from_select(attr_mh,FieldSet.new(:attribute,[:value_derived]),update_select_ds)
+      opts = {:update_only_if_change => [:value_derived],:returning_cols => [:id]}
+      changed_ids = update_from_select(attr_mh,FieldSet.new(:attribute,[:value_derived]),update_select_ds,opts)
+      #if no changes exit otehrwise recursively call propagate
+      return nil if changed_ids.empty?
+      propagate(changed_ids.map{|r|attr_mh.createIDH(:guid => r[:id])}) #TODO: see if setting parent right?
     end
 
     #deprecate below once subsumed by above

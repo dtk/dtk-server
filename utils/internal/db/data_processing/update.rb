@@ -11,7 +11,15 @@ module XYZ
 #        sequel_select = select_ds.sequel_ds.ungraphed.from_self(:alias => select_prefix) #ungraphed and from_self just to be safe
         sequel_select = select_ds.sequel_ds.ungraphed.from_self #ungraphed and from_self just to be safe
         db_rel = DB_REL_DEF[model_handle[:model_name]]
-        update_ds = dataset(db_rel,update_table_prefix,sequel_select).where("#{update_table_prefix}__id".to_sym => "#{select_prefix}__id".to_sym)
+
+        wc = {"#{update_table_prefix}__id".to_sym => "#{select_prefix}__id".to_sym}
+        ch_cols = opts[:update_only_if_change]
+        if ch_cols
+          wc_add = ch_cols.map{|col|SQL.not_equal("#{update_table_prefix}__#{col}".to_sym,"#{select_prefix}__#{col}".to_sym)}
+          wc = SQL.and(*([wc]+wc_add))
+        end
+
+        update_ds = dataset(db_rel,update_table_prefix,sequel_select).where(wc)
         update_set_clause = columns.inject({}){|hash,col| hash.merge(col => "#{select_prefix}__#{col}".to_sym)}
 
         set_updated_at!(update_set_clause)

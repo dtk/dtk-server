@@ -17,7 +17,7 @@ module XYZ
     #######################
     ### object processing and access functions
     ##########################  add new links ##################
-    def self.create_from_hash(parent_id_handle,hash)
+    def self.create_from_hash_X(parent_id_handle,hash)
       rows = hash.values.first.values.map do |raw_row|
         row = Aux.col_refs_to_keys(raw_row)
         row[:input_id] = row[:input_id].to_i

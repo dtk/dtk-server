@@ -16,7 +16,9 @@ if (!R8.ViewSpace) {
 			_isReady = false,
 			_events = {},
 
-			_links = {};
+			_links = {},
+			_linkRenderList = [];
+
 		return {
 
 			init: function() {
@@ -80,6 +82,104 @@ if (!R8.ViewSpace) {
 				}
 
 				this.purgePendingDelete();
+				this.retrieveLinks();
+
+			},
+
+			itemsReady: function() {
+				
+			},
+
+			retrieveLinks:function() {
+				var itemList = [];
+				for(i in _items) {
+					if(_items[i].get('model') == 'node')
+						itemList.push({'id':_items[i].get('id'),'model':_items[i].get('model')});
+				}
+				var that = this;
+				YUI().use('json',function(Y){
+					var linkCallback = function(ioId,responseObj) {
+						that.setLinks(ioId,responseObj);
+						that.renderLinks();
+					}
+					var params = {
+						'callbacks': {
+							'io:success':linkCallback
+						},
+						'cfg': {
+							'data': 'context_list=' + Y.JSON.stringify(itemList)
+						}
+					};
+					R8.Ctrl.call('attribute_link/get_under_context_list',params);
+				});				
+			},
+
+			setLinks: function(ioId,responseObj) {
+				eval("R8.Ctrl.callResults[ioId]['response'] =" + responseObj.responseText);
+				var response = R8.Ctrl.callResults[ioId]['response'];
+				var linkList = response['application_attribute_link_get_under_context_list']['content'][0]['data'];
+				for(i in linkList) {
+					if(linkList[i]['id'] == '' || linkList[i]['hidden'] == true || linkList[i]['type'] == 'internal') continue;
+
+					_links['link-'+linkList[i]['id']] = linkList[i];
+					_linkRenderList.push('link-'+linkList[i]['id']);
+				}
+			},
+
+			renderLinks: function() {
+				var pendingRemoval = [];
+				if(_linkRenderList.length == 0) return;
+
+				for(var i=_linkRenderList.length-1; i >=0; i--) {
+//TODO: decide how best to manage item/port id's, currently using id for items, and port-<id> for ports
+					var linkId = _linkRenderList[i],
+						portId = _links[linkId]['port_id'],
+						itemId = _links[linkId]['item_id'],
+						startNodeId = 'port-'+portId,
+						endNodeId = 'port-'+_links[linkId]['other_end_id'],
+						startPortDef = this.getItemPortDef(itemId,'port-'+portId),
+						endPortDef = this.getPortDefById('port-'+_links[linkId]['other_end_id']);
+
+					if (typeof(startPortDef) != 'undefined' && endPortDef != null) {
+						var linkDef = {
+								'id': linkId,
+								'startItemId':itemId,
+								'endItemId': endPortDef['parentItemId'],
+								'type': 'fullBezier',
+								'startElement': {
+									'elemID': '?',
+									'location':startPortDef.location,
+									'connectElemID':startNodeId
+								},
+								'endElements': [{
+									'elemID':'?',
+									'location':endPortDef.location,
+									'connectElemID':endNodeId
+								}]
+							};
+
+						this.addLinkToItems(linkId,linkDef);
+
+						R8.Canvas.renderLink(linkDef);
+						var startNode = R8.Utils.Y.one('#'+startNodeId);
+						var endNode = R8.Utils.Y.one('#'+endNodeId);
+						startNode.removeClass('available');
+						startNode.addClass('connected');
+						endNode.removeClass('available');
+						endNode.addClass('connected');
+
+						delete(_linkRenderList.pop());
+					}
+				}
+
+				if(_linkRenderList.length > 0) {
+					var that = this;
+					var callback = function() {
+						that.renderLinks();
+					}
+					setTimeout(callback,20);
+					return;
+				}
 			},
 
 			renderItemPorts: function(itemId,ports) {
@@ -179,11 +279,29 @@ console.log(ports);
 				return pDefs[portDefId];
 			},
 
+			getPortDefById: function(portId) {
+				for(itemId in _items) {
+					var pDefs = _items[itemId].get('portDefs');
+					if(pDefs != null && typeof(pDefs[portId]) != 'undefined') {
+						var returnDef = pDefs[portId];
+//TODO: temp hack, should probably set parent item id permanently
+						returnDef['parentItemId'] = itemId;
+						return returnDef;
+					}
+				}
+				return null;
+			},
+
 			setLink: function(id,def) {
 				_links[id] = def;
 
 				_items[_links[id]['startItemId']].addLink(id,def);
 				_items[_links[id]['endItemId']].addLink(id,def);
+			},
+
+			addLinkToItems: function(id,def) {
+				_items[def['startItemId']].addLink(id,def);
+				_items[def['endItemId']].addLink(id,def);
 			},
 
 			purgeUIData: function(ioId,responseObj) {

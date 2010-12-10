@@ -14,7 +14,7 @@ module Ramaze::Helper
 
     def update_from_hash(id,hash,opts={})
       idh = id_handle(id,model_name,hash["display_name"])
-      model_class(model_name).update_from_hash_assignments(idh,hash,opts)
+      model_class(model_name).update_from_hash_assignments(idh,Aux.col_refs_to_keys(hash),opts)
     end
 
     def create_from_hash(parent_id_handle,hash)

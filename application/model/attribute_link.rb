@@ -17,14 +17,12 @@ module XYZ
     #######################
     ### object procssing and access functions
     def self.create_from_hash_x(parent_id_handle,hash)
-      pp [:in_attribute_link_update_from_hash,parent_id_handle,hash]
       rows = hash.values.first.values.map do |raw_row|
         row = Aux.col_refs_to_keys(raw_row)
         row[:input_id] = row[:input_id].to_i
         row[:output_id] = row[:output_id].to_i
         row
       end
-      pp [:rows,rows]
       create_links(parent_id_handle,rows)
     end
 
@@ -147,8 +145,8 @@ module XYZ
          {
            :ref => "sap_config:#{sap_config_id.to_s}-#{new_sap_id}",
            :display_name => "link:sap_config-sap",
-           :input_id => sap_config_id,
-           :output_id => new_sap_id,
+           :input_id => new_sap_id,
+           :output_id => sap_config_id,
            :type => "internal",
            :hidden => true,
            :function => "sap_config[ipv4]",
@@ -157,8 +155,8 @@ module XYZ
          {
            :ref => "host_address:#{ipv4_id.to_s}-#{new_sap_id}",
            :display_name => "link:host_address-sap",
-           :input_id => ipv4_id,
-           :output_id => new_sap_id,
+           :input_id => new_sap_id,
+           :output_id => ipv4_id,
            :type => "internal",
            :hidden => true,
            :function => "host_address[ipv4]",
@@ -172,7 +170,26 @@ module XYZ
     ########################## end add new links ##################
 
     ########################## propagate changes ##################
+    def self.propagate(output_attr_id_handles)
+      return Array.new if output_attr_id_handles.empty?
+      attr_mh = output_attr_id_handles.first
+      field_set = Model::FieldSet.new(:attribute,[:id,:value_asserted,:value_derived,:semantic_type,:linked_attributes])
+      filter = [:and, [:oneof, :attribute__id, output_attr_id_handles.map{|idh|idh.get_id()}]]
+      #dont propagate to attributes with asserted values
+      wc = {:attribute2__value_asserted => nil}
+      ds = SearchObject.create_from_field_set(field_set,attr_mh[:c],filter).create_dataset().where(wc)
+      new_val_rows = ds.all.map do |row|
+        input_attr_row = row[:attribute2]
+        output_attr_row = row
+        propagate_proc = PropagateProcessor.new(row[:attribute_link],input_attr_row,output_attr_row)
+        propagate_proc.propagate().merge(:id => input_attr_row[:id])
+      end
+      return Array.new if new_val_rows.empty?
+      update_select_ds = SQL::ArrayDataset.create(db,new_val_rows,attr_mh) 
+      update_from_select(attr_mh,FieldSet.new(:attribute,[:value_derived]),update_select_ds)
+    end
 
+    #deprecate below once subsumed by above
     def self.propagate_when_eq_links(attr_changes)
       return Array.new if attr_changes.empty?
       #build up pattern that traces from root id_handles in changes pending to directly connected links
@@ -219,25 +236,6 @@ module XYZ
         new_item_hash.merge(base_object ? {:base_object => base_object} : {})
       end
       Action.create_pending_change_items(new_item_hashes)
-    end
-
-    #TODO: below will subsume above
-    #if no fn can be computable on sql side (like equal can short cuit by not having to pass through and process through ruby
-    def self.propagate(input_attr_id_handles)
-      return Array.new if input_attr_id_handles.empty?
-      attr_mh = input_attr_id_handles.first
-      field_set = Model::FieldSet.new(:attribute,[:id,:value_asserted,:value_derived,:semantic_type,:linked_attributes])
-      filter = [:and, [:oneof, :attribute__id, input_attr_id_handles.map{|idh|idh.get_id()}]]
-      #dont propagate to attributes with asseretd values
-      wc = {:attribute2__value_asserted => nil}
-      ds = SearchObject.create_from_field_set(field_set,attr_mh[:c],filter).create_dataset().where(wc)
-      new_val_rows = ds.all.map do |row|
-        propagate_proc = PropagateProcessor.new(row[:attribute_link],row,row[:attribute2])
-        propagate_proc.propagate().merge(:id => row[:attribute2][:id])
-      end
-      return Array.new if new_val_rows.empty?
-      update_select_ds = SQL::ArrayDataset.create(db,new_val_rows,attr_mh) 
-      update_from_select(attr_mh,FieldSet.new(:attribute,[:value_derived]),update_select_ds)
     end
 
    ########################## end: propagate changes ##################

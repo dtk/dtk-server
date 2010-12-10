@@ -1,8 +1,9 @@
 module XYZ
   class PropagateProcessor
+    #propgate from output var to input var
     def propagate()
       #function 'eq' short circuited
-      return {:derived_value => input_value_aux()} if function == "eq"
+      return {:derived_value => output_value_aux()} if function == "eq"
       #TODO: debug
       [:function,:function_index,:input_value,:input_semantic_type,:output_value,:output_semantic_type,:input_link_info].each do |x| 
         pp [x,eval(x.to_s)]
@@ -31,10 +32,7 @@ module XYZ
    private
     attr_reader :function,:function_index
     def input_value()
-      @input_value ||= input_value_aux()
-    end
-    def input_value_aux()
-      @input_attr[:value_asserted]||@input_attr[:value_derived]
+      @input_value ||= @input_attr[:value_derived]
     end
     def input_semantic_type()
       @input_semantic_type ||= SemanticType.create_from_attribute(@input_attr)
@@ -43,7 +41,10 @@ module XYZ
       @input_link_info ||= @input_attr[:link_info]
     end
     def output_value()
-      @output_value ||= @output_attr[:value_derived]
+      @output_value ||= output_value_aux()
+    end
+    def output_value_aux()
+      @output_attr[:value_asserted]||@output_attr[:value_derived]
     end
     def output_semantic_type()
       @output_semantic_type ||= SemanticType.create_from_attribute(@output_attr)
@@ -51,19 +52,30 @@ module XYZ
 
     #function-specfic propagation
     def propagate_when_sap_config_ipv4()
-      unless output_semantic_type().is_array? and input_semantic_type().is_array?
-        raise ErrorNotImplemented.new("propagate_when_sap_config_ipv4 when both are not arrays")
+      output_v = 
+        if output_semantic_type().is_array? 
+          raise ErrorNotImplemented.new("propagate_when_sap_config_ipv4 when output has empty list") if output_value.empty?
+          output_value
+        else
+          [output_value]
+        end
+
+      value = nil
+      if input_semantic_type().is_array?
+        #cartesian product with host_address 
+        value = Array.new
+        output_v.each do |sap_config|
+          value += input_value.map{|input_item|sap_config.merge("host_address" => input_item["host_address"])}
+        end
+      else #not input_semantic_type().is_array?
+        raise Error.new("propagate_when_sap_config_ipv4 does not support input scalar and output array with size > 1") if output_value.size > 1
+        value = output_v.first.merge("host_address" => input_value["host_address"])
       end
-      #cartesian product with host_address 
-      ret = Array.new
-      input_value.each do |sap_config|
-        ret += output_value.map{|output_item|sap_config.merge(:host_address => output_item[:host_address])}
-      end
-      {:value_derived => ret}
+      {:value_derived => value}
     end
 
     def propagate_when_select_one()
-      raise ErrorNotImplemented.new("propagate_when_select_one when input has more than one elements") if input_value().size > 1
+      raise ErrorNotImplemented.new("propagate_when_select_one when input has more than one elements") if output_value().size > 1
       {:value_derived => input_value().first}
     end
 
@@ -72,14 +84,14 @@ module XYZ
       array_pointers = link_info.array_pointers(function_index)
       if array_pointers.nil?
         if output_value().nil?
-          ret = (input_value||[]) + [nil]
-          link_info.update_array_pointers!(function_index,[ret.size-1])
+          value = (input_value||[]) + [nil]
+          link_info.update_array_pointers!(function_index,[value.size-1])
         else
           new_rows = output_semantic_type().is_array? ?  output_value() : [output_value()]
-          ret = (input_value||[]) + new_rows
-          link_info.update_array_pointers!(function_index,((input_value||[]).size...ret.size).to_a)
+          value = (input_value||[]) + new_rows
+          link_info.update_array_pointers!(function_index,((input_value||[]).size...value.size).to_a)
         end
-Debug.print_and_ret(        {:value_derived => ret,:link_info => link_info.hash_value})
+Debug.print_and_ret(        {:value_derived => value,:link_info => link_info.hash_value})
       else
         raise ErrorNotImplemented.new("propagate_when_eq_indexed when  array_pointers non null")
       end

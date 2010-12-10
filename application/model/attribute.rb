@@ -5,9 +5,9 @@ module XYZ
       external_ref_column_defs()
 
       #columns related to the value
-      column :value_asserted, :json
-      column :value_derived, :json
-      column :value_actual, :json
+      column :value_asserted, :json, :ret_keys_as_symbols => false
+      column :value_derived, :json, :ret_keys_as_symbols => false
+      column :value_actual, :json, :ret_keys_as_symbols => false
       #TODO: may rename attribute_value to desired_value
       virtual_column :attribute_value, :type => :json, :local_dependencies => [:value_asserted,:value_derived],
         :sql_fn => SQL::ColRef.coalesce(:value_asserted,:value_derived)
@@ -177,13 +177,13 @@ also related is allowing omission of columns mmentioned in jon condition; post p
          {
            :model_name => :attribute_link,
            :join_type => :inner,
-           :join_cond=>{:input_id=> :attribute__id},
-           :cols=>[:input_id,:output_id,:function,:function_index]
+           :join_cond=>{:output_id=> :attribute__id},
+           :cols=>[:output_id,:input_id,:function,:function_index]
          },
          {
            :model_name => :attribute,
            :join_type => :inner,
-           :join_cond=>{:id=> :attribute_link__output_id},
+           :join_cond=>{:id=> :attribute_link__input_id},
            :cols=>[:id, :value_asserted,:value_derived,:semantic_type]
          }
         ]

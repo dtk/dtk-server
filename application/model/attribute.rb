@@ -321,14 +321,15 @@ also related is allowing omission of columns mmentioned in jon condition; post p
 
     def self.add_needed_ipv4_sap_attributes(cmp_id_handle,ipv4_host_addresses)
       component_id = cmp_id_handle.get_id()
-      field_set = Model::FieldSet.new(:component,[:id,:attributes])
+      field_set = Model::FieldSet.new(:component,[:id,:display_name,:attributes])
      #TODO: allowing feature in until nest features in base services filter = [:and, [:eq, :component__id, component_id],[:eq, :basic_type,"service"]]
       filter = [:and, [:eq, :component__id, component_id]]
       global_wc = {:attribute__semantic_type_summary => "sap_config[ipv4]"}
       ds = SearchObject.create_from_field_set(field_set,cmp_id_handle[:c],filter).create_dataset().where(global_wc)
 
       #should only be one attribute matching (or none)
-      sap_config_attr = (ds.all.first||{})[:attribute]
+      component = ds.all.first
+      sap_config_attr = (component||{})[:attribute]
       return nil unless sap_config_attr
       sap_config_attr_idh = cmp_id_handle.createIDH(:guid => sap_config_attr[:id],:model_name => :attribute, :parent_model_name => :component)
 
@@ -345,6 +346,9 @@ also related is allowing omission of columns mmentioned in jon condition; post p
         end
       end
 
+      description_prefix = (component[:display_name]||"").split("::").map{|x|x.capitalize}.join(" ") 
+      description = description_prefix.empty? ? "Service Access Point" : "#{description_prefix} SAP"
+
       new_sap_attr_rows =
         [{
           :ref => "sap[ipv4]",
@@ -353,7 +357,7 @@ also related is allowing omission of columns mmentioned in jon condition; post p
           :value_derived => new_sap_value_list,
           :is_port => true,
           :data_type => "json",
-          :description => "mysql ip service access point configuration",
+          :description => description,
           #TODO: need the  => {"application" => service qualification)
           :semantic_type => {":array" => "sap[ipv4]"},
           :semantic_type_summary => "sap[ipv4]"

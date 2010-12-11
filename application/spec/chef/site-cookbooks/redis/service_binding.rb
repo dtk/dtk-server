@@ -3,7 +3,7 @@ service :redis_service do
    :semantic_type => {":array" => {"sap_config[ipv4]" => {"application" => "redis"}}},
    :type => "hash",
    :port_type => "input",
-   :decription => "redis ip service access point configuration",
+   :description => "redis ip service access point configuration",
    :type => "hash",
      :transform => 
      [{"port" =>

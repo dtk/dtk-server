@@ -195,7 +195,6 @@
       },
       "apache2/_service/apache2_service/sap_config/ipv4": {
         "required": "optional",
-        "decription": "apache2 ip service access point configuration",
         "is_service_attribute": true,
         "calculated": false,
         "transform": [
@@ -214,6 +213,7 @@
         "recipes": [
 
         ],
+        "description": "apache2 ip service access point configuration",
         "semantic_type": {
           ":array": {
             "sap_config[ipv4]": {

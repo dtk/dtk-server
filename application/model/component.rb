@@ -28,9 +28,6 @@ module XYZ
          }
         ]
 
-        virtual_column :parent_name, :possible_parents => [:component,:library,:node,:node_group,:project]
-
-        #TODO: stub
         virtual_column :has_pending_change, :type => :boolean, :hidden => true,
          :remote_dependencies =>
          [
@@ -42,12 +39,16 @@ module XYZ
           }
          ]
 
+        virtual_column :parent_name, :possible_parents => [:component,:library,:node,:node_group,:project]
+
         many_to_one :component, :library, :node, :node_group, :project
         one_to_many :component, :attribute_link, :attribute, :monitoring_item
       end
     end
     ##### Actions
     ### virtual column defs
+
+    #TODO: write as sql fn for efficiency
     def has_pending_change()
       ((self[:action]||{})[:count]||0) > 0
     end

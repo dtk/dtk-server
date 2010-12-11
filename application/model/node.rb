@@ -59,6 +59,17 @@ module XYZ
            :cols => [:id,:type,:hidden,{:input_id => :other_end_input_id},:output_id,:node_node_id]
          }
         ]
+        virtual_column :has_pending_change, :type => :boolean, :hidden => true,
+         :remote_dependencies =>
+         [
+          {
+            :model_name => :action,
+            #TODO: avoidng use of :node__node
+            :sequel_def => lambda{|ds|ds.where(:state => "pending").join(:component__component,{:id => :component_id}).group_and_count(:component__node_node_id)},
+            :join_type => :left_outer,
+            :join_cond=>{:node_node_id =>:node__id}
+          }
+         ]
 
 
       foreign_key :data_source_id, :data_source, FK_SET_NULL_OPT
@@ -68,6 +79,11 @@ module XYZ
 
     ### virtual column defs
     #######################
+    #TODO: write as sql fn for efficiency
+    def has_pending_change()
+      ((self[:action]||{})[:count]||0) > 0
+    end
+
     #object processing and access functions
     def self.add_model_specific_override_attrs!(override_attrs)
       override_attrs[:type] = "staged"

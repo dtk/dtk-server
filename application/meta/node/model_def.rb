@@ -42,6 +42,9 @@
         :type=>'json',
         :omit => ['list','display','edit','filter','order_by']
     },
+    :has_pending_change=>{
+        :type=>:boolean,
+    },
     :parent_name=>{
         :type=>'json',
         :no_column=>true

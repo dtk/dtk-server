@@ -51,8 +51,30 @@ if (!R8.ViewSpace) {
 
 				_events['item_click'] = R8.Utils.Y.delegate('click',this.updateSelectedItems,_node,'.vspace-item',this);
 				_events['vspace_click'] = R8.Utils.Y.delegate('click',this.clearSelectedItems,'body','#viewspace');
+				_events['port_mover'] = R8.Utils.Y.delegate('mouseover',this.portMover,_node,'.port',this);
+				_events['port_mover'] = R8.Utils.Y.delegate('mouseout',this.portMout,_node,'.port',this);
 //				R8.Workspace.events['item_click'] = R8.Utils.Y.delegate('click',function(){console.log('clicked item');},R8.Workspace.viewSpaceNode,'.item, .connector');
 //				R8.Workspace.events['vspace_mdown'] = R8.Utils.Y.delegate('mousedown',R8.Workspace.checkMouseDownEvent,'body','#viewspace');
+			},
+
+			portMout: function(e) {
+				R8.Utils.Y.one('#port-details').remove();
+			},
+
+			portMover: function(e) {
+				var portNode = e.currentTarget,
+					portId = portNode.get('id'),
+					portDef = this.getPortDefById(portId),
+					left = e.clientX - 240,
+					top = e.clientY - 70;
+
+				var modelHTML = '<div id="port-details" style="position:absolute; z-index: 100; width: 200px; height: 50px; border: 1px solid black; background-color: #FFFFFF; top: '+top+'px; left: '+left+'px;">\
+									<div style="height: 20px; width: 200px; float: left; position: relative; font-weight: bold">'+portDef['display_name']+'</div>\
+									<div style="height: 30px; width: 200px; float: left; position: relative;">'+portDef['description']+'</div>\
+								</div>';
+
+				_node.append(modelHTML);
+//console.log(portDef);
 			},
 
 			addItems: function(items) {

@@ -180,6 +180,10 @@ p 'Panel IS:'+tpl_result[:panel]
       port_list.each do |el|
         val = el[:attribute_value]
         el[:value] = (val.kind_of?(Hash) or val.kind_of?(Array)) ? JSON.generate(val) : val
+        #TODO: probably shoudl isntead use virtual column that provides qualified name
+        if el[:display_name] and (el[:component]||{})[:display_name]
+          el[:display_name] = "#{el[:component][:display_name].gsub("::","/")}/#{el[:display_name]}"
+        end
       end
 
       Model::materialize_virtual_columns!(port_list,[:port_type])

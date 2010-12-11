@@ -190,7 +190,8 @@ if (!R8.ViewSpace) {
 						endNode.removeClass('available');
 						endNode.addClass('connected');
 
-						delete(_linkRenderList.pop());
+						R8.Utils.arrayRemove(_linkRenderList,i);
+//						delete(_linkRenderList.pop());
 					}
 				}
 

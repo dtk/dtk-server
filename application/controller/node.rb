@@ -172,7 +172,7 @@ p 'Panel IS:'+tpl_result[:panel]
 
     def get_ports(id=nil)
       filter = [:and,[:eq,:is_port,true],[:eq,:port_is_external,true]]
-      cols = [:id,:display_name,:base_object_node,:value_derived,:value_asserted,:port_type]
+      cols = [:id,:display_name,:base_object_node,:value_derived,:value_asserted,:port_type,:description]
       field_set = Model::FieldSet.new(:attribute,cols)
       ds = SearchObject.create_from_field_set(field_set,ret_session_context_id(),filter).create_dataset()
       ds = ds.where(:param_node_id => id.to_i) if id

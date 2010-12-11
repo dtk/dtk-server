@@ -18,7 +18,7 @@
         :type=>:select,
         :size=>15
     },
-    :only_one_per_node=>{
+    :has_pending_change=>{
         :type=>:boolean,
     },
     :version=>{

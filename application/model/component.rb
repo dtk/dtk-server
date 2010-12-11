@@ -29,12 +29,29 @@ module XYZ
         ]
 
         virtual_column :parent_name, :possible_parents => [:component,:library,:node,:node_group,:project]
+
+        #TODO: stub
+        virtual_column :has_pending_change, :type => :boolean, :hidden => true,
+         :remote_dependencies =>
+         [
+          {
+            :model_name => :action,
+            :sequel_def => lambda{|ds|ds.where(~{:component_id => nil}).group_and_count(:component_id)},
+            :join_type => :left_outer,
+            :join_cond=>{:component_id =>:component__id}
+#            :cols => [:id,:display_name,:state,:component_id]
+          }
+         ]
+
         many_to_one :component, :library, :node, :node_group, :project
         one_to_many :component, :attribute_link, :attribute, :monitoring_item
       end
     end
     ##### Actions
     ### virtual column defs
+    def has_pending_change()
+      ((self[:action]||{})[:count]||0) > 0
+    end
     #######################
     ### object procssing and access functions
     #object processing and access functions

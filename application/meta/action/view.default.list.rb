@@ -7,15 +7,7 @@
           }}
       ],
       :field_list => [
-         {:node_group => {
-              :type => 'text',
-              :help => '',
-            }},
-         {:node => {
-              :type => 'text',
-              :help => '',
-            }},
-         {:component => {
+         {:qualified_parent_name => {
               :type => 'text',
               :help => '',
             }},

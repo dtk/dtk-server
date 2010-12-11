@@ -11,6 +11,7 @@
   :uri => 'Uri',
   :parent_name => 'Parent',
   :only_one_per_node => '1 Per Node',
+  :has_pending_change => 'Pending Change',
   :ui => 'UI',
   :updated_at => 'Date Modified',
   :created_at => 'Date Created',

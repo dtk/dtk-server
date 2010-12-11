@@ -10,7 +10,7 @@ module XYZ
       column :object_type, :varchar, :size => 15 # "attribute" | "node" | "component"
       column :transaction, :int, :default => 1 #TODO may introduce transaction object and make this a foreign key
       #TODO: change below to more general json field about ordering
-      column :relative_order_order, :int, :default => 1 #relative with respect to parent
+      column :relative_order, :int, :default => 1 #relative with respect to parent
       column :change, :json # gives detail about the change
 
       virtual_column :parent_name, :possible_parents => [:datacenter,:action]
@@ -20,6 +20,7 @@ module XYZ
       virtual_column :node_group, :path => [:base_object,:node_group,:display_name]
       virtual_column :node, :path => [:base_object,:node,:display_name]
       virtual_column :component, :path => [:base_object,:component,:display_name]
+      virtual_column :qualified_parent_name, :type => :varchar, :local_dependencies => [:base_object]
 
       #one of thse wil be non null and point to object being changed or added
       foreign_key :node_id, :attribute, FK_CASCADE_OPT
@@ -32,6 +33,15 @@ module XYZ
     end
     ### virtual column defs
     #######################
+    def qualified_parent_name()
+      base =  self[:base_object]
+      return nil unless base
+      node_or_ng = (base[:node]||{})[:display_name]||(base[:node_group]||{})[:display_name]
+      component = (base[:component]||{})[:display_name]
+      return nil if node_or_ng.nil? and component.nil?
+      [node_or_ng,component].compact.join("/")
+    end
+
     #object processing and access functions
     #######################
     def self.create_pending_change_item(new_item_hash)

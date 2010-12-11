@@ -33,9 +33,16 @@ module XYZ
           #join in any needed tables
           graph_ds = simple_dataset.from_self(:alias => model_handle[:model_name])
           (remote_col_info||[]).each do |join_info|
-            rs_opts = (join_info[:cols] ? Model::FieldSet.opt(join_info[:cols],join_info[:model_name]) : {}).merge :return_as_hash => true
-            filter = join_info[:filter] ? SimpleSearchPattern::ret_sequel_filter(join_info[:filter],join_info[:model_name]) : nil
-            right_ds = search_object.db.get_objects_just_dataset(model_handle.createMH(:model_name => join_info[:model_name]),filter,rs_opts)
+            right_ds = nil
+            right_ds_mh = model_handle.createMH(:model_name => join_info[:model_name])
+            if join_info[:sequel_def] #override with sequel def
+              sequel_ds = join_info[:sequel_def].call(search_object.db.dataset(DB_REL_DEF[join_info[:model_name]]))
+              right_ds = Dataset.new(right_ds_mh,sequel_ds)
+            else
+              rs_opts = (join_info[:cols] ? Model::FieldSet.opt(join_info[:cols],join_info[:model_name]) : {}).merge :return_as_hash => true
+              filter = join_info[:filter] ? SimpleSearchPattern::ret_sequel_filter(join_info[:filter],join_info[:model_name]) : nil
+              right_ds = search_object.db.get_objects_just_dataset(right_ds_mh,filter,rs_opts)
+            end
             graph_ds = graph_ds.graph(join_info[:join_type]||:left_outer,right_ds,join_info[:join_cond])
           end
 

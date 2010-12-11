@@ -8,6 +8,7 @@
   :transaction => 'Transaction',
   :change => 'Changes',
   :parent_name => 'Parent',
+  :qualified_parent_name => 'Parent',
   :old_value => 'Old',
   :new_value => 'New',
   :base_object => 'Base Obj',

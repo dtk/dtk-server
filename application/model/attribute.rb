@@ -259,6 +259,7 @@ also related is allowing omission of columns mmentioned in jon condition; post p
       Aux.put_in_bracket_form(token_array)
     end
 
+    #TODO: may remove
     def self.update_attributes(attr_mh,attribute_rows)
       return Array.new if attribute_rows.empty?
       unpruned_update_select_ds = SQL::ArrayDataset.create(db,attribute_rows,attr_mh,:convert_for_update => true)
@@ -276,38 +277,43 @@ also related is allowing omission of columns mmentioned in jon condition; post p
       pp [:changed_attrs,changed_attrs]
     end
 
-    def self.update_from_hash_assignments(id_handle,hash_assigns,opts={})
-      Model.update_from_hash_assignments(id_handle,hash_assigns,opts)
-      #TODO: should this functionality below be called from within Attribute.update_from_hash_assignments or instead be called
-      # from ahigher level fn?
-      #if there is an actual change then set up actions to make the change; check whetehr there is an actual change is by 
-      # comparing asserted value to attribute_actual; actual change is if attribute_actual is not null (meaning it has been set) and 
-      #different from changed_value 
-      changed_value = hash_assigns[:value_asserted] #TODO: check whether actual change
-      return nil if changed_value.nil?
+    def self.update_and_propagate_attribute_value(attr_idh,value_asserted)
+      base_object = get_attribute_with_base_object(attr_idh,attr_idh[:parent_model_name])
+      old_value = (base_object||{})[:value_asserted]
+
+      new_val_rows = [{:id => attr_idh.get_id(),:value_asserted => value_asserted}]
+      changed_ids = update_changed_values(attr_idh.createMH(),new_val_rows,:value_asserted)
+      #if no change, exit 
+      return nil if changed_ids.empty?
 
       #TODO any more efficient way to get action_parent_idh and parent_idh info
-      action_parent_idh = id_handle.get_top_container_id_handle(:datacenter)
+      action_parent_idh = attr_idh.get_top_container_id_handle(:datacenter)
       return nil unless action_parent_idh #this would happend if top container is not a datacenter TODO: see if this should be "trapped" at higher level
-      base_object = get_attribute_with_base_object(id_handle,:node_group)
       new_item_hash = {
-        :new_item => id_handle,
-        :parent => action_parent_idh
+        :new_item => attr_idh,
+        :parent => action_parent_idh,
+        :change => {:old => old_value, :new => value_asserted}
       }
       new_item_hash.merge!(:base_object => base_object) if base_object
-      action_id_handle = Action.create_pending_change_item(new_item_hash)
-      propagate_changes([AttributeChange.new(id_handle,changed_value,action_id_handle)]) if action_id_handle
+      action_idh = Action.create_pending_change_item(new_item_hash)
+      propagate_changes([AttributeChange.new(attr_idh,value_asserted,action_idh)]) if action_idh
     end
 
-    def self.get_attribute_with_base_object(attr_id_handle,base_model_name)
-      field_set = FieldSet.new(:attribute,[:id,:display_name,"base_object_#{base_model_name}".to_sym])
-      filter = [:and,[:eq,:id,attr_id_handle.get_id()]]
-      ds = SearchObject.create_from_field_set(field_set,attr_id_handle[:c],filter).create_dataset()
+    def self.update_changed_values(attr_mh,new_val_rows,value_type)
+      update_select_ds = SQL::ArrayDataset.create(db,new_val_rows,attr_mh)
+      opts = {:update_only_if_change => [value_type],:returning_cols => [:id]}
+      update_from_select(attr_mh,FieldSet.new(:attribute,[value_type]),update_select_ds,opts)
+    end
+
+    def self.get_attribute_with_base_object(attr_idh,base_model_name)
+      field_set = FieldSet.new(:attribute,[:id,:display_name,:value_asserted,"base_object_#{base_model_name}".to_sym])
+      filter = [:and,[:eq,:id,attr_idh.get_id()]]
+      ds = SearchObject.create_from_field_set(field_set,attr_idh[:c],filter).create_dataset()
       ds.all.first
     end
 
     def self.get_attributes_with_base_objects(attr_model_handle,attr_id_list,base_model_name)
-      field_set = FieldSet.new(:attribute,[:id,:display_name,"base_object_#{base_model_name}".to_sym])
+      field_set = FieldSet.new(:attribute,[:id,:display_name,:value_asserted,"base_object_#{base_model_name}".to_sym])
       filter = [:or] + attr_id_list.map{|id|[:eq,:id,id]}
       ds = SearchObject.create_from_field_set(field_set,attr_model_handle[:c],filter).create_dataset()
       ds.all

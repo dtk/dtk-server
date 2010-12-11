@@ -16,6 +16,7 @@ module XYZ
 
     #######################
     ### object processing and access functions
+
     ##########################  add new links ##################
     def self.create_from_hash(parent_id_handle,hash)
       rows = hash.values.first.values.map do |raw_row|
@@ -181,11 +182,10 @@ module XYZ
         propagate_proc.propagate().merge(:id => input_attr_row[:id])
       end
       return Array.new if new_val_rows.empty?
-      update_select_ds = SQL::ArrayDataset.create(db,new_val_rows,attr_mh) 
-      opts = {:update_only_if_change => [:value_derived],:returning_cols => [:id]}
-      changed_ids = update_from_select(attr_mh,FieldSet.new(:attribute,[:value_derived]),update_select_ds,opts)
-      #if no changes exit otehrwise recursively call propagate
+      changed_ids = Attribute.update_changed_values(attr_mh,new_val_rows,:value_derived)
+      #if no changes exit otherwise recursively call propagate
       return nil if changed_ids.empty?
+
 =begin
   TODO: need to modify fragment I cut and paste below from deprecated fn:  propagate_when_eq_links
   TODO: need tpo figure out what changes are recorded

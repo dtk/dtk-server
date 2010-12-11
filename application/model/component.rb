@@ -36,10 +36,9 @@ module XYZ
          [
           {
             :model_name => :action,
-            :sequel_def => lambda{|ds|ds.where(~{:component_id => nil}).group_and_count(:component_id)},
+            :sequel_def => lambda{|ds|ds.where({:state => "pending"} & ~{:component_id => nil}).group_and_count(:component_id)},
             :join_type => :left_outer,
             :join_cond=>{:component_id =>:component__id}
-#            :cols => [:id,:display_name,:state,:component_id]
           }
          ]
 

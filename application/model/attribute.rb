@@ -184,7 +184,7 @@ also related is allowing omission of columns mmentioned in jon condition; post p
            :model_name => :attribute,
            :join_type => :inner,
            :join_cond=>{:id=> :attribute_link__input_id},
-           :cols=>[:id, :value_asserted,:value_derived,:semantic_type,:link_info]
+           :cols=>[:id, :value_asserted,:value_derived,:semantic_type,:link_info,:display_name]
          }
         ]
 
@@ -296,7 +296,18 @@ also related is allowing omission of columns mmentioned in jon condition; post p
       }
       new_item_hash.merge!(:base_object => base_object) if base_object
       action_idh = Action.create_pending_change_item(new_item_hash)
-      propagate_changes([AttributeChange.new(attr_idh,value_asserted,action_idh)]) if action_idh
+
+      nested_changes_hash = propagate_changes([AttributeChange.new(attr_idh,value_asserted,action_idh)]) if action_idh
+
+      #compute and merge in base object values and action parernt
+      nested_base_objects = get_attributes_with_base_objects(attr_idh.createMH(),nested_changes_hash.keys,:node) #TODO: hard coded :node
+      nested_base_objects.each do |base_obj|
+        id = base_obj[:id]
+        nested_changes_hash[id].merge!({:base_object => base_obj,:parent => action_idh})
+      end
+      pp [:nested_changes,nested_changes_hash.values]
+      Action.create_pending_change_items(nested_changes_hash.values)
+      nil
     end
 
     def self.update_changed_values(attr_mh,new_val_rows,value_type)
@@ -394,7 +405,7 @@ also related is allowing omission of columns mmentioned in jon condition; post p
    private
     ###### helper fns
     def self.propagate_changes(attr_changes) 
-      new_changes = AttributeLink.propagate(attr_changes.map{|x|x.id_handle})
+      AttributeLink.propagate(attr_changes.map{|x|x.id_handle})
     end
 
 ###################################################################

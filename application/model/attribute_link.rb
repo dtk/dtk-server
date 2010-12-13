@@ -167,24 +167,41 @@ module XYZ
     ########################## end add new links ##################
 
     ########################## propagate changes ##################
+    #returns all changes
+    #TODO: flat list now; look at nested list reflecting hierarchical plan decomposition
     def self.propagate(output_attr_id_handles)
-      return Array.new if output_attr_id_handles.empty?
+      return Hash.new if output_attr_id_handles.empty?
       attr_mh = output_attr_id_handles.first
       field_set = Model::FieldSet.new(:attribute,[:id,:value_asserted,:value_derived,:semantic_type,:linked_attributes])
       filter = [:and, [:oneof, :attribute__id, output_attr_id_handles.map{|idh|idh.get_id()}]]
       #dont propagate to attributes with asserted values
       wc = {:attribute2__value_asserted => nil}
       ds = SearchObject.create_from_field_set(field_set,attr_mh[:c],filter).create_dataset().where(wc)
-      new_val_rows = ds.all.map do |row|
+      change_info = Hash.new
+      new_val_rows = Array.new
+      ds.all.each do |row|
         input_attr_row = row[:attribute2]
         output_attr_row = row
         propagate_proc = PropagateProcessor.new(row[:attribute_link],input_attr_row,output_attr_row)
-        propagate_proc.propagate().merge(:id => input_attr_row[:id])
+
+        new_value_row = propagate_proc.propagate().merge(:id => input_attr_row[:id])
+        new_val_rows << new_value_row
+
+        change_info[input_attr_row[:id]] = {
+          :new_item => attr_mh.createIDH(:guid => input_attr_row[:id], :display_name => input_attr_row[:display_name]),
+          :change => {:old => input_attr_row[:value_derived], :new => new_value_row[:value_derived]}
+        }
       end
-      return Array.new if new_val_rows.empty?
+      return Hash.new if new_val_rows.empty?
       changed_ids = Attribute.update_changed_values(attr_mh,new_val_rows,:value_derived)
-      #if no changes exit otherwise recursively call propagate
-      return nil if changed_ids.empty?
+      #if no changes exit, otherwise recursively call propagate
+      return Hash.new if changed_ids.empty?
+
+      pruned_changes = change_info.inject({}){|h,kv|h.merge(kv[0] => kv[1]) if changed_ids.map{|x|x[:id]}.include?(kv[0])}||{}
+
+      propagated_changes = propagate(changed_ids.map{|r|attr_mh.createIDH(:guid => r[:id])}) #TODO: see if setting parent right?
+      pruned_changes.merge(propagated_changes)
+    end
 
 =begin
   TODO: need to modify fragment I cut and paste below from deprecated fn:  propagate_when_eq_links
@@ -202,8 +219,7 @@ module XYZ
       end
       Action.create_pending_change_items(new_item_hashes)
 =end
-      propagate(changed_ids.map{|r|attr_mh.createIDH(:guid => r[:id])}) #TODO: see if setting parent right?
-    end
+
 
 
    ########################## end: propagate changes ##################

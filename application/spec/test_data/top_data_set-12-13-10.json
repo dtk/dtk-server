@@ -1,0 +1,190 @@
+{
+  "datacenter": {
+    "dc1": {
+      "display_name": "EC2 Staging 1",
+      "description": "EC2 West Staging 1",
+      "network_partition": {
+        "internet": {
+          "display_name": "internet",
+          "ds_key": "",
+          "is_internet": true,
+          "is_deployed": false
+        }
+      },
+      "node_group": {
+        "all_staged_nodes": {
+          "display_name": "all_staged_nodes",
+          "dynamic_search_pattern": {
+            ":relation": ":node",
+            ":filter": [
+              ":and",
+              [
+                ":eq",
+                ":type",
+                "staged"
+              ]
+            ]
+          }
+        }
+      },
+      "data_source": {
+        "ec2": {
+          "display_name": "ec2",
+          "data_source_entry": {
+            "node_group_member": {
+              "display_name": "node_group_member",
+              "ds_is_golden_store": true,
+              "ds_name": "ec2",
+              "obj_type": "node_group_member"
+            },
+            "node_group": {
+              "display_name": "node_group",
+              "ds_is_golden_store": true,
+              "ds_name": "ec2",
+              "obj_type": "node_group"
+            },
+            "network_partition": {
+              "display_name": "network_partition",
+              "ds_is_golden_store": true,
+              "ds_name": "ec2",
+              "obj_type": "network_partition"
+            },
+            "node_instance": {
+              "display_name": "node_instance",
+              "source_obj_type": "instance",
+              "ds_is_golden_store": true,
+              "ds_name": "ec2",
+              "obj_type": "node"
+            }
+          },
+          "ds_name": "ec2"
+        }
+      }
+    },
+    "dc2": {
+      "display_name": "EC2 Prod. 1",
+      "description": "EC2 East Production 1",
+      "network_partition": {
+        "internet": {
+          "display_name": "internet",
+          "ds_key": "",
+          "is_internet": true,
+          "is_deployed": false
+        }
+      },
+      "node_group": {
+        "all_staged_nodes": {
+          "display_name": "all_staged_nodes",
+          "dynamic_search_pattern": {
+            ":relation": ":node",
+            ":filter": [
+              ":and",
+              [
+                ":eq",
+                ":type",
+                "staged"
+              ]
+            ]
+          }
+        }
+      },
+      "data_source": {
+        "ec2": {
+          "display_name": "ec2",
+          "data_source_entry": {
+            "node_group_member": {
+              "display_name": "node_group_member",
+              "ds_is_golden_store": true,
+              "ds_name": "ec2",
+              "obj_type": "node_group_member"
+            },
+            "node_group": {
+              "display_name": "node_group",
+              "ds_is_golden_store": true,
+              "ds_name": "ec2",
+              "obj_type": "node_group"
+            },
+            "network_partition": {
+              "display_name": "network_partition",
+              "ds_is_golden_store": true,
+              "ds_name": "ec2",
+              "obj_type": "network_partition"
+            },
+            "node_instance": {
+              "display_name": "node_instance",
+              "source_obj_type": "instance",
+              "ds_is_golden_store": true,
+              "ds_name": "ec2",
+              "obj_type": "node"
+            }
+          },
+          "ds_name": "ec2"
+        }
+      }
+    }
+  },
+  "library": {
+    "test": {
+      "data_source": {
+        "chef": {
+          "display_name": "chef",
+          "data_source_entry": {
+            "component_recipe": {
+              "display_name": "component_recipe",
+              "source_obj_type": "recipe",
+              "ds_is_golden_store": true,
+              "data_source_entry": {
+                "component_monitoring_item": {
+                  "display_name": "component_monitoring_item",
+                  "ds_is_golden_store": true,
+                  "ds_name": "chef",
+                  "obj_type": "monitoring_item"
+                },
+                "component_attribute": {
+                  "display_name": "component_attribute",
+                  "ds_is_golden_store": true,
+                  "ds_name": "chef",
+                  "obj_type": "attribute"
+                }
+              },
+              "ds_name": "chef",
+              "obj_type": "component"
+            }
+          },
+          "ds_name": "chef"
+        },
+        "ec2": {
+          "display_name": "ec2",
+          "data_source_entry": {
+            "node_image": {
+              "display_name": "node_image",
+              "source_obj_type": "image",
+              "ds_is_golden_store": true,
+              "ds_name": "ec2",
+              "obj_type": "node"
+            }
+          },
+          "ds_name": "ec2"
+        },
+        "user_data": {
+          "display_name": "user_data",
+          "data_source_entry": {
+            "component": {
+              "display_name": "component",
+              "ds_is_golden_store": true,
+              "ds_name": "user_data",
+              "obj_type": "component"
+            },
+            "node": {
+              "display_name": "node",
+              "ds_is_golden_store": true,
+              "ds_name": "user_data",
+              "obj_type": "node"
+            }
+          },
+          "ds_name": "user_data"
+        }
+      }
+    }
+  }
+}

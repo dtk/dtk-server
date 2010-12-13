@@ -9,9 +9,10 @@ module XYZ
             hash_content_for_single_target(target_id_handle_x.first,opts)
           else
             target_id_handle_x.inject({}) do |res,target_id_handle| 
-              hash = hash_content_for_single_target(target_id_handle,opts)
+              content = hash_content_for_single_target(target_id_handle,opts)
               path = target_id_handle[:uri].gsub(Regexp.new("^/"),"").split("/")
-              res.merge!(path.reverse.inject(hash){|h,key|{key => h}}) 
+              HashObject.set_nested_value!(res,path,content)
+              res
             end
           end
         else
@@ -19,6 +20,7 @@ module XYZ
         end
       write_to_file(hash_content,json_file)
     end
+    
 
     def hash_content_for_single_target(target_id_handle,opts={})
       target_id_info = get_row_from_id_handle(target_id_handle)

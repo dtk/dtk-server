@@ -12,12 +12,11 @@ module XYZ
           input_into_model(target_id_handle,hash_content) 
         else
           hash_content.each do |relation_type,info|
-            #TODO: use TerstURI fncs for this parsing
-            ref = info.keys.first
-            child_target_id_handle = IDHandle[:c => target_id_handle[:c], :uri => "/#{relation_type}/#{ref}"]
-            child_hash_content = info.values.first
-            create_prefix_object_if_needed(child_target_id_handle,opts)
-            input_into_model(child_target_id_handle,child_hash_content)
+            info.each do |ref,child_hash_content|
+              child_target_id_handle = IDHandle[:c => target_id_handle[:c], :uri => "/#{relation_type}/#{ref}"]
+              create_prefix_object_if_needed(child_target_id_handle,opts)
+              input_into_model(child_target_id_handle,child_hash_content)
+            end
           end
         end
       end

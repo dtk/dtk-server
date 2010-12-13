@@ -102,7 +102,10 @@ p 'Panel IS:'+tpl_result[:panel]
         pp 'component:'+component[:display_name]
         pp 'id:'+component[:id].to_s
         component_name = component[:display_name].gsub('::','_')
-        component[:label] = component_i18n[component_name.to_sym]
+
+        component[:label] = component_i18n[(component[:ds_attributes]||{})[:ref].to_sym]  if (component[:ds_attributes]||{})[:ref]  
+        component[:label] ||= component_i18n[component_name.to_sym] || "component"
+                             
         component[:onclick] = "R8.Workspace.Dock.loadDockPanel('component/wspace_dock_get_attributes/#{component[:id].to_s}');"
 #        component[:onclick] = "R8.Workspace.Dock.loadDockPanel('node/get_components/2147484111');"
       end

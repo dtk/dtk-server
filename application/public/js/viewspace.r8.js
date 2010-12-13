@@ -58,7 +58,7 @@ if (!R8.ViewSpace) {
 			},
 
 			portMout: function(e) {
-				R8.Utils.Y.one('#port-details').remove();
+				R8.Utils.Y.one('#port-modal').remove();
 			},
 
 			portMover: function(e) {
@@ -66,14 +66,33 @@ if (!R8.ViewSpace) {
 					portId = portNode.get('id'),
 					portDef = this.getPortDefById(portId),
 					left = e.clientX - 240,
-					top = e.clientY - 70;
+					top = e.clientY - 90;
 
-				var modelHTML = '<div id="port-details" style="position:absolute; z-index: 100; width: 200px; height: 50px; border: 1px solid black; background-color: #FFFFFF; top: '+top+'px; left: '+left+'px;">\
+				var modalHTML = '<div id="port-modal" class="port-modal" style="top: '+top+'px; left: '+left+'px;">\
+									<div class="l-col">\
+										<div class="corner tl"></div>\
+										<div class="l-col-body"></div>\
+										<div class="corner bl"></div>\
+									</div>\
+									<div id="port-modal-body" class="body">\
+										<div class="header">'+portDef['display_name']+'</div>\
+										<div class=".body-content">\
+											<div>'+portDef['description']+'</div>\
+										</div>\
+									</div>\
+									<div class="r-col">\
+										<div class="corner tr"></div>\
+										<div class="r-col-body"></div>\
+										<div class="corner br"></div>\
+									</div>\
+							</div>';
+/*
+				var modalHTML = '<div id="port-details" style="position:absolute; z-index: 100; width: 200px; height: 50px; border: 1px solid black; background-color: #FFFFFF; top: '+top+'px; left: '+left+'px;">\
 									<div style="height: 20px; width: 200px; float: left; position: relative; font-weight: bold">'+portDef['display_name']+'</div>\
 									<div style="height: 30px; width: 200px; float: left; position: relative;">'+portDef['description']+'</div>\
 								</div>';
-
-				_node.append(modelHTML);
+*/
+				_node.append(modalHTML);
 //console.log(portDef);
 			},
 

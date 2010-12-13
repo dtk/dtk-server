@@ -211,3 +211,80 @@
 	margin-top: 6px;
 }
 .panel-item.active .label { font-weight: bold; }
+
+
+
+/*-------ViewSpace Modal-----------*/
+
+.port-modal {
+	height: 80px;
+	width: 200px;
+	position: absolute;
+	z-index: 100;
+}
+.port-modal .l-col {
+	width: 7px;
+	height: 80px;
+	position: relative;
+	float: left;
+}
+.port-modal .r-col {
+	width: 7px;
+	height: 80px;
+	position: relative;
+	float: left;
+}
+.port-modal .l-col-body {
+	height: 66px;
+	width: 5px;
+	border-left: 2px solid black;
+	background-color: #FFFFFF;
+	position: relative;
+	float: left;
+}
+.port-modal .r-col-body {
+	height: 66px;
+	width: 5px;
+	border-right: 2px solid black;
+	background-color: #FFFFFF;
+	position: relative;
+	float: left;
+}
+
+.port-modal .body {
+	height: 76px;
+	width: 186px;
+	background-color: #FFFFFF;
+	position: relative;
+	float: left;
+	border-top: 2px solid black;
+	border-bottom: 2px solid black;
+}
+
+.port-modal .header {
+	width: 100%;
+/*	height: 20px;*/
+	font-weight: bold;
+}
+
+.port-modal .corner {
+	height: 7px;
+	width: 7px;
+	background-repeat: no-repeat;
+	float: left;
+	background-image: url(../images/modal-corners-white.png);
+	position: relative;
+	float: left;
+}
+
+.port-modal .corner.tl {
+}
+.port-modal .corner.tr {
+	background-position: 0px -7px;
+}
+.port-modal .corner.br {
+	background-position: 0px -14px;
+}
+.port-modal .corner.bl {
+	background-position: 0px -21px;
+}

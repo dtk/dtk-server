@@ -40,6 +40,24 @@ module XYZ
           }
          ]
 
+        virtual_column :containing_datacenter, :type => :varchar, :hidden => true,
+          :remote_dependencies =>
+         [
+          {
+            :model_name => :datacenter,
+            :sequel_def => lambda{|ds|ds.join_table(:right_outer,:node__node,{:datacenter_datacenter_id => :datacenter__id}).select({:node__id => :node_id},:datacenter__display_name)},
+            :join_type => :left_outer,
+            :join_cond=>{:node_id => :component__node_node_id}
+          },
+          {
+            :model_name => :datacenter,
+            :sequel_def => lambda{|ds|ds.join_table(:right_outer,:node__node_group,{:datacenter_datacenter_id => :datacenter__id}).select({:node_group__id => :node_group_id},:datacenter__display_name)},
+            :join_type => :left_outer,
+            :join_cond=>{:node_group_id => :component__node_node_group_id}
+          }
+         ]
+
+
         virtual_column :parent_name, :possible_parents => [:component,:library,:node,:node_group,:project]
 
         many_to_one :component, :library, :node, :node_group, :project
@@ -48,6 +66,10 @@ module XYZ
     end
     ##### Actions
     ### virtual column defs
+    
+    def containing_datacenter()
+      (self[:datacenter]||{})[:display_name]||(self[:datacenter2]||{})[:display_name]
+    end
 
     #TODO: write as sql fn for efficiency
     def has_pending_change()

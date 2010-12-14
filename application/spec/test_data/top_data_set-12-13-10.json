@@ -1,6 +1,982 @@
 {
   "datacenter": {
     "dc1": {
+      "display_name" : "EC2 Staging 1",
+      "description" : "EC2 West Staging 1",
+      "attribute_link": {
+        "attribute_link:2147484035-2147484021": {
+          "*output_id": "/node/s-ami-e2cc398b/component/mysql::server/attribute/sap[ipv4]",
+          "display_name": "attribute_link:2147484035-2147484021",
+          "*input_id": "/node/s-ami-06c72c6f/component/wordpress/attribute/wordpress][sap_ref]",
+          "function_index": "1",
+          "hidden": false,
+          "function": "select_one",
+          "label": "1"
+        }
+      },
+      "node": {
+        "s-ami-06c72c6f": {
+          "type": "staged",
+          "attribute_link": {
+            "sap_config:2147484052-2147484057": {
+              "*output_id": "/node/s-ami-06c72c6f/component/apache2/attribute/apache2][sap_config][ipv4]",
+              "type": "internal",
+              "display_name": "link:sap_config-sap",
+              "*input_id": "/node/s-ami-06c72c6f/component/apache2/attribute/sap[ipv4]",
+              "hidden": true,
+              "function": "sap_config[ipv4]",
+              "label": "1"
+            },
+            "host_address:2147483983-2147484057": {
+              "*output_id": "/node/s-ami-06c72c6f/attribute/host_addresses[ipv4]",
+              "type": "internal",
+              "display_name": "link:host_address-sap",
+              "*input_id": "/node/s-ami-06c72c6f/component/apache2/attribute/sap[ipv4]",
+              "hidden": true,
+              "function": "host_address[ipv4]",
+              "label": "1"
+            }
+          },
+          "ds_key": "[:user_data, \"/library/test/ami-06c72c6f\"]",
+          "node_interface": {
+            "eth0": {
+              "type": "ethernet",
+              "display_name": "eth0"
+            }
+          },
+          "display_name": "word press",
+          "ds_source_obj_type": "image",
+          "is_deployed": true,
+          "monitoring_item": {
+            "check_ping": {
+              "enabled": true,
+              "description": "ping",
+              "display_name": "check_ping"
+            },
+            "check_mem": {
+              "enabled": true,
+              "description": "Free Memory",
+              "display_name": "check_mem"
+            },
+            "check_local_procs": {
+              "enabled": true,
+              "description": "Processes",
+              "display_name": "check_local_procs"
+            },
+            "check_all_disks": {
+              "enabled": true,
+              "description": "Free Space All Disks",
+              "display_name": "check_all_disks"
+            },
+            "check_memory_profiler": {
+              "enabled": true,
+              "description": "Memory Profiler",
+              "display_name": "check_memory_profiler"
+            },
+            "check_iostat": {
+              "enabled": true,
+              "description": "Iostat",
+              "display_name": "check_iostat"
+            },
+            "check_ssh": {
+              "enabled": true,
+              "description": "SSH",
+              "display_name": "check_ssh"
+            }
+          },
+          "component": {
+            "php::php5": {
+              "type": "template",
+              "only_one_per_node": true,
+              "description": "Install php5 packages and php.ini config file",
+              "ds_key": "[:user_data, \"/library/test/php::php5\"]",
+              "display_name": "php::php5",
+              "external_ref": {
+                "type": "chef_recipe",
+                "recipe_name": "php::php5"
+              },
+              "basic_type": "language",
+              "ds_attributes": {
+                "ref": "php::php5",
+                "ui": "{\"images\": {\"tnail\":\"php.png\",\"display\":\"php.png\",\"tiny\":\"\"}}",
+                "qualified_ref": "/library/test/php::php5"
+              }
+            },
+            "wordpress": {
+              "type": "template",
+              "only_one_per_node": true,
+              "description": "Installs and configures wordpress LAMP stack on a single system",
+              "ds_key": "[:user_data, \"/library/test/wordpress\"]",
+              "display_name": "wordpress",
+              "external_ref": {
+                "type": "chef_recipe",
+                "recipe_name": "wordpress"
+              },
+              "attribute": {
+                "wordpress][db][user]": {
+                  "data_type": "string",
+                  "description": "Wordpress will connect to MySQL using this user.",
+                  "display_name": "db[user]",
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[wordpress][db][user]"
+                  },
+                  "read_only": false,
+                  "is_port": false,
+                  "value_asserted": "wordpressuser",
+                  "required": false
+                },
+                "wordpress][keys][secure_auth]": {
+                  "data_type": "string",
+                  "description": "Wordpress secure auth key.",
+                  "display_name": "keys[secure_auth]",
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[wordpress][keys][secure_auth]"
+                  },
+                  "read_only": false,
+                  "is_port": false,
+                  "required": false
+                },
+                "wordpress][keys][auth]": {
+                  "data_type": "string",
+                  "description": "Wordpress auth key.",
+                  "display_name": "keys[auth]",
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[wordpress][keys][auth]"
+                  },
+                  "read_only": false,
+                  "is_port": false,
+                  "required": false
+                },
+                "wordpress][checksum]": {
+                  "data_type": "string",
+                  "description": "Checksum of the tarball for the version specified.",
+                  "display_name": "checksum",
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[wordpress][checksum]"
+                  },
+                  "read_only": false,
+                  "is_port": false,
+                  "value_asserted": "7342627f4a3dca44886c5aca6834cc88671dbd3aa2760182d2fcb9a330807",
+                  "required": false
+                },
+                "wordpress][keys][nonce]": {
+                  "data_type": "string",
+                  "description": "Wordpress nonce key.",
+                  "display_name": "keys[nonce]",
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[wordpress][keys][nonce]"
+                  },
+                  "read_only": false,
+                  "is_port": false,
+                  "required": false
+                },
+                "wordpress][db][password]": {
+                  "data_type": "string",
+                  "description": "Password for the Wordpress MySQL user.",
+                  "display_name": "db[password]",
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[wordpress][db][password]"
+                  },
+                  "read_only": false,
+                  "is_port": false,
+                  "required": false
+                },
+                "wordpress][version]": {
+                  "data_type": "string",
+                  "description": "Version of Wordpress to download from the Wordpress site.",
+                  "display_name": "version",
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[wordpress][version]"
+                  },
+                  "read_only": false,
+                  "is_port": false,
+                  "value_asserted": "2.9.2",
+                  "required": false
+                },
+                "wordpress][db][database]": {
+                  "data_type": "string",
+                  "description": "Wordpress will use this MySQL database to store its data.",
+                  "display_name": "db[database]",
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[wordpress][db][database]"
+                  },
+                  "read_only": false,
+                  "is_port": false,
+                  "value_asserted": "wordpressdb",
+                  "required": false
+                },
+                "wordpress][keys][logged_in]": {
+                  "data_type": "string",
+                  "description": "Wordpress logged-in key.",
+                  "display_name": "keys[logged_in]",
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[wordpress][keys][logged_in]"
+                  },
+                  "read_only": false,
+                  "is_port": false,
+                  "required": false
+                },
+                "wordpress][sap_ref]": {
+                  "data_type": "json",
+                  "description": "wordpress mysql service access point reference",
+                  "semantic_type_summary": "sap_ref",
+                  "display_name": "sap_ref",
+                  "external_ref": {
+                    "type": "service_attribute",
+                    "path": "service[wordpress][sap_ref]"
+                  },
+                  "semantic_type": {
+                    "sap_ref": {
+                      "application": {
+                        "type": "sql::mysql"
+                      }
+                    }
+                  },
+                  "read_only": false,
+                  "is_port": true,
+                  "value_derived": {
+                    "host_address": null,
+                    "port": "3306",
+                    "protocol": "tcp"
+                  },
+                  "value_asserted": {
+                    "application": {
+                      "username": "wordpressuser",
+                      "database": "wordpressdb",
+                      "password": null
+                    }
+                  },
+                  "required": true
+                },
+                "wordpress][dir]": {
+                  "data_type": "string",
+                  "description": "Location to place wordpress files.",
+                  "display_name": "dir",
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[wordpress][dir]"
+                  },
+                  "read_only": false,
+                  "is_port": false,
+                  "value_asserted": "/var/www",
+                  "required": false
+                }
+              },
+              "ds_attributes": {
+                "ref": "wordpress",
+                "ui": "{\"images\": {\"tnail\":\"wordpress.png\",\"display\":\"wordpress.png\",\"tiny\":\"\"}}",
+                "qualified_ref": "/library/test/wordpress"
+              }
+            },
+            "apache2": {
+              "type": "template",
+              "only_one_per_node": true,
+              "description": "Main Apache configuration",
+              "ds_key": "[:user_data, \"/library/test/apache2\"]",
+              "display_name": "apache2",
+              "external_ref": {
+                "type": "chef_recipe",
+                "recipe_name": "apache2"
+              },
+              "monitoring_item": {
+                "inet_service_up": {
+                  "enabled": true,
+                  "display_name": "inet_service_up"
+                }
+              },
+              "attribute": {
+                "sap[ipv4]": {
+                  "data_type": "json",
+                  "description": "Apache2 SAP",
+                  "semantic_type_summary": "sap[ipv4]",
+                  "display_name": "sap[ipv4]",
+                  "semantic_type": {
+                    ":array": "sap[ipv4]"
+                  },
+                  "read_only": false,
+                  "is_port": true,
+                  "value_derived": [
+                    {
+                      "host_address": null,
+                      "protocol": "tcp",
+                      "ports": [
+                        "80",
+                        "443"
+                      ]
+                    }
+                  ],
+                  "required": false
+                },
+                "apache2][contact]": {
+                  "data_type": "string",
+                  "description": "Email address of webmaster",
+                  "display_name": "contact",
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[apache2][contact]"
+                  },
+                  "read_only": false,
+                  "is_port": false,
+                  "value_asserted": "ops@example.com",
+                  "required": false
+                },
+                "apache2][user]": {
+                  "data_type": "string",
+                  "description": "User Apache runs as",
+                  "display_name": "user",
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[apache2][user]"
+                  },
+                  "read_only": false,
+                  "is_port": false,
+                  "value_asserted": "www-data",
+                  "required": false
+                },
+                "apache2][keepalive]": {
+                  "data_type": "string",
+                  "description": "HTTP persistent connections",
+                  "display_name": "keepalive",
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[apache2][keepalive]"
+                  },
+                  "read_only": false,
+                  "is_port": false,
+                  "value_asserted": "On",
+                  "required": false
+                },
+                "apache2][keepaliverequests]": {
+                  "data_type": "string",
+                  "description": "Number of requests allowed on a persistent connection",
+                  "display_name": "keepaliverequests",
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[apache2][keepaliverequests]"
+                  },
+                  "read_only": false,
+                  "is_port": false,
+                  "value_asserted": "100",
+                  "required": false
+                },
+                "apache2][serversignature]": {
+                  "data_type": "string",
+                  "description": "Configure footer on server-generated documents",
+                  "display_name": "serversignature",
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[apache2][serversignature]"
+                  },
+                  "read_only": false,
+                  "is_port": false,
+                  "value_asserted": "On",
+                  "required": false
+                },
+                "apache2][icondir]": {
+                  "data_type": "string",
+                  "description": "Directory location for icons",
+                  "display_name": "icondir",
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[apache2][icondir]"
+                  },
+                  "read_only": false,
+                  "is_port": false,
+                  "value_asserted": "/usr/share/apache2/icons",
+                  "required": false
+                },
+                "apache2][listen_ports]": {
+                  "data_type": "json",
+                  "description": "Ports that Apache should listen on",
+                  "display_name": "listen_ports",
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[apache2][listen_ports]"
+                  },
+                  "read_only": false,
+                  "is_port": false,
+                  "value_asserted": [
+                    "80",
+                    "443"
+                  ],
+                  "required": false
+                },
+                "apache2][keepalivetimeout]": {
+                  "data_type": "string",
+                  "description": "Time to wait for requests on persistent connection",
+                  "display_name": "keepalivetimeout",
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[apache2][keepalivetimeout]"
+                  },
+                  "read_only": false,
+                  "is_port": false,
+                  "value_asserted": "5",
+                  "required": false
+                },
+                "apache2][binary]": {
+                  "data_type": "string",
+                  "description": "Apache server daemon program",
+                  "display_name": "binary",
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[apache2][binary]"
+                  },
+                  "read_only": false,
+                  "is_port": false,
+                  "value_asserted": "/usr/sbin/apache2",
+                  "required": false
+                },
+                "apache2][log_dir]": {
+                  "data_type": "string",
+                  "description": "Location for Apache logs",
+                  "display_name": "log_dir",
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[apache2][log_dir]"
+                  },
+                  "read_only": false,
+                  "is_port": false,
+                  "value_asserted": "/etc/apache2",
+                  "required": false
+                },
+                "apache2][sap_config][ipv4]": {
+                  "data_type": "json",
+                  "semantic_type_summary": "sap_config[ipv4]",
+                  "display_name": "sap_config[ipv4]",
+                  "external_ref": {
+                    "type": "service_attribute",
+                    "path": "service[apache2_service][sap_config][ipv4]"
+                  },
+                  "semantic_type": {
+                    ":array": {
+                      "sap_config[ipv4]": {
+                        "application": "webserver"
+                      }
+                    }
+                  },
+                  "read_only": false,
+                  "is_port": true,
+                  "value_asserted": [
+                    {
+                      "protocol": "tcp",
+                      "ports": [
+                        "80",
+                        "443"
+                      ]
+                    }
+                  ],
+                  "required": false
+                },
+                "apache2][dir]": {
+                  "data_type": "string",
+                  "description": "Location for Apache configuration",
+                  "display_name": "dir",
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[apache2][dir]"
+                  },
+                  "read_only": false,
+                  "is_port": false,
+                  "value_asserted": "/etc/apache2",
+                  "required": false
+                },
+                "apache2][timeout]": {
+                  "data_type": "string",
+                  "description": "Connection timeout value",
+                  "display_name": "timeout",
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[apache2][timeout]"
+                  },
+                  "read_only": false,
+                  "is_port": false,
+                  "value_asserted": "300",
+                  "required": false
+                },
+                "apache2][servertokens]": {
+                  "data_type": "string",
+                  "description": "Server response header",
+                  "display_name": "servertokens",
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[apache2][servertokens]"
+                  },
+                  "read_only": false,
+                  "is_port": false,
+                  "value_asserted": "Prod",
+                  "required": false
+                }
+              },
+              "basic_type": "service",
+              "ds_attributes": {
+                "ref": "apache2",
+                "ui": "{\"images\": {\"tnail\":\"apache.png\",\"display\":\"apache.png\",\"tiny\":\"\"}}",
+                "qualified_ref": "/library/test/apache2"
+              }
+            }
+          },
+          "attribute": {
+            "host_addresses[ipv4]": {
+              "data_type": "json",
+              "semantic_type_summary": "host_address[ipv4]",
+              "display_name": "host_addresses[ipv4]",
+              "semantic_type": {
+                ":array": "host_address[ipv4]"
+              },
+              "read_only": true,
+              "is_port": true,
+              "value_derived": [
+                null
+              ],
+              "required": false
+            }
+          },
+          "data_source": "user_data",
+          "ds_attributes": {
+            "is_public": false,
+            "type": "machine",
+            "flavor": {
+              "disk": null
+            },
+            "state": "available",
+            "ramdisk_id": "ari-d5709dbc",
+            "product_codes": [
+
+            ],
+            "architecture": "i386",
+            "root_device_name": "/dev/sda1",
+            "location": "411986592491/rnp-chef-09-6-ubuntu-910-x86_32",
+            "kernel_id": "aki-5f15f636",
+            "block_device_mapping": [
+              {
+                "deviceName": "/dev/sda1",
+                "deleteOnTermination": "true",
+                "volumeSize": "15",
+                "snapshotId": "snap-caa459a1"
+              }
+            ],
+            "root_device_type": "ebs",
+            "id": "ami-06c72c6f",
+            "owner_id": "411986592491",
+            "platform": null
+          },
+          "ui": {
+            "2147483649": {
+              "top": "118",
+              "left": "402"
+            },
+            "top": 248,
+            "left": 348
+          }
+        },
+        "s-ami-e2cc398b": {
+          "type": "staged",
+          "attribute_link": {
+            "host_address:2147483993-2147484021": {
+              "*output_id": "/node/s-ami-e2cc398b/attribute/host_addresses[ipv4]",
+              "type": "internal",
+              "display_name": "link:host_address-sap",
+              "*input_id": "/node/s-ami-e2cc398b/component/mysql::server/attribute/sap[ipv4]",
+              "hidden": true,
+              "function": "host_address[ipv4]",
+              "label": "1"
+            },
+            "sap_config:2147484014-2147484021": {
+              "*output_id": "/node/s-ami-e2cc398b/component/mysql::server/attribute/mysql][sap_config][ipv4]",
+              "type": "internal",
+              "display_name": "link:sap_config-sap",
+              "*input_id": "/node/s-ami-e2cc398b/component/mysql::server/attribute/sap[ipv4]",
+              "hidden": true,
+              "function": "sap_config[ipv4]",
+              "label": "1"
+            }
+          },
+          "ds_key": "[:user_data, \"/library/test/ami-e2cc398b\"]",
+          "node_interface": {
+            "eth0": {
+              "type": "ethernet",
+              "display_name": "eth0"
+            }
+          },
+          "display_name": "mysql",
+          "ds_source_obj_type": "image",
+          "is_deployed": true,
+          "monitoring_item": {
+            "check_ping": {
+              "enabled": true,
+              "description": "ping",
+              "display_name": "check_ping"
+            },
+            "check_mem": {
+              "enabled": true,
+              "description": "Free Memory",
+              "display_name": "check_mem"
+            },
+            "check_local_procs": {
+              "enabled": true,
+              "description": "Processes",
+              "display_name": "check_local_procs"
+            },
+            "check_all_disks": {
+              "enabled": true,
+              "description": "Free Space All Disks",
+              "display_name": "check_all_disks"
+            },
+            "check_memory_profiler": {
+              "enabled": true,
+              "description": "Memory Profiler",
+              "display_name": "check_memory_profiler"
+            },
+            "check_iostat": {
+              "enabled": true,
+              "description": "Iostat",
+              "display_name": "check_iostat"
+            },
+            "check_ssh": {
+              "enabled": true,
+              "description": "SSH",
+              "display_name": "check_ssh"
+            }
+          },
+          "component": {
+            "mysql::server": {
+              "type": "template",
+              "only_one_per_node": true,
+              "description": "Installs packages required for mysql servers w/o manual intervention",
+              "ds_key": "[:user_data, \"/library/test/mysql::server\"]",
+              "display_name": "mysql::server",
+              "external_ref": {
+                "type": "chef_recipe",
+                "recipe_name": "mysql::server"
+              },
+              "monitoring_item": {
+                "mysql_basic_health": {
+                  "enabled": true,
+                  "display_name": "mysql_basic_health"
+                },
+                "inet_service_up": {
+                  "enabled": true,
+                  "display_name": "inet_service_up"
+                }
+              },
+              "attribute": {
+                "sap[ipv4]": {
+                  "data_type": "json",
+                  "description": "Mysql Server SAP",
+                  "semantic_type_summary": "sap[ipv4]",
+                  "display_name": "sap[ipv4]",
+                  "semantic_type": {
+                    ":array": "sap[ipv4]"
+                  },
+                  "read_only": false,
+                  "is_port": true,
+                  "value_derived": [
+                    {
+                      "host_address": null,
+                      "port": "3306",
+                      "protocol": "tcp"
+                    }
+                  ],
+                  "required": false
+                },
+                "mysql][tunable][net_read_timeout]": {
+                  "data_type": "string",
+                  "display_name": "tunable[net_read_timeout]",
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[mysql][tunable][net_read_timeout]"
+                  },
+                  "read_only": false,
+                  "is_port": false,
+                  "value_asserted": "30",
+                  "required": false
+                },
+                "mysql][port]": {
+                  "data_type": "string",
+                  "description": "MySQL Server TCP port",
+                  "display_name": "port",
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[mysql][port]"
+                  },
+                  "read_only": false,
+                  "is_port": false,
+                  "value_asserted": "3306",
+                  "required": false
+                },
+                "mysql][tunable][wait_timeout]": {
+                  "data_type": "string",
+                  "display_name": "tunable[wait_timeout]",
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[mysql][tunable][wait_timeout]"
+                  },
+                  "read_only": false,
+                  "is_port": false,
+                  "value_asserted": "180",
+                  "required": false
+                },
+                "mysql][sap][socket]": {
+                  "data_type": "json",
+                  "description": "mysql unix socket service access point",
+                  "semantic_type_summary": "sap[socket]",
+                  "display_name": "sap[socket]",
+                  "external_ref": {
+                    "type": "service_attribute",
+                    "path": "service[mysql_server][sap][socket]"
+                  },
+                  "semantic_type": {
+                    "sap[socket]": {
+                      "application": {
+                        "type": "sql::mysql"
+                      }
+                    }
+                  },
+                  "read_only": false,
+                  "is_port": true,
+                  "value_asserted": {
+                    "socket_file": "/var/run/mysqld/mysqld.sock"
+                  },
+                  "required": false
+                },
+                "mysql][tunable][key_buffer]": {
+                  "data_type": "string",
+                  "display_name": "tunable[key_buffer]",
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[mysql][tunable][key_buffer]"
+                  },
+                  "read_only": false,
+                  "is_port": false,
+                  "value_asserted": "250M",
+                  "required": false
+                },
+                "mysql][ec2_path]": {
+                  "data_type": "string",
+                  "description": "Location of mysql directory on EC2 instance EBS volumes",
+                  "display_name": "ec2_path",
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[mysql][ec2_path]"
+                  },
+                  "read_only": false,
+                  "is_port": false,
+                  "value_asserted": "/mnt/mysql",
+                  "required": false
+                },
+                "mysql][tunable][back_log]": {
+                  "data_type": "string",
+                  "display_name": "tunable[back_log]",
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[mysql][tunable][back_log]"
+                  },
+                  "read_only": false,
+                  "is_port": false,
+                  "value_asserted": "128",
+                  "required": false
+                },
+                "mysql][server_root_password]": {
+                  "data_type": "string",
+                  "description": "Randomly generated password for the mysqld root user",
+                  "display_name": "server_root_password",
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[mysql][server_root_password]"
+                  },
+                  "read_only": false,
+                  "is_port": false,
+                  "required": false
+                },
+                "mysql][bind_address]": {
+                  "data_type": "string",
+                  "description": "Address that mysqld should listen on",
+                  "display_name": "bind_address",
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[mysql][bind_address]"
+                  },
+                  "read_only": false,
+                  "is_port": false,
+                  "required": false
+                },
+                "mysql][tunable][max_heap_table_size]": {
+                  "data_type": "string",
+                  "display_name": "tunable[max_heap_table_size]",
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[mysql][tunable][max_heap_table_size]"
+                  },
+                  "read_only": false,
+                  "is_port": false,
+                  "value_asserted": "32M",
+                  "required": false
+                },
+                "mysql][tunable][net_write_timeout]": {
+                  "data_type": "string",
+                  "display_name": "tunable[net_write_timeout]",
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[mysql][tunable][net_write_timeout]"
+                  },
+                  "read_only": false,
+                  "is_port": false,
+                  "value_asserted": "30",
+                  "required": false
+                },
+                "mysql][sap_config][ipv4]": {
+                  "data_type": "json",
+                  "description": "mysql ip service access point configuration",
+                  "semantic_type_summary": "sap_config[ipv4]",
+                  "display_name": "sap_config[ipv4]",
+                  "external_ref": {
+                    "type": "service_attribute",
+                    "path": "service[mysql_server][sap_config][ipv4]"
+                  },
+                  "semantic_type": {
+                    ":array": {
+                      "sap_config[ipv4]": {
+                        "application": {
+                          "type": "sql::mysql",
+                          "db_created_on_server": true
+                        }
+                      }
+                    }
+                  },
+                  "read_only": false,
+                  "is_port": true,
+                  "value_asserted": [
+                    {
+                      "port": "3306",
+                      "protocol": "tcp"
+                    }
+                  ],
+                  "required": false
+                },
+                "mysql][datadir]": {
+                  "data_type": "string",
+                  "description": "Location of mysql databases",
+                  "display_name": "datadir",
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[mysql][datadir]"
+                  },
+                  "read_only": false,
+                  "is_port": false,
+                  "value_asserted": "/var/lib/mysql",
+                  "required": false
+                },
+                "mysql][tunable][max_connections]": {
+                  "data_type": "string",
+                  "display_name": "tunable[max_connections]",
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[mysql][tunable][max_connections]"
+                  },
+                  "read_only": false,
+                  "is_port": false,
+                  "value_asserted": "800",
+                  "required": false
+                },
+                "mysql][monitor_user_id]": {
+                  "data_type": "string",
+                  "description": "db userid for monitoring application to use",
+                  "display_name": "monitor_user_id",
+                  "external_ref": {
+                    "type": "service_attribute",
+                    "path": "service[mysql_server][monitor_user_id]"
+                  },
+                  "read_only": false,
+                  "is_port": true,
+                  "value_asserted": "root",
+                  "required": false
+                },
+                "mysql][tunable][table_cache]": {
+                  "data_type": "string",
+                  "display_name": "tunable[table_cache]",
+                  "external_ref": {
+                    "type": "chef_attribute",
+                    "path": "node[mysql][tunable][table_cache]"
+                  },
+                  "read_only": false,
+                  "is_port": false,
+                  "value_asserted": "128",
+                  "required": false
+                }
+              },
+              "basic_type": "service",
+              "ds_attributes": {
+                "ref": "mysql::server",
+                "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}",
+                "qualified_ref": "/library/test/mysql::server"
+              }
+            }
+          },
+          "attribute": {
+            "host_addresses[ipv4]": {
+              "data_type": "json",
+              "semantic_type_summary": "host_address[ipv4]",
+              "display_name": "host_addresses[ipv4]",
+              "semantic_type": {
+                ":array": "host_address[ipv4]"
+              },
+              "read_only": true,
+              "is_port": true,
+              "value_derived": [
+                null
+              ],
+              "required": false
+            }
+          },
+          "data_source": "user_data",
+          "ds_attributes": {
+            "is_public": false,
+            "type": "machine",
+            "flavor": {
+              "disk": null
+            },
+            "state": "available",
+            "ramdisk_id": "ari-d5709dbc",
+            "product_codes": [
+
+            ],
+            "architecture": "i386",
+            "root_device_name": "/dev/sda1",
+            "location": "411986592491/rnp-chef-09-8-ubuntu-lucid-x86_32",
+            "kernel_id": "aki-5f15f636",
+            "block_device_mapping": [
+              {
+                "deviceName": "/dev/sda1",
+                "deleteOnTermination": "true",
+                "volumeSize": "15",
+                "snapshotId": "snap-d6bf91bd"
+              }
+            ],
+            "root_device_type": "ebs",
+            "id": "ami-e2cc398b",
+            "owner_id": "411986592491",
+            "platform": null
+          },
+          "ui": {
+            "2147483649": {
+              "top": "278",
+              "left": "436"
+            },
+            "top": 317,
+            "left": 307
+          }
+        }
+      },
       "data_source": {
         "ec2": {
           "display_name": "ec2",
@@ -38,7 +1014,6 @@
         "all_staged_nodes": {
           "display_name": "all_staged_nodes",
           "dynamic_search_pattern": {
-            ":relation": ":node",
             ":filter": [
               ":and",
               [
@@ -46,7 +1021,8 @@
                 ":type",
                 "staged"
               ]
-            ]
+            ],
+            ":relation": ":node"
           }
         }
       },
@@ -60,159 +1036,161 @@
       }
     },
     "dc2": {
+    "display_name" : "EC2 Prod. 1",
+      "description" : "EC2 East Production 1",
       "attribute_link": {
         "attribute_link:2147483972-2147483967": {
-          "display_name": "attribute_link:2147483972-2147483967",
-          "function_index": "1",
           "*output_id": "/node/s-ami-e2cc398b/component/mysql::master/attribute/sap[ipv4]",
+          "display_name": "attribute_link:2147483972-2147483967",
+          "*input_id": "/node/s-ami-e2cc398b-2/component/mysql::slave/attribute/mysql][sap_ref_to_master]",
+          "function_index": "1",
           "hidden": false,
           "function": "select_one",
-          "label": "1",
-          "*input_id": "/node/s-ami-e2cc398b-2/component/mysql::slave/attribute/mysql][sap_ref_to_master]"
+          "label": "1"
         },
         "attribute_link:2147483861-2147483983": {
-          "display_name": "attribute_link:2147483861-2147483983",
-          "function_index": "3",
           "*output_id": "/node/s-ami-06c72c6f-2/component/nagios::client/attribute/sap[ipv4]",
+          "display_name": "attribute_link:2147483861-2147483983",
+          "*input_id": "/node/s-ami-06c72c6f/component/nagios::server/attribute/nagios][monitor_sap_refs]",
+          "function_index": "3",
           "hidden": false,
           "function": "eq_indexed",
-          "label": "1",
-          "*input_id": "/node/s-ami-06c72c6f/component/nagios::server/attribute/nagios][monitor_sap_refs]"
+          "label": "1"
         },
         "attribute_link:2147483842-2147483826": {
+          "*output_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][gid]",
           "type": "member",
           "display_name": "attribute_link:2147483842-2147483826",
-          "*output_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][gid]",
+          "*input_id": "/node/s-ami-e2cc398b-2/component/user_account/attribute/user_account][gid]",
           "hidden": false,
           "function": "eq",
-          "label": "1",
-          "*input_id": "/node/s-ami-e2cc398b-2/component/user_account/attribute/user_account][gid]"
+          "label": "1"
         },
         "attribute_link:2147483838-2147483825": {
+          "*output_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][uid]",
           "type": "member",
           "display_name": "attribute_link:2147483838-2147483825",
-          "*output_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][uid]",
+          "*input_id": "/node/s-ami-e2cc398b-2/component/user_account/attribute/user_account][uid]",
           "hidden": false,
           "function": "eq",
-          "label": "1",
-          "*input_id": "/node/s-ami-e2cc398b-2/component/user_account/attribute/user_account][uid]"
+          "label": "1"
         },
         "attribute_link:2147483841-2147483826": {
+          "*output_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][gid]",
           "type": "member",
           "display_name": "attribute_link:2147483841-2147483826",
-          "*output_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][gid]",
+          "*input_id": "/node/s-ami-e2cc398b/component/user_account/attribute/user_account][gid]",
           "hidden": false,
           "function": "eq",
-          "label": "1",
-          "*input_id": "/node/s-ami-e2cc398b/component/user_account/attribute/user_account][gid]"
+          "label": "1"
         },
         "attribute_link:2147483837-2147483825": {
+          "*output_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][uid]",
           "type": "member",
           "display_name": "attribute_link:2147483837-2147483825",
-          "*output_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][uid]",
+          "*input_id": "/node/s-ami-e2cc398b/component/user_account/attribute/user_account][uid]",
           "hidden": false,
           "function": "eq",
-          "label": "1",
-          "*input_id": "/node/s-ami-e2cc398b/component/user_account/attribute/user_account][uid]"
+          "label": "1"
         },
         "attribute_link:2147483840-2147483826": {
+          "*output_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][gid]",
           "type": "member",
           "display_name": "attribute_link:2147483840-2147483826",
-          "*output_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][gid]",
+          "*input_id": "/node/s-ami-06c72c6f/component/user_account/attribute/user_account][gid]",
           "hidden": false,
           "function": "eq",
-          "label": "1",
-          "*input_id": "/node/s-ami-06c72c6f/component/user_account/attribute/user_account][gid]"
+          "label": "1"
         },
         "attribute_link:2147483913-2147483937": {
-          "display_name": "attribute_link:2147483913-2147483937",
-          "function_index": "1",
           "*output_id": "/node/s-ami-e2cc398b/component/mysql::server/attribute/sap[ipv4]",
+          "display_name": "attribute_link:2147483913-2147483937",
+          "*input_id": "/node/s-ami-06c72c6f-2/component/wordpress/attribute/wordpress][sap_ref]",
+          "function_index": "1",
           "hidden": false,
           "function": "select_one",
-          "label": "1",
-          "*input_id": "/node/s-ami-06c72c6f-2/component/wordpress/attribute/wordpress][sap_ref]"
+          "label": "1"
         },
         "attribute_link:2147483833-2147483824": {
+          "*output_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][username]",
           "type": "member",
           "display_name": "attribute_link:2147483833-2147483824",
-          "*output_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][username]",
+          "*input_id": "/node/s-ami-e2cc398b/component/user_account/attribute/user_account][username]",
           "hidden": false,
           "function": "eq",
-          "label": "1",
-          "*input_id": "/node/s-ami-e2cc398b/component/user_account/attribute/user_account][username]"
+          "label": "1"
         },
         "attribute_link:2147483835-2147483824": {
+          "*output_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][username]",
           "type": "member",
           "display_name": "attribute_link:2147483835-2147483824",
-          "*output_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][username]",
+          "*input_id": "/node/s-ami-06c72c6f-2/component/user_account/attribute/user_account][username]",
           "hidden": false,
           "function": "eq",
-          "label": "1",
-          "*input_id": "/node/s-ami-06c72c6f-2/component/user_account/attribute/user_account][username]"
+          "label": "1"
         },
         "attribute_link:2147483836-2147483825": {
+          "*output_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][uid]",
           "type": "member",
           "display_name": "attribute_link:2147483836-2147483825",
-          "*output_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][uid]",
+          "*input_id": "/node/s-ami-06c72c6f/component/user_account/attribute/user_account][uid]",
           "hidden": false,
           "function": "eq",
-          "label": "1",
-          "*input_id": "/node/s-ami-06c72c6f/component/user_account/attribute/user_account][uid]"
+          "label": "1"
         },
         "attribute_link:2147483832-2147483824": {
+          "*output_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][username]",
           "type": "member",
           "display_name": "attribute_link:2147483832-2147483824",
-          "*output_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][username]",
+          "*input_id": "/node/s-ami-06c72c6f/component/user_account/attribute/user_account][username]",
           "hidden": false,
           "function": "eq",
-          "label": "1",
-          "*input_id": "/node/s-ami-06c72c6f/component/user_account/attribute/user_account][username]"
+          "label": "1"
         },
         "attribute_link:2147483834-2147483824": {
+          "*output_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][username]",
           "type": "member",
           "display_name": "attribute_link:2147483834-2147483824",
-          "*output_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][username]",
+          "*input_id": "/node/s-ami-e2cc398b-2/component/user_account/attribute/user_account][username]",
           "hidden": false,
           "function": "eq",
-          "label": "1",
-          "*input_id": "/node/s-ami-e2cc398b-2/component/user_account/attribute/user_account][username]"
+          "label": "1"
         },
         "attribute_link:2147483839-2147483825": {
+          "*output_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][uid]",
           "type": "member",
           "display_name": "attribute_link:2147483839-2147483825",
-          "*output_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][uid]",
+          "*input_id": "/node/s-ami-06c72c6f-2/component/user_account/attribute/user_account][uid]",
           "hidden": false,
           "function": "eq",
-          "label": "1",
-          "*input_id": "/node/s-ami-06c72c6f-2/component/user_account/attribute/user_account][uid]"
+          "label": "1"
         },
         "attribute_link:2147483861-2147483977": {
-          "display_name": "attribute_link:2147483861-2147483977",
-          "function_index": "2",
           "*output_id": "/node/s-ami-e2cc398b-2/component/nagios::client/attribute/sap[ipv4]",
+          "display_name": "attribute_link:2147483861-2147483977",
+          "*input_id": "/node/s-ami-06c72c6f/component/nagios::server/attribute/nagios][monitor_sap_refs]",
+          "function_index": "2",
           "hidden": false,
           "function": "eq_indexed",
-          "label": "1",
-          "*input_id": "/node/s-ami-06c72c6f/component/nagios::server/attribute/nagios][monitor_sap_refs]"
+          "label": "1"
         },
         "attribute_link:2147483861-2147483989": {
-          "display_name": "attribute_link:2147483861-2147483989",
-          "function_index": "1",
           "*output_id": "/node/s-ami-e2cc398b/component/nagios::client/attribute/sap[ipv4]",
+          "display_name": "attribute_link:2147483861-2147483989",
+          "*input_id": "/node/s-ami-06c72c6f/component/nagios::server/attribute/nagios][monitor_sap_refs]",
+          "function_index": "1",
           "hidden": false,
           "function": "eq_indexed",
-          "label": "1",
-          "*input_id": "/node/s-ami-06c72c6f/component/nagios::server/attribute/nagios][monitor_sap_refs]"
+          "label": "1"
         },
         "attribute_link:2147483843-2147483826": {
+          "*output_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][gid]",
           "type": "member",
           "display_name": "attribute_link:2147483843-2147483826",
-          "*output_id": "/node_group/all_staged_nodes/component/user_account/attribute/user_account][gid]",
+          "*input_id": "/node/s-ami-06c72c6f-2/component/user_account/attribute/user_account][gid]",
           "hidden": false,
           "function": "eq",
-          "label": "1",
-          "*input_id": "/node/s-ami-06c72c6f-2/component/user_account/attribute/user_account][gid]"
+          "label": "1"
         }
       },
       "node": {
@@ -220,40 +1198,40 @@
           "type": "instance",
           "attribute_link": {
             "host_address:2147483814-2147483977": {
+              "*output_id": "/node/s-ami-e2cc398b-2/attribute/host_addresses[ipv4]",
               "type": "internal",
               "display_name": "link:host_address-sap",
-              "*output_id": "/node/s-ami-e2cc398b-2/attribute/host_addresses[ipv4]",
+              "*input_id": "/node/s-ami-e2cc398b-2/component/nagios::client/attribute/sap[ipv4]",
               "hidden": true,
               "function": "host_address[ipv4]",
-              "label": "1",
-              "*input_id": "/node/s-ami-e2cc398b-2/component/nagios::client/attribute/sap[ipv4]"
+              "label": "1"
             },
             "sap_config:2147483953-2147483960": {
+              "*output_id": "/node/s-ami-e2cc398b-2/component/mysql::server/attribute/mysql][sap_config][ipv4]",
               "type": "internal",
               "display_name": "link:sap_config-sap",
-              "*output_id": "/node/s-ami-e2cc398b-2/component/mysql::server/attribute/mysql][sap_config][ipv4]",
+              "*input_id": "/node/s-ami-e2cc398b-2/component/mysql::server/attribute/sap[ipv4]",
               "hidden": true,
               "function": "sap_config[ipv4]",
-              "label": "1",
-              "*input_id": "/node/s-ami-e2cc398b-2/component/mysql::server/attribute/sap[ipv4]"
+              "label": "1"
             },
             "sap_config:2147483976-2147483977": {
+              "*output_id": "/node/s-ami-e2cc398b-2/component/nagios::client/attribute/nagios][monitored_client_sap_config]",
               "type": "internal",
               "display_name": "link:sap_config-sap",
-              "*output_id": "/node/s-ami-e2cc398b-2/component/nagios::client/attribute/nagios][monitored_client_sap_config]",
+              "*input_id": "/node/s-ami-e2cc398b-2/component/nagios::client/attribute/sap[ipv4]",
               "hidden": true,
               "function": "sap_config[ipv4]",
-              "label": "1",
-              "*input_id": "/node/s-ami-e2cc398b-2/component/nagios::client/attribute/sap[ipv4]"
+              "label": "1"
             },
             "host_address:2147483814-2147483960": {
+              "*output_id": "/node/s-ami-e2cc398b-2/attribute/host_addresses[ipv4]",
               "type": "internal",
               "display_name": "link:host_address-sap",
-              "*output_id": "/node/s-ami-e2cc398b-2/attribute/host_addresses[ipv4]",
+              "*input_id": "/node/s-ami-e2cc398b-2/component/mysql::server/attribute/sap[ipv4]",
               "hidden": true,
               "function": "host_address[ipv4]",
-              "label": "1",
-              "*input_id": "/node/s-ami-e2cc398b-2/component/mysql::server/attribute/sap[ipv4]"
+              "label": "1"
             }
           },
           "ds_key": "[:user_data, \"/library/test/ami-e2cc398b\"]",
@@ -311,8 +1289,8 @@
               "ds_key": "[:user_data, \"/library/test/mysql::slave\"]",
               "display_name": "mysql::slave",
               "external_ref": {
-                "recipe_name": "mysql::slave",
-                "type": "chef_recipe"
+                "type": "chef_recipe",
+                "recipe_name": "mysql::slave"
               },
               "attribute": {
                 "mysql][sap_ref_to_master]": {
@@ -374,8 +1352,8 @@
               "ds_key": "[:user_data, \"/library/test/nagios::client\"]",
               "display_name": "nagios::client",
               "external_ref": {
-                "recipe_name": "nagios::client",
-                "type": "chef_recipe"
+                "type": "chef_recipe",
+                "recipe_name": "nagios::client"
               },
               "attribute": {
                 "sap[ipv4]": {
@@ -437,8 +1415,8 @@
               "ds_key": "[:user_data, \"/library/test/user_account\"]",
               "display_name": "user_account",
               "external_ref": {
-                "recipe_name": "user_account",
-                "type": "chef_recipe"
+                "type": "chef_recipe",
+                "recipe_name": "user_account"
               },
               "attribute": {
                 "user_account][username]": {
@@ -498,8 +1476,8 @@
               "ds_key": "[:user_data, \"/library/test/mysql::server\"]",
               "display_name": "mysql::server",
               "external_ref": {
-                "recipe_name": "mysql::server",
-                "type": "chef_recipe"
+                "type": "chef_recipe",
+                "recipe_name": "mysql::server"
               },
               "monitoring_item": {
                 "mysql_basic_health": {
@@ -782,19 +1760,20 @@
           },
           "data_source": "user_data",
           "ds_attributes": {
+            "is_public": false,
             "type": "machine",
-            "ramdisk_id": "ari-d5709dbc",
             "flavor": {
               "disk": null
             },
             "state": "available",
+            "ramdisk_id": "ari-d5709dbc",
             "product_codes": [
 
             ],
             "architecture": "i386",
             "root_device_name": "/dev/sda1",
-            "kernel_id": "aki-5f15f636",
             "location": "411986592491/rnp-chef-09-8-ubuntu-lucid-x86_32",
+            "kernel_id": "aki-5f15f636",
             "block_device_mapping": [
               {
                 "deviceName": "/dev/sda1",
@@ -806,8 +1785,7 @@
             "root_device_type": "ebs",
             "id": "ami-e2cc398b",
             "owner_id": "411986592491",
-            "platform": null,
-            "is_public": false
+            "platform": null
           },
           "operational_status": "good",
           "ui": {
@@ -823,22 +1801,22 @@
           "type": "instance",
           "attribute_link": {
             "sap_config:2147483894-2147483899": {
+              "*output_id": "/node/s-ami-06c72c6f/component/apache2/attribute/apache2][sap_config][ipv4]",
               "type": "internal",
               "display_name": "link:sap_config-sap",
-              "*output_id": "/node/s-ami-06c72c6f/component/apache2/attribute/apache2][sap_config][ipv4]",
+              "*input_id": "/node/s-ami-06c72c6f/component/apache2/attribute/sap[ipv4]",
               "hidden": true,
               "function": "sap_config[ipv4]",
-              "label": "1",
-              "*input_id": "/node/s-ami-06c72c6f/component/apache2/attribute/sap[ipv4]"
+              "label": "1"
             },
             "host_address:2147483784-2147483899": {
+              "*output_id": "/node/s-ami-06c72c6f/attribute/host_addresses[ipv4]",
               "type": "internal",
               "display_name": "link:host_address-sap",
-              "*output_id": "/node/s-ami-06c72c6f/attribute/host_addresses[ipv4]",
+              "*input_id": "/node/s-ami-06c72c6f/component/apache2/attribute/sap[ipv4]",
               "hidden": true,
               "function": "host_address[ipv4]",
-              "label": "1",
-              "*input_id": "/node/s-ami-06c72c6f/component/apache2/attribute/sap[ipv4]"
+              "label": "1"
             }
           },
           "ds_key": "[:user_data, \"/library/test/ami-06c72c6f\"]",
@@ -897,8 +1875,8 @@
               "ds_key": "[:user_data, \"/library/test/user_account\"]",
               "display_name": "user_account",
               "external_ref": {
-                "recipe_name": "user_account",
-                "type": "chef_recipe"
+                "type": "chef_recipe",
+                "recipe_name": "user_account"
               },
               "attribute": {
                 "user_account][username]": {
@@ -958,8 +1936,8 @@
               "ds_key": "[:user_data, \"/library/test/apache2\"]",
               "display_name": "apache2",
               "external_ref": {
-                "recipe_name": "apache2",
-                "type": "chef_recipe"
+                "type": "chef_recipe",
+                "recipe_name": "apache2"
               },
               "monitoring_item": {
                 "inet_service_up": {
@@ -1205,8 +2183,8 @@
               "ds_key": "[:user_data, \"/library/test/nagios::server\"]",
               "display_name": "nagios::server",
               "external_ref": {
-                "recipe_name": "nagios::server",
-                "type": "chef_recipe"
+                "type": "chef_recipe",
+                "recipe_name": "nagios::server"
               },
               "attribute": {
                 "nagios][monitor_sap_refs]": {
@@ -1297,19 +2275,20 @@
           },
           "data_source": "user_data",
           "ds_attributes": {
+            "is_public": false,
             "type": "machine",
-            "ramdisk_id": "ari-d5709dbc",
             "flavor": {
               "disk": null
             },
             "state": "available",
+            "ramdisk_id": "ari-d5709dbc",
             "product_codes": [
 
             ],
             "architecture": "i386",
             "root_device_name": "/dev/sda1",
-            "kernel_id": "aki-5f15f636",
             "location": "411986592491/rnp-chef-09-6-ubuntu-910-x86_32",
+            "kernel_id": "aki-5f15f636",
             "block_device_mapping": [
               {
                 "deviceName": "/dev/sda1",
@@ -1321,8 +2300,7 @@
             "root_device_type": "ebs",
             "id": "ami-06c72c6f",
             "owner_id": "411986592491",
-            "platform": null,
-            "is_public": false
+            "platform": null
           },
           "operational_status": "good",
           "ui": {
@@ -1338,58 +2316,58 @@
           "type": "instance",
           "attribute_link": {
             "host_address:2147483804-2147483989": {
+              "*output_id": "/node/s-ami-e2cc398b/attribute/host_addresses[ipv4]",
               "type": "internal",
               "display_name": "link:host_address-sap",
-              "*output_id": "/node/s-ami-e2cc398b/attribute/host_addresses[ipv4]",
+              "*input_id": "/node/s-ami-e2cc398b/component/nagios::client/attribute/sap[ipv4]",
               "hidden": true,
               "function": "host_address[ipv4]",
-              "label": "1",
-              "*input_id": "/node/s-ami-e2cc398b/component/nagios::client/attribute/sap[ipv4]"
+              "label": "1"
             },
             "host_address:2147483804-2147483967": {
+              "*output_id": "/node/s-ami-e2cc398b/attribute/host_addresses[ipv4]",
               "type": "internal",
               "display_name": "link:host_address-sap",
-              "*output_id": "/node/s-ami-e2cc398b/attribute/host_addresses[ipv4]",
+              "*input_id": "/node/s-ami-e2cc398b/component/mysql::master/attribute/sap[ipv4]",
               "hidden": true,
               "function": "host_address[ipv4]",
-              "label": "1",
-              "*input_id": "/node/s-ami-e2cc398b/component/mysql::master/attribute/sap[ipv4]"
+              "label": "1"
             },
             "sap_config:2147483930-2147483937": {
+              "*output_id": "/node/s-ami-e2cc398b/component/mysql::server/attribute/mysql][sap_config][ipv4]",
               "type": "internal",
               "display_name": "link:sap_config-sap",
-              "*output_id": "/node/s-ami-e2cc398b/component/mysql::server/attribute/mysql][sap_config][ipv4]",
+              "*input_id": "/node/s-ami-e2cc398b/component/mysql::server/attribute/sap[ipv4]",
               "hidden": true,
               "function": "sap_config[ipv4]",
-              "label": "1",
-              "*input_id": "/node/s-ami-e2cc398b/component/mysql::server/attribute/sap[ipv4]"
+              "label": "1"
             },
             "sap_config:2147483988-2147483989": {
+              "*output_id": "/node/s-ami-e2cc398b/component/nagios::client/attribute/nagios][monitored_client_sap_config]",
               "type": "internal",
               "display_name": "link:sap_config-sap",
-              "*output_id": "/node/s-ami-e2cc398b/component/nagios::client/attribute/nagios][monitored_client_sap_config]",
+              "*input_id": "/node/s-ami-e2cc398b/component/nagios::client/attribute/sap[ipv4]",
               "hidden": true,
               "function": "sap_config[ipv4]",
-              "label": "1",
-              "*input_id": "/node/s-ami-e2cc398b/component/nagios::client/attribute/sap[ipv4]"
+              "label": "1"
             },
             "sap_config:2147483966-2147483967": {
+              "*output_id": "/node/s-ami-e2cc398b/component/mysql::master/attribute/mysql][sap_config_for_slave]",
               "type": "internal",
               "display_name": "link:sap_config-sap",
-              "*output_id": "/node/s-ami-e2cc398b/component/mysql::master/attribute/mysql][sap_config_for_slave]",
+              "*input_id": "/node/s-ami-e2cc398b/component/mysql::master/attribute/sap[ipv4]",
               "hidden": true,
               "function": "sap_config[ipv4]",
-              "label": "1",
-              "*input_id": "/node/s-ami-e2cc398b/component/mysql::master/attribute/sap[ipv4]"
+              "label": "1"
             },
             "host_address:2147483804-2147483937": {
+              "*output_id": "/node/s-ami-e2cc398b/attribute/host_addresses[ipv4]",
               "type": "internal",
               "display_name": "link:host_address-sap",
-              "*output_id": "/node/s-ami-e2cc398b/attribute/host_addresses[ipv4]",
+              "*input_id": "/node/s-ami-e2cc398b/component/mysql::server/attribute/sap[ipv4]",
               "hidden": true,
               "function": "host_address[ipv4]",
-              "label": "1",
-              "*input_id": "/node/s-ami-e2cc398b/component/mysql::server/attribute/sap[ipv4]"
+              "label": "1"
             }
           },
           "ds_key": "[:user_data, \"/library/test/ami-e2cc398b\"]",
@@ -1447,8 +2425,8 @@
               "ds_key": "[:user_data, \"/library/test/nagios::client\"]",
               "display_name": "nagios::client",
               "external_ref": {
-                "recipe_name": "nagios::client",
-                "type": "chef_recipe"
+                "type": "chef_recipe",
+                "recipe_name": "nagios::client"
               },
               "attribute": {
                 "sap[ipv4]": {
@@ -1509,8 +2487,8 @@
               "ds_key": "[:user_data, \"/library/test/mysql::master\"]",
               "display_name": "mysql::master",
               "external_ref": {
-                "recipe_name": "mysql::master",
-                "type": "chef_recipe"
+                "type": "chef_recipe",
+                "recipe_name": "mysql::master"
               },
               "attribute": {
                 "sap[ipv4]": {
@@ -1601,8 +2579,8 @@
               "ds_key": "[:user_data, \"/library/test/user_account\"]",
               "display_name": "user_account",
               "external_ref": {
-                "recipe_name": "user_account",
-                "type": "chef_recipe"
+                "type": "chef_recipe",
+                "recipe_name": "user_account"
               },
               "attribute": {
                 "user_account][username]": {
@@ -1662,8 +2640,8 @@
               "ds_key": "[:user_data, \"/library/test/mysql::server\"]",
               "display_name": "mysql::server",
               "external_ref": {
-                "recipe_name": "mysql::server",
-                "type": "chef_recipe"
+                "type": "chef_recipe",
+                "recipe_name": "mysql::server"
               },
               "monitoring_item": {
                 "mysql_basic_health": {
@@ -1946,19 +2924,20 @@
           },
           "data_source": "user_data",
           "ds_attributes": {
+            "is_public": false,
             "type": "machine",
-            "ramdisk_id": "ari-d5709dbc",
             "flavor": {
               "disk": null
             },
             "state": "available",
+            "ramdisk_id": "ari-d5709dbc",
             "product_codes": [
 
             ],
             "architecture": "i386",
             "root_device_name": "/dev/sda1",
-            "kernel_id": "aki-5f15f636",
             "location": "411986592491/rnp-chef-09-8-ubuntu-lucid-x86_32",
+            "kernel_id": "aki-5f15f636",
             "block_device_mapping": [
               {
                 "deviceName": "/dev/sda1",
@@ -1970,8 +2949,7 @@
             "root_device_type": "ebs",
             "id": "ami-e2cc398b",
             "owner_id": "411986592491",
-            "platform": null,
-            "is_public": false
+            "platform": null
           },
           "operational_status": "good",
           "ui": {
@@ -1987,40 +2965,40 @@
           "type": "instance",
           "attribute_link": {
             "sap_config:2147483982-2147483983": {
+              "*output_id": "/node/s-ami-06c72c6f-2/component/nagios::client/attribute/nagios][monitored_client_sap_config]",
               "type": "internal",
               "display_name": "link:sap_config-sap",
-              "*output_id": "/node/s-ami-06c72c6f-2/component/nagios::client/attribute/nagios][monitored_client_sap_config]",
+              "*input_id": "/node/s-ami-06c72c6f-2/component/nagios::client/attribute/sap[ipv4]",
               "hidden": true,
               "function": "sap_config[ipv4]",
-              "label": "1",
-              "*input_id": "/node/s-ami-06c72c6f-2/component/nagios::client/attribute/sap[ipv4]"
+              "label": "1"
             },
             "host_address:2147483794-2147483879": {
+              "*output_id": "/node/s-ami-06c72c6f-2/attribute/host_addresses[ipv4]",
               "type": "internal",
               "display_name": "link:host_address-sap",
-              "*output_id": "/node/s-ami-06c72c6f-2/attribute/host_addresses[ipv4]",
+              "*input_id": "/node/s-ami-06c72c6f-2/component/apache2/attribute/sap[ipv4]",
               "hidden": true,
               "function": "host_address[ipv4]",
-              "label": "1",
-              "*input_id": "/node/s-ami-06c72c6f-2/component/apache2/attribute/sap[ipv4]"
+              "label": "1"
             },
             "sap_config:2147483874-2147483879": {
+              "*output_id": "/node/s-ami-06c72c6f-2/component/apache2/attribute/apache2][sap_config][ipv4]",
               "type": "internal",
               "display_name": "link:sap_config-sap",
-              "*output_id": "/node/s-ami-06c72c6f-2/component/apache2/attribute/apache2][sap_config][ipv4]",
+              "*input_id": "/node/s-ami-06c72c6f-2/component/apache2/attribute/sap[ipv4]",
               "hidden": true,
               "function": "sap_config[ipv4]",
-              "label": "1",
-              "*input_id": "/node/s-ami-06c72c6f-2/component/apache2/attribute/sap[ipv4]"
+              "label": "1"
             },
             "host_address:2147483794-2147483983": {
+              "*output_id": "/node/s-ami-06c72c6f-2/attribute/host_addresses[ipv4]",
               "type": "internal",
               "display_name": "link:host_address-sap",
-              "*output_id": "/node/s-ami-06c72c6f-2/attribute/host_addresses[ipv4]",
+              "*input_id": "/node/s-ami-06c72c6f-2/component/nagios::client/attribute/sap[ipv4]",
               "hidden": true,
               "function": "host_address[ipv4]",
-              "label": "1",
-              "*input_id": "/node/s-ami-06c72c6f-2/component/nagios::client/attribute/sap[ipv4]"
+              "label": "1"
             }
           },
           "ds_key": "[:user_data, \"/library/test/ami-06c72c6f\"]",
@@ -2078,8 +3056,8 @@
               "ds_key": "[:user_data, \"/library/test/php::php5\"]",
               "display_name": "php::php5",
               "external_ref": {
-                "recipe_name": "php::php5",
-                "type": "chef_recipe"
+                "type": "chef_recipe",
+                "recipe_name": "php::php5"
               },
               "basic_type": "language",
               "ds_attributes": {
@@ -2095,8 +3073,8 @@
               "ds_key": "[:user_data, \"/library/test/wordpress\"]",
               "display_name": "wordpress",
               "external_ref": {
-                "recipe_name": "wordpress",
-                "type": "chef_recipe"
+                "type": "chef_recipe",
+                "recipe_name": "wordpress"
               },
               "attribute": {
                 "wordpress][db][user]": {
@@ -2270,8 +3248,8 @@
               "ds_key": "[:user_data, \"/library/test/nagios::client\"]",
               "display_name": "nagios::client",
               "external_ref": {
-                "recipe_name": "nagios::client",
-                "type": "chef_recipe"
+                "type": "chef_recipe",
+                "recipe_name": "nagios::client"
               },
               "attribute": {
                 "sap[ipv4]": {
@@ -2333,8 +3311,8 @@
               "ds_key": "[:user_data, \"/library/test/user_account\"]",
               "display_name": "user_account",
               "external_ref": {
-                "recipe_name": "user_account",
-                "type": "chef_recipe"
+                "type": "chef_recipe",
+                "recipe_name": "user_account"
               },
               "attribute": {
                 "user_account][username]": {
@@ -2394,8 +3372,8 @@
               "ds_key": "[:user_data, \"/library/test/apache2\"]",
               "display_name": "apache2",
               "external_ref": {
-                "recipe_name": "apache2",
-                "type": "chef_recipe"
+                "type": "chef_recipe",
+                "recipe_name": "apache2"
               },
               "monitoring_item": {
                 "inet_service_up": {
@@ -2653,19 +3631,20 @@
           },
           "data_source": "user_data",
           "ds_attributes": {
+            "is_public": false,
             "type": "machine",
-            "ramdisk_id": "ari-d5709dbc",
             "flavor": {
               "disk": null
             },
             "state": "available",
+            "ramdisk_id": "ari-d5709dbc",
             "product_codes": [
 
             ],
             "architecture": "i386",
             "root_device_name": "/dev/sda1",
-            "kernel_id": "aki-5f15f636",
             "location": "411986592491/rnp-chef-09-6-ubuntu-910-x86_32",
+            "kernel_id": "aki-5f15f636",
             "block_device_mapping": [
               {
                 "deviceName": "/dev/sda1",
@@ -2677,8 +3656,7 @@
             "root_device_type": "ebs",
             "id": "ami-06c72c6f",
             "owner_id": "411986592491",
-            "platform": null,
-            "is_public": false
+            "platform": null
           },
           "operational_status": "good",
           "ui": {
@@ -2728,7 +3706,6 @@
         "all_staged_nodes": {
           "display_name": "all_staged_nodes",
           "dynamic_search_pattern": {
-            ":relation": ":node",
             ":filter": [
               ":and",
               [
@@ -2736,7 +3713,8 @@
                 ":type",
                 "staged"
               ]
-            ]
+            ],
+            ":relation": ":node"
           },
           "component": {
             "user_account": {
@@ -2746,8 +3724,8 @@
               "ds_key": "[:user_data, \"/library/test/user_account\"]",
               "display_name": "user_account",
               "external_ref": {
-                "recipe_name": "user_account",
-                "type": "chef_recipe"
+                "type": "chef_recipe",
+                "recipe_name": "user_account"
               },
               "attribute": {
                 "user_account][username]": {
@@ -2884,19 +3862,20 @@
           },
           "data_source": "user_data",
           "ds_attributes": {
+            "is_public": false,
             "type": "machine",
-            "ramdisk_id": "ari-d5709dbc",
             "flavor": {
               "disk": null
             },
             "state": "available",
+            "ramdisk_id": "ari-d5709dbc",
             "product_codes": [
 
             ],
             "architecture": "i386",
             "root_device_name": "/dev/sda1",
-            "kernel_id": "aki-5f15f636",
             "location": "411986592491/rnp-chef-09-6-ubuntu-910-x86_32",
+            "kernel_id": "aki-5f15f636",
             "block_device_mapping": [
               {
                 "deviceName": "/dev/sda1",
@@ -2908,14 +3887,13 @@
             "root_device_type": "ebs",
             "id": "ami-06c72c6f",
             "owner_id": "411986592491",
-            "platform": null,
-            "is_public": false
+            "platform": null
           },
           "ui": {
             "images": {
-              "display": "ubuntu.png",
+              "tnail": "ubuntu.png",
               "tiny": "",
-              "tnail": "ubuntu.png"
+              "display": "ubuntu.png"
             }
           }
         },
@@ -2990,19 +3968,20 @@
           },
           "data_source": "user_data",
           "ds_attributes": {
+            "is_public": false,
             "type": "machine",
-            "ramdisk_id": "ari-d5709dbc",
             "flavor": {
               "disk": null
             },
             "state": "available",
+            "ramdisk_id": "ari-d5709dbc",
             "product_codes": [
 
             ],
             "architecture": "i386",
             "root_device_name": "/dev/sda1",
-            "kernel_id": "aki-5f15f636",
             "location": "411986592491/rnp-chef-09-8-ubuntu-lucid-x86_32",
+            "kernel_id": "aki-5f15f636",
             "block_device_mapping": [
               {
                 "deviceName": "/dev/sda1",
@@ -3014,14 +3993,13 @@
             "root_device_type": "ebs",
             "id": "ami-e2cc398b",
             "owner_id": "411986592491",
-            "platform": null,
-            "is_public": false
+            "platform": null
           },
           "ui": {
             "images": {
-              "display": "ubuntu.png",
+              "tnail": "ubuntu.png",
               "tiny": "",
-              "tnail": "ubuntu.png"
+              "display": "ubuntu.png"
             }
           }
         }
@@ -3029,7 +4007,6 @@
       "data_source": {
         "chef": {
           "display_name": "chef",
-          "last_collection_timestamp": "Mon Dec 13 23:52:30 +0000 2010",
           "data_source_entry": {
             "component_recipe": {
               "source_obj_type": "recipe",
@@ -3053,11 +4030,11 @@
               "ds_name": "chef"
             }
           },
+          "last_collection_timestamp": "Mon Dec 13 23:52:30 +0000 2010",
           "ds_name": "chef"
         },
         "ec2": {
           "display_name": "ec2",
-          "last_collection_timestamp": "Mon Dec 13 23:52:39 +0000 2010",
           "data_source_entry": {
             "node_image": {
               "source_obj_type": "image",
@@ -3067,11 +4044,11 @@
               "ds_name": "ec2"
             }
           },
+          "last_collection_timestamp": "Mon Dec 13 23:52:39 +0000 2010",
           "ds_name": "ec2"
         },
         "user_data": {
           "display_name": "user_data",
-          "last_collection_timestamp": "Mon Dec 13 23:52:45 +0000 2010",
           "data_source_entry": {
             "component": {
               "display_name": "component",
@@ -3086,6 +4063,7 @@
               "ds_name": "user_data"
             }
           },
+          "last_collection_timestamp": "Mon Dec 13 23:52:45 +0000 2010",
           "ds_name": "user_data"
         }
       },
@@ -3097,8 +4075,8 @@
           "ds_key": "[:user_data, \"/library/test/hadoop::pig\"]",
           "display_name": "hadoop::pig",
           "external_ref": {
-            "recipe_name": "hadoop::pig",
-            "type": "chef_recipe"
+            "type": "chef_recipe",
+            "recipe_name": "hadoop::pig"
           },
           "ds_attributes": {
             "ref": "hadoop::pig",
@@ -3107,9 +4085,9 @@
           },
           "ui": {
             "images": {
-              "display": "hadoop-pig.png",
+              "tnail": "hadoop-pig.png",
               "tiny": "",
-              "tnail": "hadoop-pig.png"
+              "display": "hadoop-pig.png"
             }
           }
         },
@@ -3120,8 +4098,8 @@
           "ds_key": "[:user_data, \"/library/test/hadoop_cloudera_c3\"]",
           "display_name": "hadoop_cloudera_c3",
           "external_ref": {
-            "recipe_name": "hadoop_cloudera_c3",
-            "type": "chef_recipe"
+            "type": "chef_recipe",
+            "recipe_name": "hadoop_cloudera_c3"
           },
           "attribute": {
             "hadoop_cloudera_c3][jmxremote_password]": {
@@ -3154,9 +4132,9 @@
           },
           "ui": {
             "images": {
-              "display": "cloudera.png",
+              "tnail": "cloudera.png",
               "tiny": "",
-              "tnail": "cloudera.png"
+              "display": "cloudera.png"
             }
           }
         },
@@ -3167,8 +4145,8 @@
           "ds_key": "[:user_data, \"/library/test/postgresql::server\"]",
           "display_name": "postgresql::server",
           "external_ref": {
-            "recipe_name": "postgresql::server",
-            "type": "chef_recipe"
+            "type": "chef_recipe",
+            "recipe_name": "postgresql::server"
           },
           "attribute": {
             "postgresql][dir]": {
@@ -3192,9 +4170,9 @@
           },
           "ui": {
             "images": {
-              "display": "postgres.png",
+              "tnail": "postgres.png",
               "tiny": "",
-              "tnail": "postgres.png"
+              "display": "postgres.png"
             }
           }
         },
@@ -3205,8 +4183,8 @@
           "ds_key": "[:user_data, \"/library/test/php::php5\"]",
           "display_name": "php::php5",
           "external_ref": {
-            "recipe_name": "php::php5",
-            "type": "chef_recipe"
+            "type": "chef_recipe",
+            "recipe_name": "php::php5"
           },
           "basic_type": "language",
           "ds_attributes": {
@@ -3216,9 +4194,9 @@
           },
           "ui": {
             "images": {
-              "display": "php.png",
+              "tnail": "php.png",
               "tiny": "",
-              "tnail": "php.png"
+              "display": "php.png"
             }
           }
         },
@@ -3229,8 +4207,8 @@
           "ds_key": "[:user_data, \"/library/test/wordpress\"]",
           "display_name": "wordpress",
           "external_ref": {
-            "recipe_name": "wordpress",
-            "type": "chef_recipe"
+            "type": "chef_recipe",
+            "recipe_name": "wordpress"
           },
           "attribute": {
             "wordpress][keys][secure_auth]": {
@@ -3393,9 +4371,9 @@
           },
           "ui": {
             "images": {
-              "display": "wordpress.png",
+              "tnail": "wordpress.png",
               "tiny": "",
-              "tnail": "wordpress.png"
+              "display": "wordpress.png"
             }
           }
         },
@@ -3406,8 +4384,8 @@
           "ds_key": "[:user_data, \"/library/test/mysql::slave\"]",
           "display_name": "mysql::slave",
           "external_ref": {
-            "recipe_name": "mysql::slave",
-            "type": "chef_recipe"
+            "type": "chef_recipe",
+            "recipe_name": "mysql::slave"
           },
           "attribute": {
             "mysql][sap_ref_to_master]": {
@@ -3453,9 +4431,9 @@
           },
           "ui": {
             "images": {
-              "display": "mysql.png",
+              "tnail": "mysql.png",
               "tiny": "",
-              "tnail": "mysql.png"
+              "display": "mysql.png"
             }
           }
         },
@@ -3466,8 +4444,8 @@
           "ds_key": "[:user_data, \"/library/test/postgresql::client\"]",
           "display_name": "postgresql::client",
           "external_ref": {
-            "recipe_name": "postgresql::client",
-            "type": "chef_recipe"
+            "type": "chef_recipe",
+            "recipe_name": "postgresql::client"
           },
           "attribute": {
             "postgresql][dir]": {
@@ -3491,9 +4469,9 @@
           },
           "ui": {
             "images": {
-              "display": "postgres.png",
+              "tnail": "postgres.png",
               "tiny": "",
-              "tnail": "postgres.png"
+              "display": "postgres.png"
             }
           }
         },
@@ -3504,8 +4482,8 @@
           "ds_key": "[:user_data, \"/library/test/hadoop::hive\"]",
           "display_name": "hadoop::hive",
           "external_ref": {
-            "recipe_name": "hadoop::hive",
-            "type": "chef_recipe"
+            "type": "chef_recipe",
+            "recipe_name": "hadoop::hive"
           },
           "ds_attributes": {
             "ref": "hadoop::hive",
@@ -3514,9 +4492,9 @@
           },
           "ui": {
             "images": {
-              "display": "hadoop-hive.png",
+              "tnail": "hadoop-hive.png",
               "tiny": "",
-              "tnail": "hadoop-hive.png"
+              "display": "hadoop-hive.png"
             }
           }
         },
@@ -3527,8 +4505,8 @@
           "ds_key": "[:user_data, \"/library/test/java\"]",
           "display_name": "java",
           "external_ref": {
-            "recipe_name": "java",
-            "type": "chef_recipe"
+            "type": "chef_recipe",
+            "recipe_name": "java"
           },
           "ds_attributes": {
             "ref": "java",
@@ -3537,9 +4515,9 @@
           },
           "ui": {
             "images": {
-              "display": "java-01.png",
+              "tnail": "java-01.png",
               "tiny": "",
-              "tnail": "java-01.png"
+              "display": "java-01.png"
             }
           }
         },
@@ -3550,8 +4528,8 @@
           "ds_key": "[:user_data, \"/library/test/java_sun\"]",
           "display_name": "java_sun",
           "external_ref": {
-            "recipe_name": "java_sun",
-            "type": "chef_recipe"
+            "type": "chef_recipe",
+            "recipe_name": "java_sun"
           },
           "ds_attributes": {
             "ref": "java_sun",
@@ -3560,9 +4538,9 @@
           },
           "ui": {
             "images": {
-              "display": "java-01.png",
+              "tnail": "java-01.png",
               "tiny": "",
-              "tnail": "java-01.png"
+              "display": "java-01.png"
             }
           }
         },
@@ -3577,9 +4555,9 @@
           },
           "ui": {
             "images": {
-              "display": "rabbitmq.png",
+              "tnail": "rabbitmq.png",
               "tiny": "",
-              "tnail": "rabbitmq.png"
+              "display": "rabbitmq.png"
             }
           }
         },
@@ -3590,8 +4568,8 @@
           "ds_key": "[:user_data, \"/library/test/hadoop\"]",
           "display_name": "hadoop",
           "external_ref": {
-            "recipe_name": "hadoop",
-            "type": "chef_recipe"
+            "type": "chef_recipe",
+            "recipe_name": "hadoop"
           },
           "ds_attributes": {
             "ref": "hadoop",
@@ -3600,9 +4578,9 @@
           },
           "ui": {
             "images": {
-              "display": "hadoop.png",
+              "tnail": "hadoop.png",
               "tiny": "",
-              "tnail": "hadoop.png"
+              "display": "hadoop.png"
             }
           }
         },
@@ -3617,9 +4595,9 @@
           },
           "ui": {
             "images": {
-              "display": "rabbitmq.png",
+              "tnail": "rabbitmq.png",
               "tiny": "",
-              "tnail": "rabbitmq.png"
+              "display": "rabbitmq.png"
             }
           }
         },
@@ -3630,8 +4608,8 @@
           "ds_key": "[:user_data, \"/library/test/mysql::master\"]",
           "display_name": "mysql::master",
           "external_ref": {
-            "recipe_name": "mysql::master",
-            "type": "chef_recipe"
+            "type": "chef_recipe",
+            "recipe_name": "mysql::master"
           },
           "attribute": {
             "mysql][master_log]": {
@@ -3691,9 +4669,9 @@
           },
           "ui": {
             "images": {
-              "display": "mysql.png",
+              "tnail": "mysql.png",
               "tiny": "",
-              "tnail": "mysql.png"
+              "display": "mysql.png"
             }
           }
         },
@@ -3704,8 +4682,8 @@
           "ds_key": "[:user_data, \"/library/test/nagios::client\"]",
           "display_name": "nagios::client",
           "external_ref": {
-            "recipe_name": "nagios::client",
-            "type": "chef_recipe"
+            "type": "chef_recipe",
+            "recipe_name": "nagios::client"
           },
           "attribute": {
             "nagios][monitored_client_sap_config]": {
@@ -3741,9 +4719,9 @@
           },
           "ui": {
             "images": {
-              "display": "nagios.png",
+              "tnail": "nagios.png",
               "tiny": "",
-              "tnail": "nagios.png"
+              "display": "nagios.png"
             }
           }
         },
@@ -3754,8 +4732,8 @@
           "ds_key": "[:user_data, \"/library/test/hadoop_cloudera_c3::conf_pseudo\"]",
           "display_name": "hadoop_cloudera_c3::conf_pseudo",
           "external_ref": {
-            "recipe_name": "hadoop_cloudera_c3::conf_pseudo",
-            "type": "chef_recipe"
+            "type": "chef_recipe",
+            "recipe_name": "hadoop_cloudera_c3::conf_pseudo"
           },
           "monitoring_item": {
             "check_hadoop_namenode_remotely": {
@@ -3806,9 +4784,9 @@
           },
           "ui": {
             "images": {
-              "display": "cloudera.png",
+              "tnail": "cloudera.png",
               "tiny": "",
-              "tnail": "cloudera.png"
+              "display": "cloudera.png"
             }
           }
         },
@@ -3819,8 +4797,8 @@
           "ds_key": "[:user_data, \"/library/test/user_account\"]",
           "display_name": "user_account",
           "external_ref": {
-            "recipe_name": "user_account",
-            "type": "chef_recipe"
+            "type": "chef_recipe",
+            "recipe_name": "user_account"
           },
           "attribute": {
             "user_account][username]": {
@@ -3868,9 +4846,9 @@
           },
           "ui": {
             "images": {
-              "display": "user.png",
+              "tnail": "user.png",
               "tiny": "",
-              "tnail": "user.png"
+              "display": "user.png"
             }
           }
         },
@@ -3881,8 +4859,8 @@
           "ds_key": "[:user_data, \"/library/test/apache2\"]",
           "display_name": "apache2",
           "external_ref": {
-            "recipe_name": "apache2",
-            "type": "chef_recipe"
+            "type": "chef_recipe",
+            "recipe_name": "apache2"
           },
           "monitoring_item": {
             "inet_service_up": {
@@ -4100,9 +5078,9 @@
           },
           "ui": {
             "images": {
-              "display": "apache.png",
+              "tnail": "apache.png",
               "tiny": "",
-              "tnail": "apache.png"
+              "display": "apache.png"
             }
           }
         },
@@ -4113,8 +5091,8 @@
           "ds_key": "[:user_data, \"/library/test/redis\"]",
           "display_name": "redis",
           "external_ref": {
-            "recipe_name": "redis",
-            "type": "chef_recipe"
+            "type": "chef_recipe",
+            "recipe_name": "redis"
           },
           "monitoring_item": {
             "inet_service_up": {
@@ -4161,9 +5139,9 @@
           },
           "ui": {
             "images": {
-              "display": "redis.png",
+              "tnail": "redis.png",
               "tiny": "",
-              "tnail": "redis.png"
+              "display": "redis.png"
             }
           }
         },
@@ -4174,8 +5152,8 @@
           "ds_key": "[:user_data, \"/library/test/mysql::server\"]",
           "display_name": "mysql::server",
           "external_ref": {
-            "recipe_name": "mysql::server",
-            "type": "chef_recipe"
+            "type": "chef_recipe",
+            "recipe_name": "mysql::server"
           },
           "monitoring_item": {
             "mysql_basic_health": {
@@ -4421,9 +5399,9 @@
           },
           "ui": {
             "images": {
-              "display": "mysql.png",
+              "tnail": "mysql.png",
               "tiny": "",
-              "tnail": "mysql.png"
+              "display": "mysql.png"
             }
           }
         },
@@ -4434,8 +5412,8 @@
           "ds_key": "[:user_data, \"/library/test/hadoop::doc\"]",
           "display_name": "hadoop::doc",
           "external_ref": {
-            "recipe_name": "hadoop::doc",
-            "type": "chef_recipe"
+            "type": "chef_recipe",
+            "recipe_name": "hadoop::doc"
           },
           "ds_attributes": {
             "ref": "hadoop::doc",
@@ -4444,9 +5422,9 @@
           },
           "ui": {
             "images": {
-              "display": "hadoop.png",
+              "tnail": "hadoop.png",
               "tiny": "",
-              "tnail": "hadoop.png"
+              "display": "hadoop.png"
             }
           }
         },
@@ -4457,8 +5435,8 @@
           "ds_key": "[:user_data, \"/library/test/nagios::server\"]",
           "display_name": "nagios::server",
           "external_ref": {
-            "recipe_name": "nagios::server",
-            "type": "chef_recipe"
+            "type": "chef_recipe",
+            "recipe_name": "nagios::server"
           },
           "attribute": {
             "nagios][monitor_sap_refs]": {
@@ -4492,9 +5470,9 @@
           },
           "ui": {
             "images": {
-              "display": "nagios.png",
+              "tnail": "nagios.png",
               "tiny": "",
-              "tnail": "nagios.png"
+              "display": "nagios.png"
             }
           }
         }
@@ -4502,17 +5480,6 @@
       "search_object": {
         "user accounts": {
           "search_pattern": {
-            ":columns": [
-              ":parent_name",
-              ":display_name",
-              ":has_pending_change"
-            ],
-            ":paging": {
-            },
-            ":relation": ":component",
-            ":order_by": [
-
-            ],
             ":filter": [
               ":and",
               [
@@ -4525,6 +5492,18 @@
                 ":parent_name",
                 "node"
               ]
+            ],
+            ":columns": [
+              ":containing_datacenter",
+              ":parent_name",
+              ":display_name",
+              ":has_pending_change"
+            ],
+            ":paging": {
+            },
+            ":relation": ":component",
+            ":order_by": [
+
             ]
           },
           "display_name": "user accounts",

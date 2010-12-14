@@ -10,6 +10,9 @@
     :parent_name=>{
         :type=>:text
     },
+    :containing_datacenter=>{
+        :type=>:text
+    },
     :type=>{
         :type=>:select,
         :size=>15

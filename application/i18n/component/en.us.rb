@@ -10,6 +10,7 @@
   :version => 'Version',
   :uri => 'Uri',
   :parent_name => 'Parent',
+  :containing_datacenter => 'Datacenter',
   :only_one_per_node => '1 Per Node',
   :has_pending_change => 'Pending Change',
   :ui => 'UI',

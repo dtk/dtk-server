@@ -687,6 +687,28 @@ console.log('call to add item to workspace failed.....');
 				_viewSpaces[vSpaceId].renderItemPorts(itemId,ports);
 			},
 
+			updateItemName: function(id) {
+				var nameInputId = 'item-'+id+'-name-input',
+					nameWrapperId = 'item-'+id+'-name-wrapper',
+					nameInputWrapperId = 'item-'+id+'-name-input-wrapper',
+					inputNode = R8.Utils.Y.one('#'+nameInputId),
+					nameWrapperNode = R8.Utils.Y.one('#'+nameWrapperId),
+					model = nameWrapperNode.getAttribute('data-model'),
+					nameInputWrapperNode = R8.Utils.Y.one('#'+nameInputWrapperId),
+					newName = inputNode.get('value');
+
+				nameWrapperNode.set('innerHTML',newName);
+				nameInputWrapperNode.setStyle('display','none');
+				nameWrapperNode.setStyle('display','block');
+
+				var params = {
+					'cfg': {
+						'data': 'model='+model+'&id='+id+'&display_name='+newName+'&redirect=false'
+					}
+				};
+				R8.Ctrl.call('node/save',params);
+//console.log('gettin to wspace func to update name:'+id);
+			},
 /*
 			setupItem: function(itemDef) {
 console.log(itemDef);

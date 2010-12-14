@@ -53,6 +53,30 @@ if (!R8.ViewSpace) {
 				_events['vspace_click'] = R8.Utils.Y.delegate('click',this.clearSelectedItems,'body','#viewspace');
 				_events['port_mover'] = R8.Utils.Y.delegate('mouseover',this.portMover,_node,'.port',this);
 				_events['port_mover'] = R8.Utils.Y.delegate('mouseout',this.portMout,_node,'.port',this);
+
+				_events['item_name_dblclick'] = R8.Utils.Y.delegate('dblclick',function(e){
+					var itemId = e.currentTarget.getAttribute('data-id'),
+						inputWrapperNode = R8.Utils.Y.one('#item-'+itemId+'-name-input-wrapper'),
+						inputNode = R8.Utils.Y.one('#item-'+itemId+'-name-input');
+
+					e.currentTarget.setStyle('display','none');
+					inputWrapperNode.setStyle('display','block');
+					inputNode.focus();
+
+					if(inputNode.getAttribute('data-blursetup') == '') {
+						inputNode.on('blur',function(e){
+							var itemId = e.currentTarget.getAttribute('data-id'),
+								inputWrapperNode = R8.Utils.Y.one('#item-'+itemId+'-name-input-wrapper'),
+								nameWrapperNode = R8.Utils.Y.one('#item-'+itemId+'-name-wrapper');
+		
+							inputWrapperNode.setStyle('display','none');
+							nameWrapperNode.setStyle('display','block');
+							e.currentTarget.setAttribute('data-blursetup','true');
+						});
+					}
+
+				},_node,'.item-name',this);
+
 //				R8.Workspace.events['item_click'] = R8.Utils.Y.delegate('click',function(){console.log('clicked item');},R8.Workspace.viewSpaceNode,'.item, .connector');
 //				R8.Workspace.events['vspace_mdown'] = R8.Utils.Y.delegate('mousedown',R8.Workspace.checkMouseDownEvent,'body','#viewspace');
 			},

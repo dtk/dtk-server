@@ -138,13 +138,39 @@
 	height: 14px;
 	width: 14px;
 	z-index: 2;
+	background: url(../images/port-sprite.png) no-repeat;
 }
 
 .basic-port.available {
-	background: url(../images/workspace/naPort.png) no-repeat;
+/*	background: url(../images/workspace/naPort.png) no-repeat;*/
+}
+.basic-port.available.input-north {
+	background-position: -14px 0px;
+}
+.basic-port.available.input-south {
+	background-position: -28px 0px;
+}
+.basic-port.connected.input-north {
+	background-position: -14px -14px;
+}
+.basic-port.connected.input-south {
+	background-position: -28px -14px;
+}
+/*------------------------------------*/
+.basic-port.available.output-north {
+	background-position: -28px 0px;
+}
+.basic-port.available.output-south {
+	background-position: -14px 0px;
+}
+.basic-port.connected.output-north {
+	background-position: -28px -14px;
+}
+.basic-port.connected.output-south {
+	background-position: -14px -14px;
 }
 
 .basic-port.connected {
-	background: url(../images/workspace/connectedPort.png) no-repeat;
+/*	background: url(../images/workspace/connectedPort.png) no-repeat;*/
 }
 

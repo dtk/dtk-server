@@ -190,7 +190,8 @@ if (!R8.Node) {
 
 					portObjs[portNodeID] = {};
 					portNode.setAttribute('id',portNodeID);
-					portNode.addClass(portClass + ' available');
+					portNode.addClass(portClass + ' available '+northPorts[i]['port_type']+'-north');
+//					portNode.addClass(portClass + ' available');
 					_node.appendChild(portNode);
 
 					var portRegion = portNode.get('region');
@@ -245,7 +246,8 @@ if (!R8.Node) {
 
 					portObjs[portNodeID] = {};
 					portNode.setAttribute('id',portNodeID);
-					portNode.addClass(portClass + ' available');
+					portNode.addClass(portClass + ' available '+southPorts[i]['port_type']+'-south');
+//					portNode.addClass(portClass + ' available');
 					_node.appendChild(portNode);
 
 					var portRegion = portNode.get('region');

@@ -33,8 +33,8 @@
              :rows => 1,
              :cols => 40,
             }},
-            {:operational_status => {
-             :type => 'select',
+            {:type => {
+             :type => 'text',
              :help => '',
             }},
            {:ec2_security_groups => {

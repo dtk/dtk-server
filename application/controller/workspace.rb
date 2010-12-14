@@ -394,7 +394,7 @@ pp datacenter
     #TODO: datacenter_id=nil is stub
     def list_items_2(datacenter_id=nil)
       include_js('plugins/search.cmdhandler')
-
+pp [:datacenter_id,datacenter_id]
       if datacenter_id.nil?
         datacenter_id = IDHandle[:c => ret_session_context_id(), :uri => "/datacenter/dc1", :model_name => :datacenter].get_id()
       end

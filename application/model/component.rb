@@ -33,9 +33,10 @@ module XYZ
          [
           {
             :model_name => :action,
-            :sequel_def => lambda{|ds|ds.where({:state => "pending"} & ~{:component_id => nil}).group_and_count(:component_id)},
+            #TODO: avoidng use of :component_component
+            :sequel_def => lambda{|ds|ds.where(:state => "pending").join(:attribute__attribute,{:id => :attribute_id}).group_and_count(:attribute__component_component_id)},
             :join_type => :left_outer,
-            :join_cond=>{:component_id =>:component__id}
+            :join_cond=>{:component_component_id =>:component__id}
           }
          ]
 

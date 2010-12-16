@@ -11,18 +11,32 @@ attribute "user_account/username",
 
 attribute "user_account/uid",
   :display_name => "User id",
-  :description => "User id",
-  :required => true,
+  :description => "Numeric user id",
   :data_type => "integer",
   :recipes => ["user_account"]
 
 attribute "user_account/gid",
   :display_name => "Group id",
-  :description => "User's group id",
+  :description => "Primary group id",
   :data_type => "integer",
   :recipes => ["user_account"]
 
-###TODO may put in seprate file
+attribute "user_account/home",
+  :display_name => "Home dir",
+  :description => "Home directory location",
+  :recipes => ["user_account"]
+
+attribute "user_account/home_base",
+  :display_name => "Home dir base",
+  :description => "Home directories base location (home will be $home_base/$username",
+  :recipes => ["user_account"]
+
+attribute "user_account/shell",
+  :display_name => "Login shell",
+  :description => "Login shell",
+  :recipes => ["user_account"]
+
+###############
 attribute "_meta_info",
   :basic_types => {
     "user_account" => "user" 

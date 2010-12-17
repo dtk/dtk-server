@@ -75,6 +75,9 @@ R8.config['base_uri'] = '{%=_app[:base_uri]%}/xyz';
 				<a href="javascript:R8.Workspace.Dock.hide();">Hide Dock</a>&nbsp;&nbsp;&nbsp;
 				<a href="javascript:R8.Workspace.Dock.show();">Show Dock</a>&nbsp;&nbsp;&nbsp;
 				<a href="javascript:R8.Workspace.Dock.loadDockPanel('node/get_components/2147484111');">Dock Panel Test</a>&nbsp;&nbsp;&nbsp;
+				<div style="height:25px; width: 100px; text-align: center; position: relative; margin: -15px auto 0 auto; background-color: #DDDDDD;">
+					<a href="javascript:R8.Workspace.commitChanges();">Commit</a>
+				</div>
 			</div>
 		</div>
 		<div id="wspace-container">

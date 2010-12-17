@@ -659,6 +659,26 @@ console.log('call to add item to workspace failed.....');
 //-------------------------------------------------------------
 //-------------------------------------------------------------
 
+			commitChanges: function() {
+				var contextId = _currentViewSpace,
+					contextType = 'datacenter';
+
+				var successCallback = function(ioId,responseObj) {
+					eval("var response =" + responseObj.responseText);
+					var returnData = response['application_workspace_commit_changes']['content'][0]['data'];
+					alert(returnData);
+console.log(response);
+				}
+				var params = {
+					'cfg': {
+						'data': 'context_type='+contextType+'&context_id='+contextId
+					},
+					'callbacks': {
+						'io:success': successCallback
+					}
+				};
+				R8.Ctrl.call('workspace/commit_changes',params);
+			},
 //TODO: add check to see if viewspace is already loaded and this is a 'refocus'
 			pushViewSpace: function(viewSpaceDef) {
 				var id = viewSpaceDef['object']['id'];

@@ -589,5 +589,15 @@ pp '))))))))))))))))))))))))))))))))))))'
       SearchObject.create_from_input_hash(hash,:workspace,ret_session_context_id())
     end
 
+    def commit_changes()
+      context_id = request.params["context_id"]
+      context_type = request.params["context_type"]
+
+      test_str = 'Params passed in are context id:'+context_id+' and context type:'+context_type
+      return {
+        'data'=>test_str
+      }
+    end
+
   end
 end

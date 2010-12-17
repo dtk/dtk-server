@@ -19,41 +19,38 @@ def run_recipe(id)
 end
 
 class TestHandler < Chef::Handler
-  Info = {}
+  Response = {}
   def initialize(msg_id)
     super()
     @msg_id = msg_id
   end
   def report()
-    # The Node is available as +node+
-    subject = "node name #{node.name}\n"
-    require 'pp'; pp [:node_name_in_handler, subject]
-    TestHandler::Info[@msg_id] = subject
-    # +run_status+ is a value object with all of the run status data
-    message = "#{run_status.formatted_exception}\n"
-    # Join the backtrace lines. Coerce to an array just in case.
-    message << Array(backtrace).join("\n")
+    response = {:node_name => node.name}
+    if success?()
+      response.merge!(:status => :success)
+    else
+      error_info = {
+        :status => :failed,
+        :error => {
+          :backtrace =>  Array(backtrace),
+          :formatted_exception => run_status.formatted_exception
+        }
+      }
+      response.merge!(error_info)
+    end
+    TestHandler::Response[@msg_id] = response
   end
 end
 
-def run_recipe2()
-  chef_client = Chef::Client.new()
-  Chef::Log.level = Chef::Config[:log_level]
-#  chef_client.json_attribs = attrs
-  chef_client.run
-end
-
-
-
 module MCollective
   module Agent
-    class Chefclient < RPC::Agent
+    class Chef_client < RPC::Agent
       # Basic echo server
       def run_action
         validate :msg, String
         run_recipe(request.uniqid)
-        handler_response = TestHandler::Info.delete(request.uniqid)
-        reply.data = request[:msg] + " " + handler_response
+        handler_response = TestHandler::Response.delete(request.uniqid)
+        reply.data = handler_response
       end
     end
   end

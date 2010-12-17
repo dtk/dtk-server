@@ -1,6 +1,7 @@
 module XYZ
   class DevtestController < Controller 
-    layout :layout_devtest
+    #using default layout
+    layout :default
     def initialize
       super
       @content = nil
@@ -8,6 +9,13 @@ module XYZ
     def dev_test
       @content
     end
+
+    def chef_test
+      json_attrs = nil
+      File.open("/root/node.json"){|f| json_attrs  =f.read}
+      json_attrs
+    end
+
     def discover_and_update(*uri_array)
       c = ret_session_context_id()
       ds_type = uri_array.shift.to_sym

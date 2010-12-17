@@ -165,7 +165,7 @@ p '++++++++++++++++++++++++'
   #enter the routes defined in config into Ramaze
 
     Ramaze::Route["route_to_actionset"] = lambda{ |path, request|
-      if path =~ Regexp.new("^/xyz")
+      if path =~ Regexp.new("^/xyz") and not path =~ Regexp.new("^/xyz/devtest")
         path.gsub(Regexp.new("^/xyz"),"/xyz/actionset/process")
       end
     }

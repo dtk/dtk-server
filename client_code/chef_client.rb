@@ -19,7 +19,7 @@ class RunHandler < Chef::Handler
       error_info = {
         :status => :failed,
         :error => {
-          :backtrace =>  Array(backtrace),
+#          :backtrace =>  Array(backtrace),
           :formatted_exception => run_status.formatted_exception
         }
       }
@@ -35,7 +35,10 @@ module MCollective
       # Basic echo server
       def run_action
         validate :run_list, :list
-        run_recipe(request.uniqid,request[:run_list])
+        begin
+          run_recipe(request.uniqid,request[:run_list])
+        rescue
+        end
         handler_response = RunHandler::Response.delete(request.uniqid)
         reply.data = handler_response
       end

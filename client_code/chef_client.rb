@@ -5,20 +5,7 @@ require 'chef/client'
 require 'chef/handler'
 require 'pp'
 
-def run_recipe(id)
-  chef_client = Chef::Application::Client.new
-  chef_client.reconfigure
-  handler = TestHandler.new(id)
-  Chef::Config[:report_handlers] << handler
-  Chef::Config[:exception_handlers] << handler
-
-  chef_client.setup_application
-#   chef_client.run_application
-  json_attribs = nil
-  Chef::Client.new(json_attribs).run
-end
-
-class TestHandler < Chef::Handler
+class RunHandler < Chef::Handler
   Response = {}
   def initialize(msg_id)
     super()
@@ -38,7 +25,7 @@ class TestHandler < Chef::Handler
       }
       response.merge!(error_info)
     end
-    TestHandler::Response[@msg_id] = response
+    RunHandler::Response[@msg_id] = response
   end
 end
 
@@ -47,10 +34,23 @@ module MCollective
     class Chef_client < RPC::Agent
       # Basic echo server
       def run_action
-        validate :msg, String
-        run_recipe(request.uniqid)
-        handler_response = TestHandler::Response.delete(request.uniqid)
+        validate :run_list, :list
+        run_recipe(request.uniqid,request[:run_list])
+        handler_response = RunHandler::Response.delete(request.uniqid)
         reply.data = handler_response
+      end
+     private
+      def run_recipe(id,run_list)
+        pp [:run_list,run_list]
+        chef_client = Chef::Application::Client.new
+        chef_client.reconfigure
+        handler = RunHandler.new(id)
+        Chef::Config[:report_handlers] << handler
+        Chef::Config[:exception_handlers] << handler
+
+        chef_client.setup_application
+        hash_attribs = {"run_list" => run_list||[]}
+        Chef::Client.new(hash_attribs).run
       end
     end
   end

@@ -589,11 +589,31 @@ pp '))))))))))))))))))))))))))))))))))))'
       SearchObject.create_from_input_hash(hash,:workspace,ret_session_context_id())
     end
 
+    #TBD: stub 
+#    require 'mcollective'
+#    include MCollective::RPC
     def commit_changes()
       context_id = request.params["context_id"]
       context_type = request.params["context_type"]
-
       test_str = 'Params passed in are context id:'+context_id+' and context type:'+context_type
+=begin
+      Ramaze.defer do
+        puts "in commit_changes defer"
+        pp request.params
+        options = {
+          :disctimeout=>2,
+          :config=>"/etc/mcollective/client.cfg",
+          :filter=>{"identity"=>[], "fact"=>[], "agent"=>[], "cf_class"=>[]},
+          :timeout=>500000000
+        }
+        mc = rpcclient("chef_client",:options => options)
+        msg_content = {:run_list => ["recipe[user_account]"]}
+        results =  mc.run(msg_content)
+        results.map{|result|pp result.results[:data]} #.first.results[:data]}
+         mc.disconnect
+        puts "end of commit_changes defer"
+      end
+=end
       return {
         'data'=>test_str
       }

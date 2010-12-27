@@ -590,13 +590,13 @@ pp '))))))))))))))))))))))))))))))))))))'
     end
 
     #TBD: stub 
-#    require 'mcollective'
-#    include MCollective::RPC
+    require 'mcollective'
+    include MCollective::RPC
     def commit_changes()
       context_id = request.params["context_id"]
       context_type = request.params["context_type"]
       test_str = 'Params passed in are context id:'+context_id+' and context type:'+context_type
-=begin
+
       Ramaze.defer do
         puts "in commit_changes defer"
         pp request.params
@@ -613,7 +613,7 @@ pp '))))))))))))))))))))))))))))))))))))'
          mc.disconnect
         puts "end of commit_changes defer"
       end
-=end
+
       return {
         'data'=>test_str
       }

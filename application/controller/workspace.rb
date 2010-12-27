@@ -97,15 +97,14 @@ pp [:debug_stored_new_pos,get_objects(model_name,SQL.in(:id,model_items.map{|ite
       model_list = get_objects(model_name.to_sym,where_clause)
       model_list.each_with_index do |model,index|
         model_list[index][:model_name] = model_name
-          body_value = ''
-          model_list[index][:ui].nil? ? model_list[index][:ui] = {} : nil
-          model_list[index][:ui][:images].nil? ? model_list[index][:ui][:images] = {} : nil
-
-         !model_list[index][:ui][:images][:tnail].nil? ? img_value = '<div class="img_wrapper"><img title="' << model_list[index][:display_name] << '"' << 'src="' << R8::Config[:base_images_uri] << '/' << model_name << 'Icons/'<< model_list[index][:ui][:images][:tnail] <<'"/></div>' : img_value = ""
-          body_value = img_value
+        body_value = ''
+        model_list[index][:ui] ||= {}
+        model_list[index][:ui][:images] ||= {}
+        img_value = model_list[index][:ui][:images][:tnail] ? '<div class="img_wrapper"><img title="' << model_list[index][:display_name] << '"' << 'src="' << R8::Config[:base_images_uri] << '/' << model_name << 'Icons/'<< model_list[index][:ui][:images][:tnail] << '"/></div>' : ""
+        body_value = img_value
           
-          body_value == '' ? body_value = model_list[index][:display_name] : nil
-          model_list[index][:body_value] = body_value
+        body_value == '' ? body_value = model_list[index][:display_name] : nil
+        model_list[index][:body_value] = body_value
       end
 
       tpl = R8Tpl::TemplateR8.new("workspace/wspace_search_#{model_name}",user_context())
@@ -537,15 +536,14 @@ pp '))))))))))))))))))))))))))))))))))))'
       model_list = get_objects(model_name.to_sym,where_clause)
       model_list.each_with_index do |model,index|
         model_list[index][:model_name] = model_name
-          body_value = ''
-          model_list[index][:ui].nil? ? model_list[index][:ui] = {} : nil
-          model_list[index][:ui][:images].nil? ? model_list[index][:ui][:images] = {} : nil
-
-         !model_list[index][:ui][:images][:tnail].nil? ? img_value = '<div class="img_wrapper"><img title="' << model_list[index][:display_name] << '"' << 'src="' << R8::Config[:base_images_uri] << '/' << model_name << 'Icons/'<< model_list[index][:ui][:images][:tnail] <<'"/></div>' : img_value = ""
-          body_value = img_value
+        body_value = ''
+        model_list[index][:ui] ||= {}
+        model_list[index][:ui][:images] ||= {}
+        img_value = model_list[index][:ui][:images][:tnail] ? img_value = '<div class="img_wrapper"><img title="' << model_list[index][:display_name] << '"' << 'src="' << R8::Config[:base_images_uri] << '/' << model_name << 'Icons/'<< model_list[index][:ui][:images][:tnail] << '"/></div>' : ""
+        body_value = img_value
           
-          body_value == '' ? body_value = model_list[index][:display_name] : nil
-          model_list[index][:body_value] = body_value
+        body_value == '' ? body_value = model_list[index][:display_name] : nil
+        model_list[index][:body_value] = body_value
       end
 
       tpl = R8Tpl::TemplateR8.new("workspace/wspace_search_#{model_name}_2",user_context())
@@ -588,32 +586,57 @@ pp '))))))))))))))))))))))))))))))))))))'
       } 
       SearchObject.create_from_input_hash(hash,:workspace,ret_session_context_id())
     end
-
+=begin
     #TBD: stub 
     require 'mcollective'
     include MCollective::RPC
+    require 'ruote'
+    require 'ruote/storage/fs_storage'
+=end
     def commit_changes()
       context_id = request.params["context_id"]
       context_type = request.params["context_type"]
       test_str = 'Params passed in are context id:'+context_id+' and context type:'+context_type
-
+=begin
       Ramaze.defer do
         puts "in commit_changes defer"
         pp request.params
-        options = {
-          :disctimeout=>2,
-          :config=>"/etc/mcollective/client.cfg",
-          :filter=>{"identity"=>[], "fact"=>[], "agent"=>[], "cf_class"=>[]},
-          :timeout=>500000000
-        }
-        mc = rpcclient("chef_client",:options => options)
-        msg_content = {:run_list => ["recipe[user_account]"]}
-        results =  mc.run(msg_content)
-        results.map{|result|pp result.results[:data]} #.first.results[:data]}
-         mc.disconnect
-        puts "end of commit_changes defer"
-      end
 
+        engine = Ruote::Engine.new(Ruote::Worker.new(Ruote::FsStorage.new('ruote_work')))
+
+        # registering participants
+
+        engine.register_participant :chef_client do |workitem|
+          options = {
+            :disctimeout=>2,
+            :config=>"/etc/mcollective/client.cfg",
+            :filter=>{"identity"=>[], "fact"=>[], "agent"=>[], "cf_class"=>[]},
+            :timeout=>500000000
+      }  
+          mc = rpcclient("chef_client",:options => options)
+          msg_content = {:run_list => ["recipe[user_account]"]}
+          results =  mc.run(msg_content)
+          data = results.map{|result|result.results[:data]} #.first.results[:data]}
+          mc.disconnect
+          pp [:data,data]
+          workitem.fields['message'] = data 
+        end
+
+        engine.register_participant :bravo do |workitem|
+          pp [:bravo,workitem.fields]
+        end
+        process_def = Ruote.process_definition :name => 'test' do
+        sequence do
+          participant :chef_client
+          participant :chef_client
+          participant :bravo
+        end
+      end
+      wfid = engine.launch(process_def)
+      engine.wait_for(wfid)
+      puts "end of commit_changes defer"
+    end
+=end
       return {
         'data'=>test_str
       }
@@ -621,3 +644,6 @@ pp '))))))))))))))))))))))))))))))))))))'
 
   end
 end
+
+
+

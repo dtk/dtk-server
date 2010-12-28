@@ -586,17 +586,39 @@ pp '))))))))))))))))))))))))))))))))))))'
       } 
       SearchObject.create_from_input_hash(hash,:workspace,ret_session_context_id())
     end
+
+    def ret_pending_installed_components_so(datacenter_id)
+      dc_parent_field_name = ModelHandle.new(ret_session_context_id(),:action,:datacenter).parent_id_field_name()
+      hash = {
+        "search_pattern" => {
+          :relation => :action,
+          :filter => [:and,
+                      [:eq, dc_parent_field_name, datacenter_id],
+                      [:eq, :type,"install-component"],
+                      [:eq, :state, "pending"]],
+          :columns => [:id, :relative_order,:component,dc_parent_field_name,:action_id]
+        }
+      } 
+      SearchObject.create_from_input_hash(hash,:action,ret_session_context_id())
+    end
 =begin
     #TBD: stub 
     require 'mcollective'
     include MCollective::RPC
-    require 'ruote'
-    require 'ruote/storage/fs_storage'
 =end
     def commit_changes()
       context_id = request.params["context_id"]
       context_type = request.params["context_type"]
       test_str = 'Params passed in are context id:'+context_id+' and context type:'+context_type
+      #TODO: initial test is looking just at installed components
+      return {'data'=>test_str} unless context_type.to_sym == :datacenter
+
+      datacenter_id = context_id.to_i
+      pending_cmp_installs = Model.get_objects_from_search_object(ret_pending_installed_components_so(datacenter_id))
+      return {'data'=> "No pending installed components"} if pending_cmp_installs.empty?
+      Workflow.create_workflow(pending_cmp_installs)
+      test_str = "pending installed components [#{pending_cmp_installs.map{|x|x[:component][:id]}.join(",")}]"
+
 =begin
       Ramaze.defer do
         puts "in commit_changes defer"

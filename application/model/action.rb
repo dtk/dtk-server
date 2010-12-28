@@ -9,7 +9,7 @@ module XYZ
       #TODO; may rename
       column :object_type, :varchar, :size => 15 # "attribute" | "node" | "component"
       column :transaction, :int, :default => 1 #TODO may introduce transaction object and make this a foreign key
-      #TODO: change below to more general json field about ordering
+      #TODO: may change below to more general json field about (partial) ordering
       column :relative_order, :int, :default => 1 #relative with respect to parent
       column :change, :json # gives detail about the change
 
@@ -17,9 +17,6 @@ module XYZ
       virtual_column :old_value, :path => [:change, :old]
       virtual_column :new_value, :path => [:change, :new]
 
-      virtual_column :node_group, :path => [:base_object,:node_group,:display_name]
-      virtual_column :node, :path => [:base_object,:node,:display_name]
-      virtual_column :component, :path => [:base_object,:component,:display_name]
       virtual_column :qualified_parent_name, :type => :varchar, :local_dependencies => [:base_object]
 
       #one of thse wil be non null and point to object being changed or added
@@ -28,11 +25,26 @@ module XYZ
       foreign_key :component_id, :component, FK_CASCADE_OPT
       #TODO: may have here who, when
 
+      virtual_column :component, :type => :json, :hidden => true,
+        :remote_dependencies =>
+        [
+         {
+           :model_name => :component,
+           :join_type => :inner,
+           :join_cond=>{:id=> :action__component_id},
+           :cols=>[:id, :display_name]
+         }
+        ]
+
       many_to_one :datacenter, :action
       one_to_many :action #that is for decomposition #todo: what about for ordering
     end
     ### virtual column defs
     #######################
+    def components()
+      self[:component]
+    end
+
     def qualified_parent_name()
       base =  self[:base_object]
       return nil unless base
@@ -44,6 +56,14 @@ module XYZ
 
     #object processing and access functions
     #######################
+    def self.actions_are_concurrent?(action_list)
+      rel_order = action_list.map{|x|x[:relative_order]}
+      val = rel_order.shift
+      rel_order.each{|x|return nil unless x == val}
+      true
+    end
+
+
     def self.create_pending_change_item(new_item_hash)
       create_pending_change_items([new_item_hash]).first
     end

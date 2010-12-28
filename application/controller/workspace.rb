@@ -589,6 +589,7 @@ pp '))))))))))))))))))))))))))))))))))))'
 
     helper :commit_actions
     def commit_changes()
+pp [:threads, Thread.list]
       context_id = request.params["context_id"]
       context_type = request.params["context_type"]
       test_str = 'Params passed in are context id:'+context_id+' and context type:'+context_type
@@ -598,7 +599,7 @@ pp '))))))))))))))))))))))))))))))))))))'
       datacenter_id = context_id.to_i
       pending_cmp_installs = ret_pending_installed_components(datacenter_id)
       return {'data'=> "No pending installed components"} if pending_cmp_installs.empty?
-      pp [:pending_cmp_installs,pending_cmp_installs]
+#      pp [:pending_cmp_installs,pending_cmp_installs]
       workflow = generate_workflow(pending_cmp_installs)
       test_str = "pending installed components [#{pending_cmp_installs.map{|x|x[:component][:id]}.join(",")}]"
       Ramaze.defer do

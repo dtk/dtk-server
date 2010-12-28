@@ -31,18 +31,20 @@ module XYZ
 
       def ret_process_definition(ordered_actions)
         ::Ruote.process_definition :name => 'process' do
-          if ordered_actions.is_single_action?()
-            participant :ref => :execute_on_node, :action => ordered_actions.single_action()
-          elsif ordered_actions.is_concurrent?()
-            concurrence :mix => true do
-              ordered_actions.elements.each{|action|participant :ref => :execute_on_node, :action => action}
+          sequence do
+            if ordered_actions.is_single_action?()
+              participant :ref => :execute_on_node, :action => ordered_actions.single_action()
+            elsif ordered_actions.is_concurrent?()
+              concurrence :mix => true do
+                ordered_actions.elements.each{|action|participant :ref => :execute_on_node, :action => action}
+              end
+            elsif ordered_actions.is_sequential?()
+              sequence do
+                ordered_actions.elements.each{|action|participant :ref => :execute_on_node, :action => action}
+              end
             end
-          elsif ordered_actions.is_sequential?()
-            sequence do
-              ordered_actions.elements.each{|action|participant :ref => :execute_on_node, :action => action}
-            end
+            participant :bravo
           end
-          participant :bravo
         end
       end
     end

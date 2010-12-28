@@ -14,10 +14,10 @@ module XYZ
       first == :sequential
     end
     
-    def ret_single_action()
+    def single_action()
       self[1]
     end
-    def ret_elements()
+    def elements()
       self[1..size-1]
     end
 

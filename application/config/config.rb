@@ -58,6 +58,14 @@ R8::Config[:database][:pass] = "bosco"
 R8::Config[:database][:name] = "db_main"
 R8::Config[:database][:type] = "postgres"
 
+#Workflow related parameters
+R8::Config[:workflow] = Hash.new
+R8::Config[:workflow][:type] = "ruote"
+
+#Command and control related parameters
+R8::Config[:command_and_control] = Hash.new
+R8::Config[:command_and_control][:type] = "mcollective"
+
 
 #these are used in template.r8.rb and view.r8.rb
 #R8::Config[:sys_root_path] = "C:/webroot/R8Server"

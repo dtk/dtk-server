@@ -612,7 +612,7 @@ pp '))))))))))))))))))))))))))))))))))))'
       datacenter_id = context_id.to_i
       pending_cmp_installs = Model.get_objects_from_search_object(ret_pending_installed_components_so(datacenter_id))
       return {'data'=> "No pending installed components"} if pending_cmp_installs.empty?
-      workflow = Workflow.create_workflow(pending_cmp_installs)
+      workflow = Workflow.create(pending_cmp_installs)
       test_str = "pending installed components [#{pending_cmp_installs.map{|x|x[:component][:id]}.join(",")}]"
       Ramaze.defer do
         puts "in commit_changes defer"

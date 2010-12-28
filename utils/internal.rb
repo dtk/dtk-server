@@ -9,6 +9,7 @@ require File.expand_path('internal/serialize_to_json', File.dirname(__FILE__))
 require File.expand_path('internal/import_export', File.dirname(__FILE__))
 require File.expand_path('internal/semantic_type', File.dirname(__FILE__))
 require File.expand_path('internal/workflow', File.dirname(__FILE__))
+require File.expand_path('internal/command_and_control', File.dirname(__FILE__))
 #just load base classes; specific models dynamically loaded on need basis
 require File.expand_path('internal/data_sources', File.dirname(__FILE__))
 

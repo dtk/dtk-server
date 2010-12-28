@@ -5,7 +5,8 @@ module XYZ
   module CommandAndControlAdapter
     class Mcollective < CommandAndControl
       #TODO: should take parameter, which includes whether client is chef or puppet
-      def dispatch_to_client() 
+      def dispatch_to_client(action) 
+        pp [:client_action,action]
         mc = rpcclient("chef_client",:options => Options)
         msg_content = {:run_list => ["recipe[user_account]"]}
         results =  mc.run(msg_content)

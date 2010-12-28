@@ -15,7 +15,7 @@ module Ramaze::Helper
                       [:eq, dc_parent_field_name, datacenter_id],
                       [:eq, :type,"install-component"],
                       [:eq, :state, "pending"]],
-          :columns => [:id, :relative_order,:installed_component,dc_parent_field_name,:action_id]
+          :columns => [:id, :relative_order,:type,:installed_component,dc_parent_field_name,:action_id]
         }
       } 
       search_object = SearchObject.create_from_input_hash(hash,:action,ret_session_context_id())

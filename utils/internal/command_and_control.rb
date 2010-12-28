@@ -11,7 +11,7 @@ module XYZ
       end
       klass.new()
     end
-    def dispatch_to_client() 
+    def dispatch_to_client(action) 
       nil
     end
    private

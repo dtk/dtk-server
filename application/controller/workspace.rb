@@ -601,11 +601,7 @@ pp '))))))))))))))))))))))))))))))))))))'
       } 
       SearchObject.create_from_input_hash(hash,:action,ret_session_context_id())
     end
-=begin
-    #TBD: stub 
-    require 'mcollective'
-    include MCollective::RPC
-=end
+
     def commit_changes()
       context_id = request.params["context_id"]
       context_type = request.params["context_type"]
@@ -616,49 +612,15 @@ pp '))))))))))))))))))))))))))))))))))))'
       datacenter_id = context_id.to_i
       pending_cmp_installs = Model.get_objects_from_search_object(ret_pending_installed_components_so(datacenter_id))
       return {'data'=> "No pending installed components"} if pending_cmp_installs.empty?
-      Workflow.create_workflow(pending_cmp_installs)
+      workflow = Workflow.create_workflow(pending_cmp_installs)
       test_str = "pending installed components [#{pending_cmp_installs.map{|x|x[:component][:id]}.join(",")}]"
-
-=begin
       Ramaze.defer do
         puts "in commit_changes defer"
         pp request.params
-
-        engine = Ruote::Engine.new(Ruote::Worker.new(Ruote::FsStorage.new('ruote_work')))
-
-        # registering participants
-
-        engine.register_participant :chef_client do |workitem|
-          options = {
-            :disctimeout=>2,
-            :config=>"/etc/mcollective/client.cfg",
-            :filter=>{"identity"=>[], "fact"=>[], "agent"=>[], "cf_class"=>[]},
-            :timeout=>500000000
-      }  
-          mc = rpcclient("chef_client",:options => options)
-          msg_content = {:run_list => ["recipe[user_account]"]}
-          results =  mc.run(msg_content)
-          data = results.map{|result|result.results[:data]} #.first.results[:data]}
-          mc.disconnect
-          pp [:data,data]
-          workitem.fields['message'] = data 
-        end
-
-        engine.register_participant :bravo do |workitem|
-          pp [:bravo,workitem.fields]
-        end
-        process_def = Ruote.process_definition :name => 'test' do
-        sequence do
-          participant :chef_client
-          participant :chef_client
-          participant :bravo
-        end
+        workflow.execute()
+        puts "end of commit_changes defer"
       end
-      wfid = engine.launch(process_def)
-      engine.wait_for(wfid)
-      puts "end of commit_changes defer"
-    end
-=end
+
       return {
         'data'=>test_str
       }

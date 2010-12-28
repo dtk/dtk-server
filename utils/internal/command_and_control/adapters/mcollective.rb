@@ -3,7 +3,7 @@ include MCollective::RPC
 
 module XYZ
   class Mcollective < CommandAndControl
-    #TODO: should take parameter
+    #TODO: should take parameter, which includes whether client is chef or puppet
     def dispatch_to_client() 
       mc = rpcclient("chef_client",:options => Options)
       msg_content = {:run_list => ["recipe[user_account]"]}

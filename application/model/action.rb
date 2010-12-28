@@ -32,12 +32,12 @@ module XYZ
            :model_name => :component,
            :join_type => :inner,
            :join_cond=>{:id=> :action__component_id},
-           :cols=>[:id, :display_name]
+           :cols=>[:id, :display_name, :external_ref]
          }
         ]
 
       many_to_one :datacenter, :action
-      one_to_many :action #that is for decomposition #todo: what about for ordering
+      one_to_many :action #that is for decomposition 
     end
     ### virtual column defs
     #######################

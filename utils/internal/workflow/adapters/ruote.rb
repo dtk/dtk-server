@@ -9,7 +9,7 @@ module XYZ
         @engine.wait_for(wfid)
       end
      private 
-      def initialize(action_list)
+      def initialize(ordered_actions)
         @engine = ::Ruote::Engine.new(::Ruote::Worker.new(::Ruote::FsStorage.new('ruote_work')))
         # registering participants
         @engine.register_participant :execute_on_node do |workitem|
@@ -26,18 +26,16 @@ module XYZ
         @engine.register_participant :bravo do |workitem|
           pp [:bravo,workitem.fields]
         end
-        @process_def = ret_process_definition(action_list)
+        @process_def = ret_process_definition(ordered_actions)
       end
 
-      def ret_process_definition(action_list)
-        if Action.actions_are_concurrent?(action_list)
+      def ret_process_definition(ordered_actions)
           #TODO: stub
-          ::Ruote.process_definition :name => 'test' do
-            sequence do
-              participant :execute_on_node
-              participant :execute_on_node
-              participant :bravo
-            end
+        ::Ruote.process_definition :name => 'test' do
+          sequence do
+            participant :execute_on_node
+            participant :execute_on_node
+            participant :bravo
           end
         end
       end

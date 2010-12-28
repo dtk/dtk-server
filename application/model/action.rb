@@ -25,13 +25,19 @@ module XYZ
       foreign_key :component_id, :component, FK_CASCADE_OPT
       #TODO: may have here who, when
 
-      virtual_column :component, :type => :json, :hidden => true,
+      virtual_column :installed_component, :type => :json, :hidden => true,
         :remote_dependencies =>
         [
          {
            :model_name => :component,
            :join_type => :inner,
            :join_cond=>{:id=> :action__component_id},
+           :cols=>[:id, :display_name, :external_ref, :node_node_id]
+         },
+         {
+           :model_name => :node,
+           :join_type => :inner,
+           :join_cond=>{:id=> :component__node_node_id},
            :cols=>[:id, :display_name, :external_ref]
          }
         ]
@@ -41,9 +47,7 @@ module XYZ
     end
     ### virtual column defs
     #######################
-    def components()
-      self[:component]
-    end
+
 
     def qualified_parent_name()
       base =  self[:base_object]

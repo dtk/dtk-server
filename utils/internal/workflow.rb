@@ -1,6 +1,6 @@
 module XYZ
   class Workflow
-    def self.create(action_list)
+    def self.create(ordered_actions)
       klass = self
       begin
         type = R8::Config[:workflow][:type]
@@ -9,11 +9,11 @@ module XYZ
        rescue LoadError
         Log.error("cannot find workflow adapter; loading null workflow class")
       end
-      klass.new(action_list)
+      klass.new(ordered_actions)
     end
     def execute()
     end
-    def initialize(action_list)
+    def initialize(ordered_actions)
     end
   end
   module WorkflowAdapter

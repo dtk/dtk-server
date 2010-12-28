@@ -1,10 +1,6 @@
 require 'ruote'
 require 'ruote/storage/fs_storage'
 
-#TODO: encapsulate mcollective
-require 'mcollective'
-include MCollective::RPC
-
 module XYZ
   class Ruote < Workflow
     def execute()
@@ -12,23 +8,18 @@ module XYZ
       @engine.wait_for(wfid)
     end
    private 
-    MCOptions = {
-      :disctimeout=>2,
-      :config=>"/etc/mcollective/client.cfg",
-      :filter=>{"identity"=>[], "fact"=>[], "agent"=>[], "cf_class"=>[]},
-      :timeout=>500000000
-    }  
     def initialize(action_list)
       @engine = ::Ruote::Engine.new(::Ruote::Worker.new(::Ruote::FsStorage.new('ruote_work')))
       # registering participants
       @engine.register_participant :chef_client do |workitem|
-        mc = rpcclient("chef_client",:options => MCOptions)
-        msg_content = {:run_list => ["recipe[user_account]"]}
-        results =  mc.run(msg_content)
-        data = results.map{|result|result.results[:data]} #.first.results[:data]}
-        mc.disconnect
-        pp [:data,data]
-        workitem.fields['message'] = data 
+        begin
+          cac = CommandAndControl.create()
+          data = cac.dispatch_to_client()
+          pp [:data,data]
+          workitem.fields['message'] = data 
+         rescue Exception => e
+          Log.error("error in workflow chef_client: #{e.inspect}")
+        end
       end
 
       @engine.register_participant :bravo do |workitem|

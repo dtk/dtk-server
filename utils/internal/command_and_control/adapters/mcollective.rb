@@ -1,0 +1,25 @@
+require 'mcollective'
+include MCollective::RPC
+
+module XYZ
+  class Mcollective < CommandAndControl
+    #TODO: should take parameter
+    def dispatch_to_client() 
+      mc = rpcclient("chef_client",:options => Options)
+      msg_content = {:run_list => ["recipe[user_account]"]}
+      results =  mc.run(msg_content)
+
+      data = results.map{|result|result.results[:data]} 
+      mc.disconnect
+      data 
+    end
+ private
+    Options = {
+      :disctimeout=>2,
+      :config=>"/etc/mcollective/client.cfg",
+      :filter=>{"identity"=>[], "fact"=>[], "agent"=>[], "cf_class"=>[]},
+      :timeout=>500000000
+    }  
+
+  end
+end

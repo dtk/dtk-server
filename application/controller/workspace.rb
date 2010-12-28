@@ -615,10 +615,14 @@ pp '))))))))))))))))))))))))))))))))))))'
       workflow = Workflow.create(pending_cmp_installs)
       test_str = "pending installed components [#{pending_cmp_installs.map{|x|x[:component][:id]}.join(",")}]"
       Ramaze.defer do
-        puts "in commit_changes defer"
-        pp request.params
-        workflow.execute()
-        puts "end of commit_changes defer"
+        begin
+          puts "in commit_changes defer"
+          pp request.params
+          workflow.execute()
+        rescue Exception => e
+          Log.error("error in commit background job: #{e.inspect}")
+        end
+          puts "end of commit_changes defer"
       end
 
       return {

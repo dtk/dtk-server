@@ -5,27 +5,26 @@ module XYZ
   module WorkflowAdapter
     class Ruote < XYZ::Workflow
       def execute()
-        wfid = @engine.launch(@process_def)
-        @engine.wait_for(wfid)
+        wfid = Engine.launch(@process_def)
+        Engine.wait_for(wfid)
       end
      private 
-      def initialize(ordered_actions)
-        @engine = ::Ruote::Engine.new(::Ruote::Worker.new(::Ruote::FsStorage.new('ruote_work')))
-        # registering participants
-        @engine.register_participant :execute_on_node do |workitem|
-          begin
-            cac = CommandAndControl.create()
-            data = cac.dispatch_to_client(workitem.fields["params"]["action"])
-            pp [:data,data]
-            workitem.fields['message'] = data 
-           rescue Exception => e
-            Log.error("error in workflow execute_on_node: #{e.inspect}")
-          end
+      Engine = ::Ruote::Engine.new(::Ruote::Worker.new(::Ruote::FsStorage.new('ruote_work'))) 
+      Engine.register_participant :execute_on_node do |workitem|
+        begin
+          cac = CommandAndControl.create()
+          data = cac.dispatch_to_client(workitem.fields["params"]["action"])
+          pp [:data,data]
+          workitem.fields['message'] = data 
+        rescue Exception => e
+          Log.error("error in workflow execute_on_node: #{e.inspect}")
         end
-        
-        @engine.register_participant :bravo do |workitem|
-          pp [:bravo,workitem.fields]
-        end
+      end
+      Engine.register_participant :bravo do |workitem|
+        pp [:bravo,workitem.fields]
+      end
+
+     def initialize(ordered_actions)
         @process_def = ret_process_definition(ordered_actions)
       end
 

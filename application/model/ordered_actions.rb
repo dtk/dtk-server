@@ -2,9 +2,7 @@
 module XYZ
   class OrderedActions 
     def self.create(action_list)
-      obj=self.new()
-      obj.set_top_level(action_list)
-      obj
+      self.new().set_top_level(action_list)
     end
     def is_single_action?()
       @type == :single_action
@@ -23,21 +21,22 @@ module XYZ
       @elements
     end
 
-    #### 'private' methods fro 'this'
+    #### 'private' methods for 'this'
     def set_top_level(action_list)
       if action_list.size == 1
-        @type = :single_action
-        @elements = action_list
-        return self
+        return set(:single_action,action_list)
       end
       actions_by_node = group_by_node(action_list)
       #TODO: stub where all actions cross-node are concurrent
-      @type = :concurrent
-      @elements = actions_by_node
+      set(:concurrent,actions_by_node)
     end
 
    private
-    attr_writer :type, :elements
+    def set(type,elements)
+      @type = type
+      @elements = elements
+      self
+    end
     def initialize()
       @type = nil
       @elements = nil
@@ -55,10 +54,7 @@ module XYZ
         return action_list.first
       end
       #TODO: stub to determine appropriate sequential order on node
-      obj = self.new()
-      obj.type = :sequential
-      obj.elements = action_list
-      obj
+      self.new().set(:sequential,action_list)
     end
   end
 end

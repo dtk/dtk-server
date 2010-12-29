@@ -34,7 +34,7 @@ module XYZ
             if ordered_actions.is_single_action?()
               participant :ref => :execute_on_node, :action => ordered_actions.single_action()
             elsif ordered_actions.is_concurrent?()
-              concurrence :mix => true do
+              concurrence :merge_type => :mix do
                 ordered_actions.elements.each{|action|participant :ref => :execute_on_node, :action => action}
               end
             elsif ordered_actions.is_sequential?()

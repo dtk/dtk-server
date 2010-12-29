@@ -14,8 +14,7 @@ module XYZ
         begin
           cac = CommandAndControl.create()
           data = cac.dispatch_to_client(workitem.fields["params"]["action"])
-          pp [:data,data]
-          workitem.fields['message'] = data 
+          workitem.fields[workitem.fields["params"]["action"]["id"]] = data 
         rescue Exception => e
           Log.error("error in workflow execute_on_node: #{e.inspect}")
         end
@@ -23,13 +22,14 @@ module XYZ
       Engine.register_participant :bravo do |workitem|
         pp [:bravo,workitem.fields]
       end
-
+      @@count = 0
      def initialize(ordered_actions)
         @process_def = ret_process_definition(ordered_actions)
       end
 
       def ret_process_definition(ordered_actions)
-        ::Ruote.process_definition :name => 'process' do
+        @@count += 1
+        ::Ruote.process_definition :name => "process-#{@@count.to_s}" do
           sequence do
             if ordered_actions.is_single_action?()
               participant :ref => :execute_on_node, :action => ordered_actions.single_action()

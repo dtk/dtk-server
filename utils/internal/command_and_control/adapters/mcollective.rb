@@ -5,7 +5,6 @@ module XYZ
   module CommandAndControlAdapter
     class Mcollective < CommandAndControl
       def dispatch_to_client(action) 
-        pp [:client_action,action]
          msg_content = {:run_list => ["recipe[user_account]"]}
         results =  MC.run(msg_content)
         

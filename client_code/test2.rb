@@ -7,7 +7,8 @@ options = {
   :disctimeout=>2, 
   :config=>"/etc/mcollective/client.cfg",
   :filter=>{"identity"=>[], "fact"=>[], "agent"=>[], "cf_class"=>[]}, 
-  :timeout=>500000000 
+  :timeout=>500000000,
+:verbose => true
 }
 
 arr = []

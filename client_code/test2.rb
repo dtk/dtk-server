@@ -7,22 +7,23 @@ options = {
   :disctimeout=>2, 
   :config=>"/etc/mcollective/client.cfg",
   :filter=>{"identity"=>[], "fact"=>[], "agent"=>[], "cf_class"=>[]}, 
-  :timeout=>500000000,
-:verbose => true
+  :timeout=>500000000
 }
 
-arr = []
 mc = rpcclient("chef_client",:options => options)
+4.times do |j|
+  pp [:thhreads, Thread.list]
+  arr = []
+  results = []
 
-2.times do |i|
-  arr[i] = Thread.new {
-    pp [:i,i]
-    msg_content = {:run_list => ["recipe[user_account]"]}
-    results =  mc.run(msg_content)
-    results.map{|result|pp result.results[:data]} #.first.results[:data]}
-  }
+  2.times do |i|
+    arr[i] = Thread.new do
+      msg_content = {:run_list => ["recipe[user_account]"]}
+      results << mc.run(msg_content)
+    end
+  end
+
+  arr.each {|t| t.join}
+  pp [:results, results]
 end
-
-arr.each {|t| t.join}
 mc.disconnect
-  

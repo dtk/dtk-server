@@ -62,7 +62,7 @@ module XYZ
     #######################
     def self.actions_are_concurrent?(action_list)
 #TODO: stub
-return nil
+#return nil
       rel_order = action_list.map{|x|x[:relative_order]}
       val = rel_order.shift
       rel_order.each{|x|return nil unless x == val}

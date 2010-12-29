@@ -17,7 +17,7 @@ module XYZ
         :disctimeout=>2,
         :config=>"/etc/mcollective/client.cfg",
         :filter=>{"identity"=>[], "fact"=>[], "agent"=>[], "cf_class"=>[]},
-        :timeout=>500000000
+        :timeout=>200
       }  
       MC = rpcclient("chef_client",:options => Options)
     end

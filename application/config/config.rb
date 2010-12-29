@@ -60,7 +60,8 @@ R8::Config[:database][:type] = "postgres"
 
 #Workflow related parameters
 R8::Config[:workflow] = Hash.new
-R8::Config[:workflow][:type] = "ruote"
+#R8::Config[:workflow][:type] = "ruote"
+R8::Config[:workflow][:type] = "simple"
 
 #Command and control related parameters
 R8::Config[:command_and_control] = Hash.new

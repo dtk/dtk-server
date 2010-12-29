@@ -1,6 +1,5 @@
 
 if (!R8.Utils) {
-
 	/*
 	 * This is the utility r8 js class, more to be added
 	 */
@@ -10,13 +9,14 @@ if (!R8.Utils) {
 			/*
 			 * This is the global YUI variable to be used
 			 */
+			Y : new YUI(YUI_config).use('dd', 'node'),
 //			Y : new YUI({base:'js/yui3x/build/'}).use('dd', 'node'),
-			Y: new YUI().use('dd', 'node'),
+//			Y: new YUI().use('dd', 'node'),
 
 			/*
 			 * This is the global jQuery variable to be used
 			 */
-			$ : jQuery,
+			$: jQuery,
 
 			/*
 			 * This function takes a name/value pair json object and return a name=value&name2=value2 string

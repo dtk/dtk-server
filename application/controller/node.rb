@@ -1,5 +1,39 @@
 module XYZ
   class NodeController < Controller
+    def actest
+      tpl = R8Tpl::TemplateR8.new("node/actest",user_context())
+      tpl.assign(:_app,app_common())
+      foo = tpl.render()
+pp foo
+pp '++++++++++++++++++++++++++++++'
+
+      return {
+        :content => foo
+      }
+    end
+
+    def ac_remotesearch
+pp '++++++++++++++++++++++++++++++'
+pp request.params
+      results_array = Array.new
+      results_array << 'Michael Jordan'
+      results_array << 'Scotty Pippen'
+      results_array << 'Magic Johnson'
+      results_array << 'Larry Bird'
+      results_array << 'David Robinson'
+      results_array << 'LeBron James'
+      results_array << 'Al Harrington'
+      results_array << 'Baron Davis'
+      results_array << 'Charles Barkely'
+      results_array << 'Chuck Johnson'
+      results_array << 'Cal Hooper'
+      results_array << 'Dominique Wilkins'
+pp results_array
+
+      return {
+        :data => results_array
+      }
+    end
 
     def wspace_display(id)
       c = ret_session_context_id()

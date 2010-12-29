@@ -874,7 +874,7 @@ if (!R8.Canvas) {
 			 */
 			renderDragWire : function(startElemNode,dragElemNode,portDef) {
 				var ctrlPtBaseValue = 100;
-				var portsList = workspacePorts;
+//				var portsList = workspacePorts;
 				var portElemID = startElemNode.get('id');
 //				var startPortObj = R8.Workspace.ports[portElemID];
 //				var startPortObj = workspacePorts[portElemID];

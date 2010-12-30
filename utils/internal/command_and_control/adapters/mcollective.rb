@@ -20,7 +20,7 @@ module XYZ
       end
       Filter = {"identity"=>[], "fact"=>[], "agent"=>[], "cf_class"=>[]}
       Options = {
-        :disctimeout=>2,
+        :disctimeout=>4,
         :config=>"/etc/mcollective/client.cfg",
         :filter=> Filter,
         :timeout=>200

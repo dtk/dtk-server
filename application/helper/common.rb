@@ -2,6 +2,12 @@ module Ramaze::Helper
   module Common
     include XYZ #TODO: included because of ModelHandle amd Model; make sure not expensive to laod these defs in this module
    private
+    #query helpers
+    def get_objects_from_search_pattern_hash(hash)
+      search_object = SearchObject.create_from_input_hash({"search_pattern" => hash},hash[:relation],ret_session_context_id())
+      Model.get_objects_from_search_object(search_object)
+    end
+
     #helpers that interact with model
     def get_objects(model_name,where_clause={},opts={})
       c = ret_session_context_id()

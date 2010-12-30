@@ -90,6 +90,10 @@ module XYZ
       end
     end
     
+    def self.parent_field_name(parent_model_name,model_name)
+      ret_parent_id_field_name(DB_REL_DEF[parent_model_name],DB_REL_DEF[model_name])
+    end
+    #TODO: deprecate the two below
     def self.ret_parent_id_field_name(parent_db_rel,db_rel)
       parent_db_rel[:schema] == db_rel[:schema] ?
         (parent_db_rel[:table].to_s + "_id").to_sym :

@@ -5,12 +5,12 @@ module XYZ
   module CommandAndControlAdapter
     class Mcollective < CommandAndControl
       def dispatch_to_client(action) 
- #       mc.fact_filter "pbuilderid", pbuilderid(action)
+        opts = Options.merge(:filter => Filter.merge("fact"=>[{:value=>pbuilderid(action), :fact=>"pbuilderid"}]))
+        mc = rpcclient("chef_client",:options => opts)
         msg_content = {:run_list => ["recipe[user_account]"]}
-        results =  MC.run(msg_content)
-        
+        results = mc.run(msg_content)
         data = results.map{|result|result.results[:data]} 
-#        mc.disconnect
+        #TODO: where do we do mc.disconnect
         data 
       end
      private
@@ -18,13 +18,13 @@ module XYZ
       def pbuilderid(action)
         action[:node][:external_ref][:instance_id]
       end
+      Filter = {"identity"=>[], "fact"=>[], "agent"=>[], "cf_class"=>[]}
       Options = {
         :disctimeout=>2,
         :config=>"/etc/mcollective/client.cfg",
-        :filter=>{"identity"=>[], "fact"=>[], "agent"=>[], "cf_class"=>[]},
+        :filter=> Filter,
         :timeout=>200
       }  
-      MC = rpcclient("chef_client",:options => Options)
-    end
+   end
   end
 end

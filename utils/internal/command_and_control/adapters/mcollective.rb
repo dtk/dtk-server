@@ -5,7 +5,8 @@ module XYZ
   module CommandAndControlAdapter
     class Mcollective < CommandAndControl
       def dispatch_to_client(action) 
-         msg_content = {:run_list => ["recipe[user_account]"]}
+ #       mc.fact_filter "pbuilderid", pbuilderid(action)
+        msg_content = {:run_list => ["recipe[user_account]"]}
         results =  MC.run(msg_content)
         
         data = results.map{|result|result.results[:data]} 
@@ -13,6 +14,10 @@ module XYZ
         data 
       end
      private
+      #TODO: adapters for chef, puppet etc on payload
+      def pbuilderid(action)
+        action[:node][:external_ref][:instance_id]
+      end
       Options = {
         :disctimeout=>2,
         :config=>"/etc/mcollective/client.cfg",

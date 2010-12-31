@@ -21,6 +21,22 @@ module Ramaze::Helper
     end
 
     def add_attributes!(pending_action_list)
+      indexed_actions = pending_action_list.inject({}){|h,a|h.merge(a[:component][:id] => a)}
+      parent_field_name = DB.parent_field_name(:component,:attribute)
+      search_pattern_hash = {
+        :relation => :attribute,
+        :filter => [:and,
+                    [:oneof, parent_field_name, indexed_actions.keys]],
+        :columns => [:id,parent_field_name,:external_ref,:attribute_value,:required]
+      }
+      attrs = get_objects_from_search_pattern_hash(search_pattern_hash)
+      attrs.each do |attr|
+        action = indexed_actions[attr[parent_field_name]]
+        action[:attributes] ||= Array.new
+        action[:attributes] << attr
+      end
+      pp [:pending_action_list,pending_action_list]
+      pending_action_list
     end
   end
 end

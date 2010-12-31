@@ -19,5 +19,9 @@ module XYZ
      end
   end
    module CommandAndControlAdapter
+     class CommandAndControlError
+     end
+     class ErrorCannotFindIdentity < CommandAndControlError
+     end
    end
 end

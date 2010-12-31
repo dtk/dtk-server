@@ -17,6 +17,10 @@ module XYZ
       node[:external_ref][:instance_id]
     end
 
+    def node_name(node)
+      node[:external_ref][:instance_id]
+    end
+
     private
      Agents = Hash.new
   end

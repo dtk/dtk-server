@@ -13,9 +13,10 @@ module XYZ
           Log.error("cannot find identity for node #{node_actions[:node].inspect}")
           return nil
         end
-        msg_content = config_agent.ret_msg_content(node_actions)
+        msg_content =  config_agent.ret_msg_content(node_actions)
         filter = {"identity" => [identity], "agent" => ["chef_client"]}
         results = @mc.custom_request("run",msg_content,identity,filter)
+
         data = results.map{|result|result.results[:data]} 
         #TODO: where do we do @mc.disconnect; since @mcs shaer connection cannot do it here
         data 

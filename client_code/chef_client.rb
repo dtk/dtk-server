@@ -32,7 +32,14 @@ end
 module MCollective
   module Agent
     class Chef_client < RPC::Agent
-      # Basic echo server
+            metadata    :name        => "run chef actions",
+                        :description => "Agent to initiate Chef runs",
+                        :author      => "Reactor8",
+                        :license     => "",
+                        :version     => "",
+                        :url         => "",
+                        :timeout     => 300
+
       def run_action
         validate :run_list, :list
         begin

@@ -1,0 +1,157 @@
+/* Hide overlay markup while loading, if js is enabled */
+.yui3-js-enabled .yui3-overlay-loading {
+    top:-1000em;
+    left:-1000em;
+    position:absolute;
+}
+ 
+/* Overlay Look/Feel */
+#wspace-dock.yui3-overlay-content {
+/*    padding:3px;*/
+/*    border:1px solid #000;*/
+/*    background-color:#aaa;*/
+}
+
+#wspace-dock.yui3-overlay-content .yui3-widget-hd {
+/*    padding:5px;
+    border:2px solid #aa0000;
+    background-color:#fff;*/
+	height: 20px;
+}
+ 
+#wspace-dock.yui3-overlay-content .yui3-widget-bd {
+	background-image: url(../images/dock/trans-1x5.png);
+	background-repeat: repeat;
+}
+ 
+#wspace-dock.yui3-overlay-content .yui3-widget-ft {
+/*
+    padding:5px;
+    border:2px solid #00aa00;
+    background-color:#fff;
+*/
+}
+
+
+
+/*----------------------DOCK RELATED-------------------*/
+
+#wspace-dock .topbar { float: left; }
+#wspace-dock .topbar { height: 5px; width: 100%; }
+#wspace-dock .expand-collapse-bar { height: 15px; width: 100%; }
+#wspace-dock .expand-collapse-bar {
+	float: left;
+	background-image: url(../images/dock/trans-1x5.png);
+	background-repeat: repeat;
+}
+#wspace-dock .expand-collapse-arrows {
+	float: right;
+	margin: 1px 5px 1px 0;
+	width: 9px;
+	height: 8px;
+	background-image: url(../images/dock/expand-arrows-sprite.png);
+	background-repeat: no-repeat;
+}
+#wspace-dock .expand-collapse-arrows.collapse {
+	background-position: -9px 0px;
+}
+
+#wspace-dock .top-bottom-body { height: 5px; width: 250px; }
+#wspace-dock .top-bottom-body {
+	float: left;
+	background-image: url(../images/dock/trans-1x5.png);
+	background-repeat: repeat-x;
+}
+
+#wspace-dock .corner {
+	float: left;
+	height: 5px;
+	width: 5px;
+	background-image: url(../images/dock/trans-corners.png);
+}
+#wspace-dock .corner.tl { }
+#wspace-dock .corner.tr { background-position: 0px -5px; }
+#wspace-dock .corner.bl { background-position: 0px -15px; }
+#wspace-dock .corner.br { background-position: 0px -10px; }
+
+
+#wspace-dock .expand-collapse-bar {
+	float: left;
+	background-image: url(../images/dock/trans-1x5.png);
+	background-repeat: repeat;
+}
+#wspace-dock .expand-collapse-arrows {
+	float: right;
+	margin: 1px 5px 1px 0;
+	width: 9px;
+	height: 8px;
+	background-image: url(../images/dock/expand-arrows-sprite.png);
+	background-repeat: no-repeat;
+}
+#wspace-dock .expand-collapse-arrows.collapse {
+	background-position: -9px 0px;
+}
+ 
+
+ /*--------PANEL/ITEM RELATED----------*/
+#wspace-dock .panel-list {
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	height: 100%;
+}
+#wspace-dock .panel-list li {
+	list-style-type: none;
+	padding: 5px 0;
+	width: 250px;
+	margin: 0 auto;
+}
+
+.wspace-dock-list-item {
+	background-color: #FFFFFF;
+	padding: 5px;
+	margin-right: 18px;
+	cursor: pointer;
+	height: 25px;;
+/*	border-bottom: 1px solid #CCCCCC;*/
+	margin-bottom: 2px;
+}
+
+.wspace-dock-list-item .label {
+	font-weight: bold;
+	margin: 4px 0 0 0;
+	position: relative;
+	float: left;
+}
+
+
+/*--------ITEM/BUTTON RELATED----------*/
+
+.panel-item .label {
+	position: absolute;
+	z-index: 0;
+	margin: 5px 0 0 22px;
+	height: 20px;
+	width: 175px;
+	float: left;
+	font-size: 12px;
+}
+
+.panel-item.mover .panel-btn { background-position: -20px 0px; }
+
+.panel-btn {
+	height: 20px;
+	width: 20px;
+	margin: 5px 0 5px 5px;
+	float: left;
+	position: absolute;
+	z-index: 1;
+}
+
+.panel-btn.applications {
+	background-image: url(../images/dock/components-panel-btn-sprite-2.png);
+}
+
+.panel-item.mover .label {
+	background-color: #CCCCCC;
+}

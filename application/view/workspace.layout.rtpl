@@ -12,6 +12,7 @@
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/topbar.css" />
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/cmdbar.css" />
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/toolbar.css" />
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/dock.css" />
 
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/temp-dev.css" />
 

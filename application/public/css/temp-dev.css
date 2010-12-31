@@ -16,12 +16,13 @@
 	position: absolute;
 /*	background-color: blue;*/
 }
-.wspace-dock-wrapper.maximized { height: 410px; width: 260px; }
-.wspace-dock-wrapper.minimized { height: 90px; width: 110px; }
+.wspace-dock-wrapper.maximized { height: 425px; width: 260px; }
+.wspace-dock-wrapper.minimized { height: 220px; width: 110px; }
 
 .wspace-dock-wrapper .topbar { float: left; }
 .wspace-dock-wrapper.maximized .topbar { height: 5px; width: 410px; }
 .wspace-dock-wrapper.minimized .topbar { height: 5px; width: 110px; }
+.wspace-dock-wrapper.minimized .expand-collapse-bar {height: 15px; width: 110px; }
 
 .wspace-dock-wrapper .bottombar { float:left; }
 .wspace-dock-wrapper.maximized .bottombar { height: 5px; width: 410px; }
@@ -43,6 +44,23 @@
 	background-image: url(../images/dock/trans-1x5.png);
 	background-repeat: repeat-x;
 }
+.wspace-dock-wrapper .expand-collapse-bar {
+	float: left;
+	background-image: url(../images/dock/trans-1x5.png);
+	background-repeat: repeat;
+}
+.wspace-dock-wrapper .expand-collapse-arrows {
+	float: right;
+	margin: 1px 5px 1px 0;
+	width: 9px;
+	height: 8px;
+	background-image: url(../images/dock/expand-arrows-sprite.png);
+	background-repeat: no-repeat;
+}
+.wspace-dock-wrapper .expand-collapse-arrows.collapse {
+	background-position: -9px 0px;
+}
+ 
 .wspace-dock-wrapper.maximized .top-bottom-body { height: 5px; width: 250px; }
 .wspace-dock-wrapper.minimized .top-bottom-body { height: 5px; width: 100px; }
 
@@ -52,7 +70,7 @@
 	background-repeat: repeat-y;
 }
 .wspace-dock-wrapper.maximized .left-trans-bar { height: 400px; width: 5px; }
-.wspace-dock-wrapper.minimized .left-trans-bar { height: 80px; width: 5px; }
+.wspace-dock-wrapper.minimized .left-trans-bar { height: 200px; width: 5px; }
 
 .wspace-dock-wrapper .right-trans-bar {
 	float: left;
@@ -60,7 +78,7 @@
 	background-repeat: repeat-y;
 }
 .wspace-dock-wrapper.maximized .right-trans-bar { height: 400px; width: 5px; }
-.wspace-dock-wrapper.minimized .right-trans-bar { height: 80px; width: 5px; }
+.wspace-dock-wrapper.minimized .right-trans-bar { height: 200px; width: 5px; }
 
 .wspace-dock-maximized {
 	overflow: hidden;
@@ -80,7 +98,7 @@
 	display: none;
 	position: relative;
 	float: left;
-	height: 80px;
+	height: 200px;
 	width: 100px;
 	background-image: url(../images/dock/trans-5x5.png);
 	background-repeat: repeat;
@@ -196,6 +214,20 @@
 	width: 100px;
 	background-color: #EDEDED;
 }
+/*
+.panel-item .label {
+	float: left;
+	font-size: 12px;
+	margin-top: 6px;
+}
+*/
+.panel-item.active .label { font-weight: bold; }
+
+.panel-item.active .components-panel-btn { background-position: -16px 0px; }
+.panel-item.active .applications-panel-btn { background-position: -16px 0px; }
+.panel-item.active .users-panel-btn { background-position: -16px 0px; }
+.panel-item.active .languages-panel-btn { background-position: -16px 0px; }
+.panel-item.active .service-checks-panel-btn { background-position: -16px 0px; }
 
 .components-panel-btn {
 	height: 16px;
@@ -203,14 +235,31 @@
 	margin: 3px;
 	background-image: url(../images/dock/components-panel-btn-sprite.png);
 }
-.panel-item.active .components-panel-btn { background-position: -16px 0px; }
-
-.panel-item .label {
-	float: left;
-	font-size: 12px;
-	margin-top: 6px;
+.applications-panel-btn {
+	height: 16px;
+	width: 16px;
+	margin: 3px;
+	background-image: url(../images/dock/components-panel-btn-sprite.png);
 }
-.panel-item.active .label { font-weight: bold; }
+.languages-panel-btn {
+	height: 16px;
+	width: 16px;
+	margin: 3px;
+	background-image: url(../images/dock/components-panel-btn-sprite.png);
+}
+.service-checks-panel-btn {
+	height: 16px;
+	width: 16px;
+	margin: 3px;
+	background-image: url(../images/dock/components-panel-btn-sprite.png);
+}
+.users-panel-btn {
+	height: 16px;
+	width: 16px;
+	margin: 3px;
+	background-image: url(../images/dock/components-panel-btn-sprite.png);
+}
+
 
 
 

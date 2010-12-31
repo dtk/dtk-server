@@ -3,6 +3,7 @@
 <title>Example Layout</title>
 
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/default.layout.css" />
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/dock.css" />
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/temp-dev.css" />
 
 {%for css_include in _app[:css_includes]%}

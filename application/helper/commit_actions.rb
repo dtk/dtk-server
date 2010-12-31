@@ -35,7 +35,7 @@ module Ramaze::Helper
         action[:attributes] ||= Array.new
         action[:attributes] << attr
       end
-      pp [:pending_action_list,pending_action_list]
+#      pp [:pending_action_list,pending_action_list]
       pending_action_list
     end
   end

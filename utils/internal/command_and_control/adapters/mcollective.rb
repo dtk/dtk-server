@@ -27,10 +27,12 @@ module XYZ
      private
 
       def mcollective_id(node,config_agent)
-        return DiscoveredNodes[node[:id]] if DiscoveredNodes[node[:id]]
-        identity = discover_mcollective_id(node,config_agent)
-        Lock.synchronize{DiscoveredNodes[node[:id]] = identity}
-        identity
+        discover_mcollective_id(node,config_agent)
+        ### below removed because quicker failure if use discovery to find if node is up
+        #return DiscoveredNodes[node[:id]] if DiscoveredNodes[node[:id]]
+        #identity = discover_mcollective_id(node,config_agent)
+        #Lock.synchronize{DiscoveredNodes[node[:id]] = identity}
+        #identity
       end
       def discover_mcollective_id(node,config_agent)
         pbuilderid = config_agent.pbuilderid(node)
@@ -45,8 +47,9 @@ module XYZ
         :filter=> Filter,
         :timeout=>200
       }  
-      DiscoveredNodes = Hash.new
-      Lock = Mutex.new
+      ##removed because quicker failure to use discovery top check node is up
+      #DiscoveredNodes = Hash.new
+      #Lock = Mutex.new
    end
   end
 end

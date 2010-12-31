@@ -32,7 +32,7 @@ module XYZ
            :model_name => :component,
            :join_type => :inner,
            :join_cond=>{:id=> :action__component_id},
-           :cols=>[:id, :display_name, :external_ref, :node_node_id]
+           :cols=>[:id, :display_name, :external_ref, :node_node_id, :only_one_per_node]
          },
          {
            :model_name => :node,

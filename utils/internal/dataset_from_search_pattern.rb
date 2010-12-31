@@ -151,8 +151,8 @@ module XYZ
 
             #first prune out all non scalar real columns
             #TODO: make sure no side effects of thios switch
-            #processed_field_set =  base_field_set.only_including(Model::FieldSet.all_real_scalar(model_name))
-            processed_field_set = base_field_set.only_including(Model::FieldSet.all_real(model_name))
+            processed_field_set =  base_field_set.only_including(Model::FieldSet.all_real_scalar(model_name))
+            #processed_field_set = base_field_set.only_including(Model::FieldSet.all_real(model_name))
 
             #compute cols_to_add by looking at both local columns and ones that are in join conditions to enable remote columns to be joined in
             #do not have to worry about duplicates because with_added_cols will do that

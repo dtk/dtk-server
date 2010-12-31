@@ -1,6 +1,6 @@
 require 'ruote'
 require 'ruote/storage/fs_storage'
-
+#TODO: switch action to node_actions
 module XYZ 
   module WorkflowAdapter
     class Ruote < XYZ::Workflow

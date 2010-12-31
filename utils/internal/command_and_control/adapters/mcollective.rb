@@ -6,14 +6,14 @@ module XYZ
       def initialize()  
         @mc = rpcclient("chef_client",:options => Options)
       end
-      def dispatch_to_client(action) 
-        config_agent = ConfigAgent.load(action.config_agent_type)
-        identity = mcollective_id(action[:node],config_agent)
+      def dispatch_to_client(node_actions) 
+        config_agent = ConfigAgent.load(node_actions.config_agent_type)
+        identity = mcollective_id(node_actions[:node],config_agent)
         unless identity
-          Log.error("cannot find identity for node #{action[:node].inspect}")
+          Log.error("cannot find identity for node #{node_actions[:node].inspect}")
           return nil
         end
-        msg_content = config_agent.ret_msg_content(action)
+        msg_content = config_agent.ret_msg_content(node_actions)
         filter = {"identity" => [identity], "agent" => ["chef_client"]}
         results = @mc.custom_request("run",msg_content,identity,filter)
         data = results.map{|result|result.results[:data]} 

@@ -3,13 +3,14 @@ module XYZ
     class Simple < XYZ::Workflow
       def execute()
         results = Hash.new
+        #TODO: assuming that elements are node_actions
         if @type == :sequential
-          @elements.each{|action| results << execute_on_node(action)}
+          @elements.each{|node_actions| results << execute_on_node(node_actions)}
         elsif @type == :concurrent
-          threads = @elements.map do |action| 
+          threads = @elements.map do |node_actions| 
             Thread.new do 
-              result = execute_on_node(action)
-              @lock.synchronize{results[action[:id]] = result}
+              result = execute_on_node(node_actions)
+              @lock.synchronize{results[node_actions[:id]] = result}
             end
           end
           threads.each{|t| t.join}
@@ -17,10 +18,10 @@ module XYZ
         pp [:results, results]
       end
      private 
-      def execute_on_node(action)
+      def execute_on_node(node_actions)
         begin
           cac = CommandAndControl.create()
-          data = cac.dispatch_to_client(action)
+          data = cac.dispatch_to_client(node_actions)
         rescue Exception => e
           Log.error("error in workflow execute_on_node: #{e.inspect}")
         end

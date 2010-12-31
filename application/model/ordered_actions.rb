@@ -50,11 +50,34 @@ module XYZ
     end
 
     def order_actions_in_node(action_list)
-      if action_list.size == 1
-        return action_list.first
+      NodeActions.new(action_list)
+    end
+  end
+  class NodeActions < OrderedActions
+    def initialize(action_list)
+      super()
+      set(:sequential,action_list)
+    end
+
+    def [](key)
+      case(key)
+        when :id then id()
+        when :node then node()
       end
-      #TODO: stub to determine appropriate sequential order on node
-      self.new().set(:sequential,action_list)
+    end
+
+    def config_agent_type
+      elements.first.config_agent_type
+    end
+    private
+    def id()
+      #TODO: just taking lowest id of actions
+      elements.map{|e|e[:id]}.min
+    end
+
+    def node()
+      #since all nodes the same just taking first one
+      elements.first[:node]
     end
   end
 end

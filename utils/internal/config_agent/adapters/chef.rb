@@ -49,6 +49,7 @@ end
             list << attributes(action)
             @attributes << {:list => list}
           end
+          self
         end
        private
         def recipe(action)

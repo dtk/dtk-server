@@ -46,7 +46,7 @@
         :type=>:boolean,
     },
     :parent_name=>{
-        :type=>'json',
+        :type=>'text',
         :no_column=>true
     },
     :parent_id=>{

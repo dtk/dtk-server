@@ -3,7 +3,7 @@ module XYZ
     class Chef < ConfigAgent
       def ret_msg_content(node_actions)
         recipes_and_attrs = recipes_and_attributes(node_actions)
-        recipes_and_attrs.run_list
+        {:attributes => recipes_and_attrs.attributes, :run_list => recipes_and_attrs.run_list}
       end
      private
       def recipes_and_attributes(node_actions)
@@ -19,7 +19,7 @@ module XYZ
         end
 
         def run_list()
-          {:run_list => @recipe_names.map{|r|"recipe[#{r}]"}}        
+          @recipe_names.map{|r|"recipe[#{r}]"}
         end
 
         def add_action(action)

@@ -42,16 +42,18 @@ module MCollective
 
       def run_action
         validate :run_list, :list
+        validate :attributes, :list
         begin
-          run_recipe(request.uniqid,request[:run_list])
+          run_recipe(request.uniqid,request[:run_list],request[:attributes])
         rescue
         end
         handler_response = RunHandler::Response.delete(request.uniqid)
         reply.data = handler_response
       end
      private
-      def run_recipe(id,run_list)
+      def run_recipe(id,run_list,attributes)
         pp [:run_list,run_list]
+        pp [:attributes,attributes]
         chef_client = Chef::Application::Client.new
         chef_client.reconfigure
         handler = RunHandler.new(id)
@@ -59,7 +61,7 @@ module MCollective
         Chef::Config[:exception_handlers] << handler
 
         chef_client.setup_application
-        hash_attribs = {"run_list" => run_list||[]}
+        hash_attribs = (attributes||{}).merge({"run_list" => run_list||[]})
         Chef::Client.new(hash_attribs).run
       end
     end

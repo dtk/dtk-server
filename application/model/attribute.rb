@@ -303,7 +303,10 @@ also related is allowing omission of columns mmentioned in jon condition; post p
       nested_base_objects = get_attributes_with_base_objects(attr_idh.createMH(),nested_changes_hash.keys,:node) #TODO: hard coded :node
       nested_base_objects.each do |base_obj|
         id = base_obj[:id]
-        nested_changes_hash[id].merge!({:base_object => base_obj,:parent => action_idh})
+        #TODO: need to see if this is right
+        if nested_changes_hash[id] 
+          nested_changes_hash[id].merge!({:base_object => base_obj,:parent => action_idh})
+        end
       end
       pp [:nested_changes,nested_changes_hash.values]
       Action.create_pending_change_items(nested_changes_hash.values)

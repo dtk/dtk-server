@@ -131,7 +131,7 @@ R8.Cmdbar.cmdHandlers['search'] = {
 				var tIndex = R8.Cmdbar.getTabIndexByName(this.name);
 
 				YUI().use("node", function(Y){
-					R8.Cmdbar.loadedTabs[tIndex]['events']['slider_key_press'] = Y.get('document').on("keypress", function(e){
+					R8.Cmdbar.loadedTabs[tIndex]['events']['slider_key_press'] = Y.one('document').on("keypress", function(e){
 						if (e.keyCode == 37) {
 							R8.Cmdbar.loadedTabs[tIndex].slideLeft();
 //								e.halt();
@@ -424,7 +424,7 @@ console.log('Have a drop hit for node!!!!');
 				var tIndex = R8.Cmdbar.getTabIndexByName(this.name);
 
 				YUI().use("node", function(Y){
-					R8.Cmdbar.loadedTabs[tIndex]['events']['slider_key_press'] = Y.get('document').on("keypress", function(e){
+					R8.Cmdbar.loadedTabs[tIndex]['events']['slider_key_press'] = Y.one('document').on("keypress", function(e){
 						if (e.keyCode == 37) {
 							R8.Cmdbar.loadedTabs[tIndex].slideLeft();
 //								e.halt();

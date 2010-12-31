@@ -60,9 +60,12 @@ module XYZ
 
     #object processing and access functions
     #######################
+    def config_agent_type()
+      #TODO: stub
+      :chef
+    end
+
     def self.actions_are_concurrent?(action_list)
-#TODO: stub
-#return nil
       rel_order = action_list.map{|x|x[:relative_order]}
       val = rel_order.shift
       rel_order.each{|x|return nil unless x == val}

@@ -7,12 +7,13 @@ module XYZ
         @mc = rpcclient("chef_client",:options => Options)
       end
       def dispatch_to_client(action) 
-        identity = mcollective_id(action[:node])
+        config_agent = ConfigAgent.load(action.config_agent_type)
+        identity = mcollective_id(action[:node],config_agent)
         unless identity
           Log.error("cannot find identity for node #{action[:node].inspect}")
           return nil
         end
-        msg_content = {:run_list => ["recipe[user_account]"]}
+        msg_content = config_agent.ret_msg_content(action)
         filter = {"identity" => [identity], "agent" => ["chef_client"]}
         results = @mc.custom_request("run",msg_content,identity,filter)
         data = results.map{|result|result.results[:data]} 
@@ -21,20 +22,16 @@ module XYZ
       end
      private
 
-      def mcollective_id(node)
+      def mcollective_id(node,config_agent)
         return DiscoveredNodes[node[:id]] if DiscoveredNodes[node[:id]]
-        identity = discover_mcollective_id(node)
+        identity = discover_mcollective_id(node,config_agent)
         Lock.synchronize{DiscoveredNodes[node[:id]] = identity}
         identity
       end
-      def discover_mcollective_id(node)
-        filter = Filter.merge("fact" => [{:fact=>"pbuilderid", :value=>pbuilderid(node)}])
+      def discover_mcollective_id(node,config_agent)
+        pbuilderid = config_agent.pbuilderid(node)
+        filter = Filter.merge("fact" => [{:fact=>"pbuilderid", :value=>pbuilderid}])
         @mc.client.discover(filter,Options[:disctimeout]).first
-      end
-
-      #TODO: adapters for chef, puppet etc on payload
-      def pbuilderid(node)
-        node[:external_ref][:instance_id]
       end
 
       Filter = {"identity"=>[], "fact"=>[], "agent"=>[], "cf_class"=>[]}

@@ -454,6 +454,7 @@ if (!R8.Search) {
 						'filter_id':filterId,
 						'model_name':modelName
 					});
+
 					filterWrapper.appendChild(fieldConditionElem);
 
 					filterEditWrapper.appendChild(filterWrapper);

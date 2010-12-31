@@ -4,12 +4,14 @@ if (!R8.Utils) {
 	 * This is the utility r8 js class, more to be added
 	 */
 	R8.Utils = function(){
+
 		return {
 
 			/*
 			 * This is the global YUI variable to be used
 			 */
-			Y : new YUI(YUI_config).use('dd', 'node'),
+			Y : new YUI(YUI_config).use('event', 'node'),
+//			Y : new YUI(YUI_config).use('dd', 'node'),
 //			Y : new YUI({base:'js/yui3x/build/'}).use('dd', 'node'),
 //			Y: new YUI().use('dd', 'node'),
 

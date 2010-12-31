@@ -186,8 +186,6 @@ if (!R8.Ctrl) {
 				eval("R8.Ctrl.callResults[ioId]['response'] =" + responseObj.responseText);
 				var response = R8.Ctrl.callResults[ioId]['response'];
 
-//DEBUG
-//console.log(response);
 				//reset the callbacks array after execution
 				R8.Ctrl.tplCallbacks = new Array();
 

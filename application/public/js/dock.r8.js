@@ -172,6 +172,9 @@ if(!R8.Workspace.Dock) {
 									<div class="top-bottom-body"></div>\
 									<div class="corner tr"></div>\
 								</div>\
+								<div class="expand-collapse-bar">\
+									<div class="expand-collapse-arrows expand"></div>\
+								</div>\
 								<div class="left-trans-bar"></div>\
 								<div class="wspace-dock-maximized">\
 									<div id="wspace-dock-topbar" class="wspace-dock-topbar-container"></div>\
@@ -179,6 +182,24 @@ if(!R8.Workspace.Dock) {
 								</div>\
 								<div class="wspace-dock-minimized">\
 									<div id="wspace-dock-panel-list" class="wspace-dock-panel-list">\
+										<div id="component-panel-item" class="panel-item">\
+											<div style="float: left; height: 22px; width: 22px; margin-top: 4px;">\
+												<div class="applications-panel-btn"></div>\
+											</div>\
+											<div class="label">Applications</div>\
+										</div>\
+										<div id="component-panel-item" class="panel-item">\
+											<div style="float: left; height: 22px; width: 22px; margin-top: 4px;">\
+												<div class="languages-panel-btn"></div>\
+											</div>\
+											<div class="label">Languages</div>\
+										</div>\
+										<div id="component-panel-item" class="panel-item">\
+											<div style="float: left; height: 22px; width: 22px; margin-top: 4px;">\
+												<div class="service-checks-panel-btn"></div>\
+											</div>\
+											<div class="label">Service Checks</div>\
+										</div>\
 										<div id="component-panel-item" class="panel-item">\
 											<div style="float: left; height: 22px; width: 22px; margin-top: 4px;">\
 												<div class="components-panel-btn"></div>\

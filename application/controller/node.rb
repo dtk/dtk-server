@@ -11,6 +11,15 @@ pp '++++++++++++++++++++++++++++++'
         :content => foo
       }
     end
+    def overlaytest
+      tpl = R8Tpl::TemplateR8.new("node/overlaytest",user_context())
+      tpl.assign(:_app,app_common())
+      foo = tpl.render()
+
+      return {
+        :content => foo
+      }
+    end
 
     def ac_remotesearch
 pp '++++++++++++++++++++++++++++++'

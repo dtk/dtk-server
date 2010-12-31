@@ -1,0 +1,69 @@
+
+
+<div id="wspace-dock" class="yui3-overlay-loading">
+    <div class="yui3-widget-hd">
+		<div class="corner tl"></div>
+		<div class="top-bottom-body"></div>
+		<div class="corner tr"></div>
+		<div class="expand-collapse-bar">
+			<div class="expand-collapse-arrows expand"></div>
+		</div>
+    </div>
+    <div class="yui3-widget-bd">
+		<div style="height: 8px; width: 250px; margin: 0 auto; background-color: #CCCCCC">
+		</div>
+		<ul id="wspace-dock-panel-list" class="panel-list">
+			<li id="users-panel-item" class="panel-item">
+				<div style="float: left; height: 22px; width: 22px; margin-top: 4px;">
+					<div class="users-panel-btn"></div>
+				</div>
+				<div class="label">Users</div>
+			</li>
+			<li id="applications-panel-item" class="panel-item mover">
+				<div class="panel-btn applications"></div>
+				<div class="label"><span style="margin-left: 10px;">Applications</span></div>
+			</li>
+			<li id="service-checks-panel-item" class="panel-item">
+				<div style="float: left; height: 22px; width: 22px; margin-top: 4px;">
+					<div class="service-checks-panel-btn"></div>
+				</div>
+				<div class="label">Service Checks</div>
+			</li>
+		</ul>
+    </div>
+    <div class="yui3-widget-ft">
+		<div class="corner bl"></div>
+		<div class="top-bottom-body"></div>
+		<div class="corner br"></div>
+	</div>
+</div>
+
+<script type="text/javascript">
+function initOverlay() {
+
+	YUI(YUI_config).use("overlay", function(Y) {
+	
+	    // Create an overlay from markup
+	    var overlay = new Y.Overlay({
+	        srcNode:"#wspace-dock",
+	        width:"260px",
+	        height:"200px",
+//	        width:"10em",
+//	        height:"10em",
+	        xy:[100, 100]
+	    });
+	    overlay.render();
+	/*
+	    Y.on("click", function(e) {
+	        var x = parseInt(xInput.get("value"));
+	        var y = parseInt(yInput.get("value"));
+	        overlay.move(x,y);
+	    }, "#move");
+	
+	    Y.on("click", Y.bind(overlay.show, overlay), "#show");
+	    Y.on("click", Y.bind(overlay.hide, overlay), "#hide");
+	*/
+	});
+}
+</script>
+

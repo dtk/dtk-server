@@ -10,26 +10,38 @@
 		</div>
     </div>
     <div class="yui3-widget-bd">
-		<div style="height: 8px; width: 250px; margin: 0 auto; background-color: #CCCCCC">
-		</div>
+		<div class="panel-group">
+		<div class="header"></div>
 		<ul id="wspace-dock-panel-list" class="panel-list">
-			<li id="users-panel-item" class="panel-item">
-				<div style="float: left; height: 22px; width: 22px; margin-top: 4px;">
-					<div class="users-panel-btn"></div>
+			<li id="applications-panel-item" class="panel-item">
+				<div class="panel-btn-bg">
+					<div class="panel-btn users"></div>
 				</div>
-				<div class="label">Users</div>
-			</li>
-			<li id="applications-panel-item" class="panel-item mover">
-				<div class="panel-btn applications"></div>
-				<div class="label"><span style="margin-left: 10px;">Applications</span></div>
-			</li>
-			<li id="service-checks-panel-item" class="panel-item">
-				<div style="float: left; height: 22px; width: 22px; margin-top: 4px;">
-					<div class="service-checks-panel-btn"></div>
+				<div class="label">
+					<div style="position: relative; margin: 5px 0 0 15px;">Users</div>
 				</div>
-				<div class="label">Service Checks</div>
+				<div class="rt-endcap"></div>
+			</li>
+			<li id="applications-panel-item" class="panel-item">
+				<div class="panel-btn-bg">
+					<div class="panel-btn applications"></div>
+				</div>
+				<div class="label">
+					<div style="position: relative; margin: 5px 0 0 15px;">Applications</div>
+				</div>
+				<div class="rt-endcap"></div>
+			</li>
+			<li id="applications-panel-item" class="panel-item">
+				<div class="panel-btn-bg">
+					<div class="panel-btn service-checks"></div>
+				</div>
+				<div class="label">
+					<div style="position: relative; margin: 5px 0 0 15px;">Service Checks</div>
+				</div>
+				<div class="rt-endcap"></div>
 			</li>
 		</ul>
+		</div>
     </div>
     <div class="yui3-widget-ft">
 		<div class="corner bl"></div>
@@ -41,12 +53,12 @@
 <script type="text/javascript">
 function initOverlay() {
 
-	YUI(YUI_config).use("overlay", function(Y) {
+	YUI(YUI_config).use("overlay","node","event", function(Y) {
 	
 	    // Create an overlay from markup
 	    var overlay = new Y.Overlay({
 	        srcNode:"#wspace-dock",
-	        width:"260px",
+	        width:"225px",
 	        height:"200px",
 //	        width:"10em",
 //	        height:"10em",
@@ -63,6 +75,18 @@ function initOverlay() {
 	    Y.on("click", Y.bind(overlay.show, overlay), "#show");
 	    Y.on("click", Y.bind(overlay.hide, overlay), "#hide");
 	*/
+		Y.all('#wspace-dock .panel-list').each(function(){
+			var groupId = this.get('id'),
+				panelGroupNode = document.getElementById(groupId);
+
+			var itemMouseOver = R8.Utils.Y.delegate('mouseenter',function(e){
+				e.currentTarget.addClass('active');
+			},panelGroupNode,'.panel-item');
+
+			var itemMouseOut = R8.Utils.Y.delegate('mouseleave',function(e){
+				e.currentTarget.removeClass('active');
+			},panelGroupNode,'.panel-item');
+		});
 	});
 }
 </script>

@@ -208,12 +208,6 @@
 }
 
 /*-------------Panel Related-------------*/
-.panel-item {
-	cursor: pointer;
-	height: 30px;
-	width: 100px;
-	background-color: #EDEDED;
-}
 /*
 .panel-item .label {
 	float: left;
@@ -221,7 +215,6 @@
 	margin-top: 6px;
 }
 */
-.panel-item.active .label { font-weight: bold; }
 
 .panel-item.active .components-panel-btn { background-position: -16px 0px; }
 .panel-item.active .applications-panel-btn { background-position: -16px 0px; }

@@ -4,7 +4,9 @@ module XYZ
       return Agents[type] if Agents[type]
       klass = self
       begin
-        require File.expand_path("#{UTILS_DIR}/internal/config_agent/adapters/#{type}", File.dirname(__FILE__))
+        Lock.synchronize do
+          require File.expand_path("#{UTILS_DIR}/internal/config_agent/adapters/#{type}", File.dirname(__FILE__))
+        end
         klass = XYZ::ConfigAgentAdapter.const_get type.to_s.capitalize
        rescue LoadError
         Log.error("cannot find config agent adapter; loading null config agent class")
@@ -22,6 +24,7 @@ module XYZ
     end
 
     private
+     Lock = Mutex.new
      Agents = Hash.new
   end
   module ConfigAgentAdapter

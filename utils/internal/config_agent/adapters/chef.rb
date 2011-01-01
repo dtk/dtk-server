@@ -35,7 +35,7 @@ module XYZ
             list = Array.new
             @common_attr_index[recipe_name] = list
             list << ret_attributes(action, :strip_off_recipe_name => true)
-            @attributes.merge!(recipe_name => {"list" => list})
+             @attributes.merge!(recipe_name => {"!replace:list" => list})
           end
           self
         end

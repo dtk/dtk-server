@@ -69,7 +69,60 @@ module MCollective
 end
 
 
+################Monkey patch to get functionality to replace arrays
+# returns [to_remove,to_add]
+def remove_replace_markers(hash)
+  #TODO: just looking for {"recipe1" => {"!replace:foo" => [..]},"recipe2=> ..}
+  #e.g., {"user_account"=>{"list"=>[{"gid"=>nil, "username"=>"usertom", "uid"=>nil}]}}
+  return [{},source_hash] unless hash.kind_of?(Hash)
+  to_remove = Hash.new
+  to_add = Hash.new
+  hash.each do |k,v|
+    if v.kind_of?(Hash) and v.size == 1 and v.keys.first =~ /^!replace:(.+)$/
+      attr_name = $1
+      to_remove[k] = "!merge:#{attr_name}"
+      to_add[k] = {attr_name => v.values.first}
+    else
+      to_add[k] = v
+    end
+  end
+  [to_remove,to_add]
+end
 
+
+
+class Chef
+  class Node
+    def expand!
+      # This call should only be called on a chef-client run.
+      expansion = run_list.expand('server')
+      raise Chef::Exceptions::MissingRole if expansion.errors?
+
+      Chef::Log.debug("Applying attributes from json file")
+
+      ############## patch replacing
+      ## @normal_attrs = Chef::Mixin::DeepMerge.merge(@normal_attrs, @json_attrib_for_expansion)
+      to_remove,to_add = remove_replace_markers(@json_attrib_for_expansion)
+      @normal_attrs = 
+        if to_remove.empty? 
+          Chef::Mixin::DeepMerge.merge(@normal_attrs, @json_attrib_for_expansion)
+        else
+          with_remove = Chef::Mixin::DeepMerge.merge(@normal_attrs,to_remove)
+          Chef::Mixin::DeepMerge.merge(with_remove,to_add)
+        end
+      ########### end of patch
+
+      self[:tags] = Array.new unless attribute?(:tags)
+      @default_attrs = Chef::Mixin::DeepMerge.merge(default_attrs, expansion.default_attrs)
+      @override_attrs = Chef::Mixin::DeepMerge.merge(override_attrs, expansion.override_attrs)
+
+      @automatic_attrs[:recipes] = expansion.recipes
+      @automatic_attrs[:roles] = expansion.roles
+
+      expansion.recipes
+    end
+  end
+end
 
 
 

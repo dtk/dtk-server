@@ -4,7 +4,7 @@ if(!R8.Workspace.Dock) {
 	(function(R8){
 
 	R8.Workspace.Dock = function() {
-		var _nodeId = 'wspace-dock',
+		var _nodeId = 'wspace-dock-wrapper',
 			_node = null,
 			_display = 'none',
 			_dockWidth = 250,
@@ -166,115 +166,57 @@ if(!R8.Workspace.Dock) {
 					</div>';
 */
 
-//				var content = '<div id="'+_nodeId+'" class="class="yui3-overlay-loading collapsed" style="display: '+_display+'; right: '+_right+'px; top: '+_top+'px;">\
-//							    <div class="yui3-widget-hd">\
-
-				var header = '<div class="corner tl"></div>\
-								<div class="top-bottom-body"></div>\
-									<div class="corner tr"></div>\
-									<div id="wspace-dock-top-bar" class="expand-collapse-bar">\
-										<div class="expand-collapse-arrows"></div>\
-									</div>';
-
-				var body = '<div class="panel-group">\
-									<div class="header"></div>\
-									<ul id="wspace-dock-panel-list" class="panel-list">\
-										<li id="applications-panel-item" class="panel-item">\
-											<div class="panel-btn-bg">\
-												<div class="panel-btn users"></div>\
-											</div>\
-											<div class="label">\
-												<div style="position: relative; margin: 5px 0 0 15px;">Users</div>\
-											</div>\
-											<div class="rt-endcap"></div>\
-										</li>\
-										<li id="applications-panel-item" class="panel-item">\
-											<div class="panel-btn-bg">\
-												<div class="panel-btn applications"></div>\
-											</div>\
-											<div class="label">\
-												<div style="position: relative; margin: 5px 0 0 15px;">Applications</div>\
-											</div>\
-											<div class="rt-endcap"></div>\
-										</li>\
-										<li id="applications-panel-item" class="panel-item">\
-											<div class="panel-btn-bg">\
-												<div class="panel-btn service-checks"></div>\
-											</div>\
-											<div class="label">\
-												<div style="position: relative; margin: 5px 0 0 15px;">Service Checks</div>\
-											</div>\
-											<div class="rt-endcap"></div>\
-										</li>\
-									</ul>\
-									</div>\
-							    </div>';
-
-					var footer = '<div class="corner bl"></div>\
+				var content = '<div id="'+_nodeId+'" class="wspace-dock-wrapper minimized" style="display: '+_display+'; right: '+_right+'px; top: '+_top+'px;">\
+								<div class="topbar">\
+									<div class="corner tl"></div>\
 									<div class="top-bottom-body"></div>\
-									<div class="corner br"></div>';
+									<div class="corner tr"></div>\
+								</div>\
+								<div class="expand-collapse-bar">\
+									<div class="expand-collapse-arrows expand"></div>\
+								</div>\
+								<div class="left-trans-bar"></div>\
+								<div class="wspace-dock-maximized">\
+									<div id="wspace-dock-topbar" class="wspace-dock-topbar-container"></div>\
+									<div id="wspace-dock-body" class="wspace-dock-body-container"></div>\
+								</div>\
+								<div class="wspace-dock-minimized">\
+									<div id="wspace-dock-panel-list" class="wspace-dock-panel-list">\
+										<div id="component-panel-item" class="panel-item">\
+											<div style="float: left; height: 22px; width: 22px; margin-top: 4px;">\
+												<div class="applications-panel-btn"></div>\
+											</div>\
+											<div class="label">Applications</div>\
+										</div>\
+										<div id="component-panel-item" class="panel-item">\
+											<div style="float: left; height: 22px; width: 22px; margin-top: 4px;">\
+												<div class="languages-panel-btn"></div>\
+											</div>\
+											<div class="label">Languages</div>\
+										</div>\
+										<div id="component-panel-item" class="panel-item">\
+											<div style="float: left; height: 22px; width: 22px; margin-top: 4px;">\
+												<div class="service-checks-panel-btn"></div>\
+											</div>\
+											<div class="label">Service Checks</div>\
+										</div>\
+										<div id="component-panel-item" class="panel-item">\
+											<div style="float: left; height: 22px; width: 22px; margin-top: 4px;">\
+												<div class="components-panel-btn"></div>\
+											</div>\
+											<div class="label">Components</div>\
+										</div>\
+									</div>\
+								</div>\
+								<div class="right-trans-bar"></div>\
+								<div class="bottombar">\
+									<div class="corner bl"></div>\
+									<div class="top-bottom-body"></div>\
+									<div class="corner br"></div>\
+								</div>\
+								</div>';
 
-				var overlayNode = R8.Utils.Y.one('#wspace-dock');
-				overlayNode.setStyles({'display':_display});
-
-				YUI(YUI_config).use("overlay","node","event", function(Y) {
-/*				    var overlay = new Y.Overlay({
-//				        srcNode:"#wspace-dock",
-						id:'wspace-dock',
-						headerContent: header,
-						bodyContent: body,
-						footerContent: footer,
-				        width:"225px",
-				        height:"150px",
-//				        xy:[100, 100],
-						zIndex: 50,
-						render: "#page-container",
-						align: {
-							node: "#wspace-container",
-							points: ["tr", "tr"]
-						}
-				    });
-*/
-				    var overlay = new Y.Overlay({
-				        srcNode:"#wspace-dock",
-				        width:"225px",
-				        height:"150px",
-						align: {
-							node: "#wspace-container",
-							points: ["tr", "tr"]
-						}
-				    });
-
-				    overlay.render();
-
-					var dockTopBar = Y.one('#wspace-dock-top-bar');
-					dockTopBar.on('click',function(e){
-						if(overlayNode.hasClass('collapsed')) {
-							overlay.set('width','225px');
-							overlayNode.removeClass('collapsed');
-							overlay.set('align',{node: "#wspace-container",points: ["tr", "tr"]});
-						} else {
-							overlay.set('width','45px');
-							overlayNode.addClass('collapsed');
-							overlay.set('align',{node: "#wspace-container",points: ["tr", "tr"]});
-						}
-					});
-
-					Y.all('#wspace-dock .panel-list').each(function(){
-						var groupId = this.get('id'),
-							panelGroupNode = document.getElementById(groupId);
-			
-						var itemMouseOver = R8.Utils.Y.delegate('mouseenter',function(e){
-							e.currentTarget.addClass('active');
-						},panelGroupNode,'.panel-item');
-			
-						var itemMouseOut = R8.Utils.Y.delegate('mouseleave',function(e){
-							e.currentTarget.removeClass('active');
-						},panelGroupNode,'.panel-item');
-					});
-				});
-
-//				return content;
+				return content;
 			},
 
 			loadDockPanel: function(route) {

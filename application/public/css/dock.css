@@ -1,8 +1,10 @@
 /* Hide overlay markup while loading, if js is enabled */
 .yui3-js-enabled .yui3-overlay-loading {
+/*
     top:-1000em;
     left:-1000em;
     position:absolute;
+*/
 }
  
 /* Overlay Look/Feel */
@@ -50,13 +52,16 @@
 	width: 9px;
 	height: 8px;
 	background-image: url(../images/dock/expand-arrows-sprite.png);
+	background-position: -9px 0px;
 	background-repeat: no-repeat;
 }
-#wspace-dock .expand-collapse-arrows.collapse {
-	background-position: -9px 0px;
+#wspace-dock.collapsed .expand-collapse-arrows {
+	background-position: 0px 0px;
 }
 
 #wspace-dock .top-bottom-body { height: 5px; width: 215px; }
+#wspace-dock.collapsed .top-bottom-body { height: 5px; width: 35px; }
+
 #wspace-dock .top-bottom-body {
 	float: left;
 	background-image: url(../images/dock/trans-1x5.png);
@@ -99,8 +104,11 @@
 	width: 215px;
 	margin: 0 auto;
 }
+#wspace-dock.collapsed .panel-group {
+	width: 35px;
+}
 
-.panel-group .header {
+#wspace-dock .panel-group .header {
 	height: 8px;
 	width: 100%;
 	background-color: #CCCCCC;
@@ -119,24 +127,18 @@
 	padding: 5px 0;
 }
 
-.wspace-dock-list-item {
-	background-color: #FFFFFF;
-	padding: 5px;
-	margin-right: 18px;
-	cursor: pointer;
-	height: 25px;;
-/*	border-bottom: 1px solid #CCCCCC;*/
-	margin-bottom: 2px;
-}
-
-.panel-item .rt-endcap {
+#wspace-dock .panel-item .rt-endcap {
 	height: 25px;
 	width: 5px;
 	float: right;
 	position: relative;
 	margin-right: 5px;
 }
-.panel-item.active .rt-endcap {
+#wspace-dock.collapsed .panel-item .rt-endcap {
+	display: none;
+}
+
+#wspace-dock .panel-item.active .rt-endcap {
 	background-image: url(../images/dock/panel-item-rt-endcap.png);
 }
 
@@ -149,7 +151,7 @@
 	background-color: #EDEDED;
 }
 */
-.panel-item .label {
+#wspace-dock .panel-item .label {
 	position: absolute;
 	z-index: 0;
 	margin-left: 20px;
@@ -160,10 +162,13 @@
 	border-top: 1px solid #EDEDED;
 	border-bottom: 1px solid #EDEDED;
 }
+#wspace-dock.collapsed .panel-item .label {
+	display: none;
+}
 
-.panel-item.mover .panel-btn { background-position: -20px 0px; }
+#wspace-dock .panel-item.mover .panel-btn { background-position: -20px 0px; }
 
-.panel-btn-bg {
+#wspace-dock .panel-btn-bg {
 	height: 25px;
 	width: 25px;
 	margin-left: 5px;
@@ -172,29 +177,29 @@
 	z-index: 1;
 	background-image: url(../images/dock/panel-btn-bg-sprite.png);
 }
-.panel-item.active .panel-btn-bg {
+#wspace-dock .panel-item.active .panel-btn-bg {
 	background-position: -25px 0px;
 }
-.panel-btn {
+#wspace-dock .panel-btn {
 	height: 25px;
 	width: 25px;
 }
-.panel-item.active .panel-btn {
+#wspace-dock .panel-item.active .panel-btn {
 	background-position: -25px 0px;
 }
 
-.panel-item.active .label {
+#wspace-dock .panel-item.active .label {
 	background-color: #CCCCCC;
 	border-top: 1px solid #A5A5A5;
 	border-bottom: 1px solid #A5A5A5;
 }
 
-.panel-btn.applications {
+#wspace-dock .panel-btn.applications {
 	background-image: url(../images/dock/component-btn-sprite.png);
 }
-.panel-btn.users {
+#wspace-dock .panel-btn.users {
 	background-image: url(../images/dock/users-btn-sprite.png);
 }
-.panel-btn.service-checks {
+#wspace-dock .panel-btn.service-checks {
 	background-image: url(../images/dock/service-checks-btn-sprite.png);
 }

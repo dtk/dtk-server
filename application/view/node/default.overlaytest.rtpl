@@ -1,12 +1,13 @@
 
 
-<div id="wspace-dock" class="yui3-overlay-loading">
+<div id="wspace-dock" class="yui3-overlay-loading collapsed">
+<div class="yui3-overlay-content yui3-widget-stdmod yui3-widget-content-expanded">
     <div class="yui3-widget-hd">
 		<div class="corner tl"></div>
 		<div class="top-bottom-body"></div>
 		<div class="corner tr"></div>
-		<div class="expand-collapse-bar">
-			<div class="expand-collapse-arrows expand"></div>
+		<div id="wspace-dock-top-bar" class="expand-collapse-bar">
+			<div class="expand-collapse-arrows"></div>
 		</div>
     </div>
     <div class="yui3-widget-bd">
@@ -49,6 +50,7 @@
 		<div class="corner br"></div>
 	</div>
 </div>
+</div>
 
 <script type="text/javascript">
 function initOverlay() {
@@ -56,10 +58,11 @@ function initOverlay() {
 	YUI(YUI_config).use("overlay","node","event", function(Y) {
 	
 	    // Create an overlay from markup
+		var overlayNode = Y.one('#wspace-dock');
 	    var overlay = new Y.Overlay({
 	        srcNode:"#wspace-dock",
-	        width:"225px",
-	        height:"200px",
+	        width:"45px",
+	        height:"150px",
 //	        width:"10em",
 //	        height:"10em",
 	        xy:[100, 100]
@@ -75,6 +78,17 @@ function initOverlay() {
 	    Y.on("click", Y.bind(overlay.show, overlay), "#show");
 	    Y.on("click", Y.bind(overlay.hide, overlay), "#hide");
 	*/
+		var dockTopBar = Y.one('#wspace-dock-top-bar');
+		dockTopBar.on('click',function(e){
+			if(overlayNode.hasClass('collapsed')) {
+				overlay.set('width','225px');
+				overlayNode.removeClass('collapsed');
+			} else {
+				overlay.set('width','45px');
+				overlayNode.addClass('collapsed');
+			}
+		});
+
 		Y.all('#wspace-dock .panel-list').each(function(){
 			var groupId = this.get('id'),
 				panelGroupNode = document.getElementById(groupId);

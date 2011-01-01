@@ -233,7 +233,6 @@ p 'Panel IS:'+tpl_result[:panel]
       end
 
       Model::materialize_virtual_columns!(port_list,[:port_type])
-#pp port_list
       return {:data=>port_list}
     end
 

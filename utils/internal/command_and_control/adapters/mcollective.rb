@@ -3,10 +3,7 @@ include MCollective::RPC
 module XYZ
   module CommandAndControlAdapter
     class Mcollective < CommandAndControl
-      def initialize()  
-        @mc = rpcclient("chef_client",:options => Options)
-      end
-      def dispatch_to_client(node_actions) 
+      def self.dispatch_to_client(node_actions) 
         config_agent = ConfigAgent.load(node_actions.config_agent_type)
         identity = mcollective_id(node_actions[:node],config_agent)
         unless identity
@@ -18,7 +15,7 @@ module XYZ
         end
         msg_content =  config_agent.ret_msg_content(node_actions)
         filter = {"identity" => [identity], "agent" => ["chef_client"]}
-        results = @mc.custom_request("run",msg_content,identity,filter)
+        results = RPCClient.custom_request("run",msg_content,identity,filter)
 
         data = results.map{|result|result.results[:data]} 
         #TODO: where do we do @mc.disconnect; since @mcs share connection cannot do it here
@@ -26,7 +23,7 @@ module XYZ
       end
      private
 
-      def mcollective_id(node,config_agent)
+      def self.mcollective_id(node,config_agent)
         discover_mcollective_id(node,config_agent)
         ### below removed because quicker failure if use discovery to find if node is up
         #return DiscoveredNodes[node[:id]] if DiscoveredNodes[node[:id]]
@@ -34,10 +31,10 @@ module XYZ
         #Lock.synchronize{DiscoveredNodes[node[:id]] = identity}
         #identity
       end
-      def discover_mcollective_id(node,config_agent)
+      def self.discover_mcollective_id(node,config_agent)
         pbuilderid = config_agent.pbuilderid(node)
         filter = Filter.merge("fact" => [{:fact=>"pbuilderid", :value=>pbuilderid}])
-        @mc.client.discover(filter,Options[:disctimeout]).first
+        RPCClient.client.discover(filter,Options[:disctimeout]).first
       end
 
       Filter = {"identity"=>[], "fact"=>[], "agent"=>[], "cf_class"=>[]}
@@ -47,6 +44,7 @@ module XYZ
         :filter=> Filter,
         :timeout=>200
       }  
+      RPCClient = rpcclient("chef_client",:options => Options)
       ##removed because quicker failure to use discovery top check node is up
       #DiscoveredNodes = Hash.new
       #Lock = Mutex.new

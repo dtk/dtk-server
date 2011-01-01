@@ -20,8 +20,7 @@ module XYZ
      private 
       def execute_on_node(node_actions)
         begin
-          cac = CommandAndControl.create()
-          data = cac.dispatch_to_client(node_actions)
+          data = CommandAndControl::Adapter.dispatch_to_client(node_actions)
         rescue Exception => e
           Log.error("error in workflow execute_on_node: #{e.inspect}")
         end

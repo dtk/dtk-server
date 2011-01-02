@@ -43,6 +43,7 @@ if(!R8.Workspace.Dock) {
 					_height = _height+_panels[i].get('height');
 				}
 
+				var that = this;
 				YUI(YUI_config).use("overlay","node","event", function(Y) {
 				    _overlay = new Y.Overlay({
 				        srcNode:'#'+_nodeId,
@@ -66,6 +67,10 @@ if(!R8.Workspace.Dock) {
 							_node.addClass('collapsed');
 							_overlay.set('align',{node: "#wspace-container",points: ["tr", "tr"]});
 						}
+
+						if(that.hasOpenModal()) {
+							that.realignOpenModals();
+						}
 					});
 //DEBUG
 //appears this isnt needed
@@ -78,7 +83,7 @@ if(!R8.Workspace.Dock) {
 						var itemMouseOver = R8.Utils.Y.delegate('mouseenter',function(e){
 							e.currentTarget.addClass('active');
 						},panelGroupNode,'.panel-item');
-			
+
 						var itemMouseOut = R8.Utils.Y.delegate('mouseleave',function(e){
 							if(!e.currentTarget.hasClass('open'))
 								e.currentTarget.removeClass('active');
@@ -91,6 +96,25 @@ if(!R8.Workspace.Dock) {
 					});
 
 				});
+			},
+
+			hasOpenModal: function() {
+				for(var i in _panels) {
+					var items = _panels[i].get('items');
+					for(var j in items) {
+						if(items[j].opened()) return true;
+					}
+				}
+				return false;
+			},
+
+			realignOpenModals: function() {
+				for(var i in _panels) {
+					var items = _panels[i].get('items');
+					for(var j in items) {
+						if(items[j].opened()) items[j].realignModal();
+					}
+				}
 			},
 
 			render: function(params) {
@@ -286,12 +310,12 @@ if(!R8.Workspace.Dock) {
 			show: function() {
 				if(_node == null) _node = R8.Utils.Y.one('#'+_nodeId);
 
-				_node.setStyle('display','block');
+				_node.get('parentNode').setStyle('display','block');
 			},
 			hide: function() {
 				if(_node == null) _node = R8.Utils.Y.one('#'+_nodeId);
 
-				_node.setStyle('display','none');
+				_node.get('parentNode').setStyle('display','none');
 			},
 			toggleMinMax: function() {
 				if(_node == null) _node = R8.Utils.Y.one('#'+_nodeId);
@@ -410,6 +434,9 @@ if(!R8.Workspace.Dock) {
 					case "height":
 						return _height;
 						break;
+					case "items":
+						return _items;
+						break;
 				}
 			},
 
@@ -469,7 +496,7 @@ if(!R8.Workspace.Dock) {
 								</div>\
 						    </div>\
 						    <div id="'+_id+'-modal-body" class="yui3-widget-bd">\
-								<div style="height: 100%; width: 250px; background-color: #FFFFFF; margin: 0 auto;"></div>\
+								<div style="height: 100%; width: 250px; background-color: #FFFFFF; margin: 0 auto;">Panel for <b>'+_i18n+'</b></div>\
 						    </div>\
 						    <div id="'+_id+'-modal-footer" class="yui3-widget-ft">\
 								<div class="corner bl"></div>\
@@ -565,9 +592,12 @@ var modalId = _id;
 				if(!_opened) {
 					_node.addClass('open');
 					_modalNode.get('parentNode').setStyle('display','block');
-					_overlay.set('align',{node:'#'+_listNode.get('id'),points:['tr','tl']});
+					this.realignModal();
 					_opened = true;
 				}
+			},
+			realignModal: function() {
+				_overlay.set('align',{node:'#'+_listNode.get('id'),points:['tr','tl']});
 			}
 		}
 	}

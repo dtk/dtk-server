@@ -3,8 +3,7 @@ include MCollective::RPC
 module XYZ
   module CommandAndControlAdapter
     class Mcollective < CommandAndControl
-      def self.dispatch_to_client(node_actions) 
-        config_agent = ConfigAgent.load(node_actions.config_agent_type)
+      def self.dispatch_to_client(node_actions,config_agent) 
         identity = mcollective_id(node_actions[:node],config_agent)
         unless identity
           return {

@@ -67,6 +67,9 @@ R8::Config[:workflow][:type] = "simple"
 R8::Config[:command_and_control] = Hash.new
 R8::Config[:command_and_control][:type] = "mcollective"
 
+#optional timer plug
+#R8::Config[:timer] = Hash.new
+#R8::Config[:timer][:type] = "system_timer"
 
 #these are used in template.r8.rb and view.r8.rb
 #R8::Config[:sys_root_path] = "C:/webroot/R8Server"

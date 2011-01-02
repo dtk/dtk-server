@@ -16,7 +16,7 @@ module XYZ
     end
     Adapter = klass
 
-    def self.dispatch_to_client(action) 
+    def self.dispatch_to_client(action,config_agent) 
       nil
     end
   end

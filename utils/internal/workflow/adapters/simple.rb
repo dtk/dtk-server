@@ -19,10 +19,15 @@ module XYZ
       end
      private 
       def execute_on_node(node_actions)
+        config_agent = ConfigAgent.load(node_actions.config_agent_type)
         begin
-          data = CommandAndControl::Adapter.dispatch_to_client(node_actions)
-        rescue Exception => e
+          CommandAndControl::Adapter.dispatch_to_client(node_actions,config_agent)
+         rescue Exception => e
           Log.error("error in workflow execute_on_node: #{e.inspect}")
+          {:status => :failed,
+            :node_name => config_agent.node_name(node_actions[:node]), 
+            :error => e
+          }
         end
       end
 

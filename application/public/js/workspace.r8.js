@@ -141,9 +141,9 @@ if (!R8.Workspace) {
 
 //------Dock setup-------------
 
-//				_pageContainerNode.append(R8.Workspace.Dock.render({'display':'block','top':_toolbarNode.get('region').bottom}));
-//				R8.Workspace.Dock.init();
-				R8.Workspace.Dock.render({'display':'block','top':_toolbarNode.get('region').bottom});
+				_pageContainerNode.append(R8.Workspace.Dock.render({'display':'block','top':_toolbarNode.get('region').bottom}));
+				R8.Workspace.Dock.init();
+//				R8.Workspace.Dock.render({'display':'block','top':_toolbarNode.get('region').bottom});
 //				R8.MainToolbar.init();
 return;
 

@@ -6,31 +6,120 @@ if(!R8.Workspace.Dock) {
 	R8.Workspace.Dock = function() {
 		var _nodeId = 'wspace-dock',
 			_node = null,
+			_overlay = null,
+			_headerNode = null,
+			_bodyNode = null,
+			_footerNode = null,
+
 			_display = 'none',
-			_dockWidth = 250,
-			_state = 'foo',
+			_width = 225,
+			_height = 25,
 			_right = '0',
 			_top = '0',
 
-			_topbarNodeId = 'wspace-dock-topbar',
-			_topbarNode = null,
-			_topbarAnim = null,
-			_bodyNodeId = 'wspace-dock-body',
-			_bodyNode = null,
-			_bodyAnim = null,
-			_topbarAnimEvent = null,
-
 			_panels = [],
 
-			_setTopbarNode = function(e) {
-				_topbarNode = R8.Utils.Y.one('#'+_topbarNodeId);
-			},
-			_setBodyNode = function(e) {
-				_bodyNode = R8.Utils.Y.one('#'+_bodyNodeId);
+			testMeta = {
+				panels:[{
+					items:[
+						{id:'users',i18n:'Users'},
+						{id:'applications',i18n:'Applications'},
+						{id:'service-checks',i18n:'Service Checks'}
+					]
+				}]
 			};
-
 		return {
 			init: function() {
+				_node = R8.Utils.Y.one('#'+_nodeId);
+				_headerNode = R8.Utils.Y.one('#'+_nodeId+'-header');
+				_bodyNode = R8.Utils.Y.one('#'+_nodeId+'-body');
+				_footerNode = R8.Utils.Y.one('#'+_nodeId+'-footer');
+
+				for(var i in testMeta.panels) {
+					testMeta.panels[i]['id'] = 'panel-'+i;
+					_panels[i] = new R8.Workspace.Dock.panel(testMeta.panels[i]);
+					_bodyNode.append(_panels[i].render());
+					_panels[i].init();
+					_height = _height+_panels[i].get('height');
+				}
+
+				YUI(YUI_config).use("overlay","node","event", function(Y) {
+				    _overlay = new Y.Overlay({
+				        srcNode:'#'+_nodeId,
+				        width:_width+'px',
+				        height:_height+'px',
+						align: {
+							node: '#wspace-container',
+							points: ['tr','tr']
+						}
+				    });
+				    _overlay.render();
+
+					_topBarNode = Y.one('#wspace-dock-top-bar');
+					_topBarNode.on('click',function(e){
+						if(_node.hasClass('collapsed')) {
+							_overlay.set('width','225px');
+							_node.removeClass('collapsed');
+							_overlay.set('align',{node: "#wspace-container",points: ["tr", "tr"]});
+						} else {
+							_overlay.set('width','45px');
+							_node.addClass('collapsed');
+							_overlay.set('align',{node: "#wspace-container",points: ["tr", "tr"]});
+						}
+					});
+//DEBUG
+//appears this isnt needed
+//					_node.setStyles({'display':'block'});
+
+					Y.all('#'+_nodeId+' .panel-list').each(function(){
+						var groupId = this.get('id'),
+							panelGroupNode = document.getElementById(groupId);
+			
+						var itemMouseOver = R8.Utils.Y.delegate('mouseenter',function(e){
+							e.currentTarget.addClass('active');
+						},panelGroupNode,'.panel-item');
+			
+						var itemMouseOut = R8.Utils.Y.delegate('mouseleave',function(e){
+							if(!e.currentTarget.hasClass('open'))
+								e.currentTarget.removeClass('active');
+						},panelGroupNode,'.panel-item');
+
+//						var itemClick = R8.Utils.Y.delegate('click',function(e){
+//alert(e.currentTarget.get('id'));
+//						},panelGroupNode,'.panel-item');
+
+					});
+
+				});
+			},
+
+			render: function(params) {
+				_display = (!params['display']) ? 'none' : params['display'];
+				_top = (!params['top']) ? '0' : params['top'];
+				_right = (!params['right']) ? '0' : params['right'];
+
+				var dockTpl = '<div id="wspace-dock" class="yui3-overlay-loading" style="position:absolute; display: '+_display+'; z-index: 50;">\
+						    <div id="wspace-dock-header" class="yui3-widget-hd">\
+								<div class="corner tl"></div>\
+								<div class="top-bottom-body"></div>\
+								<div class="corner tr"></div>\
+								<div id="wspace-dock-top-bar" class="expand-collapse-bar">\
+									<div class="expand-collapse-arrows"></div>\
+								</div>\
+						    </div>\
+						    <div id="wspace-dock-body" class="yui3-widget-bd">\
+						    </div>\
+						    <div id="wspace-dock-footer" class="yui3-widget-ft">\
+								<div class="corner bl"></div>\
+								<div class="top-bottom-body"></div>\
+								<div class="corner br"></div>\
+							</div>\
+						</div>';
+
+				return dockTpl;
+			},
+
+			init2: function() {
 //TODO: temp until implmenting first panel setup
 //				_panels.push('temp');
 
@@ -144,137 +233,6 @@ if(!R8.Workspace.Dock) {
 						that.popDockPanel();
 					});
 				}
-			},
-
-			render: function(params) {
-				_display = (!params['display']) ? 'none' : params['display'];
-				_top = (!params['top']) ? '0' : params['top'];
-				_right = (!params['right']) ? '0' : params['right'];
-
-/*				var content = '<div id="'+_nodeId+'" style="display: '+_display+'; position: absolute; height: 400px; width: 250px; border: 3px solid #CCCCCC; background-color: #DDDDDD; right: '+_right+'px; top: '+_top+'px;">\
-						<div id="wspace-dock-topbar" style="float: left; position: relative; height: 30px; width: 100%; background-color: #FFFFFF;">\
-							<div id="wspace-dock-close" class="close-tab-temp"></div>\
-						</div>\
-						<div id="wspace-dock-body" style="overflow-x: hidden; overflow-y: scroll; position: relative; float: left; height: 360px; width: 240px;">\
-						</div>\
-					</div>';
-				var content = '<div id="'+_nodeId+'" class="wspace-dock-container" style="display: '+_display+'; right: '+_right+'px; top: '+_top+'px;">\
-							<div id="wspace-dock-topbar" class="wspace-dock-topbar-container">\
-							</div>\
-							<div id="wspace-dock-body" class="wspace-dock-body-container">\
-							</div>\
-					</div>';
-*/
-
-//				var content = '<div id="'+_nodeId+'" class="class="yui3-overlay-loading collapsed" style="display: '+_display+'; right: '+_right+'px; top: '+_top+'px;">\
-//							    <div class="yui3-widget-hd">\
-
-				var header = '<div class="corner tl"></div>\
-								<div class="top-bottom-body"></div>\
-									<div class="corner tr"></div>\
-									<div id="wspace-dock-top-bar" class="expand-collapse-bar">\
-										<div class="expand-collapse-arrows"></div>\
-									</div>';
-
-				var body = '<div class="panel-group">\
-									<div class="header"></div>\
-									<ul id="wspace-dock-panel-list" class="panel-list">\
-										<li id="applications-panel-item" class="panel-item">\
-											<div class="panel-btn-bg">\
-												<div class="panel-btn users"></div>\
-											</div>\
-											<div class="label">\
-												<div style="position: relative; margin: 5px 0 0 15px;">Users</div>\
-											</div>\
-											<div class="rt-endcap"></div>\
-										</li>\
-										<li id="applications-panel-item" class="panel-item">\
-											<div class="panel-btn-bg">\
-												<div class="panel-btn applications"></div>\
-											</div>\
-											<div class="label">\
-												<div style="position: relative; margin: 5px 0 0 15px;">Applications</div>\
-											</div>\
-											<div class="rt-endcap"></div>\
-										</li>\
-										<li id="applications-panel-item" class="panel-item">\
-											<div class="panel-btn-bg">\
-												<div class="panel-btn service-checks"></div>\
-											</div>\
-											<div class="label">\
-												<div style="position: relative; margin: 5px 0 0 15px;">Service Checks</div>\
-											</div>\
-											<div class="rt-endcap"></div>\
-										</li>\
-									</ul>\
-									</div>\
-							    </div>';
-
-					var footer = '<div class="corner bl"></div>\
-									<div class="top-bottom-body"></div>\
-									<div class="corner br"></div>';
-
-				var overlayNode = R8.Utils.Y.one('#wspace-dock');
-				overlayNode.setStyles({'display':_display});
-
-				YUI(YUI_config).use("overlay","node","event", function(Y) {
-/*				    var overlay = new Y.Overlay({
-//				        srcNode:"#wspace-dock",
-						id:'wspace-dock',
-						headerContent: header,
-						bodyContent: body,
-						footerContent: footer,
-				        width:"225px",
-				        height:"150px",
-//				        xy:[100, 100],
-						zIndex: 50,
-						render: "#page-container",
-						align: {
-							node: "#wspace-container",
-							points: ["tr", "tr"]
-						}
-				    });
-*/
-				    var overlay = new Y.Overlay({
-				        srcNode:"#wspace-dock",
-				        width:"225px",
-				        height:"150px",
-						align: {
-							node: "#wspace-container",
-							points: ["tr", "tr"]
-						}
-				    });
-
-				    overlay.render();
-
-					var dockTopBar = Y.one('#wspace-dock-top-bar');
-					dockTopBar.on('click',function(e){
-						if(overlayNode.hasClass('collapsed')) {
-							overlay.set('width','225px');
-							overlayNode.removeClass('collapsed');
-							overlay.set('align',{node: "#wspace-container",points: ["tr", "tr"]});
-						} else {
-							overlay.set('width','45px');
-							overlayNode.addClass('collapsed');
-							overlay.set('align',{node: "#wspace-container",points: ["tr", "tr"]});
-						}
-					});
-
-					Y.all('#wspace-dock .panel-list').each(function(){
-						var groupId = this.get('id'),
-							panelGroupNode = document.getElementById(groupId);
-			
-						var itemMouseOver = R8.Utils.Y.delegate('mouseenter',function(e){
-							e.currentTarget.addClass('active');
-						},panelGroupNode,'.panel-item');
-			
-						var itemMouseOut = R8.Utils.Y.delegate('mouseleave',function(e){
-							e.currentTarget.removeClass('active');
-						},panelGroupNode,'.panel-item');
-					});
-				});
-
-//				return content;
 			},
 
 			loadDockPanel: function(route) {
@@ -397,31 +355,66 @@ if(!R8.Workspace.Dock) {
 //-------DOCK PANEL---------------
 
 	R8.Workspace.Dock.panel = function(cfg) {
-		var _cfg = cfg,
-			_title = cfg['title']['i18n'],
-			_topbarNode = cfg['topbarNode'],
-			_bodyNode = cfg['bodyNode'],
-			_indexPos = cfg['indexPos'],
-			_bodyContent = cfg['bodyContent'],
-			_hasBackBtn = (typeof(cfg['backBtn']) !='undefined') ? cfg['backBtn'] : true;
+		var _cfg = cfg;
+			_id = cfg['id'],
+			_listNode = null,
+			_height = null,
+			_tpl = '<div id="'+_id+'" class="panel-group">\
+						<div class="header"></div>\
+							<ul id="'+_id+'-list" class="panel-list">\
+							</ul>\
+						</div>\
+				    </div>',
+			_events = {},
+			_items = {},
+			_numItems = 0;
 
 		return {
-			init: function(scroll) {
-				var scrollStyle = (scroll == true) ? 'overflow-y: scroll;' : '';
-				var backBtnContent = (_hasBackBtn == true) ? '<div id="back-btn" class="back-btn"></div>' : '';
-				var titleItem = '<div class="topbar-title-item">\
-								'+backBtnContent+'\
-								<div class="title">'+_title+'</div>\
-							</div>';
+			init: function() {
+				_listNode = R8.Utils.Y.one('#'+_id+'-list');
 
-				var bodyItem = '<div id="wspace-dock-body-'+_indexPos+'" class="wspace-body-item" style="'+scrollStyle+'">\
-								'+_bodyContent+'\
-							</div>';
+				for(var i in _cfg['items']) {
+					var itemId = _cfg['items'][i]['id'];
+					_cfg['items'][i]['list_node'] = _listNode;
+					_items[itemId] = new R8.Workspace.Dock.panelItem(_cfg['items'][i]);
+					_listNode.append(_items[itemId].render());
+					_items[itemId].init();
+					_numItems++;
+				}
 
-				_bodyNode.append(bodyItem);
-				_topbarNode.append(titleItem);
+				_height = 8 + _numItems*35;
+
+				_events['itemClick'] = R8.Utils.Y.delegate('click',function(e){
+					var itemNodeId = e.currentTarget.get('id');
+					var itemId = itemNodeId.replace('-panel-item','');
+
+					for(var item in _items) {
+						if(item == itemId) continue;
+						else {
+							_items[item].close();
+							_items[item].get('node').removeClass('active');
+						}
+					}
+					if(_items[itemId].opened()) _items[itemId].close();
+					else _items[itemId].open();
+
+				},_listNode,'.panel-item');
+
 			},
+			render: function() {
+				return _tpl;
+			},
+
+			get: function(property) {
+				switch(property) {
+					case "height":
+						return _height;
+						break;
+				}
+			},
+
 			destroy: function() {
+/*
 				var bdyChildren = _bodyNode.get('children'),
 					tpbarChildren = _topbarNode.get('children');
 
@@ -429,8 +422,153 @@ if(!R8.Workspace.Dock) {
 				bdyChildren.item(_indexPos).remove();
 				tpbarChildren.item(_indexPos).purge(true);
 				tpbarChildren.item(_indexPos).remove();
+*/
 			}
 		}
 	}
 
+	R8.Workspace.Dock.panelItem = function(cfg) {
+		var _cfg = cfg,
+			_id = cfg['id'],
+			_listNode = cfg['list_node'],
+			_node = null,
+			_overlay = null,
+			_opened = false,
+			_i18n = cfg['i18n'],
+			_tpl = '<li id="'+_id+'-panel-item" class="panel-item">\
+						<div class="lft-endcap"></div>\
+						<div class="panel-btn-bg">\
+							<div class="panel-btn '+_id+'"></div>\
+						</div>\
+						<div class="label">\
+							<div style="position: relative; margin: 5px 0 0 15px;">'+_i18n+'</div>\
+						</div>\
+						<div class="rt-endcap"></div>\
+					</li>',
+
+			_modalNode = null,
+			_modalHeaderNode = null,
+			_modalHeight = 260,
+			_modalWidth = 260,
+			_modalTpl = '<div id="'+_id+'-modal" class="yui3-overlay-loading panel-modal">\
+							<div class="yui3-widget-hd">\
+							</div>\
+							<div class="yui3-widget-bd">\
+							adsffffffffffff</div>\
+							<div class="yui3-widget-ft">\
+							</div>\
+						</div>';
+
+				var dockTpl = '<div id="'+_id+'-modal" class="yui3-overlay-loading panel-modal" style="position:absolute; display: block; z-index: 51;">\
+						    <div id="'+_id+'-modal-header" class="yui3-widget-hd">\
+								<div class="corner tl"></div>\
+								<div class="top-bottom-body"></div>\
+								<div class="corner tr"></div>\
+								<div id="'+_id+'-modal-top-bar" class="expand-collapse-bar">\
+									<div class="expand-collapse-arrows"></div>\
+								</div>\
+						    </div>\
+						    <div id="'+_id+'-modal-body" class="yui3-widget-bd">\
+								<div style="height: 100%; width: 250px; background-color: #FFFFFF; margin: 0 auto;"></div>\
+						    </div>\
+						    <div id="'+_id+'-modal-footer" class="yui3-widget-ft">\
+								<div class="corner bl"></div>\
+								<div class="top-bottom-body"></div>\
+								<div class="corner br"></div>\
+							</div>\
+						</div>';
+
+var _header = '<div class="corner tl"></div>\
+								<div class="top-bottom-body"></div>\
+								<div class="corner tr"></div>\
+								<div id="wspace-dock-top-bar" class="expand-collapse-bar">\
+									<div class="expand-collapse-arrows"></div>\
+								</div>';
+
+var _footer ='<div class="corner bl"></div>\
+								<div class="top-bottom-body"></div>\
+								<div class="corner br"></div>';
+		return {
+			init: function() {
+				_node = R8.Utils.Y.one('#'+_id+'-panel-item');
+
+				R8.Utils.Y.one('#page-container').append(dockTpl);
+				_modalNode = R8.Utils.Y.one('#'+_id+'-modal');
+				_modalHeaderNode = R8.Utils.Y.one('#'+_id+'-modal-header');
+				var that = this;
+				_modalHeaderNode.on('click',function(Y){ that.close(); that.get('node').removeClass('active'); });
+
+//				var _right = _listNode.get('region').right - _listNode.get('region').left;
+//				dialogNode.setStyles({display:'block',top:'100px',right:_right});
+var modalId = _id;
+				YUI(YUI_config).use("overlay","node","event", function(Y) {
+//console.log('should align with:'+_listNode.get('id'));
+
+				    _overlay = new Y.Overlay({
+				        srcNode:'#'+_id+'-modal',
+				        width:'260px',
+				        height:'260px',
+//						bodyContent: '<div class="body">this is a test</div>',
+//				        width:_modalWidth+'px',
+//				        height:_modalHeight+'px',
+						align: {
+							node: '#'+_listNode.get('id'),
+							points: ['tr','tl']
+						}
+				    });
+
+/*					_overlay = new Y.Overlay({
+						id:_id+'-modal',
+						width:"260px",
+						height:"260px",
+						headerContent: _header,
+						bodyContent: "Click the 'Align Next' button to try a new alignment",
+						footerContent: _footer,
+						zIndex:51,
+						align: {
+							node: '#'+_listNode.get('id'),
+							points: ['tr','tl']
+						},
+						render: '#page-container'
+					});
+*/
+				    _overlay.render();
+					_modalNode.get('parentNode').setStyle('display','none');
+//					_modalNode = R8.Utils.Y.one('#'+modalId+'-modal');
+//					_modalNode.addClass('panel-modal');
+				});
+			},
+			render: function() {
+				return _tpl;
+			},
+
+			get: function(property) {
+				switch(property) {
+					case "node":
+						return _node;
+						break;
+				}
+			},
+
+			opened: function() { return _opened; },
+
+			close: function() {
+				if(_opened) {
+					_node.removeClass('open');
+//					_node.removeClass('active');
+					_modalNode.get('parentNode').setStyle('display','none');
+				}
+				_opened = false;
+			},
+
+			open: function() {
+				if(!_opened) {
+					_node.addClass('open');
+					_modalNode.get('parentNode').setStyle('display','block');
+					_overlay.set('align',{node:'#'+_listNode.get('id'),points:['tr','tl']});
+					_opened = true;
+				}
+			}
+		}
+	}
 }

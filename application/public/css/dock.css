@@ -125,6 +125,18 @@
 	list-style-type: none;
 	height: 25px;
 	padding: 5px 0;
+	cursor: pointer;
+}
+
+#wspace-dock .panel-item .lft-endcap {
+	height: 25px;
+	width: 8px;
+	float: left;
+	position: absolute;
+	z-index: 0;
+}
+#wspace-dock .panel-item.open .lft-endcap {
+	background-color:#CCCCCC;
 }
 
 #wspace-dock .panel-item .rt-endcap {
@@ -202,4 +214,98 @@
 }
 #wspace-dock .panel-btn.service-checks {
 	background-image: url(../images/dock/service-checks-btn-sprite.png);
+}
+
+/*----------------PANEL MODAL------------*/
+
+.yui3-js-enabled .yui3-overlay-loading {
+    top:-1000em;
+    left:-1000em;
+}
+
+
+/* Overlay Look/Feel */
+.panel-modal.yui3-overlay-content {
+/*    padding:3px;*/
+/*    border:1px solid #000;*/
+/*    background-color:#aaa;*/
+}
+
+.panel-modal.yui3-overlay-content .yui3-widget-hd {
+/*    padding:5px;
+    border:2px solid #aa0000;
+    background-color:#fff;*/
+	height: 20px;
+}
+ 
+.panel-modal.yui3-overlay-content .yui3-widget-bd {
+	background-image: url(../images/dock/trans-1x5.png);
+	background-repeat: repeat;
+}
+ 
+.panel-modal.yui3-overlay-content .yui3-widget-ft {
+/*
+    padding:5px;
+    border:2px solid #00aa00;
+    background-color:#fff;
+*/
+}
+
+.panel-modal .topbar { float: left; }
+.panel-modal .topbar { height: 5px; width: 100%; }
+.panel-modal .expand-collapse-bar { height: 15px; width: 100%; }
+.panel-modal .expand-collapse-bar {
+	float: left;
+	background-image: url(../images/dock/trans-1x5.png);
+	background-repeat: repeat;
+}
+.panel-modal .expand-collapse-arrows {
+	float: right;
+	margin: 1px 5px 1px 0;
+	width: 9px;
+	height: 8px;
+	background-image: url(../images/dock/expand-arrows-sprite.png);
+	background-position: -9px 0px;
+	background-repeat: no-repeat;
+}
+.panel-modal.collapsed .expand-collapse-arrows {
+	background-position: 0px 0px;
+}
+
+.panel-modal .top-bottom-body { height: 5px; width: 250px; }
+.panel-modal.collapsed .top-bottom-body { height: 5px; width: 35px; }
+
+.panel-modal .top-bottom-body {
+	float: left;
+	background-image: url(../images/dock/trans-1x5.png);
+	background-repeat: repeat-x;
+}
+
+.panel-modal .corner {
+	float: left;
+	height: 5px;
+	width: 5px;
+	background-image: url(../images/dock/trans-corners.png);
+}
+.panel-modal .corner.tl { }
+.panel-modal .corner.tr { background-position: 0px -5px; }
+.panel-modal .corner.bl { background-position: 0px -15px; }
+.panel-modal .corner.br { background-position: 0px -10px; }
+
+
+.panel-modal .expand-collapse-bar {
+	float: left;
+	background-image: url(../images/dock/trans-1x5.png);
+	background-repeat: repeat;
+}
+.panel-modal .expand-collapse-arrows {
+	float: right;
+	margin: 1px 5px 1px 0;
+	width: 9px;
+	height: 8px;
+	background-image: url(../images/dock/expand-arrows-sprite.png);
+	background-repeat: no-repeat;
+}
+.panel-modal .expand-collapse-arrows.collapse {
+	background-position: -9px 0px;
 }

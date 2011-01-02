@@ -136,7 +136,9 @@
 	z-index: 0;
 }
 #wspace-dock .panel-item.open .lft-endcap {
-	background-color:#CCCCCC;
+/*	background-color:#CCCCCC;*/
+	background-image: url(../images/dock/trans-1x5.png);
+	background-repeat: repeat;
 }
 
 #wspace-dock .panel-item .rt-endcap {

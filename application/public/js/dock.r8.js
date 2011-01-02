@@ -473,6 +473,7 @@ if(!R8.Workspace.Dock) {
 						<div class="rt-endcap"></div>\
 					</li>',
 
+			_resizeMouseDown = false,
 			_modalNode = null,
 			_modalHeaderNode = null,
 			_modalHeight = 260,
@@ -489,18 +490,19 @@ if(!R8.Workspace.Dock) {
 				var dockTpl = '<div id="'+_id+'-modal" class="yui3-overlay-loading panel-modal" style="position:absolute; display: block; z-index: 51;">\
 						    <div id="'+_id+'-modal-header" class="yui3-widget-hd">\
 								<div class="corner tl"></div>\
-								<div class="top-bottom-body"></div>\
+								<div class="top-bottom-body width-resizer"></div>\
 								<div class="corner tr"></div>\
 								<div id="'+_id+'-modal-top-bar" class="expand-collapse-bar">\
 									<div class="expand-collapse-arrows"></div>\
 								</div>\
 						    </div>\
 						    <div id="'+_id+'-modal-body" class="yui3-widget-bd">\
-								<div style="height: 100%; width: 250px; background-color: #FFFFFF; margin: 0 auto;">Panel for <b>'+_i18n+'</b></div>\
+								<div id="'+_id+'-modal-resize-width" style="height: 100%; width: 5px; float: left; cursor: w-resize;"></div>\
+								<div class="width-resizer" style="height: 100%; width: 250px; background-color: #EDEDED; margin: 0 auto;">Panel for <b>'+_i18n+'</b></div>\
 						    </div>\
-						    <div id="'+_id+'-modal-footer" class="yui3-widget-ft">\
+						    <div id="'+_id+'-modal-footer" class="yui3-widget-ft" style="cursor: n-resize;">\
 								<div class="corner bl"></div>\
-								<div class="top-bottom-body"></div>\
+								<div class="top-bottom-body width-resizer"></div>\
 								<div class="corner br"></div>\
 							</div>\
 						</div>';
@@ -527,10 +529,9 @@ var _footer ='<div class="corner bl"></div>\
 
 //				var _right = _listNode.get('region').right - _listNode.get('region').left;
 //				dialogNode.setStyles({display:'block',top:'100px',right:_right});
-var modalId = _id;
-				YUI(YUI_config).use("overlay","node","event", function(Y) {
-//console.log('should align with:'+_listNode.get('id'));
-
+//var modalId = _id;
+				var that = this;
+				YUI(YUI_config).use('overlay','node','event','dd','dd-proxy', function(Y) {
 				    _overlay = new Y.Overlay({
 				        srcNode:'#'+_id+'-modal',
 				        width:'260px',
@@ -563,6 +564,46 @@ var modalId = _id;
 					_modalNode.get('parentNode').setStyle('display','none');
 //					_modalNode = R8.Utils.Y.one('#'+modalId+'-modal');
 //					_modalNode.addClass('panel-modal');
+
+					var widthResizer = new Y.DD.Drag({
+						node: '#'+_id+'-modal-resize-width'
+					});
+					widthResizer.plug(Y.Plugin.DDProxy, {
+						moveOnEnd: false,
+						borderStyle: false,
+					});
+					widthResizer.on('drag:drag',function(e){
+						var x1 = e.pageX;
+						var x2 = _modalNode.get('region').right;
+						var width = x2-x1;
+						_overlay.set('width',width+'px');
+						that.realignModal();
+						Y.all('#'+_id+'-modal .width-resizer').each(function(){
+							var innerWidth = width - 10;
+							this.setStyle('width',innerWidth+'px');
+						});
+					});
+
+					var heightResizer = new Y.DD.Drag({
+						node: '#'+_id+'-modal-footer'
+					});
+					heightResizer.plug(Y.Plugin.DDProxy, {
+						moveOnEnd: false,
+						borderStyle: false,
+					});
+					heightResizer.on('drag:drag',function(e){
+						var y2 = e.pageY;
+						var y1 = _modalNode.get('region').top;
+						var height = y2-y1;
+						_overlay.set('height',height+'px');
+/*
+//						that.realignModal();
+						Y.all('#'+_id+'-modal .height-resizer').each(function(){
+							var innerHeight = height - 30;
+							this.setStyle('height',innerHeight+'px');
+						});
+*/
+					});
 				});
 			},
 			render: function() {
@@ -599,6 +640,14 @@ var modalId = _id;
 			realignModal: function() {
 				_overlay.set('align',{node:'#'+_listNode.get('id'),points:['tr','tl']});
 			}
+		}
+	}
+	
+	R8.Workspace.Dock.userPlugin = function(cfg) {
+		var _cfg = cfg;
+
+		return {
+			
 		}
 	}
 }

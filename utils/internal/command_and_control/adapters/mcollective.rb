@@ -34,7 +34,7 @@ module XYZ
       def self.discover_mcollective_id(node,config_agent)
         pbuilderid = config_agent.pbuilderid(node)
         filter = Filter.merge("fact" => [{:fact=>"pbuilderid", :value=>pbuilderid}])
-        RPCClient.client.discover(filter,Options[:disctimeout]).first
+        RPCClient.client.discover(filter,Options[:disctimeout],:max_hosts_count => 1).first
       end
 
       Filter = {"identity"=>[], "fact"=>[], "agent"=>[], "cf_class"=>[]}
@@ -49,5 +49,31 @@ module XYZ
       #DiscoveredNodes = Hash.new
       #Lock = Mutex.new
    end
+  end
+end
+
+######## Monkey patch so discover can exit when get max number of item
+module MCollective
+  class Client
+    def discover(filter, timeout,opts={})
+      begin
+        reqid = sendreq("ping", "discovery", filter)
+        @log.debug("Waiting #{timeout} seconds for discovery replies to request #{reqid}")
+
+        hosts = []
+        Timeout.timeout(timeout) do
+          while opts[:max_hosts_count].nil? or opts[:max_hosts_count] > hosts.size
+            msg = receive(reqid)
+            @log.debug("Got discovery reply from #{msg[:senderid]}")
+            hosts << msg[:senderid]
+          end
+        end
+       rescue Timeout::Error => e
+        hosts.sort
+       rescue Exception => e
+        raise
+      end
+      hosts.sort
+    end
   end
 end

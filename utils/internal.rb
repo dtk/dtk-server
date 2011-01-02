@@ -17,4 +17,4 @@ require File.expand_path('internal/data_sources', File.dirname(__FILE__))
 
 ##monkey patches; shoudl be last
 #TODO: make sure not patching dyanmically loaded classes
-require File.expand_path('internal/timeout', File.dirname(__FILE__))
+#require File.expand_path('internal/timeout', File.dirname(__FILE__))

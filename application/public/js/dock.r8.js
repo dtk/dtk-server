@@ -501,6 +501,7 @@ if(!R8.Workspace.Dock) {
 								<div class="width-resizer" style="height: 100%; width: 250px; background-color: #EDEDED; margin: 0 auto;">Panel for <b>'+_i18n+'</b></div>\
 						    </div>\
 						    <div id="'+_id+'-modal-footer" class="yui3-widget-ft" style="cursor: n-resize;">\
+								<div id="'+_id+'-modal-diag-resizer" style="height: 5px; width: 5px; position: absolute; float left; z-index: 2; cursor: ne-resize;"></div>\
 								<div class="corner bl"></div>\
 								<div class="top-bottom-body width-resizer"></div>\
 								<div class="corner br"></div>\
@@ -596,14 +597,31 @@ var _footer ='<div class="corner bl"></div>\
 						var y1 = _modalNode.get('region').top;
 						var height = y2-y1;
 						_overlay.set('height',height+'px');
-/*
-//						that.realignModal();
-						Y.all('#'+_id+'-modal .height-resizer').each(function(){
-							var innerHeight = height - 30;
-							this.setStyle('height',innerHeight+'px');
-						});
-*/
 					});
+
+					var diagResizer = new Y.DD.Drag({
+						node: '#'+_id+'-modal-diag-resizer'
+					});
+					diagResizer.plug(Y.Plugin.DDProxy, {
+						moveOnEnd: false,
+						borderStyle: false,
+					});
+					diagResizer.on('drag:drag',function(e){
+						var x1 = e.pageX;
+						var x2 = _modalNode.get('region').right;
+						var width = x2-x1;
+						var y2 = e.pageY;
+						var y1 = _modalNode.get('region').top;
+						var height = y2-y1;
+						_overlay.set('height',height+'px');
+						_overlay.set('width',width+'px');
+						that.realignModal();
+						Y.all('#'+_id+'-modal .width-resizer').each(function(){
+							var innerWidth = width - 10;
+							this.setStyle('width',innerWidth+'px');
+						});
+					});
+
 				});
 			},
 			render: function() {

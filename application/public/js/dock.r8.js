@@ -25,11 +25,13 @@ if(!R8.Workspace.Dock) {
 						{
 							id:'users',i18n:'Users',
 							modal: {
-									fixed_size: true,
+									fixed_size: false,
 									min_height: 150,
 									min_width: 150,
-									max_height: 500,
-									max_width: 500
+									max_height: 300,
+									max_width: 500,
+									width: 260,
+									height: 260
 								}
 						},
 //						{id:'applications',i18n:'Applications'},
@@ -548,8 +550,8 @@ var _footer ='<div class="corner bl"></div>\
 				YUI(YUI_config).use('overlay','node','event','dd','dd-proxy', function(Y) {
 				    _overlay = new Y.Overlay({
 				        srcNode:'#'+_id+'-modal',
-				        width:'260px',
-				        height:'260px',
+				        width:_modalCfg['width']+'px',
+				        height:_modalCfg['height']+'px',
 //						bodyContent: '<div class="body">this is a test</div>',
 //				        width:_modalWidth+'px',
 //				        height:_modalHeight+'px',
@@ -605,11 +607,17 @@ var _footer ='<div class="corner bl"></div>\
 					_widthResizer.on('drag:drag',function(e){
 						var x1 = e.pageX;
 						var x2 = _modalNode.get('region').right;
-						var width = x2-x1;
-						_overlay.set('width',width+'px');
+						var newWidth = x2-x1;
+						if (newWidth > _modalCfg['max_width']) {
+							newWidth = _modalCfg['max_width'];
+						} else if(newWidth < _modalCfg['min_width'])  {
+							newWidth = _modalCfg['min_width'];
+						}
+
+						_overlay.set('width',newWidth+'px');
 						that.realignModal();
 						Y.all('#'+_id+'-modal .width-resizer').each(function(){
-							var innerWidth = width - 10;
+							var innerWidth = newWidth - 10;
 							this.setStyle('width',innerWidth+'px');
 						});
 					});
@@ -624,8 +632,13 @@ var _footer ='<div class="corner bl"></div>\
 					_heightResizer.on('drag:drag',function(e){
 						var y2 = e.pageY;
 						var y1 = _modalNode.get('region').top;
-						var height = y2-y1;
-						_overlay.set('height',height+'px');
+						var newHeight = y2-y1;
+						if (newHeight > _modalCfg['max_height']) {
+							newHeight = _modalCfg['max_height'];
+						} else if(newHeight < _modalCfg['min_height'])  {
+							newHeight = _modalCfg['min_height'];
+						}
+						_overlay.set('height',newHeight+'px');
 					});
 
 					_diagResizer = new Y.DD.Drag({
@@ -638,15 +651,27 @@ var _footer ='<div class="corner bl"></div>\
 					_diagResizer.on('drag:drag',function(e){
 						var x1 = e.pageX;
 						var x2 = _modalNode.get('region').right;
-						var width = x2-x1;
+						var newWidth = x2-x1;
+						if (newWidth > _modalCfg['max_width']) {
+							newWidth = _modalCfg['max_width'];
+						} else if(newWidth < _modalCfg['min_width'])  {
+							newWidth = _modalCfg['min_width'];
+						}
+
 						var y2 = e.pageY;
 						var y1 = _modalNode.get('region').top;
-						var height = y2-y1;
-						_overlay.set('height',height+'px');
-						_overlay.set('width',width+'px');
+						var newHeight = y2-y1;
+						if (newHeight > _modalCfg['max_height']) {
+							newHeight = _modalCfg['max_height'];
+						} else if(newHeight < _modalCfg['min_height'])  {
+							newHeight = _modalCfg['min_height'];
+						}
+
+						_overlay.set('height',newHeight+'px');
+						_overlay.set('width',newWidth+'px');
 						that.realignModal();
 						Y.all('#'+_id+'-modal .width-resizer').each(function(){
-							var innerWidth = width - 10;
+							var innerWidth = newWidth - 10;
 							this.setStyle('width',innerWidth+'px');
 						});
 					});

@@ -34,8 +34,28 @@ if(!R8.Workspace.Dock) {
 									height: 260
 								}
 						},
-//						{id:'applications',i18n:'Applications'},
-//						{id:'service-checks',i18n:'Service Checks'}
+						{id:'applications',i18n:'Applications',
+							modal: {
+									fixed_size: false,
+									min_height: 150,
+									min_width: 150,
+									max_height: 300,
+									max_width: 500,
+									width: 260,
+									height: 260
+								}
+						},
+						{id:'service-checks',i18n:'Service Checks',
+							modal: {
+									fixed_size: false,
+									min_height: 150,
+									min_width: 150,
+									max_height: 300,
+									max_width: 500,
+									width: 260,
+									height: 260
+								}
+						}
 					],
 				}]
 			};

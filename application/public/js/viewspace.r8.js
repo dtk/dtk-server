@@ -454,6 +454,8 @@ if (typeof(e) != 'undefined') {
 				if(e.ctrlKey == false) this.clearSelectedItems();
 				this.addSelectedItem(modelId,{'model':model,'id':modelId});
 
+				R8.Workspace.Dock.focusChange(_selectedItems);
+
 				e.stopImmediatePropagation();
 			},
 

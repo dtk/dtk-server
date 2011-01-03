@@ -174,6 +174,21 @@ if(!R8.Workspace.Dock) {
 				return dockTpl;
 			},
 
+			focusChange: function(focusDetails) {
+				if(this.hasOpenModal()) {
+					this.updateOpenModals(focusDetails);
+				}
+			},
+
+			updateOpenModals: function(itemDetails) {
+				for(var i in _panels) {
+					var items = _panels[i].get('items');
+					for(var j in items) {
+						if(items[j].opened()) items[j].refreshContent(itemDetails);
+					}
+				}
+			},
+
 			init2: function() {
 //TODO: temp until implmenting first panel setup
 //				_panels.push('temp');
@@ -488,6 +503,8 @@ if(!R8.Workspace.Dock) {
 	R8.Workspace.Dock.panelItem = function(cfg) {
 		var _cfg = cfg,
 			_id = cfg['id'],
+			_pluginName = _id.replace('-','_')+'Plugin',
+			_panelPlugin = null,
 			_listNode = cfg['list_node'],
 			_node = null,
 			_overlay = null,
@@ -511,6 +528,7 @@ if(!R8.Workspace.Dock) {
 
 			_modalCfg = cfg['modal'],
 			_modalNode = null,
+			_modalContentNode = null,
 			_modalHeaderNode = null,
 			_modalHeight = 260,
 			_modalWidth = 260,
@@ -534,7 +552,7 @@ if(!R8.Workspace.Dock) {
 						    </div>\
 						    <div id="'+_id+'-modal-body" class="yui3-widget-bd">\
 								<div id="'+_id+'-modal-resize-width" class="width-resize-drag"></div>\
-								<div class="width-resizer" style="height: 100%; width: 250px; background-color: #EDEDED; margin: 0 auto;">Panel for <b>'+_i18n+'</b></div>\
+								<div id="'+_id+'-modal-content" class="width-resizer" style="height: 100%; width: 250px; background-color: #EDEDED; margin: 0 auto;">Panel for <b>'+_i18n+'</b></div>\
 						    </div>\
 						    <div id="'+_id+'-modal-footer" class="yui3-widget-ft height-resize-drag">\
 								<div id="'+_id+'-modal-diag-resizer" class="diag-resize-drag"></div>\
@@ -559,14 +577,16 @@ var _footer ='<div class="corner bl"></div>\
 
 				R8.Utils.Y.one('#page-container').append(dockTpl);
 				_modalNode = R8.Utils.Y.one('#'+_id+'-modal');
+				_modalContentNode = R8.Utils.Y.one('#'+_id+'-modal-content');
 				_modalHeaderNode = R8.Utils.Y.one('#'+_id+'-modal-header');
 				var that = this;
 				_modalHeaderNode.on('click',function(Y){ that.close(); that.get('node').removeClass('active'); });
 
+				_panelPlugin = new R8.Workspace.Dock[_pluginName]({'modalContentNode':_modalContentNode});
+
 //				var _right = _listNode.get('region').right - _listNode.get('region').left;
 //				dialogNode.setStyles({display:'block',top:'100px',right:_right});
 //var modalId = _id;
-				var that = this;
 				YUI(YUI_config).use('overlay','node','event','dd','dd-proxy', function(Y) {
 				    _overlay = new Y.Overlay({
 				        srcNode:'#'+_id+'-modal',
@@ -732,15 +752,67 @@ var _footer ='<div class="corner bl"></div>\
 			},
 			realignModal: function() {
 				_overlay.set('align',{node:'#'+_listNode.get('id'),points:['tr','tl']});
+			},
+
+			refreshContent: function(items) {
+				_panelPlugin.refresh(items);
 			}
 		}
 	}
-	
-	R8.Workspace.Dock.userPlugin = function(cfg) {
-		var _cfg = cfg;
+
+	R8.Workspace.Dock.usersPlugin = function(cfg) {
+		var _cfg = cfg,
+			_modalContentNode = cfg['modalContentNode'];
 
 		return {
-			
+			refresh: function(items) {
+//TODO: assuming only one for right now
+				var item = null;
+				for(var i in items) {
+					item = items[i];
+				}
+
+				var params = {
+					'cfg': {
+						'data':'panel_id='+_modalContentNode.get('id'),
+						'method': 'GET'
+					},
+//					'callbacks': {
+//						'io:success':this.getPanelCfg
+//					}
+				};
+console.log('going to call dock get users.....');
+				R8.Ctrl.call(item.model+'/dock_get_users/'+item.id, params);
+			}
 		}
 	}
+	R8.Workspace.Dock.service_checksPlugin = function() {
+//		var _cfg = cfg;
+
+		return {
+			refresh: function(items) {
+//TODO: assuming only one for right now
+				var item = null;
+				for(var i in items) {
+					item = items[i];
+				}
+console.log(item);
+			}
+		}
+	}
+	R8.Workspace.Dock.applicationsPlugin = function() {
+//		var _cfg = cfg;
+
+		return {
+			refresh: function(items) {
+//TODO: assuming only one for right now
+				var item = null;
+				for(var i in items) {
+					item = items[i];
+				}
+console.log(item);
+			}
+		}
+	}
+
 }

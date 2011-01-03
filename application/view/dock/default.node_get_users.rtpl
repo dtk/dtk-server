@@ -1,0 +1,7 @@
+
+
+<ul class="list">
+	{%for user in user_list%}
+		<li style="height: 40px;">{%=user[:name]%}</li>
+	{%end%}
+</ul>

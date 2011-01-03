@@ -21,6 +21,27 @@ pp '++++++++++++++++++++++++++++++'
       }
     end
 
+    def dock_get_users(id)
+      user_list = Array.new
+      user_list = [
+        {:id=>'1231231',:name=>'bob'},
+        {:id=>'1231231',:name=>'jim'},
+        {:id=>'1231231',:name=>'greg'},
+        {:id=>'1231231',:name=>'sally'},
+      ]
+
+      tpl = R8Tpl::TemplateR8.new("dock/node_get_users",user_context())
+      tpl.assign(:_app,app_common())
+      tpl.assign(:user_list,user_list)
+
+      panel_id = request.params['panel_id']
+
+      return {
+        :content => tpl.render(),
+        :panel => panel_id
+      }
+    end
+
     def ac_remotesearch
 pp '++++++++++++++++++++++++++++++'
 pp request.params

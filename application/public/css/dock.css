@@ -349,3 +349,14 @@
 }
 
 */
+
+.panel-modal ul.list {
+	width: 100%;
+	background-color: #FFFFFF;
+	margin: 0;
+	padding: 0;
+}
+.panel-modal ul.list li {
+	list-style-type: none;
+	padding: 5px 0;
+}

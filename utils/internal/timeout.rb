@@ -44,23 +44,28 @@ module TimeoutMonkeyPatch
     timer_adapter = nil
     #TODO: just treating system time adapter now
     if R8::Config[:timer]
-      unless R8::Config[:timer][:type] == "system_timer"
-        Log.error("only treating now system_timer adapter")
-      else
+      case (R8::Config[:timer][:type])
+       when "system_timer"
         begin
           require 'system_timer'
           timer_adapter = SystemTimer
          rescue LoadError
           Log.error("cannot find system timer adapter; using default (Timeout)")
         end
+       when "debug_timeout" 
+        timer_adapter = nil
+       else
+        Log.error("only treating now system_timer adapter")
       end
     end
     TimerAdapterClass = timer_adapter
   end
 end
 
-class MCollective::Client
-  include TimeoutMonkeyPatch
+if (R8::Config[:timer]||{})[:type]
+  class MCollective::Client
+    include TimeoutMonkeyPatch
+  end
 end
 
 

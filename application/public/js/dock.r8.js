@@ -22,10 +22,21 @@ if(!R8.Workspace.Dock) {
 			testMeta = {
 				panels:[{
 					items:[
-						{id:'users',i18n:'Users'},
-						{id:'applications',i18n:'Applications'},
-						{id:'service-checks',i18n:'Service Checks'}
-					]
+						{
+							id:'users',i18n:'Users',
+							modal: {
+									fixed_size: false,
+									min_height: 150,
+									min_width: 150,
+									max_height: 300,
+									max_width: 500,
+									width: 260,
+									height: 260
+								}
+						},
+//						{id:'applications',i18n:'Applications'},
+//						{id:'service-checks',i18n:'Service Checks'}
+					],
 				}]
 			};
 		return {
@@ -474,6 +485,11 @@ if(!R8.Workspace.Dock) {
 					</li>',
 
 			_resizeMouseDown = false,
+			_widthResizer = null,
+			_heightResizer = null,
+			_diagResizer = null,
+
+			_modalCfg = cfg['modal'],
 			_modalNode = null,
 			_modalHeaderNode = null,
 			_modalHeight = 260,
@@ -497,17 +513,16 @@ if(!R8.Workspace.Dock) {
 								</div>\
 						    </div>\
 						    <div id="'+_id+'-modal-body" class="yui3-widget-bd">\
-								<div id="'+_id+'-modal-resize-width" style="height: 100%; width: 5px; float: left; cursor: w-resize;"></div>\
+								<div id="'+_id+'-modal-resize-width" class="width-resize-drag"></div>\
 								<div class="width-resizer" style="height: 100%; width: 250px; background-color: #EDEDED; margin: 0 auto;">Panel for <b>'+_i18n+'</b></div>\
 						    </div>\
-						    <div id="'+_id+'-modal-footer" class="yui3-widget-ft" style="cursor: n-resize;">\
-								<div id="'+_id+'-modal-diag-resizer" style="height: 5px; width: 5px; position: absolute; float left; z-index: 2; cursor: ne-resize;"></div>\
+						    <div id="'+_id+'-modal-footer" class="yui3-widget-ft height-resize-drag">\
+								<div id="'+_id+'-modal-diag-resizer" class="diag-resize-drag"></div>\
 								<div class="corner bl"></div>\
 								<div class="top-bottom-body width-resizer"></div>\
 								<div class="corner br"></div>\
 							</div>\
 						</div>';
-
 var _header = '<div class="corner tl"></div>\
 								<div class="top-bottom-body"></div>\
 								<div class="corner tr"></div>\
@@ -535,8 +550,8 @@ var _footer ='<div class="corner bl"></div>\
 				YUI(YUI_config).use('overlay','node','event','dd','dd-proxy', function(Y) {
 				    _overlay = new Y.Overlay({
 				        srcNode:'#'+_id+'-modal',
-				        width:'260px',
-				        height:'260px',
+				        width:_modalCfg['width']+'px',
+				        height:_modalCfg['height']+'px',
 //						bodyContent: '<div class="body">this is a test</div>',
 //				        width:_modalWidth+'px',
 //				        height:_modalHeight+'px',
@@ -566,64 +581,104 @@ var _footer ='<div class="corner bl"></div>\
 //					_modalNode = R8.Utils.Y.one('#'+modalId+'-modal');
 //					_modalNode.addClass('panel-modal');
 
-					var widthResizer = new Y.DD.Drag({
-						node: '#'+_id+'-modal-resize-width'
-					});
-					widthResizer.plug(Y.Plugin.DDProxy, {
-						moveOnEnd: false,
-						borderStyle: false,
-					});
-					widthResizer.on('drag:drag',function(e){
-						var x1 = e.pageX;
-						var x2 = _modalNode.get('region').right;
-						var width = x2-x1;
-						_overlay.set('width',width+'px');
-						that.realignModal();
-						Y.all('#'+_id+'-modal .width-resizer').each(function(){
-							var innerWidth = width - 10;
-							this.setStyle('width',innerWidth+'px');
-						});
-					});
-
-					var heightResizer = new Y.DD.Drag({
-						node: '#'+_id+'-modal-footer'
-					});
-					heightResizer.plug(Y.Plugin.DDProxy, {
-						moveOnEnd: false,
-						borderStyle: false,
-					});
-					heightResizer.on('drag:drag',function(e){
-						var y2 = e.pageY;
-						var y1 = _modalNode.get('region').top;
-						var height = y2-y1;
-						_overlay.set('height',height+'px');
-					});
-
-					var diagResizer = new Y.DD.Drag({
-						node: '#'+_id+'-modal-diag-resizer'
-					});
-					diagResizer.plug(Y.Plugin.DDProxy, {
-						moveOnEnd: false,
-						borderStyle: false,
-					});
-					diagResizer.on('drag:drag',function(e){
-						var x1 = e.pageX;
-						var x2 = _modalNode.get('region').right;
-						var width = x2-x1;
-						var y2 = e.pageY;
-						var y1 = _modalNode.get('region').top;
-						var height = y2-y1;
-						_overlay.set('height',height+'px');
-						_overlay.set('width',width+'px');
-						that.realignModal();
-						Y.all('#'+_id+'-modal .width-resizer').each(function(){
-							var innerWidth = width - 10;
-							this.setStyle('width',innerWidth+'px');
-						});
-					});
-
+					if(typeof(_modalCfg['fixed_size']) == 'undefined' || _modalCfg['fixed_size'] == false) {
+						that.resizeOn();
+					}
 				});
 			},
+/*
+ 						fixed_size: false,
+						min_height: 150,
+						min_width: 150,
+						max_height: 500,
+						max_width: 500
+
+ */
+			resizeOn: function() {
+				var that = this;
+				YUI(YUI_config).use('dd',function(Y){
+					_widthResizer = new Y.DD.Drag({
+						node: '#'+_id+'-modal-resize-width'
+					});
+					_widthResizer.plug(Y.Plugin.DDProxy, {
+						moveOnEnd: false,
+						borderStyle: false,
+					});
+					_widthResizer.on('drag:drag',function(e){
+						var x1 = e.pageX;
+						var x2 = _modalNode.get('region').right;
+						var newWidth = x2-x1;
+						if (newWidth > _modalCfg['max_width']) {
+							newWidth = _modalCfg['max_width'];
+						} else if(newWidth < _modalCfg['min_width'])  {
+							newWidth = _modalCfg['min_width'];
+						}
+
+						_overlay.set('width',newWidth+'px');
+						that.realignModal();
+						Y.all('#'+_id+'-modal .width-resizer').each(function(){
+							var innerWidth = newWidth - 10;
+							this.setStyle('width',innerWidth+'px');
+						});
+					});
+
+					_heightResizer = new Y.DD.Drag({
+						node: '#'+_id+'-modal-footer'
+					});
+					_heightResizer.plug(Y.Plugin.DDProxy, {
+						moveOnEnd: false,
+						borderStyle: false,
+					});
+					_heightResizer.on('drag:drag',function(e){
+						var y2 = e.pageY;
+						var y1 = _modalNode.get('region').top;
+						var newHeight = y2-y1;
+						if (newHeight > _modalCfg['max_height']) {
+							newHeight = _modalCfg['max_height'];
+						} else if(newHeight < _modalCfg['min_height'])  {
+							newHeight = _modalCfg['min_height'];
+						}
+						_overlay.set('height',newHeight+'px');
+					});
+
+					_diagResizer = new Y.DD.Drag({
+						node: '#'+_id+'-modal-diag-resizer'
+					});
+					_diagResizer.plug(Y.Plugin.DDProxy, {
+						moveOnEnd: false,
+						borderStyle: false,
+					});
+					_diagResizer.on('drag:drag',function(e){
+						var x1 = e.pageX;
+						var x2 = _modalNode.get('region').right;
+						var newWidth = x2-x1;
+						if (newWidth > _modalCfg['max_width']) {
+							newWidth = _modalCfg['max_width'];
+						} else if(newWidth < _modalCfg['min_width'])  {
+							newWidth = _modalCfg['min_width'];
+						}
+
+						var y2 = e.pageY;
+						var y1 = _modalNode.get('region').top;
+						var newHeight = y2-y1;
+						if (newHeight > _modalCfg['max_height']) {
+							newHeight = _modalCfg['max_height'];
+						} else if(newHeight < _modalCfg['min_height'])  {
+							newHeight = _modalCfg['min_height'];
+						}
+
+						_overlay.set('height',newHeight+'px');
+						_overlay.set('width',newWidth+'px');
+						that.realignModal();
+						Y.all('#'+_id+'-modal .width-resizer').each(function(){
+							var innerWidth = newWidth - 10;
+							this.setStyle('width',innerWidth+'px');
+						});
+					});
+				});
+				_modalNode.addClass('resizeable');
+			},
+
 			render: function() {
 				return _tpl;
 			},

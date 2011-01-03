@@ -71,6 +71,24 @@ module XYZ
           }
          ]
 
+      virtual_column :users, :type => :jsob, :hidden => true,
+      :remote_dependencies => 
+        [
+         {
+           :model_name => :component,
+           :join_type => :inner,
+           :filter => [:and, [:eq, :basic_type, "user"]],
+           :join_cond=>{:node_node_id => :node__id},
+           :cols=>[:id,:node_node_id]
+         },
+         {
+           :model_name => :attribute,
+           :join_type => :inner,
+           :join_cond=>{:component_component_id => :component__id},
+           :cols=>[:id,:component_component_id,:display_name,:value_asserted,:value_derived]
+         }
+        ]
+
       foreign_key :data_source_id, :data_source, FK_SET_NULL_OPT
       many_to_one :library, :datacenter, :project
       one_to_many :attribute, :attribute_link, :component, :node_interface, :address_access_point, :monitoring_item

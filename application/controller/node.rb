@@ -22,13 +22,28 @@ pp '++++++++++++++++++++++++++++++'
     end
 
     def dock_get_users(id)
-      user_list = Array.new
+      search_pattern_hash = {
+        :relation => :node,
+        :filter => [:and,[:eq, :id, id.to_i]],
+        :columns => [:users]
+      }
+      node_user_list = get_objects_from_search_pattern_hash(search_pattern_hash)
+
+      #TODO: test in case null
       user_list = [
         {:id=>'1231231',:name=>'bob'},
         {:id=>'1231231',:name=>'jim'},
         {:id=>'1231231',:name=>'greg'},
         {:id=>'1231231',:name=>'sally'},
       ]
+      #TODO: just putting in username, not uid or gid
+      unless node_user_list.empty?
+        user_list = node_user_list.map do |u|
+          attr = u[:attribute]
+          val = attr[:value_asserted]||attr[:value_derived]
+          (val and attr[:display_name] == "username") ? {:id => attr[:id], :name => val} : nil 
+        end.compact
+      end
 
       tpl = R8Tpl::TemplateR8.new("dock/node_get_users",user_context())
       tpl.assign(:_app,app_common())

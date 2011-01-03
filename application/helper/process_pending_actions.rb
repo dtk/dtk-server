@@ -4,7 +4,7 @@ module Ramaze::Helper
 
     def add_attributes!(pending_cmp_installs)
       indexed_actions = pending_cmp_installs.inject({}){|h,a|h.merge(a[:component][:id] => a)}
-      parent_field_name = DB.parent_field_name(:component,:attribute)
+      parent_field_name = DB.parent_field(:component,:attribute)
       search_pattern_hash = {
         :relation => :attribute,
         :filter => [:and,
@@ -28,7 +28,7 @@ module Ramaze::Helper
 
    private
     def ret_pending_installed_components(datacenter_id)
-      parent_field_name = DB.parent_field_name(:datacenter,:action)
+      parent_field_name = DB.parent_field(:datacenter,:action)
       search_pattern_hash = {
         :relation => :action,
         :filter => [:and,

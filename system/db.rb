@@ -90,7 +90,7 @@ module XYZ
       end
     end
     
-    def self.parent_field_name(parent_model_name,model_name)
+    def self.parent_field(parent_model_name,model_name)
       ret_parent_id_field_name(DB_REL_DEF[parent_model_name],DB_REL_DEF[model_name])
     end
     #TODO: deprecate the two below

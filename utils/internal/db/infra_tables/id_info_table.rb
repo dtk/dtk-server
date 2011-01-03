@@ -173,10 +173,10 @@ module XYZ
       DB_REL_DEF[self[:model_name]][:columns]
     end
 
-    #TODO: refactor this, DB.parent_field_name, and DB.ret_parent_id_field_name and reroot all calls to this fn and variant that takes parent_model_name as arg
+    #TODO: refactor this, DB.parent_field, and DB.ret_parent_id_field_name and reroot all calls to this fn and variant that takes parent_model_name as arg
     def parent_id_field_name()
       return nil unless self[:parent_model_name]
-      DB.parent_field_name(self[:parent_model_name],self[:model_name])
+      DB.parent_field(self[:parent_model_name],self[:model_name])
     end
    private
     def get_parent_model_name()

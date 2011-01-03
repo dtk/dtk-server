@@ -587,7 +587,7 @@ pp '))))))))))))))))))))))))))))))))))))'
       SearchObject.create_from_input_hash(hash,:workspace,ret_session_context_id())
     end
 
-    helper :commit_actions
+    helper :process_pending_actions
     def commit_changes()
 pp [:threads, Thread.list]
       context_id = request.params["context_id"]
@@ -598,8 +598,12 @@ pp [:threads, Thread.list]
 
       datacenter_id = context_id.to_i
       pending_cmp_installs = ret_pending_installed_components(datacenter_id)
-      return {'data'=> "No pending installed components"} if pending_cmp_installs.empty?
-#      pp [:pending_cmp_installs,pending_cmp_installs]
+      return {"data"=> "No pending installed components"} if pending_cmp_installs.empty?
+      add_attributes!(pending_cmp_installs)
+      
+      errors = ValidationError.find_missing_required_attributes(pending_cmp_installs)
+      return {"data" => ValidationError.debug_inspect(errors)} if errors
+ 
       workflow = generate_workflow(pending_cmp_installs)
       test_str = "pending installed components [#{pending_cmp_installs.map{|x|x[:component][:id]}.join(",")}]"
       Ramaze.defer do

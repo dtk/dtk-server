@@ -311,3 +311,41 @@
 .panel-modal .expand-collapse-arrows.collapse {
 	background-position: -9px 0px;
 }
+
+.panel-modal .width-resize-drag {
+	height: 100%;
+	width: 5px;
+	float: left;
+}
+.panel-modal.resizeable .width-resize-drag {
+	cursor: w-resize;
+}
+
+.panel-modal.resizeable .height-resize-drag {
+	cursor: n-resize;
+}
+.panel-modal .diag-resize-drag {
+	height: 5px;
+	width: 5px;
+	position: absolute;
+	float: left;
+	z-index: 2;
+}
+.panel-modal.resizeable .diag-resize-drag {
+	cursor: ne-resize;
+}
+/*
+.panel-modal .width-resizer {
+	height: 100%;
+	width: 5px;
+	float: left;
+}
+.panel-modal .diag-resizer-drag {
+	height: 5px;
+	width: 5px;
+	position: absolute;
+	float: left;
+	z-index: 2;
+}
+
+*/

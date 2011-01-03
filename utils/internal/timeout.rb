@@ -11,15 +11,15 @@ module TimeoutMonkeyPatch
 
       begin
         x = Thread.current
+        debug_print(:timeout_info,{:timeout => sec, :current_thread => x})
         y = Thread.start {
           sleep sec
-          pp [:time_out_triggered_for,x] if x.alive?
           x.raise exception, "execution expired" if x.alive?
         }
-        pp [:time_thread,y,:current_thread,x]
         yield sec
         #    return true
       rescue exception => e
+        debug_print(:time_out_triggered_for,x)
         rej = /\A#{Regexp.quote(__FILE__)}:#{__LINE__-4}\z/o
         (bt = e.backtrace).reject! {|m| rej =~ m}
         level = -caller(CALLER_OFFSET).size
@@ -31,11 +31,16 @@ module TimeoutMonkeyPatch
         # would be expected outside.
         raise Error, e.message, e.backtrace
       ensure
-        pp [:time_out_triggered_not_neeeded_for,x] if y and y.alive?
         y.kill if y and y.alive?
       end
+      debug_print(:time_out_not_needed_for,x)
     end
-    
+
+    Lock = Mutex.new
+    def self.debug_print(tag,msg)
+      Lock.synchronize{pp [tag,msg]}
+    end
+
     timer_adapter = nil
     #TODO: just treating system time adapter now
     if R8::Config[:timer]
@@ -55,7 +60,7 @@ module TimeoutMonkeyPatch
 end
 
 class MCollective::Client
-#  include TimeoutMonkeyPatch
+  include TimeoutMonkeyPatch
 end
 
 

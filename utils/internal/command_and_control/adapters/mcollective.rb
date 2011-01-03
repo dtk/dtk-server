@@ -3,6 +3,7 @@ include MCollective::RPC
 module XYZ
   module CommandAndControlAdapter
     class Mcollective < CommandAndControl
+      Lock = Mutex.new
       def self.dispatch_to_client(node_actions,config_agent) 
         identity = mcollective_id(node_actions[:node],config_agent)
         unless identity
@@ -41,7 +42,7 @@ module XYZ
         :disctimeout=>10,
         :config=>"/etc/mcollective/client.cfg",
         :filter=> Filter,
-        :timeout=>200
+        :timeout=>30
       }  
       RPCClient = rpcclient("chef_client",:options => Options)
       ##removed because quicker failure to use discovery top check node is up

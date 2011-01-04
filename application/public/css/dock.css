@@ -217,6 +217,9 @@
 #wspace-dock .panel-btn.service-checks {
 	background-image: url(../images/dock/service-checks-btn-sprite.png);
 }
+#wspace-dock .panel-btn.info {
+	background-image: url(../images/dock/info-btn-sprite.png);
+}
 
 /*----------------PANEL MODAL------------*/
 

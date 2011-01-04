@@ -23,6 +23,18 @@ if(!R8.Workspace.Dock) {
 				panels:[{
 					items:[
 						{
+							id:'info',i18n:'Info',
+							modal: {
+									fixed_size: false,
+									min_height: 150,
+									min_width: 150,
+									max_height: 300,
+									max_width: 500,
+									width: 260,
+									height: 260
+								}
+						},
+						{
 							id:'users',i18n:'Users',
 							modal: {
 									fixed_size: false,
@@ -801,6 +813,21 @@ console.log(item);
 		}
 	}
 	R8.Workspace.Dock.applicationsPlugin = function() {
+//		var _cfg = cfg;
+
+		return {
+			refresh: function(items) {
+//TODO: assuming only one for right now
+				var item = null;
+				for(var i in items) {
+					item = items[i];
+				}
+console.log(item);
+			}
+		}
+	}
+
+	R8.Workspace.Dock.infoPlugin = function() {
 //		var _cfg = cfg;
 
 		return {

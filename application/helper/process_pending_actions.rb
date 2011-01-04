@@ -49,7 +49,13 @@ module Ramaze::Helper
                     [:eq, :state, "pending"]],
         :columns => [:id, :relative_order,:type,:changed_attribute,parent_field_name,:action_id]
       }
-      get_objects_from_search_pattern_hash(search_pattern_hash)
+      ret_not_distinct = get_objects_from_search_pattern_hash(search_pattern_hash)
+      indexed_ret = Hash.new
+      #remove duplicates wrt component
+      ret_not_distinct.each do |el|
+        indexed_ret[el[:component][:id]] ||= el.reject{|k,v|k == :attribute} 
+      end
+      indexed_ret.values
     end
   end
 end

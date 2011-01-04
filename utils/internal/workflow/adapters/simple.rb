@@ -5,12 +5,16 @@ module XYZ
         results = Hash.new
         #TODO: assuming that elements are node_actions
         if @type == :sequential
-          @elements.each{|node_actions| results << execute_on_node(node_actions)}
+          @elements.each do |node_actions|
+            results[node_actions[:id]] = execute_on_node(node_actions)
+          end
         elsif @type == :concurrent
           threads = @elements.map do |node_actions| 
             Thread.new do 
               result = execute_on_node(node_actions)
-              @lock.synchronize{results[node_actions[:id]] = result}
+              @lock.synchronize do 
+                results[node_actions[:id]] = result
+              end
             end
           end
           threads.each{|t| t.join}

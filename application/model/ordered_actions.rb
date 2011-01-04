@@ -24,7 +24,8 @@ module XYZ
     #### 'private' methods for 'this'
     def set_top_level(action_list)
       if action_list.size == 1
-        return set(:single_action,action_list)
+        actions_by_node = group_by_node(action_list)
+        return set(:single_action,actions_by_node)
       end
       actions_by_node = group_by_node(action_list)
       #TODO: stub where all actions cross-node are concurrent

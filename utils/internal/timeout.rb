@@ -1,4 +1,5 @@
 #Monkey patch for Timeout
+require 'timeout'
 module TimeoutMonkeyPatch
   module Timeout
     include ::Timeout

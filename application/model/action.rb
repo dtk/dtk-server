@@ -42,6 +42,29 @@ module XYZ
          }
         ]
 
+      virtual_column :changed_attribute, :type => :json, :hidden => true,
+        :remote_dependencies =>
+        [
+         {
+           :model_name => :attribute,
+           :join_type => :inner,
+           :join_cond=> {:id => :action__attribute_id},
+           :cols=>[:id, :component_component_id]
+         },
+         {
+           :model_name => :component,
+           :join_type => :inner,
+           :join_cond=>{:id=> :attribute__component_component_id},
+           :cols=>[:id, :display_name, :external_ref, :node_node_id, :only_one_per_node]
+         },
+         {
+           :model_name => :node,
+           :join_type => :inner,
+           :join_cond=>{:id=> :component__node_node_id},
+           :cols=>[:id, :display_name, :external_ref]
+         }
+        ]
+
       many_to_one :datacenter, :action
       one_to_many :action #that is for decomposition 
     end

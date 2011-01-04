@@ -597,15 +597,18 @@ pp [:threads, Thread.list]
       return {'data'=>test_str} unless context_type.to_sym == :datacenter
 
       datacenter_id = context_id.to_i
-      pending_cmp_installs = ret_pending_installed_components(datacenter_id)
-      return {"data"=> "No pending installed components"} if pending_cmp_installs.empty?
-      add_attributes!(pending_cmp_installs)
+      pending_changes = pending_install_component(datacenter_id)
+
+#      pending_changes += pending_changed_attribute(datacenter_id)
+pp pending_changed_attribute(datacenter_id)
+      return {"data"=> "No pending changes"} if pending_changes.empty?
+      add_attributes!(pending_changes)
       
-      errors = ValidationError.find_missing_required_attributes(pending_cmp_installs)
+      errors = ValidationError.find_missing_required_attributes(pending_changes)
       return {"data" => ValidationError.debug_inspect(errors)} if errors
  
-      workflow = generate_workflow(pending_cmp_installs)
-      test_str = "pending installed components [#{pending_cmp_installs.map{|x|x[:component][:id]}.join(",")}]"
+      workflow = generate_workflow(pending_changes)
+      test_str = "pending changes on components [#{pending_changes.map{|x|x[:component][:id]}.join(",")}]"
       Ramaze.defer do
         begin
           puts "in commit_changes defer"

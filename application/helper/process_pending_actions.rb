@@ -2,8 +2,8 @@ module Ramaze::Helper
   module ProcessPendingActions
     include XYZ
 
-    def add_attributes!(pending_cmp_installs)
-      indexed_actions = pending_cmp_installs.inject({}){|h,a|h.merge(a[:component][:id] => a)}
+    def add_attributes!(pending_actions)
+      indexed_actions = pending_actions.inject({}){|h,a|h.merge(a[:component][:id] => a)}
       parent_field_name = DB.parent_field(:component,:attribute)
       search_pattern_hash = {
         :relation => :attribute,
@@ -17,7 +17,7 @@ module Ramaze::Helper
         action[:attributes] ||= Array.new
         action[:attributes] << attr
       end
-      pending_cmp_installs
+      pending_actions
     end
 
     def generate_workflow(pending_action_list)
@@ -26,9 +26,8 @@ module Ramaze::Helper
       Workflow.create(ordered_actions)
     end
 
-   private
-    def ret_pending_installed_components(datacenter_id)
-      parent_field_name = DB.parent_field(:datacenter,:action)
+    def pending_install_component(datacenter_id)
+      parent_field_name = XYZ::DB.parent_field(:datacenter,:action)
       search_pattern_hash = {
         :relation => :action,
         :filter => [:and,
@@ -40,6 +39,18 @@ module Ramaze::Helper
       get_objects_from_search_pattern_hash(search_pattern_hash)
     end
 
-
+    def pending_changed_attribute(datacenter_id)
+      parent_field_name = XYZ::DB.parent_field(:datacenter,:action)
+      search_pattern_hash = {
+        :relation => :action,
+        :filter => [:and,
+                    [:eq, parent_field_name, datacenter_id],
+                    [:eq, :type,"setting"],
+                    [:eq, :state, "pending"]],
+        :columns => [:id, :relative_order,:type,:changed_attribute,parent_field_name,:action_id]
+      }
+      get_objects_from_search_pattern_hash(search_pattern_hash)
+    end
   end
 end
+

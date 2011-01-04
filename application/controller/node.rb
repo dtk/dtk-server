@@ -41,7 +41,7 @@ pp '++++++++++++++++++++++++++++++'
         user_list = node_user_list.map do |u|
           attr = u[:attribute]
           val = attr[:value_asserted]||attr[:value_derived]
-          (val and attr[:display_name] == "username") ? {:id => attr[:id], :name => val} : nil 
+          (val and attr[:display_name] == "username") ? {:id => attr[:id], :username => val, :avatar_filename => 'generic-user-male.png'} : nil 
         end.compact
       end
 

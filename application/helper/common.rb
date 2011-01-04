@@ -202,6 +202,7 @@ limit = TestOveride if TestOveride
         :base_css_uri => R8::Config[:base_css_uri],
         :base_js_uri => R8::Config[:base_js_uri],
         :base_images_uri => R8::Config[:base_images_uri],
+        :avatar_base_uri => R8::Config[:avatar_base_uri]
       }
     end
 

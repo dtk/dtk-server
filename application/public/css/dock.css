@@ -350,6 +350,8 @@
 
 */
 
+/*------------Modal/Plugin Related------------*/
+
 .panel-modal ul.list {
 	width: 100%;
 	background-color: #FFFFFF;
@@ -358,5 +360,21 @@
 }
 .panel-modal ul.list li {
 	list-style-type: none;
-	padding: 5px 0;
+	padding: 5px 0 5px 5px;
+	font-size: 15px;
+}
+
+.panel-modal .avatar-small-bg {
+	height: 40px;
+	width: 40px;
+	float: left;
+	position: relative;
+	background-image: url(../images/user_avatars/avatar-small-bg.png);
+	background-repeat: no-repeat;
+}
+
+.panel-modal img.avatar-small {
+	height: 32px;
+	width: 32px;
+	margin: 4px;
 }

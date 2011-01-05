@@ -71,10 +71,11 @@ end
 
 ################Monkey patch to get functionality to replace arrays
 # returns [to_remove,to_add]
+
 def remove_replace_markers(hash)
   #TODO: just looking for {"recipe1" => {"!replace:foo" => [..]},"recipe2=> ..}
   #e.g., {"user_account"=>{"list"=>[{"gid"=>nil, "username"=>"usertom", "uid"=>nil}]}}
-  return [{},source_hash] unless hash.kind_of?(Hash)
+  return [{},hash] unless hash.kind_of?(Hash)
   to_remove = Hash.new
   to_add = Hash.new
   hash.each do |k,v|
@@ -88,38 +89,56 @@ def remove_replace_markers(hash)
   end
   [to_remove,to_add]
 end
-
-
+def merge_with_replace(target,source)
+  to_remove,to_add = remove_replace_markers(source)
+  if to_remove.empty? 
+    Chef::Mixin::DeepMerge.merge(target, source)
+  else
+    with_remove = Chef::Mixin::DeepMerge.merge(target,to_remove)
+    Chef::Mixin::DeepMerge.merge(with_remove,to_add)
+  end
+end
 
 class Chef
   class Node
-    def expand!
-      # This call should only be called on a chef-client run.
-      expansion = run_list.expand('server')
-      raise Chef::Exceptions::MissingRole if expansion.errors?
+    #TODO: temp until remove support for 0.9.8
+    if Chef::VERSION == "0.9.12"
+      def consume_attributes(attrs)
+        normal_attrs_to_merge = consume_run_list(attrs)
+        Chef::Log.debug("Applying attributes from json file")
+        ############## patch replacing
+        ## @normal_attrs = Chef::Mixin::DeepMerge.merge(@normal_attrs, normal_attrs_to_merge)
+        #### with
+        @normal_attrs = merge_with_replace(@normal_attrs,normal_attrs_to_merge)
+        ########### end of patch
 
-      Chef::Log.debug("Applying attributes from json file")
+        self[:tags] = Array.new unless attribute?(:tags)
+      end
+    elsif Chef::VERSION == "0.9.8"
+      def expand!
+        # This call should only be called on a chef-client run.
+        expansion = run_list.expand('server')
+        raise Chef::Exceptions::MissingRole if expansion.errors?
 
-      ############## patch replacing
-      ## @normal_attrs = Chef::Mixin::DeepMerge.merge(@normal_attrs, @json_attrib_for_expansion)
-      to_remove,to_add = remove_replace_markers(@json_attrib_for_expansion)
-      @normal_attrs = 
-        if to_remove.empty? 
-          Chef::Mixin::DeepMerge.merge(@normal_attrs, @json_attrib_for_expansion)
-        else
-          with_remove = Chef::Mixin::DeepMerge.merge(@normal_attrs,to_remove)
-          Chef::Mixin::DeepMerge.merge(with_remove,to_add)
-        end
-      ########### end of patch
+        Chef::Log.debug("Applying attributes from json file")
 
-      self[:tags] = Array.new unless attribute?(:tags)
-      @default_attrs = Chef::Mixin::DeepMerge.merge(default_attrs, expansion.default_attrs)
-      @override_attrs = Chef::Mixin::DeepMerge.merge(override_attrs, expansion.override_attrs)
+        ############## patch replacing
+        ## @normal_attrs = Chef::Mixin::DeepMerge.merge(@normal_attrs, @json_attrib_for_expansion)
+        #### with
+        @normal_attrs = merge_with_replace(@normal_attrs,@json_attrib_for_expansion)
+        ########### end of patch
 
-      @automatic_attrs[:recipes] = expansion.recipes
-      @automatic_attrs[:roles] = expansion.roles
+        self[:tags] = Array.new unless attribute?(:tags)
+        @default_attrs = Chef::Mixin::DeepMerge.merge(default_attrs, expansion.default_attrs)
+        @override_attrs = Chef::Mixin::DeepMerge.merge(override_attrs, expansion.override_attrs)
 
-      expansion.recipes
+        @automatic_attrs[:recipes] = expansion.recipes
+        @automatic_attrs[:roles] = expansion.roles
+
+        expansion.recipes
+      end
+    else
+      puts "error: chef version #{Chef::VERSION} not supported"
     end
   end
 end

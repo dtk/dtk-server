@@ -1,3 +1,55 @@
+.wspace-modal {
+	height: 350px;
+	width: 700px;
+	background-color: #CCCCCC;
+	position: absolute;
+	z-index: 110;
+	display: none;
+}
+.wspace-modal .content {
+	height: 340px;
+	width: 690px;
+	margin: 5px;
+	background-color: #EDEDED;
+}
+
+.wspace-shim {
+	background-color: #222222;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	z-index: 100;
+}
+
+
+.edit-form {
+	position: relative;
+	float: left;
+	width: 300px;
+	margin: 10px;
+}
+
+table.edit {
+	border: 0;
+}
+td.label {
+	font-size: 14px;
+	font-weight: bold;
+	width: 35%;
+}
+td.field input {
+	border: 0 none;
+	height:2.2em;
+/*	line-height:1.1em;*/
+	margin:0 0 -0.8em;
+	padding:0.2em 0.64em 0 0.44em;
+	width:20em;
+	font-size: 14px;
+	float:left;
+}
+
+/*---------------------OLDER BELOW------------------*/
+
 #page-container {
 	position: absolute;
 /*	border: 1px solid red;*/

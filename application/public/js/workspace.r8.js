@@ -9,17 +9,21 @@ if (!R8.Workspace) {
 			_pageContainerId = 'page-container',
 			_pageContainerNode = null;
 
-			_toolbarId = 'wspace-toolbar',
-			_toolbarNode = null,
+			_topbarId = 'wspace-topbar',
+			_topbarNode = null,
 
 			_contextBarId = 'wspace-context-wrapper',
-			_contextBarNode = null;
+			_contextBarNode = null,
+
+			_modalNode = null,
+			_modalNodeId = 'wspace-modal',
+			_shimNodeId = null,
+			_shimNode = null;
 
 		return {
 			viewPortRegion : null,
 			pageContainerElem : null,
 
-			topbarElem : null,
 			topbarHeight : null,
 			cmdbarElem : null,
 
@@ -38,13 +42,12 @@ if (!R8.Workspace) {
 			init : function() {
 				_pageContainerNode = R8.Utils.Y.one('#'+_pageContainerId);
 
-				_toolbarNode = R8.Utils.Y.one('#'+_toolbarId);
+				_topbarNode = R8.Utils.Y.one('#'+_topbarId);
 				_contextBarNode = R8.Utils.Y.one('#'+_contextBarId);
 
 //----------------------
 
 				this.pageContainerElem = R8.Utils.Y.one('#page-container');
-				this.topbarElem = R8.Utils.Y.one('#wspace-toolbar');
 				this.wspaceContainerElem = R8.Utils.Y.one('#wspace-container');
 				this.cmdbarElem = R8.Utils.Y.one('#cmdbar');
 
@@ -80,7 +83,7 @@ if (!R8.Workspace) {
 
 				R8.Workspace.pageContainerElem.setStyles({'height': height,'width':width});
 
-				var topbarRegion = R8.Workspace.topbarElem.get('region');
+				var topbarRegion = _topbarNode.get('region');
 				var cmdbarRegion = R8.Workspace.cmdbarElem.get('region');
 				var wspaceRegion = R8.Workspace.wspaceContainerElem.get('region');
 				var wspaceHeight = vportHeight - (topbarRegion['height']+cmdbarRegion['height']) - margin;
@@ -141,9 +144,11 @@ if (!R8.Workspace) {
 
 //------Dock setup-------------
 
-				_pageContainerNode.append(R8.Workspace.Dock.render({'display':'block','top':_toolbarNode.get('region').bottom}));
-				R8.Workspace.Dock.init();
-//				R8.Workspace.Dock.render({'display':'block','top':_toolbarNode.get('region').bottom});
+				_pageContainerNode.append(R8.Dock.render({'display':'block','top':_topbarNode.get('region').bottom}));
+				R8.Dock.init();
+
+				R8.Topbar.init();
+
 //				R8.MainToolbar.init();
 return;
 
@@ -783,6 +788,50 @@ for(vs in _viewSpaces) {
 				});
 			},
 
+			shimify: function(nodeId) {
+				var node = R8.Utils.Y.one('#'+nodeId),
+					_shimNodeId = R8.Utils.Y.guid(),
+					nodeRegion = node.get('region'),
+					height = nodeRegion.bottom - nodeRegion.top,
+					width = nodeRegion.right - nodeRegion.left;
+
+				node.append('<div id="'+_shimNodeId+'" class="wspace-shim" style="height:'+height+'; width:'+width+'"></div>');
+				_shimNode = R8.Utils.Y.one('#'+_shimNodeId);
+				_shimNode.setStyle('opacity','0.8');
+				_shimNode.on('click',function(Y){
+					R8.Workspace.destroyShim();
+				});
+			},
+			destroyShim: function() {
+				_modalNode.purge(true);
+				_modalNode.remove();
+				_modalNode = null,
+
+				_shimNode.purge(true);
+				_shimNode.remove();
+				_shimId = null;
+				_shimNode = null;
+			},
+
+			renderModal: function() {
+				var modalTpl = '<div id="'+_modalNodeId+'" class="wspace-modal">\
+									<div id="'+_modalNodeId+'-content" class="content"></div>\
+								</div>',
+					node = R8.Utils.Y.one('#wspace-container'),
+					nodeRegion = node.get('region'),
+					height = nodeRegion.bottom - nodeRegion.top,
+					width = nodeRegion.right - nodeRegion.left,
+					mTop = Math.floor((height - 350)/2),
+					mLeft = Math.floor((width-700)/2);
+
+				R8.Workspace.shimify('wspace-container');
+				node.append(modalTpl);
+				_modalNode = R8.Utils.Y.one('#'+_modalNodeId);
+				_modalNode.setStyles({'top':mTop,'left':mLeft,'display':'block'});
+
+				contentNode = R8.Utils.Y.one('#'+_modalNodeId+'-content');
+				return contentNode;
+			},
 //-------------------------------------------------------------
 //-------------------------------------------------------------
 //-------------------------------------------------------------

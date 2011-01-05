@@ -1,14 +1,14 @@
 #topbar {
 	position: relative;
 	width: 100%;
-	height: 60px;
+	height: 53px;
 	min-width: 500px;
 /*	background: repeat-x url(../images/toolbar/tbar-bg.png);*/
 /*	border: 1px solid black;*/
 }
 
-#toolbar-wrapper {
-	height: 35px;
+#wspace-toolbar {
+	height: 28px;
 	width: 100%;
 	background-color: #9CAAC1;
 }
@@ -19,4 +19,70 @@
 	background-color: #AEB9CD;
 }
 
+/*----TOOLBAR/TOOLBAR GROUPS----------------*/
 
+.toolbar-group {
+	height: 26px;
+	width: 200px;
+	position: relative;
+	float: left;
+	padding: 1px 0;
+}
+.toolbar-group .lft-endcap {
+	position: relative;
+	float: left;
+	height: 26px;
+	width: 9px;
+	background-image: url(../images/topbar/top-toolbar-sprite.png);
+	background-repeat: no-repeat;
+}
+.toolbar-group .rt-endcap {
+	position: relative;
+	float: right;
+	height: 26px;
+	width: 12px;
+	background-image: url(../images/topbar/top-toolbar-sprite.png);
+	background-repeat: no-repeat;
+	background-position: -10px 0px;
+}
+
+.toolbar-group .tool-list {
+	position: relative;
+	float: left;
+	height: 24px;
+	width: 179px;
+	background-color: #BCC7D8;
+	border-top: 1px solid #D5DCE8;
+	border-bottom: 1px solid #D5DCE8;
+}
+.toolbar-group .tool-item {
+	height: 22px;
+	width: 22px;
+	padding: 1px 5px 1px 5px;
+}
+.toolbar-group .tool-item.first {
+	padding-left: 0px;
+}
+
+.tool-item .btn-bg {
+	height: 22px;
+	width: 22px;
+}
+.tool-item.active .btn-bg {
+	background-image: url(../images/topbar/tool-btn-bg.png);
+}
+.tool-item.active.mdown .btn-bg {
+	background-position: -22px 0px;
+}
+
+.toolbar .tool-btn {
+	height: 22px;
+	width: 22px;
+}
+
+.tool-item .tool-btn.add-users {
+	background-image: url(../images/topbar/add-users-btn-sprite.png);
+}
+.tool-item.active .tool-btn.add-users {
+	background-position: -22px 0px;
+}

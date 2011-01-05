@@ -1,0 +1,10 @@
+
+
+<div class="edit-form">
+<table class="edit">
+	<tr><td class="label" nowrap="true">Username</td></tr>
+	<tr><td class="field"><input type="text" value="" size="30" id="username" name="username"/></td></tr>
+	<tr><td class="label">Grant SSH Access</td></tr>
+	<tr><td class="field"><input type="checkbox" value="true" id="grant_ssh" name="grant_ssh"/></td></tr>
+</table>
+</div>

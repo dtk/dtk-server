@@ -1,9 +1,9 @@
 
-if(!R8.Workspace.Dock) {
+if(!R8.Dock) {
 
 	(function(R8){
 
-	R8.Workspace.Dock = function() {
+	R8.Dock = function() {
 		var _nodeId = 'wspace-dock',
 			_node = null,
 			_overlay = null,
@@ -80,7 +80,7 @@ if(!R8.Workspace.Dock) {
 
 				for(var i in testMeta.panels) {
 					testMeta.panels[i]['id'] = 'panel-'+i;
-					_panels[i] = new R8.Workspace.Dock.panel(testMeta.panels[i]);
+					_panels[i] = new R8.Dock.panel(testMeta.panels[i]);
 					_bodyNode.append(_panels[i].render());
 					_panels[i].init();
 					_height = _height+_panels[i].get('height');
@@ -261,7 +261,7 @@ if(!R8.Workspace.Dock) {
 							that.maximize();
 						}
 						setTimeout(maximize,100);
-						R8.Workspace.Dock.loadDockPanel(route);
+						R8.Dock.loadDockPanel(route);
 					}
 
 				},'#wspace-dock-panel-list','.panel-item',this);
@@ -351,7 +351,7 @@ if(!R8.Workspace.Dock) {
 				_topbarNode.setStyle('width',newWidth+'px');
 				_bodyNode.setStyle('width',newWidth+'px');
 
-				_panels.push(new R8.Workspace.Dock.panel(panelCfg));
+				_panels.push(new R8.Dock.panel(panelCfg));
 				_panels[_panels.length-1].init(scroll);
 				if(_panels.length > 1) this.panelSlideLeft();
 			},
@@ -436,8 +436,8 @@ if(!R8.Workspace.Dock) {
 
 //-------DOCK PANEL---------------
 
-	R8.Workspace.Dock.panel = function(cfg) {
-		var _cfg = cfg;
+	R8.Dock.panel = function(cfg) {
+		var _cfg = cfg,
 			_id = cfg['id'],
 			_listNode = null,
 			_height = null,
@@ -458,7 +458,7 @@ if(!R8.Workspace.Dock) {
 				for(var i in _cfg['items']) {
 					var itemId = _cfg['items'][i]['id'];
 					_cfg['items'][i]['list_node'] = _listNode;
-					_items[itemId] = new R8.Workspace.Dock.panelItem(_cfg['items'][i]);
+					_items[itemId] = new R8.Dock.panelItem(_cfg['items'][i]);
 					_listNode.append(_items[itemId].render());
 					_items[itemId].init();
 					_numItems++;
@@ -512,7 +512,7 @@ if(!R8.Workspace.Dock) {
 		}
 	}
 
-	R8.Workspace.Dock.panelItem = function(cfg) {
+	R8.Dock.panelItem = function(cfg) {
 		var _cfg = cfg,
 			_id = cfg['id'],
 			_pluginName = _id.replace('-','_')+'Plugin',
@@ -594,7 +594,7 @@ var _footer ='<div class="corner bl"></div>\
 				var that = this;
 				_modalHeaderNode.on('click',function(Y){ that.close(); that.get('node').removeClass('active'); });
 
-				_panelPlugin = new R8.Workspace.Dock[_pluginName]({'modalContentNode':_modalContentNode});
+				_panelPlugin = new R8.Dock[_pluginName]({'modalContentNode':_modalContentNode});
 
 //				var _right = _listNode.get('region').right - _listNode.get('region').left;
 //				dialogNode.setStyles({display:'block',top:'100px',right:_right});
@@ -772,7 +772,7 @@ var _footer ='<div class="corner bl"></div>\
 		}
 	}
 
-	R8.Workspace.Dock.usersPlugin = function(cfg) {
+	R8.Dock.usersPlugin = function(cfg) {
 		var _cfg = cfg,
 			_modalContentNode = cfg['modalContentNode'];
 
@@ -798,7 +798,7 @@ console.log('going to call dock get users.....');
 			}
 		}
 	}
-	R8.Workspace.Dock.service_checksPlugin = function() {
+	R8.Dock.service_checksPlugin = function() {
 //		var _cfg = cfg;
 
 		return {
@@ -812,7 +812,7 @@ console.log(item);
 			}
 		}
 	}
-	R8.Workspace.Dock.applicationsPlugin = function() {
+	R8.Dock.applicationsPlugin = function() {
 //		var _cfg = cfg;
 
 		return {
@@ -827,7 +827,7 @@ console.log(item);
 		}
 	}
 
-	R8.Workspace.Dock.infoPlugin = function() {
+	R8.Dock.infoPlugin = function() {
 //		var _cfg = cfg;
 
 		return {

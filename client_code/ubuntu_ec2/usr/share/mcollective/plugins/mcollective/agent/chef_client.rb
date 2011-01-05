@@ -3,7 +3,7 @@ require 'rubygems'
 require 'chef/application/client'
 require 'chef/client'
 require 'chef/handler'
-require 'pp'
+
 
 class RunHandler < Chef::Handler
   Response = {}
@@ -14,11 +14,12 @@ class RunHandler < Chef::Handler
   def report()
     response = {:node_name => node.name}
     if success?()
-      response.merge!(:status => :success)
+      response.merge!(:status => :succeeded)
     else
       error_info = {
         :status => :failed,
         :error => {
+          #TODO: log the backtrace, rather than returning it
 #          :backtrace =>  Array(backtrace),
           :formatted_exception => run_status.formatted_exception
         }
@@ -39,21 +40,31 @@ module MCollective
                         :version     => "",
                         :url         => "",
                         :timeout     => 300
-
+      def initialize()
+        super()
+        @log = Log.instance
+      end
       def run_action
         validate :run_list, :list
         validate :attributes, :list
+        more_generic_response = {:status => :unknown}
         begin
           run_recipe(request.uniqid,request[:run_list],request[:attributes])
-        rescue
+        rescue Exception => e
+          more_generic_response = {
+            :status => :failed, 
+            :error => {
+              :formatted_exception => e.inspect
+            }
+          }
         end
         handler_response = RunHandler::Response.delete(request.uniqid)
-        reply.data = handler_response
+        reply.data = handler_response || more_generic_response
       end
      private
       def run_recipe(id,run_list,attributes)
-        pp [:run_list,run_list]
-        pp [:attributes,attributes]
+        @log.info("run_list: #{run_list.inspect}")
+        @log.info("attributes: #{attributes.inspect}")
         chef_client = Chef::Application::Client.new
         chef_client.reconfigure
         handler = RunHandler.new(id)

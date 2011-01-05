@@ -11,7 +11,7 @@ o.all_plugins
 node_name        o[:ec2][:instance_id]
 json_attribs "/etc/chef/client-config.json"
 log_level          :info
-log_location       STDOUT
+log_location       "/var/log/chef_client.log"
 ssl_verify_mode    :verify_none
 chef_server_url    "http://ec2-184-73-175-145.compute-1.amazonaws.com:4000"
 

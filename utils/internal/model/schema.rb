@@ -183,26 +183,54 @@ module XYZ
 
       ###### for shortcuts in virtual column
       class VCShortcut
-        attr_reader :val
-        def initialize(val)
-          @val = val
-        end
       end
       class VCShortcutID < VCShortcut
-      end
-      def id(model_name)
-        VCShortcutID.new(model_name)
+        def initialize(parent_model_name)
+          @parent_model_name = parent_model_name
+        end
+        def val(model_name)
+          DB.parent_field(@parent_model_name,model_name)
+        end
       end
 
+      class VCShortcutParent < VCShortcut
+        def initialize(model_name,parent_model_name)
+          @parent_model_name = parent_model_name
+          @model_name = model_name
+        end
+        def val()
+          DB.parent_field(@parent_model_name,@model_name)
+        end
+      end
+
+      def id(parent_model_name)
+        VCShortcutID.new(parent_model_name)
+      end
+
+      def p(model_name,parent_model_name)
+        VCShortcutParent.new(model_name,parent_model_name)
+      end
+
+      def q(model_name,field)
+        "#{model_name}__#{field}".to_sym
+      end
+
+      #TODO: this would be good place to do parsing to check for errors in vc defs
       def preprocess!()
         (@db_rel[:virtual_columns]||{}).each_value do |vc|
           remote_deps = vc[:remote_dependencies]
           next unless remote_deps
           remote_deps = remote_deps.values.first if remote_deps.kind_of?(Hash)
-          remote_deps.each do |join_cond|
-            (join_cond[:cols]||[]).each_with_index do |col,i|
+          remote_deps.each do |join_info|
+            (join_info[:cols]||[]).each_with_index do |col,i|
               next unless col.kind_of?(VCShortcutID)
-              join_cond[:cols][i] = DB.parent_field(col.val,join_cond[:model_name])
+              join_info[:cols][i] = col.val(join_info[:model_name])
+            end
+
+            #TODO: only applying trasnlation on {k => v} to v side, apply to k side too
+            (join_info[:join_cond]||{}).each do |k,v|
+              next unless v.kind_of?(VCShortcutParent)
+              join_info[:join_cond][k] = v.val()
             end
           end
         end

@@ -25,22 +25,24 @@ module XYZ
       foreign_key :component_id, :component, FK_CASCADE_OPT
       #TODO: may have here who, when
 
-      virtual_column :created_node, :type => :json, :hidden => true,
+      #TODO: example converetde form; apply to rest of vcs
+      virtual_column :created_node,:type => :json, :hidden => true,
         :remote_dependencies =>
         [
          {
            :model_name => :node,
            :join_type => :inner,
-           :join_cond=>{:id=> :action__node_id},
+           :join_cond=>{:id=> q(:action,:node_id)},
            :cols=>[:id, :display_name, :external_ref, id(:datacenter)]
          },
          {
            :model_name => :datacenter,
            :join_type => :inner,
-           :join_cond=>{:id=> :node__datacenter_datacenter_id},
+           :join_cond=>{:id=> p(:node,:datacenter)},
            :cols=>[:id, :display_name]
          }
         ]
+
 
       virtual_column :installed_component, :type => :json, :hidden => true,
         :remote_dependencies =>

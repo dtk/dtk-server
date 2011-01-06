@@ -606,7 +606,7 @@ pp [:threads, Thread.list]
 
       errors = ValidationError.find_missing_required_attributes(pending_changes)
       return {"data" => ValidationError.debug_inspect(errors)} if errors
- 
+
       workflow = generate_workflow(pending_changes)
       test_str = "pending changes on components [#{pending_changes.map{|x|x[:component][:id]}.join(",")}]"
       Ramaze.defer do

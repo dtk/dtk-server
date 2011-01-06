@@ -1,7 +1,11 @@
 <html>
 <head>
-
+<!--
 <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/combo?3.2.0/build/cssreset/reset.css&3.2.0/build/cssfonts/fonts.css">
+-->
+
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_js_uri]%}/external/yui/build/cssreset/reset.css">
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_js_uri]%}/external/yui/build/cssfonts/fonts.css">
 
 <!--//TODO: revisit to variablize the path of the founcation css-->
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/workspace.css" />

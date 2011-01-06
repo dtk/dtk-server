@@ -120,6 +120,8 @@ module XYZ
         end
         concrete_models.each{|model| model.apply_migration_defs(direction)}
         concrete_models.each{|model| model.set_global_db_rel_info()}
+        concrete_models.each{|model| model.preprocess!()}
+
         concrete_models.each do |model| 
           model.create_column_defs_specific_fields?(direction) 
         end
@@ -131,6 +133,7 @@ module XYZ
         concrete_models = models.reject {|m| m.top?}
         concrete_models.each{|model| model.apply_migration_defs(:up)}
         concrete_models.each{|model| model.set_global_db_rel_info()}
+        concrete_models.each{|model| model.preprocess!()}
         #returns model_names
         concrete_models.map{|klass|ret_relation_type(klass)}
       end
@@ -175,6 +178,35 @@ module XYZ
 
       def set_db(db)
         @db = db
+      end
+
+
+      ###### for shortcuts in virtual column
+      class VCShortcut
+        attr_reader :val
+        def initialize(val)
+          @val = val
+        end
+      end
+      class VCShortcutID < VCShortcut
+      end
+      def id(model_name)
+        VCShortcutID.new(model_name)
+      end
+
+      def preprocess!()
+        (@db_rel[:virtual_columns]||{}).each_value do |vc|
+          remote_deps = vc[:remote_dependencies]
+          next unless remote_deps
+          remote_deps = remote_deps.values.first if remote_deps.kind_of?(Hash)
+          remote_deps.each do |join_cond|
+            (join_cond[:cols]||[]).each_with_index do |col,i|
+              next unless col.kind_of?(VCShortcutID)
+              join_cond[:cols][i] = DB.parent_field(col.val,join_cond[:model_name])
+            end
+          end
+        end
+        self
       end
 
      private

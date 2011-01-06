@@ -184,6 +184,7 @@
 	margin: 4px 0 0 4px;
 }
 
+/*
 .item.yui3-dd-dragging {
 	margin: -7px 0 0 -7px;
 }
@@ -193,7 +194,12 @@
 .basic-item.yui3-dd-dragging .port {
 	margin: -7px 0 0 -7px;
 }
-
+*/
+/*
+.basic-item.yui3-dd-dragging .drop-shadow {
+	margin: 7px 0 0 7px;
+}
+*/
 .basic-item .ds-corner {
 	background-image: url(../images/node/basic-corners-shadow.png);
 }

@@ -299,10 +299,11 @@
 .node.yui3-dd-dragging {
 /*	margin: -7px 0 0 -7px;*/
 }
+/*
 .basic-item.node.yui3-dd-dragging .item {
 	margin: -7px 0 0 -7px;
 }
-
+*/
 .basic-item.node .ds-corner {
 	height: 7px;
 	width: 7px;

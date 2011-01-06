@@ -20,7 +20,7 @@ module XYZ
       virtual_column :qualified_parent_name, :type => :varchar, :local_dependencies => [:base_object]
 
       #one of thse wil be non null and point to object being changed or added
-      foreign_key :node_id, :attribute, FK_CASCADE_OPT
+      foreign_key :node_id, :node, FK_CASCADE_OPT
       foreign_key :attribute_id, :attribute, FK_CASCADE_OPT
       foreign_key :component_id, :component, FK_CASCADE_OPT
       #TODO: may have here who, when
@@ -111,12 +111,14 @@ module XYZ
         case object_model_name
           when :attribute then "setting"
           when :component then "install-component"
+          when :node then "create_node"
           else raise ErrorNotImplemented.new("when object type is #{object_model_name}")
       end 
       display_name_prefix = 
         case object_model_name
           when :attribute then "setting-attribute"
           when :component then "install-component"
+          when :node then "create_node"
       end 
       
       ref_prefix = "action"

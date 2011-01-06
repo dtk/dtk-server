@@ -25,6 +25,23 @@ module XYZ
       foreign_key :component_id, :component, FK_CASCADE_OPT
       #TODO: may have here who, when
 
+      virtual_column :created_node, :type => :json, :hidden => true,
+        :remote_dependencies =>
+        [
+         {
+           :model_name => :node,
+           :join_type => :inner,
+           :join_cond=>{:id=> :action__node_id},
+           :cols=>[:id, :display_name, :external_ref, :datacenter_datacenter_id]
+         },
+         {
+           :model_name => :datacenter,
+           :join_type => :inner,
+           :join_cond=>{:id=> :node__datacenter_datacenter_id},
+           :cols=>[:id, :display_name]
+         }
+        ]
+
       virtual_column :installed_component, :type => :json, :hidden => true,
         :remote_dependencies =>
         [

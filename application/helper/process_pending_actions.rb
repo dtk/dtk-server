@@ -3,6 +3,7 @@ module Ramaze::Helper
     include XYZ
 
     def add_attributes!(pending_actions)
+      return pending_actions if pending_actions.empty?
       indexed_actions = pending_actions.inject({}){|h,a|h.merge(a[:component][:id] => a)}
       parent_field_name = DB.parent_field(:component,:attribute)
       search_pattern_hash = {
@@ -35,6 +36,19 @@ module Ramaze::Helper
                     [:eq, :type,"install-component"],
                     [:eq, :state, "pending"]],
         :columns => [:id, :relative_order,:type,:installed_component,parent_field_name,:action_id]
+      }
+      get_objects_from_search_pattern_hash(search_pattern_hash)
+    end
+
+    def pending_create_node(datacenter_id)
+      parent_field_name = XYZ::DB.parent_field(:datacenter,:action)
+      search_pattern_hash = {
+        :relation => :action,
+        :filter => [:and,
+                    [:eq, parent_field_name, datacenter_id],
+                    [:eq, :type,"create_node"],
+                    [:eq, :state, "pending"]],
+        :columns => [:id, :relative_order,:type,:created_node,parent_field_name,:action_id]
       }
       get_objects_from_search_pattern_hash(search_pattern_hash)
     end

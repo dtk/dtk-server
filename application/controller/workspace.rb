@@ -605,7 +605,7 @@ pp [:threads, Thread.list]
 
       pp [:pending_create_node,pending_create_node(datacenter_id)]
 
-#      pending_changes += pending_create_node(datacenter_id)
+      pending_changes += pending_create_node(datacenter_id)
 
       return {"data"=> "No pending changes"} if pending_changes.empty?
 

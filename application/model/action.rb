@@ -33,13 +33,19 @@ module XYZ
            :model_name => :node,
            :join_type => :inner,
            :join_cond=>{:id=> q(:action,:node_id)},
-           :cols=>[:id, :display_name, :external_ref, id(:datacenter)]
+           :cols=>[:id, :display_name, :external_ref, id(:datacenter),:ancestor_id]
          },
          {
            :model_name => :datacenter,
            :join_type => :inner,
            :join_cond=>{:id=> p(:node,:datacenter)},
            :cols=>[:id, :display_name]
+         },
+         {
+           :model_name => :node,
+           :join_type => :inner,
+           :join_cond=>{:id=> q(:node,:ancestor_id)},
+           :cols=>[:id, :display_name,:external_ref]
          }
         ]
 

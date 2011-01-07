@@ -22,7 +22,6 @@ module Ramaze::Helper
     end
 
     def generate_workflow(pending_action_list)
-      add_attributes!(pending_action_list)
       ordered_actions = OrderedActions.create(pending_action_list)
       Workflow.create(ordered_actions)
     end

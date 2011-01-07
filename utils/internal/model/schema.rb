@@ -216,6 +216,7 @@ module XYZ
       end
 
       #TODO: this would be good place to do parsing to check for errors in vc defs
+      #TODO: can also do processing that looks for later join that refs a col and make sure that col in earlier table
       def preprocess!()
         (@db_rel[:virtual_columns]||{}).each_value do |vc|
           remote_deps = vc[:remote_dependencies]
@@ -227,7 +228,7 @@ module XYZ
               join_info[:cols][i] = col.val(join_info[:model_name])
             end
 
-            #TODO: only applying trasnlation on {k => v} to v side, apply to k side too
+            #TODO: only applying translation on {k => v} to v side, should apply to k side too
             (join_info[:join_cond]||{}).each do |k,v|
               next unless v.kind_of?(VCShortcutParent)
               join_info[:join_cond][k] = v.val()
@@ -239,7 +240,7 @@ module XYZ
 
      private
 
-      #TODO: drive off of   COMMON_REL_COLUMNS  
+      #TODO: drive off of  COMMON_REL_COLUMNS  
       def create_table_common_fields?(db_rel)
         create_schema_for_db_rel?(db_rel)
         seq_ref = @db.ret_sequence_ref(TOP_LOCAL_ID_SEQ)

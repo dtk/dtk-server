@@ -603,9 +603,8 @@ pp [:threads, Thread.list]
       errors = ValidationError.find_missing_required_attributes(pending_changes)
       return {"data" => ValidationError.debug_inspect(errors)} if errors
 
-      pp [:pending_create_node,pending_create_node(datacenter_id)]
-
       pending_changes += pending_create_node(datacenter_id)
+      pp [:pending_changes,pending_changes]
 
       return {"data"=> "No pending changes"} if pending_changes.empty?
 

@@ -106,9 +106,9 @@ module XYZ
 
       attr_reader :model_name_info, :sequel_ds
       def graph(join_type,right_ds,join_conditions=true,opts={})
-        new_model_name_info = right_ds.model_name_info.first.create_unique(@model_name_info)
+        new_model_name_info = right_ds.model_name_info.first.create_unique(@model_name_info,opts[:table_alias])
         model_name_info = @model_name_info + [new_model_name_info]
-        table_alias = opts[:table_alias] || new_model_name_info.ret_qualified_model_name()
+        table_alias = new_model_name_info.ret_qualified_model_name()
         #TODO: think can make more efficient by adding in :select => [cols.]] for the rs table; without that it looks like sequel making a db call to find relevant columns for join result
         sequel_graph = @sequel_ds.graph(right_ds.sequel_ds,join_conditions,opts.merge(:join_type => join_type, :table_alias => table_alias))
         Graph.new(sequel_graph,model_name_info,@c)
@@ -171,17 +171,18 @@ module XYZ
 
     class ModelNameInfo 
       attr_reader :model_name,:ref_num
-      def initialize(model_name,ref_num=1)
+      def initialize(model_name,ref_num=1,model_name_alias=nil)
         @model_name = model_name.to_sym
         @ref_num = ref_num
+        @model_name_alias = model_name_alias
       end
       def ret_qualified_model_name()
-        (@ref_num == 1 ? @model_name : "#{@model_name}#{@ref_num.to_s}").to_sym
+        @model_name_alias || (@ref_num == 1 ? @model_name : "#{@model_name}#{@ref_num.to_s}").to_sym
       end
-      def create_unique(existing_name_info)
+      def create_unique(existing_name_info,model_name_alias=nil)
         #check whether model_name is in existing_name_info if so bump up by 1
         new_ref_num =  1 + (existing_name_info.find_all{|x|x.model_name == @model_name}.map{|y|y.ref_num}.max || 0)
-        ModelNameInfo.new(@model_name,new_ref_num)
+        ModelNameInfo.new(@model_name,new_ref_num,model_name_alias)
       end
     end
 

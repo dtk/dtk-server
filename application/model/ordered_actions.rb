@@ -51,7 +51,13 @@ module XYZ
     end
 
     def order_actions_in_node(action_list)
-      NodeActions.new(action_list)
+      #shortcut if singleton
+      return NodeActions.new(action_list) if action_list.size == 1
+      #TODO: stub that just uses order given aside from a create a node which goes before all otehr node operations
+      action_create_node = action_list.find{|a|a[:type] == "create_node"}
+      return NodeActions.new(action_list) unless action_create_node
+      ordered_action_list = [action_create_node] + action_list.reject{|a|a[:type] == "create_node"}
+      NodeActions.new(ordered_action_list)
     end
   end
   class NodeActions < OrderedActions

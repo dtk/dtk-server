@@ -597,19 +597,29 @@ pp [:threads, Thread.list]
       return {'data'=>test_str} unless context_type.to_sym == :datacenter
 
       datacenter_id = context_id.to_i
-      pending_changes_need_attrs = pending_install_component(datacenter_id)
-      pending_changes_need_attrs += pending_changed_attribute(datacenter_id)
-      pending_changes = add_attributes!(pending_changes_need_attrs)
-      errors = ValidationError.find_missing_required_attributes(pending_changes)
+      pending_changes_component = pending_install_component(datacenter_id)
+      pending_changes_component += pending_changed_attribute(datacenter_id)
+      add_attributes!(pending_changes_component)
+      errors = ValidationError.find_missing_required_attributes(pending_changes_component)
       return {"data" => ValidationError.debug_inspect(errors)} if errors
 
-      pending_changes += pending_create_node(datacenter_id)
-      pp [:pending_changes,pending_changes]
+      pending_changes_node = pending_create_node(datacenter_id)
 
+      pending_changes  = pending_changes_component + pending_changes_node 
+      pp [:pending_changes,pending_changes]
       return {"data"=> "No pending changes"} if pending_changes.empty?
 
+      test_str = 
+        if pending_changes_component.empty? 
+          "pending changes on components [#{pending_changes_component.map{|x|x[:component][:id]}.join(",")}]"
+        elsif pending_changes_node.empty? 
+          "pending changes on nodes [#{pending_changes_node.map{|x|x[:node][:id]}.join(",")}]"
+        else
+          "pending changes on components [#{pending_changes_component.map{|x|x[:component][:id]}.join(",")}]; on nodes [#{pending_changes_node.map{|x|x[:node][:id]}.join(",")}]"
+        end
+
       workflow = generate_workflow(pending_changes)
-      test_str = "pending changes on components [#{pending_changes.map{|x|x[:component][:id]}.join(",")}]"
+
       Ramaze.defer do
         begin
           puts "in commit_changes defer"

@@ -43,6 +43,7 @@ module XYZ
          },
          {
            :model_name => :node,
+           :alias => :image,
            :join_type => :inner,
            :join_cond=>{:id=> q(:node,:ancestor_id)},
            :cols=>[:id, :display_name,:external_ref]

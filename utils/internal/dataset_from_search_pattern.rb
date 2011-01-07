@@ -43,7 +43,8 @@ module XYZ
               filter = join_info[:filter] ? SimpleSearchPattern::ret_sequel_filter(join_info[:filter],join_info[:model_name]) : nil
               right_ds = search_object.db.get_objects_just_dataset(right_ds_mh,filter,rs_opts)
             end
-            graph_ds = graph_ds.graph(join_info[:join_type]||:left_outer,right_ds,join_info[:join_cond])
+            opts = join_info[:alias] ? {:table_alias => join_info[:alias]} : {}
+            graph_ds = graph_ds.graph(join_info[:join_type]||:left_outer,right_ds,join_info[:join_cond],opts)
           end
 
           #add any global columns or global where clauses

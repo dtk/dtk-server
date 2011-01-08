@@ -2,7 +2,7 @@ require 'mcollective'
 include MCollective::RPC
 module XYZ
   module CommandAndControlAdapter
-    class Mcollective < CommandAndControl
+    class Mcollective < CommandAndControlNodeConfig
       def self.dispatch_to_client(node_actions)
         config_agent = ConfigAgent.load(node_actions.on_node_config_agent_type)
         rpc_client = nil

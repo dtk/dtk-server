@@ -15,11 +15,10 @@ module XYZ
       begin
         #check if there is a create node action and if so do it first
         if node_actions.create_node_action
-          create_node_agent = ConfigAgent.load(node_actions.create_node_config_agent_type)
-          node_actions.node =  create_node_agent.create_node(node_actions.create_node_action)
-          raise CommandAndControl::CannotCreateNode.new unless node_actions.node
+          cac_iaas = CommandAndControlIAAS.load(node_actions.create_node_config_agent_type)
+          node_actions.node =  cac_iaas.create_node(node_actions.create_node_action)
         end
-        CommandAndControl::Adapter.dispatch_to_client(node_actions)
+        CommandAndControlNodeConfig::Adapter.dispatch_to_client(node_actions)
        rescue Exception => e
         ret = {
           :status => :failed,

@@ -46,27 +46,20 @@ module XYZ
     def group_by_node(action_list)
       node_ids = action_list.map{|a|a[:node][:id]}.uniq
       node_ids.map do |node_id| 
-        order_actions_in_node(action_list.reject{|a|not a[:node][:id] == node_id}) 
+        NodeActions.create(action_list.reject{|a|not a[:node][:id] == node_id}) 
       end
     end
-
-    def order_actions_in_node(action_list)
-      #shortcut if singleton
-      return NodeActions.new(action_list) if action_list.size == 1
-      #TODO: stub that just uses order given aside from a create a node which goes before all otehr node operations
-      create_node_action = action_list.find{|a|a[:type] == "create_node"}
-      return NodeActions.new(action_list) unless create_node_action
-      NodeActions.new(action_list.reject{|a|a[:type] == "create_node"},create_node_action)
-    end
   end
+
   class NodeActions < OrderedActions
     attr_reader :create_node_action
     attr_accessor :node
-    def initialize(on_node_actions,create_node_action=nil)
-      super()
-      @create_node_action = create_node_action
-      @node = (create_node_action or on_node_actions.empty?) ? nil : on_node_actions.first[:node]
-      set(:sequential,on_node_actions)
+    def self.create(action_list)
+      #shortcut if singleton
+      return NodeActions.new(action_list) if action_list.size == 1
+      create_node_action = action_list.find{|a|a[:type] == "create_node"}
+      return NodeActions.new(action_list) unless create_node_action
+      NodeActions.new(action_list.reject{|a|a[:type] == "create_node"},create_node_action)
     end
 
     #TODO: may deprecate after removing refs
@@ -77,15 +70,41 @@ module XYZ
     end
 
     def on_node_config_agent_type
-      elements.first.on_node_config_agent_type
+      elements.first.action.on_node_config_agent_type
     end
     def create_node_config_agent_type
       @create_node_action ? @create_node_action.create_node_config_agent_type : nil
     end
    private
+    def initialize(on_node_actions,create_node_action=nil)
+      super()
+      @create_node_action = create_node_action
+      @node = (create_node_action or on_node_actions.empty?) ? nil : on_node_actions.first[:node]
+      set(:sequential,ComponentAction.order_and_group_by_component(on_node_actions))
+    end
+
     def id()
       #TODO: just taking lowest id of actions
-      elements.map{|e|e[:id]}.min
+      elements.map{|e|e.action[:id]}.min
+    end
+  end
+
+  class ComponentAction < OrderedActions
+    def self.order_and_group_by_component(action_list)
+      #TODO: may fold step that groups togther multiple components of same type but to different attributes here
+      #TODO: may also fold in step in initiaze that brings in attributes for components
+      #TODO: stub for ordering that just takes order in which component actions reached
+      component_ids = action_list.map{|a|a[:component][:id]}.uniq
+      component_ids.map do |component_id| 
+        self.new(action_list.reject{|a|not a[:component][:id] == component_id}) 
+      end
+    end
+    attr_reader :action
+   private
+    def initialize(actions_same_component)
+      @action_pointers = actions_same_component
+      #all actions will be teh same from perpective of any operation (i.e., will have component id and all its attributes 
+      @action = actions_same_component.first
     end
   end
 end

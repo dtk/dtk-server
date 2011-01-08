@@ -627,6 +627,7 @@ pp [:threads, Thread.list]
           workflow.execute()
         rescue Exception => e
           Log.error("error in commit background job: #{e.inspect}")
+pp e.backtrace
         end
         puts "end of commit_changes defer"
         puts "----------------"

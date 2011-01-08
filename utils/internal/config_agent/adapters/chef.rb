@@ -7,7 +7,7 @@ module XYZ
       end
      private
       def recipes_and_attributes(node_actions)
-        node_actions.elements.inject(ChefNodeActions.new()){|ret,action|ret.add_action(action)}
+        node_actions.elements.inject(ChefNodeActions.new()){|ret,component_action|ret.add_action(component_action)}
       end
 
       class ChefNodeActions 
@@ -22,7 +22,8 @@ module XYZ
           @recipe_names.map{|r|"recipe[#{r}]"}
         end
 
-        def add_action(action)
+        def add_action(component_action)
+          action = component_action.action
           recipe_name = recipe(action)
           if @common_attr_index[recipe_name]
             common_attr_val_list = @common_attr_index[recipe_name]

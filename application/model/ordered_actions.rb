@@ -133,35 +133,28 @@ module XYZ
     def [](key)
       case(key)
         when :id then id()
-        when :node then node()
         when :component then component()
         when :attributes then @attributes
       end
     end
-    def model_handle()
-      @action.model_handle()
-    end
+
+
     def add_attribute!(attr)
       @attributes << attr
     end
-    def on_node_config_agent_type
-      @action.on_node_config_agent_type()
-    end
+
+    attr_reader :model_handle,:on_node_config_agent_type
    private
-    def id()
-      (@action||{})[:id]
-    end
-    def component()
-      (@action||{})[:component]
-    end
-    def node()
-      (@action||{})[:node]
-    end
+    attr_reader :id,:component
+
     def initialize(actions_same_component)
+      action = actions_same_component.first
       @action_pointers = actions_same_component
-      #all actions will be the same from perpective of any operation (i.e., will have component id and all its attributes 
-      @action = actions_same_component.first
+      @component = action[:component]
       @attributes = Array.new
+      @id = action[:id]
+      @on_node_config_agent_type = action.on_node_config_agent_type()
+      @model_handle = action.model_handle()
     end
   end
 end

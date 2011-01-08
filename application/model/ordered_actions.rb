@@ -124,8 +124,6 @@ module XYZ
 
   class ComponentAction < OrderedActions
     def self.order_and_group_by_component(action_list)
-      #TODO: may fold step that groups togther multiple components of same type but to different attributes here
-      #TODO: may also fold in step in initiaze that brings in attributes for components
       #TODO: stub for ordering that just takes order in which component actions reached
       component_ids = action_list.map{|a|a[:component][:id]}.uniq
       component_ids.map do |component_id| 

@@ -4,8 +4,7 @@ module Ramaze::Helper
    private
     #query helpers
     def get_objects_from_search_pattern_hash(hash)
-      search_object = SearchObject.create_from_input_hash({"search_pattern" => hash},hash[:relation],ret_session_context_id())
-      Model.get_objects_from_search_object(search_object)
+      Model.get_objects_from_search_pattern_hash(ModelHandle.new(ret_session_context_id(),hash[:relation]),hash)
     end
 
     #helpers that interact with model

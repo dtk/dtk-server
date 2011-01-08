@@ -23,19 +23,18 @@ module XYZ
         end
 
         def add_action(component_action)
-          action = component_action.action
-          recipe_name = recipe(action)
+          recipe_name = recipe(component_action)
           if @common_attr_index[recipe_name]
             common_attr_val_list = @common_attr_index[recipe_name]
-            common_attr_val_list << ret_attributes(action, :strip_off_recipe_name => true)
-          elsif action[:component][:only_one_per_node]
+            common_attr_val_list << ret_attributes(component_action, :strip_off_recipe_name => true)
+          elsif component_action[:component][:only_one_per_node]
             @recipe_names << recipe_name
-            @attributes.merge!(ret_attributes(action))
+            @attributes.merge!(ret_attributes(component_action))
           else
             @recipe_names << recipe_name
             list = Array.new
             @common_attr_index[recipe_name] = list
-            list << ret_attributes(action, :strip_off_recipe_name => true)
+            list << ret_attributes(component_action, :strip_off_recipe_name => true)
              @attributes.merge!(recipe_name => {"!replace:list" => list})
           end
           self

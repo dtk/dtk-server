@@ -609,7 +609,7 @@ pp [:threads, Thread.list]
 
       ordered_actions = OrderedActions.create(pending_changes)
 
-      errors = ValidationError.find_missing_required_attributes(ordered_actions.node_config_actions())
+      errors = ValidationError.find_missing_required_attributes(ordered_actions)
       return {"data" => ValidationError.debug_inspect(errors)} if errors
 
 

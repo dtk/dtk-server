@@ -34,15 +34,15 @@ module XYZ
       set(:concurrent,actions_by_node)
     end
 
-    def node_config_actions()
-      elements.map{|el|el.node_config_actions()}.flatten
+    def component_actions()
+      elements.map{|el|el.component_actions()}.flatten
     end
 
     def add_attributes!()
-      actions = node_config_actions()
-      return self if actions.empty?
+      cmp_actions = component_actions()
+      return self if cmp_actions.empty?
 
-      indexed_actions = actions.inject({}){|h,a|h.merge(a[:component][:id] => a)}
+      indexed_actions = cmp_actions.inject({}){|h,a|h.merge(a[:component][:id] => a)}
       parent_field_name = DB.parent_field(:component,:attribute)
       search_pattern_hash = {
         :relation => :attribute,
@@ -50,13 +50,12 @@ module XYZ
                     [:oneof, parent_field_name, indexed_actions.keys]],
         :columns => [:id,parent_field_name,:external_ref,:attribute_value,:required]
       }
-      attr_mh = actions.first.model_handle().createMH(:model_name => :attribute)
+      attr_mh = cmp_actions.first.model_handle().createMH(:model_name => :attribute)
       attrs = Model.get_objects_from_search_pattern_hash(attr_mh,search_pattern_hash)
 
       attrs.each do |attr|
         action = indexed_actions[attr[parent_field_name]]
-        action[:attributes] ||= Array.new
-        action[:attributes] << attr
+        action.add_attribute!(attr)
       end
       self
     end
@@ -83,8 +82,9 @@ module XYZ
   class NodeActions < OrderedActions
     attr_reader :create_node_action
     attr_accessor :node
-    def node_config_actions()
-      elements.map{|el|el.action}.compact
+
+    def component_actions()
+      elements
     end
 
     def self.create(action_list)
@@ -95,7 +95,6 @@ module XYZ
       NodeActions.new(action_list.reject{|a|a[:type] == "create_node"},create_node_action)
     end
 
-    #TODO: may deprecate after removing refs
     def [](key)
       case(key)
         when :id then id()
@@ -103,7 +102,7 @@ module XYZ
     end
 
     def on_node_config_agent_type
-      elements.first.action.on_node_config_agent_type
+      elements.first.on_node_config_agent_type
     end
     def create_node_config_agent_type
       @create_node_action ? @create_node_action.create_node_config_agent_type : nil
@@ -118,7 +117,7 @@ module XYZ
 
     def id()
       #TODO: just taking lowest id of actions
-      elements.map{|e|e.action[:id]}.min
+      elements.map{|e|e[:id]}.min
     end
   end
 
@@ -130,12 +129,39 @@ module XYZ
         self.new(action_list.reject{|a|not a[:component][:id] == component_id}) 
       end
     end
-    attr_reader :action
+
+    def [](key)
+      case(key)
+        when :id then id()
+        when :node then node()
+        when :component then component()
+        when :attributes then @attributes
+      end
+    end
+    def model_handle()
+      @action.model_handle()
+    end
+    def add_attribute!(attr)
+      @attributes << attr
+    end
+    def on_node_config_agent_type
+      @action.on_node_config_agent_type()
+    end
    private
+    def id()
+      (@action||{})[:id]
+    end
+    def component()
+      (@action||{})[:component]
+    end
+    def node()
+      (@action||{})[:node]
+    end
     def initialize(actions_same_component)
       @action_pointers = actions_same_component
-      #all actions will be teh same from perpective of any operation (i.e., will have component id and all its attributes 
+      #all actions will be the same from perpective of any operation (i.e., will have component id and all its attributes 
       @action = actions_same_component.first
+      @attributes = Array.new
     end
   end
 end

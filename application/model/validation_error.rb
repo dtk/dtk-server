@@ -1,8 +1,9 @@
 module XYZ
   class ValidationError < HashObject 
-    def self.find_missing_required_attributes(pending_cmp_installs)
+    def self.find_missing_required_attributes(ordered_actions)
+      component_actions =  ordered_actions.component_actions()
       ret = Array.new 
-      pending_cmp_installs.each do |action|
+      component_actions.each do |action|
         action[:attributes].each do |attr|
           #TODO: need to distingusih between legitimate nil value and unset
           if attr[:required] and attr[:attribute_value].nil?

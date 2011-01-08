@@ -60,6 +60,8 @@ module XYZ
     end
   end
   class NodeActions < OrderedActions
+    attr_reader :create_node_action
+    attr_accessor :node
     def initialize(on_node_actions,create_node_action=nil)
       super()
       @create_node_action = create_node_action
@@ -67,10 +69,10 @@ module XYZ
       set(:sequential,on_node_actions)
     end
 
+    #TODO: may deprecate after removing refs
     def [](key)
       case(key)
         when :id then id()
-        when :node then @node
       end
     end
 

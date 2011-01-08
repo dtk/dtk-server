@@ -10,13 +10,13 @@ module XYZ
           #TODO: check if need lock for this
           rpc_client = rpcclient("chef_client",:options => Options)
         end
-        target_identity = mcollective_id(node_actions[:node],config_agent,rpc_client)
+        target_identity = mcollective_id(node_actions.node,config_agent,rpc_client)
         unless target_identity
           ret = {
             :status => :failed,
             :error => ErrorCannotFindIdentity.new()
           }
-          ret.merge!(:node_name => config_agent.node_name(node_actions[:node])) if node_actions[:node]
+          ret.merge!(:node_name => config_agent.node_name(node_actions.node)) if node_actions.node
           return ret
         end
         msg_content =  config_agent.ret_msg_content(node_actions)

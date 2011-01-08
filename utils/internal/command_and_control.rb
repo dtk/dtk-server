@@ -1,9 +1,5 @@
 module XYZ
   module CommandAndControlAdapter
-    class CommandAndControlError
-    end
-    class ErrorCannotFindIdentity < CommandAndControlError
-    end
   end
   class CommandAndControl
     klass = self
@@ -18,6 +14,14 @@ module XYZ
 
     def self.dispatch_to_client(action,config_agent) 
       nil
+    end
+
+    #TODO: should errors go under command and control
+    class CommandAndControlError < Exception
+    end
+    class ErrorCannotFindIdentity < CommandAndControlError
+    end
+    class CannotCreateNode < CommandAndControlError
     end
   end
 end

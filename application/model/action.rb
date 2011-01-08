@@ -57,13 +57,13 @@ module XYZ
          {
            :model_name => :component,
            :join_type => :inner,
-           :join_cond=>{:id=> :action__component_id},
-           :cols=>[:id, :display_name, :external_ref, :node_node_id, :only_one_per_node]
+           :join_cond=>{:id=> q(:action,:component_id)},
+           :cols=>[:id, :display_name, :external_ref, id(:node), :only_one_per_node]
          },
          {
            :model_name => :node,
            :join_type => :inner,
-           :join_cond=>{:id=> :component__node_node_id},
+           :join_cond=>{:id=> p(:component,:node)},
            :cols=>[:id, :display_name, :external_ref]
          }
         ]
@@ -74,19 +74,19 @@ module XYZ
          {
            :model_name => :attribute,
            :join_type => :inner,
-           :join_cond=> {:id => :action__attribute_id},
-           :cols=>[:id, :component_component_id]
+           :join_cond=> {:id => q(:action,:attribute_id)},
+           :cols=>[:id, id(:component)]
          },
          {
            :model_name => :component,
            :join_type => :inner,
-           :join_cond=>{:id=> :attribute__component_component_id},
-           :cols=>[:id, :display_name, :external_ref, :node_node_id, :only_one_per_node]
+           :join_cond=>{:id=> p(:attribute,:component)},
+           :cols=>[:id, :display_name, :external_ref, id(:node), :only_one_per_node]
          },
          {
            :model_name => :node,
            :join_type => :inner,
-           :join_cond=>{:id=> :component__node_node_id},
+           :join_cond=>{:id=> p(:component,:node)},
            :cols=>[:id, :display_name, :external_ref]
          }
         ]

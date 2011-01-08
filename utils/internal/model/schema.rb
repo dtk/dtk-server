@@ -199,7 +199,7 @@ module XYZ
           @model_name = model_name
         end
         def val()
-          DB.parent_field(@parent_model_name,@model_name)
+          "#{@model_name}__#{DB.parent_field(@parent_model_name,@model_name)}".to_sym
         end
       end
 

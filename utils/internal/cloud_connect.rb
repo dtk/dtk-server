@@ -1,5 +1,4 @@
 require 'fog'
-require 'fog/credentials'
 #TODO get Fog to correct this
 #monkey patch
 class NilClass
@@ -19,7 +18,7 @@ module XYZ
     end
     class EC2 < Top
       def initialize()             
-        @conn = Fog::AWS::EC2.new(Fog.credentials())
+        @conn = Fog::AWS::Compute.new(Fog.credentials())
       end
 
       def servers_all()

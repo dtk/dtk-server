@@ -1,4 +1,3 @@
-require File.expand_path("../cloud_connect.rb", File.dirname(__FILE__))
 require File.expand_path("mixins/security_group", File.dirname(__FILE__))
 
 module XYZ

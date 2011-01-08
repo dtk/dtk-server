@@ -10,6 +10,19 @@ module XYZ
     end
     def initialize(ordered_actions)
     end
+   protected
+    def create_or_execute_on_node(node_actions)
+      begin
+        CommandAndControl::Adapter.dispatch_to_client(node_actions)
+       rescue Exception => e
+        Log.error("error in workflow create_or_execute_on_node: #{e.inspect}")
+        config_agent = ConfigAgent.load(node_actions.on_node_config_agent_type)
+        {:status => :failed,
+          :node_name => config_agent.node_name(node_actions[:node]), 
+          :error => e
+        }
+      end
+    end
 
    private
     klass = self

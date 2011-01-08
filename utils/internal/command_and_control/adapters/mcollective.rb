@@ -3,7 +3,8 @@ include MCollective::RPC
 module XYZ
   module CommandAndControlAdapter
     class Mcollective < CommandAndControl
-      def self.dispatch_to_client(node_actions,config_agent) 
+      def self.dispatch_to_client(node_actions)
+        config_agent = ConfigAgent.load(node_actions.on_node_config_agent_type)
         rpc_client = nil
         Lock.synchronize do
           #TODO: check if need lock for this
@@ -11,11 +12,12 @@ module XYZ
         end
         target_identity = mcollective_id(node_actions[:node],config_agent,rpc_client)
         unless target_identity
-          return {
+          ret = {
             :status => :failed,
-            :node_name => config_agent.node_name(node_actions[:node]), 
             :error => ErrorCannotFindIdentity.new()
           }
+          ret.merge!(:node_name => config_agent.node_name(node_actions[:node])) if node_actions[:node]
+          return ret
         end
         msg_content =  config_agent.ret_msg_content(node_actions)
         filter = {"identity" => [target_identity], "agent" => ["chef_client"]}
@@ -27,15 +29,17 @@ module XYZ
      private
 
       def self.mcollective_id(node,config_agent,rpc_client)
-        discover_mcollective_id(node,config_agent,rpc_client)
+        return nil unless node
+        ret_discovered_mcollective_id(node,config_agent,rpc_client)
         ### below removed because quicker failure if use discovery to find if node is up
         #return DiscoveredNodes[node[:id]] if DiscoveredNodes[node[:id]]
         #identity = discover_mcollective_id(node,config_agent)
         #Lock.synchronize{DiscoveredNodes[node[:id]] = identity}
         #identity
       end
-      def self.discover_mcollective_id(node,config_agent,rpc_client)
+      def self.ret_discovered_mcollective_id(node,config_agent,rpc_client)
         pbuilderid = config_agent.pbuilderid(node)
+        return nil unless pbuilderid
         filter = Filter.merge("fact" => [{:fact=>"pbuilderid", :value=>pbuilderid}])
         rpc_client.client.discover(filter,Options[:disctimeout],:max_hosts_count => 1).first
       end

@@ -606,7 +606,7 @@ pp [:threads, Thread.list]
       pending_changes_node = pending_create_node(datacenter_id)
 
       pending_changes  = pending_changes_component + pending_changes_node 
-      pp [:pending_changes,pending_changes]
+      pp [:pending_changes,pending_changes_node]
       return {"data"=> "No pending changes"} if pending_changes.empty?
 
       test_str = 

@@ -109,9 +109,13 @@ module XYZ
 
     #object processing and access functions
     #######################
-    def config_agent_type()
+    def on_node_config_agent_type()
       #TODO: stub
       :chef
+    end
+    def create_node_config_agent_type()
+      #TODO: stub
+      :ec2
     end
 
     def self.actions_are_concurrent?(action_list)

@@ -54,37 +54,36 @@ module XYZ
       #shortcut if singleton
       return NodeActions.new(action_list) if action_list.size == 1
       #TODO: stub that just uses order given aside from a create a node which goes before all otehr node operations
-      action_create_node = action_list.find{|a|a[:type] == "create_node"}
-      return NodeActions.new(action_list) unless action_create_node
-      ordered_action_list = [action_create_node] + action_list.reject{|a|a[:type] == "create_node"}
-      NodeActions.new(ordered_action_list)
+      create_node_action = action_list.find{|a|a[:type] == "create_node"}
+      return NodeActions.new(action_list) unless create_node_action
+      NodeActions.new(action_list.reject{|a|a[:type] == "create_node"},create_node_action)
     end
   end
   class NodeActions < OrderedActions
-    def initialize(action_list)
+    def initialize(on_node_actions,create_node_action=nil)
       super()
-      set(:sequential,action_list)
+      @create_node_action = create_node_action
+      @node = (create_node_action or on_node_actions.empty?) ? nil : on_node_actions.first[:node]
+      set(:sequential,on_node_actions)
     end
 
     def [](key)
       case(key)
         when :id then id()
-        when :node then node()
+        when :node then @node
       end
     end
 
-    def config_agent_type
-      elements.first.config_agent_type
+    def on_node_config_agent_type
+      elements.first.on_node_config_agent_type
     end
-    private
+    def create_node_config_agent_type
+      @create_node_action ? @create_node_action.create_node_config_agent_type : nil
+    end
+   private
     def id()
       #TODO: just taking lowest id of actions
       elements.map{|e|e[:id]}.min
-    end
-
-    def node()
-      #since all nodes the same just taking first one
-      elements.first[:node]
     end
   end
 end

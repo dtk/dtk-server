@@ -16,11 +16,11 @@ module XYZ
 
     #common functions accross config agents
     def pbuilderid(node)
-      node[:external_ref][:instance_id]
+      (node[:external_ref]||{})[:instance_id]
     end
 
     def node_name(node)
-      node[:external_ref][:instance_id]
+      (node[:external_ref]||{})[:instance_id]
     end
 
     private

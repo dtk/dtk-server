@@ -88,8 +88,6 @@ module XYZ
     end
 
     def self.create(action_list)
-      #shortcut if singleton
-      return NodeActions.new(action_list) if action_list.size == 1
       create_node_action = action_list.find{|a|a[:type] == "create_node"}
       return NodeActions.new(action_list) unless create_node_action
       NodeActions.new(action_list.reject{|a|a[:type] == "create_node"},create_node_action)
@@ -102,7 +100,7 @@ module XYZ
     end
 
     def on_node_config_agent_type
-      elements.first.on_node_config_agent_type
+      elements.first ? elements.first.on_node_config_agent_type : nil
     end
     def create_node_config_agent_type
       @create_node_action ? @create_node_action.create_node_config_agent_type : nil
@@ -111,22 +109,22 @@ module XYZ
     def initialize(on_node_actions,create_node_action=nil)
       super()
       @create_node_action = create_node_action
-      @node = (create_node_action or on_node_actions.empty?) ? nil : on_node_actions.first[:node]
-      set(:sequential,ComponentAction.order_and_group_by_component(on_node_actions))
+      @node = create_node_action ? create_node_action[:node] : on_node_actions.first[:node]
+      set(:sequential,ComponentAction.order_and_group_by_component(on_node_actions,self))
     end
 
     def id()
-      #TODO: just taking lowest id of actions
-      elements.map{|e|e[:id]}.min
+      #just need arbitrary id; if there is @create_node_action using its id, otherwise min of  elements' ids
+      @create_node_action ? @create_node_action[:id] : elements.map{|e|e[:id]}.min
     end
   end
 
   class ComponentAction < OrderedActions
-    def self.order_and_group_by_component(action_list)
+    def self.order_and_group_by_component(action_list,parent)
       #TODO: stub for ordering that just takes order in which component actions reached
       component_ids = action_list.map{|a|a[:component][:id]}.uniq
       component_ids.map do |component_id| 
-        self.new(action_list.reject{|a|not a[:component][:id] == component_id}) 
+        self.new(action_list.reject{|a|not a[:component][:id] == component_id},parent) 
       end
     end
 
@@ -134,6 +132,7 @@ module XYZ
       case(key)
         when :id then id()
         when :component then component()
+        when :node then node()
         when :attributes then @attributes
       end
     end
@@ -146,11 +145,14 @@ module XYZ
     attr_reader :model_handle,:on_node_config_agent_type
    private
     attr_reader :id,:component
-
-    def initialize(actions_same_component)
+    def node()
+      @parent.node
+    end
+    def initialize(actions_same_component,parent)
       action = actions_same_component.first
       @action_pointers = actions_same_component
       @component = action[:component]
+      @parent = parent
       @attributes = Array.new
       @id = action[:id]
       @on_node_config_agent_type = action.on_node_config_agent_type()

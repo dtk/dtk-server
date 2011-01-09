@@ -20,13 +20,11 @@ module XYZ
         end
         CommandAndControlNodeConfig::Adapter.dispatch_to_client(node_actions)
        rescue Exception => e
-        ret = {
+        {
           :status => :failed,
           :error => e,
+          :node_name => node_actions.node[:display_name] 
         }
-        config_agent = ConfigAgent.load(node_actions.on_node_config_agent_type)
-        ret.merge!(:node_name => config_agent.node_name(node_actions.node)) if node_actions.node
-        ret
       end
     end
 

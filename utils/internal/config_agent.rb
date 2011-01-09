@@ -1,6 +1,7 @@
 module XYZ
   class ConfigAgent
     def self.load(type)
+      return nil unless type
       return Agents[type] if Agents[type]
       klass = self
       begin

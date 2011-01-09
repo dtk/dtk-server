@@ -615,10 +615,9 @@ pp [:threads, Thread.list]
 
       test_str = 
         if pending_changes_component.empty? 
-          "pending changes on components [#{pending_changes_component.map{|x|x[:component][:id]}.join(",")}]"
-        elsif pending_changes_node.empty? 
           "pending changes on nodes [#{pending_changes_node.map{|x|x[:node][:id]}.join(",")}]"
-        else
+        elsif pending_changes_node.empty? 
+          "pending changes on components [#{pending_changes_component.map{|x|x[:component][:id]}.join(",")}]"        else
           "pending changes on components [#{pending_changes_component.map{|x|x[:component][:id]}.join(",")}]; on nodes [#{pending_changes_node.map{|x|x[:node][:id]}.join(",")}]"
         end
 

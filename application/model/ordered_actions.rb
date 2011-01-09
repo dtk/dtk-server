@@ -82,14 +82,26 @@ module XYZ
     attr_reader :create_node_action
     attr_accessor :node
 
-    def component_actions()
-      elements
-    end
-
     def self.create(action_list)
       create_node_action = action_list.find{|a|a[:type] == "create_node"}
       return NodeActions.new(action_list) unless create_node_action
       NodeActions.new(action_list.reject{|a|a[:type] == "create_node"},create_node_action)
+    end
+
+    def component_actions()
+      elements
+    end
+
+
+    def save_new_node_info()
+      hash = {
+        :external_ref => @node[:external_ref],
+        :type => "instance"
+      }
+      Model.update_from_hash_assignments(node_id_handle,hash)
+    end
+
+    def update_state(state)
     end
 
     def [](key)
@@ -108,9 +120,15 @@ module XYZ
     def initialize(on_node_actions,create_node_action=nil)
       super()
       @create_node_action = create_node_action
-      @node = create_node_action ? create_node_action[:node] : on_node_actions.first[:node]
+      sample_action = create_node_action || on_node_actions.first
+      @node = sample_action[:node]
+      @node_id_handle = sample_action.model_handle().createIDH(:id => @node[:id],:model_name => :node)
+
       set(:sequential,ComponentAction.order_and_group_by_component(on_node_actions,self))
     end
+
+    attr_reader :node_id_handle
+
 
     def id()
       #just need arbitrary id; if there is @create_node_action using its id, otherwise min of  elements' ids

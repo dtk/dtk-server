@@ -12,21 +12,29 @@ module XYZ
     end
    protected
     def create_or_execute_on_node(node_actions)
+      ret = nil
       begin
         #check if there is a create node action and if so do it first
         if node_actions.create_node_action
           cac_iaas = CommandAndControlIAAS.load(node_actions.create_node_config_agent_type)
           node_actions.node =  cac_iaas.create_node(node_actions.create_node_action)
-          CommandAndControlNodeConfig::Adapter.wait_for_node_to_be_ready(node_actions.node) if node_actions.node
+          if node_actions.node
+            CommandAndControlNodeConfig::Adapter.wait_for_node_to_be_ready(node_actions.node) 
+            node_actions.save_new_node_info()
+          end
         end
-        CommandAndControlNodeConfig::Adapter.dispatch_to_client(node_actions)
+        ret = CommandAndControlNodeConfig::Adapter.dispatch_to_client(node_actions)
+        node_actions.update_state(:completed)
        rescue Exception => e
-        {
+        #TODO: right now for failure not making change to node_actions state
+        ret = {
           :status => :failed,
           :error => e,
-          :node_name => node_actions.node[:display_name] 
+          :node_name => node_actions.node[:display_name], 
+          :backtrace => e.backtrace
         }
       end
+      ret
     end
 
    private

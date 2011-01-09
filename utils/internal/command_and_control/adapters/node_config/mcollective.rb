@@ -4,40 +4,49 @@ module XYZ
   module CommandAndControlAdapter
     class Mcollective < CommandAndControlNodeConfig
       def  self.wait_for_node_to_be_ready(node)
-        sleep 60
 =begin
-        rpc_client = nil
-        Lock.synchronize do
-          #TODO: check if need lock for this
-          options =   Options.merge(:disctimeout=> DisctimeoutForNewNode)
-          rpc_client = rpcclient("chef_client",:options => options)
+        target_identity = nil
+        begin
+          rpc_client = nil
+          Lock.synchronize do
+            #TODO: check if need lock for this
+            options =   Options.merge(:disctimeout=> DisctimeoutForNewNode)
+            rpc_client = rpcclient("chef_client",:options => options)
+          end
+          target_identity = ret_discovered_mcollective_id(node,rpc_client)
+        ensure
+          rpc_client.disconnect() if rpc_client
         end
-        target_identity = ret_discovered_mcollective_id(node,rpc_client)
         raise  ErrorWhileCreatingNode unless target_identity
 =end
       end
 
       def self.dispatch_to_client(node_actions)
-        config_agent = ConfigAgent.load(node_actions.on_node_config_agent_type)
-        rpc_client = nil
-        Lock.synchronize do
-          #TODO: check if need lock for this
-          rpc_client = rpcclient("chef_client",:options => Options)
+        data = nil
+        begin
+          config_agent = ConfigAgent.load(node_actions.on_node_config_agent_type)
+          rpc_client = nil
+          Lock.synchronize do
+            #TODO: check if need lock for this
+            rpc_client = rpcclient("chef_client",:options => Options)
+          end
+          target_identity = ret_discovered_mcollective_id(node_actions.node,rpc_client)
+          unless target_identity
+            data = {
+              :status => :failed,
+              :error => ErrorCannotFindIdentity.new()
+            }
+            data.merge!(:node_name => config_agent.node_name(node_actions.node)) if node_actions.node
+          else
+            msg_content =  config_agent.ret_msg_content(node_actions)
+            filter = {"identity" => [target_identity], "agent" => ["chef_client"]}
+            results = rpc_client.custom_request("run",msg_content,target_identity,filter)
+
+            data = results.map{|result|result.results[:data]} 
+          end
+         ensure
+          rpc_client.disconnect() if rpc_client
         end
-        target_identity = ret_discovered_mcollective_id(node_actions.node,rpc_client)
-        unless target_identity
-          ret = {
-            :status => :failed,
-            :error => ErrorCannotFindIdentity.new()
-          }
-          ret.merge!(:node_name => config_agent.node_name(node_actions.node)) if node_actions.node
-          return ret
-        end
-        msg_content =  config_agent.ret_msg_content(node_actions)
-        filter = {"identity" => [target_identity], "agent" => ["chef_client"]}
-        results = rpc_client.custom_request("run",msg_content,target_identity,filter)
-        rpc_client.disconnect()
-        data = results.map{|result|result.results[:data]} 
         data 
       end
      private

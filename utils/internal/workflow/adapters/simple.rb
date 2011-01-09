@@ -24,7 +24,7 @@ module XYZ
      private 
       def initialize(ordered_actions)
         @type = ordered_actions.is_concurrent?() ? :concurrent : :sequential
-        @elements = ordered_actions.is_single_action?() ? [ordered_actions.single_action()] : ordered_actions.elements
+        @elements = ordered_actions.is_single_state_change?() ? [ordered_actions.single_state_change()] : ordered_actions.elements
         @lock = Mutex.new
         #TODO: put in max threads
      end

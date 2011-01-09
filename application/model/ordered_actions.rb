@@ -6,8 +6,8 @@ module XYZ
       ret.add_attributes!()
     end
 
-    def is_single_action?()
-      @type == :single_action
+    def is_single_state_change?()
+      @type == :single_state_change
     end
     def is_concurrent?()
       @type == :concurrent
@@ -16,7 +16,7 @@ module XYZ
       @type == :sequential
     end
     
-    def single_action()
+    def single_state_change()
       elements.first
     end
     def elements()
@@ -27,7 +27,7 @@ module XYZ
     def set_top_level(state_change_list)
       if state_change_list.size == 1
         actions_by_node = group_by_node(state_change_list)
-        return set(:single_action,actions_by_node)
+        return set(:single_state_change,actions_by_node)
       end
       actions_by_node = group_by_node(state_change_list)
       #TODO: stub where all actions cross-node are concurrent
@@ -145,7 +145,7 @@ module XYZ
 
   class ComponentAction < OrderedActions
     def self.order_and_group_by_component(state_change_list,parent)
-      #TODO: stub for ordering that just takes order in which component actions reached
+      #TODO: stub for ordering that just takes order in which component state changes made
       component_ids = state_change_list.map{|a|a[:component][:id]}.uniq
       component_ids.map do |component_id| 
         self.new(state_change_list.reject{|a|not a[:component][:id] == component_id},parent) 

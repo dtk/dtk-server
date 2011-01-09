@@ -31,8 +31,8 @@ module XYZ
         @@count += 1
         ::Ruote.process_definition :name => "process-#{@@count.to_s}" do
           sequence do
-            if ordered_actions.is_single_action?()
-              participant :ref => :execute_on_node, :action => ordered_actions.single_action()
+            if ordered_actions.is_single_state_change?()
+              participant :ref => :execute_on_node, :action => ordered_actions.single_state_change()
             elsif ordered_actions.is_concurrent?()
               concurrence :merge_type => :mix do
                 ordered_actions.elements.each{|action|participant :ref => :execute_on_node, :action => action}

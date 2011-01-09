@@ -62,34 +62,34 @@ R8::Routes["node/display"] = {
   ]
 }
 
-R8::Routes["action/list"] = {
+R8::Routes["state_change/list"] = {
   :layout => 'default',
   :alias => '',
   :params => [],
   :action_set => 
   [
    {
-     :route => "action/list",
-     #:action_id will only pick up top level actions
-     :action_params => [{:action_id => nil}],
+     :route => "state_change/list",
+     #:state_change_id will only pick up top level actions
+     :action_params => [{:state_change_id => nil}],
      :panel => "main_body"
    }
   ]
 }
 
-R8::Routes["action/display"] = {
+R8::Routes["state_change/display"] = {
   :layout => 'default',
   :alias => '',
   :params => [:id],
   :action_set => 
   [
    {
-     :route => "action/display",
+     :route => "state_change/display",
      :action_params => ["$id$"],
      :panel => "main_body"
    },
    {
-     :route => "action/list",
+     :route => "state_change/list",
      :action_params => [{:parent_id => "$id$"}],
      :panel => "main_body",
      :assign_type => :append 

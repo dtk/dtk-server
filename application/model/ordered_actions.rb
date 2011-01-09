@@ -1,4 +1,3 @@
-#TODO: should this be in model dircetory?
 module XYZ
   class OrderedActions 
     def self.create(action_list)

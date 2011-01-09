@@ -295,7 +295,7 @@ also related is allowing omission of columns mmentioned in jon condition; post p
         :change => {:old => old_value, :new => value_asserted}
       }
       new_item_hash.merge!(:base_object => base_object) if base_object
-      action_idh = Action.create_pending_change_item(new_item_hash)
+      action_idh = StateChange.create_pending_change_item(new_item_hash)
 
       nested_changes_hash = propagate_changes([AttributeChange.new(attr_idh,value_asserted,action_idh)]) if action_idh
 
@@ -309,7 +309,7 @@ also related is allowing omission of columns mmentioned in jon condition; post p
         end
       end
       pp [:nested_changes,nested_changes_hash.values]
-      Action.create_pending_change_items(nested_changes_hash.values)
+      StateChange.create_pending_change_items(nested_changes_hash.values)
       nil
     end
 

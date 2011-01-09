@@ -5,7 +5,6 @@
   :description => 'Description',
   :mode => 'Mode',
   :object_type => 'Object Type',
-  :transaction => 'Transaction',
   :change => 'Changes',
   :parent_name => 'Parent',
   :qualified_parent_name => 'Parent',

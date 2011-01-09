@@ -8,7 +8,7 @@ module XYZ
     
     #### actions
     def self.clone_post_copy_hook(new_id_handle,target_id_handle,opts={})
-      Action.create_pending_change_item(:new_item => new_id_handle, :parent => target_id_handle)
+      StateChange.create_pending_change_item(:new_item => new_id_handle, :parent => target_id_handle)
     end
 
 

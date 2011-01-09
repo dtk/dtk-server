@@ -1,6 +1,6 @@
 module XYZ
-  class Action < Model
-    set_relation_name(:action,:action)
+  class StateChange < Model
+    set_relation_name(:action,:state_change)
     def self.up()
       column :state, :varchar, :size => 15, :default => "pending" # | "executing" | "completed"
       column :mode, :varchar, :size => 15, :default => "declarative" # | "procedural"
@@ -8,12 +8,12 @@ module XYZ
       column :base_object, :json
       #TODO; may rename
       column :object_type, :varchar, :size => 15 # "attribute" | "node" | "component"
-      column :transaction, :int, :default => 1 #TODO may introduce transaction object and make this a foreign key
+
       #TODO: may change below to more general json field about (partial) ordering
       column :relative_order, :int, :default => 1 #relative with respect to parent
       column :change, :json # gives detail about the change
 
-      virtual_column :parent_name, :possible_parents => [:datacenter,:action]
+      virtual_column :parent_name, :possible_parents => [:datacenter,:state_change]
       virtual_column :old_value, :path => [:change, :old]
       virtual_column :new_value, :path => [:change, :new]
 
@@ -25,14 +25,14 @@ module XYZ
       foreign_key :component_id, :component, FK_CASCADE_OPT
       #TODO: may have here who, when
 
-      #TODO: example converetde form; apply to rest of vcs
+      #TODO: example converted form; apply to rest of vcs
       virtual_column :created_node,:type => :json, :hidden => true,
         :remote_dependencies =>
         [
          {
            :model_name => :node,
            :join_type => :inner,
-           :join_cond=>{:id=> q(:action,:node_id)},
+           :join_cond=>{:id=> q(:state_change,:node_id)},
            :cols=>[:id, :display_name, :external_ref, id(:datacenter),:ancestor_id]
          },
          {
@@ -57,7 +57,7 @@ module XYZ
          {
            :model_name => :component,
            :join_type => :inner,
-           :join_cond=>{:id=> q(:action,:component_id)},
+           :join_cond=>{:id=> q(:state_change,:component_id)},
            :cols=>[:id, :display_name, :external_ref, id(:node), :only_one_per_node]
          },
          {
@@ -74,7 +74,7 @@ module XYZ
          {
            :model_name => :attribute,
            :join_type => :inner,
-           :join_cond=> {:id => q(:action,:attribute_id)},
+           :join_cond=> {:id => q(:state_change,:attribute_id)},
            :cols=>[:id, id(:component)]
          },
          {
@@ -91,8 +91,8 @@ module XYZ
          }
         ]
 
-      many_to_one :datacenter, :action
-      one_to_many :action #that is for decomposition 
+      many_to_one :datacenter, :state_change
+      one_to_many :state_change #that is for decomposition 
     end
     ### virtual column defs
     #######################
@@ -118,8 +118,8 @@ module XYZ
       :ec2
     end
 
-    def self.actions_are_concurrent?(action_list)
-      rel_order = action_list.map{|x|x[:relative_order]}
+    def self.state_changes_are_concurrent?(state_change_list)
+      rel_order = state_change_list.map{|x|x[:relative_order]}
       val = rel_order.shift
       rel_order.each{|x|return nil unless x == val}
       true
@@ -133,7 +133,7 @@ module XYZ
     def self.create_pending_change_items(new_item_hashes)
       return nil if new_item_hashes.empty? 
       parent_model_name = new_item_hashes.first[:parent][:model_name]
-      model_handle = new_item_hashes.first[:parent].createMH({:model_name => :action, :parent_model_name => parent_model_name})
+      model_handle = new_item_hashes.first[:parent].createMH({:model_name => :state_change, :parent_model_name => parent_model_name})
       object_model_name = new_item_hashes.first[:new_item][:model_name]
       object_id_col = "#{object_model_name}_id".to_sym
       parent_id_col = model_handle.parent_id_field_name()
@@ -151,7 +151,7 @@ module XYZ
           when :node then "create_node"
       end 
       
-      ref_prefix = "action"
+      ref_prefix = "state_change"
       i=0
       rows = new_item_hashes.map do |item| 
         ref = "#{ref_prefix}#{(i+=1).to_s}"
@@ -175,11 +175,11 @@ module XYZ
     end
   end
   class AttributeChange 
-    attr_reader :id_handle,:changed_value,:action_id_handle
-    def initialize(id_handle,changed_value,action_id_handle)
+    attr_reader :id_handle,:changed_value,:state_change_id_handle
+    def initialize(id_handle,changed_value,state_change_id_handle)
       @id_handle = id_handle
       @changed_value = changed_value
-      @action_id_handle = action_id_handle
+      @state_change_id_handle = state_change_id_handle
     end
   end
 end

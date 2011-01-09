@@ -35,7 +35,7 @@ YUI_config = {
 			<li class=""><a href="{%=_app[:base_uri]%}/xyz/component/list">Components</a></li>
 <!--			<li class=""><a href="{%=_app[:base_uri]%}/xyz/attribute/list">Attributes</a></li> -->
 <!--			<li class=""><a href="{%=_app[:base_uri]%}/xyz/node_group/list">Groups</a></li> -->
-			<li class=""><a href="{%=_app[:base_uri]%}/xyz/action/list">Actions</a></li>
+			<li class=""><a href="{%=_app[:base_uri]%}/xyz/state_change/list">Pending Changes</a></li>
 <!--			<li class=""><a href="{%=_app[:base_uri]%}/xyz/search_object/list">Saved Searches</a></li> -->
 		</ul>
 	</div>

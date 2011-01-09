@@ -4,21 +4,28 @@ module XYZ
   module CommandAndControlAdapter
     class Mcollective < CommandAndControlNodeConfig
       def  self.wait_for_node_to_be_ready(node)
-=begin
+        #TODO: problem with below is that think if send message before node is connecetd it gets lost so need another way of checking; one way may be 
+
         target_identity = nil
         begin
           rpc_client = nil
           Lock.synchronize do
             #TODO: check if need lock for this
-            options =   Options.merge(:disctimeout=> DisctimeoutForNewNode)
+            options =   Options.merge(:disctimeout=> 2)
             rpc_client = rpcclient("chef_client",:options => options)
           end
-          target_identity = ret_discovered_mcollective_id(node,rpc_client)
+          #looping rather than just one discovery timeout because if node not connecetd msg lost
+          count = 0
+          while target_identity.nil? and count < 10
+            count += 1
+            target_identity = ret_discovered_mcollective_id(node,rpc_client)
+            sleep 5
+          end
         ensure
           rpc_client.disconnect() if rpc_client
         end
+        pp [:new_node_target_idenity,target_identity]
         raise  ErrorWhileCreatingNode unless target_identity
-=end
       end
 
       def self.dispatch_to_client(node_actions)
@@ -70,7 +77,6 @@ module XYZ
         :filter=> Filter,
         :timeout=>120
       }  
-      DisctimeoutForNewNode = 120
       Lock = Mutex.new
    end
   end

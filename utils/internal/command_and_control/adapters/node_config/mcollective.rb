@@ -25,7 +25,8 @@ module XYZ
           rpc_client.disconnect() if rpc_client
         end
         pp [:new_node_target_idenity,target_identity]
-        raise  ErrorWhileCreatingNode unless target_identity
+        #TODO: want to dleet node too in case timeout problem
+        raise ErrorWhileCreatingNode unless target_identity
       end
 
       def self.dispatch_to_client(node_actions)

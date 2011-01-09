@@ -1,7 +1,8 @@
+#TODO: in process of changing input action to state_change
 module XYZ
   class OrderedActions 
-    def self.create(action_list)
-      ret = self.new().set_top_level(action_list)
+    def self.create(state_change_list)
+      ret = self.new().set_top_level(state_change_list)
       ret.add_attributes!()
     end
 
@@ -23,12 +24,12 @@ module XYZ
     end
 
     #### 'private' methods for 'this'
-    def set_top_level(action_list)
-      if action_list.size == 1
-        actions_by_node = group_by_node(action_list)
+    def set_top_level(state_change_list)
+      if state_change_list.size == 1
+        actions_by_node = group_by_node(state_change_list)
         return set(:single_action,actions_by_node)
       end
-      actions_by_node = group_by_node(action_list)
+      actions_by_node = group_by_node(state_change_list)
       #TODO: stub where all actions cross-node are concurrent
       set(:concurrent,actions_by_node)
     end
@@ -70,28 +71,27 @@ module XYZ
       @elements = Array.new
     end
 
-    def group_by_node(action_list)
-      node_ids = action_list.map{|a|a[:node][:id]}.uniq
+    def group_by_node(state_change_list)
+      node_ids = state_change_list.map{|a|a[:node][:id]}.uniq
       node_ids.map do |node_id| 
-        NodeActions.create(action_list.reject{|a|not a[:node][:id] == node_id}) 
+        NodeActions.create(state_change_list.reject{|a|not a[:node][:id] == node_id}) 
       end
     end
   end
 
   class NodeActions < OrderedActions
-    attr_reader :create_node_action
+    attr_reader :create_node_state_change
     attr_accessor :node
 
-    def self.create(action_list)
-      create_node_action = action_list.find{|a|a[:type] == "create_node"}
-      return NodeActions.new(action_list) unless create_node_action
-      NodeActions.new(action_list.reject{|a|a[:type] == "create_node"},create_node_action)
+    def self.create(state_change_list)
+      create_node_state_change = state_change_list.find{|a|a[:type] == "create_node"}
+      return NodeActions.new(state_change_list) unless create_node_state_change
+      NodeActions.new(state_change_list.reject{|a|a[:type] == "create_node"},create_node_state_change)
     end
 
     def component_actions()
       elements
     end
-
 
     def save_new_node_info()
       hash = {
@@ -102,6 +102,9 @@ module XYZ
     end
 
     def update_state(state)
+      state_changes = all_pointed_to_state_changes()
+      rows = state_changes.map{|sc|{:id => sc[:id], :state => state.to_s}}
+      Model.update_from_rows(@state_change_model_handle,rows)
     end
 
     def [](key)
@@ -114,34 +117,38 @@ module XYZ
       elements.first ? elements.first.on_node_config_agent_type : nil
     end
     def create_node_config_agent_type
-      @create_node_action ? @create_node_action.create_node_config_agent_type : nil
+      @create_node_state_change ? @create_node_state_change.create_node_config_agent_type : nil
     end
    private
-    def initialize(on_node_actions,create_node_action=nil)
+    def initialize(on_node_state_changes,create_node_state_change=nil)
       super()
-      @create_node_action = create_node_action
-      sample_action = create_node_action || on_node_actions.first
-      @node = sample_action[:node]
-      @node_id_handle = sample_action.model_handle().createIDH(:id => @node[:id],:model_name => :node)
+      @create_node_state_change = create_node_state_change
+      sample_state_change = create_node_state_change || on_node_state_changes.first
+      @node = sample_state_change[:node]
+      @state_change_model_handle = sample_state_change.model_handle()
+      @node_id_handle = @state_change_model_handle.createIDH(:id => @node[:id],:model_name => :node)
 
-      set(:sequential,ComponentAction.order_and_group_by_component(on_node_actions,self))
+      set(:sequential,ComponentAction.order_and_group_by_component(on_node_state_changes,self))
     end
 
     attr_reader :node_id_handle
 
+    def all_pointed_to_state_changes()
+      (@create_node_state_change ? [@create_node_state_change] : []) + elements.map{|x|x.state_change_pointers}.flatten
+    end
 
     def id()
-      #just need arbitrary id; if there is @create_node_action using its id, otherwise min of  elements' ids
-      @create_node_action ? @create_node_action[:id] : elements.map{|e|e[:id]}.min
+      #just need arbitrary id; if there is @create_node_state_change using its id, otherwise min of  elements' ids
+      @create_node_state_change ? @create_node_state_change[:id] : elements.map{|e|e[:id]}.min
     end
   end
 
   class ComponentAction < OrderedActions
-    def self.order_and_group_by_component(action_list,parent)
+    def self.order_and_group_by_component(state_change_list,parent)
       #TODO: stub for ordering that just takes order in which component actions reached
-      component_ids = action_list.map{|a|a[:component][:id]}.uniq
+      component_ids = state_change_list.map{|a|a[:component][:id]}.uniq
       component_ids.map do |component_id| 
-        self.new(action_list.reject{|a|not a[:component][:id] == component_id},parent) 
+        self.new(state_change_list.reject{|a|not a[:component][:id] == component_id},parent) 
       end
     end
 
@@ -159,21 +166,21 @@ module XYZ
       @attributes << attr
     end
 
-    attr_reader :model_handle,:on_node_config_agent_type
+    attr_reader :model_handle,:on_node_config_agent_type,:state_change_pointers
    private
     attr_reader :id,:component
     def node()
       @parent.node
     end
-    def initialize(actions_same_component,parent)
-      action = actions_same_component.first
-      @action_pointers = actions_same_component
-      @component = action[:component]
+    def initialize(state_changes_same_component,parent)
+      state_change = state_changes_same_component.first
+      @state_change_pointers = state_changes_same_component
+      @component = state_change[:component]
       @parent = parent
       @attributes = Array.new
-      @id = action[:id]
-      @on_node_config_agent_type = action.on_node_config_agent_type()
-      @model_handle = action.model_handle()
+      @id = state_change[:id]
+      @on_node_config_agent_type = state_change.on_node_config_agent_type()
+      @model_handle = state_change.model_handle()
     end
   end
 end

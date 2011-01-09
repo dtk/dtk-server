@@ -1,9 +1,9 @@
 module XYZ
 module CommandAndControlAdapter
     class Ec2 <  CommandAndControlIAAS
-      def create_node_implementation(create_node_action)
+      def create_node_implementation(create_node_state_change)
         #TODO: rather than retuirning nill wil raise errors
-        ami = (((create_node_action||{})[:image]||{})[:external_ref]||{})[:image_id]
+        ami = (((create_node_state_change||{})[:image]||{})[:external_ref]||{})[:image_id]
         return nil unless ami
         create_options = {:image_id => ami}
         #TODO: right now hardcoding size and groups
@@ -16,7 +16,7 @@ module CommandAndControlAdapter
           :instance_id => instance_id, 
           :type => "ec2_instance"
         }
-        create_node_action[:node].merge(:external_ref => external_ref)
+        create_node_state_change[:node].merge(:external_ref => external_ref)
       end
      private
       #TODO: sharing ec2 connection with ec2 datasource

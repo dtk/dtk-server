@@ -15,9 +15,9 @@ module XYZ
       ret = nil
       begin
         #check if there is a create node action and if so do it first
-        if node_actions.create_node_action
+        if node_actions.create_node_state_change
           cac_iaas = CommandAndControlIAAS.load(node_actions.create_node_config_agent_type)
-          node_actions.node =  cac_iaas.create_node(node_actions.create_node_action)
+          node_actions.node =  cac_iaas.create_node(node_actions.create_node_state_change)
           if node_actions.node
             CommandAndControlNodeConfig::Adapter.wait_for_node_to_be_ready(node_actions.node) 
             node_actions.save_new_node_info()

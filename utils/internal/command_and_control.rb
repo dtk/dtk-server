@@ -44,8 +44,8 @@ module XYZ
       Adapters[type] = klass.new()
     end
 
-    def create_node(create_node_action)
-      new_node = create_node_implementation(create_node_action)
+    def create_node(create_node_state_change)
+      new_node = create_node_implementation(create_node_state_change)
       raise ErrorCannotCreateNode.new unless new_node
       new_node
     end

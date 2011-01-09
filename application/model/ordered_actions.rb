@@ -1,4 +1,3 @@
-#TODO: in process of changing input action to state_change
 module XYZ
   class OrderedActions 
     def self.create(state_change_list)
@@ -87,6 +86,10 @@ module XYZ
       create_node_state_change = state_change_list.find{|a|a[:type] == "create_node"}
       return NodeActions.new(state_change_list) unless create_node_state_change
       NodeActions.new(state_change_list.reject{|a|a[:type] == "create_node"},create_node_state_change)
+    end
+
+    def any_on_node_changes?()
+      not elements.empty?
     end
 
     def component_actions()

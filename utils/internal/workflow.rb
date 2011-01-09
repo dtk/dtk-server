@@ -1,3 +1,4 @@
+#TODO: need to pass back return for all actions; now if do create and update; only update put in
 module XYZ
   module WorkflowAdapter
   end
@@ -21,9 +22,16 @@ module XYZ
           if node_actions.node
             CommandAndControlNodeConfig::Adapter.wait_for_node_to_be_ready(node_actions.node) 
             node_actions.save_new_node_info()
+            ret = {
+              :status => :succeeded,
+              :operation => :create_node,
+              :node_name => node_actions.node[:display_name],
+            }
           end
         end
-        ret = CommandAndControlNodeConfig::Adapter.dispatch_to_client(node_actions)
+        if node_actions.any_on_node_changes?()
+          ret = CommandAndControlNodeConfig::Adapter.dispatch_to_client(node_actions)
+        end
         node_actions.update_state(:completed)
        rescue Exception => e
         #TODO: right now for failure not making change to node_actions state

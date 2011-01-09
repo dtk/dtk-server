@@ -4,8 +4,6 @@ module XYZ
   module CommandAndControlAdapter
     class Mcollective < CommandAndControlNodeConfig
       def  self.wait_for_node_to_be_ready(node)
-        #TODO: problem with below is that think if send message before node is connecetd it gets lost so need another way of checking; one way may be 
-
         target_identity = nil
         begin
           rpc_client = nil

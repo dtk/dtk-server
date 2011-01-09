@@ -17,6 +17,7 @@ module XYZ
         if node_actions.create_node_action
           cac_iaas = CommandAndControlIAAS.load(node_actions.create_node_config_agent_type)
           node_actions.node =  cac_iaas.create_node(node_actions.create_node_action)
+          CommandAndControlNodeConfig::Adapter.wait_for_node_to_be_ready(node_actions.node) if node_actions.node
         end
         CommandAndControlNodeConfig::Adapter.dispatch_to_client(node_actions)
        rescue Exception => e

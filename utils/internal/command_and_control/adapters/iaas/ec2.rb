@@ -9,12 +9,13 @@ module CommandAndControlAdapter
         #TODO: right now hardcoding size and groups
         create_options.merge!(:flavor_id => "t1.micro",:groups => ["basic"])
         response = @@conn.server_create(create_options)
-        pp [:response,response, :node,create_node_action[:node]]
+        pp [:response,response]
         instance_id = response[:id]
         state = response[:state]
-        #TODO: check that state is not failure and then wait until responds to a discovery
-        sleep 100
-        external_ref = {"instance_id" => instance_id, "type" => "ec2_instance"}
+        external_ref = {
+          :instance_id => instance_id, 
+          :type => "ec2_instance"
+        }
         create_node_action[:node].merge(:external_ref => external_ref)
       end
      private

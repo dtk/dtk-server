@@ -9,6 +9,8 @@ module XYZ
     end
     class ErrorCannotCreateNode < Error
     end
+    class ErrorWhileCreatingNode < Error
+    end
   end
 
   class CommandAndControlNodeConfig < CommandAndControl

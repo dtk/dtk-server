@@ -3,6 +3,20 @@ include MCollective::RPC
 module XYZ
   module CommandAndControlAdapter
     class Mcollective < CommandAndControlNodeConfig
+      def  self.wait_for_node_to_be_ready(node)
+        sleep 60
+=begin
+        rpc_client = nil
+        Lock.synchronize do
+          #TODO: check if need lock for this
+          options =   Options.merge(:disctimeout=> DisctimeoutForNewNode)
+          rpc_client = rpcclient("chef_client",:options => options)
+        end
+        target_identity = ret_discovered_mcollective_id(node,rpc_client)
+        raise  ErrorWhileCreatingNode unless target_identity
+=end
+      end
+
       def self.dispatch_to_client(node_actions)
         config_agent = ConfigAgent.load(node_actions.on_node_config_agent_type)
         rpc_client = nil
@@ -10,7 +24,7 @@ module XYZ
           #TODO: check if need lock for this
           rpc_client = rpcclient("chef_client",:options => Options)
         end
-        target_identity = mcollective_id(node_actions.node,config_agent,rpc_client)
+        target_identity = ret_discovered_mcollective_id(node_actions.node,rpc_client)
         unless target_identity
           ret = {
             :status => :failed,
@@ -28,22 +42,18 @@ module XYZ
       end
      private
 
-      def self.mcollective_id(node,config_agent,rpc_client)
+      def self.ret_discovered_mcollective_id(node,rpc_client)
         return nil unless node
-        ret_discovered_mcollective_id(node,config_agent,rpc_client)
-        ### below removed because quicker failure if use discovery to find if node is up
-        #return DiscoveredNodes[node[:id]] if DiscoveredNodes[node[:id]]
-        #identity = discover_mcollective_id(node,config_agent)
-        #Lock.synchronize{DiscoveredNodes[node[:id]] = identity}
-        #identity
-      end
-      def self.ret_discovered_mcollective_id(node,config_agent,rpc_client)
-        pbuilderid = config_agent.pbuilderid(node)
+        pbuilderid = pbuilderid(node)
         return nil unless pbuilderid
         filter = Filter.merge("fact" => [{:fact=>"pbuilderid", :value=>pbuilderid}])
         rpc_client.client.discover(filter,Options[:disctimeout],:max_hosts_count => 1).first
       end
 
+      def self.pbuilderid(node)
+        (node[:external_ref]||{})[:instance_id]
+      end
+     
       Filter = {"identity"=>[], "fact"=>[], "agent"=>[], "cf_class"=>[]}
       Options = {
         :disctimeout=>10,
@@ -51,10 +61,8 @@ module XYZ
         :filter=> Filter,
         :timeout=>120
       }  
+      DisctimeoutForNewNode = 120
       Lock = Mutex.new
-        
-      ##removed because quicker failure to use discovery top check node is up
-      #DiscoveredNodes = Hash.new
    end
   end
 end

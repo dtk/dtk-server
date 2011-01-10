@@ -22,6 +22,7 @@ if(!R8.UserComponent) {
 					return;
 				}
 				this.setupModalFormTabs();
+				this.initForm();
 			},
 			setupModalFormTabs: function() {
 				_events['tabClick'] = R8.Utils.Y.delegate('click',function(e){
@@ -48,18 +49,16 @@ if(!R8.UserComponent) {
 				var tabContentNodeId = tabId+'-tab-content';
 				R8.Utils.Y.one('#'+tabNodeId).addClass('selected');
 				R8.Utils.Y.one('#'+tabContentNodeId).setStyle('display','block');
+			},
+			initForm: function() {
+				var dirNameNode = R8.Utils.Y.one('#home_directory_name'), userNameNode = R8.Utils.Y.one('#username');
+				//console.log(R8.Utils.Y.one('#username'));
+				userNameNode.on('keyup', function(e){
+					var usernameValue = e.currentTarget.get('value');
+					dirNameNode.set('value', usernameValue);
+				});
 			}
 		}
 	}();
 	})(R8)
-
-
-function initUserForm(){
-	var dirNameNode = R8.Utils.Y.one('#home_directory_name'), userNameNode = R8.Utils.Y.one('#username');
-	//console.log(R8.Utils.Y.one('#username'));
-	userNameNode.on('keyup', function(e){
-		var usernameValue = e.currentTarget.get('value');
-		dirNameNode.set('value', usernameValue);
-	});
-}
 }

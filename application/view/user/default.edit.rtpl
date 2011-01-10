@@ -45,8 +45,6 @@
 				<tr><td class="field"><input type="checkbox" value="true" id="has_home_directory" name="has_home_directory" checked="true"/></td></tr>
 				<tr><td class="label">Home Directory Name</td></tr>
 				<tr><td class="field"><input type="text" value="" size="30" id="home_directory_name" name="home_directory_name"/></td></tr>
-				<tr><td class="label">Grant SSH Access</td></tr>
-				<tr><td class="field"><input type="checkbox" value="true" id="grant_ssh" name="grant_ssh"/></td></tr>
 			</table>
 		</div>
 		<div id="ssh-tab-content" class="tab-content" style="display: none;">

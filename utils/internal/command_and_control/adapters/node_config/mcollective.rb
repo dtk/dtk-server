@@ -42,7 +42,7 @@ module XYZ
           msg_content =  config_agent.ret_msg_content(node_actions)
           filter = {"identity" => [target_identity], "agent" => ["chef_client"]}
           response = rpc_client.custom_request("run",msg_content,target_identity,filter).first
-          raise ErrorTimout.new() unless response
+          raise ErrorTimeout.new() unless response
           raise Error.new() unless response[:data]
 
           ret = response[:data]

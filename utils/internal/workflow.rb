@@ -27,12 +27,13 @@ module XYZ
               :operation => :create_node,
               :node_name => node_actions.node[:display_name],
             }
+            node_actions.update_state_create_node(:completed)
           end
         end
         if node_actions.any_on_node_changes?()
           ret = CommandAndControlNodeConfig::Adapter.dispatch_to_client(node_actions)
         end
-        node_actions.update_state(:completed)
+        node_actions.update_state_on_node_changes(:completed)
        rescue Exception => e
         #TODO: right now for failure not making change to node_actions state
         ret = {
@@ -40,6 +41,8 @@ module XYZ
           :error => e,
           :node_name => node_actions.node[:display_name], 
         }
+        #if internal error print trace
+        pp [e,e.backtrace] unless e.kind_of?(CommandAndControl::Error)
       end
       ret
     end

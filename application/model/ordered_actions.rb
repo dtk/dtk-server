@@ -88,14 +88,6 @@ module XYZ
       NodeActions.new(state_change_list.reject{|a|a[:type] == "create_node"},create_node_state_change)
     end
 
-    def any_on_node_changes?()
-      not elements.empty?
-    end
-
-    def component_actions()
-      elements
-    end
-
     def save_new_node_info()
       hash = {
         :external_ref => @node[:external_ref],
@@ -104,10 +96,17 @@ module XYZ
       Model.update_from_hash_assignments(node_id_handle,hash)
     end
 
-    def update_state(state)
-      state_changes = all_pointed_to_state_changes()
-      rows = state_changes.map{|sc|{:id => sc[:id], :state => state.to_s}}
-      Model.update_from_rows(@state_change_model_handle,rows)
+    def any_on_node_changes?()
+      not component_actions.empty?
+    end
+
+    def update_state_on_node_changes(state)
+      update_state_aux(state,component_actions.map{|x|x.state_change_pointers}.flatten)
+    end
+
+    def update_state_create_node(state)
+      return nil unless @create_node_state_change
+      update_state_aux(state,[@create_node_state_change])
     end
 
     def [](key)
@@ -122,7 +121,18 @@ module XYZ
     def create_node_config_agent_type
       @create_node_state_change ? @create_node_state_change.create_node_config_agent_type : nil
     end
+
+    def component_actions()
+      elements
+    end
+
    private
+
+    def update_state_aux(state,state_changes)
+      rows = state_changes.map{|sc|{:id => sc[:id], :state => state.to_s}}
+      Model.update_from_rows(@state_change_model_handle,rows)
+    end
+
     def initialize(on_node_state_changes,create_node_state_change=nil)
       super()
       @create_node_state_change = create_node_state_change
@@ -135,10 +145,6 @@ module XYZ
     end
 
     attr_reader :node_id_handle
-
-    def all_pointed_to_state_changes()
-      (@create_node_state_change ? [@create_node_state_change] : []) + elements.map{|x|x.state_change_pointers}.flatten
-    end
 
     def id()
       #just need arbitrary id; if there is @create_node_state_change using its id, otherwise min of  elements' ids

@@ -3,7 +3,6 @@ module XYZ
     set_relation_name(:action,:state_change)
     def self.up()
       column :state, :varchar, :size => 15, :default => "pending" # | "executing" | "completed"
-      column :mode, :varchar, :size => 15, :default => "declarative" # | "procedural"
       column :type, :varchar, :size => 25# "setting" | "delete" | "deploy-node" | "install-component" | "patch-component" | "upgare-component" | "rollback-component" | "procedure" | .. 
       column :base_object, :json
       #TODO; may rename
@@ -173,7 +172,6 @@ module XYZ
           :display_name => display_name,
           :base_object => item[:base_object],
           :state => "pending",
-          :mode => "declarative",
           :type => type,
           :object_type => object_model_name.to_s,
           object_id_col => id,

@@ -62,7 +62,7 @@ R8::Routes["node/display"] = {
   ]
 }
 
-R8::Routes["state_change/list"] = {
+R8::Routes["state_change/list_pending"] = {
   :layout => 'default',
   :alias => '',
   :params => [],
@@ -70,8 +70,8 @@ R8::Routes["state_change/list"] = {
   [
    {
      :route => "state_change/list",
-     #:state_change_id will only pick up top level actions
-     :action_params => [{:state_change_id => nil}],
+     #:state_change_id will only pick up top level actions and ones taht are pending
+     :action_params => [{:state_change_id => nil}, {:state => "pending"}],
      :panel => "main_body"
    }
   ]

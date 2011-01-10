@@ -50,7 +50,25 @@ module XYZ
          }
         ]
 
-
+      component_same_type = {
+        #TODO: below used to handle situation where multiple isnatnces of recipe appear on same node
+        #and all parameters forming list is needed
+         #TODO: extend to allow join condition that has not so pruning out component_same_type
+        :model_name => :component,
+        :alias => :component_same_type,
+        :filter => [:and, [:eq, :only_one_per_node, false]],
+        :join_type => :left_outer,
+        #TODO: need to extend code so can use p and id in statements below
+        :join_cond=>{:external_ref=> q(:component,:external_ref), :node_node_id => p(:component,:node)},
+        :cols=>[:id, :display_name, :external_ref, id(:node), :only_one_per_node]
+      }
+      node = 
+        {
+        :model_name => :node,
+        :join_type => :inner,
+        :join_cond=>{:id=> p(:component,:node)},
+        :cols=>[:id, :display_name, :external_ref]
+      }
       virtual_column :installed_component, :type => :json, :hidden => true,
         :remote_dependencies =>
         [
@@ -60,12 +78,8 @@ module XYZ
            :join_cond=>{:id=> q(:state_change,:component_id)},
            :cols=>[:id, :display_name, :external_ref, id(:node), :only_one_per_node]
          },
-         {
-           :model_name => :node,
-           :join_type => :inner,
-           :join_cond=>{:id=> p(:component,:node)},
-           :cols=>[:id, :display_name, :external_ref]
-         }
+         node,
+         component_same_type 
         ]
 
       virtual_column :changed_attribute, :type => :json, :hidden => true,
@@ -83,25 +97,8 @@ module XYZ
            :join_cond=>{:id=> p(:attribute,:component)},
            :cols=>[:id, :display_name, :external_ref, id(:node), :only_one_per_node]
          },
-         {
-           :model_name => :node,
-           :join_type => :inner,
-           :join_cond=>{:id=> p(:component,:node)},
-           :cols=>[:id, :display_name, :external_ref]
-         },
-         #TODO: below used to handle situation where multiple isnatnces of recipe appear on same node
-         #and all parameters forming list is needed
-         #TODO: extend to allow join condition that has not so pruning out component_same_type
-         {
-           :model_name => :component,
-           :alias => :component_same_type,
-           :filter => [:and, [:eq, :only_one_per_node, false]],
-           :join_type => :left_outer,
-           #TODO: need to extend code so can use p and id in statements below
-           :join_cond=>{:external_ref=> q(:component,:external_ref), :node_node_id => p(:component,:node)},
-           :cols=>[:id, :display_name, :external_ref, id(:node), :only_one_per_node]
-         }
-
+         node,
+         component_same_type
         ]
 
       many_to_one :datacenter, :state_change

@@ -32,14 +32,14 @@ module XYZ
          :remote_dependencies =>
          [
           {
-            :model_name => :action,
+            :model_name => :state_change,
             #TODO: avoidng use of :component_component
             :sequel_def => lambda{|ds|ds.where(:state => "pending").join(:attribute__attribute,{:id => :attribute_id}).group_and_count(:attribute__component_component_id)},
             :join_type => :left_outer,
             :join_cond=>{:component_component_id =>:component__id}
           },
           {
-            :model_name => :action,
+            :model_name => :state_change,
             :sequel_def => lambda{|ds|ds.where(:state => "pending").group_and_count(:component_id)},
             :join_type => :left_outer,
             :join_cond=>{:component_id =>:component__id}
@@ -79,7 +79,7 @@ module XYZ
 
     #TODO: write as sql fn for efficiency
     def has_pending_change()
-      ((self[:action]||{})[:count]||0) > 0 or ((self[:action2]||{})[:count]||0) > 0
+      ((self[:state_change]||{})[:count]||0) > 0 or ((self[:state_change2]||{})[:count]||0) > 0
     end
     #######################
     ### object procssing and access functions

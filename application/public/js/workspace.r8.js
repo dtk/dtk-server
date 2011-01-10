@@ -829,7 +829,7 @@ for(vs in _viewSpaces) {
 				_modalNode = R8.Utils.Y.one('#'+_modalNodeId);
 				_modalNode.setStyles({'top':mTop,'left':mLeft,'display':'block'});
 
-				contentNode = R8.Utils.Y.one('#'+_modalNodeId+'-content');
+				var contentNode = R8.Utils.Y.one('#'+_modalNodeId+'-content');
 				return contentNode;
 			},
 //-------------------------------------------------------------

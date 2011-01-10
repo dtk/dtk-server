@@ -100,8 +100,8 @@ if(!R8.Dock) {
 				    });
 				    _overlay.render();
 
-					_topBarNode = Y.one('#wspace-dock-top-bar');
-					_topBarNode.on('click',function(e){
+					var topbarNode = Y.one('#wspace-dock-top-bar');
+					topbarNode.on('click',function(e){
 						if(_node.hasClass('collapsed')) {
 							_overlay.set('width','225px');
 							_node.removeClass('collapsed');
@@ -281,7 +281,7 @@ if(!R8.Dock) {
 					itemNode.removeClass('active');
 				},'#wspace-dock-panel-list','.panel-item',this);
 			},
-
+/*
 			panelSlideLeft: function() {
 				if (_topbarAnimEvent != null) {
 					_topbarAnimEvent.detach();
@@ -295,12 +295,12 @@ if(!R8.Dock) {
 					xy: [_bodyNode.getX()-250, _bodyNode.getY()]
 				});
 
-/*
-				_topbarAnim.on('end',function(e){
-				});
-				_bodyAnim.on('end',function(e){
-				});
-*/
+
+//				_topbarAnim.on('end',function(e){
+//				});
+//				_bodyAnim.on('end',function(e){
+//				});
+
 				_topbarAnim.run();
 				_bodyAnim.run();
 			},
@@ -323,7 +323,7 @@ if(!R8.Dock) {
 					});
 				}
 			},
-
+*/
 			loadDockPanel: function(route) {
 				var params = {
 					'cfg': {

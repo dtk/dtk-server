@@ -19,7 +19,19 @@ module XYZ
           end
           threads.each{|t| t.join}
         end
-        pp [:results, results]
+##TODO: for some reason this debug statement does not spit ot instance mebers of error
+##pp [:results, results]
+puts "------------results-------------"
+(results||{}).each do |key,result|
+  if result[:error] and result[:error].respond_to?(:debug_pp_form)
+    puts Aux::pp_form({key => result.merge(:error => result[:error].debug_pp_form)})
+  else
+    #TODO: very weir getting parsing error for pp {key => result}
+    x = Hash.new; x[key]=result; pp x
+  end
+end
+puts "------------end results-------------"
+#### end of debug
       end
      private 
       def initialize(ordered_actions)

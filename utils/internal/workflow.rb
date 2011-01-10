@@ -39,7 +39,6 @@ module XYZ
           :status => :failed,
           :error => e,
           :node_name => node_actions.node[:display_name], 
-          :backtrace => e.backtrace
         }
       end
       ret

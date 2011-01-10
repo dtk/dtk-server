@@ -5,7 +5,19 @@ module XYZ
     #### Error classes
     class Error < Exception
     end
-    class ErrorCannotFindIdentity < Error
+    class ErrorCannotConnect < Error
+    end
+    class ErrorTimeout < Error
+    end
+    class ErrorFailedResponse < Error
+      def initialize(response_status,response_error)
+        super()
+        @response_status = response_status
+        @response_error = response_error
+      end
+      def debug_pp_form()
+        [self.class,{:response_status => @response_status,:response_error => @response_error}]
+      end
     end
     class ErrorCannotCreateNode < Error
     end
@@ -23,10 +35,6 @@ module XYZ
       Log.error("cannot find command_and_control config control adapter; loading null command_and_control class")
     end
     Adapter = klass
-
-    def self.dispatch_to_client(action,config_agent) 
-      nil
-    end    
   end
 
   class CommandAndControlIAAS < CommandAndControl

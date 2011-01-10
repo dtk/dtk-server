@@ -28,7 +28,7 @@ module XYZ
       end
 
       def self.dispatch_to_client(node_actions)
-        data = nil
+        ret = nil
         begin
           config_agent = ConfigAgent.load(node_actions.on_node_config_agent_type)
           rpc_client = nil
@@ -37,23 +37,20 @@ module XYZ
             rpc_client = rpcclient("chef_client",:options => Options)
           end
           target_identity = ret_discovered_mcollective_id(node_actions.node,rpc_client)
-          unless target_identity
-            data = {
-              :status => :failed,
-              :error => ErrorCannotFindIdentity.new()
-            }
-            data.merge!(:node_name => config_agent.node_name(node_actions.node)) if node_actions.node
-          else
-            msg_content =  config_agent.ret_msg_content(node_actions)
-            filter = {"identity" => [target_identity], "agent" => ["chef_client"]}
-            results = rpc_client.custom_request("run",msg_content,target_identity,filter)
+          raise ErrorCannotConnect.new() unless target_identity
 
-            data = results.map{|result|result.results[:data]} 
-          end
+          msg_content =  config_agent.ret_msg_content(node_actions)
+          filter = {"identity" => [target_identity], "agent" => ["chef_client"]}
+          response = rpc_client.custom_request("run",msg_content,target_identity,filter).first
+          raise ErrorTimout.new() unless response
+          raise Error.new() unless response[:data]
+
+          ret = response[:data]
+          raise ErrorFailedResponse.new(ret[:status],ret[:error]) unless ret[:status] == :succeeded 
          ensure
           rpc_client.disconnect() if rpc_client
         end
-        data 
+        ret
       end
      private
 

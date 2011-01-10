@@ -17,6 +17,7 @@
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/cmdbar.css" />
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/toolbar.css" />
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/dock.css" />
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/wspace-modal.css" />
 
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/temp-dev.css" />
 
@@ -43,15 +44,17 @@
 					<div class="rt-endcap"></div>
 				</div>
 -->
+<!--
+				<div id="views-dropdown" class="dropdown" style="margin-right: 50px; float: left;">
+					<div style="font-size: 14px; margin-top: 4px; float: left;">View</div>
+					<div class="arrow"></div>
+				</div>
+-->
+				<div style="height:25px; text-align: center; position: relative; float: right; margin-left: 50px; background-color: #DDDDDD;">
+					<a href="{%=_app[:base_uri]%}/xyz/node/list">Main</a>&nbsp;|&nbsp;<a href="javascript:R8.Workspace.commitChanges();">Commit</a>
+				</div>
 			</div>
 			<div id="wspace-context-wrapper">
-				<a href="{%=_app[:base_uri]%}/xyz/node/list">Main</a>&nbsp;&nbsp;&nbsp;
-				<a href="javascript:R8.Workspace.Dock.hide();">Hide Dock</a>&nbsp;&nbsp;&nbsp;
-				<a href="javascript:R8.Workspace.Dock.show();">Show Dock</a>&nbsp;&nbsp;&nbsp;
-				<a href="javascript:R8.Workspace.Dock.loadDockPanel('node/get_components/2147484111');">Dock Panel Test</a>&nbsp;&nbsp;&nbsp;
-				<div style="height:25px; width: 100px; text-align: center; position: relative; margin: -15px auto 0 auto; background-color: #DDDDDD;">
-					<a href="javascript:R8.Workspace.commitChanges();">Commit</a>
-				</div>
 			</div>
 		</div>
 		<div id="wspace-container">
@@ -142,6 +145,7 @@ YUI_config = {
 
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/viewspace.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/group.r8.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/datacenter.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/node.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/port.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/toolbar.r8.js"></script>

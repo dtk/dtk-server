@@ -11,7 +11,7 @@ if(!R8.ToolbarGroup) {
 							<ul id="'+_id+'-tool-list" class="tool-list">\
 							</ul>\
 						<div class="rt-endcap"></div>\
-					</div>';
+					</div>',
 
 			_events = {},
 			_tools = {},
@@ -48,8 +48,9 @@ if(!R8.ToolbarGroup) {
 	R8.Tool = function(cfg) {
 		var _cfg = cfg,
 			_id = cfg['id'],
+			_i18n = cfg['i18n'],
 			_listNode = cfg.listNode,
-			_tpl = '<li id="'+_id+'-tool" class="tool-item first">\
+			_tpl = '<li title="'+_i18n+'" id="'+_id+'-tool" class="tool-item first">\
 							<div class="btn-bg">\
 								<div class="tool-btn '+_id+'"></div>\
 							</div>\
@@ -66,14 +67,9 @@ if(!R8.ToolbarGroup) {
 			open: function() {
 				_modalContentNode = R8.Workspace.renderModal();
 
-				var route = 'user/edit',
-					params = {
-						'cfg':{
-							'data':'panel_id='+_modalContentNode.get('id')
-						}
-					};
-				R8.Ctrl.call(route,params);
-			}
+				this.loadContent(_modalContentNode);
+			},
+			loadContent: _cfg['contentLoader']
 		}
 	}
 

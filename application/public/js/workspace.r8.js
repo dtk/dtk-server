@@ -144,10 +144,10 @@ if (!R8.Workspace) {
 
 //------Dock setup-------------
 
+				R8.Topbar.init();
+
 				_pageContainerNode.append(R8.Dock.render({'display':'block','top':_topbarNode.get('region').bottom}));
 				R8.Dock.init();
-
-				R8.Topbar.init();
 
 //				R8.MainToolbar.init();
 return;

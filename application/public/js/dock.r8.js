@@ -18,6 +18,7 @@ if(!R8.Dock) {
 			_top = '0',
 
 			_panels = [],
+			_toggleCache = {},
 
 			testMeta = {
 				panels:[{
@@ -138,6 +139,12 @@ if(!R8.Dock) {
 
 					});
 
+				});
+				R8.Topbar.addViewItem({
+					id: 'dock',
+					i18n: 'Dock',
+					visible: true,
+					clickCallback: this.toggleDock
 				});
 			},
 
@@ -365,16 +372,45 @@ if(!R8.Dock) {
 				_bodyNode.setStyle('width',newWidth+'px');
 			},
 
+			toggleDock: function() {
+				if(_node == null) _node = R8.Utils.Y.one('#'+_nodeId);
+
+				if (_node.get('parentNode').getStyle('display') == 'block') {
+					R8.Dock.hide();
+					R8.Dock.closeAllPanels();
+				} else {
+					R8.Dock.show();
+				}
+			},
 			show: function() {
 				if(_node == null) _node = R8.Utils.Y.one('#'+_nodeId);
 
 				_node.get('parentNode').setStyle('display','block');
+				for(var p in _toggleCache) {
+					var items = _panels[p].get('items');
+					for(var i in _toggleCache[p]) {
+						items[_toggleCache[p][i]].open();
+					}
+				}
+				_toggleCache = {};
 			},
 			hide: function() {
 				if(_node == null) _node = R8.Utils.Y.one('#'+_nodeId);
 
 				_node.get('parentNode').setStyle('display','none');
 			},
+			closeAllPanels: function() {
+				for(var i in _panels) {
+					var items = _panels[i].get('items');
+					for(var j in items) {
+						if(items[j].opened()) {
+							_toggleCache[i] = [j];
+							items[j].close();
+						}
+					}
+				}
+			},
+
 			toggleMinMax: function() {
 				if(_node == null) _node = R8.Utils.Y.one('#'+_nodeId);
 
@@ -427,8 +463,7 @@ if(!R8.Dock) {
 					'cfg':cfg
 				}
 				R8.Ctrl.call(route,params);
-			},
-
+			}
 		}
 	}();
 

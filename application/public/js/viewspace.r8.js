@@ -7,7 +7,7 @@ if (!R8.ViewSpace) {
 			_type = _def['type'],
 			_items = {},
 			_node = R8.Utils.Y.one('#viewspace'),
-			_updateBackgroundCall = null;
+			_updateBackgroundCall = null,
 
 			_draggableItems = {},
 			_selectedItems = {},

@@ -7,7 +7,7 @@ module XYZ
       end
      private
       def recipes_and_attributes(node_actions)
-        node_actions.elements.inject(ChefNodeActions.new()){|ret,component_action|ret.add_action(component_action)}
+        node_actions.component_actions.inject(ChefNodeActions.new()){|ret,component_action|ret.add_action(component_action)}
       end
 
       class ChefNodeActions 
@@ -35,7 +35,7 @@ module XYZ
             list = Array.new
             @common_attr_index[recipe_name] = list
             list << ret_attributes(component_action, :strip_off_recipe_name => true)
-             @attributes.merge!(recipe_name => {"!replace:list" => list})
+            @attributes.merge!(recipe_name => {"!replace:list" => list})
           end
           self
         end

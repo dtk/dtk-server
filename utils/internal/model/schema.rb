@@ -228,7 +228,7 @@ module XYZ
               join_info[:cols][i] = col.val(join_info[:model_name])
             end
 
-            #TODO: only applying translation on {k => v} to v side, should apply to k side too
+            #TODO: only applying translation  on {k => v} to v side, should apply to k side too
             (join_info[:join_cond]||{}).each do |k,v|
               next unless v.kind_of?(VCShortcutParent)
               join_info[:join_cond][k] = v.val()

@@ -1,16 +1,13 @@
 module XYZ
   class Task < Model
     set_relation_name(:task,:task)
-    class << self
-      def up()
-        column :status, :varchar, :size => 20, :default => "in_progres"
-
-        many_to_one :task 
-        one_to_many :task, :task_event, :task_error
-      end
-
-      ##### Actions
-      #TODO: removed def create(c=nil)
+    def self.up()
+      column :status, :varchar, :size => 20, :default => "in_progres"
+      column :position, :integer, :default => 1
+      column :executable_action, :json
+      column :temporal_order, :varchar, :size => 20 # = "sequential" | "concurrent"
+      many_to_one :task 
+      one_to_many :task, :task_event, :task_error
     end
 
     #Instance methods

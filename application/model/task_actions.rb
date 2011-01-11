@@ -54,12 +54,30 @@ module XYZ
         on_node_state_changes ? ConfigNode.new(on_node_state_changes) : nil
       end
 
+      def add_attributes!()
+        indexed_actions = component_actions.inject({}){|h,a|h.merge(a[:component][:id] => a)}
+        parent_field_name = DB.parent_field(:component,:attribute)
+        search_pattern_hash = {
+          :relation => :attribute,
+          :filter => [:and,
+                      [:oneof, parent_field_name, indexed_actions.keys]],
+          :columns => [:id,parent_field_name,:external_ref,:attribute_value,:required]
+        }
+        attr_mh = self[:state_change_model_handle].createMH(:model_name => :attribute)
+        attrs = Model.get_objects_from_search_pattern_hash(attr_mh,search_pattern_hash)
+        attrs.each do |attr|
+          action = indexed_actions[attr[parent_field_name]]
+          action.add_attribute!(attr)
+        end
+        self
+      end
+
       def update_state(state)
         update_state_aux(state,component_actions.map{|x|x[:state_change_pointer_ids]}.flatten)
       end
 
       def on_node_config_agent_type
-        component_actions.first.on_node_config_agent_type
+        self[:config_agent_type]
       end
 
      private
@@ -67,10 +85,12 @@ module XYZ
         sample_state_change = on_node_state_changes.first
         node = sample_state_change[:node]
         state_change_model_handle = sample_state_change.model_handle()
+        component_actions = ComponentAction.order_and_group_by_component(on_node_state_changes)
         hash = {
           :node => node,
           :state_change_model_handle => state_change_model_handle,
-          :component_actions => ComponentAction.order_and_group_by_component(on_node_state_changes)
+          :config_agent_type => component_actions.first.on_node_config_agent_type,
+          :component_actions => component_actions
         }
         super(hash)
       end

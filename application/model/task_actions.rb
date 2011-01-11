@@ -13,11 +13,45 @@ module XYZ
     end
 
     class CreateNode < TaskActionNode
+      def self.create(state_change_list)
+        create_node_state_change = state_change_list.find{|a|a[:type] == "create_node"}
+        create_node_state_change ? CreateNode.new(create_node_state_change) : nil
+      end
+
+      def save_new_node_info()
+        hash = {
+          :external_ref => self[:node][:external_ref],
+          :type => "instance"
+        }
+        Model.update_from_hash_assignments(self[:node_id_handle],hash)
+      end
+
+      def update_state(state)
+        update_state_aux(state,[self[:state_change_id]])
+      end
+
+      def create_node_config_agent_type
+        self[:config_agent_type]
+      end
+
+     private
+      def initialize(state_change)
+        node = state_change[:node]
+        state_change_model_handle = state_change.model_handle()
+        hash = {
+          :state_change_id => state_change[:id],
+          :state_change_model_handle => state_change.model_handle(),
+          :node => state_change[:node],
+          :node_id_handle => state_change_model_handle.createIDH(:id => node[:id],:model_name => :node)
+        }
+        super(hash)
+      end
     end
 
     class ConfigNode < TaskActionNode
       def self.create(state_change_list)
-        ConfigNode.new(state_change_list.reject{|a|a[:type] == "create_node"})
+        on_node_state_changes = state_change_list.reject{|a|a[:type] == "create_node"}
+        on_node_state_changes ? ConfigNode.new(on_node_state_changes) : nil
       end
 
       def update_state(state)
@@ -27,8 +61,8 @@ module XYZ
       def on_node_config_agent_type
         component_actions.first.on_node_config_agent_type
       end
-     private
 
+     private
       def initialize(on_node_state_changes)
         sample_state_change = on_node_state_changes.first
         node = sample_state_change[:node]
@@ -36,7 +70,6 @@ module XYZ
         hash = {
           :node => node,
           :state_change_model_handle => state_change_model_handle,
-          :node_id_handle => state_change_model_handle.createIDH(:id => :node[:id],:model_name => :node),
           :component_actions => ComponentAction.order_and_group_by_component(on_node_state_changes)
         }
         super(hash)

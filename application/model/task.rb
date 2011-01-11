@@ -2,7 +2,7 @@ module XYZ
   class Task < Model
     set_relation_name(:task,:task)
     def self.up()
-      column :status, :varchar, :size => 20, :default => "in_progres"
+      column :status, :varchar, :size => 20, :default => "created" # = "created" | "in_progres" | "completed"
       column :position, :integer, :default => 1
       column :executable_action, :json
       column :temporal_order, :varchar, :size => 20 # = "sequential" | "concurrent"
@@ -10,7 +10,21 @@ module XYZ
       one_to_many :task, :task_event, :task_error
     end
 
-    #Instance methods
+    def self.create_top_level(c,temporal_order)
+      hash = {
+        :status => "created",
+        :temporal_order => temporal_order,
+        :elements => Array.new
+      } 
+      Task.new(hash,c)
+    end
+
+    def add_subtask(hash)
+      self[:elements] ||= Array.new
+      new_subtask = Task.new(hash.merge(:status => "created"),c)
+      self[:elements] << new_subtask
+      new_subtask
+    end
 
     def has_error?()
       self[:has_error] 

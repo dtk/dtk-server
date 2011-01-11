@@ -606,9 +606,12 @@ pp [:threads, Thread.list]
       pending_changes_node = 
         pending_create_node(datacenter_id)
 
+
       pending_changes = pending_changes_component + pending_changes_node 
       return {"data"=> "No pending changes"} if pending_changes.empty?
-
+task = create_task_from_pending_changes(pending_changes)
+pp [:task,task]
+pp foo
       ordered_actions = OrderedActions.create(pending_changes)
 
       errors = ValidationError.find_missing_required_attributes(ordered_actions)

@@ -64,9 +64,9 @@ module XYZ
          ]
 
 
-        virtual_column :parent_name, :possible_parents => [:component,:library,:node,:node_group,:project]
+        virtual_column :parent_name, :possible_parents => [:component,:library,:node,:node_group]
 
-        many_to_one :component, :library, :node, :node_group, :project
+        many_to_one :component, :library, :node, :node_group
         one_to_many :component, :attribute_link, :attribute, :monitoring_item
       end
     end

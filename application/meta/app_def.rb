@@ -1,7 +1,6 @@
 
 {
   :model_list=> [
-    :action,
     :attribute_link,
     :attribute,
     :component,
@@ -12,10 +11,11 @@
     :network,
     :node_group,
     :node,
-    :project,
     :region,
     :search_object,
     :search_pattern_parser,
-    :task
+    :state_change,
+    :task,
+    :user                 
   ]
 }

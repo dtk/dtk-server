@@ -67,8 +67,8 @@ module XYZ
       :update_from_hash => Object,
       :create_attribute_link => AttributeLink,
       :create_simple => Object,
-      :delete => Object,
-      :encapsulate_elements_in_project => Project
+      :delete => Object
+#      :encapsulate_elements_in_project => Project
     }
 
     ACTION_HANDLER_METHOD_NAME = {

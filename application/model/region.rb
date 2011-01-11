@@ -7,7 +7,7 @@ module XYZ
         column :is_deployed, :boolean, :default => false
         column :type, :varchar, :size => 25 #type is availability_zone, datacenter, vdc
         one_to_many :region
-        many_to_one :library,:project,:region
+        many_to_one :library
       end
     end
   end
@@ -18,7 +18,7 @@ module XYZ
       def up()
         foreign_key :network_partition_id, :network_partition, FK_CASCADE_OPT
         foreign_key :region_id, :region, FK_CASCADE_OPT
-        many_to_one :library, :project
+        many_to_one :library
       end
     end
   end

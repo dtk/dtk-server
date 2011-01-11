@@ -7,7 +7,7 @@ module XYZ
       virtual_column :member_id_list
       virtual_column :member_list
       column :ui, :json
-      many_to_one :library, :datacenter, :project
+      many_to_one :library, :datacenter
       one_to_many :component
     end
 
@@ -138,7 +138,7 @@ module XYZ
       column :is_elastic_node, :boolean, :default => false
       foreign_key :node_id, :node, FK_CASCADE_OPT
       foreign_key :node_group_id, :node_group, FK_CASCADE_OPT
-      many_to_one :library, :datacenter, :project
+      many_to_one :library, :datacenter
     end
 
     ### virtual column defs
@@ -152,7 +152,7 @@ module XYZ
     def self.up()
       foreign_key :parent_group_id, :node_group, FK_CASCADE_OPT
       foreign_key :child_group_id, :node_group, FK_CASCADE_OPT
-      many_to_one :library, :datacenter, :project
+      many_to_one :library, :datacenter
     end
 
     ### virtual column defs

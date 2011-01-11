@@ -21,6 +21,7 @@ module XYZ
           node_actions.node =  cac_iaas.create_node(node_actions.create_node_state_change)
           if node_actions.node
             CommandAndControlNodeConfig::Adapter.wait_for_node_to_be_ready(node_actions.node) 
+            #TODO: save_new_node_info() should be before wait
             node_actions.save_new_node_info()
             ret = {
               :status => :succeeded,

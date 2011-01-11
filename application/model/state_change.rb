@@ -1,15 +1,13 @@
 module XYZ
   class StateChange < Model
-    set_relation_name(:action,:state_change)
+    set_relation_name(:state,:state_change)
     def self.up()
       column :state, :varchar, :size => 15, :default => "pending" # | "executing" | "completed"
-      column :type, :varchar, :size => 25# "setting" | "delete" | "deploy-node" | "install-component" | "patch-component" | "upgare-component" | "rollback-component" | "procedure" | .. 
+      column :type, :varchar, :size => 25# "setting" | "create-node" | "install-component" ?? "delete" | "patch-component" | "upgrade-component" | "rollback-component" 
       column :base_object, :json
       #TODO; may rename
       column :object_type, :varchar, :size => 15 # "attribute" | "node" | "component"
 
-      #TODO: may change below to more general json field about (partial) ordering
-      column :relative_order, :int, :default => 1 #relative with respect to parent
       column :change, :json # gives detail about the change
 
       virtual_column :parent_name, :possible_parents => [:datacenter,:state_change]

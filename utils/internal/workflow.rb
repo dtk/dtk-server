@@ -8,11 +8,26 @@ module XYZ
       Adapter.new(ordered_actions)
     end
     def execute()
+      results = execute_implementation()
+#TODO: for some reason this debug statement does not spit ot instance mebers of error
+##pp [:results, results]
+puts "------------results-------------"
+(results||{}).each do |key,result|
+  if result[:error] and result[:error].respond_to?(:debug_pp_form)
+    puts Aux::pp_form({key => result.merge(:error => result[:error].debug_pp_form)})
+  else
+    #TODO: very weir getting parsing error for pp {key => result}
+    x = Hash.new; x[key]=result; pp x
+  end
+end
+puts "------------end results-------------"
+      results
+#### end of debug
     end
     def initialize(ordered_actions)
     end
    protected
-    def create_or_execute_on_node(node_actions)
+    def self.create_or_execute_on_node(node_actions)
       ret = nil
       begin
         #check if there is a create node action and if so do it first

@@ -1,25 +1,22 @@
 require 'ruote'
 require 'ruote/storage/fs_storage'
+#TODO: below is broken because cant pass arbitrary objects as params
 #TODO: switch action to node_actions
 module XYZ 
   module WorkflowAdapter
     class Ruote < XYZ::Workflow
-      def execute()
+      def execute_implementation()
         wfid = Engine.launch(@process_def)
         Engine.wait_for(wfid)
       end
      private 
       Engine = ::Ruote::Engine.new(::Ruote::Worker.new(::Ruote::FsStorage.new('ruote_work'))) 
       Engine.register_participant :execute_on_node do |workitem|
-        begin
-          cac = CommandAndControl.create()
-          data = cac.dispatch_to_client(workitem.fields["params"]["action"])
-          workitem.fields[workitem.fields["params"]["action"]["id"]] = data 
-        rescue Exception => e
-          Log.error("error in workflow execute_on_node: #{e.inspect}")
-        end
+        action = workitem.fields["params"]["action"]
+        result = create_or_execute_on_node(action)
+        workitem.fields[workitem.fields["params"]["action"]["id"]] = result 
       end
-      Engine.register_participant :bravo do |workitem|
+      Engine.register_participant :return_results do |workitem|
         pp [:bravo,workitem.fields]
       end
       @@count = 0
@@ -42,7 +39,7 @@ module XYZ
                 ordered_actions.elements.each{|action|participant :ref => :execute_on_node, :action => action}
               end
             end
-            participant :bravo
+            participant :return_results
           end
         end
       end

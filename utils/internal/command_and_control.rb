@@ -28,7 +28,7 @@ module XYZ
       return Adapters[adapter_type][adapter_name] if Adapters[adapter_type][adapter_name]
       begin
         require File.expand_path("#{UTILS_DIR}/internal/command_and_control/adapters/#{adapter_type}/#{adapter_name}", File.dirname(__FILE__))
-        Adapters[adapter_type][adapter_name] = XYZ::CommandAndControlAdapter.const_get adapter_name.capitalize
+        Adapters[adapter_type][adapter_name] = XYZ::CommandAndControlAdapter.const_get adapter_name.to_s.capitalize
        rescue LoadError
         nil
       end
@@ -66,10 +66,5 @@ module XYZ
   end
 
   class CommandAndControlIAAS < CommandAndControl
-    def execute(create_node)
-      new_node = execute_implementation(create_node)
-      raise ErrorCannotCreateNode.new unless new_node
-      new_node
-    end
   end
 end

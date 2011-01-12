@@ -55,7 +55,8 @@ module XYZ
           :state_change_id => state_change[:id],
           :state_change_model_handle => state_change.model_handle(),
           :node => state_change[:node],
-          :node_id_handle => state_change_model_handle.createIDH(:id => node[:id],:model_name => :node)
+          :node_id_handle => state_change_model_handle.createIDH(:id => node[:id],:model_name => :node),
+          :image => state_change[:image]
         }
         super(hash)
       end
@@ -69,7 +70,7 @@ module XYZ
 
       def self.create(state_change_list)
         on_node_state_changes = state_change_list.reject{|a|a[:type] == "create_node"}
-        on_node_state_changes ? ConfigNode.new(on_node_state_changes) : nil
+        on_node_state_changes.empty? ? nil :  ConfigNode.new(on_node_state_changes) 
       end
 
       def update_state(state)

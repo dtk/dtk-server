@@ -33,8 +33,9 @@ puts "------------end results-------------"
       begin
         #check if there is a create node action and if so do it first
         if create_node
-          node_actions.node = CommandAndControl.execute_task_action(create_node)
-          if node_actions.node
+          new_node_info = CommandAndControl.execute_task_action(create_node)
+          if new_node_info
+            create_node[:node] = new_node_info
             create_node.save_new_node_info()
             CommandAndControl.wait_for_node_to_be_ready(create_node[:node])
             ret = {

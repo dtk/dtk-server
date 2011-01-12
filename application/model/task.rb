@@ -32,6 +32,8 @@ module XYZ
 
     #persists to db this and its sub tasks
     def save!()
+      #no op if sabved already as detected by whether has an id
+     return nil if id()
       set_positions!()
       #for db access efficiency implement into two phases: 1 - save all subtasks w/o ids, then point in ids
       unrolled_tasks = unroll_tasks()
@@ -57,15 +59,16 @@ module XYZ
       IDInfoTable.update_instances(model_handle,par_rel_rows_for_id_info)
 
       #save all the task_param_links
-      task_param_link_rows = unrolled_tasks.map do |t|
-        t.task_param_links.map{|pl|pl.set_and_return_info!(t.id)}.flatten
+      pl_objs = unrolled_tasks.map do |t|
+        t.task_param_links.map{|pl|pl.set_foreign_keys!(t.id)}.flatten
       end.flatten
-      pp [:task_param_link_rows,task_param_link_rows]
-      nil
-
-foo
+      pl_rows = pl_objs.map{|o|[:task_id,:ref,:input_task_id,:output_task_id].inject({}){|h,k|h.merge(k => o[k])}}
+      pl_id_info_list = Model.create_from_rows(model_handle.createMH(:model_name => :task_param_link),pl_rows)
+      update_with_pl = Array.new
+      pl_objs.each_with_index{|pl,i|pl.set_id_handle(pl_id_info_list[i])}
     end
 
+    #TODO: this probably shoudl be moved up to Model
     def id()
       id_handle ? id_handle.get_id() : nil
     end
@@ -133,17 +136,18 @@ foo
     def self.create_from_task_objects(c,input_task,output_task,input_var_path,output_var_path=nil)
       #output_var_path.nil? means same as input
       output_var_path ||= input_var_path
-      ret = self.new({:input_var_path => output_var_path,:input_var_path => output_var_path},c)
+      ret = TaskParamLink.new({:input_var_path => output_var_path,:input_var_path => output_var_path},c)
       ret.input_task = input_task
       ret.output_task = output_task
       ret
     end
 
-    def set_and_return_info!(task_id)
+    def set_foreign_keys!(task_id)
       self[:task_id] = task_id
       self[:input_task_id] = input_task ? input_task.id : nil
       self[:output_task_id] = output_task ? output_task.id : nil
-      [{:task__id => task_id, :input_task_id => self[:input_task_id],:output_task_id => self[:output_task_id]}]
+      self[:ref] = "tpl-#{self[:input_task_id].to_s}-#{self[:output_task_id].to_s}"
+      self
     end
   end
 end

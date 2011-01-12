@@ -31,7 +31,7 @@ module XYZ
     extend ModelDataClassMixins
     include ModelDataInstanceMixins
 
-    attr_reader :relation_type, :c
+    attr_reader :relation_type, :id_handle, :c
 
     #TODO: check why relation_type=model_name does not work
     def initialize(hash_scalar_values,c,relation_type=model_name())
@@ -87,7 +87,7 @@ module XYZ
     end
 
     def self.get_display_name(id_handle)
-      id = id_handle.get_id()
+      id = id_handle ? id_handle.get_id() : nil
       return nil unless id
       obj = @db.get_objects_scalar_columns(id_handle.createMH,{:id => id}, FieldSet.opt([:display_name],id_handle[:model_name])).first
       (obj||{})[:display_name]
@@ -167,6 +167,8 @@ module XYZ
       end
       nil
     end
+   protected
+
 
     #inherited virtual coulmn defs
     def parent_id()

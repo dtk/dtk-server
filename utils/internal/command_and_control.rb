@@ -10,7 +10,7 @@ module XYZ
 
     #TODO: temp hack
     def self.wait_for_node_to_be_ready(node) 
-      adapter_name = R8::Config[:command_and_control][:node_config][type]
+      adapter_name = R8::Config[:command_and_control][:node_config][:type]
       klass = load_for_aux(:node_config,adapter_name)
       klass.wait_for_node_to_be_ready(node)
     end
@@ -18,14 +18,14 @@ module XYZ
    private
     def self.load_for(task_action)
       adapter_type,adapter_name = task_action.ret_command_and_control_adapter_info()
-      adapter_name ||= R8::Config[:command_and_control][adapter_type]
+      adapter_name ||= R8::Config[:command_and_control][adapter_type][:type]
       return nil unless adapter_type and adapter_name
       load_for_aux(adapter_type,adapter_name)
     end
 
     def self.load_for_aux(adapter_type,adapter_name)
       Adapters[adapter_type] ||= Hash.new
-      return Adapters[adapter_type][adpater_name] if Adapters[adapter_type][adapter_name]
+      return Adapters[adapter_type][adapter_name] if Adapters[adapter_type][adapter_name]
       begin
         require File.expand_path("#{UTILS_DIR}/internal/command_and_control/adapters/#{adapter_type}/#{adapter_name}", File.dirname(__FILE__))
         Adapters[adapter_type][adapter_name] = XYZ::CommandAndControlAdapter.const_get adapter_name.capitalize

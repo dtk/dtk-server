@@ -11,7 +11,7 @@ module XYZ
   end
   module TaskAction
     class TaskActionNode < TaskActionBase
-      def update_state_aux(state,state_change_id)
+      def update_state_aux(state,state_change_ids)
         rows = state_change_ids.map{|id|{:id => id, :state => state.to_s}}
         Model.update_from_rows(self[:state_change_model_handle],rows)
       end
@@ -70,7 +70,7 @@ module XYZ
       end
 
       def update_state(state)
-        update_state_aux(state,component_actions.map{|x|x[:state_change_pointer_ids]}.flatten)
+        update_state_aux(state,self[:component_actions].map{|x|x[:state_change_pointer_ids]}.flatten)
       end
 
      private

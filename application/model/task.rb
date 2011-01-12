@@ -7,7 +7,7 @@ module XYZ
       column :executable_action, :json
       column :temporal_order, :varchar, :size => 20 # = "sequential" | "concurrent"
       many_to_one :task 
-      one_to_many :task, :task_event, :task_error
+      one_to_many :task, :task_param_link, :task_event, :task_error
     end
 
     def self.create_top_level(c,temporal_order)
@@ -62,6 +62,16 @@ module XYZ
       self[:has_error] = true 
     end
 
+  end
+  class TaskParamLink < Model
+    set_relation_name(:task,:param_link)
+    def self.up()
+      foreign_key :input_task_id, :task, FK_CASCADE_OPT
+      column :input_var_path, :json
+      foreign_key :output_task_id, :task, FK_CASCADE_OPT
+      column :output_var_path, :json
+      many_to_one :task 
+    end
   end
 
   class TaskEvent < Model

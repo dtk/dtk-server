@@ -15,6 +15,7 @@ module Ramaze::Helper
           node_subtask = top_level_task.add_subtask({:temporal_order => "sequential"})
           node_subtask.add_subtask({:executable_action => create_node_action})
           node_subtask.add_subtask({:executable_action => config_node_action})
+          #TODO: add TaskParamLink to indicate that create_node will update param node which updates node on config node action
         else
           #one wil be non null
           top_level_task.add_subtask({:executable_action => create_node_action||config_node_action})

@@ -29,6 +29,7 @@ puts "------------end results-------------"
     #paramter dependency link
     def self.create_or_execute_on_node(create_node,config_node)
       ret = nil
+      node = (create_node||config_node)[:node]
       begin
         #check if there is a create node action and if so do it first
         if create_node
@@ -53,7 +54,7 @@ puts "------------end results-------------"
         ret = {
           :status => :failed,
           :error => e,
-          :node_name => node_actions.node[:display_name], 
+          :node_name => node[:display_name], 
         }
         #if internal error print trace
         pp [e,e.backtrace] unless e.kind_of?(CommandAndControl::Error)

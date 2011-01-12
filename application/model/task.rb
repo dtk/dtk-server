@@ -17,14 +17,17 @@ module XYZ
       } 
       Task.new(hash,c)
     end
-
+    
+    def elements()
+      @elements||[]
+    end
     #for special tasks that have component actions
     #TODO: trie dto do this by having a class inherir from Task and hanging these fns off it, but this confused Ramaze
     def component_actions()
       if self[:executable_action].kind_of?(TaskAction::ConfigNode)
         return self[:executable_action][:component_actions]||[]
       end
-      (@elements||[]).map{|obj|obj.component_actions()}.flatten
+      elements.map{|obj|obj.component_actions()}.flatten
     end
 
 
@@ -59,9 +62,6 @@ module XYZ
       self[:has_error] = true 
     end
 
-    
-   private
-    attr_accessor :elements
   end
 
   class TaskEvent < Model

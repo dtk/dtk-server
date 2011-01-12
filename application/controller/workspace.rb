@@ -611,8 +611,6 @@ pp [:threads, Thread.list]
       return {"data"=> "No pending changes"} if pending_changes.empty?
       top_level_task = create_task_from_pending_changes(pending_changes)
 
-#      ordered_actions = OrderedActions.create(pending_changes)
-
       errors = ValidationError.find_missing_required_attributes(top_level_task)
       return {"data" => ValidationError.debug_inspect(errors)} if errors
 

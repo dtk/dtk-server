@@ -27,7 +27,7 @@ module XYZ
     def save!()
       set_positions!()
       #for db access efficiency implement into two phases: 1 - save all subtasks w/o ids, then point in ids
-      unrolled_tasks = [self] + all_subtasks()
+      unrolled_tasks = unroll_tasks()
       rows = unrolled_tasks.map do |hash_row|
         executable_action = hash_row[:executable_action]
         row = {
@@ -44,9 +44,11 @@ module XYZ
       unrolled_tasks.each_with_index{|task,i|task.set_id_handle(id_info_list[i])}
 
       #set parent relationship
-      par_rel_rows = set_and_ret_parents!()
-      IDInfoTable.update_instances(model_handle,par_rel_rows)
-pp [:foo, self]
+      par_rel_rows_for_id_info = set_and_ret_parents!()
+      par_rel_rows_for_task = par_rel_rows_for_id_info.map{|r|{:id => r[:id], :task_id => r[:parent_id]}}
+      Model.update_from_rows(model_handle,par_rel_rows_for_task)
+      IDInfoTable.update_instances(model_handle,par_rel_rows_for_id_info)
+pp [:foo, unroll_tasks()]
 foo
     end
 
@@ -89,9 +91,8 @@ foo
       [:parent_id => parent_id, :id => id] + elements.map{|e|e.set_and_ret_parents!(id)}.flatten
     end
 
-    def all_subtasks()
-      return [self] if elements.empty?
-      elements.map{|e|e.all_subtasks()}.flatten
+    def unroll_tasks()
+      [self] + elements.map{|e|e.unroll_tasks()}.flatten
     end
 
   end

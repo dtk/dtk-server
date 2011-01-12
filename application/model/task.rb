@@ -8,6 +8,7 @@ module XYZ
       #column :events, :json - content of this may instead go in result
       column :action_on_failure, :varchar, :default => "abort"
       column :position, :integer, :default => 1
+      column :executable_action_type, :varchar
       column :executable_action, :json # gets serialized version of TaskAction::Action
       column :temporal_order, :varchar, :size => 20 # = "sequential" | "concurrent"
       many_to_one :task 
@@ -28,20 +29,31 @@ module XYZ
       #for db access efficiency implement into two phases: 1 - save all subtasks w/o ids, then point in ids
       unrolled_tasks = [self] + all_subtasks()
       rows = unrolled_tasks.map do |hash_row|
+        executable_action = hash_row[:executable_action]
         row = {
           :ref => "task#{hash_row[:position].to_s}",
-          :executable_action => hash_row[:executable_action],
+          :executable_action_type => executable_action ? executable_action.class.to_s.gsub("XYZ::TaskAction","") : nil,
+          :executable_action => executable_action
         }
         cols = [:status, :result, :output_vars, :action_on_failure, :position, :temporal_order] 
         cols.each{|col|row.merge!(col => hash_row[col])}
         row
       end
-        x = Model.create_from_rows(model_handle,rows,{:convert => true,:do_not_update_info_table => true})
-pp [:foo, x]
+      id_info_list = Model.create_from_rows(model_handle,rows,{:convert => true,:do_not_update_info_table => true})
+      #set ids
+      unrolled_tasks.each_with_index{|task,i|task.set_id_handle(id_info_list[i])}
+
+      #set parent relationship
+      par_rel_rows = set_and_ret_parents!()
+      IDInfoTable.update_instances(model_handle,par_rel_rows)
+pp [:foo, self]
 foo
     end
 
-    
+    def id()
+      id_handle ? id_handle.get_id() : nil
+    end
+
     def elements()
       @elements||[]
     end
@@ -71,8 +83,14 @@ foo
       end
     end
 
+    def set_and_ret_parents!(parent_id=nil)
+      self[:task_id] = parent_id
+      id = id()
+      [:parent_id => parent_id, :id => id] + elements.map{|e|e.set_and_ret_parents!(id)}.flatten
+    end
+
     def all_subtasks()
-      return Array.new if elements.empty?
+      return [self] if elements.empty?
       elements.map{|e|e.all_subtasks()}.flatten
     end
 

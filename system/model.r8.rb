@@ -50,6 +50,10 @@ module XYZ
         end
     end
 
+    def set_id_handle(hash)
+      @id_handle = IDHandle[hash]
+    end
+
     def model_handle()
       ModelHandle.new(@c,@relation_type)
     end

@@ -49,6 +49,7 @@ module XYZ
     end
 
     class ConfigNode < TaskActionNode
+
       def self.create(state_change_list)
         on_node_state_changes = state_change_list.reject{|a|a[:type] == "create_node"}
         on_node_state_changes ? ConfigNode.new(on_node_state_changes) : nil

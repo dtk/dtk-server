@@ -1,7 +1,7 @@
 module XYZ
   class ValidationError < HashObject 
-    def self.find_missing_required_attributes(ordered_actions)
-      component_actions =  ordered_actions.component_actions()
+    def self.find_missing_required_attributes(commit_task)
+      component_actions =  commit_task.component_actions
       ret = Array.new 
       component_actions.each do |action|
         action[:attributes].each do |attr|

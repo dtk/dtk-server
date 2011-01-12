@@ -13,16 +13,25 @@ module XYZ
     def self.create_top_level(c,temporal_order)
       hash = {
         :status => "created",
-        :temporal_order => temporal_order,
-        :elements => Array.new
+        :temporal_order => temporal_order
       } 
       Task.new(hash,c)
     end
 
+    #for special tasks that have component actions
+    #TODO: trie dto do this by having a class inherir from Task and hanging these fns off it, but this confused Ramaze
+    def component_actions()
+      if self[:executable_action].kind_of?(TaskAction::ConfigNode)
+        return self[:executable_action][:component_actions]||[]
+      end
+      (@elements||[]).map{|obj|obj.component_actions()}.flatten
+    end
+
+
     def add_subtask(hash)
-      self[:elements] ||= Array.new
+      @elements ||= Array.new
       new_subtask = Task.new(hash.merge(:status => "created"),c)
-      self[:elements] << new_subtask
+      @elements << new_subtask
       new_subtask
     end
 
@@ -49,6 +58,10 @@ module XYZ
       TaskError.add(@id_handle,error)
       self[:has_error] = true 
     end
+
+    
+   private
+    attr_accessor :elements
   end
 
   class TaskEvent < Model

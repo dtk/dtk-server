@@ -609,14 +609,13 @@ pp [:threads, Thread.list]
 
       pending_changes = pending_changes_component + pending_changes_node 
       return {"data"=> "No pending changes"} if pending_changes.empty?
-task = create_task_from_pending_changes(pending_changes)
-pp [:task,task]
-pp foo
-      ordered_actions = OrderedActions.create(pending_changes)
+      top_level_task = create_task_from_pending_changes(pending_changes)
 
-      errors = ValidationError.find_missing_required_attributes(ordered_actions)
+#      ordered_actions = OrderedActions.create(pending_changes)
+
+      errors = ValidationError.find_missing_required_attributes(top_level_task)
       return {"data" => ValidationError.debug_inspect(errors)} if errors
-
+pp foo
 
       test_str = 
         if pending_changes_component.empty? 

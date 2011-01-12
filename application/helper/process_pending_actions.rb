@@ -13,10 +13,11 @@ module Ramaze::Helper
         all_config_node_actions << config_node_action if config_node_action
         if create_node_action and config_node_action
           node_subtask = top_level_task.add_subtask({:temporal_order => "sequential"})
-          node_subtask.add_subtask(create_node_action)
-          node_subtask.add_subtask(config_node_action)
+          node_subtask.add_subtask({:executable_action => create_node_action})
+          node_subtask.add_subtask({:executable_action => config_node_action})
         else
-          top_level_task.add_subtask(create_node_action||config_node_action)
+          #one wil be non null
+          top_level_task.add_subtask({:executable_action => create_node_action||config_node_action})
         end
       end
       #doing add attributes at top level rather than in each create_node_action for db access efficiency

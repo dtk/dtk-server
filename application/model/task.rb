@@ -15,9 +15,16 @@ module XYZ
       one_to_many :task, :task_param_link, :task_event, :task_error
     end
 
+    def initialize(hash_scalar_values,c,model=:task)
+      super(hash_scalar_values,c,model)
+      @elements = Array.new
+      @task_param_links = Array.new
+    end
+
     def self.create_top_level(c,temporal_order)
       hash = {
         :status => "created",
+        :action_on_failure => "abort",
         :temporal_order => temporal_order
       } 
       Task.new(hash,c)
@@ -32,7 +39,7 @@ module XYZ
         executable_action = hash_row[:executable_action]
         row = {
           :ref => "task#{hash_row[:position].to_s}",
-          :executable_action_type => executable_action ? executable_action.class.to_s.gsub("XYZ::TaskAction","") : nil,
+          :executable_action_type => executable_action ? Aux.demodulize(executable_action.class.to_s) : nil,
           :executable_action => executable_action
         }
         cols = [:status, :result, :output_vars, :action_on_failure, :position, :temporal_order] 
@@ -48,7 +55,9 @@ module XYZ
       par_rel_rows_for_task = par_rel_rows_for_id_info.map{|r|{:id => r[:id], :task_id => r[:parent_id]}}
       Model.update_from_rows(model_handle,par_rel_rows_for_task)
       IDInfoTable.update_instances(model_handle,par_rel_rows_for_id_info)
-pp [:foo, unroll_tasks()]
+      @task_param_links.each{|pl|pl.save!}
+      nil
+pp [:unrolled,unrolled_tasks]
 foo
     end
 
@@ -56,9 +65,8 @@ foo
       id_handle ? id_handle.get_id() : nil
     end
 
-    def elements()
-      @elements||[]
-    end
+    attr_reader :elements, :task_param_links
+
     #for special tasks that have component actions
     #TODO: trie dto do this by having a class inherir from Task and hanging these fns off it, but this confused Ramaze
     def component_actions()
@@ -70,10 +78,14 @@ foo
 
 
     def add_subtask(hash)
-      @elements ||= Array.new
-      new_subtask = Task.new(hash.merge(:status => "created"),c)
+      defaults = {:status => "created", :action_on_failure => "abort"}
+      new_subtask = Task.new(hash.merge(defaults),c)
       @elements << new_subtask
       new_subtask
+    end
+
+    def add_task_param_link(input_task,output_task,input_var_path,output_var_path=nil)
+      task_param_links << TaskParamLink.create_from_task_objects(c,input_task,output_task,input_var_path,output_var_path)
     end
 
     def set_positions!()
@@ -104,6 +116,27 @@ foo
       foreign_key :output_task_id, :task, FK_CASCADE_OPT
       column :output_var_path, :json
       many_to_one :task 
+    end
+
+    def initialize(hash_scalar_values,c,model=:task_param_link)
+      super(hash_scalar_values,c,model)
+      @input_task = nil
+      @output_task = nil
+    end
+
+    attr_accessor :input_task,:output_task
+    def self.create_from_task_objects(c,input_task,output_task,input_var_path,output_var_path=nil)
+      #output_var_path.nil? means same as input
+      output_var_path ||= input_var_path
+      ret = self.new({:input_var_path => output_var_path,:input_var_path => output_var_path},c)
+      ret.input_task = input_task
+      ret.output_task = output_task
+      ret
+    end
+
+    def save!()
+      #TODO: stub
+      pp [:link_tasks,input_task,output_task]
     end
   end
 end

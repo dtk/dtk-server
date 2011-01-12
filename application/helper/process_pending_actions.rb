@@ -3,6 +3,7 @@ module Ramaze::Helper
     include XYZ
 
     def create_task_from_pending_changes(state_change_list)
+      #TODO: one task simplification is when there is just one node, rather than always be top taht iterates over node; is to 
       state_changes_by_node = group_by_node(state_change_list)
       temporal_order = state_changes_by_node.size == 1 ? "sequential" : "concurrent"
       top_level_task = Task.create_top_level(ret_session_context_id(),temporal_order)
@@ -13,9 +14,9 @@ module Ramaze::Helper
         all_config_node_actions << config_node_action if config_node_action
         if create_node_action and config_node_action
           node_subtask = top_level_task.add_subtask({:temporal_order => "sequential"})
-          node_subtask.add_subtask({:executable_action => create_node_action})
-          node_subtask.add_subtask({:executable_action => config_node_action})
-          #TODO: add TaskParamLink to indicate that create_node will update param node which updates node on config node action
+          create_node_task = node_subtask.add_subtask({:executable_action => create_node_action})
+          config_node_task = node_subtask.add_subtask({:executable_action => config_node_action})
+          node_subtask.add_task_param_link(create_node_task,config_node_task,[:node,:external_ref])
         else
           #one wil be non null
           top_level_task.add_subtask({:executable_action => create_node_action||config_node_action})

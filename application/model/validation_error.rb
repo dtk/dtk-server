@@ -1,7 +1,7 @@
 module XYZ
   class ValidationError < HashObject 
     def self.find_missing_required_attributes(commit_task)
-      component_actions =  commit_task.component_actions
+      component_actions = commit_task.component_actions
       ret = Array.new 
       component_actions.each do |action|
         action[:attributes].each do |attr|
@@ -10,10 +10,10 @@ module XYZ
             error_input =
               {:external_ref => attr[:external_ref],
               :attribute_id => attr[:id],
-              :component_id => (action[:component]||{})[:id],
-              :node_id => (action[:node]||{})[:id]
+              :component_id => (action[:component]||{})[:id]
             }
             ret <<  MissingRequiredAttribute.new(error_input)
+            x=1
           end
         end
       end
@@ -27,7 +27,7 @@ module XYZ
     end
    private
     def initialize(hash)
-      super(error_fields.inject({}){|ret,f|ret.merge(f => hash[f]) if hash[f]})
+      super(error_fields.inject({}){|ret,f|hash.has_key?(f) ? ret.merge(f => hash[f]) : ret})
     end
     def error_fields()
       Array.new

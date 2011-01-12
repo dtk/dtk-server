@@ -55,9 +55,14 @@ module XYZ
       par_rel_rows_for_task = par_rel_rows_for_id_info.map{|r|{:id => r[:id], :task_id => r[:parent_id]}}
       Model.update_from_rows(model_handle,par_rel_rows_for_task)
       IDInfoTable.update_instances(model_handle,par_rel_rows_for_id_info)
-      @task_param_links.each{|pl|pl.save!}
+
+      #save all the task_param_links
+      task_param_link_rows = unrolled_tasks.map do |t|
+        t.task_param_links.map{|pl|pl.set_and_return_info!(t.id)}.flatten
+      end.flatten
+      pp [:task_param_link_rows,task_param_link_rows]
       nil
-pp [:unrolled,unrolled_tasks]
+
 foo
     end
 
@@ -85,7 +90,7 @@ foo
     end
 
     def add_task_param_link(input_task,output_task,input_var_path,output_var_path=nil)
-      task_param_links << TaskParamLink.create_from_task_objects(c,input_task,output_task,input_var_path,output_var_path)
+      @task_param_links << TaskParamLink.create_from_task_objects(c,input_task,output_task,input_var_path,output_var_path)
     end
 
     def set_positions!()
@@ -134,9 +139,11 @@ foo
       ret
     end
 
-    def save!()
-      #TODO: stub
-      pp [:link_tasks,input_task,output_task]
+    def set_and_return_info!(task_id)
+      self[:task_id] = task_id
+      self[:input_task_id] = input_task ? input_task.id : nil
+      self[:output_task_id] = output_task ? output_task.id : nil
+      [{:task__id => task_id, :input_task_id => self[:input_task_id],:output_task_id => self[:output_task_id]}]
     end
   end
 end

@@ -48,8 +48,8 @@ puts "------------end results-------------"
         end
         if config_node
           ret = CommandAndControl.execute_task_action(config_node)
+          config_node.update_state(:completed)
         end
-        config_node.update_state(:completed)
        rescue Exception => e
         #TODO: right now for failure not making change to node_actions state
         ret = {

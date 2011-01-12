@@ -62,10 +62,12 @@ module XYZ
       pl_objs = unrolled_tasks.map do |t|
         t.task_param_links.map{|pl|pl.set_foreign_keys!(t.id)}.flatten
       end.flatten
-      pl_rows = pl_objs.map{|o|[:task_id,:ref,:input_task_id,:output_task_id].inject({}){|h,k|h.merge(k => o[k])}}
-      pl_id_info_list = Model.create_from_rows(model_handle.createMH(:model_name => :task_param_link),pl_rows)
-      update_with_pl = Array.new
-      pl_objs.each_with_index{|pl,i|pl.set_id_handle(pl_id_info_list[i])}
+      unless pl_objs.empty?
+        pl_rows = pl_objs.map{|o|[:task_id,:ref,:input_task_id,:output_task_id].inject({}){|h,k|h.merge(k => o[k])}}
+        pl_id_info_list = Model.create_from_rows(model_handle.createMH(:model_name => :task_param_link),pl_rows)
+        update_with_pl = Array.new
+        pl_objs.each_with_index{|pl,i|pl.set_id_handle(pl_id_info_list[i])}
+      end
     end
 
     #TODO: this probably shoudl be moved up to Model

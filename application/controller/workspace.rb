@@ -622,6 +622,7 @@ pp [:threads, Thread.list]
           "pending changes on components [#{pending_changes_component.map{|x|x[:component][:id]}.join(",")}]; on nodes [#{pending_changes_node.map{|x|x[:node][:id]}.join(",")}]"
         end
 
+      top_level_task.save!()
       workflow = Workflow.create(top_level_task)
 
       Ramaze.defer do

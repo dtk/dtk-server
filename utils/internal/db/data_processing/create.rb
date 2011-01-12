@@ -29,6 +29,7 @@ module XYZ
           sequel_select = sequel_select.select(*columns).select_more(model_handle[:c] => :c).from_self
           columns << :c
         end
+        #parent_id_col can be null
         parent_id_col = model_handle.parent_id_field_name()
 
         overrides = override_attrs.dup
@@ -36,7 +37,7 @@ module XYZ
         ds = dataset(DB_REL_DEF[model_handle[:model_name]])
         #modify sequel_select to reflect duplicate_refs setting
         unless duplicate_refs == :no_check
-          match_cols = [:c,:ref,parent_id_col]
+          match_cols = [:c,:ref,parent_id_col].compact
           #need special processing of ref override; need to modify match_cols and select_on_match_cols
           ref_override =  overrides.delete(:ref)
           if ref_override
@@ -68,12 +69,19 @@ module XYZ
 
         #fn tries to return ids depending on whether db adater supports returning_id
         ret = nil
-        if ds.respond_to?(:insert_returning_sql) and parent_id_col
+        if ds.respond_to?(:insert_returning_sql)
           returning_ids = Array.new
-          returning_sql_cols = ([:id,:display_name,parent_id_col.as(:parent_id)] + (opts[:returning_sql_cols] || [])).uniq
+          
+          returning_sql_cols = [:id,:display_name]
+          returning_sql_cols << parent_id_col.as(:parent_id) if parent_id_col
+          if opts[:returning_sql_cols] 
+            returning_sql_cols += opts[:returning_sql_cols] 
+            returning_sql_cols.uniq!
+          end
+
           sql = ds.insert_returning_sql(returning_sql_cols,columns,sequel_select_with_cols)
           fetch_raw_sql(sql){|row| returning_ids << row}
-          IDInfoTable.update_instances(model_handle,returning_ids)
+          IDInfoTable.update_instances(model_handle,returning_ids) unless opts[:do_not_update_info_table]
           ret = 
             if opts[:returning_sql_cols]
               returning_ids
@@ -83,7 +91,7 @@ module XYZ
         else
           ds.import(columns,sequel_select_with_cols)
           #TODO: need to get ids and set 
-          raise Error.new("have not implemented create_from_select when db adapter does not support insert_returning_sql or parent_id_col not set")
+          raise Error.new("have not implemented create_from_select when db adapter does not support insert_returning_sql  not set")
         end
         ret
       end

@@ -3,8 +3,12 @@ module XYZ
     set_relation_name(:task,:task)
     def self.up()
       column :status, :varchar, :size => 20, :default => "created" # = "created" | "in_progres" | "completed"
+      column :result, :json # gets serialized version of TaskAction::Result
+      column :output_vars, :json #TaskParamLink.output_var_path points into this 
+      #column :events, :json - content of this may instead go in result
+      column :action_on_failure, :varchar, :default => "abort"
       column :position, :integer, :default => 1
-      column :executable_action, :json
+      column :executable_action, :json # gets serialized version of TaskAction::Action
       column :temporal_order, :varchar, :size => 20 # = "sequential" | "concurrent"
       many_to_one :task 
       one_to_many :task, :task_param_link, :task_event, :task_error
@@ -17,6 +21,26 @@ module XYZ
       } 
       Task.new(hash,c)
     end
+
+    #persists to db this and its sub tasks
+    def save!()
+      set_positions!()
+      #for db access efficiency implement into two phases: 1 - save all subtasks w/o ids, then point in ids
+      unrolled_tasks = [self] + all_subtasks()
+      rows = unrolled_tasks.map do |hash_row|
+        row = {
+          :ref => "task#{hash_row[:position].to_s}",
+          :executable_action => hash_row[:executable_action],
+        }
+        cols = [:status, :result, :output_vars, :action_on_failure, :position, :temporal_order] 
+        cols.each{|col|row.merge!(col => hash_row[col])}
+        row
+      end
+        x = Model.create_from_rows(model_handle,rows,{:convert => true,:do_not_update_info_table => true})
+pp [:foo, x]
+foo
+    end
+
     
     def elements()
       @elements||[]
@@ -38,28 +62,18 @@ module XYZ
       new_subtask
     end
 
-    def has_error?()
-      self[:has_error] 
+    def set_positions!()
+      self[:position] ||= 1
+      return nil if elements.empty?
+      elements.each_with_index do |e,i|
+        e[:position] = i+1
+        e.set_positions!()
+      end
     end
 
-    def update_status(new_status)
-      update({:status => new_status.to_s}) if @id_handle
-    end         
-
-    def add_event(msg)
-      TaskEvent.add(@id_handle,msg) if @id_handle
-    end
-    def add_error(error)
-      return nil unless @id_handle and error
-      TaskError.add(@id_handle,error) 
-      self[:has_error] = true
-    end
-
-    def add_error_toplevel(error)
-      return nil unless @id_handle and error
-      return nil if has_error? and error.to_s == ""
-      TaskError.add(@id_handle,error)
-      self[:has_error] = true 
+    def all_subtasks()
+      return Array.new if elements.empty?
+      elements.map{|e|e.all_subtasks()}.flatten
     end
 
   end
@@ -71,39 +85,6 @@ module XYZ
       foreign_key :output_task_id, :task, FK_CASCADE_OPT
       column :output_var_path, :json
       many_to_one :task 
-    end
-  end
-
-  class TaskEvent < Model
-    set_relation_name(:task,:event)
-    class << self
-      def up()
-        ##TBD: just using description
-
-        many_to_one :task
-      end
-
-      ##### Actions
-      def add(task_id_handle,msg)
-        create_from_hash(get_factory_id_handle(task_id_handle,:task_event),{:task_event => {:description => msg}})
-      end
-    end
-  end
-
-  class TaskError < Model
-    set_relation_name(:task,:error)
-    class << self
-      def up()
-        ##TBD: just using description
-
-        many_to_one :task
-      end
-
-      ##### Actions
-      def add(task_id_handle,error)
-	#TBD: treat more structured errors
-        create_from_hash(get_factory_id_handle(task_id_handle,:task_error),{:task_error => {:description => error.to_s}})
-      end
     end
   end
 end

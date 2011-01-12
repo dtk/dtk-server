@@ -10,6 +10,16 @@ module XYZ
     end
   end
   module TaskAction
+    module Result
+      class ResultBase
+      end
+      class Succeeded < ResultBase
+        #includes output vars
+      end
+      class Failed < ResultBase
+        #has error information
+      end
+    end
     class TaskActionNode < TaskActionBase
       def update_state_aux(state,state_change_ids)
         rows = state_change_ids.map{|id|{:id => id, :state => state.to_s}}

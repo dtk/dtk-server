@@ -32,6 +32,7 @@ puts "------------end results-------------"
       node = (create_node||config_node)[:node]
       begin
         #check if there is a create node action and if so do it first
+        #TODO: execute_task_action returns a TaskAction::Result class and this gets inserted into the task's result var
         if create_node
           new_node_info = CommandAndControl.execute_task_action(create_node)
           if new_node_info

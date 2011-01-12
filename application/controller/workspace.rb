@@ -615,7 +615,6 @@ pp [:threads, Thread.list]
 
       errors = ValidationError.find_missing_required_attributes(top_level_task)
       return {"data" => ValidationError.debug_inspect(errors)} if errors
-pp foo
 
       test_str = 
         if pending_changes_component.empty? 
@@ -625,7 +624,7 @@ pp foo
           "pending changes on components [#{pending_changes_component.map{|x|x[:component][:id]}.join(",")}]; on nodes [#{pending_changes_node.map{|x|x[:node][:id]}.join(",")}]"
         end
 
-      workflow = Workflow.create(ordered_actions)
+      workflow = Workflow.create(top_level_task)
 
       Ramaze.defer do
         begin

@@ -1,13 +1,13 @@
 module XYZ
   module ConfigAgentAdapter
     class Chef < ConfigAgent
-      def ret_msg_content(node_actions)
-        recipes_and_attrs = recipes_and_attributes(node_actions)
+      def ret_msg_content(config_node)
+        recipes_and_attrs = recipes_and_attributes(config_node)
         {:attributes => recipes_and_attrs.attributes, :run_list => recipes_and_attrs.run_list}
       end
      private
-      def recipes_and_attributes(node_actions)
-        node_actions.component_actions.inject(ChefNodeActions.new()){|ret,component_action|ret.add_action(component_action)}
+      def recipes_and_attributes(config_node)
+        config_node[:component_actions].inject(ChefNodeActions.new()){|ret,component_action|ret.add_action(component_action)}
       end
 
       class ChefNodeActions 

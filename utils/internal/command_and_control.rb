@@ -2,10 +2,47 @@ module XYZ
   module CommandAndControlAdapter
   end
   class CommandAndControl
+    def self.execute_task_action(task_action)
+      klass = load_for(task_action)
+      raise ErrorCannotLoadAdapter.new unless klass
+      klass.execute(task_action)
+    end
+
+    #TODO: temp hack
+    def self.wait_for_node_to_be_ready(node) 
+      adapter_name = R8::Config[:command_and_control][:node_config][type]
+      klass = load_for_aux(:node_config,adapter_name)
+      klass.wait_for_node_to_be_ready(node)
+    end
+
+   private
+    def self.load_for(task_action)
+      adapter_type,adapter_name = task_action.ret_command_and_control_adapter_info()
+      adapter_name ||= R8::Config[:command_and_control][adapter_type]
+      return nil unless adapter_type and adapter_name
+      load_for_aux(adapter_type,adapter_name)
+    end
+
+    def self.load_for_aux(adapter_type,adapter_name)
+      Adapters[adapter_type] ||= Hash.new
+      return Adapters[adapter_type][adpater_name] if Adapters[adapter_type][adapter_name]
+      begin
+        require File.expand_path("#{UTILS_DIR}/internal/command_and_control/adapters/#{adapter_type}/#{adapter_name}", File.dirname(__FILE__))
+        Adapters[adapter_type][adapter_name] = XYZ::CommandAndControlAdapter.const_get adapter_name.capitalize
+       rescue LoadError
+        nil
+      end
+    end
+    Adapters = Hash.new
+    Lock = Mutex.new
+
+   public
     #### Error classes
     class Error < Exception
     end
     class ErrorCannotConnect < Error
+    end
+    class ErrorCannotLoadAdapter < Error
     end
     class ErrorTimeout < Error
     end
@@ -26,40 +63,13 @@ module XYZ
   end
 
   class CommandAndControlNodeConfig < CommandAndControl
-    klass = self
-    begin
-      type = R8::Config[:command_and_control][:type]
-      require File.expand_path("#{UTILS_DIR}/internal/command_and_control/adapters/node_config/#{type}", File.dirname(__FILE__))
-      klass = XYZ::CommandAndControlAdapter.const_get type.capitalize
-    rescue LoadError
-      Log.error("cannot find command_and_control config control adapter; loading null command_and_control class")
-    end
-    Adapter = klass
   end
 
   class CommandAndControlIAAS < CommandAndControl
-    def self.load(type)
-      return Adapters[type] if Adapters[type]
-      klass = self
-      begin
-        Lock.synchronize do
-          require File.expand_path("#{UTILS_DIR}/internal/command_and_control/adapters/iaas/#{type}", File.dirname(__FILE__))
-        end
-        klass = XYZ::CommandAndControlAdapter.const_get type.to_s.capitalize
-      rescue LoadError
-        Log.error("cannot find command and control IAAS adapter; loading null one")
-      end
-      Adapters[type] = klass.new()
-    end
-
-    def create_node(create_node_state_change)
-      new_node = create_node_implementation(create_node_state_change)
+    def execute(create_node)
+      new_node = execute_implementation(create_node)
       raise ErrorCannotCreateNode.new unless new_node
       new_node
     end
-
-   private
-    Lock = Mutex.new
-    Adapters = Hash.new
   end
 end

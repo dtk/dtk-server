@@ -1,7 +1,7 @@
 module XYZ
 module CommandAndControlAdapter
-    class Ec2 <  CommandAndControlIAAS
-      def create_node_implementation(create_node_state_change)
+    class Ec2 < CommandAndControlIAAS
+      def execute_implemntation(create_node_state_change)
         #TODO: rather than retuirning nill wil raise errors
         ami = (((create_node_state_change||{})[:image]||{})[:external_ref]||{})[:image_id]
         return nil unless ami

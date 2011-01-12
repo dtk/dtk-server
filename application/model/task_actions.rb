@@ -3,6 +3,11 @@ module XYZ
     #implemented functions
     def to_hash()
     end
+
+    #returns [adapter_type,adapter_name], adapter name optional in which it wil be looked up from config
+    def ret_command_and_control_adapter_info()
+     nil
+    end
   end
   module TaskAction
     class TaskActionNode < TaskActionBase
@@ -16,6 +21,11 @@ module XYZ
       def self.create(state_change_list)
         create_node_state_change = state_change_list.find{|a|a[:type] == "create_node"}
         create_node_state_change ? CreateNode.new(create_node_state_change) : nil
+      end
+
+      def ret_command_and_control_adapter_info()
+        #TBD: stubbing ec2
+        [:iaas,:ec2]
       end
 
       def save_new_node_info()
@@ -49,6 +59,10 @@ module XYZ
     end
 
     class ConfigNode < TaskActionNode
+      def ret_command_and_control_adapter_info()
+        #TBD: stub
+        [:node_config,nil]
+      end
 
       def self.create(state_change_list)
         on_node_state_changes = state_change_list.reject{|a|a[:type] == "create_node"}
@@ -57,10 +71,6 @@ module XYZ
 
       def update_state(state)
         update_state_aux(state,component_actions.map{|x|x[:state_change_pointer_ids]}.flatten)
-      end
-
-      def on_node_config_agent_type
-        self[:config_agent_type]
       end
 
      private

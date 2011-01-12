@@ -4,8 +4,8 @@ module XYZ
   end
 
   class Workflow
-    def self.create(ordered_actions)
-      Adapter.new(ordered_actions)
+    def self.create(task)
+      Adapter.new(task)
     end
     def execute()
       results = execute_implementation()
@@ -24,32 +24,30 @@ puts "------------end results-------------"
       results
 #### end of debug
     end
-    def initialize(ordered_actions)
-    end
    protected
-    def self.create_or_execute_on_node(node_actions)
+    #TODO: iterating towards treating relationship between create_node config_node in generic way with a
+    #paramter dependency link
+    def self.create_or_execute_on_node(create_node,config_node)
       ret = nil
       begin
         #check if there is a create node action and if so do it first
-        if node_actions.create_node_state_change
-          cac_iaas = CommandAndControlIAAS.load(node_actions.create_node_config_agent_type)
-          node_actions.node =  cac_iaas.create_node(node_actions.create_node_state_change)
+        if create_node
+          node_actions.node = CommandAndControl.execute_task_action(create_node)
           if node_actions.node
-            CommandAndControlNodeConfig::Adapter.wait_for_node_to_be_ready(node_actions.node) 
-            #TODO: save_new_node_info() should be before wait
-            node_actions.save_new_node_info()
+            create_node.save_new_node_info()
+            CommandAndControl.wait_for_node_to_be_ready(create_node[:node])
             ret = {
               :status => :succeeded,
               :operation => :create_node,
-              :node_name => node_actions.node[:display_name],
+              :node_name => create_node[:node][:display_name],
             }
-            node_actions.update_state_create_node(:completed)
+            create_node.update_state(:completed)
           end
         end
-        if node_actions.any_on_node_changes?()
-          ret = CommandAndControlNodeConfig::Adapter.dispatch_to_client(node_actions)
+        if config_node
+          ret = CommandAndControl.execute_task_action(config_node)
         end
-        node_actions.update_state_on_node_changes(:completed)
+        config_node.update_state(:completed)
        rescue Exception => e
         #TODO: right now for failure not making change to node_actions state
         ret = {

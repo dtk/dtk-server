@@ -27,19 +27,19 @@ module XYZ
         raise ErrorWhileCreatingNode unless target_identity
       end
 
-      def self.dispatch_to_client(node_actions)
+      def self.execute(config_node)
         ret = nil
         begin
-          config_agent = ConfigAgent.load(node_actions.on_node_config_agent_type)
+          config_agent = ConfigAgent.load(config_node[:config_agent_type])
           rpc_client = nil
           Lock.synchronize do
             #TODO: check if need lock for this
             rpc_client = rpcclient("chef_client",:options => Options)
           end
-          target_identity = ret_discovered_mcollective_id(node_actions.node,rpc_client)
+          target_identity = ret_discovered_mcollective_id(config_node[:node],rpc_client)
           raise ErrorCannotConnect.new() unless target_identity
 
-          msg_content =  config_agent.ret_msg_content(node_actions)
+          msg_content =  config_agent.ret_msg_content(config_node)
           filter = {"identity" => [target_identity], "agent" => ["chef_client"]}
           response = rpc_client.custom_request("run",msg_content,target_identity,filter).first
           raise ErrorTimeout.new() unless response

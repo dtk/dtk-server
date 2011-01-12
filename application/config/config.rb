@@ -66,7 +66,8 @@ R8::Config[:workflow][:type] = "simple"
 
 #Command and control related parameters
 R8::Config[:command_and_control] = Hash.new
-R8::Config[:command_and_control][:type] = "mcollective"
+R8::Config[:command_and_control][:node_config] = Hash.new
+R8::Config[:command_and_control][:node_config][:type] = "mcollective"
 
 #optional timer plug
 #R8::Config[:timer] = Hash.new

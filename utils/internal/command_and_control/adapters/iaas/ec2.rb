@@ -3,7 +3,7 @@ module XYZ
     class Ec2 < CommandAndControlIAAS
       def self.execute(create_node)
         #handle case where node has been created already (and eeror mayu have been time out waiting for node to be up
-        instance_id = ((create_node[:node]||{})[:external_ref]||{})[:nstance_id]
+        instance_id = ((create_node[:node]||{})[:external_ref]||{})[:instance_id]
         if instance_id.nil?
           ami = ((create_node[:image]||{})[:external_ref]||{})[:image_id]
           raise ErrorCannotCreateNode.new unless ami

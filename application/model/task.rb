@@ -41,6 +41,7 @@ module XYZ
       rows = unrolled_tasks.map do |hash_row|
         executable_action = hash_row[:executable_action]
         row = {
+          :display_name => "task#{hash_row[:position].to_s}",
           :ref => "task#{hash_row[:position].to_s}",
           :executable_action_type => executable_action ? Aux.demodulize(executable_action.class.to_s) : nil,
           :executable_action => executable_action

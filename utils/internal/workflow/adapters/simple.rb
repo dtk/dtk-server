@@ -1,7 +1,6 @@
 module XYZ 
   module WorkflowAdapter
     class Simple < XYZ::Workflow
-
       def execute()
         @task.update(:status => "executing")
         executable_action = @task[:executable_action]
@@ -14,6 +13,7 @@ module XYZ
         end
       end
      private
+
       def process_executable_action(executable_action)
         begin 
           result_hash = CommandAndControl.execute_task_action(executable_action)

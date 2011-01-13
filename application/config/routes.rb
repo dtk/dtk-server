@@ -70,7 +70,7 @@ R8::Routes["state_change/list_pending"] = {
   [
    {
      :route => "state_change/list",
-     #:state_change_id will only pick up top level actions and ones taht are pending
+     #:state_change_id will only pick up top level state changes and ones taht are pending
      :action_params => [{:state_change_id => nil}, {:state => "pending"}],
      :panel => "main_body"
    }
@@ -90,6 +90,41 @@ R8::Routes["state_change/display"] = {
    },
    {
      :route => "state_change/list",
+     :action_params => [{:parent_id => "$id$"}],
+     :panel => "main_body",
+     :assign_type => :append 
+   }
+  ]
+}
+
+R8::Routes["task/list"] = {
+  :layout => 'default',
+  :alias => '',
+  :params => [],
+  :action_set => 
+  [
+   {
+     :route => "task/list",
+     #:task_id will only pick up top level tasks
+     :action_params => [{:task_id => nil}],
+     :panel => "main_body"
+   }
+  ]
+}
+
+R8::Routes["task/display"] = {
+  :layout => 'default',
+  :alias => '',
+  :params => [:id],
+  :action_set => 
+  [
+   {
+     :route => "task/display",
+     :action_params => ["$id$"],
+     :panel => "main_body"
+   },
+   {
+     :route => "task/list",
      :action_params => [{:parent_id => "$id$"}],
      :panel => "main_body",
      :assign_type => :append 

@@ -1,11 +1,11 @@
 require 'ruote'
 require 'ruote/storage/fs_storage'
-#TODO: below is broken because cant pass arbitrary objects as params
+#TODO: below is broken because of new refactoring
 #TODO: switch action to node_actions
 module XYZ 
   module WorkflowAdapter
     class Ruote < XYZ::Workflow
-      def execute_implementation()
+      def execute()
         wfid = Engine.launch(@process_def)
         Engine.wait_for(wfid)
       end

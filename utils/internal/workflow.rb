@@ -7,52 +7,10 @@ module XYZ
     def self.create(task)
       Adapter.new(task)
     end
+    #virtual fn gets ovewritten
     def execute()
-      execute_implementation()
     end
 
-   protected
-    #TODO: deprecate below
-    #TODO: iterating towards treating relationship between create_node config_node in generic way with a
-    #paramter dependency link
-=begin
-    def self.create_or_execute_on_node(create_node,config_node)
-      ret = nil
-      node = (create_node||config_node)[:node]
-      begin
-        #check if there is a create node action and if so do it first
-        #TODO: execute_task_action returns a TaskAction::Result class and this gets inserted into the task's result var
-        if create_node
-          new_node_info = CommandAndControl.execute_task_action(create_node)
-          if new_node_info
-            create_node[:node] = new_node_info
-            create_node.save_new_node_info()
-            CommandAndControl.wait_for_node_to_be_ready(create_node[:node])
-            ret = {
-              :status => :succeeded,
-              :operation => :create_node,
-              :node_name => create_node[:node][:display_name],
-            }
-            create_node.update_state(:completed)
-          end
-        end
-        if config_node
-          ret = CommandAndControl.execute_task_action(config_node)
-          config_node.update_state(:completed)
-        end
-       rescue Exception => e
-        #TODO: right now for failure not making change to node_actions state
-        ret = {
-          :status => :failed,
-          :error => e,
-          :node_name => node[:display_name], 
-        }
-        #if internal error print trace
-        pp [e,e.backtrace] unless e.kind_of?(CommandAndControl::Error)
-      end
-      ret
-    end
-=end
    private
     klass = self
     begin

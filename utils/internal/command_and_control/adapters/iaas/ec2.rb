@@ -8,14 +8,23 @@ module XYZ
         #TODO: right now hardcoding size and groups
         create_options.merge!(:flavor_id => "t1.micro",:groups => ["basic"])
         response = @@conn.server_create(create_options)
-        pp [:response,response]
         instance_id = response[:id]
         state = response[:state]
         external_ref = {
-          :instance_id => instance_id, 
+          :instance_id => instance_id,
           :type => "ec2_instance"
         }
-        create_node[:node].merge(:external_ref => external_ref)
+        Log.info("node created with instance id #{instance_id}; waiting for it to be avaialble")
+        pp [:node_created,response]
+        create_node[:node].merge!(:external_ref => external_ref)
+        create_node.save_new_node_info()
+
+        CommandAndControl.wait_for_node_to_be_ready(create_node[:node])
+        Log.info("node #{instance_id} is available")
+
+        {:status => "succeeded",
+          :node => {:external_ref => external_ref}
+        }
       end
      private
       #TODO: sharing ec2 connection with ec2 datasource

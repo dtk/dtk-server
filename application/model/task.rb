@@ -19,6 +19,7 @@ module XYZ
       super(hash_scalar_values,c,model)
       @elements = Array.new
       @task_param_links = Array.new
+      @task_param_inputs = Array.new
     end
 
     def self.create_top_level(c,temporal_order)
@@ -71,7 +72,7 @@ module XYZ
     end
 
 
-    attr_reader :elements, :task_param_links
+    attr_reader :elements, :task_param_links, :task_param_inputs
 
     #for special tasks that have component actions
     #TODO: trie dto do this by having a class inherir from Task and hanging these fns off it, but this confused Ramaze
@@ -91,7 +92,13 @@ module XYZ
     end
 
     def add_task_param_link(input_task,output_task,input_var_path,output_var_path=nil)
-      @task_param_links << TaskParamLink.create_from_task_objects(c,input_task,output_task,input_var_path,output_var_path)
+      task_param_link = TaskParamLink.create_from_task_objects(c,input_task,output_task,input_var_path,output_var_path)
+      @task_param_links << task_param_link
+      input_task.add_task_param_link_to_input(task_param_link)
+    end
+
+    def add_task_param_link_to_input(task_param_link)
+      @task_param_inputs << task_param_link
     end
 
     def set_positions!()

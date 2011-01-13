@@ -7,13 +7,14 @@ module XYZ
         executable_action = @task[:executable_action]
         if executable_action
           begin 
-            result_hash,output_vars = CommandAndControl.execute_task_action(executable_action)
+            result_hash = CommandAndControl.execute_task_action(executable_action)
             update_hash = {
               :status => "succeeded",
               :result => TaskAction::Result::Succeeded.new(result_hash)
             }
             @task.update(update_hash)
             executable_action.update_state(:completed)  #this send pending changes' states
+            propagate_output_vars(result_hash)
             debug_pp [:task_succeeded,@task.id,result_hash]
                          
            rescue CommandAndControl::Error => e
@@ -44,6 +45,24 @@ module XYZ
             end
           end
           threads.each{|t| t.join}
+        end
+      end
+     private
+      def propagate_output_vars(result_hash)
+        @task.task_param_inputs.each do |param_link|
+          unless param_link.output_task and param_link[:input_var_path] and param_link[:output_var_path]
+            Log.error("skipping param link because missing param")
+            next
+          end
+          val = param_link[:input_var_path].inject(result_hash){|r,key|result_hash[key]||{}}
+          pointer = param_link.output_task
+          output_path = param_link[:output_var_path].inject([]){|r,x| r << x} 
+          last_key = output_path.pop
+          output_path.each do |k|
+            pointer[k] ||= Hash.new
+            pointer = pointer[k]
+          end
+          pointer[last_key] = val
         end
       end
 

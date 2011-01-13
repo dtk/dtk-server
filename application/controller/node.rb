@@ -126,9 +126,22 @@ node[:model_name] = 'node'
           :type => 'node',
           :object => node,
           :toolbar_def => {},
-          :tpl_callback => tpl_info[:template_callback]
+          :tpl_callback => tpl_info[:template_callback],
+          :ui => node[:ui]
       }
+#DEBUG
+=begin
+        item = {
+          :type => model_name.to_s,
+          :object => node,
+          :toolbar_def => toolbar_def,
+          :tpl_callback => tpl_info[:template_callback],
+          :ui => node[:ui][datacenter_id.to_sym]
+        }
+=end
       items << item
+pp '{{{{{{{{{{{{{{{{{{{{{{{{{['
+pp items
       addItemsObj = JSON.generate(items)
       run_javascript("R8.Workspace.addItems(#{addItemsObj});")
 

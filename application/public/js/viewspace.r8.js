@@ -140,10 +140,10 @@ if (!R8.ViewSpace) {
 					if(typeof(item['ui']) == 'undefined') continue;
 
 					var id = item['object']['id'],
-						top = (typeof(_itemPosUpdateList[id]) == 'undefined') ? item['ui']['top'] : _itemPosUpdateList[id]['pos']['top'],
-						left = (typeof(_itemPosUpdateList[id]) == 'undefined') ? item['ui']['left'] : _itemPosUpdateList[id]['pos']['left'];
+						top = (typeof(_itemPosUpdateList[id]) == 'undefined') ? item['object']['ui'][_id]['top'] : _itemPosUpdateList[id]['pos']['top'],
+						left = (typeof(_itemPosUpdateList[id]) == 'undefined') ? item['object']['ui'][_id]['left'] : _itemPosUpdateList[id]['pos']['left'];
 
-					_items[id].get('node').setStyles({'top':top,'left':left});
+					_items[id].get('node').setStyles({'top':top,'left':left,'display':'block'});
 				}
 
 				this.purgePendingDelete();
@@ -384,8 +384,6 @@ console.log(ports);
 				for(item in _itemPosUpdateList) {
 					count++;
 				}
-//DEBUG
-//console.log(count);
 				var that = this;
 				if (count > 0) {
 					YUI().use("json", function(Y){
@@ -410,7 +408,6 @@ console.log(ports);
 			},
 
 			startUpdater: function() {
-			//DEBUG return;
 				var that = this;
 				var fireBackgroundUpdate = function() {
 					that.backgroundUpdater();
@@ -437,10 +434,11 @@ console.log(ports);
 
 			clearSelectedItems: function(e) {
 //DEBUG
+/*
 if (typeof(e) != 'undefined') {
 	console.log('X:' + e.clientX + '   Y:' + e.clientY);
 }
-
+*/
 				for(itemId in _selectedItems) {
 					_items[itemId].get('node').removeClass('focus');
 					_items[itemId].get('node').setStyle('zIndex',1);

@@ -89,7 +89,7 @@ module XYZ
             next
           end
           val = param_link[:input_var_path].inject(result_hash){|r,key|r[key]||{}}
-          pointer = param_link.output_task
+          pointer = param_link.output_task[:executable_action]
           output_path = param_link[:output_var_path].inject([]){|r,x| r << x} 
           last_key = output_path.pop
           output_path.each do |k|
@@ -97,6 +97,7 @@ module XYZ
             pointer = pointer[k]
           end
           pointer[last_key] = val
+          @task.update(:executable_action => param_link.output_task[:executable_action])
         end
       end
 

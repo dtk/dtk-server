@@ -324,8 +324,10 @@ return;
 //					R8.Workspace.viewspaces[vsContext]['items'][itemId]['drop'].addToGroup([dropGroupName]);
 					R8.Workspace.viewspaces[vsContext]['items'][itemId]['drop'].on('drop:enter',function(e){
 //DEBUG
+/*
 console.log('Over drop target....');
 console.log(e);
+*/
 					});
 					R8.Workspace.viewspaces[vsContext]['items'][itemId]['drop'].on('drop:hit',function(e){
 console.log('I guess I am hitting this now!!!!');
@@ -479,7 +481,9 @@ console.log('I guess I am hitting this now!!!!');
 				top = parseInt(top.replace('px',''));
 				left = parseInt(left.replace('px',''));
 
-				var ui = {'top':top,'left':left};
+				var ui = {};
+				var contextUIKey = (typeof(viewSpaceId) == 'undefined') ? _currentViewSpace : viewSpaceId;
+				ui[contextUIKey] = {'top':top,'left':left};
 
 				YUI().use("json", function(Y) {
 					var uiStr = Y.JSON.stringify(ui);
@@ -490,17 +494,19 @@ console.log('I guess I am hitting this now!!!!');
 					queryParams += '&model_redirect='+modelName+'&action_redirect=wspace_display_2&id_redirect=*id';
 //console.log(queryParams);
 //return;
+
 					var completeCallback = function(){
 						R8.Workspace.setupNewItems();
 					}
 					var callbacks = {
 						'io:renderComplete' : completeCallback
 					};
+
 					var params = {
 						'callbacks': callbacks,
 						'cfg': {
 							'data': queryParams
-						} 
+						}
 					}
 					R8.Ctrl.call(modelName+'/clone/'+modelId,params);
 				});
@@ -534,8 +540,8 @@ console.log('I guess I am hitting this now!!!!');
 
 			addNodesToGroup : function(nodeList,groupId) {
 //DEBUG
-console.log('Going to add nodes:'+nodeList);
-console.log('To Group:'+groupId);
+//console.log('Going to add nodes:'+nodeList);
+//console.log('To Group:'+groupId);
 			},
 
 			refreshItem : function(itemId) {
@@ -585,7 +591,7 @@ console.log('To Group:'+groupId);
 								delete(R8.Workspace.pendingDelete[item]);
 							}
 						}
-						R8.Workspace.regNewItem(this.get('id'));
+//						R8.Workspace.regNewItem(this.get('id'));
 //						R8.Workspace.addViewSpaceItem(this);
 //						this.setAttribute('data-status','added');
 //						R8.Workspace.addDragDrop(this.get('id'));
@@ -596,6 +602,7 @@ console.log('To Group:'+groupId);
 
 //TODO: revisit to turn components into a [viewspace][item] style
 			regNewItem : function(itemId) {
+/*
 				var vsContext = R8.Workspace.getVspaceContext();
 				var node = R8.Utils.Y.one('#'+itemId);
 				var nodeId = node.get('id');
@@ -607,6 +614,7 @@ console.log('To Group:'+groupId);
 				R8.Workspace.addDrag(itemId);
 				R8.Workspace.addDrop(itemId);
 				R8.Workspace.setupMinMax(itemId);
+*/
 			},
 
 			setupMinMax : function(itemId) {

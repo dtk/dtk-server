@@ -141,7 +141,7 @@ module XYZ
     def self.create_from_task_objects(c,input_task,output_task,input_var_path,output_var_path=nil)
       #output_var_path.nil? means same as input
       output_var_path ||= input_var_path
-      ret = TaskParamLink.new({:input_var_path => output_var_path,:input_var_path => output_var_path},c)
+      ret = TaskParamLink.new({:input_var_path => output_var_path,:output_var_path => output_var_path},c)
       ret.input_task = input_task
       ret.output_task = output_task
       ret

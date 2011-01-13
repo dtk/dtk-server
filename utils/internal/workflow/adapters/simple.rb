@@ -54,7 +54,7 @@ module XYZ
             Log.error("skipping param link because missing param")
             next
           end
-          val = param_link[:input_var_path].inject(result_hash){|r,key|result_hash[key]||{}}
+          val = param_link[:input_var_path].inject(result_hash){|r,key|r[key]||{}}
           pointer = param_link.output_task
           output_path = param_link[:output_var_path].inject([]){|r,x| r << x} 
           last_key = output_path.pop

@@ -3,42 +3,54 @@ module XYZ
     class Simple < XYZ::Workflow
 
       def execute_implementation()
-        results = Hash.new
-        if @task.elements.empty?
-          executable_action = @task[:executable_action]
-          if executable_action.kind_of?(TaskAction::ConfigNode)
-            results[executable_action.id] = self.class.create_or_execute_on_node(nil,executable_action)
-          elsif executable_action.kind_of?(TaskAction::CreateNode)
-            results[executable_action.id] = self.class.create_or_execute_on_node(executable_action,nil)
+        @task.update(:status => "executing")
+        executable_action = @task[:executable_action]
+        if executable_action
+          begin 
+            result_hash,output_vars = CommandAndControl.execute_task_action(executable_action)
+            update_hash = {
+              :status => "succeeded",
+              :result => TaskAction::Result::Succeeded.new(result_hash)
+            }
+            @task.update(update_hash)
+            executable_action.update_state(:completed)  #this send pending changes' states
+            debug_pp [:task_succeeded,@task.id,result_hash]
+                         
+           rescue CommandAndControl::Error => e
+            update_hash = {
+              :status => "failed",
+              :result => TaskAction::Result::Failed.new(e)
+            }
+            @task.update(update_hash)
+            debug_pp [:task_failed,@task.id,e]
+           rescue Exception => e
+            update_hash = {
+              :status => "failed",
+              :result => TaskAction::Result::Failed.new(CommandAndControl::Error.new)
+            }
+            @task.update(update_hash)
+            debug_pp [:task_failed_internal_error,@task.id,e,e.backtrace]
           end
-          return results
-        end
-        create_node,config_node = pattern_node_create_and_config()
-        if create_node and config_node
-          results[create_node.id] = self.class.create_or_execute_on_node(create_node,config_node)
-          return results
-        end
-
-        if @task[:temporal_order].to_sym == :sequential
+        elsif @task[:temporal_order].to_sym == :sequential
           @task.elements.each do |sub_task|
-            sub_task_results = Simple.new(sub_task).execute_implementation() 
-            results.merge!(sub_task_results)
+            #TODO: execute_implementation() should send trap here depending on @task[:action_on_failure] == "abort"
+            Simple.new(sub_task).execute_implementation() 
           end
         elsif @task[:temporal_order].to_sym == :concurrent
           lock = Mutex.new
           threads = @task.elements.map do |sub_task|
             Thread.new do 
-              sub_task_result = Simple.new(sub_task).execute_implementation()
-              lock.synchronize do 
-                results.merge!(sub_task_results)
-              end
+              Simple.new(sub_task).execute_implementation()
             end
           end
           threads.each{|t| t.join}
         end
-        results
       end
 
+      def debug_pp(x)
+        @@debug_lock.synchronize{pp x}
+      end
+      @@debug_lock = Mutex.new
 =begin
 
       def execute_implementation()
@@ -84,7 +96,7 @@ module XYZ
       def initialize(task)
         @task = task
       end
-
+=begin
       def pattern_node_create_and_config()
         return nil unless @task[:temporal_order].to_sym == :sequential
         return nil unless @task.elements and @task.elements.size == 2
@@ -92,6 +104,7 @@ module XYZ
         return nil unless @task.elements[1].kind_of?(TaskAction::ConfigNode)
         @task.elements
       end
+=end
     end
   end
 end

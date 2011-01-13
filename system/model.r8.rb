@@ -50,6 +50,10 @@ module XYZ
         end
     end
 
+    def id()
+      id_handle ? id_handle.get_id() : nil
+    end
+
     def set_id_handle(hash)
       @id_handle = IDHandle[hash]
     end
@@ -63,6 +67,12 @@ module XYZ
       array_ds = SQL::ArrayDataset.create(db,rows,model_handle,opts.merge(:convert_for_update=>true))
       field_set = Model::FieldSet.new(model_handle[:model_name],rows.first.keys - [:id])
       update_from_select(model_handle,field_set,array_ds)
+    end
+
+    def update(scalar_assignments,opts={})
+      scalar_assignments.each{|k,v| self[k] = v}
+      raise Error.new("Cannot execute update without the object having an id") unless id()
+      self.class.update_from_rows(model_handle,[scalar_assignments.merge(:id => id())],opts)
     end
 
     def self.create_from_rows(model_handle,rows,opts={})

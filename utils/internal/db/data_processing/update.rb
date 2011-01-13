@@ -46,6 +46,7 @@ module XYZ
         update_from_hash_from_instance_id(id_info,hash_assigns,opts)
       end
 
+      #TODO Enable short circuit that conditionally avoids IDInfoTable
       #TDOD may remove below two public methods and subsume by above
       def update_instance(id_handle,scalar_assigns,opts={}) 
 	id_info = IDInfoTable.get_row_from_id_handle id_handle, :raise_error => true

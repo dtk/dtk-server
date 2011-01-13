@@ -70,10 +70,6 @@ module XYZ
       end
     end
 
-    #TODO: this probably shoudl be moved up to Model
-    def id()
-      id_handle ? id_handle.get_id() : nil
-    end
 
     attr_reader :elements, :task_param_links
 

@@ -34,11 +34,6 @@ module XYZ
   #instance mixins
   module ModelDataInstanceMixins
 
-    def update(scalar_assignments,opts={})
-      scalar_assignments.each{|k,v| self[k] = v}
-      self.class.update_instance(id_handle,scalar_assignments,opts)
-    end
-
     def get_directly_contained_objects(child_relation_type,where_clause=nil)
       parent_id = IDInfoTable.get_id_from_id_handle(id_handle)
       self.class.get_objects(ModelHandle.new(id_handle[:c],child_relation_type),where_clause,:parent_id => parent_id)

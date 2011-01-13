@@ -8,25 +8,14 @@ module XYZ
       Adapter.new(task)
     end
     def execute()
-      results = execute_implementation()
-#TODO: for some reason this debug statement does not spit ot instance mebers of error
-##pp [:results, results]
-puts "------------results-------------"
-(results||{}).each do |key,result|
-  if result[:error] and result[:error].respond_to?(:debug_pp_form)
-    puts Aux::pp_form({key => result.merge(:error => result[:error].debug_pp_form)})
-  else
-    #TODO: very weir getting parsing error for pp {key => result}
-    x = Hash.new; x[key]=result; pp x
-  end
-end
-puts "------------end results-------------"
-      results
-#### end of debug
+      execute_implementation()
     end
+
    protected
+    #TODO: deprecate below
     #TODO: iterating towards treating relationship between create_node config_node in generic way with a
     #paramter dependency link
+=begin
     def self.create_or_execute_on_node(create_node,config_node)
       ret = nil
       node = (create_node||config_node)[:node]
@@ -63,7 +52,7 @@ puts "------------end results-------------"
       end
       ret
     end
-
+=end
    private
     klass = self
     begin

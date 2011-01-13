@@ -11,13 +11,22 @@ module XYZ
   end
   module TaskAction
     module Result
-      class ResultBase
+      class ResultBase < HashObject
+        def initialize(hash)
+          super(hash)
+          self[:result_type] = Aux.demodulize(self.class.to_s)
+        end
       end
       class Succeeded < ResultBase
-        #includes output vars
+        def initialize(hash)
+          super(hash)
+        end
       end
       class Failed < ResultBase
-        #has error information
+        def initialize(error_class)
+          #TODO: put error params in by invoking e.to_hash
+          super(:error_type => Aux.demodulize(error_class.class.to_s))
+        end
       end
     end
     class TaskActionNode < TaskActionBase

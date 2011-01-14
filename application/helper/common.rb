@@ -40,6 +40,11 @@ module Ramaze::Helper
       IDHandle.new(hash,{:set_parent_model_name => true})
     end
 
+    def top_level_factory_id_handle()
+      c = ret_session_context_id()
+      IDHandle[:c => c,:uri => "/#{model_name()}", :is_factory => true]
+    end
+
     def top_id_handle()
       c = ret_session_context_id()
       IDHandle[:c => c,:uri => "/"]

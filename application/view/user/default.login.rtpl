@@ -13,6 +13,5 @@
     <br /><br />
 
     <input type="submit" value="Login" />
-    <input type="hidden" name="redirect" id="redirect" value="/xyz/datacenter/list" />
   </fieldset>
 </form>

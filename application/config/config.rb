@@ -49,6 +49,12 @@ R8::Config[:base_css_uri] = R8::Config[:base_uri] + "/css"
 R8::Config[:base_images_uri] = R8::Config[:base_uri] + "/images"
 R8::Config[:avatar_base_uri] = R8::Config[:base_uri] + "/images/user_avatars"
 
+R8::Config[:login] = Hash.new
+R8::Config[:login][:path] = "/xyz/user/login"
+R8::Config[:login][:resgister] = "/xyz/user/register"
+#TODO: below is stub
+R8::Config[:login][:redirect] = "/xyz/datacenter/list"
+
 
 #Database related config params
 R8::Config[:database] = Hash.new

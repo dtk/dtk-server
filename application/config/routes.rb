@@ -153,5 +153,13 @@ R8::Routes["workspace/list_items_2"] = {
   :layout => 'workspace'
 }
 
+R8::Routes["user/login"] = {
+  :layout => 'user'
+}
+
+R8::Routes["user/register"] = {
+  :layout => 'user'
+}
+
 R8::Routes.freeze
 

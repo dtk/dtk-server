@@ -1,0 +1,11 @@
+<html>
+<head>
+<title>Example Layout</title>
+
+<body class="user">
+
+<div id="main_body">
+	{%=main_body%}
+</div>
+</body>
+</html>

@@ -9,6 +9,7 @@ recipe            "postgresql::client", "Installs postgresql client package(s)"
 recipe            "postgresql::server", "Installs postgresql server packages, templates"
 recipe            "postgresql::redhat", "Installs postgresql server packages, redhat family style"
 recipe            "postgresql::server", "Installs postgresql server packages, debian family style"
+recipe            "postgresql::app", "Test app"
 
 %w{rhel centos fedora ubuntu debian suse}.each do |os|
   supports os

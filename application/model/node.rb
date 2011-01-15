@@ -6,6 +6,7 @@ module XYZ
     def self.up()
       ds_column_defs :ds_attributes, :ds_key, :data_source, :ds_source_obj_type
       external_ref_column_defs()
+
       column :tag,  :varchar
       column :type, :varchar, :size => 25, :default => "instance" # | "image" | "staged" | "constraint" | "contraint-common-node"
       column :os, :varchar, :size => 25

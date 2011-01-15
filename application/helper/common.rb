@@ -2,6 +2,7 @@ module Ramaze::Helper
   module Common
     include XYZ #TODO: included because of ModelHandle amd Model; make sure not expensive to laod these defs in this module
    private
+
     #query helpers
     def get_objects_from_search_pattern_hash(hash)
       Model.get_objects_from_search_pattern_hash(ModelHandle.new(ret_session_context_id(),hash[:relation]),hash)

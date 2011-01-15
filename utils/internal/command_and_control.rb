@@ -2,11 +2,13 @@ module XYZ
   module CommandAndControlAdapter
   end
   class CommandAndControl
-    def self.execute_task_action(task_action)
+    def self.execute_task_action(task_action,task)
       klass = load_for(task_action)
       raise ErrorCannotLoadAdapter.new unless klass
       attributes_to_set = (task_action[:attributes]||[]).reject{|a| not a[:dynamic]}
       pp [:attributes_to_set,attributes_to_set]
+      task_mh = task.model_handle()
+      task_action.get_and_update_attributes(task_mh)
       ret = klass.execute(task_action,attributes_to_set)
       #TODO: set and propgate any dyanmic attributes set
       ret

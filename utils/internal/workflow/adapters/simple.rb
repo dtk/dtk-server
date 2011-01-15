@@ -13,17 +13,24 @@ module XYZ
         end
       end
      private
+      def initialize(task)
+        @task = task
+      end
+
+      def update_task(hash)
+        @task.update(hash)
+      end
 
       def process_executable_action(executable_action)
         begin 
-          result_hash = CommandAndControl.execute_task_action(executable_action)
+          result_hash = CommandAndControl.execute_task_action(executable_action,@task)
           update_hash = {
             :status => "succeeded",
             :result => TaskAction::Result::Succeeded.new(result_hash)
           }
           @task.update(update_hash)
           executable_action.update_state(:completed)  #this send pending changes' states
-          propagate_output_vars(result_hash)
+#deprecating          propagate_output_vars(result_hash)
           debug_pp [:task_succeeded,@task.id,result_hash]
           :succeeded              
         rescue CommandAndControl::Error => e
@@ -51,7 +58,7 @@ module XYZ
         @task.elements.each do |subtask|
           subtask_wf = Simple.new(subtask)
           if mark_as_not_reached
-            subtask_wf.update(:status => "not_reached")
+            subtask_wf.update_task(:status => "not_reached")
           else
             subtask_status = subtask_wf.execute() 
             #TODO: what to sent whole task status when failue but not @task[:action_on_failure] == "abort"
@@ -106,11 +113,6 @@ module XYZ
         @@debug_lock.synchronize{pp x}
       end
       @@debug_lock = Mutex.new
-     private 
-
-      def initialize(task)
-        @task = task
-      end
     end
   end
 end

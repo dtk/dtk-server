@@ -96,6 +96,16 @@ module XYZ
       Model.get_objects_from_search_object(search_object)
     end
 
+    def self.get_object_columns(id_handle,columns)
+      search_pattern_hash = {
+        :relation => id_handle[:model_name],
+        :filter => [:and,[:eq, :id, id_handle.get_id()]],
+        :columns => columns
+      }
+      get_objects_from_search_pattern_hash(id_handle.createMH(),search_pattern_hash).first
+    end
+
+    #may deprecate below
     def self.get_display_name(id_handle)
       id = id_handle ? id_handle.get_id() : nil
       return nil unless id

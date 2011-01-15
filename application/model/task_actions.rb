@@ -37,6 +37,11 @@ module XYZ
       def add_attribute!(attr)
         self[:attributes] << attr
       end
+
+      def get_and_update_attributes(task_mh)
+        #TODO: try to update if only need to
+      end
+
       def update_state_aux(state,state_change_ids)
         rows = state_change_ids.map{|id|{:id => id, :state => state.to_s}}
         Model.update_from_rows(self[:state_change_model_handle],rows)
@@ -89,8 +94,6 @@ module XYZ
         end
       end
 
-      def get_and_update_attributes()
-      end
 
       def create_node_config_agent_type
         self[:config_agent_type]
@@ -141,7 +144,19 @@ module XYZ
         end
       end
 
-      def get_and_update_attributes()
+      def get_and_update_attributes(task_mh)
+        #TODO: may treat updating node as regular attribute
+        #no up if already have the node's external ref
+        unless ((self[:node]||{})[:external_ref]||{})[:instance_id]
+          node_id = (self[:node]||{})[:id]
+          if node_id
+            node_info = Model.get_object_columns(task_mh.createIDH(:id => node_id, :model_name => :node),[:external_ref])
+            self[:node][:external_ref] = node_info[:external_ref]
+          else
+            Log.error("cannot update task action's node id because do not have its id")
+          end
+        end
+        super(task_mh)
       end
 
       def ret_command_and_control_adapter_info()

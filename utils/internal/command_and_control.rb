@@ -5,7 +5,11 @@ module XYZ
     def self.execute_task_action(task_action)
       klass = load_for(task_action)
       raise ErrorCannotLoadAdapter.new unless klass
-      klass.execute(task_action)
+      attributes_to_set = (task_action[:attributes]||[]).reject{|a| not a[:dynamic]}
+      pp [:attributes_to_set,attributes_to_set]
+      ret = klass.execute(task_action,attributes_to_set)
+      #TODO: set and propgate any dyanmic attributes set
+      ret
     end
 
     #TODO: temp hack

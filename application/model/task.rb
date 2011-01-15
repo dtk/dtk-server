@@ -13,7 +13,6 @@ module XYZ
 
       column :executable_action_type, :varchar
       column :executable_action, :json # gets serialized version of TaskAction::Action
-      column :attribute_pointers, :json # pointers to attributes
       many_to_one :task 
       one_to_many :task, :task_param_link, :task_event, :task_error
     end

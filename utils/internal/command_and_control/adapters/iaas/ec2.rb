@@ -1,8 +1,8 @@
 module XYZ
   module CommandAndControlAdapter
     class Ec2 < CommandAndControlIAAS
-      def self.execute(create_node)
-        #handle case where node has been created already (and eeror mayu have been time out waiting for node to be up
+      def self.execute(create_node,attributes_to_set)
+        #handle case where node has been created already (and error mayu have been time out waiting for node to be up
         instance_id = ((create_node[:node]||{})[:external_ref]||{})[:instance_id]
         if instance_id.nil?
           ami = ((create_node[:image]||{})[:external_ref]||{})[:image_id]
@@ -17,14 +17,16 @@ module XYZ
             :instance_id => instance_id,
             :type => "ec2_instance"
           }
-          Log.info("node created with instance id #{instance_id}; waiting for it to be avaialble")
+          Log.info("node created with instance id #{instance_id}; waiting for it to be available")
           pp [:node_created,response]
           create_node[:node].merge!(:external_ref => external_ref)
           create_node.save_new_node_info()
         else
-          Log.info("node already created with instance id #{instance_id}; waiting for it to be avaialble")
+          Log.info("node already created with instance id #{instance_id}; waiting for it to be available")
         end
         CommandAndControl.wait_for_node_to_be_ready(create_node[:node])
+        updated_server_state = @@conn.server_get(instance_id)
+        pp [:updated_server_state,updated_server_state]
         Log.info("node #{instance_id} is available")
 
         {:status => "succeeded",

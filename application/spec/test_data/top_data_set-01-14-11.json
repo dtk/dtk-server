@@ -4133,16 +4133,6 @@
           "ds_source_obj_type": "image",
           "data_source": "ec2",
           "attribute": {
-            "external_ref": {
-              "data_type": "json",
-              "semantic_type_summary": "node_external_ref",
-              "semantic_type": "node_external_ref",
-              "read_only": true,
-              "dynamic": true,
-              "is_port": false,
-              "display_name": "external_ref",
-              "required": false
-            },
             "host_addresses[ipv4]": {
               "data_type": "json",
               "semantic_type_summary": "host_address[ipv4]",

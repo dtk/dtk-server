@@ -35,6 +35,10 @@ module XYZ
       def image_get(id)
         hash_form(@conn.images.get(id))
       end
+      def server_get(id)
+        hash_form(@conn.servers.get(id))
+      end
+
       def server_create(options)
         hash_form(@conn.servers.create(options))
       end

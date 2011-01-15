@@ -18,6 +18,7 @@ module XYZ
       column :semantic_type_summary, :varchar, :size => 25 #for efficiency optional token that summarizes info from semantic_type
       column :read_only, :boolean, :default => false #true means variable is automtcally set
       column :required, :boolean, :default => false #whether required for this attribute to have a value inorder to execute actions for parent component; TODO: may be indexed by action
+      column :dynamic, :boolean, :default => false #means dynamically set by an execuatble action
 
       #columns related to links
       column :is_port, :boolean, :default => false

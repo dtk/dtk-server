@@ -62,8 +62,14 @@ module XYZ
       def create_node_config_agent_type
         self[:config_agent_type]
       end
+
+      #TODO: think can deprecate
       def id()
         self[:state_change_id]
+      end
+
+      def add_attribute!(attr)
+        self[:attributes] << attr
       end
 
      private
@@ -71,6 +77,7 @@ module XYZ
         node = state_change[:node]
         state_change_model_handle = state_change.model_handle()
         hash = {
+          :attributes => Array.new,
           :state_change_id => state_change[:id],
           :state_change_model_handle => state_change.model_handle(),
           :node => state_change[:node],
@@ -96,6 +103,7 @@ module XYZ
         update_state_aux(state,self[:component_actions].map{|x|x[:state_change_pointer_ids]}.flatten)
       end
 
+      #TODO: think can deprecate
       def id()
         #just need arbitrary id; if there is @create_node_state_change using its id, otherwise min of  elements' ids
         self[:component_actions].map{|e|e[:id]}.min

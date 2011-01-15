@@ -83,6 +83,9 @@ module XYZ
       end
 
       def propagate_output_vars(result_hash)
+        #TODO: convert to using dynamic attributes
+        dynamic_attributes = ((@task[:executable_action]||{})[:attributes]||[]).reject{|a| not a[:dynamic]}
+        pp [:dynamic_attributes,dynamic_attributes]
         @task.task_param_inputs.each do |param_link|
           unless param_link.output_task and param_link[:input_var_path] and param_link[:output_var_path]
             Log.error("skipping param link because missing param")

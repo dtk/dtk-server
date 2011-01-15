@@ -7,10 +7,13 @@ module XYZ
       column :output_vars, :json #TaskParamLink.output_var_path points into this 
       #column :events, :json - content of this may instead go in result
       column :action_on_failure, :varchar, :default => "abort"
+
+      column :temporal_order, :varchar, :size => 20 # = "sequential" | "concurrent"
       column :position, :integer, :default => 1
+
       column :executable_action_type, :varchar
       column :executable_action, :json # gets serialized version of TaskAction::Action
-      column :temporal_order, :varchar, :size => 20 # = "sequential" | "concurrent"
+      column :attribute_pointers, :json # pointers to attributes
       many_to_one :task 
       one_to_many :task, :task_param_link, :task_event, :task_error
     end

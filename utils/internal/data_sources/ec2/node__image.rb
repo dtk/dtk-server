@@ -24,10 +24,19 @@ module XYZ
           prefix[:display_name] = "host_addresses[ipv4]"
           prefix[:is_port] = true
           prefix[:read_only] = true
+          prefix[:dynamic] = true
           prefix[:data_type] = "json"
           prefix[:semantic_type] = {":array" => "host_address[ipv4]"}
           prefix[:semantic_type_summary] = "host_address[ipv4]"
           prefix[:value_derived] = [nil]
+
+          prefix = target[:attribute][:external_ref]
+          prefix[:display_name] = "external_ref"
+          prefix[:read_only] = true
+          prefix[:dynamic] = true
+          prefix[:data_type] = "json"
+          prefix[:semantic_type] = "node_external_ref"
+          prefix[:semantic_type_summary] = "node_external_ref"
 
         end
         class << self

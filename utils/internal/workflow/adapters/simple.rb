@@ -30,7 +30,6 @@ module XYZ
           }
           @task.update(update_hash)
           executable_action.update_state(:completed)  #this send pending changes' states
-#deprecating          propagate_output_vars(result_hash)
           debug_pp [:task_succeeded,@task.id,result_hash]
           :succeeded              
         rescue CommandAndControl::Error => e
@@ -87,26 +86,6 @@ module XYZ
         threads.each{|t| t.join}
         @task.update(:status => status.to_s)
         status
-      end
-
-      def propagate_output_vars(result_hash)
-        #TODO: convert to using dynamic attributes
-        @task.task_param_inputs.each do |param_link|
-          unless param_link.output_task and param_link[:input_var_path] and param_link[:output_var_path]
-            Log.error("skipping param link because missing param")
-            next
-          end
-          val = param_link[:input_var_path].inject(result_hash){|r,key|r[key]||{}}
-          pointer = param_link.output_task[:executable_action]
-          output_path = param_link[:output_var_path].inject([]){|r,x| r << x} 
-          last_key = output_path.pop
-          output_path.each do |k|
-            pointer[k] ||= Hash.new
-            pointer = pointer[k]
-          end
-          pointer[last_key] = val
-          @task.update(:executable_action => param_link.output_task[:executable_action])
-        end
       end
 
       def debug_pp(x)

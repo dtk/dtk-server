@@ -17,9 +17,8 @@ module Ramaze::Helper
         all_create_node_actions << create_node_action if create_node_action
         if create_node_action and config_node_action
           node_subtask = top_level_task.add_subtask({:temporal_order => "sequential"})
-          create_node_task = node_subtask.add_subtask({:executable_action => create_node_action})
-          config_node_task = node_subtask.add_subtask({:executable_action => config_node_action})
-          node_subtask.add_task_param_link(create_node_task,config_node_task,[:node,:external_ref])
+          node_subtask.add_subtask({:executable_action => create_node_action})
+          node_subtask.add_subtask({:executable_action => config_node_action})
         else
           #one wil be non null
           top_level_task.add_subtask({:executable_action => create_node_action||config_node_action})

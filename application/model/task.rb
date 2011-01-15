@@ -4,7 +4,7 @@ module XYZ
     def self.up()
       column :status, :varchar, :size => 20, :default => "created" # = "created" | "in_progres" | "completed"
       column :result, :json # gets serialized version of TaskAction::Result
-      column :output_vars, :json #TaskParamLink.output_var_path points into this 
+      #column :output_vars, :json do we need this?
       #column :events, :json - content of this may instead go in result
       column :action_on_failure, :varchar, :default => "abort"
 
@@ -14,14 +14,12 @@ module XYZ
       column :executable_action_type, :varchar
       column :executable_action, :json # gets serialized version of TaskAction::Action
       many_to_one :task 
-      one_to_many :task, :task_param_link, :task_event, :task_error
+      one_to_many :task, :task_event, :task_error
     end
 
     def initialize(hash_scalar_values,c,model=:task)
       super(hash_scalar_values,c,model)
       @elements = Array.new
-      @task_param_links = Array.new
-      @task_param_inputs = Array.new
     end
 
     def self.create_top_level(c,temporal_order)
@@ -48,7 +46,7 @@ module XYZ
           :executable_action_type => executable_action ? Aux.demodulize(executable_action.class.to_s) : nil,
           :executable_action => executable_action
         }
-        cols = [:status, :result, :output_vars, :action_on_failure, :position, :temporal_order] 
+        cols = [:status, :result, :action_on_failure, :position, :temporal_order] 
         cols.each{|col|row.merge!(col => hash_row[col])}
         row
       end
@@ -61,21 +59,9 @@ module XYZ
       par_rel_rows_for_task = par_rel_rows_for_id_info.map{|r|{:id => r[:id], :task_id => r[:parent_id]}}
       Model.update_from_rows(model_handle,par_rel_rows_for_task)
       IDInfoTable.update_instances(model_handle,par_rel_rows_for_id_info)
-
-      #save all the task_param_links
-      pl_objs = unrolled_tasks.map do |t|
-        t.task_param_links.map{|pl|pl.set_foreign_keys!(t.id)}.flatten
-      end.flatten
-      unless pl_objs.empty?
-        pl_rows = pl_objs.map{|o|[:task_id,:ref,:input_task_id,:output_task_id].inject({}){|h,k|h.merge(k => o[k])}}
-        pl_id_info_list = Model.create_from_rows(model_handle.createMH(:model_name => :task_param_link),pl_rows)
-        update_with_pl = Array.new
-        pl_objs.each_with_index{|pl,i|pl.set_id_handle(pl_id_info_list[i])}
-      end
     end
 
-
-    attr_reader :elements, :task_param_links, :task_param_inputs
+    attr_reader :elements
 
     #for special tasks that have component actions
     #TODO: trie dto do this by having a class inherir from Task and hanging these fns off it, but this confused Ramaze
@@ -92,16 +78,6 @@ module XYZ
       new_subtask = Task.new(hash.merge(defaults),c)
       @elements << new_subtask
       new_subtask
-    end
-
-    def add_task_param_link(input_task,output_task,input_var_path,output_var_path=nil)
-      task_param_link = TaskParamLink.create_from_task_objects(c,input_task,output_task,input_var_path,output_var_path)
-      @task_param_links << task_param_link
-      input_task.add_task_param_link_to_input(task_param_link)
-    end
-
-    def add_task_param_link_to_input(task_param_link)
-      @task_param_inputs << task_param_link
     end
 
     def set_positions!()
@@ -121,41 +97,6 @@ module XYZ
 
     def unroll_tasks()
       [self] + elements.map{|e|e.unroll_tasks()}.flatten
-    end
-
-  end
-  class TaskParamLink < Model
-    set_relation_name(:task,:param_link)
-    def self.up()
-      foreign_key :input_task_id, :task, FK_CASCADE_OPT
-      column :input_var_path, :json
-      foreign_key :output_task_id, :task, FK_CASCADE_OPT
-      column :output_var_path, :json
-      many_to_one :task 
-    end
-
-    def initialize(hash_scalar_values,c,model=:task_param_link)
-      super(hash_scalar_values,c,model)
-      @input_task = nil
-      @output_task = nil
-    end
-
-    attr_accessor :input_task,:output_task
-    def self.create_from_task_objects(c,input_task,output_task,input_var_path,output_var_path=nil)
-      #output_var_path.nil? means same as input
-      output_var_path ||= input_var_path
-      ret = TaskParamLink.new({:input_var_path => output_var_path,:output_var_path => output_var_path},c)
-      ret.input_task = input_task
-      ret.output_task = output_task
-      ret
-    end
-
-    def set_foreign_keys!(task_id)
-      self[:task_id] = task_id
-      self[:input_task_id] = input_task ? input_task.id : nil
-      self[:output_task_id] = output_task ? output_task.id : nil
-      self[:ref] = "tpl-#{self[:input_task_id].to_s}-#{self[:output_task_id].to_s}"
-      self
     end
   end
 end

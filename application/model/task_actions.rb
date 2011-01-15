@@ -99,13 +99,6 @@ module XYZ
         self[:config_agent_type]
       end
 
-      #TODO: think can deprecate
-=begin
-      def id()
-        self[:state_change_id]
-      end
-=end
-
      private
       def initialize(state_change)
         node = state_change[:node]
@@ -173,13 +166,6 @@ module XYZ
         update_state_aux(state,self[:component_actions].map{|x|x[:state_change_pointer_ids]}.flatten)
       end
 
-      #TODO: think can deprecate
-=begin
-      def id()
-        #just need arbitrary id; if there is @create_node_state_change using its id, otherwise min of  elements' ids
-        self[:component_actions].map{|e|e[:id]}.min
-      end
-=end
      private
       def initialize(on_node_state_changes)
         sample_state_change = on_node_state_changes.first

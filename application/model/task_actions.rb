@@ -39,7 +39,11 @@ module XYZ
       end
 
       def get_and_update_attributes(task_mh)
-        #TODO: try to update if only need to
+        #find attributes that can be updated
+        #TODO: right now being conservative in including attributes that may not need to be set
+        attributes_to_update = self[:attributes].reject{|a|not(a[:port_is_external] and a[:port_type] == "input" and not a[:value_asserted])}
+        pp [:attributes_to_update,attributes_to_update]
+x=1
       end
 
       def update_state_aux(state,state_change_ids)
@@ -127,7 +131,7 @@ module XYZ
           :relation => :attribute,
           :filter => [:and,
                       [:oneof, parent_field_name, indexed_actions.keys]],
-          :columns => [:id,:display_name,parent_field_name,:external_ref,:attribute_value,:required,:dynamic,:is_input_port,:port_is_external]
+          :columns => [:id,:display_name,parent_field_name,:external_ref,:attribute_value,:required,:dynamic,:port_type,:port_is_external]
         }
         attrs = Model.get_objects_from_search_pattern_hash(attr_mh,search_pattern_hash)
 

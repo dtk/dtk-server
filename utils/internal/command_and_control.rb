@@ -10,7 +10,7 @@ module XYZ
       task_mh = task.model_handle()
       task_action.get_and_update_attributes(task_mh)
       ret = klass.execute(task_action,attributes_to_set)
-      #TODO: set and propgate any dyanmic attributes set
+      #TODO: propgate attributes_to_set
       ret
     end
 

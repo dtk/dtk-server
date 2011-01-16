@@ -39,7 +39,7 @@ module XYZ
           end
 
           new_value = fn.call(updated_server_state)
-          unless attr[:value_asserted] == new_value
+          unless false #TODO: temp for testing attr[:value_asserted] == new_value
             attr[:value_asserted] = new_value
             updated_attributes << attr
           end

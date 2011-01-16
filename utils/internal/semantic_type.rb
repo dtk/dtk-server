@@ -15,6 +15,8 @@ module XYZ
         case function
          when "sap_config[ipv4]" 
           propagate_when_sap_config_ipv4()
+         when "host_address[ipv4]"
+          propagate_when_host_address_ipv4()
          when "select_one"
           propagate_when_select_one()
          when "eq_indexed"
@@ -47,12 +49,33 @@ module XYZ
       value = nil
       if input_semantic_type().is_array?
         #cartesian product with host_address 
+        #TODO: may simplify and use faltten form
         value = Array.new
         output_v.each do |sap_config|
           value += input_value.map{|input_item|sap_config.merge("host_address" => input_item["host_address"])}
         end
       else #not input_semantic_type().is_array?
         raise Error.new("propagate_when_sap_config_ipv4 does not support input scalar and output array with size > 1") if output_value.size > 1
+        value = output_v.first.merge("host_address" => input_value["host_address"])
+      end
+      {:value_derived => value, :link_info => nil}
+    end
+
+    def propagate_when_host_address_ipv4()
+      output_v = 
+        if output_semantic_type().is_array? 
+          raise ErrorNotImplemented.new("propagate_when_host_address_ipv4 when output has empty list") if output_value.empty?
+          output_value
+        else
+          [output_value]
+        end
+
+      value = nil
+      if input_semantic_type().is_array?
+        #cartesian product with host_address 
+        value = output_v.map{|host_address|input_value.map{|input_item|input_item.merge("host_address" => host_address)}}.flatten     
+      else #not input_semantic_type().is_array?
+        raise Error.new("propagate_when_host_address_ipv4 does not support input scalar and output array with size > 1") if output_value.size > 1
         value = output_v.first.merge("host_address" => input_value["host_address"])
       end
       {:value_derived => value, :link_info => nil}

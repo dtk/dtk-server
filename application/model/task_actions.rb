@@ -41,7 +41,9 @@ module XYZ
       def get_and_update_attributes(task_mh)
         #find attributes that can be updated
         #TODO: right now being conservative in including attributes that may not need to be set
-        attributes_to_update = self[:attributes].reject{|a|not(a[:port_is_external] and a[:port_type] == "input" and not a[:value_asserted])}
+        attributes_to_update = (self[:component_actions]||[]).map do |action|
+          (action[:attributes]||[]).reject{|a|not(a[:port_is_external] and a[:port_type] == "input" and not a[:value_asserted])}.flatten
+        end.flatten
         pp [:attributes_to_update,attributes_to_update]
 x=1
       end

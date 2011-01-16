@@ -35,11 +35,11 @@ module Ramaze::Helper
         all_actions << executable_action
         ret = create_new_task(:executable_action => executable_action) 
       else
-        ret = create_new_task(:temporal_order => "concurrent")
+        ret = create_new_task(:display_name => "create_node_stage", :temporal_order => "concurrent")
         state_change_list.each do |sc|
           executable_action = TaskAction::CreateNode.new(sc.first)
           all_actions << executable_action
-          ret.add_subtask(:executable_action => executable_action)
+          ret.add_subtask_from_hash(:executable_action => executable_action)
           end
       end
       attr_mh = ModelHandle.new(ret_session_context_id(),:attribute)
@@ -56,11 +56,11 @@ module Ramaze::Helper
         all_actions << executable_action
         ret = create_new_task(:executable_action => executable_action) 
       else
-        ret = create_new_task(:temporal_order => "concurrent")
+        ret = create_new_task(:display_name => "config_node_stage", :temporal_order => "concurrent")
         state_change_list.each do |sc|
           executable_action = TaskAction::ConfigNode.new(sc)
           all_actions << executable_action
-          ret.add_subtask(:executable_action => executable_action)
+          ret.add_subtask_from_hash(:executable_action => executable_action)
           end
       end
       attr_mh = ModelHandle.new(ret_session_context_id(),:attribute)

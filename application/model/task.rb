@@ -28,7 +28,7 @@ module XYZ
 
     #persists to db this and its sub tasks
     def save!()
-      #no op if sabved already as detected by whether has an id
+      #no op if saved already as detected by whether has an id
      return nil if id()
       set_positions!()
       #for db access efficiency implement into two phases: 1 - save all subtasks w/o ids, then point in ids
@@ -68,9 +68,13 @@ module XYZ
     end
 
 
-    def add_subtask(hash)
+    def add_subtask_from_hash(hash)
       defaults = {:status => "created", :action_on_failure => "abort"}
-      new_subtask = Task.new(hash.merge(defaults),c)
+      new_subtask = Task.new(defaults.merge(hash),c)
+      add_subtask(new_subtask)
+    end
+
+    def add_subtask(new_subtask)
       @elements << new_subtask
       new_subtask
     end

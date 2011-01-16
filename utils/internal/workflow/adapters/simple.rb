@@ -6,10 +6,12 @@ module XYZ
         executable_action = @task[:executable_action]
         if executable_action
           process_executable_action(executable_action)
-        elsif @task[:temporal_order].to_sym == :sequential
+        elsif @task[:temporal_order] == "sequential"
           process_sequential()
-        elsif @task[:temporal_order].to_sym == :concurrent
+        elsif @task[:temporal_order] == "concurrent"
           process_concurrent()
+        else
+          Log.error("do not have rules to process task")
         end
       end
 

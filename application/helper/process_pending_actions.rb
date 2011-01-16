@@ -3,9 +3,16 @@ module Ramaze::Helper
     include XYZ
 
     def create_task_from_pending_changes(state_change_list)
-      #TODO: two stages, create nodes all concurrent, then config nodes
-      #TODO: one task simplification is when there is just one node, rather than always be top taht iterates over node; is to 
-      state_changes_by_node = group_by_node(state_change_list)
+      grouped_state_changes = group_by_node_and_type(state_change_list)
+      grouped_state_changes.each_key do |type|
+        unless [TaskAction::CreateNode,TaskAction::ConfigNode].include?(type)
+          Log.error("treatment of task action type #{type.to_s} not yet treated; it will be ignored")
+          grouped_state_changes.delete(type)
+          next
+        end
+      end
+      #top level has two stages create_node then config node
+#TODO: get here in refactor of this function
       temporal_order = state_changes_by_node.size == 1 ? "sequential" : "concurrent"
       top_level_task = Task.create_top_level(ret_session_context_id(),temporal_order)
       all_config_node_actions = Array.new
@@ -31,11 +38,26 @@ module Ramaze::Helper
       top_level_task
     end
 
-    def group_by_node(state_change_list)
-      node_ids = state_change_list.map{|a|a[:node][:id]}.uniq
-      node_ids.map{|node_id|state_change_list.reject{|a|not a[:node][:id] == node_id}}
+    def group_by_node_and_type(state_change_list)
+      indexed_ret = Hash.new
+      state_change_list.each do |sc|
+        type = MappingStateChangeToTaskAction[sc[:type]]
+        unless type
+          Log.error("unexpected state change type encountered #{sc[:type]}; ignoring")
+          next
+        end
+        node_id = sc[:node][:id]
+        indexed_ret[type] ||= Hash.new
+        indexed_ret[type][node_id] ||= Array.new
+        indexed_ret[type][node_id] << sc
+      end
+      indexed_ret.inject({}){|ret,o|ret.merge(o[0] => o[1].values)}
     end
-
+    MappingStateChangeToTaskAction = {
+      "create_node" => TaskAction::CreateNode,
+      "install-component" => TaskAction::ConfigNode,
+      "setting" => TaskAction::ConfigNode
+    }
 
     def pending_create_node(datacenter_id)
       parent_field_name = XYZ::DB.parent_field(:datacenter,:state_change)

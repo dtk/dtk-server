@@ -11,31 +11,61 @@ module Ramaze::Helper
           next
         end
       end
-      #top level has two stages create_node then config node
-#TODO: get here in refactor of this function
-      temporal_order = state_changes_by_node.size == 1 ? "sequential" : "concurrent"
-      top_level_task = Task.create_top_level(ret_session_context_id(),temporal_order)
-      all_config_node_actions = Array.new
-      all_create_node_actions = Array.new
-      state_changes_by_node.each do |node_changes|
-        create_node_action = TaskAction::CreateNode.create(node_changes)
-        config_node_action = TaskAction::ConfigNode.create(node_changes)
-        all_config_node_actions << config_node_action if config_node_action
-        all_create_node_actions << create_node_action if create_node_action
-        if create_node_action and config_node_action
-          node_subtask = top_level_task.add_subtask({:temporal_order => "sequential"})
-          node_subtask.add_subtask({:executable_action => create_node_action})
-          node_subtask.add_subtask({:executable_action => config_node_action})
-        else
-          #one wil be non null
-          top_level_task.add_subtask({:executable_action => create_node_action||config_node_action})
-        end
+      #if have both create_node and config node then top level has two stages create_node then config node
+      create_nodes_task = create_nodes_task(grouped_state_changes[TaskAction::CreateNode])
+      config_nodes_task = config_nodes_task(grouped_state_changes[TaskAction::ConfigNode])
+      if create_nodes_task and config_nodes_task
+        ret = create_new_task(:temporal_order => "sequential")
+        ret.add_subtask(create_nodes_task)
+        ret.add_subtask(config_nodes_task)
+        ret
+      else
+        #only one wil be non null
+        create_nodes_task||config_nodes_task
       end
-      #doing add attributes at top level rather than in each create_node_action for db access efficiency
+    end
+
+    def create_nodes_task(state_change_list)
+      return nil if state_change_list.empty?
+      #each element will be list with single element
+      ret = nil
+      all_actions = Array.new
+      if state_change_list.size == 1
+        executable_action = TaskAction::CreateNode.new(state_change_list.first.first)
+        all_actions << executable_action
+        ret = create_new_task(:executable_action => executable_action) 
+      else
+        ret = create_new_task(:temporal_order => "concurrent")
+        state_change_list.each do |sc|
+          executable_action = TaskAction::CreateNode.new(sc.first)
+          all_actions << executable_action
+          ret.add_subtask(:executable_action => executable_action)
+          end
+      end
       attr_mh = ModelHandle.new(ret_session_context_id(),:attribute)
-      TaskAction::ConfigNode.add_attributes!(attr_mh,all_config_node_actions)
-      TaskAction::CreateNode.add_attributes!(attr_mh,all_create_node_actions)
-      top_level_task
+      TaskAction::CreateNode.add_attributes!(attr_mh,all_actions)
+      ret
+    end
+
+    def config_nodes_task(state_change_list)
+      return nil if state_change_list.empty?
+      ret = nil
+      all_actions = Array.new
+      if state_change_list.size == 1
+        executable_action = TaskAction::ConfigNode.new(state_change_list.first)
+        all_actions << executable_action
+        ret = create_new_task(:executable_action => executable_action) 
+      else
+        ret = create_new_task(:temporal_order => "concurrent")
+        state_change_list.each do |sc|
+          executable_action = TaskAction::ConfigNode.new(sc)
+          all_actions << executable_action
+          ret.add_subtask(:executable_action => executable_action)
+          end
+      end
+      attr_mh = ModelHandle.new(ret_session_context_id(),:attribute)
+      TaskAction::ConfigNode.add_attributes!(attr_mh,all_actions)
+      ret
     end
 
     def group_by_node_and_type(state_change_list)
@@ -58,6 +88,10 @@ module Ramaze::Helper
       "install-component" => TaskAction::ConfigNode,
       "setting" => TaskAction::ConfigNode
     }
+
+    def create_new_task(hash)
+      Task.new(hash,ret_session_context_id())
+    end
 
     def pending_create_node(datacenter_id)
       parent_field_name = XYZ::DB.parent_field(:datacenter,:state_change)

@@ -18,17 +18,12 @@ module XYZ
     end
 
     def initialize(hash_scalar_values,c,model=:task)
-      super(hash_scalar_values,c,model)
-      @elements = Array.new
-    end
-
-    def self.create_top_level(c,temporal_order)
-      hash = {
+      defaults = { 
         :status => "created",
-        :action_on_failure => "abort",
-        :temporal_order => temporal_order
-      } 
-      Task.new(hash,c)
+        :action_on_failure => "abort"
+      }
+      super(defaults.merge(hash_scalar_values),c,model)
+      @elements = Array.new
     end
 
     #persists to db this and its sub tasks

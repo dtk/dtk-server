@@ -62,11 +62,6 @@ module XYZ
     end
 
     class CreateNode < TaskActionNode
-
-      def self.create(state_change_list)
-        create_node_state_change = state_change_list.find{|a|a[:type] == "create_node"}
-        create_node_state_change ? CreateNode.new(create_node_state_change) : nil
-      end
       def initialize(state_change)
         node = state_change[:node]
         state_change_model_handle = state_change.model_handle()
@@ -177,11 +172,6 @@ module XYZ
       def ret_command_and_control_adapter_info()
         #TBD: stub
         [:node_config,nil]
-      end
-
-      def self.create(state_change_list)
-        on_node_state_changes = state_change_list.reject{|a|a[:type] == "create_node"}
-        on_node_state_changes.empty? ? nil :  ConfigNode.new(on_node_state_changes) 
       end
 
       def update_state(state)

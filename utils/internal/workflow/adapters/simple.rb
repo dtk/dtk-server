@@ -12,13 +12,14 @@ module XYZ
           process_concurrent()
         end
       end
-     private
-      def initialize(task)
-        @task = task
-      end
 
       def update_task(hash)
         @task.update(hash)
+      end
+
+     private
+      def initialize(task)
+        @task = task
       end
 
       def process_executable_action(executable_action)

@@ -35,6 +35,19 @@ module XYZ
                            SQL.not(:attribute__read_only),
                            :attribute__required)
 
+      #TODO: rewrite to use semantic type  
+      virtual_column :is_input_port, :type => :boolean, :hidden => true,
+         :remote_dependencies =>
+         [
+          {
+            :model_name => :attribute_link,
+            :sequel_def => lambda{|ds|ds.select(:input_id).group_and_count(:input_id)},
+            :join_type => :left_outer,
+            :join_cond=>{:input_id => q(:attribute,:id)}
+          }
+         ],
+        :sql_fn => SQL.not({q(:attribute_link,:count) => nil})
+
       uri_remote_dependencies = 
         {:uri =>
         [

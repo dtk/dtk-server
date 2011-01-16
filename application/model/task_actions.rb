@@ -30,12 +30,8 @@ module XYZ
       end
     end
     class TaskActionNode < TaskActionBase
-      def initialize(hash)
-        super(hash)
-        self[:attributes] = Array.new
-      end
-      def add_attribute!(attr)
-        self[:attributes] << attr
+      def attributes_to_set()
+        Array.new
       end
 
       def get_and_update_attributes(task_mh)
@@ -43,9 +39,9 @@ module XYZ
         #TODO: right now being conservative in including attributes that may not need to be set
         indexed_attrs_to_update = Hash.new
         (self[:component_actions]||[]).each do |action|
-          (action[:attributes]||[]).each do 
-            if a[:port_is_external] and a[:port_type] == "input" and not a[:value_asserted]
-              indexed_attrs_to_update[a[:id]] = a
+          (action[:attributes]||[]).each do |attr|
+            if attr[:port_is_external] and attr[:port_type] == "input" and not attr[:value_asserted]
+              indexed_attrs_to_update[attr[:id]] = attr
             end
           end
         end
@@ -55,7 +51,7 @@ module XYZ
           :filter => [:and,[:oneof, :id, indexed_attrs_to_update.keys]],
           :columns => [:id,:value_derived]
         }
-        new_attr_vals = Model.get_objects_from_search_pattern_hash(task_mh.createMH(:model_name => attribute),search_pattern_hash)
+        new_attr_vals = Model.get_objects_from_search_pattern_hash(task_mh.createMH(:model_name => :attribute),search_pattern_hash)
         new_attr_vals.each{|a|indexed_attrs_to_update[a[:id]][:value_derived] = a[:value_derived]}
       end
 
@@ -66,9 +62,32 @@ module XYZ
     end
 
     class CreateNode < TaskActionNode
+
       def self.create(state_change_list)
         create_node_state_change = state_change_list.find{|a|a[:type] == "create_node"}
         create_node_state_change ? CreateNode.new(create_node_state_change) : nil
+      end
+      def initialize(state_change)
+        node = state_change[:node]
+        state_change_model_handle = state_change.model_handle()
+        #TODO: see if need these model handles in hash
+        hash = {
+          :state_change_id => state_change[:id],
+          :attributes => Array.new,
+          :state_change_model_handle => state_change.model_handle(),
+          :node => state_change[:node],
+          :node_id_handle => state_change_model_handle.createIDH(:id => node[:id],:model_name => :node),
+          :image => state_change[:image]
+        }
+        super(hash)
+      end
+
+      def add_attribute!(attr)
+        self[:attributes] << attr
+      end
+
+      def attributes_to_set()
+        self[:attributes].reject{|a| not a[:dynamic]} 
       end
 
       def ret_command_and_control_adapter_info()
@@ -114,20 +133,6 @@ module XYZ
 
       def create_node_config_agent_type
         self[:config_agent_type]
-      end
-
-     private
-      def initialize(state_change)
-        node = state_change[:node]
-        state_change_model_handle = state_change.model_handle()
-        hash = {
-          :state_change_id => state_change[:id],
-          :state_change_model_handle => state_change.model_handle(),
-          :node => state_change[:node],
-          :node_id_handle => state_change_model_handle.createIDH(:id => node[:id],:model_name => :node),
-          :image => state_change[:image]
-        }
-        super(hash)
       end
     end
 

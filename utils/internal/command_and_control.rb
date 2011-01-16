@@ -5,13 +5,12 @@ module XYZ
     def self.execute_task_action(task_action,task)
       klass = load_for(task_action)
       raise ErrorCannotLoadAdapter.new unless klass
-      attributes_to_set = (task_action[:attributes]||[]).reject{|a| not a[:dynamic]}
-      pp [:attributes_to_set,attributes_to_set]
+      attributes_to_set = task_action.attributes_to_set()
       task_mh = task.model_handle()
       task_action.get_and_update_attributes(task_mh)
-      ret = klass.execute_and_set_attributes!(task_action,attributes_to_set)
-      propagate_attributes(attributes_to_set)
-      ret
+      result,updated_attributes = klass.execute(task_action,attributes_to_set)
+      propagate_attributes(updated_attributes)
+      result
     end
 
     #TODO: temp hack
@@ -22,13 +21,13 @@ module XYZ
     end
 
    private
-    def self.propagate_attributes(attributes_to_set)
-      return nil if attributes_to_set.empty?
+    def self.propagate_attributes(updated_attributes)
+      return nil if updated_attributes.empty?
       #set attributes
-      model_handle = attributes_to_set.first.model_handle
-      update_rows = attributes_to_set.map{|attr|{:id => attr[:id], :value_asserted => attr[:value_asserted]}}
+      model_handle = updated_attributes.first.model_handle
+      update_rows = updated_attributes.map{|attr|{:id => attr[:id], :value_asserted => attr[:value_asserted]}}
       Model.update_from_rows(model_handle,update_rows)
-      AttribueLink.propagate(attributes_to_set.map{|attr|attr.id_handle()})
+      AttributeLink.propagate(updated_attributes.map{|attr|attr.id_handle()})
     end
 
     def self.load_for(task_action)

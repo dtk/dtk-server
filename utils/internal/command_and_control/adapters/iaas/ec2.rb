@@ -1,7 +1,7 @@
 module XYZ
   module CommandAndControlAdapter
     class Ec2 < CommandAndControlIAAS
-      def self.execute_and_set_attributes!(create_node,attributes_to_set)
+      def self.execute(create_node,attributes_to_set)
         #handle case where node has been created already (and error mayu have been time out waiting for node to be up
         instance_id = ((create_node[:node]||{})[:external_ref]||{})[:instance_id]
         if instance_id.nil?
@@ -29,17 +29,23 @@ module XYZ
         pp [:updated_server_state,updated_server_state]
         Log.info("node #{instance_id} is available")
 
-        #set 
+        #updete attributes
+        updated_attributes = Array.new
         attributes_to_set.each do |attr|
           fn = AttributeToSetMapping[attr[:display_name]]
           unless fn
             Log.error("no rules to process attribute to set #{attr[:display_name]}")
             next
           end
-          attr[:value_asserted] = fn.call(updated_server_state)
+
+          new_value = fn.call(updated_server_state)
+          unless attr[:value_asserted] == new_value
+            attr[:value_asserted] = new_value
+            updated_attributes << attr
+          end
         end
 
-        {:status => "succeeded",
+        result = {:status => "succeeded",
           :node => {
             :external_ref => {
               :instance_id => instance_id,
@@ -47,6 +53,7 @@ module XYZ
             }
           }
         }
+        [result,updated_attributes]
       end
      private
       AttributeToSetMapping = {

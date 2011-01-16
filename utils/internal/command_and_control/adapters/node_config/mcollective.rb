@@ -27,8 +27,9 @@ module XYZ
         raise ErrorWhileCreatingNode unless target_identity
       end
 
-      def self.execute_and_set_attributes!(config_node,attributes_to_set)
-        ret = nil
+      def self.execute(config_node,attributes_to_set)
+        result = nil
+        updated_attributes = Array.new
         begin
           config_agent = ConfigAgent.load(config_node[:config_agent_type])
           rpc_client = nil
@@ -45,12 +46,12 @@ module XYZ
           raise ErrorTimeout.new() unless response
           raise Error.new() unless response[:data]
 
-          ret = response[:data]
-          raise ErrorFailedResponse.new(ret[:status],ret[:error]) unless ret[:status] == :succeeded 
+          result = response[:data]
+          raise ErrorFailedResponse.new(result[:status],result[:error]) unless result[:status] == :succeeded 
          ensure
           rpc_client.disconnect() if rpc_client
         end
-        ret
+        [result,updated_attributes]
       end
      private
 

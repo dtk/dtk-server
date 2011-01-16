@@ -27,7 +27,7 @@ module XYZ
         raise ErrorWhileCreatingNode unless target_identity
       end
 
-      def self.execute(config_node,attributes_to_set)
+      def self.execute_and_set_attributes!(config_node,attributes_to_set)
         ret = nil
         begin
           config_agent = ConfigAgent.load(config_node[:config_agent_type])

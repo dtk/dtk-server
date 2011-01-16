@@ -41,11 +41,22 @@ module XYZ
       def get_and_update_attributes(task_mh)
         #find attributes that can be updated
         #TODO: right now being conservative in including attributes that may not need to be set
-        attributes_to_update = (self[:component_actions]||[]).map do |action|
-          (action[:attributes]||[]).reject{|a|not(a[:port_is_external] and a[:port_type] == "input" and not a[:value_asserted])}.flatten
-        end.flatten
-        pp [:attributes_to_update,attributes_to_update]
-x=1
+        indexed_attrs_to_update = Hash.new
+        (self[:component_actions]||[]).each do |action|
+          (action[:attributes]||[]).each do 
+            if a[:port_is_external] and a[:port_type] == "input" and not a[:value_asserted]
+              indexed_attrs_to_update[a[:id]] = a
+            end
+          end
+        end
+        return nil if indexed_attrs_to_update.empty?
+        search_pattern_hash = {
+          :relation => :attribute,
+          :filter => [:and,[:oneof, :id, indexed_attrs_to_update.keys]],
+          :columns => [:id,:value_derived]
+        }
+        new_attr_vals = Model.get_objects_from_search_pattern_hash(task_mh.createMH(:model_name => attribute),search_pattern_hash)
+        new_attr_vals.each{|a|indexed_attrs_to_update[a[:id]][:value_derived] = a[:value_derived]}
       end
 
       def update_state_aux(state,state_change_ids)

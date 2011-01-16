@@ -9,8 +9,8 @@ module XYZ
       pp [:attributes_to_set,attributes_to_set]
       task_mh = task.model_handle()
       task_action.get_and_update_attributes(task_mh)
-      ret = klass.execute(task_action,attributes_to_set)
-      #TODO: propgate attributes_to_set
+      ret = klass.execute_and_set_attributes!(task_action,attributes_to_set)
+      propagate_attributes(attributes_to_set)
       ret
     end
 
@@ -22,6 +22,15 @@ module XYZ
     end
 
    private
+    def self.propagate_attributes(attributes_to_set)
+      return nil if attributes_to_set.empty?
+      #set attributes
+      model_handle = attributes_to_set.first.model_handle
+      update_rows = attributes_to_set.map{|attr|{:id => attr[:id], :value_asserted => attr[:value_asserted]}}
+      Model.update_from_rows(model_handle,update_rows)
+      AttribueLink.propagate(attributes_to_set.map{|attr|attr.id_handle()})
+    end
+
     def self.load_for(task_action)
       adapter_type,adapter_name = task_action.ret_command_and_control_adapter_info()
       adapter_name ||= R8::Config[:command_and_control][adapter_type][:type]

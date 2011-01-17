@@ -882,6 +882,8 @@ if (!R8.Canvas) {
 //				if(typeof(startPortObj) == 'undefined') { console.log('Failed to grab port with ID:'+portElemID); return;}
 //				var startElemFacing = startPortObj.location;
 				var startElemFacing = portDef.location;
+//DEBUG
+var viewSpaceTop = R8.Utils.Y.one('#viewSpace').get('region').top;
 
 				var canvasID = 'wireCanvas';
 				var wireCanvasElem = document.getElementById(canvasID);
@@ -950,7 +952,8 @@ if (!R8.Canvas) {
 //							var canvasLeft = startElemXY[0];
 //							var canvasTop = startElemXY[1] - ctrlYPtOffset;
 							var canvasLeft = startElemXY[0];
-							var canvasTop = startElemRegion['top'] - (ctrlYPtOffset+60);
+//							var canvasTop = startElemRegion['top'] - (ctrlYPtOffset+60);
+							var canvasTop = startElemRegion['top'] - (ctrlYPtOffset+viewSpaceTop);
 
 							var startX = startElemXOffset;
 							var startY = startElemYOffset + ctrlYPtOffset;
@@ -967,7 +970,7 @@ if (!R8.Canvas) {
 //							var canvasLeft = startElemXY[0];
 //							var canvasTop = startElemXY[1];
 							var canvasLeft = startElemRegion['left'];
-							var canvasTop = startElemRegion['top']-60;
+							var canvasTop = startElemRegion['top']-viewSpaceTop;
 
 							var startX = startElemXOffset;
 							var startY = startElemYOffset;
@@ -1038,8 +1041,8 @@ console.log('------------------');
 //							var canvasTop = dragElemXY[1];
 //DEBUG
 //TODO: figure out why positioning is off by factor of the toolbars at the top.., 25px + 35px
-							var canvasLeft = startElemRegion['left'] - 3;
-							var canvasTop = startElemRegion['top']-(canvasActualHeight+60) + elemHeightOffset;
+							var canvasLeft = startElemRegion['left'];
+							var canvasTop = startElemRegion['top']-(canvasActualHeight+viewSpaceTop) + elemHeightOffset;
 
 							var startX = startElemXOffset;
 							var startY = canvasActualHeight - startElemYOffset;
@@ -1057,7 +1060,7 @@ console.log('------------------');
 //							var canvasLeft = startElemXY[0];
 //							var canvasTop = dragElemXY[1];
 							var canvasLeft = startElemRegion['left'];
-							var canvasTop = startElemRegion['top'] - ((canvasActualHeight - (ctrlYPtOffset + startElemYOffset))+56);
+							var canvasTop = startElemRegion['top'] - ((canvasActualHeight - (ctrlYPtOffset + startElemYOffset))+viewSpaceTop);
 
 							var startX = startElemXOffset;
 							var startY = canvasActualHeight - (ctrlYPtOffset + startElemYOffset);
@@ -1123,7 +1126,7 @@ console.log('------------------');
 //							var canvasLeft = dragElemXY[0];
 //							var canvasTop = startElemXY[1] - ctrlYPtOffset;
 							var canvasLeft = dragElemXY[0];
-							var canvasTop = startElemRegion['top'] - (ctrlYPtOffset+60);
+							var canvasTop = startElemRegion['top'] - (ctrlYPtOffset+viewSpaceTop);
 
 							var startX = canvasActualWidth - startElemXOffset;
 							var startY = ctrlYPtOffset + startElemYOffset;
@@ -1140,7 +1143,7 @@ console.log('------------------');
 //							var canvasLeft = dragElemXY[0];
 //							var canvasTop = startElemXY[1];
 							var canvasLeft = dragElemRegion['left'];
-							var canvasTop = startElemRegion['top']-60;
+							var canvasTop = startElemRegion['top']-viewSpaceTop;
 
 							var startX = canvasActualWidth - startElemXOffset;
 							var startY = startElemYOffset;
@@ -1206,7 +1209,7 @@ console.log('------------------');
 //							var canvasLeft = dragElemXY[0];
 //							var canvasTop = dragElemXY[1];
 							var canvasLeft = dragElemRegion['left'];
-							var canvasTop = startElemRegion['top'] - (canvasActualHeight+60) + elemHeightOffset - 3;
+							var canvasTop = startElemRegion['top'] - (canvasActualHeight+viewSpaceTop) + elemHeightOffset;
 
 							var startX = canvasActualWidth - startElemXOffset;
 							var startY = canvasActualHeight - startElemYOffset;
@@ -1223,7 +1226,7 @@ console.log('------------------');
 //							var canvasLeft = dragElemXY[0];
 //							var canvasTop = dragElemXY[1];
 							var canvasLeft = dragElemRegion['left'];
-							var canvasTop = startElemRegion['top'] - ((canvasActualHeight - (ctrlYPtOffset + startElemYOffset))+56);
+							var canvasTop = startElemRegion['top'] - ((canvasActualHeight - (ctrlYPtOffset + startElemYOffset))+viewSpaceTop);
 
 							var startX = canvasActualWidth - startElemXOffset;
 							var startY = canvasActualHeight - (ctrlYPtOffset + startElemYOffset);

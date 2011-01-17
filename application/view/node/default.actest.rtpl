@@ -96,28 +96,28 @@ YUI_config['modules']['gallery-yui3treeview'] = {
 	requires : ["substitute", "widget", "widget-parent", "widget-child","node-focusmanager"],
 	base: '{%=_app[:base_js_uri]%}/external/yui/gallery/'
 }
-YUI(YUI_config).use("gallery-yui3treeview", function (Y) {
 
-        var treeview = new Y.TreeView({
-            srcNode: '#mytree',
-            type: "TreeView",
-            children: [
-                {
-                    label: "level1-1",
-                    type: "TreeView",
-                    children: [
-                        {label: "level2-1"},
-                        {label: "level2-2"}
-                    ]
-                },
-                {
-                    label : "level1-2"
-                }
-            ]
-        });
-       
-        treeview.render();
-      });
+YUI({gallery: 'gallery-2011.01.03-18-30'}).use('gallery-yui3treeview', function(Y) {
+//YUI(YUI_config).use('gallery-yui3treeview', function(Y) {
+	var treeview = new Y.TreeView({ 
+			srcNode: '#mytree',
+			contentBox: null,
+			type: "TreeView",
+			children: [
+			{
+				label: "level1-1",
+				type: "TreeView",
+				children: [{label: "level2-1"},{label: "level2-2"}]
+			},
+			{
+				type: "TreeView",
+				label : "level1-2"
+			}
+			]
+		});
+	treeview.render();
+});
+
 }
 
 </script>

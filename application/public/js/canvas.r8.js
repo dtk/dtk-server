@@ -883,6 +883,8 @@ if (!R8.Canvas) {
 //				var startElemFacing = startPortObj.location;
 				var startElemFacing = portDef.location;
 //DEBUG
+//TODO: revisit, need to offset by top bar size, right now using viewspace.top,need to revisit after
+//implementing context views and having multiple at a time
 var viewSpaceTop = R8.Utils.Y.one('#viewSpace').get('region').top;
 
 				var canvasID = 'wireCanvas';
@@ -1060,7 +1062,8 @@ console.log('------------------');
 //							var canvasLeft = startElemXY[0];
 //							var canvasTop = dragElemXY[1];
 							var canvasLeft = startElemRegion['left'];
-							var canvasTop = startElemRegion['top'] - ((canvasActualHeight - (ctrlYPtOffset + startElemYOffset))+viewSpaceTop);
+//							var canvasTop = startElemRegion['top'] - ((canvasActualHeight - (ctrlYPtOffset + startElemYOffset))+viewSpaceTop);
+							var canvasTop = startElemRegion['top'] - ((canvasActualHeight - (ctrlYPtOffset + (2*startElemYOffset)))+viewSpaceTop);
 
 							var startX = startElemXOffset;
 							var startY = canvasActualHeight - (ctrlYPtOffset + startElemYOffset);
@@ -1226,7 +1229,7 @@ console.log('------------------');
 //							var canvasLeft = dragElemXY[0];
 //							var canvasTop = dragElemXY[1];
 							var canvasLeft = dragElemRegion['left'];
-							var canvasTop = startElemRegion['top'] - ((canvasActualHeight - (ctrlYPtOffset + startElemYOffset))+viewSpaceTop);
+							var canvasTop = startElemRegion['top'] - ((canvasActualHeight - (ctrlYPtOffset + (2*startElemYOffset)))+viewSpaceTop);
 
 							var startX = canvasActualWidth - startElemXOffset;
 							var startY = canvasActualHeight - (ctrlYPtOffset + startElemYOffset);

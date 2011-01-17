@@ -60,6 +60,7 @@ module XYZ
             max_ref_num_ds = ds_to_group.group(*match_cols).select(*(match_cols+[max_col]))
             ref_num_col = {SQL::ColRef.case{[[{:max => nil},nil],:max+1]} => :ref_num}
             sequel_select = sequel_select.select(*([ref_num_col]+columns-[:ref_num])).join_table(:left_outer,max_ref_num_ds,match_cols)
+            columns << :ref_num unless columns.include?(:ref_num)
           end
         end
 

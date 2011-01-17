@@ -62,7 +62,7 @@ module TimeoutMonkeyPatch
     TimerAdapterClass = timer_adapter
   end
 end
-
+require 'mcollective'
 if (R8::Config[:timer]||{})[:type]
   class MCollective::Client
     include TimeoutMonkeyPatch

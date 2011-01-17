@@ -26,7 +26,7 @@ module Ramaze::Helper
     end
 
     def create_nodes_task(state_change_list)
-      return nil if state_change_list.empty?
+      return nil unless state_change_list and not state_change_list.empty?
       #each element will be list with single element
       ret = nil
       all_actions = Array.new
@@ -48,7 +48,7 @@ module Ramaze::Helper
     end
 
     def config_nodes_task(state_change_list)
-      return nil if state_change_list.empty?
+      return nil unless state_change_list and not state_change_list.empty?
       ret = nil
       all_actions = Array.new
       if state_change_list.size == 1

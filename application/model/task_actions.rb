@@ -52,7 +52,11 @@ module XYZ
           :columns => [:id,:value_derived]
         }
         new_attr_vals = Model.get_objects_from_search_pattern_hash(task_mh.createMH(:model_name => :attribute),search_pattern_hash)
-        new_attr_vals.each{|a|indexed_attrs_to_update[a[:id]][:value_derived] = a[:value_derived]}
+        new_attr_vals.each do |a|
+          attr = indexed_attrs_to_update[a[:id]]
+          #TODO: once explictly have attr[:attribute_value] need to override
+          attr[:attribute_value] = attr[:value_derived] = a[:value_derived]
+        end
       end
 
       def update_state_aux(state,state_change_ids)

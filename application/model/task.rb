@@ -55,10 +55,7 @@ module XYZ
 
       #prune top level tasks
       par_rel_rows_for_task.reject!{|r|r[:task_id].nil?}
-      return nil if par_rel_rows_for_task.empty?
-      #TODO: need to put top level tasks in id info table
-
-      Model.update_from_rows(model_handle,par_rel_rows_for_task)
+      Model.update_from_rows(model_handle,par_rel_rows_for_task) unless par_rel_rows_for_task.empty?
       IDInfoTable.update_instances(model_handle,par_rel_rows_for_id_info)
     end
 

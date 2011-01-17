@@ -78,8 +78,6 @@ R8::Config[:command_and_control][:node_config][:type] = "mcollective"
 #optional timer plug
 #R8::Config[:timer] = Hash.new
 #R8::Config[:timer][:type] = "debug_timeout" # "system_timer"
-R8::Config[:timer] = Hash.new
-R8::Config[:timer][:type] = "system_timer"
 
 #these are used in template.r8.rb and view.r8.rb
 #R8::Config[:sys_root_path] = "C:/webroot/R8Server"

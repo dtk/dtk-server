@@ -92,6 +92,9 @@
 .tool-item .tool-btn.datacenters {
 	background-image: url(../images/topbar/datacenters-btn-sprite.png);
 }
+.tool-item .tool-btn.commit {
+	background-image: url(../images/topbar/commit-btn-sprite.png);
+}
 
 /*-------------------*/
 

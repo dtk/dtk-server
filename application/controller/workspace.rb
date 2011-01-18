@@ -633,6 +633,24 @@ pp e.backtrace
       }
     end
 
+
+    def commit_test
+      tpl = R8Tpl::TemplateR8.new("workspace/commit_test",user_context())
+      panel_id = request.params['panel_id']
+
+      include_js('plugins/commit.tool')
+      include_js('external/jquery.treeview')
+      include_css('jquery.treeview')
+#      include_js('plugins/user.component')
+#      run_javascript('setTimeout(initUserForm,500);')
+      run_javascript('R8.CommitTool.init();')
+
+      return {
+        :content=> tpl.render(),
+        :panel=>panel_id
+      }
+    end
+
   end
 end
 

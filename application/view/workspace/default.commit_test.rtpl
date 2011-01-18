@@ -1,0 +1,39 @@
+	<div class="header">
+		<div class="title">Commit Changes</div>
+	</div>
+
+	<div class="body">
+	<ul id="treeview-test" class="filetree">
+		<li><span class=""><input type="checkbox"/>Folder 1</span>
+			<ul>
+				<li><span class=""><input type="checkbox"/>Item 1.1</span>
+					<ul>
+						<li><span class="">Item 1.1.1</span></li>
+					</ul>
+				</li>
+				<li><span class=""><input type="checkbox"/>Folder 2</span>
+					<ul>
+						<li><span class=""><input type="checkbox"/>Subfolder 2.1</span>
+							<ul id="">
+								<li><span class="">File 2.1.1</span></li>
+								<li><span class="">File 2.1.2</span></li>
+							</ul>
+						</li>
+						<li><span class=""><input type="checkbox"/>Subfolder 2.2</span>
+							<ul>
+								<li><span class="">File 2.2.1</span></li>
+								<li><span class="">File 2.2.2</span></li>
+							</ul>
+						</li>
+					</ul>
+				</li>
+				<li class="closed"><span class=""><input type="checkbox"/>Folder 3 (closed at start)</span>
+					<ul>
+						<li><span class="">File 3.1</span></li>
+					</ul>
+				</li>
+				<li><span class="">File 4</span></li>
+			</ul>
+		</li>
+	</ul>
+	</div>

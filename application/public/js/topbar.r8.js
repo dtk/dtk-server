@@ -59,6 +59,15 @@ if(!R8.Topbar) {
 								}
 							};
 						R8.Ctrl.call(route,params);
+					}},
+					{id:'commit',i18n:'Commit',contentLoader:function(contentNode){
+						var route = 'workspace/commit_test',
+							params = {
+								'cfg':{
+									'data':'panel_id='+contentNode.get('id')
+								}
+							};
+						R8.Ctrl.call(route,params);
 					}}
 				],
 			};

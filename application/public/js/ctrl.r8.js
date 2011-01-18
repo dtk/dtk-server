@@ -198,7 +198,7 @@ if (!R8.Ctrl) {
 					var actionItem = response['as_run_list'][i];
 
 					if (R8.Utils.isDefined(response[actionItem]['css_includes']))
-						R8.Ctrl.processCSSIncludes(ioId);
+						R8.Ctrl.processCSSIncludes(ioId,actionItem);
 
 					if (R8.Utils.isDefined(response[actionItem]['js_includes'])) {
 						R8.Ctrl.processJSIncludes(ioId,actionItem);
@@ -233,10 +233,11 @@ continue;
 
 			},
 
-			processCSSIncludes: function(ioId) {
+			processCSSIncludes: function(ioId,actionName) {
 				var cssSrc='',cssScriptElem='';
-				var cssIncludes = R8.Ctrl.callResults[ioId]['response']['css_includes'];
-
+				var cssIncludes = R8.Ctrl.callResults[ioId]['response'][actionName]['css_includes'];
+//DEBUG
+console.log(cssIncludes);
 				for (var i in cssIncludes) {
 					cssSrc = cssIncludes[i];
 

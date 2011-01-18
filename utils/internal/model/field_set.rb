@@ -135,7 +135,7 @@ module XYZ
       end
 
       def self.all_settable(model_name)
-        ret_fieldset(model_name,:all_settabler) do |db_rel|
+        ret_fieldset(model_name,:all_settable) do |db_rel|
           real_cols(db_rel) + many_to_one_cols(db_rel) + virtual_settable_cols(db_rel)
         end
       end

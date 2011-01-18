@@ -607,9 +607,9 @@ pp [:threads, Thread.list]
       errors = ValidationError.find_missing_required_attributes(top_level_task)
       return {"data" => ValidationError.debug_inspect(errors)} if errors
 
-      test_str = "pending changes: " 
+      test_str = "pending changes:\n" 
       pending_changes.each do |sc|
-        test_str << "type=#{sc[:type]}; id=#{(sc[:component]||sc[:node])[:id].to_s}; name=#{(sc[:component]||sc[:node])[:display_name]||'UNSET'}\n"
+        test_str << "  type=#{sc[:type]}; id=#{(sc[:component]||sc[:node])[:id].to_s}; name=#{(sc[:component]||sc[:node])[:display_name]||'UNSET'}\n"
       end
 
       top_level_task.save!()

@@ -71,3 +71,15 @@
 .filetree span.folder { background: url(../images/treeview/folder.gif) 0 0 no-repeat; }
 .filetree li.expandable span.folder { background: url(../images/treeview/folder-closed.gif) 0 0 no-repeat; }
 .filetree span.file { background: url(../images/treeview/file.gif) 0 0 no-repeat; }
+
+
+.filetree span { padding: 1px 0 1px 16px; display: block; }
+
+/*.filetree span.create-node,span.install-application,span.install-language,span.add-user,span.configure { padding: 1px 0 1px 16px; display: block; }*/
+
+.filetree span.create-node { background: url(../images/treeview/create-node.png) 0 0 no-repeat; }
+.filetree span.install-application { background: url(../images/treeview/install-application.png) 0 0 no-repeat; }
+.filetree span.install-language { background: url(../images/treeview/install-language.png) 0 0 no-repeat; }
+.filetree span.add-user { background: url(../images/treeview/add-user.png) 0 0 no-repeat; }
+.filetree span.configure { background: url(../images/treeview/configure.png) 0 0 no-repeat; }
+.filetree span.install-module { background: url(../images/treeview/install-module.png) 0 0 no-repeat; }

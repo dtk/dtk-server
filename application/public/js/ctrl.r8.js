@@ -236,8 +236,7 @@ continue;
 			processCSSIncludes: function(ioId,actionName) {
 				var cssSrc='',cssScriptElem='';
 				var cssIncludes = R8.Ctrl.callResults[ioId]['response'][actionName]['css_includes'];
-//DEBUG
-console.log(cssIncludes);
+
 				for (var i in cssIncludes) {
 					cssSrc = cssIncludes[i];
 

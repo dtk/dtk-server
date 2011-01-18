@@ -86,7 +86,7 @@ module XYZ
            :model_name => :attribute,
            :join_type => :inner,
            :join_cond=> {:id => q(:state_change,:attribute_id)},
-           :cols=>[:id, id(:component)]
+           :cols=>[:id, id(:component),:display_name,:value_asserted]
          },
          {
            :model_name => :component,

@@ -603,7 +603,7 @@ pp [:threads, Thread.list]
 
       datacenter_id = context_id.to_i
 
-      pending_changes = pending_changes_in_datacenter(datacenter_id)
+      pending_changes = flat_list_pending_changes_in_datacenter(datacenter_id)
       return {"data"=> "No pending changes"} if pending_changes.empty?
       top_level_task = create_task_from_pending_changes(pending_changes)
 
@@ -637,7 +637,11 @@ pp e.backtrace
     end
 
 
-    def commit_test
+    #TODO: just for testing this gets a datacenter id
+    def commit_test(datacenter_id)
+
+      pending_changes = pending_changes_to_render(datacenter_id)
+pp [:pending_changes,pending_changes]
       tpl = R8Tpl::TemplateR8.new("workspace/commit_test",user_context())
       panel_id = request.params['panel_id']
 

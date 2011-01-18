@@ -589,7 +589,10 @@ pp '))))))))))))))))))))))))))))))))))))'
       SearchObject.create_from_input_hash(hash,:workspace,ret_session_context_id())
     end
 
-    helper :process_pending_actions
+   #### actions to process pending changes
+    helper :get_pending_changes
+    helper :pending_changes_to_tasks
+
     def commit_changes()
 pp [:threads, Thread.list]
       context_id = request.params["context_id"]

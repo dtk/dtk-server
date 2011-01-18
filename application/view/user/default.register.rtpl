@@ -3,6 +3,7 @@
 	<div style="margin-left: 50px;"><img src="{%=_app[:base_images_uri]%}/R8-Logo-Black.png" border="0"/></div>
 	<br/>
 	<form action="{%=_app[:base_uri]%}/xyz/user/save_register_info" method="POST">
+	<input type="hidden" id="model" name="model" value="user"/>
 	<div style="height: 250px; width: 400px; border: 3px solid #CCCCCC; background-color: #EDEDED;">
 		<div style="margin: 10px;">
 			<table class="edit" style="border: 0;">

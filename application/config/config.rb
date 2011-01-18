@@ -53,7 +53,7 @@ R8::Config[:login] = Hash.new
 R8::Config[:login][:path] = "/xyz/user/login"
 R8::Config[:login][:resgister] = "/xyz/user/register"
 #TODO: below is stub
-R8::Config[:login][:redirect] = "/xyz/datacenter/list"
+R8::Config[:login][:redirect] = "/xyz/workspace/index"
 
 
 #Database related config params

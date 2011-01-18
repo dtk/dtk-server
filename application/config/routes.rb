@@ -139,6 +139,9 @@ R8::Routes["component/testjsonlayout"] = {
 R8::Routes["workspace"] = {
   :layout => 'workspace'
 }
+R8::Routes["workspace/index"] = {
+  :layout => 'workspace'
+}
 R8::Routes["workspace/loaddatacenter"] = {
   :layout => 'workspace'
 }

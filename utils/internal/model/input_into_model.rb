@@ -54,7 +54,7 @@ module XYZ
       end
       obj
     end  
-   
+
     def update_with_id_values(fks,c,prefixes,container_uri,opts={})
       ret_global_fks = nil
       fks.each_pair do |fk_rel_uri_x,info|
@@ -85,6 +85,27 @@ module XYZ
         end
       end
       ret_global_fks
+    end
+   
+    def process_global_keys(global_fks,c)
+      global_fks.each_pair do |fk_rel_uri,info|
+	fk_rel_id_handle = IDHandle[:c => c, :uri => fk_rel_uri]
+	info.each_pair do |col,ref_uri|
+	  ref_id_info = get_row_from_id_handle(IDHandle[:c => c, :uri => ref_uri])
+          unless ref_id_info and ref_id_info[:id]
+            if col.create_ref_object
+              #TBD: check whether should also populate ds_key; may not be needed because
+              #of relation between ds_key and relative distinguished name
+              create_simple_instance?(ref_uri,c,:set_display_name => true)
+	      ref_id_info = get_row_from_id_handle(IDHandle[:c => c, :uri => ref_uri])
+            else
+              Log.info("In proecss_global_keys cannot find object with uri #{ref_uri}") 
+              next
+            end
+          end
+	  update_instance(fk_rel_id_handle,{col.to_sym =>  ref_id_info[:id]})	  
+        end
+      end
     end
 
     def ret_rebased_uri(uri_x,prefixes,container_uri=nil)

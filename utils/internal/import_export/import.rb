@@ -7,22 +7,21 @@ module XYZ
       raise Error.new("file given #{json_file} does not exist") unless File.exists?(json_file)
       create_prefix_object_if_needed(target_id_handle,opts)
       hash_content = Aux::hash_from_file_with_json(json_file) 
-      if hash_content
-        unless target_id_handle.is_top?
-          input_into_model(target_id_handle,hash_content) 
-        else
-          ret_global_fks = Hash.new
-          hash_content.each do |relation_type,info|
-            info.each do |ref,child_hash_content|
-              child_target_id_handle = IDHandle[:c => target_id_handle[:c], :uri => "/#{relation_type}/#{ref}"]
-              create_prefix_object_if_needed(child_target_id_handle,opts)
-              r = input_into_model(child_target_id_handle,child_hash_content,:ret_global_fks => true)
-              ret_global_fks.merge!(r) if r
-            end
+      return nil unless hash_content
+      global_fks = Hash.new
+      unless target_id_handle.is_top?
+        global_fks = input_into_model(target_id_handle,hash_content) 
+      else
+        hash_content.each do |relation_type,info|
+          info.each do |ref,child_hash_content|
+            child_target_id_handle = IDHandle[:c => target_id_handle[:c], :uri => "/#{relation_type}/#{ref}"]
+            create_prefix_object_if_needed(child_target_id_handle,opts)
+            r = input_into_model(child_target_id_handle,child_hash_content,:ret_global_fks => true)
+            global_fks.merge!(r) if r
           end
-          pp [:global_fks,ret_global_fks]
         end
       end
+      process_global_keys(global_fks,target_id_handle[:c]) unless global_fks.empty?
     end
 
     def create_prefix_object_if_needed(target_id_handle,opts={})

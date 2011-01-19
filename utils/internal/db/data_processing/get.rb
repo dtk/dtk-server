@@ -191,9 +191,9 @@ module XYZ
       #TODO!!! need to determine if this will be passed materialized virtual columns in which case we need to reformulate their types
       def process_raw_scalar_hash!(hash,db_rel,opts={})
 	cols_info = db_rel[:columns]
-
         #process the table specfic columns
 	unless cols_info.nil?
+          #TODO may check whether more efficient to have top loop run over hash.keys rather than cols_info
 	  cols_info.each{|col,col_info|
 	    if hash[col]
 	      if col_info[:foreign_key_rel_type]
@@ -201,13 +201,15 @@ module XYZ
 	        if opts[:fk_as_ref].nil?
 	          hash[col] = guid
 	        else
-	           fk_id_info = IDInfoTable.get_row_from_guid(guid)               
-                   hash.delete(col)
-                   #add a "*" form if opts[:fk_as_ref] is prefix
-		   if fk_id_info[:uri] =~ Regexp.new("^#{opts[:fk_as_ref].to_s}(/.+$)")
-	             rebased_uri = $1
-	             hash[("*" + col.to_s).to_sym] = rebased_uri 
-                   end
+                  fk_id_info = IDInfoTable.get_row_from_guid(guid)               
+                  hash.delete(col)
+                  #add a "*" form if opts[:fk_as_ref] is prefix
+                  if opts[:fk_as_ref] == "/"
+                    hash[("*" + col.to_s).to_sym] = fk_id_info[:uri] 
+                  elsif fk_id_info[:uri] =~ Regexp.new("^#{opts[:fk_as_ref].to_s}(/.+$)")
+                    rebased_uri = $1
+                    hash[("*" + col.to_s).to_sym] = rebased_uri 
+                  end
 	        end
 	      elsif col_info[:type] == :json
 	        hash[col] = DB.ret_json_hash(hash[col],col_info)

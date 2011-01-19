@@ -25,13 +25,12 @@ module XYZ
     def hash_content_for_single_target(target_id_handle,opts={})
       target_id_info = get_row_from_id_handle(target_id_handle)
       raise Error.new("Target given (#{target_id_handle}) does not exist") unless target_id_info
-      prefix = nil
-      if target_id_info[:uri] =~ %r{(^/.+?/.+?)/.+$}
-        prefix = $1 
-      elsif target_id_info[:uri] =~ %r{(^/.+/.+$)}
-        prefix = $1
+      prefix =
+        if opts[:prefix_is_top] then "/"
+        elsif target_id_info[:uri] =~ %r{(^/.+?/.+?)/.+$} then $1
+        elsif target_id_info[:uri] =~ %r{(^/.+/.+$)} then $1
+        else raise Error.new
       end
-      raise Error if prefix.nil?
       get_objs_opts =  {:depth => :deep, :no_hrefs => true, :no_ids => true, :no_top_level_scalars => true, :no_null_cols => true, :fk_as_ref => prefix}.merge(opts)
       objects = get_instance_or_factory(target_id_handle,nil,get_objs_opts)
 

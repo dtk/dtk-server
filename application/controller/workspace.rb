@@ -643,8 +643,10 @@ pp e.backtrace
         pending_changes = flat_list_pending_changes_in_datacenter(datacenter_id.to_i)
         unless pending_changes.empty?
           top_level_task = create_task_from_pending_changes(pending_changes)
+          top_level_task.save!()
           rendered_tasks = top_level_task.render_form()
           pp [:rendered_tasks,rendered_tasks]
+          delete_instance(top_level_task.id())
         end
       end
 

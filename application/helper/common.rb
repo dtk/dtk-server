@@ -34,6 +34,11 @@ module Ramaze::Helper
       new_id
     end
 
+    def delete_instance(id)
+      c = ret_session_context_id()
+      Model.delete_instance(IDHandle[:c => c, :id => id,:model_name => model_name()])
+    end
+
     def id_handle(id,i_model_name=model_name(),display_name=nil)
       c = ret_session_context_id()
       hash = {:c => c,:guid => id.to_i, :model_name => i_model_name.to_sym}

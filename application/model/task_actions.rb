@@ -187,7 +187,7 @@ module XYZ
         node = sample_state_change[:node]
         hash = {
           :node => node,
-          :state_change_types => on_node_state_changes.map{|sc|sc[:type]},
+          :state_change_types => on_node_state_changes.map{|sc|sc[:type]}.uniq,
           :config_agent_type => on_node_state_changes.first.on_node_config_agent_type,
           :component_actions => ComponentAction.order_and_group_by_component(on_node_state_changes)
         }

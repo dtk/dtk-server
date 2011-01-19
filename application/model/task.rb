@@ -107,13 +107,34 @@ module XYZ
    public
     def render_form()
       #may be different forms; this is one that is organized by node_group, node, component, attribute
+      task_list = render_form_flat(true)
       #TODO: not yet teating node_group
-      return self
-      Task.group_by_node(unroll_tasks().map{|t|t.render_individual_task()})
+      render_group_by_node(task_list)
     end
-   private
 
-    def render_individual_task()
+   protected
+    #protected, not private, because of recursive call 
+     def render_form_flat(top=false)
+      #prune out all (sub)tasks except for top and  executable 
+      return [render_executable_task()] if self[:executable_action]
+      (top ? [render_top_task()] : []) + subtasks.map{|e|e.render_form_flat()}.flatten
+    end
+
+   private
+    def render_group_by_node(task_list)
+      #TODO: stub
+      task_list
+    end
+
+    def render_top_task()
+      {:id => id(),
+        :type => "top"}
+    end
+
+    def render_executable_task()
+      #TODO: stub
+      return self.merge(:subtasks => nil)
+
       node = self[:node]
       #type = 
       common_vals = {

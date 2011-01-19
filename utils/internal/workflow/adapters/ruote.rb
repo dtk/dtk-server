@@ -32,11 +32,11 @@ module XYZ
               participant :ref => :execute_on_node, :action => ordered_actions.single_state_change()
             elsif ordered_actions.is_concurrent?()
               concurrence :merge_type => :mix do
-                ordered_actions.elements.each{|action|participant :ref => :execute_on_node, :action => action}
+                ordered_actions.subtasks.each{|action|participant :ref => :execute_on_node, :action => action}
               end
             elsif ordered_actions.is_sequential?()
               sequence do
-                ordered_actions.elements.each{|action|participant :ref => :execute_on_node, :action => action}
+                ordered_actions.subtasks.each{|action|participant :ref => :execute_on_node, :action => action}
               end
             end
             participant :return_results

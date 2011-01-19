@@ -3,7 +3,7 @@ module XYZ
     set_relation_name(:state,:state_change)
     def self.up()
       column :state, :varchar, :size => 15, :default => "pending" # | "executing" | "completed"
-      column :type, :varchar, :size => 25# "setting" | "create-node" | "install-component" ?? "delete" | "patch-component" | "upgrade-component" | "rollback-component" 
+      column :type, :varchar, :size => 25# "setting" | "create-node" | "install_component" ?? "delete" | "patch-component" | "upgrade-component" | "rollback-component" 
       column :base_object, :json
       #TODO; may rename
       column :object_type, :varchar, :size => 15 # "attribute" | "node" | "component"
@@ -147,7 +147,7 @@ module XYZ
       type = 
         case object_model_name
           when :attribute then "setting"
-          when :component then "install-component"
+          when :component then "install_component"
           when :node then "create_node"
           else raise ErrorNotImplemented.new("when object type is #{object_model_name}")
       end 

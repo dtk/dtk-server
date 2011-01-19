@@ -591,7 +591,7 @@ pp '))))))))))))))))))))))))))))))))))))'
 
    #### actions to process pending changes
     helper :get_pending_changes
-    helper :pending_changes_to_tasks
+    helper :create_tasks_from_pending_changes
 
     def commit_changes()
 pp [:threads, Thread.list]

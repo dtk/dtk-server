@@ -38,7 +38,7 @@ module Ramaze::Helper
         :relation => :state_change,
         :filter => [:and,
                     [:oneof, parent_field_name, id_list],
-                    [:eq, :type,"install-component"],
+                    [:eq, :type,"install_component"],
                     [:eq, :state, "pending"]],
         :columns => [:id, :relative_order,:type,:installed_component,parent_field_name,:state_change_id].uniq
       }
@@ -64,7 +64,7 @@ module Ramaze::Helper
       state_changes.each do |sc|
         if sc[:type] == "create_node"
           indexed_ret[sc[:node][:id]] = sc
-        elsif ["setting","install-component"].include?(sc[:type])
+        elsif ["setting","install_component"].include?(sc[:type])
           indexed_ret[sc[:component][:id]] ||= sc.reject{|k,v|[:attribute,:component_same_type].include?(k)} 
           cst = sc[:component_same_type]
           indexed_ret[cst[:id]] ||=  sc.reject{|k,v| [:attribute,:component_same_type].include?(k)}.merge(:component => cst) if cst
@@ -105,7 +105,7 @@ module Ramaze::Helper
       to_add = case type
         when "setting" then transform_to_render_setting(pending_change)
         when "create_node" then transform_to_render_create_node(pending_change)
-        when "install-component" then transform_to_render_install_component(pending_change)
+        when "install_component" then transform_to_render_install_component(pending_change)
         else raise Error.new("unexpected state change type #{type}")
       end
       ret.merge(to_add)

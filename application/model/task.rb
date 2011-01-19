@@ -23,7 +23,7 @@ module XYZ
         :action_on_failure => "abort"
       }
       super(defaults.merge(hash_scalar_values),c,model)
-      @elements = Array.new
+      self[:subtasks] = Array.new
     end
 
     #persists to db this and its sub tasks
@@ -59,7 +59,9 @@ module XYZ
       IDInfoTable.update_instances(model_handle,par_rel_rows_for_id_info)
     end
 
-    attr_reader :elements
+    def subtasks()
+      self[:subtasks]
+    end
 
     #for special tasks that have component actions
     #TODO: trie dto do this by having a class inherir from Task and hanging these fns off it, but this confused Ramaze
@@ -67,7 +69,7 @@ module XYZ
       if self[:executable_action].kind_of?(TaskAction::ConfigNode)
         return self[:executable_action][:component_actions]||[]
       end
-      elements.map{|obj|obj.component_actions()}.flatten
+      subtasks.map{|obj|obj.component_actions()}.flatten
     end
 
 
@@ -78,14 +80,14 @@ module XYZ
     end
 
     def add_subtask(new_subtask)
-      @elements << new_subtask
+      self[:subtasks] << new_subtask
       new_subtask
     end
 
     def set_positions!()
       self[:position] ||= 1
-      return nil if elements.empty?
-      elements.each_with_index do |e,i|
+      return nil if subtasks.empty?
+      subtasks.each_with_index do |e,i|
         e[:position] = i+1
         e.set_positions!()
       end
@@ -94,11 +96,11 @@ module XYZ
     def set_and_ret_parents!(parent_id=nil)
       self[:task_id] = parent_id
       id = id()
-      [:parent_id => parent_id, :id => id] + elements.map{|e|e.set_and_ret_parents!(id)}.flatten
+      [:parent_id => parent_id, :id => id] + subtasks.map{|e|e.set_and_ret_parents!(id)}.flatten
     end
 
     def unroll_tasks()
-      [self] + elements.map{|e|e.unroll_tasks()}.flatten
+      [self] + subtasks.map{|e|e.unroll_tasks()}.flatten
     end
 
     #### for rending tasks

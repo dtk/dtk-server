@@ -1,5 +1,5 @@
 module Ramaze::Helper
-  module PendingChangesToTasks
+  module CreateTasksFromPendingChanges
     include XYZ
 
     def create_task_from_pending_changes(state_change_list)
@@ -85,7 +85,7 @@ module Ramaze::Helper
     end
     MappingStateChangeToTaskAction = {
       "create_node" => TaskAction::CreateNode,
-      "install-component" => TaskAction::ConfigNode,
+      "install_component" => TaskAction::ConfigNode,
       "setting" => TaskAction::ConfigNode
     }
 

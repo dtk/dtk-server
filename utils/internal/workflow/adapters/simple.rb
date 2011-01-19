@@ -57,7 +57,7 @@ module XYZ
       def process_sequential()
         status = :succeeded
         mark_as_not_reached = false
-        @task.elements.each do |subtask|
+        @task.subtasks.each do |subtask|
           subtask_wf = Simple.new(subtask)
           if mark_as_not_reached
             subtask_wf.update_task(:status => "not_reached")
@@ -78,7 +78,7 @@ module XYZ
         status = :succeeded
         lock = Mutex.new
         #TODO: not killing concurrent subtasks if one failes
-        threads = @task.elements.map do |subtask|
+        threads = @task.subtasks.map do |subtask|
           Thread.new do 
             subtask_status = Simple.new(subtask).execute()
             lock.synchronize do

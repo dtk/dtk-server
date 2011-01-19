@@ -639,9 +639,13 @@ pp e.backtrace
 
     #TODO: just for testing this gets a datacenter id
     def commit_test(datacenter_id=nil)
-      unless datacenter_id
-        pending_changes = pending_changes_to_render(datacenter_id)
-        pp [:pending_changes,pending_changes]
+      if datacenter_id
+        pending_changes = flat_list_pending_changes_in_datacenter(datacenter_id.to_i)
+        unless pending_changes.empty?
+          top_level_task = create_task_from_pending_changes(pending_changes)
+          rendered_tasks = top_level_task.render_form()
+          pp [:rendered_tasks,rendered_tasks]
+        end
       end
 
       tpl = R8Tpl::TemplateR8.new("workspace/commit_test",user_context())

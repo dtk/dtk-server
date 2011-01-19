@@ -100,6 +100,12 @@ module XYZ
     def unroll_tasks()
       [self] + elements.map{|e|e.unroll_tasks()}.flatten
     end
+
+    #### for rending tasks
+    def render_form()
+      #TODO: stub
+      self
+    end
   end
 end
 

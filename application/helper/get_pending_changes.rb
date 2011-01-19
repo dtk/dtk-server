@@ -11,26 +11,6 @@ module Ramaze::Helper
       remove_duplicate_and_add_same_component_types(ret)
     end
 
-    def pending_changes_to_render(datacenter_id)
-      ret = pending_changes_one_level_to_render(:datacenter,[datacenter_id])
-      indexed_last_level = ret.inject({}){|h,pc|h.merge(pc[:id] => pc)}
-      loop do
-        next_level = pending_changes_one_level_to_render(:state_change,indexed_last_level.values.map{|x|x[:id]})
-        break if next_level.empty?
-        next_level.each do |pc|
-          parent = indexed_last_level[pc[:parent_id]]
-          parent[:state_changes] ||= Array.new
-          parent[:state_changes] << pc
-        end
-        indexed_last_level = next_level.inject({}){|h,pc|h.merge(pc[:id] => pc)}
-      end
-      ret
-    end
-
-    def pending_changes_one_level_to_render(parent_model_name,id_list)
-      pending_changes_one_level_raw(parent_model_name,id_list).map{|pc|transform_to_render(pc)}
-    end
-
 
     def pending_changes_one_level_raw(parent_model_name,id_list)
       actions = 
@@ -95,6 +75,28 @@ module Ramaze::Helper
       indexed_ret.values
     end
 
+=begin May not need; if so deprecate
+    def pending_changes_to_render(datacenter_id)
+      ret = pending_changes_one_level_to_render(:datacenter,[datacenter_id])
+      indexed_last_level = ret.inject({}){|h,pc|h.merge(pc[:id] => pc)}
+      loop do
+        next_level = pending_changes_one_level_to_render(:state_change,indexed_last_level.values.map{|x|x[:id]})
+        break if next_level.empty?
+        next_level.each do |pc|
+          parent = indexed_last_level[pc[:parent_id]]
+          parent[:state_changes] ||= Array.new
+          parent[:state_changes] << pc
+        end
+        indexed_last_level = next_level.inject({}){|h,pc|h.merge(pc[:id] => pc)}
+      end
+      ret
+    end
+
+    def pending_changes_one_level_to_render(parent_model_name,id_list)
+      pending_changes_one_level_raw(parent_model_name,id_list).map{|pc|transform_to_render(pc)}
+    end
+
+
 
     def transform_to_render(pending_change)
       type = pending_change[:type]
@@ -136,7 +138,8 @@ module Ramaze::Helper
         :image_id => image[:display_name],
         :image_name => image[:id]
       }
-    end 
+    end
+=end 
   end
 end
 

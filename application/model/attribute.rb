@@ -16,9 +16,13 @@ module XYZ
       column :data_type, :varchar, :size => 25
       column :semantic_type, :json #points to structural info for a json var 
       column :semantic_type_summary, :varchar, :size => 25 #for efficiency optional token that summarizes info from semantic_type
-      column :read_only, :boolean, :default => false #true means variable is automtcally set
+
+      #TODO: these may be redundant; if so wil remove one
+      column :read_only, :boolean, :default => false 
+      column :dynamic, :boolean, :default => false #means dynamically set by an executable action
+
       column :required, :boolean, :default => false #whether required for this attribute to have a value inorder to execute actions for parent component; TODO: may be indexed by action
-      column :dynamic, :boolean, :default => false #means dynamically set by an execuatble action
+
 
       #columns related to links
       column :is_port, :boolean, :default => false

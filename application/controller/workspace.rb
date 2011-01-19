@@ -638,10 +638,12 @@ pp e.backtrace
 
 
     #TODO: just for testing this gets a datacenter id
-    def commit_test(datacenter_id)
+    def commit_test(datacenter_id=nil)
+      unless datacenter_id
+        pending_changes = pending_changes_to_render(datacenter_id)
+        pp [:pending_changes,pending_changes]
+      end
 
-      pending_changes = pending_changes_to_render(datacenter_id)
-pp [:pending_changes,pending_changes]
       tpl = R8Tpl::TemplateR8.new("workspace/commit_test",user_context())
       panel_id = request.params['panel_id']
 

@@ -18,7 +18,7 @@ module Ramaze::Helper
         next_level = pending_changes_one_level_to_render(:state_change,indexed_last_level.values.map{|x|x[:id]})
         break if next_level.empty?
         next_level.each do |pc|
-          parent = indexed_last_level[pc[:state_change_id]]
+          parent = indexed_last_level[pc[:parent_id]]
           parent[:state_changes] ||= Array.new
           parent[:state_changes] << pc
         end
@@ -98,7 +98,8 @@ module Ramaze::Helper
 
     def transform_to_render(pending_change)
       type = pending_change[:type]
-      ret = [:type,:id,:state_change_id].inject({}){|h,k|h.merge(k => pending_change[k])}
+      ret = [:type,:id].inject({}){|h,k|h.merge(k => pending_change[k])}
+      ret.merge!(:parent_id => pending_change[:state_change_id])
       to_add = case type
         when "setting" then transform_to_render_setting(pending_change)
         when "create_node" then transform_to_render_create_node(pending_change)
@@ -122,16 +123,16 @@ module Ramaze::Helper
     def transform_to_render_install_component(pending_change)
       attr =  pending_change[:attribute]
       cmp =  pending_change[:component]
-      { :component_id => cmp[:display_name],
-        :component_name => cmp[:id]
+      { :component_name => cmp[:display_name],
+        :component_id => cmp[:id]
       }
     end 
 
     def transform_to_render_create_node(pending_change)
       node =  pending_change[:node]
       image =  pending_change[:image]
-      { :node_id => node[:display_name],
-        :node_name => node[:id],
+      { :node_name => node[:display_name],
+        :node_id => node[:id],
         :image_id => image[:display_name],
         :image_name => image[:id]
       }

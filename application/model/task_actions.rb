@@ -70,6 +70,7 @@ module XYZ
       def initialize(state_change)
         hash = {
           :state_change_id => state_change[:id],
+          :state_change_types => [state_change[:type]],
           :attributes => Array.new,
           :node => state_change[:node],
           :image => state_change[:image]
@@ -186,6 +187,7 @@ module XYZ
         node = sample_state_change[:node]
         hash = {
           :node => node,
+          :state_change_types => on_node_state_changes.map{|sc|sc[:type]},
           :config_agent_type => on_node_state_changes.first.on_node_config_agent_type,
           :component_actions => ComponentAction.order_and_group_by_component(on_node_state_changes)
         }
@@ -214,8 +216,6 @@ module XYZ
           :state_change_pointer_ids => (state_changes_same_component||[]).map{|sc|sc[:id]},
           :attributes => Array.new,
           :component => state_change[:component],
-          :state_change_type => state_change[:type],
-          :id => state_change[:id], #TODO: is this needed? or should it be called state_change_id
           :on_node_config_agent_type => state_change.on_node_config_agent_type(),
         }
         self.new(hash)

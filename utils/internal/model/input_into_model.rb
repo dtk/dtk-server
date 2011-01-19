@@ -1,14 +1,16 @@
 module XYZ
   module InputIntoModelClassMixins
-    def input_into_model(container_id_handle,hash_with_assocs)
+    def input_into_model(container_id_handle,hash_with_assocs,opts={})
       c = container_id_handle[:c]
       fks = Hash.new
       hash_assigns = remove_fks_and_return_fks!(hash_with_assocs,fks)
       prefixes = update_from_hash_assignments(container_id_handle,hash_assigns)
+      ret_global_fks = nil
       unless fks.empty?
         container_id_info = IDInfoTable.get_row_from_id_handle(container_id_handle)
-        update_with_id_values(fks,c,prefixes,container_id_info[:uri])
+        ret_global_fks = update_with_id_values(fks,c,prefixes,container_id_info[:uri],opts)
       end
+      ret_global_fks
     end
 
     #TBD: using mixed forms (ForeignKeyAttr class and "*" form) now to avoid having to convert "*" form when doing an import
@@ -53,7 +55,8 @@ module XYZ
       obj
     end  
    
-    def update_with_id_values(fks,c,prefixes,container_uri)
+    def update_with_id_values(fks,c,prefixes,container_uri,opts={})
+      ret_global_fks = nil
       fks.each_pair do |fk_rel_uri_x,info|
         fk_rel_uri = ret_rebased_uri(fk_rel_uri_x ,prefixes,container_uri)
 	fk_rel_id_handle = IDHandle[:c => c, :uri => fk_rel_uri]
@@ -67,13 +70,21 @@ module XYZ
               create_simple_instance?(ref_uri,c,:set_display_name => true)
 	      ref_id_info = get_row_from_id_handle(IDHandle[:c => c, :uri => ref_uri])
             else
-	      Log.info("In import_into_model cannot find object with uri #{ref_uri}") 
+              unless opts[:ret_global_fks]
+                Log.info("In import_into_model cannot find object with uri #{ref_uri}") 
+              else
+                ret_global_fks ||= Hash.new
+                #purposely using fk_rel_uri (rebaselined) but ref_uri_x (raw)
+                ret_global_fks[fk_rel_uri] ||= Hash.new
+                ret_global_fks[fk_rel_uri][col] = ref_uri_x
+              end
               next
             end
           end
 	  update_instance(fk_rel_id_handle,{col.to_sym =>  ref_id_info[:id]})	  
         end
       end
+      ret_global_fks
     end
 
     def ret_rebased_uri(uri_x,prefixes,container_uri=nil)

@@ -32,7 +32,7 @@ module XYZ
             :result => TaskAction::Result::Succeeded.new(result_hash)
           }
           @task.update(update_hash)
-          executable_action.update_state(:completed)  #this send pending changes' states
+          executable_action.update_state_change_status(@task.model_handle,:completed)  #this send pending changes' states
           debug_pp [:task_succeeded,@task.id,result_hash]
           :succeeded              
         rescue CommandAndControl::Error => e

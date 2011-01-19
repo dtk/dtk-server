@@ -104,9 +104,29 @@ module XYZ
     end
 
     #### for rending tasks
+   public
     def render_form()
-      #TODO: stub
-      self
+      #may be different forms; this is one that is organized by node_group, node, component, attribute
+      #TODO: not yet teating node_group
+      return self
+      Task.group_by_node(unroll_tasks().map{|t|t.render_individual_task()})
+    end
+   private
+
+    def render_individual_task()
+      node = self[:node]
+      #type = 
+      common_vals = {
+        :status => self[:status],
+        :node_id => node[:id]
+      }
+      
+    end
+
+    def render_individual_task_create_node()
+    end
+    def self.group_by_node(task_list)
+      task_list
     end
   end
 end

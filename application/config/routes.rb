@@ -70,8 +70,8 @@ R8::Routes["state_change/list_pending"] = {
   [
    {
      :route => "state_change/list",
-     #:state_change_id will only pick up top level state changes and ones taht are pending
-     :action_params => [{:state_change_id => nil}, {:state => "pending"}],
+     #:state_change_id => nil will only pick up top level state changes second condition just picks out pending changes
+     :action_params => [{:state_change_id => nil}, {:status => "pending"}],
      :panel => "main_body"
    }
   ]

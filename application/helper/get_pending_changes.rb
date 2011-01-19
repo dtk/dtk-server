@@ -25,9 +25,9 @@ module Ramaze::Helper
         :relation => :state_change,
         :filter => [:and,
                     [:oneof, parent_field_name,id_list],
-                    [:eq, :type,"create_node"],
-                    [:eq, :state, "pending"]],
-        :columns => [:id, :relative_order,:type,:created_node,parent_field_name,:state_change_id].uniq
+                    [:eq, :type, "create_node"],
+                    [:eq, :status, "pending"]],
+        :columns => [:id,:relative_order,:type,:created_node,parent_field_name,:state_change_id].uniq
       }
       get_objects_from_search_pattern_hash(search_pattern_hash)
     end
@@ -38,8 +38,8 @@ module Ramaze::Helper
         :relation => :state_change,
         :filter => [:and,
                     [:oneof, parent_field_name, id_list],
-                    [:eq, :type,"install_component"],
-                    [:eq, :state, "pending"]],
+                    [:eq, :type, "install_component"],
+                    [:eq, :status, "pending"]],
         :columns => [:id, :relative_order,:type,:installed_component,parent_field_name,:state_change_id].uniq
       }
       get_objects_from_search_pattern_hash(search_pattern_hash)
@@ -51,8 +51,8 @@ module Ramaze::Helper
         :relation => :state_change,
         :filter => [:and,
                     [:oneof, parent_field_name, id_list],
-                    [:eq, :type,"setting"],
-                    [:eq, :state, "pending"]],
+                    [:eq, :type, "setting"],
+                    [:eq, :status, "pending"]],
         :columns => [:id, :relative_order,:type,:changed_attribute,parent_field_name,:state_change_id].uniq
       }      
       get_objects_from_search_pattern_hash(search_pattern_hash)

@@ -3,31 +3,7 @@ include MCollective::RPC
 module XYZ
   module CommandAndControlAdapter
     class Mcollective < CommandAndControlNodeConfig
-      def  self.wait_for_node_to_be_ready(node)
-        target_identity = nil
-        begin
-          rpc_client = nil
-          Lock.synchronize do
-            #TODO: check if need lock for this
-            options =   Options.merge(:disctimeout=> 2)
-            rpc_client = rpcclient("chef_client",:options => options)
-          end
-          #looping rather than just one discovery timeout because if node not connecetd msg lost
-          count = 0
-          while target_identity.nil? and count < 10
-            count += 1
-            target_identity = ret_discovered_mcollective_id(node,rpc_client)
-            sleep 5
-          end
-        ensure
-          rpc_client.disconnect() if rpc_client
-        end
-        pp [:new_node_target_idenity,target_identity]
-        #TODO: want to dleet node too in case timeout problem
-        raise ErrorWhileCreatingNode unless target_identity
-      end
-
-      def self.execute(config_node,attributes_to_set)
+      def self.execute(task_mh,config_node,attributes_to_set)
         result = nil
         updated_attributes = Array.new
         begin
@@ -53,6 +29,31 @@ module XYZ
         end
         [result,updated_attributes]
       end
+
+      def  self.wait_for_node_to_be_ready(node)
+        target_identity = nil
+        begin
+          rpc_client = nil
+          Lock.synchronize do
+            #TODO: check if need lock for this
+            options =   Options.merge(:disctimeout=> 2)
+            rpc_client = rpcclient("chef_client",:options => options)
+          end
+          #looping rather than just one discovery timeout because if node not connecetd msg lost
+          count = 0
+          while target_identity.nil? and count < 10
+            count += 1
+            target_identity = ret_discovered_mcollective_id(node,rpc_client)
+            sleep 5
+          end
+        ensure
+          rpc_client.disconnect() if rpc_client
+        end
+        pp [:new_node_target_idenity,target_identity]
+        #TODO: want to dleet node too in case timeout problem
+        raise ErrorWhileCreatingNode unless target_identity
+      end
+
      private
 
       def self.ret_discovered_mcollective_id(node,rpc_client)

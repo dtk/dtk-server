@@ -8,7 +8,7 @@ module XYZ
       attributes_to_set = task_action.attributes_to_set()
       task_mh = task.model_handle()
       task_action.get_and_update_attributes(task_mh)
-      result,updated_attributes = klass.execute(task_action,attributes_to_set)
+      result,updated_attributes = klass.execute(task_mh,task_action,attributes_to_set)
       propagate_attributes(updated_attributes)
       result
     end

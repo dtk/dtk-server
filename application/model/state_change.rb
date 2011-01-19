@@ -2,7 +2,7 @@ module XYZ
   class StateChange < Model
     set_relation_name(:state,:state_change)
     def self.up()
-      column :state, :varchar, :size => 15, :default => "pending" # | "executing" | "completed"
+      column :status, :varchar, :size => 15, :default => "pending" #  | "completed" TODO: may have  "executing" 
       column :type, :varchar, :size => 25# "setting" | "create-node" | "install_component" ?? "delete" | "patch-component" | "upgrade-component" | "rollback-component" 
       column :base_object, :json
       #TODO; may rename
@@ -169,7 +169,7 @@ module XYZ
           :ref => ref,
           :display_name => display_name,
           :base_object => item[:base_object],
-          :state => "pending",
+          :status => "pending",
           :type => type,
           :object_type => object_model_name.to_s,
           object_id_col => id,

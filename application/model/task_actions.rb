@@ -59,23 +59,19 @@ module XYZ
         end
       end
 
-      def update_state_aux(state,state_change_ids)
-        rows = state_change_ids.map{|id|{:id => id, :state => state.to_s}}
-        Model.update_from_rows(self[:state_change_model_handle],rows)
+      def update_state_change_status_aux(task_mh,status,state_change_ids)
+        rows = state_change_ids.map{|id|{:id => id, :status => status.to_s}}
+        state_change_mh = task_mh.createMH(:model_name => :state_change)
+        Model.update_from_rows(state_change_mh,rows)
       end
     end
 
     class CreateNode < TaskActionNode
       def initialize(state_change)
-        node = state_change[:node]
-        state_change_model_handle = state_change.model_handle()
-        #TODO: see if need these model handles in hash
         hash = {
           :state_change_id => state_change[:id],
           :attributes => Array.new,
-          :state_change_model_handle => state_change.model_handle(),
           :node => state_change[:node],
-          :node_id_handle => state_change_model_handle.createIDH(:id => node[:id],:model_name => :node),
           :image => state_change[:image]
         }
         super(hash)
@@ -94,16 +90,18 @@ module XYZ
         [:iaas,:ec2]
       end
 
-      def save_new_node_info()
+      def save_new_node_info(task_mh)
+        node = self[:node]
         hash = {
-          :external_ref => self[:node][:external_ref],
+          :external_ref => node[:external_ref],
           :type => "instance"
         }
-        Model.update_from_hash_assignments(self[:node_id_handle],hash)
+        node_idh = task_mh.createIDH(:model_name => :node, :id => node[:id])
+        Model.update_from_hash_assignments(node_idh,hash)
       end
 
-      def update_state(state)
-        update_state_aux(state,[self[:state_change_id]])
+      def update_state_change_status(task_mh,status)
+        update_state_change_status_aux(task_mh,status,[self[:state_change_id]])
       end
 
       def self.add_attributes!(attr_mh,action_list)
@@ -178,18 +176,16 @@ module XYZ
         [:node_config,nil]
       end
 
-      def update_state(state)
-        update_state_aux(state,self[:component_actions].map{|x|x[:state_change_pointer_ids]}.flatten)
+      def update_state_change_status(task_mh,status)
+        update_state_change_status_aux(task_mh,status,self[:component_actions].map{|x|x[:state_change_pointer_ids]}.flatten)
       end
 
      private
       def initialize(on_node_state_changes)
         sample_state_change = on_node_state_changes.first
         node = sample_state_change[:node]
-        state_change_model_handle = sample_state_change.model_handle()
         hash = {
           :node => node,
-          :state_change_model_handle => state_change_model_handle,
           :config_agent_type => on_node_state_changes.first.on_node_config_agent_type,
           :component_actions => ComponentAction.order_and_group_by_component(on_node_state_changes)
         }
@@ -218,7 +214,8 @@ module XYZ
           :state_change_pointer_ids => (state_changes_same_component||[]).map{|sc|sc[:id]},
           :attributes => Array.new,
           :component => state_change[:component],
-          :id => state_change[:id],
+          :state_change_type => state_change[:type],
+          :id => state_change[:id], #TODO: is this needed? or should it be called state_change_id
           :on_node_config_agent_type => state_change.on_node_config_agent_type(),
         }
         self.new(hash)

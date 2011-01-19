@@ -1,7 +1,7 @@
 module XYZ
   module CommandAndControlAdapter
     class Ec2 < CommandAndControlIAAS
-      def self.execute(create_node,attributes_to_set)
+      def self.execute(task_mh,create_node,attributes_to_set)
         #handle case where node has been created already (and error mayu have been time out waiting for node to be up
         instance_id = ((create_node[:node]||{})[:external_ref]||{})[:instance_id]
         if instance_id.nil?
@@ -20,7 +20,7 @@ module XYZ
           Log.info("node created with instance id #{instance_id}; waiting for it to be available")
           pp [:node_created,response]
           create_node[:node].merge!(:external_ref => external_ref)
-          create_node.save_new_node_info()
+          create_node.save_new_node_info(task_mh)
         else
           Log.info("node already created with instance id #{instance_id}; waiting for it to be available")
         end

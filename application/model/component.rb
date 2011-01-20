@@ -33,7 +33,7 @@ module XYZ
          [
           {
             :model_name => :state_change,
-            #TODO: avoidng use of :component_component
+            #TODO: avoiding use of :component_component
             :sequel_def => lambda{|ds|ds.where(:state => "pending").join(:attribute__attribute,{:id => :attribute_id}).group_and_count(:attribute__component_component_id)},
             :join_type => :left_outer,
             :join_cond=>{:component_component_id =>:component__id}

@@ -109,6 +109,7 @@ module XYZ
       #may be different forms; this is one that is organized by node_group, node, component, attribute
       task_list = render_form_flat(true)
       #TODO: not yet teating node_group
+      
       Task.render_group_by_node(task_list)
     end
 
@@ -122,22 +123,51 @@ module XYZ
 
    private
     def self.render_group_by_node(task_list)
-      #TODO: stub
-      task_list
+      ret = nil
+      indexed_nodes = Hash.new
+      indexed_cmps = Hash.new
+      task_list.each do |t|
+        if t[:level] == "top"
+          ret = t
+        elsif t[:level] == "node"
+          indexed_nodes[t[:node_id]] = t
+        elsif t[:level] == "component"
+          indexed_cmps[t[:component_id]] = t
+        end
+      end
+      task_list.each do |t|
+        if t[:level] == "node"
+          ret[:children] << t
+        elsif t[:level] == "component"
+          if indexed_nodes[t[:node_id]]
+            indexed_nodes[t[:node_id]][:children] << t
+          else
+            node_task = Task.render_task_on_node(:node_id => t[:node_id], :node_name => t[:node_name]) 
+            node_task[:children] << t
+            ret[:children] << node_task
+          end
+        elsif t[:level] == "attribute"
+          ##TODO: stub
+        end
+      end
+      ret
     end
 
     def render_top_task()
-      {:id => id(),
-        :type => "top"}
+      {:task_id => id(),
+        :level => "top",
+        :type => "top",
+        :action_on_failure=> self[:action_on_failure],
+        :children => Array.new
+      }
     end
 
     def render_executable_tasks()
       executable_action = self[:executable_action]
       sc = executable_action[:state_change_types]
       common_vals = {
-        :id => id(),
+        :task_id => id(),
         :status => self[:status],
-        :action_on_failure=> self[:action_on_failure]
       }
       ret =
         if sc.include?("create_node") then Task.render_tasks_create_node(executable_action)
@@ -146,23 +176,37 @@ module XYZ
         else 
           Log.error("do not treat executable tasks of type(s) #{sc.join(',')}")
       end
-      ret.map{|r|
-common_vals.merge(r)
-}
+      ret.map{|r|common_vals.merge(r)}
+    end
+
+    def self.render_task_on_node(node_info)
+      {:type => "on_node",
+        :level => "node",
+        :children => Array.new
+      }.merge(node_info)
     end
 
     def self.render_tasks_create_node(executable_action)
+      node = executable_action[:node]
       [{:type => "create_node",
-        :node_name => executable_action[:node][:display_name],
-        :image_name => executable_action[:image][:display_name]
+         :level => "node",
+         :node_id => node[:id],
+         :node_name => node[:display_name],
+         :image_name => executable_action[:image][:display_name],
+         :children => Array.new
       }]
     end
 
     def self.render_tasks_install_component(executable_action)
+      node = executable_action[:node]
       (executable_action[:component_actions]||[]).map do |component_action|
         component = component_action[:component]
         {:type => "install_component",
-          :component_name => component[:display_name] ? component[:display_name].gsub(/::/,"_") : nil,
+          :level => "component",
+          :node_id => node[:id],
+          :node_name => node[:display_name],
+          :component_id => component[:id],
+          :component_name => component[:display_name].gsub(/::/,"_") ,
           :component_basic_type => component[:basic_type]
         }
       end

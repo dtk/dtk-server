@@ -73,7 +73,7 @@ module XYZ
            :model_name => :component,
            :join_type => :inner,
            :join_cond=>{:id=> q(:state_change,:component_id)},
-           :cols=>[:id, :display_name, :external_ref, id(:node), :only_one_per_node]
+           :cols=>[:id, :display_name, :basic_type, :external_ref, id(:node), :only_one_per_node]
          },
          node,
          component_same_type 
@@ -92,7 +92,7 @@ module XYZ
            :model_name => :component,
            :join_type => :inner,
            :join_cond=>{:id=> p(:attribute,:component)},
-           :cols=>[:id, :display_name, :external_ref, id(:node), :only_one_per_node]
+           :cols=>[:id, :display_name, :basic_type, :external_ref, id(:node), :only_one_per_node]
          },
          node,
          component_same_type

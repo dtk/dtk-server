@@ -109,19 +109,19 @@ module XYZ
       #may be different forms; this is one that is organized by node_group, node, component, attribute
       task_list = render_form_flat(true)
       #TODO: not yet teating node_group
-      render_group_by_node(task_list)
+      Task.render_group_by_node(task_list)
     end
 
    protected
     #protected, not private, because of recursive call 
      def render_form_flat(top=false)
       #prune out all (sub)tasks except for top and  executable 
-      return [render_executable_task()] if self[:executable_action]
+      return render_executable_tasks() if self[:executable_action]
       (top ? [render_top_task()] : []) + subtasks.map{|e|e.render_form_flat()}.flatten
     end
 
    private
-    def render_group_by_node(task_list)
+    def self.render_group_by_node(task_list)
       #TODO: stub
       task_list
     end
@@ -131,21 +131,43 @@ module XYZ
         :type => "top"}
     end
 
-    def render_executable_task()
-      #TODO: stub
-      return self.merge(:subtasks => nil)
-
-      node = self[:node]
-      #type = 
+    def render_executable_tasks()
+      executable_action = self[:executable_action]
+      sc = executable_action[:state_change_types]
       common_vals = {
+        :id => id(),
         :status => self[:status],
-        :node_id => node[:id]
+        :action_on_failure=> self[:action_on_failure]
       }
-      
+      ret =
+        if sc.include?("create_node") then Task.render_tasks_create_node(executable_action)
+        elsif sc.include?("install_component") then Task.render_tasks_install_component(executable_action)
+        elsif sc.include?("setting") then task.render_tasks_setting(executable_action)
+        else 
+          Log.error("do not treat executable tasks of type(s) #{sc.join(',')}")
+      end
+      ret.map{|r|
+common_vals.merge(r)
+}
     end
 
-    def render_individual_task_create_node()
+    def self.render_tasks_create_node(executable_action)
+      [{:type => "create_node",
+        :node_name => executable_action[:node][:display_name],
+        :image_name => executable_action[:image][:display_name]
+      }]
     end
+
+    def self.render_tasks_install_component(executable_action)
+      (executable_action[:component_actions]||[]).map do |component_action|
+        component = component_action[:component]
+        {:type => "install_component",
+          :component_name => component[:display_name] ? component[:display_name].gsub(/::/,"_") : nil,
+          :component_basic_type => component[:basic_type]
+        }
+      end
+    end
+
     def self.group_by_node(task_list)
       task_list
     end

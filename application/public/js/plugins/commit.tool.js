@@ -70,7 +70,7 @@ taskDef.children[0].children[0].children = [];
 				});
 
 			},
-
+/*
 			getTreeNode: function(taskDef,viewType) {
 				var treeNode = R8.Utils.Y.Node.create('<ul>');
 				treeNode.set('id','task-'+taskDef.task_id+'-container');
@@ -80,7 +80,7 @@ taskDef.children[0].children[0].children = [];
 
 				return treeNode;
 			},
-
+*/
 			setTaskContent: function(taskDef,viewType,parentNode) {
 				var taskContent = '',taskClass='',editContent='',
 					taskId = 'task-'+taskDef.task_id+'-commit';
@@ -109,7 +109,7 @@ taskDef.children[0].children[0].children = [];
 							default:
 console.log('missing component type...');
 console.log(taskDef);
-								compTypei18n = '{unknown compontent type}';
+								compTypei18n = '{compontent_basic_type is NULL}';
 								break;
 						}
 						taskI18n = '<b>Install '+compTypei18n+'</b> ('+taskDef.component_name+')';

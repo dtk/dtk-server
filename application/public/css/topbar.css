@@ -86,6 +86,8 @@
 	background-position: -22px 0px;
 }
 
+/*----TODO: push this into js to be set at runtime-------*/
+
 .tool-item .tool-btn.add-users {
 	background-image: url(../images/topbar/add-users-btn-sprite.png);
 }
@@ -94,6 +96,9 @@
 }
 .tool-item .tool-btn.commit {
 	background-image: url(../images/topbar/commit-btn-sprite.png);
+}
+.tool-item .tool-btn.commit-test {
+	background-image: url(../images/topbar/commit-test-btn-sprite.png);
 }
 
 /*-------------------*/

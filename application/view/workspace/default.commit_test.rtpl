@@ -19,8 +19,8 @@
 							</ul>
 						</li>
 						<li><span class="install-module"><input type="checkbox"/><b>Install Module</b> (MySQLi)</span></li>
+						<li><span class="configure"><input type="checkbox"/><b>Configure</b> (Set error_reporting="E_ALL")</span></li>
 					</ul>
-					<li><span class="configure"><input type="checkbox"/><b>Configure</b> (Set error_reporting="E_ALL")</span></li>
 				</li>
 				<li class=""><span class="add-user"><input type="checkbox"/><b>Add User</b> (Rich)</span>
 					<ul>

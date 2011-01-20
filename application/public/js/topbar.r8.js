@@ -61,7 +61,16 @@ if(!R8.Topbar) {
 						R8.Ctrl.call(route,params);
 					}},
 					{id:'commit',i18n:'Commit',contentLoader:function(contentNode){
-						var route = 'workspace/commit_test',
+						var route = 'workspace/commit/'+R8.Workspace.get('context_id'),
+							params = {
+								'cfg':{
+									'data':'panel_id='+contentNode.get('id')
+								}
+							};
+						R8.Ctrl.call(route,params);
+					}},
+					{id:'commit-test',i18n:'Test Commit',contentLoader:function(contentNode){
+						var route = 'workspace/commit_test/'+R8.Workspace.get('context_id'),
 							params = {
 								'cfg':{
 									'data':'panel_id='+contentNode.get('id')

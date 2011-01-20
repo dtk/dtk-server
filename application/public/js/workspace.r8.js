@@ -61,6 +61,17 @@ if (!R8.Workspace) {
 				this.loadWorkspace();
 			},
 
+			get: function(item) {
+				switch(item) {
+					case "context_id":
+						return _currentViewSpace;
+						break;
+					case "modalNode":
+						return R8.Utils.Y.one('#'+_modalNodeId+'-content');
+						break;
+				}
+			},
+
 			setupViewspace : function() {
 				YUI().use('anim', function(Y){
 					R8.Workspace.viewspaceAnim = new Y.Anim({

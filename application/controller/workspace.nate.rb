@@ -637,9 +637,9 @@ pp e.backtrace
     end
 
 
+    #TODO: just for testing this gets a datacenter id
     def commit(datacenter_id=nil)
       if datacenter_id
-#TODO: Move pending changes retrive inside of create_commit_task
         pending_changes = flat_list_pending_changes_in_datacenter(datacenter_id.to_i)
         unless pending_changes.empty?
 #TODO: cleanup interface to tasks/pending changes
@@ -651,11 +651,6 @@ pp e.backtrace
 #          commit_task = create_commit_task(group_id)
           commit_task = create_task_from_pending_changes(pending_changes)
           commit_task.save!()
-=begin
-POSSIBLE CHANGES TO HASH
-  -task_id to id
-  -
-=end
 
 #default if nothing passed is json, make extensible for xml formatting for tuture possible integrations
 #          commit_tree = top_level_task.render_commit_tree()
@@ -666,8 +661,8 @@ POSSIBLE CHANGES TO HASH
         end
       end
 
-#      tpl = R8Tpl::TemplateR8.new("workspace/commit_test",user_context())
-#      panel_id = request.params['panel_id']
+      tpl = R8Tpl::TemplateR8.new("workspace/commit_test",user_context())
+      panel_id = request.params['panel_id']
 
       include_js('plugins/commit.tool')
       include_js('external/jquery.treeview')
@@ -675,12 +670,13 @@ POSSIBLE CHANGES TO HASH
 #      include_js('plugins/user.component')
 #      run_javascript('setTimeout(initUserForm,500);')
       commit_tree_json = JSON.generate(commit_tree)
-
+#pp '@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@'
+#pp commit_tree_json
       run_javascript("R8.CommitTool.renderTree(#{commit_tree_json},'edit');")
 
       return {
-#        :content=> tpl.render(),
-#        :panel=>panel_id
+        :content=> tpl.render(),
+        :panel=>panel_id
       }
     end
 

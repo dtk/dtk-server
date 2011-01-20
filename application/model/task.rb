@@ -199,13 +199,12 @@ module XYZ
 
     def self.render_tasks_install_component(executable_action)
 
-=begin
-Need to solve bug where value in json, not hash form
+
       #TODO: stub for testing
       if y=executable_action[:component_actions].first[:attributes]
         x=AttributeComplexType.flatten_attribute_list(y)
       end
-=end
+
       node = executable_action[:node]
       (executable_action[:component_actions]||[]).map do |component_action|
         component = component_action[:component]

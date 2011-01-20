@@ -53,12 +53,18 @@ module XYZ
           end.compact
           ret
         end
-        def attribute_name(var_name_path,opts={})
-          #TODO: assume form is node[recipe][x1] or node[recipe][x1][x2] or ..
-          reverse_keys = var_name_path.gsub(/^node\[/,"").gsub(/\]$/,"").split("][").reverse
+        def attribute_name(external_ref_path,opts={})
+          reverse_keys = to_array_form(external_ref_path).reverse
           reverse_keys.pop if opts[:strip_off_recipe_name]
           f = reverse_keys.shift
           reverse_keys.inject(f){|h,k|{k => h}}
+        end
+        #TODO: centralize this fn so can be used here and when populate external refs
+          #TODO: assume form is node[recipe][x1] or node[recipe][x1][x2] or ..
+          #service[recipe][x1] or service[recipe][x1][x2] or ..
+        def to_array_form(external_ref_path)
+          #TODO: use regexp disjunction
+          external_ref_path.gsub(/^node\[/,"").gsub(/^service\[/,"").gsub(/\]$/,"").split("][")
         end
       end
     end

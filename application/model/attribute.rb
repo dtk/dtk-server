@@ -200,6 +200,10 @@ also related is allowing omission of columns mmentioned in jon condition; post p
       self[:value_asserted] || self[:value_derived]
     end
 
+    def needs_to_be_set()
+      attribute_value().nil? and self[:required] and not self[:read_only]
+    end
+
     def port_is_external()
       return nil unless self[:is_port]
       return nil unless self[:semantic_type_summary]

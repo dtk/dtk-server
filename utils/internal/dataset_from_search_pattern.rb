@@ -24,8 +24,7 @@ module XYZ
         def process_local_and_remote_dependencies(search_object,simple_dataset,remote_col_info=nil,vcol_sql_fns=nil)
           model_handle = simple_dataset.model_handle()
           base_field_set = search_object.field_set()
-          vcol_sql_fns_just_in_col = base_field_set.vcol_sql_fns_for_just_columns(vcol_sql_fns)
-          unless remote_col_info or vcol_sql_fns or vcol_sql_fns_just_in_col
+          unless remote_col_info or vcol_sql_fns 
             opts = {} #TODO: stub
             return simple_dataset.paging_and_order(opts)
           end
@@ -48,14 +47,14 @@ module XYZ
           end
 
           #add any global columns or global where clauses
-          if vcol_sql_fns or vcol_sql_fns_just_in_col
+          if vcol_sql_fns 
             wc_exprs = (vcol_sql_fns||[]).map{|vcol,vcol_info| vcol_info[:sql_fn] ? vcol_info[:expr] : nil}.compact
             wc = (wc_exprs.empty? ? nil : SimpleSearchPattern::ret_sequel_filter([:and] + wc_exprs, model_handle))
 
             post_proc_exprs = (vcol_sql_fns||[]).map{|vcol,vcol_info| vcol_info[:sql_fn] ? nil : vcol_info[:expr]}.compact
             post_proc_filter = (post_proc_exprs.empty? ? nil : [:and] + post_proc_exprs)
 
-            vcol_values = ((vcol_sql_fns||{}).merge(vcol_sql_fns_just_in_col||{})).map{|vcol,vcol_info|vcol_info[:sql_fn] ? {:column => vcol, :value => vcol_info[:sql_fn]} : nil}.compact
+            vcol_values = (vcol_sql_fns||{}).map{|vcol,vcol_info|vcol_info[:sql_fn] ? {:column => vcol, :value => vcol_info[:sql_fn]} : nil}.compact
 
             graph_ds = graph_ds.add_virtual_column_aliases(vcol_values)
             graph_ds = graph_ds.from_self.where(wc) if wc 

@@ -43,21 +43,6 @@ module XYZ
         FieldSet.new(@model_name,@cols & field_set.cols)
       end
 
-      #this finds virtual columns that are to be used in column but not where clause (ones in vcol_sql_fns are for wheer clause
-      def vcol_sql_fns_for_just_columns(vcol_sql_fns)
-        return nil unless vcolumns = (DB_REL_DEF[model_name]||{})[:virtual_columns] 
-        ret = Hash.new
-        included_already = vcol_sql_fns ? vcol_sql_fns.keys : []
-        @cols.each do |f|
-          vcol = vcolumns[f]
-          next unless vcol 
-          next if included_already.include?(vcol)
-          next unless vcol[:sql_fn]
-          ret[f] = vcol
-        end
-        ret.empty? ? nil : ret
-      end
-
       def extra_local_columns(vcol_sql_fns=nil)
         return nil unless vcolumns = (DB_REL_DEF[model_name]||{})[:virtual_columns] 
         extra_cols = Array.new

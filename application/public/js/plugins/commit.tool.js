@@ -64,6 +64,11 @@ taskDef.children[0].children[0].children = [];
 
 				this.setTaskContent(taskDef,viewType,rootNode);
 				R8.Workspace.get('modalNode').append(rootNode);
+
+				$("#"+rootNode.get('id')).treeview({
+					collapsed: true
+				});
+
 			},
 
 			getTreeNode: function(taskDef,viewType) {

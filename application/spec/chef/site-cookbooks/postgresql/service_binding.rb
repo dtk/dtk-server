@@ -1,11 +1,11 @@
 service :postgresql do
-  attribute "sap_config/ipv4",
+  attribute "sap_config_ipv4",
     :recipes => ["postgresql::server"],
     :type => "hash",
     :description => "postgres ip service access point configuration",
     :semantic_type => {
       ":array" => {
-        "sap_config[ipv4]" => {
+        "sap_config_ipv4" => {
           "application" => {
             "type" => "sql::postgresql" 
           }}}},

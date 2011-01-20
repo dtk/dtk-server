@@ -133,7 +133,7 @@ module XYZ
            :output_id => sap_config_id,
            :type => "internal",
            :hidden => true,
-           :function => "sap_config[ipv4]",
+           :function => "sap_config_ipv4",
            :node_node_id => node_id
          },
          {
@@ -143,7 +143,7 @@ module XYZ
            :output_id => ipv4_id,
            :type => "internal",
            :hidden => true,
-           :function => "host_address[ipv4]",
+           :function => "host_address_ipv4",
            :node_node_id => node_id
          }
         ]

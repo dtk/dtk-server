@@ -21,7 +21,7 @@ module XYZ
           end
         end
       end
-      process_global_keys(global_fks,target_id_handle[:c]) unless global_fks.empty?
+      process_global_keys(global_fks,target_id_handle[:c]) unless global_fks.nil? or global_fks.empty?
     end
 
     def create_prefix_object_if_needed(target_id_handle,opts={})

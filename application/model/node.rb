@@ -120,7 +120,7 @@ module XYZ
       field_set = Model::FieldSet.new(:node,[:id,:node_attributes])
       filter = [:and, [:eq, :node__id, node_id_handle.get_id()]]
       #TDOO: might match on ref or semantic type instead
-      global_wc = {:attribute__semantic_type_summary => "host_address[ipv4]"}
+      global_wc = {:attribute__semantic_type_summary => "host_address_ipv4"}
       ds = SearchObject.create_from_field_set(field_set,cmp_id_handle[:c],filter).create_dataset().where(global_wc)
 
       ipv4_host_addrs_info = (ds.all.first||{})[:attribute]

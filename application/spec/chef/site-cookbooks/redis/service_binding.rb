@@ -1,6 +1,6 @@
 service :redis_service do
-  attribute "sap_config/ipv4",
-   :semantic_type => {":array" => {"sap_config[ipv4]" => {"application" => "redis"}}},
+  attribute "sap_config_ipv4",
+   :semantic_type => {":array" => {"sap_config_ipv4" => {"application" => "redis"}}},
    :type => "hash",
    :port_type => "input",
    :description => "redis ip service access point configuration",

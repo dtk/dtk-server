@@ -201,10 +201,11 @@ module XYZ
 
 
       #TODO: stub for testing
+=begin
       if y=executable_action[:component_actions].first[:attributes]
         x=AttributeComplexType.flatten_attribute_list(y)
       end
-
+=end
       node = executable_action[:node]
       (executable_action[:component_actions]||[]).map do |component_action|
         component = component_action[:component]

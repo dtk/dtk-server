@@ -20,14 +20,14 @@ module XYZ
           prefix[:eth0][:family] = 'ipv4' 
 
           source_complete_for target[:attribute]          
-          prefix = target[:attribute]["host_addresses[ipv4]".to_sym]
-          prefix[:display_name] = "host_addresses[ipv4]"
+          prefix = target[:attribute][:host_addresses_ipv4]
+          prefix[:display_name] = "host_addresses_ipv4"
           prefix[:is_port] = true
           prefix[:read_only] = true
           prefix[:dynamic] = true
           prefix[:data_type] = "json"
-          prefix[:semantic_type] = {":array" => "host_address[ipv4]"}
-          prefix[:semantic_type_summary] = "host_address[ipv4]"
+          prefix[:semantic_type] = {":array" => "host_address_ipv4"}
+          prefix[:semantic_type_summary] = "host_address_ipv4"
           prefix[:value_derived] = [nil]
 
         end

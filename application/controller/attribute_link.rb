@@ -48,6 +48,7 @@ module XYZ
               ]
 =end
     def get_under_context_list(explicit_hash=nil)
+
       hash = explicit_hash || request.params
 
       #TODO: ignoring query filters no
@@ -56,8 +57,8 @@ module XYZ
       raise Error.new("did not get context_list") unless context_list
       #TODO: only handling nodes
       item_ids = context_list.reject{|x|not x["model"] == "node"}.map{|y|y["id"] ? y["id"].to_i : nil}.compact
-      raise Error.new("no valid ids given") if item_ids.empty?
-#      aux_list_on_node_ports(ids)
+
+      return {'data'=> Array.new} if item_ids.empty?
 
       filter = item_ids ? [:and, [:oneof, :id, item_ids]] : nil
       cols = [:id,:display_name,:port_links]

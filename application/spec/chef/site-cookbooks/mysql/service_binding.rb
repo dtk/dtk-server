@@ -5,13 +5,13 @@ service :mysql_server do
     :description => "db userid for monitoring application to use",
     :transform => "root"
 
-  attribute "sap_config/ipv4",
+  attribute "sap_config_ipv4",
     :recipes => ["mysql::server","mysql::server2"],
     :type => "hash",
     :description => "mysql ip service access point configuration",
     :semantic_type => {
       ":array" => {
-        "sap_config[ipv4]" => {
+        "sap_config_ipv4" => {
           "application" => {
             "type" => "sql::mysql", 
             "clients_provide_dbs" => true
@@ -22,10 +22,10 @@ service :mysql_server do
        "protocol" => "tcp"
      }]
 
-  attribute "sap/socket",
+  attribute "sap_socket",
     :recipes => ["mysql::server","mysql::server2"],
     :description => "mysql unix socket service access point",
-    :semantic_type => {"sap[socket]" => {"application" => {"type" => "sql::mysql"}}},
+    :semantic_type => {"sap_socket" => {"application" => {"type" => "sql::mysql"}}},
     :type => "hash",
     :transform =>
       {
@@ -38,7 +38,7 @@ service :mysql_server do
     :description => "mysql ip service access point configuration for slave",
     :semantic_type => { 
       ":array" => {
-        "sap_config[ipv4]" => {
+        "sap_config_ipv4" => {
           "application" => {
             "type" => "sql::mysql", 
             "clients_provide_dbs" => false

@@ -57,7 +57,7 @@ module XYZ
       end
      private
       AttributeToSetMapping = {
-        "host_addresses[ipv4]" =>  lambda{|server|[server[:dns_name]]}
+        "host_addresses_ipv4" =>  lambda{|server|[server[:dns_name]]}
       }
 
       #TODO: sharing ec2 connection with ec2 datasource

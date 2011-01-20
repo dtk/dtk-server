@@ -347,7 +347,7 @@ also related is allowing omission of columns mmentioned in jon condition; post p
       field_set = Model::FieldSet.new(:component,[:id,:display_name,:attributes])
      #TODO: allowing feature in until nest features in base services filter = [:and, [:eq, :component__id, component_id],[:eq, :basic_type,"service"]]
       filter = [:and, [:eq, :component__id, component_id]]
-      global_wc = {:attribute__semantic_type_summary => "sap_config[ipv4]"}
+      global_wc = {:attribute__semantic_type_summary => "sap_config_ipv4"}
       ds = SearchObject.create_from_field_set(field_set,cmp_id_handle[:c],filter).create_dataset().where(global_wc)
 
       #should only be one attribute matching (or none)
@@ -374,16 +374,16 @@ also related is allowing omission of columns mmentioned in jon condition; post p
 
       new_sap_attr_rows =
         [{
-          :ref => "sap[ipv4]",
-          :display_name => "sap[ipv4]", 
+          :ref => "sap_ipv4",
+          :display_name => "sap_ipv4", 
           :component_component_id => component_id,
           :value_derived => new_sap_value_list,
           :is_port => true,
           :data_type => "json",
           :description => description,
           #TODO: need the  => {"application" => service qualification)
-          :semantic_type => {":array" => "sap[ipv4]"},
-          :semantic_type_summary => "sap[ipv4]"
+          :semantic_type => {":array" => "sap_ipv4"},
+          :semantic_type_summary => "sap_ipv4"
          }]
 
       attr_mh = sap_config_attr_idh.createMH()

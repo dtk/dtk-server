@@ -15,38 +15,6 @@
     "providing": {
     },
     "attributes": {
-      "mysql/_service/mysql_server/sap_config/ipv4": {
-        "required": "optional",
-        "is_service_attribute": true,
-        "calculated": false,
-        "transform": [
-          {
-            "port": {
-              "__ref": "node[mysql][port]"
-            },
-            "protocol": "tcp"
-          }
-        ],
-        "choice": [
-
-        ],
-        "type": "hash",
-        "recipes": [
-          "mysql::server",
-          "mysql::server2"
-        ],
-        "description": "mysql ip service access point configuration",
-        "semantic_type": {
-          ":array": {
-            "sap_config[ipv4]": {
-              "application": {
-                "clients_provide_dbs": true,
-                "type": "sql::mysql"
-              }
-            }
-          }
-        }
-      },
       "mysql/_service/mysql_server/monitor_user_id": {
         "required": "optional",
         "is_service_attribute": true,
@@ -152,6 +120,38 @@
         "display_name": "MySQL Bind Address",
         "description": "Address that mysqld should listen on"
       },
+      "mysql/_service/mysql_server/sap_config_ipv4": {
+        "required": "optional",
+        "is_service_attribute": true,
+        "calculated": false,
+        "transform": [
+          {
+            "port": {
+              "__ref": "node[mysql][port]"
+            },
+            "protocol": "tcp"
+          }
+        ],
+        "choice": [
+
+        ],
+        "type": "hash",
+        "recipes": [
+          "mysql::server",
+          "mysql::server2"
+        ],
+        "description": "mysql ip service access point configuration",
+        "semantic_type": {
+          ":array": {
+            "sap_config_ipv4": {
+              "application": {
+                "clients_provide_dbs": true,
+                "type": "sql::mysql"
+              }
+            }
+          }
+        }
+      },
       "mysql/tunable/back_log": {
         "required": "optional",
         "calculated": false,
@@ -246,7 +246,7 @@
         "description": "mysql ip service access point configuration for slave",
         "semantic_type": {
           ":array": {
-            "sap_config[ipv4]": {
+            "sap_config_ipv4": {
               "application": {
                 "clients_provide_dbs": false,
                 "type": "sql::mysql"
@@ -269,7 +269,21 @@
         ],
         "display_name": "MySQL Tunable Net Read Timeout"
       },
-      "mysql/_service/mysql_server/sap/socket": {
+      "mysql/tunable/max_connections": {
+        "required": "optional",
+        "calculated": false,
+        "choice": [
+
+        ],
+        "default": "800",
+        "type": "string",
+        "recipes": [
+          "mysql::server",
+          "mysql::server2"
+        ],
+        "display_name": "MySQL Tunable Max Connections"
+      },
+      "mysql/_service/mysql_server/sap_socket": {
         "required": "optional",
         "is_service_attribute": true,
         "calculated": false,
@@ -286,26 +300,12 @@
         ],
         "description": "mysql unix socket service access point",
         "semantic_type": {
-          "sap[socket]": {
+          "sap_socket": {
             "application": {
               "type": "sql::mysql"
             }
           }
         }
-      },
-      "mysql/tunable/max_connections": {
-        "required": "optional",
-        "calculated": false,
-        "choice": [
-
-        ],
-        "default": "800",
-        "type": "string",
-        "recipes": [
-          "mysql::server",
-          "mysql::server2"
-        ],
-        "display_name": "MySQL Tunable Max Connections"
       },
       "mysql/tunable/table_cache": {
         "required": "optional",

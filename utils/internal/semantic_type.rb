@@ -13,9 +13,9 @@ module XYZ
       return {:value_derived => output_value_aux(), :link_info => nil} if function == "eq"
       hash_ret = 
         case function
-         when "sap_config[ipv4]" 
+         when "sap_config_ipv4" 
           propagate_when_sap_config_ipv4()
-         when "host_address[ipv4]"
+         when "host_address_ipv4"
           propagate_when_host_address_ipv4()
          when "select_one"
           propagate_when_select_one()
@@ -240,12 +240,12 @@ Debug.print_and_ret(
 
     TranslationToSchema = self.new( 
     {
-      "sap_config[ipv4]" => {
+      "sap_config_ipv4" => {
         "port" =>  {:required => true, :type => :integer},
         "protocol" => {:required => true, :type => :string},
         "binding_addr_constraints" => {:type => :json}
       },
-      "sap[ipv4]" => {
+      "sap_ipv4" => {
         "port" => {:required => true, :type => :integer},
         "protocol" => {:required => true, :type => :string},
         "host_address" => {:required => true, :type => :string}
@@ -260,7 +260,7 @@ Debug.print_and_ret(
          {"socket_file" => {:required => true, :type => :string}}
         ]
       },
-      "sap[socket]" => {
+      "sap_socket" => {
         "socket_file" => {:required => true, :type => :string}
       },
       
@@ -276,9 +276,9 @@ Debug.print_and_ret(
     #TODO: rather than external may have :internal_only
     Info =
       {
-      "sap_config[ipv4]" => {
+      "sap_config_ipv4" => {
       },
-      "sap[ipv4]" => {
+      "sap_ipv4" => {
         :external => true,
         :port_type => "output"
       },
@@ -286,7 +286,7 @@ Debug.print_and_ret(
         :external => true,
         :port_type => "input"
       },
-      "sap[socket]" => {
+      "sap_socket" => {
       },
       "db_info" => {
 #        :external => true,

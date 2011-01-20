@@ -645,6 +645,8 @@ pp e.backtrace
           top_level_task = create_task_from_pending_changes(pending_changes)
           top_level_task.save!()
           rendered_tasks = top_level_task.render_form()
+          add_i18n_strings_to_rendered_tasks!(rendered_tasks)
+
           pp [:rendered_tasks,rendered_tasks]
           delete_instance(top_level_task.id())
         end

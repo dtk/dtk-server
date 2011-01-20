@@ -1084,7 +1084,7 @@
         "user_account": {
           "ds_key": "[:user_data, \"/library/test/user_account\"]",
           "type": "template",
-          "only_one_per_node": true,
+          "only_one_per_node": false,
           "ui": {
             "images": {
               "tnail": "user.png",

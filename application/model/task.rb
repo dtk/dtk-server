@@ -167,7 +167,7 @@ module XYZ
       }
       if sc.include?("create_node") then Task.render_tasks_create_node(executable_action,common_vals)
       elsif sc.include?("install_component") then Task.render_tasks_install_component(executable_action,common_vals)
-      elsif sc.include?("setting") then task.render_tasks_setting(executable_action,common_vals)
+      elsif sc.include?("setting") then Task.render_tasks_setting(executable_action,common_vals)
       else 
         Log.error("do not treat executable tasks of type(s) #{sc.join(',')}")
       end
@@ -203,6 +203,27 @@ module XYZ
         }
         task = {
           :type => "install_component",
+          :level => "component",
+          :node_id => node[:id],
+          :node_name => node[:display_name],
+          :component_basic_type => component[:basic_type]
+        }
+        task.merge!(cmp_attrs)
+        task.merge!(common_vals)
+        add_attributes_to_component_task!(task,component_action,cmp_attrs)
+      end
+    end
+
+    def self.render_tasks_setting(executable_action,common_vals)
+      node = executable_action[:node]
+      (executable_action[:component_actions]||[]).map do |component_action|
+        component = component_action[:component]
+        cmp_attrs = {
+          :component_id => component[:id],
+          :component_name => component[:display_name].gsub(/::/,"_")
+        }
+        task = {
+          :type => "on_component",
           :level => "component",
           :node_id => node[:id],
           :node_name => node[:display_name],

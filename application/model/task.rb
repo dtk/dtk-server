@@ -170,14 +170,12 @@ module XYZ
         :task_id => id(),
         :status => self[:status],
       }
-      ret =
-        if sc.include?("create_node") then Task.render_tasks_create_node(executable_action)
-        elsif sc.include?("install_component") then Task.render_tasks_install_component(executable_action)
-        elsif sc.include?("setting") then task.render_tasks_setting(executable_action)
-        else 
-          Log.error("do not treat executable tasks of type(s) #{sc.join(',')}")
+      if sc.include?("create_node") then Task.render_tasks_create_node(executable_action,common_vals)
+      elsif sc.include?("install_component") then Task.render_tasks_install_component(executable_action,common_vals)
+      elsif sc.include?("setting") then task.render_tasks_setting(executable_action,common_vals)
+      else 
+        Log.error("do not treat executable tasks of type(s) #{sc.join(',')}")
       end
-      ret.map{|r|common_vals.merge(r)}
     end
 
     def self.render_task_on_node(node_info)
@@ -187,38 +185,61 @@ module XYZ
       }.merge(node_info)
     end
 
-    def self.render_tasks_create_node(executable_action)
+    def self.render_tasks_create_node(executable_action,common_vals)
       node = executable_action[:node]
-      [{:type => "create_node",
-         :level => "node",
-         :node_id => node[:id],
-         :node_name => node[:display_name],
-         :image_name => executable_action[:image][:display_name],
-         :children => Array.new
-      }]
+      task = {
+        :type => "create_node",
+        :level => "node",
+        :node_id => node[:id],
+        :node_name => node[:display_name],
+        :image_name => executable_action[:image][:display_name],
+        :children => Array.new
+      }
+      [task.merge(common_vals)]
     end
 
-    def self.render_tasks_install_component(executable_action)
-
-
-      #TODO: stub for testing
-=begin
-      if y=executable_action[:component_actions].first[:attributes]
-        x=AttributeComplexType.flatten_attribute_list(y)
-      end
-=end
+    def self.render_tasks_install_component(executable_action,common_vals)
       node = executable_action[:node]
       (executable_action[:component_actions]||[]).map do |component_action|
         component = component_action[:component]
-        {:type => "install_component",
+        cmp_attrs = {
+          :component_id => component[:id],
+          :component_name => component[:display_name].gsub(/::/,"_")
+        }
+        task = {
+          :type => "install_component",
           :level => "component",
           :node_id => node[:id],
           :node_name => node[:display_name],
-          :component_id => component[:id],
-          :component_name => component[:display_name].gsub(/::/,"_") ,
           :component_basic_type => component[:basic_type]
         }
+        task.merge!(cmp_attrs)
+        task.merge!(common_vals)
+        add_attributes_to_component_task!(task,component_action,cmp_attrs)
       end
+    end
+
+    def self.add_attributes_to_component_task!(task,component_action,cmp_attrs)
+      attributes = component_action[:attributes]
+      return task unless attributes
+      children = task[:children]
+      flattten_attrs = AttributeComplexType.flatten_attribute_list(attributes)
+      flattten_attrs.each do |a|
+        attr_task = {
+          :type => "setting",
+          :level => "attribute",
+          :attribute_id => a[:id],
+          :attribute_name => a[:display_name],
+          :attribute_value => a[:attribute_value],
+          :attribute_data_type => a[:data_type],
+          :attribute_required => a[:required],
+          :attribute_dynamic => a[:dynamic]
+        }
+        attr_task.merge!(cmp_attrs)
+        #TODO: debug component_action children << attr_task
+        pp attr_task
+      end
+      task
     end
   end
 end

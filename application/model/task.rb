@@ -123,6 +123,7 @@ module XYZ
 
    private
     def self.render_group_by_node(task_list)
+      return task_list if task_list.size < 2
       ret = nil
       indexed_nodes = Hash.new
       indexed_cmps = Hash.new

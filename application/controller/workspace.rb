@@ -638,6 +638,7 @@ pp e.backtrace
 
 
     def commit(datacenter_id=nil)
+      commit_tree = Hash.new
       if datacenter_id
 #TODO: Move pending changes retrive inside of create_commit_task
         pending_changes = flat_list_pending_changes_in_datacenter(datacenter_id.to_i)

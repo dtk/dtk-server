@@ -48,23 +48,30 @@ module XYZ
           (action[:attributes]||[]).each do |attr|
             var_name_path = (attr[:external_ref]||{})[:path]
             val = attr[:attribute_value]
-            #TODO: after testing remove nils
-            ret.merge!(attribute_name(var_name_path,opts) => val) if var_name_path
-          end.compact
+            add_attribute!(ret,to_array_form(var_name_path,opts),val) if var_name_path
+          end
           ret
         end
-        def attribute_name(external_ref_path,opts={})
-          reverse_keys = to_array_form(external_ref_path).reverse
-          reverse_keys.pop if opts[:strip_off_recipe_name]
-          f = reverse_keys.shift
-          reverse_keys.inject(f){|h,k|{k => h}}
+
+        def add_attribute!(ret,array_form_path,val)
+          size = array_form_path.size
+          if size == 1
+          #TODO: after testing remove setting nils
+            ret[array_form_path.first] = val
+          else
+            ret[array_form_path.first] ||= Hash.new
+            add_attribute!(ret[array_form_path.first],array_form_path[1..size-1],val)
+          end
         end
+
         #TODO: centralize this fn so can be used here and when populate external refs
           #TODO: assume form is node[recipe][x1] or node[recipe][x1][x2] or ..
           #service[recipe][x1] or service[recipe][x1][x2] or ..
-        def to_array_form(external_ref_path)
+        def to_array_form(external_ref_path,opts)
           #TODO: use regexp disjunction
-          external_ref_path.gsub(/^node\[/,"").gsub(/^service\[/,"").gsub(/\]$/,"").split("][")
+          ret = external_ref_path.gsub(/^node\[/,"").gsub(/^service\[/,"").gsub(/\]$/,"").split("][")
+          ret.shift if opts[:strip_off_recipe_name]
+          ret
         end
       end
     end

@@ -55,6 +55,8 @@ module XYZ
       virtual_column :parent_name, :possible_parents => [:component,:node]
       many_to_one :component, :node
 
+      virtual_column :unraveled_attribute_id, :type => :varchar, :hidden => true #TODO put in depenedncies
+      #TODO: may deprecate
       virtual_column :qualified_attribute_name_under_node, :type => :varchar, :hidden => true #TODO put in depenedncies
       virtual_column :qualified_attribute_id_under_node, :type => :varchar, :hidden => true #TODO put in depenedncies
       virtual_column :qualified_attribute_name, :type => :varchar, :hidden => true #not giving dependences because assuming right base_object included in col list
@@ -226,13 +228,17 @@ also related is allowing omission of columns mmentioned in jon condition; post p
       has_req_fields ? false : true
     end
 
+    def unraveled_attribute_id()
+      qualified_attribute_id_aux()
+    end
+
+    #TODO: may deprecate below
     def qualified_attribute_name_under_node()
       qualified_attribute_name_aux()
     end
     def qualified_attribute_id_under_node()
       qualified_attribute_id_aux()
     end
-
     def qualified_attribute_name()
       node_or_group_name =
         if self[:node] then self[:node][:display_name]

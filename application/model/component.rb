@@ -22,8 +22,8 @@ module XYZ
         [
          {
            :model_name => :attribute,
-           :join_type => :inner,
-           :join_cond=>{:component_component_id =>:component__id},
+           :join_type => :left_outer,
+           :join_cond=>{:component_component_id => q(:component,:id)}, #TODO: want to use p(:component,:attribute) on left hand side
            :cols => [:id,:display_name,:component_component_id,:value_derived,:value_asserted,:semantic_type,:semantic_type_summary]
          }
         ]

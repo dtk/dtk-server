@@ -1,5 +1,37 @@
 module XYZ
   class ComponentController < Controller
+
+    def edit2(component_id)
+      search_pattern_hash = {
+        :relation => :attribute,
+        :filter => [:and, 
+                    [:eq, DB.parent_field(:component,:attribute), component_id],
+                    [:eq, :hidden, false]],
+        :columns => [:id,:display_name,:attribute_value,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
+      }
+      raw_attributes = get_objects_from_search_pattern_hash(search_pattern_hash)
+
+      attribute_list = AttributeComplexType.flatten_attribute_list(raw_attributes)
+      #add name and attr_id from :qualified_attribute_name_under_node and :qualified_attribute_id_under_node
+      attribute_list.each do |el|
+        el[:attribute_id] = el[:unraveled_attribute_id]
+        el[:attribute_name] = el[:display_name]
+      end
+      #order attribute list :qualified_attribute_name_under_node 
+      ordered_attr_list = attribute_list.sort{|a,b|(a[:attribute_name]||"_") <=> (b[:attribute_name]||"_")}
+
+      #debug print
+      cols_to_package = [:attribute_id,:attribute_name,:attribute_value,:data_type,:dynamic,:cannot_change,:required]
+      pp [:packaged_attrs,ordered_attr_list.map{|a|cols_to_package.inject({}){|h,k|h.merge(k => a[k])}}]
+
+      action_name = "test_component_edit"
+      tpl = R8Tpl::TemplateR8.new("#{model_name()}/#{action_name}",user_context())
+      tpl.assign("attribute_list",ordered_attr_list)
+      tpl.assign("component_id",component_id)
+      return {:content => tpl.render()}
+    end
+
+
     def testjsonlayout
       tpl = R8Tpl::TemplateR8.new('component/testjson',user_context())
       tpl.assign(:testing, 'Testing')

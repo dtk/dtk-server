@@ -106,6 +106,18 @@ taskDef.children[0].children[0].children = [];
 								compTypei18n = 'Application';
 								taskClass = 'install-application';
 								break;
+							case "application":
+								compTypei18n = 'Application';
+								taskClass = 'install-application';
+								break;
+							case "client":
+								compTypei18n = 'Client';
+								taskClass = 'install-application';
+								break;
+							case "service":
+								compTypei18n = 'Application';
+								taskClass = 'install-application';
+								break;
 							default:
 console.log('missing component type...');
 console.log(taskDef);
@@ -113,6 +125,11 @@ console.log(taskDef);
 								break;
 						}
 						taskI18n = '<b>Install '+compTypei18n+'</b> ('+taskDef.component_name+')';
+						editContent = '<input type="checkbox" id="'+taskId+'" name="'+taskId+'" value="true"/>';
+						break;
+					case "setting":
+						taskI18n = '<b>Configure </b>(Set '+taskDef.attribute_name+'='+taskDef.attribute_value+')';
+						taskClass = 'configure';
 						editContent = '<input type="checkbox" id="'+taskId+'" name="'+taskId+'" value="true"/>';
 						break;
 					default:

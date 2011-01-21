@@ -22,7 +22,8 @@ module XYZ
       column :dynamic, :boolean, :default => false #means dynamically set by an executable action
 
       column :required, :boolean, :default => false #whether required for this attribute to have a value inorder to execute actions for parent component; TODO: may be indexed by action
-
+      column :hidden, :boolean, :default => false
+      column :cannot_change, :boolean, :default => false
 
       #columns related to links
       column :is_port, :boolean, :default => false
@@ -374,16 +375,17 @@ also related is allowing omission of columns mmentioned in jon condition; post p
 
       new_sap_attr_rows =
         [{
-          :ref => "sap_ipv4",
-          :display_name => "sap_ipv4", 
-          :component_component_id => component_id,
-          :value_derived => new_sap_value_list,
-          :is_port => true,
-          :data_type => "json",
-          :description => description,
-          #TODO: need the  => {"application" => service qualification)
-          :semantic_type => {":array" => "sap_ipv4"},
-          :semantic_type_summary => "sap_ipv4"
+           :ref => "sap_ipv4",
+           :display_name => "sap_ipv4", 
+           :component_component_id => component_id,
+           :value_derived => new_sap_value_list,
+           :is_port => true,
+           :hidden => true,
+           :data_type => "json",
+           :description => description,
+           #TODO: need the  => {"application" => service qualification)
+           :semantic_type => {":array" => "sap_ipv4"},
+           :semantic_type_summary => "sap_ipv4"
          }]
 
       attr_mh = sap_config_attr_idh.createMH()

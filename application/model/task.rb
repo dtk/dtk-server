@@ -238,8 +238,8 @@ module XYZ
     def self.add_attributes_to_component_task!(task,component_action,cmp_attrs)
       attributes = component_action[:attributes]
       return task unless attributes
-      children = 
-      flattten_attrs = AttributeComplexType.flatten_attribute_list(attributes)
+
+      flattten_attrs = AttributeComplexType.flatten_attribute_list(attributes.reject{|a|a[:hidden]})
       flattten_attrs.each do |a|
         attr_task = {
           :type => "setting",

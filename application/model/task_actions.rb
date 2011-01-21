@@ -146,7 +146,7 @@ module XYZ
           :relation => :attribute,
           :filter => [:and,
                       [:oneof, parent_field_name, indexed_actions.keys]],
-          :columns => [:id,:display_name,parent_field_name,:external_ref,:attribute_value,:required,:dynamic,:port_type,:port_is_external, :data_type, :semantic_type]
+          :columns => [:id,:display_name,parent_field_name,:external_ref,:attribute_value,:required,:dynamic,:port_type,:port_is_external, :data_type, :semantic_type, :hidden]
         }
         attrs = Model.get_objects_from_search_pattern_hash(attr_mh,search_pattern_hash)
 

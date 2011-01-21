@@ -16,7 +16,10 @@ if (!R8.ViewSpace) {
 			_isReady = false,
 			_events = {},
 
-			_links = {},
+//TODO: revisit when implementing user/system settings more
+			_userSettings = {showPorts: true,showLinks:true},
+
+			_links = null,
 			_linkRenderList = [];
 
 		return {
@@ -149,13 +152,16 @@ if (!R8.ViewSpace) {
 				this.purgePendingDelete();
 				this.retrieveLinks();
 
+				if(_userSettings.showLinks == true) {
+					this.renderLinks();
+				}
 			},
 
 			itemsReady: function() {
 				
 			},
 
-			retrieveLinks:function() {
+			retrieveLinks: function() {
 				var itemList = [];
 				for(i in _items) {
 					if(_items[i].get('model') == 'node')
@@ -165,7 +171,8 @@ if (!R8.ViewSpace) {
 				YUI().use('json',function(Y){
 					var linkCallback = function(ioId,responseObj) {
 						that.setLinks(ioId,responseObj);
-						that.renderLinks();
+//TODO: revisit, need to decouple rendering from retrieval
+//						that.renderLinks();
 					}
 					var params = {
 						'callbacks': {
@@ -176,22 +183,33 @@ if (!R8.ViewSpace) {
 						}
 					};
 					R8.Ctrl.call('attribute_link/get_under_context_list',params);
-				});				
+				});
 			},
 
 			setLinks: function(ioId,responseObj) {
 				eval("R8.Ctrl.callResults[ioId]['response'] =" + responseObj.responseText);
 				var response = R8.Ctrl.callResults[ioId]['response'];
 				var linkList = response['application_attribute_link_get_under_context_list']['content'][0]['data'];
+				var tempLinkList = {}
 				for(i in linkList) {
 					if(linkList[i]['id'] == '' || linkList[i]['hidden'] == true || linkList[i]['type'] == 'internal') continue;
 
-					_links['link-'+linkList[i]['id']] = linkList[i];
+					tempLinkList['link-'+linkList[i]['id']] = linkList[i];
 					_linkRenderList.push('link-'+linkList[i]['id']);
 				}
+				_links = tempLinkList;
 			},
 
 			renderLinks: function() {
+				if(_links == null) {
+					var that = this;
+					var recall = function() {
+						that.renderLinks();
+					}
+					setTimeout(recall,300);
+					return;
+				}
+
 				var pendingRemoval = [];
 				if(_linkRenderList.length == 0) return;
 
@@ -248,10 +266,32 @@ if (!R8.ViewSpace) {
 				}
 			},
 
+			hideLinks: function(fromPorts) {
+				for(var l in _links) {
+					R8.Utils.Y.one('#link-'+_links[l].id).setStyle('display','none');
+				}
+				if (typeof(fromPorts) == 'undefined') {
+					_userSettings.showLinks = false;
+				}
+			},
+
+			showLinks: function(fromPorts) {
+				if(_userSettings.showPorts == false && typeof(fromPorts) == 'undefined') {
+					_userSettings.showLinks = true;
+					return;
+				}
+
+				for (var l in _links) {
+					R8.Utils.Y.one('#link-' + _links[l].id).setStyle('display', 'block');
+				}
+
+				_userSettings.showLinks = true;
+			},
+/*
 			renderItemPorts: function(itemId,ports) {
 console.log(ports);
 			},
-
+*/
 			purgePendingDelete: function() {
 				var itemChildren = _node.get('children');
 
@@ -461,6 +501,30 @@ if (typeof(e) != 'undefined') {
 
 //---------------------------------------------------
 //---------------------------------------------------
+//------------ PORT METHODS -------------------------
+//---------------------------------------------------
+//---------------------------------------------------
+			hidePorts: function() {
+				for(var i in _items) {
+					_items[i].hidePorts();
+				}
+
+				this.hideLinks(true);
+				_userSettings.showPorts = false;
+			},
+
+			showPorts: function() {
+				for(var i in _items) {
+					_items[i].showPorts();
+				}
+				if(_userSettings.showLinks == true) {
+					this.showLinks(true);
+				}
+				_userSettings.showPorts = true;
+			},
+
+//---------------------------------------------------
+//---------------------------------------------------
 //------------ ITEM METHODS -------------------------
 //---------------------------------------------------
 //---------------------------------------------------
@@ -481,7 +545,10 @@ if (typeof(e) != 'undefined') {
 				_items[id].init();
 
 				this.regNewItem(_items[id]);
-				_items[id].renderPorts();
+
+				if(_userSettings.showPorts == true) {
+					_items[id].renderPorts();
+				}
 			},
 
 			refreshGroup: function(group) {

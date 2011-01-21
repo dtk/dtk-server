@@ -9,8 +9,6 @@ if (!R8.Node) {
 			_dataModel = null,
 			_ports = {},
 			_portDefs = null,
-
-			c = null,
 			_status = null,
 			_node = null,
 			_top = null,
@@ -29,10 +27,6 @@ if (!R8.Node) {
 			_links = {};
 
 			var _dropList = {};
-
-			var _tempLinkDef = null;
-			var _tempLinkId = null;
-
 		return {
 
 			render: function() {
@@ -49,12 +43,6 @@ if (!R8.Node) {
 				_top = _node.getStyle('top');
 				_left = _node.getStyle('left');
 				_dataModel = _node.getAttribute('data-model');
-
-//console.log(_portDefs);
-				//if port defs werent passed as part of create, retrieve them
-				if(_portDefs == null) {
-					this.retrievePorts();
-				}
 
 //DEBUG
 //_portDragDelegate = _node.get('id');
@@ -76,27 +64,6 @@ if (!R8.Node) {
 					})
 				}
 */
-			},
-
-			retrievePorts: function() {
-				var that = this;
-				var portSetCallback = function(ioId,responseObj) {
-					eval("R8.Ctrl.callResults[ioId]['response'] =" + responseObj.responseText);
-					var response = R8.Ctrl.callResults[ioId]['response'];
-//TODO: revisit once controllers are reworked for cleaner result package
-					_portDefs = response['application_node_get_ports']['content'][0]['data'];
-				}
-				var asynCall = function(){
-					var params = {
-						'cfg': {
-							'method': 'GET'
-						},
-						'callbacks': {'io:success':portSetCallback}
-					};
-					R8.Ctrl.call('node/get_ports/' + _id, params);
-				}
-//console.log('going to call to get ports for node...');
-				setTimeout(asynCall, 1);
 			},
 
 			get: function(get_name) {
@@ -124,9 +91,8 @@ if (!R8.Node) {
 						break;
 				}
 			},
-/*
-			renderPortsOld: function() {
 
+			renderPorts: function() {
 				if(_portDefs == null) {
 					var that = this;
 					var renderCallback = function(ioId,responseObj) {
@@ -153,262 +119,6 @@ if (!R8.Node) {
 					return;
 				}
 			},
-*/
-			renderPorts: function() {
-				if(_portDefs == null) {
-					var that = this;
-					var recall = function() {
-						that.renderPorts();
-					}
-					setTimeout(recall,250);
-					return;
-				}
-
-//				this.setupLoadedPorts();
-				if(_portDefs == null) return;
-
-				var nodeRegion = _node.get('region'),
-					nodeWidth = nodeRegion.right - nodeRegion.left,
-					nodeHeight = nodeRegion.bottom - nodeRegion.top;
-
-//TODO: make this some config param
-				var portSpacer = 2;
-
-
-				var numPorts = _portDefs.length,
-					northPorts = [],
-					southPorts = [];
-				for (i in _portDefs) {
-					switch(_portDefs[i]['port_type']) {
-						case "input":
-							_portDefs[i]['location'] = 'south';
-							southPorts.push(_portDefs[i]);
-							break;
-						case "output":
-							_portDefs[i]['location'] = 'north';
-							northPorts.push(_portDefs[i]);
-							break;
-					}
-				}
-
-				var count = 0;
-				var prevPortWidth = 0;
-				var prevPortHeight = 0;
-				var totalPortWidth = 0;
-				var totalPortHeight = 0;
-				var portObjs = {};
-
-				//------------------------------------
-				//Render North Ports
-				//------------------------------------
-				var numPorts = northPorts.length;
-				for(i in northPorts) {
-					var portNodeID = 'port-'+northPorts[i]['id'],
-						portClass = 'basic-port port',
-						portNode = new R8.Utils.Y.Node.create('<div>');
-
-					northPorts[i]['nodeId'] = portNodeID;
-					_ports[portNodeID] = northPorts[i];
-
-					portObjs[portNodeID] = {};
-					portNode.setAttribute('id',portNodeID);
-					portNode.addClass(portClass + ' available '+northPorts[i]['port_type']+'-north');
-//					portNode.addClass(portClass + ' available');
-					_node.appendChild(portNode);
-
-					var portRegion = portNode.get('region');
-					portNode.setStyles({'display':'none'});
-					portObjs[portNodeID].height = portRegion.bottom - portRegion.top;
-					portObjs[portNodeID].width = portRegion.right - portRegion.left;
-					portObjs[portNodeID].wOffset = Math.floor(portObjs[portNodeID].width/2);
-					portObjs[portNodeID].hOffset = Math.floor(portObjs[portNodeID].height/2);
-
-					totalPortWidth += portObjs[portNodeID].width;
-					count++;
-				}
-				var numSpacers = count-1;
-				count = 0;
-				var prevLeft = 0;
-				for(var portNodeID in portObjs) {
-					var portNode = R8.Utils.Y.one('#'+portNodeID);
-					var top = -1*(portObjs[portNodeID].hOffset);
-					if (count == 0) {
-						var left = (nodeWidth - (totalPortWidth + (numSpacers * portSpacer))) / 2;
-					} else
-						var left = (prevLeft + prevPortWidth + portSpacer);
-
-					portNode.setStyles({'top':(-1*portObjs[portNodeID].hOffset)+'px','left':left+'px','display':'block'});
-
-					totalPortWidth -= (portObjs[portNodeID].width+portSpacer);
-					prevPortWidth = portObjs[portNodeID].width;
-					prevPortHeight = portObjs[portNodeID].height;
-					prevLeft = left;
-					count++;
-				}
-				//END Rendering North Ports
-
-				var count = 0;
-				var prevPortWidth = 0;
-				var prevPortHeight = 0;
-				var totalPortWidth = 0;
-				var totalPortHeight = 0;
-				var portObjs = {};
-
-				//------------------------------------
-				//Render South Ports
-				//------------------------------------
-				var numPorts = southPorts.length;
-				for(i in southPorts) {
-					var portNodeID = 'port-'+southPorts[i]['id'],
-						portClass = 'basic-port port',
-						portNode = new R8.Utils.Y.Node.create('<div>');
-
-					southPorts[i]['nodeId'] = portNodeID;
-					_ports[portNodeID] = southPorts[i];
-
-					portObjs[portNodeID] = {};
-					portNode.setAttribute('id',portNodeID);
-					portNode.addClass(portClass + ' available '+southPorts[i]['port_type']+'-south');
-//					portNode.addClass(portClass + ' available');
-					_node.appendChild(portNode);
-
-					var portRegion = portNode.get('region');
-					portNode.setStyles({'display':'none'});
-
-					portObjs[portNodeID].height = portRegion.bottom - portRegion.top;
-					portObjs[portNodeID].width = portRegion.right - portRegion.left;
-					portObjs[portNodeID].wOffset = Math.floor(portObjs[portNodeID].width/2);
-					portObjs[portNodeID].hOffset = Math.floor(portObjs[portNodeID].height/2);
-
-					totalPortWidth += portObjs[portNodeID].width;
-					count++;
-				}
-				var numSpacers = count-1;
-				count = 0;
-				var prevLeft = 0;
-				for(var portNodeID in portObjs) {
-					var portNode = R8.Utils.Y.one('#'+portNodeID);
-					var top = nodeHeight - portObjs[portNodeID].hOffset;
-					if (count == 0) {
-						var left = (nodeWidth - (totalPortWidth + (numSpacers * portSpacer))) / 2;
-					} else
-						var left = (prevLeft + prevPortWidth + portSpacer);
-
-					portNode.setStyles({'top':top+'px','left':left+'px','display':'block'});
-
-					totalPortWidth -= (portObjs[portNodeID].width+portSpacer);
-					prevPortWidth = portObjs[portNodeID].width;
-					prevPortHeight = portObjs[portNodeID].height;
-					prevLeft = left;
-					count++;
-				}
-				//END Rendering South Ports
-//DEBUG
-//console.log('done rendering ports....');
-				this.registerPorts();
-return;
-				var count = 0;
-				var prevPortWidth = 0;
-				var prevPortHeight = 0;
-				var totalPortWidth = 0;
-				var totalPortHeight = 0;
-				var portObjs = {};
-
-				//------------------------------------
-				//Render West Ports
-				//------------------------------------
-				var numPorts = R8.Workspace.components[compID].availPorts.west.length;
-				for(var port in R8.Workspace.components[compID].availPorts.west) {
-					var portNodeID = compID + '-west-' + R8.Workspace.components[compID].availPorts.west[port].id;
-					var portClass = R8.Workspace.components[compID].availPorts.west[port].type + '-port';
-					portObjs[portNodeID] = {};
-					var portNode = new R8.Utils.Y.Node.create('<div>');
-					portNode.setAttribute('id',portNodeID);
-					portNode.addClass(portClass + ' available');
-					compNode.appendChild(portNode);
-					var region = portNode.get('region');
-					portNode.setStyles({'display':'none'});
-					portObjs[portNodeID].height = region.bottom - region.top;
-					portObjs[portNodeID].width = region.right - region.left;
-					portObjs[portNodeID].wOffset = Math.floor(portObjs[portNodeID].width/2);
-					portObjs[portNodeID].hOffset = Math.floor(portObjs[portNodeID].height/2);
-
-					totalPortHeight += portObjs[portNodeID].height;
-					count++;
-				}
-				var numSpacers = count-1;
-				count = 0;
-				var prevTop = 0;
-				for(var portNodeID in portObjs) {
-					var portNode = R8.Utils.Y.one('#'+portNodeID);
-					var left = -1*(portObjs[portNodeID].wOffset);
-					if (count == 0) {
-						var top = (compNodeHeight - (totalPortHeight + (numSpacers * portSpacer))) / 2;
-					} else
-						var top = (prevTop + prevPortHeight + portSpacer);
-
-					portNode.setStyles({'top':top+'px','left':left+'px','display':'block'});
-
-					totalPortHeight -= (portObjs[portNodeID].width+portSpacer);
-					prevPortWidth = portObjs[portNodeID].width;
-					prevPortHeight = portObjs[portNodeID].height;
-					prevTop = top;
-					count++;
-				}
-				//END Rendering West Ports
-
-
-				var count = 0;
-				var prevPortWidth = 0;
-				var prevPortHeight = 0;
-				var totalPortWidth = 0;
-				var totalPortHeight = 0;
-				var portObjs = {};
-
-				//------------------------------------
-				//Render East Ports
-				//------------------------------------
-				var numPorts = R8.Workspace.components[compID].availPorts.east.length;
-				for(var port in R8.Workspace.components[compID].availPorts.east) {
-					var portNodeID = compID + '-east-' + R8.Workspace.components[compID].availPorts.east[port].id;
-					var portClass = R8.Workspace.components[compID].availPorts.east[port].type + '-port';
-					portObjs[portNodeID] = {};
-					var portNode = new R8.Utils.Y.Node.create('<div>');
-					portNode.setAttribute('id',portNodeID);
-					portNode.addClass(portClass + ' available');
-					compNode.appendChild(portNode);
-					var region = portNode.get('region');
-					portNode.setStyles({'display':'none'});
-					portObjs[portNodeID].height = region.bottom - region.top;
-					portObjs[portNodeID].width = region.right - region.left;
-					portObjs[portNodeID].wOffset = Math.floor(portObjs[portNodeID].width/2);
-					portObjs[portNodeID].hOffset = Math.floor(portObjs[portNodeID].height/2);
-
-					totalPortHeight += portObjs[portNodeID].height;
-					count++;
-				}
-				var numSpacers = count-1;
-				count = 0;
-				var prevTop = 0;
-				for(var portNodeID in portObjs) {
-					var portNode = R8.Utils.Y.one('#'+portNodeID);
-					var left = compNodeWidth - portObjs[portNodeID].wOffset;
-					if (count == 0) {
-						var top = (compNodeHeight - (totalPortHeight + (numSpacers * portSpacer))) / 2;
-					} else
-						var top = (prevTop + prevPortHeight + portSpacer);
-
-					portNode.setStyles({'top':top+'px','left':left+'px','display':'block'});
-
-					totalPortHeight -= (portObjs[portNodeID].width+portSpacer);
-					prevPortWidth = portObjs[portNodeID].width;
-					prevPortHeight = portObjs[portNodeID].height;
-					prevTop = top;
-					count++;
-				}
-				//END Rendering East Ports
-			},
-
 /*
 			loadPorts: function(ioId,responseObj) {
 				eval("R8.Ctrl.callResults[ioId]['response'] =" + responseObj.responseText);
@@ -679,27 +389,10 @@ return;
 				//END Rendering East Ports
 			},
 
-			hidePorts: function() {
-//console.log('going to hide ports...........................');
-				for(var p in _ports) {
-//console.log(_ports[p]);
-					R8.Utils.Y.one('#port-'+_ports[p].id).setStyle('display','none');
-				}
-			},
-
-			showPorts: function() {
-//console.log('going to hide ports...........................');
-				for(var p in _ports) {
-//console.log(_ports[p]);
-					R8.Utils.Y.one('#port-'+_ports[p].id).setStyle('display','block');
-				}
-			},
-
-
 			registerPorts: function() {
 				var parentItem = this;
 				YUI().use('dd-proxy','dd-drag','dd-plugin','dd-drop', function(Y){
-					for (var i in _portDefs) {
+					for (i in _portDefs) {
 						_portDefs[i]['drag'] = new Y.DD.Drag({
 							node: '#' + _portDefs[i]['nodeId']
 						});
@@ -758,10 +451,10 @@ return;
 //										var endCompID = R8.Workspace.ports[endElemID].compID;
 										var connectorType = 'fullBezier';
 										var date = new Date();
-										_tempLinkId = 't-'+date.getTime() + '-' + Math.floor(Math.random()*20);
+										var tempLinkId = 't-'+date.getTime() + '-' + Math.floor(Math.random()*20);
 
-										_tempLinkDef = {
-											'id': _tempLinkId,
+										var linkDef = {
+											'id': tempLinkId,
 											'startItemId':_id,
 											'endItemId': endNode.get('parentNode').getAttribute('data-id'),
 											'type': connectorType,
@@ -802,7 +495,7 @@ return;
 												}
 												var params = {
 													'cfg': {
-														'data': 'return_model=true&name=attribute_link&model=attribute_link&redirect=false&parent_model_name=datacenter&parent_id='+parent_id+'&input_id='+input_id+'&output_id='+output_id
+														'data': 'name=attribute_link&model=attribute_link&redirect=false&parent_model_name=datacenter&parent_id='+parent_id+'&input_id='+input_id+'&output_id='+output_id
 													},
 													'callbacks': {
 														'io:success': successCallback,
@@ -812,8 +505,8 @@ return;
 												R8.Ctrl.call('attribute_link/save',params);
 											});
 
-											//_viewSpace.setLink(tempLinkId,linkDef);
-											R8.Canvas.renderLink(_tempLinkDef);
+											_viewSpace.setLink(tempLinkId,linkDef);
+											R8.Canvas.renderLink(linkDef);
 
 											var startNode = R8.Utils.Y.one('#'+startNodeId);
 											var endNode = R8.Utils.Y.one('#'+endNodeId);
@@ -836,16 +529,7 @@ console.log('not a valid link.., mis-matched types...');
 			},
 
 			tempLinkCreateCallback: function(ioId,responseObj) {
-				eval("R8.Ctrl.callResults[ioId]['response'] =" + responseObj.responseText);
-				var response = R8.Ctrl.callResults[ioId]['response'];
-				var newLink = response.application_attribute_link_save.content[0].data;
-
-				var tempLinkId = _tempLinkDef.id;
-				_tempLinkDef.id = newLink.id;
-				R8.Utils.Y.one('#'+tempLinkId).set('id','link-'+newLink.id);
-				_viewSpace.setLink(newLink.id,_tempLinkDef);
-//DEBUG
-console.log(newLink);
+console.log('looks like link create success...');
 			},
 
 			portsReady: function() {

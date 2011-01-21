@@ -7,7 +7,7 @@ if (!R8.Workspace) {
 			_currentViewSpace = null,
 
 			_pageContainerId = 'page-container',
-			_pageContainerNode = null;
+			_pageContainerNode = null,
 
 			_topbarId = 'wspace-topbar',
 			_topbarNode = null,
@@ -18,8 +18,9 @@ if (!R8.Workspace) {
 			_modalNode = null,
 			_modalNodeId = 'wspace-modal',
 			_shimNodeId = null,
-			_shimNode = null;
+			_shimNode = null,
 
+			_events = {};
 		return {
 			viewPortRegion : null,
 			pageContainerElem : null,
@@ -138,7 +139,7 @@ if (!R8.Workspace) {
 //console.log(this);
 //				});
 
-				R8.Workspace.events['item_dbl_click'] = R8.Utils.Y.delegate('dblclick',function(e){
+				_events['item_dbl_click'] = R8.Utils.Y.delegate('dblclick',function(e){
 					var node = e.currentTarget;
 					var model = node.getAttribute('data-model');
 					var id = node.getAttribute('data-id');
@@ -161,8 +162,9 @@ if (!R8.Workspace) {
 				R8.Dock.init();
 
 //				R8.MainToolbar.init();
-return;
 
+				return;
+/*
 //TODO: right now hardcoding assignment from demoData.r8.js
 				this.components = workspaceComponents;
 				this.ports = workspacePorts;
@@ -181,9 +183,10 @@ return;
 						this.ports[portElemID] = portObj;
 console.log('registering port:'+portElemID);
 					}
-*/
+
 //TODO: this might change with behavior change of Delegate to query all children, not just 1st level
 					this.registerPorts(c);
+
 				}
 
 				for(var c in this.components) {
@@ -202,6 +205,7 @@ console.log('registering port:'+portElemID);
 					var connectionType = this.connectors[c].type;
 					R8.Canvas.renderLink(c);
 				}
+*/
 			},
 
 			toggleHandTool : function() {
@@ -284,6 +288,7 @@ console.log('registering port:'+portElemID);
 			 * @param {string} 	componentID The DOM ID for the component to add drag drop capabilities to
 			 * @param {DOM Elem}	Node Object to add drag drop capabilities to
 			 */
+/*
 			addDrag : function(itemId) {
 				var vsContext = this.getVspaceContext();
 
@@ -306,16 +311,16 @@ console.log('registering port:'+portElemID);
 					R8.Workspace.viewspaces[vsContext]['items'][itemId]['node'].setAttribute('data-status','dd-ready');
 				});
 			},
-
+*/
 			/*
 			 * removeDrag will take away a components drag/droppable capabilites on a workspace
 			 * @method removeDrag
 			 * @param {string} 	componentID The DOM ID for the component to remove drag drop capabilities from
 			 * @param {Node}	Node Object to remove drag drop capabilities from
 			 */
-			removeDrag: function(itemId){
-			},
-
+//			removeDrag: function(itemId){
+//			},
+/*
 			addDrop : function(itemId) {
 				var vsContext = this.getVspaceContext();
 				var modelName = R8.Workspace.viewspaces[vsContext]['items'][itemId]['node'].getAttribute('data-model');
@@ -338,7 +343,7 @@ return;
 /*
 console.log('Over drop target....');
 console.log(e);
-*/
+
 					});
 					R8.Workspace.viewspaces[vsContext]['items'][itemId]['drop'].on('drop:hit',function(e){
 console.log('I guess I am hitting this now!!!!');
@@ -363,6 +368,7 @@ console.log('I guess I am hitting this now!!!!');
 				}
 				return;
 			},
+*/
 
 			/*
 			 * clearSelectedItems removes styling from any selectedElements
@@ -370,6 +376,7 @@ console.log('I guess I am hitting this now!!!!');
 			 * @param {Evt} e Event object passed from event firing
 			 * @param {String} clickEventTarget String indicating if being called from which workspace event
 			 */
+/*
 			clearSelectedItems : function(e) {
 				var vsContext = R8.Workspace.getVspaceContext();
 				for(var itemId in R8.Workspace.viewspaces[vsContext]['selectedItems']) {
@@ -377,12 +384,13 @@ console.log('I guess I am hitting this now!!!!');
 				}
 				R8.Workspace.viewspaces[vsContext]['selectedItems'] = {};
 			},
-
+*/
 			/*
 			 * registerPorts will register ports with workspace and activate for connection if applicable
 			 * @method registerPorts
 			 * @param {string} compElemID
 			 */
+/*
 			registerPorts : function(compElemID) {
 //				var portObj = R8.Workspace.ports[portElemID];
 
@@ -432,11 +440,12 @@ console.log('I guess I am hitting this now!!!!');
 					console.log('drop miss');
 				});
 			},
-
+*/
 			/*
 			 * createConnector will create details for new connector, render it and call the server to persist it
 			 * @method createConnector
 			 */
+/*
 			createConnector : function(startElemID,endElemID) {
 				var startConnectorLocation = R8.Workspace.ports[startElemID].location;
 				var startCompID = R8.Workspace.ports[startElemID].compID;
@@ -473,6 +482,7 @@ console.log('I guess I am hitting this now!!!!');
 				R8.Workspace.components[startCompID].connectors[tempConnectorID] = R8.Workspace.connectors[tempConnectorID];
 				R8.Workspace.components[endCompID].connectors[tempConnectorID] = R8.Workspace.connectors[tempConnectorID];
 			},
+*/
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
@@ -627,7 +637,7 @@ console.log('I guess I am hitting this now!!!!');
 				R8.Workspace.setupMinMax(itemId);
 */
 			},
-
+/*
 			setupMinMax : function(itemId) {
 				var minMaxId = itemId+'-minmax-large';
 				var minMaxNode = R8.Utils.Y.one('#'+minMaxId);
@@ -666,7 +676,6 @@ console.log('I guess I am hitting this now!!!!');
 					},this,itemId);
 				}
 			},
-
 			addItemSuccess : function(ioId,responseObj) {
 //				eval("R8.Ctrl.callResults[ioId] =" + responseObj.responseText);
 				eval("var response =" + responseObj.responseText);
@@ -679,6 +688,7 @@ console.log('I guess I am hitting this now!!!!');
 console.log('call to add item to workspace failed.....');
 			},
 
+*/
 
 //-------------------------------------------------------------
 //-------------------------------------------------------------
@@ -725,13 +735,13 @@ console.log(response);
 				}
 				_viewSpaces[vSpaceId].addItems(items);
 			},
-
+/*
 			renderItemPorts: function(itemId,ports,viewSpaceId) {
 				var vSpaceId = (typeof(viewSpaceId) == 'undefined') ? _currentViewSpace : viewSpaceId;
 
 				_viewSpaces[vSpaceId].renderItemPorts(itemId,ports);
 			},
-
+*/
 			updateItemName: function(id) {
 				var nameInputId = 'item-'+id+'-name-input',
 					nameWrapperId = 'item-'+id+'-name-wrapper',
@@ -851,12 +861,46 @@ for(vs in _viewSpaces) {
 				var contentNode = R8.Utils.Y.one('#'+_modalNodeId+'-content');
 				return contentNode;
 			},
+
+			hidePorts: function(viewSpaceId) {
+				var vSpaceId = (typeof(viewSpaceId) == 'undefined') ? _currentViewSpace : viewSpaceId;
+//				if (!_viewSpaces[vSpaceId].isReady()) {
+//				}
+
+				_viewSpaces[vSpaceId].hidePorts();
+			},
+
+			showPorts: function(viewSpaceId) {
+				var vSpaceId = (typeof(viewSpaceId) == 'undefined') ? _currentViewSpace : viewSpaceId;
+//				if (!_viewSpaces[vSpaceId].isReady()) {
+//				}
+
+				_viewSpaces[vSpaceId].showPorts();
+			},
+
+			hideLinks: function(viewSpaceId) {
+				var vSpaceId = (typeof(viewSpaceId) == 'undefined') ? _currentViewSpace : viewSpaceId;
+//				if (!_viewSpaces[vSpaceId].isReady()) {
+//				}
+
+				_viewSpaces[vSpaceId].hideLinks();
+			},
+
+			showLinks: function(viewSpaceId) {
+				var vSpaceId = (typeof(viewSpaceId) == 'undefined') ? _currentViewSpace : viewSpaceId;
+//				if (!_viewSpaces[vSpaceId].isReady()) {
+//				}
+
+				_viewSpaces[vSpaceId].showLinks();
+			},
+
 //-------------------------------------------------------------
 //-------------------------------------------------------------
 //-------------------------------------------------------------
 
-			viewspaces : {},
+//			viewspaces : {},
 //TODO: revisit when fully implementing multiple viewspaces
+/*
 			getVspaceContext : function() {
 				if (typeof(R8.Workspace.viewspaces['vspace1']) == 'undefined') {
 					R8.Workspace.viewspaces['vspace1'] = {
@@ -866,17 +910,17 @@ for(vs in _viewSpaces) {
 				}
 				return 'vspace1';
 			},
-
-			events : {},
+*/
+//			events : {},
 			/*
 			 * Collection of active connectors for the given workspace
 			 */
-			connectors: {},
+//			connectors: {},
 
 			/*
 			 * Collection of active ports in given workspace
 			 */
-			ports: {},
+//			ports: {},
 			
 			/*
 			 * Collection of active elements for the given workspace

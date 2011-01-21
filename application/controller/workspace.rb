@@ -441,11 +441,11 @@ pp [:datacenter_id,datacenter_id]
  :src=>"wspace_list_ng_node_group.js",
  :template_callback=>"wspace_list_ng_node_group"}
 =end
-
       #--------Add Node Group List to Workspace-----
       items = Array.new
       top = 100
       left = 100
+=begin
 
       model_list.each_with_index do |node_group,index|
         model_list[index][:model_name] = model_name
@@ -465,7 +465,7 @@ pp [:datacenter_id,datacenter_id]
         }
         items << item
       end
-
+=end
       #----------------------------------------------------
       #-------Grab nodes in the datacenter-----------------
       #----------------------------------------------------
@@ -487,8 +487,8 @@ pp [:datacenter_id,datacenter_id]
         node[:ui][datacenter_id.to_sym].nil? ? node[:ui][datacenter_id.to_sym] = {} : nil
         node[:ui][datacenter_id.to_sym][:top].nil? ? node[:ui][datacenter_id.to_sym][:top] = top : nil
         node[:ui][datacenter_id.to_sym][:left].nil? ? node[:ui][datacenter_id.to_sym][:left] = left : nil
-pp node[:display_name]
-pp '))))))))))))))))))))))))))))))))))))'
+#pp node[:display_name]
+#pp '))))))))))))))))))))))))))))))))))))'
         item = {
           :type => model_name.to_s,
           :object => node,

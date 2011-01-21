@@ -53,6 +53,14 @@
 				<div style="height:25px; text-align: center; position: relative; float: right; margin-left: 50px; background-color: #DDDDDD;">
 					<a href="{%=_app[:base_uri]%}/xyz/node/list">Main</a>&nbsp;|&nbsp;<a href="javascript:R8.Workspace.commitChanges();">Commit</a>
 				</div>
+				<div style="height:25px; text-align: center; position: relative; float: right; margin-left: 50px; background-color: #DDDDDD;">
+					<a href="javascript:R8.Workspace.hidePorts();">Hide Ports</a>&nbsp;|&nbsp;
+					<a href="javascript:R8.Workspace.showPorts();">Show Ports</a>
+				</div>
+				<div style="height:25px; text-align: center; position: relative; float: right; margin-left: 50px; background-color: #DDDDDD;">
+					<a href="javascript:R8.Workspace.hideLinks();">Hide Links</a>&nbsp;|&nbsp;
+					<a href="javascript:R8.Workspace.showLinks();">Show Links</a>
+				</div>
 			</div>
 			<div id="wspace-context-wrapper">
 			</div>

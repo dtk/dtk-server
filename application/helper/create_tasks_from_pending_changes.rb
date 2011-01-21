@@ -20,8 +20,9 @@ module Ramaze::Helper
         ret.add_subtask(config_nodes_task)
         ret
       else
-        #only one wil be non null
-        create_nodes_task||config_nodes_task
+        ret = create_new_task(:temporal_order => "sequential")
+        ret.add_subtask(create_nodes_task||config_nodes_task) #only one wil be non null
+        ret
       end
     end
 

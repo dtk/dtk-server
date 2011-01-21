@@ -20,6 +20,9 @@ if (!R8.Workspace) {
 			_shimNodeId = null,
 			_shimNode = null,
 
+			_alertNode = null,
+			_alertNodeId = null,
+
 			_events = {};
 		return {
 			viewPortRegion : null,
@@ -539,7 +542,8 @@ console.log('I guess I am hitting this now!!!!');
 
 				var queryParams = 'target_model_name='+modelName+'&target_id='+modelId;
 //				queryParams += '&model_redirect='+modelName+'&action_redirect=wspace_display&id_redirect='+modelId;
-				queryParams += '&model_redirect='+modelName+'&action_redirect=wspace_refresh&id_redirect='+modelId;
+//				queryParams += '&model_redirect='+modelName+'&action_redirect=wspace_refresh&id_redirect='+modelId;
+				queryParams += '&model_redirect='+modelName+'&action_redirect=added_component_conf&id_redirect='+modelId;
 
 //				containerNode.setAttribute('data-status','pending_delete');
 
@@ -567,6 +571,8 @@ console.log('I guess I am hitting this now!!!!');
 
 			refreshItem : function(itemId) {
 				itemId = 'item-'+itemId;
+console.log('should refresh item:'+itemId);
+return;
 				var viewspaceNode = R8.Utils.Y.one('#viewspace');
 				var vspaceContext = R8.Workspace.getVspaceContext();
 				var itemChildren = viewspaceNode.get('children');
@@ -815,6 +821,41 @@ for(vs in _viewSpaces) {
 //						this.setAttribute('data-status','dd-ready');
 					}
 				});
+			},
+
+			showAlert: function(alertStr) {
+				_alertNodeId = R8.Utils.Y.guid();
+				var alertTpl = '<div id="'+_alertNodeId+'" style="height: 40px; width: 200px; border: 1px solid black; background-color: #CCCCCC; position: absolute; z-index: 100;">\
+								<div style="position: relative; margin: 5px;"><b>'+alertStr+'</b></div>\
+								</div>',
+					containerNode = R8.Utils.Y.one('#wspace-container'),
+					nodeRegion = containerNode.get('region'),
+					height = nodeRegion.bottom - nodeRegion.top,
+					width = nodeRegion.right - nodeRegion.left,
+					aTop = 0,
+					aLeft = Math.floor((width-200)/2);
+
+				containerNode.append(alertTpl);
+				_alertNode = R8.Utils.Y.one('#'+_alertNodeId);
+				_alertNode.setStyles({'top':aTop,'left':aLeft,'display':'block'});
+
+				YUI().use('anim', function(Y) {
+					var anim = new Y.Anim({
+						node: '#'+_alertNodeId,
+						to: { opacity: 0 },
+						duration: .5
+					});
+					anim.on('end', function(e) {
+						var node = this.get('node');
+						node.get('parentNode').removeChild(node);
+					});
+					var delayAnimRun = function(){
+							anim.run();
+						}
+					setTimeout(delayAnimRun,1000);
+
+				});
+//				alert(alertStr);
 			},
 
 			shimify: function(nodeId) {

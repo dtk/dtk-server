@@ -798,7 +798,7 @@ return;
 
 											YUI().use('json','io',function(Y){
 												var successCallback = function(ioId,returnObj) {
-													parentItem.tempLinkCreateCallback(ioId,returnObj);
+													parentItem.linkCreateCallback(ioId,returnObj);
 												}
 												var params = {
 													'cfg': {
@@ -835,7 +835,7 @@ console.log('not a valid link.., mis-matched types...');
 				});
 			},
 
-			tempLinkCreateCallback: function(ioId,responseObj) {
+			linkCreateCallback: function(ioId,responseObj) {
 				eval("R8.Ctrl.callResults[ioId]['response'] =" + responseObj.responseText);
 				var response = R8.Ctrl.callResults[ioId]['response'];
 				var newLink = response.application_attribute_link_save.content[0].data;
@@ -844,8 +844,6 @@ console.log('not a valid link.., mis-matched types...');
 				_tempLinkDef.id = newLink.id;
 				R8.Utils.Y.one('#'+tempLinkId).set('id','link-'+newLink.id);
 				_viewSpace.setLink(newLink.id,_tempLinkDef);
-//DEBUG
-console.log(newLink);
 			},
 
 			portsReady: function() {

@@ -150,6 +150,15 @@ pp items
       return {}
     end
 
+    def added_component_conf(id)
+      node = get_object_by_id(id)
+      display_name = node[:display_name]
+      alert_str = 'Added Component to Node('+display_name+')'
+      run_javascript("R8.Workspace.showAlert('#{alert_str}');")
+
+      return {}
+    end
+
     def wspace_refresh(id)
       c = ret_session_context_id()
       tpl = R8Tpl::TemplateR8.new("node/wspace_refresh",user_context())

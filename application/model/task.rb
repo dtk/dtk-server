@@ -126,14 +126,11 @@ module XYZ
       return task_list if task_list.size < 2
       ret = nil
       indexed_nodes = Hash.new
-      indexed_cmps = Hash.new
       task_list.each do |t|
         if t[:level] == "top"
           ret = t
         elsif t[:level] == "node"
           indexed_nodes[t[:node_id]] = t
-        elsif t[:level] == "component"
-          indexed_cmps[t[:component_id]] = t
         end
       end
       task_list.each do |t|
@@ -147,8 +144,6 @@ module XYZ
             node_task[:children] << t
             ret[:children] << node_task
           end
-        elsif t[:level] == "attribute"
-          ##TODO: stub
         end
       end
       ret
@@ -222,7 +217,7 @@ module XYZ
     def self.add_attributes_to_component_task!(task,component_action,cmp_attrs)
       attributes = component_action[:attributes]
       return task unless attributes
-      children = task[:children]
+      children = 
       flattten_attrs = AttributeComplexType.flatten_attribute_list(attributes)
       flattten_attrs.each do |a|
         attr_task = {
@@ -236,8 +231,8 @@ module XYZ
           :attribute_dynamic => a[:dynamic]
         }
         attr_task.merge!(cmp_attrs)
-        #TODO: debug component_action children << attr_task
-        pp attr_task
+        task[:children]||= Array.new
+        task[:children] << attr_task
       end
       task
     end

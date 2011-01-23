@@ -31,21 +31,23 @@ module XYZ
     end
 
     def self.ravel_raw_post_hash(raw_post_hash,type,parent_id=nil)
-      ret = Array.new
-      ravel_raw_post_hash_top_level!(ret,raw_post_hash,type,parent_id)
-      ret
+      raise Error.new("Unexpected type #{type}") unless type == :attribute  #TODO: may teat other types like component
+      indexed_ret = Hash.new
+      ravel_raw_post_hash_attribute!(indexed_ret,raw_post_hash,parent_id)
+      indexed_ret.values
     end
+
     def self.serialze(token_array)
-      token_array.join(Delimiter[:common])
+      token_array.join(Delim[:common])
     end
    private
-    Delimiter = Hash.new
-    Delimiter[:common] = "__"
-    Delimiter[:numeric_index] = "_" ##{Delimiter[:common]}"
-    Delimiter[:display_name_left] = "["
-    Delimiter[:display_name_right] = "]"
-    Delimiter.freeze
-    NumericIndexRegexp = Regexp.new("#{Delimiter[:numeric_index]}([0-9]+$)")
+    Delim = Hash.new
+    Delim[:char] = "_"
+    Delim[:common] = "#{Delim[:char]}#{Delim[:char]}"
+    Delim[:numeric_index] = Delim[:char] 
+    Delim[:display_name_left] = "["
+    Delim[:display_name_right] = "]"
+    Delim.freeze
     TypeMapping = {
       :attribute => :a,
       :component => :c
@@ -53,35 +55,62 @@ module XYZ
 
     def self.item_path_token_array(attr)
       return nil unless attr[:item_path]
-      attr[:item_path].map{|indx| indx.kind_of?(Numeric) ? "#{Delimiter[:numeric_index]}#{indx.to_s}" : indx.to_s} 
+      attr[:item_path].map{|indx| indx.kind_of?(Numeric) ? "#{Delim[:numeric_index]}#{indx.to_s}" : indx.to_s} 
     end
     def self.container_id(type,id)
       return nil if id.nil?
-      "#{TypeMapping[type.to_sym]}#{Delimiter[:common]}#{id.to_s}"
+      "#{TypeMapping[type.to_sym]}#{Delim[:common]}#{id.to_s}"
     end
 
-    def self.ravel_raw_post_hash_top_level!(ret,hash,type,parent_id=nil)
-      pattern = Regexp.new("^#{TypeMapping[type.to_sym]}#{Delimiter[:common]}([0-9]+$)")
+    def self.ravel_raw_post_hash_attribute!(ret,hash,parent_id=nil)
       hash.each do |k,child_hash|
-        id = (k =~ pattern; $1 ? $1.to_i : nil)
+        id,path = (k =~ AttrIdRegexp) && [$1.to_i,$2]
         next unless id
-        if type == :component
-          ravel_raw_post_hash_top_level!(ret,child_hash,:attribute,id)
-        elsif type == :attribute
-          ret_val = Hash.new
-          ravel_raw_post_hash_ret_val!(ret_val,:ret,child_hash)
-          ret << {:id => id, DB.parent_field(:component,:attribute) => parent_id,:value_asserted => ret_val[:ret]}
+        id_vals = {:id => id,DB.parent_field(:component,:attribute) => parent_id}
+        if path.empty? 
+          ret[id] = id_vals.merge(:value_asserted => child_hash)
         else
-          raise Error.new("Unexpected type #{type}")
+          ravel_raw_post_hash_attribute_aux!(ret,id,hash,path,id_vals)
         end
       end
     end
+    AttrIdRegexp = Regexp.new("^#{TypeMapping[:attribute]}#{Delim[:common]}([0-9]+)(.*$)")
 
+    def self.ravel_raw_post_hash_attribute_aux!(ret,index,hash,path,id_vals)
+      next_index, rest_path = (path =~ NumericIndexRegexp) && [$1.to_i,$2]
+      if path =~ NumericIndexRegexp
+        next_index, rest_path = [$1.to_i,$2]
+        ret[index] ||= ArrayObject.new 
+        #make sure that  ret[index] has enough rows
+        while ret[index].size <= next_index
+          ret[index] << nil
+        end
+      elsif path =~ KeyWithRestRegexp
+        next_index, rest_path = [$1,$2]
+        ret[index] ||= Hash.new
+      elsif path =~ KeyWORestRegexp
+        next_index, rest_path = [$1,String.new]
+        ret[index] ||= Hash.new
+      else
+        Log.error("parsing error on path #{path}")
+      end
+
+      if rest_path.empty?
+        ret[index][next_index] = id_vals.merge(:value_asserted => hash)
+      else
+        ravel_raw_post_hash_attribute_aux!(ret[index],next_index,hash,rest_path,id_vals) 
+      end
+    end
+    NumericIndexRegexp = Regexp.new("^#{Delim[:numeric_index]}([0-9]+)(.*$)")
+    KeyWithRestRegexp = Regexp.new("^#{Delim[:common]}([^#{Delim[:char]}]+)#{Delim[:common]}(.+$)")
+    KeyWORestRegexp = Regexp.new("^#{Delim[:common]}(.*$)")
+=begin Deprecate
     def self.ravel_raw_post_hash_ret_val!(ret_val,key,obj)
       if obj.kind_of?(Hash)
         obj.each do |k,v|
           num_index = (k =~ NumericIndexRegexp; $1 ? $1.to_i : nil)
           if num_index
+            
             ret_val[key] ||= ArrayObject.new 
             #make sure that  ret_val[key] has enough rows
             while ret_val[key].size <= num_index
@@ -97,7 +126,7 @@ module XYZ
         ret_val[key] = (obj.empty? ? nil : obj)
       end
     end
-
+=end
     def self.has_required_fields?(value_obj,pattern)
       #care must be taken to make this three-valued
       if pattern.is_atomic?()
@@ -221,7 +250,7 @@ module XYZ
     end
 
     def self.display_name_delim(x)
-      "#{Delimiter[:display_name_left]}#{x.to_s}#{Delimiter[:display_name_right]}"
+      "#{Delim[:display_name_left]}#{x.to_s}#{Delim[:display_name_right]}"
     end
   end
 end

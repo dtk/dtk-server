@@ -38,8 +38,9 @@ pp [:in_save_attrs,hash]
       attribute_rows = AttributeComplexType.ravel_raw_post_hash(hash,:attribute,component_id)
       
 pp [:after_ravel,attribute_rows]
-      attr_mh = ModelHandle.new(ret_session_context_id(),:attribute)
-      Attribute.update_attributes(attr_mh,attribute_rows)
+#TODO: no save while testing
+#      attr_mh = ModelHandle.new(ret_session_context_id(),:attribute)
+#      Attribute.update_attributes(attr_mh,attribute_rows)
       redirect "/xyz/component/edit2/#{component_id}"
     end
 

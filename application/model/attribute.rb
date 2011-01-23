@@ -272,7 +272,7 @@ also related is allowing omission of columns mmentioned in jon condition; post p
       attr_id_formatted = AttributeComplexType.container_id(:attribute,self[:id])
       item_path = AttributeComplexType.item_path_token_array(self)||[]
       token_array = ([node_or_group_id_formatted,cmp_id_formatted,attr_id_formatted] + item_path).compact
-      Aux.put_in_bracket_form(token_array)
+      AttributeComplexType.serialze(token_array)
     end
 
     #TODO: may remove

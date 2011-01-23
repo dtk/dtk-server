@@ -30,27 +30,36 @@ module XYZ
       ret
     end
 
-    NumericIndexDelimiter = "__indx:"
-    NumericIndexRegexp = Regexp.new("#{NumericIndexDelimiter}([0-9]+$)")
-    IDDelimiter = "__id:"
-    def self.item_path_token_array(attr)
-      return nil unless attr[:item_path]
-      attr[:item_path].map{|indx| indx.kind_of?(Numeric) ? "#{NumericIndexDelimiter}#{indx.to_s}" : indx.to_s} 
-    end
-    def self.container_id(type,id)
-      return nil if id.nil?
-      "#{IDDelimiter}#{type}:#{id.to_s}"
-    end
-
     def self.ravel_raw_post_hash(raw_post_hash,type,parent_id=nil)
       ret = Array.new
       ravel_raw_post_hash_top_level!(ret,raw_post_hash,type,parent_id)
       ret
     end
-
+    def self.serialze(token_array)
+      token_array.join(Delimiter[:common])
+    end
    private
+    Delimiter = Hash.new
+    Delimiter[:common] = "__"
+    Delimiter[:id_prefix] = "id#{Delimiter[:common]}"
+    Delimiter[:numeric_index] = "_indx#{Delimiter[:common]}"
+    Delimiter[:display_name_left] = "["
+    Delimiter[:display_name_right] = "]"
+    Delimiter.freeze
+    NumericIndexRegexp = Regexp.new("#{Delimiter[:numeric_index]}([0-9]+$)")
+
+    def self.item_path_token_array(attr)
+      return nil unless attr[:item_path]
+      attr[:item_path].map{|indx| indx.kind_of?(Numeric) ? "#{Delimiter[:numeric_index]}#{indx.to_s}" : indx.to_s} 
+    end
+    def self.container_id(type,id)
+      return nil if id.nil?
+      "#{Delimiter[:id_prefix]}#{type}#{Delimiter[:common]}#{id.to_s}"
+    end
+
+
     def self.ravel_raw_post_hash_top_level!(ret,hash,type,parent_id=nil)
-      pattern = Regexp.new("^#{IDDelimiter}#{type}:([0-9]+$)")
+      pattern = Regexp.new("^#{Delimiter[:id_prefix]}#{type}#{Delimiter[:common]}([0-9]+$)")
       hash.each do |k,child_hash|
         id = (k =~ pattern; $1 ? $1.to_i : nil)
         next unless id
@@ -178,9 +187,9 @@ module XYZ
       value_obj.each_with_index do |child_val_obj,i|
         child_attr = 
           if attr[:item_path]
-            attr.merge(:display_name => "#{attr[:display_name]}#{delim(i)}", :item_path => attr[:item_path] + [i])
+            attr.merge(:display_name => "#{attr[:display_name]}#{display_name_delim(i)}", :item_path => attr[:item_path] + [i])
           else
-            attr.merge(:root_display_name => attr[:display_name], :display_name => "#{attr[:display_name]}#{delim(i)}", :item_path => [i])
+            attr.merge(:root_display_name => attr[:display_name], :display_name => "#{attr[:display_name]}#{display_name_delim(i)}", :item_path => [i])
         end
         flatten_attribute!(ret,child_val_obj,child_attr,array_pat)
       end
@@ -193,9 +202,9 @@ module XYZ
       value_obj.each do |k,child_val_obj|
         child_attr = 
           if attr[:item_path]
-            attr.merge(:display_name => "#{attr[:display_name]}#{delim(k)}", :item_path => attr[:item_path] + [k.to_sym])
+            attr.merge(:display_name => "#{attr[:display_name]}#{display_name_delim(k)}", :item_path => attr[:item_path] + [k.to_sym])
           else
-            attr.merge(:root_display_name => attr[:display_name], :display_name => "#{attr[:display_name]}#{delim(k)}", :item_path => [k.to_sym])
+            attr.merge(:root_display_name => attr[:display_name], :display_name => "#{attr[:display_name]}#{display_name_delim(k)}", :item_path => [k.to_sym])
         end
         child_pattern = pattern[k.to_s]
         flatten_attribute!(ret,child_val_obj,child_attr,child_pattern)
@@ -209,8 +218,8 @@ module XYZ
       nil
     end
 
-    def self.delim(x)
-      "[#{x.to_s}]"
+    def self.display_name_delim(x)
+      "#{Delimiter[:display_name_left]}#{x.to_s}#{Delimiter[:display_name_right]}"
     end
   end
 end

@@ -62,15 +62,15 @@ module XYZ
       "#{TypeMapping[type.to_sym]}#{Delim[:common]}#{id.to_s}"
     end
 
-    def self.ravel_raw_post_hash_attribute!(ret,hash,parent_id=nil)
-      hash.each do |k,child_hash|
+    def self.ravel_raw_post_hash_attribute!(ret,attributes_hash,parent_id=nil)
+      attributes_hash.each do |k,attr_hash|
         id,path = (k =~ AttrIdRegexp) && [$1.to_i,$2]
         next unless id
         id_vals = {:id => id,DB.parent_field(:component,:attribute) => parent_id}
         if path.empty? 
-          ret[id] = id_vals.merge(:value_asserted => child_hash)
+          ret[id] = id_vals.merge(:value_asserted => attr_hash)
         else
-          ravel_raw_post_hash_attribute_aux!(ret,id,hash,path,id_vals)
+          ravel_raw_post_hash_attribute_aux!(ret,id,attr_hash,path,id_vals)
         end
       end
     end
@@ -101,7 +101,7 @@ module XYZ
         ravel_raw_post_hash_attribute_aux!(ret[index],next_index,hash,rest_path,id_vals) 
       end
     end
-    NumericIndexRegexp = Regexp.new("^#{Delim[:numeric_index]}([0-9]+)(.*$)")
+    NumericIndexRegexp = Regexp.new("^#{Delim[:common]}#{Delim[:numeric_index]}([0-9]+)(.*$)")
     KeyWithRestRegexp = Regexp.new("^#{Delim[:common]}([^#{Delim[:char]}]+)#{Delim[:common]}(.+$)")
     KeyWORestRegexp = Regexp.new("^#{Delim[:common]}(.*$)")
 =begin Deprecate

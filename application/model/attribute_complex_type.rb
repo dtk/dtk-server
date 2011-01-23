@@ -42,33 +42,31 @@ module XYZ
       "#{IDDelimiter}#{type}:#{id.to_s}"
     end
 
-    def self.unravel_raw_post_hash(raw_post_hash)
-      #TODO: case on model; assuming now it is node and looking for top level components
-      type = :component
+    def self.ravel_raw_post_hash(raw_post_hash,type,parent_id=nil)
       ret = Array.new
-      unravel_raw_post_hash_top_level!(ret,raw_post_hash,type)
+      ravel_raw_post_hash_top_level!(ret,raw_post_hash,type,parent_id)
       ret
     end
 
    private
-    def self.unravel_raw_post_hash_top_level!(ret,hash,type,parent_id=nil)
+    def self.ravel_raw_post_hash_top_level!(ret,hash,type,parent_id=nil)
       pattern = Regexp.new("^#{IDDelimiter}#{type}:([0-9]+$)")
       hash.each do |k,child_hash|
         id = (k =~ pattern; $1 ? $1.to_i : nil)
         next unless id
         if type == :component
-          unravel_raw_post_hash_top_level!(ret,child_hash,:attribute,id)
+          ravel_raw_post_hash_top_level!(ret,child_hash,:attribute,id)
         elsif type == :attribute
           ret_val = Hash.new
-          unravel_raw_post_hash_ret_val!(ret_val,:ret,child_hash)
-          ret << {:id => id, :component_component_id  => parent_id,:value_asserted => ret_val[:ret]}
+          ravel_raw_post_hash_ret_val!(ret_val,:ret,child_hash)
+          ret << {:id => id, DB.parent_field(:component,:attribute) => parent_id,:value_asserted => ret_val[:ret]}
         else
           raise Error.new("Unexpected type #{type}")
         end
       end
     end
 
-    def self.unravel_raw_post_hash_ret_val!(ret_val,key,obj)
+    def self.ravel_raw_post_hash_ret_val!(ret_val,key,obj)
       if obj.kind_of?(Hash)
         obj.each do |k,v|
           num_index = (k =~ NumericIndexRegexp; $1 ? $1.to_i : nil)
@@ -78,10 +76,10 @@ module XYZ
             while ret_val[key].size <= num_index
               ret_val[key] << Hash.new
             end
-            unravel_raw_post_hash_ret_val!(ret_val[key],num_index,v)
+            ravel_raw_post_hash_ret_val!(ret_val[key],num_index,v)
           else
             ret_val[key] ||= Hash.new
-            unravel_raw_post_hash_ret_val!(ret_val[key],k,v)
+            ravel_raw_post_hash_ret_val!(ret_val[key],k,v)
           end
         end
       else

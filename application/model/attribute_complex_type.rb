@@ -41,12 +41,15 @@ module XYZ
    private
     Delimiter = Hash.new
     Delimiter[:common] = "__"
-    Delimiter[:id_prefix] = "id#{Delimiter[:common]}"
-    Delimiter[:numeric_index] = "_indx#{Delimiter[:common]}"
+    Delimiter[:numeric_index] = "_" ##{Delimiter[:common]}"
     Delimiter[:display_name_left] = "["
     Delimiter[:display_name_right] = "]"
     Delimiter.freeze
     NumericIndexRegexp = Regexp.new("#{Delimiter[:numeric_index]}([0-9]+$)")
+    TypeMapping = {
+      :attribute => :a,
+      :component => :c
+    }
 
     def self.item_path_token_array(attr)
       return nil unless attr[:item_path]
@@ -54,12 +57,11 @@ module XYZ
     end
     def self.container_id(type,id)
       return nil if id.nil?
-      "#{Delimiter[:id_prefix]}#{type}#{Delimiter[:common]}#{id.to_s}"
+      "#{TypeMapping[type.to_sym]}#{Delimiter[:common]}#{id.to_s}"
     end
 
-
     def self.ravel_raw_post_hash_top_level!(ret,hash,type,parent_id=nil)
-      pattern = Regexp.new("^#{Delimiter[:id_prefix]}#{type}#{Delimiter[:common]}([0-9]+$)")
+      pattern = Regexp.new("^#{TypeMapping[type.to_sym]}#{Delimiter[:common]}([0-9]+$)")
       hash.each do |k,child_hash|
         id = (k =~ pattern; $1 ? $1.to_i : nil)
         next unless id

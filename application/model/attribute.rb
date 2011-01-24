@@ -477,7 +477,7 @@ x=1
    private
     ###### helper fns
     def self.propagate_changes(attr_changes) 
-      AttributeLink.propagate(attr_changes.map{|x|x.id_handle})
+      AttributeLink.propagate(attr_changes.map{|x|x.id_handle},attr_changes.map{|x|x.state_change_id_handle})
     end
 
 ###################################################################

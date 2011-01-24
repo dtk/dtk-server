@@ -169,12 +169,13 @@ module XYZ
     ########################## propagate changes ##################
     #returns all changes
     #TODO: flat list now; look at nested list reflecting hierarchical plan decomposition
-    def self.propagate(output_attr_id_handles)
+    def self.propagate(output_attr_id_handles,parent_id_handles=nil)
       return Hash.new if output_attr_id_handles.empty?
       attr_mh = output_attr_id_handles.first.createMH()
+      output_attr_ids = output_attr_id_handles.map{|idh|idh.get_id()}
       search_pattern_hash = {
         :relation => :attribute,
-        :filter => [:and,[:oneof, :id, output_attr_id_handles.map{|idh|idh.get_id()}]],
+        :filter => [:and,[:oneof, :id, output_attr_ids]],
         :columns => [:id,:value_asserted,:value_derived,:semantic_type,:linked_attributes]
       }
       attrs_to_update = Model.get_objects_from_search_pattern_hash(attr_mh,search_pattern_hash)
@@ -183,6 +184,13 @@ module XYZ
       attrs_to_update.reject!{|r|(r[:attribute2]||{})[:value_asserted]}
       change_info = Hash.new
       new_val_rows = Array.new
+
+      
+      parent_map = Hash.new
+      if parent_id_handles
+        output_attr_ids.each_with_index{|id,i|parent_map[id] = parent_id_handles[i]}
+      end
+
       attrs_to_update.each do |row|
         input_attr_row = row[:attribute2]
         output_attr_row = row
@@ -191,10 +199,12 @@ module XYZ
         new_value_row = propagate_proc.propagate().merge(:id => input_attr_row[:id])
         new_val_rows << new_value_row
 
-        change_info[input_attr_row[:id]] = {
+        change = {
           :new_item => attr_mh.createIDH(:guid => input_attr_row[:id], :display_name => input_attr_row[:display_name]),
           :change => {:old => input_attr_row[:value_derived], :new => new_value_row[:value_derived]}
         }
+        change.merge!(:parent => parent_map[row[:id]]) if parent_map[row[:id]]
+        change_info[input_attr_row[:id]] = change
       end
       return Hash.new if new_val_rows.empty?
       changed_ids = Attribute.update_changed_values(attr_mh,new_val_rows,:value_derived)

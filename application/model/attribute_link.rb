@@ -150,7 +150,7 @@ module XYZ
       create_from_rows(attr_link_mh,new_link_rows)
     end
 
-     ### aux fn for creaet links ###
+     ### aux fn for create links ###
     def self.propagate_from_create(attr_mh,attr_info,attr_link_rows)
       new_val_rows = attr_link_rows.map do |attr_link_row|
         input_attr = attr_info[attr_link_row[:input_id]]
@@ -159,7 +159,7 @@ module XYZ
         propagate_proc.propagate().merge(:id => input_attr[:id])
       end
       return Array.new if new_val_rows.empty?
-      update_select_ds = SQL::ArrayDataset.create(db,new_val_rows,attr_mh) 
+      update_select_ds = SQL::ArrayDataset.create(db,new_val_rows,attr_mh,:convert_for_update => true) 
       update_from_select(attr_mh,FieldSet.new(:attribute,[:value_derived,:link_info]),update_select_ds)
     end
 
@@ -171,15 +171,19 @@ module XYZ
     #TODO: flat list now; look at nested list reflecting hierarchical plan decomposition
     def self.propagate(output_attr_id_handles)
       return Hash.new if output_attr_id_handles.empty?
-      attr_mh = output_attr_id_handles.first
-      field_set = Model::FieldSet.new(:attribute,[:id,:value_asserted,:value_derived,:semantic_type,:linked_attributes])
-      filter = [:and, [:oneof, :attribute__id, output_attr_id_handles.map{|idh|idh.get_id()}]]
-      #dont propagate to attributes with asserted values
-      wc = {:attribute2__value_asserted => nil}
-      ds = SearchObject.create_from_field_set(field_set,attr_mh[:c],filter).create_dataset().where(wc)
+      attr_mh = output_attr_id_handles.first.createMH()
+      search_pattern_hash = {
+        :relation => :attribute,
+        :filter => [:and,[:oneof, :id, output_attr_id_handles.map{|idh|idh.get_id()}]],
+        :columns => [:id,:value_asserted,:value_derived,:semantic_type,:linked_attributes]
+      }
+      attrs_to_update = Model.get_objects_from_search_pattern_hash(attr_mh,search_pattern_hash)
+    
+      #dont propagate to attributes with asserted values TODO: push this restriction into search pattern
+      attrs_to_update.reject!{|r|(r[:attribute2]||{})[:value_asserted]}
       change_info = Hash.new
       new_val_rows = Array.new
-      ds.all.each do |row|
+      attrs_to_update.each do |row|
         input_attr_row = row[:attribute2]
         output_attr_row = row
         propagate_proc = PropagateProcessor.new(row[:attribute_link],input_attr_row,output_attr_row)
@@ -202,6 +206,7 @@ module XYZ
       propagated_changes = propagate(changed_ids.map{|r|attr_mh.createIDH(:guid => r[:id])}) #TODO: see if setting parent right?
       pruned_changes.merge(propagated_changes)
     end
+
 
 =begin
   TODO: need to modify fragment I cut and paste below from deprecated fn:  propagate_when_eq_links

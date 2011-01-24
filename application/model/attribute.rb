@@ -296,7 +296,7 @@ also related is allowing omission of columns mmentioned in jon condition; post p
       parent_idh = sample_attr_idh.get_top_container_id_handle(:datacenter)
 
 
-      #TODO: do we need to convert from json and if so may make conversion more base fn
+      #TODO: should we make json conversion more base fn
       changes = changed_attrs_info.map do |r|
         {
           :new_item => attr_mh.createIDH(:id => r[:id]),
@@ -317,6 +317,7 @@ pp [:changes_to_propagate,changes_to_propagate]
 
       nested_changes = propagate_changes(changes_to_propagate)
 pp [:nested_changes,nested_changes]
+x=1
 =begin
       #compute and merge in base object values and action parernt
       nested_base_objects = get_attributes_with_base_objects(attr_idh.createMH(),nested_changes_hash.keys,:node) #TODO: hard coded :node
@@ -343,6 +344,7 @@ pp [:nested_changes,nested_changes]
 
    public
 
+   #TODO: probably deprecate and if notr convert old new values to hash form
     def self.update_and_propagate_attribute_value(attr_idh,value_asserted)
       base_object = get_attribute_with_base_object(attr_idh,attr_idh[:parent_model_name])
       old_value = (base_object||{})[:value_asserted]
@@ -380,7 +382,7 @@ pp [:nested_changes,nested_changes]
     end
 
     def self.update_changed_values(attr_mh,new_val_rows,value_type)
-      update_select_ds = SQL::ArrayDataset.create(db,new_val_rows,attr_mh)
+      update_select_ds = SQL::ArrayDataset.create(db,new_val_rows,attr_mh,:convert_for_update => true)
       opts = {:update_only_if_change => [value_type],:returning_cols => [:id]}
       update_from_select(attr_mh,FieldSet.new(:attribute,[value_type]),update_select_ds,opts)
     end

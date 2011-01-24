@@ -24,7 +24,6 @@ module XYZ
          else
           raise ErrorNotImplemented.new("propagate value not implemented yet for fn #{function}")
         end
-      hash_ret.each{|k,v|hash_ret[k] = SerializeToJSON.serialize(v)}
       hash_ret
     end
 

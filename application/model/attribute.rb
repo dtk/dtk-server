@@ -275,9 +275,9 @@ also related is allowing omission of columns mmentioned in jon condition; post p
       AttributeComplexType.serialze(token_array)
     end
 
-    #TODO: may remove
     def self.update_attributes(attr_mh,attribute_rows)
       return Array.new if attribute_rows.empty?
+      #TODO: was unable to use :update_only_if_change flag on update_from_select because was unable to get old value returning col 
       unpruned_update_select_ds = SQL::ArrayDataset.create(db,attribute_rows,attr_mh,:convert_for_update => true)
 
       attr_ds = get_objects_just_dataset(attr_mh,nil,FieldSet.opt([{:id => :id2},{:value_asserted => :old_value_asserted}],:attribute))
@@ -287,11 +287,28 @@ also related is allowing omission of columns mmentioned in jon condition; post p
       update_select_ds =  unpruned_update_select_ds.join_table(:inner,attr_ds,join_cond)
 
       returning_cols_opts = {:returning_cols => [:id,:value_asserted,:old_value_asserted]}
-      changed_attrs = update_from_select(attr_mh,FieldSet.new(:attribute,[:value_asserted]),update_select_ds,returning_cols_opts)
-      return nil if changed_attrs.empty?
+      changed_attrs_raw = update_from_select(attr_mh,FieldSet.new(:attribute,[:value_asserted]),update_select_ds,returning_cols_opts)
+      return nil if changed_attrs_raw.empty?
+      #TODO: may make conversion more base fn
+      changed_attrs = changed_attrs_raw.map do |r|
+        {:id => r[:id],
+          :value_asserted => json_form(r[:value_asserted]),
+          :old_value_asserted => json_form(r[:old_value_asserted])
+        }
+      end
       #TODO: add to change actions:
       pp [:changed_attrs,changed_attrs]
     end
+   private
+   def self.json_form(x)
+     begin
+       JSON.parse(x)
+      rescue Exception
+       x
+     end
+   end
+
+   public
 
     def self.update_and_propagate_attribute_value(attr_idh,value_asserted)
       base_object = get_attribute_with_base_object(attr_idh,attr_idh[:parent_model_name])

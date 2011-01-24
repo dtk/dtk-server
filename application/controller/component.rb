@@ -34,14 +34,14 @@ module XYZ
     def save_attributes(explicit_hash=nil)
       hash = explicit_hash || request.params.dup
 pp [:in_save_attrs,hash]
-      component_id = hash.delete("component_id")
+      component_id = hash.delete("component_id").to_i
       attribute_rows = AttributeComplexType.ravel_raw_post_hash(hash,:attribute,component_id)
       
 pp [:after_ravel,attribute_rows]
 
       attr_mh = ModelHandle.new(ret_session_context_id(),:attribute)
       Attribute.update_attributes(attr_mh,attribute_rows)
-      redirect "/xyz/component/edit/#{component_id}"
+      redirect "/xyz/component/edit/#{component_id.to_s}"
     end
 
 

@@ -317,21 +317,7 @@ pp [:changes_to_propagate,changes_to_propagate]
 
       nested_changes = propagate_changes(changes_to_propagate)
 pp [:nested_changes,nested_changes]
-x=1
-=begin
-      #compute and merge in base object values and action parernt
-      nested_base_objects = get_attributes_with_base_objects(attr_idh.createMH(),nested_changes_hash.keys,:node) #TODO: hard coded :node
-      nested_base_objects.each do |base_obj|
-        id = base_obj[:id]
-        #TODO: need to see if this is right
-        if nested_changes_hash[id] 
-          nested_changes_hash[id].merge!({:base_object => base_obj,:parent => action_idh})
-        end
-      end
-      pp [:nested_changes,nested_changes_hash.values]
-      StateChange.create_pending_change_items(nested_changes_hash.values)
-=end
-      nil
+      StateChange.create_pending_change_items(nested_changes.values)
     end
    private
    def self.json_form(x)

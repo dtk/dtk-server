@@ -211,31 +211,23 @@ module XYZ
       #if no changes exit, otherwise recursively call propagate
       return Hash.new if changed_ids.empty?
 
-      pruned_changes = change_info.inject({}){|h,kv|h.merge(kv[0] => kv[1]) if changed_ids.map{|x|x[:id]}.include?(kv[0])}||{}
-
-      propagated_changes = propagate(changed_ids.map{|r|attr_mh.createIDH(:guid => r[:id])}) #TODO: see if setting parent right?
+      #TODO: using flat structure wrt to parents; so if parents pushed down use parents associated with trigger for change
+      pruned_changes = Hash.new
+      nested_parent_idhs = nil
+      nested_idhs = Array.new
+      changed_ids.each do |r|
+        id = r[:id]
+        pruned_changes[id] = change_info[id]
+        nested_idhs << attr_mh.createIDH(:id => id)
+        if parent_idh = change_info[id][:parent]
+          nested_parent_idhs ||= Array.new
+          nested_parent_idhs << parent_idh
+        end
+      end
+      
+      propagated_changes = propagate(nested_idhs,nested_parent_idhs)
       pruned_changes.merge(propagated_changes)
     end
-
-
-=begin
-  TODO: need to modify fragment I cut and paste below from deprecated fn:  propagate_when_eq_links
-  TODO: need tpo figure out what changes are recorded
-      #create the new pending changes
-      parent_action_mh = attr_changes.first.action_id_handle.createMH()
-      new_item_hashes = update_ret.map do |r|
-        new_item_hash ={
-          :new_item => attr_mh.createIDH(:guid => r[:id], :display_name => r[:display_name]), 
-          :parent => parent_action_mh.createIDH(:guid => r[:action_id]),
-          :change => {:old => r[:old_val], :new => r[:new_val]}
-        }
-        base_object = indexed_attrs_with__base_objects[r[:id]]
-        new_item_hash.merge(base_object ? {:base_object => base_object} : {})
-      end
-      Action.create_pending_change_items(new_item_hashes)
-=end
-
-
 
    ########################## end: propagate changes ##################
 

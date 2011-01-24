@@ -8,13 +8,12 @@ if(!R8.CommitTool) {
 			_tabListNodeId = 'modal-tab-list',
 			_tabListNode = null;
 
-		var _tabs = ['general','home-directory','ssh'];
+		var _tabs = ['change-list','details'];
 
 		return {
 			init: function() {
-//				R8.Utils.$(document).ready(function(){
-				_treeNode = R8.Utils.Y.one('#treeview-test');
-				if(_treeNode == null) {
+				_tabListNode = R8.Utils.Y.one('#'+_tabListNodeId);
+				if(_tabListNode == null) {
 					var that = this;
 					var setupCallback = function() {
 						that.init();
@@ -22,30 +21,21 @@ if(!R8.CommitTool) {
 					setTimeout(setupCallback,50);
 					return;
 				}
-
-				$("#treeview-test").treeview({
-					collapsed: true
-/*
-					toggle: function() {
-						console.log("%s was toggled.", $(this).find(">span").text());
-					}
-*/
-				});
-/*					
-					$("#add").click(function() {
-						var branches = $("<li><span class='folder'>New Sublist</span><ul>" + 
-							"<li><span class='file'>Item1</span></li>" + 
-							"<li><span class='file'>Item2</span></li></ul></li>").appendTo("#browser");
-						$("#browser").treeview({
-							add: branches
-						});
-					});
-*/
-//				});
-
+				this.setupModalFormTabs();
+//				this.initForm();
 			},
 
-			renderTree: function(taskDef,viewType) {
+			renderTree: function(taskDef,viewType,panel_id) {
+				testNode = R8.Utils.Y.one('#'+panel_id);
+				if(testNode == null) {
+					var that = this;
+					var renderCallback = function() {
+						that.renderTree(taskDef,viewType,panel_id);
+					}
+					setTimeout(renderCallback,50);
+					return;
+				}
+
 /*
 for(var i=taskDef.children.length-1; i >=0; i--) {
 	if(i > 1) delete(taskDef.children[i]);
@@ -63,7 +53,8 @@ taskDef.children[0].children[0].children = [];
 				rootNode.addClass('filetree');
 
 				this.setTaskContent(taskDef,viewType,rootNode);
-				R8.Workspace.get('modalNode').append(rootNode);
+//				R8.Workspace.get('modalNode').append(rootNode);
+				R8.Utils.Y.one('#'+panel_id).append(rootNode);
 
 				$("#"+rootNode.get('id')).treeview({
 					collapsed: true
@@ -165,11 +156,11 @@ console.log(taskDef);
 					var tabNodeId = e.currentTarget.get('id'),
 						tabId = tabNodeId.replace('-tab','');
 
-					R8.UserComponent.changeTabFocus(tabId);
-				},_tabListNode,'.tab');
+					this.changeTabFocus(tabId);
+				},_tabListNode,'.tab',this);
 				var itemMouseOver = R8.Utils.Y.delegate('mouseenter',function(e){
 //					e.currentTarget.addClass('active');
-				},_tabListNode,'.tab');
+				},_tabListNode,'.tab',this);
 
 			},
 			changeTabFocus: function(tabId) {
@@ -187,12 +178,14 @@ console.log(taskDef);
 				R8.Utils.Y.one('#'+tabContentNodeId).setStyle('display','block');
 			},
 			initForm: function() {
+/*
 				var dirNameNode = R8.Utils.Y.one('#home_directory_name'), userNameNode = R8.Utils.Y.one('#username');
 				//console.log(R8.Utils.Y.one('#username'));
 				userNameNode.on('keyup', function(e){
 					var usernameValue = e.currentTarget.get('value');
 					dirNameNode.set('value', usernameValue);
 				});
+*/
 			}
 		}
 	}();

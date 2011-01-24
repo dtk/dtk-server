@@ -662,14 +662,16 @@ POSSIBLE CHANGES TO HASH
 #          commit_tree = top_level_task.render_commit_tree()
 #          commit_tree = top_level_task.render_commit_tree('xml | json')
           commit_tree = commit_task.render_form()
-          add_i18n_strings_to_rendered_tasks!(commit_tree)
-#          pp [:commit_tree,commit_tree]
+          pp [:commit_tree,commit_tree]
           delete_instance(commit_task.id())
         end
       end
 
 #      tpl = R8Tpl::TemplateR8.new("workspace/commit_test",user_context())
 #      panel_id = request.params['panel_id']
+
+      tpl = R8Tpl::TemplateR8.new("workspace/commit",user_context())
+      panel_id = request.params['panel_id']
 
       include_js('plugins/commit.tool')
       include_js('external/jquery.treeview')
@@ -678,11 +680,12 @@ POSSIBLE CHANGES TO HASH
 #      run_javascript('setTimeout(initUserForm,500);')
       commit_tree_json = JSON.generate(commit_tree)
 
-      run_javascript("R8.CommitTool.renderTree(#{commit_tree_json},'edit');")
+      run_javascript("R8.CommitTool.init();")
+      run_javascript("R8.CommitTool.renderTree(#{commit_tree_json},'edit','change-list-tab-content');")
 
       return {
-#        :content=> tpl.render(),
-#        :panel=>panel_id
+        :content=> tpl.render(),
+        :panel=>panel_id
       }
     end
 

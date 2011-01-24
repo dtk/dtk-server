@@ -143,6 +143,7 @@ module XYZ
             node_task = Task.render_task_on_node(:node_id => t[:node_id], :node_name => t[:node_name]) 
             node_task[:children] << t
             ret[:children] << node_task
+            indexed_nodes[node_task[:node_id]] = node_task
           end
         end
       end

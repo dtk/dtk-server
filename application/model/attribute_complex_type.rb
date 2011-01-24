@@ -66,17 +66,17 @@ module XYZ
       attributes_hash.each do |k,attr_hash|
         id,path = (k =~ AttrIdRegexp) && [$1.to_i,$2]
         next unless id
-        id_vals = {:id => id,DB.parent_field(:component,:attribute) => parent_id}
+        ret[id] ||= {:id => id,DB.parent_field(:component,:attribute) => parent_id}
         if path.empty? 
-          ret[id] = id_vals.merge(:value_asserted => attr_hash)
+          ret[id][:value_asserted] = attr_hash
         else
-          ravel_raw_post_hash_attribute_aux!(ret,id,attr_hash,path,id_vals)
+          ravel_raw_post_hash_attribute_aux!(ret[id],:value_asserted,attr_hash,path)
         end
       end
     end
     AttrIdRegexp = Regexp.new("^#{TypeMapping[:attribute]}#{Delim[:common]}([0-9]+)(.*$)")
 
-    def self.ravel_raw_post_hash_attribute_aux!(ret,index,hash,path,id_vals)
+    def self.ravel_raw_post_hash_attribute_aux!(ret,index,hash,path)
       next_index, rest_path = (path =~ NumericIndexRegexp) && [$1.to_i,$2]
       if path =~ NumericIndexRegexp
         next_index, rest_path = [$1.to_i,$2]
@@ -96,37 +96,15 @@ module XYZ
       end
 
       if rest_path.empty?
-        ret[index][next_index] = id_vals.merge(:value_asserted => hash)
+        ret[index][next_index] = hash
       else
-        ravel_raw_post_hash_attribute_aux!(ret[index],next_index,hash,rest_path,id_vals) 
+        ravel_raw_post_hash_attribute_aux!(ret[index],next_index,hash,rest_path)
       end
     end
     NumericIndexRegexp = Regexp.new("^#{Delim[:common]}#{Delim[:numeric_index]}([0-9]+)(.*$)")
     KeyWithRestRegexp = Regexp.new("^#{Delim[:common]}([^#{Delim[:char]}]+)#{Delim[:common]}(.+$)")
     KeyWORestRegexp = Regexp.new("^#{Delim[:common]}(.*$)")
-=begin Deprecate
-    def self.ravel_raw_post_hash_ret_val!(ret_val,key,obj)
-      if obj.kind_of?(Hash)
-        obj.each do |k,v|
-          num_index = (k =~ NumericIndexRegexp; $1 ? $1.to_i : nil)
-          if num_index
-            
-            ret_val[key] ||= ArrayObject.new 
-            #make sure that  ret_val[key] has enough rows
-            while ret_val[key].size <= num_index
-              ret_val[key] << Hash.new
-            end
-            ravel_raw_post_hash_ret_val!(ret_val[key],num_index,v)
-          else
-            ret_val[key] ||= Hash.new
-            ravel_raw_post_hash_ret_val!(ret_val[key],k,v)
-          end
-        end
-      else
-        ret_val[key] = (obj.empty? ? nil : obj)
-      end
-    end
-=end
+
     def self.has_required_fields?(value_obj,pattern)
       #care must be taken to make this three-valued
       if pattern.is_atomic?()

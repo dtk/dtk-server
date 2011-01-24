@@ -662,6 +662,7 @@ POSSIBLE CHANGES TO HASH
 #          commit_tree = top_level_task.render_commit_tree()
 #          commit_tree = top_level_task.render_commit_tree('xml | json')
           commit_tree = commit_task.render_form()
+          add_i18n_strings_to_rendered_tasks!(commit_tree)
           pp [:commit_tree,commit_tree]
           delete_instance(commit_task.id())
         end

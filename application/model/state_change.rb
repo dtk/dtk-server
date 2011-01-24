@@ -136,7 +136,7 @@ module XYZ
     def self.create_pending_change_item(new_item_hash)
       create_pending_change_items([new_item_hash]).first
     end
-    #assoumption is that all parents are of same type and all changed items of same type
+    #assumption is that all parents are of same type and all changed items of same type
     def self.create_pending_change_items(new_item_hashes)
       return nil if new_item_hashes.empty? 
       parent_model_name = new_item_hashes.first[:parent][:model_name]

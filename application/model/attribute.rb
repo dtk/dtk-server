@@ -275,7 +275,7 @@ also related is allowing omission of columns mmentioned in jon condition; post p
       AttributeComplexType.serialze(token_array)
     end
 
-    def self.update_attributes(attr_mh,attribute_rows)
+    def self.update_and_propagate_attributes(attr_mh,attribute_rows)
       return Array.new if attribute_rows.empty?
       #TODO: was unable to use :update_only_if_change flag on update_from_select because was unable to get old value returning col 
       unpruned_update_select_ds = SQL::ArrayDataset.create(db,attribute_rows,attr_mh,:convert_for_update => true)
@@ -287,17 +287,50 @@ also related is allowing omission of columns mmentioned in jon condition; post p
       update_select_ds =  unpruned_update_select_ds.join_table(:inner,attr_ds,join_cond)
 
       returning_cols_opts = {:returning_cols => [:id,:value_asserted,:old_value_asserted]}
-      changed_attrs_raw = update_from_select(attr_mh,FieldSet.new(:attribute,[:value_asserted]),update_select_ds,returning_cols_opts)
-      return nil if changed_attrs_raw.empty?
-      #TODO: may make conversion more base fn
-      changed_attrs = changed_attrs_raw.map do |r|
-        {:id => r[:id],
-          :value_asserted => json_form(r[:value_asserted]),
-          :old_value_asserted => json_form(r[:old_value_asserted])
+      changed_attrs_info = update_from_select(attr_mh,FieldSet.new(:attribute,[:value_asserted]),update_select_ds,returning_cols_opts)
+      return nil if changed_attrs_info.empty?
+
+      #use sample attribute to find containing datacenter
+      sample_attr_idh = attr_mh.createIDH(:id => changed_attrs_info.first[:id])
+      #TODO: anymore efficieny way do do this; can pass datacenter in fn
+      parent_idh = sample_attr_idh.get_top_container_id_handle(:datacenter)
+
+
+      #TODO: do we need to convert from json and if so may make conversion more base fn
+      changes = changed_attrs_info.map do |r|
+        {
+          :new_item => attr_mh.createIDH(:id => r[:id]),
+          :parent => parent_idh,
+          :change => {
+            :old => json_form(r[:old_value_asserted]),
+            :new => json_form(r[:value_asserted])
+          }
         }
       end
-      #TODO: add to change actions:
-      pp [:changed_attrs,changed_attrs]
+      change_idhs = StateChange.create_pending_change_items(changes)
+      changes_to_propagate = Array.new
+      change_idhs.each_with_index do |change_idh,i|
+        change = changes[i]
+        changes_to_propagate << AttributeChange.new(change[:new_item],change[:change][:new],change_idh)
+      end
+pp [:changes_to_propagate,changes_to_propagate]
+
+      nested_changes = propagate_changes(changes_to_propagate)
+pp [:nested_changes,nested_changes]
+=begin
+      #compute and merge in base object values and action parernt
+      nested_base_objects = get_attributes_with_base_objects(attr_idh.createMH(),nested_changes_hash.keys,:node) #TODO: hard coded :node
+      nested_base_objects.each do |base_obj|
+        id = base_obj[:id]
+        #TODO: need to see if this is right
+        if nested_changes_hash[id] 
+          nested_changes_hash[id].merge!({:base_object => base_obj,:parent => action_idh})
+        end
+      end
+      pp [:nested_changes,nested_changes_hash.values]
+      StateChange.create_pending_change_items(nested_changes_hash.values)
+=end
+      nil
     end
    private
    def self.json_form(x)

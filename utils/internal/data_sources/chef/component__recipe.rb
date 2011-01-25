@@ -6,7 +6,7 @@ module XYZ
           target[:type] = "template"
           target[:basic_type] = fn(:basic_type,source["basic_type"])
           name = source["recipe_name"]
-          target[:display_name] = name
+          target[:display_name] = fn(:display_name,name)
           target[:description] = source["description"]
           target[:external_ref] = fn(:external_ref,name)
           nested_definition :monitoring_item, source["monitoring_items"]
@@ -19,7 +19,10 @@ module XYZ
           end
 
           def relative_distinguished_name(source)
-            source["recipe_name"]
+            source["recipe_name"].gsub(/::/,NameDelimiter)
+          end
+          def display_name(recipe_name)
+            recipe_name.gsub(/::/,NameDelimiter)
           end
           def external_ref(recipe_name)
             {"type" => "chef_recipe", "recipe_name" => recipe_name}

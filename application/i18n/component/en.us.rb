@@ -44,4 +44,19 @@
   :wordpress => "Wordpress",
   :nagios_client => "NRPE",
   :nagios_server => "Nagios3 Server",
+
+#TODO: replace above with new form
+  :hadoop__hive => 'Hadoop Hive',
+  :hadoop__doc => 'Hadoop Docs',
+  :rabbitmq__edge_stomp => 'Rabbit - Stomp',
+  :mysql__server2 => 'MySQL Server',
+  :mysql__server => 'MySQL Server',
+  :mysql__slave => 'MySQL Slave',
+  :mysql__master => 'MySQL Master',
+  :php__php5 => "Php5",
+  :postgresql__client => "Postgres Client",
+  :postgresql__server => "Postgres Server",
+  :postgresql__app => "Postgres App",
+  :nagios__client => "NRPE",
+  :nagios__server => "Nagios3 Server",
 }

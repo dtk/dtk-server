@@ -1,107 +1,108 @@
 module XYZ
   module DSNormalizer
     class Top
-      class << self
-        #filter applied when into put in ds_attribute bag gets overwritten for non trivial filter
-        def filter_raw_source_objects(ds_hash)
-          ds_hash
-        end
+      #filter applied when into put in ds_attribute bag gets overwritten for non trivial filter
+      def self.filter_raw_source_objects(ds_hash)
+        ds_hash
+      end
 
-        #default unique_key; can be overwritten
-        def unique_keys(ds_hash)
-          [relative_distinguished_name(ds_hash)]
-        end
-
-        def class_rules()
+      #default unique_key; can be overwritten
+      def self.unique_keys(ds_hash)
+        [relative_distinguished_name(ds_hash)]
+      end
+      
+      def self.class_rules()
         @class_rules ||= DBUpdateHash.create_with_auto_vivification()
-       end
-     private
+      end
 
-      def definitions(&block)
+     private
+      def self.definitions(&block)
         context = Context.new(self,:no_conditions)
         context.instance_eval(&block) 
         class_rules.freeze
       end
     end
-  end
-  class Context
-    attr_reader :relation,:condition, :parent
-    def initialize(parent,relation=:no_condition,condition=nil)
-      @parent = parent
-      @relation = relation
-      @condition = condition 
-    end
-    #top level "conditionals"
-    def if_exists(condition,&block)
-      context = Context.new(self,:if_exists,condition)
-      context.instance_eval(&block) 
-    end
-    #sub commands
-    def target()
-      matching_cond_index = class_rules.keys.find{|cond|cond == self}
-      class_rules[matching_cond_index || self]
-    end
 
-    def nested_definition(obj_type,source_attributes)
-      target[obj_type] = NestedDefinition.new(obj_type,source_attributes)
-    end
+    NameDelimiter = "__"
 
-    #TBD: need to fix; need to determine if use source attribute path, target attribute path and/or source ds_key to refer to foreign key
-    def foreign_key(obj_type,path)
-      ForeignKey.new(fn(lambda{|source|"/#{obj_type}/#{source}"},path))
-    end
+   class Context
+     attr_reader :relation,:condition, :parent
+     def initialize(parent,relation=:no_condition,condition=nil)
+       @parent = parent
+       @relation = relation
+       @condition = condition 
+     end
+     #top level "conditionals"
+     def if_exists(condition,&block)
+       context = Context.new(self,:if_exists,condition)
+       context.instance_eval(&block) 
+     end
+     #sub commands
+     def target()
+       matching_cond_index = class_rules.keys.find{|cond|cond == self}
+       class_rules[matching_cond_index || self]
+     end
 
-    def source()
-      Source.new()
-    end
+     def nested_definition(obj_type,source_attributes)
+       target[obj_type] = NestedDefinition.new(obj_type,source_attributes)
+     end
 
-    def if_unset(arg)
-      SetIfUnset.new(arg,self)
-    end
+     #TBD: need to fix; need to determine if use source attribute path, target attribute path and/or source ds_key to refer to foreign key
+     def foreign_key(obj_type,path)
+       ForeignKey.new(fn(lambda{|source|"/#{obj_type}/#{source}"},path))
+     end
 
-    def fn(func_name_or_def,*args)
-      Function.new(func_name_or_def,args,self)
-    end
+     def source()
+       Source.new()
+     end
 
-    def source_complete_for(trgt,constraints={})
-      trgt.mark_as_complete(constraints)
-    end
+     def if_unset(arg)
+       SetIfUnset.new(arg,self)
+     end
 
-    def source_key()
-      Function.new(lambda{|x|x.keys.first},[Source.new()],self)
-    end
+     def fn(func_name_or_def,*args)
+       Function.new(func_name_or_def,args,self)
+     end
 
-    def ==(x)
-      @relation == x.relation and @condition == x.condition
-    end
+     def source_complete_for(trgt,constraints={})
+       trgt.mark_as_complete(constraints)
+     end
 
-    def class_rules()
-      @parent.class_rules
-    end
+     def source_key()
+       Function.new(lambda{|x|x.keys.first},[Source.new()],self)
+     end
 
-    def evaluate_condition(ds_hash)
-      return true if @relation == :no_conditions
-      return @condition.apply(ds_hash) if @relation == :if_exists
-      raise Error.new("condition #{relation} does not exist")
-    end
-  end
+     def ==(x)
+       @relation == x.relation and @condition == x.condition
+     end
 
-  class NestedDefinition
-    def initialize(obj_type,source_attributes)
-      @obj_type = obj_type
-      @source_attributes = source_attributes
-    end
-    def normalize(ds_hash_list,parent_ds_object)
-      #TBD: how to avoid this db call
-      ds_object = parent_ds_object.get_directly_contained_objects(:data_source_entry,{:obj_type=>@obj_type.to_s}).first
-      raise Error.new("cannot find data source adapter for nested definition for #{@obj_type.to_s}") if ds_object.nil?
-      ret = DBUpdateHash.new()
-      (@source_attributes.apply(ds_hash_list)||{}).each do |ref,child_source_hash_x|
-        child_source_hash = child_source_hash_x.merge(:ref => ref)
-        key = ds_object.relative_distinguished_name(child_source_hash)
-        ret[key] = ds_object.normalize(child_source_hash)
-      end
-      ret.mark_as_complete if ds_object[:ds_is_golden_store]
+     def class_rules()
+       @parent.class_rules
+     end
+
+     def evaluate_condition(ds_hash)
+       return true if @relation == :no_conditions
+       return @condition.apply(ds_hash) if @relation == :if_exists
+       raise Error.new("condition #{relation} does not exist")
+     end
+   end
+
+   class NestedDefinition
+     def initialize(obj_type,source_attributes)
+       @obj_type = obj_type
+       @source_attributes = source_attributes
+     end
+     def normalize(ds_hash_list,parent_ds_object)
+       #TBD: how to avoid this db call
+       ds_object = parent_ds_object.get_directly_contained_objects(:data_source_entry,{:obj_type=>@obj_type.to_s}).first
+       raise Error.new("cannot find data source adapter for nested definition for #{@obj_type.to_s}") if ds_object.nil?
+       ret = DBUpdateHash.new()
+       (@source_attributes.apply(ds_hash_list)||{}).each do |ref,child_source_hash_x|
+         child_source_hash = child_source_hash_x.merge(:ref => ref)
+         key = ds_object.relative_distinguished_name(child_source_hash)
+         ret[key] = ds_object.normalize(child_source_hash)
+       end
+       ret.mark_as_complete if ds_object[:ds_is_golden_store]
       ret
     end
   end    

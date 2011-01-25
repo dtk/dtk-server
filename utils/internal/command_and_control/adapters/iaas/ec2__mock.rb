@@ -11,7 +11,8 @@ module XYZ
       class MockEc2Connection
         def server_create(create_options)
           instance_id = generate_unique_instance_id(create_options)
-          CommonFields.merge(:state => "pending", :id => instance_id,:created_at => created_at(instance_id),:block_device_mapping=>[])
+          instance_attr = {:state => "pending", :id => instance_id,:created_at => created_at(instance_id),:block_device_mapping=>[]}
+          CommonCreateFields.merge(create_options).merge(instance_attr)
         end
         
 
@@ -30,8 +31,10 @@ module XYZ
                "deleteOnTermination"=>true,
                "attachTime"=>"Tue Jan 25 18:57:08 UTC 2011",
                "status"=>"attached"}]
-
-          CommonFields.merge(network_attrs).merge(:state => "running", :id => instance_id,:created_at => created_at(instance_id), :block_device_mapping => block_device_mapping)
+          
+          instance_attr = {:state => "running", :id => instance_id,:created_at => created_at(instance_id), :block_device_mapping => block_device_mapping}
+          stored_info = get_cache_info(instance_id)
+          CommonCreateFields.merge(network_attrs).merge(instance_attr).merge(stored_info)
         end
 
       private
@@ -41,21 +44,52 @@ module XYZ
       end
 
       def generate_unique_instance_id(create_options)
-        #TODO: stub
-        "i-3706b75b"
+        id = nil
+        loop do
+          id = generate_random_id()
+          next if id_in_cache(id)
+          add_instance_to_cache_and_save(id,create_options)
+          break
+        end
+        id
+      end
+
+      def add_instance_to_cache_and_save(id,create_options)
+        cache[id] = create_options
+        save_cache()
+      end
+
+      def get_cache_info(instance_id)
+        cache[instance_id]||{}
+      end
+
+      def generate_random_id()
+        "i-"+(1..8).map{|x|rand(15).to_s(16)}.join("")
+      end
+
+
+      ####
+      def id_in_cache(id)
+        cache.has_key?(id)
+      end
+
+      def cache()
+        @@cache_contents ||= File.exists?(CacheFile) ? JSON.parse(IO.read(CacheFile)) : {}
+      end
+      def save_cache()
+        file_contents = JSON.pretty_generate(@@cache_contents)
+        File.open(CacheFile, 'w') {|fhandle|fhandle.write(file_contents)}
       end
       #TODO: may put this in Config file
-      CacheFile = "#{R8::Config[:sys_root_path]}/cache/ec2_mock.json"
+      CacheFile = "#{R8::Config[:sys_root_path]}/cache/application/ec2_mock.json"
       @@cache_contents = nil
 
-      CommonFields = {
-        :image_id=>"ami-ee38c987",
-        :flavor_id=>"t1.micro",
+      CommonCreateFields = {
+        :flavor_id=>"m1.small",
         :private_dns_name=>nil,
-        :state=>"pending",
         :monitoring=>[{"state"=>false}],
         :availability_zone=>"us-east-1a",
-        :groups=>["basic"],
+        :groups=>["default"],
         :ami_launch_index=>0,
         :kernel_id=>"aki-3af50453",
         :product_codes=>[],

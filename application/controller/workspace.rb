@@ -618,7 +618,7 @@ pp [:datacenter_id,datacenter_id]
       pending_changes.each do |sc|
         test_str << "  type=#{sc[:type]}; id=#{(sc[:component]||sc[:node])[:id].to_s}; name=#{(sc[:component]||sc[:node])[:display_name]||'UNSET'}\n"
       end
-=begin
+#=begin
       top_level_task.save!()
       workflow = Workflow.create(top_level_task)
 
@@ -634,10 +634,10 @@ pp e.backtrace
         puts "end of commit_changes defer"
         puts "----------------"
       end
-=end
+#=end
 
       run_javascript("R8.Workspace.showAlert('Commit Logged,Pending Execution');")
-      return {}
+ #     return {}
       return {
         'data'=>test_str
       }

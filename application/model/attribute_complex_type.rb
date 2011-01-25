@@ -38,20 +38,11 @@ module XYZ
     end
 
     def self.serialze(token_array)
-      token_array.join(Delim[:common])
+      token_array.join(Delim::Common)
     end
+
    private
-    Delim = Hash.new
-    Delim[:char] = "_"
-    Delim[:common] = "#{Delim[:char]}#{Delim[:char]}"
 
-    Delim[:numeric_index] = Delim[:char] 
-#    Delim[:display_name_left] = "["
-#    Delim[:display_name_right] = "]"
-    Delim[:display_name_left] = Delim[:common]
-    Delim[:display_name_right] = ""
-
-    Delim.freeze
     TypeMapping = {
       :attribute => :a,
       :component => :c
@@ -59,11 +50,11 @@ module XYZ
 
     def self.item_path_token_array(attr)
       return nil unless attr[:item_path]
-      attr[:item_path].map{|indx| indx.kind_of?(Numeric) ? "#{Delim[:numeric_index]}#{indx.to_s}" : indx.to_s} 
+      attr[:item_path].map{|indx| indx.kind_of?(Numeric) ? "#{Delim::NumericIndex}#{indx.to_s}" : indx.to_s} 
     end
     def self.container_id(type,id)
       return nil if id.nil?
-      "#{TypeMapping[type.to_sym]}#{Delim[:common]}#{id.to_s}"
+      "#{TypeMapping[type.to_sym]}#{Delim::Common}#{id.to_s}"
     end
 
     def self.ravel_raw_post_hash_attribute!(ret,attributes_hash,parent_id=nil)
@@ -78,7 +69,7 @@ module XYZ
         end
       end
     end
-    AttrIdRegexp = Regexp.new("^#{TypeMapping[:attribute]}#{Delim[:common]}([0-9]+)(.*$)")
+    AttrIdRegexp = Regexp.new("^#{TypeMapping[:attribute]}#{Delim::Common}([0-9]+)(.*$)")
 
     def self.ravel_raw_post_hash_attribute_aux!(ret,index,hash,path)
       next_index, rest_path = (path =~ NumericIndexRegexp) && [$1.to_i,$2]
@@ -105,9 +96,9 @@ module XYZ
         ravel_raw_post_hash_attribute_aux!(ret[index],next_index,hash,rest_path)
       end
     end
-    NumericIndexRegexp = Regexp.new("^#{Delim[:common]}#{Delim[:numeric_index]}([0-9]+)(.*$)")
-    KeyWithRestRegexp = Regexp.new("^#{Delim[:common]}([^#{Delim[:char]}]+)#{Delim[:common]}(.+$)")
-    KeyWORestRegexp = Regexp.new("^#{Delim[:common]}(.*$)")
+    NumericIndexRegexp = Regexp.new("^#{Delim::Common}#{Delim::NumericIndex}([0-9]+)(.*$)")
+    KeyWithRestRegexp = Regexp.new("^#{Delim::Common}([^#{Delim::Char}]+)#{Delim::Common}(.+$)")
+    KeyWORestRegexp = Regexp.new("^#{Delim::Common}(.*$)")
 
     def self.has_required_fields?(value_obj,pattern)
       #care must be taken to make this three-valued
@@ -232,10 +223,10 @@ module XYZ
     end
 
     def self.display_name_delim(x)
-      Delim[:display_name_left]+(x.to_s)+Delim[:display_name_right]
+      Delim::DisplayName+(x.to_s)
     end
     def self.display_name_num_delim(x)
-      Delim[:display_name_left]+Delim[:numeric_index]+(x.to_s)+Delim[:display_name_right]
+      Delim::DisplayName+Delim::NumericIndex+(x.to_s)
     end
   end
 end

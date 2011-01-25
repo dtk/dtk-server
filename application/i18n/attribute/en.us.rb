@@ -21,7 +21,12 @@
   :sap_config_ipv4 => 'SAP Config IPV4',
   :sap_socket => 'SAP Socket',
   :sap_ref => 'SAP Ref',
-
+  :sap_config_ipv4__port => "port",
+  :sap_config_ipv4__protocol => "protocol",
+  :sap_ref__port => "port",
+  :sap_ref__protocol => "protocol",
+  :sap_ref__host_address => "host addr",
+  
 #TODO: temp until finding normal local for all attribute labels
 #JMX related
   :jmxremote_port => 'JMX Remote Port',

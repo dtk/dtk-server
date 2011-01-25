@@ -22,6 +22,15 @@ module XYZ
       XYZ.const_get Aux.camelize model_name
     end
 
+    module Delim
+      Char = "_"
+      Common = "#{Char}#{Char}"
+      NumericIndex = Char
+      DisplayName = Common
+      RegexpCommon = Regexp.new(Common)
+      NumericIndexRegexp = Regexp.new("#{Common}#{NumericIndex}([0-9]+)")
+    end
+
     include FieldSetInstanceMixin
     extend CloneClassMixins
     extend InputIntoModelClassMixins

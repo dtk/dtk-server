@@ -593,31 +593,41 @@ pp [:datacenter_id,datacenter_id]
     helper :get_pending_changes
     helper :create_tasks_from_pending_changes
 
-    def commit_changes()
-pp [:threads, Thread.list]
-      context_id = request.params["context_id"]
-      context_type = request.params["context_type"]
-      test_str = 'Params passed in are context id:'+context_id+' and context type:'+context_type
+    def commit_changes(datacenter_id=nil)
+#pp [:threads, Thread.list]
+#      context_id = request.params["context_id"]
+#      context_type = request.params["context_type"]
+#      test_str = 'Params passed in are context id:'+context_id+' and context type:'+context_type
       #TODO: initial test is looking just at installed components
-      return {'data'=>test_str} unless context_type.to_sym == :datacenter
+#      return {'data'=>test_str} unless context_type.to_sym == :datacenter
 
-      datacenter_id = context_id.to_i
+#      datacenter_id = context_id.to_i
 
       pending_changes = flat_list_pending_changes_in_datacenter(datacenter_id)
-      return {"data"=> "No pending changes"} if pending_changes.empty?
+#      return {"data"=> "No pending changes"} if pending_changes.empty?
+      if pending_changes.empty?
+        run_javascript("R8.Workspace.showAlert('No Pending Changes to Commit');")
+        return {}
+      end
+
       top_level_task = create_task_from_pending_changes(pending_changes)
 
       errors = ValidationError.find_missing_required_attributes(top_level_task)
-      return {"data" => ValidationError.debug_inspect(errors)} if errors
+#      return {"data" => ValidationError.debug_inspect(errors)} if errors
+      if errors
+        run_javascript("R8.Workspace.showAlert('Commit errors for missing attrs');")
+        return {}
+      end
 
       test_str = "pending changes:\n" 
       pending_changes.each do |sc|
         test_str << "  type=#{sc[:type]}; id=#{(sc[:component]||sc[:node])[:id].to_s}; name=#{(sc[:component]||sc[:node])[:display_name]||'UNSET'}\n"
       end
 
-      top_level_task.save!()
-      workflow = Workflow.create(top_level_task)
+#      top_level_task.save!()
+#      workflow = Workflow.create(top_level_task)
 
+=begin
       Ramaze.defer do
         begin
           puts "in commit_changes defer"
@@ -630,10 +640,13 @@ pp e.backtrace
         puts "end of commit_changes defer"
         puts "----------------"
       end
+=end
 
-      return {
-        'data'=>test_str
-      }
+      run_javascript("R8.Workspace.showAlert('Commit Logged,Pending Execution');")
+      return {}
+#      return {
+#        'data'=>test_str
+#      }
     end
 
 
@@ -672,6 +685,8 @@ POSSIBLE CHANGES TO HASH
 #      panel_id = request.params['panel_id']
 
       tpl = R8Tpl::TemplateR8.new("workspace/commit",user_context())
+      tpl.assign(:_app,app_common())
+
       panel_id = request.params['panel_id']
 
       include_js('plugins/commit.tool')

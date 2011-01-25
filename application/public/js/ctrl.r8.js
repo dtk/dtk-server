@@ -63,15 +63,17 @@ if (!R8.Ctrl) {
 			//TODO: should the request handling and page updating be handled by core or R8.Ctrl?
 //			call: function(route, args, callBacks, cfg) {
 			call: function(route, params) {
-				if(typeof(params['args']) === 'object') var req_params = R8.Utils.json2Str(params['args']);
-				else if(typeof(params['args']) === 'undefined') var req_params = '';
-				else var req_params = params['args'];
+//				if(typeof(params['args']) === 'object') var req_params = R8.Utils.json2Str(params['args']);
+//				else if(typeof(params['args']) === 'undefined') var req_params = '';
+//				else var req_params = params['args'];
 
 				//if devToolsJs is available the app should be loaded once
 //				if(typeof(R8.devtools) === 'undefined')
 //					params += "&devToolsLoaded=0";
 
-				YUI().use('io','io-base','io-form', function(Y) {
+//				YUI().use('io','io-base','io-form', function(Y) {
+				YUI().use('io', function(Y) {
+
 					var cfg = {};
 					if (typeof(params['cfg']) !== 'undefined') {
 						for(cfg_item in params['cfg']) {
@@ -80,7 +82,21 @@ if (!R8.Ctrl) {
 					}
 					if(typeof(cfg['method']) == 'undefined') cfg['method'] = 'POST';
 					if(typeof(cfg['data']) == 'undefined') cfg['data'] = '';
-
+console.log('--------------------------');
+console.log(route);
+console.log(params);
+/*
+					if (typeof(params['cfg']) != 'undefined') {
+						var cfg = params['cfg'];
+						cfg['data'] = req_params;
+						if(typeof(cfg['method']) == 'undefined') cfg['method'] = 'POST';
+					} else {
+						var cfg = {
+							method: "POST",
+							data: req_params
+						};
+					}
+*/
 					if (typeof(params['callbacks']) !== 'undefined') {
 
 						for(callback in params['callbacks']) {

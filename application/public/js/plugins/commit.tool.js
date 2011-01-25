@@ -6,7 +6,9 @@ if(!R8.CommitTool) {
 	R8.CommitTool = function() {
 		var _events = {},
 			_tabListNodeId = 'modal-tab-list',
-			_tabListNode = null;
+			_tabListNode = null,
+			_formNode = null,
+			_submitBtnNode = null;
 
 		var _tabs = ['change-list','details'];
 
@@ -22,7 +24,7 @@ if(!R8.CommitTool) {
 					return;
 				}
 				this.setupModalFormTabs();
-//				this.initForm();
+				this.initForm();
 			},
 
 			renderTree: function(taskDef,viewType,panel_id) {
@@ -186,6 +188,33 @@ console.log(taskDef);
 					dirNameNode.set('value', usernameValue);
 				});
 */
+				_formNode = R8.Utils.Y.one('#modal-form');
+				_submitBtnNode = R8.Utils.Y.one('#modal-form-submit-btn');
+				_submitBtnNode.on('click',this.formSubmit);
+//				formNode.setAttribute('onsubmit',this.formSubmit);
+			},
+
+			formSubmit: function(e) {
+				R8.Workspace.destroyShim();
+/*
+				var params = {
+					'cfg' : {
+						method : 'POST',
+						form: {
+							id : 'modal-form',
+							upload: false
+						}
+					}
+				};
+*/				var params = {
+					'cfg' : {
+						method : 'GET'
+					}
+				};
+				var datacenter_id = R8.Workspace.get('context_id');
+				R8.Ctrl.call('workspace/commit_changes/'+datacenter_id,params);
+
+console.log('helllloooo there.....');
 			}
 		}
 	}();

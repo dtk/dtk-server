@@ -82,9 +82,6 @@ if (!R8.Ctrl) {
 					}
 					if(typeof(cfg['method']) == 'undefined') cfg['method'] = 'POST';
 					if(typeof(cfg['data']) == 'undefined') cfg['data'] = '';
-console.log('--------------------------');
-console.log(route);
-console.log(params);
 /*
 					if (typeof(params['cfg']) != 'undefined') {
 						var cfg = params['cfg'];

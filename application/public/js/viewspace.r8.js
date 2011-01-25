@@ -123,6 +123,10 @@ if (!R8.ViewSpace) {
 //console.log(portDef);
 			},
 
+			items: function(id) {
+				return _items[id];
+			},
+
 			addItems: function(items) {
 				for(i in items) {
 					var item = items[i], tpl_callback = item['tpl_callback'];

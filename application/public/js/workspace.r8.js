@@ -570,8 +570,9 @@ console.log('I guess I am hitting this now!!!!');
 			},
 
 			refreshItem : function(itemId) {
-				itemId = 'item-'+itemId;
-console.log('should refresh item:'+itemId);
+//				itemId = 'item-'+itemId;
+//console.log('inside workspace, should refresh item:'+itemId);
+				_viewSpaces[_currentViewSpace].items(itemId).refresh();
 return;
 				var viewspaceNode = R8.Utils.Y.one('#viewspace');
 				var vspaceContext = R8.Workspace.getVspaceContext();

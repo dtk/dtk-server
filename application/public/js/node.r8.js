@@ -78,20 +78,89 @@ if (!R8.Node) {
 */
 			},
 
-			retrievePorts: function() {
+			refresh: function() {
 				var that = this;
-				var portSetCallback = function(ioId,responseObj) {
+				this.retrievePorts(function(ioId,responseObj) {
 					eval("R8.Ctrl.callResults[ioId]['response'] =" + responseObj.responseText);
 					var response = R8.Ctrl.callResults[ioId]['response'];
-//TODO: revisit once controllers are reworked for cleaner result package
-					_portDefs = response['application_node_get_ports']['content'][0]['data'];
+					//TODO: revisit once controllers are reworked for cleaner result package
+					portDefs = response['application_node_get_ports']['content'][0]['data'];
+
+					var haveNewPorts = false;
+					for(var p in portDefs) {
+						var portId = 'port-'+portDefs[p]['id'];
+						if(typeof(_ports[portId]) == 'undefined') {
+							_portDefs.push(portDefs[p]);
+							haveNewPorts = true;
+						}
+					}
+//DEBUG
+//	haveNewPorts = true;
+					if(haveNewPorts == true) {
+						that.clearPorts();
+						that.renderPorts();
+						that.refreshLinks();
+/*
+						var testcb = function() {
+							that.renderPorts();
+							that.refreshLinks();
+						}
+						setTimeout(testcb,1000);
+*/
+					}
+				});
+			},
+/*
+			refreshPorts: function(ioId,responseObj) {
+				eval("R8.Ctrl.callResults[ioId]['response'] =" + responseObj.responseText);
+				var response = R8.Ctrl.callResults[ioId]['response'];
+				//TODO: revisit once controllers are reworked for cleaner result package
+				portDefs = response['application_node_get_ports']['content'][0]['data'];
+
+				var haveNewPorts = false;
+				for(var p in portDefs) {
+					var portId = 'port-'+portDefs[p]['id'];
+					if(typeof(_ports[portId]) == 'undefined') {
+						_ports[portId] = portDefs[p];
+						haveNewPorts = true;
+					}
 				}
+//DEBUG
+haveNewPorts = true;
+				if(haveNewPorts == true) {
+					this.clearPorts();
+				}
+			},
+*/
+			clearPorts: function() {
+				for(var p in _ports) {
+					var portNode = R8.Utils.Y.one('#'+_ports[p].nodeId);
+						portNode.purge(true);
+						portNode.remove();
+					delete(_ports[p]);
+				}
+			},
+
+			retrievePorts: function(callback) {
+				var that = this;
+
+				if (typeof(callback) == 'undefined') {
+					var getPortsCallback = function(ioId, responseObj){
+						eval("R8.Ctrl.callResults[ioId]['response'] =" + responseObj.responseText);
+						var response = R8.Ctrl.callResults[ioId]['response'];
+						//TODO: revisit once controllers are reworked for cleaner result package
+						_portDefs = response['application_node_get_ports']['content'][0]['data'];
+					}
+				} else {
+					var getPortsCallback = callback;
+				}
+
 				var asynCall = function(){
 					var params = {
 						'cfg': {
 							'method': 'GET'
 						},
-						'callbacks': {'io:success':portSetCallback}
+						'callbacks': {'io:success':getPortsCallback}
 					};
 					R8.Ctrl.call('node/get_ports/' + _id, params);
 				}
@@ -173,7 +242,6 @@ if (!R8.Node) {
 
 //TODO: make this some config param
 				var portSpacer = 2;
-
 
 				var numPorts = _portDefs.length,
 					northPorts = [],
@@ -855,9 +923,15 @@ console.log('not a valid link.., mis-matched types...');
 			},
 
 			refreshLinks: function() {
-				for(l in _links) {
-//console.log(_links[l]);
+				for(var l in _links) {
 					R8.Canvas.renderLink(_links[l]);
+//TODO: temp for now to correct for already connected port styling
+					var startNode = R8.Utils.Y.one('#'+_links[l].startElement.connectElemID);
+					var endNode = R8.Utils.Y.one('#'+_links[l].endElements[0].connectElemID);
+					startNode.removeClass('available');
+					startNode.addClass('connected');
+					endNode.removeClass('available');
+					endNode.addClass('connected');
 				}
 			},
 /*

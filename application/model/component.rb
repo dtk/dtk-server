@@ -16,7 +16,10 @@ module XYZ
         #in library parent niode is used to link to image
         #in datacenter constraint_node_id will be null and if parent is a node it will have type instance or staged
         foreign_key :constraint_node_id, :node, FK_SET_NULL_OPT
-        
+
+        #:composite_component_id (in contrast to parent field :component_id) is for tieing teh component to a composite component which is not a container
+        foreign_key :composite_component_id, :component, FK_SET_NULL_OPT
+
         virtual_column :attributes, :type => :json, :hidden => true, 
         :remote_dependencies => 
         [
@@ -51,22 +54,30 @@ module XYZ
          [
           {
             :model_name => :datacenter,
+            :alias => :datacenter_node,
             :sequel_def => lambda{|ds|ds.join_table(:right_outer,:node__node,{:datacenter_datacenter_id => :datacenter__id}).select({:node__id => :node_id},:datacenter__display_name)},
             :join_type => :left_outer,
-            :join_cond=>{:node_id => :component__node_node_id}
+            :join_cond=>{:node_id => p(:component,:node)}
           },
           {
             :model_name => :datacenter,
+            :alias => :datacenter_node_group,
             :sequel_def => lambda{|ds|ds.join_table(:right_outer,:node__node_group,{:datacenter_datacenter_id => :datacenter__id}).select({:node_group__id => :node_group_id},:datacenter__display_name)},
             :join_type => :left_outer,
-            :join_cond=>{:node_group_id => :component__node_node_group_id}
+            :join_cond=>{:node_group_id => p(:component,:node_group)}
+          },
+          {
+            :model_name => :datacenter,
+            :alias => :datacenter_direct,
+            :join_type => :left_outer,
+            :join_cond=>{:id => p(:component,:datacenter)}
           }
          ]
 
 
         virtual_column :parent_name, :possible_parents => [:component,:library,:node,:node_group]
 
-        many_to_one :component, :library, :node, :node_group
+        many_to_one :component, :library, :node, :node_group, :datacenter
         one_to_many :component, :attribute_link, :attribute, :monitoring_item
       end
     end
@@ -74,7 +85,9 @@ module XYZ
     ### virtual column defs
     
     def containing_datacenter()
-      (self[:datacenter]||{})[:display_name]||(self[:datacenter2]||{})[:display_name]
+      (self[:datacenter_direct]||{})[:display_name]||
+      (self[:datacenter_node]||{})[:display_name]||
+        (self[:datacenter_node_group]||{})[:display_name]
     end
 
     #TODO: write as sql fn for efficiency

@@ -10,7 +10,7 @@ module XYZ
           create_options = {:image_id => ami}
           #TODO: right now hardcoding size and groups
           create_options.merge!(:flavor_id => "t1.micro",:groups => ["basic"])
-          response = @@conn.server_create(create_options)
+          response = conn().server_create(create_options)
           instance_id = response[:id]
           state = response[:state]
           external_ref = {
@@ -24,8 +24,8 @@ module XYZ
         else
           Log.info("node already created with instance id #{instance_id}; waiting for it to be available")
         end
-        CommandAndControl.wait_for_node_to_be_ready(create_node[:node])
-        updated_server_state = @@conn.server_get(instance_id)
+        wait_for_node_to_be_ready(create_node[:node])
+        updated_server_state = conn().server_get(instance_id)
         pp [:updated_server_state,updated_server_state]
         Log.info("node #{instance_id} is available")
 
@@ -56,12 +56,19 @@ module XYZ
         [result,updated_attributes]
       end
      private
+      def self.wait_for_node_to_be_ready(node)
+        CommandAndControl.wait_for_node_to_be_ready(node)
+      end
+
       AttributeToSetMapping = {
         "host_addresses_ipv4" =>  lambda{|server|[server[:dns_name]]}
       }
 
       #TODO: sharing ec2 connection with ec2 datasource
-      @@conn ||= CloudConnect::EC2.new
+      def self.conn()
+        Conn[0] ||= CloudConnect::EC2.new
+      end
+      Conn = Array.new
     end
   end
 end

@@ -86,8 +86,7 @@ module XYZ
       end
 
       def ret_command_and_control_adapter_info()
-        #TBD: stubbing ec2
-        [:iaas,:ec2]
+        [:iaas,R8::Config[:command_and_control][:iaas][:type].to_sym]
       end
 
       def save_new_node_info(task_mh)

@@ -31,10 +31,10 @@ pp '++++++++++++++++++++++++++++++'
 
       #TODO: test in case null
       user_list = [
-        {:id=>'1231231',:name=>'bob'},
-        {:id=>'1231231',:name=>'jim'},
-        {:id=>'1231231',:name=>'greg'},
-        {:id=>'1231231',:name=>'sally'},
+        {:id=>'1231231',:username=>'bob',:avatar_filename => 'generic-user-male.png'},
+        {:id=>'1231231',:username=>'jim',:avatar_filename => 'generic-user-male.png'},
+        {:id=>'1231231',:username=>'greg',:avatar_filename => 'generic-user-male.png'},
+        {:id=>'1231231',:username=>'sally',:avatar_filename => 'generic-user-male.png'}
       ]
       #TODO: just putting in username, not uid or gid
       unless node_user_list.empty?
@@ -48,6 +48,42 @@ pp '++++++++++++++++++++++++++++++'
       tpl = R8Tpl::TemplateR8.new("dock/node_get_users",user_context())
       tpl.assign(:_app,app_common())
       tpl.assign(:user_list,user_list)
+
+      panel_id = request.params['panel_id']
+
+      return {
+        :content => tpl.render(),
+        :panel => panel_id
+      }
+    end
+
+    def dock_get_applications(id)
+      search_pattern_hash = {
+        :relation => :node,
+        :filter => [:and,[:eq, :id, id.to_i]],
+        :columns => [:applications]
+      }
+      node_app_list = get_objects_from_search_pattern_hash(search_pattern_hash)
+pp '*************************************'
+pp node_app_list
+      app_list = [
+        {:id=>'1231231',:name=>'postgres'},
+        {:id=>'1231231',:name=>'hive'},
+        {:id=>'1231231',:name=>'cloudera'},
+        {:id=>'1231231',:name=>'foo'}
+      ]
+=begin
+      unless node_app_list.empty?
+        app_list = node_app_list.map do |u|
+          attr = u[:attribute]
+          val = attr[:value_asserted]||attr[:value_derived]
+          (val and attr[:display_name] == "display_name") ? {:id => attr[:id], :name => val} : nil
+        end.compact
+      end
+=end
+      tpl = R8Tpl::TemplateR8.new("dock/node_get_apps",user_context())
+      tpl.assign(:_app,app_common())
+      tpl.assign(:app_list,app_list)
 
       panel_id = request.params['panel_id']
 

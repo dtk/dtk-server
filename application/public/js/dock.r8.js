@@ -20,6 +20,8 @@ if(!R8.Dock) {
 			_panels = [],
 			_toggleCache = {},
 
+			_itemFocusList = {},
+
 			testMeta = {
 				panels:[{
 					items:[
@@ -148,6 +150,14 @@ if(!R8.Dock) {
 				});
 			},
 
+			get: function(item) {
+				switch(item) {
+					case "itemFocusList":
+						return _itemFocusList;
+						break;
+				}
+			},
+
 			hasOpenModal: function() {
 				for(var i in _panels) {
 					var items = _panels[i].get('items');
@@ -194,16 +204,18 @@ if(!R8.Dock) {
 			},
 
 			focusChange: function(focusDetails) {
+				_itemFocusList = focusDetails;
+
 				if(this.hasOpenModal()) {
-					this.updateOpenModals(focusDetails);
+					this.updateOpenModals();
 				}
 			},
 
-			updateOpenModals: function(itemDetails) {
+			updateOpenModals: function() {
 				for(var i in _panels) {
 					var items = _panels[i].get('items');
 					for(var j in items) {
-						if(items[j].opened()) items[j].refreshContent(itemDetails);
+						if(items[j].opened()) items[j].refreshContent();
 					}
 				}
 			},
@@ -791,18 +803,27 @@ var _footer ='<div class="corner bl"></div>\
 
 			open: function() {
 				if(!_opened) {
+					this.refreshContent();
 					_node.addClass('open');
 					_modalNode.get('parentNode').setStyle('display','block');
 					this.realignModal();
 					_opened = true;
 				}
 			},
+
 			realignModal: function() {
 				_overlay.set('align',{node:'#'+_listNode.get('id'),points:['tr','tl']});
 			},
 
-			refreshContent: function(items) {
-				_panelPlugin.refresh(items);
+			refreshContent: function() {
+				var itemList = R8.Dock.get('itemFocusList');
+				var numItems = 0;
+				for(var i in itemList) {
+					numItems++;
+				}
+				if (numItems > 0) {
+					_panelPlugin.refresh(itemList);
+				}
 			}
 		}
 	}
@@ -847,8 +868,9 @@ console.log(item);
 			}
 		}
 	}
-	R8.Dock.applicationsPlugin = function() {
-//		var _cfg = cfg;
+	R8.Dock.applicationsPlugin = function(cfg) {
+		var _cfg = cfg,
+			_modalContentNode = cfg['modalContentNode'];
 
 		return {
 			refresh: function(items) {
@@ -857,7 +879,18 @@ console.log(item);
 				for(var i in items) {
 					item = items[i];
 				}
-console.log(item);
+
+				var params = {
+					'cfg': {
+						'data':'panel_id='+_modalContentNode.get('id'),
+						'method': 'GET'
+					},
+//					'callbacks': {
+//						'io:success':this.getPanelCfg
+//					}
+				};
+console.log('going to call dock get applications.....');
+				R8.Ctrl.call(item.model+'/dock_get_applications/'+item.id, params);
 			}
 		}
 	}

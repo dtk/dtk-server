@@ -73,11 +73,12 @@ R8::Config[:workflow][:type] = "simple"
 #Command and control related parameters
 R8::Config[:command_and_control] = Hash.new
 R8::Config[:command_and_control][:node_config] = Hash.new
-R8::Config[:command_and_control][:node_config][:type] = "mcollective"
+#R8::Config[:command_and_control][:node_config][:type] = "mcollective"
+R8::Config[:command_and_control][:node_config][:type] = "mcollective__mock"
 
 R8::Config[:command_and_control][:iaas] = Hash.new
 #TODO: put in provisions to have multiple iias providers at same time
-#R8::Config[:command_and_control][:iaas][:type] = "ec2__mock" 
+#R8::Config[:command_and_control][:iaas][:type] = "ec2" 
 R8::Config[:command_and_control][:iaas][:type] = "ec2__mock" 
 
 #optional timer plug

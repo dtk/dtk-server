@@ -906,12 +906,15 @@ console.log('not a valid link.., mis-matched types...');
 			linkCreateCallback: function(ioId,responseObj) {
 				eval("R8.Ctrl.callResults[ioId]['response'] =" + responseObj.responseText);
 				var response = R8.Ctrl.callResults[ioId]['response'];
+//TODO: revisit after cleaning up responses so dont have to traverse way down to get data
 				var newLink = response.application_attribute_link_save.content[0].data;
 
 				var tempLinkId = _tempLinkDef.id;
-				_tempLinkDef.id = newLink.id;
-				R8.Utils.Y.one('#'+tempLinkId).set('id','link-'+newLink.id);
-				_viewSpace.setLink(newLink.id,_tempLinkDef);
+				var newLinkId = 'link-'+newLink.id;
+				_tempLinkDef.id = newLinkId;
+				R8.Utils.Y.one('#'+tempLinkId).set('id',newLinkId);
+//				_viewSpace.setLink(newLink.id,_tempLinkDef);
+				_viewSpace.addLinkToItems(newLinkId,_tempLinkDef);
 			},
 
 			portsReady: function() {

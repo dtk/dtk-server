@@ -56,6 +56,7 @@ module XYZ
       many_to_one :component, :node
 
       virtual_column :unraveled_attribute_id, :type => :varchar, :hidden => true #TODO put in depenedncies
+
       #TODO: may deprecate
       virtual_column :qualified_attribute_name_under_node, :type => :varchar, :hidden => true #TODO put in depenedncies
       virtual_column :qualified_attribute_id_under_node, :type => :varchar, :hidden => true #TODO put in depenedncies
@@ -265,7 +266,7 @@ also related is allowing omission of columns mmentioned in jon condition; post p
       cmp_el = cmp_name ? cmp_name.gsub(/::.+$/,"") : nil
       attr_name = self[:display_name]
       token_array = ([node_or_group_name,cmp_el] + Aux.tokenize_bracket_name(attr_name)).compact
-      Aux.put_in_bracket_form(token_array)
+      AttributeComplexType.serialze(token_array)
     end
     def qualified_attribute_id_aux(node_or_group_id_formatted=nil)
       cmp_id_formatted = AttributeComplexType.container_id(:component,(self[:component]||{})[:id])

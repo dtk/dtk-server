@@ -200,7 +200,7 @@ module XYZ
         component = component_action[:component]
         cmp_attrs = {
           :component_id => component[:id],
-          :component_name => component[:display_name].gsub(/::/,"_")
+          :component_name => component[:display_name]
         }
         task = {
           :type => "install_component",

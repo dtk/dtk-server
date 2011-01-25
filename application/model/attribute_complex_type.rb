@@ -44,9 +44,13 @@ module XYZ
     Delim = Hash.new
     Delim[:char] = "_"
     Delim[:common] = "#{Delim[:char]}#{Delim[:char]}"
+
     Delim[:numeric_index] = Delim[:char] 
-    Delim[:display_name_left] = "["
-    Delim[:display_name_right] = "]"
+#    Delim[:display_name_left] = "["
+#    Delim[:display_name_right] = "]"
+    Delim[:display_name_left] = Delim[:common]
+    Delim[:display_name_right] = ""
+
     Delim.freeze
     TypeMapping = {
       :attribute => :a,
@@ -196,9 +200,9 @@ module XYZ
       value_obj.each_with_index do |child_val_obj,i|
         child_attr = 
           if attr[:item_path]
-            attr.merge(:display_name => "#{attr[:display_name]}#{display_name_delim(i)}", :item_path => attr[:item_path] + [i])
+            attr.merge(:display_name => "#{attr[:display_name]}#{display_name_num_delim(i)}", :item_path => attr[:item_path] + [i])
           else
-            attr.merge(:root_display_name => attr[:display_name], :display_name => "#{attr[:display_name]}#{display_name_delim(i)}", :item_path => [i])
+            attr.merge(:root_display_name => attr[:display_name], :display_name => "#{attr[:display_name]}#{display_name_num_delim(i)}", :item_path => [i])
         end
         flatten_attribute!(ret,child_val_obj,child_attr,array_pat)
       end
@@ -228,7 +232,10 @@ module XYZ
     end
 
     def self.display_name_delim(x)
-      "#{Delim[:display_name_left]}#{x.to_s}#{Delim[:display_name_right]}"
+      Delim[:display_name_left]+(x.to_s)+Delim[:display_name_right]
+    end
+    def self.display_name_num_delim(x)
+      Delim[:display_name_left]+Delim[:numeric_index]+(x.to_s)+Delim[:display_name_right]
     end
   end
 end

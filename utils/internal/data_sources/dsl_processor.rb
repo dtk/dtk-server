@@ -15,6 +15,10 @@ module XYZ
         @class_rules ||= DBUpdateHash.create_with_auto_vivification()
       end
 
+      def self.name_delimiter()
+        Model::Delim::Common
+      end
+
      private
       def self.definitions(&block)
         context = Context.new(self,:no_conditions)
@@ -23,7 +27,6 @@ module XYZ
       end
     end
 
-    NameDelimiter = "__"
 
    class Context
      attr_reader :relation,:condition, :parent

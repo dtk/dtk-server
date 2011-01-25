@@ -592,6 +592,7 @@ pp [:datacenter_id,datacenter_id]
    #### actions to process pending changes
     helper :get_pending_changes
     helper :create_tasks_from_pending_changes
+    helper :i18n_string_mapping
 
     def commit_changes(datacenter_id=nil)
 #pp [:threads, Thread.list]

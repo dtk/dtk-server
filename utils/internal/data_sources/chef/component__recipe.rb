@@ -19,10 +19,10 @@ module XYZ
           end
 
           def relative_distinguished_name(source)
-            source["recipe_name"].gsub(/::/,NameDelimiter)
+            source["recipe_name"].gsub(/::/,name_delimiter())
           end
           def display_name(recipe_name)
-            recipe_name.gsub(/::/,NameDelimiter)
+            recipe_name.gsub(/::/,name_delimiter())
           end
           def external_ref(recipe_name)
             {"type" => "chef_recipe", "recipe_name" => recipe_name}

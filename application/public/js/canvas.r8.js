@@ -59,6 +59,7 @@ if (!R8.Canvas) {
 //					var startConnectorFacing = R8.Workspace.connectors[canvasID].startElement.location;
 					var startElemID = linkDef.startElement.connectElemID;
 					var startConnectorFacing = linkDef.startElement.location;
+
 					//assuming one endpoint for now
 //					var endElemID = R8.Workspace.connectors[canvasID].endElements[0].connectElemID;
 //					var connectorType = R8.Workspace.connectors[canvasID].type;
@@ -67,7 +68,6 @@ if (!R8.Canvas) {
 					var connectorType = linkDef.type;
 					var endConnectorFacing = linkDef.endElements[0].location;
 				}
-
 				var tempCanvas = document.getElementById(canvasID);
 
 				if (tempCanvas != null) {

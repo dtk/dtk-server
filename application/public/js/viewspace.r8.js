@@ -196,6 +196,7 @@ if (!R8.ViewSpace) {
 				var linkList = response['application_attribute_link_get_under_context_list']['content'][0]['data'];
 				var tempLinkList = {}
 				for(i in linkList) {
+//TODO: revisit when cleaning up actions for retrieving links
 					if(linkList[i]['id'] == '' || linkList[i]['hidden'] == true || linkList[i]['type'] == 'internal') continue;
 
 					tempLinkList['link-'+linkList[i]['id']] = linkList[i];
@@ -350,6 +351,7 @@ console.log(ports);
 					});
 					draggableItems[itemId].on('drag:drag',function(){
 						_items[itemId].refreshLinks();
+console.log('should have refreshed link....');
 					});
 					draggableItems[itemId].on('drag:end',function(e){
 						viewSpace.clearSelectedItems();

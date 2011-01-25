@@ -595,16 +595,11 @@ pp [:datacenter_id,datacenter_id]
 
     def commit_changes(datacenter_id=nil)
 #pp [:threads, Thread.list]
-#      context_id = request.params["context_id"]
 #      context_type = request.params["context_type"]
-#      test_str = 'Params passed in are context id:'+context_id+' and context type:'+context_type
-      #TODO: initial test is looking just at installed components
-#      return {'data'=>test_str} unless context_type.to_sym == :datacenter
-
-#      datacenter_id = context_id.to_i
+      context_id = request.params["context_id"]
+      datacenter_id = context_id.to_i
 
       pending_changes = flat_list_pending_changes_in_datacenter(datacenter_id)
-#      return {"data"=> "No pending changes"} if pending_changes.empty?
       if pending_changes.empty?
         run_javascript("R8.Workspace.showAlert('No Pending Changes to Commit');")
         return {}
@@ -613,7 +608,6 @@ pp [:datacenter_id,datacenter_id]
       top_level_task = create_task_from_pending_changes(pending_changes)
 
       errors = ValidationError.find_missing_required_attributes(top_level_task)
-#      return {"data" => ValidationError.debug_inspect(errors)} if errors
       if errors
         run_javascript("R8.Workspace.showAlert('Commit errors for missing attrs');")
         return {}
@@ -623,11 +617,10 @@ pp [:datacenter_id,datacenter_id]
       pending_changes.each do |sc|
         test_str << "  type=#{sc[:type]}; id=#{(sc[:component]||sc[:node])[:id].to_s}; name=#{(sc[:component]||sc[:node])[:display_name]||'UNSET'}\n"
       end
-
-#      top_level_task.save!()
-#      workflow = Workflow.create(top_level_task)
-
 =begin
+      top_level_task.save!()
+      workflow = Workflow.create(top_level_task)
+
       Ramaze.defer do
         begin
           puts "in commit_changes defer"
@@ -644,9 +637,9 @@ pp e.backtrace
 
       run_javascript("R8.Workspace.showAlert('Commit Logged,Pending Execution');")
       return {}
-#      return {
-#        'data'=>test_str
-#      }
+      return {
+        'data'=>test_str
+      }
     end
 
 

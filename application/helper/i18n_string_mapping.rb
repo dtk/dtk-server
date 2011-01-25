@@ -33,8 +33,9 @@ module Ramaze::Helper
   def i18n_string_attribute(i18n_mappings,key)
     #TODO: stub
     proc_key,index = ret_removed_array_index(key)
-    ret = index ?  index_print_form(index) + " " : ""
-    ret << (i18n_mappings[proc_key]||proc_key.to_s)
+    ret = index_print_form(index) 
+    ret += " " unless ret.empty?
+    ret += (i18n_mappings[proc_key]||proc_key.to_s)
     capitalize_words(ret)
   end
 
@@ -48,11 +49,12 @@ module Ramaze::Helper
   end
 
   def index_print_form(index)
+    return "" unless index
     IndexPrintForm[index]||"nth"
   end
   IndexPrintForm = 
     [
-     "first",
+     "",
      "second",
      "third"
     ]

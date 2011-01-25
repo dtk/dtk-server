@@ -2,7 +2,7 @@ module XYZ
   class Task < Model
     set_relation_name(:task,:task)
     def self.up()
-      column :status, :varchar, :size => 20, :default => "created" # = "created" | "in_progres" | "completed"
+      column :status, :varchar, :size => 20, :default => "created" # = "created" | "executing" | "completed" | "failed" | "not_reached"
       column :result, :json # gets serialized version of TaskAction::Result
       #column :output_vars, :json do we need this?
       #column :events, :json - content of this may instead go in result
@@ -31,7 +31,7 @@ module XYZ
       #no op if saved already as detected by whether has an id
      return nil if id()
       set_positions!()
-      #for db access efficiency implement into two phases: 1 - save all subtasks w/o ids, then point in ids
+      #for db access efficiency implement into two phases: 1 - save all subtasks w/o ids, then put in ids
       unrolled_tasks = unroll_tasks()
       rows = unrolled_tasks.map do |hash_row|
         executable_action = hash_row[:executable_action]

@@ -29,14 +29,7 @@ pp '++++++++++++++++++++++++++++++'
         :columns => [:users]
       }
       node_user_list = get_objects_from_search_pattern_hash(search_pattern_hash)
-
-      #TODO: test in case null
-      user_list = [
-        {:id=>'1231231',:username=>'bob',:avatar_filename => 'generic-user-male.png'},
-        {:id=>'1231231',:username=>'jim',:avatar_filename => 'generic-user-male.png'},
-        {:id=>'1231231',:username=>'greg',:avatar_filename => 'generic-user-male.png'},
-        {:id=>'1231231',:username=>'sally',:avatar_filename => 'generic-user-male.png'}
-      ]
+      user_list = Array.new
       #TODO: just putting in username, not uid or gid
       unless node_user_list.empty?
         user_list = node_user_list.map do |u|
@@ -65,14 +58,7 @@ pp '++++++++++++++++++++++++++++++'
         :columns => [:applications]
       }
       node_app_list = get_objects_from_search_pattern_hash(search_pattern_hash)
-pp '*************************************'
-      app_list = [
-        {:id=>'1231231',:name=>'postgres'},
-        {:id=>'1231231',:name=>'hive'},
-        {:id=>'1231231',:name=>'cloudera'},
-        {:id=>'1231231',:name=>'foo'}
-      ]
-
+      app_list = Array.new
       #computing teh components
       unless node_app_list.empty?
         indexed_app_list = Hash.new()

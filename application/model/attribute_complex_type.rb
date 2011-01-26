@@ -155,7 +155,7 @@ module XYZ
       elsif value_obj.kind_of?(Hash)
         flatten_attribute_when_hash!(ret,value_obj,attr,pattern)
       else
-        flatten_attribute_when_mismatch!(ret,value_obj,attr,pattern)
+        flatten_attribute_when_mismatch!(ret,value_obj,attr,pattern,top_level)
       end
       nil
     end
@@ -216,8 +216,8 @@ module XYZ
       nil
     end
 
-    def self.flatten_attribute_when_mismatch!(ret,value_obj,attr,pattern)
-      Log.error("mismatch between object #{value_obj.inspect} and pattern #{pattern}")
+    def self.flatten_attribute_when_mismatch!(ret,value_obj,attr,pattern,top_level=false)
+      Log.error("mismatch between object #{value_obj.inspect} and pattern #{pattern.inspect}")
       ret << (top_level ? attr : attr.merge(:attribute_value => value_obj))
       nil
     end

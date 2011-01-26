@@ -1,5 +1,6 @@
 module XYZ
   class NodeController < Controller
+    helper :i18n_string_mapping
     def actest
       tpl = R8Tpl::TemplateR8.new("node/actest",user_context())
       tpl.assign(:_app,app_common())
@@ -89,6 +90,11 @@ pp '*************************************'
       cmp_parent = DB.parent_field(:component,:attribute)
       attr_cols = [:id,{:display_name => :name},:cannot_change,:required,:dynamic,:data_type,{:attribute_value => :value},{cmp_parent => :component_id}]
       attribute_list = AttributeComplexType.flatten_attribute_list(raw_attributes).map{|h|Aux.hash_subset(h,attr_cols)}
+      ## put in ii18n strings
+      i18n = get_i18n_mappings_for_model(:attribute)
+      attribute_list.each do |a|
+        a[:i18n] = i18n_string_attribute(i18n,a[:name].to_sym) 
+      end
       pp [:attribute_list,attribute_list]
 
       tpl = R8Tpl::TemplateR8.new("dock/node_get_apps",user_context())

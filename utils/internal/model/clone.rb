@@ -46,10 +46,8 @@ module XYZ
       source_ds = get_objects_just_dataset(source_model_handle,source_wc,source_fs)
 
       select_ds = targets_ds.join_table(:inner,source_ds)
-      dups_allowed_for_cmp = true #TODO stub
-      create_opts = {:duplicate_refs => dups_allowed_for_cmp ? :allow : :prune_duplicates,:returning_sql_cols => [:ancestor_id]}
       create_override_attrs = override_attrs.merge(:ancestor_id => source_id_handle.get_id()) 
-      new_ancestor_rel = create_from_select(target_model_handle,field_set_to_copy,select_ds,create_override_attrs,create_opts)
+      new_ancestor_rel = create_from_select(target_model_handle,field_set_to_copy,select_ds,create_override_attrs,create_opts_for_top())
       return Array.new if new_ancestor_rel.empty?
       new_id_handles = ret_id_handles_from_create_returning_ids(target_model_handle,new_ancestor_rel)
 
@@ -75,9 +73,8 @@ module XYZ
       child_ds = get_objects_just_dataset(child_model_handle,child_wc,Model::FieldSet.opt(field_set_from_ancestor))
 
       select_ds = ancestor_rel_ds.join_table(:inner,child_ds,[:parent_ancestor_id])
-      create_opts = {:duplicate_refs => :no_check, :returning_sql_cols => [:ancestor_id]}
       create_override_attrs = ret_real_columns(child_model_handle,recursive_override_attrs)
-      new_ancestor_rel = create_from_select(child_model_handle,field_set_to_copy,select_ds,create_override_attrs,create_opts)
+      new_ancestor_rel = create_from_select(child_model_handle,field_set_to_copy,select_ds,create_override_attrs,create_opts_for_child())
       return Array.new if new_ancestor_rel.empty?
       new_id_handles = ret_id_handles_from_create_returning_ids(child_model_handle,new_ancestor_rel)
 
@@ -88,6 +85,18 @@ module XYZ
       end
 
       new_id_handles
+    end
+
+
+    #TODO: stubs
+    def create_opts_for_top()
+      dups_allowed_for_cmp = true #TODO stub
+      returning_sql_cols = [:ancestor_id] 
+      returning_sql_cols << :type if model_name == :component
+      {:duplicate_refs => dups_allowed_for_cmp ? :allow : :prune_duplicates,:returning_sql_cols => returning_sql_cols}
+    end
+    def create_opts_for_child()
+      {:duplicate_refs => :no_check, :returning_sql_cols => [:ancestor_id]}
     end
 
     def ret_child_override_attrs(child_model_handle,recursive_override_attrs)

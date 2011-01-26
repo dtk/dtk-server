@@ -1,0 +1,12 @@
+<div class="edit_container">
+	<form id="component-edit-form" action="" method="post" enctype="multipart/form-data">
+		<input type="hidden" name="component_id" id="component_id" value="{%=component_id%}" />
+		<table class="edit">
+		{%for field in field_list%}
+			<tr><td class="label" nowrap="true">{%=field[:attribute_name]%}</td></tr>
+			<tr><td class="field"><input type="text" value="{%=field[:attribute_value]%}" size="30" id="{%=field[:attribute_id]%}" name="{%=field[:attribute_id]%}"/></td></tr>
+        {%end%}
+		</table>
+		<input id="component-edit-form-save" type="button" value="Save"/>
+	</form>
+</div>

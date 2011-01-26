@@ -125,7 +125,7 @@ if(!R8.Dock) {
 					Y.all('#'+_nodeId+' .panel-list').each(function(){
 						var groupId = this.get('id'),
 							panelGroupNode = document.getElementById(groupId);
-			
+
 						var itemMouseOver = R8.Utils.Y.delegate('mouseenter',function(e){
 							e.currentTarget.addClass('active');
 						},panelGroupNode,'.panel-item');
@@ -880,17 +880,76 @@ console.log(item);
 					item = items[i];
 				}
 
+				var that=this;
 				var params = {
 					'cfg': {
 						'data':'panel_id='+_modalContentNode.get('id'),
 						'method': 'GET'
 					},
-//					'callbacks': {
-//						'io:success':this.getPanelCfg
-//					}
+					'callbacks': {
+						'io:success':function(ioId,responseObj) {
+							eval("var response =" + responseObj.responseText);
+//console.log(response);
+							var content = response['application_node_dock_get_applications'].content[0].content;
+							_modalContentNode.set('innerHTML',content);
+							that.init();
+						}
+					}
 				};
 console.log('going to call dock get applications.....');
 				R8.Ctrl.call(item.model+'/dock_get_applications/'+item.id, params);
+			},
+			init: function() {
+//TODO: revisit to make more generic, shouldnt have to reference node explicitly, should be based on focus
+				R8.Utils.Y.delegate('mouseenter',function(e) {
+					var itemNode = R8.Utils.Y.one('#'+e.currentTarget.get('id'));
+					itemNode.addClass('active');
+				},'#node-application-list','.app-item',this);
+				R8.Utils.Y.delegate('mouseleave',function(e) {
+					var itemNode = R8.Utils.Y.one('#'+e.currentTarget.get('id'));
+					itemNode.removeClass('active');
+				},'#node-application-list','.app-item',this);
+				R8.Utils.Y.delegate('click',function(e) {
+					var itemNode = R8.Utils.Y.one('#'+e.currentTarget.get('id')),
+						nodeId = itemNode.get('id'),
+						componentId = nodeId.replace('app-','');
+
+						var that=this;
+						var params = {
+							'cfg': {
+								'data':'panel_id='+_modalContentNode.get('id'),
+								'method': 'GET'
+							},
+							'callbacks': {
+								'io:success':function(ioId,responseObj) {
+									eval("var response =" + responseObj.responseText);
+//console.log(response);
+									var content = response['application_component_dock_edit'].content[0].content;
+									_modalContentNode.set('innerHTML',content);
+									that.initEditForm();
+								}
+							}
+						};
+
+						R8.Ctrl.call('component/dock_edit/'+componentId, params);
+				},'#node-application-list','.app-item',this);
+			},
+			initEditForm: function() {
+				var saveBtnNode = R8.Utils.Y.one('#component-edit-form-save');
+				saveBtnNode.on('click',function(Y){
+console.log('save button clicked....');
+					var params = {
+						'cfg' : {
+							method : 'POST',
+							form: {
+								id : 'component-edit-form',
+								upload: false
+							}
+						}
+					};
+					R8.Ctrl.call('component/save_attributes',params);
+console.log('should have called to save attributes....');
+				});
 			}
 		}
 	}

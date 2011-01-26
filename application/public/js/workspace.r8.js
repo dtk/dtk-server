@@ -594,7 +594,7 @@ return;
 				});
 			},
 
-			setupNewItems : function() {
+			setupNewItems: function() {
 				var viewspaceNode = R8.Utils.Y.one('#viewspace');
 				var itemChildren = viewspaceNode.get('children');
 				itemChildren.each(function(){
@@ -629,7 +629,7 @@ return;
 			},
 
 //TODO: revisit to turn components into a [viewspace][item] style
-			regNewItem : function(itemId) {
+			regNewItem: function(itemId) {
 /*
 				var vsContext = R8.Workspace.getVspaceContext();
 				var node = R8.Utils.Y.one('#'+itemId);
@@ -826,7 +826,7 @@ for(vs in _viewSpaces) {
 
 			showAlert: function(alertStr) {
 				_alertNodeId = R8.Utils.Y.guid();
-				var alertTpl = '<div id="'+_alertNodeId+'" style="height: 40px; width: 200px; border: 1px solid black; background-color: #CCCCCC; position: absolute; z-index: 100;">\
+				var alertTpl = '<div id="'+_alertNodeId+'" style="height: 75px; width: 250px; border: 1px solid black; background-color: #CCCCCC; position: absolute; z-index: 100;">\
 								<div style="position: relative; margin: 5px;"><b>'+alertStr+'</b></div>\
 								</div>',
 					containerNode = R8.Utils.Y.one('#wspace-container'),
@@ -834,7 +834,7 @@ for(vs in _viewSpaces) {
 					height = nodeRegion.bottom - nodeRegion.top,
 					width = nodeRegion.right - nodeRegion.left,
 					aTop = 0,
-					aLeft = Math.floor((width-200)/2);
+					aLeft = Math.floor((width-250)/2);
 
 				containerNode.append(alertTpl);
 				_alertNode = R8.Utils.Y.one('#'+_alertNodeId);
@@ -853,7 +853,7 @@ for(vs in _viewSpaces) {
 					var delayAnimRun = function(){
 							anim.run();
 						}
-					setTimeout(delayAnimRun,1000);
+					setTimeout(delayAnimRun,1500);
 
 				});
 //				alert(alertStr);

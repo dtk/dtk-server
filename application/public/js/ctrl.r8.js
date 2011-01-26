@@ -127,6 +127,8 @@ if (!R8.Ctrl) {
 
 					var request = Y.io(request_url, cfg);
 //console.log('Requesting.....');
+//DEBUG
+//console.log('Request URL:'+request_url);
 //console.log(request);
 					var ioId = request['id'];
 					R8.Ctrl.callResults[ioId] = {
@@ -137,7 +139,6 @@ if (!R8.Ctrl) {
 						R8.Ctrl.callResults[ioId]['onRenderComplete'] = R8.Ctrl.onRenderComplete;
 						R8.Ctrl.onRenderComplete = null;
 					}
-//console.log(request);
 				});
 
 //TODO: old version of YUI, YUI3 now used, remove eventually
@@ -406,6 +407,12 @@ continue;
 			},
 
 			callContentReady: function(ioId,actionItem) {
+//DEBUG
+//console.log('----------Inside callContentReady-------------------');
+//console.log(ioId);
+//console.log(actionItem);
+//console.log(R8.Ctrl.callResults);
+
 				var contentList = R8.Ctrl.callResults[ioId]['response'][actionItem]['content'];
 
 				for(index in contentList) {
@@ -417,6 +424,9 @@ continue;
 			},
 
 			setCallContent: function(ioId,actionItem) {
+//TODO: figure out why this is jacked for wspace_display_2 redirect after clone
+				if(typeof(R8.Ctrl.callResults[ioId].response) == 'undefined') return true;
+
 				if(!R8.Ctrl.callContentReady(ioId,actionItem)) {
 					var setContentCallback = function() { R8.Ctrl.setCallContent(ioId,actionItem); }
 					setTimeout(setContentCallback,20);

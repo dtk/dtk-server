@@ -611,7 +611,7 @@ if(!R8.Dock) {
 						    </div>\
 						    <div id="'+_id+'-modal-body" class="yui3-widget-bd">\
 								<div id="'+_id+'-modal-resize-width" class="width-resize-drag"></div>\
-								<div id="'+_id+'-modal-content" class="width-resizer" style="height: 100%; width: 250px; background-color: #EDEDED; margin: 0 auto;">Panel for <b>'+_i18n+'</b></div>\
+								<div id="'+_id+'-modal-content" class="width-resizer" style="height: 100%; width: 250px; background-color: #EDEDED; overflow-y: scroll;">Panel for <b>'+_i18n+'</b></div>\
 						    </div>\
 						    <div id="'+_id+'-modal-footer" class="yui3-widget-ft height-resize-drag">\
 								<div id="'+_id+'-modal-diag-resizer" class="diag-resize-drag"></div>\

@@ -154,6 +154,7 @@ if (!R8.ViewSpace) {
 				}
 
 				this.purgePendingDelete();
+//DEBUG
 				this.retrieveLinks();
 
 				if(_userSettings.showLinks == true) {
@@ -551,7 +552,7 @@ if (typeof(e) != 'undefined') {
 				_items[id].init();
 
 				this.regNewItem(_items[id]);
-
+//DEBUG
 				if(_userSettings.showPorts == true) {
 					_items[id].renderPorts();
 				}

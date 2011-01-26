@@ -53,6 +53,7 @@ if (!R8.Node) {
 //console.log(_portDefs);
 				//if port defs werent passed as part of create, retrieve them
 				if(_portDefs == null) {
+//DEBUG
 					this.retrievePorts();
 				}
 
@@ -81,8 +82,8 @@ if (!R8.Node) {
 			refresh: function() {
 				var that = this;
 				this.retrievePorts(function(ioId,responseObj) {
-					eval("R8.Ctrl.callResults[ioId]['response'] =" + responseObj.responseText);
-					var response = R8.Ctrl.callResults[ioId]['response'];
+					eval("var response =" + responseObj.responseText);
+//					var response = R8.Ctrl.callResults[ioId]['response'];
 					//TODO: revisit once controllers are reworked for cleaner result package
 					portDefs = response['application_node_get_ports']['content'][0]['data'];
 
@@ -146,8 +147,9 @@ haveNewPorts = true;
 
 				if (typeof(callback) == 'undefined') {
 					var getPortsCallback = function(ioId, responseObj){
-						eval("R8.Ctrl.callResults[ioId]['response'] =" + responseObj.responseText);
-						var response = R8.Ctrl.callResults[ioId]['response'];
+//						eval("R8.Ctrl.callResults[ioId]['response'] =" + responseObj.responseText);
+//						var response = R8.Ctrl.callResults[ioId]['response'];
+						eval("var response =" + responseObj.responseText);
 						//TODO: revisit once controllers are reworked for cleaner result package
 						_portDefs = response['application_node_get_ports']['content'][0]['data'];
 					}
@@ -372,7 +374,6 @@ haveNewPorts = true;
 				}
 				//END Rendering South Ports
 //DEBUG
-//console.log('done rendering ports....');
 				this.registerPorts();
 return;
 				var count = 0;

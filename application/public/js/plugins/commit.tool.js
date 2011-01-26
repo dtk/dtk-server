@@ -83,6 +83,11 @@ taskDef.children[0].children[0].children = [];
 						taskI18n = 'Commit - '+taskDef.task_id;
 						taskClass = 'commit-task';
 						break;
+					case "on_node":
+						taskI18n = '<b>Node - '+taskDef.node_name+'</b>';
+						taskClass = 'create-node';
+						editContent = '<input type="checkbox" id="'+taskId+'" name="'+taskId+'" value="true"/>';
+						break;
 					case "create_node":
 						taskI18n = '<b>Launch Node - '+taskDef.node_name+' ('+taskDef.image_name+')</b>';
 						taskClass = 'create-node';

@@ -3,8 +3,8 @@
 <ul class="list">
 	{%for app in app_list%}
 		<li style="height: 40px;">
-			<div class="avatar-small-bg">
-<!--				<img src="{%=_app[:avatar_base_uri]%}/{%=app[:foo]%}" class="avatar-small"/>-->
+			<div class="component-icon-small-bg">
+<!--			<img src="{%=_app[:base_images_uri]%}/componentIcons/{%=app[:component_icon_filename]%}" class="component-icon-small"/>-->
 			</div>
 			<div style="float: left; margin: 10px 0 0 10px;">{%=app[:name]%}</div>
 		</li>

@@ -80,9 +80,15 @@ pp '*************************************'
           next unless r[:component]
           id = r[:component][:id]
           #TODO: ?: run display name through i18n mappings
-          indexed_app_list[id] ||= {:id => id, :name =>  r[:component][:display_name]}
+          unless indexed_app_list[id]
+            el = {:id => id, :name =>  r[:component][:display_name]} 
+            component_icon_filename = ((r[:component][:ui]||{})[:images]||{})[:tnail]
+            el.merge!(:component_icon_filename => component_icon_filename) if component_icon_filename
+            indexed_app_list[id] = el
+          end
         end
         app_list =  indexed_app_list.values
+pp [:app_list,app_list]
       end
       #computing attributes
       #TODO: should have get_objects_from_search_pattern_hash convert Hash to Attribute

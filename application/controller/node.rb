@@ -86,7 +86,8 @@ pp '*************************************'
       #computing attributes
       #TODO: should have get_objects_from_search_pattern_hash convert Hash to Attribute
       raw_attributes = node_app_list.map{|r|r[:attribute] && Attribute.new(r[:attribute],ret_session_context_id(),:attribute)}.compact
-      attr_cols = [:id,{:display_name => :name},:cannot_change,:required,:data_type,{:attribute_value => :value}]
+      cmp_parent = DB.parent_field(:component,:attribute)
+      attr_cols = [:id,{:display_name => :name},:cannot_change,:required,:dynamic,:data_type,{:attribute_value => :value},{cmp_parent => :component_id}]
       attribute_list = AttributeComplexType.flatten_attribute_list(raw_attributes).map{|h|Aux.hash_subset(h,attr_cols)}
       pp [:attribute_list,attribute_list]
 

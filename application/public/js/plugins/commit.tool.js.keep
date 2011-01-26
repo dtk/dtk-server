@@ -84,13 +84,12 @@ taskDef.children[0].children[0].children = [];
 						taskClass = 'commit-task';
 						break;
 					case "create_node":
-						taskI18n = '<b>Launch Node - '+taskDef.node_name+' ('+taskDef.image_name+')</b>';
+						taskI18n = '<b>Launch Node - '+taskDef.node_name+'</b>({need image type/name info})';
 						taskClass = 'create-node';
 						editContent = '<input type="checkbox" id="'+taskId+'" name="'+taskId+'" value="true"/>';
 						break;
 					case "install_component":
 						var compTypei18n = '';
-						var compTypeAction = 'Install';
 						switch(taskDef.component_basic_type) {
 							case "language":
 								compTypei18n = 'Language';
@@ -112,22 +111,17 @@ taskDef.children[0].children[0].children = [];
 								compTypei18n = 'Application';
 								taskClass = 'install-application';
 								break;
-							case "user":
-								compTypei18n = 'User';
-								compTypeAction = 'Add';
-								taskClass = 'install-application';
-								break;
 							default:
 console.log('missing component type...');
 console.log(taskDef);
 								compTypei18n = '{compontent_basic_type is NULL}';
 								break;
 						}
-						taskI18n = '<b>'+compTypeAction+' '+compTypei18n+'</b> ('+taskDef.component_i18n+')';
+						taskI18n = '<b>Install '+compTypei18n+'</b> ('+taskDef.component_name+')';
 						editContent = '<input type="checkbox" id="'+taskId+'" name="'+taskId+'" value="true"/>';
 						break;
 					case "setting":
-						taskI18n = '<b>Configure </b>(Set '+taskDef.attribute_i18n+'='+taskDef.attribute_value+')';
+						taskI18n = '<b>Configure </b>(Set '+taskDef.attribute_name+'='+taskDef.attribute_value+')';
 						taskClass = 'configure';
 						editContent = '<input type="checkbox" id="'+taskId+'" name="'+taskId+'" value="true"/>';
 						break;

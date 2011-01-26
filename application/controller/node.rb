@@ -72,15 +72,18 @@ pp node_app_list
         {:id=>'1231231',:name=>'cloudera'},
         {:id=>'1231231',:name=>'foo'}
       ]
-=begin
+
       unless node_app_list.empty?
-        app_list = node_app_list.map do |u|
-          attr = u[:attribute]
-          val = attr[:value_asserted]||attr[:value_derived]
-          (val and attr[:display_name] == "display_name") ? {:id => attr[:id], :name => val} : nil
-        end.compact
+        indexed_app_list = Hash.new()
+        node_app_list.each do |r|
+          next unless r[:component]
+          id = r[:component][:id]
+          #TODO: ?: run display name through i18n mappings
+          indexed_app_list[id] ||= {:id => id, :name =>  r[:component][:display_name]}
+        end
+        app_list =  indexed_app_list.values
       end
-=end
+
       tpl = R8Tpl::TemplateR8.new("dock/node_get_apps",user_context())
       tpl.assign(:_app,app_common())
       tpl.assign(:app_list,app_list)

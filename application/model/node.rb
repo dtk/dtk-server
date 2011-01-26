@@ -90,15 +90,19 @@ module XYZ
          }
         ]
 
+      #in dock 'applications means wider than basic_type == applicationsn
       virtual_column :applications, :type => :jsob, :hidden => true,
       :remote_dependencies => 
         [
          {
            :model_name => :component,
            :join_type => :inner,
-           :filter => [:and, [:eq, :basic_type, "application"]],
+           :filter => [:or, 
+                       [:eq, :basic_type, "application"],
+                       [:eq, :basic_type, "service"],
+                       [:eq, :basic_type, "client"]],
            :join_cond=>{:node_node_id => :node__id},
-           :cols=>[:id,:node_node_id]
+           :cols=>[:id,:node_node_id,:display_name]
          },
          {
            :model_name => :attribute,

@@ -597,8 +597,12 @@ pp [:datacenter_id,datacenter_id]
     def commit_changes(datacenter_id=nil)
 #pp [:threads, Thread.list]
 #      context_type = request.params["context_type"]
+      #TODO: either use param from context id or from what is posted
+      #TODO: move to getting id of top level task
       context_id = request.params["context_id"]
-      datacenter_id = context_id.to_i
+      datacenter_id ||= context_id
+
+      datacenter_id = datacenter_id && datacenter_id.to_i
 
       pending_changes = flat_list_pending_changes_in_datacenter(datacenter_id)
       if pending_changes.empty?

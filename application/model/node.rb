@@ -79,13 +79,13 @@ module XYZ
            :model_name => :component,
            :join_type => :inner,
            :filter => [:and, [:eq, :basic_type, "user"]],
-           :join_cond=>{:node_node_id => :node__id},
+           :join_cond=>{:node_node_id => q(:node,:id)},
            :cols=>[:id,:node_node_id]
          },
          {
            :model_name => :attribute,
            :join_type => :inner,
-           :join_cond=>{:component_component_id => :component__id},
+           :join_cond=>{:component_component_id => q(:component,:id)},
            :cols=>[:id,:component_component_id,:display_name,:value_asserted,:value_derived]
          }
         ]
@@ -101,14 +101,15 @@ module XYZ
                        [:eq, :basic_type, "application"],
                        [:eq, :basic_type, "service"],
                        [:eq, :basic_type, "client"]],
-           :join_cond=>{:node_node_id => :node__id},
-           :cols=>[:id,:node_node_id,:display_name]
+           :join_cond=>{:node_node_id => q(:node,:id)},
+           :cols=>[:id,:node_node_id,:display_name,:ui]
          },
          {
            :model_name => :attribute,
-           :join_type => :inner,
-           :join_cond=>{:component_component_id => :component__id},
-           :cols=>[:id,:component_component_id,:display_name,:value_asserted,:value_derived]
+           :join_type => :left_outer,
+           :filter => [:and, [:eq, :hidden, false]], 
+           :join_cond=>{:component_component_id => q(:component,:id)},
+           :cols=>[:id,:component_component_id,:display_name,:value_asserted,:value_derived,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
          }
         ]
 

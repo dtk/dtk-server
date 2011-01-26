@@ -14,6 +14,15 @@ module XYZ
         ret
       end
 
+      #key can be symbol or of form {symbol => symbol} 
+      def hash_subset(hash,keys)
+        keys.inject({}) do |ret,k|
+          key = k.kind_of?(Hash) ? k.values.first : k
+          index = k.kind_of?(Hash) ? k.keys.first : k
+          ret.merge(key => hash[index])
+        end
+      end
+
       def ret_key(key_value)
         return nil unless key_value.kind_of?(Hash)
         key_value.keys.first

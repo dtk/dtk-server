@@ -65,7 +65,6 @@ pp '++++++++++++++++++++++++++++++'
       }
       node_app_list = get_objects_from_search_pattern_hash(search_pattern_hash)
 pp '*************************************'
-pp node_app_list
       app_list = [
         {:id=>'1231231',:name=>'postgres'},
         {:id=>'1231231',:name=>'hive'},
@@ -73,6 +72,7 @@ pp node_app_list
         {:id=>'1231231',:name=>'foo'}
       ]
 
+      #computing teh components
       unless node_app_list.empty?
         indexed_app_list = Hash.new()
         node_app_list.each do |r|
@@ -83,6 +83,12 @@ pp node_app_list
         end
         app_list =  indexed_app_list.values
       end
+      #computing attributes
+      #TODO: should have get_objects_from_search_pattern_hash convert Hash to Attribute
+      raw_attributes = node_app_list.map{|r|r[:attribute] && Attribute.new(r[:attribute],ret_session_context_id(),:attribute)}.compact
+      attr_cols = [:id,{:display_name => :name},:cannot_change,:required,:data_type,{:attribute_value => :value}]
+      attribute_list = AttributeComplexType.flatten_attribute_list(raw_attributes).map{|h|Aux.hash_subset(h,attr_cols)}
+      pp [:attribute_list,attribute_list]
 
       tpl = R8Tpl::TemplateR8.new("dock/node_get_apps",user_context())
       tpl.assign(:_app,app_common())

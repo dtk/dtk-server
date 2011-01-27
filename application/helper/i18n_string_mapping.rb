@@ -43,8 +43,8 @@ module Ramaze::Helper
       proc_input_string,index = ret_removed_array_index(input_string)
       ret = index_print_form(index) 
       ret += " " unless ret.empty?
-      ret += (translate_input(i18n,:attribute,proc_input_string)||proc_input_string.to_s)
-      capitalize_words(ret)
+      translation = translate_input(i18n,:attribute,proc_input_string)
+      ret + (translation ? translation : capitalize_words(proc_input_string.to_s))
     end
 
     def translate_input(i18n,model_name,input_string)

@@ -17,10 +17,10 @@
   :description_list => 'Descr',
 
 #generic SAP related
-  :sap_ipv4 => 'SAP IPV4',
+  :sap_ipv4 => 'IPv4 Output',
   :sap_config_ipv4 => 'SAP Config IPV4',
   :sap_socket => 'SAP Socket',
-  :sap_ref => 'SAP Ref',
+  :sap_ref => 'Input Conn',
   :sap_config_ipv4__port => "port",
   :sap_config_ipv4__protocol => "protocol",
   :sap_ref__port => "port",

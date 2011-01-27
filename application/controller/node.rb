@@ -327,13 +327,17 @@ p 'Panel IS:'+tpl_result[:panel]
       field_set = Model::FieldSet.new(:attribute,cols)
       ds = SearchObject.create_from_field_set(field_set,ret_session_context_id(),filter).create_dataset()
       ds = ds.where(:param_node_id => id.to_i) if id
+      i18n = get_i18n_mappings_for_models(:component,:attribute)
       port_list = ds.all
       port_list.each do |el|
         val = el[:attribute_value]
         el[:value] = (val.kind_of?(Hash) or val.kind_of?(Array)) ? JSON.generate(val) : val
-        #TODO: probably shoudl isntead use virtual column that provides qualified name
-        if el[:display_name] and (el[:component]||{})[:display_name]
-          el[:display_name] = "#{el[:component][:display_name].gsub("::","/")}/#{el[:display_name]}"
+        attr_name = el[:display_name]
+        cmp_name = (el[:component]||{})[:display_name]
+        if attr_name and cmp_name
+          attr_i18n = i18n_string_attribute(i18n,attr_name)||attr_name
+          cmp_i18n = i18n_string_component(i18n,cmp_name)||cmp_name
+          el[:display_name] = "#{cmp_i18n} / #{attr_i18n}"
         end
         #TODO: hack to remove description
         el[:description] = ""

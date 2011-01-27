@@ -17,10 +17,10 @@ module Ramaze::Helper
       :attribute => {:models => [:attribute,:component], :name_field => :attribute_name, :i18n_field => :attribute_i18n,:aux_field => :component_name}
     }
   
-    def get_i18n_mappings_for_model(model_name)
-      model_info = MappingInfo[model_name]
-      return Hash.new unless model_info
-      model_info[:models].inject({}){|h,m|h.merge(m => get_model_i18n(m))}
+    def get_i18n_mappings_for_models(*model_names)
+      models_to_cache = model_names.map{|m|(MappingInfo[m]||{})[:models]||[]}.flatten.uniq
+      return Hash.new if models_to_cache.empty?
+      models_to_cache.inject({}){|h,m|h.merge(m => get_model_i18n(m))}
     end
 
     def i18n_string(i18n,model_name,key,aux)

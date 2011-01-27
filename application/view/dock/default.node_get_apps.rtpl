@@ -6,7 +6,7 @@
 			<div style="float: left; height: 40px; width: 60px;">
 				<img src="{%=_app[:base_images_uri]%}/componentIcons/{%=app[:component_icon_filename]%}" height="40" width="60"/>
 			</div>
-			<div style="float: left; margin: 10px 0 0 10px;">{%=app[:name]%}</div>
+			<div style="float: left; margin: 10px 0 0 10px;">{%=app[:i18n]%}</div>
 		</li>
 	{%end%}
 </ul>

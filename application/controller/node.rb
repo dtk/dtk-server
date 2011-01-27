@@ -62,12 +62,15 @@ pp '++++++++++++++++++++++++++++++'
       #computing teh components
       unless node_app_list.empty?
         indexed_app_list = Hash.new()
+        i18n = get_i18n_mappings_for_models(:component)
         node_app_list.each do |r|
           next unless r[:component]
           id = r[:component][:id]
           #TODO: ?: run display name through i18n mappings
           unless indexed_app_list[id]
-            el = {:id => id, :name =>  r[:component][:display_name]} 
+            name = r[:component][:display_name]
+            cmp_i18n = i18n_string_component(i18n,name.to_sym)
+            el = {:id => id, :name =>  name, :i18n => cmp_i18n}
             component_icon_filename = ((r[:component][:ui]||{})[:images]||{})[:tnail]
             el.merge!(:component_icon_filename => component_icon_filename) if component_icon_filename
             indexed_app_list[id] = el
@@ -83,7 +86,7 @@ pp [:app_list,app_list]
       attr_cols = [:id,{:display_name => :name},:cannot_change,:required,:dynamic,:data_type,{:attribute_value => :value},{cmp_parent => :component_id}]
       attribute_list = AttributeComplexType.flatten_attribute_list(raw_attributes).map{|h|Aux.hash_subset(h,attr_cols)}
       ## put in ii18n strings
-      i18n = get_i18n_mappings_for_model(:attribute)
+      i18n = get_i18n_mappings_for_models(:attribute)
       attribute_list.each do |a|
         a[:i18n] = i18n_string_attribute(i18n,a[:name].to_sym) 
       end

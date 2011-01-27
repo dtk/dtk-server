@@ -97,12 +97,17 @@ pp [:debug_stored_new_pos,get_objects(model_name,SQL.in(:id,model_items.map{|ite
       where_clause = SQL.and(where_clause,SQL.not(:library_library_id => nil))
 
       model_list = get_objects(model_name.to_sym,where_clause)
+      i18n = get_i18n_mappings_for_models(model_name.to_sym)
       model_list.each_with_index do |model,index|
         model_list[index][:model_name] = model_name
         body_value = ''
         model_list[index][:ui] ||= {}
         model_list[index][:ui][:images] ||= {}
-        img_value = model_list[index][:ui][:images][:tnail] ? '<div class="img_wrapper"><img title="' << model_list[index][:display_name] << '"' << 'src="' << R8::Config[:base_images_uri] << '/' << model_name << 'Icons/'<< model_list[index][:ui][:images][:tnail] << '"/></div>' : ""
+        name = model_list[index][:display_name]
+        title = name.nil? ? "" : i18n_string(i18n,model_name.to_sym,name.to_sym)
+        img_value = model_list[index][:ui][:images][:tnail] ? 
+        '<div class="img_wrapper"><img title="'+title+'"src="'+R8::Config[:base_images_uri]+'/'+model_name+'Icons/'+model_list[index][:ui][:images][:tnail]+'"/></div>' : 
+          ""
         body_value = img_value
           
         body_value == '' ? body_value = model_list[index][:display_name] : nil

@@ -23,9 +23,10 @@ module Ramaze::Helper
       models_to_cache.inject({}){|h,m|h.merge(m => get_model_i18n(m))}
     end
 
-    def i18n_string(i18n,model_name,key,aux)
+    def i18n_string(i18n,model_name,key,aux=nil)
       return i18n_string_component(i18n,key,aux) if model_name == :component
       return i18n_string_attribute(i18n,key,aux) if model_name == :attribute
+      return key.to_s if model_name == :node
       Log.error("Unexpected model type #{model_name} in i18n string translation")
       i18n[model_name][key]||key.to_s
     end

@@ -23,7 +23,7 @@ module XYZ
     #copy part of clone
     #targets is a list of id_handles, each with same model_name 
     def clone_copy(source_id_handle,targets,recursive_override_attrs={},opts={})
-      fk_info = ForeignKeyInfo.new()
+      fk_info = ForeignKeyInfo.new(db)
       return Array.new if targets.empty?
 
       source_model_name = source_id_handle[:model_name]
@@ -154,8 +154,20 @@ module XYZ
     end
 
     class ForeignKeyInfo
-      def initialize()
+      def initialize(db)
         @info = Hash.new
+        @db = db
+      end
+
+    def shift_foregn_keys()
+      each_fk do |model_handle, fk_model_name, fk_cols|
+        pp [:foo, model_handle, fk_model_name, fk_cols]
+        #get (if the set of id mappings for fk_model_name
+        id_mappings = get_id_mappings(model_handle,fk_model_name)
+        next if id_mappings.empty?
+          #TODO: may be more efficient to shift multiple fk cols at same time
+          fk_cols.each{|fk_col|shift_foregn_keys_aux(model_handle,fk_col,id_mappings)}
+        end
       end
 
       def add_id_mappings(model_handle,objs_info)
@@ -174,19 +186,27 @@ module XYZ
           pointer << fk unless pointer.include?(fk)
         end
       end
-
-      def shift_foregn_keys()
-        each_fk do |model_handle, fk_model_name, fk_cols|
-          pp [:foo, model_handle, fk_model_name, fk_cols]
-        end
-      end
-
      private
-      #TODO: this should be better aligned withj model declaration
+      #TODO: this should be better aligned with model declaration
       ForeignKeyOmissions = {
         :component => [:assembly_id],
-        :node => [:assembly_id],
+        :node => [:assembly_id]
       }
+
+      def shift_foregn_keys_aux(model_handle,fk_col,id_mappings)
+        model_name = model_handle[:model_name]
+        base_fs = Model::FieldSet.opt([:id,{fk_col => :old_key}],model_name)
+        base_wc = nil
+        base_ds = Model.get_objects_just_dataset(model_handle,base_wc,base_fs)
+
+        mappping_rows = id_mappings.map{|r| {fk_col => r[:id], :old_key => r[:ancestor_id]}}
+        mapping_ds = SQL::ArrayDataset.create(@db,mappping_rows,model_handle.createMH(:model_name => :mappings))
+        select_ds = base_ds.join_table(:inner,mapping_ds,[:old_key])
+
+        field_set = Model::FieldSet.new(model_name,[fk_col])
+        Model.update_from_select(model_handle,field_set,select_ds)
+      end
+
       def model_handle_info(mh)
         @info[mh[:c]] ||= Hash.new
         @info[mh[:c]][mh[:model_name]] ||= {:id_mappings => Array.new, :fks => Hash.new}
@@ -201,6 +221,11 @@ module XYZ
           end
         end
       end
+      
+      def get_id_mappings(mh,fk_model_name)
+        ((@info[mh[:c]]||{})[fk_model_name]||{})[:id_mappings] || Array.new
+      end
+
     end
   end
 end

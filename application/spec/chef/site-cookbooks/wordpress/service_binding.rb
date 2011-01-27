@@ -3,13 +3,7 @@ service :wordpress do
     :recipes => ["wordpress"],
     :required => true,
     :type => "hash",
-    :description => "wordpress mysql service access point reference",
-    :semantic_type => {"sap_ref" => {"application" => {"type" => "sql::mysql"}}},
-    :transform => {
-      "application" => {
-        "username" => {"__ref" =>  "node[wordpress][db][user]"},
-        "database" => {"__ref" =>  "node[wordpress][db][database]"},
-        "password" => {"__ref" =>  "node[wordpress][db][password]"}
-    }
+    :description => "wordpress service access point reference",
+    :semantic_type => {"sap_ref" => {"application" => {"type" => "sql"}}}
   }
 end

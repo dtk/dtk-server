@@ -5,7 +5,7 @@ module Ramaze::Helper
       model_name = task[:level] && task[:level].to_sym
       if model_info = MappingInfo[model_name]
         model_info[:models].each{|m|i18n[m] ||= get_model_i18n(m)}
-        source = task[model_info[:name_field]].to_sym
+        source = task[model_info[:name_field]]
         target_key = model_info[:i18n_field]
         aux = model_info[:aux_field] && task[model_info[:aux_field]] && task[model_info[:aux_field]].to_sym
         task[target_key] ||= i18n_string(i18n,model_name,source,aux) if source
@@ -23,33 +23,37 @@ module Ramaze::Helper
       models_to_cache.inject({}){|h,m|h.merge(m => get_model_i18n(m))}
     end
 
-    def i18n_string(i18n,model_name,key,aux=nil)
-      return i18n_string_component(i18n,key,aux) if model_name == :component
-      return i18n_string_attribute(i18n,key,aux) if model_name == :attribute
-      return key.to_s if model_name == :node
+    def i18n_string(i18n,model_name,input_string,aux=nil)
+      return i18n_string_component(i18n,input_string,aux) if model_name == :component
+      return i18n_string_attribute(i18n,input_string,aux) if model_name == :attribute
+      return input_string.to_s if model_name == :node
       Log.error("Unexpected model type #{model_name} in i18n string translation")
-      i18n[model_name][key]||key.to_s
+      translate_input(i18n,model_name,input_string) || input_string.to_s
     end
     
-    def i18n_string_component(i18n,key,aux=nil)
-      string = i18n[:component][key]
+    def i18n_string_component(i18n,input_string,aux=nil)
+      string = translate_input(i18n,:component,input_string)
       return string if string
       #otherwise use the following heuristic
-      key.to_s.gsub(XYZ::Model::Delim::RegexpCommon, " ")
+      input_string.to_s.gsub(XYZ::Model::Delim::RegexpCommon, " ")
     end
 
-    def i18n_string_attribute(i18n,key,component_key=nil)
+    def i18n_string_attribute(i18n,input_string,component_input_string=nil)
       #TODO: stub
-      proc_key,index = ret_removed_array_index(key)
+      proc_input_string,index = ret_removed_array_index(input_string)
       ret = index_print_form(index) 
       ret += " " unless ret.empty?
-      ret += (i18n[:attribute][proc_key]||proc_key.to_s)
+      ret += (translate_input(i18n,:attribute,proc_input_string)||proc_input_string.to_s)
       capitalize_words(ret)
+    end
+
+    def translate_input(i18n,model_name,input_string)
+      i18n[model_name][input_string.to_sym]
     end
     
     #returns first array index
-    def ret_removed_array_index(key)
-      [key.to_s.sub(XYZ::Model::Delim::NumericIndexRegexp,"").to_sym,$1 && $1.to_i]
+    def ret_removed_array_index(input_string)
+      [input_string.to_s.sub(XYZ::Model::Delim::NumericIndexRegexp,""),$1 && $1.to_i]
     end
     
     def capitalize_words(s)

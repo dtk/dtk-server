@@ -1,5 +1,7 @@
 module XYZ
   class WorkspaceController < Controller
+    helper :i18n_string_mapping
+
 #TODO: move to viewspace controller
     def update_pos(ws_id)
       items_to_save = JSON.parse(request.params["item_list"])
@@ -597,7 +599,6 @@ pp [:datacenter_id,datacenter_id]
    #### actions to process pending changes
     helper :get_pending_changes
     helper :create_tasks_from_pending_changes
-    helper :i18n_string_mapping
 
     def commit_changes(datacenter_id=nil)
 #pp [:threads, Thread.list]

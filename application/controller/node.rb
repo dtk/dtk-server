@@ -335,6 +335,8 @@ p 'Panel IS:'+tpl_result[:panel]
         if el[:display_name] and (el[:component]||{})[:display_name]
           el[:display_name] = "#{el[:component][:display_name].gsub("::","/")}/#{el[:display_name]}"
         end
+        #TODO: hack to remove description
+        el[:description] = ""
       end
 
       Model::materialize_virtual_columns!(port_list,[:port_type])

@@ -1,5 +1,6 @@
 module XYZ
   class ComponentController < Controller
+    helper :i18n_string_mapping
 
     def dock_edit(component_id)
       search_pattern_hash = {
@@ -11,26 +12,28 @@ module XYZ
       }
       raw_attributes = get_objects_from_search_pattern_hash(search_pattern_hash)
 
-      attribute_list = AttributeComplexType.flatten_attribute_list(raw_attributes)
-      #add name and attr_id from :qualified_attribute_name_under_node and :qualified_attribute_id_under_node
-      attribute_list.each do |el|
-        el[:attribute_id] = el[:unraveled_attribute_id]
-        el[:attribute_name] = el[:display_name]
+      flattened_attr_list = AttributeComplexType.flatten_attribute_list(raw_attributes)
+
+      i18n = get_i18n_mappings_for_models(:attribute)
+      attr_list = flattened_attr_list.map do |a|
+        name = a[:display_name]
+        {
+          :id => a[:unraveled_attribute_id],
+          :name =>  name,
+          :value => a[:attribute_value],
+          :i18n => i18n_string_attribute(i18n,name.to_sym)
+        }
       end
-      #order attribute list :qualified_attribute_name_under_node 
-      ordered_attr_list = attribute_list.sort{|a,b|(a[:attribute_name]||"_") <=> (b[:attribute_name]||"_")}
 
-      #debug print
-#      cols_to_package = [:attribute_id,:attribute_name,:attribute_value,:data_type,:dynamic,:cannot_change,:required]
- #     pp [:packaged_attrs,ordered_attr_list.map{|a|cols_to_package.inject({}){|h,k|h.merge(k => a[k])}}]
+      ordered_attr_list = attr_list.sort{|a,b|(a[:i18n]||"_") <=> (b[:i18n]||"_")}
 
-      action_name = "test_component_edit"
       tpl = R8Tpl::TemplateR8.new("dock/component_edit",user_context())
       tpl.assign("field_list",ordered_attr_list)
       tpl.assign("component_id",component_id)
       return {:content => tpl.render()}
     end
 
+    #TODO: is dock_display used?
     def dock_display(component_id)
       search_pattern_hash = {
         :relation => :attribute,

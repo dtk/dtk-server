@@ -52,6 +52,7 @@ pp '++++++++++++++++++++++++++++++'
     end
 
     def dock_get_applications(id)
+      #TODO: can make more efficient so dont pull attributes
       search_pattern_hash = {
         :relation => :node,
         :filter => [:and,[:eq, :id, id.to_i]],
@@ -59,14 +60,13 @@ pp '++++++++++++++++++++++++++++++'
       }
       node_app_list = get_objects_from_search_pattern_hash(search_pattern_hash)
       app_list = Array.new
-      #computing teh components
+      #computing the components
       unless node_app_list.empty?
         indexed_app_list = Hash.new()
         i18n = get_i18n_mappings_for_models(:component)
         node_app_list.each do |r|
           next unless r[:component]
           id = r[:component][:id]
-          #TODO: ?: run display name through i18n mappings
           unless indexed_app_list[id]
             name = r[:component][:display_name]
             cmp_i18n = i18n_string_component(i18n,name.to_sym)
@@ -77,8 +77,8 @@ pp '++++++++++++++++++++++++++++++'
           end
         end
         app_list =  indexed_app_list.values
-pp [:app_list,app_list]
       end
+=begin
       #computing attributes
       #TODO: should have get_objects_from_search_pattern_hash convert Hash to Attribute
       raw_attributes = node_app_list.map{|r|r[:attribute] && Attribute.new(r[:attribute],ret_session_context_id(),:attribute)}.compact
@@ -91,7 +91,7 @@ pp [:app_list,app_list]
         a[:i18n] = i18n_string_attribute(i18n,a[:name].to_sym) 
       end
       pp [:attribute_list,attribute_list]
-
+=end
       tpl = R8Tpl::TemplateR8.new("dock/node_get_apps",user_context())
       tpl.assign(:_app,app_common())
       tpl.assign(:app_list,app_list)

@@ -48,9 +48,10 @@ module XYZ
 
       select_ds = targets_ds.join_table(:inner,source_ds)
       create_override_attrs = override_attrs.merge(:ancestor_id => source_id_handle.get_id()) 
+
       new_objs_info = create_from_select(target_model_handle,field_set_to_copy,select_ds,create_override_attrs,create_opts_for_top())
-      fk_info.add_id_mappings(source_model_handle,new_objs_info)
       return Array.new if new_objs_info.empty?
+      fk_info.add_id_mappings(source_model_handle,new_objs_info)
       new_id_handles = ret_id_handles_from_create_returning_ids(target_model_handle,new_objs_info)
 
       #iterate over all nested objects which includes children object plus, for example, components for composite components
@@ -60,6 +61,7 @@ module XYZ
         child_override_attrs = ret_child_override_attrs(child_model_handle,recursive_override_attrs)
         clone_copy_child_objects2(fk_info,child_model_handle,ancestor_parent_rels,child_override_attrs)
       end
+      fk_info.shift_foregn_keys()
       new_id_handles
     end
 
@@ -81,6 +83,7 @@ module XYZ
       ancestor_rel_ds = SQL::ArrayDataset.create(db,ancestor_parent_rels,child_model_handle.createMH(:model_name => :target))
 
       field_set_to_copy = Model::FieldSet.all_real(child_model_name).with_removed_cols(:id,:local_id)
+      fk_info.add_foreign_keys(child_model_handle,field_set_to_copy)
       field_set_from_ancestor = field_set_to_copy.with_removed_cols(:ancestor_id,child_parent_id_col).with_added_cols({:id => :ancestor_id},{child_parent_id_col => :parent_ancestor_id})
       child_wc = nil
       child_ds = get_objects_just_dataset(child_model_handle,child_wc,Model::FieldSet.opt(field_set_from_ancestor))
@@ -89,14 +92,16 @@ module XYZ
       create_override_attrs = ret_real_columns(child_model_handle,recursive_override_attrs)
       new_objs_info = create_from_select(child_model_handle,field_set_to_copy,select_ds,create_override_attrs,create_opts_for_child())
       return Array.new if new_objs_info.empty?
+      fk_info.add_id_mappings(child_model_handle,new_objs_info)
       new_id_handles = ret_id_handles_from_create_returning_ids(child_model_handle,new_objs_info)
 
       #iterate all nested children
-      new_id_handles.first.get_children_model_handles.each do |child2_model_handle|
-       child_override_attrs = ret_child_override_attrs(child2_model_handle,recursive_override_attrs)
-        clone_copy_child_objects(child2_model_handle,new_objs_info,child_override_attrs)
+      get_nested_objects_context(child_model_handle,new_objs_info).each do |child_context|
+        child2_model_handle = child_context[:model_handle]
+        ancestor_parent_rels = child_context[:ancestor_parent_rels]
+        child_override_attrs = ret_child_override_attrs(child2_model_handle,recursive_override_attrs)
+        clone_copy_child_objects2(fk_info,child2_model_handle,ancestor_parent_rels,child_override_attrs)
       end
-
       new_id_handles
     end
 
@@ -160,13 +165,22 @@ module XYZ
 
       def add_foreign_keys(model_handle,field_set)
         #TODO: only putting in once per model; not sure if need to treat instances differently; if not can do this alot more efficiently computing just once
-        model_index = model_handle_info(model_handle)
-        return nil unless model_index[:fks].empty?
+        fks = model_handle_info(model_handle)[:fks]
         #put in foreign keys that are not special keys like ancestor or assembly_id
-        fk_cols = field_set.foreign_key_cols() - ([:ancestor_id] +(ForeignKeyOmissions[model_handle[:model_name]]||[]))
-        #TODO: replace with a set
-        model_index[:fks] = fk_cols
+        omit = ForeignKeyOmissions[model_handle[:model_name]]||[]
+        field_set.foreign_key_info().each do |fk,fk_info|
+          next if fk == :ancestor_id or omit.include?(fk)
+          pointer = fks[fk_info[:foreign_key_rel_type]] ||= Array.new
+          pointer << fk unless pointer.include?(fk)
+        end
       end
+
+      def shift_foregn_keys()
+        each_fk do |model_handle, fk_model_name, fk_cols|
+          pp [:foo, model_handle, fk_model_name, fk_cols]
+        end
+      end
+
      private
       #TODO: this should be better aligned withj model declaration
       ForeignKeyOmissions = {
@@ -175,7 +189,17 @@ module XYZ
       }
       def model_handle_info(mh)
         @info[mh[:c]] ||= Hash.new
-        @info[mh[:c]][mh[:model_name]] ||= {:id_mappings => Array.new, :fks => Array.new}
+        @info[mh[:c]][mh[:model_name]] ||= {:id_mappings => Array.new, :fks => Hash.new}
+      end
+
+      def each_fk(&block)
+        @info.each do |c,rest|
+          rest.each do |model_name, hash|
+            hash[:fks].each do |fk_model_name, fk_cols|
+              block.call(ModelHandle.new(c,model_name),fk_model_name, fk_cols)
+            end
+          end
+        end
       end
     end
   end

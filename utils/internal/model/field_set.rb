@@ -88,9 +88,13 @@ module XYZ
       end          
 
       #returns foreign key columns in fieldset
-      def foreign_key_cols() 
-        fks = ((DB_REL_DEF[model_name]||{})[:columns]||[]).map{|col|col[0] if col[1][:foreign_key_rel_type]}.compact
-        fks & cols
+      def foreign_key_info() 
+        db_rel_cols = ((DB_REL_DEF[model_name]||{})[:columns]||[])
+        ret = Hash.new
+        db_rel_cols.each do |col,col_info|
+          ret[col] = col_info if (col_info[:foreign_key_rel_type] and cols.include?(col))
+        end
+        ret
       end
 
       #field set in option list

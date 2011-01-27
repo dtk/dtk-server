@@ -17,8 +17,8 @@ module XYZ
         #in datacenter constraint_node_id will be null and if parent is a node it will have type instance or staged
         foreign_key :constraint_node_id, :node, FK_SET_NULL_OPT
 
-        #:composite_component_id (in contrast to parent field :component_id) is for tieing teh component to a composite component which is not a container
-        foreign_key :composite_component_id, :component, FK_SET_NULL_OPT
+        #:assembly_id (in contrast to parent field :component_id) is for tieing teh component to a composite component which is not a container
+        foreign_key :assembly_id, :component, FK_SET_NULL_OPT
 
         virtual_column :attributes, :type => :json, :hidden => true, 
         :remote_dependencies => 

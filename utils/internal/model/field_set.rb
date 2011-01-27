@@ -87,6 +87,12 @@ module XYZ
         @field_search_pattern ? @field_search_pattern.ret_where_clause_for_search_string(name_value_pairs) : {}
       end          
 
+      #returns foreign key columns in fieldset
+      def foreign_key_cols() 
+        fks = ((DB_REL_DEF[model_name]||{})[:columns]||[]).map{|col|col[0] if col[1][:foreign_key_rel_type]}.compact
+        fks & cols
+      end
+
       #field set in option list
       def self.opt(x,model_name=nil)
         field_set = 

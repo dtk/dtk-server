@@ -18,6 +18,7 @@ module XYZ
       column :image_size, :numeric, :size=>[8, 3] #in megs
       column :operational_status, :varchar, :size => 50
       column :ui, :json
+      foreign_key :assembly_id, :component, FK_SET_NULL_OPT
       virtual_column :parent_name, :possible_parents => [:library,:datacenter]
       virtual_column :disk_size, :path => [:ds_attributes,:flavor,:disk] #in megs
       #TODO how to have this conditionally "show up"

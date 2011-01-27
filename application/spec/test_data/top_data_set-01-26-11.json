@@ -533,13 +533,6 @@
               "dynamic": false,
               "description": "wordpress mysql service access point reference",
               "cannot_change": false,
-              "value_asserted": {
-                "application": {
-                  "username": "wordpressuser",
-                  "database": "wordpressdb",
-                  "password": null
-                }
-              },
               "read_only": false,
               "is_port": true,
               "required": true,

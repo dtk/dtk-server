@@ -44,7 +44,7 @@ module Ramaze::Helper
       ret = index_print_form(index) 
       ret += " " unless ret.empty?
       translation = translate_input(i18n,:attribute,proc_input_string)
-      ret + (translation ? translation : capitalize_words(proc_input_string.to_s))
+      ret + (translation ? translation : proc_input_string.to_s)
     end
 
     def translate_input(i18n,model_name,input_string)

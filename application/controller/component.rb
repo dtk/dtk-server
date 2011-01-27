@@ -21,7 +21,7 @@ module XYZ
           :id => a[:unraveled_attribute_id],
           :name =>  name,
           :value => a[:attribute_value],
-          :i18n => i18n_string_attribute(i18n,name.to_sym)
+          :i18n => i18n_string_attribute(i18n,name)
         }
       end
 

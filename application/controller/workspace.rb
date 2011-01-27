@@ -106,7 +106,7 @@ pp [:debug_stored_new_pos,get_objects(model_name,SQL.in(:id,model_items.map{|ite
         model_list[index][:ui] ||= {}
         model_list[index][:ui][:images] ||= {}
         name = model_list[index][:display_name]
-        title = name.nil? ? "" : i18n_string(i18n,model_name.to_sym,name.to_sym)
+        title = name.nil? ? "" : i18n_string(i18n,model_name.to_sym,name)
         img_value = model_list[index][:ui][:images][:tnail] ? 
         '<div class="img_wrapper"><img title="'+title+'"src="'+R8::Config[:base_images_uri]+'/'+model_name+'Icons/'+model_list[index][:ui][:images][:tnail]+'"/></div>' : 
           ""

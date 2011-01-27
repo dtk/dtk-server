@@ -69,7 +69,7 @@ pp '++++++++++++++++++++++++++++++'
           id = r[:component][:id]
           unless indexed_app_list[id]
             name = r[:component][:display_name]
-            cmp_i18n = i18n_string_component(i18n,name.to_sym)
+            cmp_i18n = i18n_string_component(i18n,name)
             el = {:id => id, :name =>  name, :i18n => cmp_i18n}
             component_icon_filename = ((r[:component][:ui]||{})[:images]||{})[:tnail]
             el.merge!(:component_icon_filename => component_icon_filename) if component_icon_filename
@@ -78,20 +78,7 @@ pp '++++++++++++++++++++++++++++++'
         end
         app_list =  indexed_app_list.values
       end
-=begin
-      #computing attributes
-      #TODO: should have get_objects_from_search_pattern_hash convert Hash to Attribute
-      raw_attributes = node_app_list.map{|r|r[:attribute] && Attribute.new(r[:attribute],ret_session_context_id(),:attribute)}.compact
-      cmp_parent = DB.parent_field(:component,:attribute)
-      attr_cols = [:id,{:display_name => :name},:cannot_change,:required,:dynamic,:data_type,{:attribute_value => :value},{cmp_parent => :component_id}]
-      attribute_list = AttributeComplexType.flatten_attribute_list(raw_attributes).map{|h|Aux.hash_subset(h,attr_cols)}
-      ## put in ii18n strings
-      i18n = get_i18n_mappings_for_models(:attribute)
-      attribute_list.each do |a|
-        a[:i18n] = i18n_string_attribute(i18n,a[:name].to_sym) 
-      end
-      pp [:attribute_list,attribute_list]
-=end
+
       tpl = R8Tpl::TemplateR8.new("dock/node_get_apps",user_context())
       tpl.assign(:_app,app_common())
       tpl.assign(:app_list,app_list)

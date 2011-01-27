@@ -77,8 +77,17 @@ taskDef.children[0].children[0].children = [];
 			setTaskContent: function(taskDef,viewType,parentNode) {
 				var taskContent = '',taskClass='',editContent='',
 					taskId = 'task-'+taskDef.task_id+'-commit';
-
-				switch(taskDef.type) {
+				var taskDefType = '';
+				if (taskDef.type != undefined) {
+				    taskDefType = taskDef.type;
+				} else {
+				    taskDefType = "no_tasks";
+				}
+				switch(taskDefType) {
+					case "no_tasks":
+						taskI18n = '<b>No Pending Changes</b>';
+						taskClass = 'no-pending-changes';
+						break;
 					case "top":
 						taskI18n = 'Commit - '+taskDef.task_id;
 						taskClass = 'commit-task';
@@ -94,8 +103,12 @@ taskDef.children[0].children[0].children = [];
 						editContent = '<input type="checkbox" id="'+taskId+'" name="'+taskId+'" value="true"/>';
 						break;
 					case "install_component":
+					case "on_component":
 						var compTypei18n = '';
 						var compTypeAction = 'Install';
+						if(taskDef.type == "on_component"){
+						    compTypeAction = 'Configure';
+						}
 						switch(taskDef.component_basic_type) {
 							case "language":
 								compTypei18n = 'Language';
@@ -137,7 +150,7 @@ console.log(taskDef);
 						editContent = '<input type="checkbox" id="'+taskId+'" name="'+taskId+'" value="true"/>';
 						break;
 					default:
-						taskI18n = '<b>UNKOWN TYPE</b>';
+						taskI18n = '<b>UNKNOWN TYPE</b>';
 						taskClass = 'unkown-type';
 						editContent = '<input type="checkbox" id="'+taskId+'" name="'+taskId+'" value="true"/>';
 console.log('unkown task type...');

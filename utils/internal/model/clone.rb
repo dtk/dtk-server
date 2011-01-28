@@ -72,19 +72,11 @@ module XYZ
         {:model_handle => mh, :id_shift_rels => id_shift_rels}
       end
       #TODO: more efficient may be to use a disjunction form and not create new rows for non parents that are nested
-
-      case model_handle[:model_name]
-       when :component
-        id_shift_rels = objs_info.map{|row|{:assembly_id => row[:id],:old_id => row[:ancestor_id]}}
-        ret << {:model_handle => model_handle, :id_shift_rels => id_shift_rels}
-      end
-=begin
       (InvertedNonParentNestedKeys[model_handle[:model_name]]||{}).each do |nested_model_name, col|
-        nested_mh =  model_handle.createMH(:model_name => nested_model_name)
+        nested_mh = ModelHandle.new(model_handle[:c],nested_model_name) #important that parent_model_name not (incorrectly) set
         id_shift_rels = objs_info.map{|row|{col => row[:id],:old_id => row[:ancestor_id]}}
         ret << {:model_handle => nested_mh, :id_shift_rels => id_shift_rels}
       end
-=end
       ret
     end
     NonParentNestedKeys = {
@@ -181,11 +173,9 @@ module XYZ
         end
       end
      private
-      #TODO: this should be better aligned with model declaration
-      ForeignKeyOmissions = {
-        :component => [:assembly_id],
-        :node => [:assembly_id]
-      }
+      ForeignKeyOmissions = CloneClassMixins::NonParentNestedKeys.inject({}) do |ret,kv|
+        ret.merge(kv[0] => kv[1].keys)
+      end
 
       def shift_foregn_keys_aux(model_handle,fk_col,id_mappings)
         model_name = model_handle[:model_name]

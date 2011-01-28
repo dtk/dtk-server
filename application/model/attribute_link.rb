@@ -9,6 +9,7 @@ module XYZ
       column :hidden, :boolean, :default => false
       column :function, :json, :default => "eq"
       column :function_index, :json
+      foreign_key :assembly_id, :component, FK_SET_NULL_OPT #TODO: may instead just determine by seeing attributes contained and what is linked
       #TODO: may deprecate and subsume in function
       column :label, :text, :default => "1"
       many_to_one :library, :datacenter, :component, :node

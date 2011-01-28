@@ -53,13 +53,15 @@ module XYZ
       return Array.new if new_objs_info.empty?
       fk_info.add_id_mappings(source_model_handle,new_objs_info)
       new_id_handles = ret_id_handles_from_create_returning_ids(target_model_handle,new_objs_info)
+      fk_info.add_id_handles(new_id_handles) #TODO: may be more efficient adding only id handles assciated with foreign keys
 
       #iterate over all nested objects which includes children object plus, for example, components for composite components
       get_nested_objects_context(source_model_handle,new_objs_info).each do |child_context|
         child_model_handle = child_context[:model_handle]
         id_shift_rels = child_context[:id_shift_rels]
         child_override_attrs = ret_child_override_attrs(child_model_handle,recursive_override_attrs)
-        clone_copy_child_objects(fk_info,child_model_handle,id_shift_rels,child_override_attrs)
+        child_id_handles = clone_copy_child_objects(fk_info,child_model_handle,id_shift_rels,child_override_attrs)
+        fk_info.add_id_handles(child_id_handles)
       end
       fk_info.shift_foregn_keys()
       new_id_handles
@@ -79,9 +81,11 @@ module XYZ
       end
       ret
     end
+    #TODO: should be able to derive from meta model
     NonParentNestedKeys = {
       :component => {:assembly_id => :component},
-      :node => {:assembly_id => :component}
+      :node => {:assembly_id => :component},
+      :attribute_link => {:assembly_id => :component}
     }
 
     InvertedNonParentNestedKeys = NonParentNestedKeys.inject({}) do |ret,kv|
@@ -111,14 +115,17 @@ module XYZ
       fk_info.add_id_mappings(child_model_handle,new_objs_info)
       new_id_handles = ret_id_handles_from_create_returning_ids(child_model_handle,new_objs_info)
 
+      ret = new_id_handles
       #iterate all nested children
       get_nested_objects_context(child_model_handle,new_objs_info).each do |child_context|
         child2_model_handle = child_context[:model_handle]
         id_shift_rels = child_context[:id_shift_rels]
         child_override_attrs = ret_child_override_attrs(child2_model_handle,recursive_override_attrs)
-        clone_copy_child_objects(fk_info,child2_model_handle,id_shift_rels,child_override_attrs)
+        child_id_handles = clone_copy_child_objects(fk_info,child2_model_handle,id_shift_rels,child_override_attrs)
+        ret += child_id_handles
       end
-      new_id_handles
+      #unlike toip level fn; this returns also nested id handles
+      ret
     end
 
     def create_opts_for_top()
@@ -145,9 +152,16 @@ module XYZ
         @db = db
       end
 
+      def add_id_handles(new_id_handles)
+        new_id_handles.each do |idh|
+          model_handle_info(idh)[:new_ids] << idh.get_id() 
+        end
+      end
+
     def shift_foregn_keys()
+#TODO: not working right yet
+return nil
       each_fk do |model_handle, fk_model_name, fk_cols|
-        pp [:foo, model_handle, fk_model_name, fk_cols]
         #get (if the set of id mappings for fk_model_name
         id_mappings = get_id_mappings(model_handle,fk_model_name)
         next if id_mappings.empty?
@@ -180,7 +194,7 @@ module XYZ
       def shift_foregn_keys_aux(model_handle,fk_col,id_mappings)
         model_name = model_handle[:model_name]
         base_fs = Model::FieldSet.opt([:id,{fk_col => :old_key}],model_name)
-        base_wc = nil
+        base_wc = SQL.in(:id,model_handle_info(model_handle)[:new_ids])
         base_ds = Model.get_objects_just_dataset(model_handle,base_wc,base_fs)
 
         mappping_rows = id_mappings.map{|r| {fk_col => r[:id], :old_key => r[:ancestor_id]}}
@@ -193,7 +207,7 @@ module XYZ
 
       def model_handle_info(mh)
         @info[mh[:c]] ||= Hash.new
-        @info[mh[:c]][mh[:model_name]] ||= {:id_mappings => Array.new, :fks => Hash.new}
+        @info[mh[:c]][mh[:model_name]] ||= {:id_mappings => Array.new, :fks => Hash.new, :new_ids => Array.new}
       end
 
       def each_fk(&block)

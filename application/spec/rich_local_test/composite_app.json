@@ -103,7 +103,6 @@
           "ds_source_obj_type": "image",
           "component": {
             "postgresql__app": {
-	      "*assembly_id": "/datacenter/dc1/component/app_assembly",
               "ds_attributes": {
                 "ui": "{\"images\": {\"tnail\":\"postgres.png\",\"display\":\"postgres.png\",\"tiny\":\"\"}}",
                 "qualified_ref": "/library/test/postgresql__app",
@@ -384,7 +383,6 @@
           "data_source": "ec2",
           "attribute_link": {
             "sap_config:2147483795-2147483796": {
-	      "*assembly_id": "/datacenter/dc1/component/app_assembly",
               "type": "internal",
               "*input_id": "/datacenter/dc1/node/s-ami-ee38c987/component/postgresql__server/attribute/sap_ipv4",
               "display_name": "link:sap_config-sap",
@@ -394,7 +392,6 @@
               "*output_id": "/datacenter/dc1/node/s-ami-ee38c987/component/postgresql__server/attribute/postgresql][sap_config_ipv4]"
             },
             "host_address:2147483770-2147483796": {
-	      "*assembly_id": "/datacenter/dc1/component/app_assembly",
               "type": "internal",
               "*input_id": "/datacenter/dc1/node/s-ami-ee38c987/component/postgresql__server/attribute/sap_ipv4",
               "display_name": "link:host_address-sap",

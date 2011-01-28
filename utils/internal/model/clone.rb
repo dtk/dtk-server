@@ -82,9 +82,11 @@ module XYZ
       model_name = model_handle[:model_name]
       parent_id_col = DB.parent_field(target_parent_mn,model_name)
       create_opts = {:duplicate_refs => :allow, :returning_sql_cols => [:ancestor_id]}
-      return ret if true #TODO: to test opts[:no_non_parent_children]
+      return ret if opts[:no_non_parent_children]
       (InvertedNonParentNestedKeys[model_handle[:model_name]]||{}).each do |nested_model_name, par_shift_col|
         nested_mh = ModelHandle.new(model_handle[:c],nested_model_name) #important that parent_model_name not (incorrectly) set
+        #TODO: need to use an modification of below
+#        nested_mh = model_handle.createMH(:model_name => nested_model_name, :parent_model_name => target_parent_mn)
         override_attrs = ret_child_override_attrs(nested_mh,recursive_override_attrs)
         common_settings = (DB_REL_DEF[nested_model_name][:many_to_one]||[]).inject({}) do |hash,pos_par|
           hash.merge(pos_par == target_parent_mn ? {DB.parent_field(pos_par,model_name) => nil} : {})
@@ -121,7 +123,9 @@ module XYZ
 
       field_set_to_copy = Model::FieldSet.all_real(child_model_name).with_removed_cols(:id,:local_id)
       fk_info.add_foreign_keys(child_model_handle,field_set_to_copy)
-      field_set_from_ancestor = field_set_to_copy.with_removed_cols(:ancestor_id,par_shift_col).with_added_cols({:id => :ancestor_id},{par_shift_col => :old_par_id})
+      #all parent_rels wil ahev same cols so taking a sample
+      remove_cols = [:ancestor_id] + parent_rels.first.keys.reject{|col|col == :old_par_id}
+      field_set_from_ancestor = field_set_to_copy.with_removed_cols(*remove_cols).with_added_cols({:id => :ancestor_id},{par_shift_col => :old_par_id})
       child_wc = nil
       child_ds = get_objects_just_dataset(child_model_handle,child_wc,Model::FieldSet.opt(field_set_from_ancestor))
 
@@ -170,8 +174,7 @@ module XYZ
       end
 
     def shift_foregn_keys()
-#TODO: not working right yet
-return nil
+      #TODO: may have glocal to shortcut when no forign keys need shifting
       each_fk do |model_handle, fk_model_name, fk_cols|
         #get (if the set of id mappings for fk_model_name
         id_mappings = get_id_mappings(model_handle,fk_model_name)

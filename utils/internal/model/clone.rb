@@ -89,7 +89,7 @@ module XYZ
         model_name = model_handle[:model_name]
         parent_id_col = DB.parent_field(target_parent_mn,model_name)
         create_opts = {:duplicate_refs => :allow, :returning_sql_cols => [:ancestor_id]}
-        return ret if opts[:no_non_parent_children]
+        return ret unless nested_in_addition_to_parent?(model_handle,objs_info)
         (InvertedNonParentNestedKeys[model_handle[:model_name]]||{}).each do |nested_model_name, par_shift_col|
           nested_mh = ModelHandle.new(model_handle[:c],nested_model_name) #important that parent_model_name not (incorrectly) set
           #TODO: need to use an modification of below
@@ -117,6 +117,10 @@ module XYZ
           ret[m][kv[0]] = col
         end
         ret
+      end
+
+      def nested_in_addition_to_parent?(model_handle,objs_info)
+        model_handle[:model_name] == :component and (objs_info.first||{})[:type] == "composite"
       end
 
       def clone_copy_child_objects(child_context)

@@ -81,6 +81,9 @@ module XYZ
       end
       ret
     end
+    #TODO: need to only have the "bottom" of below; so for example if have node dont add component too because it wil be picked
+    #up by being child of node
+    #for top level under container like assembly need to also add its parent which is same as container's parent (e.g., a library
     #TODO: should be able to derive from meta model
     NonParentNestedKeys = {
       :component => {:assembly_id => :component},

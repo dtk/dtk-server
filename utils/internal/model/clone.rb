@@ -32,9 +32,11 @@ module XYZ
 
       override_attrs = ret_real_columns(source_model_handle,recursive_override_attrs)
 
-      target_parent_model_name = targets.first[:model_name]
-      target_model_handle = source_id_handle.createMH(:parent_model_name => target_parent_model_name)
-      target_parent_id_col = target_model_handle.parent_id_field_name()
+      #all targets will have same model handle
+      sample_target =  targets.first
+      target_parent_mh = sample_target.createMH()
+      target_mh = source_id_handle.createMH(:parent_model_name => target_parent_mh[:model_name])
+      target_parent_id_col = target_mh.parent_id_field_name()
       targets_rows = targets.map{|id_handle|{target_parent_id_col => id_handle.get_id()}}
       targets_ds = SQL::ArrayDataset.create(db,targets_rows,ModelHandle.new(source_id_handle[:c],:target))
 
@@ -49,42 +51,51 @@ module XYZ
       select_ds = targets_ds.join_table(:inner,source_ds)
       create_override_attrs = override_attrs.merge(:ancestor_id => source_id_handle.get_id()) 
 
-      new_objs_info = create_from_select(target_model_handle,field_set_to_copy,select_ds,create_override_attrs,create_opts_for_top())
+      new_objs_info = create_from_select(target_mh,field_set_to_copy,select_ds,create_override_attrs,create_opts_for_top())
       return Array.new if new_objs_info.empty?
       fk_info.add_id_mappings(source_model_handle,new_objs_info)
-      new_id_handles = ret_id_handles_from_create_returning_ids(target_model_handle,new_objs_info)
+      new_id_handles = ret_id_handles_from_create_returning_ids(target_mh,new_objs_info)
       fk_info.add_id_handles(new_id_handles) #TODO: may be more efficient adding only id handles assciated with foreign keys
 
       #iterate over all nested objects which includes children object plus, for example, components for composite components
-      get_nested_objects_context(source_model_handle,new_objs_info).each do |child_context|
-        child_model_handle = child_context[:model_handle]
-        id_shift_rels = child_context[:id_shift_rels]
-        child_override_attrs = ret_child_override_attrs(child_model_handle,recursive_override_attrs)
-        child_id_handles = clone_copy_child_objects(fk_info,child_model_handle,id_shift_rels,child_override_attrs)
+      get_nested_objects__all(source_model_handle,target_parent_mh,new_objs_info,recursive_override_attrs).each do |child_context|
+        child_id_handles = clone_copy_child_objects(fk_info,child_context)
         fk_info.add_id_handles(child_id_handles)
       end
       fk_info.shift_foregn_keys()
       new_id_handles
     end
 
-    def get_nested_objects_context(model_handle,objs_info)
-      ret = model_handle.get_children_model_handles().map do |mh|
-        child_parent_id_col = mh.parent_id_field_name()
-        id_shift_rels = objs_info.map{|row|{child_parent_id_col => row[:id],:old_id => row[:ancestor_id]}}
-        {:model_handle => mh, :id_shift_rels => id_shift_rels}
+    def get_nested_objects__parents(model_handle,objs_info,recursive_override_attrs)
+      model_handle.get_children_model_handles().map do |mh|
+        override_attrs = ret_child_override_attrs(mh,recursive_override_attrs)
+        parent_id_col = mh.parent_id_field_name()
+        parent_rels = objs_info.map{|row|{parent_id_col => row[:id],:old_par_id => row[:ancestor_id]}}
+        create_opts = {:duplicate_refs => :no_check, :returning_sql_cols => [:ancestor_id]}
+        {:model_handle => mh, :parent_shift_col => parent_id_col, :parent_rels => parent_rels, :override_attrs => override_attrs, :create_opts => create_opts}
       end
-      #TODO: more efficient may be to use a disjunction form and not create new rows for non parents that are nested
-      (InvertedNonParentNestedKeys[model_handle[:model_name]]||{}).each do |nested_model_name, col|
+    end
+
+    def get_nested_objects__all(model_handle,target_parent_mh,objs_info,recursive_override_attrs,opts={})
+      ret = get_nested_objects__parents(model_handle,objs_info,recursive_override_attrs)
+      target_parent_mn = target_parent_mh[:model_name]
+      model_name = model_handle[:model_name]
+      parent_id_col = DB.parent_field(target_parent_mn,model_name)
+      create_opts = {:duplicate_refs => :allow, :returning_sql_cols => [:ancestor_id]}
+      return ret if true #TODO: to test opts[:no_non_parent_children]
+      (InvertedNonParentNestedKeys[model_handle[:model_name]]||{}).each do |nested_model_name, par_shift_col|
         nested_mh = ModelHandle.new(model_handle[:c],nested_model_name) #important that parent_model_name not (incorrectly) set
-        id_shift_rels = objs_info.map{|row|{col => row[:id],:old_id => row[:ancestor_id]}}
-        ret << {:model_handle => nested_mh, :id_shift_rels => id_shift_rels}
+        override_attrs = ret_child_override_attrs(nested_mh,recursive_override_attrs)
+        common_settings = (DB_REL_DEF[nested_model_name][:many_to_one]||[]).inject({}) do |hash,pos_par|
+          hash.merge(pos_par == target_parent_mn ? {DB.parent_field(pos_par,model_name) => nil} : {})
+        end
+        parent_rels = objs_info.map do |row|
+          common_settings.merge(par_shift_col => row[:id],:old_par_id => row[:ancestor_id], parent_id_col => row[:parent_id])
+        end
+        ret << {:model_handle => nested_mh, :parent_shift_col => par_shift_col, :parent_rels => parent_rels, :override_attrs => override_attrs, :create_opts => create_opts}
       end
       ret
     end
-    #TODO: need to only have the "bottom" of below; so for example if have node dont add component too because it wil be picked
-    #up by being child of node
-    #for top level under container like assembly need to also add its parent which is same as container's parent (e.g., a library
-    #TODO: should be able to derive from meta model
     NonParentNestedKeys = {
       :component => {:assembly_id => :component},
       :node => {:assembly_id => :component},
@@ -99,35 +110,35 @@ module XYZ
       ret
     end
 
-    def clone_copy_child_objects(fk_info,child_model_handle,id_shift_rels,recursive_override_attrs={})
+    def clone_copy_child_objects(fk_info,child_context)
+      child_model_handle = child_context[:model_handle]
+      parent_rels = child_context[:parent_rels]
+      recursive_override_attrs= child_context[:override_attrs]
       child_model_name = child_model_handle[:model_name]
-      id_shift_col = id_shift_rels.first.keys.find{|x|not x == :old_id}
+      par_shift_col = child_context[:parent_shift_col]
 
-      ancestor_rel_ds = SQL::ArrayDataset.create(db,id_shift_rels,child_model_handle.createMH(:model_name => :target))
+      ancestor_rel_ds = SQL::ArrayDataset.create(db,parent_rels,child_model_handle.createMH(:model_name => :target))
 
       field_set_to_copy = Model::FieldSet.all_real(child_model_name).with_removed_cols(:id,:local_id)
       fk_info.add_foreign_keys(child_model_handle,field_set_to_copy)
-      field_set_from_ancestor = field_set_to_copy.with_removed_cols(:ancestor_id,id_shift_col).with_added_cols({:id => :ancestor_id},{id_shift_col => :old_id})
+      field_set_from_ancestor = field_set_to_copy.with_removed_cols(:ancestor_id,par_shift_col).with_added_cols({:id => :ancestor_id},{par_shift_col => :old_par_id})
       child_wc = nil
       child_ds = get_objects_just_dataset(child_model_handle,child_wc,Model::FieldSet.opt(field_set_from_ancestor))
 
-      select_ds = ancestor_rel_ds.join_table(:inner,child_ds,[:old_id])
+      select_ds = ancestor_rel_ds.join_table(:inner,child_ds,[:old_par_id])
       create_override_attrs = ret_real_columns(child_model_handle,recursive_override_attrs)
-      new_objs_info = create_from_select(child_model_handle,field_set_to_copy,select_ds,create_override_attrs,create_opts_for_child())
+      new_objs_info = create_from_select(child_model_handle,field_set_to_copy,select_ds,create_override_attrs,child_context[:create_opts])
       return Array.new if new_objs_info.empty?
       fk_info.add_id_mappings(child_model_handle,new_objs_info)
       new_id_handles = ret_id_handles_from_create_returning_ids(child_model_handle,new_objs_info)
 
       ret = new_id_handles
       #iterate all nested children
-      get_nested_objects_context(child_model_handle,new_objs_info).each do |child_context|
-        child2_model_handle = child_context[:model_handle]
-        id_shift_rels = child_context[:id_shift_rels]
-        child_override_attrs = ret_child_override_attrs(child2_model_handle,recursive_override_attrs)
-        child_id_handles = clone_copy_child_objects(fk_info,child2_model_handle,id_shift_rels,child_override_attrs)
+      get_nested_objects__parents(child_model_handle,new_objs_info,recursive_override_attrs).each do |child_context|
+        child_id_handles = clone_copy_child_objects(fk_info,child_context)
         ret += child_id_handles
       end
-      #unlike toip level fn; this returns also nested id handles
+      #unlike top level fn; this returns also nested id handles
       ret
     end
 
@@ -136,9 +147,6 @@ module XYZ
       returning_sql_cols = [:ancestor_id] 
       returning_sql_cols << :type if model_name == :component
       {:duplicate_refs => dups_allowed_for_cmp ? :allow : :prune_duplicates,:returning_sql_cols => returning_sql_cols}
-    end
-    def create_opts_for_child()
-      {:duplicate_refs => :no_check, :returning_sql_cols => [:ancestor_id]}
     end
 
     def ret_child_override_attrs(child_model_handle,recursive_override_attrs)

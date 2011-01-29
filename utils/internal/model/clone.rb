@@ -58,7 +58,7 @@ module XYZ
 
         new_objs_info = Model.create_from_select(target_mh,field_set_to_copy,select_ds,create_override_attrs,create_opts_for_top())
         return Array.new if new_objs_info.empty?
-        fk_info.add_id_mappings(source_model_handle,new_objs_info)
+        fk_info.add_id_mappings(source_model_handle,new_objs_info, :top => true)
         new_id_handles = Model.ret_id_handles_from_create_returning_ids(target_mh,new_objs_info)
         fk_info.add_id_handles(new_id_handles) #TODO: may be more efficient adding only id handles assciated with foreign keys
 
@@ -174,18 +174,20 @@ module XYZ
       
       class ForeignKeyInfo
         def initialize(db)
-        @info = Hash.new
-        @db = db
+          @info = Hash.new
+          @db = db
+          @no_fk_processing = false
         end
 
         def add_id_handles(new_id_handles)
+          return if @no_fk_processing
           new_id_handles.each do |idh|
             model_handle_info(idh)[:new_ids] << idh.get_id() 
           end
         end
 
         def shift_foregn_keys()
-          #TODO: may have glocal to shortcut when no forign keys need shifting
+          return if @no_fk_processing
           each_fk do |model_handle, fk_model_name, fk_cols|
             #get (if the set of id mappings for fk_model_name
             id_mappings = get_id_mappings(model_handle,fk_model_name)
@@ -195,12 +197,15 @@ module XYZ
           end
         end
         
-        def add_id_mappings(model_handle,objs_info)
+        def add_id_mappings(model_handle,objs_info,opts={})
+          return if @no_fk_processing
+          @no_fk_processing = avoid_fk_processing?(model_handle,objs_info,opts)
           model_index = model_handle_info(model_handle)
           model_index[:id_mappings] = model_index[:id_mappings]+objs_info.map{|x|Aux::hash_subset(x,[:id,:ancestor_id])}
         end
 
         def add_foreign_keys(model_handle,field_set)
+          return if @no_fk_processing
           #TODO: only putting in once per model; not sure if need to treat instances differently; if not can do this alot more efficiently computing just once
           fks = model_handle_info(model_handle)[:fks]
           #put in foreign keys that are not special keys like ancestor or assembly_id
@@ -211,9 +216,14 @@ module XYZ
             pointer << fk unless pointer.include?(fk)
           end
         end
-        private
+       private
         ForeignKeyOmissions = NonParentNestedKeys.inject({}) do |ret,kv|
           ret.merge(kv[0] => kv[1].keys)
+        end
+
+        def avoid_fk_processing?(model_handle,objs_info,opts)
+          return false unless opts[:top]
+          model_handle[:model_name] != :component or (objs_info.first||{})[:type] != "composite"
         end
 
         def shift_foregn_keys_aux(model_handle,fk_col,id_mappings)

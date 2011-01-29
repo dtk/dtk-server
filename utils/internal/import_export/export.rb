@@ -31,7 +31,14 @@ module XYZ
         elsif target_id_info[:uri] =~ %r{(^/.+/.+$)} then $1
         else raise Error.new
       end
-      get_objs_opts =  {:depth => :deep, :no_hrefs => true, :no_ids => true, :no_top_level_scalars => true, :no_null_cols => true, :fk_as_ref => prefix}.merge(opts)
+      get_objs_opts = {
+        :depth => :deep, 
+        :no_hrefs => true, 
+        :no_ids => true, 
+        #TODO: do we need this? :no_top_level_scalars => true, 
+        :no_null_cols => true, 
+        :fk_as_ref => prefix
+      }.merge(opts)
       objects = get_instance_or_factory(target_id_handle,nil,get_objs_opts)
 
       #stripping off "key" which would be the containing object

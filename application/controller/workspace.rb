@@ -85,18 +85,23 @@ pp [:debug_stored_new_pos,get_objects(model_name,SQL.in(:id,model_items.map{|ite
       field_set = Model::FieldSet.default(model_name.to_sym)
 #      search_query = request.params['sq']
 
-      where_clause = {}
+      where_clause = Hash.new
       request.params.each do |name,value|
-        (field_set.include_col?(name.to_sym)) ? where_clause[name.to_sym] = value : nil;
+        where_clause[name.to_sym] = value  if field_set.include_col?(name.to_sym) 
       end
+
+      #TODO: hack to get around restriction type = template does not allow one to see assemblies
+      #TODO: need to determine how to handle an assembly that is a template; may just assume everything in library is template
+      #and then do away with explicitly setting type to "template"
+      where_clause.delete(:type) if (request.params||{})["model_name"] == "component"
 
 #      where_clause = {:display_name => search_query}
       if where_clause
         where_clause = where_clause.inject(nil){|h,o|SQL.and(h,SQL::WhereCondition.like(o[0],"#{o[1]}%"))}
       end
       
-      #restrict results to belong to library
-      where_clause = SQL.and(where_clause,SQL.not(:library_library_id => nil))
+      #restrict results to belong to library and not nested in assembly
+      where_clause = SQL.and(where_clause,SQL.not(:library_library_id => nil),{:assembly_id => nil})
 
       model_list = get_objects(model_name.to_sym,where_clause)
       i18n = get_i18n_mappings_for_models(model_name.to_sym)

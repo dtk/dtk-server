@@ -1,6 +1,7 @@
 {
   "datacenter": {
     "dc1": {
+      "display_name" : "Datacenter East 1",
       "component": {
         "app_assembly": {
           "type": "composite",
@@ -164,7 +165,7 @@
               "required": false,
               "is_port": true,
               "*ancestor_id": "/library/test/node/ami-ee38c987/attribute/host_addresses_ipv4",
-              "value_derived": [
+              "value_asserted": [
                 null
               ],
               "data_type": "json",
@@ -362,7 +363,7 @@
               "required": false,
               "is_port": true,
               "*ancestor_id": "/library/test/node/ami-ee38c987/attribute/host_addresses_ipv4",
-              "value_derived": [
+              "value_asserted": [
                 null
               ],
               "data_type": "json",
@@ -631,7 +632,7 @@
             "host_addresses_ipv4": {
               "required": false,
               "is_port": true,
-              "value_derived": [
+              "value_asserted": [
                 null
               ],
               "data_type": "json",

@@ -18,7 +18,7 @@ module XYZ
       search_pattern_hash = {
         :relation => :component,
         :filter => [:and,[:eq, :id, new_id_handle.get_id()],[:eq, :type, "composite"]],
-        :columns => [:node_assembly_parts]
+        :columns => [:node_assembly_parts_with_attrs]
       }
       node_assembly_parts = Model.get_objects_from_search_pattern_hash(new_id_handle.createMH(:model_name => :component),search_pattern_hash)
       pp [:node_assembly_parts,node_assembly_parts]

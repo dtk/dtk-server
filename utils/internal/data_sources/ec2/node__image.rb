@@ -28,7 +28,7 @@ module XYZ
           prefix[:data_type] = "json"
           prefix[:semantic_type] = {":array" => "host_address_ipv4"}
           prefix[:semantic_type_summary] = "host_address_ipv4"
-          prefix[:value_derived] = [nil]
+          prefix[:value_asserted] = [nil]
 
         end
         class << self

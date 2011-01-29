@@ -140,7 +140,7 @@
           "attribute": {
             "host_addresses_ipv4": {
               "cannot_change": false,
-              "value_derived": [
+              "value_asserted": [
                 null
               ],
               "*ancestor_id": "/library/test/node/ami-ee38c987/attribute/host_addresses_ipv4",
@@ -365,7 +365,7 @@
           "attribute": {
             "host_addresses_ipv4": {
               "cannot_change": false,
-              "value_derived": [
+              "value_asserted": [
                 null
               ],
               "*ancestor_id": "/library/test/node/ami-ee38c987/attribute/host_addresses_ipv4",
@@ -722,7 +722,7 @@
           "attribute": {
             "host_addresses_ipv4": {
               "cannot_change": false,
-              "value_derived": [
+              "value_asserted": [
                 null
               ],
               "*ancestor_id": "/datacenter/dc1/node/s-ami-ee38c987-2/attribute/host_addresses_ipv4",
@@ -836,7 +836,7 @@
           "attribute": {
             "host_addresses_ipv4": {
               "cannot_change": false,
-              "value_derived": [
+              "value_asserted": [
                 null
               ],
               "is_port": true,
@@ -1059,7 +1059,7 @@
           "attribute": {
             "host_addresses_ipv4": {
               "cannot_change": false,
-              "value_derived": [
+              "value_asserted": [
                 null
               ],
               "*ancestor_id": "/datacenter/dc1/node/s-ami-ee38c987/attribute/host_addresses_ipv4",

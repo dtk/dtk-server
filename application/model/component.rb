@@ -31,6 +31,19 @@ module XYZ
          }
         ]
 
+
+        virtual_column :node_assembly_parts, :type => :json, :hidden => true,
+        :remote_dependencies =>
+        [
+         {
+           :model_name => :node,
+           :join_type => :inner,
+           :join_cond=>{:assembly_id => q(:component,:id)},
+           :cols => [:id,:display_name,:assembly_id]
+         }
+        ]
+
+
         virtual_column :has_pending_change, :type => :boolean, :hidden => true,
          :remote_dependencies =>
          [

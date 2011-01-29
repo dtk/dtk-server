@@ -276,7 +276,6 @@
           "ds_source_obj_type": "image",
           "component": {
             "postgresql__server": {
-	      "*assembly_id": "/datacenter/dc1/component/app_assembly",
               "ds_attributes": {
                 "ui": "{\"images\": {\"tnail\":\"postgres.png\",\"display\":\"postgres.png\",\"tiny\":\"\"}}",
                 "qualified_ref": "/library/test/postgresql__server",

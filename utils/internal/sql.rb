@@ -63,8 +63,14 @@ module XYZ
         return max(block.call(self)) if block
         :Max.sql_function(arg)
       end
+
+      #TODO: use SQL.cast 
       def self.qualified_ref()
         [:ref,[[{:ref_num => nil},""]].case(["-",:ref_num.cast(:text)].sql_string_join)].sql_string_join
+      end
+
+      def self.cast(expr,type)
+        Sequel::SQL::Cast.new(expr,type)
       end
     end
 

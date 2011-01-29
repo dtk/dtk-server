@@ -95,8 +95,9 @@ module XYZ
           #TODO: need to use an modification of below
           #        nested_mh = model_handle.createMH(:model_name => nested_model_name, :parent_model_name => target_parent_mn)
           override_attrs = ret_child_override_attrs(nested_mh,recursive_override_attrs)
+          #putting in nulls to null-out; more efficient to omit this columns in create
           common_settings = (DB_REL_DEF[nested_model_name][:many_to_one]||[]).inject({}) do |hash,pos_par|
-            hash.merge(pos_par == target_parent_mn ? {DB.parent_field(pos_par,model_name) => nil} : {})
+            hash.merge(pos_par == target_parent_mn ? {} : {DB.parent_field(pos_par,model_name) => SQL::ColRef.cast(nil,ID_TYPES[:id])})
           end
           parent_rels = objs_info.map do |row|
             common_settings.merge(par_shift_col => row[:id],:old_par_id => row[:ancestor_id], parent_id_col => row[:parent_id])

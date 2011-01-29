@@ -91,9 +91,7 @@ module XYZ
         create_opts = {:duplicate_refs => :allow, :returning_sql_cols => [:ancestor_id]}
         return ret unless nested_in_addition_to_parent?(model_handle,objs_info)
         (InvertedNonParentNestedKeys[model_handle[:model_name]]||{}).each do |nested_model_name, par_shift_col|
-          nested_mh = ModelHandle.new(model_handle[:c],nested_model_name) #important that parent_model_name not (incorrectly) set
-          #TODO: need to use an modification of below
-          #        nested_mh = model_handle.createMH(:model_name => nested_model_name, :parent_model_name => target_parent_mn)
+          nested_mh = model_handle.createMH(:model_name => nested_model_name, :parent_model_name => target_parent_mn)
           override_attrs = ret_child_override_attrs(nested_mh,recursive_override_attrs)
           #putting in nulls to null-out; more efficient to omit this columns in create
           common_settings = (DB_REL_DEF[nested_model_name][:many_to_one]||[]).inject({}) do |hash,pos_par|

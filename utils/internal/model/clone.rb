@@ -2,10 +2,12 @@ module XYZ
   module CloneClassMixins
     def clone(id_handle,target_id_handle,override_attrs={},opts={})
       add_model_specific_override_attrs!(override_attrs)
-      new_id_handle = CloneCopyProcessor.new(self).clone_copy(id_handle,[target_id_handle],override_attrs,opts).first
+      clone_copy_opts = opts.merge(:include_children_id_handles => true)
+      new_id_handles,children_id_handles = CloneCopyProcessor.new(self).clone_copy(id_handle,[target_id_handle],override_attrs,clone_copy_opts)
+      new_id_handle = new_id_handles.first
       raise Error.new("cannot clone") unless new_id_handle
       #calling with respect to target
-      model_class(target_id_handle[:model_name]).clone_post_copy_hook(new_id_handle,target_id_handle,opts)
+      model_class(target_id_handle[:model_name]).clone_post_copy_hook(new_id_handle,children_id_handles,target_id_handle,opts)
       return new_id_handle.get_id()
     end
 
@@ -15,7 +17,7 @@ module XYZ
     end
 
     # to be optionally overwritten by object representing the target
-    def clone_post_copy_hook(new_id_handle,target_id_handle,opts={})
+    def clone_post_copy_hook(new_id_handle,children_id_handles,target_id_handle,opts={})
     end
 
    private
@@ -29,7 +31,8 @@ module XYZ
       #copy part of clone
       #targets is a list of id_handles, each with same model_name 
       def clone_copy(source_id_handle,targets,recursive_override_attrs={},opts={})
-        return Array.new if targets.empty?
+        include_children = opts[:include_children_id_handles] 
+        return (include_children ? [Array.new,Array.new] : Array.new) if targets.empty?
 
         source_model_name = source_id_handle[:model_name]
         source_model_handle = source_id_handle.createMH()
@@ -63,12 +66,14 @@ module XYZ
         fk_info.add_id_handles(new_id_handles) #TODO: may be more efficient adding only id handles assciated with foreign keys
 
         #iterate over all nested objects which includes children object plus, for example, components for composite components
+        all_children_id_handles = Array.new
         get_nested_objects__all(source_model_handle,target_parent_mh,new_objs_info,recursive_override_attrs).each do |child_context|
           child_id_handles = clone_copy_child_objects(child_context)
+          all_children_id_handles += child_id_handles if include_children
           fk_info.add_id_handles(child_id_handles)
         end
         fk_info.shift_foregn_keys()
-        new_id_handles
+        include_children ? [new_id_handles,all_children_id_handles] : new_id_handles
       end
      private
       attr_reader :db,:fk_info, :model_name

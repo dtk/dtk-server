@@ -134,7 +134,7 @@ module XYZ
       override_attrs[:external_ref] = nil
     end
 
-    def self.clone_post_copy_hook(new_id_handle,target_id_handle,opts={})
+    def self.clone_post_copy_hook(new_id_handle,children_id_handles,target_id_handle,opts={})
       add_needed_ipv4_sap_attributes(new_id_handle,target_id_handle)
       parent_action_id_handle = target_id_handle.get_parent_id_handle()
       StateChange.create_pending_change_item(:new_item => new_id_handle, :parent => parent_action_id_handle)

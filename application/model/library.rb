@@ -1,4 +1,3 @@
-
 module XYZ
   class Library < Model
     set_relation_name(:library,:library)
@@ -6,14 +5,16 @@ module XYZ
       #no table specfic fields (yet)
       one_to_many :component, :node, :component_def, :node_group, :node_group_member, :attribute_link, :network_partition, :network_gateway, :region,:assoc_region_network, :data_source, :search_object
     end
+
     ##### Actions
-    def self.clone_post_copy_hook(new_id_handle,target_id_handle,opts={})
+    def self.clone_post_copy_hook(new_id_handle,children_id_handles,target_id_handle,opts={})
       case new_id_handle[:model_name]
        when :component then clone_post_copy_hook__component(new_id_handle,target_id_handle,opts)
       end
     end
    private
     def self.clone_post_copy_hook__component(new_id_handle,target_id_handle,opts)
+      #TODO: may generalize and look for any dynamic attribute that neds to be reset when put in library
       #find if assembly and if so get what it is directly linked to
       search_pattern_hash = {
         :relation => :component,

@@ -21,6 +21,7 @@ module XYZ
     #######################
     ### object procssing and access functions
 
+    #TODO: needs to be retested
     def self.clone_post_copy_hook(clone_copy_output,target_id_handle,opts={})
       #create a change pending item associated with component created on the node group adn returns its id (so it can be
       # used as parent to change items for components on all the node groups memebrs
@@ -35,7 +36,7 @@ module XYZ
         :parent => action_parent_idh,
         :base_object => {:node_group => {:display_name => target_display_name}}
       }
-      action_id_handle = Action.create_pending_change_item(new_item_hash)
+      action_id_handle = StateChange.create_pending_change_item(new_item_hash)
       case new_id_handle[:model_name]
        when :component
         clone_post_copy_hook_component(new_id_handle,target_id_handle,action_id_handle,opts)

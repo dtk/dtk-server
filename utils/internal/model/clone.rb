@@ -30,6 +30,20 @@ module XYZ
         @include_children = opts[:include_children]
         end
       attr_reader :id_handles
+
+      def model_name()
+        #all id handles wil be of same type
+        @id_handles.first && @id_handles.first[:model_name]
+      end
+      
+      def children() 
+        unless @include_children
+          Log.error("children should not be called on object with @include_children set to false")
+          return Array.new
+        end
+        object_info().map{|obj|obj[:children]}.flatten
+      end
+
       def object_info()
         @indexed_object_info.values()
       end
@@ -42,10 +56,15 @@ module XYZ
       end
       def add_children(child_clone_copy_output)
         return unless @include_children
+        return if child_clone_copy_output.empty?
         child_clone_copy_output.object_info.each do |child_obj|
           par_obj = @indexed_object_info[child_obj[:parent]]
           par_obj[:children] << child_obj if par_obj
         end
+      end
+     protected
+      def empty?()
+        @id_handles.empty?
       end
     end
 

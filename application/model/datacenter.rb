@@ -8,37 +8,37 @@ module XYZ
     
     #### actions
     def self.clone_post_copy_hook(clone_copy_output,target_id_handle,opts={})
-      #TODO: incldue state chenges for not just top level
-      new_id_handle = clone_copy_output.id_handles.first
-      StateChange.create_pending_change_item(:new_item => new_id_handle, :parent => target_id_handle)
+      case clone_copy_output.model_name()
+       when :component 
+        clone_post_copy_hook__component(clone_copy_output,target_id_handle,opts)
+       else #TODO: catchall taht will be expanded
+        new_id_handle = clone_copy_output.id_handles.first
+        StateChange.create_pending_change_item(:new_item => new_id_handle, :parent => target_id_handle)
+      end
     end
-
-
-#TODO below old decrecate
-    def self.discover_nodes(dpl_id_handle,discovery_type,opts={})
-      #TBD: stubbed so discovery_type is ignored and just discovering from hard-wired chef srever
-      raise Error.new("Datacenter given (#{dpl_id_handle}) does not exist") unless exists? dpl_id_handle
-      factory_id_handle = get_factory_id_handle(dpl_id_handle,:node)
-      ChefProcessor.get_nodes_data_from_server(nil) do |node_name,node_data,error|
-        if error
-          if opts[:task]
-            opts[:task].add_error(error)
-            next
-          else
-            raise error 
-          end
-        end
-        #TBD: stub
-        print "node_name=#{node_name}\n#{JSON.pretty_generate(node_data)}\n---------------------------------\n"
-        child_id_handle = get_child_id_handle(factory_id_handle,node_name.to_sym)
-        if exists? child_id_handle
-          Log.info("#{child_id_handle[:uri] || "node"} exists already\n")
-        else
-          create_from_hash(factory_id_handle,{node_name.to_sym => node_data})
-          opts[:task].add_event("added node #{node_name}") if opts[:task]
+   private
+    def self.clone_post_copy_hook__component(clone_copy_output,target_id_handle,opts)
+      #TODO: right now this wil be just a compiste component and clone_copy_output will be off form assembly - nodee - component
+      #TODO: may put nodes under "install of assembly"
+      node_new_items = Array.new
+      #TODO: refactor CloneCopyOutput to have recursive structure rather than child level all hashes
+      clone_copy_output.children().each do |child_hash|
+        idh = child_hash[:idh]
+        case (idh||{})[:model_name]
+         when :attribute_link
+          #no op
+         when :node
+          node_new_items << {:new_item => idh, :parent => target_id_handle}
+         else
+          Log.error("unexpected form of clone_copy_output in clone_post_copy_hook__component")
+          break
         end
       end
-      raise Error if (opts[:task] ? opts[:task].has_error? : nil)
+      unless node_new_items.empty?
+        sc_idhs = StateChange.create_pending_change_items(node_new_items)
+        pp [:sc_ihds,sc_idhs]
+      end
+      #TODO: now process component installs
     end
   end
 end

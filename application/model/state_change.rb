@@ -132,7 +132,6 @@ module XYZ
       true
     end
 
-
     def self.create_pending_change_item(new_item_hash)
       create_pending_change_items([new_item_hash]).first
     end

@@ -7,7 +7,8 @@ module XYZ
     end
 
     ##### Actions
-    def self.clone_post_copy_hook(new_id_handle,children_id_handles,target_id_handle,opts={})
+    def self.clone_post_copy_hook(clone_copy_output,target_id_handle,opts={})
+      new_id_handle = clone_copy_output.id_handles.first
       case new_id_handle[:model_name]
        when :component then clone_post_copy_hook__component(new_id_handle,target_id_handle,opts)
       end

@@ -21,11 +21,13 @@ module XYZ
     #######################
     ### object procssing and access functions
 
-    def self.clone_post_copy_hook(new_id_handle,children_id_handles,target_id_handle,opts={})
+    def self.clone_post_copy_hook(clone_copy_output,target_id_handle,opts={})
       #create a change pending item associated with component created on the node group adn returns its id (so it can be
       # used as parent to change items for components on all the node groups memebrs
       #get_top_container_id_handle(:datacenter) will return nil if top is not a datacenter which wil in turn make PendingChangeItem
       #a no-op; this is desired only having pending objects in datacenter, not library
+
+      new_id_handle = clone_copy_output.id_handles.first
       action_parent_idh = target_id_handle.get_top_container_id_handle(:datacenter)
       target_display_name = target_id_handle[:display_name]|| get_display_name(target_id_handle)
       new_item_hash = {

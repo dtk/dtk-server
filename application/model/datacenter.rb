@@ -7,7 +7,9 @@ module XYZ
     end
     
     #### actions
-    def self.clone_post_copy_hook(new_id_handle,children_id_handles,target_id_handle,opts={})
+    def self.clone_post_copy_hook(clone_copy_output,target_id_handle,opts={})
+      #TODO: incldue state chenges for not just top level
+      new_id_handle = clone_copy_output.id_handles.first
       StateChange.create_pending_change_item(:new_item => new_id_handle, :parent => target_id_handle)
     end
 

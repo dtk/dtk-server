@@ -276,6 +276,7 @@ also related is allowing omission of columns mmentioned in jon condition; post p
       AttributeComplexType.serialze(token_array)
     end
 
+    #TODO: want to rename to indicate this is propgate while logging state changes; or have a flag to control whether state changes are logged
     def self.update_and_propagate_attributes(attr_mh,attribute_rows)
       return Array.new if attribute_rows.empty?
       #TODO: was unable to use :update_only_if_change flag on update_from_select because was unable to get old value returning col 

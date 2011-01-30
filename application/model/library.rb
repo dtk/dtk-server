@@ -21,7 +21,17 @@ module XYZ
         :columns => [:node_assembly_parts_with_attrs]
       }
       node_assembly_parts = Model.get_objects_from_search_pattern_hash(new_id_handle.createMH(:model_name => :component),search_pattern_hash)
-      pp [:node_assembly_parts,node_assembly_parts]
+      #TODO: probably move so can be used also when clone nodes dircetly into library
+      attrs_to_null = Array.new
+      node_assembly_parts.each do |r|
+        next unless attr = r[:attribute]
+        if attr[:display_name] == "host_addresses_ipv4" and not (attr[:value_asserted].nil? or attr[:value_derived] == [nil])
+          attrs_to_null << {:id => attr[:id],:value_asserted => [nil]}
+        end
+      end
+      attr_mh = new_id_handle.createMH(:model_name => :attribute,:parent_model_name => :node)
+      Model.update_from_rows(attr_mh,attrs_to_null)
+      AttributeLink.propagate(attrs_to_null.map{|attr|attr_mh.createIDH(:id => attr[:id])})
     end
   end
 end

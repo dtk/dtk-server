@@ -21,8 +21,8 @@ module XYZ
     end
 
    private
-
-    class CloneCopyOutput 
+    #TODO: slight refactor of CloneCopyOutput so each child is of form {:parent => <parent>,:child => <CloneCopyOutput>}
+    class CloneCopyOutput
       def initialize(opts={})
         @id_handles = Array.new
         @indexed_object_info = Hash.new

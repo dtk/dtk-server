@@ -7,7 +7,7 @@
   :controllers => [{
     :file => 'controllers/fooctrl.rb'
   }],
-  :templates => [{
-    :file => 'templates/bartemplate.rtpl'
+  :views => [{
+    :file => 'views/bartemplate.rtpl'
   }]
 }

@@ -18,21 +18,13 @@ module XYZ
     end
    private
     def self.clone_post_copy_hook__component(clone_copy_output,target_id_handle,opts)
-      #TODO: right now this wil be just a compiste component and clone_copy_output will be off form assembly - nodee - component
+      #TODO: right now this wil be just a composite component and clone_copy_output will be off form assembly - nodee - component
       #TODO: may put nodes under "install of assembly"
       node_new_items = Array.new
-      #TODO: refactor CloneCopyOutput to have recursive structure rather than child level all hashes
-      clone_copy_output.children().each do |child_hash|
-        idh = child_hash[:idh]
-        case (idh||{})[:model_name]
-         when :attribute_link
-          #no op
-         when :node
-          node_new_items << {:new_item => idh, :parent => target_id_handle}
-         else
-          Log.error("unexpected form of clone_copy_output in clone_post_copy_hook__component")
-          break
-        end
+
+      level = 1
+      clone_copy_output.children_id_handles(level,:node).each do |idh|
+        node_new_items << {:new_item => idh, :parent => target_id_handle}
       end
       unless node_new_items.empty?
         sc_idhs = StateChange.create_pending_change_items(node_new_items)

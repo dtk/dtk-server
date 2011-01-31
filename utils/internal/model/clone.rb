@@ -36,7 +36,7 @@ module XYZ
         @id_handles.first && @id_handles.first[:model_name]
       end
 
-      def children(level,model_name)
+      def children_hash_form(level,model_name)
         unless @include_children
           Log.error("children should not be called on object with @include_children set to false")
           return Array.new
@@ -45,7 +45,7 @@ module XYZ
       end
 
       def children_id_handles(level,model_name)
-        children(level,model_name).map{|child_hash|child_hash[:id_handle]}
+        children_hash_form(level,model_name).map{|child_hash|child_hash[:id_handle]}
       end
 
       def add_new_objects(objs_info,target_mh)
@@ -59,7 +59,8 @@ module XYZ
         objs_info.each_with_index do |child_obj,i|
           idh = child_idhs[i] 
           children = level_p[idh[:model_name]] ||= Array.new
-          children << {:id_handle => idh, :parent_id => child_obj[:parent]}
+          #clone_parent_id can differ from parent_id if for example node is under an assembly
+          children << {:id_handle => idh, :clone_parent_id => child_obj[parent_col]}
         end
         child_idhs
       end

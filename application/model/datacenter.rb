@@ -20,17 +20,21 @@ module XYZ
     def self.clone_post_copy_hook__component(clone_copy_output,target_id_handle,opts)
       #TODO: right now this wil be just a composite component and clone_copy_output will be off form assembly - nodee - component
       #TODO: may put nodes under "install of assembly"
-      node_new_items = Array.new
-
       level = 1
-      clone_copy_output.children_id_handles(level,:node).each do |idh|
-        node_new_items << {:new_item => idh, :parent => target_id_handle}
+      node_idhs = clone_copy_output.children_id_handles(level,:node)
+      node_new_items = node_idhs.map{|idh|{:new_item => idh, :parent => target_id_handle}}
+      return if node_new_items.empty?
+      node_sc_idhs = StateChange.create_pending_change_items(node_new_items)
+
+      indexed_node_info = Hash.new #TODO: may have state create this as output
+      node_sc_idhs.each_with_index{|sc_idh,i|indexed_node_info[node_idhs[i].get_id()] = sc_idh}
+
+      level = 2
+      component_new_items = clone_copy_output.children_hash_form(level,:component).map do |child_hash| 
+        {:new_item => child_hash[:id_handle], :parent => indexed_node_info[child_hash[:clone_parent_id]]}
       end
-      unless node_new_items.empty?
-        sc_idhs = StateChange.create_pending_change_items(node_new_items)
-        pp [:sc_ihds,sc_idhs]
-      end
-      #TODO: now process component installs
+      return if component_new_items.empty?
+      StateChange.create_pending_change_items(component_new_items)
     end
   end
 end

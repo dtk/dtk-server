@@ -119,7 +119,17 @@ module XYZ
     end
     #######################
     ### object procssing and access functions
-    #object processing and access functions
+    def get_attributes_unraveled()
+      search_pattern_hash = {
+        :filter => [:and, 
+                    [:eq, :hidden, false]],
+        :columns => [:id,:display_name,:attribute_value,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
+      }
+      raw_attributes = get_children_from_search_pattern_hash(:attribute,search_pattern_hash)
+      AttributeComplexType.flatten_attribute_list(raw_attributes)
+    end
+
+
     def self.add_model_specific_override_attrs!(override_attrs)
       override_attrs[:display_name] = SQL::ColRef.qualified_ref
     end

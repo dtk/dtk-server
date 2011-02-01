@@ -4,23 +4,7 @@ module XYZ
 
     def dock_edit(component_id)
       component = get_object_by_id(component_id)
-
-      search_pattern_hash_x = {
-        :filter => [:and, 
-                    [:eq, :hidden, false]],
-        :columns => [:id,:display_name,:attribute_value,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
-      }
-      pp [:foo,component.get_children_from_search_pattern_hash(:attribute,search_pattern_hash_x)]
-      search_pattern_hash = {
-        :relation => :attribute,
-        :filter => [:and, 
-                    [:eq, DB.parent_field(:component,:attribute), component_id],
-                    [:eq, :hidden, false]],
-        :columns => [:id,:display_name,:attribute_value,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
-      }
-      raw_attributes = get_objects_from_search_pattern_hash(search_pattern_hash)
-
-      flattened_attr_list = AttributeComplexType.flatten_attribute_list(raw_attributes)
+      flattened_attr_list = component.get_attributes_unraveled()
 
       i18n = get_i18n_mappings_for_models(:attribute)
       attr_list = flattened_attr_list.map do |a|
@@ -43,16 +27,8 @@ module XYZ
 
     #TODO: is dock_display used?
     def dock_display(component_id)
-      search_pattern_hash = {
-        :relation => :attribute,
-        :filter => [:and, 
-                    [:eq, DB.parent_field(:component,:attribute), component_id],
-                    [:eq, :hidden, false]],
-        :columns => [:id,:display_name,:attribute_value,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
-      }
-      raw_attributes = get_objects_from_search_pattern_hash(search_pattern_hash)
-
-      attribute_list = AttributeComplexType.flatten_attribute_list(raw_attributes)
+      component = get_object_by_id(component_id)
+      attribute_list = component.get_attributes_unraveled()
       #add name and attr_id from :qualified_attribute_name_under_node and :qualified_attribute_id_under_node
       attribute_list.each do |el|
         el[:attribute_id] = el[:unraveled_attribute_id]
@@ -71,16 +47,9 @@ module XYZ
     end
 
     def edit(component_id)
-      search_pattern_hash = {
-        :relation => :attribute,
-        :filter => [:and, 
-                    [:eq, DB.parent_field(:component,:attribute), component_id],
-                    [:eq, :hidden, false]],
-        :columns => [:id,:display_name,:attribute_value,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
-      }
-      raw_attributes = get_objects_from_search_pattern_hash(search_pattern_hash)
+      component = get_object_by_id(component_id)
+      attribute_list = component.get_attributes_unraveled()
 
-      attribute_list = AttributeComplexType.flatten_attribute_list(raw_attributes)
       #add name and attr_id from :qualified_attribute_name_under_node and :qualified_attribute_id_under_node
       attribute_list.each do |el|
         el[:attribute_id] = el[:unraveled_attribute_id]

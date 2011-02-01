@@ -59,6 +59,8 @@ pp '++++++++++++++++++++++++++++++'
         :columns => [:applications]
       }
       node_app_list = get_objects_from_search_pattern_hash(search_pattern_hash)
+pp '??????????????????????????????????????????'
+pp node_app_list
       app_list = Array.new
       #computing the components
       unless node_app_list.empty?
@@ -72,6 +74,7 @@ pp '++++++++++++++++++++++++++++++'
             cmp_i18n = i18n_string_component(i18n,name)
             el = {:id => id, :name =>  name, :i18n => cmp_i18n}
             component_icon_filename = ((r[:component][:ui]||{})[:images]||{})[:tnail]
+pp 'TEEEEESSSTTTT:::::'+component_icon_filename.to_s
             el.merge!(:component_icon_filename => component_icon_filename) if component_icon_filename
             indexed_app_list[id] = el
           end

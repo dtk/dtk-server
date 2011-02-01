@@ -8,6 +8,26 @@ module XYZ
     end
   end
 
+  module HashSearchPattern
+    def self.add_to_filter(hash_search_pattern,hash_filter)
+      filter = augment_filter(hash_search_pattern[:filter],hash_filter)
+      ret = {:filter => filter}
+      [:relation,:columns].each{|k|ret[k] = hash_search_pattern[k] if hash_search_pattern.has_key?(k)}
+      ret
+    end
+   private
+    def self.augment_filter(hash_filter,hash_filter_addition)
+      to_add = [hash_filter_addition]
+      if hash_filter.nil?
+        [:and] + to_add
+      elsif hash_filter.first == :and
+          hash_filter + to_add
+      else
+        [:and] + hash_filter + to_add
+      end 
+    end
+  end
+
 #TODO: add a more complex search patterm which is joins/link following of simple patterms
   class SearchPatternSimple < SearchPattern
     def initialize(hash_search_pattern)

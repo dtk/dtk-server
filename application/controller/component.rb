@@ -3,6 +3,14 @@ module XYZ
     helper :i18n_string_mapping
 
     def dock_edit(component_id)
+      component = get_object_by_id(component_id)
+
+      search_pattern_hash_x = {
+        :filter => [:and, 
+                    [:eq, :hidden, false]],
+        :columns => [:id,:display_name,:attribute_value,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
+      }
+      pp [:foo,component.get_children_from_search_pattern_hash(:attribute,search_pattern_hash_x)]
       search_pattern_hash = {
         :relation => :attribute,
         :filter => [:and, 

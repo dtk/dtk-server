@@ -101,6 +101,25 @@ module XYZ
       dataset ? dataset.all : nil
     end
 
+    def get_children_from_search_pattern_hash(child_model_name,search_pattern_hash_x)
+      parent_col_clause = [[:eq, DB.parent_field(model_name,child_model_name),id()]]
+      filter_x =  search_pattern_hash_x[:filter]
+      filter =
+        if filter_x.nil?
+          [:and] + parent_col_clause
+        elsif filter_x.first == :and
+          filter_x + parent_col_clause
+        else
+          [:and] + filter_x + parent_col_clause
+        end 
+      search_pattern_hash = {
+        :filter => filter,
+        :columns => search_pattern_hash_x[:columns]
+      }
+      child_model_handle = model_handle.createMH(child_model_name)
+      Model.get_objects_from_search_pattern_hash(child_model_handle,search_pattern_hash)
+    end
+
     def self.get_objects_from_search_pattern_hash(model_handle,search_pattern_hash)
       model_name = model_handle[:model_name]
       hash = search_pattern_hash.merge(:relation => model_name)

@@ -9,7 +9,9 @@ module XYZ
     def createIDH(x)
       IDHandle.new(self.merge(x))
     end
+    #has form hash or if just symbol then its the attribute :model_name
     def createMH(x={})
+      x = {:model_name => x} if x.kind_of?(Symbol)
       vals = [:c,:model_name,:parent_model_name].inject({}){|h,k|h.merge({k => self[k]})}
       vals.merge!(x)
       vals[:parent_model_name] ||= get_parent_model_name()

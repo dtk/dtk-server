@@ -583,6 +583,7 @@ pp [:datacenter_id,datacenter_id]
       return tpl_result
     end
 
+    #TODO: check if this and its referents are deprecated
     def ret_node_group_search_object(filter_params)
       model_name = :node_group
       parent_model_name = :datacenter

@@ -77,6 +77,16 @@ if(!R8.Topbar) {
 								}
 							};
 						R8.Ctrl.call(route,params);
+					}},
+					{id:'create-assembly',i18n:'Create Assembly',contentLoader:function(contentNode){
+//						var route = 'workspace/create_assembly/'+R8.Workspace.get('context_id'),
+						var route = 'workspace/create_assembly',
+							params = {
+								'cfg':{
+									'data':'panel_id='+contentNode.get('id')
+								}
+							};
+						R8.Ctrl.call(route,params);
 					}}
 				],
 			};

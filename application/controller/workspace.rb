@@ -774,11 +774,29 @@ POSSIBLE CHANGES TO HASH
       }
     end
 
-    def clone_assembly()
-pp '||||||||||||||||||||||||||||||||||||||'
-pp request.params
-    end
+    def clone_assembly(explicit_hash=nil)
+      hash = explicit_hash || request.params
+      return {}
+      library_id_handle = id_handle(hash["library_id"].to_i,:library)
+      create_hash = {
+        :component => {
+          hash["name"] => {
+            :display_name => hash["name"],
+            :type => "composite"
+          }
+        }
+      }
+      #TODO: bse fn that returns idhs
+      assembly_id = Component.create_from_hash(library_id_handle,create_hash).first[:id]
+      assembly_id_handle = id_handle(assembly_id,:component)
+#TODO: getting json rather than hash
+item_list = JSON.parse(hash["item_list"])
 
+      id_handles = item_list.map{|item|id_handle(item["id"].to_i,item["model"].to_sym)}
+
+      Component.clone__top_object_exists(assembly_id_handle,id_handles,library_id_handle)
+      return {}
+    end
   end
 end
 

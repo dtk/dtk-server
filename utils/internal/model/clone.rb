@@ -17,7 +17,7 @@ module XYZ
       proc = CloneCopyProcessor.new(self,opts.merge(:include_children => true))
       proc.add_id_handle(top_object_id_handle)
       #TODO: assembly_id shoudl not be hard  coded
-      child_context = ret_child_context(id_handles,target_id_handle,{:assembly_id => top_object_id_handle.get_id()}) 
+      child_context = proc.ret_child_context(id_handles,target_id_handle,{:assembly_id => top_object_id_handle.get_id()}) 
       clone_copy_output = proc.clone_copy_child_objects(child_context)
 
       new_id_handle = clone_copy_output.id_handles.first
@@ -168,6 +168,7 @@ module XYZ
         get_nested_objects__parents(child_model_handle,new_objs_info,recursive_override_attrs).each do |child_context|
           clone_copy_child_objects(child_context,level+1)
         end
+        @ret
       end
 
       def ret_child_context(id_handles,target_id_handle,existing_override_attrs={})

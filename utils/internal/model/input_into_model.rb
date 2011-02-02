@@ -99,7 +99,7 @@ module XYZ
               create_simple_instance?(ref_uri,c,:set_display_name => true)
 	      ref_id_info = get_row_from_id_handle(IDHandle[:c => c, :uri => ref_uri])
             else
-              Log.info("In proecss_global_keys cannot find object with uri #{ref_uri}") 
+              Log.info("In process_global_keys cannot find object with uri #{ref_uri}") 
               next
             end
           end

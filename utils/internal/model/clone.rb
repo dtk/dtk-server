@@ -117,6 +117,27 @@ module XYZ
         fk_info.shift_foregn_keys()
         @ret
       end
+
+      def clone_copy__top_object_to_persist(top_object,target_mh,recursive_override_attrs={})
+        top_object_mh = top_object.model_handle
+        select_ds = SQL::ArrayDataset.create(db,[top_object],top_object_mh)
+        field_set = FieldSet.new(top_object_mh[:model_name],top_object.keys)
+        new_objs_info = create_from_select(top_object_mh,field_set,select_ds)
+
+        return @ret if new_objs_info.empty?
+        new_id_handles = @ret.add_new_objects(new_objs_info,target_mh)
+        fk_info.add_id_mappings(source_model_handle,new_objs_info, :top => true)
+
+        fk_info.add_id_handles(new_id_handles) #TODO: may be more efficient adding only id handles assciated with foreign keys
+
+        #iterate over all nested objects which includes children object plus, for example, components for composite components
+        get_nested_objects__all(source_model_handle,target_mh,new_objs_info,recursive_override_attrs).each do |child_context|
+          clone_copy_child_objects(child_context)
+        end
+        fk_info.shift_foregn_keys()
+        @ret
+      end
+
      private
       def clone_copy_child_objects(child_context,level=1)
         child_model_handle = child_context[:model_handle]

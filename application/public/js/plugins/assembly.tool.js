@@ -70,9 +70,12 @@ if(!R8.AssemblyTool) {
 
 			formSubmit: function(e) {
 				var items = R8.Workspace.getSelectedItems();
-
+				var item_list = [];
+				for(var i in items) {
+					item_list.push(items[i]);
+				}
 				YUI().use("json","node", function (Y) {
-					Y.one('#item_list').set('value',Y.JSON.stringify(items));
+					Y.one('#item_list').set('value',Y.JSON.stringify(item_list));
 
 					var params = {
 						'cfg' : {

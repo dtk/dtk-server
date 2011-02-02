@@ -545,7 +545,7 @@ console.log('Have a drop hit for node!!!!');
 					});
 				});
 			},
-				
+
 			setupSliderAnim: function(Y, tIndex){
 				var name = R8.Cmdbar.loadedTabs[tIndex]['name'];
 				R8.Cmdbar.loadedTabs[tIndex].slideBarNode = Y.one('#' + name + '-slide-bar');

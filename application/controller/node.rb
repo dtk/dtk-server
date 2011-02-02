@@ -52,6 +52,11 @@ pp '++++++++++++++++++++++++++++++'
         component_el.merge(component_icon_fn ? {:component_icon_filename => component_icon_fn} : {})
       end
 
+=begin
+i18n stuff should be accessible and set within the model, shouldnt have to iterate over list in here
+and set values
+=end
+
       tpl = R8Tpl::TemplateR8.new("dock/node_get_apps",user_context())
       tpl.assign(:_app,app_common())
       tpl.assign(:app_list,app_list)
@@ -202,6 +207,14 @@ p 'Panel IS:'+tpl_result[:panel]
       field_set = Model::FieldSet.default(model_name)
       component_list = get_objects(model_name,{:node_node_id=>id})
 
+=begin
+Expect something like:
+node = Node.new(node_id)
+component_list = node.get_components()
+
+get_components should probably take a param to return sub list of type(s) of components
+ie: get_components(['language'])
+=end
 #pp model_list
       component_i18n = get_model_i18n('component',user_context())
 
@@ -303,6 +316,15 @@ p 'Panel IS:'+tpl_result[:panel]
         el[:description] = ""
       end
 
+=begin
+Expect something like:
+
+node = Node.new(node_id)
+port_list = node.get_ports()
+
+Should probably have params to filter types of ports
+ie: get_ports(['internal'])
+=end
       Model::materialize_virtual_columns!(port_list,[:port_type])
       return {:data=>port_list}
     end

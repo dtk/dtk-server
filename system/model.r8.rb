@@ -108,6 +108,11 @@ module XYZ
       Model.get_objects_from_search_pattern_hash(child_model_handle,search_pattern_hash)
     end
 
+    def get_objects_from_search_pattern_hash(search_pattern_hash_x)
+      search_pattern_hash = HashSearchPattern.add_to_filter(search_pattern_hash_x,[:eq, :id, id()])
+      Model.get_objects_from_search_pattern_hash(model_handle(),search_pattern_hash)
+    end
+
     def self.get_objects_from_search_pattern_hash(model_handle,search_pattern_hash)
       model_name = model_handle[:model_name]
       hash = search_pattern_hash.merge(:relation => model_name)

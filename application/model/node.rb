@@ -92,19 +92,22 @@ module XYZ
         ]
 
       #in dock 'applications means wider than basic_type == applicationsn
+      applications =  {
+        :model_name => :component,
+        :join_type => :inner,
+        :filter => [:or,
+                    [:eq, :basic_type, "application"],
+                    [:eq, :basic_type, "service"],
+                    [:eq, :basic_type, "client"]],
+        :join_cond=>{:node_node_id => q(:node,:id)},
+        :cols=>[:id,:node_node_id,:display_name,:ui]
+      }
       virtual_column :applications, :type => :jsob, :hidden => true,
+      :remote_dependencies => [applications]
+      virtual_column :applications_with_attrs, :type => :jsob, :hidden => true,
       :remote_dependencies => 
         [
-         {
-           :model_name => :component,
-           :join_type => :inner,
-           :filter => [:or, 
-                       [:eq, :basic_type, "application"],
-                       [:eq, :basic_type, "service"],
-                       [:eq, :basic_type, "client"]],
-           :join_cond=>{:node_node_id => q(:node,:id)},
-           :cols=>[:id,:node_node_id,:display_name,:ui]
-         },
+         applications,
          {
            :model_name => :attribute,
            :join_type => :left_outer,
@@ -127,6 +130,30 @@ module XYZ
     end
 
     #object processing and access functions
+    def get_users()
+      search_pattern_hash = {
+        :columns => [:users]
+      }
+      
+      node_user_list = get_objects_from_search_pattern_hash(search_pattern_hash)
+      user_list = Array.new
+      #TODO: just putting in username, not uid or gid
+      node_user_list.map do |u|
+        attr = u[:attribute]
+        val = attr[:value_asserted]||attr[:value_derived]
+        (val and attr[:display_name] == "username") ? {:id => attr[:id], :username => val, :avatar_filename => 'generic-user-male.png'} : nil 
+      end.compact
+    end
+
+    def get_applications()
+      search_pattern_hash = {
+        :columns => [:applications]
+      }
+      node_app_list = get_objects_from_search_pattern_hash(search_pattern_hash)
+      node_app_list.map{|r|r[:component]}.compact
+    end
+
+
     def self.add_model_specific_override_attrs!(override_attrs)
       override_attrs[:type] = "staged"
       override_attrs[:ref] = SQL::ColRef.concat("s-",:ref)

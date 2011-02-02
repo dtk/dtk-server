@@ -3,7 +3,7 @@ module XYZ
     helper :i18n_string_mapping
 
     def dock_edit(component_id)
-      component = get_object_by_id(component_id)
+      component = create_object_from_id(component_id)
       flattened_attr_list = component.get_attributes_unraveled()
 
       i18n = get_i18n_mappings_for_models(:attribute)
@@ -27,7 +27,7 @@ module XYZ
 
     #TODO: is dock_display used?
     def dock_display(component_id)
-      component = get_object_by_id(component_id)
+      component = create_object_from_id(component_id)
       attribute_list = component.get_attributes_unraveled()
       #add name and attr_id from :qualified_attribute_name_under_node and :qualified_attribute_id_under_node
       attribute_list.each do |el|
@@ -47,7 +47,7 @@ module XYZ
     end
 
     def edit(component_id)
-      component = get_object_by_id(component_id)
+      component = create_object_from_id(component_id)
       attribute_list = component.get_attributes_unraveled()
 
       #add name and attr_id from :qualified_attribute_name_under_node and :qualified_attribute_id_under_node

@@ -23,21 +23,8 @@ pp '++++++++++++++++++++++++++++++'
     end
 
     def dock_get_users(id)
-      search_pattern_hash = {
-        :relation => :node,
-        :filter => [:and,[:eq, :id, id.to_i]],
-        :columns => [:users]
-      }
-      node_user_list = get_objects_from_search_pattern_hash(search_pattern_hash)
-      user_list = Array.new
-      #TODO: just putting in username, not uid or gid
-      unless node_user_list.empty?
-        user_list = node_user_list.map do |u|
-          attr = u[:attribute]
-          val = attr[:value_asserted]||attr[:value_derived]
-          (val and attr[:display_name] == "username") ? {:id => attr[:id], :username => val, :avatar_filename => 'generic-user-male.png'} : nil 
-        end.compact
-      end
+      node = create_object_from_id(id)
+      user_list = node.get_users()
 
       tpl = R8Tpl::TemplateR8.new("dock/node_get_users",user_context())
       tpl.assign(:_app,app_common())
@@ -52,34 +39,17 @@ pp '++++++++++++++++++++++++++++++'
     end
 
     def dock_get_applications(id)
-      #TODO: can make more efficient so dont pull attributes
-      search_pattern_hash = {
-        :relation => :node,
-        :filter => [:and,[:eq, :id, id.to_i]],
-        :columns => [:applications]
-      }
-      node_app_list = get_objects_from_search_pattern_hash(search_pattern_hash)
-pp '??????????????????????????????????????????'
-pp node_app_list
+      node = create_object_from_id(id)
       app_list = Array.new
-      #computing the components
-      unless node_app_list.empty?
-        indexed_app_list = Hash.new()
-        i18n = get_i18n_mappings_for_models(:component)
-        node_app_list.each do |r|
-          next unless r[:component]
-          id = r[:component][:id]
-          unless indexed_app_list[id]
-            name = r[:component][:display_name]
-            cmp_i18n = i18n_string_component(i18n,name)
-            el = {:id => id, :name =>  name, :i18n => cmp_i18n}
-            component_icon_filename = ((r[:component][:ui]||{})[:images]||{})[:tnail]
-pp 'TEEEEESSSTTTT:::::'+component_icon_filename.to_s
-            el.merge!(:component_icon_filename => component_icon_filename) if component_icon_filename
-            indexed_app_list[id] = el
-          end
-        end
-        app_list =  indexed_app_list.values
+      db_app_list = node.get_applications()
+
+      i18n = get_i18n_mappings_for_models(:component)
+      app_list = db_app_list.map do |component|
+        name = component[:display_name]
+        cmp_i18n = i18n_string_component(i18n,name)
+        component_el = {:id => component[:id], :name =>  name, :i18n => cmp_i18n}
+        component_icon_fn = ((component[:ui]||{})[:images]||{})[:tnail]
+        component_el.merge(component_icon_fn ? {:component_icon_filename => component_icon_fn} : {})
       end
 
       tpl = R8Tpl::TemplateR8.new("dock/node_get_apps",user_context())

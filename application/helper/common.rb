@@ -14,7 +14,8 @@ module Ramaze::Helper
       model_class(model_name).get_objects(ModelHandle.new(c,model_name),where_clause,opts)
     end
 
-    def create_object_from_id(id)
+    def create_object_from_id(id_x)
+      id = id_x.to_i
       c = ret_session_context_id()
       model_class(model_name).new({:id => id},c)
     end      

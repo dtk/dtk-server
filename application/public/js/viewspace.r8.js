@@ -352,7 +352,6 @@ console.log(ports);
 					});
 					draggableItems[itemId].on('drag:drag',function(){
 						_items[itemId].refreshLinks();
-console.log('should have refreshed link....');
 					});
 					draggableItems[itemId].on('drag:end',function(e){
 						viewSpace.clearSelectedItems();

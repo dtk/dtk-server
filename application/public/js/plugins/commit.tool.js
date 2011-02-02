@@ -62,6 +62,7 @@ taskDef.children[0].children[0].children = [];
 					collapsed: true
 				});
 
+				this.setupTreeDD('task-'+taskDef.task_id+'-container');
 			},
 /*
 			getTreeNode: function(taskDef,viewType) {
@@ -157,11 +158,12 @@ console.log('unkown task type...');
 console.log(taskDef);
 						break;
 				}
-				var taskNode = R8.Utils.Y.Node.create('<li><span class="'+taskClass+'">'+editContent+taskI18n+'</span></li>');
+				var taskNode = R8.Utils.Y.Node.create('<li class="'+taskDefType+'"><span class="'+taskClass+'">'+editContent+taskI18n+'</span></li>');
 
 				if(typeof(taskDef.children) !='undefined' && taskDef.children.length > 0) {
 					var childTree = R8.Utils.Y.Node.create('<ul>');
 					childTree.set('id','task-'+taskDef.task_id+'-container');
+					childTree.addClass('task-tree');
 					for(var i in taskDef.children) {
 						this.setTaskContent(taskDef.children[i],viewType,childTree);
 					}
@@ -239,6 +241,118 @@ console.log(taskDef);
 				R8.Ctrl.call('workspace/commit_changes/'+datacenter_id,params);
 
 console.log('helllloooo there.....');
+			},
+
+			setupTreeDD: function(rootListNodeId) {
+				YUI().use('dd-constrain', 'dd-proxy', 'dd-drop', 'dd-scroll', function(Y) {
+					//Listen for all drop:over events
+					//Y.DD.DDM._debugShim = true;
+
+					//Static Vars
+					var goingUp = false, lastY = 0;
+
+					//Get the list of li's in the lists and make them draggable
+					var topTask = Y.one('#'+rootListNodeId);
+					var children = topTask.all('ul');
+					children.each(function(ulNode, index) {
+//						if(index==0) {
+							var itemList = ulNode.get('children');
+							itemList.each(function(item,indx) {
+								if(item.hasClass('setting')) return;
+								var dd = new Y.DD.Drag({
+									node: item,
+									target: {
+										padding: '20 0 0 100'
+									},
+									groups:[ulNode.get('id')]
+								}).plug(Y.Plugin.DDProxy, {
+									moveOnEnd: false
+								});/*.plug(Y.Plugin.DDConstrained, {
+									constrain2node: item.get('parentNode')
+								}).plug(Y.Plugin.DDNodeScroll, {
+									node: item.get('parentNode')
+								});*/
+							});
+							var dZone = new Y.DD.Drop({
+								node: ulNode,
+								groups:[ulNode.get('id')]
+							});
+//						}
+					});
+//return;
+					Y.DD.DDM.on('drop:over', function(e) {
+						//Get a reference to out drag and drop nodes
+						var drag = e.drag.get('node'),
+							drop = e.drop.get('node');
+
+						//Are we dropping on a li node?
+						if (drop.get('tagName').toLowerCase() === 'li') {
+							//Are we not going up?
+							if (!goingUp) {
+								drop = drop.get('nextSibling');
+							}
+							//Add the node to this list
+							e.drop.get('node').get('parentNode').insertBefore(drag, drop);
+							//Set the new parentScroll on the nodescroll plugin
+//							e.drag.nodescroll.set('parentScroll', e.drop.get('node').get('parentNode'));                        
+							//Resize this nodes shim, so we can drop on it later.
+							e.drop.sizeShim();
+						}
+					});
+					//Listen for all drag:drag events
+					Y.DD.DDM.on('drag:drag', function(e) {
+						//Get the last y point
+						var y = e.target.lastXY[1];
+						//is it greater than the lastY var?
+						if (y < lastY) {
+							//We are going up
+							goingUp = true;
+						} else {
+							//We are going down.
+							goingUp = false;
+						}
+						//Cache for next check
+						lastY = y;
+						Y.DD.DDM.syncActiveShims(true);
+					});
+					//Listen for all drag:start events
+					Y.DD.DDM.on('drag:start', function(e) {
+						//Get our drag object
+						var drag = e.target;
+						//Set some styles here
+						drag.get('node').setStyle('opacity', '.25');
+						drag.get('dragNode').set('innerHTML', drag.get('node').get('innerHTML'));
+						drag.get('dragNode').setStyles({
+							opacity: '.5',
+							borderColor: drag.get('node').getStyle('borderColor'),
+							backgroundColor: drag.get('node').getStyle('backgroundColor')
+						});
+					});
+					//Listen for a drag:end events
+					Y.DD.DDM.on('drag:end', function(e) {
+						var drag = e.target;
+						//Put out styles back
+						drag.get('node').setStyles({
+							visibility: '',
+							opacity: '1'
+						});
+					});
+					//Listen for all drag:drophit events
+					Y.DD.DDM.on('drag:drophit', function(e) {
+						var drop = e.drop.get('node'),
+							drag = e.drag.get('node');
+
+						//if we are not on an li, we must have been dropped on a ul
+						if (drop.get('tagName').toLowerCase() !== 'li') {
+							if (!drop.contains(drag)) {
+								drop.appendChild(drag);
+								//Set the new parentScroll on the nodescroll plugin
+//								e.drag.nodescroll.set('parentScroll', e.drop.get('node'));                                
+							}
+						}
+					});
+
+				});
 			}
 		}
 	}();

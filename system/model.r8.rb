@@ -46,13 +46,13 @@ module XYZ
     attr_reader :relation_type, :id_handle, :c
 
     #TODO: check why relation_type=model_name does not work
-    def initialize(hash_scalar_values,c,relation_type=model_name())
+    def initialize(hash_scalar_values,c,relation_type=model_name(),id_handle=nil)
       return nil if hash_scalar_values.nil?
 
       super(hash_scalar_values)
       @c = c
       @relation_type = relation_type
-      @id_handle = 
+      @id_handle = id_handle ||
         if hash_scalar_values[:id]
           ret_id_handle_from_db_id(hash_scalar_values[:id],relation_type)
         elsif hash_scalar_values[:uri]
@@ -60,6 +60,10 @@ module XYZ
         else
           nil
         end
+    end
+
+    def subset(*keys)
+      self.class.new(Aux.hash_subset(self,keys),@c,@relation_type,@id_handle)
     end
 
     def id()

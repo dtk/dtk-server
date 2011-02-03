@@ -786,15 +786,15 @@ POSSIBLE CHANGES TO HASH
           }
         }
       }
-      #TODO: bse fn that returns idhs
-      assembly_id = Component.create_from_hash(library_id_handle,create_hash).first[:id]
-      assembly_id_handle = id_handle(assembly_id,:component)
 #TODO: getting json rather than hash
 item_list = JSON.parse(hash["item_list"])
-
       id_handles = item_list.map{|item|id_handle(item["id"].to_i,item["model"].to_sym)}
-      create_object_from_id(id_handles.first.get_id(),:node).get_port_links()
+      links = create_object_from_id(id_handles.first.get_id(),:node).get_port_links()
+pp [:links,links]
       return {:content => nil}
+      assembly_id = Component.create_from_hash(library_id_handle,create_hash).first[:id]
+      assembly_id_handle = id_handle(assembly_id,:component)
+
       Component.clone__top_object_exists(assembly_id_handle,id_handles,library_id_handle)
       return {:content => nil}
     end

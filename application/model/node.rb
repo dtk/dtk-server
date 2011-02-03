@@ -59,6 +59,7 @@ module XYZ
         [{
            :model_name => :attribute_link,
            :join_cond=>{:input_id =>q(:attribute,:id)},
+           :join_type => :inner,
            :cols => [:id,:type,{:output_id => :other_end_output_id},:input_id,id(:node)]
          }]
 
@@ -68,6 +69,7 @@ module XYZ
         [{
            :model_name => :attribute_link,
            :join_cond=>{:output_id =>q(:attribute,:id)},
+           :join_type => :inner,
            :cols => [:id,:type,:hidden,{:input_id => :other_end_input_id},:output_id,id(:node)]
          }]
 
@@ -190,10 +192,17 @@ module XYZ
     end
 
     def get_port_links()
-      sp_hash = {:columns => [:input_port_links]}
-      input_port_rows = get_objects_from_search_pattern_hash(:columns => [:input_port_links]).map{|r|r[:attribute_link]}.compact
-      output_port_rows = get_objects_from_search_pattern_hash(:columns => [:output_port_links]).map{|r|r[:attribute_link]}.compact
-      pp [:foo,input_port_rows,output_port_rows]
+      input_port_cols = [:id, :display_name, :input_port_links]
+      input_port_rows = get_objects_from_search_pattern_hash(:columns => input_port_cols)
+      output_port_cols = [:id, :display_name, :output_port_links]
+      output_port_rows = get_objects_from_search_pattern_hash(:columns => output_port_cols)
+
+      return Array.new if input_port_rows.empty? and output_port_rows.empty?
+      #all node attrs will be the same ; so just using first as sample
+      ret = (input_port_rows.first||output_port_rows.first).subset(:id, :display_name)
+      ret[:input_port_links] = input_port_rows.map{|r|r[:attribute_link]}.compact
+      ret[:output_port_links] = output_port_rows.map{|r|r[:attribute_link]}.compact
+      ret
     end
 
     def self.add_model_specific_override_attrs!(override_attrs)

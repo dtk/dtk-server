@@ -112,7 +112,7 @@ module XYZ
 
       attr_reader :model_name_info, :sequel_ds
       def graph(join_type,right_ds,join_conditions=true,opts={})
-        new_model_name_info = right_ds.model_name_info.first.create_unique(@model_name_info,opts[:table_alias])
+        new_model_name_info = right_ds.model_name_info.first.create_unique(@model_name_info,opts)
         model_name_info = @model_name_info + [new_model_name_info]
         table_alias = new_model_name_info.ret_qualified_model_name()
         #TODO: think can make more efficient by adding in :select => [cols.]] for the rs table; without that it looks like sequel making a db call to find relevant columns for join result
@@ -176,19 +176,22 @@ module XYZ
     end
 
     class ModelNameInfo 
-      attr_reader :model_name,:ref_num
-      def initialize(model_name,ref_num=1,model_name_alias=nil)
+      attr_reader :model_name,:ref_num, :convert
+      def initialize(model_name,ref_num=1,model_name_alias=nil,convert=false)
         @model_name = model_name.to_sym
         @ref_num = ref_num
         @model_name_alias = model_name_alias
+        @convert = convert
       end
       def ret_qualified_model_name()
         @model_name_alias || (@ref_num == 1 ? @model_name : "#{@model_name}#{@ref_num.to_s}").to_sym
       end
-      def create_unique(existing_name_info,model_name_alias=nil)
+      def create_unique(existing_name_info,opts={})
+        model_name_alias = opts[:table_alias]
+        @convert = true if opts[:convert]
         #check whether model_name is in existing_name_info if so bump up by 1
         new_ref_num =  1 + (existing_name_info.find_all{|x|x.model_name == @model_name}.map{|y|y.ref_num}.max || 0)
-        ModelNameInfo.new(@model_name,new_ref_num,model_name_alias)
+        ModelNameInfo.new(@model_name,new_ref_num,model_name_alias,convert)
       end
     end
 
@@ -332,7 +335,7 @@ module XYZ
             model_index = m.ret_qualified_model_name()
             next unless row[model_index]
             Model.process_raw_db_row!(row[model_index],m.model_name)
-            if opts[:convert_child_rows]
+            if m.convert or opts[:convert_child_rows]
               row[model_index] = DB_REL_DEF[m.model_name][:model_class].new(row[model_index],@c,m.model_name)
             end
           end

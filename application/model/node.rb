@@ -58,6 +58,7 @@ module XYZ
         attribute_ports +
         [{
            :model_name => :attribute_link,
+           :convert => true,
            :join_cond=>{:input_id =>q(:attribute,:id)},
            :join_type => :inner,
            :cols => [:id,:type,{:output_id => :other_end_output_id},:input_id,id(:node)]
@@ -68,6 +69,7 @@ module XYZ
         attribute_ports +
         [{
            :model_name => :attribute_link,
+           :convert => true,
            :join_cond=>{:output_id =>q(:attribute,:id)},
            :join_type => :inner,
            :cols => [:id,:type,:hidden,{:input_id => :other_end_input_id},:output_id,id(:node)]
@@ -205,7 +207,7 @@ module XYZ
       ret
     end
 
-    def self.get_port_links(id_handles,type=nil,opts={})
+    def self.get_port_links(id_handles)
       input_port_cols = [:id, :display_name, :input_port_links]
       input_port_rows = get_objects_in_set_from_sp_hash(id_handles,:columns => input_port_cols)
       output_port_cols = [:id, :display_name, :output_port_links]
@@ -216,14 +218,19 @@ module XYZ
       input_port_rows.each do |r|
         id = r[:id]
         indexed_ret[id] ||= r.subset(:id, :display_name).merge(:input_port_links => Array.new, :output_port_links => Array.new)
+pp [:foo,r[:attribute_link].class]
         indexed_ret[id][:input_port_links] << r[:attribute_link]
       end
       output_port_rows.each do |r|
         id = r[:id]
         indexed_ret[id] ||= r.subset(:id, :display_name).merge(:output_port_links => Array.new, :output_port_links => Array.new)
         indexed_ret[id][:output_port_links] << r[:attribute_link]
+pp [:foo,r[:attribute_link].class]
       end
       indexed_ret.values
+    end
+
+    def self.get_conneected_port_links(id_handles,opts={})
     end
 
     def self.add_model_specific_override_attrs!(override_attrs)

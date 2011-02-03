@@ -35,35 +35,41 @@ module XYZ
          }
         ]
 
-      virtual_column :port_links, :type => :json, :hidden => true, 
-      :remote_dependencies => 
-        [
-         {
+      attribute_ports =   
+        [{
            :model_name => :component,
            :join_type => :inner,
            :join_cond=>{:node_node_id => q(:node,:id)},
-           :cols => [:id,:display_name,id(:node)]
+           :cols => [:id,:display_name, id(:node)]
          },
          {
            :model_name => :attribute,
            :join_type => :inner,
            :filter => [:and,[:eq,:is_port,true]],
            :join_cond=>{:component_component_id => q(:component,:id)},
-           :cols => [:id,:display_name,id(:component),:value_derived,:value_asserted,:is_port,:semantic_type_summary]
-         },
-         {
+           :cols => [:id,:display_name, id(:component)]
+         }]
+
+      virtual_column :attribute_ports, :type => :json, :hidden => true, 
+       :remote_dependencies => attribute_ports
+
+      virtual_column :input_port_links, :type => :json, :hidden => true, 
+      :remote_dependencies => 
+        attribute_ports +
+        [{
            :model_name => :attribute_link,
-           :alias => :input_link,
            :join_cond=>{:input_id =>q(:attribute,:id)},
-           :cols => [:id,:type,:hidden,{:output_id => :other_end_output_id},:input_id,id(:node)]
-         },
-         {
+           :cols => [:id,:type,{:output_id => :other_end_output_id},:input_id,id(:node)]
+         }]
+
+      virtual_column :output_port_links, :type => :json, :hidden => true, 
+      :remote_dependencies => 
+        attribute_ports +
+        [{
            :model_name => :attribute_link,
-           :alias => :output_link,
            :join_cond=>{:output_id =>q(:attribute,:id)},
            :cols => [:id,:type,:hidden,{:input_id => :other_end_input_id},:output_id,id(:node)]
-         }
-        ]
+         }]
 
         virtual_column :has_pending_change, :type => :boolean, :hidden => true,
          :remote_dependencies =>
@@ -184,9 +190,10 @@ module XYZ
     end
 
     def get_port_links()
-      sp_hash = {:columns => [:port_links]}
-      rows = get_objects_from_search_pattern_hash(sp_hash, :convert_child_rows => true)
-      pp [:foo,rows.map{|r|[r[:attribute][:port_is_external],r[:output_link],r[:input_link]]}]
+      sp_hash = {:columns => [:input_port_links]}
+      input_port_rows = get_objects_from_search_pattern_hash(:columns => [:input_port_links]).map{|r|r[:attribute_link]}.compact
+      output_port_rows = get_objects_from_search_pattern_hash(:columns => [:output_port_links]).map{|r|r[:attribute_link]}.compact
+      pp [:foo,input_port_rows,output_port_rows]
     end
 
     def self.add_model_specific_override_attrs!(override_attrs)

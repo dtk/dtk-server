@@ -5,7 +5,7 @@ module XYZ
     def self.up()
       foreign_key :input_id, :attribute, FK_CASCADE_OPT
       foreign_key :output_id, :attribute, FK_CASCADE_OPT
-      column :type, :varchar, :size => 25 # "internal" | "external" | "member"
+      column :type, :varchar, :size => 25, :default => "external" # "internal" | "external" | "member"
       column :hidden, :boolean, :default => false
       column :function, :json, :default => "eq"
       column :function_index, :json

@@ -224,7 +224,7 @@ module XYZ
         Dataset.new(model_handle(),sequel_ds)
       end
 
-      def all()
+      def all(opts={})
         ret = ArrayObject.new
         @sequel_ds.all.map do |row|
           Model.process_raw_db_row!(row,model_name)
@@ -315,7 +315,7 @@ module XYZ
         Graph.new(@sequel_ds.add_graph_aliases(graph_aliases),@model_name_info,@c)
       end
 
-      def all()
+      def all(opts={})
         #TODO may be more efficient if flatten by use something like Model.db.db[@sequel_ds.sql].all
         # this avoids needing to reanchor each from primary table (which should be bulk of info
         #alterantive look at capability of Sequel to pass in row processing block
@@ -332,6 +332,9 @@ module XYZ
             model_index = m.ret_qualified_model_name()
             next unless row[model_index]
             Model.process_raw_db_row!(row[model_index],m.model_name)
+            if opts[:convert_child_rows]
+              row[model_index] = DB_REL_DEF[m.model_name][:model_class].new(row[model_index],@c,m.model_name)
+            end
           end
           new_row = DB_REL_DEF[primary_model_name][:model_class].new(row,@c,primary_model_name)
           next if @filter_post_processing and not @filter_post_processing.call(new_row)

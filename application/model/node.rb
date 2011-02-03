@@ -41,26 +41,30 @@ module XYZ
          {
            :model_name => :component,
            :join_type => :inner,
-           :join_cond=>{:node_node_id =>:node__id},
-           :cols => [:id,:display_name,:node_node_id]
+           :join_cond=>{:node_node_id => q(:node,:id)},
+           :cols => [:id,:display_name,id(:node)]
          },
          {
            :model_name => :attribute,
            :join_type => :inner,
-           :join_cond=>{:component_component_id =>:component__id},
-           :cols => [:id,:display_name,:component_component_id]
+           :filter => [:and,[:eq,:is_port,true]],
+           :join_cond=>{:component_component_id => q(:component,:id)},
+           :cols => [:id,:display_name,id(:component),:value_derived,:value_asserted,:is_port,:semantic_type_summary]
          },
          {
            :model_name => :attribute_link,
-           :join_cond=>{:input_id =>:attribute__id},
-           :cols => [:id,:type,:hidden,{:output_id => :other_end_output_id},:input_id,:node_node_id]
+           :alias => :input_link,
+           :join_cond=>{:input_id =>q(:attribute,:id)},
+           :cols => [:id,:type,:hidden,{:output_id => :other_end_output_id},:input_id,id(:node)]
          },
          {
            :model_name => :attribute_link,
-           :join_cond=>{:output_id =>:attribute__id},
-           :cols => [:id,:type,:hidden,{:input_id => :other_end_input_id},:output_id,:node_node_id]
+           :alias => :output_link,
+           :join_cond=>{:output_id =>q(:attribute,:id)},
+           :cols => [:id,:type,:hidden,{:input_id => :other_end_input_id},:output_id,id(:node)]
          }
         ]
+
         virtual_column :has_pending_change, :type => :boolean, :hidden => true,
          :remote_dependencies =>
          [
@@ -116,6 +120,32 @@ module XYZ
            :cols=>[:id,:component_component_id,:display_name,:value_asserted,:value_derived,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
          }
         ]
+      virtual_column :deprecate_port_links, :type => :json, :hidden => true, 
+      :remote_dependencies => 
+        [
+         {
+           :model_name => :component,
+           :join_type => :inner,
+           :join_cond=>{:node_node_id =>:node__id},
+           :cols => [:id,:display_name,:node_node_id]
+         },
+         {
+           :model_name => :attribute,
+           :join_type => :inner,
+           :join_cond=>{:component_component_id =>:component__id},
+           :cols => [:id,:display_name,:component_component_id]
+         },
+         {
+           :model_name => :attribute_link,
+           :join_cond=>{:input_id =>:attribute__id},
+           :cols => [:id,:type,:hidden,{:output_id => :other_end_output_id},:input_id,:node_node_id]
+         },
+         {
+           :model_name => :attribute_link,
+           :join_cond=>{:output_id =>:attribute__id},
+           :cols => [:id,:type,:hidden,{:input_id => :other_end_input_id},:output_id,:node_node_id]
+         }
+        ]
 
       foreign_key :data_source_id, :data_source, FK_SET_NULL_OPT
       many_to_one :library, :datacenter
@@ -153,6 +183,11 @@ module XYZ
       node_app_list.map{|r|r[:component]}.compact
     end
 
+    def get_port_links()
+      sp_hash = {:columns => [:port_links]}
+      rows = get_objects_from_search_pattern_hash(sp_hash, :convert_child_rows => true)
+      pp [:foo,rows.map{|r|[r[:attribute][:port_is_external],r[:output_link],r[:input_link]]}]
+    end
 
     def self.add_model_specific_override_attrs!(override_attrs)
       override_attrs[:type] = "staged"

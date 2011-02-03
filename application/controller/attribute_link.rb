@@ -61,7 +61,7 @@ module XYZ
       return {'data'=> Array.new} if item_ids.empty?
 
       filter = item_ids ? [:and, [:oneof, :id, item_ids]] : nil
-      cols = [:id,:display_name,:port_links]
+      cols = [:id,:display_name,:deprecate_port_links]
       field_set = Model::FieldSet.new(:node,cols)
       ds = SearchObject.create_from_field_set(field_set,ret_session_context_id(),filter).create_dataset()
       ds = ds.where(SQL.not(SQL::ColRef.coalesce(:other_end_output_id,:other_end_input_id) => nil))
@@ -112,7 +112,7 @@ module XYZ
     #TODO: temp
     def aux_list_on_node_ports(node_ids)
       filter = node_ids ? [:and, [:oneof, :id, node_ids]] : nil
-      cols = [:id,:display_name,:port_links]
+      cols = [:id,:display_name,:deprecate_port_links]
       field_set = Model::FieldSet.new(:node,cols)
       ds = SearchObject.create_from_field_set(field_set,ret_session_context_id(),filter).create_dataset()
       ds = ds.where(SQL.not(SQL::ColRef.coalesce(:other_end_output_id,:other_end_input_id) => nil))

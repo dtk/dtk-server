@@ -793,7 +793,8 @@ POSSIBLE CHANGES TO HASH
 item_list = JSON.parse(hash["item_list"])
 
       id_handles = item_list.map{|item|id_handle(item["id"].to_i,item["model"].to_sym)}
-
+      create_object_from_id(id_handles.first.get_id(),:node).get_port_links()
+      return {:content => nil}
       Component.clone__top_object_exists(assembly_id_handle,id_handles,library_id_handle)
       return {:content => nil}
     end

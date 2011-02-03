@@ -96,28 +96,28 @@ module XYZ
       create_from_select(model_handle,field_set,select_ds,override_attrs,create_opts)
     end
 
-    def self.get_objects_from_search_object(search_object)
+    def self.get_objects_from_search_object(search_object,opts={})
       dataset = search_object.create_dataset()
-      dataset ? dataset.all : nil
+      dataset ? dataset.all(opts) : nil
     end
 
-    def get_children_from_search_pattern_hash(child_model_name,search_pattern_hash_x)
+    def get_children_from_search_pattern_hash(child_model_name,search_pattern_hash_x,opts={})
       parent_col_clause = [:eq, DB.parent_field(model_name,child_model_name),id()]
       search_pattern_hash = HashSearchPattern.add_to_filter(search_pattern_hash_x,parent_col_clause)
       child_model_handle = model_handle.createMH(child_model_name)
-      Model.get_objects_from_search_pattern_hash(child_model_handle,search_pattern_hash)
+      Model.get_objects_from_search_pattern_hash(child_model_handle,search_pattern_hash,opts)
     end
 
-    def get_objects_from_search_pattern_hash(search_pattern_hash_x)
+    def get_objects_from_search_pattern_hash(search_pattern_hash_x,opts={})
       search_pattern_hash = HashSearchPattern.add_to_filter(search_pattern_hash_x,[:eq, :id, id()])
-      Model.get_objects_from_search_pattern_hash(model_handle(),search_pattern_hash)
+      Model.get_objects_from_search_pattern_hash(model_handle(),search_pattern_hash,opts)
     end
 
-    def self.get_objects_from_search_pattern_hash(model_handle,search_pattern_hash)
+    def self.get_objects_from_search_pattern_hash(model_handle,search_pattern_hash,opts={})
       model_name = model_handle[:model_name]
       hash = search_pattern_hash.merge(:relation => model_name)
       search_object = SearchObject.create_from_input_hash({"search_pattern" => hash},model_name,model_handle[:c])
-      Model.get_objects_from_search_object(search_object)
+      Model.get_objects_from_search_object(search_object,opts)
     end
 
     def self.get_object_columns(id_handle,columns)

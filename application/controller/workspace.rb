@@ -789,7 +789,7 @@ POSSIBLE CHANGES TO HASH
 #TODO: getting json rather than hash
 item_list = JSON.parse(hash["item_list"])
       id_handles = item_list.map{|item|id_handle(item["id"].to_i,item["model"].to_sym)}
-      links = create_object_from_id(id_handles.first.get_id(),:node).get_port_links()
+      links = Node.get_port_links(id_handles)
 pp [:links,links]
       return {:content => nil}
       assembly_id = Component.create_from_hash(library_id_handle,create_hash).first[:id]

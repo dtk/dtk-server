@@ -120,12 +120,12 @@ module XYZ
     #######################
     ### object procssing and access functions
     def get_attributes_unraveled()
-      search_pattern_hash = {
+      sp_hash = {
         :filter => [:and, 
                     [:eq, :hidden, false]],
         :columns => [:id,:display_name,:attribute_value,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
       }
-      raw_attributes = get_children_from_search_pattern_hash(:attribute,search_pattern_hash)
+      raw_attributes = get_children_from_sp_hash(:attribute,sp_hash)
       AttributeComplexType.flatten_attribute_list(raw_attributes)
     end
 

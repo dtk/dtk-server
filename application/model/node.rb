@@ -169,11 +169,11 @@ module XYZ
 
     #object processing and access functions
     def get_users()
-      search_pattern_hash = {
+      sp_hash = {
         :columns => [:users]
       }
       
-      node_user_list = get_objects_from_search_pattern_hash(search_pattern_hash)
+      node_user_list = get_objects_from_sp_hash(sp_hash)
       user_list = Array.new
       #TODO: just putting in username, not uid or gid
       node_user_list.map do |u|
@@ -184,18 +184,18 @@ module XYZ
     end
 
     def get_applications()
-      search_pattern_hash = {
+      sp_hash = {
         :columns => [:applications]
       }
-      node_app_list = get_objects_from_search_pattern_hash(search_pattern_hash)
+      node_app_list = get_objects_from_sp_hash(sp_hash)
       node_app_list.map{|r|r[:component]}.compact
     end
 
     def get_port_links()
       input_port_cols = [:id, :display_name, :input_port_links]
-      input_port_rows = get_objects_from_search_pattern_hash(:columns => input_port_cols)
+      input_port_rows = get_objects_from_sp_hash(:columns => input_port_cols)
       output_port_cols = [:id, :display_name, :output_port_links]
-      output_port_rows = get_objects_from_search_pattern_hash(:columns => output_port_cols)
+      output_port_rows = get_objects_from_sp_hash(:columns => output_port_cols)
 
       return Array.new if input_port_rows.empty? and output_port_rows.empty?
       #all node attrs will be the same ; so just using first as sample
@@ -203,6 +203,27 @@ module XYZ
       ret[:input_port_links] = input_port_rows.map{|r|r[:attribute_link]}.compact
       ret[:output_port_links] = output_port_rows.map{|r|r[:attribute_link]}.compact
       ret
+    end
+
+    def self.get_port_links(id_handles,type=nil,opts={})
+      input_port_cols = [:id, :display_name, :input_port_links]
+      input_port_rows = get_objects_in_set_from_sp_hash(id_handles,:columns => input_port_cols)
+      output_port_cols = [:id, :display_name, :output_port_links]
+      output_port_rows = get_objects_in_set_from_sp_hash(id_handles,:columns => output_port_cols)
+
+      return Array.new if input_port_rows.empty? and output_port_rows.empty?
+      indexed_ret = Hash.new
+      input_port_rows.each do |r|
+        id = r[:id]
+        indexed_ret[id] ||= r.subset(:id, :display_name).merge(:input_port_links => Array.new, :output_port_links => Array.new)
+        indexed_ret[id][:input_port_links] << r[:attribute_link]
+      end
+      output_port_rows.each do |r|
+        id = r[:id]
+        indexed_ret[id] ||= r.subset(:id, :display_name).merge(:output_port_links => Array.new, :output_port_links => Array.new)
+        indexed_ret[id][:output_port_links] << r[:attribute_link]
+      end
+      indexed_ret.values
     end
 
     def self.add_model_specific_override_attrs!(override_attrs)

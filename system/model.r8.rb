@@ -105,32 +105,40 @@ module XYZ
       dataset ? dataset.all(opts) : nil
     end
 
-    def get_children_from_search_pattern_hash(child_model_name,search_pattern_hash_x,opts={})
+    def get_children_from_sp_hash(child_model_name,sp_hash_x,opts={})
       parent_col_clause = [:eq, DB.parent_field(model_name,child_model_name),id()]
-      search_pattern_hash = HashSearchPattern.add_to_filter(search_pattern_hash_x,parent_col_clause)
+      sp_hash = HashSearchPattern.add_to_filter(sp_hash_x,parent_col_clause)
       child_model_handle = model_handle.createMH(child_model_name)
-      Model.get_objects_from_search_pattern_hash(child_model_handle,search_pattern_hash,opts)
+      Model.get_objects_from_sp_hash(child_model_handle,sp_hash,opts)
     end
 
-    def get_objects_from_search_pattern_hash(search_pattern_hash_x,opts={})
-      search_pattern_hash = HashSearchPattern.add_to_filter(search_pattern_hash_x,[:eq, :id, id()])
-      Model.get_objects_from_search_pattern_hash(model_handle(),search_pattern_hash,opts)
+    def get_objects_from_sp_hash(sp_hash_x,opts={})
+      sp_hash = HashSearchPattern.add_to_filter(sp_hash_x,[:eq, :id, id()])
+      Model.get_objects_from_sp_hash(model_handle(),sp_hash,opts)
     end
 
-    def self.get_objects_from_search_pattern_hash(model_handle,search_pattern_hash,opts={})
+    def self.get_objects_in_set_from_sp_hash(id_handles,sp_hash_x,opts={})
+      return Array.new if id_handles.empty?
+      sample_idh = id_handles.first
+      model_handle = sample_idh.createMH()
+      sp_hash = HashSearchPattern.add_to_filter(sp_hash_x,[:oneof, :id, id_handles.map{|idh|idh.get_id()}])
+      Model.get_objects_from_sp_hash(model_handle,sp_hash,opts)
+    end
+
+    def self.get_objects_from_sp_hash(model_handle,sp_hash,opts={})
       model_name = model_handle[:model_name]
-      hash = search_pattern_hash.merge(:relation => model_name)
+      hash = sp_hash.merge(:relation => model_name)
       search_object = SearchObject.create_from_input_hash({"search_pattern" => hash},model_name,model_handle[:c])
       Model.get_objects_from_search_object(search_object,opts)
     end
 
     def self.get_object_columns(id_handle,columns)
-      search_pattern_hash = {
+      sp_hash = {
         :relation => id_handle[:model_name],
         :filter => [:and,[:eq, :id, id_handle.get_id()]],
         :columns => columns
       }
-      get_objects_from_search_pattern_hash(id_handle.createMH(),search_pattern_hash).first
+      get_objects_from_sp_hash(id_handle.createMH(),sp_hash).first
     end
 
     #may deprecate below

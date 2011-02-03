@@ -46,12 +46,12 @@ module XYZ
           end
         end
         return nil if indexed_attrs_to_update.empty?
-        search_pattern_hash = {
+        sp_hash = {
           :relation => :attribute,
           :filter => [:and,[:oneof, :id, indexed_attrs_to_update.keys]],
           :columns => [:id,:value_derived]
         }
-        new_attr_vals = Model.get_objects_from_search_pattern_hash(task_mh.createMH(:model_name => :attribute),search_pattern_hash)
+        new_attr_vals = Model.get_objects_from_sp_hash(task_mh.createMH(:model_name => :attribute),sp_hash)
         new_attr_vals.each do |a|
           attr = indexed_attrs_to_update[a[:id]]
           attr[:value_derived] = a[:value_derived]
@@ -110,7 +110,7 @@ module XYZ
 
         node_ids = action_list.map{|x|x[:node][:id]}
         parent_field_name = DB.parent_field(:node,:attribute)
-        search_pattern_hash = {
+        sp_hash = {
           :relation => :attribute,
           :filter => [:and,
                       [:eq, :dynamic, true],
@@ -118,7 +118,7 @@ module XYZ
           :columns => [:id,:display_name,parent_field_name,:external_ref,:attribute_value,:required,:dynamic]
         }
 
-        attrs = Model.get_objects_from_search_pattern_hash(attr_mh,search_pattern_hash)
+        attrs = Model.get_objects_from_sp_hash(attr_mh,sp_hash)
 
         attrs.each do |attr|
           action = indexed_actions[attr[parent_field_name]]
@@ -141,13 +141,13 @@ module XYZ
         return nil if indexed_actions.empty?
 
         parent_field_name = DB.parent_field(:component,:attribute)
-        search_pattern_hash = {
+        sp_hash = {
           :relation => :attribute,
           :filter => [:and,
                       [:oneof, parent_field_name, indexed_actions.keys]],
           :columns => [:id,:display_name,parent_field_name,:external_ref,:attribute_value,:required,:dynamic,:port_type,:port_is_external, :data_type, :semantic_type, :hidden]
         }
-        attrs = Model.get_objects_from_search_pattern_hash(attr_mh,search_pattern_hash)
+        attrs = Model.get_objects_from_sp_hash(attr_mh,sp_hash)
 
         attrs.each do |attr|
           action = indexed_actions[attr[parent_field_name]]

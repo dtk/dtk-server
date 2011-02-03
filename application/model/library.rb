@@ -17,12 +17,12 @@ module XYZ
     def self.clone_post_copy_hook__component(new_id_handle,target_id_handle,opts)
       #TODO: may generalize and look for any dynamic attribute that neds to be reset when put in library
       #find if assembly and if so get what it is directly linked to
-      search_pattern_hash = {
+      sp_hash = {
         :relation => :component,
         :filter => [:and,[:eq, :id, new_id_handle.get_id()],[:eq, :type, "composite"]],
         :columns => [:node_assembly_parts_with_attrs]
       }
-      node_assembly_parts = Model.get_objects_from_search_pattern_hash(new_id_handle.createMH(:model_name => :component),search_pattern_hash)
+      node_assembly_parts = Model.get_objects_from_sp_hash(new_id_handle.createMH(:model_name => :component),sp_hash)
       #TODO: probably move so can be used also when clone nodes dircetly into library
       attrs_to_null = Array.new
       node_assembly_parts.each do |r|

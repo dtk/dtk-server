@@ -21,7 +21,7 @@ module Ramaze::Helper
 
     def pending_create_node(parent_model_name,id_list)
       parent_field_name = XYZ::DB.parent_field(parent_model_name,:state_change)
-      search_pattern_hash = {
+      sp_hash = {
         :relation => :state_change,
         :filter => [:and,
                     [:oneof, parent_field_name,id_list],
@@ -29,12 +29,12 @@ module Ramaze::Helper
                     [:eq, :status, "pending"]],
         :columns => [:id,:relative_order,:type,:created_node,parent_field_name,:state_change_id].uniq
       }
-      get_objects_from_search_pattern_hash(search_pattern_hash)
+      get_objects_from_sp_hash(sp_hash)
     end
 
     def pending_install_component(parent_model_name,id_list)
       parent_field_name = XYZ::DB.parent_field(parent_model_name,:state_change)
-      search_pattern_hash = {
+      sp_hash = {
         :relation => :state_change,
         :filter => [:and,
                     [:oneof, parent_field_name, id_list],
@@ -42,12 +42,12 @@ module Ramaze::Helper
                     [:eq, :status, "pending"]],
         :columns => [:id, :relative_order,:type,:installed_component,parent_field_name,:state_change_id].uniq
       }
-      get_objects_from_search_pattern_hash(search_pattern_hash)
+      get_objects_from_sp_hash(sp_hash)
     end
 
     def pending_changed_attribute(parent_model_name,id_list)
       parent_field_name = XYZ::DB.parent_field(parent_model_name,:state_change)
-      search_pattern_hash = {
+      sp_hash = {
         :relation => :state_change,
         :filter => [:and,
                     [:oneof, parent_field_name, id_list],
@@ -55,7 +55,7 @@ module Ramaze::Helper
                     [:eq, :status, "pending"]],
         :columns => [:id, :relative_order,:type,:changed_attribute,parent_field_name,:state_change_id].uniq
       }      
-      get_objects_from_search_pattern_hash(search_pattern_hash)
+      get_objects_from_sp_hash(sp_hash)
     end
 
     def remove_duplicate_and_add_same_component_types(state_changes)

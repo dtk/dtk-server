@@ -4,8 +4,8 @@ module Ramaze::Helper
    private
 
     #query helpers
-    def get_objects_from_search_pattern_hash(hash)
-      Model.get_objects_from_search_pattern_hash(ModelHandle.new(ret_session_context_id(),hash[:relation]),hash)
+    def get_objects_from_sp_hash(hash)
+      Model.get_objects_from_sp_hash(ModelHandle.new(ret_session_context_id(),hash[:relation]),hash)
     end
 
     #helpers that interact with model

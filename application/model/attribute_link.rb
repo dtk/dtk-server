@@ -174,12 +174,12 @@ module XYZ
       return Hash.new if output_attr_id_handles.empty?
       attr_mh = output_attr_id_handles.first.createMH()
       output_attr_ids = output_attr_id_handles.map{|idh|idh.get_id()}
-      search_pattern_hash = {
+      sp_hash = {
         :relation => :attribute,
         :filter => [:and,[:oneof, :id, output_attr_ids]],
         :columns => [:id,:value_asserted,:value_derived,:semantic_type,:linked_attributes]
       }
-      attrs_to_update = Model.get_objects_from_search_pattern_hash(attr_mh,search_pattern_hash)
+      attrs_to_update = Model.get_objects_from_sp_hash(attr_mh,sp_hash)
     
       #dont propagate to attributes with asserted values TODO: push this restriction into search pattern
       attrs_to_update.reject!{|r|(r[:attribute2]||{})[:value_asserted]}

@@ -778,24 +778,27 @@ POSSIBLE CHANGES TO HASH
       hash = explicit_hash || request.params
 
       library_id_handle = id_handle(hash["library_id"].to_i,:library)
+      name = hash["name"] || "assembly"
       create_hash = {
         :component => {
-          hash["name"] => {
-            :display_name => hash["name"],
+          name => {
+            :display_name => name,
             :type => "composite"
           }
         }
       }
 #TODO: getting json rather than hash
 item_list = JSON.parse(hash["item_list"])
-      id_handles = item_list.map{|item|id_handle(item["id"].to_i,item["model"].to_sym)}
-      connected_links,dangling_links = Node.get_external_connected_port_links(id_handles)
-pp [:connected_links,connected_links]
-pp [:dangling_links,dangling_links]
-      return {:content => nil}
+      node_id_handles = item_list.map{|item|id_handle(item["id"].to_i,item["model"].to_sym)}
+      connected_links,dangling_links = Node.get_external_connected_port_links(node_id_handles)
+      #TODO: raise error to user if dangling link
+      Log.error("dangling links #{dangling_links.inspect}") unless dangling_links.empty?
+      link_id_handles = connected_links.map{|link|link.id_handle}
+
       assembly_id = Component.create_from_hash(library_id_handle,create_hash).first[:id]
       assembly_id_handle = id_handle(assembly_id,:component)
 
+      id_handles = node_id_handles + link_id_handles
       Component.clone__top_object_exists(assembly_id_handle,id_handles,library_id_handle)
       return {:content => nil}
     end

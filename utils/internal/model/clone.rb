@@ -16,13 +16,25 @@ module XYZ
 
       proc = CloneCopyProcessor.new(self,opts.merge(:include_children => true))
       proc.add_id_handle(top_object_id_handle)
-      #TODO: assembly_id shoudl not be hard  coded
-      child_context = proc.ret_child_context(id_handles,target_id_handle,{:assembly_id => top_object_id_handle.get_id()}) 
-      clone_copy_output = proc.clone_copy_child_objects(child_context)
 
-      new_id_handle = clone_copy_output.id_handles.first
-      raise Error.new("cannot clone") unless new_id_handle
-      #calling with respect to target
+      #group id handles by model type
+      ndx_id_handle_groups = Hash.new
+      id_handles.each do |idh|
+        model_name = idh[:model_name]
+        ndx_id_handle_groups[model_name] ||= Array.new
+        ndx_id_handle_groups[model_name] << idh
+      end
+
+      #TODO: assembly_id should not be hard  coded
+      overrides = {:assembly_id => top_object_id_handle.get_id()}
+      ndx_id_handle_groups.each_value do |child_id_handles|
+        child_context = proc.ret_child_context(child_id_handles,target_id_handle,overrides)
+        proc.clone_copy_child_objects(child_context)
+      end
+
+      proc.shift_foregn_keys()
+      clone_copy_output = proc.output
+
       model_class(target_id_handle[:model_name]).clone_post_copy_hook(clone_copy_output,target_id_handle,opts)
       return top_object_id_handle.get_id()
     end
@@ -93,6 +105,15 @@ module XYZ
         @db = parent.db
         @ret = CloneCopyOutput.new(opts)
       end
+
+      def output()
+        @ret
+      end
+
+      def shift_foregn_keys()
+        fk_info.shift_foregn_keys()
+      end
+
       #copy part of clone
       #targets is a list of id_handles, each with same model_name 
       def clone_copy(source_id_handle,targets,recursive_override_attrs={})

@@ -1,10 +1,6 @@
 module XYZ
   class Library < Model
-    set_relation_name(:library,:library)
-   def self.up()
-      #no table specfic fields (yet)
-      one_to_many :component, :node, :component_def, :node_group, :node_group_member, :attribute_link, :network_partition, :network_gateway, :region,:assoc_region_network, :data_source, :search_object
-    end
+#    set_relation_name(:library,:library)
 
     ##### Actions
     def self.clone_post_copy_hook(clone_copy_output,target_id_handle,opts={})

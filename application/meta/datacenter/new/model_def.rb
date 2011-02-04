@@ -1,0 +1,26 @@
+{
+  :schema=>:datacenter,
+  :table=>:datacenter,
+  :columns=>{
+    :ancestor_id=> {
+      :type=>:bigint,
+      :foreign_key_rel_type=>:datacenter,
+      :on_delete=>:set_null,
+      :on_update=>:set_null
+    }
+  },
+  :virtual_columns=>{},
+  :many_to_one=>[],
+  :one_to_many=>
+  [
+   :data_source,
+   :node,
+   :state_change,
+   :node_group,
+   :node_group_member,
+   :attribute_link,
+   :network_partition,
+   :network_gateway,
+   :component
+  ]
+}

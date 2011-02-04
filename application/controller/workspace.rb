@@ -776,6 +776,8 @@ POSSIBLE CHANGES TO HASH
 
     def clone_assembly(explicit_hash=nil)
       hash = explicit_hash || request.params
+      #TODO: stub
+      icon_info = {"images" => {"display" => "generic-assembly.png","tiny" => "","tnail" => "generic-assembly.png"}}
 
       library_id_handle = id_handle(hash["library_id"].to_i,:library)
       name = hash["name"] || "assembly"
@@ -783,6 +785,7 @@ POSSIBLE CHANGES TO HASH
         :component => {
           name => {
             :display_name => name,
+            :ui => icon_info,
             :type => "composite"
           }
         }

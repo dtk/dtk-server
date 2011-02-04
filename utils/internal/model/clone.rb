@@ -11,10 +11,10 @@ module XYZ
       return new_id_handle.get_id()
     end
 
-    def clone__top_object_exists(top_object_id_handle,id_handles,target_id_handle,override_attrs={},opts={})
-      add_model_specific_override_attrs!(override_attrs)
-
-      proc = CloneCopyProcessor.new(self,opts.merge(:include_children => true))
+    def clone__top_object_exists(top_object_id_handle,id_handles,target_id_handle)
+      #TODO: may add override attributes and opts
+      opts = {:include_children => true}
+      proc = CloneCopyProcessor.new(self,opts)
       proc.add_id_handle(top_object_id_handle)
 
       #group id handles by model type
@@ -35,7 +35,7 @@ module XYZ
       proc.shift_foregn_keys()
       clone_copy_output = proc.output
 
-      model_class(target_id_handle[:model_name]).clone_post_copy_hook(clone_copy_output,target_id_handle,opts)
+      model_class(target_id_handle[:model_name]).clone_post_copy_hook(clone_copy_output,target_id_handle)
       return top_object_id_handle.get_id()
     end
 

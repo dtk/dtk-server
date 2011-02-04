@@ -31,10 +31,10 @@ if(!R8.Dock) {
 									fixed_size: false,
 									min_height: 150,
 									min_width: 150,
-									max_height: 300,
-									max_width: 500,
-									width: 260,
-									height: 260
+									max_height: 700,
+									max_width: 700,
+									width: 560,
+									height: 560
 								}
 						},
 						{
@@ -649,8 +649,8 @@ var _footer ='<div class="corner bl"></div>\
 				YUI(YUI_config).use('overlay','node','event','dd','dd-proxy', function(Y) {
 				    _overlay = new Y.Overlay({
 				        srcNode:'#'+_id+'-modal',
-				        width:_modalCfg['width']+'px',
-				        height:_modalCfg['height']+'px',
+						width:_modalCfg['width']+'px',
+						height:_modalCfg['height']+'px',
 //						bodyContent: '<div class="body">this is a test</div>',
 //				        width:_modalWidth+'px',
 //				        height:_modalHeight+'px',
@@ -677,6 +677,12 @@ var _footer ='<div class="corner bl"></div>\
 */
 				    _overlay.render();
 					_modalNode.get('parentNode').setStyle('display','none');
+
+					Y.all('#'+_id+'-modal .width-resizer').each(function(){
+						var innerWidth = _modalCfg['width'] - 10;
+						this.setStyle('width',innerWidth+'px');
+					});
+
 //					_modalNode = R8.Utils.Y.one('#'+modalId+'-modal');
 //					_modalNode.addClass('panel-modal');
 

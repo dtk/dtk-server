@@ -26,6 +26,15 @@ module XYZ
       @db_rel[:virtual_columns] = {}
       @db_rel[:model_class] = self
     end
+
+    def up()
+      model_def_fn = "#{R8::Config[:meta_templates_root]}/#{model_name()}/new/model_def.rb"
+      raise Error.new("cannot find model def file #{model_def_fn} for #{model_name()}") unless  File.exists?(model_def_fn)
+      model_def = eval(IO.read(model_def_fn)) 
+      relation_name_info = [model_def[:schema]].compact + [model_def[:table]]
+      set_relation_name(*relation_name_info)
+      model_def.each{|k,v|@db_rel[k]=v} 
+    end
     
     attr_reader :db_rel
 

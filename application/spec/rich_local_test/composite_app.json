@@ -459,7 +459,6 @@
           }
         }
       },
-      "display_name": "dc1",
       "data_source": {
         "ec2": {
           "data_source_entry": {

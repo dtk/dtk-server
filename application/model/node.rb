@@ -7,7 +7,8 @@ module XYZ
       ds_column_defs :ds_attributes, :ds_key, :data_source, :ds_source_obj_type
       external_ref_column_defs()
 
-      column :tag,  :varchar
+      column :tag, :varchar
+      #TODO: may change types; by virtue of being in alibrary we know about item; may need to distingusih between backed images versus barbones one; also may only treat node constraints with search objects
       column :type, :varchar, :size => 25, :default => "instance" # | "image" | "staged" | "constraint" | "contraint-common-node"
       column :os, :varchar, :size => 25
       #TODO: is_deployed may just be a virtual column that tests if :external_ref is null

@@ -1,6 +1,17 @@
 {
  "library" : {
    "test" : {
+     "node": {
+       "ami-ee38c987": {
+ 	 "ui": {
+           "images": {
+              "tnail": "ubuntu.png",
+              "tiny": "",
+              "display": "ubuntu.png"
+           }
+	 }
+       }	    
+     },
      "component": {
 	"php__php5" : {
           "ui": "{\"images\": {\"tnail\":\"php.png\",\"display\":\"php.png\",\"tiny\":\"\"}}"
@@ -12,7 +23,8 @@
           "ui": "{\"images\": {\"tnail\":\"wordpress.png\",\"display\":\"wordpress.png\",\"tiny\":\"\"}}"
 	},	
         "user_account": {
-          "ui": "{\"images\": {\"tnail\":\"user.png\",\"display\":\"user.png\",\"tiny\":\"\"}}"
+          "ui": "{\"images\": {\"tnail\":\"user.png\",\"display\":\"user.png\",\"tiny\":\"\"}}",
+	  "only_one_per_node": false
         },
         "hadoop__pig": {
           "ui": "{\"images\": {\"tnail\":\"hadoop-pig.png\",\"display\":\"hadoop-pig.png\",\"tiny\":\"\"}}"

@@ -5,17 +5,16 @@ module XYZ
       def up()
         ds_column_defs :ds_attributes, :ds_key
         external_ref_column_defs()
-        column :type, :varchar, :size => 15 # instance | template | composite
+        column :component_type, :varchar #this will reflect whether component is apache, mysql etc and will enable display_name to be modified by user
+        column :type, :varchar, :size => 15 # instance | composite
         #TODO: is 'user" a well defined basic type?
         column :basic_type, :varchar, :size => 15 # service | package | language | application | client | feature | user ..
         column :only_one_per_node, :boolean, :default => true
         column :version, :varchar, :size => 25 # version of underlying component (not chef recipe .... version)
         column :uri, :varchar
         column :ui, :json
-        #constraint_node_id is used when items in library to point to a node of type contraint or contraint-common-node
-        #in library parent niode is used to link to image
-        #in datacenter constraint_node_id will be null and if parent is a node it will have type instance or staged
-        foreign_key :constraint_node_id, :node, FK_SET_NULL_OPT
+        foreign_key :node_constraint_id, :search_object, FK_SET_NULL_OPT #search object that is constraint on node component can be placed on
+
 
         #:assembly_id (in contrast to parent field :component_id) is for tieing teh component to a composite component which is not a container
         foreign_key :assembly_id, :component, FK_SET_NULL_OPT

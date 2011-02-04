@@ -3,9 +3,10 @@ module XYZ
     class Chef
       class ComponentRecipe < Top
         definitions do
-          target[:type] = "template"
+          target[:type] = "instance"
           target[:basic_type] = fn(:basic_type,source["basic_type"])
           name = source["recipe_name"]
+          target[:component_type] = fn(:component_type,name)
           target[:display_name] = fn(:display_name,name)
           target[:description] = source["description"]
           target[:external_ref] = fn(:external_ref,name)
@@ -22,6 +23,9 @@ module XYZ
             source["recipe_name"].gsub(/::/,name_delimiter())
           end
           def display_name(recipe_name)
+            recipe_name.gsub(/::/,name_delimiter())
+          end
+          def component_type(recipe_name)
             recipe_name.gsub(/::/,name_delimiter())
           end
           def external_ref(recipe_name)

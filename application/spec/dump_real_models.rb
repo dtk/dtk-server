@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+#complete hack, but is aux fn
 root = File.expand_path('../', File.dirname(__FILE__))
 require root + '/app'
 #utils/internal/serialize_to_json.rb
@@ -39,9 +40,9 @@ ordered_top_level_keys =
    :schema,
    :table,
    :columns,
-   :virtual_columns,
    :many_to_one,
-   :one_to_many
+   :one_to_many,
+   :virtual_columns,
   ]
 
 next_level_keys = {
@@ -59,13 +60,38 @@ next_level_keys = {
   :virtual_columns=>
   [
    :type,
-   :remote_dependencies,
    :hidden,
-   :possible_parents,
    :local_dependencies,
    :sql_fn,
-   :path]
+   :possible_parents,
+   :path,
+   :remote_dependencies
+  ]
 }
+
+RemoteDepCols = 
+  [
+   :model_name,
+   :alias,
+   :sequel_def,
+   :convert,
+   :join_type,
+   :filter,
+   :join_cond,
+   :cols
+  ]
+
+def proc_remote_dep(rem_dep)
+  conditions = rem_dep.kind_of?(Array) ? rem_dep : rem_dep.values.first
+  proc_conditions = conditions.map do |cond|
+    ordered_hash = ActiveSupport::OrderedHash.new()
+    RemoteDepCols.each do |k|
+      ordered_hash[k] = cond[k] if cond.has_key?(k)
+    end
+    ordered_hash
+  end
+  rem_dep.kind_of?(Array) ? proc_conditions : {rem_dep.keys.first => proc_conditions}
+end
 
 
 DB_REL_DEF.each do |model_name,info|
@@ -78,7 +104,11 @@ DB_REL_DEF.each do |model_name,info|
       val = Hash.new
       info[k].each do |nk,nv|
         nested_oh = ActiveSupport::OrderedHash.new()
-        next_level.each{|nlk|nested_oh[nlk] = nv[nlk] if nv.has_key?(nlk)}
+        next_level.each do |nlk|
+          if nv.has_key?(nlk)
+            nested_oh[nlk] = (nlk == :remote_dependencies ? proc_remote_dep(nv[nlk]) : nv[nlk])  
+          end
+        end
         val[nk] = nested_oh
       end
     end
@@ -87,6 +117,7 @@ DB_REL_DEF.each do |model_name,info|
   pp ordered_hash
   puts "------------------------------------------------------"
 end
+
 
 
 

@@ -61,7 +61,7 @@ module XYZ
            :convert => true,
            :join_cond=>{:input_id =>q(:attribute,:id)},
            :join_type => :inner,
-           :cols => [:id,:type,{:output_id => :other_end_output_id},:input_id,id(:node)]
+           :cols => [:id,:type,:input_id,:output_id,id(:node)]
          }]
 
       virtual_column :output_port_links, :type => :json, :hidden => true, 
@@ -72,7 +72,7 @@ module XYZ
            :convert => true,
            :join_cond=>{:output_id =>q(:attribute,:id)},
            :join_type => :inner,
-           :cols => [:id,:type,:hidden,{:input_id => :other_end_input_id},:output_id,id(:node)]
+           :cols => [:id,:type,:input_id,:output_id,id(:node)]
          }]
 
         virtual_column :has_pending_change, :type => :boolean, :hidden => true,
@@ -218,19 +218,41 @@ module XYZ
       input_port_rows.each do |r|
         id = r[:id]
         indexed_ret[id] ||= r.subset(:id, :display_name).merge(:input_port_links => Array.new, :output_port_links => Array.new)
-pp [:foo,r[:attribute_link].class]
         indexed_ret[id][:input_port_links] << r[:attribute_link]
       end
       output_port_rows.each do |r|
         id = r[:id]
         indexed_ret[id] ||= r.subset(:id, :display_name).merge(:output_port_links => Array.new, :output_port_links => Array.new)
         indexed_ret[id][:output_port_links] << r[:attribute_link]
-pp [:foo,r[:attribute_link].class]
       end
       indexed_ret.values
     end
 
-    def self.get_conneected_port_links(id_handles,opts={})
+    #returns [connected_links,dangling_links]
+    def self.get_external_connected_port_links(id_handles)
+      ret = [Array.new,Array.new]
+
+      in_port_cols = [:id, :display_name, :input_port_links]
+      ndx_in_links = Hash.new
+      get_objects_in_set_from_sp_hash(id_handles,:columns => in_port_cols).each do |r|
+        link = r[:attribute_link]
+        ndx_in_links[link[:id]] = link if link[:type] == "external"
+      end
+
+      out_port_cols = [:id, :display_name, :output_port_links]
+      ndx_out_links = Hash.new
+      get_objects_in_set_from_sp_hash(id_handles,:columns => out_port_cols).each do |r|
+        link = r[:attribute_link]
+        ndx_out_links[link[:id]] = link if link[:type] == "external"
+      end
+
+      return ret if ndx_in_links.empty? and ndx_out_links.empty?
+
+      connected_links = (ndx_in_links.keys & ndx_out_links.keys).map{|id|ndx_in_links[id]}
+
+      dangling_links = (ndx_in_links.keys - ndx_out_links.keys).map{|id|ndx_in_links[id]}
+      dangling_links += (ndx_out_links.keys - ndx_in_links.keys).map{|id|ndx_out_links[id]}
+      [connected_links,dangling_links]
     end
 
     def self.add_model_specific_override_attrs!(override_attrs)

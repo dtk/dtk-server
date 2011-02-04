@@ -789,8 +789,9 @@ POSSIBLE CHANGES TO HASH
 #TODO: getting json rather than hash
 item_list = JSON.parse(hash["item_list"])
       id_handles = item_list.map{|item|id_handle(item["id"].to_i,item["model"].to_sym)}
-      links = Node.get_port_links(id_handles)
-pp [:links,links]
+      connected_links,dangling_links = Node.get_external_connected_port_links(id_handles)
+pp [:connected_links,connected_links]
+pp [:dangling_links,dangling_links]
       return {:content => nil}
       assembly_id = Component.create_from_hash(library_id_handle,create_hash).first[:id]
       assembly_id_handle = id_handle(assembly_id,:component)

@@ -58,6 +58,10 @@ module XYZ
   class IDHandle < Hash
     include CommonMixin
 
+    def create_object()
+      Model.model_class(self[:model_name]).new({:id => get_id()},self[:c])
+    end
+
     def get_id()
       (IDInfoTable.get_row_from_id_handle(self,:short_circuit_for_minimal_row => true)||{})[:id]
     end

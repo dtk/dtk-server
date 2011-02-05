@@ -3,7 +3,9 @@ module XYZ
     helper :i18n_string_mapping
 
     def dock_edit(component_id)
-#How is create object from id knowing its component?
+#TODO: test
+pp ModelDefProcessor.get_component(id_handle(component_id))
+
       component = create_object_from_id(component_id)
       flattened_attr_list = component.get_attributes_unraveled()
 

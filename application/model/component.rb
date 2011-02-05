@@ -25,8 +25,9 @@ module XYZ
          {
            :model_name => :attribute,
            :join_type => :left_outer,
+           :convert => true,
            :join_cond=>{:component_component_id => q(:component,:id)}, #TODO: want to use p(:component,:attribute) on left hand side
-           :cols => [:id,:display_name,:component_component_id,:value_derived,:value_asserted,:semantic_type,:semantic_type_summary]
+           :cols => [:id,:display_name,:component_component_id,:value_derived,:value_asserted,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
          }
         ]
 
@@ -117,7 +118,15 @@ module XYZ
       ((self[:state_change]||{})[:count]||0) > 0 or ((self[:state_change2]||{})[:count]||0) > 0
     end
     #######################
-    ### object procssing and access functions
+    ### object processing and access functions
+    def get_component_with_attributes_unraveled()
+      sp_hash = {:columns => [:id,:display_name,:component_type,:basic_type,:attributes]}
+      component_and_attrs = get_objects_from_sp_hash(sp_hash)
+      return nil if component_and_attrs.empty?
+      component = component_and_attrs.first.subset(:id,:display_name,:component_type,:basic_type)
+      component.merge(:attributes => AttributeComplexType.flatten_attribute_list(component_and_attrs.map{|r|r[:attribute]}))
+    end
+
     def get_attributes_unraveled()
       sp_hash = {
         :filter => [:and, 

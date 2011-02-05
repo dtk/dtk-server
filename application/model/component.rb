@@ -124,6 +124,8 @@ module XYZ
       component_and_attrs = get_objects_from_sp_hash(sp_hash)
       return nil if component_and_attrs.empty?
       component = component_and_attrs.first.subset(:id,:display_name,:component_type,:basic_type)
+      #if component_and_attrs.first[:attribute] null teher shoudl only be one element in component_and_attrs
+      return component.merge(:attributes => Array.new) unless component_and_attrs.first[:attribute]
       component.merge(:attributes => AttributeComplexType.flatten_attribute_list(component_and_attrs.map{|r|r[:attribute]}))
     end
 

@@ -15,14 +15,27 @@ module XYZ
       end
 
       #key can be symbol or of form {symbol => symbol} 
-      def hash_subset(hash,keys)
-        keys.inject({}) do |ret,k|
-          key = k.kind_of?(Hash) ? k.values.first : k
+      def hash_subset(hash,keys,&block)
+        hash_subset_aux(Hash.new(),hash,keys,&block)
+      end
+      def ordered_hash_subset(hash,keys,&block)
+        hash_subset_aux(ActiveSupport::OrderedHash.new(),hash,keys,&block)
+      end
+     private
+      def hash_subset_aux(seed,hash,keys,&block)
+        keys.inject(seed) do |ret,k|
           index = k.kind_of?(Hash) ? k.keys.first : k
-          ret.merge(key => hash[index])
+          unless hash.has_key?(index)
+            ret
+          else
+            key = k.kind_of?(Hash) ? k.values.first : k
+            val = block ? block.call(hash[index]) : hash[index] 
+            ret.merge(key => val)
+          end
         end
       end
 
+     public
       def ret_key(key_value)
         return nil unless key_value.kind_of?(Hash)
         key_value.keys.first
@@ -237,3 +250,22 @@ private
    end
 end
 
+#monkey patch
+module ActiveSupport
+  class OrderedHash < ::Hash
+    def pretty_print(q)
+#      q.group(0, "#<OrderedHash", "}>") {
+      q.group(0,"","}") {
+#        q.breakable " "
+        q.text "{"
+        q.group(1) {
+          q.seplist(self) {|pair|
+            q.pp pair.first
+            q.text "=>"
+            q.pp pair.last
+          }
+        }
+      }
+    end
+  end
+end

@@ -33,5 +33,92 @@
     }
   },
   :many_to_one=>[:datacenter, :state_change],
-  :one_to_many=>[:state_change]
+  :one_to_many=>[:state_change],
+  :virtual_columns=>{
+    :installed_component=>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [{
+         :model_name=>:component,
+         :join_type=>:inner,
+         :join_cond=>{:id=>:state_change__component_id},
+         :cols=>[:id,:display_name,:basic_type,:external_ref,:node_node_id,:only_one_per_node]
+       },
+       {
+         :model_name=>:node,
+         :join_type=>:inner,
+         :join_cond=>{:id=>:component__node_node_id},
+         :cols=>[:id, :display_name, :external_ref]
+       },
+       {
+         :model_name=>:component,
+         :alias=>:component_same_type,
+         :join_type=>:left_outer,
+         :filter=>[:and, [:eq, :only_one_per_node, false]],
+         :join_cond=>{:external_ref=>:component__external_ref,:node_node_id=>:component__node_node_id},
+         :cols=>[:id,:display_name,:external_ref,:node_node_id,:only_one_per_node]
+       }]
+    },
+    :changed_attribute=>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [{
+         :model_name=>:attribute,
+         :join_type=>:inner,
+         :join_cond=>{:id=>:state_change__attribute_id},
+         :cols=>[:id, :component_component_id, :display_name, :value_asserted]
+       },
+       {
+         :model_name=>:component,
+         :join_type=>:inner,
+         :join_cond=>{:id=>:attribute__component_component_id},
+         :cols=>[:id,:display_name,:basic_type,:external_ref,:node_node_id,:only_one_per_node]
+       },
+       {
+         :model_name=>:node,
+         :join_type=>:inner,
+         :join_cond=>{:id=>:component__node_node_id},
+         :cols=>[:id, :display_name, :external_ref]
+       },
+       {
+         :model_name=>:component,
+         :alias=>:component_same_type,
+         :join_type=>:left_outer,
+         :filter=>[:and, [:eq, :only_one_per_node, false]],
+         :join_cond=>{:external_ref=>:component__external_ref,:node_node_id=>:component__node_node_id},
+         :cols=>[:id,:display_name,:external_ref,:node_node_id,:only_one_per_node]
+       }]
+    },
+    :created_node=>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [{
+         :model_name=>:node,
+         :join_type=>:inner,
+         :join_cond=>{:id=>:state_change__node_id},
+         :cols=>[:id,:display_name,:external_ref,:datacenter_datacenter_id,:ancestor_id]
+       },
+       {
+         :model_name=>:datacenter,
+         :join_type=>:inner,
+         :join_cond=>{:id=>:node__datacenter_datacenter_id},
+         :cols=>[:id, :display_name]},
+       {
+         :model_name=>:node,
+         :alias=>:image,
+         :join_type=>:inner,
+         :join_cond=>{:id=>:node__ancestor_id},
+         :cols=>[:id, :display_name, :external_ref]
+       }]
+    },
+    :parent_name=>{
+      :possible_parents=>[:datacenter, :state_change]
+    },
+    :old_value=>{:path=>[:change, :old]},
+    :qualified_parent_name=>{:type=>:varchar, :local_dependencies=>[:base_object]},
+    :new_value=>{:path=>[:change, :new]}
+  }
 }

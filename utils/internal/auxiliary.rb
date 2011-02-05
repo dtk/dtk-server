@@ -29,7 +29,14 @@ module XYZ
             ret
           else
             key = k.kind_of?(Hash) ? k.values.first : k
-            val = block ? block.call(hash[index]) : hash[index] 
+            val = 
+              if block and block.arity == 1
+                block.call(hash[index])
+              elsif block and block.arity == 2
+                block.call(key,hash[index])
+              else  
+                hash[index]
+              end
             ret.merge(key => val)
           end
         end

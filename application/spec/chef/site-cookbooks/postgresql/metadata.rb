@@ -10,6 +10,8 @@ recipe            "postgresql::server", "Installs postgresql server packages, te
 recipe            "postgresql::redhat", "Installs postgresql server packages, redhat family style"
 recipe            "postgresql::server", "Installs postgresql server packages, debian family style"
 recipe            "postgresql::app", "Test app"
+recipe            "postgresql::db", "Postgresql DB"
+recipe            "postgresql::single_tenant", "Postgresql single tenant client"
 
 %w{rhel centos fedora ubuntu debian suse}.each do |os|
   supports os

@@ -49,6 +49,12 @@
           "ui": "{\"images\": {\"tnail\":\"postgres.png\",\"display\":\"postgres.png\",\"tiny\":\"\"}}",
 	  "basic_type": "application"
         },
+	 "postgresql__db": {
+	  "basic_type": "service"
+        },
+	 "postgresql__single_tenant": {
+	  "basic_type": "application"
+        },
 	"hadoop__hive": {
           "ui": "{\"images\": {\"tnail\":\"hadoop-hive.png\",\"display\":\"hadoop-hive.png\",\"tiny\":\"\"}}",
 	  "basic_type": "service"

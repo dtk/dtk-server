@@ -21,17 +21,17 @@ module XYZ
              DBUpdateHash.new()
            end
 
-           #TODO" use aux fns
            def relative_distinguished_name(source)
              split = source[:ref].split("/")
-             split.join("][") + (split.size == 1 ? "" : "]")
+             split.shift if split.size > 1
+             split.join(name_delimiter())
            end
 
           #### defined and helper fns
            def display_name(source)
              split = source[:ref].split("/")
              split.shift if split.size > 1
-             Aux.put_in_bracket_form(split)
+             split.join(name_delimiter())
            end
 
           def external_ref(source)

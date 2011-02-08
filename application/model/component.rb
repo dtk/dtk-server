@@ -8,7 +8,7 @@ module XYZ
         column :component_type, :varchar #this will reflect whether component is apache, mysql etc and will enable display_name to be modified by user
         column :type, :varchar, :size => 15 # instance | composite
         #TODO: is 'user" a well defined basic type?
-        column :basic_type, :varchar, :size => 15 # service | package | language | application | client | feature | user ..
+        column :basic_type, :varchar, :size => 15 # service | package | database_server | database | language | application | client | feature | user ..
         column :only_one_per_node, :boolean, :default => true
         column :version, :varchar, :size => 25 # version of underlying component (not chef recipe .... version)
         column :uri, :varchar

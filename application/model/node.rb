@@ -88,7 +88,7 @@ module XYZ
           }
          ]
 
-      virtual_column :users, :type => :jsob, :hidden => true,
+      virtual_column :users, :type => :json, :hidden => true,
       :remote_dependencies => 
         [
          {
@@ -110,16 +110,13 @@ module XYZ
       applications =  {
         :model_name => :component,
         :join_type => :inner,
-        :filter => [:or,
-                    [:eq, :basic_type, "application"],
-                    [:eq, :basic_type, "service"],
-                    [:eq, :basic_type, "client"]],
+        :filter => [:and,[:oneof, :basic_type, ["application", "database_server", "database", "service", "client"]]],
         :join_cond=>{:node_node_id => q(:node,:id)},
         :cols=>[:id,:node_node_id,:display_name,:ui]
       }
-      virtual_column :applications, :type => :jsob, :hidden => true,
+      virtual_column :applications, :type => :json, :hidden => true,
       :remote_dependencies => [applications]
-      virtual_column :applications_with_attrs, :type => :jsob, :hidden => true,
+      virtual_column :applications_with_attrs, :type => :json, :hidden => true,
       :remote_dependencies => 
         [
          applications,

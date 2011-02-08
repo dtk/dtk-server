@@ -39,7 +39,7 @@
         },
 	"postgresql__server": {
           "ui": "{\"images\": {\"tnail\":\"postgres.png\",\"display\":\"postgres.png\",\"tiny\":\"\"}}",
-	  "basic_type": "service"
+	  "basic_type": "database_server"
         },
 	 "postgresql__client": {
           "ui": "{\"images\": {\"tnail\":\"postgres.png\",\"display\":\"postgres.png\",\"tiny\":\"\"}}",
@@ -50,7 +50,7 @@
 	  "basic_type": "application"
         },
 	 "postgresql__db": {
-	  "basic_type": "service"
+	  "basic_type": "database"
         },
 	 "postgresql__single_tenant": {
 	  "basic_type": "application"
@@ -93,7 +93,8 @@
 	  "basic_type": "feature"
         },
 	"mysql__server": {
-          "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}"
+          "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}",
+	  "basic_type": "database_server"
         },
 	"redis": {
           "ui": "{\"images\": {\"tnail\":\"redis.png\",\"display\":\"redis.png\",\"tiny\":\"\"}}"

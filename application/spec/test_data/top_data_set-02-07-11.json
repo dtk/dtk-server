@@ -10,6 +10,12 @@
       "node": {
         "ami-ee38c987": {
           "type": "image",
+          "node_interface": {
+            "eth0": {
+              "type": "ethernet",
+              "display_name": "eth0"
+            }
+          },
           "ui": {
             "images": {
               "tiny": "",
@@ -55,12 +61,6 @@
             }
           },
           "ds_key": "[:user_data, \"/library/test/ami-ee38c987\"]",
-          "node_interface": {
-            "eth0": {
-              "type": "ethernet",
-              "display_name": "eth0"
-            }
-          },
           "ds_source_obj_type": "image",
           "display_name": "ami-ee38c987",
           "data_source": "user_data",
@@ -89,35 +89,35 @@
           },
           "is_deployed": true,
           "ds_attributes": {
-            "virtualizationType": "paravirtual",
+            "root_device_type": "ebs",
             "type": "machine",
+            "block_device_mapping": [
+              {
+                "snapshotId": "snap-f9179794",
+                "deviceName": "/dev/sda1",
+                "deleteOnTermination": "true",
+                "volumeSize": 8
+              }
+            ],
+            "is_public": false,
             "flavor": {
               "disk": null
             },
             "description": null,
             "state": "available",
-            "product_codes": [
-
-            ],
+            "virtualizationType": "paravirtual",
             "tags": {
             },
-            "root_device_name": "/dev/sda1",
-            "root_device_type": "ebs",
-            "block_device_mapping": [
-              {
-                "deviceName": "/dev/sda1",
-                "deleteOnTermination": "true",
-                "volumeSize": 8,
-                "snapshotId": "snap-f9179794"
-              }
+            "product_codes": [
+
             ],
             "location": "411986592491/rnp-chef-09-12-mcollective-1-0-ubuntu-lucid-x86_32",
             "name": "rnp-chef-09-12-mcollective-1-0-ubuntu-lucid-x86_32",
             "architecture": "i386",
-            "is_public": false,
             "kernel_id": "aki-3af50453",
             "id": "ami-ee38c987",
-            "owner_id": "411986592491"
+            "owner_id": "411986592491",
+            "root_device_name": "/dev/sda1"
           }
         }
       },
@@ -180,7 +180,7 @@
             }
           },
           "ds_name": "user_data",
-          "last_collection_timestamp": "Mon Feb 07 22:16:51 +0000 2011",
+          "last_collection_timestamp": "Tue Feb 08 16:06:05 +0000 2011",
           "display_name": "user_data"
         }
       },
@@ -197,12 +197,12 @@
           },
           "ds_key": "[:user_data, \"/library/test/hadoop__pig\"]",
           "description": "Installs hadoop's pig package",
+          "only_one_per_node": true,
           "display_name": "hadoop__pig",
           "external_ref": {
             "type": "chef_recipe",
             "recipe_name": "hadoop::pig"
           },
-          "only_one_per_node": true,
           "component_type": "hadoop__pig",
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"hadoop-pig.png\",\"display\":\"hadoop-pig.png\",\"tiny\":\"\"}}",
@@ -223,6 +223,7 @@
           },
           "ds_key": "[:user_data, \"/library/test/hadoop_cloudera_c3\"]",
           "description": "Installs hadoop from Cloudera's repo",
+          "only_one_per_node": true,
           "display_name": "hadoop_cloudera_c3",
           "attribute": {
             "jmxremote_password": {
@@ -258,7 +259,6 @@
             "type": "chef_recipe",
             "recipe_name": "hadoop_cloudera_c3"
           },
-          "only_one_per_node": true,
           "component_type": "hadoop_cloudera_c3",
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"cloudera.png\",\"display\":\"cloudera.png\",\"tiny\":\"\"}}",
@@ -272,6 +272,7 @@
           "type": "instance",
           "ds_key": "[:user_data, \"/library/test/postgresql__db\"]",
           "description": "Postgresql DB",
+          "only_one_per_node": true,
           "display_name": "postgresql__db",
           "attribute": {
             "db_config": {
@@ -307,14 +308,13 @@
             "type": "chef_recipe",
             "recipe_name": "postgresql::db"
           },
-          "only_one_per_node": true,
           "component_type": "postgresql__db",
           "ds_attributes": {
             "ref": "postgresql__db",
             "qualified_ref": "/library/test/postgresql__db",
-            "basic_type": "service"
+            "basic_type": "database"
           },
-          "basic_type": "service"
+          "basic_type": "database"
         },
         "php__php5": {
           "type": "instance",
@@ -327,12 +327,12 @@
           },
           "ds_key": "[:user_data, \"/library/test/php__php5\"]",
           "description": "Install php5 packages and php.ini config file",
+          "only_one_per_node": true,
           "display_name": "php__php5",
           "external_ref": {
             "type": "chef_recipe",
             "recipe_name": "php::php5"
           },
-          "only_one_per_node": true,
           "component_type": "php__php5",
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"php.png\",\"display\":\"php.png\",\"tiny\":\"\"}}",
@@ -353,6 +353,7 @@
           },
           "ds_key": "[:user_data, \"/library/test/wordpress\"]",
           "description": "Installs and configures wordpress LAMP stack on a single system",
+          "only_one_per_node": true,
           "display_name": "wordpress",
           "attribute": {
             "db__user": {
@@ -545,7 +546,6 @@
             "type": "chef_recipe",
             "recipe_name": "wordpress"
           },
-          "only_one_per_node": true,
           "component_type": "wordpress",
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"wordpress.png\",\"display\":\"wordpress.png\",\"tiny\":\"\"}}",
@@ -566,6 +566,7 @@
           },
           "ds_key": "[:user_data, \"/library/test/mysql__slave\"]",
           "description": "For extending mysql server to serve as a slave",
+          "only_one_per_node": true,
           "display_name": "mysql__slave",
           "attribute": {
             "sap_ref_to_master": {
@@ -613,7 +614,6 @@
             "type": "chef_recipe",
             "recipe_name": "mysql::slave"
           },
-          "only_one_per_node": true,
           "component_type": "mysql__slave",
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}",
@@ -633,6 +633,7 @@
           },
           "ds_key": "[:user_data, \"/library/test/postgresql__app\"]",
           "description": "Test app",
+          "only_one_per_node": true,
           "display_name": "postgresql__app",
           "attribute": {
             "sap_ref": {
@@ -663,7 +664,6 @@
             "type": "chef_recipe",
             "recipe_name": "postgresql::app"
           },
-          "only_one_per_node": true,
           "component_type": "postgresql__app",
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"postgres.png\",\"display\":\"postgres.png\",\"tiny\":\"\"}}",
@@ -684,12 +684,12 @@
           },
           "ds_key": "[:user_data, \"/library/test/hadoop__hive\"]",
           "description": "Installs hadoop's hive package",
+          "only_one_per_node": true,
           "display_name": "hadoop__hive",
           "external_ref": {
             "type": "chef_recipe",
             "recipe_name": "hadoop::hive"
           },
-          "only_one_per_node": true,
           "component_type": "hadoop__hive",
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"hadoop-hive.png\",\"display\":\"hadoop-hive.png\",\"tiny\":\"\"}}",
@@ -710,6 +710,7 @@
           },
           "ds_key": "[:user_data, \"/library/test/postgresql__server\"]",
           "description": "Installs postgresql server packages, debian family style",
+          "only_one_per_node": true,
           "display_name": "postgresql__server",
           "attribute": {
             "sap_config_ipv4": {
@@ -748,15 +749,14 @@
             "type": "chef_recipe",
             "recipe_name": "postgresql::server"
           },
-          "only_one_per_node": true,
           "component_type": "postgresql__server",
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"postgres.png\",\"display\":\"postgres.png\",\"tiny\":\"\"}}",
             "ref": "postgresql__server",
             "qualified_ref": "/library/test/postgresql__server",
-            "basic_type": "service"
+            "basic_type": "database_server"
           },
-          "basic_type": "service"
+          "basic_type": "database_server"
         },
         "java": {
           "type": "instance",
@@ -769,12 +769,12 @@
           },
           "ds_key": "[:user_data, \"/library/test/java\"]",
           "description": "Installs openjdk to provide Java",
+          "only_one_per_node": true,
           "display_name": "java",
           "external_ref": {
             "type": "chef_recipe",
             "recipe_name": "java"
           },
-          "only_one_per_node": true,
           "component_type": "java",
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"java-01.png\",\"display\":\"java-01.png\",\"tiny\":\"\"}}",
@@ -788,6 +788,7 @@
           "type": "instance",
           "ds_key": "[:user_data, \"/library/test/postgresql__single_tenant\"]",
           "description": "Postgresql single tenant client",
+          "only_one_per_node": true,
           "display_name": "postgresql__single_tenant",
           "attribute": {
             "db_ref": {
@@ -818,7 +819,6 @@
             "type": "chef_recipe",
             "recipe_name": "postgresql::single_tenant"
           },
-          "only_one_per_node": true,
           "component_type": "postgresql__single_tenant",
           "ds_attributes": {
             "ref": "postgresql__single_tenant",
@@ -838,12 +838,12 @@
           },
           "ds_key": "[:user_data, \"/library/test/java_sun\"]",
           "description": "Installs Sun Java using preseed to accept terms",
+          "only_one_per_node": true,
           "display_name": "java_sun",
           "external_ref": {
             "type": "chef_recipe",
             "recipe_name": "java_sun"
           },
-          "only_one_per_node": true,
           "component_type": "java_sun",
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"java-01.png\",\"display\":\"java-01.png\",\"tiny\":\"\"}}",
@@ -862,8 +862,8 @@
             }
           },
           "ds_key": "[:user_data, \"/library/test/rabbitmq__edge\"]",
-          "display_name": "rabbitmq__edge",
           "only_one_per_node": true,
+          "display_name": "rabbitmq__edge",
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"rabbitmq.png\",\"display\":\"rabbitmq.png\",\"tiny\":\"\"}}",
             "ref": "rabbitmq__edge",
@@ -881,8 +881,8 @@
             }
           },
           "ds_key": "[:user_data, \"/library/test/rabbitmq__default\"]",
-          "display_name": "rabbitmq__default",
           "only_one_per_node": true,
+          "display_name": "rabbitmq__default",
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"rabbitmq.png\",\"display\":\"rabbitmq.png\",\"tiny\":\"\"}}",
             "ref": "rabbitmq__default",
@@ -902,12 +902,12 @@
           },
           "ds_key": "[:user_data, \"/library/test/hadoop\"]",
           "description": "Installs hadoop from Cloudera's repo",
+          "only_one_per_node": true,
           "display_name": "hadoop",
           "external_ref": {
             "type": "chef_recipe",
             "recipe_name": "hadoop"
           },
-          "only_one_per_node": true,
           "component_type": "hadoop",
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"hadoop.png\",\"display\":\"hadoop.png\",\"tiny\":\"\"}}",
@@ -946,6 +946,7 @@
           },
           "ds_key": "[:user_data, \"/library/test/hadoop_cloudera_c3__conf_pseudo\"]",
           "description": "Installs hadoop-conf-pseudo and enables hadoop services",
+          "only_one_per_node": true,
           "display_name": "hadoop_cloudera_c3__conf_pseudo",
           "attribute": {
             "jmxremote_password": {
@@ -981,7 +982,6 @@
             "type": "chef_recipe",
             "recipe_name": "hadoop_cloudera_c3::conf_pseudo"
           },
-          "only_one_per_node": true,
           "component_type": "hadoop_cloudera_c3__conf_pseudo",
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"cloudera.png\",\"display\":\"cloudera.png\",\"tiny\":\"\"}}",
@@ -1002,6 +1002,7 @@
           },
           "ds_key": "[:user_data, \"/library/test/nagios__client\"]",
           "description": "Installs and configures a nagios client with nrpe",
+          "only_one_per_node": true,
           "display_name": "nagios__client",
           "attribute": {
             "monitored_client_sap_config": {
@@ -1036,7 +1037,6 @@
             "type": "chef_recipe",
             "recipe_name": "nagios::client"
           },
-          "only_one_per_node": true,
           "component_type": "nagios__client",
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"nagios.png\",\"display\":\"nagios.png\",\"tiny\":\"\"}}",
@@ -1066,6 +1066,7 @@
           },
           "ds_key": "[:user_data, \"/library/test/mysql__server\"]",
           "description": "Installs packages required for mysql servers w/o manual intervention",
+          "only_one_per_node": true,
           "display_name": "mysql__server",
           "attribute": {
             "tunable__key_buffer": {
@@ -1345,14 +1346,14 @@
             "type": "chef_recipe",
             "recipe_name": "mysql::server"
           },
-          "only_one_per_node": true,
           "component_type": "mysql__server",
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}",
             "ref": "mysql__server",
-            "qualified_ref": "/library/test/mysql__server"
+            "qualified_ref": "/library/test/mysql__server",
+            "basic_type": "database_server"
           },
-          "basic_type": "service"
+          "basic_type": "database_server"
         },
         "postgresql__client": {
           "type": "instance",
@@ -1365,12 +1366,12 @@
           },
           "ds_key": "[:user_data, \"/library/test/postgresql__client\"]",
           "description": "Installs postgresql client package(s)",
+          "only_one_per_node": true,
           "display_name": "postgresql__client",
           "external_ref": {
             "type": "chef_recipe",
             "recipe_name": "postgresql::client"
           },
-          "only_one_per_node": true,
           "component_type": "postgresql__client",
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"postgres.png\",\"display\":\"postgres.png\",\"tiny\":\"\"}}",
@@ -1391,6 +1392,7 @@
           },
           "ds_key": "[:user_data, \"/library/test/user_account\"]",
           "description": "Installs a user account",
+          "only_one_per_node": true,
           "display_name": "user_account",
           "attribute": {
             "gid": {
@@ -1488,7 +1490,6 @@
             "type": "chef_recipe",
             "recipe_name": "user_account"
           },
-          "only_one_per_node": true,
           "component_type": "user_account",
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"user.png\",\"display\":\"user.png\",\"tiny\":\"\"}}",
@@ -1515,6 +1516,7 @@
           },
           "ds_key": "[:user_data, \"/library/test/apache2\"]",
           "description": "Main Apache configuration",
+          "only_one_per_node": true,
           "display_name": "apache2",
           "attribute": {
             "dir": {
@@ -1765,12 +1767,64 @@
             "type": "chef_recipe",
             "recipe_name": "apache2"
           },
-          "only_one_per_node": true,
           "component_type": "apache2",
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"apache.png\",\"display\":\"apache.png\",\"tiny\":\"\"}}",
             "ref": "apache2",
             "qualified_ref": "/library/test/apache2",
+            "basic_type": "service"
+          },
+          "basic_type": "service"
+        },
+        "nagios__server": {
+          "type": "instance",
+          "ui": {
+            "images": {
+              "tiny": "",
+              "tnail": "nagios.png",
+              "display": "nagios.png"
+            }
+          },
+          "ds_key": "[:user_data, \"/library/test/nagios__server\"]",
+          "description": "Installs and configures a nagios server",
+          "only_one_per_node": true,
+          "display_name": "nagios__server",
+          "attribute": {
+            "monitor_sap_refs": {
+              "semantic_type": {
+                ":array": {
+                  "sap_ref": {
+                    "application": {
+                      "type": "nrpe"
+                    }
+                  }
+                }
+              },
+              "description": "monitor client service access point ref",
+              "dynamic": false,
+              "cannot_change": false,
+              "display_name": "monitor_sap_refs",
+              "read_only": false,
+              "required": true,
+              "external_ref": {
+                "type": "service_attribute",
+                "path": "service[nagios][monitor_sap_refs]"
+              },
+              "semantic_type_summary": "sap_ref",
+              "hidden": false,
+              "data_type": "json",
+              "is_port": true
+            }
+          },
+          "external_ref": {
+            "type": "chef_recipe",
+            "recipe_name": "nagios::server"
+          },
+          "component_type": "nagios__server",
+          "ds_attributes": {
+            "ui": "{\"images\": {\"tnail\":\"nagios.png\",\"display\":\"nagios.png\",\"tiny\":\"\"}}",
+            "ref": "nagios__server",
+            "qualified_ref": "/library/test/nagios__server",
             "basic_type": "service"
           },
           "basic_type": "service"
@@ -1786,6 +1840,7 @@
           },
           "ds_key": "[:user_data, \"/library/test/mysql__master\"]",
           "description": "For extending mysql server to serve as a master",
+          "only_one_per_node": true,
           "display_name": "mysql__master",
           "attribute": {
             "sap_config_for_slave": {
@@ -1847,7 +1902,6 @@
             "type": "chef_recipe",
             "recipe_name": "mysql::master"
           },
-          "only_one_per_node": true,
           "component_type": "mysql__master",
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}",
@@ -1855,59 +1909,6 @@
             "qualified_ref": "/library/test/mysql__master"
           },
           "basic_type": "feature"
-        },
-        "nagios__server": {
-          "type": "instance",
-          "ui": {
-            "images": {
-              "tiny": "",
-              "tnail": "nagios.png",
-              "display": "nagios.png"
-            }
-          },
-          "ds_key": "[:user_data, \"/library/test/nagios__server\"]",
-          "description": "Installs and configures a nagios server",
-          "display_name": "nagios__server",
-          "attribute": {
-            "monitor_sap_refs": {
-              "semantic_type": {
-                ":array": {
-                  "sap_ref": {
-                    "application": {
-                      "type": "nrpe"
-                    }
-                  }
-                }
-              },
-              "description": "monitor client service access point ref",
-              "dynamic": false,
-              "cannot_change": false,
-              "display_name": "monitor_sap_refs",
-              "read_only": false,
-              "required": true,
-              "external_ref": {
-                "type": "service_attribute",
-                "path": "service[nagios][monitor_sap_refs]"
-              },
-              "semantic_type_summary": "sap_ref",
-              "hidden": false,
-              "data_type": "json",
-              "is_port": true
-            }
-          },
-          "external_ref": {
-            "type": "chef_recipe",
-            "recipe_name": "nagios::server"
-          },
-          "only_one_per_node": true,
-          "component_type": "nagios__server",
-          "ds_attributes": {
-            "ui": "{\"images\": {\"tnail\":\"nagios.png\",\"display\":\"nagios.png\",\"tiny\":\"\"}}",
-            "ref": "nagios__server",
-            "qualified_ref": "/library/test/nagios__server",
-            "basic_type": "service"
-          },
-          "basic_type": "service"
         },
         "redis": {
           "type": "instance",
@@ -1930,6 +1931,7 @@
           },
           "ds_key": "[:user_data, \"/library/test/redis\"]",
           "description": "Installs/Configures redis",
+          "only_one_per_node": true,
           "display_name": "redis",
           "attribute": {
             "sap_config_ipv4": {
@@ -1966,7 +1968,6 @@
             "type": "chef_recipe",
             "recipe_name": "redis"
           },
-          "only_one_per_node": true,
           "component_type": "redis",
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"redis.png\",\"display\":\"redis.png\",\"tiny\":\"\"}}",
@@ -1986,12 +1987,12 @@
           },
           "ds_key": "[:user_data, \"/library/test/hadoop__doc\"]",
           "description": "Installs hadoop documentation",
+          "only_one_per_node": true,
           "display_name": "hadoop__doc",
           "external_ref": {
             "type": "chef_recipe",
             "recipe_name": "hadoop::doc"
           },
-          "only_one_per_node": true,
           "component_type": "hadoop__doc",
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"hadoop.png\",\"display\":\"hadoop.png\",\"tiny\":\"\"}}",

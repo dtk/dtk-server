@@ -93,7 +93,7 @@ pp [:debug_stored_new_pos,get_objects(model_name,SQL.in(:id,model_items.map{|ite
       #TODO: hack to get around restriction type = template does not allow one to see assemblies
       #TODO: need to determine how to handle an assembly that is a template; may just assume everything in library is template
       #and then do away with explicitly setting type to "template"
-      where_clause.delete(:type) if (request.params||{})["model_name"] == "component"
+#      where_clause.delete(:type) if (request.params||{})["model_name"] == "component"
 
 #      where_clause = {:display_name => search_query}
       if where_clause

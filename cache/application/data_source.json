@@ -50,7 +50,8 @@
 	  "basic_type": "application"
         },
 	 "postgresql__db": {
-	  "basic_type": "database"
+	  "basic_type": "database",
+	  "only_one_per_node": false
         },
 	 "postgresql__single_tenant": {
 	  "basic_type": "application"

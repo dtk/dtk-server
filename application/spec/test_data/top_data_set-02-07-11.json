@@ -18,9 +18,9 @@
           },
           "ui": {
             "images": {
-              "tiny": "",
               "tnail": "ubuntu.png",
-              "display": "ubuntu.png"
+              "display": "ubuntu.png",
+              "tiny": ""
             }
           },
           "monitoring_item": {
@@ -89,35 +89,35 @@
           },
           "is_deployed": true,
           "ds_attributes": {
-            "root_device_type": "ebs",
             "type": "machine",
-            "block_device_mapping": [
-              {
-                "snapshotId": "snap-f9179794",
-                "deviceName": "/dev/sda1",
-                "deleteOnTermination": "true",
-                "volumeSize": 8
-              }
+            "product_codes": [
+
             ],
-            "is_public": false,
+            "root_device_name": "/dev/sda1",
             "flavor": {
               "disk": null
             },
             "description": null,
+            "root_device_type": "ebs",
             "state": "available",
-            "virtualizationType": "paravirtual",
+            "block_device_mapping": [
+              {
+                "volumeSize": 8,
+                "snapshotId": "snap-f9179794",
+                "deviceName": "/dev/sda1",
+                "deleteOnTermination": "true"
+              }
+            ],
+            "is_public": false,
             "tags": {
             },
-            "product_codes": [
-
-            ],
+            "virtualizationType": "paravirtual",
             "location": "411986592491/rnp-chef-09-12-mcollective-1-0-ubuntu-lucid-x86_32",
             "name": "rnp-chef-09-12-mcollective-1-0-ubuntu-lucid-x86_32",
             "architecture": "i386",
             "kernel_id": "aki-3af50453",
             "id": "ami-ee38c987",
-            "owner_id": "411986592491",
-            "root_device_name": "/dev/sda1"
+            "owner_id": "411986592491"
           }
         }
       },
@@ -180,7 +180,7 @@
             }
           },
           "ds_name": "user_data",
-          "last_collection_timestamp": "Tue Feb 08 16:06:05 +0000 2011",
+          "last_collection_timestamp": "Tue Feb 08 18:11:04 +0000 2011",
           "display_name": "user_data"
         }
       },
@@ -190,9 +190,9 @@
           "type": "instance",
           "ui": {
             "images": {
-              "tiny": "",
               "tnail": "hadoop-pig.png",
-              "display": "hadoop-pig.png"
+              "display": "hadoop-pig.png",
+              "tiny": ""
             }
           },
           "ds_key": "[:user_data, \"/library/test/hadoop__pig\"]",
@@ -216,9 +216,9 @@
           "type": "instance",
           "ui": {
             "images": {
-              "tiny": "",
               "tnail": "cloudera.png",
-              "display": "cloudera.png"
+              "display": "cloudera.png",
+              "tiny": ""
             }
           },
           "ds_key": "[:user_data, \"/library/test/hadoop_cloudera_c3\"]",
@@ -311,6 +311,7 @@
           "component_type": "postgresql__db",
           "ds_attributes": {
             "ref": "postgresql__db",
+            "only_one_per_node": false,
             "qualified_ref": "/library/test/postgresql__db",
             "basic_type": "database"
           },
@@ -320,9 +321,9 @@
           "type": "instance",
           "ui": {
             "images": {
-              "tiny": "",
               "tnail": "php.png",
-              "display": "php.png"
+              "display": "php.png",
+              "tiny": ""
             }
           },
           "ds_key": "[:user_data, \"/library/test/php__php5\"]",
@@ -346,9 +347,9 @@
           "type": "instance",
           "ui": {
             "images": {
-              "tiny": "",
               "tnail": "wordpress.png",
-              "display": "wordpress.png"
+              "display": "wordpress.png",
+              "tiny": ""
             }
           },
           "ds_key": "[:user_data, \"/library/test/wordpress\"]",
@@ -404,7 +405,7 @@
               "data_type": "string",
               "is_port": false
             },
-           "sap_ref": {
+            "sap_ref": {
               "semantic_type": {
                 "sap_ref": {
                   "application": {
@@ -559,9 +560,9 @@
           "type": "instance",
           "ui": {
             "images": {
-              "tiny": "",
               "tnail": "mysql.png",
-              "display": "mysql.png"
+              "display": "mysql.png",
+              "tiny": ""
             }
           },
           "ds_key": "[:user_data, \"/library/test/mysql__slave\"]",
@@ -626,9 +627,9 @@
           "type": "instance",
           "ui": {
             "images": {
-              "tiny": "",
               "tnail": "postgres.png",
-              "display": "postgres.png"
+              "display": "postgres.png",
+              "tiny": ""
             }
           },
           "ds_key": "[:user_data, \"/library/test/postgresql__app\"]",
@@ -677,9 +678,9 @@
           "type": "instance",
           "ui": {
             "images": {
-              "tiny": "",
               "tnail": "hadoop-hive.png",
-              "display": "hadoop-hive.png"
+              "display": "hadoop-hive.png",
+              "tiny": ""
             }
           },
           "ds_key": "[:user_data, \"/library/test/hadoop__hive\"]",
@@ -703,9 +704,9 @@
           "type": "instance",
           "ui": {
             "images": {
-              "tiny": "",
               "tnail": "postgres.png",
-              "display": "postgres.png"
+              "display": "postgres.png",
+              "tiny": ""
             }
           },
           "ds_key": "[:user_data, \"/library/test/postgresql__server\"]",
@@ -762,9 +763,9 @@
           "type": "instance",
           "ui": {
             "images": {
-              "tiny": "",
               "tnail": "java-01.png",
-              "display": "java-01.png"
+              "display": "java-01.png",
+              "tiny": ""
             }
           },
           "ds_key": "[:user_data, \"/library/test/java\"]",
@@ -831,9 +832,9 @@
           "type": "instance",
           "ui": {
             "images": {
-              "tiny": "",
               "tnail": "java-01.png",
-              "display": "java-01.png"
+              "display": "java-01.png",
+              "tiny": ""
             }
           },
           "ds_key": "[:user_data, \"/library/test/java_sun\"]",
@@ -853,51 +854,13 @@
           },
           "basic_type": "language"
         },
-        "rabbitmq__edge": {
-          "ui": {
-            "images": {
-              "tiny": "",
-              "tnail": "rabbitmq.png",
-              "display": "rabbitmq.png"
-            }
-          },
-          "ds_key": "[:user_data, \"/library/test/rabbitmq__edge\"]",
-          "only_one_per_node": true,
-          "display_name": "rabbitmq__edge",
-          "ds_attributes": {
-            "ui": "{\"images\": {\"tnail\":\"rabbitmq.png\",\"display\":\"rabbitmq.png\",\"tiny\":\"\"}}",
-            "ref": "rabbitmq__edge",
-            "qualified_ref": "/library/test/rabbitmq__edge",
-            "basic_type": "feature"
-          },
-          "basic_type": "feature"
-        },
-        "rabbitmq__default": {
-          "ui": {
-            "images": {
-              "tiny": "",
-              "tnail": "rabbitmq.png",
-              "display": "rabbitmq.png"
-            }
-          },
-          "ds_key": "[:user_data, \"/library/test/rabbitmq__default\"]",
-          "only_one_per_node": true,
-          "display_name": "rabbitmq__default",
-          "ds_attributes": {
-            "ui": "{\"images\": {\"tnail\":\"rabbitmq.png\",\"display\":\"rabbitmq.png\",\"tiny\":\"\"}}",
-            "ref": "rabbitmq__default",
-            "qualified_ref": "/library/test/rabbitmq__default",
-            "basic_type": "service"
-          },
-          "basic_type": "service"
-        },
         "hadoop": {
           "type": "instance",
           "ui": {
             "images": {
-              "tiny": "",
               "tnail": "hadoop.png",
-              "display": "hadoop.png"
+              "display": "hadoop.png",
+              "tiny": ""
             }
           },
           "ds_key": "[:user_data, \"/library/test/hadoop\"]",
@@ -921,9 +884,9 @@
           "type": "instance",
           "ui": {
             "images": {
-              "tiny": "",
               "tnail": "cloudera.png",
-              "display": "cloudera.png"
+              "display": "cloudera.png",
+              "tiny": ""
             }
           },
           "monitoring_item": {
@@ -991,13 +954,51 @@
           },
           "basic_type": "feature"
         },
+        "rabbitmq__edge": {
+          "ui": {
+            "images": {
+              "tnail": "rabbitmq.png",
+              "display": "rabbitmq.png",
+              "tiny": ""
+            }
+          },
+          "ds_key": "[:user_data, \"/library/test/rabbitmq__edge\"]",
+          "only_one_per_node": true,
+          "display_name": "rabbitmq__edge",
+          "ds_attributes": {
+            "ui": "{\"images\": {\"tnail\":\"rabbitmq.png\",\"display\":\"rabbitmq.png\",\"tiny\":\"\"}}",
+            "ref": "rabbitmq__edge",
+            "qualified_ref": "/library/test/rabbitmq__edge",
+            "basic_type": "feature"
+          },
+          "basic_type": "feature"
+        },
+        "rabbitmq__default": {
+          "ui": {
+            "images": {
+              "tnail": "rabbitmq.png",
+              "display": "rabbitmq.png",
+              "tiny": ""
+            }
+          },
+          "ds_key": "[:user_data, \"/library/test/rabbitmq__default\"]",
+          "only_one_per_node": true,
+          "display_name": "rabbitmq__default",
+          "ds_attributes": {
+            "ui": "{\"images\": {\"tnail\":\"rabbitmq.png\",\"display\":\"rabbitmq.png\",\"tiny\":\"\"}}",
+            "ref": "rabbitmq__default",
+            "qualified_ref": "/library/test/rabbitmq__default",
+            "basic_type": "service"
+          },
+          "basic_type": "service"
+        },
         "nagios__client": {
           "type": "instance",
           "ui": {
             "images": {
-              "tiny": "",
               "tnail": "nagios.png",
-              "display": "nagios.png"
+              "display": "nagios.png",
+              "tiny": ""
             }
           },
           "ds_key": "[:user_data, \"/library/test/nagios__client\"]",
@@ -1049,9 +1050,9 @@
           "type": "instance",
           "ui": {
             "images": {
-              "tiny": "",
               "tnail": "mysql.png",
-              "display": "mysql.png"
+              "display": "mysql.png",
+              "tiny": ""
             }
           },
           "monitoring_item": {
@@ -1359,9 +1360,9 @@
           "type": "instance",
           "ui": {
             "images": {
-              "tiny": "",
               "tnail": "postgres.png",
-              "display": "postgres.png"
+              "display": "postgres.png",
+              "tiny": ""
             }
           },
           "ds_key": "[:user_data, \"/library/test/postgresql__client\"]",
@@ -1385,9 +1386,9 @@
           "type": "instance",
           "ui": {
             "images": {
-              "tiny": "",
               "tnail": "user.png",
-              "display": "user.png"
+              "display": "user.png",
+              "tiny": ""
             }
           },
           "ds_key": "[:user_data, \"/library/test/user_account\"]",
@@ -1503,9 +1504,9 @@
           "type": "instance",
           "ui": {
             "images": {
-              "tiny": "",
               "tnail": "apache.png",
-              "display": "apache.png"
+              "display": "apache.png",
+              "tiny": ""
             }
           },
           "monitoring_item": {
@@ -1780,9 +1781,9 @@
           "type": "instance",
           "ui": {
             "images": {
-              "tiny": "",
               "tnail": "nagios.png",
-              "display": "nagios.png"
+              "display": "nagios.png",
+              "tiny": ""
             }
           },
           "ds_key": "[:user_data, \"/library/test/nagios__server\"]",
@@ -1833,9 +1834,9 @@
           "type": "instance",
           "ui": {
             "images": {
-              "tiny": "",
               "tnail": "mysql.png",
-              "display": "mysql.png"
+              "display": "mysql.png",
+              "tiny": ""
             }
           },
           "ds_key": "[:user_data, \"/library/test/mysql__master\"]",
@@ -1914,9 +1915,9 @@
           "type": "instance",
           "ui": {
             "images": {
-              "tiny": "",
               "tnail": "redis.png",
-              "display": "redis.png"
+              "display": "redis.png",
+              "tiny": ""
             }
           },
           "monitoring_item": {
@@ -1980,9 +1981,9 @@
           "type": "instance",
           "ui": {
             "images": {
-              "tiny": "",
               "tnail": "hadoop.png",
-              "display": "hadoop.png"
+              "display": "hadoop.png",
+              "tiny": ""
             }
           },
           "ds_key": "[:user_data, \"/library/test/hadoop__doc\"]",

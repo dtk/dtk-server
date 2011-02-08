@@ -97,7 +97,17 @@ module XYZ
           }
          ]
 
-
+        virtual_column :sap_par_dependency_database, :type => :json, :hidden => true,
+        :remote_dependencies =>
+          [{
+             :model_name => :attribute,
+             :convert => true,
+             :filter => [:and, [:eq,:display_name,"sap_ipv4"]],
+             :join_type => :inner,
+             :join_cond=>{:component_component_id => q(:component,:id)},
+             :cols => [:id,:display_name,:value_asserted,:value_derived]
+                         
+           }]
         virtual_column :parent_name, :possible_parents => [:component,:library,:node,:node_group]
 
         many_to_one :component, :library, :node, :node_group, :datacenter
@@ -118,6 +128,39 @@ module XYZ
       ((self[:state_change]||{})[:count]||0) > 0 or ((self[:state_change2]||{})[:count]||0) > 0
     end
     #######################
+    def self.add_needed_sap_attributes(component_idh,par_component_idh)
+     #find if there is a dependent attribute on par_component_idh as function of component_idh basic type
+      sp_hash = {
+        :filter => [:and, [:oneof, :basic_type, ParentDependency.keys]],
+        :columns => [:id, :display_name,:basic_type]
+      }
+      component = component_idh.get_objects_from_sp_hash(sp_hash).first
+      return nil unless component
+      
+      par_sp_hash = {
+        :columns => [:id, :display_name,ParentDependency[component[:basic_type]]]
+      }
+      par_component = par_component_idh.get_objects_from_sp_hash(par_sp_hash).first
+      unless par_component
+        Log.error("component #{component_idh}'s parent #{par_component_idh} is expected to haev a dependency attribute, but does not")
+        return nil
+      end
+
+#sap_config_attr_idh, new_sap_attr_idh = Attribute.add_needed_sap_attributes(component_idh,par_component[:attribute][:attribute_value])
+=begin convert
+      sap_config_attr_idh, new_sap_attr_idh = Attribute.add_needed_ipv4_sap_attributes(component_idh,ipv4_host_addrs)
+      return nil unless new_sap_attr_idh
+      AttributeLink.create_links_ipv4_sap(new_sap_attr_idh,sap_config_attr_idh,ipv4_host_addrs_idh,par_component_idh)
+=end
+    end
+   private
+    ParentDependency = {
+      "database" => :sap_par_dependency_database
+    }
+   public
+
+
+
     ### object processing and access functions
     def get_component_with_attributes_unraveled()
       sp_hash = {:columns => [:id,:display_name,:component_type,:basic_type,:attributes]}

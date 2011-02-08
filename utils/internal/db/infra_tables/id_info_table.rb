@@ -62,6 +62,10 @@ module XYZ
       Model.model_class(self[:model_name]).new({:id => get_id()},self[:c])
     end
 
+    def get_objects_from_sp_hash(sp_hash,opts={})
+      create_object().get_objects_from_sp_hash(sp_hash,opts)
+    end
+
     def get_id()
       (IDInfoTable.get_row_from_id_handle(self,:short_circuit_for_minimal_row => true)||{})[:id]
     end

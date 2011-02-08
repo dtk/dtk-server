@@ -404,7 +404,7 @@
               "data_type": "string",
               "is_port": false
             },
-            "sap_ref": {
+           "sap_ref": {
               "semantic_type": {
                 "sap_ref": {
                   "application": {

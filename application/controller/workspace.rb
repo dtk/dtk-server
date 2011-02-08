@@ -93,7 +93,7 @@ pp [:debug_stored_new_pos,get_objects(model_name,SQL.in(:id,model_items.map{|ite
       #TODO: hack to get around restriction type = template does not allow one to see assemblies
       #TODO: need to determine how to handle an assembly that is a template; may just assume everything in library is template
       #and then do away with explicitly setting type to "template"
-      where_clause.delete(:type) if (request.params||{})["model_name"] == "component"
+#      where_clause.delete(:type) if (request.params||{})["model_name"] == "component"
 
 #      where_clause = {:display_name => search_query}
       if where_clause
@@ -120,6 +120,10 @@ pp [:debug_stored_new_pos,get_objects(model_name,SQL.in(:id,model_items.map{|ite
         body_value == '' ? body_value = model_list[index][:display_name] : nil
         model_list[index][:body_value] = body_value
       end
+
+pp "^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+pp model_list
+pp "^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
 
       tpl = R8Tpl::TemplateR8.new("workspace/wspace_search_#{model_name}",user_context())
       tpl.set_js_tpl_name("wspace_search_#{model_name}")
@@ -153,8 +157,7 @@ pp [:debug_stored_new_pos,get_objects(model_name,SQL.in(:id,model_items.map{|ite
       model_list = Model.get_objects_from_search_object(search_object)
 pp model_list
 
-#TODO: deprecate add_js_exe for run_javascript
-      add_js_exe("R8.Workspace.setupNewItems();")
+      run_javascript("R8.Workspace.setupNewItems();")
       top = 100
       left = 100
       model_list.each_with_index do |node_group,index|
@@ -175,7 +178,7 @@ pp model_list
 
 #TODO: temp
       tpl.assign('datacenter_name','dc1')
-2
+#2
       _model_var = {}
       _model_var[:i18n] = get_model_i18n(model_name,user_context())
       tpl.assign("_#{model_name().to_s}",_model_var)
@@ -407,7 +410,7 @@ pp datacenter
     #TODO: datacenter_id=nil is stub
     def list_items_2(datacenter_id=nil)
       include_js('plugins/search.cmdhandler')
-pp [:datacenter_id,datacenter_id]
+
       if datacenter_id.nil?
         datacenter_id = IDHandle[:c => ret_session_context_id(), :uri => "/datacenter/dc1", :model_name => :datacenter].get_id()
       end

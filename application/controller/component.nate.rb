@@ -4,7 +4,7 @@ module XYZ
 
     def dock_edit(component_id)
 #TODO: test
-#pp ModelDefProcessor.get_component(id_handle(component_id))
+pp ModelDefProcessor.get_component(id_handle(component_id))
 
       component = create_object_from_id(component_id)
       flattened_attr_list = component.get_attributes_unraveled()
@@ -256,5 +256,4 @@ pp items
 
     return {}
   end
-
 end

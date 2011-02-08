@@ -5,6 +5,7 @@ if (!R8.Workspace) {
 		var _viewSpaces = {},
 			_viewSpaceStack = [],
 			_currentViewSpace = null,
+			_viewContext = 'node',
 
 			_pageContainerId = 'page-container',
 			_pageContainerNode = null,
@@ -534,6 +535,31 @@ console.log('I guess I am hitting this now!!!!');
 					}
 					R8.Ctrl.call(modelName+'/clone/'+modelId,params);
 				});
+			},
+
+			addAssemblyToViewspace : function(componentId,assemblyContext,assemblyLeftPos,containerNode) {
+//				var modelName = containerNode.getAttribute('data-model');
+//				var modelId = containerNode.getAttribute('data-id');
+				if(_viewContext == assemblyContext) {
+					var queryParams = 'target_model_name=datacenter&target_id='+_currentViewSpace;
+					queryParams += '&model_redirect=component&action_redirect=add_assembly_items&id_redirect='+componentId;
+					queryParams += '&parent_id='+_currentViewSpace+'&assembly_left_pos='+assemblyLeftPos
+
+					var completeCallback = function() {
+						R8.Workspace.refreshItem(modelId);
+					}
+					var callbacks = {
+						'io:renderComplete' : completeCallback
+					};
+					R8.Ctrl.call('component/clone/'+componentId,{
+//						'callbacks': callbacks,
+						'cfg': {
+							'data': queryParams
+						}
+					});
+				} else {
+
+				}
 			},
 
 			addComponentToContainer : function(componentId,containerNode) {

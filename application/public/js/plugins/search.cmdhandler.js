@@ -516,22 +516,47 @@ console.log('Have a drop hit for node!!!!');
 					});
 
 					R8.Cmdbar.loadedTabs[tIndex].compDDel.on('drag:mouseDown', function(e){
-						var dropGroup = 'dg-component';
-						var dropList = Y.all('#viewspace div.'+dropGroup);
-						dropList.each(function(){
-							if(!this.hasClass('yui3-dd-drop')) {
-								var drop = new Y.DD.Drop({node:this});
+						var componentType = this.get('currentNode').get('children').item(0).getAttribute('data-type'); 
+
+						if(componentType == 'composite') {
+							var dropGroup = 'dg-node-assembly';
+							var viewspace = Y.one('#viewspace');
+							if(!viewspace.hasClass('yui3-dd-drop')) {
+								var drop = new Y.DD.Drop({node:viewspace});
 								drop.addToGroup([dropGroup]);
 								drop.on('drop:enter',function(e){
 								});
 								drop.on('drop:hit',function(e){
+//DEBUG
+//var dragClone = e.drag.get('dragNode').get('children').item(0);
+//console.log(e.drag.pageX);
+//console.log(e.drag.get('dragNode').get('region').left);
+//return;
 									var dropNode = e.drop.get('node');
 									var compNode = e.drag.get('dragNode').get('children').item(0);
 									var componentId = compNode.getAttribute('data-id');
-									R8.Workspace.addComponentToContainer(componentId,dropNode);
+									var assemblyLeftPos = e.drag.get('dragNode').get('region').left;
+									R8.Workspace.addAssemblyToViewspace(componentId,'node',assemblyLeftPos,dropNode);
 								});
 							}
-						});
+						} else {
+							var dropGroup = 'dg-component';
+							var dropList = Y.all('#viewspace div.'+dropGroup);
+							dropList.each(function(){
+								if(!this.hasClass('yui3-dd-drop')) {
+									var drop = new Y.DD.Drop({node:this});
+									drop.addToGroup([dropGroup]);
+									drop.on('drop:enter',function(e){
+									});
+									drop.on('drop:hit',function(e){
+										var dropNode = e.drop.get('node');
+										var compNode = e.drag.get('dragNode').get('children').item(0);
+										var componentId = compNode.getAttribute('data-id');
+										R8.Workspace.addComponentToContainer(componentId,dropNode);
+									});
+								}
+							});
+						}
 					});
 
 					R8.Cmdbar.loadedTabs[tIndex].compDDel.on('drag:start', function(e){

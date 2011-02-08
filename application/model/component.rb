@@ -137,8 +137,9 @@ module XYZ
       component = component_idh.get_objects_from_sp_hash(sp_hash).first
       return nil unless component
       
+      basic_type_info = BasicTypeInfo[component[:basic_type]]
       par_sp_hash = {
-        :columns => [:id, :display_name,ParentDependency[component[:basic_type]]]
+        :columns => [:id, :display_name,basic_type_info[:par_dependency]]
       }
       par_component = par_component_idh.get_objects_from_sp_hash(par_sp_hash).first
       unless par_component
@@ -146,17 +147,72 @@ module XYZ
         return nil
       end
 
-#sap_config_attr_idh, new_sap_attr_idh = Attribute.add_needed_sap_attributes(component_idh,par_component[:attribute][:attribute_value])
-=begin convert
-      sap_config_attr_idh, new_sap_attr_idh = Attribute.add_needed_ipv4_sap_attributes(component_idh,ipv4_host_addrs)
+      par_cmp_attr_val = par_component[:attribute][:attribute_value]
+      semantic_type_summary = basic_type_info[:semantic_type_summary]
+      sap_config_attr_idh, new_sap_attr_idh = component.add_needed_sap_attributes_aux(par_cmp_attr_val,semantic_type_summary)
       return nil unless new_sap_attr_idh
-      AttributeLink.create_links_ipv4_sap(new_sap_attr_idh,sap_config_attr_idh,ipv4_host_addrs_idh,par_component_idh)
-=end
+#TODO: put in generalzied version      AttributeLink.create_links_ipv4_sap(new_sap_attr_idh,sap_config_attr_idh,ipv4_host_addrs_idh,par_component_idh)
     end
    private
-    ParentDependency = {
-      "database" => :sap_par_dependency_database
+    BasicTypeInfo = {
+      "database" => {
+        :par_dependency => :sap_par_dependency_database,
+        :semantic_type_summary => "db_config"
+      }
     }
+   protected
+    def add_needed_sap_attributes_aux(par_cmp_attr_val,semantic_type_summary)
+=begin
+      component_id = cmp_id_handle.get_id()
+      field_set = Model::FieldSet.new(:component,[:id,:display_name,:attributes])
+     #TODO: allowing feature in until nest features in base services filter = [:and, [:eq, :component__id, component_id],[:eq, :basic_type,"service"]]
+      filter = [:and, [:eq, :component__id, component_id]]
+      global_wc = {:attribute__semantic_type_summary => "sap_config_ipv4"}
+      ds = SearchObject.create_from_field_set(field_set,cmp_id_handle[:c],filter).create_dataset().where(global_wc)
+
+      #should only be one attribute matching (or none)
+      component = ds.all.first
+      sap_config_attr = (component||{})[:attribute]
+      return nil unless sap_config_attr
+      sap_config_attr_idh = cmp_id_handle.createIDH(:guid => sap_config_attr[:id],:model_name => :attribute, :parent_model_name => :component)
+
+      #cartesian product of sap_config(s) and host addreses
+      new_sap_value_list = Array.new
+      #TODO: if graph converted hased values into Model types then could just do sap_config_attr[:attribute_value]
+      values = sap_config_attr[:value_asserted]||sap_config_attr[:value_derived]
+      #values can be hash or array; determine by looking at semantic_type
+      #TODO: may use instead look up from semantic type
+      values = [values] unless values.kind_of?(Array)
+      values.each do |sap_config|
+        ipv4_host_addresses.each do |ipv4_addr|
+          new_sap_value_list << sap_config.merge(:host_address => ipv4_addr)
+        end
+      end
+
+      description_prefix = (component[:display_name]||"").split("::").map{|x|x.capitalize}.join(" ") 
+      description = description_prefix.empty? ? "Service Access Point" : "#{description_prefix} SAP"
+
+      new_sap_attr_rows =
+        [{
+           :ref => "sap_ipv4",
+           :display_name => "sap_ipv4", 
+           :component_component_id => component_id,
+           :value_derived => new_sap_value_list,
+           :is_port => true,
+           :hidden => true,
+           :data_type => "json",
+           :description => description,
+           #TODO: need the  => {"application" => service qualification)
+           :semantic_type => {":array" => "sap_ipv4"},
+           :semantic_type_summary => "sap_ipv4"
+         }]
+
+      attr_mh = sap_config_attr_idh.createMH()
+      new_sap_attr_idh = create_from_rows(attr_mh,new_sap_attr_rows, :convert => true).first
+      
+      [sap_config_attr_idh,new_sap_attr_idh]
+=end
+    end
    public
 
 

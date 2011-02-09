@@ -226,6 +226,10 @@ TODO: old code, to be removed
       top_node = {}
       top_most = 2000
       node_list.each do |node|
+        unless (node[:ui]||{})[parent_id.to_sym]
+          Log.error("no coordinates for node with id #{node[:id].to_s} in #{parent_id.to_s}")
+          return {}
+        end
         if node[:ui][parent_id.to_sym][:top].to_i < top_most.to_i
           left_diff = assembly_left_pos.to_i-node[:ui][parent_id.to_sym][:left].to_i
           top_node = {:id=>node[:id],:ui=>node[:ui][parent_id.to_sym],:left_diff=>left_diff}

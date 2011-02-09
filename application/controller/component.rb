@@ -222,6 +222,17 @@ TODO: old code, to be removed
 =end
       node_list = get_objects(:node,{:assembly_id=>id})
 
+      #get the top most item in the list to set new positions
+      top_node = {}
+      top_most = 2000
+      node_list.each do |node|
+        if node[:ui][parent_id.to_sym][:top].to_i < top_most.to_i
+          left_diff = assembly_left_pos.to_i-node[:ui][parent_id.to_sym][:left].to_i
+          top_node = {:id=>node[:id],:ui=>node[:ui][parent_id.to_sym],:left_diff=>left_diff}
+          top_most = node[:ui][parent_id.to_sym][:top]
+        end
+      end
+
       tpl = R8Tpl::TemplateR8.new("node/wspace_display",user_context())
       tpl.set_js_tpl_name("node_wspace_display")
       tpl_info = tpl.render()
@@ -229,7 +240,12 @@ TODO: old code, to be removed
 
       items = Array.new
       node_list.each do |node|
-        node[:ui][parent_id.to_sym][:left] = assembly_left_pos
+        if node[:id] == top_node[:id]
+          node[:ui][parent_id.to_sym][:left] = assembly_left_pos
+        else
+          node[:ui][parent_id.to_sym][:left] = node[:ui][parent_id.to_sym][:left].to_i+top_node[:left_diff].to_i
+        end
+
         item = {
           :type => 'node',
           :object => node,

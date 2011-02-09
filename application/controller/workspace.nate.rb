@@ -121,6 +121,10 @@ pp [:debug_stored_new_pos,get_objects(model_name,SQL.in(:id,model_items.map{|ite
         model_list[index][:body_value] = body_value
       end
 
+pp "^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+pp model_list
+pp "^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+
       tpl = R8Tpl::TemplateR8.new("workspace/wspace_search_#{model_name}",user_context())
       tpl.set_js_tpl_name("wspace_search_#{model_name}")
       tpl.assign('model_list',model_list)
@@ -153,8 +157,7 @@ pp [:debug_stored_new_pos,get_objects(model_name,SQL.in(:id,model_items.map{|ite
       model_list = Model.get_objects_from_search_object(search_object)
 pp model_list
 
-#TODO: deprecate add_js_exe for run_javascript
-      add_js_exe("R8.Workspace.setupNewItems();")
+      run_javascript("R8.Workspace.setupNewItems();")
       top = 100
       left = 100
       model_list.each_with_index do |node_group,index|
@@ -175,7 +178,7 @@ pp model_list
 
 #TODO: temp
       tpl.assign('datacenter_name','dc1')
-2
+#2
       _model_var = {}
       _model_var[:i18n] = get_model_i18n(model_name,user_context())
       tpl.assign("_#{model_name().to_s}",_model_var)
@@ -407,7 +410,7 @@ pp datacenter
     #TODO: datacenter_id=nil is stub
     def list_items_2(datacenter_id=nil)
       include_js('plugins/search.cmdhandler')
-pp [:datacenter_id,datacenter_id]
+
       if datacenter_id.nil?
         datacenter_id = IDHandle[:c => ret_session_context_id(), :uri => "/datacenter/dc1", :model_name => :datacenter].get_id()
       end
@@ -583,6 +586,7 @@ pp [:datacenter_id,datacenter_id]
       return tpl_result
     end
 
+    #TODO: check if this and its referents are deprecated
     def ret_node_group_search_object(filter_params)
       model_name = :node_group
       parent_model_name = :datacenter
@@ -773,9 +777,36 @@ POSSIBLE CHANGES TO HASH
       }
     end
 
-    def clone_assembly()
-pp '||||||||||||||||||||||||||||||||||||||'
-pp request.params
+    def clone_assembly(explicit_hash=nil)
+      hash = explicit_hash || request.params
+      #TODO: stub
+      icon_info = {"images" => {"display" => "generic-assembly.png","tiny" => "","tnail" => "generic-assembly.png"}}
+
+      library_id_handle = id_handle(hash["library_id"].to_i,:library)
+      name = hash["name"] || "assembly"
+      create_hash = {
+        :component => {
+          name => {
+            :display_name => name,
+            :ui => icon_info,
+            :type => "composite"
+          }
+        }
+      }
+#TODO: getting json rather than hash
+item_list = JSON.parse(hash["item_list"])
+      node_id_handles = item_list.map{|item|id_handle(item["id"].to_i,item["model"].to_sym)}
+      connected_links,dangling_links = Node.get_external_connected_port_links(node_id_handles)
+      #TODO: raise error to user if dangling link
+      Log.error("dangling links #{dangling_links.inspect}") unless dangling_links.empty?
+      link_id_handles = connected_links.map{|link|link.id_handle}
+
+      assembly_id = Component.create_from_hash(library_id_handle,create_hash).first[:id]
+      assembly_id_handle = id_handle(assembly_id,:component)
+
+      id_handles = node_id_handles + link_id_handles
+      Component.clone__top_object_exists(assembly_id_handle,id_handles,library_id_handle)
+      return {:content => nil}
     end
   end
 end

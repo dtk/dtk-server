@@ -197,7 +197,7 @@ module XYZ
       basic_type_info = BasicTypeInfo[component[:basic_type]]
       sap_dep = basic_type_info[:sap_dependency]
 
-      sap_info = component.get_objects_from_sp_hash(:columns => [:id, :display_name,sap_dep]).first
+      sap_info = component.get_objects_from_sp_hash(:columns => [:id, :display_name, sap_dep]).first
       unless sap_info
         Log.error("error in finding sap dependencies for component #{component_idh}")
         return nil
@@ -231,7 +231,7 @@ module XYZ
         :sap_config => "db_config",
         :sap_config_fn_name => "db_config__sap_db",
         :parent_attr => "sap_ipv4",
-        :parent_dn_name => "sap_ipv4__sap_db",
+        :parent_fn_name => "sap_ipv4__sap_db",
         :semantic_type => "sap_db", #TODO: need the  => {"application" => service qualification)
         :semantic_type_summary => "sap_db",
         :description => "DB access point",

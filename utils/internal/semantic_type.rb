@@ -21,6 +21,8 @@ module XYZ
           propagate_when_select_one()
          when "eq_indexed"
           propagate_when_eq_indexed()
+         when "sap_ipv4__sap_db" 
+          propagate_when_sap_ipv4__sap_db()
          else
           raise ErrorNotImplemented.new("propagate value not implemented yet for fn #{function}")
         end
@@ -35,6 +37,7 @@ module XYZ
     end
    private
 
+    #TODO: need to simplify so we dont need all these one ofs
     #function-specfic propagation
     def propagate_when_sap_config_ipv4()
       output_v = 
@@ -48,13 +51,37 @@ module XYZ
       value = nil
       if input_semantic_type().is_array?
         #cartesian product with host_address 
-        #TODO: may simplify and use faltten form
+        #TODO: may simplify and use flatten form
         value = Array.new
         output_v.each do |sap_config|
           value += input_value.map{|input_item|sap_config.merge("host_address" => input_item["host_address"])}
         end
       else #not input_semantic_type().is_array?
         raise Error.new("propagate_when_sap_config_ipv4 does not support input scalar and output array with size > 1") if output_value.size > 1
+        value = output_v.first.merge("host_address" => input_value["host_address"])
+      end
+      {:value_derived => value, :link_info => nil}
+    end
+
+    def propagate_when_sap_ipv4__sap_db()
+      output_v = 
+        if output_semantic_type().is_array? 
+          raise ErrorNotImplemented.new("propagate_when_sap_ipv4__sap_db when output has empty list") if output_value.empty?
+          output_value
+        else
+          [output_value]
+        end
+
+      value = nil
+      if input_semantic_type().is_array?
+        #cartesian product with host_address 
+        #TODO: may simplify and use flatten form
+        value = Array.new
+        output_v.each do |sap_config|
+          value += input_value.map{|input_item|sap_config.merge("host_address" => input_item["host_address"])}
+        end
+      else #not input_semantic_type().is_array?
+        raise Error.new("propagate_when_sap_ipv4__sap_db does not support input scalar and output array with size > 1") if output_value.size > 1
         value = output_v.first.merge("host_address" => input_value["host_address"])
       end
       {:value_derived => value, :link_info => nil}

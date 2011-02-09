@@ -63,6 +63,7 @@ module XYZ
       {:value_derived => value, :link_info => nil}
     end
 
+    #TODO: unify the propgation from sap_config
     def propagate_when_sap_ipv4__sap_db()
       output_v = 
         if output_semantic_type().is_array? 
@@ -78,7 +79,7 @@ module XYZ
         #TODO: may simplify and use flatten form
         value = Array.new
         output_v.each do |sap_config|
-          value += input_value.map{|input_item|sap_config.merge("host_address" => input_item["host_address"])}
+          value += input_value.map{|input_item|sap_config.merge(Aux::hash_subset(input_item,["host_address","port","protocol"]))}
         end
       else #not input_semantic_type().is_array?
         raise Error.new("propagate_when_sap_ipv4__sap_db does not support input scalar and output array with size > 1") if output_value.size > 1

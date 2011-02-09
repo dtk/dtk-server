@@ -232,7 +232,7 @@ module XYZ
         :sap_config_fn_name => "db_config__sap_db",
         :parent_attr => "sap_ipv4",
         :parent_fn_name => "sap_ipv4__sap_db",
-        :semantic_type => "sap_db", #TODO: need the  => {"application" => service qualification)
+        :semantic_type => {":array" => "sap_db"}, #TODO: need the  => {"application" => service qualification)
         :semantic_type_summary => "sap_db",
         :description => "DB access point",
         :fn => lambda{|sap_config,par|compute_sap_db(sap_config,par)}

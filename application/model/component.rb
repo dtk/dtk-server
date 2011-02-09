@@ -117,8 +117,7 @@ module XYZ
              :alias => :parent_component,
              :join_type => :inner,
              :join_cond=>{:id => p(:component,:component)},
-             :cols => [:id,:display_name,id(:component)]
-                         
+             :cols => [:id,:display_name,id(:node)]
            },
            {
              :model_name => :attribute,
@@ -128,10 +127,15 @@ module XYZ
              :join_type => :inner,
              :join_cond=>{:component_component_id => q(:parent_component,:id)},
              :cols => [:id,:display_name,:value_asserted,:value_derived,id(:component)]
+           },
+           {
+             :model_name => :node,
+             :convert => true,
+             :join_type => :inner,
+             :join_cond=>{:id => :parent_component__node_node_id},
+             :cols => [:id,:display_name]
            }
           ]
-
-
 
       end
     end
@@ -199,10 +203,13 @@ module XYZ
         return nil
       end
 
-      sap_val = basic_type_info[:fn].call(sap_info[:attribute][:attribute_value],sap_info[:parent_attribute][:attribute_value])
-    
-      new_sap_attr_row = Aux::hash_subset(basic_type_info,[{:sap => :ref},{:sap => :display_name},:description,:semantic_type,:semantic_type_summary])
-      new_sap_attr_row.merge!(
+      sap_config_attr = sap_info[:attribute]
+      par_attr = sap_info[:parent_attribute]
+      node = sap_info[:node]
+
+      sap_val = basic_type_info[:fn].call(sap_config_attr[:attribute_value],par_attr[:attribute_value])
+      sap_attr_row = Aux::hash_subset(basic_type_info,[{:sap => :ref},{:sap => :display_name},:description,:semantic_type,:semantic_type_summary])
+      sap_attr_row.merge!(
          :component_component_id => component[:id],
          :value_derived => sap_val,
          :is_port => true,
@@ -210,15 +217,21 @@ module XYZ
          :data_type => "json")
 
       attr_mh = component_idh.createMH(:model_name => :attribute, :parent_model_name => :component)
-      new_sap_attr_idh = create_from_rows(attr_mh,[new_sap_attr_row], :convert => true).first
-      return nil unless new_sap_attr_idh
-      #TODO: put in generalzied version      AttributeLink.create_links_ipv4_sap(new_sap_attr_idh,sap_config_attr_idh,ipv4_host_addrs_idh,par_component_idh)
+      sap_attr_idh = create_from_rows(attr_mh,[sap_attr_row], :convert => true).first
+
+      return nil unless sap_attr_idh
+      AttributeLink.create_links_sap(basic_type_info,sap_attr_idh,sap_config_attr.id_handle(),par_attr.id_handle(),node.id_handle())
     end
    private
+    #TODO: some of these are redendant of whats in sap_dependency_X like "sap_ipv4" and "sap_db"
     BasicTypeInfo = {
       "database" => {
         :sap_dependency => :sap_dependency_database,
         :sap => "sap_db",
+        :sap_config => "db_config",
+        :sap_config_fn_name => "db_config__sap_db",
+        :parent_attr => "sap_ipv4",
+        :parent_dn_name => "sap_ipv4__sap_db",
         :semantic_type => "sap_db", #TODO: need the  => {"application" => service qualification)
         :semantic_type_summary => "sap_db",
         :description => "DB access point",

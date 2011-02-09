@@ -121,6 +121,42 @@ module XYZ
       create_from_select(attr_link_mh,attr_link_fs,attr_link_ds,override_attrs,opts)
     end
 
+
+    def self.create_links_sap(link_info,sap_attr_idh,sap_config_attr_idh,par_idh,node_idh)
+      attr_link_mh = sap_attr_idh.createMH(:model_name => :attribute_link, :parent_model_name => :node)
+      sap_id,sap_config_id,par_id,node_id = [sap_attr_idh,sap_config_attr_idh,par_idh,node_idh].map{|x|x.get_id()}
+
+      sap_config_name = link_info[:sap_config]
+      sap_name = link_info[:sap]
+      parent_attr_name = link_info[:parent_attr_name]
+
+      new_link_rows =
+        [
+         {
+           :ref => "#{sap_config_name}:#{sap_config_id.to_s}-#{sap_id}",
+           :display_name => "link:#{sap_config_name}-#{sap_name}",
+           :input_id => sap_id,
+           :output_id => sap_config_id,
+           :type => "internal",
+           :hidden => true,
+           :function => link_info[:sap_config_fn_name],
+           :node_node_id => node_id
+         },
+         {
+           :ref => "#{parent_attr_name}:#{par_id.to_s}-#{sap_id}",
+           :display_name => "link:#{parent_attr_name}-#{sap_name}",
+           :input_id => sap_id,
+           :output_id => par_id,
+           :type => "internal",
+           :hidden => true,
+           :function => link_info[:parent_fn_name],
+           :node_node_id => node_id
+         }
+        ]
+      create_from_rows(attr_link_mh,new_link_rows)
+    end
+
+    #TODO: deprecate below after subsuming from above
     def self.create_links_ipv4_sap(new_sap_attr_idh,sap_config_attr_idh,ipv4_host_addrs_idh,node_idh)
       attr_link_mh = node_idh.createMH(:model_name => :attribute_link, :parent_model_name => :node)
       new_sap_id,sap_config_id,ipv4_id,node_id = [new_sap_attr_idh,sap_config_attr_idh,ipv4_host_addrs_idh,node_idh].map{|x|x.get_id()}

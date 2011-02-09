@@ -962,6 +962,12 @@ for(vs in _viewSpaces) {
 				_viewSpaces[vSpaceId].showLinks();
 			},
 
+			touchItems: function(itemList,viewSpaceId) {
+				var vSpaceId = (typeof(viewSpaceId) == 'undefined') ? _currentViewSpace : viewSpaceId;
+
+				_viewSpaces[vSpaceId].touchItems(itemList);
+			},
+
 //-------------------------------------------------------------
 //-------------------------------------------------------------
 //-------------------------------------------------------------

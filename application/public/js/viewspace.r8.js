@@ -388,6 +388,22 @@ console.log(ports);
 				item.get('node').setAttribute('data-status','dd-ready');
 			},
 
+			touchItems: function(item_list) {
+				for(var i in item_list) {
+					var itemId = item_list[i],
+						itemNode = _items[itemId].get('node');
+
+					_itemPosUpdateList[itemId] = {
+						'model':_items[itemId].get('model'),
+						'pos':{'top':itemNode.getStyle('top'),'left':itemNode.getStyle('left')}
+					};
+				}				
+				YUI().use('json','cookie', function(Y){
+					var _itemPosUpdateListJSON = Y.JSON.stringify(_itemPosUpdateList);
+					Y.Cookie.set("_itemPosUpdateList", _itemPosUpdateListJSON);
+				});
+			},
+
 			getItemPortDef: function(itemId,portDefId) {
 				var pDefs = _items[itemId].get('portDefs');
 				return pDefs[portDefId];

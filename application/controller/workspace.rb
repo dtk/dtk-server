@@ -5,6 +5,7 @@ module XYZ
 #TODO: move to viewspace controller
     def update_pos(ws_id)
       items_to_save = JSON.parse(request.params["item_list"])
+
       return {} if items_to_save.empty?
       
 #TODO: patch that maps nil model_name to node_group
@@ -28,9 +29,11 @@ items_to_save.values.each{|item|item["model"] ||= "node_group"}
         Model.update_from_rows(model_handle,update_rows,:partial_value=>true)
         
 #TODO: remove debug statement
+=begin
 pp [:model_name,model_name]
 pp [:model_items,model_items]
 pp [:debug_stored_new_pos,get_objects(model_name,SQL.in(:id,model_items.map{|item|item[0].to_i}),Model::FieldSet.opt([:id,:ui],model_name))]
+=end
       end
       return {}
     end

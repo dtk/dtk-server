@@ -239,7 +239,9 @@ TODO: old code, to be removed
       include_js_tpl(tpl_info[:src])
 
       items = Array.new
+      item_id_list = []
       node_list.each do |node|
+        item_id_list << node[:id]
         if node[:id] == top_node[:id]
           node[:ui][parent_id.to_sym][:left] = assembly_left_pos
         else
@@ -269,6 +271,9 @@ pp items
 
     addItemsObj = JSON.generate(items)
     run_javascript("R8.Workspace.addItems(#{addItemsObj});")
+
+    item_id_list_json = JSON.generate(item_id_list)
+    run_javascript("R8.Workspace.touchItems(#{item_id_list_json});")
 
     return {}
   end

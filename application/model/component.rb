@@ -116,7 +116,7 @@ module XYZ
              :model_name => :component,
              :alias => :parent_component,
              :join_type => :inner,
-             :join_cond=>{:component_id => q(:component,:id)},
+             :join_cond=>{:id => p(:component,:component)},
              :cols => [:id,:display_name,id(:component)]
                          
            },
@@ -178,12 +178,11 @@ module XYZ
     def self.clone_post_copy_hook(clone_copy_output,target_id_handle,opts={})
       component_idh = clone_copy_output.id_handles.first
       add_needed_sap_attributes(component_idh)
-      parent_action_id_handle = target_id_handle.get_parent_id_handle()
+      parent_action_id_handle = target_id_handle.get_top_container_id_handle(:datacenter)
       StateChange.create_pending_change_item(:new_item => component_idh, :parent => parent_action_id_handle)
     end
 
     def self.add_needed_sap_attributes(component_idh)
-     #find if there is a dependent attribute on par_component_idh as function of component_idh basic type
       sp_hash = {
         :filter => [:and, [:oneof, :basic_type, BasicTypeInfo.keys]],
         :columns => [:id, :display_name,:basic_type]
@@ -191,7 +190,8 @@ module XYZ
       component = component_idh.get_objects_from_sp_hash(sp_hash).first
       return nil unless component
       
-      sap_dep = BasicTypeInfo[component[:basic_type]][:sap_dependency]
+      basic_type_info = BasicTypeInfo[component[:basic_type]]
+      sap_dep = basic_type_info[:sap_dependency]
 
       sap_info = component.get_objects_from_sp_hash(:columns => [:id, :display_name,sap_dep]).first
       unless sap_info
@@ -199,9 +199,9 @@ module XYZ
         return nil
       end
 
-      sap_val = sap_info[:fn].call(sap_info[:attribute][:attribute_value],sap_info[:parent_attribute][:attribute_value])
+      sap_val = basic_type_info[:fn].call(sap_info[:attribute][:attribute_value],sap_info[:parent_attribute][:attribute_value])
     
-      new_sap_attr_row = Aux::hash_subset(base_type_info,[{:sap => :ref},{:sap => :display_name},:description,:semantic_type,:semantic_type_summary])
+      new_sap_attr_row = Aux::hash_subset(basic_type_info,[{:sap => :ref},{:sap => :display_name},:description,:semantic_type,:semantic_type_summary])
       new_sap_attr_row.merge!(
          :component_component_id => component[:id],
          :value_derived => sap_val,
@@ -209,7 +209,7 @@ module XYZ
          :hidden => true,
          :data_type => "json")
 
-      attr_mh = sap_config_attr_idh.createMH(:model_name => :attribute, :parent_model_name => :component)
+      attr_mh = component_idh.createMH(:model_name => :attribute, :parent_model_name => :component)
       new_sap_attr_idh = create_from_rows(attr_mh,[new_sap_attr_row], :convert => true).first
       return nil unless new_sap_attr_idh
       #TODO: put in generalzied version      AttributeLink.create_links_ipv4_sap(new_sap_attr_idh,sap_config_attr_idh,ipv4_host_addrs_idh,par_component_idh)
@@ -226,9 +226,9 @@ module XYZ
       }
     }
    protected
-    def compute_sap_db(sap_config_val,par_val)
-      #TODO: check if it is this simple
-      sap_config_val.merge(par_val)
+    def self.compute_sap_db(sap_config_val,par_vals)
+      #TODO: check if it is this simple; also may not need and propagate as byproduct of adding a link 
+      par_vals.map{|par_val|sap_config_val.merge(par_val)}
     end
    public
 

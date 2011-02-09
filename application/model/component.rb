@@ -97,17 +97,38 @@ module XYZ
           }
          ]
 
-        virtual_column :sap_par_dependency_database, :type => :json, :hidden => true,
+
+        virtual_column :sap_dependency_database, :type => :json, :hidden => true,
         :remote_dependencies =>
           [{
              :model_name => :attribute,
              :convert => true,
-             :filter => [:and, [:eq,:display_name,"sap_ipv4"]],
+             :filter => [:and, [:eq, :semantic_type_summary, "db_config"]],
              :join_type => :inner,
              :join_cond=>{:component_component_id => q(:component,:id)},
              :cols => [:id,:display_name,:value_asserted,:value_derived]
                          
-           }]
+           },
+
+           {
+             :model_name => :component,
+             :alias => :parent_component,
+             :join_type => :inner,
+             :join_cond=>{:component_component_id => q(:component,:id)},
+             :cols => [:id,:display_name,:component_component_id]
+                         
+           },
+           {
+             :model_name => :attribute,
+             :alias => :parent_attribute,
+             :convert => true,
+             :filter => [:and, [:eq,:display_name,"sap_ipv4"]],
+             :join_type => :inner,
+             :join_cond=>{:component_component_id => q(:parent_component,:id)},
+             :cols => [:id,:display_name,:value_asserted,:value_derived]
+           }
+          ]
+
         virtual_column :parent_name, :possible_parents => [:component,:library,:node,:node_group]
 
         many_to_one :component, :library, :node, :node_group, :datacenter
@@ -128,7 +149,14 @@ module XYZ
       ((self[:state_change]||{})[:count]||0) > 0 or ((self[:state_change2]||{})[:count]||0) > 0
     end
     #######################
-    def self.add_needed_sap_attributes(component_idh,par_component_idh)
+    def self.clone_post_copy_hook(clone_copy_output,target_id_handle,opts={})
+      component_idh = clone_copy_output.id_handles.first
+      add_needed_sap_attributes(component_idh)
+      parent_action_id_handle = target_id_handle.get_parent_id_handle()
+      StateChange.create_pending_change_item(:new_item => new_id_handle, :parent => parent_action_id_handle)
+    end
+
+    def self.add_needed_sap_attributes(component_idh)
      #find if there is a dependent attribute on par_component_idh as function of component_idh basic type
       sp_hash = {
         :filter => [:and, [:oneof, :basic_type, ParentDependency.keys]],
@@ -137,85 +165,46 @@ module XYZ
       component = component_idh.get_objects_from_sp_hash(sp_hash).first
       return nil unless component
       
-      basic_type_info = BasicTypeInfo[component[:basic_type]]
-      par_sp_hash = {
-        :columns => [:id, :display_name,basic_type_info[:par_dependency]]
-      }
-      par_component = par_component_idh.get_objects_from_sp_hash(par_sp_hash).first
-      unless par_component
-        Log.error("component #{component_idh}'s parent #{par_component_idh} is expected to haev a dependency attribute, but does not")
+      sap_dep = BasicTypeInfo[component[:basic_type]][:sap_dependency]
+
+      sap_info = component.get_objects_from_sp_hash(:columns => [:id, :display_name,sap_dep]).first
+      unless sap_info
+        Log.error("error in finding sap dependencies for component #{component_idh}")
         return nil
       end
 
-      par_cmp_attr_val = par_component[:attribute][:attribute_value]
-      semantic_type_summary = basic_type_info[:semantic_type_summary]
-      sap_config_attr_idh, new_sap_attr_idh = component.add_needed_sap_attributes_aux(par_cmp_attr_val,semantic_type_summary)
+      sap_val = sap_info[:fn].call(sap_info[:attribute][:attribute_value],sap_info[:parent_attribute][:attribute_value])
+    
+      new_sap_attr_row = Aux::hash_subset(base_type_info,[{:sap => :ref},{:sap => :display_name},:description,:semantic_type,:semantic_type_summary])
+      new_sap_attr_row.merge!(
+         :component_component_id => component[:id],
+         :value_derived => sap_val,
+         :is_port => true,
+         :hidden => true,
+         :data_type => "json")
+
+      attr_mh = sap_config_attr_idh.createMH(:model_name => :attribute, :parnet_model_name => :component)
+      new_sap_attr_idh = create_from_rows(attr_mh,[new_sap_attr_row], :convert => true).first
       return nil unless new_sap_attr_idh
-#TODO: put in generalzied version      AttributeLink.create_links_ipv4_sap(new_sap_attr_idh,sap_config_attr_idh,ipv4_host_addrs_idh,par_component_idh)
+      #TODO: put in generalzied version      AttributeLink.create_links_ipv4_sap(new_sap_attr_idh,sap_config_attr_idh,ipv4_host_addrs_idh,par_component_idh)
     end
    private
     BasicTypeInfo = {
       "database" => {
-        :par_dependency => :sap_par_dependency_database,
-        :semantic_type_summary => "db_config"
+        :sap => "sap_db",
+        :semantic_type => "sap_db", #TODO: need the  => {"application" => service qualification)
+        :semantic_type_summary => "sap_db",
+        :description => "DB access point",
+        :sap_dependency => :sap_dependency_database,
+        :fn => lambda{|sap_config,par|compute_sap_db(sap_config,par)}
       }
     }
    protected
-    def add_needed_sap_attributes_aux(par_cmp_attr_val,semantic_type_summary)
-=begin
-      component_id = cmp_id_handle.get_id()
-      field_set = Model::FieldSet.new(:component,[:id,:display_name,:attributes])
-     #TODO: allowing feature in until nest features in base services filter = [:and, [:eq, :component__id, component_id],[:eq, :basic_type,"service"]]
-      filter = [:and, [:eq, :component__id, component_id]]
-      global_wc = {:attribute__semantic_type_summary => "sap_config_ipv4"}
-      ds = SearchObject.create_from_field_set(field_set,cmp_id_handle[:c],filter).create_dataset().where(global_wc)
-
-      #should only be one attribute matching (or none)
-      component = ds.all.first
-      sap_config_attr = (component||{})[:attribute]
-      return nil unless sap_config_attr
-      sap_config_attr_idh = cmp_id_handle.createIDH(:guid => sap_config_attr[:id],:model_name => :attribute, :parent_model_name => :component)
-
-      #cartesian product of sap_config(s) and host addreses
-      new_sap_value_list = Array.new
-      #TODO: if graph converted hased values into Model types then could just do sap_config_attr[:attribute_value]
-      values = sap_config_attr[:value_asserted]||sap_config_attr[:value_derived]
-      #values can be hash or array; determine by looking at semantic_type
-      #TODO: may use instead look up from semantic type
-      values = [values] unless values.kind_of?(Array)
-      values.each do |sap_config|
-        ipv4_host_addresses.each do |ipv4_addr|
-          new_sap_value_list << sap_config.merge(:host_address => ipv4_addr)
-        end
-      end
-
-      description_prefix = (component[:display_name]||"").split("::").map{|x|x.capitalize}.join(" ") 
-      description = description_prefix.empty? ? "Service Access Point" : "#{description_prefix} SAP"
-
-      new_sap_attr_rows =
-        [{
-           :ref => "sap_ipv4",
-           :display_name => "sap_ipv4", 
-           :component_component_id => component_id,
-           :value_derived => new_sap_value_list,
-           :is_port => true,
-           :hidden => true,
-           :data_type => "json",
-           :description => description,
-           #TODO: need the  => {"application" => service qualification)
-           :semantic_type => {":array" => "sap_ipv4"},
-           :semantic_type_summary => "sap_ipv4"
-         }]
-
-      attr_mh = sap_config_attr_idh.createMH()
-      new_sap_attr_idh = create_from_rows(attr_mh,new_sap_attr_rows, :convert => true).first
-      
-      [sap_config_attr_idh,new_sap_attr_idh]
-=end
+    def compute_sap_db(sap_config_val,par_val)
+      #TODO: check if it is this simple
+      sap_config_val.merge(par_val)
     end
    public
-
-
 
     ### object processing and access functions
     def get_component_with_attributes_unraveled()

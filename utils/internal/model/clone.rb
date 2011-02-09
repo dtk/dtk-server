@@ -1,5 +1,14 @@
 module XYZ
   module CloneClassMixins
+
+    #TODO: may just be temporary; this function takes into account that front end may not send teh actual target handle for componenst who parents
+    # are on components not nodes
+    def find_real_target_id_handle(id_handle,specified_target_idh)
+      return specified_target_idh unless id_handle[:model_name] == :component and specified_target_idh[:model_name] == :node
+      #TODO: stuib
+      specified_target_idh 
+    end
+
     def clone(id_handle,target_id_handle,override_attrs={},opts={})
       add_model_specific_override_attrs!(override_attrs)
       proc = CloneCopyProcessor.new(self,opts.merge(:include_children => true))

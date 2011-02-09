@@ -67,6 +67,7 @@ module XYZ
     end
 
     def id()
+      return self[:id] if self[:id] #short cicuit
       id_handle ? id_handle.get_id() : nil
     end
 

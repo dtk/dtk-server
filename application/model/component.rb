@@ -19,6 +19,10 @@ module XYZ
         #:assembly_id (in contrast to parent field :component_id) is for tieing teh component to a composite component which is not a container
         foreign_key :assembly_id, :component, FK_SET_NULL_OPT
 
+        many_to_one :component, :library, :node, :node_group, :datacenter
+        one_to_many :component, :attribute_link, :attribute, :monitoring_item
+        virtual_column :parent_name, :possible_parents => [:component,:library,:node,:node_group]
+
         virtual_column :attributes, :type => :json, :hidden => true, 
         :remote_dependencies => 
         [
@@ -106,16 +110,14 @@ module XYZ
              :filter => [:and, [:eq, :semantic_type_summary, "db_config"]],
              :join_type => :inner,
              :join_cond=>{:component_component_id => q(:component,:id)},
-             :cols => [:id,:display_name,:value_asserted,:value_derived]
-                         
+             :cols => [:id,:display_name,:value_asserted,:value_derived,id(:component)]
            },
-
            {
              :model_name => :component,
              :alias => :parent_component,
              :join_type => :inner,
-             :join_cond=>{:component_component_id => q(:component,:id)},
-             :cols => [:id,:display_name,:component_component_id]
+             :join_cond=>{:component_id => q(:component,:id)},
+             :cols => [:id,:display_name,id(:component)]
                          
            },
            {
@@ -125,14 +127,12 @@ module XYZ
              :filter => [:and, [:eq,:display_name,"sap_ipv4"]],
              :join_type => :inner,
              :join_cond=>{:component_component_id => q(:parent_component,:id)},
-             :cols => [:id,:display_name,:value_asserted,:value_derived]
+             :cols => [:id,:display_name,:value_asserted,:value_derived,id(:component)]
            }
           ]
 
-        virtual_column :parent_name, :possible_parents => [:component,:library,:node,:node_group]
 
-        many_to_one :component, :library, :node, :node_group, :datacenter
-        one_to_many :component, :attribute_link, :attribute, :monitoring_item
+
       end
     end
     ##### Actions
@@ -149,17 +149,43 @@ module XYZ
       ((self[:state_change]||{})[:count]||0) > 0 or ((self[:state_change2]||{})[:count]||0) > 0
     end
     #######################
+
+    def determine_cloned_components_parent(specified_target_idh)
+      
+      cmp_fs = FieldSet.opt([:id,:display_name,:component_type],:component)
+      specified_target_id = specified_target_idh.get_id()
+      cmp_ds = Model.get_objects_just_dataset(model_handle,{:id => id()},cmp_fs)
+      mapping_ds = SQL::ArrayDataset.create(self.class.db,SubComponentComponentMapping,model_handle.createMH(:mapping))
+                          
+      first_join_ds =  cmp_ds.graph(:inner,mapping_ds,{:component => :component_type})
+
+      parent_cmp_ds = Model.get_objects_just_dataset(model_handle,{:node_node_id => specified_target_idh.get_id()},cmp_fs)
+
+      final_join_ds = first_join_ds.graph(:inner,parent_cmp_ds,{:component_type => :parent},{:convert => true})
+      
+      target_info = final_join_ds.all().first
+      return specified_target_idh unless target_info
+      target_info[:component2].id_handle()
+    end
+
+   private
+    SubComponentComponentMapping = 
+      [
+       {:component => "postgresql__db", :parent => "postgresql__server"}
+      ]
+   public
+
     def self.clone_post_copy_hook(clone_copy_output,target_id_handle,opts={})
       component_idh = clone_copy_output.id_handles.first
       add_needed_sap_attributes(component_idh)
       parent_action_id_handle = target_id_handle.get_parent_id_handle()
-      StateChange.create_pending_change_item(:new_item => new_id_handle, :parent => parent_action_id_handle)
+      StateChange.create_pending_change_item(:new_item => component_idh, :parent => parent_action_id_handle)
     end
 
     def self.add_needed_sap_attributes(component_idh)
      #find if there is a dependent attribute on par_component_idh as function of component_idh basic type
       sp_hash = {
-        :filter => [:and, [:oneof, :basic_type, ParentDependency.keys]],
+        :filter => [:and, [:oneof, :basic_type, BasicTypeInfo.keys]],
         :columns => [:id, :display_name,:basic_type]
       }
       component = component_idh.get_objects_from_sp_hash(sp_hash).first
@@ -183,7 +209,7 @@ module XYZ
          :hidden => true,
          :data_type => "json")
 
-      attr_mh = sap_config_attr_idh.createMH(:model_name => :attribute, :parnet_model_name => :component)
+      attr_mh = sap_config_attr_idh.createMH(:model_name => :attribute, :parent_model_name => :component)
       new_sap_attr_idh = create_from_rows(attr_mh,[new_sap_attr_row], :convert => true).first
       return nil unless new_sap_attr_idh
       #TODO: put in generalzied version      AttributeLink.create_links_ipv4_sap(new_sap_attr_idh,sap_config_attr_idh,ipv4_host_addrs_idh,par_component_idh)
@@ -191,11 +217,11 @@ module XYZ
    private
     BasicTypeInfo = {
       "database" => {
+        :sap_dependency => :sap_dependency_database,
         :sap => "sap_db",
         :semantic_type => "sap_db", #TODO: need the  => {"application" => service qualification)
         :semantic_type_summary => "sap_db",
         :description => "DB access point",
-        :sap_dependency => :sap_dependency_database,
         :fn => lambda{|sap_config,par|compute_sap_db(sap_config,par)}
       }
     }

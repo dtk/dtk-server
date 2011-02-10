@@ -179,14 +179,14 @@ module XYZ
       ]
    public
 
-    def self.clone_post_copy_hook(clone_copy_output,target_id_handle,opts={})
+    def clone_post_copy_hook(clone_copy_output,opts={})
       component_idh = clone_copy_output.id_handles.first
       add_needed_sap_attributes(component_idh)
-      parent_action_id_handle = target_id_handle.get_top_container_id_handle(:datacenter)
+      parent_action_id_handle = id_handle().get_top_container_id_handle(:datacenter)
       StateChange.create_pending_change_item(:new_item => component_idh, :parent => parent_action_id_handle)
     end
 
-    def self.add_needed_sap_attributes(component_idh)
+    def add_needed_sap_attributes(component_idh)
       sp_hash = {
         :filter => [:and, [:oneof, :basic_type, BasicTypeInfo.keys]],
         :columns => [:id, :display_name,:basic_type]
@@ -217,7 +217,7 @@ module XYZ
          :data_type => "json")
 
       attr_mh = component_idh.createMH(:model_name => :attribute, :parent_model_name => :component)
-      sap_attr_idh = create_from_rows(attr_mh,[sap_attr_row], :convert => true).first
+      sap_attr_idh = self.class.create_from_rows(attr_mh,[sap_attr_row], :convert => true).first
 
       return nil unless sap_attr_idh
       AttributeLink.create_links_sap(basic_type_info,sap_attr_idh,sap_config_attr.id_handle(),par_attr.id_handle(),node.id_handle())
@@ -239,7 +239,7 @@ module XYZ
       }
     }
    protected
-    def self.compute_sap_db(sap_config_val,par_vals)
+    def compute_sap_db(sap_config_val,par_vals)
       #TODO: check if it is this simple; also may not need and propagate as byproduct of adding a link 
       par_vals.map{|par_val|sap_config_val.merge(par_val)}
     end

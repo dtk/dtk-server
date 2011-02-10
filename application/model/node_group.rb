@@ -22,12 +22,12 @@ module XYZ
     ### object procssing and access functions
 
     #TODO: needs to be retested
-    def self.clone_post_copy_hook(clone_copy_output,target_id_handle,opts={})
+    def clone_post_copy_hook(clone_copy_output,opts={})
       #create a change pending item associated with component created on the node group adn returns its id (so it can be
       # used as parent to change items for components on all the node groups memebrs
       #get_top_container_id_handle(:datacenter) will return nil if top is not a datacenter which wil in turn make PendingChangeItem
       #a no-op; this is desired only having pending objects in datacenter, not library
-
+      target_id_handle = id_handle()
       new_id_handle = clone_copy_output.id_handles.first
       action_parent_idh = target_id_handle.get_top_container_id_handle(:datacenter)
       target_display_name = target_id_handle[:display_name]|| get_display_name(target_id_handle)
@@ -39,7 +39,7 @@ module XYZ
       action_id_handle = StateChange.create_pending_change_item(new_item_hash)
       case new_id_handle[:model_name]
        when :component
-        clone_post_copy_hook_component(new_id_handle,target_id_handle,action_id_handle,opts)
+        clone_post_copy_hook_component(new_id_handle,action_id_handle,opts)
        else
         raise Error.new("clone_post_copy_hook to node_group from #{new_id_handle[:model_name]} not implemented yet")
       end
@@ -60,10 +60,10 @@ module XYZ
     end
    private
 
-    def self.clone_post_copy_hook_component(ng_cmp_id_handle,node_group_id_handle,action_id_handle,opts={})
-      node_group_obj = get_object(node_group_id_handle)
+    def clone_post_copy_hook_component(ng_cmp_id_handle,action_id_handle,opts={})
+      node_group_obj = self.class.get_object(id_handle())
       member_list = (node_group_obj||{})[:member_list]||[]
-      targets = member_list.map{|node|node_group_id_handle.createIDH({:model_name => :node,:id=> node[:id], :display_name => node[:display_name]})}
+      targets = member_list.map{|node|id_handle().createIDH({:model_name => :node,:id=> node[:id], :display_name => node[:display_name]})}
       return Array.new if  targets.empty?
       recursive_override_attrs={
         :attribute => {
@@ -87,7 +87,7 @@ module XYZ
       end
       Action.create_pending_change_items(new_items)
 
-      AttributeLink.create_links_node_group_members(node_group_id_handle,ng_cmp_id_handle,node_cmp_id_handles)
+      AttributeLink.create_links_node_group_members(id_handle(),ng_cmp_id_handle,node_cmp_id_handles)
 
       #TODO: links for monitor_items
       nil

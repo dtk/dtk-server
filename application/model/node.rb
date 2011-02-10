@@ -260,9 +260,11 @@ module XYZ
       override_attrs[:external_ref] = nil
     end
 
-    def self.clone_post_copy_hook(clone_copy_output,target_id_handle,opts={})
+    def clone_post_copy_hook(clone_copy_output,opts={})
+      target_id_handle = id_handle()
       new_id_handle = clone_copy_output.id_handles.first
-      add_needed_ipv4_sap_attributes(new_id_handle,target_id_handle)
+      #TODO: change to isnatnce method
+      self.class.add_needed_ipv4_sap_attributes(new_id_handle,target_id_handle)
       parent_action_id_handle = target_id_handle.get_parent_id_handle()
       StateChange.create_pending_change_item(:new_item => new_id_handle, :parent => parent_action_id_handle)
     end

@@ -3,22 +3,22 @@ module XYZ
 #    set_relation_name(:datacenter,:datacenter)
     
     #### actions
-    def self.clone_post_copy_hook(clone_copy_output,target_id_handle,opts={})
+    def clone_post_copy_hook(clone_copy_output,opts={})
       case clone_copy_output.model_name()
        when :component 
-        clone_post_copy_hook__component(clone_copy_output,target_id_handle,opts)
+        clone_post_copy_hook__component(clone_copy_output,opts)
        else #TODO: catchall taht will be expanded
         new_id_handle = clone_copy_output.id_handles.first
-        StateChange.create_pending_change_item(:new_item => new_id_handle, :parent => target_id_handle)
+        StateChange.create_pending_change_item(:new_item => new_id_handle, :parent => id_handle())
       end
     end
    private
-    def self.clone_post_copy_hook__component(clone_copy_output,target_id_handle,opts)
+    def clone_post_copy_hook__component(clone_copy_output,opts)
       #TODO: right now this wil be just a composite component and clone_copy_output will be off form assembly - nodee - component
       #TODO: may put nodes under "install of assembly"
       level = 1
       node_idhs = clone_copy_output.children_id_handles(level,:node)
-      node_new_items = node_idhs.map{|idh|{:new_item => idh, :parent => target_id_handle}}
+      node_new_items = node_idhs.map{|idh|{:new_item => idh, :parent => id_handle()}}
       return if node_new_items.empty?
       node_sc_idhs = StateChange.create_pending_change_items(node_new_items)
 

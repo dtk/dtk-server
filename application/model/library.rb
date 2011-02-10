@@ -3,14 +3,14 @@ module XYZ
 #    set_relation_name(:library,:library)
 
     ##### Actions
-    def self.clone_post_copy_hook(clone_copy_output,target_id_handle,opts={})
+    def clone_post_copy_hook(clone_copy_output,opts={})
       new_id_handle = clone_copy_output.id_handles.first
       case new_id_handle[:model_name]
-       when :component then clone_post_copy_hook__component(new_id_handle,target_id_handle,opts)
+       when :component then clone_post_copy_hook__component(new_id_handle,opts)
       end
     end
    private
-    def self.clone_post_copy_hook__component(new_id_handle,target_id_handle,opts)
+    def clone_post_copy_hook__component(new_id_handle,opts)
       #TODO: may generalize and look for any dynamic attribute that neds to be reset when put in library
       #find if assembly and if so get what it is directly linked to
       sp_hash = {

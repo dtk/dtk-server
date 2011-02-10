@@ -319,6 +319,11 @@ Debug.print_and_ret(
       },
       "sap_socket" => {
       },
+      "sap_db" => {
+        :external => true,
+        :port_type => "output"
+      },
+      #TODO: deprecate below
       "db_info" => {
 #        :external => true,
       }

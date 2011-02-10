@@ -36,7 +36,25 @@ module XYZ
          }
         ]
 
-      attribute_ports =   
+      virtual_column :attribute_ports, :type => :json, :hidden => true, 
+       :remote_dependencies => 
+        [{
+           :model_name => :component,
+           :join_type => :inner,
+           :join_cond=>{:node_node_id => q(:node,:id)},
+           :cols => [:id,:display_name, id(:node)]
+         },
+         {
+           :model_name => :attribute,
+           :convert => true,
+           :join_type => :inner,
+           :filter => [:and,[:eq,:is_port,true]],
+           :join_cond=>{:component_component_id => q(:component,:id)},
+           :cols => [:id,:display_name, id(:component),:is_port,:semantic_type_summary,:description]
+         }]
+
+
+      attribute_ports_for_links =   
         [{
            :model_name => :component,
            :join_type => :inner,
@@ -51,12 +69,10 @@ module XYZ
            :cols => [:id,:display_name, id(:component)]
          }]
 
-      virtual_column :attribute_ports, :type => :json, :hidden => true, 
-       :remote_dependencies => attribute_ports
 
       virtual_column :input_port_links, :type => :json, :hidden => true, 
       :remote_dependencies => 
-        attribute_ports +
+        attribute_ports_for_links +
         [{
            :model_name => :attribute_link,
            :convert => true,
@@ -67,7 +83,7 @@ module XYZ
 
       virtual_column :output_port_links, :type => :json, :hidden => true, 
       :remote_dependencies => 
-        attribute_ports +
+        attribute_ports_for_links +
         [{
            :model_name => :attribute_link,
            :convert => true,
@@ -167,13 +183,9 @@ module XYZ
       ((self[:action]||{})[:count]||0) > 0
     end
 
-    #object processing and access functions
+    ###### model interfaaces
     def get_users()
-      sp_hash = {
-        :columns => [:users]
-      }
-      
-      node_user_list = get_objects_from_sp_hash(sp_hash)
+      node_user_list = get_objects_from_sp_hash(:columns => [:users])
       user_list = Array.new
       #TODO: just putting in username, not uid or gid
       node_user_list.map do |u|
@@ -184,17 +196,38 @@ module XYZ
     end
 
     def get_applications()
-      node_app_list = get_objects_from_sp_hash(:columns => [:applications])
-      applications_hash_list = node_app_list.map{|r|r[:component]}.compact
+      app_hash_list = get_objects_col_from_sp_hash({:columns => [:applications]},:component)
 
       i18n = get_i18n_mappings_for_models(:component)
-      applications_hash_list.map do |component|
+      app_hash_list.map do |component|
         name = component[:display_name]
-        cmp_i18n = i18n_string_component(i18n,name)
+        cmp_i18n = i18n_string(i18n,:component,name)
         component_el = {:id => component[:id], :name =>  name, :i18n => cmp_i18n}
         component_icon_fn = ((component[:ui]||{})[:images]||{})[:tnail]
         component_el.merge(component_icon_fn ? {:component_icon_filename => component_icon_fn} : {})
       end
+    end
+
+    def get_ports(type=nil)
+      attr_port_rows = get_objects_from_sp_hash(:columns => [:attribute_ports])
+
+      i18n = get_i18n_mappings_for_models(:component,:attribute)
+      port_list = Array.new
+      attr_port_rows.each do |r|
+        next unless attr = r[:attribute]
+        next if type == :external and not attr[:port_is_external]
+        #TODO think dont need val = attr[:attribute_value]
+        ###attr[:value] = (val.kind_of?(Hash) or val.kind_of?(Array)) ? JSON.generate(val) : val
+        ## if put back in then :attribute_ports will need value_derived and value_asseretd
+        attr_name = attr[:display_name]
+        cmp_name = (r[:component]||{})[:display_name]
+        attr[:display_name] =  get_i18n_port_name(i18n,attr_name,cmp_name) if attr_name and cmp_name
+        #TODO: hack to remove description
+        attr[:description] = ""
+        port_list << attr
+      end
+      Model::materialize_virtual_columns!(port_list,[:port_type])
+      port_list
     end
 
     def get_port_links()

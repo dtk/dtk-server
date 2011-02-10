@@ -8,7 +8,7 @@ module R8Tpl
           source = task[model_info[:name_field]]
           target_key = model_info[:i18n_field]
           aux = model_info[:aux_field] && task[model_info[:aux_field]] && task[model_info[:aux_field]].to_sym
-          task[target_key] ||= I18nAux::i18n_string(i18n,model_name,source,aux) if source
+          task[target_key] ||= i18n_string(i18n,model_name,source,aux) if source
         end
         (task[:children]||[]).map{|t|add_i18n_strings_to_rendered_tasks!(t,i18n)}
       end
@@ -22,17 +22,24 @@ module R8Tpl
       I18nMappingInfo = {
         :component => {:models => [:component], :name_field => :component_name, :i18n_field => :component_i18n},
         :attribute => {:models => [:attribute,:component], :name_field => :attribute_name, :i18n_field => :attribute_i18n,:aux_field => :component_name}
-    }
-  
+      }
+
+      def i18n_string(i18n,model_name,input_string,aux=nil)
+        return I18nAux::i18n_string_component(i18n,input_string,aux) if model_name == :component
+        return I18nAux::i18n_string_attribute(i18n,input_string,aux) if model_name == :attribute
+        return input_string.to_s if model_name == :node
+        Log.error("Unexpected model type #{model_name} in i18n string translation")
+        I18nAux::translate_input(i18n,model_name,input_string) || input_string.to_s
+      end
+
+      def get_i18n_port_name(i18n,attr_name,cmp_name)
+        attr_i18n = I18nAux::i18n_string_attribute(i18n,attr_name)||attr_name
+        cmp_i18n = I18nAux::i18n_string_component(i18n,cmp_name)||cmp_name
+        "#{cmp_i18n} / #{attr_i18n}"
+      end
+
+
       module I18nAux
-        def self.i18n_string(i18n,model_name,input_string,aux=nil)
-          return i18n_string_component(i18n,input_string,aux) if model_name == :component
-          return i18n_string_attribute(i18n,input_string,aux) if model_name == :attribute
-          return input_string.to_s if model_name == :node
-          Log.error("Unexpected model type #{model_name} in i18n string translation")
-          translate_input(i18n,model_name,input_string) || input_string.to_s
-        end
-    
         def self.i18n_string_component(i18n,input_string,aux=nil)
           string = translate_input(i18n,:component,input_string)
           return string if string

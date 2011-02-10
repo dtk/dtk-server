@@ -19,7 +19,7 @@ module XYZ
       Aux::underscore(Aux::demodulize(self.to_s)).to_sym
     end
     def model_name()
-      self.class.model_name()
+      self.class.model_name() 
     end
 
     def self.model_class(model_name)
@@ -118,6 +118,10 @@ module XYZ
     def get_objects_from_sp_hash(sp_hash_x,opts={})
       sp_hash = HashSearchPattern.add_to_filter(sp_hash_x,[:eq, :id, id()])
       Model.get_objects_from_sp_hash(model_handle(),sp_hash,opts)
+    end
+
+    def get_objects_col_from_sp_hash(sp_hash_x,col,opts={})
+      get_objects_from_sp_hash(sp_hash_x,opts).map{|r|r[col]}.compact
     end
 
     def self.get_objects_in_set_from_sp_hash(id_handles,sp_hash_x,opts={})

@@ -54,6 +54,50 @@ pp '++++++++++++++++++++++++++++++'
       }
     end
 
+    def get_ports(id)
+      node = create_object_from_id(id)
+      port_list = node.get_ports(:external)
+      return {:data=>port_list}
+    end
+=begin
+    def get_ports(id=nil)
+      filter = [:and,[:eq,:is_port,true],[:eq,:port_is_external,true]]
+      cols = [:id,:display_name,:base_object_node,:value_derived,:value_asserted,:port_type,:description]
+      field_set = Model::FieldSet.new(:attribute,cols)
+      ds = SearchObject.create_from_field_set(field_set,ret_session_context_id(),filter).create_dataset()
+      ds = ds.where(:param_node_id => id.to_i) if id
+      i18n = get_i18n_mappings_for_models(:component,:attribute)
+      port_list = ds.all
+      port_list.each do |el|
+        val = el[:attribute_value]
+        el[:value] = (val.kind_of?(Hash) or val.kind_of?(Array)) ? JSON.generate(val) : val
+        attr_name = el[:display_name]
+        cmp_name = (el[:component]||{})[:display_name]
+        if attr_name and cmp_name
+          attr_i18n = i18n_string_attribute(i18n,attr_name)||attr_name
+          cmp_i18n = i18n_string_component(i18n,cmp_name)||cmp_name
+          el[:display_name] = "#{cmp_i18n} / #{attr_i18n}"
+        end
+        #TODO: hack to remove description
+        el[:description] = ""
+      end
+
+
+Expect something like:
+
+node = Node.new(node_id)
+port_list = node.get_ports()
+
+Should probably have params to filter types of ports
+ie: get_ports(['internal'])
+
+      Model::materialize_virtual_columns!(port_list,[:port_type])
+      return {:data=>port_list}
+    end
+=end
+
+
+
     def ac_remotesearch
 pp '++++++++++++++++++++++++++++++'
 pp request.params
@@ -277,41 +321,6 @@ ie: get_components(['language'])
       run_javascript("R8.Workspace.renderItemPorts('#{id}',#{ports});")
 
       return {}
-    end
-
-    def get_ports(id=nil)
-      filter = [:and,[:eq,:is_port,true],[:eq,:port_is_external,true]]
-      cols = [:id,:display_name,:base_object_node,:value_derived,:value_asserted,:port_type,:description]
-      field_set = Model::FieldSet.new(:attribute,cols)
-      ds = SearchObject.create_from_field_set(field_set,ret_session_context_id(),filter).create_dataset()
-      ds = ds.where(:param_node_id => id.to_i) if id
-      i18n = get_i18n_mappings_for_models(:component,:attribute)
-      port_list = ds.all
-      port_list.each do |el|
-        val = el[:attribute_value]
-        el[:value] = (val.kind_of?(Hash) or val.kind_of?(Array)) ? JSON.generate(val) : val
-        attr_name = el[:display_name]
-        cmp_name = (el[:component]||{})[:display_name]
-        if attr_name and cmp_name
-          attr_i18n = i18n_string_attribute(i18n,attr_name)||attr_name
-          cmp_i18n = i18n_string_component(i18n,cmp_name)||cmp_name
-          el[:display_name] = "#{cmp_i18n} / #{attr_i18n}"
-        end
-        #TODO: hack to remove description
-        el[:description] = ""
-      end
-
-=begin
-Expect something like:
-
-node = Node.new(node_id)
-port_list = node.get_ports()
-
-Should probably have params to filter types of ports
-ie: get_ports(['internal'])
-=end
-      Model::materialize_virtual_columns!(port_list,[:port_type])
-      return {:data=>port_list}
     end
 
   end

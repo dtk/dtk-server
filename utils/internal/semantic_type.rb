@@ -24,6 +24,8 @@ module XYZ
           propagate_when_eq_indexed()
          when "sap_ipv4__sap_db" 
           propagate_when_sap_ipv4__sap_db()
+         when "db_config__sap_db"
+          propagate_when_db_config__sap_db()
          else
           raise ErrorNotImplemented.new("propagate value not implemented yet for fn #{function}")
         end
@@ -65,10 +67,7 @@ module XYZ
       {:value_derived => value, :link_info => nil}
     end
 
-    def propagate_when_sap_ipv4__sap_db()
-      ret_cartesian_product()
-    end
-
+    #TODO: refactor to use  ret_cartesian_product()
     def propagate_when_host_address_ipv4()
       output_v = 
         if output_semantic_type().is_array? 
@@ -87,6 +86,14 @@ module XYZ
         value = output_v.first.merge("host_address" => input_value["host_address"])
       end
       {:value_derived => value, :link_info => nil}
+    end
+
+    def propagate_when_sap_ipv4__sap_db()
+      ret_cartesian_product()
+    end
+
+    def propagate_when_db_config__sap_db
+      ret_cartesian_product()
     end
 
     def propagate_when_select_one()
@@ -323,10 +330,10 @@ Debug.print_and_ret(
         :external => true,
         :port_type => "output"
       },
-      #TODO: deprecate below
-      "db_info" => {
-#        :external => true,
-      }
+      "db_ref" => {
+        :external => true,
+        :port_type => "input"
+      },
     }
   end
 end

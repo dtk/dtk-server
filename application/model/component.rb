@@ -239,7 +239,7 @@ module XYZ
       }
     }
    protected
-    def compute_sap_db(sap_config_val,par_vals)
+    def self.compute_sap_db(sap_config_val,par_vals)
       #TODO: check if it is this simple; also may not need and propagate as byproduct of adding a link 
       par_vals.map{|par_val|sap_config_val.merge(par_val)}
     end

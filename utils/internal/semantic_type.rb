@@ -326,6 +326,8 @@ Debug.print_and_ret(
       },
       "sap_socket" => {
       },
+      "sap_config_db" => {
+      },
       "sap_db" => {
         :external => true,
         :port_type => "output"

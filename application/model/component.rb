@@ -267,7 +267,7 @@ module XYZ
     end
 
 
-    def self.add_model_specific_override_attrs!(override_attrs)
+    def add_model_specific_override_attrs!(override_attrs)
       override_attrs[:display_name] = SQL::ColRef.qualified_ref
     end
 

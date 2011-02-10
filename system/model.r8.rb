@@ -36,8 +36,9 @@ module XYZ
 
     include FieldSetInstanceMixin
     extend CloneClassMixins
+    include CloneInstanceMixins
     extend InputIntoModelClassMixins
-
+    
     #TBD: refactoring: below is old to be refactored; above is refactored
     extend ModelSchemaClassMixins
     extend ModelDataClassMixins

@@ -1,3 +1,4 @@
+#TODO: may just make an isnatnce mixin
 module XYZ
   module CloneClassMixins
 
@@ -10,13 +11,17 @@ module XYZ
    private
 
    public
+    #TODO: may refactor to be instance rather than class method
     def clone(id_handle,target_id_handle,override_attrs={},opts={})
-      add_model_specific_override_attrs!(override_attrs)
+      clone_source_object = id_handle.create_object()
+      clone_source_object.add_model_specific_override_attrs!(override_attrs)
       proc = CloneCopyProcessor.new(self,opts.merge(:include_children => true))
       clone_copy_output = proc.clone_copy(id_handle,[target_id_handle],override_attrs)
       new_id_handle = clone_copy_output.id_handles.first
       raise Error.new("cannot clone") unless new_id_handle
       #calling with respect to target
+      #TODO: refactor to target_object = target_id_handle.create_object()
+      #target_object.clone_post_copy_hook(clone_copy_output,target_id_handle,opts)
       model_class(target_id_handle[:model_name]).clone_post_copy_hook(clone_copy_output,target_id_handle,opts)
       return new_id_handle.get_id()
     end
@@ -48,16 +53,18 @@ module XYZ
       model_class(target_id_handle[:model_name]).clone_post_copy_hook(clone_copy_output,target_id_handle)
       return top_object_id_handle.get_id()
     end
-
+  end
+  module CloneInstanceMixins
    protected
     # to be optionally overwritten by object representing the source
     def add_model_specific_override_attrs!(override_attrs)
     end
-
+  end
+  module CloneClassMixins
+   protected
     # to be optionally overwritten by object representing the target
     def clone_post_copy_hook(new_id_handle,children_id_handles,target_id_handle,opts={})
     end
-
    private
     #TODO: slight refactor of CloneCopyOutput so each child is of form {:parent => <parent>,:child => <CloneCopyOutput>}
     class CloneCopyOutput

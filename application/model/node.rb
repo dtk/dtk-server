@@ -253,7 +253,7 @@ module XYZ
       [connected_links,dangling_links]
     end
 
-    def self.add_model_specific_override_attrs!(override_attrs)
+    def add_model_specific_override_attrs!(override_attrs)
       override_attrs[:type] = "staged"
       override_attrs[:ref] = SQL::ColRef.concat("s-",:ref)
       override_attrs[:display_name] = SQL::ColRef.concat{|o|["s-",:display_name,o.case{[[{:ref_num=> nil},""],o.concat("-",:ref_num)]}]}

@@ -184,11 +184,17 @@ module XYZ
     end
 
     def get_applications()
-      sp_hash = {
-        :columns => [:applications]
-      }
-      node_app_list = get_objects_from_sp_hash(sp_hash)
-      node_app_list.map{|r|r[:component]}.compact
+      node_app_list = get_objects_from_sp_hash(:columns => [:applications])
+      applications_hash_list = node_app_list.map{|r|r[:component]}.compact
+
+      i18n = get_i18n_mappings_for_models(:component)
+      applications_hash_list.map do |component|
+        name = component[:display_name]
+        cmp_i18n = i18n_string_component(i18n,name)
+        component_el = {:id => component[:id], :name =>  name, :i18n => cmp_i18n}
+        component_icon_fn = ((component[:ui]||{})[:images]||{})[:tnail]
+        component_el.merge(component_icon_fn ? {:component_icon_filename => component_icon_fn} : {})
+      end
     end
 
     def get_port_links()

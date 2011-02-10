@@ -40,22 +40,7 @@ pp '++++++++++++++++++++++++++++++'
 
     def dock_get_applications(id)
       node = create_object_from_id(id)
-      app_list = Array.new
-      db_app_list = node.get_applications()
-
-      i18n = get_i18n_mappings_for_models(:component)
-      app_list = db_app_list.map do |component|
-        name = component[:display_name]
-        cmp_i18n = i18n_string_component(i18n,name)
-        component_el = {:id => component[:id], :name =>  name, :i18n => cmp_i18n}
-        component_icon_fn = ((component[:ui]||{})[:images]||{})[:tnail]
-        component_el.merge(component_icon_fn ? {:component_icon_filename => component_icon_fn} : {})
-      end
-
-=begin
-i18n stuff should be accessible and set within the model, shouldnt have to iterate over list in here
-and set values
-=end
+      app_list = node.get_applications()
 
       tpl = R8Tpl::TemplateR8.new("dock/node_get_apps",user_context())
       tpl.assign(:_app,app_common())

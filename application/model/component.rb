@@ -13,8 +13,7 @@ module XYZ
         column :version, :varchar, :size => 25 # version of underlying component (not chef recipe .... version)
         column :uri, :varchar
         column :ui, :json
-        foreign_key :node_constraint_id, :search_object, FK_SET_NULL_OPT #search object that is constraint on node component can be placed on
-
+        foreign_key :constraints_id, :constraints, FK_SET_NULL_OPT #search object that is constraint on node component can be placed on
 
         #:assembly_id (in contrast to parent field :component_id) is for tieing teh component to a composite component which is not a container
         foreign_key :assembly_id, :component, FK_SET_NULL_OPT

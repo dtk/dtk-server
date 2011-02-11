@@ -1,8 +1,43 @@
 module XYZ
   class Datacenter < Model
 #    set_relation_name(:datacenter,:datacenter)
-    
-    #### actions
+
+    #### model api functions
+    def self.get_port_links(id_handles)
+      return Array.new if id_handles.empty?
+      
+      node_id_handles = id_handles.select{|idh|idh[:model_name] == :node}
+      if node_id_handles.size < id_handles.size
+        models_not_treated = id_handles.reject{|idh|idh[:model_name] == :node}.map{idh|idh[:model_name]}.unique
+        Log.error("Item list for Datacenter.get_port_links has models not treated (#{models_not_treated.join(",")}; they will be ignored")
+      end
+
+      raw_link_list = Node.get_port_links(node_id_handles)
+
+      link_list = Array.new
+      raw_link_list.each do |el|
+        [:input_port_links,:output_port_links].each do |dir|
+          (el[dir]||[]).each do |attr_link|
+            port_dir = dir == :input_port_links ? "input" : "output"
+            port_id = dir == :input_port_links ? attr_link[:input_id] : attr_link[:output_id]
+            other_end_id = dir == :input_port_links ? attr_link[:output_id] : attr_link[:input_id]
+            link_list << {
+              :id => attr_link[:id],
+              :item_id => el[:id],
+              :item_name => el[:display_name],
+              :port_id => port_id,
+              :port_name => attr_link[:port_i18n],
+              :type => attr_link[:type],
+              :port_dir => port_dir,
+              :hidden => attr_link[:hidden],
+              :other_end_id => other_end_id
+            }
+          end
+        end
+      end
+      link_list
+    end
+    #### clone helping functions
     def clone_post_copy_hook(clone_copy_output,opts={})
       case clone_copy_output.model_name()
        when :component 

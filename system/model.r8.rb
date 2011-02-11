@@ -9,6 +9,7 @@ require File.expand_path(UTILS_DIR+'/internal/model/data', File.dirname(__FILE__
 module XYZ
   class Model < HashObject 
     include R8Tpl::Utility::I18n
+    extend R8Tpl::Utility::I18n
     class << self
       attr_reader :db
       #TODO: get benchmark from config file

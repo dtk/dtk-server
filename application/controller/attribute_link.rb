@@ -50,47 +50,10 @@ module XYZ
     def get_under_context_list(explicit_hash=nil)
 
       hash = explicit_hash || request.params
-
-      #TODO: ignoring query filters no
       context_list = JSON.parse(hash["context_list"])
 
-      raise Error.new("did not get context_list") unless context_list
-      #TODO: only handling nodes
-      item_ids = context_list.reject{|x|not x["model"] == "node"}.map{|y|y["id"] ? y["id"].to_i : nil}.compact
-
-      return {'data'=> Array.new} if item_ids.empty?
-
-      filter = item_ids ? [:and, [:oneof, :id, item_ids]] : nil
-      cols = [:id,:display_name,:deprecate_port_links]
-      field_set = Model::FieldSet.new(:node,cols)
-      ds = SearchObject.create_from_field_set(field_set,ret_session_context_id(),filter).create_dataset()
-      ds = ds.where(SQL.not(SQL::ColRef.coalesce(:other_end_output_id,:other_end_input_id) => nil))
-
-      raw_link_list = ds.all
-      link_list = Array.new
-      raw_link_list.each do |el|
-        component_name = el[:component][:display_name].gsub(/::.+$/,"")
-        port_name = Aux.put_in_bracket_form([component_name] + Aux.tokenize_bracket_name(el[:attribute][:display_name]))
-        type = (el[:attribute_link]||{})[:type]||(el[:attribute_link2]||{})[:type]
-        hidden = (el[:attribute_link]||{})[:hidden].nil? ? (el[:attribute_link2]||{})[:hidden] : (el[:attribute_link]||{})[:hidden]
-        other_end_id = (el[:attribute_link]||{})[:other_end_output_id]||(el[:attribute_link2]||{})[:other_end_input_id]
-        port_dir = el[:attribute_link] ? "input" : "output"
-        id = el[:attribute_link].nil? ? "" : el[:attribute_link][:id]
-        link_list << {
-          :id => id,
-          :item_id => el[:id],
-          :item_name => el[:display_name],
-          :port_id => el[:attribute][:id],
-          :port_name => port_name,
-          :type => type,
-          :port_dir => port_dir,
-          :hidden => hidden,
-          :other_end_id => other_end_id
-        }
-      end
-#DEBUG
-#pp '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
-#pp link_list
+      item_id_handles = context_list.map{|x|id_handle(x["id"].to_i,x["model"].to_sym)}
+      link_list = Datacenter.get_port_links(item_id_handles)
       return {'data'=>link_list}
     end
 

@@ -78,7 +78,7 @@ module XYZ
            :convert => true,
            :join_cond=>{:input_id =>q(:attribute,:id)},
            :join_type => :inner,
-           :cols => [:id,:type,:input_id,:output_id,id(:node)]
+           :cols => [:id,:type,:input_id,:output_id,id(:node),:hidden]
          }]
 
       virtual_column :output_port_links, :type => :json, :hidden => true, 
@@ -89,7 +89,7 @@ module XYZ
            :convert => true,
            :join_cond=>{:output_id =>q(:attribute,:id)},
            :join_type => :inner,
-           :cols => [:id,:type,:input_id,:output_id,id(:node)]
+           :cols => [:id,:type,:input_id,:output_id,id(:node),:hidden]
          }]
 
         virtual_column :has_pending_change, :type => :boolean, :hidden => true,
@@ -230,37 +230,25 @@ module XYZ
       port_list
     end
 
-    def get_port_links()
-      input_port_cols = [:id, :display_name, :input_port_links]
-      input_port_rows = get_objects_from_sp_hash(:columns => input_port_cols)
-      output_port_cols = [:id, :display_name, :output_port_links]
-      output_port_rows = get_objects_from_sp_hash(:columns => output_port_cols)
-
-      return Array.new if input_port_rows.empty? and output_port_rows.empty?
-      #all node attrs will be the same ; so just using first as sample
-      ret = (input_port_rows.first||output_port_rows.first).subset(:id, :display_name)
-      ret[:input_port_links] = input_port_rows.map{|r|r[:attribute_link]}.compact
-      ret[:output_port_links] = output_port_rows.map{|r|r[:attribute_link]}.compact
-      ret
-    end
-
     def self.get_port_links(id_handles)
       input_port_cols = [:id, :display_name, :input_port_links]
       input_port_rows = get_objects_in_set_from_sp_hash(id_handles,:columns => input_port_cols)
       output_port_cols = [:id, :display_name, :output_port_links]
       output_port_rows = get_objects_in_set_from_sp_hash(id_handles,:columns => output_port_cols)
-
+      i18n = get_i18n_mappings_for_models(:component,:attribute)
       return Array.new if input_port_rows.empty? and output_port_rows.empty?
       indexed_ret = Hash.new
       input_port_rows.each do |r|
         id = r[:id]
         indexed_ret[id] ||= r.subset(:id, :display_name).merge(:input_port_links => Array.new, :output_port_links => Array.new)
-        indexed_ret[id][:input_port_links] << r[:attribute_link]
+        port_i18n = get_i18n_port_name(i18n,r[:attribute][:display_name],r[:component][:display_name])
+        indexed_ret[id][:input_port_links] << r[:attribute_link].merge(:port_i18n => port_i18n)
       end
       output_port_rows.each do |r|
         id = r[:id]
         indexed_ret[id] ||= r.subset(:id, :display_name).merge(:output_port_links => Array.new, :output_port_links => Array.new)
-        indexed_ret[id][:output_port_links] << r[:attribute_link]
+        port_i18n = get_i18n_port_name(i18n,r[:attribute][:display_name],r[:component][:display_name])
+        indexed_ret[id][:output_port_links] << r[:attribute_link].merge(:port_i18n => port_i18n)
       end
       indexed_ret.values
     end

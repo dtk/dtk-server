@@ -3,7 +3,7 @@ module XYZ
 #    set_relation_name(:datacenter,:datacenter)
 
     #### model api functions
-    def self.get_port_links(id_handles)
+    def self.get_links(id_handles)
       return Array.new if id_handles.empty?
       
       node_id_handles = id_handles.select{|idh|idh[:model_name] == :node}

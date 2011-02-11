@@ -282,8 +282,6 @@ module XYZ
     end
 
     ###### Helper fns
-
-
     def get_contained_attribute_ids(opts={})
       parent_id = IDInfoTable.get_id_from_id_handle(id_handle)
       nested_cmps = get_objects(ModelHandle.new(id_handle[:c],:component),nil,:parent_id => parent_id)

@@ -263,7 +263,17 @@ module XYZ
         :columns => [:id,:display_name,:attribute_value,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
       }
       raw_attributes = get_children_from_sp_hash(:attribute,sp_hash)
-      AttributeComplexType.flatten_attribute_list(raw_attributes)
+      flattened_attr_list = AttributeComplexType.flatten_attribute_list(raw_attributes)
+      i18n = get_i18n_mappings_for_models(:attribute)
+      flattened_attr_list.map do |a|
+        name = a[:display_name]
+        {
+          :id => a[:unraveled_attribute_id],
+          :name =>  name,
+          :value => a[:attribute_value],
+          :i18n => i18n_string(i18n,:attribute,name)
+        }
+      end
     end
 
 

@@ -1,11 +1,11 @@
 service :postgresql do
-  attribute "sap_config_ipv4",
+  attribute "sap_config__l4",
     :recipes => ["postgresql::server"],
     :type => "hash",
     :description => "postgres ip service access point configuration",
     :semantic_type => {
       ":array" => {
-        "sap_config_ipv4" => {
+        "sap_config__l4" => {
           "application" => {
             "type" => "sql::postgresql" 
           }}}},
@@ -15,19 +15,19 @@ service :postgresql do
        "protocol" => "tcp"
      }]
 
-  attribute "sap_ref",
+  attribute "sap_ref__l4",
     :recipes => ["postgresql::app"],
     :required => true,
     :type => "hash",
     :description => "postgresql admin service access point reference to connect to server",
-    :semantic_type => {"sap_ref" => {"application" => {"type" => "sql::postgresql"}}}
+    :semantic_type => {"sap_ref__l4" => {"application" => {"type" => "sql::postgresql"}}}
 
-  attribute "db_config",
+  attribute "sap_config__db",
     :recipes => ["postgresql::db"],
     :type => "hash",
     :description => "postgres db",
     :semantic_type => {
-      "db_config" => {
+      "sap_config__db" => {
           "application" => {
              "type" => "sql::postgresql" 
       }}},
@@ -37,13 +37,28 @@ service :postgresql do
        "owner" => nil,
        "password" => nil
     }
+  attribute "sap_config__db__admin",
+    :recipes => ["postgresql::server"],
+    :type => "hash",
+    :description => "postgres db",
+    :semantic_type => {
+      "sap_config__db" => {
+          "application" => {
+             "type" => "sql::postgresql" 
+      }}},
+    :transform =>
+    {
+       "name"  => "admin",
+       "owner" => "admin",
+       "password" => nil
+    }
 
-  attribute "db_ref",
+  attribute "sap_ref__db",
     :recipes => ["postgresql::single_tenant"],
     :required => true,
     :type => "hash",
     :description => "postgresql db connection",
-    :semantic_type => {"db_ref" => {"application" => {"type" => "sql::postgresql"}}}
+    :semantic_type => {"sap_ref__db" => {"application" => {"type" => "sql::postgresql"}}}
 
 end
 

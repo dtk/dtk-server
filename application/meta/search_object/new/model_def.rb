@@ -10,7 +10,5 @@
       :on_update=>:set_null
     }
   },
-  :many_to_one=>[:library],
-  :one_to_many=>[],
-  :virtual_columns=>{}
+  :many_to_one=>[:library]
 }

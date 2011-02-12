@@ -23,6 +23,35 @@
         "display_name": "Apache Log Directory",
         "description": "Location for Apache logs"
       },
+      "apache2/_service/apache2_service/sap_config__l4": {
+        "required": "optional",
+        "is_service_attribute": true,
+        "calculated": false,
+        "transform": [
+          {
+            "protocol": "tcp",
+            "ports": {
+              "__ref": "node[apache2][listen_ports]"
+            }
+          }
+        ],
+        "port_type": "input",
+        "choice": [
+
+        ],
+        "type": "hash",
+        "recipes": [
+
+        ],
+        "description": "apache2 ip service access point configuration",
+        "semantic_type": {
+          ":array": {
+            "sap_config__l4": {
+              "application": "webserver"
+            }
+          }
+        }
+      },
       "_meta_info": {
         "required": "optional",
         "calculated": false,
@@ -106,35 +135,6 @@
         ],
         "display_name": "Apache Binary",
         "description": "Apache server daemon program"
-      },
-      "apache2/_service/apache2_service/sap_config_ipv4": {
-        "required": "optional",
-        "is_service_attribute": true,
-        "calculated": false,
-        "transform": [
-          {
-            "protocol": "tcp",
-            "ports": {
-              "__ref": "node[apache2][listen_ports]"
-            }
-          }
-        ],
-        "port_type": "input",
-        "choice": [
-
-        ],
-        "type": "hash",
-        "recipes": [
-
-        ],
-        "description": "apache2 ip service access point configuration",
-        "semantic_type": {
-          ":array": {
-            "sap_config_ipv4": {
-              "application": "webserver"
-            }
-          }
-        }
       },
       "apache2/dir": {
         "required": "optional",

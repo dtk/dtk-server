@@ -9,7 +9,7 @@
     "providing": {
     },
     "attributes": {
-      "redis/_service/redis_service/sap_config_ipv4": {
+      "redis/_service/redis_service/sap_config__l4": {
         "required": "optional",
         "is_service_attribute": true,
         "calculated": false,
@@ -32,7 +32,7 @@
         "description": "redis ip service access point configuration",
         "semantic_type": {
           ":array": {
-            "sap_config_ipv4": {
+            "sap_config__l4": {
               "application": "redis"
             }
           }

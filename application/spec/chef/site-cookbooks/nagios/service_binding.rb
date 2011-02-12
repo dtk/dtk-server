@@ -4,7 +4,7 @@ service :nagios do
     :required => true,
     :type => "hash",
     :description => "monitored client service access point",
-    :semantic_type => {"sap_config_ipv4" => {"application" => {"type" => "nrpe"}}},
+    :semantic_type => {"sap_config__l4" => {"application" => {"type" => "nrpe"}}},
     :transform => {
       "port" => "5666",
       "protocol" => "tcp"
@@ -15,5 +15,5 @@ service :nagios do
     :required => true,
     :type => "hash",
     :description => "monitor client service access point ref",
-    :semantic_type => {":array" => {"sap_ref" => {"application" => {"type" => "nrpe"}}}}
+    :semantic_type => {":array" => {"sap_ref__l4" => {"application" => {"type" => "nrpe"}}}}
 end

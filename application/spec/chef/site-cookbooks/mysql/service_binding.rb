@@ -5,13 +5,13 @@ service :mysql_server do
     :description => "db userid for monitoring application to use",
     :transform => "root"
 
-  attribute "sap_config_ipv4",
+  attribute "sap_config__l4",
     :recipes => ["mysql::server","mysql::server2"],
     :type => "hash",
     :description => "mysql ip service access point configuration",
     :semantic_type => {
       ":array" => {
-        "sap_config_ipv4" => {
+        "sap_config__l4" => {
           "application" => {
             "type" => "sql::mysql", 
             "clients_provide_dbs" => true
@@ -22,10 +22,10 @@ service :mysql_server do
        "protocol" => "tcp"
      }]
 
-  attribute "sap_socket",
+  attribute "sap__socket",
     :recipes => ["mysql::server","mysql::server2"],
     :description => "mysql unix socket service access point",
-    :semantic_type => {"sap_socket" => {"application" => {"type" => "sql::mysql"}}},
+    :semantic_type => {"sap__socket" => {"application" => {"type" => "sql::mysql"}}},
     :type => "hash",
     :transform =>
       {
@@ -38,7 +38,7 @@ service :mysql_server do
     :description => "mysql ip service access point configuration for slave",
     :semantic_type => { 
       ":array" => {
-        "sap_config_ipv4" => {
+        "sap_config__l4" => {
           "application" => {
             "type" => "sql::mysql", 
             "clients_provide_dbs" => false
@@ -62,7 +62,7 @@ service :mysql_server do
     :required => true,
     :type => "hash",
     :description => "mysql service access point reference for slave to connect with master",
-    :semantic_type => {"sap_ref" => {"application" => {"type" => "sql::mysql"}}}
+    :semantic_type => {"sap_ref__db" => {"application" => {"type" => "sql::mysql"}}}
 
     
   attribute "master_log_ref",

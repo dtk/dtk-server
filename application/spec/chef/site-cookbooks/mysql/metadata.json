@@ -45,6 +45,38 @@
         "display_name": "MySQL Server Root Password",
         "description": "Randomly generated password for the mysqld root user"
       },
+      "mysql/_service/mysql_server/sap_config__l4": {
+        "required": "optional",
+        "is_service_attribute": true,
+        "calculated": false,
+        "transform": [
+          {
+            "port": {
+              "__ref": "node[mysql][port]"
+            },
+            "protocol": "tcp"
+          }
+        ],
+        "choice": [
+
+        ],
+        "type": "hash",
+        "recipes": [
+          "mysql::server",
+          "mysql::server2"
+        ],
+        "description": "mysql ip service access point configuration",
+        "semantic_type": {
+          ":array": {
+            "sap_config__l4": {
+              "application": {
+                "clients_provide_dbs": true,
+                "type": "sql::mysql"
+              }
+            }
+          }
+        }
+      },
       "mysql/tunable/max_heap_table_size": {
         "required": "optional",
         "calculated": false,
@@ -120,38 +152,6 @@
         "display_name": "MySQL Bind Address",
         "description": "Address that mysqld should listen on"
       },
-      "mysql/_service/mysql_server/sap_config_ipv4": {
-        "required": "optional",
-        "is_service_attribute": true,
-        "calculated": false,
-        "transform": [
-          {
-            "port": {
-              "__ref": "node[mysql][port]"
-            },
-            "protocol": "tcp"
-          }
-        ],
-        "choice": [
-
-        ],
-        "type": "hash",
-        "recipes": [
-          "mysql::server",
-          "mysql::server2"
-        ],
-        "description": "mysql ip service access point configuration",
-        "semantic_type": {
-          ":array": {
-            "sap_config_ipv4": {
-              "application": {
-                "clients_provide_dbs": true,
-                "type": "sql::mysql"
-              }
-            }
-          }
-        }
-      },
       "mysql/tunable/back_log": {
         "required": "optional",
         "calculated": false,
@@ -208,7 +208,7 @@
         ],
         "description": "mysql service access point reference for slave to connect with master",
         "semantic_type": {
-          "sap_ref": {
+          "sap_ref__db": {
             "application": {
               "type": "sql::mysql"
             }
@@ -246,7 +246,7 @@
         "description": "mysql ip service access point configuration for slave",
         "semantic_type": {
           ":array": {
-            "sap_config_ipv4": {
+            "sap_config__l4": {
               "application": {
                 "clients_provide_dbs": false,
                 "type": "sql::mysql"
@@ -283,30 +283,6 @@
         ],
         "display_name": "MySQL Tunable Max Connections"
       },
-      "mysql/_service/mysql_server/sap_socket": {
-        "required": "optional",
-        "is_service_attribute": true,
-        "calculated": false,
-        "transform": {
-          "socket_file": "/var/run/mysqld/mysqld.sock"
-        },
-        "choice": [
-
-        ],
-        "type": "hash",
-        "recipes": [
-          "mysql::server",
-          "mysql::server2"
-        ],
-        "description": "mysql unix socket service access point",
-        "semantic_type": {
-          "sap_socket": {
-            "application": {
-              "type": "sql::mysql"
-            }
-          }
-        }
-      },
       "mysql/tunable/table_cache": {
         "required": "optional",
         "calculated": false,
@@ -334,6 +310,30 @@
         ],
         "display_name": "MySQL Tunables",
         "description": "Hash of MySQL tunable attributes"
+      },
+      "mysql/_service/mysql_server/sap__socket": {
+        "required": "optional",
+        "is_service_attribute": true,
+        "calculated": false,
+        "transform": {
+          "socket_file": "/var/run/mysqld/mysqld.sock"
+        },
+        "choice": [
+
+        ],
+        "type": "hash",
+        "recipes": [
+          "mysql::server",
+          "mysql::server2"
+        ],
+        "description": "mysql unix socket service access point",
+        "semantic_type": {
+          "sap__socket": {
+            "application": {
+              "type": "sql::mysql"
+            }
+          }
+        }
       },
       "mysql/ec2_path": {
         "required": "optional",

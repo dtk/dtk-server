@@ -106,7 +106,7 @@ module XYZ
           [{
              :model_name => :attribute,
              :convert => true,
-             :filter => [:and, [:eq, :semantic_type_summary, "db_config"]],
+             :filter => [:and, [:eq, :semantic_type_summary, "sap_config__db"]],
              :join_type => :inner,
              :join_cond=>{:component_component_id => q(:component,:id)},
              :cols => [:id,:display_name,:value_asserted,:value_derived,id(:component)]
@@ -122,7 +122,7 @@ module XYZ
              :model_name => :attribute,
              :alias => :parent_attribute,
              :convert => true,
-             :filter => [:and, [:eq,:display_name,"sap_ipv4"]],
+             :filter => [:and, [:eq,:display_name,"sap__l4"]],
              :join_type => :inner,
              :join_cond=>{:component_component_id => q(:parent_component,:id)},
              :cols => [:id,:display_name,:value_asserted,:value_derived,id(:component)]
@@ -222,17 +222,17 @@ module XYZ
       AttributeLink.create_links_sap(basic_type_info,sap_attr_idh,sap_config_attr.id_handle(),par_attr.id_handle(),node.id_handle())
     end
    private
-    #TODO: some of these are redendant of whats in sap_dependency_X like "sap_ipv4" and "sap_db"
+    #TODO: some of these are redendant of whats in sap_dependency_X like "sap__l4" and "sap__db"
     BasicTypeInfo = {
       "database" => {
         :sap_dependency => :sap_dependency_database,
-        :sap => "sap_db",
-        :sap_config => "db_config",
-        :sap_config_fn_name => "db_config__sap_db",
-        :parent_attr => "sap_ipv4",
-        :parent_fn_name => "sap_ipv4__sap_db",
-        :semantic_type => {":array" => "sap_db"}, #TODO: need the  => {"application" => service qualification)
-        :semantic_type_summary => "sap_db",
+        :sap => "sap__db",
+        :sap_config => "sap_config__db",
+        :sap_config_fn_name => "sap_config_conn__db",
+        :parent_attr => "sap__l4",
+        :parent_fn_name => "sap_conn__l4__db",
+        :semantic_type => {":array" => "sap__db"}, #TODO: need the  => {"application" => service qualification)
+        :semantic_type_summary => "sap__db",
         :description => "DB access point",
         :fn => lambda{|sap_config,par|compute_sap_db(sap_config,par)}
       }

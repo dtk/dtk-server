@@ -157,7 +157,7 @@ module XYZ
     end
 
     #TODO: deprecate below after subsuming from above
-    def self.create_links_ipv4_sap(new_sap_attr_idh,sap_config_attr_idh,ipv4_host_addrs_idh,node_idh)
+    def self.create_links_l4_sap(new_sap_attr_idh,sap_config_attr_idh,ipv4_host_addrs_idh,node_idh)
       attr_link_mh = node_idh.createMH(:model_name => :attribute_link, :parent_model_name => :node)
       new_sap_id,sap_config_id,ipv4_id,node_id = [new_sap_attr_idh,sap_config_attr_idh,ipv4_host_addrs_idh,node_idh].map{|x|x.get_id()}
       
@@ -170,7 +170,7 @@ module XYZ
            :output_id => sap_config_id,
            :type => "internal",
            :hidden => true,
-           :function => "sap_config_ipv4",
+           :function => "sap_config__l4",
            :node_node_id => node_id
          },
          {

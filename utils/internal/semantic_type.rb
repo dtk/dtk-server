@@ -14,18 +14,18 @@ module XYZ
       return {:value_derived => output_value_aux(), :link_info => nil} if function == "eq"
       hash_ret = 
         case function
-         when "sap_config_ipv4" 
-          propagate_when_sap_config_ipv4()
+         when "sap_config__l4" 
+          propagate_when_sap_config__l4()
          when "host_address_ipv4"
           propagate_when_host_address_ipv4()
          when "select_one"
           propagate_when_select_one()
          when "eq_indexed"
           propagate_when_eq_indexed()
-         when "sap_ipv4__sap_db" 
-          propagate_when_sap_ipv4__sap_db()
-         when "db_config__sap_db"
-          propagate_when_db_config__sap_db()
+         when "sap_conn__l4__db" 
+          propagate_when_sap_conn__l4__db()
+         when "sap_config_conn__db"
+          propagate_when_sap_config_conn__db()
          else
           raise ErrorNotImplemented.new("propagate value not implemented yet for fn #{function}")
         end
@@ -43,10 +43,10 @@ module XYZ
     #TODO: need to simplify so we dont need all these one ofs
     #######function-specfic propagation
     #TODO: refactor to use  ret_cartesian_product()
-    def propagate_when_sap_config_ipv4()
+    def propagate_when_sap_config__l4()
       output_v = 
         if output_semantic_type().is_array? 
-          raise ErrorNotImplemented.new("propagate_when_sap_config_ipv4 when output has empty list") if output_value.empty?
+          raise ErrorNotImplemented.new("propagate_when_sap_config__l4 when output has empty list") if output_value.empty?
           output_value
         else
           [output_value]
@@ -61,7 +61,7 @@ module XYZ
           value += input_value.map{|input_item|sap_config.merge("host_address" => input_item["host_address"])}
         end
       else #not input_semantic_type().is_array?
-        raise Error.new("propagate_when_sap_config_ipv4 does not support input scalar and output array with size > 1") if output_value.size > 1
+        raise Error.new("propagate_when_sap_config__l4 does not support input scalar and output array with size > 1") if output_value.size > 1
         value = output_v.first.merge("host_address" => input_value["host_address"])
       end
       {:value_derived => value, :link_info => nil}
@@ -88,11 +88,11 @@ module XYZ
       {:value_derived => value, :link_info => nil}
     end
 
-    def propagate_when_sap_ipv4__sap_db()
+    def propagate_when_sap_conn__l4__db()
       ret_cartesian_product()
     end
 
-    def propagate_when_db_config__sap_db
+    def propagate_when_sap_config_conn__db
       ret_cartesian_product()
     end
 
@@ -278,17 +278,17 @@ Debug.print_and_ret(
 
     TranslationToSchema = self.new( 
     {
-      "sap_config_ipv4" => {
+      "sap_config__l4" => {
         "port" =>  {:required => true, :type => :integer},
         "protocol" => {:required => true, :type => :string},
         "binding_addr_constraints" => {:type => :json}
       },
-      "sap_ipv4" => {
+      "sap__l4" => {
         "port" => {:required => true, :type => :integer},
         "protocol" => {:required => true, :type => :string},
         "host_address" => {:required => true, :type => :string}
       },
-      "sap_ref" => {
+      "sap_ref__l4" => {
         :or => 
         [{
            "port" => {:required => true, :type => :integer},
@@ -298,15 +298,9 @@ Debug.print_and_ret(
          {"socket_file" => {:required => true, :type => :string}}
         ]
       },
-      "sap_socket" => {
+      "sap__socket" => {
         "socket_file" => {:required => true, :type => :string}
       },
-      
-      "db_info" => {
-        "username" => {:required => true, :type => :string},
-        "database" => {:required => true, :type => :string},
-        "password" => {:required => true, :type => :string}
-      }
     },true)
   end
 
@@ -314,25 +308,25 @@ Debug.print_and_ret(
     #TODO: rather than external may have :internal_only
     Info =
       {
-      "sap_config_ipv4" => {
+      "sap_config__l4" => {
       },
-      "sap_ipv4" => {
+      "sap__l4" => {
         :external => true,
         :port_type => "output"
       },
-      "sap_ref" => {
+      "sap_ref__l4" => {
         :external => true,
         :port_type => "input"
       },
-      "sap_socket" => {
+      "sap__socket" => {
       },
-      "sap_config_db" => {
+      "sap_config__db" => {
       },
-      "sap_db" => {
+      "sap__db" => {
         :external => true,
         :port_type => "output"
       },
-      "db_ref" => {
+      "sap_ref__db" => {
         :external => true,
         :port_type => "input"
       },

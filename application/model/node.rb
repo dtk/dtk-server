@@ -291,12 +291,12 @@ module XYZ
       target_id_handle = id_handle()
       new_id_handle = clone_copy_output.id_handles.first
       #TODO: change to isnatnce method
-      self.class.add_needed_ipv4_sap_attributes(new_id_handle,target_id_handle)
+      self.class.add_needed_l4_sap_attributes(new_id_handle,target_id_handle)
       parent_action_id_handle = target_id_handle.get_parent_id_handle()
       StateChange.create_pending_change_item(:new_item => new_id_handle, :parent => parent_action_id_handle)
     end
 
-    def self.add_needed_ipv4_sap_attributes(cmp_id_handle,node_id_handle)
+    def self.add_needed_l4_sap_attributes(cmp_id_handle,node_id_handle)
       field_set = Model::FieldSet.new(:node,[:id,:node_attributes])
       filter = [:and, [:eq, :node__id, node_id_handle.get_id()]]
       #TDOO: might match on ref or semantic type instead
@@ -307,9 +307,9 @@ module XYZ
       return nil unless ipv4_host_addrs_info
       ipv4_host_addrs = ipv4_host_addrs_info[:value_asserted]||ipv4_host_addrs_info[:value_derived]
       ipv4_host_addrs_idh = cmp_id_handle.createIDH({:guid => ipv4_host_addrs_info[:id], :model_name => :attribute, :parent_model_name => :node})
-      sap_config_attr_idh, new_sap_attr_idh = Attribute.add_needed_ipv4_sap_attributes(cmp_id_handle,ipv4_host_addrs)
+      sap_config_attr_idh, new_sap_attr_idh = Attribute.add_needed_l4_sap_attributes(cmp_id_handle,ipv4_host_addrs)
       return nil unless new_sap_attr_idh
-      AttributeLink.create_links_ipv4_sap(new_sap_attr_idh,sap_config_attr_idh,ipv4_host_addrs_idh,node_id_handle)
+      AttributeLink.create_links_l4_sap(new_sap_attr_idh,sap_config_attr_idh,ipv4_host_addrs_idh,node_id_handle)
     end
 
     #TODO: quick hack

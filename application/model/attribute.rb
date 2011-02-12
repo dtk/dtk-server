@@ -389,12 +389,12 @@ pp [:nested_changes,nested_changes]
       ds.all
     end
 
-    def self.add_needed_ipv4_sap_attributes(cmp_id_handle,ipv4_host_addresses)
+    def self.add_needed_l4_sap_attributes(cmp_id_handle,ipv4_host_addresses)
       component_id = cmp_id_handle.get_id()
       field_set = Model::FieldSet.new(:component,[:id,:display_name,:attributes])
      #TODO: allowing feature in until nest features in base services filter = [:and, [:eq, :component__id, component_id],[:eq, :basic_type,"service"]]
       filter = [:and, [:eq, :component__id, component_id]]
-      global_wc = {:attribute__semantic_type_summary => "sap_config_ipv4"}
+      global_wc = {:attribute__semantic_type_summary => "sap_config__l4"}
       ds = SearchObject.create_from_field_set(field_set,cmp_id_handle[:c],filter).create_dataset().where(global_wc)
 
       #should only be one attribute matching (or none)
@@ -421,8 +421,8 @@ pp [:nested_changes,nested_changes]
 
       new_sap_attr_rows =
         [{
-           :ref => "sap_ipv4",
-           :display_name => "sap_ipv4", 
+           :ref => "sap__l4",
+           :display_name => "sap__l4", 
            :component_component_id => component_id,
            :value_derived => new_sap_value_list,
            :is_port => true,
@@ -430,8 +430,8 @@ pp [:nested_changes,nested_changes]
            :data_type => "json",
            :description => description,
            #TODO: need the  => {"application" => service qualification)
-           :semantic_type => {":array" => "sap_ipv4"},
-           :semantic_type_summary => "sap_ipv4"
+           :semantic_type => {":array" => "sap__l4"},
+           :semantic_type_summary => "sap__l4"
          }]
 
       attr_mh = sap_config_attr_idh.createMH()

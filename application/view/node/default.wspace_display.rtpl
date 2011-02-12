@@ -1,5 +1,5 @@
 
-	<div id="item-{%=node[:id]%}" data-status="pending_setup" data-id="{%=node[:id]%}" data-model="node" class="basic-item node medium green dg-node dg-component">
+	<div id="item-{%=node[:id]%}" data-status="pending_setup" data-id="{%=node[:id]%}" data-model="node" class="basic-item node medium green dg-component">
 		<div id="item-{%=node[:id]%}-large" class="item-display" style="display:none;">
 			<div id="item-{%=node[:id]%}-large-display" data-id="{%=node[:id]%}" data-model="node" class="item-display item node">
 				<div class="l-col">

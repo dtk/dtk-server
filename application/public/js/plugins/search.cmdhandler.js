@@ -516,7 +516,7 @@ console.log('Have a drop hit for node!!!!');
 					});
 
 					R8.Cmdbar.loadedTabs[tIndex].compDDel.on('drag:mouseDown', function(e){
-						var componentType = this.get('currentNode').get('children').item(0).getAttribute('data-type'); 
+						var componentType = this.get('currentNode').get('children').item(0).getAttribute('data-type');
 
 						if(componentType == 'composite') {
 							var dropGroup = 'dg-node-assembly';
@@ -527,11 +527,6 @@ console.log('Have a drop hit for node!!!!');
 								drop.on('drop:enter',function(e){
 								});
 								drop.on('drop:hit',function(e){
-//DEBUG
-//var dragClone = e.drag.get('dragNode').get('children').item(0);
-//console.log(e.drag.pageX);
-//console.log(e.drag.get('dragNode').get('region').left);
-//return;
 									var dropNode = e.drop.get('node');
 									var compNode = e.drag.get('dragNode').get('children').item(0);
 									var componentId = compNode.getAttribute('data-id');
@@ -544,11 +539,17 @@ console.log('Have a drop hit for node!!!!');
 							var dropList = Y.all('#viewspace div.'+dropGroup);
 							dropList.each(function(){
 								if(!this.hasClass('yui3-dd-drop')) {
+//DEBUG
+console.log('Processing drop create for each node...');
+console.log(this);
 									var drop = new Y.DD.Drop({node:this});
 									drop.addToGroup([dropGroup]);
 									drop.on('drop:enter',function(e){
+console.log('Entered a component drop zone....');
 									});
 									drop.on('drop:hit',function(e){
+//DEBUG
+console.log('Got a drop hit for component....');
 										var dropNode = e.drop.get('node');
 										var compNode = e.drag.get('dragNode').get('children').item(0);
 										var componentId = compNode.getAttribute('data-id');

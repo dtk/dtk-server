@@ -5,5 +5,5 @@
     :node_constraints=>{:type=>:json},
     :component_constraints=>{:type=>:json},
   },
-  :many_to_one=>[:library]
+  :many_to_one=>[:component]
 }

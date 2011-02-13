@@ -14,6 +14,12 @@ module XYZ
     #TODO: may refactor to be instance rather than class method
     def clone(id_handle,target_id_handle,override_attrs={},opts={})
       clone_source_object = id_handle.create_object()
+###TODO: testing new functionality
+      constraints = clone_source_object.get_constraints() if model_name == :component
+      if constraints
+        pp [:evaluation, constraints.evaluate(id_handle,target_id_handle)]
+      end
+#######
       clone_source_object.add_model_specific_override_attrs!(override_attrs)
       proc = CloneCopyProcessor.new(self,opts.merge(:include_children => true))
       clone_copy_output = proc.clone_copy(id_handle,[target_id_handle],override_attrs)

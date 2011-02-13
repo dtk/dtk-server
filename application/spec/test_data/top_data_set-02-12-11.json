@@ -9,6 +9,7 @@
     "test": {
       "data_source": {
         "chef": {
+          "last_collection_timestamp": "Sun Feb 13 01:36:53 +0000 2011",
           "display_name": "chef",
           "data_source_entry": {
             "component_recipe": {
@@ -33,10 +34,10 @@
               "ds_is_golden_store": true
             }
           },
-          "ds_name": "chef",
-          "last_collection_timestamp": "Sun Feb 13 00:03:38 +0000 2011"
+          "ds_name": "chef"
         },
         "ec2": {
+          "last_collection_timestamp": "Sun Feb 13 01:39:19 +0000 2011",
           "display_name": "ec2",
           "data_source_entry": {
             "node_image": {
@@ -47,10 +48,10 @@
               "ds_is_golden_store": true
             }
           },
-          "ds_name": "ec2",
-          "last_collection_timestamp": "Sun Feb 13 00:04:34 +0000 2011"
+          "ds_name": "ec2"
         },
         "user_data": {
+          "last_collection_timestamp": "Sun Feb 13 01:39:30 +0000 2011",
           "display_name": "user_data",
           "data_source_entry": {
             "component": {
@@ -66,8 +67,7 @@
               "ds_is_golden_store": true
             }
           },
-          "ds_name": "user_data",
-          "last_collection_timestamp": "Sun Feb 13 00:04:43 +0000 2011"
+          "ds_name": "user_data"
         }
       },
       "display_name": "test",
@@ -87,17 +87,12 @@
             "type": "ec2_image",
             "image_id": "ami-ee38c987"
           },
-          "node_interface": {
-            "eth0": {
-              "type": "ethernet",
-              "display_name": "eth0"
-            }
-          },
           "ds_attributes": {
             "type": "machine",
             "product_codes": [
 
             ],
+            "architecture": "i386",
             "root_device_name": "/dev/sda1",
             "description": null,
             "root_device_type": "ebs",
@@ -121,8 +116,13 @@
             "flavor": {
               "disk": null
             },
-            "id": "ami-ee38c987",
-            "architecture": "i386"
+            "id": "ami-ee38c987"
+          },
+          "node_interface": {
+            "eth0": {
+              "type": "ethernet",
+              "display_name": "eth0"
+            }
           },
           "monitoring_item": {
             "check_ping": {
@@ -170,19 +170,19 @@
               "display_name": "host_addresses_ipv4",
               "required": false,
               "semantic_type_summary": "host_address_ipv4",
-              "is_port": true,
               "data_type": "json",
               "semantic_type": {
                 ":array": "host_address_ipv4"
               },
               "read_only": true,
+              "is_port": true,
               "hidden": false,
               "dynamic": true
             }
           },
           "ds_key": "[:user_data, \"/library/test/ami-ee38c987\"]",
-          "is_deployed": true,
-          "ds_source_obj_type": "image"
+          "ds_source_obj_type": "image",
+          "is_deployed": true
         }
       },
       "component": {
@@ -200,7 +200,6 @@
             "type": "chef_recipe",
             "recipe_name": "hadoop::pig"
           },
-          "only_one_per_node": true,
           "description": "Installs hadoop's pig package",
           "component_type": "hadoop__pig",
           "ds_attributes": {
@@ -209,6 +208,7 @@
             "basic_type": "service",
             "qualified_ref": "/library/test/hadoop__pig"
           },
+          "only_one_per_node": true,
           "basic_type": "service",
           "ds_key": "[:user_data, \"/library/test/hadoop__pig\"]"
         },
@@ -226,7 +226,6 @@
             "type": "chef_recipe",
             "recipe_name": "hadoop_cloudera_c3"
           },
-          "only_one_per_node": true,
           "description": "Installs hadoop from Cloudera's repo",
           "component_type": "hadoop_cloudera_c3",
           "ds_attributes": {
@@ -235,6 +234,7 @@
             "basic_type": "service",
             "qualified_ref": "/library/test/hadoop_cloudera_c3"
           },
+          "only_one_per_node": true,
           "basic_type": "service",
           "attribute": {
             "jmxremote_password": {
@@ -245,9 +245,9 @@
                 "type": "service_attribute",
                 "path": "service[hadoop_namenode][jmxremote_password]"
               },
-              "is_port": true,
               "data_type": "string",
               "read_only": false,
+              "is_port": true,
               "hidden": false,
               "dynamic": false
             },
@@ -259,9 +259,9 @@
                 "type": "service_attribute",
                 "path": "service[hadoop_namenode][jmxremote_port]"
               },
-              "is_port": true,
               "data_type": "string",
               "read_only": false,
+              "is_port": true,
               "hidden": false,
               "dynamic": false
             }
@@ -275,7 +275,6 @@
             "type": "chef_recipe",
             "recipe_name": "postgresql::db"
           },
-          "only_one_per_node": true,
           "description": "Postgresql DB",
           "component_type": "postgresql__db",
           "ds_attributes": {
@@ -284,6 +283,7 @@
             "basic_type": "database",
             "qualified_ref": "/library/test/postgresql__db"
           },
+          "only_one_per_node": true,
           "basic_type": "database",
           "attribute": {
             "sap_config__db": {
@@ -299,9 +299,8 @@
                 "type": "service_attribute",
                 "path": "service[postgresql][sap_config__db]"
               },
-              "semantic_type_summary": "sap_config__db",
               "description": "postgres db",
-              "is_port": true,
+              "semantic_type_summary": "sap_config__db",
               "data_type": "json",
               "semantic_type": {
                 "sap_config__db": {
@@ -311,6 +310,7 @@
                 }
               },
               "read_only": false,
+              "is_port": true,
               "hidden": false,
               "dynamic": false
             }
@@ -331,7 +331,6 @@
             "type": "chef_recipe",
             "recipe_name": "php::php5"
           },
-          "only_one_per_node": true,
           "description": "Install php5 packages and php.ini config file",
           "component_type": "php__php5",
           "ds_attributes": {
@@ -340,6 +339,7 @@
             "basic_type": "language",
             "qualified_ref": "/library/test/php__php5"
           },
+          "only_one_per_node": true,
           "basic_type": "language",
           "ds_key": "[:user_data, \"/library/test/php__php5\"]"
         },
@@ -357,7 +357,6 @@
             "type": "chef_recipe",
             "recipe_name": "wordpress"
           },
-          "only_one_per_node": true,
           "description": "Installs and configures wordpress LAMP stack on a single system",
           "component_type": "wordpress",
           "ds_attributes": {
@@ -366,6 +365,7 @@
             "basic_type": "service",
             "qualified_ref": "/library/test/wordpress"
           },
+          "only_one_per_node": true,
           "basic_type": "service",
           "attribute": {
             "db__user": {
@@ -378,9 +378,9 @@
                 "path": "node[wordpress][db][user]"
               },
               "description": "Wordpress will connect to MySQL using this user.",
-              "is_port": false,
               "data_type": "string",
               "read_only": false,
+              "is_port": false,
               "hidden": false,
               "dynamic": false
             },
@@ -392,9 +392,8 @@
                 "type": "service_attribute",
                 "path": "service[wordpress][sap_ref__l4]"
               },
-              "semantic_type_summary": "sap_ref__l4",
               "description": "wordpress service access point reference",
-              "is_port": true,
+              "semantic_type_summary": "sap_ref__l4",
               "data_type": "json",
               "semantic_type": {
                 "sap_ref__l4": {
@@ -404,6 +403,7 @@
                 }
               },
               "read_only": false,
+              "is_port": true,
               "hidden": false,
               "dynamic": false
             },
@@ -417,9 +417,9 @@
                 "path": "node[wordpress][dir]"
               },
               "description": "Location to place wordpress files.",
-              "is_port": false,
               "data_type": "string",
               "read_only": false,
+              "is_port": false,
               "hidden": false,
               "dynamic": false
             },
@@ -433,9 +433,9 @@
                 "path": "node[wordpress][db][database]"
               },
               "description": "Wordpress will use this MySQL database to store its data.",
-              "is_port": false,
               "data_type": "string",
               "read_only": false,
+              "is_port": false,
               "hidden": false,
               "dynamic": false
             },
@@ -448,9 +448,9 @@
                 "path": "node[wordpress][keys][logged_in]"
               },
               "description": "Wordpress logged-in key.",
-              "is_port": false,
               "data_type": "string",
               "read_only": false,
+              "is_port": false,
               "hidden": false,
               "dynamic": false
             },
@@ -463,9 +463,9 @@
                 "path": "node[wordpress][keys][nonce]"
               },
               "description": "Wordpress nonce key.",
-              "is_port": false,
               "data_type": "string",
               "read_only": false,
+              "is_port": false,
               "hidden": false,
               "dynamic": false
             },
@@ -479,9 +479,9 @@
                 "path": "node[wordpress][checksum]"
               },
               "description": "Checksum of the tarball for the version specified.",
-              "is_port": false,
               "data_type": "string",
               "read_only": false,
+              "is_port": false,
               "hidden": false,
               "dynamic": false
             },
@@ -494,9 +494,9 @@
                 "path": "node[wordpress][db][password]"
               },
               "description": "Password for the Wordpress MySQL user.",
-              "is_port": false,
               "data_type": "string",
               "read_only": false,
+              "is_port": false,
               "hidden": false,
               "dynamic": false
             },
@@ -510,9 +510,9 @@
                 "path": "node[wordpress][version]"
               },
               "description": "Version of Wordpress to download from the Wordpress site.",
-              "is_port": false,
               "data_type": "string",
               "read_only": false,
+              "is_port": false,
               "hidden": false,
               "dynamic": false
             },
@@ -525,9 +525,9 @@
                 "path": "node[wordpress][keys][secure_auth]"
               },
               "description": "Wordpress secure auth key.",
-              "is_port": false,
               "data_type": "string",
               "read_only": false,
+              "is_port": false,
               "hidden": false,
               "dynamic": false
             },
@@ -540,9 +540,9 @@
                 "path": "node[wordpress][keys][auth]"
               },
               "description": "Wordpress auth key.",
-              "is_port": false,
               "data_type": "string",
               "read_only": false,
+              "is_port": false,
               "hidden": false,
               "dynamic": false
             }
@@ -563,7 +563,6 @@
             "type": "chef_recipe",
             "recipe_name": "mysql::slave"
           },
-          "only_one_per_node": true,
           "description": "For extending mysql server to serve as a slave",
           "component_type": "mysql__slave",
           "ds_attributes": {
@@ -571,6 +570,7 @@
             "ref": "mysql__slave",
             "qualified_ref": "/library/test/mysql__slave"
           },
+          "only_one_per_node": true,
           "basic_type": "feature",
           "attribute": {
             "sap_ref_to_master": {
@@ -581,9 +581,8 @@
                 "type": "service_attribute",
                 "path": "service[mysql_server][sap_ref_to_master]"
               },
-              "semantic_type_summary": "sap_ref__db",
               "description": "mysql service access point reference for slave to connect with master",
-              "is_port": true,
+              "semantic_type_summary": "sap_ref__db",
               "data_type": "json",
               "semantic_type": {
                 "sap_ref__db": {
@@ -593,6 +592,7 @@
                 }
               },
               "read_only": false,
+              "is_port": true,
               "hidden": false,
               "dynamic": false
             },
@@ -604,12 +604,12 @@
                 "type": "service_attribute",
                 "path": "service[mysql_server][master_log_ref]"
               },
-              "semantic_type_summary": "mysql_master_log_info",
               "description": "reference for mysql slave to get master log position",
-              "is_port": true,
+              "semantic_type_summary": "mysql_master_log_info",
               "data_type": "json",
               "semantic_type": "\"mysql_master_log_info\"",
               "read_only": false,
+              "is_port": true,
               "hidden": false,
               "dynamic": false
             }
@@ -630,7 +630,6 @@
             "type": "chef_recipe",
             "recipe_name": "postgresql::app"
           },
-          "only_one_per_node": true,
           "description": "Test app",
           "component_type": "postgresql__app",
           "ds_attributes": {
@@ -639,6 +638,7 @@
             "basic_type": "application",
             "qualified_ref": "/library/test/postgresql__app"
           },
+          "only_one_per_node": true,
           "basic_type": "application",
           "attribute": {
             "sap_ref__l4": {
@@ -649,9 +649,8 @@
                 "type": "service_attribute",
                 "path": "service[postgresql][sap_ref__l4]"
               },
-              "semantic_type_summary": "sap_ref__l4",
               "description": "postgresql admin service access point reference to connect to server",
-              "is_port": true,
+              "semantic_type_summary": "sap_ref__l4",
               "data_type": "json",
               "semantic_type": {
                 "sap_ref__l4": {
@@ -661,6 +660,7 @@
                 }
               },
               "read_only": false,
+              "is_port": true,
               "hidden": false,
               "dynamic": false
             }
@@ -681,7 +681,6 @@
             "type": "chef_recipe",
             "recipe_name": "hadoop::hive"
           },
-          "only_one_per_node": true,
           "description": "Installs hadoop's hive package",
           "component_type": "hadoop__hive",
           "ds_attributes": {
@@ -690,6 +689,7 @@
             "basic_type": "service",
             "qualified_ref": "/library/test/hadoop__hive"
           },
+          "only_one_per_node": true,
           "basic_type": "service",
           "ds_key": "[:user_data, \"/library/test/hadoop__hive\"]"
         },
@@ -707,7 +707,6 @@
             "type": "chef_recipe",
             "recipe_name": "postgresql::server"
           },
-          "only_one_per_node": true,
           "description": "Installs postgresql server packages, debian family style",
           "component_type": "postgresql__server",
           "ds_attributes": {
@@ -716,6 +715,7 @@
             "basic_type": "database_server",
             "qualified_ref": "/library/test/postgresql__server"
           },
+          "only_one_per_node": true,
           "basic_type": "database_server",
           "attribute": {
             "sap_config__db__admin": {
@@ -731,9 +731,8 @@
                 "type": "service_attribute",
                 "path": "service[postgresql][sap_config__db__admin]"
               },
-              "semantic_type_summary": "sap_config__db",
               "description": "postgres db",
-              "is_port": true,
+              "semantic_type_summary": "sap_config__db",
               "data_type": "json",
               "semantic_type": {
                 "sap_config__db": {
@@ -743,6 +742,7 @@
                 }
               },
               "read_only": false,
+              "is_port": true,
               "hidden": false,
               "dynamic": false
             },
@@ -760,9 +760,8 @@
                 "type": "service_attribute",
                 "path": "service[postgresql][sap_config__l4]"
               },
-              "semantic_type_summary": "sap_config__l4",
               "description": "postgres ip service access point configuration",
-              "is_port": true,
+              "semantic_type_summary": "sap_config__l4",
               "data_type": "json",
               "semantic_type": {
                 ":array": {
@@ -774,6 +773,7 @@
                 }
               },
               "read_only": false,
+              "is_port": true,
               "hidden": false,
               "dynamic": false
             }
@@ -794,7 +794,6 @@
             "type": "chef_recipe",
             "recipe_name": "java"
           },
-          "only_one_per_node": true,
           "description": "Installs openjdk to provide Java",
           "component_type": "java",
           "ds_attributes": {
@@ -803,6 +802,7 @@
             "basic_type": "language",
             "qualified_ref": "/library/test/java"
           },
+          "only_one_per_node": true,
           "basic_type": "language",
           "ds_key": "[:user_data, \"/library/test/java\"]"
         },
@@ -813,7 +813,6 @@
             "type": "chef_recipe",
             "recipe_name": "postgresql::single_tenant"
           },
-          "only_one_per_node": true,
           "description": "Postgresql single tenant client",
           "component_type": "postgresql__single_tenant",
           "ds_attributes": {
@@ -821,6 +820,7 @@
             "basic_type": "application",
             "qualified_ref": "/library/test/postgresql__single_tenant"
           },
+          "only_one_per_node": true,
           "basic_type": "application",
           "attribute": {
             "sap_ref__db": {
@@ -831,9 +831,8 @@
                 "type": "service_attribute",
                 "path": "service[postgresql][sap_ref__db]"
               },
-              "semantic_type_summary": "sap_ref__db",
               "description": "postgresql db connection",
-              "is_port": true,
+              "semantic_type_summary": "sap_ref__db",
               "data_type": "json",
               "semantic_type": {
                 "sap_ref__db": {
@@ -843,6 +842,7 @@
                 }
               },
               "read_only": false,
+              "is_port": true,
               "hidden": false,
               "dynamic": false
             }
@@ -863,7 +863,6 @@
             "type": "chef_recipe",
             "recipe_name": "java_sun"
           },
-          "only_one_per_node": true,
           "description": "Installs Sun Java using preseed to accept terms",
           "component_type": "java_sun",
           "ds_attributes": {
@@ -872,6 +871,7 @@
             "basic_type": "language",
             "qualified_ref": "/library/test/java_sun"
           },
+          "only_one_per_node": true,
           "basic_type": "language",
           "ds_key": "[:user_data, \"/library/test/java_sun\"]"
         },
@@ -884,13 +884,13 @@
               "display": "rabbitmq.png"
             }
           },
-          "only_one_per_node": true,
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"rabbitmq.png\",\"display\":\"rabbitmq.png\",\"tiny\":\"\"}}",
             "ref": "rabbitmq__edge",
             "basic_type": "feature",
             "qualified_ref": "/library/test/rabbitmq__edge"
           },
+          "only_one_per_node": true,
           "basic_type": "feature",
           "ds_key": "[:user_data, \"/library/test/rabbitmq__edge\"]"
         },
@@ -903,13 +903,13 @@
               "display": "rabbitmq.png"
             }
           },
-          "only_one_per_node": true,
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"rabbitmq.png\",\"display\":\"rabbitmq.png\",\"tiny\":\"\"}}",
             "ref": "rabbitmq__default",
             "basic_type": "service",
             "qualified_ref": "/library/test/rabbitmq__default"
           },
+          "only_one_per_node": true,
           "basic_type": "service",
           "ds_key": "[:user_data, \"/library/test/rabbitmq__default\"]"
         },
@@ -927,7 +927,6 @@
             "type": "chef_recipe",
             "recipe_name": "hadoop"
           },
-          "only_one_per_node": true,
           "description": "Installs hadoop from Cloudera's repo",
           "component_type": "hadoop",
           "ds_attributes": {
@@ -936,6 +935,7 @@
             "basic_type": "service",
             "qualified_ref": "/library/test/hadoop"
           },
+          "only_one_per_node": true,
           "basic_type": "service",
           "ds_key": "[:user_data, \"/library/test/hadoop\"]"
         },
@@ -953,7 +953,6 @@
             "type": "chef_recipe",
             "recipe_name": "hadoop_cloudera_c3::conf_pseudo"
           },
-          "only_one_per_node": true,
           "description": "Installs hadoop-conf-pseudo and enables hadoop services",
           "component_type": "hadoop_cloudera_c3__conf_pseudo",
           "ds_attributes": {
@@ -962,6 +961,8 @@
             "basic_type": "feature",
             "qualified_ref": "/library/test/hadoop_cloudera_c3__conf_pseudo"
           },
+          "only_one_per_node": true,
+          "basic_type": "feature",
           "monitoring_item": {
             "check_hadoop_namenode_remotely": {
               "display_name": "check_hadoop_namenode_remotely",
@@ -980,7 +981,6 @@
               "enabled": true
             }
           },
-          "basic_type": "feature",
           "attribute": {
             "jmxremote_password": {
               "cannot_change": false,
@@ -990,9 +990,9 @@
                 "type": "service_attribute",
                 "path": "service[hadoop_namenode][jmxremote_password]"
               },
-              "is_port": true,
               "data_type": "string",
               "read_only": false,
+              "is_port": true,
               "hidden": false,
               "dynamic": false
             },
@@ -1004,9 +1004,9 @@
                 "type": "service_attribute",
                 "path": "service[hadoop_namenode][jmxremote_port]"
               },
-              "is_port": true,
               "data_type": "string",
               "read_only": false,
+              "is_port": true,
               "hidden": false,
               "dynamic": false
             }
@@ -1027,7 +1027,6 @@
             "type": "chef_recipe",
             "recipe_name": "nagios::client"
           },
-          "only_one_per_node": true,
           "description": "Installs and configures a nagios client with nrpe",
           "component_type": "nagios__client",
           "ds_attributes": {
@@ -1035,6 +1034,7 @@
             "ref": "nagios__client",
             "qualified_ref": "/library/test/nagios__client"
           },
+          "only_one_per_node": true,
           "basic_type": "service",
           "attribute": {
             "monitored_client_sap_config": {
@@ -1049,9 +1049,8 @@
                 "type": "service_attribute",
                 "path": "service[nagios][monitored_client_sap_config]"
               },
-              "semantic_type_summary": "sap_config__l4",
               "description": "monitored client service access point",
-              "is_port": true,
+              "semantic_type_summary": "sap_config__l4",
               "data_type": "json",
               "semantic_type": {
                 "sap_config__l4": {
@@ -1061,6 +1060,7 @@
                 }
               },
               "read_only": false,
+              "is_port": true,
               "hidden": false,
               "dynamic": false
             }
@@ -1081,7 +1081,6 @@
             "type": "chef_recipe",
             "recipe_name": "mysql::server"
           },
-          "only_one_per_node": true,
           "description": "Installs packages required for mysql servers w/o manual intervention",
           "component_type": "mysql__server",
           "ds_attributes": {
@@ -1090,6 +1089,8 @@
             "basic_type": "database_server",
             "qualified_ref": "/library/test/mysql__server"
           },
+          "only_one_per_node": true,
+          "basic_type": "database_server",
           "monitoring_item": {
             "mysql_basic_health": {
               "display_name": "mysql_basic_health",
@@ -1100,7 +1101,6 @@
               "enabled": true
             }
           },
-          "basic_type": "database_server",
           "attribute": {
             "tunable__key_buffer": {
               "value_asserted": "250M",
@@ -1111,9 +1111,9 @@
                 "type": "chef_attribute",
                 "path": "node[mysql][tunable][key_buffer]"
               },
-              "is_port": false,
               "data_type": "string",
               "read_only": false,
+              "is_port": false,
               "hidden": false,
               "dynamic": false
             },
@@ -1127,9 +1127,9 @@
                 "path": "service[mysql_server][monitor_user_id]"
               },
               "description": "db userid for monitoring application to use",
-              "is_port": true,
               "data_type": "string",
               "read_only": false,
+              "is_port": true,
               "hidden": false,
               "dynamic": false
             },
@@ -1142,9 +1142,9 @@
                 "type": "chef_attribute",
                 "path": "node[mysql][tunable][net_read_timeout]"
               },
-              "is_port": false,
               "data_type": "string",
               "read_only": false,
+              "is_port": false,
               "hidden": false,
               "dynamic": false
             },
@@ -1157,9 +1157,9 @@
                 "type": "chef_attribute",
                 "path": "node[mysql][tunable][table_cache]"
               },
-              "is_port": false,
               "data_type": "string",
               "read_only": false,
+              "is_port": false,
               "hidden": false,
               "dynamic": false
             },
@@ -1173,9 +1173,9 @@
                 "path": "node[mysql][port]"
               },
               "description": "MySQL Server TCP port",
-              "is_port": false,
               "data_type": "string",
               "read_only": false,
+              "is_port": false,
               "hidden": false,
               "dynamic": false
             },
@@ -1189,9 +1189,9 @@
                 "path": "node[mysql][datadir]"
               },
               "description": "Location of mysql databases",
-              "is_port": false,
               "data_type": "string",
               "read_only": false,
+              "is_port": false,
               "hidden": false,
               "dynamic": false
             },
@@ -1205,9 +1205,9 @@
                 "path": "node[mysql][ec2_path]"
               },
               "description": "Location of mysql directory on EC2 instance EBS volumes",
-              "is_port": false,
               "data_type": "string",
               "read_only": false,
+              "is_port": false,
               "hidden": false,
               "dynamic": false
             },
@@ -1220,9 +1220,9 @@
                 "type": "chef_attribute",
                 "path": "node[mysql][tunable][net_write_timeout]"
               },
-              "is_port": false,
               "data_type": "string",
               "read_only": false,
+              "is_port": false,
               "hidden": false,
               "dynamic": false
             },
@@ -1240,9 +1240,8 @@
                 "type": "service_attribute",
                 "path": "service[mysql_server][sap_config__l4]"
               },
-              "semantic_type_summary": "sap_config__l4",
               "description": "mysql ip service access point configuration",
-              "is_port": true,
+              "semantic_type_summary": "sap_config__l4",
               "data_type": "json",
               "semantic_type": {
                 ":array": {
@@ -1255,6 +1254,7 @@
                 }
               },
               "read_only": false,
+              "is_port": true,
               "hidden": false,
               "dynamic": false
             },
@@ -1267,9 +1267,9 @@
                 "type": "chef_attribute",
                 "path": "node[mysql][tunable][max_heap_table_size]"
               },
-              "is_port": false,
               "data_type": "string",
               "read_only": false,
+              "is_port": false,
               "hidden": false,
               "dynamic": false
             },
@@ -1282,9 +1282,9 @@
                 "type": "chef_attribute",
                 "path": "node[mysql][tunable][back_log]"
               },
-              "is_port": false,
               "data_type": "string",
               "read_only": false,
+              "is_port": false,
               "hidden": false,
               "dynamic": false
             },
@@ -1297,9 +1297,9 @@
                 "type": "chef_attribute",
                 "path": "node[mysql][tunable][wait_timeout]"
               },
-              "is_port": false,
               "data_type": "string",
               "read_only": false,
+              "is_port": false,
               "hidden": false,
               "dynamic": false
             },
@@ -1312,9 +1312,9 @@
                 "path": "node[mysql][bind_address]"
               },
               "description": "Address that mysqld should listen on",
-              "is_port": false,
               "data_type": "string",
               "read_only": false,
+              "is_port": false,
               "hidden": false,
               "dynamic": false
             },
@@ -1327,9 +1327,9 @@
                 "path": "node[mysql][server_root_password]"
               },
               "description": "Randomly generated password for the mysqld root user",
-              "is_port": false,
               "data_type": "string",
               "read_only": false,
+              "is_port": false,
               "hidden": false,
               "dynamic": false
             },
@@ -1342,9 +1342,9 @@
                 "type": "chef_attribute",
                 "path": "node[mysql][tunable][max_connections]"
               },
-              "is_port": false,
               "data_type": "string",
               "read_only": false,
+              "is_port": false,
               "hidden": false,
               "dynamic": false
             },
@@ -1359,9 +1359,8 @@
                 "type": "service_attribute",
                 "path": "service[mysql_server][sap__socket]"
               },
-              "semantic_type_summary": "sap__socket",
               "description": "mysql unix socket service access point",
-              "is_port": true,
+              "semantic_type_summary": "sap__socket",
               "data_type": "json",
               "semantic_type": {
                 "sap__socket": {
@@ -1371,6 +1370,7 @@
                 }
               },
               "read_only": false,
+              "is_port": true,
               "hidden": false,
               "dynamic": false
             }
@@ -1391,7 +1391,6 @@
             "type": "chef_recipe",
             "recipe_name": "postgresql::client"
           },
-          "only_one_per_node": true,
           "description": "Installs postgresql client package(s)",
           "component_type": "postgresql__client",
           "ds_attributes": {
@@ -1400,6 +1399,7 @@
             "basic_type": "client",
             "qualified_ref": "/library/test/postgresql__client"
           },
+          "only_one_per_node": true,
           "basic_type": "client",
           "ds_key": "[:user_data, \"/library/test/postgresql__client\"]"
         },
@@ -1417,7 +1417,6 @@
             "type": "chef_recipe",
             "recipe_name": "user_account"
           },
-          "only_one_per_node": true,
           "description": "Installs a user account",
           "component_type": "user_account",
           "ds_attributes": {
@@ -1426,6 +1425,7 @@
             "only_one_per_node": false,
             "qualified_ref": "/library/test/user_account"
           },
+          "only_one_per_node": true,
           "basic_type": "user",
           "attribute": {
             "gid": {
@@ -1437,9 +1437,9 @@
                 "path": "node[user_account][gid]"
               },
               "description": "Primary group id",
-              "is_port": false,
               "data_type": "integer",
               "read_only": false,
+              "is_port": false,
               "hidden": false,
               "dynamic": false
             },
@@ -1452,9 +1452,9 @@
                 "path": "node[user_account][username]"
               },
               "description": "User name",
-              "is_port": false,
               "data_type": "string",
               "read_only": false,
+              "is_port": false,
               "hidden": false,
               "dynamic": false
             },
@@ -1467,9 +1467,9 @@
                 "path": "node[user_account][uid]"
               },
               "description": "Numeric user id",
-              "is_port": false,
               "data_type": "integer",
               "read_only": false,
+              "is_port": false,
               "hidden": false,
               "dynamic": false
             },
@@ -1482,9 +1482,9 @@
                 "path": "node[user_account][shell]"
               },
               "description": "Login shell",
-              "is_port": false,
               "data_type": "string",
               "read_only": false,
+              "is_port": false,
               "hidden": false,
               "dynamic": false
             },
@@ -1497,9 +1497,9 @@
                 "path": "node[user_account][home_base]"
               },
               "description": "Home directories base location (home will be $home_base/$username",
-              "is_port": false,
               "data_type": "string",
               "read_only": false,
+              "is_port": false,
               "hidden": false,
               "dynamic": false
             },
@@ -1512,9 +1512,9 @@
                 "path": "node[user_account][home]"
               },
               "description": "Home directory location",
-              "is_port": false,
               "data_type": "string",
               "read_only": false,
+              "is_port": false,
               "hidden": false,
               "dynamic": false
             }
@@ -1535,7 +1535,6 @@
             "type": "chef_recipe",
             "recipe_name": "apache2"
           },
-          "only_one_per_node": true,
           "description": "Main Apache configuration",
           "component_type": "apache2",
           "ds_attributes": {
@@ -1544,13 +1543,14 @@
             "basic_type": "service",
             "qualified_ref": "/library/test/apache2"
           },
+          "only_one_per_node": true,
+          "basic_type": "service",
           "monitoring_item": {
             "inet_service_up": {
               "display_name": "inet_service_up",
               "enabled": true
             }
           },
-          "basic_type": "service",
           "attribute": {
             "dir": {
               "value_asserted": "/etc/apache2",
@@ -1562,9 +1562,9 @@
                 "path": "node[apache2][dir]"
               },
               "description": "Location for Apache configuration",
-              "is_port": false,
               "data_type": "string",
               "read_only": false,
+              "is_port": false,
               "hidden": false,
               "dynamic": false
             },
@@ -1578,9 +1578,9 @@
                 "path": "node[apache2][timeout]"
               },
               "description": "Connection timeout value",
-              "is_port": false,
               "data_type": "string",
               "read_only": false,
+              "is_port": false,
               "hidden": false,
               "dynamic": false
             },
@@ -1594,9 +1594,9 @@
                 "path": "node[apache2][binary]"
               },
               "description": "Apache server daemon program",
-              "is_port": false,
               "data_type": "string",
               "read_only": false,
+              "is_port": false,
               "hidden": false,
               "dynamic": false
             },
@@ -1610,9 +1610,9 @@
                 "path": "node[apache2][keepaliverequests]"
               },
               "description": "Number of requests allowed on a persistent connection",
-              "is_port": false,
               "data_type": "string",
               "read_only": false,
+              "is_port": false,
               "hidden": false,
               "dynamic": false
             },
@@ -1626,9 +1626,9 @@
                 "path": "node[apache2][contact]"
               },
               "description": "Email address of webmaster",
-              "is_port": false,
               "data_type": "string",
               "read_only": false,
+              "is_port": false,
               "hidden": false,
               "dynamic": false
             },
@@ -1642,9 +1642,9 @@
                 "path": "node[apache2][servertokens]"
               },
               "description": "Server response header",
-              "is_port": false,
               "data_type": "string",
               "read_only": false,
+              "is_port": false,
               "hidden": false,
               "dynamic": false
             },
@@ -1661,9 +1661,9 @@
                 "path": "node[apache2][listen_ports]"
               },
               "description": "Ports that Apache should listen on",
-              "is_port": false,
               "data_type": "json",
               "read_only": false,
+              "is_port": false,
               "hidden": false,
               "dynamic": false
             },
@@ -1677,9 +1677,9 @@
                 "path": "node[apache2][keepalivetimeout]"
               },
               "description": "Time to wait for requests on persistent connection",
-              "is_port": false,
               "data_type": "string",
               "read_only": false,
+              "is_port": false,
               "hidden": false,
               "dynamic": false
             },
@@ -1700,9 +1700,8 @@
                 "type": "service_attribute",
                 "path": "service[apache2_service][sap_config__l4]"
               },
-              "semantic_type_summary": "sap_config__l4",
               "description": "apache2 ip service access point configuration",
-              "is_port": true,
+              "semantic_type_summary": "sap_config__l4",
               "data_type": "json",
               "semantic_type": {
                 ":array": {
@@ -1712,6 +1711,7 @@
                 }
               },
               "read_only": false,
+              "is_port": true,
               "hidden": false,
               "dynamic": false
             },
@@ -1725,9 +1725,9 @@
                 "path": "node[apache2][serversignature]"
               },
               "description": "Configure footer on server-generated documents",
-              "is_port": false,
               "data_type": "string",
               "read_only": false,
+              "is_port": false,
               "hidden": false,
               "dynamic": false
             },
@@ -1741,9 +1741,9 @@
                 "path": "node[apache2][log_dir]"
               },
               "description": "Location for Apache logs",
-              "is_port": false,
               "data_type": "string",
               "read_only": false,
+              "is_port": false,
               "hidden": false,
               "dynamic": false
             },
@@ -1757,9 +1757,9 @@
                 "path": "node[apache2][user]"
               },
               "description": "User Apache runs as",
-              "is_port": false,
               "data_type": "string",
               "read_only": false,
+              "is_port": false,
               "hidden": false,
               "dynamic": false
             },
@@ -1773,9 +1773,9 @@
                 "path": "node[apache2][icondir]"
               },
               "description": "Directory location for icons",
-              "is_port": false,
               "data_type": "string",
               "read_only": false,
+              "is_port": false,
               "hidden": false,
               "dynamic": false
             },
@@ -1789,9 +1789,9 @@
                 "path": "node[apache2][keepalive]"
               },
               "description": "HTTP persistent connections",
-              "is_port": false,
               "data_type": "string",
               "read_only": false,
+              "is_port": false,
               "hidden": false,
               "dynamic": false
             }
@@ -1812,7 +1812,6 @@
             "type": "chef_recipe",
             "recipe_name": "mysql::master"
           },
-          "only_one_per_node": true,
           "description": "For extending mysql server to serve as a master",
           "component_type": "mysql__master",
           "ds_attributes": {
@@ -1820,6 +1819,7 @@
             "ref": "mysql__master",
             "qualified_ref": "/library/test/mysql__master"
           },
+          "only_one_per_node": true,
           "basic_type": "feature",
           "attribute": {
             "sap_config_for_slave": {
@@ -1841,9 +1841,8 @@
                 "type": "service_attribute",
                 "path": "service[mysql_server][sap_config_for_slave]"
               },
-              "semantic_type_summary": "sap_config__l4",
               "description": "mysql ip service access point configuration for slave",
-              "is_port": true,
+              "semantic_type_summary": "sap_config__l4",
               "data_type": "json",
               "semantic_type": {
                 ":array": {
@@ -1856,6 +1855,7 @@
                 }
               },
               "read_only": false,
+              "is_port": true,
               "hidden": false,
               "dynamic": false
             },
@@ -1867,12 +1867,12 @@
                 "type": "service_attribute",
                 "path": "service[mysql_server][master_log]"
               },
-              "semantic_type_summary": "mysql_master_log_info",
               "description": "master log position",
-              "is_port": true,
+              "semantic_type_summary": "mysql_master_log_info",
               "data_type": "json",
               "semantic_type": "\"mysql_master_log_info\"",
               "read_only": false,
+              "is_port": true,
               "hidden": false,
               "dynamic": false
             }
@@ -1893,7 +1893,6 @@
             "type": "chef_recipe",
             "recipe_name": "nagios::server"
           },
-          "only_one_per_node": true,
           "description": "Installs and configures a nagios server",
           "component_type": "nagios__server",
           "ds_attributes": {
@@ -1902,6 +1901,7 @@
             "basic_type": "service",
             "qualified_ref": "/library/test/nagios__server"
           },
+          "only_one_per_node": true,
           "basic_type": "service",
           "attribute": {
             "monitor_sap_refs": {
@@ -1912,9 +1912,8 @@
                 "type": "service_attribute",
                 "path": "service[nagios][monitor_sap_refs]"
               },
-              "semantic_type_summary": "sap_ref__l4",
               "description": "monitor client service access point ref",
-              "is_port": true,
+              "semantic_type_summary": "sap_ref__l4",
               "data_type": "json",
               "semantic_type": {
                 ":array": {
@@ -1926,6 +1925,7 @@
                 }
               },
               "read_only": false,
+              "is_port": true,
               "hidden": false,
               "dynamic": false
             }
@@ -1946,7 +1946,6 @@
             "type": "chef_recipe",
             "recipe_name": "redis"
           },
-          "only_one_per_node": true,
           "description": "Installs/Configures redis",
           "component_type": "redis",
           "ds_attributes": {
@@ -1954,6 +1953,8 @@
             "ref": "redis",
             "qualified_ref": "/library/test/redis"
           },
+          "only_one_per_node": true,
+          "basic_type": "service",
           "monitoring_item": {
             "inet_service_up": {
               "display_name": "inet_service_up",
@@ -1964,7 +1965,6 @@
               "enabled": true
             }
           },
-          "basic_type": "service",
           "attribute": {
             "sap_config__l4": {
               "value_asserted": [
@@ -1980,9 +1980,8 @@
                 "type": "service_attribute",
                 "path": "service[redis_service][sap_config__l4]"
               },
-              "semantic_type_summary": "sap_config__l4",
               "description": "redis ip service access point configuration",
-              "is_port": true,
+              "semantic_type_summary": "sap_config__l4",
               "data_type": "json",
               "semantic_type": {
                 ":array": {
@@ -1992,6 +1991,7 @@
                 }
               },
               "read_only": false,
+              "is_port": true,
               "hidden": false,
               "dynamic": false
             }
@@ -2012,7 +2012,6 @@
             "type": "chef_recipe",
             "recipe_name": "hadoop::doc"
           },
-          "only_one_per_node": true,
           "description": "Installs hadoop documentation",
           "component_type": "hadoop__doc",
           "ds_attributes": {
@@ -2021,6 +2020,7 @@
             "basic_type": "feature",
             "qualified_ref": "/library/test/hadoop__doc"
           },
+          "only_one_per_node": true,
           "basic_type": "feature",
           "ds_key": "[:user_data, \"/library/test/hadoop__doc\"]"
         }

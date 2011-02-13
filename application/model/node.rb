@@ -183,7 +183,8 @@ module XYZ
       ((self[:action]||{})[:count]||0) > 0
     end
 
-    ###### model interfaaces
+    #######################
+    ######### Model apis
     def get_users()
       node_user_list = get_objects_from_sp_hash(:columns => [:users])
       user_list = Array.new

@@ -13,13 +13,11 @@ module XYZ
         column :version, :varchar, :size => 25 # version of underlying component (not chef recipe .... version)
         column :uri, :varchar
         column :ui, :json
-        foreign_key :constraints_id, :constraints, FK_SET_NULL_OPT #search object that is constraint on node component can be placed on
-
         #:assembly_id (in contrast to parent field :component_id) is for tieing teh component to a composite component which is not a container
         foreign_key :assembly_id, :component, FK_SET_NULL_OPT
 
         many_to_one :component, :library, :node, :node_group, :datacenter
-        one_to_many :component, :attribute_link, :attribute, :monitoring_item
+        one_to_many :component, :attribute_link, :attribute, :monitoring_item, :constraints
         virtual_column :parent_name, :possible_parents => [:component,:library,:node,:node_group]
 
         virtual_column :attributes, :type => :json, :hidden => true, 
@@ -31,6 +29,18 @@ module XYZ
            :convert => true,
            :join_cond=>{:component_component_id => q(:component,:id)}, #TODO: want to use p(:component,:attribute) on left hand side
            :cols => [:id,:display_name,:component_component_id,:value_derived,:value_asserted,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
+         }
+        ]
+
+        virtual_column :constraints, :type => :json, :hidden => true, 
+        :remote_dependencies => 
+        [
+         {
+           :model_name => :constraints,
+           :join_type => :left_outer,
+           :convert => true,
+           :join_cond=>{:component_component_id => q(:component,:id)}, 
+           :cols => [:id,:display_name,id(:component),:node_constraints,:component_constraints]
          }
         ]
 
@@ -151,8 +161,14 @@ module XYZ
     def has_pending_change()
       ((self[:state_change]||{})[:count]||0) > 0 or ((self[:state_change2]||{})[:count]||0) > 0
     end
-    #######################
 
+    #######################
+    ######### Model apis
+    def get_constraints()
+      get_objects_col_from_sp_hash({:columns => [:constraints]},:constraints).first
+    end
+
+    ####################
     def determine_cloned_components_parent(specified_target_idh)
       
       cmp_fs = FieldSet.opt([:id,:display_name,:component_type],:component)

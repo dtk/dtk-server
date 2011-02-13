@@ -5,7 +5,14 @@
         "component": {
           "obj_type": "component",
           "ds_name": "user_data",
-          "display_name": "component"
+          "display_name": "component",
+	    "data_source_entry": {
+              "component_attribute": {
+                "obj_type": "constraints",
+                "ds_name": "user_data",
+                "display_name": "constraints "
+              }
+            }		
         },
 	"node": {	
           "obj_type": "node",

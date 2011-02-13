@@ -23,7 +23,12 @@
 	},	
 	"wordpress" : {
           "ui": "{\"images\": {\"tnail\":\"wordpress.png\",\"display\":\"wordpress.png\",\"tiny\":\"\"}}",
-	  "basic_type" : "service"
+	  "basic_type" : "service",
+	  "constraints" : {
+	    "wordpress" : {
+	       "required_components" : ["php__php5","apache2"]
+            }	    
+          }
 	},	
         "user_account": {
           "ui": "{\"images\": {\"tnail\":\"user.png\",\"display\":\"user.png\",\"tiny\":\"\"}}",

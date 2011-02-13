@@ -11,16 +11,15 @@ module XYZ
           if_exists(source["basic_type"]) do
             target[:basic_type] = source["basic_type"]
           end
+          nested_definition :constraints, source["constraints"]
         end
-         class << self
-            def unique_keys(source)
-              [source["qualified_ref"]]
-            end
+        def self.unique_keys(source)
+          [source["qualified_ref"]]
+        end
 
-           def relative_distinguished_name(source)
-             source["ref"]
-           end
-         end
+        def self.relative_distinguished_name(source)
+          source["ref"]
+        end
       end
     end
   end

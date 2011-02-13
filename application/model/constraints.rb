@@ -14,6 +14,49 @@ module XYZ
       #TODO: process node constraint
       true
     end
+
+    module Macro
+      def self.required_components(component_list)
+        component_list.map do |cmp|
+          hash = {
+            :filter => [:and, [:eq, :component_type, cmp]],
+            :columns => [cmp => :component_type]
+          }
+          string_symbol_form(hash)
+        end
+      end
+     private
+      def self.string_symbol_form(term)
+        if term.kind_of?(Symbol)
+          ":#{term}"
+        elsif term.kind_of?(String)
+          term
+        elsif term.kind_of?(Hash)
+          term.inject({}){|h,kv|h.merge(string_symbol_form(kv[0]) => string_symbol_form(kv[1]))}
+        elsif term.kind_of?(Array) 
+          term.map{|t|string_symbol_form(t)}
+        else
+          Log.error("unexpected form for term #{term.inspect}")
+        end
+      end
+    end
+=begin
+          {
+               ":filter": [
+                ":and",
+                [
+                  ":eq",
+                  ":component_type",
+                  "postgresql__server"
+                ]
+              ],
+              ":columns": [
+                {"postgresql__server" : ":component_type"}
+              ]
+            }]
+=end
+
+
    private
     def evaluate_component_constraints(component_id_handle,target_id_handle)
       return true unless constraints = self[:component_constraints]

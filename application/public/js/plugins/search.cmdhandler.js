@@ -539,17 +539,11 @@ console.log('Have a drop hit for node!!!!');
 							var dropList = Y.all('#viewspace div.'+dropGroup);
 							dropList.each(function(){
 								if(!this.hasClass('yui3-dd-drop')) {
-//DEBUG
-console.log('Processing drop create for each node...');
-console.log(this);
 									var drop = new Y.DD.Drop({node:this});
 									drop.addToGroup([dropGroup]);
 									drop.on('drop:enter',function(e){
-console.log('Entered a component drop zone....');
 									});
 									drop.on('drop:hit',function(e){
-//DEBUG
-console.log('Got a drop hit for component....');
 										var dropNode = e.drop.get('node');
 										var compNode = e.drag.get('dragNode').get('children').item(0);
 										var componentId = compNode.getAttribute('data-id');

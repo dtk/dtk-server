@@ -11,8 +11,8 @@ module XYZ
   module HashSearchPattern
     #TODO: shoudl unify with parsing in utils/internal/dataset_from_search_pattern.rb; and may do away with having to deal with symbol and variant forms
     def self.add_to_filter(hash_search_pattern,hash_filter)
-      filter = augment_filter(index(hash_search_pattern,:filter,:is_symbol => true),hash_filter)
-      merge(hash_search_pattern,{:filter => filter},:is_symbol => true)
+      filter = augment_filter(index(hash_search_pattern,:filter),hash_filter)
+      merge(hash_search_pattern,{:filter => filter})
     end
 
    private
@@ -153,8 +153,8 @@ module XYZ
       columns.map do |col| 
         if col.kind_of?(Symbol) or col.kind_of?(String)
           ret_symbol(col)
-        elsif col.kind_of?(Hash) and col.size = 1
-          {ret_symbol(ret_symbol_key(col)) => ret_symbol(Aux::ret_value(col))}
+        elsif col.kind_of?(Hash) and col.size == 1
+          {ret_scalar(col.keys.first) => ret_symbol(Aux::ret_value(col))}
         else
           raise ErrorPatternNotImplemented.new(:column,col)
         end

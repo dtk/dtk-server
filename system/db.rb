@@ -76,10 +76,11 @@ module XYZ
     end
 
     #TODO: just temp until we get rid of need to convert keys to symbols; right now default is to do so 
-    def self.ret_json_hash(raw_value,col_info)
+    def self.ret_json_hash(raw_value,col_info,opts={})
       begin
         hash = JSON.parse(raw_value)
-        if col_info.has_key?(:ret_keys_as_symbols) and col_info[:ret_keys_as_symbols].to_s == "false" 
+        if (col_info.has_key?(:ret_keys_as_symbols) and col_info[:ret_keys_as_symbols].to_s == "false") or
+           (opts.has_key?(:ret_keys_as_symbols) and opts[:ret_keys_as_symbols].to_s == "false")
           hash
         else
           ret_keys_as_symbols(hash)

@@ -176,7 +176,8 @@ module XYZ
     #######################
     ######### Model apis
     def get_constraints()
-      get_objects_col_from_sp_hash({:columns => [:constraints]},:constraints).first
+      opts = {:ret_keys_as_symbols => false}
+      get_objects_col_from_sp_hash({:columns => [:constraints]},:constraints,opts).first
     end
 
     def get_containing_node_id()

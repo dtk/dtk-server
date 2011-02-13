@@ -230,7 +230,7 @@ module XYZ
       def all(opts={})
         ret = ArrayObject.new
         @sequel_ds.all.map do |row|
-          Model.process_raw_db_row!(row,model_name)
+          Model.process_raw_db_row!(row,model_name,opts)
           new_row = DB_REL_DEF[model_name][:model_class].new(row,@c,model_name)
           next if @filter_post_processing and not @filter_post_processing.call(new_row)
           ret << new_row
@@ -329,12 +329,12 @@ module XYZ
         ret = ArrayObject.new
         @sequel_ds.all.each do |row|
           primary_cols = row.delete(primary_model_name)
-          Model.process_raw_db_row!(primary_cols,primary_model_name)
+          Model.process_raw_db_row!(primary_cols,primary_model_name,opts)
           primary_cols.each{|k,v|row[k] = v}
           rest_model_indexes.each do |m|
             model_index = m.ret_qualified_model_name()
             next unless row[model_index]
-            Model.process_raw_db_row!(row[model_index],m.model_name)
+            Model.process_raw_db_row!(row[model_index],m.model_name,opts)
             if m.convert or opts[:convert_child_rows]
               row[model_index] = DB_REL_DEF[m.model_name][:model_class].new(row[model_index],@c,m.model_name)
             end

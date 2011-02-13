@@ -215,7 +215,7 @@ module XYZ
       port_list = Array.new
       attr_port_rows.each do |r|
         next unless attr = r[:attribute]
-        next if type == :external and not attr[:port_is_external]
+        next if type == "external" and not attr[:port_is_external]
         #TODO think dont need val = attr[:attribute_value]
         ###attr[:value] = (val.kind_of?(Hash) or val.kind_of?(Array)) ? JSON.generate(val) : val
         ## if put back in then :attribute_ports will need value_derived and value_asseretd

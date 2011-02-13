@@ -34,7 +34,7 @@
             }
           },
           "ds_name": "chef",
-          "last_collection_timestamp": "Sat Feb 12 18:47:35 +0000 2011"
+          "last_collection_timestamp": "Sun Feb 13 00:03:38 +0000 2011"
         },
         "ec2": {
           "display_name": "ec2",
@@ -48,7 +48,7 @@
             }
           },
           "ds_name": "ec2",
-          "last_collection_timestamp": "Sat Feb 12 18:48:36 +0000 2011"
+          "last_collection_timestamp": "Sun Feb 13 00:04:34 +0000 2011"
         },
         "user_data": {
           "display_name": "user_data",
@@ -67,7 +67,7 @@
             }
           },
           "ds_name": "user_data",
-          "last_collection_timestamp": "Sat Feb 12 18:49:03 +0000 2011"
+          "last_collection_timestamp": "Sun Feb 13 00:04:43 +0000 2011"
         }
       },
       "display_name": "test",
@@ -98,29 +98,29 @@
             "product_codes": [
 
             ],
+            "root_device_name": "/dev/sda1",
             "description": null,
+            "root_device_type": "ebs",
             "state": "available",
             "kernel_id": "aki-3af50453",
-            "root_device_name": "/dev/sda1",
-            "root_device_type": "ebs",
-            "owner_id": "411986592491",
-            "tags": {
-            },
             "block_device_mapping": [
               {
-                "deleteOnTermination": "true",
                 "volumeSize": 8,
                 "snapshotId": "snap-f9179794",
-                "deviceName": "/dev/sda1"
+                "deviceName": "/dev/sda1",
+                "deleteOnTermination": "true"
               }
             ],
             "is_public": false,
+            "owner_id": "411986592491",
+            "tags": {
+            },
+            "virtualizationType": "paravirtual",
             "location": "411986592491/rnp-chef-09-12-mcollective-1-0-ubuntu-lucid-x86_32",
             "name": "rnp-chef-09-12-mcollective-1-0-ubuntu-lucid-x86_32",
             "flavor": {
               "disk": null
             },
-            "virtualizationType": "paravirtual",
             "id": "ami-ee38c987",
             "architecture": "i386"
           },
@@ -384,6 +384,29 @@
               "hidden": false,
               "dynamic": false
             },
+            "sap_ref__l4": {
+              "cannot_change": false,
+              "display_name": "sap_ref__l4",
+              "required": true,
+              "external_ref": {
+                "type": "service_attribute",
+                "path": "service[wordpress][sap_ref__l4]"
+              },
+              "semantic_type_summary": "sap_ref__l4",
+              "description": "wordpress service access point reference",
+              "is_port": true,
+              "data_type": "json",
+              "semantic_type": {
+                "sap_ref__l4": {
+                  "application": {
+                    "type": "sql"
+                  }
+                }
+              },
+              "read_only": false,
+              "hidden": false,
+              "dynamic": false
+            },
             "dir": {
               "value_asserted": "/var/www",
               "cannot_change": false,
@@ -412,36 +435,6 @@
               "description": "Wordpress will use this MySQL database to store its data.",
               "is_port": false,
               "data_type": "string",
-              "read_only": false,
-              "hidden": false,
-              "dynamic": false
-            },
-            "sap_ref": {
-              "value_asserted": {
-                "application": {
-                  "username": "wordpressuser",
-                  "database": "wordpressdb",
-                  "password": null
-                }
-              },
-              "cannot_change": false,
-              "display_name": "sap_ref",
-              "required": true,
-              "external_ref": {
-                "type": "service_attribute",
-                "path": "service[wordpress][sap_ref]"
-              },
-              "semantic_type_summary": "sap_ref",
-              "description": "wordpress mysql service access point reference",
-              "is_port": true,
-              "data_type": "json",
-              "semantic_type": {
-                "sap_ref": {
-                  "application": {
-                    "type": "sql::mysql"
-                  }
-                }
-              },
               "read_only": false,
               "hidden": false,
               "dynamic": false

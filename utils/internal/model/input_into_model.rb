@@ -71,7 +71,7 @@ module XYZ
 	      ref_id_info = get_row_from_id_handle(IDHandle[:c => c, :uri => ref_uri])
             else
               unless opts[:ret_global_fks]
-                Log.info("In import_into_model cannot find object with uri #{ref_uri}") 
+                Log.error("In import_into_model cannot find object with uri #{ref_uri}") 
               else
                 ret_global_fks ||= Hash.new
                 #purposely using fk_rel_uri (rebaselined) but ref_uri_x (raw)
@@ -99,7 +99,7 @@ module XYZ
               create_simple_instance?(ref_uri,c,:set_display_name => true)
 	      ref_id_info = get_row_from_id_handle(IDHandle[:c => c, :uri => ref_uri])
             else
-              Log.info("In process_global_keys cannot find object with uri #{ref_uri}") 
+              Log.error("In process_global_keys cannot find object with uri #{ref_uri}") 
               next
             end
           end

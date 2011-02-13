@@ -66,6 +66,17 @@ module XYZ
            }
           ]
 
+        virtual_column :containing_node_id_info, :type => :json, :hidden => true,
+         :remote_dependencies =>
+         [
+          {
+            :model_name => :component,
+            :alias => :parent_component,
+            :join_type => :left_outer,
+            :join_cond=>{:id => p(:component,:component)},
+            :cols => [:id,:display_name,id(:node)]
+          }
+         ]
 
         virtual_column :has_pending_change, :type => :boolean, :hidden => true,
          :remote_dependencies =>
@@ -166,6 +177,12 @@ module XYZ
     ######### Model apis
     def get_constraints()
       get_objects_col_from_sp_hash({:columns => [:constraints]},:constraints).first
+    end
+
+    def get_containing_node_id()
+      return self[:node_node_id] if self[:node_node_id]
+      row = get_objects_from_sp_hash(:columns => [:node_node_id,:containing_node_id_info]).first
+      row[:node_node_id]||(row[:parent_component]||{})[:node_node_id]
     end
 
     ####################

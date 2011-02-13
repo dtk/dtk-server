@@ -9,22 +9,43 @@ module XYZ
   end
 
   module HashSearchPattern
+    #TODO: shoudl unify with parsing in utils/internal/dataset_from_search_pattern.rb; and may do away with having to deal with symbol and variant forms
     def self.add_to_filter(hash_search_pattern,hash_filter)
-      filter = augment_filter(hash_search_pattern[:filter],hash_filter)
-      ret = {:filter => filter}
-      [:relation,:columns].each{|k|ret[k] = hash_search_pattern[k] if hash_search_pattern.has_key?(k)}
-      ret
+      filter = augment_filter(index(hash_search_pattern,:filter,:is_symbol => true),hash_filter)
+      merge(hash_search_pattern,{:filter => filter},:is_symbol => true)
     end
+
    private
     def self.augment_filter(hash_filter,hash_filter_addition)
       to_add = [hash_filter_addition]
       if hash_filter.nil?
         [:and] + to_add
-      elsif hash_filter.first == :and
+      elsif match(hash_filter.first,:and)
           hash_filter + to_add
       else
         [:and] + hash_filter + to_add
       end 
+    end
+
+    def self.symbol_persistent_form(symbol,opts={})
+      opts[:is_symbol] ? ":#{symbol}".to_sym : ":#{symbol}"
+    end
+
+    def self.merge(hash,to_add,opts={})
+      to_add.inject(hash){|h,kv|h.merge(select_index_form(h,kv[0],opts) => kv[1])}
+     end
+
+    def self.select_index_form(hash,symbol_index,opts={})
+      return symbol_index if hash[symbol_index] 
+      symbol_persistent_form = symbol_persistent_form(symbol_index,opts)
+      hash[symbol_persistent_form] ? symbol_persistent_form : symbol_index
+    end
+
+    def self.index(hash,symbol_index,opts={})
+      hash[symbol_index]||hash[symbol_persistent_form(symbol_index,opts)]
+    end
+    def self.match(term,symbol,opts={})
+      term == symbol or term == symbol_persistent_form(symbol,opts) 
     end
   end
 

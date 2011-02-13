@@ -140,6 +140,10 @@ module XYZ
       Model.get_objects_from_search_object(search_object,opts)
     end
 
+    def get_object_columns(id_handle,columns)
+      self.class.get_object_columns(id_handle(),columns)
+    end
+
     def self.get_object_columns(id_handle,columns)
       sp_hash = {
         :relation => id_handle[:model_name],

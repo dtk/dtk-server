@@ -15,10 +15,12 @@ module XYZ
     def clone(id_handle,target_id_handle,override_attrs={},opts={})
       clone_source_object = id_handle.create_object()
 ###TODO: testing new functionality
+=begin
       constraints = clone_source_object.get_constraints() if model_name == :component
       if constraints
         pp [:evaluation, constraints.evaluate(id_handle,target_id_handle)]
       end
+=end
 #######
       clone_source_object.add_model_specific_override_attrs!(override_attrs)
       proc = CloneCopyProcessor.new(self,opts.merge(:include_children => true))

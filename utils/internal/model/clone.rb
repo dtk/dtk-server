@@ -8,28 +8,33 @@ module XYZ
       return specified_target_idh unless id_handle[:model_name] == :component and specified_target_idh[:model_name] == :node
       id_handle.create_object().determine_cloned_components_parent(specified_target_idh)
     end
-   private
+  end
 
-   public
-    #TODO: may refactor to be instance rather than class method
-    def clone(id_handle,target_id_handle,override_attrs={},opts={})
+  module CloneInstanceMixins
+    def clone_into(id_handle,override_attrs={},opts={})
+###TODO: testing new functionality
+=begin
+        constraints = id_handle.create_object.get_constraints() if id_handle[:model_name] == :component
+        if constraints
+          pp [:evaluation, constraints.evaluate(id_handle,input_target_id_handle)]
+        end
+=end
+#######
       clone_source_object = id_handle.create_object()
       clone_source_object.add_model_specific_override_attrs!(override_attrs)
-      proc = CloneCopyProcessor.new(self,opts.merge(:include_children => true))
-      clone_copy_output = proc.clone_copy(id_handle,[target_id_handle],override_attrs)
+      proc = CloneCopyProcessor.new(clone_source_object,opts.merge(:include_children => true))
+      clone_copy_output = proc.clone_copy(id_handle,[id_handle()],override_attrs)
       new_id_handle = clone_copy_output.id_handles.first
       raise Error.new("cannot clone") unless new_id_handle
       #calling with respect to target
-      target_object = target_id_handle.create_object()
-      target_object.clone_post_copy_hook(clone_copy_output,opts)
-#      model_class(target_id_handle[:model_name]).clone_post_copy_hook(clone_copy_output,target_id_handle,opts)
+      clone_post_copy_hook(clone_copy_output,opts)
       return new_id_handle.get_id()
     end
 
-    def clone__top_object_exists(top_object_id_handle,id_handles,target_id_handle)
+    def clone_into__top_object_exists(top_object_id_handle,id_handles)
       #TODO: may add override attributes and opts
       opts = {:include_children => true}
-      proc = CloneCopyProcessor.new(self,opts)
+      proc = CloneCopyProcessor.new(top_object_id_handle.create_object(),opts)
       proc.add_id_handle(top_object_id_handle)
 
       #group id handles by model type
@@ -43,19 +48,16 @@ module XYZ
       #TODO: assembly_id should not be hard  coded
       overrides = {:assembly_id => top_object_id_handle.get_id()}
       ndx_id_handle_groups.each_value do |child_id_handles|
-        child_context = proc.ret_child_context(child_id_handles,target_id_handle,overrides)
+        child_context = proc.ret_child_context(child_id_handles,id_handle(),overrides)
         proc.clone_copy_child_objects(child_context)
       end
 
       proc.shift_foregn_keys()
       clone_copy_output = proc.output
-      target_object = target_id_handle.create_object()
-      target_object.clone_post_copy_hook(clone_copy_output)
-#      model_class(target_id_handle[:model_name]).clone_post_copy_hook(clone_copy_output,target_id_handle)
+      clone_post_copy_hook(clone_copy_output)
       return top_object_id_handle.get_id()
     end
-  end
-  module CloneInstanceMixins
+
    protected
     # to be optionally overwritten by object representing the source
     def add_model_specific_override_attrs!(override_attrs)
@@ -64,9 +66,8 @@ module XYZ
     # to be optionally overwritten by object representing the target
     def clone_post_copy_hook(clone_copy_output,opts={})
     end
-  end
-  module CloneClassMixins
-   private
+
+    private
     #TODO: slight refactor of CloneCopyOutput so each child is of form {:parent => <parent>,:child => <CloneCopyOutput>}
     class CloneCopyOutput
       def initialize(opts={})
@@ -117,10 +118,18 @@ module XYZ
     end
 
     class CloneCopyProcessor
+=begin
       def initialize(parent,opts={})
-        @fk_info = ForeignKeyInfo.new(parent.db)
+        @db = parent.class.db
+        @fk_info = ForeignKeyInfo.new(@db)
         @model_name = parent.model_name()
-        @db = parent.db
+        @ret = CloneCopyOutput.new(opts)
+      end
+=end
+      def initialize(source_obj,opts={})
+        @db = source_obj.class.db
+        @fk_info = ForeignKeyInfo.new(@db)
+        @model_name = source_obj.model_name()
         @ret = CloneCopyOutput.new(opts)
       end
 

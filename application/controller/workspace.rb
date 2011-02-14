@@ -756,7 +756,9 @@ item_list = JSON.parse(hash["item_list"])
       assembly_id_handle = id_handle(assembly_id,:component)
 
       id_handles = node_id_handles + link_id_handles
-      Component.clone__top_object_exists(assembly_id_handle,id_handles,library_id_handle)
+      library_object = library_id_handle.create_object()
+      #TODO: encapsulate some of above so ca just call library_object.clone_into(...
+      library_object.clone_into__top_object_exists(assembly_id_handle,id_handles)
       return {:content => nil}
     end
   end

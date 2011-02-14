@@ -143,16 +143,15 @@ pp [:after_ravel,attribute_rows]
 
         items << item
       end
-=begin
+
 pp '+++++++++++++++++++++++++++++++'
 pp '++++CHECKING TO SEE IF ASSEMBLY REDIRECT IS CORRECT+++'
 pp '+++++++++++++++++++++++++++++++'
 pp request.params
 pp '+++++++++++++++++++++++++++++++'
 pp items
-    p_str = JSON.generate(request.params)
-    run_javascript("alert('Added assembly, here are req params:  #{p_str}');")
-=end
+#    p_str = JSON.generate(request.params)
+#    run_javascript("alert('Added assembly, here are req params:  #{p_str}');")
 
     addItemsObj = JSON.generate(items)
     run_javascript("R8.Workspace.addItems(#{addItemsObj});")

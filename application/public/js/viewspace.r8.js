@@ -155,22 +155,34 @@ if (!R8.ViewSpace) {
 
 				this.purgePendingDelete();
 //DEBUG
-				this.retrieveLinks();
-
-				if(_userSettings.showLinks == true) {
-					this.renderLinks();
-				}
+				this.retrieveLinks(items);
+//TODO: revisit and have retrieveLinks file a custom callback when complete that renderLinks can sub to
+//				if(_userSettings.showLinks == true) {
+//					this.renderLinks();
+//				}
 			},
 
 			itemsReady: function() {
 				
 			},
 
-			retrieveLinks: function() {
+			retrieveLinks: function(items) {
 				var itemList = [];
-				for(i in _items) {
-					if(_items[i].get('model') == 'node')
-						itemList.push({'id':_items[i].get('id'),'model':_items[i].get('model')});
+				if (typeof(items) == 'undefined') {
+					for (var i in _items) {
+						if (_items[i].get('model') == 'node') 
+							itemList.push({
+								'id': _items[i].get('id'),
+								'model': _items[i].get('model')
+							});
+					}
+				} else {
+					for(var i in items) {
+						itemList.push({
+							'id': items[i].object.id,
+							'model': items[i].type
+						});
+					}
 				}
 				var that = this;
 				YUI().use('json',function(Y){
@@ -203,7 +215,16 @@ if (!R8.ViewSpace) {
 					tempLinkList['link-'+linkList[i]['id']] = linkList[i];
 					_linkRenderList.push('link-'+linkList[i]['id']);
 				}
-				_links = tempLinkList;
+				_links = {};
+				for(var i in tempLinkList) _links[i] = tempLinkList[i];
+//				_links = tempLinkList;
+//DEBUG
+console.log('end of setLinks...renderList is:');
+console.log(_linkRenderList);
+				if(_userSettings.showLinks == true) {
+					this.renderLinks();
+				}
+
 			},
 
 			renderLinks: function() {
@@ -217,6 +238,9 @@ if (!R8.ViewSpace) {
 				}
 
 				var pendingRemoval = [];
+//DEBUG
+console.log('inside of renderLinks...');
+console.log(_linkRenderList);
 				if(_linkRenderList.length == 0) return;
 
 				for(var i=_linkRenderList.length-1; i >=0; i--) {
@@ -228,6 +252,10 @@ if (!R8.ViewSpace) {
 						endNodeId = 'port-'+_links[linkId]['other_end_id'],
 						startPortDef = this.getItemPortDef(itemId,'port-'+portId),
 						endPortDef = this.getPortDefById('port-'+_links[linkId]['other_end_id']);
+//DEBUG
+console.log('have a link in renderLinkList....');
+console.log(_linkRenderList[i]);
+console.log(_links[linkId]);
 
 					if (typeof(startPortDef) != 'undefined' && endPortDef != null) {
 						var linkDef = {
@@ -246,7 +274,9 @@ if (!R8.ViewSpace) {
 									'connectElemID':endNodeId
 								}]
 							};
-
+//DEBUG
+console.log('going to add link to items....');
+console.log(linkDef);
 						this.addLinkToItems(linkId,linkDef);
 
 						R8.Canvas.renderLink(linkDef);
@@ -397,7 +427,7 @@ console.log(ports);
 						'model':_items[itemId].get('model'),
 						'pos':{'top':itemNode.getStyle('top'),'left':itemNode.getStyle('left')}
 					};
-				}				
+				}
 				YUI().use('json','cookie', function(Y){
 					var _itemPosUpdateListJSON = Y.JSON.stringify(_itemPosUpdateList);
 					Y.Cookie.set("_itemPosUpdateList", _itemPosUpdateListJSON);

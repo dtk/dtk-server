@@ -64,18 +64,67 @@ module XYZ
       }
     end
 
+    def add_item(id)
+#      id_handle = id_handle(id)
+=begin
+      hash = request.params.dup
+      target_id_handle = nil
+      if hash["target_id"] and hash["target_model_name"]
+        input_target_id_handle = id_handle(hash["target_id"].to_i,hash["target_model_name"].to_sym)
+        target_id_handle = Model.find_real_target_id_handle(id_handle,input_target_id_handle)
+      elsif hash["target_uri"] and hash["obj"]#TODO: stub for testing
+        c = ret_session_context_id()
+        target_id_handle = IDHandle.new({:c => c, :uri => hash["target_uri"]},{:set_parent_model_name => true})
+        target_id = target_id_handle.get_id()
+      else
+        Log.info("not implemented yet")
+        return redirect "/xyz/#{model_name()}/display/#{id.to_s}"
+      end
+=end
+      #TODO: need to copy in avatar when hash["ui"] is non null
+      datacenter = id_handle(id,:datacenter).create_object()
+
+#      model_id_handle = id_handle(request.params["id"].to_i,request.params["model"].to_sym)
+      override_attrs = request.params["ui"] ? {:ui=>request.params["ui"]} : {}
+#      target_object = target_id_handle.create_object()
+      new_id = datacenter.add_item(request.params["id"],request.params["model"])
+      id = new_id if new_id
+
+#TODO: clean this up,hack to update UI params for newly cloned object
+#      update_from_hash(id,{:ui=>hash["ui"]})
+
+#      hash["redirect"] ? redirect_route = "/xyz/#{hash["redirect"]}/#{id.to_s}" : redirect_route = "/xyz/#{model_name()}/display/#{id.to_s}"
+
+      if hash["model_redirect"]
+        base_redirect = "/xyz/#{hash["model_redirect"]}/#{hash["action_redirect"]}"
+        redirect_id =  hash["id_redirect"].match(/^\*/) ? id.to_s : hash["id_redirect"]
+        redirect_route = "#{base_redirect}/#{redirect_id}"
+        request_params = ''
+        expected_params = ['model_redirect','action_redirect','id_redirect','target_id','target_model_name']
+        request.params.each do |name,value|
+          if !expected_params.include?(name)
+            request_params << '&' if request_params != ''
+            request_params << "#{name}=#{value}"
+          end
+        end
+        ajax_request? ? redirect_route += '.json' : nil
+        redirect_route << URI.encode("?#{request_params}") if request_params != ''
+      else
+        redirect_route = "/xyz/#{model_name()}/display/#{id.to_s}"
+        ajax_request? ? redirect_route += '.json' : nil
+      end
+
+      redirect redirect_route
+    end
+
     def get_links(id)
       datacenter = id_handle(id,:datacenter).create_object()
       item_list = JSON.parse(request.params["item_list"])
 
 #TODO: move this call into underlying get_links call,
-#TODO: make get_links an instance method, should pull all links from children if item_list is []/nil
       item_list = item_list.map{|x|id_handle(x["id"].to_i,x["model"].to_sym)}
-
+#TODO: make get_links an instance method, should pull all links from children if item_list is []/nil
       link_list = datacenter.class.get_links(item_list)
-
-pp '@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@'
-pp link_list
       return {'data'=>link_list}
     end
 

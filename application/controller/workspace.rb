@@ -411,13 +411,10 @@ pp datacenter
     end
 
     def list_items_2(datacenter_id)
+      datacenter = id_handle(datacenter_id,:datacenter).create_object()
+      datacenter_id = datacenter.id()
+
       include_js('plugins/search.cmdhandler')
-
-#      pp [:debug, id_handle(datacenter_id,:datacenter).create_object().get_items()]
-
-      datacenter = get_object_by_id(datacenter_id,:datacenter)
-
-      view_space = Hash.new
       view_space = {
         :type => 'datacenter',
         :object => datacenter
@@ -425,103 +422,40 @@ pp datacenter
       v_space_obj = JSON.generate(view_space)
       run_javascript("R8.Workspace.pushViewSpace(#{v_space_obj});")
 
-      model_name = :node_group
-      filter_params = {:parent_id => datacenter_id}
-      search_object =  ret_node_group_search_object(filter_params)
-
-      model_list = Model.get_objects_from_search_object(search_object)
-#pp model_list
-
       #--------Setup Toolbar for access each group from ACL's---------
-#        add_js_exe("R8.Toolbar.init({node:'group-#{model_list[0][:id]}',tools:['quicksearch']});")
+      #        add_js_exe("R8.Toolbar.init({node:'group-#{model_list[0][:id]}',tools:['quicksearch']});")
       user_has_toolbar_access = true
       user_group_tool_list = Array.new
       user_group_tool_list << 'quicksearch'
-      toolbar_def = {
-        :tools => user_group_tool_list
-      }
+      toolbar_def = {:tools => user_group_tool_list}
+
       include_js('toolbar.quicksearch.r8')
 
-#TODO: place holder stubs for ideas on possible future behavior
-#      UI::workspace.add_item(model_list[i])
-#      UI::workspace.render()
+      tpl_info_hash = Hash.new
 
       tpl = R8Tpl::TemplateR8.new("node_group/wspace_display",user_context())
       tpl.set_js_tpl_name("ng_wspace_display")
-      tpl_info = tpl.render()
-      include_js_tpl(tpl_info[:src])
+      tpl_info_hash[:node_group] = tpl.render()
+      include_js_tpl(tpl_info_hash[:node_group][:src])
 
-=begin
-{:template_vars=>{},
- :src=>"wspace_list_ng_node_group.js",
- :template_callback=>"wspace_list_ng_node_group"}
-=end
-      #--------Add Node Group List to Workspace-----
-      items = Array.new
-      top = 100
-      left = 100
-=begin
-
-      model_list.each_with_index do |node_group,index|
-        model_list[index][:model_name] = model_name
-        model_list[index][:ui].nil? ? model_list[index][:ui] = {} : nil
-        model_list[index][:ui][datacenter_id.to_sym].nil? ? model_list[index][:ui][datacenter_id.to_sym] = {} : nil
-        model_list[index][:ui][datacenter_id.to_sym][:top].nil? ? model_list[index][:ui][datacenter_id.to_sym][:top] = top : nil
-        model_list[index][:ui][datacenter_id.to_sym][:left].nil? ? model_list[index][:ui][datacenter_id.to_sym][:left] = left : nil
-
-        top = top+50
-        left = left+50
-
-        item = {
-          :type => model_name,
-          :object => model_list[index],
-          :toolbar_def => toolbar_def,
-          :tpl_callback => tpl_info[:template_callback]
-        }
-        items << item
-      end
-=end
-      #----------------------------------------------------
-      #-------Grab nodes in the datacenter-----------------
-      #----------------------------------------------------
-      #need to augment for nodes that are in datacenter directly and not node groups
       tpl = R8Tpl::TemplateR8.new("node/wspace_display",user_context())
       tpl.set_js_tpl_name("node_wspace_display")
-      tpl_info = tpl.render()
-      include_js_tpl(tpl_info[:src])
+      tpl_info_hash[:node] = tpl.render()
+      include_js_tpl(tpl_info_hash[:node][:src])
 
-      model_name = :node
-      field_set = Model::FieldSet.default(model_name)
-      node_list = get_objects(model_name,{:datacenter_datacenter_id=>datacenter_id,:ds_source_obj_type=>'image'})
+      ##### ----------------- add in model info
+      model_list = datacenter.get_items()
 
-      top = 100
-      left = 200
-
-      node_list.each do |node|
-        node[:ui].nil? ? node[:ui] = {} : nil
-        node[:ui][datacenter_id.to_sym].nil? ? node[:ui][datacenter_id.to_sym] = {} : nil
-        node[:ui][datacenter_id.to_sym][:top].nil? ? node[:ui][datacenter_id.to_sym][:top] = top : nil
-        node[:ui][datacenter_id.to_sym][:left].nil? ? node[:ui][datacenter_id.to_sym][:left] = left : nil
-#pp node[:display_name]
-#pp '))))))))))))))))))))))))))))))))))))'
-        item = {
+      items = model_list.map do |object|
+        model_name = object.model_name
+        {
           :type => model_name.to_s,
-          :object => node,
+          :object => object,
           :toolbar_def => toolbar_def,
-          :tpl_callback => tpl_info[:template_callback],
-          :ui => node[:ui][datacenter_id.to_sym]
+          :tpl_callback => tpl_info_hash[model_name][:template_callback],
+          :ui => object[:ui][datacenter_id.to_s.to_sym]
         }
-        top = top+50
-        left = left+50
-
-        items << item
       end
-      #----------------------------------------------------
-      #----------------------------------------------------
-      #----------------------------------------------------
-
-#TODO: decide if its possible in clean manner to manage toolbar access at item level in ad-hoc ways
-#right now single toolbar def for all items in list for each type
 
       addItemsObj = JSON.generate(items)
       run_javascript("R8.Workspace.addItems(#{addItemsObj});")

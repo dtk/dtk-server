@@ -1,6 +1,7 @@
 require File.expand_path(UTILS_DIR+'/internal/model/field_set', File.dirname(__FILE__))
 require File.expand_path(UTILS_DIR+'/internal/model/input_into_model', File.dirname(__FILE__))
 require File.expand_path(UTILS_DIR+'/internal/model/clone', File.dirname(__FILE__))
+require File.expand_path(UTILS_DIR+'/internal/model/get_items', File.dirname(__FILE__))
 
 #TODO: lose all of these, lose notion of schema and data
 require File.expand_path(UTILS_DIR+'/internal/model/schema', File.dirname(__FILE__))
@@ -40,7 +41,8 @@ module XYZ
     extend CloneClassMixins
     include CloneInstanceMixins
     extend InputIntoModelClassMixins
-    
+    include GetItemsInstanceMixins
+
     #TBD: refactoring: below is old to be refactored; above is refactored
     extend ModelSchemaClassMixins
     extend ModelDataClassMixins

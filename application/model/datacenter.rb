@@ -5,14 +5,6 @@ module XYZ
     #######################
     ######### Model apis
 
-    def get_items()
-      objects = 
-        get_objects_col_from_sp_hash({:columns => [:nodes]},:node) + 
-        get_objects_col_from_sp_hash({:columns => [:node_groups]},:node_group) 
-      objects.each{|o|o[:model_name] = o.model_name}
-      add_ui_positions_if_needed!(objects)
-    end
-
 #TODO: dont take id_handle in, take id,model
 #    def add_item(id,model,overide_attrs={})
     def add_item(id_handle,overide_attrs={})
@@ -21,37 +13,6 @@ module XYZ
 
       clone_into(id_handle,override_attrs)
     end
-
-   private
-    def add_ui_positions_if_needed!(objects)
-      default_pos = DefaultPositions.new()
-      objects.each do |o|
-        o[:ui] ||= Hash.new
-        pos = o[:ui][id().to_s.to_sym] ||= Hash.new
-        pos[:left] ||= default_pos.ret_and_increment(o.model_name,:left)
-        pos[:top] ||= default_pos.ret_and_increment(o.model_name,:top)
-      end
-    end
-    class DefaultPositions
-      def initialize()
-        @positions = {
-          :node => {:left => 200, :top => 100},
-          :node_group => {:left => 100, :top => 100}
-        }
-      end
-      def ret_and_increment(model_name,axis)
-        ret = @positions[model_name][axis]
-        @positions[model_name][axis] += Increment[model_name][axis]
-        ret
-      end
-     private
-      Increment = {
-        :node => {:left => 50, :top => 50},
-        :node_group => {:left => 50, :top => 50}
-      }
-    end
-
-   public
 
     def self.get_links(id_handles)
       return Array.new if id_handles.empty?

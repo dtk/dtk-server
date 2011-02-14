@@ -196,17 +196,20 @@ if (!R8.ViewSpace) {
 							'io:success':linkCallback
 						},
 						'cfg': {
-							'data': 'context_list=' + Y.JSON.stringify(itemList)
+//							'data': 'context_list=' + Y.JSON.stringify(itemList)
+							'data': 'item_list=' + Y.JSON.stringify(itemList)
 						}
 					};
-					R8.Ctrl.call('attribute_link/get_under_context_list',params);
+//					R8.Ctrl.call('attribute_link/get_under_context_list',params);
+					R8.Ctrl.call(_type+'/get_links/'+_id,params);
 				});
 			},
 
 			setLinks: function(ioId,responseObj) {
 				eval("R8.Ctrl.callResults[ioId]['response'] =" + responseObj.responseText);
 				var response = R8.Ctrl.callResults[ioId]['response'];
-				var linkList = response['application_attribute_link_get_under_context_list']['content'][0]['data'];
+//				var linkList = response['application_attribute_link_get_under_context_list']['content'][0]['data'];
+				var linkList = response['application_datacenter_get_links']['content'][0]['data'];
 				var tempLinkList = {}
 				for(i in linkList) {
 //TODO: revisit when cleaning up actions for retrieving links

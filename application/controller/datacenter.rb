@@ -64,5 +64,20 @@ module XYZ
       }
     end
 
+    def get_links(id)
+      datacenter = id_handle(id,:datacenter).create_object()
+      item_list = JSON.parse(request.params["item_list"])
+
+#TODO: move this call into underlying get_links call,
+#TODO: make get_links an instance method, should pull all links from children if item_list is []/nil
+      item_list = item_list.map{|x|id_handle(x["id"].to_i,x["model"].to_sym)}
+
+      link_list = datacenter.class.get_links(item_list)
+
+pp '@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@'
+pp link_list
+      return {'data'=>link_list}
+    end
+
   end
 end

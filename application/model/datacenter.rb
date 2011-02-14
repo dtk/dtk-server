@@ -45,7 +45,9 @@ module XYZ
 
     def self.get_links(id_handles)
       return Array.new if id_handles.empty?
-      
+
+#      id_handles = id_handles.map{|x|id_handle(x["id"].to_i,x["model"].to_sym)}
+
       node_id_handles = id_handles.select{|idh|idh[:model_name] == :node}
       if node_id_handles.size < id_handles.size
         models_not_treated = id_handles.reject{|idh|idh[:model_name] == :node}.map{idh|idh[:model_name]}.unique
@@ -77,6 +79,7 @@ module XYZ
       end
       link_list
     end
+
     #### clone helping functions
     def clone_post_copy_hook(clone_copy_output,opts={})
       case clone_copy_output.model_name()
@@ -87,7 +90,9 @@ module XYZ
         StateChange.create_pending_change_item(:new_item => new_id_handle, :parent => id_handle())
       end
     end
+
    private
+
     def clone_post_copy_hook__component(clone_copy_output,opts)
       #TODO: right now this wil be just a composite component and clone_copy_output will be off form assembly - nodee - component
       #TODO: may put nodes under "install of assembly"
@@ -107,6 +112,7 @@ module XYZ
       return if component_new_items.empty?
       StateChange.create_pending_change_items(component_new_items)
     end
+
   end
 end
 

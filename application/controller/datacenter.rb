@@ -96,9 +96,9 @@ module XYZ
 
 #      hash["redirect"] ? redirect_route = "/xyz/#{hash["redirect"]}/#{id.to_s}" : redirect_route = "/xyz/#{model_name()}/display/#{id.to_s}"
 
-      if hash["model_redirect"]
-        base_redirect = "/xyz/#{hash["model_redirect"]}/#{hash["action_redirect"]}"
-        redirect_id =  hash["id_redirect"].match(/^\*/) ? id.to_s : hash["id_redirect"]
+      if request.params["model_redirect"]
+        base_redirect = "/xyz/#{request.params["model_redirect"]}/#{request.params["action_redirect"]}"
+        redirect_id =  request.params["id_redirect"].match(/^\*/) ? id.to_s : request.params["id_redirect"]
         redirect_route = "#{base_redirect}/#{redirect_id}"
         request_params = ''
         expected_params = ['model_redirect','action_redirect','id_redirect','target_id','target_model_name']

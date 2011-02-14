@@ -17,9 +17,9 @@ module XYZ
 #    def add_item(id,model,overide_attrs={})
     def add_item(id_handle,overide_attrs={})
       #TODO: need to copy in avatar when hash["ui"] is non null
-      override_attrs = hash["ui"] ? {:ui=>hash["ui"]} : {}
+      override_attrs = overide_attrs["ui"] ? {:ui=>overide_attrs["ui"]} : {}
 
-      return self.clone_into(id_handle,override_attrs)
+      clone_into(id_handle,override_attrs)
     end
 
    private

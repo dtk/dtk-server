@@ -410,6 +410,7 @@ pp datacenter
 =end
     end
 
+=begin
     def list_items_2(datacenter_id)
       datacenter = id_handle(datacenter_id,:datacenter).create_object()
       datacenter_id = datacenter.id()
@@ -467,6 +468,7 @@ pp datacenter
         :panel => 'viewspace'
       }
     end
+=end
 
     def search_2
 #pp request.params
@@ -483,7 +485,7 @@ pp datacenter
       if where_clause
         where_clause = where_clause.inject(nil){|h,o|SQL.and(h,SQL::WhereCondition.like(o[0],"#{o[1]}%"))}
       end
- 
+
       model_list = get_objects(model_name.to_sym,where_clause)
       model_list.each_with_index do |model,index|
         model_list[index][:model_name] = model_name

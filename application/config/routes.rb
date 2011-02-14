@@ -164,5 +164,10 @@ R8::Routes["user/register"] = {
   :layout => 'login'
 }
 
+R8::Routes["datacenter/load_vspace"] = {
+  :layout => 'workspace'
+}
+
+
 R8::Routes.freeze
 

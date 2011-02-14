@@ -78,7 +78,7 @@ module XYZ
       #TODO: short circuit if parent_guid and parent_model_name are set
       c = self[:c]
       id_info = IDInfoTable.get_row_from_id_handle(self)
-      return nil unless id_info and id_info[:parent_relation_type] and id_info[:parent_id] and id_info[:parent_id]>0  
+      return nil unless id_info and id_info[:parent_relation_type] and id_info[:parent_id] 
       IDHandle[:c => c, :id => id_info[:parent_id], :model_name => id_info[:parent_relation_type]]
     end
     def get_parent_id_handle_with_display_name()

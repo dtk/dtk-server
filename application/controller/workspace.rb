@@ -15,14 +15,29 @@ items_to_save.values.each{|item|item["model"] ||= "node_group"}
       model_names = items_to_save.values.map{|item|item["model"].to_sym}.uniq
       model_names.each do |model_name| 
         model_handle = ModelHandle.new(ret_session_context_id(),model_name)
+
         model_items = items_to_save.reject{|item_id,info|not info["model"].to_sym == model_name}
+        
+        #TODO: temp hack; adn expensive call taht shoudl be removed; make sure that items_to_save all have ws_id as parent; hack now assumeing ws_id is just datacenter
+        parent_field = :datacenter_datacenter_id
+        model_items.reject! do |item_id,info|
+          idh = id_handle(item_id.to_i,info["model"].to_sym)
+          if idh[:parent_model_name] == :datacenter
+            false
+          else
+            obj_info = idh.create_object.get_objects_from_sp_hash(:columns => [parent_field]).first
+            not (obj_info||{})[parent_field] == (ws_id && ws_id.to_i)
+          end
+        end
+        #############################################
+
 
         update_rows = model_items.map do |item_id,info|
           {
             :id => item_id.to_i, 
             :ui  => {ws_id.to_s.to_sym =>
-              {:left => info["pos"]["left"].gsub(/[^0-9]+/,""),
-                :top => info["pos"]["top"].gsub(/[^0-9]+/,"")}
+              {:left => info["pos"]["left"].gsub(/[^0-9]+/,"").to_i,
+                :top => info["pos"]["top"].gsub(/[^0-9]+/,"").to_i}
             }
           }
         end

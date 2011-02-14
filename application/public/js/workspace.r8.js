@@ -520,6 +520,9 @@ console.log('I guess I am hitting this now!!!!');
 //console.log(queryParams);
 //return;
 
+					var queryParams = 'ui='+uiStr+'&id='+modelId+'&model='+modelName;
+					queryParams += '&model_redirect='+modelName+'&action_redirect=wspace_display_2&id_redirect=*id';
+
 					var completeCallback = function(){
 						R8.Workspace.setupNewItems();
 					}
@@ -533,7 +536,8 @@ console.log('I guess I am hitting this now!!!!');
 							'data': queryParams
 						}
 					}
-					R8.Ctrl.call(modelName+'/clone/'+modelId,params);
+//					R8.Ctrl.call(modelName+'/clone/'+modelId,params);
+					R8.Ctrl.call(vspaceType+'/add_item/'+vspaceId,params);
 				});
 			},
 

@@ -64,7 +64,7 @@ module XYZ
       }
     end
 
-    def add_item(id)
+    def self.add_item(id)
 #      id_handle = id_handle(id)
 =begin
       hash = request.params.dup
@@ -84,10 +84,10 @@ module XYZ
       #TODO: need to copy in avatar when hash["ui"] is non null
       datacenter = id_handle(id,:datacenter).create_object()
 
-#      model_id_handle = id_handle(request.params["id"].to_i,request.params["model"].to_sym)
-      override_attrs = request.params["ui"] ? {:ui=>request.params["ui"]} : {}
-#      target_object = target_id_handle.create_object()
-      new_id = datacenter.add_item(request.params["id"],request.params["model"])
+#      override_attrs = request.params["ui"] ? {:ui=>request.params["ui"]} : {}
+
+      model_id_handle = id_handle(request.params["id"].to_i,request.params["model"].to_sym)
+      new_id = datacenter.add_item(request.params["id"],request.params["model"],request.params["ui"])
       id = new_id if new_id
 
 #TODO: clean this up,hack to update UI params for newly cloned object

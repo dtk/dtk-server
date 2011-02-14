@@ -12,6 +12,16 @@ module XYZ
       objects.each{|o|o[:model_name] = o.model_name}
       add_ui_positions_if_needed!(objects)
     end
+
+#TODO: dont take id_handle in, take id,model
+#    def add_item(id,model,overide_attrs={})
+    def add_item(id_handle,overide_attrs={})
+      #TODO: need to copy in avatar when hash["ui"] is non null
+      override_attrs = hash["ui"] ? {:ui=>hash["ui"]} : {}
+
+      return self.clone_into(id_handle,override_attrs)
+    end
+
    private
     def add_ui_positions_if_needed!(objects)
       default_pos = DefaultPositions.new()

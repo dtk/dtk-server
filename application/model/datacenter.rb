@@ -2,7 +2,14 @@ module XYZ
   class Datacenter < Model
 #    set_relation_name(:datacenter,:datacenter)
 
-    #### model api functions
+    #######################
+    ######### Model apis
+
+    def get_items()
+      get_objects_col_from_sp_hash({:columns => [:nodes]},:node) + 
+        get_objects_col_from_sp_hash({:columns => [:node_groups]},:node_group) 
+    end
+
     def self.get_links(id_handles)
       return Array.new if id_handles.empty?
       

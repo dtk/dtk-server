@@ -410,13 +410,10 @@ pp datacenter
 =end
     end
 
-    #TODO: datacenter_id=nil is stub
-    def list_items_2(datacenter_id=nil)
+    def list_items_2(datacenter_id)
       include_js('plugins/search.cmdhandler')
 
-      if datacenter_id.nil?
-        datacenter_id = IDHandle[:c => ret_session_context_id(), :uri => "/datacenter/dc1", :model_name => :datacenter].get_id()
-      end
+#      pp [:debug, id_handle(datacenter_id,:datacenter).create_object().get_items()]
 
       datacenter = get_object_by_id(datacenter_id,:datacenter)
 

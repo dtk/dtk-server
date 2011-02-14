@@ -31,10 +31,31 @@ module XYZ
       model_def_fn = "#{R8::Config[:meta_templates_root]}/#{model_name()}/new/model_def.rb"
       raise Error.new("cannot find model def file #{model_def_fn} for #{model_name()}") unless  File.exists?(model_def_fn)
       model_def = eval(IO.read(model_def_fn)) 
+      preprocess_model_def!(model_def)
       relation_name_info = [model_def[:schema]].compact + [model_def[:table]]
       set_relation_name(*relation_name_info)
       model_def.each{|k,v|@db_rel[k]=v} 
     end
+   private
+    def preprocess_model_def!(model_def)
+      #if model_def hash remote_dependency make sure that in each join condition cols have these join conditions
+      remote_dep_extend_cols_if_needed!(model_def)
+    end
+    def remote_dep_extend_cols_if_needed!(model_def)
+      (model_def[:virtual_columns]||{}).each_value do |col|(col[:remote_dependencies]||[]).each do |rem_dep|
+          (rem_dep[:join_cond]||{}).each_key do |k|
+            local_col = k
+            if k.to_s =~ /(^.+)__(.+$)/ 
+              next unless $1.to_sym = rem_dep[:model_name]
+              local_col = $2.to_sym
+            end
+            rem_dep[:cols] << local_col unless rem_dep[:cols].include?(local_col)
+          end
+        end
+      end
+    end
+
+   public
     
     attr_reader :db_rel
 

@@ -9,8 +9,6 @@
       :on_update=>:set_null
     }
   },
-  :virtual_columns=>{},
-  :many_to_one=>[],
   :one_to_many=>
   [
    :data_source,
@@ -22,5 +20,31 @@
    :network_partition,
    :network_gateway,
    :component
-  ]
+  ],
+  :virtual_columns=>{
+    :nodes=>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [{
+         :model_name=>:node,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:datacenter_datacenter_id=>:datacenter__id},
+         :cols=>[:id,:display_name,:ui,:type]
+       }]
+    },
+    :node_groups=>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [{
+         :model_name=>:node_group,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:datacenter_datacenter_id=>:datacenter__id},
+         :cols=>[:id,:display_name,:ui,:type]
+       }]
+    }
+  }
 }

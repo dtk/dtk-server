@@ -64,7 +64,7 @@ module XYZ
       }
     end
 
-    def self.add_item(id)
+    def add_item(id)
 #      id_handle = id_handle(id)
 =begin
       hash = request.params.dup

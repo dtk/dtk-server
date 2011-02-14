@@ -78,7 +78,7 @@ module XYZ
       #TODO: short circuit if parent_guid and parent_model_name are set
       c = self[:c]
       id_info = IDInfoTable.get_row_from_id_handle(self)
-      return nil unless id_info and id_info[:parent_id] 
+      return nil unless id_info and id_info[:parent_relation_type] and id_info[:parent_id] and id_info[:parent_id]>0  
       IDHandle[:c => c, :id => id_info[:parent_id], :model_name => id_info[:parent_relation_type]]
     end
     def get_parent_id_handle_with_display_name()
@@ -145,8 +145,11 @@ module XYZ
       if opts[:set_parent_model_name]
         unless self[:parent_model_name]
           parent_idh = get_parent_id_handle()
-          raise Error.new("cannot find parent info from #{self.inspect}") unless parent_idh
-          self[:parent_model_name] = parent_idh[:model_name] 
+          if parent_idh
+            self[:parent_model_name] = parent_idh[:model_name] 
+          else
+            Log.error("cannot find parent info from #{self.inspect}")
+          end
         end
       end
       freeze
@@ -157,7 +160,7 @@ module XYZ
     end
    private
     def get_parent_model_name()
-      self[:parent_model_name] || get_parent_id_handle()[:model_name]
+      self[:parent_model_name] || (get_parent_id_handle()||{})[:model_name]
     end
 
     def get_model_name()

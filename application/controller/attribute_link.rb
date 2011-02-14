@@ -51,7 +51,6 @@ module XYZ
 
       hash = explicit_hash || request.params
       context_list = JSON.parse(hash["context_list"])
-
       item_id_handles = context_list.map{|x|id_handle(x["id"].to_i,x["model"].to_sym)}
       link_list = Datacenter.get_links(item_id_handles)
       return {'data'=>link_list}

@@ -87,7 +87,8 @@ module XYZ
 #      override_attrs = request.params["ui"] ? {:ui=>request.params["ui"]} : {}
 
       model_id_handle = id_handle(request.params["id"].to_i,request.params["model"].to_sym)
-      new_id = datacenter.add_item(request.params["id"],request.params["model"],request.params["ui"])
+      new_id = datacenter.add_item(model_id_handle,request.params["ui"])
+#      new_id = datacenter.add_item(request.params["id"],request.params["model"],request.params["ui"])
       id = new_id if new_id
 
 #TODO: clean this up,hack to update UI params for newly cloned object

@@ -218,9 +218,6 @@ if (!R8.ViewSpace) {
 				_links = {};
 				for(var i in tempLinkList) _links[i] = tempLinkList[i];
 //				_links = tempLinkList;
-//DEBUG
-console.log('end of setLinks...renderList is:');
-console.log(_linkRenderList);
 				if(_userSettings.showLinks == true) {
 					this.renderLinks();
 				}
@@ -238,9 +235,6 @@ console.log(_linkRenderList);
 				}
 
 				var pendingRemoval = [];
-//DEBUG
-console.log('inside of renderLinks...');
-console.log(_linkRenderList);
 				if(_linkRenderList.length == 0) return;
 
 				for(var i=_linkRenderList.length-1; i >=0; i--) {
@@ -252,10 +246,6 @@ console.log(_linkRenderList);
 						endNodeId = 'port-'+_links[linkId]['other_end_id'],
 						startPortDef = this.getItemPortDef(itemId,'port-'+portId),
 						endPortDef = this.getPortDefById('port-'+_links[linkId]['other_end_id']);
-//DEBUG
-console.log('have a link in renderLinkList....');
-console.log(_linkRenderList[i]);
-console.log(_links[linkId]);
 
 					if (typeof(startPortDef) != 'undefined' && endPortDef != null) {
 						var linkDef = {
@@ -274,9 +264,7 @@ console.log(_links[linkId]);
 									'connectElemID':endNodeId
 								}]
 							};
-//DEBUG
-console.log('going to add link to items....');
-console.log(linkDef);
+
 						this.addLinkToItems(linkId,linkDef);
 
 						R8.Canvas.renderLink(linkDef);

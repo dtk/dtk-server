@@ -82,7 +82,7 @@ module XYZ
       end
 =end
       #TODO: need to copy in avatar when hash["ui"] is non null
-      datacenter = id_handle(id,:datacenter).create_object()
+      datacenter = id_handle(id).create_object()
 
 #      override_attrs = request.params["ui"] ? {:ui=>request.params["ui"]} : {}
 

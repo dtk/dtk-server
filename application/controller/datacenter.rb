@@ -68,8 +68,8 @@ module XYZ
     end
 
     def update_vspace_ui(id)
-      dc_hash = get_object_by_id(id,:datacenter)
-      update_from_hash(id,{:ui=>JSON.parse(request.params["ui"])})
+#TODO: not used      dc_hash = get_object_by_id(id,:datacenter)
+      update_from_hash(id,{:ui=>JSON.parse(request.params["ui"])}) if request.params["ui"].kind_of?(Hash)
       return {}
     end
 

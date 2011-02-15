@@ -51,10 +51,10 @@ module XYZ
     attr_reader :relation_type, :id_handle, :c
 
     #TODO: check why relation_type=model_name does not work
-    def initialize(hash_scalar_values,c,relation_type=model_name(),id_handle=nil)
+    def initialize(hash_scalar_values,c,relation_type_x=model_name(),id_handle=nil)
       return nil if hash_scalar_values.nil?
-
       super(hash_scalar_values)
+      relation_type = SubClassRelations[relation_type_x]||relation_type_x
       @c = c
       @relation_type = relation_type
       @id_handle = id_handle ||
@@ -66,7 +66,11 @@ module XYZ
           nil
         end
     end
-
+   private
+    SubClassRelations = {
+     :assembly => :component
+    }
+   public
     def subset(*keys)
       self.class.new(Aux.hash_subset(self,keys),@c,@relation_type,@id_handle)
     end

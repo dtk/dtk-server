@@ -156,7 +156,7 @@ module XYZ
              :cols => [:id,:display_name]
            }
           ]
-
+        set_submodel(:assembly)
       end
     end
     ##### Actions

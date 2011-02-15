@@ -28,15 +28,29 @@ module XYZ
     end
 
     def up()
-      model_def_fn = "#{R8::Config[:meta_templates_root]}/#{model_name()}/new/model_def.rb"
-      raise Error.new("cannot find model def file #{model_def_fn} for #{model_name()}") unless  File.exists?(model_def_fn)
-      model_def = eval(IO.read(model_def_fn)) 
+      model_def = load_model_def()
       preprocess_model_def!(model_def)
       relation_name_info = [model_def[:schema]].compact + [model_def[:table]]
       set_relation_name(*relation_name_info)
       model_def.each{|k,v|@db_rel[k]=v} 
     end
+
+    def set_submodel(submodel_name)
+      model_def = load_model_def(submodel_name)
+      preprocess_model_def!(model_def)
+      model_def.each do |top_key,top_val|
+        next unless [:virtual_columns].include?(top_key)
+        top_val.each{|k,v|@db_rel[top_key][k] = v}
+      end
+    end
+
    private
+    def load_model_def(model_nm=model_name())
+      model_def_fn = "#{R8::Config[:meta_templates_root]}/#{model_nm}/new/model_def.rb"
+      raise Error.new("cannot find model def file #{model_def_fn} for #{model_name()}") unless  File.exists?(model_def_fn)
+      eval(IO.read(model_def_fn)) 
+    end
+
     def preprocess_model_def!(model_def)
       #if model_def hash remote_dependency make sure that in each join condition cols have these join conditions
       remote_dep_extend_cols_if_needed!(model_def)
@@ -144,7 +158,7 @@ module XYZ
 
       def migrate_all_models(direction)
         # order is important
-        concrete_models = models.reject {|m| m.top?}
+        concrete_models = ret_concrete_models()
         concrete_models.each do |model| 
           model.create_column_defs_common_fields?(direction) 
         end
@@ -160,7 +174,7 @@ module XYZ
 
       def initialize_all_models(db)
         set_db_for_all_models(db)
-        concrete_models = models.reject {|m| m.top?}
+        concrete_models = ret_concrete_models()
         concrete_models.each{|model| model.apply_migration_defs(:up)}
         concrete_models.each{|model| model.set_global_db_rel_info()}
         concrete_models.each{|model| model.preprocess!()}
@@ -169,6 +183,9 @@ module XYZ
       end
      #######
      protected
+      def ret_concrete_models()
+        models.reject {|m|m.top? or not m.superclass == Model}
+      end
 
       def create_column_defs_common_fields?(direction)
         create_table_common_fields?(@db_rel) if direction == :up

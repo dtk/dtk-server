@@ -11,19 +11,22 @@ module XYZ
   end
 
   module CloneInstanceMixins
-    def clone_into(id_handle,override_attrs={},opts={})
+    def clone_into(source_id_handle,override_attrs={},opts={})
+      target_id_handle = id_handle()
+      clone_source_object = source_id_handle.create_object()
+
 ###TODO: testing new functionality
 =begin
-        constraints = id_handle.create_object.get_constraints() if id_handle[:model_name] == :component
+        constraints = clone_source_object.get_constraints()
         if constraints
-          pp [:evaluation, constraints.evaluate(id_handle,input_target_id_handle)]
+          pp [:evaluation, constraints.evaluate(source_id_handle,target_id_handle)]
         end
 =end
 #######
-      clone_source_object = id_handle.create_object()
+
       clone_source_object.add_model_specific_override_attrs!(override_attrs)
       proc = CloneCopyProcessor.new(clone_source_object,opts.merge(:include_children => true))
-      clone_copy_output = proc.clone_copy(id_handle,[id_handle()],override_attrs)
+      clone_copy_output = proc.clone_copy(source_id_handle,[target_id_handle],override_attrs)
       new_id_handle = clone_copy_output.id_handles.first
       raise Error.new("cannot clone") unless new_id_handle
       #calling with respect to target
@@ -65,6 +68,11 @@ module XYZ
 
     # to be optionally overwritten by object representing the target
     def clone_post_copy_hook(clone_copy_output,opts={})
+    end
+
+    # to be overwritten
+    def get_constraints()
+      nil
     end
 
     private

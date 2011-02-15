@@ -4,6 +4,7 @@ if (!R8.ViewSpace) {
 	R8.ViewSpace = function(viewSpaceDef) {
 		var _def = viewSpaceDef,
 			_id = _def['object']['id'],
+			_ui = _def.object.ui,
 			_type = _def['type'],
 			_items = {},
 			_node = R8.Utils.Y.one('#viewspace'),
@@ -31,6 +32,11 @@ if (!R8.ViewSpace) {
 				YUI().use('cookie','json', function(Y){
 					_itemPosUpdateListJSON = Y.Cookie.get("_itemPosUpdateList");
 					_itemPosUpdateList = (_itemPosUpdateListJSON == null) ? {} : Y.JSON.parse(_itemPosUpdateListJSON);
+//TODO: cleanup after moving fully to new pos handling
+					for(var i in _itemPosUpdateList) {
+						_ui.items[i]['top'] = _itemPosUpdateList[i]['pos']['top'];
+						_ui.items[i]['left'] = _itemPosUpdateList[i]['pos']['left'];
+					}
 					_isReady = true;
 				});
 			},
@@ -128,6 +134,8 @@ if (!R8.ViewSpace) {
 			},
 
 			addItems: function(items) {
+				if(_ui == null) _ui = {"items":{}};
+
 				for(i in items) {
 					var item = items[i], tpl_callback = item['tpl_callback'];
 
@@ -146,9 +154,21 @@ if (!R8.ViewSpace) {
 					}
 					if(typeof(item['ui']) == 'undefined') continue;
 
-					var id = item['object']['id'],
+/*					var id = item['object']['id'],
 						top = (typeof(_itemPosUpdateList[id]) == 'undefined') ? item['object']['ui'][_id]['top'] : _itemPosUpdateList[id]['pos']['top'],
 						left = (typeof(_itemPosUpdateList[id]) == 'undefined') ? item['object']['ui'][_id]['left'] : _itemPosUpdateList[id]['pos']['left'];
+*/
+					var itemId = item['object']['id'];
+//TODO: cleanup after fully moving away from old UI indexing
+					if(typeof(_ui.items[itemId]) == 'undefined') {
+						_ui.items[itemId] = {};
+						_ui.items[itemId]['top'] = item['object']['ui'][_id]['top'];
+						_ui.items[itemId]['left'] = item['object']['ui'][_id]['left'];
+					}
+
+					var id = item['object']['id'],
+						top = (typeof(_itemPosUpdateList[id]) == 'undefined') ? _ui.items[id]['top'] : _itemPosUpdateList[id]['pos']['top'],
+						left = (typeof(_itemPosUpdateList[id]) == 'undefined') ? _ui.items[id]['left'] : _itemPosUpdateList[id]['pos']['left'];
 
 					_items[id].get('node').setStyles({'top':top,'left':left,'display':'block'});
 				}
@@ -385,6 +405,9 @@ console.log(ports);
 							'model':_items[itemId].get('model'),
 							'pos':{'top':top,'left':left}
 						};
+						_ui.items[itemId]['top'] = top;
+						_ui.items[itemId]['left'] = left;
+
 						YUI().use('json','cookie', function(Y){
 							var _itemPosUpdateListJSON = Y.JSON.stringify(_itemPosUpdateList);
 							Y.Cookie.set("_itemPosUpdateList", _itemPosUpdateListJSON);
@@ -418,6 +441,10 @@ console.log(ports);
 						'model':_items[itemId].get('model'),
 						'pos':{'top':itemNode.getStyle('top'),'left':itemNode.getStyle('left')}
 					};
+//TODO: cleanup after moving fully to new pos handling
+					_ui.items[itemId]['top'] = top;
+					_ui.items[itemId]['left'] = left;
+
 				}
 				YUI().use('json','cookie', function(Y){
 					var _itemPosUpdateListJSON = Y.JSON.stringify(_itemPosUpdateList);
@@ -470,7 +497,9 @@ console.log(ports);
 				var that = this;
 				if (count > 0) {
 					YUI().use("json", function(Y){
-						var reqParam = 'item_list=' + Y.JSON.stringify(_itemPosUpdateList);
+//						var reqParam = 'item_list=' + Y.JSON.stringify(_itemPosUpdateList);
+						var reqParam = 'ui=' + Y.JSON.stringify(_ui);
+
 						var params = {
 							'cfg': {
 								'data': reqParam
@@ -480,7 +509,8 @@ console.log(ports);
 							}
 						};
 						//R8.Ctrl.call('viewspace/update_pos/' + _id, params);
-						R8.Ctrl.call('workspace/update_pos/' + _id, params);
+//						R8.Ctrl.call('workspace/update_pos/' + _id, params);
+						R8.Ctrl.call('datacenter/update_vspace_ui/' + _id, params);
 					});
 				}
 

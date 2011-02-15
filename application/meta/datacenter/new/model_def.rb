@@ -7,6 +7,9 @@
       :foreign_key_rel_type=>:datacenter,
       :on_delete=>:set_null,
       :on_update=>:set_null
+    },
+    :ui=> {
+      :type=>:json
     }
   },
   :one_to_many=>

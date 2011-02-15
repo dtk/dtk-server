@@ -139,9 +139,9 @@ pp [:debug_stored_new_pos,get_objects(model_name,SQL.in(:id,model_items.map{|ite
         model_list[index][:body_value] = body_value
       end
 
-pp "^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
-pp model_list
-pp "^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+#pp "^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+#pp model_list
+#pp "^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
 
       tpl = R8Tpl::TemplateR8.new("workspace/wspace_search_#{model_name}",user_context())
       tpl.set_js_tpl_name("wspace_search_#{model_name}")

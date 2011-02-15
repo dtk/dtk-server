@@ -19,9 +19,10 @@
        },
        {
          :model_name=>:attribute,
-         :join_type=>:inner,
+         :join_type=>:left_outer,
+         :filter => [:and,[:eq, :hidden, false]],
          :join_cond=>{:component_component_id=>:sub_component__id},
-         :cols=>[:id,:display_name,:attribute_value,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
+         :cols=>[:id,:display_name,:value_derived,:value_asserted,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
        }]
     }
   }

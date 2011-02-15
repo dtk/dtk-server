@@ -17,10 +17,16 @@ module XYZ
 
 ###TODO: testing new functionality
 =begin
+       ##contraints
         constraints = clone_source_object.get_constraints()
         if constraints
           pp [:evaluation, constraints.evaluate(source_id_handle,target_id_handle)]
         end
+=end
+      ####unraveled assembly attributes
+=begin
+      source_object = source_id_handle.create_object(:find_subtype => true)
+      source_object.get_attributes_unraveled() if source_object.respond_to?(:get_attributes_unraveled)
 =end
 #######
 

@@ -58,8 +58,18 @@ module XYZ
   class IDHandle < Hash
     include CommonMixin
 
-    def create_object()
-      Model.model_class(self[:model_name]).new({:id => get_id()},self[:c])
+    def create_object(opts={})
+      model_name =
+        if opts.empty? #short circuit
+          self[:model_name]
+        elsif opts[:model_name]
+          opts[:model_name]
+        elsif opts[:find_subtype]
+          Model.find_subtype_model_name(self)
+        else
+          self[:model_name]
+        end
+      Model.model_class( model_name).new({:id => get_id()},self[:c])
     end
 
     def get_objects_from_sp_hash(sp_hash,opts={})

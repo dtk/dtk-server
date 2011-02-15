@@ -71,6 +71,20 @@ module XYZ
      :assembly => :component
     }
    public
+
+    def self.find_subtype_model_name(id_handle)
+      model_name = id_handle[:model_name]
+      return model_name unless SubClassRelations.values.include?(model_name)
+      #TODO: make this data driven too off SubClassRelations
+      if model_name == :component
+        type = get_object_scalar_column(id_handle,:type)
+        type == "composite" ? :assembly : model_name
+      else
+        Log.error("not implemented: finding subclass of relation #{model_name}")
+        model_name
+      end
+    end
+
     def subset(*keys)
       self.class.new(Aux.hash_subset(self,keys),@c,@relation_type,@id_handle)
     end
@@ -159,12 +173,19 @@ module XYZ
       get_objects_from_sp_hash(id_handle.createMH(),sp_hash).first
     end
 
+    def self.get_object_scalar_column(id_handle,col)
+      (get_object_scalar_columns(id_handle,[col])||{})[col]
+    end
+
+    def self.get_object_scalar_columns(id_handle,cols)
+      id = id_handle && id_handle.get_id() 
+      return nil unless id
+      @db.get_objects_scalar_columns(id_handle.createMH,{:id => id}, FieldSet.opt(cols,id_handle[:model_name])).first
+    end
+
     #may deprecate below
     def self.get_display_name(id_handle)
-      id = id_handle ? id_handle.get_id() : nil
-      return nil unless id
-      obj = @db.get_objects_scalar_columns(id_handle.createMH,{:id => id}, FieldSet.opt([:display_name],id_handle[:model_name])).first
-      (obj||{})[:display_name]
+      get_object_scalar_column(id_handle,:display_name)
     end
 
 

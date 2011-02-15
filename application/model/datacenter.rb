@@ -5,11 +5,9 @@ module XYZ
     #######################
     ######### Model apis
 
-#TODO: dont take id_handle in, take id,model
-#    def add_item(id,model,overide_attrs={})
-    def add_item(id_handle,ui_overide_attrs=nil)
+    def add_item(id_handle,override_attrs=nil)
       #TODO: need to copy in avatar when hash["ui"] is non null
-      override_attrs = ui_overide_attrs ? {:ui=>ui_overide_attrs} : {}
+      override_attrs = {} if override_attrs.nil?
 
       clone_into(id_handle,override_attrs)
     end

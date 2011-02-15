@@ -143,8 +143,7 @@ node[:model_name] = 'node'
         }
 =end
       items << item
-pp '{{{{{{{{{{{{{{{{{{{{{{{{{['
-pp items
+
       addItemsObj = JSON.generate(items)
       run_javascript("R8.Workspace.addItems(#{addItemsObj});")
 

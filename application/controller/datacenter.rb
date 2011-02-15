@@ -65,30 +65,13 @@ module XYZ
     end
 
     def add_item(id)
-#      id_handle = id_handle(id)
-=begin
-      hash = request.params.dup
-      target_id_handle = nil
-      if hash["target_id"] and hash["target_model_name"]
-        input_target_id_handle = id_handle(hash["target_id"].to_i,hash["target_model_name"].to_sym)
-        target_id_handle = Model.find_real_target_id_handle(id_handle,input_target_id_handle)
-      elsif hash["target_uri"] and hash["obj"]#TODO: stub for testing
-        c = ret_session_context_id()
-        target_id_handle = IDHandle.new({:c => c, :uri => hash["target_uri"]},{:set_parent_model_name => true})
-        target_id = target_id_handle.get_id()
-      else
-        Log.info("not implemented yet")
-        return redirect "/xyz/#{model_name()}/display/#{id.to_s}"
-      end
-=end
       #TODO: need to copy in avatar when hash["ui"] is non null
       datacenter = id_handle(id).create_object()
 
-#      override_attrs = request.params["ui"] ? {:ui=>request.params["ui"]} : {}
+      override_attrs = request.params["ui"] ? {:ui=>request.params["ui"]} : {}
 
       model_id_handle = id_handle(request.params["id"].to_i,request.params["model"].to_sym)
-      new_id = datacenter.add_item(model_id_handle,request.params["ui"])
-#      new_id = datacenter.add_item(request.params["id"],request.params["model"],request.params["ui"])
+      new_id = datacenter.add_item(model_id_handle,override_attrs)
       id = new_id if new_id
 
 #TODO: clean this up,hack to update UI params for newly cloned object

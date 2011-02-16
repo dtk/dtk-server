@@ -20,7 +20,7 @@ module XYZ
         one_to_many :component, :attribute_link, :attribute, :monitoring_item, :constraints
         virtual_column :parent_name, :possible_parents => [:component,:library,:node,:node_group]
 
-        virtual_column :view_def, :type => :varchar, :hidden => true, :local_dependencies => [:id,:view_def_ref,:component_type] 
+        virtual_column :view_def_key, :type => :varchar, :hidden => true, :local_dependencies => [:id,:view_def_ref,:component_type] 
 
         virtual_column :attributes, :type => :json, :hidden => true, 
         :remote_dependencies => 
@@ -42,7 +42,7 @@ module XYZ
            :convert => true,
            :filter => [:and, [:eq, :hidden, false]],
            :join_cond=>{:component_component_id => q(:component,:id)}, #TODO: want to use p(:component,:attribute) on left hand side
-           :cols => [:id,:display_name,:component_component_id,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
+           :cols => [:id,:display_name,:view_def_key,:component_component_id,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
          }
         ]
 
@@ -175,7 +175,7 @@ module XYZ
     end
     ##### Actions
     ### virtual column defs
-    def view_def()
+    def view_def_key()
       self[:view_def_ref]||self[:component_type]||self[:id]
     end
 
@@ -309,7 +309,7 @@ module XYZ
       sp_hash = {:columns => [:id,:display_name,:component_type,:basic_type,:attributes_view_def_info]}
       component_and_attrs = get_objects_from_sp_hash(sp_hash)
       return nil if component_and_attrs.empty?
-      component = component_and_attrs.first.subset(:id,:display_name,:component_type,:basic_type)
+      component = component_and_attrs.first.subset_with_vcs(:id,:display_name,:component_type,:basic_type,:view_def_key)
       #if component_and_attrs.first[:attribute] null there shoudl only be one element in component_and_attrs
       return component.merge(:attributes => Array.new) unless component_and_attrs.first[:attribute]
       opts = {:flatten_nil_value => true}

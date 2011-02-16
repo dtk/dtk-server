@@ -88,6 +88,13 @@ module XYZ
     def subset(*keys)
       self.class.new(Aux.hash_subset(self,keys),@c,@relation_type,@id_handle)
     end
+    #subset with virtual columns; tehy get substituted for real columns
+    #TODO: this may be good place to materialze vcs
+    def subset_with_vcs(*keys_x)
+      new_field_set = Model::FieldSet.new(@relation_type,keys_x).with_replaced_local_columns?()
+      keys = new_field_set ? new_field_set.cols : keys_x
+      subset(*keys)
+    end
 
     def id()
       return self[:id] if self[:id] #short cicuit

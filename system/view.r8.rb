@@ -37,6 +37,14 @@ module R8Tpl
       @js_require = []
     end
 
+    def update_cache_for_virtual_object()
+      case @view_name 
+        when :edit then render_edit_tpl_cache()
+        when :display then render_display_tpl_cache()
+        when :list then render_list_tpl_cache()
+      end
+      ret_existing_view_path(:cache)
+    end
 
     def update_cache_for_saved_search()
       render_list_tpl_cache()

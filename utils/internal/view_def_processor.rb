@@ -6,10 +6,10 @@ module XYZ
       return if SavedAlready[type][view_def_key]
       view_meta_hash = convert_to_view_def_form(type,cmp_attrs_objs)
 
-      #TODO: need to change signature to be moer descriptive
-      view = R8Tpl::ViewR8.new(:component,view_def_key,user,true,view_meta_hash,{:view_type => type})
+      view_name = "#{type}.#{view_def_key}"
+      view = R8Tpl::ViewR8.new(:component,view_name,user,true,view_meta_hash,{:view_type => type})
       #TODO: hack until have more geenral fn
-      view.update_cache_for_saved_search()
+      x=view.update_cache_for_virtual_object()
       SavedAlready[type][view_def_key] = TRUE
     end
    private 

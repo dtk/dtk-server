@@ -149,16 +149,15 @@ module XYZ
         flatten_attribute_when_nil_pattern!(ret,value_obj,attr,opts)
       elsif pattern.is_atomic?()
         flatten_attribute_when_atomic_pattern!(ret,value_obj,attr,pattern,opts)
-      elsif value_obj.kind_of?(Array)
-        flatten_attribute_when_array!(ret,value_obj,attr,pattern)
-      elsif value_obj.kind_of?(Hash)
-        flatten_attribute_when_hash!(ret,value_obj,attr,pattern)
+      elsif value_obj.kind_of?(Array) or (pattern.is_array?() and value_obj.nil? and opts[:flatten_nil_value]) 
+        flatten_attribute_when_array!(ret,value_obj,attr,pattern,opts)
+      elsif value_obj.kind_of?(Hash) or (pattern.is_hash?() and value_obj.nil? and opts[:flatten_nil_value])
+        flatten_attribute_when_hash!(ret,value_obj,attr,pattern,opts.merge(:top_level=>false))
       else
-        flatten_attribute_when_mismatch!(ret,value_obj,attr,pattern,opts)
+        flatten_attribute_when_mismatch!(ret,value_obj,attr,pattern,opts.merge(:top_level=>false))
       end
       nil
     end
-
 
     def self.flatten_attribute_when_nil_pattern!(ret,value_obj,attr,opts={})
       if attr[:data_type] == "json" and opts[:top_level]
@@ -169,7 +168,7 @@ module XYZ
       nil
     end
 
-    def self.flatten_attribute_when_atomic_pattern!(ret,value_obj,attr,pattern,top_level={})
+    def self.flatten_attribute_when_atomic_pattern!(ret,value_obj,attr,pattern,opts={})
       if attr[:data_type] == pattern[:type].to_s and opts[:top_level]
         ret << attr
       else
@@ -178,31 +177,34 @@ module XYZ
       nil
     end
 
-    def self.flatten_attribute_when_array!(ret,value_obj,attr,pattern)
+    def self.flatten_attribute_when_array!(ret,value_obj,attr,pattern,opts={})
       array_pat = pattern[:array]
-      return flatten_attribute_when_mismatch!(ret,value_obj,attr,pattern) unless array_pat
+      return flatten_attribute_when_mismatch!(ret,value_obj,attr,pattern,opts) unless array_pat
 
-      if value_obj.empty? 
+      if (value_obj||[]).empty? and not opts[:flatten_nil_value] 
         ret << attr.merge(:attribute_value => value_obj)
         return nil
       end
 
-      value_obj.each_with_index do |child_val_obj,i|
+      #if nil value_obj then just assume one row
+      child_list = (value_obj||[]).empty? ? [nil] : value_obj
+      child_list.each_with_index do |child_val_obj,i|
         child_attr = 
           if attr[:item_path]
             attr.merge(:display_name => "#{attr[:display_name]}#{display_name_num_delim(i)}", :item_path => attr[:item_path] + [i])
           else
             attr.merge(:root_display_name => attr[:display_name], :display_name => "#{attr[:display_name]}#{display_name_num_delim(i)}", :item_path => [i])
         end
-        flatten_attribute!(ret,child_val_obj,child_attr,array_pat)
+        flatten_attribute!(ret,child_val_obj,child_attr,array_pat,opts)
       end
       nil
     end
 
     #TODO: shoudl we iterate over missiing keys pattern.keys - val_obj.keys)
-    def self.flatten_attribute_when_hash!(ret,value_obj,attr,pattern)
-      return flatten_attribute_when_mismatch!(ret,value_obj,attr,pattern) if pattern[:array]
-      value_obj.each do |k,child_val_obj|
+    def self.flatten_attribute_when_hash!(ret,value_obj,attr,pattern,opts={})
+      return flatten_attribute_when_mismatch!(ret,value_obj,attr,pattern,opts) if pattern[:array] or ((value_obj||{}).empty? and not opts[:flatten_nil_value])
+      child_list = (value_obj||{}).empty? ? pattern.inject({}){|h,kv|h.merge(kv[0].to_sym => nil)} : value_obj 
+      child_list.each do |k,child_val_obj|
         child_attr = 
           if attr[:item_path]
             attr.merge(:display_name => "#{attr[:display_name]}#{display_name_delim(k)}", :item_path => attr[:item_path] + [k.to_sym])
@@ -210,7 +212,7 @@ module XYZ
             attr.merge(:root_display_name => attr[:display_name], :display_name => "#{attr[:display_name]}#{display_name_delim(k)}", :item_path => [k.to_sym])
         end
         child_pattern = pattern[k.to_s]
-        flatten_attribute!(ret,child_val_obj,child_attr,child_pattern)
+        flatten_attribute!(ret,child_val_obj,child_attr,child_pattern,opts)
       end
       nil
     end

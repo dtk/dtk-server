@@ -251,6 +251,9 @@ Debug.print_and_ret(
     def is_atomic?()
       has_key?(:type)
     end
+    def is_hash?()
+      not (is_array?() or is_atomic?())
+    end
 
     #returns [array_body_pattern, whether_can_be_empty]
     def parse_array()

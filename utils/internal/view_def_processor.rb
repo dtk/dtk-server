@@ -47,7 +47,7 @@ pp [:cmp_attrs_objs,cmp_attrs_objs]
       fields = attr_objs.map do |attr|
         #stub
         {attr[:display_name].to_sym =>{
-            :type => 'text',
+            :type => convert_type(attr[:data_type]),
             :help => '',
             :rows => 1,
             :cols => 40,
@@ -62,5 +62,14 @@ pp [:cmp_attrs_objs,cmp_attrs_objs]
          :fields => fields
        }]
     end
+
+    def self.convert_type(data_type)
+      TypeConvert[data_type]||"text"
+    end
+    TypeConvert = {
+      "string" => "text",
+      "json" => "hash",
+      "integer" => "integer"
+    }
   end
 end

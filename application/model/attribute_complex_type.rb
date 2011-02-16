@@ -200,7 +200,6 @@ module XYZ
       nil
     end
 
-    #TODO: shoudl we iterate over missiing keys pattern.keys - val_obj.keys)
     def self.flatten_attribute_when_hash!(ret,value_obj,attr,pattern,opts={})
       return flatten_attribute_when_mismatch!(ret,value_obj,attr,pattern,opts) if pattern[:array] or ((value_obj||{}).empty? and not opts[:flatten_nil_value])
       child_list = (value_obj||{}).empty? ? pattern.inject({}){|h,kv|h.merge(kv[0].to_sym => nil)} : value_obj 

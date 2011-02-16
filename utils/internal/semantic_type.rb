@@ -245,7 +245,6 @@ Debug.print_and_ret(
 
       ret = create_with_auto_vivification()
       if  semantic_type.kind_of?(Hash)
-        
         ret_schema_from_semantic_type_aux!(ret,key,semantic_type.values.first)
       end
       if ret.empty?
@@ -256,7 +255,7 @@ Debug.print_and_ret(
     end
 
     def is_atomic?()
-      has_key?(:type) and not self[:type] == :json
+      has_key?(:type)
     end
 
     #returns [array_body_pattern, whether_can_be_empty]
@@ -279,7 +278,7 @@ Debug.print_and_ret(
       elsif semantic_type.kind_of?(Hash) and not semantic_type.keys.first == :application
         ret_schema_from_semantic_type_aux!(ret[index],key,semantic_type.values.first)        
       else
-        ret[index] = SemanticType.new({:type => "json"})
+        ret[index] = SemanticTypeSchema.new({:type => :json})
       end
     end
 
@@ -295,6 +294,13 @@ Debug.print_and_ret(
         "protocol" => {:required => true, :type => :string},
         "host_address" => {:required => true, :type => :string}
       },
+=begin
+      "sap_config__db" => {
+        "name" => {:required => true, :type => :string},
+        "owner" => {:required => true, :type => :string},
+        "passsword" => {:type => :string}
+      },
+=end
       "sap_ref__l4" => {
         :or => 
         [{

@@ -147,7 +147,7 @@ module XYZ
     def self.flatten_attribute!(ret,value_obj,attr,pattern,opts={})
       if pattern.nil?
         flatten_attribute_when_nil_pattern!(ret,value_obj,attr,opts)
-      elsif pattern.is_atomic?()
+      elsif pattern.is_atomic?() and not (value_obj.kind_of?(Array) or value_obj.kind_of?(Hash))
         flatten_attribute_when_atomic_pattern!(ret,value_obj,attr,pattern,opts)
       elsif value_obj.kind_of?(Array) or (pattern.is_array?() and value_obj.nil? and opts[:flatten_nil_value]) 
         flatten_attribute_when_array!(ret,value_obj,attr,pattern,opts)

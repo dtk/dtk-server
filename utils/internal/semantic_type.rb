@@ -244,8 +244,10 @@ Debug.print_and_ret(
       return TranslationToSchema[key] if TranslationToSchema[key]
 
       ret = create_with_auto_vivification()
-      if  semantic_type.kind_of?(Hash)
-        ret_schema_from_semantic_type_aux!(ret,key,semantic_type.values.first)
+      if semantic_type.kind_of?(Hash)
+        val = semantic_type.values.first
+        return create_json_type() if val.kind_of?(Hash) and val.keys.first == :application
+        ret_schema_from_semantic_type_aux!(ret,key,val)
       end
       if ret.empty?
         Log.error("found semantic type #{semantic_type.inspect} that does not have a nested type definition")
@@ -275,11 +277,15 @@ Debug.print_and_ret(
       key = semantic_type_key(semantic_type)
       if TranslationToSchema[key]
         ret[index] = TranslationToSchema[key]
-      elsif semantic_type.kind_of?(Hash) and not semantic_type.keys.first == :application
+      elsif semantic_type.kind_of?(Hash)
         ret_schema_from_semantic_type_aux!(ret[index],key,semantic_type.values.first)        
       else
-        ret[index] = SemanticTypeSchema.new({:type => :json})
+        ret[index] = create_json_type()
       end
+    end
+
+    def self.create_json_type()
+      SemanticTypeSchema.new({:type => :json})
     end
 
     TranslationToSchema = self.new( 
@@ -294,13 +300,11 @@ Debug.print_and_ret(
         "protocol" => {:required => true, :type => :string},
         "host_address" => {:required => true, :type => :string}
       },
-=begin
       "sap_config__db" => {
         "name" => {:required => true, :type => :string},
         "owner" => {:required => true, :type => :string},
         "passsword" => {:type => :string}
       },
-=end
       "sap_ref__l4" => {
         :or => 
         [{

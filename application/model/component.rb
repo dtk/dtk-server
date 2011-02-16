@@ -39,7 +39,7 @@ module XYZ
            :join_type => :left_outer,
            :convert => true,
            :join_cond=>{:component_component_id => q(:component,:id)}, #TODO: want to use p(:component,:attribute) on left hand side
-           :cols => [:id,:display_name,:component_component_id,:semnatic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
+           :cols => [:id,:display_name,:component_component_id,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
          }
         ]
 
@@ -306,7 +306,8 @@ module XYZ
       component = component_and_attrs.first.subset(:id,:display_name,:component_type,:basic_type)
       #if component_and_attrs.first[:attribute] null there shoudl only be one element in component_and_attrs
       return component.merge(:attributes => Array.new) unless component_and_attrs.first[:attribute]
-      component.merge(:attributes => AttributeComplexType.flatten_attribute_list(component_and_attrs.map{|r|r[:attribute]}))
+      opts = {:flatten_nil_value => true}
+      component.merge(:attributes => AttributeComplexType.flatten_attribute_list(component_and_attrs.map{|r|r[:attribute]},opts))
     end
 
     def get_attributes_unraveled()

@@ -11,17 +11,16 @@ module XYZ
       has_required_fields?(obj,pattern)
     end
 
-    def self.flatten_attribute_list(attr_list)
+    def self.flatten_attribute_list(attr_list,opts={})
       ret = Array.new
       attr_list.each do |attr|
         value = attr[:attribute_value]
-        if value.nil? or not attr[:data_type] == "json"
+        if (value.nil? and not opts[:flatten_nil_value]) or not attr[:data_type] == "json"
           ret << attr 
         else
           nested_type_pat = SemanticTypeSchema.create_from_semantic_type(attr[:semantic_type])
           if nested_type_pat
-            top_level=true
-            flatten_attribute!(ret,value,attr,nested_type_pat,top_level)
+            flatten_attribute!(ret,value,attr,nested_type_pat,opts.merge(:top_level=> true))
           else 
             ret << attr
           end
@@ -145,24 +144,24 @@ module XYZ
 
     #TODO: add "index that will be used to tie unravvled attribute back to the base object and make sure
     #base object in the attribute
-    def self.flatten_attribute!(ret,value_obj,attr,pattern,top_level=false)
+    def self.flatten_attribute!(ret,value_obj,attr,pattern,opts={})
       if pattern.nil?
-        flatten_attribute_when_nil_pattern!(ret,value_obj,attr,top_level)
+        flatten_attribute_when_nil_pattern!(ret,value_obj,attr,opts)
       elsif pattern.is_atomic?()
-        flatten_attribute_when_atomic_pattern!(ret,value_obj,attr,pattern,top_level)
+        flatten_attribute_when_atomic_pattern!(ret,value_obj,attr,pattern,opts)
       elsif value_obj.kind_of?(Array)
         flatten_attribute_when_array!(ret,value_obj,attr,pattern)
       elsif value_obj.kind_of?(Hash)
         flatten_attribute_when_hash!(ret,value_obj,attr,pattern)
       else
-        flatten_attribute_when_mismatch!(ret,value_obj,attr,pattern,top_level)
+        flatten_attribute_when_mismatch!(ret,value_obj,attr,pattern,opts)
       end
       nil
     end
 
 
-    def self.flatten_attribute_when_nil_pattern!(ret,value_obj,attr,top_level)
-      if attr[:data_type] == "json" and top_level
+    def self.flatten_attribute_when_nil_pattern!(ret,value_obj,attr,opts={})
+      if attr[:data_type] == "json" and opts[:top_level]
         ret << attr
       else
         ret << attr.merge(:attribute_value => value_obj,:data_type => "json")
@@ -170,8 +169,8 @@ module XYZ
       nil
     end
 
-    def self.flatten_attribute_when_atomic_pattern!(ret,value_obj,attr,pattern,top_level)
-      if attr[:data_type] == pattern[:type].to_s and top_level
+    def self.flatten_attribute_when_atomic_pattern!(ret,value_obj,attr,pattern,top_level={})
+      if attr[:data_type] == pattern[:type].to_s and opts[:top_level]
         ret << attr
       else
         ret << attr.merge(:attribute_value => value_obj,:data_type => pattern[:type].to_s)
@@ -216,9 +215,9 @@ module XYZ
       nil
     end
 
-    def self.flatten_attribute_when_mismatch!(ret,value_obj,attr,pattern,top_level=false)
+    def self.flatten_attribute_when_mismatch!(ret,value_obj,attr,pattern,opts={})
       Log.error("mismatch between object #{value_obj.inspect} and pattern #{pattern.inspect}")
-      ret << (top_level ? attr : attr.merge(:attribute_value => value_obj))
+      ret << (opts[:top_level] ? attr : attr.merge(:attribute_value => value_obj))
       nil
     end
 

@@ -17,7 +17,7 @@ module XYZ
 
     def edit(component_id)
 
-#ViewDefProcessor.save_view_in_cache?(:list,id_handle(component_id),user_context())
+#ViewDefProcessor.save_view_in_cache?(:display,id_handle(component_id),user_context())
 
       component = create_object_from_id(component_id)
       attr_list = component.get_attributes_unraveled()

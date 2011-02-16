@@ -7,13 +7,13 @@ module XYZ
       view_meta_hash = convert_to_view_def_form(type,cmp_attrs_objs)
 
       #TODO: need to change signature to be moer descriptive
-      view = R8Tpl::ViewR8.new(:component,view_def_key,user,true,view_meta_hash)
+      view = R8Tpl::ViewR8.new(:component,view_def_key,user,true,view_meta_hash,{:view_type => type})
       #TODO: hack until have more geenral fn
       view.update_cache_for_saved_search()
       SavedAlready[type][view_def_key] = TRUE
     end
    private 
-    SavedAlready = {:edit => Hash.new, :list => Hash.new}
+    SavedAlready = {:edit => Hash.new, :display => Hash.new}
     def self.get_model_info(id_handle,opts={})
       id_handle.create_object().get_info_for_view_def()
     end
@@ -21,16 +21,16 @@ module XYZ
     def self.convert_to_view_def_form(type,cmp_attrs_objs)
       case type
         when :edit then convert_to_edit_view_def_form(cmp_attrs_objs)
-        when :list then convert_to_list_view_def_form(cmp_attrs_objs)
+        when :display then convert_to_display_view_def_form(cmp_attrs_objs)
         else Log.error("unsupported type #{type} was given")
       end
     end
 
-    def self.convert_to_list_view_def_form(cmp_attrs_objs)
+    def self.convert_to_display_view_def_form(cmp_attrs_objs)
       ret = ActiveSupport::OrderedHash.new()
-      ret[:tr_class] = "tr-dl"
-      ret[:hidden_fields] = hidden_fields(:list,cmp_attrs_objs)
-      ret[:field_list] = field_list(cmp_attrs_objs[:attributes])
+      ret[:action] = ""
+      ret[:hidden_fields] = hidden_fields(:edit,cmp_attrs_objs)
+      ret[:field_groups] = field_groups(cmp_attrs_objs[:attributes])
       ret
     end
     def self.convert_to_edit_view_def_form(cmp_attrs_objs)
@@ -40,6 +40,7 @@ module XYZ
       ret[:field_groups] = field_groups(cmp_attrs_objs[:attributes])
       ret
     end
+
     def self.hidden_fields(type,cmp_attrs_objs)
       HiddenFields[type].map do |hf|
         {hf.keys.first => Aux::ordered_hash_subset(hf.values.first,[:required,:type,:value])}

@@ -7,7 +7,8 @@ module R8Tpl
     include CommonMixin
     include Utility::I18n
     attr_accessor :obj_name, :tpl_contents, :css_require, :js_require
-    def initialize(model_name,view_name,user,is_saved_search=false,view_meta_hash=nil)
+    #TODO: need to refactor this signature
+    def initialize(model_name,view_name,user,is_saved_search=false,view_meta_hash=nil,opts={})
 
       #TODO: clean up
       @model_name = model_name
@@ -15,7 +16,7 @@ module R8Tpl
       @view_name = view_name
       if is_saved_search
         @saved_search_ref = view_name
-        @view_name = :list #TODO: should not be hard-wired
+        @view_name = opts[:view_type] || :list #TODO: should not be hard-wired
       end
 
       @form_id = "#{@model_name}-#{@view_name}-form"

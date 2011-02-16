@@ -1,5 +1,5 @@
 module XYZ
-  class PropagateProcessor
+class PropagateProcessor
     #propgate from output var to input var
     def propagate()
 
@@ -183,6 +183,9 @@ Debug.print_and_ret(
       #TODO: may have :array+ and :array* to distinguish whether array can be empty
       keys.first == :array
     end
+    def is_hash?()
+      not (is_array?() or is_atomic?())
+    end
   end
   class SemanticType < HashObject
     include CommonSemanticTypeMixin
@@ -202,6 +205,9 @@ Debug.print_and_ret(
       else
         raise raise ErrorNotImplemented.new("find_link_function for input #{input_sem_type.inspect} and output #{output_sem_type.inspect}")
       end
+    end
+    def is_atomic?()
+      nil
     end
    private
     def self.convert_hash(item)
@@ -239,6 +245,7 @@ Debug.print_and_ret(
 
       ret = create_with_auto_vivification()
       if  semantic_type.kind_of?(Hash)
+        
         ret_schema_from_semantic_type_aux!(ret,key,semantic_type.values.first)
       end
       if ret.empty?
@@ -249,10 +256,7 @@ Debug.print_and_ret(
     end
 
     def is_atomic?()
-      has_key?(:type)
-    end
-    def is_hash?()
-      not (is_array?() or is_atomic?())
+      has_key?(:type) and not self[:type] == :json
     end
 
     #returns [array_body_pattern, whether_can_be_empty]
@@ -272,7 +276,7 @@ Debug.print_and_ret(
       key = semantic_type_key(semantic_type)
       if TranslationToSchema[key]
         ret[index] = TranslationToSchema[key]
-      elsif semantic_type.kind_of?(Hash)
+      elsif semantic_type.kind_of?(Hash) and not semantic_type.keys.first == :application
         ret_schema_from_semantic_type_aux!(ret[index],key,semantic_type.values.first)        
       else
         ret[index] = SemanticType.new({:type => "json"})

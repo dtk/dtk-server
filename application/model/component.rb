@@ -38,6 +38,7 @@ module XYZ
            :model_name => :attribute,
            :join_type => :left_outer,
            :convert => true,
+           :filter => [:and, [:eq, :hidden, false]],
            :join_cond=>{:component_component_id => q(:component,:id)}, #TODO: want to use p(:component,:attribute) on left hand side
            :cols => [:id,:display_name,:component_component_id,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
          }

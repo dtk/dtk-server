@@ -974,6 +974,17 @@ for(vs in _viewSpaces) {
 				_viewSpaces[vSpaceId].touchItems(itemList);
 			},
 
+			test_get_items: function(id) {
+				var params = {
+					'callbakcs': {
+						'io:success': function(ioId,responseObj) {
+							eval("var response=" + responseObj.responseText);
+							console.log(response);
+						}
+					}
+				}
+				R8.Ctrl.call('assembly/test_get_items/'+id,params);
+			},
 //-------------------------------------------------------------
 //-------------------------------------------------------------
 //-------------------------------------------------------------

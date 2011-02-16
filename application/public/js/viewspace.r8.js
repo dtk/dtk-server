@@ -166,6 +166,7 @@ if (!R8.ViewSpace) {
 						_ui.items[itemId]['left'] = item['object']['ui'][_id]['left'];
 					}
 
+
 					var id = item['object']['id'],
 						top = (typeof(_itemPosUpdateList[id]) == 'undefined') ? _ui.items[id]['top'] : _itemPosUpdateList[id]['pos']['top'],
 						left = (typeof(_itemPosUpdateList[id]) == 'undefined') ? _ui.items[id]['left'] : _itemPosUpdateList[id]['pos']['left'];
@@ -444,8 +445,8 @@ console.log(ports);
 //TODO: cleanup after moving fully to new pos handling
 					_ui.items[itemId]['top'] = top;
 					_ui.items[itemId]['left'] = left;
-
 				}
+
 				YUI().use('json','cookie', function(Y){
 					var _itemPosUpdateListJSON = Y.JSON.stringify(_itemPosUpdateList);
 					Y.Cookie.set("_itemPosUpdateList", _itemPosUpdateListJSON);

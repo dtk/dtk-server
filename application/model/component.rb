@@ -31,6 +31,17 @@ module XYZ
            :cols => [:id,:display_name,:component_component_id,:value_derived,:value_asserted,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
          }
         ]
+        virtual_column :attributes_view_def_info, :type => :json, :hidden => true, 
+        :remote_dependencies => 
+        [
+         {
+           :model_name => :attribute,
+           :join_type => :left_outer,
+           :convert => true,
+           :join_cond=>{:component_component_id => q(:component,:id)}, #TODO: want to use p(:component,:attribute) on left hand side
+           :cols => [:id,:display_name,:component_component_id,:semnatic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
+         }
+        ]
 
         virtual_column :constraints, :type => :json, :hidden => true, 
         :remote_dependencies => 
@@ -188,7 +199,6 @@ module XYZ
 
     ####################
     def determine_cloned_components_parent(specified_target_idh)
-      
       cmp_fs = FieldSet.opt([:id,:display_name,:component_type],:component)
       specified_target_id = specified_target_idh.get_id()
       cmp_ds = Model.get_objects_just_dataset(model_handle,{:id => id()},cmp_fs)
@@ -284,7 +294,17 @@ module XYZ
       component_and_attrs = get_objects_from_sp_hash(sp_hash)
       return nil if component_and_attrs.empty?
       component = component_and_attrs.first.subset(:id,:display_name,:component_type,:basic_type)
-      #if component_and_attrs.first[:attribute] null teher shoudl only be one element in component_and_attrs
+      #if component_and_attrs.first[:attribute] null there shoudl only be one element in component_and_attrs
+      return component.merge(:attributes => Array.new) unless component_and_attrs.first[:attribute]
+      component.merge(:attributes => AttributeComplexType.flatten_attribute_list(component_and_attrs.map{|r|r[:attribute]}))
+    end
+
+    def get_info_for_view_def()
+      sp_hash = {:columns => [:id,:display_name,:component_type,:basic_type,:attributes_view_def_info]}
+      component_and_attrs = get_objects_from_sp_hash(sp_hash)
+      return nil if component_and_attrs.empty?
+      component = component_and_attrs.first.subset(:id,:display_name,:component_type,:basic_type)
+      #if component_and_attrs.first[:attribute] null there shoudl only be one element in component_and_attrs
       return component.merge(:attributes => Array.new) unless component_and_attrs.first[:attribute]
       component.merge(:attributes => AttributeComplexType.flatten_attribute_list(component_and_attrs.map{|r|r[:attribute]}))
     end

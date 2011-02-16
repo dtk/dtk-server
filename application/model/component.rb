@@ -15,10 +15,12 @@ module XYZ
         column :ui, :json
         #:assembly_id (in contrast to parent field :component_id) is for tieing teh component to a composite component which is not a container
         foreign_key :assembly_id, :component, FK_SET_NULL_OPT
-
+        column :view_def_ref, :varchar
         many_to_one :component, :library, :node, :node_group, :datacenter
         one_to_many :component, :attribute_link, :attribute, :monitoring_item, :constraints
         virtual_column :parent_name, :possible_parents => [:component,:library,:node,:node_group]
+
+        virtual_column :view_def, :type => :varchar, :hidden => true, :local_dependencies => [:id,:view_def_ref,:component_type] 
 
         virtual_column :attributes, :type => :json, :hidden => true, 
         :remote_dependencies => 
@@ -173,7 +175,10 @@ module XYZ
     end
     ##### Actions
     ### virtual column defs
-    
+    def view_def()
+      self[:view_def_ref]||self[:component_type]||self[:id]
+    end
+
     def containing_datacenter()
       (self[:datacenter_direct]||{})[:display_name]||
       (self[:datacenter_node]||{})[:display_name]||

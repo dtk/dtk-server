@@ -55,10 +55,24 @@ module XYZ
         extra_cols.empty? ? nil : extra_cols
       end
 
+      def with_replaced_local_columns?()
+        return nil unless vcolumns = (DB_REL_DEF[model_name]||{})[:virtual_columns] 
+        extra_cols = Array.new
+        removed_cols = Array.new
+        @cols.each do |f|
+          field_extra_cols = parse_local_dependencies(vcolumns[f])
+          next if field_extra_cols.empty?
+          removed_cols << f
+          field_extra_cols.each{|col| extra_cols << col unless (extra_cols.include?(col) or @cols.include?(col))}
+        end
+        return nil if extra_cols.empty?
+        FieldSet.new(@model_name,(@cols + extra_cols) - removed_cols)
+      end
+
       def with_related_local_columns()
         extra_local_cols = extra_local_columns()
         return self unless extra_local_cols 
-        FieldSet.new(@model_name,@cols + extra_cols)
+        FieldSet.new(@model_name,@cols + extra_local_cols)
       end
 
 

@@ -29,7 +29,6 @@ module XYZ
 
     def up()
       model_def = load_model_def()
-      preprocess_model_def!(model_def)
       relation_name_info = [model_def[:schema]].compact + [model_def[:table]]
       set_relation_name(*relation_name_info)
       model_def.each{|k,v|@db_rel[k]=v} 
@@ -37,7 +36,6 @@ module XYZ
 
     def set_submodel(submodel_name)
       model_def = load_model_def(submodel_name)
-      preprocess_model_def!(model_def)
       model_def.each do |top_key,top_val|
         next unless [:virtual_columns].include?(top_key)
         top_val.each{|k,v|@db_rel[top_key][k] = v}
@@ -50,25 +48,6 @@ module XYZ
       raise Error.new("cannot find model def file #{model_def_fn} for #{model_name()}") unless  File.exists?(model_def_fn)
       eval(IO.read(model_def_fn)) 
     end
-
-    def preprocess_model_def!(model_def)
-      #if model_def hash remote_dependency make sure that in each join condition cols have these join conditions
-      remote_dep_extend_cols_if_needed!(model_def)
-    end
-    def remote_dep_extend_cols_if_needed!(model_def)
-      (model_def[:virtual_columns]||{}).each_value do |col|(col[:remote_dependencies]||[]).each do |rem_dep|
-          (rem_dep[:join_cond]||{}).each_key do |k|
-            local_col = k
-            if k.to_s =~ /(^.+)__(.+$)/ 
-              next unless $1.to_sym = rem_dep[:model_name]
-              local_col = $2.to_sym
-            end
-            rem_dep[:cols] << local_col unless rem_dep[:cols].include?(local_col)
-          end
-        end
-      end
-    end
-
    public
     
     attr_reader :db_rel
@@ -263,7 +242,6 @@ module XYZ
       end
 
       #TODO: this would be good place to do parsing to check for errors in vc defs
-      #TODO: can also do processing that looks for later join that refs a col and make sure that col in earlier table
       def preprocess!()
         (@db_rel[:virtual_columns]||{}).each_value do |vc|
           remote_deps = vc[:remote_dependencies]
@@ -274,18 +252,35 @@ module XYZ
               next unless col.kind_of?(VCShortcutID)
               join_info[:cols][i] = col.val(join_info[:model_name])
             end
-
             #TODO: only applying translation  on {k => v} to v side, should apply to k side too
             (join_info[:join_cond]||{}).each do |k,v|
               next unless v.kind_of?(VCShortcutParent)
               join_info[:join_cond][k] = v.val()
             end
+            preprocess_add_needed_join_info_cols!(join_info)
+            preprocess_substitutue_join_info_vcols!(join_info)
           end
         end
         self
       end
 
      private
+      def preprocess_add_needed_join_info_cols!(join_info)
+        return unless join_info[:cols]
+        (join_info[:join_cond]||{}).each_key do |k|
+          local_col = k
+          if k.to_s =~ /(^.+)__(.+$)/ 
+            next unless $1.to_sym = join_info[:model_name]
+            local_col = $2.to_sym
+          end
+          join_info[:cols] << local_col unless join_info[:cols].include?(local_col)
+        end
+      end
+      def preprocess_substitutue_join_info_vcols!(join_info)
+        return unless join_info[:cols]
+        new_field_set = Model::FieldSet.new(join_info[:model_name],join_info[:cols]).with_replaced_local_columns?()
+        join_info[:cols] = new_field_set.cols if new_field_set
+      end
 
       #TODO: drive off of  COMMON_REL_COLUMNS  
       def create_table_common_fields?(db_rel)

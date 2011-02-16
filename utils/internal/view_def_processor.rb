@@ -1,19 +1,29 @@
 module XYZ
   class ViewDefProcessor
-    def self.save_edit_view_in_cache?(id_handle,user,opts={})
+    def self.save_view_in_cache?(type,id_handle,user,opts={})
       cmp_attrs_objs = get_model_info(id_handle,opts)
       view_def_key = cmp_attrs_objs[:view_def_key]
-      return if SavedAlready[view_def_key]
-      view_meta_hash = convert_to_edit_view_def_form(cmp_attrs_objs)
+      return if SavedAlready[type][view_def_key]
+      view_meta_hash = convert_to_view_def_form(type,cmp_attrs_objs)
 
+      #TODO: need to change signature to be moer descriptive
       view = R8Tpl::ViewR8.new(:component,view_def_key,user,true,view_meta_hash)
+      #TODO: hack until have more geenral fn
       view.update_cache_for_saved_search()
-      SavedAlready[view_def_key] = TRUE
+      SavedAlready[type][view_def_key] = TRUE
     end
    private 
-    SavedAlready = Hash.new
+    SavedAlready = {:edit => Hash.new, :list => Hash.new}
     def self.get_model_info(id_handle,opts={})
       id_handle.create_object().get_info_for_view_def()
+    end
+
+    def self.convert_to_view_def_form(type,cmp_attrs_objs)
+      case type
+        when :edit then convert_to_edit_view_def_form(cmp_attrs_objs)
+        when :list then convert_to_list_view_def_form(cmp_attrs_objs)
+        else Log.error("unsupported type #{type} was given")
+      end
     end
 
     def self.convert_to_list_view_def_form(cmp_attrs_objs)

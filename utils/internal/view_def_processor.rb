@@ -12,8 +12,7 @@ module XYZ
       view_meta_hash = convert_to_view_def_form(type,cmp_attrs_objs)
 
       view = R8Tpl::ViewR8.new(:component,view_name,user,true,view_meta_hash,{:view_type => type})
-      #TODO: hack until have more geenral fn
-      x=view.update_cache_for_virtual_object()
+      view.update_cache_for_virtual_object()
       SavedAlready[type][view_def_key] = TRUE
       ret
     end

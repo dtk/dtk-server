@@ -7,8 +7,8 @@ module XYZ
       component = create_object_from_id(id)
       template_name = component.save_view_in_cache?(:display,user_context())
       tpl = R8Tpl::TemplateR8.new(template_name,user_context())
-      obj = component.get_virtual_object_attributes()
-      tpl.assign("component",obj)
+      vals = component.get_virtual_object_attributes()
+      tpl.assign("component",vals)
       return {:content => tpl.render()}
     end
 
@@ -16,8 +16,9 @@ module XYZ
       component = create_object_from_id(id)
       template_name = component.save_view_in_cache?(:edit,user_context())
       tpl = R8Tpl::TemplateR8.new(template_name,user_context())
-      obj = component.get_virtual_object_attributes()
-      tpl.assign("component",obj)
+      vals,ids = component.get_virtual_object_attributes(:ret_ids => true)
+      tpl.assign("component",vals)
+      tpl.assign("component_id",ids)
       return {:content => tpl.render()}
     end
 
@@ -26,7 +27,7 @@ module XYZ
       #TODO: can thsi be handled another way
       #convert empty strings to nils
       attr_val_hash.each{|k,v|attr_val_hash[k] = nil if v.kind_of?(String) and v.empty?}
-      component_id = attr_val_hash.delete("component_id").to_i
+      component_id = attr_val_hash.delete("id").to_i
       attribute_rows = AttributeComplexType.ravel_raw_post_hash(attr_val_hash,:attribute,component_id)
       attr_mh = ModelHandle.new(ret_session_context_id(),:attribute)
       Attribute.update_and_propagate_attributes(attr_mh,attribute_rows)

@@ -320,28 +320,19 @@ module XYZ
       component.merge(:attributes => AttributeComplexType.flatten_attribute_list(component_and_attrs.map{|r|r[:attribute]},opts))
     end
 
-    def get_virtual_object_attributes()
+    def get_attributes_unraveled(to_set={})
       sp_hash = {
         :filter => [:and, 
                     [:eq, :hidden, false]],
-#        :columns => [:id,:display_name,:component_component_id,:attribute_value,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
         :columns => [:id,:display_name,:component_component_id,:attribute_value,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
       }
       raw_attributes = get_children_from_sp_hash(:attribute,sp_hash)
-      flattened_attr_list = AttributeComplexType.flatten_attribute_list(raw_attributes)
-      sample = flattened_attr_list.first
-      return Hash.new unless sample
-      component_id = sample[:component_component_id]
-      flattened_attr_list.inject({:id => component_id}){|h,r|h.merge((r[:display_name]||"unknown").to_sym => r[:attribute_value])}
-    end
+      return Array.new if raw_attributes.empty?
+      if to_set.has_key?(:component_id)
+        sample = raw_attributes.first
+        to_set[:component_id] = sample[:component_component_id]
+      end
 
-    def get_attributes_unraveled()
-      sp_hash = {
-        :filter => [:and, 
-                    [:eq, :hidden, false]],
-        :columns => [:id,:display_name,:attribute_value,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
-      }
-      raw_attributes = get_children_from_sp_hash(:attribute,sp_hash)
       flattened_attr_list = AttributeComplexType.flatten_attribute_list(raw_attributes)
       i18n = get_i18n_mappings_for_models(:attribute)
       flattened_attr_list.map do |a|
@@ -353,6 +344,17 @@ module XYZ
           :i18n => i18n_string(i18n,:attribute,name)
         }
       end
+    end
+
+    def get_virtual_object_attributes(opts={})
+      to_set = {:component_id => nil}
+      attrs = get_attributes_unraveled(to_set)
+      vals = attrs.inject({:id=>to_set[:component_id]}){|h,a|h.merge(a[:name].to_sym => a[:value])}
+      if opts[:ret_ids]
+        ids = attrs.inject({}){|h,a|h.merge(a[:name].to_sym => a[:id])}
+        return [vals,ids]
+      end
+      vals
     end
 
 

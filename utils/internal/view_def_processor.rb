@@ -34,14 +34,14 @@ module XYZ
       ret = ActiveSupport::OrderedHash.new()
       ret[:action] = ""
       ret[:hidden_fields] = hidden_fields(:display,cmp_attrs_objs)
-      ret[:field_groups] = field_groups(cmp_attrs_objs[:attributes])
+      ret[:field_groups] = field_groups(:display,cmp_attrs_objs[:attributes])
       ret
     end
     def self.convert_to_edit_view_def_form(cmp_attrs_objs)
       ret = ActiveSupport::OrderedHash.new()
       ret[:action] = ""
       ret[:hidden_fields] = hidden_fields(:edit,cmp_attrs_objs)
-      ret[:field_groups] = field_groups(cmp_attrs_objs[:attributes])
+      ret[:field_groups] = field_groups(:edit,cmp_attrs_objs[:attributes])
       ret
     end
 
@@ -107,7 +107,25 @@ module XYZ
      ]
     }
 
-    def self.field_list(attr_objs)
+    def self.field_list(type,attr_objs)
+      case type
+        when :edit then field_list_edit(attr_objs)
+        when :display then field_list_display(attr_objs)
+      end
+    end
+    def self.field_list_display(attr_objs)
+      #TODO stub
+      attr_objs.map do |attr|
+        {attr[:display_name].to_sym =>{
+            :type => convert_type(attr[:data_type]),
+            :help => '',
+            :rows => 1,
+            :cols => 40
+          }
+        }
+      end
+    end
+    def self.field_list_edit(attr_objs)
       #TODO stub
       attr_objs.map do |attr|
         {attr[:display_name].to_sym =>{
@@ -115,18 +133,21 @@ module XYZ
             :help => '',
             :rows => 1,
             :cols => 40,
+            :id => "{%=component_id[:#{attr[:display_name]}]%}",
+            :override_name => "{%=component_id[:#{attr[:display_name]}]%}"
           }
         }
       end
     end
 
-    def self.field_groups(attr_objs)
+    def self.field_groups(type,attr_objs)
       [
        {
          :num_cols => 1,
          :display_labels => true,
-         :fields => field_list(attr_objs)
-       }]
+         :fields => field_list(type,attr_objs)
+       }
+      ]
     end
 
     def self.convert_type(data_type)

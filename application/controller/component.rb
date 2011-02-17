@@ -7,11 +7,9 @@ module XYZ
       component = create_object_from_id(id)
       template_name = component.save_view_in_cache?(:display,user_context())
       tpl = R8Tpl::TemplateR8.new(template_name,user_context())
-      cmp_attrs_objs = component.get_component_with_attributes_unraveled()
-      #TODO: #####put this process in model/component
-      
-      #######
-      super
+      obj = component.get_vairtual_object()
+      tpl.assign("component",obj)
+      return {:content => tpl.render()}
     end
 
     def dock_edit(component_id)

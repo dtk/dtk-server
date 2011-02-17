@@ -320,6 +320,21 @@ module XYZ
       component.merge(:attributes => AttributeComplexType.flatten_attribute_list(component_and_attrs.map{|r|r[:attribute]},opts))
     end
 
+    def get_virtual_object_attributes()
+      sp_hash = {
+        :filter => [:and, 
+                    [:eq, :hidden, false]],
+#        :columns => [:id,:display_name,:component_component_id,:attribute_value,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
+        :columns => [:id,:display_name,:component_component_id,:attribute_value,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
+      }
+      raw_attributes = get_children_from_sp_hash(:attribute,sp_hash)
+      flattened_attr_list = AttributeComplexType.flatten_attribute_list(raw_attributes)
+      sample = flattened_attr_list.first
+      return Hash.new unless sample
+      component_id = sample[:component_component_id]
+      flattened_attr_list.inject({:id => component_id}){|h,r|h.merge((r[:display_name]||"unknown").to_sym => r[:attribute_value])}
+    end
+
     def get_attributes_unraveled()
       sp_hash = {
         :filter => [:and, 

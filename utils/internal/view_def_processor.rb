@@ -79,7 +79,7 @@ module XYZ
          :action => {
            :required => true,
            :type => 'hidden',
-           :value => 'edit',
+           :value => 'save_attribute'
          },
         }
      ],
@@ -102,7 +102,7 @@ module XYZ
          :action => {
            :required => true,
            :type => 'hidden',
-           :value => 'save_attribute',
+           :value => 'edit_test',
          },
         }
      ]

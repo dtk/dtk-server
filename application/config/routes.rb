@@ -9,6 +9,7 @@ R8::Routes[:login] = {
   :alias => 'user/login',
 }
 #Routes that correspond to (non-trivial action sets)
+=begin
 R8::Routes["component/display"] = {
   :layout => 'default',
   :alias => '',
@@ -35,7 +36,7 @@ R8::Routes["component/display"] = {
    }
   ]
 }
-
+=end
 R8::Routes["node/display"] = {
   :layout => 'default',
   :alias => '',

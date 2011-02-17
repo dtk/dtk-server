@@ -7,7 +7,7 @@ module XYZ
       component = create_object_from_id(id)
       template_name = component.save_view_in_cache?(:display,user_context())
       tpl = R8Tpl::TemplateR8.new(template_name,user_context())
-      obj = component.get_vairtual_object()
+      obj = component.get_virtual_object_attributes()
       tpl.assign("component",obj)
       return {:content => tpl.render()}
     end

@@ -4,10 +4,13 @@ module XYZ
 
     ##TODO just for testing
     def display(id,parsed_query_string=nil)
-
-#ViewDefProcessor.save_view_in_cache?(:display,id_handle(id),user_context())
-
-
+      component = create_object_from_id(id)
+      template_name = component.save_view_in_cache?(:display,user_context())
+      tpl = R8Tpl::TemplateR8.new(template_name,user_context())
+      cmp_attrs_objs = component.get_component_with_attributes_unraveled()
+      #TODO: #####put this process in model/component
+      
+      #######
       super
     end
 

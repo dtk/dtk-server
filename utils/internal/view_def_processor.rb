@@ -1,16 +1,21 @@
 module XYZ
   class ViewDefProcessor
+    #returns template path
+    #TODO: hack now that needs saved_search prefix
     def self.save_view_in_cache?(type,id_handle,user,opts={})
+      #TODO: make more efficient be just getting view_def_key info first
       cmp_attrs_objs = get_model_info(id_handle,opts)
       view_def_key = cmp_attrs_objs[:view_def_key]
-      return if SavedAlready[type][view_def_key]
+      view_name = "#{type}.#{view_def_key}"
+      ret = "saved_search/#{view_name}"
+      return ret if SavedAlready[type][view_def_key]
       view_meta_hash = convert_to_view_def_form(type,cmp_attrs_objs)
 
-      view_name = "#{type}.#{view_def_key}"
       view = R8Tpl::ViewR8.new(:component,view_name,user,true,view_meta_hash,{:view_type => type})
       #TODO: hack until have more geenral fn
       x=view.update_cache_for_virtual_object()
       SavedAlready[type][view_def_key] = TRUE
+      ret
     end
    private 
     SavedAlready = {:edit => Hash.new, :display => Hash.new}
@@ -29,7 +34,7 @@ module XYZ
     def self.convert_to_display_view_def_form(cmp_attrs_objs)
       ret = ActiveSupport::OrderedHash.new()
       ret[:action] = ""
-      ret[:hidden_fields] = hidden_fields(:edit,cmp_attrs_objs)
+      ret[:hidden_fields] = hidden_fields(:display,cmp_attrs_objs)
       ret[:field_groups] = field_groups(cmp_attrs_objs[:attributes])
       ret
     end
@@ -67,14 +72,37 @@ module XYZ
          :model => {
            :required => true,
            :type => 'hidden',
-           :value => 'virtual_object',
+           :value => 'component',
          }
        },
        {
          :action => {
            :required => true,
            :type => 'hidden',
-           :value => 'save',
+           :value => 'edit',
+         },
+        }
+     ],
+      :display => 
+      [
+       {
+         :id => {
+           :required => true,
+           :type => 'hidden',
+         }
+       },
+       {
+         :obj => {
+           :required => true,
+           :type => 'hidden',
+           :value => 'component',
+         }
+       },
+       {
+         :action => {
+           :required => true,
+           :type => 'hidden',
+           :value => 'save_attribute',
          },
         }
      ]

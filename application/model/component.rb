@@ -204,6 +204,10 @@ module XYZ
     end
 
     ####################
+    def save_view_in_cache?(type,user_context)
+      ViewDefProcessor.save_view_in_cache?(:display,id_handle(),user_context)
+    end
+
     def determine_cloned_components_parent(specified_target_idh)
       cmp_fs = FieldSet.opt([:id,:display_name,:component_type],:component)
       specified_target_id = specified_target_idh.get_id()

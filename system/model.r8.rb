@@ -190,6 +190,10 @@ module XYZ
       @db.get_objects_scalar_columns(id_handle.createMH,{:id => id}, FieldSet.opt(cols,id_handle[:model_name])).first
     end
 
+    def is_assembly?()
+      nil
+    end
+
     #may deprecate below
     def self.get_display_name(id_handle)
       get_object_scalar_column(id_handle,:display_name)

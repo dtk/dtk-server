@@ -1,5 +1,10 @@
 module XYZ
   class Assembly < Component
+
+    def is_assembly?()
+      true
+    end
+
     def get_attributes_unraveled()
       rows = get_objects_from_sp_hash(:columns => [:assembly_unravel_attributes])
 pp [:unraveld_assembly_rows,rows]

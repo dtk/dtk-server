@@ -410,6 +410,10 @@ module XYZ
       return Array.new if assocs.nil?
       assocs.map{|assoc|Model.get_object(IDHandle[:c=>@c,:guid => assoc[:node_id]])}
     end
+
+    def is_assembly?()
+      self[:type] == "composite"
+    end
   end
 end
 

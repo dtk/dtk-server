@@ -122,6 +122,17 @@ pp [:debug_stored_new_pos,get_objects(model_name,SQL.in(:id,model_items.map{|ite
       where_clause = SQL.and(where_clause,SQL.not(:library_library_id => nil),{:assembly_id => nil})
 
       model_list = get_objects(model_name.to_sym,where_clause)
+
+###TODO: test for get_items on assemblies
+=begin
+      model_list.map do |obj|
+        if obj.is_assembly?()
+          pp [:composite_get_items,obj.id(),obj[:display_name],obj.get_items()]
+        end
+      end
+=end
+###### end ###TODO: test for get_items on assemblies
+
       i18n = get_i18n_mappings_for_models(model_name.to_sym)
       model_list.each_with_index do |model,index|
         model_list[index][:model_name] = model_name

@@ -18,7 +18,8 @@ module XYZ
       end
     end
     SubItemModelNames = {
-      :datacenter => [:node,:node_group]
+      :datacenter => [:node,:node_group],
+      :component => [:node,:component]
     }
     class DefaultPositions
       def initialize(ws_model_name)
@@ -33,10 +34,12 @@ module XYZ
       end
      private
       Increment = {
+        :component => {:left => 50, :top => 50},
         :node => {:left => 50, :top => 50},
         :node_group => {:left => 50, :top => 50}
       }
       StartPositions = {
+        :component => {:left => 200, :top => 100},
         :node => {:left => 200, :top => 100},
         :node_group => {:left => 100, :top => 100}
       }

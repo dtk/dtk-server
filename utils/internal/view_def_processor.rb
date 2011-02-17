@@ -102,7 +102,7 @@ module XYZ
          :action => {
            :required => true,
            :type => 'hidden',
-           :value => 'edit_test',
+           :value => 'edit',
          },
         }
      ]

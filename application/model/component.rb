@@ -205,7 +205,7 @@ module XYZ
 
     ####################
     def save_view_in_cache?(type,user_context)
-      ViewDefProcessor.save_view_in_cache?(:display,id_handle(),user_context)
+      ViewDefProcessor.save_view_in_cache?(type,id_handle(),user_context)
     end
 
     def determine_cloned_components_parent(specified_target_idh)

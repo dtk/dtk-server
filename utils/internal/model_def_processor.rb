@@ -1,8 +1,7 @@
 module XYZ
   class ModelDefProcessor
-    def self.get_component(id_handle,opts={})
+    def self.get(id_handle,opts={})
       cmp_attrs_objs = id_handle.create_object().get_component_with_attributes_unraveled()
-pp [:cmp_attrs_objs,cmp_attrs_objs]
       convert_to_model_def_form(cmp_attrs_objs)
     end
     private 

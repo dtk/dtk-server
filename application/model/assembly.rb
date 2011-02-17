@@ -4,6 +4,9 @@ module XYZ
     def is_assembly?()
       true
     end
+    def is_base_component?()
+      nil
+    end
 
     def get_attributes_unraveled()
       rows = get_objects_from_sp_hash(:columns => [:assembly_unravel_attributes])

@@ -203,6 +203,15 @@ module XYZ
       row[:node_node_id]||(row[:parent_component]||{})[:node_node_id]
     end
 
+    def get_model_def()
+      return Hash.new unless is_base_component?()
+      ModelDefProcessor.get(id_handle())
+    end
+
+    def get_field_def()
+      get_model_def()[:columns]
+    end
+
     ####################
     def save_view_in_cache?(type,user_context)
       ViewDefProcessor.save_view_in_cache?(type,id_handle(),user_context)
@@ -413,6 +422,9 @@ module XYZ
 
     def is_assembly?()
       self[:type] == "composite"
+    end
+    def is_base_component?()
+      not self[:type] == "composite"
     end
   end
 end

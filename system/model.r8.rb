@@ -193,6 +193,9 @@ module XYZ
     def is_assembly?()
       nil
     end
+    def is_base_component?()
+      nil
+    end
 
     #may deprecate below
     def self.get_display_name(id_handle)

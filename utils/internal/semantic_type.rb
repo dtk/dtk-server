@@ -303,7 +303,7 @@ Debug.print_and_ret(
       "sap_config__db" => {
         "name" => {:required => true, :type => :string},
         "owner" => {:required => true, :type => :string},
-        "passsword" => {:type => :string}
+        "password" => {:type => :string}
       },
       "sap_ref__l4" => {
         :or => 

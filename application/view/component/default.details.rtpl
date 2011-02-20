@@ -1,0 +1,59 @@
+
+<div id="details-wrapper" class="details-wrapper" style="">
+	<div id="details-header" class="details-header" style="">
+		<div class="title" style="">{%=component[:name]%}</div>
+	</div>
+	<div id="content-wrapper" class="content-wrapper" style="">
+		<div id="details-tab-content" class="tab-content">
+			<div class="display-container">
+				<table class="display">
+					<tr id="">
+						<td class="label">Owner</td>
+						<td class="field">R8</td>
+					</tr>
+					<tr id="">
+						<td class="label">Description</td>
+						<td class="field">{%=component[:description]%}</td>
+					</tr>
+					<tr id="">
+						<td class="label">Date Created</td>
+						<td class="field">{%=component[:created_at]%}</td>
+					</tr>
+					<tr id="">
+						<td class="label">Date Modified</td>
+						<td class="field">{%=component[:updated_at]%}</td>
+					</tr>
+					<tr id="">
+						<td class="label">&nbsp;</td>
+						<td class="field">&nbsp;</td>
+					</tr>
+					<tr id="">
+						<td class="label">OS Support</td>
+						<td class="field">
+							{%for os in component[:supported_os_list]%}
+								<img title="{%=os[:name]%} : {%=os[:version]%}" src="{%=component_images_uri%}/{%=os[:ui][:images][:icon]%}" style=""/>
+							{%end%}
+						</td>
+					</tr>
+				</table>
+				<br/><br/>
+				<table class="display">
+					<tr id="">
+						<td class="label">Display Icon</td>
+						<td class="field"><img src="{%=component_images_uri%}/{%=component[:ui][:images][:display]%}" style="float: left;"/></td>
+					</tr>
+				</table>
+			</div>
+		</div>
+<!--
+		<div id="instances-tab-content" class="tab-content" style="display: none;">
+		</div>
+		<div id="assembly-tab-content" class="tab-content" style="display: none;">
+		</div>
+		<div id="dependencies-tab-content" class="tab-content" style="display: none;">
+		</div>
+		<div id="layouts-tab-content" class="tab-content" style="display: none;">
+		</div>
+-->
+	</div>
+</div>

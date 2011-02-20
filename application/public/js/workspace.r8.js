@@ -44,7 +44,7 @@ if (!R8.Workspace) {
 			//Y Node reference Object for the viewspaceElem
 			nodeRef : null,
 
-			init : function() {
+			init: function() {
 				_pageContainerNode = R8.Utils.Y.one('#'+_pageContainerId);
 
 				_topbarNode = R8.Utils.Y.one('#'+_topbarId);

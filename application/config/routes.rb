@@ -170,5 +170,9 @@ R8::Routes["datacenter/load_vspace"] = {
 }
 
 
+R8::Routes["component/details"] = {
+  :layout => 'details'
+}
+
 R8::Routes.freeze
 

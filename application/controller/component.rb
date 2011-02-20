@@ -2,6 +2,38 @@ module XYZ
   class ComponentController < Controller
     helper :i18n_string_mapping
 
+    def details(id)
+      component = get_object_by_id(id)
+      tpl = R8Tpl::TemplateR8.new("component/details",user_context())
+
+#      img_str = '<img title="' << component[:display_name] << '"' << 'src="' << R8::Config[:base_images_uri] << '/component/Icons/'<< component[:ui][:images][:tnail] << '"/>'
+
+      _model_var = {}
+      _model_var[:i18n] = get_model_i18n(:component,user_context())
+      component[:name] = _model_var[:i18n][component[:display_name].to_sym]
+
+#TEMP UNTIL FULLY IMPLEMENTING DEPENDENCIES
+      supported_os_list = [
+        {:id=>12345,:name=>'Ubuntu',:version=>'10.4',:ui=>{:images=>{:icon=>'ubuntu-favicon.png'}}},
+        {:id=>12345,:name=>'Debian',:version=>'6',:ui=>{:images=>{:icon=>'debian-favicon.png'}}},
+        {:id=>12345,:name=>'Fedora',:version=>'14',:ui=>{:images=>{:icon=>'fedora-favicon.png'}}},
+        {:id=>12345,:name=>'CentOS',:version=>'5.5',:ui=>{:images=>{:icon=>'centos-favicon.png'}}},
+        {:id=>12345,:name=>'RedHat',:version=>'6',:ui=>{:images=>{:icon=>'redhat-favicon.png'}}}
+      ]
+      component[:supported_os_list] = supported_os_list
+
+pp '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
+pp component
+
+      tpl.assign("_#{model_name().to_s}",_model_var)
+      tpl.assign("component",component)
+      tpl.assign("component_images_uri",R8::Config[:component_images_uri])
+
+      run_javascript("R8.Component.displayInit();")
+
+      return {:content => tpl.render()}
+    end
+
     ##TODO just for testing
     def display(id,parsed_query_string=nil)
       component = create_object_from_id(id)

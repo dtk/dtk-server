@@ -24,6 +24,9 @@
   :components => 'Components',
   :no_attributes => 'No Attributes',
 
+  :actions => 'Actions',
+  :details => 'Details',
+
 #temp strings for component names
   :hadoop => 'Hadoop',
   :hadoop_hive => 'Hadoop Hive',

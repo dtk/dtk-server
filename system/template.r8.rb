@@ -22,19 +22,19 @@ module R8Tpl
       :js_templating_on,
       :root_js_element_var_name,:root_js_hash,:loop_vars,:ctrl_vars,:js_var_header
 
-    def initialize(relative_distinguished_view_path,user,path_type_to_use=nil)
+    def initialize(view_path,user,path_type=nil)
       @user = user
       @profile = @user.current_profile
 
       #TODO: clean up
       @model_name = @view_name = String.new
       @saved_search_ref = nil
-      rdn = relative_distinguished_view_path.split("/")
+      rdn = view_path.split("/")
       #TODO: fidn better way to determine isa_saved_search
       if rdn.size == 2
         if rdn[0] == "saved_search"
           @saved_search_ref = rdn[1]
-          path_type_to_use ||= :cache
+          path_type ||= :cache
           @view_name = :list #TODO: should not be hard-wired
         else
           @model_name,@view_name = rdn
@@ -88,8 +88,8 @@ module R8Tpl
       (R8::Config[:js_templating_on].nil?) ? @js_templating_on = true : @js_templating_on = R8::Config[:js_templating_on]
 
 
-        #TODO: think of better terminology then path_type_to_use
-       set_view(path_type_to_use)
+        #TODO: think of better terminology then path_type
+       set_view(path_type)
     end
 
     def js_templating_on?
@@ -585,10 +585,10 @@ p '     iteratorVarRaw: '+newLoopHash[:iteratorVarRaw].to_s
 ##################BEGIN NEW TEMPLATE STUBS FOR VIEW HANDLING#################################
 #from_view might need some explanation, used in case of one global Template object for request
 #   used as flag then Template called within meta view cache generation where its not possible to have a metaview
-  def set_view(path_type_to_use=nil)
+  def set_view(path_type=nil)
     #TODO treating @model_name when it is nil or empty
     #check paths in order 
-    ordered_paths = (path_type_to_use ? [path_type_to_use] : [:base, :meta])
+    ordered_paths = (path_type ? [path_type] : [:base, :meta])
     ordered_paths.each do |path_type|
       path = ret_existing_view_path(path_type)
       next unless path

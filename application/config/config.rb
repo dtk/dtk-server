@@ -47,6 +47,8 @@ R8::Config[:base_js_uri] = R8::Config[:base_uri] + "/js"
 R8::Config[:base_js_cache_uri] = R8::Config[:base_uri] + "/js/cache"
 R8::Config[:base_css_uri] = R8::Config[:base_uri] + "/css"
 R8::Config[:base_images_uri] = R8::Config[:base_uri] + "/images"
+R8::Config[:node_images_uri] = R8::Config[:base_uri] + "/images/nodeIcons"
+R8::Config[:component_images_uri] = R8::Config[:base_uri] + "/images/componentIcons"
 R8::Config[:avatar_base_uri] = R8::Config[:base_uri] + "/images/user_avatars"
 
 R8::Config[:login] = Hash.new

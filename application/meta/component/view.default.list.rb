@@ -30,8 +30,18 @@
        :type => 'text',
        :help => '',
      }},
+    {:actions => {
+      :type => 'actions_basic',
+      :help => '',
+      :action_seperator => '&nbsp;|&nbsp;',
+      :action_list => [
+      {:route => 'component/details/{%=component[:id]%}',:label=>'details'}
+      ]
+    }},
+=begin
    {:created_at => {
        :type => 'text',
      }},
+=end
   ]
 }

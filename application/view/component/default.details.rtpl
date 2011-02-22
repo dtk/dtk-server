@@ -4,7 +4,7 @@
 		<div class="title" style="">{%=component[:name]%}</div>
 	</div>
 	<div id="content-wrapper" class="content-wrapper" style="">
-		<div id="details-tab-content" class="tab-content">
+		<div id="details-content" class="content">
 			<div class="display-container">
 				<table class="display">
 					<tr id="">
@@ -18,6 +18,10 @@
 					<tr id="">
 						<td class="label">Date Created</td>
 						<td class="field">{%=component[:created_at]%}</td>
+					</tr>
+					<tr id="">
+						<td class="label">Type</td>
+						<td class="field">{%=component[:basic_type]%}</td>
 					</tr>
 					<tr id="">
 						<td class="label">Date Modified</td>
@@ -45,15 +49,22 @@
 				</table>
 			</div>
 		</div>
-<!--
-		<div id="instances-tab-content" class="tab-content" style="display: none;">
+
+		<div id="instances-content" class="content" style="display: none;">
+			This is some instances content
 		</div>
-		<div id="assembly-tab-content" class="tab-content" style="display: none;">
+		<div id="assembly-content" class="content" style="display: none;">
+			This is some assembly content
 		</div>
-		<div id="dependencies-tab-content" class="tab-content" style="display: none;">
+		<div id="editor-content" class="content" style="display: none;">
+			This is some editor content
 		</div>
-		<div id="layouts-tab-content" class="tab-content" style="display: none;">
+		<div id="dependencies-content" class="content" style="display: none;">
+			This is dependencies content
 		</div>
--->
+		<div id="layout-content" class="content" style="display: none;">
+			This is layout content
+		</div>
+
 	</div>
 </div>

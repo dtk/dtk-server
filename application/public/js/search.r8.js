@@ -428,11 +428,10 @@ if (!R8.Search) {
 					var filterWrapper = document.createElement('div');
 					filterWrapper.setAttribute('id',filterId+'-filter-wrapper');
 					filterWrapper.setAttribute('style','float:left; width: 100%; height: 80px;');
-				
+
 					//add field select list
 					filterWrapper.appendChild(fieldElem);
-				
-				
+								
 					//add field operator select list
 					(typeof(filterDef) !='undefined' && filterDef != null) ? operator = filterDef[0].replace(':','') : operator = null;
 
@@ -454,9 +453,7 @@ if (!R8.Search) {
 						'filter_id':filterId,
 						'model_name':modelName
 					});
-
 					filterWrapper.appendChild(fieldConditionElem);
-
 					filterEditWrapper.appendChild(filterWrapper);
 
 					//add save button
@@ -565,7 +562,7 @@ if (!R8.Search) {
 					filterWrapper.appendChild(inputElem);
 				},
 */
-				getConditionInput : function(params) {
+				getConditionInput: function(params) {
 					var fieldName = params['field_name'];
 					var fieldDef = params['field_def'];
 					var operator = params['operator'];
@@ -575,6 +572,7 @@ if (!R8.Search) {
 
 					switch(fieldDef['type']) {
 						case "text":
+						case "json":
 							var inputElem = document.createElement('input');
 							inputElem.setAttribute('id',filterId+'-condition');
 							inputElem.setAttribute('name',filterId+'-condition');

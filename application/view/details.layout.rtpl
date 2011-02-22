@@ -31,10 +31,12 @@
 		<div id="main-body" class="main-body" style="">
 			<div id="mb-l-pane" class="mb-l-pane">
 				<div id="spacer" style="height: 100px; width: inherit;"></div>
-				<div id="-search-attrs" class="details-categories">
-					<div id="-filters-search-attr" class="details-cat selected"><div class="label">Details</div></div>
-					<div id="-ordering-search-attr" class="details-cat"><div class="label">Instances</div></div>
-					<div id="-columns-search-attr" class="details-cat"><div class="label">Dependencies</div></div>
+				<div id="detail-categories" class="details-categories">
+					<div id="details-details-cat" class="details-cat selected"><div class="label">Details</div></div>
+					<div id="instances-details-cat" class="details-cat"><div class="label">Instances</div></div>
+					<div id="dependencies-details-cat" class="details-cat"><div class="label">Dependencies</div></div>
+					<div id="editor-details-cat" class="details-cat"><div class="label">Editor</div></div>
+					<div id="layout-details-cat" class="details-cat"><div class="label">Layouts</div></div>
 				</div>
 			</div>
 			<div id="mb-r-pane" class="mb-r-pane">
@@ -73,8 +75,9 @@ YUI_config = {
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/render_tbar_component.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/workspace.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/cmdbar.r8.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/component.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/maintoolbar.r8.js"></script>
+
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/detailview.r8.js"></script>
 
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/toolbargroup.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/topbar.r8.js"></script>

@@ -29,9 +29,72 @@ pp component
       tpl.assign("component",component)
       tpl.assign("component_images_uri",R8::Config[:component_images_uri])
 
-      run_javascript("R8.Component.displayInit();")
+      run_javascript("R8.Detailview.init('#{id}');")
 
       return {:content => tpl.render()}
+    end
+
+    def instance_list(id)
+      instance_list = get_objects(:component,{:ancestor_id=>id})
+
+      tpl = R8Tpl::TemplateR8.new("component/list",user_context())
+      _model_var = {:i18n => get_model_i18n(model_name().to_s,user_context())}
+      tpl.assign(:_component,_model_var)
+      tpl.assign(:component_list,instance_list)
+      tpl.assign(:_app,app_common())
+
+#---------------------------------
+      search_context = 'component-list'
+      search_content = ''
+      tpl.assign(:search_content, search_content)
+      tpl.assign(:search_context, search_context)
+
+      search_object =  ret_search_object_in_request()
+      tpl.assign(:list_start_prev,0)
+      tpl.assign(:list_start_next,20)
+      tpl.assign(:current_start,0)
+
+      return {
+        :panel=>request.params["panel_id"],
+        :content=>tpl.render()
+      }
+    end
+
+    def layout_test(id)
+      component = create_object_from_id(id,:component)
+      field_defs = component.get_field_def()
+
+pp '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
+pp field_defs
+
+      tpl = R8Tpl::TemplateR8.new("component/layout_test",user_context())
+      _model_var = {:i18n => get_model_i18n(model_name().to_s,user_context())}
+      tpl.assign(:_component,_model_var)
+      tpl.assign(:field_def_list,field_defs)
+
+      include_css('layout-editor')
+      include_js('layout.editor.r8')
+
+      layout_def = {
+        :id => 'foo',
+        :name => 'New Layout',
+        :groups => {
+          'group-1' => {
+            :nul_cols =>1,
+            :i18n => 'Group 1',
+            :fields =>[]
+          }
+        }
+      }
+
+      field_defs_json = JSON.generate(field_defs);
+      layout_def_json = JSON.generate(layout_def);
+      run_javascript("R8.LayoutEditor.init(#{layout_def_json},#{field_defs_json});")
+
+      return {
+        :content=>tpl.render(),
+        :panel=>request.params["panel_id"]
+      }
     end
 
     ##TODO just for testing

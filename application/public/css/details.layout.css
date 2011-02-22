@@ -79,7 +79,7 @@ body {
 .details-header {
 	height: 30px;
 	padding: 5px;
-	width: inherit;
+	width: 96%;
 }
 
 .details-header .title {
@@ -95,7 +95,7 @@ body {
 	overflow: auto;
 }
 
-.content-wrapper .tab-content {
+.content-wrapper .content {
 	height: 96%;
 	width: 96%;
 	padding: 5px;

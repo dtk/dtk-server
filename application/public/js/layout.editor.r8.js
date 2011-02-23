@@ -6,12 +6,14 @@ if(!R8.LayoutEditor) {
 		var _groupListNode = null
 			_addGroupNode = null,
 			_contentWrapperNode = null,
+			_modalHeaderNode = null,
 			_events = {},
 
 			_availFields = {};
 			_layoutDef = {
 				'id': 'foo',
 				'name': 'New Layout',
+				'i18n': 'Create User',
 				'groups':{
 					'group-1': {
 						'nul_cols':1,
@@ -46,6 +48,30 @@ if(!R8.LayoutEditor) {
 				_groupListNode = R8.Utils.Y.one('#modal-tab-list');
 				_addGroupNode = R8.Utils.Y.one('#add-group-btn');
 				_contentWrapperNode = R8.Utils.Y.one('#modal-content-wrapper');
+				_modalHeaderNode = R8.Utils.Y.one('#modal-header');
+
+				_modalHeaderNode.on('mouseenter',function(e){
+					e.currentTarget.setStyles({'border':'1px dashed #0000CC'});
+				});
+				_modalHeaderNode.on('mouseleave',function(e){
+					e.currentTarget.setStyles({'border':'1px solid #EDEDED'});
+				});
+				_modalHeaderNode.on('click',function(e){
+					R8.Utils.Y.one('#title-txt').setStyles({'display':'none'});
+					R8.Utils.Y.one('#modal-header').setStyles({'border':'1px solid #EDEDED'});
+					R8.Utils.Y.one('#title-input-wrapper').setStyle('display','block');
+					R8.Utils.Y.one('#title-input').focus();
+				});
+				R8.Utils.Y.one('#title-input').on('change',function(e){
+					R8.Utils.Y.one('#title-txt').set('innerHTML',this.get('value'));
+				});
+				R8.Utils.Y.one('#title-input').on('blur',function(e){
+					var inputVal = R8.Utils.Y.one('#title-input').get('value');
+					R8.Utils.Y.one('#title-input-wrapper').setStyle('display','none');
+					R8.Utils.Y.one('#title-txt').setStyles({'display':'block'});
+					_layoutDef.i18n = inputVal;
+				});
+
 				_events['addGroupClick'] = _addGroupNode.on('click',this.addGroup,this);
 				_events['groupClick'] = R8.Utils.Y.delegate('click',this.groupClick,'#modal-tab-list','.tab',this);
 
@@ -60,6 +86,14 @@ if(!R8.LayoutEditor) {
 				_addGroupNode = null;
 				_contentWrapperNode = null;
 				_events = {};
+			},
+			updateHeader: function() {
+				var inputVal = R8.Utils.Y.one('#title-input').get('value');
+				R8.Utils.Y.one('#title-txt').set('innerHTML',inputVal);
+				R8.Utils.Y.one('#title-input-wrapper').setStyle('display','none');
+				R8.Utils.Y.one('#title-txt').setStyles({'display':'block'});
+
+				_layoutDef.i18n = inputVal;
 			},
 			fieldInLayout: function(fieldName) {
 				for(var gId in _layoutDef.groups) {
@@ -169,7 +203,7 @@ if(!R8.LayoutEditor) {
 								var tabOvrCallback = function() {
 										R8.LayoutEditor.groupFocus(groupId);
 									}
-								_tabSwitchTimeout = setTimeout(tabOvrCallback,1700);
+								_tabSwitchTimeout = setTimeout(tabOvrCallback,1500);
 							});
 							dObj.on('drop:exit',function(e){
 								if (_tabSwitchTimeout != null) {

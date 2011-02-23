@@ -17,8 +17,15 @@
 
 			<div id="" class="wspace-modal">
 				<div id="-content" class="content">
-					<div class="header">
-						<div class="title">Create User</div>
+					<div id="modal-header" class="header" style="border: 1px #EDEDED solid; cursor: pointer;">
+						<div class="title">
+							<span id="title-txt">Create User</span>
+							<div id="title-input-wrapper" style="display:none;">
+								<form onsubmit="R8.LayoutEditor.updateHeader(); return false;">
+								<input id="title-input" type="text" size="35" value="Create User"/>
+								</form>
+							</div>
+						</div>
 					</div>
 					<div class="body">
 						<div class="tab-wrapper">

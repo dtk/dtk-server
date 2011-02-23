@@ -77,7 +77,7 @@ if (!R8.ViewSpace) {
 							var itemId = e.currentTarget.getAttribute('data-id'),
 								inputWrapperNode = R8.Utils.Y.one('#item-'+itemId+'-name-input-wrapper'),
 								nameWrapperNode = R8.Utils.Y.one('#item-'+itemId+'-name-wrapper');
-		
+
 							inputWrapperNode.setStyle('display','none');
 							nameWrapperNode.setStyle('display','block');
 							e.currentTarget.setAttribute('data-blursetup','true');

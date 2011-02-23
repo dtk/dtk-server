@@ -119,6 +119,12 @@ if(!R8.LayoutEditor) {
 				var newGroupNode = R8.Utils.Y.Node.create(this.getGroupMarkup(groupId,groupLabel));
 				_groupListNode.append(newGroupNode);
 				_contentWrapperNode.append(this.getContentMarkup(groupId));
+
+				var groupFListContainer = R8.Utils.Y.one('#'+groupId+'-field-list');
+				for(var f in groupDef.fields) {
+					var fieldContent = this.getFieldMarkup(groupDef.fields[f]);
+					groupFListContainer.append(fieldContent);
+				}
 /*
 				_layoutDef.groups.push({
 					'name':groupId,
@@ -183,6 +189,14 @@ if(!R8.LayoutEditor) {
 //									<ul id="'+id+'-field-list" style="margin: 5px; width: 200px; height: 200px; float: left; border: 1px solid black;">\
 
 				return contentTpl;
+			},
+
+			getFieldMarkup: function(fieldDef) {
+				var fieldTpl = '<li style="height: 20px; width: 140px; margin: 3px; padding: 3px; border: 1px solid rgb(153, 153, 153); opacity: 1;" id="'+fieldDef.name+'" class="yui3-dd-drop yui3-dd-draggable">\
+					<span style="">'+fieldDef.i18n+'</span>\
+				</li>';
+
+				return fieldTpl;
 			},
 
 			setupDD: function() {
@@ -306,8 +320,8 @@ if(!R8.LayoutEditor) {
 						}
 					});
 
-					var lis = Y.Node.all('#available-fields li');
-					lis.each(function(v, k) {
+					var fields = Y.Node.all('#available-fields li');
+					fields.each(function(v, k) {
 						var dd = new Y.DD.Drag({
 							node: v,
 							groups:['field-drop','group-switch'],
@@ -321,8 +335,27 @@ if(!R8.LayoutEditor) {
 						});
 					});
 
-					var uls = Y.Node.all('#available-fields');
-					uls.each(function(v, k) {
+					for(var g in _layoutDef.groups) {
+						var groupId = _layoutDef.groups[g].name;
+
+						var fields = Y.Node.all('#'+groupId+'-field-list li');
+						fields.each(function(v, k) {
+							var dd = new Y.DD.Drag({
+								node: v,
+								groups:['field-drop','group-switch'],
+								target: {
+									padding: '0 0 0 20'
+								}
+							}).plug(Y.Plugin.DDProxy, {
+								moveOnEnd: false
+							}).plug(Y.Plugin.DDConstrained, {
+								constrain2node: '#editor-wrapper'
+							});
+						});
+					}
+
+					var fContainer = Y.Node.all('#available-fields');
+					fContainer.each(function(v, k) {
 						var tar = new Y.DD.Drop({
 							node: v,
 							groups:['field-drop']

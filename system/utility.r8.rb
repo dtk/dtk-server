@@ -47,8 +47,8 @@ module R8Tpl
           input_string.to_s.gsub(XYZ::Model::Delim::RegexpCommon, " ")
         end
 
-        def self.i18n_string_attribute(i18n,input_string,component_input_string=nil)
-          #TODO: stub
+        def self.i18n_string_attribute(i18n,input_string,component_type=nil)
+          #TODO: stub; not yet using component_typ
           proc_input_string,index = ret_removed_array_index(input_string)
           ret = index_print_form(index) 
           ret += " " unless ret.empty?

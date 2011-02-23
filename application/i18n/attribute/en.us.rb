@@ -26,7 +26,10 @@
   :sap_ref__l4__port => "port",
   :sap_ref__l4__protocol => "protocol",
   :sap_ref__l4__host_address => "host addr",
-  
+  :sap_config__db__name => "db name",
+  :sap_config__db__owner => "db owner",
+  :sap_config__db__password => "db password",
+
 #TODO: temp until finding normal local for all attribute labels
 #JMX related
   :jmxremote_port => 'JMX Remote Port',

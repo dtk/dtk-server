@@ -144,13 +144,13 @@ pp [:debug_stored_new_pos,get_objects(model_name,SQL.in(:id,model_items.map{|ite
 ###### end ###TODO: test for get_model_def on assemblies
 
 ###TODO: test for get_field_def on assemblies
-=begin
+#=begin
       model_list.map do |obj|
         if obj.is_base_component?()
           pp [:get_field_def,obj.id(),obj[:display_name],obj.get_field_def()]
         end
       end
-=end
+#=end
 ###### end ###TODO: test for get_field_def on assemblies
 
       i18n = get_i18n_mappings_for_models(model_name.to_sym)

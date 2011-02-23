@@ -99,7 +99,17 @@ remove if below is right
              :name => 'group-1',
               :num_cols =>1,
               :i18n => 'Group 1',
-              :fields =>[]
+              :fields =>[
+               {:i18n=>"keys__auth",
+                :name=>"keys__auth",
+                :id=>"a__2147483670",
+                :description=>"Wordpress auth key.",
+                :type=>:string,
+                :default=>nil,
+                :required=>false,
+                :read_only=>false,
+                :cannot_change=>false}
+              ]
             }]
          },
          #...earlier ones (if they exist)

@@ -917,7 +917,7 @@ for(vs in _viewSpaces) {
 			},
 
 			renderModal: function() {
-				var modalTpl = '<div id="'+_modalNodeId+'" class="wspace-modal">\
+				var modalTpl = '<div id="'+_modalNodeId+'" class="wspace-modal" style="display:none;">\
 									<div id="'+_modalNodeId+'-content" class="content"></div>\
 								</div>',
 					node = R8.Utils.Y.one('#wspace-container'),

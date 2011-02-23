@@ -1,6 +1,5 @@
 require File.expand_path('field.r8.rb', File.dirname(__FILE__))
 require File.expand_path('common_mixin.r8', File.dirname(__FILE__))
-require File.expand_path('utility.r8', File.dirname(__FILE__))
 
 module R8Tpl
   class ViewR8

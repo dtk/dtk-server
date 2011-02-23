@@ -19,7 +19,9 @@ module XYZ
         hash_subset_aux(Hash.new(),hash,keys,opts,&block)
       end
       def ordered_hash_subset(hash,keys,opts={},&block)
-        hash_subset_aux(ActiveSupport::OrderedHash.new(),hash,keys,opts,&block)
+        seed = ActiveSupport::OrderedHash.new()
+        seed.merge!(opts[:seed]) if opts[:seed]
+        hash_subset_aux(seed,hash,keys,opts,&block)
       end
      private
       def hash_subset_aux(seed,hash,keys,opts={},&block)

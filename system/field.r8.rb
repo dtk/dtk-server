@@ -1,5 +1,4 @@
 #TBD: put under module and make as many as possible methods private
-require File.expand_path('utility.r8', File.dirname(__FILE__))
 
 module R8Tpl
 class FieldR8

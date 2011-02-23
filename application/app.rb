@@ -15,7 +15,8 @@ APPLICATION_DIR = File.expand_path('../' + R8::Config[:application_name], File.d
 UTILS_DIR = File.expand_path('../utils', File.dirname(__FILE__))
 SYSTEM_DIR = File.expand_path('../system', File.dirname(__FILE__))
 
-require File.expand_path('../utils/utils', File.dirname(__FILE__))
+require SYSTEM_DIR + '/utility.r8.rb'
+require UTILS_DIR + '/utils'
 
 require File.expand_path('config/routes.rb',File.dirname(__FILE__))
 

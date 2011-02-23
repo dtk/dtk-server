@@ -1,15 +1,19 @@
 module XYZ
   class ModelDefProcessor
+    extend R8Tpl::Utility::I18n
     def self.get(id_handle,opts={})
       cmp_attrs_objs = id_handle.create_object().get_component_with_attributes_unraveled()
       convert_to_model_def_form(cmp_attrs_objs)
     end
     private 
     def self.convert_to_model_def_form(cmp_attrs_objs)
+      i18n = get_i18n_mappings_for_models(:attribute)
       ret = Aux::ordered_hash_subset(cmp_attrs_objs,ComponentMappings){|v|v.kind_of?(String) ? v.to_sym : v}
 
       ret[:columns] = cmp_attrs_objs[:attributes].map do |col_info|
-        Aux::ordered_hash_subset(col_info,ColumnMappings,:include_virtual_columns => true) do |k,v|
+        i18n_string = i18n_string(i18n,:attribute,col_info[:display_name])
+        opts = {:include_virtual_columns => true,:seed => {:i18n => i18n_string}}
+        Aux::ordered_hash_subset(col_info,ColumnMappings,opts) do |k,v|
           convert_value_if_needed(k,v,col_info)
         end
       end
@@ -27,7 +31,7 @@ module XYZ
        {:data_type => :type},
        {:attribute_value => :default},
        :required,
-       :dynamic,
+       {:dynamic => :read_only},
        :cannot_change
       ]
   

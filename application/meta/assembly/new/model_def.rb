@@ -19,6 +19,7 @@
        },
        {
          :model_name=>:attribute,
+         :convert => true,
          :join_type=>:left_outer,
          :join_cond=>{:component_component_id=>:sub_component__id},
          :cols => [:id,:display_name,:hidden,:description,:component_component_id,:attribute_value,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]

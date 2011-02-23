@@ -30,7 +30,7 @@ module XYZ
            :join_type => :left_outer,
            :convert => true,
            :join_cond=>{:component_component_id => q(:component,:id)}, #TODO: want to use p(:component,:attribute) on left hand side
-           :cols => [:id,:display_name,:component_component_id,:value_derived,:value_asserted,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
+           :cols => [:id,:display_name,:description,:component_component_id,:attribute_value,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
          }
         ]
         virtual_column :attributes_view_def_info, :type => :json, :hidden => true, 

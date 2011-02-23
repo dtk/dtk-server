@@ -29,6 +29,7 @@ module XYZ
       [
        {:display_name => :name},
        {:unraveled_attribute_id => :id},
+       :description,
        {:data_type => :type},
        {:attribute_value => :default},
        :required,

@@ -73,6 +73,7 @@ pp field_defs
       tpl.assign(:field_def_list,field_defs)
 
       include_css('layout-editor')
+      include_css('wspace-modal')
       include_js('layout.editor.r8')
 
       layout_def = {

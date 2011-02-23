@@ -14,29 +14,19 @@
 			</ul>
 		</div>
 		<div class="layout-editor body">
-
-			<div id="" class="wspace-modal">
-				<div id="-content" class="content">
-					<div class="header">
-						<div class="title">Create User</div>
-					</div>
-					<div class="body">
-						<div class="tab-wrapper">
-							<ul id="modal-tab-list" class="tab-list">
-								<li id="group-1-tab" class="tab selected">Group 1</li>
-							</ul>
-							<div id="add-group-btn" class="add-group-btn"></div>
-						</div>
-						<div id="modal-content-wrapper" class="content-wrapper">
-							<div id="group-1-content" class="tab-content">
-								<ul id="group-1-field-list" style="margin: 5px; width: 200px; height: 200px; float: left; border: 1px solid black;">
-								</ul>
-							</div>
-						</div>
-					</div>
+			<div class="tab-wrapper">
+				<ul id="layout-tab-list" class="tab-list">
+					<li id="group-1-tab" class="tab selected">Group 1</li>
+					<li id="add-tab" class="tab">+</li>
+				</ul>
+				<div style="float: left; height: 20px; width: 20px; margin:5px; border: 1px solid #999999;">+</div>
+			</div>
+			<div id="group-content-wrapper" class="content-wrapper">
+				<div id="group-1-content" class="tab-content">
+					<ul id="group-1-field-list" style="margin: 5px; width: 200px; height: 200px; float: left; border: 1px solid black;">
+					</ul>
 				</div>
 			</div>
-
 		</div>
 	</div>
 </div>

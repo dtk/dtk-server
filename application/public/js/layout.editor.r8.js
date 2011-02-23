@@ -26,7 +26,7 @@ if(!R8.LayoutEditor) {
 
 		return {
 			init: function(layoutDef,fieldDefs) {
-				if(document.getElementById('layout-tab-list') == null || document.getElementById('add-tab') == null) {
+				if(document.getElementById('modal-tab-list') == null || document.getElementById('add-group-btn') == null) {
 					var that = this;
 					var initCallback = function() {
 						R8.LayoutEditor.init(layoutDef,fieldDefs);
@@ -43,11 +43,11 @@ if(!R8.LayoutEditor) {
 					}
 				}
 
-				_groupListNode = R8.Utils.Y.one('#layout-tab-list');
-				_addGroupNode = R8.Utils.Y.one('#add-tab');
-				_contentWrapperNode = R8.Utils.Y.one('#group-content-wrapper');
-//				_events['addGroupClick'] = _addGroupNode.on('click',this.addGroup,this);
-				_events['groupClick'] = R8.Utils.Y.delegate('click',this.groupClick,'#layout-tab-list','.tab',this);
+				_groupListNode = R8.Utils.Y.one('#modal-tab-list');
+				_addGroupNode = R8.Utils.Y.one('#add-group-btn');
+				_contentWrapperNode = R8.Utils.Y.one('#modal-content-wrapper');
+				_events['addGroupClick'] = _addGroupNode.on('click',this.addGroup,this);
+				_events['groupClick'] = R8.Utils.Y.delegate('click',this.groupClick,'#modal-tab-list','.tab',this);
 
 //				_events['groupDblClick'] = R8.Utils.Y.delegate('dblclick',function(e){
 //					console.log('hello there...');
@@ -65,12 +65,12 @@ if(!R8.LayoutEditor) {
 				return false;
 			},
 			addGroup: function(e) {
-				var groupIndex = _groupListNode.get('children').size();
+				var groupIndex = _groupListNode.get('children').size()+1;
 				var groupId = 'group-'+groupIndex;
 				var groupLabel = 'Group '+groupIndex;
 
 				var newGroupNode = R8.Utils.Y.Node.create(this.getGroupMarkup(groupId,groupLabel));
-				_groupListNode.insertBefore(newGroupNode,_addGroupNode);
+				_groupListNode.append(newGroupNode);
 				_contentWrapperNode.append(this.getContentMarkup(groupId));
 
 				_layoutDef['groups'][groupId] = {
@@ -98,7 +98,7 @@ if(!R8.LayoutEditor) {
 				}
 			},
 			getGroupMarkup: function(id,i18n) {
-				var groupTpl = '<li id="'+id+'-tab" class="tab selected">'+i18n+'</li>';
+				var groupTpl = '<li id="'+id+'-tab" class="tab selected">'+i18n+'</li>'; 
 
 				return groupTpl;
 			},

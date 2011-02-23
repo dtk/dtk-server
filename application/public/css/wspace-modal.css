@@ -12,13 +12,16 @@
 	background-color: #CCCCCC;
 	position: absolute;
 	z-index: 110;
-	display: none;
+/*	display: none;*/
 }
 .wspace-modal .content {
 	height: 340px;
 	width: 690px;
-	margin: 5px;
+/*	height: 330px;
+	width: 680px;
+*/	margin: 5px;
 	background-color: #EDEDED;
+	padding: 0;
 }
 /*------------------------------*/
 
@@ -86,6 +89,8 @@
 	float: left;
 	overflow-y: scroll;
 	overflow-x: hidden;
+
+	border: 0px;
 }
 
 .wspace-modal .tab-content {

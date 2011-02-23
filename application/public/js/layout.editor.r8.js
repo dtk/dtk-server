@@ -10,6 +10,8 @@ if(!R8.LayoutEditor) {
 			_events = {},
 
 			_availFields = {};
+			_layoutDef = {};
+/*
 			_layoutDef = {
 				'id': 'foo',
 				'name': 'New Layout',
@@ -22,7 +24,7 @@ if(!R8.LayoutEditor) {
 					}
 				}
 			},
-
+*/
 			_draggingField = false,
 			_tabSwitchTimeout = null;
 
@@ -37,18 +39,19 @@ if(!R8.LayoutEditor) {
 					return;
 				}
 
+				_groupListNode = R8.Utils.Y.one('#modal-tab-list');
+				_addGroupNode = R8.Utils.Y.one('#add-group-btn');
+				_contentWrapperNode = R8.Utils.Y.one('#modal-content-wrapper');
+				_modalHeaderNode = R8.Utils.Y.one('#modal-header');
+
 				_layoutDef = layoutDef;
+				this.renderLayout();
 
 				for(var i in fieldDefs) {
 					if(!this.fieldInLayout(fieldDefs[i].name)) {
 						_availFields[fieldDefs[i].name] = fieldDefs[i];
 					}
 				}
-
-				_groupListNode = R8.Utils.Y.one('#modal-tab-list');
-				_addGroupNode = R8.Utils.Y.one('#add-group-btn');
-				_contentWrapperNode = R8.Utils.Y.one('#modal-content-wrapper');
-				_modalHeaderNode = R8.Utils.Y.one('#modal-header');
 
 				_modalHeaderNode.on('mouseenter',function(e){
 					e.currentTarget.setStyles({'border':'1px dashed #0000CC'});
@@ -96,13 +99,35 @@ if(!R8.LayoutEditor) {
 				_layoutDef.i18n = inputVal;
 			},
 			fieldInLayout: function(fieldName) {
-				for(var gId in _layoutDef.groups) {
-					var fieldList = _layoutDef.groups[gId].fields;
-					for(var i in fieldList) {
-						if(fieldList[i] == fieldName) return true;
+				for(var g in _layoutDef.groups) {
+					var fieldList = _layoutDef.groups[g].fields;
+					for(var f in fieldList) {
+						if(fieldList[f] == fieldName) return true;
 					}
 				}
 				return false;
+			},
+			renderLayout: function() {
+				for(var g in _layoutDef.groups) {
+					this.renderGroup(_layoutDef.groups[g]);
+				}
+			},
+			renderGroup: function(groupDef) {
+				var groupId = groupDef.name;
+				var groupLabel = groupDef.i18n;
+
+				var newGroupNode = R8.Utils.Y.Node.create(this.getGroupMarkup(groupId,groupLabel));
+				_groupListNode.append(newGroupNode);
+				_contentWrapperNode.append(this.getContentMarkup(groupId));
+/*
+				_layoutDef.groups.push({
+					'name':groupId,
+					'nul_cols':1,
+					'i18n': groupLabel,
+					'fields':[]
+				});
+*/
+//				this.groupFocus(_layoutDef.groups.length-1);
 			},
 			addGroup: function(e) {
 				var groupIndex = _groupListNode.get('children').size()+1;
@@ -113,15 +138,18 @@ if(!R8.LayoutEditor) {
 				_groupListNode.append(newGroupNode);
 				_contentWrapperNode.append(this.getContentMarkup(groupId));
 
-				_layoutDef['groups'][groupId] = {
+				_layoutDef.groups.push({
+					'name':groupId,
 					'nul_cols':1,
 					'i18n': groupLabel,
 					'fields':[]
-				};
-				this.groupFocus(groupId);
+				});
+				this.groupFocus(_layoutDef.groups.length-1);
 			},
-			groupFocus: function(groupId) {
-				for(var gId in _layoutDef.groups) {
+			groupFocus: function(groupIndex) {
+				var groupId = _layoutDef.groups[groupIndex].name;
+				for(var g in _layoutDef.groups) {
+					var gId = _layoutDef.groups[g].name;
 					R8.Utils.Y.one('#'+gId+'-tab').removeClass('selected');
 					R8.Utils.Y.one('#'+gId+'-content').setStyle('display','none');
 				}
@@ -129,13 +157,16 @@ if(!R8.LayoutEditor) {
 				R8.Utils.Y.one('#'+groupId+'-content').setStyle('display','block');
 			},
 			groupClick: function(e) {
-				if(e.currentTarget.get('id') == 'add-tab') {
-					this.addGroup(e);
-				} else {
-					var id = e.currentTarget.get('id'),
-						groupId = id.replace('-tab','');
-					this.groupFocus(groupId);
+				var id = e.currentTarget.get('id'),
+					groupId = id.replace('-tab',''),
+					groupIndex = this.getGIndexByName(groupId);
+				this.groupFocus(groupIndex);
+			},
+			getGIndexByName: function(groupName) {
+				for(var g in _layoutDef.groups) {
+					if(groupName === _layoutDef.groups[g].name) return g;
 				}
+				return false;
 			},
 			getGroupMarkup: function(id,i18n) {
 				var groupTpl = '<li id="'+id+'-tab" class="tab selected">'+i18n+'</li>'; 
@@ -184,7 +215,8 @@ if(!R8.LayoutEditor) {
 					});
 
 					Y.DD.DDM.on('drag:mouseDown',function(e){
-						for(var gId in _layoutDef.groups) {
+						for(var g in _layoutDef.groups) {
+							var gId = _layoutDef.groups[g].name;
 							var gFieldNode = Y.one('#'+gId+'-field-list');
 							if(!gFieldNode.hasClass('yui3-dd-drop')) {
 								var dObj = new Y.DD.Drop({
@@ -206,7 +238,7 @@ if(!R8.LayoutEditor) {
 								var id = e.currentTarget.get('node').get('id'),
 									groupId = id.replace('-tab','');
 								var tabOvrCallback = function() {
-										R8.LayoutEditor.groupFocus(groupId);
+										R8.LayoutEditor.groupFocus(that.getGIndexByName(groupId));
 									}
 								_tabSwitchTimeout = setTimeout(tabOvrCallback,1500);
 							});

@@ -30,15 +30,10 @@
 					<div class="body">
 						<div class="tab-wrapper">
 							<ul id="modal-tab-list" class="tab-list">
-								<li id="group-1-tab" class="tab selected">Group 1</li>
 							</ul>
 							<div id="add-group-btn" class="add-group-btn"></div>
 						</div>
 						<div id="modal-content-wrapper" class="content-wrapper">
-							<div id="group-1-content" class="tab-content">
-								<ul id="group-1-field-list" style="margin: 10px 5px 5px 5px; width: 90%; height: 90%; float: left; border: 1px solid #EDEDED;">
-								</ul>
-							</div>
 						</div>
 					</div>
 				</div>

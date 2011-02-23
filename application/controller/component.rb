@@ -106,7 +106,7 @@ remove if below is right
         ]
 
       field_defs_json = JSON.generate(field_defs);
-      layout_def_json = JSON.generate(layout_def);
+      layout_def_json = JSON.generate(layout_def[0]);
       run_javascript("R8.LayoutEditor.init(#{layout_def_json},#{field_defs_json});")
 
       return {

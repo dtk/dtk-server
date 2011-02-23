@@ -13,6 +13,7 @@ if (!R8.Detailview) {
 
 			_viewportRegion = null,
 			_events = {},
+			_focusedIndex = 'details',
 			_contentList = {
 				'details': {
 					'loaded': true,
@@ -68,6 +69,12 @@ if (!R8.Detailview) {
 					},
 					getRoute: function(item_id) {
 						return this.route+'/'+item_id
+					},
+					blur: function() {
+						var layoutEditorNode = R8.Utils.Y.one('#layout-editor');
+						layoutEditorNode.purge(true);
+						layoutEditorNode.remove();
+						R8.LayoutEditor.reset();
 					}
 				}
 			};
@@ -136,6 +143,9 @@ if (!R8.Detailview) {
 				}
 				R8.Utils.Y.one('#'+selectedCat+'-details-cat').addClass('selected');
 				R8.Utils.Y.one('#'+selectedCat+'-content').setStyle('display','block');
+
+				if(typeof(_contentList[_focusedIndex].blur) != 'undefined') _contentList[_focusedIndex].blur();
+				_focusedIndex = selectedCat;
 
 				if(_contentList[selectedCat].loaded != true) {
 					var params = {

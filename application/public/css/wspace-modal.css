@@ -87,7 +87,7 @@
 	margin: 0 10px 5px 10px;
 	position: relative;
 	float: left;
-	overflow-y: scroll;
+	overflow-y: auto;
 	overflow-x: hidden;
 
 	border: 0px;

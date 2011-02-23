@@ -55,6 +55,12 @@ if(!R8.LayoutEditor) {
 
 				this.setupDD();
 			},
+			reset: function() {
+				_groupListNode = null;
+				_addGroupNode = null;
+				_contentWrapperNode = null;
+				_events = {};
+			},
 			fieldInLayout: function(fieldName) {
 				for(var gId in _layoutDef.groups) {
 					var fieldList = _layoutDef.groups[gId].fields;

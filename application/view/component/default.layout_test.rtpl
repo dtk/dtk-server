@@ -1,6 +1,6 @@
 
 
-<div style="height: inherit; width: inherit;">
+<div id="layout-editor" style="height: inherit; width: inherit;">
 	<div id="editor-header" style="height: 40px; width: 100%"></div>
 	<div id="editor-wrapper" style="height: 310px; width: 100%;">
 		<div id="editor-fields" style="width: 200px; height: inherit; float: left;">

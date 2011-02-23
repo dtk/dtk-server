@@ -1,5 +1,6 @@
 module XYZ
-  class ModelDefProcessor
+  module ComponentModelDefProcessor
+  module ModelDefProcessor
     extend R8Tpl::Utility::I18n
     def self.get(id_handle,opts={})
       cmp_attrs_objs = id_handle.create_object().get_component_with_attributes_unraveled()
@@ -52,4 +53,5 @@ module XYZ
       end
     end
   end
+end
 end

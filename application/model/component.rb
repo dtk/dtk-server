@@ -1,5 +1,7 @@
+require  File.expand_path('component_model_def_processor', File.dirname(__FILE__))
 module XYZ
   class Component < Model
+    include ComponentModelDefProcessor
     set_relation_name(:component,:component)
     class << self
       def up()

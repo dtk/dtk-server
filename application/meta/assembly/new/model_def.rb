@@ -1,6 +1,6 @@
 {
   :virtual_columns=>{
-    :assembly_unravel_attributes=> {
+    :node_assembly_attributes=> {
       :type=>:json,
       :hidden=>true,
       :remote_dependencies=>
@@ -20,9 +20,8 @@
        {
          :model_name=>:attribute,
          :join_type=>:left_outer,
-         :filter => [:and,[:eq, :hidden, false]],
          :join_cond=>{:component_component_id=>:sub_component__id},
-         :cols=>[:id,:display_name,:attribute_value,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
+         :cols => [:id,:display_name,:hidden,:description,:component_component_id,:attribute_value,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
        }]
     },
     :nodes=> {

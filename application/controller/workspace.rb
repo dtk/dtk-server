@@ -143,7 +143,7 @@ pp [:debug_stored_new_pos,get_objects(model_name,SQL.in(:id,model_items.map{|ite
 =end
 ###### end ###TODO: test for get_model_def on assemblies
 
-###TODO: test for get_field_def on assemblies
+###TODO: test for get_field_def on base components
 =begin
       model_list.map do |obj|
         if obj.is_base_component?()
@@ -151,6 +151,15 @@ pp [:debug_stored_new_pos,get_objects(model_name,SQL.in(:id,model_items.map{|ite
         end
       end
 =end
+###TODO: test for get_field_def on assemblies
+#=begin
+      model_list.map do |obj_x|
+        if obj_x.is_assembly?()
+          obj = Assembly.new(obj_x,obj_x.c,:component,obj_x.id_handle)
+          pp [:get_field_def,obj.id(),obj[:display_name],obj.get_field_def()]
+        end
+      end
+#=end
 ###### end ###TODO: test for get_field_def on assemblies
 
       i18n = get_i18n_mappings_for_models(model_name.to_sym)

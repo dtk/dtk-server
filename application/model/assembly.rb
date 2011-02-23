@@ -4,26 +4,23 @@ module XYZ
     def is_assembly?()
       true
     end
+    def assembly_type()
+      #TODO: stub; may use basic_type to distinguish between component and node assemblies
+      :node
+    end
     def is_base_component?()
       nil
     end
-
-    def get_attributes_unraveled()
-      rows = get_objects_from_sp_hash(:columns => [:assembly_unravel_attributes])
-pp [:unraveld_assembly_rows,rows]
-=begin
-      flattened_attr_list = AttributeComplexType.flatten_attribute_list(raw_attributes)
-      i18n = get_i18n_mappings_for_models(:attribute)
-      flattened_attr_list.map do |a|
-        name = a[:display_name]
-        {
-          :id => a[:unraveled_attribute_id],
-          :name =>  name,
-          :value => a[:attribute_value],
-          :i18n => i18n_string(i18n,:attribute,name)
-        }
-      end
-=end
+    def get_component_with_attributes_unraveled(attr_filters={:hidden => true})
+      attr_vc = "#{assembly_type()}_assembly_attributes".to_sym
+      sp_hash = {:columns => [:id,:display_name,attr_vc]}
+      component_and_attrs = get_objects_from_sp_hash(sp_hash)
+      return nil if component_and_attrs.empty?
+      component = component_and_attrs.first.subset(:id,:display_name,:component_type,:basic_type)
+      #if component_and_attrs.first[attr_vc] null there shoudl only be one element in component_and_attrs
+      return component.merge(:attributes => Array.new) unless component_and_attrs.first[attr_vc]
+      filtered_attrs = component_and_attrs.map{|r|r[attr_vc] unless attribute_is_filtered?(r[attr_vc],attr_filters)}.compact
+      component.merge(:attributes => AttributeComplexType.flatten_attribute_list(filtered_attrs))
     end
   end
 end

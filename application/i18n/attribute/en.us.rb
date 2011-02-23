@@ -29,6 +29,10 @@
   :sap_config__db__name => "DB Name",
   :sap_config__db__owner => "DB User",
   :sap_config__db__password => "DB User Password",
+#TODO: for below should be way to parse with wild card 
+  :sap_config__db__admin__name => "Admin DB Name",
+  :sap_config__db__admin__owner => "DB Admin User",
+  :sap_config__db__admin__password => "DB Admin Password",
 
 #TODO: temp until finding normal local for all attribute labels
 #JMX related

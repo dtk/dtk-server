@@ -319,6 +319,7 @@ module XYZ
       component.merge(:attributes => AttributeComplexType.flatten_attribute_list(filtered_attrs))
     end
    private
+    #only filters if value is known
     def attribute_is_filtered?(attribute,attr_filters)
       return false if attr_filters.empty?
       attr_filters.each{|k,v|return true if attribute[k] == v}

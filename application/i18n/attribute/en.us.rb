@@ -21,14 +21,14 @@
   :sap_config__l4 => 'SAP Config IPV4',
   :sap__socket => 'SAP Socket',
   :sap_ref__l4 => 'Input Conn',
-  :sap_config__l4__port => "port",
-  :sap_config__l4__protocol => "protocol",
-  :sap_ref__l4__port => "port",
-  :sap_ref__l4__protocol => "protocol",
-  :sap_ref__l4__host_address => "host addr",
-  :sap_config__db__name => "db name",
-  :sap_config__db__owner => "db owner",
-  :sap_config__db__password => "db password",
+  :sap_config__l4__port => "Port",
+  :sap_config__l4__protocol => "Protocol",
+  :sap_ref__l4__port => "Port",
+  :sap_ref__l4__protocol => "Protocol",
+  :sap_ref__l4__host_address => "Host Addr",
+  :sap_config__db__name => "DB Name",
+  :sap_config__db__owner => "DB User",
+  :sap_config__db__password => "DB User Password",
 
 #TODO: temp until finding normal local for all attribute labels
 #JMX related

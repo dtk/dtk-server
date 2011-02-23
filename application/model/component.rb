@@ -30,7 +30,7 @@ module XYZ
            :join_type => :left_outer,
            :convert => true,
            :join_cond=>{:component_component_id => q(:component,:id)}, #TODO: want to use p(:component,:attribute) on left hand side
-           :cols => [:id,:display_name,:description,:component_component_id,:attribute_value,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
+           :cols => [:id,:display_name,:hidden,:description,:component_component_id,:attribute_value,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
          }
         ]
         virtual_column :attributes_view_def_info, :type => :json, :hidden => true, 
@@ -308,15 +308,24 @@ module XYZ
    public
 
     ### object processing and access functions
-    def get_component_with_attributes_unraveled()
+    def get_component_with_attributes_unraveled(attr_filters={:hidden => true})
       sp_hash = {:columns => [:id,:display_name,:component_type,:basic_type,:attributes]}
       component_and_attrs = get_objects_from_sp_hash(sp_hash)
       return nil if component_and_attrs.empty?
       component = component_and_attrs.first.subset(:id,:display_name,:component_type,:basic_type)
       #if component_and_attrs.first[:attribute] null there shoudl only be one element in component_and_attrs
       return component.merge(:attributes => Array.new) unless component_and_attrs.first[:attribute]
-      component.merge(:attributes => AttributeComplexType.flatten_attribute_list(component_and_attrs.map{|r|r[:attribute]}))
+      filtered_attrs = component_and_attrs.map{|r|r[:attribute] unless attribute_is_filtered?(r[:attribute],attr_filters)}.compact
+      component.merge(:attributes => AttributeComplexType.flatten_attribute_list(filtered_attrs))
     end
+   private
+    def attribute_is_filtered?(attribute,attr_filters)
+      return false if attr_filters.empty?
+      attr_filters.each{|k,v|return true if attribute[k] == v}
+      false
+    end
+
+   public
 
     def get_info_for_view_def()
       sp_hash = {:columns => [:id,:display_name,:component_type,:basic_type,:attributes_view_def_info]}

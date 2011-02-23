@@ -1,12 +1,17 @@
 module XYZ
   module ComponentModelDefProcessor
-  module ModelDefProcessor
-    extend R8Tpl::Utility::I18n
-    def self.get(id_handle,opts={})
-      cmp_attrs_objs = id_handle.create_object().get_component_with_attributes_unraveled()
-      convert_to_model_def_form(cmp_attrs_objs)
+    def get_model_def(attr_filters={:hidden => true})
+      cmp_attrs_objs = get_component_with_attributes_unraveled(attr_filters)
+      ModelDefProcessorInternals.convert_to_model_def_form(cmp_attrs_objs)
     end
-    private 
+
+    def get_field_def(attr_filters={:hidden => true})
+      get_model_def(attr_filters)[:columns]
+    end
+
+  module ModelDefProcessorInternals
+    extend R8Tpl::Utility::I18n
+
     def self.convert_to_model_def_form(cmp_attrs_objs)
       i18n = get_i18n_mappings_for_models(:attribute)
       component_type = cmp_attrs_objs[:component_type] 
@@ -21,6 +26,7 @@ module XYZ
       end
       ret
     end
+   private
     ComponentMappings =
       [
        {:component_type => :model_name},

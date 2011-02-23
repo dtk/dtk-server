@@ -205,15 +205,6 @@ module XYZ
       row[:node_node_id]||(row[:parent_component]||{})[:node_node_id]
     end
 
-    def get_model_def()
-      return Hash.new unless is_base_component?()
-      ModelDefProcessor.get(id_handle())
-    end
-
-    def get_field_def()
-      get_model_def()[:columns]
-    end
-
     ####################
     def save_view_in_cache?(type,user_context)
       ViewDefProcessor.save_view_in_cache?(type,id_handle(),user_context)
@@ -315,14 +306,13 @@ module XYZ
       component_and_attrs = get_objects_from_sp_hash(sp_hash)
       return nil if component_and_attrs.empty?
       component = component_and_attrs.first.subset(:id,:display_name,:component_type,:basic_type)
-      #if component_and_attrs.first[:attribute] null there shoudl only be one element in component_and_attrs
-      return component.merge(:attributes => Array.new) unless component_and_attrs.first[:attribute]
       filtered_attrs = component_and_attrs.map{|r|r[:attribute] unless attribute_is_filtered?(r[:attribute],attr_filters)}.compact
       component.merge(:attributes => AttributeComplexType.flatten_attribute_list(filtered_attrs))
     end
    private
     #only filters if value is known
     def attribute_is_filtered?(attribute,attr_filters)
+      return false if attribute.nil?
       return false if attr_filters.empty?
       attr_filters.each{|k,v|return true if attribute[k] == v}
       false

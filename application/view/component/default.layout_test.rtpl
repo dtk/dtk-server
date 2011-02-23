@@ -8,7 +8,7 @@
 			<ul id="available-fields" style="margin: 5px; width: 200px; height: 275px; overflow-y: scroll; float: left;">
 			{%for field in field_def_list%}
 				<li id="{%=field[:name]%}" style="height: 20px; width: 140px; margin: 3px; padding: 3px; border: 1px solid #999999;">
-					<span style="">{%=field[:name]%}</span>
+					<span style="">{%=field[:i18n]%}</span>
 				</li>
 			{%end%}
 			</ul>

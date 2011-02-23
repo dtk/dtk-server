@@ -132,7 +132,7 @@ if(!R8.LayoutEditor) {
 
 						//Are we dropping on a li node?
 //						if (drop.get('tagName').toLowerCase() === 'li' && drop.get('parentNode').get('id') != 'available-fields') {
-						if (drop.get('tagName').toLowerCase() === 'li' && drop.get('parentNode').get('id') != 'layout-tab-list') {
+						if (drop.get('tagName').toLowerCase() === 'li' && drop.get('parentNode').get('id') != 'modal-tab-list') {
 							//Are we not going up?
 							if (!goingUp) {
 								drop = drop.get('nextSibling');
@@ -155,10 +155,10 @@ if(!R8.LayoutEditor) {
 							}
 						}
 
-						var groupTabList = Y.Node.all('#layout-tab-list .tab');
+						var groupTabList = Y.Node.all('#modal-tab-list .tab');
 						groupTabList.each(function(gt,i){
 //TODO: remove after refactoring plus btn out of <ul>
-							if(gt.get('id') == 'add-tab' || gt.hasClass('yui3-dd-drop')) return;
+							if(gt.hasClass('yui3-dd-drop')) return;
 							var dObj = new Y.DD.Drop({
 								node: gt,
 								groups:['group-switch']
@@ -202,6 +202,10 @@ if(!R8.LayoutEditor) {
 							borderColor: drag.get('node').getStyle('borderColor'),
 							backgroundColor: drag.get('node').getStyle('backgroundColor')
 						});
+					});
+
+					Y.DD.DDM.on('drop:exit',function(e){
+						Y.DD.DDM.syncActiveShims(true);
 					});
 
 					Y.DD.DDM.on('drag:end', function(e) {

@@ -75,7 +75,8 @@ pp field_defs
       include_css('layout-editor')
       include_css('wspace-modal')
       include_js('layout.editor.r8')
-
+=begin
+remove if below is right
       layout_def = {
         :id => 'foo',
         :name => 'New Layout',
@@ -87,6 +88,22 @@ pp field_defs
           }
         }
       }
+=end
+
+      layout_def = 
+        [{
+           :id => 'foo',
+           :name => 'New Layout',
+           :groups => 
+           [{
+             :name => 'group-1',
+              :num_cols =>1,
+              :i18n => 'Group 1',
+              :fields =>[]
+            }]
+         },
+         #...earlier ones (if they exist)
+        ]
 
       field_defs_json = JSON.generate(field_defs);
       layout_def_json = JSON.generate(layout_def);

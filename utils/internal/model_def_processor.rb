@@ -8,11 +8,10 @@ module XYZ
     def self.convert_to_model_def_form(cmp_attrs_objs)
       ret = Aux::ordered_hash_subset(cmp_attrs_objs,ComponentMappings){|v|v.kind_of?(String) ? v.to_sym : v}
 
-      ret[:columns] = cmp_attrs_objs[:attributes].inject({}) do |h,col_info|
-        converted_col_info = Aux::ordered_hash_subset(col_info,ColumnMappings) do |k,v|
+      ret[:columns] = cmp_attrs_objs[:attributes].map do |col_info|
+        Aux::ordered_hash_subset(col_info,ColumnMappings,:include_virtual_columns => true) do |k,v|
           convert_value_if_needed(k,v,col_info)
         end
-        h.merge(col_info[:display_name].to_sym => converted_col_info)
       end
       ret
     end
@@ -23,20 +22,19 @@ module XYZ
       ]
     ColumnMappings = 
       [
+       {:display_name => :name},
+       {:unraveled_attribute_id => :id},
        {:data_type => :type},
        {:attribute_value => :default},
-       :size,
        :required,
        :dynamic,
-       :cannot_change,
-       #TODO: not for unraveled :semantic_type_summary,
-       #TODO: not for :semantic_type
+       :cannot_change
       ]
   
     def self.convert_value_if_needed(k,v,col_info)
       case k
         when :type then v.to_sym
-        when :default then type_convert_value(v,col_info[:data_type]) #data_type not tupe because cold_info not converted
+        when :default then type_convert_value(v,col_info[:data_type]) 
         else v
       end
     end

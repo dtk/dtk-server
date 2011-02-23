@@ -15,17 +15,17 @@ module XYZ
       end
 
       #key can be symbol or of form {symbol => symbol} 
-      def hash_subset(hash,keys,&block)
-        hash_subset_aux(Hash.new(),hash,keys,&block)
+      def hash_subset(hash,keys,opts={},&block)
+        hash_subset_aux(Hash.new(),hash,keys,opts,&block)
       end
-      def ordered_hash_subset(hash,keys,&block)
-        hash_subset_aux(ActiveSupport::OrderedHash.new(),hash,keys,&block)
+      def ordered_hash_subset(hash,keys,opts={},&block)
+        hash_subset_aux(ActiveSupport::OrderedHash.new(),hash,keys,opts,&block)
       end
      private
-      def hash_subset_aux(seed,hash,keys,&block)
+      def hash_subset_aux(seed,hash,keys,opts={},&block)
         keys.inject(seed) do |ret,k|
           index = k.kind_of?(Hash) ? k.keys.first : k
-          unless hash.has_key?(index)
+          unless hash.has_key?(index) or opts[:include_virtual_columns]
             ret
           else
             key = k.kind_of?(Hash) ? k.values.first : k

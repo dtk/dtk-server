@@ -209,15 +209,7 @@ module XYZ
     end
 
     def get_field_def()
-      def_list = get_model_def()[:columns]
-
-      field_defs = []
-      def_list.map do |field,def_item|
-        def_item[:name] = field
-        field_defs << def_item
-      end
-
-      field_defs
+      get_model_def()[:columns]
     end
 
     ####################

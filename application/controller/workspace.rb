@@ -147,12 +147,16 @@ pp [:debug_stored_new_pos,get_objects(model_name,SQL.in(:id,model_items.map{|ite
 =begin
       model_list.map do |obj|
         if obj.is_base_component?()
-          pp [:get_field_def,obj.id(),obj[:display_name],obj.get_field_def()]
+          model_handle = nil
+          fd = Layout.create_and_save_from_field_def(model_handle,obj.get_field_def(),:edit)
+          puts "==============================================="
+          pp [:get_field_def,obj.id(),obj[:display_name],fd]
+
         end
       end
 =end
 ###TODO: test for get_field_def on assemblies
-#=begin
+=begin
       model_list.map do |obj_x|
         if obj_x.is_assembly?()
           obj = Assembly.new(obj_x,obj_x.c,:component,obj_x.id_handle)
@@ -162,7 +166,7 @@ pp [:debug_stored_new_pos,get_objects(model_name,SQL.in(:id,model_items.map{|ite
           pp [:get_field_def,obj.id(),obj[:display_name],fd]
         end
       end
-#=end
+=end
 ###### end ###TODO: test for get_field_def on assemblies
 
       i18n = get_i18n_mappings_for_models(model_name.to_sym)

@@ -16,11 +16,21 @@ module XYZ
       sp_hash = {:columns => [:id,:display_name,:component_type,:basic_type,attr_vc]}
       component_and_attrs = get_objects_from_sp_hash(sp_hash)
       return nil if component_and_attrs.empty?
+      sample = component_and_attrs.first
       #TODO: hack until basic_type is populated
-      #component = component_and_attrs.first.subset(:id,:display_name,:component_type,:basic_type)
-      component = component_and_attrs.first.subset(:id,:display_name,:component_type).merge(:basic_type => "#{assembly_type()}_assembly")
-      filtered_attrs = component_and_attrs.map{|r|r[:attribute] unless attribute_is_filtered?(r[:attribute],attr_filters)}.compact
-      component.merge(:attributes => AttributeComplexType.flatten_attribute_list(filtered_attrs))
+      #component = sample.subset(:id,:display_name,:component_type,:basic_type)
+      component = sample.subset(:id,:display_name,:component_type).merge(:basic_type => "#{assembly_type()}_assembly")
+      node_attrs = {:node_id => sample[:node][:id], :node_name => sample[:node][:display_name]} 
+      filtered_attrs = component_and_attrs.map do |r|
+        attr = r[:attribute]
+        if attr and not attribute_is_filtered?(attr,attr_filters)
+          cmp = r[:sub_component]
+          cmp_attrs = {:component_type => cmp[:component_type],:component_name => cmp[:display_name]}
+          attr.merge(node_attrs).merge(cmp_attrs)
+        end
+      end.compact
+      attributes = AttributeComplexType.flatten_attribute_list(filtered_attrs)
+      component.merge(:attributes => attributes)
     end
   end
 end

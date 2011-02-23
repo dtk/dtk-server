@@ -318,7 +318,7 @@ module XYZ
       component_and_attrs = get_objects_from_sp_hash(sp_hash)
       return nil if component_and_attrs.empty?
       component = component_and_attrs.first.subset(:id,:display_name,:component_type,:basic_type)
-      component_attrs = {:component_type => component[:component_type]}
+      component_attrs = {:component_type => component[:component_type],:component_name => component[:display_name]}
       filtered_attrs = component_and_attrs.map do |r|
         attr = r[:attribute]
         attr.merge(component_attrs) if attr and not attribute_is_filtered?(attr,attr_filters)

@@ -13,13 +13,15 @@ module XYZ
     extend R8Tpl::Utility::I18n
 
     def self.convert_to_model_def_form(cmp_attrs_objs)
-      i18n = get_i18n_mappings_for_models(:attribute)
+      i18n = get_i18n_mappings_for_models(:attribute,:component)
       component_type = cmp_attrs_objs[:component_type] 
       ret = Aux::ordered_hash_subset(cmp_attrs_objs,ComponentMappings){|v|v.kind_of?(String) ? v.to_sym : v}
 
       ret[:columns] = cmp_attrs_objs[:attributes].map do |col_info|
-        i18n_string = i18n_string(i18n,:attribute,col_info[:display_name],component_type)
-        opts = {:include_virtual_columns => true,:seed => {:i18n => i18n_string}}
+        i18n_attr = i18n_string(i18n,:attribute,col_info[:display_name],component_type)
+        i18n_component = i18n_string(i18n,:component,col_info[:component_name])
+        seed = {:i18n => i18n_attr, :component_i18n => i18n_component}
+        opts = {:include_virtual_columns => true,:seed => seed}
         Aux::ordered_hash_subset(col_info,ColumnMappings,opts) do |k,v|
           convert_value_if_needed(k,v,col_info)
         end
@@ -34,6 +36,8 @@ module XYZ
       ]
     ColumnMappings = 
       [
+       :node_id,
+       :node_name,
        :component_type,
        {:component_component_id => :component_id},
        {:display_name => :name},

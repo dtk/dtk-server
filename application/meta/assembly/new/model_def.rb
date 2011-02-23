@@ -15,7 +15,7 @@
          :alias=>:sub_component,
          :join_type=>:inner,
          :join_cond=>{:node_node_id=>:node__id},
-         :cols=>[:id,:display_name]
+         :cols=>[:id,:display_name,:component_type]
        },
        {
          :model_name=>:attribute,

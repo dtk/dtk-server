@@ -8,15 +8,9 @@
       :on_delete=>:set_null,
       :on_update=>:set_null
     },
-    :model_id=> {
-      :type=>:bigint
-    },
-    :model_parent=> {
+    :type => {
       :type=>:text,
-      :length=>50
-    },
-    :model_id=> {
-      :type=>:bigint
+      :length=>20
     },
     :def=> {
       :type=>:json
@@ -24,7 +18,7 @@
   },
   :one_to_many=>
   [
-   :node,
+   #TODO put in when used  :node,
    :component
   ],
   :virtual_columns=>{

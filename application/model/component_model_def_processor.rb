@@ -34,6 +34,8 @@ module XYZ
       ]
     ColumnMappings = 
       [
+       :component_type,
+       {:component_component_id => :component_id},
        {:display_name => :name},
        {:unraveled_attribute_id => :id},
        :description,

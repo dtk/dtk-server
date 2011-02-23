@@ -19,7 +19,7 @@ module XYZ
         foreign_key :assembly_id, :component, FK_SET_NULL_OPT
         column :view_def_ref, :varchar
         many_to_one :component, :library, :node, :node_group, :datacenter
-        one_to_many :component, :attribute_link, :attribute, :monitoring_item, :constraints
+        one_to_many :component, :attribute_link, :attribute, :monitoring_item, :constraints, :layout
         virtual_column :parent_name, :possible_parents => [:component,:library,:node,:node_group]
 
         virtual_column :view_def_key, :type => :varchar, :hidden => true, :local_dependencies => [:id,:view_def_ref,:component_type] 
@@ -172,6 +172,18 @@ module XYZ
              :cols => [:id,:display_name]
            }
           ]
+
+        
+        virtual_column :layouts, :type => :json, :hidden => true,
+        :remote_dependencies =>
+          [{
+             :model_name => :layout,
+             :convert => true,
+             :join_type => :inner,
+             :join_cond=>{:component_component_id => q(:component,:id)},
+             :cols => [:id,:display_name,id(:component),:def,:type,:updated_at]
+           }]
+
         set_submodel(:assembly)
       end
     end
@@ -306,13 +318,17 @@ module XYZ
       component_and_attrs = get_objects_from_sp_hash(sp_hash)
       return nil if component_and_attrs.empty?
       component = component_and_attrs.first.subset(:id,:display_name,:component_type,:basic_type)
-      filtered_attrs = component_and_attrs.map{|r|r[:attribute] unless attribute_is_filtered?(r[:attribute],attr_filters)}.compact
-      component.merge(:attributes => AttributeComplexType.flatten_attribute_list(filtered_attrs))
+      component_attrs = {:component_type => component[:component_type]}
+      filtered_attrs = component_and_attrs.map do |r|
+        attr = r[:attribute]
+        attr.merge(component_attrs) if attr and not attribute_is_filtered?(attr,attr_filters)
+      end.compact
+      attributes = AttributeComplexType.flatten_attribute_list(filtered_attrs)
+      component.merge(:attributes => attributes)
     end
    private
     #only filters if value is known
     def attribute_is_filtered?(attribute,attr_filters)
-      return false if attribute.nil?
       return false if attr_filters.empty?
       attr_filters.each{|k,v|return true if attribute[k] == v}
       false

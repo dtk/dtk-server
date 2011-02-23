@@ -146,9 +146,10 @@ if(!R8.LayoutEditor) {
 				var groupIndex = _groupListNode.get('children').size();
 				var id = (typeof(id) == 'undefined') ? 'group-'+groupIndex : id;
 				var contentTpl = '<div id="'+id+'-content" class="tab-content">\
-									<ul id="'+id+'-field-list" style="margin: 5px; width: 200px; height: 200px; float: left; border: 1px solid black;">\
+									<ul id="'+id+'-field-list" style="margin: 10px 5px 5px 5px; width: 90%; height: 90%; float: left; border: 1px solid #EDEDED;">\
 									</ul>\
 								  </div>';
+//									<ul id="'+id+'-field-list" style="margin: 5px; width: 200px; height: 200px; float: left; border: 1px solid black;">\
 
 				return contentTpl;
 			},
@@ -167,6 +168,8 @@ if(!R8.LayoutEditor) {
 						//Are we dropping on a li node?
 //						if (drop.get('tagName').toLowerCase() === 'li' && drop.get('parentNode').get('id') != 'available-fields') {
 						if (drop.get('tagName').toLowerCase() === 'li' && drop.get('parentNode').get('id') != 'modal-tab-list') {
+							var dropParent = drop.get('parentNode');
+							if(dropParent.get('id') != 'available-fields') dropParent.setStyle('border','1px dashed #0000CC');
 							//Are we not going up?
 							if (!goingUp) {
 								drop = drop.get('nextSibling');
@@ -175,6 +178,8 @@ if(!R8.LayoutEditor) {
 							e.drop.get('node').get('parentNode').insertBefore(drag, drop);
 							//Resize this nodes shim, so we can drop on it later.
 							e.drop.sizeShim();
+						} else if(drop.get('id') != 'available-fields' && !drop.hasClass('tab')) {
+							drop.setStyle('border','1px dashed #0000CC');
 						}
 					});
 
@@ -239,6 +244,8 @@ if(!R8.LayoutEditor) {
 					});
 
 					Y.DD.DDM.on('drop:exit',function(e){
+						var drop = e.target.get('node');
+						if(!drop.hasClass('tab') && drop.get('tagName').toLowerCase() !== 'li') drop.setStyle('border','1px solid #EDEDED');
 						Y.DD.DDM.syncActiveShims(true);
 					});
 
@@ -260,6 +267,7 @@ if(!R8.LayoutEditor) {
 
 						//if we are not on an li, we must have been dropped on a ul
 						if (drop.get('tagName').toLowerCase() !== 'li') {
+							if(drop.get('id') != 'available-fields') drop.setStyle('border','1px solid #EDEDED');
 							if (!drop.contains(drag)) {
 								drop.appendChild(drag);
 							}

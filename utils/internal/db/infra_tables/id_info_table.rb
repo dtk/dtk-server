@@ -60,11 +60,9 @@ module XYZ
 
     def create_object(opts={})
       model_name =
-        if opts.empty? #short circuit
-          self[:model_name]
-        elsif opts[:model_name]
+        if opts[:model_name]
           opts[:model_name]
-        elsif opts[:find_subtype]
+        elsif not opts[:donot_find_subtype]
           Model.find_subtype_model_name(self)
         else
           self[:model_name]

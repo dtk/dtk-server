@@ -61,12 +61,8 @@ pp component
     end
 
     def layout_test(id)
-      #component = create_object_from_id(id,:component)
-      component = id_handle(id,:component).create_object(:find_subtype => true)
+      component = create_object_from_id(id,:component)
       field_defs = component.get_field_def()
-
-##pp '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
-##pp field_defs
 
       tpl = R8Tpl::TemplateR8.new("component/layout_test",user_context())
       _model_var = {:i18n => get_model_i18n(model_name().to_s,user_context())}
@@ -76,33 +72,8 @@ pp component
       include_css('layout-editor')
       include_css('wspace-modal')
       include_js('layout.editor.r8')
-=begin
-      layout_def = 
-        [{
-           :id => 'foo',
-           :name => 'New Layout',
-           :groups => 
-           [{
-             :name => 'group-1',
-              :num_cols =>1,
-              :i18n => 'Group 1',
-              :fields =>[
-               {:i18n=>"keys__auth",
-                :name=>"keys__auth",
-                :id=>"a__2147483670",
-                :description=>"Wordpress auth key.",
-                :type=>:string,
-                :default=>nil,
-                :required=>false,
-                :read_only=>false,
-                :cannot_change=>false}
-              ]
-            }]
-         },
-         #...earlier ones (if they exist)
-        ]
-=end
-      layout_list = create_object_from_id(id).get_layouts(:edit)
+
+      layout_list = component.get_layouts(:edit)
 pp [:layout_def,layout_list]
 
       field_defs_json = JSON.generate(field_defs)

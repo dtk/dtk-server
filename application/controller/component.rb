@@ -61,7 +61,8 @@ pp component
     end
 
     def layout_test(id)
-      component = create_object_from_id(id,:component)
+      #component = create_object_from_id(id,:component)
+      component = id_handle(id,:component).create_object(:find_subtype => true)
       field_defs = component.get_field_def()
 
 ##pp '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'

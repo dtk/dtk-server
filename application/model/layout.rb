@@ -1,13 +1,23 @@
 #TODO: unify with view_def_processor
 module XYZ
   class Layout < Model
-    def self.create_and_save_from_field_def(model_handle,field_def,view_type)
+    def self.create_and_save_from_field_def(parent_id_handle,field_def,view_type)
       layout_def = 
         case view_type
           when :edit then LayoutViewDefProcessor.layout_def_from_field_def__edit(field_def)
+        else raise Error.new("type #{view_type} is unexpected")
        end
-      #TODO: stub
-      {:groups => layout_def}
+
+      name = "foo" #TODO: stub
+      hash = {
+        :display_name => name,
+        :type => view_type.to_s,
+        :def => {:groups => layout_def}
+      }
+      create_hash = {:layout => {name => hash}}
+
+      new_id = create_from_hash(parent_id_handle,create_hash).map{|x|x[:id]}.first
+      new_id
     end
    private
     module LayoutViewDefProcessor
@@ -39,14 +49,13 @@ module XYZ
       end
       
       def self.field_list__edit(el)
-        {el[:name].to_sym => {
-            :type => convert_type(el[:type]),
-            :help => el[:description] || '',
-            :rows => 1,
-            :cols => 40,
-            :id => "{%=component_id[:#{el[:name]}]%}",
-            :override_name => "{%=component_id[:#{el[:name]}]%}"
-          }
+        {:name => el[:name],
+          :type => convert_type(el[:type]),
+          :help => el[:description] || '',
+          :rows => 1,
+          :cols => 40,
+          :id => "{%=component_id[:#{el[:name]}]%}",
+          :override_name => "{%=component_id[:#{el[:name]}]%}"
         }
       end
       def self.convert_type(data_type)

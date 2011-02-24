@@ -335,6 +335,19 @@ module XYZ
     end
 
    public
+    def get_layouts(view_type)
+      from_db = get_layouts_from_db(view_type)
+      return from_db unless from_db.empty?
+      Layout.create_and_save_from_field_def(id_handle(),get_field_def(),view_type)
+      get_layouts_from_db(view_type)
+    end
+
+   protected
+    def get_layouts_from_db(view_type)
+      unprocessed_rows = get_objects_col_from_sp_hash({:columns => [:layouts]},:layout)
+      unprocessed_rows.select{|l|l[:type] == view_type.to_s}.sort{|a,b|b[:updated_at] <=> a[:updated_at]}
+    end
+   public
 
     def get_info_for_view_def()
       sp_hash = {:columns => [:id,:display_name,:component_type,:basic_type,:attributes_view_def_info]}

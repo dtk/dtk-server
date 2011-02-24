@@ -64,8 +64,8 @@ pp component
       component = create_object_from_id(id,:component)
       field_defs = component.get_field_def()
 
-pp '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
-pp field_defs
+##pp '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
+##pp field_defs
 
       tpl = R8Tpl::TemplateR8.new("component/layout_test",user_context())
       _model_var = {:i18n => get_model_i18n(model_name().to_s,user_context())}
@@ -76,20 +76,6 @@ pp field_defs
       include_css('wspace-modal')
       include_js('layout.editor.r8')
 =begin
-remove if below is right
-      layout_def = {
-        :id => 'foo',
-        :name => 'New Layout',
-        :groups => {
-          'group-1' => {
-            :nul_cols =>1,
-            :i18n => 'Group 1',
-            :fields =>[]
-          }
-        }
-      }
-=end
-
       layout_def = 
         [{
            :id => 'foo',
@@ -114,7 +100,9 @@ remove if below is right
          },
          #...earlier ones (if they exist)
         ]
-
+=end
+      layout_def = create_object_from_id(id).get_layouts(:edit)
+pp [:layout_def,layout_def]
       field_defs_json = JSON.generate(field_defs);
       layout_def_json = JSON.generate(layout_def[0]);
       run_javascript("R8.LayoutEditor.init(#{layout_def_json},#{field_defs_json});")

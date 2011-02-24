@@ -16,7 +16,7 @@
       :type=>:json
     }
   },
-  :one_to_many=>
+  :many_to_one=>
   [
    #TODO put in when used  :node,
    :component

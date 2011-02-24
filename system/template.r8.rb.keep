@@ -8,23 +8,6 @@ module R8Tpl
   class TemplateR8 
     include CommonMixin
 
-    #TODO: will refactor to this fn
-    def self.create(model_name,view_name,user,virtual_model_ref=nil,source=:cache)
-      self.new(nil,nil,nil,model_name,view_name,user,virtual_model_ref,source)
-    end
-
-    def new_initialize(model_name,view_name,user,virtual_model_ref=nil,source=:cache)
-      @user = user
-      @profile = @user.current_profile
-      @model_name = model_name
-      @view_name = view_name
-      @virtual_model_ref = virtual_model_ref
-
-      initialize_vars()
-
-      set_view(source)
-    end
-
     START_TAG_REGEX = /\{%\s*/
     #  END_TAG_REGEX = /\s*.*%\}/
     #TODO: revisit when implementing if and iterators
@@ -39,9 +22,7 @@ module R8Tpl
       :js_templating_on,
       :root_js_element_var_name,:root_js_hash,:loop_vars,:ctrl_vars,:js_var_header
 
-      
-    def initialize(view_path,user,path_type=nil,*args)
-      return new_initialize(*args) unless args.empty?
+    def initialize(view_path,user,path_type=nil)
       @user = user
       @profile = @user.current_profile
 
@@ -68,13 +49,6 @@ module R8Tpl
         @view_name = vp_parts.first
       end
 
-      initialize_vars()
-
-      #TODO: think of better terminology then path_type
-       set_view(path_type)
-    end
-
-    def initialize_vars()
       @view_path = nil
 
       @js_var_header = 'tpl_vars'
@@ -119,8 +93,10 @@ module R8Tpl
 
       (R8::Config[:js_templating_on].nil?) ? @js_templating_on = true : @js_templating_on = R8::Config[:js_templating_on]
 
-    end
 
+        #TODO: think of better terminology then path_type
+       set_view(path_type)
+    end
 
     def js_templating_on?
       return @js_templating_on

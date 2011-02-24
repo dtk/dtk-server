@@ -2,8 +2,8 @@ module R8Tpl
   module CommonMixin
     
     #temp until deprecate @saved_search_ref
-    def virtual_model_ref()
-      @virtual_model_ref || @saved_search_ref
+    def virtual_model_id()
+      @virtual_model_id || @saved_search_ref
     end
 
     #returns the appropriate view path
@@ -21,8 +21,8 @@ module R8Tpl
           return nil if @profile.to_sym == :default
           "#{R8::Config[:meta_templates_root]}/#{@model_name}/view.default.#{@view_name}.rb"
         when :cache 
-          if virtual_model_ref
-            "#{R8::Config[:app_cache_root]}/view/saved_search/#{@profile}.#{virtual_model_ref}.rtpl"
+          if virtual_model_id
+            "#{R8::Config[:app_cache_root]}/view/saved_search/#{@profile}.#{virtual_model_id}.rtpl"
           else
           "#{R8::Config[:app_cache_root]}/view/#{@model_name}/#{@profile}.#{@view_name}.rtpl"
           end

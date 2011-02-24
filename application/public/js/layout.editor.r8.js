@@ -46,7 +46,6 @@ if(!R8.LayoutEditor) {
 
 				_layoutDef = layoutDef;
 				this.renderLayout();
-
 				for(var i in fieldDefs) {
 					if(!this.fieldInLayout(fieldDefs[i].name)) {
 						_availFields[fieldDefs[i].name] = fieldDefs[i];
@@ -102,7 +101,7 @@ if(!R8.LayoutEditor) {
 				for(var g in _layoutDef.groups) {
 					var fieldList = _layoutDef.groups[g].fields;
 					for(var f in fieldList) {
-						if(fieldList[f] == fieldName) return true;
+						if(fieldList[f].name == fieldName) return true;
 					}
 				}
 				return false;
@@ -115,8 +114,8 @@ if(!R8.LayoutEditor) {
 			renderGroup: function(groupDef) {
 				var groupId = groupDef.name;
 				var groupLabel = groupDef.i18n;
-
 				var newGroupNode = R8.Utils.Y.Node.create(this.getGroupMarkup(groupId,groupLabel));
+
 				_groupListNode.append(newGroupNode);
 				_contentWrapperNode.append(this.getContentMarkup(groupId));
 
@@ -192,6 +191,8 @@ if(!R8.LayoutEditor) {
 			},
 
 			getFieldMarkup: function(fieldDef) {
+				if(typeof(fieldDef.i18n) === 'undefined') fieldDef.i18n = fieldDef.name;
+
 				var fieldTpl = '<li style="height: 20px; width: 140px; margin: 3px; padding: 3px; border: 1px solid rgb(153, 153, 153); opacity: 1;" id="'+fieldDef.name+'" class="yui3-dd-drop yui3-dd-draggable">\
 					<span style="">'+fieldDef.i18n+'</span>\
 				</li>';

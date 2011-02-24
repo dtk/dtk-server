@@ -102,10 +102,11 @@ pp component
          #...earlier ones (if they exist)
         ]
 =end
-      layout_def = create_object_from_id(id).get_layouts(:edit)
-pp [:layout_def,layout_def]
-      field_defs_json = JSON.generate(field_defs);
-      layout_def_json = JSON.generate(layout_def[0]);
+      layout_list = create_object_from_id(id).get_layouts(:edit)
+#pp [:layout_def,layout_def]
+
+      field_defs_json = JSON.generate(field_defs)
+      layout_def_json = JSON.generate(layout_list[0][:def])
       run_javascript("R8.LayoutEditor.init(#{layout_def_json},#{field_defs_json});")
 
       return {

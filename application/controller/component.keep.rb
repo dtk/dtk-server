@@ -1,76 +1,189 @@
 module XYZ
   class ComponentController < Controller
+    helper :i18n_string_mapping
 
-    def edit(component_id)
-      component = get_object_by_id(component_id)
-pp '????????????????????????'
+    def details(id)
+      component = get_object_by_id(id)
+      tpl = R8Tpl::TemplateR8.new("component/details",user_context())
+
+#      img_str = '<img title="' << component[:display_name] << '"' << 'src="' << R8::Config[:base_images_uri] << '/component/Icons/'<< component[:ui][:images][:tnail] << '"/>'
+
+      _model_var = {}
+      _model_var[:i18n] = get_model_i18n(:component,user_context())
+      component[:name] = _model_var[:i18n][component[:display_name].to_sym]
+
+#TEMP UNTIL FULLY IMPLEMENTING DEPENDENCIES
+      supported_os_list = [
+        {:id=>12345,:name=>'Ubuntu',:version=>'10.4',:ui=>{:images=>{:icon=>'ubuntu-favicon.png'}}},
+        {:id=>12345,:name=>'Debian',:version=>'6',:ui=>{:images=>{:icon=>'debian-favicon.png'}}},
+        {:id=>12345,:name=>'Fedora',:version=>'14',:ui=>{:images=>{:icon=>'fedora-favicon.png'}}},
+        {:id=>12345,:name=>'CentOS',:version=>'5.5',:ui=>{:images=>{:icon=>'centos-favicon.png'}}},
+        {:id=>12345,:name=>'RedHat',:version=>'6',:ui=>{:images=>{:icon=>'redhat-favicon.png'}}}
+      ]
+      component[:supported_os_list] = supported_os_list
+
+pp '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
 pp component
 
-      search_pattern_hash = {
-        :relation => :attribute,
-        :filter => [:and, 
-                    [:eq, DB.parent_field(:component,:attribute), component_id],
-                    [:eq, :hidden, false]],
-        :columns => [:id,:display_name,:attribute_value,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
+      tpl.assign("_#{model_name().to_s}",_model_var)
+      tpl.assign("component",component)
+      tpl.assign("component_images_uri",R8::Config[:component_images_uri])
+
+      run_javascript("R8.Detailview.init('#{id}');")
+
+      return {:content => tpl.render()}
+    end
+
+    def instance_list(id)
+      instance_list = get_objects(:component,{:ancestor_id=>id})
+
+      tpl = R8Tpl::TemplateR8.new("component/list",user_context())
+      _model_var = {:i18n => get_model_i18n(model_name().to_s,user_context())}
+      tpl.assign(:_component,_model_var)
+      tpl.assign(:component_list,instance_list)
+      tpl.assign(:_app,app_common())
+
+#---------------------------------
+      search_context = 'component-list'
+      search_content = ''
+      tpl.assign(:search_content, search_content)
+      tpl.assign(:search_context, search_context)
+
+      search_object =  ret_search_object_in_request()
+      tpl.assign(:list_start_prev,0)
+      tpl.assign(:list_start_next,20)
+      tpl.assign(:current_start,0)
+
+      return {
+        :panel=>request.params["panel_id"],
+        :content=>tpl.render()
       }
-      raw_attributes = get_objects_from_search_pattern_hash(search_pattern_hash)
+    end
 
-      attribute_list = AttributeComplexType.flatten_attribute_list(raw_attributes)
-      #add name and attr_id from :qualified_attribute_name_under_node and :qualified_attribute_id_under_node
-      attribute_list.each do |el|
-        el[:attribute_id] = el[:unraveled_attribute_id]
-        el[:attribute_name] = el[:display_name]
-      end
-      #order attribute list :qualified_attribute_name_under_node 
-      ordered_attr_list = attribute_list.sort{|a,b|(a[:attribute_name]||"_") <=> (b[:attribute_name]||"_")}
+    def layout_test(id)
+      component = create_object_from_id(id,:component)
+      field_defs = component.get_field_def()
 
-      #debug print
-      cols_to_package = [:attribute_id,:attribute_name,:attribute_value,:data_type,:dynamic,:cannot_change,:required]
+##pp '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
+##pp field_defs
 
-#pp [:packaged_attrs,ordered_attr_list.map{|a|cols_to_package.inject({}){|h,k|h.merge(k => a[k])}}]
+      tpl = R8Tpl::TemplateR8.new("component/layout_test",user_context())
+      _model_var = {:i18n => get_model_i18n(model_name().to_s,user_context())}
+      tpl.assign(:_component,_model_var)
+      tpl.assign(:field_def_list,field_defs)
 
+      include_css('layout-editor')
+      include_css('wspace-modal')
+      include_js('layout.editor.r8')
 =begin
-            {:display_name => {
-             :type => 'text',
-             :help => '',
-             :rows => 1,
-             :cols => 40,
-            }},
+      layout_def = 
+        [{
+           :id => 'foo',
+           :name => 'New Layout',
+           :groups => 
+           [{
+             :name => 'group-1',
+              :num_cols =>1,
+              :i18n => 'Group 1',
+              :fields =>[
+               {:i18n=>"keys__auth",
+                :name=>"keys__auth",
+                :id=>"a__2147483670",
+                :description=>"Wordpress auth key.",
+                :type=>:string,
+                :default=>nil,
+                :required=>false,
+                :read_only=>false,
+                :cannot_change=>false}
+              ]
+            }]
+         },
+         #...earlier ones (if they exist)
+        ]
 =end
-      attr_list = Array.new
-      ordered_attr_list.each do |attr|
-        field_meta = Hash.new
-        field_meta = {
-          :display_name => attr[:attribute_name],
-          :type => 'text',
-          :help => 'Some Help String',
-          :rows => 1,
-          :cols => 40
-        }
-        attr_list << field_meta
-      end
-pp '????????????????????????'
-pp attr_list
+      layout_list = create_object_from_id(id).get_layouts(:edit)
+#pp [:layout_list,layout_list]
 
-      action_name = "test_component_edit"
-#      tpl = R8Tpl::TemplateR8.new("#{model_name()}/#{action_name}",user_context())
-      tpl = R8Tpl::TemplateR8.new("#{model_name()}/#{component_id}",user_context())
-      tpl.assign("attribute_list",ordered_attr_list)
+      field_defs_json = JSON.generate(field_defs)
+      layout_def_json = JSON.generate(layout_list[0][:def])
+      run_javascript("R8.LayoutEditor.init(#{layout_def_json},#{field_defs_json});")
+
+      return {
+        :content=>tpl.render(),
+        :panel=>request.params["panel_id"]
+      }
+    end
+
+    ##TODO just for testing
+    def display(id,parsed_query_string=nil)
+      component = create_object_from_id(id)
+      template_name = component.save_view_in_cache?(:display,user_context())
+      tpl = R8Tpl::TemplateR8.new(template_name,user_context())
+      vals = component.get_virtual_object_attributes()
+      tpl.assign("component",vals)
+      return {:content => tpl.render()}
+    end
+
+    def edit(id,parsed_query_string=nil)
+      component = create_object_from_id(id)
+      template_name = component.save_view_in_cache?(:edit,user_context())
+      tpl = R8Tpl::TemplateR8.new(template_name,user_context())
+      vals,ids = component.get_virtual_object_attributes(:ret_ids => true)
+      tpl.assign("component",vals)
+      tpl.assign("component_id",ids)
+      return {:content => tpl.render()}
+    end
+
+    def save(explicit_hash=nil)
+      attr_val_hash = explicit_hash || request.params.dup
+      #TODO: can thsi be handled another way
+      #convert empty strings to nils
+      attr_val_hash.each{|k,v|attr_val_hash[k] = nil if v.kind_of?(String) and v.empty?}
+      component_id = attr_val_hash.delete("id").to_i
+      attribute_rows = AttributeComplexType.ravel_raw_post_hash(attr_val_hash,:attribute,component_id)
+      attr_mh = ModelHandle.new(ret_session_context_id(),:attribute)
+      Attribute.update_and_propagate_attributes(attr_mh,attribute_rows)
+      redirect "/xyz/component/edit/#{component_id.to_s}"
+    end
+
+   ####### end TODO for testing 
+
+    def dock_edit(component_id)
+      component = create_object_from_id(component_id)
+      attr_list = component.get_attributes_unraveled()
+
+      #TODO The ordering should not matter all that much since the views will be generated by the view defs
+      ordered_attr_list = attr_list.sort{|a,b|(a[:i18n]||"_") <=> (b[:i18n]||"_")}
+
+      tpl = R8Tpl::TemplateR8.new("dock/component_edit",user_context())
+      tpl.assign("field_list",ordered_attr_list)
       tpl.assign("component_id",component_id)
       return {:content => tpl.render()}
     end
 
+
+#TODO: rename to save
     def save_attributes(explicit_hash=nil)
-      hash = explicit_hash || request.params.dup
-pp [:in_save_attrs,hash]
-      component_id = hash.delete("component_id").to_i
-      attribute_rows = AttributeComplexType.ravel_raw_post_hash(hash,:attribute,component_id)
+=begin
+Would expect to have something like:
+
+component = Compoennt.new(component_id)
+component.save(request.params)
+=end
+
+      attr_val_hash = explicit_hash || request.params.dup
+      #TODO: can thsi be handled another way
+      #convert empty strings to nils
+      attr_val_hash.each{|k,v|attr_val_hash[k] = nil if v.kind_of?(String) and v.empty?}
+#pp [:in_save_attrs,attr_val_hash]
+      component_id = attr_val_hash.delete("component_id").to_i
+      attribute_rows = AttributeComplexType.ravel_raw_post_hash(attr_val_hash,:attribute,component_id)
       
-pp [:after_ravel,attribute_rows]
+#pp [:after_ravel,attribute_rows]
 
       attr_mh = ModelHandle.new(ret_session_context_id(),:attribute)
-      Attribute.update_attributes(attr_mh,attribute_rows)
-      redirect "/xyz/component/edit/#{component_id.to_s}"
+      Attribute.update_and_propagate_attributes(attr_mh,attribute_rows)
+      redirect "/xyz/component/dock_edit/#{component_id.to_s}"
     end
 
 
@@ -110,68 +223,76 @@ pp [:after_ravel,attribute_rows]
       return tpl.render()
     end
 
-    def wspace_dock_get_attributes(id)
-      component = get_object_by_id(id)
-      component_name = component[:display_name].gsub('::','_')
-      component_context = component[:display_name].gsub(/::.+$/,'')
+  end
 
-      model_name = :attribute
-      field_set = Model::FieldSet.default(model_name)
-      attribute_list = get_objects(model_name,{:component_component_id=>id})
+  def add_assembly_items(id=nil)
+      parent_id = request.params["parent_id"]
+      assembly_left_pos = request.params["assembly_left_pos"]
+=begin
+      filter = [:and,[:eq,:assembly_id,id]]
+      field_set = Model::FieldSet.new(:node)
+      ds = SearchObject.create_from_field_set(field_set,ret_session_context_id(),filter).create_dataset()
+      node_list = ds.all
+=end
+      node_list = get_objects(:node,{:assembly_id=>id})
 
-      component_i18n = get_model_i18n('component',user_context())
-      attr_i18n = get_model_i18n('attribute',user_context())
-
-      attribute_list.each do |attribute|
-        pp '--------------------'
-        
-        pp 'component:'+component_name
-        pp 'attribute:'+attribute[:display_name]
-        attribute_name = attribute[:display_name].gsub('::','_')
-        attribute_name = attribute_name.gsub('[','_')
-        attribute_name = attribute_name.gsub(']','')
-        pp 'attr name:'+attribute_name
-        pp 'id:'+attribute[:id].to_s
-        pp "#{component_context}__#{attribute_name}".to_sym
-        attribute[:label] = attr_i18n["#{component_context}__#{attribute_name}".to_sym]||attr_i18n[attribute_name.to_sym]
-
-#        component[:onclick] = "R8.Workspace.Dock.loadDockPanel('component/get_attributes/#{component[:id].to_s}');"
-#        component[:onclick] = "R8.Workspace.Dock.loadDockPanel('node/get_components/2147484111');"
+      #get the top most item in the list to set new positions
+      top_node = {}
+      top_most = 2000
+      node_list.each do |node|
+        unless (node[:ui]||{})[parent_id.to_sym]
+          Log.error("no coordinates for node with id #{node[:id].to_s} in #{parent_id.to_s}")
+          return {}
+        end
+        if node[:ui][parent_id.to_sym][:top].to_i < top_most.to_i
+          left_diff = assembly_left_pos.to_i-node[:ui][parent_id.to_sym][:left].to_i
+          top_node = {:id=>node[:id],:ui=>node[:ui][parent_id.to_sym],:left_diff=>left_diff}
+          top_most = node[:ui][parent_id.to_sym][:top]
+        end
       end
 
-      if attribute_list.length == 0
-        attribute_list = Array.new
-        attribute_list[0] = {
-          :label => component_i18n[:no_attributes],
-          :id => 'null'
-        }
-        attribute_list[0][:css_class] = 'first last'
-      else
-        attribute_list[0][:css_class] = 'first'
-        attribute_list[attribute_list.length-1][:css_class] = 'last'
-      end
-
-      tpl = R8Tpl::TemplateR8.new("workspace/dock_list",user_context())
-#      tpl.assign(:component_list,component_list)
-      js_tpl_name = 'wspace_dock_list'
-      tpl.set_js_tpl_name(js_tpl_name)
+      tpl = R8Tpl::TemplateR8.new("node/wspace_display",user_context())
+      tpl.set_js_tpl_name("node_wspace_display")
       tpl_info = tpl.render()
       include_js_tpl(tpl_info[:src])
 
-      panel_id = request.params['panel_id']
+      items = Array.new
+      item_id_list = []
+      node_list.each do |node|
+        item_id_list << node[:id]
+        if node[:id] == top_node[:id]
+          node[:ui][parent_id.to_sym][:left] = assembly_left_pos
+        else
+          node[:ui][parent_id.to_sym][:left] = node[:ui][parent_id.to_sym][:left].to_i+top_node[:left_diff].to_i
+        end
 
-      panel_cfg_hash = {
-        :title=>{
-          :i18n=> component_i18n[component_name.to_sym]
-        },
-        :item_list=>attribute_list,
-      }
-      panel_cfg = JSON.generate(panel_cfg_hash)
-#TODO: temp pass of
-      run_javascript("R8.Workspace.Dock.pushDockPanel2('0',#{panel_cfg},'#{js_tpl_name}');")
+        item = {
+          :type => 'node',
+          :object => node,
+#          :toolbar_def => toolbar_def,
+          :tpl_callback => tpl_info[:template_callback],
+          :ui => node[:ui][parent_id.to_sym]
+        }
 
-      return {}
-    end
+        items << item
+      end
 
+pp '+++++++++++++++++++++++++++++++'
+pp '++++CHECKING TO SEE IF ASSEMBLY REDIRECT IS CORRECT+++'
+pp '+++++++++++++++++++++++++++++++'
+pp request.params
+pp '+++++++++++++++++++++++++++++++'
+pp items
+#    p_str = JSON.generate(request.params)
+#    run_javascript("alert('Added assembly, here are req params:  #{p_str}');")
+
+    addItemsObj = JSON.generate(items)
+    run_javascript("R8.Workspace.addItems(#{addItemsObj});")
+
+    item_id_list_json = JSON.generate(item_id_list)
+    run_javascript("R8.Workspace.touchItems(#{item_id_list_json});")
+
+    return {}
   end
+
 end

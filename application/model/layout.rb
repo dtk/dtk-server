@@ -26,10 +26,9 @@ module XYZ
         field_def.each do |el|
           index = group_index(el)
           indexed_groups[index] ||= {
-            #TODO: stub that name and i18n are teh same
             :name => group_name(el),
             :num_cols =>1,
-            :i18n => group_name(el),
+            :i18n => group_i18n(el),
             :fields => Array.new
           }
           indexed_groups[index][:fields] << field_list__edit(el)
@@ -40,12 +39,16 @@ module XYZ
       def self.group_index(el)
         el[:component_id]
       end
-      def self.group_name(el)
+      def self.group_i18n(el)
         if el[:node_name]
           "#{el[:node_name]}/#{el[:component_i18n]}"
         else
           el[:component_i18n]
         end
+      end
+
+      def self.group_name(el)
+        group_i18n(el).gsub(/[^A-Za-z0-9_]/,"_")
       end
       
       def self.field_list__edit(el)

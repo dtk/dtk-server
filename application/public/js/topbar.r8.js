@@ -106,6 +106,9 @@ if(!R8.Topbar) {
 				_toolbarNode.append(_dropdowns[0].render());
 				_dropdowns[0].init();
 
+//TODO: revisit to cleanup later
+_toolbarNode.append('<div class="menu-divider"></div>');
+
 				_toolbars[0] = new R8.ToolbarGroup(groupDef);
 				_toolbarNode.append(_toolbars[0].render());
 				_toolbars[0].init();
@@ -149,7 +152,8 @@ if(!R8.Topbar) {
 			_id = cfg['id']+'-dropdown',
 			_i18n = cfg['i18n'],
 			_dropdownNode = null,
-			_tpl = '<div id="'+_id+'" class="dropdown" style="margin-right: 50px; float: left;">\
+//			_tpl = '<div id="'+_id+'" class="dropdown" style="margin-right: 50px; float: left;">\
+			_tpl = '<div id="'+_id+'" class="dropdown" style="float: left;">\
 							<div style="font-size: 14px; margin-top: 4px; float: left;">'+_i18n+'</div>\
 							<div class="arrow"></div>\
 						</div>',

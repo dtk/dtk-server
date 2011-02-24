@@ -1,3 +1,39 @@
+.menu-item {
+	float: left;
+	padding-top: 7px;
+	margin-left: 30px;
+	font-size: 16px;
+}
+.menu-item a:hover, a:link, a:active, a:visited {
+	color: #30322f;
+}
+.menu-item a:hover {
+	color: #FFFFFF;
+}
+
+.menu-item a {
+	text-decoration: none;
+}
+
+.logo {
+	height: 30px;
+	width: 26px;
+	float: left;
+	margin: 5px 0 0 10px;
+}
+
+.logo.black {
+	background-image: url(../images/icon-black.png);
+}
+
+.menu-divider {
+	height: inherit;
+	width: 7px;
+	margin: 0 10px;
+	float: left;
+	background-image: url(../images/menu-divider.png);
+}
+
 .vspace-item { display: none; }
 
 #page-container {

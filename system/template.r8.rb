@@ -29,18 +29,24 @@ module R8Tpl
       #TODO: clean up
       @model_name = @view_name = String.new
       @saved_search_ref = nil
-      rdn = view_path.split("/")
+      vp_parts = view_path.split("/")
       #TODO: fidn better way to determine isa_saved_search
-      if rdn.size == 2
-        if rdn[0] == "saved_search"
-          @saved_search_ref = rdn[1]
+      if vp_parts.size == 2
+        if vp_parts[0] == "saved_search"
+          @saved_search_ref = vp_parts[1]
           path_type ||= :cache
           @view_name = :list #TODO: should not be hard-wired
         else
-          @model_name,@view_name = rdn
+          @model_name,@view_name = vp_parts
         end
+      elsif vp_parts.size == 3
+#TODO: consider scenario between saved searches stored by user, per model vs. component views which are per view/model_instance
+        @model_name,@view_name,@model_id = vp_parts
+        layout_list = get_objects(:layout,{:component_component_id=>model_id,:type=>view_type})
+
+#Should take newest one for now, later have enhancement for 'deployed'/'active' flag or something similar
       else
-        @view_name = rdn.first
+        @view_name = vp_parts.first
       end
 
       @view_path = nil
@@ -50,7 +56,7 @@ module R8Tpl
       @tpl_contents = String.new
       @tpl_results = nil
       @xhtml_document = nil
-      
+
       @js_tpl_callback = String.new
       @js_file_name = String.new
 

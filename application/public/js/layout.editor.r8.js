@@ -49,6 +49,7 @@ if(!R8.LayoutEditor) {
 				for(var i in fieldDefs) {
 					if(!this.fieldInLayout(fieldDefs[i].name)) {
 						_availFields[fieldDefs[i].name] = fieldDefs[i];
+						this.addAvailField(fieldDefs[i]);
 					}
 				}
 
@@ -105,6 +106,11 @@ if(!R8.LayoutEditor) {
 					}
 				}
 				return false;
+			},
+			addAvailField: function(fieldDef) {
+				var availFieldsContainer = R8.Utils.Y.one('#available-fields');
+				var fieldContent = this.getFieldMarkup(fieldDef);
+				availFieldsContainer.append(fieldContent);
 			},
 			renderLayout: function() {
 				for(var g in _layoutDef.groups) {

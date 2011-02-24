@@ -41,6 +41,9 @@ if (!R8.Detailview) {
 						var searchJsonStr = R8.Utils.Y.JSON.stringify(search);
 
 						return 'search='+searchJsonStr;
+					},
+					getRoute: function() {
+						return this.route
 					}
 				},
 				'dependencies': {
@@ -136,6 +139,8 @@ if (!R8.Detailview) {
 			toggleDetails: function(e) {
 				var id = e.currentTarget.get('id'),
 					selectedCat = id.replace('-details-cat','');
+
+				if(selectedCat === _focusedIndex) return;
 
 				for(var contentId in _contentList) {
 					R8.Utils.Y.one('#'+contentId+'-details-cat').removeClass('selected');

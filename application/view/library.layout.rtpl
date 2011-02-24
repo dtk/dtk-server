@@ -5,15 +5,17 @@
 -->
 
 <link rel="SHORTCUT ICON" href="{%=_app[:base_images_uri]%}/icon-black.ico" />
+<!--
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_js_uri]%}/external/yui/build/cssreset/reset.css">
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_js_uri]%}/external/yui/build/cssfonts/fonts.css">
+-->
 
 <!--//TODO: revisit to variablize the path of the founcation css-->
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/topbar.css" />
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/cmdbar.css" />
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/toolbar.css" />
 
-<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/details.layout.css" />
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/library.layout.css" />
 
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/temp-dev.css" />
 
@@ -28,25 +30,23 @@
 		<div id="page-topbar">
 			<div id="menu-bar" class="menu-bar">
 				<div class="logo black"></div>
-				<div class="menu-item"><a href="{%=_app[:base_uri]%}/xyz/node/list"  style="color: #EEF48C">Library</a></div>
+				<div class="menu-item"><a href="{%=_app[:base_uri]%}/xyz/component/list" style="color: #EEF48C">Library</a></div>
 				<div class="menu-item"><a href="{%=_app[:base_uri]%}/xyz/workspace">Workspace</a></div>
-				<div class="menu-item"><a href="{%=_app[:base_uri]%}/xyz/node/list">Dashboard</a></div>
+				<div class="menu-item"><a href="{%=_app[:base_uri]%}/xyz/datacenter/list">Dashboard</a></div>
 			</div>
 		</div>
+		<div id="menu_container">
+			<ul>
+				<li class=""><a href="{%=_app[:base_uri]%}/xyz/home">Home</a></li>
+				<li class=""><a href="{%=_app[:base_uri]%}/xyz/datacenter/list">Datacenters</a></li>
+				<li class=""><a href="{%=_app[:base_uri]%}/xyz/node/list">Nodes</a></li>
+				<li class="selected"><a href="{%=_app[:base_uri]%}/xyz/component/list">Components</a></li>
+				<li class=""><a href="{%=_app[:base_uri]%}/xyz/state_change/list_pending">Pending Changes</a></li>
+				<li class=""><a href="{%=_app[:base_uri]%}/xyz/task/list">Tasks</a></li>
+			</ul>
+		</div>
 		<div id="main-body" class="main-body" style="">
-			<div id="mb-l-pane" class="mb-l-pane">
-				<div id="spacer" style="height: 100px; width: inherit;"></div>
-				<div id="detail-categories" class="details-categories">
-					<div id="details-details-cat" class="details-cat selected"><div class="label">Summary</div></div>
-					<div id="instances-details-cat" class="details-cat"><div class="label">Instances</div></div>
-					<div id="dependencies-details-cat" class="details-cat"><div class="label">Constraints</div></div>
-					<div id="editor-details-cat" class="details-cat"><div class="label">Edit</div></div>
-					<div id="layout-details-cat" class="details-cat"><div class="label">Layouts</div></div>
-				</div>
-			</div>
-			<div id="mb-r-pane" class="mb-r-pane">
-				{%=main_body%}
-			</div>
+			{%=main_body%}
 		</div>
 		</div>
 	</div>
@@ -96,6 +96,7 @@ YUI_config = {
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/toolbar.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/dock.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/page.r8.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/search.r8.js"></script>
 
 
 <script type="text/javascript">

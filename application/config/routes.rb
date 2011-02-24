@@ -174,5 +174,12 @@ R8::Routes["component/details"] = {
   :layout => 'details'
 }
 
+R8::Routes["datacenter/list"] = {
+  :layout => 'dashboard'
+}
+R8::Routes["component/list"] = {
+  :layout => 'library'
+}
+
 R8::Routes.freeze
 

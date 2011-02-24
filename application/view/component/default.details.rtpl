@@ -50,21 +50,10 @@
 			</div>
 		</div>
 
-		<div id="instances-content" class="content" style="display: none;">
-			This is some instances content
-		</div>
-		<div id="assembly-content" class="content" style="display: none;">
-			This is some assembly content
-		</div>
-		<div id="editor-content" class="content" style="display: none;">
-			This is some editor content
-		</div>
-		<div id="dependencies-content" class="content" style="display: none;">
-			This is dependencies content
-		</div>
-		<div id="layout-content" class="content" style="display: none;">
-			This is layout content
-		</div>
-
+		<div id="instances-content" class="content" style="display: none;"></div>
+		<div id="assembly-content" class="content" style="display: none;"></div>
+		<div id="editor-content" class="content" style="display: none;"></div>
+		<div id="dependencies-content" class="content" style="display: none;"></div>
+		<div id="layout-content" class="content" style="display: none;"></div>
 	</div>
 </div>

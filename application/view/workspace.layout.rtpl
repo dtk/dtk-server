@@ -31,6 +31,13 @@
 	<div id="page-container" style="margin: 0 auto 0 auto;">
 		<div id="wspace-topbar">
 			<div id="wspace-toolbar" class="toolbar">
+
+				<div class="logo black"></div>
+				<div class="menu-item"><a href="{%=_app[:base_uri]%}/xyz/component/list">Library</a></div>
+				<div class="menu-item"><a href="{%=_app[:base_uri]%}/xyz/workspace" style="color: #EEF48C">Workspace</a></div>
+				<div class="menu-item"><a href="{%=_app[:base_uri]%}/xyz/datacenter/list">Dashboard</a></div>
+
+				<div class="menu-divider"></div>
 <!--
 				<div class=".toolbar-group">
 					<div class="lft-endcap"></div>
@@ -50,6 +57,7 @@
 					<div class="arrow"></div>
 				</div>
 -->
+<!--
 				<div style="height:25px; text-align: center; position: relative; float: right; margin-left: 50px; background-color: #DDDDDD;">
 					<a href="{%=_app[:base_uri]%}/xyz/node/list">Main</a>&nbsp;|&nbsp;<a href="javascript:R8.Workspace.commitChanges();">Commit</a>
 				</div>
@@ -64,6 +72,7 @@
 				<div style="height:25px; text-align: center; position: relative; float: right; margin-left: 50px; background-color: #DDDDDD;">
 					<a href="javascript:R8.Workspace.showAlert('Footime!!');">Alert</a>&nbsp;|&nbsp;
 				</div>
+-->
 			</div>
 			<div id="wspace-context-wrapper">
 			</div>

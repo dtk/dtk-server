@@ -8,9 +8,10 @@ body {
 .page-container {
 	min-height: 100%;
 	position: relative;
-	background-color: #FFFFFF;
+/*	background-color: #FFFFFF;*/
+	background-image: url(../images/blue-bg-test.png);
+	background-repeat: repeat;
 }
-
 
 /*-----------------------*/
 /*---TOP BAR-------------*/

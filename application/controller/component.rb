@@ -103,7 +103,7 @@ pp component
         ]
 =end
       layout_list = create_object_from_id(id).get_layouts(:edit)
-#pp [:layout_def,layout_def]
+pp [:layout_def,layout_list]
 
       field_defs_json = JSON.generate(field_defs)
       layout_def_json = JSON.generate(layout_list[0][:def])

@@ -28,9 +28,9 @@
 		<div id="page-topbar">
 			<div id="menu-bar" class="menu-bar">
 				<div class="logo black"></div>
-				<div class="menu-item"><a href="{%=_app[:base_uri]%}/xyz/node/list"  style="color: #EEF48C">Library</a></div>
+				<div class="menu-item"><a href="{%=_app[:base_uri]%}/xyz/component/list"  style="color: #EEF48C">Library</a></div>
 				<div class="menu-item"><a href="{%=_app[:base_uri]%}/xyz/workspace">Workspace</a></div>
-				<div class="menu-item"><a href="{%=_app[:base_uri]%}/xyz/node/list">Dashboard</a></div>
+				<div class="menu-item"><a href="{%=_app[:base_uri]%}/xyz/datacenter/list">Dashboard</a></div>
 			</div>
 		</div>
 		<div id="main-body" class="main-body" style="">

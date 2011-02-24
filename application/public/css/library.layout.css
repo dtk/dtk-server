@@ -6,6 +6,10 @@ body {
 	margin: 0;
 }
 
+.main-body {
+	overflow-y: auto;
+}
+
 .page-container {
 	min-height: 100%;
 	position: relative;

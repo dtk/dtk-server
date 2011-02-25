@@ -1,3 +1,4 @@
+#TODO: model_name and relation_type redundant
 require File.expand_path(UTILS_DIR+'/internal/model/field_set', File.dirname(__FILE__))
 require File.expand_path(UTILS_DIR+'/internal/model/input_into_model', File.dirname(__FILE__))
 require File.expand_path(UTILS_DIR+'/internal/model/clone', File.dirname(__FILE__))
@@ -18,10 +19,11 @@ module XYZ
     end
 
     def self.model_name()
-      Aux::underscore(Aux::demodulize(self.to_s)).to_sym
+      model_name_x = Aux::underscore(Aux::demodulize(self.to_s)).to_sym
+      SubClassRelations[model_name_x]|| model_name_x
     end
     def model_name()
-      self.class.model_name() 
+      @relation_type || self.class.model_name() 
     end
 
     def self.model_class(model_name)

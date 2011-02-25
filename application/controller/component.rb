@@ -125,12 +125,13 @@ pp [:layout_def,layout_list]
 
     def instance_edit_test(id)
       component = create_object_from_id(id)
-      attr_list = component.get_attributes_unraveled()
 
       virtual_model_ref = id.to_s
       tpl = R8Tpl::TemplateR8.create("component","edit",user_context(),virtual_model_ref,:meta_db)
-      tpl.assign("field_list",attr_list)
-      tpl.assign("component_id",id)
+      vals,ids = component.get_virtual_object_attributes(:ret_ids => true)
+      tpl.assign("component",vals)
+      tpl.assign("component_id",ids)
+
       return {:content => tpl.render()}
 
     end

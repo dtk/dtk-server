@@ -48,7 +48,12 @@ module R8Tpl
         @type = type
       end
       attr_reader :type
+      def db_id()
+        return self.to_i if type == :db
+        raise XYZ::Error.new("db_id can omly be called when type == :db")
+      end
     end
+
 
     #returns the appropriate view path if it exists
     def ret_existing_view_path(type)

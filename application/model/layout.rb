@@ -2,13 +2,13 @@
 module XYZ
   class Layout < Model
     def self.create_and_save_from_field_def(parent_id_handle,field_def,view_type)
-      layout_def = create_from_field_def(field_def,view_type)
+      layout_def = create_def_from_field_def(field_def,view_type)
 
       name = "foo" #TODO: stub
       hash = {
         :display_name => name,
         :type => view_type.to_s,
-        :def => {:groups => layout_def}
+        :def => layout_def
       }
       create_hash = {:layout => {name => hash}}
 
@@ -16,15 +16,17 @@ module XYZ
       new_id
     end
 
-    def self.create_from_field_def(field_def,view_type)
-      case view_type
-       when :edit then LayoutViewDefProcessor.layout_def_from_field_def__edit(field_def)
-       else raise Error.new("type #{view_type} is unexpected")
-      end
+    def self.create_def_from_field_def(field_def,view_type)
+      groups = 
+        case view_type
+         when :edit then LayoutViewDefProcessor.layout_groups_from_field_def__edit(field_def)
+         else raise Error.new("type #{view_type} is unexpected")
+       end
+      {:groups => groups}
     end
    private
     module LayoutViewDefProcessor
-      def self.layout_def_from_field_def__edit(field_def)
+      def self.layout_groups_from_field_def__edit(field_def)
         indexed_groups = Hash.new
         field_def.each do |el|
           index = group_index(el)

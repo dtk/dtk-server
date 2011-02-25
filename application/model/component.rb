@@ -1,7 +1,9 @@
 require  File.expand_path('component_model_def_processor', File.dirname(__FILE__))
+require  File.expand_path('component_view_meta_processor', File.dirname(__FILE__))
 module XYZ
   class Component < Model
     include ComponentModelDefProcessor
+    include ComponentViewMetaProcessor
     set_relation_name(:component,:component)
     class << self
       def up()
@@ -353,10 +355,9 @@ module XYZ
 
    public
 
-    def get_view_def(view_type)
-      from_db = get_view_def_from_db(view_type)
-      return from_db if from_db
-      Layout.create_from_field_def(get_field_def(),view_type)
+    def get_view_meta(view_type)
+      layout_def = (get_instance_layout_from_db(view_type)||{})[:def] || Layout.create_def_from_field_def(get_field_def(),view_type)
+      create_view_meta_from_layout_def(view_type,layout_def)
     end
 
     def get_layouts(view_type)
@@ -373,12 +374,12 @@ module XYZ
       unprocessed_rows.select{|l|l[:type] == view_type.to_s}.sort{|a,b|b[:updated_at] <=> a[:updated_at]}
     end
 
-    def get_view_def_from_db(view_type)
+    def get_instance_layout_from_db(view_type)
       #TODO: more efficient would be to use db limit 
-      view_def = get_layouts_from_db(view_type,:layouts).first
-      return view_def if view_def
-      view_def = get_layouts_from_db(view_type,:layouts_from_ancestor).first
-      return view_def if view_def
+      instance_layout = get_layouts_from_db(view_type,:layouts).first
+      return instance_layout if instance_layout
+      instance_layout = get_layouts_from_db(view_type,:layouts_from_ancestor).first
+      return instance_layout if instance_layout
     end
    public
 

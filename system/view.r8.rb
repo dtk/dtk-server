@@ -171,10 +171,11 @@ module R8Tpl
   end
 
   def get_view_meta__db()
-    component = user.create_object_from_id(@view_path.to_i)
-    view_def = component.get_view_def(@view_name)
-    pp [:view_def_from_db,view_def]
-    view_def
+    component = user.create_object_from_id(@view_path.db_id)
+    view_meta = component.get_view_meta(view_type().to_sym)
+    pp [:view_meta_from_db,view_meta]
+    raise XYZ::Error.new("got here; now need to work on where views persisted and look up")
+    view_meta
   end
 
   def get_view_meta__file()

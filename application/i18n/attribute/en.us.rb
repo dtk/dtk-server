@@ -33,6 +33,7 @@
   :sap_config__db__admin__name => "Admin DB Name",
   :sap_config__db__admin__owner => "DB Admin User",
   :sap_config__db__admin__password => "DB Admin Password",
+  :sap_ref_to_master => "Master Reference",
 
 #TODO: temp until finding normal local for all attribute labels
 #JMX related
@@ -59,8 +60,12 @@
   :mysql__sap_ref_to_master => "SAP Ref to Master",
   :mysql__sap_config_for_slave => "SAP Config for Slave",
 
+#mysql slave
+  :master_log_ref=>"Master Log Ref",
+
 #postgresql
   :postgresql__dir => "PostgreSQL Directory",
+
 #user_account
   :user_account__username => "User Name",
   :user_account__uid => "User ID",
@@ -82,6 +87,16 @@
  :apache2__listen_ports=>"Listen Ports",
 
 #wordpress
+ :db__user=>"DB Username",
+ :db__password=>"DB Password",
+ :dir=> "App Directory",
+ :checksum=>"Checksum",
+ :keys__nonce=>"Keys Nonce",
+ :keys__logged_in=>"Keys Logged In",
+ :version=>"Version",
+ :keys__auth=>"Keys Auth",
+ :keys__secure_auth=>"Keys Secure Auth",
+
  :wordpress__dir=>"Installation Directory",
  :wordpress__keys_logged_in=>"Logged-in Key",
  :wordpress__db_database=>"MySQL Database",
@@ -92,6 +107,7 @@
  :wordpress__keys_auth=>"Auth Key",
  :wordpress__checksum=>"Tarball Checksum",
  :wordpress__keys_secure_auth=>"Secure Auth Key",
+
 #nagios
   :nagios__monitored_client_sap_config => "SAP Config",
   :nagios__monitor_sap_refs => "NRPE SAP Refs",

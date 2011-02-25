@@ -45,6 +45,8 @@ if(!R8.LayoutEditor) {
 				_modalHeaderNode = R8.Utils.Y.one('#modal-header');
 
 				_layoutDef = layoutDef;
+//TODO: this is temp until fully refactoring the view/rtpl stuff
+this.setI18n(fieldDefs);
 				this.renderLayout();
 				for(var i in fieldDefs) {
 					if(!this.fieldInLayout(fieldDefs[i].name)) {
@@ -84,6 +86,26 @@ if(!R8.LayoutEditor) {
 
 				this.setupDD();
 			},
+//-----------------------------------------
+//TODO: remove after cleanup
+			setI18n: function(fieldDefs) {
+console.log(fieldDefs);
+				for(var g in _layoutDef.groups) {
+					for(var f in _layoutDef.groups[g].fields) {
+						_layoutDef.groups[g].fields[f].i18n = this.getFieldI18n(_layoutDef.groups[g].fields[f].name,fieldDefs);
+					}
+				}
+			},
+			getFieldI18n: function(fName,fieldDefs) {
+				for(var f in fieldDefs) {
+					if(fieldDefs[f].name === fName) {
+console.log(fName+':'+fieldDefs[f].i18n);
+						return fieldDefs[f].i18n;
+					}
+				}
+				return fName;
+			},
+//-----------------------------------------
 			reset: function() {
 				_groupListNode = null;
 				_addGroupNode = null;
@@ -180,7 +202,7 @@ if(!R8.LayoutEditor) {
 				return false;
 			},
 			getGroupMarkup: function(id,i18n) {
-				var groupTpl = '<li id="'+id+'-tab" class="tab selected">'+i18n+'</li>'; 
+				var groupTpl = '<li id="'+id+'-tab" class="tab selected">'+i18n+'</li>';
 
 				return groupTpl;
 			},

@@ -4,8 +4,8 @@
 	<div id="editor-header" style="height: 40px; width: 100%"></div>
 	<div id="editor-wrapper" style="height: 310px; width: 100%;">
 		<div id="editor-fields" style="width: 200px; height: inherit; float: left;">
-			<div style="height: 30px; width: inherit;">Available Fields</div>
-			<ul id="available-fields" style="background-color: #EDEDED; margin: 5px; width: 200px; height: 275px; overflow-y: auto; float: left;">
+			<div style="height: 30px; width: inherit; font-weight: bold; text-align: center;">Available Fields</div>
+			<ul id="available-fields" style="border: 1px solid #999999; background-color: #EDEDED; margin: 5px; width: 200px; height: 275px; overflow-y: auto; float: left;">
 			</ul>
 		</div>
 		<div class="layout-editor body">

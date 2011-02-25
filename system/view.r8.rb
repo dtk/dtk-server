@@ -6,8 +6,33 @@ module R8Tpl
     include CommonMixin
     include Utility::I18n
     attr_accessor :obj_name, :tpl_contents, :css_require, :js_require
+
+    def self.create(model_name,view_name,user,view_path)
+      all_args = 6.times.inject([]){|x,y|x << nil} + [model_name,view_name,user,view_path]
+      self.new(*all_args)
+    end
+
+    def new_initialize(model_name,view_name,user,view_path)
+      @model_name = model_name
+      @view_name = view_name
+      @user = user
+      @profile = @user.current_profile || :default #profile will dictate the specific view to use/generate
+      @view_path = view_path
+
+
+      @form_id = "#{@model_name}-#{@view_name}-form"
+      @i18n = get_model_i18n(model_name,user)
+
+      #TODO: probably remove
+      #if set non null then will not try to find path and pull from file
+      @view_meta = nil    #hash defining an instance of a view
+
+      initialize_vars()
+    end
+
     #TODO: need to refactor this signature
-    def initialize(model_name,view_name,user,is_saved_search=false,view_meta_hash=nil,opts={})
+    def initialize(model_name,view_name,user,is_saved_search=false,view_meta_hash=nil,opts={},*args)
+      return new_initialize(*args) unless args.empty?
 
       #TODO: clean up
       @model_name = model_name
@@ -17,7 +42,7 @@ module R8Tpl
         @saved_search_ref = view_name
         @view_name = opts[:view_type] || :list #TODO: should not be hard-wired
       end
-
+      
       @form_id = "#{@model_name}-#{@view_name}-form"
       @user = user
       @profile = @user.current_profile || :default #profile will dictate the specific view to use/generate
@@ -26,6 +51,10 @@ module R8Tpl
       #if set non null then will not try to find path and pull from file
       @view_meta = view_meta_hash    #hash defining an instance of a view
 
+      initialize_vars()
+    end
+
+    def initialize_vars()
       @override_meta_path = nil        #path where the overrides for a view should be located
 
       @js_cache_path = nil             #this is the path to the JS file that will process/render the view
@@ -67,6 +96,7 @@ module R8Tpl
       end
       ret_existing_view_path(:cache)
     end
+
 
     def render()
       if cache_current?
@@ -131,7 +161,20 @@ module R8Tpl
     @view_meta ||= get_view_meta
   end
 
+  def view_path_type()
+    @view_path ? @view_path.type : :file
+  end
+
   def get_view_meta()
+    view_path_type() == :db ? get_view_meta__db() : get_view_meta__file()
+  end
+
+  def get_view_meta__db()
+    pp @user
+    raise Error.new("got here")
+  end
+
+  def get_view_meta__file()
     #TODO: revisit to work on override possiblities and for profile handling
     #should check for all view locations, direct and override
     #TODO: figure out best way to do PHP style requires/loading of external meta hashes
@@ -148,9 +191,18 @@ module R8Tpl
     end
   end
 
-
+  
   # This will check to see if the TPL view file exists and isnt stale compare to the base TPL and other factors
   def cache_current?()
+    view_path_type() == :db ? cache_current__db?() : cache_current__file?()
+  end
+
+  def cache_current__db?()
+    #TODO: stub
+    false
+  end
+
+  def cache_current__file?()
     cache_path = ret_existing_view_path(:cache)
     return nil unless cache_path
     meta_view_path = ret_existing_view_path(:meta)

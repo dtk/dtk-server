@@ -38,6 +38,14 @@
       {:route => 'component/details/{%=component[:id]%}',:label=>'details'}
       ]
     }},
+    {:instance => {
+      :type => 'actions_basic',
+      :help => '',
+      :action_seperator => '&nbsp;|&nbsp;',
+      :action_list => [
+      {:route => 'component/instance_edit_test/{%=component[:id]%}',:label=>'instance'}
+      ]
+    }},
 =begin
    {:created_at => {
        :type => 'text',

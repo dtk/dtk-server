@@ -20,7 +20,10 @@ module R8Tpl
         return path if path
         return nil if @profile.to_sym == :default
         ViewPath.new(:file,"#{R8::Config[:meta_templates_root]}/#{@model_name}/view.default.#{@view_name}.rb")
+       when :meta_db
+         ViewPath.new(:db,virtual_model_ref)
        when :cache 
+        #TODO: fix so saved_search not hard coded
         if virtual_model_ref
           ViewPath.new(:file,"#{R8::Config[:app_cache_root]}/view/saved_search/#{@profile}.#{virtual_model_ref}.rtpl")
         else

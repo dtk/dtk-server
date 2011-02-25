@@ -118,6 +118,17 @@ pp [:layout_def,layout_list]
       redirect "/xyz/component/edit/#{component_id.to_s}"
     end
 
+    def instance_edit_test(id)
+      component = create_object_from_id(id)
+      attr_list = component.get_attributes_unraveled()
+
+      virtual_model_ref = id.to_s
+      tpl = R8Tpl::TemplateR8.create("component","edit",user_context(),virtual_model_ref,:meta_db)
+      tpl.assign("field_list",attr_list)
+      tpl.assign("component_id",id)
+      return {:content => tpl.render()}
+
+    end
    ####### end TODO for testing 
 
     def dock_edit(component_id)

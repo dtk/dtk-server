@@ -639,6 +639,9 @@ p '     iteratorVarRaw: '+newLoopHash[:iteratorVarRaw].to_s
      when :meta
       view = ViewR8.new(@model_name,@view_name,@user)
       view.update_cache?()
+     when :meta_db
+      view = ViewR8.create(@model_name,@view_name,@user,path)
+      view.update_cache?()
      when :cache
       path
      end

@@ -26,6 +26,8 @@
 
   :actions => 'Actions',
   :details => 'Details',
+#temp for testing
+  :instance => 'Instance',
 
 #temp strings for component names
   :hadoop => 'Hadoop',

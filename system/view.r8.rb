@@ -496,10 +496,9 @@ module R8Tpl
     }
 
     files.each do |path, content| 
-      if content
-        FileUtils.mkdir_p(File.dirname(path)) unless File.exists?(File.dirname(path))
-        File.open(path, 'w') {|fhandle|fhandle.write(content)}
-      end
+      next unless content
+      FileUtils.mkdir_p(File.dirname(path)) unless File.exists?(File.dirname(path))
+      File.open(path, 'w') {|fhandle|fhandle.write(content)}
     end
   end
 

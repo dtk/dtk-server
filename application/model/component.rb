@@ -184,6 +184,23 @@ module XYZ
              :cols => [:id,:display_name,id(:component),:def,:type,:updated_at]
            }]
 
+        virtual_column :layouts_from_ancestor, :type => :json, :hidden => true,
+        :remote_dependencies =>
+          [{
+             :model_name => :component,
+             :alias => :template,
+             :join_type => :inner,
+             :join_cond=>{:ancestor_id => q(:component,:id)},
+             :cols => [:id,:display_name]
+           },
+           {
+             :model_name => :layout,
+             :convert => true,
+             :join_type => :inner,
+             :join_cond=>{:component_component_id => q(:template,:id)},
+             :cols => [:id,:display_name,id(:component),:def,:type,:updated_at]
+           }]
+
         set_submodel(:assembly)
       end
     end
@@ -335,6 +352,13 @@ module XYZ
     end
 
    public
+
+    def get_view_def(view_type)
+      from_db = get_view_def_from_db(view_type)
+      return from_db if from_db
+      Layout.create_from_field_def(get_field_def(),view_type)
+    end
+
     def get_layouts(view_type)
       from_db = get_layouts_from_db(view_type)
       return from_db unless from_db.empty?
@@ -343,12 +367,22 @@ module XYZ
     end
 
    protected
-    def get_layouts_from_db(view_type)
-      unprocessed_rows = get_objects_col_from_sp_hash({:columns => [:layouts]},:layout)
+    def get_layouts_from_db(view_type,layout_vc=:layouts)
+      unprocessed_rows = get_objects_col_from_sp_hash({:columns => [layout_vc]},:layout)
+      #TODO: more efficient would be to use db sort
       unprocessed_rows.select{|l|l[:type] == view_type.to_s}.sort{|a,b|b[:updated_at] <=> a[:updated_at]}
+    end
+
+    def get_view_def_from_db(view_type)
+      #TODO: more efficient would be to use db limit 
+      view_def = get_layouts_from_db(view_type,:layouts).first
+      return view_def if view_def
+      view_def = get_layouts_from_db(view_type,:layouts_from_ancestor).first
+      return view_def if view_def
     end
    public
 
+    #TODO: wil be deperacted
     def get_info_for_view_def()
       sp_hash = {:columns => [:id,:display_name,:component_type,:basic_type,:attributes_view_def_info]}
       component_and_attrs = get_objects_from_sp_hash(sp_hash)

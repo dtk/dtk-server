@@ -1,6 +1,11 @@
 module Ramaze::Helper
   module Common
     include XYZ #TODO: included because of ModelHandle amd Model; make sure not expensive to laod these defs in this module
+
+    def create_object_from_id(id,model_name_x=model_name(),opts={})
+      id_handle(id,model_name_x).create_object(opts)
+    end      
+
    private
 
     #query helpers
@@ -13,10 +18,6 @@ module Ramaze::Helper
       c = ret_session_context_id()
       model_class(model_name).get_objects(ModelHandle.new(c,model_name),where_clause,opts)
     end
-
-    def create_object_from_id(id,model_name_x=model_name(),opts={})
-      id_handle(id,model_name_x).create_object(opts)
-    end      
 
     def get_object_by_id(id,model_name_x=model_name())
       get_objects(model_name_x,{:id => id}).first

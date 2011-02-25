@@ -6,6 +6,7 @@ module R8Tpl
     include CommonMixin
     include Utility::I18n
     attr_accessor :obj_name, :tpl_contents, :css_require, :js_require
+    attr_reader :user
 
     def self.create(model_name,view_name,user,view_path)
       all_args = 6.times.inject([]){|x,y|x << nil} + [model_name,view_name,user,view_path]
@@ -170,8 +171,10 @@ module R8Tpl
   end
 
   def get_view_meta__db()
-    pp @user
-    raise Error.new("got here")
+    component = user.create_object_from_id(@view_path.to_i)
+    view_def = component.get_view_def(@view_name)
+    pp [:view_def_from_db,view_def]
+    view_def
   end
 
   def get_view_meta__file()

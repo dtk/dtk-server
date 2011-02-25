@@ -86,7 +86,8 @@ pp [:layout_def,layout_list]
       }
     end
 
-    ##TODO just for testing
+##TODO ======= just for testing
+=begin
     def display(id,parsed_query_string=nil)
       component = create_object_from_id(id)
       template_name = component.save_view_in_cache?(:display,user_context())
@@ -94,6 +95,10 @@ pp [:layout_def,layout_list]
       vals = component.get_virtual_object_attributes()
       tpl.assign("component",vals)
       return {:content => tpl.render()}
+    end
+=end
+    def display(id,parsed_query_string=nil)
+      redirect "/xyz/component/details/#{id.to_s}"
     end
 
     def edit(id,parsed_query_string=nil)

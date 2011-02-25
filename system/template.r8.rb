@@ -32,6 +32,8 @@ module R8Tpl
     CTRL_BLOCK_REGEX = /(#{START_TAG_REGEX}([a-zA-Z_@:\[\]][a-zA-Z0-9_@:\[\]'"=\>\<\|&\(\),.\s\!]*)#{END_TAG_REGEX})/m
     #  /\{%\s*(for|if|end)\s*.*%\}/
 
+    attr_reader :model_name,:view_name,:view_model_ref,:user
+
     attr_accessor :tpl_path,:tpl_contents,:tpl_results,:tpl_file_handle,
       :template_vars,:js_render_queue,:xhtml_document,:element_count,:ctrl_close_stack,
       :indent,:num_indents,:panel_set_element_id,
@@ -640,7 +642,7 @@ p '     iteratorVarRaw: '+newLoopHash[:iteratorVarRaw].to_s
       view = ViewR8.new(@model_name,@view_name,@user)
       view.update_cache?()
      when :meta_db
-      view = ViewR8.create(@model_name,@view_name,@user,path)
+      view = ViewR8.create(self,path)
       view.update_cache?()
      when :cache
       path

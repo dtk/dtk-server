@@ -1,9 +1,12 @@
 module R8Tpl
   module CommonMixin
     
-    #temp until deprecate @saved_search_ref
+    #TODO: temp until deprecate @saved_search_ref
     def virtual_model_ref()
       @virtual_model_ref || @saved_search_ref
+    end
+    def virtual_model_ref_type()
+      @saved_search_ref ? :saved_search : :virtual_object
     end
 
     #returns the appropriate view path
@@ -25,7 +28,11 @@ module R8Tpl
        when :cache 
         #TODO: fix so saved_search not hard coded
         if virtual_model_ref
-          ViewPath.new(:file,"#{R8::Config[:app_cache_root]}/view/saved_search/#{@profile}.#{virtual_model_ref}.rtpl")
+          if virtual_model_ref_type() == :virtual_object
+            ViewPath.new(:file,"#{R8::Config[:app_cache_root]}/view/#{@model_name}/#{@profile}.#{@view_name}.#{virtual_model_ref}.rtpl")
+          else
+            ViewPath.new(:file,"#{R8::Config[:app_cache_root]}/view/saved_search/#{@profile}.#{virtual_model_ref}.rtpl")
+          end
         else
           ViewPath.new(:file,"#{R8::Config[:app_cache_root]}/view/#{@model_name}/#{@profile}.#{@view_name}.rtpl")
         end

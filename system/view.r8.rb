@@ -8,21 +8,21 @@ module R8Tpl
     attr_accessor :obj_name, :tpl_contents, :css_require, :js_require
     attr_reader :user
 
-    def self.create(model_name,view_name,user,view_path)
-      all_args = 6.times.inject([]){|x,y|x << nil} + [model_name,view_name,user,view_path]
+    def self.create(tpl,view_path)
+      all_args = 6.times.inject([]){|x,y|x << nil} + [tpl,view_path]
       self.new(*all_args)
     end
 
-    def new_initialize(model_name,view_name,user,view_path)
-      @model_name = model_name
-      @view_name = view_name
-      @user = user
+    def new_initialize(tpl,view_path)
+      @model_name = tpl.model_name
+      @view_name = tpl.view_name
+      @virtual_model_ref = tpl.virtual_model_ref
+      @user = tpl.user
       @profile = @user.current_profile || :default #profile will dictate the specific view to use/generate
       @view_path = view_path
 
-
       @form_id = "#{@model_name}-#{@view_name}-form"
-      @i18n = get_model_i18n(model_name,user)
+      @i18n = get_model_i18n(@model_name,@user)
 
       #TODO: probably remove
       #if set non null then will not try to find path and pull from file
@@ -174,7 +174,6 @@ module R8Tpl
     component = user.create_object_from_id(@view_path.db_id)
     view_meta = component.get_view_meta(view_type().to_sym)
     pp [:view_meta_from_db,view_meta]
-    raise XYZ::Error.new("got here; now need to work on where views persisted and look up")
     view_meta
   end
 

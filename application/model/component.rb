@@ -365,7 +365,9 @@ module XYZ
     end
 
     def get_view_meta_id(view_type)
-      #TODO: stub
+      #TODO: can be more efficient (rather than using get_instance_layout_from_db can use something that returns most recent laypout id); also not sure whether if no db hit to return id()
+      from_db = get_instance_layout_from_db(view_type)
+      return from_db[:id] if from_db
       id()
     end
 

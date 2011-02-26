@@ -86,6 +86,13 @@ module R8Tpl
         return self.to_i if type == :db
         raise XYZ::Error.new("db_id can omly be called when type == :db")
       end
+      def edit_time()
+        case @type
+          when :file then File.mtime(self).to_i
+          when :db then 0 #TODO: stub
+          else raise XYZ::Error.new("unexpected type #{@type}")
+        end
+      end
     end
 
 

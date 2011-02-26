@@ -178,34 +178,23 @@ module R8Tpl
 
   
   # This will check to see if the TPL view file exists and isnt stale compare to the base TPL and other factors
-  def cache_current?()
-    view_path_type() == :db ? cache_current__db?() : cache_current__file?()
-  end
-
-  def cache_current__db?()
-    #TODO: stub
-    false
-  end
-
-  def cache_current__file?()
+ def cache_current?()
     cache_path = ret_existing_view_path(:cache)
     return nil unless cache_path
-    meta_view_path = ret_existing_view_path(:meta)
+    meta_view_path = ret_existing_view_path(view_path_type() == :db ? :meta_db : :meta)
     raise XYZ::Error.new("to generate cache appropriate meta file must exist") unless  meta_view_path
     system_view_path = ret_existing_view_path(:system)
     raise XYZ::Error.new("to generate cache appropriate system file must exist") unless  system_view_path
 
-    #TODO: ask Nate about intended semantics; modified because error if file does not exist, but clause executed
     if not R8::Config[:dev_mode].nil? or R8::Config[:dev_mode] == false
-      cache_edit_time = File.mtime(cache_path).to_i
-      meta_view_edit_time = File.mtime(meta_view_path).to_i
-      system_view_edit_time = File.mtime(system_view_path).to_i
-      cache_edit_time > meta_view_edit_time and  cache_edit_time > system_view_edit_time
+      cache_edit_time = cache_path.edit_time()
+      meta_view_edit_time = meta_view_path.edit_time()
+      system_view_edit_time = system_view_path.edit_time()
+      cache_edit_time > meta_view_edit_time and cache_edit_time > system_view_edit_time
     else
-      nil #TODO: should this be true or nil?
+      nil
     end
   end
-
 
   def get_system_rtpl_contents()
     IO.read(ret_existing_view_path(:system))

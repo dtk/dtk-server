@@ -358,17 +358,17 @@ module XYZ
 
     def get_view_meta(view_type,virtual_model_ref)
       from_db = get_instance_layout_from_db(view_type)
-      virtual_model_ref.set_view_meta_id(from_db[:id]) if from_db
+      virtual_model_ref.set_view_meta_info(from_db[:id],from_db[:updated_at]) if from_db
 
       layout_def = (from_db||{})[:def] || Layout.create_def_from_field_def(get_field_def(),view_type)
       create_view_meta_from_layout_def(view_type,layout_def)
     end
 
-    def get_view_meta_id(view_type)
+    def get_view_meta_info(view_type)
       #TODO: can be more efficient (rather than using get_instance_layout_from_db can use something that returns most recent laypout id); also not sure whether if no db hit to return id()
       from_db = get_instance_layout_from_db(view_type)
-      return from_db[:id] if from_db
-      id()
+      return [from_db[:id],from_db[:updated_at]] if from_db
+      [id(),Time.new()]
     end
 
     def get_layouts(view_type)

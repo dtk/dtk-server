@@ -175,7 +175,6 @@ module R8Tpl
      raise XYZ::ErrorNotImplemented.new()
     end
   end
-
   
   # This will check to see if the TPL view file exists and isnt stale compare to the base TPL and other factors
  def cache_current?()
@@ -187,9 +186,9 @@ module R8Tpl
     raise XYZ::Error.new("to generate cache appropriate system file must exist") unless  system_view_path
 
     if not R8::Config[:dev_mode].nil? or R8::Config[:dev_mode] == false
-      cache_edit_time = cache_path.edit_time()
-      meta_view_edit_time = meta_view_path.edit_time()
-      system_view_edit_time = system_view_path.edit_time()
+      cache_edit_time = cache_path.edit_time_as_int()
+      meta_view_edit_time = meta_view_path.edit_time_as_int()
+      system_view_edit_time = system_view_path.edit_time_as_int()
       cache_edit_time > meta_view_edit_time and cache_edit_time > system_view_edit_time
     else
       nil

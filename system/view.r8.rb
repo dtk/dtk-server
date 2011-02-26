@@ -140,22 +140,6 @@ module R8Tpl
     XYZ::HashObject.nested_value(@i18n,term)
   end
 
-  ViewTranslations = {
-    :edit => 'edit',
-    :quick_edit => 'edit',
-    :list_edit_in_place => 'edit',
-    :display => 'display',
-    :hover => 'display',
-    :saved_search => 'list',
-    :list => 'list',
-    :related_panel => 'list',
-    :search => 'search'
-  }
-
-  def view_type()
-    ViewTranslations[@view_name.to_sym]
-  end
-
   #if not set yet, this will grab/set the meta array for given object/viewType
   # TODO: should have extensible definition of viewName (ie: edit,quickEdit,editInline,etc)
   def view_meta()
@@ -172,9 +156,7 @@ module R8Tpl
 
   def get_view_meta__db()
     component = user.create_object_from_id(@view_path.db_id)
-    view_meta = component.get_view_meta(view_type().to_sym)
-    pp [:view_meta_from_db,view_meta]
-    view_meta
+    component.get_view_meta(view_type().to_sym,@virtual_model_ref)
   end
 
   def get_view_meta__file()

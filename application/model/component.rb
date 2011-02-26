@@ -192,7 +192,7 @@ module XYZ
              :model_name => :component,
              :alias => :template,
              :join_type => :inner,
-             :join_cond=>{:ancestor_id => q(:component,:id)},
+             :join_cond=>{:id => q(:component,:ancestor_id)},
              :cols => [:id,:display_name]
            },
            {
@@ -355,9 +355,17 @@ module XYZ
 
    public
 
-    def get_view_meta(view_type)
-      layout_def = (get_instance_layout_from_db(view_type)||{})[:def] || Layout.create_def_from_field_def(get_field_def(),view_type)
+    def get_view_meta(view_type,virtual_model_ref)
+      from_db = get_instance_layout_from_db(view_type)
+      virtual_model_ref.set_view_meta_id(from_db[:id]) if from_db
+
+      layout_def = (from_db||{})[:def] || Layout.create_def_from_field_def(get_field_def(),view_type)
       create_view_meta_from_layout_def(view_type,layout_def)
+    end
+
+    def get_view_meta_id(view_type)
+      #TODO: stub
+      id()
     end
 
     def get_layouts(view_type)
@@ -431,7 +439,6 @@ module XYZ
       end
       vals
     end
-
 
     def add_model_specific_override_attrs!(override_attrs)
       override_attrs[:display_name] = SQL::ColRef.qualified_ref

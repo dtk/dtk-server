@@ -9,16 +9,16 @@ module R8Tpl
     include CommonMixin
 
     #TODO: will refactor to this fn
-    def self.create(model_name,view_name,user,virtual_model_ref=nil,source=:cache)
-      self.new(nil,nil,nil,model_name,view_name,user,virtual_model_ref,source)
+    def self.create(model_name,view_name,user,virtual_model_ref_str=nil,source=:cache)
+      self.new(nil,nil,nil,model_name,view_name,user,virtual_model_ref_str,source)
     end
 
-    def new_initialize(model_name,view_name,user,virtual_model_ref=nil,source=:cache)
+    def new_initialize(model_name,view_name,user,virtual_model_ref_str=nil,source=:cache)
       @user = user
       @profile = @user.current_profile
       @model_name = model_name
       @view_name = view_name
-      @virtual_model_ref = virtual_model_ref
+      @virtual_model_ref = VirtualModelRef.create(virtual_model_ref_str,view_type(view_name),user)
 
       initialize_vars()
 

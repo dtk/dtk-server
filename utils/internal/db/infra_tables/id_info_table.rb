@@ -27,8 +27,8 @@ module XYZ
       ModelHandle.new(self[:c],model_name,self[:parent_model_name])
     end
 
-    def get_children_model_handles()
-      get_children_model_names().map{|child_model_name|ModelHandle.new(self[:c],child_model_name,self[:model_name])}
+    def get_children_model_handles(opts={})
+      get_children_model_names(opts).map{|child_model_name|ModelHandle.new(self[:c],child_model_name,self[:model_name])}
     end
 
     def to_s
@@ -44,8 +44,10 @@ module XYZ
     end
 
    private
-    def get_children_model_names()
-      db_rel[:one_to_many]||[]
+    def get_children_model_names(opts={})
+      ret = db_rel[:one_to_many]||[]
+      ret = ret - (db_rel[:one_to_many_clone_omit]||[]) if opts[:clone_context]
+      ret
     end
     def db_rel()
       DB_REL_DEF[self[:model_name]]

@@ -22,6 +22,7 @@ module XYZ
         column :view_def_ref, :varchar
         many_to_one :component, :library, :node, :node_group, :datacenter
         one_to_many :component, :attribute_link, :attribute, :monitoring_item, :constraints, :layout
+        one_to_many_clone_omit :layout
         virtual_column :parent_name, :possible_parents => [:component,:library,:node,:node_group]
 
         virtual_column :view_def_key, :type => :varchar, :hidden => true, :local_dependencies => [:id,:view_def_ref,:component_type] 

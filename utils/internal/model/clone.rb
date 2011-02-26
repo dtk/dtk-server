@@ -258,7 +258,7 @@ module XYZ
      private
       attr_reader :db,:fk_info, :model_name
       def get_nested_objects__parents(model_handle,objs_info,recursive_override_attrs)
-        model_handle.get_children_model_handles().map do |mh|
+        model_handle.get_children_model_handles(:clone_context => true).map do |mh|
           override_attrs = ret_child_override_attrs(mh,recursive_override_attrs)
           parent_id_col = mh.parent_id_field_name()
           parent_rels = objs_info.map{|row|{parent_id_col => row[:id],:old_par_id => row[:ancestor_id]}}

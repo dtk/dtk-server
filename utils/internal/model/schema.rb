@@ -22,6 +22,7 @@ module XYZ
       @db_rel[:relation_type] = @relation_type
       @db_rel[:many_to_one] = []
       @db_rel[:one_to_many] = []
+      @db_rel[:one_to_many_clone_omit] = []
       @db_rel[:columns] = {}
       @db_rel[:virtual_columns] = {}
       @db_rel[:model_class] = self
@@ -58,6 +59,10 @@ module XYZ
 
     def one_to_many(*target_relation_types)
       @db_rel[:one_to_many] = target_relation_types
+    end
+
+    def one_to_many_clone_omit(*target_relation_types)
+      @db_rel[:one_to_many_clone_omit] = target_relation_types
     end
 
     def column(col_name,col_type,opts={})

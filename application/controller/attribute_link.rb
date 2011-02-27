@@ -3,6 +3,16 @@ module XYZ
   class Attribute_linkController < Controller
     helper :ports
     #TODO: right now just for testing
+
+=begin
+TODO: testing of port constraints
+    def save(explicit_hash=nil,opts={})
+      hash = explicit_hash || request.params.dup
+      constraints = create_object_from_id(hash["input_id"],:attribute).get_constraints()
+      super(hash,opts)
+    end
+=end
+
     def list_legal_connections(*parent_uri_array) #TODO stub
       parent_id = nil
       parent_uri = (parent_uri_array.empty? ? "/datacenter/dc1" : "/" + parent_uri_array.join("/"))

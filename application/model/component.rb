@@ -228,6 +228,7 @@ module XYZ
     ######### Model apis
     def get_constraints()
       opts = {:ret_keys_as_symbols => false}
+      #TODO: look at get_contraints on attribute; and use of preprocessing to get rid of ":" form
       get_objects_col_from_sp_hash({:columns => [:constraints]},:constraints,opts).first
     end
 

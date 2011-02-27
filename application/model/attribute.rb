@@ -34,6 +34,18 @@ module XYZ
      
       virtual_column :is_unset, :type => :boolean, :hidden => true, :local_dependencies => [:value_asserted,:value_derived,:data_type,:semantic_type]
 
+      virtual_column :constraints, :type => :json, :hidden => true, 
+        :remote_dependencies => 
+        [
+         {
+           :model_name => :constraints,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond=>{:attribute_attribute_id => q(:attribute,:id)},
+           :cols => [:id,:component_constraints]
+         }]
+
+
       virtual_column :needs_to_be_set, :type => :boolean, :hidden => true, 
         :local_dependencies => [:value_asserted,:value_derived,:read_only,:required],
         :sql_fn => SQL.and({:attribute__value_asserted => nil},{:attribute__value_derived => nil},
@@ -54,7 +66,7 @@ module XYZ
 
       virtual_column :parent_name, :possible_parents => [:component,:node]
       many_to_one :component, :node
-
+      one_to_many :constraints #for ports indicating what they can connect to
       virtual_column :unraveled_attribute_id, :type => :varchar, :hidden => true #TODO put in depenedncies
 
       #TODO: may deprecate
@@ -257,7 +269,14 @@ also related is allowing omission of columns mmentioned in jon condition; post p
     def id_info_uri()
       (self[:id_info]||{})[:uri]
     end
+
     #######################
+    ######### Model apis
+    def get_constraints()
+      raw_constraints = (get_objects_col_from_sp_hash({:columns => [:constraints]},:constraints).first||{})[:component_constraints]
+      raw_constraints && raw_constraints.map{|hash|SearchPattern.create_just_filter(hash)}
+    end
+
     ### object procssing and access functions
 
     def qualified_attribute_name_aux(node_or_group_name=nil)

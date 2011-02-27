@@ -9,7 +9,7 @@ module XYZ
 
       column :tag, :varchar
       #TODO: may change types; by virtue of being in alibrary we know about item; may need to distingusih between backed images versus barbones one; also may only treat node constraints with search objects
-      column :type, :varchar, :size => 25, :default => "instance" # | "image" | "staged" | "constraint" | "contraint-common-node"
+      column :type, :varchar, :size => 25, :default => "instance" # | "image" | "staged" | "constraint" | "constraint-common-node"
       column :os, :varchar, :size => 25
       #TODO: is_deployed may just be a virtual column that tests if :external_ref is null
       column :is_deployed, :boolean
@@ -37,8 +37,9 @@ module XYZ
         ]
 
       virtual_column :attribute_ports, :type => :json, :hidden => true, 
-       :remote_dependencies => 
-        [{
+      :remote_dependencies => 
+        [
+         {
            :model_name => :component,
            :join_type => :inner,
            :join_cond=>{:node_node_id => q(:node,:id)},

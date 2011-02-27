@@ -6,10 +6,13 @@ module XYZ
       #TODO: case on whether simple or complex
       SearchPatternSimple.new(hash_search_pattern)
     end
+    def self.create_just_filter(hash_search_pattern)
+      SearchPatternSimple.new(hash_search_pattern,:keys=>[:filter])
+    end
   end
 
   module HashSearchPattern
-    #TODO: shoudl unify with parsing in utils/internal/dataset_from_search_pattern.rb; and may do away with having to deal with symbol and variant forms
+    #TODO: should unify with parsing in utils/internal/dataset_from_search_pattern.rb; and may do away with having to deal with symbol and variant forms
     def self.add_to_filter(hash_search_pattern,hash_filter)
       filter = augment_filter(index(hash_search_pattern,:filter),hash_filter)
       merge(hash_search_pattern,{:filter => filter})
@@ -51,10 +54,21 @@ module XYZ
 
 #TODO: add a more complex search patterm which is joins/link following of simple patterms
   class SearchPatternSimple < SearchPattern
-    def initialize(hash_search_pattern)
+    def initialize(hash_search_pattern,opts={})
       super()
-      parse_and_set!(hash_search_pattern)
+      parse_and_set!(hash_search_pattern,opts)
     end
+
+    def break_filter_into_conjunctions()
+      filter = self[:filter]
+      return [filter] unless filter.first == :and 
+      filter[1..filter.size-1].map{|x|break_into_conjunctions(x)}.flatten
+    end
+
+    def ret_col_in_comparison(expression)
+      expression[1].kind_of?(Symbol) ? expression[1] : expression[2]
+    end
+
     def hash_for_json_generate()
       ret = process_symbols(self)
       #TODO: would be nice to get rid of this hack
@@ -130,12 +144,16 @@ module XYZ
       self[:filter]
     end
 
-    def parse_and_set!(hash_input)
-      self[:relation] = ret_relation(hash_input)
-      self[:columns] = ret_columns(hash_input)
-      self[:filter] = ret_filter(hash_input)
-      self[:order_by] = ret_order_by(hash_input)
-      self[:paging] = ret_paging(hash_input)
+    def parse_and_set!(hash_input,opts={})
+      self[:relation] = ret_relation(hash_input) unless donot_ret_key(:relation,opts)
+      self[:columns] = ret_columns(hash_input) unless donot_ret_key(:columns,opts)
+      self[:filter] = ret_filter(hash_input) unless donot_ret_key(:filter,opts)
+      self[:order_by] = ret_order_by(hash_input) unless donot_ret_key(:order_by,opts)
+      self[:paging] = ret_paging(hash_input) unless donot_ret_key(:paging,opts)
+    end
+    def donot_ret_key(key,opts)
+      return nil unless opts[:keys]
+      not opts[:keys].include?(key)
     end
 
     def ret_relation(hash_input)

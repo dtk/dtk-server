@@ -20,13 +20,15 @@ module XYZ
           process_local_and_remote_dependencies(search_object,self.new(mh_in_search_pattern,sequel_ds),remote_col_info,vcol_sql_fns)
         end
 
-        #TODO: test stub
-        def test_dynamic_virtual_column(id_handle,remote_col_info)
-          simple_dataset = Model.get_objects_just_dataset(id_handle.createMH(),{:id => id_handle.get_id()})
+        def create_dataset_from_join_array(id_handle,join_array)
+          #TODO: may take first in join_array to be base model spec or instead prune columns based on what is in join_array  or add cols and wher clause to above
           db = id_handle.db
+          model_name = id_handle[:model_name]
+          base_dataset = Dataset.new(id_handle.createMH(),db.dataset(DB_REL_DEF[model_name]).where(:id => id_handle.get_id()).from_self(:alias => model_name))
+
           #join in any needed tables
-          graph_ds = simple_dataset.from_self(:alias => id_handle[:model_name])
-          remote_col_info.each do |join_info|
+          graph_ds = base_dataset
+          join_array.each do |join_info|
             right_ds = nil
             right_ds_mh = id_handle.createMH(:model_name => join_info[:model_name])
             if join_info[:sequel_def] #override with sequel def
@@ -41,7 +43,7 @@ module XYZ
             opts.merge!(:convert => true) if join_info[:convert]
             graph_ds = graph_ds.graph(join_info[:join_type]||:left_outer,right_ds,join_info[:join_cond],opts)
           end
-          graph_ds.all
+          graph_ds
         end
 
        private

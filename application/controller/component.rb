@@ -129,8 +129,8 @@ pp [:layout_def,layout_list]
         virtual_col_def = ((DB_REL_DEF[model_name]||{})[:virtual_columns]||{})[virtual_col_name.to_sym]
         remote_col_info = (virtual_col_def||{})[:remote_dependencies]
         raise Error.new("bad virtual_col_name #{virtual_col_name}") unless remote_col_info
-        x = SQL::DataSetSearchPattern.test_dynamic_virtual_column(id_handle,remote_col_info)
-        pp [:debug,x]
+        dataset = SQL::DataSetSearchPattern.create_dataset_from_join_array(id_handle,remote_col_info)
+        pp [:debug,dataset.all]
       end
 
       component = create_object_from_id(id)

@@ -123,7 +123,16 @@ pp [:layout_def,layout_list]
       redirect "/xyz/component/edit/#{component_id.to_s}"
     end
 
-    def instance_edit_test(id)
+    def instance_edit_test(id,virtual_col_name=nil)
+      if virtual_col_name
+        id_handle = id_handle(id)
+        virtual_col_def = ((DB_REL_DEF[model_name]||{})[:virtual_columns]||{})[virtual_col_name.to_sym]
+        remote_col_info = (virtual_col_def||{})[:remote_dependencies]
+        raise Error.new("bad virtual_col_name #{virtual_col_name}") unless remote_col_info
+        x = SQL::DataSetSearchPattern.test_dynamic_virtual_column(id_handle,remote_col_info)
+        pp [:debug,x]
+      end
+
       component = create_object_from_id(id)
 
       virtual_model_ref = id.to_s

@@ -31,6 +31,10 @@ module XYZ
       get_children_model_names(opts).map{|child_model_name|ModelHandle.new(self[:c],child_model_name,self[:model_name])}
     end
 
+    def db()
+      Model.model_class(self[:model_name]).db
+    end
+
     def to_s
       model_name = "model_name=#{self[:model_name]||"UNKNOWN"}"
       uri_or_guid = 

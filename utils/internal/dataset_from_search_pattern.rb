@@ -20,6 +20,30 @@ module XYZ
           process_local_and_remote_dependencies(search_object,self.new(mh_in_search_pattern,sequel_ds),remote_col_info,vcol_sql_fns)
         end
 
+        #TODO: test stub
+        def test_dynamic_virtual_column(id_handle,remote_col_info)
+          simple_dataset = Model.get_objects_just_dataset(id_handle.createMH(),{:id => id_handle.get_id()})
+          db = id_handle.db
+          #join in any needed tables
+          graph_ds = simple_dataset.from_self(:alias => id_handle[:model_name])
+          remote_col_info.each do |join_info|
+            right_ds = nil
+            right_ds_mh = id_handle.createMH(:model_name => join_info[:model_name])
+            if join_info[:sequel_def] #override with sequel def
+              sequel_ds = join_info[:sequel_def].call(db.dataset(DB_REL_DEF[join_info[:model_name]]))
+              right_ds = Dataset.new(right_ds_mh,sequel_ds)
+            else
+              rs_opts = (join_info[:cols] ? Model::FieldSet.opt(join_info[:cols],join_info[:model_name]) : {}).merge :return_as_hash => true
+              filter = join_info[:filter] ? SimpleSearchPattern::ret_sequel_filter(join_info[:filter],join_info[:model_name]) : nil
+              right_ds = db.get_objects_just_dataset(right_ds_mh,filter,rs_opts)
+            end
+            opts = join_info[:alias] ? {:table_alias => join_info[:alias]} : {}
+            opts.merge!(:convert => true) if join_info[:convert]
+            graph_ds = graph_ds.graph(join_info[:join_type]||:left_outer,right_ds,join_info[:join_cond],opts)
+          end
+          graph_ds.all
+        end
+
        private
         def process_local_and_remote_dependencies(search_object,simple_dataset,remote_col_info=nil,vcol_sql_fns=nil)
           model_handle = simple_dataset.model_handle()

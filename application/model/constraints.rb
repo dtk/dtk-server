@@ -55,7 +55,18 @@ module XYZ
    private
     module PortConstraint
       def self.evaluate(constraint,other_end_idh)
-        convert_from_virtual_object_form(constraint)
+        search_pattern_filter_part = convert_from_virtual_object_form(constraint)
+        #TODO: not right; just place holder; need to use code from
+=begin
+        virtual_col_def = ((DB_REL_DEF[model_name]||{})[:virtual_columns]||{})[virtual_col_name.to_sym]
+        remote_col_info = (virtual_col_def||{})[:remote_dependencies]
+        raise Error.new("bad virtual_col_name #{virtual_col_name}") unless remote_col_info
+        dataset = SQL::DataSetSearchPattern.create_dataset_from_join_array(id_handle,remote_col_info)
+        pp [:debug,dataset.all]
+=end
+        search_pattern = search_pattern_filter_part.merge(:relation => :component,:columns => [:id])
+        Model.get_objects_from_search_object(search_object)
+        
 =begin
         [{
            :model_name => :attribute,
@@ -74,9 +85,24 @@ module XYZ
       end
       private
       #converts from form that acts as if attributes are directly attached to component  
-      def self.convert_from_virtual_object_form(vo_form)
-        pp [:debug,HashSearchPattern.break_filter_into_conjunctions(vo_form[:filter])]
+      def self.convert_from_virtual_object_form(search_pattern)
+        real = Array.new
+        virtual = Array.new
+        real_cols = real_component_columns()
+        search_pattern.break_filter_into_conjunctions().each do |conjunction|
+          if real_cols.include?(search_pattern.ret_col_in_comparison(conjunction))
+            real << conjunction
+          else 
+            virtual << conjunction
+          end
+        end
+        return search_pattern.merge(:relation => :component,:columns => [:id]) if virtual.empty?
+        #TODO: stub
+        search_pattern.merge(:relation => :component,:columns => [:id])
       end
+    end
+    def self.real_component_columns()
+      @real_component_columns ||= DB_REL_DEF[:component][:columns]
     end
 
     #TODO: unify the different contraint variants

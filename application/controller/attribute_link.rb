@@ -9,6 +9,9 @@ TODO: testing of port constraints
     def save(explicit_hash=nil,opts={})
       hash = explicit_hash || request.params.dup
       constraints = create_object_from_id(hash["input_id"],:attribute).get_constraints()
+      if constraints
+        matches = constraints.evaluate_port_constraints(id_handle(hash["output_id"],:attribute)
+      end
       super(hash,opts)
     end
 =end

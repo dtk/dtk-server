@@ -52,6 +52,11 @@ module XYZ
 
     attr_reader :relation_type, :id_handle, :c
 
+    #this may be overwritten by the models
+    def self.create(hash_scalar_values,c,relation_type_x=model_name(),id_handle=nil)
+      self.new(hash_scalar_values,c,relation_type_x,id_handle)
+    end
+    #TODO: make initialize and use create
     #TODO: check why relation_type=model_name does not work
     def initialize(hash_scalar_values,c,relation_type_x=model_name(),id_handle=nil)
       return nil if hash_scalar_values.nil?

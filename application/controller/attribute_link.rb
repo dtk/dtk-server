@@ -3,17 +3,18 @@ module XYZ
     helper :ports
     #TODO: right now just for testing
 
-=begin
+#=begin
 #TODO: testing of port constraints
     def save(explicit_hash=nil,opts={})
       hash = explicit_hash || request.params.dup
-      constraints = create_object_from_id(hash["input_id"],:attribute).get_constraints()
-      if constraints
-        matches = Constraints.evaluate_port_constraints(constraints,id_handle(hash["output_id"],:attribute))
+      dependencies = create_object_from_id(hash["input_id"],:attribute).get_dependencies()
+      if dependencies
+        target = {:target_port_id_handle => id_handle(hash["output_id"],:attribute)}
+        matches = Dependency.evaluate_constraints_given_target(dependencies,target)
       end
       super(hash,opts)
     end
-=end
+#=end
 
     def list_legal_connections(*parent_uri_array) #TODO stub
       parent_id = nil

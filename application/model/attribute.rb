@@ -34,15 +34,20 @@ module XYZ
      
       virtual_column :is_unset, :type => :boolean, :hidden => true, :local_dependencies => [:value_asserted,:value_derived,:data_type,:semantic_type]
 
-      virtual_column :constraints, :type => :json, :hidden => true, 
+      virtual_column :parent_name, :possible_parents => [:component,:node]
+      many_to_one :component, :node
+      one_to_many :dependency #for ports indicating what they can connect to
+
+      virtual_column :dependencies, :type => :json, :hidden => true, 
         :remote_dependencies => 
         [
          {
-           :model_name => :constraints,
+           :model_name => :dependency,
+           :alias => :dependencies,
            :convert => true,
            :join_type => :inner,
            :join_cond=>{:attribute_attribute_id => q(:attribute,:id)},
-           :cols => [:id,:component_constraints]
+           :cols => [:id,:search_pattern,:type]
          }]
 
 
@@ -64,9 +69,6 @@ module XYZ
       }
       virtual_column :id_info_uri, :hidden => true, :remote_dependencies => uri_remote_dependencies
 
-      virtual_column :parent_name, :possible_parents => [:component,:node]
-      many_to_one :component, :node
-      one_to_many :constraints #for ports indicating what they can connect to
       virtual_column :unraveled_attribute_id, :type => :varchar, :hidden => true #TODO put in depenedncies
 
       #TODO: may deprecate
@@ -272,9 +274,10 @@ also related is allowing omission of columns mmentioned in jon condition; post p
 
     #######################
     ######### Model apis
-    def get_constraints()
-      raw_constraints = (get_objects_col_from_sp_hash({:columns => [:constraints]},:constraints).first||{})[:component_constraints]
-      raw_constraints && raw_constraints.map{|hash|SearchPattern.create_just_filter(hash)}
+    def get_dependencies()
+#      raw_constraints = (get_objects_col_from_sp_hash({:columns => [:constraints]},:constraints).first||{})[:component_constraints]
+ #     raw_constraints && raw_constraints.map{|hash|SearchPattern.create_just_filter(hash)}
+      get_objects_col_from_sp_hash({:columns => [:dependencies]},:dependencies)
     end
 
     ### object procssing and access functions

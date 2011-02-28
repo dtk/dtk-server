@@ -336,10 +336,10 @@ module XYZ
             next unless row[model_index]
             Model.process_raw_db_row!(row[model_index],m.model_name,opts)
             if m.convert or opts[:convert_child_rows]
-              row[model_index] = DB_REL_DEF[m.model_name][:model_class].new(row[model_index],@c,m.model_name)
+              row[model_index] = DB_REL_DEF[m.model_name][:model_class].create(row[model_index],@c,m.model_name)
             end
           end
-          new_row = DB_REL_DEF[primary_model_name][:model_class].new(row,@c,primary_model_name)
+          new_row = DB_REL_DEF[primary_model_name][:model_class].create(row,@c,primary_model_name)
           next if @filter_post_processing and not @filter_post_processing.call(new_row)
           ret << new_row
         end

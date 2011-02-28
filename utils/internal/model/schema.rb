@@ -47,7 +47,11 @@ module XYZ
     def load_model_def(model_nm=model_name())
       model_def_fn = "#{R8::Config[:meta_templates_root]}/#{model_nm}/new/model_def.rb"
       raise Error.new("cannot find model def file #{model_def_fn} for #{model_name()}") unless  File.exists?(model_def_fn)
-      eval(IO.read(model_def_fn)) 
+      begin
+        eval(IO.read(model_def_fn)) 
+       rescue Exception => e
+        raise Error.new("parsing error in #{model_def_fn}: #{e.inspect}")
+      end
     end
    public
     

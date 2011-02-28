@@ -150,25 +150,26 @@ module XYZ
     end
 
     def parse_and_set!(hash_input,opts={})
-      self[:relation] = ret_relation(hash_input) unless donot_ret_key(:relation,opts)
-      self[:columns] = ret_columns(hash_input) unless donot_ret_key(:columns,opts)
+      self[:relation] = ret_relation(hash_input) unless donot_ret_key([:relation,:model_name],opts)
+      self[:columns] = ret_columns(hash_input) unless donot_ret_key([:columns,:cols],opts)
       self[:filter] = ret_filter(hash_input) unless donot_ret_key(:filter,opts)
       self[:order_by] = ret_order_by(hash_input) unless donot_ret_key(:order_by,opts)
       self[:paging] = ret_paging(hash_input) unless donot_ret_key(:paging,opts)
     end
-    def donot_ret_key(key,opts)
+    def donot_ret_key(key_or_keys,opts)
       return nil unless opts[:keys]
-      not opts[:keys].include?(key)
+      (opts[:keys] & Array(key_or_keys)).empty?
     end
 
+    #TODO: move to using model_name, not relation
     def ret_relation(hash_input)
-      relation_str = find_key_from_input(:relation,hash_input)
+      relation_str = find_key_from_input(:relation,hash_input)||find_key_from_input(:model_name,hash_input)
       return nil unless relation_str
       ret_symbol(relation_str)
     end
 
     def ret_columns(hash_input)
-      columns = find_key_from_input(:columns,hash_input)
+      columns = find_key_from_input(:columns,hash_input)||find_key_from_input(:cols,hash_input)
       return Array.new if columns.nil? or columns.empty?
       raise ErrorParsing.new(:columns,columns) unless columns.kind_of?(Array)
       #form will be an array with each term either token or {:foo => :alias}; 

@@ -54,12 +54,12 @@ module XYZ
    private
     module PortConstraint
       def self.evaluate_virtual_component_constraint(vc_constraint,other_end_idh)
-        join_array = convert_vc_contraint_to_join_array(vc_constraint)
+        join_array = convert_vc_constraint_to_join_array(vc_constraint)
         model_handle = other_end_idh.createMH(:attribute)
         base_sp_hash = {
           :model_name => :attribute,
           :filter => [:and,[:eq,:id, other_end_idh.get_id()]],
-          :cols=>[:id,:component_component_id]
+          :cols => [:id,:component_component_id]
         }
         base_sp = SearchPatternSimple.new(base_sp_hash)
         dataset = SQL::DataSetSearchPattern.create_dataset_from_join_array(model_handle,base_sp,join_array)
@@ -68,7 +68,7 @@ module XYZ
 
      private
       #converts from form that acts as if attributes are directly attached to component  
-      def self.convert_vc_contraint_to_join_array(vc_constraint)
+      def self.convert_vc_constraint_to_join_array(vc_constraint)
         real = Array.new
         virtual = Array.new
         real_cols = real_component_columns()
@@ -85,7 +85,8 @@ module XYZ
              :model_name => :component,
              :filter => [:and] + real,
              :join_type => :inner,
-             :join_cond => {:id => :attribute__component_component_id}
+             :join_cond => {:id => :attribute__component_component_id},
+             :cols => [:id,:display_name]
            }]
           else
           #TODO: STUB
@@ -93,7 +94,8 @@ module XYZ
              :model_name => :component,
              :filter => [:and] + real,
              :join_type => :inner,
-             :join_cond => {:id => :attribute__component_component_id}
+             :join_cond => {:id => :attribute__component_component_id},
+             :cols => [:id,:display_name]
            }]
         end
       end

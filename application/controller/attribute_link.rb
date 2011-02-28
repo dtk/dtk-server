@@ -1,4 +1,3 @@
-
 module XYZ
   class Attribute_linkController < Controller
     helper :ports

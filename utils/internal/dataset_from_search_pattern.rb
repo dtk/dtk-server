@@ -98,13 +98,13 @@ module XYZ
             ds = ret_sequel_ds_with_filter(ds,sequel_filter)
             ret_sequel_ds_with_order_by_and_paging(ds,search_pattern)
           end
-          #TODO: btter relate these two
+          #TODO: better relate these two methods
           def self.ret_sequel_ds(model_handle,search_pattern)
             ds = model_handle.db.empty_dataset()
             ds_add = ret_sequel_ds_with_relation(ds,search_pattern)
             return nil unless ds_add; ds = ds_add
         
-            ds_add = ret_sequel_ds_with_columns(ds,search_pattern,model_handle,remote_col_info,vcol_sql_fns)
+            ds_add = ret_sequel_ds_with_columns(ds,search_pattern,model_handle)
             return nil unless ds_add; ds = ds_add
 
             sequel_filter = ret_filter_hash(search_pattern) && ret_sequel_filter(ret_filter_hash(search_pattern),model_handle)

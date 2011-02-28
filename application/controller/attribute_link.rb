@@ -5,12 +5,12 @@ module XYZ
     #TODO: right now just for testing
 
 =begin
-TODO: testing of port constraints
+#TODO: testing of port constraints
     def save(explicit_hash=nil,opts={})
       hash = explicit_hash || request.params.dup
       constraints = create_object_from_id(hash["input_id"],:attribute).get_constraints()
       if constraints
-        matches = constraints.evaluate_port_constraints(id_handle(hash["output_id"],:attribute)
+        matches = Constraints.evaluate_port_constraints(constraints,id_handle(hash["output_id"],:attribute))
       end
       super(hash,opts)
     end

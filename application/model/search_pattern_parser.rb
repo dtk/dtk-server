@@ -59,15 +59,20 @@ module XYZ
       parse_and_set!(hash_search_pattern,opts)
     end
 
-    def break_filter_into_conjunctions()
-      filter = self[:filter]
-      return [filter] unless filter.first == :and 
-      filter[1..filter.size-1].map{|x|break_into_conjunctions(x)}.flatten
-    end
-
     def ret_col_in_comparison(expression)
       expression[1].kind_of?(Symbol) ? expression[1] : expression[2]
     end
+    def break_filter_into_conjunctions()
+      break_into_conjunctions(self[:filter])
+    end
+   private
+    def break_into_conjunctions(expression)
+      return [expression] unless expression.first == :and 
+      expression[1..expression.size-1].inject([]) do |a,x|
+        a + break_into_conjunctions(x)
+      end
+    end
+   public
 
     def hash_for_json_generate()
       ret = process_symbols(self)

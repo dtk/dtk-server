@@ -15,22 +15,17 @@ module XYZ
           sequel_filter,vcol_sql_fns = SimpleSearchPattern::ret_sequel_filter_and_vcol_sql_fns(search_pattern,mh_in_search_pattern)
 
           remote_col_info = search_object.related_remote_column_info(vcol_sql_fns)
-          sequel_ds = SimpleSearchPattern::ret_sequel_ds(search_object.db.empty_dataset(),search_pattern,sequel_filter,mh_in_search_pattern,remote_col_info,vcol_sql_fns)
+          sequel_ds = SimpleSearchPattern::ret_sequel_ds_with_sequel_filter(mh_in_search_pattern,search_pattern,sequel_filter,remote_col_info,vcol_sql_fns)
           return nil unless sequel_ds
           process_local_and_remote_dependencies(search_object,self.new(mh_in_search_pattern,sequel_ds),remote_col_info,vcol_sql_fns)
         end
 
-        def create_dataset_from_join_array(id_handle,join_array)
-          #TODO: may take first in join_array to be base model spec or instead prune columns based on what is in join_array  or add cols and wher clause to above
-          db = id_handle.db
-          model_name = id_handle[:model_name]
-          base_dataset = Dataset.new(id_handle.createMH(),db.dataset(DB_REL_DEF[model_name]).where(:id => id_handle.get_id()).from_self(:alias => model_name))
-
-          #join in any needed tables
-          graph_ds = base_dataset
+        def create_dataset_from_join_array(model_handle,base_search_pattern,join_array)
+          db = model_handle.db
+          graph_ds = Dataset.new(model_handle,SimpleSearchPattern::ret_sequel_ds(model_handle,base_search_pattern))
           join_array.each do |join_info|
             right_ds = nil
-            right_ds_mh = id_handle.createMH(:model_name => join_info[:model_name])
+            right_ds_mh = model_handle.createMH(:model_name => join_info[:model_name])
             if join_info[:sequel_def] #override with sequel def
               sequel_ds = join_info[:sequel_def].call(db.dataset(DB_REL_DEF[join_info[:model_name]]))
               right_ds = Dataset.new(right_ds_mh,sequel_ds)
@@ -92,13 +87,27 @@ module XYZ
         end
 
         module SimpleSearchPattern
-          def self.ret_sequel_ds(ds,search_pattern,sequel_filter,model_handle,remote_col_info=nil,vcol_sql_fns=nil)
+          def self.ret_sequel_ds_with_sequel_filter(model_handle,search_pattern,sequel_filter,remote_col_info=nil,vcol_sql_fns=nil)
+            ds = model_handle.db.empty_dataset()
             ds_add = ret_sequel_ds_with_relation(ds,search_pattern)
             return nil unless ds_add; ds = ds_add
         
             ds_add = ret_sequel_ds_with_columns(ds,search_pattern,model_handle,remote_col_info,vcol_sql_fns)
             return nil unless ds_add; ds = ds_add
-          
+
+            ds = ret_sequel_ds_with_filter(ds,sequel_filter)
+            ret_sequel_ds_with_order_by_and_paging(ds,search_pattern)
+          end
+          #TODO: btter relate these two
+          def self.ret_sequel_ds(model_handle,search_pattern)
+            ds = model_handle.db.empty_dataset()
+            ds_add = ret_sequel_ds_with_relation(ds,search_pattern)
+            return nil unless ds_add; ds = ds_add
+        
+            ds_add = ret_sequel_ds_with_columns(ds,search_pattern,model_handle,remote_col_info,vcol_sql_fns)
+            return nil unless ds_add; ds = ds_add
+
+            sequel_filter = ret_filter_hash(search_pattern) && ret_sequel_filter(ret_filter_hash(search_pattern),model_handle)
             ds = ret_sequel_ds_with_filter(ds,sequel_filter)
             ret_sequel_ds_with_order_by_and_paging(ds,search_pattern)
           end
@@ -109,6 +118,11 @@ module XYZ
             vcol_sql_fns = Hash.new
             sequel_filter = ret_sequel_filter(filter_hash,model_handle,vcol_sql_fns)
             return [sequel_filter,vcol_sql_fns.empty? ? nil : vcol_sql_fns]
+          end
+
+          def self.ret_filter_hash(search_pattern)
+            filter_hash = search_pattern.find_key(:filter)
+            filter_hash.empty? ? filter_hash : nil
           end
 
           #if vcol_sql_fns is passed is nil then this wil not do any special processing on virtual columns; otehrwise it wil take out virtual columns and append unto this filter_hash

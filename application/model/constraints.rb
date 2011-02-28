@@ -42,10 +42,9 @@ module XYZ
       end
     end
 
-    def evaluate_port_constraints(other_end_idh)
-      constraints = self[:component_constraints]
-      constraints.each do |constraint|
-        match = PortConstraint.evaluate(constraint,other_end_idh)
+    def self.evaluate_port_constraints(vc_constraints,other_end_idh)
+      vc_constraints.each do |vc_constraint|
+        match = PortConstraint.evaluate_virtual_component_constraint(vc_constraint,other_end_idh)
         pp [:debug,match]
         return false if match.empty?
       end
@@ -54,58 +53,57 @@ module XYZ
 
    private
     module PortConstraint
-      def self.evaluate(constraint,other_end_idh)
-        search_pattern_filter_part = convert_from_virtual_object_form(constraint)
-        #TODO: not right; just place holder; need to use code from
-=begin
-        virtual_col_def = ((DB_REL_DEF[model_name]||{})[:virtual_columns]||{})[virtual_col_name.to_sym]
-        remote_col_info = (virtual_col_def||{})[:remote_dependencies]
-        raise Error.new("bad virtual_col_name #{virtual_col_name}") unless remote_col_info
-        dataset = SQL::DataSetSearchPattern.create_dataset_from_join_array(id_handle,remote_col_info)
-        pp [:debug,dataset.all]
-=end
-        search_pattern = search_pattern_filter_part.merge(:relation => :component,:columns => [:id])
-        Model.get_objects_from_search_object(search_object)
-        
-=begin
-        [{
-           :model_name => :attribute,
-           :filter => [:and,[:eq,:id, other_end_idh.get_id()]],
-           :cols=>[:id,:component_component_id]
-         },
-         {
-           :model_name => :component,
-           :join_type => :inner,
-           :filter => [:and,[:eq,:component_type,component_type]]
-           :join_cond=>{:id=> :attribute__component_component_id},
-           :cols=>[:id, :display_name,:node_node_id]
-         }
-        ]
-=end
+      def self.evaluate_virtual_component_constraint(vc_constraint,other_end_idh)
+        join_array = convert_vc_contraint_to_join_array(vc_constraint)
+        model_handle = other_end_idh.createMH(:attribute)
+        base_sp_hash = {
+          :model_name => :attribute,
+          :filter => [:and,[:eq,:id, other_end_idh.get_id()]],
+          :cols=>[:id,:component_component_id]
+        }
+        base_sp = SearchPatternSimple.new(base_sp_hash)
+        dataset = SQL::DataSetSearchPattern.create_dataset_from_join_array(model_handle,base_sp,join_array)
+        dataset.all.first
       end
-      private
+
+     private
       #converts from form that acts as if attributes are directly attached to component  
-      def self.convert_from_virtual_object_form(search_pattern)
+      def self.convert_vc_contraint_to_join_array(vc_constraint)
         real = Array.new
         virtual = Array.new
         real_cols = real_component_columns()
-        search_pattern.break_filter_into_conjunctions().each do |conjunction|
-          if real_cols.include?(search_pattern.ret_col_in_comparison(conjunction))
+        conjunctions = vc_constraint.break_filter_into_conjunctions() 
+        conjunctions.each do |conjunction|
+          if real_cols.include?(vc_constraint.ret_col_in_comparison(conjunction))
             real << conjunction
           else 
             virtual << conjunction
           end
         end
-        return search_pattern.merge(:relation => :component,:columns => [:id]) if virtual.empty?
-        #TODO: stub
-        search_pattern.merge(:relation => :component,:columns => [:id])
+        if virtual.empty?
+          [{
+             :model_name => :component,
+             :filter => [:and] + real,
+             :join_type => :inner,
+             :join_cond => {:id => :attribute__component_component_id}
+           }]
+          else
+          #TODO: STUB
+          [{
+             :model_name => :component,
+             :filter => [:and] + real,
+             :join_type => :inner,
+             :join_cond => {:id => :attribute__component_component_id}
+           }]
+        end
+      end
+
+      def self.real_component_columns()
+        @real_component_columns ||= DB_REL_DEF[:component][:columns].keys
       end
     end
-    def self.real_component_columns()
-      @real_component_columns ||= DB_REL_DEF[:component][:columns]
-    end
 
-    #TODO: unify the different contraint variants
+    #TODO: unify the different constraint variants
     def evaluate_component_constraints(component_id_handle,target_id_handle)
       return true unless constraints = self[:component_constraints]
       component_mh = component_id_handle.createMH()

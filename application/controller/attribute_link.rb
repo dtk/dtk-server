@@ -3,7 +3,7 @@ module XYZ
     helper :ports
     #TODO: right now just for testing
 
-#=begin
+=begin
 #TODO: testing of port constraints
     def save(explicit_hash=nil,opts={})
       hash = explicit_hash || request.params.dup
@@ -14,7 +14,7 @@ module XYZ
       end
       super(hash,opts)
     end
-#=end
+=end
 
     def list_legal_connections(*parent_uri_array) #TODO stub
       parent_id = nil

@@ -25,11 +25,11 @@ module XYZ
     def msg(violations)
       v_with_text = violations.compact
       if v_with_text.size < 2
-        return "contraint violations"
+        return "constraint violations"
       elsif v_with_text.size == 2
-        return "contraint violations: #{v_with_text[1]}"
+        return "constraint violations: #{v_with_text[1]}"
       end
-      ret = "contraint violations: "
+      ret = "constraint violations: "
       ret << (v_with_text.first == :or ? "one of " : "")
       ret << "(#{v_with_text[1..v_with_text.size-1].join(",")})"
     end

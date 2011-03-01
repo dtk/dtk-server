@@ -10,10 +10,7 @@ module XYZ
       constraints = create_object_from_id(hash["input_id"],:attribute).get_constraints()
       if constraints
         target = {:target_port_id_handle => id_handle(hash["output_id"],:attribute)}
-        unless constraints.evaluate_given_target(target)
-          violations = constraints.ret_violations(target)
-          raise ErrorConstraintViolations.new(violations)
-        end
+        constraints.evaluate_given_target(target, :raise_error_when_violation => true)
       end
       super(hash,opts)
     end

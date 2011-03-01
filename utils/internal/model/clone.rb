@@ -16,13 +16,16 @@ module XYZ
       clone_source_object = source_id_handle.create_object()
 
 ###TODO: testing new functionality
-=begin
-       ##contraints
+#=begin
+       ##constraints
+      if clone_source_object.class == Component and target_id_handle[:model_name] == :node
         constraints = clone_source_object.get_constraints()
         if constraints
-          pp [:evaluation, constraints.evaluate(source_id_handle,target_id_handle)]
+          target = {:target_node_id_handle => target_id_handle}
+          constraints.evaluate_given_target(target, :raise_error_when_violation => true)
         end
-=end
+      end
+#=end
       ####unraveled assembly attributes
 =begin
       source_object = source_id_handle.create_object()

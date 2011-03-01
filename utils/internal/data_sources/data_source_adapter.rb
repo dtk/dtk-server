@@ -63,7 +63,7 @@ module XYZ
         constraints = (assign.kind_of?(DBUpdateHash) ? assign.constraints : nil)
         target_obj[attr].set_constraints(constraints) if constraints
         if assign.empty?
-          #include empty hash if there are contraints associated with it (this wil serve to delet all
+          #include empty hash if there are constraints associated with it (this wil serve to delet all
           # its peers; only including this conditionally is for optimization
           #dont overwrite will null if  target_obj[attr] already has a value
           if constraints and not target_obj.has_key?(attr)

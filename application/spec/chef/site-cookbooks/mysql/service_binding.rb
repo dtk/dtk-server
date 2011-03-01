@@ -54,7 +54,7 @@ service :mysql_server do
            "__ref" => "node[mysql][server_root_password]" #TODO: should use replicate user
          }
        },
-       "constraints" => {}#put in contraint that this can just be attached to slave use
+       "constraints" => {}#put in constraint that this can just be attached to slave use
      }]
 
   attribute "sap_ref_to_master",

@@ -1,10 +1,21 @@
+#TODO: simplify by changing target arg to be just idh
 module XYZ
   class Constraints
     def initialize(logical_op,dependency_list)
       @logical_op = logical_op
       @constraints = dependency_list.map{|dep|Constraint.create(dep)}
     end
-    def evaluate_given_target(target)
+    def evaluate_given_target(target,opts={})
+      ret = evaluate_given_target_just_eval(target)
+      return ret if ret
+      if opts[:raise_error_when_violation]
+        violations = ret_violations(target)
+        raise ErrorConstraintViolations.new(violations)
+      end
+      ret
+    end
+  private
+    def evaluate_given_target_just_eval(target)
       return true if @constraints.empty?
       @constraints.each do |constraint|
         match = constraint.evaluate_given_target(target)
@@ -16,12 +27,12 @@ module XYZ
             return false if match.nil?
         end
       end
-       case @logical_op
-         when :or then false
-         when :and then true
-       end
+      case @logical_op
+        when :or then false
+        when :and then true
+      end
     end
-
+   public
     def ret_violations(target)
       violations = @constraints.map do |constraint|
         match = constraint.evaluate_given_target(target)
@@ -63,8 +74,10 @@ module XYZ
     def self.create(dependency)
       if dependency[:type] == "component" and dependency[:attribute_attribute_id]
         PortConstraint.new(dependency)
+      elsif dependency[:type] == "component" and dependency[:component_component_id]
+        ComponentConstraint.new(dependency)
       else
-        Error.new("unexpetced dependency type")
+        raise Error.new("unexpected dependency type")
       end
     end
     def evaluate_given_target(target)
@@ -87,10 +100,9 @@ module XYZ
    public    
   end
 
-  class ComponentConstraint < Constraint
-   private
+  module ProcessVirtualComponentMixin
     #converts from form that acts as if attributes are directly attached to component  
-    def ret_join_array()
+    def ret_join_array(base_model_name,base_col)
       real = Array.new
       virtual = Array.new
       real_cols = real_component_columns()
@@ -106,7 +118,7 @@ module XYZ
       direct_component = {
         :model_name => :component,
         :join_type => :inner,
-        :join_cond => {:id => :attribute__component_component_id},
+        :join_cond => {:id => "#{base_model_name}__#{base_col}".to_sym},
         :cols => [:id,:display_name]
       }
       direct_component.merge!(:filter => [:and] + real) unless real.empty?
@@ -133,11 +145,36 @@ module XYZ
     end
   end
 
-  class PortConstraint < ComponentConstraint
+  class ComponentConstraint < Constraint
    private
+    include ProcessVirtualComponentMixin
+    def create_dataset(target)
+      node_idh  = 
+        if target[:target_node_id_handle]
+          target[:target_node_id_handle]
+        elsif target[:target_component_id_handle]
+          target[:target_component_id_handle].get_containing_node_id()
+        else
+          raise Error.new("unexpected target")
+        end
+      join_array = ret_join_array(:node,:id)
+      model_handle = node_idh.createMH(:node)
+      base_sp_hash = {
+        :model_name => :node,
+        :filter => [:and,[:eq,:id, node_idh.get_id()]],
+        :cols => [:id]
+      }
+      base_sp = SearchPatternSimple.new(base_sp_hash)
+      SQL::DataSetSearchPattern.create_dataset_from_join_array(model_handle,base_sp,join_array)
+    end
+  end
+
+  class PortConstraint < Constraint
+   private
+    include ProcessVirtualComponentMixin
     def create_dataset(target)
       other_end_idh  = target[:target_port_id_handle]
-      join_array = ret_join_array()
+      join_array = ret_join_array(:attribute,:component_component_id)
       model_handle = other_end_idh.createMH(:attribute)
       base_sp_hash = {
         :model_name => :attribute,

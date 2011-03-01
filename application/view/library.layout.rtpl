@@ -45,7 +45,7 @@
 				<li class=""><a href="{%=_app[:base_uri]%}/xyz/task/list">Tasks</a></li>
 			</ul>
 		</div>
-		<div id="main-body" class="main-body" style="">
+		<div id="main-body" class="main-body" style="height: 700px; overflow-y: auto;">
 			{%=main_body%}
 		</div>
 		</div>

@@ -12,6 +12,7 @@ module XYZ
           target[:external_ref] = fn(:external_ref,name)
           nested_definition :monitoring_item, source["monitoring_items"]
           nested_definition :attribute, source["attributes"]
+          nested_definition :dependency, source["dependencies"]
         end
 
         class << self

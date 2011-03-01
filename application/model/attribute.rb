@@ -274,14 +274,12 @@ also related is allowing omission of columns mmentioned in jon condition; post p
 
     #######################
     ######### Model apis
-    def get_dependencies()
-#      raw_constraints = (get_objects_col_from_sp_hash({:columns => [:constraints]},:constraints).first||{})[:component_constraints]
- #     raw_constraints && raw_constraints.map{|hash|SearchPattern.create_just_filter(hash)}
-      get_objects_col_from_sp_hash({:columns => [:dependencies]},:dependencies)
+    def get_constraints()
+      dependency_list = get_objects_col_from_sp_hash({:columns => [:dependencies]},:dependencies)
+      Constraints.new(:or,dependency_list)
     end
 
     ### object procssing and access functions
-
     def qualified_attribute_name_aux(node_or_group_name=nil)
       cmp_name = (self[:component]||{})[:display_name]
       #strip what will be recipe name

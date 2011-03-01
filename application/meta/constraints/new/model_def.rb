@@ -1,9 +1,0 @@
-{
-  :schema=>:constraints,
-  :table=>:constraints,
-  :columns=>{
-    :node_constraints=>{:type=>:json},
-    :component_constraints=>{:type=>:json},
-  },
-  :many_to_one=>[:component]
-}

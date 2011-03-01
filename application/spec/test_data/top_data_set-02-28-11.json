@@ -58,8 +58,8 @@
               "obj_type": "component",
               "data_source_entry": {
                 "component_attribute": {
-                  "display_name": "constraints ",
-                  "obj_type": "constraints",
+                  "display_name": "dependency",
+                  "obj_type": "dependency",
                   "ds_name": "user_data",
                   "ds_is_golden_store": true
                 }
@@ -371,7 +371,7 @@
             "ui": "{\"images\": {\"tnail\":\"wordpress.png\",\"display\":\"wordpress.png\",\"tiny\":\"\"}}",
             "ref": "wordpress",
             "basic_type": "service",
-            "constraints": {
+            "dependency": {
               "wordpress": {
                 "required_components": [
                   "php__php5",
@@ -382,41 +382,20 @@
             "qualified_ref": "/library/test/wordpress"
           },
           "basic_type": "service",
-          "constraints": {
-            "wordpress": {
-              "display_name": "wordpress",
-              "component_constraints": [
-                {
-                  ":filter": [
-                    ":and",
-                    [
-                      ":eq",
-                      ":component_type",
-                      "php__php5"
-                    ]
-                  ],
-                  ":columns": [
-                    {
-                      "php__php5": ":component_type"
-                    }
-                  ]
-                },
-                {
-                  ":filter": [
-                    ":and",
-                    [
-                      ":eq",
-                      ":component_type",
-                      "apache2"
-                    ]
-                  ],
-                  ":columns": [
-                    {
-                      "apache2": ":component_type"
-                    }
-                  ]
-                }
-              ]
+          "dependency": {
+            "php__php5": {
+	      "type" : "component",   
+              "search_pattern": {
+                ":filter": [":and",[":eq",":component_type","php__php5"]],
+                ":columns": [{"php__php5": ":component_type"}]
+	      }
+            },
+            "apache2": {
+	      "type" : "component",   
+              "search_pattern": {
+                ":filter": [":and",[":eq",":component_type","apache2"]],
+                ":columns": [{"apache2": ":component_type"}]
+	      }
             }
           },
           "attribute": {

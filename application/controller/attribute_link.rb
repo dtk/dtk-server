@@ -7,10 +7,10 @@ module XYZ
 #TODO: testing of port constraints
     def save(explicit_hash=nil,opts={})
       hash = explicit_hash || request.params.dup
-      dependencies = create_object_from_id(hash["input_id"],:attribute).get_dependencies()
-      if dependencies
+      constraints = create_object_from_id(hash["input_id"],:attribute).get_constraints()
+      if constraints
         target = {:target_port_id_handle => id_handle(hash["output_id"],:attribute)}
-        matches = Dependency.evaluate_constraints_given_target(dependencies,target)
+        matches = constraints.evaluate_given_target(target)
       end
       super(hash,opts)
     end

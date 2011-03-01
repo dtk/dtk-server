@@ -21,7 +21,7 @@ module XYZ
         foreign_key :assembly_id, :component, FK_SET_NULL_OPT
         column :view_def_ref, :varchar
         many_to_one :component, :library, :node, :node_group, :datacenter
-        one_to_many :component, :attribute_link, :attribute, :monitoring_item, :constraints, :layout
+        one_to_many :component, :attribute_link, :attribute, :monitoring_item, :dependency, :layout
         one_to_many_clone_omit :layout
         virtual_column :parent_name, :possible_parents => [:component,:library,:node,:node_group]
 
@@ -51,15 +51,16 @@ module XYZ
          }
         ]
 
-        virtual_column :constraints, :type => :json, :hidden => true, 
+        virtual_column :dependencies, :type => :json, :hidden => true, 
         :remote_dependencies => 
         [
          {
-           :model_name => :constraints,
-           :join_type => :left_outer,
+           :model_name => :dependency,
+           :alias => :dependencies,
            :convert => true,
+           :join_type => :inner,
            :join_cond=>{:component_component_id => q(:component,:id)}, 
-           :cols => [:id,:display_name,id(:component),:node_constraints,:component_constraints]
+           :cols => [:id,:search_pattern,:type]
          }
         ]
 
@@ -227,9 +228,8 @@ module XYZ
     #######################
     ######### Model apis
     def get_constraints()
-      opts = {:ret_keys_as_symbols => false}
-      #TODO: look at get_contraints on attribute; and use of preprocessing to get rid of ":" form
-      get_objects_col_from_sp_hash({:columns => [:constraints]},:constraints,opts).first
+      dependency_list = get_objects_col_from_sp_hash({:columns => [:dependencies]},:dependencies)
+      Constraints.new(:and,dependency_list)
     end
 
     def get_containing_node_id()

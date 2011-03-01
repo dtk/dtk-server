@@ -26,8 +26,8 @@ module XYZ
     def self.evaluate_constraints_given_target(constraints,target)
       constraints.each do |constraint|
         match = constraint.evaluate_given_target(target)
+        return false if match.nil?
         pp [:debug,match]
-        return false if match.empty?
       end
       true
     end
@@ -46,31 +46,37 @@ module XYZ
       real = Array.new
       virtual = Array.new
       real_cols = real_component_columns()
-      conjunctions = ((self[:search_pattern]||{}[:filter])||[]).break_filter_into_conjunctions() 
-      conjunctions.each do |conjunction|
-        if real_cols.include?(ret_col_in_comparison(conjunction))
+      search_pattern.break_filter_into_conjunctions().each do |conjunction|
+        parsed_comparision = SearchPatternSimple.ret_parsed_comparison(conjunction)
+        if real_cols.include?(parsed_comparision[:col])
           real << conjunction
         else 
-          virtual << conjunction
+          virtual << parsed_comparision
         end
       end
+
+      direct_component = {
+        :model_name => :component,
+        :join_type => :inner,
+        :join_cond => {:id => :attribute__component_component_id},
+        :cols => [:id,:display_name]
+      }
+      direct_component.merge!(:filter => [:and] + real) unless real.empty?
+
       if virtual.empty?
-        [{
-           :model_name => :component,
-           :filter => [:and] + real,
-           :join_type => :inner,
-           :join_cond => {:id => :attribute__component_component_id},
-           :cols => [:id,:display_name]
-         }]
+        [direct_component]
       else
-        #TODO: STUB
-        [{
-           :model_name => :component,
-           :filter => [:and] + real,
-           :join_type => :inner,
-           :join_cond => {:id => :attribute__component_component_id},
-           :cols => [:id,:display_name]
-         }]
+        [direct_component] +
+          virtual.map do |v|
+          {
+            :model_name => :attribute,
+            :alias => v[:col],
+            :filter => [v[:op],v[:col],v[:constant]],
+            :join_type => :inner,
+            :join_cond => {:component_component_id => :component__id},
+            :cols => [:id,:display_name]
+          }
+        end
       end
     end
 

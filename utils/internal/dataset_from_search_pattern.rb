@@ -22,7 +22,7 @@ module XYZ
 
         def create_dataset_from_join_array(model_handle,base_search_pattern,join_array)
           db = model_handle.db
-          graph_ds = Dataset.new(model_handle,SimpleSearchPattern::ret_sequel_ds(model_handle,base_search_pattern))
+          graph_ds = Dataset.new(model_handle,SimpleSearchPattern::ret_sequel_ds(model_handle,base_search_pattern)).from_self(:alias => model_handle[:model_name])
           join_array.each do |join_info|
             right_ds = nil
             right_ds_mh = model_handle.createMH(:model_name => join_info[:model_name])
@@ -122,7 +122,7 @@ module XYZ
 
           def self.ret_filter_hash(search_pattern)
             filter_hash = search_pattern.find_key(:filter)
-            filter_hash.empty? ? filter_hash : nil
+            filter_hash.empty? ?nil : filter_hash
           end
 
           #if vcol_sql_fns is passed is nil then this wil not do any special processing on virtual columns; otehrwise it wil take out virtual columns and append unto this filter_hash

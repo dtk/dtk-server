@@ -59,16 +59,18 @@ module XYZ
       parse_and_set!(hash_search_pattern,opts)
     end
 
-    def ret_col_in_comparison(expression)
-      expression[1].kind_of?(Symbol) ? expression[1] : expression[2]
+    def self.ret_parsed_comparison(expr)
+      (expr[1].kind_of?(Symbol) ? {:col => expr[1], :constant => expr[2]} : {:col => expr[2], :constant => expr[1]}).merge(:op => expr[0])
     end
+
     def break_filter_into_conjunctions()
+      return [] if self[:filter].nil? or self[:filter].empty?
       break_into_conjunctions(self[:filter])
     end
    private
-    def break_into_conjunctions(expression)
-      return [expression] unless expression.first == :and 
-      expression[1..expression.size-1].inject([]) do |a,x|
+    def break_into_conjunctions(expr)
+      return [expr] unless expr.first == :and 
+      expr[1..expr.size-1].inject([]) do |a,x|
         a + break_into_conjunctions(x)
       end
     end

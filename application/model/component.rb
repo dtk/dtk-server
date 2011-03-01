@@ -60,7 +60,7 @@ module XYZ
            :convert => true,
            :join_type => :inner,
            :join_cond=>{:component_component_id => q(:component,:id)}, 
-           :cols => [:id,:search_pattern,:type]
+           :cols => [:id,:search_pattern,:type,:description]
          }
         ]
 

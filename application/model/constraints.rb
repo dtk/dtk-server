@@ -22,6 +22,15 @@ module XYZ
        end
     end
 
+    def ret_violations(target)
+      violations = @constraints.map do |constraint|
+        match = constraint.evaluate_given_target(target)
+        constraint[:description] if match.nil?
+      end.compact
+      return Array.new if violations.empty?
+      [@logical_op] + violations
+    end
+
     module Macro
       def self.required_components(component_list)
         component_list.map do |cmp|

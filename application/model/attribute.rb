@@ -47,9 +47,8 @@ module XYZ
            :convert => true,
            :join_type => :inner,
            :join_cond=>{:attribute_attribute_id => q(:attribute,:id)},
-           :cols => [:id,:search_pattern,:type]
+           :cols => [:id,:search_pattern,:type,:description]
          }]
-
 
       virtual_column :needs_to_be_set, :type => :boolean, :hidden => true, 
         :local_dependencies => [:value_asserted,:value_derived,:read_only,:required],

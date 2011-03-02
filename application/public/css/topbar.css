@@ -41,11 +41,20 @@
 	background-image: url(../images/topbar/bg-grey-slice.png);
 }
 
-.menu-bar .menu-item {
+.menu-bar .item {
 	float: left;
 	padding-top: 9px;
-	margin-left: 20px;
+	margin-left: 15px;
 	font-size: 16px;
+}
+
+.menu-bar .divider {
+	height: 40px;
+	width: 6px;
+	background-image: url(../images/topbar/menu-divider.png);
+	background-repeat: no-repeat;
+	margin: 0 15px;
+	float: left;
 }
 .menu-bar .left-cap {
 	height: 40px;
@@ -69,14 +78,14 @@
 }
 
 
-.menu-bar .menu-item a:hover, a:link, a:active, a:visited {
+.menu-bar .item a:hover, a:link, a:active, a:visited {
 	color: #30322f;
 }
-.menu-bar .menu-item a:hover {
+.menu-bar .item a:hover {
 	color: #3e5865;
 }
 
-.menu-bar .menu-item a {
+.menu-bar .item a {
 	text-decoration: none;
 }
 

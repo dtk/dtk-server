@@ -31,9 +31,12 @@
 				<div class="yui3-u left-cap"></div>
 				<div class="yui3-u body">
 					<div class="logo black"></div>
-					<div class="menu-item"><a href="{%=_app[:base_uri]%}/xyz/component/list"  style="color: #4FA4D0">Library</a></div>
-					<div class="menu-item"><a href="{%=_app[:base_uri]%}/xyz/workspace">Workspace</a></div>
-					<div class="menu-item"><a href="{%=_app[:base_uri]%}/xyz/datacenter/list">Dashboard</a></div>
+					<div class="item"><a href="{%=_app[:base_uri]%}/xyz/component/list"  style="color: #4FA4D0">Library</a></div>
+					<div class="item"><a href="{%=_app[:base_uri]%}/xyz/workspace">Workspace</a></div>
+					<div class="item"><a href="{%=_app[:base_uri]%}/xyz/datacenter/list">Dashboard</a></div>
+					<div class="divider"></div>
+					<div class="item"><a href="{%=_app[:base_uri]%}/xyz/workspace">Foo</a></div>
+					<div class="item"><a href="{%=_app[:base_uri]%}/xyz/datacenter/list">Bar</a></div>
 				</div>
 				<div class="yui3-u right-cap"></div>
 			</div>

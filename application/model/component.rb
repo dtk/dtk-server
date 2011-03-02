@@ -228,8 +228,11 @@ module XYZ
     #######################
     ######### Model apis
     def get_constraints()
-      dependency_list = get_objects_col_from_sp_hash({:columns => [:dependencies]},:dependencies)
-      Constraints.new(:and,dependency_list)
+      rows = get_objects_from_sp_hash({:columns => [:dependencies,:only_one_per_node,:component_type]})
+      return Constraints.new() if rows.empty?
+      constraints = rows.map{|r|Constraint.create(r[:dependencies])}
+      constraints << Constraint::Macro.only_one_per_node(rows.first[:component_type]) if rows.first[:only_one_per_node]
+      Constraints.new(:and,constraints)
     end
 
     def get_containing_node_id()

@@ -275,7 +275,7 @@ also related is allowing omission of columns mmentioned in jon condition; post p
     ######### Model apis
     def get_constraints()
       dependency_list = get_objects_col_from_sp_hash({:columns => [:dependencies]},:dependencies)
-      Constraints.new(:or,dependency_list)
+      Constraints.new(:or,dependency_list.map{|dep|Constraint.create(dep)})
     end
 
     ### object procssing and access functions

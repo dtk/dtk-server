@@ -1,9 +1,9 @@
 #TODO: simplify by changing target arg to be just idh
 module XYZ
   class Constraints
-    def initialize(logical_op,dependency_list)
+    def initialize(logical_op=:and,constraints=[])
       @logical_op = logical_op
-      @constraints = dependency_list.map{|dep|Constraint.create(dep)}
+      @constraints = constraints
     end
     def evaluate_given_target(target,opts={})
       ret = evaluate_given_target_just_eval(target)
@@ -18,13 +18,12 @@ module XYZ
     def evaluate_given_target_just_eval(target)
       return true if @constraints.empty?
       @constraints.each do |constraint|
-        match = constraint.evaluate_given_target(target)
-        pp [:debug,match] unless match.nil?
+        constraint_holds = constraint.evaluate_given_target(target)
         case @logical_op
           when :or
-            return true unless match.nil?
+            return true if constraint_holds
           when :and
-            return false if match.nil?
+            return false unless constraint_holds
         end
       end
       case @logical_op
@@ -35,21 +34,21 @@ module XYZ
    public
     def ret_violations(target)
       violations = @constraints.map do |constraint|
-        match = constraint.evaluate_given_target(target)
-        constraint[:description] if match.nil?
+        constraint_holds = constraint.evaluate_given_target(target)
+        constraint[:description] unless constraint_holds
       end.compact
       return Array.new if violations.empty?
       [@logical_op] + violations
     end
 
     module Macro
+      #TODO: so if can move over so Macro under Constraint and produces constraint not a sp
       def self.required_component(component_type)
         hash = {
           :filter => [:and, [:eq, :component_type, component_type]],
         }
         string_symbol_form(hash)
       end
-
      private
       def self.string_symbol_form(term)
         if term.kind_of?(Symbol)
@@ -79,7 +78,21 @@ module XYZ
     end
     def evaluate_given_target(target)
       dataset = create_dataset(target)
-      dataset.all.first
+      is_empty = dataset.all.empty?
+      self[:negate] ? is_empty : (not is_empty)
+    end
+
+    module Macro
+      def self.only_one_per_node(component_type)
+        dep = {
+          :description => "Only one component of type #{component_type} can be on a node",
+          :negate => true,
+          :search_pattern => {
+            :filter => [:and, [:eq, :component_type, component_type]],
+          }
+        }
+        ComponentConstraint.new(dep)
+      end
     end
 
    private

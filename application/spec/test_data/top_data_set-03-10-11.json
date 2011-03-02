@@ -52,7 +52,7 @@
         },
         "user_data": {
           "display_name": "user_data",
-          "last_collection_timestamp": "Wed Mar 02 04:02:08 +0000 2011",
+          "last_collection_timestamp": "Wed Mar 02 17:09:56 +0000 2011",
           "data_source_entry": {
             "component": {
               "display_name": "component",
@@ -133,41 +133,41 @@
           },
           "ui": {
             "images": {
-              "display": "ubuntu.png",
               "tiny": "",
+              "display": "ubuntu.png",
               "tnail": "ubuntu.png"
             }
           },
           "ds_attributes": {
             "type": "machine",
             "kernel_id": "aki-3af50453",
-            "root_device_name": "/dev/sda1",
-            "root_device_type": "ebs",
             "owner_id": "411986592491",
             "description": null,
-            "block_device_mapping": [
-              {
-                "volumeSize": 8,
-                "snapshotId": "snap-f9179794",
-                "deviceName": "/dev/sda1",
-                "deleteOnTermination": "true"
-              }
+            "product_codes": [
+
             ],
             "state": "available",
-            "is_public": false,
             "tags": {
             },
+            "root_device_name": "/dev/sda1",
             "architecture": "i386",
             "flavor": {
               "disk": null
             },
-            "virtualizationType": "paravirtual",
+            "root_device_type": "ebs",
+            "block_device_mapping": [
+              {
+                "deviceName": "/dev/sda1",
+                "deleteOnTermination": "true",
+                "volumeSize": 8,
+                "snapshotId": "snap-f9179794"
+              }
+            ],
+            "is_public": false,
             "location": "411986592491/rnp-chef-09-12-mcollective-1-0-ubuntu-lucid-x86_32",
             "name": "rnp-chef-09-12-mcollective-1-0-ubuntu-lucid-x86_32",
             "id": "ami-ee38c987",
-            "product_codes": [
-
-            ]
+            "virtualizationType": "paravirtual"
           },
           "is_deployed": true,
           "attribute": {
@@ -205,8 +205,8 @@
           },
           "ui": {
             "images": {
-              "display": "hadoop-pig.png",
               "tiny": "",
+              "display": "hadoop-pig.png",
               "tnail": "hadoop-pig.png"
             }
           },
@@ -231,8 +231,8 @@
           },
           "ui": {
             "images": {
-              "display": "cloudera.png",
               "tiny": "",
+              "display": "cloudera.png",
               "tnail": "cloudera.png"
             }
           },
@@ -336,8 +336,8 @@
           },
           "ui": {
             "images": {
-              "display": "php.png",
               "tiny": "",
+              "display": "php.png",
               "tnail": "php.png"
             }
           },
@@ -362,8 +362,8 @@
           },
           "ui": {
             "images": {
-              "display": "wordpress.png",
               "tiny": "",
+              "display": "wordpress.png",
               "tnail": "wordpress.png"
             }
           },
@@ -608,8 +608,8 @@
           },
           "ui": {
             "images": {
-              "display": "mysql.png",
               "tiny": "",
+              "display": "mysql.png",
               "tnail": "mysql.png"
             }
           },
@@ -675,8 +675,8 @@
           },
           "ui": {
             "images": {
-              "display": "postgres.png",
               "tiny": "",
+              "display": "postgres.png",
               "tnail": "postgres.png"
             }
           },
@@ -689,21 +689,6 @@
           },
           "attribute": {
             "sap_ref__l4": {
-	       "dependency": {
-                  "component_constraint": {
-		  "description" : "Not connecting to Postgres Server",
-		  "type" : "component",
-                  "search_pattern": {
-                    ":filter": [
-                    ":and",
-                    [
-                      ":eq",
-                      ":component_type",
-                      "postgresql__server"
-                    ]]
-                  }
-		}
-	     },
               "display_name": "sap_ref__l4",
               "required": true,
               "external_ref": {
@@ -720,6 +705,23 @@
               },
               "semantic_type_summary": "sap_ref__l4",
               "data_type": "json",
+              "dependency": {
+                "component_constraint": {
+                  "display_name": "component_constraint",
+                  "type": "component",
+                  "search_pattern": {
+                    ":filter": [
+                      ":and",
+                      [
+                        ":eq",
+                        ":component_type",
+                        "postgresql__server"
+                      ]
+                    ]
+                  },
+                  "description": "Not connecting to Postgres Server"
+                }
+              },
               "dynamic": false,
               "read_only": false,
               "cannot_change": false,
@@ -741,8 +743,8 @@
           },
           "ui": {
             "images": {
-              "display": "hadoop-hive.png",
               "tiny": "",
+              "display": "hadoop-hive.png",
               "tnail": "hadoop-hive.png"
             }
           },
@@ -767,8 +769,8 @@
           },
           "ui": {
             "images": {
-              "display": "postgres.png",
               "tiny": "",
+              "display": "postgres.png",
               "tnail": "postgres.png"
             }
           },
@@ -854,8 +856,8 @@
           },
           "ui": {
             "images": {
-              "display": "java-01.png",
               "tiny": "",
+              "display": "java-01.png",
               "tnail": "java-01.png"
             }
           },
@@ -918,8 +920,8 @@
           "only_one_per_node": true,
           "ui": {
             "images": {
-              "display": "rabbitmq.png",
               "tiny": "",
+              "display": "rabbitmq.png",
               "tnail": "rabbitmq.png"
             }
           },
@@ -942,8 +944,8 @@
           },
           "ui": {
             "images": {
-              "display": "hadoop.png",
               "tiny": "",
+              "display": "hadoop.png",
               "tnail": "hadoop.png"
             }
           },
@@ -986,8 +988,8 @@
           },
           "ui": {
             "images": {
-              "display": "cloudera.png",
               "tiny": "",
+              "display": "cloudera.png",
               "tnail": "cloudera.png"
             }
           },
@@ -1042,8 +1044,8 @@
           },
           "ui": {
             "images": {
-              "display": "nagios.png",
               "tiny": "",
+              "display": "nagios.png",
               "tnail": "nagios.png"
             }
           },
@@ -1106,8 +1108,8 @@
           },
           "ui": {
             "images": {
-              "display": "mysql.png",
               "tiny": "",
+              "display": "mysql.png",
               "tnail": "mysql.png"
             }
           },
@@ -1406,8 +1408,8 @@
           },
           "ui": {
             "images": {
-              "display": "postgres.png",
               "tiny": "",
+              "display": "postgres.png",
               "tnail": "postgres.png"
             }
           },
@@ -1432,8 +1434,8 @@
           },
           "ui": {
             "images": {
-              "display": "user.png",
               "tiny": "",
+              "display": "user.png",
               "tnail": "user.png"
             }
           },
@@ -1556,8 +1558,8 @@
           },
           "ui": {
             "images": {
-              "display": "apache.png",
               "tiny": "",
+              "display": "apache.png",
               "tnail": "apache.png"
             }
           },
@@ -1826,8 +1828,8 @@
           },
           "ui": {
             "images": {
-              "display": "java-01.png",
               "tiny": "",
+              "display": "java-01.png",
               "tnail": "java-01.png"
             }
           },
@@ -1851,8 +1853,8 @@
           },
           "ui": {
             "images": {
-              "display": "mysql.png",
               "tiny": "",
+              "display": "mysql.png",
               "tnail": "mysql.png"
             }
           },
@@ -1932,8 +1934,8 @@
           },
           "ui": {
             "images": {
-              "display": "nagios.png",
               "tiny": "",
+              "display": "nagios.png",
               "tnail": "nagios.png"
             }
           },
@@ -1995,8 +1997,8 @@
           },
           "ui": {
             "images": {
-              "display": "redis.png",
               "tiny": "",
+              "display": "redis.png",
               "tnail": "redis.png"
             }
           },
@@ -2046,8 +2048,8 @@
           "only_one_per_node": true,
           "ui": {
             "images": {
-              "display": "rabbitmq.png",
               "tiny": "",
+              "display": "rabbitmq.png",
               "tnail": "rabbitmq.png"
             }
           },
@@ -2071,8 +2073,48 @@
           "description": "Installs and configures Tomcat",
           "ds_attributes": {
             "basic_type": "service",
+            "dependency": {
+              "jpackage": {
+                "required_component": "jpackage"
+              },
+              "java": {
+                "required_component": "java"
+              }
+            },
             "qualified_ref": "/library/test/tomcat",
             "ref": "tomcat"
+          },
+          "dependency": {
+            "java": {
+              "display_name": "java",
+              "type": "component",
+              "search_pattern": {
+                ":filter": [
+                  ":and",
+                  [
+                    ":eq",
+                    ":component_type",
+                    "java"
+                  ]
+                ]
+              },
+              "description": "java is required"
+            },
+            "jpackage": {
+              "display_name": "jpackage",
+              "type": "component",
+              "search_pattern": {
+                ":filter": [
+                  ":and",
+                  [
+                    ":eq",
+                    ":component_type",
+                    "jpackage"
+                  ]
+                ]
+              },
+              "description": "jpackage is required"
+            }
           },
           "ds_key": "[:user_data, \"/library/test/tomcat\"]",
           "component_type": "tomcat"
@@ -2088,8 +2130,8 @@
           },
           "ui": {
             "images": {
-              "display": "hadoop.png",
               "tiny": "",
+              "display": "hadoop.png",
               "tnail": "hadoop.png"
             }
           },

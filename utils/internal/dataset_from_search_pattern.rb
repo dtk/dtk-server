@@ -137,13 +137,9 @@ module XYZ
               next if el_op.nil? #this can happen if el has a vcol in it
               and_list << case el_op
                when :eq
-                if el_args[1].kind_of?(TrueClass)
-                  el_args[0]
-                elsif el_args[1].kind_of?(FalseClass)
-                  SQL.not(el_args[0])
-                else
-                  {el_args[0] => el_args[1]}
-                end
+                ret_eq_comparison(el_args[0],el_args[1])
+               when :neq
+                SQL.not(ret_eq_comparison(el_args[0],el_args[1]))
                when :lt
                 el_args[0].to_s.lit < el_args[1].to_s.lit
                when :lte
@@ -174,6 +170,17 @@ module XYZ
           end
 
          private
+
+          def self.ret_eq_comparison(arg1,arg2)
+            if arg2.kind_of?(TrueClass)
+              arg1
+            elsif arg2.kind_of?(FalseClass)
+              SQL.not(arg1)
+            else
+              {arg1 => arg2}
+            end
+          end
+
           def self.ret_sequel_ds_with_relation(ds,search_pattern)
             relation = search_pattern.find_key(:relation)
             sql_tbl_name = DB.sequel_table_name(relation)

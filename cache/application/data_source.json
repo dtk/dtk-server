@@ -72,7 +72,11 @@
           "ui": "{\"images\": {\"tnail\":\"java-01.png\",\"display\":\"java-01.png\",\"tiny\":\"\"}}"
         },
 	"tomcat": {
-	"basic_type": "service"
+	"basic_type": "service",
+        "dependency" : {
+	    "java" : {"required_component" :"java"},
+	    "jpackage" : {"required_component" :"jpackage"}
+          }	    
         },
 	 "mysql__master": {
           "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}"

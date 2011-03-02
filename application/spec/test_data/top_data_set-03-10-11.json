@@ -689,6 +689,21 @@
           },
           "attribute": {
             "sap_ref__l4": {
+	       "dependency": {
+                  "component_constraint": {
+		  "description" : "Not connecting to Postgres Server",
+		  "type" : "component",
+                  "search_pattern": {
+                    ":filter": [
+                    ":and",
+                    [
+                      ":eq",
+                      ":component_type",
+                      "postgresql__server"
+                    ]]
+                  }
+		}
+	     },
               "display_name": "sap_ref__l4",
               "required": true,
               "external_ref": {

@@ -8,9 +8,9 @@
           "display_name": "component",
 	    "data_source_entry": {
               "component_attribute": {
-                "obj_type": "constraints",
+                "obj_type": "dependency",
                 "ds_name": "user_data",
-                "display_name": "constraints "
+                "display_name": "dependency"
               }
             }		
         },

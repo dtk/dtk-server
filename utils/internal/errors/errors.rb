@@ -30,8 +30,8 @@ module XYZ
         return "constraint violations: #{v_with_text[1]}"
       end
       ret = "constraint violations: "
-      ret << (v_with_text.first == :or ? "one of " : "")
-      ret << "(#{v_with_text[1..v_with_text.size-1].join(",")})"
+      ret << (v_with_text.first == :or ? "(atleast) one of " : "")
+      ret << "(#{v_with_text[1..v_with_text.size-1].join(", ")})"
     end
   end
 

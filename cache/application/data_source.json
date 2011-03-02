@@ -24,11 +24,10 @@
 	"wordpress" : {
           "ui": "{\"images\": {\"tnail\":\"wordpress.png\",\"display\":\"wordpress.png\",\"tiny\":\"\"}}",
 	  "basic_type" : "service",
-	  "constraints" : {
-	    "wordpress" : {
-	       "required_components" : ["php__php5","apache2"]
-            }	    
-          }
+	  "dependency" : {
+	    "php__php5" : {"required_component" :"php__php5"},
+	    "apache2" : {"required_component" :"apache2"}
+          }	    
 	},	
         "user_account": {
           "ui": "{\"images\": {\"tnail\":\"user.png\",\"display\":\"user.png\",\"tiny\":\"\"}}",
@@ -89,7 +88,7 @@
           "ui": "{\"images\": {\"tnail\":\"rabbitmq.png\",\"display\":\"rabbitmq.png\",\"tiny\":\"\"}}",
 	  "basic_type": "feature"
         },
-	"rabbitmq__default": {
+	"rabbitmq": {
           "ui": "{\"images\": {\"tnail\":\"rabbitmq.png\",\"display\":\"rabbitmq.png\",\"tiny\":\"\"}}",
 	  "basic_type": "service"
         },

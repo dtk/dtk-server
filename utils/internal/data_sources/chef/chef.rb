@@ -51,11 +51,13 @@ module XYZ
           next unless metadata
           ref = recipe_name
           values = {
+            "normalized_recipe_name" => normalized_recipe_name(recipe_name),
+            "recipe_name" => recipe_name, 
             "basic_type" => metadata["basic_type"],
             "node_name" => node.name
           }
-          attributes = get_attributes_with_values(recipe_name,metadata,node)
-          ret[ref] = DataSourceUpdateHash.new(values.merge({"attributes" => attributes}))
+          attrs = get_attributes_with_values(recipe_name,metadata,node)
+          ret[ref] = DataSourceUpdateHash.new(values.merge({"attributes" => attrs}))
         end
         return ret
       end
@@ -70,16 +72,22 @@ module XYZ
           metadata = get_metadata_for_recipe(recipe_name)
           next unless metadata
           values = {
+            "normalized_recipe_name" => normalized_recipe_name(recipe_name),
             "recipe_name" => recipe_name, 
             "description" => description,
             "basic_type" => metadata["basic_type"]
           }
-          monitoring_items = get_monitoring_items(metadata)
-          attributes =  get_attributes_with_values(recipe_name,metadata)
-          ds_hash = DataSourceUpdateHash.new(values.merge({"attributes" => attributes, "monitoring_items" => monitoring_items}))
+          mons = get_monitoring_items(metadata)
+          attrs =  get_attributes_with_values(recipe_name,metadata)
+          ds_hash = DataSourceUpdateHash.new(values.merge({"attributes" => attrs, "monitoring_items" => mons}))
           ret << ds_hash.freeze 
         end
         ret
+      end
+
+      def normalized_recipe_name(recipe_name)
+        return $1 if recipe_name =~ /(^.+)::default/
+        recipe_name.gsub(/::/,Model::Delim::Common)
       end
 
       def get_node(node_name)

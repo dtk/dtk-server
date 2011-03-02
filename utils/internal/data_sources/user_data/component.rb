@@ -11,7 +11,7 @@ module XYZ
           if_exists(source["basic_type"]) do
             target[:basic_type] = source["basic_type"]
           end
-          nested_definition :constraints, source["constraints"]
+          nested_definition :dependency, source["dependency"]
         end
         def self.unique_keys(source)
           [source["qualified_ref"]]

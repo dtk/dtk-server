@@ -43,14 +43,11 @@ module XYZ
     end
 
     module Macro
-      def self.required_components(component_list)
-        component_list.map do |cmp|
-          hash = {
-            :filter => [:and, [:eq, :component_type, cmp]],
-            :columns => [cmp => :component_type]
-          }
-          string_symbol_form(hash)
-        end
+      def self.required_component(component_type)
+        hash = {
+          :filter => [:and, [:eq, :component_type, component_type]],
+        }
+        string_symbol_form(hash)
       end
 
      private
@@ -102,7 +99,7 @@ module XYZ
 
   module ProcessVirtualComponentMixin
     #converts from form that acts as if attributes are directly attached to component  
-    def ret_join_array(base_model_name,base_col)
+    def ret_join_array(join_cond)
       real = Array.new
       virtual = Array.new
       real_cols = real_component_columns()
@@ -115,11 +112,13 @@ module XYZ
         end
       end
 
+      cols = [:id,:display_name]
+      cols << join_cond.keys.first unless cols.include?(join_cond.keys.first)
       direct_component = {
         :model_name => :component,
         :join_type => :inner,
-        :join_cond => {:id => "#{base_model_name}__#{base_col}".to_sym},
-        :cols => [:id,:display_name]
+        :join_cond => join_cond,
+        :cols => cols
       }
       direct_component.merge!(:filter => [:and] + real) unless real.empty?
 
@@ -157,7 +156,8 @@ module XYZ
         else
           raise Error.new("unexpected target")
         end
-      join_array = ret_join_array(:node,:id)
+      join_cond = {:node_node_id => :node__id}
+      join_array = ret_join_array(join_cond)
       model_handle = node_idh.createMH(:node)
       base_sp_hash = {
         :model_name => :node,
@@ -174,7 +174,8 @@ module XYZ
     include ProcessVirtualComponentMixin
     def create_dataset(target)
       other_end_idh  = target[:target_port_id_handle]
-      join_array = ret_join_array(:attribute,:component_component_id)
+      join_cond = {:id => :attribute__component_component_id}
+      join_array = ret_join_array(join_cond)
       model_handle = other_end_idh.createMH(:attribute)
       base_sp_hash = {
         :model_name => :attribute,

@@ -5,10 +5,16 @@ if (!R8.Detailview) {
 		var _item_id = null,
 			_pageContainerNode = null,
 			_topbarNode = null,
-			_mainBodyNode = null,
-			_mblPaneNode = null,
-			_mbcPaneNode = null,
-			_mbrPaneNode = null,
+			_mainBodyWrapperNode = null,
+
+			_mblPanelNode = null,
+			_mbContentWrapperNode = null,
+			_mbMainContentNode = null,
+
+			_mbSpacerNode = null,
+			_mbTopCapNode = null,
+			_mbBtmCapNode = null,
+
 			_detailsHeader = null,
 			_contentWrapperNode = null,
 
@@ -100,24 +106,26 @@ if (!R8.Detailview) {
 				_item_id = item_id;
 
 				_pageContainerNode = R8.Utils.Y.one('#page-container');
-				_mainBodyNode = R8.Utils.Y.one('#main-body');
+				_mainBodyWrapperNode = R8.Utils.Y.one('#main-body-wrapper');
 				_topbarNode = R8.Utils.Y.one('#page-topbar');
 
-				_mblPaneNode = R8.Utils.Y.one('#mb-l-pane');
-				_mbcPaneNode = R8.Utils.Y.one('#mb-c-pane');
-				_mbrPaneNode = R8.Utils.Y.one('#mb-r-pane');
+				_mblPanelNode = R8.Utils.Y.one('#mb-l-panel');
+				_mbSpacerNode = R8.Utils.Y.one('#mb-panel-spacer');
+				_mbContentWrapperNode = R8.Utils.Y.one('#mb-content-wrapper');
+				_mbMainContentNode = R8.Utils.Y.one('#mb-main-content');
+				_mbTopCapNode = R8.Utils.Y.one('#mb-top-cap');
+				_mbBtmCapNode = R8.Utils.Y.one('#mb-btm-cap');
 
 				_detailsHeaderNode = R8.Utils.Y.one('#details-header');
-				_contentWrapperNode = R8.Utils.Y.one('#content-wrapper');
 
 				var that = this;
-//				R8.Utils.Y.one(window).on('resize',function(e){
-//					that.resizePage();
-//				});
-//				this.resizePage();
+				R8.Utils.Y.one(window).on('resize',function(e){
+					that.resizePage();
+				});
+				this.resizePage();
 
 //TODO: move this to centralized place
-				_events['catClick'] = R8.Utils.Y.delegate('click',this.toggleDetails,'#detail-categories','.details-cat');
+				_events['catClick'] = R8.Utils.Y.delegate('click',this.toggleDetails,'#display-categories','.display-cat');
 			},
 			resizePage: function() {
 				_viewportRegion = _pageContainerNode.get('viewportRegion');
@@ -126,29 +134,39 @@ if (!R8.Detailview) {
 				var vportWidth = _viewportRegion['width'];
 
 				var topbarRegion = _topbarNode.get('region');
-				var mainBodyHeight = vportHeight - (topbarRegion['height']);
-				_mainBodyNode.setStyles({'height':mainBodyHeight});
+				var mainBodyWrapperHeight = vportHeight - (topbarRegion['height']);
+				_mainBodyWrapperNode.setStyles({'height':mainBodyWrapperHeight});
 
-				var mblPaneWidth = _mblPaneNode.get('region').width;
-				var mbrPaneWidth = (vportWidth - mblPaneWidth);
-				_mbrPaneNode.setStyles({'width': mbrPaneWidth,'height':mainBodyHeight,'left': mblPaneWidth});
+				var mblPanelWidth = _mblPanelNode.get('region').width;
+				var spacerSize = 10;
+				var spacerWidth = 2*spacerSize;
+				var mbcWrapperWidth = (vportWidth - mblPanelWidth - spacerWidth),
+					mbcWrapperHeight = (mainBodyWrapperHeight-spacerWidth);
+				_mbContentWrapperNode.setStyles({'width': mbcWrapperWidth,'height':mbcWrapperHeight});
 
-				var contentBorder = 10;
-				var contentHeight = (mainBodyHeight - _detailsHeaderNode.get('region').height - contentBorder);
-				_contentWrapperNode.setStyles({'height': contentHeight, 'width': (mbrPaneWidth-contentBorder)});
+				var capsOffset = 10;
+				var mContentHeight = mbcWrapperHeight - capsOffset;
+				_mbMainContentNode.setStyles({'height':mContentHeight,'width':mbcWrapperWidth});
+
+				var cornersWidth = 10;
+				_mbTopCapNode.setStyle('width',(mbcWrapperWidth-cornersWidth));
+				_mbBtmCapNode.setStyle('width',(mbcWrapperWidth-cornersWidth));
+
+//				var contentHeight = (mainBodyHeight - _detailsHeaderNode.get('region').height);
+//				_contentWrapperNode.setStyles({'height': contentHeight, 'width': (mbrPaneWidth)});
 			},
 
 			toggleDetails: function(e) {
 				var id = e.currentTarget.get('id'),
-					selectedCat = id.replace('-details-cat','');
+					selectedCat = id.replace('-display-cat','');
 
 				if(selectedCat === _focusedIndex) return;
 
 				for(var contentId in _contentList) {
-					R8.Utils.Y.one('#'+contentId+'-details-cat').removeClass('selected');
+					R8.Utils.Y.one('#'+contentId+'-display-cat').removeClass('selected');
 					R8.Utils.Y.one('#'+contentId+'-content').setStyle('display','none');
 				}
-				R8.Utils.Y.one('#'+selectedCat+'-details-cat').addClass('selected');
+				R8.Utils.Y.one('#'+selectedCat+'-cat').addClass('selected');
 				R8.Utils.Y.one('#'+selectedCat+'-content').setStyle('display','block');
 
 				if(typeof(_contentList[_focusedIndex].blur) != 'undefined') _contentList[_focusedIndex].blur();

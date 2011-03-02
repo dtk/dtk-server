@@ -1,11 +1,3 @@
-#page-topbar {
-	position: relative;
-	width: 100%;
-	height: 53px;
-	min-width: 500px;
-/*	background: repeat-x url(../images/toolbar/tbar-bg.png);*/
-/*	border: 1px solid black;*/
-}
 
 #wspace-toolbar {
 /*	height: 28px;*/
@@ -18,6 +10,86 @@
 /*	height: 25px;*/
 	width: 100%;
 	background-color: #AEB9CD;
+}
+
+/*----TOPBAR MAIN STYLINS----------------*/
+/*-----------------------*/
+/*---TOP BAR-------------*/
+/*-----------------------*/
+
+.top-bar {
+	position: relative;
+	width: 100%;
+	height: 40px;
+	min-width: 600px;
+/*	background: repeat-x url(../images/toolbar/tbar-bg.png);*/
+/*	border: 1px solid black;*/
+}
+
+.top-bar .menu-bar {
+	height: 40px;
+	padding-left: 4px;
+	padding-right: 4px;
+	background-repeat: repeat-x;
+}
+.menu-bar .body {
+	width: 100%;
+	height: 40px;
+	background-repeat: repeat-x;
+}
+.menu-bar.grey .body {
+	background-image: url(../images/topbar/bg-grey-slice.png);
+}
+
+.menu-bar .menu-item {
+	float: left;
+	padding-top: 9px;
+	margin-left: 20px;
+	font-size: 16px;
+}
+.menu-bar .left-cap {
+	height: 40px;
+	width: 4px;
+	margin-left: -4px;
+	background-position: 0px 0px;
+	background-repeat: no-repeat;
+}
+.menu-bar.grey .left-cap {
+	background-image: url(../images/topbar/bg-grey-end-caps.png);
+}
+.menu-bar .right-cap {
+	height: 40px;
+	width: 4px;
+	margin-right: -4px;
+	background-position: -4px 0px;
+	background-repeat: no-repeat;
+}
+.menu-bar.grey .right-cap {
+	background-image: url(../images/topbar/bg-grey-end-caps.png);
+}
+
+
+.menu-bar .menu-item a:hover, a:link, a:active, a:visited {
+	color: #30322f;
+}
+.menu-bar .menu-item a:hover {
+	color: #3e5865;
+}
+
+.menu-bar .menu-item a {
+	text-decoration: none;
+}
+
+.logo {
+	height: 30px;
+/*	width: 106px;*/
+	width: 26px;
+	float: left;
+	margin: 5px 0 0 0px;
+}
+
+.logo.black {
+	background-image: url(../images/icon-black.png);
 }
 
 /*----TOOLBAR/TOOLBAR GROUPS----------------*/

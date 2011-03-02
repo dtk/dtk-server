@@ -7,6 +7,7 @@ if (!R8.Detailview) {
 			_topbarNode = null,
 			_mainBodyNode = null,
 			_mblPaneNode = null,
+			_mbcPaneNode = null,
 			_mbrPaneNode = null,
 			_detailsHeader = null,
 			_contentWrapperNode = null,
@@ -103,16 +104,17 @@ if (!R8.Detailview) {
 				_topbarNode = R8.Utils.Y.one('#page-topbar');
 
 				_mblPaneNode = R8.Utils.Y.one('#mb-l-pane');
+				_mbcPaneNode = R8.Utils.Y.one('#mb-c-pane');
 				_mbrPaneNode = R8.Utils.Y.one('#mb-r-pane');
 
 				_detailsHeaderNode = R8.Utils.Y.one('#details-header');
 				_contentWrapperNode = R8.Utils.Y.one('#content-wrapper');
 
 				var that = this;
-				R8.Utils.Y.one(window).on('resize',function(e){
-					that.resizePage();
-				});
-				this.resizePage();
+//				R8.Utils.Y.one(window).on('resize',function(e){
+//					that.resizePage();
+//				});
+//				this.resizePage();
 
 //TODO: move this to centralized place
 				_events['catClick'] = R8.Utils.Y.delegate('click',this.toggleDetails,'#detail-categories','.details-cat');

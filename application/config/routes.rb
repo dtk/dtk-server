@@ -173,6 +173,9 @@ R8::Routes["datacenter/load_vspace"] = {
 R8::Routes["component/details"] = {
   :layout => 'details'
 }
+R8::Routes["component/details2"] = {
+  :layout => 'details2'
+}
 
 R8::Routes["datacenter/list"] = {
   :layout => 'dashboard'

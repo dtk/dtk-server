@@ -1,0 +1,196 @@
+
+body {
+	height: 100%;
+	overflow: hidden;
+	color: #30322f;
+	background-image: url(../images/blue-bg-test.png);
+	background-repeat: repeat;
+}
+
+.page-container {
+	min-height: 100%;
+	position: relative;
+/*	background-color: #FFFFFF;*/
+/*	background-image: url(../images/blue-bg-test.png);
+	background-repeat: repeat;*/
+}
+
+
+.main-body {
+	height: inherit;
+	width: inherit;
+	min-height: 300px;
+	min-width: 600px;
+	position: relative;
+	padding-left: 150px;
+	padding-right: 5px;
+}
+
+.mb-l-pane {
+	width: 150px;
+	margin-left: -150px;
+	height: inherit;
+	min-width: 150px;
+	min-height: 300px;
+	background-color: #FFFFFF;
+}
+.mb-pane {
+	width: 100%;
+	height: inherit;
+/*	background-color: green;*/
+}
+.mb-pane-l-spacer {
+	width: 5px;
+	margin-left: -5px;
+	height: inherit;
+}
+.mb-pane-r-spacer {
+	width: 5px;
+	margin-right: -5px;
+	height: inherit;
+}
+
+.mb-r-pane {
+	width: 10px;
+	height: inherit;
+	margin-right: -10px;
+	background-color: #FFFFFF;
+/*	border: 5px solid #AACCEE;*/
+}
+
+
+/*---------------------------------*/
+/*---Left Pane Stylings------------*/
+/*---------------------------------*/
+
+.details-categories {
+	position: relative;
+	float: left;
+	width: inherit;
+}
+
+.details-cat {
+	width: inherit;
+	height: 25px;
+	font-size: 14px;
+	font-weight: bold;
+	cursor: pointer;
+}
+.details-cat .label {
+	margin: 3px 5px;;
+	float: right;
+}
+.details-cat.selected {
+	background-color: #C3C4C4;
+}
+
+
+/*---------------------------------*/
+/*------RPane/Details Related------*/
+/*---------------------------------*/
+
+.details-wrapper {
+	height: inherit;
+	width: inherit;
+}
+
+.details-header {
+	height: 30px;
+	padding: 5px;
+	width: 96%;
+}
+
+.details-header .title {
+	font-size: 18pt;
+	font-weight: bold;
+	float: left;
+/*	color: #30322f;*/
+}
+
+.content-wrapper {
+	height: inherit;
+	width: inherit;
+	border: 5px solid #C3C4C4;	
+	overflow: auto;
+}
+
+.content-wrapper .content {
+	height: 96%;
+	width: 96%;
+	padding: 5px;
+}
+
+
+
+/*----------Display View-------------*/
+
+.display-container {
+	padding: 10px;
+	position: relative;
+	min-width: 300px;
+	min-height: 250px;
+	width: 600px;
+}
+
+table.display {
+	border-top: 1px solid #999999;
+	border-collapse:collapse;
+	width:100%;
+	background-color: #ECECEC;
+}
+
+table.display th {
+	background-color:#DDDDDD;
+	border-bottom: 1px solid #999999;
+	color:#444444;
+	padding:5px;
+	text-align:left;
+}
+
+table.display td {
+	padding: 5px;
+}
+
+table.display td.label {
+	vertical-align: top;
+	font-weight: bold;
+	width: 20%;
+	white-space: nowrap;
+}
+
+/*------------Form related-----------------*/
+
+
+.edit-form {
+	position: relative;
+	float: left;
+	width: 300px;
+	margin: 10px;
+}
+
+table.edit {
+	border: 0;
+}
+td.label {
+	font-size: 15px;
+/*	width: 35%;*/
+	padding: 3px;
+}
+td.field {
+	padding: 3px 3px 7px 3px;
+}
+td.field input[type=text] {
+	border: 1px solid #CCCCCC;
+	height:1.6em;
+/*	line-height:1.1em;*/
+/*	margin:0 0 -0.8em;*/
+/*	padding:0.2em 0.64em 0 0.44em;*/
+	width:20em;
+	font-size: 14px;
+	float:left;
+}
+td.field input[type=text]:focus {
+	border: 2px solid #AEB9CD;
+}
+
+

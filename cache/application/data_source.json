@@ -64,6 +64,47 @@
           "ui": "{\"images\": {\"tnail\":\"hadoop-hive.png\",\"display\":\"hadoop-hive.png\",\"tiny\":\"\"}}",
 	  "basic_type": "service"
         },
+	"java_webapp": {
+          "ui": "{\"images\": {\"tnail\":\"java-01.png\",\"display\":\"java-01.png\",\"tiny\":\"\"}}",
+	  "basic_type": "application",
+	  "component_type": "java_webapp",
+	  "only_one_per_node": false,	  
+          "dependency" : {
+	    "tomcat" : {"required_component" :"tomcat"}
+          },
+	  "attribute": {
+            "sap_ref__l4": {
+              "display_name": "sap_ref__l4",
+              "required": true,
+              "description": "postgresql admin service access point reference to connect to server",
+              "semantic_type": "sap_ref__l4",
+              "semantic_type_summary": "sap_ref__l4",
+              "data_type": "json",
+              "dependency": {
+                "component_constraint": {
+                  "display_name": "component_constraint",
+                  "type": "component",
+                  "search_pattern": {
+                    ":filter": [
+                      ":and",
+                      [
+                        ":eq",
+                        ":component_type",
+                        "postgresql__server"
+                      ]
+                    ]
+                  },
+                  "description": "Not connecting to Postgres Server"
+                }
+              },
+              "dynamic": false,
+              "read_only": false,
+              "cannot_change": false,
+              "hidden": false,
+              "is_port": true
+            }
+          }
+        },
 	"java": {
           "ui": "{\"images\": {\"tnail\":\"java-01.png\",\"display\":\"java-01.png\",\"tiny\":\"\"}}",
 	  "basic_type": "language"

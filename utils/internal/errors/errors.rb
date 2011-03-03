@@ -17,7 +17,10 @@ module XYZ
       end
     end
   end
-  class ErrorConstraintViolations < Error
+  class ErrorForUser < Error
+  end
+
+  class ErrorConstraintViolations < ErrorForUser
     def initialize(violations)
        super(msg(violations),:ConstraintViolations)
     end
@@ -32,6 +35,20 @@ module XYZ
       ret = "constraint violations: "
       ret << (v_with_text.first == :or ? "(atleast) one of " : "")
       ret << "(#{v_with_text[1..v_with_text.size-1].join(", ")})"
+    end
+  end
+
+  class ErrorUserInputNeeded < ErrorForUser
+    def initialize(needed_inputs)
+      super()
+      @needed_inputs = needed_inputs
+    end
+    def to_s()
+      ret = "following inputs are needed:\n"
+      @needed_inputs.each do |k,v|
+        ret << "  #{k}: type=#{v[:type]}; description=#{v[:description]}\n"
+      end
+      ret
     end
   end
 
@@ -66,19 +83,7 @@ module XYZ
       end
     end
   end
-  class ErrorUserInputNeeded < Error
-    def initialize(needed_inputs)
-      super()
-      @needed_inputs = needed_inputs
-    end
-    def to_s()
-      ret = "following inputs are needed:\n"
-      @needed_inputs.each do |k,v|
-        ret << "  #{k}: type=#{v[:type]}; description=#{v[:description]}\n"
-      end
-      ret
-    end
-  end
+
   class ErrorAMQP < Error
     def to_s()
       "AMQP error"

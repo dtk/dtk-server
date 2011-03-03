@@ -7,10 +7,22 @@
           "ds_name": "user_data",
           "display_name": "component",
 	    "data_source_entry": {
-              "component_attribute": {
+              "component_dependency": {
                 "obj_type": "dependency",
                 "ds_name": "user_data",
                 "display_name": "dependency"
+              },
+              "component_attribute": {
+                "obj_type": "attribute",
+                "ds_name": "user_data",
+                "display_name": "attribute",
+		"data_source_entry": {
+                  "attribute_dependency": {
+                    "obj_type": "dependency",
+                    "ds_name": "user_data",
+                    "display_name": "dependency"
+                  }
+                }
               }
             }		
         },

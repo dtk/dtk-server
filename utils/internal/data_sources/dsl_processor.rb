@@ -26,8 +26,6 @@ module XYZ
         class_rules.freeze
       end
     end
-
-
    class Context
      attr_reader :relation,:condition, :parent
      def initialize(parent,relation=:no_condition,condition=nil)
@@ -35,6 +33,7 @@ module XYZ
        @relation = relation
        @condition = condition 
      end
+
      #top level "conditionals"
      def if_exists(condition,&block)
        context = Context.new(self,:if_exists,condition)
@@ -88,6 +87,10 @@ module XYZ
        return @condition.apply(ds_hash) if @relation == :if_exists
        raise Error.new("condition #{relation} does not exist")
      end
+
+    def column_names(model_name)
+      DB_REL_DEF[model_name][:columns].keys
+    end
    end
 
    class NestedDefinition

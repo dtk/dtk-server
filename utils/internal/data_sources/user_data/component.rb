@@ -4,14 +4,17 @@ module XYZ
       class Component < Top 
         definitions do
           target[:display_name] = source["ref"]
-          target[:ui] = source["ui"]
-          if_exists(source["only_one_per_node"]) do
-            target[:only_one_per_node] = source["only_one_per_node"]
+          (column_names(:component) - [:display_name]).each do |v|
+            if_exists(source[v.to_s]) do
+              target[v.to_sym] = source[v.to_s]
+            end
           end
-          if_exists(source["basic_type"]) do
-            target[:basic_type] = source["basic_type"]
+          if_exists(source["attribute"]) do
+            nested_definition :attribute, source["attribute"]
           end
-          nested_definition :dependency, source["dependency"]
+          if_exists(source["dependency"]) do
+            nested_definition :dependency, source["dependency"]
+          end
         end
         def self.unique_keys(source)
           [source["qualified_ref"]]

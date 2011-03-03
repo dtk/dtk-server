@@ -15,7 +15,7 @@ module XYZ
         #TODO: refactor to have: user, service_check, language, package, application, service, extension
         #maybe also 'db'
         #clean up so rather than samentic type attributes view these as extensionable types
-        column :basic_type, :varchar, :size => 15 # service | package | database_server | database | language | application | client | feature | user ..
+        column :basic_type, :varchar, :size => 25 # service | package | service__database | database | language | application | client | feature | user ..
         column :only_one_per_node, :boolean, :default => true
         column :version, :varchar, :size => 25 # version of underlying component (not chef recipe .... version)
         column :uri, :varchar

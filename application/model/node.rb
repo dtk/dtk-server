@@ -124,7 +124,7 @@ module XYZ
         ]
 
       #TODO: just for testing
-      application_basic_types = %w{application service database database_server language extension client}
+      application_basic_types = %w{application service service__database database language extension client}
 
       #in dock 'applications means wider than basic_type == applicationsn
       virtual_column :applications, :type => :json, :hidden => true,

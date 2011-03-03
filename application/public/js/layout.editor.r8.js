@@ -208,7 +208,7 @@ this.setI18n(fieldDefs);
 				var groupIndex = _groupListNode.get('children').size();
 				var id = (typeof(id) == 'undefined') ? 'group-'+groupIndex : id;
 				var contentTpl = '<div id="'+id+'-content" class="tab-content">\
-									<ul id="'+id+'-field-list" style="margin: 10px 5px 5px 5px; width: 90%; height: 90%; float: left; border: 1px solid #EDEDED;">\
+									<ul id="'+id+'-field-list" class="field-list">\
 									</ul>\
 								  </div>';
 //									<ul id="'+id+'-field-list" style="margin: 5px; width: 200px; height: 200px; float: left; border: 1px solid black;">\

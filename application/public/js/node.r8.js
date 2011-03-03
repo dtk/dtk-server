@@ -907,6 +907,8 @@ console.log('not a valid link.., mis-matched types...');
 			linkCreateCallback: function(ioId,responseObj) {
 				eval("R8.Ctrl.callResults[ioId]['response'] =" + responseObj.responseText);
 				var response = R8.Ctrl.callResults[ioId]['response'];
+//DEBUG
+console.log(response);
 //TODO: revisit after cleaning up responses so dont have to traverse way down to get data
 				var newLink = response.application_attribute_link_save.content[0].data;
 

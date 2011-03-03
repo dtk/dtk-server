@@ -176,13 +176,25 @@ pp [:debug_stored_new_pos,get_objects(model_name,SQL.in(:id,model_items.map{|ite
         model_list[index][:ui][:images] ||= {}
         name = model_list[index][:display_name]
         title = name.nil? ? "" : i18n_string(i18n,model_name.to_sym,name)
+
+
+#TODO: change after implementing all the new types and making generic icons for them
+        model_type = 'database'
+        model_list[index][:image_path] = model_list[index][:ui][:images][:tnail] ? 
+        R8::Config[:base_images_uri]+'/'+model_name+'Icons/'+model_list[index][:ui][:images][:tnail] : 
+        R8::Config[:base_images_uri]+'/'+model_name+'Icons/'+model_type+'-unknown.png'
+
+        model_list[index][:i18n] = name.nil? ? "" : i18n_string(i18n,model_name.to_sym,name)
+
+=begin
         img_value = model_list[index][:ui][:images][:tnail] ? 
         '<div class="img_wrapper"><img title="'+title+'"src="'+R8::Config[:base_images_uri]+'/'+model_name+'Icons/'+model_list[index][:ui][:images][:tnail]+'"/></div>' : 
-          ""
+          ''
         body_value = img_value
           
         body_value == '' ? body_value = model_list[index][:display_name] : nil
         model_list[index][:body_value] = body_value
+=end
       end
 
 #pp "^^^^^^^^^^^^^^^^^^^^^^^^^^^^"

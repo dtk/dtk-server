@@ -10,7 +10,14 @@
 					<div class="l-col-body"></div>
 					<div class="corner bl"></div>
 				</div>
-				<div id="body-{%=model[:id]%}" class="body">{%=model[:body_value]%}</div>
+				<div id="body-{%=model[:id]%}" class="body">
+        			<div class="img_wrapper">
+        				<img src="{%=model[:image_path]%}"/>
+        			</div>
+					<div style="margin: 0 auto; position: absolute; bottom: 9; width: inherit; height: 10px;">
+						{%=model[:i18n]%}
+					</span>
+				</div>
 				<div class="r-col">
 					<div class="corner tr"></div>
 					<div class="r-col-body"></div>

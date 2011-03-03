@@ -72,3 +72,15 @@
 	margin-top: 10px;
 }
 */
+
+.layout-editor .field-list {
+	margin: 10px 5px 5px 5px;
+	width: 95%;
+	height: 85%;
+	float: left;
+	border: 1px solid #EDEDED;
+}
+
+.layout-editor .yui3-dd-drop-active-valid.field-list {
+	background-color: #DDDDDD;
+}

@@ -41,23 +41,42 @@
 				<div class="yui3-u right-cap"></div>
 			</div>
 		</div>
-		<div style="height: 5px; width: inherit;"></div>
-		<div id="main-body" class="yui3-g main-body">
-			<div id="mb-l-pane" class="yui3-u mb-l-pane">
-				<div id="spacer" style="height: 100px; width: inherit;"></div>
-				<div id="detail-categories" class="details-categories">
-					<div id="details-details-cat" class="details-cat selected"><div class="label">Summary</div></div>
-					<div id="instances-details-cat" class="details-cat"><div class="label">Instances</div></div>
-					<div id="dependencies-details-cat" class="details-cat"><div class="label">Constraints</div></div>
-					<div id="editor-details-cat" class="details-cat"><div class="label">Edit</div></div>
-					<div id="layout-details-cat" class="details-cat"><div class="label">Layouts</div></div>
+		<div style="height: 10px; width: inherit;"></div>
+		<div id="main-body-wrapper" class="main-body-wrapper">
+			<div id="mb-l-panel" class="mb-l-panel">
+				<div class="cap">
+					<div class="bar"></div>
+					<div class="corner tr"></div>
+				</div>
+				<div id="spacer" style="height: 70px; width: inherit; background-color: #FFFFFF;"></div>
+				<div id="display-categories" class="display-categories">
+					<div id="display-summary-cat" class="display-cat selected"><div class="label">Summary</div></div>
+					<div id="instances-details-cat" class="display-cat"><div class="label">Instances</div></div>
+					<div id="dependencies-details-cat" class="display-cat"><div class="label">Constraints</div></div>
+					<div id="editor-details-cat" class="display-cat"><div class="label">Edit</div></div>
+					<div id="layout-details-cat" class="display-cat"><div class="label">Layouts</div></div>
+				</div>
+				<div class="cap">
+					<div class="bar"></div>
+					<div class="corner br"></div>
 				</div>
 			</div>
-			<div id="mb-pane" class="yui3-u mb-pane">
-				<div style="height: 100%; width: 100%; background-color: green; margin: 0 5px;"</div>
-				{%=main_body%}
+			<div id="mb-panel-spacer" class="mb-panel-spacer"></div>
+			<div id="mb-content-wrapper" class="mb-content-wrapper">
+				<div id="mb-top-cap" class="yui3-g cap">
+					<div class="yui3-u corner tl"></div>
+					<div class="yui3-u bar"></div>
+					<div class="yui3-u corner tr"></div>
+				</div>
+				<div id="mb-main-content" class="mb-main-content">
+					{%=main_body%}
+				</div>
+				<div id="mb-btm-cap" class="yui3-g cap">
+					<div class="yui3-u corner bl"></div>
+					<div class="yui3-u bar"></div>
+					<div class="yui3-u corner br"></div>
+				</div>
 			</div>
-			<div class="yui3-u mb-pane-r-spacer"></div>
 		</div>
 		</div>
 	</div>

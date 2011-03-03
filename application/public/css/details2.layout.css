@@ -16,74 +16,127 @@ body {
 }
 
 
-.main-body {
+.main-body-wrapper {
 	height: inherit;
 	width: inherit;
 	min-height: 300px;
 	min-width: 600px;
 	position: relative;
-	padding-left: 150px;
-	padding-right: 5px;
 }
 
-.mb-l-pane {
+/*---------------------------------*/
+/*---Left Panel Stylings------------*/
+/*---------------------------------*/
+.mb-l-panel {
 	width: 150px;
-	margin-left: -150px;
-	height: inherit;
-	min-width: 150px;
-	min-height: 300px;
+	height: 300px;
+	position: relative;
+	float: left;
+}
+
+.mb-l-panel .cap {
+	width: 150px;
+	height: 5px;
+}
+.mb-l-panel .cap .bar {
+	width: 145px;
+	height: 5px;
 	background-color: #FFFFFF;
+	float: left;
 }
-.mb-pane {
-	width: 100%;
-	height: inherit;
-/*	background-color: green;*/
-}
-.mb-pane-l-spacer {
+.mb-l-panel .corner {
+	height: 5px;
 	width: 5px;
-	margin-left: -5px;
-	height: inherit;
+	background-image: url(../images/display/corners-white.png);
+	float: left;
 }
-.mb-pane-r-spacer {
-	width: 5px;
-	margin-right: -5px;
-	height: inherit;
+.mb-l-panel .corner.tr {
+	background-position: 0px -5px;
 }
-
-.mb-r-pane {
-	width: 10px;
-	height: inherit;
-	margin-right: -10px;
-	background-color: #FFFFFF;
-/*	border: 5px solid #AACCEE;*/
+.mb-l-panel .corner.br {
+	background-position: 0px -10px;
 }
 
 
-/*---------------------------------*/
-/*---Left Pane Stylings------------*/
-/*---------------------------------*/
 
-.details-categories {
+.display-categories {
 	position: relative;
 	float: left;
 	width: inherit;
+	background-color: #FFFFFF;
 }
 
-.details-cat {
+.display-cat {
 	width: inherit;
 	height: 25px;
 	font-size: 14px;
 	font-weight: bold;
 	cursor: pointer;
 }
-.details-cat .label {
+.display-cat .label {
 	margin: 3px 5px;;
 	float: right;
 }
-.details-cat.selected {
+.display-cat.selected {
 	background-color: #C3C4C4;
 }
 
+.mb-panel-spacer {
+	position: relative;
+	float: left;
+	width: 10px;
+	height: inherit;
+}
+
+/*---------------------------------*/
+/*---MAIN BODY CONTENT Stylings----*/
+/*---------------------------------*/
+
+.mb-content-wrapper {
+	width: 100%;
+	height: inherit;
+	position: relative;
+	float: left;
+}
+
+
+.mb-content-wrapper .cap {
+	width: inherit;
+	height: 5px;
+	padding: 0 5px;
+}
+.mb-content-wrapper .cap .bar {
+	width: 100%;
+	height: 5px;
+	background-color: #FFFFFF;
+}
+.mb-content-wrapper .corner {
+	height: 5px;
+	width: 5px;
+	background-image: url(../images/display/corners-white.png);
+}
+.mb-content-wrapper .corner.tl {
+	background-position: 0px 0px;
+	margin-left: -5px;
+}
+.mb-content-wrapper .corner.tr {
+	background-position: 0px -5px;
+	margin-right: -5px;
+}
+.mb-content-wrapper .corner.br {
+	background-position: 0px -10px;
+	margin-right: -5px;
+}
+.mb-content-wrapper .corner.bl {
+	background-position: 0px -15px;
+	margin-left: -5px;
+}
+
+.mb-main-content {
+	background-color: #FFFFFF;
+	width: inherit;
+	height: inherit;
+}
 
 /*---------------------------------*/
 /*------RPane/Details Related------*/

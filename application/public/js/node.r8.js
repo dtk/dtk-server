@@ -907,8 +907,25 @@ console.log('not a valid link.., mis-matched types...');
 			linkCreateCallback: function(ioId,responseObj) {
 				eval("R8.Ctrl.callResults[ioId]['response'] =" + responseObj.responseText);
 				var response = R8.Ctrl.callResults[ioId]['response'];
+
+				var errorData = response.application_attribute_link_save.content[0].data.error;
+				if(typeof(errorData) != 'undefined') {
+					R8.Utils.Y.one('#'+_tempLinkDef.id).remove();
+					R8.Workspace.showAlert(errorData.error_msg);
+
+					var startPortNode = R8.Utils.Y.one('#'+_tempLinkDef.startElement.connectElemID);
+					var endPortNode = R8.Utils.Y.one('#'+_tempLinkDef.endElements[0].connectElemID);
+					startPortNode.removeClass('connected');
+					startPortNode.addClass('available');
+					endPortNode.removeClass('connected');
+					endPortNode.addClass('available');
+
 //DEBUG
-console.log(response);
+//console.log(_tempLinkDef);
+//console.log(errorData);
+					return;
+				}
+
 //TODO: revisit after cleaning up responses so dont have to traverse way down to get data
 				var newLink = response.application_attribute_link_save.content[0].data;
 

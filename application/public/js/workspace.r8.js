@@ -108,6 +108,7 @@ if (!R8.Workspace) {
 				R8.Workspace.topbarHeight = topbarRegion['height'];
 
 				for(rcId in R8.Workspace.resizeCallbacks) {
+//console.log(R8.Workspace.resizeCallbacks[rcId]['nodeId']);
 					var nodeObj = R8.Utils.Y.one(R8.Workspace.resizeCallbacks[rcId]['nodeId']);
 					var newDimensions = R8.Workspace.resizeCallbacks[rcId]['lambda'](vportHeight,vportWidth);
 					nodeObj.setStyles(newDimensions);
@@ -885,7 +886,7 @@ for(vs in _viewSpaces) {
 					var delayAnimRun = function(){
 							anim.run();
 						}
-					setTimeout(delayAnimRun,1500);
+					setTimeout(delayAnimRun,1800);
 
 				});
 //				alert(alertStr);

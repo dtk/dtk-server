@@ -1,10 +1,10 @@
 
-<div id="details-wrapper" class="details-wrapper" style="">
-	<div id="details-header" class="details-header" style="">
+<div id="display-wrapper" class="display-wrapper">
+	<div id="details-header" class="details-header">
 		<div class="title" style="">{%=component[:name]%}</div>
 	</div>
-	<div id="content-wrapper" class="content-wrapper" style="">
-		<div id="details-content" class="content">
+	<div id="content-wrapper" class="content-wrapper">
+		<div id="summary-content" class="cat-content">
 			<div class="display-container">
 				<table class="display">
 					<tr id="">
@@ -50,10 +50,10 @@
 			</div>
 		</div>
 
-		<div id="instances-content" class="content" style="display: none;"></div>
-		<div id="assembly-content" class="content" style="display: none;"></div>
-		<div id="editor-content" class="content" style="display: none;"></div>
-		<div id="dependencies-content" class="content" style="display: none;"></div>
-		<div id="layout-content" class="content" style="display: none;"></div>
+		<div id="instances-content" class="cat-content" style="display: none;"></div>
+		<div id="assembly-content" class="cat-content" style="display: none;"></div>
+		<div id="editor-content" class="cat-content" style="display: none;"></div>
+		<div id="dependencies-content" class="cat-content" style="display: none;"></div>
+		<div id="layout-content" class="cat-content" style="display: none;"></div>
 	</div>
 </div>

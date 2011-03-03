@@ -20,9 +20,9 @@ if (!R8.Detailview) {
 
 			_viewportRegion = null,
 			_events = {},
-			_focusedIndex = 'details',
+			_focusedIndex = 'summary',
 			_contentList = {
-				'details': {
+				'summary': {
 					'loaded': true,
 					'route': 'foo/bar'
 				},
@@ -142,6 +142,10 @@ if (!R8.Detailview) {
 				var spacerWidth = 2*spacerSize;
 				var mbcWrapperWidth = (vportWidth - mblPanelWidth - spacerWidth),
 					mbcWrapperHeight = (mainBodyWrapperHeight-spacerWidth);
+
+				mbcWrapperWidth = (mbcWrapperWidth < 700) ? 700 : mbcWrapperWidth;
+				mbcWrapperHeight = (mbcWrapperHeight < 400) ? 400 : mbcWrapperHeight;
+
 				_mbContentWrapperNode.setStyles({'width': mbcWrapperWidth,'height':mbcWrapperHeight});
 
 				var capsOffset = 10;
@@ -158,14 +162,15 @@ if (!R8.Detailview) {
 
 			toggleDetails: function(e) {
 				var id = e.currentTarget.get('id'),
-					selectedCat = id.replace('-display-cat','');
+					selectedCat = id.replace('-cat','');
 
 				if(selectedCat === _focusedIndex) return;
 
 				for(var contentId in _contentList) {
-					R8.Utils.Y.one('#'+contentId+'-display-cat').removeClass('selected');
+					R8.Utils.Y.one('#'+contentId+'-cat').removeClass('selected');
 					R8.Utils.Y.one('#'+contentId+'-content').setStyle('display','none');
 				}
+console.log('selectedCat:'+selectedCat);
 				R8.Utils.Y.one('#'+selectedCat+'-cat').addClass('selected');
 				R8.Utils.Y.one('#'+selectedCat+'-content').setStyle('display','block');
 

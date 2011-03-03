@@ -89,7 +89,6 @@ this.setI18n(fieldDefs);
 //-----------------------------------------
 //TODO: remove after cleanup
 			setI18n: function(fieldDefs) {
-console.log(fieldDefs);
 				for(var g in _layoutDef.groups) {
 					for(var f in _layoutDef.groups[g].fields) {
 						_layoutDef.groups[g].fields[f].i18n = this.getFieldI18n(_layoutDef.groups[g].fields[f].name,fieldDefs);
@@ -99,7 +98,6 @@ console.log(fieldDefs);
 			getFieldI18n: function(fName,fieldDefs) {
 				for(var f in fieldDefs) {
 					if(fieldDefs[f].name === fName) {
-console.log(fName+':'+fieldDefs[f].i18n);
 						return fieldDefs[f].i18n;
 					}
 				}

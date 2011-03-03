@@ -63,8 +63,8 @@ pp component
 
       run_javascript("R8.Detailview.init('#{id}');")
 
-#      return {:content => tpl.render()}
-      return {:content => ""}
+      return {:content => tpl.render()}
+#      return {:content => ""}
     end
 
     def instance_list(id)

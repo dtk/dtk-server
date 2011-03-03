@@ -78,7 +78,8 @@ body {
 	float: right;
 }
 .display-cat.selected {
-	background-color: #C3C4C4;
+/*	background-color: #C3C4C4;*/
+	background-color: #AEB9CD;
 }
 
 .mb-panel-spacer {
@@ -142,7 +143,7 @@ body {
 /*------RPane/Details Related------*/
 /*---------------------------------*/
 
-.details-wrapper {
+.display-wrapper {
 	height: inherit;
 	width: inherit;
 }
@@ -163,14 +164,15 @@ body {
 .content-wrapper {
 	height: inherit;
 	width: inherit;
-	border: 5px solid #C3C4C4;	
-	overflow: auto;
+/*	border: 5px solid #C3C4C4;*/
+	overflow-y: auto;
+	padding: 10px;
 }
 
-.content-wrapper .content {
+.content-wrapper .cat-content {
 	height: 96%;
 	width: 96%;
-	padding: 5px;
+	overflow-y: auto;
 }
 
 
@@ -178,7 +180,6 @@ body {
 /*----------Display View-------------*/
 
 .display-container {
-	padding: 10px;
 	position: relative;
 	min-width: 300px;
 	min-height: 250px;

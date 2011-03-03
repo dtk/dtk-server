@@ -473,11 +473,11 @@ console.log('Have a drop hit for node!!!!');
 				delete (this.events['lbtn_click']);
 				this.events['rbtn_click'].detach();
 				delete (this.events['rbtn_click']);
-					
+
 				//TODO: figure out why slider_key_press throws undefined error after a 2nd search is run
 				this.events['slider_key_press'].detach();
 				delete (this.events['slider_key_press']);
-					
+
 				this.sliderAnim = null;
 				this.slideBarNode = null;
 				this.sliderSetup = false;
@@ -569,6 +569,9 @@ console.log('Have a drop hit for node!!!!');
 			setupSliderAnim: function(Y, tIndex){
 				var name = R8.Cmdbar.loadedTabs[tIndex]['name'];
 				R8.Cmdbar.loadedTabs[tIndex].slideBarNode = Y.one('#' + name + '-slide-bar');
+//DEBUG
+R8.Cmdbar.loadedTabs[tIndex].listContainer = Y.one('#' + name + '-list-container');
+
 				R8.Cmdbar.loadedTabs[tIndex].sliderAnim = new Y.Anim({
 					node: R8.Cmdbar.loadedTabs[tIndex].slideBarNode,
 					duration: 0.3,
@@ -582,11 +585,14 @@ console.log('Have a drop hit for node!!!!');
 			},
 			slideLeft: function(e){
 				var tIndex = R8.Cmdbar.getTabIndexByName(this.name);
-				if (R8.Cmdbar.loadedTabs[tIndex].sliderInMotion) 
+				var containerRgn = R8.Cmdbar.loadedTabs[tIndex].listContainer.get('region'),
+					sliderRgn = R8.Cmdbar.loadedTabs[tIndex].slideBarNode.get('region');
+
+				if (R8.Cmdbar.loadedTabs[tIndex].sliderInMotion || (sliderRgn.right <= containerRgn.right))
 					return;
-				else 
+				else
 					R8.Cmdbar.loadedTabs[tIndex].sliderInMotion = true;
-					
+
 				R8.Cmdbar.loadedTabs[tIndex].sliderAnim.set('to', {
 					xy: [R8.Cmdbar.loadedTabs[tIndex].slideBarNode.getX() - 510, R8.Cmdbar.loadedTabs[tIndex].slideBarNode.getY()]
 				});
@@ -594,7 +600,10 @@ console.log('Have a drop hit for node!!!!');
 			},
 			slideRight: function(e){
 				var tIndex = R8.Cmdbar.getTabIndexByName(this.name);
-				if (R8.Cmdbar.loadedTabs[tIndex].sliderInMotion) 
+				var containerRgn = R8.Cmdbar.loadedTabs[tIndex].listContainer.get('region'),
+					sliderRgn = R8.Cmdbar.loadedTabs[tIndex].slideBarNode.get('region');
+
+				if (R8.Cmdbar.loadedTabs[tIndex].sliderInMotion || (sliderRgn.left >= containerRgn.left)) 
 					return;
 				else 
 					R8.Cmdbar.loadedTabs[tIndex].sliderInMotion = true;

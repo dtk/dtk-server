@@ -208,7 +208,7 @@ pp [:debug_stored_new_pos,get_objects(model_name,SQL.in(:id,model_items.map{|ite
       tpl.set_js_tpl_name("wspace_search_#{model_name}")
       tpl.assign('model_list',model_list)
 
-      slide_width = 170*model_list.size
+      slide_width = 130*model_list.size
       tpl.assign('slide_width',slide_width)
       #TODO: needed to below back in so template did not barf
  # }

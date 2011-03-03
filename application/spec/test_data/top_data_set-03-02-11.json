@@ -1965,8 +1965,8 @@
           "ui": {
             "images": {
               "tiny": "",
-              "tnail": "java-01.png",
-              "display": "java-01.png"
+              "tnail": "pkg-language-java-jpackage.png",
+              "display": "pkg-language-java-jpackage.png"
             }
           },
           "display_name": "jpackage",
@@ -2198,6 +2198,13 @@
           "ds_key": "[:user_data, \"/library/test/rabbitmq\"]"
         },
         "tomcat": {
+          "ui": {
+            "images": {
+              "tiny": "",
+              "tnail": "server-tomcat.png",
+              "display": "server-tomcat.png"
+            }
+          },
           "type": "instance",
           "display_name": "tomcat",
           "description": "Installs and configures Tomcat",

@@ -179,10 +179,13 @@ pp [:debug_stored_new_pos,get_objects(model_name,SQL.in(:id,model_items.map{|ite
 
 
 #TODO: change after implementing all the new types and making generic icons for them
-        model_type = 'database'
+        model_type = 'service'
+        model_sub_type = 'db'
+        model_type_str = model_type+'-'+model_sub_type
+
         model_list[index][:image_path] = model_list[index][:ui][:images][:tnail] ? 
         R8::Config[:base_images_uri]+'/'+model_name+'Icons/'+model_list[index][:ui][:images][:tnail] : 
-        R8::Config[:base_images_uri]+'/'+model_name+'Icons/'+model_type+'-unknown.png'
+        R8::Config[:base_images_uri]+'/'+model_name+'Icons/unknown-'+model_type_str+'.png'
 
         model_list[index][:i18n] = name.nil? ? "" : i18n_string(i18n,model_name.to_sym,name)
 

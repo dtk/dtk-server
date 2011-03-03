@@ -5,10 +5,18 @@ service :mysql_server do
     :description => "db userid for monitoring application to use",
     :transform => "root"
 
+  attribute "db_params",
+   :recipes => ["mysql::db"],
+   :semantic_type => "db_params",
+   :description => "Parameters for a db",
+   :type => "hash"
+
   attribute "sap_config__l4",
     :recipes => ["mysql::server","mysql::server2"],
     :type => "hash",
     :description => "mysql ip service access point configuration",
+    :semantic_type => {":array" => "sap_config__l4"},
+=begin
     :semantic_type => {
       ":array" => {
         "sap_config__l4" => {
@@ -16,6 +24,7 @@ service :mysql_server do
             "type" => "sql::mysql", 
             "clients_provide_dbs" => true
           }}}},
+=end
     :transform =>
     [{
        "port" => {"__ref" => "node[mysql][port]"},
@@ -25,7 +34,7 @@ service :mysql_server do
   attribute "sap__socket",
     :recipes => ["mysql::server","mysql::server2"],
     :description => "mysql unix socket service access point",
-    :semantic_type => {"sap__socket" => {"application" => {"type" => "sql::mysql"}}},
+    :semantic_type => "sap__socket",
     :type => "hash",
     :transform =>
       {
@@ -36,6 +45,8 @@ service :mysql_server do
     :recipes => ["mysql::master"],
     :type => "hash",
     :description => "mysql ip service access point configuration for slave",
+    :semantic_type => {":array" => "sap_config__l4"},
+=begin
     :semantic_type => { 
       ":array" => {
         "sap_config__l4" => {
@@ -43,6 +54,7 @@ service :mysql_server do
             "type" => "sql::mysql", 
             "clients_provide_dbs" => false
         }}}},
+=end
     :transform => 
     [{
        "port" => {"__ref" => "node[mysql][port]"},

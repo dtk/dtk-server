@@ -37,6 +37,10 @@ module XYZ
         return hash if path.empty?
         nested_value_private!(hash,path.dup)
       end
+      def has_path?(hash,path)
+        return true if path.empty?
+        has_path_private!(hash,path.dup)
+      end
 
       def set_nested_value!(hash,path,val)
         if path.size == 0
@@ -68,17 +72,23 @@ module XYZ
       end
     end
 
-    class << self
-      # "*" in path means just take whatever is next (assuming singleton; otehrwise takes first
-      # marked by "!" since it updates the path parameter
-      def nested_value_private!(hash,path)
-        return nil unless hash.kind_of?(Hash)
-        f = path.shift
-        f = hash.keys.first if f == "*"
-        return nil unless hash.has_key?(f)
-        return hash[f] if path.length == 0
-        nested_value_private!(hash[f],path)
-      end
+    # "*" in path means just take whatever is next (assuming singleton; otehrwise takes first
+    # marked by "!" since it updates the path parameter
+    def self.nested_value_private!(hash,path)
+      return nil unless hash.kind_of?(Hash)
+      f = path.shift
+      f = hash.keys.first if f == "*"
+      return nil unless hash.has_key?(f)
+      return hash[f] if path.length == 0
+      nested_value_private!(hash[f],path)
+    end
+    def self.has_path_private!(hash,path)
+      return nil unless hash.kind_of?(Hash)
+      f = path.shift
+      f = hash.keys.first if f == "*"
+      return nil unless hash.has_key?(f)
+      return hash.has_key?(f) if path.length == 0
+      nested_value_private!(hash[f],path)
     end
   end
 

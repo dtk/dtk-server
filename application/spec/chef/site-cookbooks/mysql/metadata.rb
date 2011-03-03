@@ -9,6 +9,7 @@ recipe            "mysql::server_ec2", "Performs EC2-specific mountpoint manipul
 recipe            "mysql::client_app1", "Sample client application that connects to a mysql database"
 recipe            "mysql::slave", "For extending mysql server to serve as a slave"
 recipe            "mysql::master", "For extending mysql server to serve as a master"
+recipe            "mysql::db", "Mysql DB"
 
 %w{ debian ubuntu }.each do |os|
   supports os

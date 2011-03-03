@@ -1,6 +1,7 @@
 {
     "recipes": {
       "mysql::slave": "For extending mysql server to serve as a slave",
+      "mysql::db": "Mysql DB",
       "mysql::server2": "Installs packages required for mysql servers w/o manual intervention",
       "mysql::client_app1": "Sample client application that connects to a mysql database",
       "mysql::client": "Installs packages required for mysql clients using run_action magic",
@@ -67,14 +68,7 @@
         ],
         "description": "mysql ip service access point configuration",
         "semantic_type": {
-          ":array": {
-            "sap_config__l4": {
-              "application": {
-                "clients_provide_dbs": true,
-                "type": "sql::mysql"
-              }
-            }
-          }
+          ":array": "sap_config__l4"
         }
       },
       "mysql/tunable/max_heap_table_size": {
@@ -245,15 +239,22 @@
         ],
         "description": "mysql ip service access point configuration for slave",
         "semantic_type": {
-          ":array": {
-            "sap_config__l4": {
-              "application": {
-                "clients_provide_dbs": false,
-                "type": "sql::mysql"
-              }
-            }
-          }
+          ":array": "sap_config__l4"
         }
+      },
+      "mysql/_service/mysql_server/db_params": {
+        "required": "optional",
+        "is_service_attribute": true,
+        "calculated": false,
+        "choice": [
+
+        ],
+        "type": "hash",
+        "recipes": [
+          "mysql::db"
+        ],
+        "description": "Parameters for a db",
+        "semantic_type": "db_params"
       },
       "mysql/tunable/net_read_timeout": {
         "required": "optional",
@@ -327,13 +328,7 @@
           "mysql::server2"
         ],
         "description": "mysql unix socket service access point",
-        "semantic_type": {
-          "sap__socket": {
-            "application": {
-              "type": "sql::mysql"
-            }
-          }
-        }
+        "semantic_type": "sap__socket"
       },
       "mysql/ec2_path": {
         "required": "optional",

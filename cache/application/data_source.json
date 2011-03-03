@@ -120,11 +120,20 @@
           }	    
         },
 	 "mysql__master": {
-          "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}"
+          "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}",
+	  "basic_type": "extension"
+
         },
 	 "mysql__slave": {
-          "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}"
+          "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}",
+	  "basic_type": "extension"
         },
+	 "mysql__db": {
+          "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}",
+	  "basic_type": "db",
+	  "only_one_per_node": false
+        },
+
 	"hadoop": {
           "ui": "{\"images\": {\"tnail\":\"hadoop.png\",\"display\":\"hadoop.png\",\"tiny\":\"\"}}",
 	  "basic_type": "service"

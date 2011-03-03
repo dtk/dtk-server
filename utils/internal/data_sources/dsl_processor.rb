@@ -84,7 +84,7 @@ module XYZ
 
      def evaluate_condition(ds_hash)
        return true if @relation == :no_conditions
-       return @condition.apply(ds_hash) if @relation == :if_exists
+       return @condition.has_path?(ds_hash) if @relation == :if_exists
        raise Error.new("condition #{relation} does not exist")
      end
 
@@ -124,6 +124,9 @@ module XYZ
 
     def apply(hash)
       HashObject.nested_value(hash,@path)
+    end
+    def has_path?(hash)
+      HashObject.has_path?(hash,@path)
     end
   end
 

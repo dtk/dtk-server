@@ -51,7 +51,28 @@
         },
 	 "postgresql__app": {
           "ui": "{\"images\": {\"tnail\":\"postgres.png\",\"display\":\"postgres.png\",\"tiny\":\"\"}}",
-	  "basic_type": "application"
+	  "basic_type": "application",
+           "attribute": {
+            "sap_ref__l4": {
+	      "dependency": {
+                "component_constraint": {
+                  "display_name": "component_constraint",
+                  "type": "component",
+                  "search_pattern": {
+                    ":filter": [
+                      ":and",
+                      [
+                        ":eq",
+                        ":component_type",
+                        "postgresql__server"
+                      ]
+                    ]
+                  },
+                  "description": "Not connecting to Postgres Server"
+                }
+              }
+            }
+          }
         },
 	 "postgresql__db": {
 	  "basic_type": "database",
@@ -136,7 +157,7 @@
         },
 	 "mysql__db": {
           "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}",
-	  "basic_type": "db",
+	  "basic_type": "database",
 	  "only_one_per_node": false
         },
 
@@ -146,7 +167,7 @@
         },
 	"rabbitmq__edge": {
           "ui": "{\"images\": {\"tnail\":\"rabbitmq.png\",\"display\":\"rabbitmq.png\",\"tiny\":\"\"}}",
-	  "basic_type": "feature"
+	  "basic_type": "extension"
         },
 	"rabbitmq": {
           "ui": "{\"images\": {\"tnail\":\"rabbitmq.png\",\"display\":\"rabbitmq.png\",\"tiny\":\"\"}}",
@@ -157,7 +178,7 @@
         },
 	"hadoop_cloudera_c3__conf_pseudo": {
           "ui": "{\"images\": {\"tnail\":\"cloudera.png\",\"display\":\"cloudera.png\",\"tiny\":\"\"}}",
-	  "basic_type": "feature"
+	  "basic_type": "extension"
         },
 	"mysql__server": {
           "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}",
@@ -168,7 +189,7 @@
         },
 	 "hadoop__doc": {
           "ui": "{\"images\": {\"tnail\":\"hadoop.png\",\"display\":\"hadoop.png\",\"tiny\":\"\"}}",
-	  "basic_type" : "feature"
+	  "basic_type" : "extension"
         },
 	"nagios__server": {
           "ui": "{\"images\": {\"tnail\":\"nagios.png\",\"display\":\"nagios.png\",\"tiny\":\"\"}}",

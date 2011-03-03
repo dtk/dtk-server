@@ -879,6 +879,23 @@
           },
           "attribute": {
             "sap_ref__l4": {
+	      "dependency": {
+                "component_constraint": {
+                  "display_name": "component_constraint",
+                  "type": "component",
+                  "search_pattern": {
+                    ":filter": [
+                      ":and",
+                      [
+                        ":eq",
+                        ":component_type",
+                        "postgresql__server"
+                      ]
+                    ]
+                  },
+                  "description": "Not connecting to Postgres Server"
+                }
+              },
               "dynamic": false,
               "description": "postgresql admin service access point reference to connect to server",
               "cannot_change": false,

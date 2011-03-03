@@ -123,28 +123,22 @@ module XYZ
          }
         ]
 
+      #TODO: just for testing
+      application_basic_types = %w{application service database database_server language extension client}
+
       #in dock 'applications means wider than basic_type == applicationsn
-      applications =  {
-        :model_name => :component,
-        :join_type => :inner,
-        :filter => [:and,[:oneof, :basic_type, ["application", "database_server", "database", "service", "client"]]],
-        :join_cond=>{:node_node_id => q(:node,:id)},
-        :cols=>[:id,:node_node_id,:display_name,:ui]
-      }
       virtual_column :applications, :type => :json, :hidden => true,
-      :remote_dependencies => [applications]
-      virtual_column :applications_with_attrs, :type => :json, :hidden => true,
       :remote_dependencies => 
         [
-         applications,
          {
-           :model_name => :attribute,
-           :join_type => :left_outer,
-           :filter => [:and, [:eq, :hidden, false]], 
-           :join_cond=>{:component_component_id => q(:component,:id)},
-           :cols=>[:id,:component_component_id,:display_name,:value_asserted,:value_derived,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
+           :model_name => :component,
+           :join_type => :inner,
+           :filter => [:and,[:oneof, :basic_type, application_basic_types]],
+           :join_cond=>{:node_node_id => q(:node,:id)},
+           :cols=>[:id,:node_node_id,:display_name,:ui]
          }
         ]
+
       virtual_column :deprecate_port_links, :type => :json, :hidden => true, 
       :remote_dependencies => 
         [

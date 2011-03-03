@@ -228,81 +228,6 @@ Debug.print_and_ret(
     end
   end
 
-  #TODO: for input ports may just have constraints, not syntax
-  module AttributeSemantic
-    #TODO: rather than external may have :internal_only
-    Info =
-      #L4 Saps adn sockets
-      {
-      "sap_config__l4" => {
-        :syntax => {
-          "port" =>  {:required => true, :type => :integer},
-          "protocol" => {:required => true, :type => :string},
-          "binding_addr_constraints" => {:type => :json}
-        }
-      },
-      "sap__l4" => {
-        :external => true,
-        :port_type => "output",
-        :syntax =>  {
-          "port" => {:required => true, :type => :integer},
-          "protocol" => {:required => true, :type => :string},
-          "host_address" => {:required => true, :type => :string}
-        }
-      },
-      "sap_ref__l4" => {
-        :external => true,
-        :port_type => "input", 
-        :syntax => { 
-          :or => 
-          [{
-             "port" => {:required => true, :type => :integer},
-             "protocol" => {:required => true, :type => :string},
-             "host_address" => {:required => true, :type => :string}
-           },
-           {"socket_file" => {:required => true, :type => :string}}
-          ]
-        }
-      },
-      "sap__socket" => {
-        :syntax => {
-          "socket_file" => {:required => true, :type => :string}
-        }
-      },
-
-      #DB params
-      "db_config" => {
-        :external => true,
-        :port_type => "output",
-        :syntax => {
-          "database" => {:required => true, :type => :string},
-          "username" => {:required => true, :type => :string},
-          "password" => {:required => false, :type => :string}
-        }
-      },
-      "db_params" => {
-        :external => true,
-        :port_type => "input"
-      },
-      "db_ref" => {
-        :external => true,
-        :port_type => "input"
-      },
-
-      #TODO: may deprecate below
-      "sap_config__db" => {
-      },
-      "sap__db" => {
-        :external => true,
-        :port_type => "output"
-      },
-      "sap_ref__db" => {
-        :external => true,
-        :port_type => "input"
-      },
-    }
-  end
-
   class SemanticTypeSchema < HashObject
     include CommonSemanticTypeMixin
     def self.create_from_attribute(attr)
@@ -363,6 +288,65 @@ Debug.print_and_ret(
       SemanticTypeSchema.new({:type => :json})
     end
 
-    TranslationToSchema = self.new(AttributeSemantic::Info.inject({}){|h,kv|h.merge(kv[0] => kv[1][:syntax])},true)
+    TranslationToSchema = self.new( 
+    {
+      "sap_config__l4" => {
+        "port" =>  {:required => true, :type => :integer},
+        "protocol" => {:required => true, :type => :string},
+        "binding_addr_constraints" => {:type => :json}
+      },
+      "sap__l4" => {
+        "port" => {:required => true, :type => :integer},
+        "protocol" => {:required => true, :type => :string},
+        "host_address" => {:required => true, :type => :string}
+      },
+      "sap_config__db" => {
+        "name" => {:required => true, :type => :string},
+        "owner" => {:required => true, :type => :string},
+        "password" => {:type => :string}
+      },
+      "sap_ref__l4" => {
+        :or => 
+        [{
+           "port" => {:required => true, :type => :integer},
+           "protocol" => {:required => true, :type => :string},
+           "host_address" => {:required => true, :type => :string}
+         },
+         {"socket_file" => {:required => true, :type => :string}}
+        ]
+      },
+      "sap__socket" => {
+        "socket_file" => {:required => true, :type => :string}
+      },
+    },true)
+  end
+
+  module AttributeSemantic
+    #TODO: rather than external may have :internal_only
+    Info =
+      {
+      "sap_config__l4" => {
+      },
+      "sap__l4" => {
+        :external => true,
+        :port_type => "output"
+      },
+      "sap_ref__l4" => {
+        :external => true,
+        :port_type => "input"
+      },
+      "sap__socket" => {
+      },
+      "sap_config__db" => {
+      },
+      "sap__db" => {
+        :external => true,
+        :port_type => "output"
+      },
+      "sap_ref__db" => {
+        :external => true,
+        :port_type => "input"
+      },
+    }
   end
 end

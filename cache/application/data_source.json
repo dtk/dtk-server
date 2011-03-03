@@ -102,6 +102,15 @@
               "cannot_change": false,
               "hidden": false,
               "is_port": true
+            },
+            "db_config": {
+              "display_name": "db_config",
+              "required": true,
+              "description": "DB configuration",
+              "semantic_type": "db_config",
+              "semantic_type_summary": "db_config",
+              "data_type": "json",
+              "is_port": true
             }
           }
         },
@@ -109,14 +118,11 @@
           "ui": "{\"images\": {\"tnail\":\"java-01.png\",\"display\":\"java-01.png\",\"tiny\":\"\"}}",
 	  "basic_type": "language"
         },
-	"jpackage": {
-          "ui": "{\"images\": {\"tnail\":\"java-01.png\",\"display\":\"java-01.png\",\"tiny\":\"\"}}"
-        },
 	"tomcat": {
-	"basic_type": "service",
-        "dependency" : {
-	    "java" : {"required_component" :"java"},
-	    "jpackage" : {"required_component" :"jpackage"}
+          "ui": "{\"images\": {\"tnail\":\"server-tomcat.png\",\"display\":\"server-tomcat.png\",\"tiny\":\"\"}}",
+ 	  "basic_type": "service",
+          "dependency" : {
+	    "java" : {"required_component" :"java"}
           }	    
         },
 	 "mysql__master": {

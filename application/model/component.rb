@@ -413,7 +413,7 @@ module XYZ
       component.merge(:attributes => AttributeComplexType.flatten_attribute_list(component_and_attrs.map{|r|r[:attribute]},opts))
     end
 
-    def get_attributes_unraveled(to_set={})
+    def get_attributes_unraveled(to_set={},opts={})
       sp_hash = {
         :filter => [:and, 
                     [:eq, :hidden, false]],
@@ -426,7 +426,7 @@ module XYZ
         to_set[:component_id] = sample[:component_component_id]
       end
 
-      flattened_attr_list = AttributeComplexType.flatten_attribute_list(raw_attributes)
+      flattened_attr_list = AttributeComplexType.flatten_attribute_list(raw_attributes,opts)
       i18n = get_i18n_mappings_for_models(:attribute)
       flattened_attr_list.map do |a|
         name = a[:display_name]

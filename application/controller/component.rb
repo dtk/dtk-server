@@ -29,7 +29,7 @@ pp component
       tpl.assign("component",component)
       tpl.assign("component_images_uri",R8::Config[:component_images_uri])
 
-      run_javascript("R8.Detailview.init('#{id}');")
+      run_javascript("R8.Displayview.init('#{id}');")
 
       return {:content => tpl.render()}
     end
@@ -61,10 +61,33 @@ pp component
       tpl.assign("component",component)
       tpl.assign("component_images_uri",R8::Config[:component_images_uri])
 
-      run_javascript("R8.Detailview.init('#{id}');")
+      run_javascript("R8.Displayview.init('#{id}');")
 
       return {:content => tpl.render()}
 #      return {:content => ""}
+    end
+
+    def editor(id)
+      component = create_object_from_id(id,:component)
+      field_defs = component.get_field_def()
+
+      tpl = R8Tpl::TemplateR8.new("component/editor",user_context())
+      _model_var = {:i18n => get_model_i18n(model_name().to_s,user_context())}
+      tpl.assign(:_component,_model_var)
+
+      tpl.assign(:_app,app_common())
+      tpl.assign(:field_def_list,field_defs)
+
+      include_css('component-editor')
+      include_js('fields.r8')
+
+      field_defs_json = JSON.generate(field_defs)
+      run_javascript("R8.Fields.init(#{field_defs_json});")
+
+      return {
+        :content=>tpl.render(),
+        :panel=>request.params["panel_id"]
+      }
     end
 
     def instance_list(id)

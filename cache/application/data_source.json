@@ -111,11 +111,11 @@
                       [
                         ":eq",
                         ":component_type",
-                        "postgresql__server"
+                        "mysql__server"
                       ]
                     ]
                   },
-                  "description": "Not connecting to Postgres Server"
+                  "description": "Not connecting to Mysql Server"
                 }
               },
               "dynamic": false,

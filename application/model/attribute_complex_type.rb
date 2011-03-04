@@ -145,7 +145,7 @@ module XYZ
       elsif pattern.is_atomic?() and not (value_obj.kind_of?(Array) or value_obj.kind_of?(Hash))
         flatten_attribute_when_atomic_pattern!(ret,value_obj,attr,pattern,opts)
       elsif value_obj.kind_of?(Array) or (pattern.is_array?() and value_obj.nil? and opts[:flatten_nil_value]) 
-        flatten_attribute_when_array!(ret,value_obj,attr,pattern,opts)
+        flatten_attribute_when_array!(ret,value_obj,attr,pattern,opts.merge(:top_level=>false))
       elsif value_obj.kind_of?(Hash) or (pattern.is_hash?() and value_obj.nil? and opts[:flatten_nil_value])
         flatten_attribute_when_hash!(ret,value_obj,attr,pattern,opts.merge(:top_level=>false))
       else
@@ -157,6 +157,8 @@ module XYZ
     def self.flatten_attribute_when_nil_pattern!(ret,value_obj,attr,opts={})
       if value_obj && value_obj.kind_of?(Hash)
         flatten_attribute_when_hash!(ret,value_obj,attr,nil,opts.merge(:top_level=>false))
+      elsif value_obj && value_obj.kind_of?(Array)
+        flatten_attribute_when_array!(ret,value_obj,attr,nil,opts.merge(:top_level=>false))
       elsif attr[:data_type] == "json" and opts[:top_level]
         ret << attr
       else
@@ -175,16 +177,23 @@ module XYZ
     end
 
     def self.flatten_attribute_when_array!(ret,value_obj,attr,pattern,opts={})
-      array_pat = pattern[:array]
-      return flatten_attribute_when_mismatch!(ret,value_obj,attr,pattern,opts) unless array_pat
-
-      if (value_obj||[]).empty? and not opts[:flatten_nil_value] 
+      #compute child_list and array_pat if no mismitch
+      child_list = nil
+      if pattern.nil?
+        #TODO: this really not a mismatch, but code still handles correctly
+        return flatten_attribute_when_mismatch!(ret,value_obj,attr,pattern,opts) if (value_obj||[]).empty?
+        child_list = value_obj        
+      elsif not pattern[:array]
+        return flatten_attribute_when_mismatch!(ret,value_obj,attr,pattern,opts) 
+      elsif (value_obj||[]).empty? and not opts[:flatten_nil_value] 
         ret << attr.merge(:attribute_value => value_obj)
         return nil
+      else
+        array_pat = pattern[:array]
+        #if nil value_obj then just assume one row
+        child_list = (value_obj||[]).empty? ? [nil] : value_obj
       end
 
-      #if nil value_obj then just assume one row
-      child_list = (value_obj||[]).empty? ? [nil] : value_obj
       child_list.each_with_index do |child_val_obj,i|
         child_attr = 
           if attr[:item_path]
@@ -201,9 +210,10 @@ module XYZ
       #compute child_list if no mismitch
       child_list = nil
       if pattern.nil?
+        #TODO: this really not a mismatch, but code still handles correctly
         return flatten_attribute_when_mismatch!(ret,value_obj,attr,pattern,opts) if (value_obj||{}).empty?
         child_list = value_obj
-      elsif  pattern[:array] or ((value_obj||{}).empty? and not opts[:flatten_nil_value])
+      elsif pattern[:array] or ((value_obj||{}).empty? and not opts[:flatten_nil_value])
         return flatten_attribute_when_mismatch!(ret,value_obj,attr,pattern,opts)
       else
         child_list = (value_obj||{}).empty? ? pattern.inject({}){|h,kv|h.merge(kv[0].to_sym => nil)} : value_obj 

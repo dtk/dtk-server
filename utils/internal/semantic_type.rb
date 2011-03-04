@@ -202,6 +202,8 @@ Debug.print_and_ret(
         "select_one"
       elsif  output_sem_type.is_array? and input_sem_type.is_array?
         "eq_indexed"
+      elsif  (not output_sem_type.is_array?) and (not input_sem_type.is_array?)
+        "eq"
       else
         raise raise ErrorNotImplemented.new("find_link_function for input #{input_sem_type.inspect} and output #{output_sem_type.inspect}")
       end
@@ -324,10 +326,7 @@ Debug.print_and_ret(
         return create_json_type() if val.kind_of?(Hash) and val.keys.first == :application
         ret_schema_from_semantic_type_aux!(ret,key,val)
       end
-      if ret.empty?
-        Log.error("found semantic type #{semantic_type.inspect} that does not have a nested type definition")
-        return nil
-      end
+      return nil if ret.empty?
       ret.freeze
     end
 

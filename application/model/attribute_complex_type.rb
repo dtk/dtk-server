@@ -1,10 +1,9 @@
-#TODO: just stubbing now with cached hashes
 module XYZ
-  class AttributeComplexType < Model
+  #TODO: remove as model
+  class AttributeComplexType < Model 
     set_relation_name(:attribute,:complex_type)
     def self.up()
     end
-    #helper fns
     def self.has_required_fields_given_semantic_type?(obj,semantic_type)
       pattern =  SemanticTypeSchema.create_from_semantic_type(semantic_type)
       return nil unless pattern
@@ -19,11 +18,7 @@ module XYZ
           ret << attr 
         else
           nested_type_pat = SemanticTypeSchema.create_from_semantic_type(attr[:semantic_type])
-          if nested_type_pat
-            flatten_attribute!(ret,value,attr,nested_type_pat,opts.merge(:top_level=> true))
-          else 
-            ret << attr
-          end
+          flatten_attribute!(ret,value,attr,nested_type_pat,opts.merge(:top_level=> true))
         end
       end
       ret
@@ -145,7 +140,7 @@ module XYZ
     #TODO: add "index that will be used to tie unravvled attribute back to the base object and make sure
     #base object in the attribute
     def self.flatten_attribute!(ret,value_obj,attr,pattern,opts={})
-      if pattern.nil?
+      if pattern.nil? 
         flatten_attribute_when_nil_pattern!(ret,value_obj,attr,opts)
       elsif pattern.is_atomic?() and not (value_obj.kind_of?(Array) or value_obj.kind_of?(Hash))
         flatten_attribute_when_atomic_pattern!(ret,value_obj,attr,pattern,opts)
@@ -160,7 +155,9 @@ module XYZ
     end
 
     def self.flatten_attribute_when_nil_pattern!(ret,value_obj,attr,opts={})
-      if attr[:data_type] == "json" and opts[:top_level]
+      if value_obj && value_obj.kind_of?(Hash)
+        flatten_attribute_when_hash!(ret,value_obj,attr,nil,opts.merge(:top_level=>false))
+      elsif attr[:data_type] == "json" and opts[:top_level]
         ret << attr
       else
         ret << attr.merge(:attribute_value => value_obj,:data_type => "json")
@@ -201,8 +198,17 @@ module XYZ
     end
 
     def self.flatten_attribute_when_hash!(ret,value_obj,attr,pattern,opts={})
-      return flatten_attribute_when_mismatch!(ret,value_obj,attr,pattern,opts) if pattern[:array] or ((value_obj||{}).empty? and not opts[:flatten_nil_value])
-      child_list = (value_obj||{}).empty? ? pattern.inject({}){|h,kv|h.merge(kv[0].to_sym => nil)} : value_obj 
+      #compute child_list if no mismitch
+      child_list = nil
+      if pattern.nil?
+        return flatten_attribute_when_mismatch!(ret,value_obj,attr,pattern,opts) if (value_obj||{}).empty?
+        child_list = value_obj
+      elsif  pattern[:array] or ((value_obj||{}).empty? and not opts[:flatten_nil_value])
+        return flatten_attribute_when_mismatch!(ret,value_obj,attr,pattern,opts)
+      else
+        child_list = (value_obj||{}).empty? ? pattern.inject({}){|h,kv|h.merge(kv[0].to_sym => nil)} : value_obj 
+      end
+
       child_list.each do |k,child_val_obj|
         child_attr = 
           if attr[:item_path]
@@ -210,7 +216,7 @@ module XYZ
           else
             attr.merge(:root_display_name => attr[:display_name], :display_name => "#{attr[:display_name]}#{display_name_delim(k)}", :item_path => [k.to_sym])
         end
-        child_pattern = pattern[k.to_s]
+        child_pattern = pattern && pattern[k.to_s]
         flatten_attribute!(ret,child_val_obj,child_attr,child_pattern,opts)
       end
       nil

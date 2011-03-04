@@ -4,7 +4,8 @@ module XYZ
       class Component < Top 
         definitions do
           target[:display_name] = source["ref"]
-          (column_names(:component) - [:display_name]).each do |v|
+          target[:basic_type] = fn(:basic_type,source)
+          (column_names(:component) - [:display_name,:basic_type]).each do |v|
             if_exists(source[v.to_s]) do
               target[v.to_sym] = source[v.to_s]
             end
@@ -22,6 +23,15 @@ module XYZ
 
         def self.relative_distinguished_name(source)
           source["ref"]
+        end
+
+        def self.basic_type(source)
+          #TODO: assumes that user_data has all basic types specfic types
+          return source["basic_type"] if source["basic_type"]
+          if source["specific_type"]
+            basic_type = ComponentTypeHierarchy.basic_type(source["specific_type"])
+            basic_type && basic_type.to_s
+          end
         end
       end
     end

@@ -9,13 +9,14 @@ module XYZ
       def up()
         ds_column_defs :ds_attributes, :ds_key
         external_ref_column_defs()
-        column :component_type, :varchar #this will reflect whether component is apache, mysql etc and will enable display_name to be modified by user
+
         column :type, :varchar, :size => 15 # instance | composite
-        #TODO: is 'user" a well defined basic type?
-        #TODO: refactor to have: user, service_check, language, package, application, service, extension
-        #maybe also 'db'
-        #clean up so rather than samentic type attributes view these as extensionable types
-        column :basic_type, :varchar, :size => 25 # service | package | service__database | database | language | application | client | feature | user ..
+        #top level in component type hiererarchy
+        column :basic_type, :varchar, :size => 25 #service, application, language, application, extension, database, user
+        #leaf type in component type 
+        column :specific_type, :varchar, :size => 30 
+        column :component_type, :varchar #this will reflect whether component is apache, mysql etc and will enable display_name to be modified by user
+
         column :only_one_per_node, :boolean, :default => true
         column :version, :varchar, :size => 25 # version of underlying component (not chef recipe .... version)
         column :uri, :varchar

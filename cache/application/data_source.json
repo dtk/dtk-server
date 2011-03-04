@@ -15,15 +15,15 @@
      "component": {
 	"php__php5" : {
           "ui": "{\"images\": {\"tnail\":\"php.png\",\"display\":\"php.png\",\"tiny\":\"\"}}",
-	  "basic_type": "language"
+	  "specific_type": "php"
 	},	
 	"apache2" : {
           "ui": "{\"images\": {\"tnail\":\"apache.png\",\"display\":\"apache.png\",\"tiny\":\"\"}}",
-	  "basic_type": "service"
+          "specific_type": "web_server"	      
 	},	
 	"wordpress" : {
           "ui": "{\"images\": {\"tnail\":\"wordpress.png\",\"display\":\"wordpress.png\",\"tiny\":\"\"}}",
-	  "basic_type" : "service",
+	  "specific_type": "php_app",
 	  "dependency" : {
 	    "php__php5" : {"required_component" :"php__php5"},
 	    "apache2" : {"required_component" :"apache2"}
@@ -31,6 +31,7 @@
 	},	
         "user_account": {
           "ui": "{\"images\": {\"tnail\":\"user.png\",\"display\":\"user.png\",\"tiny\":\"\"}}",
+	  "basic_type" : "user",
 	  "only_one_per_node": false
         },
         "hadoop__pig": {
@@ -43,15 +44,15 @@
         },
 	"postgresql__server": {
           "ui": "{\"images\": {\"tnail\":\"postgres.png\",\"display\":\"postgres.png\",\"tiny\":\"\"}}",
-	  "basic_type": "service__database"
+	  "specific_type" : "postgres_db_server"	
         },
 	 "postgresql__client": {
           "ui": "{\"images\": {\"tnail\":\"postgres.png\",\"display\":\"postgres.png\",\"tiny\":\"\"}}",
-	  "basic_type": "client"
+	  "basic_type": "extension"
         },
 	 "postgresql__app": {
           "ui": "{\"images\": {\"tnail\":\"postgres.png\",\"display\":\"postgres.png\",\"tiny\":\"\"}}",
-	  "basic_type": "application",
+	  "basic_type" : "application",
            "attribute": {
             "sap_ref__l4": {
 	      "dependency": {
@@ -63,8 +64,8 @@
                       ":and",
                       [
                         ":eq",
-                        ":component_type",
-                        "postgresql__server"
+                        ":specific_type",
+                        "postgres_db_server"
                       ]
                     ]
                   },
@@ -75,19 +76,17 @@
           }
         },
 	 "postgresql__db": {
-	  "basic_type": "database",
+	  "specific_type" : "postgres_db",
 	  "only_one_per_node": false
         },
-	 "postgresql__single_tenant": {
-	  "basic_type": "application"
-        },
+
 	"hadoop__hive": {
           "ui": "{\"images\": {\"tnail\":\"hadoop-hive.png\",\"display\":\"hadoop-hive.png\",\"tiny\":\"\"}}",
 	  "basic_type": "service"
         },
 	"java_webapp": {
           "ui": "{\"images\": {\"tnail\":\"java-01.png\",\"display\":\"java-01.png\",\"tiny\":\"\"}}",
-	  "basic_type": "application",
+	  "specific_type": "java_app",
 	  "component_type": "java_webapp",
 	  "only_one_per_node": false,	  
           "dependency" : {
@@ -110,8 +109,8 @@
                       ":and",
                       [
                         ":eq",
-                        ":component_type",
-                        "mysql__server"
+                        ":specific_type",
+                        "mysql_db_server"
                       ]
                     ]
                   },
@@ -137,7 +136,7 @@
         },
 	"java": {
           "ui": "{\"images\": {\"tnail\":\"java-01.png\",\"display\":\"java-01.png\",\"tiny\":\"\"}}",
-	  "basic_type": "language"
+	  "specific_type": "java"
         },
 	"tomcat": {
           "ui": "{\"images\": {\"tnail\":\"server-tomcat.png\",\"display\":\"server-tomcat.png\",\"tiny\":\"\"}}",
@@ -157,7 +156,7 @@
         },
 	 "mysql__db": {
           "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}",
-	  "basic_type": "database",
+	  "specific_type" : "mysql_db_server",	      
 	  "only_one_per_node": false
         },
 
@@ -171,10 +170,11 @@
         },
 	"rabbitmq": {
           "ui": "{\"images\": {\"tnail\":\"rabbitmq.png\",\"display\":\"rabbitmq.png\",\"tiny\":\"\"}}",
-	  "basic_type": "service"
+	  "specific_type" : "msg_bus"
         },
 	"nagios__client": {
-          "ui": "{\"images\": {\"tnail\":\"nagios.png\",\"display\":\"nagios.png\",\"tiny\":\"\"}}"
+          "ui": "{\"images\": {\"tnail\":\"nagios.png\",\"display\":\"nagios.png\",\"tiny\":\"\"}}",
+	  "specific_type" : "monitoring_agent"
         },
 	"hadoop_cloudera_c3__conf_pseudo": {
           "ui": "{\"images\": {\"tnail\":\"cloudera.png\",\"display\":\"cloudera.png\",\"tiny\":\"\"}}",
@@ -182,10 +182,11 @@
         },
 	"mysql__server": {
           "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}",
-	  "basic_type": "service__database"
+	  "specific_type" : "mysql_db_server"
         },
 	"redis": {
-          "ui": "{\"images\": {\"tnail\":\"redis.png\",\"display\":\"redis.png\",\"tiny\":\"\"}}"
+          "ui": "{\"images\": {\"tnail\":\"redis.png\",\"display\":\"redis.png\",\"tiny\":\"\"}}",
+	  "basic_type": "service"
         },
 	 "hadoop__doc": {
           "ui": "{\"images\": {\"tnail\":\"hadoop.png\",\"display\":\"hadoop.png\",\"tiny\":\"\"}}",
@@ -193,7 +194,7 @@
         },
 	"nagios__server": {
           "ui": "{\"images\": {\"tnail\":\"nagios.png\",\"display\":\"nagios.png\",\"tiny\":\"\"}}",
-	  "basic_type" : "service"
+	  "specific_type" : "monitoring_server"
         }
      }
    }

@@ -43,7 +43,7 @@ module XYZ
            :model_name => :component,
            :join_type => :inner,
            :join_cond=>{:node_node_id => q(:node,:id)},
-           :cols => [:id,:display_name, id(:node)]
+           :cols => [:id,:display_name, :component_type, id(:node)]
          },
          {
            :model_name => :attribute,
@@ -124,7 +124,7 @@ module XYZ
         ]
 
       #TODO: just for testing
-      application_basic_types = %w{application service service__database database language extension client}
+      application_basic_types = %w{application service database language extension}
 
       #in dock 'applications means wider than basic_type == applicationsn
       virtual_column :applications, :type => :json, :hidden => true,
@@ -208,6 +208,74 @@ module XYZ
       attr_port_rows = get_objects_from_sp_hash(:columns => [:attribute_ports])
 
       i18n = get_i18n_mappings_for_models(:component,:attribute)
+      port_list = PortList.create(type)
+      attr_port_rows.each do |r|
+        next unless attr = r[:attribute]
+        cmp = r[:component]||{}
+        next if port_list.is_pruned?(attr)
+
+        attr_name = attr[:display_name]
+        cmp_name = cmp[:display_name]
+        attr[:display_name] =  get_i18n_port_name(i18n,attr_name,cmp_name) if attr_name and cmp_name
+        #TODO: hack to remove description
+        attr[:description] = ""
+        port_list.add_or_collapse_attribute!(attr,cmp)
+      end
+      ret_port_list = port_list.list
+      Model::materialize_virtual_columns!(ret_port_list,[:port_type])
+      ret_port_list
+    end
+   private
+    class PortList
+      attr_reader :list
+      def self.create(type)
+        case type
+          when "external" then PortListExternal.new() 
+          when "l4" then PortListL4.new() 
+          else PortList.new
+        end
+      end
+      def is_pruned?(attr)
+        false
+      end
+      def add_or_collapse_attribute!(attr,cmp)
+        @list << attr
+      end
+    private
+      def initialize()
+        @list = Array.new
+        @annotations = Array.new
+      end
+    end
+
+    class PortListExternal < PortList
+      def is_pruned?(attr)
+        not attr[:port_is_external]
+      end
+    end
+
+    class PortListL4 < PortListExternal
+      def is_pruned?(attr)
+        not %w{sap_ref__l4 sap__l4}.include?(attr[:display_name])
+      end
+      def add_or_collapse_attribute!(attr,cmp)
+        #TODO: stub that assumes that all are connected to same server; need also attr values
+        @annotations.each_with_index do |annotation,i|
+          next unless annotation == cmp[:component_type]
+          #use port with minimum id as teh psuedo object id
+          @list[i] = attr if attr[:id] < @list[i][:id]
+          return
+        end
+        @annotations << cmp[:component_type] 
+        @list << attr
+      end
+    end
+   public
+=begin
+    def get_ports(type=nil)
+      attr_port_rows = get_objects_from_sp_hash(:columns => [:attribute_ports])
+
+      i18n = get_i18n_mappings_for_models(:component,:attribute)
       port_list = Array.new
       attr_port_rows.each do |r|
         next unless attr = r[:attribute]
@@ -225,7 +293,7 @@ module XYZ
       Model::materialize_virtual_columns!(port_list,[:port_type])
       port_list
     end
-
+=end
     def self.get_port_links(id_handles)
       input_port_cols = [:id, :display_name, :input_port_links]
       input_port_rows = get_objects_in_set_from_sp_hash(id_handles,:columns => input_port_cols)

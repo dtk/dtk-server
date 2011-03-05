@@ -73,80 +73,66 @@ module XYZ
       field_set = FieldSet.new(attr_link_mh[:model_name],rows.first.keys)
       returning_ids = create_from_select(attr_link_mh,field_set,select_ds,override_attrs,:returning_sql_cols=> [:id])
       propagate_from_create(attr_mh,attr_info,rows)
-      #TODO: might use form pass to  create_link_post_processing fro above
+      #TODO: might use form pass to  add_related_links? fro above
       link_info_list = rows.map{|r|{:input => attr_info[r[:input_id]],:output => attr_info[r[:output_id]]}}
 
-      create_link_post_processing(attr_link_mh,link_info_list)
+      add_related_links?(attr_link_mh,link_info_list)
       returning_ids
     end
 
-    def self.create_link_post_processing(attr_link_mh,link_info_list)
-return
-#TODO: until get it fully working
-      link_info_list.each do |link|
-        if ComponentType::Application.include?(link[:input][:component_parent]) and
-            ComponentType::DbServer.include?(link[:output][:component_parent])
-          #TODO: other test should be making sure that application has  a db_ref attribute  
-          pp [:debug, "should create a db on db server item"]
-        end
+    def self.add_related_links?(attr_link_mh,link_info_list)
+      link_info_list.each{|link_info|add_related_link?(attr_link_mh,link_info)}
+    end
+
+    #TODO: can we make this more data driven 
+    def self.add_related_link?(attr_link_mh,link_info)
+      input_cmp = link_info[:input][:component_parent]
+      if ComponentType::Application.include?(input_cmp)
+        attr_db_config = input_cmp.get_virtual_attribute("db_config",[:id],:semantic_type_summary)
+        add_related_link_from_db_config(attr_link_mh,link_info,attr_db_config) if attr_db_config
       end
     end
 
-####
-=begin    
-DEPRECATE
-    def self.create_links(parent_id_handle,rows)
-      attr_link_mh = parent_id_handle.create_childMH(:attribute_link)
-      #TODO: parent model name can also be node
-      attr_mh = attr_link_mh.createMH(:model_name => :attribute,:parent_model_name=>:component)
+    #TODO: may encapsualte under the ComponentType::Database
+    def self.add_related_link_from_db_config(attr_link_mh,link_info,attr_db_config)
+return #TODO: stub until get working
+      output_cmp = link_info[:output][:component_parent]
 
-      #set the parent id and ref and make 
-      parent_col = attr_link_mh.parent_id_field_name()
-      parent_id = parent_id_handle.get_id()
-      rows.each do |row|
-        row[parent_col] ||= parent_id
-        row[:ref] = "attribute_link:#{row[:input_id]}-#{row[:output_id]}"
+      cmp_mh = attr_link_mh.createMH(:component)
+      base_sp_hash = {
+        :model_name => :component,
+        :filter => [:eq, :id, output_cmp[:ancestor_id]],
+        :cols => [:id,:library_library_id]
+      }
+      join_array = 
+        [{
+           :model_name => :attribute,
+           :join_type => :inner,
+           :alias => :db_component_name,
+           :filter => [:eq, :display_name, "db_component"],
+           :join_cond => {:component_component_id => :component__id},
+           :cols => [:value_asserted,:component_component_id]
+         },
+         {:model_name => :component,
+           :alias => :db_component,
+           :join_type => :inner,
+           :convert => true,
+           :join_cond => {:display_name => :db_component_name__value_asserted, :library_library_id => :component__library_library_id},
+           :cols => [:id,:display_name,:library_library_id]
+         }]
+
+      rows = get_objects_from_join_array(cmp_mh,base_sp_hash,join_array)
+      db_component = rows.first && rows.first[:db_component]
+      unless db_component
+        Log.error("Cannot find the db component associated with the db server")
+        return
       end
-
-      #TODO: make more efficient by setting attribute_link.function_index and attribute.link_info in fewer sql ops 
-      #get info needed to set attribute_link.function_index
-      endpoint_ids = rows.map{|r|[r[:input_id],r[:output_id]]}.flatten.uniq
-      attr_wc = SQL.in(:id,endpoint_ids)
-      attr_fs = FieldSet.opt([:id,:link_info,:value_derived,:value_asserted,:semantic_type],:attribute)
-      attr_ds = get_objects_just_dataset(attr_mh,attr_wc,attr_fs)
-
-      attr_info = attr_ds.all.inject({}) do |h,attr|
-        new_info = {
-          :link_info => Attribute::LinkInfo.new(attr[:link_info]),
-          :semantic_type => SemanticType.create_from_attribute(attr)
-        }
-        h.merge(attr[:id] => attr.merge(new_info))
-      end
-   pp [:attr_info,attr_info]   
-
-      #set function and new function_index and new updated link_info
-      updated_link_info = Hash.new
-      rows.each do |row|
-        input_id = row[:input_id]
-        link_info = attr_info[input_id][:link_info]
-        new_index = link_info.set_next_index!()
-        row[:function] = SemanticType.find_link_function(attr_info[input_id][:semantic_type],attr_info[row[:output_id]][:semantic_type])
-        row[:function_index] = new_index
-        updated_link_info[input_id] = link_info.hash_value
-      end
-
-      #update attribute link_info
-      update_from_rows(attr_mh,updated_link_info.map{|id,link_info|{:id => id, :link_info => link_info}}) 
-
-      #create attribute_links
-      select_ds = SQL::ArrayDataset.create(db,rows,attr_link_mh,:convert_for_create => true)
-      override_attrs = {}
-      field_set = FieldSet.new(attr_link_mh[:model_name],rows.first.keys)
-      returning_ids = create_from_select(attr_link_mh,field_set,select_ds,override_attrs,:returning_sql_cols=> [:id])
-      propagate_from_create(attr_mh,attr_info,rows)
-      returning_ids
+      pp [:debug, "got here", db_component]
     end
-=end
+
+
+####################
+
 
      ### special purpose create links ###
     def self.create_links_node_group_members(node_group_id_handle,ng_cmp_id_handle,node_cmp_id_handles)

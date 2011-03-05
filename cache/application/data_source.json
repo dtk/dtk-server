@@ -44,11 +44,11 @@
         },
 	"postgresql__server": {
           "ui": "{\"images\": {\"tnail\":\"postgres.png\",\"display\":\"postgres.png\",\"tiny\":\"\"}}",
-	  "specific_type" : "postgres_db_server"	
+	  "specific_type" : "postgres_db_server"
         },
-	 "postgresql__client": {
-          "ui": "{\"images\": {\"tnail\":\"postgres.png\",\"display\":\"postgres.png\",\"tiny\":\"\"}}",
-	  "basic_type": "extension"
+	 "postgresql__db": {
+	  "specific_type" : "postgres_db",
+	  "only_one_per_node": false
         },
 	 "postgresql__app": {
           "ui": "{\"images\": {\"tnail\":\"postgres.png\",\"display\":\"postgres.png\",\"tiny\":\"\"}}",
@@ -75,11 +75,6 @@
             }
           }
         },
-	 "postgresql__db": {
-	  "specific_type" : "postgres_db",
-	  "only_one_per_node": false
-        },
-
 	"hadoop__hive": {
           "ui": "{\"images\": {\"tnail\":\"hadoop-hive.png\",\"display\":\"hadoop-hive.png\",\"tiny\":\"\"}}",
 	  "basic_type": "service"
@@ -145,6 +140,16 @@
 	    "java" : {"required_component" :"java"}
           }	    
         },
+
+	"mysql__server": {
+          "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}",
+	  "specific_type" : "mysql_db_server"
+        },
+	 "mysql__db": {
+          "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}",
+	  "specific_type" : "mysql_db_server",	      
+	  "only_one_per_node": false
+        },
 	 "mysql__master": {
           "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}",
 	  "basic_type": "extension"
@@ -153,11 +158,6 @@
 	 "mysql__slave": {
           "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}",
 	  "basic_type": "extension"
-        },
-	 "mysql__db": {
-          "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}",
-	  "specific_type" : "mysql_db_server",	      
-	  "only_one_per_node": false
         },
 
 	"hadoop": {
@@ -179,10 +179,6 @@
 	"hadoop_cloudera_c3__conf_pseudo": {
           "ui": "{\"images\": {\"tnail\":\"cloudera.png\",\"display\":\"cloudera.png\",\"tiny\":\"\"}}",
 	  "basic_type": "extension"
-        },
-	"mysql__server": {
-          "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}",
-	  "specific_type" : "mysql_db_server"
         },
 	"redis": {
           "ui": "{\"images\": {\"tnail\":\"redis.png\",\"display\":\"redis.png\",\"tiny\":\"\"}}",

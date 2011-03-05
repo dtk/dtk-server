@@ -32,6 +32,19 @@
         ],
         "description": "db userid for monitoring application to use"
       },
+      "mysql/db_component": {
+        "required": "optional",
+        "calculated": false,
+        "choice": [
+
+        ],
+        "default": "mysql__db",
+        "type": "string",
+        "recipes": [
+          "mysql::server",
+          "mysql::server2"
+        ]
+      },
       "mysql/server_root_password": {
         "required": "optional",
         "calculated": false,

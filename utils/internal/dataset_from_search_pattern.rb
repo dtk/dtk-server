@@ -127,10 +127,14 @@ module XYZ
 
           #if vcol_sql_fns is passed is nil then this wil not do any special processing on virtual columns; otehrwise it wil take out virtual columns and append unto this filter_hash
           def self.ret_sequel_filter(filter_hash,model_handle,vcol_sql_fns=nil)
-            #TODO: just treating "and" and "or" now
+            #TODO: just treating "and", "or", and "implicit "and"
             #TODO: some below use Sequel others are wrapper SQL in sql.rb; clean up
             op,args = get_op_and_args(filter_hash)
-            raise ErrorPatternNotImplemented.new(:filter_operation,op) unless [:and,:or].include?(op)
+            unless [:and,:or].include?(op)
+              #impilicit and
+              args = [[op] + args]
+              op = :and
+            end
             and_list = Array.new
             args.each do |el|
               el_op,el_args = get_filter_condition_op_and_args!(vcol_sql_fns,el,model_handle)
@@ -155,7 +159,7 @@ module XYZ
                when :oneof
                 SQL.in(el_args[0],el_args[1])
                else
-                raise ErrorPatternNotImplemented.new(:equal_op,el_op) 
+                raise ErrorPatternNotImplemented.new(:comparison_op,el_op) 
               end
             end
             return nil if and_list.empty?

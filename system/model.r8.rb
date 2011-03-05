@@ -143,6 +143,12 @@ module XYZ
       dataset ? dataset.all(opts) : nil
     end
 
+    def self.get_objects_from_join_array(model_handle,base_sp_hash,join_array,opts={})
+      base_sp = SearchPatternSimple.new(base_sp_hash)
+      dataset = SQL::DataSetSearchPattern.create_dataset_from_join_array(model_handle,base_sp,join_array)
+      dataset ? dataset.all(opts) : nil
+    end
+
     def get_children_from_sp_hash(child_model_name,sp_hash_x,opts={})
       parent_col_clause = [:eq, DB.parent_field(model_name,child_model_name),id()]
       sp_hash = HashSearchPattern.add_to_filter(sp_hash_x,parent_col_clause)

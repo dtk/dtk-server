@@ -61,7 +61,7 @@ module XYZ
            :convert => true,
            :join_type => :left_outer,
            :join_cond=>{:id => p(:attribute,:component)},
-           :cols => [:id,:display_name,:component_type,:most_specific_type]
+           :cols => [:id,:display_name,:component_type,:most_specific_type,:ancestor_id]
          }]
 
       virtual_column :needs_to_be_set, :type => :boolean, :hidden => true, 
@@ -277,6 +277,7 @@ module XYZ
 
     #######################
     ######### Model apis
+
     def get_constraints()
       dependency_list = get_objects_col_from_sp_hash({:columns => [:dependencies]},:dependencies)
       Constraints.new(:or,dependency_list.map{|dep|Constraint.create(dep)})

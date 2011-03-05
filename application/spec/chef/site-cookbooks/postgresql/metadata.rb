@@ -17,4 +17,8 @@ recipe            "postgresql::single_tenant", "Postgresql single tenant client"
   supports os
 end
 
+attribute "postgresql/db_component",
+  :default => "postgresql__db",
+  :recipes => ["postgresql::server"]
+
 require File.expand_path('metadata_aux.rb',::Chef::Config[:cucumber_path]);__t(__FILE__,self)

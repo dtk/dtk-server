@@ -195,9 +195,13 @@ module XYZ
       ret = Array.new
       if filter.kind_of?(Array)
         op,args = get_op_and_args(filter)
-        if op.nil? or not [:and,:or].include?(op)
+        if op.nil?
           log_parsing_error_to_skip(:filter_operation,op)
-          next
+          return ret
+        elsif not [:and,:or].include?(op)
+          #assume implicit and
+          args = [[op] + args]
+          op = :and
         end
         ret << op
         args.each do |el|

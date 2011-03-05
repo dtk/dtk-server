@@ -236,6 +236,15 @@ module XYZ
 
     #######################
     ######### Model apis
+    #TODO: may wrap with higher fn get_attribute which cases on whether virtual
+    def get_virtual_attribute(attribute_name,cols,field_to_match=:display_name)
+      sp_hash = {
+        :columns => cols,
+        :filter => [:and, [:eq, field_to_match, attribute_name.to_s]]
+        }
+      get_objects_from_sp_hash(model_handle.createMH(:attribute),sp_hash).first
+    end
+
     def get_constraints()
       rows = get_objects_from_sp_hash({:columns => [:dependencies,:only_one_per_node,:component_type]})
       return Constraints.new() if rows.empty?

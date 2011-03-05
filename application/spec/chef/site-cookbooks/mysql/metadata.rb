@@ -91,6 +91,9 @@ attribute "mysql/tunable/max_heap_table_size",
   :default => "32M",
   :recipes => ["mysql::server","mysql::server2"]
 
+attribute "mysql/db_component",
+  :default => "mysql__db",
+  :recipes => ["mysql::server","mysql::server2"]
 
 ###TODO may put in seperate file
 attribute "_meta_info",

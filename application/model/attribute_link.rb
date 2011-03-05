@@ -28,8 +28,54 @@ module XYZ
       end
       create_links(parent_id_handle,rows)
     end
-
     
+    def self.create_links(parent_id_handle,rows)
+      attr_link_mh = parent_id_handle.create_childMH(:attribute_link)
+      #TODO: parent model name can also be node
+      attr_mh = attr_link_mh.createMH(:model_name => :attribute,:parent_model_name=>:component)
+
+      #set the parent id and ref and make 
+      parent_col = attr_link_mh.parent_id_field_name()
+      parent_id = parent_id_handle.get_id()
+      rows.each do |row|
+        row[parent_col] ||= parent_id
+        row[:ref] = "attribute_link:#{row[:input_id]}-#{row[:output_id]}"
+      end
+
+      #TODO: make more efficient by setting attribute_link.function_index and attribute.link_info in fewer sql ops 
+      #get info needed to set attribute_link.function_index
+      endpoint_ids = rows.map{|r|[r[:input_id],r[:output_id]]}.flatten.uniq
+      sp_hash = {
+        :columns => [:id,:link_info_object,:attribute_value,:semantic_type_object,:component_parent],
+        :filter => [:and, [:oneof, :id, endpoint_ids]]
+      }
+      attr_rows = get_objects_from_sp_hash(attr_mh,sp_hash)
+      attr_info = attr_rows.inject({}){|h,attr|h.merge(attr[:id] => attr)}
+
+      #set function and new function_index and new updated link_info
+      updated_link_info = Hash.new
+      rows.each do |row|
+        input_id = row[:input_id]
+        link_info = attr_info[input_id][:link_info_object]
+        new_index = link_info.set_next_index!()
+        row[:function] = SemanticType.find_link_function(attr_info[input_id][:semantic_type_object],attr_info[row[:output_id]][:semantic_type_object])
+        row[:function_index] = new_index
+        updated_link_info[input_id] = link_info.hash_value
+      end
+
+      #update attribute link_info
+      update_from_rows(attr_mh,updated_link_info.map{|id,link_info|{:id => id, :link_info => link_info}}) 
+
+      #create attribute_links
+      select_ds = SQL::ArrayDataset.create(db,rows,attr_link_mh,:convert_for_create => true)
+      override_attrs = {}
+      field_set = FieldSet.new(attr_link_mh[:model_name],rows.first.keys)
+      returning_ids = create_from_select(attr_link_mh,field_set,select_ds,override_attrs,:returning_sql_cols=> [:id])
+      propagate_from_create(attr_mh,attr_info,rows)
+      returning_ids
+    end
+
+=begin    
     def self.create_links(parent_id_handle,rows)
       attr_link_mh = parent_id_handle.create_childMH(:attribute_link)
       #TODO: parent model name can also be node
@@ -81,6 +127,7 @@ module XYZ
       propagate_from_create(attr_mh,attr_info,rows)
       returning_ids
     end
+=end
 
      ### special purpose create links ###
     def self.create_links_node_group_members(node_group_id_handle,ng_cmp_id_handle,node_cmp_id_handles)

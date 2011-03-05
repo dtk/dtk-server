@@ -14,9 +14,6 @@ module XYZ
     def clone_into(source_id_handle,override_attrs={},opts={})
       target_id_handle = id_handle()
       clone_source_object = source_id_handle.create_object()
-
-###TODO: testing new functionality
-#=begin
        ##constraints
       if clone_source_object.class == Component and target_id_handle[:model_name] == :node
         constraints = clone_source_object.get_constraints()
@@ -25,13 +22,6 @@ module XYZ
           constraints.evaluate_given_target(target, :raise_error_when_violation => true)
         end
       end
-#=end
-      ####unraveled assembly attributes
-=begin
-      source_object = source_id_handle.create_object()
-      source_object.get_attributes_unraveled() if source_object.respond_to?(:get_attributes_unraveled)
-=end
-#######
 
       clone_source_object.add_model_specific_override_attrs!(override_attrs)
       proc = CloneCopyProcessor.new(clone_source_object,opts.merge(:include_children => true))

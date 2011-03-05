@@ -271,29 +271,8 @@ module XYZ
       end
     end
    public
-=begin
-    def get_ports(type=nil)
-      attr_port_rows = get_objects_from_sp_hash(:columns => [:attribute_ports])
 
-      i18n = get_i18n_mappings_for_models(:component,:attribute)
-      port_list = Array.new
-      attr_port_rows.each do |r|
-        next unless attr = r[:attribute]
-        next if type == "external" and not attr[:port_is_external]
-        #TODO think dont need val = attr[:attribute_value]
-        ###attr[:value] = (val.kind_of?(Hash) or val.kind_of?(Array)) ? JSON.generate(val) : val
-        ## if put back in then :attribute_ports will need value_derived and value_asseretd
-        attr_name = attr[:display_name]
-        cmp_name = (r[:component]||{})[:display_name]
-        attr[:display_name] =  get_i18n_port_name(i18n,attr_name,cmp_name) if attr_name and cmp_name
-        #TODO: hack to remove description
-        attr[:description] = ""
-        port_list << attr
-      end
-      Model::materialize_virtual_columns!(port_list,[:port_type])
-      port_list
-    end
-=end
+    #TODO: needs to be revised to be compatible with virtual ports (liek l4); so type arg must be also given
     def self.get_port_links(id_handles)
       input_port_cols = [:id, :display_name, :input_port_links]
       input_port_rows = get_objects_in_set_from_sp_hash(id_handles,:columns => input_port_cols)

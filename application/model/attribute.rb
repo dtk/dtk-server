@@ -16,6 +16,7 @@ module XYZ
       column :data_type, :varchar, :size => 25
       column :semantic_type, :json #points to structural info for a json var 
       column :semantic_type_summary, :varchar, :size => 25 #for efficiency optional token that summarizes info from semantic_type
+      virtual_column :semantic_type_object, :type => :object, :hidden => true, :local_dependencies => [:semantic_type]
 
       #TODO: these may be redundant; if so wil remove one
       column :read_only, :boolean, :default => false 
@@ -31,7 +32,8 @@ module XYZ
       virtual_column :port_type, :type => :varchar, :hidden => true, :local_dependencies => [:is_port,:semantic_type_summary]
 
       column :link_info, :json, :ret_keys_as_symbols => false
-     
+      virtual_column :link_info_object, :type => :object, :hidden => true, :local_dependencies => [:link_info]
+
       virtual_column :is_unset, :type => :boolean, :hidden => true, :local_dependencies => [:value_asserted,:value_derived,:data_type,:semantic_type]
 
       virtual_column :parent_name, :possible_parents => [:component,:node]
@@ -48,6 +50,18 @@ module XYZ
            :join_type => :inner,
            :join_cond=>{:attribute_attribute_id => q(:attribute,:id)},
            :cols => [:id,:search_pattern,:type,:description]
+         }]
+
+      virtual_column :component_parent, :type => :json, :hidden => true,
+        :remote_dependencies =>
+        [
+         {
+           :model_name => :component,
+           :alias => :component_parent,
+           :convert => true,
+           :join_type => :left_outer,
+           :join_cond=>{:id => p(:attribute,:component)},
+           :cols => [:id,:display_name,:component_type,:specific_type,:basic_type]
          }]
 
       virtual_column :needs_to_be_set, :type => :boolean, :hidden => true, 
@@ -174,25 +188,7 @@ module XYZ
          }
         ]
 
-=begin TODO: would like "search object link form"
-also related is allowing omission of columns mmentioned in jon condition; post processing when entering vcol def would added these in
-         { {:relation => :this
-           },
-           {:relation => :component,
-            :columns => [:id, :display_name]
-           },
-           [
-             {:relation => :node,
-              :columns => [:id, :display_name],
-              :params => [:datacenter_id]
-             },
-             {:relation => :node_group,
-              :columns => [:id, :display_name],
-              :params => [:datacenter_id]
-              }
-           ]
-         }
-=end
+
       virtual_column :linked_attributes, :type => :json, :hidden => true, 
         :remote_dependencies => 
         [
@@ -215,6 +211,14 @@ also related is allowing omission of columns mmentioned in jon condition; post p
     ### virtual column defs
     def attribute_value()
       self[:value_asserted] || self[:value_derived]
+    end
+
+    def link_info_object()
+      LinkInfo.new(self[:link_info])
+    end
+
+    def semantic_type_object()
+      SemanticType.create_from_attribute(self)
     end
 
     def needs_to_be_set()
@@ -255,8 +259,8 @@ also related is allowing omission of columns mmentioned in jon condition; post p
     end
     def qualified_attribute_name()
       node_or_group_name =
-        if self[:node] then self[:node][:display_name]
-        elsif self[:node_group] then self[:node_group][:display_name]
+        if self.has_key?(:node) then self[:node][:display_name]
+        elsif self.has_key?(:node_group) then self[:node_group][:display_name]
       end
       qualified_attribute_name_aux(node_or_group_name)
     end
@@ -280,7 +284,7 @@ also related is allowing omission of columns mmentioned in jon condition; post p
 
     ### object procssing and access functions
     def qualified_attribute_name_aux(node_or_group_name=nil)
-      cmp_name = (self[:component]||{})[:display_name]
+      cmp_name = self.has_key?(:component) ? self[:component][:display_name] : nil
       #strip what will be recipe name
       cmp_el = cmp_name ? cmp_name.gsub(/::.+$/,"") : nil
       attr_name = self[:display_name]
@@ -288,7 +292,8 @@ also related is allowing omission of columns mmentioned in jon condition; post p
       AttributeComplexType.serialze(token_array)
     end
     def qualified_attribute_id_aux(node_or_group_id_formatted=nil)
-      cmp_id_formatted = AttributeComplexType.container_id(:component,(self[:component]||{})[:id])
+      cmp_id = self.has_key?(:component) ? self[:component][:id] : nil
+      cmp_id_formatted = AttributeComplexType.container_id(:component,cmp_id)
       attr_id_formatted = AttributeComplexType.container_id(:attribute,self[:id])
       item_path = AttributeComplexType.item_path_token_array(self)||[]
       token_array = ([node_or_group_id_formatted,cmp_id_formatted,attr_id_formatted] + item_path).compact

@@ -15,7 +15,8 @@ module XYZ
         column :basic_type, :varchar, :size => 25 #service, application, language, application, extension, database, user
         #leaf type in component type 
         column :specific_type, :varchar, :size => 30 
-        column :component_type, :varchar #this will reflect whether component is apache, mysql etc and will enable display_name to be modified by user
+        column :component_type, :varchar, :size => 50 #this is the exact component type; two instances taht share this can differ by things like defaults
+        virtual_column :most_specific_type, :type => :varchar, :local_dependencies => [:specific_type,:basic_type]
 
         column :only_one_per_node, :boolean, :default => true
         column :version, :varchar, :size => 25 # version of underlying component (not chef recipe .... version)
@@ -216,6 +217,10 @@ module XYZ
     ### virtual column defs
     def view_def_key()
       self[:view_def_ref]||self[:component_type]||self[:id]
+    end
+
+    def most_specific_type()
+      self[:specific_type]||self[:basic_type]
     end
 
     def containing_datacenter()

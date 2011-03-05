@@ -52,6 +52,7 @@ module XYZ
       attr_rows = get_objects_from_sp_hash(attr_mh,sp_hash)
       attr_info = attr_rows.inject({}){|h,attr|h.merge(attr[:id] => attr)}
 
+
       #set function and new function_index and new updated link_info
       updated_link_info = Hash.new
       rows.each do |row|
@@ -72,10 +73,28 @@ module XYZ
       field_set = FieldSet.new(attr_link_mh[:model_name],rows.first.keys)
       returning_ids = create_from_select(attr_link_mh,field_set,select_ds,override_attrs,:returning_sql_cols=> [:id])
       propagate_from_create(attr_mh,attr_info,rows)
+      #TODO: might use form pass to  create_link_post_processing fro above
+      link_info_list = rows.map{|r|{:input => attr_info[r[:input_id]],:output => attr_info[r[:output_id]]}}
+
+      create_link_post_processing(attr_link_mh,link_info_list)
       returning_ids
     end
 
+    def self.create_link_post_processing(attr_link_mh,link_info_list)
+return
+#TODO: until get it fully working
+      link_info_list.each do |link|
+        if ComponentType::Application.include?(link[:input][:component_parent]) and
+            ComponentType::DbServer.include?(link[:output][:component_parent])
+          #TODO: other test should be making sure that application has  a db_ref attribute  
+          pp [:debug, "should create a db on db server item"]
+        end
+      end
+    end
+
+####
 =begin    
+DEPRECATE
     def self.create_links(parent_id_handle,rows)
       attr_link_mh = parent_id_handle.create_childMH(:attribute_link)
       #TODO: parent model name can also be node

@@ -61,7 +61,7 @@ module XYZ
            :convert => true,
            :join_type => :left_outer,
            :join_cond=>{:id => p(:attribute,:component)},
-           :cols => [:id,:display_name,:component_type,:specific_type,:basic_type]
+           :cols => [:id,:display_name,:component_type,:most_specific_type]
          }]
 
       virtual_column :needs_to_be_set, :type => :boolean, :hidden => true, 

@@ -93,41 +93,11 @@ module XYZ
       end
     end
 
-    #TODO: may encapsualte under the ComponentType::Database
     def self.add_related_link_from_db_config(attr_link_mh,link_info,attr_db_config)
-
-      output_cmp = link_info[:output][:component_parent]
-
-      cmp_mh = attr_link_mh.createMH(:component)
-      base_sp_hash = {
-        :model_name => :component,
-        :filter => [:eq, :id, output_cmp[:ancestor_id]],
-        :cols => [:id,:library_library_id]
-      }
-      join_array = 
-        [{
-           :model_name => :attribute,
-           :join_type => :inner,
-           :alias => :db_component_name,
-           :filter => [:eq, :display_name, "db_component"],
-           :join_cond => {:component_component_id => :component__id},
-           :cols => [:value_asserted,:component_component_id]
-         },
-         {:model_name => :component,
-           :alias => :db_component,
-           :join_type => :inner,
-           :convert => true,
-           :join_cond => {:display_name => :db_component_name__value_asserted, :library_library_id => :component__library_library_id},
-           :cols => [:id,:display_name,:library_library_id]
-         }]
-
-      rows = get_objects_from_join_array(cmp_mh,base_sp_hash,join_array)
-      db_component = rows.first && rows.first[:db_component]
-      unless db_component
-        Log.error("Cannot find the db component associated with the db server")
-        return
-      end
-      pp [:debug, "got here", db_component]
+      db_server_component = link_info[:output][:component_parent]
+      db_server_node = attr_link_mh.createIDH(:id => db_server_component[:node_node_id],:model_name => :node).create_object()
+      db_component_idh = ComponentType::Database.clone_db_on_db_server_node(db_server_node,db_server_component)
+      pp [:db_component_idh,db_component_idh]
     end
 
 

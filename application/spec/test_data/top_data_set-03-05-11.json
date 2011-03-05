@@ -1,8 +1,8 @@
 {
   "datacenter": {
     "dc1": {
-      "description": "Datacenter number 1",
-      "display_name": "Datacenter 1"
+      "display_name": "Datacenter 1",
+      "description": "Datacenter number 1"
     }
   },
   "library": {
@@ -10,268 +10,247 @@
       "data_source": {
         "chef": {
           "display_name": "chef",
-          "last_collection_timestamp": "Sat Mar 05 19:35:09 +0000 2011",
           "data_source_entry": {
             "component_recipe": {
-              "source_obj_type": "recipe",
               "ds_is_golden_store": true,
               "display_name": "component_recipe",
-              "obj_type": "component",
               "data_source_entry": {
                 "component_monitoring_item": {
                   "ds_is_golden_store": true,
                   "display_name": "component_monitoring_item",
-                  "obj_type": "monitoring_item",
-                  "ds_name": "chef"
+                  "ds_name": "chef",
+                  "obj_type": "monitoring_item"
                 },
                 "component_attribute": {
                   "ds_is_golden_store": true,
                   "display_name": "component_attribute",
-                  "obj_type": "attribute",
-                  "ds_name": "chef"
+                  "ds_name": "chef",
+                  "obj_type": "attribute"
                 }
               },
-              "ds_name": "chef"
+              "ds_name": "chef",
+              "obj_type": "component",
+              "source_obj_type": "recipe"
             }
           },
-          "ds_name": "chef"
+          "ds_name": "chef",
+          "last_collection_timestamp": "Sat Mar 05 21:58:12 +0000 2011"
         },
         "ec2": {
           "display_name": "ec2",
-          "last_collection_timestamp": "Sat Mar 05 19:35:25 +0000 2011",
           "data_source_entry": {
             "node_image": {
-              "source_obj_type": "image",
               "ds_is_golden_store": true,
               "display_name": "node_image",
+              "ds_name": "ec2",
               "obj_type": "node",
-              "ds_name": "ec2"
+              "source_obj_type": "image"
             }
           },
-          "ds_name": "ec2"
+          "ds_name": "ec2",
+          "last_collection_timestamp": "Sat Mar 05 21:58:21 +0000 2011"
         },
         "user_data": {
           "display_name": "user_data",
-          "last_collection_timestamp": "Sat Mar 05 19:35:28 +0000 2011",
           "data_source_entry": {
             "component": {
               "ds_is_golden_store": true,
               "display_name": "component",
-              "obj_type": "component",
               "data_source_entry": {
                 "component_dependency": {
                   "ds_is_golden_store": true,
                   "display_name": "dependency",
-                  "obj_type": "dependency",
-                  "ds_name": "user_data"
+                  "ds_name": "user_data",
+                  "obj_type": "dependency"
                 },
                 "component_attribute": {
                   "ds_is_golden_store": true,
                   "display_name": "attribute",
-                  "obj_type": "attribute",
                   "data_source_entry": {
                     "attribute_dependency": {
                       "ds_is_golden_store": true,
                       "display_name": "dependency",
-                      "obj_type": "dependency",
-                      "ds_name": "user_data"
+                      "ds_name": "user_data",
+                      "obj_type": "dependency"
                     }
                   },
-                  "ds_name": "user_data"
+                  "ds_name": "user_data",
+                  "obj_type": "attribute"
                 }
               },
-              "ds_name": "user_data"
+              "ds_name": "user_data",
+              "obj_type": "component"
             },
             "node": {
               "ds_is_golden_store": true,
               "display_name": "node",
-              "obj_type": "node",
-              "ds_name": "user_data"
+              "ds_name": "user_data",
+              "obj_type": "node"
             }
           },
-          "ds_name": "user_data"
+          "ds_name": "user_data",
+          "last_collection_timestamp": "Sat Mar 05 21:58:23 +0000 2011"
         }
       },
+      "display_name": "test",
       "node": {
         "ami-ee38c987": {
           "type": "image",
-          "monitoring_item": {
-            "check_ping": {
-              "description": "ping",
-              "display_name": "check_ping",
-              "enabled": true
-            },
-            "check_mem": {
-              "description": "Free Memory",
-              "display_name": "check_mem",
-              "enabled": true
-            },
-            "check_local_procs": {
-              "description": "Processes",
-              "display_name": "check_local_procs",
-              "enabled": true
-            },
-            "check_all_disks": {
-              "description": "Free Space All Disks",
-              "display_name": "check_all_disks",
-              "enabled": true
-            },
-            "check_memory_profiler": {
-              "description": "Memory Profiler",
-              "display_name": "check_memory_profiler",
-              "enabled": true
-            },
-            "check_iostat": {
-              "description": "Iostat",
-              "display_name": "check_iostat",
-              "enabled": true
-            },
-            "check_ssh": {
-              "description": "SSH",
-              "display_name": "check_ssh",
-              "enabled": true
-            }
-          },
-          "ds_key": "[:user_data, \"/library/test/ami-ee38c987\"]",
+          "ds_source_obj_type": "image",
+          "is_deployed": true,
           "ui": {
             "images": {
-              "tnail": "ubuntu.png",
               "tiny": "",
+              "tnail": "ubuntu.png",
               "display": "ubuntu.png"
             }
           },
-          "ds_source_obj_type": "image",
           "display_name": "ami-ee38c987",
           "data_source": "user_data",
+          "external_ref": {
+            "type": "ec2_image",
+            "image_id": "ami-ee38c987"
+          },
+          "monitoring_item": {
+            "check_ping": {
+              "display_name": "check_ping",
+              "description": "ping",
+              "enabled": true
+            },
+            "check_mem": {
+              "display_name": "check_mem",
+              "description": "Free Memory",
+              "enabled": true
+            },
+            "check_local_procs": {
+              "display_name": "check_local_procs",
+              "description": "Processes",
+              "enabled": true
+            },
+            "check_all_disks": {
+              "display_name": "check_all_disks",
+              "description": "Free Space All Disks",
+              "enabled": true
+            },
+            "check_memory_profiler": {
+              "display_name": "check_memory_profiler",
+              "description": "Memory Profiler",
+              "enabled": true
+            },
+            "check_iostat": {
+              "display_name": "check_iostat",
+              "description": "Iostat",
+              "enabled": true
+            },
+            "check_ssh": {
+              "display_name": "check_ssh",
+              "description": "SSH",
+              "enabled": true
+            }
+          },
+          "ds_attributes": {
+            "root_device_type": "ebs",
+            "type": "machine",
+            "block_device_mapping": [
+              {
+                "snapshotId": "snap-f9179794",
+                "deviceName": "/dev/sda1",
+                "deleteOnTermination": "true",
+                "volumeSize": 8
+              }
+            ],
+            "is_public": false,
+            "architecture": "i386",
+            "description": null,
+            "state": "available",
+            "virtualizationType": "paravirtual",
+            "kernel_id": "aki-3af50453",
+            "owner_id": "411986592491",
+            "tags": {
+            },
+            "product_codes": [
+
+            ],
+            "location": "411986592491/rnp-chef-09-12-mcollective-1-0-ubuntu-lucid-x86_32",
+            "name": "rnp-chef-09-12-mcollective-1-0-ubuntu-lucid-x86_32",
+            "flavor": {
+              "disk": null
+            },
+            "id": "ami-ee38c987",
+            "root_device_name": "/dev/sda1"
+          },
+          "attribute": {
+            "host_addresses_ipv4": {
+              "is_port": true,
+              "required": false,
+              "display_name": "host_addresses_ipv4",
+              "semantic_type_summary": "host_address_ipv4",
+              "semantic_type": {
+                ":array": "host_address_ipv4"
+              },
+              "value_asserted": [
+                null
+              ],
+              "read_only": true,
+              "data_type": "json",
+              "dynamic": true,
+              "hidden": false,
+              "cannot_change": false
+            }
+          },
           "node_interface": {
             "eth0": {
               "type": "ethernet",
               "display_name": "eth0"
             }
           },
-          "external_ref": {
-            "type": "ec2_image",
-            "image_id": "ami-ee38c987"
-          },
-          "attribute": {
-            "host_addresses_ipv4": {
-              "dynamic": true,
-              "required": false,
-              "display_name": "host_addresses_ipv4",
-              "cannot_change": false,
-              "semantic_type": {
-                ":array": "host_address_ipv4"
-              },
-              "read_only": true,
-              "value_asserted": [
-                null
-              ],
-              "is_port": true,
-              "hidden": false,
-              "data_type": "json",
-              "semantic_type_summary": "host_address_ipv4"
-            }
-          },
-          "ds_attributes": {
-            "flavor": {
-              "disk": null
-            },
-            "type": "machine",
-            "product_codes": [
-
-            ],
-            "architecture": "i386",
-            "root_device_name": "/dev/sda1",
-            "description": null,
-            "root_device_type": "ebs",
-            "state": "available",
-            "block_device_mapping": [
-              {
-                "volumeSize": 8,
-                "snapshotId": "snap-f9179794",
-                "deviceName": "/dev/sda1",
-                "deleteOnTermination": "true"
-              }
-            ],
-            "is_public": false,
-            "tags": {
-            },
-            "kernel_id": "aki-3af50453",
-            "virtualizationType": "paravirtual",
-            "owner_id": "411986592491",
-            "location": "411986592491/rnp-chef-09-12-mcollective-1-0-ubuntu-lucid-x86_32",
-            "name": "rnp-chef-09-12-mcollective-1-0-ubuntu-lucid-x86_32",
-            "id": "ami-ee38c987"
-          },
-          "is_deployed": true
+          "ds_key": "[:user_data, \"/library/test/ami-ee38c987\"]"
         }
       },
-      "display_name": "test",
       "component": {
         "hadoop__pig": {
           "type": "instance",
-          "ds_key": "[:user_data, \"/library/test/hadoop__pig\"]",
+          "basic_type": "service",
           "ui": {
             "images": {
-              "tnail": "hadoop-pig.png",
               "tiny": "",
+              "tnail": "hadoop-pig.png",
               "display": "hadoop-pig.png"
             }
           },
-          "description": "Installs hadoop's pig package",
-          "only_one_per_node": true,
           "display_name": "hadoop__pig",
+          "description": "Installs hadoop's pig package",
           "external_ref": {
             "type": "chef_recipe",
             "recipe_name": "hadoop::pig"
           },
-          "basic_type": "service",
           "ds_attributes": {
+            "basic_type": "service",
             "ui": "{\"images\": {\"tnail\":\"hadoop-pig.png\",\"display\":\"hadoop-pig.png\",\"tiny\":\"\"}}",
             "ref": "hadoop__pig",
-            "basic_type": "service",
             "qualified_ref": "/library/test/hadoop__pig"
           },
-          "component_type": "hadoop__pig"
+          "only_one_per_node": true,
+          "component_type": "hadoop__pig",
+          "ds_key": "[:user_data, \"/library/test/hadoop__pig\"]"
         },
         "mysql__db": {
           "type": "instance",
-          "ds_key": "[:user_data, \"/library/test/mysql__db\"]",
+          "basic_type": "service",
           "ui": {
             "images": {
-              "tnail": "mysql.png",
               "tiny": "",
+              "tnail": "mysql.png",
               "display": "mysql.png"
             }
           },
-          "specific_type": "mysql_db_server",
-          "description": "Mysql DB",
-          "only_one_per_node": false,
           "display_name": "mysql__db",
+          "description": "Mysql DB",
           "external_ref": {
             "type": "chef_recipe",
             "recipe_name": "mysql::db"
           },
-          "attribute": {
-            "db_params": {
-              "description": "Parameters for a db",
-              "dynamic": false,
-              "required": false,
-              "display_name": "db_params",
-              "cannot_change": false,
-              "external_ref": {
-                "type": "service_attribute",
-                "path": "service[mysql_server][db_params]"
-              },
-              "semantic_type": "db_params",
-              "read_only": false,
-              "is_port": true,
-              "hidden": false,
-              "data_type": "json",
-              "semantic_type_summary": "db_params"
-            }
-          },
-          "basic_type": "service",
+          "specific_type": "mysql_db_server",
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}",
             "ref": "mysql__db",
@@ -279,82 +258,109 @@
             "only_one_per_node": false,
             "qualified_ref": "/library/test/mysql__db"
           },
-          "component_type": "mysql__db"
+          "only_one_per_node": false,
+          "attribute": {
+            "db_params": {
+              "is_port": true,
+              "required": false,
+              "display_name": "db_params",
+              "description": "Parameters for a db",
+              "semantic_type_summary": "db_params",
+              "external_ref": {
+                "type": "service_attribute",
+                "path": "service[mysql_server][db_params]"
+              },
+              "semantic_type": "db_params",
+              "read_only": false,
+              "data_type": "json",
+              "dynamic": false,
+              "hidden": false,
+              "cannot_change": false
+            }
+          },
+          "component_type": "mysql__db",
+          "ds_key": "[:user_data, \"/library/test/mysql__db\"]"
         },
         "hadoop_cloudera_c3": {
           "type": "instance",
-          "ds_key": "[:user_data, \"/library/test/hadoop_cloudera_c3\"]",
+          "basic_type": "service",
           "ui": {
             "images": {
-              "tnail": "cloudera.png",
               "tiny": "",
+              "tnail": "cloudera.png",
               "display": "cloudera.png"
             }
           },
-          "description": "Installs hadoop from Cloudera's repo",
-          "only_one_per_node": true,
           "display_name": "hadoop_cloudera_c3",
+          "description": "Installs hadoop from Cloudera's repo",
           "external_ref": {
             "type": "chef_recipe",
             "recipe_name": "hadoop_cloudera_c3"
           },
+          "ds_attributes": {
+            "basic_type": "service",
+            "ui": "{\"images\": {\"tnail\":\"cloudera.png\",\"display\":\"cloudera.png\",\"tiny\":\"\"}}",
+            "ref": "hadoop_cloudera_c3",
+            "qualified_ref": "/library/test/hadoop_cloudera_c3"
+          },
+          "only_one_per_node": true,
           "attribute": {
             "jmxremote_password": {
-              "dynamic": false,
+              "is_port": true,
               "required": false,
               "display_name": "jmxremote_password",
-              "cannot_change": false,
               "external_ref": {
                 "type": "service_attribute",
                 "path": "service[hadoop_namenode][jmxremote_password]"
               },
               "read_only": false,
-              "is_port": true,
+              "data_type": "string",
+              "dynamic": false,
               "hidden": false,
-              "data_type": "string"
+              "cannot_change": false
             },
             "jmxremote_port": {
-              "dynamic": false,
+              "is_port": true,
               "required": false,
               "display_name": "jmxremote_port",
-              "cannot_change": false,
               "external_ref": {
                 "type": "service_attribute",
                 "path": "service[hadoop_namenode][jmxremote_port]"
               },
               "read_only": false,
-              "is_port": true,
+              "data_type": "string",
+              "dynamic": false,
               "hidden": false,
-              "data_type": "string"
+              "cannot_change": false
             }
           },
-          "basic_type": "service",
-          "ds_attributes": {
-            "ui": "{\"images\": {\"tnail\":\"cloudera.png\",\"display\":\"cloudera.png\",\"tiny\":\"\"}}",
-            "ref": "hadoop_cloudera_c3",
-            "basic_type": "service",
-            "qualified_ref": "/library/test/hadoop_cloudera_c3"
-          },
-          "component_type": "hadoop_cloudera_c3"
+          "component_type": "hadoop_cloudera_c3",
+          "ds_key": "[:user_data, \"/library/test/hadoop_cloudera_c3\"]"
         },
         "postgresql__db": {
           "type": "instance",
-          "ds_key": "[:user_data, \"/library/test/postgresql__db\"]",
-          "specific_type": "postgres_db",
-          "description": "Postgresql DB",
-          "only_one_per_node": false,
+          "basic_type": "database",
           "display_name": "postgresql__db",
+          "description": "Postgresql DB",
           "external_ref": {
             "type": "chef_recipe",
             "recipe_name": "postgresql::db"
           },
+          "specific_type": "postgres_db",
+          "ds_attributes": {
+            "ref": "postgresql__db",
+            "specific_type": "postgres_db",
+            "only_one_per_node": false,
+            "qualified_ref": "/library/test/postgresql__db"
+          },
+          "only_one_per_node": false,
           "attribute": {
             "sap_config__db": {
-              "description": "postgres db",
-              "dynamic": false,
+              "is_port": true,
               "required": false,
               "display_name": "sap_config__db",
-              "cannot_change": false,
+              "description": "postgres db",
+              "semantic_type_summary": "sap_config__db",
               "external_ref": {
                 "type": "service_attribute",
                 "path": "service[postgresql][sap_config__db]"
@@ -366,41 +372,36 @@
                   }
                 }
               },
-              "read_only": false,
               "value_asserted": {
                 "name": null,
                 "password": null,
                 "owner": null
               },
-              "is_port": true,
-              "hidden": false,
+              "read_only": false,
               "data_type": "json",
-              "semantic_type_summary": "sap_config__db"
+              "dynamic": false,
+              "hidden": false,
+              "cannot_change": false
             }
           },
-          "basic_type": "database",
-          "ds_attributes": {
-            "ref": "postgresql__db",
-            "specific_type": "postgres_db",
-            "only_one_per_node": false,
-            "qualified_ref": "/library/test/postgresql__db"
-          },
-          "component_type": "postgresql__db"
+          "component_type": "postgresql__db",
+          "ds_key": "[:user_data, \"/library/test/postgresql__db\"]"
         },
         "java_webapp": {
-          "ds_key": "[:user_data, \"/library/test/java_webapp\"]",
+          "basic_type": "application",
           "ui": {
             "images": {
-              "tnail": "java-01.png",
               "tiny": "",
+              "tnail": "java-01.png",
               "display": "java-01.png"
             }
           },
+          "display_name": "java_webapp",
           "specific_type": "java_app",
-          "only_one_per_node": false,
           "dependency": {
             "tomcat": {
               "type": "component",
+              "display_name": "tomcat",
               "description": "tomcat is required",
               "search_pattern": {
                 ":filter": [
@@ -411,18 +412,79 @@
                     "tomcat"
                   ]
                 ]
-              },
-              "display_name": "tomcat"
+              }
             }
           },
-          "display_name": "java_webapp",
+          "ds_attributes": {
+            "ui": "{\"images\": {\"tnail\":\"java-01.png\",\"display\":\"java-01.png\",\"tiny\":\"\"}}",
+            "ref": "java_webapp",
+            "specific_type": "java_app",
+            "dependency": {
+              "tomcat": {
+                "required_component": "tomcat"
+              }
+            },
+            "only_one_per_node": false,
+            "attribute": {
+              "sap_ref__l4": {
+                "is_port": true,
+                "required": true,
+                "description": "postgresql admin service access point reference to connect to server",
+                "display_name": "sap_ref__l4",
+                "semantic_type_summary": "sap_ref__l4",
+                "semantic_type": "sap_ref__l4",
+                "dependency": {
+                  "component_constraint": {
+                    "type": "component",
+                    "description": "Not connecting to Mysql Server",
+                    "display_name": "component_constraint",
+                    "search_pattern": {
+                      ":filter": [
+                        ":and",
+                        [
+                          ":eq",
+                          ":specific_type",
+                          "mysql_db_server"
+                        ]
+                      ]
+                    }
+                  }
+                },
+                "read_only": false,
+                "dynamic": false,
+                "data_type": "json",
+                "hidden": false,
+                "cannot_change": false
+              },
+              "db_config": {
+                "is_port": true,
+                "required": true,
+                "description": "DB configuration",
+                "display_name": "db_config",
+                "semantic_type_summary": "db_config",
+                "semantic_type": "db_config",
+                "data_type": "json"
+              }
+            },
+            "component_type": "java_webapp",
+            "qualified_ref": "/library/test/java_webapp"
+          },
+          "only_one_per_node": false,
           "attribute": {
             "sap_ref__l4": {
-              "dynamic": false,
+              "is_port": true,
               "required": true,
+              "display_name": "sap_ref__l4",
+              "semantic_type_summary": "sap_ref__l4",
+              "external_ref": {
+                "type": "attribute",
+                "path": "sap_ref__l4"
+              },
+              "semantic_type": "sap_ref__l4",
               "dependency": {
                 "component_constraint": {
                   "type": "component",
+                  "display_name": "component_constraint",
                   "description": "Not connecting to Mysql Server",
                   "search_pattern": {
                     ":filter": [
@@ -433,140 +495,83 @@
                         "mysql_db_server"
                       ]
                     ]
-                  },
-                  "display_name": "component_constraint"
+                  }
                 }
               },
-              "display_name": "sap_ref__l4",
-              "cannot_change": false,
-              "external_ref": {
-                "type": "attribute",
-                "path": "sap_ref__l4"
-              },
-              "semantic_type": "sap_ref__l4",
               "read_only": false,
-              "is_port": true,
-              "hidden": false,
               "data_type": "json",
-              "semantic_type_summary": "sap_ref__l4"
+              "dynamic": false,
+              "hidden": false,
+              "cannot_change": false
             },
             "db_config": {
-              "dynamic": false,
+              "is_port": true,
               "required": true,
               "display_name": "db_config",
-              "cannot_change": false,
+              "semantic_type_summary": "db_config",
               "external_ref": {
                 "type": "attribute",
                 "path": "db_config"
               },
               "semantic_type": "db_config",
               "read_only": false,
-              "is_port": true,
-              "hidden": false,
               "data_type": "json",
-              "semantic_type_summary": "db_config"
+              "dynamic": false,
+              "hidden": false,
+              "cannot_change": false
             }
           },
-          "basic_type": "application",
-          "ds_attributes": {
-            "ui": "{\"images\": {\"tnail\":\"java-01.png\",\"display\":\"java-01.png\",\"tiny\":\"\"}}",
-            "ref": "java_webapp",
-            "specific_type": "java_app",
-            "only_one_per_node": false,
-            "dependency": {
-              "tomcat": {
-                "required_component": "tomcat"
-              }
-            },
-            "attribute": {
-              "db_config": {
-                "description": "DB configuration",
-                "required": true,
-                "display_name": "db_config",
-                "semantic_type": "db_config",
-                "is_port": true,
-                "data_type": "json",
-                "semantic_type_summary": "db_config"
-              },
-              "sap_ref__l4": {
-                "dynamic": false,
-                "description": "postgresql admin service access point reference to connect to server",
-                "required": true,
-                "display_name": "sap_ref__l4",
-                "cannot_change": false,
-                "dependency": {
-                  "component_constraint": {
-                    "type": "component",
-                    "description": "Not connecting to Mysql Server",
-                    "search_pattern": {
-                      ":filter": [
-                        ":and",
-                        [
-                          ":eq",
-                          ":specific_type",
-                          "mysql_db_server"
-                        ]
-                      ]
-                    },
-                    "display_name": "component_constraint"
-                  }
-                },
-                "semantic_type": "sap_ref__l4",
-                "read_only": false,
-                "is_port": true,
-                "hidden": false,
-                "data_type": "json",
-                "semantic_type_summary": "sap_ref__l4"
-              }
-            },
-            "component_type": "java_webapp",
-            "qualified_ref": "/library/test/java_webapp"
-          },
-          "component_type": "java_webapp"
+          "component_type": "java_webapp",
+          "ds_key": "[:user_data, \"/library/test/java_webapp\"]"
         },
         "php__php5": {
           "type": "instance",
-          "ds_key": "[:user_data, \"/library/test/php__php5\"]",
+          "basic_type": "language",
           "ui": {
             "images": {
-              "tnail": "php.png",
               "tiny": "",
+              "tnail": "php.png",
               "display": "php.png"
             }
           },
-          "specific_type": "php",
-          "description": "Install php5 packages and php.ini config file",
-          "only_one_per_node": true,
           "display_name": "php__php5",
+          "description": "Install php5 packages and php.ini config file",
           "external_ref": {
             "type": "chef_recipe",
             "recipe_name": "php::php5"
           },
-          "basic_type": "language",
+          "specific_type": "php",
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"php.png\",\"display\":\"php.png\",\"tiny\":\"\"}}",
             "ref": "php__php5",
             "specific_type": "php",
             "qualified_ref": "/library/test/php__php5"
           },
-          "component_type": "php__php5"
+          "only_one_per_node": true,
+          "component_type": "php__php5",
+          "ds_key": "[:user_data, \"/library/test/php__php5\"]"
         },
         "wordpress": {
           "type": "instance",
-          "ds_key": "[:user_data, \"/library/test/wordpress\"]",
+          "basic_type": "application",
           "ui": {
             "images": {
-              "tnail": "wordpress.png",
               "tiny": "",
+              "tnail": "wordpress.png",
               "display": "wordpress.png"
             }
           },
-          "specific_type": "php_app",
+          "display_name": "wordpress",
           "description": "Installs and configures wordpress LAMP stack on a single system",
-          "only_one_per_node": true,
+          "external_ref": {
+            "type": "chef_recipe",
+            "recipe_name": "wordpress"
+          },
+          "specific_type": "php_app",
           "dependency": {
             "php__php5": {
               "type": "component",
+              "display_name": "php__php5",
               "description": "Php5 is required",
               "search_pattern": {
                 ":filter": [
@@ -577,11 +582,11 @@
                     "php__php5"
                   ]
                 ]
-              },
-              "display_name": "php__php5"
+              }
             },
             "apache2": {
               "type": "component",
+              "display_name": "apache2",
               "description": "Apache2 is required",
               "search_pattern": {
                 ":filter": [
@@ -592,38 +597,47 @@
                     "apache2"
                   ]
                 ]
-              },
-              "display_name": "apache2"
+              }
             }
           },
-          "display_name": "wordpress",
-          "external_ref": {
-            "type": "chef_recipe",
-            "recipe_name": "wordpress"
+          "ds_attributes": {
+            "ui": "{\"images\": {\"tnail\":\"wordpress.png\",\"display\":\"wordpress.png\",\"tiny\":\"\"}}",
+            "ref": "wordpress",
+            "specific_type": "php_app",
+            "dependency": {
+              "apache2": {
+                "required_component": "apache2"
+              },
+              "php__php5": {
+                "required_component": "php__php5"
+              }
+            },
+            "qualified_ref": "/library/test/wordpress"
           },
+          "only_one_per_node": true,
           "attribute": {
             "db__user": {
-              "description": "Wordpress will connect to MySQL using this user.",
-              "dynamic": false,
+              "is_port": false,
               "required": false,
               "display_name": "db__user",
-              "cannot_change": false,
+              "description": "Wordpress will connect to MySQL using this user.",
               "external_ref": {
                 "type": "chef_attribute",
                 "path": "node[wordpress][db][user]"
               },
-              "read_only": false,
               "value_asserted": "wordpressuser",
-              "is_port": false,
+              "read_only": false,
+              "data_type": "string",
+              "dynamic": false,
               "hidden": false,
-              "data_type": "string"
+              "cannot_change": false
             },
             "sap_ref__l4": {
-              "description": "wordpress service access point reference",
-              "dynamic": false,
+              "is_port": true,
               "required": true,
               "display_name": "sap_ref__l4",
-              "cannot_change": false,
+              "description": "wordpress service access point reference",
+              "semantic_type_summary": "sap_ref__l4",
               "external_ref": {
                 "type": "service_attribute",
                 "path": "service[wordpress][sap_ref__l4]"
@@ -636,192 +650,184 @@
                 }
               },
               "read_only": false,
-              "is_port": true,
-              "hidden": false,
               "data_type": "json",
-              "semantic_type_summary": "sap_ref__l4"
+              "dynamic": false,
+              "hidden": false,
+              "cannot_change": false
             },
             "dir": {
-              "description": "Location to place wordpress files.",
-              "dynamic": false,
+              "is_port": false,
               "required": false,
               "display_name": "dir",
-              "cannot_change": false,
+              "description": "Location to place wordpress files.",
               "external_ref": {
                 "type": "chef_attribute",
                 "path": "node[wordpress][dir]"
               },
-              "read_only": false,
               "value_asserted": "/var/www",
-              "is_port": false,
+              "read_only": false,
+              "data_type": "string",
+              "dynamic": false,
               "hidden": false,
-              "data_type": "string"
+              "cannot_change": false
             },
             "db__database": {
-              "description": "Wordpress will use this MySQL database to store its data.",
-              "dynamic": false,
+              "is_port": false,
               "required": false,
               "display_name": "db__database",
-              "cannot_change": false,
+              "description": "Wordpress will use this MySQL database to store its data.",
               "external_ref": {
                 "type": "chef_attribute",
                 "path": "node[wordpress][db][database]"
               },
-              "read_only": false,
               "value_asserted": "wordpressdb",
-              "is_port": false,
+              "read_only": false,
+              "data_type": "string",
+              "dynamic": false,
               "hidden": false,
-              "data_type": "string"
+              "cannot_change": false
             },
             "keys__logged_in": {
-              "description": "Wordpress logged-in key.",
-              "dynamic": false,
+              "is_port": false,
               "required": false,
               "display_name": "keys__logged_in",
-              "cannot_change": false,
+              "description": "Wordpress logged-in key.",
               "external_ref": {
                 "type": "chef_attribute",
                 "path": "node[wordpress][keys][logged_in]"
               },
               "read_only": false,
-              "is_port": false,
+              "data_type": "string",
+              "dynamic": false,
               "hidden": false,
-              "data_type": "string"
+              "cannot_change": false
             },
             "keys__nonce": {
-              "description": "Wordpress nonce key.",
-              "dynamic": false,
+              "is_port": false,
               "required": false,
               "display_name": "keys__nonce",
-              "cannot_change": false,
+              "description": "Wordpress nonce key.",
               "external_ref": {
                 "type": "chef_attribute",
                 "path": "node[wordpress][keys][nonce]"
               },
               "read_only": false,
-              "is_port": false,
+              "data_type": "string",
+              "dynamic": false,
               "hidden": false,
-              "data_type": "string"
+              "cannot_change": false
             },
             "checksum": {
-              "description": "Checksum of the tarball for the version specified.",
-              "dynamic": false,
+              "is_port": false,
               "required": false,
               "display_name": "checksum",
-              "cannot_change": false,
+              "description": "Checksum of the tarball for the version specified.",
               "external_ref": {
                 "type": "chef_attribute",
                 "path": "node[wordpress][checksum]"
               },
-              "read_only": false,
               "value_asserted": "7342627f4a3dca44886c5aca6834cc88671dbd3aa2760182d2fcb9a330807",
-              "is_port": false,
+              "read_only": false,
+              "data_type": "string",
+              "dynamic": false,
               "hidden": false,
-              "data_type": "string"
+              "cannot_change": false
             },
             "db__password": {
-              "description": "Password for the Wordpress MySQL user.",
-              "dynamic": false,
+              "is_port": false,
               "required": false,
               "display_name": "db__password",
-              "cannot_change": false,
+              "description": "Password for the Wordpress MySQL user.",
               "external_ref": {
                 "type": "chef_attribute",
                 "path": "node[wordpress][db][password]"
               },
               "read_only": false,
-              "is_port": false,
+              "data_type": "string",
+              "dynamic": false,
               "hidden": false,
-              "data_type": "string"
+              "cannot_change": false
             },
             "version": {
-              "description": "Version of Wordpress to download from the Wordpress site.",
-              "dynamic": false,
+              "is_port": false,
               "required": false,
               "display_name": "version",
-              "cannot_change": false,
+              "description": "Version of Wordpress to download from the Wordpress site.",
               "external_ref": {
                 "type": "chef_attribute",
                 "path": "node[wordpress][version]"
               },
-              "read_only": false,
               "value_asserted": "2.9.2",
-              "is_port": false,
+              "read_only": false,
+              "data_type": "string",
+              "dynamic": false,
               "hidden": false,
-              "data_type": "string"
+              "cannot_change": false
             },
             "keys__secure_auth": {
-              "description": "Wordpress secure auth key.",
-              "dynamic": false,
+              "is_port": false,
               "required": false,
               "display_name": "keys__secure_auth",
-              "cannot_change": false,
+              "description": "Wordpress secure auth key.",
               "external_ref": {
                 "type": "chef_attribute",
                 "path": "node[wordpress][keys][secure_auth]"
               },
               "read_only": false,
-              "is_port": false,
+              "data_type": "string",
+              "dynamic": false,
               "hidden": false,
-              "data_type": "string"
+              "cannot_change": false
             },
             "keys__auth": {
-              "description": "Wordpress auth key.",
-              "dynamic": false,
+              "is_port": false,
               "required": false,
               "display_name": "keys__auth",
-              "cannot_change": false,
+              "description": "Wordpress auth key.",
               "external_ref": {
                 "type": "chef_attribute",
                 "path": "node[wordpress][keys][auth]"
               },
               "read_only": false,
-              "is_port": false,
+              "data_type": "string",
+              "dynamic": false,
               "hidden": false,
-              "data_type": "string"
+              "cannot_change": false
             }
           },
-          "basic_type": "application",
-          "ds_attributes": {
-            "ui": "{\"images\": {\"tnail\":\"wordpress.png\",\"display\":\"wordpress.png\",\"tiny\":\"\"}}",
-            "ref": "wordpress",
-            "specific_type": "php_app",
-            "dependency": {
-              "php__php5": {
-                "required_component": "php__php5"
-              },
-              "apache2": {
-                "required_component": "apache2"
-              }
-            },
-            "qualified_ref": "/library/test/wordpress"
-          },
-          "component_type": "wordpress"
+          "component_type": "wordpress",
+          "ds_key": "[:user_data, \"/library/test/wordpress\"]"
         },
         "mysql__slave": {
           "type": "instance",
-          "ds_key": "[:user_data, \"/library/test/mysql__slave\"]",
+          "basic_type": "extension",
           "ui": {
             "images": {
-              "tnail": "mysql.png",
               "tiny": "",
+              "tnail": "mysql.png",
               "display": "mysql.png"
             }
           },
-          "description": "For extending mysql server to serve as a slave",
-          "only_one_per_node": true,
           "display_name": "mysql__slave",
+          "description": "For extending mysql server to serve as a slave",
           "external_ref": {
             "type": "chef_recipe",
             "recipe_name": "mysql::slave"
           },
+          "ds_attributes": {
+            "basic_type": "extension",
+            "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}",
+            "ref": "mysql__slave",
+            "qualified_ref": "/library/test/mysql__slave"
+          },
+          "only_one_per_node": true,
           "attribute": {
             "sap_ref_to_master": {
-              "description": "mysql service access point reference for slave to connect with master",
-              "dynamic": false,
+              "is_port": true,
               "required": true,
               "display_name": "sap_ref_to_master",
-              "cannot_change": false,
+              "description": "mysql service access point reference for slave to connect with master",
+              "semantic_type_summary": "sap_ref__db",
               "external_ref": {
                 "type": "service_attribute",
                 "path": "service[mysql_server][sap_ref_to_master]"
@@ -834,79 +840,83 @@
                 }
               },
               "read_only": false,
-              "is_port": true,
-              "hidden": false,
               "data_type": "json",
-              "semantic_type_summary": "sap_ref__db"
+              "dynamic": false,
+              "hidden": false,
+              "cannot_change": false
             },
             "master_log_ref": {
-              "description": "reference for mysql slave to get master log position",
-              "dynamic": false,
+              "is_port": true,
               "required": true,
               "display_name": "master_log_ref",
-              "cannot_change": false,
+              "description": "reference for mysql slave to get master log position",
+              "semantic_type_summary": "mysql_master_log_info",
               "external_ref": {
                 "type": "service_attribute",
                 "path": "service[mysql_server][master_log_ref]"
               },
               "semantic_type": "mysql_master_log_info",
               "read_only": false,
-              "is_port": true,
-              "hidden": false,
               "data_type": "json",
-              "semantic_type_summary": "mysql_master_log_info"
+              "dynamic": false,
+              "hidden": false,
+              "cannot_change": false
             }
           },
-          "basic_type": "extension",
-          "ds_attributes": {
-            "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}",
-            "ref": "mysql__slave",
-            "basic_type": "extension",
-            "qualified_ref": "/library/test/mysql__slave"
-          },
-          "component_type": "mysql__slave"
+          "component_type": "mysql__slave",
+          "ds_key": "[:user_data, \"/library/test/mysql__slave\"]"
         },
         "postgresql__app": {
           "type": "instance",
-          "ds_key": "[:user_data, \"/library/test/postgresql__app\"]",
+          "basic_type": "application",
           "ui": {
             "images": {
-              "tnail": "postgres.png",
               "tiny": "",
+              "tnail": "postgres.png",
               "display": "postgres.png"
             }
           },
-          "description": "Test app",
-          "only_one_per_node": true,
           "display_name": "postgresql__app",
+          "description": "Test app",
           "external_ref": {
             "type": "chef_recipe",
             "recipe_name": "postgresql::app"
           },
+          "ds_attributes": {
+            "basic_type": "application",
+            "ui": "{\"images\": {\"tnail\":\"postgres.png\",\"display\":\"postgres.png\",\"tiny\":\"\"}}",
+            "ref": "postgresql__app",
+            "attribute": {
+              "sap_ref__l4": {
+                "dependency": {
+                  "component_constraint": {
+                    "type": "component",
+                    "description": "Not connecting to Postgres Server",
+                    "display_name": "component_constraint",
+                    "search_pattern": {
+                      ":filter": [
+                        ":and",
+                        [
+                          ":eq",
+                          ":specific_type",
+                          "postgres_db_server"
+                        ]
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "qualified_ref": "/library/test/postgresql__app"
+          },
+          "only_one_per_node": true,
           "attribute": {
             "sap_ref__l4": {
-              "description": "postgresql admin service access point reference to connect to server",
-              "dynamic": false,
+              "is_port": true,
               "required": true,
-              "dependency": {
-                "component_constraint": {
-                  "type": "component",
-                  "description": "Not connecting to Postgres Server",
-                  "search_pattern": {
-                    ":filter": [
-                      ":and",
-                      [
-                        ":eq",
-                        ":specific_type",
-                        "postgres_db_server"
-                      ]
-                    ]
-                  },
-                  "display_name": "component_constraint"
-                }
-              },
               "display_name": "sap_ref__l4",
-              "cannot_change": false,
+              "description": "postgresql admin service access point reference to connect to server",
+              "semantic_type_summary": "sap_ref__l4",
               "external_ref": {
                 "type": "attribute",
                 "path": "sap_ref__l4"
@@ -918,94 +928,105 @@
                   }
                 }
               },
-              "read_only": false,
-              "is_port": true,
-              "hidden": false,
-              "data_type": "json",
-              "semantic_type_summary": "sap_ref__l4"
-            }
-          },
-          "basic_type": "application",
-          "ds_attributes": {
-            "ui": "{\"images\": {\"tnail\":\"postgres.png\",\"display\":\"postgres.png\",\"tiny\":\"\"}}",
-            "ref": "postgresql__app",
-            "attribute": {
-              "sap_ref__l4": {
-                "dependency": {
-                  "component_constraint": {
-                    "type": "component",
-                    "description": "Not connecting to Postgres Server",
-                    "search_pattern": {
-                      ":filter": [
-                        ":and",
-                        [
-                          ":eq",
-                          ":specific_type",
-                          "postgres_db_server"
-                        ]
+              "dependency": {
+                "component_constraint": {
+                  "type": "component",
+                  "display_name": "component_constraint",
+                  "description": "Not connecting to Postgres Server",
+                  "search_pattern": {
+                    ":filter": [
+                      ":and",
+                      [
+                        ":eq",
+                        ":specific_type",
+                        "postgres_db_server"
                       ]
-                    },
-                    "display_name": "component_constraint"
+                    ]
                   }
                 }
-              }
-            },
-            "basic_type": "application",
-            "qualified_ref": "/library/test/postgresql__app"
+              },
+              "read_only": false,
+              "data_type": "json",
+              "dynamic": false,
+              "hidden": false,
+              "cannot_change": false
+            }
           },
-          "component_type": "postgresql__app"
+          "component_type": "postgresql__app",
+          "ds_key": "[:user_data, \"/library/test/postgresql__app\"]"
         },
         "hadoop__hive": {
           "type": "instance",
-          "ds_key": "[:user_data, \"/library/test/hadoop__hive\"]",
+          "basic_type": "service",
           "ui": {
             "images": {
-              "tnail": "hadoop-hive.png",
               "tiny": "",
+              "tnail": "hadoop-hive.png",
               "display": "hadoop-hive.png"
             }
           },
-          "description": "Installs hadoop's hive package",
-          "only_one_per_node": true,
           "display_name": "hadoop__hive",
+          "description": "Installs hadoop's hive package",
           "external_ref": {
             "type": "chef_recipe",
             "recipe_name": "hadoop::hive"
           },
-          "basic_type": "service",
           "ds_attributes": {
+            "basic_type": "service",
             "ui": "{\"images\": {\"tnail\":\"hadoop-hive.png\",\"display\":\"hadoop-hive.png\",\"tiny\":\"\"}}",
             "ref": "hadoop__hive",
-            "basic_type": "service",
             "qualified_ref": "/library/test/hadoop__hive"
           },
-          "component_type": "hadoop__hive"
+          "only_one_per_node": true,
+          "component_type": "hadoop__hive",
+          "ds_key": "[:user_data, \"/library/test/hadoop__hive\"]"
         },
         "postgresql__server": {
           "type": "instance",
-          "ds_key": "[:user_data, \"/library/test/postgresql__server\"]",
+          "basic_type": "service",
           "ui": {
             "images": {
-              "tnail": "postgres.png",
               "tiny": "",
+              "tnail": "postgres.png",
               "display": "postgres.png"
             }
           },
-          "specific_type": "postgres_db_server",
-          "description": "Installs postgresql server packages, debian family style",
-          "only_one_per_node": true,
           "display_name": "postgresql__server",
+          "description": "Installs postgresql server packages, debian family style",
           "external_ref": {
             "type": "chef_recipe",
             "recipe_name": "postgresql::server"
           },
+          "specific_type": "postgres_db_server",
+          "ds_attributes": {
+            "ui": "{\"images\": {\"tnail\":\"postgres.png\",\"display\":\"postgres.png\",\"tiny\":\"\"}}",
+            "ref": "postgresql__server",
+            "specific_type": "postgres_db_server",
+            "qualified_ref": "/library/test/postgresql__server"
+          },
+          "only_one_per_node": true,
           "attribute": {
-            "sap_config__db__admin": {
-              "description": "postgres db",
+            "db_component": {
+              "is_port": false,
+              "required": false,
+              "display_name": "db_component",
+              "external_ref": {
+                "type": "chef_attribute",
+                "path": "node[postgresql][db_component]"
+              },
+              "value_asserted": "postgresql__db",
+              "read_only": false,
+              "data_type": "string",
               "dynamic": false,
+              "hidden": false,
+              "cannot_change": false
+            },
+            "sap_config__db__admin": {
+              "is_port": true,
               "required": false,
               "display_name": "sap_config__db__admin",
-              "cannot_change": false,
+              "description": "postgres db",
+              "semantic_type_summary": "sap_config__db",
               "external_ref": {
                 "type": "service_attribute",
                 "path": "service[postgresql][sap_config__db__admin]"
@@ -1017,23 +1038,23 @@
                   }
                 }
               },
-              "read_only": false,
               "value_asserted": {
                 "name": "admin",
                 "password": null,
                 "owner": "admin"
               },
-              "is_port": true,
-              "hidden": false,
+              "read_only": false,
               "data_type": "json",
-              "semantic_type_summary": "sap_config__db"
+              "dynamic": false,
+              "hidden": false,
+              "cannot_change": false
             },
             "sap_config__l4": {
-              "description": "postgres ip service access point configuration",
-              "dynamic": false,
+              "is_port": true,
               "required": false,
               "display_name": "sap_config__l4",
-              "cannot_change": false,
+              "description": "postgres ip service access point configuration",
+              "semantic_type_summary": "sap_config__l4",
               "external_ref": {
                 "type": "service_attribute",
                 "path": "service[postgresql][sap_config__l4]"
@@ -1047,102 +1068,110 @@
                   }
                 }
               },
-              "read_only": false,
               "value_asserted": [
                 {
                   "port": 5432,
                   "protocol": "tcp"
                 }
               ],
-              "is_port": true,
-              "hidden": false,
+              "read_only": false,
               "data_type": "json",
-              "semantic_type_summary": "sap_config__l4"
+              "dynamic": false,
+              "hidden": false,
+              "cannot_change": false
             }
           },
-          "basic_type": "service",
-          "ds_attributes": {
-            "ui": "{\"images\": {\"tnail\":\"postgres.png\",\"display\":\"postgres.png\",\"tiny\":\"\"}}",
-            "ref": "postgresql__server",
-            "specific_type": "postgres_db_server",
-            "qualified_ref": "/library/test/postgresql__server"
-          },
-          "component_type": "postgresql__server"
+          "component_type": "postgresql__server",
+          "ds_key": "[:user_data, \"/library/test/postgresql__server\"]"
         },
         "java": {
           "type": "instance",
-          "ds_key": "[:user_data, \"/library/test/java\"]",
+          "basic_type": "language",
           "ui": {
             "images": {
-              "tnail": "java-01.png",
               "tiny": "",
+              "tnail": "java-01.png",
               "display": "java-01.png"
             }
           },
-          "specific_type": "java",
-          "description": "Installs openjdk to provide Java",
-          "only_one_per_node": true,
           "display_name": "java",
+          "description": "Installs openjdk to provide Java",
           "external_ref": {
             "type": "chef_recipe",
             "recipe_name": "java"
           },
-          "basic_type": "language",
+          "specific_type": "java",
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"java-01.png\",\"display\":\"java-01.png\",\"tiny\":\"\"}}",
             "ref": "java",
             "specific_type": "java",
             "qualified_ref": "/library/test/java"
           },
-          "component_type": "java"
+          "only_one_per_node": true,
+          "component_type": "java",
+          "ds_key": "[:user_data, \"/library/test/java\"]"
         },
         "rabbitmq__edge": {
-          "ds_key": "[:user_data, \"/library/test/rabbitmq__edge\"]",
+          "basic_type": "extension",
           "ui": {
             "images": {
-              "tnail": "rabbitmq.png",
               "tiny": "",
+              "tnail": "rabbitmq.png",
               "display": "rabbitmq.png"
             }
           },
-          "only_one_per_node": true,
           "display_name": "rabbitmq__edge",
-          "basic_type": "extension",
           "ds_attributes": {
+            "basic_type": "extension",
             "ui": "{\"images\": {\"tnail\":\"rabbitmq.png\",\"display\":\"rabbitmq.png\",\"tiny\":\"\"}}",
             "ref": "rabbitmq__edge",
-            "basic_type": "extension",
             "qualified_ref": "/library/test/rabbitmq__edge"
-          }
+          },
+          "only_one_per_node": true,
+          "ds_key": "[:user_data, \"/library/test/rabbitmq__edge\"]"
         },
         "hadoop": {
           "type": "instance",
-          "ds_key": "[:user_data, \"/library/test/hadoop\"]",
+          "basic_type": "service",
           "ui": {
             "images": {
-              "tnail": "hadoop.png",
               "tiny": "",
+              "tnail": "hadoop.png",
               "display": "hadoop.png"
             }
           },
-          "description": "Installs hadoop from Cloudera's repo",
-          "only_one_per_node": true,
           "display_name": "hadoop",
+          "description": "Installs hadoop from Cloudera's repo",
           "external_ref": {
             "type": "chef_recipe",
             "recipe_name": "hadoop"
           },
-          "basic_type": "service",
           "ds_attributes": {
+            "basic_type": "service",
             "ui": "{\"images\": {\"tnail\":\"hadoop.png\",\"display\":\"hadoop.png\",\"tiny\":\"\"}}",
             "ref": "hadoop",
-            "basic_type": "service",
             "qualified_ref": "/library/test/hadoop"
           },
-          "component_type": "hadoop"
+          "only_one_per_node": true,
+          "component_type": "hadoop",
+          "ds_key": "[:user_data, \"/library/test/hadoop\"]"
         },
         "hadoop_cloudera_c3__conf_pseudo": {
           "type": "instance",
+          "basic_type": "extension",
+          "ui": {
+            "images": {
+              "tiny": "",
+              "tnail": "cloudera.png",
+              "display": "cloudera.png"
+            }
+          },
+          "display_name": "hadoop_cloudera_c3__conf_pseudo",
+          "description": "Installs hadoop-conf-pseudo and enables hadoop services",
+          "external_ref": {
+            "type": "chef_recipe",
+            "recipe_name": "hadoop_cloudera_c3::conf_pseudo"
+          },
           "monitoring_item": {
             "check_hadoop_namenode_remotely": {
               "display_name": "check_hadoop_namenode_remotely",
@@ -1161,85 +1190,77 @@
               "enabled": true
             }
           },
-          "ds_key": "[:user_data, \"/library/test/hadoop_cloudera_c3__conf_pseudo\"]",
-          "ui": {
-            "images": {
-              "tnail": "cloudera.png",
-              "tiny": "",
-              "display": "cloudera.png"
-            }
+          "ds_attributes": {
+            "basic_type": "extension",
+            "ui": "{\"images\": {\"tnail\":\"cloudera.png\",\"display\":\"cloudera.png\",\"tiny\":\"\"}}",
+            "ref": "hadoop_cloudera_c3__conf_pseudo",
+            "qualified_ref": "/library/test/hadoop_cloudera_c3__conf_pseudo"
           },
-          "description": "Installs hadoop-conf-pseudo and enables hadoop services",
           "only_one_per_node": true,
-          "display_name": "hadoop_cloudera_c3__conf_pseudo",
-          "external_ref": {
-            "type": "chef_recipe",
-            "recipe_name": "hadoop_cloudera_c3::conf_pseudo"
-          },
           "attribute": {
             "jmxremote_password": {
-              "dynamic": false,
+              "is_port": true,
               "required": false,
               "display_name": "jmxremote_password",
-              "cannot_change": false,
               "external_ref": {
                 "type": "service_attribute",
                 "path": "service[hadoop_namenode][jmxremote_password]"
               },
               "read_only": false,
-              "is_port": true,
+              "data_type": "string",
+              "dynamic": false,
               "hidden": false,
-              "data_type": "string"
+              "cannot_change": false
             },
             "jmxremote_port": {
-              "dynamic": false,
+              "is_port": true,
               "required": false,
               "display_name": "jmxremote_port",
-              "cannot_change": false,
               "external_ref": {
                 "type": "service_attribute",
                 "path": "service[hadoop_namenode][jmxremote_port]"
               },
               "read_only": false,
-              "is_port": true,
+              "data_type": "string",
+              "dynamic": false,
               "hidden": false,
-              "data_type": "string"
+              "cannot_change": false
             }
           },
-          "basic_type": "extension",
-          "ds_attributes": {
-            "ui": "{\"images\": {\"tnail\":\"cloudera.png\",\"display\":\"cloudera.png\",\"tiny\":\"\"}}",
-            "ref": "hadoop_cloudera_c3__conf_pseudo",
-            "basic_type": "extension",
-            "qualified_ref": "/library/test/hadoop_cloudera_c3__conf_pseudo"
-          },
-          "component_type": "hadoop_cloudera_c3__conf_pseudo"
+          "component_type": "hadoop_cloudera_c3__conf_pseudo",
+          "ds_key": "[:user_data, \"/library/test/hadoop_cloudera_c3__conf_pseudo\"]"
         },
         "nagios__client": {
           "type": "instance",
-          "ds_key": "[:user_data, \"/library/test/nagios__client\"]",
+          "basic_type": "service",
           "ui": {
             "images": {
-              "tnail": "nagios.png",
               "tiny": "",
+              "tnail": "nagios.png",
               "display": "nagios.png"
             }
           },
-          "specific_type": "monitoring_agent",
-          "description": "Installs and configures a nagios client with nrpe",
-          "only_one_per_node": true,
           "display_name": "nagios__client",
+          "description": "Installs and configures a nagios client with nrpe",
           "external_ref": {
             "type": "chef_recipe",
             "recipe_name": "nagios::client"
           },
+          "specific_type": "monitoring_agent",
+          "ds_attributes": {
+            "ui": "{\"images\": {\"tnail\":\"nagios.png\",\"display\":\"nagios.png\",\"tiny\":\"\"}}",
+            "ref": "nagios__client",
+            "specific_type": "monitoring_agent",
+            "qualified_ref": "/library/test/nagios__client"
+          },
+          "only_one_per_node": true,
           "attribute": {
             "monitored_client_sap_config": {
-              "description": "monitored client service access point",
-              "dynamic": false,
+              "is_port": true,
               "required": true,
               "display_name": "monitored_client_sap_config",
-              "cannot_change": false,
+              "description": "monitored client service access point",
+              "semantic_type_summary": "sap_config__l4",
               "external_ref": {
                 "type": "service_attribute",
                 "path": "service[nagios][monitored_client_sap_config]"
@@ -1251,28 +1272,156 @@
                   }
                 }
               },
-              "read_only": false,
               "value_asserted": {
                 "port": "5666",
                 "protocol": "tcp"
               },
-              "is_port": true,
-              "hidden": false,
+              "read_only": false,
               "data_type": "json",
-              "semantic_type_summary": "sap_config__l4"
+              "dynamic": false,
+              "hidden": false,
+              "cannot_change": false
             }
           },
-          "basic_type": "service",
-          "ds_attributes": {
-            "ui": "{\"images\": {\"tnail\":\"nagios.png\",\"display\":\"nagios.png\",\"tiny\":\"\"}}",
-            "ref": "nagios__client",
-            "specific_type": "monitoring_agent",
-            "qualified_ref": "/library/test/nagios__client"
+          "component_type": "nagios__client",
+          "ds_key": "[:user_data, \"/library/test/nagios__client\"]"
+        },
+        "user_account": {
+          "type": "instance",
+          "basic_type": "user",
+          "ui": {
+            "images": {
+              "tiny": "",
+              "tnail": "user.png",
+              "display": "user.png"
+            }
           },
-          "component_type": "nagios__client"
+          "display_name": "user_account",
+          "description": "Installs a user account",
+          "external_ref": {
+            "type": "chef_recipe",
+            "recipe_name": "user_account"
+          },
+          "ds_attributes": {
+            "basic_type": "user",
+            "ui": "{\"images\": {\"tnail\":\"user.png\",\"display\":\"user.png\",\"tiny\":\"\"}}",
+            "ref": "user_account",
+            "only_one_per_node": false,
+            "qualified_ref": "/library/test/user_account"
+          },
+          "only_one_per_node": false,
+          "attribute": {
+            "gid": {
+              "is_port": false,
+              "required": false,
+              "display_name": "gid",
+              "description": "Primary group id",
+              "external_ref": {
+                "type": "chef_attribute",
+                "path": "node[user_account][gid]"
+              },
+              "read_only": false,
+              "data_type": "integer",
+              "dynamic": false,
+              "hidden": false,
+              "cannot_change": false
+            },
+            "username": {
+              "is_port": false,
+              "required": true,
+              "display_name": "username",
+              "description": "User name",
+              "external_ref": {
+                "type": "chef_attribute",
+                "path": "node[user_account][username]"
+              },
+              "read_only": false,
+              "data_type": "string",
+              "dynamic": false,
+              "hidden": false,
+              "cannot_change": false
+            },
+            "uid": {
+              "is_port": false,
+              "required": false,
+              "display_name": "uid",
+              "description": "Numeric user id",
+              "external_ref": {
+                "type": "chef_attribute",
+                "path": "node[user_account][uid]"
+              },
+              "read_only": false,
+              "data_type": "integer",
+              "dynamic": false,
+              "hidden": false,
+              "cannot_change": false
+            },
+            "shell": {
+              "is_port": false,
+              "required": false,
+              "display_name": "shell",
+              "description": "Login shell",
+              "external_ref": {
+                "type": "chef_attribute",
+                "path": "node[user_account][shell]"
+              },
+              "read_only": false,
+              "data_type": "string",
+              "dynamic": false,
+              "hidden": false,
+              "cannot_change": false
+            },
+            "home_base": {
+              "is_port": false,
+              "required": false,
+              "display_name": "home_base",
+              "description": "Home directories base location (home will be $home_base/$username",
+              "external_ref": {
+                "type": "chef_attribute",
+                "path": "node[user_account][home_base]"
+              },
+              "read_only": false,
+              "data_type": "string",
+              "dynamic": false,
+              "hidden": false,
+              "cannot_change": false
+            },
+            "home": {
+              "is_port": false,
+              "required": false,
+              "display_name": "home",
+              "description": "Home directory location",
+              "external_ref": {
+                "type": "chef_attribute",
+                "path": "node[user_account][home]"
+              },
+              "read_only": false,
+              "data_type": "string",
+              "dynamic": false,
+              "hidden": false,
+              "cannot_change": false
+            }
+          },
+          "component_type": "user_account",
+          "ds_key": "[:user_data, \"/library/test/user_account\"]"
         },
         "mysql__server": {
           "type": "instance",
+          "basic_type": "service",
+          "ui": {
+            "images": {
+              "tiny": "",
+              "tnail": "mysql.png",
+              "display": "mysql.png"
+            }
+          },
+          "display_name": "mysql__server",
+          "description": "Installs packages required for mysql servers w/o manual intervention",
+          "external_ref": {
+            "type": "chef_recipe",
+            "recipe_name": "mysql::server"
+          },
+          "specific_type": "mysql_db_server",
           "monitoring_item": {
             "mysql_basic_health": {
               "display_name": "mysql_basic_health",
@@ -1283,153 +1432,159 @@
               "enabled": true
             }
           },
-          "ds_key": "[:user_data, \"/library/test/mysql__server\"]",
-          "ui": {
-            "images": {
-              "tnail": "mysql.png",
-              "tiny": "",
-              "display": "mysql.png"
-            }
+          "ds_attributes": {
+            "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}",
+            "ref": "mysql__server",
+            "specific_type": "mysql_db_server",
+            "qualified_ref": "/library/test/mysql__server"
           },
-          "specific_type": "mysql_db_server",
-          "description": "Installs packages required for mysql servers w/o manual intervention",
           "only_one_per_node": true,
-          "display_name": "mysql__server",
-          "external_ref": {
-            "type": "chef_recipe",
-            "recipe_name": "mysql::server"
-          },
           "attribute": {
             "tunable__key_buffer": {
-              "dynamic": false,
+              "is_port": false,
               "required": false,
               "display_name": "tunable__key_buffer",
-              "cannot_change": false,
               "external_ref": {
                 "type": "chef_attribute",
                 "path": "node[mysql][tunable][key_buffer]"
               },
-              "read_only": false,
               "value_asserted": "250M",
-              "is_port": false,
+              "read_only": false,
+              "data_type": "string",
+              "dynamic": false,
               "hidden": false,
-              "data_type": "string"
+              "cannot_change": false
             },
             "monitor_user_id": {
-              "description": "db userid for monitoring application to use",
-              "dynamic": false,
+              "is_port": true,
               "required": false,
               "display_name": "monitor_user_id",
-              "cannot_change": false,
+              "description": "db userid for monitoring application to use",
               "external_ref": {
                 "type": "service_attribute",
                 "path": "service[mysql_server][monitor_user_id]"
               },
-              "read_only": false,
               "value_asserted": "root",
-              "is_port": true,
+              "read_only": false,
+              "data_type": "string",
+              "dynamic": false,
               "hidden": false,
-              "data_type": "string"
+              "cannot_change": false
             },
             "tunable__net_read_timeout": {
-              "dynamic": false,
+              "is_port": false,
               "required": false,
               "display_name": "tunable__net_read_timeout",
-              "cannot_change": false,
               "external_ref": {
                 "type": "chef_attribute",
                 "path": "node[mysql][tunable][net_read_timeout]"
               },
-              "read_only": false,
               "value_asserted": "30",
-              "is_port": false,
+              "read_only": false,
+              "data_type": "string",
+              "dynamic": false,
               "hidden": false,
-              "data_type": "string"
+              "cannot_change": false
             },
             "tunable__table_cache": {
-              "dynamic": false,
+              "is_port": false,
               "required": false,
               "display_name": "tunable__table_cache",
-              "cannot_change": false,
               "external_ref": {
                 "type": "chef_attribute",
                 "path": "node[mysql][tunable][table_cache]"
               },
-              "read_only": false,
               "value_asserted": "128",
-              "is_port": false,
+              "read_only": false,
+              "data_type": "string",
+              "dynamic": false,
               "hidden": false,
-              "data_type": "string"
+              "cannot_change": false
             },
             "port": {
-              "description": "MySQL Server TCP port",
-              "dynamic": false,
+              "is_port": false,
               "required": false,
               "display_name": "port",
-              "cannot_change": false,
+              "description": "MySQL Server TCP port",
               "external_ref": {
                 "type": "chef_attribute",
                 "path": "node[mysql][port]"
               },
-              "read_only": false,
               "value_asserted": "3306",
-              "is_port": false,
+              "read_only": false,
+              "data_type": "string",
+              "dynamic": false,
               "hidden": false,
-              "data_type": "string"
+              "cannot_change": false
             },
             "datadir": {
-              "description": "Location of mysql databases",
-              "dynamic": false,
+              "is_port": false,
               "required": false,
               "display_name": "datadir",
-              "cannot_change": false,
+              "description": "Location of mysql databases",
               "external_ref": {
                 "type": "chef_attribute",
                 "path": "node[mysql][datadir]"
               },
-              "read_only": false,
               "value_asserted": "/var/lib/mysql",
-              "is_port": false,
+              "read_only": false,
+              "data_type": "string",
+              "dynamic": false,
               "hidden": false,
-              "data_type": "string"
+              "cannot_change": false
             },
             "ec2_path": {
-              "description": "Location of mysql directory on EC2 instance EBS volumes",
-              "dynamic": false,
+              "is_port": false,
               "required": false,
               "display_name": "ec2_path",
-              "cannot_change": false,
+              "description": "Location of mysql directory on EC2 instance EBS volumes",
               "external_ref": {
                 "type": "chef_attribute",
                 "path": "node[mysql][ec2_path]"
               },
-              "read_only": false,
               "value_asserted": "/mnt/mysql",
-              "is_port": false,
+              "read_only": false,
+              "data_type": "string",
+              "dynamic": false,
               "hidden": false,
-              "data_type": "string"
+              "cannot_change": false
+            },
+            "db_component": {
+              "is_port": false,
+              "required": false,
+              "display_name": "db_component",
+              "external_ref": {
+                "type": "chef_attribute",
+                "path": "node[mysql][db_component]"
+              },
+              "value_asserted": "mysql__db",
+              "read_only": false,
+              "data_type": "string",
+              "dynamic": false,
+              "hidden": false,
+              "cannot_change": false
             },
             "tunable__net_write_timeout": {
-              "dynamic": false,
+              "is_port": false,
               "required": false,
               "display_name": "tunable__net_write_timeout",
-              "cannot_change": false,
               "external_ref": {
                 "type": "chef_attribute",
                 "path": "node[mysql][tunable][net_write_timeout]"
               },
-              "read_only": false,
               "value_asserted": "30",
-              "is_port": false,
+              "read_only": false,
+              "data_type": "string",
+              "dynamic": false,
               "hidden": false,
-              "data_type": "string"
+              "cannot_change": false
             },
             "sap_config__l4": {
-              "description": "mysql ip service access point configuration",
-              "dynamic": false,
+              "is_port": true,
               "required": false,
               "display_name": "sap_config__l4",
-              "cannot_change": false,
+              "description": "mysql ip service access point configuration",
+              "semantic_type_summary": "sap_config__l4",
               "external_ref": {
                 "type": "service_attribute",
                 "path": "service[mysql_server][sap_config__l4]"
@@ -1437,419 +1592,300 @@
               "semantic_type": {
                 ":array": "sap_config__l4"
               },
-              "read_only": false,
               "value_asserted": [
                 {
                   "port": "3306",
                   "protocol": "tcp"
                 }
               ],
-              "is_port": true,
-              "hidden": false,
+              "read_only": false,
               "data_type": "json",
-              "semantic_type_summary": "sap_config__l4"
+              "dynamic": false,
+              "hidden": false,
+              "cannot_change": false
             },
             "tunable__max_heap_table_size": {
-              "dynamic": false,
+              "is_port": false,
               "required": false,
               "display_name": "tunable__max_heap_table_size",
-              "cannot_change": false,
               "external_ref": {
                 "type": "chef_attribute",
                 "path": "node[mysql][tunable][max_heap_table_size]"
               },
-              "read_only": false,
               "value_asserted": "32M",
-              "is_port": false,
+              "read_only": false,
+              "data_type": "string",
+              "dynamic": false,
               "hidden": false,
-              "data_type": "string"
+              "cannot_change": false
             },
             "tunable__back_log": {
-              "dynamic": false,
+              "is_port": false,
               "required": false,
               "display_name": "tunable__back_log",
-              "cannot_change": false,
               "external_ref": {
                 "type": "chef_attribute",
                 "path": "node[mysql][tunable][back_log]"
               },
-              "read_only": false,
               "value_asserted": "128",
-              "is_port": false,
+              "read_only": false,
+              "data_type": "string",
+              "dynamic": false,
               "hidden": false,
-              "data_type": "string"
+              "cannot_change": false
             },
             "tunable__wait_timeout": {
-              "dynamic": false,
+              "is_port": false,
               "required": false,
               "display_name": "tunable__wait_timeout",
-              "cannot_change": false,
               "external_ref": {
                 "type": "chef_attribute",
                 "path": "node[mysql][tunable][wait_timeout]"
               },
-              "read_only": false,
               "value_asserted": "180",
-              "is_port": false,
+              "read_only": false,
+              "data_type": "string",
+              "dynamic": false,
               "hidden": false,
-              "data_type": "string"
+              "cannot_change": false
             },
             "bind_address": {
-              "description": "Address that mysqld should listen on",
-              "dynamic": false,
+              "is_port": false,
               "required": false,
               "display_name": "bind_address",
-              "cannot_change": false,
+              "description": "Address that mysqld should listen on",
               "external_ref": {
                 "type": "chef_attribute",
                 "path": "node[mysql][bind_address]"
               },
               "read_only": false,
-              "is_port": false,
+              "data_type": "string",
+              "dynamic": false,
               "hidden": false,
-              "data_type": "string"
+              "cannot_change": false
             },
             "server_root_password": {
-              "description": "Randomly generated password for the mysqld root user",
-              "dynamic": false,
+              "is_port": false,
               "required": false,
               "display_name": "server_root_password",
-              "cannot_change": false,
+              "description": "Randomly generated password for the mysqld root user",
               "external_ref": {
                 "type": "chef_attribute",
                 "path": "node[mysql][server_root_password]"
               },
               "read_only": false,
-              "is_port": false,
+              "data_type": "string",
+              "dynamic": false,
               "hidden": false,
-              "data_type": "string"
+              "cannot_change": false
             },
             "tunable__max_connections": {
-              "dynamic": false,
+              "is_port": false,
               "required": false,
               "display_name": "tunable__max_connections",
-              "cannot_change": false,
               "external_ref": {
                 "type": "chef_attribute",
                 "path": "node[mysql][tunable][max_connections]"
               },
-              "read_only": false,
               "value_asserted": "800",
-              "is_port": false,
+              "read_only": false,
+              "data_type": "string",
+              "dynamic": false,
               "hidden": false,
-              "data_type": "string"
+              "cannot_change": false
             },
             "sap__socket": {
-              "description": "mysql unix socket service access point",
-              "dynamic": false,
+              "is_port": true,
               "required": false,
               "display_name": "sap__socket",
-              "cannot_change": false,
+              "description": "mysql unix socket service access point",
+              "semantic_type_summary": "sap__socket",
               "external_ref": {
                 "type": "service_attribute",
                 "path": "service[mysql_server][sap__socket]"
               },
               "semantic_type": "sap__socket",
-              "read_only": false,
               "value_asserted": {
                 "socket_file": "/var/run/mysqld/mysqld.sock"
               },
-              "is_port": true,
-              "hidden": false,
+              "read_only": false,
               "data_type": "json",
-              "semantic_type_summary": "sap__socket"
+              "dynamic": false,
+              "hidden": false,
+              "cannot_change": false
             }
           },
-          "basic_type": "service",
-          "ds_attributes": {
-            "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}",
-            "ref": "mysql__server",
-            "specific_type": "mysql_db_server",
-            "qualified_ref": "/library/test/mysql__server"
-          },
-          "component_type": "mysql__server"
-        },
-        "user_account": {
-          "type": "instance",
-          "ds_key": "[:user_data, \"/library/test/user_account\"]",
-          "ui": {
-            "images": {
-              "tnail": "user.png",
-              "tiny": "",
-              "display": "user.png"
-            }
-          },
-          "description": "Installs a user account",
-          "only_one_per_node": false,
-          "display_name": "user_account",
-          "external_ref": {
-            "type": "chef_recipe",
-            "recipe_name": "user_account"
-          },
-          "attribute": {
-            "gid": {
-              "description": "Primary group id",
-              "dynamic": false,
-              "required": false,
-              "display_name": "gid",
-              "cannot_change": false,
-              "external_ref": {
-                "type": "chef_attribute",
-                "path": "node[user_account][gid]"
-              },
-              "read_only": false,
-              "is_port": false,
-              "hidden": false,
-              "data_type": "integer"
-            },
-            "username": {
-              "description": "User name",
-              "dynamic": false,
-              "required": true,
-              "display_name": "username",
-              "cannot_change": false,
-              "external_ref": {
-                "type": "chef_attribute",
-                "path": "node[user_account][username]"
-              },
-              "read_only": false,
-              "is_port": false,
-              "hidden": false,
-              "data_type": "string"
-            },
-            "uid": {
-              "description": "Numeric user id",
-              "dynamic": false,
-              "required": false,
-              "display_name": "uid",
-              "cannot_change": false,
-              "external_ref": {
-                "type": "chef_attribute",
-                "path": "node[user_account][uid]"
-              },
-              "read_only": false,
-              "is_port": false,
-              "hidden": false,
-              "data_type": "integer"
-            },
-            "shell": {
-              "description": "Login shell",
-              "dynamic": false,
-              "required": false,
-              "display_name": "shell",
-              "cannot_change": false,
-              "external_ref": {
-                "type": "chef_attribute",
-                "path": "node[user_account][shell]"
-              },
-              "read_only": false,
-              "is_port": false,
-              "hidden": false,
-              "data_type": "string"
-            },
-            "home_base": {
-              "description": "Home directories base location (home will be $home_base/$username",
-              "dynamic": false,
-              "required": false,
-              "display_name": "home_base",
-              "cannot_change": false,
-              "external_ref": {
-                "type": "chef_attribute",
-                "path": "node[user_account][home_base]"
-              },
-              "read_only": false,
-              "is_port": false,
-              "hidden": false,
-              "data_type": "string"
-            },
-            "home": {
-              "description": "Home directory location",
-              "dynamic": false,
-              "required": false,
-              "display_name": "home",
-              "cannot_change": false,
-              "external_ref": {
-                "type": "chef_attribute",
-                "path": "node[user_account][home]"
-              },
-              "read_only": false,
-              "is_port": false,
-              "hidden": false,
-              "data_type": "string"
-            }
-          },
-          "basic_type": "user",
-          "ds_attributes": {
-            "ui": "{\"images\": {\"tnail\":\"user.png\",\"display\":\"user.png\",\"tiny\":\"\"}}",
-            "ref": "user_account",
-            "only_one_per_node": false,
-            "basic_type": "user",
-            "qualified_ref": "/library/test/user_account"
-          },
-          "component_type": "user_account"
+          "component_type": "mysql__server",
+          "ds_key": "[:user_data, \"/library/test/mysql__server\"]"
         },
         "apache2": {
           "type": "instance",
+          "basic_type": "service",
+          "ui": {
+            "images": {
+              "tiny": "",
+              "tnail": "apache.png",
+              "display": "apache.png"
+            }
+          },
+          "display_name": "apache2",
+          "description": "Main Apache configuration",
+          "external_ref": {
+            "type": "chef_recipe",
+            "recipe_name": "apache2"
+          },
+          "specific_type": "web_server",
           "monitoring_item": {
             "inet_service_up": {
               "display_name": "inet_service_up",
               "enabled": true
             }
           },
-          "ds_key": "[:user_data, \"/library/test/apache2\"]",
-          "ui": {
-            "images": {
-              "tnail": "apache.png",
-              "tiny": "",
-              "display": "apache.png"
-            }
+          "ds_attributes": {
+            "ui": "{\"images\": {\"tnail\":\"apache.png\",\"display\":\"apache.png\",\"tiny\":\"\"}}",
+            "ref": "apache2",
+            "specific_type": "web_server",
+            "qualified_ref": "/library/test/apache2"
           },
-          "specific_type": "web_server",
-          "description": "Main Apache configuration",
           "only_one_per_node": true,
-          "display_name": "apache2",
-          "external_ref": {
-            "type": "chef_recipe",
-            "recipe_name": "apache2"
-          },
           "attribute": {
             "dir": {
-              "description": "Location for Apache configuration",
-              "dynamic": false,
+              "is_port": false,
               "required": false,
               "display_name": "dir",
-              "cannot_change": false,
+              "description": "Location for Apache configuration",
               "external_ref": {
                 "type": "chef_attribute",
                 "path": "node[apache2][dir]"
               },
-              "read_only": false,
               "value_asserted": "/etc/apache2",
-              "is_port": false,
+              "read_only": false,
+              "data_type": "string",
+              "dynamic": false,
               "hidden": false,
-              "data_type": "string"
+              "cannot_change": false
             },
             "timeout": {
-              "description": "Connection timeout value",
-              "dynamic": false,
+              "is_port": false,
               "required": false,
               "display_name": "timeout",
-              "cannot_change": false,
+              "description": "Connection timeout value",
               "external_ref": {
                 "type": "chef_attribute",
                 "path": "node[apache2][timeout]"
               },
-              "read_only": false,
               "value_asserted": "300",
-              "is_port": false,
+              "read_only": false,
+              "data_type": "string",
+              "dynamic": false,
               "hidden": false,
-              "data_type": "string"
+              "cannot_change": false
             },
             "binary": {
-              "description": "Apache server daemon program",
-              "dynamic": false,
+              "is_port": false,
               "required": false,
               "display_name": "binary",
-              "cannot_change": false,
+              "description": "Apache server daemon program",
               "external_ref": {
                 "type": "chef_attribute",
                 "path": "node[apache2][binary]"
               },
-              "read_only": false,
               "value_asserted": "/usr/sbin/apache2",
-              "is_port": false,
+              "read_only": false,
+              "data_type": "string",
+              "dynamic": false,
               "hidden": false,
-              "data_type": "string"
+              "cannot_change": false
             },
             "keepaliverequests": {
-              "description": "Number of requests allowed on a persistent connection",
-              "dynamic": false,
+              "is_port": false,
               "required": false,
               "display_name": "keepaliverequests",
-              "cannot_change": false,
+              "description": "Number of requests allowed on a persistent connection",
               "external_ref": {
                 "type": "chef_attribute",
                 "path": "node[apache2][keepaliverequests]"
               },
-              "read_only": false,
               "value_asserted": "100",
-              "is_port": false,
+              "read_only": false,
+              "data_type": "string",
+              "dynamic": false,
               "hidden": false,
-              "data_type": "string"
+              "cannot_change": false
             },
             "contact": {
-              "description": "Email address of webmaster",
-              "dynamic": false,
+              "is_port": false,
               "required": false,
               "display_name": "contact",
-              "cannot_change": false,
+              "description": "Email address of webmaster",
               "external_ref": {
                 "type": "chef_attribute",
                 "path": "node[apache2][contact]"
               },
-              "read_only": false,
               "value_asserted": "ops@example.com",
-              "is_port": false,
+              "read_only": false,
+              "data_type": "string",
+              "dynamic": false,
               "hidden": false,
-              "data_type": "string"
+              "cannot_change": false
             },
             "servertokens": {
-              "description": "Server response header",
-              "dynamic": false,
+              "is_port": false,
               "required": false,
               "display_name": "servertokens",
-              "cannot_change": false,
+              "description": "Server response header",
               "external_ref": {
                 "type": "chef_attribute",
                 "path": "node[apache2][servertokens]"
               },
-              "read_only": false,
               "value_asserted": "Prod",
-              "is_port": false,
+              "read_only": false,
+              "data_type": "string",
+              "dynamic": false,
               "hidden": false,
-              "data_type": "string"
+              "cannot_change": false
             },
             "listen_ports": {
-              "description": "Ports that Apache should listen on",
-              "dynamic": false,
+              "is_port": false,
               "required": false,
               "display_name": "listen_ports",
-              "cannot_change": false,
+              "description": "Ports that Apache should listen on",
               "external_ref": {
                 "type": "chef_attribute",
                 "path": "node[apache2][listen_ports]"
               },
-              "read_only": false,
               "value_asserted": [
                 "80",
                 "443"
               ],
-              "is_port": false,
+              "read_only": false,
+              "data_type": "json",
+              "dynamic": false,
               "hidden": false,
-              "data_type": "json"
+              "cannot_change": false
             },
             "keepalivetimeout": {
-              "description": "Time to wait for requests on persistent connection",
-              "dynamic": false,
+              "is_port": false,
               "required": false,
               "display_name": "keepalivetimeout",
-              "cannot_change": false,
+              "description": "Time to wait for requests on persistent connection",
               "external_ref": {
                 "type": "chef_attribute",
                 "path": "node[apache2][keepalivetimeout]"
               },
-              "read_only": false,
               "value_asserted": "5",
-              "is_port": false,
+              "read_only": false,
+              "data_type": "string",
+              "dynamic": false,
               "hidden": false,
-              "data_type": "string"
+              "cannot_change": false
             },
             "sap_config__l4": {
-              "description": "apache2 ip service access point configuration",
-              "dynamic": false,
+              "is_port": true,
               "required": false,
               "display_name": "sap_config__l4",
-              "cannot_change": false,
+              "description": "apache2 ip service access point configuration",
+              "semantic_type_summary": "sap_config__l4",
               "external_ref": {
                 "type": "service_attribute",
                 "path": "service[apache2_service][sap_config__l4]"
@@ -1861,7 +1897,6 @@
                   }
                 }
               },
-              "read_only": false,
               "value_asserted": [
                 {
                   "protocol": "tcp",
@@ -1871,125 +1906,126 @@
                   ]
                 }
               ],
-              "is_port": true,
-              "hidden": false,
+              "read_only": false,
               "data_type": "json",
-              "semantic_type_summary": "sap_config__l4"
+              "dynamic": false,
+              "hidden": false,
+              "cannot_change": false
             },
             "serversignature": {
-              "description": "Configure footer on server-generated documents",
-              "dynamic": false,
+              "is_port": false,
               "required": false,
               "display_name": "serversignature",
-              "cannot_change": false,
+              "description": "Configure footer on server-generated documents",
               "external_ref": {
                 "type": "chef_attribute",
                 "path": "node[apache2][serversignature]"
               },
-              "read_only": false,
               "value_asserted": "On",
-              "is_port": false,
+              "read_only": false,
+              "data_type": "string",
+              "dynamic": false,
               "hidden": false,
-              "data_type": "string"
+              "cannot_change": false
             },
             "log_dir": {
-              "description": "Location for Apache logs",
-              "dynamic": false,
+              "is_port": false,
               "required": false,
               "display_name": "log_dir",
-              "cannot_change": false,
+              "description": "Location for Apache logs",
               "external_ref": {
                 "type": "chef_attribute",
                 "path": "node[apache2][log_dir]"
               },
-              "read_only": false,
               "value_asserted": "/etc/apache2",
-              "is_port": false,
+              "read_only": false,
+              "data_type": "string",
+              "dynamic": false,
               "hidden": false,
-              "data_type": "string"
+              "cannot_change": false
             },
             "user": {
-              "description": "User Apache runs as",
-              "dynamic": false,
+              "is_port": false,
               "required": false,
               "display_name": "user",
-              "cannot_change": false,
+              "description": "User Apache runs as",
               "external_ref": {
                 "type": "chef_attribute",
                 "path": "node[apache2][user]"
               },
-              "read_only": false,
               "value_asserted": "www-data",
-              "is_port": false,
+              "read_only": false,
+              "data_type": "string",
+              "dynamic": false,
               "hidden": false,
-              "data_type": "string"
+              "cannot_change": false
             },
             "icondir": {
-              "description": "Directory location for icons",
-              "dynamic": false,
+              "is_port": false,
               "required": false,
               "display_name": "icondir",
-              "cannot_change": false,
+              "description": "Directory location for icons",
               "external_ref": {
                 "type": "chef_attribute",
                 "path": "node[apache2][icondir]"
               },
-              "read_only": false,
               "value_asserted": "/usr/share/apache2/icons",
-              "is_port": false,
+              "read_only": false,
+              "data_type": "string",
+              "dynamic": false,
               "hidden": false,
-              "data_type": "string"
+              "cannot_change": false
             },
             "keepalive": {
-              "description": "HTTP persistent connections",
-              "dynamic": false,
+              "is_port": false,
               "required": false,
               "display_name": "keepalive",
-              "cannot_change": false,
+              "description": "HTTP persistent connections",
               "external_ref": {
                 "type": "chef_attribute",
                 "path": "node[apache2][keepalive]"
               },
-              "read_only": false,
               "value_asserted": "On",
-              "is_port": false,
+              "read_only": false,
+              "data_type": "string",
+              "dynamic": false,
               "hidden": false,
-              "data_type": "string"
+              "cannot_change": false
             }
           },
-          "basic_type": "service",
-          "ds_attributes": {
-            "ui": "{\"images\": {\"tnail\":\"apache.png\",\"display\":\"apache.png\",\"tiny\":\"\"}}",
-            "ref": "apache2",
-            "specific_type": "web_server",
-            "qualified_ref": "/library/test/apache2"
-          },
-          "component_type": "apache2"
+          "component_type": "apache2",
+          "ds_key": "[:user_data, \"/library/test/apache2\"]"
         },
         "mysql__master": {
           "type": "instance",
-          "ds_key": "[:user_data, \"/library/test/mysql__master\"]",
+          "basic_type": "extension",
           "ui": {
             "images": {
-              "tnail": "mysql.png",
               "tiny": "",
+              "tnail": "mysql.png",
               "display": "mysql.png"
             }
           },
-          "description": "For extending mysql server to serve as a master",
-          "only_one_per_node": true,
           "display_name": "mysql__master",
+          "description": "For extending mysql server to serve as a master",
           "external_ref": {
             "type": "chef_recipe",
             "recipe_name": "mysql::master"
           },
+          "ds_attributes": {
+            "basic_type": "extension",
+            "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}",
+            "ref": "mysql__master",
+            "qualified_ref": "/library/test/mysql__master"
+          },
+          "only_one_per_node": true,
           "attribute": {
             "sap_config_for_slave": {
-              "description": "mysql ip service access point configuration for slave",
-              "dynamic": false,
+              "is_port": true,
               "required": false,
               "display_name": "sap_config_for_slave",
-              "cannot_change": false,
+              "description": "mysql ip service access point configuration for slave",
+              "semantic_type_summary": "sap_config__l4",
               "external_ref": {
                 "type": "service_attribute",
                 "path": "service[mysql_server][sap_config_for_slave]"
@@ -1997,7 +2033,6 @@
               "semantic_type": {
                 ":array": "sap_config__l4"
               },
-              "read_only": false,
               "value_asserted": [
                 {
                   "port": "3306",
@@ -2009,63 +2044,64 @@
                   }
                 }
               ],
-              "is_port": true,
-              "hidden": false,
+              "read_only": false,
               "data_type": "json",
-              "semantic_type_summary": "sap_config__l4"
+              "dynamic": false,
+              "hidden": false,
+              "cannot_change": false
             },
             "master_log": {
-              "description": "master log position",
-              "dynamic": false,
+              "is_port": true,
               "required": true,
               "display_name": "master_log",
-              "cannot_change": false,
+              "description": "master log position",
+              "semantic_type_summary": "mysql_master_log_info",
               "external_ref": {
                 "type": "service_attribute",
                 "path": "service[mysql_server][master_log]"
               },
               "semantic_type": "mysql_master_log_info",
               "read_only": false,
-              "is_port": true,
-              "hidden": false,
               "data_type": "json",
-              "semantic_type_summary": "mysql_master_log_info"
+              "dynamic": false,
+              "hidden": false,
+              "cannot_change": false
             }
           },
-          "basic_type": "extension",
-          "ds_attributes": {
-            "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}",
-            "ref": "mysql__master",
-            "basic_type": "extension",
-            "qualified_ref": "/library/test/mysql__master"
-          },
-          "component_type": "mysql__master"
+          "component_type": "mysql__master",
+          "ds_key": "[:user_data, \"/library/test/mysql__master\"]"
         },
         "nagios__server": {
           "type": "instance",
-          "ds_key": "[:user_data, \"/library/test/nagios__server\"]",
+          "basic_type": "service",
           "ui": {
             "images": {
-              "tnail": "nagios.png",
               "tiny": "",
+              "tnail": "nagios.png",
               "display": "nagios.png"
             }
           },
-          "specific_type": "monitoring_server",
-          "description": "Installs and configures a nagios server",
-          "only_one_per_node": true,
           "display_name": "nagios__server",
+          "description": "Installs and configures a nagios server",
           "external_ref": {
             "type": "chef_recipe",
             "recipe_name": "nagios::server"
           },
+          "specific_type": "monitoring_server",
+          "ds_attributes": {
+            "ui": "{\"images\": {\"tnail\":\"nagios.png\",\"display\":\"nagios.png\",\"tiny\":\"\"}}",
+            "ref": "nagios__server",
+            "specific_type": "monitoring_server",
+            "qualified_ref": "/library/test/nagios__server"
+          },
+          "only_one_per_node": true,
           "attribute": {
             "monitor_sap_refs": {
-              "description": "monitor client service access point ref",
-              "dynamic": false,
+              "is_port": true,
               "required": true,
               "display_name": "monitor_sap_refs",
-              "cannot_change": false,
+              "description": "monitor client service access point ref",
+              "semantic_type_summary": "sap_ref__l4",
               "external_ref": {
                 "type": "service_attribute",
                 "path": "service[nagios][monitor_sap_refs]"
@@ -2080,23 +2116,31 @@
                 }
               },
               "read_only": false,
-              "is_port": true,
-              "hidden": false,
               "data_type": "json",
-              "semantic_type_summary": "sap_ref__l4"
+              "dynamic": false,
+              "hidden": false,
+              "cannot_change": false
             }
           },
-          "basic_type": "service",
-          "ds_attributes": {
-            "ui": "{\"images\": {\"tnail\":\"nagios.png\",\"display\":\"nagios.png\",\"tiny\":\"\"}}",
-            "ref": "nagios__server",
-            "specific_type": "monitoring_server",
-            "qualified_ref": "/library/test/nagios__server"
-          },
-          "component_type": "nagios__server"
+          "component_type": "nagios__server",
+          "ds_key": "[:user_data, \"/library/test/nagios__server\"]"
         },
         "redis": {
           "type": "instance",
+          "basic_type": "service",
+          "ui": {
+            "images": {
+              "tiny": "",
+              "tnail": "redis.png",
+              "display": "redis.png"
+            }
+          },
+          "display_name": "redis",
+          "description": "Installs/Configures redis",
+          "external_ref": {
+            "type": "chef_recipe",
+            "recipe_name": "redis"
+          },
           "monitoring_item": {
             "inet_service_up": {
               "display_name": "inet_service_up",
@@ -2107,28 +2151,20 @@
               "enabled": true
             }
           },
-          "ds_key": "[:user_data, \"/library/test/redis\"]",
-          "ui": {
-            "images": {
-              "tnail": "redis.png",
-              "tiny": "",
-              "display": "redis.png"
-            }
+          "ds_attributes": {
+            "basic_type": "service",
+            "ui": "{\"images\": {\"tnail\":\"redis.png\",\"display\":\"redis.png\",\"tiny\":\"\"}}",
+            "ref": "redis",
+            "qualified_ref": "/library/test/redis"
           },
-          "description": "Installs/Configures redis",
           "only_one_per_node": true,
-          "display_name": "redis",
-          "external_ref": {
-            "type": "chef_recipe",
-            "recipe_name": "redis"
-          },
           "attribute": {
             "sap_config__l4": {
-              "description": "redis ip service access point configuration",
-              "dynamic": false,
+              "is_port": true,
               "required": false,
               "display_name": "sap_config__l4",
-              "cannot_change": false,
+              "description": "redis ip service access point configuration",
+              "semantic_type_summary": "sap_config__l4",
               "external_ref": {
                 "type": "service_attribute",
                 "path": "service[redis_service][sap_config__l4]"
@@ -2140,63 +2176,62 @@
                   }
                 }
               },
-              "read_only": false,
               "value_asserted": [
                 {
                   "port": null,
                   "protocol": "tcp"
                 }
               ],
-              "is_port": true,
-              "hidden": false,
+              "read_only": false,
               "data_type": "json",
-              "semantic_type_summary": "sap_config__l4"
+              "dynamic": false,
+              "hidden": false,
+              "cannot_change": false
             }
           },
-          "basic_type": "service",
-          "ds_attributes": {
-            "ui": "{\"images\": {\"tnail\":\"redis.png\",\"display\":\"redis.png\",\"tiny\":\"\"}}",
-            "ref": "redis",
-            "basic_type": "service",
-            "qualified_ref": "/library/test/redis"
-          },
-          "component_type": "redis"
+          "component_type": "redis",
+          "ds_key": "[:user_data, \"/library/test/redis\"]"
         },
         "rabbitmq": {
-          "ds_key": "[:user_data, \"/library/test/rabbitmq\"]",
+          "basic_type": "service",
           "ui": {
             "images": {
-              "tnail": "rabbitmq.png",
               "tiny": "",
+              "tnail": "rabbitmq.png",
               "display": "rabbitmq.png"
             }
           },
-          "specific_type": "msg_bus",
-          "only_one_per_node": true,
           "display_name": "rabbitmq",
-          "basic_type": "service",
+          "specific_type": "msg_bus",
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"rabbitmq.png\",\"display\":\"rabbitmq.png\",\"tiny\":\"\"}}",
             "ref": "rabbitmq",
             "specific_type": "msg_bus",
             "qualified_ref": "/library/test/rabbitmq"
-          }
+          },
+          "only_one_per_node": true,
+          "ds_key": "[:user_data, \"/library/test/rabbitmq\"]"
         },
         "tomcat": {
           "type": "instance",
-          "ds_key": "[:user_data, \"/library/test/tomcat\"]",
+          "basic_type": "service",
           "ui": {
             "images": {
-              "tnail": "server-tomcat.png",
               "tiny": "",
+              "tnail": "server-tomcat.png",
               "display": "server-tomcat.png"
             }
           },
+          "display_name": "tomcat",
           "description": "Installs and configures Tomcat",
-          "only_one_per_node": true,
+          "external_ref": {
+            "type": "chef_recipe",
+            "recipe_name": "tomcat::default"
+          },
           "dependency": {
             "java": {
               "type": "component",
+              "display_name": "java",
               "description": "java is required",
               "search_pattern": {
                 ":filter": [
@@ -2207,17 +2242,11 @@
                     "java"
                   ]
                 ]
-              },
-              "display_name": "java"
+              }
             }
           },
-          "display_name": "tomcat",
-          "external_ref": {
-            "type": "chef_recipe",
-            "recipe_name": "tomcat::default"
-          },
-          "basic_type": "service",
           "ds_attributes": {
+            "basic_type": "service",
             "ui": "{\"images\": {\"tnail\":\"server-tomcat.png\",\"display\":\"server-tomcat.png\",\"tiny\":\"\"}}",
             "ref": "tomcat",
             "dependency": {
@@ -2225,36 +2254,37 @@
                 "required_component": "java"
               }
             },
-            "basic_type": "service",
             "qualified_ref": "/library/test/tomcat"
           },
-          "component_type": "tomcat"
+          "only_one_per_node": true,
+          "component_type": "tomcat",
+          "ds_key": "[:user_data, \"/library/test/tomcat\"]"
         },
         "hadoop__doc": {
           "type": "instance",
-          "ds_key": "[:user_data, \"/library/test/hadoop__doc\"]",
+          "basic_type": "extension",
           "ui": {
             "images": {
-              "tnail": "hadoop.png",
               "tiny": "",
+              "tnail": "hadoop.png",
               "display": "hadoop.png"
             }
           },
-          "description": "Installs hadoop documentation",
-          "only_one_per_node": true,
           "display_name": "hadoop__doc",
+          "description": "Installs hadoop documentation",
           "external_ref": {
             "type": "chef_recipe",
             "recipe_name": "hadoop::doc"
           },
-          "basic_type": "extension",
           "ds_attributes": {
+            "basic_type": "extension",
             "ui": "{\"images\": {\"tnail\":\"hadoop.png\",\"display\":\"hadoop.png\",\"tiny\":\"\"}}",
             "ref": "hadoop__doc",
-            "basic_type": "extension",
             "qualified_ref": "/library/test/hadoop__doc"
           },
-          "component_type": "hadoop__doc"
+          "only_one_per_node": true,
+          "component_type": "hadoop__doc",
+          "ds_key": "[:user_data, \"/library/test/hadoop__doc\"]"
         }
       }
     }

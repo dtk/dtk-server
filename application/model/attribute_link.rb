@@ -95,7 +95,7 @@ module XYZ
 
     #TODO: may encapsualte under the ComponentType::Database
     def self.add_related_link_from_db_config(attr_link_mh,link_info,attr_db_config)
-return #TODO: stub until get working
+
       output_cmp = link_info[:output][:component_parent]
 
       cmp_mh = attr_link_mh.createMH(:component)

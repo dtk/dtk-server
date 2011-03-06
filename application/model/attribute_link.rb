@@ -94,6 +94,8 @@ module XYZ
     end
 
     def self.add_related_link_from_db_config(attr_link_mh,link_info,attr_db_config)
+return 
+#TODO: omitted until finsihed
       db_server_component = link_info[:output][:component_parent]
       db_server_node = attr_link_mh.createIDH(:id => db_server_component[:node_node_id],:model_name => :node).create_object()
       db_component_idh = ComponentType::Database.clone_db_on_db_server_node(db_server_node,db_server_component)

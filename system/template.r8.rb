@@ -203,6 +203,8 @@ module R8Tpl
     end
 
     def tpl_to_js(view_tpl_contents)
+#DEBUG
+#return @js_file_name
     if self.js_tpl_current?
       return nil
     end
@@ -234,7 +236,7 @@ module R8Tpl
 
           #if the node has value contents its a text node and process said contents
           if newJSNode[:elementType] == 'text'
-            self.process_node_text(newJSNode[:value],!parentNode.nil? ? parentNode[:jsElementVarName] : '', newJSNode[:elementType])
+            self.process_node_text(newJSNode[:value],!parentNode.nil? ? parentNode[:jsElementVarName] : '', parentNode[:elementType])
           else
             self.js_queue_push('node', self.create_element_js(newJSNode[:elementType],newJSNode[:jsElementVarName]))
             @element_count += 1
@@ -408,7 +410,7 @@ module R8Tpl
     case parentElementType
       when "select" then
         if childElementType == 'option'
-          self.js_queue_push('appendChild',parentJSElementVarName + '.add('+childJSElementVarName+');')
+          self.js_queue_push('appendChild',parentJSElementVarName + '.add('+childJSElementVarName+',null);')
         else
           self.js_queue_push('appendChild',parentJSElementVarName + '.appendChild('+childJSElementVarName+');')
         end

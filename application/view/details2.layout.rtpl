@@ -10,6 +10,7 @@
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_js_uri]%}/external/yui/build/cssgrids/grids.css">
 
 <!--//TODO: revisit to variablize the path of the founcation css-->
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/form.css" />
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/topbar.css" />
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/cmdbar.css" />
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/toolbar.css" />

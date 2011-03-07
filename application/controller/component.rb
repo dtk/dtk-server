@@ -71,6 +71,17 @@ pp component
       component = create_object_from_id(id,:component)
       field_defs = component.get_field_def()
 
+#TODO: retool include_js to take string or hash, if hash then assumed js tpl and handled differently
+      tpl = R8Tpl::TemplateR8.new("component/edit_field",user_context())
+      tpl.set_js_tpl_name("component_edit_field")
+      tpl_info = tpl.render()
+      include_js_tpl(tpl_info[:src])
+
+      tpl = R8Tpl::TemplateR8.new("component/display_field",user_context())
+      tpl.set_js_tpl_name("component_display_field")
+      tpl_info = tpl.render()
+      include_js_tpl(tpl_info[:src])
+
       tpl = R8Tpl::TemplateR8.new("component/editor",user_context())
       _model_var = {:i18n => get_model_i18n(model_name().to_s,user_context())}
       tpl.assign(:_component,_model_var)
@@ -88,6 +99,16 @@ pp component
         :content=>tpl.render(),
         :panel=>request.params["panel_id"]
       }
+    end
+
+    def save_field(id)
+pp '///////////////////////////////////////////////'
+pp request.params
+
+#TODO: remove this after implementing
+      field_def_json = request.params["field_def"]
+      run_javascript("R8.Fields.handleSavedField(#{field_def_json});")
+      return {}
     end
 
     def instance_list(id)

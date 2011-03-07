@@ -28,7 +28,8 @@ module XYZ
       link_list = Array.new
       raw_link_list.each do |el|
         [:input_port_links,:output_port_links].each do |dir|
-          (el[dir]||[]).each do |attr_link|
+          next unless el.has_key?(dir)
+          el[dir].each do |attr_link|
             port_dir = dir == :input_port_links ? "input" : "output"
             port_id = dir == :input_port_links ? attr_link[:input_id] : attr_link[:output_id]
             other_end_id = dir == :input_port_links ? attr_link[:output_id] : attr_link[:input_id]

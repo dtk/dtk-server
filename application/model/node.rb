@@ -80,6 +80,14 @@ module XYZ
            :join_cond=>{:input_id =>q(:attribute,:id)},
            :join_type => :inner,
            :cols => [:id,:type,:input_id,:output_id,id(:node),:hidden]
+         },
+         {
+           :model_name => :attribute,
+           :alias => :attr_other_end,
+           :convert => true,
+           :join_cond=>{:id =>q(:attribute_link,:output_id)},
+           :join_type => :inner,
+           :cols => [:id,:display_name]
          }]
 
       virtual_column :output_port_links, :type => :json, :hidden => true, 
@@ -91,6 +99,14 @@ module XYZ
            :join_cond=>{:output_id =>q(:attribute,:id)},
            :join_type => :inner,
            :cols => [:id,:type,:input_id,:output_id,id(:node),:hidden]
+         },
+         {
+           :model_name => :attribute,
+           :alias => :attr_other_end,
+           :convert => true,
+           :join_cond=>{:id =>q(:attribute_link,:input_id)},
+           :join_type => :inner,
+           :cols => [:id,:display_name]
          }]
 
         virtual_column :has_pending_change, :type => :boolean, :hidden => true,
@@ -102,8 +118,8 @@ module XYZ
             :sequel_def => lambda{|ds|ds.where(:state => "pending").join(:component__component,{:id => :component_id}).group_and_count(:component__node_node_id)},
             :join_type => :left_outer,
             :join_cond=>{:node_node_id =>:node__id}
-          }
-         ]
+          }]
+
 
       virtual_column :users, :type => :json, :hidden => true,
       :remote_dependencies => 
@@ -205,15 +221,19 @@ module XYZ
     end
 
     def get_ports(type=nil)
+      port_list = PortList.create(type,[id_handle])
+
       attr_port_rows = get_objects_from_sp_hash(:columns => [:attribute_ports])
 
       i18n = get_i18n_mappings_for_models(:component,:attribute)
-      port_list = PortList.create(type)
-      attr_port_rows.each do |r|
-        next unless attr = r[:attribute]
-        cmp = r[:component]||{}
-        next if port_list.is_pruned?(attr)
 
+      pruned_attr_port_rows = attr_port_rows.reject{|r| r[:attribute].nil? or port_list.attr_is_pruned?(r[:attribute])}
+      return Array.new if pruned_attr_port_rows.empty?
+      #to allow group procesisng of needed info
+
+      pruned_attr_port_rows.each do |r|
+        attr = r[:attribute]
+        cmp = r[:component]||{}
         attr_name = attr[:display_name]
         cmp_name = cmp[:display_name]
         attr[:display_name] =  get_i18n_port_name(i18n,attr_name,cmp_name) if attr_name and cmp_name
@@ -221,20 +241,18 @@ module XYZ
         attr[:description] = ""
         port_list.add_or_collapse_attribute!(attr,cmp)
       end
-      ret_port_list = port_list.list
-      Model::materialize_virtual_columns!(ret_port_list,[:port_type])
-      ret_port_list
+
+      port_list_top_level = port_list.top_level()
+      Model::materialize_virtual_columns!(port_list_top_level,[:port_type])
+      port_list_top_level
     end
+
     def self.get_port_links(id_handles,type="l4")
       port_list = PortList.create(type)
-      input_port_cols = [:id, :display_name, :input_port_links]
-      input_port_rows = get_objects_in_set_from_sp_hash(id_handles,:columns => input_port_cols).reject do |r|
-        port_list.is_pruned?(r[:attribute])
-      end
-      output_port_cols = [:id, :display_name, :output_port_links]
-      output_port_rows = get_objects_in_set_from_sp_hash(id_handles,:columns => output_port_cols).reject do |r|
-        port_list.is_pruned?(r[:attribute])
-      end
+
+      input_port_rows = port_list.get_input_port_link_info(id_handles)
+      output_port_rows = port_list.get_output_port_link_info(id_handles)
+
       i18n = get_i18n_mappings_for_models(:component,:attribute)
       return Array.new if input_port_rows.empty? and output_port_rows.empty?
       indexed_ret = Hash.new
@@ -255,47 +273,92 @@ module XYZ
 
    private
     class PortList
-      attr_reader :list
-      def self.create(type)
+      def self.create(type,node_id_handles=nil)
         case type
           when "external" then PortListExternal.new() 
-          when "l4" then PortListL4.new() 
+          when "l4" then PortListL4.new().set_context(node_id_handles) 
           else PortList.new
         end
       end
-      def is_pruned?(attr)
+      def attr_is_pruned?(attr)
         false
       end
-      def add_or_collapse_attribute!(attr,cmp)
-        @list << attr
+      def link_is_pruned?(link)
+        false
       end
-    private
+
+      def add_or_collapse_attribute!(attr,cmp)
+        @top_level << attr
+      end
+      def top_level()
+        @top_level
+      end
+
+      def get_input_port_link_info(node_id_handles)
+        input_port_cols = [:id, :display_name, :input_port_links]
+        Model.get_objects_in_set_from_sp_hash(node_id_handles,:columns => input_port_cols).reject do |r|
+          attr_is_pruned?(r[:attribute]) or attr_is_pruned?(r[:attr_other_end]) or link_is_pruned?(r[:attribute_link])
+        end
+      end
+      def get_output_port_link_info(node_id_handles)
+        output_port_cols = [:id, :display_name, :output_port_links]
+        Model.get_objects_in_set_from_sp_hash(node_id_handles,:columns => output_port_cols).reject do |r|
+          attr_is_pruned?(r[:attribute]) or attr_is_pruned?(r[:attr_other_end]) or link_is_pruned?(r[:attribute_link])
+        end
+      end
+     private
       def initialize()
-        @list = Array.new
-        @annotations = Array.new
+        @top_level = Array.new
       end
     end
 
     class PortListExternal < PortList
-      def is_pruned?(attr)
+      def attr_is_pruned?(attr)
         not attr[:port_is_external]
       end
     end
 
     class PortListL4 < PortListExternal
-      def is_pruned?(attr)
+      def initialize()
+        super
+        @equiv_classes = Hash.new
+        @indexed_port_links = nil
+      end
+
+      def attr_is_pruned?(attr)
         not %w{sap_ref__l4 sap__l4}.include?(attr[:display_name])
       end
+      def link_is_pruned?(link)
+        not link[:type] == "external"
+      end
+
       def add_or_collapse_attribute!(attr,cmp)
-        #TODO: stub that assumes that all are connected to same server; need also attr values
-        @annotations.each_with_index do |annotation,i|
-          next unless annotation == cmp[:component_type]
-          #use port with minimum id as teh psuedo object id
-          @list[i] = attr if attr[:id] < @list[i][:id]
-          return
+        equiv_class = ret_equiv_class(attr,cmp)
+        @equiv_classes[equiv_class] ||= Array.new
+        @equiv_classes[equiv_class] << attr
+      end
+      def top_level()
+        @equiv_classes.values.map{|equiv_class|attr_with_min_id(equiv_class)}
+      end
+
+      def set_context(node_id_handles)
+        return self unless node_id_handles and not node_id_handles.empty?
+       # @indexed_port_links = get_input_port_link_info(node_id_handles).inject ..
+        @port_links = get_input_port_link_info(node_id_handles)
+        self
+      end
+
+     private
+      def ret_equiv_class(attr,cmp)
+        cmp[:component_type]
+      end
+      
+      def attr_with_min_id(attrs)
+        ret = attrs.first
+        attrs[1..attrs.size-1].each do |a|
+          ret = a if a[:id] < ret[:id]
         end
-        @annotations << cmp[:component_type] 
-        @list << attr
+        ret
       end
     end
 

@@ -19,24 +19,25 @@ module XYZ
     ### object processing and access functions
 
     ##########################  add new links ##################
-    def self.create_from_hash(parent_id_handle,hash)
+    def self.create_from_hash(parent_idh,hash)
       rows = hash.values.first.values.map do |raw_row|
         row = Aux.col_refs_to_keys(raw_row)
         row[:input_id] = row[:input_id].to_i
         row[:output_id] = row[:output_id].to_i
         row
       end
-      create_links(parent_id_handle,rows)
+      create_links(parent_idh,rows)
     end
-    
-    def self.create_links(parent_id_handle,rows)
-      attr_link_mh = parent_id_handle.create_childMH(:attribute_link)
+
+
+    def self.create_links(parent_idh,rows)
+      attr_link_mh = parent_idh.create_childMH(:attribute_link)
       #TODO: parent model name can also be node
       attr_mh = attr_link_mh.createMH(:model_name => :attribute,:parent_model_name=>:component)
 
       #set the parent id and ref and make 
       parent_col = attr_link_mh.parent_id_field_name()
-      parent_id = parent_id_handle.get_id()
+      parent_id = parent_idh.get_id()
       rows.each do |row|
         row[parent_col] ||= parent_id
         row[:ref] = "attribute_link:#{row[:input_id]}-#{row[:output_id]}"
@@ -76,30 +77,35 @@ module XYZ
       #TODO: might use form pass to  add_related_links? fro above
       link_info_list = rows.map{|r|{:input => attr_info[r[:input_id]],:output => attr_info[r[:output_id]]}}
 
-      add_related_links?(attr_link_mh,link_info_list)
+      add_related_links?(parent_idh,link_info_list)
       returning_ids
     end
 
-    def self.add_related_links?(attr_link_mh,link_info_list)
-      link_info_list.each{|link_info|add_related_link?(attr_link_mh,link_info)}
+    def self.add_related_links?(parent_idh,link_info_list)
+      link_info_list.each{|link_info|add_related_link?(parent_idh,link_info)}
     end
 
     #TODO: can we make this more data driven 
-    def self.add_related_link?(attr_link_mh,link_info)
+    def self.add_related_link?(parent_idh,link_info)
       input_cmp = link_info[:input][:component_parent]
       if ComponentType::Application.include?(input_cmp)
         attr_db_config = input_cmp.get_virtual_attribute("db_config",[:id],:semantic_type_summary)
-        add_related_link_from_db_config(attr_link_mh,link_info,attr_db_config) if attr_db_config
+        add_related_link_from_db_config(parent_idh,link_info,attr_db_config) if attr_db_config
       end
     end
 
-    def self.add_related_link_from_db_config(attr_link_mh,link_info,attr_db_config)
-return 
-#TODO: omitted until finsihed
+    def self.add_related_link_from_db_config(parent_idh,link_info,attr_db_config)
       db_server_component = link_info[:output][:component_parent]
-      db_server_node = attr_link_mh.createIDH(:id => db_server_component[:node_node_id],:model_name => :node).create_object()
-      db_component_idh = ComponentType::Database.clone_db_on_db_server_node(db_server_node,db_server_component)
+      db_server_node = parent_idh.createIDH(:id => db_server_component[:node_node_id],:model_name => :node).create_object()
+      db_component_idh = ComponentType::Database.clone_db_onto_db_server_node(db_server_node,db_server_component)
       pp [:db_component_idh,db_component_idh]
+      #find link between db component 
+      attr_db_params = db_component_idh.create_object().get_virtual_attribute("db_params",[:id],:semantic_type_summary)
+      unless attr_db_params
+        Log.error("cannot find db_params attribute on db_component")
+        return
+      end
+      create_links(parent_idh,[{:input_id => attr_db_params[:id],:output_id => attr_db_config[:id]}])
     end
 
 

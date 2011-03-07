@@ -239,10 +239,11 @@ module XYZ
     #TODO: may wrap with higher fn get_attribute which cases on whether virtual
     def get_virtual_attribute(attribute_name,cols,field_to_match=:display_name)
       sp_hash = {
-        :columns => cols,
-        :filter => [:and, [:eq, field_to_match, attribute_name.to_s]]
-        }
-      get_objects_from_sp_hash(model_handle.createMH(:attribute),sp_hash).first
+        :model_name => :attribute,
+        :filter => [:eq, field_to_match, attribute_name],
+        :cols => cols
+      }
+      get_children_from_sp_hash(:attribute,sp_hash).first
     end
 
     def get_constraints()

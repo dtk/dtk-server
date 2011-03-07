@@ -1,7 +1,7 @@
 module XYZ
   module ComponentType
     class Database < ComponentTypeHierarchy
-      def self.clone_db_on_db_server_node(db_server_node,db_server_component)
+      def self.clone_db_onto_db_server_node(db_server_node,db_server_component)
         base_sp_hash = {
           :model_name => :component,
           :filter => [:eq, :id, db_server_component[:ancestor_id]],

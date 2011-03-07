@@ -225,6 +225,34 @@ module XYZ
       Model::materialize_virtual_columns!(ret_port_list,[:port_type])
       ret_port_list
     end
+    def self.get_port_links(id_handles,type="l4")
+      port_list = PortList.create(type)
+      input_port_cols = [:id, :display_name, :input_port_links]
+      input_port_rows = get_objects_in_set_from_sp_hash(id_handles,:columns => input_port_cols).reject do |r|
+        port_list.is_pruned?(r[:attribute])
+      end
+      output_port_cols = [:id, :display_name, :output_port_links]
+      output_port_rows = get_objects_in_set_from_sp_hash(id_handles,:columns => output_port_cols).reject do |r|
+        port_list.is_pruned?(r[:attribute])
+      end
+      i18n = get_i18n_mappings_for_models(:component,:attribute)
+      return Array.new if input_port_rows.empty? and output_port_rows.empty?
+      indexed_ret = Hash.new
+      input_port_rows.each do |r|
+        id = r[:id]
+        indexed_ret[id] ||= r.subset(:id, :display_name).merge(:input_port_links => Array.new, :output_port_links => Array.new)
+        port_i18n = get_i18n_port_name(i18n,r[:attribute][:display_name],r[:component][:display_name])
+        indexed_ret[id][:input_port_links] << r[:attribute_link].merge(:port_i18n => port_i18n)
+      end
+      output_port_rows.each do |r|
+        id = r[:id]
+        indexed_ret[id] ||= r.subset(:id, :display_name).merge(:output_port_links => Array.new, :output_port_links => Array.new)
+        port_i18n = get_i18n_port_name(i18n,r[:attribute][:display_name],r[:component][:display_name])
+        indexed_ret[id][:output_port_links] << r[:attribute_link].merge(:port_i18n => port_i18n)
+      end
+      indexed_ret.values
+    end
+
    private
     class PortList
       attr_reader :list
@@ -270,8 +298,9 @@ module XYZ
         @list << attr
       end
     end
-   public
 
+=begin
+DEPRECATE
     #TODO: needs to be revised to be compatible with virtual ports (liek l4); so type arg must be also given
     def self.get_port_links(id_handles)
       input_port_cols = [:id, :display_name, :input_port_links]
@@ -295,8 +324,10 @@ module XYZ
       end
       indexed_ret.values
     end
-
+=end
+    #TODO: unify with above
     #returns [connected_links,dangling_links]
+public
     def self.get_external_connected_port_links(id_handles)
       ret = [Array.new,Array.new]
 

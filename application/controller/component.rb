@@ -108,6 +108,7 @@ pp component
       field_def_update = field_def_update_x.inject({}) do |h,kv|
         h.merge(kv[0] => (kv[1] && kv[1].empty?) ? nil : kv[1])
       end
+      field_def_update["required"] = [true,"true"].include?(field_def_update["required"])
       component = create_object_from_id(field_def_update["field_def"]["component_id"])
       new_field_def = component.update_field_def(field_def_update)
       

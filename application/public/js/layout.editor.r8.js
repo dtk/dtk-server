@@ -36,7 +36,7 @@ if(!R8.LayoutEditor) {
 				if(document.getElementById('modal-tab-list') == null || document.getElementById('add-group-btn') == null) {
 					var that = this;
 					var initCallback = function() {
-						R8.LayoutEditor.init(layoutDef,fieldDefs);
+					    R8.LayoutEditor.init(parentId,layoutDef,fieldDefs);
 					}
 					setTimeout(initCallback,25);
 					return;

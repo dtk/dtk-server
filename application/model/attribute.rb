@@ -301,6 +301,7 @@ module XYZ
       AttributeComplexType.serialze(token_array)
     end
 
+
     #TODO: want to rename to indicate this is propgate while logging state changes; or have a flag to control whether state changes are logged
     def self.update_and_propagate_attributes(attr_mh,attribute_rows)
       return Array.new if attribute_rows.empty?

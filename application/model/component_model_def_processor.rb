@@ -19,7 +19,8 @@ module XYZ
     def self.update_field_def(component,field_def_update)
       #compute default 
       attribute_rows = AttributeComplexType.ravel_raw_post_hash({field_def_update["id"] => field_def_update["default"]},:attribute,component[:id])
-      pp [:attribute_rows,field_def_update["name"],attribute_rows]
+      attr_mh = component.model_handle.createMH(:attribute)
+      Model.update_from_rows(attr_mh,attribute_rows,:partial_value => true)
       field_def_update["field_def"].merge("default" => field_def_update["default"])
     end
 

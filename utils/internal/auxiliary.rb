@@ -154,9 +154,15 @@ module XYZ
         end
       end
 
+      #TODO: look for mismatches between update and base
       def merge_into_json_col!(base,key,update)
-        if update.kind_of?(Hash) and base[key].kind_of?(Hash)
-          update.each{|k,v|merge_into_json_col!(base[key],k,v)} 
+        basek = base[key]
+        if update.kind_of?(Hash) and basek.kind_of?(Hash)
+          update.each{|k,v|merge_into_json_col!(basek,k,v)}
+        elsif update.kind_of?(Array) and basek.kind_of?(Array) 
+          raise Error.new("can only merge two arrays of same size") unless update.size == basek.size
+          raise Error.new("can only merge arrays of hashes") if update.find{|x|not x.kind_of?(Hash)} or basek.find{|x|not x.kind_of?(Hash)} 
+          update.each_with_index{|upd,i|merge_into_json_col!(basek,i,upd)}
         else
           base[key] = update
         end

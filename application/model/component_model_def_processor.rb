@@ -18,10 +18,11 @@ module XYZ
 
     def self.update_field_def(component,field_def_update)
       #compute default 
-      attribute_rows = AttributeComplexType.ravel_raw_post_hash({field_def_update["id"] => field_def_update["default"]},:attribute,component[:id])
+      default_assign = AttributeComplexType.ravel_raw_post_hash({field_def_update["id"] => field_def_update["default"]},:attribute,component[:id]).first
       attr_mh = component.model_handle.createMH(:attribute)
-      Model.update_from_rows(attr_mh,attribute_rows,:partial_value => true)
-      field_def_update["field_def"].merge("default" => field_def_update["default"])
+      attr_hash = Aux::hash_subset(field_def_update,%w{description}).merge(default_assign)
+      Model.update_from_rows(attr_mh,[attr_hash],:partial_value => true)
+      field_def_update["field_def"].merge(Aux::hash_subset(field_def_update,%w{default description}))
     end
 
     def self.convert_to_model_def_form(cmp_attrs_objs)

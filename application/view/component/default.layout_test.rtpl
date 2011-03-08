@@ -13,14 +13,14 @@
 		<div style="font-weight: bold; float: left; margin-left: 100px;">History&nbsp;</div>
 		<div style="float: left;">
 			<select>
-				<option value="23954234" selected="true">03/02/2011 - {No Description}</option>
-				<option value="23954234">02/03/2011 - {No Description}</option>
-				<option value="23954234">01/23/2011 - {No Description}</option>
+				{%for layout in layout_list%}
+					<option value="{%=layout[:id]%}">{%=layout[:updated_at]%} - {{%=layout[:description]%}}</option>
+				{%end%}
 			</select>
 		</div>
 		<div style="float: left; margin-left: 50px;">
 			<button onclick="R8.LayoutEditor.save();" style="margin-left: 5px;">Save</button>
-			<button onclick="" style="margin-left: 5px;">Save & Publish</button>
+			<button onclick="R8.LayoutEditor.deploy();" style="margin-left: 5px;">Publish</button>
 			<button onclick="" style="margin-left: 5px;">Create New</button>
 		</div>
 	</div>
@@ -34,6 +34,7 @@
 			<form id="wspace-edit-form" name="wspace-edit-form" style="float: left;">
 				<input type="hidden" id="type" name="type" value="wspace-edit"/>
 				<input type="hidden" id="def" name="def" value=""/>
+				<input type="hidden" id="active" name="active" value="false"/>
 			</form>
 			<div id="" class="wspace-modal">
 				<div id="-content" class="content">

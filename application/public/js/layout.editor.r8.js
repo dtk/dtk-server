@@ -50,10 +50,6 @@ if(!R8.LayoutEditor) {
 
 				_layoutDef = layoutDef;
 
-//DEBUG
-console.log('loading layout...');
-console.log(_layoutDef);
-
 //TODO: this is temp until fully refactoring the view/rtpl stuff
 this.setI18n(fieldDefs);
 				this.renderLayout();
@@ -97,7 +93,20 @@ this.setI18n(fieldDefs);
 			},
 
 			save: function() {
-console.log(_layoutDef);
+				var layoutDefJson = R8.Utils.Y.JSON.stringify(_layoutDef),
+					params = {
+						'cfg': {
+							form: {
+								id : 'wspace-edit-form',
+								upload : false
+							}
+						}
+					}
+				document.getElementById(this.layoutType+'-form')['id'].value='';
+				document.getElementById(this.layoutType+'-form')['def'].value=layoutDefJson;
+				R8.Ctrl.call('component/save_layout/'+_parentId,params);
+			},
+			deploy: function() {
 				var layoutDefJson = R8.Utils.Y.JSON.stringify(_layoutDef),
 					params = {
 						'cfg': {
@@ -108,10 +117,8 @@ console.log(_layoutDef);
 						}
 					}
 				document.getElementById(this.layoutType+'-form')['def'].value=layoutDefJson;
-				R8.Ctrl.call('component/save_layout_test/'+_parentId,params);
-//DEBUG
-console.log('should have saved layout...');
-console.log(_layoutDef);
+				document.getElementById(this.layoutType+'-form')['active'].value='true';
+				R8.Ctrl.call('component/publish_layout/'+_parentId,params);
 			},
 //-----------------------------------------
 //TODO: remove after cleanup

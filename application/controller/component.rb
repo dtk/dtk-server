@@ -155,7 +155,7 @@ pp request.params
       include_js('layout.editor.r8')
 
       layout_list = component.get_layouts(:edit)
-pp [:layout_def,layout_list]
+      tpl.assign(:layout_list,layout_list)
 
       field_defs_json = JSON.generate(field_defs)
       layout_def_json = JSON.generate(layout_list[0][:def])
@@ -167,12 +167,20 @@ pp [:layout_def,layout_list]
       }
     end
 
-    def save_layout_test(id)
+    def save_layout(id)
 pp '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
 pp request.params
 
       return {}
     end
+
+    def publish_layout(id)
+pp '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+pp request.params
+
+      return {}
+    end
+
 ##TODO ======= just for testing
 =begin
     def display(id,parsed_query_string=nil)

@@ -169,9 +169,8 @@ pp component
     end
 
     def save_layout(id)
-pp '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-pp request.params
-
+      layout_def = JSON.parse(request.params["def"])
+      pp [:layout_def,layout_def]
       return {}
     end
 

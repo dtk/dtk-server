@@ -9,13 +9,19 @@ module XYZ
       get_model_def(attr_filters)[:columns]
     end
 
-    def update_field_def(field_def)
-      #TODO: stub
-      pp :in_update_field_def
+    def update_field_def(field_def_update)
+      ModelDefProcessorInternals.update_field_def(self,field_def_update)
     end
 
   module ModelDefProcessorInternals
     extend R8Tpl::Utility::I18n
+
+    def self.update_field_def(component,field_def_update)
+      #compute default 
+      attribute_rows = AttributeComplexType.ravel_raw_post_hash({field_def_update["id"] => field_def_update["default"]},:attribute,component[:id])
+      pp [:attribute_rows,field_def_update["name"],attribute_rows]
+      field_def_update["field_def"].merge("default" => field_def_update["default"])
+    end
 
     def self.convert_to_model_def_form(cmp_attrs_objs)
       i18n = get_i18n_mappings_for_models(:attribute,:component)

@@ -102,16 +102,12 @@ pp component
     end
 
     def save_field(id)
-pp '///////////////////////////////////////////////'
-pp request.params
-
-#TODO: remove this after implementing
       field_def_json = request.params["field_def"]
-      field_def = JSON.parse(field_def_json)
-      component = create_object_from_id(field_def["component_id"])
-      component.update_field_def(field_def)
-
-      run_javascript("R8.Fields.handleSavedField(#{field_def_json});")
+      field_def_update = request.params.merge("field_def" => JSON.parse(field_def_json))
+      component = create_object_from_id(field_def_update["field_def"]["component_id"])
+      new_field_def = component.update_field_def(field_def_update)
+      
+      run_javascript("R8.Fields.handleSavedField(#{JSON.generate(new_field_def)});")
       return {}
     end
 

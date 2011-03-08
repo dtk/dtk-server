@@ -1,7 +1,29 @@
 
 
 <div id="layout-editor" style="height: inherit; width: inherit;">
-	<div id="editor-header" style="height: 40px; width: 100%"></div>
+	<div id="editor-header" style="height: 40px; width: 100%">
+		<div style="float: left; font-weight: bold;">Layout&nbsp;</div>
+		<div style="float: left;">
+			<select>
+				<option value="wspace-edit" selected="true">Worskapce Edit</option>
+				<option value="dock-display">Dock Display</option>
+				<option value="dock-edit">Dock Edit</option>
+			</select>
+		</div>
+		<div style="font-weight: bold; float: left; margin-left: 100px;">History&nbsp;</div>
+		<div style="float: left;">
+			<select>
+				<option value="23954234" selected="true">03/02/2011 - {No Description}</option>
+				<option value="23954234">02/03/2011 - {No Description}</option>
+				<option value="23954234">01/23/2011 - {No Description}</option>
+			</select>
+		</div>
+		<div style="float: left; margin-left: 50px;">
+			<button onclick="R8.LayoutEditor.save();" style="margin-left: 5px;">Save</button>
+			<button onclick="" style="margin-left: 5px;">Save & Publish</button>
+			<button onclick="" style="margin-left: 5px;">Create New</button>
+		</div>
+	</div>
 	<div id="editor-wrapper" style="height: 310px; min-width: 960px;">
 		<div id="editor-fields" style="width: 200px; height: inherit; float: left;">
 			<div style="height: 30px; width: inherit; font-weight: bold; text-align: center;">Available Fields</div>
@@ -9,7 +31,10 @@
 			</ul>
 		</div>
 		<div class="layout-editor body">
-
+			<form id="wspace-edit-form" name="wspace-edit-form" style="float: left;">
+				<input type="hidden" id="type" name="type" value="wspace-edit"/>
+				<input type="hidden" id="def" name="def" value=""/>
+			</form>
 			<div id="" class="wspace-modal">
 				<div id="-content" class="content">
 					<div id="modal-header" class="header" style="border: 1px #EDEDED solid; cursor: pointer;">
@@ -33,7 +58,6 @@
 					</div>
 				</div>
 			</div>
-
 		</div>
 	</div>
 </div>

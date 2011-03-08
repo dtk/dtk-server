@@ -8,8 +8,9 @@ if(!R8.LayoutEditor) {
 			_contentWrapperNode = null,
 			_modalHeaderNode = null,
 			_events = {},
+			_parentId = null,
 
-			_availFields = {};
+			_availFields = {},
 			_layoutDef = {};
 /*
 			_layoutDef = {
@@ -29,7 +30,9 @@ if(!R8.LayoutEditor) {
 			_tabSwitchTimeout = null;
 
 		return {
-			init: function(layoutDef,fieldDefs) {
+			layoutType: 'wspace-edit',
+
+			init: function(parentId,layoutDef,fieldDefs) {
 				if(document.getElementById('modal-tab-list') == null || document.getElementById('add-group-btn') == null) {
 					var that = this;
 					var initCallback = function() {
@@ -38,6 +41,7 @@ if(!R8.LayoutEditor) {
 					setTimeout(initCallback,25);
 					return;
 				}
+				_parentId = parentId;
 
 				_groupListNode = R8.Utils.Y.one('#modal-tab-list');
 				_addGroupNode = R8.Utils.Y.one('#add-group-btn');
@@ -45,6 +49,11 @@ if(!R8.LayoutEditor) {
 				_modalHeaderNode = R8.Utils.Y.one('#modal-header');
 
 				_layoutDef = layoutDef;
+
+//DEBUG
+console.log('loading layout...');
+console.log(_layoutDef);
+
 //TODO: this is temp until fully refactoring the view/rtpl stuff
 this.setI18n(fieldDefs);
 				this.renderLayout();
@@ -85,6 +94,24 @@ this.setI18n(fieldDefs);
 //				},'#layout-tab-list','.tab',this);
 
 				this.setupDD();
+			},
+
+			save: function() {
+console.log(_layoutDef);
+				var layoutDefJson = R8.Utils.Y.JSON.stringify(_layoutDef),
+					params = {
+						'cfg': {
+							form: {
+								id : 'wspace-edit-form',
+								upload : false
+							}
+						}
+					}
+				document.getElementById(this.layoutType+'-form')['def'].value=layoutDefJson;
+				R8.Ctrl.call('component/save_layout_test/'+_parentId,params);
+//DEBUG
+console.log('should have saved layout...');
+console.log(_layoutDef);
 			},
 //-----------------------------------------
 //TODO: remove after cleanup

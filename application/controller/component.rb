@@ -155,7 +155,7 @@ pp [:layout_def,layout_list]
 
       field_defs_json = JSON.generate(field_defs)
       layout_def_json = JSON.generate(layout_list[0][:def])
-      run_javascript("R8.LayoutEditor.init(#{layout_def_json},#{field_defs_json});")
+      run_javascript("R8.LayoutEditor.init(#{id},#{layout_def_json},#{field_defs_json});")
 
       return {
         :content=>tpl.render(),
@@ -163,6 +163,12 @@ pp [:layout_def,layout_list]
       }
     end
 
+    def save_layout_test(id)
+pp '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+pp request.params
+
+      return {}
+    end
 ##TODO ======= just for testing
 =begin
     def display(id,parsed_query_string=nil)

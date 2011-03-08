@@ -55,18 +55,18 @@ if (!R8.Canvas) {
 					var linkDef = a[0];
 					var canvasID = linkDef['id'];
 
-//					var startElemID = R8.Workspace.connectors[canvasID].startElement.connectElemID;
-//					var startConnectorFacing = R8.Workspace.connectors[canvasID].startElement.location;
-					var startElemID = linkDef.startElement.connectElemID;
-					var startConnectorFacing = linkDef.startElement.location;
+					var startElemID = linkDef.startItem.nodeId;
+					var startConnectorFacing = linkDef.startItem.location;
 
 					//assuming one endpoint for now
 //					var endElemID = R8.Workspace.connectors[canvasID].endElements[0].connectElemID;
 //					var connectorType = R8.Workspace.connectors[canvasID].type;
 //					var endConnectorFacing = R8.Workspace.connectors[canvasID].endElements[0].location;
-					var endElemID = linkDef.endElements[0].connectElemID;
+
+					var endElemID = linkDef.endItems[0].nodeId;
 					var connectorType = linkDef.type;
-					var endConnectorFacing = linkDef.endElements[0].location;
+					var endConnectorFacing = linkDef.endItems[0].location;
+					var styleConfig = linkDef.style;
 				}
 				var tempCanvas = document.getElementById(canvasID);
 
@@ -854,8 +854,8 @@ if (!R8.Canvas) {
 
 				// use getContext to use the canvas for drawing
 				var ctx = document.getElementById(canvasID).getContext('2d');
-				for (var i in this.config.activeConnector) {
-					var connectorCfg = this.config.activeConnector[i];
+				for (var i in styleConfig) {
+					var connectorCfg = styleConfig[i];
 					ctx.beginPath();
 					ctx.strokeStyle = connectorCfg.strokeStyle;
 					ctx.lineWidth = connectorCfg.lineWidth;

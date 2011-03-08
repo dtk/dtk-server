@@ -969,6 +969,19 @@ for(vs in _viewSpaces) {
 				_viewSpaces[vSpaceId].showLinks();
 			},
 
+			mergePorts: function(port2Merge,targetPort) {
+				var vSpaceId = (typeof(viewSpaceId) == 'undefined') ? _currentViewSpace : viewSpaceId;
+//				if (!_viewSpaces[vSpaceId].isReady()) {
+//				}
+
+				_viewSpaces[vSpaceId].mergePorts('port-2147483941','port-2147483681');
+			},
+
+			createLink: function() {
+				var vSpaceId = (typeof(viewSpaceId) == 'undefined') ? _currentViewSpace : viewSpaceId;
+				_viewSpaces[vSpaceId].createLink();
+			},
+
 			touchItems: function(itemList,viewSpaceId) {
 				var vSpaceId = (typeof(viewSpaceId) == 'undefined') ? _currentViewSpace : viewSpaceId;
 

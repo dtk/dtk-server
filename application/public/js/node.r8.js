@@ -834,26 +834,25 @@ return;
 											'startItemId':_id,
 											'endItemId': endNode.get('parentNode').getAttribute('data-id'),
 											'type': connectorType,
-											'startElement': {
-												'elemID': '?',
+											'startItem': {
 												'location':startPortDef.location,
-												'connectElemID':startNodeId
+												'nodeId':startNodeId
 											},
-											'endElements': [{
+											'endItems': [{
 												'elemID':'?',
 												'location':endPortDef.location,
-												'connectElemID':endNodeId
+												'nodeId':endNodeId
 											}]
 										}
 /*
 										R8.Workspace.connectors[tempConnectorID] = {
 											'type': connectorType,
-											'startElement': {
+											'startItem': {
 												'elemID': '?',
 												'location':startConnectorLocation,
 												'connectElemID':startNodeId
 											},
-											'endElements': [{
+											'endItems': [{
 												'elemID':'?',
 												'location':endConnectorLocation,
 												'connectElemID':endNodeId
@@ -913,8 +912,8 @@ console.log('not a valid link.., mis-matched types...');
 					R8.Utils.Y.one('#'+_tempLinkDef.id).remove();
 					R8.Workspace.showAlert(errorData.error_msg);
 
-					var startPortNode = R8.Utils.Y.one('#'+_tempLinkDef.startElement.connectElemID);
-					var endPortNode = R8.Utils.Y.one('#'+_tempLinkDef.endElements[0].connectElemID);
+					var startPortNode = R8.Utils.Y.one('#'+_tempLinkDef.startItem.nodeId);
+					var endPortNode = R8.Utils.Y.one('#'+_tempLinkDef.endItems[0].nodeId);
 					startPortNode.removeClass('connected');
 					startPortNode.addClass('available');
 					endPortNode.removeClass('connected');
@@ -934,23 +933,23 @@ console.log('not a valid link.., mis-matched types...');
 				_tempLinkDef.id = newLinkId;
 				R8.Utils.Y.one('#'+tempLinkId).set('id',newLinkId);
 //				_viewSpace.setLink(newLink.id,_tempLinkDef);
-				_viewSpace.addLinkToItems(newLinkId,_tempLinkDef);
+				_viewSpace.addLinkToItems(_tempLinkDef);
 			},
 
 			portsReady: function() {
 				return _portsReady;
 			},
 
-			addLink: function(id,def) {
-				_links[id] = def;
+			addLink: function(linkDef) {
+				_links[linkDef.id] = linkDef;
 			},
 
 			refreshLinks: function() {
 				for(var l in _links) {
 					R8.Canvas.renderLink(_links[l]);
 //TODO: temp for now to correct for already connected port styling
-					var startNode = R8.Utils.Y.one('#'+_links[l].startElement.connectElemID);
-					var endNode = R8.Utils.Y.one('#'+_links[l].endElements[0].connectElemID);
+					var startNode = R8.Utils.Y.one('#'+_links[l].startItem.nodeId);
+					var endNode = R8.Utils.Y.one('#'+_links[l].endItems[0].nodeId);
 					startNode.removeClass('available');
 					startNode.addClass('connected');
 					endNode.removeClass('available');

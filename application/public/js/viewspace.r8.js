@@ -90,6 +90,95 @@ if (!R8.ViewSpace) {
 //				R8.Workspace.events['vspace_mdown'] = R8.Utils.Y.delegate('mousedown',R8.Workspace.checkMouseDownEvent,'body','#viewspace');
 			},
 
+			createLink: function() {
+				var date = new Date();
+				var tempLinkId = 't-'+date.getTime() + '-' + Math.floor(Math.random()*20),
+					startPortId = 'port-2147483941',
+					endPortId = 'port-2147483744',
+					startPortDef = this.getPortDefById(startPortId),
+					endPortDef = this.getPortDefById(endPortId);
+
+				var linkDef = {
+						'id': tempLinkId,
+						'startItem': {
+							'parentItemId': startPortDef['parentItemId'],
+							'location':startPortDef.location,
+							'nodeId':startPortId
+						},
+						'endItems': [{
+							'parentItemId': endPortDef['parentItemId'],
+							'location':endPortDef.location,
+							'nodeId':endPortId
+						}],
+						'type': 'fullBezier',
+						'style':[
+							{'strokeStyle':'#4EF7DE','lineWidth':5,'lineCap':'round'},
+							{'strokeStyle':'#FF33FF','lineWidth':3,'lineCap':'round'}
+						],
+						'port_id': startPortDef.id,
+						'other_end_id': endPortDef.id
+					};
+
+//TODO: this is temp
+				_links[linkDef.id] = linkDef;
+				this.addLinkToItems(linkDef);
+				R8.Canvas.renderLink(linkDef);
+			},
+
+			getLinkDefByPortId: function(portId) {
+				for(var l in _links) {
+					if(_links[l].port_id ==  portId || _links[l].other_end_id == portId) return _links[l];
+				}
+			},
+
+			mergePorts: function(mergePortNodeId,targetPortNodeId) {
+				var mergePortDef = this.getPortDefById(mergePortNodeId),
+					targetPortDef = this.getPortDefById(targetPortNodeId),
+					mergePortNode = R8.Utils.Y.one('#'+mergePortDef.nodeId),
+					targetPortNode = R8.Utils.Y.one('#'+targetPortDef.nodeId),
+					linkDef = this.getLinkDefByPortId(mergePortNodeId.replace('port-',''));
+
+				//make sure the merging port animates over the target port
+				mergePortNode.setStyle('zIndex','3');
+				var that=this;
+				YUI().use('anim', function(Y) {
+					var pX = targetPortNode.getX(),
+						pY = mergePortNode.getY();
+
+				    var portAnim = new Y.Anim({
+				        node: '#'+mergePortNodeId,
+						to: {
+							xy: [targetPortNode.getX(),mergePortNode.getY()]
+						},
+						duration: 0.5
+				    });
+					portAnim.on('tween',function(e){
+						_items[mergePortDef.parentItemId].refreshLinks();
+					});
+				    var linkAnim = new Y.Anim({
+				        node: '#'+linkDef.id,
+						to: {
+							opacity: 0
+						},
+						duration: 0.3
+				    });
+
+
+					var animOnEnd = function(e) {
+							this.setAttrs({
+								'to':{opacity: 0},
+								duration: 0.3
+							});
+							this.on('end',function(e){
+								linkAnim.run();
+							});
+							this.run();
+						}
+					portAnim.once('end',animOnEnd);
+					portAnim.run();
+				});
+			},
+
 			portMout: function(e) {
 				R8.Utils.Y.one('#port-modal').remove();
 			},
@@ -270,26 +359,32 @@ if (!R8.ViewSpace) {
 						endNodeId = 'port-'+_links[linkId]['other_end_id'],
 						startPortDef = this.getItemPortDef(itemId,'port-'+portId),
 						endPortDef = this.getPortDefById('port-'+_links[linkId]['other_end_id']);
+//TODO: hardcode the style until persisting back at the db
+					if(typeof(_links[linkId].style) == 'undefined') {
+						_links[linkId].style = [
+							{'strokeStyle':'#25A3FC','lineWidth':3,'lineCap':'round'},
+							{'strokeStyle':'#63E4FF','lineWidth':1,'lineCap':'round'}
+						];
+					}
 
 					if (typeof(startPortDef) != 'undefined' && endPortDef != null) {
 						var linkDef = {
 								'id': linkId,
-								'startItemId':itemId,
-								'endItemId': endPortDef['parentItemId'],
 								'type': 'fullBezier',
-								'startElement': {
-									'elemID': '?',
+								'startItem': {
+									'parentItemId':itemId,
 									'location':startPortDef.location,
-									'connectElemID':startNodeId
+									'nodeId':startNodeId
 								},
-								'endElements': [{
-									'elemID':'?',
+								'endItems': [{
+									'parentItemId': endPortDef['parentItemId'],
 									'location':endPortDef.location,
-									'connectElemID':endNodeId
-								}]
+									'nodeId':endNodeId
+								}],
+								'style':_links[linkId].style
 							};
 
-						this.addLinkToItems(linkId,linkDef);
+						this.addLinkToItems(linkDef);
 
 						R8.Canvas.renderLink(linkDef);
 						var startNode = R8.Utils.Y.one('#'+startNodeId);
@@ -478,9 +573,10 @@ console.log(ports);
 				_items[_links[id]['endItemId']].addLink(id,def);
 			},
 
-			addLinkToItems: function(id,def) {
-				_items[def['startItemId']].addLink(id,def);
-				_items[def['endItemId']].addLink(id,def);
+			addLinkToItems: function(linkDef) {
+//TODO: revisit after implementing many end item links
+				_items[linkDef.startItem.parentItemId].addLink(linkDef);
+				_items[linkDef.endItems[0].parentItemId].addLink(linkDef);
 			},
 
 			purgeUIData: function(ioId,responseObj) {

@@ -9,6 +9,11 @@ module XYZ
       get_model_def(attr_filters)[:columns]
     end
 
+    def update_field_def(field_def)
+      #TODO: stub
+      pp :in_update_field_def
+    end
+
   module ModelDefProcessorInternals
     extend R8Tpl::Utility::I18n
 

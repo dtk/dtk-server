@@ -507,13 +507,14 @@ p '    Match '+m.to_s+': '+matches[m]
         newLoopHash[:iteratorVar] = ctrlPieces[3].gsub('@','')
         newLoopHash[:loopIndex] = nil
 #DEBUG
+=begin
 p '=====Have a forloop to process====='
 p '     LoopContent: '+ctrlPieces.inspect
 p '     LoopVarName: '+newLoopHash[:ctrlVarName].to_s
 p '     iteratorVarName: '+newLoopHash[:iteratorVar].to_s
 p '     iteratorVarRaw: '+newLoopHash[:iteratorVarRaw].to_s
 p 'Going to parse variables with ctr_vars:  '+@ctrl_vars.inspect
-
+=end
         @ctrl_vars << newLoopHash
         varParser = R8Tpl::TplVarParser.new(newLoopHash[:ctrlVarName],@js_var_header,@ctrl_vars)
         varParser.process
@@ -673,9 +674,6 @@ class TplVarParser
                 :is_hash
 
   def initialize(varString,jsVarHeader='rtplVars',ctrlVarMappings=nil)
-#DEBUG
-p '------------Inside of variable handler-----------------'
-p '    var_string:'+varString
     @var_string = varString
     @js_var_string = ''
     if self.invalid? then return false end
@@ -761,12 +759,13 @@ p '    var_string:'+varString
     else
       @ctrl_var_mappings.each do |ctrl_var|
 #DEBUG
+=begin
 p '++++++++++++++++TEST+++++++++++++++++++'
 p '   var_name:'+@var_name
 p '   ctrlVarName:'+ctrl_var[:ctrlVarName]
 p '   js var header:'+@js_var_header
 p '   iteratorVar:'+ctrl_var[:iteratorVar]
-
+=end
         if ctrl_var[:ctrlVarName] == @var_name then 
 #          (return @js_var_header + "['" + ctrl_var[:iteratorVar] + "']["+@var_name+"]") : 
           (@is_hash) ? 

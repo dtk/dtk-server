@@ -55,6 +55,8 @@ if(!R8.LayoutEditor) {
 						_layoutDef.groups[g].content_display = 'none';
 					}
 				}
+
+				this.setI18n(fieldDefs);
 				_editorTplWrapperNode = R8.Utils.Y.one('#editor-tpl-wrapper');
 				_editorTplWrapperNode.append(R8.Rtpl.wspace_edit_layout({
 					'layout_def': _layoutDef
@@ -66,7 +68,6 @@ if(!R8.LayoutEditor) {
 				_modalHeaderNode = R8.Utils.Y.one('#modal-header');
 
 //TODO: this is temp until fully refactoring the view/rtpl stuff
-this.setI18n(fieldDefs);
 
 //				this.renderLayout();
 				for(var i in fieldDefs) {

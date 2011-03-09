@@ -90,6 +90,7 @@ this.setI18n(fieldDefs);
 				});
 				R8.Utils.Y.one('#title-input').on('change',function(e){
 					R8.Utils.Y.one('#title-txt').set('innerHTML',this.get('value'));
+					_layoutDef.i18n = this.get('value');
 				});
 				R8.Utils.Y.one('#title-input').on('blur',function(e){
 					var inputVal = R8.Utils.Y.one('#title-input').get('value');

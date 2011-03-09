@@ -73,6 +73,11 @@ module XYZ
           nil
         end
     end
+
+    def i18n_language()
+      @id_handle ? @id_handle.i18n_language() : R8::Config[:default_language]
+    end
+
    private
     SubClassRelations = {
      :assembly => :component

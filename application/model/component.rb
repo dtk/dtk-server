@@ -10,6 +10,11 @@ module XYZ
         ds_column_defs :ds_attributes, :ds_key
         external_ref_column_defs()
 
+        #columns related to name/labels
+        #specfic labels of components and its attributes
+        column :i18n_labels,  :json, :ret_keys_as_symbols => false
+
+        #columns related to type
         column :type, :varchar, :size => 15 # instance | composite
         #top level in component type hiererarchy
         column :basic_type, :varchar, :size => 25 #service, application, language, application, extension, database, user
@@ -246,6 +251,41 @@ module XYZ
       get_children_from_sp_hash(:attribute,sp_hash).first
     end
 
+
+    def get_component_i18n_label()
+      ret = get_stored_component_i18n_label?()
+      return ret if ret
+      i18n = get_i18n_mappings_for_models(:component)      
+      i18n_string(i18n,:component,self[:display_name])
+    end
+
+    def get_attribute_i18n_label(attribute)
+      ret = get_stored_attribute_i18n_label?(attribute)
+      return ret if ret
+      i18n = get_i18n_mappings_for_models(:attribute,:component)      
+      i18n_string(i18n,:attribute,attribute[:display_name],self[:component_type])
+    end
+
+    def update_component_i18n_label(label)
+      update_hash = {:id => self[:id], :i18n_labels => {i18n_language() => {:component => label}}}
+      Model.update_from_rows(model_handle,[update_hash],:partial_value=>true)
+    end
+    def update_attribute_i18n_label(attribute_name,label)
+      update_hash = {:id => self[:id], :i18n_labels => {i18n_language() => {:attributes => {attribute_name => label}}}}
+      Model.update_from_rows(model_handle,[update_hash],:partial_value=>true)
+    end
+
+   private
+    def get_stored_attribute_i18n_label?(attribute)
+      return nil unless self[:i18n_labels]
+      ((self[:i18n_labels][i18n_language()]||{})["attributes"]||{})[attribute[:display_name]]
+    end
+    def get_stored_component_i18n_label?()
+      return nil unless self[:i18n_labels]
+      ((self[:i18n_labels][i18n_language()]||{})["component"]||{})[self[:display_name]]
+    end
+   public
+
     def get_constraints()
       rows = get_objects_from_sp_hash({:columns => [:dependencies,:only_one_per_node,:component_type]})
       return Constraints.new() if rows.empty?
@@ -357,7 +397,7 @@ module XYZ
 
     ### object processing and access functions
     def get_component_with_attributes_unraveled(attr_filters={:hidden => true})
-      sp_hash = {:columns => [:id,:display_name,:component_type,:basic_type,:attributes]}
+      sp_hash = {:columns => [:id,:display_name,:component_type,:basic_type,:attributes, :i18n_labels]}
       component_and_attrs = get_objects_from_sp_hash(sp_hash)
       return nil if component_and_attrs.empty?
       component = component_and_attrs.first.subset(:id,:display_name,:component_type,:basic_type)

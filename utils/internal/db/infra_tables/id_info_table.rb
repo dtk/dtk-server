@@ -76,6 +76,11 @@ module XYZ
       Model.model_class( model_name).new({:id => get_id()},self[:c])
     end
 
+    def i18n_language()
+      #TODO: stub
+       R8::Config[:default_language]
+    end
+
     def get_objects_from_sp_hash(sp_hash,opts={})
       create_object().get_objects_from_sp_hash(sp_hash,opts)
     end

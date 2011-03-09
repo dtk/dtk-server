@@ -267,11 +267,11 @@ module XYZ
     end
 
     def update_component_i18n_label(label)
-      update_hash = {:id => self[:id], :i18n_labels => {i18n_language() => {:component => label}}}
+      update_hash = {:id => self[:id], :i18n_labels => {i18n_language() => {"component" => label}}}
       Model.update_from_rows(model_handle,[update_hash],:partial_value=>true)
     end
     def update_attribute_i18n_label(attribute_name,label)
-      update_hash = {:id => self[:id], :i18n_labels => {i18n_language() => {:attributes => {attribute_name => label}}}}
+      update_hash = {:id => self[:id], :i18n_labels => {i18n_language() => {"attributes" => {attribute_name => label}}}}
       Model.update_from_rows(model_handle,[update_hash],:partial_value=>true)
     end
 
@@ -397,10 +397,10 @@ module XYZ
 
     ### object processing and access functions
     def get_component_with_attributes_unraveled(attr_filters={:hidden => true})
-      sp_hash = {:columns => [:id,:display_name,:component_type,:basic_type,:attributes, :i18n_labels]}
+      sp_hash = {:columns => [:id,:display_name,:component_type,:basic_type,:attributes,:i18n_labels]}
       component_and_attrs = get_objects_from_sp_hash(sp_hash)
       return nil if component_and_attrs.empty?
-      component = component_and_attrs.first.subset(:id,:display_name,:component_type,:basic_type)
+      component = component_and_attrs.first.subset(:id,:display_name,:component_type,:basic_type,:i18n_labels)
       component_attrs = {:component_type => component[:component_type],:component_name => component[:display_name]}
       filtered_attrs = component_and_attrs.map do |r|
         attr = r[:attribute]

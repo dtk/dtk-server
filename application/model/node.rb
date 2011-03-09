@@ -25,17 +25,6 @@ module XYZ
       #TODO how to have this conditionally "show up"
       virtual_column :ec2_security_groups, :path => [:ds_attributes,:groups] 
 
-      virtual_column :node_attributes, :type => :json, :hidden => true, 
-      :remote_dependencies => 
-        [
-         {
-           :model_name => :attribute,
-           :join_type => :inner,
-           :join_cond=>{:node_node_id =>:node__id},
-           :cols => [:id,:display_name,:node_node_id,:value_derived,:value_asserted,:semantic_type_summary]
-         }
-        ]
-
       virtual_column :attribute_ports, :type => :json, :hidden => true, 
       :remote_dependencies => 
         [
@@ -184,7 +173,7 @@ module XYZ
 
       foreign_key :data_source_id, :data_source, FK_SET_NULL_OPT
       many_to_one :library, :datacenter
-      one_to_many :attribute, :attribute_link, :component, :node_interface, :address_access_point, :monitoring_item
+      one_to_many :attribute, :port, :attribute_link, :component, :node_interface, :address_access_point, :monitoring_item
     end
 
     ### virtual column defs
@@ -196,6 +185,16 @@ module XYZ
 
     #######################
     ######### Model apis
+    def get_virtual_attribute(attribute_name,cols,field_to_match=:display_name)
+      sp_hash = {
+        :model_name => :attribute,
+        :filter => [:eq, field_to_match, attribute_name],
+        :cols => cols
+      }
+      get_children_from_sp_hash(:attribute,sp_hash).first
+    end
+
+
     def get_users()
       node_user_list = get_objects_from_sp_hash(:columns => [:users])
       user_list = Array.new
@@ -403,28 +402,21 @@ public
     end
 
     def clone_post_copy_hook(clone_copy_output,opts={})
-      target_id_handle = id_handle()
-      new_id_handle = clone_copy_output.id_handles.first
-      #TODO: change to isnatnce method
-      self.class.add_needed_l4_sap_attributes(new_id_handle,target_id_handle)
-      parent_action_id_handle = target_id_handle.get_parent_id_handle()
-      StateChange.create_pending_change_item(:new_item => new_id_handle, :parent => parent_action_id_handle)
+      cmp_id_handle = clone_copy_output.id_handles.first
+      add_needed_l4_sap_attributes(cmp_id_handle)
+      parent_action_id_handle = get_parent_id_handle()
+      StateChange.create_pending_change_item(:new_item => cmp_id_handle, :parent => parent_action_id_handle)
     end
 
-    def self.add_needed_l4_sap_attributes(cmp_id_handle,node_id_handle)
-      field_set = Model::FieldSet.new(:node,[:id,:node_attributes])
-      filter = [:and, [:eq, :node__id, node_id_handle.get_id()]]
-      #TDOO: might match on ref or semantic type instead
-      global_wc = {:attribute__semantic_type_summary => "host_address_ipv4"}
-      ds = SearchObject.create_from_field_set(field_set,cmp_id_handle[:c],filter).create_dataset().where(global_wc)
-
-      ipv4_host_addrs_info = (ds.all.first||{})[:attribute]
+    def add_needed_l4_sap_attributes(cmp_id_handle)
+      ipv4_host_addrs_info = get_virtual_attribute("host_address_ipv4",[:id,:attribute_value],:semantic_type_summary)
       return nil unless ipv4_host_addrs_info
-      ipv4_host_addrs = ipv4_host_addrs_info[:value_asserted]||ipv4_host_addrs_info[:value_derived]
-      ipv4_host_addrs_idh = cmp_id_handle.createIDH({:guid => ipv4_host_addrs_info[:id], :model_name => :attribute, :parent_model_name => :node})
+      ipv4_host_addrs = ipv4_host_addrs_info[:attribute_value]
+      ipv4_host_addrs_idh = cmp_id_handle.createIDH({:id => ipv4_host_addrs_info[:id], :model_name => :attribute, :parent_model_name => :node})
       sap_config_attr_idh, new_sap_attr_idh = Attribute.add_needed_l4_sap_attributes(cmp_id_handle,ipv4_host_addrs)
       return nil unless new_sap_attr_idh
-      AttributeLink.create_links_l4_sap(new_sap_attr_idh,sap_config_attr_idh,ipv4_host_addrs_idh,node_id_handle)
+      AttributeLink.create_links_l4_sap(new_sap_attr_idh,sap_config_attr_idh,ipv4_host_addrs_idh,id_handle)
+      new_sap_attr_idh
     end
 
     #TODO: quick hack

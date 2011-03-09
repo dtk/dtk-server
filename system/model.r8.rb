@@ -52,6 +52,10 @@ module XYZ
 
     attr_reader :relation_type, :id_handle, :c
 
+    def get_parent_id_handle()
+      id_handle.get_parent_id_handle()
+    end
+
     #this may be overwritten by the models
     def self.create(hash_scalar_values,c,relation_type_x=model_name(),id_handle=nil)
       self.new(hash_scalar_values,c,relation_type_x,id_handle)

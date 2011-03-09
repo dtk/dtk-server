@@ -402,7 +402,7 @@ module XYZ
     end
 
     def add_layout(view_type,layout_def)
-      x=1
+      Layout.save(id_handle(),layout_def,view_type)
     end
 
    protected

@@ -19,7 +19,7 @@ if(!R8.LayoutEditor) {
 				'i18n': 'Create User',
 				'groups':{
 					'group-1': {
-						'nul_cols':1,
+						'num_cols':1,
 						'i18n': 'Group 1',
 						'fields':[]
 					}
@@ -42,13 +42,13 @@ if(!R8.LayoutEditor) {
 					return;
 				}
 				_parentId = parentId;
+				_fieldDefs = fieldDefs;
+				_layoutDef = layoutDef;
 
 				_groupListNode = R8.Utils.Y.one('#modal-tab-list');
 				_addGroupNode = R8.Utils.Y.one('#add-group-btn');
 				_contentWrapperNode = R8.Utils.Y.one('#modal-content-wrapper');
 				_modalHeaderNode = R8.Utils.Y.one('#modal-header');
-
-				_layoutDef = layoutDef;
 
 //TODO: this is temp until fully refactoring the view/rtpl stuff
 this.setI18n(fieldDefs);
@@ -92,7 +92,24 @@ this.setI18n(fieldDefs);
 				this.setupDD();
 			},
 
+			getFieldDefByName: function(fieldName) {
+				for(var f in _fieldDefs) {
+					if(_fieldDefs[f].name == fieldName) return _fieldDefs[f];
+				}
+			},
+			getCurrentDef: function() {
+				var currentDef = _layoutDef;
+				var that = this;
+				for(var g in _layoutDef.groups) {
+					currentDef.groups[g].fields = [];
+					R8.Utils.Y.all('#'+_layoutDef.groups[g].name+'-field-list li').each(function(){
+						currentDef.groups[g].fields.push(that.getFieldDefByName(this.get('id')));
+					});
+				}
+				return currentDef;
+			},
 			save: function() {
+				var layoutDef = this.getCurrentDef();
 				var layoutDefJson = R8.Utils.Y.JSON.stringify(_layoutDef),
 					params = {
 						'cfg': {
@@ -168,16 +185,28 @@ this.setI18n(fieldDefs);
 			},
 			renderLayout: function() {
 				for(var g in _layoutDef.groups) {
+					if(g==0) {
+						_layoutDef.groups[g].focus=true;
+					}
 					this.renderGroup(_layoutDef.groups[g]);
 				}
 			},
 			renderGroup: function(groupDef) {
-				var groupId = groupDef.name;
-				var groupLabel = groupDef.i18n;
-				var newGroupNode = R8.Utils.Y.Node.create(this.getGroupMarkup(groupId,groupLabel));
+				var groupId = groupDef.name,
+					groupLabel = groupDef.i18n,
+					selected = '',
+					contentDisplay = 'none';
+
+				if (groupDef.focus == true) {
+					selected = 'selected';
+					contentDisplay = 'block';
+				}
+
+				var newGroupNode = R8.Utils.Y.Node.create(this.getGroupMarkup(groupId,groupLabel,selected));
+				var contentNode = R8.Utils.Y.Node.create(this.getContentMarkup(groupId,contentDisplay));
 
 				_groupListNode.append(newGroupNode);
-				_contentWrapperNode.append(this.getContentMarkup(groupId));
+				_contentWrapperNode.append(contentNode);
 
 				var groupFListContainer = R8.Utils.Y.one('#'+groupId+'-field-list');
 				for(var f in groupDef.fields) {
@@ -187,7 +216,7 @@ this.setI18n(fieldDefs);
 /*
 				_layoutDef.groups.push({
 					'name':groupId,
-					'nul_cols':1,
+					'num_cols':1,
 					'i18n': groupLabel,
 					'fields':[]
 				});
@@ -199,13 +228,13 @@ this.setI18n(fieldDefs);
 				var groupId = 'group-'+groupIndex;
 				var groupLabel = 'Group '+groupIndex;
 
-				var newGroupNode = R8.Utils.Y.Node.create(this.getGroupMarkup(groupId,groupLabel));
+				var newGroupNode = R8.Utils.Y.Node.create(this.getGroupMarkup(groupId,groupLabel,'selected'));
 				_groupListNode.append(newGroupNode);
-				_contentWrapperNode.append(this.getContentMarkup(groupId));
+				_contentWrapperNode.append(this.getContentMarkup(groupId,'block'));
 
 				_layoutDef.groups.push({
 					'name':groupId,
-					'nul_cols':1,
+					'num_cols':1,
 					'i18n': groupLabel,
 					'fields':[]
 				});
@@ -233,15 +262,15 @@ this.setI18n(fieldDefs);
 				}
 				return false;
 			},
-			getGroupMarkup: function(id,i18n) {
-				var groupTpl = '<li id="'+id+'-tab" class="tab selected">'+i18n+'</li>';
+			getGroupMarkup: function(id,i18n,selected) {
+				var groupTpl = '<li id="'+id+'-tab" class="tab '+selected+'">'+i18n+'</li>';
 
 				return groupTpl;
 			},
-			getContentMarkup: function(id) {
+			getContentMarkup: function(id,display) {
 				var groupIndex = _groupListNode.get('children').size();
 				var id = (typeof(id) == 'undefined') ? 'group-'+groupIndex : id;
-				var contentTpl = '<div id="'+id+'-content" class="tab-content">\
+				var contentTpl = '<div id="'+id+'-content" class="tab-content" style="display: '+display+';">\
 									<ul id="'+id+'-field-list" class="field-list">\
 									</ul>\
 								  </div>';

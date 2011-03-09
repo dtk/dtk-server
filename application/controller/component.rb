@@ -146,7 +146,12 @@ pp component
       component = create_object_from_id(id,:component)
       field_defs = component.get_field_def()
 
-      tpl = R8Tpl::TemplateR8.new("component/layout_test",user_context())
+      tpl = R8Tpl::TemplateR8.new("component/wspace_edit_layout",user_context())
+      tpl.set_js_tpl_name('wspace_edit_layout')
+      js_tpl = tpl.render()
+      include_js_tpl(js_tpl[:src])
+
+      tpl = R8Tpl::TemplateR8.new("component/layout_editor",user_context())
       _model_var = {:i18n => get_model_i18n(model_name().to_s,user_context())}
       tpl.assign(:_component,_model_var)
       tpl.assign(:field_def_list,field_defs)

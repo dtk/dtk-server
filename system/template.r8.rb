@@ -506,15 +506,13 @@ p '    Match '+m.to_s+': '+matches[m]
         newLoopHash[:iteratorVarRaw] = ctrlPieces[3].strip
         newLoopHash[:iteratorVar] = ctrlPieces[3].gsub('@','')
         newLoopHash[:loopIndex] = nil
-#R8 DEBUG
-=begin
+#DEBUG
 p '=====Have a forloop to process====='
 p '     LoopContent: '+ctrlPieces.inspect
 p '     LoopVarName: '+newLoopHash[:ctrlVarName].to_s
 p '     iteratorVarName: '+newLoopHash[:iteratorVar].to_s
 p '     iteratorVarRaw: '+newLoopHash[:iteratorVarRaw].to_s
-=end
-#p 'Going to parse variables with ctr_vars:  '+@ctrl_vars.inspect
+p 'Going to parse variables with ctr_vars:  '+@ctrl_vars.inspect
 
         @ctrl_vars << newLoopHash
         varParser = R8Tpl::TplVarParser.new(newLoopHash[:ctrlVarName],@js_var_header,@ctrl_vars)
@@ -523,6 +521,8 @@ p '     iteratorVarRaw: '+newLoopHash[:iteratorVarRaw].to_s
         varParser = R8Tpl::TplVarParser.new(newLoopHash[:iteratorVar],@js_var_header,@ctrl_vars)
         varParser.process
         iteratorVar = varParser.js_var_string
+
+@ctrl_vars[@ctrl_vars.length-1][:iteratorVarParsed] = iteratorVar
 
         jsContent = "for(var " + ctrlVarName + " in " + iteratorVar + ") { "
         self.js_queue_push('forloopheader', jsContent)
@@ -673,6 +673,9 @@ class TplVarParser
                 :is_hash
 
   def initialize(varString,jsVarHeader='rtplVars',ctrlVarMappings=nil)
+#DEBUG
+p '------------Inside of variable handler-----------------'
+p '    var_string:'+varString
     @var_string = varString
     @js_var_string = ''
     if self.invalid? then return false end
@@ -757,9 +760,17 @@ class TplVarParser
       return @js_var_header + "['" + @var_name.gsub('@','') + "']"
     else
       @ctrl_var_mappings.each do |ctrl_var|
+#DEBUG
+p '++++++++++++++++TEST+++++++++++++++++++'
+p '   var_name:'+@var_name
+p '   ctrlVarName:'+ctrl_var[:ctrlVarName]
+p '   js var header:'+@js_var_header
+p '   iteratorVar:'+ctrl_var[:iteratorVar]
+
         if ctrl_var[:ctrlVarName] == @var_name then 
+#          (return @js_var_header + "['" + ctrl_var[:iteratorVar] + "']["+@var_name+"]") : 
           (@is_hash) ? 
-          (return @js_var_header + "['" + ctrl_var[:iteratorVar] + "']["+@var_name+"]") : 
+          (return ctrl_var[:iteratorVarParsed] + "["+@var_name+"]") : 
           (return @var_name)
         end
       end

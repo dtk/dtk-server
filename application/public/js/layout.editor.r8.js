@@ -7,6 +7,7 @@ if(!R8.LayoutEditor) {
 			_addGroupNode = null,
 			_contentWrapperNode = null,
 			_modalHeaderNode = null,
+			_editorTplWrapperNode = null,
 			_events = {},
 			_parentId = null,
 
@@ -33,7 +34,7 @@ if(!R8.LayoutEditor) {
 			layoutType: 'wspace-edit',
 
 			init: function(parentId,layoutDef,fieldDefs) {
-				if(document.getElementById('modal-tab-list') == null || document.getElementById('add-group-btn') == null) {
+				if(document.getElementById('editor-tpl-wrapper') == null) {
 					var that = this;
 					var initCallback = function() {
 					    R8.LayoutEditor.init(parentId,layoutDef,fieldDefs);
@@ -45,6 +46,20 @@ if(!R8.LayoutEditor) {
 				_fieldDefs = fieldDefs;
 				_layoutDef = layoutDef;
 
+				for(var g in _layoutDef.groups) {
+					if(g==0) {
+						_layoutDef.groups[g].selected = 'selected';
+						_layoutDef.groups[g].content_display = 'block';
+					} else {
+						_layoutDef.groups[g].selected = '';
+						_layoutDef.groups[g].content_display = 'none';
+					}
+				}
+				_editorTplWrapperNode = R8.Utils.Y.one('#editor-tpl-wrapper');
+				_editorTplWrapperNode.append(R8.Rtpl.wspace_edit_layout({
+					'layout_def': _layoutDef
+				}));
+
 				_groupListNode = R8.Utils.Y.one('#modal-tab-list');
 				_addGroupNode = R8.Utils.Y.one('#add-group-btn');
 				_contentWrapperNode = R8.Utils.Y.one('#modal-content-wrapper');
@@ -52,7 +67,8 @@ if(!R8.LayoutEditor) {
 
 //TODO: this is temp until fully refactoring the view/rtpl stuff
 this.setI18n(fieldDefs);
-				this.renderLayout();
+
+//				this.renderLayout();
 				for(var i in fieldDefs) {
 					if(!this.fieldInLayout(fieldDefs[i].name)) {
 						_availFields[fieldDefs[i].name] = fieldDefs[i];
@@ -91,7 +107,15 @@ this.setI18n(fieldDefs);
 
 				this.setupDD();
 			},
+			loadViewInstance: function(layoutId) {
+				var params = {
+						cfg: {
+							data: 'layout_id='+layoutId
+						}
+					};
 
+				R8.Ctrl.call('component/layout_test/'+_parentId,params);
+			},
 			getFieldDefByName: function(fieldName) {
 				for(var f in _fieldDefs) {
 					if(_fieldDefs[f].name == fieldName) return _fieldDefs[f];

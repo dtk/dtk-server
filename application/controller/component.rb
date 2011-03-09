@@ -169,8 +169,12 @@ pp component
     end
 
     def save_layout(id)
-      layout_def = JSON.parse(request.params["def"])
-      pp [:layout_def,layout_def]
+      hash = request.params
+      #TODO: stub that replaces view_type = hash["type"].to_sym 
+      view_type = :edit
+      layout_def = JSON.parse(hash["def"])
+      component = create_object_from_id(id,:component)
+      component.add_layout(view_type,layout_def)
       return {}
     end
 

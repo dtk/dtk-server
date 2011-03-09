@@ -401,6 +401,10 @@ module XYZ
       get_layouts_from_db(view_type)
     end
 
+    def add_layout(view_type,layout_def)
+      x=1
+    end
+
    protected
     def get_layouts_from_db(view_type,layout_vc=:layouts)
       unprocessed_rows = get_objects_col_from_sp_hash({:columns => [layout_vc]},:layout)

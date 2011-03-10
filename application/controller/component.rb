@@ -151,6 +151,11 @@ pp component
       js_tpl = tpl.render()
       include_js_tpl(js_tpl[:src])
 
+      tpl = R8Tpl::TemplateR8.new("component/group_tab_popup",user_context())
+      tpl.set_js_tpl_name('group_tab_popup')
+      js_tpl = tpl.render()
+      include_js_tpl(js_tpl[:src])
+
       tpl = R8Tpl::TemplateR8.new("component/layout_editor",user_context())
       _model_var = {:i18n => get_model_i18n(model_name().to_s,user_context())}
       tpl.assign(:_component,_model_var)

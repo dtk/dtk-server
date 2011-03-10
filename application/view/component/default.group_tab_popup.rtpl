@@ -1,0 +1,4 @@
+
+<div id="gt-popup" style="position: absolute; z-index: 500; width: 200px; height: 80px; border: 1px solid black; background-color: #FFFFFF;">
+	{%=group_def[:name]%}
+</div>

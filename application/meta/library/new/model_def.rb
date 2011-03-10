@@ -18,6 +18,7 @@
    :node_group,
    :node_group_member,
    :attribute_link,
+   :port_link,
    :network_partition,
    :network_gateway,
    :region,

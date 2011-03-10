@@ -64,6 +64,7 @@ module XYZ
            :cols => [:id,:display_name,:component_type,:most_specific_type,:ancestor_id,:node_node_id]
          }]
 
+      #TODO: see if below is still needed
       virtual_column :port, :type => :json, :hidden => true,
         :remote_dependencies =>
         [

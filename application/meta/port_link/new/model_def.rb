@@ -1,0 +1,19 @@
+{
+  :schema=>:port,
+  :table=>:link,
+  :columns=>{
+    :input_id=>{
+      :type=>:bigint,
+      :foreign_key_rel_type=>:port,
+      :on_delete=>:cascade,
+      :on_update=>:cascade
+    },
+    :output_id=>{
+      :type=>:bigint,
+      :foreign_key_rel_type=>:port,
+      :on_delete=>:cascade,
+      :on_update=>:cascade
+    }
+  },
+  :many_to_one=>[:library, :datacenter, :component]
+}

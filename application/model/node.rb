@@ -25,6 +25,54 @@ module XYZ
       #TODO how to have this conditionally "show up"
       virtual_column :ec2_security_groups, :path => [:ds_attributes,:groups] 
 
+
+      ##### for connection to ports and port links
+      ports_cols_def = {:cols => [:id,id(:port),:type,id(:node),:containing_node_id,:external_attribute_id]}
+      ports_def =   
+        [
+         {
+           :model_name => :port,
+           :join_type => :inner,
+           :join_cond=>{:containing_node_id => q(:node,:id)}
+         }.merge(ports_cols_def)
+        ]
+
+      virtual_column :input_ports_with_links, :type => :json, :hidden => true, 
+      :remote_dependencies => 
+        ports_def +
+        [
+         {
+           :model_name => :port_link,
+           :join_cond=>{:input_id =>q(:port,:id)},
+           :join_type => :left_outer,
+           :cols => [:id,:input_id,:output_id]
+         },
+         {
+           :model_name => :port,
+           :alias => :port_other_end,
+           :join_cond=>{:id =>q(:port_link,:output_id)},
+           :join_type => :left_outer,
+         }.merge(ports_cols_def)
+        ]
+      virtual_column :output_ports_with_links, :type => :json, :hidden => true, 
+      :remote_dependencies => 
+        ports_def +
+        [
+         {
+           :model_name => :port_link,
+           :join_cond=>{:output_id =>q(:port,:id)},
+           :join_type => :left_outer,
+           :cols => [:id,:input_id,:output_id]
+         },
+         {
+           :model_name => :port,
+           :alias => :port_other_end,
+           :join_cond=>{:id =>q(:port_link,:input_id)},
+           :join_type => :left_outer
+         }.merge(ports_cols_def)
+        ]
+
+      ### TODO: this may be deprecated when move to materizlaied ports
       virtual_column :attribute_ports, :type => :json, :hidden => true, 
       :remote_dependencies => 
         [
@@ -97,6 +145,8 @@ module XYZ
            :join_type => :inner,
            :cols => [:id,:display_name]
          }]
+      ##### end of for connection to ports and port links
+
 
         virtual_column :has_pending_change, :type => :boolean, :hidden => true,
          :remote_dependencies =>
@@ -307,7 +357,7 @@ module XYZ
     def clone_post_copy_hook(clone_copy_output,opts={})
       cmp_id_handle = clone_copy_output.id_handles.first
       create_needed_l4_sap_attributes(cmp_id_handle)
-      Port.create_ports_for_external_attributes(id_handle,cmp_id_handle)
+      Port.create_ports_for_output_attributes(id_handle,cmp_id_handle)
       parent_action_id_handle = get_parent_id_handle()
       StateChange.create_pending_change_item(:new_item => cmp_id_handle, :parent => parent_action_id_handle)
     end

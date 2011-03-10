@@ -31,7 +31,7 @@ module XYZ
         foreign_key :assembly_id, :component, FK_SET_NULL_OPT
         column :view_def_ref, :varchar
         many_to_one :component, :library, :node, :node_group, :datacenter
-        one_to_many :component, :attribute_link, :attribute, :monitoring_item, :dependency, :layout
+        one_to_many :component, :attribute_link, :attribute, :port_link, :monitoring_item, :dependency, :layout
         one_to_many_clone_omit :layout
         virtual_column :parent_name, :possible_parents => [:component,:library,:node,:node_group]
 

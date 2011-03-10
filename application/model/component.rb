@@ -58,7 +58,7 @@ module XYZ
            :cols => [:id,:display_name,:view_def_key,id(:component),:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
          )]
 
-        virtual_column :attributes_port, :type => :json, :hidden => true, 
+        virtual_column :attributes_ports, :type => :json, :hidden => true, 
         :remote_dependencies => 
         [attributes_def.merge(
            :filter => [:eq, :is_port, true],
@@ -256,6 +256,13 @@ module XYZ
       get_children_from_sp_hash(:attribute,sp_hash).first
     end
 
+    def get_attributes_ports()
+      opts = {:keep_col_ref => true}
+      rows = get_objects_from_sp_hash({:columns => [:ref,:attributes_ports]},opts)
+      return Array.new if rows.empty?
+      component_ref = rows.first[:ref]
+      rows.map{|r|r[:attribute].merge(:component_ref => component_ref)}
+    end
 
     def get_component_i18n_label()
       ret = get_stored_component_i18n_label?()

@@ -191,31 +191,30 @@ module XYZ
       #TODO!!! need to determine if this will be passed materialized virtual columns in which case we need to reformulate their types
       def process_raw_scalar_hash!(hash,db_rel,opts={})
 	cols_info = db_rel[:columns]
-        #process the table specfic columns
-	unless cols_info.nil?
-          #TODO may check whether more efficient to have top loop run over hash.keys rather than cols_info
-	  cols_info.each{|col,col_info|
-	    if hash[col]
-	      if col_info[:foreign_key_rel_type]
-	        guid = IDInfoTable.ret_foreign_key_guid(hash[col],col_info[:foreign_key_rel_type])
-	        if opts[:fk_as_ref].nil?
-	          hash[col] = guid
-	        else
-                  fk_id_info = IDInfoTable.get_row_from_guid(guid)               
-                  hash.delete(col)
-                  #add a "*" form if opts[:fk_as_ref] is prefix
-                  if opts[:fk_as_ref] == "/"
-                    hash[("*" + col.to_s).to_sym] = fk_id_info[:uri] 
-                  elsif fk_id_info[:uri] =~ Regexp.new("^#{opts[:fk_as_ref].to_s}(/.+$)")
-                    rebased_uri = $1
-                    hash[("*" + col.to_s).to_sym] = rebased_uri 
-                  end
-	        end
-	      elsif col_info[:type] == :json
-	        hash[col] = DB.ret_json_hash(hash[col],col_info,opts)
-	      end
-	    end
-	  }
+        #process the table specific columns
+	if cols_info
+          hash.each_key do |col|
+            col_info = cols_info[col]
+            next unless col_info 
+            if col_info[:foreign_key_rel_type]
+              guid = IDInfoTable.ret_foreign_key_guid(hash[col],col_info[:foreign_key_rel_type])
+              if opts[:fk_as_ref].nil?
+                hash[col] = guid
+              else
+                fk_id_info = IDInfoTable.get_row_from_guid(guid)               
+                hash.delete(col)
+                #add a "*" form if opts[:fk_as_ref] is prefix
+                if opts[:fk_as_ref] == "/"
+                  hash[("*" + col.to_s).to_sym] = fk_id_info[:uri] 
+                elsif fk_id_info[:uri] =~ Regexp.new("^#{opts[:fk_as_ref].to_s}(/.+$)")
+                  rebased_uri = $1
+                  hash[("*" + col.to_s).to_sym] = rebased_uri 
+                end
+              end
+            elsif col_info[:type] == :json
+              hash[col] = DB.ret_json_hash(hash[col],col_info,opts)
+            end
+          end
 	end
 
         #common fields
@@ -230,7 +229,8 @@ module XYZ
 	  hash[:id] = IDInfoTable.ret_guid_from_db_id(hash[:id],db_rel[:relation_type])
         end
 
-        [:ref, :ref_num].each{|x|hash.delete(x)}
+        hash.delete(:ref_num) unless opts[:keep_col_ref_num]
+        hash.delete(:ref) unless opts[:keep_col_ref]
 
 	hash.each_pair{|col,v|hash.delete(col) if v.nil?} if opts[:no_null_cols]
 

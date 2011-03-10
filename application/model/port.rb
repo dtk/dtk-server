@@ -2,15 +2,14 @@ module XYZ
   class Port < Model
     def self.create_ports_for_output_attributes(node_id_handle,cmp_id_handle)
       component = cmp_id_handle.create_object()
-      attrs_output = component.get_objects_col_from_sp_hash({:columns => [:attributes_port]},:attribute).select do |a|
-        a[:port_is_external] and a[:port_type] == "output"
+      attrs_output = component.get_attributes_ports().select do |attr|
+        attr[:port_is_external] and attr[:port_type] == "output"
       end
       return if attrs_output.empty?
       create_ports_that_wrap_attributes(node_id_handle,attrs_output)
     end
 
     def self.create_and_update_l4_ports?(link_info_list)
-      return #TODO: working on below
       return if link_info_list.empty?
       sample_attr = link_info_list.first[:input]
       node_mh = sample_attr.model_handle.createMH(:node)
@@ -35,9 +34,10 @@ module XYZ
 
       #create l4 ports
       new_l4_ports = attrs_external.map do |attr|
+        ref = port_ref(attr)
         {
           :type => "l4",
-          :ref => attr[:ref],
+          :ref => ref,
           :display_name => attr[:display_name],
           :containing_node_id => node_id,
           :node_node_id => node_id
@@ -48,19 +48,23 @@ module XYZ
       create_info = create_from_rows(model_handle,new_l4_ports,opts)
 
       #create nested ports
-      new_port_index = create_info.inject({}){|h,idh|h.merge(idh[:ref] => idh.get_id())}
+      new_port_index = create_info.inject({}){|h,ret_info|h.merge(ret_info[:ref] => ret_info[:id])}
       nested_ports = attrs_external.map do |attr|
+        ref = port_ref(attr)
         {
           :type => "external",
-          :ref => attr[:ref],
+          :ref => ref,
           :display_name => attr[:display_name],
           :external_attribute_id => attr[:id],
           :containing_node_id => node_id,
-          :port_id => new_port_index[attr[:ref]]  
+          :port_id => new_port_index[ref]
         }
       end
       nested_mh = node_id_handle.createMH(:model_name => :port, :parent_model_name => :port)
       create_from_rows(nested_mh,nested_ports)
+    end
+    def self.port_ref(attr)
+      "#{attr[:component_ref]}__#{attr[:ref]}"
     end
   end
 

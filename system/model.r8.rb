@@ -139,10 +139,9 @@ module XYZ
     end
 
     def self.create_from_rows(model_handle,rows,opts={})
-      opts = opts[:convert] ? {:convert_for_create => true} : {}
-      select_ds = SQL::ArrayDataset.create(db,rows,model_handle,opts)
+      select_ds = SQL::ArrayDataset.create(db,rows,model_handle,opts[:convert] ? {:convert_for_create => true} : {})
       override_attrs = {}
-      create_opts = {} #TODO: stub
+      create_opts = Aux::hash_subset(opts,[:returning_sql_cols])
       field_set = FieldSet.new(model_handle[:model_name],rows.first.keys)
       create_from_select(model_handle,field_set,select_ds,override_attrs,create_opts)
     end

@@ -169,8 +169,9 @@ pp component
       tpl.assign(:layout_list,layout_list)
 
       field_defs_json = JSON.generate(field_defs)
-      layout_def_json = JSON.generate(layout_list[0][:def])
-      run_javascript("R8.LayoutEditor.init(#{id},#{layout_def_json},#{field_defs_json});")
+#      layout_def_json = JSON.generate(layout_list[0][:def])
+      layout_json = JSON.generate(layout_list[0])
+      run_javascript("R8.LayoutEditor.init(#{layout_json},#{field_defs_json});")
 
       return {
         :content=>tpl.render(),

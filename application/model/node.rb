@@ -270,104 +270,7 @@ module XYZ
       indexed_ret.values
     end
 
-   private
-    class PortList
-      def self.create(type,node_id_handles=nil)
-        case type
-          when "external" then PortListExternal.new() 
-          when "l4" then PortListL4.new().set_context(node_id_handles) 
-          else PortList.new
-        end
-      end
-      def attr_is_pruned?(attr)
-        false
-      end
-      def link_is_pruned?(link)
-        false
-      end
-
-      def add_or_collapse_attribute!(attr,cmp)
-        @top_level << attr
-      end
-      def top_level()
-        @top_level
-      end
-
-      def get_input_port_link_info(node_id_handles)
-        input_port_cols = [:id, :display_name, :input_port_links]
-        Model.get_objects_in_set_from_sp_hash(node_id_handles,:columns => input_port_cols).reject do |r|
-          attr_is_pruned?(r[:attribute]) or attr_is_pruned?(r[:attr_other_end]) or link_is_pruned?(r[:attribute_link])
-        end
-      end
-      def get_output_port_link_info(node_id_handles)
-        output_port_cols = [:id, :display_name, :output_port_links]
-        Model.get_objects_in_set_from_sp_hash(node_id_handles,:columns => output_port_cols).reject do |r|
-          attr_is_pruned?(r[:attribute]) or attr_is_pruned?(r[:attr_other_end]) or link_is_pruned?(r[:attribute_link])
-        end
-      end
-     private
-      def initialize()
-        @top_level = Array.new
-      end
-    end
-
-    class PortListExternal < PortList
-      def attr_is_pruned?(attr)
-        not attr[:port_is_external]
-      end
-    end
-
-    class PortListL4 < PortListExternal
-      def initialize()
-        super
-        @equiv_classes = Hash.new
-        @ports_other_end = nil
-      end
-
-      def attr_is_pruned?(attr)
-        not %w{sap_ref__l4 sap__l4}.include?(attr[:display_name])
-      end
-      def link_is_pruned?(link)
-        not link[:type] == "external"
-      end
-
-      def add_or_collapse_attribute!(attr,cmp)
-        equiv_class = ret_equiv_class(attr,cmp)
-        @equiv_classes[equiv_class] ||= Array.new
-        @equiv_classes[equiv_class] << attr
-      end
-      def top_level()
-        @equiv_classes.values.map{|equiv_class|attr_with_min_id(equiv_class)}
-      end
-
-      def set_context(node_id_handles)
-        return self unless node_id_handles and not node_id_handles.empty?
-       # @indexed_port_links = get_input_port_link_info(node_id_handles).inject ..
-        @ports_other_end = get_input_port_link_info(node_id_handles).inject({}) do |h,link_info|
-          #implicit assumption is that theer is just one link conencted to l4 input
-          h.merge(link_info[:attribute][:id] => link_info[:attr_other_end][:id])
-        end
-        self
-      end
-
-     private
-      def ret_equiv_class(attr,cmp)
-        #TODO: if not connected then using attr own id to make unconencted ports show up
-        @ports_other_end[attr[:id]]||attr[:id]
-      end
-      
-      def attr_with_min_id(attrs)
-        ret = attrs.first
-        attrs[1..attrs.size-1].each do |a|
-          ret = a if a[:id] < ret[:id]
-        end
-        ret
-      end
-    end
-
-    #TODO: unify with above
     #returns [connected_links,dangling_links]
-public
     def self.get_external_connected_port_links(id_handles)
       ret = [Array.new,Array.new]
 
@@ -403,17 +306,18 @@ public
 
     def clone_post_copy_hook(clone_copy_output,opts={})
       cmp_id_handle = clone_copy_output.id_handles.first
-      add_needed_l4_sap_attributes(cmp_id_handle)
+      create_needed_l4_sap_attributes(cmp_id_handle)
+      Port.create_external_ports(id_handle,cmp_id_handle)
       parent_action_id_handle = get_parent_id_handle()
       StateChange.create_pending_change_item(:new_item => cmp_id_handle, :parent => parent_action_id_handle)
     end
 
-    def add_needed_l4_sap_attributes(cmp_id_handle)
+    def create_needed_l4_sap_attributes(cmp_id_handle)
       ipv4_host_addrs_info = get_virtual_attribute("host_address_ipv4",[:id,:attribute_value],:semantic_type_summary)
       return nil unless ipv4_host_addrs_info
       ipv4_host_addrs = ipv4_host_addrs_info[:attribute_value]
       ipv4_host_addrs_idh = cmp_id_handle.createIDH({:id => ipv4_host_addrs_info[:id], :model_name => :attribute, :parent_model_name => :node})
-      sap_config_attr_idh, new_sap_attr_idh = Attribute.add_needed_l4_sap_attributes(cmp_id_handle,ipv4_host_addrs)
+      sap_config_attr_idh, new_sap_attr_idh = Attribute.create_needed_l4_sap_attributes(cmp_id_handle,ipv4_host_addrs)
       return nil unless new_sap_attr_idh
       AttributeLink.create_links_l4_sap(new_sap_attr_idh,sap_config_attr_idh,ipv4_host_addrs_idh,id_handle)
       new_sap_attr_idh

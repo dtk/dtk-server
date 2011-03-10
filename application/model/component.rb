@@ -37,29 +37,34 @@ module XYZ
 
         virtual_column :view_def_key, :type => :varchar, :hidden => true, :local_dependencies => [:id,:view_def_ref,:component_type] 
 
+        ###### virtual columns related to attributes
+        attributes_def =  {
+          :model_name => :attribute,
+          :join_type => :left_outer,
+          :convert => true,
+          :join_cond=>{:component_component_id => q(:component,:id)} #TODO: want to use p(:component,:attribute) on left hand side
+        }
+
         virtual_column :attributes, :type => :json, :hidden => true, 
         :remote_dependencies => 
-        [
-         {
-           :model_name => :attribute,
-           :join_type => :left_outer,
-           :convert => true,
-           :join_cond=>{:component_component_id => q(:component,:id)}, #TODO: want to use p(:component,:attribute) on left hand side
-           :cols => [:id,:display_name,:hidden,:description,:component_component_id,:attribute_value,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
-         }
-        ]
+        [attributes_def.merge(
+           :cols => [:id,:display_name,:hidden,:description,id(:component),:attribute_value,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
+        )]
+
         virtual_column :attributes_view_def_info, :type => :json, :hidden => true, 
         :remote_dependencies => 
-        [
-         {
-           :model_name => :attribute,
-           :join_type => :left_outer,
-           :convert => true,
-           :filter => [:and, [:eq, :hidden, false]],
-           :join_cond=>{:component_component_id => q(:component,:id)}, #TODO: want to use p(:component,:attribute) on left hand side
-           :cols => [:id,:display_name,:view_def_key,:component_component_id,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
-         }
-        ]
+        [attributes_def.merge(
+           :filter => [:eq, :hidden, false],
+           :cols => [:id,:display_name,:view_def_key,id(:component),:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
+         )]
+
+        virtual_column :attributes_port, :type => :json, :hidden => true, 
+        :remote_dependencies => 
+        [attributes_def.merge(
+           :filter => [:eq, :is_port, true],
+           :cols => [:id,:display_name,id(:component),:port_is_external]
+         )]
+        ###### end of virtual columns related to attributes
 
         virtual_column :dependencies, :type => :json, :hidden => true, 
         :remote_dependencies => 

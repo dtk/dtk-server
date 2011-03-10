@@ -415,7 +415,7 @@ pp [:nested_changes,nested_changes]
       ds.all
     end
 
-    def self.add_needed_l4_sap_attributes(cmp_id_handle,ipv4_host_addresses)
+    def self.create_needed_l4_sap_attributes(cmp_id_handle,ipv4_host_addresses)
       component_id = cmp_id_handle.get_id()
       field_set = Model::FieldSet.new(:component,[:id,:display_name,:attributes])
      #TODO: allowing feature in until nest features in base services filter = [:and, [:eq, :component__id, component_id],[:eq, :basic_type,"service"]]

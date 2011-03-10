@@ -42,7 +42,7 @@ if(!R8.LayoutEditor) {
 				if(document.getElementById('editor-tpl-wrapper') == null) {
 					var that = this;
 					var initCallback = function() {
-					    R8.LayoutEditor.init(parentId,layoutDef,fieldDefs);
+					    R8.LayoutEditor.init(layout,fieldDefs);
 					}
 					setTimeout(initCallback,25);
 					return;
@@ -54,7 +54,7 @@ if(!R8.LayoutEditor) {
 				for(var g in _layout.def.groups) {
 					_layout.def.groups[g].index = g;
 					_layout.def.groups[g].id = 'l-'+_layout.id+'-g-'+g;
-//					_layout.def.groups[g].ogName = _layout.def.groups[g].name;
+
 					if(g==0) {
 						_layout.def.groups[g].selected = 'selected';
 						_layout.def.groups[g].content_display = 'block';
@@ -81,7 +81,6 @@ if(!R8.LayoutEditor) {
 //				this.renderLayout();
 				for(var i in fieldDefs) {
 					if(!this.fieldInLayout(fieldDefs[i].name)) {
-						_availFields[fieldDefs[i].name] = fieldDefs[i];
 						this.addAvailField(fieldDefs[i]);
 					}
 				}
@@ -144,7 +143,7 @@ if(!R8.LayoutEditor) {
 					showPopup = function() {
 						that.showGtPopup(groupDef);
 					};
-				_gtPopupShowTimeout = setTimeout(showPopup,500);
+				_gtPopupShowTimeout = setTimeout(showPopup,400);
 			},
 			groupMleave: function(e) {
 				if(_draggingField == true) return;
@@ -153,9 +152,10 @@ if(!R8.LayoutEditor) {
 					clearGtPopup = function() {
 						that.clearGtPopup();
 					}
-				_gtPopupHideTimeout = setTimeout(clearGtPopup,300);
+				_gtPopupHideTimeout = setTimeout(clearGtPopup,400);
 			},
 			resetPopup: function() {
+				if(_gtPopupNode == null) return;
 				_gtPopupNode.purge(true);
 				_gtPopupNode.remove();
 				_gtPopupNode = null;
@@ -170,11 +170,11 @@ if(!R8.LayoutEditor) {
 				_gtPopupNode = this.getPopupNode(groupDef);
 
 				var gtCenter = gtRegion.left + Math.floor(gtRegion.width/2),
-					pBottom = gtNode.getY() - 5,
+					pTop = gtNode.getY() - 45,
 					pLeft = gtCenter - 75;
 //					pLeft = gtCenter - Math.floor(popupNode.get('region').width/2);
 
-				_gtPopupNode.setStyles({'bottom':pBottom+'px','left':pLeft+'px'});
+				_gtPopupNode.setStyles({'top':pTop+'px','left':pLeft+'px'});
 				R8.Utils.Y.one('#page-container').append(_gtPopupNode);
 				_gtPopupIndex = groupDef.index;
 			},
@@ -185,7 +185,7 @@ if(!R8.LayoutEditor) {
 				var clearPopup = function() {
 					that.resetPopup();
 				}
-				_gtPopupHideTimeout = setTimeout(clearPopup,700);
+				_gtPopupHideTimeout = setTimeout(clearPopup,400);
 			},
 			getPopupNode: function(groupDef) {
 				var popupNode = R8.Utils.Y.Node.create(R8.Rtpl.group_tab_popup({'group_def': groupDef})),
@@ -196,25 +196,28 @@ if(!R8.LayoutEditor) {
 					var clearPopup = function() {
 						that.clearGtPopup();
 					}
-					_gtPopupHideTimeout = setTimeout(clearPopup,700);
+					_gtPopupHideTimeout = setTimeout(clearPopup,400);
 				});
 
 				return popupNode;
 			},
-			gtToggleNameUpdate: function(groupName) {
+			gtToggleNameUpdate: function(groupId) {
 				var inputNode = R8.Utils.Y.one('#gt-name-input');
 				if(typeof(_events['gtNameChange']) != 'undefined') _events['gtNameChange'].detach();
 
-				R8.Utils.Y.one('#gt-edit-actions').setStyle('display','none');
-				R8.Utils.Y.one('#gt-rename-wrapper').setStyle('display','block');
+				if(R8.Utils.Y.one('#gt-rename-wrapper').getStyle('display') == 'block') {
+					R8.Utils.Y.one('#gt-rename-wrapper').setStyle('display','none');					
+					R8.Utils.Y.one('#gt-edit-actions').setStyle('display','block');
+				} else {
+					R8.Utils.Y.one('#gt-edit-actions').setStyle('display','none');
+					R8.Utils.Y.one('#gt-rename-wrapper').setStyle('display','block');
 
-				var that=this;
-				_events['gtNameChange'] = R8.Utils.Y.one('body').on('keyup',function(e){
-					that.gtUpdateName(R8.Utils.Y.one('#gt-name-input').get('value'));
-//					R8.Utils.Y.one('#title-txt').set('innerHTML',this.get('value'));
-//					_layout.def.i18n = this.get('value');
-				});
-				inputNode.focus();
+					var that=this;
+					_events['gtNameChange'] = R8.Utils.Y.one('body').on('keyup',function(e){
+						that.gtUpdateName(R8.Utils.Y.one('#gt-name-input').get('value'));
+					});
+					inputNode.focus();
+				}
 			},
 
 			gtUpdateName: function(newName) {
@@ -222,7 +225,31 @@ if(!R8.LayoutEditor) {
 				_layout.def.groups[_gtPopupIndex].name = newName.replace(' ','_');
 
 				R8.Utils.Y.one('#'+_layout.def.groups[_gtPopupIndex].id+'-tab').set('innerHTML',newName);
-//console.log('should update name to:'+newName);
+			},
+
+			deleteGroup: function(groupId) {
+				var groupDef = this.getGroupDefById(groupId),
+					that = this;
+
+				R8.Utils.Y.all('#'+groupDef.id+'-field-list li').each(function(){
+					R8.Utils.Y.one('#available-fields').append(this);
+					_availFields[this.get('id')] = that.getFieldDefByName(this.get('id'));
+				});
+
+				var gIndex = this.getGroupIndexById(groupDef.id),
+					gTabNode = R8.Utils.Y.one('#'+groupDef.id+'-tab'),
+					gWasSelected = false;
+
+				if(gTabNode.hasClass('selected')) gWasSelected = true;
+
+				gTabNode.purge(true).remove();
+				R8.Utils.Y.one('#'+groupDef.id+'-content').purge(true).remove();
+				R8.Utils.arrayRemove(_layout.def.groups,gIndex);
+
+				this.resetPopup();
+				if (gWasSelected && _layout.def.groups.length > 0) {
+					this.groupFocus(_layout.def.groups[0].id);
+				}
 			},
 //-------------------------------------------------------
 			loadViewInstance: function(layoutId) {
@@ -303,6 +330,12 @@ if(!R8.LayoutEditor) {
 				}
 				return false;
 			},
+			getGroupIndexById: function(groupId) {
+				for(var g in _layout.def.groups) {
+					if(_layout.def.groups[g].id == groupId) return g;
+				}
+				return false;
+			},
 			reset: function() {
 				_groupListNode = null;
 				_addGroupNode = null;
@@ -329,7 +362,9 @@ if(!R8.LayoutEditor) {
 			addAvailField: function(fieldDef) {
 				var availFieldsContainer = R8.Utils.Y.one('#available-fields');
 				var fieldContent = this.getFieldMarkup(fieldDef);
+
 				availFieldsContainer.append(fieldContent);
+				_availFields[fieldDef.name] = fieldDef;
 			},
 			renderLayout: function() {
 				for(var g in _layout.def.groups) {
@@ -372,21 +407,26 @@ if(!R8.LayoutEditor) {
 //				this.groupFocus(_layout.def.groups.length-1);
 			},
 			addGroup: function(e) {
-				var groupIndex = _groupListNode.get('children').size()+1;
-				var groupId = 'group-'+groupIndex;
-				var groupLabel = 'Group '+groupIndex;
+				var groupNum = (_groupListNode.get('children').size()+1),
+					newIndex = _layout.def.groups.length,
+					groupId = 'l-'+_layout.id+'-g-'+_layout.def.groups.length;
+					groupLabel = 'Group '+groupNum,
+					groupName = 'group_'+newIndex;
 
 				var newGroupNode = R8.Utils.Y.Node.create(this.getGroupMarkup(groupId,groupLabel,'selected'));
 				_groupListNode.append(newGroupNode);
 				_contentWrapperNode.append(this.getContentMarkup(groupId,'block'));
 
 				_layout.def.groups.push({
-					'name':groupId,
-					'num_cols':1,
+					'id': groupId,
+					'index': newIndex,
+					'name': groupName,
+					'num_cols': 1,
 					'i18n': groupLabel,
-					'fields':[]
+					'fields': []
 				});
-				this.groupFocus(_layout.def.groups.length-1);
+
+				this.groupFocus(groupId);
 			},
 			groupFocus: function(groupId) {
 				for(var g in _layout.def.groups) {
@@ -490,7 +530,7 @@ if(!R8.LayoutEditor) {
 								var tabOvrCallback = function() {
 										R8.LayoutEditor.groupFocus(groupId);
 									}
-								_tabSwitchTimeout = setTimeout(tabOvrCallback,1500);
+								_tabSwitchTimeout = setTimeout(tabOvrCallback,1200);
 							});
 							dObj.on('drop:exit',function(e){
 								if (_tabSwitchTimeout != null) {
@@ -513,6 +553,8 @@ if(!R8.LayoutEditor) {
 
 					Y.DD.DDM.on('drag:start', function(e) {
 						_draggingField = true;
+						that.resetPopup();
+
 						//Get our drag object
 						var drag = e.target;
 						//Set some styles here

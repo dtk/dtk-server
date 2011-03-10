@@ -1,21 +1,43 @@
 module XYZ
   class Port < Model
-    def self.create_external_ports(node_id_handle,cmp_id_handle)
+    def self.create_ports_for_external_attributes(node_id_handle,cmp_id_handle)
       component = cmp_id_handle.create_object()
       attrs_external = component.get_objects_col_from_sp_hash({:columns => [:attributes_port]},:attribute).select{|a|a[:port_is_external]}
       return if attrs_external.empty?
       node_id = node_id_handle.get_id()
-     #TODO: maek sure that external_attribute_id does not cause problems when creating and cloning a node assembly
+
       new_ports = attrs_external.map do |attr|
-        {:type => "external",
+        hash = {
+          :type => attr[:port_type] == "output" ? "l4" : "external",
           :ref => attr[:display_name],
-          :external_attribute_id => attr[:id],
+          :display_name => attr[:display_name],
           :node_node_id => node_id
         }
+        hash.merge(attr[:port_type] == "input" ? {:external_attribute_id => attr[:id]} : {})
       end
       model_handle = node_id_handle.createMH(:model_name => :port, :parent_model_name => :node)
-      create_from_rows(model_handle,new_ports)
+      opts = {:returning_sql_cols => [:display_name,:id]}
+      create_info = create_from_rows(model_handle,new_ports,opts)
+
+      #for output ports need to nest in l4 ports
+      output_attrs = attrs_external.select{|a|a[:port_type] == "output"}
+      return if output_attrs.empty?
+      new_port_index = create_info.inject({}){|h,idh|h.merge(idh[:display_name] => idh.get_id())}
+      nested_ports = output_attrs.map do |attr|
+        name = attr[:display_name]
+        {
+          :type => "external",
+          :ref => name,
+          :display_name => name,
+          :external_attribute_id => attr[:id],
+          :containing_node_id => node_id,
+          :port_id => new_port_index[name]  
+        }
+      end
+      nested_mh = node_id_handle.createMH(:model_name => :port, :parent_model_name => :port)
+      create_from_rows(nested_mh,nested_ports)
     end
+
     def self.create_and_update_l4_ports?(link_info_list)
       return #TODO: below is under work
       indexed_attrs = Hash.new

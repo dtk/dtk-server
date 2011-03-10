@@ -62,7 +62,7 @@ module XYZ
         :remote_dependencies => 
         [attributes_def.merge(
            :filter => [:eq, :is_port, true],
-           :cols => [:id,:display_name,id(:component),:port_is_external]
+           :cols => [:id,:display_name,id(:component),:port_is_external,:port_type]
          )]
         ###### end of virtual columns related to attributes
 

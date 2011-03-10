@@ -12,11 +12,14 @@ if(!R8.LayoutEditor) {
 			_parentId = null,
 
 			_availFields = {},
-			_layoutDef = {},
+			_layout = null,
 			
-			_popupClearTimeout = null;
+			_gtPopupNode = null,
+			_gtPopupIndex = null,
+			_gtPopupShowTimeout = null,
+			_gtPopupHideTimeout = null;
 /*
-			_layoutDef = {
+			_layout.def = {
 				'id': 'foo',
 				'name': 'New Layout',
 				'i18n': 'Create User',
@@ -35,7 +38,7 @@ if(!R8.LayoutEditor) {
 		return {
 			layoutType: 'wspace-edit',
 
-			init: function(parentId,layoutDef,fieldDefs) {
+			init: function(layout,fieldDefs) {
 				if(document.getElementById('editor-tpl-wrapper') == null) {
 					var that = this;
 					var initCallback = function() {
@@ -44,25 +47,28 @@ if(!R8.LayoutEditor) {
 					setTimeout(initCallback,25);
 					return;
 				}
-				_parentId = parentId;
+				_layout = layout;
+				_parentId = _layout.component_component_id;
 				_fieldDefs = fieldDefs;
-				_layoutDef = layoutDef;
 
-				for(var g in _layoutDef.groups) {
+				for(var g in _layout.def.groups) {
+					_layout.def.groups[g].index = g;
+					_layout.def.groups[g].id = 'l-'+_layout.id+'-g-'+g;
+//					_layout.def.groups[g].ogName = _layout.def.groups[g].name;
 					if(g==0) {
-						_layoutDef.groups[g].selected = 'selected';
-						_layoutDef.groups[g].content_display = 'block';
+						_layout.def.groups[g].selected = 'selected';
+						_layout.def.groups[g].content_display = 'block';
 					} else {
-						_layoutDef.groups[g].selected = '';
-						_layoutDef.groups[g].content_display = 'none';
+						_layout.def.groups[g].selected = '';
+						_layout.def.groups[g].content_display = 'none';
 					}
 				}
 
-				if(typeof(_layoutDef.i18n) == 'undefined') _layoutDef.i18n = '(no title)';
+				if(typeof(_layout.def.i18n) == 'undefined') _layout.def.i18n = '(no title)';
 				this.setI18n(fieldDefs);
 				_editorTplWrapperNode = R8.Utils.Y.one('#editor-tpl-wrapper');
 				_editorTplWrapperNode.append(R8.Rtpl.wspace_edit_layout({
-					'layout_def': _layoutDef
+					'layout': _layout
 				}));
 
 				_groupListNode = R8.Utils.Y.one('#modal-tab-list');
@@ -94,19 +100,22 @@ if(!R8.LayoutEditor) {
 				});
 				R8.Utils.Y.one('#title-input').on('change',function(e){
 					R8.Utils.Y.one('#title-txt').set('innerHTML',this.get('value'));
-					_layoutDef.i18n = this.get('value');
+					_layout.def.i18n = this.get('value');
 				});
 				R8.Utils.Y.one('#title-input').on('blur',function(e){
 					var inputVal = R8.Utils.Y.one('#title-input').get('value');
 					R8.Utils.Y.one('#title-input-wrapper').setStyle('display','none');
 					R8.Utils.Y.one('#title-txt').setStyles({'display':'block'});
-					_layoutDef.i18n = inputVal;
+					_layout.def.i18n = inputVal;
 				});
 
 				_events['addGroupClick'] = _addGroupNode.on('click',this.addGroup,this);
 				_events['groupClick'] = R8.Utils.Y.delegate('click',this.groupClick,'#modal-tab-list','.tab',this);
+
+//-----Group Popup----------
 				_events['groupMenter'] = R8.Utils.Y.delegate('mouseenter',this.groupMenter,'#modal-tab-list','.tab',this);
 				_events['groupMleave'] = R8.Utils.Y.delegate('mouseleave',this.groupMleave,'#modal-tab-list','.tab',this);
+//--------------------------
 
 //				_events['groupDblClick'] = R8.Utils.Y.delegate('dblclick',function(e){
 //					console.log('hello there...');
@@ -114,58 +123,108 @@ if(!R8.LayoutEditor) {
 
 				this.setupDD();
 			},
+//-------------Group Popup--------------------------
 			groupMenter: function(e) {
 				if(_draggingField == true) return;
-				var tempPopupNode = R8.Utils.Y.one('#gt-popup');
-				if (tempPopupNode != null) {
-					tempPopupNode.purge(true);
-					tempPopupNode.remove();
+
+				var that = this,
+					gNodeId = e.currentTarget.get('id'),
+					groupId = gNodeId.replace('-tab','');
+
+				if(_gtPopupNode != null) {
+					_gtPopupHideTimeout = null;
+					if (_gtPopupNode.getAttribute('data-gId') == groupId) {
+						return;
+					} else {
+						this.resetPopup();
+					}
 				}
-				_popupClearTimeout = null;
-				var groupId = e.currentTarget.get('id'),
-					gtRegion = e.currentTarget.get('region'),
-					groupName = groupId.replace('-tab',''),
-					groupDef = this.getGroupDefByName(groupName),
-					popupNode = this.getPopupNode(groupDef);
 
-				popupNode.setStyle('display','none');
-				R8.Utils.Y.one('#page-container').append(popupNode);
-
-				var gtCenter = gtRegion.left + Math.floor(gtRegion.width/2),
-					pBottom = gtRegion.top + 10,
-					pLeft = gtCenter - 100;
-//					pLeft = gtCenter - Math.floor(popupNode.get('region').width/2);
-
-				popupNode.setStyles({'bottom':pBottom+'px','left':pLeft+'px','display':'block'});
+				var	groupDef = this.getGroupDefById(groupId),
+					showPopup = function() {
+						that.showGtPopup(groupDef);
+					};
+				_gtPopupShowTimeout = setTimeout(showPopup,500);
 			},
 			groupMleave: function(e) {
 				if(_draggingField == true) return;
 
-				var groupId = e.currentTarget.get('id'),
-					groupName = groupId.replace('-tab',''),
-					that = this;
-
-				var clearPopup = function() {
-					that.clearGroupPopup(groupName);
-				}
-				_popupClearTimeout = setTimeout(clearPopup,500);
+				var that = this,
+					clearGtPopup = function() {
+						that.clearGtPopup();
+					}
+				_gtPopupHideTimeout = setTimeout(clearGtPopup,300);
 			},
-			clearGroupPopup: function() {
-				if(_popupClearTimeout == null) return;
+			resetPopup: function() {
+				_gtPopupNode.purge(true);
+				_gtPopupNode.remove();
+				_gtPopupNode = null;
+				_gtPopupIndex = null;
+			},
+			showGtPopup: function(groupDef) {
+				_gtPopupShowTimeout = null;
+
+				var gtNode = R8.Utils.Y.one('#'+groupDef.id+'-tab'),
+					gtRegion = gtNode.get('region');
+
+				_gtPopupNode = this.getPopupNode(groupDef);
+
+				var gtCenter = gtRegion.left + Math.floor(gtRegion.width/2),
+					pBottom = gtNode.getY() - 5,
+					pLeft = gtCenter - 75;
+//					pLeft = gtCenter - Math.floor(popupNode.get('region').width/2);
+
+				_gtPopupNode.setStyles({'bottom':pBottom+'px','left':pLeft+'px'});
+				R8.Utils.Y.one('#page-container').append(_gtPopupNode);
+				_gtPopupIndex = groupDef.index;
+			},
+			clearGtPopup: function() {
+				if(_gtPopupHideTimeout == null) return;
+
+				var that = this;
 				var clearPopup = function() {
-					R8.Utils.Y.one('#gt-popup').remove();
+					that.resetPopup();
 				}
-				_popupClearTimeout = setTimeout(clearPopup,700);
+				_gtPopupHideTimeout = setTimeout(clearPopup,700);
 			},
 			getPopupNode: function(groupDef) {
-				var popupNode = R8.Utils.Y.Node.create(R8.Rtpl.group_tab_popup({'group_def': groupDef}));
+				var popupNode = R8.Utils.Y.Node.create(R8.Rtpl.group_tab_popup({'group_def': groupDef})),
+					that=this;
 
-				popupNode.on('mouseenter',function(e){clearTimeout(_popupClearTimeout);});
-				popupNode.on('mouseleave',this.clearGroupPopup);
+				popupNode.on('mouseenter',function(e){clearTimeout(_gtPopupHideTimeout);});
+				popupNode.on('mouseleave',function(e){
+					var clearPopup = function() {
+						that.clearGtPopup();
+					}
+					_gtPopupHideTimeout = setTimeout(clearPopup,700);
+				});
 
 				return popupNode;
 			},
+			gtToggleNameUpdate: function(groupName) {
+				var inputNode = R8.Utils.Y.one('#gt-name-input');
+				if(typeof(_events['gtNameChange']) != 'undefined') _events['gtNameChange'].detach();
 
+				R8.Utils.Y.one('#gt-edit-actions').setStyle('display','none');
+				R8.Utils.Y.one('#gt-rename-wrapper').setStyle('display','block');
+
+				var that=this;
+				_events['gtNameChange'] = R8.Utils.Y.one('body').on('keyup',function(e){
+					that.gtUpdateName(R8.Utils.Y.one('#gt-name-input').get('value'));
+//					R8.Utils.Y.one('#title-txt').set('innerHTML',this.get('value'));
+//					_layout.def.i18n = this.get('value');
+				});
+				inputNode.focus();
+			},
+
+			gtUpdateName: function(newName) {
+				_layout.def.groups[_gtPopupIndex].i18n = newName;
+				_layout.def.groups[_gtPopupIndex].name = newName.replace(' ','_');
+
+				R8.Utils.Y.one('#'+_layout.def.groups[_gtPopupIndex].id+'-tab').set('innerHTML',newName);
+//console.log('should update name to:'+newName);
+			},
+//-------------------------------------------------------
 			loadViewInstance: function(layoutId) {
 				var params = {
 						cfg: {
@@ -181,11 +240,11 @@ if(!R8.LayoutEditor) {
 				}
 			},
 			getCurrentDef: function() {
-				var currentDef = _layoutDef;
+				var currentDef = _layout.def;
 				var that = this;
-				for(var g in _layoutDef.groups) {
+				for(var g in _layout.def.groups) {
 					currentDef.groups[g].fields = [];
-					R8.Utils.Y.all('#'+_layoutDef.groups[g].name+'-field-list li').each(function(){
+					R8.Utils.Y.all('#'+_layout.def.groups[g].id+'-field-list li').each(function(){
 						currentDef.groups[g].fields.push(that.getFieldDefByName(this.get('id')));
 					});
 				}
@@ -193,7 +252,7 @@ if(!R8.LayoutEditor) {
 			},
 			save: function() {
 				var layoutDef = this.getCurrentDef();
-				var layoutDefJson = R8.Utils.Y.JSON.stringify(_layoutDef),
+				var layoutDefJson = R8.Utils.Y.JSON.stringify(_layout.def),
 					params = {
 						'cfg': {
 							form: {
@@ -207,7 +266,7 @@ if(!R8.LayoutEditor) {
 				R8.Ctrl.call('component/save_layout/'+_parentId,params);
 			},
 			deploy: function() {
-				var layoutDefJson = R8.Utils.Y.JSON.stringify(_layoutDef),
+				var layoutDefJson = R8.Utils.Y.JSON.stringify(_layout.def),
 					params = {
 						'cfg': {
 							form: {
@@ -223,9 +282,9 @@ if(!R8.LayoutEditor) {
 //-----------------------------------------
 //TODO: remove after cleanup
 			setI18n: function(fieldDefs) {
-				for(var g in _layoutDef.groups) {
-					for(var f in _layoutDef.groups[g].fields) {
-						_layoutDef.groups[g].fields[f].i18n = this.getFieldI18n(_layoutDef.groups[g].fields[f].name,fieldDefs);
+				for(var g in _layout.def.groups) {
+					for(var f in _layout.def.groups[g].fields) {
+						_layout.def.groups[g].fields[f].i18n = this.getFieldI18n(_layout.def.groups[g].fields[f].name,fieldDefs);
 					}
 				}
 			},
@@ -238,9 +297,9 @@ if(!R8.LayoutEditor) {
 				return fName;
 			},
 //-----------------------------------------
-			getGroupDefByName: function(groupName) {
-				for(var g in _layoutDef.groups) {
-					if(_layoutDef.groups[g].name == groupName) return _layoutDef.groups[g];
+			getGroupDefById: function(groupId) {
+				for(var g in _layout.def.groups) {
+					if(_layout.def.groups[g].id == groupId) return _layout.def.groups[g];
 				}
 				return false;
 			},
@@ -256,11 +315,11 @@ if(!R8.LayoutEditor) {
 				R8.Utils.Y.one('#title-input-wrapper').setStyle('display','none');
 				R8.Utils.Y.one('#title-txt').setStyles({'display':'block'});
 
-				_layoutDef.i18n = inputVal;
+				_layout.def.i18n = inputVal;
 			},
 			fieldInLayout: function(fieldName) {
-				for(var g in _layoutDef.groups) {
-					var fieldList = _layoutDef.groups[g].fields;
+				for(var g in _layout.def.groups) {
+					var fieldList = _layout.def.groups[g].fields;
 					for(var f in fieldList) {
 						if(fieldList[f].name == fieldName) return true;
 					}
@@ -273,11 +332,11 @@ if(!R8.LayoutEditor) {
 				availFieldsContainer.append(fieldContent);
 			},
 			renderLayout: function() {
-				for(var g in _layoutDef.groups) {
+				for(var g in _layout.def.groups) {
 					if(g==0) {
-						_layoutDef.groups[g].focus=true;
+						_layout.def.groups[g].focus=true;
 					}
-					this.renderGroup(_layoutDef.groups[g]);
+					this.renderGroup(_layout.def.groups[g]);
 				}
 			},
 			renderGroup: function(groupDef) {
@@ -303,14 +362,14 @@ if(!R8.LayoutEditor) {
 					groupFListContainer.append(fieldContent);
 				}
 /*
-				_layoutDef.groups.push({
+				_layout.def.groups.push({
 					'name':groupId,
 					'num_cols':1,
 					'i18n': groupLabel,
 					'fields':[]
 				});
 */
-//				this.groupFocus(_layoutDef.groups.length-1);
+//				this.groupFocus(_layout.def.groups.length-1);
 			},
 			addGroup: function(e) {
 				var groupIndex = _groupListNode.get('children').size()+1;
@@ -321,18 +380,17 @@ if(!R8.LayoutEditor) {
 				_groupListNode.append(newGroupNode);
 				_contentWrapperNode.append(this.getContentMarkup(groupId,'block'));
 
-				_layoutDef.groups.push({
+				_layout.def.groups.push({
 					'name':groupId,
 					'num_cols':1,
 					'i18n': groupLabel,
 					'fields':[]
 				});
-				this.groupFocus(_layoutDef.groups.length-1);
+				this.groupFocus(_layout.def.groups.length-1);
 			},
-			groupFocus: function(groupIndex) {
-				var groupId = _layoutDef.groups[groupIndex].name;
-				for(var g in _layoutDef.groups) {
-					var gId = _layoutDef.groups[g].name;
+			groupFocus: function(groupId) {
+				for(var g in _layout.def.groups) {
+					var gId = _layout.def.groups[g].id;
 					R8.Utils.Y.one('#'+gId+'-tab').removeClass('selected');
 					R8.Utils.Y.one('#'+gId+'-content').setStyle('display','none');
 				}
@@ -341,13 +399,12 @@ if(!R8.LayoutEditor) {
 			},
 			groupClick: function(e) {
 				var id = e.currentTarget.get('id'),
-					groupId = id.replace('-tab',''),
-					groupIndex = this.getGIndexByName(groupId);
-				this.groupFocus(groupIndex);
+					groupId = id.replace('-tab','');
+				this.groupFocus(groupId);
 			},
 			getGIndexByName: function(groupName) {
-				for(var g in _layoutDef.groups) {
-					if(groupName === _layoutDef.groups[g].name) return g;
+				for(var g in _layout.def.groups) {
+					if(groupName === _layout.def.groups[g].name) return g;
 				}
 				return false;
 			},
@@ -408,8 +465,8 @@ if(!R8.LayoutEditor) {
 					});
 
 					Y.DD.DDM.on('drag:mouseDown',function(e){
-						for(var g in _layoutDef.groups) {
-							var gId = _layoutDef.groups[g].name;
+						for(var g in _layout.def.groups) {
+							var gId = _layout.def.groups[g].id;
 							var gFieldNode = Y.one('#'+gId+'-field-list');
 							if(!gFieldNode.hasClass('yui3-dd-drop')) {
 								var dObj = new Y.DD.Drop({
@@ -431,7 +488,7 @@ if(!R8.LayoutEditor) {
 								var id = e.currentTarget.get('node').get('id'),
 									groupId = id.replace('-tab','');
 								var tabOvrCallback = function() {
-										R8.LayoutEditor.groupFocus(that.getGIndexByName(groupId));
+										R8.LayoutEditor.groupFocus(groupId);
 									}
 								_tabSwitchTimeout = setTimeout(tabOvrCallback,1500);
 							});
@@ -514,8 +571,8 @@ if(!R8.LayoutEditor) {
 						});
 					});
 
-					for(var g in _layoutDef.groups) {
-						var groupId = _layoutDef.groups[g].name;
+					for(var g in _layout.def.groups) {
+						var groupId = _layout.def.groups[g].id;
 
 						var fields = Y.Node.all('#'+groupId+'-field-list li');
 						fields.each(function(v, k) {

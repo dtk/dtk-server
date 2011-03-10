@@ -12,7 +12,9 @@ if(!R8.LayoutEditor) {
 			_parentId = null,
 
 			_availFields = {},
-			_layoutDef = {};
+			_layoutDef = {},
+			
+			_popupClearTimeout = null;
 /*
 			_layoutDef = {
 				'id': 'foo',
@@ -56,6 +58,7 @@ if(!R8.LayoutEditor) {
 					}
 				}
 
+				if(typeof(_layoutDef.i18n) == 'undefined') _layoutDef.i18n = '(no title)';
 				this.setI18n(fieldDefs);
 				_editorTplWrapperNode = R8.Utils.Y.one('#editor-tpl-wrapper');
 				_editorTplWrapperNode.append(R8.Rtpl.wspace_edit_layout({
@@ -102,6 +105,8 @@ if(!R8.LayoutEditor) {
 
 				_events['addGroupClick'] = _addGroupNode.on('click',this.addGroup,this);
 				_events['groupClick'] = R8.Utils.Y.delegate('click',this.groupClick,'#modal-tab-list','.tab',this);
+				_events['groupMenter'] = R8.Utils.Y.delegate('mouseenter',this.groupMenter,'#modal-tab-list','.tab',this);
+				_events['groupMleave'] = R8.Utils.Y.delegate('mouseleave',this.groupMleave,'#modal-tab-list','.tab',this);
 
 //				_events['groupDblClick'] = R8.Utils.Y.delegate('dblclick',function(e){
 //					console.log('hello there...');
@@ -109,6 +114,58 @@ if(!R8.LayoutEditor) {
 
 				this.setupDD();
 			},
+			groupMenter: function(e) {
+				if(_draggingField == true) return;
+				var tempPopupNode = R8.Utils.Y.one('#gt-popup');
+				if (tempPopupNode != null) {
+					tempPopupNode.purge(true);
+					tempPopupNode.remove();
+				}
+				_popupClearTimeout = null;
+				var groupId = e.currentTarget.get('id'),
+					gtRegion = e.currentTarget.get('region'),
+					groupName = groupId.replace('-tab',''),
+					groupDef = this.getGroupDefByName(groupName),
+					popupNode = this.getPopupNode(groupDef);
+
+				popupNode.setStyle('display','none');
+				R8.Utils.Y.one('#page-container').append(popupNode);
+
+				var gtCenter = gtRegion.left + Math.floor(gtRegion.width/2),
+					pBottom = gtRegion.top + 10,
+					pLeft = gtCenter - 100;
+//					pLeft = gtCenter - Math.floor(popupNode.get('region').width/2);
+
+				popupNode.setStyles({'bottom':pBottom+'px','left':pLeft+'px','display':'block'});
+			},
+			groupMleave: function(e) {
+				if(_draggingField == true) return;
+
+				var groupId = e.currentTarget.get('id'),
+					groupName = groupId.replace('-tab',''),
+					that = this;
+
+				var clearPopup = function() {
+					that.clearGroupPopup(groupName);
+				}
+				_popupClearTimeout = setTimeout(clearPopup,500);
+			},
+			clearGroupPopup: function() {
+				if(_popupClearTimeout == null) return;
+				var clearPopup = function() {
+					R8.Utils.Y.one('#gt-popup').remove();
+				}
+				_popupClearTimeout = setTimeout(clearPopup,700);
+			},
+			getPopupNode: function(groupDef) {
+				var popupNode = R8.Utils.Y.Node.create(R8.Rtpl.group_tab_popup({'group_def': groupDef}));
+
+				popupNode.on('mouseenter',function(e){clearTimeout(_popupClearTimeout);});
+				popupNode.on('mouseleave',this.clearGroupPopup);
+
+				return popupNode;
+			},
+
 			loadViewInstance: function(layoutId) {
 				var params = {
 						cfg: {
@@ -181,6 +238,12 @@ if(!R8.LayoutEditor) {
 				return fName;
 			},
 //-----------------------------------------
+			getGroupDefByName: function(groupName) {
+				for(var g in _layoutDef.groups) {
+					if(_layoutDef.groups[g].name == groupName) return _layoutDef.groups[g];
+				}
+				return false;
+			},
 			reset: function() {
 				_groupListNode = null;
 				_addGroupNode = null;

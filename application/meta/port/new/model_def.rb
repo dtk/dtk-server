@@ -5,6 +5,12 @@
     :type=>{
       :type=>:varchar,
       :size =>25
+    },
+    :external_attribute_id=>{
+      :type=>:bigint,
+      :foreign_key_rel_type=>:attribute,
+      :on_delete=>:cascade,
+      :on_update=>:cascade
     }
   },
   :virtual_columns=>{},

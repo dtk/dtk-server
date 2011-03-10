@@ -3,7 +3,18 @@ module XYZ
     def self.create_external_ports(node_id_handle,cmp_id_handle)
       component = cmp_id_handle.create_object()
       attrs_external = component.get_objects_col_from_sp_hash({:columns => [:attributes_port]},:attribute).select{|a|a[:port_is_external]}
-      attrs_external
+      return if attrs_external.empty?
+      node_id = node_id_handle.get_id()
+     #TODO: maek sure that external_attribute_id does not cause problems when creating and cloning a node assembly
+      new_ports = attrs_external.map do |attr|
+        {:type => "external",
+          :ref => attr[:display_name],
+          :external_attribute_id => attr[:id],
+          :node_node_id => node_id
+        }
+      end
+      model_handle = node_id_handle.createMH(:model_name => :port, :parent_model_name => :node)
+      create_from_rows(model_handle,new_ports)
     end
   end
 

@@ -16,6 +16,17 @@ module XYZ
       model_handle = node_id_handle.createMH(:model_name => :port, :parent_model_name => :node)
       create_from_rows(model_handle,new_ports)
     end
+    def self.create_and_update_l4_ports?(link_info_list)
+      return #TODO: below is under work
+      indexed_attrs = Hash.new
+      link_info_list.each do |link_info|
+        indexed_attrs[link_info[:output][:id]] ||= link_info[:output]
+        indexed_attrs[link_info[:input][:id]] ||= link_info[:input]
+      end
+      attr_idhs = indexed_attrs.values.map{|a|a.id_handle}
+      conn_ports = get_objects_in_set_from_sp_hash(attr_idhs,{:cols => [:port]}).map{|r|r[:port]}
+      conn_ports
+    end
   end
 
   class PortList

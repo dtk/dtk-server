@@ -64,6 +64,16 @@ module XYZ
            :cols => [:id,:display_name,:component_type,:most_specific_type,:ancestor_id,:node_node_id]
          }]
 
+      virtual_column :port, :type => :json, :hidden => true,
+        :remote_dependencies =>
+        [
+         {
+           :model_name => :port,
+           :join_type => :inner,
+           :join_cond=>{:external_attribute_id => q(:attribute,:id)},
+           :cols => [:id,:type,:external_attribute_id,:containing_node_id,id(:node),id(:port)]
+         }]
+
       virtual_column :needs_to_be_set, :type => :boolean, :hidden => true, 
         :local_dependencies => [:value_asserted,:value_derived,:read_only,:required],
         :sql_fn => SQL.and({:attribute__value_asserted => nil},{:attribute__value_derived => nil},

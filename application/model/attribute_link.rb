@@ -74,27 +74,29 @@ module XYZ
       field_set = FieldSet.new(attr_link_mh[:model_name],rows.first.keys)
       returning_ids = create_from_select(attr_link_mh,field_set,select_ds,override_attrs,:returning_sql_cols=> [:id])
       propagate_from_create(attr_mh,attr_info,rows)
-      #TODO: might use form pass to  add_related_links? fro above
+      #TODO: might use form pass to  create_related_links? fro above
       link_info_list = rows.map{|r|{:input => attr_info[r[:input_id]],:output => attr_info[r[:output_id]]}}
 
-      add_related_links?(parent_idh,link_info_list)
+      create_related_links?(parent_idh,link_info_list)
+      #TODO: assumption is that what is created by create_related_links? has no bearing on l4 ports
+      Port.create_and_update_l4_ports?(link_info_list)
       returning_ids
     end
 
-    def self.add_related_links?(parent_idh,link_info_list)
-      link_info_list.each{|link_info|add_related_link?(parent_idh,link_info)}
+    def self.create_related_links?(parent_idh,link_info_list)
+      link_info_list.each{|link_info|create_related_link?(parent_idh,link_info)}
     end
 
     #TODO: can we make this more data driven 
-    def self.add_related_link?(parent_idh,link_info)
+    def self.create_related_link?(parent_idh,link_info)
       input_cmp = link_info[:input][:component_parent]
       if ComponentType::Application.include?(input_cmp)
         attr_db_config = input_cmp.get_virtual_attribute("db_config",[:id],:semantic_type_summary)
-        add_related_link_from_db_config(parent_idh,link_info,attr_db_config) if attr_db_config
+        create_related_link_from_db_config(parent_idh,link_info,attr_db_config) if attr_db_config
       end
     end
 
-    def self.add_related_link_from_db_config(parent_idh,link_info,attr_db_config)
+    def self.create_related_link_from_db_config(parent_idh,link_info,attr_db_config)
       db_server_component = link_info[:output][:component_parent]
       db_server_node = parent_idh.createIDH(:id => db_server_component[:node_node_id],:model_name => :node).create_object()
       db_component_idh = ComponentType::Database.clone_db_onto_db_server_node(db_server_node,db_server_component)

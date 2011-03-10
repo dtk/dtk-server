@@ -11,9 +11,14 @@
       :foreign_key_rel_type=>:attribute,
       :on_delete=>:cascade,
       :on_update=>:cascade
+    },
+    :containing_node_id=>{
+      :type=>:bigint,
+      :foreign_key_rel_type=>:node,
+      :on_delete=>:cascade,
+      :on_update=>:cascade
     }
   },
-  :virtual_columns=>{},
   :many_to_one=>[:port,:node],
   :one_to_many=>[:port]
 }

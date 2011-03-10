@@ -17,6 +17,9 @@
               "display": "ubuntu.png"
             }
           },
+          "ds_key": "[:user_data, \"/library/test/ami-ee38c987\"]",
+          "ds_source_obj_type": "image",
+          "is_deployed": true,
           "monitoring_item": {
             "check_ping": {
               "description": "ping",
@@ -54,15 +57,12 @@
               "enabled": true
             }
           },
-          "ds_key": "[:user_data, \"/library/test/ami-ee38c987\"]",
-          "is_deployed": true,
           "node_interface": {
             "eth0": {
               "type": "ethernet",
               "display_name": "eth0"
             }
           },
-          "ds_source_obj_type": "image",
           "attribute": {
             "host_addresses_ipv4": {
               "data_type": "json",
@@ -89,35 +89,35 @@
             "image_id": "ami-ee38c987"
           },
           "ds_attributes": {
-            "virtualizationType": "paravirtual",
             "type": "machine",
+            "virtualizationType": "paravirtual",
             "flavor": {
               "disk": null
             },
             "description": null,
             "state": "available",
+            "tags": {
+            },
             "product_codes": [
 
             ],
-            "tags": {
-            },
             "architecture": "i386",
             "root_device_name": "/dev/sda1",
             "root_device_type": "ebs",
             "kernel_id": "aki-3af50453",
-            "block_device_mapping": [
-              {
-                "deviceName": "/dev/sda1",
-                "deleteOnTermination": "true",
-                "volumeSize": 8,
-                "snapshotId": "snap-f9179794"
-              }
-            ],
             "location": "411986592491/rnp-chef-09-12-mcollective-1-0-ubuntu-lucid-x86_32",
             "name": "rnp-chef-09-12-mcollective-1-0-ubuntu-lucid-x86_32",
-            "is_public": false,
+            "block_device_mapping": [
+              {
+                "snapshotId": "snap-f9179794",
+                "deviceName": "/dev/sda1",
+                "deleteOnTermination": "true",
+                "volumeSize": 8
+              }
+            ],
             "id": "ami-ee38c987",
-            "owner_id": "411986592491"
+            "owner_id": "411986592491",
+            "is_public": false
           }
         }
       },
@@ -147,7 +147,7 @@
             }
           },
           "ds_name": "chef",
-          "last_collection_timestamp": "Thu Mar 10 01:33:31 +0000 2011",
+          "last_collection_timestamp": "Thu Mar 10 04:29:57 +0000 2011",
           "display_name": "chef"
         },
         "ec2": {
@@ -161,7 +161,7 @@
             }
           },
           "ds_name": "ec2",
-          "last_collection_timestamp": "Thu Mar 10 01:33:45 +0000 2011",
+          "last_collection_timestamp": "Thu Mar 10 04:30:07 +0000 2011",
           "display_name": "ec2"
         },
         "user_data": {
@@ -202,7 +202,7 @@
             }
           },
           "ds_name": "user_data",
-          "last_collection_timestamp": "Thu Mar 10 01:33:48 +0000 2011",
+          "last_collection_timestamp": "Thu Mar 10 04:30:09 +0000 2011",
           "display_name": "user_data"
         }
       },
@@ -270,15 +270,15 @@
             "recipe_name": "mysql::db"
           },
           "basic_type": "service",
-          "specific_type": "mysql_db_server",
           "component_type": "mysql__db",
           "ds_attributes": {
-            "only_one_per_node": false,
             "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}",
+            "only_one_per_node": false,
             "qualified_ref": "/library/test/mysql__db",
             "ref": "mysql__db",
             "specific_type": "mysql_db_server"
-          }
+          },
+          "specific_type": "mysql_db_server"
         },
         "hadoop_cloudera_c3": {
           "type": "instance",
@@ -377,14 +377,14 @@
             "recipe_name": "postgresql::db"
           },
           "basic_type": "database",
-          "specific_type": "postgres_db",
           "component_type": "postgresql__db",
           "ds_attributes": {
             "only_one_per_node": false,
             "qualified_ref": "/library/test/postgresql__db",
             "ref": "postgresql__db",
             "specific_type": "postgres_db"
-          }
+          },
+          "specific_type": "postgres_db"
         },
         "java_webapp": {
           "only_one_per_node": false,
@@ -466,11 +466,10 @@
           },
           "display_name": "java_webapp",
           "basic_type": "application",
-          "specific_type": "java_app",
           "component_type": "java_webapp",
           "ds_attributes": {
-            "only_one_per_node": false,
             "ui": "{\"images\": {\"tnail\":\"java-01.png\",\"display\":\"java-01.png\",\"tiny\":\"\"}}",
+            "only_one_per_node": false,
             "qualified_ref": "/library/test/java_webapp",
             "ref": "java_webapp",
             "dependency": {
@@ -521,7 +520,8 @@
             },
             "component_type": "java_webapp",
             "specific_type": "java_app"
-          }
+          },
+          "specific_type": "java_app"
         },
         "php__php5": {
           "type": "instance",
@@ -541,14 +541,14 @@
             "recipe_name": "php::php5"
           },
           "basic_type": "language",
-          "specific_type": "php",
           "component_type": "php__php5",
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"php.png\",\"display\":\"php.png\",\"tiny\":\"\"}}",
             "qualified_ref": "/library/test/php__php5",
             "ref": "php__php5",
             "specific_type": "php"
-          }
+          },
+          "specific_type": "php"
         },
         "wordpress": {
           "type": "instance",
@@ -780,7 +780,6 @@
             "recipe_name": "wordpress"
           },
           "basic_type": "application",
-          "specific_type": "php_app",
           "component_type": "wordpress",
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"wordpress.png\",\"display\":\"wordpress.png\",\"tiny\":\"\"}}",
@@ -795,7 +794,8 @@
               }
             },
             "specific_type": "php_app"
-          }
+          },
+          "specific_type": "php_app"
         },
         "mysql__slave": {
           "type": "instance",
@@ -1074,14 +1074,14 @@
             "recipe_name": "postgresql::server"
           },
           "basic_type": "service",
-          "specific_type": "postgres_db_server",
           "component_type": "postgresql__server",
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"postgres.png\",\"display\":\"postgres.png\",\"tiny\":\"\"}}",
             "qualified_ref": "/library/test/postgresql__server",
             "ref": "postgresql__server",
             "specific_type": "postgres_db_server"
-          }
+          },
+          "specific_type": "postgres_db_server"
         },
         "java": {
           "type": "instance",
@@ -1101,14 +1101,14 @@
             "recipe_name": "java"
           },
           "basic_type": "language",
-          "specific_type": "java",
           "component_type": "java",
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"java-01.png\",\"display\":\"java-01.png\",\"tiny\":\"\"}}",
             "qualified_ref": "/library/test/java",
             "ref": "java",
             "specific_type": "java"
-          }
+          },
+          "specific_type": "java"
         },
         "rabbitmq__edge": {
           "only_one_per_node": true,
@@ -1165,6 +1165,8 @@
               "display": "cloudera.png"
             }
           },
+          "description": "Installs hadoop-conf-pseudo and enables hadoop services",
+          "ds_key": "[:user_data, \"/library/test/hadoop_cloudera_c3__conf_pseudo\"]",
           "monitoring_item": {
             "check_hadoop_namenode_remotely": {
               "display_name": "check_hadoop_namenode_remotely",
@@ -1183,8 +1185,6 @@
               "enabled": true
             }
           },
-          "description": "Installs hadoop-conf-pseudo and enables hadoop services",
-          "ds_key": "[:user_data, \"/library/test/hadoop_cloudera_c3__conf_pseudo\"]",
           "attribute": {
             "jmxremote_password": {
               "data_type": "string",
@@ -1276,14 +1276,14 @@
             "recipe_name": "nagios::client"
           },
           "basic_type": "service",
-          "specific_type": "monitoring_agent",
           "component_type": "nagios__client",
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"nagios.png\",\"display\":\"nagios.png\",\"tiny\":\"\"}}",
             "qualified_ref": "/library/test/nagios__client",
             "ref": "nagios__client",
             "specific_type": "monitoring_agent"
-          }
+          },
+          "specific_type": "monitoring_agent"
         },
         "mysql__server": {
           "type": "instance",
@@ -1295,6 +1295,8 @@
               "display": "mysql.png"
             }
           },
+          "description": "Installs packages required for mysql servers w/o manual intervention",
+          "ds_key": "[:user_data, \"/library/test/mysql__server\"]",
           "monitoring_item": {
             "mysql_basic_health": {
               "display_name": "mysql_basic_health",
@@ -1305,8 +1307,6 @@
               "enabled": true
             }
           },
-          "description": "Installs packages required for mysql servers w/o manual intervention",
-          "ds_key": "[:user_data, \"/library/test/mysql__server\"]",
           "attribute": {
             "tunable__key_buffer": {
               "data_type": "string",
@@ -1589,14 +1589,14 @@
             "recipe_name": "mysql::server"
           },
           "basic_type": "service",
-          "specific_type": "mysql_db_server",
           "component_type": "mysql__server",
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}",
             "qualified_ref": "/library/test/mysql__server",
             "ref": "mysql__server",
             "specific_type": "mysql_db_server"
-          }
+          },
+          "specific_type": "mysql_db_server"
         },
         "user_account": {
           "type": "instance",
@@ -1710,8 +1710,8 @@
           "basic_type": "user",
           "component_type": "user_account",
           "ds_attributes": {
-            "only_one_per_node": false,
             "ui": "{\"images\": {\"tnail\":\"user.png\",\"display\":\"user.png\",\"tiny\":\"\"}}",
+            "only_one_per_node": false,
             "qualified_ref": "/library/test/user_account",
             "ref": "user_account",
             "basic_type": "user"
@@ -1727,14 +1727,14 @@
               "display": "apache.png"
             }
           },
+          "description": "Main Apache configuration",
+          "ds_key": "[:user_data, \"/library/test/apache2\"]",
           "monitoring_item": {
             "inet_service_up": {
               "display_name": "inet_service_up",
               "enabled": true
             }
           },
-          "description": "Main Apache configuration",
-          "ds_key": "[:user_data, \"/library/test/apache2\"]",
           "attribute": {
             "dir": {
               "data_type": "string",
@@ -1986,14 +1986,14 @@
             "recipe_name": "apache2"
           },
           "basic_type": "service",
-          "specific_type": "web_server",
           "component_type": "apache2",
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"apache.png\",\"display\":\"apache.png\",\"tiny\":\"\"}}",
             "qualified_ref": "/library/test/apache2",
             "ref": "apache2",
             "specific_type": "web_server"
-          }
+          },
+          "specific_type": "web_server"
         },
         "mysql__master": {
           "type": "instance",
@@ -2115,14 +2115,14 @@
             "recipe_name": "nagios::server"
           },
           "basic_type": "service",
-          "specific_type": "monitoring_server",
           "component_type": "nagios__server",
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"nagios.png\",\"display\":\"nagios.png\",\"tiny\":\"\"}}",
             "qualified_ref": "/library/test/nagios__server",
             "ref": "nagios__server",
             "specific_type": "monitoring_server"
-          }
+          },
+          "specific_type": "monitoring_server"
         },
         "redis": {
           "type": "instance",
@@ -2134,6 +2134,8 @@
               "display": "redis.png"
             }
           },
+          "description": "Installs/Configures redis",
+          "ds_key": "[:user_data, \"/library/test/redis\"]",
           "monitoring_item": {
             "inet_service_up": {
               "display_name": "inet_service_up",
@@ -2144,8 +2146,6 @@
               "enabled": true
             }
           },
-          "description": "Installs/Configures redis",
-          "ds_key": "[:user_data, \"/library/test/redis\"]",
           "attribute": {
             "sap_config__l4": {
               "data_type": "json",
@@ -2203,13 +2203,13 @@
           "ds_key": "[:user_data, \"/library/test/rabbitmq\"]",
           "display_name": "rabbitmq",
           "basic_type": "service",
-          "specific_type": "msg_bus",
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"rabbitmq.png\",\"display\":\"rabbitmq.png\",\"tiny\":\"\"}}",
             "qualified_ref": "/library/test/rabbitmq",
             "ref": "rabbitmq",
             "specific_type": "msg_bus"
-          }
+          },
+          "specific_type": "msg_bus"
         },
         "tomcat": {
           "type": "instance",

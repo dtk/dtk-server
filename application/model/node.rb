@@ -27,33 +27,20 @@ module XYZ
 
 
       ##### for connection to ports and port links
-      ports_cols_def = {:cols => [:id,id(:port),:type,id(:node),:containing_node_id,:external_attribute_id]}
+      ports_cols_def = [:id,id(:port),:type,id(:node),:containing_node_id,:external_attribute_id,:ref]
       ports_def =   
         [
          {
            :model_name => :port,
            :join_type => :inner,
            :join_cond=>{:containing_node_id => q(:node,:id)}
-         }.merge(ports_cols_def)
+         }.merge(:cols => ports_cols_def)
         ]
 
-      virtual_column :input_ports_with_links, :type => :json, :hidden => true, 
+      virtual_column :ports, :type => :json, :hidden => true, 
       :remote_dependencies => 
-        ports_def +
-        [
-         {
-           :model_name => :port_link,
-           :join_cond=>{:input_id =>q(:port,:id)},
-           :join_type => :left_outer,
-           :cols => [:id,:input_id,:output_id]
-         },
-         {
-           :model_name => :port,
-           :alias => :port_other_end,
-           :join_cond=>{:id =>q(:port_link,:output_id)},
-           :join_type => :left_outer,
-         }.merge(ports_cols_def)
-        ]
+        ports_def
+
       virtual_column :output_ports_with_links, :type => :json, :hidden => true, 
       :remote_dependencies => 
         ports_def +
@@ -69,7 +56,7 @@ module XYZ
            :alias => :port_other_end,
            :join_cond=>{:id =>q(:port_link,:input_id)},
            :join_type => :left_outer
-         }.merge(ports_cols_def)
+         }.merge(:cols => ports_cols_def)
         ]
 
       ### TODO: this may be deprecated when move to materizlaied ports
@@ -244,6 +231,13 @@ module XYZ
       get_children_from_sp_hash(:attribute,sp_hash).first
     end
 
+    def self.get_ports(id_handles)
+      get_objects_in_set_from_sp_hash(id_handles,{:cols => [:ports]},{:keep_col_ref => true}).map{|r|r[:port]}
+    end
+
+    def self.get_output_ports_with_links(id_handles)
+      get_objects_in_set_from_sp_hash(id_handles,{:cols => [:output_ports_with_links]},{:keep_col_ref => true})
+    end
 
     def get_users()
       node_user_list = get_objects_from_sp_hash(:columns => [:users])

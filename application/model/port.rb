@@ -42,16 +42,27 @@ module XYZ
     end
 
     def self.create_and_update_l4_ports?(link_info_list)
-      return #working on below
+return #working on below
       return if link_info_list.empty?
       sample_attr = link_info_list.first[:input]
       node_mh = sample_attr.model_handle.createMH(:node)
+
+      #compute indexed_input_ports
+      input_node_idhs = link_info_list.inject({}) do |h,link_info|
+        node_id = link_info[:input][:component_parent][:node_node_id]
+        h.merge(node_id => node_mh.createIDH(:id => node_id))
+      end.values
+      indexed_input_ports = Node.get_ports(input_node_idhs).inject({}) do |h,port|
+        index = port[:external_attribute_id]
+        index ? h.merge(index => port) : h
+      end
 
       output_node_idhs = link_info_list.inject({}) do |h,link_info|
         node_id = link_info[:output][:component_parent][:node_node_id]
         h.merge(node_id => node_mh.createIDH(:id => node_id))
       end.values
-      output_port_info = get_objects_in_set_from_sp_hash(output_node_idhs,{:cols => [:output_ports_with_links]})
+      output_port_info = Node.get_output_ports_with_links(output_node_idhs)
+
       #for each input in link_info_list either it must be placed under an existing l4 port or a layer 4 port must be created for it
       #in all cases the input external port must be rerooted under the (existing or new l4 port)
 
@@ -83,17 +94,21 @@ module XYZ
       input_to_l4 = Hash.new
       l4_to_create = Array.new
       link_info_list.each do |link_info|
+        add_to_l4_to_create = false
         output_id = link_info[:output][:id]
         input_attr = link_info[:input]
         unless ports = attr_to_ports[output_id]
-          l4_to_create << input_attr
+          add_to_l4_to_create = true
         else
           input_node_id = input_attr[:component_parent][:node_node_id]
           unless port = ports.find{|p|p[:node_node_id] == input_node_id}
-            l4_to_create << input_attr
+            add_to_l4_to_create = true
           else
             input_to_l4[input_attr[:id]] = port[:id] 
           end
+        end
+        if add_to_l4_to_create
+          l4_to_create << input_attr.merge(:port => indexed_input_ports[input_attr[:id]])
         end
       end
 
@@ -110,7 +125,7 @@ module XYZ
       return Array.new if attrs_external.empty?
       new_l4_ports = attrs_external.map do |attr|
         node_id = attr[:component_parent][:node_node_id]
-        ref = port_ref(attr)
+        ref = attr[:port][:ref]
         {
           :type => "l4",
           :ref => ref,

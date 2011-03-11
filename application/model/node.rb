@@ -27,37 +27,41 @@ module XYZ
 
 
       ##### for connection to ports and port links
-      ports_cols_def = [:id,id(:port),:type,id(:node),:containing_node_id,:external_attribute_id,:ref]
-      ports_def =   
+      virtual_column :ports, :type => :json, :hidden => true, 
+        :remote_dependencies => 
         [
          {
            :model_name => :port,
            :join_type => :inner,
-           :join_cond=>{:containing_node_id => q(:node,:id)}
-         }.merge(:cols => ports_cols_def)
-        ]
+           :join_cond=>{:containing_node_id => q(:node,:id)},
+           :cols => [:id,id(:port),:type,id(:node),:containing_node_id,:external_attribute_id,:ref]
+         }]
 
-      virtual_column :ports, :type => :json, :hidden => true, 
-      :remote_dependencies => 
-        ports_def
-
-      virtual_column :output_ports_with_links, :type => :json, :hidden => true, 
-      :remote_dependencies => 
-        ports_def +
+      virtual_column :output_attrs_to_l4_input_ports, :type => :json, :hidden => true,
+        :remote_dependencies =>
         [
          {
-           :model_name => :port_link,
-           :join_cond=>{:output_id =>q(:port,:id)},
-           :join_type => :left_outer,
-           :cols => [:id,:input_id,:output_id]
+           :model_name => :port,
+           :alias => :port_external_output,
+           :join_type => :inner,
+           :filter => [:eq,:type,"external"],
+           :join_cond=>{:containing_node_id => q(:node,:id)},
+           :cols => [:id,:external_attribute_id,:containing_node_id,id(:port)]
          },
          {
-           :model_name => :port,
-           :alias => :port_other_end,
-           :join_cond=>{:id =>q(:port_link,:input_id)},
-           :join_type => :left_outer
-         }.merge(:cols => ports_cols_def)
-        ]
+           :model_name => :port_link,
+           :alias => :port_link_l4,
+           :join_type => :inner,
+           :join_cond=>{:output_id => :port_external_output__port_id},
+           :cols => [:input_id]
+         },
+         { :model_name => :port,
+           :alias => :port_l4_input,
+           :join_type => :inner,
+           :filter => [:eq,:type,"l4"],
+           :join_cond=>{:id => q(:port_link_l4,:input_id)},
+           :cols => [:id,:containing_node_id]
+         }]
 
       ### TODO: this may be deprecated when move to materizlaied ports
       virtual_column :attribute_ports, :type => :json, :hidden => true, 
@@ -235,8 +239,17 @@ module XYZ
       get_objects_in_set_from_sp_hash(id_handles,{:cols => [:ports]},{:keep_col_ref => true}).map{|r|r[:port]}
     end
 
-    def self.get_output_ports_with_links(id_handles)
-      get_objects_in_set_from_sp_hash(id_handles,{:cols => [:output_ports_with_links]},{:keep_col_ref => true})
+    def self.get_output_attrs_to_l4_input_ports(id_handles)
+      rows = get_objects_in_set_from_sp_hash(id_handles,{:cols => [:output_attrs_to_l4_input_ports]},{:keep_col_ref => true})
+      return Hash.new if rows.empty?
+      #restructure so that get mapping from attribute_id to port
+      ret = Hash.new
+      rows.each do |row|
+        attr_id = row[:port_external_output][:external_attribute_id]
+        ret[attr_id] ||= Array.new
+        ret[attr_id] << row[:port_l4_input]
+      end
+      ret
     end
 
     def get_users()

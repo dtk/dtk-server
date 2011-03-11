@@ -44,7 +44,7 @@ module XYZ
     end
 
     def self.create_and_update_l4_ports?(link_info_list)
-      return #TODO working on below
+      return #TODO: working on below
       return if link_info_list.empty?
       sample_attr = link_info_list.first[:input]
       node_mh = sample_attr.model_handle.createMH(:node)
@@ -63,34 +63,10 @@ module XYZ
         node_id = link_info[:output][:component_parent][:node_node_id]
         h.merge(node_id => node_mh.createIDH(:id => node_id))
       end.values
-      output_port_info = Node.get_output_ports_with_links(output_node_idhs)
+      attr_to_ports = Node.get_output_attrs_to_l4_input_ports(output_node_idhs)
 
       #for each input in link_info_list either it must be placed under an existing l4 port or a layer 4 port must be created for it
       #in all cases the input external port must be rerooted under the (existing or new l4 port)
-
-      #for each attribute pointed to in output_port_info find the l4 port that its in and the othr end l4 port
-      port_links = Hash.new
-      output_port_info.each do |port_info|
-        output_port = port_info[:port]
-        next unless output_port[:type] == "l4"
-        next unless other_end = port_info[:port_other_end]
-        index = output_port[:id]
-        port_links[index] ||= Array.new
-        port_links[index] << other_end
-      end
-
-      #TODO: can this be directly computed by joins, rather than needing to do these "joins" in Ruby
-      #this contains output attribute to input l4 ports
-      attr_to_ports = Hash.new
-      unless port_links.empty?
-        output_port_info.each do |port_info|
-          output_port = port_info[:port]
-          next unless output_port[:type] == "external"
-          index = output_port[:external_attribute_id]
-          output_port = port_links[output_port[:port]]
-          attr_to_ports[index] = output_port if output_port
-        end
-      end
 
       #compute input to l4 mapping
       input_to_l4 = Hash.new
@@ -103,7 +79,7 @@ module XYZ
           add_to_l4_to_create = true
         else
           input_node_id = input_attr[:component_parent][:node_node_id]
-          unless port = ports.find{|p|p[:node_node_id] == input_node_id}
+          unless port = ports.find{|p|p[:containing_node_id] == input_node_id}
             add_to_l4_to_create = true
           else
             input_to_l4[input_attr[:id]] = port[:id] 
@@ -119,7 +95,7 @@ module XYZ
         input_to_l4[attr[:id]] = l4_idhs[i].get_id() 
       end
 
-      l4_idhs
+      input_to_l4
     end
   
    private

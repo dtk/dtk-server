@@ -7,9 +7,10 @@ module XYZ
       node_id = node_id_handle.get_id()
 
       new_ports = attrs_external.map do |attr|
-        ref = port_ref(attr)
+        type = attr[:port_type] == "output" ? "l4" : "external"
+        ref = port_ref(type,attr)
         hash = {
-          :type => attr[:port_type] == "output" ? "l4" : "external",
+          :type => type,
           :ref => ref,
           :display_name => attr[:display_name],
           :containing_node_id => node_id,
@@ -24,17 +25,18 @@ module XYZ
       #for output ports need to nest in l4 ports
       output_attrs = attrs_external.select{|a|a[:port_type] == "output"}
       return if output_attrs.empty?
-      new_port_index = create_info.inject({}){|h,ret_info|h.merge(ret_info[:ref] => ret_info[:id])}
+      new_port_index = create_info.inject({}){|h,ret_info|h.merge(strip_type(ret_info[:ref]) => ret_info[:id])}
 
       nested_ports = output_attrs.map do |attr|
-        ref = port_ref(attr)
+        type = "external"
+        ref = port_ref(type,attr)
         {
-          :type => "external",
+          :type => type,
           :ref => ref,
           :display_name => attr[:display_name],
           :external_attribute_id => attr[:id],
           :containing_node_id => node_id,
-          :port_id => new_port_index[ref]
+          :port_id => new_port_index[strip_type(ref)]
         }
       end
       nested_mh = node_id_handle.createMH(:model_name => :port, :parent_model_name => :port)
@@ -42,7 +44,7 @@ module XYZ
     end
 
     def self.create_and_update_l4_ports?(link_info_list)
-return #working on below
+      return #TODO working on below
       return if link_info_list.empty?
       sample_attr = link_info_list.first[:input]
       node_mh = sample_attr.model_handle.createMH(:node)
@@ -125,9 +127,10 @@ return #working on below
       return Array.new if attrs_external.empty?
       new_l4_ports = attrs_external.map do |attr|
         node_id = attr[:component_parent][:node_node_id]
-        ref = attr[:port][:ref]
+        type = "l4"
+        ref = add_type(type,strip_type(attr[:port][:ref]))
         {
-          :type => "l4",
+          :type => type,
           :ref => ref,
           :display_name => attr[:display_name],
           :containing_node_id => node_id,
@@ -138,8 +141,17 @@ return #working on below
       model_handle = sample.model_handle.createMH(:model_name => :port, :parent_model_name => :node)
       create_from_rows(model_handle,new_l4_ports)
     end
-    def self.port_ref(attr)
-      "#{attr[:component_ref]}__#{attr[:ref]}"
+   private
+    def self.port_ref(type,attr)
+      "#{type}___#{attr[:component_ref]}___#{attr[:ref]}"
+    end
+    
+    def self.strip_type(ref)
+      ref.gsub(/^[^_]+___/,"")
+    end
+
+    def self.add_type(type,stripped_ref)
+      "#{type}___#{stripped_ref}"
     end
   end
 

@@ -1,55 +1,32 @@
 module XYZ
   class Port < Model
-    def self.create_ports_for_output_attributes(node_id_handle,cmp_id_handle)
+    def self.create_ports_for_external_attributes(node_id_handle,cmp_id_handle)
       component = cmp_id_handle.create_object()
-      attrs_output = component.get_attributes_ports().select do |attr|
-        attr[:port_is_external] and attr[:port_type] == "output"
-      end
-      return if attrs_output.empty?
-      create_ports_that_wrap_attributes(node_id_handle,attrs_output)
-    end
-
-    def self.create_and_update_l4_ports?(link_info_list)
-      return if link_info_list.empty?
-      sample_attr = link_info_list.first[:input]
-      node_mh = sample_attr.model_handle.createMH(:node)
-
-      input_node_idhs = link_info_list.inject({}) do |h,link_info|
-        node_id = link_info[:input][:component_parent][:node_node_id]
-        h.merge(node_id => node_mh.createIDH(:id => node_id))
-      end.values
-      input_port_info = get_objects_in_set_from_sp_hash(input_node_idhs,{:cols => [:input_ports_with_links]})
-
-      output_node_idhs = link_info_list.inject({}) do |h,link_info|
-        node_id = link_info[:output][:component_parent][:node_node_id]
-        h.merge(node_id => node_mh.createIDH(:id => node_id))
-      end.values
-      output_port_info = get_objects_in_set_from_sp_hash(output_node_idhs,{:cols => [:output_ports_with_links]})
-      output_port_info
-    end
-  
-   private
-    def self.create_ports_that_wrap_attributes(node_id_handle,attrs_external)
+      attrs_external = component.get_attributes_ports().select{|a|a[:port_is_external]}
+      return if attrs_external.empty?
       node_id = node_id_handle.get_id()
 
-      #create l4 ports
-      new_l4_ports = attrs_external.map do |attr|
+      new_ports = attrs_external.map do |attr|
         ref = port_ref(attr)
-        {
-          :type => "l4",
+        hash = {
+          :type => attr[:port_type] == "output" ? "l4" : "external",
           :ref => ref,
           :display_name => attr[:display_name],
           :containing_node_id => node_id,
           :node_node_id => node_id
         }
+        hash.merge(attr[:port_type] == "input" ? {:external_attribute_id => attr[:id]} : {})
       end
       model_handle = node_id_handle.createMH(:model_name => :port, :parent_model_name => :node)
       opts = {:returning_sql_cols => [:ref,:id]}
-      create_info = create_from_rows(model_handle,new_l4_ports,opts)
+      create_info = create_from_rows(model_handle,new_ports,opts)
 
-      #create nested ports
+      #for output ports need to nest in l4 ports
+      output_attrs = attrs_external.select{|a|a[:port_type] == "output"}
+      return if output_attrs.empty?
       new_port_index = create_info.inject({}){|h,ret_info|h.merge(ret_info[:ref] => ret_info[:id])}
-      nested_ports = attrs_external.map do |attr|
+
+      nested_ports = output_attrs.map do |attr|
         ref = port_ref(attr)
         {
           :type => "external",
@@ -62,6 +39,88 @@ module XYZ
       end
       nested_mh = node_id_handle.createMH(:model_name => :port, :parent_model_name => :port)
       create_from_rows(nested_mh,nested_ports)
+    end
+
+    def self.create_and_update_l4_ports?(link_info_list)
+      return #working on below
+      return if link_info_list.empty?
+      sample_attr = link_info_list.first[:input]
+      node_mh = sample_attr.model_handle.createMH(:node)
+
+      output_node_idhs = link_info_list.inject({}) do |h,link_info|
+        node_id = link_info[:output][:component_parent][:node_node_id]
+        h.merge(node_id => node_mh.createIDH(:id => node_id))
+      end.values
+      output_port_info = get_objects_in_set_from_sp_hash(output_node_idhs,{:cols => [:output_ports_with_links]})
+      #for each input in link_info_list either it must be placed under an existing l4 port or a layer 4 port must be created for it
+      #in all cases the input external port must be rerooted under the (existing or new l4 port)
+
+      #for each attribute pointed to in output_port_info find the l4 port that its in and the othr end l4 port
+      port_links = Hash.new
+      output_port_info.each do |port_info|
+        output_port = port_info[:port]
+        next unless output_port[:type] == "l4"
+        next unless other_end = port_info[:port_other_end]
+        index = output_port[:id]
+        port_links[index] ||= Array.new
+        port_links[index] << other_end
+      end
+
+      #TODO: can this be directly computed by joins, rather than needing to do these "joins" in Ruby
+      #this contains output attribute to input l4 ports
+      attr_to_ports = Hash.new
+      unless port_links.empty?
+        output_port_info.each do |port_info|
+          output_port = port_info[:port]
+          next unless output_port[:type] == "external"
+          index = output_port[:external_attribute_id]
+          output_port = port_links[output_port[:port]]
+          attr_to_ports[index] = output_port if output_port
+        end
+      end
+
+      #compute input to l4 mapping
+      input_to_l4 = Hash.new
+      l4_to_create = Array.new
+      link_info_list.each do |link_info|
+        output_id = link_info[:output][:id]
+        input_attr = link_info[:input]
+        unless ports = attr_to_ports[output_id]
+          l4_to_create << input_attr
+        else
+          input_node_id = input_attr[:component_parent][:node_node_id]
+          unless port = ports.find{|p|p[:node_node_id] == input_node_id}
+            l4_to_create << input_attr
+          else
+            input_to_l4[input_attr[:id]] = port[:id] 
+          end
+        end
+      end
+
+      l4_idhs = create_l4_ports(node_id_handle,l4_to_create)
+      l4_to_create.each_with_index do |attr,i|
+        input_to_l4[attr[:id]] = l4_idhs[i].get_id() 
+      end
+
+      l4_idhs
+    end
+  
+   private
+    def self.create_l4_ports(node_id_handle,attrs_external)
+      return Array.new if attrs_external.empty?
+      node_id = node_id_handle.get_id()
+      new_l4_ports = attrs_external.map do |attr|
+        ref = port_ref(attr)
+        {
+          :type => "l4",
+          :ref => ref,
+          :display_name => attr[:display_name],
+          :containing_node_id => node_id,
+          :node_node_id => node_id
+        }
+      end
+      model_handle = node_id_handle.createMH(:model_name => :port, :parent_model_name => :node)
+      create_from_rows(model_handle,new_l4_ports)
     end
     def self.port_ref(attr)
       "#{attr[:component_ref]}__#{attr[:ref]}"

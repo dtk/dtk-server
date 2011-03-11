@@ -79,7 +79,7 @@ module XYZ
 
       create_related_links?(parent_idh,link_info_list)
       #TODO: assumption is that what is created by create_related_links? has no bearing on l4 ports
-      Port.create_and_update_l4_ports?(link_info_list)
+      Port.create_and_update_l4_ports_and_links?(parent_idh,link_info_list)
       returning_ids
     end
 

@@ -64,6 +64,26 @@ module XYZ
            :cols => [:id,:display_name,:component_type,:most_specific_type,:ancestor_id,:node_node_id]
          }]
 
+      virtual_column :port_info, :type => :boolean, :hidden => true,
+      :remote_dependencies => 
+        [
+         {
+           :model_name => :port,
+           :alias => :port_external,
+           :join_type => :inner,
+           :filter => [:eq,:type,"external"],
+           :join_cond=>{:external_attribute_id => q(:attribute,:id)},
+           :cols => [:id,id(:port),:type,id(:node),:containing_node_id,:external_attribute_id,:ref]
+         },
+         {
+           :model_name => :port,
+           :alias => :port_l4,
+           :join_type => :left_outer,
+           :filter => [:eq,:type,"l4"],
+           :join_cond=>{:id => q(:port_external,:port_id)},
+           :cols => [:id,id(:port),:type,id(:node),:containing_node_id,:external_attribute_id,:ref]
+         }]
+
       virtual_column :needs_to_be_set, :type => :boolean, :hidden => true, 
         :local_dependencies => [:value_asserted,:value_derived,:read_only,:required],
         :sql_fn => SQL.and({:attribute__value_asserted => nil},{:attribute__value_derived => nil},
@@ -281,6 +301,10 @@ module XYZ
     def get_constraints()
       dependency_list = get_objects_col_from_sp_hash({:columns => [:dependencies]},:dependencies)
       Constraints.new(:or,dependency_list.map{|dep|Constraint.create(dep)})
+    end
+    
+    def self.get_port_info(id_handles)
+      get_objects_in_set_from_sp_hash(id_handles,{:cols => [:port_info]},{:keep_col_ref => true})
     end
 
 

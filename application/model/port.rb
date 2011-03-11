@@ -97,7 +97,7 @@ module XYZ
         end
       end
 
-      l4_idhs = create_l4_ports(node_id_handle,l4_to_create)
+      l4_idhs = create_l4_ports(l4_to_create)
       l4_to_create.each_with_index do |attr,i|
         input_to_l4[attr[:id]] = l4_idhs[i].get_id() 
       end
@@ -106,10 +106,10 @@ module XYZ
     end
   
    private
-    def self.create_l4_ports(node_id_handle,attrs_external)
+    def self.create_l4_ports(attrs_external)
       return Array.new if attrs_external.empty?
-      node_id = node_id_handle.get_id()
       new_l4_ports = attrs_external.map do |attr|
+        node_id = attr[:component_parent][:node_node_id]
         ref = port_ref(attr)
         {
           :type => "l4",
@@ -119,7 +119,8 @@ module XYZ
           :node_node_id => node_id
         }
       end
-      model_handle = node_id_handle.createMH(:model_name => :port, :parent_model_name => :node)
+      sample = attrs_external.first
+      model_handle = sample.model_handle.createMH(:model_name => :port, :parent_model_name => :node)
       create_from_rows(model_handle,new_l4_ports)
     end
     def self.port_ref(attr)

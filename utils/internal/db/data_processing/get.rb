@@ -194,6 +194,7 @@ module XYZ
         #process the table specific columns
 	if cols_info
           hash.each_key do |col|
+            next if hash[col].nil?
             col_info = cols_info[col]
             next unless col_info 
             if col_info[:foreign_key_rel_type]

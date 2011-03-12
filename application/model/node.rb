@@ -34,7 +34,7 @@ module XYZ
            :model_name => :port,
            :join_type => :inner,
            :join_cond=>{:node_node_id => q(:node,:id)},
-           :cols => [:id,:type,id(:node),:containing_port_id,:external_attribute_id,:ref]
+           :cols => [:id,:type,id(:node),:containing_port_id,:external_attribute_id,:port_direction,:ref]
          }]
 
       virtual_column :output_attrs_to_l4_input_ports, :type => :json, :hidden => true,
@@ -238,7 +238,71 @@ module XYZ
     def self.get_ports(id_handles)
       get_objects_in_set_from_sp_hash(id_handles,{:cols => [:ports]},{:keep_ref_cols => true}).map{|r|r[:port]}
     end
+=begin
+    def get_ports(type=nil)
+      port_list = self.class.get_ports([id_handle]).select do |port|
+        type.nil? or 
+          case type
+            when "external" then port[:type] == "external"
+            #if type is l4 return l4 ports and external ones not yet placed under a l4 port
+            when "l4" then port[:type] == "l4" or (port[:type] == "external" and port[:containing_port_id].nil?)
+          end
+      end
 
+      return Array.new if port_list.nil?
+
+
+      i18n = get_i18n_mappings_for_models(:component,:attribute)
+
+      pruned_attr_port_rows = attr_port_rows.reject{|r| r[:attribute].nil? or port_list.attr_is_pruned?(r[:attribute])}
+      return Array.new if pruned_attr_port_rows.empty?
+      #to allow group procesisng of needed info
+
+      pruned_attr_port_rows.each do |r|
+        attr = r[:attribute]
+        cmp = r[:component]||{}
+        attr_name = attr[:display_name]
+        cmp_name = cmp[:display_name]
+        attr[:display_name] =  get_i18n_port_name(i18n,attr_name,cmp_name) if attr_name and cmp_name
+        #TODO: hack to remove description
+        attr[:description] = ""
+        port_list.add_or_collapse_attribute!(attr,cmp)
+      end
+
+      port_list_top_level = port_list.top_level()
+      Model::materialize_virtual_columns!(port_list_top_level,[:port_type])
+      port_list_top_level
+    end
+=end
+#=begin
+#DEPRECATE
+    def get_ports(type=nil)
+      port_list = PortList.create(type,[id_handle])
+
+      attr_port_rows = get_objects_from_sp_hash(:columns => [:attribute_ports])
+
+      i18n = get_i18n_mappings_for_models(:component,:attribute)
+
+      pruned_attr_port_rows = attr_port_rows.reject{|r| r[:attribute].nil? or port_list.attr_is_pruned?(r[:attribute])}
+      return Array.new if pruned_attr_port_rows.empty?
+      #to allow group procesisng of needed info
+
+      pruned_attr_port_rows.each do |r|
+        attr = r[:attribute]
+        cmp = r[:component]||{}
+        attr_name = attr[:display_name]
+        cmp_name = cmp[:display_name]
+        attr[:display_name] =  get_i18n_port_name(i18n,attr_name,cmp_name) if attr_name and cmp_name
+        #TODO: hack to remove description
+        attr[:description] = ""
+        port_list.add_or_collapse_attribute!(attr,cmp)
+      end
+
+      port_list_top_level = port_list.top_level()
+      Model::materialize_virtual_columns!(port_list_top_level,[:port_type])
+      port_list_top_level
+    end
+#=end
     def self.get_output_attrs_to_l4_input_ports(id_handles)
       rows = get_objects_in_set_from_sp_hash(id_handles,{:cols => [:output_attrs_to_l4_input_ports]},{:keep_ref_cols => true})
       return Hash.new if rows.empty?
@@ -276,32 +340,6 @@ module XYZ
       end
     end
 
-    def get_ports(type=nil)
-      port_list = PortList.create(type,[id_handle])
-
-      attr_port_rows = get_objects_from_sp_hash(:columns => [:attribute_ports])
-
-      i18n = get_i18n_mappings_for_models(:component,:attribute)
-
-      pruned_attr_port_rows = attr_port_rows.reject{|r| r[:attribute].nil? or port_list.attr_is_pruned?(r[:attribute])}
-      return Array.new if pruned_attr_port_rows.empty?
-      #to allow group procesisng of needed info
-
-      pruned_attr_port_rows.each do |r|
-        attr = r[:attribute]
-        cmp = r[:component]||{}
-        attr_name = attr[:display_name]
-        cmp_name = cmp[:display_name]
-        attr[:display_name] =  get_i18n_port_name(i18n,attr_name,cmp_name) if attr_name and cmp_name
-        #TODO: hack to remove description
-        attr[:description] = ""
-        port_list.add_or_collapse_attribute!(attr,cmp)
-      end
-
-      port_list_top_level = port_list.top_level()
-      Model::materialize_virtual_columns!(port_list_top_level,[:port_type])
-      port_list_top_level
-    end
 
     def self.get_port_links(id_handles,type="l4")
       port_list = PortList.create(type)

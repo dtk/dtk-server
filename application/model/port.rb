@@ -15,7 +15,8 @@ module XYZ
           :type => type,
           :ref => ref,
           :display_name => ref,
-          :node_node_id => node_id
+          :node_node_id => node_id,
+          :port_direction => attr[:port_type]
         }
         hash.merge(attr[:port_type] == "input" ? {:external_attribute_id => attr[:id]} : {})
       end
@@ -37,7 +38,8 @@ module XYZ
           :display_name => ref,
           :external_attribute_id => attr[:id],
           :node_node_id => node_id,
-          :containing_port_id => new_port_index[strip_type(ref)]
+          :containing_port_id => new_port_index[strip_type(ref)],
+          :port_direction => "output"
         }
       end
       create_from_rows(port_mh,nested_ports)
@@ -91,7 +93,7 @@ module XYZ
       end
 
       #create needed l4 ports and update input_attr_to_l4
-      l4_idhs = create_l4_ports(l4_input_to_create)
+      l4_idhs = create_l4_input_ports(l4_input_to_create)
       l4_input_to_create.each_with_index do |attr,i|
         input_attr_to_l4[attr[:id]] = {:port_id => l4_idhs[i].get_id(), :state =>  :created}
       end
@@ -137,7 +139,7 @@ module XYZ
        update_from_rows(port_mh,update_rows)
     end
 
-    def self.create_l4_ports(attrs_external)
+    def self.create_l4_input_ports(attrs_external)
       return Array.new if attrs_external.empty?
       new_l4_ports = attrs_external.map do |attr|
         node_id = attr[:component_parent][:node_node_id]
@@ -147,7 +149,8 @@ module XYZ
           :type => type,
           :ref => ref,
           :display_name => ref,
-          :node_node_id => node_id
+          :node_node_id => node_id,
+          :port_direction => "input"
         }
       end
       sample = attrs_external.first

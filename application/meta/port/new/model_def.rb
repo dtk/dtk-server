@@ -6,6 +6,10 @@
       :type=>:varchar,
       :size =>25
     },
+    :port_direction=>{
+      :type=>:varchar,
+      :size =>10
+    },
     :external_attribute_id=>{
       :type=>:bigint,
       :foreign_key_rel_type=>:attribute,

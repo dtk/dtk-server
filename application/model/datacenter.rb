@@ -12,10 +12,8 @@ module XYZ
       clone_into(id_handle,override_attrs)
     end
 
-    def self.get_links(id_handles)
+    def self.get_port_links(id_handles,type="l4")
       return Array.new if id_handles.empty?
-
-#      id_handles = id_handles.map{|x|id_handle(x["id"].to_i,x["model"].to_sym)}
 
       node_id_handles = id_handles.select{|idh|idh[:model_name] == :node}
       if node_id_handles.size < id_handles.size
@@ -23,25 +21,25 @@ module XYZ
         Log.error("Item list for Datacenter.get_port_links has models not treated (#{models_not_treated.join(",")}; they will be ignored")
       end
 
-      raw_link_list = Node.get_port_links(node_id_handles)
+      raw_link_list = Node.get_port_links(node_id_handles,type)
 
       link_list = Array.new
       raw_link_list.each do |el|
         [:input_port_links,:output_port_links].each do |dir|
           next unless el.has_key?(dir)
-          el[dir].each do |attr_link|
+          el[dir].each do |port_link|
             port_dir = dir == :input_port_links ? "input" : "output"
-            port_id = dir == :input_port_links ? attr_link[:input_id] : attr_link[:output_id]
-            other_end_id = dir == :input_port_links ? attr_link[:output_id] : attr_link[:input_id]
+            port_id = dir == :input_port_links ? port_link[:input_id] : port_link[:output_id]
+            other_end_id = dir == :input_port_links ? port_link[:output_id] : port_link[:input_id]
             link_list << {
-              :id => attr_link[:id],
+              :id => port_link[:id],
               :item_id => el[:id],
               :item_name => el[:display_name],
               :port_id => port_id,
-              :port_name => attr_link[:port_i18n],
-              :type => attr_link[:type],
+# TODO: is this needed? if so need to have get_port_links set :port_i18n              :port_name => port_link[:port_i18n],
+              :type => type,
               :port_dir => port_dir,
-              :hidden => attr_link[:hidden],
+              :hidden => false,
               :other_end_id => other_end_id
             }
           end

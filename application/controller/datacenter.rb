@@ -127,7 +127,7 @@ module XYZ
 #TODO: move this call into underlying get_links call,
       item_list = item_list.map{|x|id_handle(x["id"].to_i,x["model"].to_sym)}
 #TODO: make get_links an instance method, should pull all links from children if item_list is []/nil
-      link_list = datacenter.class.get_links(item_list)
+      link_list = datacenter.class.get_port_links(item_list)
       return {'data'=>link_list}
     end
 

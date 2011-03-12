@@ -63,6 +63,51 @@ module XYZ
            :cols => [:id,id(:node)]
          }]
 
+      virtual_column :input_port_links, :type => :json, :hidden => true, 
+      :remote_dependencies => 
+        [{
+           :model_name => :port,
+           :join_type => :inner,
+           :join_cond=>{:node_node_id => q(:node,:id)},
+           :cols => [:id,:display_name,:type]
+         },
+        {
+           :model_name => :port_link,
+           :join_cond=>{:input_id =>q(:port,:id)},
+           :join_type => :inner,
+           :cols => [:id,:input_id,:output_id]
+         },
+         {
+           :model_name => :port,
+           :alias => :attr_other_end,
+           :join_cond=>{:id =>q(:port_link,:output_id)},
+           :join_type => :inner,
+           :cols => [:id,:display_name,:type]
+         }]
+
+      virtual_column :output_port_links, :type => :json, :hidden => true, 
+      :remote_dependencies => 
+        [{
+           :model_name => :port,
+           :join_type => :inner,
+           :join_cond=>{:node_node_id => q(:node,:id)},
+           :cols => [:id,:display_name,:type]
+         },
+        {
+           :model_name => :port_link,
+           :join_cond=>{:output_id =>q(:port,:id)},
+           :join_type => :inner,
+           :cols => [:id,:input_id,:output_id]
+         },
+         {
+           :model_name => :port,
+           :alias => :attr_other_end,
+           :join_cond=>{:id =>q(:port_link,:input_id)},
+           :join_type => :inner,
+           :cols => [:id,:display_name,:type]
+         }]
+
+
       ### TODO: this may be deprecated when move to materizlaied ports
       virtual_column :attribute_ports, :type => :json, :hidden => true, 
       :remote_dependencies => 
@@ -83,59 +128,6 @@ module XYZ
          }]
 
 
-      attribute_ports_for_links =   
-        [{
-           :model_name => :component,
-           :join_type => :inner,
-           :join_cond=>{:node_node_id => q(:node,:id)},
-           :cols => [:id,:display_name, id(:node)]
-         },
-         {
-           :model_name => :attribute,
-           :join_type => :inner,
-           :filter => [:and,[:eq,:is_port,true]],
-           :join_cond=>{:component_component_id => q(:component,:id)},
-           :cols => [:id,:display_name, id(:component)]
-         }]
-
-
-      virtual_column :input_port_links, :type => :json, :hidden => true, 
-      :remote_dependencies => 
-        attribute_ports_for_links +
-        [{
-           :model_name => :attribute_link,
-           :convert => true,
-           :join_cond=>{:input_id =>q(:attribute,:id)},
-           :join_type => :inner,
-           :cols => [:id,:type,:input_id,:output_id,id(:node),:hidden]
-         },
-         {
-           :model_name => :attribute,
-           :alias => :attr_other_end,
-           :convert => true,
-           :join_cond=>{:id =>q(:attribute_link,:output_id)},
-           :join_type => :inner,
-           :cols => [:id,:display_name]
-         }]
-
-      virtual_column :output_port_links, :type => :json, :hidden => true, 
-      :remote_dependencies => 
-        attribute_ports_for_links +
-        [{
-           :model_name => :attribute_link,
-           :convert => true,
-           :join_cond=>{:output_id =>q(:attribute,:id)},
-           :join_type => :inner,
-           :cols => [:id,:type,:input_id,:output_id,id(:node),:hidden]
-         },
-         {
-           :model_name => :attribute,
-           :alias => :attr_other_end,
-           :convert => true,
-           :join_cond=>{:id =>q(:attribute_link,:input_id)},
-           :join_type => :inner,
-           :cols => [:id,:display_name]
-         }]
       ##### end of for connection to ports and port links
 
 
@@ -238,7 +230,7 @@ module XYZ
     def self.get_ports(id_handles)
       get_objects_in_set_from_sp_hash(id_handles,{:cols => [:ports]},{:keep_ref_cols => true}).map{|r|r[:port]}
     end
-=begin
+
     def get_ports(type=nil)
       port_list = self.class.get_ports([id_handle]).select do |port|
         type.nil? or 
@@ -249,60 +241,47 @@ module XYZ
           end
       end
 
-      return Array.new if port_list.nil?
-
-
+=begin #factor in
       i18n = get_i18n_mappings_for_models(:component,:attribute)
-
-      pruned_attr_port_rows = attr_port_rows.reject{|r| r[:attribute].nil? or port_list.attr_is_pruned?(r[:attribute])}
-      return Array.new if pruned_attr_port_rows.empty?
-      #to allow group procesisng of needed info
-
-      pruned_attr_port_rows.each do |r|
-        attr = r[:attribute]
-        cmp = r[:component]||{}
-        attr_name = attr[:display_name]
-        cmp_name = cmp[:display_name]
         attr[:display_name] =  get_i18n_port_name(i18n,attr_name,cmp_name) if attr_name and cmp_name
-        #TODO: hack to remove description
-        attr[:description] = ""
-        port_list.add_or_collapse_attribute!(attr,cmp)
-      end
-
-      port_list_top_level = port_list.top_level()
-      Model::materialize_virtual_columns!(port_list_top_level,[:port_type])
-      port_list_top_level
-    end
 =end
-#=begin
-#DEPRECATE
-    def get_ports(type=nil)
-      port_list = PortList.create(type,[id_handle])
 
-      attr_port_rows = get_objects_from_sp_hash(:columns => [:attribute_ports])
-
-      i18n = get_i18n_mappings_for_models(:component,:attribute)
-
-      pruned_attr_port_rows = attr_port_rows.reject{|r| r[:attribute].nil? or port_list.attr_is_pruned?(r[:attribute])}
-      return Array.new if pruned_attr_port_rows.empty?
-      #to allow group procesisng of needed info
-
-      pruned_attr_port_rows.each do |r|
-        attr = r[:attribute]
-        cmp = r[:component]||{}
-        attr_name = attr[:display_name]
-        cmp_name = cmp[:display_name]
-        attr[:display_name] =  get_i18n_port_name(i18n,attr_name,cmp_name) if attr_name and cmp_name
-        #TODO: hack to remove description
-        attr[:description] = ""
-        port_list.add_or_collapse_attribute!(attr,cmp)
+      port_list.map do |port|
+        {
+          :description=>"",
+          :is_port=>true,
+          :display_name=> port[:display_name],
+          :port_type=> port[:port_direction],
+          :id=> port[:id]
+        }
       end
-
-      port_list_top_level = port_list.top_level()
-      Model::materialize_virtual_columns!(port_list_top_level,[:port_type])
-      port_list_top_level
     end
-#=end
+
+    def self.get_port_links(id_handles,type="l4")
+      raise Error.new("not implemented yet: get_port_links when type = #{type}") unless type == "l4"
+
+      input_port_rows =  get_objects_in_set_from_sp_hash(id_handles,:columns => [:id, :display_name, :input_port_links]).select do |r|
+        r[:port][:type] == type
+      end
+      output_port_rows =  get_objects_in_set_from_sp_hash(id_handles,:columns => [:id, :display_name, :output_port_links]).select do |r|
+        r[:port][:type] == type
+      end
+      return Array.new if input_port_rows.empty? and output_port_rows.empty?
+
+      indexed_ret = Hash.new
+      input_port_rows.each do |r|
+        id = r[:id]
+        indexed_ret[id] ||= r.subset(:id, :display_name).merge(:input_port_links => Array.new, :output_port_links => Array.new)
+        indexed_ret[id][:input_port_links] << r[:port_link]
+      end
+      output_port_rows.each do |r|
+        id = r[:id]
+        indexed_ret[id] ||= r.subset(:id, :display_name).merge(:output_port_links => Array.new, :output_port_links => Array.new)
+        indexed_ret[id][:output_port_links] << r[:port_link]
+      end
+      indexed_ret.values
+    end
+
     def self.get_output_attrs_to_l4_input_ports(id_handles)
       rows = get_objects_in_set_from_sp_hash(id_handles,{:cols => [:output_attrs_to_l4_input_ports]},{:keep_ref_cols => true})
       return Hash.new if rows.empty?
@@ -341,30 +320,7 @@ module XYZ
     end
 
 
-    def self.get_port_links(id_handles,type="l4")
-      port_list = PortList.create(type)
-
-      input_port_rows = port_list.get_input_port_link_info(id_handles)
-      output_port_rows = port_list.get_output_port_link_info(id_handles)
-
-      i18n = get_i18n_mappings_for_models(:component,:attribute)
-      return Array.new if input_port_rows.empty? and output_port_rows.empty?
-      indexed_ret = Hash.new
-      input_port_rows.each do |r|
-        id = r[:id]
-        indexed_ret[id] ||= r.subset(:id, :display_name).merge(:input_port_links => Array.new, :output_port_links => Array.new)
-        port_i18n = get_i18n_port_name(i18n,r[:attribute][:display_name],r[:component][:display_name])
-        indexed_ret[id][:input_port_links] << r[:attribute_link].merge(:port_i18n => port_i18n)
-      end
-      output_port_rows.each do |r|
-        id = r[:id]
-        indexed_ret[id] ||= r.subset(:id, :display_name).merge(:output_port_links => Array.new, :output_port_links => Array.new)
-        port_i18n = get_i18n_port_name(i18n,r[:attribute][:display_name],r[:component][:display_name])
-        indexed_ret[id][:output_port_links] << r[:attribute_link].merge(:port_i18n => port_i18n)
-      end
-      indexed_ret.values
-    end
-
+    #TODO: rename or refactor in light of new port model
     #returns [connected_links,dangling_links]
     def self.get_external_connected_port_links(id_handles)
       ret = [Array.new,Array.new]

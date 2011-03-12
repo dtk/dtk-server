@@ -230,8 +230,7 @@ module XYZ
 	  hash[:id] = IDInfoTable.ret_guid_from_db_id(hash[:id],db_rel[:relation_type])
         end
 
-        hash.delete(:ref_num) unless opts[:keep_col_ref_num]
-        hash.delete(:ref) unless opts[:keep_col_ref]
+        [:ref_num,:ref].each{|col|hash.delete(col)} unless opts[:keep_ref_cols]
 
 	hash.each_pair{|col,v|hash.delete(col) if v.nil?} if opts[:no_null_cols]
 

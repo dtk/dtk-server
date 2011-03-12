@@ -62,7 +62,7 @@ module XYZ
         :remote_dependencies => 
         [attributes_def.merge(
            :filter => [:eq, :is_port, true],
-           :cols => [:id,:display_name,:ref,id(:component),:port_is_external,:port_type]
+           :cols => [:id,:display_name,id(:component),:port_is_external,:port_type,:has_port_object]
          )]
         ###### end of virtual columns related to attributes
 
@@ -257,11 +257,12 @@ module XYZ
     end
 
     def get_attributes_ports()
-      opts = {:keep_col_ref => true}
-      rows = get_objects_from_sp_hash({:columns => [:ref,:attributes_ports]},opts)
+      opts = {:keep_ref_cols => true}
+      rows = get_objects_from_sp_hash({:columns => [:ref,:ref_num,:attributes_ports]},opts)
       return Array.new if rows.empty?
       component_ref = rows.first[:ref]
-      rows.map{|r|r[:attribute].merge(:component_ref => component_ref)}
+      component_ref_num = rows.first[:ref_num]
+      rows.map{|r|r[:attribute].merge(:component_ref => component_ref,:component_ref_num => component_ref_num)}
     end
 
     def get_component_i18n_label()

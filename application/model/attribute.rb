@@ -30,6 +30,7 @@ module XYZ
       column :is_port, :boolean, :default => false
       virtual_column :port_is_external, :type => :boolean, :hidden => true, :local_dependencies => [:is_port,:semantic_type_summary]
       virtual_column :port_type, :type => :varchar, :hidden => true, :local_dependencies => [:is_port,:semantic_type_summary]
+      virtual_column :has_port_object, :type => :booelan, :hidden => true, :local_dependencies => [:is_port,:semantic_type_summary]
 
       column :link_info, :json, :ret_keys_as_symbols => false
       virtual_column :link_info_object, :type => :object, :hidden => true, :local_dependencies => [:link_info]
@@ -255,6 +256,11 @@ module XYZ
       return nil unless self[:semantic_type_summary]
       (AttributeSemantic::Info[self[:semantic_type_summary]]||{})[:port_type]
     end
+    def has_port_object()
+      return nil unless self[:is_port]
+      return nil unless self[:semantic_type_summary]
+      (AttributeSemantic::Info[self[:semantic_type_summary]]||{})[:has_port_object]
+    end
 
     def is_unset()
       #care must be takedn so this is three-valued
@@ -304,7 +310,7 @@ module XYZ
     end
     
     def self.get_port_info(id_handles)
-      get_objects_in_set_from_sp_hash(id_handles,{:cols => [:port_info]},{:keep_col_ref => true})
+      get_objects_in_set_from_sp_hash(id_handles,{:cols => [:port_info]},{:keep_ref_cols => true})
     end
 
 

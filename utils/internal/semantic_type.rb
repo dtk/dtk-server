@@ -246,6 +246,7 @@ Debug.print_and_ret(
       "sap__l4" => {
         :external => true,
         :port_type => "output",
+        :has_port_object => true,
         :syntax =>  {
           "port" => {:required => true, :type => :integer},
           "protocol" => {:required => true, :type => :string},
@@ -255,6 +256,7 @@ Debug.print_and_ret(
       "sap_ref__l4" => {
         :external => true,
         :port_type => "input", 
+        :has_port_object => true,
         :syntax => { 
           :or => 
           [{

@@ -2,7 +2,9 @@ module XYZ
   class Port < Model
     def self.create_ports_for_external_attributes(node_id_handle,cmp_id_handle)
       component = cmp_id_handle.create_object()
-      attrs_external = component.get_attributes_ports().select{|a|a[:port_is_external]}
+      attrs_external = component.get_attributes_ports().select do |attr|
+        attr[:port_is_external] and attr[:has_port_object]
+      end
       return if attrs_external.empty?
       node_id = node_id_handle.get_id()
 
@@ -153,9 +155,9 @@ module XYZ
       create_from_rows(model_handle,new_l4_ports)
     end
 
-
     def self.port_ref(type,attr)
-      "#{type}___#{attr[:component_ref]}___#{attr[:ref]}"
+      ref_num = (attr[:component_ref_num]||1).to_s
+      "#{type}___#{attr[:component_ref]}___#{attr[:display_name]}___#{ref_num}"
     end
     
     def self.strip_type(ref)

@@ -236,11 +236,11 @@ module XYZ
     end
 
     def self.get_ports(id_handles)
-      get_objects_in_set_from_sp_hash(id_handles,{:cols => [:ports]},{:keep_col_ref => true}).map{|r|r[:port]}
+      get_objects_in_set_from_sp_hash(id_handles,{:cols => [:ports]},{:keep_ref_cols => true}).map{|r|r[:port]}
     end
 
     def self.get_output_attrs_to_l4_input_ports(id_handles)
-      rows = get_objects_in_set_from_sp_hash(id_handles,{:cols => [:output_attrs_to_l4_input_ports]},{:keep_col_ref => true})
+      rows = get_objects_in_set_from_sp_hash(id_handles,{:cols => [:output_attrs_to_l4_input_ports]},{:keep_ref_cols => true})
       return Hash.new if rows.empty?
       #restructure so that get mapping from attribute_id to port
       ret = Hash.new

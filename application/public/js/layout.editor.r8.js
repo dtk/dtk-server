@@ -143,7 +143,7 @@ if(!R8.LayoutEditor) {
 					showPopup = function() {
 						that.showGtPopup(groupDef);
 					};
-				_gtPopupShowTimeout = setTimeout(showPopup,400);
+				_gtPopupShowTimeout = setTimeout(showPopup,200);
 			},
 			groupMleave: function(e) {
 				if(_draggingField == true) return;
@@ -152,7 +152,7 @@ if(!R8.LayoutEditor) {
 					clearGtPopup = function() {
 						that.clearGtPopup();
 					}
-				_gtPopupHideTimeout = setTimeout(clearGtPopup,400);
+				_gtPopupHideTimeout = setTimeout(clearGtPopup,200);
 			},
 			resetPopup: function() {
 				if(_gtPopupNode == null) return;
@@ -221,6 +221,8 @@ if(!R8.LayoutEditor) {
 			},
 
 			gtUpdateName: function(newName) {
+//DEBUG
+console.log('PopupIndex:'+_gtPopupIndex);
 				_layout.def.groups[_gtPopupIndex].i18n = newName;
 				_layout.def.groups[_gtPopupIndex].name = newName.replace(' ','_');
 
@@ -266,9 +268,25 @@ if(!R8.LayoutEditor) {
 					if(_fieldDefs[f].name == fieldName) return _fieldDefs[f];
 				}
 			},
+			getGroupDefById: function(groupId) {
+				for(var g in _layout.def.groups) {
+					if(_layout.def.groups[g].id == groupId) return _layout.def.groups[g];
+				}
+				return false;
+			},
 			getCurrentDef: function() {
-				var currentDef = _layout.def;
 				var that = this;
+					newGroupList = [];
+
+				R8.Utils.Y.all('#modal-tab-list li').each(function(){
+					var tabNodeId = this.get('id'),
+						groupId = tabNodeId.replace('-tab','');
+
+					newGroupList.push(that.getGroupDefById(groupId));
+				});
+				_layout.def.groups = newGroupList;
+
+				var currentDef = _layout.def;
 				for(var g in _layout.def.groups) {
 					currentDef.groups[g].fields = [];
 					R8.Utils.Y.all('#'+_layout.def.groups[g].id+'-field-list li').each(function(){
@@ -279,6 +297,7 @@ if(!R8.LayoutEditor) {
 			},
 			save: function() {
 				var layoutDef = this.getCurrentDef();
+
 				var layoutDefJson = R8.Utils.Y.JSON.stringify(_layout.def),
 					params = {
 						'cfg': {
@@ -476,19 +495,22 @@ if(!R8.LayoutEditor) {
 			},
 
 			setupDD: function() {
-				var that=this;
+				var that=this,
+					gListNodeId = 'modal-tab-list';
 
 				YUI().use('dd-constrain', 'dd-proxy', 'dd-drop', function(Y) {
-					var goingUp = false, lastY = 0;
+					var goingUp = false, goingLeft = false, lastY = 0, lastX = 0;
 
 					Y.DD.DDM.on('drop:over', function(e) {
 						//Get a reference to our drag and drop nodes
 						var drag = e.drag.get('node'),
 							drop = e.drop.get('node');
 
+						if(drop.get('id') == gListNodeId) return;
+
 						//Are we dropping on a li node?
 //						if (drop.get('tagName').toLowerCase() === 'li' && drop.get('parentNode').get('id') != 'available-fields') {
-						if (drop.get('tagName').toLowerCase() === 'li' && drop.get('parentNode').get('id') != 'modal-tab-list') {
+						if (drop.get('tagName').toLowerCase() === 'li' && drop.get('parentNode').get('id') != gListNodeId) {
 							var dropParent = drop.get('parentNode');
 							if(dropParent.get('id') != 'available-fields') dropParent.setStyle('border','1px dashed #0000CC');
 							//Are we not going up?
@@ -516,15 +538,42 @@ if(!R8.LayoutEditor) {
 							}
 						}
 
-						var groupTabList = Y.Node.all('#modal-tab-list .tab');
+						var groupTabList = Y.Node.all('#'+gListNodeId+' .tab');
 						groupTabList.each(function(gt,i){
-//TODO: remove after refactoring plus btn out of <ul>
-							if(gt.hasClass('yui3-dd-drop')) return;
-							var dObj = new Y.DD.Drop({
+							if(gt.hasClass('yui3-dd-draggable')) return;
+							var dd = new Y.DD.Drag({
 								node: gt,
-								groups:['group-switch']
+								groups:['group-reorder'],
+								target: {
+									padding: '0 0 0 20'
+								}
+							}).plug(Y.Plugin.DDProxy, {
+								moveOnEnd: false
+							}).plug(Y.Plugin.DDConstrained, {
+								constrain2node: '#editor-wrapper'
 							});
-							dObj.on('drop:enter',function(e){
+							dd.on('drag:start',function(e){
+								that.resetPopup();
+							});
+							dd.on('drag:drag', function(e) {
+								var x = e.target.lastXY[0];
+			
+								//is it greater than the lastY
+								if (x < lastX) { goingLeft = true; }
+								else { goingLeft = false; }
+	
+								lastX = x;
+							});
+	
+							var gtDrop = new Y.DD.Drop({
+								node: gt,
+								groups:['group-reorder','group-switch']
+							});
+							gtDrop.on('drop:enter',function(e){
+								var drag = e.drag.get('node');
+	
+								if(drag.hasClass('tab')) return false;
+	
 								var id = e.currentTarget.get('node').get('id'),
 									groupId = id.replace('-tab','');
 								var tabOvrCallback = function() {
@@ -532,12 +581,32 @@ if(!R8.LayoutEditor) {
 									}
 								_tabSwitchTimeout = setTimeout(tabOvrCallback,1200);
 							});
-							dObj.on('drop:exit',function(e){
+	
+							gtDrop.on('drop:exit',function(e){
 								if (_tabSwitchTimeout != null) {
 									clearTimeout(_tabSwitchTimeout);
 									_tabSwitchTimeout = null;
 								}
 							});
+	
+							gtDrop.on('drop:over', function(e) {
+								//Get a reference to our drag and drop nodes
+								var drag = e.drag.get('node'),
+									drop = e.drop.get('node');
+	
+								if(!drag.hasClass('tab')) return false;
+	
+								var dropParent = drop.get('parentNode');
+	
+								if (!goingLeft) {
+									drop = drop.get('nextSibling');
+								}
+								//Add the node to this list
+								e.drop.get('node').get('parentNode').insertBefore(drag, drop);
+								//Resize this nodes shim, so we can drop on it later.
+								e.drop.sizeShim();
+							});
+	
 						});
 					});
 
@@ -569,6 +638,9 @@ if(!R8.LayoutEditor) {
 
 					Y.DD.DDM.on('drop:exit',function(e){
 						var drop = e.target.get('node');
+
+						if(drop.get('id') == gListNodeId) return false;
+
 						if(!drop.hasClass('tab') && drop.get('tagName').toLowerCase() !== 'li') drop.setStyle('border','1px solid #EDEDED');
 						Y.DD.DDM.syncActiveShims(true);
 					});
@@ -576,7 +648,7 @@ if(!R8.LayoutEditor) {
 					Y.DD.DDM.on('drag:end', function(e) {
 						_draggingField = false;
 						var drag = e.target;
-						//Put our styles back
+						//set styles back
 						drag.get('node').setStyles({
 							visibility: '',
 							opacity: '1'
@@ -587,7 +659,7 @@ if(!R8.LayoutEditor) {
 						var drop = e.drop.get('node'),
 							drag = e.drag.get('node');
 
-						if(e.drop.inGroup(['group-switch'])) return false;
+						if(e.drop.inGroup(['group-switch']) || drop.get('id') == gListNodeId) return false;
 
 						//if we are not on an li, we must have been dropped on a ul
 						if (drop.get('tagName').toLowerCase() !== 'li') {
@@ -639,6 +711,170 @@ if(!R8.LayoutEditor) {
 							groups:['field-drop']
 						});
 					});
+
+					//-----------------------------------------------
+					//Setup DD for Tab/Group re-ordering
+					var gListNode = Y.one('#'+gListNodeId);
+
+					gListNode.on('mouseenter',function(e){
+						var groupTabList = Y.Node.all('#'+gListNodeId+' .tab');
+
+						groupTabList.each(function(gt,i){
+							if(gt.hasClass('yui3-dd-draggable')) return;
+							var dd = new Y.DD.Drag({
+								node: gt,
+								groups:['group-reorder'],
+								target: {
+									padding: '0 0 0 20'
+								}
+							}).plug(Y.Plugin.DDProxy, {
+								moveOnEnd: false
+							}).plug(Y.Plugin.DDConstrained, {
+								constrain2node: '#editor-wrapper'
+							});
+							dd.on('drag:start',function(e){
+								that.resetPopup();
+							});
+							dd.on('drag:drag', function(e) {
+								var x = e.target.lastXY[0];
+		
+								//is it greater than the lastY
+								if (x < lastX) { goingLeft = true; }
+								else { goingLeft = false; }
+
+								lastX = x;
+							});
+
+							var gtDrop = new Y.DD.Drop({
+								node: gt,
+								groups:['group-reorder','group-switch']
+							});
+							gtDrop.on('drop:enter',function(e){
+								var drag = e.drag.get('node');
+
+								if(drag.hasClass('tab')) return false;
+
+								var id = e.currentTarget.get('node').get('id'),
+									groupId = id.replace('-tab','');
+								var tabOvrCallback = function() {
+										R8.LayoutEditor.groupFocus(groupId);
+									}
+								_tabSwitchTimeout = setTimeout(tabOvrCallback,1200);
+							});
+
+							gtDrop.on('drop:exit',function(e){
+								if (_tabSwitchTimeout != null) {
+									clearTimeout(_tabSwitchTimeout);
+									_tabSwitchTimeout = null;
+								}
+							});
+
+
+							gtDrop.on('drop:over', function(e) {
+								//Get a reference to our drag and drop nodes
+								var drag = e.drag.get('node'),
+									drop = e.drop.get('node');
+
+								if(!drag.hasClass('tab')) return false;
+
+								var dropParent = drop.get('parentNode');
+
+								if (!goingLeft) {
+									drop = drop.get('nextSibling');
+								}
+								//Add the node to this list
+								e.drop.get('node').get('parentNode').insertBefore(drag, drop);
+								//Resize this nodes shim, so we can drop on it later.
+								e.drop.sizeShim();
+							});
+
+						});
+//TODO: remove later on
+/*
+						var gtReorderDrop = new Y.DD.Drop({
+							node: gListNode,
+							groups:['group-reorder']
+						});
+*/
+					});
+					//---end mouseenter setup for handling new tabs
+
+					var groupTabList = Y.Node.all('#'+gListNodeId+' .tab');
+
+					groupTabList.each(function(gt,i){
+						if(gt.hasClass('yui3-dd-draggable')) return;
+						var dd = new Y.DD.Drag({
+							node: gt,
+							groups:['group-reorder'],
+							target: {
+								padding: '0 0 0 20'
+							}
+						}).plug(Y.Plugin.DDProxy, {
+							moveOnEnd: false
+						}).plug(Y.Plugin.DDConstrained, {
+							constrain2node: '#editor-wrapper'
+						});
+						dd.on('drag:start',function(e){
+							that.resetPopup();
+						});
+						dd.on('drag:drag', function(e) {
+							var x = e.target.lastXY[0];
+		
+							//is it greater than the lastY
+							if (x < lastX) { goingLeft = true; }
+							else { goingLeft = false; }
+
+							lastX = x;
+						});
+
+						var gtDrop = new Y.DD.Drop({
+							node: gt,
+							groups:['group-reorder','group-switch']
+						});
+						gtDrop.on('drop:enter',function(e){
+							var drag = e.drag.get('node');
+
+							if(drag.hasClass('tab')) return false;
+
+							var id = e.currentTarget.get('node').get('id'),
+								groupId = id.replace('-tab','');
+							var tabOvrCallback = function() {
+									R8.LayoutEditor.groupFocus(groupId);
+								}
+							_tabSwitchTimeout = setTimeout(tabOvrCallback,1200);
+						});
+
+						gtDrop.on('drop:exit',function(e){
+							if (_tabSwitchTimeout != null) {
+								clearTimeout(_tabSwitchTimeout);
+								_tabSwitchTimeout = null;
+							}
+						});
+
+						gtDrop.on('drop:over', function(e) {
+							//Get a reference to our drag and drop nodes
+							var drag = e.drag.get('node'),
+								drop = e.drop.get('node');
+
+							if(!drag.hasClass('tab')) return false;
+
+							var dropParent = drop.get('parentNode');
+
+							if (!goingLeft) {
+								drop = drop.get('nextSibling');
+							}
+							//Add the node to this list
+							e.drop.get('node').get('parentNode').insertBefore(drag, drop);
+							//Resize this nodes shim, so we can drop on it later.
+							e.drop.sizeShim();
+						});
+
+					});
+					var gtReorderDrop = new Y.DD.Drop({
+						node: gListNode,
+						groups:['group-reorder']
+					});
+
 				});
 			}
 		}

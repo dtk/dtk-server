@@ -33,8 +33,8 @@ module XYZ
          {
            :model_name => :port,
            :join_type => :inner,
-           :join_cond=>{:containing_node_id => q(:node,:id)},
-           :cols => [:id,id(:port),:type,id(:node),:containing_node_id,:external_attribute_id,:ref]
+           :join_cond=>{:node_node_id => q(:node,:id)},
+           :cols => [:id,:type,id(:node),:containing_port_id,:external_attribute_id,:ref]
          }]
 
       virtual_column :output_attrs_to_l4_input_ports, :type => :json, :hidden => true,
@@ -45,14 +45,14 @@ module XYZ
            :alias => :port_external_output,
            :join_type => :inner,
            :filter => [:eq,:type,"external"],
-           :join_cond=>{:containing_node_id => q(:node,:id)},
-           :cols => [:id,:external_attribute_id,:containing_node_id,id(:port)]
+           :join_cond=>{:node_node_id => q(:node,:id)},
+           :cols => [:id,id(:node),:containing_port_id,:external_attribute_id]
          },
          {
            :model_name => :port_link,
            :alias => :port_link_l4,
            :join_type => :inner,
-           :join_cond=>{:output_id => :port_external_output__port_id},
+           :join_cond=>{:output_id => q(:port_external_output,:containing_port_id)},
            :cols => [:input_id]
          },
          { :model_name => :port,
@@ -60,7 +60,7 @@ module XYZ
            :join_type => :inner,
            :filter => [:eq,:type,"l4"],
            :join_cond=>{:id => q(:port_link_l4,:input_id)},
-           :cols => [:id,:containing_node_id]
+           :cols => [:id,id(:node)]
          }]
 
       ### TODO: this may be deprecated when move to materizlaied ports

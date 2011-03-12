@@ -12,15 +12,14 @@ module XYZ
         hash = {
           :type => type,
           :ref => ref,
-          :display_name => attr[:display_name],
-          :containing_node_id => node_id,
+          :display_name => ref,
           :node_node_id => node_id
         }
         hash.merge(attr[:port_type] == "input" ? {:external_attribute_id => attr[:id]} : {})
       end
-      model_handle = node_id_handle.createMH(:model_name => :port, :parent_model_name => :node)
+      port_mh = node_id_handle.createMH(:model_name => :port, :parent_model_name => :node)
       opts = {:returning_sql_cols => [:ref,:id]}
-      create_info = create_from_rows(model_handle,new_ports,opts)
+      create_info = create_from_rows(port_mh,new_ports,opts)
 
       #for output ports need to nest in l4 ports
       output_attrs = attrs_external.select{|a|a[:port_type] == "output"}
@@ -33,18 +32,17 @@ module XYZ
         {
           :type => type,
           :ref => ref,
-          :display_name => attr[:display_name],
+          :display_name => ref,
           :external_attribute_id => attr[:id],
-          :containing_node_id => node_id,
-          :port_id => new_port_index[strip_type(ref)]
+          :node_node_id => node_id,
+          :containing_port_id => new_port_index[strip_type(ref)]
         }
       end
-      nested_mh = node_id_handle.createMH(:model_name => :port, :parent_model_name => :port)
-      create_from_rows(nested_mh,nested_ports)
+      create_from_rows(port_mh,nested_ports)
     end
 
     def self.create_and_update_l4_ports_and_links?(parent_idh,link_info_list)
-return #TODO: will still testing
+#return #TODO: will still testing
       return if link_info_list.empty?
       sample_attr = link_info_list.first[:input]
       node_mh = sample_attr.model_handle.createMH(:node)
@@ -79,7 +77,7 @@ return #TODO: will still testing
           add_to_l4_input_to_create = true
         else
           input_node_id = input_attr[:component_parent][:node_node_id]
-          unless port = ports.find{|p|p[:containing_node_id] == input_node_id}
+          unless port = ports.find{|p|p[:node_node_id] == input_node_id}
             add_to_l4_input_to_create = true
           else
             input_attr_to_l4[input_attr[:id]] = {:port_id => port[:id], :state => :existed} 
@@ -131,12 +129,10 @@ return #TODO: will still testing
       update_rows = reroot_info.map do |info|
         {
           :id => info[:external_port_id],
-          :port_id => info[:l4_port_id],
-          :node_node_id => SQL::ColRef.cast(nil,ID_TYPES[:id])
-        }
+          :containing_port_id => info[:l4_port_id],
+         }
       end
-      #TODO: need to change the id.info_table; create and use a new flag :parent_changed
-      update_from_rows(port_mh,update_rows)
+       update_from_rows(port_mh,update_rows)
     end
 
     def self.create_l4_ports(attrs_external)
@@ -148,8 +144,7 @@ return #TODO: will still testing
         {
           :type => type,
           :ref => ref,
-          :display_name => attr[:display_name],
-          :containing_node_id => node_id,
+          :display_name => ref,
           :node_node_id => node_id
         }
       end
@@ -157,7 +152,8 @@ return #TODO: will still testing
       model_handle = sample.model_handle.createMH(:model_name => :port, :parent_model_name => :node)
       create_from_rows(model_handle,new_l4_ports)
     end
-   private
+
+
     def self.port_ref(type,attr)
       "#{type}___#{attr[:component_ref]}___#{attr[:ref]}"
     end

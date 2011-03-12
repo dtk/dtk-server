@@ -12,13 +12,12 @@
       :on_delete=>:cascade,
       :on_update=>:cascade
     },
-    :containing_node_id=>{
+    :containing_port_id=>{
       :type=>:bigint,
-      :foreign_key_rel_type=>:node,
-      :on_delete=>:cascade,
-      :on_update=>:cascade
+      :foreign_key_rel_type=>:port,
+      :on_delete=>:set_null,
+      :on_update=>:set_null
     }
   },
-  :many_to_one=>[:port,:node],
-  :one_to_many=>[:port]
+  :many_to_one=>[:node]
 }

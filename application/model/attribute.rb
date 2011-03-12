@@ -73,15 +73,15 @@ module XYZ
            :join_type => :inner,
            :filter => [:eq,:type,"external"],
            :join_cond=>{:external_attribute_id => q(:attribute,:id)},
-           :cols => [:id,id(:port),:type,id(:node),:containing_node_id,:external_attribute_id,:ref]
+           :cols => [:id,:type,id(:node),:containing_port_id,:external_attribute_id,:ref]
          },
          {
            :model_name => :port,
            :alias => :port_l4,
            :join_type => :left_outer,
            :filter => [:eq,:type,"l4"],
-           :join_cond=>{:id => q(:port_external,:port_id)},
-           :cols => [:id,id(:port),:type,id(:node),:containing_node_id,:external_attribute_id,:ref]
+           :join_cond=>{:id => q(:port_external,:containing_port_id)},
+           :cols => [:id,:type,id(:node),:containing_port_id,:external_attribute_id,:ref]
          }]
 
       virtual_column :needs_to_be_set, :type => :boolean, :hidden => true, 

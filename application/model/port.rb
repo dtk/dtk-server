@@ -67,48 +67,50 @@ module XYZ
       #for each input in link_info_list either it must be placed under an existing l4 port or a layer 4 port must be created for it
       #in all cases the input external port must be rerooted under the (existing or new l4 port)
 
-      #compute input to l4 mapping
+      #compute input attribute to l4 output mapping
       input_attr_to_l4 = Hash.new
-      l4_to_create = Array.new
+      l4_input_to_create = Array.new
       link_info_list.each do |link_info|
-        add_to_l4_to_create = false
+        add_to_l4_input_to_create = false
         output_id = link_info[:output][:id]
         input_attr = link_info[:input]
         unless ports = attr_to_ports[output_id]
-          add_to_l4_to_create = true
+          add_to_l4_input_to_create = true
         else
           input_node_id = input_attr[:component_parent][:node_node_id]
           unless port = ports.find{|p|p[:containing_node_id] == input_node_id}
-            add_to_l4_to_create = true
+            add_to_l4_input_to_create = true
           else
-            input_attr_to_l4[input_attr[:id]] = port[:id] 
+            input_attr_to_l4[input_attr[:id]] = {:port_id => port[:id], :state => :existed} 
           end
         end
-        if add_to_l4_to_create
-          l4_to_create << input_attr.merge(:port => indexed_input_ports[input_attr[:id]])
+        if add_to_l4_input_to_create
+          l4_input_to_create << input_attr.merge(:port => indexed_input_ports[input_attr[:id]])
         end
       end
 
-      #create needed l4 ports
-      l4_idhs = create_l4_ports(l4_to_create)
-      
-      l4_to_create.each_with_index do |attr,i|
-        input_attr_to_l4[attr[:id]] = l4_idhs[i].get_id() 
+      #create needed l4 ports and update input_attr_to_l4
+      l4_idhs = create_l4_ports(l4_input_to_create)
+      l4_input_to_create.each_with_index do |attr,i|
+        input_attr_to_l4[attr[:id]] = {:port_id => l4_idhs[i].get_id(), :state =>  :created}
       end
 
       #create needed l4 port_links
-      #first get the output port info for each link
-      output_attr_idhs = link_info_list.map{|link_info|link_info[:output].id_handle}.uniq
-      output_attr_to_l4 = Attribute.get_port_info(output_attr_idhs).inject({}) do |h,port_info|
-        h.merge(port_info[:port_external][:external_attribute_id] => port_info[:port_l4][:id])
+      attr_links_for_port_links = link_info_list.select{|l|input_attr_to_l4[l[:input][:id]][:state] == :created}
+      unless attr_links_for_port_links.empty?
+        output_attr_idhs = attr_links_for_port_links.map{|link_info|link_info[:output].id_handle}.uniq
+        output_attr_to_l4 = Attribute.get_port_info(output_attr_idhs).inject({}) do |h,port_info|
+          h.merge(port_info[:port_external][:external_attribute_id] => port_info[:port_l4][:id])
+        end
+
+        l4_links_to_create = attr_links_for_port_links.map do |link_info|
+          {:input_id => input_attr_to_l4[link_info[:input][:id]][:port_id],
+            :output_id => output_attr_to_l4[link_info[:output][:id]]}
+        end.uniq
+        PortLink.create(parent_idh,l4_links_to_create)
       end
 
-      l4_links_to_create = link_info_list.map do |link_info|
-        {:input_id => input_attr_to_l4[link_info[:input][:id]],
-          :output_id => output_attr_to_l4[link_info[:output][:id]]}
-      end.uniq
-
-      PortLink.create(parent_idh,l4_links_to_create)
+      #TODO: reroot neeeded external ports
 
     end
   

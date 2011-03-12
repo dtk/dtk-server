@@ -30,7 +30,7 @@ module XYZ
     end
 
 
-    def self.create_links(parent_idh,rows)
+    def self.create_links(parent_idh,rows,opts={})
       attr_link_mh = parent_idh.create_childMH(:attribute_link)
       #TODO: parent model name can also be node
       attr_mh = attr_link_mh.createMH(:model_name => :attribute,:parent_model_name=>:component)
@@ -74,7 +74,8 @@ module XYZ
       field_set = FieldSet.new(attr_link_mh[:model_name],rows.first.keys)
       returning_ids = create_from_select(attr_link_mh,field_set,select_ds,override_attrs,:returning_sql_cols=> [:id])
       propagate_from_create(attr_mh,attr_info,rows)
-      #TODO: might use form pass to  create_related_links? fro above
+
+      return returning_ids if opts[:no_nested_processing]
       link_info_list = rows.map{|r|{:input => attr_info[r[:input_id]],:output => attr_info[r[:output_id]]}}
 
       create_related_links?(parent_idh,link_info_list)
@@ -100,14 +101,16 @@ module XYZ
       db_server_component = link_info[:output][:component_parent]
       db_server_node = parent_idh.createIDH(:id => db_server_component[:node_node_id],:model_name => :node).create_object()
       db_component_idh = ComponentType::Database.clone_db_onto_db_server_node(db_server_node,db_server_component)
-      pp [:db_component_idh,db_component_idh]
+
       #find link between db component 
       attr_db_params = db_component_idh.create_object().get_virtual_attribute("db_params",[:id],:semantic_type_summary)
       unless attr_db_params
         Log.error("cannot find db_params attribute on db_component")
         return
       end
-      create_links(parent_idh,[{:input_id => attr_db_params[:id],:output_id => attr_db_config[:id]}])
+      link = {:input_id => attr_db_params[:id],:output_id => attr_db_config[:id]}
+      opts = {:no_nested_processing => true}
+      create_links(parent_idh,[link],opts)
     end
 
 

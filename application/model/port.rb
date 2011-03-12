@@ -44,16 +44,17 @@ module XYZ
     end
 
     def self.create_and_update_l4_ports_and_links?(parent_idh,link_info_list)
+return #TODO: will still testing
       return if link_info_list.empty?
       sample_attr = link_info_list.first[:input]
       node_mh = sample_attr.model_handle.createMH(:node)
 
-      #compute indexed_input_ports
+      #compute indexed_input_external_ports
       input_node_idhs = link_info_list.inject({}) do |h,link_info|
         node_id = link_info[:input][:component_parent][:node_node_id]
         h.merge(node_id => node_mh.createIDH(:id => node_id))
       end.values
-      indexed_input_ports = Node.get_ports(input_node_idhs).inject({}) do |h,port|
+      indexed_input_external_ports = Node.get_ports(input_node_idhs).inject({}) do |h,port|
         index = port[:external_attribute_id]
         index ? h.merge(index => port) : h
       end
@@ -85,7 +86,7 @@ module XYZ
           end
         end
         if add_to_l4_input_to_create
-          l4_input_to_create << input_attr.merge(:port => indexed_input_ports[input_attr[:id]])
+          l4_input_to_create << input_attr.merge(:port => indexed_input_external_ports[input_attr[:id]])
         end
       end
 
@@ -110,11 +111,34 @@ module XYZ
         PortLink.create(parent_idh,l4_links_to_create)
       end
 
-      #TODO: reroot neeeded external ports
+      #reroot neeeded external ports
+      reroot_info = link_info_list.map{|l|l[:input][:id]}.uniq.map do |attr_id|
+        {
+          :attribute_id => attr_id,
+          :external_port_id => indexed_input_external_ports[attr_id][:id],
+          :l4_port_id => input_attr_to_l4[attr_id][:port_id]
+        }
+      end
 
+      port_mh = parent_idh.createMH(:port)
+      reroot_external_ports(port_mh,reroot_info)
+      reroot_info
     end
   
    private
+    def self.reroot_external_ports(port_mh,reroot_info)
+      return if reroot_info.empty?
+      update_rows = reroot_info.map do |info|
+        {
+          :id => info[:external_port_id],
+          :port_id => info[:l4_port_id],
+          :node_node_id => SQL::ColRef.cast(nil,ID_TYPES[:id])
+        }
+      end
+      #TODO: need to change the id.info_table; create and use a new flag :parent_changed
+      update_from_rows(port_mh,update_rows)
+    end
+
     def self.create_l4_ports(attrs_external)
       return Array.new if attrs_external.empty?
       new_l4_ports = attrs_external.map do |attr|

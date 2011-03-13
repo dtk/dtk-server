@@ -32,6 +32,7 @@ module XYZ
         [
          {
            :model_name => :port,
+           :convert => true,
            :join_type => :inner,
            :join_cond=>{:node_node_id => q(:node,:id)},
            :cols => [:id,:type,id(:node),:containing_port_id,:external_attribute_id,:port_direction,:ref]
@@ -241,16 +242,13 @@ module XYZ
           end
       end
 
-=begin #factor in
       i18n = get_i18n_mappings_for_models(:component,:attribute)
-        attr[:display_name] =  get_i18n_port_name(i18n,attr_name,cmp_name) if attr_name and cmp_name
-=end
 
       port_list.map do |port|
         {
           :description=>"",
           :is_port=>true,
-          :display_name=> port[:display_name],
+          :display_name=> get_i18n_port_name(i18n,port),
           :port_type=> port[:port_direction],
           :id=> port[:id]
         }

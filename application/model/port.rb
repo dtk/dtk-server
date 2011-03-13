@@ -55,7 +55,6 @@ module XYZ
     end
 
     def self.create_and_update_l4_ports_and_links?(parent_idh,link_info_list)
-#return #TODO: will still testing
       return if link_info_list.empty?
       sample_attr = link_info_list.first[:input]
       node_mh = sample_attr.model_handle.createMH(:node)
@@ -166,7 +165,18 @@ module XYZ
       model_handle = sample.model_handle.createMH(:model_name => :port, :parent_model_name => :node)
       create_from_rows(model_handle,new_l4_ports)
     end
-
+   public
+    #TODO: assumption that ref and display_name are teh same
+    def component_name()
+      self[:display_name].split("___")[1]
+    end
+    def attribute_name()
+      self[:display_name].split("___")[2]
+    end
+    def ref_num()
+      self[:display_name].split("___")[3].to_i
+    end
+   private
     def self.port_ref(type,attr)
       ref_num = (attr[:component_ref_num]||1).to_s
       "#{type}___#{attr[:component_ref]}___#{attr[:display_name]}___#{ref_num}"

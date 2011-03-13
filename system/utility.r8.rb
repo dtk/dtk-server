@@ -32,12 +32,17 @@ module R8Tpl
         I18nAux::translate_input(i18n,model_name,input_string) || input_string.to_s
       end
 
-      def get_i18n_port_name(i18n,attr_name,cmp_name)
+      def get_i18n_port_name(i18n,port)
+        attr_name = port.attribute_name()
+        cmp_name = port.component_name()
         attr_i18n = I18nAux::i18n_string_attribute(i18n,attr_name)||attr_name
         cmp_i18n = I18nAux::i18n_string_component(i18n,cmp_name)||cmp_name
-        "#{cmp_i18n} / #{attr_i18n}"
+        if port[:type] == "l4"
+          "#{cmp_i18n} / #{attr_i18n}"
+        else
+          "#{cmp_i18n} #{port.ref_num().to_s} / #{attr_i18n}"
+        end
       end
-
 
       module I18nAux
         def self.i18n_string_component(i18n,input_string,aux=nil)

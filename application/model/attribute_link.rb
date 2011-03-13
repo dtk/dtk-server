@@ -26,7 +26,24 @@ module XYZ
         row[:output_id] = row[:output_id].to_i
         row
       end
-      create_links(parent_idh,rows)
+
+      #TODO: hack until front end api changes
+      port_idhs = rows.map do |r|
+        [parent_idh.createIDH(:id => r[:input_id], :model_name => :port, :parent_model_name => :node),
+         parent_idh.createIDH(:id => r[:output_id], :model_name => :port, :parent_model_name => :node)]
+      end.flatten.uniq
+
+      indexed_attrs = Port.get_attribute_info(port_idhs).inject({}){|h,r|h.merge(r[:id] => r)}
+
+      attr_link_rows = rows.map do |r|
+        {
+          :display_name => r[:display_name],
+          :input_id => indexed_attrs[r[:input_id]][:attribute][:id],
+          :output_id => indexed_attrs[r[:output_id]][:attribute][:id]
+        }
+      end
+      
+      create_links(parent_idh,attr_link_rows)
     end
 
 

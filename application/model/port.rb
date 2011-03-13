@@ -1,5 +1,14 @@
 module XYZ
   class Port < Model
+    def self.get_attribute_info(port_id_handles)
+      get_objects_in_set_from_sp_hash(port_id_handles,:columns => [:id,:attribute]).map do |r|
+        {
+          :id => r[:id],
+          :attribute => r[:attribute_direct]||r[:attribute_nested]
+        }
+      end
+    end
+
     def self.create_ports_for_external_attributes(node_id_handle,cmp_id_handle)
       component = cmp_id_handle.create_object()
       attrs_external = component.get_attributes_ports().select do |attr|

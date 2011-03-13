@@ -34,12 +34,9 @@ module XYZ
             link_list << {
               :id => port_link[:id],
               :item_id => el[:id],
-              :item_name => el[:display_name],
               :port_id => port_id,
-# TODO: is this needed? if so need to have get_port_links set :port_i18n              :port_name => port_link[:port_i18n],
               :type => type,
               :port_dir => port_dir,
-              :hidden => false,
               :other_end_id => other_end_id
             }
           end

@@ -262,7 +262,9 @@ module XYZ
       return Array.new if rows.empty?
       component_ref = rows.first[:ref]
       component_ref_num = rows.first[:ref_num]
-      rows.map{|r|r[:attribute].merge(:component_ref => component_ref,:component_ref_num => component_ref_num)}
+      rows.map do |r|
+        r[:attribute].merge(:component_ref => component_ref,:component_ref_num => component_ref_num) if r[:attribute]
+      end.compact
     end
 
     def get_component_i18n_label()

@@ -1,5 +1,5 @@
 module XYZ
-   class AttributeLink < Model
+  class AttributeLink < Model
     set_relation_name(:attribute,:link)
 
     def self.up()
@@ -15,39 +15,9 @@ module XYZ
       many_to_one :library, :datacenter, :component, :node
     end
 
-    #######################
-    ### object processing and access functions
 
     ##########################  add new links ##################
-    def self.create_from_hash(parent_idh,hash)
-      rows = hash.values.first.values.map do |raw_row|
-        row = Aux.col_refs_to_keys(raw_row)
-        row[:input_id] = row[:input_id].to_i
-        row[:output_id] = row[:output_id].to_i
-        row
-      end
-
-      #TODO: hack until front end api changes
-      port_idhs = rows.map do |r|
-        [parent_idh.createIDH(:id => r[:input_id], :model_name => :port, :parent_model_name => :node),
-         parent_idh.createIDH(:id => r[:output_id], :model_name => :port, :parent_model_name => :node)]
-      end.flatten.uniq
-
-      indexed_attrs = Port.get_attribute_info(port_idhs).inject({}){|h,r|h.merge(r[:id] => r)}
-
-      attr_link_rows = rows.map do |r|
-        {
-          :display_name => r[:display_name],
-          :input_id => indexed_attrs[r[:input_id]][:attribute][:id],
-          :output_id => indexed_attrs[r[:output_id]][:attribute][:id]
-        }
-      end
-      
-      create_links(parent_idh,attr_link_rows)
-    end
-
-
-    def self.create_links(parent_idh,rows,opts={})
+    def self.create_port_and_attr_links(parent_idh,rows,opts={})
       attr_link_mh = parent_idh.create_childMH(:attribute_link)
       #TODO: parent model name can also be node
       attr_mh = attr_link_mh.createMH(:model_name => :attribute,:parent_model_name=>:component)
@@ -127,7 +97,7 @@ module XYZ
       end
       link = {:input_id => attr_db_params[:id],:output_id => attr_db_config[:id]}
       opts = {:no_nested_processing => true}
-      create_links(parent_idh,[link],opts)
+      create_port_and_attr_links(parent_idh,[link],opts)
     end
 
 

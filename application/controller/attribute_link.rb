@@ -2,16 +2,40 @@ module XYZ
   class Attribute_linkController < Controller
     helper :ports
     def save(explicit_hash=nil,opts={})
+      hash = explicit_hash || request.params.dup
+      return Error.new("not implemented update of attribute link") if hash["id"]
+
+      #TODO: right now call reaching here has port link attributes not attribute links; so should probably move this to under port link controller
+      port_input_id,port_output_id = [hash["input_id"].to_i,hash["output_id"].to_i]
+      port_idhs = [port_input_id,port_output_id].map{|id|id_handle(id,:port)}
+      indexed_attrs = Port.get_attribute_info(port_idhs).inject({}){|h,r|h.merge(r[:id] => r)}
+      attr_link = {
+        :display_name => hash["name"],
+        :input_id => indexed_attrs[port_input_id][:attribute][:id],
+        :output_id => indexed_attrs[port_output_id][:attribute][:id]
+      }
+
       handle_errors do
-        hash = explicit_hash || request.params.dup
-        constraints = create_object_from_id(hash["input_id"],:attribute).get_constraints()
+        constraints = create_object_from_id(attr_link[:input_id],:attribute).get_constraints()
         if constraints
-          target = {:target_port_id_handle => id_handle(hash["output_id"],:attribute)}
+          target = {:target_port_id_handle => id_handle(attr_link[:output_id],:attribute)}
           constraints.evaluate_given_target(target, :raise_error_when_violation => true)
         end
-        super(hash,opts)
+
+        parent_id_handle = id_handle(hash["parent_id"],hash["parent_model_name"])
+        new_attr_link_info = AttributeLink.create_port_and_attr_links(parent_id_handle,[attr_link]).first
+        new_id = new_attr_link_info[:id]
+        if hash["return_model"] == "true"
+          return {:data=> get_object_by_id(new_id)}
+        end
+    
+        return new_id if opts[:return_id]
+        redirect = (not (hash["redirect"].to_s == "false"))
+        redirect "/xyz/#{model_name()}/display/#{new_id.to_s}" if redirect
       end
     end
+
+
     #TODO: right now just for testing
     def list_legal_connections(*parent_uri_array) #TODO stub
       parent_id = nil

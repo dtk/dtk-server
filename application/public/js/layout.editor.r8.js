@@ -67,7 +67,7 @@ if(!R8.LayoutEditor) {
 				if(typeof(_layout.def.i18n) == 'undefined') _layout.def.i18n = '(no title)';
 				this.setI18n(fieldDefs);
 				_editorTplWrapperNode = R8.Utils.Y.one('#editor-tpl-wrapper');
-				_editorTplWrapperNode.append(R8.Rtpl.wspace_edit_layout({
+				_editorTplWrapperNode.append(R8.Rtpl.wspace_modal_layout({
 					'layout': _layout
 				}));
 
@@ -160,6 +160,14 @@ if(!R8.LayoutEditor) {
 				_gtPopupNode.remove();
 				_gtPopupNode = null;
 				_gtPopupIndex = null;
+
+//TODO: revisit, including for now to accomodate when popup gets in weird state and dupes are rendered
+				var testNode = R8.Utils.Y.one('#gt-popup');
+				while(testNode != null) {
+					testNode.purge(true);
+					testNode.remove();
+					testNode = R8.Utils.Y.one('#gt-popup');
+				}
 			},
 			showGtPopup: function(groupDef) {
 				_gtPopupShowTimeout = null;
@@ -188,7 +196,7 @@ if(!R8.LayoutEditor) {
 				_gtPopupHideTimeout = setTimeout(clearPopup,400);
 			},
 			getPopupNode: function(groupDef) {
-				var popupNode = R8.Utils.Y.Node.create(R8.Rtpl.group_tab_popup({'group_def': groupDef})),
+				var popupNode = R8.Utils.Y.Node.create(R8.Rtpl.wspace_modal_group_popup({'group_def': groupDef})),
 					that=this;
 
 				popupNode.on('mouseenter',function(e){clearTimeout(_gtPopupHideTimeout);});
@@ -222,7 +230,7 @@ if(!R8.LayoutEditor) {
 
 			gtUpdateName: function(newName) {
 //DEBUG
-console.log('PopupIndex:'+_gtPopupIndex);
+//console.log('PopupIndex:'+_gtPopupIndex);
 				_layout.def.groups[_gtPopupIndex].i18n = newName;
 				_layout.def.groups[_gtPopupIndex].name = newName.replace(' ','_');
 

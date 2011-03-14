@@ -146,13 +146,15 @@ pp component
       component = create_object_from_id(id,:component)
       field_defs = component.get_field_def()
 
-      tpl = R8Tpl::TemplateR8.new("component/wspace_edit_layout",user_context())
-      tpl.set_js_tpl_name('wspace_edit_layout')
+      include_css('wspace_modal')
+      tpl = R8Tpl::TemplateR8.new("component/wspace_modal_layout",user_context())
+      tpl.set_js_tpl_name('wspace_modal_layout')
+
       js_tpl = tpl.render()
       include_js_tpl(js_tpl[:src])
 
-      tpl = R8Tpl::TemplateR8.new("component/group_tab_popup",user_context())
-      tpl.set_js_tpl_name('group_tab_popup')
+      tpl = R8Tpl::TemplateR8.new("component/wspace_modal_group_popup",user_context())
+      tpl.set_js_tpl_name('wspace_modal_group_popup')
       js_tpl = tpl.render()
       include_js_tpl(js_tpl[:src])
 
@@ -162,7 +164,6 @@ pp component
       tpl.assign(:field_def_list,field_defs)
 
       include_css('layout-editor')
-      include_css('wspace-modal')
       include_js('layout.editor.r8')
 
       layout_list = component.get_layouts(:edit)

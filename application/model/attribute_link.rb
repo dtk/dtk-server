@@ -66,9 +66,8 @@ module XYZ
       link_info_list = rows.map{|r|{:input => attr_info[r[:input_id]],:output => attr_info[r[:output_id]]}}
 
       create_related_links?(parent_idh,link_info_list)
-      #TODO: assumption is that what is created by create_related_links? has no bearing on l4 ports
+      #TODO: assumption is that what is created by create_related_links? has no bearing on l4 ports (as manifsted by using link_info_list arg computred before create_related_links? call
       Port.create_and_update_l4_ports_and_links?(parent_idh,link_info_list)
-      returning_ids
     end
 
     def self.create_related_links?(parent_idh,link_info_list)

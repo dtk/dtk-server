@@ -23,8 +23,11 @@ module XYZ
         end
 
         parent_id_handle = id_handle(hash["parent_id"],hash["parent_model_name"])
-        new_attr_link_info = AttributeLink.create_port_and_attr_links(parent_id_handle,[attr_link]).first
-        new_id = new_attr_link_info[:id]
+        ret = AttributeLink.create_port_and_attr_links(parent_id_handle,[attr_link])
+puts "-------------------------"
+pp ["new create link response:", ret]
+puts "-------------------------"
+        new_id = ret[:new_port_links].first
         if hash["return_model"] == "true"
           return {:data=> get_object_by_id(new_id)}
         end

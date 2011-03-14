@@ -55,7 +55,8 @@ module XYZ
     end
 
     def self.create_and_update_l4_ports_and_links?(parent_idh,link_info_list)
-      return if link_info_list.empty?
+      ret = {:new_port_links => Array.new,:new_l4_ports => Array.new, :merged_external_ports => Array.new}
+      return ret if link_info_list.empty?
       sample_attr = link_info_list.first[:input]
       node_mh = sample_attr.model_handle.createMH(:node)
 
@@ -102,6 +103,7 @@ module XYZ
 
       #create needed l4 ports and update input_attr_to_l4
       l4_idhs = create_l4_input_ports(l4_input_to_create)
+      ret[:new_l4_ports] = l4_idhs.map{|idh|idh.get_id()}
       l4_input_to_create.each_with_index do |attr,i|
         input_attr_to_l4[attr[:id]] = {:port_id => l4_idhs[i].get_id(), :state =>  :created}
       end
@@ -118,7 +120,7 @@ module XYZ
           {:input_id => input_attr_to_l4[link_info[:input][:id]][:port_id],
             :output_id => output_attr_to_l4[link_info[:output][:id]]}
         end.uniq
-        PortLink.create(parent_idh,l4_links_to_create)
+        ret[:new_port_links] = PortLink.create(parent_idh,l4_links_to_create).map{|idh|idh.get_id()}
       end
 
       #reroot neeeded external ports
@@ -129,10 +131,10 @@ module XYZ
           :l4_port_id => input_attr_to_l4[attr_id][:port_id]
         }
       end
-
+      ret[:merged_external_ports] = reroot_info.map{|r|Aux::hash_subset(r,[:external_port_id,:l4_port_id])}
       port_mh = parent_idh.createMH(:port)
       reroot_external_ports(port_mh,reroot_info)
-      reroot_info
+      ret
     end
   
    private

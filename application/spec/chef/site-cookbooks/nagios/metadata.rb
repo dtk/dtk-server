@@ -14,14 +14,5 @@ recipe "nagios::server", "Installs and configures a nagios server"
 end
 
 depends "apache2"
-#depends "chef_aux"
-#depends "monitoring"
-###TODO may put in seperate file
-
-attribute "_meta_info",
-  :basic_types => {
-    "nagios::server" => "service", 
-    "nagios::client" => "service", 
-   }
-
-require File.expand_path('metadata_aux.rb',::Chef::Config[:cucumber_path]);__t(__FILE__,self)
+depends "chef_aux"
+depends "monitoring"

@@ -120,7 +120,7 @@ module XYZ
           {:input_id => input_attr_to_l4[link_info[:input][:id]][:port_id],
             :output_id => output_attr_to_l4[link_info[:output][:id]]}
         end.uniq
-        ret[:new_port_links] = PortLink.create(parent_idh,l4_links_to_create).map{|idh|idh.get_id()}
+        ret[:new_port_links] = PortLink.create_from_links_hash(parent_idh,l4_links_to_create).map{|idh|idh.get_id()}
       end
 
       #reroot neeeded external ports

@@ -1,6 +1,6 @@
 module XYZ
   class PortLink < Model
-    def self.create(parent_idh,links_to_create)
+    def self.create_from_links_hash(parent_idh,links_to_create)
       parent_mn =  parent_idh[:model_name]
       parent_id = parent_idh.get_id()
       port_link_mh = parent_idh.createMH(:model_name => :port_link,:parent_model_name => parent_mn)

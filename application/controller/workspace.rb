@@ -808,7 +808,7 @@ POSSIBLE CHANGES TO HASH
 #TODO: getting json rather than hash
 item_list = JSON.parse(hash["item_list"])
       node_id_handles = item_list.map{|item|id_handle(item["id"].to_i,item["model"].to_sym)}
-      connected_links,dangling_links = Node.get_external_connected_port_links(node_id_handles)
+      connected_links,dangling_links = Node.get_external_connected_links(node_id_handles)
       #TODO: raise error to user if dangling link
       Log.error("dangling links #{dangling_links.inspect}") unless dangling_links.empty?
       link_id_handles = connected_links.map{|link|link.id_handle}

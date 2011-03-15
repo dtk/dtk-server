@@ -64,8 +64,7 @@ module XYZ
            :cols => [:id,id(:node)]
          }]
 
-      virtual_column :input_port_links, :type => :json, :hidden => true, 
-      :remote_dependencies => 
+      input_port_links_def = 
         [{
            :model_name => :port,
            :join_type => :inner,
@@ -74,11 +73,18 @@ module XYZ
          },
         {
            :model_name => :port_link,
+           :convert => true,
            :join_cond=>{:input_id =>q(:port,:id)},
            :join_type => :inner,
            :cols => [:id,:input_id,:output_id]
-         },
-         {
+         }]
+      virtual_column :input_port_links, :type => :json, :hidden => true, 
+      :remote_dependencies => input_port_links_def 
+
+      virtual_column :input_port_link_info, :type => :json, :hidden => true, 
+      :remote_dependencies => 
+        input_port_links_def +
+        [{
            :model_name => :port,
            :alias => :attr_other_end,
            :join_cond=>{:id =>q(:port_link,:output_id)},
@@ -86,8 +92,7 @@ module XYZ
            :cols => [:id,:display_name,:type]
          }]
 
-      virtual_column :output_port_links, :type => :json, :hidden => true, 
-      :remote_dependencies => 
+      output_port_links_def =
         [{
            :model_name => :port,
            :join_type => :inner,
@@ -96,11 +101,18 @@ module XYZ
          },
         {
            :model_name => :port_link,
+           :convert => true,
            :join_cond=>{:output_id =>q(:port,:id)},
            :join_type => :inner,
            :cols => [:id,:input_id,:output_id]
-         },
-         {
+         }]
+
+      virtual_column :output_port_links, :type => :json, :hidden => true, 
+      :remote_dependencies => output_port_links_def
+      virtual_column :output_port_links, :type => :json, :hidden => true, 
+      :remote_dependencies => 
+        output_port_links_def +
+         [{
            :model_name => :port,
            :alias => :attr_other_end,
            :join_cond=>{:id =>q(:port_link,:input_id)},
@@ -109,11 +121,8 @@ module XYZ
          }]
 
 
-      ### TODO: this may be deprecated when move to materizlaied ports
-      virtual_column :attribute_ports, :type => :json, :hidden => true, 
-      :remote_dependencies => 
-        [
-         {
+      cmp_attrs_on_node_def = 
+        [{
            :model_name => :component,
            :join_type => :inner,
            :join_cond=>{:node_node_id => q(:node,:id)},
@@ -121,11 +130,31 @@ module XYZ
          },
          {
            :model_name => :attribute,
+           :join_type => :inner,
+           :join_cond=>{:component_component_id => q(:component,:id)},
+           :cols => [:id,:display_name]
+         }]
+      virtual_column :input_attribute_links, :type => :json, :hidden => true, 
+      :remote_dependencies => 
+        cmp_attrs_on_node_def +
+        [
+         {
+           :model_name => :attribute_link,
            :convert => true,
            :join_type => :inner,
-           :filter => [:and,[:eq,:is_port,true]],
-           :join_cond=>{:component_component_id => q(:component,:id)},
-           :cols => [:id,:display_name, id(:component),:is_port,:semantic_type_summary,:description]
+           :join_cond=>{:input_id => q(:attribute,:id)},
+           :cols => [:id,:display_name, :type, :input_id,:output_id]
+         }]
+      virtual_column :output_attribute_links, :type => :json, :hidden => true, 
+      :remote_dependencies => 
+        cmp_attrs_on_node_def +
+        [
+         {
+           :model_name => :attribute_link,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond=>{:output_id => q(:attribute,:id)},
+           :cols => [:id,:display_name, :type, :input_id,:output_id]
          }]
 
 
@@ -258,10 +287,10 @@ module XYZ
     def self.get_port_links(id_handles,type="l4")
       raise Error.new("not implemented yet: get_port_links when type = #{type}") unless type == "l4"
 
-      input_port_rows =  get_objects_in_set_from_sp_hash(id_handles,:columns => [:id, :display_name, :input_port_links]).select do |r|
+      input_port_rows =  get_objects_in_set_from_sp_hash(id_handles,:columns => [:id, :display_name, :input_port_link_info]).select do |r|
         r[:port][:type] == type
       end
-      output_port_rows =  get_objects_in_set_from_sp_hash(id_handles,:columns => [:id, :display_name, :output_port_links]).select do |r|
+      output_port_rows =  get_objects_in_set_from_sp_hash(id_handles,:columns => [:id, :display_name, :output_port_link_info]).select do |r|
         r[:port][:type] == type
       end
       return Array.new if input_port_rows.empty? and output_port_rows.empty?
@@ -317,20 +346,55 @@ module XYZ
       end
     end
 
-
-    #TODO: rename or refactor in light of new port model
+    #returns external attribute links and port links
     #returns [connected_links,dangling_links]
-    def self.get_external_connected_port_links(id_handles)
+    def self.get_external_connected_links(id_handles)
+      port_link_ret = get_conn_port_links(id_handles)
+      attr_link_ret = get_conn_external_attr_links(id_handles)
+      [port_link_ret[0]+attr_link_ret[0],port_link_ret[1]+attr_link_ret[1]]
+    end
+
+    #return ports links 
+    #returns [connected_links,dangling_links]
+    def self.get_conn_port_links(id_handles)
       ret = [Array.new,Array.new]
 
       in_port_cols = [:id, :display_name, :input_port_links]
+      ndx_in_links = Hash.new
+      get_objects_in_set_from_sp_hash(id_handles,:columns => in_port_cols).each do |r|
+        link = r[:port_link]
+        ndx_in_links[link[:id]] = link 
+      end
+
+      out_port_cols = [:id, :display_name, :output_port_links]
+      ndx_out_links = Hash.new
+      get_objects_in_set_from_sp_hash(id_handles,:columns => out_port_cols).each do |r|
+        link = r[:port_link]
+        ndx_out_links[link[:id]] = link 
+      end
+
+      return ret if ndx_in_links.empty? and ndx_out_links.empty?
+
+      connected_links = (ndx_in_links.keys & ndx_out_links.keys).map{|id|ndx_in_links[id]}
+
+      dangling_links = (ndx_in_links.keys - ndx_out_links.keys).map{|id|ndx_in_links[id]}
+      dangling_links += (ndx_out_links.keys - ndx_in_links.keys).map{|id|ndx_out_links[id]}
+      [connected_links,dangling_links]
+    end
+
+    #return externally connected attribute links
+    #returns [connected_links,dangling_links]
+    def self.get_conn_external_attr_links(id_handles)
+      ret = [Array.new,Array.new]
+
+      in_port_cols = [:id, :display_name, :input_attribute_links]
       ndx_in_links = Hash.new
       get_objects_in_set_from_sp_hash(id_handles,:columns => in_port_cols).each do |r|
         link = r[:attribute_link]
         ndx_in_links[link[:id]] = link if link[:type] == "external"
       end
 
-      out_port_cols = [:id, :display_name, :output_port_links]
+      out_port_cols = [:id, :display_name, :output_attribute_links]
       ndx_out_links = Hash.new
       get_objects_in_set_from_sp_hash(id_handles,:columns => out_port_cols).each do |r|
         link = r[:attribute_link]

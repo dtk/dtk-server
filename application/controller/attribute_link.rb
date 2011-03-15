@@ -29,7 +29,7 @@ pp ["new create link response:", ret]
 puts "-------------------------"
         new_id = ret[:new_port_links].first
         if hash["return_model"] == "true"
-          return {:data=> get_object_by_id(new_id)}
+          return {:data=> get_object_by_id(new_id,:port_link)}
         end
     
         return new_id if opts[:return_id]

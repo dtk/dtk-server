@@ -284,7 +284,8 @@ module XYZ
       NonParentNestedKeys = {
         :component => {:assembly_id => :component},
         :node => {:assembly_id => :component},
-        :attribute_link => {:assembly_id => :component}
+        :attribute_link => {:assembly_id => :component},
+        :port_link => {:assembly_id => :component}
       }
 
       InvertedNonParentNestedKeys = NonParentNestedKeys.inject({}) do |ret,kv|

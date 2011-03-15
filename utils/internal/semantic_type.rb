@@ -103,12 +103,12 @@ class PropagateProcessor
 
     def propagate_when_eq_indexed()
       link_info = input_link_info()
-      array_pointers = link_info.array_pointers(function_index)
+      array_pointers = link_info && link_info.array_pointers(function_index)
       new_rows = output_value().nil? ? [nil] : (output_semantic_type().is_array? ?  output_value() : [output_value()])
       value = nil
       if array_pointers.nil?
         value = (input_value||[]) + new_rows
-        link_info.update_array_pointers!(function_index,((input_value||[]).size...value.size).to_a)
+        link_info.update_array_pointers!(function_index,(Array(input_value||[]).size...value.size))
       else
         unless array_pointers.size == new_rows.size
           raise ErrorNotImplemented.new("propagate_when_eq_indexed when number of rows spliced in changes")
@@ -164,7 +164,6 @@ Debug.print_and_ret(
     def input_link_info()
       return @input_link_info if @input_link_info 
       link_info = @input_attr[:link_info]
-      return nil unless link_info
       @input_link_info = link_info.kind_of?(Attribute::LinkInfo) ? link_info : Attribute::LinkInfo.new(link_info)
     end
     def output_value()

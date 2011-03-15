@@ -498,7 +498,7 @@ pp [:nested_changes,nested_changes]
     end
 
     class LinkInfo < HashObject
-      def initialize(link_info_attr_val)
+      def initialize(link_info_attr_val=nil)
         super(link_info_attr_val||{})
       end
       def set_next_index!()

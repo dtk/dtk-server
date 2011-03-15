@@ -288,10 +288,10 @@ module XYZ
       raise Error.new("not implemented yet: get_port_links when type = #{type}") unless type == "l4"
 
       input_port_rows =  get_objects_in_set_from_sp_hash(id_handles,:columns => [:id, :display_name, :input_port_link_info]).select do |r|
-        r[:port][:type] == type
+        (r[:port]||{})[:type] == type
       end
       output_port_rows =  get_objects_in_set_from_sp_hash(id_handles,:columns => [:id, :display_name, :output_port_link_info]).select do |r|
-        r[:port][:type] == type
+        (r[:port]||{})[:type] == type
       end
       return Array.new if input_port_rows.empty? and output_port_rows.empty?
 

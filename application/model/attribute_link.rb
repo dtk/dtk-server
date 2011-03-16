@@ -34,7 +34,7 @@ module XYZ
       #get info needed to set attribute_link.function_index
       endpoint_ids = rows.map{|r|[r[:input_id],r[:output_id]]}.flatten.uniq
       sp_hash = {
-        :columns => [:id,:link_info_object,:attribute_value,:semantic_type_object,:component_parent],
+        :columns => [:id,:link_info,:attribute_value,:semantic_type_object,:component_parent],
         :filter => [:and, [:oneof, :id, endpoint_ids]]
       }
       attr_rows = get_objects_from_sp_hash(attr_mh,sp_hash)
@@ -42,18 +42,17 @@ module XYZ
 
 
       #set function and new function_index and new updated link_info
-      updated_link_info = Hash.new
+      updated_link_info = Array.new
       rows.each do |row|
         input_id = row[:input_id]
-        link_info = attr_info[input_id][:link_info_object]
-        new_index = link_info.set_next_index!()
+        new_index = Attribute::LinkInfo.set_next_index!(attr_info[input_id])
         row[:function] = SemanticType.find_link_function(attr_info[input_id][:semantic_type_object],attr_info[row[:output_id]][:semantic_type_object])
         row[:function_index] = new_index
-        updated_link_info[input_id] = link_info.hash_value
+        updated_link_info << {:id => input_id,:link_info => attr_info[input_id][:link_info]}
       end
 
       #update attribute link_info
-      update_from_rows(attr_mh,updated_link_info.map{|id,link_info|{:id => id, :link_info => link_info}}) 
+      update_from_rows(attr_mh,updated_link_info)
 
       #create attribute_links
       select_ds = SQL::ArrayDataset.create(db,rows,attr_link_mh,:convert_for_create => true)

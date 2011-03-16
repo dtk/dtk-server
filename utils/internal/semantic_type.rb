@@ -5,7 +5,7 @@ class PropagateProcessor
 
 =begin Debuging helpers
       puts "---------------------------"
-      [:function,:function_index,:input_value,:input_semantic_type,:output_value,:output_semantic_type,:input_link_info].each do |x| 
+      [:function,:function_index,:input_value,:input_semantic_type,:output_value,:output_semantic_type].each do |x| 
         pp [x,eval(x.to_s)]
       end
       puts "---------------------------"
@@ -102,13 +102,12 @@ class PropagateProcessor
     end
 
     def propagate_when_eq_indexed()
-      link_info = input_link_info()
-      array_pointers = link_info && link_info.array_pointers(function_index)
+      array_pointers = Attribute::LinkInfo.array_pointers(@input_attr,function_index)
       new_rows = output_value().nil? ? [nil] : (output_semantic_type().is_array? ?  output_value() : [output_value()])
       value = nil
       if array_pointers.nil?
         value = (input_value||[]) + new_rows
-        link_info.update_array_pointers!(function_index,(Array(input_value||[]).size...value.size))
+        Attribute::LinkInfo.update_array_pointers!(@input_attr,function_index,(Array(input_value||[]).size...value.size))
       else
         unless array_pointers.size == new_rows.size
           raise ErrorNotImplemented.new("propagate_when_eq_indexed when number of rows spliced in changes")
@@ -126,7 +125,7 @@ class PropagateProcessor
         end
       end
 Debug.print_and_ret(
-      {:value_derived => value,:link_info => link_info.hash_value}
+      {:value_derived => value,:link_info => @input_attr[:link_info]}
 )
     end
 
@@ -161,11 +160,7 @@ Debug.print_and_ret(
     def input_semantic_type()
       @input_semantic_type ||= SemanticType.create_from_attribute(@input_attr)
     end
-    def input_link_info()
-      return @input_link_info if @input_link_info 
-      link_info = @input_attr[:link_info]
-      @input_link_info = link_info.kind_of?(Attribute::LinkInfo) ? link_info : Attribute::LinkInfo.new(link_info)
-    end
+
     def output_value()
       @output_value ||= output_value_aux()
     end

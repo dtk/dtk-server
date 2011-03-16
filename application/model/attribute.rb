@@ -33,7 +33,6 @@ module XYZ
       virtual_column :has_port_object, :type => :booelan, :hidden => true, :local_dependencies => [:is_port,:semantic_type_summary]
 
       column :link_info, :json, :ret_keys_as_symbols => false
-      virtual_column :link_info_object, :type => :object, :hidden => true, :local_dependencies => [:link_info]
 
       virtual_column :is_unset, :type => :boolean, :hidden => true, :local_dependencies => [:value_asserted,:value_derived,:data_type,:semantic_type]
 
@@ -232,10 +231,6 @@ module XYZ
     ### virtual column defs
     def attribute_value()
       self[:value_asserted] || self[:value_derived]
-    end
-
-    def link_info_object()
-      LinkInfo.new(self[:link_info])
     end
 
     def semantic_type_object()
@@ -497,25 +492,22 @@ pp [:nested_changes,nested_changes]
       [sap_config_attr_idh,new_sap_attr_idh]
     end
 
-    class LinkInfo < HashObject
-      def initialize(link_info_attr_val=nil)
-        super(link_info_attr_val||{})
-      end
-      def set_next_index!()
-        self["indexes"] ||= Array.new
-        next_index = (self["indexes"].max||0)+1
-        self["indexes"] << next_index
+    module LinkInfo
+      def self.set_next_index!(attr)
+        link_info = attr[:link_info] ||= Hash.new
+        link_info["indexes"] ||= Array.new
+        next_index = (link_info["indexes"].max||0)+1
+        link_info["indexes"] << next_index
         next_index
       end
-      def hash_value()
-        self
+      def self.array_pointers(attr,index)
+        link_info = attr[:link_info]||{}
+        (link_info["array_pointers"]||{})[index.to_s]
       end
-      def array_pointers(index)
-        (self["array_pointers"]||{})[index.to_s]
-      end
-      def update_array_pointers!(index,pointers)
-        self["array_pointers"] ||= Hash.new
-        self["array_pointers"][index.to_s] = pointers.map{|x|x.to_i}
+      def self.update_array_pointers!(attr,index,pointers)
+        link_info = attr[:link_info] ||= Hash.new
+        link_info["array_pointers"] ||= Hash.new
+        link_info["array_pointers"][index.to_s] = pointers.map{|x|x.to_i}
       end
     end
 

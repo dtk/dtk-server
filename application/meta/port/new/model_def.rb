@@ -6,7 +6,7 @@
       :type=>:varchar,
       :size =>25
     },
-    :port_direction=>{
+    :direction=>{
       :type=>:varchar,
       :size =>10
     },
@@ -25,6 +25,11 @@
   },
   :many_to_one=>[:node],
   :virtual_columns=>{
+    :location=>{
+      :type=>:varchar,
+      :hidden=>true,
+      :local_dependencies => [:direction,:display_name]
+    },
     :attribute=>{
       :type=>:json,
       :hidden=>true,

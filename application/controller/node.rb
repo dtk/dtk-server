@@ -56,8 +56,8 @@ pp '++++++++++++++++++++++++++++++'
 
     def get_ports(id)
       node = create_object_from_id(id)
-#      port_list = node.get_ports("external")
       port_list = node.get_ports("l4")
+pp [:port_list,port_list]
       return {:data=>port_list}
     end
 

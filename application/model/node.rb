@@ -35,7 +35,7 @@ module XYZ
            :convert => true,
            :join_type => :inner,
            :join_cond=>{:node_node_id => q(:node,:id)},
-           :cols => [:id,:type,id(:node),:containing_port_id,:external_attribute_id,:port_direction,:ref]
+           :cols => [:id,:type,id(:node),:containing_port_id,:external_attribute_id,:direction,:location,:ref]
          }]
 
       virtual_column :output_attrs_to_l4_input_ports, :type => :json, :hidden => true,
@@ -276,9 +276,11 @@ module XYZ
       port_list.map do |port|
         {
           :description=>"",
-          :is_port=>true,
+          :is_port=>true, #TODO: probably not needed
+          :location=> port[:location],
           :display_name=> get_i18n_port_name(i18n,port),
-          :port_type=> port[:port_direction],
+          :direction=> port[:direction], 
+          :port_type=> port[:direction], #TODO: deprecate in favor of direction
           :id=> port[:id]
         }
       end

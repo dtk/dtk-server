@@ -1,5 +1,17 @@
 module XYZ
   class Port < Model
+    ####################
+    #virtual attribute defs
+    def location()
+      #TODO: stub
+      return "east" if self[:display_name] =~ /nagios__server/
+      return "west" if self[:display_name] =~ /nagios__client/
+      case self[:direction]
+        when "output" then "north"
+        when "input" then "south"
+      end
+    end
+    ###########
     def self.get_attribute_info(port_id_handles)
       get_objects_in_set_from_sp_hash(port_id_handles,:columns => [:id,:attribute]).map do |r|
         {
@@ -25,7 +37,7 @@ module XYZ
           :ref => ref,
           :display_name => ref,
           :node_node_id => node_id,
-          :port_direction => attr[:port_type]
+          :direction => attr[:port_type]
         }
         hash.merge(attr[:port_type] == "input" ? {:external_attribute_id => attr[:id]} : {})
       end
@@ -48,7 +60,7 @@ module XYZ
           :external_attribute_id => attr[:id],
           :node_node_id => node_id,
           :containing_port_id => new_port_index[strip_type(ref)],
-          :port_direction => "output"
+          :direction => "output"
         }
       end
       create_from_rows(port_mh,nested_ports)
@@ -250,7 +262,7 @@ module XYZ
           :ref => ref,
           :display_name => ref,
           :node_node_id => node_id,
-          :port_direction => "input"
+          :direction => "input"
         }
       end
       sample = attrs_external.first

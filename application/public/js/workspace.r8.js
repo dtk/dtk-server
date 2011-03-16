@@ -929,11 +929,13 @@ for(vs in _viewSpaces) {
 					mLeft = Math.floor((width-700)/2);
 
 				R8.Workspace.shimify('wspace-container');
+
 				node.append(modalTpl);
 				_modalNode = R8.Utils.Y.one('#'+_modalNodeId);
 				_modalNode.setStyles({'top':mTop,'left':mLeft,'display':'block'});
 
 				var contentNode = R8.Utils.Y.one('#'+_modalNodeId+'-content');
+
 				return contentNode;
 			},
 
@@ -969,12 +971,13 @@ for(vs in _viewSpaces) {
 				_viewSpaces[vSpaceId].showLinks();
 			},
 
-			mergePorts: function(port2Merge,targetPort) {
+			mergePorts: function(port2MergeId,targetPortId) {
 				var vSpaceId = (typeof(viewSpaceId) == 'undefined') ? _currentViewSpace : viewSpaceId;
 //				if (!_viewSpaces[vSpaceId].isReady()) {
 //				}
-
-				_viewSpaces[vSpaceId].mergePorts('port-2147483941','port-2147483681');
+//DEBUG
+console.log('inside workspace.mergePorts with ids:'+port2MergeId+','+targetPortId);
+				_viewSpaces[vSpaceId].mergePorts('port-'+port2MergeId,'port-'+targetPortId);
 			},
 
 			createLink: function() {

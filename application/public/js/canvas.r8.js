@@ -87,8 +87,12 @@ if (!R8.Canvas) {
 //				var endElemXY = endElemNode.getXY();
 
 				//DEBUG
-				var startElemXY = R8.Component.getPortXY(startElemID);
-				var endElemXY = R8.Component.getPortXY(endElemID);
+				var wspaceElem = R8.Utils.Y.one('#viewspace');
+				var wspaceXY = wspaceElem.getXY();
+				var tempXY = startElemNode.getXY();
+				var startElemXY = [(tempXY[0]-wspaceXY[0]),(tempXY[1]-wspaceXY[1])]
+				var tempXY = endElemNode.getXY();
+				var endElemXY = [(tempXY[0]-wspaceXY[0]),(tempXY[1]-wspaceXY[1])]
 
 				//get offset for 1/2 start and end node height/widths
 				var endElemRegion = endElemNode.get('region');

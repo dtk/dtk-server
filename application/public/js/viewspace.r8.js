@@ -138,6 +138,17 @@ if (!R8.ViewSpace) {
 					targetPortNode = R8.Utils.Y.one('#'+targetPortDef.nodeId),
 					linkDef = this.getLinkDefByPortId(mergePortNodeId.replace('port-',''));
 
+//DEBUG
+/*
+console.log('inside of viewspace.mergeports...');
+console.log('mergePortNodeId:'+mergePortNodeId);
+console.log(mergePortDef);
+console.log('targetPortNodeId:'+targetPortNodeId);
+console.log(targetPortDef);
+console.log(linkDef);
+console.log('----------PARENT TEST--------------');
+console.log(_items[mergePortDef.parentItemId]);
+*/
 				//make sure the merging port animates over the target port
 				mergePortNode.setStyle('zIndex','3');
 				var that=this;
@@ -163,7 +174,6 @@ if (!R8.ViewSpace) {
 						duration: 0.3
 				    });
 
-
 					var animOnEnd = function(e) {
 							this.setAttrs({
 								'to':{opacity: 0},
@@ -171,12 +181,22 @@ if (!R8.ViewSpace) {
 							});
 							this.on('end',function(e){
 								linkAnim.run();
+
+								var reflowCallback = function() {
+									that.removeLink(linkDef.id);
+									_items[mergePortDef.parentItemId].removePort('port-'+mergePortDef.id);
+								}
+								setTimeout(reflowCallback,200);
 							});
 							this.run();
 						}
 					portAnim.once('end',animOnEnd);
+
 					portAnim.run();
 				});
+			},
+			removeLink: function(linkId) {
+				delete(_links[linkId]);
 			},
 
 			portMout: function(e) {
@@ -573,6 +593,9 @@ console.log(ports);
 				_items[_links[id]['endItemId']].addLink(id,def);
 			},
 
+			addLink: function(linkDef) {
+				_links[linkDef.id] = linkDef;
+			},
 			addLinkToItems: function(linkDef) {
 //TODO: revisit after implementing many end item links
 				_items[linkDef.startItem.parentItemId].addLink(linkDef);

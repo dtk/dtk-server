@@ -66,7 +66,6 @@ if(!R8.ToolbarGroup) {
 			},
 			open: function() {
 				_modalContentNode = R8.Workspace.renderModal();
-
 				this.loadContent(_modalContentNode);
 			},
 			loadContent: _cfg['contentLoader']

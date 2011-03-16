@@ -111,6 +111,38 @@ if (!R8.Node) {
 					}
 				});
 			},
+
+			removePortOld: function(portId) {
+				delete(_ports['port-'+portId]);
+			},
+
+			removePort: function(portId) {
+				for(var p in _portDefs) {
+					if(portId == ('port-'+_portDefs[p].id)) {
+						var portNode = R8.Utils.Y.one('#'+_ports[portId].nodeId);
+							portNode.purge(true);
+							portNode.remove();
+						R8.Utils.arrayRemove(_portDefs,p);
+						delete(_ports[portId]);
+						this.removeLinkByPortId(portId);
+						this.reflowPorts();
+						return;
+					}
+				}
+			},
+			reflowPorts: function() {
+				this.clearPorts();
+				this.renderPorts();
+				this.refreshLinks();
+			},
+			removeLinkByPortId: function(portId) {
+				for(var l in _links) {
+					if(portId == _links[l].startItem.nodeId || portId == _links[l].endItems[0].nodeId) {
+						delete(_links[l]);
+						return;
+					}
+				}
+			},
 /*
 			refreshPorts: function(ioId,responseObj) {
 				eval("R8.Ctrl.callResults[ioId]['response'] =" + responseObj.responseText);
@@ -836,14 +868,23 @@ return;
 											'type': connectorType,
 											'startItem': {
 												'location':startPortDef.location,
-												'nodeId':startNodeId
+												'nodeId':startNodeId,
+//												'portNodeId':startNodeId,
+												'parentItemId':_id
 											},
 											'endItems': [{
 												'elemID':'?',
 												'location':endPortDef.location,
-												'nodeId':endNodeId
-											}]
+												'nodeId':endNodeId,
+//												'portNodeId':endNodeId,
+												'parentItemId': endNode.get('parentNode').getAttribute('data-id'),
+											}],
+											'style':[
+												{'strokeStyle':'#4EF7DE','lineWidth':5,'lineCap':'round'},
+												{'strokeStyle':'#FF33FF','lineWidth':3,'lineCap':'round'}
+											],
 										}
+
 /*
 										R8.Workspace.connectors[tempConnectorID] = {
 											'type': connectorType,
@@ -891,6 +932,7 @@ return;
 											endNode.addClass('connected');
 
 										} else {
+//DEBUG
 console.log('not a valid link.., mis-matched types...');
 										}
 									});
@@ -906,8 +948,8 @@ console.log('not a valid link.., mis-matched types...');
 			linkCreateCallback: function(ioId,responseObj) {
 				eval("R8.Ctrl.callResults[ioId]['response'] =" + responseObj.responseText);
 				var response = R8.Ctrl.callResults[ioId]['response'];
-
 				var errorData = response.application_attribute_link_save.content[0].data.error;
+
 				if(typeof(errorData) != 'undefined') {
 					R8.Utils.Y.one('#'+_tempLinkDef.id).remove();
 					R8.Workspace.showAlert(errorData.error_msg);
@@ -919,21 +961,66 @@ console.log('not a valid link.., mis-matched types...');
 					endPortNode.removeClass('connected');
 					endPortNode.addClass('available');
 
-//DEBUG
-//console.log(_tempLinkDef);
-//console.log(errorData);
 					return;
 				}
 
 //TODO: revisit after cleaning up responses so dont have to traverse way down to get data
-				var newLink = response.application_attribute_link_save.content[0].data;
+				var linkResult = response.application_attribute_link_save.content[0].data,
+					newLink = linkResult.link,
+					linkChanges = linkResult.link_changes;
 
-				var tempLinkId = _tempLinkDef.id;
-				var newLinkId = 'link-'+newLink.id;
-				_tempLinkDef.id = newLinkId;
-				R8.Utils.Y.one('#'+tempLinkId).set('id',newLinkId);
-//				_viewSpace.setLink(newLink.id,_tempLinkDef);
-				_viewSpace.addLinkToItems(_tempLinkDef);
+				if(typeof(linkChanges) != 'undefined') {
+//DEBUG
+//console.log('link changes...');
+//console.log(linkChanges);
+					if (typeof(linkChanges.new_l4_ports) != 'undefined' && linkChanges.new_l4_ports.length > 0) {
+						//TODO: assume only one new port for now, revisit to cleanup if no use case is found
+						var newPortObjId = linkChanges.new_l4_ports[0], newPortId = 'port-' + newPortObjId;
+						var oldPortId = 'port-' + linkChanges.merged_external_ports[0].external_port_id, oldPortNodeId = _ports[oldPortId].nodeId;
+
+						R8.Utils.Y.one('#' + oldPortNodeId).set('id', newPortId);
+
+						_ports[newPortId] = _ports[oldPortId];
+						_ports[newPortId].id = newPortObjId;
+						_ports[newPortId].nodeId = newPortId;
+
+						if (_tempLinkDef.startItem.nodeId == oldPortNodeId) {
+							_tempLinkDef.startItem.nodeId = newPortId;
+						}
+						else {
+							_tempLinkDef.endItems[0].nodeId = newPortId;
+						}
+
+						var tempLinkId = _tempLinkDef.id;
+						var newLinkId = 'link-'+newLink.id;
+						_tempLinkDef.id = newLinkId;
+						_tempLinkDef.style = [
+							{'strokeStyle':'#25A3FC','lineWidth':3,'lineCap':'round'},
+							{'strokeStyle':'#63E4FF','lineWidth':1,'lineCap':'round'}
+						];
+						R8.Utils.Y.one('#'+tempLinkId).set('id',newLinkId);
+		//				_viewSpace.setLink(newLink.id,_tempLinkDef);
+						_viewSpace.addLinkToItems(_tempLinkDef);
+						R8.Canvas.renderLink(_tempLinkDef);
+					} else if (typeof(linkChanges.merged_external_ports) != 'undefined') {
+						var mergePortObjId = linkChanges.merged_external_ports[0].external_port_id,
+							targetPortObjId = linkChanges.merged_external_ports[0].l4_port_id;
+//DEBUG
+/*
+console.log('need to merge ports...');
+console.log('ports-->');
+console.log(_ports);
+console.log('mergePort:'+mergePortObjId);
+console.log('targetPort:'+targetPortObjId);
+*/
+//TODO: revisit, should cleanup
+						_tempLinkDef.port_id = mergePortObjId;
+						_tempLinkDef.other_end_id = targetPortObjId;
+						_viewSpace.addLinkToItems(_tempLinkDef);
+						_viewSpace.addLink(_tempLinkDef);
+						_viewSpace.mergePorts('port-'+mergePortObjId,'port-'+targetPortObjId);
+					}
+				}
 			},
 
 			portsReady: function() {

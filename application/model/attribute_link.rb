@@ -62,15 +62,15 @@ module XYZ
       propagate_from_create(attr_mh,attr_info,rows)
 
       return returning_ids if opts[:no_nested_processing]
-      link_info_list = rows.map{|r|{:input => attr_info[r[:input_id]],:output => attr_info[r[:output_id]]}}
+      attr_links = rows.map{|r|{:input => attr_info[r[:input_id]],:output => attr_info[r[:output_id]]}}
 
-      create_related_links?(parent_idh,link_info_list)
-      #TODO: assumption is that what is created by create_related_links? has no bearing on l4 ports (as manifsted by using link_info_list arg computred before create_related_links? call
-      Port.create_and_update_l4_ports_and_links?(parent_idh,link_info_list)
+      create_related_links?(parent_idh,attr_links)
+      #TODO: assumption is that what is created by create_related_links? has no bearing on l4 ports (as manifsted by using attr_links arg computred before create_related_links? call
+      Port.create_and_update_l4_ports_and_links?(parent_idh,attr_links)
     end
 
-    def self.create_related_links?(parent_idh,link_info_list)
-      link_info_list.each{|link_info|create_related_link?(parent_idh,link_info)}
+    def self.create_related_links?(parent_idh,attr_links)
+      attr_links.each{|link_info|create_related_link?(parent_idh,link_info)}
     end
 
     #TODO: can we make this more data driven 

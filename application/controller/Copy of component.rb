@@ -143,48 +143,39 @@ pp component
     end
 
     def layout_test(id)
-      #assuming that request params has field type
-#      view_type = request.params["type"]||"wspace-edit" #TODO: stubbed with value wspace-edit
-      view_type = request.params["type"]||"dock_display" #TODO: stubbed with value dock_display
-
       component = create_object_from_id(id,:component)
       field_defs = component.get_field_def()
-
-      include_css(view_type)
-      tpl = R8Tpl::TemplateR8.new("component/#{view_type}_layout",user_context())
-      tpl.set_js_tpl_name("#{view_type}_layout")
+=begin
+      include_css('wspace_modal')
+      tpl = R8Tpl::TemplateR8.new("component/wspace_modal_layout",user_context())
+      tpl.set_js_tpl_name('wspace_modal_layout')
+=end
+      include_css('dock_display')
+      tpl = R8Tpl::TemplateR8.new("component/dock_display_layout",user_context())
+      tpl.set_js_tpl_name('dock_display_layout')
 
       js_tpl = tpl.render()
       include_js_tpl(js_tpl[:src])
 
-      tpl = R8Tpl::TemplateR8.new("component/#{view_type}_group_popup",user_context())
-      tpl.set_js_tpl_name("#{view_type}_group_popup")
+
+#      tpl = R8Tpl::TemplateR8.new("component/wspace_modal_group_popup",user_context())
+#      tpl.set_js_tpl_name('wspace_modal_group_popup')
+      tpl = R8Tpl::TemplateR8.new("component/dock_display_group_popup",user_context())
+      tpl.set_js_tpl_name('dock_display_group_popup')
+
       js_tpl = tpl.render()
       include_js_tpl(js_tpl[:src])
 
       tpl = R8Tpl::TemplateR8.new("component/layout_editor",user_context())
       _model_var = {:i18n => get_model_i18n(model_name().to_s,user_context())}
       tpl.assign(:_component,_model_var)
-      tpl.assign(:view_type,view_type)
       tpl.assign(:field_def_list,field_defs)
 
-      view_type_list = [
-        {:type=>'wspace_edit',:i18n=>'Workspace Edit',:selected=>''},
-        {:type=>'dock_edit',:i18n=>'Dock Edit',:selected=>''},
-        {:type=>'dock_display',:i18n=>'Dock Display',:selected=>''}
-      ]
-      view_type_list.each_with_index do |vt,i|
-        view_type_list[i][:selected] = (view_type_list[i][:type] == view_type) ? 'selected="true"' : ''
-      end
-
-      tpl.assign(:view_type_list,view_type_list)
-
       include_css('layout-editor')
-      include_js("#{view_type}.layout_editor.r8")
+#      include_js('wspace_moadl.layout_editor.r8')
+      include_js('dock_display.layout_editor.r8')
 
-      layout_list = component.get_layouts(view_type)
-#pp [:layout_list,layout_list]
-
+      layout_list = component.get_layouts(:edit)
       tpl.assign(:layout_list,layout_list)
 
       field_defs_json = JSON.generate(field_defs)
@@ -200,16 +191,11 @@ pp component
 
     def save_layout(id)
       hash = request.params
-      
-      layout_info = {
-        :type => hash["type"]||"wspace-edit", #TODO: remove ||"wspace-edit" when value explicitly passed
-        :description => hash["description"]||"sample description", #TODO: remove ||"sample description"
-        :is_active =>  hash["is_active"] ? hash["is_active"] = "true" : true,
-        :def => JSON.parse(hash["def"])
-      }
-
+      #TODO: stub that replaces view_type = hash["type"].to_sym 
+      view_type = :edit
+      layout_def = JSON.parse(hash["def"])
       component = create_object_from_id(id,:component)
-      component.add_layout(layout_info)
+      component.add_layout(view_type,layout_def)
       return {}
     end
 

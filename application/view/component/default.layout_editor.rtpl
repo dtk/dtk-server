@@ -4,10 +4,10 @@
 	<div id="editor-header" style="height: 40px; width: 100%">
 		<div style="float: left; font-weight: bold;">Layout&nbsp;</div>
 		<div style="float: left;">
-			<select>
-				<option value="wspace-edit" selected="true">Worskapce Edit</option>
-				<option value="dock-display">Dock Display</option>
-				<option value="dock-edit">Dock Edit</option>
+			<select id="view_type" name="view_type">
+				{%for vt in view_type_list%}
+					<option value="{%=vt[:type]%}" {%=vt[:selected]%}>{%=vt[:i18n]%}</option>
+				{%end%}
 			</select>
 		</div>
 		<div style="font-weight: bold; float: left; margin-left: 100px;">History&nbsp;</div>
@@ -30,8 +30,8 @@
 			<ul id="available-fields" style="border: 1px solid #999999; background-color: #EDEDED; margin: 5px; width: 200px; height: 275px; overflow-y: auto; float: left;">
 			</ul>
 		</div>
-			<form id="wspace-edit-form" name="wspace-edit-form" style="float: left;">
-				<input type="hidden" id="type" name="type" value="wspace-edit"/>
+			<form id="{%=view_type%}-form" name="{%=view_type%}-form" style="float: left;">
+				<input type="hidden" id="type" name="type" value="{%=view_type%}"/>
 				<input type="hidden" id="def" name="def" value=""/>
 				<input type="hidden" id="active" name="active" value="false"/>
 			</form>

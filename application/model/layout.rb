@@ -23,11 +23,13 @@ module XYZ
     end
 
     def self.create_def_from_field_def(field_def,view_type)
-      groups = 
+=begin
         case view_type.to_s
          when "wspace-edit" then LayoutViewDefProcessor.layout_groups_from_field_def__edit(field_def)
          else raise Error.new("type #{view_type} is unexpected")
        end
+=end
+      groups = LayoutViewDefProcessor.layout_groups_from_field_def__edit(field_def)
       {:groups => groups}
     end
    private

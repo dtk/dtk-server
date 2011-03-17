@@ -74,11 +74,30 @@
 */
 
 .layout-editor .field-list {
-	margin: 10px 5px 5px 5px;
-	width: 95%;
-	height: 85%;
+/*	margin: 10px 5px 5px 5px;*/
+/*	width: 95%;
+	height: 85%;*/
+	width: 250px;
+	height: 95%;
 	float: left;
 	border: 1px solid #EDEDED;
+
+	padding-top: 18px;
+	overflow: auto;
+}
+
+.layout-editor .field-overlay {
+	height: 20px;
+	width: 230px;
+	background-image: url(../images/layout-field-overlay.png);
+	background-repeat: repeat-x;
+	position: absolute;
+}
+.layout-editor .top.field-overlay {
+}
+.layout-editor .bottom.field-overlay {
+	background-position: 0px -20px;
+	bottom: 0;
 }
 
 .layout-editor .yui3-dd-drop-active-valid.field-list {

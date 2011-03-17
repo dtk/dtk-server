@@ -138,7 +138,7 @@
 	height: 14px;
 	width: 14px;
 	z-index: 2;
-	background: url(../images/port-sprite.png) no-repeat;
+	background: url(../images/port-sprite-2.png) no-repeat;
 }
 
 .basic-port.available {
@@ -150,11 +150,23 @@
 .basic-port.available.input-south {
 	background-position: -28px 0px;
 }
+.basic-port.available.input-west {
+	background-position: -42px 0px;
+}
+.basic-port.available.input-east {
+	background-position: -56px 0px;
+}
 .basic-port.connected.input-north {
 	background-position: -14px -14px;
 }
 .basic-port.connected.input-south {
 	background-position: -28px -14px;
+}
+.basic-port.connected.input-west {
+	background-position: -42px -14px;
+}
+.basic-port.connected.input-east {
+	background-position: -56px -14px;
 }
 /*------------------------------------*/
 .basic-port.available.output-north {
@@ -163,12 +175,26 @@
 .basic-port.available.output-south {
 	background-position: -14px 0px;
 }
+.basic-port.available.output-west {
+	background-position: -56px 0px;
+}
+.basic-port.available.output-east {
+	background-position: -42px 0px;
+}
 .basic-port.connected.output-north {
 	background-position: -28px -14px;
 }
 .basic-port.connected.output-south {
 	background-position: -14px -14px;
 }
+.basic-port.connected.output-west {
+	background-position: -56px -14px;
+}
+.basic-port.connected.output-east {
+	background-position: -42px -14px;
+}
+
+
 
 .basic-port.connected {
 /*	background: url(../images/workspace/connectedPort.png) no-repeat;*/

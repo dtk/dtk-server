@@ -14,7 +14,7 @@
       "data_source": {
         "chef": {
           "display_name": "chef",
-          "last_collection_timestamp": "Thu Mar 17 00:08:54 +0000 2011",
+          "last_collection_timestamp": "Thu Mar 17 02:36:21 +0000 2011",
           "data_source_entry": {
             "component_recipe": {
               "ds_is_golden_store": true,
@@ -29,6 +29,14 @@
                 "component_attribute": {
                   "ds_is_golden_store": true,
                   "display_name": "component_attribute",
+                  "data_source_entry": {
+                    "attribute_dependency": {
+                      "ds_is_golden_store": true,
+                      "display_name": "attribute_dependency",
+                      "ds_name": "chef",
+                      "obj_type": "dependency"
+                    }
+                  },
                   "ds_name": "chef",
                   "obj_type": "attribute"
                 }
@@ -42,7 +50,7 @@
         },
         "ec2": {
           "display_name": "ec2",
-          "last_collection_timestamp": "Thu Mar 17 00:09:06 +0000 2011",
+          "last_collection_timestamp": "Thu Mar 17 02:36:35 +0000 2011",
           "data_source_entry": {
             "node_image": {
               "ds_is_golden_store": true,
@@ -56,7 +64,7 @@
         },
         "user_data": {
           "display_name": "user_data",
-          "last_collection_timestamp": "Thu Mar 17 00:09:09 +0000 2011",
+          "last_collection_timestamp": "Thu Mar 17 02:36:37 +0000 2011",
           "data_source_entry": {
             "component": {
               "ds_is_golden_store": true,
@@ -153,8 +161,25 @@
             }
           },
           "ds_attributes": {
-            "root_device_type": "ebs",
             "type": "machine",
+            "virtualizationType": "paravirtual",
+            "description": null,
+            "state": "available",
+            "kernel_id": "aki-3af50453",
+            "owner_id": "411986592491",
+            "tags": {
+            },
+            "product_codes": [
+
+            ],
+            "architecture": "i386",
+            "root_device_name": "/dev/sda1",
+            "root_device_type": "ebs",
+            "location": "411986592491/rnp-chef-09-12-mcollective-1-0-ubuntu-lucid-x86_32",
+            "name": "rnp-chef-09-12-mcollective-1-0-ubuntu-lucid-x86_32",
+            "flavor": {
+              "disk": null
+            },
             "block_device_mapping": [
               {
                 "snapshotId": "snap-f9179794",
@@ -163,25 +188,8 @@
                 "volumeSize": 8
               }
             ],
-            "is_public": false,
-            "description": null,
-            "state": "available",
-            "virtualizationType": "paravirtual",
-            "kernel_id": "aki-3af50453",
-            "owner_id": "411986592491",
-            "tags": {
-            },
-            "architecture": "i386",
-            "product_codes": [
-
-            ],
-            "location": "411986592491/rnp-chef-09-12-mcollective-1-0-ubuntu-lucid-x86_32",
-            "name": "rnp-chef-09-12-mcollective-1-0-ubuntu-lucid-x86_32",
-            "flavor": {
-              "disk": null
-            },
             "id": "ami-ee38c987",
-            "root_device_name": "/dev/sda1"
+            "is_public": false
           },
           "attribute": {
             "host_addresses_ipv4": {
@@ -427,15 +435,6 @@
               }
             },
             "attribute": {
-              "db_config": {
-                "semantic_type_summary": "db_config",
-                "required": true,
-                "semantic_type": "db_config",
-                "description": "DB configuration",
-                "display_name": "db_config",
-                "data_type": "json",
-                "is_port": true
-              },
               "sap_ref__l4": {
                 "semantic_type_summary": "sap_ref__l4",
                 "required": true,
@@ -464,6 +463,15 @@
                 "read_only": false,
                 "data_type": "json",
                 "hidden": false,
+                "is_port": true
+              },
+              "db_config": {
+                "semantic_type_summary": "db_config",
+                "required": true,
+                "semantic_type": "db_config",
+                "description": "DB configuration",
+                "display_name": "db_config",
+                "data_type": "json",
                 "is_port": true
               }
             },
@@ -889,15 +897,6 @@
             "qualified_ref": "/library/test/postgresql__app",
             "basic_type": "application",
             "attribute": {
-              "db_config": {
-                "semantic_type_summary": "db_config",
-                "required": true,
-                "semantic_type": "db_config",
-                "description": "DB configuration",
-                "display_name": "db_config",
-                "data_type": "json",
-                "is_port": true
-              },
               "sap_ref__l4": {
                 "semantic_type_summary": "sap_ref__l4",
                 "required": true,
@@ -918,6 +917,15 @@
                     }
                   }
                 },
+                "data_type": "json",
+                "is_port": true
+              },
+              "db_config": {
+                "semantic_type_summary": "db_config",
+                "required": true,
+                "semantic_type": "db_config",
+                "description": "DB configuration",
+                "display_name": "db_config",
                 "data_type": "json",
                 "is_port": true
               }
@@ -2210,6 +2218,97 @@
             }
           },
           "ds_key": "[:user_data, \"/library/test/redis\"]"
+        },
+        "postgresql__pgpool": {
+          "type": "instance",
+          "component_type": "postgresql__pgpool",
+          "only_one_per_node": true,
+          "ui": {
+            "images": {
+              "tnail": "postgres.png",
+              "display": "postgres.png",
+              "tiny": ""
+            }
+          },
+          "display_name": "postgresql__pgpool",
+          "description": "Installs pgpool load balancer",
+          "external_ref": {
+            "type": "chef_recipe",
+            "recipe_name": "postgresql::pgpool"
+          },
+          "ds_attributes": {
+            "ui": "{\"images\": {\"tnail\":\"postgres.png\",\"display\":\"postgres.png\",\"tiny\":\"\"}}",
+            "qualified_ref": "/library/test/postgresql__pgpool",
+            "ref": "postgresql__pgpool",
+            "specific_type": "postgres_db_server"
+          },
+          "basic_type": "service",
+          "attribute": {
+            "pg_pool_sap_config__l4": {
+              "semantic_type_summary": "sap_config__l4",
+              "required": false,
+              "semantic_type": "sap_config__l4",
+              "display_name": "pg_pool_sap_config__l4",
+              "description": "postgres ip service access point configuration",
+              "value_asserted": [
+                {
+                  "port": 5432,
+                  "protocol": "tcp"
+                }
+              ],
+              "external_ref": {
+                "type": "service_attribute",
+                "path": "service[postgresql][pg_pool_sap_config__l4]"
+              },
+              "dynamic": false,
+              "read_only": false,
+              "cannot_change": false,
+              "data_type": "json",
+              "hidden": false,
+              "is_port": true
+            },
+            "pg_pool_sap_ref__l4": {
+              "semantic_type_summary": "sap_ref__l4",
+              "required": false,
+              "semantic_type": {
+                ":array": "sap_ref__l4"
+              },
+              "display_name": "pg_pool_sap_ref__l4",
+              "description": "postgres ip service access point configuration",
+              "value_asserted": [
+                {
+                  "port": 5432,
+                  "protocol": "tcp"
+                }
+              ],
+              "external_ref": {
+                "type": "service_attribute",
+                "path": "service[postgresql][pg_pool_sap_ref__l4]"
+              },
+              "dynamic": false,
+              "dependency": {
+                "attribute_constraint": {
+                  "type": "component",
+                  "display_name": "attribute_constraint",
+                  "description": "Not connecting to Postgres Server",
+                  "search_pattern": {
+                    ":filter": [
+                      ":eq",
+                      ":specific_type",
+                      "postgres_db_server"
+                    ]
+                  }
+                }
+              },
+              "read_only": false,
+              "cannot_change": false,
+              "data_type": "json",
+              "hidden": false,
+              "is_port": true
+            }
+          },
+          "ds_key": "[:user_data, \"/library/test/postgresql__pgpool\"]",
+          "specific_type": "postgres_db_server"
         },
         "rabbitmq": {
           "only_one_per_node": true,

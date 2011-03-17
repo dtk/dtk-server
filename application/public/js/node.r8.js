@@ -286,10 +286,14 @@ haveNewPorts = true;
 				for (i in _portDefs) {
 					switch(_portDefs[i]['location']) {
 						case "north":
-							northPorts.push(_portDefs[i]);
+//							northPorts.push(_portDefs[i]);
+							_portDefs[i]['location'] = 'west';
+							westPorts.push(_portDefs[i]);
 							break;
 						case "south":
-							southPorts.push(_portDefs[i]);
+//							southPorts.push(_portDefs[i]);
+							_portDefs[i]['location'] = 'east';
+							eastPorts.push(_portDefs[i]);
 							break;
 						case "west":
 							westPorts.push(_portDefs[i]);

@@ -872,7 +872,7 @@ if (!R8.Canvas) {
 
 			/*
 			 * renderDragWire currently renders the connector during drag/connect activity
-			 * @method renderWire
+			 * @method renderDragWire
 			 * @param {Node} srcNode
 			 * @param {Node} dragNode
 			 */
@@ -989,7 +989,7 @@ var viewSpaceTop = R8.Utils.Y.one('#viewSpace').get('region').top;
 							var canvasActualWidth = canvasBaseWidth;
 							var canvasActualHeight = canvasBaseHeight;
 							var canvasLeft = startElemXY[0];
-							var canvasTop = startElemXY[1];
+							var canvasTop = startElemXY[1] - viewSpaceTop;
 
 							var startX = startElemXOffset;
 							var startY = startElemYOffset;
@@ -1002,7 +1002,7 @@ var viewSpaceTop = R8.Utils.Y.one('#viewSpace').get('region').top;
 							var canvasActualWidth = canvasBaseWidth + ctrlXPtOffset;
 							var canvasActualHeight = canvasBaseHeight;
 							var canvasLeft = startElemXY[0] - ctrlXPtOffset;
-							var canvasTop = startElemXY[1];
+							var canvasTop = startElemXY[1] - viewSpaceTop;
 
 							var startX = startElemXOffset + ctrlXPtOffset;
 							var startY = startElemYOffset;
@@ -1080,7 +1080,7 @@ console.log('------------------');
 							var canvasActualWidth = canvasBaseWidth;
 							var canvasActualHeight = canvasBaseHeight;
 							var canvasLeft = startElemXY[0];
-							var canvasTop = dragElemXY[1];
+							var canvasTop = dragElemXY[1] - viewSpaceTop;
 
 							var startX = startElemXOffset;
 							var startY = canvasActualHeight - startElemYOffset;
@@ -1093,7 +1093,7 @@ console.log('------------------');
 							var canvasActualWidth = canvasBaseWidth + ctrlXPtOffset;
 							var canvasActualHeight = canvasBaseHeight;
 							var canvasLeft = startElemXY[0] - ctrlXPtOffset;
-							var canvasTop = dragElemXY[1];
+							var canvasTop = dragElemXY[1] - viewSpaceTop;
 
 							var startX = startElemXOffset + ctrlXPtOffset;
 							var startY = canvasActualHeight - startElemYOffset;
@@ -1163,7 +1163,7 @@ console.log('------------------');
 							var canvasActualWidth = canvasBaseWidth + ctrlXPtOffset;
 							var canvasActualHeight = canvasBaseHeight;
 							var canvasLeft = dragElemXY[0];
-							var canvasTop = startElemXY[1];
+							var canvasTop = startElemXY[1] - viewSpaceTop;
 
 							var startX = canvasActualWidth - (ctrlXPtOffset + startElemXOffset);
 							var startY = startElemYOffset;
@@ -1176,7 +1176,7 @@ console.log('------------------');
 							var canvasActualWidth = canvasBaseWidth;
 							var canvasActualHeight = canvasBaseHeight;
 							var canvasLeft = dragElemXY[0];
-							var canvasTop = startElemXY[1];
+							var canvasTop = startElemXY[1] - viewSpaceTop;
 
 							var startX = canvasActualWidth - startElemYOffset;
 							var startY = startElemYOffset;
@@ -1246,7 +1246,7 @@ console.log('------------------');
 							var canvasActualWidth = canvasBaseWidth + ctrlXPtOffset;
 							var canvasActualHeight = canvasBaseHeight;
 							var canvasLeft = dragElemXY[0];
-							var canvasTop = dragElemXY[1];
+							var canvasTop = dragElemXY[1] - viewSpaceTop;
 
 							var startX = canvasActualWidth - (ctrlXPtOffset + startElemXOffset);
 							var startY = canvasActualHeight - startElemYOffset;
@@ -1259,7 +1259,7 @@ console.log('------------------');
 							var canvasActualWidth = canvasBaseWidth;
 							var canvasActualHeight = canvasBaseHeight;
 							var canvasLeft = dragElemXY[0];
-							var canvasTop = dragElemXY[1];
+							var canvasTop = dragElemXY[1] - viewSpaceTop;
 
 							var startX = canvasActualWidth - startElemXOffset;
 							var startY = canvasActualHeight - startElemYOffset;

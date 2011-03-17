@@ -22,6 +22,22 @@ pp '++++++++++++++++++++++++++++++'
       }
     end
 
+    def dock_get_service_checks(id)
+      node = create_object_from_id(id)
+      service_checks = node.get_service_checks()
+
+      tpl = R8Tpl::TemplateR8.new("dock/node_get_service_checks",user_context())
+      tpl.assign(:_app,app_common())
+      tpl.assign(:service_checks,service_checks)
+
+      panel_id = request.params['panel_id']
+
+      return {
+        :content => tpl.render(),
+        :panel => panel_id
+      }
+    end
+
     def dock_get_users(id)
       node = create_object_from_id(id)
       user_list = node.get_users()

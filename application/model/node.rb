@@ -191,9 +191,38 @@ module XYZ
          }
         ]
 
+
+      virtual_column :monitoring_items__node, :type => :json, :hidden => true,
+      :remote_dependencies =>
+        [
+         {
+           :model_name => :monitoring_item,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond=>{:node_node_id => q(:node,:id)},
+           :cols=>[:id,:display_name,:service_name,:condition_name,:condition_description,:enabled,:params,:attributes_to_monitor]
+         },
+        ]
+      virtual_column :monitoring_items__component, :type => :json, :hidden => true,
+      :remote_dependencies =>
+        [
+         {
+           :model_name => :component,
+           :join_type => :inner,
+           :join_cond=>{:node_node_id => q(:node,:id)},
+           :cols=>[:id,:display_name]
+         },
+         {
+           :model_name => :monitoring_item,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond=>{:component_component_id => q(:component,:id)},
+           :cols=>[:id,:display_name,:service_name,:condition_name,:condition_description,:enabled,:params,:attributes_to_monitor]
+         },
+        ]
+
       #TODO: just for testing
       application_basic_types = %w{application service database language extension}
-
       #in dock 'applications means wider than basic_type == applicationsn
       virtual_column :applications, :type => :json, :hidden => true,
       :remote_dependencies => 
@@ -346,6 +375,19 @@ module XYZ
         component_icon_fn = ((component[:ui]||{})[:images]||{})[:tnail]
         component_el.merge(component_icon_fn ? {:component_icon_filename => component_icon_fn} : {})
       end
+    end
+
+    def get_service_checks()
+      ret = get_objects_col_from_sp_hash({:columns => [:monitoring_items__node]},:monitoring_item)
+
+      i18n = get_i18n_mappings_for_models(:component)
+
+      get_objects_from_sp_hash(:columns => [:monitoring_items__component]).each do |r|
+        cmp_name = r[:component][:display_name]
+        cmp_info = {:component_name => cmp_name,:component_i18n => i18n_string(i18n,:component,cmp_name) }
+        ret << r[:monitoring_item].merge(cmp_info)
+      end
+      ret
     end
 
     #returns external attribute links and port links

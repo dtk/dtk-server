@@ -143,6 +143,9 @@ pp component
     end
 
     def layout_test(id)
+      #assuming that request params has field type
+      view_type = request.params["type"]||"wspace-edit" #TODO: stubbed with value wspace-edit
+
       component = create_object_from_id(id,:component)
       field_defs = component.get_field_def()
 
@@ -166,7 +169,9 @@ pp component
       include_css('layout-editor')
       include_js('layout.editor.r8')
 
-      layout_list = component.get_layouts(:edit)
+      layout_list = component.get_layouts(view_type)
+pp [:layout_list,layout_list]
+
       tpl.assign(:layout_list,layout_list)
 
       field_defs_json = JSON.generate(field_defs)
@@ -182,11 +187,16 @@ pp component
 
     def save_layout(id)
       hash = request.params
-      #TODO: stub that replaces view_type = hash["type"].to_sym 
-      view_type = :edit
-      layout_def = JSON.parse(hash["def"])
+      
+      layout_info = {
+        :type => hash["type"]||"wspace-edit", #TODO: remove ||"wspace-edit" when value explicitly passed
+        :description => hash["description"]||"sample description", #TODO: remove ||"sample description"
+        :is_active =>  hash["is_active"] ? hash["is_active"] = "true" : true,
+        :def => JSON.parse(hash["def"])
+      }
+
       component = create_object_from_id(id,:component)
-      component.add_layout(view_type,layout_def)
+      component.add_layout(layout_info)
       return {}
     end
 

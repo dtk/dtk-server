@@ -2,13 +2,11 @@
 module XYZ
   class Layout < Model
 
-    def self.save(parent_id_handle,layout_def,view_type)
+    def self.save(parent_id_handle,layout_info)
       name = "foo" #TODO: stub
       hash = {
-        :display_name => name,
-        :type => view_type.to_s,
-        :def => layout_def
-      }
+        :display_name => name
+      }.merge(layout_info)
       create_hash = {:layout => {name => hash}}
 
       new_id = create_from_hash(parent_id_handle,create_hash).map{|x|x[:id]}.first
@@ -17,13 +15,17 @@ module XYZ
 
     def self.create_and_save_from_field_def(parent_id_handle,field_def,view_type)
       layout_def = create_def_from_field_def(field_def,view_type)
-      save(parent_id_handle,layout_def,view_type)
+      layout_info = {
+        :def => layout_def,
+        :type => view_type.to_s
+      }
+      save(parent_id_handle,layout_info)
     end
 
     def self.create_def_from_field_def(field_def,view_type)
       groups = 
-        case view_type
-         when :edit then LayoutViewDefProcessor.layout_groups_from_field_def__edit(field_def)
+        case view_type.to_s
+         when "wspace-edit" then LayoutViewDefProcessor.layout_groups_from_field_def__edit(field_def)
          else raise Error.new("type #{view_type} is unexpected")
        end
       {:groups => groups}

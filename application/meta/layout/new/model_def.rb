@@ -12,6 +12,10 @@
       :type=>:text,
       :length=>20
     },
+    :is_active => {
+      :type=>:boolean,
+      :default => true
+    },
     :def=> {
       :type=>:json
     }

@@ -200,7 +200,7 @@ module XYZ
              :convert => true,
              :join_type => :inner,
              :join_cond=>{:component_component_id => q(:component,:id)},
-             :cols => [:id,:display_name,id(:component),:def,:type,:updated_at]
+             :cols => [:id,:display_name,id(:component),:def,:type,:is_active,:description,:updated_at]
            }]
 
         virtual_column :layouts_from_ancestor, :type => :json, :hidden => true,
@@ -217,7 +217,7 @@ module XYZ
              :convert => true,
              :join_type => :inner,
              :join_cond=>{:component_component_id => q(:template,:id)},
-             :cols => [:id,:display_name,id(:component),:def,:type,:updated_at]
+             :cols => [:id,:display_name,id(:component),:def,:type,:is_active,:description,:updated_at]
            }]
 
         set_submodel(:assembly)
@@ -456,8 +456,8 @@ module XYZ
       get_layouts_from_db(view_type)
     end
 
-    def add_layout(view_type,layout_def)
-      Layout.save(id_handle(),layout_def,view_type)
+    def add_layout(layout_info)
+      Layout.save(id_handle(),layout_info)
     end
 
    protected

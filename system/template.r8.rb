@@ -41,7 +41,6 @@ module R8Tpl
       :js_templating_on,
       :root_js_element_var_name,:root_js_hash,:loop_vars,:ctrl_vars,:js_var_header
 
-      
     def initialize(view_path,user,path_type=nil,*args)
       return new_initialize(*args) unless args.empty?
       @user = user
@@ -63,7 +62,10 @@ module R8Tpl
       elsif vp_parts.size == 3
 #TODO: consider scenario between saved searches stored by user, per model vs. component views which are per view/model_instance
         @model_name,@view_name,@model_id = vp_parts
-        layout_list = get_objects(:layout,{:component_component_id=>model_id,:type=>view_type})
+#        layout_list = get_objects(:layout,{:component_component_id=>model_id,:type=>view_type})
+
+#TODO: should return the current layout for the given model, view_type and component
+        layout_list = get_objects(:layout,{:component_component_id=>model_id,:type=>view_type,:active=>true})
 
 #Should take newest one for now, later have enhancement for 'deployed'/'active' flag or something similar
       else

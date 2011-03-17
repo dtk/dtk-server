@@ -377,17 +377,19 @@ module XYZ
       end
     end
 
-    def get_service_checks()
-      ret = get_objects_col_from_sp_hash({:columns => [:monitoring_items__node]},:monitoring_item)
-
+    def get_node_service_checks()
+      #TODO: i18n treatment of service check names
+      get_objects_col_from_sp_hash({:columns => [:monitoring_items__node]},:monitoring_item)
+    end
+    def get_component_service_checks()
+      #TODO: i18n treatment of service check names
       i18n = get_i18n_mappings_for_models(:component)
 
-      get_objects_from_sp_hash(:columns => [:monitoring_items__component]).each do |r|
+      get_objects_from_sp_hash(:columns => [:monitoring_items__component]).map do |r|
         cmp_name = r[:component][:display_name]
         cmp_info = {:component_name => cmp_name,:component_i18n => i18n_string(i18n,:component,cmp_name) }
-        ret << r[:monitoring_item].merge(cmp_info)
+        r[:monitoring_item].merge(cmp_info)
       end
-      ret
     end
 
     #returns external attribute links and port links

@@ -860,9 +860,9 @@ console.log('going to call dock get users.....');
 			}
 		}
 	}
-	R8.Dock.service_checksPlugin = function() {
-//		var _cfg = cfg;
-
+	R8.Dock.service_checksPlugin = function(cfg) {
+	        var _cfg = cfg,
+	                 _modalContentNode = cfg['modalContentNode'];
 		return {
 			refresh: function(items) {
 //TODO: assuming only one for right now
@@ -870,7 +870,17 @@ console.log('going to call dock get users.....');
 				for(var i in items) {
 					item = items[i];
 				}
-console.log(item);
+				//console.log(item);
+
+				var params = {
+					'cfg': {
+						'data':'panel_id='+_modalContentNode.get('id'),
+						'method': 'GET'
+					},
+				};
+console.log('going to call dock get service checks.....');
+				R8.Ctrl.call(item.model+'/dock_get_service_checks/'+item.id, params);
+
 			}
 		}
 	}

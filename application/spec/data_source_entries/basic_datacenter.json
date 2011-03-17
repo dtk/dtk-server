@@ -1,4 +1,12 @@
 {
-  "display_name" : "Datacenter 1",
-  "description" : "Datacenter number 1"
+  "datacenter": {
+    "dc1": {
+      "description": "Production East",
+      "display_name": "Production East"
+    },
+    "dc2": {
+      "description": "Staging 1",
+      "display_name": "Staging 1"
+    }
+  }
 }

@@ -16,3 +16,5 @@ end
 depends "apache2"
 depends "chef_aux"
 depends "monitoring"
+
+require File.expand_path('metadata_aux.rb',::Chef::Config[:cucumber_path]);__t(__FILE__,self)

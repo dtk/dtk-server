@@ -48,26 +48,36 @@
         },
 	 "postgresql__db": {
 	  "specific_type" : "postgres_db",
+          "ui": "{\"images\": {\"tnail\":\"database-unknown.png\",\"display\":\"database-unknown.png\",\"tiny\":\"\"}}",
 	  "only_one_per_node": false
         },
 	 "postgresql__app": {
           "ui": "{\"images\": {\"tnail\":\"postgres.png\",\"display\":\"postgres.png\",\"tiny\":\"\"}}",
 	  "basic_type" : "application",
            "attribute": {
+            "db_config": {
+              "display_name": "db_config",
+              "required": true,
+              "description": "DB configuration",
+              "semantic_type": "db_config",
+              "semantic_type_summary": "db_config",
+              "data_type": "json",
+              "is_port": true
+            },
             "sap_ref__l4": {
+              "display_name": "sap_ref__l4",
+              "required": true,
+              "description": "Layer 4 DB ref",
+              "semantic_type": "sap_ref__l4",
+              "semantic_type_summary": "sap_ref__l4",
+              "data_type": "json",
+              "is_port": true,
 	      "dependency": {
                 "component_constraint": {
                   "display_name": "component_constraint",
                   "type": "component",
                   "search_pattern": {
-                    ":filter": [
-                      ":and",
-                      [
-                        ":eq",
-                        ":specific_type",
-                        "postgres_db_server"
-                      ]
-                    ]
+                    ":filter": [":eq",":specific_type","postgres_db_server"]
                   },
                   "description": "Not connecting to Postgres Server"
                 }

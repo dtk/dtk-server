@@ -84,15 +84,17 @@ module R8Tpl
     def update_cache?()
       unless cache_current?
         case view_type().to_sym
-         when :edit
-          render_edit_tpl_cache() 
-          #          add_validation()
-         when :display
-          render_display_tpl_cache() 
-         when :list
-          render_list_tpl_cache() 
-         when :search
-          render_search_tpl_cache() 
+          when :edit
+            render_edit_tpl_cache()
+            #          add_validation()
+          when :display
+            render_display_tpl_cache()
+          when :list
+            render_list_tpl_cache()
+          when :search
+            render_search_tpl_cache()
+          when :dock_display
+            render_dock_display_tpl_cache()
         end
       end
       ret_existing_view_path(:cache)
@@ -108,16 +110,18 @@ module R8Tpl
       end
 
       case (view_type())
-      when "edit"
-        render_edit_tpl_cache() 
-        #       add_validation()
-      when "display"
-        render_display_tpl_cache()
-      when "list"
-        render_list_tpl_cache() 
-      when "search"
-        render_search_tpl_cache() 
-      end
+        when "edit"
+          render_edit_tpl_cache() 
+          #       add_validation()
+        when "display"
+          render_display_tpl_cache()
+        when "list"
+          render_list_tpl_cache() 
+        when "search"
+          render_search_tpl_cache() 
+        when "dock_display"
+          render_dock_display_tpl_cache() 
+        end
       self
     end
   
@@ -640,6 +644,111 @@ module R8Tpl
     @tpl_contents = r8TPL.render(get_system_rtpl_contents())
     fwrite()
   end
+
+#------------------------------------------------------------------------------
+#---------------This will lay groundwork for next setup of views/tpls----------
+#------------------------------------------------------------------------------
+  def render_dock_display_tpl_cache()
+    field_handler = FieldR8.new(self)
+    r8TPL = R8Tpl::TemplateR8.new("#{@model_name}/#{@view_name}",@user,:system)
+    r8TPL.js_templating_on = false   #template engine should catch non JS automatically, but forcing to be sure
+
+#    i18n = utils.get_model_i18n(@model_name)
+    r8TPL.assign(:formId, @form_id)
+    r8TPL.assign(:formAction, view_meta[:action])
+    r8TPL.assign(:editId, "{%=#{@model_name}[:id]%}")
+
+    td_label_class = (view_meta[:td_label_class].nil? ? 'label' : view_meta[:td_label_class])
+    td_field_class = (view_meta[:td_field_class].nil? ? 'field' : view_meta[:td_field_class])
+
+    #add any form hidden fields
+    hidden_fields = []
+    (view_meta[:hidden_fields]||[]).each do |hfield_hash|
+      hfield_hash.each do |field_name,field_meta|
+        field_meta[:name] = field_name.to_s
+        field_meta[:id] ||= field_meta[:name]
+        field_meta[:value] ||= "{%=#{@model_name}[:#{field_name}]%}"
+        hidden_fields << field_meta
+      end
+    end
+    r8TPL.assign(:h_field_list, hidden_fields)
+
+    rows = []
+    group_num = 0
+    (view_meta[:field_groups]||[]).each do |group_hash|
+      row_count = 0
+      display_labels = group_hash[:display_labels]
+      num_cols = group_hash[:num_cols].to_i
+      col_index = 0
+      field_num = 0
+      rows[row_count] = {}
+      rows[row_count][:cols] = []
+
+      group_hash[:fields].each do |field_hash|
+        field_num +=1
+        rows[row_count][:row_id] = 'g'+group_num.to_s+'-r'+row_count.to_s
+        #if size is 0 then its a blank spot in the form
+        if(field_hash.length == 0) then
+          rows[row_count][:cols][col_index] = {}
+          rows[row_count][:cols][col_index][:class] = td_label_class
+          rows[row_count][:cols][col_index][:content] = '&amp;nbsp;'
+          rows[row_count][:cols][col_index][:col_id] = 'r'+row_count.to_s+'-c'+col_index.to_s+'-label'
+          col_index+=1
+          rows[row_count][:cols][col_index] = {}
+          rows[row_count][:cols][col_index][:class] =  td_field_class
+          rows[row_count][:cols][col_index][:content] = '&amp;nbsp;'
+          rows[row_count][:cols][col_index][:col_id] = 'r'+row_count.to_s+'-c'+col_index.to_s+'-field'
+        else
+          field_hash.each do |field_name,field_meta|
+            field_meta[:name] = field_name.to_sym
+            if(field_meta[:id].nil?) then field_meta[:id] = field_meta[:name] end
+            field_meta[:model_name] = @model_name
+
+            rows[row_count][:cols][col_index] = {}
+
+            #do label
+            if display_labels
+              if @i18n[(field_meta[:name].to_s+'_'+@view_name.to_s).to_sym] 
+                rows[row_count][:cols][col_index][:content] = '{%=_'+@model_name.to_s+'[:i18n][:'+field_meta[:name].to_s+'_'+@view_name.to_s + ']%}'
+              elsif @i18n[field_meta[:name].to_sym]
+                rows[row_count][:cols][col_index][:content] = '{%=_'+@model_name.to_s+'[:i18n][:'+field_meta[:name].to_s+']%}'
+              else
+                rows[row_count][:cols][col_index][:content] = field_meta[:name]
+              end
+            else
+              rows[row_count][:cols][col_index][:content] = '&nbsp;'
+            end
+
+            rows[row_count][:cols][col_index][:class] = td_label_class
+            rows[row_count][:cols][col_index][:col_id] = field_meta[:name].to_s+"-label"
+            col_index+=1
+            rows[row_count][:cols][col_index] = {}
+            #do field
+            rows[row_count][:cols][col_index][:col_id] = field_meta[:name].to_s+"-field"
+            rows[row_count][:cols][col_index][:content] = field_handler.get_field(view_type(), field_meta, 'tpl')
+            rows[row_count][:cols][col_index][:class] = td_field_class
+          end
+        end
+        #if remainder is 0 then its time to start rendering the next row, increment row, reset col
+        if(field_num.remainder(num_cols) == 0) then
+          row_count+=1
+          col_index = 0
+          rows[row_count] = {}
+          rows[row_count][:cols] = []
+        else 
+          col_index+=1
+        end
+        #end of field interation
+      end
+      #end of group interation
+      group_num +=1
+    end
+    r8TPL.assign(:rows, rows)
+
+    @tpl_contents = r8TPL.render(get_system_rtpl_contents())
+    fwrite()
+  end
+#------------------------------------------------------------------------------
 
   # This will return the path for the JS cache file
 #TODO: revisit once randomizer js template naming is going a-la smarty caches

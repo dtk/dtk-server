@@ -192,6 +192,7 @@ module XYZ
         ]
 
 
+      monitoring_items_cols_def = [:id,:display_name,:service_name,:condition_name,:condition_description,:enabled,:params,:attributes_to_monitor]
       virtual_column :monitoring_items__node, :type => :json, :hidden => true,
       :remote_dependencies =>
         [
@@ -200,7 +201,7 @@ module XYZ
            :convert => true,
            :join_type => :inner,
            :join_cond=>{:node_node_id => q(:node,:id)},
-           :cols=>[:id,:display_name,:service_name,:condition_name,:condition_description,:enabled,:params,:attributes_to_monitor]
+           :cols=> monitoring_items_cols_def
          },
         ]
       virtual_column :monitoring_items__component, :type => :json, :hidden => true,
@@ -217,7 +218,7 @@ module XYZ
            :convert => true,
            :join_type => :inner,
            :join_cond=>{:component_component_id => q(:component,:id)},
-           :cols=>[:id,:display_name,:service_name,:condition_name,:condition_description,:enabled,:params,:attributes_to_monitor]
+           :cols=>monitoring_items_cols_def
          },
         ]
 

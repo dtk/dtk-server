@@ -61,6 +61,7 @@
   :php__php5 => "Php5",
   :postgresql__client => "Postgres Client",
   :postgresql__server => "Postgres Server",
+  :postgresql__pgpool => "Pgpool",
   :postgresql__app => "Postgres App",
   :nagios__client => "NRPE",
   :nagios__server => "Nagios3 Server",

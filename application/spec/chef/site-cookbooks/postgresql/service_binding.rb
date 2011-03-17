@@ -16,10 +16,10 @@ service :postgresql do
     :description => "postgres ip service access point configuration",
     :semantic_type => "sap_config__l4",
     :transform =>
-    [{
+    {
        "port"  => 5432,
        "protocol" => "tcp"
-     }]
+     }
 
   attribute "pg_pool_sap_ref__l4",
     :recipes => ["postgresql::pgpool"],

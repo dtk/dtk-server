@@ -65,7 +65,7 @@
 
 #postgresql
   :postgresql__dir => "PostgreSQL Directory",
-
+  :conns_to_real_dbs => "Conn to DBs",
 #user_account
   :user_account__username => "User Name",
   :user_account__uid => "User ID",

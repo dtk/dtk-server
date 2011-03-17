@@ -1,6 +1,6 @@
 service :postgresql do
   attribute "sap_config__l4",
-    :recipes => ["postgresql::server"],
+    :recipes => ["postgresql::server","postgresql::pgpool"],
     :type => "hash",
     :description => "postgres ip service access point configuration",
     :semantic_type => {":array" =>"sap_config__l4"},
@@ -10,28 +10,12 @@ service :postgresql do
        "protocol" => "tcp"
      }]
 
-  attribute "pg_pool_sap_config__l4",
-    :recipes => ["postgresql::pgpool"],
-    :type => "hash",
-    :description => "postgres ip service access point configuration",
-    :semantic_type => "sap_config__l4",
-    :transform =>
-    {
-       "port"  => 5432,
-       "protocol" => "tcp"
-     }
-
-  attribute "pg_pool_sap_ref__l4",
+  attribute "conns_to_real_dbs",
     :recipes => ["postgresql::pgpool"],
     :type => "hash",
     :description => "postgres ip service access point configuration",
     :semantic_type => {":array" => "sap_ref__l4"},
-    :transform =>
-    [{
-       "port"  => 5432,
-       "protocol" => "tcp"
-     }],
-     :dependency  => {
+    :dependency  => {
        "attribute_constraint" => {
          "display_name"=> "component_constraint",
          "type"=> "component",

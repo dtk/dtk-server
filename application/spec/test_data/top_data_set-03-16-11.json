@@ -14,7 +14,7 @@
       "data_source": {
         "chef": {
           "display_name": "chef",
-          "last_collection_timestamp": "Thu Mar 17 02:46:04 +0000 2011",
+          "last_collection_timestamp": "Thu Mar 17 03:02:22 +0000 2011",
           "data_source_entry": {
             "component_recipe": {
               "ds_is_golden_store": true,
@@ -50,7 +50,7 @@
         },
         "ec2": {
           "display_name": "ec2",
-          "last_collection_timestamp": "Thu Mar 17 02:46:13 +0000 2011",
+          "last_collection_timestamp": "Thu Mar 17 03:02:34 +0000 2011",
           "data_source_entry": {
             "node_image": {
               "ds_is_golden_store": true,
@@ -64,7 +64,7 @@
         },
         "user_data": {
           "display_name": "user_data",
-          "last_collection_timestamp": "Thu Mar 17 02:46:15 +0000 2011",
+          "last_collection_timestamp": "Thu Mar 17 03:02:37 +0000 2011",
           "data_source_entry": {
             "component": {
               "ds_is_golden_store": true,
@@ -162,34 +162,34 @@
           },
           "ds_attributes": {
             "type": "machine",
-            "virtualizationType": "paravirtual",
             "description": null,
+            "product_codes": [
+
+            ],
             "state": "available",
             "kernel_id": "aki-3af50453",
             "owner_id": "411986592491",
             "tags": {
             },
-            "product_codes": [
-
-            ],
-            "architecture": "i386",
             "root_device_name": "/dev/sda1",
             "root_device_type": "ebs",
+            "architecture": "i386",
+            "block_device_mapping": [
+              {
+                "deviceName": "/dev/sda1",
+                "deleteOnTermination": "true",
+                "volumeSize": 8,
+                "snapshotId": "snap-f9179794"
+              }
+            ],
+            "is_public": false,
             "location": "411986592491/rnp-chef-09-12-mcollective-1-0-ubuntu-lucid-x86_32",
             "name": "rnp-chef-09-12-mcollective-1-0-ubuntu-lucid-x86_32",
             "flavor": {
               "disk": null
             },
-            "block_device_mapping": [
-              {
-                "snapshotId": "snap-f9179794",
-                "deviceName": "/dev/sda1",
-                "deleteOnTermination": "true",
-                "volumeSize": 8
-              }
-            ],
             "id": "ami-ee38c987",
-            "is_public": false
+            "virtualizationType": "paravirtual"
           },
           "attribute": {
             "host_addresses_ipv4": {
@@ -2244,44 +2244,17 @@
           },
           "basic_type": "service",
           "attribute": {
-            "pg_pool_sap_config__l4": {
-              "semantic_type_summary": "sap_config__l4",
-              "required": false,
-              "semantic_type": "sap_config__l4",
-              "display_name": "pg_pool_sap_config__l4",
-              "description": "postgres ip service access point configuration",
-              "value_asserted": {
-                "port": 5432,
-                "protocol": "tcp"
-              },
-              "external_ref": {
-                "type": "service_attribute",
-                "path": "service[postgresql][pg_pool_sap_config__l4]"
-              },
-              "dynamic": false,
-              "read_only": false,
-              "cannot_change": false,
-              "data_type": "json",
-              "hidden": false,
-              "is_port": true
-            },
-            "pg_pool_sap_ref__l4": {
+            "conns_to_real_dbs": {
               "semantic_type_summary": "sap_ref__l4",
               "required": false,
               "semantic_type": {
                 ":array": "sap_ref__l4"
               },
-              "display_name": "pg_pool_sap_ref__l4",
+              "display_name": "conns_to_real_dbs",
               "description": "postgres ip service access point configuration",
-              "value_asserted": [
-                {
-                  "port": 5432,
-                  "protocol": "tcp"
-                }
-              ],
               "external_ref": {
                 "type": "service_attribute",
-                "path": "service[postgresql][pg_pool_sap_ref__l4]"
+                "path": "service[postgresql][conns_to_real_dbs]"
               },
               "dynamic": false,
               "dependency": {
@@ -2298,6 +2271,31 @@
                   }
                 }
               },
+              "read_only": false,
+              "cannot_change": false,
+              "data_type": "json",
+              "hidden": false,
+              "is_port": true
+            },
+            "sap_config__l4": {
+              "semantic_type_summary": "sap_config__l4",
+              "required": false,
+              "semantic_type": {
+                ":array": "sap_config__l4"
+              },
+              "display_name": "sap_config__l4",
+              "description": "postgres ip service access point configuration",
+              "value_asserted": [
+                {
+                  "port": 5432,
+                  "protocol": "tcp"
+                }
+              ],
+              "external_ref": {
+                "type": "service_attribute",
+                "path": "service[postgresql][sap_config__l4]"
+              },
+              "dynamic": false,
               "read_only": false,
               "cannot_change": false,
               "data_type": "json",

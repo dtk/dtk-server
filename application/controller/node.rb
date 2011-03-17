@@ -25,7 +25,7 @@ pp '++++++++++++++++++++++++++++++'
     def dock_get_service_checks(id)
       node = create_object_from_id(id)
       service_checks = node.get_service_checks()
-
+pp [:service_checks,service_checks]
       tpl = R8Tpl::TemplateR8.new("dock/node_get_service_checks",user_context())
       tpl.assign(:_app,app_common())
       tpl.assign(:service_checks,service_checks)

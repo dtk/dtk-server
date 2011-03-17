@@ -241,7 +241,7 @@ module XYZ
           recipes = attr_metadata["recipes"]||[]
           next unless recipes.empty? or recipes.include?(recipe_name)
           attr_name,service_name = get_attribute_and_service_names(raw_attr_name)
-          ret[attr_name] = attr_metadata.dup
+          ret[attr_name] = attr_metadata.dup #TODO: dont think dup is needed
           ret[attr_name]["service_name"] = service_name if service_name
           ret[attr_name]["is_port"] = (service_name ? true : false)
           ##############

@@ -14,6 +14,9 @@ module XYZ
           target[:value_asserted] = fn(lambda{|x,y|x||y},source["value"],source[]["default"])
           target[:semantic_type] = fn(:semantic_type,source["semantic_type"])
           target[:semantic_type_summary] = fn(:semantic_type_summary,source["semantic_type"])
+          if_exists(source["dependency"]) do
+            nested_definition :dependency, source["dependency"]
+          end
         end
 
         def self.filter_raw_source_objects(source)

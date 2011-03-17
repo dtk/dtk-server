@@ -46,6 +46,10 @@
           "ui": "{\"images\": {\"tnail\":\"postgres.png\",\"display\":\"postgres.png\",\"tiny\":\"\"}}",
 	  "specific_type" : "postgres_db_server"
         },
+	"postgresql__pgpool": {
+          "ui": "{\"images\": {\"tnail\":\"postgres.png\",\"display\":\"postgres.png\",\"tiny\":\"\"}}",
+	  "specific_type" : "postgres_db_server"
+        },
 	 "postgresql__db": {
 	  "specific_type" : "postgres_db",
           "ui": "{\"images\": {\"tnail\":\"database-unknown.png\",\"display\":\"database-unknown.png\",\"tiny\":\"\"}}",

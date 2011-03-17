@@ -9,6 +9,7 @@ recipe            "postgresql::client", "Installs postgresql client package(s)"
 recipe            "postgresql::server", "Installs postgresql server packages, templates"
 recipe            "postgresql::redhat", "Installs postgresql server packages, redhat family style"
 recipe            "postgresql::server", "Installs postgresql server packages, debian family style"
+recipe            "postgresql::pgpool", "Installs pgpool load balancer"
 recipe            "postgresql::app", "Test app"
 recipe            "postgresql::db", "Postgresql DB"
 

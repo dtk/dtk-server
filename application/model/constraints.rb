@@ -45,7 +45,7 @@ module XYZ
       #TODO: so if can move over so Macro under Constraint and produces constraint not a sp
       def self.required_component(component_type)
         hash = {
-          :filter => [:and, [:eq, :component_type, component_type]],
+          :filter => [:eq, :component_type, component_type],
         }
         string_symbol_form(hash)
       end
@@ -88,7 +88,7 @@ module XYZ
           :description => "Only one component of type #{component_type} can be on a node",
           :negate => true,
           :search_pattern => {
-            :filter => [:and, [:eq, :component_type, component_type]],
+            :filter => [:eq, :component_type, component_type],
           }
         }
         ComponentConstraint.new(dep)

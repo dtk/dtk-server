@@ -1,4 +1,7 @@
 module XYZ
+  class Violation < Model
+  end
+
   class ValidationError < HashObject 
     def self.find_missing_required_attributes(commit_task)
       component_actions = commit_task.component_actions

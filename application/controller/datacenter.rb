@@ -6,6 +6,12 @@ module XYZ
       "datacenter created with name #{name}"
     end
 
+    def get_warnings(id)
+      datacenter = get_object_from_id(id)
+      warnings = datacenter.get_warnings()
+      return {}
+    end
+
     def load_vspace(datacenter_id)
       datacenter = id_handle(datacenter_id,:datacenter).create_object()
       datacenter_id = datacenter.id()

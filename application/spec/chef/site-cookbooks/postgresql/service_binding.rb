@@ -18,7 +18,7 @@ service :postgresql do
     :dependency  => {
        "attribute_constraint" => {
          "display_name"=> "component_constraint",
-         "type"=> "component",
+         "type"=> "attribute",
          "search_pattern"=> {
            ":filter"=> [":eq",":specific_type","postgres_db_server"]
          },

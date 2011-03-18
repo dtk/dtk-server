@@ -4,13 +4,24 @@ module XYZ
       class Dependency < Top
         definitions do
           target[:display_name] = source[:ref]
-          target[:type] = "component"
+          target[:type] =  fn(:type,source)
           target[:search_pattern] = fn(:search_pattern,source)
           target[:description] = fn(:description,source)
+          target[:severity] = fn(:severity,source)
         end
 
         def self.relative_distinguished_name(source)
           source[:ref]
+        end
+
+        def self.type(source)
+          ret = source["type"] || ("component" if source["required_component"])
+          raise Error.new("unexpected form for chef dependency") unless ret
+          ret
+        end
+
+        def self.severity(source)
+          source["severity"] || type(source) == "component" ? "warning" : "error"
         end
 
         def self.search_pattern(source)

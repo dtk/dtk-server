@@ -49,7 +49,7 @@ module XYZ
            :convert => true,
            :join_type => :inner,
            :join_cond=>{:attribute_attribute_id => q(:attribute,:id)},
-           :cols => [:id,:search_pattern,:type,:description]
+           :cols => [:id,:search_pattern,:type,:description,:severity]
          }]
 
       virtual_column :component_parent, :type => :json, :hidden => true,

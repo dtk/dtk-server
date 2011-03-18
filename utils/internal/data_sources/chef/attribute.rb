@@ -15,7 +15,7 @@ module XYZ
           target[:semantic_type] = fn(:semantic_type,source["semantic_type"])
           target[:semantic_type_summary] = fn(:semantic_type_summary,source["semantic_type"])
           if_exists(source["dependency"]) do
-            nested_definition :dependency, source["dependency"]
+            nested_definition :dependency,source["dependency"]
           end
         end
 
@@ -35,7 +35,7 @@ module XYZ
           split.shift if split.size > 1
           split.join(name_delimiter())
         end
-
+        
         def self.external_ref(source)
           prefix = source[:service_name] ? "service[#{source[:service_name]}]" : "node[#{source[:ref].split("/").first}]"
           path = prefix+name_suffix(source)

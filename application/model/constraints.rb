@@ -8,9 +8,20 @@ module XYZ
     def evaluate_given_target(target,opts={})
       ret = evaluate_given_target_just_eval(target)
       return ret if ret
-      if opts[:raise_error_when_violation]
-        violations = ret_violations(target)
-        raise ErrorConstraintViolations.new(violations)
+      violations = ret_violations(target)
+      if opts[:raise_error_when_any_violation]
+        #TODO: shpould probably make violations a class so can hide this
+        e = violations["error"]
+        w = violations["warning"]
+        logical_op = (e+w).first
+        all_violations = [logical_op] + (e[1..e.size-1]||[]) + (w[1..w.size-1]||[])
+        raise ErrorConstraintViolations.new(all_violations)
+      elsif opts[:raise_error_when_error_violation] 
+        pp [:warnings, violations["warning"]]
+        raise ErrorConstraintViolations.new(violations["error"]) unless violations["error"].empty?
+      else
+        pp [:errors, violations["error"]]
+        pp [:warnings, violations["warning"]]
       end
       ret
     end
@@ -33,12 +44,14 @@ module XYZ
     end
    public
     def ret_violations(target)
-      violations = @constraints.map do |constraint|
-        constraint_holds = constraint.evaluate_given_target(target)
-        constraint[:description] unless constraint_holds
-      end.compact
-      return Array.new if violations.empty?
-      [@logical_op] + violations
+      ret = {"error" => Array.new, "warning" => Array.new}
+      @constraints.each do |constraint|
+        next if constraint.evaluate_given_target(target)
+        severity = constraint[:severity]
+        ret[severity] = [@logical_op] if ret[severity].empty?
+        ret[severity] << constraint[:description]
+      end
+      ret
     end
 
     module Macro

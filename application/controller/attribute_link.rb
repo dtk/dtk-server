@@ -19,7 +19,7 @@ module XYZ
         constraints = create_object_from_id(attr_link[:input_id],:attribute).get_constraints()
         if constraints
           target = {:target_port_id_handle => id_handle(attr_link[:output_id],:attribute)}
-          constraints.evaluate_given_target(target, :raise_error_when_violation => true)
+          constraints.evaluate_given_target(target, :raise_error_when_error_violation => true)
         end
 
         parent_id_handle = id_handle(hash["parent_id"],hash["parent_model_name"])

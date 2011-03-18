@@ -4,11 +4,8 @@
 <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/combo?3.2.0/build/cssreset/reset.css&3.2.0/build/cssfonts/fonts.css">
 -->
 
-<link rel="SHORTCUT ICON" href="{%=_app[:base_images_uri]%}/icon-black.ico" />
-
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_js_uri]%}/external/yui/build/cssreset/reset.css">
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_js_uri]%}/external/yui/build/cssfonts/fonts.css">
-<link rel="stylesheet" type="text/css" href="{%=_app[:base_js_uri]%}/external/yui/build/cssgrids/grids.css">
 
 <!--//TODO: revisit to variablize the path of the founcation css-->
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/workspace.css" />
@@ -33,24 +30,6 @@
 
 	<body onload="R8.Workspace.init();" class="yui3-skin-sam  yui-skin-sam">
 	<div id="page-container" style="margin: 0 auto 0 auto;">
-		<div id="page-topbar" class="top-bar">
-			<div id="menu-bar" class="yui3-g menu-bar grey">
-				<div class="yui3-u left-cap"></div>
-				<div id="wspace-toolbar" class="toolbar yui3-u body">
-					<div class="logo black"></div>
-					<div class="item"><a href="{%=_app[:base_uri]%}/xyz/component/list">Library</a></div>
-					<div class="item"><a href="{%=_app[:base_uri]%}/xyz/workspace" style="color: #4FA4D0">Workspace</a></div>
-					<div class="item"><a href="{%=_app[:base_uri]%}/xyz/datacenter/list">Dashboard</a></div>
-					<div class="item"><a href="{%=_app[:base_uri]%}/xyz/node/list">Assets</a></div>
-					<div class="divider"></div>
-				</div>
-				<div class="yui3-u right-cap"></div>
-			</div>
-			<div id="wspace-context-wrapper">
-			</div>
-		</div>
-
-<!--
 		<div id="wspace-topbar">
 			<div id="wspace-toolbar" class="toolbar">
 
@@ -60,9 +39,45 @@
 				<div class="menu-item"><a href="{%=_app[:base_uri]%}/xyz/datacenter/list">Dashboard</a></div>
 
 				<div class="menu-divider"></div>
+<!--
+				<div class=".toolbar-group">
+					<div class="lft-endcap"></div>
+					<ul class="tool-list">
+						<li id="'+_id+'-panel-item" class="tool-item first">
+							<div class="btn-bg">
+								<div class="tool-btn users"></div>
+							</div>
+						</li>
+					</ul>
+					<div class="rt-endcap"></div>
+				</div>
+-->
+<!--
+				<div id="views-dropdown" class="dropdown" style="margin-right: 50px; float: left;">
+					<div style="font-size: 14px; margin-top: 4px; float: left;">View</div>
+					<div class="arrow"></div>
+				</div>
+-->
+<!--
+				<div style="height:25px; text-align: center; position: relative; float: right; margin-left: 50px; background-color: #DDDDDD;">
+					<a href="{%=_app[:base_uri]%}/xyz/node/list">Main</a>&nbsp;|&nbsp;<a href="javascript:R8.Workspace.commitChanges();">Commit</a>
+				</div>
+				<div style="height:25px; text-align: center; position: relative; float: right; margin-left: 50px; background-color: #DDDDDD;">
+					<a href="javascript:R8.Workspace.hidePorts();">Hide Ports</a>&nbsp;|&nbsp;
+					<a href="javascript:R8.Workspace.showPorts();">Show Ports</a>
+				</div>
+				<div style="height:25px; text-align: center; position: relative; float: right; margin-left: 50px; background-color: #DDDDDD;">
+					<a href="javascript:R8.Workspace.hideLinks();">Hide Links</a>&nbsp;|&nbsp;
+					<a href="javascript:R8.Workspace.showLinks();">Show Links</a>
+				</div>
+				<div style="height:25px; text-align: center; position: relative; float: right; margin-left: 50px; background-color: #DDDDDD;">
+					<a href="javascript:R8.Workspace.showAlert('Footime!!');">Alert</a>&nbsp;|&nbsp;
+				</div>
+-->
+			</div>
+			<div id="wspace-context-wrapper">
 			</div>
 		</div>
--->
 		<div id="wspace-container">
 			<div id="workspace" class="workspace">
 				<div id="viewspace" class="viewspace">

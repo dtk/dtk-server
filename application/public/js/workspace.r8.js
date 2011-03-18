@@ -10,7 +10,8 @@ if (!R8.Workspace) {
 			_pageContainerId = 'page-container',
 			_pageContainerNode = null,
 
-			_topbarId = 'wspace-topbar',
+//			_topbarNodeId = 'wspace-topbar',
+			_topbarNodeId = 'page-topbar',
 			_topbarNode = null,
 
 			_contextBarId = 'wspace-context-wrapper',
@@ -47,7 +48,7 @@ if (!R8.Workspace) {
 			init: function() {
 				_pageContainerNode = R8.Utils.Y.one('#'+_pageContainerId);
 
-				_topbarNode = R8.Utils.Y.one('#'+_topbarId);
+				_topbarNode = R8.Utils.Y.one('#'+_topbarNodeId);
 				_contextBarNode = R8.Utils.Y.one('#'+_contextBarId);
 
 //----------------------
@@ -73,6 +74,9 @@ if (!R8.Workspace) {
 						break;
 					case "modalNode":
 						return R8.Utils.Y.one('#'+_modalNodeId+'-content');
+						break;
+					case "topbarNodeId":
+						return _topbarNodeId
 						break;
 				}
 			},

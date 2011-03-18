@@ -140,12 +140,14 @@ if(!R8.Dock) {
 //						},panelGroupNode,'.panel-item');
 
 					});
-
+//DEBUG
+//hiding the dock by default for demo, change after implementing user settings/memory
+					that.hide();
 				});
 				R8.Topbar.addViewItem({
 					id: 'dock',
 					i18n: 'Dock',
-					visible: true,
+					visible: false,
 					clickCallback: this.toggleDock
 				});
 			},
@@ -408,7 +410,6 @@ if(!R8.Dock) {
 			},
 			hide: function() {
 				if(_node == null) _node = R8.Utils.Y.one('#'+_nodeId);
-
 				_node.get('parentNode').setStyle('display','none');
 			},
 			closeAllPanels: function() {

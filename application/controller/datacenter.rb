@@ -8,9 +8,9 @@ module XYZ
 
     def get_warnings(id)
       datacenter = get_object_from_id(id)
-      warnings = datacenter.get_current_violations("warning")
-pp [:warnings,warnings]
-      return {}
+      notification_list = datacenter.get_current_violations("warning")
+pp [:warnings,notification_list]
+      return {:data=>notification_list}
     end
 
     def load_vspace(datacenter_id)

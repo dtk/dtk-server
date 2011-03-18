@@ -9,6 +9,7 @@ if(!R8.Topbar) {
 			_toolbarNodeId = 'wspace-toolbar',
 			_toolbarNode = null,
 			_toolbars = [],
+			_divisions = [],
 
 			_dropdowns = [];
 
@@ -40,7 +41,7 @@ if(!R8.Topbar) {
 							</div>';
 //--------------------------------------------------------
 
-		var groupDef = {
+		var toolbarDef = {
 				tools:[
 					{id:'add-users',i18n:'Create User',contentLoader:function(contentNode){
 						var route = 'user/edit',
@@ -69,7 +70,7 @@ if(!R8.Topbar) {
 							};
 						R8.Ctrl.call(route,params);
 					}},
-					{id:'commit-test',i18n:'Test Commit',contentLoader:function(contentNode){
+/*					{id:'commit-test',i18n:'Test Commit',contentLoader:function(contentNode){
 						var route = 'workspace/commit_test/'+R8.Workspace.get('context_id'),
 							params = {
 								'cfg':{
@@ -78,7 +79,7 @@ if(!R8.Topbar) {
 							};
 						R8.Ctrl.call(route,params);
 					}},
-					{id:'create-assembly',i18n:'Create Assembly',contentLoader:function(contentNode){
+*/					{id:'create-assembly',i18n:'Create Assembly',contentLoader:function(contentNode){
 //						var route = 'workspace/create_assembly/'+R8.Workspace.get('context_id'),
 						var route = 'workspace/create_assembly',
 							params = {
@@ -94,9 +95,15 @@ if(!R8.Topbar) {
 		var dropdownDef = {
 			id:'view',
 			i18n: 'View',
-			type: 'base'
+			type: 'base',
+			align: 'left'
 		}
-
+		var notificationsDef = {
+			id:'notifications',
+			i18n: 'Notifications',
+			type: 'image',
+			align: 'right'
+		}
 		return {
 			init: function() {
 				_node = R8.Utils.Y.one('#'+_id);
@@ -109,7 +116,7 @@ if(!R8.Topbar) {
 //TODO: revisit to cleanup later
 _toolbarNode.append('<div class="menu-divider"></div>');
 
-				_toolbars[0] = new R8.ToolbarGroup(groupDef);
+				_toolbars[0] = new R8.ToolbarGroup(toolbarDef);
 				_toolbarNode.append(_toolbars[0].render());
 				_toolbars[0].init();
 
@@ -136,6 +143,15 @@ _toolbarNode.append('<div class="menu-divider"></div>');
 					});
 
 				});
+
+				var segCfg = {
+					'id': 'test',
+					'tbarNode': _toolbarNode,
+					'align': 'right',
+					'plugin': R8.Notifications
+				};
+				var test = new R8.TbarSegment(segCfg);
+				test.init();
 			},
 			addViewItem: function(def) {
 				_dropdowns[0].addItem(def);
@@ -144,6 +160,40 @@ _toolbarNode.append('<div class="menu-divider"></div>');
 	}();
 
 	})(R8)
+
+//--------------------Topbar divisions------------------------------------
+
+	R8.TbarSegment = function(cfg) {
+		var _cfg = cfg,
+			_id = _cfg.id+'-division',
+			_segmentNode = null,
+			_node = null,
+			_contentNode = null,
+			_tbarNode = _cfg.tbarNode,
+			_plugin = _cfg.plugin,
+			_alignment = _cfg.align,
+
+			_divisionTpl = '<div id="'+_id+'-tbar" style="height: inherit; position: relative;">\
+								<div class="menu-divider"></div>\
+								<div id="'+_id+'-tbar-content" style="height: inherit;">Hello Foo!!!</div>\
+							</div>';
+
+		return {
+			init: function() {
+				_segmentNode = R8.Utils.Y.Node.create(_divisionTpl);
+				_segmentNode.setStyles({'float':_alignment});
+
+				_tbarNode.append(_segmentNode);
+				_node = R8.Utils.Y.one('#'+_id+'-tbar');
+				_contentNode = R8.Utils.Y.one('#'+_id+'-tbar-content');
+
+				_contentNode.set('innerHTML',_plugin.render());
+				_plugin.init({'nodeId':_id+'-tbar'});
+			}
+		}
+	}
+
+
 
 //---------------------Dropdown base object--------------------------------
 
@@ -210,7 +260,8 @@ _toolbarNode.append('<div class="menu-divider"></div>');
 					e.stopImmediatePropagation();
 				},this);
 
-				var mTop = R8.Utils.Y.one('#wspace-topbar').get('region').bottom,
+				var topbarNodeId = R8.Workspace.get('topbarNodeId');
+				var mTop = R8.Utils.Y.one('#'+topbarNodeId).get('region').bottom,
 					mLeft = _dropdownNode.get('region').left-3;
 
 				_modalNode.setStyles({'top':mTop,'left':mLeft});
@@ -281,11 +332,11 @@ _toolbarNode.append('<div class="menu-divider"></div>');
 			},
 			toggleDropdown: function() {
 				if(_dropdownOpen == true) {
-					_dropdownNode.removeClass('open');
+					_dropdownNode.removeClass('active');
 					_modalNode.setStyle('display','none');
 					_dropdownOpen = false;
 				} else {
-					_dropdownNode.addClass('open');
+					_dropdownNode.addClass('active');
 					_modalNode.setStyle('display','block');
 					_dropdownOpen = true;
 				}

@@ -191,18 +191,18 @@
 /*-------------------*/
 
 .toolbar .dropdown {
-	margin: 3px 10px 0 10px;
-	padding: 0 5px;
-	height: 25px;
+	padding: 7px 5px 0 5px;
+	height: inherit;
 /*	width: 70px;*/
 	float: left;
-	border-top: 3px solid #9CAAC1;
 	cursor: pointer;
 }
-.toolbar .dropdown.open {
-	background-color: #EDEDED;
+.toolbar .dropdown.active {
+/*	background-color: #EDEDED;*/
+	background-image: url(../images/topbar/bg-grey-slice-inverted.png);
+	background-repeat: repeat-x;
 }
-.toolbar .dropdown.open.mover {
+.toolbar .dropdown.active.mover {
 	background-color: #CCCCCC;
 }
 

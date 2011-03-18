@@ -75,7 +75,10 @@ module XYZ
       #each element of expression_list will either be constraint or a disjunction
       parent_idh = parent.id_handle()
       parent_mn = parent_idh[:model_name]
-      raise Error.new("Violation.save_atomic_expressions not implemented yet when parent has type #{parent_mn}") unless parent.respond_to?(:get_violations_from_db)
+      unless parent.respond_to?(:get_violations_from_db)
+      Log.error("Violation.save_atomic_expressions not implemented yet when parent has type #{parent_mn}") 
+        return
+      end
       violation_mh = parent_idh.create_childMH(:violation)
       parent_id = parent_idh.get_id()
       parent_col = DB.parent_field(parent_mn,:violation)

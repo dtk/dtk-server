@@ -81,7 +81,7 @@ module XYZ
 
   class Constraint < HashObject
     def self.create(dependency)
-      if dependency[:type] == "component" and dependency[:attribute_attribute_id]
+      if dependency[:type] == "attribute" and dependency[:attribute_attribute_id]
         PortConstraint.new(dependency)
       elsif dependency[:type] == "component" and dependency[:component_component_id]
         ComponentConstraint.new(dependency)

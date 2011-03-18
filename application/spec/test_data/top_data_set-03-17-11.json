@@ -13,7 +13,7 @@
     "test": {
       "data_source": {
         "chef": {
-          "last_collection_timestamp": "Fri Mar 18 01:51:00 +0000 2011",
+          "last_collection_timestamp": "Fri Mar 18 02:09:38 +0000 2011",
           "display_name": "chef",
           "data_source_entry": {
             "component_recipe": {
@@ -49,7 +49,7 @@
           "ds_name": "chef"
         },
         "ec2": {
-          "last_collection_timestamp": "Fri Mar 18 01:51:10 +0000 2011",
+          "last_collection_timestamp": "Fri Mar 18 02:09:50 +0000 2011",
           "display_name": "ec2",
           "data_source_entry": {
             "node_image": {
@@ -63,7 +63,7 @@
           "ds_name": "ec2"
         },
         "user_data": {
-          "last_collection_timestamp": "Fri Mar 18 01:51:14 +0000 2011",
+          "last_collection_timestamp": "Fri Mar 18 02:09:54 +0000 2011",
           "display_name": "user_data",
           "data_source_entry": {
             "component": {
@@ -413,7 +413,7 @@
               "type": "component",
               "display_name": "tomcat",
               "description": "tomcat is required",
-              "severity": "error",
+              "severity": "warning",
               "search_pattern": {
                 ":filter": [
                   ":eq",
@@ -576,7 +576,7 @@
               "type": "component",
               "display_name": "php__php5",
               "description": "Php5 is required",
-              "severity": "error",
+              "severity": "warning",
               "search_pattern": {
                 ":filter": [
                   ":eq",
@@ -589,7 +589,7 @@
               "type": "component",
               "display_name": "apache2",
               "description": "Apache2 is required",
-              "severity": "error",
+              "severity": "warning",
               "search_pattern": {
                 ":filter": [
                   ":eq",
@@ -2402,7 +2402,7 @@
               "type": "component",
               "display_name": "java",
               "description": "java is required",
-              "severity": "error",
+              "severity": "warning",
               "search_pattern": {
                 ":filter": [
                   ":eq",

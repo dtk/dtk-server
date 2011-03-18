@@ -86,6 +86,7 @@ module XYZ
       def self.only_one_per_node(component_type)
         dep = {
           :description => "Only one component of type #{component_type} can be on a node",
+          :severity => "error",
           :negate => true,
           :search_pattern => {
             :filter => [:eq, :component_type, component_type],

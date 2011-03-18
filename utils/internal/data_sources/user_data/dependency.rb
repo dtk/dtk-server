@@ -21,7 +21,7 @@ module XYZ
         end
 
         def self.severity(source)
-          source["severity"] || source["type"] == "component" ? "warning" : "error"
+          source["severity"] || type(source) == "component" ? "warning" : "error"
         end
 
         def self.search_pattern(source)

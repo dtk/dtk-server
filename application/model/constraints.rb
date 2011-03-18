@@ -8,16 +8,20 @@ module XYZ
     def evaluate_given_target(target,opts={})
       ret = evaluate_given_target_just_eval(target)
       return ret if ret
+      target_parent_obj = target.values.first.get_parent_id_handle().create_object
       violations = ret_violations(target)
       if opts[:raise_error_when_any_violation]
         all_violations = ViolationExpression(violations["error"],violations["warning"])
         raise ErrorConstraintViolations.new(all_violations.pp_form)
       elsif opts[:raise_error_when_error_violation] 
         pp [:warnings, violations["warning"].pp_form]
+        Violation.save_expression(target_parent_obj,violations["warning"])
         raise ErrorConstraintViolations.new(violations["error"].pp_form) unless violations["error"].empty?
       else
         pp [:errors, violations["error"].pp_form]
+        Violation.save_expression(target_parent_obj,violations["error"])
         pp [:warnings, violations["warning"].pp_form]
+        Violation.save_expression(target_parent_obj,violations["warning"])
       end
       ret
     end
@@ -40,7 +44,7 @@ module XYZ
     end
    public
     def ret_violations(target)
-      ret = {"error" => ViolationExpression.new(@logical_op), "warning" => ViolationExpression.new(@logical_op)}
+      ret = {"error" => ViolationExpression.new(target,@logical_op), "warning" => ViolationExpression.new(target,@logical_op)}
         
       @constraints.each do |constraint|
         next if constraint.evaluate_given_target(target)

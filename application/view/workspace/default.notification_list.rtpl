@@ -1,0 +1,7 @@
+
+{%for notification in notification_list%}
+	<div class="item">
+		<div class="icon warning"></div>
+		<div class="content">{%=notification[:description]%}</div>
+	</div>
+{%end%}

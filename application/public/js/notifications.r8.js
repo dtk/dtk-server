@@ -10,14 +10,10 @@ if(!R8.Notifications) {
 
 				_tbarTpl = '<div class="tbar-plugin notifications">\
 							<div class="icon"></div>\
-							<div id="notify-count" class="notify-count">5</div>\
+							<div id="notify-count" class="notify-count"></div>\
 						</div>';
 
 				_panelTpl = '<div id="notifications-panel">\
-								<div class="item">\
-									<div class="icon warning"></div>\
-									<div class="content">This is your first warning.......</div>\
-								</div>\
 							</div>';
 			return {
 				init: function(cfg) {
@@ -59,7 +55,7 @@ if(!R8.Notifications) {
 								eval("var response =" + responseObj.responseText);
 								//TODO: revisit once controllers are reworked for cleaner result package
 								notification_list = response['application_datacenter_get_warnings']['content'][0]['data'];
-console.log(notification_list);
+								that.refreshList(notification_list);
 							}
 						var params = {
 							'callbacks': {
@@ -69,8 +65,9 @@ console.log(notification_list);
 						R8.Ctrl.call('datacenter/get_warnings/'+dcId,params);
 					}
 				},
-				tempCallback: function() {
-					
+				refreshList: function(nList) {
+					R8.Utils.Y.one('#notify-count').set('innerHTML',nList.length);
+					_panelNode.set('innerHTML',R8.Rtpl.notification_list({'notification_list':nList}));
 				},
 				startPoller: function() {
 					

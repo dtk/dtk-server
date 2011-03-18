@@ -7,7 +7,7 @@ module XYZ
     end
 
     def get_warnings(id)
-      datacenter = get_object_from_id(id)
+      datacenter = get_object_by_id(id)
       notification_list = datacenter.get_current_violations("warning")
 pp [:warnings,notification_list]
       return {:data=>notification_list}
@@ -19,6 +19,12 @@ pp [:warnings,notification_list]
 
 #TODO: how to retrieve fields from instance?
       dc_hash = get_object_by_id(datacenter_id,:datacenter)
+
+#TODO: revisit when cleaning up toolbar, plugins and user settings
+      tpl = R8Tpl::TemplateR8.new("workspace/notification_list",user_context())
+      tpl.set_js_tpl_name("notification_list")
+      tpl_info = tpl.render()
+      include_js_tpl(tpl_info[:src])
 
       include_js('plugins/search.cmdhandler')
       view_space = {

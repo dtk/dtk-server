@@ -99,7 +99,7 @@ module XYZ
       end
       saved_violations = parent.get_violations_from_db()
       prune_already_saved_violations!(create_rows,saved_violations)
-      create_from_rows(violation_mh,create_rows)
+      create_from_rows(violation_mh,create_rows, :convert => true)
     end
     def self.prune_already_saved_violations!(create_rows,saved_violations)
       #TODO: stub

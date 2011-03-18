@@ -8,7 +8,8 @@ module XYZ
 
     def get_warnings(id)
       datacenter = get_object_from_id(id)
-      warnings = datacenter.get_warnings()
+      warnings = datacenter.get_current_violations("warning")
+pp [:warnings,warnings]
       return {}
     end
 

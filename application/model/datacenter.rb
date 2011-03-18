@@ -9,7 +9,8 @@ module XYZ
     end
     #this prunes those in db amnd then prunes and updates get_violations_from_db so violations no longer current are removed
     def get_current_violations(severity=nil)
-
+      get_violations_from_db(severity)
+      #TODO: wil also get rid of stale violations
     end
 
 

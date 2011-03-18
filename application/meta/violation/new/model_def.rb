@@ -3,13 +3,7 @@
   :table=>:violation,
   :columns=>{
     :severity=>{:type=>:varchar, :size=>20}, # error || warning || ..
-    :message=>{:type=>:json},
-    :dependency_id=>{
-      :type=>:bigint,
-      :foreign_key_rel_type=>:dependency,
-      :on_delete=>:cascade,
-      :on_update=>:cascade
-    },
+    :expression=>{:type=>:json},
     :target_node_id=>{
       :type=>:bigint,
       :foreign_key_rel_type=>:node,

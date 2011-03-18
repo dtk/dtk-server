@@ -1,9 +1,17 @@
 module XYZ
   class Datacenter < Model
-#    set_relation_name(:datacenter,:datacenter)
 
-    #######################
     ######### Model apis
+    def get_violations_from_db(severity=nil)
+      get_objects_col_from_sp_hash({:columns => [:violations]},:violation).select do |v|
+        severity.nil? or v[:severity] == severity
+      end
+    end
+    #this prunes those in db amnd then prunes and updates get_violations_from_db so violations no longer current are removed
+    def get_current_violations(severity=nil)
+
+    end
+
 
     def add_item(id_handle,override_attrs=nil)
       #TODO: need to copy in avatar when hash["ui"] is non null

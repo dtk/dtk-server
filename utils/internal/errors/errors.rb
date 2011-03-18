@@ -26,6 +26,7 @@ module XYZ
     end
    private
     def msg(violations)
+      return ("constraint violation: " + violations) if violations.kind_of?(String)
       v_with_text = violations.compact
       if v_with_text.size < 2
         return "constraint violations"

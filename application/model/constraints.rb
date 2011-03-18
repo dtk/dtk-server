@@ -10,18 +10,14 @@ module XYZ
       return ret if ret
       violations = ret_violations(target)
       if opts[:raise_error_when_any_violation]
-        #TODO: shpould probably make violations a class so can hide this
-        e = violations["error"]
-        w = violations["warning"]
-        logical_op = (e+w).first
-        all_violations = [logical_op] + (e[1..e.size-1]||[]) + (w[1..w.size-1]||[])
-        raise ErrorConstraintViolations.new(all_violations)
+        all_violations = ViolationExpression(violations["error"],violations["warning"])
+        raise ErrorConstraintViolations.new(all_violations.pp_form)
       elsif opts[:raise_error_when_error_violation] 
-        pp [:warnings, violations["warning"]]
-        raise ErrorConstraintViolations.new(violations["error"]) unless violations["error"].empty?
+        pp [:warnings, violations["warning"].pp_form]
+        raise ErrorConstraintViolations.new(violations["error"].pp_form) unless violations["error"].empty?
       else
-        pp [:errors, violations["error"]]
-        pp [:warnings, violations["warning"]]
+        pp [:errors, violations["error"].pp_form]
+        pp [:warnings, violations["warning"].pp_form]
       end
       ret
     end
@@ -44,12 +40,12 @@ module XYZ
     end
    public
     def ret_violations(target)
-      ret = {"error" => Array.new, "warning" => Array.new}
+      ret = {"error" => ViolationExpression.new(@logical_op), "warning" => ViolationExpression.new(@logical_op)}
+        
       @constraints.each do |constraint|
         next if constraint.evaluate_given_target(target)
         severity = constraint[:severity]
-        ret[severity] = [@logical_op] if ret[severity].empty?
-        ret[severity] << constraint[:description]
+        ret[severity] << constraint
       end
       ret
     end

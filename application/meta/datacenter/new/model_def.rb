@@ -50,6 +50,18 @@
          :join_cond=>{:datacenter_datacenter_id=>:datacenter__id},
          :cols=>[:id,:display_name,:ui,:type]
        }]
+    },
+    :violations=>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [{
+         :model_name=>:violation,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:datacenter_datacenter_id=>:datacenter__id},
+         :cols=>[:id,:display_name,:severity,:expression,:target_node_id]
+       }]
     }
   }
 }

@@ -63,8 +63,41 @@ module XYZ
       expression_list = ret_expression_list(violation_expression)
       save_atomic_expressions(parent,expression_list)
     end
-   private
 
+    #This function delete
+    def self.ret_and_update_violations(target_node_id_handles)
+      ret = Array.new
+      return ret if target_node_id_handles.empty?
+      sample_idh = target_node_id_handles.first
+      saved_violations = Node.get_violations(target_node_id_handles)
+      viol_idhs_to_delete = Array.new
+
+      saved_violations.each do |v|
+        raise Error.new("Not treating expression form") unless constraint_hash = v[:expression][:constraint]
+        constraint = Constraint.create(constraint_hash)
+        vtttype = constraint[:target_type] 
+        target_idh = sample_idh.createIDH(:model_name => vt_model_name(vtttype),:id => constraint[:target_id])
+        target = {vtttype => target_idh}
+        if constraint.evaluate_given_target(target)
+          Log.info("violation with id #{v[:id].to_s} no longer applicable; being removed")
+          viol_idhs_to_delete << violation_mh.createIDH(:id => v[:id])
+        else
+          ret << v
+        end
+      end
+      delete_instances(viol_idhs_to_delete) unless viol_idhs_to_delete.empty?
+      ret
+    end
+
+   private
+    def self.vt_model_name(vtttype)
+      ret = VTModelName[vtttype]
+      return ret if ret
+      raise Error.new("Unexpected violaition target type #{vtttype}")
+    end
+    VTModelName = {
+      "target_node_id_handle" => :node
+    }
     def self.ret_expression_list(expression)
       return expression unless expression[:logical_op] == :and
       expression[:elements].map do |expr_el|
@@ -102,9 +135,8 @@ module XYZ
         create_rows << new_item
         target_node_id_handles << vt[:id_handle]
       end
-      saved_violations = Node.get_violations(target_node_id_handles)
-      violations_to_delete_idh = saved_to_delete_and_pruned_new_violations!(create_rows,saved_violations,violation_mh)
-      delete_instances(violations_to_delete_idh) unless violations_to_delete_idh.empty?
+      saved_violations = ret_and_update_violations(target_node_id_handles)
+      prune_duplicate_violations!(create_rows,saved_violations)
       create_from_rows(violation_mh,create_rows, :convert => true) unless create_rows.empty?
     end
 
@@ -124,33 +156,12 @@ module XYZ
       }
     end
 
-    def self.saved_to_delete_and_pruned_new_violations!(create_rows,saved_violations,violation_mh)
-      viol_idhs_to_delete = Array.new
-      saved_violations.each do |v|
-        raise Error.new("Not treating expression form") unless constraint_hash = v[:expression][:constraint]
-        constraint = Constraint.create(constraint_hash)
-        vtttype = constraint[:target_type] 
-        target_idh = violation_mh.createIDH(:model_name => vt_model_name(vtttype),:id => constraint[:target_id])
-        target = {vtttype => target_idh}
-        if constraint.evaluate_given_target(target)
-          Log.info("violation with id #{v[:id].to_s} no longer applicable; being removed")
-          viol_idhs_to_delete << violation_mh.createIDH(:id => v[:id])
-        end
-      end
-      #check which violations no longer hold
+    def self.prune_duplicate_violations!(create_rows,saved_violations)
       #TODO: stub
       pp [:create_rows,create_rows]
       pp [:saved_violations,saved_violations]
-      return viol_idhs_to_delete
+      create_rows
     end
-    def self.vt_model_name(vtttype)
-      ret = VTModelName[vtttype]
-      return ret if ret
-      raise Error.new("Unexpected violaition target type #{vtttype}")
-    end
-    VTModelName = {
-      "target_node_id_handle" => :node
-    }
   end
 
   class ValidationError < HashObject 

@@ -782,7 +782,8 @@ console.log(response);
 				_currentViewSpace = id;
 
 				var contextTpl = '<span class="context-span">'+viewSpaceDef.i18n+' > '+viewSpaceDef.object.display_name+'</span>';
-				_contextBarNode.append(contextTpl);
+				//RICHCHANGEAXs				_contextBarNode.append(contextTpl);
+				 
 			},
 
 			addItems: function(items,viewSpaceId) {

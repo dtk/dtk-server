@@ -51,7 +51,7 @@
          :cols=>[:id,:display_name,:ui,:type]
        }]
     },
-    :violations=>{
+    :violation_info=>{
       :type=>:json,
       :hidden=>true,
       :remote_dependencies=>
@@ -61,6 +61,12 @@
          :join_type=>:inner,
          :join_cond=>{:datacenter_datacenter_id=>:datacenter__id},
          :cols=>[:id,:display_name,:severity,:description,:expression,:target_node_id,:updated_at]
+       },
+       {
+         :model_name=>:node,
+         :join_type=>:left_outer,
+         :join_cond=>{:id=>:violation__target_node_id},
+         :cols=>[:id,:display_name]
        }]
     }
   }

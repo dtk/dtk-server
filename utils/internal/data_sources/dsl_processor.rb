@@ -152,8 +152,13 @@ module XYZ
       evaluated_args = @args.map{|term|apply_to_term(term,ds_hash)}
       if @function_name 
         #resolve with respect class adapter
-        #TBD: where do we put "wired" fns; can put it in DSNormalizerTop if using this path below
-        @context_parent.parent.send(@function_name,*evaluated_args)
+        #TODO: where do we put "wired" fns; can put it in DSNormalizerTop if using this path below
+        #TODO: hack to handle when fn eval under if context
+        if @context_parent.parent.respond_to?(@function_name)
+          @context_parent.parent.send(@function_name,*evaluated_args)
+        else
+          @context_parent.parent.parent.send(@function_name,*evaluated_args)
+        end
       elsif @function_ref
         @function_ref.call(*evaluated_args)
       end

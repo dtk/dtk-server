@@ -14,11 +14,16 @@ module XYZ
             nested_definition :attribute, source["attribute"]
           end
           if_exists(source["dependency"]) do
-            nested_definition :dependency, source["dependency"]
+            nested_definition :dependency, fn(:dependency,source)
           end
         end
         def self.unique_keys(source)
           [source["qualified_ref"]]
+        end
+
+        def self.dependency(source)
+          dep = source["dependency"]
+          dep.inject({}){|h,kv|h.merge(kv[0] => kv[1].merge("parent_display_name" => source["ref"]))}
         end
 
         def self.relative_distinguished_name(source)

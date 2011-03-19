@@ -55,25 +55,40 @@ module XYZ
     end
 
     module Macro
-      #TODO: so if can move over so Macro under Constraint and produces constraint not a sp
-      def self.required_component(component_type)
-        hash = {
-          :filter => [:eq, :component_type, component_type],
-        }
-        string_symbol_form(hash)
-      end
      private
-      def self.string_symbol_form(term)
-        if term.kind_of?(Symbol)
-          ":#{term}"
-        elsif term.kind_of?(String)
-          term
-        elsif term.kind_of?(Hash)
-          term.inject({}){|h,kv|h.merge(string_symbol_form(kv[0]) => string_symbol_form(kv[1]))}
-        elsif term.kind_of?(Array) 
-          term.map{|t|string_symbol_form(t)}
-        else
-          Log.error("unexpected form for term #{term.inspect}")
+      class Common
+        def self.component_i18n()
+          @@component_i18n ||= Model.get_i18n_mappings_for_models(:component)
+        end
+        def self.string_symbol_form(term)
+          if term.kind_of?(Symbol)
+            ":#{term}"
+          elsif term.kind_of?(String)
+            term
+          elsif term.kind_of?(Hash)
+            term.inject({}){|h,kv|h.merge(string_symbol_form(kv[0]) => string_symbol_form(kv[1]))}
+          elsif term.kind_of?(Array) 
+            term.map{|t|string_symbol_form(t)}
+          else
+            Log.error("unexpected form for term #{term.inspect}")
+          end
+        end
+      end
+     public
+      class RequiredComponent < Common
+        def self.search_pattern(required_component)
+          hash = {
+           :filter => [:eq, :component_type, required_component]
+          }
+         string_symbol_form(hash)
+        end
+        def self.description(required_component,base_component)
+          "#{print_form(required_component)} is required for #{print_form(base_component)}"
+        end
+        private
+        def self.print_form(cmp_display_name)
+          i18n = Model.i18n_string(component_i18n,:component,cmp_display_name)
+          i18n || cmp_display_name.split(name_delimiter()).map{|x|x.capitalize()}.join(" ")
         end
       end
     end

@@ -3,15 +3,17 @@ module XYZ
     class Chef
       class Dependency < Top
         definitions do
-          target[:display_name] = source[:ref]
-          target[:type] =  fn(:type,source)
-          target[:search_pattern] = fn(:search_pattern,source)
-          target[:description] = fn(:description,source)
-          target[:severity] = fn(:severity,source)
+          [:display_name, :type, :search_pattern, :description, :severity].each do |k|
+            target[k] = fn(k,source)
+          end
         end
 
         def self.relative_distinguished_name(source)
           source[:ref]
+        end
+
+        def self.display_name(source)
+          source["display_name"]
         end
 
         def self.type(source)
@@ -27,18 +29,16 @@ module XYZ
         def self.search_pattern(source)
           return source["search_pattern"] if source["search_pattern"]
           component = source["required_component"]
-          raise Error.new("unexpected form for chef dependency") unless component
-          XYZ::Constraints::Macro.required_component(component)
+          raise Error.new("unexpected form for userdata dependency") unless component
+          XYZ::Constraints::Macro::RequiredComponent.search_pattern(component)
         end
+
         def self.description(source)
           return source["description"] if source["description"]
-          component = source["required_component"]
-          raise Error.new("unexpected form for chef dependency") unless component
-          i18n_name = Model.i18n_string(component_i18n,:component,component)
-          "#{i18n_name || component.split(name_delimiter()).map{|x|x.capitalize()}.join(" ")} is required"
-        end
-        def self.component_i18n()
-          @@component_i18n ||= Model.get_i18n_mappings_for_models(:component)
+          required_cmp = source["required_component"]
+          base_cmp = source["parent_display_name"]
+          raise Error.new("unexpected form for userdata dependency") unless required_cmp and base_cmp
+          XYZ::Constraints::Macro::RequiredComponent.description(required_cmp,base_cmp)
         end
       end
     end

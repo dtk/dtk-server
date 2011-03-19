@@ -13,8 +13,8 @@
     "test": {
       "data_source": {
         "chef": {
+          "last_collection_timestamp": "Sat Mar 19 06:22:50 +0000 2011",
           "display_name": "chef",
-          "last_collection_timestamp": "Fri Mar 18 17:06:16 +0000 2011",
           "data_source_entry": {
             "component_recipe": {
               "ds_is_golden_store": true,
@@ -49,8 +49,8 @@
           "ds_name": "chef"
         },
         "ec2": {
+          "last_collection_timestamp": "Sat Mar 19 06:23:00 +0000 2011",
           "display_name": "ec2",
-          "last_collection_timestamp": "Fri Mar 18 17:06:25 +0000 2011",
           "data_source_entry": {
             "node_image": {
               "ds_is_golden_store": true,
@@ -63,8 +63,8 @@
           "ds_name": "ec2"
         },
         "user_data": {
+          "last_collection_timestamp": "Sat Mar 19 06:23:03 +0000 2011",
           "display_name": "user_data",
-          "last_collection_timestamp": "Fri Mar 18 17:06:29 +0000 2011",
           "data_source_entry": {
             "component": {
               "ds_is_golden_store": true,
@@ -148,8 +148,8 @@
           "ds_source_obj_type": "image",
           "ui": {
             "images": {
-              "tnail": "ubuntu.png",
               "display": "ubuntu.png",
+              "tnail": "ubuntu.png",
               "tiny": ""
             }
           },
@@ -158,12 +158,6 @@
           "external_ref": {
             "type": "ec2_image",
             "image_id": "ami-ee38c987"
-          },
-          "node_interface": {
-            "eth0": {
-              "type": "ethernet",
-              "display_name": "eth0"
-            }
           },
           "ds_attributes": {
             "type": "machine",
@@ -216,6 +210,12 @@
             }
           },
           "is_deployed": true,
+          "node_interface": {
+            "eth0": {
+              "type": "ethernet",
+              "display_name": "eth0"
+            }
+          },
           "ds_key": "[:user_data, \"/library/test/ami-ee38c987\"]"
         }
       },
@@ -225,8 +225,8 @@
           "component_type": "hadoop__pig",
           "ui": {
             "images": {
-              "tnail": "hadoop-pig.png",
               "display": "hadoop-pig.png",
+              "tnail": "hadoop-pig.png",
               "tiny": ""
             }
           },
@@ -236,13 +236,13 @@
             "recipe_name": "hadoop::pig",
             "type": "chef_recipe"
           },
-          "only_one_per_node": true,
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"hadoop-pig.png\",\"display\":\"hadoop-pig.png\",\"tiny\":\"\"}}",
             "qualified_ref": "/library/test/hadoop__pig",
             "ref": "hadoop__pig",
             "basic_type": "service"
           },
+          "only_one_per_node": true,
           "ds_key": "[:user_data, \"/library/test/hadoop__pig\"]",
           "basic_type": "service"
         },
@@ -251,26 +251,25 @@
           "component_type": "mysql__db",
           "ui": {
             "images": {
-              "tnail": "mysql.png",
               "display": "mysql.png",
+              "tnail": "mysql.png",
               "tiny": ""
             }
           },
-          "specific_type": "mysql_db_server",
           "display_name": "mysql__db",
           "description": "Mysql DB",
           "external_ref": {
             "recipe_name": "mysql::db",
             "type": "chef_recipe"
           },
-          "only_one_per_node": false,
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}",
-            "specific_type": "mysql_db_server",
-            "only_one_per_node": false,
             "qualified_ref": "/library/test/mysql__db",
-            "ref": "mysql__db"
+            "only_one_per_node": false,
+            "ref": "mysql__db",
+            "specific_type": "mysql_db_server"
           },
+          "only_one_per_node": false,
           "attribute": {
             "db_params": {
               "required": false,
@@ -291,15 +290,16 @@
             }
           },
           "ds_key": "[:user_data, \"/library/test/mysql__db\"]",
-          "basic_type": "service"
+          "basic_type": "service",
+          "specific_type": "mysql_db_server"
         },
         "hadoop_cloudera_c3": {
           "type": "instance",
           "component_type": "hadoop_cloudera_c3",
           "ui": {
             "images": {
-              "tnail": "cloudera.png",
               "display": "cloudera.png",
+              "tnail": "cloudera.png",
               "tiny": ""
             }
           },
@@ -309,13 +309,13 @@
             "recipe_name": "hadoop_cloudera_c3",
             "type": "chef_recipe"
           },
-          "only_one_per_node": true,
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"cloudera.png\",\"display\":\"cloudera.png\",\"tiny\":\"\"}}",
             "qualified_ref": "/library/test/hadoop_cloudera_c3",
             "ref": "hadoop_cloudera_c3",
             "basic_type": "service"
           },
+          "only_one_per_node": true,
           "attribute": {
             "jmxremote_password": {
               "required": false,
@@ -354,26 +354,25 @@
           "component_type": "postgresql__db",
           "ui": {
             "images": {
-              "tnail": "database-unknown.png",
               "display": "database-unknown.png",
+              "tnail": "database-unknown.png",
               "tiny": ""
             }
           },
-          "specific_type": "postgres_db",
           "display_name": "postgresql__db",
           "description": "Postgresql DB",
           "external_ref": {
             "recipe_name": "postgresql::db",
             "type": "chef_recipe"
           },
-          "only_one_per_node": false,
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"database-unknown.png\",\"display\":\"database-unknown.png\",\"tiny\":\"\"}}",
-            "specific_type": "postgres_db",
-            "only_one_per_node": false,
             "qualified_ref": "/library/test/postgresql__db",
-            "ref": "postgresql__db"
+            "only_one_per_node": false,
+            "ref": "postgresql__db",
+            "specific_type": "postgres_db"
           },
+          "only_one_per_node": false,
           "attribute": {
             "db_params": {
               "required": false,
@@ -394,25 +393,24 @@
             }
           },
           "ds_key": "[:user_data, \"/library/test/postgresql__db\"]",
-          "basic_type": "database"
+          "basic_type": "database",
+          "specific_type": "postgres_db"
         },
         "java_webapp": {
           "component_type": "java_webapp",
           "ui": {
             "images": {
-              "tnail": "java-01.png",
               "display": "java-01.png",
+              "tnail": "java-01.png",
               "tiny": ""
             }
           },
-          "specific_type": "java_app",
           "display_name": "java_webapp",
-          "only_one_per_node": false,
           "dependency": {
             "tomcat": {
               "type": "component",
               "display_name": "tomcat",
-              "description": "tomcat is required",
+              "description": "tomcat is required for java_webapp",
               "severity": "warning",
               "search_pattern": {
                 ":filter": [
@@ -426,14 +424,13 @@
           "ds_attributes": {
             "component_type": "java_webapp",
             "ui": "{\"images\": {\"tnail\":\"java-01.png\",\"display\":\"java-01.png\",\"tiny\":\"\"}}",
-            "specific_type": "java_app",
-            "only_one_per_node": false,
             "qualified_ref": "/library/test/java_webapp",
             "dependency": {
               "tomcat": {
                 "required_component": "tomcat"
               }
             },
+            "only_one_per_node": false,
             "attribute": {
               "db_config": {
                 "required": true,
@@ -472,8 +469,10 @@
                 "cannot_change": false
               }
             },
-            "ref": "java_webapp"
+            "ref": "java_webapp",
+            "specific_type": "java_app"
           },
+          "only_one_per_node": false,
           "attribute": {
             "sap_ref__l4": {
               "required": true,
@@ -524,58 +523,57 @@
             }
           },
           "ds_key": "[:user_data, \"/library/test/java_webapp\"]",
-          "basic_type": "application"
+          "basic_type": "application",
+          "specific_type": "java_app"
         },
         "php__php5": {
           "type": "instance",
           "component_type": "php__php5",
           "ui": {
             "images": {
-              "tnail": "php.png",
               "display": "php.png",
+              "tnail": "php.png",
               "tiny": ""
             }
           },
-          "specific_type": "php",
           "display_name": "php__php5",
           "description": "Install php5 packages and php.ini config file",
           "external_ref": {
             "recipe_name": "php::php5",
             "type": "chef_recipe"
           },
-          "only_one_per_node": true,
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"php.png\",\"display\":\"php.png\",\"tiny\":\"\"}}",
-            "specific_type": "php",
             "qualified_ref": "/library/test/php__php5",
-            "ref": "php__php5"
+            "ref": "php__php5",
+            "specific_type": "php"
           },
+          "only_one_per_node": true,
           "ds_key": "[:user_data, \"/library/test/php__php5\"]",
-          "basic_type": "language"
+          "basic_type": "language",
+          "specific_type": "php"
         },
         "wordpress": {
           "type": "instance",
           "component_type": "wordpress",
           "ui": {
             "images": {
-              "tnail": "wordpress.png",
               "display": "wordpress.png",
+              "tnail": "wordpress.png",
               "tiny": ""
             }
           },
-          "specific_type": "php_app",
           "display_name": "wordpress",
           "description": "Installs and configures wordpress LAMP stack on a single system",
           "external_ref": {
             "recipe_name": "wordpress",
             "type": "chef_recipe"
           },
-          "only_one_per_node": true,
           "dependency": {
             "php__php5": {
               "type": "component",
               "display_name": "php__php5",
-              "description": "Php5 is required",
+              "description": "Php5 is required for Wordpress",
               "severity": "warning",
               "search_pattern": {
                 ":filter": [
@@ -588,7 +586,7 @@
             "apache2": {
               "type": "component",
               "display_name": "apache2",
-              "description": "Apache2 is required",
+              "description": "Apache2 is required for Wordpress",
               "severity": "warning",
               "search_pattern": {
                 ":filter": [
@@ -601,7 +599,6 @@
           },
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"wordpress.png\",\"display\":\"wordpress.png\",\"tiny\":\"\"}}",
-            "specific_type": "php_app",
             "qualified_ref": "/library/test/wordpress",
             "dependency": {
               "php__php5": {
@@ -611,8 +608,10 @@
                 "required_component": "apache2"
               }
             },
-            "ref": "wordpress"
+            "ref": "wordpress",
+            "specific_type": "php_app"
           },
+          "only_one_per_node": true,
           "attribute": {
             "db__user": {
               "required": false,
@@ -794,15 +793,16 @@
             }
           },
           "ds_key": "[:user_data, \"/library/test/wordpress\"]",
-          "basic_type": "application"
+          "basic_type": "application",
+          "specific_type": "php_app"
         },
         "mysql__slave": {
           "type": "instance",
           "component_type": "mysql__slave",
           "ui": {
             "images": {
-              "tnail": "mysql.png",
               "display": "mysql.png",
+              "tnail": "mysql.png",
               "tiny": ""
             }
           },
@@ -812,13 +812,13 @@
             "recipe_name": "mysql::slave",
             "type": "chef_recipe"
           },
-          "only_one_per_node": true,
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}",
             "qualified_ref": "/library/test/mysql__slave",
             "ref": "mysql__slave",
             "basic_type": "extension"
           },
+          "only_one_per_node": true,
           "attribute": {
             "sap_ref_to_master": {
               "required": true,
@@ -869,8 +869,8 @@
           "component_type": "postgresql__app",
           "ui": {
             "images": {
-              "tnail": "postgres.png",
               "display": "postgres.png",
+              "tnail": "postgres.png",
               "tiny": ""
             }
           },
@@ -880,7 +880,6 @@
             "recipe_name": "postgresql::app",
             "type": "chef_recipe"
           },
-          "only_one_per_node": true,
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"postgres.png\",\"display\":\"postgres.png\",\"tiny\":\"\"}}",
             "qualified_ref": "/library/test/postgresql__app",
@@ -921,6 +920,7 @@
             "ref": "postgresql__app",
             "basic_type": "application"
           },
+          "only_one_per_node": true,
           "attribute": {
             "sap_ref__l4": {
               "required": true,
@@ -978,8 +978,8 @@
           "component_type": "hadoop__hive",
           "ui": {
             "images": {
-              "tnail": "hadoop-hive.png",
               "display": "hadoop-hive.png",
+              "tnail": "hadoop-hive.png",
               "tiny": ""
             }
           },
@@ -989,13 +989,13 @@
             "recipe_name": "hadoop::hive",
             "type": "chef_recipe"
           },
-          "only_one_per_node": true,
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"hadoop-hive.png\",\"display\":\"hadoop-hive.png\",\"tiny\":\"\"}}",
             "qualified_ref": "/library/test/hadoop__hive",
             "ref": "hadoop__hive",
             "basic_type": "service"
           },
+          "only_one_per_node": true,
           "ds_key": "[:user_data, \"/library/test/hadoop__hive\"]",
           "basic_type": "service"
         },
@@ -1004,25 +1004,24 @@
           "component_type": "postgresql__server",
           "ui": {
             "images": {
-              "tnail": "postgres.png",
               "display": "postgres.png",
+              "tnail": "postgres.png",
               "tiny": ""
             }
           },
-          "specific_type": "postgres_db_server",
           "display_name": "postgresql__server",
           "description": "Installs postgresql server packages, debian family style",
           "external_ref": {
             "recipe_name": "postgresql::server",
             "type": "chef_recipe"
           },
-          "only_one_per_node": true,
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"postgres.png\",\"display\":\"postgres.png\",\"tiny\":\"\"}}",
-            "specific_type": "postgres_db_server",
             "qualified_ref": "/library/test/postgresql__server",
-            "ref": "postgresql__server"
+            "ref": "postgresql__server",
+            "specific_type": "postgres_db_server"
           },
+          "only_one_per_node": true,
           "attribute": {
             "shared_buffers": {
               "required": false,
@@ -1111,51 +1110,52 @@
             }
           },
           "ds_key": "[:user_data, \"/library/test/postgresql__server\"]",
-          "basic_type": "service"
+          "basic_type": "service",
+          "specific_type": "postgres_db_server"
         },
         "java": {
           "type": "instance",
           "component_type": "java",
           "ui": {
             "images": {
-              "tnail": "java-01.png",
               "display": "java-01.png",
+              "tnail": "java-01.png",
               "tiny": ""
             }
           },
-          "specific_type": "java",
           "display_name": "java",
           "description": "Installs openjdk to provide Java",
           "external_ref": {
             "recipe_name": "java",
             "type": "chef_recipe"
           },
-          "only_one_per_node": true,
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"java-01.png\",\"display\":\"java-01.png\",\"tiny\":\"\"}}",
-            "specific_type": "java",
             "qualified_ref": "/library/test/java",
-            "ref": "java"
+            "ref": "java",
+            "specific_type": "java"
           },
+          "only_one_per_node": true,
           "ds_key": "[:user_data, \"/library/test/java\"]",
-          "basic_type": "language"
+          "basic_type": "language",
+          "specific_type": "java"
         },
         "rabbitmq__edge": {
           "ui": {
             "images": {
-              "tnail": "rabbitmq.png",
               "display": "rabbitmq.png",
+              "tnail": "rabbitmq.png",
               "tiny": ""
             }
           },
           "display_name": "rabbitmq__edge",
-          "only_one_per_node": true,
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"rabbitmq.png\",\"display\":\"rabbitmq.png\",\"tiny\":\"\"}}",
             "qualified_ref": "/library/test/rabbitmq__edge",
             "ref": "rabbitmq__edge",
             "basic_type": "extension"
           },
+          "only_one_per_node": true,
           "ds_key": "[:user_data, \"/library/test/rabbitmq__edge\"]",
           "basic_type": "extension"
         },
@@ -1164,8 +1164,8 @@
           "component_type": "hadoop",
           "ui": {
             "images": {
-              "tnail": "hadoop.png",
               "display": "hadoop.png",
+              "tnail": "hadoop.png",
               "tiny": ""
             }
           },
@@ -1175,13 +1175,13 @@
             "recipe_name": "hadoop",
             "type": "chef_recipe"
           },
-          "only_one_per_node": true,
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"hadoop.png\",\"display\":\"hadoop.png\",\"tiny\":\"\"}}",
             "qualified_ref": "/library/test/hadoop",
             "ref": "hadoop",
             "basic_type": "service"
           },
+          "only_one_per_node": true,
           "ds_key": "[:user_data, \"/library/test/hadoop\"]",
           "basic_type": "service"
         },
@@ -1242,8 +1242,8 @@
           "component_type": "hadoop_cloudera_c3__conf_pseudo",
           "ui": {
             "images": {
-              "tnail": "cloudera.png",
               "display": "cloudera.png",
+              "tnail": "cloudera.png",
               "tiny": ""
             }
           },
@@ -1253,13 +1253,13 @@
             "recipe_name": "hadoop_cloudera_c3::conf_pseudo",
             "type": "chef_recipe"
           },
-          "only_one_per_node": true,
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"cloudera.png\",\"display\":\"cloudera.png\",\"tiny\":\"\"}}",
             "qualified_ref": "/library/test/hadoop_cloudera_c3__conf_pseudo",
             "ref": "hadoop_cloudera_c3__conf_pseudo",
             "basic_type": "extension"
           },
+          "only_one_per_node": true,
           "attribute": {
             "jmxremote_password": {
               "required": false,
@@ -1298,25 +1298,24 @@
           "component_type": "nagios__client",
           "ui": {
             "images": {
-              "tnail": "nagios.png",
               "display": "nagios.png",
+              "tnail": "nagios.png",
               "tiny": ""
             }
           },
-          "specific_type": "monitoring_agent",
           "display_name": "nagios__client",
           "description": "Installs and configures a nagios client with nrpe",
           "external_ref": {
             "recipe_name": "nagios::client",
             "type": "chef_recipe"
           },
-          "only_one_per_node": true,
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"nagios.png\",\"display\":\"nagios.png\",\"tiny\":\"\"}}",
-            "specific_type": "monitoring_agent",
             "qualified_ref": "/library/test/nagios__client",
-            "ref": "nagios__client"
+            "ref": "nagios__client",
+            "specific_type": "monitoring_agent"
           },
+          "only_one_per_node": true,
           "attribute": {
             "sap_config__l4": {
               "required": true,
@@ -1341,7 +1340,8 @@
             }
           },
           "ds_key": "[:user_data, \"/library/test/nagios__client\"]",
-          "basic_type": "service"
+          "basic_type": "service",
+          "specific_type": "monitoring_agent"
         },
         "mysql__server": {
           "monitoring_item": {
@@ -1370,25 +1370,24 @@
           "component_type": "mysql__server",
           "ui": {
             "images": {
-              "tnail": "mysql.png",
               "display": "mysql.png",
+              "tnail": "mysql.png",
               "tiny": ""
             }
           },
-          "specific_type": "mysql_db_server",
           "display_name": "mysql__server",
           "description": "Installs packages required for mysql servers w/o manual intervention",
           "external_ref": {
             "recipe_name": "mysql::server",
             "type": "chef_recipe"
           },
-          "only_one_per_node": true,
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}",
-            "specific_type": "mysql_db_server",
             "qualified_ref": "/library/test/mysql__server",
-            "ref": "mysql__server"
+            "ref": "mysql__server",
+            "specific_type": "mysql_db_server"
           },
+          "only_one_per_node": true,
           "attribute": {
             "tunable__key_buffer": {
               "required": false,
@@ -1666,15 +1665,16 @@
             }
           },
           "ds_key": "[:user_data, \"/library/test/mysql__server\"]",
-          "basic_type": "service"
+          "basic_type": "service",
+          "specific_type": "mysql_db_server"
         },
         "user_account": {
           "type": "instance",
           "component_type": "user_account",
           "ui": {
             "images": {
-              "tnail": "user.png",
               "display": "user.png",
+              "tnail": "user.png",
               "tiny": ""
             }
           },
@@ -1684,14 +1684,14 @@
             "recipe_name": "user_account",
             "type": "chef_recipe"
           },
-          "only_one_per_node": false,
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"user.png\",\"display\":\"user.png\",\"tiny\":\"\"}}",
-            "only_one_per_node": false,
             "qualified_ref": "/library/test/user_account",
+            "only_one_per_node": false,
             "ref": "user_account",
             "basic_type": "user"
           },
+          "only_one_per_node": false,
           "attribute": {
             "gid": {
               "required": false,
@@ -1804,25 +1804,24 @@
           "component_type": "apache2",
           "ui": {
             "images": {
-              "tnail": "apache.png",
               "display": "apache.png",
+              "tnail": "apache.png",
               "tiny": ""
             }
           },
-          "specific_type": "web_server",
           "display_name": "apache2",
           "description": "Main Apache configuration",
           "external_ref": {
             "recipe_name": "apache2",
             "type": "chef_recipe"
           },
-          "only_one_per_node": true,
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"apache.png\",\"display\":\"apache.png\",\"tiny\":\"\"}}",
-            "specific_type": "web_server",
             "qualified_ref": "/library/test/apache2",
-            "ref": "apache2"
+            "ref": "apache2",
+            "specific_type": "web_server"
           },
+          "only_one_per_node": true,
           "attribute": {
             "dir": {
               "required": false,
@@ -2069,15 +2068,16 @@
             }
           },
           "ds_key": "[:user_data, \"/library/test/apache2\"]",
-          "basic_type": "service"
+          "basic_type": "service",
+          "specific_type": "web_server"
         },
         "mysql__master": {
           "type": "instance",
           "component_type": "mysql__master",
           "ui": {
             "images": {
-              "tnail": "mysql.png",
               "display": "mysql.png",
+              "tnail": "mysql.png",
               "tiny": ""
             }
           },
@@ -2087,13 +2087,13 @@
             "recipe_name": "mysql::master",
             "type": "chef_recipe"
           },
-          "only_one_per_node": true,
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"mysql.png\",\"display\":\"mysql.png\",\"tiny\":\"\"}}",
             "qualified_ref": "/library/test/mysql__master",
             "ref": "mysql__master",
             "basic_type": "extension"
           },
+          "only_one_per_node": true,
           "attribute": {
             "sap_config_for_slave": {
               "required": false,
@@ -2151,25 +2151,24 @@
           "component_type": "nagios__server",
           "ui": {
             "images": {
-              "tnail": "nagios.png",
               "display": "nagios.png",
+              "tnail": "nagios.png",
               "tiny": ""
             }
           },
-          "specific_type": "monitoring_server",
           "display_name": "nagios__server",
           "description": "Installs and configures a nagios server",
           "external_ref": {
             "recipe_name": "nagios::server",
             "type": "chef_recipe"
           },
-          "only_one_per_node": true,
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"nagios.png\",\"display\":\"nagios.png\",\"tiny\":\"\"}}",
-            "specific_type": "monitoring_server",
             "qualified_ref": "/library/test/nagios__server",
-            "ref": "nagios__server"
+            "ref": "nagios__server",
+            "specific_type": "monitoring_server"
           },
+          "only_one_per_node": true,
           "attribute": {
             "sap_ref__l4": {
               "required": true,
@@ -2192,7 +2191,8 @@
             }
           },
           "ds_key": "[:user_data, \"/library/test/nagios__server\"]",
-          "basic_type": "service"
+          "basic_type": "service",
+          "specific_type": "monitoring_server"
         },
         "redis": {
           "monitoring_item": {
@@ -2220,8 +2220,8 @@
           "component_type": "redis",
           "ui": {
             "images": {
-              "tnail": "redis.png",
               "display": "redis.png",
+              "tnail": "redis.png",
               "tiny": ""
             }
           },
@@ -2231,13 +2231,13 @@
             "recipe_name": "redis",
             "type": "chef_recipe"
           },
-          "only_one_per_node": true,
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"redis.png\",\"display\":\"redis.png\",\"tiny\":\"\"}}",
             "qualified_ref": "/library/test/redis",
             "ref": "redis",
             "basic_type": "service"
           },
+          "only_one_per_node": true,
           "attribute": {
             "sap_config__l4": {
               "required": false,
@@ -2277,25 +2277,24 @@
           "component_type": "postgresql__pgpool",
           "ui": {
             "images": {
-              "tnail": "postgres.png",
               "display": "postgres.png",
+              "tnail": "postgres.png",
               "tiny": ""
             }
           },
-          "specific_type": "postgres_db_server",
           "display_name": "postgresql__pgpool",
           "description": "Installs pgpool load balancer",
           "external_ref": {
             "recipe_name": "postgresql::pgpool",
             "type": "chef_recipe"
           },
-          "only_one_per_node": true,
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"postgres.png\",\"display\":\"postgres.png\",\"tiny\":\"\"}}",
-            "specific_type": "postgres_db_server",
             "qualified_ref": "/library/test/postgresql__pgpool",
-            "ref": "postgresql__pgpool"
+            "ref": "postgresql__pgpool",
+            "specific_type": "postgres_db_server"
           },
+          "only_one_per_node": true,
           "attribute": {
             "conns_to_real_dbs": {
               "required": false,
@@ -2313,7 +2312,7 @@
               "dependency": {
                 "attribute_constraint": {
                   "type": "attribute",
-                  "display_name": "attribute_constraint",
+                  "display_name": "component_constraint",
                   "description": "Not connecting to Postgres Server",
                   "severity": "error",
                   "search_pattern": {
@@ -2358,35 +2357,36 @@
             }
           },
           "ds_key": "[:user_data, \"/library/test/postgresql__pgpool\"]",
-          "basic_type": "service"
+          "basic_type": "service",
+          "specific_type": "postgres_db_server"
         },
         "rabbitmq": {
           "ui": {
             "images": {
-              "tnail": "rabbitmq.png",
               "display": "rabbitmq.png",
+              "tnail": "rabbitmq.png",
               "tiny": ""
             }
           },
-          "specific_type": "msg_bus",
           "display_name": "rabbitmq",
-          "only_one_per_node": true,
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"rabbitmq.png\",\"display\":\"rabbitmq.png\",\"tiny\":\"\"}}",
-            "specific_type": "msg_bus",
             "qualified_ref": "/library/test/rabbitmq",
-            "ref": "rabbitmq"
+            "ref": "rabbitmq",
+            "specific_type": "msg_bus"
           },
+          "only_one_per_node": true,
           "ds_key": "[:user_data, \"/library/test/rabbitmq\"]",
-          "basic_type": "service"
+          "basic_type": "service",
+          "specific_type": "msg_bus"
         },
         "tomcat": {
           "type": "instance",
           "component_type": "tomcat",
           "ui": {
             "images": {
-              "tnail": "server-tomcat.png",
               "display": "server-tomcat.png",
+              "tnail": "server-tomcat.png",
               "tiny": ""
             }
           },
@@ -2396,12 +2396,11 @@
             "recipe_name": "tomcat::default",
             "type": "chef_recipe"
           },
-          "only_one_per_node": true,
           "dependency": {
             "java": {
               "type": "component",
               "display_name": "java",
-              "description": "java is required",
+              "description": "java is required for tomcat",
               "severity": "warning",
               "search_pattern": {
                 ":filter": [
@@ -2423,6 +2422,7 @@
             "ref": "tomcat",
             "basic_type": "service"
           },
+          "only_one_per_node": true,
           "ds_key": "[:user_data, \"/library/test/tomcat\"]",
           "basic_type": "service"
         },
@@ -2431,8 +2431,8 @@
           "component_type": "hadoop__doc",
           "ui": {
             "images": {
-              "tnail": "hadoop.png",
               "display": "hadoop.png",
+              "tnail": "hadoop.png",
               "tiny": ""
             }
           },
@@ -2442,13 +2442,13 @@
             "recipe_name": "hadoop::doc",
             "type": "chef_recipe"
           },
-          "only_one_per_node": true,
           "ds_attributes": {
             "ui": "{\"images\": {\"tnail\":\"hadoop.png\",\"display\":\"hadoop.png\",\"tiny\":\"\"}}",
             "qualified_ref": "/library/test/hadoop__doc",
             "ref": "hadoop__doc",
             "basic_type": "extension"
           },
+          "only_one_per_node": true,
           "ds_key": "[:user_data, \"/library/test/hadoop__doc\"]",
           "basic_type": "extension"
         }

@@ -9,6 +9,17 @@ module XYZ
     def self.create_just_filter(hash_search_pattern)
       SearchPatternSimple.new(hash_search_pattern,:keys=>[:filter])
     end
+    def self.process_symbols(obj)
+      if obj.kind_of?(Array)
+        obj.map{|x|process_symbols(x)}
+      elsif obj.kind_of?(Hash)
+        obj.inject({}){|h,kv|h.merge(process_symbols(kv[0]) => process_symbols(kv[1]))}
+      elsif obj.kind_of?(Symbol)
+        ":#{obj}"
+      else
+        obj
+      end
+    end
   end
 
   module HashSearchPattern
@@ -125,19 +136,9 @@ module XYZ
     end
    private
     include GenerateListMetaView
-
     def process_symbols(obj)
-      if obj.kind_of?(Array)
-        obj.map{|x|process_symbols(x)}
-      elsif obj.kind_of?(Hash)
-        obj.inject({}){|h,kv|h.merge(process_symbols(kv[0]) => process_symbols(kv[1]))}
-      elsif obj.kind_of?(Symbol)
-        ":#{obj}"
-      else
-        obj
-      end
+      SearchPattern.process_symbols(obj)
     end
-
 
     def find_key_from_input(type,hash_input)
       pair = hash_input.find{|k,v|ret_symbol(k) == type}

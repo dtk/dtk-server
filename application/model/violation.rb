@@ -110,7 +110,13 @@ module XYZ
 
     def self.violation_expression_for_db(expr)
       raise Error.new("Violation expression form not treated") unless expr.kind_of?(Constraint)
-      {:constraint => Aux.hash_subset(expr,[:search_pattern,:violation_target,:id])}
+      {
+        :constraint => {
+          :search_pattern => SearchPattern.process_symbols(expr[:search_pattern]),
+          :violation_target_type => expr[:violation_target][:type],
+          :id => expr[:id]
+        }
+      }
     end
 
     def self.saved_to_delete_and_pruned_new_violations!(create_rows,saved_violations)

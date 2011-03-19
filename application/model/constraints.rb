@@ -191,10 +191,10 @@ module XYZ
     include ProcessVirtualComponentMixin
     def create_dataset(target)
       node_idh  = 
-        if target[:target_node_id_handle]
-          target[:target_node_id_handle]
-        elsif target[:target_component_id_handle]
-          target[:target_component_id_handle].get_containing_node_id()
+        if target["target_node_id_handle"]
+          target["target_node_id_handle"]
+        elsif target["target_component_id_handle"]
+          target["target_component_id_handle"].get_containing_node_id()
         else
           raise Error.new("unexpected target")
         end

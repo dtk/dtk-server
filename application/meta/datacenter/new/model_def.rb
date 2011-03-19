@@ -60,7 +60,7 @@
          :convert => true,
          :join_type=>:inner,
          :join_cond=>{:datacenter_datacenter_id=>:datacenter__id},
-         :cols=>[:id,:display_name,:severity,:description,:expression,:target_node_id,:updated_at]
+         :cols=>[:id,:display_name,:severity,:description,:target_node_id,:updated_at]
        },
        {
          :model_name=>:node,

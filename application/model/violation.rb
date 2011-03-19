@@ -1,21 +1,29 @@
 module XYZ
-  class ViolationExpression 
-    attr_reader :elements,:logical_op,:violation_target
+  class ViolationExpression < HashObject 
     def initialize(violation_target,logical_op)
-      @violation_target = violation_target
-      @logical_op = logical_op
-      @elements = Array.new
+      hash = {
+        :violation_target => ViolationTarget.new(violation_target),
+        :logical_op => logical_op,
+        :elements => Array.new
+      }
+      super(hash)
     end
 
     def <<(expr)
-      @elements << expr
+      self[:elements] << expr
       self
+    end
+
+    def constrainit_list
+      self[:elements].map do |e|
+        e.kind_of?(Constraint) ? e : e.constrainit_list 
+      end.flatten
     end
 
     def self.and(*exprs)
       vt = exprs.first.violation_target
       exprs[1..exprs.size-1].map do |e|
-        unless exprs.first.eq_violation_target?(e)
+        unless vt == e[:violation_target]
           raise Error.new("Not supported conjunction of expressions with different violation_targets")
         end
       end
@@ -25,35 +33,28 @@ module XYZ
     end
 
     def empty?()
-      @elements.empty?()
+      self[:elements].empty?()
     end
 
     def pp_form()
-      Array.new if @elements.empty?
-      args = @elements.map{|x|x.kind_of?(Constraint) ? x[:description] : x.pp_form}
-      args.size == 1 ? args.first : [@logical_op] + args 
+      Array.new if self[:elements].empty?
+      args = self[:elements].map{|x|x.kind_of?(Constraint) ? x[:description] : x.pp_form}
+      args.size == 1 ? args.first : [self[:logical_op]] + args 
     end
-    
-    def self.target_type(vt)
-      vt.keys.first
-    end
-    def self.target_id_handle(vt)
-      vt.values.first
-    end
-    def self.target_id(vt)
-      target_id_handle(vt).get_id()
+  end
+
+  class ViolationTarget < HashObject
+    def initialize(key_idh)
+      hash = {
+        :type => key_idh.keys.first,
+        :id_handle => key_idh.values.first,
+        :id => key_idh.values.first.get_id()
+      }
+      super(hash)
     end
 
-   protected
-    def eq_violation_target?(violation_expression)
-      ve2 = violation_expression #just for succinctness
-      (violation_target_type() == ve2.violation_target_type()) and (violation_target_id() == ve2.violation_target_id())
-    end
-    def violation_target_type()
-      self.class.target_type(violation_target)
-    end
-    def violation_target_id()
-      self.class.target_id(violation_target)
+    def ==(vt2)
+      (self[:type] == vt2[:type]) and  (self[:id] == vt2[:id])
     end
   end
 
@@ -65,9 +66,9 @@ module XYZ
    private
 
     def self.ret_expression_list(expression)
-      return expression unless expression.logical_op == :and
-      expression.elements.map do |expr_el|
-        if expr_el.kind_of?(Constraint) then expr_el.merge(:violation_target => expression.violation_target)
+      return expression unless expression[:logical_op] == :and
+      expression[:elements].map do |expr_el|
+        if expr_el.kind_of?(Constraint) then expr_el.merge(:violation_target => expression[:violation_target])
         elsif (not expr_el.logical_op == :and) then expr_el
         else expr_el.map{|x|ret_expression_list(x)}
         end
@@ -85,29 +86,33 @@ module XYZ
       create_rows = Array.new
       target_node_id_handles = Array.new 
       expression_list.each do |e|
-        sample_constraint = e.kind_of?(Constraint) ? e : e.elements.first
-        vt = e.kind_of?(Constraint) ? e[:violation_target] : e.violation_target
-        raise Error.new("target type not treated") unless ViolationExpression.target_type(vt) == :target_node_id_handle
-        #TODO: assumes that under or is constraint elements
-        vexpr = e.kind_of?(Constraint) ? ["and",e[:id]] : ["or"] + e.elements.map{|x|x[:id]} 
-        description = e.kind_of?(Constraint) ? e[:description] : e.elements.map{|x|x[:description]}.join(" or ")
+        sample_constraint = e.kind_of?(Constraint) ? e : e.constraint_list.first
+        vt = e[:violation_target]
+        raise Error.new("target type #{vt[:type]} not treated") unless vt[:type] == "target_node_id_handle"
+        description = e.kind_of?(Constraint) ? e[:description] : e[:elements].map{|x|x[:description]}.join(" or ")
         ref = "violation" #TODO: stub
         new_item = {
           :ref => ref,
           parent_col => parent_id,
           :severity => sample_constraint[:severity],
-          :target_node_id => ViolationExpression.target_id(vt),
-          :expression => vexpr,
+          :target_node_id => vt[:id],
+          :expression => violation_expression_for_db(e),
           :description => description
         }
         create_rows << new_item
-        target_node_id_handles << ViolationExpression.target_id_handle(vt)
+        target_node_id_handles << vt[:id_handle]
       end
       saved_violations = Node.get_violations(target_node_id_handles)
       violations_to_delete_idh = saved_to_delete_and_pruned_new_violations!(create_rows,saved_violations)
       delete_instances(violations_to_delete_idh) unless violations_to_delete_idh.empty?
       create_from_rows(violation_mh,create_rows, :convert => true) unless create_rows.empty?
     end
+
+    def self.violation_expression_for_db(expr)
+      raise Error.new("Violation expression form not treated") unless expr.kind_of?(Constraint)
+      {:constraint => Aux.hash_subset(expr,[:search_pattern,:violation_target,:id])}
+    end
+
     def self.saved_to_delete_and_pruned_new_violations!(create_rows,saved_violations)
       #TODO: stub
       pp [:create_rows,create_rows]

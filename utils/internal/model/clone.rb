@@ -18,7 +18,7 @@ module XYZ
       if clone_source_object.class == Component and target_id_handle[:model_name] == :node
         constraints = clone_source_object.get_constraints()
         if constraints
-          target = {:target_node_id_handle => target_id_handle}
+          target = {"target_node_id_handle" => target_id_handle}
           constraints.evaluate_given_target(target, :raise_error_when_error_violation => true)
         end
       end

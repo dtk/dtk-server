@@ -25,6 +25,8 @@ if (!R8.Workspace) {
 			_alertNode = null,
 			_alertNodeId = null,
 
+			_initialized = false,
+
 			_events = {};
 		return {
 			viewPortRegion : null,
@@ -65,6 +67,8 @@ if (!R8.Workspace) {
 				this.setupViewspace();
 				R8.Cmdbar.init();
 				this.loadWorkspace();
+
+				_initialized = true;
 			},
 
 			get: function(item) {
@@ -758,13 +762,27 @@ console.log(response);
 				};
 				R8.Ctrl.call('workspace/commit_changes',params);
 			},
+
+			initialized: function() { return _initialized; },
+
 //TODO: add check to see if viewspace is already loaded and this is a 'refocus'
 			pushViewSpace: function(viewSpaceDef) {
+				if(!this.initialized()) {
+					var that=this;
+					var initWaitCallback = function() {
+						that.pushViewSpace(viewSpaceDef);
+					}
+					setTimeout(initWaitCallback,20);
+				}
+
 				var id = viewSpaceDef['object']['id'];
 				_viewSpaces[id] = new R8.ViewSpace(viewSpaceDef);
 				_viewSpaces[id].init();
 				_viewSpaceStack.push(id);
 				_currentViewSpace = id;
+
+				var contextTpl = '<span class="context-span">'+viewSpaceDef.i18n+' > '+viewSpaceDef.object.display_name+'</span>';
+				_contextBarNode.append(contextTpl);
 			},
 
 			addItems: function(items,viewSpaceId) {

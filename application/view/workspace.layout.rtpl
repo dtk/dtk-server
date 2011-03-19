@@ -41,7 +41,7 @@
 					<div class="item"><a href="{%=_app[:base_uri]%}/xyz/component/list">Library</a></div>
 					<div class="item"><a href="{%=_app[:base_uri]%}/xyz/workspace" style="color: #4FA4D0">Workspace</a></div>
 					<div class="item"><a href="{%=_app[:base_uri]%}/xyz/datacenter/list">Dashboard</a></div>
-					<div class="item"><a href="{%=_app[:base_uri]%}/xyz/node/list">Assets</a></div>
+					<div class="item"><a href="{%=_app[:base_uri]%}/xyz/inventory/index">Inventory</a></div>
 					<div class="divider"></div>
 				</div>
 				<div class="yui3-u right-cap"></div>

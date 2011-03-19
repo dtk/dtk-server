@@ -29,6 +29,7 @@ pp [:warnings,notification_list]
       include_js('plugins/search.cmdhandler')
       view_space = {
         :type => 'datacenter',
+        :i18n => 'Environments',
         :object => dc_hash
       }
       v_space_obj = JSON.generate(view_space)

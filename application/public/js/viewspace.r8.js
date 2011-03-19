@@ -491,9 +491,11 @@ console.log(ports);
 					draggableItems = _draggableItems,
 					itemId = item.get('id');
 
-				YUI().use('dd-drag','dd-plugin',function(Y){
+				YUI().use('dd-constrain','dd-drag','dd-plugin',function(Y){
 					draggableItems[itemId] = new Y.DD.Drag({
 						node: '#'+item.get('node_id')
+					}).plug(Y.Plugin.DDConstrained, {
+						constrain2node: '#viewspace'
 					});
 
 					//add invalid drag items here.., right now only ports
@@ -549,6 +551,9 @@ console.log(ports);
 			},
 
 			touchItems: function(item_list) {
+//DEBUG
+console.log('touching items....');
+console.log(item_list);
 				for(var i in item_list) {
 					var itemId = item_list[i],
 						itemNode = _items[itemId].get('node');
@@ -558,8 +563,8 @@ console.log(ports);
 						'pos':{'top':itemNode.getStyle('top'),'left':itemNode.getStyle('left')}
 					};
 //TODO: cleanup after moving fully to new pos handling
-					_ui.items[itemId]['top'] = top;
-					_ui.items[itemId]['left'] = left;
+					_ui.items[itemId]['top'] = itemNode.getStyle('top');
+					_ui.items[itemId]['left'] = itemNode.getStyle('left');
 				}
 
 				YUI().use('json','cookie', function(Y){

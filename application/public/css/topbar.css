@@ -6,12 +6,6 @@
 	background-color: #9CAAC1;
 }
 
-#wspace-context-wrapper {
-/*	height: 25px;*/
-	width: 100%;
-	background-color: #AEB9CD;
-}
-
 /*----TOPBAR MAIN STYLINS----------------*/
 /*-----------------------*/
 /*---TOP BAR-------------*/
@@ -101,6 +95,26 @@
 	background-image: url(../images/icon-black.png);
 }
 
+/*------Context Menu Bar-------------------*/
+
+#wspace-context-wrapper {
+	width: 400px;
+	height: 25px;
+	background-image: url(../images/topbar/context-bar-bg-slice.png);
+	background-repeat: repeat-x;
+	position: absolute;
+	z-index: 100;
+	top: 40px;
+	left: 20px;
+}
+
+#wspace-context-wrapper .context-span {
+	position: relative;
+	float: left;
+	font-weight: bold;
+	font-size: 14px;
+	margin: 3px 0 0 10px;
+}
 /*----TOOLBAR/TOOLBAR GROUPS----------------*/
 
 .toolbar-group {

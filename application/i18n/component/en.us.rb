@@ -65,4 +65,9 @@
   :postgresql__app => "Postgres App",
   :nagios__client => "NRPE",
   :nagios__server => "Nagios3 Server",
+
+#### test for user accounts
+  :user_account_tom => "Tom",
+  :user_account_rich => "Rich",
+  :user_account_nate => "Nate",
 }

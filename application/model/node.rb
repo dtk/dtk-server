@@ -236,6 +236,17 @@ module XYZ
            :cols=>[:id,:node_node_id,:display_name,:ui]
          }
         ]
+      virtual_column :monitoring_agents, :type => :json, :hidden => true,
+      :remote_dependencies => 
+        [
+         {
+           :model_name => :component,
+           :join_type => :inner,
+           :filter => [:eq, :specific_type, "monitoring_agent"],
+           :join_cond=>{:node_node_id => q(:node,:id)},
+           :cols=>[:id,:node_node_id,:display_name]
+         }
+        ]
 
       virtual_column :deprecate_port_links, :type => :json, :hidden => true, 
       :remote_dependencies => 
@@ -379,10 +390,13 @@ module XYZ
     end
 
     def get_node_service_checks()
+      return Array.new if get_objects_from_sp_hash(:columns => [:monitoring_agents]).empty?
+
       #TODO: i18n treatment of service check names
       get_objects_col_from_sp_hash({:columns => [:monitoring_items__node]},:monitoring_item)
     end
     def get_component_service_checks()
+      return Array.new if get_objects_from_sp_hash(:columns => [:monitoring_agents]).empty?
       #TODO: i18n treatment of service check names
       i18n = get_i18n_mappings_for_models(:component)
 

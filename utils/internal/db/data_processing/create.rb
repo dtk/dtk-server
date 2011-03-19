@@ -1,6 +1,4 @@
 #TODO: need to refactor to make more efficient
-require 'sequel'
-
 module XYZ
   class DB
     module DataProcessingCreate

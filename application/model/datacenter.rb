@@ -2,18 +2,13 @@ module XYZ
   class Datacenter < Model
 
     ######### Model apis
-    def get_violations_from_db(severity=nil)
+    def get_violation_info(severity=nil)
       get_objects_from_sp_hash(:columns => [:violation_info]).map do |r|
         v = r[:violation]
         if severity.nil? or v[:severity] == severity
           v.merge(:target_node_display_name => (r[:node]||{})[:display_name])
         end
       end.compact
-    end
-    #this prunes those in db amnd then prunes and updates get_violations_from_db so violations no longer current are removed
-    def get_current_violations(severity=nil)
-      get_violations_from_db(severity)
-      #TODO: wil also get rid of stale violations
     end
 
 

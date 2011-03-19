@@ -37,10 +37,13 @@ module XYZ
     def self.target_type(vt)
       vt.keys.first
     end
-
-    def self.target_id(vt)
-      vt.values.first.get_id()
+    def self.target_id_handle(vt)
+      vt.values.first
     end
+    def self.target_id(vt)
+      target_id_handle(vt).get_id()
+    end
+
    protected
     def eq_violation_target?(violation_expression)
       ve2 = violation_expression #just for succinctness
@@ -75,15 +78,13 @@ module XYZ
       #each element of expression_list will either be constraint or a disjunction
       parent_idh = parent.id_handle()
       parent_mn = parent_idh[:model_name]
-      unless parent.respond_to?(:get_violations_from_db)
-      Log.error("Violation.save_atomic_expressions not implemented yet when parent has type #{parent_mn}") 
-        return
-      end
       violation_mh = parent_idh.create_childMH(:violation)
       parent_id = parent_idh.get_id()
       parent_col = DB.parent_field(parent_mn,:violation)
-            
-      create_rows = expression_list.map do |e|
+         
+      create_rows = Array.new
+      target_node_id_handles = Array.new 
+      expression_list.each do |e|
         sample_constraint = e.kind_of?(Constraint) ? e : e.elements.first
         vt = e.kind_of?(Constraint) ? e[:violation_target] : e.violation_target
         raise Error.new("target type not treated") unless ViolationExpression.target_type(vt) == :target_node_id_handle
@@ -91,7 +92,7 @@ module XYZ
         vexpr = e.kind_of?(Constraint) ? ["and",e[:id]] : ["or"] + e.elements.map{|x|x[:id]} 
         description = e.kind_of?(Constraint) ? e[:description] : e.elements.map{|x|x[:description]}.join(" or ")
         ref = "violation" #TODO: stub
-        {
+        new_item = {
           :ref => ref,
           parent_col => parent_id,
           :severity => sample_constraint[:severity],
@@ -99,13 +100,19 @@ module XYZ
           :expression => vexpr,
           :description => description
         }
+        create_rows << new_item
+        target_node_id_handles << ViolationExpression.target_id_handle(vt)
       end
-      saved_violations = parent.get_violations_from_db()
-      prune_already_saved_violations!(create_rows,saved_violations)
-      create_from_rows(violation_mh,create_rows, :convert => true)
+      saved_violations = Node.get_violations(target_node_id_handles)
+      violations_to_delete_idh = saved_to_delete_and_pruned_new_violations!(create_rows,saved_violations)
+      delete_instances(violations_to_delete_idh) unless violations_to_delete_idh.empty?
+      create_from_rows(violation_mh,create_rows, :convert => true) unless create_rows.empty?
     end
-    def self.prune_already_saved_violations!(create_rows,saved_violations)
+    def self.saved_to_delete_and_pruned_new_violations!(create_rows,saved_violations)
       #TODO: stub
+      pp [:create_rows,create_rows]
+      pp [:saved_violations,saved_violations]
+      return Array.new
     end
   end
 

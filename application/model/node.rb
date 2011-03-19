@@ -173,6 +173,17 @@ module XYZ
           }]
 
 
+      virtual_column :violations, :type => :json, :hidden => true,
+      :remote_dependencies => 
+        [
+         {
+           :model_name => :violation,
+           :join_type => :inner,
+           :convert => true,
+           :join_cond=>{:target_node_id => q(:node,:id)},
+           :cols=>[:id,:display_name,:severity,:description,:expression,:target_node_id,:updated_at]
+         }]
+
       virtual_column :users, :type => :json, :hidden => true,
       :remote_dependencies => 
         [
@@ -363,6 +374,10 @@ module XYZ
         ret[attr_id] << row[:port_l4_input]
       end
       ret
+    end
+
+    def self.get_violations(id_handles)
+      get_objects_in_set_from_sp_hash(id_handles,{:cols => [:violations]}).map{|r|r[:violation]}
     end
 
     def get_users()

@@ -1,13 +1,22 @@
-
-require 'sequel'
-
 module XYZ
   class DB
     module DataProcessingDelete
       def delete_instance(id_handle,opts={}) #TBD: if include opts would be for example whether containers are deleted
+        #TODO: more efficient to remove this call to IDInfoTable.get_row_from_id_handl
 	id_info = IDInfoTable.get_row_from_id_handle id_handle, :raise_error => true
 	#TBD: best practices says that one stores all resources that were present and return 200 if was to support idempotent delete
 	ds = dataset(id_info[:db_rel]).where(:id => id_info[:id])
+	ds.delete
+	nil
+      end
+
+      def delete_instances(id_handles,opts={}) #TBD: if include opts would be for example whether containers are deleted
+        return if id_handles.empty?
+
+        sample_idh = id_handles.first
+        #TODO: more efficient to remove this call to IDInfoTable.get_row_from_id_handl
+	id_info = IDInfoTable.get_row_from_id_handle sample_idh, :raise_error => true
+	ds = dataset(id_info[:db_rel]).where(:id => id_handles.map{|idh|idh.get_id()})
 	ds.delete
 	nil
       end

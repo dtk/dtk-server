@@ -103,7 +103,7 @@ module XYZ
         target_node_id_handles << vt[:id_handle]
       end
       saved_violations = Node.get_violations(target_node_id_handles)
-      violations_to_delete_idh = saved_to_delete_and_pruned_new_violations!(create_rows,saved_violations)
+      violations_to_delete_idh = saved_to_delete_and_pruned_new_violations!(create_rows,saved_violations,violation_mh)
       delete_instances(violations_to_delete_idh) unless violations_to_delete_idh.empty?
       create_from_rows(violation_mh,create_rows, :convert => true) unless create_rows.empty?
     end
@@ -112,19 +112,45 @@ module XYZ
       raise Error.new("Violation expression form not treated") unless expr.kind_of?(Constraint)
       {
         :constraint => {
+          :type => expr[:type],
+          :component_component_id => expr[:component_component_id],
+          :attribute_attribute_id => expr[:attribute_attribute_id],
+          :negate => expr[:negate],
           :search_pattern => SearchPattern.process_symbols(expr[:search_pattern]),
-          :violation_target_type => expr[:violation_target][:type],
+          :target_type => expr[:violation_target][:type],
+          :target_id => expr[:violation_target][:id],
           :id => expr[:id]
         }
       }
     end
 
-    def self.saved_to_delete_and_pruned_new_violations!(create_rows,saved_violations)
+    def self.saved_to_delete_and_pruned_new_violations!(create_rows,saved_violations,violation_mh)
+      viol_idhs_to_delete = Array.new
+      saved_violations.each do |v|
+        raise Error.new("Not treating expression form") unless constraint_hash = v[:expression][:constraint]
+        constraint = Constraint.create(constraint_hash)
+        vtttype = constraint[:target_type] 
+        target_idh = violation_mh.createIDH(:model_name => vt_model_name(vtttype),:id => constraint[:target_id])
+        target = {vtttype => target_idh}
+        if constraint.evaluate_given_target(target)
+          Log.info("violation with id #{v[:id].to_s} no longer applicable; being removed")
+          viol_idhs_to_delete << violation_mh.createIDH(:id => v[:id])
+        end
+      end
+      #check which violations no longer hold
       #TODO: stub
       pp [:create_rows,create_rows]
       pp [:saved_violations,saved_violations]
-      return Array.new
+      return viol_idhs_to_delete
     end
+    def self.vt_model_name(vtttype)
+      ret = VTModelName[vtttype]
+      return ret if ret
+      raise Error.new("Unexpected violaition target type #{vtttype}")
+    end
+    VTModelName = {
+      "target_node_id_handle" => :node
+    }
   end
 
   class ValidationError < HashObject 

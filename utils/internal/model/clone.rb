@@ -19,10 +19,10 @@ module XYZ
         constraints = clone_source_object.get_constraints()
         if constraints
           target = {"target_node_id_handle" => target_id_handle}
-          #TODO: might rename below function to reflect that it also updates violations
-          constraints.evaluate_given_target(target, :raise_error_when_error_violation => true)
+          opts = {:raise_error_when_error_violation => true, :update_violations => [target_id_handle]}
+          constraints.evaluate_given_target(target, opts)
         else
-          Violation.ret_and_update_violations([target_id_handle])
+          Violation.update_and_ret_violations([target_id_handle])
         end
       end
 

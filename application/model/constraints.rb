@@ -7,21 +7,27 @@ module XYZ
     end
     def evaluate_given_target(target,opts={})
       ret = evaluate_given_target_just_eval(target)
-      return ret if ret
+      if ret
+        Violation.update_and_ret_violations(opts[:update_violations]) if opts[:update_violations]
+        return ret
+      end
       target_parent_obj = target.values.first.get_parent_id_handle().create_object
       violations = ret_violations(target)
       if opts[:raise_error_when_any_violation]
+        Violation.update_and_ret_violations(opts[:update_violations]) if opts[:update_violations]
         all_violations = ViolationExpression(violations["error"],violations["warning"])
         raise ErrorConstraintViolations.new(all_violations.pp_form)
       elsif opts[:raise_error_when_error_violation] 
         pp [:warnings, violations["warning"].pp_form]
-        Violation.save_expression(target_parent_obj,violations["warning"])
+        save_opts = Aux.hash_subset(opts,[:update_violations])
+        Violation.save(target_parent_obj,violations["warning"],save_opts)
         raise ErrorConstraintViolations.new(violations["error"].pp_form) unless violations["error"].empty?
       else
         pp [:errors, violations["error"].pp_form]
-        Violation.save_expression(target_parent_obj,violations["error"])
+        Violation.save(target_parent_obj,violations["error"])
+        save_opts = Aux.hash_subset(opts,[:update_violations]) #TODO: only needed for one of two below
         pp [:warnings, violations["warning"].pp_form]
-        Violation.save_expression(target_parent_obj,violations["warning"])
+        Violation.save(target_parent_obj,violations["warning"],save_opts)
       end
       ret
     end

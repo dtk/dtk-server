@@ -14,9 +14,9 @@ module XYZ
       self
     end
 
-    def constrainit_list
+    def constraint_list()
       self[:elements].map do |e|
-        e.kind_of?(Constraint) ? e : e.constrainit_list 
+        e.kind_of?(Constraint) ? e : e.constraint_list() 
       end.flatten
     end
 
@@ -59,19 +59,24 @@ module XYZ
   end
 
   class Violation < Model
-    def self.save_expression(parent,violation_expression)
+    def self.save(parent,violation_expression,opts={})
       expression_list = ret_expression_list(violation_expression)
-      save_atomic_expressions(parent,expression_list)
+      save_list(parent,expression_list,opts)
     end
 
-    #This function delete
-    def self.ret_and_update_violations(target_node_id_handles)
+   
+    def self.ret_violations(target_node_id_handles)
       ret = Array.new
       return ret if target_node_id_handles.empty?
+      Node.get_violations(target_node_id_handles)
+    end
+    def self.update_and_ret_violations(target_node_id_handles)
+      ret = Array.new
+      saved_violations = ret_violations(target_node_id_handles)
+      return ret if saved_violations.empty?
       sample_idh = target_node_id_handles.first
-      saved_violations = Node.get_violations(target_node_id_handles)
-      viol_idhs_to_delete = Array.new
 
+      viol_idhs_to_delete = Array.new
       saved_violations.each do |v|
         raise Error.new("Not treating expression form") unless constraint_hash = v[:expression][:constraint]
         constraint = Constraint.create(constraint_hash)
@@ -80,7 +85,7 @@ module XYZ
         target = {vtttype => target_idh}
         if constraint.evaluate_given_target(target)
           Log.info("violation with id #{v[:id].to_s} no longer applicable; being removed")
-          viol_idhs_to_delete << violation_mh.createIDH(:id => v[:id])
+          viol_idhs_to_delete << sample_idh.createIDH(:model_name => :violation,:id => v[:id])
         else
           ret << v
         end
@@ -108,7 +113,7 @@ module XYZ
       end.flatten
     end
 
-    def self.save_atomic_expressions(parent,expression_list)
+    def self.save_list(parent,expression_list,opts={})
       #each element of expression_list will either be constraint or a disjunction
       parent_idh = parent.id_handle()
       parent_mn = parent_idh[:model_name]
@@ -135,7 +140,13 @@ module XYZ
         create_rows << new_item
         target_node_id_handles << vt[:id_handle]
       end
-      saved_violations = ret_and_update_violations(target_node_id_handles)
+      saved_violations = 
+        if opts[:update_violations] 
+          idhs = (opts[:update_violations]+target_node_id_handles).uniq
+          update_and_ret_violations(idhs)
+        else
+          ret_violations(target_node_id_handles)
+        end
       prune_duplicate_violations!(create_rows,saved_violations)
       create_from_rows(violation_mh,create_rows, :convert => true) unless create_rows.empty?
     end

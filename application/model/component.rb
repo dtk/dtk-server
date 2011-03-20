@@ -504,14 +504,13 @@ module XYZ
       flattened_attr_list = AttributeComplexType.flatten_attribute_list(raw_attributes,opts)
       i18n = get_i18n_mappings_for_models(:attribute)
       flattened_attr_list.map do |a|
-        readonly = 
         name = a[:display_name]
         {
           :id => a[:unraveled_attribute_id],
           :name =>  name,
           :value => a[:attribute_value],
           :i18n => i18n_string(i18n,:attribute,name),
-          :disabled_attribute => a.is_readonly? ? "disabled" : ""
+          :is_readonly => a.is_readonly?
         }
       end
     end

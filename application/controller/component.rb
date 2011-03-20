@@ -283,7 +283,14 @@ pp request.params
     def dock_edit(component_id)
       component = create_object_from_id(component_id)
       to_set = {}
-      attr_list = component.get_attributes_unraveled(to_set,:flatten_nil_value => true)
+      attr_list_x = component.get_attributes_unraveled(to_set,:flatten_nil_value => true)
+      #TODO:" temp
+      attr_list = attr_list_x.map do |a|
+        disabled_info = {
+          :disabled_attribute => a[:is_readonly] ? "disabled" : "",
+        }
+        Aux::hash_subset(a,[:id,:name,:value,:i18n,:is_readonly]).merge(disabled_info)
+      end
 
       #TODO strawman ordering; puts readonly at bottom
       ordered_attr_list = attr_list.sort do |a,b|

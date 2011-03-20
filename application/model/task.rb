@@ -237,6 +237,8 @@ module XYZ
       end
     end
 
+    #TODO: modifications made (in comparison to keep value to better render in commit pane
+    #may need a flag that indiactes whetehr to reformulate
     def self.add_attributes_to_component_task!(task,component_action,cmp_attrs)
       attributes = component_action[:attributes]
       return task unless attributes
@@ -246,12 +248,17 @@ module XYZ
       end
       flattten_attrs = AttributeComplexType.flatten_attribute_list(pruned_attrs)
       flattten_attrs.each do |a|
+        val = a[:attribute_value]
+        if val.nil?
+          next unless a[:port_type] == "input"
+          val = "DYNAMICALLY SET"
+        end
         attr_task = {
           :type => "setting",
           :level => "attribute",
           :attribute_id => a[:id],
           :attribute_name => a[:display_name],
-          :attribute_value => a[:attribute_value],
+          :attribute_value => val,
           :attribute_data_type => a[:data_type],
           :attribute_required => a[:required],
           :attribute_dynamic => a[:dynamic]

@@ -67,7 +67,8 @@ module XYZ
     #TODO: trie dto do this by having a class inherir from Task and hanging these fns off it, but this confused Ramaze
     def component_actions()
       if self[:executable_action].kind_of?(TaskAction::ConfigNode)
-        return self[:executable_action][:component_actions]||[]
+        action = self[:executable_action]
+        return (action[:component_actions]||[]).map{|ca| action[:node] ? ca.merge(:node => action[:node]) : ca}
       end
       subtasks.map{|obj|obj.component_actions()}.flatten
     end

@@ -641,7 +641,10 @@ pp datacenter
 
       errors = ValidationError.find_missing_required_attributes(top_level_task)
       if errors
-        run_javascript("R8.Workspace.showAlert('Commit errors for missing attrs');")
+        #TODO: stub
+        alert_msg = "'Commit errors for missing attrs'"
+        errors.each {|e| pp [:commit_error,e]}
+        run_javascript("R8.Workspace.showAlert(#{alert_msg});")
         return {}
       end
 

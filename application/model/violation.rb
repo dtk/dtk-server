@@ -180,22 +180,27 @@ module XYZ
     end
   end
 
+  #TODO: unify with Violation class
   class ValidationError < HashObject 
+    extend R8Tpl::Utility::I18n
     def self.find_missing_required_attributes(commit_task)
       component_actions = commit_task.component_actions
       ret = Array.new 
+      i18n = get_i18n_mappings_for_models(:attribute,:component)
       component_actions.each do |action|
-        action[:attributes].each do |attr|
+        component_name = i18n_string(i18n,:component, (action[:component]||{})[:display_name])
+        node_name = (action[:node]||{})[:display_name]
+        node_id = (action[:node]||{})[:id]
+        AttributeComplexType.flatten_attribute_list(action[:attributes],:flatten_nil_value=>true).each do |attr|
           #TODO: need to distingusih between legitimate nil value and unset
-          if attr[:required] and attr[:attribute_value].nil?
-            error_input =
-              {:external_ref => attr[:external_ref],
-              :attribute_id => attr[:id],
-              :component_id => (action[:component]||{})[:id]
-            }
-            ret <<  MissingRequiredAttribute.new(error_input)
-            x=1
-          end
+          next unless attr[:required] and attr[:attribute_value].nil? and not attr[:port_type] == "input"
+          error_input = {
+            :attribute_name => i18n_string(i18n,:attribute,attr[:display_name]),
+            :component_name => component_name,
+            :node_name => node_name,
+            :node_id => node_id
+          }
+          ret <<  MissingRequiredAttribute.new(error_input)
         end
       end
       ret.empty? ? nil : ret
@@ -216,7 +221,7 @@ module XYZ
    public
     class MissingRequiredAttribute < ValidationError
       def error_fields()
-        [:external_ref,:attribute_id,:component_id,:node_id]
+        [:node_id,:node_name,:component_name,:attribute_name]
       end
     end
   end

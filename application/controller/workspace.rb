@@ -643,7 +643,7 @@ pp datacenter
       if errors
         #TODO: stub
         alert_msg = "'Commit errors for missing attrs'"
-        errors.each {|e| pp [:commit_error,e]}
+        errors.each {|e| pp [:commit_error,Aux::demodulize(e.class.to_s),e]}
         run_javascript("R8.Workspace.showAlert(#{alert_msg});")
         return {}
       end

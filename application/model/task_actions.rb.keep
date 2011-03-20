@@ -193,6 +193,7 @@ module XYZ
       end
     end
 
+
     class ComponentAction < HashObject
       def self.order_and_group_by_component(state_change_list)
         #TODO: stub for ordering that just takes order in which component state changes made
@@ -207,19 +208,14 @@ module XYZ
       end
 
       private
-      def self.create(scs_same_cmp)
-        state_change = scs_same_cmp.first
+      def self.create(state_changes_same_component)
+        state_change = state_changes_same_component.first
         hash = {
-          :state_change_pointer_ids => scs_same_cmp.map{|sc|sc[:id]},
+          :state_change_pointer_ids => (state_changes_same_component||[]).map{|sc|sc[:id]},
           :attributes => Array.new,
           :component => state_change[:component],
           :on_node_config_agent_type => state_change.on_node_config_agent_type(),
         }
-        #TODO: can get more sophsiticated and handle case where some components installed and otehr are incremental
-        incremental_change = !scs_same_cmp.find{|sc|not sc[:type] == "setting"}
-        if incremental_change
-          hash.merge!(:changed_attribute_ids => scs_same_cmp.map{|sc|sc[:attribute_id]}) 
-        end
         self.new(hash)
       end
 

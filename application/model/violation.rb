@@ -70,7 +70,7 @@ module XYZ
       return ret if target_node_id_handles.empty?
       Node.get_violations(target_node_id_handles)
     end
-    def self.update_and_ret_violations(target_node_id_handles)
+    def self.update_violations(target_node_id_handles)
       ret = Array.new
       saved_violations = ret_violations(target_node_id_handles)
       return ret if saved_violations.empty?
@@ -140,13 +140,7 @@ module XYZ
         create_rows << new_item
         target_node_id_handles << vt[:id_handle]
       end
-      saved_violations = 
-        if opts[:update_violations] 
-          idhs = (opts[:update_violations]+target_node_id_handles).uniq
-          update_and_ret_violations(idhs)
-        else
-          ret_violations(target_node_id_handles)
-        end
+      saved_violations = ret_violations(target_node_id_handles)
       prune_duplicate_violations!(create_rows,saved_violations)
       create_from_rows(violation_mh,create_rows, :convert => true) unless create_rows.empty?
     end

@@ -19,10 +19,8 @@ module XYZ
         constraints = clone_source_object.get_constraints()
         if constraints
           target = {"target_node_id_handle" => target_id_handle}
-          opts = {:raise_error_when_error_violation => true, :update_violations => [target_id_handle]}
-          constraints.evaluate_given_target(target, opts)
-        else
-          Violation.update_and_ret_violations([target_id_handle])
+          opts = {:raise_error_when_error_violation => true}
+          constraints.evaluate_given_target(target,opts)
         end
       end
 
@@ -33,6 +31,10 @@ module XYZ
       raise Error.new("cannot clone") unless new_id_handle
       #calling with respect to target
       clone_post_copy_hook(clone_copy_output,opts)
+
+      if clone_source_object.class == Component and target_id_handle[:model_name] == :node
+        Violation.update_violations([target_id_handle])
+      end
       return new_id_handle.get_id()
     end
 

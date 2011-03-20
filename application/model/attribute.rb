@@ -18,18 +18,22 @@ module XYZ
       column :semantic_type_summary, :varchar, :size => 25 #for efficiency optional token that summarizes info from semantic_type
       virtual_column :semantic_type_object, :type => :object, :hidden => true, :local_dependencies => [:semantic_type]
 
-      #TODO: these may be redundant; if so wil remove one
+      ###cols that relate to who or what can or does change the attribute
+      #TODO: need to clearly relate these four
       column :read_only, :boolean, :default => false 
       column :dynamic, :boolean, :default => false #means dynamically set by an executable action
+      virtual_column :port_type, :type => :varchar, :hidden => true, :local_dependencies => [:is_port,:semantic_type_summary]
+      column :cannot_change, :boolean, :default => false
+
 
       column :required, :boolean, :default => false #whether required for this attribute to have a value inorder to execute actions for parent component; TODO: may be indexed by action
       column :hidden, :boolean, :default => false
-      column :cannot_change, :boolean, :default => false
 
       #columns related to links
       column :is_port, :boolean, :default => false
       virtual_column :port_is_external, :type => :boolean, :hidden => true, :local_dependencies => [:is_port,:semantic_type_summary]
-      virtual_column :port_type, :type => :varchar, :hidden => true, :local_dependencies => [:is_port,:semantic_type_summary]
+
+
       virtual_column :has_port_object, :type => :booelan, :hidden => true, :local_dependencies => [:is_port,:semantic_type_summary]
 
       column :link_info, :json, :ret_keys_as_symbols => false
@@ -228,7 +232,14 @@ module XYZ
 
 
     end
+
     ### virtual column defs
+
+    #TODO: collapse this and 4 fields used here
+    def is_readonly?()
+      (self[:port_type] == "input") or self[:read_only] or self[:dynamic] or self[:cannot_change]
+    end
+
     def attribute_value()
       self[:value_asserted] || self[:value_derived]
     end

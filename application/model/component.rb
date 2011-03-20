@@ -492,7 +492,7 @@ module XYZ
       sp_hash = {
         :filter => [:and, 
                     [:eq, :hidden, false]],
-        :columns => [:id,:display_name,:component_component_id,:attribute_value,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
+        :columns => [:id,:display_name,:component_component_id,:attribute_value,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change,:port_type,:read_only]
       }
       raw_attributes = get_children_from_sp_hash(:attribute,sp_hash)
       return Array.new if raw_attributes.empty?
@@ -504,12 +504,14 @@ module XYZ
       flattened_attr_list = AttributeComplexType.flatten_attribute_list(raw_attributes,opts)
       i18n = get_i18n_mappings_for_models(:attribute)
       flattened_attr_list.map do |a|
+        readonly = 
         name = a[:display_name]
         {
           :id => a[:unraveled_attribute_id],
           :name =>  name,
           :value => a[:attribute_value],
-          :i18n => i18n_string(i18n,:attribute,name)
+          :i18n => i18n_string(i18n,:attribute,name),
+          :disabled_attribute => a.is_readonly? ? "disabled" : ""
         }
       end
     end

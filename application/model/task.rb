@@ -237,8 +237,6 @@ module XYZ
       end
     end
 
-    #TODO: modifications made (in comparison to keep value to better render in commit pane
-    #may need a flag that indiactes whetehr to reformulate
     def self.add_attributes_to_component_task!(task,component_action,cmp_attrs)
       attributes = component_action[:attributes]
       return task unless attributes

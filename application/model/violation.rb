@@ -141,7 +141,7 @@ module XYZ
         target_node_id_handles << vt[:id_handle]
       end
       saved_violations = ret_violations(target_node_id_handles)
-      prune_duplicate_violations!(create_rows,saved_violations)
+      create_rows = prune_duplicate_violations(create_rows,saved_violations)
       create_from_rows(violation_mh,create_rows, :convert => true) unless create_rows.empty?
     end
 
@@ -161,11 +161,21 @@ module XYZ
       }
     end
 
-    def self.prune_duplicate_violations!(create_rows,saved_violations)
-      #TODO: stub
-      pp [:create_rows,create_rows]
-      pp [:saved_violations,saved_violations]
-      create_rows
+    def self.prune_duplicate_violations(create_rows,saved_violations)
+      return create_rows if saved_violations.empty?
+      create_rows.reject do |r|
+        unless c1 = r[:expression][:constraint]
+          Log.error("Not treating expressions of form #{r[:expression].keys.first}")
+          next
+        end
+        saved_violations.find do |sv|
+          unless c2 = sv[:expression][:constraint]
+            Log.error("Not treating expressions of form #{sv[:expression].keys.first}")
+            next
+          end
+          (r[:severity] == sv[:severity]) and (c1[:id] == c2[:id]) and (c1[:target_id] = c2[:target_id])
+        end
+      end
     end
   end
 

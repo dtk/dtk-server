@@ -91,7 +91,8 @@ module XYZ
       end
     end
     NumericIndexRegexp = Regexp.new("^#{Delim::Common}#{Delim::NumericIndex}([0-9]+)(.*$)")
-    KeyWithRestRegexp = Regexp.new("^#{Delim::Common}([^#{Delim::Char}]+)#{Delim::Common}(.+$)")
+#TODO make sure cahging this is right    KeyWithRestRegexp = Regexp.new("^#{Delim::Common}([^#{Delim::Char}]+)#{Delim::Common}(.+$)")
+    KeyWithRestRegexp = Regexp.new("^#{Delim::Common}([^#{Delim::Char}]+)(#{Delim::Common}.+$)")
     KeyWORestRegexp = Regexp.new("^#{Delim::Common}(.*$)")
 
     def self.has_required_fields?(value_obj,pattern)

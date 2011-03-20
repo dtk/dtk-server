@@ -104,6 +104,7 @@ module XYZ
       "target_node_id_handle" => :node
     }
     def self.ret_expression_list(expression)
+      return Array.new if expression[:elements].empty?
       return expression unless expression[:logical_op] == :and
       expression[:elements].map do |expr_el|
         if expr_el.kind_of?(Constraint) then expr_el.merge(:violation_target => expression[:violation_target])

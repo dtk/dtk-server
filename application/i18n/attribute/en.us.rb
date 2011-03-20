@@ -108,6 +108,9 @@
  :wordpress__checksum=>"Tarball Checksum",
  :wordpress__keys_secure_auth=>"Secure Auth Key",
 
+#haproxy
+ :conns_to_real_servers => "Real Servers",
+
 #nagios
   :nagios__monitored_client_sap_config => "SAP Config",
   :nagios__monitor_sap_refs => "NRPE SAP Refs",

@@ -77,12 +77,6 @@ attribute "apache2/icondir",
   :description => "Directory location for icons",
   :default => "/usr/share/apache2/icons"
 
-attribute "apache2/listen_ports",
-  :display_name => "Apache Listen Ports",
-  :description => "Ports that Apache should listen on",
-  :type => "array",
-  :default => [ "80", "443" ]
-
 attribute "apache2/contact",
   :display_name => "Apache Contact",
   :description => "Email address of webmaster",

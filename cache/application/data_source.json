@@ -38,6 +38,9 @@
           "ui": "{\"images\": {\"tnail\":\"hadoop-pig.png\",\"display\":\"hadoop-pig.png\",\"tiny\":\"\"}}",
 	  "basic_type": "service"
         },
+        "haproxy": {
+	  "specific_type": "load_balancer"
+        },
 	"hadoop_cloudera_c3": {
           "ui": "{\"images\": {\"tnail\":\"cloudera.png\",\"display\":\"cloudera.png\",\"tiny\":\"\"}}",
 	  "basic_type" : "service"

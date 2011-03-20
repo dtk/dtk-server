@@ -29,10 +29,12 @@
         "calculated": false,
         "transform": [
           {
-            "protocol": "tcp",
-            "ports": {
-              "__ref": "node[apache2][listen_ports]"
-            }
+            "port": 80,
+            "protocol": "tcp"
+          },
+          {
+            "port": 443,
+            "protocol": "tcp"
           }
         ],
         "port_type": "input",
@@ -43,13 +45,9 @@
         "recipes": [
 
         ],
-        "description": "apache2 ip service access point configuration",
+        "description": "apache2 ip listen portsK,service access point configuration",
         "semantic_type": {
-          ":array": {
-            "sap_config__l4": {
-              "application": "webserver"
-            }
-          }
+          ":array": "sap_config__l4"
         }
       },
       "_meta_info": {
@@ -191,23 +189,6 @@
         ],
         "display_name": "Apache Keepalive",
         "description": "HTTP persistent connections"
-      },
-      "apache2/listen_ports": {
-        "required": "optional",
-        "calculated": false,
-        "choice": [
-
-        ],
-        "default": [
-          "80",
-          "443"
-        ],
-        "type": "array",
-        "recipes": [
-
-        ],
-        "display_name": "Apache Listen Ports",
-        "description": "Ports that Apache should listen on"
       },
       "apache2": {
         "required": "optional",

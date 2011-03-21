@@ -122,7 +122,8 @@ _toolbarNode.append('<div class="menu-divider"></div>');
 
 				var that = this;
 				YUI(YUI_config).use("node","event", function(Y) {
-					Y.all('#'+_id+' .toolbar-group').each(function(){
+//					Y.all('#'+_id+' .toolbar-group').each(function(){
+					Y.all('#'+_toolbarNodeId+' .toolbar-group').each(function(){
 						var groupId = this.get('id'),
 							tbarGroupNode = document.getElementById(groupId);
 			
@@ -175,7 +176,7 @@ _toolbarNode.append('<div class="menu-divider"></div>');
 
 			_divisionTpl = '<div id="'+_id+'-tbar" style="height: inherit; position: relative;">\
 								<div class="menu-divider"></div>\
-								<div id="'+_id+'-tbar-content" style="height: inherit;">Hello Foo!!!</div>\
+								<div id="'+_id+'-tbar-content" style="position: relative; float: left; height: 40px;">Hello Foo!!!</div>\
 							</div>';
 
 		return {

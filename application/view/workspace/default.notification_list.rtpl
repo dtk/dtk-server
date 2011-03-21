@@ -1,6 +1,6 @@
 
 {%for notification in notification_list%}
-	<div class="item">
+	<div class="item" data-node-id="{%=notification[:target_node_id]%}">
 		<div class="icon warning"></div>
 		<div class="content">{%=notification[:description]%}</div>
 	</div>

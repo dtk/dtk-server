@@ -687,6 +687,15 @@ console.log(_ui);
 				return _selectedItems;
 			},
 
+//TODO: revisit, right now these are only used from notifications panel mouseenter/mouseleave
+			itemFocus: function(itemId) {
+				this.clearSelectedItems();
+				this.addSelectedItem(itemId,{});
+			},
+			blurItems: function() {
+				this.clearSelectedItems();
+			},
+//-------------------------------------------------------------------------------------------
 			addSelectedItem: function(itemId,data) {
 				_selectedItems[itemId] = data;
 				_items[itemId].get('node').setStyle('zIndex',51);

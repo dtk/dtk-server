@@ -153,17 +153,21 @@
 	float: left;
 	height: 26px;
 	width: 9px;
+/*
 	background-image: url(../images/topbar/top-toolbar-sprite.png);
 	background-repeat: no-repeat;
+*/
 }
 .toolbar-group .rt-endcap {
 	position: relative;
 	float: right;
 	height: 26px;
 	width: 12px;
+/*
 	background-image: url(../images/topbar/top-toolbar-sprite.png);
 	background-repeat: no-repeat;
 	background-position: -10px 0px;
+*/
 }
 
 .toolbar-group .tool-list {
@@ -171,9 +175,11 @@
 	float: left;
 	height: 24px;
 	width: 179px;
+/*
 	background-color: #BCC7D8;
 	border-top: 1px solid #D5DCE8;
 	border-bottom: 1px solid #D5DCE8;
+*/
 }
 .toolbar-group .tool-item {
 	height: 22px;
@@ -236,6 +242,9 @@
 /*	background-color: #EDEDED;*/
 	background-image: url(../images/topbar/bg-grey-slice-inverted.png);
 	background-repeat: repeat-x;
+	border-left: 3px solid #9CAAC1;
+	border-right: 3px solid #9CAAC1;
+	margin-left: -3px;
 }
 .toolbar .dropdown.active.mover {
 	background-color: #CCCCCC;
@@ -256,7 +265,8 @@
 	position: absolute;
 	z-index: 100;
 	display: none;
-	background-color: #EDEDED;
+/*	background-color: #EDEDED;*/
+	background-color: #FFFFFF;
 	border-left: 3px solid #9CAAC1;
 	border-right: 3px solid #9CAAC1;
 	border-bottom: 3px solid #9CAAC1;
@@ -282,8 +292,10 @@
 	width: 150px;
 	float: left;
 	font-size: 12px;
-	border-top: 1px solid #EDEDED;
-	border-bottom: 1px solid #EDEDED;
+/*	border-top: 1px solid #EDEDED;
+	border-bottom: 1px solid #EDEDED;*/
+	border-top: 1px solid #FFFFFF;
+	border-bottom: 1px solid #FFFFFF;
 }
 .dropdown-list .dropdown-item.visible .label {
 	border-top: 1px solid #A5A5A5;

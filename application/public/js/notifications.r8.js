@@ -27,11 +27,24 @@ if(!R8.Notifications) {
 					_panelNode = R8.Utils.Y.one('#notifications-panel');
 					var topbarNodeId = R8.Workspace.get('topbarNodeId');
 					var pTop = R8.Utils.Y.one('#'+topbarNodeId).get('region').bottom,
-						pLeft = _node.get('region').right-_panelWidth;
+						pLeft = _node.get('region').right-_panelWidth-11;
 	
 					_panelNode.setStyles({'top':pTop,'left':pLeft});
 
 					this.startPoller();
+
+					R8.Utils.Y.one('#page-container').on('click',function(e){
+						if(this.panelOpen()) this.toggleNotifyPanel();
+					},this);
+
+					var itemMenter = R8.Utils.Y.delegate('mouseenter',function(e){
+						var itemId = e.currentTarget.getAttribute('data-node-id');
+						R8.Workspace.itemFocus(itemId);
+					},'#notifications-panel','.item',this);
+					var itemMleave = R8.Utils.Y.delegate('mouseleave',function(e){
+						var itemId = e.currentTarget.getAttribute('data-node-id');
+						R8.Workspace.blurItems();
+					},'#notifications-panel','.item',this);
 				},
 				render: function() {
 					return _tbarTpl;
@@ -68,6 +81,8 @@ if(!R8.Notifications) {
 						R8.Ctrl.call('datacenter/get_warnings/'+dcId,params);
 				},
 				setLatestList: function(nList) {
+//DEBUG
+console.log(nList);
 					R8.Utils.Y.one('#notify-count').set('innerHTML',nList.length);
 					_panelNode.set('innerHTML',R8.Rtpl.notification_list({'notification_list':nList}));
 				},

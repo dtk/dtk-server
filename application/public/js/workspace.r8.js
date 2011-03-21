@@ -807,6 +807,16 @@ console.log(response);
 				_viewSpaces[vSpaceId].addItems(items);
 			},
 
+			itemFocus: function(itemId,viewSpaceId) {
+				var vSpaceId = (typeof(viewSpaceId) == 'undefined') ? _currentViewSpace : viewSpaceId;
+				_viewSpaces[vSpaceId].itemFocus(itemId);
+			},
+
+			blurItems: function(viewSpaceId) {
+				var vSpaceId = (typeof(viewSpaceId) == 'undefined') ? _currentViewSpace : viewSpaceId;
+				_viewSpaces[vSpaceId].blurItems();
+			},
+
 //TODO: revisit when handling multiple viewspaces loaded at same time
 			refreshNotifications: function(viewSpaceId) {
 				var vSpaceId = (typeof(viewSpaceId) == 'undefined') ? _currentViewSpace : viewSpaceId;

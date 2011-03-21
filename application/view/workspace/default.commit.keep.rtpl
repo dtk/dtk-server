@@ -16,9 +16,8 @@
 			<table class="edit">
 				<tr><td class="label">Commit Msg</td></tr>
 				<tr><td class="field"><input type="text" value="" size="40" id="commit_msg" name="commit_msg"/></td></tr>
-				{%=commit_content%}
 			</table>
-			<input id="modal-form-submit-btn" type="button" value="{%=submit_label%}"/>
+			<input id="modal-form-submit-btn" type="button" value="Commit"/>
 		</div>
 	</div>
 	</form>

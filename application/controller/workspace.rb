@@ -715,6 +715,23 @@ POSSIBLE CHANGES TO HASH
       tpl = R8Tpl::TemplateR8.new("workspace/commit",user_context())
       tpl.assign(:_app,app_common())
 
+#TODO: using datacenters as environments right now, redo later on
+      dc_hash = get_object_by_id(datacenter_id,:datacenter)
+      if dc_hash[:type] == 'production'
+        commit_content = '<tr><td class="label">Maintenance Window</td></tr>
+                          <tr><td class="field"><select id="commit_date" name="commit_date">
+                            <option value="foo">Prime Window - Tue 10pm</option>
+                            <option value="foo">Weekly Window - Fri 8pm</option>
+                            <option value="foo">Weekend Warrior - Saturday 8pm</option>
+                          </select></td></tr>'
+        submit_label = "Schedule Changes"
+      else
+        commit_content = ""
+        submit_label = "Commit"
+      end
+      tpl.assign(:commit_content,commit_content)
+      tpl.assign(:submit_label,submit_label)
+
       panel_id = request.params['panel_id']
 
       include_js('plugins/commit.tool')

@@ -10,6 +10,10 @@
     },
     :ui=> {
       :type=>:json
+    },
+    :type=> {
+      :type=>:text,
+      :length=>30
     }
   },
   :one_to_many=>

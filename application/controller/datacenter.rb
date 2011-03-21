@@ -62,7 +62,7 @@ pp [:warnings,notification_list]
 
       items = model_list.map do |object|
         object_id_sym = object.id.to_s.to_sym
-        ui = (!dc_hash[:ui][:items][object_id_sym].nil?) ? dc_hash[:ui][:items][object_id_sym] : object[:ui][datacenter_id.to_s.to_sym]
+        ui = ((dc_hash[:ui]||{})[:items]||{})[object_id_sym] || (object[:ui]||{})[datacenter_id.to_s.to_sym]
 
         model_name = object.model_name
         {
@@ -71,7 +71,6 @@ pp [:warnings,notification_list]
           :toolbar_def => toolbar_def,
           :tpl_callback => tpl_info_hash[model_name][:template_callback],
           :ui => ui
-#          :ui => object[:ui][datacenter_id.to_s.to_sym]
         }
       end
 

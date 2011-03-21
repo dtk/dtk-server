@@ -248,7 +248,7 @@ module XYZ
       flattten_attrs.each do |a|
         val = a[:attribute_value]
         if val.nil?
-          next unless a[:port_type] == "input"
+          next unless a[:port_type] == "input" and a[:required]
           val = "DYNAMICALLY SET"
         end
         attr_task = {

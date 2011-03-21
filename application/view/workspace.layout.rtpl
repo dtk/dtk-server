@@ -47,6 +47,9 @@
 				<div class="yui3-u right-cap"></div>
 			</div>
 			<div id="wspace-context-wrapper">
+				<div class="l-endcap"></div>
+				<div id="wspace-context"></div>
+				<div class="r-endcap"></div>
 			</div>
 		</div>
 

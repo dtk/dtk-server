@@ -98,22 +98,43 @@
 /*------Context Menu Bar-------------------*/
 
 #wspace-context-wrapper {
-	width: 400px;
+	width: 330px;
 	height: 25px;
-	background-image: url(../images/topbar/context-bar-bg-slice.png);
-	background-repeat: repeat-x;
 	position: absolute;
 	z-index: 100;
 	top: 40px;
 	left: 20px;
 }
-
+#wspace-context-wrapper .l-endcap {
+	height: 25px;
+	width: 5px;
+	background: no-repeat url(../images/topbar/context-bar-end-caps.png);
+	position: relative;
+	float: left;
+}
+#wspace-context-wrapper .r-endcap {
+	height: 25px;
+	width: 25px;
+	background: no-repeat url(../images/topbar/context-bar-end-caps.png);
+	background-position: -10px 0px;
+	position: relative;
+	float: left;
+}
+#wspace-context {
+	height: 25px;
+	width: 300px;
+	background-image: url(../images/topbar/context-bar-bg-slice.png);
+	background-repeat: repeat-x;
+	position: relative;
+	float: left;
+}
 #wspace-context-wrapper .context-span {
 	position: relative;
 	float: left;
 	font-weight: bold;
 	font-size: 14px;
 	margin: 3px 0 0 10px;
+	color: #FFFFFF;
 }
 /*----TOOLBAR/TOOLBAR GROUPS----------------*/
 

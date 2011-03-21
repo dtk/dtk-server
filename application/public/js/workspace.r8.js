@@ -14,7 +14,8 @@ if (!R8.Workspace) {
 			_topbarNodeId = 'page-topbar',
 			_topbarNode = null,
 
-			_contextBarId = 'wspace-context-wrapper',
+//			_contextBarId = 'wspace-context-wrapper',
+			_contextBarId = 'wspace-context',
 			_contextBarNode = null,
 
 			_modalNoe = null,

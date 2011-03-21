@@ -131,6 +131,10 @@ taskDef.children[0].children[0].children = [];
 								compTypei18n = 'Application';
 								taskClass = 'install-application';
 								break;
+							case "database":
+								compTypei18n = 'Database';
+								taskClass = 'install-application';
+								break;
 							case "user":
 								compTypei18n = 'User';
 								compTypeAction = 'Add';

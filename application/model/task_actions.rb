@@ -209,8 +209,10 @@ module XYZ
       private
       def self.create(scs_same_cmp)
         state_change = scs_same_cmp.first
+        #TODO: may deprecate need for ||[sc[:id]
+        pointer_ids = scs_same_cmp.map{|sc|sc[:linked_ids]||[sc[:id]]}.flatten
         hash = {
-          :state_change_pointer_ids => scs_same_cmp.map{|sc|sc[:id]},
+          :state_change_pointer_ids => pointer_ids,
           :attributes => Array.new,
           :component => state_change[:component],
           :on_node_config_agent_type => state_change.on_node_config_agent_type(),

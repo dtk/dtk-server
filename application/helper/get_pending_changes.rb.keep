@@ -63,28 +63,17 @@ module Ramaze::Helper
       #remove duplicates wrt component looking at both component and component_same_type
       state_changes.each do |sc|
         if sc[:type] == "create_node"
-          indexed_ret[sc[:node][:id]] = augment_with_linked_id(sc,sc[:id])
+          indexed_ret[sc[:node][:id]] = sc
         elsif ["setting","install_component"].include?(sc[:type])
-          indexed_ret[sc[:component][:id]] = augment_with_linked_id(indexed_ret[sc[:component][:id]] || sc.reject{|k,v|[:attribute,:component_same_type].include?(k)},sc[:id])
-
-          if cst = sc[:component_same_type]
-            indexed_ret[cst[:id]] = augment_with_linked_id(indexed_ret[cst[:id]] || sc.reject{|k,v| [:attribute,:component_same_type].include?(k)}.merge(:component => cst),sc[:id])
-          end
+          indexed_ret[sc[:component][:id]] ||= sc.reject{|k,v|[:attribute,:component_same_type].include?(k)} 
+          cst = sc[:component_same_type]
+          indexed_ret[cst[:id]] ||=  sc.reject{|k,v| [:attribute,:component_same_type].include?(k)}.merge(:component => cst) if cst
         else
           Log.error("unexepceted type #{sc[:type]}; ignoring")
         end
       end
       indexed_ret.values
     end
-   private
-    def augment_with_linked_id(state_change,id)
-      if linked = state_change[:linked_ids]
-        linked.include?(id) ? state_change : state_change.merge(:linked_ids => linked + [id])
-      else
-        state_change.merge(:linked_ids => [id])
-      end
-    end
-   public
 
 =begin May not need; if so deprecate
     def pending_changes_to_render(datacenter_id)

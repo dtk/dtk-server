@@ -193,7 +193,7 @@ module XYZ
         node_id = (action[:node]||{})[:id]
         AttributeComplexType.flatten_attribute_list(action[:attributes],:flatten_nil_value=>true).each do |attr|
           #TODO: need to distingusih between legitimate nil value and unset
-          next unless attr[:required] and attr[:attribute_value].nil? and not attr[:port_type] == "input"
+          next unless attr[:required] and attr[:attribute_value].nil? and (not attr[:port_type] == "input") and (not attr[:dynamic])
           error_input = {
             :attribute_name => i18n_string(i18n,:attribute,attr[:display_name]),
             :component_name => component_name,

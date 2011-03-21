@@ -244,9 +244,11 @@ Debug.print_and_ret(
         :syntax =>  {
           "port" => {:required => true, :type => :integer},
           "protocol" => {:required => true, :type => :string},
-          "host_address" => {:required => true, :type => :string}
+          "host_address" => {:required => true, :dynamic => true, :type => :string}
         }
       },
+=begin
+rather than having or having two sap refs and user can remove or add to component
       "sap_ref__l4" => {
         :external => true,
         :port_type => "input", 
@@ -262,6 +264,18 @@ Debug.print_and_ret(
           ]
         }
       },
+=end
+      "sap_ref__l4" => {
+        :external => true,
+        :port_type => "input", 
+        :has_port_object => true,
+        :syntax => { 
+           "port" => {:required => true, :type => :integer},
+           "protocol" => {:required => true, :type => :string},
+           "host_address" => {:required => true, :type => :string}
+        }
+      },
+
       "sap__socket" => {
         :syntax => {
           "socket_file" => {:required => true, :type => :string}

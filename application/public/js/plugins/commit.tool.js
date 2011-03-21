@@ -158,6 +158,11 @@ console.log('unkown task type...');
 console.log(taskDef);
 						break;
 				}
+//TODO: cleanup post demos
+				if (taskDefType != 'setting') {
+					var tempDropdown = '<select name=""><option value="foo">Auto</option><option value="bar">Manual</option></select>';
+					editContent = editContent + '&nbsp;' + tempDropdown + '&nbsp;';
+				}
 				var taskNode = R8.Utils.Y.Node.create('<li class="'+taskDefType+'"><span class="'+taskClass+'">'+editContent+taskI18n+'</span></li>');
 
 				if(typeof(taskDef.children) !='undefined' && taskDef.children.length > 0) {

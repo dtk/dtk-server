@@ -81,8 +81,6 @@ if(!R8.Notifications) {
 						R8.Ctrl.call('datacenter/get_warnings/'+dcId,params);
 				},
 				setLatestList: function(nList) {
-//DEBUG
-console.log(nList);
 					R8.Utils.Y.one('#notify-count').set('innerHTML',nList.length);
 					_panelNode.set('innerHTML',R8.Rtpl.notification_list({'notification_list':nList}));
 				},

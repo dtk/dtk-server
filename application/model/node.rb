@@ -380,6 +380,13 @@ module XYZ
       get_objects_in_set_from_sp_hash(id_handles,{:cols => [:violations]}).map{|r|r[:violation]}
     end
 
+    def get_ui_info(datacenter)
+      datacenter_id_sym = datacenter[:id].to_s.to_sym
+      node_id_sym = self[:id].to_s.to_sym
+      #TODO: hack assumes that canm just take position from first node[:u1]
+      ui = ((datacenter[:ui]||{})[:items]||{})[node_id_sym] || (self[:ui]||{})[datacenter_id_sym] || (self[:ui]||{}).values.first
+    end
+
     def get_users()
       node_user_list = get_objects_from_sp_hash(:columns => [:users])
       user_list = Array.new

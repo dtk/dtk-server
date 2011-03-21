@@ -5,9 +5,6 @@ if (!R8.ViewSpace) {
 		var _def = viewSpaceDef,
 			_id = _def['object']['id'],
 			_ui = _def.object.ui,
-			_uiCookie = {},
-			_cookieKey = '_uiCookie-'+_id,
-
 			_type = _def['type'],
 			_items = {},
 			_node = R8.Utils.Y.one('#viewspace'),
@@ -33,20 +30,12 @@ if (!R8.ViewSpace) {
 				this.startUpdater();
 
 				YUI().use('cookie','json', function(Y){
-					var uiCookieJSON = Y.Cookie.get(_cookieKey);
-					_uiCookie = (uiCookieJSON == null) ? {} : Y.JSON.parse(uiCookieJSON);
-//					_itemPosUpdateListJSON = Y.Cookie.get("_itemPosUpdateList");
-//					_itemPosUpdateList = (_itemPosUpdateListJSON == null) ? {} : Y.JSON.parse(_itemPosUpdateListJSON);
+					_itemPosUpdateListJSON = Y.Cookie.get("_itemPosUpdateList");
+					_itemPosUpdateList = (_itemPosUpdateListJSON == null) ? {} : Y.JSON.parse(_itemPosUpdateListJSON);
 //TODO: cleanup after moving fully to new pos handling
-/*
 					for(var i in _itemPosUpdateList) {
 						_ui.items[i]['top'] = _itemPosUpdateList[i]['pos']['top'];
 						_ui.items[i]['left'] = _itemPosUpdateList[i]['pos']['left'];
-					}
-*/
-					for(var i in _uiCookie) {
-						_ui.items[i]['top'] = _uiCookie[i]['top'];
-						_ui.items[i]['left'] = _uiCookie[i]['left'];
 					}
 					_isReady = true;
 				});
@@ -279,25 +268,23 @@ console.log(_items[mergePortDef.parentItemId]);
 						left = (typeof(_itemPosUpdateList[id]) == 'undefined') ? item['object']['ui'][_id]['left'] : _itemPosUpdateList[id]['pos']['left'];
 */
 					var itemId = item['object']['id'];
-
+//TODO: cleanup after fully moving away from old UI indexing
 					if(typeof(_ui.items[itemId]) == 'undefined') {
 						_ui.items[itemId] = {};
 						_ui.items[itemId]['top'] = item['object']['ui'][_id]['top'];
 						_ui.items[itemId]['left'] = item['object']['ui'][_id]['left'];
 					}
 
-/*					var id = item['object']['id'],
+
+					var id = item['object']['id'],
 						top = (typeof(_itemPosUpdateList[id]) == 'undefined') ? _ui.items[id]['top'] : _itemPosUpdateList[id]['pos']['top'],
 						left = (typeof(_itemPosUpdateList[id]) == 'undefined') ? _ui.items[id]['left'] : _itemPosUpdateList[id]['pos']['left'];
-*/
-					var id = item['object']['id'],
-						top = (typeof(_uiCookie[id]) == 'undefined') ? _ui.items[id]['top'] : _uiCookie[id]['top'],
-						left = (typeof(_uiCookie[id]) == 'undefined') ? _ui.items[id]['left'] : _uiCookie[id]['left'];
 
 					_items[id].get('node').setStyles({'top':top,'left':left,'display':'block'});
 				}
 
 				this.purgePendingDelete();
+//DEBUG
 				this.retrieveLinks(items);
 //TODO: revisit and have retrieveLinks file a custom callback when complete that renderLinks can sub to
 //				if(_userSettings.showLinks == true) {
@@ -504,11 +491,9 @@ console.log(ports);
 					draggableItems = _draggableItems,
 					itemId = item.get('id');
 
-				YUI().use('dd-constrain','dd-drag','dd-plugin',function(Y){
+				YUI().use('dd-drag','dd-plugin',function(Y){
 					draggableItems[itemId] = new Y.DD.Drag({
 						node: '#'+item.get('node_id')
-					}).plug(Y.Plugin.DDConstrained, {
-						constrain2node: '#viewspace'
 					});
 
 					//add invalid drag items here.., right now only ports
@@ -527,8 +512,7 @@ console.log(ports);
 					});
 					draggableItems[itemId].on('drag:end',function(e){
 						viewSpace.clearSelectedItems();
-						viewSpace.touchItems([itemId]);
-/*						var node = this.get('node'),
+						var node = this.get('node'),
 							nodeId = node.get('id'),
 							top = node.getStyle('top'),
 							left = node.getStyle('left');
@@ -540,15 +524,10 @@ console.log(ports);
 						_ui.items[itemId]['top'] = top;
 						_ui.items[itemId]['left'] = left;
 
-//DEBUG
-console.log('Need to update positions...');
-console.log(_itemPosUpdateList);
-console.log(_ui.items[itemId]);
 						YUI().use('json','cookie', function(Y){
 							var _itemPosUpdateListJSON = Y.JSON.stringify(_itemPosUpdateList);
 							Y.Cookie.set("_itemPosUpdateList", _itemPosUpdateListJSON);
 						});
-*/
 //TODO: revisit after cleanup, currently needed b/c on drag end, margins get updated for dropshadow so links
 //are off by several pixels
 /*
@@ -574,23 +553,18 @@ console.log(_ui.items[itemId]);
 					var itemId = item_list[i],
 						itemNode = _items[itemId].get('node');
 
-//					_itemPosUpdateList[itemId] = {
-//						'model':_items[itemId].get('model'),
-//						'pos':{'top':itemNode.getStyle('top'),'left':itemNode.getStyle('left')}
-//					};
-
-					if(typeof(_uiCookie[itemId]) == 'undefined') _uiCookie[itemId] = {};
-					_uiCookie[itemId]['top'] = itemNode.getStyle('top');
-					_uiCookie[itemId]['left'] = itemNode.getStyle('left');
-
-					var top = itemNode.getStyle('top');
-					var left = itemNode.getStyle('left');
-					_ui.items[itemId]['top'] = parseInt(top.replace('px',''));
-					_ui.items[itemId]['left'] = parseInt(left.replace('px',''));
+					_itemPosUpdateList[itemId] = {
+						'model':_items[itemId].get('model'),
+						'pos':{'top':itemNode.getStyle('top'),'left':itemNode.getStyle('left')}
+					};
+//TODO: cleanup after moving fully to new pos handling
+					_ui.items[itemId]['top'] = top;
+					_ui.items[itemId]['left'] = left;
 				}
+
 				YUI().use('json','cookie', function(Y){
-					var _uiCookieJSON = Y.JSON.stringify(_uiCookie);
-					Y.Cookie.set(_cookieKey, _uiCookieJSON);
+					var _itemPosUpdateListJSON = Y.JSON.stringify(_itemPosUpdateList);
+					Y.Cookie.set("_itemPosUpdateList", _itemPosUpdateListJSON);
 				});
 			},
 
@@ -629,15 +603,15 @@ console.log(_ui.items[itemId]);
 			},
 
 			purgeUIData: function(ioId,responseObj) {
-				_uiCookie = {};
+				_itemPosUpdateList = {};
 				YUI().use("cookie",function(Y){
-					Y.Cookie.remove(_cookieKey);
+					Y.Cookie.remove('_itemPosUpdateList');
 				});
 			},
 
 			backgroundUpdater: function() {
 				var count = 0;
-				for(item in _uiCookie) {
+				for(item in _itemPosUpdateList) {
 					count++;
 				}
 				var that = this;
@@ -645,9 +619,7 @@ console.log(_ui.items[itemId]);
 					YUI().use("json", function(Y){
 //						var reqParam = 'item_list=' + Y.JSON.stringify(_itemPosUpdateList);
 						var reqParam = 'ui=' + Y.JSON.stringify(_ui);
-//DEBUG
-console.log('in backgroundUpdater...');
-console.log(_ui);
+
 						var params = {
 							'cfg': {
 								'data': reqParam

@@ -22,9 +22,6 @@ module XYZ
       ]
       component[:supported_os_list] = supported_os_list
 
-pp '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
-pp component
-
       tpl.assign("_#{model_name().to_s}",_model_var)
       tpl.assign("component",component)
       tpl.assign("component_images_uri",R8::Config[:component_images_uri])
@@ -423,7 +420,7 @@ component.save(request.params)
       node_list.each do |node|
         item_id_list << node[:id]
         if node[:id] == top_node[:id]
-          node[:ui][parent_id.to_sym][:left] = assembly_left_pos
+          node[:ui][parent_id.to_sym][:left] = assembly_left_pos.to_i
         else
           node[:ui][parent_id.to_sym][:left] = node[:ui][parent_id.to_sym][:left].to_i+top_node[:left_diff].to_i
         end
@@ -439,12 +436,6 @@ component.save(request.params)
         items << item
       end
 
-pp '+++++++++++++++++++++++++++++++'
-pp '++++CHECKING TO SEE IF ASSEMBLY REDIRECT IS CORRECT+++'
-pp '+++++++++++++++++++++++++++++++'
-pp request.params
-pp '+++++++++++++++++++++++++++++++'
-pp items
 #    p_str = JSON.generate(request.params)
 #    run_javascript("alert('Added assembly, here are req params:  #{p_str}');")
 

@@ -9,6 +9,7 @@ module XYZ
     def get_warnings(id)
       datacenter = get_object_by_id(id)
       notification_list = datacenter.get_violation_info("warning")
+#DEBUG
 pp [:warnings,notification_list]
       return {:data=>notification_list}
     end
@@ -32,8 +33,8 @@ pp [:warnings,notification_list]
         :i18n => 'Environments',
         :object => dc_hash
       }
-      v_space_obj = JSON.generate(view_space)
-      run_javascript("R8.Workspace.pushViewSpace(#{v_space_obj});")
+#      v_space_obj = JSON.generate(view_space)
+#      run_javascript("R8.Workspace.pushViewSpace(#{v_space_obj});")
 
       #--------Setup Toolbar for access each group from ACL's---------
       #        add_js_exe("R8.Toolbar.init({node:'group-#{model_list[0][:id]}',tools:['quicksearch']});")
@@ -60,18 +61,24 @@ pp [:warnings,notification_list]
       model_list = datacenter.get_items()
 
       items = model_list.map do |object|
+        object_id_sym = object.id.to_s.to_sym
+        ui = (!dc_hash[:ui][:items][object_id_sym].nil?) ? dc_hash[:ui][:items][object_id_sym] : object[:ui][datacenter_id.to_s.to_sym]
+
         model_name = object.model_name
         {
           :type => model_name.to_s,
           :object => object,
           :toolbar_def => toolbar_def,
           :tpl_callback => tpl_info_hash[model_name][:template_callback],
-          :ui => object[:ui][datacenter_id.to_s.to_sym]
+          :ui => ui
+#          :ui => object[:ui][datacenter_id.to_s.to_sym]
         }
       end
 
-      addItemsObj = JSON.generate(items)
-      run_javascript("R8.Workspace.addItems(#{addItemsObj});")
+      view_space[:items] = items
+      view_space_json = JSON.generate(view_space)
+      run_javascript("R8.Workspace.pushViewSpace(#{view_space_json});")
+
 
       #---------------------------------------------
 
@@ -83,6 +90,8 @@ pp [:warnings,notification_list]
 
     def update_vspace_ui(id)
 #TODO: not used      dc_hash = get_object_by_id(id,:datacenter)
+pp '*******UPDATING VSPACE UI***************'
+pp request.params
       update_from_hash(id,{:ui=>JSON.parse(request.params["ui"])})
 #      update_from_hash(id,{:ui=>JSON.parse(request.params["ui"])}) if request.params["ui"].kind_of?(Hash)
       return {}

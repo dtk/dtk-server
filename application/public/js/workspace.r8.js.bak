@@ -17,15 +17,13 @@ if (!R8.Workspace) {
 			_contextBarId = 'wspace-context-wrapper',
 			_contextBarNode = null,
 
-			_modalNoe = null,
+			_modalNode = null,
 			_modalNodeId = 'wspace-modal',
 			_shimNodeId = null,
 			_shimNode = null,
 
 			_alertNode = null,
 			_alertNodeId = null,
-
-			_initialized = false,
 
 			_events = {};
 		return {
@@ -53,6 +51,8 @@ if (!R8.Workspace) {
 				_topbarNode = R8.Utils.Y.one('#'+_topbarNodeId);
 				_contextBarNode = R8.Utils.Y.one('#'+_contextBarId);
 
+//----------------------
+
 				this.pageContainerElem = R8.Utils.Y.one('#page-container');
 				this.wspaceContainerElem = R8.Utils.Y.one('#wspace-container');
 				this.cmdbarElem = R8.Utils.Y.one('#cmdbar');
@@ -65,8 +65,6 @@ if (!R8.Workspace) {
 				this.setupViewspace();
 				R8.Cmdbar.init();
 				this.loadWorkspace();
-
-				_initialized = true;
 			},
 
 			get: function(item) {
@@ -555,8 +553,7 @@ console.log('I guess I am hitting this now!!!!');
 //				var modelId = containerNode.getAttribute('data-id');
 				if(_viewContext == assemblyContext) {
 					var queryParams = 'target_model_name=datacenter&target_id='+_currentViewSpace;
-//					queryParams += '&model_redirect=component&action_redirect=add_assembly_items&id_redirect='+componentId;
-					queryParams += '&model_redirect=component&action_redirect=add_assembly_items&id_redirect=*id';
+					queryParams += '&model_redirect=component&action_redirect=add_assembly_items&id_redirect='+componentId;
 					queryParams += '&parent_id='+_currentViewSpace+'&assembly_left_pos='+assemblyLeftPos
 
 					var completeCallback = function() {
@@ -761,32 +758,13 @@ console.log(response);
 				};
 				R8.Ctrl.call('workspace/commit_changes',params);
 			},
-
-			initialized: function() { return _initialized; },
-
 //TODO: add check to see if viewspace is already loaded and this is a 'refocus'
 			pushViewSpace: function(viewSpaceDef) {
-				if(this.initialized() == false) {
-					var that=this;
-					var initWaitCallback = function() {
-						that.pushViewSpace(viewSpaceDef);
-					}
-					setTimeout(initWaitCallback,20);
-					return;
-				}
-
 				var id = viewSpaceDef['object']['id'];
 				_viewSpaces[id] = new R8.ViewSpace(viewSpaceDef);
 				_viewSpaces[id].init();
 				_viewSpaceStack.push(id);
 				_currentViewSpace = id;
-
-				var contextTpl = '<span class="context-span">'+viewSpaceDef.i18n+' > '+viewSpaceDef.object.display_name+'</span>';
-				_contextBarNode.append(contextTpl);
-
-				if(typeof(viewSpaceDef.items) != 'undefined') {
-					this.addItems(viewSpaceDef.items, id);
-				}
 			},
 
 			addItems: function(items,viewSpaceId) {
@@ -1001,6 +979,8 @@ for(vs in _viewSpaces) {
 				var vSpaceId = (typeof(viewSpaceId) == 'undefined') ? _currentViewSpace : viewSpaceId;
 //				if (!_viewSpaces[vSpaceId].isReady()) {
 //				}
+//DEBUG
+console.log('inside workspace.mergePorts with ids:'+port2MergeId+','+targetPortId);
 				_viewSpaces[vSpaceId].mergePorts('port-'+port2MergeId,'port-'+targetPortId);
 			},
 

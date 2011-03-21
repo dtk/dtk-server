@@ -6,6 +6,10 @@ module XYZ
         instance_id = ((create_node[:node]||{})[:external_ref]||{})[:instance_id]
         if instance_id.nil?
           ami = ((create_node[:image]||{})[:external_ref]||{})[:image_id]
+          unless ami
+            Log.error("cannot find ami")
+            ami = "ami-ee38c987" #TODO: stub
+          end
           raise ErrorCannotCreateNode.new unless ami
           create_options = {:image_id => ami}
           #TODO: right now hardcoding size and groups

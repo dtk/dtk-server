@@ -421,7 +421,6 @@ component.save(request.params)
         Log.error("no coordinates for node with id #{node[:id].to_s} in #{parent_id.to_s}") unless ui
         if ui
           if node[:id] == top_node[:id]
-            #TODO: does node ui have also be updated? node[:ui][parent_id.to_sym][:left] = assembly_left_pos.to_i
             ui[:left] = assembly_left_pos.to_i
           else
             ui[:left] = ui[:left].to_i + top_node[:left_diff].to_i

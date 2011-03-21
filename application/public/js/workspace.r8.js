@@ -602,6 +602,8 @@ console.log('I guess I am hitting this now!!!!');
 						'data': queryParams
 					}
 				});
+
+				this.refreshNotifications();
 			},
 
 			addNodesToGroup : function(nodeList,groupId) {
@@ -788,6 +790,8 @@ console.log(response);
 				if(typeof(viewSpaceDef.items) != 'undefined') {
 					this.addItems(viewSpaceDef.items, id);
 				}
+
+				this.refreshNotifications();
 			},
 
 			addItems: function(items,viewSpaceId) {
@@ -801,6 +805,17 @@ console.log(response);
 					return;
 				}
 				_viewSpaces[vSpaceId].addItems(items);
+			},
+
+//TODO: revisit when handling multiple viewspaces loaded at same time
+			refreshNotifications: function(viewSpaceId) {
+				var vSpaceId = (typeof(viewSpaceId) == 'undefined') ? _currentViewSpace : viewSpaceId;
+
+				//call refresh of notifications with slight delay
+				var notifyRefresh = function(){
+					R8.Notifications.refreshList();
+				}
+				setTimeout(notifyRefresh,1000);
 			},
 /*
 			renderItemPorts: function(itemId,ports,viewSpaceId) {

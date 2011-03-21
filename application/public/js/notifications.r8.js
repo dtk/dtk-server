@@ -48,14 +48,17 @@ if(!R8.Notifications) {
 						_node.addClass('active');
 						_panelNode.setStyle('display','block');
 						_panelOpen = true;
-
+//						this.refreshList();
+					}
+				},
+				refreshList: function() {
 						var dcId = R8.Workspace.get('context_id'),
 							that = this,
 							notificationsCallback = function(ioId,responseObj) {
 								eval("var response =" + responseObj.responseText);
 								//TODO: revisit once controllers are reworked for cleaner result package
 								notification_list = response['application_datacenter_get_warnings']['content'][0]['data'];
-								that.refreshList(notification_list);
+								that.setLatestList(notification_list);
 							}
 						var params = {
 							'callbacks': {
@@ -63,9 +66,8 @@ if(!R8.Notifications) {
 							}
 						};
 						R8.Ctrl.call('datacenter/get_warnings/'+dcId,params);
-					}
 				},
-				refreshList: function(nList) {
+				setLatestList: function(nList) {
 					R8.Utils.Y.one('#notify-count').set('innerHTML',nList.length);
 					_panelNode.set('innerHTML',R8.Rtpl.notification_list({'notification_list':nList}));
 				},

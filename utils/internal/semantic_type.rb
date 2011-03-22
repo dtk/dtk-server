@@ -58,7 +58,8 @@ class PropagateProcessor
         #TODO: may simplify and use flatten form
         value = Array.new
         output_v.each do |sap_config|
-          value += input_value.map{|input_item|sap_config.merge("host_address" => input_item["host_address"])}
+#TODO: euqivalent changes may be needed on other cartesion products: removing this for below          value += input_value.map{|input_item|sap_config.merge("host_address" => input_item["host_address"])}
+          value += input_value.map{|iv|iv["host_address"]}.uniq.map{|addr|sap_config.merge("host_address" => addr)}
         end
       else #not input_semantic_type().is_array?
         raise Error.new("propagate_when_sap_config__l4 does not support input scalar and output array with size > 1") if output_value.size > 1

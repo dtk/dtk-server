@@ -65,7 +65,9 @@
 
 #postgresql
   :postgresql__dir => "PostgreSQL Directory",
-  :conns_to_real_dbs => "Conn to DBs",
+  :conns_to_real_dbs__port => "DB Conn Port",
+  :conns_to_real_dbs__protocol => "DB Conn Proto",
+  :conns_to_real_dbs__host_address => "DB Conn Addr",
 #user_account
   :user_account__username => "User Name",
   :user_account__uid => "User ID",

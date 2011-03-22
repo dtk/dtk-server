@@ -109,7 +109,9 @@
  :wordpress__keys_secure_auth=>"Secure Auth Key",
 
 #haproxy
- :conns_to_real_servers => "Real Servers",
+ :conns_to_real_servers__host_address => "Real Server Addr",
+ :conns_to_real_servers__port => "Real Server Port",
+ :conns_to_real_servers__protocol => "Real Server Proto",
 
 #nagios
   :nagios__monitored_client_sap_config => "SAP Config",

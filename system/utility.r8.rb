@@ -53,12 +53,14 @@ module R8Tpl
         end
 
         def self.i18n_string_attribute(i18n,input_string,component_type=nil)
-          #TODO: stub; not yet using component_typ
+          #TODO: stub; not yet using component_type
           proc_input_string,index = ret_removed_array_index(input_string)
-          ret = index_print_form(index) 
-          ret += " " unless ret.empty?
           translation = translate_input(i18n,:attribute,proc_input_string)
-          ret + (translation ? translation : proc_input_string.to_s)
+          ret = (translation ? translation : proc_input_string.to_s)
+          if ndx = index_print_form(index) 
+            ret += " #{ndx}"
+          end 
+          ret
         end
         
         def self.translate_input(i18n,model_name,input_string)
@@ -75,15 +77,10 @@ module R8Tpl
         end
 
         def self.index_print_form(index)
-          return "" unless index
-          IndexPrintForm[index]||"nth"
+          return nil if index.nil?
+          return nil if index == 0
+          "[#{(index+1).to_s}]"
         end
-        IndexPrintForm = 
-          [
-           "",
-           "second",
-           "third"
-          ]
 
       end
 

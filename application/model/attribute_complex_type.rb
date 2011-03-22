@@ -173,7 +173,7 @@ module XYZ
         ret << attr
       else
         flatten_attr = attr.merge(:attribute_value => value_obj,:data_type => pattern[:type].to_s)
-        [:required,:dynamic].each{|k|flatten_attr.merge!(k => pattern[k]) unless pattern[k].nil?}
+        [:required,:dynamic,:hidden].each{|k|flatten_attr.merge!(k => pattern[k]) unless pattern[k].nil?}
         ret << flatten_attr
       end    
       nil

@@ -237,7 +237,7 @@ module XYZ
 
     #TODO: collapse this and 4 fields used here
     def is_readonly?()
-      (self[:port_type] == "input") or self[:read_only] or self[:dynamic] or self[:cannot_change]
+      (self[:port_type] == "input") or self[:read_only] or self[:dynamic] or self[:cannot_change] 
     end
 
     def attribute_value()

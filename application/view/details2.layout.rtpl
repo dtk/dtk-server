@@ -15,6 +15,9 @@
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/cmdbar.css" />
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/toolbar.css" />
 
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/list.css" />
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/search.css" />
+
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/details2.layout.css" />
 
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/temp-dev.css" />
@@ -111,6 +114,8 @@ YUI_config = {
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/workspace.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/cmdbar.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/maintoolbar.r8.js"></script>
+
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/search.r8.js"></script>
 
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/display.r8.js"></script>
 

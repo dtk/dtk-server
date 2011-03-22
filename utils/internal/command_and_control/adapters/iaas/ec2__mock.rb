@@ -1,4 +1,5 @@
 require File.expand_path('ec2', File.dirname(__FILE__))
+require 'ipaddr'
 module XYZ
   module CommandAndControlAdapter
     class Ec2__mock < Ec2
@@ -18,11 +19,13 @@ module XYZ
 
         def server_get(instance_id)
           #TODO stub
+          #hard coding AWS east addresses
+          addr = generate_random_ipv4("184.73.0.1","184.73.255.254")
           network_attrs = {
-            :ip_address=>"184.73.10.255",
+            :ip_address=>addr,
             :private_dns_name=>"domU-12-31-39-02-D8-05.compute-1.internal",
             :private_ip_address=>"10.248.223.243",
-            :dns_name=>"ec2-184-73-10-255.compute-1.amazonaws.com",
+            :dns_name=>"ec2-#{addr.gsub(".","-")}.compute-1.amazonaws.com",
           }
           #TODO: stub
           block_device_mapping =
@@ -67,6 +70,12 @@ module XYZ
         "i-"+(1..8).map{|x|rand(15).to_s(16)}.join("")
       end
 
+      def generate_random_ipv4(lower_ip_dot_n,upper_ip_dot_n)
+        lower = IPAddr.new(lower_ip_dot_n)
+        upper = IPAddr.new(upper_ip_dot_n)
+        offset = rand(1+upper.to_i - lower.to_i)
+        IPAddr.new(lower.to_i + offset,Socket::AF_INET).to_s
+      end
 
       ####
       def id_in_cache(id)

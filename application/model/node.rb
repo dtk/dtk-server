@@ -384,7 +384,7 @@ module XYZ
       datacenter_id_sym = datacenter[:id].to_s.to_sym
       node_id_sym = self[:id].to_s.to_sym
       #TODO: hack assumes that canm just take position from first node[:u1]
-      ui = ((datacenter[:ui]||{})[:items]||{})[node_id_sym] || (self[:ui]||{})[datacenter_id_sym] || (self[:ui]||{}).values.first
+      ((datacenter[:ui]||{})[:items]||{})[node_id_sym] || (self[:ui]||{})[datacenter_id_sym] || (self[:ui]||{}).values.first
     end
 
     def update_ui_info!(ui,datacenter)

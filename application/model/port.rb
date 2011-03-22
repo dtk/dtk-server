@@ -5,7 +5,9 @@ module XYZ
     def location()
       #TODO: stub
       return "east" if self[:display_name] =~ /nagios__server/
+      return "east" if self[:display_name] =~ /mysql__master/
       return "west" if self[:display_name] =~ /nagios__client/
+      return "west" if self[:display_name] =~ /mysql__slave/
       case self[:direction]
         when "output" then "north"
         when "input" then "south"

@@ -864,13 +864,7 @@
             "sap_ref__l4": {
               "required": true,
               "dynamic": false,
-              "semantic_type": {
-                "sap_ref__l4": {
-                  "application": {
-                    "type": "sql"
-                  }
-                }
-              },
+              "semantic_type": {":array" : "sap_ref__l4"},
               "display_name": "sap_ref__l4",
               "description": "wordpress service access point reference",
               "cannot_change": false,
@@ -1067,23 +1061,6 @@
               "read_only": false,
               "data_type": "json",
               "semantic_type_summary": "sap_ref__l4",
-              "hidden": false
-            },
-            "master_log_ref": {
-              "required": true,
-              "dynamic": false,
-              "semantic_type": "mysql_master_log_info",
-              "display_name": "master_log_ref",
-              "description": "reference for mysql slave to get master log position",
-              "cannot_change": false,
-              "external_ref": {
-                "type": "service_attribute",
-                "path": "service[mysql_server][master_log_ref]"
-              },
-              "is_port": true,
-              "read_only": false,
-              "data_type": "json",
-              "semantic_type_summary": "mysql_master_log_info",
               "hidden": false
             }
           },

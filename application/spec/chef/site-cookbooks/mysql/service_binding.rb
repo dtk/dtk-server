@@ -74,7 +74,7 @@ service :mysql_server do
     :required => true,
     :type => "hash",
     :description => "mysql service access point reference for slave to connect with master",
-    :semantic_type => {"sap_ref__db" => {"application" => {"type" => "sql::mysql"}}}
+    :semantic_type => "sap_ref__l4"
 
     
   attribute "master_log_ref",

@@ -4,5 +4,5 @@ service :wordpress do
     :required => true,
     :type => "hash",
     :description => "wordpress service access point reference",
-    :semantic_type => {"sap_ref__l4" => {"application" => {"type" => "sql"}}}
+    :semantic_type => {":array" => "sap_ref__l4"}
 end

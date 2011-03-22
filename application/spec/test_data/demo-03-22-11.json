@@ -1631,22 +1631,6 @@
               "data_type": "string",
               "hidden": false
             },
-            "port": {
-              "required": false,
-              "dynamic": false,
-              "display_name": "port",
-              "description": "MySQL Server TCP port",
-              "value_asserted": "3306",
-              "cannot_change": false,
-              "external_ref": {
-                "type": "chef_attribute",
-                "path": "node[mysql][port]"
-              },
-              "is_port": false,
-              "read_only": false,
-              "data_type": "string",
-              "hidden": false
-            },
             "datadir": {
               "required": false,
               "dynamic": false,
@@ -1692,7 +1676,7 @@
               "is_port": false,
               "read_only": false,
               "data_type": "string",
-              "hidden": false
+              "hidden": true
             },
             "tunable__net_write_timeout": {
               "required": false,
@@ -1773,21 +1757,6 @@
               "external_ref": {
                 "type": "chef_attribute",
                 "path": "node[mysql][tunable][wait_timeout]"
-              },
-              "is_port": false,
-              "read_only": false,
-              "data_type": "string",
-              "hidden": false
-            },
-            "bind_address": {
-              "required": false,
-              "dynamic": false,
-              "display_name": "bind_address",
-              "description": "Address that mysqld should listen on",
-              "cannot_change": false,
-              "external_ref": {
-                "type": "chef_attribute",
-                "path": "node[mysql][bind_address]"
               },
               "is_port": false,
               "read_only": false,

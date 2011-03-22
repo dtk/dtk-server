@@ -22,6 +22,7 @@ attribute "mysql/server_root_password",
   :description => "Randomly generated password for the mysqld root user",
   :recipes => ["mysql::server","mysql::server2"]
 
+=begin
 attribute "mysql/port",
   :display_name => "MySQL TCP Port",
   :description => "MySQL Server TCP port",
@@ -32,6 +33,7 @@ attribute "mysql/bind_address",
   :display_name => "MySQL Bind Address",
   :description => "Address that mysqld should listen on",
   :recipes => ["mysql::server","mysql::server2"]
+=end
 
 attribute "mysql/datadir",
   :display_name => "MySQL Data Directory",
@@ -93,6 +95,7 @@ attribute "mysql/tunable/max_heap_table_size",
 
 attribute "mysql/db_component",
   :default => "mysql__db",
+  :hidden => true,
   :recipes => ["mysql::server","mysql::server2"]
 
 ###TODO may put in seperate file

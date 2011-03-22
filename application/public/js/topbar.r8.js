@@ -52,8 +52,8 @@ if(!R8.Topbar) {
 							};
 						R8.Ctrl.call(route,params);
 					}},
-					{id:'datacenters',i18n:'Datacenters',contentLoader:function(contentNode){
-						var route = 'user/edit',
+					{id:'add-environments',i18n:'Add Environment',contentLoader:function(contentNode){
+						var route = 'datacenter/wspace_edit',
 							params = {
 								'cfg':{
 									'data':'panel_id='+contentNode.get('id')

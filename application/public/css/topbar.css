@@ -215,7 +215,7 @@
 .tool-item .tool-btn.add-users {
 	background-image: url(../images/topbar/add-users-btn-sprite.png);
 }
-.tool-item .tool-btn.datacenters {
+.tool-item .tool-btn.add-environments {
 	background-image: url(../images/topbar/datacenters-btn-sprite.png);
 }
 .tool-item .tool-btn.commit {

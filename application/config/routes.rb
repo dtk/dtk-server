@@ -181,7 +181,19 @@ R8::Routes["datacenter/list"] = {
   :layout => 'dashboard'
 }
 R8::Routes["component/list"] = {
-  :layout => 'library'
+  :layout => 'inventory'
+}
+
+R8::Routes["node/list"] = {
+  :layout => 'inventory'
+}
+
+R8::Routes["datacenter/list"] = {
+  :layout => 'inventory'
+}
+
+R8::Routes["inventory/index"] = {
+  :layout => 'inventory'
 }
 
 R8::Routes.freeze

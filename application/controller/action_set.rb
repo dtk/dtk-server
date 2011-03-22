@@ -69,7 +69,11 @@ module XYZ
         model,method = action[:route].split("/")
         method ||= :index
         action_namespace = "#{R8::Config[:application_name]}_#{model}_#{method}".to_sym
-
+=begin
+#DEBUG
+pp ctrl_result
+pp ')))))))))))))))))))))))))))))))))))))))))))))'
+=end
         @ctrl_results[action_namespace] = ctrl_result
         @ctrl_results[:as_run_list] << action_namespace
       end

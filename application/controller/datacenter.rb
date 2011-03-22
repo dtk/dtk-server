@@ -156,5 +156,21 @@ pp request.params
       return {'data'=>link_list}
     end
 
+    def wspace_edit
+      tpl = R8Tpl::TemplateR8.new("datacenter/wspace_edit",user_context())
+      tpl.assign(:_app,app_common())
+      tpl.assign(:submit_label,"Create Environment")
+      panel_id = request.params['panel_id']
+
+      include_js('plugins/environment.tool')
+#      run_javascript('setTimeout(initUserForm,500);')
+      run_javascript('R8.EnvironmentTool.init();')
+
+      return {
+        :content=> tpl.render(),
+        :panel=>panel_id
+      }
+    end
+
   end
 end

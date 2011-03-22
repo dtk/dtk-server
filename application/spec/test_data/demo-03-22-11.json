@@ -1055,13 +1055,7 @@
             "sap_ref_to_master": {
               "required": true,
               "dynamic": false,
-              "semantic_type": {
-                "sap_ref__db": {
-                  "application": {
-                    "type": "sql::mysql"
-                  }
-                }
-              },
+              "semantic_type": "sap_ref__l4",
               "display_name": "sap_ref_to_master",
               "description": "mysql service access point reference for slave to connect with master",
               "cannot_change": false,
@@ -1072,7 +1066,7 @@
               "is_port": true,
               "read_only": false,
               "data_type": "json",
-              "semantic_type_summary": "sap_ref__db",
+              "semantic_type_summary": "sap_ref__l4",
               "hidden": false
             },
             "master_log_ref": {

@@ -34,6 +34,7 @@
   :hadoop_hive => 'Hadoop Hive',
   :hadoop_doc => 'Hadoop Docs',
   :hadoop_cloudera_c3 => 'Cloudera C3',
+  :hadoop_cloudera_c3__conf_pseudo => 'Pseudo Conf',
   :rabbitmq_edge_stomp => 'Rabbit - Stomp',
   :mysql_server2 => 'MySQL Server',
   :mysql_server => 'MySQL Server',

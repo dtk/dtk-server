@@ -39,6 +39,7 @@
 	  "basic_type": "service"
         },
         "haproxy": {
+          "ui": "{\"images\": {\"tnail\":\"haproxy.png\",\"display\":\"haproxy.png\",\"tiny\":\"\"}}",
 	  "specific_type": "load_balancer"
         },
 	"hadoop_cloudera_c3": {

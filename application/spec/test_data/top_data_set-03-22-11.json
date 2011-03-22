@@ -2591,6 +2591,13 @@
         },
         "haproxy": {
           "type": "instance",
+          "ui": {
+            "images": {
+              "tnail": "haproxy.png",
+              "display": "haproxy.png",
+              "tiny": ""
+            }
+          },
           "component_type": "haproxy",
           "basic_type": "service",
           "display_name": "haproxy",

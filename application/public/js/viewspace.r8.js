@@ -280,6 +280,7 @@ console.log(_items[mergePortDef.parentItemId]);
 */
 					var itemId = item['object']['id'];
 
+//TODO: revisit with UI pos cleanup, using ui params at both item and item.object level
 					if(typeof(_ui.items[itemId]) == 'undefined') {
 						_ui.items[itemId] = {};
 						_ui.items[itemId]['top'] = item['object']['ui'][_id]['top'];

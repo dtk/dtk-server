@@ -590,20 +590,20 @@ console.log('I guess I am hitting this now!!!!');
 
 				var completeCallback = function() {
 					R8.Workspace.refreshItem(modelId);
+					R8.Workspace.refreshNotifications();
 				}
 				var callbacks = {
 					'io:renderComplete' : completeCallback
 				};
 //				containerNode.setAttribute('data-status','pending_delete');
 //				R8.Ctrl.call('component/clone/'+componentId,queryParams,callbacks);
+
 				R8.Ctrl.call('component/clone/'+componentId,{
 					'callbacks': callbacks,
 					'cfg': {
 						'data': queryParams
 					}
 				});
-
-				this.refreshNotifications();
 			},
 
 			addNodesToGroup : function(nodeList,groupId) {
@@ -614,7 +614,6 @@ console.log('I guess I am hitting this now!!!!');
 
 			refreshItem : function(itemId) {
 //				itemId = 'item-'+itemId;
-//console.log('inside workspace, should refresh item:'+itemId);
 				_viewSpaces[_currentViewSpace].items(itemId).refresh();
 return;
 				var viewspaceNode = R8.Utils.Y.one('#viewspace');

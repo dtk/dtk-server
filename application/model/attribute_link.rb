@@ -248,21 +248,38 @@ module XYZ
         output_attr_ids.each_with_index{|id,i|parent_map[id] = parent_id_handles[i]}
       end
 
-      attrs_to_update.each do |row|
+      attrs_to_update.each_with_index do |row,i|
         input_attr_row = row[:attribute2]
         output_attr_row = row
         propagate_proc = PropagateProcessor.new(row[:attribute_link],input_attr_row,output_attr_row)
 
         new_value_row = propagate_proc.propagate().merge(:id => input_attr_row[:id])
-        new_val_rows << new_value_row
 
-        change = {
-          :new_item => attr_mh.createIDH(:guid => input_attr_row[:id], :display_name => input_attr_row[:display_name]),
-          :change => {:old => input_attr_row[:value_derived], :new => new_value_row[:value_derived]}
-        }
-        change.merge!(:parent => parent_map[row[:id]]) if parent_map[row[:id]]
-        change_info[input_attr_row[:id]] = change
+        #case on whether the input attribute is also upstream in attrs_to_update; if so just update these upstream
+        #references; otehrwise addpend to new_val_rows and change_info
+        attr_upstream = false
+=begin
+TODO
+Need to fix; has side effect that in initial prop mode not updating propely
+        (i+1..attrs_to_update.size-1).each do |j|
+          if input_attr_row[:id] == attrs_to_update[j][:attribute2][:id]
+            attr_upstream = true
+            attrs_to_update[j][:attribute2][:value_derived] = new_value_row[:value_derived]
+          end
+        end
+=end
+        unless attr_upstream
+          new_val_rows << new_value_row
+
+          change = {
+            :new_item => attr_mh.createIDH(:guid => input_attr_row[:id], :display_name => input_attr_row[:display_name]),
+            :change => {:old => input_attr_row[:value_derived], :new => new_value_row[:value_derived]}
+          }
+          change.merge!(:parent => parent_map[row[:id]]) if parent_map[row[:id]]
+          change_info[input_attr_row[:id]] = change
+        end
       end
+
       return Hash.new if new_val_rows.empty?
       changed_ids = Attribute.update_changed_values(attr_mh,new_val_rows,:value_derived)
       #if no changes exit, otherwise recursively call propagate

@@ -163,7 +163,7 @@ console.log(taskDef);
 						break;
 				}
 //TODO: cleanup post demos
-				if (taskDefType != 'setting') {
+				if (taskDefType != 'setting' && taskDefType != 'top' && taskDefType != 'no_tasks') {
 					var tempDropdown = '<select name=""><option value="foo">Auto</option><option value="bar">Manual</option></select>';
 					editContent = editContent + '&nbsp;' + tempDropdown + '&nbsp;';
 				}

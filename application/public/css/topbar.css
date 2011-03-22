@@ -116,7 +116,7 @@
 	height: 25px;
 	width: 25px;
 	background: no-repeat url(../images/topbar/context-bar-end-caps.png);
-	background-position: -10px 0px;
+	background-position: -15px 0px;
 	position: relative;
 	float: left;
 }
@@ -131,7 +131,6 @@
 #wspace-context-wrapper .context-span {
 	position: relative;
 	float: left;
-	font-weight: bold;
 	font-size: 14px;
 	margin: 3px 0 0 10px;
 	color: #FFFFFF;

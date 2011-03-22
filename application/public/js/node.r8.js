@@ -198,7 +198,6 @@ haveNewPorts = true;
 					};
 					R8.Ctrl.call('node/get_ports/' + _id, params);
 				}
-//console.log('going to call to get ports for node...');
 				setTimeout(asynCall, 1);
 			},
 

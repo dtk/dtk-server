@@ -111,6 +111,8 @@ if (!R8.Ctrl) {
 									Y.on('io:end', params['callbacks'][callback]);
 									break;
 								case "io:renderComplete":
+//DEBUG
+console.log('have a renderComplete callback....');
 									R8.Ctrl.onRenderComplete = params['callbacks'][callback];
 									break;
 							}
@@ -126,11 +128,8 @@ if (!R8.Ctrl) {
 					var request_url = R8.config['base_uri']+'/'+route;
 
 					var request = Y.io(request_url, cfg);
-//console.log('Requesting.....');
-//DEBUG
-//console.log('Request URL:'+request_url);
-//console.log(request);
 					var ioId = request['id'];
+
 					R8.Ctrl.callResults[ioId] = {
 						'request' : request
 					};
@@ -279,8 +278,6 @@ continue;
 				for(index in contentList) {
 					if(typeof(contentList[index]) === 'object' && typeof(contentList[index]['src']) !='undefined' && contentList[index]['src'] != '') {
 						YUI().use(function(Y) {
-//DEBUG
-//console.log(contentList[index]);
 							var url = contentList[index]['src'];
 							obj = Y.Get.script(url, {
 								onSuccess: function() {

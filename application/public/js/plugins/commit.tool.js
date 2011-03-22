@@ -225,7 +225,9 @@ console.log(taskDef);
 */
 				_formNode = R8.Utils.Y.one('#modal-form');
 				_submitBtnNode = R8.Utils.Y.one('#modal-form-submit-btn');
-				_submitBtnNode.on('click',this.formSubmit);
+				_submitBtnNode.on('click',function(e){
+					this.formSubmit();
+				},this);
 //				formNode.setAttribute('onsubmit',this.formSubmit);
 			},
 
@@ -248,8 +250,6 @@ console.log(taskDef);
 				};
 				var datacenter_id = R8.Workspace.get('context_id');
 				R8.Ctrl.call('workspace/commit_changes/'+datacenter_id,params);
-
-console.log('helllloooo there.....');
 			},
 
 			setupTreeDD: function(rootListNodeId) {

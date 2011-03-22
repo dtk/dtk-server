@@ -641,10 +641,29 @@ pp datacenter
 
       errors = ValidationError.find_missing_required_attributes(top_level_task)
       if errors
+        error_list = []
         #TODO: stub
+        i18n = {
+          "MissingRequiredAttribute"=>'is missing required Attribute'
+        }
         alert_msg = "'Commit errors for missing attrs'"
-        errors.each {|e| pp [:commit_error,Aux::demodulize(e.class.to_s),e]}
+        error_str = "Commit errors for missing attrs<br/>"
+        errors.each { |e|
+          error_name = Aux::demodulize(e.class.to_s)
+          case error_name
+            when "MissingRequiredAttribute"
+              error_description = "Component <b>#{e[:component_name]}</b> on node <b>#{e[:node_name]}</b> "+i18n[error_name]+"#{e[:attribute_name]}"
+          end
+#TODO: revisit when fully implementing notifications/feed, right now warnings on component add are different then commit errors
+          e[:name] = error_name
+          e[:target_node_id] = e[:node_id]
+          e[:description] = error_description
+          e[:type] = "error"
+          error_list << e
+         }
         run_javascript("R8.Workspace.showAlert(#{alert_msg});")
+        error_list_json = JSON.generate(error_list)
+        run_javascript("R8.Notifications.addErrors(#{error_list_json});")
         return {}
       end
 

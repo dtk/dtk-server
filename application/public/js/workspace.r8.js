@@ -910,8 +910,14 @@ for(vs in _viewSpaces) {
 
 			showAlert: function(alertStr) {
 				_alertNodeId = R8.Utils.Y.guid();
-				var alertTpl = '<div id="'+_alertNodeId+'" style="height: 75px; width: 250px; border: 1px solid black; background-color: #CCCCCC; position: absolute; z-index: 100;">\
+/*				var alertTpl = '<div id="'+_alertNodeId+'" style="height: 75px; width: 250px; border: 1px solid black; background-color: #CCCCCC; position: absolute; z-index: 100;">\
 								<div style="position: relative; margin: 5px;"><b>'+alertStr+'</b></div>\
+								</div>',
+*/
+				var alertTpl = '<div id="'+_alertNodeId+'" class="modal-alert-wrapper">\
+									<div class="l-cap"></div>\
+									<div class="body"><b>'+alertStr+'</b></div>\
+									<div class="r-cap"></div>\
 								</div>',
 					containerNode = R8.Utils.Y.one('#wspace-container'),
 					nodeRegion = containerNode.get('region'),
@@ -923,7 +929,7 @@ for(vs in _viewSpaces) {
 				containerNode.append(alertTpl);
 				_alertNode = R8.Utils.Y.one('#'+_alertNodeId);
 				_alertNode.setStyles({'top':aTop,'left':aLeft,'display':'block'});
-
+//return;
 				YUI().use('anim', function(Y) {
 					var anim = new Y.Anim({
 						node: '#'+_alertNodeId,

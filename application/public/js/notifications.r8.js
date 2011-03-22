@@ -7,6 +7,7 @@ if(!R8.Notifications) {
 				_panelNode = null,
 				_panelOpen = false,
 				_panelWidth = 400,
+				_notificationList = [],
 
 				_tbarTpl = '<div class="tbar-plugin notifications">\
 							<div class="icon"></div>\
@@ -71,6 +72,9 @@ if(!R8.Notifications) {
 								eval("var response =" + responseObj.responseText);
 								//TODO: revisit once controllers are reworked for cleaner result package
 								notification_list = response['application_datacenter_get_warnings']['content'][0]['data'];
+//DEBUG
+console.log(notification_list);
+
 								that.setLatestList(notification_list);
 							}
 						var params = {
@@ -80,8 +84,12 @@ if(!R8.Notifications) {
 						};
 						R8.Ctrl.call('datacenter/get_warnings/'+dcId,params);
 				},
+				updateCount: function() {
+					R8.Utils.Y.one('#notify-count').set('innerHTML',_notificationList.length);
+				},
 				setLatestList: function(nList) {
-					R8.Utils.Y.one('#notify-count').set('innerHTML',nList.length);
+					_notificationList = nList;
+					this.updateCount();
 					_panelNode.set('innerHTML',R8.Rtpl.notification_list({'notification_list':nList}));
 				},
 				startPoller: function() {
@@ -89,6 +97,15 @@ if(!R8.Notifications) {
 				},
 				cancelPoller: function() {
 					
+				},
+				addErrors: function(errorList) {
+					for(var i in errorList) {
+						_notificationList.push(errorList[i]);
+					}
+					this.updateCount();
+					_panelNode.prepend(R8.Rtpl.notification_list({'notification_list':errorList}));
+console.log('inside of notifications addErrors....');
+console.log(errorList);
 				}
 			}
 		}();

@@ -44,10 +44,12 @@
 
 .menu-bar .divider {
 	height: 40px;
-	width: 6px;
-	background-image: url(../images/topbar/menu-divider.png);
+/*	width: 6px;*/
+	width: 26px;
+/*	background-image: url(../images/topbar/menu-divider.png);*/
+	background-image: url(../images/topbar/menu-divider-angled.png);
 	background-repeat: no-repeat;
-	margin: 0 15px;
+/*	margin: 0 15px;*/
 	float: left;
 }
 .menu-bar .left-cap {
@@ -98,7 +100,7 @@
 /*------Context Menu Bar-------------------*/
 
 #wspace-context-wrapper {
-	width: 330px;
+	width: 300px;
 	height: 25px;
 	position: absolute;
 	z-index: 100;
@@ -109,20 +111,20 @@
 	height: 25px;
 	width: 5px;
 	background: no-repeat url(../images/topbar/context-bar-end-caps.png);
+	background-position: -5px 0px;
 	position: relative;
 	float: left;
 }
 #wspace-context-wrapper .r-endcap {
 	height: 25px;
-	width: 25px;
+	width: 5px;
 	background: no-repeat url(../images/topbar/context-bar-end-caps.png);
-	background-position: -15px 0px;
 	position: relative;
 	float: left;
 }
 #wspace-context {
 	height: 25px;
-	width: 300px;
+	width: 290px;
 	background-image: url(../images/topbar/context-bar-bg-slice.png);
 	background-repeat: repeat-x;
 	position: relative;

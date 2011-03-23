@@ -114,7 +114,7 @@ if(!R8.Topbar) {
 				_dropdowns[0].init();
 
 //TODO: revisit to cleanup later
-_toolbarNode.append('<div class="menu-divider"></div>');
+_toolbarNode.append('<div class="divider"></div>');
 
 				_toolbars[0] = new R8.ToolbarGroup(toolbarDef);
 				_toolbarNode.append(_toolbars[0].render());
@@ -175,7 +175,7 @@ _toolbarNode.append('<div class="menu-divider"></div>');
 			_alignment = _cfg.align,
 
 			_divisionTpl = '<div id="'+_id+'-tbar" style="height: inherit; position: relative;">\
-								<div class="menu-divider"></div>\
+								<div class="divider"></div>\
 								<div id="'+_id+'-tbar-content" style="position: relative; float: left; height: 40px;">Hello Foo!!!</div>\
 							</div>';
 

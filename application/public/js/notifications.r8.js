@@ -72,9 +72,6 @@ if(!R8.Notifications) {
 								eval("var response =" + responseObj.responseText);
 								//TODO: revisit once controllers are reworked for cleaner result package
 								notification_list = response['application_datacenter_get_warnings']['content'][0]['data'];
-//DEBUG
-console.log(notification_list);
-
 								that.setLatestList(notification_list);
 							}
 						var params = {

@@ -613,6 +613,16 @@ console.log(_ui.items[itemId]);
 				return null;
 			},
 
+			getItemByPortId: function(portId) {
+				for(itemId in _items) {
+					var pDefs = _items[itemId].get('portDefs');
+					if(pDefs != null && typeof(pDefs[portId]) != 'undefined') {
+						var returnDef = pDefs[portId];
+						return _items[itemId];
+					}
+				}
+				return null;
+			},
 			setLink: function(id,def) {
 				_links[id] = def;
 

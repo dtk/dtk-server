@@ -1088,61 +1088,70 @@ console.log('not a valid link.., mis-matched types...');
 					linkChanges = linkResult.link_changes;
 
 				if(typeof(linkChanges) != 'undefined') {
-//DEBUG
-console.log('link changes...');
-console.log(linkChanges);
 					if (typeof(linkChanges.new_l4_ports) != 'undefined' && linkChanges.new_l4_ports.length > 0) {
 						//TODO: assume only one new port for now, revisit to cleanup if no use case is found
 						var newPortObjId = linkChanges.new_l4_ports[0], newPortId = 'port-' + newPortObjId;
-						var oldPortId = 'port-' + linkChanges.merged_external_ports[0].external_port_id, oldPortNodeId = _ports[oldPortId].nodeId;
+						var oldPortId = 'port-' + linkChanges.merged_external_ports[0].external_port_id;
 
-						R8.Utils.Y.one('#' + oldPortNodeId).set('id', newPortId);
-
-						_ports[newPortId] = _ports[oldPortId];
-						_ports[newPortId].id = newPortObjId;
-						_ports[newPortId].nodeId = newPortId;
-
-						if (_tempLinkDef.startItem.nodeId == oldPortNodeId) {
-							_tempLinkDef.startItem.nodeId = newPortId;
+						var swapDef = {
+								'oldPortId': oldPortId,
+								'newPortId': newPortId,
+								'tempLinkDef': _tempLinkDef,
+								'newLink': newLink
+							}
+						if(typeof(_ports[oldPortId]) == 'undefined') {
+							//this is node for output port, need input one
+							var inputItem = _viewSpace.getItemByPortId(oldPortId);
+							inputItem.swapExt4L4(swapDef);
+						} else {
+							this.swapExt4L4(swapDef);
 						}
-						else {
-							_tempLinkDef.endItems[0].nodeId = newPortId;
-						}
-
-						var tempLinkId = _tempLinkDef.id;
-						var newLinkId = 'link-'+newLink.id;
-						_tempLinkDef.id = newLinkId;
-						_tempLinkDef.style = [
-							{'strokeStyle':'#25A3FC','lineWidth':3,'lineCap':'round'},
-							{'strokeStyle':'#63E4FF','lineWidth':1,'lineCap':'round'}
-						];
-						R8.Utils.Y.one('#'+tempLinkId).set('id',newLinkId);
-		//				_viewSpace.setLink(newLink.id,_tempLinkDef);
-						_viewSpace.addLinkToItems(_tempLinkDef);
-						R8.Canvas.renderLink(_tempLinkDef);
 					} else if (typeof(linkChanges.merged_external_ports) != 'undefined') {
 						var mergePortObjId = linkChanges.merged_external_ports[0].external_port_id,
 							targetPortObjId = linkChanges.merged_external_ports[0].l4_port_id;
-//DEBUG
-/*
-console.log('need to merge ports...');
-console.log('ports-->');
-console.log(_ports);
-console.log('mergePort:'+mergePortObjId);
-console.log('targetPort:'+targetPortObjId);
-*/
-//TODO: revisit, should cleanup
+
 						_tempLinkDef.port_id = mergePortObjId;
 						_tempLinkDef.other_end_id = targetPortObjId;
 						_viewSpace.addLinkToItems(_tempLinkDef);
 						_viewSpace.addLink(_tempLinkDef);
-//DEBUG
-console.log('calling mergePorts with mergePort:'+mergePortObjId+'   and targetPort:'+targetPortObjId);
+
 						_viewSpace.mergePorts('port-'+mergePortObjId,'port-'+targetPortObjId);
 					}
 				}
 			},
 
+			swapExt4L4: function(swapDef) {
+				var oldPortId = swapDef.oldPortId,
+					newPortId = swapDef.newPortId,
+					tempLinkDef = swapDef.tempLinkDef,
+					newLink = swapDef.newLink;
+
+				var oldPortNodeId = _ports[oldPortId].nodeId;
+				R8.Utils.Y.one('#' + oldPortNodeId).set('id', newPortId);
+
+				_ports[newPortId] = _ports[oldPortId];
+				_ports[newPortId].id = newPortId;
+				_ports[newPortId].nodeId = newPortId;
+
+				if (tempLinkDef.startItem.nodeId == oldPortNodeId) {
+					tempLinkDef.startItem.nodeId = newPortId;
+				}
+				else {
+					tempLinkDef.endItems[0].nodeId = newPortId;
+				}
+
+				var tempLinkId = tempLinkDef.id;
+				var newLinkId = 'link-'+newLink.id;
+				tempLinkDef.id = newLinkId;
+				tempLinkDef.style = [
+					{'strokeStyle':'#25A3FC','lineWidth':3,'lineCap':'round'},
+					{'strokeStyle':'#63E4FF','lineWidth':1,'lineCap':'round'}
+				];
+				R8.Utils.Y.one('#'+tempLinkId).set('id',newLinkId);
+		//		_viewSpace.setLink(newLink.id,_tempLinkDef);
+				_viewSpace.addLinkToItems(tempLinkDef);
+				R8.Canvas.renderLink(tempLinkDef);
+			},
 			portsReady: function() {
 				return _portsReady;
 			},

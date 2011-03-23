@@ -258,16 +258,12 @@ module XYZ
         #case on whether the input attribute is also upstream in attrs_to_update; if so just update these upstream
         #references; otehrwise addpend to new_val_rows and change_info
         attr_upstream = false
-=begin
-TODO
-Need to fix; has side effect that in initial prop mode not updating propely
         (i+1..attrs_to_update.size-1).each do |j|
           if input_attr_row[:id] == attrs_to_update[j][:attribute2][:id]
             attr_upstream = true
             attrs_to_update[j][:attribute2][:value_derived] = new_value_row[:value_derived]
           end
         end
-=end
         unless attr_upstream
           new_val_rows << new_value_row
 

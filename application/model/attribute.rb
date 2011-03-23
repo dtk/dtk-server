@@ -433,10 +433,48 @@ pp [:nested_changes,nested_changes]
     end
 
     def self.update_changed_values(attr_mh,new_val_rows,value_type)
+      return update_changed_values_incremental(attr_mh,new_val_rows,value_type) if new_val_rows.first and new_val_rows.first.kind_of?(PropagateProcessor::OutputArraySlice) 
       update_select_ds = SQL::ArrayDataset.create(db,new_val_rows,attr_mh,:convert_for_update => true)
       opts = {:update_only_if_change => [value_type],:returning_cols => [:id]}
       update_from_select(attr_mh,FieldSet.new(:attribute,[value_type]),update_select_ds,opts)
     end
+
+    def self.update_changed_values_incremental(attr_mh,array_slice_rows,value_type)
+      rows = array_slice_rows.map do |r|
+        value = incremental_value(:value_derived,r[:indexes],r[:array_slice])
+        {
+          :id => r[:id],
+          :value_derived => value
+        }
+      end
+      #TODO: just for testing since throws away all but first row
+     x = rows.first[:value_derived]
+      fs = Model::FieldSet.opt([:id,{x => :value_derived}],model_name)
+      update_select_ds = Model.get_objects_just_dataset(attr_mh,nil,fs)
+      opts = {:update_only_if_change => [value_type],:returning_cols => [:id]}
+      update_from_select(attr_mh,FieldSet.new(:attribute,[value_type]),update_select_ds,opts)
+    end
+    #TODO: this should probably go in db../update
+    def self.incremental_value(col,indexes,array_slice)
+      pattern = Array.new
+      replace = Array.new
+      array_slice_ndx = 0
+      replace_ndx = 1
+      (0..indexes.max).each do |i|
+        if indexes.include?(i)
+          pattern << "{.+?}"
+          replace << array_slice[array_slice_ndx]
+          array_slice_ndx += 1
+        else
+          pattern << "({.+?})"
+          replace << "\\#{replace_ndx}"
+          replace_ndx += 1
+        end
+      end
+      replace_string = replace.map{|x|(x.kind_of?(Hash) or x.kind_of?(Array)) ? JSON.generate(x) : x}.join(",")
+      :regexp_replace.sql_function(:value_derived,pattern.join(","),replace_string)
+    end
+
 
     def self.get_attribute_with_base_object(attr_idh,base_model_name)
       field_set = FieldSet.new(:attribute,[:id,:display_name,:value_asserted,"base_object_#{base_model_name}".to_sym])

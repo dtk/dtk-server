@@ -1,15 +1,12 @@
 module XYZ
-class PropagateProcessor
+  class PropagateProcessor
+    class Output < HashObject
+    end
+    class OutputArraySlice < Output
+    end
+
     #propgate from output var to input var
     def propagate()
-
-=begin Debuging helpers
-      puts "---------------------------"
-      [:function,:function_index,:input_value,:input_semantic_type,:output_value,:output_semantic_type].each do |x| 
-        pp [x,eval(x.to_s)]
-      end
-      puts "---------------------------"
-=end
       #function 'eq' short circuited
       return {:value_derived => output_value_aux(), :link_info => nil} if function == "eq"
       hash_ret = 
@@ -29,7 +26,7 @@ class PropagateProcessor
          else
           raise ErrorNotImplemented.new("propagate value not implemented yet for fn #{function}")
         end
-      hash_ret
+      hash_ret.kind_of?(Output) ? hash_ret : Output.new(hash_ret)
     end
 
     def initialize(attr_link,input_attr,output_attr)
@@ -103,12 +100,13 @@ class PropagateProcessor
     end
 
     def propagate_when_eq_indexed()
+      #TODO: in transition; getr rid of need to put in :derived_value
       array_pointers = Attribute::LinkInfo.array_pointers(@input_attr,function_index)
       new_rows = output_value().nil? ? [nil] : (output_semantic_type().is_array? ?  output_value() : [output_value()])
       value = nil
       if array_pointers.nil?
-        value = (input_value||[]) + new_rows
-        Attribute::LinkInfo.update_array_pointers!(@input_attr,function_index,(Array(input_value||[]).size...value.size))
+       value = (input_value||[]) + new_rows
+        array_pointers = Attribute::LinkInfo.update_array_pointers!(@input_attr,function_index,(Array(input_value||[]).size...value.size))
       else
         unless array_pointers.size == new_rows.size
           raise ErrorNotImplemented.new("propagate_when_eq_indexed when number of rows spliced in changes")
@@ -125,9 +123,8 @@ class PropagateProcessor
           end
         end
       end
-Debug.print_and_ret(
-      {:value_derived => value,:link_info => @input_attr[:link_info]}
-)
+#      OutputArraySlice.new(:indexes => array_pointers, :array_slice => new_rows, :link_info => @input_attr[:link_info], :value_derived => value)
+       {:value_derived => value,:link_info => @input_attr[:link_info]}
     end
 
     ###### helper fns for propagation fns

@@ -15,6 +15,9 @@
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/cmdbar.css" />
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/toolbar.css" />
 
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/list.css" />
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/search.css" />
+
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/details2.layout.css" />
 
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/temp-dev.css" />
@@ -35,9 +38,8 @@
 					<div class="item"><a href="{%=_app[:base_uri]%}/xyz/component/list"  style="color: #4FA4D0">Library</a></div>
 					<div class="item"><a href="{%=_app[:base_uri]%}/xyz/workspace">Workspace</a></div>
 					<div class="item"><a href="{%=_app[:base_uri]%}/xyz/datacenter/list">Dashboard</a></div>
+					<div class="item"><a href="{%=_app[:base_uri]%}/xyz/node/list">Inventory</a></div>
 					<div class="divider"></div>
-					<div class="item"><a href="{%=_app[:base_uri]%}/xyz/workspace">Foo</a></div>
-					<div class="item"><a href="{%=_app[:base_uri]%}/xyz/datacenter/list">Bar</a></div>
 				</div>
 				<div class="yui3-u right-cap"></div>
 			</div>
@@ -111,6 +113,8 @@ YUI_config = {
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/workspace.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/cmdbar.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/maintoolbar.r8.js"></script>
+
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/search.r8.js"></script>
 
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/display.r8.js"></script>
 

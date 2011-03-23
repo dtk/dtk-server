@@ -2,7 +2,7 @@ module XYZ
   class ComponentController < Controller
     helper :i18n_string_mapping
 
-    def details(id)
+    def details_old(id)
       component = get_object_by_id(id)
       tpl = R8Tpl::TemplateR8.new("component/details",user_context())
 
@@ -31,7 +31,7 @@ module XYZ
       return {:content => tpl.render()}
     end
 
-    def details2(id)
+    def details(id)
       component = get_object_by_id(id)
       tpl = R8Tpl::TemplateR8.new("component/details",user_context())
 

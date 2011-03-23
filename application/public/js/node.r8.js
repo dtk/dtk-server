@@ -1089,8 +1089,8 @@ console.log('not a valid link.., mis-matched types...');
 
 				if(typeof(linkChanges) != 'undefined') {
 //DEBUG
-//console.log('link changes...');
-//console.log(linkChanges);
+console.log('link changes...');
+console.log(linkChanges);
 					if (typeof(linkChanges.new_l4_ports) != 'undefined' && linkChanges.new_l4_ports.length > 0) {
 						//TODO: assume only one new port for now, revisit to cleanup if no use case is found
 						var newPortObjId = linkChanges.new_l4_ports[0], newPortId = 'port-' + newPortObjId;
@@ -1136,6 +1136,8 @@ console.log('targetPort:'+targetPortObjId);
 						_tempLinkDef.other_end_id = targetPortObjId;
 						_viewSpace.addLinkToItems(_tempLinkDef);
 						_viewSpace.addLink(_tempLinkDef);
+//DEBUG
+console.log('calling mergePorts with mergePort:'+mergePortObjId+'   and targetPort:'+targetPortObjId);
 						_viewSpace.mergePorts('port-'+mergePortObjId,'port-'+targetPortObjId);
 					}
 				}

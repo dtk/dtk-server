@@ -440,20 +440,24 @@ pp [:nested_changes,nested_changes]
     end
 
     def self.update_changed_values_incremental(attr_mh,array_slice_rows,value_type)
-      rows = array_slice_rows.map do |r|
+      update_rows = array_slice_rows.map do |r|
         value = incremental_value(:value_derived,r[:indexes],r[:array_slice])
         {
           :id => r[:id],
           :value_derived => value
         }
       end
-      #TODO: just for testing since throws away all but first row
-     x = rows.first[:value_derived]
-      fs = Model::FieldSet.opt([:id,{x => :value_derived}],model_name)
-      update_select_ds = Model.get_objects_just_dataset(attr_mh,nil,fs)
-      opts = {:update_only_if_change => [value_type],:returning_cols => [:id]}
-      update_from_select(attr_mh,FieldSet.new(:attribute,[value_type]),update_select_ds,opts)
+
+      #TODO: see if can optimze to do multiple rows at once
+      update_rows.map do |r|
+        fs = Model::FieldSet.opt([:id,{r[:value_derived] => :value_derived}],:attribute)
+        wc=nil
+        update_select_ds = Model.get_objects_just_dataset(attr_mh,wc,fs)
+        opts = {:update_only_if_change => [value_type],:returning_cols => [:id]}
+        update_from_select(attr_mh,FieldSet.new(:attribute,[value_type]),update_select_ds,opts)
+      end.flatten
     end
+
     #TODO: this should probably go in db../update
     def self.incremental_value(col,indexes,array_slice)
       pattern = Array.new

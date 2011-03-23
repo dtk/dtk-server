@@ -123,8 +123,8 @@ module XYZ
           end
         end
       end
-#      OutputArraySlice.new(:indexes => array_pointers, :array_slice => new_rows, :link_info => @input_attr[:link_info], :value_derived => value)
-       {:value_derived => value,:link_info => @input_attr[:link_info]}
+#    OutputArraySlice.new(:indexes => array_pointers, :array_slice => new_rows, :link_info => @input_attr[:link_info], :value_derived => value)
+      {:value_derived => value,:link_info => @input_attr[:link_info]}
     end
 
     ###### helper fns for propagation fns

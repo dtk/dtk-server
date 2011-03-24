@@ -401,59 +401,19 @@ module XYZ
       StateChange.create_pending_change_items(nested_changes.values)
     end
 
+    def self.update_attribute_values(attr_mh,new_val_rows,cols_x,opts={})
+      cols = Array(cols_x)
+      return update_attribute_values_incremental(attr_mh,new_val_rows,cols,opts) if new_val_rows.first and new_val_rows.first.kind_of?(PropagateProcessor::OutputArraySlice) 
+      update_select_ds = SQL::ArrayDataset.create(db,new_val_rows,attr_mh,:convert_for_update => true)
+      update_from_select(attr_mh,FieldSet.new(:attribute,cols),update_select_ds,opts)
+    end
+
    private
     def self.unravelled_value(val,path)
       return nil unless Aux.can_take_index?(val)
       path.size == 1 ? val[path.first] : unravelled_value(val[path.first],path[1..path.size-1])
     end
-   public
 
-=begin
-rewrite to look for fine garin diffs
-    #TODO: want to rename to indicate this is propgate while logging state changes; or have a flag to control whether state changes are logged
-    def self.update_and_propagate_attributes(attr_mh,attribute_rows)
-      return Array.new if attribute_rows.empty?
-      #TODO: was unable to use :update_only_if_change flag on update_from_select because was unable to get old value returning col 
-      unpruned_update_select_ds = SQL::ArrayDataset.create(db,attribute_rows,attr_mh,:convert_for_update => true)
-
-      attr_ds = get_objects_just_dataset(attr_mh,nil,FieldSet.opt([{:id => :id2},{:value_asserted => :old_value_asserted}],:attribute))
-      #add qualification so that only updated values are set
-      join_cond = SQL.and({:id => :id2},SQL.not_equal(:value_asserted,:old_value_asserted))
-                          
-      update_select_ds =  unpruned_update_select_ds.join_table(:inner,attr_ds,join_cond)
-
-      returning_cols_opts = {:returning_cols => [:id,:value_asserted,:old_value_asserted]}
-      changed_attrs_info = update_from_select(attr_mh,FieldSet.new(:attribute,[:value_asserted]),update_select_ds,returning_cols_opts)
-      return nil if changed_attrs_info.empty?
-
-      #use sample attribute to find containing datacenter
-      sample_attr_idh = attr_mh.createIDH(:id => changed_attrs_info.first[:id])
-      #TODO: anymore efficieny way do do this; can pass datacenter in fn
-      parent_idh = sample_attr_idh.get_top_container_id_handle(:datacenter)
-
-
-      #TODO: should we make json conversion more base fn
-      changes = changed_attrs_info.map do |r|
-        {
-          :new_item => attr_mh.createIDH(:id => r[:id]),
-          :parent => parent_idh,
-          :change => {
-            :old => json_form(r[:old_value_asserted]),
-            :new => json_form(r[:value_asserted])
-          }
-        }
-      end
-      change_idhs = StateChange.create_pending_change_items(changes)
-      changes_to_propagate = Array.new
-      change_idhs.each_with_index do |change_idh,i|
-        change = changes[i]
-        changes_to_propagate << AttributeChange.new(change[:new_item],change[:change][:new],change_idh)
-      end
-      nested_changes = propagate_changes(changes_to_propagate)
-      StateChange.create_pending_change_items(nested_changes.values)
-    end
-=end
-   private
    def self.json_form(x)
      begin
        JSON.parse(x)
@@ -465,55 +425,6 @@ rewrite to look for fine garin diffs
      (v.kind_of?(Hash) or v.kind_of?(Array)) ? JSON.generate(v) : v
    end
 
-   public
-
-   #TODO: probably deprecate and if notr convert old new values to hash form
-    def self.update_and_propagate_attribute_value(attr_idh,value_asserted)
-      base_object = get_attribute_with_base_object(attr_idh,attr_idh[:parent_model_name])
-      old_value = (base_object||{})[:value_asserted]
-
-      new_val_rows = [{:id => attr_idh.get_id(),:value_asserted => value_asserted}]
-
-      opts = {:update_only_if_change => [:value_asserted],:returning_cols => [:id]}
-      changed_ids = update_attribute_values(attr_idh.createMH(),new_val_rows,:value_asserted,opts)
-      #if no change, exit 
-      return nil if changed_ids.empty?
-
-      #TODO any more efficient way to get action_parent_idh and parent_idh info
-      action_parent_idh = attr_idh.get_top_container_id_handle(:datacenter)
-      return nil unless action_parent_idh #this would happend if top container is not a datacenter TODO: see if this should be "trapped" at higher level
-      new_item_hash = {
-        :new_item => attr_idh,
-        :parent => action_parent_idh,
-        :change => {:old => old_value, :new => value_asserted}
-      }
-      new_item_hash.merge!(:base_object => base_object) if base_object
-      action_idh = StateChange.create_pending_change_item(new_item_hash)
-
-      nested_changes_hash = propagate_changes([AttributeChange.new(attr_idh,value_asserted,action_idh)]) if action_idh
-
-      #compute and merge in base object values and action parernt
-      nested_base_objects = get_attributes_with_base_objects(attr_idh.createMH(),nested_changes_hash.keys,:node) #TODO: hard coded :node
-      nested_base_objects.each do |base_obj|
-        id = base_obj[:id]
-        #TODO: need to see if this is right
-        if nested_changes_hash[id] 
-          nested_changes_hash[id].merge!({:base_object => base_obj,:parent => action_idh})
-        end
-      end
-      pp [:nested_changes,nested_changes_hash.values]
-      StateChange.create_pending_change_items(nested_changes_hash.values)
-      nil
-    end
-
-    def self.update_attribute_values(attr_mh,new_val_rows,cols_x,opts={})
-      cols = Array(cols_x)
-      return update_attribute_values_incremental(attr_mh,new_val_rows,cols,opts) if new_val_rows.first and new_val_rows.first.kind_of?(PropagateProcessor::OutputArraySlice) 
-      update_select_ds = SQL::ArrayDataset.create(db,new_val_rows,attr_mh,:convert_for_update => true)
-      update_from_select(attr_mh,FieldSet.new(:attribute,cols),update_select_ds,opts)
-    end
-
-   private
     def self.update_attribute_values_incremental(attr_mh,array_slice_rows,cols_x,opts={})
       cols = cols_x
       cols += [:id] unless cols_x.include?(:id)

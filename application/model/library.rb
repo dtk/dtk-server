@@ -29,6 +29,7 @@ module XYZ
       end
       attr_mh = new_id_handle.createMH(:model_name => :attribute,:parent_model_name => :node)
       Model.update_from_rows(attr_mh,attrs_to_null)
+      #TODO: switch over to AttributeLink.propagate
       AttributeLink.propagate(attrs_to_null.map{|attr|attr_mh.createIDH(:id => attr[:id])})
     end
   end

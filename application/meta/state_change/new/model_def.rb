@@ -7,6 +7,7 @@
     :object_type=>{:type=>:varchar, :size=>15},
     :base_object=>{:type=>:json},
     :change=>{:type=>:json},
+    :change_paths=>{:type=>:json},
     :attribute_id=>{
       :type=>:bigint,
       :foreign_key_rel_type=>:attribute,

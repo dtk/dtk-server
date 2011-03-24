@@ -3,6 +3,7 @@ module XYZ
 #    set_relation_name(:state,:state_change)
     ### virtual column defs
     #######################
+    #TODO: deprecate
     def qualified_parent_name()
       base =  self[:base_object]
       return nil unless base
@@ -65,14 +66,16 @@ module XYZ
         hash = {
           :ref => ref,
           :display_name => display_name,
-          :base_object => item[:base_object],
           :status => "pending",
           :type => type,
           :object_type => object_model_name.to_s,
           object_id_col => id,
-          parent_id_col => parent_id
+          parent_id_col => parent_id,
+          :base_object => item[:base_object] #TODO: should deprecate
         }
-        item[:change] ? hash.merge(:change => item[:change]) : hash
+        hash.merge!(:change => item[:change]) if item[:change]
+        hash.merge!(:change_paths => item[:change_paths]) if item[:change_paths]
+        hash
       end
       create_from_rows(model_handle,rows,{:convert => true})
     end

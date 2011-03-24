@@ -26,10 +26,13 @@ module Ramaze::Helper
     def update_from_hash(id,hash,opts={})
       idh = id_handle(id,model_name,hash["display_name"])
       hash_assigns = Aux.col_refs_to_keys(hash)
-      #TODO: temp stub to determine if just updated value_asserted
+
+      #TODO: deprecate
       if model_name == :attribute and hash_assigns.has_key?(:value_asserted)
-        return Attribute.update_and_propagate_attribute_value(idh, hash_assigns[:value_asserted])
+        raise Error.new("this path is deprecated")
+        #return Attribute.update_and_propagate_attribute_value(idh, hash_assigns[:value_asserted])
       end
+
       Model.update_from_hash_assignments(idh,Aux.col_refs_to_keys(hash),opts)
     end
 

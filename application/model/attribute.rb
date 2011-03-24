@@ -347,11 +347,11 @@ module XYZ
       end
 
       #prune tattributes change paths for attrribues taht have not changed
-      changed_attrs_info = Hash.new
+      ndx_ch_attr_info = Hash.new
       attribute_rows.each do |r|
         id = r[:id]
         if existing_values[id].nil?
-          changed_attrs_info[id] = Aux::hash_subset(r,[:id,:value_asserted])
+          ndx_ch_attr_info[id] = Aux::hash_subset(r,[:id,:value_asserted])
           next
         end
 
@@ -360,24 +360,19 @@ module XYZ
         if r[:change_paths]
           r[:change_paths].each do |path|
             next if unravelled_value(new_val,path) == unravelled_value(existing_val,path)
-            changed_attrs_info[id] ||= Aux::hash_subset(r,[:id,:value_asserted]).merge(:change_paths => Array.new,:old_value_asserted => existing_val)
-            changed_attrs_info[id][:change_paths] << path
+            ndx_ch_attr_info[id] ||= Aux::hash_subset(r,[:id,:value_asserted]).merge(:change_paths => Array.new,:old_value_asserted => existing_val)
+            ndx_ch_attr_info[id][:change_paths] << path
           end
         elsif not (existing_val == new_val)
-          changed_attrs_info[id] = Aux::hash_subset(r,[:id,:value_asserted]).merge(:old_value_asserted => existing_val) 
+          ndx_ch_attr_info[id] = Aux::hash_subset(r,[:id,:value_asserted]).merge(:old_value_asserted => existing_val) 
         end
       end
 
-      return nil if changed_attrs_info.empty?
-
+      return nil if ndx_ch_attr_info.empty?
+      changed_attrs_info = ndx_ch_attr_info.values
       #TODO: when have comprehensive incremental change use Attribute.update_changed_values (and generalzie to take asserted as well as derived attributes)
-      array_ds = SQL::ArrayDataset.create(db,changed_attrs_info,attr_mh,:convert_for_update=>true)
-      fs = Model::FieldSet.new(:attribute,[:value_asserted])
-      update_from_select(attr_mh,fs,array_ds)
-=begin
-      update_rows = changed_attrs_info.values.map{|r|Aux::hash_subset(r,[:id,:value_asserted])}
+      update_rows = changed_attrs_info.map{|r|Aux::hash_subset(r,[:id,:value_asserted])}
       update_from_rows(attr_mh,update_rows,:partial_value => true)
-=end
 
       #use sample attribute to find containing datacenter
       sample_attr_idh = attr_mh.createIDH(:id => changed_attrs_info.first[:id])

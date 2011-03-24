@@ -45,6 +45,10 @@ module XYZ
       end
 
      public
+      def can_take_index?(x)
+        x.kind_of?(Hash) or x.kind_of?(Array)
+      end
+
       def ret_key(key_value)
         return nil unless key_value.kind_of?(Hash)
         key_value.keys.first

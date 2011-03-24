@@ -59,16 +59,19 @@ module XYZ
         if path.empty? 
           ret[id][:value_asserted] = attr_hash
         else
-          ravel_raw_post_hash_attribute_aux!(ret[id],:value_asserted,attr_hash,path)
+          change_paths = ret[id][:change_paths] ||= Array.new
+          change_paths << change_path = Array.new
+          ravel_raw_post_hash_attribute_aux!(ret[id],:value_asserted,attr_hash,path,change_path)
         end
       end
     end
     AttrIdRegexp = Regexp.new("^#{TypeMapping[:attribute]}#{Delim::Common}([0-9]+)(.*$)")
 
-    def self.ravel_raw_post_hash_attribute_aux!(ret,index,hash,path)
+    def self.ravel_raw_post_hash_attribute_aux!(ret,index,hash,path,change_path)
       next_index, rest_path = (path =~ NumericIndexRegexp) && [$1.to_i,$2]
       if path =~ NumericIndexRegexp
         next_index, rest_path = [$1.to_i,$2]
+        change_path << next_index
         ret[index] ||= ArrayObject.new 
         #make sure that  ret[index] has enough rows
         while ret[index].size <= next_index
@@ -76,9 +79,11 @@ module XYZ
         end
       elsif path =~ KeyWithRestRegexp
         next_index, rest_path = [$1,$2]
+        change_path << next_index
         ret[index] ||= Hash.new
       elsif path =~ KeyWORestRegexp
         next_index, rest_path = [$1,String.new]
+        change_path << next_index
         ret[index] ||= Hash.new
       else
         Log.error("parsing error on path #{path}")
@@ -87,7 +92,7 @@ module XYZ
       if rest_path.empty?
         ret[index][next_index] = hash
       else
-        ravel_raw_post_hash_attribute_aux!(ret[index],next_index,hash,rest_path)
+        ravel_raw_post_hash_attribute_aux!(ret[index],next_index,hash,rest_path,change_path)
       end
     end
     NumericIndexRegexp = Regexp.new("^#{Delim::Common}#{Delim::NumericIndex}([0-9]+)(.*$)")

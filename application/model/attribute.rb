@@ -338,7 +338,86 @@ module XYZ
       AttributeComplexType.serialze(token_array)
     end
 
+    #TODO: want to rename to indicate this is propgate while logging state changes; or have a flag to control whether state changes are logged
+    def self.update_and_propagate_attributes(attr_mh,attribute_rows)
+      return Array.new if attribute_rows.empty?
+      attr_idhs = attribute_rows.map{|r|attr_mh.createIDH(:id => r[:id])}
+      existing_values = get_objects_in_set_from_sp_hash(attr_idhs,:columns => [:id,:value_asserted]).inject({}) do |h,r|
+        h.merge(r[:id] => r)
+      end
 
+      #compute pruned_attribute_rows, which removes rows and  change_paths elements that have no changed
+      ndx_pruned_attrs = Hash.new
+      attribute_rows.each do |r|
+        id = r[:id]
+        if existing_values[id].nil?
+          ndx_pruned_attrs[id] = r 
+        elsif r[:change_paths]
+          val = r[:value_asserted]
+          existing_val = existing_values[id][:value_asserted]
+          r[:change_paths].each do |path|
+            next if unravelled_value(val,path) == unravelled_value(existing_val,path)
+            ndx_pruned_attrs[id] ||= r.merge(:change_paths => Array.new)
+            ndx_pruned_attrs[id][:change_paths] << path
+          end
+        else
+          ndx_pruned_attrs[id] = r unless (existing_values[id][:value_asserted] == r[:value_asserted])
+        end
+      end
+
+      return nil if ndx_pruned_attrs.empty?
+
+      raise Error.new("got here")
+
+      #TODO: was unable to use :update_only_if_change flag on update_from_select because was unable to get old value returning col 
+      unpruned_update_select_ds = SQL::ArrayDataset.create(db,attribute_rows,attr_mh,:convert_for_update => true)
+
+      attr_ds = get_objects_just_dataset(attr_mh,nil,FieldSet.opt([{:id => :id2},{:value_asserted => :old_value_asserted}],:attribute))
+      #add qualification so that only updated values are set
+      join_cond = SQL.and({:id => :id2},SQL.not_equal(:value_asserted,:old_value_asserted))
+                          
+      update_select_ds =  unpruned_update_select_ds.join_table(:inner,attr_ds,join_cond)
+
+      returning_cols_opts = {:returning_cols => [:id,:value_asserted,:old_value_asserted]}
+      changed_attrs_info = update_from_select(attr_mh,FieldSet.new(:attribute,[:value_asserted]),update_select_ds,returning_cols_opts)
+      return nil if changed_attrs_info.empty?
+
+      #use sample attribute to find containing datacenter
+      sample_attr_idh = attr_mh.createIDH(:id => changed_attrs_info.first[:id])
+      #TODO: anymore efficieny way do do this; can pass datacenter in fn
+      parent_idh = sample_attr_idh.get_top_container_id_handle(:datacenter)
+
+
+      #TODO: should we make json conversion more base fn
+      changes = changed_attrs_info.map do |r|
+        {
+          :new_item => attr_mh.createIDH(:id => r[:id]),
+          :parent => parent_idh,
+          :change => {
+            :old => json_form(r[:old_value_asserted]),
+            :new => json_form(r[:value_asserted])
+          }
+        }
+      end
+      change_idhs = StateChange.create_pending_change_items(changes)
+      changes_to_propagate = Array.new
+      change_idhs.each_with_index do |change_idh,i|
+        change = changes[i]
+        changes_to_propagate << AttributeChange.new(change[:new_item],change[:change][:new],change_idh)
+      end
+      nested_changes = propagate_changes(changes_to_propagate)
+      StateChange.create_pending_change_items(nested_changes.values)
+    end
+
+   private
+    def self.unravelled_value(val,path)
+      return nil unless can_take_index?(val)
+      path.size == 1 ? val[path.first] : unravelled_value(val[path.first],path[1..path.size-1])
+    end
+   public
+
+=begin
+rewrite to look for fine garin diffs
     #TODO: want to rename to indicate this is propgate while logging state changes; or have a flag to control whether state changes are logged
     def self.update_and_propagate_attributes(attr_mh,attribute_rows)
       return Array.new if attribute_rows.empty?
@@ -381,6 +460,7 @@ module XYZ
       nested_changes = propagate_changes(changes_to_propagate)
       StateChange.create_pending_change_items(nested_changes.values)
     end
+=end
    private
    def self.json_form(x)
      begin

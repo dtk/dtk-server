@@ -323,23 +323,12 @@ pp request.params
 
 #TODO: rename to save
     def save_attributes(explicit_hash=nil)
-=begin
-Would expect to have something like:
-
-component = Compoennt.new(component_id)
-component.save(request.params)
-=end
-
       attr_val_hash = explicit_hash || request.params.dup
       #TODO: can thsi be handled another way
       #convert empty strings to nils
       attr_val_hash.each{|k,v|attr_val_hash[k] = nil if v.kind_of?(String) and v.empty?}
-#pp [:in_save_attrs,attr_val_hash]
       component_id = attr_val_hash.delete("component_id").to_i
       attribute_rows = AttributeComplexType.ravel_raw_post_hash(attr_val_hash,:attribute,component_id)
-      
-#pp [:after_ravel,attribute_rows]
-
       attr_mh = ModelHandle.new(ret_session_context_id(),:attribute)
       Attribute.update_and_propagate_attributes(attr_mh,attribute_rows)
       redirect "/xyz/component/dock_edit/#{component_id.to_s}"

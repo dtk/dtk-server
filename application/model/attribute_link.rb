@@ -216,8 +216,7 @@ module XYZ
         propagate_proc.propagate().merge(:id => input_attr[:id])
       end
       return Array.new if new_val_rows.empty?
-      update_select_ds = SQL::ArrayDataset.create(db,new_val_rows,attr_mh,:convert_for_update => true) 
-      update_from_select(attr_mh,FieldSet.new(:attribute,[:value_derived,:link_info]),update_select_ds)
+      Attribute.update_attribute_values(attr_mh,new_val_rows,[:value_derived,:link_info])
     end
 
 
@@ -279,7 +278,8 @@ module XYZ
       end
 
       return Hash.new if new_val_rows.empty?
-      changed_ids = Attribute.update_changed_values(attr_mh,new_val_rows,:value_derived)
+      opts = {:update_only_if_change => [:value_derived],:returning_cols => [:id]}
+      changed_ids = Attribute.update_attribute_values(attr_mh,new_val_rows,:value_derived,opts)
       #if no changes exit, otherwise recursively call propagate
       return Hash.new if changed_ids.empty?
 

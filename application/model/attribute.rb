@@ -378,10 +378,7 @@ module XYZ
         change = changes[i]
         changes_to_propagate << AttributeChange.new(change[:new_item],change[:change][:new],change_idh)
       end
-pp [:changes_to_propagate,changes_to_propagate]
-
       nested_changes = propagate_changes(changes_to_propagate)
-pp [:nested_changes,nested_changes]
       StateChange.create_pending_change_items(nested_changes.values)
     end
    private
@@ -401,7 +398,9 @@ pp [:nested_changes,nested_changes]
       old_value = (base_object||{})[:value_asserted]
 
       new_val_rows = [{:id => attr_idh.get_id(),:value_asserted => value_asserted}]
-      changed_ids = update_changed_values(attr_idh.createMH(),new_val_rows,:value_asserted)
+
+      opts = {:update_only_if_change => [:value_asserted],:returning_cols => [:id]}
+      changed_ids = update_attribute_values(attr_idh.createMH(),new_val_rows,:value_asserted,opts)
       #if no change, exit 
       return nil if changed_ids.empty?
 
@@ -432,33 +431,37 @@ pp [:nested_changes,nested_changes]
       nil
     end
 
-    def self.update_changed_values(attr_mh,new_val_rows,value_type)
-      return update_changed_values_incremental(attr_mh,new_val_rows,value_type) if new_val_rows.first and new_val_rows.first.kind_of?(PropagateProcessor::OutputArraySlice) 
+    def self.update_attribute_values(attr_mh,new_val_rows,cols_x,opts={})
+      cols = Array(cols_x)
+      return update_attribute_values_incremental(attr_mh,new_val_rows,cols,opts) if new_val_rows.first and new_val_rows.first.kind_of?(PropagateProcessor::OutputArraySlice) 
       update_select_ds = SQL::ArrayDataset.create(db,new_val_rows,attr_mh,:convert_for_update => true)
-      opts = {:update_only_if_change => [value_type],:returning_cols => [:id]}
-      update_from_select(attr_mh,FieldSet.new(:attribute,[value_type]),update_select_ds,opts)
+      update_from_select(attr_mh,FieldSet.new(:attribute,cols),update_select_ds,opts)
     end
 
-    def self.update_changed_values_incremental(attr_mh,array_slice_rows,value_type)
+    def self.update_attribute_values_incremental(attr_mh,array_slice_rows,cols_x,opts={})
+      cols = cols_x
+      cols += [:id] unless cols_x.include?(:id)
       update_rows = array_slice_rows.map do |r|
         value = incremental_value(:value_derived,r[:indexes],r[:array_slice])
-        {
-          :id => r[:id],
-          :value_derived => value
-        }
+        #TODO: unify with code in SQL::ArrayDataset
+        (cols-[:value_derived]).inject({:value_derived => value}) do |h,col|
+          v = r[col]
+          h.merge(col => (v.kind_of?(Hash) or v.kind_of?(Array)) ? JSON.generate(v) : v)
+        end
       end
 
-      #TODO: see if can optimze to do multiple rows at once
+      #TODO: see if can optimize to do multiple rows at once
       update_rows.map do |r|
-        fs = Model::FieldSet.opt([:id,{r[:value_derived] => :value_derived}],:attribute)
-        wc=nil
+        fs = Model::FieldSet.opt([:id]+(cols-[:id]).map{|col|{r[col] => col}},:attribute)
+        wc={:id => r[:id]}
         update_select_ds = Model.get_objects_just_dataset(attr_mh,wc,fs)
-        opts = {:update_only_if_change => [value_type],:returning_cols => [:id]}
-        update_from_select(attr_mh,FieldSet.new(:attribute,[value_type]),update_select_ds,opts)
+        x=update_from_select(attr_mh,FieldSet.new(:attribute,cols-[:id]),update_select_ds,opts)
+        x
       end.flatten
     end
 
-    #TODO: this should probably go in db../update
+
+    #TODO: this should probably go in db../update or sql
     def self.incremental_value(col,indexes,array_slice)
       pattern = Array.new
       replace = Array.new
@@ -476,7 +479,9 @@ pp [:nested_changes,nested_changes]
         end
       end
       replace_string = replace.map{|x|(x.kind_of?(Hash) or x.kind_of?(Array)) ? JSON.generate(x) : x}.join(",")
-      :regexp_replace.sql_function(:value_derived,pattern.join(","),replace_string)
+      replace_case = :regexp_replace.sql_function(:value_derived,pattern.join(","),replace_string)
+      new_case = JSON.generate(array_slice)
+      SQL::ColRef.case{[[{:value_derived => nil},new_case],replace_case]}
     end
 
 

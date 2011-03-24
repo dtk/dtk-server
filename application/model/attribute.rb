@@ -346,51 +346,46 @@ module XYZ
         h.merge(r[:id] => r)
       end
 
-      #compute pruned_attribute_rows, which removes rows and  change_paths elements that have no changed
-      ndx_pruned_attrs = Hash.new
+      #prune tattributes change paths for attrribues taht have not changed
+      changed_attrs_info = Hash.new
       attribute_rows.each do |r|
         id = r[:id]
         if existing_values[id].nil?
-          ndx_pruned_attrs[id] = r 
-        elsif r[:change_paths]
-          val = r[:value_asserted]
-          existing_val = existing_values[id][:value_asserted]
+          changed_attrs_info[id] = Aux::hash_subset(r,[:id,:value_asserted])
+          next
+        end
+
+        new_val = r[:value_asserted]
+        existing_val = existing_values[id][:value_asserted]
+        if r[:change_paths]
           r[:change_paths].each do |path|
-            next if unravelled_value(val,path) == unravelled_value(existing_val,path)
-            ndx_pruned_attrs[id] ||= r.merge(:change_paths => Array.new)
-            ndx_pruned_attrs[id][:change_paths] << path
+            next if unravelled_value(new_val,path) == unravelled_value(existing_val,path)
+            changed_attrs_info[id] ||= Aux::hash_subset(r,[:id,:value_asserted]).merge(:change_paths => Array.new,:old_value_asserted => existing_val)
+            changed_attrs_info[id][:change_paths] << path
           end
-        else
-          ndx_pruned_attrs[id] = r unless (existing_values[id][:value_asserted] == r[:value_asserted])
+        elsif not (existing_val == new_val)
+          changed_attrs_info[id] = Aux::hash_subset(r,[:id,:value_asserted]).merge(:old_value_asserted => existing_val) 
         end
       end
 
-      return nil if ndx_pruned_attrs.empty?
-
-      raise Error.new("got here")
-
-      #TODO: was unable to use :update_only_if_change flag on update_from_select because was unable to get old value returning col 
-      unpruned_update_select_ds = SQL::ArrayDataset.create(db,attribute_rows,attr_mh,:convert_for_update => true)
-
-      attr_ds = get_objects_just_dataset(attr_mh,nil,FieldSet.opt([{:id => :id2},{:value_asserted => :old_value_asserted}],:attribute))
-      #add qualification so that only updated values are set
-      join_cond = SQL.and({:id => :id2},SQL.not_equal(:value_asserted,:old_value_asserted))
-                          
-      update_select_ds =  unpruned_update_select_ds.join_table(:inner,attr_ds,join_cond)
-
-      returning_cols_opts = {:returning_cols => [:id,:value_asserted,:old_value_asserted]}
-      changed_attrs_info = update_from_select(attr_mh,FieldSet.new(:attribute,[:value_asserted]),update_select_ds,returning_cols_opts)
       return nil if changed_attrs_info.empty?
+
+      #TODO: when have comprehensive incremental change use Attribute.update_changed_values (and generalzie to take asserted as well as derived attributes)
+      array_ds = SQL::ArrayDataset.create(db,changed_attrs_info,attr_mh,:convert_for_update=>true)
+      fs = Model::FieldSet.new(:attribute,[:value_asserted])
+      update_from_select(attr_mh,fs,array_ds)
+=begin
+      update_rows = changed_attrs_info.values.map{|r|Aux::hash_subset(r,[:id,:value_asserted])}
+      update_from_rows(attr_mh,update_rows,:partial_value => true)
+=end
 
       #use sample attribute to find containing datacenter
       sample_attr_idh = attr_mh.createIDH(:id => changed_attrs_info.first[:id])
       #TODO: anymore efficieny way do do this; can pass datacenter in fn
       parent_idh = sample_attr_idh.get_top_container_id_handle(:datacenter)
 
-
-      #TODO: should we make json conversion more base fn
       changes = changed_attrs_info.map do |r|
-        {
+        hash = {
           :new_item => attr_mh.createIDH(:id => r[:id]),
           :parent => parent_idh,
           :change => {
@@ -398,6 +393,8 @@ module XYZ
             :new => json_form(r[:value_asserted])
           }
         }
+        hash.merge!(:change_paths => r[:change_paths]) if r[:change_paths]
+        hash
       end
       change_idhs = StateChange.create_pending_change_items(changes)
       changes_to_propagate = Array.new
@@ -411,7 +408,7 @@ module XYZ
 
    private
     def self.unravelled_value(val,path)
-      return nil unless can_take_index?(val)
+      return nil unless Aux.can_take_index?(val)
       path.size == 1 ? val[path.first] : unravelled_value(val[path.first],path[1..path.size-1])
     end
    public
@@ -468,6 +465,9 @@ rewrite to look for fine garin diffs
       rescue Exception
        x
      end
+   end
+   def self.json_generate(v)
+     (v.kind_of?(Hash) or v.kind_of?(Array)) ? JSON.generate(v) : v
    end
 
    public
@@ -527,7 +527,7 @@ rewrite to look for fine garin diffs
         #TODO: unify with code in SQL::ArrayDataset
         (cols-[:value_derived]).inject({:value_derived => value}) do |h,col|
           v = r[col]
-          h.merge(col => (v.kind_of?(Hash) or v.kind_of?(Array)) ? JSON.generate(v) : v)
+          h.merge(col => json_generate(v))
         end
       end
 
@@ -549,7 +549,7 @@ rewrite to look for fine garin diffs
 
     def self.incremental_value_new(col,indexes,array_slice)
       #TODO: not taking account 'race' condition where simulatneusly adding two new links to an attribute and they pick same new indexes; solution may be to use a db sequence; but still would have problem if later one tried to be added after earlier one
-      return JSON.generate(array_slice) if indexes.min == 0 #first indexes added
+      return json_generate(array_slice) if indexes.min == 0 #first indexes added
 
       pattern = Array.new
       replace = Array.new
@@ -558,7 +558,7 @@ rewrite to look for fine garin diffs
         replace << "\\#{replace_ndx}"
       end
 
-      replace += array_slice.map{|x|(x.kind_of?(Hash) or x.kind_of?(Array)) ? JSON.generate(x) : x}
+      replace += array_slice.map{|x|json_generate(x)}
       :regexp_replace.sql_function(:value_derived,pattern.join(","),replace.join(","))
     end
 
@@ -570,8 +570,7 @@ rewrite to look for fine garin diffs
       (0..indexes.max).each do |i|
         if indexes.include?(i)
           pattern << "{.+?}"
-          rep = array_slice[array_slice_ndx]
-          replace << ((rep.kind_of?(Hash) or rep.kind_of?(Array)) ? JSON.generate(rep) : rep) 
+          replace << json_generate(array_slice[array_slice_ndx])
           array_slice_ndx += 1
         else
           pattern << "({.+?})"

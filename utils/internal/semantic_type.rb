@@ -100,12 +100,12 @@ module XYZ
     end
 
     def propagate_when_eq_indexed()
-      #TODO: in transition; getr rid of need to put in :derived_value
+      #TODO: in transition; get rid of need to put in :derived_value
       array_pointers = Attribute::LinkInfo.array_pointers(@input_attr,function_index)
       new_rows = output_value().nil? ? [nil] : (output_semantic_type().is_array? ?  output_value() : [output_value()])
       value = nil
-      if array_pointers.nil?
-       value = (input_value||[]) + new_rows
+      if new_indexes_to_add = array_pointers.nil? ?  true : false
+        value = (input_value||[]) + new_rows
         array_pointers = Attribute::LinkInfo.update_array_pointers!(@input_attr,function_index,(Array(input_value||[]).size...value.size))
       else
         unless array_pointers.size == new_rows.size
@@ -123,7 +123,7 @@ module XYZ
           end
         end
       end
-#    OutputArraySlice.new(:indexes => array_pointers, :array_slice => new_rows, :link_info => @input_attr[:link_info], :value_derived => value)
+#    OutputArraySlice.new(:indexes => array_pointers, :array_slice => new_rows, :new_indexes_to_add => new_indexes_to_add, :link_info => @input_attr[:link_info], :value_derived => value)
       {:value_derived => value,:link_info => @input_attr[:link_info]}
     end
 

@@ -438,11 +438,12 @@ module XYZ
       update_from_select(attr_mh,FieldSet.new(:attribute,cols),update_select_ds,opts)
     end
 
+   private
     def self.update_attribute_values_incremental(attr_mh,array_slice_rows,cols_x,opts={})
       cols = cols_x
       cols += [:id] unless cols_x.include?(:id)
       update_rows = array_slice_rows.map do |r|
-        value = incremental_value(:value_derived,r[:indexes],r[:array_slice])
+        value = incremental_value(:value_derived,r[:indexes],r[:array_slice],r[:new_indexes_to_add])
         #TODO: unify with code in SQL::ArrayDataset
         (cols-[:value_derived]).inject({:value_derived => value}) do |h,col|
           v = r[col]
@@ -462,7 +463,26 @@ module XYZ
 
 
     #TODO: this should probably go in db../update or sql
-    def self.incremental_value(col,indexes,array_slice)
+    def self.incremental_value(col,indexes,array_slice,new_indexes_to_add)
+      new_indexes_to_add ? incremental_value_new(col,indexes,array_slice) : incremental_value_change(col,indexes,array_slice)
+    end
+
+    def self.incremental_value_new(col,indexes,array_slice)
+      #TODO: not taking account 'race' condition where simulatneusly adding two new links to an attribute and they pick same new indexes; solution may be to use a db sequence; but still would have problem if later one tried to be added after earlier one
+      return JSON.generate(array_slice) if indexes.min == 0 #first indexes added
+
+      pattern = Array.new
+      replace = Array.new
+      (1..indexes.min).each do |replace_ndx|
+        pattern << "({.+?})"
+        replace << "\\#{replace_ndx}"
+      end
+
+      replace += array_slice.map{|x|(x.kind_of?(Hash) or x.kind_of?(Array)) ? JSON.generate(x) : x}
+      :regexp_replace.sql_function(:value_derived,pattern.join(","),replace.join(","))
+    end
+
+    def self.incremental_value_change(col,indexes,array_slice)
       pattern = Array.new
       replace = Array.new
       array_slice_ndx = 0
@@ -470,7 +490,8 @@ module XYZ
       (0..indexes.max).each do |i|
         if indexes.include?(i)
           pattern << "{.+?}"
-          replace << array_slice[array_slice_ndx]
+          rep = array_slice[array_slice_ndx]
+          replace << ((rep.kind_of?(Hash) or rep.kind_of?(Array)) ? JSON.generate(rep) : rep) 
           array_slice_ndx += 1
         else
           pattern << "({.+?})"
@@ -478,12 +499,9 @@ module XYZ
           replace_ndx += 1
         end
       end
-      replace_string = replace.map{|x|(x.kind_of?(Hash) or x.kind_of?(Array)) ? JSON.generate(x) : x}.join(",")
-      replace_case = :regexp_replace.sql_function(:value_derived,pattern.join(","),replace_string)
-      new_case = JSON.generate(array_slice)
-      SQL::ColRef.case{[[{:value_derived => nil},new_case],replace_case]}
+      :regexp_replace.sql_function(:value_derived,pattern.join(","),replace.join(","))
     end
-
+   public
 
     def self.get_attribute_with_base_object(attr_idh,base_model_name)
       field_set = FieldSet.new(:attribute,[:id,:display_name,:value_asserted,"base_object_#{base_model_name}".to_sym])

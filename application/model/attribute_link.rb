@@ -255,9 +255,10 @@ module XYZ
         new_value_row = propagate_proc.propagate().merge(:id => input_attr_row[:id])
 
         #case on whether the input attribute is also upstream in attrs_to_update; if so just update these upstream
-        #references; otehrwise addpend to new_val_rows and change_info
+        #references; otherwise addpend to new_val_rows and change_info
         attr_upstream = false
 =begin
+TODO: can deprecate now taht doing db side increemntal update
         (i+1..attrs_to_update.size-1).each do |j|
           if input_attr_row[:id] == attrs_to_update[j][:attribute2][:id]
             attr_upstream = true

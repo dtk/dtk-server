@@ -36,8 +36,6 @@ module XYZ
 
       virtual_column :has_port_object, :type => :booelan, :hidden => true, :local_dependencies => [:is_port,:semantic_type_summary]
 
-      column :link_info, :json, :ret_keys_as_symbols => false
-
       virtual_column :is_unset, :type => :boolean, :hidden => true, :local_dependencies => [:value_asserted,:value_derived,:data_type,:semantic_type]
 
       virtual_column :parent_name, :possible_parents => [:component,:node]
@@ -220,14 +218,14 @@ module XYZ
            :model_name => :attribute_link,
            :join_type => :inner,
            :join_cond=>{:output_id=> :attribute__id},
-           :cols=>[:output_id,:input_id,:function,:index_map,:function_index]
+           :cols=>[:output_id,:input_id,:function,:index_map]
          },
          {
            :model_name => :attribute,
            :alias => :input_attribute,
            :join_type => :inner,
            :join_cond=>{:id=> :attribute_link__input_id},
-           :cols=>[:id, :value_asserted,:value_derived,:semantic_type,:link_info,:display_name]
+           :cols=>[:id, :value_asserted,:value_derived,:semantic_type,:display_name]
          }
         ]
 
@@ -553,25 +551,6 @@ module XYZ
       new_sap_attr_idh = create_from_rows(attr_mh,new_sap_attr_rows, :convert => true).first
       
       [sap_config_attr_idh,new_sap_attr_idh]
-    end
-
-    module LinkInfo
-      def self.set_next_index!(attr)
-        link_info = attr[:link_info] ||= Hash.new
-        link_info["indexes"] ||= Array.new
-        next_index = (link_info["indexes"].max||0)+1
-        link_info["indexes"] << next_index
-        next_index
-      end
-      def self.array_pointers(attr,index)
-        link_info = attr[:link_info]||{}
-        (link_info["array_pointers"]||{})[index.to_s]
-      end
-      def self.update_array_pointers!(attr,index,pointers)
-        link_info = attr[:link_info] ||= Hash.new
-        link_info["array_pointers"] ||= Hash.new
-        link_info["array_pointers"][index.to_s] = pointers.map{|x|x.to_i}
-      end
     end
 
    private

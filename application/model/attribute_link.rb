@@ -18,8 +18,8 @@ module XYZ
       #get info needed to set attribute_link.function_index
       endpoint_ids = rows.map{|r|[r[:input_id],r[:output_id]]}.flatten.uniq
       sp_hash = {
-        :columns => [:id,:link_info,:attribute_value,:semantic_type_object,:component_parent],
-        :filter => [:and, [:oneof, :id, endpoint_ids]]
+        :columns => [:id,:attribute_value,:semantic_type_object,:component_parent],
+        :filter => [:oneof, :id, endpoint_ids]
       }
       attr_rows = get_objects_from_sp_hash(attr_mh,sp_hash)
       attr_info = attr_rows.inject({}){|h,attr|h.merge(attr[:id] => attr)}
@@ -30,19 +30,9 @@ module XYZ
         input_id = row[:input_id]
         input_attr = attr_info[input_id]
         output_attr = attr_info[row[:output_id]]
-        new_index = Attribute::LinkInfo.set_next_index!(input_attr) #TODO: deprecate; subsumed by index_map
         #TODO: semantic type object may pull in what its connecetd component type is
         row[:function] = SemanticType.find_link_function(input_attr[:semantic_type_object],output_attr[:semantic_type_object])
-
-        index_map = SemanticType.find_index_map(input_attr,output_attr)
-#        row[:index_map] = index_map if index_map
-        row[:function_index] = new_index #TODO: deprecate; subsumed by index_map
-        input_attr_update = {:id => input_id,:link_info => input_attr[:link_info]} #TODO: deprecate; subsumed by index_map
-        input_attrs_updates << input_attr_update unless input_attr_update.empty?
       end
-
-      #update input attrs
-      update_from_rows(attr_mh,input_attrs_updates) unless input_attrs_updates.empty?
 
       #create attribute_links
       select_ds = SQL::ArrayDataset.create(db,rows,attr_link_mh,:convert_for_create => true)
@@ -206,7 +196,7 @@ module XYZ
         propagate_proc.propagate().merge(:id => input_attr[:id])
       end
       return Array.new if new_val_rows.empty?
-      Attribute.update_attribute_values(attr_mh,new_val_rows,[:value_derived,:link_info])
+      Attribute.update_attribute_values(attr_mh,new_val_rows,[:value_derived])
     end
 
 

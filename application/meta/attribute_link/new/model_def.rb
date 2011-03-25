@@ -23,9 +23,7 @@
       :foreign_key_rel_type=>:component, #TODO: may instead just determine by seeing attributes contained and what is linked
       :on_delete=>:set_null,
       :on_update=>:set_null
-    },
-    :function_index=>{:type=>:json}, #TODO: deprecate; subsumed by :index_map
-    :label=>{:type=>:text, :default => "1"} #TODO: deprecate; subsumed by :index_map
+    }
   },
   :many_to_one=>[:library, :datacenter, :component, :node]
 }

@@ -10,7 +10,7 @@ module XYZ
     #propgate from output var to input var
     def propagate()
       #function 'eq' short circuited
-      return {:value_derived => output_value_aux(), :link_info => nil} if function == "eq"
+      return {:value_derived => output_value_aux()} if function == "eq"
       hash_ret = 
         case function
          when "sap_config__l4" 
@@ -35,7 +35,6 @@ module XYZ
       @function = attr_link[:function]
       @index_map = AttributeLink::IndexMap.convert_if_needed(attr_link[:index_map])
       @attr_link_id =  attr_link[:id]
-      @function_index = attr_link[:function_index] #TODO: remove
       @input_attr = input_attr
       @output_attr = output_attr
     end
@@ -66,7 +65,7 @@ module XYZ
         raise Error.new("propagate_when_sap_config__l4 does not support input scalar and output array with size > 1") if output_value.size > 1
         value = output_v.first.merge("host_address" => input_value["host_address"])
       end
-      {:value_derived => value, :link_info => nil}
+      {:value_derived => value}
     end
 
     #TODO: refactor to use  ret_cartesian_product()
@@ -87,7 +86,7 @@ module XYZ
         raise Error.new("propagate_when_host_address_ipv4 does not support input scalar and output array with size > 1") if output_value.size > 1
         value = output_v.first.merge("host_address" => input_value["host_address"])
       end
-      {:value_derived => value, :link_info => nil}
+      {:value_derived => value}
     end
 
     def propagate_when_sap_conn__l4__db()
@@ -100,7 +99,7 @@ module XYZ
 
     def propagate_when_select_one()
       raise ErrorNotImplemented.new("propagate_when_select_one when input has more than one elements") if output_value() and output_value().size > 1
-      {:value_derived => output_value ? output_value().first : nil, :link_info => nil}
+      {:value_derived => output_value ? output_value().first : nil}
     end
 
     def propagate_when_eq_indexed()
@@ -132,12 +131,11 @@ module XYZ
         raise Error.new("cartesian_product does not support input scalar and output array with size > 1") if output_value.size > 1
         value =  input_value.merge(output_v.first)
       end
-      {:value_derived => value, :link_info => nil}
+      {:value_derived => value}
     end
 
     #########instance var access fns
     attr_reader :function
-    attr_reader :function_index #TODO remove
     def input_value()
       @input_value ||= @input_attr[:value_derived]
     end
@@ -185,19 +183,6 @@ module XYZ
       else
         raise ErrorNotImplemented.new("find_link_function for input #{input_sem_type.inspect} and output #{output_sem_type.inspect}")
       end
-    end
-
-    def self.find_index_map(input_attr,output_attr)
-      ret = nil
-      return ret unless input_attr[:semantic_type_object].is_array?
-      output_size = (output_attr[:attribute_value]||[]).size
-      if output_size == 0
-        Log.error("output_size == 0 is unexpected")
-        return ret
-      end
-      input_size = (input_attr[:attribute_value]||[]).size
-      return nil if input_size == 0
-      AttributeLink::IndexMap.generate(0,output_size-1,input_size)
     end
 
     def is_atomic?()

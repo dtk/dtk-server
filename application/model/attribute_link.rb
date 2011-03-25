@@ -35,7 +35,7 @@ module XYZ
         row[:function] = SemanticType.find_link_function(input_attr[:semantic_type_object],output_attr[:semantic_type_object])
 
         index_map = SemanticType.find_index_map(input_attr,output_attr)
-        row[:index_map] = index_map if index_map
+#        row[:index_map] = index_map if index_map
         row[:function_index] = new_index #TODO: deprecate; subsumed by index_map
         input_attr_update = {:id => input_id,:link_info => input_attr[:link_info]} #TODO: deprecate; subsumed by index_map
         input_attrs_updates << input_attr_update unless input_attr_update.empty?

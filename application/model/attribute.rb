@@ -403,6 +403,7 @@ module XYZ
 
     def self.update_attribute_values(attr_mh,new_val_rows,cols_x,opts={})
       cols = Array(cols_x)
+      #assumption that all elements in new_val_rows have same type
       return update_attribute_values_array_slice(attr_mh,new_val_rows,cols,opts) if new_val_rows.first and new_val_rows.first.kind_of?(PropagateProcessor::OutputArraySlice) 
       return update_attribute_values_array_append(attr_mh,new_val_rows,cols,opts) if new_val_rows.first and new_val_rows.first.kind_of?(PropagateProcessor::OutputArrayAppend) 
       update_select_ds = SQL::ArrayDataset.create(db,new_val_rows,attr_mh,:convert_for_update => true)

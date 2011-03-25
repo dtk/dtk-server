@@ -25,7 +25,7 @@ module XYZ
       attr_info = attr_rows.inject({}){|h,attr|h.merge(attr[:id] => attr)}
 
       #set function and new function_index and new updated link_info
-      updated_link_info = Array.new
+      input_attrs_updates = Array.new
       rows.each do |row|
         input_id = row[:input_id]
         input_attr = attr_info[input_id]
@@ -33,14 +33,16 @@ module XYZ
         new_index = Attribute::LinkInfo.set_next_index!(input_attr) #TODO: deprecate; subsumed by index_map
         #TODO: semantic type object may pull in what its connecetd component type is
         row[:function] = SemanticType.find_link_function(input_attr[:semantic_type_object],output_attr[:semantic_type_object])
-        index_map = SemanticType.find_index_map(input_attr,output_attr)
+        input_attr_upd = Hash.new
+        index_map,input_attr_update = SemanticType.find_index_map_and_input_attr_updates(input_attr,output_attr)
         row[:index_map] = index_map if index_map
         row[:function_index] = new_index #TODO: deprecate; subsumed by index_map
-        updated_link_info << {:id => input_id,:link_info => input_attr[:link_info]} #TODO: deprecate; subsumed by index_map
+        input_attr_update.merge!(:id => input_id,:link_info => input_attr[:link_info]) #TODO: deprecate; subsumed by index_map
+        input_attrs_updates << input_attr_update unless input_attr_update.empty?
       end
 
-      #update attribute link_info
-      update_from_rows(attr_mh,updated_link_info)
+      #update input attrs
+      update_from_rows(attr_mh,input_attrs_updates) unless input_attrs_updates.empty?
 
       #create attribute_links
       select_ds = SQL::ArrayDataset.create(db,rows,attr_link_mh,:convert_for_create => true)

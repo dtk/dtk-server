@@ -197,9 +197,23 @@ module XYZ
       elsif  (not output_sem_type.is_array?) and (not input_sem_type.is_array?)
         "eq"
       else
-        raise raise ErrorNotImplemented.new("find_link_function for input #{input_sem_type.inspect} and output #{output_sem_type.inspect}")
+        raise ErrorNotImplemented.new("find_link_function for input #{input_sem_type.inspect} and output #{output_sem_type.inspect}")
       end
     end
+
+    def self.find_index_map(input_attr,output_attr)
+      return nil unless input_attr[:semantic_type_object].is_array?
+      output_size = (output_attr[:attribute_value]||[]).size
+      if output_size == 0
+        Log.error("output_size == 0 is unexepected")
+        return nil
+      end
+      input_size = (input_attr[:attribute_value]||[]).size
+      (0..output_size-1).map do |i|
+        {:output => [i], :input => [i+input_size]}
+      end
+    end
+
     def is_atomic?()
       nil
     end

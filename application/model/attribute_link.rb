@@ -1,21 +1,5 @@
 module XYZ
   class AttributeLink < Model
-    set_relation_name(:attribute,:link)
-
-    def self.up()
-      foreign_key :input_id, :attribute, FK_CASCADE_OPT
-      foreign_key :output_id, :attribute, FK_CASCADE_OPT
-      column :type, :varchar, :size => 25, :default => "external" # "internal" | "external" | "member"
-      column :hidden, :boolean, :default => false
-      column :function, :json, :default => "eq"
-      column :function_index, :json
-      foreign_key :assembly_id, :component, FK_SET_NULL_OPT #TODO: may instead just determine by seeing attributes contained and what is linked
-      #TODO: may deprecate and subsume in function
-      column :label, :text, :default => "1"
-      many_to_one :library, :datacenter, :component, :node
-    end
-
-
     ##########################  add new links ##################
     def self.create_port_and_attr_links(parent_idh,rows,opts={})
       attr_link_mh = parent_idh.create_childMH(:attribute_link)
@@ -40,15 +24,19 @@ module XYZ
       attr_rows = get_objects_from_sp_hash(attr_mh,sp_hash)
       attr_info = attr_rows.inject({}){|h,attr|h.merge(attr[:id] => attr)}
 
-
       #set function and new function_index and new updated link_info
       updated_link_info = Array.new
       rows.each do |row|
         input_id = row[:input_id]
-        new_index = Attribute::LinkInfo.set_next_index!(attr_info[input_id])
-        row[:function] = SemanticType.find_link_function(attr_info[input_id][:semantic_type_object],attr_info[row[:output_id]][:semantic_type_object])
-        row[:function_index] = new_index
-        updated_link_info << {:id => input_id,:link_info => attr_info[input_id][:link_info]}
+        input_attr = attr_info[input_id]
+        output_attr = attr_info[row[:output_id]]
+        new_index = Attribute::LinkInfo.set_next_index!(input_attr) #TODO: deprecate; subsumed by index_map
+        #TODO: semantic type object may pull in what its connecetd component type is
+        row[:function] = SemanticType.find_link_function(input_attr[:semantic_type_object],output_attr[:semantic_type_object])
+        index_map = SemanticType.find_index_map(input_attr,output_attr)
+        row[:index_map] = index_map if index_map
+        row[:function_index] = new_index #TODO: deprecate; subsumed by index_map
+        updated_link_info << {:id => input_id,:link_info => input_attr[:link_info]} #TODO: deprecate; subsumed by index_map
       end
 
       #update attribute link_info
@@ -100,9 +88,7 @@ module XYZ
 
 
 ####################
-
-
-     ### special purpose create links ###
+    ### special purpose create links ###
     def self.create_links_node_group_members(node_group_id_handle,ng_cmp_id_handle,node_cmp_id_handles)
       node_cmp_mh = node_cmp_id_handles.first.createMH
       node_cmp_wc = {:ancestor_id => ng_cmp_id_handle.get_id()}

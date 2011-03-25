@@ -220,7 +220,7 @@ module XYZ
            :model_name => :attribute_link,
            :join_type => :inner,
            :join_cond=>{:output_id=> :attribute__id},
-           :cols=>[:output_id,:input_id,:function,:function_index]
+           :cols=>[:output_id,:input_id,:function,:index_map,:function_index]
          },
          {
            :model_name => :attribute,

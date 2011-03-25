@@ -231,6 +231,7 @@ module XYZ
       end
     end
 
+    #TODO: think problem is that output may not have rows yet oir may expand so better solution would be to set index map at same time that propagating variable -> need to make this atomic too or maybe this gives us chance to do a transaction where input variable and link's index map updated within a transaction"
     def self.find_index_map_and_input_attr_updates(input_attr,output_attr)
       ret = [nil,{}]
       return ret unless input_attr[:semantic_type_object].is_array?
@@ -243,9 +244,9 @@ module XYZ
       index_map = (0..output_size-1).map do |i|
         {:output => [i], :input => [i+input_size]}
       end
-#      [index_map,{:id => input_attr[:id], :value_derived => null_values(output_attr[:attribute_value])}]
-      pp [:null_values,null_values(output_attr[:attribute_value])]
-      #TODO: need to know if there is a first connection or not; if first connection overwrite; else append
+      #TODO: use the 'transaction version' that augments arrays
+      value_derived = (input_attr[:attribute_value]||[]) + null_values(output_attr[:attribute_value])
+#      [index_map,{:id => input_attr[:id], :value_derived => value_derived}]
       [index_map,{}]
     end
 

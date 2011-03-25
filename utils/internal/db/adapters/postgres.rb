@@ -5,6 +5,7 @@ module XYZ
       @db = Sequel.postgres(db_params[:name], :user => db_params[:user],  :host => db_params[:hostname], :password => db_params[:pass])
     end
 
+
     def ret_array_dataset(rows)
       ds = @db.dataset()
       sql = String.new
@@ -33,6 +34,9 @@ module XYZ
       create_function_zzz_ret_id?()
       create_element_update_trigger?()
       create_sequence?(TOP_LOCAL_ID_SEQ,ID_TYPES[:local_id]) 
+      
+      #custom functions
+      create_custom_function__append_to_array_value?()
     end
 
     def create_table_common_extras?(db_rel)
@@ -216,12 +220,50 @@ module XYZ
     end
 
   private
+    def execute_function_aux(fn_name,*args)
+      @db.get("#{FUNCTION_SCHEMA}.#{fn_name}".to_sym.sql_function(*args))
+    end
 
     def ret_schema_and_table(rel)
       rel.kind_of?(Hash) ? rel : {:schema => :public, :table => rel}
     end
     def ret_schema_and_fn(fn)
       fn.kind_of?(Hash) ? fn : {:schema => :public, :fn => :fn}
+    end
+#####custom functions
+    def create_custom_function__append_to_array_value?()
+      fn_args =
+        [
+         {:schema => FUNCTION_SCHEMA,:fn => :append_to_array_value},
+         "DECLARE
+    arr varchar[];
+    ret integer;
+    new_vals varchar;
+    max_index integer := 0;
+   BEGIN
+   SELECT  regexp_split_to_array(regexp_replace(value_derived,'.$',''),'},{')
+     INTO arr
+     FROM attribute.attribute WHERE id = _id and c = _c;
+   IF arr IS NULL THEN
+     ret := 0;
+     new_vals := _vals_to_app;
+   ELSE
+    ret := array_upper(arr,1);
+    new_vals := array_to_string(arr,'},{') || regexp_replace(_vals_to_app,'^.',',');
+  END IF;
+
+   UPDATE attribute.attribute SET value_derived = new_vals
+    WHERE id = _id and c = _c;
+   RETURN ret;
+  END",
+         {
+           :returns => :integer, 
+           :language => "plpgsql",
+           :behavior => :VOLATILE, 
+           :args => [{:_c => :integer}, {:_id => ID_TYPES[:id]},{:_vals_to_app => :varchar}]
+         }
+        ]
+      create_function?(*fn_args)
     end
   end
 end

@@ -1,13 +1,8 @@
 module XYZ
   class DB
     module DataProcessingGet
-
       def execute_function(fn_name,model_handle,*args)
-        FUNCTION_SCHEMA
-        ds = @db.empty_dataset()
-        ds.select("#{FUNCTION_SCHEMA}__#{fn_name}".to_sym.sql_function(model_handle[:c],*args) => :val)
-        rows = ds.all
-        rows.first && rows.first[:val]
+        execute_function_aux(fn_name,model_handle[:c],*args)
       end
 
       #where clause could be hash or string

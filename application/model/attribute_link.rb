@@ -33,7 +33,7 @@ module XYZ
         new_index = Attribute::LinkInfo.set_next_index!(input_attr) #TODO: deprecate; subsumed by index_map
         #TODO: semantic type object may pull in what its connecetd component type is
         row[:function] = SemanticType.find_link_function(input_attr[:semantic_type_object],output_attr[:semantic_type_object])
-        input_attr_upd = Hash.new
+
         index_map = SemanticType.find_index_map(input_attr,output_attr)
         row[:index_map] = index_map if index_map
         row[:function_index] = new_index #TODO: deprecate; subsumed by index_map

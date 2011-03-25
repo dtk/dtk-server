@@ -226,6 +226,7 @@ module XYZ
         return ret
       end
       input_size = (input_attr[:attribute_value]||[]).size
+      return nil if input_size == 0
       AttributeLink::IndexMap.generate(0,output_size-1,input_size)
     end
 

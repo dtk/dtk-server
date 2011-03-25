@@ -225,7 +225,8 @@ module XYZ
     ########################## propagate changes ##################
     #returns all changes
     #TODO: flat list now; look at nested list reflecting hierarchical plan decomposition
-    def self.propagate(output_attr_id_handles,parent_id_handles=nil)
+    #TODO: rather than needing look up existing values for output vars; might allow change/new values to be provided as function arguments
+   def self.propagate(output_attr_id_handles,parent_id_handles=nil)
       return Hash.new if output_attr_id_handles.empty?
       attr_mh = output_attr_id_handles.first.createMH()
       output_attr_ids = output_attr_id_handles.map{|idh|idh.get_id()}
@@ -237,7 +238,7 @@ module XYZ
       attrs_to_update = Model.get_objects_from_sp_hash(attr_mh,sp_hash)
     
       #dont propagate to attributes with asserted values TODO: push this restriction into search pattern
-      attrs_to_update.reject!{|r|(r[:attribute2]||{})[:value_asserted]}
+      attrs_to_update.reject!{|r|(r[:input_attribute]||{})[:value_asserted]}
       change_info = Hash.new
       new_val_rows = Array.new
 
@@ -248,7 +249,7 @@ module XYZ
       end
 
       attrs_to_update.each_with_index do |row,i|
-        input_attr_row = row[:attribute2]
+        input_attr_row = row[:input_attribute]
         output_attr_row = row
         propagate_proc = PropagateProcessor.new(row[:attribute_link],input_attr_row,output_attr_row)
 
@@ -288,7 +289,7 @@ module XYZ
       pruned_changes.merge(propagated_changes)
     end
 
-
+=begin
     def self.propagate_old(output_attr_id_handles,parent_id_handles=nil)
       return Hash.new if output_attr_id_handles.empty?
       attr_mh = output_attr_id_handles.first.createMH()
@@ -301,7 +302,7 @@ module XYZ
       attrs_to_update = Model.get_objects_from_sp_hash(attr_mh,sp_hash)
     
       #dont propagate to attributes with asserted values TODO: push this restriction into search pattern
-      attrs_to_update.reject!{|r|(r[:attribute2]||{})[:value_asserted]}
+      attrs_to_update.reject!{|r|(r[:input_attribute]||{})[:value_asserted]}
       change_info = Hash.new
       new_val_rows = Array.new
 
@@ -312,7 +313,7 @@ module XYZ
       end
 
       attrs_to_update.each_with_index do |row,i|
-        input_attr_row = row[:attribute2]
+        input_attr_row = row[:input_attribute]
         output_attr_row = row
         propagate_proc = PropagateProcessor.new(row[:attribute_link],input_attr_row,output_attr_row)
 
@@ -321,15 +322,15 @@ module XYZ
         #case on whether the input attribute is also upstream in attrs_to_update; if so just update these upstream
         #references; otherwise addpend to new_val_rows and change_info
         attr_upstream = false
-=begin
+#=begin
 TODO: can deprecate now taht doing db side increemntal update
         (i+1..attrs_to_update.size-1).each do |j|
-          if input_attr_row[:id] == attrs_to_update[j][:attribute2][:id]
+          if input_attr_row[:id] == attrs_to_update[j][:input_attribute][:id]
             attr_upstream = true
-            attrs_to_update[j][:attribute2][:value_derived] = new_value_row[:value_derived]
+            attrs_to_update[j][:input_attribute][:value_derived] = new_value_row[:value_derived]
           end
         end
-=end
+#=end
         unless attr_upstream
           new_val_rows << new_value_row
 
@@ -365,7 +366,7 @@ TODO: can deprecate now taht doing db side increemntal update
       propagated_changes = propagate_old(nested_idhs,nested_parent_idhs)
       pruned_changes.merge(propagated_changes)
     end
-
+=end
    ########################## end: propagate changes ##################
 
     def self.get_legal_connections(parent_id_handle)

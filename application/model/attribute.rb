@@ -224,12 +224,12 @@ module XYZ
          },
          {
            :model_name => :attribute,
+           :alias => :input_attribute,
            :join_type => :inner,
            :join_cond=>{:id=> :attribute_link__input_id},
            :cols=>[:id, :value_asserted,:value_derived,:semantic_type,:link_info,:display_name]
          }
         ]
-
 
     end
 

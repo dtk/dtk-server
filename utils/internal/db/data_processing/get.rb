@@ -1,6 +1,15 @@
 module XYZ
   class DB
     module DataProcessingGet
+
+      def execute_function(fn_name,model_handle,*args)
+        FUNCTION_SCHEMA
+        ds = @db.empty_dataset()
+        ds.select("#{FUNCTION_SCHEMA}__#{fn_name}".to_sym.sql_function(model_handle[:c],*args) => :val)
+        rows = ds.all
+        rows.first && rows.first[:val]
+      end
+
       #where clause could be hash or string
       def get_objects_scalar_columns(model_handle,where_clause=nil,opts={})
         c = model_handle[:c]

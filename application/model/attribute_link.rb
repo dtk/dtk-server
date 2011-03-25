@@ -34,10 +34,10 @@ module XYZ
         #TODO: semantic type object may pull in what its connecetd component type is
         row[:function] = SemanticType.find_link_function(input_attr[:semantic_type_object],output_attr[:semantic_type_object])
         input_attr_upd = Hash.new
-        index_map,input_attr_update = SemanticType.find_index_map_and_input_attr_updates(input_attr,output_attr)
+        index_map = SemanticType.find_index_map(input_attr,output_attr)
         row[:index_map] = index_map if index_map
         row[:function_index] = new_index #TODO: deprecate; subsumed by index_map
-        input_attr_update.merge!(:id => input_id,:link_info => input_attr[:link_info]) #TODO: deprecate; subsumed by index_map
+        input_attr_update = {:id => input_id,:link_info => input_attr[:link_info]} #TODO: deprecate; subsumed by index_map
         input_attrs_updates << input_attr_update unless input_attr_update.empty?
       end
 
@@ -356,7 +356,30 @@ TODO: can deprecate now taht doing db side increemntal update
     end
 =end
    ########################## end: propagate changes ##################
+    class IndexMap < Array
+      def self.generate(lower_bound,upper_bound,offset)
+        create_from_array((lower_bound..upper_bound).map{|i|{:output => [i], :input => [i+offset]}})
+      end
+      def self.convert_if_needed(x)
+        x.kind_of?(Array) ? create_from_array(x) : x
+      end
 
+      def input_array_indexes()
+        ret = Array.new
+        self.map do |el|
+          raise Error.new("unexpected form in input_array_indexes") unless el[:input] and el[:input].size == 1 and el[:input].first.kind_of?(Fixnum) 
+          el[:input].first
+        end 
+      end
+     private
+      def self.create_from_array(a)
+        ret = new()
+        a.each{|el| ret << el}
+        ret
+      end
+    end
+
+######################## TODO: see whichj of below is tsil used
     def self.get_legal_connections(parent_id_handle)
       c = parent_id_handle[:c]
       parent_id = IDInfoTable.get_id_from_id_handle(parent_id_handle)
@@ -371,6 +394,41 @@ TODO: can deprecate now taht doing db side increemntal update
     end
 
    private
+    def self.ret_function_if_can_determine(input_obj,output_obj)
+      i_sem = input_obj[:semantic_type]
+      return nil if i_sem.nil?
+      o_sem = output_obj[:semantic_type]
+      return nil if o_sem.nil?
+
+      #TBD: haven't put in any rules if they have different seamntic types
+      return nil unless i_sem.keys.first == o_sem.keys.first      
+      
+      sem_type = i_sem.keys.first
+      ret_function_endpoints_same_type(i_sem[sem_type],o_sem[sem_type])
+    end
+
+    def self.ret_function_endpoints_same_type(i,o)
+      #TBD: more robust is allowing for example output to be "database", which matches with "postgresql" and also to have version info, etc
+      raise Error.new("mismatched input and output types") unless i[:type] == o[:type]
+      return :equal if !i[:is_array] and !o[:is_array]
+      return :equal if i[:is_array] and o[:is_array]
+      return :concat if !i[:is_array] and o[:is_array]
+      raise Error.new("mismatched input and output types") if i[:is_array] and !o[:is_array]
+      nil
+    end
+
+    def get_input_attribute(opts={})
+      return nil if self[:input_id].nil?
+      get_object_from_db_id(self[:input_id],:attribute)
+    end
+
+    def get_output_attribute(opts={})
+      return nil if self[:output_id].nil?
+      get_object_from_db_id(self[:output_id],:attribute)
+    end
+  end
+end
+
 
     ##### Actions
 =begin TODO: needs fixing up or removal
@@ -397,44 +455,3 @@ TODO: can deprecate now taht doing db side increemntal update
 =end
       #returns function if can determine from semantic type of input and output
       #throws an error if finds a mismatch
-    class << self
-      def ret_function_if_can_determine(input_obj,output_obj)
-        i_sem = input_obj[:semantic_type]
-        return nil if i_sem.nil?
-        o_sem = output_obj[:semantic_type]
-        return nil if o_sem.nil?
-
-        #TBD: haven't put in any rules if they have different seamntic types
-        return nil unless i_sem.keys.first == o_sem.keys.first      
-      
-        sem_type = i_sem.keys.first
-        ret_function_endpoints_same_type(i_sem[sem_type],o_sem[sem_type])
-      end
-
-    private
-
-      def ret_function_endpoints_same_type(i,o)
-        #TBD: more robust is allowing for example output to be "database", which matches with "postgresql" and also to have version info, etc
-        raise Error.new("mismatched input and output types") unless i[:type] == o[:type]
-        return :equal if !i[:is_array] and !o[:is_array]
-        return :equal if i[:is_array] and o[:is_array]
-        return :concat if !i[:is_array] and o[:is_array]
-        raise Error.new("mismatched input and output types") if i[:is_array] and !o[:is_array]
-        nil
-      end
-    end
-
-    ##instance fns
-    def get_input_attribute(opts={})
-      return nil if self[:input_id].nil?
-      get_object_from_db_id(self[:input_id],:attribute)
-    end
-
-    def get_output_attribute(opts={})
-      return nil if self[:output_id].nil?
-      get_object_from_db_id(self[:output_id],:attribute)
-    end
-  end
-  # END Attribute class definition
-end
-

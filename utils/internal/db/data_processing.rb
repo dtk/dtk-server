@@ -15,10 +15,14 @@ module XYZ
       include DataProcessingDelete unless included_modules.include?(DataProcessingDelete)
       include DataProcessingUpdate unless included_modules.include?(DataProcessingUpdate)
       
-      def convert_from_object_to_db_form!(model_handle,scalar_assigns,sql_operation,opts={})
+      def ret_convert_from_object_to_db_form(model_handle,scalar_assigns,sql_operation,opts={})
+        ret = scalar_assigns
         db_rel = DB_REL_DEF[model_handle[:model_name]]
-        return nil unless db_rel #to take into account model_name can be an artificial one, for example for array datasets 
-        modify_to_reflect_special_processing!(scalar_assigns,db_rel,sql_operation,opts)
+        return ret unless db_rel #to take into account model_name can be an artificial one, for example for array datasets 
+        #shallow copy here is sufficienct because modify_to_reflect_special_processing! only modofies at the top key level
+        ret = scalar_assigns.dup
+        modify_to_reflect_special_processing!(ret,db_rel,sql_operation,opts)
+        ret
       end
 
       def json_table_column?(col,db_rel)

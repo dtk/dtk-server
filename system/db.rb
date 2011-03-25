@@ -160,6 +160,7 @@ class DBRel < Hash
   CONTEXT_TABLE = DBRel[:schema => :context, :table => :context]
   USER_TABLE = DBRel[:schema => :user, :table => :user]
   ELEMENT_UPDATE_TRIGGER = {:schema => TOP_SCHEMA_NAME, :fn => :element_update}
+  FUNCTION_SCHEMA = TOP_SCHEMA_NAME
 
   CONTEXT_ID = :c
   FK_CASCADE_OPT = {:on_delete => :cascade, :on_update => :cascade}

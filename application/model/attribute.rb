@@ -403,7 +403,8 @@ module XYZ
 
     def self.update_attribute_values(attr_mh,new_val_rows,cols_x,opts={})
       cols = Array(cols_x)
-      return update_attribute_values_incremental(attr_mh,new_val_rows,cols,opts) if new_val_rows.first and new_val_rows.first.kind_of?(PropagateProcessor::OutputArraySlice) 
+      return update_attribute_values_array_slice(attr_mh,new_val_rows,cols,opts) if new_val_rows.first and new_val_rows.first.kind_of?(PropagateProcessor::OutputArraySlice) 
+      return update_attribute_values_array_append(attr_mh,new_val_rows,cols,opts) if new_val_rows.first and new_val_rows.first.kind_of?(PropagateProcessor::OutputArrayAppend) 
       update_select_ds = SQL::ArrayDataset.create(db,new_val_rows,attr_mh,:convert_for_update => true)
       update_from_select(attr_mh,FieldSet.new(:attribute,cols),update_select_ds,opts)
     end
@@ -414,22 +415,37 @@ module XYZ
       path.size == 1 ? val[path.first] : unravelled_value(val[path.first],path[1..path.size-1])
     end
 
-   def self.json_form(x)
-     begin
-       JSON.parse(x)
+    def self.json_form(x)
+      begin
+        JSON.parse(x)
       rescue Exception
-       x
-     end
-   end
-   def self.json_generate(v)
-     (v.kind_of?(Hash) or v.kind_of?(Array)) ? JSON.generate(v) : v
-   end
+        x
+      end
+    end
+    def self.json_generate(v)
+      (v.kind_of?(Hash) or v.kind_of?(Array)) ? JSON.generate(v) : v
+    end
 
-    def self.update_attribute_values_incremental(attr_mh,array_slice_rows,cols_x,opts={})
+    def self.update_attribute_values_array_append(attr_mh,array_slice_rows,cols,opts={})
+      #TODO: make sure cols is what expect
+      attr_link_updates = Array.new
+      array_slice_rows.each do |r|
+        offset = execute_function(:append_to_array_value,attr_mh,r[:id],json_generate(r[:array_slice]))
+        attr_link_update = {
+          :id => r[:attr_link_id],
+          :index_map => AttributeLink::IndexMap.generate(0,r[:array_slice].size,offset)
+        }
+      end
+      attr_link_mh = attr_mh.createMH(:attribute_link)
+      update_from_rows(attr_link_mh,attr_link_updates)
+    end
+
+    def self.update_attribute_values_array_slice(attr_mh,array_slice_rows,cols_x,opts={})
       cols = cols_x
       cols += [:id] unless cols_x.include?(:id)
       update_rows = array_slice_rows.map do |r|
-        value = incremental_value(:value_derived,r[:indexes],r[:array_slice],r[:new_indexes_to_add])
+        index_map = AttributeLink::IndexMap.convert_if_needed(r[:index_map])
+        value = incremental_value(:value_derived,index_map,r[:array_slice])
         #TODO: unify with code in SQL::ArrayDataset
         (cols-[:value_derived]).inject({:value_derived => value}) do |h,col|
           v = r[col]
@@ -447,28 +463,11 @@ module XYZ
       end.flatten
     end
 
-
     #TODO: this should probably go in db../update or sql
-    def self.incremental_value(col,indexes,array_slice,new_indexes_to_add)
-      new_indexes_to_add ? incremental_value_new(col,indexes,array_slice) : incremental_value_change(col,indexes,array_slice)
-    end
+    def self.incremental_value(col,index_map,array_slice)
+      raise Error.new("unexpected that index_map is null") if index_map.nil?
+      indexes = index_map.input_array_indexes()
 
-    def self.incremental_value_new(col,indexes,array_slice)
-      #TODO: not taking account 'race' condition where simulatneusly adding two new links to an attribute and they pick same new indexes; solution may be to use a db sequence; but still would have problem if later one tried to be added after earlier one
-      return json_generate(array_slice) if indexes.min == 0 #first indexes added
-
-      pattern = Array.new
-      replace = Array.new
-      (1..indexes.min).each do |replace_ndx|
-        pattern << "({.+?})"
-        replace << "\\#{replace_ndx}"
-      end
-
-      replace += array_slice.map{|x|json_generate(x)}
-      :regexp_replace.sql_function(:value_derived,pattern.join(","),replace.join(","))
-    end
-
-    def self.incremental_value_change(col,indexes,array_slice)
       pattern = Array.new
       replace = Array.new
       array_slice_ndx = 0

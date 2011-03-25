@@ -4,6 +4,8 @@ module XYZ
     end
     class OutputArraySlice < Output
     end
+    class OutputArrayAppend < Output
+    end
 
     #propgate from output var to input var
     def propagate()
@@ -31,7 +33,9 @@ module XYZ
 
     def initialize(attr_link,input_attr,output_attr)
       @function = attr_link[:function]
-      @function_index = attr_link[:function_index]
+      @index_map = AttributeLink::IndexMap.convert_if_needed(attr_link[:index_map])
+      @attr_link_id =  attr_link[:id]
+      @function_index = attr_link[:function_index] #TODO: remove
       @input_attr = input_attr
       @output_attr = output_attr
     end
@@ -100,31 +104,12 @@ module XYZ
     end
 
     def propagate_when_eq_indexed()
-      #TODO: in transition; get rid of need to put in :derived_value
-      array_pointers = Attribute::LinkInfo.array_pointers(@input_attr,function_index)
       new_rows = output_value().nil? ? [nil] : (output_semantic_type().is_array? ?  output_value() : [output_value()])
-      value = nil
-      if new_indexes_to_add = array_pointers.nil? ?  true : false
-        value = (input_value||[]) + new_rows
-        array_pointers = Attribute::LinkInfo.update_array_pointers!(@input_attr,function_index,(Array(input_value||[]).size...value.size))
+      if @index_map 
+        OutputArraySlice.new(:index_map => @index_map, :array_slice => new_rows)
       else
-        unless array_pointers.size == new_rows.size
-          raise ErrorNotImplemented.new("propagate_when_eq_indexed when number of rows spliced in changes")
-        end
-        value = Array.new
-        new_rows_index = 0
-        #replace rows in array_pointers with new_rows
-        input_value.each_with_index do |row,i|
-          if array_pointers.include?(i)
-            value << new_rows[new_rows_index]
-            new_rows_index += 1
-          else
-            value << row
-          end
-        end
+        OutputArrayAppend.new(:array_slice => new_rows, :attr_link_id => @attr_link_id)
       end
-    OutputArraySlice.new(:indexes => array_pointers, :array_slice => new_rows, :new_indexes_to_add => new_indexes_to_add, :link_info => @input_attr[:link_info], :value_derived => value)
-#      {:value_derived => value,:link_info => @input_attr[:link_info]}
     end
 
 =begin
@@ -181,7 +166,8 @@ module XYZ
     end
 
     #########instance var access fns
-    attr_reader :function,:function_index
+    attr_reader :function
+    attr_reader :function_index #TODO remove
     def input_value()
       @input_value ||= @input_attr[:value_derived]
     end
@@ -231,40 +217,23 @@ module XYZ
       end
     end
 
-    #TODO: think problem is that output may not have rows yet oir may expand so better solution would be to set index map at same time that propagating variable -> need to make this atomic too or maybe this gives us chance to do a transaction where input variable and link's index map updated within a transaction"
-    def self.find_index_map_and_input_attr_updates(input_attr,output_attr)
-      ret = [nil,{}]
+    def self.find_index_map(input_attr,output_attr)
+      ret = nil
       return ret unless input_attr[:semantic_type_object].is_array?
       output_size = (output_attr[:attribute_value]||[]).size
       if output_size == 0
-        Log.error("output_size == 0 is unexepected")
+        Log.error("output_size == 0 is unexpected")
         return ret
       end
       input_size = (input_attr[:attribute_value]||[]).size
-      index_map = (0..output_size-1).map do |i|
-        {:output => [i], :input => [i+input_size]}
-      end
-      #TODO: use the 'transaction version' that augments arrays
-      value_derived = (input_attr[:attribute_value]||[]) + null_values(output_attr[:attribute_value])
-#      [index_map,{:id => input_attr[:id], :value_derived => value_derived}]
-      [index_map,{}]
+      AttributeLink::IndexMap.generate(0,output_size-1,input_size)
     end
 
     def is_atomic?()
       nil
     end
+
    private
-
-    def self.null_values(item)
-      if item.kind_of?(Array)
-        item.map{|x|null_values(x)}
-      elsif item.kind_of?(Hash)
-        item.inject({}){|h,kv|h.merge(kv[0] => null_values(kv[1]))}
-      else
-        nil
-      end
-    end
-
     def self.convert_hash(item)
       return item unless item.kind_of?(Hash)
       item.inject({}) do |h,kv|

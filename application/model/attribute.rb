@@ -428,13 +428,15 @@ module XYZ
 
     def self.update_attribute_values_array_append(attr_mh,array_slice_rows,cols,opts={})
       #TODO: make sure cols is what expect
+      #raise Error.new unless cols == [:value_derived]
       attr_link_updates = Array.new
       array_slice_rows.each do |r|
         offset = execute_function(:append_to_array_value,attr_mh,r[:id],json_generate(r[:array_slice]))
         attr_link_update = {
           :id => r[:attr_link_id],
-          :index_map => AttributeLink::IndexMap.generate(0,r[:array_slice].size,offset)
+          :index_map => AttributeLink::IndexMap.generate(0,r[:array_slice].size-1,offset)
         }
+        attr_link_updates << attr_link_update
       end
       attr_link_mh = attr_mh.createMH(:attribute_link)
       update_from_rows(attr_link_mh,attr_link_updates)

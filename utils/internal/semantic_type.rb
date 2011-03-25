@@ -112,36 +112,6 @@ module XYZ
       end
     end
 
-=begin
-    def propagate_when_eq_indexed()
-      #TODO: in transition; get rid of need to put in :derived_value
-      array_pointers = Attribute::LinkInfo.array_pointers(@input_attr,function_index)
-      new_rows = output_value().nil? ? [nil] : (output_semantic_type().is_array? ?  output_value() : [output_value()])
-      value = nil
-      if new_indexes_to_add = array_pointers.nil? ?  true : false
-        value = (input_value||[]) + new_rows
-        array_pointers = Attribute::LinkInfo.update_array_pointers!(@input_attr,function_index,(Array(input_value||[]).size...value.size))
-      else
-        unless array_pointers.size == new_rows.size
-          raise ErrorNotImplemented.new("propagate_when_eq_indexed when number of rows spliced in changes")
-        end
-        value = Array.new
-        new_rows_index = 0
-        #replace rows in array_pointers with new_rows
-        input_value.each_with_index do |row,i|
-          if array_pointers.include?(i)
-            value << new_rows[new_rows_index]
-            new_rows_index += 1
-          else
-            value << row
-          end
-        end
-      end
-    OutputArraySlice.new(:indexes => array_pointers, :array_slice => new_rows, :new_indexes_to_add => new_indexes_to_add, :link_info => @input_attr[:link_info], :value_derived => value)
-#      {:value_derived => value,:link_info => @input_attr[:link_info]}
-    end
-
-=end
     ###### helper fns for propagation fns
     def ret_cartesian_product()
       output_v = 

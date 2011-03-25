@@ -49,6 +49,8 @@ module XYZ
       override_attrs = {}
       field_set = FieldSet.new(attr_link_mh[:model_name],rows.first.keys)
       returning_ids = create_from_select(attr_link_mh,field_set,select_ds,override_attrs,:returning_sql_cols=> [:id])
+      returning_ids.each_with_index{|id_info,i|rows[i][:id] = id_info[:id]}
+
       propagate_from_create(attr_mh,attr_info,rows)
 
       return returning_ids if opts[:no_nested_processing]

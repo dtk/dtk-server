@@ -280,7 +280,7 @@ module XYZ
           unless obj
             row
           else
-            (obj.keys-[:id]).each{|k|Aux.merge_into_json_col!(obj,k.row[k])}
+            (obj.keys-[:id]).each{|k|Aux.merge_into_json_col!(obj,k,row[k])}
             obj
           end
         end

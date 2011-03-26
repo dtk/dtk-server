@@ -6,7 +6,7 @@ module XYZ
   #a link constraint violation raised saying they cannot connect. Matching is based by finding most specfic match (wrt type hierrachy of
   #input component then most specific match of output component
   #NOTE: need to flesh out details related to "inheritance override issues"
-  PossibelComponentConnections = {
+  PossibleComponentConnections = {
     :mysql__slave => { #input component; can be component_type or member of component hiererachy
 
       #connection type is so can specify, for example 'this is a db connection', monitoring connection, etc; 

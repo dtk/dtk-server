@@ -103,5 +103,8 @@ module XYZ
     end
     class Application < ComponentTypeHierarchy
     end
+    #dynamically create all other classes not explicitly defined
+    #class name is goten by Aux::camelize(key)
+    #klass = Object.const_set(class_name,ComponentTypeHierarchy)
   end
 end

@@ -51,6 +51,15 @@ module XYZ
   end
   class ComponentTypeHierarchy
     include TypeHierarchyDefMixin
+
+    #adapted from  http://www.ruby-forum.com/topic/163430
+    def self.inherited(sub)
+      (@subclasses ||= Array.new).push(sub).uniq!
+    end
+    def self.subclasses()
+      @subclasses
+    end
+
     def self.basic_type(specific_type)
       ret_basic_type[specific_type.to_sym]
     end
@@ -103,8 +112,19 @@ module XYZ
     end
     class Application < ComponentTypeHierarchy
     end
+
     #dynamically create all other classes not explicitly defined
-    #class name is goten by Aux::camelize(key)
-    #klass = Object.const_set(class_name,ComponentTypeHierarchy)
+    def self.all_keys(x)
+      return Array.new unless x.kind_of?(Hash)
+      x.keys + x.values.map{|el|all_keys(el)}.flatten
+    end
+    existing_subclass_names = ComponentTypeHierarchy.subclasses.map{|x|x.to_s}
+    include TypeHierarchyDefMixin
+    all_keys(TypeHierarchy).each do |key|
+      klass_name = Aux::camelize(key)
+      unless existing_subclass_names.include?(klass_name)
+        const_set(klass_name,Class.new(ComponentTypeHierarchy)) 
+      end
+    end
   end
 end

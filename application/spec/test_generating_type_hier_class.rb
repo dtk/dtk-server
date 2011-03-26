@@ -1,9 +1,10 @@
 require 'rubygems'
 require 'pp'
-class_name = 'foo'.capitalize
+
 #klass = Object.const_set(class_name,Class.new)
 
 #taken from http://www.ruby-forum.com/topic/163430
+=begin
 class Class
   def inherited other
     super if defined? super
@@ -18,11 +19,21 @@ class Class
     end
   end
 end
+=end
+
 
 
 class Top 
   def test()
     pp :works
+  end
+  def self.inherited(sub)
+    #adapted from  http://www.ruby-forum.com/topic/163430 
+    (@subclasses ||= Array.new).push(sub).uniq!
+  end
+
+  def self.subclasses()
+    @subclasses
   end
 end
 
@@ -30,6 +41,8 @@ class Service < Top
   def test2()
     pp :test2
   end
+end
+class Application < Top
 end
 Service.new.test2()
 
@@ -76,7 +89,7 @@ Service.new.test2()
       all_keys(TypeHierarchy).each do |key|
         klass_name = camelize(key)
         next if existing_subclass_names.include?(klass_name)
-        Object.const_set(klass_name,Top)
+        Object.const_set(klass_name,Class.new(Top))
       end
 Perl.new.test()
 Service.new.test2()

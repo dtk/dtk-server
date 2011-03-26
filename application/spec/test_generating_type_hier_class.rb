@@ -2,17 +2,37 @@ require 'rubygems'
 require 'pp'
 class_name = 'foo'.capitalize
 #klass = Object.const_set(class_name,Class.new)
+
+#taken from http://www.ruby-forum.com/topic/163430
+class Class
+  def inherited other
+    super if defined? super
+  ensure
+    ( @subclasses ||= [] ).push(other).uniq!
+  end
+
+  def subclasses
+    @subclasses ||= []
+    @subclasses.inject( [] ) do |list, subclass|
+      list.push(subclass, *subclass.subclasses)
+    end
+  end
+end
+
+
 class Top 
   def test()
     pp :works
   end
 end
 
-class Service
+class Service < Top
   def test2()
     pp :test2
   end
 end
+Service.new.test2()
+
 #klass = Object.const_set(class_name,Class.new)
     TypeHierarchy = {
       :service => {
@@ -52,8 +72,11 @@ end
         x.keys + x.values.map{|el|all_keys(el)}.flatten
       end
 
+      existing_subclass_names = Top.subclasses.map{|x|x.to_s}
       all_keys(TypeHierarchy).each do |key|
-        Object.const_set(camelize(key),Top)
+        klass_name = camelize(key)
+        next if existing_subclass_names.include?(klass_name)
+        Object.const_set(klass_name,Top)
       end
 Perl.new.test()
 Service.new.test2()

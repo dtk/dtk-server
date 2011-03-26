@@ -92,7 +92,14 @@ module XYZ
     # unqiuely related to the one in the path; so for example below {:related_component => :db_of} is in path
     #where it is refering to database server (mysql__server or postgres__server etc) and {:related_component => :db_of} 
     #then respectively refers to mysql__db or postgresql__db
-    #NOTE: should we more explicitly capture that a db component gets created; 
+    # {:related_component => :db_of} is nested within a create comamdn to indiacet that this is causing a new db to created
+    # as opposed to using an existing one
+    #
+    #NOTE: if theer are components that can have multiple instances on same node and need to refernce one of them need
+    #way of referencing it; this is similiar to 'load balancer keep alive issue' adn may be solved by refernce to
+    #what is on otehr side of link
+    #NOTE: curerntly dont have a create for new attributes; only introduce if need it; (dont think need it because attributes unique
+    #and mult instance handled by arrays
     :java_app =>  {
       :connnection_type => :db,
       :required => true,
@@ -101,15 +108,17 @@ module XYZ
        {:database__server => {
            :attribute_connections => 
            [{
-              :input => [:__output_component,{:related_component => :db_of},:db_connection_ref], 
+              :input => [:__output_component,{:create => {:related_component => :db_of}},:db_connection_ref], 
               :output => [:__input_componet,:db_connection]
             }]
          }
        }
       ]
     },
-    #shows how a default connection currently encoded between a sap_config__l4 and sap__l4 could be encoded in this representation
+    #shows how a default connection currently encoded between a sap_config__l4 and sap__l4 (and handled by 'hard coding') 
+    #could be encoded in this representation
     #this also shows use of the node attribute host_addresses
+
     #NOTE: this is a link that is hidden from end user and between attributes on same component
     :service => {
       :connection_type => :sap_config__l4__to__sap__l4,

@@ -52,14 +52,6 @@ module XYZ
   class ComponentTypeHierarchy
     include TypeHierarchyDefMixin
 
-    #adapted from  http://www.ruby-forum.com/topic/163430
-    def self.inherited(sub)
-      (@subclasses ||= Array.new).push(sub).uniq!
-    end
-    def self.subclasses()
-      @subclasses
-    end
-
     def self.basic_type(specific_type)
       ret_basic_type[specific_type.to_sym]
     end
@@ -69,6 +61,14 @@ module XYZ
     end
 
    private
+    #adapted from  http://www.ruby-forum.com/topic/163430
+    def self.inherited(sub)
+      (@subclasses ||= Array.new).push(sub).uniq!
+    end
+    def self.subclasses()
+      @subclasses
+    end
+
     def self.ret_basic_type()
       @basic_type ||= TypeHierarchy.inject({}){|h,kv|h.merge(ret_basic_type_aux(kv[0],kv[1]))}
     end
@@ -118,7 +118,7 @@ module XYZ
       return Array.new unless x.kind_of?(Hash)
       x.keys + x.values.map{|el|all_keys(el)}.flatten
     end
-    existing_subclass_names = ComponentTypeHierarchy.subclasses.map{|x|x.to_s}
+    existing_subclass_names = ComponentTypeHierarchy.subclasses.map{|x|Aux::demodulize(x.to_s)}
     include TypeHierarchyDefMixin
     all_keys(TypeHierarchy).each do |key|
       klass_name = Aux::camelize(key)

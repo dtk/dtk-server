@@ -56,8 +56,8 @@ module XYZ
       ret_basic_type[specific_type.to_sym]
     end
 
-    def self.include?(component)
-      specific_types.include?(component[:most_specific_type])
+    def self.include?(type)
+      specific_types.include?(type.to_s)
     end
 
    private
@@ -108,6 +108,7 @@ module XYZ
   end
 
   module ComponentType
+    #TODO: intent is to be able to add custom classes
     class DbServer < ComponentTypeHierarchy
     end
     class Application < ComponentTypeHierarchy

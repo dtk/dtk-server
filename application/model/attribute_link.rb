@@ -58,7 +58,7 @@ module XYZ
     #TODO: can we make this more data driven 
     def self.create_related_link?(parent_idh,link_info)
       input_cmp = link_info[:input][:component_parent]
-      if ComponentType::Application.include?(input_cmp)
+      if ComponentType::Application.include?(input_cmp[:specific_component_type])
         attr_db_config = input_cmp.get_virtual_attribute("db_config",[:id],:semantic_type_summary)
         create_related_link_from_db_config(parent_idh,link_info,attr_db_config) if attr_db_config
       end

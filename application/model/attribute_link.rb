@@ -29,8 +29,13 @@ module XYZ
       rows.each do |row|
         input_id = row[:input_id]
         input_attr = attr_info[input_id]
-#pp [:connectivity_profile, input_attr[:component_parent][:connectivity_profile]]
+
+        conn_profile = input_attr[:component_parent][:connectivity_profile]
+#pp [:connectivity_profile, conn_profile]
         output_attr = attr_info[row[:output_id]]
+        output_cmp = output_attr[:component_parent]
+#pp [:connectivity_info,conn_profile.match_output(output_cmp[:component_type],output_cmp[:most_specific_type])]
+
         #TODO: semantic type object may pull in what its connecetd component type is
         row[:function] = SemanticType.find_link_function(input_attr[:semantic_type_object],output_attr[:semantic_type_object])
       end

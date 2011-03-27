@@ -238,10 +238,7 @@ module XYZ
     end
 
      def connectivity_profile()
-       #TODO: do we return all matches from both or have find_component take two args?
-       ret = NewConnectionProcessor.find_component_connectivity_profile(self[:component_type])
-       return ret unless ret.empty?
-       NewConnectionProcessor.find_component_connectivity_profile(self[:most_specific_type])
+       ConnectivityProfile.find(self[:component_type],self[:most_specific_type])
      end
 
     def containing_datacenter()

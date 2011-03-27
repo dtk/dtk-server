@@ -21,7 +21,6 @@ module XYZ
         #leaf type in component type 
         column :specific_type, :varchar, :size => 30 
         column :component_type, :varchar, :size => 50 #this is the exact component type; two instances taht share this can differ by things like defaults
-        virtual_column :most_specific_type, :type => :varchar, :local_dependencies => [:specific_type,:basic_type]
 
         column :only_one_per_node, :boolean, :default => true
         column :version, :varchar, :size => 25 # version of underlying component (not chef recipe .... version)
@@ -30,6 +29,11 @@ module XYZ
         #:assembly_id (in contrast to parent field :component_id) is for tieing teh component to a composite component which is not a container
         foreign_key :assembly_id, :component, FK_SET_NULL_OPT
         column :view_def_ref, :varchar
+
+        #TODO: for efficiency materialize adn if so haev two variants of :component_parent for attribute; one for input, which brings in :connectivity_profile and other for output which deos not
+        virtual_column :connectivity_profile, :type => :json, :local_dependencies => [:specific_type,:basic_type]
+        virtual_column :most_specific_type, :type => :varchar, :local_dependencies => [:specific_type,:basic_type]
+
         many_to_one :component, :library, :node, :node_group, :datacenter
         one_to_many :component, :attribute_link, :attribute, :port_link, :monitoring_item, :dependency, :layout
         one_to_many_clone_omit :layout
@@ -232,6 +236,13 @@ module XYZ
     def most_specific_type()
       self[:specific_type]||self[:basic_type]
     end
+
+     def connectivity_profile()
+       #TODO: do we return all matches from both or have find_component take two args?
+       ret = NewConnectionProcessor.find_component_connectivity_profile(self[:component_type])
+       return ret unless ret.empty?
+       NewConnectionProcessor.find_component_connectivity_profile(self[:most_specific_type])
+     end
 
     def containing_datacenter()
       (self[:datacenter_direct]||{})[:display_name]||

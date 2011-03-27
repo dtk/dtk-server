@@ -1,6 +1,18 @@
 module XYZ
   class NewConnectionProcessor
-    #TODO: this should be private after testing
+    def self.find_component_connectivity_profile(input_cmp_type_x)
+      ret = Array.new
+      return ret if input_cmp_type_x.nil?
+      input_cmp_type = input_cmp_type_x.to_sym
+      rules = get_possible_component_connections()
+      rules.map do |rule_input_cmp_type,rest|
+        component_type_match(input_cmp_type,rule_input_cmp_type) ? rest.merge(:input_component_type => rule_input_cmp_type) : nil
+      end.compact
+    end
+
+   private
+    #TODO:rewrite in terms of find_component_connectivity_profile
+    #Dont forget to convert to sym
     def self.find_matching_rule(input_cmp_type,output_cmp_type)
       ret = nil
       rules = get_possible_component_connections()
@@ -19,8 +31,7 @@ module XYZ
       end
       ret
     end
-    private
-
+   
     def self.component_type_match(cmp_type,rule_cmp_type)
       return true if cmp_type == rule_cmp_type
       type_class = ComponentType.ret_class(rule_cmp_type)

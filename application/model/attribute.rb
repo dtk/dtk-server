@@ -63,7 +63,7 @@ module XYZ
            :convert => true,
            :join_type => :left_outer,
            :join_cond=>{:id => p(:attribute,:component)},
-           :cols => [:id,:display_name,:component_type,:most_specific_type,:ancestor_id,:node_node_id]
+           :cols => [:id,:display_name,:component_type,:most_specific_type,:connectivity_profile,:ancestor_id,:node_node_id]
          }]
 
       virtual_column :port_info, :type => :boolean, :hidden => true,

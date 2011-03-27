@@ -57,16 +57,22 @@ module XYZ
     end
 
     def self.include?(type)
-      specific_types.include?(type.to_s)
+      type && specific_types.include?(type.to_sym)
     end
 
    private
     #adapted from  http://www.ruby-forum.com/topic/163430
     def self.inherited(sub)
-      (@subclasses ||= Array.new).push(sub).uniq!
+      return if sub.to_s =~ /^#<Class/ #hack to get rid of anonymous classes
+      add_to_subclass(sub)
     end
-    def self.subclasses()
-      @subclasses
+
+    def self.add_to_subclass(sub)
+      subclass_name = Aux::demodulize(sub.to_s)
+      (@subclass_names ||= Array.new).push(subclass_name).uniq!
+    end
+    def self.subclass_names()
+      @subclass_names
     end
 
     def self.ret_basic_type()
@@ -103,11 +109,17 @@ module XYZ
     def self.specific_types()
       return @specific_types if @specific_types
       key = key_associated_with_class()
-      @specific_types = [key.to_s] + keys_under_subtype(key).map{|x|x.to_s}
+      @specific_types = [key] + keys_under_subtype(key)
     end
   end
 
   module ComponentType
+    def self.ret_class(type)
+      klass_name = Aux::camelize(type.to_s)
+      return nil unless ComponentTypeHierarchy.subclass_names().include?(klass_name)
+      const_get(klass_name)
+    end
+
     #TODO: intent is to be able to add custom classes
     class DbServer < ComponentTypeHierarchy
     end
@@ -119,12 +131,12 @@ module XYZ
       return Array.new unless x.kind_of?(Hash)
       x.keys + x.values.map{|el|all_keys(el)}.flatten
     end
-    existing_subclass_names = ComponentTypeHierarchy.subclasses.map{|x|Aux::demodulize(x.to_s)}
+    existing_subclass_names = ComponentTypeHierarchy.subclass_names()
     include TypeHierarchyDefMixin
     all_keys(TypeHierarchy).each do |key|
       klass_name = Aux::camelize(key)
       unless existing_subclass_names.include?(klass_name)
-        const_set(klass_name,Class.new(ComponentTypeHierarchy)) 
+        ComponentTypeHierarchy.add_to_subclass(const_set(klass_name,Class.new(ComponentTypeHierarchy)) )
       end
     end
   end

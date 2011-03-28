@@ -60,6 +60,11 @@ module XYZ
       tpl_info_hash[:node] = tpl.render()
       include_js_tpl(tpl_info_hash[:node][:src])
 
+      tpl = R8Tpl::TemplateR8.new("datacenter/wspace_monitor_display",user_context())
+      tpl.set_js_tpl_name("wspace_monitor_display")
+      tpl_info_hash[:monitor] = tpl.render()
+      include_js_tpl(tpl_info_hash[:monitor][:src])
+
       ##### ----------------- add in model info
       model_list = datacenter.get_items()
 
@@ -67,16 +72,19 @@ module XYZ
         object_id_sym = object.id.to_s.to_sym
         ui = ((dc_hash[:ui]||{})[:items]||{})[object_id_sym] || (object[:ui]||{})[datacenter_id.to_s.to_sym]
 
+        obj_tags = object[:display_name].split(',')
         model_name = object.model_name
+        type = (obj_tags.include?("monitor")) ? :monitor : model_name
         {
-          :type => model_name.to_s,
+          :type => type.to_s,
+          :model => model_name.to_s,
           :object => object,
           :toolbar_def => toolbar_def,
-          :tpl_callback => tpl_info_hash[model_name][:template_callback],
-          :ui => ui
+          :tpl_callback => tpl_info_hash[type][:template_callback],
+          :ui => ui,
+          :tags => obj_tags
         }
       end
-
       view_space[:items] = items
       view_space_json = JSON.generate(view_space)
       run_javascript("R8.Workspace.pushViewSpace(#{view_space_json});")

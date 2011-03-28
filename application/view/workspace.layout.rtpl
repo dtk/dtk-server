@@ -16,6 +16,7 @@
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/basic-group.css" />
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/basic-node.css" />
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/basic-item.css" />
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/monitor.css" />
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/topbar.css" />
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/cmdbar.css" />
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/toolbar.css" />
@@ -122,15 +123,6 @@ YUI_config = {
 };
 </script>
 
-<!-- JS -->
-<!--
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/demoData.r8.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/demoData2.r8.js"></script>
--->
-
-<!--
-<script type="text/javascript" src="http://yui.yahooapis.com/combo?3.0.0/build/yui/yui.js&3.0.0/build/loader/loader.js"></script>
--->
 
 <script src="{%=_app[:base_js_uri]%}/external/jquery.js"></script>
 <script src="{%=_app[:base_js_uri]%}/external/jquery.cookie.js"></script>
@@ -147,8 +139,9 @@ YUI_config = {
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/cmdbar.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/utils.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/component.r8.js"></script>
+<!--
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/maintoolbar.r8.js"></script>
-
+-->
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/toolbargroup.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/notifications.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/topbar.r8.js"></script>
@@ -157,7 +150,9 @@ YUI_config = {
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/viewspace.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/group.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/datacenter.r8.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/monitor.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/node.r8.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/link.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/port.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/toolbar.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/dock.r8.js"></script>

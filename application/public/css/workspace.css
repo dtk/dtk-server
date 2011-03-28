@@ -34,7 +34,7 @@
 	background-image: url(../images/menu-divider.png);
 }
 
-.vspace-item { display: none; }
+/*.vspace-item { display: none; }*/
 
 #page-container {
 	position: absolute;
@@ -185,9 +185,14 @@
 /*	border: 1px solid blue;*/
 }
 
-.fullBezier-basic {
+.link {
 	position: absolute;
 	z-index: 0;
+}
+.link.full-bezier {
+/*	border: 1px solid red;*/
+}
+.link.hanger {
 /*	border: 1px solid red;*/
 }
 

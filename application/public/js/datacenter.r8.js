@@ -1,5 +1,5 @@
 
-
+/*
 if(!R8.Datacenter) {
 /*
 //	R8.Datacenter = function(){}
@@ -25,15 +25,13 @@ var monkey = new CodeMonkey();
 monkey.writeCode();
 
 */
-var tester = function() {
-	
-}
 
 /*
 // a constructor that inherits from the parent-supplier
 function Guru(){}
 Y.extend(Guru, Programmer);
 var guru = new Guru();
-*/
+
 
 }
+*/

@@ -24,6 +24,7 @@ if (!R8.ViewSpace) {
 			_userSettings = {showPorts: true,showLinks:true},
 
 			_links = null,
+			_links2 = {},
 			_linkRenderList = [];
 
 		return {
@@ -64,7 +65,16 @@ if (!R8.ViewSpace) {
 					case "def":
 						return _def;
 						break;
+					case "node":
+						return _node;
+						break;
 				}
+			},
+			items: function(itemId) {
+				return _items[itemId];
+			},
+			links: function(linkId) {
+				return _links2[linkId];
 			},
 
 			setupEvents: function() {
@@ -141,13 +151,21 @@ if (!R8.ViewSpace) {
 					if(_links[l].port_id ==  portId || _links[l].other_end_id == portId) return _links[l];
 				}
 			},
+			getLinkByPortId: function(portId) {
+				for(var l in _links2) {
+					if(_links2[l].get('portId') ==  portId || _links2[l].get('otherEndId') == portId) return _links2[l];
+				}
+
+				return null;
+			},
 
 			mergePorts: function(mergePortNodeId,targetPortNodeId) {
 				var mergePortDef = this.getPortDefById(mergePortNodeId),
 					targetPortDef = this.getPortDefById(targetPortNodeId),
 					mergePortNode = R8.Utils.Y.one('#'+mergePortDef.nodeId),
 					targetPortNode = R8.Utils.Y.one('#'+targetPortDef.nodeId),
-					linkDef = this.getLinkDefByPortId(mergePortNodeId.replace('port-',''));
+					link = this.getLinkByPortId(mergePortNodeId.replace('port-',''));
+//					linkDef = this.getLinkDefByPortId(mergePortNodeId.replace('port-',''));
 
 //DEBUG
 /*
@@ -175,10 +193,11 @@ console.log(_items[mergePortDef.parentItemId]);
 						duration: 0.5
 				    });
 					portAnim.on('tween',function(e){
-						_items[mergePortDef.parentItemId].refreshLinks();
+//						_items[mergePortDef.parentItemId].refreshLinks();
+						link.render();
 					});
 				    var linkAnim = new Y.Anim({
-				        node: '#'+linkDef.id,
+				        node: '#'+link.get('canvasNodeId'),
 						to: {
 							opacity: 0
 						},
@@ -194,7 +213,7 @@ console.log(_items[mergePortDef.parentItemId]);
 								linkAnim.run();
 
 								var reflowCallback = function() {
-									that.removeLink(linkDef.id);
+									that.removeLink(link.get('id'));
 									_items[mergePortDef.parentItemId].removePort('port-'+mergePortDef.id);
 								}
 								setTimeout(reflowCallback,200);
@@ -206,10 +225,12 @@ console.log(_items[mergePortDef.parentItemId]);
 					portAnim.run();
 				});
 			},
+/*
+//TODO: old, remove after updating link handling for external to l4 merge
 			removeLink: function(linkId) {
 				delete(_links[linkId]);
 			},
-
+*/
 			portMout: function(e) {
 				R8.Utils.Y.one('#port-modal').remove();
 			},
@@ -266,13 +287,16 @@ console.log(_items[mergePortDef.parentItemId]);
 						case "node":
 							this.addNode(item);
 							break;
+						case "monitor":
+							this.addMonitor(item);
+							break;
 						case "component":
 							this.addComponent(item);
 							break;
 						default:
 							break;
 					}
-					if(typeof(item['ui']) == 'undefined') continue;
+					if(typeof(item['ui']) == 'undefined' || items[i]['type'] == "monitor") continue;
 
 /*					var id = item['object']['id'],
 						top = (typeof(_itemPosUpdateList[id]) == 'undefined') ? item['object']['ui'][_id]['top'] : _itemPosUpdateList[id]['pos']['top'],
@@ -324,7 +348,7 @@ console.log(_items[mergePortDef.parentItemId]);
 					for(var i in items) {
 						itemList.push({
 							'id': items[i].object.id,
-							'model': items[i].type
+							'model': items[i].model
 						});
 					}
 				}
@@ -361,17 +385,54 @@ console.log(_items[mergePortDef.parentItemId]);
 
 					tempLinkList['link-'+linkList[i]['id']] = linkList[i];
 					_linkRenderList.push('link-'+linkList[i]['id']);
+//DEBUG
+					this.addLink(linkList[i]);
+//					_links2['link-'+linkList[i]['id']] = new R8.Link(linkList[i],this);
 				}
 				_links = {};
-				for(var i in tempLinkList) _links[i] = tempLinkList[i];
+//				for(var i in tempLinkList) _links[i] = tempLinkList[i];
 //				_links = tempLinkList;
-				if(_userSettings.showLinks == true) {
-					this.renderLinks();
-				}
+//				if(_userSettings.showLinks == true) {
+//					this.renderLinks();
+//				}
 
 			},
 
+			addLink: function(linkObj) {
+				var linkId = 'link-'+linkObj.id;
+				_links2[linkId] = new R8.Link(linkObj,this);
+				_links2[linkId].init();
+				_links2[linkId].render();
+			},
+
+			removeLink: function(linkId) {
+				this.removeLinkFromItems(linkId);
+				_links2[linkId].destroy();
+				delete(_links2[linkId]);
+			},
+			addLinkToItems: function(linkDef) {
+//TODO: revisit after implementing many end item links
+				_items[linkDef.startItem.parentItemId].addLink(linkDef);
+				_items[linkDef.endItems[0].parentItemId].addLink(linkDef);
+			},
+			removeLinkFromItems: function(linkId) {
+//TODO: revisit after implementing many end item links
+				var startItemId = _links2[linkId].get('startParentItemId');
+				var endItemId = _links2[linkId].get('endParentItemId');
+				_items[startItemId].removeLink(linkId);
+				_items[endItemId].removeLink(linkId);
+			},
+/*
 			renderLinks: function() {
+
+
+				for(var l in _links2) {
+					_links2[l].init();
+					_links2[l].render();
+				}
+//DEBUG
+//TODO: remove below code once all new link handling us done
+return;
 				if(_links == null) {
 					var that = this;
 					var recall = function() {
@@ -419,8 +480,8 @@ console.log(_items[mergePortDef.parentItemId]);
 							};
 
 						this.addLinkToItems(linkDef);
+						this.renderLink(linkDef);
 
-						R8.Canvas.renderLink(linkDef);
 						var startNode = R8.Utils.Y.one('#'+startNodeId);
 						var endNode = R8.Utils.Y.one('#'+endNodeId);
 						startNode.removeClass('available');
@@ -442,7 +503,7 @@ console.log(_items[mergePortDef.parentItemId]);
 					return;
 				}
 			},
-
+*/
 			hideLinks: function(fromPorts) {
 				for(var l in _links) {
 					R8.Utils.Y.one('#link-'+_links[l].id).setStyle('display','none');
@@ -489,9 +550,16 @@ console.log(ports);
 					itemNode = item.get('node');
 
 				itemNode.setAttribute('data-status','added');
-				itemNode.addClass('vspace-item');
-				this.addDrag(item);
-//				this.addDrop(itemId);
+
+				switch(item.get('type')) {
+					case "node":
+						itemNode.addClass('vspace-item');
+						this.addDrag(item);
+						break;
+					case "monitor":
+						itemNode.addClass('vspace-item');
+						break;
+				}
 			},
 
 
@@ -605,6 +673,7 @@ console.log(_ui.items[itemId]);
 					var pDefs = _items[itemId].get('portDefs');
 					if(pDefs != null && typeof(pDefs[portId]) != 'undefined') {
 						var returnDef = pDefs[portId];
+
 //TODO: temp hack, should probably set parent item id permanently
 						returnDef['parentItemId'] = itemId;
 						return returnDef;
@@ -622,21 +691,6 @@ console.log(_ui.items[itemId]);
 					}
 				}
 				return null;
-			},
-			setLink: function(id,def) {
-				_links[id] = def;
-
-				_items[_links[id]['startItemId']].addLink(id,def);
-				_items[_links[id]['endItemId']].addLink(id,def);
-			},
-
-			addLink: function(linkDef) {
-				_links[linkDef.id] = linkDef;
-			},
-			addLinkToItems: function(linkDef) {
-//TODO: revisit after implementing many end item links
-				_items[linkDef.startItem.parentItemId].addLink(linkDef);
-				_items[linkDef.endItems[0].parentItemId].addLink(linkDef);
 			},
 
 			purgeUIData: function(ioId,responseObj) {
@@ -656,9 +710,7 @@ console.log(_ui.items[itemId]);
 					YUI().use("json", function(Y){
 //						var reqParam = 'item_list=' + Y.JSON.stringify(_itemPosUpdateList);
 						var reqParam = 'ui=' + Y.JSON.stringify(_ui);
-//DEBUG
-console.log('in backgroundUpdater...');
-console.log(_ui);
+
 						var params = {
 							'cfg': {
 								'data': reqParam
@@ -786,7 +838,20 @@ if (typeof(e) != 'undefined') {
 				_items[id].init();
 
 				this.regNewItem(_items[id]);
-//DEBUG
+
+				if(_userSettings.showPorts == true) {
+					_items[id].renderPorts();
+				}
+			},
+
+			addMonitor: function(monitor) {
+				var id = monitor['object']['id'];
+				_items[id] = new R8.Monitor(monitor,this);
+				_node.append(_items[id].render());
+				_items[id].init();
+
+				this.regNewItem(_items[id]);
+
 				if(_userSettings.showPorts == true) {
 					_items[id].renderPorts();
 				}

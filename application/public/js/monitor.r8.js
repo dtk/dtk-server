@@ -1,8 +1,8 @@
 
-if (!R8.Node) {
+if (!R8.Monitor) {
 
-	R8.Node = function(nodeDef,viewSpace) {
-		var _def = nodeDef,
+	R8.Monitor = function(monitorDef,viewSpace) {
+		var _def = monitorDef,
 			_id = _def['object']['id'],
 			_object = _def['object'],
 			_type = _def['type'],
@@ -31,7 +31,7 @@ if (!R8.Node) {
 
 			var _dropList = {};
 
-			var _tempLinkDef = null;
+//			var _tempLinkDef = null;
 			var _tempLinkObj = null;
 			var _tempLinkId = null;
 
@@ -39,11 +39,11 @@ if (!R8.Node) {
 
 			render: function() {
 				var tpl_callback = _def['tpl_callback'];
-				return R8.Rtpl[tpl_callback]({'node': _def['object']});
+				return R8.Rtpl[tpl_callback]({'monitor': _def['object']});
 			},
 
 			init: function() {
-				_node = R8.Utils.Y.one('#item-'+_id);
+				_node = R8.Utils.Y.one('#monitor-'+_id);
 				_status = _node.getAttribute('data-status');
 
 				if(_status != 'pending_setup') return;
@@ -58,27 +58,8 @@ if (!R8.Node) {
 //DEBUG
 					this.retrievePorts();
 				}
-
 //DEBUG
-//_portDragDelegate = _node.get('id');
-				this.setupMinMax();
-
-//TODO: decide if nodes will have toolbars like node groups, else just plug into dock
-/*
-				if(typeof(_def['toolbar_def']) != 'undefined') {
-					_def['toolbar_def']['parent_node_id'] = this.get('node_id');
-					_toolbar = new R8.Toolbar(_def['toolbar_def']);
-					_toolbar.init();
-				}
-*
-/*
-				if(_status == 'pending_delete') {
-					_viewSpace.pushPendingDelete(_id,{
-						'top':_node.getStyle('top'),
-						'left':_node.getStyle('left')
-					})
-				}
-*/
+//				this.setupMinMax();
 			},
 
 			portsReady: function() {
@@ -230,7 +211,7 @@ haveNewPorts = true;
 						return _id;
 						break;
 					case "type":
-						return "node";
+						return "monitor";
 						break;
 					case "model":
 						return _dataModel;

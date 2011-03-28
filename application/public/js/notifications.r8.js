@@ -12,7 +12,7 @@ if(!R8.Notifications) {
 				_tbarTpl = '<div class="tbar-plugin notifications">\
 							<div class="icon"></div>\
 							<div id="notify-count" class="notify-count"></div>\
-						</div>';
+						</div>',
 
 				_panelTpl = '<div id="notifications-panel">\
 							</div>';
@@ -71,7 +71,7 @@ if(!R8.Notifications) {
 							notificationsCallback = function(ioId,responseObj) {
 								eval("var response =" + responseObj.responseText);
 								//TODO: revisit once controllers are reworked for cleaner result package
-								notification_list = response['application_datacenter_get_warnings']['content'][0]['data'];
+								var notification_list = response['application_datacenter_get_warnings']['content'][0]['data'];
 								that.setLatestList(notification_list);
 							}
 						var params = {

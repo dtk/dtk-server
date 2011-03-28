@@ -116,18 +116,24 @@ if(!R8.Link) {
 //							startPortDef = this.getPortDefById(_linkDef.endItems[0].nodeId);
 //						}
 						R8.Canvas.renderHanger(_linkDef,_endPortDef);
-var monitorNode = R8.Utils.Y.one('#monitor-'+_linkDef.startItem.parentItemId);
-var cloneNode = monitorNode.cloneNode(true);
-cloneNode.set('id','link-'+_id+'-hangerPort');
-
-var temp = _endNode.getStyle('left');
-var pLeft = temp.replace('px','');
-var cLeft = (pLeft-(20+40))+'px';
-temp = _endNode.getStyle('top');
-var pTop = temp.replace('px','');
-var cTop = (pTop-14)+'px';
-cloneNode.setStyles({'top': cTop,'left': cLeft});
-R8.Utils.Y.one('#item-'+_linkDef.endItems[0].parentItemId).append(cloneNode);
+var monitorNode = R8.Utils.Y.one('#link-'+_id+'-hangerPort');
+if (monitorNode == null) {
+	monitorNode = R8.Utils.Y.one('#monitor-' + _linkDef.startItem.parentItemId);
+	var cloneNode = monitorNode.cloneNode(true);
+	cloneNode.set('id', 'link-' + _id + '-hangerPort');
+	
+	var temp = _endNode.getStyle('left');
+	var pLeft = temp.replace('px', '');
+	var cLeft = (pLeft - (20 + 40)) + 'px';
+	temp = _endNode.getStyle('top');
+	var pTop = temp.replace('px', '');
+	var cTop = (pTop - 14) + 'px';
+	cloneNode.setStyles({
+		'top': cTop,
+		'left': cLeft
+	});
+	R8.Utils.Y.one('#item-' + _linkDef.endItems[0].parentItemId).append(cloneNode);
+}
 						break;
 				}
 

@@ -106,8 +106,8 @@ module XYZ
        {:db_server => {
            :attribute_mappings => 
            [{
-              :input => [:__output_component,{:create => {:relation_name => :database_of}},:db_connection_ref], 
-              :output => [:__input_component,:db_connection]
+              :input => [:__output_component,{:create => {:relation_name => :database_of}},:db_params], 
+              :output => [:__input_component,:db_config]
             }]
          }
        }

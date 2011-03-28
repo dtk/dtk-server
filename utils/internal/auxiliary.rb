@@ -14,6 +14,17 @@ module XYZ
         ret
       end
 
+      #for hashs and arrays
+      def deep_copy(obj)
+        if obj.kind_of?(Hash)
+          obj.inject({}){|h,kv|h.merge(kv[0] => deep_copy(kv[1]))}
+        elsif obj.kind_of?(Array)
+          obj.map{|el|deep_copy(el)}
+        else
+          obj
+        end
+      end
+
       #key can be symbol or of form {symbol => symbol} 
       def hash_subset(hash,keys,opts={},&block)
         hash_subset_aux(Hash.new(),hash,keys,opts,&block)

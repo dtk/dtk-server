@@ -69,11 +69,12 @@ return #TODO: commit avoids while testing
       conn_info[:attribute_mappings].each do |attr_mapping|
         input_component = conn_info[:input][:component_parent]
         output_component = conn_info[:output][:component_parent]
-        attr_mapping.create_new_components!(input_component,output_component) 
-        input_attr = attr_mapping.get_attribute(:input,input_component,output_component)
-        output_attr = attr_mapping.get_attribute(:output,input_component,output_component)
-        raise Error.new("cannot find input_id") unless input_attr[:id]
-        raise Error.new("cannot find output_id") unless output_attr[:id]
+        attr_mapping.reset!(input_component,output_component)
+        attr_mapping.create_new_components!()
+        input_attr = attr_mapping.get_attribute(:input)
+        output_attr = attr_mapping.get_attribute(:output)
+        raise Error.new("cannot find input_id") unless input_attr
+        raise Error.new("cannot find output_id") unless output_attr
         link = {:input_id => input_attr[:id],:output_id => output_attr[:id]}
         opts = {:no_nested_processing => true}
         create_port_and_attr_links(parent_idh,[link],opts)

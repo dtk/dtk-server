@@ -312,10 +312,10 @@ module XYZ
 
     #attribute on component on node
     #assumption is that component cannot appear more than once on node
-    def get_virtual_component_attribute(component_type,attribute_name,cols,field_to_match=:display_name)
+    def get_virtual_component_attribute(cmp_assign,attr_assign,cols)
       base_sp_hash = {
         :model_name => :component,
-        :filter => [:and, [:eq, :component_type, component_type],[:eq, :node_node_id,self[:id]]],
+        :filter => [:and, [:eq, cmp_assign.keys.first,cmp_assign.values.first],[:eq, :node_node_id,self[:id]]],
         :cols => [:id]
         }
       join_array = 
@@ -323,7 +323,7 @@ module XYZ
            :model_name => :attribute,
            :convert => true,
            :join_type => :inner,
-           :filter => [:eq, field_to_match,attribute_name],
+           :filter => [:eq, attr_assign.keys.first,attr_assign.values.first],
            :join_cond => {:component_component_id => :component__id},
            :cols => cols.include?(:component_component_id) ? cols : cols + [:component_component_id]
          }]

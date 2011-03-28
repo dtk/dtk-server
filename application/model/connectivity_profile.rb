@@ -44,32 +44,63 @@ module XYZ
   end
 
   class AttributeMapping < HashObject
-    def create_new_components!(input_component,output_component)
-      #TODO: for efficiency can do input and output at same time
-      [:input,:output].each{|dir|create_new_components_aux!(dir,input_component,output_component)}
+    def reset!(input_component,output_component)
+      self[:processed_paths] = {
+        :input => Aux::deep_copy(self[:input]),
+        :output => Aux::deep_copy(self[:output])
+      }
+      self[:input_component] = input_component
+      self[:output_component] = output_component
+      self[:switched] = false
     end
 
-    def get_attribute(dir,input_component,output_component)
-      component,path = get_component_and_path(dir,input_component,output_component)
+    def create_new_components!()
+      #TODO: for efficiency can do input and output at same time
+      [:input,:output].each{|dir|create_new_components_aux!(dir)}
+    end
+
+    def get_attribute(dir)
+      component,path = get_component_and_path(dir)
       #TODO: hard coded for certain cases; generalize to follow path which would be done by dynmaically generating join
       if path.size == 1 and not is_special_key?(path.first)
         component.get_virtual_attribute(path.first.to_s,[:id],:display_name)
       elsif path.size == 3 and is_special_key_type?(:parent,path.first)
         node = create_node_object(component)
-        #convert to form where args are path, fields where defualt fields are [:component_type,:display_name]
-        node.get_virtual_component_attribute(path[1].to_s,path[2].to_s,[:id],:display_name)
+        node.get_virtual_component_attribute({:component_type => path[1].to_s},{:display_name => path[2].to_s},[:id])
+      elsif path.size == 2 and is_create_info?(path.first)
+        cmp_id = is_create_info?(path.first)[:id]
+        unless cmp_id
+          Log.error("cannot find the id of new object created")
+          return nil
+        end
+        node = create_node_object(component)
+        node.get_virtual_component_attribute({:id => cmp_id},{:display_name => path[1].to_s},[:id])
       else
         raise Error.new("Not implemented yet")
       end
     end
 
    private
-    def create_new_components_aux!(dir,input_component,output_component)
-      component,path = get_component_and_path(dir,input_component,output_component)
+    def input_component()
+      self[:input_component]
+    end
+    def output_component()
+      self[:output_component]
+    end
+    def is_switched?()
+      self[:switched]
+    end
+    def switch_input_and_output!()
+      self[:switched] = true
+    end
+
+    def create_new_components_aux!(dir)
+      component,path = get_component_and_path(dir)
       #TODO: hard wiring where we are looking for create not for example handling case where path starts with :parent
-      relation_name = is_create_related_component?(path.first)
-      return unless relation_name
-      #fidn related component
+      create_info = is_create_info?(path.first)
+      return unless create_info
+      relation_name = create_info[:relation_name].to_s
+      #find related component
       related_component = component.get_related_library_component(relation_name)
       raise Error.log("cannot find component that is related to #{component[:display_name]||"a component"} using #{relation_name}") unless related_component
       #clone related component into node that component is conatined in
@@ -83,15 +114,24 @@ module XYZ
     end
 
     #returns [component,path]; dups path so it can be safely modified
-    def get_component_and_path(dir,input_component,output_component)
-      path = self[dir].dup
+    def get_component_and_path(dir)
+      path = self[:processed_paths][dir]
       component = nil
-      reverse = (dir == :input) ? :output_component : :input_componen
-      if is_special_key_type?(reverse,self[dir].first)
-        component = (dir == :output) ? input_component : output_component
+      reverse = (dir == :input) ? :output_component : :input_component
+      if is_special_key_type?(reverse,path.first)
         path.shift
+        if is_switched?() 
+          component = (dir == :input) ? input_component : output_component
+        else
+          component = (dir == :output) ? input_component : output_component
+          switch_input_and_output!()
+        end
       else
-        component = (dir == :input) ? input_component : output_component
+        if is_switched?()
+          component = (dir == :output) ? input_component : output_component
+        else
+          component = (dir == :input) ? input_component : output_component
+        end
       end
       [component,path]
     end
@@ -106,11 +146,11 @@ module XYZ
     end
     
     #if item signifies to create a related component, this returns tenh relation name
-    def is_create_related_component?(item)
-      (item.kind_of?(Hash) and item.keys.first.to_s == "create") ? item.values.first[:relation_name].to_s : nil
+    def is_create_info?(item)
+      (item.kind_of?(Hash) and item.keys.first.to_s == "create") ? item.values.first : nil
     end
     def update_create_path_element!(item,id)
-      item.merge(:id => id)
+      item[:create].merge!(:id => id)
     end
   end
 end

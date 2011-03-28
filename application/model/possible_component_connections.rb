@@ -106,7 +106,7 @@ module XYZ
        {:database__server => {
            :attribute_connections => 
            [{
-              :input => [:__output_component,{:create => {:related_component => :db_of}},:db_connection_ref], 
+              :input => [:__output_component,{:__create => {:__related_component => :database_of}},:db_connection_ref], 
               :output => [:__input_componet,:db_connection]
             }]
          }

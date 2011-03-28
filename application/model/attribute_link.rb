@@ -67,8 +67,10 @@ module XYZ
 return #TODO: commit avoids while testing
       return unless conn_info[:attribute_mappings]
        conn_info[:attribute_mappings].each do |attr_mapping|
-        input_attr = attr_mapping.get_attribute(:input,conn_info[:input][:component_parent])
-        output_attr = attr_mapping.get_attribute(:output,conn_info[:output][:component_parent])
+        input_component = conn_info[:input][:component_parent]
+        output_component = conn_info[:output][:component_parent]
+        input_attr = attr_mapping.get_attribute(:input,input_component,output_component)
+        output_attr = attr_mapping.get_attribute(:output,input_component,output_component)
         raise Error.new("cannot find input_id") unless input_attr[:id]
         raise Error.new("cannot find output_id") unless output_attr[:id]
         link = {:input_id => input_attr[:id],:output_id => output_attr[:id]}

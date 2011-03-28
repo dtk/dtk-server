@@ -66,9 +66,10 @@ module XYZ
     def self.create_related_link?(parent_idh,conn_info)
 return #TODO: commit avoids while testing
       return unless conn_info[:attribute_mappings]
-       conn_info[:attribute_mappings].each do |attr_mapping|
+      conn_info[:attribute_mappings].each do |attr_mapping|
         input_component = conn_info[:input][:component_parent]
         output_component = conn_info[:output][:component_parent]
+        attr_mapping.create_new_components!(input_component,output_component) 
         input_attr = attr_mapping.get_attribute(:input,input_component,output_component)
         output_attr = attr_mapping.get_attribute(:output,input_component,output_component)
         raise Error.new("cannot find input_id") unless input_attr[:id]

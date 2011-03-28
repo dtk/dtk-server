@@ -36,7 +36,7 @@ module XYZ
     def self.component_type_match(cmp_type,most_specific_type,rule_cmp_type)
       return true if (cmp_type == rule_cmp_type or most_specific_type == rule_cmp_type)
       type_class = ComponentType.ret_class(rule_cmp_type)
-      type_class and type_class.include?(cmp_type)
+      type_class and type_class.include?(most_specific_type)
     end
     def self.get_possible_component_connections()
       @possible_connections ||= XYZ::PossibleComponentConnections #TODO: stub
@@ -44,13 +44,19 @@ module XYZ
   end
 
   class AttributeMapping < HashObject
+    def create_new_components!(input_component,output_component)
+      #TODO: for efficiency can do input and output at same time
+      [:input,:output].each{|dir|create_new_components_aux!(dir,input_component,output_component)}
+    end
+
     def get_attribute(dir,input_component,output_component)
       component,path = get_component_and_path(dir,input_component,output_component)
       #TODO: hard coded for certain cases; generalize to follow path which would be done by dynmaically generating join
       if path.size == 1 and not is_special_key?(path.first)
         component.get_virtual_attribute(path.first.to_s,[:id],:display_name)
       elsif path.size == 3 and is_special_key_type?(:parent,path.first)
-        node = component.id_handle.createIDH(:model_name => :node, :id => component[:node_node_id]).create_object()
+        node = create_node_object(component)
+        #convert to form where args are path, fields where defualt fields are [:component_type,:display_name]
         node.get_virtual_component_attribute(path[1].to_s,path[2].to_s,[:id],:display_name)
       else
         raise Error.new("Not implemented yet")
@@ -58,19 +64,31 @@ module XYZ
     end
 
    private
+    def create_new_components_aux!(dir,input_component,output_component)
+      component,path = get_component_and_path(dir,input_component,output_component)
+      #TODO: hard wiring where we are looking for create not for example handling case where path starts with :parent
+      relation_name = is_create_related_component?(path.first)
+      return unless relation_name
+      related_component = component.get_related_library_component(relation_name)
+    end
+
+    def create_node_object(component)
+      component.id_handle.createIDH(:model_name => :node, :id => component[:node_node_id]).create_object()
+    end
+
     #returns [component,path]; dups path so it can be safely modified
     def get_component_and_path(dir,input_component,output_component)
       component = nil
       path = nil
-      if is_special_key_type?([:input_component,:output_component],self[dir])
+      if is_special_key_type?([:input_component,:output_component],self[dir].first)
         type_to_find = (dir == :input) ? :input_component : :output_component
         dir_to_use =
-          if is_special_key_type?(type_to_find,self[:input]) then :input
-          elsif is_special_key_type?(type_to_find,self[:output]) then :output
+          if is_special_key_type?(type_to_find,self[:input].first) then :input
+          elsif is_special_key_type?(type_to_find,self[:output].first) then :output
           end
-        raise Error.new("unexepected argumenets") unless dir_to_use
+        raise Error.new("unexepected arguments") unless dir_to_use
         component = (dir_to_use == :input) ? input_component : output_component
-        path = self[:dir_to_use].dup
+        path = self[dir_to_use].dup
         path.shift
       else
         component = (dir == :input) ? input_component : output_component
@@ -79,12 +97,18 @@ module XYZ
       [component,path]
     end
 
+    ###parsing functions
     def is_special_key?(item)
       (item.kind_of?(String) or item.kind_of?(Symbol)) and item.to_s =~ /^__/
     end
     def is_special_key_type?(type_or_types,item)
-      types = Array[type_or_types]
+      types = Array(type_or_types)
       item.respond_to?(:to_sym) and types.map{|t|"__#{t}"}.include?(item.to_s)
+    end
+    
+    #if item signifies to create a related component, this returns tenh relation name
+    def is_create_related_component?(item)
+      (item.kind_of?(Hash) and item.keys.first.to_s == "create") ? item.values.first[:relation_name].to_s : nil
     end
   end
 end

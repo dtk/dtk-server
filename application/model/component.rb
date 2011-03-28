@@ -298,6 +298,36 @@ module XYZ
       Model.update_from_rows(model_handle,[update_hash],:partial_value=>true)
     end
 
+    #this is an instance and it finds alibrary component
+    def get_related_library_component(relation_name,cols=[:id,:display_name])
+      base_sp_hash = {
+        :model_name => :component,
+        :filter => [:eq, :id, self[:ancestor_id]],
+        :cols => [:id]
+      }
+      join_array = 
+        [{
+           :model_name => :component_relation,
+           :join_type => :inner,
+           :filter => [:eq, :relation_name, relation_name.to_s],
+           :join_cond => {:source_component_id => :component__id},
+           :cols => [:source_component_id,:target_component_id]
+         },
+         {
+           :model_name => :component,
+           :alias => :target_component,
+           :join_type => :inner,
+           :convert => true,
+           :join_cond => {:id => :component_relation__target_component_id},
+           :cols => cols
+         }
+        ]
+      rows = Model.get_objects_from_join_array(model_handle,base_sp_hash,join_array)
+      #should be only one element
+      Log.error("component relation match should only match one component") if rows.size > 1
+      rows.first && rows.first[:target_component]
+    end
+
    private
     def get_stored_attribute_i18n_label?(attribute)
       return nil unless self[:i18n_labels]

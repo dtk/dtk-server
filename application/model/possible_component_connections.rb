@@ -98,16 +98,16 @@ module XYZ
     #what is on otehr side of link
     #NOTE: curerntly dont have a create for new attributes; only introduce if need it; (dont think need it because attributes unique
     #and mult instance handled by arrays
-    :java_app =>  {
+    :java_webapp =>  {
       :connnection_type => :db,
       :required => true,
       :output_components =>
       [
-       {:database__server => {
-           :attribute_connections => 
+       {:db_server => {
+           :attribute_mappings => 
            [{
-              :input => [:__output_component,{:__create => {:__related_component => :database_of}},:db_connection_ref], 
-              :output => [:__input_componet,:db_connection]
+              :input => [:__output_component,{:create => {:relation_name => :database_of}},:db_connection_ref], 
+              :output => [:__input_component,:db_connection]
             }]
          }
        }
@@ -118,6 +118,7 @@ module XYZ
     #this also shows use of the node attribute host_addresses
 
     #NOTE: this is a link that is hidden from end user and between attributes on same component
+=begin
     :service => {
       :connection_type => :sap_config__l4__to__sap__l4,
       :required => true,
@@ -125,7 +126,7 @@ module XYZ
       [
        {:service => {
            :constraints => [], #TODO: need to add a constraint saying input and output are same component
-           :attribute_connections => 
+           :attribute_mappings => 
            [
             {
               :input => [:sap__l4], 
@@ -137,5 +138,6 @@ module XYZ
          }
        }]
     }
+=end
   }
 end

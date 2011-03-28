@@ -69,7 +69,13 @@ module XYZ
       #TODO: hard wiring where we are looking for create not for example handling case where path starts with :parent
       relation_name = is_create_related_component?(path.first)
       return unless relation_name
+      #fidn related component
       related_component = component.get_related_library_component(relation_name)
+      raise Error.log("cannot find component that is related to #{component[:display_name]||"a component"} using #{relation_name}") unless related_component
+      #clone related component into node that component is conatined in
+      node = create_node_object(component)
+      new_cmp_id = node.clone_into(related_component.id_handle())
+      update_create_path_element!(path.first,new_cmp_id)
     end
 
     def create_node_object(component)
@@ -78,26 +84,19 @@ module XYZ
 
     #returns [component,path]; dups path so it can be safely modified
     def get_component_and_path(dir,input_component,output_component)
+      path = self[dir].dup
       component = nil
-      path = nil
-      if is_special_key_type?([:input_component,:output_component],self[dir].first)
-        type_to_find = (dir == :input) ? :input_component : :output_component
-        dir_to_use =
-          if is_special_key_type?(type_to_find,self[:input].first) then :input
-          elsif is_special_key_type?(type_to_find,self[:output].first) then :output
-          end
-        raise Error.new("unexepected arguments") unless dir_to_use
-        component = (dir_to_use == :input) ? input_component : output_component
-        path = self[dir_to_use].dup
+      reverse = (dir == :input) ? :output_component : :input_componen
+      if is_special_key_type?(reverse,self[dir].first)
+        component = (dir == :output) ? input_component : output_component
         path.shift
       else
         component = (dir == :input) ? input_component : output_component
-        path = self[dir].dup
       end
       [component,path]
     end
 
-    ###parsing functions
+    ###parsing functions and related functions
     def is_special_key?(item)
       (item.kind_of?(String) or item.kind_of?(Symbol)) and item.to_s =~ /^__/
     end
@@ -109,6 +108,9 @@ module XYZ
     #if item signifies to create a related component, this returns tenh relation name
     def is_create_related_component?(item)
       (item.kind_of?(Hash) and item.keys.first.to_s == "create") ? item.values.first[:relation_name].to_s : nil
+    end
+    def update_create_path_element!(item,id)
+      item.merge(:id => id)
     end
   end
 end

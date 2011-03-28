@@ -64,7 +64,7 @@ module XYZ
     end
 
     def self.create_related_link?(parent_idh,conn_info)
-return #TODO: wil testing
+return #TODO: commit avoids while testing
       return unless conn_info[:attribute_mappings]
        conn_info[:attribute_mappings].each do |attr_mapping|
         input_attr = attr_mapping.get_attribute(:input,conn_info[:input][:component_parent])

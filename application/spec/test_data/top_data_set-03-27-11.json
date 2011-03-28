@@ -2277,7 +2277,7 @@
               "read_only": false,
               "data_type": "json",
               "semantic_type_summary": "mysql_master_log_info",
-              "hidden": true
+              "hidden": false
             }
           },
           "ds_key": "[:user_data, \"/library/test/mysql__master\"]"

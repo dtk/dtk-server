@@ -400,15 +400,32 @@ module XYZ
     end
 
     def self.update_attribute_values(attr_mh,new_val_rows,cols_x,opts={})
+      #break up by type of row and process and aggregate
+      return ret if new_val_rows.empty?
       cols = Array(cols_x)
-      #assumption that all elements in new_val_rows have same type
-      return update_attribute_values_array_slice(attr_mh,new_val_rows,cols,opts) if new_val_rows.first and new_val_rows.first.kind_of?(PropagateProcessor::OutputArraySlice) 
-      return update_attribute_values_array_append(attr_mh,new_val_rows,cols,opts) if new_val_rows.first and new_val_rows.first.kind_of?(PropagateProcessor::OutputArrayAppend) 
-      update_select_ds = SQL::ArrayDataset.create(db,new_val_rows,attr_mh,:convert_for_update => true)
-      update_from_select(attr_mh,FieldSet.new(:attribute,cols),update_select_ds,opts)
+      ndx_new_val_rows = new_val_rows.inject({}) do |h,r|
+        index = Aux::demodulize(r.class.to_s)
+        (h[index] ||= Array.new) << r
+        h
+      end
+      ndx_new_val_rows.map do |type,rows|
+        update_attribute_values_aux(type,attr_mh,rows,cols,opts)
+      end.flatten
     end
 
    private
+    def self.update_attribute_values_aux(type,attr_mh,new_val_rows,cols,opts={})
+      case type
+        when "OutputArraySlice"
+          update_attribute_values_array_slice(attr_mh,new_val_rows,cols,opts)
+        when "OutputArrayAppend"
+          update_attribute_values_array_append(attr_mh,new_val_rows,cols,opts)
+        else
+        update_select_ds = SQL::ArrayDataset.create(db,new_val_rows,attr_mh,:convert_for_update => true)
+        update_from_select(attr_mh,FieldSet.new(:attribute,cols),update_select_ds,opts)
+      end
+    end
+
     def self.unravelled_value(val,path)
       return nil unless Aux.can_take_index?(val)
       path.size == 1 ? val[path.first] : unravelled_value(val[path.first],path[1..path.size-1])

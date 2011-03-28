@@ -44,5 +44,25 @@ module XYZ
   end
 
   class AttributeMapping < HashObject
+    def get_attribute(dir,component)
+      path = self[dir]
+      #TODO: hard coded for certain cases; generalize to follow path
+      if path.size == 1 and not special_symbol?(path.first)
+        component.get_virtual_attribute(path.first.to_s,[:id],:display_name)
+      elsif path.size == 3 and special_symbol_parent?(path.first)
+        node = component.id_handle.createIDH(:model_name => :node, :id => component[:node_node_id]).create_object()
+        node.get_virtual_component_attribute(path[1].to_s,path[2].to_s,[:id],:display_name)
+      else
+        raise Error.new("Not implemnted yet")
+      end
+    end
+
+   private
+    def special_symbol?(item)
+      item.to_s =~ /^__/
+    end
+    def special_symbol_parent?(item)
+      item.to_sym == :__parent
+    end
   end
 end

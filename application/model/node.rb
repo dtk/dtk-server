@@ -300,6 +300,7 @@ module XYZ
 
     #######################
     ######### Model apis
+    #attribute on node
     def get_virtual_attribute(attribute_name,cols,field_to_match=:display_name)
       sp_hash = {
         :model_name => :attribute,
@@ -307,6 +308,27 @@ module XYZ
         :cols => cols
       }
       get_children_from_sp_hash(:attribute,sp_hash).first
+    end
+
+    #attribute on component on node
+    #assumption is that component cannot appear more than once on node
+    def get_virtual_component_attribute(component_type,attribute_name,cols,field_to_match=:display_name)
+      base_sp_hash = {
+        :model_name => :component,
+        :filter => [:and, [:eq, :component_type, component_type],[:eq, :node_node_id,self[:id]]],
+        :cols => [:id]
+        }
+      join_array = 
+        [{
+           :model_name => :attribute,
+           :convert => true,
+           :join_type => :inner,
+           :filter => [:eq, field_to_match,attribute_name],
+           :join_cond => {:component_component_id => :component__id},
+           :cols => cols.include?(:component_component_id) ? cols : cols + [:component_component_id]
+         }]
+      row = Model.get_objects_from_join_array(model_handle.createMH(:component),base_sp_hash,join_array).first
+      row && row[:attribute]
     end
 
     def self.get_ports(id_handles)

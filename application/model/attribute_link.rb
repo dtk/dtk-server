@@ -33,7 +33,7 @@ module XYZ
         output_attr = attr_info[row[:output_id]]
         output_cmp = output_attr[:component_parent]
         conn_profile = input_attr[:component_parent][:connectivity_profile]
-        #TODO: phasing in by first using for creating_related links; then using for teh whole attribute link process 
+        #TODO: phasing in by first using for creating_related links; then using for the whole process to create attribute links and check for constraint violations
         conn_info = conn_profile.match_output(output_cmp[:component_type],output_cmp[:most_specific_type])
         conn_info_list << (conn_info||{}).merge(:input => input_attr, :output => output_attr)
 
@@ -64,7 +64,17 @@ module XYZ
     end
 
     def self.create_related_link?(parent_idh,conn_info)
+return #TODO: wil testing
       return unless conn_info[:attribute_mappings]
+       conn_info[:attribute_mappings].each do |attr_mapping|
+        input_attr = attr_mapping.get_attribute(:input,conn_info[:input][:component_parent])
+        output_attr = attr_mapping.get_attribute(:output,conn_info[:output][:component_parent])
+        raise Error.new("cannot find input_id") unless input_attr[:id]
+        raise Error.new("cannot find output_id") unless output_attr[:id]
+        link = {:input_id => input_attr[:id],:output_id => output_attr[:id]}
+        opts = {:no_nested_processing => true}
+        create_port_and_attr_links(parent_idh,[link],opts)
+      end
     end
 =begin
 DEPRECATED    

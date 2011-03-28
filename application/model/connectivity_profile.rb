@@ -21,7 +21,10 @@ module XYZ
           rule_output_cmp_type = output_info.keys.first
           next unless self.class.component_type_match(cmp_type,most_specific_type,rule_output_cmp_type)
           #TODO: not looking for multiple matches and just looking fro first one
-          ret = Aux::hash_subset(one_match,[:input_component_type,:required,:connection_type]).merge(:output_component_type => rule_output_cmp_type).merge(output_info.values.first)
+          ret = Aux::hash_subset(one_match,[:input_component_type,:required,:connection_type]).merge(:output_component_type => rule_output_cmp_type)
+          info = output_info.values.first
+          ams = info[:attribute_mappings]
+          ret.merge!(ams ? info.merge(:attribute_mappings => ams.map{|x|AttributeMapping.new(x)}) : info)
           break
         end
         break if ret
@@ -38,7 +41,8 @@ module XYZ
     def self.get_possible_component_connections()
       @possible_connections ||= XYZ::PossibleComponentConnections #TODO: stub
     end
-#TODO: remove    x=find_matching_rule(:mysql_db_server,:mysql_db_server)
-  
+  end
+
+  class AttributeMapping < HashObject
   end
 end

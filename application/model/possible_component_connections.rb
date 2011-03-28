@@ -24,7 +24,7 @@ module XYZ
       :output_components =>
       [
        {
-        :mysql__master => { #output component: can be component_type or member of component hiererachy
+        :mysql__server => { #output component: can be component_type or member of component hiererachy
            ###contraints
            #this is optional and needed to be specified only for constraints beyond the implicit constraint 
            #that input x cannot connect to output y unless they match a 'rule' here (match taking into account 
@@ -63,11 +63,9 @@ module XYZ
             # :__input_node or __output_node are used 
             #the mapping can be in terms of base attributes or in terms of unravelled attributes by making 
             #the path (given by a list more than a single array element) example port on a layer 4 sap ref would be [:sap_ref__l4,:port]
-            #The meaning of simple mapping is equality; for more complex relatsions functions can be used on the output side
-            {:input => [:master_log_ref], :output => [:master_log]},
-            
-            #this is an example of using __parent; needed because the l4 sap is on the mysql__server component, not the mysql__master
-            {:input => [:sap_ref__l4], :output => [:__parent,:mysql__server,:sap__l4]}
+            #The meaning of simple mapping is equality; for more complex relations functions can be used on the output side
+            #this is an example of using __parent; needed because the master_log ref is on mysql__master, not mysql_server
+            {:input => [:master_log_ref], :output => [:__parent,:mysql__master,:master_log]},
            ]
          }
        }]

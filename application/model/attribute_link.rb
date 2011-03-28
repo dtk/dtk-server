@@ -26,15 +26,16 @@ module XYZ
 
       #set function and new function_index and new updated link_info
       input_attrs_updates = Array.new
+      conn_info_list = Array.new
       rows.each do |row|
         input_id = row[:input_id]
         input_attr = attr_info[input_id]
-
-        conn_profile = input_attr[:component_parent][:connectivity_profile]
-#pp [:connectivity_profile, conn_profile]
         output_attr = attr_info[row[:output_id]]
         output_cmp = output_attr[:component_parent]
-#pp [:connectivity_info,conn_profile.match_output(output_cmp[:component_type],output_cmp[:most_specific_type])]
+        conn_profile = input_attr[:component_parent][:connectivity_profile]
+        #TODO: phasing in by first using for creating_related links; then using for teh whole attribute link process 
+        conn_info = conn_profile.match_output(output_cmp[:component_type],output_cmp[:most_specific_type])
+        conn_info_list << (conn_info||{}).merge(:input => input_attr, :output => output_attr)
 
         #TODO: semantic type object may pull in what its connecetd component type is
         row[:function] = SemanticType.find_link_function(input_attr[:semantic_type_object],output_attr[:semantic_type_object])
@@ -50,17 +51,23 @@ module XYZ
       propagate_from_create(attr_mh,attr_info,rows)
 
       return returning_ids if opts[:no_nested_processing]
-      attr_links = rows.map{|r|{:input => attr_info[r[:input_id]],:output => attr_info[r[:output_id]]}}
 
-      create_related_links?(parent_idh,attr_links)
+##  TODO: remove create_related_links?(parent_idh,attr_links)
+      create_related_links?(parent_idh,conn_info_list)
       #TODO: assumption is that what is created by create_related_links? has no bearing on l4 ports (as manifsted by using attr_links arg computred before create_related_links? call
+      attr_links = rows.map{|r|{:input => attr_info[r[:input_id]],:output => attr_info[r[:output_id]]}}
       Port.create_and_update_l4_ports_and_links?(parent_idh,attr_links)
     end
 
-    def self.create_related_links?(parent_idh,attr_links)
-      attr_links.each{|link_info|create_related_link?(parent_idh,link_info)}
+    def self.create_related_links?(parent_idh,conn_info_list)
+      conn_info_list.each{|conn_info|create_related_link?(parent_idh,conn_info)}
     end
 
+    def self.create_related_link?(parent_idh,conn_info)
+      return unless conn_info[:attribute_mappings]
+    end
+=begin
+DEPRECATED    
     #TODO: can we make this more data driven 
     def self.create_related_link?(parent_idh,link_info)
       input_cmp = link_info[:input][:component_parent]
@@ -85,7 +92,7 @@ module XYZ
       opts = {:no_nested_processing => true}
       create_port_and_attr_links(parent_idh,[link],opts)
     end
-
+=end
 
 ####################
     ### special purpose create links ###

@@ -1,7 +1,7 @@
 module XYZ
   class ConnectivityProfile < ArrayObject
     #TODO: both args not needed if update the type hierarchy with leaf components 
-    def self.find(cmp_type_x,most_specific_type_x)
+    def self.find(cmp_type_x,most_specific_type_x,conn_type = :external)
       ret = self.new()
       cmp_type = cmp_type_x && cmp_type_x.to_sym
       most_specific_type = most_specific_type_x && most_specific_type_x.to_sym

@@ -113,22 +113,41 @@ module XYZ
        }
       ]
     },
+  }
+  PossibleIntraNodeConnections = {
+    :nagios__client  => {
+      :connection_type => :service_check,
+      :output_components =>
+      [{
+         :mysql__server => {
+           :attribute_mappings => 
+           [
+            {
+              :input => [:service_check_input, :__component_id,:db_params], 
+              :output => [:monitor_db_config]
+            },
+            {
+              :input => [:service_check_input, :__component_id,:port], 
+              :output => [:sap_config__l4,:port]
+            }]
+         }
+       }]
+    },
+=begin
     #shows how a default connection currently encoded between a sap_config__l4 and sap__l4 (and handled by 'hard coding') 
     #could be encoded in this representation
     #this also shows use of the node attribute host_addresses
 
     #NOTE: this is a link that is hidden from end user and between attributes on same component
-=begin
     :service => {
       :connection_type => :sap_config__l4__to__sap__l4,
       :required => true,
       :output_components =>
-      [
-       {:service => {
+      [{
+         :service => {
            :constraints => [], #TODO: need to add a constraint saying input and output are same component
            :attribute_mappings => 
-           [
-            {
+           [{
               :input => [:sap__l4], 
               :output => {
                 :fn => :cartesian_concat, 
@@ -138,6 +157,7 @@ module XYZ
          }
        }]
     }
+  }
 =end
   }
 end

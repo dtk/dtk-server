@@ -27,13 +27,11 @@ if (!R8.Canvas) {
 					{'strokeStyle':'#FF33FF','lineWidth':3,'lineCap':'round'}
 					],
 			},
+
 			/**
-			 * renderHanger will draw a connection between to points on a workspace.
-			 * It is overloaded will either take just input of a connectionID, or startNodeID,endNodeID,connectorType
+			 * renderHanger
 			 * @method renderHanger
-			 * @param {string} startNodeID DOM ElementID to start rendering the connector from
-			 * @param {string} endNodeID DOM ElementID to finish rendering the connector to
-			 * @param {string} connectorType Type of connection to render, Available are fullBezier,startBezier,endBezier,Line,RightAngle
+			 * @param {string} some param here
 			 */
 			renderHanger: function(linkDef,startPortDef){
 				var canvasNodeId = linkDef['id'];

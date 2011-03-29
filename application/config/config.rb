@@ -35,6 +35,9 @@ module R8
   Config = Hash.new
 end
 
+#local-copy flags
+#R8::Config[:rich_testing_flag] = true
+
 #Application defaults
 R8::Config[:application_name] = "application"
 R8::Config[:default_language] = "en.us"

@@ -64,7 +64,8 @@ module XYZ
     end
 
     def self.create_related_link?(parent_idh,conn_info)
-return #TODO: commit avoids while testing
+return unless R8::Config[:rich_testing_flag]
+
       return unless conn_info[:attribute_mappings]
       conn_info[:attribute_mappings].each do |attr_mapping|
         input_component = conn_info[:input][:component_parent]

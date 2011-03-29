@@ -532,6 +532,7 @@ module XYZ
     def clone_post_copy_hook(clone_copy_output,opts={})
       cmp_id_handle = clone_copy_output.id_handles.first
       create_needed_l4_sap_attributes(cmp_id_handle)
+      create_needed_additional_links(cmp_id_handle)
       Port.create_ports_for_external_attributes(id_handle,cmp_id_handle)
       parent_action_id_handle = get_parent_id_handle()
       StateChange.create_pending_change_item(:new_item => cmp_id_handle, :parent => parent_action_id_handle)
@@ -546,6 +547,14 @@ module XYZ
       return nil unless new_sap_attr_idh
       AttributeLink.create_links_l4_sap(new_sap_attr_idh,sap_config_attr_idh,ipv4_host_addrs_idh,id_handle)
       new_sap_attr_idh
+    end
+
+    def create_needed_additional_links(cmp_id_handle)
+return unless R8::Config[:rich_testing_flag]
+      #TODO: more efficient would be to have clone object output have this info
+      component = cmp_id_handle.create_object()
+      profile = component.get_objects_col_from_sp_hash({:cols => [:connectivity_profile_internal]},:connectivity_profile_internal).first
+      return unless component
     end
 
     #TODO: quick hack

@@ -32,6 +32,18 @@ module XYZ
       ret
     end
 
+    #may collapse this with find external
+    def self.find_internal(cmp_type_x,most_specific_type_x)
+      ret = self.new()
+      cmp_type = cmp_type_x && cmp_type_x.to_sym
+      most_specific_type = most_specific_type_x && most_specific_type_x.to_sym
+      rules = get_possible_intra_component_connections()
+      ret_array = rules.map do |rule_cmp_type,rest|
+        component_type_match(cmp_type,most_specific_type,rule_cmp_type) ? rest.merge(:matching_component_type => rule_cmp_type) : nil
+      end.compact
+      self.new(ret_array)
+    end
+
    private
     def self.component_type_match(cmp_type,most_specific_type,rule_cmp_type)
       return true if (cmp_type == rule_cmp_type or most_specific_type == rule_cmp_type)
@@ -43,8 +55,8 @@ module XYZ
     end
 
     def self.get_possible_intra_component_connections()
-      return @possible_intra_connections if @possible_intra_connections
-      ret = PossibleIntraNodeConnections 
+      return @possible_intra_connections if @possible_intra_connections #TODO: stub
+      ret = PossibleIntraNodeConnections.dup 
       invert(ret).each do |k,v|
         if ret[k] then ret[k].merge!(k => v)
         else ret[k] = v
@@ -56,10 +68,11 @@ module XYZ
     def self.invert(x)
       ret = Hash.new
       x.each do |outside_cmp,v|
+        dir = v[:input_components] ? :input_components : :output_components
         inv_dir = v[:output_components] ? :input_components : :output_components
-        (v[:output_components]||v[:input_components]||[]).each do |cmp_info|
+        (v[dir]||[]).each do |cmp_info|
           inside_cmp = cmp_info.keys.first
-          ret[inside_cmp] ||= v.merge(inv_dir => Array.new)
+          ret[inside_cmp] ||= Aux.hash_subset(v,v.keys-[dir]).merge(inv_dir => Array.new)
           ret[inside_cmp][inv_dir] << {outside_cmp => cmp_info.values.first}
         end
       end

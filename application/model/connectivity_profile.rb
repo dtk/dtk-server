@@ -1,7 +1,7 @@
 module XYZ
   class ConnectivityProfile < ArrayObject
     #TODO: both args not needed if update the type hierarchy with leaf components 
-    def self.find(cmp_type_x,most_specific_type_x,conn_type = :external)
+    def self.find_external(cmp_type_x,most_specific_type_x)
       ret = self.new()
       cmp_type = cmp_type_x && cmp_type_x.to_sym
       most_specific_type = most_specific_type_x && most_specific_type_x.to_sym
@@ -40,6 +40,29 @@ module XYZ
     end
     def self.get_possible_component_connections()
       @possible_connections ||= XYZ::PossibleComponentConnections #TODO: stub
+    end
+
+    def self.get_possible_intra_component_connections()
+      return @possible_intra_connections if @possible_intra_connections
+      ret = PossibleIntraNodeConnections 
+      invert(ret).each do |k,v|
+        if ret[k] then ret[k].merge!(k => v)
+        else ret[k] = v
+        end
+      end      
+      @possible_intra_connections = ret
+    end
+
+    def self.invert(x)
+      ret = Hash.new
+      x.each do |inv_output_cmp,v|
+        (v[:output_components]||[]).each do |output_cmp_info|
+          inv_input_cmp = output_cmp_info.keys.first
+          ret[inv_input_cmp] ||= v.merge(:input_components => Array.new)
+          ret[inv_input_cmp][:input_components] << {inv_output_cmp => output_cmp_info.values.first}
+        end
+      end
+      ret
     end
   end
 

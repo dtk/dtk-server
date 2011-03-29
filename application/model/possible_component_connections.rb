@@ -115,7 +115,7 @@ module XYZ
     },
   }
   private
-  OnewayPossibleIntraNodeConnections = {
+  PossibleIntraNodeConnections = {
     :nagios__client  => {
       :connection_type => :service_check,
       :output_components =>
@@ -161,32 +161,4 @@ module XYZ
   }
 =end
   }
-=begin
-  module ConnHelper
-    def self.add_other_half(x)
-      invert = invert(x)
-#      inv.inject(x){|h,kv|h.merge(kv[0] => kv[1])}
-    end
-    def self.invert(x)
-      ret = Hash.new
-      x.each do |k,v|
-        inv_output_cmp = kv[0]
-        (kv[1][:output_components]||[]).each do |el|
-          inv_input_cmp = el.keys.first
-          inv_attr_mapping = ((el.values.first||{})[:attribute_mappings]||[]).map do |attr_info|
-            {
-              :input => attr_info[:output],
-              :output => attr_info[:input]
-            }
-          end
-          inv_output_cmps = {inv_output_cmp => el.merge(:attribute_mappings => inv_attr_mapping)}
-
-        end
-        h.merge(kv[1]).merge(inv_input_cmp => {:output_components => inv_output_cmps})
-
-      end
-    end
-  end
-  PossibleIntraNodeConnections = ConnHelper::add_other_half(OnewayPossibleIntraNodeConnections)
-=end
 end

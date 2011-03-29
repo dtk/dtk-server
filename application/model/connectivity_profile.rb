@@ -55,11 +55,12 @@ module XYZ
 
     def self.invert(x)
       ret = Hash.new
-      x.each do |inv_output_cmp,v|
-        (v[:output_components]||[]).each do |output_cmp_info|
-          inv_input_cmp = output_cmp_info.keys.first
-          ret[inv_input_cmp] ||= v.merge(:input_components => Array.new)
-          ret[inv_input_cmp][:input_components] << {inv_output_cmp => output_cmp_info.values.first}
+      x.each do |outside_cmp,v|
+        inv_dir = v[:output_components] ? :input_components : :output_components
+        (v[:output_components]||v[:input_components]||[]).each do |cmp_info|
+          inside_cmp = cmp_info.keys.first
+          ret[inside_cmp] ||= v.merge(inv_dir => Array.new)
+          ret[inside_cmp][inv_dir] << {outside_cmp => cmp_info.values.first}
         end
       end
       ret

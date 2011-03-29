@@ -115,12 +115,13 @@ module XYZ
     },
   }
   private
+  #this is output to input
   PossibleIntraNodeConnections = {
-    :nagios__client  => {
+    :mysql__server => {
       :connection_type => :service_check,
-      :output_components =>
+      :input_components =>
       [{
-         :mysql__server => {
+         :nagios__client  => {
            :attribute_mappings => 
            [
             {

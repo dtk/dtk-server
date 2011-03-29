@@ -110,7 +110,7 @@ if (!R8.ViewSpace) {
 //				R8.Workspace.events['item_click'] = R8.Utils.Y.delegate('click',function(){console.log('clicked item');},R8.Workspace.viewSpaceNode,'.item, .connector');
 //				R8.Workspace.events['vspace_mdown'] = R8.Utils.Y.delegate('mousedown',R8.Workspace.checkMouseDownEvent,'body','#viewspace');
 			},
-
+/*
 			createLink: function() {
 				var date = new Date();
 				var tempLinkId = 't-'+date.getTime() + '-' + Math.floor(Math.random()*20),
@@ -145,7 +145,7 @@ if (!R8.ViewSpace) {
 				this.addLinkToItems(linkDef);
 				R8.Canvas.renderLink(linkDef);
 			},
-
+*/
 			getLinkDefByPortId: function(portId) {
 				for(var l in _links) {
 					if(_links[l].port_id ==  portId || _links[l].other_end_id == portId) return _links[l];
@@ -323,7 +323,7 @@ console.log(_items[mergePortDef.parentItemId]);
 				}
 
 				this.purgePendingDelete();
-				this.retrieveLinks(items);
+//				this.retrieveLinks(items);
 //TODO: revisit and have retrieveLinks file a custom callback when complete that renderLinks can sub to
 //				if(_userSettings.showLinks == true) {
 //					this.renderLinks();
@@ -378,13 +378,13 @@ console.log(_items[mergePortDef.parentItemId]);
 				var response = R8.Ctrl.callResults[ioId]['response'];
 //				var linkList = response['application_attribute_link_get_under_context_list']['content'][0]['data'];
 				var linkList = response['application_datacenter_get_links']['content'][0]['data'];
-				var tempLinkList = {}
+//				var tempLinkList = {};
 				for(i in linkList) {
 //TODO: revisit when cleaning up actions for retrieving links
 					if(linkList[i]['id'] == '' || linkList[i]['hidden'] == true || linkList[i]['type'] == 'internal') continue;
 
-					tempLinkList['link-'+linkList[i]['id']] = linkList[i];
-					_linkRenderList.push('link-'+linkList[i]['id']);
+//					tempLinkList['link-'+linkList[i]['id']] = linkList[i];
+//					_linkRenderList.push('link-'+linkList[i]['id']);
 //DEBUG
 					this.addLink(linkList[i]);
 //					_links2['link-'+linkList[i]['id']] = new R8.Link(linkList[i],this);
@@ -395,7 +395,6 @@ console.log(_items[mergePortDef.parentItemId]);
 //				if(_userSettings.showLinks == true) {
 //					this.renderLinks();
 //				}
-
 			},
 
 			addLink: function(linkObj) {

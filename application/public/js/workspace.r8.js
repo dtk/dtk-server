@@ -751,7 +751,8 @@ console.log('call to add item to workspace failed.....');
 					eval("var response =" + responseObj.responseText);
 					var returnData = response['application_workspace_commit_changes']['content'][0]['data'];
 					alert(returnData);
-console.log(response);
+//DEBUG
+//console.log(response);
 				}
 				var params = {
 					'cfg': {
@@ -788,6 +789,7 @@ console.log(response);
 
 				if(typeof(viewSpaceDef.items) != 'undefined') {
 					this.addItems(viewSpaceDef.items, id);
+					_viewSpaces[id].retrieveLinks(viewSpaceDef.items);
 				}
 
 				this.refreshNotifications();

@@ -35,8 +35,14 @@ if(!R8.Link) {
 			_endPortDef = null,
 			_endPortLocation = '?',
 
+			_proxyNode = null,
+			_proxyId = _linkObj.other_end_id,
+			_proxyNodeId = 'port-'+_linkObj.other_end_id,
+			_proxyPortDef = null,
+			_proxyPortLocation = '?',
+
 			//render related vars
-			_bzCtrlPtBaseValue = 200;
+			_bzCtrlPtBaseValue = 100;
 
 			if(typeof(_linkObj.style) == 'undefined') {
 				_linkObj.style = [
@@ -44,7 +50,10 @@ if(!R8.Link) {
 					{'strokeStyle':'#63E4FF','lineWidth':1,'lineCap':'round'}
 				];
 			}
-
+			_monitorDefaultStyle = [
+					{'strokeStyle':'#5BF300','lineWidth':3,'lineCap':'round'},
+					{'strokeStyle':'#25A3FC','lineWidth':1,'lineCap':'round'}
+			];
 		return {
 			init: function() {
 				_startPortDef = _viewSpace.getPortDefById('port-'+_portId,true);
@@ -77,6 +86,12 @@ if(!R8.Link) {
 					}],
 					'style':_linkObj.style
 				};
+//TODO: revisit after fully implementing link types and new meta
+				if (this.isTypeOf('monitor')) {
+					_linkDef.type = 'monitor';
+					_linkDef.style = _monitorDefaultStyle;
+				}
+
 				_startNode = R8.Utils.Y.one('#'+_startNodeId);
 				_endNode = R8.Utils.Y.one('#'+_endNodeId);
 
@@ -100,11 +115,7 @@ if(!R8.Link) {
 					return;
 				}
 
-
-				if(this.isTypeOf('monitor')) var linkType = 'monitor';
-				else var linkType = _linkDef.type;
-
-				switch(linkType) {
+				switch(_linkDef.type) {
 					case "fullBezier":
 						this.setFullBezierDef();
 						R8.Canvas.drawFullBezier(_fullBezierDef);
@@ -116,6 +127,35 @@ if(!R8.Link) {
 //							startPortDef = this.getPortDefById(_linkDef.endItems[0].nodeId);
 //						}
 						R8.Canvas.renderHanger(_linkDef,_endPortDef);
+var proxyNode = R8.Utils.Y.one('#port-proxy-'+_endPortDef.id);
+if (proxyNode == null) {
+	var portNodeID = 'port-proxy-' + _endPortDef.id,
+		portClass = 'monitor-port available',
+		proxyNode = new R8.Utils.Y.Node.create('<div>');
+
+	proxyNode.addClass(portClass);
+
+	var temp = _endNode.getStyle('left');
+	var pLeft = temp.replace('px', '');
+	var cLeft = (pLeft - 39) + 'px';
+	temp = _endNode.getStyle('top');
+	var pTop = temp.replace('px', '');
+	var cTop = (pTop-7) + 'px';
+	proxyNode.setStyles({
+		'top': cTop,
+		'left': cLeft
+	});
+
+	R8.Utils.Y.one('#item-' + _linkDef.endItems[0].parentItemId).append(proxyNode);
+
+	proxyNode.on('mouseenter',function(e){
+		R8.Canvas.renderLine(_linkDef,_endPortDef);
+	},this);
+	proxyNode.on('mouseleave',function(e){
+console.log('left proxy node.., should delete temp link');
+	},this);
+}
+/*
 var monitorNode = R8.Utils.Y.one('#link-'+_id+'-hangerPort');
 if (monitorNode == null) {
 	monitorNode = R8.Utils.Y.one('#monitor-' + _linkDef.startItem.parentItemId);
@@ -134,6 +174,7 @@ if (monitorNode == null) {
 	});
 	R8.Utils.Y.one('#item-' + _linkDef.endItems[0].parentItemId).append(cloneNode);
 }
+*/
 						break;
 				}
 

@@ -562,8 +562,15 @@ return unless R8::Config[:rich_testing_flag]
         :cols => [:component_type,:most_specific_type]
       }
       other_cmps = get_children_from_sp_hash(:component,sp_hash)
-      return if other_cmps.empty?
-      conn_profile.match_other_components(other_cmps)
+      conn_info_list = conn_profile.match_other_components(other_cmps)
+      return if conn_info_list.empty?
+      conn_info_list.each do |conn_list|
+        input_component = (conn_list[:other_dir] == :input) ? conn_list[:other_component] : component
+        input_component = (conn_list[:other_dir] == :output) ? conn_list[:other_component] : component
+        (conn_list[:attribute_mappings]||[]).each do |attr_mapping|
+       #   link = attr_mapping.ret_link()
+        end
+      end
     end
 
     #TODO: quick hack

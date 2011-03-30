@@ -130,28 +130,46 @@ module XYZ
       [:input,:output].each{|dir|create_new_components_aux!(dir)}
     end
 
-    def get_attribute(dir)
+    def ret_link()
+      input_attr,input_path = get_attribute_with_unravel_path(:input)
+      output_attr,output_path = get_attribute_with_unravel_path(:output)
+      raise Error.new("cannot find input_id") unless input_attr
+      raise Error.new("cannot find output_id") unless output_attr
+      ret = {:input_id => input_attr[:id],:output_id => output_attr[:id]}
+      ret.merge!(:input_path => input_path) if input_path
+      ret.merge!(:output_path => output_path) if output_path
+      ret
+    end
+
+   private
+
+    #returns [attribute,unravel_path]
+    def get_attribute_with_unravel_path(dir)
+      ret_path = nil
+      ret = [nil,ret_path]
       component,path = get_component_and_path(dir)
       #TODO: hard coded for certain cases; generalize to follow path which would be done by dynmaically generating join
       if path.size == 1 and not is_special_key?(path.first)
-        component.get_virtual_attribute(path.first.to_s,[:id],:display_name)
+        attr = component.get_virtual_attribute(path.first.to_s,[:id],:display_name)
+        [attr,ret_path]
       elsif path.size == 3 and is_special_key_type?(:parent,path.first)
         node = create_node_object(component)
-        node.get_virtual_component_attribute({:component_type => path[1].to_s},{:display_name => path[2].to_s},[:id])
+        attr = node.get_virtual_component_attribute({:component_type => path[1].to_s},{:display_name => path[2].to_s},[:id])
+        [attr,ret_path]
       elsif path.size == 2 and is_create_info?(path.first)
         cmp_id = is_create_info?(path.first)[:id]
         unless cmp_id
           Log.error("cannot find the id of new object created")
-          return nil
+          return ret
         end
         node = create_node_object(component)
-        node.get_virtual_component_attribute({:id => cmp_id},{:display_name => path[1].to_s},[:id])
+        attr = node.get_virtual_component_attribute({:id => cmp_id},{:display_name => path[1].to_s},[:id])
+        [attr,ret_path]
       else
         raise Error.new("Not implemented yet")
       end
     end
 
-   private
     def input_component()
       self[:input_component]
     end

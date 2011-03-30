@@ -72,11 +72,7 @@ return unless R8::Config[:rich_testing_flag]
         output_component = conn_info[:output][:component_parent]
         attr_mapping.reset!(input_component,output_component)
         attr_mapping.create_new_components!()
-        input_attr = attr_mapping.get_attribute(:input)
-        output_attr = attr_mapping.get_attribute(:output)
-        raise Error.new("cannot find input_id") unless input_attr
-        raise Error.new("cannot find output_id") unless output_attr
-        link = {:input_id => input_attr[:id],:output_id => output_attr[:id]}
+        link = attr_mapping.ret_link()
         opts = {:no_nested_processing => true}
         create_port_and_attr_links(parent_idh,[link],opts)
       end

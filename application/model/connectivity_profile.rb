@@ -146,28 +146,34 @@ module XYZ
     #returns [attribute,unravel_path]
     def get_attribute_with_unravel_path(dir)
       ret_path = nil
-      ret = [nil,ret_path]
+      ret_attr = nil
+      ret = [ret_attr,ret_path]
       component,path = get_component_and_path(dir)
       #TODO: hard coded for certain cases; generalize to follow path which would be done by dynmaically generating join
-      if path.size == 1 and not is_special_key?(path.first)
-        attr = component.get_virtual_attribute(path.first.to_s,[:id],:display_name)
-        [attr,ret_path]
+      if is_simple_key?(path.first)
+        if path.size == 1
+          ret_attr = component.get_virtual_attribute(path.first.to_s,[:id],:display_name)
+        elsif is_unravel_path?(path[1..path.size-1])
+          ret_attr = component.get_virtual_attribute(path.first.to_s,[:id],:display_name)
+          ret_path = process_unravel_path(path[1..path.size-1],component)
+        else
+          raise Error.new("Not implemented yet")
+        end
       elsif path.size == 3 and is_special_key_type?(:parent,path.first)
         node = create_node_object(component)
-        attr = node.get_virtual_component_attribute({:component_type => path[1].to_s},{:display_name => path[2].to_s},[:id])
-        [attr,ret_path]
-      elsif path.size == 2 and is_create_info?(path.first)
-        cmp_id = is_create_info?(path.first)[:id]
+        ret_attr = node.get_virtual_component_attribute({:component_type => path[1].to_s},{:display_name => path[2].to_s},[:id])
+      elsif path.size == 2 and is_create_component_info?(path.first)
+        cmp_id = is_create_component_info?(path.first)[:id]
         unless cmp_id
           Log.error("cannot find the id of new object created")
           return ret
         end
         node = create_node_object(component)
-        attr = node.get_virtual_component_attribute({:id => cmp_id},{:display_name => path[1].to_s},[:id])
-        [attr,ret_path]
+        ret_attr = node.get_virtual_component_attribute({:id => cmp_id},{:display_name => path[1].to_s},[:id])
       else
         raise Error.new("Not implemented yet")
       end
+      [ret_attr,ret_path]
     end
 
     def input_component()
@@ -186,7 +192,7 @@ module XYZ
     def create_new_components_aux!(dir)
       component,path = get_component_and_path(dir)
       #TODO: hard wiring where we are looking for create not for example handling case where path starts with :parent
-      create_info = is_create_info?(path.first)
+      create_info = is_create_component_info?(path.first)
       return unless create_info
       relation_name = create_info[:relation_name].to_s
       #find related component
@@ -226,20 +232,49 @@ module XYZ
     end
 
     ###parsing functions and related functions
-    def is_special_key?(item)
-      (item.kind_of?(String) or item.kind_of?(Symbol)) and item.to_s =~ /^__/
+    def is_simple_key?(item)
+      (item.kind_of?(String) or item.kind_of?(Symbol)) and not item.to_s =~ /^__/
     end
+
     def is_special_key_type?(type_or_types,item)
       types = Array(type_or_types)
       item.respond_to?(:to_sym) and types.map{|t|"__#{t}"}.include?(item.to_s)
     end
     
     #if item signifies to create a related component, this returns tenh relation name
-    def is_create_info?(item)
-      (item.kind_of?(Hash) and item.keys.first.to_s == "create") ? item.values.first : nil
+    def is_create_component_info?(item)
+      (item.kind_of?(Hash) and item.keys.first.to_s == "create_component") ? item.values.first : nil
     end
     def update_create_path_element!(item,id)
       item[:create].merge!(:id => id)
+    end
+    def is_create_index?(item)
+      (item.kind_of?(Hash) and item.keys.first.to_s == "create_index") 
+    end
+    def process_create_index(item,component)
+      info = item.values.first 
+      ret = {:index_name => info[:name].to_s}
+      if info[:key]
+        if (info[:key].kind_of?(Symbol) or info[:key].kind_of?(String)) and info[:key].to_s == "__component_id"
+          ret.merge!(:key => {:component_id => component[:id]})
+        else
+          Raise Error.new("create index key not treated")
+        end
+      end
+      ret
+    end
+
+    def is_unravel_path?(path)
+      path.each do |el|
+        return false unless is_simple_key?(el) or is_create_index?(el)
+      end
+      true
+    end
+
+    def process_unravel_path(path,component)
+      path.map do |el|
+        is_create_index?(el) ? process_create_index(el,component) : el
+      end
     end
   end
 end

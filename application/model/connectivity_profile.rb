@@ -2,14 +2,14 @@ module XYZ
   class ConnectivityProfile < ArrayObject
     #TODO: both args not needed if update the type hierarchy with leaf components 
     def self.find_external(cmp_type_x,most_specific_type_x)
-      ret = self.new()
+      ret = nil
       cmp_type = cmp_type_x && cmp_type_x.to_sym
       most_specific_type = most_specific_type_x && most_specific_type_x.to_sym
       rules = get_possible_component_connections()
       ret_array = rules.map do |rule_input_cmp_type,rest|
         component_type_match(cmp_type,most_specific_type,rule_input_cmp_type) ? rest.merge(:input_component_type => rule_input_cmp_type) : nil
       end.compact
-      self.new(ret_array)
+      ret_array.empty? ? nil : self.new(ret_array)
     end
 
     def match_output(cmp_type_x,most_specific_type_x)
@@ -32,19 +32,53 @@ module XYZ
       ret
     end
 
-    #may collapse this with find external
+    #may collapse these with find external functions
     def self.find_internal(cmp_type_x,most_specific_type_x)
-      ret = self.new()
+      ret = nil
       cmp_type = cmp_type_x && cmp_type_x.to_sym
       most_specific_type = most_specific_type_x && most_specific_type_x.to_sym
       rules = get_possible_intra_component_connections()
       ret_array = rules.map do |rule_cmp_type,rest|
         component_type_match(cmp_type,most_specific_type,rule_cmp_type) ? rest.merge(:matching_component_type => rule_cmp_type) : nil
       end.compact
-      self.new(ret_array)
+      ret_array.empty? ? nil : self.new(ret_array)
+    end
+
+    def match_other_components(other_components)
+      ret = Array.new
+      other_components.each do |cmp|
+        self.each do |one_match|
+          match = self.class.match_other_components_aux(:input,cmp,one_match)
+          ret << match if match
+          match = self.class.match_other_components_aux(:output,cmp,one_match)
+          ret << match if match
+        end
+      end
+      ret
     end
 
    private
+    def self.match_other_components_aux(dir,cmp,one_match)
+      ret = nil
+      cmp_type = cmp[:component_type]&& cmp[:component_type].to_sym
+      most_specific_type = cmp[:most_specific_type] && cmp[:most_specific_type].to_sym
+      to_merge = {:other_dir => dir}
+      dir_index = (dir == :input) ? :input_components : :output_components
+      (one_match[dir_index]||[]).each do |inside_info|
+        rule_inside_cmp_type = inside_info.keys.first
+        next unless component_type_match(cmp_type,most_specific_type,rule_inside_cmp_type)
+        #TODO: not looking for multiple matches and just looking fro first one
+        to_merge.merge!(:other_component => cmp,:other_component_type => rule_inside_cmp_type)
+        ret = Aux::hash_subset(one_match,[:matching_component_type,:connection_type]).merge(to_merge)
+        info = inside_info.values.first
+        ams = info[:attribute_mappings]
+        ret.merge!(ams ? info.merge(:attribute_mappings => ams.map{|x|AttributeMapping.new(x)}) : info)
+        break
+      end
+      ret
+    end
+
+
     def self.component_type_match(cmp_type,most_specific_type,rule_cmp_type)
       return true if (cmp_type == rule_cmp_type or most_specific_type == rule_cmp_type)
       type_class = ComponentType.ret_class(rule_cmp_type)

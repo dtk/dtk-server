@@ -553,8 +553,17 @@ module XYZ
 return unless R8::Config[:rich_testing_flag]
       #TODO: more efficient would be to have clone object output have this info
       component = cmp_id_handle.create_object()
-      profile = component.get_objects_col_from_sp_hash({:cols => [:connectivity_profile_internal]},:connectivity_profile_internal).first
-      return unless component
+      conn_profile = component.get_objects_col_from_sp_hash({:cols => [:connectivity_profile_internal]}).first
+      return unless conn_profile
+      #get all other components on node
+      sp_hash = {
+        :model_name => :component,
+        :filter => [:neq, :id, cmp_id_handle.get_id()],
+        :cols => [:component_type,:most_specific_type]
+      }
+      other_cmps = get_children_from_sp_hash(:component,sp_hash)
+      return if other_cmps.empty?
+      conn_profile.match_other_components(other_cmps)
     end
 
     #TODO: quick hack

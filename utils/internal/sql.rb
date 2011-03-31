@@ -200,7 +200,7 @@ module XYZ
       include FilterPostProcessingMixin 
       #TODO: needed to fully qualify Dataset; could this constraint be removed? by chaging expose?
       post_hook = "lambda{|x|XYZ::SQL::Dataset.new(model_handle,x,@filter_post_processing)}"
-      expose_methods_from_internal_object :sequel_ds, %w{where select from_self}, :post_hook => post_hook
+      expose_methods_from_internal_object :sequel_ds, %w{where select from_self for_update}, :post_hook => post_hook
       expose_methods_from_internal_object :sequel_ds, %w{sql}
       def initialize(model_handle,sequel_ds,filter_post_processing=nil)
         @model_name_info = [ModelNameInfo.new(model_handle[:model_name])]

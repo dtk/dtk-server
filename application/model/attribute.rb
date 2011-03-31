@@ -446,6 +446,10 @@ module XYZ
 
     def self.update_attribute_values_partial(attr_mh,new_val_rows,cols,opts={})
       pp [:new_val_rows,new_val_rows]
+      
+      fs = Model::FieldSet.opt([:id, :value_derived,:value_asserted],:attribute)
+      wc = SQL.in(:id,new_val_rows.map{|r|r[:id]})
+      existing_values_ds = Model.get_objects_just_dataset_for_update(attr_mh,wc,fs)
       raise Error.new("not implemented yet")
     end
 
@@ -483,8 +487,7 @@ module XYZ
         fs = Model::FieldSet.opt([:id]+(cols-[:id]).map{|col|{r[col] => col}},:attribute)
         wc={:id => r[:id]}
         update_select_ds = Model.get_objects_just_dataset(attr_mh,wc,fs)
-        x=update_from_select(attr_mh,FieldSet.new(:attribute,cols-[:id]),update_select_ds,opts)
-        x
+        update_from_select(attr_mh,FieldSet.new(:attribute,cols-[:id]),update_select_ds,opts)
       end.flatten
     end
 

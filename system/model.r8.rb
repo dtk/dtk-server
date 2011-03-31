@@ -15,7 +15,7 @@ module XYZ
     class << self
       attr_reader :db
       #TODO: get benchmark from config file
-      expose_methods_from_internal_object :db, %w{update_from_select update_from_hash_assignments update_instance execute_function get_instance_or_factory get_instance_scalar_values get_objects_just_dataset get_object_ids_wrt_parent get_parent_object exists? create_from_select ret_id_handles_from_create_returning_ids create_from_hash create_simple_instance? delete_instance delete_instances delete_instances_wrt_parent process_raw_db_row!} #, :benchmark => %w{create_from_hash} # :all
+      expose_methods_from_internal_object :db, %w{update_from_select update_from_hash_assignments update_instance execute_function get_instance_or_factory get_instance_scalar_values get_objects_just_dataset get_objects_just_dataset_for_update get_object_ids_wrt_parent get_parent_object exists? create_from_select ret_id_handles_from_create_returning_ids create_from_hash create_simple_instance? delete_instance delete_instances delete_instances_wrt_parent process_raw_db_row!} #, :benchmark => %w{create_from_hash} # :all
     end
 
     def self.model_name()

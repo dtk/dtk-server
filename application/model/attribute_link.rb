@@ -1,7 +1,26 @@
 module XYZ
   class AttributeLink < Model
     ##########################  add new links ##################
+    def self.create_attr_links(parent_idh,rows,opts={})
+      attr_info = get_attribute_info(parent_idh,rows)
+      create_attr_links_aux(parent_idh,rows,attr_info,opts)
+    end
+
     def self.create_port_and_attr_links(parent_idh,rows,opts={})
+      attr_info = get_attribute_info(parent_idh,rows)
+      create_attr_links_aux(parent_idh,rows,attr_info,opts)
+
+      #compute conn_info_list
+      conn_info_list = get_conn_info_list(rows,attr_info)
+
+      create_related_links?(parent_idh,conn_info_list)
+      #TODO: assumption is that what is created by create_related_links? has no bearing on l4 ports (as manifsted by using attr_links arg computred before create_related_links? call
+      attr_links = rows.map{|r|{:input => attr_info[r[:input_id]],:output => attr_info[r[:output_id]]}}
+      Port.create_and_update_l4_ports_and_links?(parent_idh,attr_links)
+    end
+
+   private
+    def self.get_attribute_info(parent_idh,rows)
       attr_link_mh = parent_idh.create_childMH(:attribute_link)
       #TODO: parent model name can also be node
       attr_mh = attr_link_mh.createMH(:model_name => :attribute,:parent_model_name=>:component)
@@ -14,20 +33,18 @@ module XYZ
         row[:ref] = "attribute_link:#{row[:input_id]}-#{row[:output_id]}"
       end
 
-      #TODO: make more efficient by setting attribute_link.function_index and attribute.link_info in fewer sql ops 
-      #get info needed to set attribute_link.function_index
       endpoint_ids = rows.map{|r|[r[:input_id],r[:output_id]]}.flatten.uniq
       sp_hash = {
         :columns => [:id,:attribute_value,:semantic_type_object,:component_parent],
         :filter => [:oneof, :id, endpoint_ids]
       }
       attr_rows = get_objects_from_sp_hash(attr_mh,sp_hash)
-      attr_info = attr_rows.inject({}){|h,attr|h.merge(attr[:id] => attr)}
+      attr_rows.inject({}){|h,attr|h.merge(attr[:id] => attr)}
+    end
 
-      #set function and new function_index and new updated link_info
-      input_attrs_updates = Array.new
-      conn_info_list = Array.new
-      rows.each do |row|
+    #compute conn_info_list
+    def self.get_conn_info_list(rows,attr_info)
+      rows.map do |row|
         input_id = row[:input_id]
         input_attr = attr_info[input_id]
         output_attr = attr_info[row[:output_id]]
@@ -35,28 +52,29 @@ module XYZ
         conn_profile = input_attr[:component_parent][:connectivity_profile_external]
         #TODO: phasing in by first using for creating_related links; then using for the whole process to create attribute links and check for constraint violations
         conn_info = conn_profile && conn_profile.match_output(output_cmp[:component_type],output_cmp[:most_specific_type])
-        conn_info_list << (conn_info||{}).merge(:input => input_attr, :output => output_attr)
+        (conn_info||{}).merge(:input => input_attr, :output => output_attr)
+      end
+    end
 
+    def self.create_attr_links_aux(parent_idh,rows,attr_info,opts={})
+      #set function 
+      rows.each do |row|
+        input_attr = attr_info[row[:input_id]]
+        output_attr = attr_info[row[:output_id]]
         #TODO: semantic type object may pull in what its connecetd component type is
         row[:function] = SemanticType.find_link_function(input_attr[:semantic_type_object],output_attr[:semantic_type_object])
       end
 
       #create attribute_links
+      attr_link_mh = parent_idh.create_childMH(:attribute_link)
       select_ds = SQL::ArrayDataset.create(db,rows,attr_link_mh,:convert_for_create => true)
       override_attrs = {}
       field_set = FieldSet.new(attr_link_mh[:model_name],rows.first.keys)
       returning_ids = create_from_select(attr_link_mh,field_set,select_ds,override_attrs,:returning_sql_cols=> [:id])
       returning_ids.each_with_index{|id_info,i|rows[i][:id] = id_info[:id]}
 
+      attr_mh = attr_link_mh.createMH(:model_name => :attribute,:parent_model_name=>:component)
       propagate_from_create(attr_mh,attr_info,rows)
-
-      return returning_ids if opts[:no_nested_processing]
-
-##  TODO: remove create_related_links?(parent_idh,attr_links)
-      create_related_links?(parent_idh,conn_info_list)
-      #TODO: assumption is that what is created by create_related_links? has no bearing on l4 ports (as manifsted by using attr_links arg computred before create_related_links? call
-      attr_links = rows.map{|r|{:input => attr_info[r[:input_id]],:output => attr_info[r[:output_id]]}}
-      Port.create_and_update_l4_ports_and_links?(parent_idh,attr_links)
     end
 
     def self.create_related_links?(parent_idh,conn_info_list)
@@ -73,39 +91,13 @@ return unless R8::Config[:rich_testing_flag]
         attr_mapping.reset!(input_component,output_component)
         attr_mapping.create_new_components!()
         link = attr_mapping.ret_link()
-        opts = {:no_nested_processing => true}
-        create_port_and_attr_links(parent_idh,[link],opts)
-      end
-    end
-=begin
-DEPRECATED    
-    #TODO: can we make this more data driven 
-    def self.create_related_link?(parent_idh,link_info)
-      input_cmp = link_info[:input][:component_parent]
-      if ComponentType::Application.include?(input_cmp[:most_specific_type])
-        attr_db_config = input_cmp.get_virtual_attribute("db_config",[:id],:semantic_type_summary)
-        create_related_link_from_db_config(parent_idh,link_info,attr_db_config) if attr_db_config
+        create_attr_links(parent_idh,[link])
       end
     end
 
-    def self.create_related_link_from_db_config(parent_idh,link_info,attr_db_config)
-      db_server_component = link_info[:output][:component_parent]
-      db_server_node = parent_idh.createIDH(:id => db_server_component[:node_node_id],:model_name => :node).create_object()
-      db_component_idh = ComponentType::Database.clone_db_onto_db_server_node(db_server_node,db_server_component)
-
-      #find link between db component 
-      attr_db_params = db_component_idh.create_object().get_virtual_attribute("db_params",[:id],:semantic_type_summary)
-      unless attr_db_params
-        Log.error("cannot find db_params attribute on db_component")
-        return
-      end
-      link = {:input_id => attr_db_params[:id],:output_id => attr_db_config[:id]}
-      opts = {:no_nested_processing => true}
-      create_port_and_attr_links(parent_idh,[link],opts)
-    end
-=end
 
 ####################
+   public
     ### special purpose create links ###
     def self.create_links_node_group_members(node_group_id_handle,ng_cmp_id_handle,node_cmp_id_handles)
       node_cmp_mh = node_cmp_id_handles.first.createMH

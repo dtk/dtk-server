@@ -570,6 +570,7 @@ return unless R8::Config[:rich_testing_flag]
         (conn_list[:attribute_mappings]||[]).each do |attr_mapping|
           attr_mapping.reset!(input_component,output_component)
           link = attr_mapping.ret_link()
+          AttributeLink.create_attr_links(parent_idh,[link],opts={})
         end
       end
     end

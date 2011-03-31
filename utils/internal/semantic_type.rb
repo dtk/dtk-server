@@ -37,6 +37,8 @@ module XYZ
       @attr_link_id =  attr_link[:id]
       @input_attr = input_attr
       @output_attr = output_attr
+      @input_path = attr_link[:input_path]
+      @output_path = attr_link[:output_path]
     end
    private
 

@@ -367,22 +367,42 @@ TODO: can deprecate now taht doing db side increemntal update
 =end
    ########################## end: propagate changes ##################
     class IndexMap < Array
-      def self.generate(lower_bound,upper_bound,offset)
-        create_from_array((lower_bound..upper_bound).map{|i|{:output => [i], :input => [i+offset]}})
-      end
       def self.convert_if_needed(x)
         x.kind_of?(Array) ? create_from_array(x) : x
+      end
+
+      def self.generate(lower_bound,upper_bound,offset)
+        create_from_array((lower_bound..upper_bound).map{|i|{:output => [i], :input => [i+offset]}})
       end
 
       def input_array_indexes()
         ret = Array.new
         self.map do |el|
-          raise Error.new("unexpected form in input_array_indexes") unless el[:input] and el[:input].size == 1 and el[:input].first.kind_of?(Fixnum) 
+          raise Error.new("unexpected form in input_array_indexes") unless el[:input].is_singleton_array?()
           el[:input].first
         end 
       end
      private
       def self.create_from_array(a)
+        return nil unless a
+        ret = new()
+        a.each do |el| 
+          input = el[:input].kind_of?(IndexMapPath) ? el[:input] : IndexMapPath.create_from_array(el[:input])
+          output = el[:output].kind_of?(IndexMapPath) ? el[:output] : IndexMapPath.create_from_array(el[:output])
+          ret << {:input => input, :ouput => output}
+        end
+        ret
+      end
+
+    end
+
+    class IndexMapPath < Array
+      def is_singleton_array?()
+        self.size == 1 and self.first.kind_of?(Fixnum)
+      end
+     private
+      def self.create_from_array(a)
+        return nil unless a
         ret = new()
         a.each{|el| ret << el}
         ret

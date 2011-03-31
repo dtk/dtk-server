@@ -6,6 +6,8 @@ module XYZ
     end
     class OutputArrayAppend < Output
     end
+    class OutputHash < Output
+    end
 
     #propgate from output var to input var
     def propagate()

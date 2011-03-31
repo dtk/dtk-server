@@ -173,7 +173,7 @@ module XYZ
       else
         raise Error.new("Not implemented yet")
       end
-      [ret_attr,ret_path]
+      [ret_attr,AttributeLink::IndexMapPath.create_from_array(ret_path)]
     end
 
     def input_component()

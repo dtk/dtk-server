@@ -420,6 +420,8 @@ module XYZ
           update_attribute_values_array_slice(attr_mh,new_val_rows,cols,opts)
         when "OutputArrayAppend"
           update_attribute_values_array_append(attr_mh,new_val_rows,cols,opts)
+        when "OutputPartial"
+          update_attribute_values_partial(attr_mh,new_val_rows,cols,opts)
         else
         update_select_ds = SQL::ArrayDataset.create(db,new_val_rows,attr_mh,:convert_for_update => true)
         update_from_select(attr_mh,FieldSet.new(:attribute,cols),update_select_ds,opts)
@@ -440,6 +442,11 @@ module XYZ
     end
     def self.json_generate(v)
       (v.kind_of?(Hash) or v.kind_of?(Array)) ? JSON.generate(v) : v
+    end
+
+    def self.update_attribute_values_partial(attr_mh,new_val_rows,cols,opts={})
+      pp [:new_val_rows,new_val_rows]
+      raise Error.new("not implemented yet")
     end
 
     def self.update_attribute_values_array_append(attr_mh,array_slice_rows,cols,opts={})

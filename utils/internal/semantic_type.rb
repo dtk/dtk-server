@@ -6,7 +6,7 @@ module XYZ
     end
     class OutputArrayAppend < Output
     end
-    class OutputHash < Output
+    class OutputPartial < Output
     end
 
     #propgate from output var to input var
@@ -107,11 +107,15 @@ module XYZ
     end
 
     def propagate_when_eq_indexed()
-      new_rows = output_value().nil? ? [nil] : (output_semantic_type().is_array? ?  output_value() : [output_value()])
-      if @index_map 
-        OutputArraySlice.new(:index_map => @index_map, :array_slice => new_rows)
+      unless @input_path.empty? and @output_path.empty?
+        OutputPartial.new(:output => @output_path.take_slice(output_value), :input_path => @input_path, :output_path => @output_path)
       else
-        OutputArrayAppend.new(:array_slice => new_rows, :attr_link_id => @attr_link_id)
+        new_rows = output_value().nil? ? [nil] : (output_semantic_type().is_array? ?  output_value() : [output_value()])
+        if @index_map 
+          OutputArraySlice.new(:index_map => @index_map, :array_slice => new_rows)
+        else
+          OutputArrayAppend.new(:array_slice => new_rows, :attr_link_id => @attr_link_id)
+        end
       end
     end
 

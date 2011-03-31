@@ -398,14 +398,40 @@ TODO: can deprecate now taht doing db side increemntal update
 
     class IndexMapPath < Array
       def is_singleton_array?()
-        self.size == 1 and self.first.kind_of?(Fixnum)
+        self.size == 1 and is_array_el?(self.first)
+      end
+      def take_slice(el)
+        return el if self.empty?
+        return nil if el.nil?
+        if is_array_el?(self.first)
+          if el.kind_of?(Array)
+            rest().take_slice(el[self.first])
+          else
+            Log.error("array expected")
+            nil
+          end
+        else
+          if el.kind_of?(Hash)
+            rest().take_slice(el[self.first])
+          else
+            Log.error("hash expected")
+            nil
+          end
+        end
       end
      private
       def self.create_from_array(a)
-        return nil unless a
         ret = new()
+        return ret unless a
         a.each{|el| ret << el}
         ret
+      end
+
+      def rest()
+        self[1..self.size-1]
+      end
+      def is_array_el?(el)
+        el.kind_of?(Fixnum)
       end
     end
 

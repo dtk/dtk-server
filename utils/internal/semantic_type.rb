@@ -172,9 +172,12 @@ module XYZ
       self.new(convert_hash(semantic_type))
     end
 
-    def self.find_link_function(input_sem_type,output_sem_type)
-      #TODO: stub; should test byod is array whether types match
-      if output_sem_type.is_array? and not input_sem_type.is_array?
+    def self.find_link_function(input_attr,output_attr)
+      input_sem_type = input_attr[:semantic_type_object]
+      output_sem_type = output_attr[:semantic_type_object]
+      if input_attr[:input_path] or output_attr[:output_path]
+        "eq_indexed"
+      elsif output_sem_type.is_array? and not input_sem_type.is_array?
         "select_one"
       elsif  output_sem_type.is_array? and input_sem_type.is_array?
         "eq_indexed"

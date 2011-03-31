@@ -3,12 +3,12 @@ module XYZ
     ##########################  add new links ##################
     def self.create_attr_links(parent_idh,rows,opts={})
       attr_info = get_attribute_info(parent_idh,rows)
-      create_attr_links_aux(parent_idh,rows,attr_info,opts)
+      create_attr_links_aux!(rows,parent_idh,attr_info,opts)
     end
 
     def self.create_port_and_attr_links(parent_idh,rows,opts={})
       attr_info = get_attribute_info(parent_idh,rows)
-      create_attr_links_aux(parent_idh,rows,attr_info,opts)
+      create_attr_links_aux!(rows,parent_idh,attr_info,opts)
 
       #compute conn_info_list
       conn_info_list = get_conn_info_list(rows,attr_info)
@@ -56,21 +56,23 @@ module XYZ
       end
     end
 
-    def self.create_attr_links_aux(parent_idh,rows,attr_info,opts={})
-      #set function 
+    #modifies rows by inserting created ids and link fn in it
+    def self.create_attr_links_aux!(rows,parent_idh,attr_info,opts={})
+      #form create rows by adding link function and removing :input_path,:output_path
       rows.each do |row|
-        input_attr = attr_info[row[:input_id]]
-        output_attr = attr_info[row[:output_id]]
-        #TODO: semantic type object may pull in what its connecetd component type is
-        row[:function] = SemanticType.find_link_function(input_attr[:semantic_type_object],output_attr[:semantic_type_object])
+        input_attr = attr_info[row[:input_id]].merge(row[:input_path] ? {:input_path => row[:input_path]} : {})
+        output_attr = attr_info[row[:output_id]].merge(row[:output_path] ? {:output_path => row[:output_path]} : {})
+        row[:function] = SemanticType.find_link_function(input_attr,output_attr)
       end
 
       #create attribute_links
+      create_rows = rows.map{|row|Aux::hash_subset(row,row.keys - [:input_path,:output_path])}
       attr_link_mh = parent_idh.create_childMH(:attribute_link)
-      select_ds = SQL::ArrayDataset.create(db,rows,attr_link_mh,:convert_for_create => true)
+      select_ds = SQL::ArrayDataset.create(db,create_rows,attr_link_mh,:convert_for_create => true)
       override_attrs = {}
-      field_set = FieldSet.new(attr_link_mh[:model_name],rows.first.keys)
+      field_set = FieldSet.new(attr_link_mh[:model_name],create_rows.first.keys)
       returning_ids = create_from_select(attr_link_mh,field_set,select_ds,override_attrs,:returning_sql_cols=> [:id])
+      #insert the new ids into rows
       returning_ids.each_with_index{|id_info,i|rows[i][:id] = id_info[:id]}
 
       attr_mh = attr_link_mh.createMH(:model_name => :attribute,:parent_model_name=>:component)

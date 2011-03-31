@@ -248,32 +248,21 @@ module XYZ
     def update_create_path_element!(item,id)
       item[:create].merge!(:id => id)
     end
-    def is_create_index?(item)
-      (item.kind_of?(Hash) and item.keys.first.to_s == "create_index") 
-    end
-    def process_create_index(item,component)
-      info = item.values.first 
-      ret = {:index_name => info[:name].to_s}
-      if info[:key]
-        if (info[:key].kind_of?(Symbol) or info[:key].kind_of?(String)) and info[:key].to_s == "__component_id"
-          ret.merge!(:key => {:component_id => component[:id]})
-        else
-          Raise Error.new("create index key not treated")
-        end
-      end
-      ret
+
+    def process_create_component_index(item,component)
+      {:create_component_index => {:component_id => component[:id]}}
     end
 
     def is_unravel_path?(path)
       path.each do |el|
-        return false unless is_simple_key?(el) or is_create_index?(el)
+        return false unless is_simple_key?(el) or is_special_key_type?(:create_component_index,el)
       end
       true
     end
 
     def process_unravel_path(path,component)
       path.map do |el|
-        is_create_index?(el) ? process_create_index(el,component) : el
+        is_special_key_type?(:create_component_index,el) ? process_create_component_index(el,component) : el
       end
     end
   end

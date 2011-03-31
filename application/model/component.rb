@@ -22,7 +22,11 @@ module XYZ
         column :specific_type, :varchar, :size => 30 
         column :component_type, :varchar, :size => 50 #this is the exact component type; two instances taht share this can differ by things like defaults
 
+        #if set to true only one isnatnce of a component (using component_type to determine 'same') can be on a node
         column :only_one_per_node, :boolean, :default => true
+        #refernce used when multiple isnatnces of same component type 
+        #TODO: make sure that this is preserved under clone; case to watch out fro is when cloning for example more dbs in something with dbs
+        virtual_column :multiple_instance_ref, :type => :integer ,:local_dependencies => [:ref]
         column :version, :varchar, :size => 25 # version of underlying component (not chef recipe .... version)
         column :uri, :varchar
         column :ui, :json
@@ -238,18 +242,22 @@ module XYZ
       self[:specific_type]||self[:basic_type]
     end
 
-     def connectivity_profile_external()
-       ConnectivityProfile.find_external(self[:component_type],self[:most_specific_type])
-     end
-     def connectivity_profile_internal()
-       ConnectivityProfile.find_internal(self[:component_type],self[:most_specific_type])
-     end
+    def connectivity_profile_external()
+      ConnectivityProfile.find_external(self[:component_type],self[:most_specific_type])
+    end
+    def connectivity_profile_internal()
+      ConnectivityProfile.find_internal(self[:component_type],self[:most_specific_type])
+    end
+    
+    def multiple_instance_ref()
+      self[:ref]||1
+    end   
 
     def containing_datacenter()
       (self[:datacenter_direct]||{})[:display_name]||
-      (self[:datacenter_node]||{})[:display_name]||
+        (self[:datacenter_node]||{})[:display_name]||
         (self[:datacenter_node_group]||{})[:display_name]
-    end
+     end
 
     #TODO: write as sql fn for efficiency
     def has_pending_change()

@@ -126,11 +126,11 @@ module XYZ
            [
             {
               #if component can only appear once on node, key not needed
-              :input => [:service_check_input, {:create_index => {:name => :mysql, :key => :__component_id}},:db_params], 
+              :input => [:service_check_input, :mysql, :__create_component_index, :db_params], 
               :output => [:monitor_db_config]
             },
             {
-              :input => [:service_check_input, {:create_index => {:name => :mysql, :key => :__component_id}},:port], 
+              :input => [:service_check_input, :mysql, :__create_component_index, :port],
               :output => [:sap_config__l4,:port]
             }]
          }

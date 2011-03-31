@@ -285,6 +285,10 @@ rather than having or having two sap refs and user can remove or add to componen
         :port_type => "input"
       },
 
+      "service_check_input" => {
+        :port_type => "input"
+      },
+
       #TODO: may deprecate below
       "sap_config__db" => {
       },

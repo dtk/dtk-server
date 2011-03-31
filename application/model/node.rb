@@ -564,13 +564,14 @@ return unless R8::Config[:rich_testing_flag]
       other_cmps = get_children_from_sp_hash(:component,sp_hash)
       conn_info_list = conn_profile.match_other_components(other_cmps)
       return if conn_info_list.empty?
+      parent_idh = cmp_id_handle.get_parent_id_handle
       conn_info_list.each do |conn_list|
         input_component = (conn_list[:other_dir] == :input) ? conn_list[:other_component] : component
         output_component = (conn_list[:other_dir] == :output) ? conn_list[:other_component] : component
         (conn_list[:attribute_mappings]||[]).each do |attr_mapping|
           attr_mapping.reset!(input_component,output_component)
           link = attr_mapping.ret_link()
-          AttributeLink.create_attr_links(parent_idh,[link],opts={})
+          AttributeLink.create_attr_links(parent_idh,[link])
         end
       end
     end

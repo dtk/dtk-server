@@ -26,7 +26,7 @@ module XYZ
         column :only_one_per_node, :boolean, :default => true
         #refernce used when multiple isnatnces of same component type 
         #TODO: make sure that this is preserved under clone; case to watch out fro is when cloning for example more dbs in something with dbs
-        virtual_column :multiple_instance_ref, :type => :integer ,:local_dependencies => [:ref]
+        virtual_column :multiple_instance_ref, :type => :integer ,:local_dependencies => [:ref_num]
         column :version, :varchar, :size => 25 # version of underlying component (not chef recipe .... version)
         column :uri, :varchar
         column :ui, :json
@@ -250,7 +250,7 @@ module XYZ
     end
     
     def multiple_instance_ref()
-      self[:ref]||1
+      self[:ref_num]||1
     end   
 
     def containing_datacenter()

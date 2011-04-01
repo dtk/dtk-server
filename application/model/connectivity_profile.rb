@@ -250,7 +250,7 @@ module XYZ
     end
 
     def process_create_component_index(item,component)
-      {:create_component_index => {:component_id => component[:id]}}
+      {:create_component_index => {:component_idh => component.id_handle()}}
     end
 
     def is_unravel_path?(path)

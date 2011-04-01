@@ -32,11 +32,8 @@ end
 #need to rework/architect as needed, this is from first test pass
 
 module R8
-  Config = Hash.new
+  Config = Hash.new unless defined? ::R8::Config
 end
-
-#local-copy flags
-#R8::Config[:rich_testing_flag] = true
 
 #Application defaults
 R8::Config[:application_name] = "application"

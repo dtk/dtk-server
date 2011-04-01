@@ -419,6 +419,31 @@ TODO: can deprecate now taht doing db side increemntal update
           end
         end
       end
+
+      #TODO: more fficient and not needed if can be resolved when get index
+      def self.resolve_paths!(path_list)
+        ndx_cmp_idhs = Hash.new
+        path_list.each do |index_map_path|
+          index_map_path.each_with_index do |el,i|
+            next unless el.kind_of?(Hash)
+            next unless idh = (el[:create_component_index]||{})[:component_idh] 
+            id = idh.get_id()
+            ndx_cmp_idhs[id] ||= {:idh => idh, :elements => Array.new}
+            ndx_cmp_idhs[id][:elements] << {:path => index_map_path, :i => i}
+          end
+        end
+        return if ndx_cmp_idhs.empty?
+        cmp_idhs =  ndx_cmp_idhs.values.map{|x|x[:idh]}
+        sp_hash = {:columns => [:id,:multiple_instance_ref]}
+        opts = {:keep_ref_cols => true}
+        cmp_info = Model.get_objects_in_set_from_sp_hash(cmp_idhs,sp_hash,opts)
+        cmp_info.each do |r|
+          ref = r[:multiple_instance_ref]
+          ndx_cmp_idhs[r[:id]][:elements].each do |el|
+            el[:path][el[:i]] = ref
+          end
+        end
+      end
      private
       def self.create_from_array(a)
         ret = new()

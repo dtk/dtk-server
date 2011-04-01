@@ -445,6 +445,8 @@ module XYZ
     end
 
     def self.update_attribute_values_partial(attr_mh,new_val_rows,cols,opts={})
+      AttributeLink::IndexMapPath.resolve_paths!(new_val_rows.map{|r|r[:input_path]})
+
       pp [:new_val_rows,new_val_rows]
       
       fs = Model::FieldSet.opt([:id, :value_derived,:value_asserted],:attribute)

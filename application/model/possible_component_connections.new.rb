@@ -9,7 +9,8 @@ module XYZ
   ComponentLinkDefs = {
     :java_app => { #NOTE: referered by ':java_app' or if connection between same type of componentr use :alias
       :component_connections =>  #this lists the possible and required type of component compnenctions (e.g.g., database, monitor, etc
-      [{ 
+      [
+       { 
          :type => :database, #this is a component type or member of teh component type hierarchy
          :required => true, #indicates that is required that java_app must be connected to a database component
          :possible_instantiations => { #lists the possible component type or member of the component type hierarchy that in this case are the
@@ -43,6 +44,14 @@ module XYZ
               {"postgresql__server.sap__l4" => "java_app.sap_ref__l4"},
               {"java_app.db_config" => "postgresql_db.db_params"}
              ]
+           }
+         }
+       },
+       { 
+         :type => :monitoring_server, 
+         :required => false, 
+         :possible_instantiations => { 
+           :nagios__server => { #TODO: ...
            }
          }
        }]

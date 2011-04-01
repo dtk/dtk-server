@@ -33,9 +33,6 @@ module XYZ
         get_objects_scalar_columns(model_handle,where_clause,opts.merge({:return_just_sequel_dataset => true}))
       end
 
-      def get_objects_just_dataset_for_update(model_handle,where_clause=nil,opts={})
-        get_objects_just_dataset(model_handle,where_clause,opts).for_update()
-      end
 
       #TODO: may be able to optimze seeing that curerntly uses get_objects
       def get_object_scalar_columns(id_handle,opts={})
@@ -44,7 +41,6 @@ module XYZ
 	return unless id_info and id_info[:id]
         get_objects_scalar_columns(ModelHandle.new(c,id_info[:relation_type]),{:id => id_info[:id]},opts).first
       end
-
 
       #TBD: convert so where clause could be hash or string       
       def get_object_ids_wrt_parent(relation_type,parent_id_handle,where_clause=nil)

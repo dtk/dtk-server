@@ -289,6 +289,13 @@ return unless R8::Config[:rich_testing_flag]
 
    ########################## end: propagate changes ##################
     class IndexMap < Array
+      def merge_into(source,output_var)
+        self.inject(source) do |ret,el|
+          delta = el[:output].take_slice(output_var)
+          el[:input].merge_into(ret,delta)
+        end
+      end
+
       def self.convert_if_needed(x)
         x.kind_of?(Array) ? create_from_array(x) : x
       end
@@ -308,6 +315,14 @@ return unless R8::Config[:rich_testing_flag]
           el[:input].first
         end 
       end
+
+      def self.resolve_input_paths!(index_map_list)
+        return if index_map_list.empty?
+        paths = Array.new
+        index_map_list.each{|im|im.each{|im_el|paths << im_el[:input]}}
+        IndexMapPath.resolve_paths!(paths)
+      end
+
      private
       def self.create_from_array(a)
         return nil unless a
@@ -319,7 +334,6 @@ return unless R8::Config[:rich_testing_flag]
         end
         ret
       end
-
     end
 
     class IndexMapPath < Array
@@ -373,7 +387,7 @@ return unless R8::Config[:rich_testing_flag]
         end
       end
 
-      #TODO: more fficient and not needed if can be resolved when get index
+      #TODO: more efficient and not needed if can be resolved when get index
       def self.resolve_paths!(path_list)
         ndx_cmp_idhs = Hash.new
         path_list.each do |index_map_path|

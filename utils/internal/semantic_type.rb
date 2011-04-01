@@ -108,19 +108,13 @@ module XYZ
 
     def propagate_when_eq_indexed()
       #TODO: may flag more explicitly if from create or propagate vars
-      if (@input_path && (not @input_path.empty?)) or (@output_path && (not @output_path.empty?)) or (@index_map and @index_map.size == 1)
-        input_path = (@index_map && @index_map.first[:input]) || @input_path
-        output_path =(@index_map && @index_map.first[:output]) || @output_path
-        index_map_exists = @index_map ? true : false
-        OutputPartial.new(:attr_link_id => @attr_link_id, :output => output_path.take_slice(output_value), :input_path => input_path, :output_path => output_path, :index_map_exists => index_map_exists)
-      else
+      if @index_map.nil? and (@input_path.nil? or @input_path.empty?) and (@output_path.nil? or @output_path.empty?)
         new_rows = output_value().nil? ? [nil] : (output_semantic_type().is_array? ?  output_value() : [output_value()])
-        if @index_map 
-          #TODO: this may be deprecated since subsumed by OutputPartial
-          OutputArraySlice.new(:index_map => @index_map, :array_slice => new_rows)
-        else
-          OutputArrayAppend.new(:array_slice => new_rows, :attr_link_id => @attr_link_id)
-        end
+        OutputArrayAppend.new(:array_slice => new_rows, :attr_link_id => @attr_link_id)
+      else
+        index_map_persisted = @index_map ? true : false
+        index_map = @index_map || AttributeLink::IndexMap.generate_from_paths(@input_path,@output_path)
+        OutputPartial.new(:attr_link_id => @attr_link_id, :output_value => output_value, :index_map => index_map, :index_map_persisted => index_map_persisted)
       end
     end
 

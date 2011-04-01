@@ -444,14 +444,14 @@ module XYZ
       (v.kind_of?(Hash) or v.kind_of?(Array)) ? JSON.generate(v) : v
     end
 
-    #TODO: may need to do this like ArrayAppend and ArraySlice; if new just update indexmap otherwise use index map 
     def self.update_attribute_values_partial(attr_mh,partial_update_rows,cols,opts={})
-      AttributeLink::IndexMapPath.resolve_paths!(partial_update_rows.map{|r|r[:input_path]})
+      AttributeLink::IndexMap.resolve_input_paths!(partial_update_rows.map{|r|r[:index_map] unless r[:index_map_persisted]}.compact)
 
       pp [:partial_update_rows,partial_update_rows]
       
       fs = Model::FieldSet.opt([:id,:value_derived],:attribute)
       wc = SQL.in(:id,partial_update_rows.map{|r|r[:id]})
+      #TODO: write version taht we can move to db functions that as units selects transform using a block and then updates
       existing_vals = Model.get_objects_just_dataset_for_update(attr_mh,wc,fs).all()
       ndx_existing_vals = existing_vals.inject({}) do |h,r|
         h.merge(r[:id] => r[:value_derived])
@@ -463,21 +463,23 @@ module XYZ
         existing_val = ndx_attr_updates[attr_id] || ndx_existing_vals[attr_id]
         ndx_attr_updates[attr_id] = {
           :id => attr_id,
-          :value_derived => r[:input_path].merge_into(existing_val,r[:output])
+          :value_derived => r[:index_map].merge_into(existing_val,r[:output_value])
         }
-        unless r[:index_map_exists]
+        unless r[:index_map_persisted]
           attr_link_updates << {
             :id => r[:attr_link_id],
-            :index_map => AttributeLink::IndexMap.generate_from_paths(r[:input_path],r[:output_path])
+            :index_map => r[:index_map]
           }
         end
       end
       attr_updates = ndx_attr_updates.values
+      update_from_rows(attr_mh,attr_updates)
+      #TODO: need to check what really changed
 
       unless attr_link_updates.empty?
         update_from_rows(attr_mh.createMH(:attribute_link),attr_link_updates)
       end
-      update_from_rows(attr_mh,attr_updates)
+
       #TODO: need to check what really changed
       attr_updates.map{|r|Aux.hash_subset(r,[:id])}
     end

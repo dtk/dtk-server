@@ -233,7 +233,7 @@ module XYZ
 
     ###parsing functions and related functions
     def is_simple_key?(item)
-      (item.kind_of?(String) or item.kind_of?(Symbol)) and not item.to_s =~ /^__/
+      item.kind_of?(Fixnum) or ((item.kind_of?(String) or item.kind_of?(Symbol)) and not item.to_s =~ /^__/)
     end
 
     def is_special_key_type?(type_or_types,item)

@@ -443,7 +443,7 @@ module XYZ
     def self.json_generate(v)
       (v.kind_of?(Hash) or v.kind_of?(Array)) ? JSON.generate(v) : v
     end
-
+=begin
     def self.update_attribute_values_partial(attr_mh,partial_update_rows,cols,opts={})
       AttributeLink::IndexMap.resolve_input_paths!(partial_update_rows.map{|r|r[:index_map] unless r[:index_map_persisted]}.compact)
 
@@ -482,6 +482,58 @@ module XYZ
 
       #TODO: need to check what really changed
       attr_updates.map{|r|Aux.hash_subset(r,[:id])}
+    end
+=end
+
+    def self.update_attribute_values_partial(attr_mh,partial_update_rows,cols,opts={})
+      AttributeLink::IndexMap.resolve_input_paths!(partial_update_rows.map{|r|r[:index_map] unless r[:index_map_persisted]}.compact)
+
+      pp [:partial_update_rows,partial_update_rows]
+      id_list = partial_update_rows.map{|r|r[:id]}
+
+      ndx_attr_updates = Hash.new
+      select_process_and_update(attr_mh,[:id,:value_derived],id_list) do |existing_vals|
+        ndx_existing_vals = existing_vals.inject({}) do |h,r|
+          h.merge(r[:id] => r[:value_derived])
+        end
+        partial_update_rows.each do |r|
+          attr_id = r[:id]
+          existing_val = ndx_attr_updates[attr_id] || ndx_existing_vals[attr_id]
+          ndx_attr_updates[attr_id] = {
+            :id => attr_id,
+            :value_derived => r[:index_map].merge_into(existing_val,r[:output_value])
+          }
+        end
+        ndx_attr_updates.values
+      end
+      attr_updates = ndx_attr_updates.values
+
+      attr_link_updates = Array.new
+      ndx_attr_updates = Hash.new
+      attr_link_updates = partial_update_rows.map do |r|
+        unless r[:index_map_persisted]
+          {
+            :id => r[:attr_link_id],
+            :index_map => r[:index_map]
+          }
+        end
+      end.compact
+      unless attr_link_updates.empty?
+        update_from_rows(attr_mh.createMH(:attribute_link),attr_link_updates)
+      end
+
+      #TODO: need to check what really changed
+      attr_updates.map{|r|Aux.hash_subset(r,[:id])}
+    end
+
+    def self.select_process_and_update(model_handle,cols_x,id_list,opts={},&block)
+      cols = cols_x.include?(:id) ? cols_x : cols_x +[:id]
+      fs = Model::FieldSet.opt(cols,model_handle[:model_name])
+      wc = SQL.in(:id,id_list)
+      existing_rows = get_objects_just_dataset(model_handle,wc,fs).for_update().all()
+      modified_rows = block.call(existing_rows)
+      #TODO: shoudl check taht evry id in id_list appears in modified_rows
+      update_from_rows(model_handle,modified_rows)
     end
 
     def self.update_attribute_values_array_append(attr_mh,array_slice_rows,cols,opts={})

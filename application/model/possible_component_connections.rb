@@ -131,7 +131,7 @@ module XYZ
             },
             {
               :input => [:service_check_input, :mysql, :__create_component_index, :port],
-              :output => [:sap_config__l4,:port]
+              :output => [:sap_config__l4,0,:port]
             }]
          }
        }]

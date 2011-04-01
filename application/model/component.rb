@@ -250,7 +250,7 @@ module XYZ
     end
     
     def multiple_instance_ref()
-      self[:ref_num]||1
+      (self[:ref_num]||1) - 1 
     end   
 
     def containing_datacenter()

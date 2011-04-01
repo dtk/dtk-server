@@ -287,84 +287,6 @@ return unless R8::Config[:rich_testing_flag]
       pruned_changes.merge(propagated_changes)
     end
 
-=begin
-    def self.propagate_old(output_attr_id_handles,parent_id_handles=nil)
-      return Hash.new if output_attr_id_handles.empty?
-      attr_mh = output_attr_id_handles.first.createMH()
-      output_attr_ids = output_attr_id_handles.map{|idh|idh.get_id()}
-      sp_hash = {
-        :relation => :attribute,
-        :filter => [:and,[:oneof, :id, output_attr_ids]],
-        :columns => [:id,:value_asserted,:value_derived,:semantic_type,:linked_attributes]
-      }
-      attrs_to_update = Model.get_objects_from_sp_hash(attr_mh,sp_hash)
-    
-      #dont propagate to attributes with asserted values TODO: push this restriction into search pattern
-      attrs_to_update.reject!{|r|(r[:input_attribute]||{})[:value_asserted]}
-      change_info = Hash.new
-      new_val_rows = Array.new
-
-      
-      parent_map = Hash.new
-      if parent_id_handles
-        output_attr_ids.each_with_index{|id,i|parent_map[id] = parent_id_handles[i]}
-      end
-
-      attrs_to_update.each_with_index do |row,i|
-        input_attr_row = row[:input_attribute]
-        output_attr_row = row
-        propagate_proc = PropagateProcessor.new(row[:attribute_link],input_attr_row,output_attr_row)
-
-        new_value_row = propagate_proc.propagate().merge(:id => input_attr_row[:id])
-
-        #case on whether the input attribute is also upstream in attrs_to_update; if so just update these upstream
-        #references; otherwise addpend to new_val_rows and change_info
-        attr_upstream = false
-#=begin
-TODO: can deprecate now taht doing db side increemntal update
-        (i+1..attrs_to_update.size-1).each do |j|
-          if input_attr_row[:id] == attrs_to_update[j][:input_attribute][:id]
-            attr_upstream = true
-            attrs_to_update[j][:input_attribute][:value_derived] = new_value_row[:value_derived]
-          end
-        end
-#=end
-        unless attr_upstream
-          new_val_rows << new_value_row
-
-          change = {
-            :new_item => attr_mh.createIDH(:guid => input_attr_row[:id], :display_name => input_attr_row[:display_name]),
-            :change => {:old => input_attr_row[:value_derived], :new => new_value_row[:value_derived]}
-          }
-          change.merge!(:parent => parent_map[row[:id]]) if parent_map[row[:id]]
-          change_info[input_attr_row[:id]] = change
-        end
-      end
-
-      return Hash.new if new_val_rows.empty?
-      opts = {:update_only_if_change => [:value_derived],:returning_cols => [:id]}
-      changed_ids = Attribute.update_attribute_values(attr_mh,new_val_rows,:value_derived,opts)
-      #if no changes exit, otherwise recursively call propagate
-      return Hash.new if changed_ids.empty?
-
-      #TODO: using flat structure wrt to parents; so if parents pushed down use parents associated with trigger for change
-      pruned_changes = Hash.new
-      nested_parent_idhs = nil
-      nested_idhs = Array.new
-      changed_ids.each do |r|
-        id = r[:id]
-        pruned_changes[id] = change_info[id]
-        nested_idhs << attr_mh.createIDH(:id => id)
-        if parent_idh = change_info[id][:parent]
-          nested_parent_idhs ||= Array.new
-          nested_parent_idhs << parent_idh
-        end
-      end
-      
-      propagated_changes = propagate_old(nested_idhs,nested_parent_idhs)
-      pruned_changes.merge(propagated_changes)
-    end
-=end
    ########################## end: propagate changes ##################
     class IndexMap < Array
       def self.convert_if_needed(x)
@@ -413,6 +335,32 @@ TODO: can deprecate now taht doing db side increemntal update
         else
           if el.kind_of?(Hash)
             rest().take_slice(el[self.first])
+          else
+            Log.error("hash expected")
+            nil
+          end
+        end
+      end
+
+      def merge_into(source,delta)
+        return delta if self.empty?
+        el = self.first
+        if is_array_el?(el)
+          if source.kind_of?(Array) or source.nil?()
+            ret = source ? source.dup : []
+            if ret.size <= el
+              ret += (0.. el - ret.size).map{nil}
+            end
+            ret[el] = rest().merge_into(ret[el],delta)
+            ret
+          else
+            Log.error("array expected")
+            nil
+          end
+        else
+          if el.kind_of?(Hash) or source.nil?()
+            ret = source || {}
+            ret.merge(el => rest().merge_into(ret[el],delta))
           else
             Log.error("hash expected")
             nil

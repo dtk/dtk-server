@@ -444,15 +444,27 @@ module XYZ
       (v.kind_of?(Hash) or v.kind_of?(Array)) ? JSON.generate(v) : v
     end
 
-    def self.update_attribute_values_partial(attr_mh,new_val_rows,cols,opts={})
-      AttributeLink::IndexMapPath.resolve_paths!(new_val_rows.map{|r|r[:input_path]})
+    #TODO: may need to do this like ArrayAppend and ArraySlice; if new just update indexmap otherwise use index map 
+    def self.update_attribute_values_partial(attr_mh,partial_update_rows,cols,opts={})
+      AttributeLink::IndexMapPath.resolve_paths!(partial_update_rows.map{|r|r[:input_path]})
 
-      pp [:new_val_rows,new_val_rows]
+      pp [:partial_update_rows,partial_update_rows]
       
-      fs = Model::FieldSet.opt([:id, :value_derived,:value_asserted],:attribute)
-      wc = SQL.in(:id,new_val_rows.map{|r|r[:id]})
-      existing_values_ds = Model.get_objects_just_dataset_for_update(attr_mh,wc,fs)
-      raise Error.new("not implemented yet")
+      fs = Model::FieldSet.opt([:id,:value_derived],:attribute)
+      wc = SQL.in(:id,partial_update_rows.map{|r|r[:id]})
+      existing_vals = Model.get_objects_just_dataset_for_update(attr_mh,wc,fs).all()
+      ndx_existing_vals = existing_vals.inject({}) do |h,r|
+        h.merge(r[:id] => r[:value_derived])
+      end
+      attr_updates = partial_update_rows.map do |r|
+        id = r[:id]
+        {
+          :id => id,
+          :value_derived => r[:input_path].merge_into(ndx_existing_vals[id],r[:output])
+        }
+      end
+      update_from_rows(attr_mh,attr_updates)
+      #TODO: need to update the index map and need to handek case where multiple updates from same attribute
     end
 
     def self.update_attribute_values_array_append(attr_mh,array_slice_rows,cols,opts={})

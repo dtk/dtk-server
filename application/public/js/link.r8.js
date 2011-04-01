@@ -137,10 +137,12 @@ if (proxyNode == null) {
 
 	var temp = _endNode.getStyle('left');
 	var pLeft = temp.replace('px', '');
-	var cLeft = (pLeft - 39) + 'px';
+//	var cLeft = (pLeft - 39) + 'px';
+	var cLeft = (pLeft - 25) + 'px';
 	temp = _endNode.getStyle('top');
 	var pTop = temp.replace('px', '');
-	var cTop = (pTop-7) + 'px';
+	var cTop = (pTop-6) + 'px';
+//	var cTop = (parseInt(pTop)+1) + 'px';
 	proxyNode.setStyles({
 		'top': cTop,
 		'left': cLeft

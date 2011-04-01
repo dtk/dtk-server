@@ -354,10 +354,9 @@
 */
 
 /*------------Modal/Plugin Related------------*/
-
+/*
 .panel-modal ul.list {
 	width: 100%;
-/*	background-color: #EDEDED;*/
 	margin: 0;
 	padding: 0;
 }
@@ -365,6 +364,7 @@
 	list-style-type: none;
 	padding: 5px 0 5px 5px;
 	font-size: 15px;
+	cursor: pointer;
 }
 
 .panel-modal .avatar-small-bg {
@@ -380,4 +380,47 @@
 	height: 32px;
 	width: 32px;
 	margin: 4px;
+}
+*/
+/*------------App List Related------------*/
+
+ul.app-list {
+/*	width: 100%;*/
+/*	background-color: blue;*/
+/*	margin: 0 15px 0 5px;*/
+	padding: 5px 15px 5px 5px;
+}
+.app-list .app-item {
+	width: 100%;
+	list-style-type: none;
+	padding: 5px;
+	margin: 0 0 5px 0;
+	font-size: 15px;
+	cursor: pointer;
+/*	background-color: #FFFFFF;*/
+}
+.app-item .l-end-cap {
+	height: 40px;
+	width: 6px;
+	background-image: url(../images/dock/panel-item-end-caps.png);
+	background-repeat: no-repeat;
+	position: relative;
+	float: left;
+}
+.app-item .item-body {
+	height: 40px;
+	background-image: url(../images/dock/panel-item-bg.png);
+	background-repeat: repeat-x;
+	position: relative;
+	float: left;
+	width: 92%;
+}
+.app-item .r-end-cap {
+	height: 40px;
+	width: 6px;
+	background-image: url(../images/dock/panel-item-end-caps.png);
+	background-position: -6px 0px;
+	background-repeat: no-repeat;
+	position: relative;
+	float: left;
 }

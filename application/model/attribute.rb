@@ -401,7 +401,7 @@ module XYZ
 
     def self.update_attribute_values(attr_mh,new_val_rows,cols_x,opts={})
       #break up by type of row and process and aggregate
-      return ret if new_val_rows.empty?
+      return Array.new if new_val_rows.empty?
       cols = Array(cols_x)
       ndx_new_val_rows = new_val_rows.inject({}) do |h,r|
         index = Aux::demodulize(r.class.to_s)
@@ -456,15 +456,30 @@ module XYZ
       ndx_existing_vals = existing_vals.inject({}) do |h,r|
         h.merge(r[:id] => r[:value_derived])
       end
-      attr_updates = partial_update_rows.map do |r|
-        id = r[:id]
-        {
-          :id => id,
-          :value_derived => r[:input_path].merge_into(ndx_existing_vals[id],r[:output])
+      attr_link_updates = Array.new
+      ndx_attr_updates = Hash.new
+      partial_update_rows.each do |r|
+        attr_id = r[:id]
+        existing_val = ndx_attr_updates[attr_id] || ndx_existing_vals[attr_id]
+        ndx_attr_updates[attr_id] = {
+          :id => attr_id,
+          :value_derived => r[:input_path].merge_into(existing_val,r[:output])
         }
+        unless r[:index_map_exists]
+          attr_link_updates << {
+            :id => r[:attr_link_id],
+            :index_map => AttributeLink::IndexMap.generate_from_paths(r[:input_path],r[:output_path])
+          }
+        end
+      end
+      attr_updates = ndx_attr_updates.values
+
+      unless attr_link_updates.empty?
+        update_from_rows(attr_mh.createMH(:attribute_link),attr_link_updates)
       end
       update_from_rows(attr_mh,attr_updates)
-      #TODO: need to update the index map and need to handek case where multiple updates from same attribute
+      #TODO: need to check what really changed
+      attr_updates.map{|r|Aux.hash_subset(r,[:id])}
     end
 
     def self.update_attribute_values_array_append(attr_mh,array_slice_rows,cols,opts={})
@@ -475,7 +490,7 @@ module XYZ
         offset = execute_function(:append_to_array_value,attr_mh,r[:id],json_generate(r[:array_slice]))
         attr_link_update = {
           :id => r[:attr_link_id],
-          :index_map => AttributeLink::IndexMap.generate(0,r[:array_slice].size-1,offset)
+          :index_map => AttributeLink::IndexMap.generate_from_bounds(0,r[:array_slice].size-1,offset)
         }
         attr_link_updates << attr_link_update
       end

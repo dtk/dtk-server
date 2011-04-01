@@ -292,8 +292,12 @@ return unless R8::Config[:rich_testing_flag]
       def self.convert_if_needed(x)
         x.kind_of?(Array) ? create_from_array(x) : x
       end
+      
+      def self.generate_from_paths(input_path,output_path)
+        create_from_array([{:input => input_path, :output => output_path}])
+      end
 
-      def self.generate(lower_bound,upper_bound,offset)
+      def self.generate_from_bounds(lower_bound,upper_bound,offset)
         create_from_array((lower_bound..upper_bound).map{|i|{:output => [i], :input => [i+offset]}})
       end
 
@@ -311,7 +315,7 @@ return unless R8::Config[:rich_testing_flag]
         a.each do |el| 
           input = el[:input].kind_of?(IndexMapPath) ? el[:input] : IndexMapPath.create_from_array(el[:input])
           output = el[:output].kind_of?(IndexMapPath) ? el[:output] : IndexMapPath.create_from_array(el[:output])
-          ret << {:input => input, :ouput => output}
+          ret << {:input => input, :output => output}
         end
         ret
       end
@@ -322,19 +326,20 @@ return unless R8::Config[:rich_testing_flag]
       def is_singleton_array?()
         self.size == 1 and is_array_el?(self.first)
       end
-      def take_slice(el)
-        return el if self.empty?
-        return nil if el.nil?
-        if is_array_el?(self.first)
-          if el.kind_of?(Array)
-            rest().take_slice(el[self.first])
+      def take_slice(source)
+        return source if self.empty?
+        return nil if source.nil?
+        el = self.first
+        if is_array_el?(el)
+          if source.kind_of?(Array)
+            rest().take_slice(source[el])
           else
             Log.error("array expected")
             nil
           end
         else
-          if el.kind_of?(Hash)
-            rest().take_slice(el[self.first])
+          if source.kind_of?(Hash)
+            rest().take_slice(source[el.to_s])
           else
             Log.error("hash expected")
             nil
@@ -358,9 +363,9 @@ return unless R8::Config[:rich_testing_flag]
             nil
           end
         else
-          if el.kind_of?(Hash) or source.nil?()
+          if source.kind_of?(Hash) or source.nil?()
             ret = source || {}
-            ret.merge(el => rest().merge_into(ret[el],delta))
+            ret.merge(el.to_s => rest().merge_into(ret[el.to_s],delta))
           else
             Log.error("hash expected")
             nil

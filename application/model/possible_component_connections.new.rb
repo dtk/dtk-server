@@ -14,6 +14,8 @@ module XYZ
               :constraints => [],
               :events => 
               [
+               #changed from on_create to on_create_link because theer are other events relevant such as this triggering
+               #when a new component is added to a node (this is applicable for an internal link scenario I am working on)
                {:on_create_link => {
                    :instantiate_component => {
                      :alias => :mysql_db,
@@ -62,18 +64,35 @@ module XYZ
          :possible_links => 
          [
           {:mysql__server => {
+              #allowing a general section fro aliases; as well as alias to appear in sections such as an alias fro a created item
+              #alias is similar to how a local variable is used in a programming language
               :aliases => {
-                :master => "extension(:mysql__server,master)"
+                #function extension(component,extension_type) returns the eextension associated with the base component
+                #whether or not extensions are tretaed as mixins the extension fn is needed to enforce constraint that an extension
+                #must be on a component or to express instatiate (if needed) the master extension 
+                :master_ext => "extension(:mysql__server,master)"
               },
               :constraints => 
               [
-               [:eq, "parent(:mysql__slave).version", "mysql__server.version"],
-               [:instantiated, :master]
+               #using the array form for constraints that using internally; 
+               #this like the other syntactic orms may be changed without impacting semantics
+               #first constraint captures that the two mysql components being linked need to have identical version; 
+               #the function 'base' is the inverse of 'extension'
+               [:eq, "base(:mysql__slave).version", "mysql__server.version"],
+               #this captures that the master extension must be instantiaed; the other 
+               #alternative would be to omit this constraint and
+               #include an event that instantiated the mysql master extension if it did not exist
+               #if we did not include the alias def for master_ext; this constraint could be written as 
+               # [:instantiated, "extension(:mysql__server,master)"]
+               [:instantiated, :master_ext]
               ],
               :events => [],
               :attribute_mappings => 
               [
-               {"master.master_log" => "mysql__slave.master_log_ref"},
+               {"master_ext.master_log" => "mysql__slave.master_log_ref"},
+               #if extensions treated as mixins instead of components with their own attributes, then would be written by
+               # {"master__server.master_log" => "mysql__slave.master_log_ref"}
+
                {"mysql__server.sap__l4" => "mysql__slave.sap_ref__l4"}
               ]
             }

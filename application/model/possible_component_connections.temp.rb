@@ -67,7 +67,7 @@ module XYZ
               },
               :constraints => 
               [
-               [:eq, "parent(:mysql__slave).version", "mysql__server.version"],
+               [:eq, "base(:mysql__slave).version", "mysql__server.version"],
                [:instantiated, :master]
               ],
               :events => [],

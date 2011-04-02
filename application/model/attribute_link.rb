@@ -52,7 +52,7 @@ module XYZ
         conn_profile = input_attr[:component_parent][:link_defs_external]
         #TODO: phasing in by first using for creating_related links; then using for the whole process to create attribute links and check for constraint violations
         conn_info = conn_profile && conn_profile.match_output(output_cmp)
-        (conn_info||{}).merge(:input => input_attr, :output => output_attr)
+        (conn_info||{}).merge(:local_attr_info => input_attr, :remote_attr_info => output_attr)
       end
     end
 
@@ -83,15 +83,17 @@ module XYZ
       conn_info_list.each{|conn_info|create_related_link?(parent_idh,conn_info)}
     end
 
+    #TODO: might rename since this can also do things like create new components
     def self.create_related_link?(parent_idh,conn_info)
 return unless R8::Config[:rich_testing_flag]
 
-      return unless conn_info[:attribute_mappings]
+      return unless conn_info[:attribute_mappings] or conn_info[:events]
+      context = LinkDefContext.new(conn_info)
+      (conn_info[:events]|[]).each{|ev|ev.process!(context)}
       conn_info[:attribute_mappings].each do |attr_mapping|
         input_component = conn_info[:input][:component_parent]
         output_component = conn_info[:output][:component_parent]
-        attr_mapping.reset!(input_component,output_component)
-        attr_mapping.create_new_components!()
+        attr_mapping.set_context!(input_component,output_component)
         link = attr_mapping.ret_link()
         create_attr_links(parent_idh,[link])
       end

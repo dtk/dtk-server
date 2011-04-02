@@ -243,7 +243,7 @@ module XYZ
     end
 
     def connectivity_profile_external()
-      ConnectivityProfile.find_external(self[:component_type],self[:most_specific_type])
+      ConnectivityProfile.find_external(self[:component_type])
     end
     def connectivity_profile_internal()
       ConnectivityProfile.find_internal(self[:component_type],self[:most_specific_type])

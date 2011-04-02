@@ -51,7 +51,7 @@ module XYZ
         output_cmp = output_attr[:component_parent]
         conn_profile = input_attr[:component_parent][:connectivity_profile_external]
         #TODO: phasing in by first using for creating_related links; then using for the whole process to create attribute links and check for constraint violations
-        conn_info = conn_profile && conn_profile.match_output(output_cmp[:component_type],output_cmp[:most_specific_type])
+        conn_info = conn_profile && conn_profile.match_output(output_cmp)
         (conn_info||{}).merge(:input => input_attr, :output => output_attr)
       end
     end

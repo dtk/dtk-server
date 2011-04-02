@@ -1,31 +1,30 @@
-require  File.expand_path('possible_component_connections.temp.rb', File.dirname(__FILE__))
 module XYZ
   class ConnectivityProfile < ArrayObject
-    def self.find_external(component_type)
+    #TODO: both args not needed if update the type hierarchy with leaf components 
+    def self.find_external(cmp_type_x,most_specific_type_x)
       ret = nil
-      return ret if component_type.nil?
-      link_def_array = (get_component_external_link_defs(component_type.to_sym)||{})[:link_defs]
-      link_def_array ? self.new(link_def_array) : nil
+      cmp_type = cmp_type_x && cmp_type_x.to_sym
+      most_specific_type = most_specific_type_x && most_specific_type_x.to_sym
+      rules = get_possible_component_connections()
+      ret_array = rules.map do |rule_input_cmp_type,rest|
+        component_type_match(cmp_type,most_specific_type,rule_input_cmp_type) ? rest.merge(:input_component_type => rule_input_cmp_type) : nil
+      end.compact
+      ret_array.empty? ? nil : self.new(ret_array)
     end
 
-    def match_output(component,link_type=nil)
+    def match_output(cmp_type_x,most_specific_type_x)
       ret = nil
-      cmp_type = component[:component_type] && component[:component_type].to_sym
-      most_specific_type = component[:most_specific_type] && component[:most_specific_type].to_sym
+      cmp_type = cmp_type_x && cmp_type_x.to_sym
+      most_specific_type = most_specific_type_x && most_specific_type_x.to_sym
       self.each do |one_match|
-        next if link_type and not one_match[:type].to_s == link_type.to_s
-        (one_match[:possible_links]||[]).each do |link|
-          link_cmp_type = link.keys.first
-          next unless self.class.component_type_match(cmp_type,most_specific_type,link_cmp_type)
+        (one_match[:output_components]||[]).each do |output_info|
+          rule_output_cmp_type = output_info.keys.first
+          next unless self.class.component_type_match(cmp_type,most_specific_type,rule_output_cmp_type)
           #TODO: not looking for multiple matches and just looking fro first one
-          ret = Aux::hash_subset(one_match,[:required,:type])
-          link_info = link.values.first
-          if link_info[:constraints] and not link_info[:constraints].empty?
-            Log.error("constraints not implemented yet")
-          end
-          ams = link_info[:attribute_mappings]
-          ret.merge!(ams ? link_info.merge(:attribute_mappings => ams.map{|x|AttributeMapping.parse_and_create(x)}) : link_info)
-          ret.merge!(:matching_link_type => link_cmp_type)
+          ret = Aux::hash_subset(one_match,[:input_component_type,:required,:connection_type]).merge(:output_component_type => rule_output_cmp_type)
+          info = output_info.values.first
+          ams = info[:attribute_mappings]
+          ret.merge!(ams ? info.merge(:attribute_mappings => ams.map{|x|AttributeMapping.new(x)}) : info)
           break
         end
         break if ret
@@ -85,8 +84,8 @@ module XYZ
       type_class = ComponentType.ret_class(rule_cmp_type)
       type_class and type_class.include?(most_specific_type)
     end
-    def self.get_component_external_link_defs(component_type)
-      XYZ::ComponentExternalLinkDefs[component_type]
+    def self.get_possible_component_connections()
+      @possible_connections ||= XYZ::PossibleComponentConnections #TODO: stub
     end
 
     def self.get_possible_intra_component_connections()
@@ -116,19 +115,6 @@ module XYZ
   end
 
   class AttributeMapping < HashObject
-    def self.parse_and_create(out_in_hash)
-      hash = {
-        :input => out_in_hash.values.first.split(".").map{|x|parse_el(x)},
-        :output => out_in_hash.keys.first.split(".").map{|x|parse_el(x)}
-      }
-      self.new(hash)
-    end
-   private
-    def self.parse_el(el)
-      el =~ /^[0-9]+$/ ? el.to_i : el.to_sym 
-    end
-
-   public
     def reset!(input_component,output_component)
       self[:processed_paths] = {
         :input => Aux::deep_copy(self[:input]),

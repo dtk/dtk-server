@@ -14,10 +14,10 @@ module XYZ
               :constraints => [],
               :events => 
               [
-               {:on_create => {
+               {:on_create_link => {
                    :instantiate_component => {
                      :alias => :mysql_db,
-                     :component => "database_of(template_of(:mysql__server))",
+                     :component => "database_of(template(:mysql__server))",
                      :node => :remote
                    }
                  }
@@ -33,10 +33,10 @@ module XYZ
               :constraints => [],
               :events => 
               [
-               {:on_create => {
+               {:on_create_link => {
                    :instantiate_component => {
                      :alias => :postgresql_db,
-                     :component => "database_of(template_of(:postgresql__server))",
+                     :component => "database_of(template(:postgresql__server))",
                      :node => :remote
                    }
                  }
@@ -45,6 +45,36 @@ module XYZ
               [
                {"postgresql__server.sap__l4" => "java_webapp.sap_ref__l4"},
                {"java_webapp.db_config" => "postgresql_db.db_params"}
+              ]
+            }
+          }
+        ]
+       }]
+    },
+    :mysql__slave => {
+      :attributes => [],
+      :link_defs => 
+      [
+       {
+         :type => :mysql__server,
+         :required => true, 
+
+         :possible_links => 
+         [
+          {:mysql__server => {
+              :aliases => {
+                :master => "extension(:mysql__server,master)"
+              },
+              :constraints => 
+              [
+               [:eq, "parent(:mysql__slave).version", "mysql__server.version"],
+               [:instantiated, :master]
+              ],
+              :events => [],
+              :attribute_mappings => 
+              [
+               {"master.master_log" => "mysql__slave.master_log_ref"},
+               {"mysql__server.sap__l4" => "mysql__slave.sap_ref__l4"}
               ]
             }
           }

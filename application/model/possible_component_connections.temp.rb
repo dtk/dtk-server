@@ -14,24 +14,17 @@ module XYZ
               :constraints => [],
               :events => 
               [
-               {
-                 :type => :create_component,
-#seems like the event is in terms of what action is to be taken, not what has been taken?
-    #for instance, event definition is on creation of link, and action is creating db component
-#being a component def, seems redundant to call it create_component if in terms of event not action
-#                 :type => :on_create,
-#is there a scenario where the parent wouldnt be that of the of the link def?
-                 :parent => {:node_of => :mysql__server},
-#is it necessary to say to create a database of mysql__server on link of type mysql__server?
-                 :component => {:database_of => :mysql__server},
-#what is alias used for?
-                 :alias => :mysql_db
-               }
-              ],
+               {:on_create => {
+                   :instantiate_component => {
+                     :alias => :mysql_db,
+                     :component => "database_of(template_of(:mysql__server))",
+                     :node => :remote
+                   }
+                 }
+               }],
               :attribute_mappings => 
               [
                {"mysql__server.sap__l4" => "java_webapp.sap_ref__l4"},
-#db_params seems a bit vague/generic as a name, assuming that is db user/pass?
                {"java_webapp.db_config" => "mysql_db.db_params"}
               ]
             }
@@ -40,13 +33,14 @@ module XYZ
               :constraints => [],
               :events => 
               [
-               {
-                 :type => :create_component,
-                 :parent => {:node_of => :postgresql__server},
-                 :component => {:database_of => :postgresql__server},
-                 :alias => :postgresql_db
-               }
-              ],
+               {:on_create => {
+                   :instantiate_component => {
+                     :alias => :postgresql_db,
+                     :component => "database_of(template_of(:postgresql__server))",
+                     :node => :remote
+                   }
+                 }
+               }],
               :attribute_mappings => 
               [
                {"postgresql__server.sap__l4" => "java_webapp.sap_ref__l4"},

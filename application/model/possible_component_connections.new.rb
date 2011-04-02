@@ -64,7 +64,7 @@ module XYZ
          :possible_links => 
          [
           {:mysql__server => {
-              #allowing a general section fro aliases; as well as alias to appear in sections such as an alias fro a created item
+              #allowing a general section for aliases; as well as alias to appear in sections such as an alias for a created item
               #alias is similar to how a local variable is used in a programming language
               :aliases => {
                 #function extension(component,extension_type) returns the eextension associated with the base component
@@ -75,11 +75,12 @@ module XYZ
               :constraints => 
               [
                #using the array form for constraints that using internally; 
-               #this like the other syntactic orms may be changed without impacting semantics
+               #this like the other syntactic forms may be changed without impacting semantics
                #first constraint captures that the two mysql components being linked need to have identical version; 
                #the function 'base' is the inverse of 'extension'
                [:eq, "base(:mysql__slave).version", "mysql__server.version"],
-               #this captures that the master extension must be instantiaed; the other 
+
+               #this captures that the master extension must be instantitaed; the other 
                #alternative would be to omit this constraint and
                #include an event that instantiated the mysql master extension if it did not exist
                #if we did not include the alias def for master_ext; this constraint could be written as 

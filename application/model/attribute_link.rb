@@ -49,7 +49,7 @@ module XYZ
         input_attr = attr_info[input_id]
         output_attr = attr_info[row[:output_id]]
         output_cmp = output_attr[:component_parent]
-        conn_profile = input_attr[:component_parent][:connectivity_profile_external]
+        conn_profile = input_attr[:component_parent][:link_defs_external]
         #TODO: phasing in by first using for creating_related links; then using for the whole process to create attribute links and check for constraint violations
         conn_info = conn_profile && conn_profile.match_output(output_cmp)
         (conn_info||{}).merge(:input => input_attr, :output => output_attr)

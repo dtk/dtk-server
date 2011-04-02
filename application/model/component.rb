@@ -35,7 +35,7 @@ module XYZ
         column :view_def_ref, :varchar
 
         #TODO: for efficiency materialize and if so have two variants of :component_parent for attribute; one for input, which brings in :connectivity_profile and other for output which deos not
-        virtual_column :connectivity_profile_external, :type => :json, :local_dependencies => [:component_type,:specific_type,:basic_type]
+        virtual_column :link_defs_external, :type => :json, :local_dependencies => [:component_type,:specific_type,:basic_type]
         virtual_column :connectivity_profile_internal, :type => :json, :local_dependencies => [:component_type,:specific_type,:basic_type]
         virtual_column :most_specific_type, :type => :varchar, :local_dependencies => [:specific_type,:basic_type]
 
@@ -242,11 +242,11 @@ module XYZ
       self[:specific_type]||self[:basic_type]
     end
 
-    def connectivity_profile_external()
-      ConnectivityProfile.find_external(self[:component_type])
+    def link_defs_external()
+      LinkDefsExternal.find(self[:component_type])
     end
     def connectivity_profile_internal()
-      ConnectivityProfile.find_internal(self[:component_type],self[:most_specific_type])
+      LinkDefsInternal.find(self[:component_type],self[:most_specific_type])
     end
     
     def multiple_instance_ref()

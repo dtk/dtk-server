@@ -1,11 +1,25 @@
 require  File.expand_path('possible_component_connections.temp.rb', File.dirname(__FILE__))
 module XYZ
   class ConnectivityProfile < ArrayObject
-    def self.find_external(component_type)
+   private
+    def self.component_type_match(cmp_type,most_specific_type,rule_cmp_type)
+      return true if (cmp_type == rule_cmp_type or most_specific_type == rule_cmp_type)
+      type_class = ComponentType.ret_class(rule_cmp_type)
+      type_class and type_class.include?(most_specific_type)
+    end
+  end
+
+  class LinkDefsExternal < ConnectivityProfile 
+    def initialize(link_def_array,local_type)
+      super(link_def_array)
+      @local_type = local_type
+    end
+
+    def self.find(component_type)
       ret = nil
       return ret if component_type.nil?
       link_def_array = (get_component_external_link_defs(component_type.to_sym)||{})[:link_defs]
-      link_def_array ? self.new(link_def_array) : nil
+      link_def_array ? self.new(link_def_array,component_type.to_sym) : nil
     end
 
     def match_output(component,link_type=nil)
@@ -25,16 +39,22 @@ module XYZ
           end
           ams = link_info[:attribute_mappings]
           ret.merge!(ams ? link_info.merge(:attribute_mappings => ams.map{|x|AttributeMapping.parse_and_create(x)}) : link_info)
-          ret.merge!(:matching_link_type => link_cmp_type)
+          ret.merge!(:local_type => @local_type, :remote_type => link_cmp_type)
           break
         end
         break if ret
       end
       ret
     end
-
+   private
+    def self.get_component_external_link_defs(component_type)
+      XYZ::ComponentExternalLinkDefs[component_type]
+    end
+  end
+  
+  class LinkDefsInternal < ConnectivityProfile
     #may collapse these with find external functions
-    def self.find_internal(cmp_type_x,most_specific_type_x)
+    def self.find(cmp_type_x,most_specific_type_x)
       ret = nil
       cmp_type = cmp_type_x && cmp_type_x.to_sym
       most_specific_type = most_specific_type_x && most_specific_type_x.to_sym
@@ -79,15 +99,6 @@ module XYZ
       ret
     end
 
-
-    def self.component_type_match(cmp_type,most_specific_type,rule_cmp_type)
-      return true if (cmp_type == rule_cmp_type or most_specific_type == rule_cmp_type)
-      type_class = ComponentType.ret_class(rule_cmp_type)
-      type_class and type_class.include?(most_specific_type)
-    end
-    def self.get_component_external_link_defs(component_type)
-      XYZ::ComponentExternalLinkDefs[component_type]
-    end
 
     def self.get_possible_intra_component_connections()
       return @possible_intra_connections if @possible_intra_connections #TODO: stub

@@ -84,6 +84,7 @@ module XYZ
     end
 
     #TODO: might rename since this can also do things like create new components
+    #TODO: can better bulk up operations
     def self.create_related_link?(parent_idh,conn_info)
 return unless R8::Config[:rich_testing_flag]
 
@@ -91,10 +92,7 @@ return unless R8::Config[:rich_testing_flag]
       context = LinkDefContext.new(conn_info)
       (conn_info[:events]|[]).each{|ev|ev.process!(context)}
       conn_info[:attribute_mappings].each do |attr_mapping|
-        input_component = conn_info[:input][:component_parent]
-        output_component = conn_info[:output][:component_parent]
-        attr_mapping.set_context!(input_component,output_component)
-        link = attr_mapping.ret_link()
+        link = attr_mapping.ret_link(context)
         create_attr_links(parent_idh,[link])
       end
     end

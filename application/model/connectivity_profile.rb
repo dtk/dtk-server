@@ -43,7 +43,7 @@ module XYZ
             ret.merge!(:attribute_mappings => ams.map{|x|AttributeMapping.parse_and_create(x)})
           end
           if evs = link_info[:events]
-            ret.merge!(:events => evs.map{|x|LinkDefEvent.parse_and_create(x)})
+            ret.merge!(:events => evs.map{|x|LinkDefEvent.parse_and_create(x,link)})
           end
           break
         end
@@ -173,11 +173,11 @@ module XYZ
   end
 
   class LinkDefEvent < HashObject
-    def self.parse_and_create(hash)
+    def self.parse_and_create(hash,link)
       if hash.keys.first.to_sym == :on_create_link 
         rhs = hash.values.first
-        if rhs.keys.first.to_sym == :instantiate_component
-          LinkDefEventCreateComponent.new(rhs.values.first)
+        if rhs.keys.first.to_sym == :extend_component
+          LinkDefEventCreateComponentEC.new(rhs.values.first,link)
         else
           raise Error.new("unexpected link definition right hand side type #{rhs.keys.first}")
         end
@@ -192,17 +192,13 @@ module XYZ
   end
 
   class LinkDefEventCreateComponent < LinkDefEvent
-    def initialize(hash)
-      validate_top_level(hash)
-      super(hash.merge(:component => parse_component_string(hash[:component])))
-    end
-
     def process!(context)
       #find related component
       component = context.find_component(self[:component][:base])
       raise Error.new("cannot find component with ref #{self[:component][:base]} in context") unless component
-      related_component = component.get_related_library_component(self[:component][:relation_name])
-      raise Error.log("cannot find related component that is related to #{component[:display_name]||"a component"} using #{relation_name}") unless related_component
+      relation_name = self[:component][:relation_name]
+      related_component = component.get_related_library_component(relation_name)
+      raise Error.new("cannot find related component that is related to #{component[:display_name]||"a component"} using #{relation_name}") unless related_component
 
       #find node to clone it into
       node = (self[:node] == :local) ? context.local_node : context.remote_node
@@ -220,15 +216,27 @@ module XYZ
 
    private
     def validate_top_level(hash)
-      raise Error.new("not set whether node is local or remote") unless (hash[:node] == :local or hash[:node] == :remote)
-      raise Error.new("no component is given") unless hash[:component]
+     raise Error.new("node is set incorrectly") if hash[:node] and not [:local,:remote].include?(hash[:node])
     end
+  end
 
-    def parse_component_string(str)
-      #example form "database_of(template(:postgresql__server))"
-      relation_name, base =  (str =~ /(^.+)[(]template[(]:(.+)[)][)]$/; [$1,$2])
-      raise Error.new("component string of form (#{str}) not treated") unless (relation_name and base)
-      {:relation_name => relation_name.to_sym, :base => base.to_sym}
+  class LinkDefEventCreateComponentEC < LinkDefEventCreateComponent
+    def initialize(hash,link)
+      validate_top_level(hash)
+      new_hash = {
+        :node => hash[:node] || :remote,
+        :component => {
+          :relation_name => hash[:extension_type],
+          :base => link.keys.first
+        }
+      }
+      new_hash.merge!(:alias => hash[:alias]) if hash.has_key?(:alias)
+      super(new_hash)
+    end
+   private
+    def validate_top_level(hash)
+      super
+      raise Error.new("no extension_type is given") unless hash[:extension_type]
     end
   end
 

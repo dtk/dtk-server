@@ -15,10 +15,9 @@ module XYZ
               :events => 
               [
                {:on_create_link => {
-                   :instantiate_component => {
+                   :extend_component => {
                      :alias => :mysql_db,
-                     :component => "database_of(template(:mysql__server))",
-                     :node => :remote
+                     :extension_type => :database
                    }
                  }
                }],
@@ -34,10 +33,9 @@ module XYZ
               :events => 
               [
                {:on_create_link => {
-                   :instantiate_component => {
+                   :extend_component => {
                      :alias => :postgresql_db,
-                     :component => "database_of(template(:postgresql__server))",
-                     :node => :remote
+                     :extension_type => :database
                    }
                  }
                }],

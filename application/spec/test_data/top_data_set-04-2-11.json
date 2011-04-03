@@ -451,13 +451,13 @@
         }
       },
       "component_relation": {
-        "postgresql__server__database_of": {
-	   "relation_name": "database_of",
+        "postgresql__server__database": {
+	   "relation_name": "database",
            "*source_component_id": "/library/test/component/postgresql__server", 
            "*target_component_id": "/library/test/component/postgresql__db"
         },
-        "mysql__server__database_of": {
-	   "relation_name": "database_of",
+        "mysql__server__database": {
+	   "relation_name": "database",
            "*source_component_id": "/library/test/component/mysql__server", 
            "*target_component_id": "/library/test/component/mysql__db"
         }	

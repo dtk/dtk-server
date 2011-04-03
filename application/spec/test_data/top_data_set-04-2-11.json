@@ -754,6 +754,19 @@
                       "mysql_db_server"
                     ]
                   }
+                },
+                "attribute_constraint_2": {
+                  "type": "attribute",
+                  "display_name": "attribute_constraint",
+                  "description": "Not connecting to Postgres Server",
+                  "severity": "error",
+                  "search_pattern": {
+                    ":filter": [
+                      ":eq",
+                      ":specific_type",
+                      "postgres_db_server"
+                    ]
+                  }
                 }
               },
               "is_port": true,

@@ -289,7 +289,7 @@ module XYZ
       else
         raise Error.new("Not implemented yet")
       end
-      [attr,AttributeLink::IndexMapPath.create_from_array(index_map_path)]
+      [attr,index_map_path && AttributeLink::IndexMapPath.create_from_array(index_map_path)]
     end
 
     ###parsing functions and related functions

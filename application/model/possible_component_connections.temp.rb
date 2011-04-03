@@ -23,7 +23,7 @@ module XYZ
                }],
               :attribute_mappings => 
               [
-               {"mysql__server.sap__l4" => "java_webapp.sap_ref__l4"},
+            #   {"mysql__server.sap__l4" => "java_webapp.sap_ref__l4"},
                {"java_webapp.db_config" => "mysql_db.db_params"}
               ]
             }
@@ -41,7 +41,7 @@ module XYZ
                }],
               :attribute_mappings => 
               [
-               {"postgresql__server.sap__l4" => "java_webapp.sap_ref__l4"},
+           #    {"postgresql__server.sap__l4" => "java_webapp.sap_ref__l4"},
                {"java_webapp.db_config" => "postgresql_db.db_params"}
               ]
             }

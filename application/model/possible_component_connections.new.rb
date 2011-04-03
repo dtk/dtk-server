@@ -92,9 +92,6 @@ module XYZ
               :attribute_mappings => 
               [
                {"mysql__server.master_log" => "mysql__slave.master_log_ref"},
-               #if extensions treated as mixins instead of components with their own attributes, then would be written by
-               # {"master__server.master_log" => "mysql__slave.master_log_ref"}
-
                {"mysql__server.sap__l4" => "mysql__slave.sap_ref__l4"}
               ]
             }

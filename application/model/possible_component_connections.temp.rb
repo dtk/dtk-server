@@ -54,25 +54,24 @@ module XYZ
       :link_defs => 
       [
        {
-         :type => :mysql__server,
+         :type => :master_connection, 
          :required => true, 
 
          :possible_links => 
          [
           {:mysql__server => {
-              :aliases => {
-                :master => "extension(:mysql__server,master)"
+              :aliases => { #no aliases used in thsi example now
               },
               :constraints => 
               [
-               [:eq, "base(:mysql__slave).version", "mysql__server.version"],
-               [:instantiated, :master]
+               [:eq, "mysql__slave.version", "mysql__server.version"],
+               [:component_extended, :master]
               ],
               :events => [],
               :attribute_mappings => 
               [
-               {"master.master_log" => "mysql__slave.master_log_ref"},
-               {"mysql__server.sap__l4" => "mysql__slave.sap_ref__l4"}
+               {"mysql__server.master_log" => "mysql__slave.master_log_ref"},
+             #  {"mysql__server.sap__l4" => "mysql__slave.sap_ref__l4"}
               ]
             }
           }

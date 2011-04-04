@@ -16,7 +16,7 @@ module XYZ
       clone_source_object = source_id_handle.create_object()
        ##constraints
       if clone_source_object.class == Component and target_id_handle[:model_name] == :node
-        constraints = clone_source_object.get_constraints()
+        constraints = clone_source_object.get_constraints!(:update_object => true)
         if constraints
           target = {"target_node_id_handle" => target_id_handle}
           opts = {:raise_error_when_error_violation => true}
@@ -74,8 +74,12 @@ module XYZ
     def clone_post_copy_hook(clone_copy_output,opts={})
     end
 
-    # to be overwritten
     def get_constraints()
+      get_constraints!()
+    end
+    # to be overwritten
+    #opts can be {:update_object => true} to update object
+    def get_constraints!(opts={})
       nil
     end
 

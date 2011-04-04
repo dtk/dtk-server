@@ -308,7 +308,8 @@ module XYZ
     #######################
     ######### Model apis
 
-    def get_constraints()
+    def get_constraints!(opts={})
+      Log.error("opts not implemented yet") unless opts.empty?
       dependency_list = get_objects_col_from_sp_hash({:columns => [:dependencies]},:dependencies)
       Constraints.new(:or,dependency_list.map{|dep|Constraint.create(dep)})
     end

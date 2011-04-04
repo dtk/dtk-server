@@ -29,7 +29,6 @@ module XYZ
         virtual_column :multiple_instance_ref, :type => :integer ,:local_dependencies => [:ref_num]
 
         #used when this component is an extension
-        virtual_column :extension_info, :type => :json, :local_dependencies => [:extended_base_id,:extension_type]
         foreign_key :extended_base_id, :component, FK_SET_NULL_OPT
         column :extension_type, :varchar, :size => 30
 
@@ -259,11 +258,6 @@ module XYZ
       (self[:ref_num]||1) - 1 
     end   
 
-    def extension_info()
-      return nil unless self[:extended_base_id]
-      Aux.hash_subset(self,[:extended_base_id,:extension_type])
-    end
-
     def containing_datacenter()
       (self[:datacenter_direct]||{})[:display_name]||
         (self[:datacenter_node]||{})[:display_name]||
@@ -382,14 +376,16 @@ module XYZ
     end
    public
 
-    def get_constraints()
+    def get_constraints!(opts={})
       #TODO: may see if precalculating more is more efficient
-      sp_hash = {:cols => [:dependencies,:only_one_per_node,:component_type, :extension_info]}
-      rows = get_objects_from_sp_hash(sp_hash)
-      constraints = rows.map{|r|Constraint.create(r[:dependencies]) if r[:dependencies]}.compact
+      cmp_cols = [:only_one_per_node,:component_type,:extended_base_id]
+      rows = get_objects_from_sp_hash(:cols => [:dependencies] + cmp_cols)
       cmp_info = rows.first #just picking first since component info same for all rows
+      cmp_cols.each{|col|self[col] = cmp_info[col]} if opts[:update_object]
+
+      constraints = rows.map{|r|Constraint.create(r[:dependencies]) if r[:dependencies]}.compact
       constraints << Constraint::Macro.only_one_per_node(cmp_info[:component_type]) if cmp_info[:only_one_per_node]
-      constraints << Constraint::Macro.base_for_extension(cmp_info[:extension_info]) if cmp_info[:extension_info]
+      constraints << Constraint::Macro.base_for_extension(cmp_info[:extended_base_id]) if cmp_info[:extended_base_id]
       return Constraints.new() if constraints.empty?
       Constraints.new(:and,constraints)
     end

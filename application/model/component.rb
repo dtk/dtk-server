@@ -27,6 +27,11 @@ module XYZ
         #refernce used when multiple isnatnces of same component type 
         #TODO: make sure that this is preserved under clone; case to watch out fro is when cloning for example more dbs in something with dbs
         virtual_column :multiple_instance_ref, :type => :integer ,:local_dependencies => [:ref_num]
+
+        #used when this component is an extension
+        foreign_key :extended_base_id, :component, FK_SET_NULL_OPT
+        column :extension_type, :varchar, :size => 30
+
         column :version, :varchar, :size => 25 # version of underlying component (not chef recipe .... version)
         column :uri, :varchar
         column :ui, :json
@@ -310,8 +315,9 @@ module XYZ
       Model.update_from_rows(model_handle,[update_hash],:partial_value=>true)
     end
 
-    #this is an instance and it finds alibrary component
-    def get_related_library_component(relation_name,cols=[:id,:display_name])
+    #this is an instance and it finds a library component
+    #TODO: extend with multiple isntance id
+    def get_extension_in_library(extension_type,cols=[:id,:display_name],multiple_instance_id=nil)
       base_sp_hash = {
         :model_name => :component,
         :filter => [:eq, :id, self[:ancestor_id]],
@@ -319,19 +325,13 @@ module XYZ
       }
       join_array = 
         [{
-           :model_name => :component_relation,
-           :join_type => :inner,
-           :filter => [:eq, :relation_name, relation_name.to_s],
-           :join_cond => {:source_component_id => :component__id},
-           :cols => [:source_component_id,:target_component_id]
-         },
-         {
            :model_name => :component,
            :alias => :target_component,
            :join_type => :inner,
+           :filter => [:eq, :extension_type, extension_type.to_s],
            :convert => true,
-           :join_cond => {:id => :component_relation__target_component_id},
-           :cols => cols
+           :join_cond => {:extended_base_id => :component__id},
+           :cols => Aux.array_add?(cols,[:extended_base_id])
          }
         ]
       rows = Model.get_objects_from_join_array(model_handle,base_sp_hash,join_array)

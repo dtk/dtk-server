@@ -177,7 +177,7 @@ module XYZ
       if hash.keys.first.to_sym == :on_create_link 
         rhs = hash.values.first
         if rhs.keys.first.to_sym == :extend_component
-          LinkDefEventCreateComponentEC.new(rhs.values.first,link)
+          LinkDefEventExtendComponent.new(rhs.values.first,link)
         else
           raise Error.new("unexpected link definition right hand side type #{rhs.keys.first}")
         end
@@ -191,25 +191,34 @@ module XYZ
     end
   end
 
-  class LinkDefEventCreateComponent < LinkDefEvent
+  class LinkDefEventExtendComponent < LinkDefEvent
+    def initialize(hash,link)
+      validate_top_level(hash)
+      new_hash = {
+        :node => hash[:node] || :remote,
+        :extension_type => hash[:extension_type],
+        :base_component => link.keys.first
+      }
+      new_hash.merge!(:alias => hash[:alias]) if hash.has_key?(:alias)
+      super(new_hash)
+    end
+
     def process!(context)
-      #find related component
-      component = context.find_component(self[:component][:base])
-      raise Error.new("cannot find component with ref #{self[:component][:base]} in context") unless component
-      relation_name = self[:component][:relation_name]
-      related_component = component.get_related_library_component(relation_name)
-      raise Error.new("cannot find related component that is related to #{component[:display_name]||"a component"} using #{relation_name}") unless related_component
+      base_component = context.find_component(self[:base_component])
+      raise Error.new("cannot find component with ref #{self[:base_component]} in context") unless base_component
+      component_extension = base_component.get_extension_in_library(self[:extension_type])
+      raise Error.new("cannot find library extension of type #{self[:extension_type]} to #{self[:base_component]} in library") unless component_extension
 
       #find node to clone it into
       node = (self[:node] == :local) ? context.local_node : context.remote_node
       raise Error.new("cannot find node of type #{self[:node]} in context") unless node
 
       #clone compont into node
-      new_cmp_id = node.clone_into(related_component.id_handle())
+      new_cmp_id = node.clone_into(component_extension.id_handle())
 
       #if alis is given, update context to reflect this
       if self[:alias]
-        new_cmp = component.id_handle.createIDH(:model_name => :component, :id => new_cmp_id).create_object()
+        new_cmp = base_component.id_handle.createIDH(:model_name => :component, :id => new_cmp_id).create_object()
         context.add_component!(self[:alias],new_cmp)
       end
     end
@@ -217,25 +226,6 @@ module XYZ
    private
     def validate_top_level(hash)
      raise Error.new("node is set incorrectly") if hash[:node] and not [:local,:remote].include?(hash[:node])
-    end
-  end
-
-  class LinkDefEventCreateComponentEC < LinkDefEventCreateComponent
-    def initialize(hash,link)
-      validate_top_level(hash)
-      new_hash = {
-        :node => hash[:node] || :remote,
-        :component => {
-          :relation_name => hash[:extension_type],
-          :base => link.keys.first
-        }
-      }
-      new_hash.merge!(:alias => hash[:alias]) if hash.has_key?(:alias)
-      super(new_hash)
-    end
-   private
-    def validate_top_level(hash)
-      super
       raise Error.new("no extension_type is given") unless hash[:extension_type]
     end
   end
@@ -321,172 +311,3 @@ module XYZ
   end
 end
 
-=begin
-  ####DEPRECATE all below
-  class AttributeMappingOLD < HashObject
-    def self.parse_and_create(out_in_hash)
-      hash = {
-        :input => out_in_hash.values.first.split(".").map{|x|parse_el(x)},
-        :output => out_in_hash.keys.first.split(".").map{|x|parse_el(x)}
-      }
-      self.new(hash)
-    end
-   private
-    def self.parse_el(el)
-      el =~ /^[0-9]+$/ ? el.to_i : el.to_sym 
-    end
-
-   public
-    def reset!(input_component,output_component)
-      self[:processed_paths] = {
-        :input => Aux::deep_copy(self[:input]),
-        :output => Aux::deep_copy(self[:output])
-      }
-      self[:input_component] = input_component
-      self[:output_component] = output_component
-      self[:switched] = false
-    end
-
-    def create_new_components!()
-      #TODO: for efficiency can do input and output at same time
-      [:input,:output].each{|dir|create_new_components_aux!(dir)}
-    end
-
-    def ret_link()
-      input_attr,input_path = get_attribute_with_unravel_path(:input)
-      output_attr,output_path = get_attribute_with_unravel_path(:output)
-      raise Error.new("cannot find input_id") unless input_attr
-      raise Error.new("cannot find output_id") unless output_attr
-      ret = {:input_id => input_attr[:id],:output_id => output_attr[:id]}
-      ret.merge!(:input_path => input_path) if input_path
-      ret.merge!(:output_path => output_path) if output_path
-      ret
-    end
-
-   private
-
-    #returns [attribute,unravel_path]
-    def get_attribute_with_unravel_path(dir)
-      ret_path = nil
-      ret_attr = nil
-      ret = [ret_attr,ret_path]
-      component,path = get_component_and_path(dir)
-      #TODO: hard coded for certain cases; generalize to follow path which would be done by dynmaically generating join
-      if is_simple_key?(path.first)
-        if path.size == 1
-          ret_attr = component.get_virtual_attribute(path.first.to_s,[:id],:display_name)
-        elsif is_unravel_path?(path[1..path.size-1])
-          ret_attr = component.get_virtual_attribute(path.first.to_s,[:id],:display_name)
-          ret_path = process_unravel_path(path[1..path.size-1],component)
-        else
-          raise Error.new("Not implemented yet")
-        end
-      elsif path.size == 3 and is_special_key_type?(:parent,path.first)
-        node = create_node_object(component)
-        ret_attr = node.get_virtual_component_attribute({:component_type => path[1].to_s},{:display_name => path[2].to_s},[:id])
-      elsif path.size == 2 and is_create_component_info?(path.first)
-        cmp_id = is_create_component_info?(path.first)[:id]
-        unless cmp_id
-          Log.error("cannot find the id of new object created")
-          return ret
-        end
-        node = create_node_object(component)
-        ret_attr = node.get_virtual_component_attribute({:id => cmp_id},{:display_name => path[1].to_s},[:id])
-      else
-        raise Error.new("Not implemented yet")
-      end
-      [ret_attr,AttributeLink::IndexMapPath.create_from_array(ret_path)]
-    end
-
-    def input_component()
-      self[:input_component]
-    end
-    def output_component()
-      self[:output_component]
-    end
-    def is_switched?()
-      self[:switched]
-    end
-    def switch_input_and_output!()
-      self[:switched] = true
-    end
-
-    def create_new_components_aux!(dir)
-      component,path = get_component_and_path(dir)
-      #TODO: hard wiring where we are looking for create not for example handling case where path starts with :parent
-      create_info = is_create_component_info?(path.first)
-      return unless create_info
-      relation_name = create_info[:relation_name].to_s
-      #find related component
-      related_component = component.get_related_library_component(relation_name)
-      raise Error.log("cannot find component that is related to #{component[:display_name]||"a component"} using #{relation_name}") unless related_component
-      #clone related component into node that component is conatined in
-      node = create_node_object(component)
-      new_cmp_id = node.clone_into(related_component.id_handle())
-      update_create_path_element!(path.first,new_cmp_id)
-    end
-
-    def create_node_object(component)
-      component.id_handle.createIDH(:model_name => :node, :id => component[:node_node_id]).create_object()
-    end
-
-    #returns [component,path]; dups path so it can be safely modified
-    def get_component_and_path(dir)
-      path = self[:processed_paths][dir]
-      component = nil
-      reverse = (dir == :input) ? :output_component : :input_component
-      if is_special_key_type?(reverse,path.first)
-        path.shift
-        if is_switched?() 
-          component = (dir == :input) ? input_component : output_component
-        else
-          component = (dir == :output) ? input_component : output_component
-          switch_input_and_output!()
-        end
-      else
-        if is_switched?()
-          component = (dir == :output) ? input_component : output_component
-        else
-          component = (dir == :input) ? input_component : output_component
-        end
-      end
-      [component,path]
-    end
-
-    ###parsing functions and related functions
-    def is_simple_key?(item)
-      item.kind_of?(Fixnum) or ((item.kind_of?(String) or item.kind_of?(Symbol)) and not item.to_s =~ /^__/)
-    end
-
-    def is_special_key_type?(type_or_types,item)
-      types = Array(type_or_types)
-      item.respond_to?(:to_sym) and types.map{|t|"__#{t}"}.include?(item.to_s)
-    end
-    
-    #if item signifies to create a related component, this returns tenh relation name
-    def is_create_component_info?(item)
-      (item.kind_of?(Hash) and item.keys.first.to_s == "create_component") ? item.values.first : nil
-    end
-    def update_create_path_element!(item,id)
-      item[:create].merge!(:id => id)
-    end
-
-    def process_create_component_index(item,component)
-      {:create_component_index => {:component_idh => component.id_handle()}}
-    end
-
-    def is_unravel_path?(path)
-      path.each do |el|
-        return false unless is_simple_key?(el) or is_special_key_type?(:create_component_index,el)
-      end
-      true
-    end
-
-    def process_unravel_path(path,component)
-      path.map do |el|
-        is_special_key_type?(:create_component_index,el) ? process_create_component_index(el,component) : el
-      end
-    end
-  end
-end
-=end

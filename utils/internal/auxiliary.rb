@@ -56,6 +56,11 @@ module XYZ
       end
 
      public
+      #adds to array only if not included
+      def array_add?(a,el)
+        a.include?(el) ? a : a + [el]
+      end
+
       def can_take_index?(x)
         x.kind_of?(Hash) or x.kind_of?(Array)
       end

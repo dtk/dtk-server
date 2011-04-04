@@ -280,6 +280,31 @@ module XYZ
       }
       get_children_from_sp_hash(:attribute,sp_hash).first
     end
+    
+    #TODO: may collapse with above
+    #assumed to be called only on base component; looks for virtual attributes, but also includes extended attributes
+    #multiple_instance_clause is used in case multiple extensions of same type and need to select particular one
+    def get_virtual_attribute__base_with_extensions(attribute_name,cols,field_to_match=:display_name,multiple_instance_clause=nil)
+      #TODO: may be more efficient to do in single call to db
+      ret = get_virtual_attribute(attribute_name,cols,field_to_match)
+      return ret if ret
+      base_sp_hash = {
+        :model_name => :component,
+        :filter => [:eq, :extended_base_id, id()],
+        :cols => [:id]
+      }
+      join_array = 
+        [{
+           :model_name => :attribute,
+           :convert => true,
+           :join_type => :inner,
+           :filter => [:eq, field_to_match, attribute_name],
+           :cols => Aux.array_add?(cols,field_to_match)
+         }]
+      rows = Model.get_objects_from_join_array(model_handle,base_sp_hash,join_array)
+      Log.error("get virtual attribute shoudl only match one attribute") if rows.size > 1
+      rows.first && rows.first[:attribute]
+    end
 
     def get_attributes_ports()
       opts = {:keep_ref_cols => true}
@@ -315,9 +340,10 @@ module XYZ
       Model.update_from_rows(model_handle,[update_hash],:partial_value=>true)
     end
 
-    #this is an instance and it finds a library component
-    #TODO: extend with multiple isntance id
-    def get_extension_in_library(extension_type,cols=[:id,:display_name],multiple_instance_id=nil)
+    #self is an instance and it finds a library component
+    #multiple_instance_clause is used in case multiple extensions of same type and need to select particular one
+    #TODO: extend with multiple instance id
+    def get_extension_in_library(extension_type,cols=[:id,:display_name],multiple_instance_clause=nil)
       base_sp_hash = {
         :model_name => :component,
         :filter => [:eq, :id, self[:ancestor_id]],
@@ -335,8 +361,7 @@ module XYZ
          }
         ]
       rows = Model.get_objects_from_join_array(model_handle,base_sp_hash,join_array)
-      #should be only one element
-      Log.error("component relation match should only match one component") if rows.size > 1
+      Log.error("get extension library shoudl only match one component") if rows.size > 1
       rows.first && rows.first[:target_component]
     end
 

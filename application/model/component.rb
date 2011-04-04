@@ -287,10 +287,11 @@ module XYZ
       self[:extended_base_id] ? true : false
     end
 
-    #TODO: may collapse with above
-    #assumed to be called only on base component; looks for virtual attributes, but also includes extended attributes
-    #multiple_instance_clause is used in case multiple extensions of same type and need to select particular one
-    def get_virtual_attribute__base_with_extensions(attribute_name,cols,field_to_match=:display_name,multiple_instance_clause=nil)
+    #TODO: may collapse with above or make below teh default
+
+    #looks at both directly directly conencted attributes and ones on base component that is on one of its extensions
+    #TODO: extend with logic for multiple_instance_clause
+    def get_virtual_attribute__include_mixins(attribute_name,cols,field_to_match=:display_name,multiple_instance_clause=nil)
       #TODO: may be more efficient to do in single call to db
       ret = get_virtual_attribute(attribute_name,cols,field_to_match)
       return ret if ret
@@ -305,7 +306,8 @@ module XYZ
            :convert => true,
            :join_type => :inner,
            :filter => [:eq, field_to_match, attribute_name],
-           :cols => Aux.array_add?(cols,field_to_match)
+           :join_cond => {:component_component_id => :component__id} ,
+           :cols => Aux.array_add?(cols,:component_component_id)
          }]
       rows = Model.get_objects_from_join_array(model_handle,base_sp_hash,join_array)
       Log.error("get virtual attribute shoudl only match one attribute") if rows.size > 1
@@ -348,7 +350,7 @@ module XYZ
 
     #self is an instance and it finds a library component
     #multiple_instance_clause is used in case multiple extensions of same type and need to select particular one
-    #TODO: extend with multiple instance id
+    #TODO: extend with logic for multiple_instance_clause
     def get_extension_in_library(extension_type,cols=[:id,:display_name],multiple_instance_clause=nil)
       base_sp_hash = {
         :model_name => :component,

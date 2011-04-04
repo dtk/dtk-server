@@ -271,7 +271,7 @@ module XYZ
       if is_simple_key?(path[0]) and path.size >= 2 #test that path starts with component
         component = context.find_component(path[0])
         raise Error.new("cannot find component with path ref #{full_path[0]}") unless component
-        attr = component.get_virtual_attribute(path[1].to_s,[:id],:display_name)
+        attr = component.get_virtual_attribute__include_mixins(path[1].to_s,[:id],:display_name)
         if path.size > 2 
           rest_path = path[2..path.size-1]
           if is_unravel_path?(rest_path)

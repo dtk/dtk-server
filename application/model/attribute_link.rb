@@ -90,7 +90,7 @@ return unless R8::Config[:rich_testing_flag]
 
       return unless conn_info[:attribute_mappings] or conn_info[:events]
       context = LinkDefContext.new(conn_info)
-      (conn_info[:events]|[]).each{|ev|ev.process!(context)}
+      (conn_info[:events]||[]).each{|ev|ev.process!(context)}
       conn_info[:attribute_mappings].each do |attr_mapping|
         link = attr_mapping.ret_link(context)
         create_attr_links(parent_idh,[link])

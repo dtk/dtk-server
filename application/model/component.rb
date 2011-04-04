@@ -282,6 +282,7 @@ module XYZ
     end
     
     def is_extension?()
+      Log.error("this should not be called if :extended_base_id not set") unless self.has_key?(:extended_base_id)
       self[:extended_base_id] ? true : false
     end
 
@@ -615,6 +616,11 @@ module XYZ
 
     def add_model_specific_override_attrs!(override_attrs)
       override_attrs[:display_name] = SQL::ColRef.qualified_ref
+      #handle case if this is an extension
+      if is_extension?()
+        Log.error("not handling case where source component is extension and does not yet have :target_extended_base_id set") unless self[:target_extended_base_id]
+        override_attrs[:extended_base_id] = self[:target_extended_base_id]
+      end
     end
 
     ###### Helper fns

@@ -137,7 +137,7 @@ module XYZ
             :filter => [:eq, :ancestor_id, extended_base_id]
           },
           :info_gathered => {
-            :extended_base_id => :id
+            :target_extended_base_id => :id
           }
         }
         ComponentConstraint.new(dep)
@@ -236,8 +236,8 @@ module XYZ
 
     def update_object_from_info_gathered!(object,rows)
       row = rows.first
-      return unless self[:info_gathered] and row
-      self[:info_gathered].each{|obj_key,k| object[obj_key] = row[k]}
+      return unless self[:info_gathered] and row and row[:component]
+      self[:info_gathered].each{|obj_key,k| object[obj_key] = row[:component][k]}
     end
   end
 

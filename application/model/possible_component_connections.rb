@@ -13,7 +13,7 @@ module XYZ
       #there will be a standard set of connections plus ones that are more special purpose 
       #(like db_slave_to_master) and can be user defined like 
       #NOTE: may allow these to also be at the connection_mapping level
-      :connection_type => :db_slave_to_master,
+      :connection_type => :master_connection,
 
       #:required captures whether connection to this input is required; by default may make this true, but listed here for illustration
       #this can be at this level or connection mapping level (if for example there is multiple attributes associated

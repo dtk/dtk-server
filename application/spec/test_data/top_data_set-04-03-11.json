@@ -505,11 +505,11 @@
             "specific_type": "mysql_db_server"
           },
           "attribute": {
-            "db_params": {
+            "db_params_ref": {
               "required": false,
               "dynamic": false,
               "semantic_type": "db_params",
-              "display_name": "db_params",
+              "display_name": "db_params_ref",
               "description": "Parameters for a db",
               "cannot_change": false,
               "external_ref": {
@@ -610,11 +610,11 @@
             "specific_type": "postgres_db"
           },
           "attribute": {
-            "db_params": {
+            "db_params_ref": {
               "required": false,
               "dynamic": false,
               "semantic_type": "db_params",
-              "display_name": "db_params",
+              "display_name": "db_params_ref",
               "description": "Parameters for a db",
               "cannot_change": false,
               "external_ref": {
@@ -658,22 +658,12 @@
             }
           },
           "only_one_per_node": false,
-          "ds_attributes": {
-            "component_type": "java_webapp",
-            "ui": "{\"images\": {\"tnail\":\"java-01.png\",\"display\":\"java-01.png\",\"tiny\":\"\"}}",
-            "qualified_ref": "/library/test/java_webapp",
-            "dependency": {
-              "tomcat": {
-                "required_component": "tomcat"
-              }
-            },
-            "only_one_per_node": false,
             "attribute": {
-              "db_config": {
+              "db_params": {
                 "required": true,
                 "semantic_type": "db_config",
                 "description": "DB configuration",
-                "display_name": "db_config",
+                "display_name": "db_params",
                 "is_port": true,
                 "data_type": "json",
                 "semantic_type_summary": "db_config"
@@ -719,73 +709,7 @@
                 "semantic_type_summary": "sap_ref__l4"
               }
             },
-            "ref": "java_webapp",
             "specific_type": "java_app"
-          },
-          "attribute": {
-            "sap_ref__l4": {
-              "required": true,
-              "dynamic": false,
-              "semantic_type": "sap_ref__l4",
-              "display_name": "sap_ref__l4",
-              "cannot_change": false,
-              "external_ref": {
-                "type": "attribute",
-                "path": "sap_ref__l4"
-              },
-              "dependency": {
-                "attribute_constraint": {
-                  "type": "attribute",
-                  "display_name": "attribute_constraint",
-                  "description": "Not connecting to Mysql Server",
-                  "severity": "error",
-                  "search_pattern": {
-                    ":filter": [
-                      ":eq",
-                      ":specific_type",
-                      "mysql_db_server"
-                    ]
-                  }
-                },
-                "attribute_constraint_2": {
-                  "type": "attribute",
-                  "display_name": "attribute_constraint",
-                  "description": "Not connecting to Postgres Server",
-                  "severity": "error",
-                  "search_pattern": {
-                    ":filter": [
-                      ":eq",
-                      ":specific_type",
-                      "postgres_db_server"
-                    ]
-                  }
-                }
-              },
-              "is_port": true,
-              "read_only": false,
-              "data_type": "json",
-              "semantic_type_summary": "sap_ref__l4",
-              "hidden": false
-            },
-            "db_config": {
-              "required": true,
-              "dynamic": false,
-              "semantic_type": "db_config",
-              "display_name": "db_config",
-              "cannot_change": false,
-              "external_ref": {
-                "type": "attribute",
-                "path": "db_config"
-              },
-              "is_port": true,
-              "read_only": false,
-              "data_type": "json",
-              "semantic_type_summary": "db_config",
-              "hidden": false
-            }
-          },
-          "specific_type": "java_app",
-          "ds_key": "[:user_data, \"/library/test/java_webapp\"]"
         },
         "php__php5": {
           "type": "instance",

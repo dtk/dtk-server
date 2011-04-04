@@ -11,38 +11,36 @@ module XYZ
          :possible_links => 
          [
           {:mysql__server => {
-              :constraints => [],
-              :events => 
-              [
-               {:on_create_link => {
+              :events => { 
+                :on_create_link => 
+                [{
                    :extend_component => {
                      :alias => :mysql_db,
                      :extension_type => :database
                    }
-                 }
-               }],
+                 }]
+              },
               :attribute_mappings => 
               [
             #   {"mysql__server.sap__l4" => "java_webapp.sap_ref__l4"},
-               {"java_webapp.db_config" => "mysql_db.db_params"}
+               {"java_webapp.db_params" => "mysql_db.db_params_ref"}
               ]
             }
           },
           {:postgresql__server => {
-              :constraints => [],
-              :events => 
-              [
-               {:on_create_link => {
+              :events => {
+                :on_create_link =>
+                [{
                    :extend_component => {
                      :alias => :postgresql_db,
                      :extension_type => :database
                    }
-                 }
-               }],
-              :attribute_mappings => 
+                 }]
+              },
+              :attribute_mappings =>
               [
-           #    {"postgresql__server.sap__l4" => "java_webapp.sap_ref__l4"},
-               {"java_webapp.db_config" => "postgresql_db.db_params"}
+               #   {"postgresql__server.sap__l4" => "java_webapp.sap_ref__l4"},
+               {"java_webapp.db_params" => "postgresql_db.db_params_ref"}
               ]
             }
           }
@@ -60,14 +58,11 @@ module XYZ
          :possible_links => 
          [
           {:mysql__server => {
-              :aliases => { #no aliases used in thsi example now
-              },
               :constraints => 
               [
+               [:component_extended, "master"],
                [:eq, "mysql__slave.version", "mysql__server.version"],
-               [:component_extended, :master]
               ],
-              :events => [],
               :attribute_mappings => 
               [
                {"mysql__server.master_log" => "mysql__slave.master_log_ref"},

@@ -282,7 +282,7 @@ module XYZ
     end
     
     def is_extension?()
-      return if self.kind_of?(Assembly)
+      return false if self.kind_of?(Assembly)
       Log.error("this should not be called if :extended_base_id not set") unless self.has_key?(:extended_base_id)
       self[:extended_base_id] ? true : false
     end

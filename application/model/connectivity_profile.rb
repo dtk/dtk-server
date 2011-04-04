@@ -43,7 +43,10 @@ module XYZ
             ret.merge!(:attribute_mappings => ams.map{|x|AttributeMapping.parse_and_create(x)})
           end
           if evs = link_info[:events]
-            ret.merge!(:events => evs.map{|x|LinkDefEvent.parse_and_create(x,link)})
+            events = evs.map do |trigger,trigger_evs|
+              trigger_evs.map{|rhs|LinkDefEvent.parse_and_create(trigger,rhs,link)}
+            end.flatten
+            ret.merge!(:events => events)
           end
           break
         end
@@ -173,9 +176,8 @@ module XYZ
   end
 
   class LinkDefEvent < HashObject
-    def self.parse_and_create(hash,link)
-      if hash.keys.first.to_sym == :on_create_link 
-        rhs = hash.values.first
+    def self.parse_and_create(trigger,rhs,link)
+      if trigger == :on_create_link 
         if rhs.keys.first.to_sym == :extend_component
           LinkDefEventExtendComponent.new(rhs.values.first,link)
         else

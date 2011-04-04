@@ -213,8 +213,10 @@ module XYZ
       node = (self[:node] == :local) ? context.local_node : context.remote_node
       raise Error.new("cannot find node of type #{self[:node]} in context") unless node
 
-      #clone compont into node
-      new_cmp_id = node.clone_into(component_extension.id_handle())
+      #clone component into node
+      override_attrs = {:extended_base_id => base_component[:id]}
+      #TODO: may put in flags to tell clone operation not to do any constraint checking
+      new_cmp_id = node.clone_into(component_extension.id_handle(),override_attrs)
 
       #if alis is given, update context to reflect this
       if self[:alias]

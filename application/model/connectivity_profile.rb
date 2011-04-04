@@ -218,7 +218,7 @@ module XYZ
       #TODO: may put in flags to tell clone operation not to do any constraint checking
       new_cmp_id = node.clone_into(component_extension.id_handle(),override_attrs)
 
-      #if alis is given, update context to reflect this
+      #if alias is given, update context to reflect this
       if self[:alias]
         new_cmp = base_component.id_handle.createIDH(:model_name => :component, :id => new_cmp_id).create_object()
         context.add_component!(self[:alias],new_cmp)

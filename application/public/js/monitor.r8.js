@@ -1147,7 +1147,16 @@ console.log('not a valid link.., mis-matched types...');
 						_viewSpace.addLinkToItems(_tempLinkDef);
 						_viewSpace.addLink(_tempLinkDef);
 */
-						_viewSpace.mergePorts('port-'+mergePortObjId,'port-'+targetPortObjId);
+
+						var nodeTest = R8.Utils.Y.one('#'+mergePortObjId);
+//TODO: revisit when cleaning up links,merge scenarios, monitoring and LB type scenarios cause
+//error when new link is created and no merge needs to happen
+//DEBUG
+//console.log('TESTING TESTING.....');
+//console.log(nodeTest);
+						if(nodeTest != null) {
+							_viewSpace.mergePorts('port-' + mergePortObjId, 'port-' + targetPortObjId);
+						}
 					}
 				}
 			},

@@ -552,138 +552,11 @@ haveNewPorts = true;
 				}
 				//END Rendering East Ports
 
-//DEBUG
 				this.registerPorts();
-return;
-				var count = 0;
-				var prevPortWidth = 0;
-				var prevPortHeight = 0;
-				var totalPortWidth = 0;
-				var totalPortHeight = 0;
-				var portObjs = {};
-
-				//------------------------------------
-				//Render West Ports
-				//------------------------------------
-				var numPorts = R8.Workspace.components[compID].availPorts.west.length;
-				for(var port in R8.Workspace.components[compID].availPorts.west) {
-					var portNodeID = compID + '-west-' + R8.Workspace.components[compID].availPorts.west[port].id;
-					var portClass = R8.Workspace.components[compID].availPorts.west[port].type + '-port';
-					portObjs[portNodeID] = {};
-					var portNode = new R8.Utils.Y.Node.create('<div>');
-					portNode.setAttribute('id',portNodeID);
-					portNode.addClass(portClass + ' available');
-					compNode.appendChild(portNode);
-					var region = portNode.get('region');
-					portNode.setStyles({'display':'none'});
-					portObjs[portNodeID].height = region.bottom - region.top;
-					portObjs[portNodeID].width = region.right - region.left;
-					portObjs[portNodeID].wOffset = Math.floor(portObjs[portNodeID].width/2);
-					portObjs[portNodeID].hOffset = Math.floor(portObjs[portNodeID].height/2);
-
-					totalPortHeight += portObjs[portNodeID].height;
-					count++;
-				}
-				var numSpacers = count-1;
-				count = 0;
-				var prevTop = 0;
-				for(var portNodeID in portObjs) {
-					var portNode = R8.Utils.Y.one('#'+portNodeID);
-					var left = -1*(portObjs[portNodeID].wOffset);
-					if (count == 0) {
-						var top = (compNodeHeight - (totalPortHeight + (numSpacers * portSpacer))) / 2;
-					} else
-						var top = (prevTop + prevPortHeight + portSpacer);
-
-					portNode.setStyles({'top':top+'px','left':left+'px','display':'block'});
-
-					totalPortHeight -= (portObjs[portNodeID].width+portSpacer);
-					prevPortWidth = portObjs[portNodeID].width;
-					prevPortHeight = portObjs[portNodeID].height;
-					prevTop = top;
-					count++;
-				}
-				//END Rendering West Ports
-
-
-				var count = 0;
-				var prevPortWidth = 0;
-				var prevPortHeight = 0;
-				var totalPortWidth = 0;
-				var totalPortHeight = 0;
-				var portObjs = {};
-
-				//------------------------------------
-				//Render East Ports
-				//------------------------------------
-				var numPorts = R8.Workspace.components[compID].availPorts.east.length;
-				for(var port in R8.Workspace.components[compID].availPorts.east) {
-					var portNodeID = compID + '-east-' + R8.Workspace.components[compID].availPorts.east[port].id;
-					var portClass = R8.Workspace.components[compID].availPorts.east[port].type + '-port';
-					portObjs[portNodeID] = {};
-					var portNode = new R8.Utils.Y.Node.create('<div>');
-					portNode.setAttribute('id',portNodeID);
-					portNode.addClass(portClass + ' available');
-					compNode.appendChild(portNode);
-					var region = portNode.get('region');
-					portNode.setStyles({'display':'none'});
-					portObjs[portNodeID].height = region.bottom - region.top;
-					portObjs[portNodeID].width = region.right - region.left;
-					portObjs[portNodeID].wOffset = Math.floor(portObjs[portNodeID].width/2);
-					portObjs[portNodeID].hOffset = Math.floor(portObjs[portNodeID].height/2);
-
-					totalPortHeight += portObjs[portNodeID].height;
-					count++;
-				}
-				var numSpacers = count-1;
-				count = 0;
-				var prevTop = 0;
-				for(var portNodeID in portObjs) {
-					var portNode = R8.Utils.Y.one('#'+portNodeID);
-					var left = compNodeWidth - portObjs[portNodeID].wOffset;
-					if (count == 0) {
-						var top = (compNodeHeight - (totalPortHeight + (numSpacers * portSpacer))) / 2;
-					} else
-						var top = (prevTop + prevPortHeight + portSpacer);
-
-					portNode.setStyles({'top':top+'px','left':left+'px','display':'block'});
-
-					totalPortHeight -= (portObjs[portNodeID].width+portSpacer);
-					prevPortWidth = portObjs[portNodeID].width;
-					prevPortHeight = portObjs[portNodeID].height;
-					prevTop = top;
-					count++;
-				}
-				//END Rendering East Ports
-
 				_portsReady = true;
 			},
 
 /*
-			loadPorts: function(ioId,responseObj) {
-				eval("R8.Ctrl.callResults[ioId]['response'] =" + responseObj.responseText);
-				var response = R8.Ctrl.callResults[ioId]['response'];
-				_ports = response['application_node_get_ports']['content'][0]['data'];
-			},
-*/
-/*
-			renderPorts3: function() {
-				if(_portDefs == null) return;
-
-				for (i in _portDefs) {
-					var portId = _portDefs[i]['id'];
-					_ports[portId] = new R8.Port(_portDefs[i],this);
-					_ports[portId].init();
-				}
-			},
-*/
-			/*
-			 * renderPorts adds one or more ports to a given component
-			 * @method renderPorts
-			 * @param {string} compID ID of the component object to lookup and render 
-			 * @param {object} compObj JSON object to render
-			 * @return {Node} Returns the node of the rendered component to be appended to workspace container
-			 */
 			setupLoadedPorts: function() {
 				if(_portDefs == null) return;
 
@@ -928,7 +801,7 @@ return;
 				}
 				//END Rendering East Ports
 			},
-
+*/
 			hidePorts: function() {
 //console.log('going to hide ports...........................');
 				for(var p in _ports) {
@@ -1011,10 +884,21 @@ return;
 //										_tempLinkId = 't-'+date.getTime() + '-' + Math.floor(Math.random()*20);
 										_tempLinkId = date.getTime() + '-' + Math.floor(Math.random()*20);
 
+//DEBUG
+//TODO: temp hack to solve issue of connecting output port on node to input port on monitoring server
+if(startPortDef.direction == "output") {
+	var tempDef = startPortDef;
+	var itemId = endPortDef.parentItemId;
+	startPortDef = endPortDef;
+	endPortDef = tempDef;
+} else {
+	var itemId = _id;
+}
 										_tempLinkObj = {
 											id: _tempLinkId,
 											port_id: startPortDef.id,
-											item_id: _id,
+//											item_id: _id,
+											item_id: itemId,
 											other_end_id: endPortDef.id,
 											style:[
 												{'strokeStyle':'#4EF7DE','lineWidth':5,'lineCap':'round'},
@@ -1082,6 +966,8 @@ return;
 												R8.Ctrl.call('attribute_link/save',params);
 											});
 
+//DEBUG
+console.log(_tempLinkObj);
 											_viewSpace.addLink(_tempLinkObj);
 
 //											R8.Canvas.renderLink(_tempLinkDef);
@@ -1166,7 +1052,11 @@ console.log('not a valid link.., mis-matched types...');
 						_viewSpace.addLinkToItems(_tempLinkDef);
 						_viewSpace.addLink(_tempLinkDef);
 */
-						_viewSpace.mergePorts('port-'+mergePortObjId,'port-'+targetPortObjId);
+						var nodeTest = R8.Utils.Y.one('#'+mergePortObjId);
+
+						if(nodeTest != null) {
+							_viewSpace.mergePorts('port-' + mergePortObjId, 'port-' + targetPortObjId);
+						}
 					}
 				}
 			},

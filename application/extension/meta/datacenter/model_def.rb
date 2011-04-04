@@ -1,4 +1,6 @@
 
+model_defs[:datacenter][:columns][:type][:length] = 100
+
 model_defs[:datacenter][:columns][:new_field_01] = {
       :type=>:text,
       :length=>30

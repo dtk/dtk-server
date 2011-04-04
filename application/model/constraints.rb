@@ -49,7 +49,7 @@ module XYZ
         
       @constraints.each do |constraint|
         next if constraint.evaluate_given_target(target)
-        severity = constraint[:severity]
+        severity = constraint[:severity] || "error"
         ret[severity] << constraint
       end
       ret

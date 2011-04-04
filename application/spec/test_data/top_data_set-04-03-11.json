@@ -681,6 +681,7 @@
                     "type": "attribute",
                     "description": "Not connecting to Mysql Server",
                     "display_name": "attribute_constraint",
+                    "severity": "error",	    
                     "search_pattern": {
                       ":filter": [
                         ":eq",

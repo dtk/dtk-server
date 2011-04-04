@@ -6,7 +6,7 @@ module XYZ
       @constraints = constraints
     end
     def evaluate_given_target(target,opts={})
-      ret = evaluate_given_target_just_eval(target)
+      ret = evaluate_given_target_just_eval(target,opts)
       return ret if ret
 
       target_parent_obj = target.values.first.get_parent_id_handle().create_object
@@ -27,10 +27,10 @@ module XYZ
       ret
     end
   private
-    def evaluate_given_target_just_eval(target)
+    def evaluate_given_target_just_eval(target,opts={})
       return true if @constraints.empty?
       @constraints.each do |constraint|
-        constraint_holds = constraint.evaluate_given_target(target)
+        constraint_holds = constraint.evaluate_given_target(target,opts)
         case @logical_op
           when :or
             return true if constraint_holds
@@ -105,9 +105,14 @@ module XYZ
         raise Error.new("unexpected dependency type")
       end
     end
-    def evaluate_given_target(target)
+    def evaluate_given_target(target,opts={})
       dataset = create_dataset(target)
-      is_empty = dataset.all.empty?
+      rows = dataset.all
+
+      #opportunistic gathering of info
+      update_object_from_info_gathered!(opts[:update_object],rows) if opts[:update_object]
+
+      is_empty = rows.empty?
       self[:negate] ? is_empty : (not is_empty)
     end
 
@@ -130,6 +135,9 @@ module XYZ
           :severity => "error",
           :search_pattern => {
             :filter => [:eq, :ancestor_id, extended_base_id]
+          },
+          :info_gathered => {
+            :extended_base_id => :id
           }
         }
         ComponentConstraint.new(dep)
@@ -148,7 +156,11 @@ module XYZ
     def search_pattern()
       self[:search_pattern]
     end
-   public    
+
+    #overrwritten
+    def update_object_from_info_gathered!(object,rows)
+      raise Error.new("not treating constraint update of object of type #{obj.class.to_s}") 
+    end
   end
 
   module ProcessVirtualComponentMixin
@@ -220,6 +232,12 @@ module XYZ
       }
       base_sp = SearchPatternSimple.new(base_sp_hash)
       SQL::DataSetSearchPattern.create_dataset_from_join_array(model_handle,base_sp,join_array)
+    end
+
+    def update_object_from_info_gathered!(object,rows)
+      row = rows.first
+      return unless self[:info_gathered] and row
+      self[:info_gathered].each{|obj_key,k| object[obj_key] = row[k]}
     end
   end
 

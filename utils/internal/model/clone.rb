@@ -19,7 +19,7 @@ module XYZ
         constraints = clone_source_object.get_constraints!(:update_object => true)
         if constraints
           target = {"target_node_id_handle" => target_id_handle}
-          opts = {:raise_error_when_error_violation => true}
+          opts = {:raise_error_when_error_violation => true, :update_object => clone_source_object}
           constraints.evaluate_given_target(target,opts)
         end
       end

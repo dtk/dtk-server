@@ -281,6 +281,10 @@ module XYZ
       get_children_from_sp_hash(:attribute,sp_hash).first
     end
     
+    def is_extension?()
+      self[:extended_base_id] ? true : false
+    end
+
     #TODO: may collapse with above
     #assumed to be called only on base component; looks for virtual attributes, but also includes extended attributes
     #multiple_instance_clause is used in case multiple extensions of same type and need to select particular one

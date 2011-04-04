@@ -11,6 +11,11 @@ module XYZ
     def is_base_component?()
       nil
     end
+
+    def self.db_rel()
+      Component.db_rel()
+    end
+
     def get_component_with_attributes_unraveled(attr_filters={})
       attr_vc = "#{assembly_type()}_assembly_attributes".to_sym
       sp_hash = {:columns => [:id,:display_name,:component_type,:basic_type,attr_vc]}

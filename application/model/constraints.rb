@@ -123,6 +123,17 @@ module XYZ
         }
         ComponentConstraint.new(dep)
       end
+      def self.base_for_extension(extension_info)
+        dep = {
+          #TODO: would be helpful to list base component name
+          :description => "Extension's base component not on node",
+          :severity => "error",
+          :search_pattern => {
+            :filter => [:eq, :ancestor_id, extension_info[:extended_base_id]]
+          }
+        }
+        ComponentConstraint.new(dep)
+      end
     end
 
    private

@@ -1055,6 +1055,8 @@
           "type": "instance",
           "component_type": "mysql__slave",
           "basic_type": "extension",
+	  "extension_type": "slave",
+	  "*extended_base_id": "/library/test/component/mysql__server", 
           "ui": {
             "images": {
               "tnail": "mysql.png",
@@ -2286,6 +2288,8 @@
           "type": "instance",
           "component_type": "mysql__master",
           "basic_type": "extension",
+	  "extension_type": "master",
+	  "*extended_base_id": "/library/test/component/mysql__server", 
           "ui": {
             "images": {
               "tnail": "mysql.png",

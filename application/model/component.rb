@@ -29,6 +29,7 @@ module XYZ
         virtual_column :multiple_instance_ref, :type => :integer ,:local_dependencies => [:ref_num]
 
         #used when this component is an extension
+        virtual_column :extension_info, :type => :json, :local_dependencies => [:extended_base_id,:extension_type]
         foreign_key :extended_base_id, :component, FK_SET_NULL_OPT
         column :extension_type, :varchar, :size => 30
 
@@ -87,7 +88,7 @@ module XYZ
            :model_name => :dependency,
            :alias => :dependencies,
            :convert => true,
-           :join_type => :inner,
+           :join_type => :left_outer,
            :join_cond=>{:component_component_id => q(:component,:id)}, 
            :cols => [:id,:search_pattern,:type,:description,:severity]
          }
@@ -258,6 +259,11 @@ module XYZ
       (self[:ref_num]||1) - 1 
     end   
 
+    def extension_info()
+      return nil unless self[:extended_base_id]
+      Aux.hash_subset(self,[:extended_base_id,:extension_type])
+    end
+
     def containing_datacenter()
       (self[:datacenter_direct]||{})[:display_name]||
         (self[:datacenter_node]||{})[:display_name]||
@@ -377,10 +383,14 @@ module XYZ
    public
 
     def get_constraints()
-      rows = get_objects_from_sp_hash({:columns => [:dependencies,:only_one_per_node,:component_type]})
-      return Constraints.new() if rows.empty?
-      constraints = rows.map{|r|Constraint.create(r[:dependencies])}
-      constraints << Constraint::Macro.only_one_per_node(rows.first[:component_type]) if rows.first[:only_one_per_node]
+      #TODO: may see if precalculating more is more efficient
+      sp_hash = {:cols => [:dependencies,:only_one_per_node,:component_type, :extension_info]}
+      rows = get_objects_from_sp_hash(sp_hash)
+      constraints = rows.map{|r|Constraint.create(r[:dependencies]) if r[:dependencies]}.compact
+      cmp_info = rows.first #just picking first since component info same for all rows
+      constraints << Constraint::Macro.only_one_per_node(cmp_info[:component_type]) if cmp_info[:only_one_per_node]
+      constraints << Constraint::Macro.base_for_extension(cmp_info[:extension_info]) if cmp_info[:extension_info]
+      return Constraints.new() if constraints.empty?
       Constraints.new(:and,constraints)
     end
 

@@ -65,6 +65,10 @@ module XYZ
       return top_object_id_handle.get_id()
     end
 
+    def get_constraints()
+      get_constraints!()
+    end
+
    protected
     # to be optionally overwritten by object representing the source
     def add_model_specific_override_attrs!(override_attrs)
@@ -74,9 +78,6 @@ module XYZ
     def clone_post_copy_hook(clone_copy_output,opts={})
     end
 
-    def get_constraints()
-      get_constraints!()
-    end
     # to be overwritten
     #opts can be {:update_object => true} to update object
     def get_constraints!(opts={})

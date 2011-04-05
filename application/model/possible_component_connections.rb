@@ -74,29 +74,19 @@ module XYZ
        }]
     }
   }
-  PossibleIntraNodeConnections = {
+  #TODO: making very simple and symetric now; wil figure out how to align with external links
+  IntraNodeConnections = {
     :mysql__server => {
-      :internal_link_defs => 
-      [
-       {
-         :type => :service_check,
-         :required => true, 
-
-         :possible_links => 
-         [
-          {
-            :nagios__client  => {
-              :attribute_mappings => 
-              [
-               #with seperate db this would be mysql__server.db_params[database=monitor]
-               {"mysql__server.monitor_db_params" => 
-                 "nagios__client.service_check_input.mysql[component_index].db_params_ref"},
-               {"mysql__server.sap_config__l4.0.port" =>
-                 "nagios__client.service_check_input.mysql[component_index].port"}
-              ]
-            }
-          }]
-       }]
+      :nagios__client  => {
+        :attribute_mappings => 
+        [
+         #with seperate db this would be mysql__server.db_params[database=monitor]
+         {"mysql__server.monitor_db_params" => 
+           "nagios__client.service_check_input.mysql[component_index].db_params_ref"},
+         {"mysql__server.sap_config__l4.0.port" =>
+           "nagios__client.service_check_input.mysql[component_index].port"}
+        ]
+      }
     }
   }
 end

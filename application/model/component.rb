@@ -251,7 +251,7 @@ module XYZ
       LinkDefsExternal.find(self[:component_type])
     end
     def connectivity_profile_internal()
-      LinkDefsInternal.find(self[:component_type],self[:most_specific_type])
+      LinkDefsInternal.find(self[:component_type])
     end
     
     def multiple_instance_ref()

@@ -1,27 +1,11 @@
 module XYZ
   class ConnectivityProfile < ArrayObject
-   private
-    def self.component_type_match(cmp_type,most_specific_type,rule_cmp_type)
-      return true if (cmp_type == rule_cmp_type or most_specific_type == rule_cmp_type)
-      type_class = ComponentType.ret_class(rule_cmp_type)
-      type_class and type_class.include?(most_specific_type)
-    end
-  end
-
-  class LinkDefsExternal < ConnectivityProfile 
     def initialize(link_def_array,local_type)
       super(link_def_array)
       @local_type = local_type
     end
 
-    def self.find(component_type)
-      ret = nil
-      return ret if component_type.nil?
-      link_def_array = (get_component_external_link_defs(component_type.to_sym)||{})[:link_defs]
-      link_def_array ? self.new(link_def_array,component_type.to_sym) : nil
-    end
-
-    def match_output(component,link_type=nil)
+    def match_component(component,link_type=nil)
       ret = nil
       cmp_type = component[:component_type] && component[:component_type].to_sym
       most_specific_type = component[:most_specific_type] && component[:most_specific_type].to_sym
@@ -55,6 +39,22 @@ module XYZ
     end
 
    private
+    def self.component_type_match(cmp_type,most_specific_type,rule_cmp_type)
+      return true if (cmp_type == rule_cmp_type or most_specific_type == rule_cmp_type)
+      type_class = ComponentType.ret_class(rule_cmp_type)
+      type_class and type_class.include?(most_specific_type)
+    end
+  end
+
+  class LinkDefsExternal < ConnectivityProfile 
+    def self.find(component_type)
+      ret = nil
+      return ret if component_type.nil?
+      link_def_array = (get_component_external_link_defs(component_type.to_sym)||{})[:link_defs]
+      link_def_array ? self.new(link_def_array,component_type.to_sym) : nil
+    end
+
+   private
     def self.get_component_external_link_defs(component_type)
       XYZ::ComponentExternalLinkDefs[component_type]
     end
@@ -62,114 +62,42 @@ module XYZ
   
   class LinkDefsInternal < ConnectivityProfile
     #may collapse these with find external functions
-    def self.find(cmp_type_x,most_specific_type_x)
+
+    def self.find(component_type)
       ret = nil
-      cmp_type = cmp_type_x && cmp_type_x.to_sym
-      most_specific_type = most_specific_type_x && most_specific_type_x.to_sym
-      rules = get_possible_intra_component_connections()
-      ret_array = rules.map do |rule_cmp_type,rest|
-        component_type_match(cmp_type,most_specific_type,rule_cmp_type) ? rest.merge(:matching_component_type => rule_cmp_type) : nil
-      end.compact
-      ret_array.empty? ? nil : self.new(ret_array)
+      return ret if component_type.nil?
+      link_def_array = get_component_internal_link_def_array(component_type.to_sym)
+      link_def_array ? self.new(link_def_array,component_type.to_sym) : nil
     end
 
     def match_other_components(other_components)
       ret = Array.new
       other_components.each do |cmp|
-        self.each do |one_match|
-          match = self.class.match_other_components_aux(:input,cmp,one_match)
-          ret << match if match
-          match = self.class.match_other_components_aux(:output,cmp,one_match)
-          ret << match if match
-        end
+        match = match_component(cmp)
+        ret << match if match
       end
       ret
     end
-
    private
-    def self.match_other_components_aux(dir,cmp,one_match)
-      ret = nil
-      cmp_type = cmp[:component_type]&& cmp[:component_type].to_sym
-      most_specific_type = cmp[:most_specific_type] && cmp[:most_specific_type].to_sym
-      to_merge = {:other_dir => dir}
-      dir_index = (dir == :input) ? :input_components : :output_components
-      (one_match[dir_index]||[]).each do |inside_info|
-        rule_inside_cmp_type = inside_info.keys.first
-        next unless component_type_match(cmp_type,most_specific_type,rule_inside_cmp_type)
-        #TODO: not looking for multiple matches and just looking fro first one
-        to_merge.merge!(:other_component => cmp,:other_component_type => rule_inside_cmp_type)
-        ret = Aux::hash_subset(one_match,[:matching_component_type,:connection_type]).merge(to_merge)
-        info = inside_info.values.first
-        ams = info[:attribute_mappings]
-        ret.merge!(ams ? info.merge(:attribute_mappings => ams.map{|x|AttributeMapping.new(x)}) : info)
-        break
-      end
-      ret
-    end
 
-
-    def self.get_possible_intra_component_connections()
+    def self.get_component_internal_link_def_array(component_type)
       #TODO: stub
-      PossibleIntraNodeConnections
+      @indexed_intra_conns ||= index_intra_conns(IntraNodeConnections)
+      link = @indexed_intra_conns[component_type]
+      link ? [{:possible_links => [link]}] : nil
+    
     end
-=begin
     def self.index_intra_conns(x)
-      ret = Hash.new
+      ret = IntraNodeConnections.dup
       x.each do |outside_cmp,v|
-        v[:internal_link_defs].each do |link_def|
-          type = link_def[:type]
-          required = link_def[:required]
-          link_def[:possible_links].each do |link|
-            inside_cmp = link.keys.first
-            info = link.values.first
-            ret[outside_cmp] ||= Hash.new
-            #TODO: not treating caese where this 'matches' more than once
-            if ret[outside_cmp][inside_cmp]
-              
-            end
-
-
-      ret = Hash.new
-      indexed_form = Hash.new
-      x = PossibleIntraNodeConnections
-      set_indexed_form!(indexed_form,x)
-      set_indexed_form!(indexed_form,x,:invert => true)
-      indexed_form.each do |outside_cmp,v|
-        ret[outside_cmp] ||= {:internal_link_defs => Array.new}
-        pointer = ret[outside_cmp][:internal_link_defs]
-        v.each do |type,link_def|
-          link_def.each do |inside_cmp,info|
-            links << info
-        ret[outside_cmp] ||= Hash.new
-        if ret[k] then ret[k].merge!(k => v)
-        else ret[k] = v
-        end
-      end      
-      @possible_intra_connections = ret
-    end
-      #calcuulation is expensive, but just done once
-
-        
-    def self.set_indexed_form!(ret,x,opts={})
-      x.each do |orig_outside_cmp,v|
-        v[:internal_link_defs].each do |link_def|
-          type = link_def[:type]
-          link_def[:possible_links].each do |link|
-            outside_cmp = opts[:invert] ? link.keys.first : orig_outside_cmp
-            inside_cmp = opts[:invert] ? orig_outside_cmp : link.keys.first
-            ret[outside_cmp] ||= Hash.new
-            ndx = ret[outside_cmp][type] ||= {
-              :required =>  link_def[:required],
-            }
-            #TODO: may need to reverse some stuff in info
-            info = link.values.first
-            ndx[inside_cmp][:info] = info
-          end
+        v.each do |inside_cmp,info|
+          ret[inside_cmp] ||= Hash.new
+          Log.error("unexpected that ret[inside_cmp][outside_cmp] has value") if ret[inside_cmp][outside_cmp]
+          ret[inside_cmp][outside_cmp] = info
         end
       end
       ret
     end
-=end
   end
 
   class LinkDefContext < HashObject

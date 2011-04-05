@@ -566,10 +566,12 @@ return unless R8::Config[:rich_testing_flag]
       return if conn_info_list.empty?
       parent_idh = cmp_id_handle.get_parent_id_handle
       conn_info_list.each do |conn_info|
-        context = LinkDefContext.new(conn_info)
-        #TODO: need to determine if this direction flipping is needed for refactor
-        #input_component = (conn_list[:other_dir] == :input) ? conn_list[:other_component] : component
-        #output_component = (conn_list[:other_dir] == :output) ? conn_list[:other_component] : component
+        #TODO: need to make sure that contingently need to flip what is local and what is remote
+        components = {
+          conn_info[:local_type] => component, 
+          conn_info[:remote_type] => conn_info[:other_component]
+        }
+        context = InternalLinkDefContext.new(components)
         (conn_info[:attribute_mappings]||[]).each do |attr_mapping|
           link = attr_mapping.ret_link(context)
           AttributeLink.create_attr_links(parent_idh,[link])

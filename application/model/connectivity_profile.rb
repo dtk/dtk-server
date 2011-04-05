@@ -74,7 +74,7 @@ module XYZ
       ret = Array.new
       other_components.each do |cmp|
         match = match_component(cmp)
-        ret << match if match
+        ret << match.merge(:other_component => cmp) if match
       end
       ret
     end
@@ -101,24 +101,6 @@ module XYZ
   end
 
   class LinkDefContext < HashObject
-    def initialize(link_def)
-      local_cmp = link_def[:local_attr_info][:component_parent]
-      remote_cmp = link_def[:remote_attr_info][:component_parent]
-      cmps = {
-        link_def[:local_type] =>  local_cmp,
-        link_def[:remote_type] =>  remote_cmp
-      }
-      nodes = {
-        :local => create_node_object(local_cmp),
-        :remote => create_node_object(remote_cmp)
-      }
-
-      hash = {
-        :components => cmps,
-        :nodes => nodes
-      }
-      super(hash)
-    end
     def add_component!(ref,component)
       self[:components] ||= Hash.new
       self[:components][ref] = component
@@ -139,6 +121,34 @@ module XYZ
       component.id_handle.createIDH(:model_name => :node, :id => component[:node_node_id]).create_object()
     end
   end
+
+  class ExternalLinkDefContext < LinkDefContext
+    def initialize(local_cmp,remote_cmp,local_type,remote_type)
+      local_node = create_node_object(local_cmp)
+      remote_node = create_node_object(remote_cmp)
+      hash = {
+        :components => {
+          local_type =>  local_cmp,
+          remote_type =>  remote_cmp
+        },
+        :nodes => {
+          :local => local_node,
+          :remote => remote_node
+        }
+      }
+      super(hash)
+    end
+  end
+
+  class InternalLinkDefContext < LinkDefContext
+    def initialize(components)
+      hash = {
+        :components => components
+      }
+      super(hash)
+    end
+  end
+
 
   class LinkDefEvent < HashObject
     def self.parse_and_create(trigger,rhs,link)
@@ -224,7 +234,7 @@ module XYZ
           el
         end
       end.flatten(1)
-      split.each{|el|block.call(el)}
+      split.map{|el|block.call(el)}
     end
     SimpleTokenPat = 'a-zA-Z0-9_-'
     AnyTokenPat = SimpleTokenPat + '_\[\]:'
@@ -258,7 +268,7 @@ module XYZ
       path = self[dir]
       if is_simple_key?(path[0]) and path.size >= 2 #test that path starts with component
         component = context.find_component(path[0])
-        raise Error.new("cannot find component with path ref #{full_path[0]}") unless component
+        raise Error.new("cannot find component with path ref #{path[0]}") unless component
         attr = component.get_virtual_attribute__include_mixins(path[1].to_s,[:id],:display_name)
         if path.size > 2 
           rest_path = path[2..path.size-1]

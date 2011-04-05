@@ -89,7 +89,9 @@ module XYZ
 return unless R8::Config[:rich_testing_flag]
 
       return unless conn_info[:attribute_mappings] or conn_info[:events]
-      context = LinkDefContext.new(conn_info)
+      local_cmp = conn_info[:local_attr_info][:component_parent]
+      remote_cmp = conn_info[:remote_attr_info][:component_parent]
+      context = ExternalLinkDefContext.new(local_cmp,remote_cmp,conn_info[:local_type],conn_info[:remote_type])
       (conn_info[:events]||[]).each{|ev|ev.process!(context)}
       conn_info[:attribute_mappings].each do |attr_mapping|
         link = attr_mapping.ret_link(context)

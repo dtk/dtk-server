@@ -109,29 +109,67 @@ module XYZ
 
 
     def self.get_possible_intra_component_connections()
-      return @possible_intra_connections if @possible_intra_connections #TODO: stub
-      ret = PossibleIntraNodeConnections.dup 
-      invert(ret).each do |k,v|
+      #TODO: stub
+      PossibleIntraNodeConnections
+    end
+=begin
+    def self.index_intra_conns(x)
+      ret = Hash.new
+      x.each do |outside_cmp,v|
+        v[:internal_link_defs].each do |link_def|
+          type = link_def[:type]
+          required = link_def[:required]
+          link_def[:possible_links].each do |link|
+            inside_cmp = link.keys.first
+            info = link.values.first
+            ret[outside_cmp] ||= Hash.new
+            #TODO: not treating caese where this 'matches' more than once
+            if ret[outside_cmp][inside_cmp]
+              
+            end
+
+
+      ret = Hash.new
+      indexed_form = Hash.new
+      x = PossibleIntraNodeConnections
+      set_indexed_form!(indexed_form,x)
+      set_indexed_form!(indexed_form,x,:invert => true)
+      indexed_form.each do |outside_cmp,v|
+        ret[outside_cmp] ||= {:internal_link_defs => Array.new}
+        pointer = ret[outside_cmp][:internal_link_defs]
+        v.each do |type,link_def|
+          link_def.each do |inside_cmp,info|
+            links << info
+        ret[outside_cmp] ||= Hash.new
         if ret[k] then ret[k].merge!(k => v)
         else ret[k] = v
         end
       end      
       @possible_intra_connections = ret
     end
+      #calcuulation is expensive, but just done once
 
-    def self.invert(x)
-      ret = Hash.new
-      x.each do |outside_cmp,v|
-        dir = v[:input_components] ? :input_components : :output_components
-        inv_dir = v[:output_components] ? :input_components : :output_components
-        (v[dir]||[]).each do |cmp_info|
-          inside_cmp = cmp_info.keys.first
-          ret[inside_cmp] ||= Aux.hash_subset(v,v.keys-[dir]).merge(inv_dir => Array.new)
-          ret[inside_cmp][inv_dir] << {outside_cmp => cmp_info.values.first}
+        
+    def self.set_indexed_form!(ret,x,opts={})
+      x.each do |orig_outside_cmp,v|
+        v[:internal_link_defs].each do |link_def|
+          type = link_def[:type]
+          link_def[:possible_links].each do |link|
+            outside_cmp = opts[:invert] ? link.keys.first : orig_outside_cmp
+            inside_cmp = opts[:invert] ? orig_outside_cmp : link.keys.first
+            ret[outside_cmp] ||= Hash.new
+            ndx = ret[outside_cmp][type] ||= {
+              :required =>  link_def[:required],
+            }
+            #TODO: may need to reverse some stuff in info
+            info = link.values.first
+            ndx[inside_cmp][:info] = info
+          end
         end
       end
       ret
     end
+=end
   end
 
   class LinkDefContext < HashObject

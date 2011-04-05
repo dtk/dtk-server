@@ -86,6 +86,7 @@ if(!R8.Link) {
 					}],
 					'style':_linkObj.style
 				};
+
 //TODO: revisit after fully implementing link types and new meta
 				if (this.isTypeOf('monitor')) {
 					_linkDef.type = 'monitor';

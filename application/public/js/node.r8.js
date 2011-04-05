@@ -905,6 +905,7 @@ if(startPortDef.direction == "output") {
 												{'strokeStyle':'#FF33FF','lineWidth':3,'lineCap':'round'}
 											]
 										}
+
 /*
 										_tempLinkDef = {
 											'id': _tempLinkId,
@@ -966,8 +967,6 @@ if(startPortDef.direction == "output") {
 												R8.Ctrl.call('attribute_link/save',params);
 											});
 
-//DEBUG
-console.log(_tempLinkObj);
 											_viewSpace.addLink(_tempLinkObj);
 
 //											R8.Canvas.renderLink(_tempLinkDef);
@@ -1000,11 +999,13 @@ console.log('not a valid link.., mis-matched types...');
 
 //TODO: fix error/cleanup scenario with new handling of links
 				if(typeof(errorData) != 'undefined') {
-					R8.Utils.Y.one('#'+_tempLinkDef.id).remove();
+					R8.Utils.Y.one('#link-'+_tempLinkObj.id).remove();
 					R8.Workspace.showAlert(errorData.error_msg);
 
-					var startPortNode = R8.Utils.Y.one('#'+_tempLinkDef.startItem.nodeId);
-					var endPortNode = R8.Utils.Y.one('#'+_tempLinkDef.endItems[0].nodeId);
+					var startPortNode = R8.Utils.Y.one('#port-'+_tempLinkObj.port_id);
+					var endPortNode = R8.Utils.Y.one('#port-'+_tempLinkObj.other_end_id);
+//					var startPortNode = R8.Utils.Y.one('#'+_tempLinkObj.startItem.nodeId);
+//					var endPortNode = R8.Utils.Y.one('#'+_tempLinkObj.endItems[0].nodeId);
 					startPortNode.removeClass('connected');
 					startPortNode.addClass('available');
 					endPortNode.removeClass('connected');

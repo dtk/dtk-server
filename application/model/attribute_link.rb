@@ -1,26 +1,31 @@
 module XYZ
   class AttributeLink < Model
     ##########################  add new links ##################
-    def self.create_attr_links(parent_idh,rows,opts={})
-      attr_info = get_attribute_info(parent_idh,rows)
-      create_attr_links_aux!(rows,parent_idh,attr_info,opts)
+    def self.create_attr_links(parent_idh,rows_to_create,opts={})
+      attr_info = get_attribute_info(parent_idh,rows_to_create)
+      create_attr_links_aux!(rows_to_create,parent_idh,attr_info,opts)
     end
 
-    def self.create_port_and_attr_links(parent_idh,rows,opts={})
-      attr_info = get_attribute_info(parent_idh,rows)
-      create_attr_links_aux!(rows,parent_idh,attr_info,opts)
+    def self.create_port_and_attr_links(parent_idh,rows_to_create,opts={})
+      #get info about attributes on each side of link
+      attr_info = get_attribute_info(parent_idh,rows_to_create)
 
-      #compute conn_info_list
-      conn_info_list = get_conn_info_list(rows,attr_info)
+      #get info about link defs
+      conn_info_list = get_conn_info_list(rows_to_create,attr_info)
+
+      check_constraints(parent_idh,rows_to_create,conn_info_list)
+
+      #create teh links
+      create_attr_links_aux!(rows_to_create,parent_idh,attr_info,opts)
 
       create_related_links?(parent_idh,conn_info_list)
       #TODO: assumption is that what is created by create_related_links? has no bearing on l4 ports (as manifsted by using attr_links arg computred before create_related_links? call
-      attr_links = rows.map{|r|{:input => attr_info[r[:input_id]],:output => attr_info[r[:output_id]]}}
+      attr_links = rows_to_create.map{|r|{:input => attr_info[r[:input_id]],:output => attr_info[r[:output_id]]}}
       Port.create_and_update_l4_ports_and_links?(parent_idh,attr_links)
     end
 
    private
-    def self.get_attribute_info(parent_idh,rows)
+    def self.get_attribute_info(parent_idh,rows_to_create)
       attr_link_mh = parent_idh.create_childMH(:attribute_link)
       #TODO: parent model name can also be node
       attr_mh = attr_link_mh.createMH(:model_name => :attribute,:parent_model_name=>:component)
@@ -28,12 +33,12 @@ module XYZ
       #set the parent id and ref and make 
       parent_col = attr_link_mh.parent_id_field_name()
       parent_id = parent_idh.get_id()
-      rows.each do |row|
+      rows_to_create.each do |row|
         row[parent_col] ||= parent_id
         row[:ref] = "attribute_link:#{row[:input_id]}-#{row[:output_id]}"
       end
 
-      endpoint_ids = rows.map{|r|[r[:input_id],r[:output_id]]}.flatten.uniq
+      endpoint_ids = rows_to_create.map{|r|[r[:input_id],r[:output_id]]}.flatten.uniq
       sp_hash = {
         :columns => [:id,:attribute_value,:semantic_type_object,:component_parent],
         :filter => [:oneof, :id, endpoint_ids]
@@ -42,9 +47,8 @@ module XYZ
       attr_rows.inject({}){|h,attr|h.merge(attr[:id] => attr)}
     end
 
-    #compute conn_info_list
-    def self.get_conn_info_list(rows,attr_info)
-      rows.map do |row|
+    def self.get_conn_info_list(rows_to_create,attr_info)
+      rows_to_create.map do |row|
         input_id = row[:input_id]
         input_attr = attr_info[input_id]
         output_attr = attr_info[row[:output_id]]
@@ -56,27 +60,43 @@ module XYZ
       end
     end
 
-    #modifies rows by inserting created ids and link fn in it
-    def self.create_attr_links_aux!(rows,parent_idh,attr_info,opts={})
-      #form create rows by adding link function and removing :input_path,:output_path
-      rows.each do |row|
+    def self.check_constraints(parent_idh,rows_to_create,conn_info_list)
+      attr_mh = parent_idh.createMH(:model_name => :attribute,:parent_model_name=>:component)
+      #TODO: may modify to get all constraints from  conn_info_list
+      rows_to_create.each do |row| 
+        #TODO: right now constraints just on input, not output, attributes
+        attr = attr_mh.createIDH(:id => row[:input_id]).create_object()
+        constraints = attr.get_constraints()
+
+        #TODO: use conn_info_list for more constraints
+        next unless constraints
+        target = {:target_port_id_handle => attr_mh.createIDH(:id => row[:output_id])}
+        constraints.evaluate_given_target(target, :raise_error_when_error_violation => true)
+      end
+    end
+
+
+    #modifies rows_to_create by inserting created ids and link fn in it
+    def self.create_attr_links_aux!(rows_to_create,parent_idh,attr_info,opts={})
+      #form create rows_to_create by adding link function and removing :input_path,:output_path
+      rows_to_create.each do |row|
         input_attr = attr_info[row[:input_id]].merge(row[:input_path] ? {:input_path => row[:input_path]} : {})
         output_attr = attr_info[row[:output_id]].merge(row[:output_path] ? {:output_path => row[:output_path]} : {})
         row[:function] = SemanticType.find_link_function(input_attr,output_attr)
       end
 
       #create attribute_links
-      create_rows = rows.map{|row|Aux::hash_subset(row,row.keys - [:input_path,:output_path])}
+      rows_for_array_ds = rows_to_create.map{|row|Aux::hash_subset(row,row.keys - [:input_path,:output_path])}
       attr_link_mh = parent_idh.create_childMH(:attribute_link)
-      select_ds = SQL::ArrayDataset.create(db,create_rows,attr_link_mh,:convert_for_create => true)
+      select_ds = SQL::ArrayDataset.create(db,rows_for_array_ds,attr_link_mh,:convert_for_create => true)
       override_attrs = {}
-      field_set = FieldSet.new(attr_link_mh[:model_name],create_rows.first.keys)
+      field_set = FieldSet.new(attr_link_mh[:model_name],rows_for_array_ds.first.keys)
       returning_ids = create_from_select(attr_link_mh,field_set,select_ds,override_attrs,:returning_sql_cols=> [:id])
-      #insert the new ids into rows
-      returning_ids.each_with_index{|id_info,i|rows[i][:id] = id_info[:id]}
+      #insert the new ids into rows_to_create
+      returning_ids.each_with_index{|id_info,i|rows_to_create[i][:id] = id_info[:id]}
 
       attr_mh = attr_link_mh.createMH(:model_name => :attribute,:parent_model_name=>:component)
-      propagate_from_create(attr_mh,attr_info,rows)
+      propagate_from_create(attr_mh,attr_info,rows_to_create)
     end
 
     def self.create_related_links?(parent_idh,conn_info_list)

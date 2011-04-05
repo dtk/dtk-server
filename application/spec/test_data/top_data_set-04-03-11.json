@@ -1573,17 +1573,17 @@
               "data_type": "string",
               "hidden": false
             },
-            "monitor_db_config": {
+            "monitor_db_params": {
               "required": false,
               "dynamic": false,
 	      "semantic_type": "db_config",
 	      "semantic_type_summary": "db_config",
-              "display_name": "monitor_db_config",
+              "display_name": "monitor_db_params",
               "description": "db config for monitoring application to use",
               "cannot_change": false,
               "external_ref": {
                 "type": "service_attribute",
-                "path": "service[mysql_server][monitor_db_config]"
+                "path": "service[mysql_server][monitor_db_params]"
               },
               "is_port": true,
               "read_only": false,

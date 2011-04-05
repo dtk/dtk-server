@@ -1,4 +1,3 @@
-require  File.expand_path('possible_component_connections.temp.rb', File.dirname(__FILE__))
 module XYZ
   class ConnectivityProfile < ArrayObject
    private

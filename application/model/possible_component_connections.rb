@@ -82,9 +82,9 @@ module XYZ
         [
          #with seperate db this would be mysql__server.db_params[database=monitor]
          {"mysql__server.monitor_db_params" => 
-           "nagios__client.service_check_input.mysql[component_index].db_params_ref"},
+           "nagios__client.service_check_input.mysql[:component_index].db_params_ref"},
          {"mysql__server.sap_config__l4.0.port" =>
-           "nagios__client.service_check_input.mysql[component_index].port"}
+           "nagios__client.service_check_input.mysql[:component_index].port"}
         ]
       }
     }

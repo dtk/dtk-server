@@ -202,12 +202,35 @@ module XYZ
   class AttributeMapping < HashObject
     def self.parse_and_create(out_in_hash)
       hash = {
-        :input => out_in_hash.values.first.split(".").map{|x|parse_el(x)},
-        :output => out_in_hash.keys.first.split(".").map{|x|parse_el(x)}
+        :input => split_path(out_in_hash.values.first){|x|parse_el(x)},
+        :output => split_path(out_in_hash.keys.first){|x|parse_el(x)}
       }
       self.new(hash)
     end
    private
+    def self.split_path(path,&block)
+      split = path.split(".").map do |el|
+        #process special symbols
+        Log.error("unexpected token #{el}") unless el =~ AnyTokenRE
+        if el =~ IndexedPatRE
+          first_part = $1; index = $2
+          if index = ":component_index"
+            [first_part,"__create_component_index"]
+          else
+            Log.error("index not treated #{index}")
+            el
+          end
+        else
+          el
+        end
+      end.flatten(1)
+      split.each{|el|block.call(el)}
+    end
+    SimpleTokenPat = 'a-zA-Z0-9_-'
+    AnyTokenPat = SimpleTokenPat + '_\[\]:'
+    AnyTokenRE = Regexp.new("^[#{AnyTokenPat}]+$") 
+    IndexedPatRE = Regexp.new("(^[#{SimpleTokenPat}]+)\\[([:#{SimpleTokenPat}]+)\\]$")
+
     def self.parse_el(el)
       el =~ /^[0-9]+$/ ? el.to_i : el.to_sym 
     end
@@ -258,7 +281,7 @@ module XYZ
 
     def is_special_key_type?(type_or_types,item)
       types = Array(type_or_types)
-      item.respond_to?(:to_sym) and types.map{|t|"__#{t}"}.include?(item.to_s)
+      [String,Symbol].include?(item.class) and types.map{|t|"__#{t}"}.include?(item.to_s)
     end
 
     def is_unravel_path?(path)

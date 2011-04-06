@@ -107,6 +107,8 @@ module XYZ
       end
     end
     def evaluate_given_target(target,opts={})
+      #if no :search_pattern then this is a 'necessary fail'
+      return false unless search_pattern
       dataset = create_dataset(target)
       rows = dataset.all
 

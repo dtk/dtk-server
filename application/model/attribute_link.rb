@@ -8,19 +8,13 @@ module XYZ
 
     def self.create_port_and_attr_links(parent_idh,rows_to_create_x,opts={})
       rows_to_create = Aux::deep_copy(rows_to_create_x)
-      #get info about attributes on each side of link
       attr_info = get_attribute_info(parent_idh,rows_to_create)
-
-      #add link info to rows to create
       set_external_link_info!(rows_to_create,attr_info)
-
       check_constraints(parent_idh,rows_to_create)
-
-      #create the links
       create_attr_links_aux!(rows_to_create,parent_idh,attr_info,opts)
+      process_external_link_defs?(parent_idh,rows_to_create,attr_info)
 
-      create_related_links?(parent_idh,rows_to_create)
-      #TODO: assumption is that what is created by create_related_links? has no bearing on l4 ports (as manifsted by using attr_links arg computred before create_related_links? call
+      #TODO: assumption is that what is created by process_external_link_defs? has no bearing on l4 ports (as manifsted by using attr_links arg computred before process_external_link_defs? call
       attr_links = rows_to_create.map{|r|{:input => attr_info[r[:input_id]],:output => attr_info[r[:output_id]]}}
       Port.create_and_update_l4_ports_and_links?(parent_idh,attr_links)
     end
@@ -50,13 +44,12 @@ module XYZ
 
     def self.set_external_link_info!(rows_to_create,attr_info)
       rows_to_create.each do |row|
-        input_id = row[:input_id]
-        input_attr = attr_info[input_id]
+        input_attr = attr_info[row[:input_id]]
         output_attr = attr_info[row[:output_id]]
         output_cmp = output_attr[:component_parent]
         row[:link_defs] = input_attr[:component_parent][:link_defs_external]
         conn_info = row[:link_defs] && row[:link_defs].match_component(output_cmp)
-        row[:conn_info] = (conn_info||{}).merge(:local_attr_info => input_attr, :remote_attr_info => output_attr)
+        row[:conn_info] = conn_info if conn_info
       end
     end
 
@@ -103,20 +96,19 @@ module XYZ
       propagate_from_create(attr_mh,attr_info,rows_to_create)
     end
 
-    def self.create_related_links?(parent_idh,rows_to_create)
+    def self.process_external_link_defs?(parent_idh,rows_to_create,attr_info)
       rows_to_create.each do |row|
-        create_related_link?(parent_idh,row[:conn_info])
+        create_related_link_aux?(parent_idh,row,attr_info)
       end
     end
 
-    #TODO: might rename since this can also do things like create new components
     #TODO: can better bulk up operations
-    def self.create_related_link?(parent_idh,conn_info)
+    def self.process_external_link_defs_aux?(parent_idh,attr_link,attr_info)
 return unless R8::Config[:rich_testing_flag]
-
-      return unless conn_info[:attribute_mappings] or conn_info[:events]
-      local_cmp = conn_info[:local_attr_info][:component_parent]
-      remote_cmp = conn_info[:remote_attr_info][:component_parent]
+      conn_info = attr_link[:conn_info]
+      return unless conn_info
+      local_cmp = attr_info[attr_link[:input_id]][:component_parent]
+      remote_cmp = attr_info[attr_link[:output_id]][:component_parent]
       context = ExternalLinkDefContext.new(local_cmp,remote_cmp,conn_info[:local_type],conn_info[:remote_type])
       (conn_info[:events]||[]).each{|ev|ev.process!(context)}
       conn_info[:attribute_mappings].each do |attr_mapping|

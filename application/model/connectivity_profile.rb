@@ -114,14 +114,91 @@ module XYZ
       ret
     end
 
-    def get_context_refs()
-      ret = HashObject.create_with_auto_vivification()
+    def get_context(local_cmp,remote_cmp)
+      ret = ContextTermValues.new
       constraints = self[:constraints]
       constraints.each{|cnstr|cnstr.get_context_refs!(ret)} if constraints
-      ret.freeze
+      ret.set_values!(self,local_cmp,remote_cmp)
     end
   end
 
+  class ContextTermValues
+    def initialize()
+      #TDOO: if needed put in machanism where terms map to same values so only need to set values once
+      @term_mappings = Hash.new
+      @node_mappings = Hash.new
+    end
+
+    def add!(type,term,*value_ref)
+      unless @term_mappings.has_key?(term)
+        @term_mappings[term] = 
+          case type
+           when :component
+            ValueComponent.new(*value_ref)
+           when :attribute
+            ValueAttribute.new(*value_ref)
+           when :link_cardinality
+            ValueLinkCardinality.new(*value_ref)
+           else
+            Log.error("unexpected type #{type}")
+            nil
+          end
+      end
+    end
+
+    def set_values!(link_info,local_cmp,remote_cmp)
+      #need to process different types differently; components have all component you need
+      @node_mappings = {
+        :local => create_node_object(local_cmp),
+        :remote => create_node_object(remote_cmp)
+      }
+      @term_mappings.values.each{|v|v.set_component_value!(link_info,local_cmp,remote_cmp)}
+      self
+    end
+   private
+    def create_node_object(component)
+      component.id_handle.createIDH(:model_name => :node, :id => component[:node_node_id]).create_object()
+    end
+
+    class Value 
+      def initialize(component_ref)
+        @component_ref = component_ref
+        @value = nil
+      end
+
+      def set_component_value!(link_info,local_cmp,remote_cmp)
+        if @component_ref == link_info[:local_type]
+          @value = local_cmp
+        elsif @component_ref == link_info[:remote_type]
+          @value = remote_cmp
+        else
+          Log.error("cannot find ref to component #{@ref}")
+        end
+      end
+    end
+
+    class ValueComponent < Value
+      def initialize(component_ref)
+        super(component_ref)
+      end
+    end
+
+    class ValueAttribute < Value
+      def initialize(component_ref,attr_ref)
+        super(component_ref)
+        @attr_ref = attr_ref
+      end
+    end
+
+    class ValueLinkCardinality < Value
+      def initialize(component_ref,attr_ref)
+        super(component_ref)
+        @attr_ref = attr_ref
+      end
+    end
+  end
+
+  #TODO: unify below with above
   class LinkDefContext < HashObject
     def add_component!(ref,component)
       self[:components] ||= Hash.new
@@ -202,6 +279,7 @@ module XYZ
     def get_context_refs_eq_term!(ret,term)
       return unless term.kind_of?(String)
       split = term.split(SplitPat)
+      term_index = term.gsub(/^:/,"")
       if split[0] =~ ComponentTermRE
         component = $1.to_sym
       else
@@ -209,7 +287,7 @@ module XYZ
         return
       end
       if split.size == 1
-        ret[:component][component] = true
+        ret.add!(:component,term_index,component)
       else
         if split[1] =~ AttributeTermRE
           attr = $1.to_sym
@@ -218,9 +296,9 @@ module XYZ
           return
         end
         if split.size == 2
-          ret[:attribute]["#{component}.#{attr}".to_sym] = true
+          ret.add!(:attribute,term_index,component,attr)
         elsif split.size == 3 and split[2] == "cardinality"
-          ret[:link_cardinality]["#{component}.#{attr}".to_sym] = true
+          ret.add!(:link_cardinality,term_index,component,attr)
         else
           Log.error("unexpected form")
         end

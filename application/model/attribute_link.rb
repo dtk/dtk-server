@@ -61,6 +61,9 @@ module XYZ
       #TODO: can optimze to do in bulk (i.e., one shared context accross rows in contrast to
       rows_to_create.each do |row|
         next unless conn_info = row[:conn_info]
+
+#        context_refs =  conn_info.get_context_refs()
+
         local_cmp = attr_info[row[:input_id]][:component_parent]
         remote_cmp = attr_info[row[:output_id]][:component_parent]
         context = ExternalLinkDefContext.new(local_cmp,remote_cmp,conn_info[:local_type],conn_info[:remote_type])

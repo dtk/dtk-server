@@ -21,16 +21,8 @@ module XYZ
           if link_info[:constraints] and not link_info[:constraints].empty?
             Log.error("constraints not implemented yet")
           end
-          ret = Aux::hash_subset(one_match,[:required,:type]).merge(:local_type => @local_type, :remote_type => link_cmp_type).merge(link_info)
-          if ams = link_info[:attribute_mappings]
-            ret.merge!(:attribute_mappings => ams.map{|x|AttributeMapping.parse_and_create(x)})
-          end
-          if evs = link_info[:events]
-            events = evs.map do |trigger,trigger_evs|
-              trigger_evs.map{|rhs|LinkDefEvent.parse_and_create(trigger,rhs,link)}
-            end.flatten
-            ret.merge!(:events => events)
-          end
+          single_link_context = Aux.hash_subset(one_match,[:required,:type]).merge(:local_type => @local_type, :remote_type => link_cmp_type)
+          ret = SingleLink.create(single_link_context,link_info)
           break
         end
         break if ret
@@ -104,6 +96,32 @@ module XYZ
     end
   end
 
+  class SingleLink < HashObject
+    def self.create(single_link_context,link_info)
+      ret = new(single_link_context)
+      if ams = link_info[:attribute_mappings]
+        ret.merge!(:attribute_mappings => ams.map{|x|AttributeMapping.parse_and_create(x)})
+      end
+      if evs = link_info[:events]
+        events = evs.map do |trigger,trigger_evs|
+          trigger_evs.map{|rhs|LinkDefEvent.parse_and_create(trigger,rhs,link)}
+        end.flatten(1)
+        ret.merge!(:events => events)
+      end
+      if cnstrs = link_info[:constraints]
+        ret.merge!(:constraints => LinkDefConstraint.parse_and_create(cnstrs))
+      end
+      ret
+    end
+
+    def get_context_refs()
+      ret = HashObject.create_with_auto_vivification()
+      constraints = self[:constraints]
+      constraints.each{|cnstr|cnstr.get_context_refs!(ret)} if constraints
+      ret.freeze
+    end
+  end
+
   class LinkDefContext < HashObject
     def add_component!(ref,component)
       self[:components] ||= Hash.new
@@ -153,6 +171,64 @@ module XYZ
     end
   end
 
+  module LinkDefParsingMixin
+    SimpleTokenPat = 'a-zA-Z0-9_-'
+    AnyTokenPat = SimpleTokenPat + '_\[\]:'
+    SplitPat = '.'
+  end
+
+  class LinkDefConstraint < HashObject
+    include LinkDefParsingMixin
+    def self.parse_and_create(constraints)
+      #TODO: stub; more efficient would be to group liek constraints under a conjunction
+      constraints.map do |cnstr|
+        new(:filter => cnstr)
+      end
+    end
+
+    def get_context_refs!(ret)
+      relation = self[:filter]
+      if relation.nil?
+        Log.error("unexpected form")
+      elsif relation[0] == :extension_exists
+        get_context_refs_eq_term!(ret,relation[1])
+      elsif relation[0] == :eq
+        relation[1..2].each{|t|get_context_refs_eq_term!(ret,t)}
+      else
+        Log.error("unexpected form")
+      end
+    end
+   private
+    def get_context_refs_eq_term!(ret,term)
+      return unless term.kind_of?(String)
+      split = term.split(SplitPat)
+      if split[0] =~ ComponentTermRE
+        component = $1.to_sym
+      else
+        Log.error("unexpected form")
+        return
+      end
+      if split.size == 1
+        ret[:component][component] = true
+      else
+        if split[1] =~ AttributeTermRE
+          attr = $1.to_sym
+        else
+          Log.error("unexpected form")
+          return
+        end
+        if split.size == 2
+          ret[:attribute]["#{component}.#{attr}".to_sym] = true
+        elsif split.size == 3 and split[2] == "cardinality"
+          ret[:link_cardinality]["#{component}.#{attr}".to_sym] = true
+        else
+          Log.error("unexpected form")
+        end
+      end
+    end
+    ComponentTermRE = Regexp.new("^:([#{SimpleTokenPat}]+$)") 
+    AttributeTermRE = Regexp.new("^([#{SimpleTokenPat}]+$)") 
+  end
 
   class LinkDefEvent < HashObject
     def self.parse_and_create(trigger,rhs,link)
@@ -214,6 +290,7 @@ module XYZ
   end
 
   class AttributeMapping < HashObject
+    include LinkDefParsingMixin
     def self.parse_and_create(out_in_hash)
       hash = {
         :input => split_path(out_in_hash.values.first){|x|parse_el(x)},
@@ -223,7 +300,7 @@ module XYZ
     end
    private
     def self.split_path(path,&block)
-      split = path.split(".").map do |el|
+      split = path.split(SplitPat).map do |el|
         #process special symbols
         Log.error("unexpected token #{el}") unless el =~ AnyTokenRE
         if el =~ IndexedPatRE
@@ -240,8 +317,6 @@ module XYZ
       end.flatten(1)
       split.map{|el|block.call(el)}
     end
-    SimpleTokenPat = 'a-zA-Z0-9_-'
-    AnyTokenPat = SimpleTokenPat + '_\[\]:'
     AnyTokenRE = Regexp.new("^[#{AnyTokenPat}]+$") 
     IndexedPatRE = Regexp.new("(^[#{SimpleTokenPat}]+)\\[([:#{SimpleTokenPat}]+)\\]$")
 

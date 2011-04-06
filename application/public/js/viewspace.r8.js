@@ -664,6 +664,7 @@ console.log(_ui.items[itemId]);
 
 			getItemPortDef: function(itemId,portDefId) {
 				var pDefs = _items[itemId].get('portDefs');
+
 				return pDefs[portDefId];
 			},
 

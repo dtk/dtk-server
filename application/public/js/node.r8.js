@@ -875,31 +875,35 @@ return;
 										var endPortDef = _viewSpace.getItemPortDef(endParentId,endNode.getAttribute('id'));
 										var startPortDef = _ports[startNodeId];
 
-										var startConnectorLocation = 'north';
+//										var startConnectorLocation = 'north';
 //										var startCompID = R8.Workspace.ports[startElemID].compID;
-										var endConnectorLocation = 'north';
+//										var endConnectorLocation = 'north';
 //										var endCompID = R8.Workspace.ports[endElemID].compID;
-										var connectorType = 'fullBezier';
+//										var connectorType = 'fullBezier';
 										var date = new Date();
 //										_tempLinkId = 't-'+date.getTime() + '-' + Math.floor(Math.random()*20);
 										_tempLinkId = date.getTime() + '-' + Math.floor(Math.random()*20);
 
-//DEBUG
 //TODO: temp hack to solve issue of connecting output port on node to input port on monitoring server
 if(startPortDef.direction == "output") {
-	var tempDef = startPortDef;
-	var itemId = endPortDef.parentItemId;
-	startPortDef = endPortDef;
-	endPortDef = tempDef;
+	var portId = endPortDef.id;
+//	var itemId = endPortDef.parentItemId;
+	var itemId = endParentId;
+	var otherEndId = startPortDef.id;
 } else {
+	var portId = startPortDef.id;
+	var otherEndId = endPortDef.id;
 	var itemId = _id;
 }
+
 										_tempLinkObj = {
 											id: _tempLinkId,
-											port_id: startPortDef.id,
+											port_id: portId,
+//											port_id: startPortDef.id,
 //											item_id: _id,
 											item_id: itemId,
-											other_end_id: endPortDef.id,
+											other_end_id: otherEndId,
+//											other_end_id: endPortDef.id,
 											style:[
 												{'strokeStyle':'#4EF7DE','lineWidth':5,'lineCap':'round'},
 												{'strokeStyle':'#FF33FF','lineWidth':3,'lineCap':'round'}
@@ -967,6 +971,9 @@ if(startPortDef.direction == "output") {
 												R8.Ctrl.call('attribute_link/save',params);
 											});
 
+//DEBUG
+console.log('calling addLink with tempLinkObj:');
+console.log(_tempLinkObj);
 											_viewSpace.addLink(_tempLinkObj);
 
 //											R8.Canvas.renderLink(_tempLinkDef);
@@ -1053,8 +1060,12 @@ console.log('not a valid link.., mis-matched types...');
 						_viewSpace.addLinkToItems(_tempLinkDef);
 						_viewSpace.addLink(_tempLinkDef);
 */
-						var nodeTest = R8.Utils.Y.one('#'+mergePortObjId);
-
+						var nodeTest = R8.Utils.Y.one('#port-'+mergePortObjId);
+//DEBUG
+console.log('Have a link merge scenario link changes are...');
+console.log(linkChanges);
+console.log('nodeTest:');
+console.log(nodeTest);
 						if(nodeTest != null) {
 							_viewSpace.mergePorts('port-' + mergePortObjId, 'port-' + targetPortObjId);
 						}

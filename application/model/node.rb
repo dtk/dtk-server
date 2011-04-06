@@ -550,7 +550,6 @@ module XYZ
     end
 
     def create_needed_additional_links(cmp_id_handle)
-return unless R8::Config[:rich_testing_flag]
       #TODO: more efficient would be to have clone object output have this info
       component = cmp_id_handle.create_object()
       conn_profile = component.get_objects_col_from_sp_hash({:cols => [:connectivity_profile_internal]}).first

@@ -59,7 +59,7 @@ module XYZ
       rows_to_create.each do |row| 
         #TODO: right now constraints just on input, not output, attributes
         attr = attr_mh.createIDH(:id => row[:input_id]).create_object()
-        constraints = attr.get_constraints()
+        constraints = Constraints.new()
         if row[:link_defs]
           unless row[:conn_info]
            constraints << Constraint::Macro.no_legal_endpoints(row[:link_defs])
@@ -98,13 +98,12 @@ module XYZ
 
     def self.process_external_link_defs?(parent_idh,rows_to_create,attr_info)
       rows_to_create.each do |row|
-        create_related_link_aux?(parent_idh,row,attr_info)
+        process_external_link_defs_aux?(parent_idh,row,attr_info)
       end
     end
 
     #TODO: can better bulk up operations
     def self.process_external_link_defs_aux?(parent_idh,attr_link,attr_info)
-return unless R8::Config[:rich_testing_flag]
       conn_info = attr_link[:conn_info]
       return unless conn_info
       local_cmp = attr_info[attr_link[:input_id]][:component_parent]
@@ -116,7 +115,6 @@ return unless R8::Config[:rich_testing_flag]
         create_attr_links(parent_idh,[link])
       end
     end
-
 
 ####################
    public

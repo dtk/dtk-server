@@ -60,8 +60,12 @@ module XYZ
           {:mysql__server => {
               :constraints => 
               [
-               [:component_extended, "master"],
-               [:eq, "mysql__slave.version", "mysql__server.version"],
+               [:extension_exists, ":mysql__server", "master"],
+               [:eq, ":mysql__slave.version", ":mysql__server.version"],
+
+               [:eq, ":mysql__slave.sap_ref__l4.cardinaity", 1]
+               #alt form would be 
+               #[:link_cardinality, ":mysql__slave.sap_ref__l4", 1] 
               ],
               :attribute_mappings => 
               [

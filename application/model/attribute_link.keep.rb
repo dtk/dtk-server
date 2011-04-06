@@ -1,22 +1,17 @@
 module XYZ
   class AttributeLink < Model
     ##########################  add new links ##################
-    def self.create_attr_links(parent_idh,rows_to_create_x,opts={})
-      rows_to_create = Aux::deep_copy(rows_to_create_x)
-      attr_mh = parent_idh.createMH(:model_name => :attribute,:parent_model_name=>:component) #TODO: parent model name can also be node
-      attr_info = get_attribute_info(attr_mh,rows_to_create)
-      create_attr_links_aux!(rows_to_create,parent_idh,attr_mh,attr_info,opts)
+    def self.create_attr_links(parent_idh,rows_to_create,opts={})
+      attr_info = get_attribute_info(parent_idh,rows_to_create)
+      create_attr_links_aux!(rows_to_create,parent_idh,attr_info,opts)
     end
 
-    #TODO: after settle on exact semantics for ports; this can become conenction between two components
     def self.create_port_and_attr_links(parent_idh,rows_to_create_x,opts={})
       rows_to_create = Aux::deep_copy(rows_to_create_x)
-      attr_mh = parent_idh.createMH(:model_name => :attribute,:parent_model_name=>:component) #TODO: parent model name can also be node
-      attr_info = get_attribute_info(attr_mh,rows_to_create)
+      attr_info = get_attribute_info(parent_idh,rows_to_create)
       set_external_link_info!(rows_to_create,attr_info)
-      get_context!(rows_to_create,attr_info)
-      check_constraints(attr_mh,rows_to_create)
-      create_attr_links_aux!(rows_to_create,parent_idh,attr_mh,attr_info,opts)
+      check_constraints(parent_idh,rows_to_create)
+      create_attr_links_aux!(rows_to_create,parent_idh,attr_info,opts)
       process_external_link_defs?(parent_idh,rows_to_create,attr_info)
 
       #TODO: assumption is that what is created by process_external_link_defs? has no bearing on l4 ports (as manifsted by using attr_links arg computred before process_external_link_defs? call
@@ -25,17 +20,19 @@ module XYZ
     end
 
    private
-    #mechanism to compensate for fact that cols arer being added by processing fns to rows_to_create that
-    #must be removed before they are saved
-    RemoveKeys = Array.new
-    def self.remove_keys()
-      RemoveKeys
-    end
-    def self.add_to_remove_keys(*keys)
-      keys.each{|k|RemoveKeys << k unless RemoveKeys.include?(k)}
-    end
+    def self.get_attribute_info(parent_idh,rows_to_create)
+      attr_link_mh = parent_idh.create_childMH(:attribute_link)
+      #TODO: parent model name can also be node
+      attr_mh = attr_link_mh.createMH(:model_name => :attribute,:parent_model_name=>:component)
 
-    def self.get_attribute_info(attr_mh,rows_to_create)
+      #set the parent id and ref and make 
+      parent_col = attr_link_mh.parent_id_field_name()
+      parent_id = parent_idh.get_id()
+      rows_to_create.each do |row|
+        row[parent_col] ||= parent_id
+        row[:ref] = "attribute_link:#{row[:input_id]}-#{row[:output_id]}"
+      end
+
       endpoint_ids = rows_to_create.map{|r|[r[:input_id],r[:output_id]]}.flatten.uniq
       sp_hash = {
         :columns => [:id,:attribute_value,:semantic_type_object,:component_parent],
@@ -55,21 +52,9 @@ module XYZ
         row[:conn_info] = conn_info if conn_info
       end
     end
-    add_to_remove_keys :link_defs, :conn_info 
 
-    def self.get_context!(rows_to_create,attr_info)
-      #TODO: can optimze to do in bulk (i.e., one shared context accross rows in contrast to
-      rows_to_create.each do |row|
-        next unless conn_info = row[:conn_info]
-        local_cmp = attr_info[row[:input_id]][:component_parent]
-        remote_cmp = attr_info[row[:output_id]][:component_parent]
-        context = ExternalLinkDefContext.new(local_cmp,remote_cmp,conn_info[:local_type],conn_info[:remote_type])
-        row[:context] = context
-      end
-    end
-    add_to_remove_keys :context
-
-    def self.check_constraints(attr_mh,rows_to_create)
+    def self.check_constraints(parent_idh,rows_to_create)
+      attr_mh = parent_idh.createMH(:model_name => :attribute,:parent_model_name=>:component)
       #TODO: may modify to get all constraints from  conn_info_list
       rows_to_create.each do |row| 
         #TODO: right now constraints just on input, not output, attributes
@@ -88,22 +73,18 @@ module XYZ
     end
 
     #modifies rows_to_create by inserting created ids and link fn in it
-    def self.create_attr_links_aux!(rows_to_create,parent_idh,attr_mh,attr_info,opts={})
-      #add needed columns to rows_to_create
-      attr_link_mh = parent_idh.create_childMH(:attribute_link)
-      parent_col = attr_link_mh.parent_id_field_name()
-      parent_id = parent_idh.get_id()
-
+    def self.create_attr_links_aux!(rows_to_create,parent_idh,attr_info,opts={})
+      #form create rows_to_create by adding link function and removing :input_path,:output_path
       rows_to_create.each do |row|
-        row[parent_col] ||= parent_id
-        row[:ref] = "attribute_link:#{row[:input_id]}-#{row[:output_id]}"
         input_attr = attr_info[row[:input_id]].merge(row[:input_path] ? {:input_path => row[:input_path]} : {})
         output_attr = attr_info[row[:output_id]].merge(row[:output_path] ? {:output_path => row[:output_path]} : {})
         row[:function] = SemanticType.find_link_function(input_attr,output_attr)
       end
 
       #create attribute_links
+      remove_keys = [:input_path,:output_path,:conn_info, :link_defs]
       rows_for_array_ds = rows_to_create.map{|row|Aux::hash_subset(row,row.keys - remove_keys)}
+      attr_link_mh = parent_idh.create_childMH(:attribute_link)
       select_ds = SQL::ArrayDataset.create(db,rows_for_array_ds,attr_link_mh,:convert_for_create => true)
       override_attrs = {}
       field_set = FieldSet.new(attr_link_mh[:model_name],rows_for_array_ds.first.keys)
@@ -111,22 +92,27 @@ module XYZ
       #insert the new ids into rows_to_create
       returning_ids.each_with_index{|id_info,i|rows_to_create[i][:id] = id_info[:id]}
 
+      attr_mh = attr_link_mh.createMH(:model_name => :attribute,:parent_model_name=>:component)
       propagate_from_create(attr_mh,attr_info,rows_to_create)
     end
-    add_to_remove_keys :input_path,:output_path
 
-
-    #TODO: can better bulk up operations
     def self.process_external_link_defs?(parent_idh,rows_to_create,attr_info)
       rows_to_create.each do |row|
-        conn_info = row[:conn_info]
-        next unless conn_info
-        context = row[:context]
-        (conn_info[:events]||[]).each{|ev|ev.process!(context)}
-        conn_info[:attribute_mappings].each do |attr_mapping|
-          link = attr_mapping.ret_link(context)
-          create_attr_links(parent_idh,[link])
-        end
+        process_external_link_defs_aux?(parent_idh,row,attr_info)
+      end
+    end
+
+    #TODO: can better bulk up operations
+    def self.process_external_link_defs_aux?(parent_idh,attr_link,attr_info)
+      conn_info = attr_link[:conn_info]
+      return unless conn_info
+      local_cmp = attr_info[attr_link[:input_id]][:component_parent]
+      remote_cmp = attr_info[attr_link[:output_id]][:component_parent]
+      context = ExternalLinkDefContext.new(local_cmp,remote_cmp,conn_info[:local_type],conn_info[:remote_type])
+      (conn_info[:events]||[]).each{|ev|ev.process!(context)}
+      conn_info[:attribute_mappings].each do |attr_mapping|
+        link = attr_mapping.ret_link(context)
+        create_attr_links(parent_idh,[link])
       end
     end
 

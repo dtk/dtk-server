@@ -6,19 +6,20 @@ module XYZ
       create_attr_links_aux!(rows_to_create,parent_idh,attr_info,opts)
     end
 
-    def self.create_port_and_attr_links(parent_idh,rows_to_create,opts={})
+    def self.create_port_and_attr_links(parent_idh,rows_to_create_x,opts={})
+      rows_to_create = Aux::deep_copy(rows_to_create_x)
       #get info about attributes on each side of link
       attr_info = get_attribute_info(parent_idh,rows_to_create)
 
-      #get info about link defs
-      conn_info_list = get_conn_info_list(rows_to_create,attr_info)
+      #add link info to rows to create
+      set_external_link_info!(rows_to_create,attr_info)
 
-      check_constraints(parent_idh,rows_to_create,conn_info_list)
+      check_constraints(parent_idh,rows_to_create)
 
-      #create teh links
+      #create the links
       create_attr_links_aux!(rows_to_create,parent_idh,attr_info,opts)
 
-      create_related_links?(parent_idh,conn_info_list)
+      create_related_links?(parent_idh,rows_to_create)
       #TODO: assumption is that what is created by create_related_links? has no bearing on l4 ports (as manifsted by using attr_links arg computred before create_related_links? call
       attr_links = rows_to_create.map{|r|{:input => attr_info[r[:input_id]],:output => attr_info[r[:output_id]]}}
       Port.create_and_update_l4_ports_and_links?(parent_idh,attr_links)
@@ -47,34 +48,36 @@ module XYZ
       attr_rows.inject({}){|h,attr|h.merge(attr[:id] => attr)}
     end
 
-    def self.get_conn_info_list(rows_to_create,attr_info)
-      rows_to_create.map do |row|
+    def self.set_external_link_info!(rows_to_create,attr_info)
+      rows_to_create.each do |row|
         input_id = row[:input_id]
         input_attr = attr_info[input_id]
         output_attr = attr_info[row[:output_id]]
         output_cmp = output_attr[:component_parent]
-        conn_profile = input_attr[:component_parent][:link_defs_external]
-        #TODO: phasing in by first using for creating_related links; then using for the whole process to create attribute links and check for constraint violations
-        conn_info = conn_profile && conn_profile.match_component(output_cmp)
-        (conn_info||{}).merge(:local_attr_info => input_attr, :remote_attr_info => output_attr)
+        row[:link_defs] = input_attr[:component_parent][:link_defs_external]
+        conn_info = row[:link_defs] && row[:link_defs].match_component(output_cmp)
+        row[:conn_info] = (conn_info||{}).merge(:local_attr_info => input_attr, :remote_attr_info => output_attr)
       end
     end
 
-    def self.check_constraints(parent_idh,rows_to_create,conn_info_list)
+    def self.check_constraints(parent_idh,rows_to_create)
       attr_mh = parent_idh.createMH(:model_name => :attribute,:parent_model_name=>:component)
       #TODO: may modify to get all constraints from  conn_info_list
       rows_to_create.each do |row| 
         #TODO: right now constraints just on input, not output, attributes
         attr = attr_mh.createIDH(:id => row[:input_id]).create_object()
         constraints = attr.get_constraints()
-
-        #TODO: use conn_info_list for more constraints
-        next unless constraints
+        if row[:link_defs]
+          unless row[:conn_info]
+           constraints << Constraint::Macro.no_legal_endpoints(row[:link_defs])
+          end
+        end
+        next if constraints.empty?
         target = {:target_port_id_handle => attr_mh.createIDH(:id => row[:output_id])}
+        #TODO: may treat differently if rows_to_create has multiple rows
         constraints.evaluate_given_target(target, :raise_error_when_error_violation => true)
       end
     end
-
 
     #modifies rows_to_create by inserting created ids and link fn in it
     def self.create_attr_links_aux!(rows_to_create,parent_idh,attr_info,opts={})
@@ -86,7 +89,8 @@ module XYZ
       end
 
       #create attribute_links
-      rows_for_array_ds = rows_to_create.map{|row|Aux::hash_subset(row,row.keys - [:input_path,:output_path])}
+      remove_keys = [:input_path,:output_path,:conn_info, :link_defs]
+      rows_for_array_ds = rows_to_create.map{|row|Aux::hash_subset(row,row.keys - remove_keys)}
       attr_link_mh = parent_idh.create_childMH(:attribute_link)
       select_ds = SQL::ArrayDataset.create(db,rows_for_array_ds,attr_link_mh,:convert_for_create => true)
       override_attrs = {}
@@ -99,8 +103,10 @@ module XYZ
       propagate_from_create(attr_mh,attr_info,rows_to_create)
     end
 
-    def self.create_related_links?(parent_idh,conn_info_list)
-      conn_info_list.each{|conn_info|create_related_link?(parent_idh,conn_info)}
+    def self.create_related_links?(parent_idh,rows_to_create)
+      rows_to_create.each do |row|
+        create_related_link?(parent_idh,row[:conn_info])
+      end
     end
 
     #TODO: might rename since this can also do things like create new components

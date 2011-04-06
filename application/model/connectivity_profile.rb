@@ -54,6 +54,10 @@ module XYZ
       link_def_array ? self.new(link_def_array,component_type.to_sym) : nil
     end
 
+    def remote_components()
+      map{|x|(x[:possible_links]||[]).map{|l|l.keys.first}}.flatten(1)
+    end
+
    private
     def self.get_component_external_link_defs(component_type)
       XYZ::ComponentExternalLinkDefs[component_type]

@@ -1,10 +1,11 @@
 #TODO: simplify by changing target arg to be just idh
 module XYZ
-  class Constraints
+  class Constraints < Array
     def initialize(logical_op=:and,constraints=[])
+      super(constraints)
       @logical_op = logical_op
-      @constraints = constraints
     end
+
     def evaluate_given_target(target,opts={})
       ret = evaluate_given_target_just_eval(target,opts)
       return ret if ret
@@ -28,8 +29,8 @@ module XYZ
     end
   private
     def evaluate_given_target_just_eval(target,opts={})
-      return true if @constraints.empty?
-      @constraints.each do |constraint|
+      return true if self.empty?
+      self.each do |constraint|
         constraint_holds = constraint.evaluate_given_target(target,opts)
         case @logical_op
           when :or
@@ -47,7 +48,7 @@ module XYZ
     def ret_violations(target)
       ret = {"error" => ViolationExpression.new(target,@logical_op), "warning" => ViolationExpression.new(target,@logical_op)}
         
-      @constraints.each do |constraint|
+      self.each do |constraint|
         next if constraint.evaluate_given_target(target)
         severity = constraint[:severity] || "error"
         ret[severity] << constraint
@@ -141,6 +142,16 @@ module XYZ
           }
         }
         ComponentConstraint.new(dep)
+      end
+
+      def self.no_legal_endpoints(external_link_defs)
+        eps = external_link_defs.remote_components
+        #no search pattern means 'necessarily fail'
+        dep = {
+          :description => "Link must attach to node with a component of type (#{eps.join(", ")}",
+          :severity => "error"
+        }
+        PortConstraint.new(dep)
       end
     end
 

@@ -22,8 +22,8 @@ module XYZ
               },
               :attribute_mappings => 
               [
-            #   {"mysql__server.sap__l4" => "java_webapp.sap_ref__l4"},
-               {"java_webapp.db_params" => "mysql_db.db_params_ref"}
+            #   {":mysql__server.sap__l4" => ":java_webapp.sap_ref__l4"},
+               {":java_webapp.db_params" => ":mysql_db.db_params_ref"}
               ]
             }
           },
@@ -39,8 +39,8 @@ module XYZ
               },
               :attribute_mappings =>
               [
-               #   {"postgresql__server.sap__l4" => "java_webapp.sap_ref__l4"},
-               {"java_webapp.db_params" => "postgresql_db.db_params_ref"}
+               #   {":postgresql__server.sap__l4" => ":java_webapp.sap_ref__l4"},
+               {":java_webapp.db_params" => ":postgresql_db.db_params_ref"}
               ]
             }
           }
@@ -69,8 +69,8 @@ module XYZ
               ],
               :attribute_mappings => 
               [
-               {"mysql__server.master_log" => "mysql__slave.master_log_ref"},
-             #  {"mysql__server.sap__l4" => "mysql__slave.sap_ref__l4"}
+               {":mysql__server.master_log" => ":mysql__slave.master_log_ref"},
+             #  {":mysql__server.sap__l4" => ":mysql__slave.sap_ref__l4"}
               ]
             }
           }
@@ -85,10 +85,10 @@ module XYZ
         :attribute_mappings => 
         [
          #with seperate db this would be mysql__server.db_params[database=monitor]
-         {"mysql__server.monitor_db_params" => 
-           "nagios__client.service_check_input.mysql[:component_index].db_params_ref"},
-         {"mysql__server.sap_config__l4.0.port" =>
-           "nagios__client.service_check_input.mysql[:component_index].port"}
+         {":mysql__server.monitor_db_params" => 
+           ":nagios__client.service_check_input.mysql[:component_index].db_params_ref"},
+         {":mysql__server.sap_config__l4.0.port" =>
+           ":nagios__client.service_check_input.mysql[:component_index].port"}
         ]
       }
     }

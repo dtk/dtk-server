@@ -118,6 +118,8 @@ module XYZ
       ret = ContextTermValues.new
       constraints = self[:constraints]
       constraints.each{|cnstr|cnstr.get_context_refs!(ret)} if constraints
+      ams = self[:attribute_mappings]
+      ams.each{|am|am.get_context_refs!(ret)} if ams
       ret.set_values!(self,local_cmp,remote_cmp)
     end
   end
@@ -129,9 +131,14 @@ module XYZ
       @node_mappings = Hash.new
     end
 
-    def add!(type,term,*value_ref)
-      unless @term_mappings.has_key?(term)
-        @term_mappings[term] = 
+    def find_attribute(term_index)
+      match = @term_mappings[term_index]
+      match && match.value
+    end
+
+    def add!(type,term_index,*value_ref)
+      unless @term_mappings.has_key?(term_index)
+        @term_mappings[term_index] = 
           case type
            when :component
             ValueComponent.new(*value_ref)
@@ -160,18 +167,25 @@ module XYZ
         if v.kind_of?(ValueAttribute)
           id = v.component_id
           a = attrs_to_get[id] ||= Array.new
-          a << {:attribute_name => v.attribute_ref, :value_object => v}
+          a << {:attribute_name => v.attribute_ref.to_s, :value_object => v}
         end
       end
       unless attrs_to_get.empty?
         component_mh = local_cmp.model_handle()
         cols = [:id,:value_derived,:value_asserted]
-        x = Component.get_virtual_attributes__include_mixins(component_mh,attrs_to_get,cols)
-        x
+        from_db = Component.get_virtual_attributes__include_mixins(component_mh,attrs_to_get,cols)
+         attrs_to_get.each do |component_id,rest|
+          next unless cmp_info = from_db[component_id]
+          rest.each do |a|
+            attr_name = a[:attribute_name]
+            a[:value_object].set_attribute_value!(cmp_info[attr_name]) if cmp_info.has_key?(attr_name)
+          end
+        end
       end
       self
     end
    private
+    
     def create_node_object(component)
       component.id_handle.createIDH(:model_name => :node, :id => component[:node_node_id]).create_object()
     end
@@ -195,6 +209,9 @@ module XYZ
       def component_id()
         @component && @component[:id]
       end
+      #overwrite
+      def value()
+      end
     end
 
     class ValueComponent < Value
@@ -208,6 +225,12 @@ module XYZ
       def initialize(component_ref,attr_ref)
         super(component_ref)
         @attribute_ref = attr_ref
+      end
+      def set_attribute_value!(attribute)
+        @attribute = attribute
+      end
+      def value()
+        @attribute
       end
     end
 
@@ -276,34 +299,10 @@ module XYZ
     SimpleTokenPat = 'a-zA-Z0-9_-'
     AnyTokenPat = SimpleTokenPat + '_\[\]:'
     SplitPat = '.'
-  end
 
-  class LinkDefConstraint < HashObject
-    include LinkDefParsingMixin
-    def self.parse_and_create(constraints)
-      #TODO: stub; more efficient would be to group liek constraints under a conjunction
-      constraints.map do |cnstr|
-        new(:filter => cnstr)
-      end
-    end
-
-    def get_context_refs!(ret)
-      relation = self[:filter]
-      if relation.nil?
-        Log.error("unexpected form")
-      elsif relation[0] == :extension_exists
-        get_context_refs_eq_term!(ret,relation[1])
-      elsif relation[0] == :eq
-        relation[1..2].each{|t|get_context_refs_eq_term!(ret,t)}
-      else
-        Log.error("unexpected form")
-      end
-    end
-   private
-    def get_context_refs_eq_term!(ret,term)
-      return unless term.kind_of?(String)
-      split = term.split(SplitPat)
-      term_index = term.gsub(/^:/,"")
+    def get_context_refs_eq_term!(ret,term_index)
+      return unless term_index.kind_of?(String)
+      split = term_index.split(SplitPat)
       if split[0] =~ ComponentTermRE
         component = $1.to_sym
       else
@@ -330,6 +329,29 @@ module XYZ
     end
     ComponentTermRE = Regexp.new("^:([#{SimpleTokenPat}]+$)") 
     AttributeTermRE = Regexp.new("^([#{SimpleTokenPat}]+$)") 
+  end
+
+  class LinkDefConstraint < HashObject
+    include LinkDefParsingMixin
+    def self.parse_and_create(constraints)
+      #TODO: stub; more efficient would be to group liek constraints under a conjunction
+      constraints.map do |cnstr|
+        new(:filter => cnstr)
+      end
+    end
+
+    def get_context_refs!(ret)
+      relation = self[:filter]
+      if relation.nil?
+        Log.error("unexpected form")
+      elsif relation[0] == :extension_exists
+        get_context_refs_eq_term!(ret,relation[1])
+      elsif relation[0] == :eq
+        relation[1..2].each{|t|get_context_refs_eq_term!(ret,t)}
+      else
+        Log.error("unexpected form")
+      end
+    end
   end
 
   class LinkDefEvent < HashObject
@@ -400,7 +422,15 @@ module XYZ
       }
       self.new(hash)
     end
+    def get_context_refs!(ret)
+      get_context_refs_eq_term!(ret,attr_context_index(self[:input]))
+      get_context_refs_eq_term!(ret,attr_context_index(self[:output]))
+    end
    private
+    def attr_context_index(path)
+      #TODO: may parse attribute mapping differently taking first element to be ':component.attr'
+      ":#{path[0..1].join(SplitPat)}"
+    end
     def self.split_path(path,&block)
       split = path.split(SplitPat).map do |el|
         #process special symbols
@@ -423,7 +453,7 @@ module XYZ
     IndexedPatRE = Regexp.new("(^[#{SimpleTokenPat}]+)\\[([:#{SimpleTokenPat}]+)\\]$")
 
     def self.parse_el(el)
-      el =~ /^[0-9]+$/ ? el.to_i : el.to_sym 
+      el =~ /^[0-9]+$/ ? el.to_i : el.gsub(/^:/,"").to_sym 
     end
 
    public
@@ -448,9 +478,7 @@ module XYZ
       ret = [attr,index_map_path]
       path = self[dir]
       if is_simple_key?(path[0]) and path.size >= 2 #test that path starts with component
-        component = context.find_component(path[0])
-        raise Error.new("cannot find component with path ref #{path[0]}") unless component
-        attr = component.get_virtual_attribute__include_mixins(path[1].to_s,[:id],:display_name)
+        attr = context.find_attribute(attr_context_index(path))
         if path.size > 2 
           rest_path = path[2..path.size-1]
           if is_unravel_path?(rest_path)

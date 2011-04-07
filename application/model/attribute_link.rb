@@ -66,7 +66,7 @@ module XYZ
         remote_cmp = attr_info[row[:output_id]][:component_parent]
         context = ExternalLinkDefContext.new(local_cmp,remote_cmp,conn_info[:local_type],conn_info[:remote_type])
         #TODO: replace above with
-#        context_x = conn_info.get_context(local_cmp,remote_cmp)
+        context = conn_info.get_context(local_cmp,remote_cmp)
 
         row[:context] = context
       end

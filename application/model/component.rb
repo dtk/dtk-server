@@ -298,7 +298,7 @@ module XYZ
           id = r[:id]
           attr_name = r[:attribute][field_to_match]
           ret[id] ||= Hash.new
-          ret[id][attr_name.to_sym] = r[:attribute]
+          ret[id][attr_name] = r[:attribute]
         end
       end
       ret

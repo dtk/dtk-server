@@ -195,24 +195,23 @@ module XYZ
       attrs_to_get = Hash.new
       @term_mappings.each_value do |v|
         if v.kind_of?(ValueAttribute)
-          id = v.component_id
-          a = attrs_to_get[id] ||= Array.new
+          cmp = v.component
+          a = (attrs_to_get[cmp[:id]] ||= {:component => cmp, :attribute_info => Array.new})[:attribute_info]
           a << {:attribute_name => v.attribute_ref.to_s, :value_object => v}
         end
       end
-      component_mh = local_cmp.model_handle()
-      get_and_update_component_virtual_attributes!(attrs_to_get,component_mh)
+      get_and_update_component_virtual_attributes!(attrs_to_get)
       self
     end
    private
 
-    def get_and_update_component_virtual_attributes!(attrs_to_get,component_mh)
+    def get_and_update_component_virtual_attributes!(attrs_to_get)
       return if attrs_to_get.empty?
       cols = [:id,:value_derived,:value_asserted]
-      from_db = Component.get_virtual_attributes__include_mixins(component_mh,attrs_to_get,cols)
-      attrs_to_get.each do |component_id,rest|
+      from_db = Component.get_virtual_attributes__include_mixins(attrs_to_get,cols)
+      attrs_to_get.each do |component_id,hash_val|
         next unless cmp_info = from_db[component_id]
-        rest.each do |a|
+        hash_val[:attribute_info].each do |a|
           attr_name = a[:attribute_name]
           a[:value_object].set_attribute_value!(cmp_info[attr_name]) if cmp_info.has_key?(attr_name)
         end
@@ -229,6 +228,7 @@ module XYZ
     end
 
     class Value 
+      attr_reader :component
       def initialize(component_ref)
         @component_ref = component_ref
         @component = nil
@@ -246,10 +246,6 @@ module XYZ
       
       def set_component_value!(component)
         @component = component
-      end
-
-      def component_id()
-        @component && @component[:id]
       end
       #overwrite
       def value()

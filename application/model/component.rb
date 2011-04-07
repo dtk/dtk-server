@@ -22,7 +22,7 @@ module XYZ
         column :specific_type, :varchar, :size => 30 
         column :component_type, :varchar, :size => 50 #this is the exact component type; two instances taht share this can differ by things like defaults
 
-        #if set to true only one isnatnce of a component (using component_type to determine 'same') can be on a node
+        #if set to true only one instance of a component (using component_type to determine 'same') can be on a node
         column :only_one_per_node, :boolean, :default => true
         #refernce used when multiple isnatnces of same component type 
         #TODO: make sure that this is preserved under clone; case to watch out fro is when cloning for example more dbs in something with dbs
@@ -288,34 +288,48 @@ module XYZ
     end
 
     #looks at both directly directly conencted attributes and ones on base component that is on one of its extensions
-    def self.get_virtual_attributes__include_mixins(component_mh,attrs_to_get,cols,field_to_match=:display_name)
+    def self.get_virtual_attributes__include_mixins(attrs_to_get,cols,field_to_match=:display_name)
       ret = Hash.new
       #TODO: may be able to avoid this loop
-      attrs_to_get.each do |component_id,attr_info|
+      attrs_to_get.each do |component_id,hash_value|
+        attr_info = hash_value[:attribute_info]
+        component = hash_value[:component]
         attr_names = attr_info.map{|a|a[:attribute_name].to_s}
-        rows = get_virtual_attribute_aux(component_mh,component_id,attr_names,cols,field_to_match)
-        rows.each do |r|
-          attr_name = r[:attribute][field_to_match]
+        rows = component.get_virtual_attributes__include_mixins(attr_names,cols,field_to_match)
+        rows.each do |attr|
+          attr_name = attr[field_to_match]
           ret[component_id] ||= Hash.new
-          ret[component_id][attr_name] = r[:attribute]
+          ret[component_id][attr_name] = attr
         end
       end
       ret
     end
 
-    #looks at both directly directly conencted attributes and ones on base component that is on one of its extensions
-    #TODO: extend with logic for multiple_instance_clause
-    def get_virtual_attribute__include_mixins(attribute_name,cols,field_to_match=:display_name,multiple_instance_clause=nil)
-      rows = self.class.get_virtual_attribute_aux(model_handle,id(),[attribute_name],cols,field_to_match,multiple_instance_clause)
-      Log.error("get virtual attribute should only match one attribute") if rows.size > 1
-      rows.first && rows.first[:attribute]
+    def get_virtual_attributes__include_mixins(attribute_names,cols,field_to_match=:display_name,multiple_instance_clause=nil)
+      is_extension = self[:extended_base_id] ? true : false
+      is_extension ?
+        get_virtual_attributes_aux_extension(attribute_names,cols,field_to_match,multiple_instance_clause) :
+        get_virtual_attributes_aux_base(attribute_names,cols,field_to_match,multiple_instance_clause)
     end
    private
-    def self.get_virtual_attribute_aux(component_mh,component_id,attribute_names,cols,field_to_match=:display_name,multiple_instance_clause=nil)
+    def get_virtual_attributes_aux_extension(attribute_names,cols,field_to_match=:display_name,multiple_instance_clause=nil)
+      component_id = self[:id]
+      base_id = self[:extended_base_id]
+      sp_hash = {
+        :model_name => :attribute,
+        :filter => [:and, [:oneof, field_to_match, attribute_names], [:oneof, :component_component_id, [component_id,base_id]]],
+        :cols => Aux.array_add?(cols,[:component_component_id,field_to_match])
+      }
+      attr_mh = model_handle().createMH(:attribute)
+      Model.get_objects_from_sp_hash(attr_mh,sp_hash)
+    end
+
+    def get_virtual_attributes_aux_base(attribute_names,cols,field_to_match=:display_name,multiple_instance_clause=nil)
+      component_id = self[:id]
       base_sp_hash = {
         :model_name => :component,
         :filter => [:or, [:eq, :extended_base_id, component_id], [:eq, :id, component_id]],
-        :cols => [:id]
+        :cols => [:id,:extended_base_id]
       }
       join_array = 
         [{
@@ -326,7 +340,7 @@ module XYZ
            :join_cond => {:component_component_id => :component__id},
            :cols => Aux.array_add?(cols,[:component_component_id,field_to_match])
          }]
-      get_objects_from_join_array(component_mh,base_sp_hash,join_array)
+      Model.get_objects_from_join_array(model_handle,base_sp_hash,join_array).map{|r|r[:attribute]}
     end
     public
 

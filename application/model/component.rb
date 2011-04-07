@@ -295,10 +295,9 @@ module XYZ
         attr_names = attr_info.map{|a|a[:attribute_name].to_s}
         rows = get_virtual_attribute_aux(component_mh,component_id,attr_names,cols,field_to_match)
         rows.each do |r|
-          id = r[:id]
           attr_name = r[:attribute][field_to_match]
-          ret[id] ||= Hash.new
-          ret[id][attr_name] = r[:attribute]
+          ret[component_id] ||= Hash.new
+          ret[component_id][attr_name] = r[:attribute]
         end
       end
       ret

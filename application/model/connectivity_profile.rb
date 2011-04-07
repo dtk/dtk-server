@@ -104,7 +104,7 @@ module XYZ
       end
       if evs = link_info[:events]
         events = evs.map do |trigger,trigger_evs|
-          trigger_evs.map{|rhs|LinkDefEvent.parse_and_create(trigger,rhs,link)}
+          trigger_evs.map{|rhs|LinkDefEvent.parse_and_create(trigger,rhs,single_link_context)}
         end.flatten(1)
         ret.merge!(:events => events)
       end
@@ -134,6 +134,12 @@ module XYZ
     def find_attribute(term_index)
       match = @term_mappings[term_index]
       match && match.value
+    end
+    def remote_node()
+      @node_mappings[:remote]
+    end
+    def local_node()
+      @node_mappings[:local]
     end
 
     def add!(type,term_index,*value_ref)
@@ -268,24 +274,6 @@ module XYZ
     end
   end
 
-  class ExternalLinkDefContext < LinkDefContext
-    def initialize(local_cmp,remote_cmp,local_type,remote_type)
-      local_node = create_node_object(local_cmp)
-      remote_node = create_node_object(remote_cmp)
-      hash = {
-        :components => {
-          local_type =>  local_cmp,
-          remote_type =>  remote_cmp
-        },
-        :nodes => {
-          :local => local_node,
-          :remote => remote_node
-        }
-      }
-      super(hash)
-    end
-  end
-
   class InternalLinkDefContext < LinkDefContext
     def initialize(components)
       hash = {
@@ -355,10 +343,10 @@ module XYZ
   end
 
   class LinkDefEvent < HashObject
-    def self.parse_and_create(trigger,rhs,link)
+    def self.parse_and_create(trigger,rhs,single_link_context)
       if trigger == :on_create_link 
         if rhs.keys.first.to_sym == :extend_component
-          LinkDefEventExtendComponent.new(rhs.values.first,link)
+          LinkDefEventExtendComponent.new(rhs.values.first,single_link_context)
         else
           raise Error.new("unexpected link definition right hand side type #{rhs.keys.first}")
         end
@@ -373,12 +361,14 @@ module XYZ
   end
 
   class LinkDefEventExtendComponent < LinkDefEvent
-    def initialize(hash,link)
+    def initialize(hash,single_link_context)
       validate_top_level(hash)
+      remote_or_local = hash[:node] || :remote
+      base_cmp = single_link_context[remote_or_local == :remote ? :remote_type : :local_type]
       new_hash = {
-        :node => hash[:node] || :remote,
+        :node => remote_or_local,
         :extension_type => hash[:extension_type],
-        :base_component => link.keys.first
+        :base_component => base_cmp
       }
       new_hash.merge!(:alias => hash[:alias]) if hash.has_key?(:alias)
       super(new_hash)

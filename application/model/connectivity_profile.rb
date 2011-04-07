@@ -131,7 +131,13 @@ module XYZ
       @node_mappings = Hash.new
     end
 
-    def find_attribute(term_index)
+    def find_attribute(term_index_x)
+      term_index = normalize_term_index(term_index_x)
+      match = @term_mappings[term_index]
+      match && match.value
+    end
+    def find_component(term_index_x)
+      term_index = normalize_term_index(term_index_x)
       match = @term_mappings[term_index]
       match && match.value
     end
@@ -142,7 +148,8 @@ module XYZ
       @node_mappings[:local]
     end
 
-    def add!(type,term_index,*value_ref)
+    def add_ref!(type,term_index_x,*value_ref)
+      term_index = normalize_term_index(term_index_x)
       unless @term_mappings.has_key?(term_index)
         @term_mappings[term_index] = 
           case type
@@ -159,14 +166,20 @@ module XYZ
       end
     end
 
+    def add_component_ref_and_value!(cmp_ref,cmp_value)
+      term_index = normalize_term_index(cmp_ref)
+      add_ref!(:component,term_index,cmp_ref).set_component_value!(cmp_value)
+      #TODO: must also update any attribute refernce to this component
+    end
+
     def set_values!(link_info,local_cmp,remote_cmp)
-      #need to process different types differently; components have all component you need
+      [link_info[:local_type],link_info[:remote_type]].each{|t|add_ref!(:component,t,t)}
       @node_mappings = {
         :local => create_node_object(local_cmp),
         :remote => create_node_object(remote_cmp)
       }
       @term_mappings.values.each do |v| 
-        v.set_component_value!(link_info,local_cmp,remote_cmp)
+        v.set_component_remote_and_local_value!(link_info,local_cmp,remote_cmp)
       end
       attrs_to_get = Hash.new
       @term_mappings.each_value do |v|
@@ -191,6 +204,10 @@ module XYZ
       self
     end
    private
+    def normalize_term_index(t_x)
+      t = t_x.to_s
+      t =~ /^[^:]/ ? ":#{t}" : t
+    end
     
     def create_node_object(component)
       component.id_handle.createIDH(:model_name => :node, :id => component[:node_node_id]).create_object()
@@ -202,7 +219,7 @@ module XYZ
         @component = nil
       end
 
-      def set_component_value!(link_info,local_cmp,remote_cmp)
+      def set_component_remote_and_local_value!(link_info,local_cmp,remote_cmp)
         if @component_ref == link_info[:local_type]
           @component = local_cmp
         elsif @component_ref == link_info[:remote_type]
@@ -210,6 +227,10 @@ module XYZ
         else
           Log.error("cannot find ref to component #{@ref}")
         end
+      end
+      
+      def set_component_value!(component)
+        @component = component
       end
 
       def component_id()
@@ -223,6 +244,9 @@ module XYZ
     class ValueComponent < Value
       def initialize(component_ref)
         super(component_ref)
+      end
+      def value()
+        @component
       end
     end
 
@@ -298,7 +322,7 @@ module XYZ
         return
       end
       if split.size == 1
-        ret.add!(:component,term_index,component)
+        ret.add_ref!(:component,term_index,component)
       else
         if split[1] =~ AttributeTermRE
           attr = $1.to_sym
@@ -307,9 +331,9 @@ module XYZ
           return
         end
         if split.size == 2
-          ret.add!(:attribute,term_index,component,attr)
+          ret.add_ref!(:attribute,term_index,component,attr)
         elsif split.size == 3 and split[2] == "cardinality"
-          ret.add!(:link_cardinality,term_index,component,attr)
+          ret.add_ref!(:link_cardinality,term_index,component,attr)
         else
           Log.error("unexpected form")
         end
@@ -392,7 +416,7 @@ module XYZ
       #if alias is given, update context to reflect this
       if self[:alias]
         new_cmp = base_component.id_handle.createIDH(:model_name => :component, :id => new_cmp_id).create_object()
-        context.add_component!(self[:alias],new_cmp)
+        context.add_component_ref_and_value!(self[:alias],new_cmp)
       end
     end
 

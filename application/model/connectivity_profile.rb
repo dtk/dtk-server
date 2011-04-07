@@ -124,7 +124,7 @@ module XYZ
 
   class ContextTermValues
     def initialize()
-      #TDOO: if needed put in machanism where terms map to same values so only need to set values once
+      #TODO: if needed put in machanism where terms map to same values so only need to set values once
       @term_mappings = Hash.new
       @node_mappings = Hash.new
     end
@@ -152,7 +152,23 @@ module XYZ
         :local => create_node_object(local_cmp),
         :remote => create_node_object(remote_cmp)
       }
-      @term_mappings.values.each{|v|v.set_component_value!(link_info,local_cmp,remote_cmp)}
+      @term_mappings.values.each do |v| 
+        v.set_component_value!(link_info,local_cmp,remote_cmp)
+      end
+      attrs_to_get = Hash.new
+      @term_mappings.each_value do |v|
+        if v.kind_of?(ValueAttribute)
+          id = v.component_id
+          a = attrs_to_get[id] ||= Array.new
+          a << {:attribute_name => v.attribute_ref, :value_object => v}
+        end
+      end
+      unless attrs_to_get.empty?
+        component_mh = local_cmp.model_handle()
+        cols = [:id,:value_derived,:value_asserted]
+        x = Component.get_virtual_attributes__include_mixins(component_mh,attrs_to_get,cols)
+        x
+      end
       self
     end
    private
@@ -163,17 +179,21 @@ module XYZ
     class Value 
       def initialize(component_ref)
         @component_ref = component_ref
-        @value = nil
+        @component = nil
       end
 
       def set_component_value!(link_info,local_cmp,remote_cmp)
         if @component_ref == link_info[:local_type]
-          @value = local_cmp
+          @component = local_cmp
         elsif @component_ref == link_info[:remote_type]
-          @value = remote_cmp
+          @component = remote_cmp
         else
           Log.error("cannot find ref to component #{@ref}")
         end
+      end
+
+      def component_id()
+        @component && @component[:id]
       end
     end
 
@@ -184,16 +204,20 @@ module XYZ
     end
 
     class ValueAttribute < Value
+      attr_reader :attribute_ref
       def initialize(component_ref,attr_ref)
         super(component_ref)
-        @attr_ref = attr_ref
+        @attribute_ref = attr_ref
       end
     end
 
     class ValueLinkCardinality < Value
       def initialize(component_ref,attr_ref)
         super(component_ref)
-        @attr_ref = attr_ref
+        @attribute_ref = attr_ref
+      end
+      def set_attribute_value!(attr)
+        @attribute =  attr
       end
     end
   end

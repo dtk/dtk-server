@@ -287,17 +287,35 @@ module XYZ
       self[:extended_base_id] ? true : false
     end
 
-    #TODO: may collapse with above or make below teh default
+    #looks at both directly directly conencted attributes and ones on base component that is on one of its extensions
+    def self.get_virtual_attributes__include_mixins(component_mh,attrs_to_get,cols,field_to_match=:display_name)
+      ret = Hash.new
+      #TODO: may be able to avoid this loop
+      attrs_to_get.each do |component_id,attr_info|
+        attr_names = attr_info.map{|a|a[:attribute_name].to_s}
+        rows = get_virtual_attribute_aux(component_mh,component_id,attr_names,cols,field_to_match)
+        rows.each do |r|
+          id = r[:id]
+          attr_name = r[:attribute][field_to_match]
+          ret[id] ||= Hash.new
+          ret[id][attr_name.to_sym] = r[:attribute]
+        end
+      end
+      ret
+    end
 
     #looks at both directly directly conencted attributes and ones on base component that is on one of its extensions
     #TODO: extend with logic for multiple_instance_clause
     def get_virtual_attribute__include_mixins(attribute_name,cols,field_to_match=:display_name,multiple_instance_clause=nil)
-      #TODO: may be more efficient to do in single call to db
-      ret = get_virtual_attribute(attribute_name,cols,field_to_match)
-      return ret if ret
+      rows = self.class.get_virtual_attribute_aux(model_handle,id(),[attribute_name],cols,field_to_match,multiple_instance_clause)
+      Log.error("get virtual attribute should only match one attribute") if rows.size > 1
+      rows.first && rows.first[:attribute]
+    end
+   private
+    def self.get_virtual_attribute_aux(component_mh,component_id,attribute_names,cols,field_to_match=:display_name,multiple_instance_clause=nil)
       base_sp_hash = {
         :model_name => :component,
-        :filter => [:eq, :extended_base_id, id()],
+        :filter => [:or, [:eq, :extended_base_id, component_id], [:eq, :id, component_id]],
         :cols => [:id]
       }
       join_array = 
@@ -305,14 +323,13 @@ module XYZ
            :model_name => :attribute,
            :convert => true,
            :join_type => :inner,
-           :filter => [:eq, field_to_match, attribute_name],
-           :join_cond => {:component_component_id => :component__id} ,
-           :cols => Aux.array_add?(cols,:component_component_id)
+           :filter => [:oneof, field_to_match, attribute_names],
+           :join_cond => {:component_component_id => :component__id},
+           :cols => Aux.array_add?(cols,[:component_component_id,field_to_match])
          }]
-      rows = Model.get_objects_from_join_array(model_handle,base_sp_hash,join_array)
-      Log.error("get virtual attribute shoudl only match one attribute") if rows.size > 1
-      rows.first && rows.first[:attribute]
+      get_objects_from_join_array(component_mh,base_sp_hash,join_array)
     end
+    public
 
     def get_attributes_ports()
       opts = {:keep_ref_cols => true}

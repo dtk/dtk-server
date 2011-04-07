@@ -19,8 +19,8 @@ module XYZ
         constraints = clone_source_object.get_constraints!(:update_object => true)
         if constraints
           target = {"target_node_id_handle" => target_id_handle}
-          opts = {:raise_error_when_error_violation => true, :update_object => clone_source_object}
-          constraints.evaluate_given_target(target,opts)
+          constraint_opts = {:raise_error_when_error_violation => true, :update_object => clone_source_object}
+          constraints.evaluate_given_target(target,constraint_opts)
         end
       end
 
@@ -35,7 +35,11 @@ module XYZ
       if clone_source_object.class == Component and target_id_handle[:model_name] == :node
         Violation.update_violations([target_id_handle])
       end
-      return new_id_handle.get_id()
+      if opts[:ret_new_obj_with_cols]
+        clone_copy_output.objects.first
+      else
+        new_id_handle.get_id()
+      end
     end
 
     def clone_into__top_object_exists(top_object_id_handle,id_handles)
@@ -89,12 +93,14 @@ module XYZ
     class CloneCopyOutput
       def initialize(opts={})
         @id_handles = Array.new
+        @objects = nil
         @children = Hash.new
         #TODO: more efficient than making this Boolean is structure that indicates what depth to save children 
         @include_children = opts[:include_children]
+        @ret_new_obj_with_cols = opts[:ret_new_obj_with_cols]
         end
 
-      attr_reader :id_handles
+      attr_reader :id_handles, :ret_new_obj_with_cols, :objects
       def model_name()
         #all id handles wil be of same type
         @id_handles.first && @id_handles.first[:model_name]
@@ -112,8 +118,17 @@ module XYZ
         children_hash_form(level,model_name).map{|child_hash|child_hash[:id_handle]}
       end
 
-      def set_new_objects(objs_info,target_mh)
+      def set_new_objects!(objs_info,target_mh)
         @id_handles = Model.ret_id_handles_from_create_returning_ids(target_mh,objs_info)
+        if @ret_new_obj_with_cols
+          @objects = Array.new
+          objs_info.each_with_index do |obj_hash,i|
+            obj = @id_handles[i].create_object()
+            @ret_new_obj_with_cols.each{|col|obj[col] ||= obj_hash[col] if obj_hash.has_key?(col)}
+            @objects << obj
+          end
+        end
+        @id_handles
       end
 
       def add_id_handle(id_handle)
@@ -135,14 +150,6 @@ module XYZ
     end
 
     class CloneCopyProcessor
-=begin
-      def initialize(parent,opts={})
-        @db = parent.class.db
-        @fk_info = ForeignKeyInfo.new(@db)
-        @model_name = parent.model_name()
-        @ret = CloneCopyOutput.new(opts)
-      end
-=end
       def initialize(source_obj,opts={})
         @db = source_obj.class.db
         @fk_info = ForeignKeyInfo.new(@db)
@@ -190,7 +197,7 @@ module XYZ
 
         new_objs_info = Model.create_from_select(target_mh,field_set_to_copy,select_ds,create_override_attrs,create_opts_for_top())
         return @ret if new_objs_info.empty?
-        new_id_handles = @ret.set_new_objects(new_objs_info,target_mh)
+        new_id_handles = @ret.set_new_objects!(new_objs_info,target_mh)
         fk_info.add_id_mappings(source_model_handle,new_objs_info, :top => true)
 
         fk_info.add_id_handles(new_id_handles) #TODO: may be more efficient adding only id handles assciated with foreign keys
@@ -314,6 +321,7 @@ module XYZ
         dups_allowed_for_cmp = true #TODO stub
         returning_sql_cols = [:ancestor_id] 
         returning_sql_cols << :type if model_name == :component
+        (@ret.ret_new_obj_with_cols||{}).each{|col| returning_sql_cols << col unless returning_sql_cols.include?(col)}
         {:duplicate_refs => dups_allowed_for_cmp ? :allow : :prune_duplicates,:returning_sql_cols => returning_sql_cols}
       end
 

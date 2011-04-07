@@ -178,9 +178,8 @@ module XYZ
 
       #update all attributes taht ref this component
       cmp_id = cmp_value[:id]
-      attrs_to_get = {cmp_id => @component_attr_index[cmp_ref]}
-      component_mh = cmp_value.model_handle()
-      get_and_update_component_virtual_attributes!(attrs_to_get,component_mh)
+      attrs_to_get = {cmp_id => {:component => cmp_value, :attribute_info => @component_attr_index[cmp_ref]}}
+      get_and_update_component_virtual_attributes!(attrs_to_get)
     end
 
     def set_values!(link_info,local_cmp,remote_cmp)
@@ -192,10 +191,12 @@ module XYZ
       @term_mappings.values.each do |v| 
         v.set_component_remote_and_local_value!(link_info,local_cmp,remote_cmp)
       end
+      #set attrs_to_get
       attrs_to_get = Hash.new
       @term_mappings.each_value do |v|
         if v.kind_of?(ValueAttribute)
-          cmp = v.component
+          #v.component can be null if refers to component created by an event
+          next unless cmp = v.component
           a = (attrs_to_get[cmp[:id]] ||= {:component => cmp, :attribute_info => Array.new})[:attribute_info]
           a << {:attribute_name => v.attribute_ref.to_s, :value_object => v}
         end
@@ -422,11 +423,11 @@ module XYZ
       #clone component into node
       override_attrs = {:extended_base_id => base_component[:id]}
       #TODO: may put in flags to tell clone operation not to do any constraint checking
-      new_cmp_id = node.clone_into(component_extension.id_handle(),override_attrs)
+      clone_opts = {:ret_new_obj_with_cols => [:id,:display_name,:extended_base_id]}
+      new_cmp = node.clone_into(component_extension.id_handle(),override_attrs,clone_opts)
 
       #if alias is given, update context to reflect this
       if self[:alias]
-        new_cmp = base_component.id_handle.createIDH(:model_name => :component, :id => new_cmp_id).create_object()
         context.add_component_ref_and_value!(self[:alias],new_cmp)
       end
     end

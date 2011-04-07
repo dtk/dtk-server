@@ -287,7 +287,10 @@ module XYZ
       self[:extended_base_id] ? true : false
     end
 
-    #looks at both directly directly conencted attributes and ones on base component that is on one of its extensions
+    #looks at 
+    # 1) directly directly connected attributes
+    # 2) if extension then attributes on teh extenion's base
+    # 3) if base then extensions on all its attributes (TODO: NOTE: in which case multiple_instance_clause may be needed)
     def self.get_virtual_attributes__include_mixins(attrs_to_get,cols,field_to_match=:display_name)
       ret = Hash.new
       #TODO: may be able to avoid this loop

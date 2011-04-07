@@ -129,6 +129,7 @@ module XYZ
       #TODO: if needed put in machanism where terms map to same values so only need to set values once
       @term_mappings = Hash.new
       @node_mappings = Hash.new
+      @component_attr_index = Hash.new
     end
 
     def find_attribute(term_index_x)
@@ -156,7 +157,12 @@ module XYZ
            when :component
             ValueComponent.new(*value_ref)
            when :attribute
-            ValueAttribute.new(*value_ref)
+            cmp_ref = value_ref[0]
+            attr_name = value_ref[1].to_s
+            v = ValueAttribute.new(*value_ref)
+            p = @component_attr_index[cmp_ref] ||= Array.new
+            p << {:attribute_name => attr_name,:value_object => v}
+            v
            when :link_cardinality
             ValueLinkCardinality.new(*value_ref)
            else
@@ -169,7 +175,12 @@ module XYZ
     def add_component_ref_and_value!(cmp_ref,cmp_value)
       term_index = normalize_term_index(cmp_ref)
       add_ref!(:component,term_index,cmp_ref).set_component_value!(cmp_value)
-      #TODO: must also update any attribute refernce to this component
+
+      #update all attributes taht ref this component
+      cmp_id = cmp_value[:id]
+      attrs_to_get = {cmp_id => @component_attr_index[cmp_ref]}
+      component_mh = cmp_value.model_handle()
+      get_and_update_component_virtual_attributes!(attrs_to_get,component_mh)
     end
 
     def set_values!(link_info,local_cmp,remote_cmp)
@@ -189,21 +200,25 @@ module XYZ
           a << {:attribute_name => v.attribute_ref.to_s, :value_object => v}
         end
       end
-      unless attrs_to_get.empty?
-        component_mh = local_cmp.model_handle()
-        cols = [:id,:value_derived,:value_asserted]
-        from_db = Component.get_virtual_attributes__include_mixins(component_mh,attrs_to_get,cols)
-         attrs_to_get.each do |component_id,rest|
-          next unless cmp_info = from_db[component_id]
-          rest.each do |a|
-            attr_name = a[:attribute_name]
-            a[:value_object].set_attribute_value!(cmp_info[attr_name]) if cmp_info.has_key?(attr_name)
-          end
-        end
-      end
+      component_mh = local_cmp.model_handle()
+      get_and_update_component_virtual_attributes!(attrs_to_get,component_mh)
       self
     end
    private
+
+    def get_and_update_component_virtual_attributes!(attrs_to_get,component_mh)
+      return if attrs_to_get.empty?
+      cols = [:id,:value_derived,:value_asserted]
+      from_db = Component.get_virtual_attributes__include_mixins(component_mh,attrs_to_get,cols)
+      attrs_to_get.each do |component_id,rest|
+        next unless cmp_info = from_db[component_id]
+        rest.each do |a|
+          attr_name = a[:attribute_name]
+          a[:value_object].set_attribute_value!(cmp_info[attr_name]) if cmp_info.has_key?(attr_name)
+        end
+      end
+    end
+
     def normalize_term_index(t_x)
       t = t_x.to_s
       t =~ /^[^:]/ ? ":#{t}" : t

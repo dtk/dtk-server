@@ -23,6 +23,16 @@ ATTR_DEFAULTS = {
   "is_port" => false
 }
 
+def key_form(obj)
+  if obj.kind_of?(Hash)
+    obj.inject({}){|h,kv|h.merge(kv[0].to_sym => key_form(kv[1]))}
+  elsif obj.kind_of?(Array)
+    obj.map{|el|key_form(el)}
+  else
+    obj
+  end
+end
+
 input_file = ARGV[0]
 output_file = ARGV[1]
 component_name = ARGV[2]
@@ -35,6 +45,6 @@ component = hash_content["library"]["test"]["component"][component_name]
 raise NameError.new("cannot find component") unless component
 remove_default_attrs!(component)
 File.open(output_file, "w") do |f|
-  f.write(XYZ::Aux.pp_form({component_name => component}))
+  f.write(XYZ::Aux.pp_form(key_form(component_name => component)))
 end
 

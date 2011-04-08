@@ -446,9 +446,9 @@ module XYZ
     end
 
     def self.update_attribute_values_partial(attr_mh,partial_update_rows,cols,opts={})
-      AttributeLink::IndexMap.resolve_input_paths!(partial_update_rows.map{|r|r[:index_map] unless r[:index_map_persisted]}.compact)
-
-      pp [:partial_update_rows,partial_update_rows]
+      index_map_list = partial_update_rows.map{|r|r[:index_map] unless r[:index_map_persisted]}.compact
+      cmp_mh = attr_mh.createMH(:component)
+      AttributeLink::IndexMap.resolve_input_paths!(index_map_list,cmp_mh)
       id_list = partial_update_rows.map{|r|r[:id]}
 
       ndx_attr_updates = Hash.new

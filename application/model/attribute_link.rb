@@ -348,11 +348,11 @@ module XYZ
         end 
       end
 
-      def self.resolve_input_paths!(index_map_list)
+      def self.resolve_input_paths!(index_map_list,component_mh)
         return if index_map_list.empty?
         paths = Array.new
         index_map_list.each{|im|im.each{|im_el|paths << im_el[:input]}}
-        IndexMapPath.resolve_paths!(paths)
+        IndexMapPath.resolve_paths!(paths,component_mh)
       end
 
      private
@@ -420,14 +420,13 @@ module XYZ
       end
 
       #TODO: more efficient and not needed if can be resolved when get index
-      def self.resolve_paths!(path_list)
+      def self.resolve_paths!(path_list,component_mh)
         ndx_cmp_idhs = Hash.new
         path_list.each do |index_map_path|
           index_map_path.each_with_index do |el,i|
             next unless el.kind_of?(Hash)
-            next unless idh = (el[:create_component_index]||{})[:component_idh] 
-            id = idh.get_id()
-            ndx_cmp_idhs[id] ||= {:idh => idh, :elements => Array.new}
+            next unless id = (el[:create_component_index]||{})[:component_id] 
+            ndx_cmp_idhs[id] ||= {:idh => component_mh.createIDH(:id => id), :elements => Array.new}
             ndx_cmp_idhs[id][:elements] << {:path => index_map_path, :i => i}
           end
         end

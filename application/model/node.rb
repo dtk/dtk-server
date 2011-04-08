@@ -564,13 +564,9 @@ module XYZ
       conn_info_list = conn_profile.match_other_components(other_cmps)
       return if conn_info_list.empty?
       parent_idh = cmp_id_handle.get_parent_id_handle
+
       conn_info_list.each do |conn_info|
-        #TODO: need to make sure that contingently need to flip what is local and what is remote
-        components = {
-          conn_info[:local_type] => component, 
-          conn_info[:remote_type] => conn_info[:other_component]
-        }
-        context = InternalLinkDefContext.new(components)
+        context = conn_info.get_context(component,conn_info[:other_component])
         (conn_info[:attribute_mappings]||[]).each do |attr_mapping|
           link = attr_mapping.ret_link(context)
           AttributeLink.create_attr_links(parent_idh,[link])

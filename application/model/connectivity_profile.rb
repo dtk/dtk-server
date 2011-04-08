@@ -287,38 +287,6 @@ module XYZ
     end
   end
 
-  #TODO: unify below with above
-  class LinkDefContext < HashObject
-    def add_component!(ref,component)
-      self[:components] ||= Hash.new
-      self[:components][ref] = component
-      self
-    end
-    def find_component(ref)
-      (self[:components]||{})[ref]
-    end
-
-    def remote_node()
-      (self[:nodes]||{})[:remote]
-    end
-    def local_node()
-      (self[:nodes]||{})[:local]
-    end
-    private
-    def create_node_object(component)
-      component.id_handle.createIDH(:model_name => :node, :id => component[:node_node_id]).create_object()
-    end
-  end
-
-  class InternalLinkDefContext < LinkDefContext
-    def initialize(components)
-      hash = {
-        :components => components
-      }
-      super(hash)
-    end
-  end
-
   module LinkDefParsingMixin
     SimpleTokenPat = 'a-zA-Z0-9_-'
     AnyTokenPat = SimpleTokenPat + '_\[\]:'
@@ -449,14 +417,30 @@ module XYZ
       self.new(hash)
     end
     def get_context_refs!(ret)
-      get_context_refs_eq_term!(ret,attr_context_index(self[:input]))
-      get_context_refs_eq_term!(ret,attr_context_index(self[:output]))
+      get_context_refs_eq_term!(ret,context_index_attr(self[:input]))
+      get_context_refs_eq_term!(ret,context_index_attr(self[:output]))
     end
+
+    def ret_link(context)
+      input_attr,input_path = get_attribute_with_unravel_path(:input,context)
+      output_attr,output_path = get_attribute_with_unravel_path(:output,context)
+      raise Error.new("cannot find input_id") unless input_attr
+      raise Error.new("cannot find output_id") unless output_attr
+      ret = {:input_id => input_attr[:id],:output_id => output_attr[:id]}
+      ret.merge!(:input_path => input_path) if input_path
+      ret.merge!(:output_path => output_path) if output_path
+      ret
+    end
+
    private
-    def attr_context_index(path)
+    def context_index_attr(path)
       #TODO: may parse attribute mapping differently taking first element to be ':component.attr'
       ":#{path[0..1].join(SplitPat)}"
     end
+    def context_index_component(path)
+      ":#{path[0]}"
+    end
+
     def self.split_path(path,&block)
       split = path.split(SplitPat).map do |el|
         #process special symbols
@@ -482,21 +466,6 @@ module XYZ
       el =~ /^[0-9]+$/ ? el.to_i : el.gsub(/^:/,"").to_sym 
     end
 
-   public
-
-    def ret_link(context)
-      input_attr,input_path = get_attribute_with_unravel_path(:input,context)
-      output_attr,output_path = get_attribute_with_unravel_path(:output,context)
-      raise Error.new("cannot find input_id") unless input_attr
-      raise Error.new("cannot find output_id") unless output_attr
-      ret = {:input_id => input_attr[:id],:output_id => output_attr[:id]}
-      ret.merge!(:input_path => input_path) if input_path
-      ret.merge!(:output_path => output_path) if output_path
-      ret
-    end
-
-   private
-
     #returns [attribute,unravel_path]
     def get_attribute_with_unravel_path(dir,context)
       index_map_path = nil
@@ -504,11 +473,12 @@ module XYZ
       ret = [attr,index_map_path]
       path = self[dir]
       if is_simple_key?(path[0]) and path.size >= 2 #test that path starts with component
-        attr = context.find_attribute(attr_context_index(path))
+        attr = context.find_attribute(context_index_attr(path))
         if path.size > 2 
           rest_path = path[2..path.size-1]
           if is_unravel_path?(rest_path)
-            index_map_path = process_unravel_path(rest_path,component)
+            cmp = context.find_component(context_index_component(path))
+            index_map_path = process_unravel_path(rest_path,cmp)
           else
             raise Error.new("Not implemented yet")
           end
@@ -543,7 +513,7 @@ module XYZ
     end
     
     def process_create_component_index(item,component)
-      {:create_component_index => {:component_idh => component.id_handle()}}
+      {:create_component_index => {:component_id => component[:id]}}
     end
   end
 end

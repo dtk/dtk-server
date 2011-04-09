@@ -14,7 +14,7 @@ raise NameError.new("input file does not exist") unless File.exists?(input_file)
 output_form =
   if output_file =~ /[.]rb$/ then :hash
   elsif output_file =~ /[.]json$/ then :json
-  elsif output_file =~ /[.]yaml$/ then :yaml
+  elsif output_file =~ /[.]yml$/ then :yaml
   else raise NameError.new("wrong format for output file") 
   end
 raise NameError.new("no component given") unless component_name

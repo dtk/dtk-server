@@ -1,10 +1,25 @@
 #!/usr/bin/env ruby
 import_file = ARGV[0]
 container_uri = ARGV[1] || "/"
-delete_flag = ARGV[2]
-root = File.expand_path('../', File.dirname(__FILE__))
-opts = delete_flag == "delete" ? {:delete => true} : {}
-require root + '/app'
+flag = ARGV[2]
+Root = File.expand_path('../', File.dirname(__FILE__))
+
+def load_component_opts(type)
+  files = Dir.glob("#{Root}/spec/chef/site-cookbooks/*/r8meta.#{TypeMapping[type]}")
+  files.empty? ? {} : {:r8meta => {:type => type, :files => files}}
+end
+TypeMapping = {
+  :yaml => "yml"
+}
+
+opts = 
+  case flag 
+    when "delete" then {:delete => true} 
+    when "r8meta_yaml" then load_component_opts(:yaml)
+    else {}
+  end
+
+require Root + '/app'
 XYZ::Object.import_objects_from_file(XYZ::IDHandle[:c => 2, :uri => container_uri],import_file,opts)
 
 

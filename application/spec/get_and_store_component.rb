@@ -4,6 +4,7 @@ require 'json'
 require 'yaml'
 require 'pp'
 require File.expand_path('../../utils/internal/auxiliary', File.dirname(__FILE__))
+require File.expand_path('../../utils/internal/log', File.dirname(__FILE__))
 
 input_file = ARGV[0]
 output_file = ARGV[1]
@@ -40,13 +41,32 @@ ATTR_DEFAULTS = {
 
 def order(component)
   ret = ActiveSupport::OrderedHash.new()
+  missing_cmps = component.keys - COMPONENT_KEY_ORDER
+  XYZ::Log.error("missing component keys in (#{missing_cmps.join(", ")})") unless missing_cmps.empty?
   COMPONENT_KEY_ORDER.each do |cmp_key|
-    ret[cmp_key] = component[cmp_key] if component.has_key?(cmp_key)
+    if component.has_key?(cmp_key)
+      if cmp_key == "attribute"
+        attrs = component["attribute"]
+        cmp_val = attrs.keys.sort.inject(ActiveSupport::OrderedHash.new()) do |h,attr|
+          attr_info = attrs[attr]
+          missing_attrs = attr_info.keys - ATTR_KEY_ORDER
+          XYZ::Log.error("missing component keys in (#{missing_attrs.join(", ")})") unless missing_attrs.empty?
+          ordered_attr_info = ATTR_KEY_ORDER.inject(ActiveSupport::OrderedHash.new()) do |h2,attr_key|
+            attr_info.include?(attr_key) ? h2.merge(attr_key =>  attr_info[attr_key]) : h2
+          end
+          h.merge(attr => ordered_attr_info)
+        end
+      else 
+        cmp_val = component[cmp_key] 
+      end
+      ret[cmp_key] = cmp_val
+    end
   end
   ret
 end
 COMPONENT_KEY_ORDER = 
-  ["display_name",
+  [
+   "display_name",
    "description",
    "ui",
    "type",
@@ -58,8 +78,26 @@ COMPONENT_KEY_ORDER =
    "monitoring_item",
    "external_ref",
    "ds_key",
-   "ds_attributes"]
+   "ds_attributes"
+]
 
+ATTR_KEY_ORDER = 
+  [
+   "display_name",
+   "description",
+   "data_type",
+   "value_asserted",
+   "is_port",
+   "semantic_type_summary",
+   "semantic_type",
+   "required",
+   "external_ref",
+   "read_only",
+   "dynamic",
+   "cannot_change",
+   "hidden",
+]
+        
 def key_form(obj)
   if obj.kind_of?(Hash)
     obj.inject({}){|h,kv|h.merge(kv[0].to_sym => key_form(kv[1]))}
@@ -79,7 +117,6 @@ hash_output = {component_name => ordered_component}
 File.open(output_file, "w") do |f|
   case output_form
     when :hash
-    #TODO: need to take into account ordering
       f.write(XYZ::Aux.pp_form(key_form ? key_form(hash_output) : hash_output))
     when :yaml
       YAML.dump(hash_output,f)

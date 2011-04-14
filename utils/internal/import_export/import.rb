@@ -8,6 +8,7 @@ module XYZ
       create_prefix_object_if_needed(target_id_handle,opts)
       hash_content = Aux::hash_from_file_with_json(json_file) 
       return nil unless hash_content
+      add_r8meta!(hash_content,opts[:r8meta]) if opts[:r8meta]
       global_fks = Hash.new
       unless target_id_handle.is_top?
         global_fks = input_into_model(target_id_handle,hash_content) 
@@ -31,6 +32,20 @@ module XYZ
         delete_instance(target_id_handle)
       end
       create_simple_instance?(target_id_handle[:uri],target_id_handle[:c])    
+    end
+
+    def add_r8meta!(hash,r8meta)
+      type = r8meta[:type]
+      if type == :yaml
+        library = r8meta[:library]
+        require 'yaml'
+        r8meta[:files].each do |file|
+          component_hash = YAML.load_file( file)
+          hash["library"][library]["component"][component_hash.keys.first] = component_hash.values.first
+        end 
+      else
+        raise Error.new("Type #{type} not supported")
+      end
     end
   end
 end

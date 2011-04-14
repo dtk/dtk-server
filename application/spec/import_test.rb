@@ -6,7 +6,12 @@ Root = File.expand_path('../', File.dirname(__FILE__))
 
 def load_component_opts(type)
   files = Dir.glob("#{Root}/spec/chef/site-cookbooks/*/r8meta.#{TypeMapping[type]}")
-  files.empty? ? {} : {:r8meta => {:type => type, :files => files}}
+  if files.empty? 
+    {} 
+  else
+    library = "test" #TODO: stub 
+    {:r8meta => {:type => type, :library => library, :files => files}}
+  end
 end
 TypeMapping = {
   :yaml => "yml"

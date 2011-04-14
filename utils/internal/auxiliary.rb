@@ -285,6 +285,7 @@ private
    end
 end
 
+require 'active_support/ordered_hash'
 #monkey patch
 module ActiveSupport
   class OrderedHash < ::Hash

@@ -40,8 +40,8 @@ module XYZ
         library = r8meta[:library]
         require 'yaml'
         r8meta[:files].each do |file|
-          component_hash = YAML.load_file( file)
-          hash["library"][library]["component"][component_hash.keys.first] = component_hash.values.first
+          component_hash = YAML.load_file(file)
+          component_hash.each{|k,v|hash["library"][library]["component"][k] = v}
         end 
       else
         raise Error.new("Type #{type} not supported")

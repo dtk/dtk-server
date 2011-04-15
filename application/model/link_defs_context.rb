@@ -38,6 +38,8 @@ module XYZ
             p = @component_attr_index[cmp_ref] ||= Array.new
             p << {:attribute_name => attr_name,:value_object => v}
             v
+           when :node_attribute
+            ValueNodeAttribute.new(*value_ref)
            when :link_cardinality
             ValueLinkCardinality.new(*value_ref)
            else
@@ -66,7 +68,7 @@ module XYZ
       @term_mappings.values.each do |v| 
         v.set_component_remote_and_local_value!(link_info,local_cmp,remote_cmp)
       end
-      #set attrs_to_get
+      #set (component) attributes
       attrs_to_get = Hash.new
       @term_mappings.each_value do |v|
         if v.kind_of?(ValueAttribute)
@@ -77,6 +79,22 @@ module XYZ
         end
       end
       get_and_update_component_virtual_attributes!(attrs_to_get)
+
+      #set node attributes
+      attrs_to_get = Hash.new
+      @term_mappings.each_value do |v|
+        if v.kind_of?(ValueNodeAttribute)
+          node = @node_mappings[v.node_ref]
+          unless node
+            Log.error("cannot find node associated with node ref")
+            next
+          end
+          a = (attrs_to_get[node[:id]] ||= {:node => node, :attribute_info => Array.new})[:attribute_info]
+          a << {:attribute_name => v.attribute_ref.to_s, :value_object => v}
+        end
+      end
+      get_and_update_node_virtual_attributes!(attrs_to_get)
+
       self
     end
    private
@@ -90,6 +108,19 @@ module XYZ
         hash_val[:attribute_info].each do |a|
           attr_name = a[:attribute_name]
           a[:value_object].set_attribute_value!(cmp_info[attr_name]) if cmp_info.has_key?(attr_name)
+        end
+      end
+    end
+
+    def get_and_update_node_virtual_attributes!(attrs_to_get)
+      return if attrs_to_get.empty?
+      cols = [:id,:value_derived,:value_asserted]
+      from_db = Node.get_virtual_attributes(attrs_to_get,cols)
+      attrs_to_get.each do |node_id,hash_val|
+        next unless node_info = from_db[node_id]
+        hash_val[:attribute_info].each do |a|
+          attr_name = a[:attribute_name]
+          a[:value_object].set_attribute_value!(node_info[attr_name]) if node_info.has_key?(attr_name)
         end
       end
     end
@@ -111,6 +142,7 @@ module XYZ
       end
 
       def set_component_remote_and_local_value!(link_info,local_cmp,remote_cmp)
+        return if @component_ref.nil? #would fire if this is a NodeAttribute
         if @component_ref == link_info[:local_type]
           @component = local_cmp
         elsif @component_ref == link_info[:remote_type]
@@ -141,6 +173,21 @@ module XYZ
       attr_reader :attribute_ref
       def initialize(component_ref,attr_ref)
         super(component_ref)
+        @attribute_ref = attr_ref
+      end
+      def set_attribute_value!(attribute)
+        @attribute = attribute
+      end
+      def value()
+        @attribute
+      end
+    end
+
+    class ValueNodeAttribute < Value
+      attr_reader :attribute_ref, :node_ref
+      def initialize(node_ref,attr_ref)
+        super(nil)
+        @node_ref = node_ref
         @attribute_ref = attr_ref
       end
       def set_attribute_value!(attribute)

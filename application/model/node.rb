@@ -309,6 +309,32 @@ module XYZ
       }
       get_children_from_sp_hash(:attribute,sp_hash).first
     end
+    #TODO: may write above in terms of below
+    def get_virtual_attributes(attribute_names,cols,field_to_match=:display_name)
+      sp_hash = {
+        :model_name => :attribute,
+        :filter => [:oneof, field_to_match, attribute_names],
+        :cols => cols
+      }
+      get_children_from_sp_hash(:attribute,sp_hash)
+    end
+
+    def self.get_virtual_attributes(attrs_to_get,cols,field_to_match=:display_name)
+      ret = Hash.new
+      #TODO: may be able to avoid this loop
+      attrs_to_get.each do |node_id,hash_value|
+        attr_info = hash_value[:attribute_info]
+        node = hash_value[:node]
+        attr_names = attr_info.map{|a|a[:attribute_name].to_s}
+        rows = node.get_virtual_attributes(attr_names,cols,field_to_match)
+        rows.each do |attr|
+          attr_name = attr[field_to_match]
+          ret[node_id] ||= Hash.new
+          ret[node_id][attr_name] = attr
+        end
+      end
+      ret
+    end
 
     #attribute on component on node
     #assumption is that component cannot appear more than once on node

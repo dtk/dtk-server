@@ -40,6 +40,7 @@ module XYZ
               :attribute_mappings =>
               [
                #   {":postgresql__server.sap__l4" => ":java_webapp.sap_ref__l4"},
+               {":local_node.host_address_ipv4" => ":postgresql_db.client_host_addr"},
                {":java_webapp.db_params" => ":postgresql_db.db_params_ref"}
               ]
             }

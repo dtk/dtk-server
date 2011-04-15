@@ -85,6 +85,7 @@ COMPONENT_KEY_ORDER =
    "specific_type",
    "component_type",
    "only_one_per_node",
+   "dependency",
    "attribute",
    "extension_type",
    "*extended_base_id",

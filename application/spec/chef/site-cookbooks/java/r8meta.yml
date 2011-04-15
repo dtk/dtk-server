@@ -1,0 +1,40 @@
+--- !omap 
+- java_webapp: !omap 
+    - display_name: java_webapp
+    - ui: 
+        images: 
+          tiny: ""
+          tnail: java-01.png
+          display: java-01.png
+    - basic_type: application
+    - specific_type: java_app
+    - component_type: java_webapp
+    - only_one_per_node: false
+    - dependency: 
+        tomcat: 
+          type: component
+          search_pattern: 
+            ":filter": 
+            - ":eq"
+            - ":component_type"
+            - tomcat
+          display_name: tomcat
+          description: tomcat is required for java_webapp
+          severity: warning
+    - attribute: !omap 
+        - db_params: !omap 
+            - display_name: db_params
+            - description: DB configuration
+            - data_type: json
+            - is_port: true
+            - semantic_type_summary: db_config
+            - semantic_type: db_config
+            - required: true
+        - sap_ref__l4: !omap 
+            - display_name: sap_ref__l4
+            - description: postgresql admin service access point reference to connect to server
+            - data_type: json
+            - is_port: true
+            - semantic_type_summary: sap_ref__l4
+            - semantic_type: sap_ref__l4
+            - required: true

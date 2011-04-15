@@ -132,6 +132,16 @@ module XYZ
     def get_context_refs_eq_term!(ret,term_index)
       return unless term_index.kind_of?(String)
       split = term_index.split(SplitPat)
+      if split[0] =~ NodeTermRE
+        node_ref = $1.to_sym
+        if split.size == 2
+          ret.add_ref!(:node_attribute,term_index,node_ref,split[1])
+        else
+          Log.error("unexpected form")
+        end
+        return
+      end  
+
       if split[0] =~ ComponentTermRE
         component = $1.to_sym
       else
@@ -156,6 +166,7 @@ module XYZ
         end
       end
     end
+    NodeTermRE = Regexp.new("^:(local|remote)_node$") 
     ComponentTermRE = Regexp.new("^:([#{SimpleTokenPat}]+$)") 
     AttributeTermRE = Regexp.new("^([#{SimpleTokenPat}]+$)") 
   end

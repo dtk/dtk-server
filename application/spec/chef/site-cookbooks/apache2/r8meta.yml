@@ -1,145 +1,138 @@
---- 
-apache2: 
-  only_one_per_node: true
-  basic_type: service
-  ds_key: "[:user_data, \"/library/test/apache2\"]"
-  type: instance
-  specific_type: web_server
-  attribute: 
-    dir: 
-      data_type: string
-      description: Location for Apache configuration
-      display_name: dir
-      external_ref: 
-        type: chef_attribute
-        path: node[apache2][dir]
-      value_asserted: /etc/apache2
-    keepaliverequests: 
-      data_type: string
-      description: Number of requests allowed on a persistent connection
-      display_name: keepaliverequests
-      external_ref: 
-        type: chef_attribute
-        path: node[apache2][keepaliverequests]
-      value_asserted: "100"
-    binary: 
-      data_type: string
-      description: Apache server daemon program
-      display_name: binary
-      external_ref: 
-        type: chef_attribute
-        path: node[apache2][binary]
-      value_asserted: /usr/sbin/apache2
-    timeout: 
-      data_type: string
-      description: Connection timeout value
-      display_name: timeout
-      external_ref: 
-        type: chef_attribute
-        path: node[apache2][timeout]
-      value_asserted: "300"
-    contact: 
-      data_type: string
-      description: Email address of webmaster
-      display_name: contact
-      external_ref: 
-        type: chef_attribute
-        path: node[apache2][contact]
-      value_asserted: ops@example.com
-    servertokens: 
-      data_type: string
-      description: Server response header
-      display_name: servertokens
-      external_ref: 
-        type: chef_attribute
-        path: node[apache2][servertokens]
-      value_asserted: Prod
-    sap_config__l4: 
-      is_port: true
-      data_type: json
-      semantic_type_summary: sap_config__l4
-      description: apache2 ip listen portsK,service access point configuration
-      display_name: sap_config__l4
-      external_ref: 
-        type: service_attribute
-        path: service[apache2_service][sap_config__l4]
-      value_asserted: 
-      - port: 80
-        protocol: tcp
-      - port: 443
-        protocol: tcp
-      semantic_type: 
-        ":array": sap_config__l4
-    keepalivetimeout: 
-      data_type: string
-      description: Time to wait for requests on persistent connection
-      display_name: keepalivetimeout
-      external_ref: 
-        type: chef_attribute
-        path: node[apache2][keepalivetimeout]
-      value_asserted: "5"
-    serversignature: 
-      data_type: string
-      description: Configure footer on server-generated documents
-      display_name: serversignature
-      external_ref: 
-        type: chef_attribute
-        path: node[apache2][serversignature]
-      value_asserted: "On"
-    icondir: 
-      data_type: string
-      description: Directory location for icons
-      display_name: icondir
-      external_ref: 
-        type: chef_attribute
-        path: node[apache2][icondir]
-      value_asserted: /usr/share/apache2/icons
-    user: 
-      data_type: string
-      description: User Apache runs as
-      display_name: user
-      external_ref: 
-        type: chef_attribute
-        path: node[apache2][user]
-      value_asserted: www-data
-    log_dir: 
-      data_type: string
-      description: Location for Apache logs
-      display_name: log_dir
-      external_ref: 
-        type: chef_attribute
-        path: node[apache2][log_dir]
-      value_asserted: /etc/apache2
-    keepalive: 
-      data_type: string
-      description: HTTP persistent connections
-      display_name: keepalive
-      external_ref: 
-        type: chef_attribute
-        path: node[apache2][keepalive]
-      value_asserted: "On"
-  description: Main Apache configuration
-  display_name: apache2
-  ds_attributes: 
-    qualified_ref: /library/test/apache2
-    specific_type: web_server
-    ref: apache2
-    ui: "{\"images\": {\"tnail\":\"apache.png\",\"display\":\"apache.png\",\"tiny\":\"\"}}"
-  external_ref: 
-    recipe_name: apache2
-    type: chef_recipe
-  ui: 
-    images: 
-      tiny: ""
-      tnail: apache.png
-      display: apache.png
-  monitoring_item: 
-    inet_service_up: 
-      service_name: apache2_service
-      condition_description: this service should be accessible over tcp
-      enabled: true
-      condition_name: accessible_over_tcp
-      params: 
-      - sap
-      display_name: inet_service_up
-  component_type: apache2
+--- !omap 
+- apache2: !omap 
+    - display_name: apache2
+    - description: Main Apache configuration
+    - external_ref: 
+        type: chef_recipe
+        recipe_name: apache2
+    - ui: 
+        images: 
+          tiny: ""
+          tnail: apache.png
+          display: apache.png
+    - type: instance
+    - basic_type: service
+    - specific_type: web_server
+    - component_type: apache2
+    - attribute: !omap 
+        - binary: !omap 
+            - display_name: binary
+            - description: Apache server daemon program
+            - data_type: string
+            - value_asserted: /usr/sbin/apache2
+            - external_ref: 
+                type: chef_attribute
+                path: node[apache2][binary]
+        - contact: !omap 
+            - display_name: contact
+            - description: Email address of webmaster
+            - data_type: string
+            - value_asserted: ops@example.com
+            - external_ref: 
+                type: chef_attribute
+                path: node[apache2][contact]
+        - dir: !omap 
+            - display_name: dir
+            - description: Location for Apache configuration
+            - data_type: string
+            - value_asserted: /etc/apache2
+            - external_ref: 
+                type: chef_attribute
+                path: node[apache2][dir]
+        - icondir: !omap 
+            - display_name: icondir
+            - description: Directory location for icons
+            - data_type: string
+            - value_asserted: /usr/share/apache2/icons
+            - external_ref: 
+                type: chef_attribute
+                path: node[apache2][icondir]
+        - keepalive: !omap 
+            - display_name: keepalive
+            - description: HTTP persistent connections
+            - data_type: string
+            - value_asserted: "On"
+            - external_ref: 
+                type: chef_attribute
+                path: node[apache2][keepalive]
+        - keepaliverequests: !omap 
+            - display_name: keepaliverequests
+            - description: Number of requests allowed on a persistent connection
+            - data_type: string
+            - value_asserted: "100"
+            - external_ref: 
+                type: chef_attribute
+                path: node[apache2][keepaliverequests]
+        - keepalivetimeout: !omap 
+            - display_name: keepalivetimeout
+            - description: Time to wait for requests on persistent connection
+            - data_type: string
+            - value_asserted: "5"
+            - external_ref: 
+                type: chef_attribute
+                path: node[apache2][keepalivetimeout]
+        - log_dir: !omap 
+            - display_name: log_dir
+            - description: Location for Apache logs
+            - data_type: string
+            - value_asserted: /etc/apache2
+            - external_ref: 
+                type: chef_attribute
+                path: node[apache2][log_dir]
+        - sap_config__l4: !omap 
+            - display_name: sap_config__l4
+            - description: apache2 ip listen portsK,service access point configuration
+            - data_type: json
+            - value_asserted: 
+              - port: 80
+                protocol: tcp
+              - port: 443
+                protocol: tcp
+            - is_port: true
+            - semantic_type_summary: sap_config__l4
+            - semantic_type: 
+                ":array": sap_config__l4
+            - external_ref: 
+                type: service_attribute
+                path: service[apache2_service][sap_config__l4]
+        - serversignature: !omap 
+            - display_name: serversignature
+            - description: Configure footer on server-generated documents
+            - data_type: string
+            - value_asserted: "On"
+            - external_ref: 
+                type: chef_attribute
+                path: node[apache2][serversignature]
+        - servertokens: !omap 
+            - display_name: servertokens
+            - description: Server response header
+            - data_type: string
+            - value_asserted: Prod
+            - external_ref: 
+                type: chef_attribute
+                path: node[apache2][servertokens]
+        - timeout: !omap 
+            - display_name: timeout
+            - description: Connection timeout value
+            - data_type: string
+            - value_asserted: "300"
+            - external_ref: 
+                type: chef_attribute
+                path: node[apache2][timeout]
+        - user: !omap 
+            - display_name: user
+            - description: User Apache runs as
+            - data_type: string
+            - value_asserted: www-data
+            - external_ref: 
+                type: chef_attribute
+                path: node[apache2][user]
+    - monitoring_item: 
+        inet_service_up: 
+          service_name: apache2_service
+          condition_description: this service should be accessible over tcp
+          enabled: true
+          condition_name: accessible_over_tcp
+          params: 
+          - sap
+          display_name: inet_service_up

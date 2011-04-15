@@ -71,7 +71,7 @@
             - semantic_type: db_params
             - external_ref: 
                 type: service_attribute
-                path: service[postgresql][db][*index][db_params]
+                path: service[postgresql][db][db_params]
         - client_host_addr: !omap 
             - display_name: client_host_addr
             - description: Client host address
@@ -79,7 +79,7 @@
             - is_port: true
             - external_ref: 
                 type: service_attribute
-                path: service[postgresql][db][*index][client_host_addr]
+                path: service[postgresql][db][client_host_addr]
     - extension_type: database
     - "*extended_base_id": /library/test/component/postgresql__server
 - postgresql__pgpool: !omap 

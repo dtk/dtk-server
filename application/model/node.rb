@@ -314,7 +314,7 @@ module XYZ
       sp_hash = {
         :model_name => :attribute,
         :filter => [:oneof, field_to_match, attribute_names],
-        :cols => cols
+        :cols => Aux.array_add?(cols,field_to_match)
       }
       get_children_from_sp_hash(:attribute,sp_hash)
     end

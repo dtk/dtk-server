@@ -77,8 +77,6 @@
             - description: Client host address
             - data_type: string
             - is_port: true
-            - semantic_type_summary: string_input
-            - semantic_type: string_input
             - external_ref: 
                 type: service_attribute
                 path: service[postgresql][db][*index][client_host_addr]

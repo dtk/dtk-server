@@ -82,7 +82,6 @@ end
 
 ################Monkey patch to get functionality to replace arrays
 # returns [to_remove,to_add]
-
 def remove_replace_markers(hash)
   #TODO: just looking for {"recipe1" => {"!replace:foo" => [..]},"recipe2=> ..}
   #e.g., {"user_account"=>{"list"=>[{"gid"=>nil, "username"=>"usertom", "uid"=>nil}]}}
@@ -95,11 +94,22 @@ def remove_replace_markers(hash)
       to_remove[k] = "!merge:#{attr_name}"
       to_add[k] = {attr_name => v.values.first}
     else
-      to_add[k] = v
+      if v.kind_of?(Hash)
+        nested_to_remove,nested_to_add = remove_replace_markers(v)
+        if nested_to_remove.empty?
+          to_add[k] = v
+        else
+          to_remove[k] = nested_to_remove
+          to_add[k] = nested_to_add
+        end
+      else
+        to_add[k] = v
+      end
     end
   end
   [to_remove,to_add]
 end
+
 def merge_with_replace(target,source)
   to_remove,to_add = remove_replace_markers(source)
   if to_remove.empty? 

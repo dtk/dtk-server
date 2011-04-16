@@ -196,5 +196,9 @@ R8::Routes["inventory/index"] = {
   :layout => 'inventory'
 }
 
+R8::Routes["editor/index"] = {
+  :layout => 'editor'
+}
+
 R8::Routes.freeze
 

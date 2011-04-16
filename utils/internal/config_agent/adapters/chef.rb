@@ -29,17 +29,33 @@ module XYZ
             common_attr_val_list << ret_attributes(component_action, :strip_off_recipe_name => true)
           elsif component_action[:component][:only_one_per_node]
             @recipe_names << recipe_name
-            @attributes.merge!(ret_attributes(component_action))
+            deep_merge!(@attributes,ret_attributes(component_action))
           else
             @recipe_names << recipe_name
             list = Array.new
             @common_attr_index[recipe_name] = list
             list << ret_attributes(component_action, :strip_off_recipe_name => true)
-            @attributes.merge!(recipe_name => {"!replace:list" => list})
+            if recipe_name =~ /(^.+)::(.+$)/
+              cookbook_name = $1
+              rcp_name = $2
+              deep_merge!(@attributes,{cookbook_name => {rcp_name => {"!replace:list" => list}}})
+            else
+              deep_merge!(@attributes,{recipe_name => {"!replace:list" => list}})
+            end
           end
           self
         end
        private
+        def deep_merge!(target,source)
+          source.each do |k,v|
+            if target.has_key?(k)
+              deep_merge!(target[k],v)
+            else
+              target[k] = v
+            end
+          end
+        end
+
         def recipe(action)
           ((action[:component]||{})[:external_ref]||{})[:recipe_name]
         end

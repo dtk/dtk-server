@@ -1,0 +1,32 @@
+#editor, .editor {
+	font-size: 12px;
+	width: 1200px;
+	height: 500px;
+	position: relative;
+	float: left;
+}
+
+#file-explorer {
+	background-color: #FFFFFF;
+	border: 2px solid #CCCCCC;
+	width: 300px;
+	height: 100%;
+	overflow: auto;
+	position: relative;
+	float: left;
+}
+
+.select-popup {
+	position: absolute;
+	z-index: 100;
+	height: 70px;
+	width: 150px;
+	background-color: #CCCCCC;
+
+	text-decoration: none;
+
+	-moz-border-radius-topleft: 5px;
+	-moz-border-radius-topright: 5px;
+	-moz-border-radius-bottomleft: 5px;
+	-moz-border-radius-bottomright: 5px;
+}

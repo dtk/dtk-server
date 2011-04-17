@@ -109,5 +109,6 @@ R8::Config[:css_file_dir] = "#{R8::Config[:app_root_path]}/public/css"
 R8::Config[:js_file_write_path] = "#{R8::Config[:app_root_path]}/public/js/cache"
 R8::Config[:js_templating_on] = false
 
+R8::Config[:editor_file_path] = "#{R8::Config[:app_root_path]}/editor"
 
 R8::Config[:page_limit] = 20

@@ -18,6 +18,7 @@
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/list.css" />
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/search.css" />
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/inventory.layout.css" />
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/editor.css" />
 
 {%for css_include in _app[:css_includes]%}
 	<link rel="stylesheet" type="text/css" href="{%=css_include%}" />
@@ -41,42 +42,16 @@
 				<div class="yui3-u right-cap"></div>
 			</div>
 		</div>
-		<div style="height: 10px; width: inherit;"></div>
 		<div id="main-body-wrapper" class="main-body-wrapper">
-			<div id="mb-l-panel" class="mb-l-panel">
-				<div class="cap">
-					<div class="bar"></div>
-					<div class="corner tr"></div>
-				</div>
-				<div id="spacer" style="height: 70px; width: inherit; background-color: #FFFFFF;"></div>
-				<div id="view-categories" class="view-categories">
-					<div id="node-cat" class="view-cat"><div class="label">Nodes</div></div>
-					<div id="component-cat" class="view-cat"><div class="label">Components</div></div>
-					<div id="datacenter-cat" class="view-cat"><div class="label">Environments</div></div>
-					<div id="link-cat" class="view-cat"><div class="label">Links</div></div>
-					<div id="target-cat" class="view-cat"><div class="label">Deploy Targets</div></div>
-				</div>
-				<div class="cap">
-					<div class="bar"></div>
-					<div class="corner br"></div>
+			<div id="file-explorer">
+				<div style="height: 30px; width: 150px; margin: 10px;">
+					<a href="javascript:R8.Editor.loadFile('1');">apache2.conf.erb</a><br/>
+					<a href="javascript:R8.Editor.loadFile('2');">metadata.json</a><br/>
+					<a href="javascript:R8.Editor.loadFile('3');">metadata.rb</a><br/>
+					<a href="javascript:R8.Editor.loadFile('4');">default.rb</a><br/>
 				</div>
 			</div>
-			<div id="mb-panel-spacer" class="mb-panel-spacer"></div>
-			<div id="mb-content-wrapper" class="mb-content-wrapper" style="height: 400px; width: 700px;">
-				<div id="mb-top-cap" class="yui3-g cap">
-					<div class="yui3-u corner tl"></div>
-					<div class="yui3-u bar"></div>
-					<div class="yui3-u corner tr"></div>
-				</div>
-				<div id="mb-main-content" class="mb-main-content" style="height: 400px; width: 700px;">
-					{%=main_body%}
-				</div>
-				<div id="mb-btm-cap" class="yui3-g cap">
-					<div class="yui3-u corner bl"></div>
-					<div class="yui3-u bar"></div>
-					<div class="yui3-u corner br"></div>
-				</div>
-			</div>
+			<div id="editor"></div>
 		</div>
 		</div>
 	</div>
@@ -94,6 +69,22 @@ YUI_config = {
 };
 </script>
 
+<script>
+
+window.onload = function() {
+	R8.Editor.init();
+};
+
+function getSelection() {
+	console.log(editor.getSelectionRange());
+//	alert(editor.getSession().doc.getTextRange(editor.getSelectionRange()));
+}
+
+function swapAttrVar() {
+	editor.insert("<% foobut %>");
+}
+</script>
+
 <!-- JS -->
 
 <script src="{%=_app[:base_js_uri]%}/external/jquery.js"></script>
@@ -104,25 +95,21 @@ YUI_config = {
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/ctrl.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/utils.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/model.r8.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/canvas.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/templating.r8.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/maintoolbar.r8.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/workspace.r8.js"></script>
+<!--<script type="text/javascript" src="{%=_app[:base_js_uri]%}/cmdbar.r8.js"></script>-->
 
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/inventory.r8.js"></script>
+<script src="{%=_app[:base_js_uri]%}/external/ace/src/ace.js" type="text/javascript" charset="utf-8"></script>
+<script src="{%=_app[:base_js_uri]%}/external/ace/src/mode-ruby.js" type="text/javascript" charset="utf-8"></script>
+<script src="{%=_app[:base_js_uri]%}/external/ace/src/theme-twilight.js" type="text/javascript" charset="utf-8"></script>
+
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/editor.r8.js"></script>
 
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/toolbargroup.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/topbar.r8.js"></script>
-
-
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/viewspace.r8.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/group.r8.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/datacenter.r8.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/node.r8.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/port.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/toolbar.r8.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/dock.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/page.r8.js"></script>
-
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/search.r8.js"></script>
 
 
 <script type="text/javascript">

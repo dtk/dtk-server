@@ -113,7 +113,7 @@
       },
       "display_name": "test",
       "node": {
-        "ami-0aeb1763": {
+        "ami-e2eb178b": {
           "type": "image",
           "ds_source_obj_type": "image",
           "is_deployed": true,
@@ -128,7 +128,7 @@
           "data_source": "user_data",
           "external_ref": {
             "type": "ec2_image",
-            "image_id": "ami-0aeb1763"
+            "image_id": "ami-e2eb178b"
           },
           "node_interface": {
             "eth0": {
@@ -162,7 +162,7 @@
             "flavor": {
               "disk": null
             },
-            "id": "ami-0aeb1763",
+            "id": "ami-e2eb178b",
             "product_codes": [
 
             ]
@@ -223,7 +223,7 @@
               "enabled": true
             }
           },
-          "ds_key": "[:user_data, \"/library/test/ami-0aeb1763\"]"
+          "ds_key": "[:user_data, \"/library/test/ami-e2eb178b\"]"
         },
         "ami-aa37c984": {
           "type": "image",

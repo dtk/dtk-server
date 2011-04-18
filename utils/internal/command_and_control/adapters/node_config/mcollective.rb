@@ -10,14 +10,15 @@ module XYZ
           config_agent = ConfigAgent.load(config_node[:config_agent_type])
           rpc_client = nil
           Lock.synchronize do
-            #TODO: check if need lock for this
-            rpc_client = rpcclient("chef_client",:options => Options)
+            #TODO: check if really need lock for this
+            #deep copy because rpcclient modifies options
+            rpc_client = rpcclient(mcollective_agent,:options => Aux::deep_copy(Options))
           end
           target_identity = ret_discovered_mcollective_id(config_node[:node],rpc_client)
           raise ErrorCannotConnect.new() unless target_identity
 
           msg_content =  config_agent.ret_msg_content(config_node)
-          filter = {"identity" => [target_identity], "agent" => ["chef_client"]}
+          filter = {"identity" => [target_identity], "agent" => [mcollective_agent]}
           response = rpc_client.custom_request("run",msg_content,target_identity,filter).first
           raise ErrorTimeout.new() unless response
           raise Error.new() unless response[:data]
@@ -37,7 +38,7 @@ module XYZ
           Lock.synchronize do
             #TODO: check if need lock for this
             options =   Options.merge(:disctimeout=> 2)
-            rpc_client = rpcclient("chef_client",:options => options)
+            rpc_client = rpcclient(mcollective_agent,:options => options)
           end
           #looping rather than just one discovery timeout because if node not connecetd msg lost
           count = 0
@@ -55,6 +56,9 @@ module XYZ
       end
 
      private
+      def self.mcollective_agent()
+        @mcollective_agent ||= R8::Config[:command_and_control][:node_config][:mcollective][:agent]
+      end
 
       def self.ret_discovered_mcollective_id(node,rpc_client)
         return nil unless node

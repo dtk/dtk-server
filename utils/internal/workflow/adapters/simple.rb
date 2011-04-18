@@ -1,15 +1,16 @@
 module XYZ 
   module WorkflowAdapter
     class Simple < XYZ::Workflow
-      def execute()
+      def execute(top_task_idh=nil)
+        top_task_idh ||= @task.id_handle()
         @task.update(:status => "executing")
         executable_action = @task[:executable_action]
         if executable_action
-          process_executable_action(executable_action)
+          process_executable_action(executable_action,top_task_idh)
         elsif @task[:temporal_order] == "sequential"
-          process_sequential()
+          process_sequential(top_task_idh)
         elsif @task[:temporal_order] == "concurrent"
-          process_concurrent()
+          process_concurrent(top_task_idh)
         else
           Log.error("do not have rules to process task")
         end
@@ -24,9 +25,9 @@ module XYZ
         @task = task
       end
 
-      def process_executable_action(executable_action)
+      def process_executable_action(executable_action,top_task_idh)
         begin 
-          result_hash = CommandAndControl.execute_task_action(executable_action,@task)
+          result_hash = CommandAndControl.execute_task_action(executable_action,@task,top_task_idh)
           update_hash = {
             :status => "succeeded",
             :result => TaskAction::Result::Succeeded.new(result_hash)
@@ -54,7 +55,7 @@ module XYZ
         end
       end
 
-      def process_sequential()
+      def process_sequential(top_task_idh)
         status = :succeeded
         mark_as_not_reached = false
         @task.subtasks.each do |subtask|
@@ -62,7 +63,7 @@ module XYZ
           if mark_as_not_reached
             subtask_wf.update_task(:status => "not_reached")
           else
-            subtask_status = subtask_wf.execute() 
+            subtask_status = subtask_wf.execute(top_task_idh) 
             #TODO: what to sent whole task status when failue but not @task[:action_on_failure] == "abort"
             if subtask_status == :failed 
               status = :failed
@@ -74,13 +75,13 @@ module XYZ
         status
       end
 
-      def process_concurrent()
+      def process_concurrent(top_task_idh)
         status = :succeeded
         lock = Mutex.new
         #TODO: not killing concurrent subtasks if one failes
         threads = @task.subtasks.map do |subtask|
           Thread.new do 
-            subtask_status = Simple.new(subtask).execute()
+            subtask_status = Simple.new(subtask).execute(top_task_idh)
             lock.synchronize do
               status = :failed if subtask_status == :failed 
             end

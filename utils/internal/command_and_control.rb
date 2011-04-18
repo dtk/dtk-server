@@ -2,13 +2,14 @@ module XYZ
   module CommandAndControlAdapter
   end
   class CommandAndControl
-    def self.execute_task_action(task_action,task)
+    def self.execute_task_action(task_action,task,top_task_idh)
       klass = load_for(task_action)
       raise ErrorCannotLoadAdapter.new unless klass
       attributes_to_set = task_action.attributes_to_set()
       task_mh = task.model_handle()
+      task_idh = task.id_handle()
       task_action.get_and_update_attributes(task_mh)
-      result,updated_attributes = klass.execute(task_mh,task_action,attributes_to_set)
+      result,updated_attributes = klass.execute(task_idh,top_task_idh,task_action,attributes_to_set)
       propagate_attributes(updated_attributes)
       result
     end

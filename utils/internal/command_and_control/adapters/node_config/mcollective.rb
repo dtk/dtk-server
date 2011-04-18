@@ -3,7 +3,7 @@ include MCollective::RPC
 module XYZ
   module CommandAndControlAdapter
     class Mcollective < CommandAndControlNodeConfig
-      def self.execute(task_mh,config_node,attributes_to_set)
+      def self.execute(task_idh,top_task_idh,config_node,attributes_to_set)
         result = nil
         updated_attributes = Array.new
         begin
@@ -18,6 +18,7 @@ module XYZ
           raise ErrorCannotConnect.new() unless target_identity
 
           msg_content =  config_agent.ret_msg_content(config_node)
+          msg_content.merge!(:task_id => task_idh.get_id(),:top_task_id => top_task_idh.get_id())
           filter = {"identity" => [target_identity], "agent" => [mcollective_agent]}
           response = rpc_client.custom_request("run",msg_content,target_identity,filter).first
           raise ErrorTimeout.new() unless response

@@ -1,7 +1,7 @@
 module XYZ
   module CommandAndControlAdapter
     class Mcollective__mock < CommandAndControlNodeConfig
-      def self.execute(task_mh,config_node,attributes_to_set)
+      def self.execute(task_idh,top_task_idh,config_node,attributes_to_set)
         node_name = ((config_node[:node]||{})[:external_ref]||{})[:instance_id] || "i-c18838ad" #TODO: stubbed instance name
         result = {
           :status=>:succeeded, 

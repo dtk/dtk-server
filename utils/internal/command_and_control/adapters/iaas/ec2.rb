@@ -1,7 +1,8 @@
 module XYZ
   module CommandAndControlAdapter
     class Ec2 < CommandAndControlIAAS
-      def self.execute(task_mh,create_node,attributes_to_set)
+      def self.execute(task_idh,top_task_idh,create_node,attributes_to_set)
+        task_mh = task_idh.model_handle()
         #handle case where node has been created already (and error mayu have been time out waiting for node to be up
         instance_id = ((create_node[:node]||{})[:external_ref]||{})[:instance_id]
         if instance_id.nil?

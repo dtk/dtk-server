@@ -55,5 +55,7 @@
 		<div id="editor-content" class="cat-content" style="display: none;"></div>
 		<div id="dependencies-content" class="cat-content" style="display: none;"></div>
 		<div id="layout-content" class="cat-content" style="display: none;"></div>
+		<div id="constraints-content" class="cat-content" style="display: none;"></div>
+		<div id="config_templates-content" class="cat-content" style="display: none;"></div>
 	</div>
 </div>

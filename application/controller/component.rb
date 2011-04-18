@@ -139,6 +139,66 @@ module XYZ
       }
     end
 
+    def constraints(id)
+#      component = create_object_from_id(id,:component)
+#      constraints = component.get_constraints()
+
+#TODO: retool include_js to take string or hash, if hash then assumed js tpl and handled differently
+      tpl = R8Tpl::TemplateR8.new("component/constraints",user_context())
+#      tpl.set_js_tpl_name("component_constraints")
+#      tpl_info = tpl.render()
+#      include_js_tpl(tpl_info[:src])
+
+#      include_css('component-editor')
+#      include_js('fields.r8')
+
+#     field_defs_json = JSON.generate(field_defs)
+#      run_javascript("R8.Fields.init(#{field_defs_json});")
+
+      return {
+        :content=>tpl.render(),
+        :panel=>request.params["panel_id"]
+      }
+    end
+
+    def upload_config()
+      upload_param = request.params["config_file"]
+      cfg_filename = upload_param[:filename]
+      tmp_file = upload_param[:tempfile]
+pp tmp_file.path
+      new_path = R8::Config[:config_file_path]+'/'+cfg_filename
+      file_contents=IO.read(tmp_file.path)
+
+      File.open(new_path, 'w') do |f|  
+        f.puts file_contents
+      end
+
+      return {}
+    end
+
+    def config_templates(id)
+#      component = create_object_from_id(id,:component)
+#      constraints = component.get_constraints()
+
+#TODO: retool include_js to take string or hash, if hash then assumed js tpl and handled differently
+      tpl = R8Tpl::TemplateR8.new("component/upload_config_file",user_context())
+      tpl.assign(:_app,app_common())
+#      tpl.set_js_tpl_name("component_constraints")
+#      tpl_info = tpl.render()
+#      include_js_tpl(tpl_info[:src])
+
+#      include_css('component-editor')
+#      include_js('fields.r8')
+
+#     field_defs_json = JSON.generate(field_defs)
+#      run_javascript("R8.Fields.init(#{field_defs_json});")
+
+      return {
+        :content=>tpl.render(),
+        :panel=>request.params["panel_id"]
+      }
+    end
+
     def layout_test(id)
       #assuming that request params has field type
 #      view_type = request.params["type"]||"wspace-edit" #TODO: stubbed with value wspace-edit

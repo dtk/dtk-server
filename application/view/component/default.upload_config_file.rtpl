@@ -1,0 +1,10 @@
+
+<div id="upload_form">
+	<form id="content_upload" name="content_upload" enctype="multipart/form-data" action="{%=_app[:base_uri]%}/xyz/component/upload_config"  method="post">
+		<input type="hidden" name="iframe_upload" value="1"/>
+		<input type="hidden" name="publication_id" value="{$issue.publication_id}"/>
+		File&nbsp;<input type="file" name="config_file" id="config_file" size="40"/>
+		<br/><br/>
+		<input type="submit" value="Upload"/>
+	</form>
+</div>

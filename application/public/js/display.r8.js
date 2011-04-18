@@ -73,6 +73,34 @@ if (!R8.Displayview) {
 */
 					}
 				},
+				'constraints': {
+					'loaded': false,
+					'route': 'component/constraints',
+					'params': {
+					},
+					getParams: function(item_id) {
+						return '';
+					},
+					getRoute: function(item_id) {
+						return this.route+'/'+item_id
+					},
+					blur: function() {
+					}
+				},
+				'config_templates': {
+					'loaded': false,
+					'route': 'component/config_templates',
+					'params': {
+					},
+					getParams: function(item_id) {
+						return '';
+					},
+					getRoute: function(item_id) {
+						return this.route+'/'+item_id
+					},
+					blur: function() {
+					}
+				},
 				'layout': {
 					'loaded': false,
 					'route': 'component/layout_test',

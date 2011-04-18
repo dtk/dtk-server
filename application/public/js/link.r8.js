@@ -47,7 +47,8 @@ if(!R8.Link) {
 			if(typeof(_linkObj.style) == 'undefined') {
 				_linkObj.style = [
 					{'strokeStyle':'#25A3FC','lineWidth':3,'lineCap':'round'},
-					{'strokeStyle':'#63E4FF','lineWidth':1,'lineCap':'round'}
+					{'strokeStyle':'#000000','lineWidth':1,'lineCap':'round'}
+//					{'strokeStyle':'#63E4FF','lineWidth':1,'lineCap':'round'}
 				];
 			}
 			_monitorDefaultStyle = [

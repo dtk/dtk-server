@@ -21,6 +21,7 @@ module XYZ
           msg_content.merge!(:task_id => task_idh.get_id(),:top_task_id => top_task_idh.get_id())
           filter = {"identity" => [target_identity], "agent" => [mcollective_agent]}
           response = rpc_client.custom_request("run",msg_content,target_identity,filter).first
+pp [:response,response]
           raise ErrorTimeout.new() unless response
           raise Error.new() unless response[:data]
 

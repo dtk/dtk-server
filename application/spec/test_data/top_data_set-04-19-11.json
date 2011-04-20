@@ -113,7 +113,7 @@
       },
       "display_name": "test",
       "node": {
-        "ami-563ac63f": {
+        "ami-183ac671": {
           "type": "image",
           "ds_source_obj_type": "image",
           "is_deployed": true,
@@ -128,7 +128,7 @@
           "data_source": "user_data",
           "external_ref": {
             "type": "ec2_image",
-            "image_id": "ami-563ac63f"
+            "image_id": "ami-183ac671"
           },
           "node_interface": {
             "eth0": {
@@ -162,7 +162,7 @@
             "flavor": {
               "disk": null
             },
-            "id": "ami-563ac63f",
+            "id": "ami-183ac671",
             "product_codes": [
 
             ]
@@ -223,7 +223,7 @@
               "enabled": true
             }
           },
-          "ds_key": "[:user_data, \"/library/test/ami-563ac63f\"]"
+          "ds_key": "[:user_data, \"/library/test/ami-183ac671\"]"
         },
         "ami-aa37c984": {
           "type": "image",

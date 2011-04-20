@@ -173,6 +173,8 @@ module XYZ
       FileAsset.load_and_create_file_asset(id_handle(component_id),cfg_filename,tmp_file_path)
       #TODO: delete /tmp file File.unlink(tmp_file_path)
 
+      pp [:test, FileAsset.get_file_asset(id_handle(component_id),cfg_filename)]
+
 =begin
 pp tmp_file.path
       new_path = R8::Config[:config_file_path]+'/'+cfg_filename

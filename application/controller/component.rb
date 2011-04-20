@@ -162,6 +162,9 @@ module XYZ
     end
 
     def upload_config()
+      redirect_route = request.params["redirect"]
+      component_id = request.params["component_id"].to_i 
+
       upload_param = request.params["config_file"]
       cfg_filename = upload_param[:filename]
       tmp_file = upload_param[:tempfile]
@@ -172,8 +175,7 @@ pp tmp_file.path
       File.open(new_path, 'w') do |f|  
         f.puts file_contents
       end
-
-      return {}
+      redirect redirect_route
     end
 
     def config_templates(id)
@@ -182,6 +184,7 @@ pp tmp_file.path
 
 #TODO: retool include_js to take string or hash, if hash then assumed js tpl and handled differently
       tpl = R8Tpl::TemplateR8.new("component/upload_config_file",user_context())
+      tpl.assign("component_id",id)
       tpl.assign(:_app,app_common())
 #      tpl.set_js_tpl_name("component_constraints")
 #      tpl_info = tpl.render()

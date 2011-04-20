@@ -26,6 +26,7 @@ module XYZ
       end
 
       def process_executable_action(executable_action,top_task_idh)
+        debug_print_task_info = "task_id=#{@task.id.to_s}; top_task_id=#{top_task_idh.get_id()}"
         begin 
           result_hash = CommandAndControl.execute_task_action(executable_action,@task,top_task_idh)
           update_hash = {
@@ -34,7 +35,7 @@ module XYZ
           }
           @task.update(update_hash)
           executable_action.update_state_change_status(@task.model_handle,:completed)  #this send pending changes' states
-          debug_pp [:task_succeeded,@task.id,result_hash]
+          debug_pp [:task_succeeded,debug_print_task_info,result_hash]
           :succeeded              
         rescue CommandAndControl::Error => e
           update_hash = {
@@ -42,7 +43,7 @@ module XYZ
             :result => TaskAction::Result::Failed.new(e)
           }
           @task.update(update_hash)
-          debug_pp [:task_failed,@task.id,e]
+          debug_pp [:task_failed,debug_print_task_info,e]
           :failed
         rescue Exception => e
           update_hash = {
@@ -50,7 +51,7 @@ module XYZ
             :result => TaskAction::Result::Failed.new(CommandAndControl::Error.new)
           }
           @task.update(update_hash)
-          debug_pp [:task_failed_internal_error,@task.id,e,e.backtrace]
+          debug_pp [:task_failed_internal_error,debug_print_task_info,e,e.backtrace]
           :failed
         end
       end

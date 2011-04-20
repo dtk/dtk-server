@@ -1,6 +1,9 @@
 --- !omap 
 - java_webapp: !omap 
     - display_name: java_webapp
+    - external_ref: 
+        type: chef_recipe
+        recipe_name: java::java_webapp
     - ui: 
         images: 
           tiny: ""

@@ -633,6 +633,10 @@
         },
         "java_webapp": {
           "component_type": "java_webapp",
+          "external_ref": {
+            "type": "chef_recipe",
+            "recipe_name": "java::java_webapp"
+          },
           "basic_type": "application",
           "ui": {
             "images": {

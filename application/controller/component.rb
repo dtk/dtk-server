@@ -175,11 +175,11 @@ module XYZ
       cfg_filename = upload_param[:filename]
       tmp_file_handle = upload_param[:tempfile]
       file_content = tmp_file_handle.read 
-      create_object_from_id(component_id).add_config_file(cfg_filename,file_content)
       tmp_file_handle.close
+      id_handle(component_id).create_object().add_config_file(cfg_filename,file_content)
       #TODO: delete /tmp file File.unlink(tmp_file_path)
 
-     ## pp [:test, FileAsset.get_file_asset(id_handle(component_id),cfg_filename)]
+#     pp [:test,id_handle(component_id).create_object().get_config_file(cfg_filename)] 
 
 =begin
 pp tmp_file.path

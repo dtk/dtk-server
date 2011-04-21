@@ -274,10 +274,12 @@ module XYZ
     #TODO: may wrap with higher fn get_attribute which cases on whether virtual
 
     def add_config_file(file_name,file_content)
+      #TODO: may check first that object does not have already a config file with same name
       parent_col = DB.parent_field(:component,:file_asset)
 
       create_row = {
         :ref => file_name,
+        :type => "config_file",
         :file_name => file_name,
         :display_name => file_name,
         parent_col => id(),
@@ -286,6 +288,25 @@ module XYZ
 
       file_asset_mh = id_handle().create_childMH(:file_asset)
       Model.create_from_rows(file_asset_mh,[create_row])
+    end
+
+    def get_config_file(file_name)
+      sp_hash = {
+        :model_name => :file_asset,
+        :filter => [:and, [:eq, :file_name, file_name], [:eq, :type, "config_file"]],
+        :cols => [:id,:content]
+      }
+      get_children_from_sp_hash(:file_asset,sp_hash).first
+    end
+    def get_config_files(opts={}) # opts: {:include_content => true} means include content, otherwise just ids and file names returned
+      cols = [:id,:file_name]
+      cols << :content if opts[:include_content]
+      sp_hash = {
+        :model_name => :file_asset,
+        :filter => [:eq, :type, "config_file"],
+        :cols => cols
+      }
+      get_children_from_sp_hash(:file_asset,sp_hash)
     end
 
     def get_virtual_attribute(attribute_name,cols,field_to_match=:display_name)

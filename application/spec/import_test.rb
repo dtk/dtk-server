@@ -3,9 +3,9 @@ import_file = ARGV[0]
 container_uri = ARGV[1] || "/"
 flag = ARGV[2]
 Root = File.expand_path('../', File.dirname(__FILE__))
-
+require "#{Root}/config/environment_config.rb"
 def load_component_opts(type)
-  files = Dir.glob("#{Root}/spec/chef/site-cookbooks/*/r8meta.#{TypeMapping[type]}")
+  files = Dir.glob("#{R8::EnvironmentConfig::CoreCookbooksRoot}/*/r8meta.#{TypeMapping[type]}")
   if files.empty? 
     {} 
   else

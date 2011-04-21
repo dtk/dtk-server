@@ -51,11 +51,17 @@ module XYZ
       ]
       component[:supported_os_list] = supported_os_list
 
+      config_file_list = [
+        {:id=>12345,:name=>'php.ini',:owner_id=>'1123',:owner_name=>'Rich',:created_by_id=>'12112',:created_by_name=>'Rich'},
+        {:id=>12345,:name=>'http.conf',:owner_id=>'1123',:owner_name=>'Nate',:created_by_id=>'12112',:created_by_name=>'Nate'},
+        {:id=>12345,:name=>'my.cnf',:owner_id=>'1123',:owner_name=>'Bob',:created_by_id=>'12112',:created_by_name=>'Bob'}
+      ]
 #pp '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
 #pp component
 
       tpl.assign("_#{model_name().to_s}",_model_var)
       tpl.assign("component",component)
+      tpl.assign("config_file_list",config_file_list)
       tpl.assign("component_images_uri",R8::Config[:component_images_uri])
 
       run_javascript("R8.Displayview.init('#{id}');")

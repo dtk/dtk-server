@@ -26,6 +26,17 @@ module XYZ
       }
       component_idh.create_object().get_children_from_sp_hash(:file_asset,sp_hash).first
     end
+
+#stubs for further methods
+=begin
+    def save_as(new_name)
+    end
+    def delete()
+    end
+    def save()
+    end
+
+=end
   end
 end
 

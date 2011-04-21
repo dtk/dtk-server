@@ -87,6 +87,20 @@ if (!R8.Displayview) {
 					blur: function() {
 					}
 				},
+				'file_editor': {
+					'loaded': false,
+					'route': 'component/file_editor',
+					'params': {
+					},
+					getParams: function(item_id) {
+						return '';
+					},
+					getRoute: function(item_id) {
+						return this.route+'/'+item_id
+					},
+					blur: function() {
+					}
+				},
 				'config_templates': {
 					'loaded': false,
 					'route': 'component/config_templates',
@@ -219,6 +233,10 @@ if (!R8.Displayview) {
 					R8.Ctrl.call(_contentList[selectedCat].getRoute(_item_id),params);
 //					console.log(selectedCat+' content isnt loaded yet...');
 				}
+			},
+
+			loadFile: function(fileId) {
+console.log('loading file:'+fileId);
 			}
 		}
 	}();

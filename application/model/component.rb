@@ -272,6 +272,22 @@ module XYZ
     #######################
     ######### Model apis
     #TODO: may wrap with higher fn get_attribute which cases on whether virtual
+
+    def add_config_file(file_name,file_content)
+      parent_col = DB.parent_field(:component,:file_asset)
+
+      create_row = {
+        :ref => file_name,
+        :file_name => file_name,
+        :display_name => file_name,
+        parent_col => id(),
+        :content => file_content
+      }
+
+      file_asset_mh = id_handle().create_childMH(:file_asset)
+      Model.create_from_rows(file_asset_mh,[create_row])
+    end
+
     def get_virtual_attribute(attribute_name,cols,field_to_match=:display_name)
       sp_hash = {
         :model_name => :attribute,

@@ -1,6 +1,10 @@
 --- !omap 
 - java_webapp: !omap 
     - display_name: java_webapp
+    - implementation: !omap
+        - chef_recipe:
+            type: chef_recipe
+            version: "0.9.16"
     - external_ref: 
         type: chef_recipe
         recipe_name: java::java_webapp

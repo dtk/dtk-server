@@ -2,6 +2,10 @@
 - postgresql__app: !omap 
     - display_name: postgresql__app
     - description: Test app
+    - implementation: !omap
+        - chef_recipe:
+            type: chef_recipe
+            version: "0.9.16"
     - external_ref: 
         type: chef_recipe
         recipe_name: postgresql::app
@@ -48,6 +52,10 @@
 - postgresql__db: !omap 
     - display_name: postgresql__db
     - description: Postgresql DB
+    - implementation: !omap
+        - chef_recipe:
+            type: chef_recipe
+            version: "0.9.16"
     - external_ref: 
         type: chef_recipe
         recipe_name: postgresql::db
@@ -85,6 +93,10 @@
 - postgresql__pgpool: !omap 
     - display_name: postgresql__pgpool
     - description: Installs pgpool load balancer
+    - implementation: !omap
+        - chef_recipe:
+            type: chef_recipe
+            version: "0.9.16"
     - external_ref: 
         type: chef_recipe
         recipe_name: postgresql::pgpool
@@ -137,6 +149,10 @@
 - postgresql__server: !omap 
     - display_name: postgresql__server
     - description: Installs postgresql server packages, debian family style
+    - implementation: !omap
+        - chef_recipe:
+            type: chef_recipe
+            version: "0.9.16"
     - external_ref: 
         type: chef_recipe
         recipe_name: postgresql::server

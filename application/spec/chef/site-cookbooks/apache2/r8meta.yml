@@ -2,6 +2,10 @@
 - apache2: !omap 
     - display_name: apache2
     - description: Main Apache configuration
+    - implementation: !omap
+        - chef_recipe:
+            type: chef_recipe
+            version: "0.9.16"
     - external_ref: 
         type: chef_recipe
         recipe_name: apache2

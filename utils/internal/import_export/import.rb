@@ -9,6 +9,13 @@ module XYZ
       hash_content = Aux::hash_from_file_with_json(json_file) 
       return nil unless hash_content
       add_r8meta!(hash_content,opts[:r8meta]) if opts[:r8meta]
+      if opts[:add_implementation_file_refs]
+        file_ref_info = opts[:add_implementation_file_refs]
+        library = file_ref_info[:library]
+        base_dir = file_ref_info[:base_directory]
+        impl_info = temp_hack_to_get_implementation_info(hash_content,library)
+        add_implementation_file_refs!(hash_content,library,impl_info,base_dir)
+      end
       global_fks = Hash.new
       unless target_id_handle.is_top?
         global_fks = input_into_model(target_id_handle,hash_content) 
@@ -41,11 +48,36 @@ module XYZ
         require 'yaml'
         r8meta[:files].each do |file|
           component_hash = YAML.load_file(file)
-          component_hash.each{|k,v|hash["library"][library]["component"][k] = v}
+          component_hash.each{|k,v|library_components_hash(hash,library)[k] = v}
         end 
       else
         raise Error.new("Type #{type} not supported")
       end
+    end
+
+    def temp_hack_to_get_implementation_info(hash,library)
+      ret = Hash.new
+      library_components_hash(hash,library).each do |cmp,cmp_info|
+        next unless cmp_info["implementation"]
+        ret[cmp] = cmp.gsub(/__.+$/,"")
+      end
+      ret
+    end
+    def add_implementation_file_refs!(hash,library,implementation_info,base_dir)
+      component_dirs = implementation_info.values
+      files = Array.new
+      cur_dir = Dir.pwd
+      begin
+        Dir.chdir(base_dir)
+        files = Dir["{#{component_dirs.join(",")}}/**/*"].select{|item|File.file?(item)}
+       ensure
+        Dir.chdir(cur_dir)
+      end
+      files
+    end
+
+    def library_components_hash(hash,library)
+      hash["library"][library]["component"]
     end
   end
 end

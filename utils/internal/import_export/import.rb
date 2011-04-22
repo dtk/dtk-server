@@ -63,17 +63,43 @@ module XYZ
       end
       ret
     end
-    def add_implementation_file_refs!(hash,library,implementation_info,base_dir)
-      component_dirs = implementation_info.values
-      files = Array.new
+    def add_implementation_file_refs!(hash,library,impl_info,base_dir)
+      cmp_dirs = impl_info.values
+      file_paths = Array.new
       cur_dir = Dir.pwd
       begin
         Dir.chdir(base_dir)
-        files = Dir["{#{component_dirs.join(",")}}/**/*"].select{|item|File.file?(item)}
+        file_paths = Dir["{#{cmp_dirs.join(",")}}/**/*"].select{|item|File.file?(item)}
        ensure
         Dir.chdir(cur_dir)
       end
-      files
+      indexed_file_paths = Hash.new
+      file_paths.each do |file_path|
+        dir = file_path =~ Regexp.new("(^[^/]+)/") ? $1 : nil
+        (indexed_file_paths[dir] ||= Array.new) << file_path
+      end
+
+      components_hash = library_components_hash(hash,library)
+      impl_info.each do |cmp,cmp_dir|
+        next unless indexed_file_paths[cmp_dir]
+        cmp_file_assets = indexed_file_paths[cmp_dir].inject({}) do |h,file_path|
+          file_name = file_path =~ Regexp.new("/([^/]+$)") ? $1 : file
+          file_asset = {
+            :type => "chef_file", #TODO: stub
+            :display_name => file_name,
+            :file_name => file_name,
+            :path => file_path
+          }
+          h.merge(file_path => file_asset)
+        end
+        #TODO: "chef_recipe" stubbed
+        impl = components_hash[cmp]["implementation"].values.find{|x|x["type"] == "chef_recipe"}
+        unless impl
+          Log.error("expected impl to be non nil")
+          next
+        end
+        impl["file_asset"] = cmp_file_assets
+      end
     end
 
     def library_components_hash(hash,library)

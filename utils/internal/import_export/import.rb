@@ -100,7 +100,8 @@ module XYZ
               :file_name => file_name,
               :path => file_path
             }
-            h.merge(file_path => file_asset)
+            file_asset_ref = file_path.gsub(Regexp.new("/"),"_") #removing "/" since they confuse processing
+            h.merge(file_asset_ref => file_asset)
           end
           implementation_hash[cookbook] = {
             "type" => "chef_cookbook",

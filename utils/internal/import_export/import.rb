@@ -89,7 +89,7 @@ module XYZ
         return unless impl_cookbooks
 
         #add implementation objects to hash
-        implementation_hash = hash["library"]["implementation"] ||= Hash.new
+        implementation_hash = hash["library"][library]["implementation"] ||= Hash.new
         impl_cookbooks.each do |cookbook|
           next unless file_paths = indexed_file_paths[cookbook]
           cmp_file_assets = file_paths.inject({}) do |h,file_path|
@@ -105,7 +105,7 @@ module XYZ
           implementation_hash[cookbook] = {
             "type" => "chef_cookbook",
             "version" => version,
-            "file_asset" => {"file_asset" => cmp_file_assets}
+            "file_asset" => cmp_file_assets
           }
         end
 

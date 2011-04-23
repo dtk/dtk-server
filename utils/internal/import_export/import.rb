@@ -9,12 +9,13 @@ module XYZ
       hash_content = Aux::hash_from_file_with_json(json_file) 
       return nil unless hash_content
       add_r8meta!(hash_content,opts[:r8meta]) if opts[:r8meta]
-      if opts[:add_implementation_file_refs]
-        file_ref_info = opts[:add_implementation_file_refs]
-        library = file_ref_info[:library]
-        base_dir = file_ref_info[:base_directory]
-        impl_info = temp_hack_to_get_implementation_info(hash_content,library)
-        add_implementation_file_refs!(hash_content,library,impl_info,base_dir)
+      if opts[:add_implementations]
+        impl_info = opts[:add_implementations]
+        library = impl_info[:library]
+        base_dir = impl_info[:base_directory]
+        type = impl_info[:type]
+        version = impl_info[:version]
+        add_implementations!(hash_content,type,version,library,base_dir)
       end
       global_fks = Hash.new
       unless target_id_handle.is_top?
@@ -48,62 +49,76 @@ module XYZ
         require 'yaml'
         r8meta[:files].each do |file|
           component_hash = YAML.load_file(file)
-          component_hash.each{|k,v|library_components_hash(hash,library)[k] = v}
+          component_hash.each{|k,v|hash["library"][library]["component"][k] = v}
         end 
       else
         raise Error.new("Type #{type} not supported")
       end
     end
 
-    def temp_hack_to_get_implementation_info(hash,library)
-      ret = Hash.new
-      library_components_hash(hash,library).each do |cmp,cmp_info|
-        next unless cmp_info["implementation"]
-        ret[cmp] = cmp.gsub(/__.+$/,"")
+    def add_implementations!(hash,type,version,library,base_dir)
+      case type
+       when :chef
+        ChefImplementation::add_implementations!(hash,version,library,base_dir)
+       else
+        raise Error.new("Implmentation type #{type} not implemented")
       end
-      ret
     end
-    def add_implementation_file_refs!(hash,library,impl_info,base_dir)
-      cmp_dirs = impl_info.values
-      file_paths = Array.new
-      cur_dir = Dir.pwd
-      begin
-        Dir.chdir(base_dir)
-        file_paths = Dir["{#{cmp_dirs.join(",")}}/**/*"].select{|item|File.file?(item)}
-       ensure
-        Dir.chdir(cur_dir)
-      end
-      indexed_file_paths = Hash.new
-      file_paths.each do |file_path|
-        dir = file_path =~ Regexp.new("(^[^/]+)/") ? $1 : nil
-        (indexed_file_paths[dir] ||= Array.new) << file_path
-      end
 
-      components_hash = library_components_hash(hash,library)
-      impl_info.each do |cmp,cmp_dir|
-        next unless indexed_file_paths[cmp_dir]
-        cmp_file_assets = indexed_file_paths[cmp_dir].inject({}) do |h,file_path|
-          file_name = file_path =~ Regexp.new("/([^/]+$)") ? $1 : file
-          file_asset = {
-            :type => "chef_file", #TODO: stub
-            :display_name => file_name,
-            :file_name => file_name,
-            :path => file_path
+    module ChefImplementation
+      def self.add_implementations!(hash,version,library,base_dir)
+        file_paths = Array.new
+        cur_dir = Dir.pwd
+        begin
+          Dir.chdir(base_dir)
+          file_paths = Dir["**/*"].select{|item|File.file?(item)}
+         ensure
+          Dir.chdir(cur_dir)
+        end
+        return if file_paths.empty?
+
+        indexed_file_paths = Hash.new
+        file_paths.each do |file_path|
+          dir = file_path =~ Regexp.new("(^[^/]+)/") ? $1 : nil
+          (indexed_file_paths[dir] ||= Array.new) << file_path
+        end
+        
+        #find components that correspond to an implementation 
+        components_hash = hash["library"][library]["component"]
+        impl_cookbooks = components_hash.keys.map{|cmp_ref|cookbook_from_component_ref(cmp_ref)}.uniq & indexed_file_paths.keys
+        return unless impl_cookbooks
+
+        #add implementation objects to hash
+        implementation_hash = hash["library"]["implementation"] ||= Hash.new
+        impl_cookbooks.each do |cookbook|
+          next unless file_paths = indexed_file_paths[cookbook]
+          cmp_file_assets = file_paths.inject({}) do |h,file_path|
+            file_name = file_path =~ Regexp.new("/([^/]+$)") ? $1 : file
+            file_asset = {
+              :type => "chef_file", 
+              :display_name => file_name,
+              :file_name => file_name,
+              :path => file_path
+            }
+            h.merge(file_path => file_asset)
+          end
+          implementation_hash[cookbook] = {
+            "type" => "chef_cookbook",
+            "version" => version,
+            "file_asset" => {"file_asset" => cmp_file_assets}
           }
-          h.merge(file_path => file_asset)
         end
-        #TODO: "chef_recipe" stubbed
-        impl = components_hash[cmp]["implementation"].values.find{|x|x["type"] == "chef_recipe"}
-        unless impl
-          Log.error("expected impl to be non nil")
-          next
-        end
-        impl["file_asset"] = cmp_file_assets
-      end
-    end
 
-    def library_components_hash(hash,library)
-      hash["library"][library]["component"]
+        #add foreign key to components that reference an implementation
+        components_hash.each do |cmp_ref, cmp_info|
+          cookbook = cookbook_from_component_ref(cmp_ref)
+          next unless impl_cookbooks.include?(cookbook)
+          cmp_info["*implementation_id"] = "/library/#{library}/implementation/#{cookbook}"
+        end
+      end
+      def self.cookbook_from_component_ref(cmp_ref)
+        cmp_ref.gsub(/__.+$/,"")
+      end
     end
   end
 end

@@ -39,13 +39,16 @@ module XYZ
         foreign_key :assembly_id, :component, FK_SET_NULL_OPT
         column :view_def_ref, :varchar
 
+        #TODO: change if multiple implementations per component
+        foreign_key :implementation_id, :implementation, FK_SET_NULL_OPT
+
         #TODO: for efficiency materialize and if so have two variants of :component_parent for attribute; one for input, which brings in :connectivity_profile and other for output which deos not
         virtual_column :link_defs_external, :type => :json, :local_dependencies => [:component_type,:specific_type,:basic_type]
         virtual_column :connectivity_profile_internal, :type => :json, :local_dependencies => [:component_type,:specific_type,:basic_type]
         virtual_column :most_specific_type, :type => :varchar, :local_dependencies => [:specific_type,:basic_type]
 
         many_to_one :component, :library, :node, :node_group, :datacenter
-        one_to_many :component, :attribute_link, :attribute, :port_link, :monitoring_item, :dependency, :layout, :file_asset, :implementation
+        one_to_many :component, :attribute_link, :attribute, :port_link, :monitoring_item, :dependency, :layout, :file_asset
         one_to_many_clone_omit :layout
         virtual_column :parent_name, :possible_parents => [:component,:library,:node,:node_group]
 

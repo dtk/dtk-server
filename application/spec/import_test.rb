@@ -8,6 +8,7 @@ Root = File.expand_path('../', File.dirname(__FILE__))
 require "#{Root}/config/environment_config.rb"
 
 BaseDir = R8::EnvironmentConfig::CoreCookbooksRoot
+Implementation = {:type => :chef, :version => "0.9.16"}
 
 def load_component_opts(type)
   files = Dir.glob("#{BaseDir}/*/r8meta.#{TypeMapping[type]}")
@@ -29,7 +30,7 @@ opts =
   end
 
 require Root + '/app'
-opts.merge!(:add_implementation_file_refs => {:library => Library, :base_directory => BaseDir})
+opts.merge!(:add_implementations => {:type => Implementation[:type], :version => Implementation[:version], :library => Library, :base_directory => BaseDir})
 XYZ::Object.import_objects_from_file(XYZ::IDHandle[:c => 2, :uri => container_uri],import_file,opts)
 
 

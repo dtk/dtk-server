@@ -11,7 +11,7 @@ require "#{root}/utils/internal/errors"
 require "#{root}/utils/internal/log"
 require "#{root}/application/config/environment_config"
 
-def process(recipes,type)
+def get_hash_output(recipes,type)
   #TODO: assuming all from same cookbook
   cookbook = recipes.first.gsub(/::.+$/,"")
   meta_file = "#{R8::EnvironmentConfig::CoreCookbooksRoot}/#{cookbook}/r8meta.#{TypeMapping[type]}"
@@ -23,7 +23,8 @@ def process(recipes,type)
   raise XYZ::Error.new("None of the specified recipes appear in the meta data") if pruned_recipes.empty?
 
   #set run list
-  hash_output = {"run_list" => pruned_recipes.map{|r|"recipe[#{r}]"}}
+  hash_output =  ActiveSupport::OrderedHash.new()
+  hash_output.merge!("run_list" => pruned_recipes.map{|r|"recipe[#{r}]"})
     #set default values and stubs
     pruned_recipes.each do |r|
       (meta_content[r.gsub(/::/,"__")]["attribute"]||{}).each do |attr_ref,attr_info|
@@ -33,6 +34,7 @@ def process(recipes,type)
         add_attribute!(hash_output,attr_ref,attr_info,default || "**STUBVALUE")
     end
   end
+  hash_output
 end
 
 TypeMapping = {
@@ -45,6 +47,16 @@ def add_attribute!(hash_output,attr_ref,attr_info,value)
     return
   end
   path = external_ref_path.gsub(/((node)|(service))\[/,"").gsub(/\]$/,"").split("][")
+  deep_merge!(hash_output,path,value)
+end
+
+def deep_merge!(target,path,value)
+  if path.size
+    target[path.first] = value
+  else
+    target[path.first] ||= Hash.new
+    deep_merge!(target[path.first],path[1..path.size-1],value)
+  end
 end
 
     
@@ -57,4 +69,5 @@ end
   "run_list": [ "recipe[resolver]" ]
 }
 =end
-process(recipes,type)
+hash_output = get_hash_output(recipes,type)
+hash_output

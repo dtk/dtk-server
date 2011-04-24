@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 require 'yaml'
+#required since overloads what is returned by YAML::load_file
+require 'active_support/ordered_hash'
 cookbook = ARGV[0]
 type = :yaml
 

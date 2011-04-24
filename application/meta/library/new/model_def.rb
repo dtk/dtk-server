@@ -26,6 +26,7 @@
    :data_source,
    :search_object,
    :constraints,
-   :component_relation
+   :component_relation,
+   :implementation
   ]
 }

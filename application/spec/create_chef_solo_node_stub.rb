@@ -1,9 +1,11 @@
 #!/usr/bin/env ruby
+require 'rubygems'
 require 'yaml'
 require 'json'
 #required since overloads what is returned by YAML::load_file
 require 'active_support/ordered_hash'
 recipes = ARGV[0].split(",")
+node_json_file = ARGV[1]
 type = :yaml
 
 root = File.expand_path('../../', File.dirname(__FILE__))
@@ -70,4 +72,5 @@ end
 }
 =end
 hash_output = get_hash_output(recipes,type)
-hash_output
+File.open(node_json_file,"w"){|f|f.puts(JSON.pretty_generate(hash_output))}
+

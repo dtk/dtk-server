@@ -7,3 +7,4 @@ tar zxf rubygems-1.3.7.tgz
 cd rubygems-1.3.7
 ruby setup.rb --no-format-executable 
 gem install ohai chef --no-rdoc --no-ri
+

@@ -51,7 +51,7 @@ def add_attribute!(hash_output,attr_ref,attr_info,value)
 end
 
 def deep_merge!(target,path,value)
-  if path.size
+  if path.size == 1
     target[path.first] = value
   else
     target[path.first] ||= Hash.new

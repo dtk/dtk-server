@@ -641,6 +641,7 @@ pp datacenter
 
       errors = ValidationError.find_missing_required_attributes(top_level_task)
       if errors
+        pp [:errors,errors]
         error_list = []
         #TODO: stub
         i18n = {

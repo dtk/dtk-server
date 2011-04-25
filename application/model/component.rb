@@ -483,7 +483,9 @@ module XYZ
     end
 
     def determine_cloned_components_parent(specified_target_idh)
-      cmp_fs = FieldSet.opt([:id,:display_name,:component_type],:component)
+      #TODO: may deprecate if not using; previously mapped extensions to parents; now putting them with node as tehir parent
+      return specified_target_idh if SubComponentComponentMapping.empty?
+     cmp_fs = FieldSet.opt([:id,:display_name,:component_type],:component)
       specified_target_id = specified_target_idh.get_id()
       cmp_ds = Model.get_objects_just_dataset(model_handle,{:id => id()},cmp_fs)
       mapping_ds = SQL::ArrayDataset.create(self.class.db,SubComponentComponentMapping,model_handle.createMH(:mapping))
@@ -502,7 +504,7 @@ module XYZ
    private
     SubComponentComponentMapping = 
       [
-       {:component => "postgresql__db", :parent => "postgresql__server"}
+#       {:component => "postgresql__db", :parent => "postgresql__server"}
       ]
    public
 

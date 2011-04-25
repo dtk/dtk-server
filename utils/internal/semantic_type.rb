@@ -278,11 +278,13 @@ rather than having or having two sap refs and user can remove or add to componen
 
       "db_user_access" => {
         :external => true,
-        :port_type => "input",
+#TODO: need to rexamine use of :port_type => "input" in light of having attributes that can be read only vs read/write depending
+#if they have alink; currently if marked as input then they are treated as readonly        
+#        :port_type => "input",
         :syntax => {
           "username" => {:required => true, :type => :string},
           "password" => {:required => false, :type => :string},
-          "access_type" => {:required => true, :type => :string}, # sock | inet | .. inet6 
+          "inet_access" => {:required => true, :type => :boolean},
           "client_host_addr" => {:required => false, :type => :string}
         }
       },

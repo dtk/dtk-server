@@ -41,7 +41,10 @@ module XYZ
               [
                #   {":postgresql__server.sap__l4" => ":java_webapp.sap_ref__l4"},
                {":local_node.host_addresses_ipv4" => ":postgresql_db.client_host_addr"},
-               {":java_webapp.db_params" => ":postgresql_db.db_params_ref"}
+               #{":java_webapp.db_params" => ":postgresql_db.db_params_ref"}
+               {":java_webapp.db_database" => ":postgresql_db.database"},
+               {":java_webapp.db_username" => ":postgresql_db.username"},
+               {":java_webapp.db_password" => ":postgresql_db.password"}
               ]
             }
           }

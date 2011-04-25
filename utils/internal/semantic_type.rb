@@ -276,6 +276,18 @@ rather than having or having two sap refs and user can remove or add to componen
         }
       },
 
+      "db_user_access" => {
+        :external => true,
+        :port_type => "input",
+        :syntax => {
+          "username" => {:required => true, :type => :string},
+          "password" => {:required => false, :type => :string},
+          "access_type" => {:required => true, :type => :string}, # sock | inet | .. inet6 
+          "client_host_addr" => {:required => false, :type => :string}
+        }
+      },
+
+      #TODO deprecate db ones in favor of above
       #DB params
       "db_config" => {
         :external => true,

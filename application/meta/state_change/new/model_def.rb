@@ -56,10 +56,11 @@
        {
          :model_name=>:component,
          :alias=>:component_same_type,
+         :convert=>true,
          :join_type=>:left_outer,
          :filter=>[:and, [:eq, :only_one_per_node, false]],
          :join_cond=>{:external_ref=>:component__external_ref,:node_node_id=>:component__node_node_id},
-         :cols=>[:id,:display_name,:external_ref,:node_node_id,:only_one_per_node]
+         :cols=>[:id,:display_name,:basic_type,:external_ref,:node_node_id,:only_one_per_node,:extended_base_id]
        }]
     },
     :changed_attribute=>{
@@ -88,10 +89,11 @@
        {
          :model_name=>:component,
          :alias=>:component_same_type,
+         :convert=>true,
          :join_type=>:left_outer,
          :filter=>[:and, [:eq, :only_one_per_node, false]],
          :join_cond=>{:external_ref=>:component__external_ref,:node_node_id=>:component__node_node_id},
-         :cols=>[:id,:display_name,:external_ref,:node_node_id,:only_one_per_node]
+         :cols=>[:id,:display_name,:basic_type,:external_ref,:node_node_id,:only_one_per_node,:extended_base_id]
        }]
     },
     :created_node=>{

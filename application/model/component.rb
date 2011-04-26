@@ -391,7 +391,7 @@ module XYZ
       base_ids = extension_cmps.map{|x|x[:extended_base_id]}
       sp_hash = {
         :model_name => :attribute,
-        :filter => [:and, [:oneof, field_to_match, attribute_names], [:oneof, :component_component_id, component_ids + base_ids]],
+        :filter => [:oneof, :component_component_id, component_ids + base_ids],
         :cols => Aux.array_add?(cols,[:component_component_id])
       }
       attr_mh = sample_cmp.model_handle().createMH(:attribute)

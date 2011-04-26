@@ -52,15 +52,6 @@
          :join_type=>:inner,
          :join_cond=>{:id=>:component__node_node_id},
          :cols=>[:id, :display_name, :external_ref]
-       },
-       {
-         :model_name=>:component,
-         :alias=>:component_same_type,
-         :convert=>true,
-         :join_type=>:left_outer,
-         :filter=>[:and, [:eq, :only_one_per_node, false]],
-         :join_cond=>{:external_ref=>:component__external_ref,:node_node_id=>:component__node_node_id},
-         :cols=>[:id,:display_name,:basic_type,:external_ref,:node_node_id,:only_one_per_node,:extended_base_id]
        }]
     },
     :changed_attribute=>{
@@ -85,42 +76,8 @@
          :join_type=>:inner,
          :join_cond=>{:id=>:component__node_node_id},
          :cols=>[:id, :display_name, :external_ref]
-       },
-       {
-         :model_name=>:component,
-         :alias=>:component_same_type,
-         :convert=>true,
-         :join_type=>:left_outer,
-         :filter=>[:and, [:eq, :only_one_per_node, false]],
-         :join_cond=>{:external_ref=>:component__external_ref,:node_node_id=>:component__node_node_id},
-         :cols=>[:id,:display_name,:basic_type,:external_ref,:node_node_id,:only_one_per_node,:extended_base_id]
        }]
     },
-    :changed_attribute_direct=>{
-      :type=>:json,
-      :hidden=>true,
-      :remote_dependencies=>
-      [{
-         :model_name=>:attribute,
-         :join_type=>:inner,
-         :join_cond=>{:id=>:state_change__attribute_id},
-         :cols=>[:id, :component_component_id, :display_name, :value_asserted]
-       },
-       {
-         :model_name=>:component,
-         :convert=>true,
-         :join_type=>:inner,
-         :join_cond=>{:id=>:attribute__component_component_id},
-         :cols=>[:id,:display_name,:basic_type,:external_ref,:node_node_id,:only_one_per_node,:extended_base_id]
-       },
-       {
-         :model_name=>:node,
-         :join_type=>:inner,
-         :join_cond=>{:id=>:component__node_node_id},
-         :cols=>[:id, :display_name, :external_ref]
-       }]
-    },
-
     :created_node=>{
       :type=>:json,
       :hidden=>true,

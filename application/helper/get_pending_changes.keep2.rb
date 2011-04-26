@@ -42,10 +42,7 @@ module Ramaze::Helper
                     [:eq, :status, "pending"]],
         :columns => [:id, :relative_order,:type,:installed_component,parent_field_name,:state_change_id].uniq
       }
-      sc_with_direct_cmps = get_objects_from_sp_hash(sp_hash)
-      cols = [:id,:display_name,:basic_type,:external_ref,:node_node_id,:only_one_per_node,:extended_base_id]
-      related_cmps = Component.get_components_related_by_mixins(sc_with_direct_cmps.map{|sc|sc[:component]},cols)
-      sc_with_direct_cmps
+      get_objects_from_sp_hash(sp_hash)
     end
 
     def pending_changed_attribute(parent_model_name,id_list)
@@ -58,10 +55,7 @@ module Ramaze::Helper
                     [:eq, :status, "pending"]],
         :columns => [:id, :relative_order,:type,:changed_attribute,parent_field_name,:state_change_id].uniq
       }      
-      sc_with_direct_cmps = get_objects_from_sp_hash(sp_hash)
-      cols = [:id,:display_name,:basic_type,:external_ref,:node_node_id,:only_one_per_node,:extended_base_id]
-      related_cmps = Component.get_components_related_by_mixins(sc_with_direct_cmps.map{|sc|sc[:component]},cols)
-      sc_with_direct_cmps
+      get_objects_from_sp_hash(sp_hash)
     end
 
     def remove_duplicate_and_add_same_component_types(state_changes)

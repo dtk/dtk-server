@@ -356,59 +356,66 @@ module XYZ
     end
 
     def self.get_components_related_by_mixins(components,cols)
+      return Array.new if components.empty?
+      sample_cmp = components.first
+      component_mh = sample_cmp.model_handle()
       #use base cmp id as equivalence class and find all members of equivalence class to find what each related component is
       #associated with
       cmp_id_to_equiv_class = Hash.new
       equiv_class_members = Hash.new
-      ext_cmps = Hash.new
-      base_cmps = Hash.new
+      ext_cmps = Array.new
+      base_cmp_ids = Array.new
       components.each do |cmp|
         id = cmp[:id]
         if cmp[:extended_base_id]
           ext_cmps << cmp
+          base_cmp_ids << cmp[:extended_base_id]
           cmp_id_to_equiv_class[id] = (equiv_class_members[cmp[:extended_base_id]] ||= Array.new) << id
         else
-          base_cmps << cmp
+          base_cmp_ids << cmp[:id]
           cmp_id_to_equiv_class[id] = (equiv_class_members[id] ||= Array.new) << id
         end
       end
 
       indexed_ret = Hash.new
-      get_components_related_by_mixins_from_extension(ext_cmps,cols).each do |found_base_cmp|
+      get_components_related_by_mixins_from_extension(component_mh,ext_cmps,cols).each do |found_base_cmp|
         id = found_base_cmp[:id]
         #if found_base_cmp in components dont put in result
         unless cmp_id_to_equiv_class[id]
-          indexed_ret[id] = cmp.merge(:assoc_component_ids => equiv_class_members[id])
+          indexed_ret[id] = found_base_cmp.merge(:assoc_component_ids => equiv_class_members[id])
         end
       end
 
-      get_components_related_by_mixins_from_base(base_cmps.col).each do |found_ext_cmp|
-        id = cmp[:id]
+      get_components_related_by_mixins_from_base(component_mh,base_cmp_ids,cols).each do |found_ext_cmp|
         id = found_ext_cmp[:id]
         #if found_ext_cmp in components dont put in result
         unless cmp_id_to_equiv_class[id]
-          indexed_ret[id] = cmp.merge(:assoc_component_ids => equiv_class_members[cmp[:extended_base_id]])
+          indexed_ret[id] = found_ext_cmp.merge(:assoc_component_ids => equiv_class_members[found_ext_cmp[:extended_base_id]])
         end
       end
       indexed_ret.values
     end
 
-
   private
-    def self.get_components_related_by_mixins_from_extension(extension_cmps,cols)
+    def self.get_components_related_by_mixins_from_extension(component_mh,extension_cmps,cols)
       return Array.new if extension_cmps.empty?
-      sample_cmp = extension_cmps.first
-      base_ids = extension_cmps.map{|x|x[:extended_base_id]}
+      base_ids = extension_cmps.map{|cmp|cmp[:extended_base_id]}
       sp_hash = {
         :model_name => :component,
         :filter => [:oneof, :id, base_ids],
         :cols => Aux.array_add?(cols,[:id])
       }
-      cmp_mh = sample_cmp.model_handle()
-      get_objects_from_sp_hash(cmp_mh,sp_hash)
+      get_objects_from_sp_hash(component_mh,sp_hash)
     end
 
-    def self.get_components_related_by_mixins_from_base(base_cmps,cols)
+    def self.get_components_related_by_mixins_from_base(component_mh,base_cmp_ids,cols)
+      return Array.new if base_cmp_ids.empty?
+      sp_hash = {
+        :model_name => :component,
+        :filter => [:oneof, :extended_base_id, base_cmp_ids],
+        :cols => Aux.array_add?(cols,[:id])
+      }
+      get_objects_from_sp_hash(component_mh,sp_hash)
     end
 =begin
 TODO: may deprecate

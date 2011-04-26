@@ -86,44 +86,19 @@ module Ramaze::Helper
 
     def remove_dups_and_proc_related_components(state_changes)
       indexed_ret = Hash.new
-      #remove duplicates wrt component looking at both component and component_same_type
+      #remove duplicates wrt component and process linked_ids
       state_changes.each do |sc|
         if sc[:type] == "create_node"
           indexed_ret[sc[:node][:id]] = augment_with_linked_id(sc,sc[:id])
         elsif ["setting","install_component"].include?(sc[:type])
-          indexed_ret[sc[:component][:id]] = augment_with_linked_id(indexed_ret[sc[:component][:id]] || sc.reject{|k,v|[:attribute,:component_same_type].include?(k)},sc[:id])
-
-          if cst = sc[:component_same_type]
-            indexed_ret[cst[:id]] = augment_with_linked_id(indexed_ret[cst[:id]] || sc.reject{|k,v| [:attribute,:component_same_type].include?(k)}.merge(:component => cst),sc[:id])
-          end
+          indexed_ret[sc[:component][:id]] = augment_with_linked_id(indexed_ret[sc[:component][:id]] || sc.reject{|k,v|[:attribute].include?(k)},sc[:id])
         else
-          Log.error("unexepceted type #{sc[:type]}; ignoring")
+          Log.error("unexpected type #{sc[:type]}; ignoring")
         end
       end
       indexed_ret.values
     end
 
-=begin
-TOD: deprecate
-    def remove_duplicate_and_add_same_component_types(state_changes)
-      indexed_ret = Hash.new
-      #remove duplicates wrt component looking at both component and component_same_type
-      state_changes.each do |sc|
-        if sc[:type] == "create_node"
-          indexed_ret[sc[:node][:id]] = augment_with_linked_id(sc,sc[:id])
-        elsif ["setting","install_component"].include?(sc[:type])
-          indexed_ret[sc[:component][:id]] = augment_with_linked_id(indexed_ret[sc[:component][:id]] || sc.reject{|k,v|[:attribute,:component_same_type].include?(k)},sc[:id])
-
-          if cst = sc[:component_same_type]
-            indexed_ret[cst[:id]] = augment_with_linked_id(indexed_ret[cst[:id]] || sc.reject{|k,v| [:attribute,:component_same_type].include?(k)}.merge(:component => cst),sc[:id])
-          end
-        else
-          Log.error("unexepceted type #{sc[:type]}; ignoring")
-        end
-      end
-      indexed_ret.values
-    end
-=end
    private
     def augment_with_linked_id(state_change,id)
       if linked = state_change[:linked_ids]

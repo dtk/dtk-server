@@ -8,7 +8,7 @@ module Ramaze::Helper
         ret += last_level
         last_level = pending_changes_one_level_raw(:state_change,last_level.map{|x|x[:id]})
       end
-      remove_duplicate_and_add_same_component_types(ret)
+      remove_dups_and_proc_related_components(ret)
     end
 
 
@@ -43,9 +43,7 @@ module Ramaze::Helper
         :columns => [:id, :relative_order,:type,:installed_component,parent_field_name,:state_change_id].uniq
       }
       sc_with_direct_cmps = get_objects_from_sp_hash(sp_hash)
-      cols = [:id,:display_name,:basic_type,:external_ref,:node_node_id,:only_one_per_node,:extended_base_id]
-      related_cmps = Component.get_components_related_by_mixins(sc_with_direct_cmps.map{|sc|sc[:component]},cols)
-      sc_with_direct_cmps
+      add_related_components(sc_with_direct_cmps)
     end
 
     def pending_changed_attribute(parent_model_name,id_list)
@@ -59,11 +57,54 @@ module Ramaze::Helper
         :columns => [:id, :relative_order,:type,:changed_attribute,parent_field_name,:state_change_id].uniq
       }      
       sc_with_direct_cmps = get_objects_from_sp_hash(sp_hash)
-      cols = [:id,:display_name,:basic_type,:external_ref,:node_node_id,:only_one_per_node,:extended_base_id]
-      related_cmps = Component.get_components_related_by_mixins(sc_with_direct_cmps.map{|sc|sc[:component]},cols)
-      sc_with_direct_cmps
+      add_related_components(sc_with_direct_cmps)
     end
 
+    def add_related_components(sc_with_direct_cmps)
+      cols = [:id,:display_name,:basic_type,:external_ref,:node_node_id,:only_one_per_node,:extended_base_id]
+      related_cmps = Component.get_components_related_by_mixins(sc_with_direct_cmps.map{|sc|sc[:component]},cols)
+      #TODO: assumption that cmps only appear once in sc_with_direct_cmps
+      component_index = Hash.new
+      sc_with_direct_cmps.each do |sc|
+        cmp_id = sc[:component][:id]
+        unless component_index[cmp_id]
+          component_index[cmp_id] = sc
+        else
+          Log.error("component id #{cmp_id.to_s} appears more than once in sc_with_direct_cmps")
+        end
+      end
+      sc_with_related_cmps = Array.new
+      related_cmps.map do |cmp|
+        cmp[:assoc_component_ids].each do |cmp_id|
+          related_sc = component_index[cmp_id].merge(:component => cmp)
+          sc_with_related_cmps << related_sc
+        end
+      end
+
+      sc_with_direct_cmps + sc_with_related_cmps
+    end
+
+    def remove_dups_and_proc_related_components(state_changes)
+      indexed_ret = Hash.new
+      #remove duplicates wrt component looking at both component and component_same_type
+      state_changes.each do |sc|
+        if sc[:type] == "create_node"
+          indexed_ret[sc[:node][:id]] = augment_with_linked_id(sc,sc[:id])
+        elsif ["setting","install_component"].include?(sc[:type])
+          indexed_ret[sc[:component][:id]] = augment_with_linked_id(indexed_ret[sc[:component][:id]] || sc.reject{|k,v|[:attribute,:component_same_type].include?(k)},sc[:id])
+
+          if cst = sc[:component_same_type]
+            indexed_ret[cst[:id]] = augment_with_linked_id(indexed_ret[cst[:id]] || sc.reject{|k,v| [:attribute,:component_same_type].include?(k)}.merge(:component => cst),sc[:id])
+          end
+        else
+          Log.error("unexepceted type #{sc[:type]}; ignoring")
+        end
+      end
+      indexed_ret.values
+    end
+
+=begin
+TOD: deprecate
     def remove_duplicate_and_add_same_component_types(state_changes)
       indexed_ret = Hash.new
       #remove duplicates wrt component looking at both component and component_same_type
@@ -82,6 +123,7 @@ module Ramaze::Helper
       end
       indexed_ret.values
     end
+=end
    private
     def augment_with_linked_id(state_change,id)
       if linked = state_change[:linked_ids]

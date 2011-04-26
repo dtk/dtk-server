@@ -354,6 +354,23 @@ module XYZ
         get_virtual_attributes_aux_extension(attribute_names,cols,field_to_match,multiple_instance_clause) :
         get_virtual_attributes_aux_base(attribute_names,cols,field_to_match,multiple_instance_clause)
     end
+
+    def self.get_all_virtual_attributes__include_mixins(component_idhs,cols)
+      #TODO: first call not needed if calling fn gets extended_base_ids
+      sp_hash = {
+        :model_name => :component,
+        :cols => [:id,:display_name,:extended_base_id]
+      }
+      components = get_objects_in_set_from_sp_hash(component_idhs,sp_hash)
+      attrs_extension = get_all_virtual_attributes_aux_extension(components.select{|x|x[:extended_base_id]},cols)
+      attrs_base = get_all_virtual_attributes_aux_base(components.reject{|x|x[:extended_base_id]},cols)
+      #remove dups
+      indexed_ret = Hash.new
+      attrs_extension.each{|attr| indexed_ret[attr[:id]] ||= attr}
+      attrs_base.each{|attr| indexed_ret[attr[:id]] ||= attr}
+      indexed_ret.values
+    end
+
    private
     def get_virtual_attributes_aux_extension(attribute_names,cols,field_to_match=:display_name,multiple_instance_clause=nil)
       component_id = self[:id]
@@ -365,6 +382,20 @@ module XYZ
       }
       attr_mh = model_handle().createMH(:attribute)
       Model.get_objects_from_sp_hash(attr_mh,sp_hash)
+    end
+
+    def self.get_all_virtual_attributes_aux_extension(extension_cmps,cols)
+      return Array.new if extension_cmps.empty?
+      sample_cmp = extension_cmps.first
+      component_ids = extension_cmps.map{|x|x[:id]}
+      base_ids = extension_cmps.map{|x|x[:extended_base_id]}
+      sp_hash = {
+        :model_name => :attribute,
+        :filter => [:and, [:oneof, field_to_match, attribute_names], [:oneof, :component_component_id, component_ids + base_ids]],
+        :cols => Aux.array_add?(cols,[:component_component_id])
+      }
+      attr_mh = sample_cmp.model_handle().createMH(:attribute)
+      get_objects_from_sp_hash(attr_mh,sp_hash)
     end
 
     def get_virtual_attributes_aux_base(attribute_names,cols,field_to_match=:display_name,multiple_instance_clause=nil)
@@ -385,6 +416,28 @@ module XYZ
          }]
       Model.get_objects_from_join_array(model_handle,base_sp_hash,join_array).map{|r|r[:attribute]}
     end
+
+    def self.get_all_virtual_attributes_aux_base(base_cmps,cols)
+      return Array.new if base_cmps.empty?
+      sample_cmp = base_cmps.first
+      component_ids = base_cmps.map{|x|x[:id]}
+      base_sp_hash = {
+        :model_name => :component,
+        :filter => [:or, [:oneof, :extended_base_id, component_ids], [:oneof, :id, component_ids]],
+        :cols => [:id,:extended_base_id]
+      }
+      join_array = 
+        [{
+           :model_name => :attribute,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond => {:component_component_id => :component__id},
+           :cols => Aux.array_add?(cols,[:component_component_id])
+         }]
+      model_handle = sample_cmp.model_handle
+      get_objects_from_join_array(model_handle,base_sp_hash,join_array).map{|r|r[:attribute]}
+    end
+
     public
 
     def get_attributes_ports()

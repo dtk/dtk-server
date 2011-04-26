@@ -143,11 +143,12 @@ module XYZ
         parent_field_name = DB.parent_field(:component,:attribute)
         sp_hash = {
           :relation => :attribute,
-          :filter => [:and,
-                      [:oneof, parent_field_name, indexed_actions.keys]],
+          :filter => [:oneof, parent_field_name, indexed_actions.keys],
           :columns => [:id,:display_name,parent_field_name,:external_ref,:attribute_value,:required,:dynamic,:port_type,:port_is_external, :data_type, :semantic_type, :hidden]
         }
         attrs = Model.get_objects_from_sp_hash(attr_mh,sp_hash)
+
+
 
         attrs.each do |attr|
           action = indexed_actions[attr[parent_field_name]]

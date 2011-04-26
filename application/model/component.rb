@@ -355,18 +355,38 @@ module XYZ
         get_virtual_attributes_aux_base(attribute_names,cols,field_to_match,multiple_instance_clause)
     end
 
-    def self.get_all_virtual_attributes__include_mixins(component_idhs,cols)
+    #attributes indexed by component id that it is related to
+    def self.get_all_extended_virtual_attributes(component_idhs,cols)
       #TODO: first call not needed if calling fn gets extended_base_ids
       sp_hash = {
         :model_name => :component,
         :cols => [:id,:display_name,:extended_base_id]
       }
       components = get_objects_in_set_from_sp_hash(component_idhs,sp_hash)
-      attrs_extension = get_all_virtual_attributes_aux_extension(components.select{|x|x[:extended_base_id]},cols)
+      cmps_extended = Array.new
+      cmps_base = Array.new
+      assoc_cmps = Hash.new
+      components.each do |cmp|
+        if cmp[:extended_base_id]
+          cmps_extended << cmp
+          assoc_cmps[cmp[:id]] = cmp[:extended_base_id]
+        else
+          cmps_base << cmp
+        end
+      end
+
+      ret = Hash.new
+      attrs_extension = get_all_virtual_attributes_aux_extension(cmps_extended,cols)
       attrs_base = get_all_virtual_attributes_aux_base(components.reject{|x|x[:extended_base_id]},cols)
-      #remove dups
+
+      #remove dups and add the associated_component_id
       indexed_ret = Hash.new
-      attrs_extension.each{|attr| indexed_ret[attr[:id]] ||= attr}
+      #component_component_id will be pointing to member of component_idhs or to its base 
+      attrs_extension.each do |attr| 
+        next if indexed_ret[attr[:id]]
+        #if assoc_cmps[attr[:component_component_id]]
+      end
+
       attrs_base.each{|attr| indexed_ret[attr[:id]] ||= attr}
       indexed_ret.values
     end

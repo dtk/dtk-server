@@ -148,14 +148,16 @@ module XYZ
         }
         attrs = Model.get_objects_from_sp_hash(attr_mh,sp_hash)
 
+=begin
         component_idhs = indexed_actions.values.map{|a|attr_mh.createIDH(:model_name=>:component,:id=>a[:component][:id])}
         cols = [:id,:display_name,parent_field_name,:external_ref,:attribute_value,:required,:dynamic,:port_type,:port_is_external, :data_type, :semantic_type, :hidden]
-        attrsx = Component.get_all_virtual_attributes__include_mixins(component_idhs,cols)
-
+        attrs = Component.get_all_extended_virtual_attributes(component_idhs,cols)
+=end
         attrs.each do |attr|
           action = indexed_actions[attr[parent_field_name]]
           action.add_attribute!(attr)
         end
+
       end
 
       def get_and_update_attributes(task_mh)

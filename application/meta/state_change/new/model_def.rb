@@ -42,9 +42,10 @@
       :remote_dependencies=>
       [{
          :model_name=>:component,
+         :convert=>true,
          :join_type=>:inner,
          :join_cond=>{:id=>:state_change__component_id},
-         :cols=>[:id,:display_name,:basic_type,:external_ref,:node_node_id,:only_one_per_node]
+         :cols=>[:id,:display_name,:basic_type,:external_ref,:node_node_id,:only_one_per_node,:extended_base_id]
        },
        {
          :model_name=>:node,
@@ -73,9 +74,10 @@
        },
        {
          :model_name=>:component,
+         :convert=>true,
          :join_type=>:inner,
          :join_cond=>{:id=>:attribute__component_component_id},
-         :cols=>[:id,:display_name,:basic_type,:external_ref,:node_node_id,:only_one_per_node]
+         :cols=>[:id,:display_name,:basic_type,:external_ref,:node_node_id,:only_one_per_node,:extended_base_id]
        },
        {
          :model_name=>:node,

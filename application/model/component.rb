@@ -378,7 +378,7 @@ module XYZ
         id = found_base_cmp[:id]
         #if found_base_cmp in components dont put in result
         unless cmp_id_to_equiv_class[id]
-          indexed_ret[id] = cmp
+          indexed_ret[id] = cmp.merge(:assoc_component_ids => equiv_class_members[id])
         end
       end
 
@@ -387,9 +387,7 @@ module XYZ
         id = found_ext_cmp[:id]
         #if found_ext_cmp in components dont put in result
         unless cmp_id_to_equiv_class[id]
-          indexed_ret[id] = cmp
-        else
-          cmp_id_to_equiv_class[id] = equiv_class_members[cmp[:extended_base_id]]
+          indexed_ret[id] = cmp.merge(:assoc_component_ids => equiv_class_members[cmp[:extended_base_id]])
         end
       end
       indexed_ret.values

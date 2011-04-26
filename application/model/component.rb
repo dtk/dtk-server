@@ -356,25 +356,48 @@ module XYZ
     end
 
     def self.get_components_related_by_mixins(components,cols)
-      cmp_ids_hash = components.inject({}){|h,cmp|h.merge(cmp[:id]=>true)}
-      extension_cmps = components.select{|cmp|cmp[:extended_base_id]}
-      indexed_ret = Hash.new
-      get_components_related_by_mixins__extension(extension_cmps,cols).each do |cmp|
-        #only include ones not in components
+      #use base cmp id as equivalence class and find all members of equivalence class to find what each related component is
+      #associated with
+      cmp_id_to_equiv_class = Hash.new
+      equiv_class_members = Hash.new
+      ext_cmps = Hash.new
+      base_cmps = Hash.new
+      components.each do |cmp|
         id = cmp[:id]
-        indexed_ret[id] = cmp unless cmp_ids_hash[id]
+        if cmp[:extended_base_id]
+          ext_cmps << cmp
+          cmp_id_to_equiv_class[id] = (equiv_class_members[cmp[:extended_base_id]] ||= Array.new) << id
+        else
+          base_cmps << cmp
+          cmp_id_to_equiv_class[id] = (equiv_class_members[id] ||= Array.new) << id
+        end
       end
-      base_cmps = components.reject{|cmp|cmp[:extended_base_id]}
-      get_components_related_by_mixins__base(base_cmps.col).each do |cmp|
+
+      indexed_ret = Hash.new
+      get_components_related_by_mixins_from_extension(ext_cmps,cols).each do |found_base_cmp|
+        id = found_base_cmp[:id]
+        #if found_base_cmp in components dont put in result
+        unless cmp_id_to_equiv_class[id]
+          indexed_ret[id] = cmp
+        end
+      end
+
+      get_components_related_by_mixins_from_base(base_cmps.col).each do |found_ext_cmp|
         id = cmp[:id]
-        indexed_ret[id] ||= cmp unless cmp_ids_hash[id]
+        id = found_ext_cmp[:id]
+        #if found_ext_cmp in components dont put in result
+        unless cmp_id_to_equiv_class[id]
+          indexed_ret[id] = cmp
+        else
+          cmp_id_to_equiv_class[id] = equiv_class_members[cmp[:extended_base_id]]
+        end
       end
       indexed_ret.values
     end
 
 
   private
-    def self.get_components_related_by_mixins__extension(extension_cmps,cols)
+    def self.get_components_related_by_mixins_from_extension(extension_cmps,cols)
       return Array.new if extension_cmps.empty?
       sample_cmp = extension_cmps.first
       base_ids = extension_cmps.map{|x|x[:extended_base_id]}
@@ -387,7 +410,7 @@ module XYZ
       get_objects_from_sp_hash(cmp_mh,sp_hash)
     end
 
-    def self.get_components_related_by_mixins__base(base_cmps,cols)
+    def self.get_components_related_by_mixins_from_base(base_cmps,cols)
     end
 =begin
 TODO: may deprecate

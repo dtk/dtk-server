@@ -61,18 +61,23 @@ module Ramaze::Helper
     end
 
     def add_related_components(sc_with_direct_cmps)
-      cols = [:id,:display_name,:basic_type,:external_ref,:node_node_id,:only_one_per_node,:extended_base_id]
-      related_cmps = Component.get_components_related_by_mixins(sc_with_direct_cmps.map{|sc|sc[:component]},cols)
-      #TODO: assumption that cmps only appear once in sc_with_direct_cmps
       component_index = Hash.new
       sc_with_direct_cmps.each do |sc|
         cmp_id = sc[:component][:id]
         unless component_index[cmp_id]
           component_index[cmp_id] = sc
         else
-          Log.error("component id #{cmp_id.to_s} appears more than once in sc_with_direct_cmps")
+          if sc[:type] == "install_component" 
+            component_index[cmp_id] = sc
+          end
         end
       end
+
+      cols = [:id,:display_name,:basic_type,:external_ref,:node_node_id,:only_one_per_node,:extended_base_id]
+      cmps_in_sc = component_index.values.map{|sc|sc[:component]}
+      related_cmps = Component.get_components_related_by_mixins(cmps_in_sc,cols)
+      #TODO: assumption that cmps only appear once in sc_with_direct_cmps
+
       sc_with_related_cmps = Array.new
       related_cmps.map do |cmp|
         cmp[:assoc_component_ids].each do |cmp_id|
@@ -90,6 +95,7 @@ module Ramaze::Helper
       state_changes.each do |sc|
         if sc[:type] == "create_node"
           indexed_ret[sc[:node][:id]] = augment_with_linked_id(sc,sc[:id])
+          #TODO: ordering may do thsi anyway, but do we explicitly want to make sure if both setting adn isnatll use install as type
         elsif ["setting","install_component"].include?(sc[:type])
           indexed_ret[sc[:component][:id]] = augment_with_linked_id(indexed_ret[sc[:component][:id]] || sc.reject{|k,v|[:attribute].include?(k)},sc[:id])
         else

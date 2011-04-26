@@ -355,6 +355,40 @@ module XYZ
         get_virtual_attributes_aux_base(attribute_names,cols,field_to_match,multiple_instance_clause)
     end
 
+    def self.get_components_related_by_mixins(components,cols)
+      cmp_ids_hash = components.inject({}){|h,cmp|h.merge(cmp[:id]=>true)}
+      extension_cmps = components.select{|cmp|cmp[:extended_base_id]}
+      indexed_ret = Hash.new
+      get_components_related_by_mixins__extension(extension_cmps,cols).each do |cmp|
+        #only include ones not in components
+        id = cmp[:id]
+        indexed_ret[id] = cmp unless cmp_ids_hash[id]
+      end
+      base_cmps = components.reject{|cmp|cmp[:extended_base_id]}
+      get_components_related_by_mixins__base(base_cmps.col).each do |cmp|
+        id = cmp[:id]
+        indexed_ret[id] ||= cmp unless cmp_ids_hash[id]
+      end
+      indexed_ret.values
+    end
+
+
+  private
+    def self.get_components_related_by_mixins__extension(extension_cmps,cols)
+      return Array.new if extension_cmps.empty?
+      sample_cmp = extension_cmps.first
+      base_ids = extension_cmps.map{|x|x[:extended_base_id]}
+      sp_hash = {
+        :model_name => :component,
+        :filter => [:oneof, :id, base_ids],
+        :cols => Aux.array_add?(cols,[:id])
+      }
+      cmp_mh = sample_cmp.model_handle()
+      get_objects_from_sp_hash(cmp_mh,sp_hash)
+    end
+
+    def self.get_components_related_by_mixins__base(base_cmps,cols)
+    end
 =begin
 TODO: may deprecate
     #attributes indexed by component id that it is related to

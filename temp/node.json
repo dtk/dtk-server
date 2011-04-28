@@ -1,0 +1,14 @@
+{
+  "run_list": [ 
+    "recipe[gitolite]",	
+    "recipe[gitolite::user]"
+  ],
+  "gitolite": {
+    "user": {
+      "list": [
+        {"repository": "repo2", "username": "liz"},
+        {"repository": "repo4", "username": "tom"}
+      ]     
+    }
+  }
+}

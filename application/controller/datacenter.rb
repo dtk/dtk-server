@@ -1,5 +1,16 @@
 module XYZ
   class DatacenterController < Controller
+    #TODO: just to show values
+    def list()
+      c = ret_session_context_id()
+      model_handle = ModelHandle.new(c,:project)
+      projects = Project.get_all(model_handle)
+      pp [:projects,projects]
+      projects.each{|p|pp p.get_tree()}
+      super
+    end
+    ################
+
     def create(name)
       c = ret_session_context_id()
       Datacenter.create(name,c)

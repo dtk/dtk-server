@@ -24,6 +24,7 @@
        },
        {
          :model_name=>:component,
+         :convert => true,
          :join_type=>:left_outer,
          :join_cond=>{:node_node_id=>:node__id},
          :cols=>[:id,:display_name,:description,:node_node_id]

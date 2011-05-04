@@ -6,7 +6,12 @@ module XYZ
       model_handle = ModelHandle.new(c,:project)
       projects = Project.get_all(model_handle)
       pp [:projects,projects]
-      projects.each{|p|pp p.get_tree()}
+      projects.each do |p|
+        tree = p.get_tree()
+#        pp tree
+        sample_cmp = tree.values.first[:nodes].values.first[:components].values.first
+        pp sample_cmp.get_implementation_file_paths()
+      end
       super
     end
     ################

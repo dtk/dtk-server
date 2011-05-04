@@ -83,6 +83,23 @@ module XYZ
          )]
         ###### end of virtual columns related to attributes
 
+      virtual_column :implementation_file_paths, :type => :json, :hidden => true,
+      :remote_dependencies =>
+        [
+         {
+           :model_name => :implementation,
+           :join_type => :inner,
+           :join_cond=>{:id => q(:component,:implementation_id)},
+           :cols => [:id,:display_name,:type]
+         },
+         {
+           :model_name => :file_asset,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond=>{:implementation_implementation_id => q(:implementation,:id)},
+           :cols => [:id,:file_name,:type,:path]
+         }]
+
         virtual_column :dependencies, :type => :json, :hidden => true, 
         :remote_dependencies => 
         [
@@ -276,6 +293,17 @@ module XYZ
     ######### Model apis
 
     def get_implementation_file_paths()
+      sp_hash = {:cols => [:id,:display_name,:implementation_file_paths]}
+      unravelled_ret = get_objects_from_sp_hash(sp_hash)
+      ret = Hash.new
+      unravelled_ret.each do |r|
+        unless implementation = ret[r[:implementation][:id]] 
+          implementation = ret[r[:implementation][:id]] = r[:implementation].reject{|k,v|k == :project_id}.merge(:model_name => "implementation")
+        end
+        file_assets = implementation[:file_assets] ||= Hash.new
+        file_assets[r[:file_asset][:id]] = r[:file_asset].reject{|k,v|k == :implementation_implementation_id} if r[:file_asset]
+      end
+      ret
     end
 
     def add_config_file(file_name,file_content)

@@ -274,7 +274,9 @@ module XYZ
 
     #######################
     ######### Model apis
-    #TODO: may wrap with higher fn get_attribute which cases on whether virtual
+
+    def get_implementation_file_paths()
+    end
 
     def add_config_file(file_name,file_content)
       #TODO: may check first that object does not have already a config file with same name

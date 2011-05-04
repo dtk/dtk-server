@@ -13,7 +13,7 @@ module XYZ
       ret_global_fks
     end
 
-    #TBD: using mixed forms (ForeignKeyAttr class and "*" form) now to avoid having to convert "*" form when doing an import
+    #TODO: using mixed forms (ForeignKeyAttr class and "*" form) now to avoid having to convert "*" form when doing an import
     def mark_as_foreign_key(attr,opts={})
       ForeignKeyAttr.new(attr,opts)
     end
@@ -65,7 +65,7 @@ module XYZ
 	  ref_id_info = get_row_from_id_handle(IDHandle[:c => c, :uri => ref_uri])
           unless ref_id_info and ref_id_info[:id]
             if col.create_ref_object
-              #TBD: check whether should also populate ds_key; may not be needed because
+              #TODO: check whether should also populate ds_key; may not be needed because
               #of relation between ds_key and relative distinguished name
               create_simple_instance?(ref_uri,c,:set_display_name => true)
 	      ref_id_info = get_row_from_id_handle(IDHandle[:c => c, :uri => ref_uri])
@@ -94,7 +94,7 @@ module XYZ
 	  ref_id_info = get_row_from_id_handle(IDHandle[:c => c, :uri => ref_uri])
           unless ref_id_info and ref_id_info[:id]
             if col.create_ref_object
-              #TBD: check whether should also populate ds_key; may not be needed because
+              #TODO: check whether should also populate ds_key; may not be needed because
               #of relation between ds_key and relative distinguished name
               create_simple_instance?(ref_uri,c,:set_display_name => true)
 	      ref_id_info = get_row_from_id_handle(IDHandle[:c => c, :uri => ref_uri])
@@ -119,10 +119,11 @@ module XYZ
          ref = $2
          stripped_uri = ""
       else
-        raise Error 
+        #TODO: double check that everything that works heer is fine;being no op seems to work fine when uri_x is "" because it is referencing top level object like aproject
+#TODO        raise Error 
       end
       # find prefix that matches and rebase
-      #TBD: don't think this is exactly right
+      #TODO: don't think this is exactly right
       prefix_matches = []
       prefixes.each{|prefix|
 	prefix =~ %r{^.+/(.+?)/(.+?$)}

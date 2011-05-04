@@ -14,7 +14,13 @@
     :type=> {
       :type=>:text,
       :length=>30
-    }
+    },
+    :project_id=> { #TODO: when port datacenters to be target objects; project should be a parent
+      :type=>:bigint,
+      :foreign_key_rel_type=>:project,
+      :on_delete=>:set_null,
+      :on_update=>:set_null
+    },
   },
   :one_to_many=>
   [

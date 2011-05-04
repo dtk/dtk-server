@@ -295,15 +295,17 @@ module XYZ
     def get_implementation_file_paths()
       sp_hash = {:cols => [:id,:display_name,:implementation_file_paths]}
       unravelled_ret = get_objects_from_sp_hash(sp_hash)
-      ret = Hash.new
+      hash_ret = Hash.new
       unravelled_ret.each do |r|
-        unless implementation = ret[r[:implementation][:id]] 
-          implementation = ret[r[:implementation][:id]] = r[:implementation].reject{|k,v|k == :project_id}.merge(:model_name => "implementation")
+        unless implementation = hash_ret[r[:implementation][:id]] 
+          implementation = hash_ret[r[:implementation][:id]] = r[:implementation].reject{|k,v|k == :project_id}.merge(:model_name => "implementation")
         end
         file_assets = implementation[:file_assets] ||= Hash.new
         file_assets[r[:file_asset][:id]] = r[:file_asset].reject{|k,v|k == :implementation_implementation_id} if r[:file_asset]
       end
-      ret
+      hash_ret.values.map do |impl|
+        impl.merge(:file_assets => impl[:file_assets].values)
+      end
     end
 
     def add_config_file(file_name,file_content)

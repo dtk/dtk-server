@@ -33,7 +33,7 @@ module XYZ
     attr_reader :path
    private
 
-    def ret_repo_path(context)
+    def self.ret_repo_path(context)
       #TODO: stub
       project_ref = (context[:project]||{})[:ref]
       project_ref ? "project-#{project_ref}" : "master"

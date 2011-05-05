@@ -19,9 +19,13 @@ include XYZ
 c = 2
 if test_type == "get_file"
   sp_hash = {
-    :filter => [:eq, :path, opts[
+    :filter => [:eq, :path, options[:filename]],
     :cols => [:id,:path]
   }
+  file_asset_mh = ModelHandle.new(c,:file_asset)
+  file_asset = Model.get_objects_from_sp_hash(file_asset_mh,sp_hash).first
+  raise Error.new("file asset #{options[:filename]} not found") unless file_asset
+  pp file_asset.get_content()
 end
 
 =begin
@@ -38,4 +42,4 @@ projects.each do |p|
         sample_content = sample_file_asset.get_implementation_file_content()
         pp sample_content
 =end
-end
+

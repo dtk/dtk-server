@@ -10,7 +10,11 @@ module XYZ
         tree = p.get_tree()
 #        pp tree
         sample_cmp = tree.values.first[:nodes].values.first[:components].values.first
-        pp sample_cmp.get_implementation_file_paths()
+        file_paths = sample_cmp.get_implementation_file_paths()
+#        pp file_paths
+        sample_file_asset = file_paths.first[:file_assets].first
+        sample_content = sample_file_asset.get_implementation_file_content()
+        pp sample_content
       end
       super
     end

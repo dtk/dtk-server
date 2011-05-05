@@ -291,7 +291,7 @@ module XYZ
 
     #######################
     ######### Model apis
-
+=begin
     def get_implementation_file_paths()
       sp_hash = {:cols => [:id,:display_name,:implementation_file_paths]}
       unravelled_ret = get_objects_from_sp_hash(sp_hash)
@@ -307,7 +307,41 @@ module XYZ
         impl.merge(:file_assets => impl[:file_assets].values)
       end
     end
+=end
+    def get_implementation_file_paths()
+      sp_hash = {:cols => [:id,:display_name,:implementation_file_paths]}
+      unravelled_ret = get_objects_from_sp_hash(sp_hash)
+      indexed_ret = Hash.new
+      unravelled_ret.each do |r|
+        unless implementation = indexed_ret[r[:implementation][:id]] 
+          implementation = indexed_ret[r[:implementation][:id]] = r[:implementation].reject{|k,v|k == :project_id}.merge(:model_name => "implementation")
+        end
+        file_assets = implementation[:file_assets] ||= Array.new
+        set_hierrachical_file_struct!(file_assets,r[:file_asset].reject{|k,v|k == :implementation_implementation_id}) if r[:file_asset]
+      end
+      indexed_ret.values
+    end
 
+   private
+    def set_hierrachical_file_struct!(ret,file_asset,path=nil)
+      path ||= file_asset[:path].split("/")
+      if path.size == 1
+        ret << file_asset.merge(:model_name => "file_asset")
+      else
+        dir = ret.find{|x|x[:display_name] == path[0] and x[:model_name] == "directory_asset"}
+        unless dir
+          dir = {
+            :model_name => "directory_asset",
+            :display_name => path[0]
+          }
+          ret << dir
+        end
+        children = dir[:children] ||= Array.new
+        set_hierrachical_file_struct!(children,file_asset,path[1..path.size-1])
+      end
+    end
+
+   public
     def add_config_file(file_name,file_content)
       #TODO: may check first that object does not have already a config file with same name
       parent_col = DB.parent_field(:component,:file_asset)

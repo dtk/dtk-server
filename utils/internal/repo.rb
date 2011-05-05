@@ -9,6 +9,11 @@ module XYZ
       repo.checkout(repo_path) do
         full_path = "#{repo.path}/#{file_asset[:path]}"
         ret = File.open(full_path){|f|f.read}
+        #TODO: commiting because it looks like file change visible in otehr branches until commit
+        #should see if we can do more efficient job using @index.add(file_name,content)
+        message = "Updating #{file_asset[:path]} in #{repo_path}"
+        @grit_repo.add(file_asset[:path])
+        @grit_repo.commit_index(message)
       end
       ret
     end
@@ -43,7 +48,8 @@ module XYZ
     def add_branch(branch_name,start="master")
       start ||= "master"
       checkout(start)
-      @index.commit("Adding branch #{branch_name}", [@grit_repo.commit(start)], nil, nil, branch_name)
+      #TODO: check if this works when start is diffeernat than master
+      @index.commit("Adding branch #{branch_name}", [@grit_repo.commits.first], nil, nil, branch_name)
     end
 
 

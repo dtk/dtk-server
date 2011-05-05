@@ -9,9 +9,10 @@ module XYZ
         :cols => [:path,:implementation_info]
       }
       file_obj = get_objects_from_sp_hash(sp_hash).first
-      repo_path = file_obj[:implementation][:repo_path] 
+      project = {:ref => "poject1"} #TODO: stub until get the relevant project
+      content = Repo.get_file_content(file_obj,{:implementation => file_obj[:implementation], :project => project})
       #TODO: determine whether makes sense to store newly gotten content in db or just do this if any changes
-      Repo.get_file_content(file_obj,repo_path)
+      content
     end
 #stubs for methods
 =begin

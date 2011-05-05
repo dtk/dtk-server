@@ -1,8 +1,10 @@
 require 'grit'
 module XYZ
   class Repo 
-    def self.get_file_content(file_asset,repo_path)
+    def self.get_file_content(file_asset,context={})
       repo = get_repo(file_asset)
+      repo_path_x = ret_repo_path(context)
+      repo_path = repo.branch_exists?(repo_path_x) ? repo_path_x : "master"
       ret = nil
       repo.checkout(repo_path) do
         full_path = "#{repo.path}/#{file_asset[:path]}"
@@ -24,8 +26,19 @@ module XYZ
       end
     end
 
+    def branch_exists?(branch_name)
+      @grit_repo.heads.find{|h|h.name == branch_name} ? true : nil
+    end
+
     attr_reader :path
    private
+
+    def ret_repo_path(context)
+      #TODO: stub
+      project_ref = (context[:project]||{})[:ref]
+      project_ref ? "project-#{project_ref}" : "master"
+    end
+
     attr_reader :grit_repo
     def initialize(path)
       @path = path
@@ -59,10 +72,6 @@ module XYZ
       # @index.add(file_name,content)
       # @ index.commit(message, [@grit_repo.commit(branch_name)])
       ret
-    end
-
-    def branch_exists?(branch_name)
-      @grit_repo.heads.find{|h|h.name == branch_name} ? true : nil
     end
 
     def git_command()

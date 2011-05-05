@@ -291,23 +291,6 @@ module XYZ
 
     #######################
     ######### Model apis
-=begin
-    def get_implementation_file_paths()
-      sp_hash = {:cols => [:id,:display_name,:implementation_file_paths]}
-      unravelled_ret = get_objects_from_sp_hash(sp_hash)
-      hash_ret = Hash.new
-      unravelled_ret.each do |r|
-        unless implementation = hash_ret[r[:implementation][:id]] 
-          implementation = hash_ret[r[:implementation][:id]] = r[:implementation].reject{|k,v|k == :project_id}.merge(:model_name => "implementation")
-        end
-        file_assets = implementation[:file_assets] ||= Hash.new
-        file_assets[r[:file_asset][:id]] = r[:file_asset].reject{|k,v|k == :implementation_implementation_id} if r[:file_asset]
-      end
-      hash_ret.values.map do |impl|
-        impl.merge(:file_assets => impl[:file_assets].values)
-      end
-    end
-=end
     def get_implementation_file_paths()
       sp_hash = {:cols => [:id,:display_name,:implementation_file_paths]}
       unravelled_ret = get_objects_from_sp_hash(sp_hash)
@@ -334,12 +317,22 @@ module XYZ
             :model_name => "directory_asset",
             :display_name => path[0]
           }
-          ret << dir
+#TODO: replace with this after debugging          ret << dir
+          ret << debug_order_dir(dir)
         end
         children = dir[:children] ||= Array.new
         set_hierrachical_file_struct!(children,file_asset,path[1..path.size-1])
       end
     end
+
+    #TODO: remove after using for testing
+   def debug_order_dir(dir)
+     ret = ActiveSupport::OrderedHash.new()
+     [:model_name, :display_name, :children].each do |k|
+       ret[k] = dir[k] if dir.has_key?(k)
+     end
+     ret
+   end
 
    public
     def add_config_file(file_name,file_content)

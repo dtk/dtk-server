@@ -2,6 +2,7 @@
 require 'rubygems'
 require 'optparse'
 require 'pp'
+require 'tmpdir'
 root = File.expand_path('../', File.dirname(__FILE__))
 options = Hash.new
 OptionParser.new do|opts|
@@ -9,37 +10,50 @@ OptionParser.new do|opts|
  
    # Define the options, and what they do
    opts.on( '-f', '--filename FILENAME', 'File name' ) do |f|
-     options[:filename] = f
+     options[:file_path] = f
    end
 end.parse!
 test_type = ARGV[0]
 
 require root + '/app'
 include XYZ
-c = 2
-if test_type == "get_file"
+
+def get_file_asset(path)
+  c = 2
   sp_hash = {
-    :filter => [:eq, :path, options[:filename]],
+    :filter => [:eq, :path, path],
     :cols => [:id,:path]
   }
   file_asset_mh = ModelHandle.new(c,:file_asset)
-  file_asset = Model.get_objects_from_sp_hash(file_asset_mh,sp_hash).first
-  raise Error.new("file asset #{options[:filename]} not found") unless file_asset
-  pp file_asset.get_content()
+  ret = Model.get_objects_from_sp_hash(file_asset_mh,sp_hash).first
+  raise "file asset #{path} not found" unless ret
+  ret
+end
+  
+def get_file(options)
+  file_asset = get_file_asset(options[:file_path])
+  file_asset.get_content()
 end
 
-=begin
-model_handle = ModelHandle.new(c,:project)
-projects = Project.get_all(model_handle)
-pp [:projects,projects]
-projects.each do |p|
-  tree = p.get_tree()
-  #        pp tree
-  sample_cmp = tree.values.first[:nodes].values.first[:components].values.first
-  file_paths = sample_cmp.get_implementation_file_paths()
-  pp file_paths
-        sample_file_asset = file_paths.first[:file_assets].first
-        sample_content = sample_file_asset.get_implementation_file_content()
-        pp sample_content
-=end
+def edit_file(options)
+  file_asset = get_file_asset(options[:file_path])
+  contents = file_asset.get_content()
+  filename = "tmp-"
+  0.upto(20) { filename += rand(9).to_s }
+  filename << ".txt"
+  filename = File.join(Dir.tmpdir, filename)
+  File.open(filename, "w") do |f|
+    f.sync = true
+    f.puts contents
+  end
+  system("#{ENV["EDITOR"] || "emacs"} #{filename}")
 
+  ret = File.open(filename){|f|f.read}
+  File.unlink(filename)
+  ret
+end
+
+case test_type
+  when "get_file" then pp get_file(options)
+  when "edit_file" then edit_file(options)
+end

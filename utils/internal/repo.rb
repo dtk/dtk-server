@@ -13,6 +13,16 @@ module XYZ
       ret
     end
 
+    def self.update_file_content(file_asset,content,context={})
+      repo = get_repo(file_asset)
+      repo_path = ret_repo_path(context)
+      repo.add_branch(repo_path) unless repo.branch_exists?(repo_path) 
+      repo.checkout(repo_path) do
+        full_path = "#{repo.path}/#{file_asset[:path]}"
+        File.open(full_path,"w"){|f|f << content}
+      end
+    end
+
     def checkout(branch_name,&block)
       branch_name ||= "master"
       @index.read_tree(branch_name)
@@ -29,6 +39,13 @@ module XYZ
     def branch_exists?(branch_name)
       @grit_repo.heads.find{|h|h.name == branch_name} ? true : nil
     end
+
+    def add_branch(branch_name,start="master")
+      start ||= "master"
+      checkout(start)
+      @index.commit("Adding branch #{branch_name}", [@grit_repo.commit(start)], nil, nil, branch_name)
+    end
+
 
     attr_reader :path
    private
@@ -51,12 +68,6 @@ module XYZ
     end
     CachedRepo = self.new(R8::EnvironmentConfig::CoreCookbooksRoot)
  
-    def add_branch(branch_name,start="master")
-      start ||= "master"
-      checkout(start)
-      @index.commit("Adding branch #{branch_name}", [@grit_repo.commit(start)], nil, nil, branch_name)
-    end
-
     def add_file(file_name,content,branch_name="master")
       message = "Adding #{file_name} to #{branch_name}"
       ret = nil

@@ -37,20 +37,24 @@ end
 
 def edit_file(options)
   file_asset = get_file_asset(options[:file_path])
-  contents = file_asset.get_content()
+  content = file_asset.get_content()
   filename = "tmp-"
   0.upto(20) { filename += rand(9).to_s }
   filename << ".txt"
   filename = File.join(Dir.tmpdir, filename)
-  File.open(filename, "w") do |f|
-    f.sync = true
-    f.puts contents
-  end
-  system("#{ENV["EDITOR"] || "emacs"} #{filename}")
-
-  ret = File.open(filename){|f|f.read}
-  File.unlink(filename)
-  ret
+  new_content = nil
+  begin
+    File.open(filename, "w") do |f|
+      f.sync = true
+      f.puts content
+    end
+    system("#{ENV["EDITOR"] || "emacs"} #{filename}")
+     
+    new_content = File.open(filename){|f|f.read}
+   ensure
+    File.unlink(filename)
+   end
+   file_asset.update_content(new_content)
 end
 
 case test_type

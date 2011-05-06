@@ -167,11 +167,14 @@ module XYZ
         :task_id => id(),
         :status => self[:status],
       }
+      #order is important
       if sc.include?("create_node") then Task.render_tasks_create_node(executable_action,common_vals)
-      elsif sc.include?("install_component") then Task.render_tasks_install_component(executable_action,common_vals)
+      elsif sc.include?("install_component") then Task.render_tasks_component_op("install_component",executable_action,common_vals)
       elsif sc.include?("setting") then Task.render_tasks_setting(executable_action,common_vals)
+      elsif sc.include?("update_implementation") then Task.render_tasks_component_op("update_implementation",executable_action,common_vals)
       else 
         Log.error("do not treat executable tasks of type(s) #{sc.join(',')}")
+        nil
       end
     end
 
@@ -195,7 +198,7 @@ module XYZ
       [task.merge(common_vals)]
     end
 
-    def self.render_tasks_install_component(executable_action,common_vals)
+    def self.render_tasks_component_op(type,executable_action,common_vals)
       node = executable_action[:node]
       (executable_action[:component_actions]||[]).map do |component_action|
         component = component_action[:component]
@@ -204,7 +207,7 @@ module XYZ
           :component_name => component[:display_name]
         }
         task = {
-          :type => "install_component",
+          :type => type,
           :level => "component",
           :node_id => node[:id],
           :node_name => node[:display_name],

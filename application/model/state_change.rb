@@ -42,7 +42,7 @@ module XYZ
       object_model_name = new_item_hashes.first[:new_item][:model_name]
       object_id_col = "#{object_model_name}_id".to_sym
       parent_id_col = model_handle.parent_id_field_name()
-      type = 
+      type = new_item_hashes.first[:type] ||  
         case object_model_name
           when :attribute then "setting"
           when :component then "install_component"

@@ -87,6 +87,7 @@ module Ramaze::Helper
     MappingStateChangeToTaskAction = {
       "create_node" => TaskAction::CreateNode,
       "install_component" => TaskAction::ConfigNode,
+      "update_implementation" => TaskAction::ConfigNode,
       "setting" => TaskAction::ConfigNode
     }
 

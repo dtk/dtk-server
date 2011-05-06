@@ -103,6 +103,11 @@ taskDef.children[0].children[0].children = [];
 						taskClass = 'create-node';
 						editContent = '<input type="checkbox" id="'+taskId+'" name="'+taskId+'" value="true"/>';
 						break;
+					case "update_implementation":
+					    taskI18n = '<b>Update Implementation ('+taskDef.component_i18n+')</b>';
+					    taskClass = 'update-implementation';
+					    editContent = '<input type="checkbox" id="'+taskId+'" name="'+taskId+'" value="true"/>';
+					    break;
 					case "install_component":
 					case "on_component":
 						var compTypei18n = '';

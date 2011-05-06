@@ -13,12 +13,12 @@ module Ramaze::Helper
 
 
     def pending_changes_one_level_raw(parent_model_name,id_list)
-      actions = 
-        pending_create_node(parent_model_name,id_list) + 
-        pending_install_component(parent_model_name,id_list) +
+      pending_create_node(parent_model_name,id_list) + 
+        pending_component_op(parent_model_name,id_list) +
         pending_changed_attribute(parent_model_name,id_list)
     end
 
+    #TODO: for efficinecy so which ones of the three 'pending sub function scan collapse to minize db calls
     def pending_create_node(parent_model_name,id_list)
       parent_field_name = XYZ::DB.parent_field(parent_model_name,:state_change)
       sp_hash = {
@@ -32,13 +32,13 @@ module Ramaze::Helper
       get_objects_from_sp_hash(sp_hash)
     end
 
-    def pending_install_component(parent_model_name,id_list)
+    def pending_component_op(parent_model_name,id_list)
       parent_field_name = XYZ::DB.parent_field(parent_model_name,:state_change)
       sp_hash = {
         :relation => :state_change,
         :filter => [:and,
                     [:oneof, parent_field_name, id_list],
-                    [:eq, :type, "install_component"],
+                    [:oneof, :type, ["install_component", "update_implementation"]],
                     [:eq, :status, "pending"]],
         :columns => [:id, :relative_order,:type,:installed_component,parent_field_name,:state_change_id].uniq
       }
@@ -96,7 +96,7 @@ module Ramaze::Helper
         if sc[:type] == "create_node"
           indexed_ret[sc[:node][:id]] = augment_with_linked_id(sc,sc[:id])
           #TODO: ordering may do thsi anyway, but do we explicitly want to make sure if both setting adn isnatll use install as type
-        elsif ["setting","install_component"].include?(sc[:type])
+        elsif ["setting","install_component","update_implementation"].include?(sc[:type])
           indexed_ret[sc[:component][:id]] = augment_with_linked_id(indexed_ret[sc[:component][:id]] || sc.reject{|k,v|[:attribute].include?(k)},sc[:id])
         else
           Log.error("unexpected type #{sc[:type]}; ignoring")

@@ -27,8 +27,8 @@ module XYZ
         #TODO: commiting because it looks like file change visible in otehr branches until commit
         #should see if we can do more efficient job using @index.add(file_name,content)
         message = "Updating #{file_asset[:path]} in #{repo_path}"
-        @grit_repo.add(file_asset[:path])
-        @grit_repo.commit_index(message)
+        git_command__add(file_asset[:path])
+        git_command__commit(message)
       end
     end
 
@@ -49,6 +49,14 @@ module XYZ
       end
     end
     CachedRepos = Hash.new
+
+    attr_reader :grit_repo
+    def initialize(path)
+      @path = path
+      @grit_repo = Grit::Repo.new(path)
+      @index = @grit_repo.index #creates new object so use @index, not grit_repo
+    end
+ 
 
     def checkout(branch_name,&block)
       Dir.chdir(@path) do 
@@ -73,8 +81,8 @@ module XYZ
     def add_branch(branch_name,start="master")
       start ||= "master"
       checkout(start)
-      #TODO: check if this works when start is diffeernat than master
-      @index.commit("Adding branch #{branch_name}", [@grit_repo.commits.first], nil, nil, branch_name)
+      message = "Adding branch #{branch_name}"
+      git_command__add_branch(branch_name,message,start)
     end
 
     def ret_repo_path(context)
@@ -83,26 +91,19 @@ module XYZ
       project_ref ? "project-#{project_ref}" : "master"
     end
 
-    attr_reader :grit_repo
-    def initialize(path)
-      @path = path
-      @grit_repo = Grit::Repo.new(path)
-      @index = @grit_repo.index #creates new object so use @index, not grit_repo
-    end
- 
-    def add_file(file_name,content,branch_name="master")
-      message = "Adding #{file_name} to #{branch_name}"
+    def add_file(file_path,content,branch_name="master")
+      message = "Adding #{file_path} to #{branch_name}"
       ret = nil
       Dir.chdir(@path) do
-        File.open(file_name,"w"){|f|f << content}
+        File.open(file_path,"w"){|f|f << content}
         checkout(branch_name) do 
-          @grit_repo.add(file_name)
-          ret = @grit_repo.commit_index(message)
+          git_command__add(file_path)
+          ret = git_command__commit(message)
         end
       end  
 
       #TODO: new form not working
-      # @index.add(file_name,content)
+      # @index.add(file_path,content)
       # @ index.commit(message, [@grit_repo.commit(branch_name)])
       ret
     end
@@ -116,6 +117,16 @@ module XYZ
     def git_command__checkout(branch_name)
       git_command.checkout({},branch_name)
     end
+    def git_command__add_branch(branch_name,message,start="master")
+      #TODO: check if this works when start is diffeernat than master
+      @index.commit(message, [@grit_repo.commits.first], nil, nil, branch_name)
+    end
+    def git_command__add(file_path)
+      @grit_repo.add(file_path)
+    end
+    def git_command__commit(message)
+      @grit_repo.commit_index(message)
+    end
   end
   class RepoWindows  < Repo
    private
@@ -126,7 +137,18 @@ module XYZ
     end
     attr_reader :git
     def git_command__checkout(branch_name)
+      `#{git} checkout #{branch_name}`
+    end
+    def git_command__add_branch(branch_name,message,start="master")
+      #TODO: check if this works when start is diffeernat than master
+      #TODO: not adding message
       `#{git} branch #{branch_name}`
+    end
+    def git_command__add(file_path)
+      `#{git} add #{file_path}`
+    end
+    def git_command__commit(message)
+      `#{git} commit -m #{message}`
     end
   end
 end

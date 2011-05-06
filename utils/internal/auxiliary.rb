@@ -25,6 +25,16 @@ module XYZ
         end
       end
 
+      def platform_is_linux?()
+        RUBY_PLATFORM.downcase.include?("linux")
+      end
+      def platform_is_windows?()
+        RUBY_PLATFORM.downcase.include?("mswin") or RUBY_PLATFORM.downcase.include?("mingw")
+      end
+      def platform()
+        RUBY_PLATFORM
+      end
+
       #key can be symbol or of form {symbol => symbol} 
       def hash_subset(hash,keys,opts={},&block)
         hash_subset_aux(Hash.new(),hash,keys,opts,&block)

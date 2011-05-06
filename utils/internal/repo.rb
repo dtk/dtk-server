@@ -39,21 +39,29 @@ module XYZ
     end
     def self.get_repo_aux(path,file_asset,content)
       root = R8::EnvironmentConfig::CoreCookbooksRoot
-      self.new(path == "__top" ? root : "#{root}/#{path}")
+      full_path = path == "__top" ? root : "#{root}/#{path}"
+      if Aux::platform_is_linux?()
+        RepoLinux.new(full_path)
+      elsif  Aux::platform_is_windows?()
+        RepoWindows.new(full_path)
+      else
+        raise Error.new("platform #{AUx::platform} not treated")
+      end
     end
     CachedRepos = Hash.new
 
     def checkout(branch_name,&block)
       Dir.chdir(@path) do 
         branch_name ||= "master"
-        @index.read_tree(branch_name)
-        #TODO: when get index mechanisms to work dont need below
+
         current_head = @grit_repo.head.name
-        git_command.checkout({},branch_name)
+        #TODO: when get index mechanisms to work subsiture cmmited out for below
+        #@index.read_tree(branch_name)
+        git_command__checkout(branch_name)
         return unless block
         yield
         unless current_head == branch_name
-          git_command.checkout({},current_head)
+          git_command__checkout(current_head)
         end
       end
     end
@@ -101,6 +109,24 @@ module XYZ
 
     def git_command()
       @grit_repo.git
+    end
+  end
+  class RepoLinux < Repo
+   private
+    def git_command__checkout(branch_name)
+      git_command.checkout({},branch_name)
+    end
+  end
+  class RepoWindows  < Repo
+   private
+    def initialize()
+      raise Error.new("R8::EnvironmentConfig::GitExecutable not defined") unless defined? R8::EnvironmentConfig::GitExecutable
+      @git = R8::EnvironmentConfig::GitExecutable
+      super
+    end
+    attr_reader :git
+    def git_command__checkout(branch_name)
+      `#{git} branch #{branch_name}`
     end
   end
 end

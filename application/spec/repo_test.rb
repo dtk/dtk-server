@@ -20,12 +20,13 @@ include XYZ
 
 def get_file_asset(path)
   c = 2
+  repo,af_path = (path =~ Regexp.new("(^[^/]+)/(.+$)"); [$1,$2])
   sp_hash = {
-    :filter => [:eq, :path, path],
-    :cols => [:id,:path]
+    :filter => [:eq, :path, af_path],
+    :cols => [:id,:path,:implementation_info]
   }
   file_asset_mh = ModelHandle.new(c,:file_asset)
-  ret = Model.get_objects_from_sp_hash(file_asset_mh,sp_hash).first
+  ret = Model.get_objects_from_sp_hash(file_asset_mh,sp_hash).find{|x|x[:implementation][:repo] == repo}
   raise "file asset #{path} not found" unless ret
   ret
 end
@@ -58,6 +59,8 @@ def edit_file(options)
 end
 
 case test_type
-  when "get_file" then pp get_file(options)
+  when "get_file" 
+    contents = get_file(options)
+    p contents
   when "edit_file" then edit_file(options)
 end

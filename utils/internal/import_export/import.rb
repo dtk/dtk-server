@@ -92,8 +92,12 @@ module XYZ
         implementation_hash = hash["library"][library]["implementation"] ||= Hash.new
         impl_cookbooks.each do |cookbook|
           next unless file_paths = indexed_file_paths[cookbook]
-          cmp_file_assets = file_paths.inject({}) do |h,file_path|
-            file_name = file_path =~ Regexp.new("/([^/]+$)") ? $1 : file
+          repo = cookbook
+          cmp_file_assets = file_paths.inject({}) do |h,file_path_x|
+            #if repo is null then want ful file path; otherwise we have repo per cookbook and
+            #want to strip off leading repo
+            file_path = repo ? file_path_x.gsub(Regexp.new("^#{repo}/"),"") : file_path_x
+            file_name = file_path =~ Regexp.new("/([^/]+$)") ? $1 : file_name
             file_asset = {
               :type => "chef_file", 
               :display_name => file_name,
@@ -106,6 +110,7 @@ module XYZ
           implementation_hash[cookbook] = {
             "type" => "chef_cookbook",
             "version" => version,
+            "repo" => repo,
             "file_asset" => cmp_file_assets
           }
         end

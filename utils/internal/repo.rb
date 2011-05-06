@@ -2,11 +2,11 @@ require 'grit'
 module XYZ
   class Repo 
     def self.get_file_content(file_asset,context={})
-      get_repo(file_asset).get_file_content(file_asset,context)
+      get_repo(file_asset,context).get_file_content(file_asset,context)
     end
 
     def self.update_file_content(file_asset,content,context={})
-      get_repo(file_asset).update_file_content(file_asset,content,context)
+      get_repo(file_asset,context).update_file_content(file_asset,content,context)
     end
 
     def get_file_content(file_asset,context={})
@@ -33,6 +33,16 @@ module XYZ
     end
 
    private
+    def self.get_repo(file_asset,content)
+      index = content[:implementation][:repo] || "__top"
+      CachedRepos[index] ||= get_repo_aux(index,file_asset,content)
+    end
+    def self.get_repo_aux(path,file_asset,content)
+      root = R8::EnvironmentConfig::CoreCookbooksRoot
+      self.new(path == "__top" ? root : "#{root}/#{path}")
+    end
+    CachedRepos = Hash.new
+
     def checkout(branch_name,&block)
       Dir.chdir(@path) do 
         branch_name ||= "master"
@@ -71,11 +81,6 @@ module XYZ
       @grit_repo = Grit::Repo.new(path)
       @index = @grit_repo.index #creates new object so use @index, not grit_repo
     end
-    #TODO stubbed; should use context info in file asset id_handle to determine which repo to use
-    def self.get_repo(file_asset)
-      CachedRepo
-    end
-    CachedRepo = self.new(R8::EnvironmentConfig::CoreCookbooksRoot)
  
     def add_file(file_name,content,branch_name="master")
       message = "Adding #{file_name} to #{branch_name}"

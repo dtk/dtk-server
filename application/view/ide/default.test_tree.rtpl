@@ -67,6 +67,9 @@
 							<li id="node_815" rel="opscode" class="jstree-leaf">
 								<a href="#">apache2</a>
 							</li>
+							<li id="node_815" rel="puppet" class="jstree-leaf">
+								<a href="#">apache2</a>
+							</li>
 						</ul>
 					</li>
 				</ul>

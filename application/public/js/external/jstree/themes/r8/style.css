@@ -144,3 +144,6 @@
 .jstree-r8 li[rel=opscode] > a > .jstree-icon {
 	background-position: 0 -126px;
 }
+.jstree-r8 li[rel=puppet] > a > .jstree-icon {
+	background-position: -36px -126px;
+}

@@ -65,6 +65,8 @@ if (!R8.Ctrl) {
 								case "io:end":
 									Y.on('io:end', params['callbacks'][callback]);
 									break;
+								case "io:complete":
+									Y.on('io:complete', params['callbacks'][callback]);
 								case "io:renderComplete":
 									R8.Ctrl.onRenderComplete = params['callbacks'][callback];
 									break;

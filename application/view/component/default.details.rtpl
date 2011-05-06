@@ -49,7 +49,8 @@
 				</table>
 
 				<br/><br/>
-				<b>Configuration Files</b>
+				<div class="group-header">Configuration Files</div><div id="add-cfg-file-btn" class="add-btn"></div>
+				<div id="cfg-file-container" style="position: relative; float: left; width: inherit;">
 				<table class="display">
 					<tr>
 						<th>Name</th>
@@ -58,12 +59,13 @@
 					</tr>
 					{%for config_file in config_file_list%}
 					<tr id="cfg-file-{%=config_file[:id]%}">
-						<td><a href="javascript:R8.Displayview.loadFile('{%=config_file[:id]%}');">{%=config_file[:name]%}</a></td>
+						<td><a href="javascript:R8.Editor.loadFile('{%=config_file[:id]%}');">{%=config_file[:name]%}</a></td>
 						<td>{%=config_file[:owner_name]%}</td>
 						<td>{%=config_file[:created_by_name]%}</td>
 					</tr>
 					{%end%}
 				</table>
+				</div>
 			</div>
 		</div>
 
@@ -71,7 +73,7 @@
 		<div id="assembly-content" class="cat-content" style="display: none;"></div>
 		<div id="editor-content" class="cat-content" style="display: none;"></div>
 		<div id="file_editor-content" class="cat-content" style="display: none;">
-			<div id="file-editor"></div>
+			<div id="editor-foo"></div>
 		</div>
 		<div id="dependencies-content" class="cat-content" style="display: none;"></div>
 		<div id="layout-content" class="cat-content" style="display: none;"></div>

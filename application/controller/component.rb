@@ -33,6 +33,12 @@ module XYZ
 
     def details(id)
       component = get_object_by_id(id)
+
+      tpl = R8Tpl::TemplateR8.new("component/cfg_file_list",user_context())
+      tpl.set_js_tpl_name("component_cfg_file_list")
+      tpl_info = tpl.render()
+      include_js_tpl(tpl_info[:src])
+
       tpl = R8Tpl::TemplateR8.new("component/details",user_context())
 
 #      img_str = '<img title="' << component[:display_name] << '"' << 'src="' << R8::Config[:base_images_uri] << '/component/Icons/'<< component[:ui][:images][:tnail] << '"/>'
@@ -50,24 +56,36 @@ module XYZ
         {:id=>12345,:name=>'RedHat',:version=>'6',:ui=>{:images=>{:icon=>'redhat-favicon.png'}}}
       ]
       component[:supported_os_list] = supported_os_list
-
+=begin
       config_file_list = [
         {:id=>12345,:name=>'php.ini',:owner_id=>'1123',:owner_name=>'Rich',:created_by_id=>'12112',:created_by_name=>'Rich'},
         {:id=>12345,:name=>'http.conf',:owner_id=>'1123',:owner_name=>'Nate',:created_by_id=>'12112',:created_by_name=>'Nate'},
         {:id=>12345,:name=>'my.cnf',:owner_id=>'1123',:owner_name=>'Bob',:created_by_id=>'12112',:created_by_name=>'Bob'}
       ]
-#pp '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
-#pp component
+=end
+      cfg_file_list = component.get_config_files();
+pp '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
+pp cfg_file_list
 
       tpl.assign("_#{model_name().to_s}",_model_var)
       tpl.assign("component",component)
-      tpl.assign("config_file_list",config_file_list)
+      tpl.assign("config_file_list",cfg_file_list)
       tpl.assign("component_images_uri",R8::Config[:component_images_uri])
 
       run_javascript("R8.Displayview.init('#{id}');")
 
       return {:content => tpl.render()}
 #      return {:content => ""}
+    end
+
+    def add_cfg_file(id)
+      tpl = R8Tpl::TemplateR8.new("component/add_cfg_file",user_context())
+      tpl.assign(:component_id,id)
+
+      return {
+        :content=>tpl.render(),
+        :panel=>request.params["panel_id"]
+      }
     end
 
     def editor(id)
@@ -165,6 +183,49 @@ module XYZ
         :content=>tpl.render(),
         :panel=>request.params["panel_id"]
       }
+    end
+
+    def get_cfg_file_contents(id)
+       component = get_object_by_id(id)
+       return {
+        :data=>component.get_config_file(request.params["file_asset_id"])
+       }
+    end
+
+    def add_cfg_file_from_upload(id)
+       component = get_object_by_id(id)
+#      redirect_route = request.params["redirect"]
+#      component_id = request.params["component_id"].to_i 
+
+      upload_param = request.params["config_file"]
+      cfg_filename = upload_param[:filename]
+      tmp_file_handle = upload_param[:tempfile]
+      file_content = tmp_file_handle.read 
+      tmp_file_handle.close
+#TODO: need to clean up ways to get at and work with objects
+# create_object_from_id,get_object_by_id,id_handle(id).create_object(), etc
+#      id_handle(id).create_object().add_config_file(cfg_filename,file_content)
+      component.add_config_file(cfg_filename,file_content)
+      #TODO: delete /tmp file File.unlink(tmp_file_path)
+
+#     pp [:test,id_handle(component_id).create_object().get_config_file(cfg_filename)] 
+
+=begin
+pp tmp_file.path
+      new_path = R8::Config[:config_file_path]+'/'+cfg_filename
+      file_contents=IO.read(tmp_file.path)
+
+      File.open(new_path, 'w') do |f|  
+        f.puts file_contents
+      end
+=end
+#      redirect redirect_route
+      return {
+        :data=> {
+          :cfg_file_list=>component.get_config_files()
+        }
+      }
+
     end
 
     def upload_config()

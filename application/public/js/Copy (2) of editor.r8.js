@@ -12,8 +12,6 @@ if (!R8.Editor) {
 			_topbarWrapperNode = null,
 			_editorWrapperNode = null,
 
-			_editorContainerNode = null,
-
 			_editorBtnNode = null,
 			_editorBarWrapperNode = null,
 			_editorBarWrapperClosedWidth = 90,
@@ -62,25 +60,21 @@ if (!R8.Editor) {
 			_events = {};
 
 		return {
-			init: function(cfg) {
-//				var topbarNode = R8.Utils.Y.one('#menu-bar-body');
-//				topbarNode.append(_topbarTpl);
+			init: function() {
+				var topbarNode = R8.Utils.Y.one('#menu-bar-body');
+				topbarNode.append(_topbarTpl);
 
-//				_editorBarWrapperNode = R8.Utils.Y.one('#editor-bar-wrapper');
-//				_editorBarWrapperClosedWidth = _editorBarWrapperNode.get('region').width;
-/*
+				_editorBarWrapperNode = R8.Utils.Y.one('#editor-bar-wrapper');
+				_editorBarWrapperClosedWidth = _editorBarWrapperNode.get('region').width;
 				_editorBtnNode = R8.Utils.Y.one('#editor-btn');
 				_editorBtnNode.on('click',function(e){
 					this.toggleEditor();
 				},this);
-*/
+
 				_pageContainerNode = R8.Utils.Y.one('#page-container');
-//				_pageContainerNode.append(_editorTpl);
 
-//				_topbarWrapperNode = R8.Utils.Y.one('#page-topbar');
-
-				_editorContainerNode = R8.Utils.Y.one('#'+cfg.containerNodeId);
-				_editorContainerNode.append(_editorTpl);
+				_pageContainerNode.append(_editorTpl);
+				_topbarWrapperNode = R8.Utils.Y.one('#page-topbar');
 
 				_editorWrapperNode = R8.Utils.Y.one('#editor-wrapper');
 				_editorHeaderNode = R8.Utils.Y.one('#editor-header');
@@ -149,7 +143,7 @@ if (!R8.Editor) {
 
 					clearTimeout(_selectionPopTimeout);
 					if (that.get('selectionSize') > 0) {
-						var selectCallback = function() {
+						var selectCallback = function(){
 							R8.Editor.renderSelectionPopup();
 						}
 						_selectionPopTimeout = setTimeout(selectCallback, 400);
@@ -277,31 +271,6 @@ alert('should create new attr for component...');
 				clearTimeout(_selectionPopTimeout);
 			},
 			resizePage: function() {
-/*
-				_viewportRegion = _pageContainerNode.get('viewportRegion');
-
-				var vportHeight = _viewportRegion['height'];
-				var vportWidth = _viewportRegion['width'];
-
-				var topbarRegion = _topbarWrapperNode.get('region');
-
-				var pgRegion = _pageContainerNode.get('region');
-*/
-				var wrapperRegion = _editorContainerNode.get('region');
-				var editorWrapperHeight = wrapperRegion.height;
-				var editorWrapperWidth = wrapperRegion.width;
-
-				_editorWrapperNode.setStyles({
-					'height':editorWrapperHeight,
-					'width':editorWrapperWidth,
-//					'top': _topbarWrapperNode.get('region').height
-				});
-
-				_editorNode.setStyles({'height':(editorWrapperHeight-_editorHeaderHeight),'width':editorWrapperWidth});
-				_editorHeaderNode.setStyles({'width':editorWrapperWidth});
-				_editor.resize();
-			},
-			resizePageOld: function() {
 				_viewportRegion = _pageContainerNode.get('viewportRegion');
 
 				var vportHeight = _viewportRegion['height'];

@@ -2,7 +2,7 @@
 if (!R8.Displayview) {
 
 	R8.Displayview = function() {
-		var _item_id = null,
+		var _itemId = null,
 			_pageContainerNode = null,
 			_topbarNode = null,
 			_mainBodyWrapperNode = null,
@@ -17,6 +17,8 @@ if (!R8.Displayview) {
 
 			_detailsHeader = null,
 			_contentWrapperNode = null,
+
+			_addCfgBtnNode = null,
 
 			_viewportRegion = null,
 			_events = {},
@@ -92,11 +94,11 @@ if (!R8.Displayview) {
 					'route': 'component/file_editor',
 					'params': {
 					},
-					getParams: function(item_id) {
-						return '';
+					getParams: function(itemId,fileAssetId) {
+						return 'file_asset_id='+fileAssetId;
 					},
-					getRoute: function(item_id) {
-						return this.route+'/'+item_id
+					getRoute: function(itemId) {
+						return this.route+'/'+itemId
 					},
 					blur: function() {
 					}
@@ -149,7 +151,9 @@ if (!R8.Displayview) {
 */
 		return {
 			init: function(item_id) {
-				_item_id = item_id;
+				R8.UI.init();
+
+				_itemId = item_id;
 
 				_pageContainerNode = R8.Utils.Y.one('#page-container');
 				_mainBodyWrapperNode = R8.Utils.Y.one('#main-body-wrapper');
@@ -164,11 +168,24 @@ if (!R8.Displayview) {
 
 				_detailsHeaderNode = R8.Utils.Y.one('#details-header');
 
+				_addCfgBtnNode = R8.Utils.Y.one('#add-cfg-file-btn');
+				_addCfgBtnNode.on('click',function(e){
+					var contentNode = R8.UI.renderModal();
+					var params = {
+						'cfg': {
+							'data': 'panel_id='+contentNode.get('id')
+						}
+					};
+					R8.Ctrl.call('component/add_cfg_file/'+_itemId,params);
+				},this);
+
 				var that = this;
 				R8.Utils.Y.one(window).on('resize',function(e){
 					that.resizePage();
 				});
 				this.resizePage();
+
+				R8.Editor.init();
 
 //TODO: move this to centralized place
 				_events['catClick'] = R8.Utils.Y.delegate('click',this.toggleDetails,'#display-categories','.display-cat');
@@ -226,17 +243,93 @@ if (!R8.Displayview) {
 				if(_contentList[selectedCat].loaded != true) {
 					var params = {
 						'cfg':{
-							'data':'panel_id='+selectedCat+'-content&'+_contentList[selectedCat].getParams(_item_id)
+							'data':'panel_id='+selectedCat+'-content&'+_contentList[selectedCat].getParams(_itemId)
 						}
 					};
-//console.log(_contentList[selectedCat].getParams(_item_id));
-					R8.Ctrl.call(_contentList[selectedCat].getRoute(_item_id),params);
+//console.log(_contentList[selectedCat].getParams(_itemId));
+					R8.Ctrl.call(_contentList[selectedCat].getRoute(_itemId),params);
 //					console.log(selectedCat+' content isnt loaded yet...');
 				}
 			},
 
-			loadFile: function(fileId) {
-console.log('loading file:'+fileId);
+			loadCfgFile: function(fileId) {
+				//file_editor-content
+/*
+				for(var contentId in _contentList) {
+					if(contentId == 'file_editor')
+						R8.Utils.Y.one('#'+contentId+'-content').setStyle('display','block');
+					else
+						R8.Utils.Y.one('#'+contentId+'-content').setStyle('display','none');
+				}
+*/
+
+				var editorWrapperTpl = '<div id="editor-wrapper"></div>';
+				var editorWrapperNode = R8.Utils.Y.Node.create(editorWrapperTpl);
+				var yOffset = _topbarNode.get('region').height;
+
+				editorWrapperNode.setStyles({
+					'width': _pageContainerNode.get('region').width+'px',
+					'height': (_pageContainerNode.get('region').height)+'px',
+					'top': yOffset+'px',
+					'position': 'absolute',
+					'zIndex': 10,
+					'left': '0px',
+					'backgroundColor': '#FFFFFF'
+				});
+				_pageContainerNode.append(editorWrapperNode);
+
+				var callback = function(ioId,responseObj) {
+					eval("var response =" + responseObj.responseText);
+					var file = response.application_component_get_cfg_file_contents.content[0].data;
+
+					R8.Editor.loadFile(file);
+/*
+					R8.Editor.init({
+						itemId: _itemId,
+//						editorWrapperNodeId: 'file_editor-content',
+						editorWrapperNodeId: 'editor-wrapper',
+						'fileId': file.id,
+						contents: file.contents
+					});
+*/
+				}
+				var params = {
+					'cfg' : {
+						method: 'POST',
+						'data': 'file_asset_id='+fileId
+					},
+					'callbacks': {
+						'io:success':callback
+					}
+				};
+				R8.Ctrl.call('component/get_cfg_file/'+_itemId,params);
+//DEBUG
+//console.log('loading file:'+fileId);
+			},
+			uploadCfgFile: function(formId) {
+				var that=this;
+				var callback = function(ioId,responseObj) {
+					eval("var response =" + responseObj.responseText);
+					var cfg_file_list = response.application_component_add_cfg_file_from_upload.content[0].data.cfg_file_list;
+					var tpl = R8.Rtpl.component_cfg_file_list({
+						'config_file_list':cfg_file_list
+					});
+					R8.Utils.Y.one('#cfg-file-container').set('innerHTML',tpl);
+				}
+				var params = {
+					'cfg' : {
+						method : 'POST',
+						form: {
+							id : formId,
+							upload : true
+						}
+					},
+					'callbacks': {
+						'io:complete':callback
+					}
+				};
+				R8.Ctrl.call('component/add_cfg_file_from_upload/'+_itemId,params);
+				R8.UI.closeModal();
 			}
 		}
 	}();

@@ -200,5 +200,12 @@ R8::Routes["editor/index"] = {
   :layout => 'editor'
 }
 
+R8::Routes["ide/index"] = {
+  :layout => 'ide'
+}
+R8::Routes["ide/test_tree"] = {
+  :layout => 'ide'
+}
+
 R8::Routes.freeze
 

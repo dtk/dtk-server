@@ -246,4 +246,19 @@ td.field input[type=text]:focus {
 	border: 2px solid #AEB9CD;
 }
 
-
+.group-header {
+	font-size: 16px;
+	font-weight: bold;
+	position: relative;
+	float: left;
+	height: 20px;
+}
+.add-btn {
+	background-image: url(../images/plus-button2.png);
+	height: 16px;
+	width: 16px;
+	margin-left: 10px;
+	cursor: pointer;
+	position: relative;
+	float: left;
+}

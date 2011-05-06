@@ -18,6 +18,7 @@ module XYZ
       file_obj = get_objects_from_sp_hash({:cols => [:path,:implementation_info]}).first
       project = {:ref => "project1"} #TODO: stub until get the relevant project
       Repo.update_file_content(self,content,{:implementation => file_obj[:implementation], :project => project})
+      file_obj[:implementation].create_pending_change_item(self)
     end
 
 #stubs for methods

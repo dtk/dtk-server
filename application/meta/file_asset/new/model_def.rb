@@ -14,9 +14,10 @@
       :remote_dependencies=>
       [{
          :model_name=>:implementation,
+         :convert => true,
          :join_type=>:left_outer,
          :join_cond=>{:id=>:file_asset__implementation_implementation_id},
-         :cols=>[:id,:display_name,:type,:repo_path]
+         :cols=>[:id,:display_name,:type]
        }]
     }
   },

@@ -61,6 +61,10 @@ end
 case test_type
   when "get_file" 
     contents = get_file(options)
-    p contents
-  when "edit_file" then edit_file(options)
+    contents.each_line{|l|STDOUT << l}
+    STDOUT << "\n"
+  when "edit_file"
+    edit_file(options)
+  else
+    raise "Illegal test type: #{test_type}"
 end

@@ -65,7 +65,7 @@ module XYZ
         current_head = @grit_repo.head.name
         #TODO: when get index mechanisms to work subsiture cmmited out for below
         #@index.read_tree(branch_name)
-        git_command__checkout(branch_name)
+        git_command__checkout(branch_name) unless current_head == branch_name
         return unless block
         yield
         unless current_head == branch_name

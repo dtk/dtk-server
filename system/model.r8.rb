@@ -290,6 +290,10 @@ module XYZ
       end
     end
 
+    def materialize_virtual_columns(*virtual_cols)
+      virtual_cols.inject(self){|h,vc|h.merge(vc => self[vc])}
+    end
+
     def self.materialize_virtual_columns!(rows,virtual_cols)
       rows.each do |r|
         virtual_cols.each{|vc|r[vc] = r[vc]}

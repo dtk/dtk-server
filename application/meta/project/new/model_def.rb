@@ -14,13 +14,13 @@
          :alias => :target,
          :join_type=>:inner,
          :join_cond=>{:project_id=>:project__id},
-         :cols=>[:id,:display_name,:description,:project_id]
+         :cols=>[:id,:display_name,:description,:project_id,:iaas_type]
        },
        {
          :model_name=>:node,
          :join_type=>:left_outer,
          :join_cond=>{:datacenter_datacenter_id=>:target__id},
-         :cols=>[:id,:display_name,:description,:datacenter_datacenter_id]
+         :cols=>[:id,:display_name,:description,:datacenter_datacenter_id,:os_type]
        },
        {
          :model_name=>:component,

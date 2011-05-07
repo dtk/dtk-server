@@ -12,8 +12,12 @@
       :type=>:json
     },
     :type=> {
-      :type=>:text,
+      :type=>:varchar,
       :length=>30
+    },
+    :iaas_type=> {
+      :type=>:varchar,
+      :length=>20
     },
     :project_id=> { #TODO: when port datacenters to be target objects; project should be a parent
       :type=>:bigint,

@@ -27,7 +27,7 @@
          :convert => true,
          :join_type=>:left_outer,
          :join_cond=>{:node_node_id=>:node__id},
-         :cols=>[:id,:display_name,:description,:node_node_id]
+         :cols=>[:id,:display_name,:description,:node_node_id,:basic_type,:specific_type,:component_type]
        }]
     }
   }

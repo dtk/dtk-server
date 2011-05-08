@@ -15,30 +15,30 @@ module XYZ
 
     ###
     def get_file_content(file_asset,context={})
-      repo_path_x = ret_repo_path(context[:project])
-      repo_path = branch_exists?(repo_path_x) ? repo_path_x : "master"
+      branch_x = ret_branch(context[:project])
+      branch = branch_exists?(branch_x) ? branch_x : "master"
       ret = nil
-      checkout(repo_path) do
+      checkout(branch) do
         ret = File.open(file_asset[:path]){|f|f.read}
       end
       ret
     end
 
     def update_file_content(file_asset,content,context={})
-      repo_path = ret_repo_path(context[:project])
-      add_branch(repo_path) unless branch_exists?(repo_path) 
-      checkout(repo_path) do
+      branch = ret_branch(context[:project])
+      add_branch(branch) unless branch_exists?(branch) 
+      checkout(branch) do
         File.open(file_asset[:path],"w"){|f|f << content}
         #TODO: commiting because it looks like file change visible in otehr branches until commit
         #should see if we can do more efficient job using @index.add(file_name,content)
-        message = "Updating #{file_asset[:path]} in #{repo_path}"
+        message = "Updating #{file_asset[:path]} in #{branch}"
         git_command__add(file_asset[:path])
         git_command__commit(message)
       end
     end
 
     def push_implementation(context)
-      repo_path = ret_repo_path(context[:project])
+      branch = ret_branch(context[:project])
     end
 
    private
@@ -59,7 +59,7 @@ module XYZ
     end
     CachedRepos = Hash.new
 
-    def ret_repo_path(project)
+    def ret_branch(project)
       #TODO: stub
       project_ref = (project||{})[:ref]
       project_ref ? "project-#{project_ref}" : "master"

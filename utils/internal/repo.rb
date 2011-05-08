@@ -39,6 +39,7 @@ module XYZ
 
     def push_implementation(context)
       branch = ret_branch(context[:project])
+      git_command__push(branch)
     end
 
    private
@@ -125,7 +126,7 @@ module XYZ
   class RepoLinux < Repo
    private
     def git_command__checkout(branch_name)
-      git_command.checkout({},branch_name)
+      git_command.checkout(CmdOpts,branch_name)
     end
     def git_command__add_branch(branch_name,message,start="master")
       #TODO: check if this works when start is diffeernat than master
@@ -137,6 +138,11 @@ module XYZ
     def git_command__commit(message)
       @grit_repo.commit_index(message)
     end
+    def git_command__push(branch)
+      git_command.push(CmdOpts,"origin", "#{branch}:refs/heads/#{branch}")
+    end
+    CmdOpts = {}
+
   end
   class RepoWindows  < Repo
    private
@@ -159,6 +165,9 @@ module XYZ
     end
     def git_command__commit(message)
       `#{git} commit -m #{message}`
+    end
+    def git_command__push(branch)
+      `#{git} push origin #{branch}:refs/heads/#{branch}`
     end
   end
 end

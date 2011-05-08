@@ -12,6 +12,9 @@ OptionParser.new do|opts|
    opts.on( '-f', '--filename FILENAME', 'File name' ) do |f|
      options[:file_path] = f
    end
+   opts.on( '-p', '--push', 'Push changes' ) do 
+     options[:push] = true
+   end
 end.parse!
 test_type = ARGV[0]
 
@@ -56,6 +59,12 @@ def edit_file(options)
     File.unlink(filename)
    end
    file_asset.update_content(new_content)
+  if options[:push]
+    #TODO: project stubbed
+    context = {:implementation => file_asset[:implementation], :project => {:ref => "project1"}}
+    Repo.push_implementation(context)
+  end
+
 end
 
 case test_type

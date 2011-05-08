@@ -2,15 +2,20 @@ require 'grit'
 module XYZ
   class Repo 
     def self.get_file_content(file_asset,context={})
-      get_repo(file_asset,context).get_file_content(file_asset,context)
+      get_repo(context[:implementation]).get_file_content(file_asset,context)
     end
 
     def self.update_file_content(file_asset,content,context={})
-      get_repo(file_asset,context).update_file_content(file_asset,content,context)
+      get_repo(context[:implementation]).update_file_content(file_asset,content,context)
     end
 
+    def self.push_implementation(context={})
+      get_repo(context[:implementation]).push_implementation(context)
+    end
+
+    ###
     def get_file_content(file_asset,context={})
-      repo_path_x = ret_repo_path(context)
+      repo_path_x = ret_repo_path(context[:project])
       repo_path = branch_exists?(repo_path_x) ? repo_path_x : "master"
       ret = nil
       checkout(repo_path) do
@@ -20,7 +25,7 @@ module XYZ
     end
 
     def update_file_content(file_asset,content,context={})
-      repo_path = ret_repo_path(context)
+      repo_path = ret_repo_path(context[:project])
       add_branch(repo_path) unless branch_exists?(repo_path) 
       checkout(repo_path) do
         File.open(file_asset[:path],"w"){|f|f << content}
@@ -32,12 +37,16 @@ module XYZ
       end
     end
 
-   private
-    def self.get_repo(file_asset,content)
-      index = content[:implementation][:repo] || "__top"
-      CachedRepos[index] ||= get_repo_aux(index,file_asset,content)
+    def push_implementation(context)
+      repo_path = ret_repo_path(context[:project])
     end
-    def self.get_repo_aux(path,file_asset,content)
+
+   private
+    def self.get_repo(implementation)
+      index = implementation[:repo] || "__top"
+      CachedRepos[index] ||= get_repo_aux(index)
+    end
+    def self.get_repo_aux(path)
       root = R8::EnvironmentConfig::CoreCookbooksRoot
       full_path = path == "__top" ? root : "#{root}/#{path}"
       if Aux::platform_is_linux?()
@@ -45,10 +54,17 @@ module XYZ
       elsif  Aux::platform_is_windows?()
         RepoWindows.new(full_path)
       else
-        raise Error.new("platform #{AUx::platform} not treated")
+        raise Error.new("platform #{Aux::platform} not treated")
       end
     end
     CachedRepos = Hash.new
+
+    def ret_repo_path(project)
+      #TODO: stub
+      project_ref = (project||{})[:ref]
+      project_ref ? "project-#{project_ref}" : "master"
+    end
+
 
     attr_reader :grit_repo
     def initialize(path)
@@ -83,12 +99,6 @@ module XYZ
       checkout(start)
       message = "Adding branch #{branch_name}"
       git_command__add_branch(branch_name,message,start)
-    end
-
-    def ret_repo_path(context)
-      #TODO: stub
-      project_ref = (context[:project]||{})[:ref]
-      project_ref ? "project-#{project_ref}" : "master"
     end
 
     def add_file(file_path,content,branch_name="master")

@@ -90,7 +90,8 @@ pp [:response,response]
       def self.push_implementation(config_node)
         return unless (config_node[:state_change_types] & ["install_component","update_implementation"]).size > 0
         cmp_idhs = config_node[:component_actions].map{|x|x[:component].id_handle}
-        #TODO: get all the implementations associated with a member of cmp_idhs
+        #TODO: get all the implementations; instead of getting cmp_idhs instead make sure taht cmp has
+        implementation id
       end
     end
   end

@@ -17,8 +17,13 @@ module XYZ
           target_identity = ret_discovered_mcollective_id(config_node[:node],rpc_client)
           raise ErrorCannotConnect.new() unless target_identity
 
+          #push implementation
+          push_implementation(config_node)
+
           msg_content =  config_agent.ret_msg_content(config_node)
           msg_content.merge!(:task_id => task_idh.get_id(),:top_task_id => top_task_idh.get_id())
+
+          #make mcollective request
           filter = {"identity" => [target_identity], "agent" => [mcollective_agent]}
           response = rpc_client.custom_request("run",msg_content,target_identity,filter).first
 pp [:response,response]
@@ -82,7 +87,12 @@ pp [:response,response]
         :timeout=>120
       }  
       Lock = Mutex.new
-   end
+      def self.push_implementation(config_node)
+        return unless (config_node[:state_change_types] & ["install_component","update_implementation"]).size > 0
+        cmp_idhs = config_node[:component_actions].map{|x|x[:component].id_handle}
+        #TODO: get all the implementations associated with a member of cmp_idhs
+      end
+    end
   end
 end
 

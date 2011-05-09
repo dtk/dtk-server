@@ -36,7 +36,7 @@
   :many_to_one=>[:datacenter, :state_change],
   :one_to_many=>[:state_change],
   :virtual_columns=>{
-    :installed_component=>{
+    :changed_component=>{
       :type=>:json,
       :hidden=>true,
       :remote_dependencies=>
@@ -45,7 +45,7 @@
          :convert=>true,
          :join_type=>:inner,
          :join_cond=>{:id=>:state_change__component_id},
-         :cols=>[:id,:display_name,:basic_type,:external_ref,:node_node_id,:only_one_per_node,:extended_base_id]
+         :cols=>[:id,:display_name,:basic_type,:external_ref,:node_node_id,:only_one_per_node,:extended_base_id,:implementation_id]
        },
        {
          :model_name=>:node,

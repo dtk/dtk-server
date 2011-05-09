@@ -89,9 +89,16 @@ pp [:response,response]
       Lock = Mutex.new
       def self.push_implementation(config_node)
         return unless (config_node[:state_change_types] & ["install_component","update_implementation"]).size > 0
-        cmp_idhs = config_node[:component_actions].map{|x|x[:component].id_handle}
-        #TODO: get all the implementations; instead of getting cmp_idhs instead make sure taht cmp has
-        implementation id
+        sample_idh = config_node[:component_actions].first[:component].id_handle
+        impl_idhs = config_node[:component_actions].map{|x|x[:component][:implementation_id]}.uniq.map do |impl_id|
+          sample_idh.createIDH(:model_name => :implementation, :id => impl_id)
+        end
+        impls = Model.get_objects_in_set_from_sp_hash(impl_idhs,{:col => [:id, :repo]})
+        impls.each do |impl|
+          project = {:ref => "project1"} #TODO: stub until get the relevant project
+          context = {:implementation => impl, :project => project}
+          Repo.push_implementation(context)
+        end
       end
     end
   end

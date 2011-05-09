@@ -14,11 +14,10 @@ module Ramaze::Helper
 
     def pending_changes_one_level_raw(parent_model_name,id_list)
       pending_create_node(parent_model_name,id_list) + 
-        pending_component_op(parent_model_name,id_list) +
+        pending_changed_component(parent_model_name,id_list) +
         pending_changed_attribute(parent_model_name,id_list)
     end
 
-    #TODO: for efficinecy so which ones of the three 'pending sub function scan collapse to minize db calls
     def pending_create_node(parent_model_name,id_list)
       parent_field_name = XYZ::DB.parent_field(parent_model_name,:state_change)
       sp_hash = {
@@ -32,7 +31,7 @@ module Ramaze::Helper
       get_objects_from_sp_hash(sp_hash)
     end
 
-    def pending_component_op(parent_model_name,id_list)
+    def pending_changed_component(parent_model_name,id_list)
       parent_field_name = XYZ::DB.parent_field(parent_model_name,:state_change)
       sp_hash = {
         :relation => :state_change,
@@ -40,7 +39,7 @@ module Ramaze::Helper
                     [:oneof, parent_field_name, id_list],
                     [:oneof, :type, ["install_component", "update_implementation"]],
                     [:eq, :status, "pending"]],
-        :columns => [:id, :relative_order,:type,:installed_component,parent_field_name,:state_change_id].uniq
+        :columns => [:id, :relative_order,:type,:changed_component,parent_field_name,:state_change_id].uniq
       }
       sc_with_direct_cmps = get_objects_from_sp_hash(sp_hash)
       add_related_components(sc_with_direct_cmps)

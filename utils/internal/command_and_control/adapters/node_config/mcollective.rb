@@ -17,11 +17,13 @@ module XYZ
           target_identity = ret_discovered_mcollective_id(config_node[:node],rpc_client)
           raise ErrorCannotConnect.new() unless target_identity
 
+          project = {:ref => "project1"} #TODO: stub until get the relevant project
+
           #push implementation
-          push_implementation(config_node)
+          push_implementation(config_node,project)
 
           msg_content =  config_agent.ret_msg_content(config_node)
-          msg_content.merge!(:task_id => task_idh.get_id(),:top_task_id => top_task_idh.get_id())
+          msg_content.merge!(:task_id => task_idh.get_id(),:top_task_id => top_task_idh.get_id(), :project => project)
 
           #make mcollective request
           filter = {"identity" => [target_identity], "agent" => [mcollective_agent]}
@@ -87,7 +89,7 @@ pp [:response,response]
         :timeout=>120
       }  
       Lock = Mutex.new
-      def self.push_implementation(config_node)
+      def self.push_implementation(config_node,project)
         return unless (config_node[:state_change_types] & ["install_component","update_implementation"]).size > 0
         sample_idh = config_node[:component_actions].first[:component].id_handle
         impl_idhs = config_node[:component_actions].map{|x|x[:component][:implementation_id]}.uniq.map do |impl_id|
@@ -95,7 +97,6 @@ pp [:response,response]
         end
         impls = Model.get_objects_in_set_from_sp_hash(impl_idhs,{:col => [:id, :repo]})
         impls.each do |impl|
-          project = {:ref => "project1"} #TODO: stub until get the relevant project
           context = {:implementation => impl, :project => project}
           Repo.push_implementation(context)
         end

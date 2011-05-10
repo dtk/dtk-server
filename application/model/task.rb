@@ -17,6 +17,55 @@ module XYZ
       one_to_many :task, :task_event, :task_error
     end
 
+    def self.get_top_level_tasks(model_handle)
+      sp_hash = {
+        :cols => [:id,:display_name,:status,:updated_at,:executable_action_type],
+        :filter => [:eq,:task_id,nil] #so this is a top level task
+      }
+      get_objects_from_sp_hash(model_handle,sp_hash).reject{|k,v|k == :subtasks}
+    end
+
+
+    def get_associated_nodes()
+      exec_actions = Array.new
+      #if executable level then get its executable_action
+      if self.has_key?(:executable_action_type) 
+        #will have an executable action so if have it already
+        if self[:executable_action_type]
+          exec_actions << self[:executable_action] || get_objects_col_from_sp_hash(:cols=>[:executable_action]).first
+        end
+      else
+        exec_action = get_objects_col_from_sp_hash(:cols=>[:executable_action]).first
+        exec_actions <<  exec_action if exec_action
+      end
+
+      #if task does not have execuatble actions then get all subtasks
+      if exec_actions.empty?
+        exec_actions = get_all_subtasks().map{|t|t[:executable_action]}
+      end
+      exec_actions.inject({}) do |h,ea|
+        node = ea[:node]
+        node ? h.merge(node[:id] => node) : h
+      end.values
+    end
+
+    #recursively walks structure, but returns them in flat list
+    def get_all_subtasks()
+      ret = Array.new
+      id_handles = [id_handle]
+
+      until id_handles.empty?
+        sp_hash = {
+        :cols => [:id,:display_name,:status,:updated_at,:task_id,:executable_action_type,:executable_action],
+          :filter => [:oneof,:task_id,id_handles.map{|idh|idh.get_id}] 
+        }
+        next_level_objs = Model.get_objects_from_sp_hash(model_handle,sp_hash).reject{|k,v|k == :subtasks}
+        id_handles = next_level_objs.map{|obj|obj.id_handle}
+        ret += next_level_objs
+      end
+      ret
+    end
+
     def initialize(hash_scalar_values,c,model=:task)
       defaults = { 
         :status => "created",

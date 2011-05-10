@@ -14,6 +14,8 @@ module XYZ
           sample_impl = implementation_tree.find{|x|x[:display_name] == "apache2"}[:implementations].first
           pp sample_impl.get_asset_files()
         end
+
+=end
         tree = p.get_target_tree()
       #  pp tree
         sample_cmp = ((((tree.first||{})[:nodes]||[]).first||{})[:components]||[]).find{|x|x[:display_name] == "apache2"}
@@ -21,7 +23,7 @@ module XYZ
           file_paths = sample_cmp.get_implementation_file_paths()
           pp file_paths
         end
-=end
+#=end
 
       end
       super

@@ -5,10 +5,12 @@ module XYZ
       c = ret_session_context_id()
       model_handle = ModelHandle.new(c,:project)
       projects = Project.get_all(model_handle)
-#      pp [:projects,projects]
+      pp [:projects,projects]
       projects.each do |p|
-        tree = p.get_tree()
-        pp tree
+        implementation_tree = p.get_implementaton_tree()
+        pp implementation_tree
+#        tree = p.get_tree()
+ #       pp tree
 #        sample_cmp = tree.values.first[:nodes].values.first[:components].values.first
 #        file_paths = sample_cmp.get_implementation_file_paths()
 #        pp file_paths

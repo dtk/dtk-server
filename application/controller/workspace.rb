@@ -679,6 +679,8 @@ pp datacenter
       Ramaze.defer do
         begin
           puts "in commit_changes defer"
+          top_task_id = top_level_task.id_handle.get_id()
+          puts "starting top_task_id = #{top_task_id.to_s}"
           pp request.params
           workflow.execute()
         rescue Exception => e

@@ -6,14 +6,9 @@ module XYZ
       def self.execute(task_idh,top_task_idh,config_node,attributes_to_set)
         result = nil
         updated_attributes = Array.new
-        begin
+        ret_rpc_client() do |rpc_client|
           config_agent = ConfigAgent.load(config_node[:config_agent_type])
-          rpc_client = nil
-          Lock.synchronize do
-            #TODO: check if really need lock for this
-            #deep copy because rpcclient modifies options
-            rpc_client = rpcclient(mcollective_agent,:options => Aux::deep_copy(Options))
-          end
+
           target_identity = ret_discovered_mcollective_id(config_node[:node],rpc_client)
           raise ErrorCannotConnect.new() unless target_identity
 
@@ -34,10 +29,16 @@ pp [:response,response]
 
           result = response[:data]
           raise ErrorFailedResponse.new(result[:status],result[:error]) unless result[:status] == :succeeded 
-         ensure
-          rpc_client.disconnect() if rpc_client
         end
         [result,updated_attributes]
+      end
+
+      def self.get_logs(key,value,nodes)
+        ret_rpc_client() do |rpc_client|
+          #msg_content = 
+          response = rpc_client.custom_request("run",msg_content,target_identity,filter).first
+          pp [:response,response]
+        end
       end
 
       def  self.wait_for_node_to_be_ready(node)
@@ -65,6 +66,25 @@ pp [:response,response]
       end
 
      private
+      def self.ret_rpc_client(&block)
+        rpc_client = nil
+        Lock.synchronize do
+          #TODO: check if really need lock for this
+          #deep copy because rpcclient modifies options
+          rpc_client = rpcclient(mcollective_agent,:options => Aux::deep_copy(Options))
+        end
+        unless block
+          rpc_client
+        else
+          begin
+            block.call(rpc_client)
+           ensure
+            rpc_client.disconnect() if rpc_client
+          end
+          nil
+        end
+      end
+
       def self.mcollective_agent()
         @mcollective_agent ||= R8::Config[:command_and_control][:node_config][:mcollective][:agent]
       end

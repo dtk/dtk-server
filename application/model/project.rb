@@ -6,7 +6,7 @@ module XYZ
       get_objects_from_sp_hash(model_handle,sp_hash)
     end
 
-    def get_implementaton_tree()
+    def get_implementaton_tree(opts={})
       sp_hash = {:cols => [:id,:display_name,:type,:implementation_tree]}
       unravelled_ret = get_objects_from_sp_hash(sp_hash)
       ret_hash = Hash.new
@@ -17,7 +17,13 @@ module XYZ
         impls = cmp_template[:implementations] ||= Hash.new
         impls[r[:implementation][:id]] ||= r[:implementation]
       end
-      ret_hash.values.map{|ct|ct.merge(:implementations => ct[:implementations].values)}
+      ret = ret_hash.values.map{|ct|ct.merge(:implementations => ct[:implementations].values)}
+      return ret unless opts[:include_file_assets]
+      
+      impl_idhs = ret.map{|ct|ct[:implementations].map{|impl|impl.id_handle}}.flatten(1)
+      indexed_asset_files = Implementation.get_indexed_asset_files(impl_idhs)
+      ret.each{|ct|ct[:implementations].each{|impl|impl.merge!(:file_assets => indexed_asset_files[impl[:id]])}}
+      ret
     end
 
     def get_target_tree()

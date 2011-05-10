@@ -5,6 +5,17 @@ module XYZ
       FileAsset.ret_hierrachical_file_struct(flat_file_assets)
     end
 
+    #indexed by implementation_id
+    def self.get_indexed_asset_files(id_handles)
+      flat_file_assets = get_objects_in_set_from_sp_hash(id_handles,{:cols => [:id,:file_assets]})
+      ret = Hash.new
+      flat_file_assets.each do |r|
+        pointer = ret[r[:id]] ||= Array.new
+        FileAsset.set_hierrachical_file_struct!(pointer,r[:file_asset].reject{|k,v|k == :implementation_implementation_id})
+      end
+      ret
+    end
+
     def create_pending_change_item(file_asset)
       get_objects_from_sp_hash({:cols => [:component_info]}).each do |r|
         cmp_idh = r[:component].id_handle()

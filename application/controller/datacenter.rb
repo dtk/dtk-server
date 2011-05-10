@@ -7,19 +7,22 @@ module XYZ
       projects = Project.get_all(model_handle)
       pp [:projects,projects]
       projects.each do |p|
+=begin
         implementation_tree = p.get_implementaton_tree()
         pp implementation_tree
-=begin
-        if implementation_tree.first
-          sample_impl = implementation_tree.first[:component_templates].first[:implementations].first
+        if implementation_tree.find{|x|x[:display_name] == "apache2"}
+          sample_impl = implementation_tree.find{|x|x[:display_name] == "apache2"}[:implementations].first
           pp sample_impl.get_asset_files()
         end
-      tree = p.get_tree()
-       pp tree
-       sample_cmp = tree.values.first[:nodes].values.first[:components].values.first
-       file_paths = sample_cmp.get_implementation_file_paths()
-       pp file_paths
+        tree = p.get_target_tree()
+      #  pp tree
+        sample_cmp = ((((tree.first||{})[:nodes]||[]).first||{})[:components]||[]).find{|x|x[:display_name] == "apache2"}
+        if sample_cmp
+          file_paths = sample_cmp.get_implementation_file_paths()
+          pp file_paths
+        end
 =end
+
       end
       super
     end

@@ -97,7 +97,7 @@ module XYZ
             #if repo is null then want ful file path; otherwise we have repo per cookbook and
             #want to strip off leading repo
             file_path = repo ? file_path_x.gsub(Regexp.new("^#{repo}/"),"") : file_path_x
-            file_name = file_path =~ Regexp.new("/([^/]+$)") ? $1 : file_name
+            file_name = file_path =~ Regexp.new("/([^/]+$)") ? $1 : file_path
             file_asset = {
               :type => "chef_file", 
               :display_name => file_name,

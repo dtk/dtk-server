@@ -8,7 +8,7 @@ module XYZ
       pp [:projects,projects]
 
       projects.each_with_index { |p,i|
-        projects[i][:tree] = p.get_tree()
+        projects[i][:tree] = p.get_target_tree()
         projects[i][:name] = projects[i][:display_name]
       }
 pp projects

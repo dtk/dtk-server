@@ -11,26 +11,17 @@ module XYZ
       unravelled_ret = get_objects_from_sp_hash(sp_hash)
       ret_hash = Hash.new
       unravelled_ret.each do |r|
-        unless target = ret_hash[r[:target][:id]]
-          target = ret_hash[r[:target][:id]] ||= r[:target].reject{|k,v|k == :project_id}.merge(:model_name => "target")
-        end
-        cmp_templates = target[:component_templates] ||= Hash.new
-        unless cmp_template = cmp_templates[r[:component_template][:id]] 
-          cmp_template = cmp_templates[r[:component_template][:id]] = r[:component_template].reject{|k,v|[:ancestor_id].include?(k)}
+        unless cmp_template = ret_hash[r[:component_template][:id]] 
+          cmp_template = ret_hash[r[:component_template][:id]] = r[:component_template].reject{|k,v|[:ancestor_id].include?(k)}
         end
         impls = cmp_template[:implementations] ||= Hash.new
         impls[r[:implementation][:id]] ||= r[:implementation]
       end
-      ret_hash.values.map do |t|
-        cmp_templates = t[:component_templates].values.map do |ct|
-          ct.merge(:implementations => ct[:implementations].values)
-        end
-        t.merge(:component_templates => cmp_templates)
-      end
+      ret_hash.values.map{|ct|ct.merge(:implementations => ct[:implementations].values)}
     end
 
-    def get_tree()
-      sp_hash = {:cols => [:id,:display_name,:type,:tree]}
+    def get_target_tree()
+      sp_hash = {:cols => [:id,:display_name,:type,:target_tree]}
       unravelled_ret = get_objects_from_sp_hash(sp_hash)
       ret_hash = Hash.new
       unravelled_ret.each do |r|

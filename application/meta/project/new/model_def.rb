@@ -5,7 +5,7 @@
     :type => {:type=>:varchar, :size => 25}
   },
   :virtual_columns=>{
-    :tree=>{
+    :target_tree=>{
       :type=>:json,
       :hidden=>true,
       :remote_dependencies=>

@@ -25,6 +25,18 @@
          :join_cond=>{:id=>:component__node_node_id},
          :cols=>[:id,:display_name,:datacenter_datacenter_id]
        }]
+    },
+    :file_assets=>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [{
+         :model_name=>:file_asset,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:implementation_implementation_id => :implementation__id},
+         :cols=>[:id,:file_name,:type,:path]
+       }]
     }
   },
   :many_to_one=>[:library,:datacenter],

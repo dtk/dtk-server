@@ -63,6 +63,7 @@
        },
        {
          :model_name=>:implementation,
+         :convert => true,
          :join_type=>:inner,
          :join_cond=>{:id=>:component__implementation_id},
          :cols=>[:id,:display_name,:type]

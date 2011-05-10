@@ -21,6 +21,40 @@ module XYZ
       file_obj[:implementation].create_pending_change_item(self)
     end
 
+    def self.ret_hierrachical_file_struct(flat_file_assets)
+      ret = Array.new
+      flat_file_assets.each{|f| set_hierrachical_file_struct!(ret,f)}
+      ret
+    end
+
+    def self.set_hierrachical_file_struct!(ret,file_asset,path=nil)
+      path ||= file_asset[:path].split("/")
+      if path.size == 1
+        ret << file_asset.merge(:model_name => "file_asset")
+      else
+        dir = ret.find{|x|x[:display_name] == path[0] and x[:model_name] == "directory_asset"}
+        unless dir
+          dir = {
+            :model_name => "directory_asset",
+            :display_name => path[0]
+          }
+          #TODO: replace with this after debugging          ret << dir
+          ret << debug_order_dir(dir)
+        end
+        children = dir[:children] ||= Array.new
+        set_hierrachical_file_struct!(children,file_asset,path[1..path.size-1])
+      end
+    end
+    private
+    #TODO: remove after using for testing
+   def self.debug_order_dir(dir)
+     ret = ActiveSupport::OrderedHash.new()
+     [:model_name, :display_name, :children].each do |k|
+       ret[k] = dir[k] if dir.has_key?(k)
+     end
+     ret
+   end
+
 #stubs for methods
 =begin
     def rename(new_name)

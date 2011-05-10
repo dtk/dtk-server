@@ -8,7 +8,9 @@ module XYZ
       pp [:projects,projects]
       projects.each do |p|
         implementation_tree = p.get_implementaton_tree()
-        pp implementation_tree
+#        pp implementation_tree
+        sample_impl = implementation_tree.first[:component_templates].first[:implementations].first
+        pp sample_impl.get_asset_files()
 #        tree = p.get_tree()
  #       pp tree
 #        sample_cmp = tree.values.first[:nodes].values.first[:components].values.first

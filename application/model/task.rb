@@ -66,6 +66,11 @@ module XYZ
       ret
     end
 
+    def ret_command_and_control_adapter_info()
+      #TODO: stub
+      [:node_config,nil]
+    end
+
     def initialize(hash_scalar_values,c,model=:task)
       defaults = { 
         :status => "created",

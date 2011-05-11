@@ -171,7 +171,7 @@ module XYZ
       end
 
       def ret_command_and_control_adapter_info()
-        #TBD: stub
+        #TODO: stub
         [:node_config,nil]
       end
 

@@ -6,7 +6,7 @@ module XYZ
       def self.execute(task_idh,top_task_idh,config_node,attributes_to_set)
         result = nil
         updated_attributes = Array.new
-        ret_rpc_client() do |rpc_client|
+        ret_rpc_client(mcollective_agent) do |rpc_client|
           config_agent = ConfigAgent.load(config_node[:config_agent_type])
 
           target_identity = ret_discovered_mcollective_id(config_node[:node],rpc_client)
@@ -33,10 +33,15 @@ pp [:response,response]
         [result,updated_attributes]
       end
 
-      def self.get_logs(key,value,nodes)
-        ret_rpc_client() do |rpc_client|
-          #msg_content = 
-          response = rpc_client.custom_request("run",msg_content,target_identity,filter).first
+      def self.get_logs(task,nodes)
+        value = task.id_handle.get_id().to_s
+        key = task[:executable_action_type] ? "task_id" : "top_task_id"
+        msg_content = {:key => key, :value => value}
+        agent = "get_log_fragment"
+        ret_rpc_client(agent) do |rpc_client|
+          target_identities = ret_discovered_mcollective_ids(nodes,rpc_client)
+          filter = {"identity" => target_identities.values, "agent" => [agent]}
+          response = rpc_client.custom_request("get",msg_content,target_identities.values,filter)
           pp [:response,response]
         end
       end
@@ -66,12 +71,12 @@ pp [:response,response]
       end
 
      private
-      def self.ret_rpc_client(&block)
+      def self.ret_rpc_client(agent,&block)
         rpc_client = nil
         Lock.synchronize do
           #TODO: check if really need lock for this
           #deep copy because rpcclient modifies options
-          rpc_client = rpcclient(mcollective_agent,:options => Aux::deep_copy(Options))
+          rpc_client = rpcclient(agent,:options => Aux::deep_copy(Options))
         end
         unless block
           rpc_client
@@ -85,8 +90,14 @@ pp [:response,response]
         end
       end
 
+      #TODO: not sure if what name of agent is shoudl be configurable
       def self.mcollective_agent()
         @mcollective_agent ||= R8::Config[:command_and_control][:node_config][:mcollective][:agent]
+      end
+
+      def self.ret_discovered_mcollective_ids(nodes,rpc_client)
+        #TODO: make more efficient by making a disjunctive call to get all ids at same time
+        nodes.inject({}){|h,n|h.merge(n[:id] => ret_discovered_mcollective_id(n,rpc_client))}
       end
 
       def self.ret_discovered_mcollective_id(node,rpc_client)

@@ -14,6 +14,11 @@ module XYZ
       result
     end
 
+    def self.get_logs(task,nodes)
+      klass = load_for(task)
+      klass.get_logs(task,nodes)
+    end
+
     #TODO: temp hack
     def self.wait_for_node_to_be_ready(node) 
       adapter_name = R8::Config[:command_and_control][:node_config][:type]
@@ -31,8 +36,8 @@ module XYZ
       AttributeLink.propagate(updated_attributes.map{|attr|attr.id_handle()})
     end
 
-    def self.load_for(task_action)
-      adapter_type,adapter_name = task_action.ret_command_and_control_adapter_info()
+    def self.load_for(task_or_task_action)
+      adapter_type,adapter_name = task_or_task_action.ret_command_and_control_adapter_info()
       adapter_name ||= R8::Config[:command_and_control][adapter_type][:type]
       return nil unless adapter_type and adapter_name
       load_for_aux(adapter_type,adapter_name)

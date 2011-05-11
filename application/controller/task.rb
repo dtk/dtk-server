@@ -7,9 +7,12 @@ module XYZ
 
         tasks = Task.get_top_level_tasks(model_handle).sort{|a,b| b[:updated_at] <=> a[:updated_at]}
         task = tasks.first
+      else
+        raise Error.new("not implemented yet get_logs with task id given")
       end
-      assoc_nodes =  task.get_associated_nodes()
+      assoc_nodes = task.get_associated_nodes()
       pp assoc_nodes
+      pp CommandAndControl.get_logs(task,assoc_nodes)
       {:content => {}}
     end
   end

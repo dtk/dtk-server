@@ -1,46 +1,23 @@
 module XYZ
   class ParseLog
-    def self.break_into_segments(lines)
-      ret = LogSegments.new
-      current_segment = nil
-      lines.each do |line|
-        if match = Pattern.find{|k,pat|line =~ pat}
-          ret << current_segment if current_segment
-          current_segment = LogSegment.new(match[0],line)
-        elsif current_segment
-          current_segment << line 
-        end
-      end
-      ret << current_segment if current_segment
-      ret.post_process!()
+    def self.parse(lines)
+      get_adapter().parse(lines)
     end
    private
-    #order is important because of subsumption
-    Pattern =  Aux::ordered_hash(
-      [{:debug => /DEBUG:/},
-#       {:backtrace => /INFO:  backtrace:/},
-       {:error => /ERROR:/},
-       {:info => /INFO:/}]
-    )
+    def self.get_adapter()
+      adapter_type = :chef #TODO stub
+      Adapters[adapter_type] ||= get_adapter_aux(adapter_type)
+    end
+    Adapters = Hash.new
+    def self.get_adapter_aux(adapter_type)
+      require File.expand_path("#{UTILS_DIR}/internal/parse_log/adapters/#{adapter_type}", File.dirname(__FILE__))
+      XYZ::ParseLogAdapter.const_get adapter_type.to_s.capitalize
+     rescue LoadError
+      raise Error.new("cannot find log parser adapter")
+    end
   end
+
   class LogSegments < Array
-    def post_process!()
-      #if an error then this is repeated; so cut off
-      cut_off_after_error!()
-      self
-    end
-   private
-    def cut_off_after_error!()
-      pos = nil
-      self.each_with_index do |seg,i|
-        if seg.type == :error
-          pos = i
-          break
-        end
-      end
-      self.slice!(pos+1,size-pos) if pos
-      self
-    end
   end
 
   class LogSegment 

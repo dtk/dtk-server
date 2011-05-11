@@ -20,15 +20,35 @@ module XYZ
   class LogSegments < Array
   end
 
+
   class LogSegment 
-    attr_reader :type,:line,:aux_data
-    def initialize(type,line)
+    def self.create(type,line)
+      LogSegmentGeneric.new(type,line)
+    end
+    attr_reader :type
+   private
+    def initialize(type)
       @type = type
+    end
+  end
+
+  class LogSegmentGeneric < LogSegment 
+    attr_reader :line,:aux_data
+    def initialize(type,line)
+      super(type)
       @line = line 
       @aux_data = Array.new
     end
     def <<(line)
       @aux_data << line
+    end
+  end
+
+  class LogSegmentError < LogSegment
+    attr_reader :error_type
+    def initialize(error_type)
+      super(:error)
+      @error_type = error_type
     end
   end
 end

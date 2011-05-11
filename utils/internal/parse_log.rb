@@ -18,6 +18,10 @@ module XYZ
   end
 
   class LogSegments < Array
+    def initialize()
+      super()
+      @complete = nil
+    end
   end
 
 

@@ -11,12 +11,13 @@ module XYZ
         raise Error.new("not implemented yet get_logs with task id given")
       end
       assoc_nodes = task.get_associated_nodes()
-      pp assoc_nodes
       logs = CommandAndControl.get_logs(task,assoc_nodes)
+      pp "----------------"
       logs.each do |node_id,result|
         pp "log for node_id #{node_id.to_s}"
         parsed_log = ParseLog.parse(result[:data])
-        parsed_log
+        STDOUT << parsed_log.pp_form_summary
+        STDOUT << "----------------\n"
       end
       {:content => {}}
     end

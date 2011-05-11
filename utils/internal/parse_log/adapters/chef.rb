@@ -24,7 +24,23 @@ module XYZ
       )
      public
       class LogSegments < ::XYZ::LogSegments
+        def pp_form_summary()
+          if @complete
+            if last.type == :error
+              "complete with error\n" + Aux::pp_form(last)
+            else
+              "complete and ok\n"
+            end
+          else
+            if last.type == :error
+              "incomplete with error\n" + Aux::pp_form(last)
+            else
+              "incomplete and no error yet\n"
+            end
+          end
+        end
         def post_process!()
+          @complete = last && (last.line  =~ /handlers complete/ ? true : false)
           #if an error then this is repeated; so cut off
           error_segment_pos = cut_off_after_error!()
           if error_segment_pos

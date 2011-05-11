@@ -41,12 +41,31 @@ module XYZ
 
       #if task does not have execuatble actions then get all subtasks
       if exec_actions.empty?
-        exec_actions = get_all_subtasks().map{|t|t[:executable_action]}
+        exec_actions = get_all_subtasks().map{|t|t[:executable_action]}.compact
       end
-      exec_actions.inject({}) do |h,ea|
-        node = ea[:node]
-        node ? h.merge(node[:id] => node) : h
-      end.values
+      
+      #get all unique nodes; looking for attribute :external_ref
+      indexed_nodes = Hash.new
+      exec_actions.each do |ea|
+        next unless node = ea[:node]
+        node_id = node[:id]
+        unless indexed_nodes[node_id] and indexed_nodes[node_id][:external_ref]
+          indexed_nodes[node_id] = node
+        end
+      end
+
+      #need to query db if missing external_refs
+      node_ids_missing_ext_refs = indexed_nodes.values.reject{|n|n[:external_ref]}.map{|n|n[:id]}
+      unless node_ids_missing_ext_refs.empty?
+        sp_hash = {
+          :cols => [:id,:external_ref],
+          :filter => [:oneof, :id, node_ids_missing_ext_refs]
+        }
+        node_mh = model_handle.createMH(:node)
+        node_objs = Model.get_objects_from_sp_hash(node_mh,sp_hash)
+        node_objs.each{|r|indexed_nodes[r[:id]][:external_ref] = r[:external_ref]}
+      end
+      indexed_nodes.values
     end
 
     #recursively walks structure, but returns them in flat list

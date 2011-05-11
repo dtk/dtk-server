@@ -31,7 +31,7 @@ module XYZ
             error_segment = self[error_segment_pos]
             PossibleErrors.each do |err|
               if err.isa?(error_segment)
-                self[error_segment_pos] = err.new(error_segment)
+                self[error_segment_pos] = err.new(error_segment,self)
                 break
               end
             end
@@ -63,17 +63,18 @@ module XYZ
           end
           nil
         end
-        attr_reader :template_file,:error_line_num,:error_lines,:error_detail
-        def initialize(log_segment)
+        attr_reader :template_file_ref,:error_line_num,:error_lines,:error_detail
+        def initialize(log_segment,all_segments)
           super(:template_error)
-          @template_file = nil
+          @template_file_ref = nil
           @error_line_num = nil
           @error_detail = nil
           @error_lines = Array.new
-          parse!(log_segment)
+          parse!(log_segment,all_segments)
         end
        private
-        def parse!(log_segment)
+        def parse!(log_segment,all_segments)
+          @template_file_ref = ChefFileRef.find_chef_template(all_segments[all_segments.size-2])
           state = :init
           log_segment.aux_data.each do |l|
             return if state == :setting_error_lines and l.empty?
@@ -94,6 +95,18 @@ module XYZ
                 state = :setting_error_lines
               end
             end
+          end
+        end
+      end
+      #complication is taht may not have uniq handle on file
+      class ChefFileRef < HashObject
+        def self.find_chef_template(segment)
+          if segment.line =~ /looking for template (.+) in cookbook :(.+$)/
+            hash = {
+              :cookbook => $2,
+              :file_name => $1
+            }
+            self.new(hash)
           end
         end
       end

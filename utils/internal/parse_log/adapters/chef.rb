@@ -56,11 +56,41 @@ module XYZ
       end
       class ErrorTemplate < ::XYZ::LogSegmentError 
         def self.isa?(log_segment)
-          #TODO stub
-          true
+          log_segment.aux_data.each do |l|
+            unless l.empty?
+              return l =~ /Chef::Mixin::Template::TemplateError/
+            end
+          end
+          nil
         end
+        attr_reader :template_file,:error_line_num,:error_lines
         def initialize(log_segment)
           super(:template_error)
+          @template_file = nil
+          @error_line_num = nil
+          @error_lines = Array.new
+          parse!(log_segment)
+        end
+       private
+        def parse!(log_segment)
+          state = :init
+          log_segment.aux_data.each do |l|
+            return if state == :setting_error_lines and l.empty?
+            next if l.empty?
+            if state == :init
+              if l =~ /Chef::Mixin::Template::TemplateError/
+                state = :error_found
+                if l =~ /on line #([0-9]+):/
+                  @error_line_num = $1.to_i
+                end
+              end
+            elsif [:error_found,:setting_error_lines].include?(state)
+              if l =~ /[0-9]+:/
+                @error_lines << l
+                state = :setting_error_lines
+              end
+            end
+          end
         end
       end
 

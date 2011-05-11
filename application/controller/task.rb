@@ -12,7 +12,8 @@ module XYZ
       end
       assoc_nodes = task.get_associated_nodes()
       pp assoc_nodes
-      pp CommandAndControl.get_logs(task,assoc_nodes)
+      logs = CommandAndControl.get_logs(task,assoc_nodes)
+      pp logs
       {:content => {}}
     end
   end

@@ -34,16 +34,22 @@ pp [:response,response]
       end
 
       def self.get_logs(task,nodes)
+        ret = nodes.inject({}){|h,n|h.merge(n[:id] => nil)}
         value = task.id_handle.get_id().to_s
         key = task[:executable_action_type] ? "task_id" : "top_task_id"
         msg_content = {:key => key, :value => value}
         agent = "get_log_fragment"
         ret_rpc_client(agent) do |rpc_client|
-          target_identities = ret_discovered_mcollective_ids(nodes,rpc_client)
-          filter = {"identity" => target_identities.values, "agent" => [agent]}
-          response = rpc_client.custom_request("get",msg_content,target_identities.values,filter)
-          pp [:response,response]
+          target_identities = ret_discovered_mcollective_id_info(nodes,rpc_client)
+          filter = {"identity" => target_identities.keys, "agent" => [agent]}
+          responses = rpc_client.custom_request("get",msg_content,target_identities.keys,filter)
+          raise ErrorTimeout.new() unless responses
+          responses.each do |response|
+            node_id = target_identities[response[:sender]]
+            ret[node_id] = response[:data]
+          end
         end
+        ret
       end
 
       def  self.wait_for_node_to_be_ready(node)
@@ -95,9 +101,9 @@ pp [:response,response]
         @mcollective_agent ||= R8::Config[:command_and_control][:node_config][:mcollective][:agent]
       end
 
-      def self.ret_discovered_mcollective_ids(nodes,rpc_client)
+      def self.ret_discovered_mcollective_id_info(nodes,rpc_client)
         #TODO: make more efficient by making a disjunctive call to get all ids at same time
-        nodes.inject({}){|h,n|h.merge(n[:id] => ret_discovered_mcollective_id(n,rpc_client))}
+        nodes.inject({}){|h,n|h.merge(ret_discovered_mcollective_id(n,rpc_client) => n[:id])}
       end
 
       def self.ret_discovered_mcollective_id(node,rpc_client)

@@ -63,11 +63,12 @@ module XYZ
           end
           nil
         end
-        attr_reader :template_file,:error_line_num,:error_lines
+        attr_reader :template_file,:error_line_num,:error_lines,:error_detail
         def initialize(log_segment)
           super(:template_error)
           @template_file = nil
           @error_line_num = nil
+          @error_detail = nil
           @error_lines = Array.new
           parse!(log_segment)
         end
@@ -82,6 +83,9 @@ module XYZ
                 state = :error_found
                 if l =~ /on line #([0-9]+):/
                   @error_line_num = $1.to_i
+                end
+                if l =~ /TemplateError \((.+) for #<Erubis::Context/
+                  @error_detail = $1
                 end
               end
             elsif [:error_found,:setting_error_lines].include?(state)

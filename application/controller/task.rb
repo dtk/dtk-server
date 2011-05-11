@@ -13,7 +13,11 @@ module XYZ
       assoc_nodes = task.get_associated_nodes()
       pp assoc_nodes
       logs = CommandAndControl.get_logs(task,assoc_nodes)
-      pp logs
+      logs.each do |node_id,result|
+        pp "log for node_id #{node_id.to_s}"
+        log_segments = ParseLog.break_into_segments(result[:data])
+        log_segments
+      end
       {:content => {}}
     end
   end

@@ -35,6 +35,12 @@ module XYZ
         RUBY_PLATFORM
       end
 
+      def ordered_hash(array_with_hashes)
+        array_with_hashes.inject(ActiveSupport::OrderedHash.new) do |h,x|
+          h.merge(x.keys.first => x.values.first)
+        end
+      end
+
       #key can be symbol or of form {symbol => symbol} 
       def hash_subset(hash,keys,opts={},&block)
         hash_subset_aux(Hash.new(),hash,keys,opts,&block)

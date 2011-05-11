@@ -41,8 +41,9 @@ pp [:response,response]
         agent = "get_log_fragment"
         ret_rpc_client(agent) do |rpc_client|
           target_identities = ret_discovered_mcollective_id_info(nodes,rpc_client)
-          filter = {"identity" => target_identities.keys, "agent" => [agent]}
-          responses = rpc_client.custom_request("get",msg_content,target_identities.keys,filter)
+          target_nodes = target_identities.keys
+          filter = {"identity" => /^(#{target_nodes.join('|')})$/}
+          responses = rpc_client.custom_request("get",msg_content,nodes,filter)
           raise ErrorTimeout.new() unless responses
           responses.each do |response|
             node_id = target_identities[response[:sender]]
@@ -103,6 +104,9 @@ pp [:response,response]
 
       def self.ret_discovered_mcollective_id_info(nodes,rpc_client)
         #TODO: make more efficient by making a disjunctive call to get all ids at same time
+        #TODO: this might be done using filter
+        #pbuilderids = nodes.map{|n|pbuilderid(node)}
+        #filter = Filter.merge("fact" => [{:fact=>"pbuilderid", :value=>/^(#{pbuilderids.join('|')})$/}
         nodes.inject({}){|h,n|h.merge(ret_discovered_mcollective_id(n,rpc_client) => n[:id])}
       end
 

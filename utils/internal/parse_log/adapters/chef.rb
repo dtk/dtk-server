@@ -90,7 +90,7 @@ module XYZ
         end
 
         def error_segment()
-          last if @complete and last.type == :error
+          last if @complete and last.kind_of?(::XYZ::LogSegmentError)
         end
 
         def find_error_position()
@@ -158,6 +158,26 @@ module XYZ
           @error_detail = segments_from_error.first.aux_data.first
         end
       end
+
+      class ErrorMissingRecipe < ::XYZ::LogSegmentError 
+        def self.isa?(segments_from_error)
+          return nil unless segments_from_error.size > 1
+          line = segments_from_error[1].line
+          line =~ /ArgumentError: Cannot find a recipe matching/
+        end
+        def initialize(segments_from_error,prev_segment)
+          super(:missing_recipe_error)
+          parse!(segments_from_error)
+        end
+       private
+        def parse!(segments_from_error)
+          line = segments_from_error[1].line
+          if line =~ /ArgumentError: (.+$)/
+            @error_detail = $1
+          end
+        end
+      end
+
       #complication is that may not have uniq handle on file
       class ChefFileRef < HashObject
         def self.find_chef_template(segment)
@@ -201,7 +221,8 @@ module XYZ
         end
       end
 
-      PossibleErrors = [ErrorTemplate,ErrorRecipe]
+      #TODO: automatically compute this
+      PossibleErrors = [ErrorTemplate,ErrorRecipe,ErrorMissingRecipe]
     end
   end
 end

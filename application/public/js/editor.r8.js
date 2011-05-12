@@ -45,6 +45,7 @@ if (!R8.Editor) {
 			_mousePos = null,
 
 			_files = {},
+			_loadedFile = '',
 
 			_topbarTpl = '<div id="editor-bar-wrapper" class="editor-bar-wrapper closed">\
 						<div class="divider"></div>\
@@ -336,6 +337,7 @@ if(_editorContainerNode == null) return;
 				_files[file.id] = new R8.File(fileDef);
 				this.addTab(file.id);
 				this.fileFocus(file.id);
+				_loadedFile = file.id;
 			},
 			addTab: function(fileId) {
 				var fileName = _files[fileId].get('name');
@@ -386,6 +388,26 @@ if(_editorContainerNode == null) return;
 					}
 				};
 				R8.Ctrl.call('file_asset/get/'+fileId,params);
+			},
+			saveFile: function() {
+				var content = _editor.getSession().getValue();
+
+				var callback = function(ioId,responseObj) {
+//					eval("var response =" + responseObj.responseText);
+//					var file = response.application_component_get_cfg_file_contents.content[0].data;
+
+					alert('File Saved');
+				}
+				var params = {
+					'cfg' : {
+						method: 'POST',
+						'data': 'content='+content
+					},
+					'callbacks': {
+						'io:success':callback
+					}
+				};
+				R8.Ctrl.call('file_asset/save_content/'+fileId,params);
 			},
 			setFileContents: function(ioId,responseObj) {
 				eval("var response =" + responseObj.responseText);

@@ -48,6 +48,7 @@
 						<div class="item"><a href="{%=_app[:base_uri]%}/xyz/node/list">Inventory</a></div>
 					</div>
 					<div class="divider"></div>
+					<div class="sub-item"><a href="javascript:R8.Editor.saveFile();">Save</a></div>
 				</div>
 				<div class="yui3-u right-cap"></div>
 			</div>

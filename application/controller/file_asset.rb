@@ -11,6 +11,13 @@ module XYZ
       return {:data=>file_asset}
     end
 
+    def save_content(id)
+      file_asset = get_object_by_id(id)
+      file_asset.update_content(req.params[:content])
+
+      return {:data=>{}}
+    end
+
     def test_get(*path_array)
       path = path_array.join("/")
       repo,af_path = (path =~ Regexp.new("(^[^/]+)/(.+$)"); [$1,$2])

@@ -84,5 +84,8 @@ module XYZ
       @error_detail = nil
       @error_lines = Array.new
     end
+    def ret_file_asset(model_handle)
+      @error_file_ref && @error_file_ref.ret_file_asset(model_handle)
+    end
   end
 end

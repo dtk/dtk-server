@@ -28,21 +28,25 @@ module XYZ
       class LogSegments < ::XYZ::LogSegments
         def pp_form_summary()
           if @complete
-            if last.type == :error
-              "complete with error\n" + Aux::pp_form(last)
+            if has_error?()
+              error_segment = error_segment()
+              "complete with error\n" + (error_segment ? Aux::pp_form(error_segment) : "")
             else
               "complete and ok\n"
             end
           else
-            if last.type == :error
-              "incomplete with error\n" + Aux::pp_form(last)
+            if has_error?()
+              error_segment = error_segment()
+              "incomplete with error\n" + (error_segment ? Aux::pp_form(error_segment) : "")
             else
               "incomplete and no error yet\n"
             end
           end
         end
+
         def post_process!()
           @complete = complete?()
+          return self unless @complete
           error_pos =  find_error_position()
           return self unless error_pos
           segments_from_error = self[error_pos,1+size-error_pos]
@@ -61,12 +65,32 @@ module XYZ
           self[error_pos] = specific_error if specific_error
           self
         end
+        def ret_file_asset_if_error(model_handle)
+          if has_error?()
+            error_segment = error_segment()
+            error_segment && error_segment.ret_file_asset(model_handle)
+          end
+        end
+
        private
         def complete?()
           return false if empty?
           return true if last.line =~ /handlers complete/
           return false if size < 2
           self[size-2].line  =~ /handlers complete/ ? true : false
+        end
+
+        def has_error?()
+          if @complete
+            #short circuit when complete
+            last.type == :error
+          else
+            find{|s|s.type == :error}
+          end
+        end
+
+        def error_segment()
+          last if @complete and last.type == :error
         end
 
         def find_error_position()
@@ -153,6 +177,27 @@ module XYZ
             :file_name => recipe_filename
           }
           self.new(hash)
+        end
+        def ret_file_asset(model_handle)
+          file_asset_path = ret_file_asset_path()
+          return nil unless file_asset_path and self[:cookbook]
+          sp_hash = {
+            :filter => [:eq, :path, file_asset_path],
+            :cols => [:id,:path,:implementation_info]
+          }
+          file_asset_mh = model_handle.createMH(:file_asset)
+          Model.get_objects_from_sp_hash(file_asset_mh,sp_hash).find{|x|x[:implementation][:repo] == self[:cookbook]}
+        end
+       private
+        def ret_file_asset_path()
+          return nil unless self[:file_name]
+          case self[:type]
+           when :template
+            #TODO: stub; since does not handle case where multiple versions
+            "templates/default/#{self[:file_name]}"
+           when :recipe
+            "recipes/#{self[:file_name]}"
+          end
         end
       end
 

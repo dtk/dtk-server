@@ -19,7 +19,7 @@
 
 .jstree-default a.jstree-loading .jstree-icon { background:url("throbber.gif") center center no-repeat !important; }
 
-.jstree-default.jstree-focused { background:#ffffee; }
+/*.jstree-default.jstree-focused { background:#ffffee; }*/
 
 .jstree-default .jstree-no-dots li, 
 .jstree-default .jstree-no-dots .jstree-leaf > ins { background:transparent; }
@@ -147,6 +147,19 @@
 .jstree-r8 li[rel=opscode] > a > .jstree-icon {
 	background-position: 0 -126px;
 }
+.jstree-r8 li[rel=chef_cookbook] > a > .jstree-icon {
+	background-position: 0 -126px;
+}
 .jstree-r8 li[rel=puppet] > a > .jstree-icon {
 	background-position: -36px -126px;
+}
+
+.jstree-r8 li[rel=file] > a > .jstree-icon {
+	background-position: 0 -144px;
+}
+.jstree-r8 li.jstree-closed[rel=directory] > a > .jstree-icon {
+	background-position: -36px -72px;
+}
+.jstree-r8 li.jstree-open[rel=directory] > a > .jstree-icon {
+	background-position: -54px -72px;
 }

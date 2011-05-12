@@ -10,6 +10,7 @@ module XYZ
       projects.each_with_index { |p,i|
         projects[i][:tree] = {}
         projects[i][:tree][:targets] = p.get_target_tree()
+        projects[i][:tree][:component_templates] = p.get_implementaton_tree(:include_file_assets => true)
         projects[i][:name] = projects[i][:display_name]
       }
 pp projects
@@ -35,7 +36,7 @@ pp projects
 #      return {:content=>''}
     end
 
-  
+
     def test_tree()
 #      tpl = R8Tpl::TemplateR8.new("ide/test_tree",user_context())
 

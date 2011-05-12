@@ -22,12 +22,21 @@ module XYZ
       super()
       @complete = nil
     end
+    def hash_form()
+      {
+        :complete => @complete,
+        :log_segments => map{|l|l.hash_form()}
+      }
+    end
   end
 
 
   class LogSegment 
     def self.create(type,line)
       LogSegmentGeneric.new(type,line)
+    end
+    def hash_form()
+      {:type => type}
     end
     attr_reader :type
    private
@@ -38,6 +47,13 @@ module XYZ
 
   class LogSegmentGeneric < LogSegment 
     attr_reader :line,:aux_data
+    def hash_form()
+      added = {
+        :line => @line,
+        :aux_data => @aux_data
+      }
+      super.merge(added)
+    end
     def initialize(type,line)
       super(type)
       @line = line 
@@ -50,6 +66,16 @@ module XYZ
 
   class LogSegmentError < LogSegment
     attr_reader :error_type,:error_file_ref,:error_line_num,:error_lines,:error_detail
+    def hash_form()
+      added = {
+        :error_type => @error_type,
+        :error_file_ref => @error_file_ref,
+        :error_line_num => @error_line_num,
+        :error_detail => @error_detail,
+        :error_lines => @error_lines
+      }
+      super.merge(added)
+    end
     def initialize(error_type)
       super(:error)
       @error_type = error_type

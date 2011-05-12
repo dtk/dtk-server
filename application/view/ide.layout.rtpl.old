@@ -53,52 +53,20 @@
 			</div>
 		</div>
 		<div id="main-body-wrapper" class="main-body-wrapper">
-
-			<div id="l-region" class="region">
-			</div>
-			<div id="l-resizer" class="v-region-resizer"></div>
-			<div id="main-region">
-<!--
-				<div id="editor-panel" class="panel">
-					<div id="editor-panel-header" class="header">
-						<ul id="editor-panel-tab-list" class="panel-tab-list">
-							<li id="project-view-tab" class="active">Foo</li>
-							<li id="component-view-tab">Bar</li>
-						</ul>
-					</div>
-					<div id="editor-panel-content"></div>
+			<div id="mb-l-panel" class="mb-l-panel">
+				<div id="l-panel-tab-wrapper" class="l-panel-tab-wrapper">
+					<ul id="l-panel-tab-list" class="l-panel-tab-list">
+						<li id="project-view-tab" class="active">Project</li>
+						<li id="component-view-tab">Components</li>
+					</ul>
 				</div>
-				<div id="bottom-panel" class="panel">
-					<div id="bottom-panel-header" class="header">
-						<ul id="bottom-panel-tab-list" class="panel-tab-list">
-							<li id="project-view-tab" class="active">Foo</li>
-							<li id="component-view-tab">bar</li>
-						</ul>
-					</div>
-					<div id="bottom-panel-content"></div>
-				</div>
--->
 			</div>
-
-<!--
+			<div id="l-panel-spacer" class="v-panel-spacer"></div>
+			<div id="main-panel-wrapper" class="main-panel-wrapper">
 				<div id="editor-panel" class="editor-panel"></div>
 				<div id="editor-panel-spacer" class="h-panel-spacer"></div>
 				<div id="console-panel" class="console-panel"></div>
--->
-<!--
-			<div id="region-top-full">top full</div>
-			<div id="region-left">left</div>
-			<div id="region-top">top</div>
-			<div id="region-right">right</div>
-			<div id="region-editor">editor</div>
-			<div id="region-bottom">bottom</div>
-			<div id="region-bottom-full">bottom full</div>
-
-			<div id="region-left-1">left 1</div>
-			<div id="region-editor">editor</div>
-			<div id="region-left-2">left 2</div>
-			<div id="region-bottom">bottom</div>
--->
+			</div>
 		</div>
 		</div>
 	</div>
@@ -134,12 +102,6 @@ YUI_config = {
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/templating.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/utils.r8.js"></script>
 
-
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.panel.js"></script>
-
-
-
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/project.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/target.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/node.r8.js"></script>
@@ -151,6 +113,8 @@ YUI_config = {
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/maintoolbar.r8.js"></script>
 
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/search.r8.js"></script>
+
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/ide.r8.js"></script>
 
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/toolbargroup.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/topbar.r8.js"></script>

@@ -452,6 +452,10 @@ p "After Matched Value(s):"+matches.post_match
     transformedTxt = self.check_for_tpl_vars(text)
     if(transformedTxt == text) then transformedTxt = '"'+transformedTxt+'"' end
 
+    self.js_queue_push('innerHTML', self.ret_set_inner_html_js(parentVarName,transformedTxt))
+#DEBUG
+#TODO: revisit, removed this b/c thought it was causing errors in some tree renderings, might not be the case
+=begin
     case parent_node_type
       when "option", "textarea" then
         self.js_queue_push('innerHTML', self.ret_set_inner_html_js(parentVarName,transformedTxt))
@@ -472,7 +476,7 @@ p "After Matched Value(s):"+matches.post_match
           self.append_child_js(parentVarName, '', jsVarName, 'span')
         end
     end
-
+=end
   end
 
   def handle_tpl_ctrl(matchResult)

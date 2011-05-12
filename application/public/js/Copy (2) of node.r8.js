@@ -3,21 +3,13 @@ if (!R8.Node) {
 
 	R8.Node = function(nodeDef,viewSpace) {
 		var _def = nodeDef,
-
-//TODO: revisit, id/type/object are needed/shared between tree and workspace, need to merge behavior to one
-			_id = (typeof(_def.id) == 'undefined') ?  _def['object']['id'] : _def.id,
+			_id = _def['object']['id'],
 			_object = _def['object'],
 			_type = _def['type'],
-
-			_os_type = _def.os_type,
 			_dataModel = null,
 			_ports = {},
 			_portDefs = null,
 			_portsReady = false,
-
-			_applications = {},
-			_leafNode = null,
-			_applicationsLeafNode = null,
 
 			c = null,
 			_status = null,
@@ -32,9 +24,7 @@ if (!R8.Node) {
 
 			_portDragDelegate = null,
 			_portsReady = false,
-//TODO: revisit.., link creation depends on this for drop setup/detection
 			_viewSpace = viewSpace,
-
 			_toolbar = null,
 
 			_links = {};
@@ -51,38 +41,7 @@ if (!R8.Node) {
 				var tpl_callback = _def['tpl_callback'];
 				return R8.Rtpl[tpl_callback]({'node': _def['object']});
 			},
-			renderTree: function() {
-				var nodeLeaf = {
-					'node_id': 'target-'+_def.id,
-					'type': 'node-'+_os_type,
-					'basic_type': 'node',
-					'name': _def.display_name
-//					'name': _def.name
-				};
 
-				_leafNode = R8.Utils.Y.Node.create(R8.Rtpl['project_tree_leaf']({'leaf_item': nodeLeaf}));
-
-				var applicationsLeaf = {
-					'node_id': 'node-applications-'+_def.id,
-					'type': 'applications',
-					'basic_type': '',
-					'name': 'Applications'
-				};
-				_applicationsLeafNode = R8.Utils.Y.Node.create(R8.Rtpl['project_tree_leaf']({'leaf_item': applicationsLeaf}));
-
-				var ulNode = R8.Utils.Y.Node.create('<ul></ul>');
-				for(var c in _def.components) {
-					var componentId = _def.components.id;
-					_applications[componentId] = new R8.Component(_def.components[c]);
-					ulNode.append(_applications[componentId].renderTree());
-				}
-				_applicationsLeafNode.append(ulNode);
-				var ulNode2 = R8.Utils.Y.Node.create('<ul></ul>');
-				ulNode2.append(_applicationsLeafNode);
-				_leafNode.append(ulNode2);
-
-				return _leafNode;
-			},
 			init: function() {
 				_node = R8.Utils.Y.one('#item-'+_id);
 				_status = _node.getAttribute('data-status');

@@ -4,12 +4,7 @@ if (!R8.Component) {
 	/*
 	 * This is the component r8 js class, more to be added
 	 */
-	R8.Component = function(componentDef){
-		var _def = componentDef,
-			_leafNode = null,
-
-			_events = {};
-
+	R8.Component = function(){
 		return {
 
 			/*
@@ -30,17 +25,6 @@ if (!R8.Component) {
 				}
 			},
 
-			renderTree: function() {
-				var componentLeaf = {
-					'node_id': 'target-'+_def.id,
-					'type': 'application',
-					'basic_type': 'component',
-					'name': _def.display_name
-//					'name': _def.name
-				};
-				_leafNode = R8.Utils.Y.Node.create(R8.Rtpl['project_tree_leaf']({'leaf_item': componentLeaf}));
-				return _leafNode;
-			},
 			/*
 			 * renderPorts adds one or more ports to a given component
 			 * @method renderPorts
@@ -302,5 +286,5 @@ if (!R8.Component) {
 				return returnXY;
 			}
 		}
-	};
+	}();
 }

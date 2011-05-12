@@ -25,35 +25,44 @@ body {
 }
 
 /*---------------------------------*/
-/*---Region Stylings------------*/
+/*---Panel Stylings------------*/
 /*---------------------------------*/
-#l-region {
-	min-width: 50px;
-	width: 175px;
-	height: 100%;
+.panel {
 	position: relative;
 	background-color: #FFFFFF;
 	float: left;
 }
 
-#main-region {
-	min-width: 100px;
-	width: 600px;
-	height: 100%;
-	position: relative;
+#l-panel {
 	background-color: green;
-	float: left;
-}
-#editor-panel {
-	min-width: 100px;
-	width: 600px;
-	height: 100%;
-	position: relative;
-	background-color: #FFFFFF;
-	float: left;
 }
 
-.v-region-resizer {
+#main-panel {
+	min-width: 100px;
+	width: 300px;
+	height: 100%;
+	width: 100%;
+	position: relative;
+	background-color: blue;
+	float: left;
+}
+#main-panel-header {
+	position: relative;
+	float: left;
+	background-color: #CCCCCC;
+}
+#main-panel-content {
+	position: relative;
+	min-width: 100px;
+	width: 300px;
+	height: 90%;
+	width: 100%;
+	float: left;
+	background-color: green;
+}
+
+
+.v-panel-spacer {
 	height: 100%;
 	width: 3px;
 	background-color: #CCCCCC;
@@ -61,7 +70,7 @@ body {
 	float: left;
 	cursor: w-resize;
 }
-.h-region-resizer {
+.h-panel-spacer {
 	height: 3px;
 	width: 100%;
 	background-color: #CCCCCC;
@@ -82,22 +91,84 @@ body {
 	width: inherit;
 
 }
-/*------Panel--------------------------*/
 
-.panel {
-	position: relative;
+/*
+#region-top-full {
+	width: 100%;
+	height: 15%;
+	background-color: #FFFFFF;
+}
+#region-left {
+	width: 25%;
+	height: 70%;
+	background-color: #AEB9CD;
 	float: left;
 }
-.panel.foobut {
-	background-color: red;
+#region-top {
+	width: 50%;
+	height: 15%;
+	background-color: blue;
+	float: left;
+	color: #FFFFFF;
 }
-.panel.barbut {
-	background-color: yellow;
+#region-editor {
+	float: left;
+	width: 50%;
+	height: 40%;
+	background-color: black;
+	color: #FFFFFF;	
+}
+#region-right {
+	width: 25%;
+	height: 70%;
+	background-color: #AEB9CD;
+	float: right;
+}
+#region-bottom {
+	width: 50%;
+	height: 15%;
+	background-color: blue;
+	float: left;
+	color: #FFFFFF;
+}
+#region-bottom-full {
+	width: 100%;
+	height: 15%;
+	background-color: #FFFFFF;
+	float: left;
+}
+*/
+
+#region-left-1 {
+	width: 25%;
+	height: 50%;
+	background-color: #FFFFFF;
+	float: left;
+}
+#region-left-2 {
+	width: 25%;
+	height: 50%;
+	background-color: green;
+	float: left;
+}
+#region-editor {
+	width: 75%;
+	height: 80%;
+	background-color: black;
+	float: right;
+	color: #FFFFFF;
+}
+#region-bottom {
+	width: 75%;
+	height: 20%;
+	background-color: blue;
+	float: left;
+	color: #FFFFFF;
 }
 
+/*------Left Panel--------------------------*/
 
-
-.panel .header {
+.l-panel-tab-wrapper {
 	position: relative;
 	width: 100%;
 	height: 25px;
@@ -105,7 +176,7 @@ body {
 	background-color: #E4E4E4;
 }
 
-.panel .header .tab-list {
+.l-panel-tab-list {
 	position: relative;
 	width: 100%;
 	height: 25px;
@@ -113,14 +184,14 @@ body {
 	
 	overflow-x: hidden;
 }
-.panel .header .tab-list li {
+.l-panel-tab-list li {
 	list-style: none outside;
 	height: 25px;
 	padding: 5px 5px 0 5px;
 	position: relative;
 	float: left;
 }
-.panel .header .tab-list li.active {
+.l-panel-tab-list li.active {
 	border-top: 1px solid #343434;
 	border-left: 1px solid #343434;
 	border-right: 1px solid #343434;

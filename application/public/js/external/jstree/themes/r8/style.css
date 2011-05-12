@@ -86,6 +86,9 @@
 	background-position: -36px -72px;
 }
 
+.jstree-r8 li[rel=project] > a > .jstree-icon {
+	background-position: 0 -72px;
+}
 .jstree-r8 li.jstree-closed[rel=project] > a > .jstree-icon {
 	background-position: 0 -72px;
 }

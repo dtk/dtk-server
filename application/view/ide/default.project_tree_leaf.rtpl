@@ -1,0 +1,5 @@
+
+
+<li id="{%=leaf_item[:node_id]%}" rel="{%=leaf_item[:type]%}" class="jstree-leaf">
+	<a id="leaf-body-{%=leaf_item[:node_id]%}" href="#" class="leaf-body" type="{%=leaf_item[:basic_type]%}">{%=leaf_item[:name]%}</a>
+</li>

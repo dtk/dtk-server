@@ -13,7 +13,7 @@ module XYZ
 
     def save_content(id)
       file_asset = get_object_by_id(id)
-      file_asset.update_content(req.params[:content])
+      file_asset.update_content(request.params["content"])
 
       return {:data=>{}}
     end

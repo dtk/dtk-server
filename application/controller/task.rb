@@ -21,6 +21,9 @@ module XYZ
           pp "log for node_id #{node_id.to_s}"
           parsed_log = ParseLog.parse(result[:data])
           hash_form = parsed_log.hash_form()
+          STDOUT << parsed_log.pp_form_summary
+          pp [:file_asset_if_error,parsed_log.ret_file_asset_if_error(model_handle)]
+          STDOUT << "----------------\n"
           break if hash_form[:log_segments].find{|seg|seg[:type] == :error}
         end
         if hash_form

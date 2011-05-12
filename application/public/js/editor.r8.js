@@ -407,7 +407,7 @@ if(_editorContainerNode == null) return;
 						'io:success':callback
 					}
 				};
-				R8.Ctrl.call('file_asset/save_content/'+fileId,params);
+				R8.Ctrl.call('file_asset/save_content/'+_loadedFile,params);
 			},
 			setFileContents: function(ioId,responseObj) {
 				eval("var response =" + responseObj.responseText);

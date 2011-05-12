@@ -49,10 +49,14 @@ module XYZ
   end
 
   class LogSegmentError < LogSegment
-    attr_reader :error_type
+    attr_reader :error_type,:error_file_ref,:error_line_num,:error_lines,:error_detail
     def initialize(error_type)
       super(:error)
       @error_type = error_type
+      @error_file_ref = nil
+      @error_line_num = nil
+      @error_detail = nil
+      @error_lines = Array.new
     end
   end
 end

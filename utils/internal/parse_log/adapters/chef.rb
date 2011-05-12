@@ -42,7 +42,7 @@ module XYZ
           end
         end
         def post_process!()
-          @complete = last && (last.line  =~ /handlers complete/ ? true : false)
+          @complete = complete?()
           error_pos =  find_error_position()
           return self unless error_pos
           segments_from_error = self[error_pos,1+size-error_pos]
@@ -62,6 +62,13 @@ module XYZ
           self
         end
        private
+        def complete?()
+          return false if empty?
+          return true if last.line =~ /handlers complete/
+          return false if size < 2
+          self[size-2].line  =~ /handlers complete/ ? true : false
+        end
+
         def find_error_position()
           each_with_index{|seg,i|return i if seg.type == :error}
           nil
@@ -70,24 +77,17 @@ module XYZ
       class ErrorTemplate < ::XYZ::LogSegmentError 
         def self.isa?(segments_from_error)
           segments_from_error.first.aux_data.each do |l|
-            unless l.empty?
-              return l =~ /Chef::Mixin::Template::TemplateError/
-            end
+            return l =~ /Chef::Mixin::Template::TemplateError/ unless l.empty?
           end
           nil
         end
-        attr_reader :template_file_ref,:error_line_num,:error_lines,:error_detail
         def initialize(segments_from_error,prev_segment)
           super(:template_error)
-          @template_file_ref = nil
-          @error_line_num = nil
-          @error_detail = nil
-          @error_lines = Array.new
           parse!(segments_from_error,prev_segment)
         end
        private
         def parse!(segments_from_error,prev_segment)
-          @template_file_ref = ChefFileRef.find_chef_template(prev_segment)
+          @error_file_ref = ChefFileRef.find_chef_template(prev_segment)
           state = :init
           segments_from_error.first.aux_data.each do |l|
             return if state == :setting_error_lines and l.empty?
@@ -111,20 +111,52 @@ module XYZ
           end
         end
       end
-      #complication is taht may not have uniq handle on file
+      #TODO: this is runtime vs syntactic error
+      class ErrorRecipe < ::XYZ::LogSegmentError 
+        def self.isa?(segments_from_error)
+          line = segments_from_error.first.line
+          line =~ Regexp.new("#{RecipeCache}[^/]+/recipes")
+        end
+        def initialize(segments_from_error,prev_segment)
+          super(:recipe_error)
+          parse!(segments_from_error)
+        end
+       private
+        RecipeCache = "/var/chef/cookbooks/"
+        def parse!(segments_from_error)
+          line = segments_from_error.first.line
+          if line =~ Regexp.new("#{RecipeCache}([^/]+)/recipes/([^:]+):([0-9]+):in `from_file'")
+            cookbook = $1
+            recipe_filename = $2
+            @error_line_num = $3.to_i 
+            @error_file_ref = ChefFileRef.recipe(cookbook,recipe_filename)
+          end
+          @error_detail = segments_from_error.first.aux_data.first
+        end
+      end
+      #complication is that may not have uniq handle on file
       class ChefFileRef < HashObject
         def self.find_chef_template(segment)
           if segment.line =~ /looking for template (.+) in cookbook :(.+$)/
             hash = {
+              :type => :template,
               :cookbook => $2,
               :file_name => $1
             }
             self.new(hash)
           end
         end
+        def self.recipe(cookbook,recipe_filename)
+          hash = {
+            :type => :recipe,
+            :cookbook => cookbook,
+            :file_name => recipe_filename
+          }
+          self.new(hash)
+        end
       end
 
-      PossibleErrors = [ErrorTemplate]
+      PossibleErrors = [ErrorTemplate,ErrorRecipe]
     end
   end
 end

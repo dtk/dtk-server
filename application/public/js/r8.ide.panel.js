@@ -14,6 +14,7 @@ if (!R8.IDE.panel) {
 			_node = null,
 			_headerNode = null,
 			_contentNode = null,
+			_viewContentNodes = {},
 
 			_contentList = {},
 
@@ -47,10 +48,18 @@ if (!R8.IDE.panel) {
 				_headerNode = R8.Utils.Y.one('#'+_def.id+'-header');
 				_contentNode = R8.Utils.Y.one('#'+_def.id+'-content');
 
+				this.initViews();
 				_initialized = true;
 
 				this.resize();
 				this.loadViews();
+			},
+			initViews: function() {
+				for(var v in _def.views) {
+					var viewDef = _def.views[v];
+					if(typeof(viewDef.method) == 'undefined') continue;
+					_viewContentNodes[viewDef.id] = R8.Utils.Y.one('#view-content-'+viewDef.id);
+				}
 			},
 			resize: function() {
 				if(!_initialized) return;
@@ -90,7 +99,7 @@ if (!R8.IDE.panel) {
 				for(var v in _def.views) {
 					var viewDef = _def.views[v];
 					if(typeof(viewDef.method) == 'undefined') continue;
-					R8.IDE.views[viewDef.method](_contentNode);
+					R8.IDE.views[viewDef.method](_viewContentNodes[viewDef.id]);
 				}
 			}
 		}

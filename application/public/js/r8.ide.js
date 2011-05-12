@@ -105,7 +105,7 @@ if (!R8.IDE) {
 					'defaultHeight': .80
 				}, {
 					'id': 'console-panel',
-					'pClass': 'barbut',
+					'pClass': 'tempclass',
 					'minHeight': 100,
 					'minWidth': 300,
 					'relativePos': 'main',
@@ -495,8 +495,23 @@ if (!R8.IDE) {
 					}
 				},
 				renderChefDebugger: function(contentNode) {
-contentNode.set('innerHTML','fooooooooooooo!!!!');
-				}
+//contentNode.set('innerHTML','fooooooooooooo!!!!');
+					var setLogsCallback = function(ioId,responseObj) {
+						eval("var response =" + responseObj.responseText);
+						var log_content = response.application_task_get_logs.content[0].content;
+//console.log(log_contents);
+						contentNode.append(log_content);
+					}
+					var params = {
+						'cfg': {
+							'data': ''
+						},
+						'callbacks': {
+							'io:success': setLogsCallback
+						}
+					};
+					R8.Ctrl.call('task/get_logs',params);
+				},
 			},
 
 			renderEditor: function() {

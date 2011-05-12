@@ -1,0 +1,9 @@
+
+
+<div style="overflow: scroll;" class="log-output">
+	{%for log_segment in logging["log_segments"]%}
+		<div id="foo" style="float: left; height: 17px;" class="{%=log_segment["type"]%}">
+			{%=log_segment["line"]%}
+		</div>
+	{%end%}
+</div>

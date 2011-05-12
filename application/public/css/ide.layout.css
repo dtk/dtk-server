@@ -91,11 +91,17 @@ body {
 .panel.foobut {
 	background-color: red;
 }
-.panel.barbut {
-	background-color: yellow;
+.panel.tempclass {
+	background-color: #FFFFFF;
+	overflow: auto;
 }
 
 
+.panel .content-wrapper {
+}
+.panel .content {
+	overflow: auto;
+}
 
 .panel .header {
 	position: relative;

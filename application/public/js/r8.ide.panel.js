@@ -15,6 +15,7 @@ if (!R8.IDE.panel) {
 			_headerNode = null,
 			_contentNode = null,
 			_viewContentNodes = {},
+			_currentView = '',
 
 			_contentList = {},
 
@@ -66,6 +67,15 @@ if (!R8.IDE.panel) {
 
 				var contentHeight = _node.get('region').height - _headerNode.get('region').height;
 				_contentNode.setStyles({'height':contentHeight,'width':_node.get('region').width,'backgroundColor':'#FFFFFF'});
+
+				var numViews = _def.views.length;
+				for(var i=0; i < numViews; i++) {
+					if(_def.views[i].id == _currentView && typeof(_def.views[i].resizeMethod) != 'undefined') {
+						_viewContentNodes[_def.views[i].id].setStyles({'height':contentHeight,'width':_node.get('region').width,'backgroundColor':'#FFFFFF'});
+						R8.IDE.views[_def.views[i].resizeMethod]();
+						i = numViews + 1;
+					}
+				}
 			},
 			render: function() {
 				this.setViewFocus();
@@ -86,11 +96,13 @@ if (!R8.IDE.panel) {
 
 				if(typeof(_def.viewFocus) == 'undefined') {
 					_def.views[0]['tClass'] = _def.views[0]['tClass'] + ' active';
+					_currentView = _def.views[0].id;
 				}
 
 				for(var i=0; i < numViews; i++) {
 					if(_def.views[i].id == _def.viewFocus) {
 						_def.views[i]['tClass'] = _def.views[i]['tClass'] + ' active';
+						_currentView = _def.views[i].id;
 						i = numViews + 1;
 					}
 				}

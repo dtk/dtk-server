@@ -102,7 +102,16 @@ if (!R8.IDE) {
 					'minHeight': 100,
 					'minWidth': 300,
 					'relativePos': 'main',
-					'defaultHeight': .80
+					'defaultHeight': .80,
+					'views': [{
+						'id': 'editor',
+						'label': 'Editor',
+						'view': 'editorView',
+						'method': 'renderEditor',
+						'resizeMethod': 'resizeEditor'
+					}
+					],
+					'viewFocus': 'editor'
 				}, {
 					'id': 'console-panel',
 					'pClass': 'tempclass',
@@ -443,6 +452,7 @@ if (!R8.IDE) {
 						var consolePanelNode = R8.Utils.Y.one('#console-panel');
 						consolePanelNode.setStyle('height',(_mainRegionNode.get('region').height - (editorPanelNode.get('region').height+_resizerWidth)));
 
+						_mainRegionPanels['editor-panel'].resize();
 //						that.resizePanels();
 					});
 
@@ -488,6 +498,13 @@ if (!R8.IDE) {
 				return region;
 			},
 			views: {
+				renderEditor: function(contentNode) {
+					var cfg = {'containerNodeId': contentNode.get('id')};
+					R8.Editor.init(cfg);
+				},
+				resizeEditor: function() {
+					R8.Editor.resize();
+				},
 				renderProjectTree: function(contentNode) {
 					for (var p in _projects) {
 						_loadedProjects[_projects[p].id] = new R8.Project(_projects[p]);

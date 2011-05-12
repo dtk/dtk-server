@@ -67,13 +67,10 @@ if (!R8.Editor) {
 				_editorContainerNode.append(_editorTpl);
 
 				_editorWrapperNode = R8.Utils.Y.one('#editor-wrapper');
-				_editorHeaderNode = R8.Utils.Y.one('#editor-header');
+//				_editorHeaderNode = R8.Utils.Y.one('#editor-header');
 				_editorNode = R8.Utils.Y.one('#editor');
 
-				var that = this;
-				R8.Utils.Y.one(window).on('resize',function(e){
-					that.resizePage();
-				});
+				_pageContainerNode = R8.Utils.Y.one('#page-container');
 
 				this.initEditor();
 			},
@@ -107,7 +104,7 @@ if (!R8.Editor) {
 				var RubyScriptMode = require("ace/mode/ruby").Mode;
 				_editor.getSession().setMode(new RubyScriptMode());
 
-//				_editor.getSession().setValue("NOD Getting Editor to work.....\n\nNow is the time....");
+//				_editor.getSession().setValue("NOD Getting Editor to work.....\n\nFooooooo!!!");
 
 				_gutterNode = R8.Utils.Y.one('#editor .ace_gutter');
 //				_contentNode = R8.Utils.Y.one('#editor .ace_content');
@@ -117,10 +114,11 @@ if (!R8.Editor) {
 //console.log(_gutterNode.get('region'));
 
 //				var headerSpacerTpl = '<div style="height: inherit; width: '+(_gutterNode.get('region').width+10)+'px;"></div>';
-				var headerSpacerTpl = '<div style="height: inherit; width: 60px; float: left;"></div>';
-				_editorHeaderNode.append(headerSpacerTpl);
 
-				this.resizePage();
+//				var headerSpacerTpl = '<div style="height: inherit; width: 60px; float: left;"></div>';
+//				_editorHeaderNode.append(headerSpacerTpl);
+
+				this.resize();
 
 				var that=this;
 
@@ -153,12 +151,6 @@ if (!R8.Editor) {
 				},this);
 
 /*
-				if(typeof(_cfg.contents) != 'undefined') {
-					_editor.getSession().setValue(_cfg.contents);
-					_editor.gotoLine(1);
-					delete(_cfg.contents);
-				}
-*/
 				_events['ftabMouseEnter'] = R8.Utils.Y.delegate('mouseenter',function(e){
 					e.currentTarget.addClass('show-close');
 				},_editorHeaderNode,'.file-tab');
@@ -181,7 +173,7 @@ if (!R8.Editor) {
 
 					R8.Editor.closeFile(fileId);
 				},_editorHeaderNode,'.file-tab .close-file');
-
+*/
 				_initialized = true;
 			},
 			isInitialized: function() {
@@ -260,7 +252,7 @@ alert('should create new attr for component...');
 				_editor.replace(varContent);
 				clearTimeout(_selectionPopTimeout);
 			},
-			resizePage: function() {
+			resize: function() {
 /*
 				_viewportRegion = _pageContainerNode.get('viewportRegion');
 
@@ -271,18 +263,23 @@ alert('should create new attr for component...');
 
 				var pgRegion = _pageContainerNode.get('region');
 */
+//DEBUG
+//console.log('inside resize in editor...');
+if(_editorContainerNode == null) return;
+
 				var wrapperRegion = _editorContainerNode.get('region');
 				var editorWrapperHeight = wrapperRegion.height;
 				var editorWrapperWidth = wrapperRegion.width;
-
+/*
 				_editorWrapperNode.setStyles({
 					'height':editorWrapperHeight,
 					'width':editorWrapperWidth,
 //					'top': _topbarWrapperNode.get('region').height
 				});
-
-				_editorNode.setStyles({'height':(editorWrapperHeight-_editorHeaderHeight),'width':editorWrapperWidth});
-				_editorHeaderNode.setStyles({'width':editorWrapperWidth});
+*/
+				_editorNode.setStyles({'height':(editorWrapperHeight),'width':editorWrapperWidth});
+//				_editorNode.setStyles({'height':(editorWrapperHeight-_editorHeaderHeight),'width':editorWrapperWidth});
+//				_editorHeaderNode.setStyles({'width':editorWrapperWidth});
 				_editor.resize();
 			},
 			resizePageOld: function() {
@@ -314,7 +311,7 @@ alert('should create new attr for component...');
 				});
 
 				_editorNode.setStyles({'height':(editorWrapperHeight-_editorHeaderHeight),'width':editorWrapperWidth});
-				_editorHeaderNode.setStyles({'width':editorWrapperWidth});
+//				_editorHeaderNode.setStyles({'width':editorWrapperWidth});
 				_editor.resize();
 			},
 			loadFileOld: function(fileId) {
@@ -344,7 +341,7 @@ alert('should create new attr for component...');
 				var fileName = _files[fileId].get('name');
 				var tabTpl = '<div id="file-tab-'+fileId+'" class="file-tab">'+fileName+'<div id="close-file-'+fileId+'" class="close-file"></div></div>';
 
-				_editorHeaderNode.append(tabTpl);
+//				_editorHeaderNode.append(tabTpl);
 			},
 			fileFocus: function(fileId) {
 				if(_currentFileFocus == fileId) return;
@@ -354,25 +351,30 @@ alert('should create new attr for component...');
 					_editor.gotoLine(1);
 				}
 				setTimeout(callback,150);
-
+/*
 				for(var f in _files) {
 					R8.Utils.Y.one('#file-tab-'+f).removeClass('focus');
 				}
 				R8.Utils.Y.one('#file-tab-'+fileId).addClass('focus');
 				_currentFileFocus = fileId;
+*/
 			},
 			loadFile: function(fileId) {
+/*
 				if(typeof(_files[fileId]) != 'undefined') {
 					this.fileFocus(fileId);
 					return;
 				}
+*/
 				var callback = function(ioId,responseObj) {
 					eval("var response =" + responseObj.responseText);
 //					var file = response.application_component_get_cfg_file_contents.content[0].data;
 					var file = response.application_file_asset_get.content[0].data;
 
 					R8.Editor.fileInit(file);
-					if(_editorOpen == false) { R8.Editor.toggleEditor(); }
+//DEBUG
+//TODO: this is for when editor is docked on toolbar
+//					if(_editorOpen == false) { R8.Editor.toggleEditor(); }
 				}
 				var params = {
 					'cfg' : {

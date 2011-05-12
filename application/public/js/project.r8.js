@@ -81,13 +81,13 @@ console.log(_def);
 					var leafNodeId = e.currentTarget.get('id'),
 						leafType = e.currentTarget.getAttribute('type'),
 						leafObjectId = leafNodeId.replace('leaf-body-'+leafType+'-','');
-				
+
 					switch(leafType) {
 						case "target":
 							_targets[leafObjectId].loadMain();
 							break;
 						case "file":
-							this.loadFileInEditor(leafOjbectId);
+							this.loadFileInEditor(leafObjectId);
 							break;
 					}
 					e.halt();
@@ -105,7 +105,7 @@ console.log(_def);
 */
 			},
 			loadFileInEditor: function(fileId) {
-				
+				R8.Editor.loadFile(fileId);
 			},
 			renderComponentsTree: function() {
 				var projectComponentsLeaf = {
@@ -162,7 +162,7 @@ console.log(_def);
 						case "directory_asset":
 							var ulDNode = R8.Utils.Y.Node.create('<ul></ul>');
 							var dirLeaf = {
-								'node_id': 'dir-asset-'+f+'-'+file_assets[f].display_name,
+								'node_id': 'directory-'+f+'-'+file_assets[f].display_name,
 //								'type': 'directory',
 								'basic_type': 'directory',
 								'name': file_assets[f].display_name
@@ -174,7 +174,7 @@ console.log(_def);
 							break;
 						case "file_asset":
 							var fileLeaf = {
-								'node_id': 'file-asset-'+file_assets[f].id,
+								'node_id': 'file-'+file_assets[f].id,
 								'type': 'file',
 								'basic_type': 'file',
 //								'type': file_assets[f].model_name,

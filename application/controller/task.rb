@@ -14,9 +14,6 @@ module XYZ
 
       unless R8::Config[:command_and_control][:node_config][:type] == "mcollective"
         chef_logging = get_logs_mock(assoc_nodes)
-
-pp chef_logging
-
         tpl = R8Tpl::TemplateR8.new("task/chef_log_view",user_context())
         tpl.assign(:logging,chef_logging)
 

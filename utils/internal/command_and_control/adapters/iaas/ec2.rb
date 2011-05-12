@@ -9,7 +9,7 @@ module XYZ
           ami = ((create_node[:image]||{})[:external_ref]||{})[:image_id]
           unless ami
             Log.error("cannot find ami")
-            ami = "ami-ee38c987" #TODO: stub
+            ami = "ami-2a4cb343" #TODO: stub
           end
           raise ErrorCannotCreateNode.new unless ami
           create_options = {:image_id => ami}

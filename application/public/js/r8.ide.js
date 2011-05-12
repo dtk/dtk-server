@@ -497,6 +497,10 @@ if (!R8.IDE) {
 				}
 				return region;
 			},
+			refreshChefDebug: function() {
+				var tempNode = R8.Utils.Y.one('#view-content-chef_debugger');
+				this.views.renderChefDebugger(tempNode);
+			},
 			views: {
 				renderEditor: function(contentNode) {
 					var cfg = {'containerNodeId': contentNode.get('id')};
@@ -516,8 +520,9 @@ if (!R8.IDE) {
 					var setLogsCallback = function(ioId,responseObj) {
 						eval("var response =" + responseObj.responseText);
 						var log_content = response.application_task_get_logs.content[0].content;
-//console.log(log_contents);
-						contentNode.append(log_content);
+//console.log(log_content);
+						contentNode.set('innerHTML',log_content);
+//						contentNode.append(log_content);
 					}
 					var params = {
 						'cfg': {

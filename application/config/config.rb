@@ -75,8 +75,8 @@ R8::Config[:workflow][:type] = "simple"
 #Command and control related parameters
 R8::Config[:command_and_control] ||= Hash.new
 R8::Config[:command_and_control][:node_config] ||= Hash.new
-#R8::Config[:command_and_control][:node_config][:type] ||= "mcollective"
-R8::Config[:command_and_control][:node_config][:type] ||= "mcollective__mock"
+R8::Config[:command_and_control][:node_config][:type] ||= "mcollective"
+#R8::Config[:command_and_control][:node_config][:type] ||= "mcollective__mock"
 #TODO: not sure if what name of agent is shoudl be configurable
 R8::Config[:command_and_control][:node_config][:mcollective] ||= Hash.new
 R8::Config[:command_and_control][:node_config][:mcollective][:agent] ||= "chef_solo"

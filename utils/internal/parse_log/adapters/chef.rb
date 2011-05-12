@@ -20,6 +20,8 @@ module XYZ
       Pattern =  Aux::ordered_hash(
         [{:debug => /DEBUG:/},
          {:error => /ERROR:/},
+         {:info_error => /INFO: error:/},
+         {:info_backtrace => /INFO: backtrace:/},
          {:info => /INFO:/}]
       )
      public
@@ -41,38 +43,33 @@ module XYZ
         end
         def post_process!()
           @complete = last && (last.line  =~ /handlers complete/ ? true : false)
-          #if an error then this is repeated; so cut off
-          error_segment_pos = cut_off_after_error!()
-          if error_segment_pos
-            error_segment = self[error_segment_pos]
-            PossibleErrors.each do |err|
-              if err.isa?(error_segment)
-                self[error_segment_pos] = err.new(error_segment,self)
-                break
-              end
-            end
-          end
-          self
-        end
-        private
-        #if an error cuts off after error and returns the error segment position
-        def cut_off_after_error!()
-          pos = nil
-          self.each_with_index do |seg,i|
-            if seg.type == :error
-              pos = i
+          error_pos =  find_error_position()
+          return self unless error_pos
+          segments_from_error = self[error_pos,1+size-error_pos]
+          prev_segment =  self[error_pos-1]
+          #try to find specific error
+          specific_error = nil
+          PossibleErrors.each do |err|
+            if err.isa?(segments_from_error)
+              specific_error = err.new(segments_from_error,prev_segment)
               break
             end
           end
-          if pos
-            slice!(pos+1,size-pos)
-            pos
-          end
+
+          #cut off everything after error and replace last item with specfic error
+          slice!(error_pos+1,size-error_pos)
+          self[error_pos] = specific_error if specific_error
+          self
+        end
+       private
+        def find_error_position()
+          each_with_index{|seg,i|return i if seg.type == :error}
+          nil
         end
       end
       class ErrorTemplate < ::XYZ::LogSegmentError 
-        def self.isa?(log_segment)
-          log_segment.aux_data.each do |l|
+        def self.isa?(segments_from_error)
+          segments_from_error.first.aux_data.each do |l|
             unless l.empty?
               return l =~ /Chef::Mixin::Template::TemplateError/
             end
@@ -80,19 +77,19 @@ module XYZ
           nil
         end
         attr_reader :template_file_ref,:error_line_num,:error_lines,:error_detail
-        def initialize(log_segment,all_segments)
+        def initialize(segments_from_error,prev_segment)
           super(:template_error)
           @template_file_ref = nil
           @error_line_num = nil
           @error_detail = nil
           @error_lines = Array.new
-          parse!(log_segment,all_segments)
+          parse!(segments_from_error,prev_segment)
         end
        private
-        def parse!(log_segment,all_segments)
-          @template_file_ref = ChefFileRef.find_chef_template(all_segments[all_segments.size-2])
+        def parse!(segments_from_error,prev_segment)
+          @template_file_ref = ChefFileRef.find_chef_template(prev_segment)
           state = :init
-          log_segment.aux_data.each do |l|
+          segments_from_error.first.aux_data.each do |l|
             return if state == :setting_error_lines and l.empty?
             next if l.empty?
             if state == :init

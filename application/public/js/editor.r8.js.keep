@@ -63,6 +63,22 @@ if (!R8.Editor) {
 
 		return {
 			init: function(cfg) {
+//				var topbarNode = R8.Utils.Y.one('#menu-bar-body');
+//				topbarNode.append(_topbarTpl);
+
+//				_editorBarWrapperNode = R8.Utils.Y.one('#editor-bar-wrapper');
+//				_editorBarWrapperClosedWidth = _editorBarWrapperNode.get('region').width;
+/*
+				_editorBtnNode = R8.Utils.Y.one('#editor-btn');
+				_editorBtnNode.on('click',function(e){
+					this.toggleEditor();
+				},this);
+*/
+				_pageContainerNode = R8.Utils.Y.one('#page-container');
+//				_pageContainerNode.append(_editorTpl);
+
+//				_topbarWrapperNode = R8.Utils.Y.one('#page-topbar');
+
 				_editorContainerNode = R8.Utils.Y.one('#'+cfg.containerNodeId);
 				_editorContainerNode.append(_editorTpl);
 

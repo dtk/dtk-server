@@ -86,7 +86,12 @@ console.log(_def);
 						case "target":
 							_targets[leafObjectId].loadMain();
 							break;
+						case "file":
+							this.loadFileInEditor(leafOjbectId);
+							break;
 					}
+					e.halt();
+					e.stopImmediatePropagation();
 				},_leafNode,'.leaf-body',this);
 
 /*
@@ -98,6 +103,9 @@ console.log(_def);
 	<li id="node_2" rel="project" class="jstree-open">
 		<a href="#" class="">Chef 01</a>
 */
+			},
+			loadFileInEditor: function(fileId) {
+				
 			},
 			renderComponentsTree: function() {
 				var projectComponentsLeaf = {
@@ -168,6 +176,7 @@ console.log(_def);
 							var fileLeaf = {
 								'node_id': 'file-asset-'+file_assets[f].id,
 								'type': 'file',
+								'basic_type': 'file',
 //								'type': file_assets[f].model_name,
 //								'basic_type': file_assets[f].type,
 								'name': file_assets[f].file_name

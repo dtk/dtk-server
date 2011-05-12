@@ -130,7 +130,9 @@ module XYZ
     end
     def git_command__add_branch(branch_name,message,start="master")
       #TODO: check if this works when start is diffeernat than master
-      @index.commit(message, [@grit_repo.commits.first], nil, nil, branch_name)
+      #TODO: looks like this not working: @index.commit(message, [@grit_repo.commits.first], nil, nil, branch_name)
+      #TODO: not taking into account message
+      git_command.branch(CmdOpts,branch_name)
     end
     def git_command__add(file_path)
       @grit_repo.add(file_path)

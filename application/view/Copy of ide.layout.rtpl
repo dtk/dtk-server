@@ -49,9 +49,7 @@
 					</div>
 					<div class="divider"></div>
 					<div class="sub-item"><a href="javascript:R8.Editor.saveFile();">Save</a></div>
-					<div class="sub-item"><a href="javascript:R8.IDE.refreshChefDebug('debug');">Refresh Chef Debug</a></div>
-					<div class="sub-item"><a href="javascript:R8.IDE.refreshChefDebug('info');">Refresh Chef Info</a></div>
-					<div class="sub-item"><a href="javascript:R8.IDE.refreshChefDebug('summary');">Refresh Chef Summary</a></div>
+					<div class="sub-item"><a href="javascript:R8.IDE.refreshChefDebug();">Refresh Chef Debug</a></div>
 				</div>
 				<div class="yui3-u right-cap"></div>
 			</div>

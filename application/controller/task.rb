@@ -1,7 +1,10 @@
 module XYZ
   class TaskController < Controller
-    def get_logs(task_id=nil)
+    def get_logs(level="debug",task_id=nil)
+      
       #task_id is nil means get most recent task
+      #TODO: hack
+      level = "debug" if level = "undefined"
       model_handle = ModelHandle.new(ret_session_context_id(),model_name)
 
       unless task_id

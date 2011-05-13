@@ -497,9 +497,9 @@ if (!R8.IDE) {
 				}
 				return region;
 			},
-			refreshChefDebug: function(level) {
+			refreshChefDebug: function() {
 				var tempNode = R8.Utils.Y.one('#view-content-chef_debugger');
-				this.views.renderChefDebugger(tempNode,level);
+				this.views.renderChefDebugger(tempNode);
 			},
 			views: {
 				renderEditor: function(contentNode) {
@@ -515,7 +515,7 @@ if (!R8.IDE) {
 						_loadedProjects[_projects[p].id].renderTree(contentNode);
 					}
 				},
-			    renderChefDebugger: function(contentNode,level) {
+				renderChefDebugger: function(contentNode) {
 //contentNode.set('innerHTML','fooooooooooooo!!!!');
 					var setLogsCallback = function(ioId,responseObj) {
 						eval("var response =" + responseObj.responseText);
@@ -532,7 +532,7 @@ if (!R8.IDE) {
 							'io:success': setLogsCallback
 						}
 					};
-					R8.Ctrl.call('task/get_logs/'+level,params);
+					R8.Ctrl.call('task/get_logs',params);
 				},
 			},
 

@@ -1,10 +1,12 @@
 module XYZ
   class TaskController < Controller
-    def get_logs(level="debug",task_id=nil)
+    def get_logs(level="info",task_id=nil)
       
       #task_id is nil means get most recent task
       #TODO: hack
-      level = "debug" if level = "undefined"
+      level = "info" if level == "undefined"
+      level = level.to_sym
+
       model_handle = ModelHandle.new(ret_session_context_id(),model_name)
 
       unless task_id
@@ -18,7 +20,7 @@ module XYZ
       chef_logging = nil
       if R8::Config[:command_and_control][:node_config][:type] == "mcollective"
         logs = CommandAndControl.get_logs(task,assoc_nodes)
-        #if multiple nodes present error otehrwise present first
+        #if multiple nodes present error otherwise present first
         hash_form = nil
         logs.each do |node_id,result|
           pp "log for node_id #{node_id.to_s}"
@@ -37,26 +39,29 @@ module XYZ
       end
 
       chef_logging ||= get_logs_mock(assoc_nodes)
-      tpl = R8Tpl::TemplateR8.new("task/chef_log_view",user_context())
-      tpl.assign(:logging,chef_logging)
-      
-      return {:content => tpl.render()}
 
-      logs = CommandAndControl.get_logs(task,assoc_nodes)
-      pp "----------------"
-      i = 0
-      logs.each do |node_id,result|
-        pp "log for node_id #{node_id.to_s}"
-          parsed_log = ParseLog.parse(result[:data])
-          hash_form = parsed_log.hash_form()
-          #File.open("/tmp/t#{node_id.to_s}.json","w"){|f|f << JSON.pretty_generate(hash_form)}
-          STDOUT << parsed_log.pp_form_summary
-          pp [:file_asset_if_error,parsed_log.ret_file_asset_if_error(model_handle)]
-          STDOUT << "----------------\n"
-      end
-      {:content => {}}
+      tpl = R8Tpl::TemplateR8.new(ChefLogView[level],user_context())
+      tpl.assign(:logging,filter_for_log_level(chef_logging,level))
+      
+      {:content => tpl.render()}
     end
   private
+
+    ChefLogView = {
+      :debug => "task/chef_log_view",
+      :info => "task/chef_log_view",
+      :summary => "task/chef_log_view"
+    }
+
+    def filter_for_log_level(chef_logging,level)
+      segments = 
+        case level
+          when :debug then chef_logging["log_segments"] 
+          when :info then chef_logging["log_segments"].select{|s|%w{info error}.include?(s["type"])}
+          when :summary then [chef_logging["log_segments"].last]
+      end
+      chef_logging.merge("log_segments" => segments)
+    end
 
     def convert_symbols(obj)
       if obj.kind_of?(Hash)

@@ -13,7 +13,7 @@ module XYZ
         projects[i][:tree][:component_templates] = p.get_implementaton_tree(:include_file_assets => true)
         projects[i][:name] = projects[i][:display_name]
       }
-pp projects
+#pp projects
       tpl = R8Tpl::TemplateR8.new("ide/project_tree_leaf",user_context())
       tpl.set_js_tpl_name("project_tree_leaf")
       tpl_info = tpl.render()

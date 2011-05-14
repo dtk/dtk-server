@@ -38,22 +38,13 @@ module XYZ
             :model_name => "directory_asset",
             :display_name => path[0]
           }
-          #TODO: replace with this after debugging          ret << dir
-          ret << debug_order_dir(dir)
+          ret << dir
         end
         children = dir[:children] ||= Array.new
         set_hierrachical_file_struct!(children,file_asset,path[1..path.size-1])
       end
     end
-    private
-    #TODO: remove after using for testing
-   def self.debug_order_dir(dir)
-     ret = ActiveSupport::OrderedHash.new()
-     [:model_name, :display_name, :children].each do |k|
-       ret[k] = dir[k] if dir.has_key?(k)
-     end
-     ret
-   end
+
 
 #stubs for methods
 =begin

@@ -11,7 +11,8 @@ module XYZ
       ret = Hash.new
       flat_file_assets.each do |r|
         pointer = ret[r[:id]] ||= Array.new
-        FileAsset.set_hierrachical_file_struct!(pointer,r[:file_asset].reject{|k,v|k == :implementation_implementation_id})
+        file_asset = r[:file_asset].reject{|k,v|k == :implementation_implementation_id}
+        FileAsset.set_hierrachical_file_struct!(pointer,file_asset)
       end
       ret
     end

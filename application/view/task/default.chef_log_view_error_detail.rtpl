@@ -1,0 +1,14 @@
+
+
+<div style="overflow: scroll;" class="log-output">
+         <div id="foo" style="float: left; height: 17px;" class="error">
+			Error: {%=error_detail%}
+		</div>
+		<br><br>
+	{%for error_line in error_lines%}
+		<div id="foo" style="float: left; height: 17px;" class="error">
+			{%=error_line%}
+		</div>
+		<br><br>
+	{%end%}
+</div>

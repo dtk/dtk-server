@@ -32,8 +32,6 @@ module XYZ
         :log_segments => map{|l|l.hash_form()}
       }
     end
-
-
   end
 
 

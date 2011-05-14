@@ -73,9 +73,11 @@ module XYZ
         ret.assign(:msg,msg)
        when :debug
         segments = parsed_log.select{|s|[:info,:debug].include?(s.type)}.map{|s|s.hash_form()}
+        segments << summary(parsed_log)
         ret.assign(:log_segments,segments)
        when :info
         segments = parsed_log.select{|s|[:info].include?(s.type)}.map{|s|s.hash_form()}
+        segments << summary(parsed_log)
         ret.assign(:log_segments,segments)
        when :error_detail
         hash_form = parsed_log.error_segment.hash_form()
@@ -84,6 +86,19 @@ module XYZ
         end
       end
       ret
+    end
+
+
+    def summary(log_segments)
+      summary = 
+        if log_segments.is_complete?() then log_segments.has_error?() ? "complete with error" : "complete and ok"
+        elsif log_segments.has_error?() then "inomplete with error"
+        else "inomplete no error yet"
+        end
+      {:type => "summary",
+        :line => summary,
+        :aux_data => []
+      }
     end
 
     #TODO: probably depcrecate

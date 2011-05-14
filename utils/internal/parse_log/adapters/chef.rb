@@ -27,6 +27,7 @@ module XYZ
      public
       class LogSegments < ::XYZ::LogSegments
 
+        #TODO: may use just for testing; if so deprecate
         def pp_form_summary()
           if @complete
             if has_error?()
@@ -77,14 +78,6 @@ module XYZ
           last if @complete and last.kind_of?(::XYZ::LogSegmentError)
         end
 
-       private
-        def complete?()
-          return false if empty?
-          return true if last.line =~ /handlers complete/
-          return false if size < 2
-          self[size-2].line  =~ /handlers complete/ ? true : false
-        end
-
         def has_error?()
           if @complete
             #short circuit when complete
@@ -92,6 +85,14 @@ module XYZ
           else
             find{|s|s.type == :error}
           end
+        end
+
+       private
+        def complete?()
+          return false if empty?
+          return true if last.line =~ /handlers complete/
+          return false if size < 2
+          self[size-2].line  =~ /handlers complete/ ? true : false
         end
 
         def find_error_position()

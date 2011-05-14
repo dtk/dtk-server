@@ -65,11 +65,7 @@ module XYZ
       ret = R8Tpl::TemplateR8.new(ChefLogView[view_type],user_context())
       case view_type
        when :simple
-        msg =
-          if parsed_log.nil? then "no results"
-          elsif parsed_log.is_complete?() then "complete and no errors" 
-          else "no errors yet"
-        end
+        msg = parsed_log.nil? ? "no results" : summary(parsed_log)[:line]
         ret.assign(:msg,msg)
        when :debug
         segments = parsed_log.select{|s|[:info,:debug].include?(s.type)}.map{|s|s.hash_form()}
@@ -87,7 +83,6 @@ module XYZ
       end
       ret
     end
-
 
     def summary(log_segments)
       summary = 

@@ -1,0 +1,7 @@
+
+
+<div style="overflow: scroll;" class="log-output">
+		<div id="foo" style="float: left; height: 17px;" class="summary">
+			{%=msg%}
+		</div>
+</div>

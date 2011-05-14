@@ -221,8 +221,30 @@ module XYZ
         end
       end
 
-      #TODO: automatically compute this
-      PossibleErrors = [ErrorTemplate,ErrorRecipe,ErrorMissingRecipe]
+      class ErrorGeneric < ::XYZ::LogSegmentError 
+        def self.isa?(segments_from_error)
+          return nil unless segments_from_error.size > 1
+          line = segments_from_error[0].line
+          return nil unless  line =~ /ERROR: Running exception handlers/
+
+          segments_from_error[1].type == "info_error"
+        end
+        def initialize(segments_from_error,prev_segment)
+          super(:error)
+          parse!(segments_from_error)
+        end
+       private
+        def parse!(segments_from_error)
+          line = segments_from_error[1].line
+          if line =~ /Chef::Exceptions::Exec: (.+$)/
+            @error_detail = $1
+          end
+          @error_lines = segments_from_error[1].aux_data
+        end
+      end
+
+      #order makes a differnce for parsing
+      PossibleErrors = [ErrorTemplate,ErrorRecipe,ErrorMissingRecipe,ErrorGeneric]
     end
   end
 end

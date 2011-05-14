@@ -21,6 +21,7 @@ module XYZ
       if R8::Config[:command_and_control][:node_config][:type] == "mcollective"
         logs = CommandAndControl.get_logs(task,assoc_nodes)
         #if multiple nodes present error otherwise present first
+        #TODO: rather than working form hash look at marshal unmarshal functions
         hash_form = nil
         logs.each do |node_id,result|
           pp "log for node_id #{node_id.to_s}"

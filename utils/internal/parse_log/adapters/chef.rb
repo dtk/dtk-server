@@ -18,14 +18,15 @@ module XYZ
      private
       #order is important because of subsumption
       Pattern =  Aux::ordered_hash(
-        [{"debug" => /DEBUG:/},
-         {"error" => /ERROR:/},
-         {"info_error" => /INFO: error:/},
-         {"info_backtrace" => /INFO: backtrace:/},
-         {"info" => /INFO:/}]
+        [{:debug => /DEBUG:/},
+         {:error => /ERROR:/},
+         {:info_error => /INFO: error:/},
+         {:info_backtrace => /INFO: backtrace:/},
+         {:info => /INFO:/}]
       )
      public
       class LogSegments < ::XYZ::LogSegments
+
         def pp_form_summary()
           if @complete
             if has_error?()
@@ -72,6 +73,10 @@ module XYZ
           end
         end
 
+        def error_segment()
+          last if @complete and last.kind_of?(::XYZ::LogSegmentError)
+        end
+
        private
         def complete?()
           return false if empty?
@@ -83,18 +88,14 @@ module XYZ
         def has_error?()
           if @complete
             #short circuit when complete
-            last.type == "error"
+            last.type == :error
           else
-            find{|s|s.type == "error"}
+            find{|s|s.type == :error}
           end
         end
 
-        def error_segment()
-          last if @complete and last.kind_of?(::XYZ::LogSegmentError)
-        end
-
         def find_error_position()
-          each_with_index{|seg,i|return i if seg.type == "error"}
+          each_with_index{|seg,i|return i if seg.type == :error}
           nil
         end
       end
@@ -227,7 +228,7 @@ module XYZ
           line = segments_from_error[0].line
           return nil unless  line =~ /ERROR: Running exception handlers/
 
-          segments_from_error[1].type == "info_error"
+          segments_from_error[1].type == :info_error
         end
         def initialize(segments_from_error,prev_segment)
           super(:error)

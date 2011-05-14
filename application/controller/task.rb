@@ -17,53 +17,76 @@ module XYZ
       end
       assoc_nodes = task.get_associated_nodes()
 
-      chef_logging = nil
+      parsed_log = nil
+      found_error = nil
       if R8::Config[:command_and_control][:node_config][:type] == "mcollective"
         logs = CommandAndControl.get_logs(task,assoc_nodes)
         #if multiple nodes present error otherwise present first
         #TODO: rather than working form hash look at marshal unmarshal functions
-        hash_form = nil
+        first_parsed_log = nil
         logs.each do |node_id,result|
           pp "log for node_id #{node_id.to_s}"
-          parsed_log = ParseLog.parse(result[:data])
-          hash_form = parsed_log.hash_form()
-          STDOUT << parsed_log.pp_form_summary
-          pp [:file_asset_if_error,parsed_log.ret_file_asset_if_error(model_handle)]
+          pl = ParseLog.parse(result[:data])
+          first_parsed_log ||= pl
+          STDOUT << pl.pp_form_summary
+          pp [:file_asset_if_error,pl.ret_file_asset_if_error(model_handle)]
           STDOUT << "----------------\n"
-          break if hash_form[:log_segments].find{|seg|seg[:type] == :error}
+          #TODO: hack whetre find error node and if no error node first node
+          if pl.find{|seg|seg.type == :error}
+            parsed_log = pl
+            found_error = true
+            break
+          end
         end
-        if hash_form
-          chef_logging = convert_symbols(hash_form)
-        end
+        parsed_log ||= first_parsed_log 
+
       else
-        chef_logging = get_logs_mock(assoc_nodes)
+        raise Error.new("rewriting")
+#        chef_logging = get_logs_mock(assoc_nodes)
       end
 
-      chef_logging ||= get_logs_mock(assoc_nodes)
-
-      tpl = R8Tpl::TemplateR8.new(ChefLogView[level],user_context())
-      tpl.assign(:logging,filter_for_log_level(chef_logging,level))
-      
+      view_type =  
+        if parsed_log.nil? then :simple 
+        elsif level == :summary then parsed_log.error_segment ? :error_detail : :simple
+        else level 
+      end
+      tpl = find_template_for_view_type(view_type,parsed_log)
       {:content => tpl.render()}
     end
   private
-
     ChefLogView = {
       :debug => "task/chef_log_view",
       :info => "task/chef_log_view",
-      :summary => "task/chef_log_view"
+      :simple => "task/chef_log_view_simple",
+      :error_detail => "task/chef_log_view_error_detail"
     }
 
-    def filter_for_log_level(chef_logging,level)
-      segments = 
-        case level
-          when :debug then chef_logging["log_segments"] 
-          when :info then chef_logging["log_segments"].select{|s|%w{info error}.include?(s["type"])}
-          when :summary then [chef_logging["log_segments"].last]
+    def find_template_for_view_type(view_type,parsed_log)
+      ret = R8Tpl::TemplateR8.new(ChefLogView[view_type],user_context())
+      case view_type
+       when :simple
+        msg =
+          if parsed_log.nil? then "no results"
+          elsif parsed_log.is_complete?() then "complete and no errors" 
+          else "no errors yet"
+        end
+        ret.assign(:msg,msg)
+       when :debug
+        segments = parsed_log.select{|s|[:info,:debug].include?(s.type)}.map{|s|s.hash_form()}
+        ret.assign(:log_segments,segments)
+       when :info
+        segments = parsed_log.select{|s|[:info].include?(s.type)}.map{|s|s.hash_form()}
+        ret.assign(:log_segments,segments)
+       when :error_detail
+        hash_form = parsed_log.error_segment.hash_form()
+        [:error_detail,:error_lines].each do |val|
+          ret.assign(val,hash_form[val])
+        end
       end
-      chef_logging.merge("log_segments" => segments)
+      ret
     end
 
+    #TODO: probably depcrecate
     def convert_symbols(obj)
       if obj.kind_of?(Hash)
         obj.inject({}){|h,kv| h.merge(kv[0].to_s => convert_symbols(kv[1]))}

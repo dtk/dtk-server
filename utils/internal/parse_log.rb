@@ -18,6 +18,10 @@ module XYZ
   end
 
   class LogSegments < Array
+    def is_complete?()
+      @complete
+    end
+
     def initialize()
       super()
       @complete = nil
@@ -28,6 +32,8 @@ module XYZ
         :log_segments => map{|l|l.hash_form()}
       }
     end
+
+
   end
 
 

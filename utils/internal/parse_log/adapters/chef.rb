@@ -237,11 +237,13 @@ module XYZ
         end
        private
         def parse!(segments_from_error)
-          line = segments_from_error[1].line
-          if line =~ /Chef::Exceptions::Exec: (.+$)/
+          segment = segments_from_error[1]
+          if segment.line =~ /Chef::Exceptions::Exec: (.+$)/
+            @error_detail = $1
+          elsif segment.type == :info_error and segment.line =~ /INFO: error: (.+$)/
             @error_detail = $1
           end
-          @error_lines = segments_from_error[1].aux_data
+          @error_lines = segment.aux_data
         end
       end
 

@@ -14,7 +14,8 @@ module XYZ
           raise ErrorCannotCreateNode.new unless ami
           create_options = {:image_id => ami}
           #TODO: right now hardcoding size and groups
-          create_options.merge!(:flavor_id => "t1.micro",:groups => ["basic"])
+          create_options.merge!(:flavor_id => "m1.small",:groups => ["basic"])
+#          create_options.merge!(:flavor_id => "t1.micro",:groups => ["basic"])
           response = conn().server_create(create_options)
           instance_id = response[:id]
           state = response[:state]

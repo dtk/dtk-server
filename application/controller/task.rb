@@ -30,13 +30,17 @@ module XYZ
       first_parsed_log = nil
       logs.each do |node_id,result|
         pp "log for node_id #{node_id.to_s}"
+        unless result[:data]
+          pp "no log data"
+          next
+        end
         pl = ParseLog.parse(result[:data])
         first_parsed_log ||= pl
         STDOUT << pl.pp_form_summary
         #          File.open("/tmp/raw#{node_id.to_s}.txt","w"){|f|result[:data].each{|l|f << l+"\n"}}
         pp [:file_asset_if_error,pl.ret_file_asset_if_error(model_handle)]
         STDOUT << "----------------\n"
-        #TODO: hack whetre find error node and if no error node first node
+        #TODO: hack whete find error node and if no error node first node
         if pl.find{|seg|seg.type == :error}
           parsed_log = pl
           found_error = true

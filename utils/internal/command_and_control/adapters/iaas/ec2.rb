@@ -12,10 +12,11 @@ module XYZ
             ami = "ami-2a4cb343" #TODO: stub
           end
           raise ErrorCannotCreateNode.new unless ami
-          create_options = {:image_id => ami}
-          #TODO: right now hardcoding size and groups
-          create_options.merge!(:flavor_id => "m1.small",:groups => ["basic"])
-#          create_options.merge!(:flavor_id => "t1.micro",:groups => ["basic"])
+          flavor_id = ((create_node[:image]||{})[:external_ref]||{})[:size] || R8::Config[:command_and_control][:iaas][:ec2][:default_image_size] 
+          create_options = {:image_id => ami,:flavor_id => flavor_id}
+
+          #TODO: right now hardcoding groups
+          create_options.merge!(:groups => ["basic"])
           response = conn().server_create(create_options)
           instance_id = response[:id]
           state = response[:state]

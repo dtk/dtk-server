@@ -120,23 +120,6 @@ module XYZ
       git_command__add_branch(branch_name,message,start)
     end
 
-    def add_file(file_path,content,branch_name="master")
-      message = "Adding #{file_path} to #{branch_name}"
-      ret = nil
-      Dir.chdir(@path) do
-        File.open(file_path,"w"){|f|f << content}
-        checkout(branch_name) do 
-          git_command__add(file_path)
-          ret = git_command__commit(message)
-        end
-      end  
-
-      #TODO: new form not working
-      # @index.add(file_path,content)
-      # @ index.commit(message, [@grit_repo.commit(branch_name)])
-      ret
-    end
-
     def git_command()
       @grit_repo.git
     end

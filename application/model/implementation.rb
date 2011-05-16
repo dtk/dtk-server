@@ -18,9 +18,10 @@ module XYZ
     end
 
     def add_asset_file(path,content=nil)
-      impl_type = self[:type] || get_objects_col_from_sp_hash(:cols => [:type]).first
+      impl_obj = add_cols_if_not_present(:type,:repo)
+      impl_type = impl_obj[:type]
       file_asset_type = FileAssetType[impl_type.to_sym]
-      FileAsset.add(self,file_asset_type,path,content)
+      FileAsset.add(impl_obj,file_asset_type,path,content)
     end
    private
     FileAssetType = { 

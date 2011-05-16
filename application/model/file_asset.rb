@@ -21,6 +21,30 @@ module XYZ
       file_obj[:implementation].create_pending_change_item(self)
     end
 
+    def self.add(impl_obj,type,path,content)
+      file_name = (path =~ Regexp.new("/([^/]+$)")) ? $1 : path
+      hash = {
+        :type => type,
+        :ref => file_asset_ref(path),
+        :file_name => file_name,
+        :display_name => file_name,
+        :path => path,
+        :content => content,
+        :implementation_implementation_id => impl_obj.id()
+      }
+      file_asset_mh = impl_obj.model_handle.createMH(:file_asset)
+      new_file_asset_idh = create_from_rows(file_asset_mh,[hash]).first
+      new_file_asset_obj = new_file_asset_idh.create_object().merge(hash)
+      project = {:ref => "project1"} #TODO: stub until get the relevant project
+      Repo.add_file(new_file_asset_obj,content,{:implementation => impl_obj, :project => project})
+      impl_obj.create_pending_change_item(new_file_asset_obj)
+    end
+   private
+    def self.file_asset_ref(path)
+      path.gsub(Regexp.new("/"),"_")
+    end
+   public
+
     def self.ret_hierrachical_file_struct(flat_file_assets)
       ret = Array.new
       flat_file_assets.each{|f| set_hierrachical_file_struct!(ret,f)}

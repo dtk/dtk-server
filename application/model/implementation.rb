@@ -17,6 +17,17 @@ module XYZ
       ret
     end
 
+    def add_asset_file(path,content=nil)
+      impl_type = self[:type] || get_objects_col_from_sp_hash(:cols => [:type]).first
+      file_asset_type = FileAssetType[impl_type.to_sym]
+      FileAsset.add(self,file_asset_type,path,content)
+    end
+   private
+    FileAssetType = { 
+      :chef_cookbook => "chef_file"
+    }
+   public
+
     def create_pending_change_item(file_asset)
       get_objects_from_sp_hash({:cols => [:component_info]}).each do |r|
         cmp_idh = r[:component].id_handle()

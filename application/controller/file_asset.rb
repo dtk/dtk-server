@@ -34,5 +34,19 @@ module XYZ
       STDOUT << "\n"
       {:content=>"<pre>#{contents}</pre>"}
     end
+
+    def test_add(*path_array)
+      path = path_array.join("/")
+      repo,af_path = (path =~ Regexp.new("(^[^/]+)/(.+$)"); [$1,$2])
+      sp_hash = {
+        :filter => [:eq, :ref, repo],
+        :cols => [:id,:type]
+      }
+      mh  = ModelHandle.new(ret_session_context_id(),:implementation)
+      impl = Model.get_objects_from_sp_hash(mh,sp_hash).first
+      raise "implementation #{repo} not found" unless impl
+      impl.add_asset_file(af_path)
+      {:content => nil}
+    end
   end
 end

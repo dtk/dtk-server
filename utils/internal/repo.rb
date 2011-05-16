@@ -9,6 +9,10 @@ module XYZ
       get_repo(context[:implementation]).update_file_content(file_asset,content,context)
     end
 
+    def self.add_file(file_asset,content,context={})
+      get_repo(context[:implementation]).add_file(file_asset,content,context)
+    end
+
     def self.push_implementation(context={})
       get_repo(context[:implementation]).push_implementation(context)
     end
@@ -22,6 +26,20 @@ module XYZ
         ret = File.open(file_asset[:path]){|f|f.read}
       end
       ret
+    end
+
+    def add_file(file_asset,content,context={})
+      content ||= String.new
+      branch = ret_branch(context[:project])
+      add_branch(branch) unless branch_exists?(branch) 
+      checkout(branch) do
+        File.open(file_asset[:path],"w"){|f|f << content}
+        #TODO: commiting because it looks like file change visible in otehr branches until commit
+        #should see if we can do more efficient job using @index.add(file_name,content)
+        message = "Adding #{file_asset[:path]} in #{branch}"
+        git_command__add(file_asset[:path])
+        git_command__commit(message)
+      end
     end
 
     def update_file_content(file_asset,content,context={})

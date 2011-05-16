@@ -21,29 +21,29 @@ module XYZ
       found_error = nil
       if R8::Config[:command_and_control][:node_config][:type] == "mcollective"
         logs = CommandAndControl.get_logs(task,assoc_nodes)
-        #if multiple nodes present error otherwise present first
-        #TODO: rather than working form hash look at marshal unmarshal functions
-        first_parsed_log = nil
-        logs.each do |node_id,result|
-          pp "log for node_id #{node_id.to_s}"
-          pl = ParseLog.parse(result[:data])
-          first_parsed_log ||= pl
-          STDOUT << pl.pp_form_summary
-          pp [:file_asset_if_error,pl.ret_file_asset_if_error(model_handle)]
-          STDOUT << "----------------\n"
-          #TODO: hack whetre find error node and if no error node first node
-          if pl.find{|seg|seg.type == :error}
-            parsed_log = pl
-            found_error = true
-            break
-          end
-        end
-        parsed_log ||= first_parsed_log 
-
       else
-        raise Error.new("rewriting")
-#        chef_logging = get_logs_mock(assoc_nodes)
+        logs = get_logs_mock(assoc_nodes)
       end
+
+      #if multiple nodes present error otherwise present first
+      #TODO: rather than working form hash look at marshal unmarshal functions
+      first_parsed_log = nil
+      logs.each do |node_id,result|
+        pp "log for node_id #{node_id.to_s}"
+        pl = ParseLog.parse(result[:data])
+        first_parsed_log ||= pl
+        STDOUT << pl.pp_form_summary
+        #          File.open("/tmp/raw#{node_id.to_s}.txt","w"){|f|result[:data].each{|l|f << l+"\n"}}
+        pp [:file_asset_if_error,pl.ret_file_asset_if_error(model_handle)]
+        STDOUT << "----------------\n"
+        #TODO: hack whetre find error node and if no error node first node
+        if pl.find{|seg|seg.type == :error}
+          parsed_log = pl
+          found_error = true
+          break
+        end
+      end
+      parsed_log ||= first_parsed_log 
 
       view_type =  
         if parsed_log.nil? then :simple 
@@ -96,29 +96,23 @@ module XYZ
       }
     end
 
-    #TODO: probably depcrecate
-    def convert_symbols(obj)
-      if obj.kind_of?(Hash)
-        obj.inject({}){|h,kv| h.merge(kv[0].to_s => convert_symbols(kv[1]))}
-      elsif obj.kind_of?(Array)
-        obj.map{|x|convert_symbols(x)}
-      else
-        obj
-      end
-    end
     def get_logs_mock(assoc_nodes)
+      ret = Hash.new
       i = 0
       assoc_nodes.each do |node|
         pp "log for node_id #{node[:id].to_s}"
         file = File.expand_path(SampleSets[i], File.dirname(__FILE__))
-        hash_form = File.open(file){|f|JSON.parse(f.read)}
-
-        return hash_form
-
+        raw_log = File.open(file){|f|f.read}
+        data = Array.new
+        raw_log.each_line{|l|data << l.chomp}
+        ret[node[:id]] = {
+          :data => data
+        }
         i += i
         break if i >= SampleSets.size
       end
+      ret
     end
-    SampleSets = ["temp/error_example1.json","temp/ok_example1.json"]
+    SampleSets = ["temp/error_example1.raw.txt"]
   end
 end

@@ -60,6 +60,11 @@ if (!R8.Editor) {
 							</div>\
 							<div id="editor" style="position: relative; float: left;"></div>\
 						</div>',
+
+			_editorFormTpl = '<form id="hidden_editor_form" name="hidden_editor_form">\
+								<input type="hidden" id="editor_file_id" name="editor_file_id"/>\
+								<input type="hidden" id="editor_file_content" name="editor_file_content"/>\
+							</form>';
 			_events = {};
 
 		return {
@@ -175,6 +180,10 @@ if (!R8.Editor) {
 					R8.Editor.closeFile(fileId);
 				},_editorHeaderNode,'.file-tab .close-file');
 */
+
+//TODO: this is temp to use hidden form to update file currently in editor
+				_editorNode.append(_editorFormTpl);
+
 				_initialized = true;
 			},
 			isInitialized: function() {
@@ -398,10 +407,16 @@ if(_editorContainerNode == null) return;
 
 					alert('File Saved');
 				}
+				document.getElementById('editor_file_id').value = _loadedFile;
+				document.getElementById('editor_file_content').value = content;
 				var params = {
 					'cfg' : {
 						method: 'POST',
-						'data': 'content='+content
+						'data': 'content='+content,
+						form: {
+							id: 'hidden_editor_form',
+							useDisabled: true
+						}
 					},
 					'callbacks': {
 						'io:success':callback

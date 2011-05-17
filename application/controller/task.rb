@@ -19,7 +19,9 @@ module XYZ
 
       parsed_log = nil
       found_error = nil
-      if R8::Config[:command_and_control][:node_config][:type] == "mcollective"
+
+#      if R8::Config[:command_and_control][:node_config][:type] == "mcollective"
+      if R8::EnvironmentConfig::CommandAndControlMode == "mcollective"
         logs = CommandAndControl.get_logs(task,assoc_nodes)
       else
         logs = get_logs_mock(assoc_nodes)

@@ -3,6 +3,12 @@ module XYZ
     helper :i18n_string_mapping
 
     def get(id)
+      return {:data=>{
+        :id => '12345',
+        :name => 'Some File.rb',
+        :content => 'this is some content ; and some more content ; asdfasfdasfd'
+      }}
+
       file_asset = get_object_by_id(id)
       file_asset[:name] = file_asset[:file_name]
       file_asset[:content] = file_asset.get_content()
@@ -12,8 +18,11 @@ module XYZ
     end
 
     def save_content(id)
-      file_asset = get_object_by_id(id)
-      file_asset.update_content(request.params["content"])
+#      file_asset = get_object_by_id(id)
+#      file_asset.update_content(request.params["content"])
+
+      file_asset = get_object_by_id(request.params["editor_file_id"])
+      file_asset.update_content(request.params["editor_file_content"])
 
       return {:data=>{}}
     end

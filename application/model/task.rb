@@ -1,22 +1,5 @@
 module XYZ
   class Task < Model
-    set_relation_name(:task,:task)
-    def self.up()
-      column :status, :varchar, :size => 20, :default => "created" # = "created" | "executing" | "completed" | "failed" | "not_reached"
-      column :result, :json # gets serialized version of TaskAction::Result
-      #column :output_vars, :json do we need this?
-      #column :events, :json - content of this may instead go in result
-      column :action_on_failure, :varchar, :default => "abort"
-
-      column :temporal_order, :varchar, :size => 20 # = "sequential" | "concurrent"
-      column :position, :integer, :default => 1
-
-      column :executable_action_type, :varchar
-      column :executable_action, :json # gets serialized version of TaskAction::Action
-      many_to_one :task 
-      one_to_many :task, :task_event, :task_error
-    end
-
     def self.get_top_level_tasks(model_handle)
       sp_hash = {
         :cols => [:id,:display_name,:status,:updated_at,:executable_action_type],

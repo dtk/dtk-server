@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 import_file = ARGV[0]
 container_uri = ARGV[1] || "/"
-flag = ARGV[2]
+flag = ARGV[2] || "r8meta_yaml"
 Library = "test" #TODO: stub 
 
 Root = File.expand_path('../', File.dirname(__FILE__))

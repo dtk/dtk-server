@@ -17,6 +17,79 @@ module XYZ
       one_to_many :task, :task_event, :task_error
     end
 
+    def self.get_top_level_tasks(model_handle)
+      sp_hash = {
+        :cols => [:id,:display_name,:status,:updated_at,:executable_action_type],
+        :filter => [:eq,:task_id,nil] #so this is a top level task
+      }
+      get_objects_from_sp_hash(model_handle,sp_hash).reject{|k,v|k == :subtasks}
+    end
+
+
+    def get_associated_nodes()
+      exec_actions = Array.new
+      #if executable level then get its executable_action
+      if self.has_key?(:executable_action_type) 
+        #will have an executable action so if have it already
+        if self[:executable_action_type]
+          exec_actions << self[:executable_action] || get_objects_col_from_sp_hash(:cols=>[:executable_action]).first
+        end
+      else
+        exec_action = get_objects_col_from_sp_hash(:cols=>[:executable_action]).first
+        exec_actions <<  exec_action if exec_action
+      end
+
+      #if task does not have execuatble actions then get all subtasks
+      if exec_actions.empty?
+        exec_actions = get_all_subtasks().map{|t|t[:executable_action]}.compact
+      end
+      
+      #get all unique nodes; looking for attribute :external_ref
+      indexed_nodes = Hash.new
+      exec_actions.each do |ea|
+        next unless node = ea[:node]
+        node_id = node[:id]
+        unless indexed_nodes[node_id] and indexed_nodes[node_id][:external_ref]
+          indexed_nodes[node_id] = node
+        end
+      end
+
+      #need to query db if missing external_refs
+      node_ids_missing_ext_refs = indexed_nodes.values.reject{|n|n[:external_ref]}.map{|n|n[:id]}
+      unless node_ids_missing_ext_refs.empty?
+        sp_hash = {
+          :cols => [:id,:external_ref],
+          :filter => [:oneof, :id, node_ids_missing_ext_refs]
+        }
+        node_mh = model_handle.createMH(:node)
+        node_objs = Model.get_objects_from_sp_hash(node_mh,sp_hash)
+        node_objs.each{|r|indexed_nodes[r[:id]][:external_ref] = r[:external_ref]}
+      end
+      indexed_nodes.values
+    end
+
+    #recursively walks structure, but returns them in flat list
+    def get_all_subtasks()
+      ret = Array.new
+      id_handles = [id_handle]
+
+      until id_handles.empty?
+        sp_hash = {
+        :cols => [:id,:display_name,:status,:updated_at,:task_id,:executable_action_type,:executable_action],
+          :filter => [:oneof,:task_id,id_handles.map{|idh|idh.get_id}] 
+        }
+        next_level_objs = Model.get_objects_from_sp_hash(model_handle,sp_hash).reject{|k,v|k == :subtasks}
+        id_handles = next_level_objs.map{|obj|obj.id_handle}
+        ret += next_level_objs
+      end
+      ret
+    end
+
+    def ret_command_and_control_adapter_info()
+      #TODO: stub
+      [:node_config,nil]
+    end
+
     def initialize(hash_scalar_values,c,model=:task)
       defaults = { 
         :status => "created",
@@ -167,11 +240,14 @@ module XYZ
         :task_id => id(),
         :status => self[:status],
       }
+      #order is important
       if sc.include?("create_node") then Task.render_tasks_create_node(executable_action,common_vals)
-      elsif sc.include?("install_component") then Task.render_tasks_install_component(executable_action,common_vals)
+      elsif sc.include?("install_component") then Task.render_tasks_component_op("install_component",executable_action,common_vals)
       elsif sc.include?("setting") then Task.render_tasks_setting(executable_action,common_vals)
+      elsif sc.include?("update_implementation") then Task.render_tasks_component_op("update_implementation",executable_action,common_vals)
       else 
         Log.error("do not treat executable tasks of type(s) #{sc.join(',')}")
+        nil
       end
     end
 
@@ -195,7 +271,7 @@ module XYZ
       [task.merge(common_vals)]
     end
 
-    def self.render_tasks_install_component(executable_action,common_vals)
+    def self.render_tasks_component_op(type,executable_action,common_vals)
       node = executable_action[:node]
       (executable_action[:component_actions]||[]).map do |component_action|
         component = component_action[:component]
@@ -204,7 +280,7 @@ module XYZ
           :component_name => component[:display_name]
         }
         task = {
-          :type => "install_component",
+          :type => type,
           :level => "component",
           :node_id => node[:id],
           :node_name => node[:display_name],
@@ -240,15 +316,23 @@ module XYZ
     def self.add_attributes_to_component_task!(task,component_action,cmp_attrs)
       attributes = component_action[:attributes]
       return task unless attributes
-
-      flattten_attrs = AttributeComplexType.flatten_attribute_list(attributes.reject{|a|a[:hidden]})
+      keep_ids = component_action[:changed_attribute_ids]
+      pruned_attrs = attributes.reject do |a|
+        a[:hidden] or (keep_ids and not keep_ids.include?(a[:id]))
+      end
+      flattten_attrs = AttributeComplexType.flatten_attribute_list(pruned_attrs)
       flattten_attrs.each do |a|
+        val = a[:attribute_value]
+        if val.nil?
+          next unless a[:port_type] == "input" and a[:required]
+          val = "DYNAMICALLY SET"
+        end
         attr_task = {
           :type => "setting",
           :level => "attribute",
           :attribute_id => a[:id],
           :attribute_name => a[:display_name],
-          :attribute_value => a[:attribute_value],
+          :attribute_value => val,
           :attribute_data_type => a[:data_type],
           :attribute_required => a[:required],
           :attribute_dynamic => a[:dynamic]

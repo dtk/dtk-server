@@ -93,8 +93,8 @@ module XYZ
     def summary(log_segments)
       summary = 
         if log_segments.is_complete?() then log_segments.has_error?() ? "complete with error" : "complete and ok"
-        elsif log_segments.has_error?() then "inomplete with error"
-        else "inomplete no error yet"
+        elsif log_segments.has_error?() then "incomplete with error"
+        else "incomplete no error yet"
         end
       {:type => "summary",
         :line => summary,

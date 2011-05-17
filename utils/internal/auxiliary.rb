@@ -321,7 +321,8 @@ module ActiveSupport
     end
   end
 end
-
+=begin
+TODO: remove
 require 'rack'
 
 module Rack::Utils
@@ -338,6 +339,7 @@ module Rack::Utils
  module_function :parse_nested_query
   DEFAULT_SEP_MODIFIED = /[&] */n
 end
+=end
 
 
 

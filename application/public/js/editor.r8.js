@@ -412,7 +412,7 @@ if(_editorContainerNode == null) return;
 				var params = {
 					'cfg' : {
 						method: 'POST',
-						'data': 'content='+content,
+//						'data': 'content='+content,
 						form: {
 							id: 'hidden_editor_form',
 							useDisabled: true

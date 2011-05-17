@@ -321,3 +321,23 @@ module ActiveSupport
     end
   end
 end
+
+require 'rack'
+
+module Rack::Utils
+  def parse_nested_query(qs, d = nil)
+    params = {}
+    
+    (qs || '').split(d ? /[#{d}] */n : DEFAULT_SEP_MODIFIED).each do |p|
+      k, v = unescape(p).split('=', 2)
+      normalize_params(params, k, v)
+    end
+    
+    return params
+  end
+ module_function :parse_nested_query
+  DEFAULT_SEP_MODIFIED = /[&] */n
+end
+
+#Rack::Utils::DEFAULT_SEP = /[&] */n
+

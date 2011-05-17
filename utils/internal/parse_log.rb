@@ -80,7 +80,7 @@ module XYZ
       }
       super.merge(added)
     end
-    def initialize(error_type)
+    def initialize()
       super(:error)
       @error_type = error_type
       @error_file_ref = nil
@@ -90,6 +90,10 @@ module XYZ
     end
     def ret_file_asset(model_handle)
       @error_file_ref && @error_file_ref.ret_file_asset(model_handle)
+    end
+    private
+    def error_type()
+      Aux::underscore(self.class.to_s).to_sym
     end
   end
 end

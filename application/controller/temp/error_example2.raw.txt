@@ -1,0 +1,318 @@
+[Tue, 17 May 2011 20:36:37 +0000] INFO: *** Chef 0.10.0 ***
+[Tue, 17 May 2011 20:36:38 +0000] DEBUG: Building node object for domU-12-31-39-06-74-1F.compute-1.internal
+[Tue, 17 May 2011 20:36:38 +0000] DEBUG: Extracting run list from JSON attributes provided on command line
+[Tue, 17 May 2011 20:36:38 +0000] INFO: Setting the run_list to ["recipe[postgresql::server]"] from JSON
+[Tue, 17 May 2011 20:36:38 +0000] DEBUG: Applying attributes from json file
+[Tue, 17 May 2011 20:36:38 +0000] DEBUG: Platform is ubuntu version 10.04
+[Tue, 17 May 2011 20:36:38 +0000] INFO: Run List is [recipe[postgresql::server]]
+[Tue, 17 May 2011 20:36:38 +0000] INFO: Run List expands to [postgresql::server]
+[Tue, 17 May 2011 20:36:38 +0000] INFO: Starting Chef Run for domU-12-31-39-06-74-1F.compute-1.internal
+[Tue, 17 May 2011 20:36:38 +0000] DEBUG: No chefignore file found at /var/chef/cookbooks/chefignore no files will be ignored
+[Tue, 17 May 2011 20:36:38 +0000] DEBUG: Node domU-12-31-39-06-74-1F.compute-1.internal loading cookbook postgresql's attribute file /var/chef/cookbooks/postgresql/attributes/default.rb
+[Tue, 17 May 2011 20:36:38 +0000] DEBUG: Loading Recipe postgresql::server via include_recipe
+[Tue, 17 May 2011 20:36:38 +0000] DEBUG: Found recipe server in cookbook postgresql
+[Tue, 17 May 2011 20:36:38 +0000] DEBUG: Loading Recipe postgresql::client via include_recipe
+[Tue, 17 May 2011 20:36:38 +0000] DEBUG: Found recipe client in cookbook postgresql
+[Tue, 17 May 2011 20:36:38 +0000] DEBUG: Loading Recipe postgresql::server_debian via include_recipe
+[Tue, 17 May 2011 20:36:38 +0000] DEBUG: Found recipe server_debian in cookbook postgresql
+[Tue, 17 May 2011 20:36:38 +0000] DEBUG: I am not loading postgresql::client, because I have already seen it.
+[Tue, 17 May 2011 20:36:38 +0000] DEBUG: Loading from cookbook_path: /var/chef/cookbooks
+[Tue, 17 May 2011 20:36:38 +0000] DEBUG: Converging node domU-12-31-39-06-74-1F.compute-1.internal
+[Tue, 17 May 2011 20:36:38 +0000] INFO: Processing package[postgresql-client] action install (postgresql::client line 22)
+[Tue, 17 May 2011 20:36:38 +0000] DEBUG: package[postgresql-client] checking apt-cache policy
+[Tue, 17 May 2011 20:36:39 +0000] DEBUG: package[postgresql-client] current version is nil
+[Tue, 17 May 2011 20:36:39 +0000] DEBUG: package[postgresql-client] candidate version is 8.4.7-0ubuntu0.10.04
+[Tue, 17 May 2011 20:36:39 +0000] DEBUG: Executing apt-get -q -y install postgresql-client=8.4.7-0ubuntu0.10.04
+[Tue, 17 May 2011 20:36:52 +0000] DEBUG: ---- Begin output of apt-get -q -y install postgresql-client=8.4.7-0ubuntu0.10.04 ----
+[Tue, 17 May 2011 20:36:52 +0000] DEBUG: STDOUT: Reading package lists...
+Building dependency tree...
+Reading state information...
+The following extra packages will be installed:
+  libpq5 postgresql-client postgresql-client-8.4 postgresql-client-common
+Suggested packages:
+  postgresql-8.4 postgresql-doc-8.4
+The following NEW packages will be installed:
+  libpq5 postgresql-client postgresql-client-8.4 postgresql-client-common
+0 upgraded, 4 newly installed, 0 to remove and 26 not upgraded.
+Need to get 945kB of archives.
+After this operation, 5300kB of additional disk space will be used.
+Get:1 http://us-east-1.ec2.archive.ubuntu.com/ubuntu/ lucid-updates/main libpq5 8.4.7-0ubuntu0.10.04 [86.2kB]
+Get:2 http://us-east-1.ec2.archive.ubuntu.com/ubuntu/ lucid-updates/main postgresql-client-common 106ubuntu1 [52.4kB]
+Get:3 http://us-east-1.ec2.archive.ubuntu.com/ubuntu/ lucid-updates/main postgresql-client-8.4 8.4.7-0ubuntu0.10.04 [786kB]
+Get:4 http://us-east-1.ec2.archive.ubuntu.com/ubuntu/ lucid-updates/main postgresql-client 8.4.7-0ubuntu0.10.04 [20.1kB]
+Fetched 945kB in 0s (1302kB/s)
+Selecting previously deselected package libpq5.
+(Reading database ... 43967 files and directories currently installed.)
+Unpacking libpq5 (from .../libpq5_8.4.7-0ubuntu0.10.04_i386.deb) ...
+Selecting previously deselected package postgresql-client-common.
+Unpacking postgresql-client-common (from .../postgresql-client-common_106ubuntu1_all.deb) ...
+Selecting previously deselected package postgresql-client-8.4.
+Unpacking postgresql-client-8.4 (from .../postgresql-client-8.4_8.4.7-0ubuntu0.10.04_i386.deb) ...
+Selecting previously deselected package postgresql-client.
+Unpacking postgresql-client (from .../postgresql-client_8.4.7-0ubuntu0.10.04_all.deb) ...
+Processing triggers for man-db ...
+Setting up libpq5 (8.4.7-0ubuntu0.10.04) ...
+
+Setting up postgresql-client-common (106ubuntu1) ...
+Setting up postgresql-client-8.4 (8.4.7-0ubuntu0.10.04) ...
+update-alternatives: using /usr/share/postgresql/8.4/man/man1/psql.1.gz to provide /usr/share/man/man1/psql.1.gz (psql.1.gz) in auto mode.
+
+Setting up postgresql-client (8.4.7-0ubuntu0.10.04) ...
+Processing triggers for libc-bin ...
+ldconfig deferred processing now taking place
+[Tue, 17 May 2011 20:36:52 +0000] DEBUG: STDERR: 
+[Tue, 17 May 2011 20:36:52 +0000] DEBUG: ---- End output of apt-get -q -y install postgresql-client=8.4.7-0ubuntu0.10.04 ----
+[Tue, 17 May 2011 20:36:52 +0000] DEBUG: Ran apt-get -q -y install postgresql-client=8.4.7-0ubuntu0.10.04 returned 0
+[Tue, 17 May 2011 20:36:52 +0000] INFO: package[postgresql-client] installed version 8.4.7-0ubuntu0.10.04
+[Tue, 17 May 2011 20:36:52 +0000] INFO: Processing package[python-software-properties] action install (postgresql::server_debian line 24)
+[Tue, 17 May 2011 20:36:52 +0000] DEBUG: package[python-software-properties] checking apt-cache policy
+[Tue, 17 May 2011 20:36:54 +0000] DEBUG: package[python-software-properties] current version is 0.75.10.1
+[Tue, 17 May 2011 20:36:54 +0000] DEBUG: package[python-software-properties] candidate version is 0.75.10.1
+[Tue, 17 May 2011 20:36:54 +0000] DEBUG: package[python-software-properties] is already installed - nothing to do
+[Tue, 17 May 2011 20:36:54 +0000] INFO: Processing execute[add-apt-repository ppa:pitti/postgresql] action run (postgresql::server_debian line 27)
+[Tue, 17 May 2011 20:36:54 +0000] INFO: execute[add-apt-repository ppa:pitti/postgresql] sh(add-apt-repository ppa:pitti/postgresql)
+[Tue, 17 May 2011 20:36:55 +0000] INFO: execute[add-apt-repository ppa:pitti/postgresql] ran successfully
+[Tue, 17 May 2011 20:36:55 +0000] INFO: Processing execute[apt-get update] action run (postgresql::server_debian line 28)
+[Tue, 17 May 2011 20:36:55 +0000] INFO: execute[apt-get update] sh(apt-get update)
+[Tue, 17 May 2011 20:37:01 +0000] INFO: execute[apt-get update] ran successfully
+[Tue, 17 May 2011 20:37:01 +0000] INFO: Processing package[postgresql-9.0] action install (postgresql::server_debian line 30)
+[Tue, 17 May 2011 20:37:01 +0000] DEBUG: package[postgresql-9.0] checking apt-cache policy
+[Tue, 17 May 2011 20:37:01 +0000] DEBUG: package[postgresql-9.0] current version is nil
+[Tue, 17 May 2011 20:37:01 +0000] DEBUG: package[postgresql-9.0] candidate version is 9.0.4-1~lucid1
+[Tue, 17 May 2011 20:37:01 +0000] DEBUG: Executing apt-get -q -y install postgresql-9.0=9.0.4-1~lucid1
+[Tue, 17 May 2011 20:37:23 +0000] DEBUG: ---- Begin output of apt-get -q -y install postgresql-9.0=9.0.4-1~lucid1 ----
+[Tue, 17 May 2011 20:37:23 +0000] DEBUG: STDOUT: Reading package lists...
+Building dependency tree...
+Reading state information...
+The following extra packages will be installed:
+  libpq5 postgresql-9.0 postgresql-client-9.0 postgresql-client-common
+  postgresql-common
+Suggested packages:
+  oidentd ident-server postgresql-doc-9.0
+The following NEW packages will be installed:
+  postgresql-9.0 postgresql-client-9.0 postgresql-common
+The following packages will be upgraded:
+  libpq5 postgresql-client-common
+2 upgraded, 3 newly installed, 0 to remove and 45 not upgraded.
+Need to get 7182kB of archives.
+After this operation, 20.1MB of additional disk space will be used.
+Get:1 http://ppa.launchpad.net/pitti/postgresql/ubuntu/ lucid/main libpq5 9.1~beta1-2~lucid [450kB]
+Get:2 http://ppa.launchpad.net/pitti/postgresql/ubuntu/ lucid/main postgresql-client-common 115~lucid [56.4kB]
+Get:3 http://ppa.launchpad.net/pitti/postgresql/ubuntu/ lucid/main postgresql-client-9.0 9.0.4-1~lucid1 [1309kB]
+Get:4 http://ppa.launchpad.net/pitti/postgresql/ubuntu/ lucid/main postgresql-common 115~lucid [89.9kB]
+Get:5 http://ppa.launchpad.net/pitti/postgresql/ubuntu/ lucid/main postgresql-9.0 9.0.4-1~lucid1 [5277kB]
+Preconfiguring packages ...
+Fetched 7182kB in 1s (4176kB/s)
+(Reading database ... 44186 files and directories currently installed.)
+Preparing to replace libpq5 8.4.7-0ubuntu0.10.04 (using .../libpq5_9.1~beta1-2~lucid_i386.deb) ...
+Unpacking replacement libpq5 ...
+Preparing to replace postgresql-client-common 106ubuntu1 (using .../postgresql-client-common_115~lucid_all.deb) ...
+Unpacking replacement postgresql-client-common ...
+Selecting previously deselected package postgresql-client-9.0.
+Unpacking postgresql-client-9.0 (from .../postgresql-client-9.0_9.0.4-1~lucid1_i386.deb) ...
+Selecting previously deselected package postgresql-common.
+Unpacking postgresql-common (from .../postgresql-common_115~lucid_all.deb) ...
+Selecting previously deselected package postgresql-9.0.
+Unpacking postgresql-9.0 (from .../postgresql-9.0_9.0.4-1~lucid1_i386.deb) ...
+Processing triggers for man-db ...
+Processing triggers for ureadahead ...
+Setting up libpq5 (9.1~beta1-2~lucid) ...
+
+Setting up postgresql-client-common (115~lucid) ...
+Setting up postgresql-client-9.0 (9.0.4-1~lucid1) ...
+update-alternatives: using /usr/share/postgresql/9.0/man/man1/psql.1.gz to provide /usr/share/man/man1/psql.1.gz (psql.1.gz) in auto mode.
+
+Setting up postgresql-common (115~lucid) ...
+
+Setting up postgresql-9.0 (9.0.4-1~lucid1) ...
+Creating new cluster (configuration: /etc/postgresql/9.0/main, data: /var/lib/postgresql/9.0/main)...
+Moving configuration file /var/lib/postgresql/9.0/main/postgresql.conf to /etc/postgresql/9.0/main...
+Moving configuration file /var/lib/postgresql/9.0/main/pg_hba.conf to /etc/postgresql/9.0/main...
+Moving configuration file /var/lib/postgresql/9.0/main/pg_ident.conf to /etc/postgresql/9.0/main...
+Configuring postgresql.conf to use port 5432...
+update-alternatives: using /usr/share/postgresql/9.0/man/man1/postmaster.1.gz to provide /usr/share/man/man1/postmaster.1.gz (postmaster.1.gz) in auto mode.
+ * Starting PostgreSQL 9.0 database server
+   ...done.
+
+Processing triggers for libc-bin ...
+ldconfig deferred processing now taking place
+[Tue, 17 May 2011 20:37:23 +0000] DEBUG: STDERR: Adding user postgres to group ssl-cert
+Building PostgreSQL dictionaries from installed myspell/hunspell packages...
+[Tue, 17 May 2011 20:37:23 +0000] DEBUG: ---- End output of apt-get -q -y install postgresql-9.0=9.0.4-1~lucid1 ----
+[Tue, 17 May 2011 20:37:23 +0000] DEBUG: Ran apt-get -q -y install postgresql-9.0=9.0.4-1~lucid1 returned 0
+[Tue, 17 May 2011 20:37:23 +0000] INFO: package[postgresql-9.0] installed version 9.0.4-1~lucid1
+[Tue, 17 May 2011 20:37:23 +0000] INFO: Processing service[postgresql] action nothing (postgresql::server_debian line 36)
+[Tue, 17 May 2011 20:37:23 +0000] DEBUG: service[postgresql] supports status, running
+[Tue, 17 May 2011 20:37:23 +0000] DEBUG: Executing /etc/init.d/postgresql status
+[Tue, 17 May 2011 20:37:23 +0000] DEBUG: ---- Begin output of /etc/init.d/postgresql status ----
+[Tue, 17 May 2011 20:37:23 +0000] DEBUG: STDOUT: Running clusters: 9.0/main 
+[Tue, 17 May 2011 20:37:23 +0000] DEBUG: STDERR: 
+[Tue, 17 May 2011 20:37:23 +0000] DEBUG: ---- End output of /etc/init.d/postgresql status ----
+[Tue, 17 May 2011 20:37:23 +0000] DEBUG: Ran /etc/init.d/postgresql status returned 0
+[Tue, 17 May 2011 20:37:23 +0000] DEBUG: service[postgresql] is running
+[Tue, 17 May 2011 20:37:23 +0000] DEBUG: service[postgresql] runlevel 6, action stop, priority 21
+[Tue, 17 May 2011 20:37:23 +0000] DEBUG: service[postgresql] runlevel 0, action stop, priority 21
+[Tue, 17 May 2011 20:37:23 +0000] DEBUG: service[postgresql] runlevel 1, action stop, priority 21
+[Tue, 17 May 2011 20:37:23 +0000] DEBUG: service[postgresql] runlevel 2, action start, priority 19
+[Tue, 17 May 2011 20:37:23 +0000] DEBUG: service[postgresql] runlevel 3, action start, priority 19
+[Tue, 17 May 2011 20:37:23 +0000] DEBUG: service[postgresql] runlevel 4, action start, priority 19
+[Tue, 17 May 2011 20:37:23 +0000] DEBUG: service[postgresql] runlevel 5, action start, priority 19
+[Tue, 17 May 2011 20:37:23 +0000] DEBUG: Doing nothing for service[postgresql]
+[Tue, 17 May 2011 20:37:23 +0000] INFO: Processing template[/etc/postgresql/9.0/main/pg_hba.conf] action create (postgresql::server_debian line 66)
+[Tue, 17 May 2011 20:37:23 +0000] DEBUG: Current content's checksum:  c54fee658ec7cea6ebcbc227877fe90db08285a14e2ce478d177754937e3f8de
+[Tue, 17 May 2011 20:37:23 +0000] DEBUG: Rendered content's checksum: d3010ed8738e7c7321534b2bdbcaaeb6c319d7d418ac37b050695ff819b7ebea
+[Tue, 17 May 2011 20:37:23 +0000] INFO: template[/etc/postgresql/9.0/main/pg_hba.conf] backed up to /var/chef/backup/etc/postgresql/9.0/main/pg_hba.conf.chef-20110517203723
+[Tue, 17 May 2011 20:37:23 +0000] INFO: template[/etc/postgresql/9.0/main/pg_hba.conf] owner changed to 106
+[Tue, 17 May 2011 20:37:23 +0000] INFO: template[/etc/postgresql/9.0/main/pg_hba.conf] owner changed to 113
+[Tue, 17 May 2011 20:37:23 +0000] INFO: template[/etc/postgresql/9.0/main/pg_hba.conf] updated content
+[Tue, 17 May 2011 20:37:23 +0000] INFO: Processing template[/etc/postgresql/9.0/main/postgresql.conf] action create (postgresql::server_debian line 77)
+[Tue, 17 May 2011 20:37:23 +0000] DEBUG: Current content's checksum:  979b611173c4e283f05d0099418257c2117be61ff23d48cad529033461ce6952
+[Tue, 17 May 2011 20:37:23 +0000] DEBUG: Rendered content's checksum: 4fbb27cb36d1314ec411bddab259372822ce3bb02911a1a7a7ca30f885cac41e
+[Tue, 17 May 2011 20:37:23 +0000] INFO: template[/etc/postgresql/9.0/main/postgresql.conf] backed up to /var/chef/backup/etc/postgresql/9.0/main/postgresql.conf.chef-20110517203723
+[Tue, 17 May 2011 20:37:23 +0000] INFO: template[/etc/postgresql/9.0/main/postgresql.conf] owner changed to 106
+[Tue, 17 May 2011 20:37:23 +0000] INFO: template[/etc/postgresql/9.0/main/postgresql.conf] owner changed to 113
+[Tue, 17 May 2011 20:37:23 +0000] INFO: template[/etc/postgresql/9.0/main/postgresql.conf] updated content
+[Tue, 17 May 2011 20:37:23 +0000] INFO: template[/etc/postgresql/9.0/main/pg_hba.conf] sending reload action to service[postgresql] (delayed)
+[Tue, 17 May 2011 20:37:23 +0000] INFO: Processing service[postgresql] action reload (postgresql::server_debian line 36)
+[Tue, 17 May 2011 20:37:23 +0000] DEBUG: service[postgresql] supports status, running
+[Tue, 17 May 2011 20:37:23 +0000] DEBUG: Executing /etc/init.d/postgresql status
+[Tue, 17 May 2011 20:37:23 +0000] DEBUG: ---- Begin output of /etc/init.d/postgresql status ----
+[Tue, 17 May 2011 20:37:23 +0000] DEBUG: STDOUT: Running clusters: 9.0/main 
+[Tue, 17 May 2011 20:37:23 +0000] DEBUG: STDERR: 
+[Tue, 17 May 2011 20:37:23 +0000] DEBUG: ---- End output of /etc/init.d/postgresql status ----
+[Tue, 17 May 2011 20:37:23 +0000] DEBUG: Ran /etc/init.d/postgresql status returned 0
+[Tue, 17 May 2011 20:37:23 +0000] DEBUG: service[postgresql] is running
+[Tue, 17 May 2011 20:37:24 +0000] DEBUG: service[postgresql] runlevel 6, action stop, priority 21
+[Tue, 17 May 2011 20:37:24 +0000] DEBUG: service[postgresql] runlevel 0, action stop, priority 21
+[Tue, 17 May 2011 20:37:24 +0000] DEBUG: service[postgresql] runlevel 1, action stop, priority 21
+[Tue, 17 May 2011 20:37:24 +0000] DEBUG: service[postgresql] runlevel 2, action start, priority 19
+[Tue, 17 May 2011 20:37:24 +0000] DEBUG: service[postgresql] runlevel 3, action start, priority 19
+[Tue, 17 May 2011 20:37:24 +0000] DEBUG: service[postgresql] runlevel 4, action start, priority 19
+[Tue, 17 May 2011 20:37:24 +0000] DEBUG: service[postgresql] runlevel 5, action start, priority 19
+[Tue, 17 May 2011 20:37:24 +0000] DEBUG: Executing /etc/init.d/postgresql reload
+[Tue, 17 May 2011 20:37:24 +0000] DEBUG: ---- Begin output of /etc/init.d/postgresql reload ----
+[Tue, 17 May 2011 20:37:24 +0000] DEBUG: STDOUT:  * Reloading PostgreSQL 9.0 database server
+   ...done.
+[Tue, 17 May 2011 20:37:24 +0000] DEBUG: STDERR: 
+[Tue, 17 May 2011 20:37:24 +0000] DEBUG: ---- End output of /etc/init.d/postgresql reload ----
+[Tue, 17 May 2011 20:37:24 +0000] DEBUG: Ran /etc/init.d/postgresql reload returned 0
+[Tue, 17 May 2011 20:37:24 +0000] INFO: service[postgresql] reloaded
+[Tue, 17 May 2011 20:37:24 +0000] INFO: template[/etc/postgresql/9.0/main/postgresql.conf] sending restart action to service[postgresql] (delayed)
+[Tue, 17 May 2011 20:37:24 +0000] INFO: Processing service[postgresql] action restart (postgresql::server_debian line 36)
+[Tue, 17 May 2011 20:37:24 +0000] DEBUG: service[postgresql] supports status, running
+[Tue, 17 May 2011 20:37:24 +0000] DEBUG: Executing /etc/init.d/postgresql status
+[Tue, 17 May 2011 20:37:24 +0000] DEBUG: ---- Begin output of /etc/init.d/postgresql status ----
+[Tue, 17 May 2011 20:37:24 +0000] DEBUG: STDOUT: Running clusters: 9.0/main 
+[Tue, 17 May 2011 20:37:24 +0000] DEBUG: STDERR: 
+[Tue, 17 May 2011 20:37:24 +0000] DEBUG: ---- End output of /etc/init.d/postgresql status ----
+[Tue, 17 May 2011 20:37:24 +0000] DEBUG: Ran /etc/init.d/postgresql status returned 0
+[Tue, 17 May 2011 20:37:24 +0000] DEBUG: service[postgresql] is running
+[Tue, 17 May 2011 20:37:24 +0000] DEBUG: service[postgresql] runlevel 6, action stop, priority 21
+[Tue, 17 May 2011 20:37:24 +0000] DEBUG: service[postgresql] runlevel 0, action stop, priority 21
+[Tue, 17 May 2011 20:37:24 +0000] DEBUG: service[postgresql] runlevel 1, action stop, priority 21
+[Tue, 17 May 2011 20:37:24 +0000] DEBUG: service[postgresql] runlevel 2, action start, priority 19
+[Tue, 17 May 2011 20:37:24 +0000] DEBUG: service[postgresql] runlevel 3, action start, priority 19
+[Tue, 17 May 2011 20:37:24 +0000] DEBUG: service[postgresql] runlevel 4, action start, priority 19
+[Tue, 17 May 2011 20:37:24 +0000] DEBUG: service[postgresql] runlevel 5, action start, priority 19
+[Tue, 17 May 2011 20:37:24 +0000] DEBUG: Executing /etc/init.d/postgresql restart
+[Tue, 17 May 2011 20:37:26 +0000] DEBUG: ---- Begin output of /etc/init.d/postgresql restart ----
+[Tue, 17 May 2011 20:37:26 +0000] DEBUG: STDOUT:  * Restarting PostgreSQL 9.0 database server
+ * The PostgreSQL server failed to start. Please check the log output:
+2011-05-17 20:37:25 UTC LOG:  invalid connection type "all
+	"
+2011-05-17 20:37:25 UTC CONTEXT:  line 1 of configuration file "/etc/postgresql/9.0/main/pg_hba.conf"
+2011-05-17 20:37:25 UTC FATAL:  could not load pg_hba.conf
+   ...fail!
+[Tue, 17 May 2011 20:37:26 +0000] DEBUG: STDERR: 
+[Tue, 17 May 2011 20:37:26 +0000] DEBUG: ---- End output of /etc/init.d/postgresql restart ----
+[Tue, 17 May 2011 20:37:26 +0000] DEBUG: Ran /etc/init.d/postgresql restart returned 1
+[Tue, 17 May 2011 20:37:26 +0000] ERROR: service[postgresql] (postgresql::server_debian line 36) has had an error
+[Tue, 17 May 2011 20:37:26 +0000] ERROR: Running exception handlers
+[Tue, 17 May 2011 20:37:26 +0000] INFO: error: Chef::Exceptions::Exec: service[postgresql] (postgresql::server_debian line 36) had an error: /etc/init.d/postgresql restart returned 1, expected 0
+---- Begin output of /etc/init.d/postgresql restart ----
+STDOUT:  * Restarting PostgreSQL 9.0 database server
+ * The PostgreSQL server failed to start. Please check the log output:
+2011-05-17 20:37:25 UTC LOG:  invalid connection type "all
+	"
+2011-05-17 20:37:25 UTC CONTEXT:  line 1 of configuration file "/etc/postgresql/9.0/main/pg_hba.conf"
+2011-05-17 20:37:25 UTC FATAL:  could not load pg_hba.conf
+   ...fail!STDERR: 
+---- End output of /etc/init.d/postgresql restart ----
+
+[Tue, 17 May 2011 20:37:26 +0000] INFO: backtrace: 
+    /usr/lib/ruby/gems/1.8/gems/chef-0.10.0/lib/chef/mixin/command.rb:185:in `handle_command_failures'
+   /usr/lib/ruby/gems/1.8/gems/chef-0.10.0/lib/chef/mixin/command.rb:132:in `run_command'
+   /usr/lib/ruby/gems/1.8/gems/chef-0.10.0/lib/chef/provider/service/init.rb:53:in `restart_service'
+   /usr/lib/ruby/gems/1.8/gems/chef-0.10.0/lib/chef/provider/service.rb:78:in `action_restart'
+   /usr/lib/ruby/gems/1.8/gems/chef-0.10.0/lib/chef/resource.rb:417:in `send'
+   /usr/lib/ruby/gems/1.8/gems/chef-0.10.0/lib/chef/resource.rb:417:in `run_action'
+   /usr/lib/ruby/gems/1.8/gems/chef-0.10.0/lib/chef/runner.rb:45:in `run_action'
+   /usr/lib/ruby/gems/1.8/gems/chef-0.10.0/lib/chef/runner.rb:86:in `converge'
+   /usr/lib/ruby/gems/1.8/gems/chef-0.10.0/lib/chef/runner.rb:82:in `each'
+   /usr/lib/ruby/gems/1.8/gems/chef-0.10.0/lib/chef/runner.rb:82:in `converge'
+   /usr/lib/ruby/gems/1.8/gems/chef-0.10.0/lib/chef/client.rb:312:in `converge'
+   /usr/lib/ruby/gems/1.8/gems/chef-0.10.0/lib/chef/client.rb:160:in `run'
+   /usr/share/mcollective/plugins/mcollective/agent/chef_solo.rb:141:in `run_recipe'
+   /usr/share/mcollective/plugins/mcollective/agent/chef_solo.rb:49:in `run_action'
+   /usr/lib/ruby/1.8/mcollective/rpc/agent.rb:83:in `send'
+   /usr/lib/ruby/1.8/mcollective/rpc/agent.rb:83:in `handlemsg'
+   /usr/lib/ruby/1.8/mcollective/agents.rb:68:in `send'
+   /usr/lib/ruby/1.8/mcollective/agents.rb:102:in `dispatch'
+   /usr/lib/ruby/1.8/timeout.rb:62:in `timeout'
+   /usr/lib/ruby/1.8/mcollective/agents.rb:101:in `dispatch'
+   /usr/lib/ruby/1.8/mcollective/agents.rb:99:in `initialize'
+   /usr/lib/ruby/1.8/mcollective/agents.rb:99:in `new'
+   /usr/lib/ruby/1.8/mcollective/agents.rb:99:in `dispatch'
+   /usr/lib/ruby/1.8/mcollective/runner.rb:93:in `agentmsg'
+   /usr/lib/ruby/1.8/mcollective/runner.rb:73:in `run'
+   /usr/lib/ruby/1.8/mcollective/runner.rb:59:in `loop'
+   /usr/lib/ruby/1.8/mcollective/runner.rb:59:in `run'
+   /usr/sbin/mcollectived:49
+   /usr/lib/ruby/1.8/mcollective/runner.rb:43:in `daemonize'
+   /usr/lib/ruby/1.8/mcollective/runner.rb:35:in `fork'
+   /usr/lib/ruby/1.8/mcollective/runner.rb:35:in `daemonize'
+   /usr/sbin/mcollectived:40
+[Tue, 17 May 2011 20:37:26 +0000] ERROR: Exception handlers complete
+[Tue, 17 May 2011 20:37:26 +0000] DEBUG: Re-raising exception: Chef::Exceptions::Exec - service[postgresql] (postgresql::server_debian line 36) had an error: /etc/init.d/postgresql restart returned 1, expected 0
+---- Begin output of /etc/init.d/postgresql restart ----
+STDOUT:  * Restarting PostgreSQL 9.0 database server
+ * The PostgreSQL server failed to start. Please check the log output:
+2011-05-17 20:37:25 UTC LOG:  invalid connection type "all
+	"
+2011-05-17 20:37:25 UTC CONTEXT:  line 1 of configuration file "/etc/postgresql/9.0/main/pg_hba.conf"
+2011-05-17 20:37:25 UTC FATAL:  could not load pg_hba.conf
+   ...fail!STDERR: 
+---- End output of /etc/init.d/postgresql restart ----
+
+/usr/lib/ruby/gems/1.8/gems/chef-0.10.0/lib/chef/mixin/command.rb:185:in `handle_command_failures'
+  /usr/lib/ruby/gems/1.8/gems/chef-0.10.0/lib/chef/mixin/command.rb:132:in `run_command'
+  /usr/lib/ruby/gems/1.8/gems/chef-0.10.0/lib/chef/provider/service/init.rb:53:in `restart_service'
+  /usr/lib/ruby/gems/1.8/gems/chef-0.10.0/lib/chef/provider/service.rb:78:in `action_restart'
+  /usr/lib/ruby/gems/1.8/gems/chef-0.10.0/lib/chef/resource.rb:417:in `send'
+  /usr/lib/ruby/gems/1.8/gems/chef-0.10.0/lib/chef/resource.rb:417:in `run_action'
+  /usr/lib/ruby/gems/1.8/gems/chef-0.10.0/lib/chef/runner.rb:45:in `run_action'
+  /usr/lib/ruby/gems/1.8/gems/chef-0.10.0/lib/chef/runner.rb:86:in `converge'
+  /usr/lib/ruby/gems/1.8/gems/chef-0.10.0/lib/chef/runner.rb:82:in `each'
+  /usr/lib/ruby/gems/1.8/gems/chef-0.10.0/lib/chef/runner.rb:82:in `converge'
+  /usr/lib/ruby/gems/1.8/gems/chef-0.10.0/lib/chef/client.rb:312:in `converge'
+  /usr/lib/ruby/gems/1.8/gems/chef-0.10.0/lib/chef/client.rb:160:in `run'
+  /usr/share/mcollective/plugins/mcollective/agent/chef_solo.rb:141:in `run_recipe'
+  /usr/share/mcollective/plugins/mcollective/agent/chef_solo.rb:49:in `run_action'
+  /usr/lib/ruby/1.8/mcollective/rpc/agent.rb:83:in `send'
+  /usr/lib/ruby/1.8/mcollective/rpc/agent.rb:83:in `handlemsg'
+  /usr/lib/ruby/1.8/mcollective/agents.rb:68:in `send'
+  /usr/lib/ruby/1.8/mcollective/agents.rb:102:in `dispatch'
+  /usr/lib/ruby/1.8/timeout.rb:62:in `timeout'
+  /usr/lib/ruby/1.8/mcollective/agents.rb:101:in `dispatch'
+  /usr/lib/ruby/1.8/mcollective/agents.rb:99:in `initialize'
+  /usr/lib/ruby/1.8/mcollective/agents.rb:99:in `new'
+  /usr/lib/ruby/1.8/mcollective/agents.rb:99:in `dispatch'
+  /usr/lib/ruby/1.8/mcollective/runner.rb:93:in `agentmsg'
+  /usr/lib/ruby/1.8/mcollective/runner.rb:73:in `run'
+  /usr/lib/ruby/1.8/mcollective/runner.rb:59:in `loop'
+  /usr/lib/ruby/1.8/mcollective/runner.rb:59:in `run'
+  /usr/sbin/mcollectived:49
+  /usr/lib/ruby/1.8/mcollective/runner.rb:43:in `daemonize'
+  /usr/lib/ruby/1.8/mcollective/runner.rb:35:in `fork'
+  /usr/lib/ruby/1.8/mcollective/runner.rb:35:in `daemonize'
+  /usr/sbin/mcollectived:40

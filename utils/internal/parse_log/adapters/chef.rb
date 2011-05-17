@@ -108,7 +108,7 @@ module XYZ
           nil
         end
         def initialize(segments_from_error,prev_segment)
-          super(:template_error)
+          super()
           parse!(segments_from_error,prev_segment)
         end
        private
@@ -144,7 +144,7 @@ module XYZ
           line =~ Regexp.new("#{RecipeCache}[^/]+/recipes")
         end
         def initialize(segments_from_error,prev_segment)
-          super(:recipe_error)
+          super()
           parse!(segments_from_error)
         end
        private
@@ -168,7 +168,7 @@ module XYZ
           line =~ /ArgumentError: Cannot find a recipe matching/
         end
         def initialize(segments_from_error,prev_segment)
-          super(:missing_recipe_error)
+          super()
           parse!(segments_from_error)
         end
        private
@@ -176,6 +176,30 @@ module XYZ
           line = segments_from_error[1].line
           if line =~ /ArgumentError: (.+$)/
             @error_detail = $1
+          end
+        end
+      end
+
+      class ErrorService < ::XYZ::LogSegmentError 
+        def self.isa?(segments_from_error)
+          return nil unless segments_from_error.size > 1
+          line = segments_from_error[0].line
+          line =~ /ERROR: service/
+        end
+        def initialize(segments_from_error,prev_segment)
+          super()
+          parse!(segments_from_error)
+        end
+       private
+        def parse!(segments_from_error)
+          line = segments_from_error[0].line
+          if line =~ /ERROR: (.+$)/
+            @error_detail = $1
+          end
+          return unless segments_from_error.size > 2
+          segment = segments_from_error[2]
+          if segment.line =~ /INFO: error: Chef::Exceptions::Exec/
+            @error_lines = segment.aux_data
           end
         end
       end
@@ -248,7 +272,7 @@ module XYZ
       end
 
       #order makes a differnce for parsing
-      PossibleErrors = [ErrorTemplate,ErrorRecipe,ErrorMissingRecipe,ErrorGeneric]
+      PossibleErrors = [ErrorTemplate,ErrorRecipe,ErrorMissingRecipe,ErrorService,ErrorGeneric]
     end
   end
 end

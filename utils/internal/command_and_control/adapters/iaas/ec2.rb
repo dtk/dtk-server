@@ -8,8 +8,7 @@ module XYZ
         if instance_id.nil?
           ami = ((create_node[:image]||{})[:external_ref]||{})[:image_id]
           unless ami
-            Log.error("cannot find ami")
-            ami = "ami-2a4cb343" #TODO: stub
+            raise Error.new("cannot find ami")
           end
           raise ErrorCannotCreateNode.new unless ami
           flavor_id = ((create_node[:image]||{})[:external_ref]||{})[:size] || R8::Config[:command_and_control][:iaas][:ec2][:default_image_size] 

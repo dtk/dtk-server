@@ -339,5 +339,5 @@ module Rack::Utils
   DEFAULT_SEP_MODIFIED = /[&] */n
 end
 
-#Rack::Utils::DEFAULT_SEP = /[&] */n
+
 

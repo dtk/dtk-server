@@ -1,5 +1,21 @@
 module XYZ
   class Task < Model
+
+    def self.create_from_nodes_to_rerun(node_idhs)
+      config_nodes_task = config_nodes_task(grouped_state_changes[TaskAction::ConfigNode])
+      if create_nodes_task and config_nodes_task
+        ret = create_new_task(:temporal_order => "sequential")
+        ret.add_subtask(create_nodes_task)
+        ret.add_subtask(config_nodes_task)
+        ret
+      else
+        ret = create_new_task(:temporal_order => "sequential")
+        ret.add_subtask(create_nodes_task||config_nodes_task) #only one wil be non null
+        ret
+      end
+    end
+
+
     def self.get_top_level_tasks(model_handle)
       sp_hash = {
         :cols => [:id,:display_name,:status,:updated_at,:executable_action_type],
@@ -228,6 +244,7 @@ module XYZ
       elsif sc.include?("install_component") then Task.render_tasks_component_op("install_component",executable_action,common_vals)
       elsif sc.include?("setting") then Task.render_tasks_setting(executable_action,common_vals)
       elsif sc.include?("update_implementation") then Task.render_tasks_component_op("update_implementation",executable_action,common_vals)
+      elsif sc.include?("rerun_component") then Task.render_tasks_component_op("rerun_component",executable_action,common_vals)
       else 
         Log.error("do not treat executable tasks of type(s) #{sc.join(',')}")
         nil

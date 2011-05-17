@@ -1,5 +1,20 @@
 module XYZ
   class TaskController < Controller
+    #TODO: test stub
+    def rerun_components(node_id)
+      node_idh = id_handle(node_id,:node)
+      StateChange.create_rerun_state_changes([node_idh])
+      {:content => nil}
+    end
+
+    #TODO: test stub
+    def commit()
+      model_handle = ModelHandle.new(ret_session_context_id(),:datacenter)
+      datacenters = Model.get_objects_from_sp_hash(model_handle,{:cols =>[:id]})
+      raise Error.new("only can be called when teher is one datacenter") unless datacenters.size == 1
+      redirect "/xyz/workspace/commit_changes/#{datacenters.first[:id].to_s}"
+    end
+
     def get_logs(level="info",task_id=nil)
       
       #task_id is nil means get most recent task

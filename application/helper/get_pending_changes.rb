@@ -1,3 +1,4 @@
+#TODO: move to methods on state changes
 module Ramaze::Helper
   module GetPendingChanges
     include XYZ
@@ -37,7 +38,7 @@ module Ramaze::Helper
         :relation => :state_change,
         :filter => [:and,
                     [:oneof, parent_field_name, id_list],
-                    [:oneof, :type, ["install_component", "update_implementation"]],
+                    [:oneof, :type, ["install_component", "update_implementation","rerun_component"]],
                     [:eq, :status, "pending"]],
         :columns => [:id, :relative_order,:type,:changed_component,parent_field_name,:state_change_id].uniq
       }
@@ -95,7 +96,7 @@ module Ramaze::Helper
         if sc[:type] == "create_node"
           indexed_ret[sc[:node][:id]] = augment_with_linked_id(sc,sc[:id])
           #TODO: ordering may do thsi anyway, but do we explicitly want to make sure if both setting adn isnatll use install as type
-        elsif ["setting","install_component","update_implementation"].include?(sc[:type])
+        elsif ["setting","install_component","update_implementation","rerun_component"].include?(sc[:type])
           indexed_ret[sc[:component][:id]] = augment_with_linked_id(indexed_ret[sc[:component][:id]] || sc.reject{|k,v|[:attribute].include?(k)},sc[:id])
         else
           Log.error("unexpected type #{sc[:type]}; ignoring")

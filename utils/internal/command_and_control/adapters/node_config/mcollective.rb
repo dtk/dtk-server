@@ -131,7 +131,7 @@ pp [:response,response]
       }  
       Lock = Mutex.new
       def self.push_implementation(config_node,project)
-        return unless (config_node[:state_change_types] & ["install_component","update_implementation"]).size > 0
+        return unless (config_node[:state_change_types] & ["install_component","update_implementation","rerun_component"]).size > 0
         sample_idh = config_node[:component_actions].first[:component].id_handle
         impl_idhs = config_node[:component_actions].map{|x|x[:component][:implementation_id]}.uniq.map do |impl_id|
           sample_idh.createIDH(:model_name => :implementation, :id => impl_id)

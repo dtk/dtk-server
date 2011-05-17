@@ -30,6 +30,7 @@ module XYZ
    public
 
     def create_pending_change_item(file_asset)
+      #TODO: make more efficient by using StateChange.create_pending_change_items
       get_objects_from_sp_hash({:cols => [:component_info]}).each do |r|
         cmp_idh = r[:component].id_handle()
         parent_idh = cmp_idh.createIDH(:model_name => :datacenter, :id => r[:node][:datacenter_datacenter_id])

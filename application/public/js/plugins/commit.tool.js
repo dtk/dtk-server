@@ -108,6 +108,11 @@ taskDef.children[0].children[0].children = [];
 					    taskClass = 'update-implementation';
 					    editContent = '<input type="checkbox" id="'+taskId+'" name="'+taskId+'" value="true"/>';
 					    break;
+					case "rerun_component":
+					    taskI18n = '<b>Rerun ('+taskDef.component_i18n+')</b>';
+					    taskClass = 'rerun-component';
+					    editContent = '<input type="checkbox" id="'+taskId+'" name="'+taskId+'" value="true"/>';
+					    break;
 					case "install_component":
 					case "on_component":
 						var compTypei18n = '';

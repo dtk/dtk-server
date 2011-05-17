@@ -1,8 +1,21 @@
 module XYZ
   class StateChange < Model
-#    set_relation_name(:state,:state_change)
-    ### virtual column defs
-    #######################
+
+    def self.create_rerun_state_changes(node_idhs)
+      sample_idh = node_idhs.first()
+      sp_hash = {
+        :cols => [:id,:datacenter_datacenter_id,:components]
+      }
+      new_item_hashes = Model.get_objects_in_set_from_sp_hash(node_idhs,sp_hash).map do |r|
+        {
+          :new_item => r[:component].id_handle(), 
+          :parent => sample_idh.createIDH(:model_name => :datacenter, :id=> r[:datacenter_datacenter_id]),
+          :type => "rerun_component"
+        }
+      end
+      create_pending_change_items(new_item_hashes)
+    end
+
     #TODO: deprecate
     def qualified_parent_name()
       base =  self[:base_object]

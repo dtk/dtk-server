@@ -35,19 +35,22 @@ pp [:response,response]
 
       def self.get_logs(task,nodes)
         ret = nodes.inject({}){|h,n|h.merge(n[:id] => nil)}
+
         value = task.id_handle.get_id().to_s
         key = task[:executable_action_type] ? "task_id" : "top_task_id"
         msg_content = {:key => key, :value => value}
         agent = "get_log_fragment"
         ret_rpc_client(agent) do |rpc_client|
-          target_identities = ret_discovered_mcollective_id_info(nodes,rpc_client)
-          target_nodes = target_identities.keys
-          filter = {"identity" => /^(#{target_nodes.join('|')})$/}
-          responses = rpc_client.custom_request("get",msg_content,nodes,filter)
-          raise ErrorTimeout.new() unless responses
-          responses.each do |response|
-            node_id = target_identities[response[:sender]]
-            ret[node_id] = response[:data]
+          pbuilderid_index = nodes.inject({}){|h,n|h.merge(pbuilderid(n) => n[:id])}
+          target_identities = ret_discovered_mcollective_ids(pbuilderid_index.keys,rpc_client)
+          unless target_identities.empty?
+            filter = {"identity" => /^(#{target_identities.join('|')})$/}
+            responses = rpc_client.custom_request("get",msg_content,target_identities,filter)
+            raise ErrorTimeout.new() unless responses #TODO: is this needed?
+            responses.each do |response|
+              node_id = pbuilderid_index[response[:data][:pbuilderid]]
+              ret[node_id] = response[:data]
+            end
           end
         end
         ret
@@ -102,13 +105,14 @@ pp [:response,response]
         @mcollective_agent ||= R8::Config[:command_and_control][:node_config][:mcollective][:agent]
       end
 
-      def self.ret_discovered_mcollective_id_info(nodes,rpc_client)
-        #TODO: make more efficient by making a disjunctive call to get all ids at same time
-        #TODO: this might be done using filter
-        #pbuilderids = nodes.map{|n|pbuilderid(node)}
-        #filter = Filter.merge("fact" => [{:fact=>"pbuilderid", :value=>/^(#{pbuilderids.join('|')})$/}
-        nodes.inject({}){|h,n|h.merge(ret_discovered_mcollective_id(n,rpc_client) => n[:id])}
+      def self.ret_discovered_mcollective_ids(pbuilderids,rpc_client)
+        ret = Array.new
+        return ret if pbuilderids.empty?
+        value_pattern = /^(#{pbuilderids.join('|')})$/
+        filter = Filter.merge("fact" => [{:fact=>"pbuilderid", :value=>value_pattern}])
+        rpc_client.client.discover(filter,Options[:disctimeout],:max_hosts_count => pbuilderids.size)
       end
+
 
       def self.ret_discovered_mcollective_id(node,rpc_client)
         return nil unless node
@@ -124,7 +128,7 @@ pp [:response,response]
      
       Filter = {"identity"=>[], "fact"=>[], "agent"=>[], "cf_class"=>[]}
       Options = {
-        :disctimeout=>10,
+        :disctimeout=>3,
         :config=>"/etc/mcollective/client.cfg",
         :filter=> Filter,
         :timeout=>120

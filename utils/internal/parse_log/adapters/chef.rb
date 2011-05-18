@@ -100,98 +100,67 @@ module XYZ
           nil
         end
       end
-      class ErrorTemplate < ::XYZ::LogSegmentError 
-        def self.isa?(segments_from_error)
-          segments_from_error.first.aux_data.each do |l|
-            return l =~ /Chef::Mixin::Template::TemplateError/ unless l.empty?
-          end
-          nil
-        end
+
+      class ErrorChefLog < ::XYZ::LogSegmentError
         def initialize(segments_from_error,prev_segment)
           super()
           parse!(segments_from_error,prev_segment)
         end
-       private
-        def parse!(segments_from_error,prev_segment)
-          @error_file_ref = ChefFileRef.find_chef_template(prev_segment)
-          state = :init
-          segments_from_error.first.aux_data.each do |l|
-            return if state == :setting_error_lines and l.empty?
-            next if l.empty?
-            if state == :init
-              if l =~ /Chef::Mixin::Template::TemplateError/
-                state = :error_found
-                if l =~ /on line #([0-9]+):/
-                  @error_line_num = $1.to_i
-                end
-                if l =~ /TemplateError \((.+) for #<Erubis::Context/
-                  @error_detail = $1
-                end
-              end
-            elsif [:error_found,:setting_error_lines].include?(state)
-              if l =~ /[0-9]+:/
-                @error_lines << l
-                state = :setting_error_lines
-              end
-            end
-          end
-        end
-      end
-      #TODO: this is runtime vs syntactic error
-      class ErrorRecipe < ::XYZ::LogSegmentError 
-        def self.isa?(segments_from_error)
-          line = segments_from_error.first.line
-          line =~ Regexp.new("#{RecipeCache}[^/]+/recipes")
-        end
-        def initialize(segments_from_error,prev_segment)
-          super()
-          parse!(segments_from_error)
-        end
-       private
-        RecipeCache = "/var/chef/cookbooks/"
-        def parse!(segments_from_error)
-          line = segments_from_error.first.line
-          if line =~ Regexp.new("#{RecipeCache}([^/]+)/recipes/([^:]+):([0-9]+):in `from_file'")
-            cookbook = $1
-            recipe_filename = $2
-            @error_line_num = $3.to_i 
-            @error_file_ref = ChefFileRef.recipe(cookbook,recipe_filename)
-          end
-          @error_detail = segments_from_error.first.aux_data.first
-        end
       end
 
-      class ErrorMissingRecipe < ::XYZ::LogSegmentError 
+      class ErrorGeneric < ErrorChefLog 
         def self.isa?(segments_from_error)
           return nil unless segments_from_error.size > 1
-          line = segments_from_error[1].line
-          line =~ /ArgumentError: Cannot find a recipe matching/
-        end
-        def initialize(segments_from_error,prev_segment)
-          super()
-          parse!(segments_from_error)
+          line = segments_from_error[0].line
+          return nil unless  line =~ /ERROR: Running exception handlers/
+
+          segments_from_error[1].type == :info_error
         end
        private
-        def parse!(segments_from_error)
-          line = segments_from_error[1].line
-          if line =~ /ArgumentError: (.+$)/
+        def parse!(segments_from_error,prev_segment)
+          segment = segments_from_error[1]
+          if segment.line =~ /Chef::Exceptions::Exec: (.+$)/
+            @error_detail = $1
+          elsif segment.type == :info_error and segment.line =~ /INFO: error: (.+$)/
             @error_detail = $1
           end
+          @error_lines = segment.aux_data
         end
       end
 
-      class ErrorService < ::XYZ::LogSegmentError 
+
+      class ErrorTemplate < ErrorChefLog 
+        def self.isa?(segments_from_error)
+          line = segments_from_error[0].line
+          line =~ /ERROR: template/
+        end
+       private
+        def parse!(segments_from_error,prev_segment)
+          detail = nil
+          if segments_from_error.size > 2 
+            line = segments_from_error[2].line
+            if line =~ /INFO: error: Chef::Mixin::Template::TemplateError: (.+) for #/
+              detail = $1
+            end
+          end
+
+          @error_detail = "template error" + (detail ? ": #{detail}" : "")
+          line = segments_from_error[0].line
+          template_resource = line =~ /template\[([^\]]+)\]/ && $1
+          recipe = line =~ /template\[[^\]]+\] \((.+)\) line/ && $1
+          @error_lines << "template resource: #{template_resource}" if template_resource
+          @error_lines << "called from recipe: #{recipe}" if recipe
+        end
+      end
+
+      class ErrorService < ErrorChefLog 
         def self.isa?(segments_from_error)
           return nil unless segments_from_error.size > 1
           line = segments_from_error[0].line
           line =~ /ERROR: service/
         end
-        def initialize(segments_from_error,prev_segment)
-          super()
-          parse!(segments_from_error)
-        end
        private
-        def parse!(segments_from_error)
+        def parse!(segments_from_error,prev_segment)
           line = segments_from_error[0].line
           if line =~ /ERROR: (.+$)/
             @error_detail = $1
@@ -203,6 +172,42 @@ module XYZ
           end
         end
       end
+
+      #TODO: this is runtime vs syntactic error
+      class ErrorRecipe < ErrorChefLog 
+        def self.isa?(segments_from_error)
+          line = segments_from_error.first.line
+          line =~ Regexp.new("#{RecipeCache}[^/]+/recipes")
+        end
+       private
+        RecipeCache = "/var/chef/cookbooks/"
+        def parse!(segments_from_error,prev_segment)
+          line = segments_from_error.first.line
+          if line =~ Regexp.new("#{RecipeCache}([^/]+)/recipes/([^:]+):([0-9]+):in `from_file'")
+            cookbook = $1
+            recipe_filename = $2
+            @error_line_num = $3.to_i 
+            @error_file_ref = ChefFileRef.recipe(cookbook,recipe_filename)
+          end
+          @error_detail = segments_from_error.first.aux_data.first
+        end
+      end
+
+      class ErrorMissingRecipe < ErrorChefLog 
+        def self.isa?(segments_from_error)
+          return nil unless segments_from_error.size > 1
+          line = segments_from_error[1].line
+          line =~ /ArgumentError: Cannot find a recipe matching/
+        end
+       private
+        def parse!(segments_from_error,prev_segment)
+          line = segments_from_error[1].line
+          if line =~ /ArgumentError: (.+$)/
+            @error_detail = $1
+          end
+        end
+      end
+
 
       #complication is that may not have uniq handle on file
       class ChefFileRef < HashObject
@@ -244,30 +249,6 @@ module XYZ
            when :recipe
             "recipes/#{self[:file_name]}"
           end
-        end
-      end
-
-      class ErrorGeneric < ::XYZ::LogSegmentError 
-        def self.isa?(segments_from_error)
-          return nil unless segments_from_error.size > 1
-          line = segments_from_error[0].line
-          return nil unless  line =~ /ERROR: Running exception handlers/
-
-          segments_from_error[1].type == :info_error
-        end
-        def initialize(segments_from_error,prev_segment)
-          super(:error)
-          parse!(segments_from_error)
-        end
-       private
-        def parse!(segments_from_error)
-          segment = segments_from_error[1]
-          if segment.line =~ /Chef::Exceptions::Exec: (.+$)/
-            @error_detail = $1
-          elsif segment.type == :info_error and segment.line =~ /INFO: error: (.+$)/
-            @error_detail = $1
-          end
-          @error_lines = segment.aux_data
         end
       end
 

@@ -147,7 +147,7 @@ module XYZ
           @error_detail = "template error" + (detail ? ": #{detail}" : "")
           line = segments_from_error[0].line
           template_resource = line =~ /template\[([^\]]+)\]/ && $1
-          recipe = line =~ /template\[[^\]]+\] \((.+)\) line/ && $1
+          recipe = line =~ /template\[[^\]]+\] \((.+) line/ && $1
           @error_lines << "template resource: #{template_resource}" if template_resource
           @error_lines << "called from recipe: #{recipe}" if recipe
         end

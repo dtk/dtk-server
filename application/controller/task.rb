@@ -47,7 +47,7 @@ module XYZ
       first_parsed_log = nil
       logs.each do |node_id,result|
         pp "log for node_id #{node_id.to_s}"
-        unless result[:data]
+        unless result and result[:data]
           pp "no log data"
           next
         end

@@ -113,7 +113,6 @@ pp [:response,response]
         rpc_client.client.discover(filter,Options[:disctimeout],:max_hosts_count => pbuilderids.size)
       end
 
-
       def self.ret_discovered_mcollective_id(node,rpc_client)
         return nil unless node
         pbuilderid = pbuilderid(node)

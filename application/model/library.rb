@@ -8,8 +8,16 @@ module XYZ
       case new_id_handle[:model_name]
        when :component then clone_post_copy_hook__component(new_id_handle,opts)
       end
+      level = 1
+      node_idhs = clone_copy_output.get_children_id_handles(level,:node)
+      clone_post_copy_hook__child_nodes(node_idhs) unless node_idhs.empty?
     end
    private
+    def clone_post_copy_hook__child_nodes(node_idhs)
+      #TODO: stub
+      node_idhs
+    end
+
     def clone_post_copy_hook__component(new_id_handle,opts)
       #TODO: may generalize and look for any dynamic attribute that neds to be reset when put in library
       #find if assembly and if so get what it is directly linked to

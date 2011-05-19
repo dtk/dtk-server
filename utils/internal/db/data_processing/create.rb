@@ -31,8 +31,8 @@ module XYZ
         parent_id_col = model_handle.parent_id_field_name()
 
         overrides = override_attrs.dup
-
-        ds = dataset(DB_REL_DEF[model_handle[:model_name]])
+        db_rel = DB_REL_DEF[model_handle[:model_name]]
+        ds = dataset(db_rel)
         #modify sequel_select to reflect duplicate_refs setting
         unless duplicate_refs == :no_check
           match_cols = [:c,:ref,parent_id_col].compact
@@ -81,12 +81,9 @@ module XYZ
           sql = ds.insert_returning_sql(returning_sql_cols,columns,sequel_select_with_cols)
           fetch_raw_sql(sql){|row| returning_ids << row}
           IDInfoTable.update_instances(model_handle,returning_ids) unless opts[:do_not_update_info_table]
-          ret = 
-            if opts[:returning_sql_cols]
-              returning_ids
-            else
-              ret_id_handles_from_create_returning_ids(model_handle,returning_ids)
-          end
+          ret = opts[:returning_sql_cols] ? 
+            process_json_fields_in_returning_ids!(returning_ids,db_rel) :
+            ret_id_handles_from_create_returning_ids(model_handle,returning_ids)
         else
           ds.import(columns,sequel_select_with_cols)
           #TODO: need to get ids and set 
@@ -94,7 +91,24 @@ module XYZ
         end
         ret
       end
-
+      private
+       def process_json_fields_in_returning_ids!(returning_ids,db_rel)
+         #convert any json fields
+         #short circuit
+         return returning_ids if returning_ids.empty?
+         cols_info = db_rel[:columns]
+         return returning_ids unless returning_ids.first.find{|k,v|(cols_info[k]||{})[:type] == :json}
+         returning_ids.each do |row|
+           row.each do |k,v|
+             next unless col_info = cols_info[k]
+             if col_info[:type] == :json
+               row[k] = DB.ret_json_hash(v,col_info)
+             end
+           end 
+         end
+         returning_ids
+       end
+     public
       def ret_id_handles_from_create_returning_ids(model_handle,returning_ids)
         returning_ids.map{|row|model_handle.createIDH(:id => row[:id], :display_name => row[:display_name],:parent_guid => row[:parent_id])}
       end

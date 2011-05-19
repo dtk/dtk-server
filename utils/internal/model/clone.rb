@@ -42,6 +42,7 @@ module XYZ
       end
     end
 
+    #TODO: if just used for cloning into assemblies in libraries may rename
     def clone_into__top_object_exists(top_object_id_handle,id_handles)
       #TODO: may add override attributes and opts
       opts = {:include_children => true}
@@ -64,9 +65,11 @@ module XYZ
       end
 
       proc.shift_foregn_keys()
+      #TODO: check if clone_post copy needs to be done after key shift; if not can simplify
       clone_copy_output = proc.output
       clone_post_copy_hook(clone_copy_output)
-      return top_object_id_handle.get_id()
+
+      top_object_id_handle.get_id()
     end
 
     def get_constraints()
@@ -104,6 +107,10 @@ module XYZ
       def model_name()
         #all id handles wil be of same type
         @id_handles.first && @id_handles.first[:model_name]
+      end
+
+      def get_children_id_handles(level,model_name)
+        ((@children[level]||{})[model_name]||[]).map{|x|x[:id_handle]}
       end
 
       def children_hash_form(level,model_name)
@@ -256,9 +263,14 @@ module XYZ
           hash.merge({DB.parent_field(pos_par,model_name) => val})
         end
 
-        parent_rels = id_handles.map{|idh|{:old_par_id => idh.get_id()}}
-        create_opts = {:duplicate_refs => :allow, :returning_sql_cols => [:ancestor_id]}
 
+        ret_sql_cols = [:ancestor_id]
+        case model_handle[:model_name]
+          when :node then ret_sql_cols << :external_ref
+        end
+        create_opts = {:duplicate_refs => :allow, :returning_sql_cols => ret_sql_cols}
+        parent_rels = id_handles.map{|idh|{:old_par_id => idh.get_id()}}
+        
         {:model_handle => model_handle, :clone_par_col => :id, :parent_rels => parent_rels, :override_attrs => override_attrs, :create_opts => create_opts}
       end
 
@@ -319,8 +331,13 @@ module XYZ
 
       def create_opts_for_top()
         dups_allowed_for_cmp = true #TODO stub
+
         returning_sql_cols = [:ancestor_id] 
-        returning_sql_cols << :type if model_name == :component
+        #TODO" may make what are returning sql columns methods in model classes liek do for clone post copy
+        case model_name
+          when :component then returning_sql_cols << :type
+        end
+
         (@ret.ret_new_obj_with_cols||{}).each{|col| returning_sql_cols << col unless returning_sql_cols.include?(col)}
         {:duplicate_refs => dups_allowed_for_cmp ? :allow : :prune_duplicates,:returning_sql_cols => returning_sql_cols}
       end

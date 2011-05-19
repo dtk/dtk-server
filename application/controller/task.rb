@@ -107,7 +107,7 @@ module XYZ
         pls = Array.new
         incl = view_type == :debug ? [:info,:debug] : [:info]
         each_parsed_log(parsed_logs) do |type,node_info,parsed_log|
-          segments = parsed_log.select{|s|incl.include?(s.type)}.map{|s|s.hash_form()}
+          segments = (parsed_log||[]).select{|s|incl.include?(s.type)}.map{|s|s.hash_form()}
           pls << {:type => type,:node_info => node_info,:segments => segments}
         end
         ret.assign(:parsed_logs,pls)

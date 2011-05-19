@@ -109,8 +109,8 @@ module XYZ
         @id_handles.first && @id_handles.first[:model_name]
       end
 
-      def get_children_id_handles(level,model_name)
-        ((@children[level]||{})[model_name]||[]).map{|x|x[:id_handle]}
+      def get_children_object_info(level,model_name)
+        ((@children[level]||{})[model_name]||[]).map{|x|x[:obj_info]}
       end
 
       def children_hash_form(level,model_name)
@@ -150,7 +150,7 @@ module XYZ
           idh = child_idhs[i] 
           children = level_p[idh[:model_name]] ||= Array.new
           #clone_parent_id can differ from parent_id if for example node is under an assembly
-          children << {:id_handle => idh, :clone_parent_id => child_obj[parent_col]}
+          children << {:id_handle => idh, :clone_parent_id => child_obj[parent_col], :obj_info => child_obj}
         end
         child_idhs
       end

@@ -9,13 +9,19 @@ module XYZ
        when :component then clone_post_copy_hook__component(new_id_handle,opts)
       end
       level = 1
-      node_idhs = clone_copy_output.get_children_id_handles(level,:node)
-      clone_post_copy_hook__child_nodes(node_idhs) unless node_idhs.empty?
+      node_hash_list = clone_copy_output.get_children_object_info(level,:node)
+      unless node_hash_list.empty?
+        node_mh = new_id_handle.createMH(:node)
+        clone_post_copy_hook__child_nodes(node_mh,node_hash_list) 
+      end
     end
    private
-    def clone_post_copy_hook__child_nodes(node_idhs)
-      #TODO: stub
-      node_idhs
+    def clone_post_copy_hook__child_nodes(node_mh,node_hash_list)
+      rows = node_hash_list.map do |r|
+        ext_ref = r[:external_ref] && r[:external_ref].reject{|k,v|k == :instance_id}.merge(:type => "ec2_image")
+        {:id => r[:id],:external_ref =>  ext_ref}
+      end
+      Model.update_from_rows(node_mh,rows)
     end
 
     def clone_post_copy_hook__component(new_id_handle,opts)

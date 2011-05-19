@@ -85,9 +85,15 @@ module XYZ
     def each_parsed_log(parsed_logs,&block)
       [:no_data,:ok,:error].each do |type|
         parsed_logs[type].each do |el|
-          node_info = "#{el[:node_name]} (id=#{el[:node_id].to_s}"
+          node_info = "#{el[:node_name]} (id=#{el[:node_id].to_s})"
           block.call(type,node_info,el[:parsed_log])
         end
+      end
+    end
+    def each_error_parsed_log(parsed_logs,&block)
+      parsed_logs[:error].each do |el|
+        node_info = "#{el[:node_name]} (id=#{el[:node_id].to_s})"
+        block.call(node_info,el[:parsed_log])
       end
     end
 
@@ -106,10 +112,16 @@ module XYZ
         end
         ret.assign(:parsed_logs,pls)
        when :error_detail
-        hash_form = parsed_log.error_segment.hash_form()
-        [:error_detail,:error_lines].each do |val|
-          ret.assign(val,hash_form[val])
+        #just showing error cases
+        errors = Array.new
+        each_error_parsed_log(parsed_logs) do |node_info,parsed_log|
+          hash_form = parsed_log.error_segment.hash_form()
+          err = [:error_detail,:error_lines].inject(:node_info => node_info) do |h,val|
+            h.merge(val => hash_form[val])
+          end
+          errors << err
         end
+        ret.assign(:errors,errors)
       end
       ret
     end

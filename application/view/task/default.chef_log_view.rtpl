@@ -1,5 +1,3 @@
-
-
 <div style="overflow: scroll;" class="log-output">
   {%for pl in parsed_logs%}
 	<div id="foo" style="float: left; height: 17px;" class="{%=pl[:type]%}">

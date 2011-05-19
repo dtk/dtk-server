@@ -63,6 +63,8 @@ module XYZ
       end
      private
       def self.wait_for_node_to_be_ready(node)
+        pp [:thread_cur,Thread.current]
+        Thread.pass
         CommandAndControl.wait_for_node_to_be_ready(node)
       end
 

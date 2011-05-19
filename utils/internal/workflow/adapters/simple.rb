@@ -88,6 +88,7 @@ module XYZ
             end
           end
         end
+pp [:threads, threads]
         threads.each{|t| t.join}
         @task.update(:status => status.to_s)
         status

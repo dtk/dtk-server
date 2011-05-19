@@ -24,7 +24,6 @@ def recursive_copy(src_dir,dest_dir,level=0)
 end
 
 recursive_copy(source_dir,target_dir)
-
 Git = R8::EnvironmentConfig::GitExecutable
 Dir.foreach(target_dir) do |dir|
   Dir.chdir(File.join(target_dir,dir)) do 

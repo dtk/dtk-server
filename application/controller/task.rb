@@ -19,7 +19,8 @@ module XYZ
       
       #task_id is nil means get most recent task
       #TODO: hack
-      level = "info" if level == "undefined"
+     # level = "info" if level == "undefined"
+      level = "summary" if level == "undefined"
       level = level.to_sym
 
       model_handle = ModelHandle.new(ret_session_context_id(),model_name)
@@ -31,7 +32,7 @@ module XYZ
         raise Error.new("not implemented yet get_logs with task id given")
       end
       assoc_nodes = task.get_associated_nodes()
-
+      ndx_node_names = assoc_nodes.inject({}){|h,n|h.merge(n[:id] => n[:display_name])}
       parsed_log = nil
       found_error = nil
 
@@ -42,36 +43,32 @@ module XYZ
         logs = get_logs_mock(assoc_nodes)
       end
 
-      #if multiple nodes present error otherwise present first
-      #TODO: rather than working form hash look at marshal unmarshal functions
-      first_parsed_log = nil
+      parsed_logs = {:no_data =>  Array.new,:ok => Array.new, :error => Array.new}
       logs.each do |node_id,result|
-        pp "log for node_id #{node_id.to_s}"
+        node_name = ndx_node_names[node_id]
+        pp "log for node #{node_name} (id=#{node_id.to_s})"
         unless result and result[:data]
           pp "no log data"
+          parsed_logs[:no_data] << {:node_id => node_id,:node_name => node_name}
           next
         end
         pl = ParseLog.parse(result[:data])
-        first_parsed_log ||= pl
         STDOUT << pl.pp_form_summary
         #          File.open("/tmp/raw#{node_id.to_s}.txt","w"){|f|result[:data].each{|l|f << l+"\n"}}
         pp [:file_asset_if_error,pl.ret_file_asset_if_error(model_handle)]
         STDOUT << "----------------\n"
         #TODO: hack whete find error node and if no error node first node
-        if pl.find{|seg|seg.type == :error}
-          parsed_log = pl
-          found_error = true
-          break
-        end
+        type = pl.find{|seg|seg.type == :error} ? :error : :ok
+        parsed_logs[type] << {:node_id => node_id, :node_name => node_name,:parsed_log => pl}
       end
-      parsed_log ||= first_parsed_log 
+      
 
       view_type =  
-        if parsed_log.nil? then :simple 
-        elsif level == :summary then parsed_log.error_segment ? :error_detail : :simple
+        if no_results?(parsed_logs) then :simple 
+        elsif level == :summary then parsed_logs[:error].empty? ? :simple : :error_detail 
         else level 
       end
-      tpl = find_template_for_view_type(view_type,parsed_log)
+      tpl = find_template_for_view_type(view_type,parsed_logs)
       {:content => tpl.render()}
     end
   private
@@ -81,13 +78,22 @@ module XYZ
       :simple => "task/chef_log_view_simple",
       :error_detail => "task/chef_log_view_error_detail"
     }
+    def no_results?(parsed_logs)
+      not parsed_logs.values.find{|v|v.size > 0}
+    end
 
-    def find_template_for_view_type(view_type,parsed_log)
+    def each_parsed_log(parsed_logs,&block)
+      [:no_data,:ok,:error].each do |type|
+        parsed_logs[type].each{|el|block.call(type,el[:node_id],el[:node_name],el[:parsed_log])}
+      end
+    end
+
+    def find_template_for_view_type(view_type,parsed_logs)
       ret = R8Tpl::TemplateR8.new(ChefLogView[view_type],user_context())
       case view_type
        when :simple
-        msg = parsed_log.nil? ? "no results" : summary(parsed_log)[:line]
-        ret.assign(:msg,msg)
+        msgs = no_results?(parsed_logs) ? ["no results"] : summary(parsed_logs)
+        ret.assign(:msgs,msgs)
        when :debug
         segments = parsed_log.select{|s|[:info,:debug].include?(s.type)}.map{|s|s.hash_form()}
         segments << summary(parsed_log)
@@ -105,7 +111,22 @@ module XYZ
       ret
     end
 
-    def summary(log_segments)
+    def summary(parsed_logs)
+      ret = Array.new
+      each_parsed_log(parsed_logs) do |type,node_id,node_name,parsed_log|
+        ret << "--------------- #{node_name} (id=#{node_id.to_s}) ----------------------"
+        summary = 
+          if type == :no_data then "no_data"
+          elsif parsed_log.is_complete?() then type == :error ? "complete with error" : "complete and ok"
+          elsif type == :error then "incomplete with error"
+          else "incomplete no error yet"
+          end
+        ret << summary
+        ret << "-------------------------------------------------------"
+      end
+      ret
+    end
+    def summary2(log_segments)
       summary = 
         if log_segments.is_complete?() then log_segments.has_error?() ? "complete with error" : "complete and ok"
         elsif log_segments.has_error?() then "incomplete with error"

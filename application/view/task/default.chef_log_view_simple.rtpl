@@ -1,7 +1,10 @@
 
 
 <div style="overflow: scroll;" class="log-output">
+        {%for msg in msgs%}
 		<div id="foo" style="float: left; height: 17px;" class="summary">
 			{%=msg%}
 		</div>
+		<br></br>
+        {%end%}
 </div>

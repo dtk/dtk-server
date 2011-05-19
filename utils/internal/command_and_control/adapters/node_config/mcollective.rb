@@ -22,7 +22,9 @@ module XYZ
 
           #make mcollective request
           filter = {"identity" => [target_identity], "agent" => [mcollective_agent]}
+pp [:thread_before, Thread.current]
           response = rpc_client.custom_request("run",msg_content,target_identity,filter).first
+pp [:thread_after, Thread.current]
 pp [:response,response]
           raise ErrorTimeout.new() unless response
           raise Error.new() unless response[:data]

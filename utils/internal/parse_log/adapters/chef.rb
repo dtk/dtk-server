@@ -110,24 +110,16 @@ module XYZ
 
       class ErrorGeneric < ErrorChefLog 
         def self.isa?(segments_from_error)
-          return nil unless segments_from_error.size > 1
-          line = segments_from_error[0].line
-          return nil unless  line =~ /ERROR: Running exception handlers/
-
-          segments_from_error[1].type == :info_error
+          true
         end
        private
         def parse!(segments_from_error,prev_segment)
-          segment = segments_from_error[1]
-          if segment.line =~ /Chef::Exceptions::Exec: (.+$)/
-            @error_detail = $1
-          elsif segment.type == :info_error and segment.line =~ /INFO: error: (.+$)/
+          segment = segments_from_error[0]
+          if segment.line =~ /ERROR: (.+$)/
             @error_detail = $1
           end
-          @error_lines = segment.aux_data
         end
       end
-
 
       class ErrorTemplate < ErrorChefLog 
         def self.isa?(segments_from_error)

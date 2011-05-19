@@ -53,8 +53,8 @@ module XYZ
         end
       end
 
-      #need to query db if missing external_refs
-      node_ids_missing_ext_refs = indexed_nodes.values.reject{|n|n[:external_ref]}.map{|n|n[:id]}
+      #need to query db if missing external_refs having isnatnce_id
+      node_ids_missing_ext_refs = indexed_nodes.values.reject{|n|(n[:external_ref]||{})[:instance_id]}.map{|n|n[:id]}
       unless node_ids_missing_ext_refs.empty?
         sp_hash = {
           :cols => [:id,:external_ref],

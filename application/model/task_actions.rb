@@ -71,8 +71,7 @@ module XYZ
           :state_change_id => state_change[:id],
           :state_change_types => [state_change[:type]],
           :attributes => Array.new,
-          :node => state_change[:node],
-          :image => state_change[:image]
+          :node => state_change[:node]
         }
         super(hash)
       end

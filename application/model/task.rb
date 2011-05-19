@@ -265,7 +265,6 @@ module XYZ
         :level => "node",
         :node_id => node[:id],
         :node_name => node[:display_name],
-        :image_name => executable_action[:image][:display_name],
         :children => Array.new
       }
       [task.merge(common_vals)]

@@ -558,11 +558,11 @@ module XYZ
       [connected_links,dangling_links]
     end
 
+    ################## cloning related methods
     def add_model_specific_override_attrs!(override_attrs)
       override_attrs[:type] = "staged"
       override_attrs[:ref] = SQL::ColRef.concat("s-",:ref)
       override_attrs[:display_name] = SQL::ColRef.concat{|o|["s-",:display_name,o.case{[[{:ref_num=> nil},""],o.concat("-",:ref_num)]}]}
-      override_attrs[:external_ref] = nil
     end
 
     def clone_post_copy_hook(clone_copy_output,opts={})
@@ -573,6 +573,7 @@ module XYZ
       parent_action_id_handle = get_parent_id_handle()
       StateChange.create_pending_change_item(:new_item => cmp_id_handle, :parent => parent_action_id_handle)
     end
+    ################## cloning related methods
 
     def create_needed_l4_sap_attributes(cmp_id_handle)
       ipv4_host_addrs_info = get_virtual_attribute("host_address_ipv4",[:id,:attribute_value],:semantic_type_summary)

@@ -4,14 +4,15 @@ module XYZ
       def self.execute(task_idh,top_task_idh,create_node,attributes_to_set)
         task_mh = task_idh.createMH()
         #handle case where node has been created already (and error mayu have been time out waiting for node to be up
-        instance_id = ((create_node[:node]||{})[:external_ref]||{})[:instance_id]
+        external_ref = (create_node[:node]||{})[:external_ref]||{}
+        instance_id = external_ref[:instance_id]
         if instance_id.nil?
-          ami = ((create_node[:image]||{})[:external_ref]||{})[:image_id]
+          ami = external_ref[:image_id]
           unless ami
             raise Error.new("cannot find ami")
           end
           raise ErrorCannotCreateNode.new unless ami
-          flavor_id = ((create_node[:image]||{})[:external_ref]||{})[:size] || R8::Config[:command_and_control][:iaas][:ec2][:default_image_size] 
+          flavor_id = external_ref[:size] || R8::Config[:command_and_control][:iaas][:ec2][:default_image_size] 
           create_options = {:image_id => ami,:flavor_id => flavor_id}
 
           #TODO: right now hardcoding groups
@@ -19,10 +20,10 @@ module XYZ
           response = conn().server_create(create_options)
           instance_id = response[:id]
           state = response[:state]
-          external_ref = {
+          external_ref = external_ref.merge({
             :instance_id => instance_id,
             :type => "ec2_instance"
-          }
+          })
           Log.info("node created with instance id #{instance_id}; waiting for it to be available")
           pp [:node_created,response]
           create_node[:node].merge!(:external_ref => external_ref)
@@ -53,10 +54,7 @@ module XYZ
 
         result = {:status => "succeeded",
           :node => {
-            :external_ref => {
-              :instance_id => instance_id,
-              :type => "ec2_instance"
-            }
+            :external_ref => external_ref
           }
         }
         [result,updated_attributes]

@@ -92,13 +92,7 @@
          :model_name=>:datacenter,
          :join_type=>:inner,
          :join_cond=>{:id=>:node__datacenter_datacenter_id},
-         :cols=>[:id, :display_name]},
-       {
-         :model_name=>:node,
-         :alias=>:image,
-         :join_type=>:inner,
-         :join_cond=>{:id=>:node__ancestor_id},
-         :cols=>[:id, :display_name, :external_ref]
+         :cols=>[:id, :display_name]
        }]
     },
     :parent_name=>{

@@ -84,7 +84,10 @@ module XYZ
 
     def each_parsed_log(parsed_logs,&block)
       [:no_data,:ok,:error].each do |type|
-        parsed_logs[type].each{|el|block.call(type,el[:node_id],el[:node_name],el[:parsed_log])}
+        parsed_logs[type].each do |el|
+          node_info = "#{el[:node_name]} (id=#{el[:node_id].to_s}"
+          block.call(type,node_info,el[:parsed_log])
+        end
       end
     end
 
@@ -94,14 +97,14 @@ module XYZ
        when :simple
         msgs = no_results?(parsed_logs) ? ["no results"] : summary(parsed_logs)
         ret.assign(:msgs,msgs)
-       when :debug
-        segments = parsed_log.select{|s|[:info,:debug].include?(s.type)}.map{|s|s.hash_form()}
-        segments << summary(parsed_log)
-        ret.assign(:log_segments,segments)
-       when :info
-        segments = parsed_log.select{|s|[:info].include?(s.type)}.map{|s|s.hash_form()}
-        segments << summary(parsed_log)
-        ret.assign(:log_segments,segments)
+       when :debug, :info
+        pls = Array.new
+        incl = view_type == :debug ? [:info,:debug] : [:info]
+        each_parsed_log(parsed_logs) do |type,node_info,parsed_log|
+          segments = parsed_log.select{|s|incl.include?(s.type)}.map{|s|s.hash_form()}
+          pls << {:type => type,:node_info => node_info,:segments => segments}
+        end
+        ret.assign(:parsed_logs,pls)
        when :error_detail
         hash_form = parsed_log.error_segment.hash_form()
         [:error_detail,:error_lines].each do |val|
@@ -113,8 +116,8 @@ module XYZ
 
     def summary(parsed_logs)
       ret = Array.new
-      each_parsed_log(parsed_logs) do |type,node_id,node_name,parsed_log|
-        ret << "--------------- #{node_name} (id=#{node_id.to_s}) ----------------------"
+      each_parsed_log(parsed_logs) do |type,node_info,parsed_log|
+        ret << "--------------- #{node_info} ----------------------"
         summary = 
           if type == :no_data then "no_data"
           elsif parsed_log.is_complete?() then type == :error ? "complete with error" : "complete and ok"
@@ -125,17 +128,6 @@ module XYZ
         ret << "-------------------------------------------------------"
       end
       ret
-    end
-    def summary2(log_segments)
-      summary = 
-        if log_segments.is_complete?() then log_segments.has_error?() ? "complete with error" : "complete and ok"
-        elsif log_segments.has_error?() then "incomplete with error"
-        else "incomplete no error yet"
-        end
-      {:type => "summary",
-        :line => summary,
-        :aux_data => []
-      }
     end
 
     def get_logs_mock(assoc_nodes)

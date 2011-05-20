@@ -50,17 +50,10 @@
        },
        {
          :model_name=>:component,
-         :join_type=>:inner,
-         :join_cond=>{:node_node_id=>:node__id},
-         :cols=>[:id,:display_name,:node_node_id,:ancestor_id,:implementation_id]
-       },
-       {
-         :model_name=>:component,
-         :alias => :component_template,
          :convert => true,
          :join_type=>:inner,
-         :join_cond=>{:id=>:component__ancestor_id},
-         :cols=>[:id,:display_name,:description,:ancestor_id,:basic_type,:specific_type,:component_type]
+         :join_cond=>{:node_node_id=>:node__id},
+         :cols=>[:id,:display_name,:description,:ancestor_id,:basic_type,:specific_type,:component_type,:implementation_id]
        },
        {
          :model_name=>:implementation,

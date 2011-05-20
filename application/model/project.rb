@@ -11,10 +11,10 @@ module XYZ
       unravelled_ret = get_objects_from_sp_hash(sp_hash)
       ret_hash = Hash.new
       unravelled_ret.each do |r|
-        unless cmp_template = ret_hash[r[:component_template][:id]] 
-          cmp_template = ret_hash[r[:component_template][:id]] = r[:component_template].reject{|k,v|[:ancestor_id].include?(k)}
+        unless cmp = ret_hash[r[:component][:id]] 
+          cmp = ret_hash[r[:component][:id]] = r[:component].reject{|k,v|[:node_node_id,:implementation_id].include?(k)}
         end
-        impls = cmp_template[:implementations] ||= Hash.new
+        impls = cmp[:implementations] ||= Hash.new
         impls[r[:implementation][:id]] ||= r[:implementation]
       end
       ret = ret_hash.values.map{|ct|ct.merge(:implementations => ct[:implementations].values)}

@@ -31,7 +31,7 @@ module XYZ
       else
         raise Error.new("not implemented yet get_logs with task id given")
       end
-      assoc_nodes = task.get_associated_nodes()
+      assoc_nodes = task.get_associated_nodes()||[]
       ndx_node_names = assoc_nodes.inject({}){|h,n|h.merge(n[:id] => n[:display_name])}
       parsed_log = nil
       found_error = nil

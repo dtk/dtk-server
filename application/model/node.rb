@@ -383,7 +383,7 @@ module XYZ
     end
 
     def get_project()
-      get_objects_from_sp_hash(:cols => [:project]).first
+      get_objects_col_from_sp_hash(:cols => [:project]).first
     end
 
     def self.get_ports(id_handles)
@@ -578,10 +578,11 @@ module XYZ
     end
 
     ################## cloning related methods
-    def clone_into(id_handle,override_attrs)
+    def clone_into(id_handle,override_attrs={},opts={})
+      return super(id_handle,override_attrs,opts)
       unless id_handle[:model_name] == :component
         Log.error("unexpected model #{id_handle[:model_name]}) associated with id_handle")
-        return super(id_handle,override_attrs)
+        return super(id_handle,override_attrs,opts)
       end
       clone_opts = {:ret_new_obj_with_cols => [:id,:display_name,:implementation_id]}
       new_cmp = super(id_handle,override_attrs,clone_opts)
@@ -593,7 +594,11 @@ module XYZ
       proj = get_project()
       library_impl = id_handle.createIDH(:model_name => :implementation,:id => new_cmp[:implementation_id]).create_object()
       project_impl_idh = library_impl.find_match_in_project(proj.id_handle())
-
+      if project_impl_idh
+      else
+        project_impl_idh = proj.clone_into(library_impl)
+      end
+      #TODO: replace new_cmp implementatio_id with project_impl_idh.get_id()
       ret
     end
 

@@ -11,8 +11,11 @@ module XYZ
       unravelled_ret = get_objects_from_sp_hash(sp_hash)
       ret_hash = Hash.new
       unravelled_ret.each do |r|
-        unless cmp = ret_hash[r[:component][:id]] 
-          cmp = ret_hash[r[:component][:id]] = r[:component].reject{|k,v|[:node_node_id,:implementation_id].include?(k)}
+        #only one instance of components with same component_type
+        #TODO: dont think ids are used; but for consistency using lowest id instance
+        cmp = ret_hash[r[:component][:component_type]] 
+        if cmp.nil? or r[:component][:id] < cmp[:id] 
+          cmp = ret_hash[r[:component][:component_type]] = r[:component].reject{|k,v|[:node_node_id,:implementation_id].include?(k)}
         end
         impls = cmp[:implementations] ||= Hash.new
         impls[r[:implementation][:id]] ||= r[:implementation]

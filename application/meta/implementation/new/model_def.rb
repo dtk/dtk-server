@@ -39,6 +39,6 @@
        }]
     }
   },
-  :many_to_one=>[:library,:datacenter],
+  :many_to_one=>[:library,:project],
   :one_to_many=>[:file_asset]
 }

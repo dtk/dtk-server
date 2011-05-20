@@ -38,8 +38,7 @@
    :network_partition,
    :network_gateway,
    :component,
-   :violation,
-   :implementation
+   :violation
   ],
   :virtual_columns=>{
     :nodes=>{

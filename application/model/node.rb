@@ -25,6 +25,21 @@ module XYZ
       #TODO how to have this conditionally "show up"
       virtual_column :ec2_security_groups, :path => [:ds_attributes,:groups] 
 
+      virtual_column :project, :type => :json, :hidden => true,
+        :remote_dependencies =>
+        [{
+           :model_name => :datacenter,
+           :join_type => :inner,
+           :join_cond => {:id => p(:node,:datacenter)},
+           :cols => [:id,:project_id]
+         },
+         {
+           :model_name => :project,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond => {:id => q(:datacenter,:project_id)},
+           :cols => [:id,:display_name,:type]
+         }]
 
       ##### for connection to ports and port links
       virtual_column :ports, :type => :json, :hidden => true, 
@@ -367,6 +382,10 @@ module XYZ
       row && row[:attribute]
     end
 
+    def get_project()
+      get_objects_from_sp_hash(:cols => [:project]).first
+    end
+
     def self.get_ports(id_handles)
       get_objects_in_set_from_sp_hash(id_handles,{:cols => [:ports]},{:keep_ref_cols => true}).map{|r|r[:port]}
     end
@@ -559,6 +578,25 @@ module XYZ
     end
 
     ################## cloning related methods
+    def clone_into(id_handle,override_attrs)
+      unless id_handle[:model_name] == :component
+        Log.error("unexpected model #{id_handle[:model_name]}) associated with id_handle")
+        return super(id_handle,override_attrs)
+      end
+      clone_opts = {:ret_new_obj_with_cols => [:id,:display_name,:implementation_id]}
+      new_cmp = super(id_handle,override_attrs,clone_opts)
+      ret = new_cmp.id_handle()
+      #special processing so that component's implementations are cloned to project
+      #new_cmp will have implementation_id set to library implementation
+      #need to search project to see if has implementation that matches (same repo)
+      #if match then set new_cmps impelemntation_id to this otehrwise need to clone implementaion in library to project
+      proj = get_project()
+      library_impl = id_handle.createIDH(:model_name => :implementation,:id => new_cmp[:implementation_id]).create_object()
+      project_impl_idh = library_impl.find_match_in_project(proj.id_handle())
+
+      ret
+    end
+
     def add_model_specific_override_attrs!(override_attrs)
       override_attrs[:type] = "staged"
       override_attrs[:ref] = SQL::ColRef.concat("s-",:ref)
@@ -573,7 +611,7 @@ module XYZ
       parent_action_id_handle = get_parent_id_handle()
       StateChange.create_pending_change_item(:new_item => cmp_id_handle, :parent => parent_action_id_handle)
     end
-    ################## cloning related methods
+    ########################################
 
     def create_needed_l4_sap_attributes(cmp_id_handle)
       ipv4_host_addrs_info = get_virtual_attribute("host_address_ipv4",[:id,:attribute_value],:semantic_type_summary)

@@ -23,6 +23,27 @@ module XYZ
       file_asset_type = FileAssetType[impl_type.to_sym]
       FileAsset.add(impl_obj,file_asset_type,path,content)
     end
+
+    def find_match_in_project(project_idh)
+      base_sp_hash = {
+        :model_name => :implementation,
+        :filter => [:eq, :id, id()],
+        :cols => [:repo]
+      }
+      join_array = 
+        [{
+           :model_name => :implementation,
+           :alias => :proj_impl,
+           :convert => true,
+           :join_type => :inner,
+           :filter => [:eq, :project_project_id, project_idh.get_id()],
+           :join_cond => {:repo => :implementation__repo},
+           :cols => [:id,:repo]
+         }]
+
+      row = Model.get_objects_from_join_array(model_handle(),base_sp_hash,join_array).first
+      row && row[:proj_impl].id_handle()
+    end
    private
     FileAssetType = { 
       :chef_cookbook => "chef_file"

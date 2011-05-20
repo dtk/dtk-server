@@ -4,6 +4,7 @@
   :columns=>{
     :type => {:type=>:varchar, :size => 25}
   },
+  :one_to_many=> [:implementation],
   :virtual_columns=>{
     :target_tree=>{
       :type=>:json,

@@ -184,8 +184,7 @@ if (!R8.Displayview) {
 					that.resizePage();
 				});
 				this.resizePage();
-
-				R8.Editor.init();
+				//R8.Editor.init();
 
 //TODO: move this to centralized place
 				_events['catClick'] = R8.Utils.Y.delegate('click',this.toggleDetails,'#display-categories','.display-cat');

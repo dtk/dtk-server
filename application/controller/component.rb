@@ -91,7 +91,7 @@ pp cfg_file_list
     def editor(id)
       component = create_object_from_id(id,:component)
       field_defs = component.get_field_def()
-
+pp [:field_defs,field_defs]
 #TODO: retool include_js to take string or hash, if hash then assumed js tpl and handled differently
       tpl = R8Tpl::TemplateR8.new("component/edit_field",user_context())
       tpl.set_js_tpl_name("component_edit_field")

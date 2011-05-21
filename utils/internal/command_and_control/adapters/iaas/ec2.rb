@@ -4,7 +4,8 @@ module XYZ
       def self.execute(task_idh,top_task_idh,create_node,attributes_to_set)
         task_mh = task_idh.createMH()
         #handle case where node has been created already (and error mayu have been time out waiting for node to be up
-        external_ref = (create_node[:node]||{})[:external_ref]||{}
+        node = create_node[:node]
+        external_ref = node[:external_ref]||{}
         instance_id = external_ref[:instance_id]
         if instance_id.nil?
           ami = external_ref[:image_id]
@@ -24,16 +25,16 @@ module XYZ
             :instance_id => instance_id,
             :type => "ec2_instance"
           })
-          Log.info("node created with instance id #{instance_id}; waiting for it to be available")
-          pp [:node_created,response]
-          create_node[:node].merge!(:external_ref => external_ref)
+          Log.info("node #{node[:display_name]} (#{node[:id]}) with ec2 instance id #{instance_id}; waiting for it to be available")
+          #pp [:node_created,response]
+          node.merge!(:external_ref => external_ref)
           create_node.save_new_node_info(task_mh)
         else
           Log.info("node already created with instance id #{instance_id}; waiting for it to be available")
         end
-        wait_for_node_to_be_ready(create_node[:node])
+        wait_for_node_to_be_ready(node)
         updated_server_state = conn().server_get(instance_id)
-        pp [:updated_server_state,updated_server_state]
+        #pp [:updated_server_state,updated_server_state]
         Log.info("node #{instance_id} is available")
 
         #updete attributes
@@ -61,8 +62,6 @@ module XYZ
       end
      private
       def self.wait_for_node_to_be_ready(node)
-        pp [:thread_cur,Thread.current]
-        Thread.pass
         CommandAndControl.wait_for_node_to_be_ready(node)
       end
 

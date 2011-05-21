@@ -22,10 +22,7 @@ module XYZ
 
           #make mcollective request
           filter = {"identity" => [target_identity], "agent" => [mcollective_agent]}
-pp [:thread_before, Thread.current]
           response = rpc_client.custom_request("run",msg_content,target_identity,filter).first
-pp [:thread_after, Thread.current]
-pp [:response,response]
           raise ErrorTimeout.new() unless response
           raise Error.new() unless response[:data]
 
@@ -59,6 +56,35 @@ pp [:response,response]
       end
 
       def  self.wait_for_node_to_be_ready(node)
+        pp [:test1,node[:display_name]]
+        target_identity = nil
+        #looping rather than just one discovery timeout because if node not connecetd msg lost
+        count = 0
+        while target_identity.nil? and count < 10
+          pp [:test2,node[:display_name]]
+          count += 1
+          rpc_client = nil
+          rpc_opts =   Options.merge(:disctimeout=> 2)
+
+          begin
+            #creating and detsroying rpcclient in loop because when kept open looks liek blocking thread scheduling
+            Lock.synchronize do
+              #TODO: check if need lock for this
+              rpc_client = rpcclient(mcollective_agent,:options => rpc_opts)
+            end
+            target_identity = ret_discovered_mcollective_id(node,rpc_client)
+           ensure
+            rpc_client.disconnect() if rpc_client
+          end
+          sleep 5
+        end
+        pp [:new_node_target_idenity,target_identity]
+        #TODO: want to delete node too in case timeout problem
+        raise ErrorWhileCreatingNode unless target_identity
+      end
+=begin
+TODO: deprecate because seems to block thread scheduling
+      def self.wait_for_node_to_be_ready(node)
         target_identity = nil
         begin
           rpc_client = nil
@@ -81,7 +107,7 @@ pp [:response,response]
         #TODO: want to dleet node too in case timeout problem
         raise ErrorWhileCreatingNode unless target_identity
       end
-
+=end
      private
       def self.ret_rpc_client(agent,&block)
         rpc_client = nil

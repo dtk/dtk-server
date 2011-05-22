@@ -621,12 +621,14 @@ module XYZ
       #find new implementation id
       library_impl = id_handle.createIDH(:model_name => :implementation,:id => self[:implementation_id]).create_object()
       proj_impl_idh = library_impl.find_match_in_project(proj_idh)
-      new_impl_id = proj_impl_idh ? proj_impl_idh.get_id() : proj.clone_into(library_impl.id_handle())
+      new_impl_id = proj_impl_idh ? proj_impl_idh.get_id() : proj.clone_into(library_impl)
 
       #find new ancestor_id
       library_cmp_tmpl_idh = id_handle.createIDH(:id => self[:ancestor_id])
+      #since source copied from object they shaer same attributes
+      library_cmp_tmpl =  library_cmp_tmpl_idh.create_object.merge(:extended_base_id => self[:extended_base_id])
       proj_cmp_tmpl_idh = find_match_in_project(proj_idh)
-      new_ancestor_id = proj_cmp_tmpl_idh ? proj_cmp_tmpl_idh.get_id() : proj.clone_into(library_cmp_tmpl_idh)
+      new_ancestor_id = proj_cmp_tmpl_idh ? proj_cmp_tmpl_idh.get_id() : proj.clone_into(library_cmp_tmpl)
 
       update_from_hash_assignments(:implementation_id => new_impl_id, :ancestor_id => new_ancestor_id)
     end

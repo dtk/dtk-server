@@ -31,14 +31,14 @@ module XYZ
       else
         raise Error.new("not implemented yet get_logs with task id given")
       end
-      assoc_nodes = task.get_associated_nodes()||[]
+      assoc_nodes = (task && task.get_associated_nodes())||[]
       ndx_node_names = assoc_nodes.inject({}){|h,n|h.merge(n[:id] => n[:display_name])}
       parsed_log = nil
       found_error = nil
 
 #      if R8::Config[:command_and_control][:node_config][:type] == "mcollective"
       if R8::EnvironmentConfig::CommandAndControlMode == "mcollective"
-        logs = CommandAndControl.get_logs(task,assoc_nodes)
+        logs = task ? CommandAndControl.get_logs(task,assoc_nodes) : []
       else
         logs = get_logs_mock(assoc_nodes)
       end

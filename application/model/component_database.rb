@@ -32,7 +32,7 @@ module XYZ
           Log.error("Cannot find the db component associated with the db server")
           return nil
         end
-        new_db_cmp_id = db_server_node.clone_into(db_component.id_handle())
+        new_db_cmp_id = db_server_node.clone_into(db_component)
         db_server_component.model_handle.createIDH(:id => new_db_cmp_id)
       end
     end

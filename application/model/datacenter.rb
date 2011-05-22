@@ -12,11 +12,11 @@ module XYZ
     end
 
 
-    def add_item(id_handle,override_attrs=nil)
+    def add_item(source_id_handle,override_attrs=nil)
       #TODO: need to copy in avatar when hash["ui"] is non null
       override_attrs = {} if override_attrs.nil?
 
-      clone_into(id_handle,override_attrs)
+      clone_into(source_id_handle.create_object(),override_attrs)
     end
 
     def self.get_port_links(id_handles,type="l4")

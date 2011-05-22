@@ -240,7 +240,7 @@ module XYZ
       override_attrs = {:extended_base_id => base_component[:id]}
       #TODO: may put in flags to tell clone operation not to do any constraint checking
       clone_opts = {:ret_new_obj_with_cols => [:id,:display_name,:extended_base_id]}
-      new_cmp = node.clone_into(component_extension.id_handle(),override_attrs,clone_opts)
+      new_cmp = node.clone_into(component_extension,override_attrs,clone_opts)
 
       #if alias is given, update context to reflect this
       if self[:alias]

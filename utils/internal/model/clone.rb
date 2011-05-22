@@ -11,9 +11,8 @@ module XYZ
   end
 
   module CloneInstanceMixins
-    def clone_into(source_id_handle,override_attrs={},opts={})
+    def clone_into(clone_source_object,override_attrs={},opts={})
       target_id_handle = id_handle()
-      clone_source_object = source_id_handle.create_object()
        ##constraints
       if clone_source_object.class == Component and target_id_handle[:model_name] == :node
         constraints = clone_source_object.get_constraints!(:update_object => true)
@@ -26,7 +25,7 @@ module XYZ
 
       clone_source_object.add_model_specific_override_attrs!(override_attrs)
       proc = CloneCopyProcessor.new(clone_source_object,opts.merge(:include_children => true))
-      clone_copy_output = proc.clone_copy(source_id_handle,[target_id_handle],override_attrs)
+      clone_copy_output = proc.clone_copy(clone_source_object.id_handle,[target_id_handle],override_attrs)
       new_id_handle = clone_copy_output.id_handles.first
       raise Error.new("cannot clone") unless new_id_handle
       #calling with respect to target

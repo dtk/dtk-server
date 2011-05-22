@@ -47,7 +47,7 @@ module XYZ
         virtual_column :connectivity_profile_internal, :type => :json, :local_dependencies => [:component_type,:specific_type,:basic_type]
         virtual_column :most_specific_type, :type => :varchar, :local_dependencies => [:specific_type,:basic_type]
 
-        many_to_one :component, :library, :node, :node_group, :datacenter
+        many_to_one :component, :library, :node, :node_group, :datacenter, :project
         one_to_many :component, :attribute_link, :attribute, :port_link, :monitoring_item, :dependency, :layout, :file_asset
         one_to_many_clone_omit :layout
         virtual_column :parent_name, :possible_parents => [:component,:library,:node,:node_group]
@@ -607,6 +607,46 @@ module XYZ
       add_needed_sap_attributes(component_idh)
       parent_action_id_handle = id_handle().get_top_container_id_handle(:datacenter)
       StateChange.create_pending_change_item(:new_item => component_idh, :parent => parent_action_id_handle)
+    end
+
+    #handles copying over if needed component template and implementation into project
+    def clone_post_copy_hook_into_node(node)
+      #processing so that component's implementation and template are cloned to project
+      #self will have implementation_id set to library implementation and ancestor_id set to library template
+      #need to search project to see if has implementation that matches (same repo)
+      #if match then set new_cmps impelemntation_id to this otehrwise need to clone implementaion in library to project
+      proj = node.get_project()
+      proj_idh = proj.id_handle()
+
+      #find new implementation id
+      library_impl = id_handle.createIDH(:model_name => :implementation,:id => self[:implementation_id]).create_object()
+      proj_impl_idh = library_impl.find_match_in_project(proj_idh)
+      new_impl_id = proj_impl_idh ? proj_impl_idh.get_id() : proj.clone_into(library_impl.id_handle())
+
+      #find new ancestor_id
+      library_cmp_tmpl_idh = id_handle.createIDH(:id => self[:ancestor_id])
+      proj_cmp_tmpl_idh = find_match_in_project(proj_idh)
+      new_ancestor_id = proj_cmp_tmpl_idh ? proj_cmp_tmpl_idh.get_id() : proj.clone_into(library_cmp_tmpl_idh)
+
+      update_from_hash_assignments(:implementation_id => new_impl_id, :ancestor_id => new_ancestor_id)
+    end
+   private
+    def find_match_in_project(project_idh)
+      sp_hash = {
+        :filter => [:and,
+                    [:eq, :project_project_id, project_idh.get_id()],
+                    [:eq, :component_type, self[:component_type]],
+                    #TODO: put in when are setting version [:eq,:version, self[:version]]
+                   ],
+        :cols => [:id]
+      }
+      row = Model.get_objects_from_sp_hash(model_handle,sp_hash).first
+      row && row.id_handle()
+    end
+   public
+
+    def source_clone_info_opts()
+      {:ret_new_obj_with_cols => [:id,:implementation_id,:component_type,:version,:ancestor_id]
     end
 
     def add_needed_sap_attributes(component_idh)

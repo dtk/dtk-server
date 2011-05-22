@@ -138,6 +138,10 @@ module XYZ
       self.class.update_from_rows(model_handle,[scalar_assignments.merge(:id => id())],opts)
     end
 
+    def update_from_hash_assignments(scalar_assignments,opts={})
+      self.class.update_from_hash_assignments(id_handle,scalar_assignments,opts)
+    end
+
     def self.create_from_rows(model_handle,rows,opts={})
       select_ds = SQL::ArrayDataset.create(db,rows,model_handle,opts[:convert] ? {:convert_for_create => true} : {})
       override_attrs = {}

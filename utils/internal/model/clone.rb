@@ -42,6 +42,11 @@ module XYZ
       end
     end
 
+    #this gets optionally overwritten
+    def source_clone_info_opts()
+      {:ret_new_obj_with_cols => [:id]}
+    end
+
     #TODO: if just used for cloning into assemblies in libraries may rename
     def clone_into__top_object_exists(top_object_id_handle,id_handles)
       #TODO: may add override attributes and opts

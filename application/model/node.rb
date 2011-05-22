@@ -578,29 +578,6 @@ module XYZ
     end
 
     ################## cloning related methods
-    def clone_into(id_handle,override_attrs={},opts={})
-      unless id_handle[:model_name] == :component
-        Log.error("unexpected model #{id_handle[:model_name]}) associated with id_handle")
-        return super(id_handle,override_attrs,opts)
-      end
-      clone_opts = {:ret_new_obj_with_cols => [:id,:display_name,:implementation_id]}
-      new_cmp = super(id_handle,override_attrs,clone_opts)
-      ret = new_cmp.id_handle()
-      ret ret unless new_cmp[:implementation_id]
-
-      #special processing so that component's implementations are cloned to project
-      #new_cmp will have implementation_id set to library implementation
-      #need to search project to see if has implementation that matches (same repo)
-      #if match then set new_cmps impelemntation_id to this otehrwise need to clone implementaion in library to project
-      proj = get_project()
-      proj_idh = proj.id_handle()
-      library_impl = id_handle.createIDH(:model_name => :implementation,:id => new_cmp[:implementation_id]).create_object()
-      project_impl_idh = library_impl.find_match_in_project(proj_idh)
-      new_impl_id = project_impl_idh ? project_impl_idh.get_id() : proj.clone_into(library_impl.id_handle())
-      Model.update_from_hash_assignments(proj_idh,{:implementation_id => new_impl_id})
-      ret
-    end
-
     def add_model_specific_override_attrs!(override_attrs)
       override_attrs[:type] = "staged"
       override_attrs[:ref] = SQL::ColRef.concat("s-",:ref)
@@ -608,6 +585,10 @@ module XYZ
     end
 
     def clone_post_copy_hook(clone_copy_output,opts={})
+      cmp_obj = clone_copy_output.objects.first
+      #handles copying over if needed component template and implementation into project
+      cmp_obj.clone_post_copy_hook_into_node(self)
+
       cmp_id_handle = clone_copy_output.id_handles.first
       create_needed_l4_sap_attributes(cmp_id_handle)
       create_needed_additional_links(cmp_id_handle)

@@ -507,7 +507,7 @@
       },
       "component": {
         "php__php5": {
-          "type": "instance",
+          "type": "template",
           "component_type": "php__php5",
           "basic_type": "language",
           "ui": {
@@ -534,7 +534,7 @@
           "ds_key": "[:user_data, \"/library/test/php__php5\"]"
         },
         "wordpress": {
-          "type": "instance",
+          "type": "template",
           "component_type": "wordpress",
           "basic_type": "application",
           "ui": {
@@ -771,6 +771,7 @@
           "ds_key": "[:user_data, \"/library/test/wordpress\"]"
         },
         "rabbitmq__edge": {
+          "component_type": "rabbitmq__edge",
           "basic_type": "extension",
           "ui": {
             "images": {
@@ -790,7 +791,7 @@
           "ds_key": "[:user_data, \"/library/test/rabbitmq__edge\"]"
         },
         "nagios__client": {
-          "type": "instance",
+          "type": "template",
           "component_type": "nagios__client",
           "basic_type": "service",
           "ui": {
@@ -854,7 +855,7 @@
           "ds_key": "[:user_data, \"/library/test/nagios__client\"]"
         },
         "user_account": {
-          "type": "instance",
+          "type": "template",
           "component_type": "user_account",
           "basic_type": "user",
           "ui": {
@@ -973,7 +974,7 @@
           "ds_key": "[:user_data, \"/library/test/user_account\"]"
         },
         "nagios__server": {
-          "type": "instance",
+          "type": "template",
           "component_type": "nagios__server",
           "basic_type": "service",
           "ui": {
@@ -1021,7 +1022,7 @@
           "ds_key": "[:user_data, \"/library/test/nagios__server\"]"
         },
         "redis": {
-          "type": "instance",
+          "type": "template",
           "component_type": "redis",
           "basic_type": "service",
           "ui": {
@@ -1099,7 +1100,7 @@
           "ds_key": "[:user_data, \"/library/test/redis\"]"
         },
         "postgresql__pgpool": {
-          "type": "instance",
+          "type": "template",
           "component_type": "postgresql__pgpool",
           "basic_type": "service",
           "ui": {
@@ -1187,6 +1188,7 @@
           "ds_key": "[:user_data, \"/library/test/postgresql__pgpool\"]"
         },
         "rabbitmq": {
+          "component_type": "rabbitmq",
           "basic_type": "service",
           "ui": {
             "images": {
@@ -1207,7 +1209,7 @@
           "ds_key": "[:user_data, \"/library/test/rabbitmq\"]"
         },
         "haproxy": {
-          "type": "instance",
+          "type": "template",
           "ui": {
             "images": {
               "tnail": "haproxy.png",
@@ -1281,52 +1283,6 @@
           },
           "specific_type": "load_balancer",
           "ds_key": "[:user_data, \"/library/test/haproxy\"]"
-        },
-        "tomcat": {
-          "type": "instance",
-          "component_type": "tomcat",
-          "basic_type": "service",
-          "ui": {
-            "images": {
-              "tnail": "server-tomcat.png",
-              "display": "server-tomcat.png",
-              "tiny": ""
-            }
-          },
-          "display_name": "tomcat",
-          "description": "Installs and configures Tomcat",
-          "external_ref": {
-            "type": "chef_recipe",
-            "recipe_name": "tomcat::default"
-          },
-          "dependency": {
-            "java": {
-              "type": "component",
-              "display_name": "java",
-              "description": "java is required for tomcat",
-              "severity": "warning",
-              "search_pattern": {
-                ":filter": [
-                  ":eq",
-                  ":component_type",
-                  "java"
-                ]
-              }
-            }
-          },
-          "only_one_per_node": true,
-          "ds_attributes": {
-            "ui": "{\"images\": {\"tnail\":\"server-tomcat.png\",\"display\":\"server-tomcat.png\",\"tiny\":\"\"}}",
-            "basic_type": "service",
-            "qualified_ref": "/library/test/tomcat",
-            "dependency": {
-              "java": {
-                "required_component": "java"
-              }
-            },
-            "ref": "tomcat"
-          },
-          "ds_key": "[:user_data, \"/library/test/tomcat\"]"
         }
       }
     }

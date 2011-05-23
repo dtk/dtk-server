@@ -15,7 +15,7 @@ module XYZ
         column :i18n_labels,  :json, :ret_keys_as_symbols => false
 
         #columns related to type
-        column :type, :varchar, :size => 15 # instance | composite | template
+        column :type, :varchar, :size => 15, :default => "template" # instance | composite | template
         #top level in component type hiererarchy
         column :basic_type, :varchar, :size => 25 #service, application, language, application, extension, database, user
         #leaf type in component type 

@@ -23,7 +23,7 @@ module XYZ
         end
       end
 
-      clone_source_object.add_model_specific_override_attrs!(override_attrs)
+      clone_source_object.add_model_specific_override_attrs!(override_attrs,self)
       proc = CloneCopyProcessor.new(clone_source_object,opts.merge(:include_children => true))
       clone_copy_output = proc.clone_copy(clone_source_object.id_handle,[target_id_handle],override_attrs)
       new_id_handle = clone_copy_output.id_handles.first
@@ -82,7 +82,7 @@ module XYZ
 
    protected
     # to be optionally overwritten by object representing the source
-    def add_model_specific_override_attrs!(override_attrs)
+    def add_model_specific_override_attrs!(override_attrs,target_obj)
     end
 
     # to be optionally overwritten by object representing the target

@@ -716,7 +716,7 @@ module XYZ
    public
     def promote_template__new_version(new_version,library_idh)
       #TODO: can make more efficient by getting object and doing test if library item exists in same call
-      get_object_cols_and_update_ruby_obj!(:component_type)
+      get_object_cols_and_update_ruby_obj!(:component_type,:extended_base_id)
       #check if exists already
       raise Error.new("component template #{self[:component_type]} (#{new_version}) already exists") if  matching_library_template_exists?(new_version,library_idh)
       override_attrs={:version => new_version}
@@ -730,10 +730,10 @@ module XYZ
         :cols => [:id],
         :filter => [:and, 
                      [:eq, :library_library_id, library_idh.get_id()],
-                     [:eq, :version, self[:version]],
+                     [:eq, :version, version],
                      [:eq, :component_type, self[:component_type]]]
       }
-      get_objects_from_sp_hash(sp_hash).first
+      Model.get_objects_from_sp_hash(model_handle,sp_hash).first
     end
                      
    public
@@ -855,12 +855,13 @@ module XYZ
       vals
     end
 
-    def add_model_specific_override_attrs!(override_attrs)
-      override_attrs[:display_name] = SQL::ColRef.qualified_ref
+    def add_model_specific_override_attrs!(override_attrs,target_obj)
+      override_attrs[:display_name] ||= SQL::ColRef.qualified_ref 
+      override_attrs[:type] ||= (target_obj.model_handle[:model_name] == :node ? "instance" : "template")
       #handle case if this is an extension
       if is_extension?()
         Log.error("not handling case where source component is extension and does not yet have :target_extended_base_id set") unless self[:target_extended_base_id]
-        override_attrs[:extended_base_id] = self[:target_extended_base_id]
+        override_attrs[:extended_base_id] ||= self[:target_extended_base_id] 
       end
     end
 

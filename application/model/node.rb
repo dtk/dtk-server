@@ -578,10 +578,10 @@ module XYZ
     end
 
     ################## cloning related methods
-    def add_model_specific_override_attrs!(override_attrs)
-      override_attrs[:type] = "staged"
-      override_attrs[:ref] = SQL::ColRef.concat("s-",:ref)
-      override_attrs[:display_name] = SQL::ColRef.concat{|o|["s-",:display_name,o.case{[[{:ref_num=> nil},""],o.concat("-",:ref_num)]}]}
+    def add_model_specific_override_attrs!(override_attrs,target_obj)
+      override_attrs[:type] ||= "staged"
+      override_attrs[:ref] ||= SQL::ColRef.concat("s-",:ref)
+      override_attrs[:display_name] ||= SQL::ColRef.concat{|o|["s-",:display_name,o.case{[[{:ref_num=> nil},""],o.concat("-",:ref_num)]}]}
     end
 
     def clone_post_copy_hook(clone_copy_output,opts={})

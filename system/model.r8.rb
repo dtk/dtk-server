@@ -179,6 +179,14 @@ module XYZ
       Model.get_objects_from_sp_hash(child_model_handle,sp_hash,opts)
     end
 
+    def get_object_cols_and_update_ruby_obj!(*cols)
+      cols_to_get =  cols.reject{|col|self.has_key?(col)}
+      return self if cols_to_get.empty?
+      vals = get_objects_from_sp_hash(:cols => cols_to_get)
+      vals.each{|k,v|self[k]=v}
+      self
+    end
+
     def get_objects_from_sp_hash(sp_hash_x,opts={})
       sp_hash = HashSearchPattern.add_to_filter(sp_hash_x,[:eq, :id, id()])
       Model.get_objects_from_sp_hash(model_handle(),sp_hash,opts)

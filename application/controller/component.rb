@@ -2,6 +2,24 @@ module XYZ
   class ComponentController < Controller
     helper :i18n_string_mapping
 
+    #TODO: remove when finshed testing
+    def test_new_version(cmp_type,version="0.0.1",new_version="0.0.2")
+      sp_hash = {
+        :cols => [:id],
+        :filter => [:and, 
+                    [:eq,:version, version], 
+                    [:eq, :component_type, cmp_type],
+                    [:neq, :project_project_id, nil]]
+      }
+      proj_cmp_tmpl = Model.get_objects_from_sp_hash(model_handle(),sp_hash).first
+      raise Error.new("cannot find project template associated with #{cmp_type} (#{version})") unless proj_cmp_tmpl
+      library_obj = Model.get_objects_from_sp_hash(model_handle(:library),{:cols => [:id]}).first
+      proj_cmp_tmpl.promote_template__new_version(new_version,library_obj.id_handle)
+      return {:content => {}}
+    end
+
+    ##############################
+    
     def details_old(id)
       component = get_object_by_id(id)
       tpl = R8Tpl::TemplateR8.new("component/details",user_context())

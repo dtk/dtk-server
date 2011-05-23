@@ -6,12 +6,11 @@ module Ramaze::Helper
       id_handle(id,model_name_x).create_object(opts)
     end      
 
-   private
-
-    #query helpers
-    def get_objects_from_sp_hash(hash)
-      Model.get_objects_from_sp_hash(ModelHandle.new(ret_session_context_id(),hash[:relation]),hash)
+    def model_handle(model_name_x=model_name())
+      c = ret_session_context_id()
+      ModelHandle.new(c,model_name_x)
     end
+   private
 
     #helpers that interact with model
     def get_objects(model_name,where_clause={},opts={})

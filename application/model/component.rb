@@ -32,7 +32,7 @@ module XYZ
         foreign_key :extended_base_id, :component, FK_SET_NULL_OPT
         column :extension_type, :varchar, :size => 30
 
-        column :version, :varchar, :size => 25 # version of underlying component (not chef recipe .... version)
+        column :version, :varchar, :size => 25, :default => "0.0.1" # version of underlying component (not chef recipe .... version)
         column :uri, :varchar
         column :ui, :json
         #:assembly_id (in contrast to parent field :component_id) is for tieing teh component to a composite component which is not a container
@@ -602,6 +602,7 @@ module XYZ
       ]
    public
 
+    ######## clone related ##############################
     def clone_post_copy_hook(clone_copy_output,opts={})
       component_idh = clone_copy_output.id_handles.first
       add_needed_sap_attributes(component_idh)
@@ -625,10 +626,10 @@ module XYZ
 
       #find new ancestor_id
       library_cmp_tmpl_idh = id_handle.createIDH(:id => self[:ancestor_id])
-      #since source copied from object they shaer same attributes
+      #ok to do below because self and library_cmp_tmpl sahre attribute values
       library_cmp_tmpl =  library_cmp_tmpl_idh.create_object.merge(:extended_base_id => self[:extended_base_id])
       proj_cmp_tmpl_idh = find_match_in_project(proj_idh)
-      new_ancestor_id = proj_cmp_tmpl_idh ? proj_cmp_tmpl_idh.get_id() : proj.clone_into(library_cmp_tmpl)
+      new_ancestor_id = proj_cmp_tmpl_idh ? proj_cmp_tmpl_idh.get_id() : proj.clone_into(library_cmp_tmpl,{:implementation_id => new_impl_id})
 
       update_from_hash_assignments(:implementation_id => new_impl_id, :ancestor_id => new_ancestor_id)
     end
@@ -638,7 +639,7 @@ module XYZ
         :filter => [:and,
                     [:eq, :project_project_id, project_idh.get_id()],
                     [:eq, :component_type, self[:component_type]],
-                    #TODO: put in when are setting version [:eq,:version, self[:version]]
+                    [:eq,:version, self[:version]]
                    ],
         :cols => [:id]
       }
@@ -708,8 +709,34 @@ module XYZ
       #TODO: check if it is this simple; also may not need and propagate as byproduct of adding a link 
       par_vals.map{|par_val|sap_config_val.merge(par_val)}
     end
-   public
 
+    ######## end of clone related ##############################
+
+    ####### methods that promote a project template to the library
+   public
+    def promote_template__new_version(new_version,library_idh)
+      #TODO: can make more efficient by getting object and doing test if library item exists in same call
+      get_object_cols_and_update_ruby_obj!(:component_type)
+      #check if exists already
+      raise Error.new("component template #{self[:component_type]} (#{new_version}) already exists") if  matching_library_template_exists?(new_version,library_idh)
+      override_attrs={:version => new_version}
+      clone_opts={:ret_new_obj_with_cols => [:id,:implementation_id]}
+      clone_copy_obj = library_idh.create_object().clone_into(self,override_attrs,clone_opts)
+      ret = clone_copy_obj.id_handle.first
+    end
+   private
+    def matching_library_template_exists?(version,library_idh)
+      sp_hash = {
+        :cols => [:id],
+        :filter => [:and, 
+                     [:eq, :library_library_id, library_idh.get_id()],
+                     [:eq, :version, self[:version]],
+                     [:eq, :component_type, self[:component_type]]]
+      }
+      get_objects_from_sp_hash(sp_hash).first
+    end
+                     
+   public
     ### object processing and access functions
     def get_component_with_attributes_unraveled(attr_filters={:hidden => true})
       sp_hash = {:columns => [:id,:display_name,:component_type,:basic_type,:attributes,:i18n_labels]}

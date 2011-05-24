@@ -17,8 +17,10 @@ module XYZ
       #TODO: can make more efficient to see if this object has the values that querying for an if so avoid db query
       file_obj = get_objects_from_sp_hash({:cols => [:path,:implementation_info]}).first
       project = {:ref => "project1"} #TODO: stub until get the relevant project
-      Repo.update_file_content(self,content,{:implementation => file_obj[:implementation], :project => project})
-      file_obj[:implementation].create_pending_change_item(self)
+      impl_obj = file_obj[:implementation]
+      Repo.update_file_content(self,content,{:implementation => impl_obj, :project => project})
+      impl_obj.set_to_indicate_updated()
+      impl_obj.create_pending_change_item(self)
     end
 
     def self.add(impl_obj,type,path,content)

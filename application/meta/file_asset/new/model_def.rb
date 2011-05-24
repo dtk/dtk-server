@@ -5,7 +5,7 @@
     :type => {:type=>:varchar, :size=>25},
     :file_name => {:type=>:varchar, :size=>50},
     :path => {:type=>:varchar},
-    :content=> {:type=>:varchar}
+    :content=> {:type=>:text}
   },
   :virtual_columns=>{
     :implementation_info=>{

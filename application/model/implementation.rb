@@ -72,6 +72,17 @@ module XYZ
       ret
     end
 
+    def set_to_indicate_updated()
+      #TODO: short cut and avoid setting updated on project templates if impl set to updated already update({:updated => true},{:update_only_if_change => true})
+      update(:updated => true)
+      #set updated for the project templates that point to this implemntation
+      fs = FieldSet.opt([:updated,:id],:component)
+      wc = {:implementation_id => id(), :type => "template"}
+      cmp_mh = model_handle.createMH(:component)
+      update_ds = Model.get_objects_just_dataset(cmp_mh,wc,fs)
+      Model.update_from_select(cmp_mh,FieldSet.new(:component,[:updated]),update_ds)    
+    end
+
     def create_pending_change_item(file_asset)
       #TODO: make more efficient by using StateChange.create_pending_change_items
       get_objects_from_sp_hash({:cols => [:component_info]}).each do |r|

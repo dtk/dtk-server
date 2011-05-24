@@ -96,8 +96,14 @@ module XYZ
 
     def get_new_version_num(library_idh)
       #TODO: potential race condition in getting new version
-      sp_hash = {:cols => [:version_num],:filter => [:eq, :library_library_id, library_idh.get_id()]}
-      existing_ver_nums = get_objects_from_sp_hash(library_idh.model_handle(:implementatation),sp_hash).map{|r|r[:version_num]}
+      sp_hash = {
+        :cols => [:version_num],
+        :filter => [:and,
+                    [:eq, :library_library_id, library_idh.get_id()],
+                    [:eq, :repo, self[:repo]]]
+      }
+      impl_idh = library_idh.createMH(:implementatation)
+      existing_ver_nums = get_objects_from_sp_hash(impl_idh,sp_hash).map{|r|r[:version_num]}
       1 + (existing_ver_nums.max||0)
     end
 

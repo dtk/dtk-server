@@ -14,6 +14,10 @@ module XYZ
         #specfic labels of components and its attributes
         column :i18n_labels,  :json, :ret_keys_as_symbols => false
 
+        #columns related to version
+        column :version, :varchar, :size => 25, :default => "0.0.1" # version of underlying component (not chef recipe .... version)
+        column :updated, :boolean, :default => false
+
         #columns related to type
         column :type, :varchar, :size => 15, :default => "template" # instance | composite | template
         #top level in component type hiererarchy
@@ -32,7 +36,6 @@ module XYZ
         foreign_key :extended_base_id, :component, FK_SET_NULL_OPT
         column :extension_type, :varchar, :size => 30
 
-        column :version, :varchar, :size => 25, :default => "0.0.1" # version of underlying component (not chef recipe .... version)
         column :uri, :varchar
         column :ui, :json
         #:assembly_id (in contrast to parent field :component_id) is for tieing teh component to a composite component which is not a container
@@ -715,16 +718,16 @@ module XYZ
     ####### methods that promote a project template to the library
    public
     def promote_template__new_version(new_version,library_idh)
-      #TODO: can make more efficient by getting object and doing test if library item exists in same call
+      #TODO: can make more efficient by reducing number of seprate calss to db
       get_object_cols_and_update_ruby_obj!(:component_type,:extended_base_id,:implementation_id)
-      #check if exists already
+      #check if version exists already
       raise Error.new("component template #{self[:component_type]} (#{new_version}) already exists") if  matching_library_template_exists?(new_version,library_idh)
-      #TODO: is there logic to detrmine whether an implemntation in library can be used; think we should put flag whether project implementation has changed
-      #or have insatnce point into library instance until it is changed
-      proj_impl_idh = id_handle.createIDH(:model_name => :implementation, :id => self[:implementation_id])
-      new_impl_id = library_idh.create_object.clone_into(proj_impl_idh.create_object)
+      #if project templaet has  been updated then need to generate
+      proj_impl = id_handle.createIDH(:model_name => :implementation, :id => self[:implementation_id]).create_object
 
-      override_attrs={:version => new_version, :implementation_id => new_impl_id}
+      library_impl_idh = proj_impl.clone_into_library_if_needed(library_idh)
+
+      override_attrs = {:version => new_version, :implementation_id => library_impl_idh.get_id()}
       library_idh.create_object().clone_into(self,override_attrs)
     end
    private
@@ -861,6 +864,7 @@ module XYZ
     def add_model_specific_override_attrs!(override_attrs,target_obj)
       override_attrs[:display_name] ||= SQL::ColRef.qualified_ref 
       override_attrs[:type] ||= (target_obj.model_handle[:model_name] == :node ? "instance" : "template")
+      override_attrs[:updated] ||= false
       #handle case if this is an extension
       if is_extension?()
         Log.error("not handling case where source component is extension and does not yet have :target_extended_base_id set") unless self[:target_extended_base_id]

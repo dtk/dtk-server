@@ -4,8 +4,8 @@
   :columns=>{
     :type => {:type=>:varchar, :size => 25},
     :repo => {:type=>:varchar, :size => 25},
-    :version => {:type=>:varchar, :size => 25},
-    :r8version => {:type=>:varchar, :size => 25, :default => "0.0.1"}
+    :version_num => {:type=>:integer, :default => 1},
+    :updated => {:type=>:boolean, :default => false}
   },
   :virtual_columns=>{
     :component_info=>{

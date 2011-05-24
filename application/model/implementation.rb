@@ -23,12 +23,17 @@ module XYZ
       file_asset_type = FileAssetType[impl_type.to_sym]
       FileAsset.add(impl_obj,file_asset_type,path,content)
     end
+   private
+    FileAssetType = { 
+      :chef_cookbook => "chef_file"
+    }
+   public
 
     def find_match_in_project(project_idh)
       base_sp_hash = {
         :model_name => :implementation,
         :filter => [:eq, :id, id()],
-        :cols => [:repo]
+        :cols => [:repo, :version_num]
       }
       join_array = 
         [{
@@ -37,18 +42,35 @@ module XYZ
            :convert => true,
            :join_type => :inner,
            :filter => [:eq, :project_project_id, project_idh.get_id()],
-           :join_cond => {:repo => :implementation__repo},
-           :cols => [:id,:repo]
+           :join_cond => {:repo => :implementation__repo, :version_num => :implementation__version_num},
+           :cols => [:id,:repo,:version_num]
          }]
 
       row = Model.get_objects_from_join_array(model_handle(),base_sp_hash,join_array).first
       row && row[:proj_impl].id_handle()
     end
-   private
-    FileAssetType = { 
-      :chef_cookbook => "chef_file"
-    }
-   public
+
+    def add_model_specific_override_attrs!(override_attrs,target_obj)
+      override_attrs[:updated] ||= false
+    end
+
+    #self is a project implementation; returns library implementation idh
+    def clone_into_library_if_needed(library_idh)
+      ret = nil
+      #if implementation is updated, need to create a new implemntation in library; otherwise use
+      get_object_cols_and_update_ruby_obj!(:updated,:repo,:version_num)
+      if self[:updated]
+        new_version_num = get_new_version_num(library_idh)
+        override_attrs={:version_num => new_version_num}
+        new_impl_id = library_idh.create_object.clone_into(self,override_attrs)
+        ret = library_idh.createIDH(:model_name => :implemntation, :id => new_impl_id)
+      else
+        impl_obj = matching_library_template_exists?(self[:version_num],library_idh)
+        raise Error.new("expected to find a matching library implemntation") unless impl_obj
+        ret = impl_obj.id_handle
+      end
+      ret
+    end
 
     def create_pending_change_item(file_asset)
       #TODO: make more efficient by using StateChange.create_pending_change_items
@@ -57,6 +79,26 @@ module XYZ
         parent_idh = cmp_idh.createIDH(:model_name => :datacenter, :id => r[:node][:datacenter_datacenter_id])
         StateChange.create_pending_change_item(:new_item => cmp_idh, :parent => parent_idh, :type => "update_implementation")
       end
+    end
+
+   private
+
+    def get_new_version_num(library_idh)
+      #TODO: potential race condition in getting new version
+      sp_hash = {:cols => [:version_num],:filter => [:eq, :library_library_id, library_idh.get_id()]}
+      existing_ver_nums = get_objects_from_sp_hash(library_idh.model_handle(:implementatation),sp_hash).map{|r|r[:version_num]}
+      1 + (existing_ver_nums.max||0)
+    end
+
+    def matching_library_template_exists?(version_num,library_idh)
+      sp_hash = {
+        :cols => [:id],
+        :filter => [:and, 
+                     [:eq, :library_library_id, library_idh.get_id()],
+                     [:eq, :version_num, version_num],
+                     [:eq, :repo, self[:repo]]]
+      }
+      Model.get_objects_from_sp_hash(model_handle,sp_hash).first
     end
   end
 end

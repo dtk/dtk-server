@@ -716,13 +716,16 @@ module XYZ
    public
     def promote_template__new_version(new_version,library_idh)
       #TODO: can make more efficient by getting object and doing test if library item exists in same call
-      get_object_cols_and_update_ruby_obj!(:component_type,:extended_base_id)
+      get_object_cols_and_update_ruby_obj!(:component_type,:extended_base_id,:implementation_id)
       #check if exists already
       raise Error.new("component template #{self[:component_type]} (#{new_version}) already exists") if  matching_library_template_exists?(new_version,library_idh)
-      override_attrs={:version => new_version}
-      clone_opts={:ret_new_obj_with_cols => [:id,:implementation_id]}
-      clone_copy_obj = library_idh.create_object().clone_into(self,override_attrs,clone_opts)
-      ret = clone_copy_obj.id_handle.first
+      #TODO: is there logic to detrmine whether an implemntation in library can be used; think we should put flag whether project implementation has changed
+      #or have insatnce point into library instance until it is changed
+      proj_impl_idh = id_handle.createIDH(:model_name => :implementation, :id => self[:implementation_id])
+      new_impl_id = library_idh.create_object.clone_into(proj_impl_idh.create_object)
+
+      override_attrs={:version => new_version, :implementation_id => new_impl_id}
+      library_idh.create_object().clone_into(self,override_attrs)
     end
    private
     def matching_library_template_exists?(version,library_idh)

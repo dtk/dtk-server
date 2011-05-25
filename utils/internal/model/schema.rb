@@ -306,7 +306,7 @@ module XYZ
           Timestamp :created_at, :default => SQL.now
           Timestamp :updated_at, :default => SQL.now
           column :owner_id, ID_TYPES[:id] #TODO: make into foreign key
-          column :team_id, ID_TYPES[:id] #TODO: make into foreign key
+          column :group_id, ID_TYPES[:id] #TODO: make into foreign key
         end
 
         @db.create_table_common_extras?(db_rel)

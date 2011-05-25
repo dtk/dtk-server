@@ -9,21 +9,33 @@ module XYZ
         cmp_type = rest[0]
         version = rest[1] || "0.0.1"
         new_version = rest[2] ||"0.0.2"
-        sp_hash = {
-          :cols => [:id],
-          :filter => [:and, 
-                      [:eq,:version, version], 
-                      [:eq, :component_type, cmp_type],
-                      [:neq, :project_project_id, nil]]
-        }
-        proj_cmp_tmpl = Model.get_objects_from_sp_hash(model_handle(),sp_hash).first
-        raise Error.new("cannot find project template associated with #{cmp_type} (#{version})") unless proj_cmp_tmpl
+        proj_cmp_tmpl = ret_project_component_template(cmp_type,version)
         library_obj = Model.get_objects_from_sp_hash(model_handle(:library),{:cols => [:id]}).first
         proj_cmp_tmpl.promote_template__new_version(new_version,library_obj.id_handle)
+      elsif action == "update_default"
+        cmp_type = rest[0]
+        version = rest[1]
+        attr = rest[2] 
+        val = hash["val"]
+        proj_cmp_tmpl = ret_project_component_template(cmp_type,version)
+        proj_cmp_tmpl.update_default(attr,val)
       end
       return {:content => {}}
     end
-
+   private
+    def ret_project_component_template(cmp_type,version)
+      sp_hash = {
+        :cols => [:id],
+        :filter => [:and, 
+                    [:eq,:version, version], 
+                    [:eq, :component_type, cmp_type],
+                    [:neq, :project_project_id, nil]]
+        }
+      ret = Model.get_objects_from_sp_hash(model_handle(),sp_hash).first #TODO: assume just one project
+      raise Error.new("cannot find project template associated with #{cmp_type} (#{version})") unless ret
+      ret
+    end
+   public
     ##############################
     
     def details_old(id)

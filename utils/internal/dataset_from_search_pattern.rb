@@ -40,7 +40,9 @@ module XYZ
           end
           graph_ds
         end
-
+        def ret_sequel_filter(filter_hash,model_handle)
+          SimpleSearchPattern::ret_sequel_filter(filter_hash,model_handle[:model_name])
+        end
        private
         def process_local_and_remote_dependencies(search_object,simple_dataset,remote_col_info=nil,vcol_sql_fns=nil)
           model_handle = simple_dataset.model_handle()

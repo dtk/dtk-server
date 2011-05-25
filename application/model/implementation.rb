@@ -76,11 +76,9 @@ module XYZ
       #TODO: short cut and avoid setting updated on project templates if impl set to updated already update({:updated => true},{:update_only_if_change => true})
       update(:updated => true)
       #set updated for the project templates that point to this implemntation
-      fs = FieldSet.opt([:updated,:id],:component)
-      wc = {:implementation_id => id(), :type => "template"}
       cmp_mh = model_handle.createMH(:component)
-      update_ds = Model.get_objects_just_dataset(cmp_mh,wc,fs)
-      Model.update_from_select(cmp_mh,FieldSet.new(:component,[:updated]),update_ds)    
+      filter = [:and, [:eq, :implementation_id, id()], [:eq, :type, "template"]]
+      Model.update_rows_meeting_filter(cmp_mh,{:updated => true},filter)
     end
 
     def create_pending_change_item(file_asset)

@@ -138,6 +138,11 @@ module XYZ
       self.class.update_from_rows(model_handle,[scalar_assignments.merge(:id => id())],opts)
     end
 
+    def self.update_rows_meeting_filter(model_handle,scalar_assignments,filter_hash,opts={})
+      where_clause = SQL::DataSetSearchPattern.ret_sequel_filter(filter_hash,model_handle)
+      @db.update_rows_meeting_filter(model_handle,scalar_assignments,where_clause,opts)
+    end
+
     def update_from_hash_assignments(scalar_assignments,opts={})
       self.class.update_from_hash_assignments(id_handle,scalar_assignments,opts)
     end

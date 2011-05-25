@@ -36,6 +36,17 @@ module XYZ
         ret
       end
 
+
+      def update_rows_meeting_filter(model_handle,scalar_assignments,where_clause,opts={})
+        #TODO: not treating opts yet or conversion from json form
+        update_set_clause = scalar_assignments
+        set_updated_at!(update_set_clause)
+        db_rel = DB_REL_DEF[model_handle[:model_name]]
+        update_ds = dataset(db_rel).where(where_clause)
+        update_ds.update(update_set_clause)
+        nil
+      end
+
       #TODO Enable short circuit that conditionally avoids IDInfoTable
       #returns list of created uris
       def update_from_hash_assignments(id_handle,hash_assigns,opts={})

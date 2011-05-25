@@ -1,9 +1,11 @@
 require  File.expand_path('component_model_def_processor', File.dirname(__FILE__))
 require  File.expand_path('component_view_meta_processor', File.dirname(__FILE__))
+require  File.expand_path('component_template', File.dirname(__FILE__)) #TODO: move appropriaet fns below to component_template
 module XYZ
   class Component < Model
     include ComponentModelDefProcessor
     include ComponentViewMetaProcessor
+    include ComponentTemplate
     set_relation_name(:component,:component)
     class << self
       def up()
@@ -53,7 +55,7 @@ module XYZ
         many_to_one :component, :library, :node, :node_group, :datacenter, :project
         one_to_many :component, :attribute_link, :attribute, :port_link, :monitoring_item, :dependency, :layout, :file_asset
         one_to_many_clone_omit :layout
-        virtual_column :parent_name, :possible_parents => [:component,:library,:node,:node_group]
+        virtual_column :parent_name, :possible_parents => [:component,:library,:node,:node_group,:project]
 
         virtual_column :view_def_key, :type => :varchar, :hidden => true, :local_dependencies => [:id,:view_def_ref,:component_type] 
 

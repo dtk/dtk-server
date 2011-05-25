@@ -7,7 +7,7 @@ module XYZ
       #columns related to the value
       column :value_asserted, :json, :ret_keys_as_symbols => false
       column :value_derived, :json, :ret_keys_as_symbols => false
-      column :is_instance_value, :booelan, :default => false #to distinguish between when value_asserted is from default versus directly asserted
+      column :is_instance_value, :boolean, :default => false #to distinguish between when value_asserted is from default versus directly asserted
       #TODO: not used yet column :value_actual, :json, :ret_keys_as_symbols => false
       #TODO: may rename attribute_value to desired_value
       virtual_column :attribute_value, :type => :json, :local_dependencies => [:value_asserted,:value_derived],

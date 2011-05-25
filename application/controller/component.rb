@@ -17,6 +17,8 @@ module XYZ
         version = rest[1]
         attr = rest[2] 
         val = hash["val"]
+        val = true if value == "true"
+        val = false if value == "false"
         proj_cmp_tmpl = ret_project_component_template(cmp_type,version)
         proj_cmp_tmpl.update_default(attr,val)
       end

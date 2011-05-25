@@ -4,16 +4,19 @@ module XYZ
     module DataProcessingCreate
       #creates a new instance w/ref_num bumped if needed
       #TODO: make more efficient by reducing or elimintaing calss to id table as well as using bulk inserts
-      def create_from_hash(id_handle,hash,clone_helper=nil,opts={})
+      #TODO: may eventually depercate this
+      def create_from_hash(id_handle,hash,opts={})
 	id_info = IDInfoTable.get_row_from_id_handle id_handle, :raise_error => true 
 
 	#check if instance or factory
         if id_info[:is_factory]
-	  create_from_hash_with_factory(id_info[:c],id_info[:uri],hash,clone_helper,opts) 
+          factory_idh = id_handle.createIDH(:uri => id_info[:uri], :is_factory => true)
+	  create_from_hash_with_factory(factory_idh,hash,opts) 
         else
           hash.map{|relation_type,child_hash|
-            factory_id_handle = IDInfoTable.get_factory_id_handle(id_handle,relation_type)
-            create_from_hash_with_factory(factory_id_handle[:c],factory_id_handle[:uri],child_hash,clone_helper,opts)
+            factory_info = IDInfoTable.get_factory_id_handle(id_handle,relation_type)
+            factory_idh = id_handle.createIDH(:uri => factory_info[:uri])
+            create_from_hash_with_factory(factory_idh,child_hash,opts)
           }.flatten
         end
       end
@@ -129,18 +132,18 @@ module XYZ
       end
 
      private
-      def create_from_hash_with_factory(c,factory_uri,hash,clone_helper=nil,opts={})
+      def create_from_hash_with_factory(factory_idh,hash,opts={})
         ret = Array.new
         hash.each do |ref,assignments| 
-	  new_item = create_instance(factory_uri,ref,assignments,c,clone_helper,opts)
+	  new_item = create_instance(factory_idh,ref,assignments,opts)
 	  Log.info("created new object: uri=#{new_item[:uri]}; id=#{new_item[:id]}")		   
 	  ret << new_item
         end
 	ret
       end
 
-      def create_instance(factory_uri,ref,assignments,c,clone_helper=nil,opts={})
-        relation_type,parent_uri = RestURI.parse_factory_uri(factory_uri) 
+      def create_instance(factory_idh,ref,assignments,opts={})
+        relation_type,parent_uri = RestURI.parse_factory_uri(factory_idh[:uri])
         db_rel = DB_REL_DEF[relation_type]
 
 	scalar_assignments = ret_settable_scalar_assignments(assignments,db_rel)
@@ -155,6 +158,7 @@ module XYZ
 	new_id = nil
 	parent_id = nil
 	parent_relation_type = nil
+        c = factory_idh[:c]
        	if parent_uri == "/" ## if top level object
           ref_num = compute_ref_num(db_rel,ref,c)          	  
 	  #TBD check that the assignments are legal, or trap
@@ -177,26 +181,25 @@ module XYZ
 	end              
 
 	raise Error.new("error while inserting element") if new_id.nil?
-	clone_helper.update(c,db_rel,old_id,new_id,scalar_assignments) if clone_helper
 
-	new_uri  = RestURI::ret_new_uri(factory_uri,ref,ref_num)
+	new_uri  = RestURI::ret_new_uri(factory_idh[:uri],ref,ref_num)
 
 	#need to fill in extra columns in associated uri table entry
 	IDInfoTable.update_instance(db_rel,new_id,new_uri,relation_type,parent_id,parent_relation_type)
 	############# processing scalar columns by inserting a row in db_rel
 
-	create_factory_uris_and_contained_objects(new_uri,new_id,relation_type,obj_assignments,c,clone_helper,opts)
+	create_factory_uris_and_contained_objects(new_uri,new_id,relation_type,obj_assignments,c,opts)
 	
 	{:uri => new_uri, :id => new_id}
       end
 
-      def create_factory_uris_and_contained_objects(uri,id,relation_type,obj_assignments,c,clone_helper=nil,opts={})
+      def create_factory_uris_and_contained_objects(uri,id,relation_type,obj_assignments,c,opts={})
 	db_rel = DB_REL_DEF[relation_type]
 	return nil if db_rel.nil? #TBD: this probably should be an error
 	child_list = db_rel[:one_to_many]
 	return nil if child_list.nil?
 
-	child_list.each{|child_type|
+	child_list.each do |child_type|
 	  factory_uri = RestURI.ret_factory_uri(uri,child_type)
 	  IDInfoTable.insert_factory(child_type,factory_uri,relation_type,id,c)
 	  #TBD: does not check if there are erroneous subobjects on obj_assignments
@@ -204,17 +207,19 @@ module XYZ
 	  child_hash_or_array = obj_assignments[child_type] || obj_assignments[child_type.to_s]
 	  next if child_hash_or_array.nil?
           if child_hash_or_array.kind_of?(Hash)
-	    child_hash_or_array.each{|ref,assignments|
-	      create_instance(factory_uri,ref,assignments,c,clone_helper,opts)
-	    }
+	    child_hash_or_array.each do |ref,assignments|
+              factory_idh = IDHandle[:uri => factory_uri, :c => c, :is_factory => true]
+	      create_instance(factory_idh,ref,assignments,opts)
+	    end
 	  elsif child_hash_or_array.kind_of?(Array)
-            child_hash_or_array.each{|child_hash|
-	      child_hash.each{|ref,assignments|
-	        create_instance(factory_uri,ref,assignments,c,clone_helper,opts)
-              }
-            }
+            child_hash_or_array.each do |child_hash|
+	      child_hash.each do |ref,assignments|
+                factory_idh = IDHandle[:uri => factory_uri, :c => c, :is_factory => true]
+	        create_instance(factory_idh,ref,assignments,opts)
+              end
+            end
 	  end
-	}
+	end
 	nil
       end
 

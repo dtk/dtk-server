@@ -20,7 +20,7 @@ module XYZ
            :join_type => :inner,
            :filter => [:and, [:eq, field_to_match, attribute_name], [:eq, :is_instance_value,false]],
            :join_cond => {:component_component_id => :component__id},
-           :cols => [:id]
+           :cols => [:id,:component_component_id]
          }]
       attr_ids_to_update = Model.get_objects_from_join_array(model_handle,base_sp_hash,join_array).map{|r|r[:attribute][:id]}
       unless attr_ids_to_update.empty?

@@ -15,7 +15,7 @@ def add_user_and_group(username)
   exists_user,user_id = add_if_does_not_exist(:user,:username,username)
   exists_group,group_id = add_if_does_not_exist(:group,:groupname,username)
   unless exists_user and exists_group
-    XYZ::Model.create_from_rows(model_handle(:user_group_relation),[{:user_id => user_id, :group_id => group_id}])
+    create_row(model_handle(:user_group_relation),{:user_id => user_id, :group_id => group_id})
   end
   [user_id,group_id]
 end
@@ -28,10 +28,17 @@ def add_if_does_not_exist(model_name,attr,val)
     exists = true
   else
     exists = false
-    idh = XYZ::Model.create_from_rows(mh,[{attr => val}]).first
+    idh = create_row(mh,{attr => val})
     id = idh.get_id()
   end
   [exists,id]
+end
+
+def create_row(model_handle,scalar_assigns_x)
+  scalar_assigns = scalar_assigns_x.dup
+  ref = scalar_assigns.delete(:ref)
+  top_idh = XYZ::IDHandle[:c => model_handle[:c],:uri => "/"]
+  XYZ::Model.create_from_hash(top_idh,{model_handle[:model_name].to_s => {ref => scalar_assigns}}) 
 end
 
 def model_handle(model_name)

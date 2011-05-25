@@ -33,7 +33,7 @@ module XYZ
       end
       #idempotent
       def create_simple(new_uri,c,opts={})
-        create_simple_instance?(new_uri,c,opts)
+        create_simple_instance?(IDHandle[:uri => new_uri,:c => c],opts)
       end
 
       #TODO: rewrite using join querey

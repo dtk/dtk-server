@@ -12,15 +12,15 @@ BaseDir = R8::EnvironmentConfig::CoreCookbooksRoot
 Implementation = {:type => :chef, :version => "0.10.0"}
 
 def add_user_and_group(username)
-  exists_user,user_id = add_if_does_not_exist(:user,:username,username)
-  exists_group,group_id = add_if_does_not_exist(:user_group,:groupname,username)
+  exists_user,user_id = add_if_does_not_exist(:user,username,:username,username)
+  exists_group,group_id = add_if_does_not_exist(:user_group,username,:groupname,username)
   unless exists_user and exists_group
-    create_row(model_handle(:user_group_relation),{:user_id => user_id, :group_id => group_id})
+    create_row(model_handle(:user_group_relation),{:ref => "#{username}-#{username}",:user_id => user_id, :user_group_id => group_id})
   end
   [user_id,group_id]
 end
 
-def add_if_does_not_exist(model_name,attr,val)
+def add_if_does_not_exist(model_name,ref,attr,val)
   sp_hash = {:cols => [:id],:filter => [:eq,attr,val]}
   mh = model_handle(model_name)
   matching_obj = XYZ::Model.get_objects_from_sp_hash(mh,sp_hash).first
@@ -28,7 +28,7 @@ def add_if_does_not_exist(model_name,attr,val)
     exists = true
   else
     exists = false
-    id = create_row(mh,{attr => val}).first[:id]
+    id = create_row(mh,{:ref => ref, attr => val}).first[:id]
   end
   [exists,id]
 end
@@ -66,9 +66,11 @@ opts =
   end
 
 require Root + '/app'
-add_user_and_group(username)
-exit
+user_id, group_id = add_user_and_group(username)
+container_idh = XYZ::IDHandle[:c => 2, :uri => container_uri, :user_id => user_id, :group_id => group_id]
+opts.merge!(:username => username)
 opts.merge!(:add_implementations => {:type => Implementation[:type], :version => Implementation[:version], :library => Library, :base_directory => BaseDir})
-XYZ::Object.import_objects_from_file(XYZ::IDHandle[:c => 2, :uri => container_uri],import_file,opts)
+
+XYZ::Object.import_objects_from_file(container_idh,import_file,opts)
 
 

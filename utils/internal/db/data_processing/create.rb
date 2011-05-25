@@ -113,17 +113,19 @@ module XYZ
         returning_ids.map{|row|model_handle.createIDH(:id => row[:id], :display_name => row[:display_name],:parent_guid => row[:parent_id])}
       end
 
-      def create_simple_instance?(new_uri,c,opts={})
-        return new_uri if exists? IDHandle[:uri => new_uri, :c => c]
-        ref,factory_uri = RestURI.parse_instance_uri(new_uri)
+      def create_simple_instance?(uri_id_handle,opts={})
+        return uri_id_handle[:uri] if exists? uri_id_handle
+        ref,factory_uri = RestURI.parse_instance_uri(uri_id_handle[:uri])
 
         #create parent if does not exists and this is recursive create
         if opts[:recursive_create]
           relation_type,parent_uri = RestURI.parse_factory_uri(factory_uri)
-          create_simple_instance?(parent_uri,c,opts) unless parent_uri == "/" or exists? IDHandle[:uri => parent_uri, :c => c]
+          parent_idh = uri_id_handle.createIDH(:uri => parent_uri)
+          create_simple_instance?(parent_idh,opts) unless parent_uri == "/" or exists? parent_idh
         end
         assignments = opts[:set_display_name] ? {:display_name => ref} : {}
-        create_from_hash(IDHandle[:c => c, :uri => factory_uri, :is_factory => true],{ref => assignments}).first
+        factory_idh = uri_id_handle.createIDH(:uri => factory_uri, :is_factory => true)
+        create_from_hash(factory_idh,{ref => assignments}).first
       end
 
      private

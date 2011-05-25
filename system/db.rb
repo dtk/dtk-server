@@ -158,7 +158,8 @@ class DBRel < Hash
   ID_INFO_TABLE = DBRel[:schema => TOP_SCHEMA_NAME, :table => :id_info, :id => :relation_id, :local_id => :relation_local_id,:parent_id => :parent_id, :relation_type => :id_info]
   CLONE_HELPER_TABLE = DBRel[:schema => TOP_SCHEMA_NAME, :table => :clone_helper]
   CONTEXT_TABLE = DBRel[:schema => :context, :table => :context]
-  USER_TABLE = DBRel[:schema => :user, :table => :user]
+  USER_TABLE = DBRel[:schema => :app_user, :table => :user]
+  USER_GROUP_TABLE = DBRel[:schema => :app_user, :table => :group]
   ELEMENT_UPDATE_TRIGGER = {:schema => TOP_SCHEMA_NAME, :fn => :element_update}
   FUNCTION_SCHEMA = TOP_SCHEMA_NAME
 

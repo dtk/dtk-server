@@ -8,7 +8,7 @@
       :on_delete=>:cascade,
       :on_update=>:cascade
     },
-    :group_id=>{
+    :user_group_id=>{
       :type=>:bigint,
       :foreign_key_rel_type=>:user_group,
       :on_delete=>:cascade,

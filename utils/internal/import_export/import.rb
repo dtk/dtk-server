@@ -19,11 +19,13 @@ module XYZ
       end
       global_fks = Hash.new
       unless target_id_handle.is_top?
+        #TODO: do we need to factor in opts[:username] here?
         global_fks = input_into_model(target_id_handle,hash_content) 
       else
         hash_content.each do |relation_type,info|
           info.each do |ref,child_hash_content|
-            child_target_id_handle = IDHandle[:c => target_id_handle[:c], :uri => "/#{relation_type}/#{ref}"]
+            child_uri = opts[:username] ? "/#{relation_type}/#{ref}-#{opts[:username]}" : "/#{relation_type}/#{ref}"
+            child_target_id_handle = target_id_handle.createIDH(:uri => child_uri)
             create_prefix_object_if_needed(child_target_id_handle,opts)
             r = input_into_model(child_target_id_handle,child_hash_content,:ret_global_fks => true)
             global_fks.merge!(r) if r
@@ -39,7 +41,7 @@ module XYZ
         Log.info("deleting #{target_id_handle}")
         delete_instance(target_id_handle)
       end
-      create_simple_instance?(target_id_handle[:uri],target_id_handle[:c])    
+      create_simple_instance?(target_id_handle)
     end
 
     def add_r8meta!(hash,r8meta)

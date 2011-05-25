@@ -161,6 +161,8 @@ module XYZ
       self[:display_name] = x[:display_name] if x[:display_name]
       self[:parent_guid] = x[:parent_guid].to_i if x[:parent_guid]
       self[:parent_model_name] = x[:parent_model_name].to_sym if x[:parent_model_name]
+      self[:user_id] = x[:user_id] if x[:user_id]
+      self[:group_id] = x[:group_id] if x[:group_id]
       if opts[:set_parent_model_name]
         unless self[:parent_model_name]
           parent_idh = get_parent_id_handle()

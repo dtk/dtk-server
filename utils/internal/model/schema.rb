@@ -305,8 +305,8 @@ module XYZ
           String :display_name
           Timestamp :created_at, :default => SQL.now
           Timestamp :updated_at, :default => SQL.now
-          column :owner_id, ID_TYPES[:id] #TODO: make into foreign key
-          column :group_id, ID_TYPES[:id] #TODO: make into foreign key
+          foreign_key :owner_id, USER_TABLE.schema_table_symbol, FK_CASCADE_OPT.merge({:type =>  ID_TYPES[:id]})
+          foreign_key :group_id, USER_GROUP_TABLE.schema_table_symbol, FK_CASCADE_OPT.merge({:type =>  ID_TYPES[:id]})
         end
 
         @db.create_table_common_extras?(db_rel)

@@ -29,7 +29,8 @@ module Ramaze::Helper
                     [:eq, :status, "pending"]],
         :columns => [:id,:relative_order,:type,:created_node,parent_field_name,:state_change_id].uniq
       }
-      get_objects_from_sp_hash(sp_hash)
+      state_change_mh = model_handle(:state_change)
+      Model.get_objects_from_sp_hash(state_change_mh,sp_hash)
     end
 
     def pending_changed_component(parent_model_name,id_list)
@@ -42,7 +43,8 @@ module Ramaze::Helper
                     [:eq, :status, "pending"]],
         :columns => [:id, :relative_order,:type,:changed_component,parent_field_name,:state_change_id].uniq
       }
-      sc_with_direct_cmps = get_objects_from_sp_hash(sp_hash)
+      state_change_mh = model_handle(:state_change)
+      sc_with_direct_cmps = Model.get_objects_from_sp_hash(state_change_mh,sp_hash)
       add_related_components(sc_with_direct_cmps)
     end
 
@@ -56,7 +58,8 @@ module Ramaze::Helper
                     [:eq, :status, "pending"]],
         :columns => [:id, :relative_order,:type,:changed_attribute,parent_field_name,:state_change_id].uniq
       }      
-      sc_with_direct_cmps = get_objects_from_sp_hash(sp_hash)
+      state_change_mh = model_handle(:state_change)
+      sc_with_direct_cmps = Model.get_objects_from_sp_hash(state_change_mh,sp_hash)
       add_related_components(sc_with_direct_cmps)
     end
 

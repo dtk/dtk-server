@@ -1,9 +1,10 @@
 module XYZ
   module InputIntoModelClassMixins
+    include CommonInputImport
     def input_into_model(container_id_handle,hash_with_assocs,opts={})
       c = container_id_handle[:c]
       fks = Hash.new
-      hash_assigns = remove_fks_and_return_fks!(hash_with_assocs,fks)
+      hash_assigns = remove_fks_and_return_fks!(hash_with_assocs,fks,opts)
       prefixes = update_from_hash_assignments(container_id_handle,hash_assigns)
       ret_global_fks = nil
       unless fks.empty?
@@ -40,15 +41,15 @@ module XYZ
       end
     end
 
-    def remove_fks_and_return_fks!(obj,fks,path="")
+    def remove_fks_and_return_fks!(obj,fks,opts={},path="")
       obj.each_pair do |k,v|
         if v.kind_of?(Hash) 
-	  remove_fks_and_return_fks!(v,fks,path + "/" + k.to_s)	    
+	  remove_fks_and_return_fks!(v,fks,opts,path + "/" + k.to_s)	    
         elsif v.kind_of?(Array)
 	  next
         elsif is_foreign_key_attr?(k)
-	  fks[path] ||= {}
-	  fks[path][foreign_key_attr_form(k)] = v 
+	  fks[path] ||= Hash.new
+	  fks[path][foreign_key_attr_form(k)] = modify_uri_with_user_name(v,opts[:username]) 
 	  obj.delete(k)
         end 
       end

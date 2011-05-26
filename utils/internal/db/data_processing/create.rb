@@ -4,8 +4,11 @@ module XYZ
     module DataProcessingCreate
       #creates a new instance w/ref_num bumped if needed
       #TODO: make more efficient by reducing or elimintaing calss to id table as well as using bulk inserts
-      #TODO: may eventually depercate this
+      #TODO: may eventually deprecate this
       def create_from_hash(id_handle,hash,opts={})
+        if id_handle.is_top?()
+          id_handle
+        end
 	id_info = IDInfoTable.get_row_from_id_handle id_handle, :raise_error => true 
 
 	#check if instance or factory
@@ -232,20 +235,7 @@ module XYZ
       end
 
       def insert_into_db(factory_idh,db_rel,scalar_assignments)
-        c = factory_idh[:c]
-        context_info = context().inject({}){|h,kv| factory_idh.has_key?(kv[0]) ? h.merge(kv[1] => factory_idh[kv[0]]) : h}
-	new_id = dataset(db_rel).insert(scalar_assignments.merge(context_info))
-	raise Error.new("Error inserting into table") unless new_id
-        new_id
-      end
-
-      def context()
-        @context ||= 
-          {
-          :c => CONTEXT_ID,
-          :user_id => :owner_id,
-          :group_id => :group_id
-        }
+	dataset(db_rel).insert(add_columns_for_authorization(scalar_assignments,factory_idh))
       end
     end
   end

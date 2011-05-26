@@ -24,7 +24,6 @@
    :region,
    :assoc_region_network,
    :data_source,
-   :search_object,
    :constraints,
    :component_relation,
    :implementation

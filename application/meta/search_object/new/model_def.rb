@@ -9,6 +9,5 @@
       :on_delete=>:set_null,
       :on_update=>:set_null
     }
-  },
-  :many_to_one=>[:library]
+  }
 }

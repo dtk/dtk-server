@@ -2,10 +2,6 @@ require File.expand_path('search_pattern_parser', File.dirname(__FILE__))
 
 module XYZ
   class SearchObject < Model
-#    set_relation_name(:search,:object)
-    ### virtual column defs
-    #helper fns
-
     def json_search_pattern()
       search_pattern ? JSON.generate(search_pattern) : nil
     end
@@ -82,7 +78,7 @@ module XYZ
       view.update_cache_for_saved_search()
     end
 
-    def save()
+    def save(model_handle)
       search_pattern_db =  search_pattern.ret_form_for_db()
       relation_db = (search_pattern||{})[:relation] ? search_pattern[:relation].to_s : nil
       if @id_handle
@@ -94,17 +90,16 @@ module XYZ
         self.class.update_from_hash_assignments(@id_handle,hash_assignments)
       else
         raise Error.new("saved search cannot be created if search_pattern or relation does not exist") unless search_pattern_db and relation_db
-        #TODO: consider putting searches at top
-        parent_id_handle = IDHandle[:c => @c,:uri => "/library/test", :model_name => :library] #TODO: stub
+        factory_idh = model_handle.createIDH(:uri => "/search_object", :is_factory => true)
         hash_assignments = {
           :display_name => name || "search_object",
           :search_pattern => search_pattern_db,
           :relation => relation_db
         }
         ref = hash_assignments[:display_name]
-        create_hash = {:search_object => {ref => hash_assignments}}
-        new_id = self.class.create_from_hash(parent_id_handle,create_hash).map{|x|x[:id]}.first
-        @id_handle = IDHandle[:c => @c, :guid => new_id, :model_name => :search_object]
+        create_hash = {ref => hash_assignments}
+        new_id = Model.create_from_hash(factory_idh,create_hash).map{|x|x[:id]}.first
+        @id_handle = IDHandle[:c => @c, :id => new_id, :model_name => :search_object]
       end
       id()
     end

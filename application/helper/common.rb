@@ -20,7 +20,6 @@ module Ramaze::Helper
 
     #helpers that interact with model
     def get_objects(model_name,where_clause={},opts={})
-      c = ret_session_context_id()
       model_class(model_name).get_objects(model_handle(model_name),where_clause,opts)
     end
 

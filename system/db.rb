@@ -118,7 +118,22 @@ module XYZ
       end
       conjoin_set.size == 1 ? where_clause : SQL.and(*conjoin_set)
     end
- 
+
+    def add_columns_for_authorization(scalar_assignments,factory_idh)
+      to_add = Hash.new
+      to_add.merge!(CONTEXT_ID => factory_idh[:c]) if factory_idh[:c]
+      to_add.merge!(:owner_id => factory_idh[:user_id]) if factory_idh[:user_id]
+      if group_ids = factory_idh[:group_ids]
+        if group_ids.size == 1 
+          to_add.merge!(:group_id => group_ids.first)
+        elsif group_ids.size > 1 
+          Log.error("currently not treating case where multiple members of group_ids")
+        end
+      end
+      scalar_assignments.merge(to_add)
+    end
+
+
     def self.ret_keys_as_symbols(obj)
       return obj.map{|x|ret_keys_as_symbols(x)} if obj.kind_of?(Array)
       return obj unless obj.kind_of?(Hash)
@@ -192,7 +207,7 @@ class DBRel < Hash
     :created_at => {:type => :timestamp},
     :updated_at => {:type => :timestamp},
     :owner_id => {:type => ID_TYPES[:id], :hidden => true},
-    :team_id => {:type => ID_TYPES[:id], :hidden => true}
+    :group_id => {:type => ID_TYPES[:id], :hidden => true}
   }
 end
 

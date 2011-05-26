@@ -67,7 +67,7 @@ opts =
 
 require Root + '/app'
 user_id, group_id = add_user_and_group(username)
-container_idh = XYZ::IDHandle[:c => 2, :uri => container_uri, :user_id => user_id, :group_id => group_id]
+container_idh = XYZ::IDHandle[:c => 2, :uri => container_uri, :user_id => user_id, :group_ids => [group_id]]
 opts.merge!(:username => username)
 opts.merge!(:add_implementations => {:type => Implementation[:type], :version => Implementation[:version], :library => Library, :base_directory => BaseDir})
 

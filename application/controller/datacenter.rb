@@ -2,6 +2,7 @@ module XYZ
   class DatacenterController < Controller
     #TODO: just to show values
     def list()
+      login_first
       c = ret_session_context_id()
       model_handle = ModelHandle.new(c,:project)
       projects = Project.get_all(model_handle)

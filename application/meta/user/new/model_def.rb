@@ -8,7 +8,7 @@
     :last_name => {:type=>:varchar, :size => 50},
     :is_admin_user=> {:type=>:boolean},
     :email_addresses_primary => {:type=>:varchar, :size => 50},
-    :settings => {:type=>:json, :size => 50},
+    :settings => {:type=>:json},
     :status => {:type=>:varchar, :size => 50}
   }
 }

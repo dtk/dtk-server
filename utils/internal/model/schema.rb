@@ -146,8 +146,13 @@ module XYZ
 
       def migrate_all_models(direction)
         # order is important
+        user_models = ret_user_models()
+        user_models.each do |model|
+          model.create_column_defs_common_fields?(direction,:user_model=>true)
+        end
+
         concrete_models = ret_concrete_models()
-        concrete_models.each do |model| 
+        (concrete_models-user_models).each do |model| 
           model.create_column_defs_common_fields?(direction) 
         end
         concrete_models.each{|model| model.apply_migration_defs(direction)}
@@ -175,8 +180,12 @@ module XYZ
         models.reject {|m|m.top? or not m.superclass == Model}
       end
 
-      def create_column_defs_common_fields?(direction)
-        create_table_common_fields?(@db_rel) if direction == :up
+      def ret_user_models()
+        [XYZ::User,XYZ::UserGroup,XYZ::UserGroupRelation]
+      end
+
+      def create_column_defs_common_fields?(direction,opts={})
+        create_table_common_fields?(@db_rel,opts) if direction == :up
       end
 
       def apply_migration_defs(direction)
@@ -292,10 +301,11 @@ module XYZ
       end
 
       #TODO: drive off of  COMMON_REL_COLUMNS  
-      def create_table_common_fields?(db_rel)
+      def create_table_common_fields?(db_rel,opts={})
         create_schema_for_db_rel?(db_rel)
         seq_ref = @db.ret_sequence_ref(TOP_LOCAL_ID_SEQ)
         @db.create_table?(db_rel) do
+          #TODO: do we want user models indexed by context
           foreign_key CONTEXT_ID, CONTEXT_TABLE.schema_table_symbol, FK_CASCADE_OPT.merge({:null => false,:type =>  ID_TYPES[:context_id]})
           primary_key :id, :type => ID_TYPES[:id], :null => false
           column :local_id, ID_TYPES[:local_id], :default => Sequel::LiteralString.new(seq_ref), :null => false
@@ -305,8 +315,10 @@ module XYZ
           String :display_name
           Timestamp :created_at, :default => SQL.now
           Timestamp :updated_at, :default => SQL.now
-          foreign_key :owner_id, USER_TABLE.schema_table_symbol, FK_CASCADE_OPT.merge({:type =>  ID_TYPES[:id]})
-          foreign_key :group_id, USER_GROUP_TABLE.schema_table_symbol, FK_CASCADE_OPT.merge({:type =>  ID_TYPES[:id]})
+          unless opts[:user_model]
+            foreign_key :owner_id, USER_TABLE.schema_table_symbol, FK_CASCADE_OPT.merge({:type =>  ID_TYPES[:id]})
+            foreign_key :group_id, USER_GROUP_TABLE.schema_table_symbol, FK_CASCADE_OPT.merge({:type =>  ID_TYPES[:id]})
+          end
         end
 
         @db.create_table_common_extras?(db_rel)

@@ -162,7 +162,7 @@ module XYZ
        	if parent_uri == "/" ## if top level object
           ref_num = compute_ref_num(db_rel,ref,c)          	  
 	  #TBD check that the assignments are legal, or trap
-	  new_id = insert_into_db(c,db_rel,scalar_assignments.merge({:ref_num => ref_num}))
+	  new_id = insert_into_db(factory_idh,db_rel,scalar_assignments.merge({:ref_num => ref_num}))
         else
 	  parent_id_info = IDInfoTable.get_row_from_uri parent_uri,c,:raise_error => true 
 	  parent_id = parent_id_info[:id]
@@ -176,7 +176,7 @@ module XYZ
           if opts[:sync_display_name_with_ref] and ref_num and ref_num > 1
             merge_attrs.merge!(:display_name => "#{ref}-#{ref_num.to_s}")
           end
-	  new_id = insert_into_db(c,db_rel,scalar_assignments.merge(merge_attrs))
+	  new_id = insert_into_db(factory_idh,db_rel,scalar_assignments.merge(merge_attrs))
 
 	end              
 
@@ -187,7 +187,7 @@ module XYZ
 	#need to fill in extra columns in associated uri table entry
 	IDInfoTable.update_instance(db_rel,new_id,new_uri,relation_type,parent_id,parent_relation_type)
 	############# processing scalar columns by inserting a row in db_rel
-
+        
 	create_factory_uris_and_contained_objects(new_uri,new_id,relation_type,obj_assignments,c,opts)
 	
 	{:uri => new_uri, :id => new_id}
@@ -231,10 +231,21 @@ module XYZ
 	max ? max + 1 : 2
       end
 
-      def insert_into_db(c,db_rel,scalar_assignments)
-	new_id = dataset(db_rel).insert(scalar_assignments.merge({CONTEXT_ID => c}))
+      def insert_into_db(factory_idh,db_rel,scalar_assignments)
+        c = factory_idh[:c]
+        context_info = context().inject({}){|h,kv| factory_idh.has_key?(kv[0]) ? h.merge(kv[1] => factory_idh[kv[0]]) : h}
+	new_id = dataset(db_rel).insert(scalar_assignments.merge(context_info))
 	raise Error.new("Error inserting into table") unless new_id
         new_id
+      end
+
+      def context()
+        @context ||= 
+          {
+          :c => CONTEXT_ID,
+          :user_id => :owner_id,
+          :group_id => :group_id
+        }
       end
     end
   end

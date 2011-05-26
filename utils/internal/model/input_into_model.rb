@@ -2,14 +2,13 @@ module XYZ
   module InputIntoModelClassMixins
     include CommonInputImport
     def input_into_model(container_id_handle,hash_with_assocs,opts={})
-      c = container_id_handle[:c]
       fks = Hash.new
       hash_assigns = remove_fks_and_return_fks!(hash_with_assocs,fks,opts)
       prefixes = update_from_hash_assignments(container_id_handle,hash_assigns)
       ret_global_fks = nil
       unless fks.empty?
         container_id_info = IDInfoTable.get_row_from_id_handle(container_id_handle)
-        ret_global_fks = update_with_id_values(fks,c,prefixes,container_id_info[:uri],opts)
+        ret_global_fks = update_with_id_values(fks,container_id_handle[:c],prefixes,container_id_info[:uri],opts)
       end
       ret_global_fks
     end

@@ -191,12 +191,21 @@ module XYZ
 
   class ModelHandle < Hash
     include CommonMixin
-    def initialize(c,model_name,parent_model_name=nil)
+    def initialize(c,model_name,parent_model_name=nil,user=nil)
       super()
       self[:c] = c
       self[:model_name] = model_name.to_sym
       self[:parent_model_name] = parent_model_name.to_sym if parent_model_name
+      if user
+        self[:user_id] = user[:id] if  user[:id]
+        self[:group_ids] =  user[:group_ids] if user[:group_ids]
+      end
       freeze
+    end
+
+    def self.create_from_user(user,model_name)
+      parent_model_name=nil
+      self.new(user[:c],model_name,parent_model_name,user)
     end
 
     def get_virtual_columns()

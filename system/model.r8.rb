@@ -78,6 +78,10 @@ module XYZ
         end
     end
 
+    def self.create_from_model_handle(hash_scalar_values,model_handle)
+      self.new(hash_scalar_values,model_handle[:c],model_handle[:model_name])
+    end
+
     def i18n_language()
       @id_handle ? @id_handle.i18n_language() : R8::Config[:default_language]
     end
@@ -265,7 +269,6 @@ module XYZ
     #may do so by having constructor for search object that takes model_handle and filter
     #TODO: this fn is limited in how ir deals with vcols on column list;
     def self.get_objects(model_handle,where_clause={},opts={})
-      c = model_handle[:c]
       model_name = model_handle[:model_name]
 
       base_field_set =  opts[:field_set] || FieldSet.default(model_name)
@@ -280,7 +283,7 @@ module XYZ
         graph_ds = get_objects_just_dataset(model_handle,where_clause,augmented_opts)
         related_col_info.each do |join_info|
           rs_opts = (join_info[:cols] ? FieldSet.opt(join_info[:cols],join_info[:model_name]) : {}).merge :return_as_hash => true
-          right_ds = @db.get_objects_just_dataset(ModelHandle.new(c,join_info[:model_name]),nil,rs_opts)
+          right_ds = @db.get_objects_just_dataset(model_handle.createMH(join_info[:model_name]),nil,rs_opts)
           graph_ds = graph_ds.graph(:left_outer,right_ds,join_info[:join_cond])
         end
         graph_ds = graph_ds.paging_and_order(opts)
@@ -293,7 +296,7 @@ module XYZ
       c = id_handle[:c]
       id_info = IDInfoTable.get_row_from_id_handle id_handle, :raise_error => opts[:raise_error], :short_circuit_for_minimal_row => true
       return unless id_info and id_info[:id]
-      get_objects(ModelHandle.new(c,id_info[:relation_type]),{:id => id_info[:id]},opts).first
+      get_objects(id_handle.createMH(id_info[:relation_type]),{:id => id_info[:id]},opts).first
     end
 
     def self.get_object_deep(id_handle,opts={})

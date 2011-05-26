@@ -104,6 +104,20 @@ module XYZ
       self.class.ret_parent_id_field_name(parent_db_rel,db_rel)
     end
   private
+
+    def augment_for_authorization(where_clause,model_handle)
+      return {} unless where_clause
+      conjoin_set = [where_clause]
+      conjoin_set << {CONTEXT_ID => model_handle[:c]} if model_handle[:c]
+      if group_ids = model_handle[:group_ids]
+        if group_ids.size == 1 
+          conjoin_set << {:group_id => group_ids.first}
+        elsif group_ids.size > 1 
+          conjoin_set << {:group_id => group_ids}
+        end
+      end
+      conjoin_set.size == 1 ? where_clause : SQL.and(*conjoin_set)
+    end
  
     def self.ret_keys_as_symbols(obj)
       return obj.map{|x|ret_keys_as_symbols(x)} if obj.kind_of?(Array)

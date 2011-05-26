@@ -98,7 +98,6 @@ pp [:debug_stored_new_pos,get_objects(model_name,SQL.in(:id,model_items.map{|ite
     end
 
     def search
-#pp request.params
       model_name = request.params['model_name']
       field_set = Model::FieldSet.default(model_name.to_sym)
 #      search_query = request.params['sq']

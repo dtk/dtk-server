@@ -7,25 +7,24 @@ module XYZ
 
       #where clause could be hash or string
       def get_objects_scalar_columns(model_handle,where_clause=nil,opts={})
-        c = model_handle[:c]
-        relation_type =  model_handle[:model_name]
+        model_name =  model_handle[:model_name]
         #special processing if parent_id given
         parent_id = opts[:parent_id]
         if parent_id
           parent_id_info = IDInfoTable.get_row_from_guid(parent_id)
-          parent_fk_col = ret_parent_id_field_name(parent_id_info[:db_rel],DB_REL_DEF[relation_type])
+          parent_fk_col = ret_parent_id_field_name(parent_id_info[:db_rel],DB_REL_DEF[model_name])
           where_clause = SQL.and(where_clause,{parent_fk_col => parent_id_info[:id]})
         end
 
-        db_rel = DB_REL_DEF[relation_type]
-        filter = SQL.and({CONTEXT_ID => c},where_clause)
+        db_rel = DB_REL_DEF[model_name]
+        filter = augment_for_authorization(where_clause,model_handle) #SQL.and({CONTEXT_ID => c},where_clause)
 	ds = ret_dataset_with_scalar_columns(db_rel,opts).filter(filter)
-        return SQL::Dataset.new(model_handle,ds.from_self(:alias => relation_type)) if opts[:return_just_sequel_dataset]
+        return SQL::Dataset.new(model_handle,ds.from_self(:alias => model_name)) if opts[:return_just_sequel_dataset]
 
         ds = DB.ret_paging_and_order_added_to_dataset(ds,opts)
 	ds.all.map do |raw_hash|
           hash = process_raw_scalar_hash!(raw_hash,db_rel)
-          db_rel[:model_class].new(hash,c,relation_type)
+          db_rel[:model_class].create_from_model_handle(hash,model_handle)
         end
       end
 
@@ -36,20 +35,18 @@ module XYZ
 
       #TODO: may be able to optimze seeing that curerntly uses get_objects
       def get_object_scalar_columns(id_handle,opts={})
-	c = id_handle[:c]
 	id_info = IDInfoTable.get_row_from_id_handle id_handle, :raise_error => opts[:raise_error], :short_circuit_for_minimal_row => true
 	return unless id_info and id_info[:id]
-        get_objects_scalar_columns(ModelHandle.new(c,id_info[:relation_type]),{:id => id_info[:id]},opts).first
+        get_objects_scalar_columns(id_handle.createMH(id_info[:relation_type]),{:id => id_info[:id]},opts).first
       end
 
       #TBD: convert so where clause could be hash or string       
       def get_object_ids_wrt_parent(relation_type,parent_id_handle,where_clause=nil)
-	c = parent_id_handle[:c]
 	db_rel = DB_REL_DEF[relation_type]
 	parent_id_info = IDInfoTable.get_row_from_id_handle(parent_id_handle)
         parent_fk_col = ret_parent_id_field_name(parent_id_info[:db_rel],db_rel)
-        w = SQL.and(where_clause,{parent_fk_col => parent_id_info[:id],CONTEXT_ID => c})
-	ds = dataset(db_rel).select(:id).where(w)
+        wc = SQL.and(where_clause,{parent_fk_col => parent_id_info[:id]})
+	ds = dataset(db_rel).select(:id).where(augment_for_authorization(wc,model_handle))
         ds.all.map{|raw_hash|
 	  IDInfoTable.ret_guid_from_db_id(raw_hash[:id],db_rel[:relation_type])
 	}

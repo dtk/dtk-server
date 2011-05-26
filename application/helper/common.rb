@@ -7,15 +7,14 @@ module Ramaze::Helper
     end      
 
     def model_handle(model_name_x=model_name())
-      c = ret_session_context_id()
-      ModelHandle.new(c,model_name_x)
+      ModelHandle.create_from_user(user,model_name_x)
     end
    private
 
     #helpers that interact with model
     def get_objects(model_name,where_clause={},opts={})
       c = ret_session_context_id()
-      model_class(model_name).get_objects(ModelHandle.new(c,model_name),where_clause,opts)
+      model_class(model_name).get_objects(model_handle(model_name),where_clause,opts)
     end
 
     def get_object_by_id(id,model_name_x=model_name())

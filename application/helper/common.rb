@@ -7,7 +7,14 @@ module Ramaze::Helper
     end      
 
     def model_handle(model_name_x=model_name())
-      ModelHandle.create_from_user(user,model_name_x)
+      user_x = user
+      if user_x.class == nil
+        if defined?(R8::EnvironmentConfig::TestUser)
+          c = ret_session_context_id()
+          user_x = @test_user ||= XYZ::User.get_user(ModelHandle.new(c,:user),R8::EnvironmentConfig::TestUser)
+        end
+      end
+      ModelHandle.create_from_user(user_x,model_name_x)
     end
    private
 

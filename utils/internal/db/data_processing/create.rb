@@ -187,34 +187,34 @@ module XYZ
 	#need to fill in extra columns in associated uri table entry
 	IDInfoTable.update_instance(db_rel,new_id,new_uri,relation_type,parent_id,parent_relation_type)
 	############# processing scalar columns by inserting a row in db_rel
-        
-	create_factory_uris_and_contained_objects(new_uri,new_id,relation_type,obj_assignments,c,opts)
+        container_idh = factory_idh.createIDH(:uri => new_uri, :c => c, :model_name => relation_type)
+	create_factory_uris_and_contained_objects(container_idh,new_id,obj_assignments,opts)
 	
 	{:uri => new_uri, :id => new_id}
       end
 
-      def create_factory_uris_and_contained_objects(uri,id,relation_type,obj_assignments,c,opts={})
-	db_rel = DB_REL_DEF[relation_type]
+      def create_factory_uris_and_contained_objects(container_idh,id,obj_assignments,opts={})
+	db_rel = DB_REL_DEF[container_idh[:model_name]]
 	return nil if db_rel.nil? #TBD: this probably should be an error
 	child_list = db_rel[:one_to_many]
 	return nil if child_list.nil?
 
 	child_list.each do |child_type|
-	  factory_uri = RestURI.ret_factory_uri(uri,child_type)
-	  IDInfoTable.insert_factory(child_type,factory_uri,relation_type,id,c)
+	  factory_uri = RestURI.ret_factory_uri(container_idh[:uri],child_type)
+	  IDInfoTable.insert_factory(child_type,factory_uri,container_idh[:model_name],id,container_idh[:c])
 	  #TBD: does not check if there are erroneous subobjects on obj_assignments
 	  #index can be string or symbol
 	  child_hash_or_array = obj_assignments[child_type] || obj_assignments[child_type.to_s]
 	  next if child_hash_or_array.nil?
           if child_hash_or_array.kind_of?(Hash)
 	    child_hash_or_array.each do |ref,assignments|
-              factory_idh = IDHandle[:uri => factory_uri, :c => c, :is_factory => true]
+              factory_idh = container_idh.createIDH(:uri => factory_uri,:is_factory => true)
 	      create_instance(factory_idh,ref,assignments,opts)
 	    end
 	  elsif child_hash_or_array.kind_of?(Array)
             child_hash_or_array.each do |child_hash|
 	      child_hash.each do |ref,assignments|
-                factory_idh = IDHandle[:uri => factory_uri, :c => c, :is_factory => true]
+                factory_idh = container_idh.createIDH(:uri => factory_uri,:is_factory => true)
 	        create_instance(factory_idh,ref,assignments,opts)
               end
             end

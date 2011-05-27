@@ -202,7 +202,7 @@ module XYZ
 
       #dispatcher line
       if ACTION_HANDLER_IS_ASYNCHRONOUS[action]
-        Ramaze.defer{
+        CreateThread.defer{
           begin
             obj.send(ACTION_HANDLER_METHOD_NAME[action] || action,*params)
             task.update_status(:complete) 

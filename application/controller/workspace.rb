@@ -675,7 +675,7 @@ pp datacenter
       top_level_task.save!()
       workflow = Workflow.create(top_level_task)
 
-      Ramaze.defer do
+      CreateThread.defer do
         begin
           puts "in commit_changes defer"
           top_task_id = top_level_task.id_handle.get_id()

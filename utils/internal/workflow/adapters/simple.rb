@@ -81,7 +81,7 @@ module XYZ
         lock = Mutex.new
         #TODO: not killing concurrent subtasks if one failes
         threads = @task.subtasks.map do |subtask|
-          Thread.new do 
+          CreateThread.defer do 
             subtask_status = Simple.new(subtask).execute(top_task_idh)
             lock.synchronize do
               status = :failed if subtask_status == :failed 

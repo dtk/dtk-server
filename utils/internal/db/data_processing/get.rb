@@ -17,7 +17,7 @@ module XYZ
         end
 
         db_rel = DB_REL_DEF[model_name]
-        filter = augment_for_authorization(where_clause,model_handle) #SQL.and({CONTEXT_ID => c},where_clause)
+        filter = DB.augment_for_authorization(where_clause,model_handle) #SQL.and({CONTEXT_ID => c},where_clause)
 	ds = ret_dataset_with_scalar_columns(db_rel,opts).filter(filter)
         return SQL::Dataset.new(model_handle,ds.from_self(:alias => model_name)) if opts[:return_just_sequel_dataset]
 
@@ -46,7 +46,7 @@ module XYZ
 	parent_id_info = IDInfoTable.get_row_from_id_handle(parent_id_handle)
         parent_fk_col = ret_parent_id_field_name(parent_id_info[:db_rel],db_rel)
         wc = SQL.and(where_clause,{parent_fk_col => parent_id_info[:id]})
-	ds = dataset(db_rel).select(:id).where(augment_for_authorization(wc,model_handle))
+	ds = dataset(db_rel).select(:id).where(DB.augment_for_authorization(wc,model_handle))
         ds.all.map{|raw_hash|
 	  IDInfoTable.ret_guid_from_db_id(raw_hash[:id],db_rel[:relation_type])
 	}

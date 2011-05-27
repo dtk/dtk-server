@@ -12,8 +12,8 @@ module XYZ
 
           raise Error.new("illegal model name (#{relation_in_search_pattern}) in search pattern") unless DB_REL_DEF[relation_in_search_pattern]
 
-          sequel_filter,vcol_sql_fns = SimpleSearchPattern::ret_sequel_filter_and_vcol_sql_fns(search_pattern,mh_in_search_pattern)
-
+          sequel_filter_wo_auth,vcol_sql_fns = SimpleSearchPattern::ret_sequel_filter_and_vcol_sql_fns(search_pattern,mh_in_search_pattern)
+          sequel_filter = DB.augment_for_authorization(sequel_filter_wo_auth,mh_in_search_pattern)
           remote_col_info = search_object.related_remote_column_info(vcol_sql_fns)
           sequel_ds = SimpleSearchPattern::ret_sequel_ds_with_sequel_filter(mh_in_search_pattern,search_pattern,sequel_filter,remote_col_info,vcol_sql_fns)
           return nil unless sequel_ds

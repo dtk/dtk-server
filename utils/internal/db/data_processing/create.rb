@@ -235,7 +235,7 @@ module XYZ
       end
 
       def insert_into_db(factory_idh,db_rel,scalar_assignments)
-	dataset(db_rel).insert(add_columns_for_authorization(scalar_assignments,factory_idh))
+	dataset(db_rel).insert(DB.add_columns_for_authorization(scalar_assignments,factory_idh))
       end
     end
   end

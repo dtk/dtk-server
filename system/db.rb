@@ -105,7 +105,7 @@ module XYZ
     end
   private
 
-    def augment_for_authorization(where_clause,model_handle)
+    def self.augment_for_authorization(where_clause,model_handle)
       conjoin_set = where_clause ? [where_clause] : Array.new 
       session = CurrentSession.new
       auth_filters = NoAuth.include?(model_handle[:model_name]) ? nil : session.get_auth_filters()
@@ -123,7 +123,7 @@ module XYZ
 
     NoAuth = [:user,:user_group,:user_group_relation]
 
-    def process_session_auth(session,auth_filters)
+    def self.process_session_auth(session,auth_filters)
       ret =  Array.new
       user_obj = session.get_user_object()
       return ret unless user_obj
@@ -142,7 +142,7 @@ module XYZ
       end
       ret
     end
-    def auth_context()
+    def self.auth_context()
       @auth_context ||= {
         :c => [:c,CONTEXT_ID],
         :user_id => [:id,:owner_id]
@@ -150,7 +150,7 @@ module XYZ
       }
     end
 
-    def add_columns_for_authorization(scalar_assignments,factory_idh)
+    def self.add_columns_for_authorization(scalar_assignments,factory_idh)
       to_add = Hash.new
       user_obj = CurrentSession.new.get_user_object()
       if user_obj

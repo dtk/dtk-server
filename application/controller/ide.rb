@@ -25,6 +25,9 @@ module XYZ
       include_js_tpl(tpl_info[:src])
 
       projects_json = JSON.generate(projects)
+#TODO: figure out why this user init isnt firing inside of bundle and return
+#DEBUG
+      run_javascript("R8.User.init();")
       run_javascript("R8.IDE.init(#{projects_json});")
 #      run_javascript("R8.IDE.addProjects(#{projects_json});")
 

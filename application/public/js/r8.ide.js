@@ -98,6 +98,7 @@ if (!R8.IDE) {
 				}
 				, {
 					'id': 'editor-panel',
+					'type': 'editor',
 					'pClass': 'foobut',
 					'minHeight': 100,
 					'minWidth': 300,
@@ -365,9 +366,6 @@ if (!R8.IDE) {
 				}
 			},
 
-
-
-
 			initPanelContents: function() {
 				_projectViewNode = R8.Utils.Y.one('#project-view-content');
 //				this.renderProjects();
@@ -455,7 +453,13 @@ if (!R8.IDE) {
 						_mainRegionPanels['editor-panel'].resize();
 //						that.resizePanels();
 					});
+					editorResizer.on('drag:end',function(e){
+//DEBUG
+						var editorPanelNode = R8.Utils.Y.one('#editor-panel');
+						var editorHeight = editorPanelNode.getStyle('height');
 
+						R8.User.setSetting('editorPanelHeight',editorHeight);
+					});
 				});
 			},
 			toggleDetails: function(e) {

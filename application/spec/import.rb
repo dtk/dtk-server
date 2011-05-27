@@ -17,7 +17,7 @@ def add_user_and_group(username)
   unless exists_user and exists_group
     create_row(model_handle(:user_group_relation),{:ref => "#{username}-#{username}",:user_id => user_id, :user_group_id => group_id})
   end
-  [user_id,group_id]
+  XYZ::User.get_user(model_handle(:user),username)
 end
 
 def add_if_does_not_exist(model_name,ref,attr,val)
@@ -66,11 +66,13 @@ opts =
   end
 
 require Root + '/app'
-user_id, group_id = add_user_and_group(username)
-container_idh = XYZ::IDHandle[:c => 2, :uri => container_uri, :user_id => user_id, :group_ids => [group_id]]
+user_obj = add_user_and_group(username)
+
+container_idh = XYZ::IDHandle[:c => 2, :uri => container_uri, :user_id => user_obj[:id], :group_ids => user_obj[:group_ids]]
 opts.merge!(:username => username)
 opts.merge!(:add_implementations => {:type => Implementation[:type], :version => Implementation[:version], :library => Library, :base_directory => BaseDir})
 
+XYZ::CurrentSession.new.set_user_object(user_obj)
 XYZ::Object.import_objects_from_file(container_idh,import_file,opts)
 
 

@@ -121,14 +121,19 @@ module XYZ
 
     def add_columns_for_authorization(scalar_assignments,factory_idh)
       to_add = Hash.new
-      to_add.merge!(CONTEXT_ID => factory_idh[:c]) if factory_idh[:c]
-      to_add.merge!(:owner_id => factory_idh[:user_id]) if factory_idh[:user_id]
-      if group_ids = factory_idh[:group_ids]
-        if group_ids.size == 1 
-          to_add.merge!(:group_id => group_ids.first)
-        elsif group_ids.size > 1 
-          Log.error("currently not treating case where multiple members of group_ids")
+      user_obj = CurrentSession.new.get_user_object()
+      if user_obj
+        to_add.merge!(CONTEXT_ID => user_obj[:c]) if user_obj[:c]
+        to_add.merge!(:owner_id => user_obj[:id]) if user_obj[:id]
+        if group_ids = user_obj[:group_ids]
+          if group_ids.size == 1 
+            to_add.merge!(:group_id => group_ids.first)
+          elsif group_ids.size > 1 
+            Log.error("currently not treating case where multiple members of group_ids")
+          end
         end
+      else
+        to_add.merge!(CONTEXT_ID => factory_idh[:c]) if factory_idh[:c]
       end
       scalar_assignments.merge(to_add)
     end

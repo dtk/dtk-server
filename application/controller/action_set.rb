@@ -2,7 +2,12 @@ module XYZ
   class ActionsetController < Controller
     def process(*route)
       
-#      login_first unless route.first == "user"
+      unless route.first == "user"
+        login_first 
+        session = CurrentSession.new
+        session.set_user_object(user_object())
+        session.set_auth_filters(:c,:group_ids)
+      end
       @json_response = true if ajax_request?
 
       #seperate route in 'route_key' (e.g., object/action, object) and its params 'action_set_params'

@@ -106,17 +106,48 @@ module XYZ
   private
 
     def augment_for_authorization(where_clause,model_handle)
-      return {} unless where_clause
-      conjoin_set = [where_clause]
-      conjoin_set << {CONTEXT_ID => model_handle[:c]} if model_handle[:c]
-      if group_ids = model_handle[:group_ids]
-        if group_ids.size == 1 
-          conjoin_set << {:group_id => group_ids.first}
-        elsif group_ids.size > 1 
-          conjoin_set << {:group_id => group_ids}
+      conjoin_set = where_clause ? [where_clause] : Array.new 
+      session = CurrentSession.new
+      auth_filters = NoAuth.include?(model_handle[:model_name]) ? nil : session.get_auth_filters()
+      if auth_filters 
+        conjoin_set += process_session_auth(session,auth_filters)
+      else
+        conjoin_set << {CONTEXT_ID => model_handle[:c]} if model_handle[:c]
+      end
+      case conjoin_set.size 
+        when 0 then {}
+        when 1 then conjoin_set.first
+        else SQL.and(*conjoin_set)
+      end
+    end
+
+    NoAuth = [:user,:user_group,:user_group_relation]
+
+    def process_session_auth(session,auth_filters)
+      ret =  Array.new
+      user_obj = session.get_user_object()
+      return ret unless user_obj
+      auth_filters.each do |auth_filter|
+        if auth = auth_context[auth_filter]
+          ret << {auth[1] => user_obj[auth[0]]} if user_obj[auth[0]]
+        elsif auth_filter == :group_ids
+          if group_ids = user_obj[:group_ids]
+            if group_ids.size == 1 
+              ret << {:group_id => group_ids.first}
+            elsif group_ids.size > 1 
+              Log.error("currently not treating case where multiple members of group_ids")
+            end
+          end
         end
       end
-      conjoin_set.size == 1 ? where_clause : SQL.and(*conjoin_set)
+      ret
+    end
+    def auth_context()
+      @auth_context ||= {
+        :c => [:c,CONTEXT_ID],
+        :user_id => [:id,:owner_id]
+        #special process of :group_id
+      }
     end
 
     def add_columns_for_authorization(scalar_assignments,factory_idh)

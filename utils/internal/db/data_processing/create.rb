@@ -28,11 +28,14 @@ module XYZ
         duplicate_refs = opts[:duplicate_refs] || :allow #other alternatives: #:no_check | :error_on_duplicate | :prune_duplicates
         columns = field_set.cols
         sequel_select = select_ds.sequel_ds.ungraphed.from_self #ungraphed and from_self just to be safe
+=begin
         #add :c if not present
         unless columns.include?(:c)
           sequel_select = sequel_select.select(*columns).select_more(model_handle[:c] => :c).from_self
           columns << :c
         end
+=end
+        sequel_select = DB.update_create_info_for_user_info!(columns,sequel_select.select(*columns),model_handle)
         #parent_id_col can be null
         parent_id_col = model_handle.parent_id_field_name()
 
@@ -235,7 +238,7 @@ module XYZ
       end
 
       def insert_into_db(factory_idh,db_rel,scalar_assignments)
-	dataset(db_rel).insert(DB.add_columns_for_authorization(scalar_assignments,factory_idh))
+	dataset(db_rel).insert(DB.add_assignments_for_user_info(scalar_assignments,factory_idh))
       end
     end
   end

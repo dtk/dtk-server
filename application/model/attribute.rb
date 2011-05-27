@@ -550,6 +550,9 @@ module XYZ
     end
    public
 
+=begin
+TODO: these should be deprecated
+
     def self.get_attribute_with_base_object(attr_idh,base_model_name)
       field_set = FieldSet.new(:attribute,[:id,:display_name,:value_asserted,"base_object_#{base_model_name}".to_sym])
       filter = [:and,[:eq,:id,attr_idh.get_id()]]
@@ -563,6 +566,7 @@ module XYZ
       ds = SearchObject.create_from_field_set(field_set,attr_model_handle[:c],filter).create_dataset()
       ds.all
     end
+=end
 
     def self.create_needed_l4_sap_attributes(cmp_id_handle,ipv4_host_addresses)
       component_id = cmp_id_handle.get_id()

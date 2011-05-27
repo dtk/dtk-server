@@ -16,6 +16,7 @@ require File.expand_path('internal/view_def_processor', File.dirname(__FILE__))
 require File.expand_path('internal/repo', File.dirname(__FILE__))
 require File.expand_path('internal/parse_log', File.dirname(__FILE__))
 require File.expand_path('internal/current_session', File.dirname(__FILE__))
+require File.expand_path('internal/create_thread', File.dirname(__FILE__))
 
 #just load base classes; specific models dynamically loaded on need basis
 require File.expand_path('internal/data_sources', File.dirname(__FILE__))

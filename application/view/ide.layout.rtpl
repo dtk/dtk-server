@@ -134,6 +134,7 @@ YUI_config = {
 <script src="{%=_app[:base_js_uri]%}/external/ace/src/theme-cobalt.js" type="text/javascript" charset="utf-8"></script>
 
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/ctrl.r8.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.user.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/ui.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/templating.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/utils.r8.js"></script>

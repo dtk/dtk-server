@@ -20,16 +20,21 @@ end
 
 #client.connection.subscribe("/topic/mcollective.discovery.reply")
 
+
+#msg = client.receive(reqid)
+threads = Array.new
+threads << Thread.new do
+  i = 0
+  until i > 10
+    msg = client.receive
+    #msg = client.connection.receive
+    pp msg
+    i += 1
+  end
+end
+
 args = ["ping",
         "discovery",
         {"identity"=>[], "fact"=>[], "agent"=>[], "cf_class"=>[]}]
 reqid = client.sendreq(*args)
-#msg = client.receive(reqid)
-i = 0
-until i > 10
-  msg = client.receive
-  #msg = client.connection.receive
-  pp msg
-  i += 1
-end
-
+threads.each{|t|t.join}

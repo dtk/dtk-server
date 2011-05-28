@@ -3,13 +3,19 @@ module XYZ
     class McollectiveListener
       def initialize(client)
         @client = client
-        @request_ids = Array.new
+        @request_ids = Hash.new
+        @sema = Mutex.new
       end
       def process_event()
         #pattern adapted from mcollective receive
         begin 
           msg = @client.receive
-          raise MsgDoesNotMatchARequestID unless @request_ids.delete(msg[:requestid])
+          match = nil
+          @sema.synchronize do 
+            match = @request_ids.has_key?(msg[:requestid])
+            #TODO: put in logic to keep track of how many responses decrement expected count and if 0, delete
+          end
+          raise MsgDoesNotMatchARequestID unless match
          rescue MsgDoesNotMatchARequestID 
           retry
         end
@@ -18,7 +24,8 @@ module XYZ
 
       #TODO: for testing non private
       def add_request_id(request_id)
-        @request_ids << request_id
+        #TODO: deal with expected count; nil is stub
+        @sema.synchronize{@request_ids[request_id] = {:expected_count => nil}}
       end
 
      private

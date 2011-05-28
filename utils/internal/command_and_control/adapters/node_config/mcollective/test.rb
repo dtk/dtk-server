@@ -12,20 +12,29 @@ options = oparser.parse{|parser, options|
 
 client = MCollective::Client.new(options[:config])
 client.options = options
-
 include XYZ::CommandAndControl
 listener = McollectiveListener.new(client)
+
+#monkey patch
+class MCollective::Client
+  attr_reader :connection
+end
+
 threads = Array.new
-stop = nil
 threads << Thread.new do
-  until stop
+  i = 0
+  until i > 10
+#    msg = client.receive
     msg = listener.process_event()
-    pp [:received,msg]
+    pp msg
+    i += 1
   end
 end
-poller = McollectivePollerNodeReady.new(client)
-requid = poller.send
-sleep 1
-listener.add_request_id(requid)
-stop = true
+
+poller = McollectivePollerNodeReady.new(client,listener)
+reqids = Array.new
+requid = poller.send()
+
+reqids << requid
+pp reqids
 threads.each{|t|t.join}

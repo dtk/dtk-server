@@ -77,7 +77,7 @@ receiver = Receiver.new(engine)
 pdef = Ruote.process_definition :name => 'test' do
   sequence do
     participant :start
-    concurrence do
+    concurrence :merge_type => :mix do
       participant :remote1
       participant :remote2
     end

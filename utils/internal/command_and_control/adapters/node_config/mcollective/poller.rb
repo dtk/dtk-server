@@ -23,7 +23,7 @@ module XYZ
       #TODO: wrote own so can insert agent
       def new_request(agent,action, data)
         callerid = PluginManager["security_plugin"].callerid
-        {:agent  => @agent,
+        {:agent  => agent,
           :action => action,
           :caller => callerid,
           :data   => data}

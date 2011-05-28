@@ -5,17 +5,18 @@ require 'mcollective'
 require 'poller'
 require 'listener'
 
-#strange in that we get blocked if this is commented out
-client = MCollective::Client.new("/etc/mcollective/client.cfg")
+#get blocking behavior if client is initialized in a thread (or seperate threads
+client1 = nil #MCollective::Client.new("/etc/mcollective/client.cfg")
+client2 = nil #MCollective::Client.new("/etc/mcollective/client.cfg")
 
-def top()
-  client = MCollective::Client.new("/etc/mcollective/client.cfg")
+def top(client=nil)
+  client ||= MCollective::Client.new("/etc/mcollective/client.cfg")
   include XYZ::CommandAndControl
   listener = McollectiveListener.new(client)
   threads = Array.new
   threads << Thread.new do
     i = 0
-    until i > 10
+    until i > 1
       msg = listener.process_event()
       pp [Thread.current,msg]
       i += 1
@@ -28,6 +29,6 @@ def top()
 end
 
 top_threads = Array.new
-top_threads << Thread.new{top()}
-top_threads << Thread.new{top()}
+top_threads << Thread.new{top(client1)}
+top_threads << Thread.new{top(client2)}
 top_threads.each{|t2|t2.join}

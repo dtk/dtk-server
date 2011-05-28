@@ -4,7 +4,7 @@ if (!R8.User) {
 	R8.User = function() {
 		var _id = '',
 
-			_settingsCookie = {},
+			_settingsCookie = '',
 			_settingsCookieKey = '_userSettingsCookie-'+_id,
 			_updateBackgroundCall = null,
 			_settings = {},
@@ -47,8 +47,8 @@ console.log('just set setting:'+key);
 			stopUpdater: function() {
 				clearTimeout(_updateBackgroundCall);
 			},
-			purgeSettingsData: function(ioId,responseObj) {
-				_settingsCookie = {};
+			purgePendingSettings: function(ioId,responseObj) {
+				_settingsUpdateList = {};
 				YUI().use("cookie",function(Y){
 					Y.Cookie.remove(_settingsCookieKey);
 				});
@@ -56,7 +56,7 @@ console.log('just set setting:'+key);
 //TODO: generalize the background updater.., have it be centralized and people subscribe to
 			backgroundUpdater: function() {
 				var count = 0;
-				for(item in _settingsCookieKey) {
+				for(item in _settingsUpdateList) {
 					count++;
 				}
 				var that = this;
@@ -64,15 +64,15 @@ console.log('just set setting:'+key);
 					YUI().use("json", function(Y) {
 //DEBUG
 console.log('going to pass back settings for persisting...');
-console.log(_settings);
-						var reqParam = 'settings=' + Y.JSON.stringify(_settings);
+console.log(_settingsUpdateList);
+						var reqParam = 'settings=' + Y.JSON.stringify(_settingsUpdateList);
 
 						var params = {
 							'cfg': {
 								'data': reqParam
 							},
 							'callbacks': {
-								'io:success':that.purgeSettingsData
+								'io:success':that.purgePendingSettings
 							}
 						};
 						R8.Ctrl.call('user/update_settings/' + _id, params);

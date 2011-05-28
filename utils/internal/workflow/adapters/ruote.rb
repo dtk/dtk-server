@@ -1,5 +1,6 @@
 require 'ruote'
-require 'ruote/storage/fs_storage'
+require File.expand_path('ruote/receiver', File.dirname(__FILE__))
+
 #TODO: below is broken because of new refactoring
 #TODO: switch action to node_actions
 module XYZ 
@@ -10,7 +11,7 @@ module XYZ
         Engine.wait_for(wfid)
       end
      private 
-      Engine = ::Ruote::Engine.new(::Ruote::Worker.new(::Ruote::FsStorage.new('ruote_work'))) 
+      Engine = ::Ruote::Engine.new(::Ruote::Worker.new(::Ruote::HashStorage.new))
       Engine.register_participant :execute_on_node do |workitem|
         action = workitem.fields["params"]["action"]
         result = create_or_execute_on_node(action)

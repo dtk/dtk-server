@@ -7,7 +7,6 @@ class WorkQueue
   Queue = Array.new
   Sema = Mutex.new
   def self.push(msg)
-    pp [:pushing_msg]
     Sema.synchronize{Queue << msg}
   end
 
@@ -25,12 +24,12 @@ class MyRemoteParticipant
   #include Ruote::LocalParticipant
  
   def consume(workitem)
-pp :here
     WorkQueue.push(workitem_to_msg(workitem))
   end
  
   def on_reply(workitem)
-    workitem.fields['msg'] = "back at #{Time.now.to_s}"
+    pp [:reply_from,workitem.participant_name]
+    workitem.fields[workitem.participant_name] = "response from #{workitem.participant_name}"
   end
  
   protected
@@ -51,7 +50,6 @@ class Receiver < Ruote::Receiver
  
   def listen
      loop do  
-      pp :in_loop
       sleep 2
      reply_to_engine(workitem_from_msg(WorkQueue.pop))
     end
@@ -64,10 +62,11 @@ end
  
 engine = Ruote::Engine.new(Ruote::Worker.new(Ruote::HashStorage.new))
  
-engine.register_participant :remote, MyRemoteParticipant
+engine.register_participant :remote1, MyRemoteParticipant
+engine.register_participant :remote2, MyRemoteParticipant
 
 engine.register_participant :report do |workitem|
-  pp "I received a message #{workitem.fields['msg']}"
+  pp [:fields,workitem.fields]
 end
 
 engine.register_participant :start do |workitem|
@@ -78,7 +77,10 @@ receiver = Receiver.new(engine)
 pdef = Ruote.process_definition :name => 'test' do
   sequence do
     participant :start
-    participant :remote
+    concurrence do
+      participant :remote1
+      participant :remote2
+    end
     participant :report
   end
 end

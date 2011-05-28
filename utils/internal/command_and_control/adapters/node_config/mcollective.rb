@@ -69,7 +69,7 @@ module XYZ
           begin
             #creating and detsroying rpcclient in loop because when kept open looks liek blocking thread scheduling
             Lock.synchronize do
-              #TODO: check if need lock for this
+              #lock is needed since Client.new is not thread safe
               rpc_client = rpcclient(mcollective_agent,:options => rpc_opts)
             end
             target_identity = ret_discovered_mcollective_id(node,rpc_client)
@@ -112,7 +112,7 @@ TODO: deprecate because seems to block thread scheduling
       def self.ret_rpc_client(agent,&block)
         rpc_client = nil
         Lock.synchronize do
-          #TODO: check if really need lock for this
+          #lock is needed since Client.new is not thread safe
           #deep copy because rpcclient modifies options
           rpc_client = rpcclient(agent,:options => Aux::deep_copy(Options))
         end

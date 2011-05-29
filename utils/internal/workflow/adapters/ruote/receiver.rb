@@ -13,18 +13,17 @@ module XYZ
       def stop()
         @stop = true
       end
-      private
-        def listen
-          while not @stop
-            msg = @listener.process_event()
-            @poller.remove_item(msg) if @poller
-            reply_to_engine(workitem_from_msg(msg)
-          end
+     private
+      def listen
+        while not @stop
+          msg = @listener.process_event()
+          @poller.remove_item(msg) if @poller
+          reply_to_engine(workitem_from_msg(msg))
         end
-        def workitem_from_msg(msg)
-          #TODO: stub
-          msg
-        end
+      end
+      def workitem_from_msg(msg)
+        #TODO: stub
+        msg
       end
     end
   end

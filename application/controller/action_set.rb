@@ -1,9 +1,8 @@
 module XYZ
   class ActionsetController < Controller
     def process(*route)
-      
       unless route.first == "user"
-        login_first 
+        login_first unless defined?(R8::EnvironmentConfig::TestUser)  #TODO unless clause for testing
         session = CurrentSession.new
         session.set_user_object(user_object())
         session.set_auth_filters(:c,:group_ids)

@@ -16,9 +16,11 @@ module XYZ
       Engine = ::Ruote::Engine.new(::Ruote::Worker.new(::Ruote::HashStorage.new))
       Engine.register_participant :execute_on_node do |workitem|
         action = workitem.fields["params"]["action"]
+=begin
         top_task_idh = workitem.fields["params"]["top_task_idh"]
         result = process_executable_action(executable_action,top_task_idh)
         workitem.fields[workitem.fields["params"]["action"]["id"]] = result 
+=end
       end
       Engine.register_participant :return_results do |workitem|
         pp [:bravo,workitem.fields]
@@ -40,7 +42,7 @@ module XYZ
         name = "process-#{@@count.to_s}"
         ["define", 
          {"name" => name},
-         [compute_process_body(task,top_task_idh)]]
+         [compute_process_body(@task,top_task_idh)]]
       end
 
       def compute_process_body(task,top_task_idh)

@@ -78,7 +78,7 @@ module XYZ
           end
           sleep 5
         end
-        pp [:new_node_target_idenity,target_identity]
+        pp [:new_node_target_identity,target_identity]
         #TODO: want to delete node too in case timeout problem
         raise ErrorWhileCreatingNode unless target_identity
       end

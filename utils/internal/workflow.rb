@@ -30,6 +30,10 @@ module XYZ
       @task = task
     end
 
+    def process_executable_action(executable_action,top_task_idh)
+      self.class.process_executable_action(@task,executable_action,top_task_idh)
+    end
+
     def self.process_executable_action(task,executable_action,top_task_idh)
       debug_print_task_info = "task_id=#{task.id.to_s}; top_task_id=#{top_task_idh.get_id()}"
       begin 
@@ -60,6 +64,10 @@ module XYZ
         :failed
       end
     end
+    def self.debug_pp(x)
+      @@debug_lock.synchronize{pp x}
+    end
+    @@debug_lock = Mutex.new
   end
 end
 

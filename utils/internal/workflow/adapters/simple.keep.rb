@@ -16,7 +16,14 @@ module XYZ
         end
       end
 
+      def update_task(hash)
+        @task.update(hash)
+      end
+
      private
+      def initialize(task)
+        @task = task
+      end
 
       def process_executable_action(executable_action,top_task_idh)
         debug_print_task_info = "task_id=#{@task.id.to_s}; top_task_id=#{top_task_idh.get_id()}"

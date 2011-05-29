@@ -8,18 +8,10 @@ module XYZ
       Adapter.new(task)
     end
     #virtual fn gets ovewritten
-    def execute(top_task_idh=nil)
-    end
-
-    def update_task(hash)
-      @task.update(hash)
+    def execute()
     end
 
    private
-    def initialize(task)
-      @task = task
-    end
-
     klass = self
     begin
       type = R8::Config[:workflow][:type]

@@ -16,10 +16,6 @@ module XYZ
     end
 
    private
-    def initialize(task)
-      @task = task
-    end
-
     klass = self
     begin
       type = R8::Config[:workflow][:type]
@@ -29,6 +25,41 @@ module XYZ
       Log.error("cannot find workflow adapter; loading null workflow class")
     end
     Adapter = klass
+
+    def initialize(task)
+      @task = task
+    end
+
+    def self.process_executable_action(task,executable_action,top_task_idh)
+      debug_print_task_info = "task_id=#{task.id.to_s}; top_task_id=#{top_task_idh.get_id()}"
+      begin 
+        result_hash = CommandAndControl.execute_task_action(executable_action,task,top_task_idh)
+        update_hash = {
+          :status => "succeeded",
+          :result => TaskAction::Result::Succeeded.new(result_hash)
+        }
+        task.update(update_hash)
+        executable_action.update_state_change_status(task.model_handle,:completed)  #this send pending changes' states
+        debug_pp [:task_succeeded,debug_print_task_info,result_hash]
+        :succeeded              
+      rescue CommandAndControl::Error => e
+        update_hash = {
+          :status => "failed",
+          :result => TaskAction::Result::Failed.new(e)
+        }
+        task.update(update_hash)
+        debug_pp [:task_failed,debug_print_task_info,e]
+        :failed
+      rescue Exception => e
+        update_hash = {
+          :status => "failed",
+          :result => TaskAction::Result::Failed.new(CommandAndControl::Error.new)
+        }
+        task.update(update_hash)
+        debug_pp [:task_failed_internal_error,debug_print_task_info,e,e.backtrace]
+        :failed
+      end
+    end
   end
 end
 

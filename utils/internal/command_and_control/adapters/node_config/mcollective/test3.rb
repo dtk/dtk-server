@@ -11,10 +11,10 @@ options = oparser.parse{|parser, options|
 }
 
 Sema = Mutex.new
-def new_client()
+def new_client(opts={})
   client = nil
   Sema.synchronize{client = MCollective::Client.new("/etc/mcollective/client.cfg")}
-  client.connection.subscribe("/topic/mcollective.discovery.reply")
+  client.connection.subscribe("/topic/mcollective.discovery.reply") unless opts[:no_subscribe]
   client
 end
 
@@ -31,8 +31,7 @@ def listen_loop(client=nil)
     pp [Thread.current,msg]
   end
 end
-#in this configuration of mc-ping is done get responses for each thread; need to figure out if enable below get 6 responses
-#and makes no difference if in thread or not
+#looks like what happens is a function of having clients in different threads and which ones do a  subscribe
 client = client2 = nil
 #client = new_client()
 #client2 = new_client()
@@ -45,7 +44,7 @@ threads << Thread.new do
 args = ["ping",
         "discovery",
         {"identity"=>[], "fact"=>[], "agent"=>[], "cf_class"=>[]}]
-reqid = new_client().sendreq(*args)
+reqid = new_client(:no_subscribe => true).sendreq(*args)
 end
 #=end
 threads.each{|t|t.join}

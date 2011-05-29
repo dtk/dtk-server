@@ -4,31 +4,49 @@ require 'pp'
 require 'mcollective'
 require 'poller'
 require 'listener'
+oparser = MCollective::Optionparser.new({:verbose => true})
 
-#get blocking behavior if client is initialized in a thread (or seperate threads
-client1 = nil #MCollective::Client.new("/etc/mcollective/client.cfg")
-client2 = nil #MCollective::Client.new("/etc/mcollective/client.cfg")
+options = oparser.parse{|parser, options|
+    parser.define_head "Pings all hosts and report their names and some stats"
+}
 
-def top(client=nil)
-  client ||= MCollective::Client.new("/etc/mcollective/client.cfg")
-  include XYZ::CommandAndControl
-  listener = McollectiveListener.new(client)
-  threads = Array.new
-  threads << Thread.new do
-    i = 0
-    until i > 1
-      msg = listener.process_event()
-      pp [Thread.current,msg]
-      i += 1
-    end
-  end
-
-  poller = McollectivePollerNodeReady.new(client,listener)
-  poller.send()
-  threads.each{|t|t.join}
+Sema = Mutex.new
+def new_client()
+  client = nil
+  Sema.synchronize{client = MCollective::Client.new("/etc/mcollective/client.cfg")}
+  client.connection.subscribe("/topic/mcollective.discovery.reply")
+  client
 end
 
-top_threads = Array.new
-top_threads << Thread.new{top(client1)}
-top_threads << Thread.new{top(client2)}
-top_threads.each{|t2|t2.join}
+#monkey patch
+class MCollective::Client
+  attr_reader :connection
+end
+
+def listen_loop(client=nil)
+  client ||= new_client()
+  count = 10
+  (1..count).each do |i|
+    msg = client.connection.receive
+    pp [Thread.current,msg]
+  end
+end
+#in this configuration of mc-ping is done get responses for each thread; need to figure out if enable below get 6 responses
+#and makes no difference if in thread or not
+client = client2 = nil
+#client = new_client()
+#client2 = new_client()
+threads = Array.new
+threads << Thread.new{listen_loop(client)}
+threads << Thread.new{listen_loop(client2)}
+
+#=begin
+threads << Thread.new do
+args = ["ping",
+        "discovery",
+        {"identity"=>[], "fact"=>[], "agent"=>[], "cf_class"=>[]}]
+reqid = new_client().sendreq(*args)
+end
+#=end
+threads.each{|t|t.join}
+

@@ -60,6 +60,32 @@ module MCollective
       msg
     end
 
+    #modified so that a receiver can be passed in
+    def r8_sendreq(msg, agent, filter = {}, opts = {})
+      target = Util.make_target(agent, :command)
+      reqid = opts[:request_id] || Digest::MD5.hexdigest("#{@config.identity}-#{Time.now.to_f.to_s}-#{target}")
+      req = @security.encoderequest(@config.identity, target, msg, reqid, filter)
+      @log.debug("Sending request #{reqid} to #{target}")
+      if opts[:receiver]
+        opts[:receiver].add_request(reqid,opts[:receiver_context],{:agent => agent})
+      else
+        r8_add_subscription?(agent)
+      end
+      @connection.send(target, req)
+      reqid
+    end
+
+    #add subscription is needed
+    def r8_add_subscription?(agent)
+      unless @subscriptions.include?(agent)
+        topic = Util.make_target(agent, :reply)
+        @log.debug("Subscribing to #{topic}")
+        @connection.subscribe(topic)
+        @subscriptions[agent] = 1
+      end
+    end
+
+    #TODO: may deprecate below
     #monkey patch addition to avoid race condition TODO: if race condition not possible can remove
     def sendreq_part1(msg, agent, filter = {})
       target = Util.make_target(agent, :command)
@@ -78,8 +104,8 @@ module MCollective
       @connection.send(target, req)
       reqid
     end
+    ########  
   end
-  
   module PluginManager
     def self.new_instance(plugin)
       raise("No plugin #{plugin} defined") unless @plugins.include?(plugin)

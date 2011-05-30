@@ -10,10 +10,9 @@ module XYZ
         common_init()
         @workitem_store = Hash.new
       end
-      def add_request(request)
-        request_id = request.id
-        @workitem_store[request_id] = request.workitem
-        @listener.add_request_id(request_id,request.opts)
+      def add_request(request_id,context,opts={})
+        @workitem_store[request_id] = context.workitem
+        @listener.add_request_id(request_id,context.opts.merge(opts))
         start()
       end
      private
@@ -33,10 +32,9 @@ module XYZ
         end
       end
     end
-    class RuoteReceiverRequest
-      attr_reader :id,:workitem, :opts
-      def initialize(request_id,workitem,opts={})
-        @id = request_id
+    class RuoteReceiverContext < ReceiverContext
+      attr_reader :workitem, :opts
+      def initialize(workitem,opts={})
         @workitem = workitem
         @opts = opts
       end

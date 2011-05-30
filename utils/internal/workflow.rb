@@ -1,6 +1,9 @@
 #TODO: need to pass back return for all actions; now if do create and update; only update put in
 module XYZ
   module WorkflowAdapter
+    #abstarct class
+    class ReceiverContext 
+    end
   end
 
   class Workflow
@@ -16,6 +19,16 @@ module XYZ
     end
 
     attr_reader :task
+
+    def process_executable_action(executable_action,top_task_idh)
+      self.class.process_executable_action(@task,executable_action,top_task_idh)
+    end
+
+    def initiate_executable_action(executable_action,top_task_idh,receiver_context)
+      opts = {:initiate_only => true, :connection => @connection, :receiver => @receiver,:receiver_context => receiver_context}
+      CommandAndControl.execute_task_action(executable_action,@task,top_task_idh,opts)
+    end
+
    private
     klass = self
     begin
@@ -29,10 +42,7 @@ module XYZ
 
     def initialize(task)
       @task = task
-    end
-
-    def process_executable_action(executable_action,top_task_idh)
-      self.class.process_executable_action(@task,executable_action,top_task_idh)
+      @connection = nil
     end
 
     def self.process_executable_action(task,executable_action,top_task_idh)
@@ -64,11 +74,6 @@ module XYZ
         debug_pp [:task_failed_internal_error,debug_print_task_info,e,e.backtrace]
         :failed
       end
-    end
-
-    def self.initiate_executable_action(connection,task,executable_action,top_task_idh)
-      opts = {:initiate_only => true, :connection => connection}
-      CommandAndControl.execute_task_action(executable_action,task,top_task_idh,opts)
     end
 
     def self.debug_pp(x)

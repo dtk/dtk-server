@@ -10,8 +10,7 @@ module XYZ
       task_idh = task.id_handle()
       task_action.get_and_update_attributes(task_mh)
       if opts[:initiate_only]
-        client = opts[:connection]
-        klass.initiate_execution(client,task_idh,top_task_idh,task_action,attributes_to_set)
+        klass.initiate_execution(task_idh,top_task_idh,task_action,attributes_to_set,opts)
       else
         result,updated_attributes = klass.execute(task_idh,top_task_idh,task_action,attributes_to_set)
         propagate_attributes(updated_attributes)

@@ -26,7 +26,7 @@ module XYZ
           @connection.disconnect() if @connection
         end
       end
-      attr_reader :listener,:poller,:connection
+      attr_reader :listener,:poller
      private 
       def initialize()
         super
@@ -59,12 +59,11 @@ module XYZ
             action = task_info["action"]
             top_task_idh = task_info["top_task_idh"]
             workflow = task_info["workflow"]
-            if task.long_running?
-              request_id = Workflow.initiate_executable_action(workflow.connection,workflow.task,action,top_task_idh)
-              request = RuoteReceiverRequest.new(request_id,workitem,{:expected_count => 1})
-              workflow.receiver.add_request(request)
+            if action.long_running?
+              context = RuoteReceiverContext.new(workitem,{:expected_count => 1})
+              workflow.initiate_executable_action(action,top_task_idh,context)
             else
-              result = Workflow.process_executable_action(task,action,top_task_idh)
+              result = process_executable_action(action,top_task_idh)
               workitem.fields[workitem.fields["params"]["action"]["id"]] = result
               reply_to_engine(workitem)
             end

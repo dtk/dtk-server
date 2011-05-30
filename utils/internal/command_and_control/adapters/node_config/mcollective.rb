@@ -37,7 +37,8 @@ module XYZ
         [result,updated_attributes]
       end
 
-      def self.initiate_execution(rpc_client,task_idh,top_task_idh,config_node,attributes_to_set)
+      def self.initiate_execution(task_idh,top_task_idh,config_node,attributes_to_set,opts)
+        rpc_client = opts[:connection]
         updated_attributes = Array.new
         config_agent = ConfigAgent.load(config_node[:config_agent_type])
 
@@ -52,9 +53,9 @@ module XYZ
         msg_content =  config_agent.ret_msg_content(config_node)
         msg_content.merge!(:task_id => task_idh.get_id(),:top_task_id => top_task_idh.get_id(), :project => project)
 
-        #make mcollective request
+        #make mcollective fire and forget request
         filter = {"identity" => [target_identity], "agent" => [mcollective_agent]}
-        rpc_client.custom_request("run",msg_content,target_identity,filter)
+        rpc_client.client.r8_sendreq("run",msg_content,filter,opts)
       end
 
       def self.create_poller_listener_connection()

@@ -1,5 +1,9 @@
 require 'mcollective'
+require File.expand_path('mcollective/listener', File.dirname(__FILE__))
+require File.expand_path('mcollective/poller', File.dirname(__FILE__))
+
 include MCollective::RPC
+
 module XYZ
   module CommandAndControlAdapter
     class Mcollective < CommandAndControlNodeConfig
@@ -30,6 +34,19 @@ module XYZ
           raise ErrorFailedResponse.new(result[:status],result[:error]) unless result[:status] == :succeeded 
         end
         [result,updated_attributes]
+      end
+
+      def self.create_poller_listener_connection()
+        options = Aux::deep_copy(Options)
+        config = options[:config]
+        client = nil
+        Lock.synchronize{client = MCollective::Client.new(config)}
+        client.options = options
+        client
+      end
+
+      def self.create_listener(connection)
+        McollectiveListener.new(connection)
       end
 
       def self.get_logs(task,nodes)
@@ -223,15 +240,35 @@ module MCollective
       
       @connection.connect
     end
+    
+    #so can pass nil argument and have it look for everything
+    def receive(requestid = nil)
+      msg = nil
+      begin
+        msg = @connection.receive
+        msg = @security.decodemsg(msg)
+        msg[:senderid] = Digest::MD5.hexdigest(msg[:senderid]) if ENV.include?("MCOLLECTIVE_ANON")
+        #line patched added clause: requestid and
+        raise(MsgDoesNotMatchRequestID, "Message reqid #{requestid} does not match our reqid #{msg[:requestid]}") if requestid and msg[:requestid] != requestid
+      rescue SecurityValidationFailed => e
+        @log.warn("Ignoring a message that did not pass security validations")
+        retry
+      rescue MsgDoesNotMatchRequestID => e
+        @log.debug("Ignoring a message for some other client")
+        retry
+      end
+      msg
+    end
   end
   
-   module PluginManager
-     def self.new_instance(plugin)
-       raise("No plugin #{plugin} defined") unless @plugins.include?(plugin)
-
-       klass = @plugins[plugin][:class]
-       eval("#{klass}.new")
-     end
-   end
+  module PluginManager
+    def self.new_instance(plugin)
+      raise("No plugin #{plugin} defined") unless @plugins.include?(plugin)
+      
+      klass = @plugins[plugin][:class]
+      eval("#{klass}.new")
+    end
+  end
 end
+
 

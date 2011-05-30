@@ -1,5 +1,5 @@
 module XYZ
-  module CommandAndControl
+  module CommandAndControlAdapter
     class McollectiveListener
       def initialize(client)
         @client = client
@@ -34,24 +34,5 @@ module XYZ
   end
 end
 
-#monkey patch
-class MCollective::Client
-  def receive(requestid = nil)
-    msg = nil
-    begin
-      msg = @connection.receive
-      msg = @security.decodemsg(msg)
-      msg[:senderid] = Digest::MD5.hexdigest(msg[:senderid]) if ENV.include?("MCOLLECTIVE_ANON")
-      #line patched added clause: requestid and
-      raise(MsgDoesNotMatchRequestID, "Message reqid #{requestid} does not match our reqid #{msg[:requestid]}") if requestid and msg[:requestid] != requestid
-    rescue SecurityValidationFailed => e
-      @log.warn("Ignoring a message that did not pass security validations")
-      retry
-    rescue MsgDoesNotMatchRequestID => e
-      @log.debug("Ignoring a message for some other client")
-      retry
-    end
-    msg
-  end
-end
+
 

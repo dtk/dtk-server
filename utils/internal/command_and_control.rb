@@ -19,6 +19,18 @@ module XYZ
       klass.get_logs(task,nodes)
     end
 
+    def self.create_poller_listener_connection()
+      adapter_name = R8::Config[:command_and_control][:node_config][:type]
+      klass = load_for_aux(:node_config,adapter_name)
+      klass.create_poller_listener_connection()
+    end
+
+    def self.create_listener(connection)
+      adapter_name = R8::Config[:command_and_control][:node_config][:type]
+      klass = load_for_aux(:node_config,adapter_name)
+      klass.create_listener(connection)
+    end
+
     #TODO: temp hack
     def self.wait_for_node_to_be_ready(node) 
       adapter_name = R8::Config[:command_and_control][:node_config][:type]
@@ -51,6 +63,8 @@ module XYZ
         Adapters[adapter_type][adapter_name] = XYZ::CommandAndControlAdapter.const_get adapter_name.to_s.capitalize
        rescue LoadError
         nil
+       rescue Exception => e
+        raise e
       end
     end
     Adapters = Hash.new

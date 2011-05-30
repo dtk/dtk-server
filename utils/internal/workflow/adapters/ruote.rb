@@ -11,19 +11,26 @@ module XYZ
       def execute(top_task_idh=nil)
         @task.update(:status => "executing") #TODO: may handle this by inserting a start subtask
         #TODO: may want to only create connection, poller and receiver on demand (if task needs it)
-        @connection ||= CommandAndControl.create_poller_listener_connection()
-        @listener ||= CommandAndControl.create_listener(@connection)
-        @receiver ||= RuoteReceiver.new(Engine,@listener)
-        @poller ||= RoutePoller.new(@connection,@receiver)
-        wfid = Engine.launch(process_def)
-        Engine.wait_for(wfid)
+        begin
+          connection = CommandAndControl.create_poller_listener_connection()
+          listener = CommandAndControl.create_listener(connection)
+          @receiver = RuoteReceiver.new(Engine,listener)
+          @poller = RuotePoller.new(connection,@receiver)
+          wfid = Engine.launch(process_def)
+          Engine.wait_for(wfid)
+         rescue Exception => e
+          raise e
+         ensure
+          @poller.stop if @poller
+          @receiver.stop if @receiver
+          connection.disconnect() if connection
+        end
       end
-      attr_reader :listener,:poller,:connection
+      attr_reader :listener,:poller
      private 
       def initialize()
         super
-        @connection = nil
-        @listener = nil
+        @receiver = nil
         @poller = nil
       end
 

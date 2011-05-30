@@ -4,7 +4,7 @@ module XYZ
     class RuotePoller
       include RuoteCommon
       def initialize(connection,receiver)
-        common_int()
+        common_init()
         @connection = connection
         @receiver = receiver
         @poll_items = Hash.new

@@ -1,6 +1,6 @@
 #TODO: generalzie to sending all requests
 module XYZ
-  module CommandAndControl
+  module CommandAndControlAdapter
     class McollectivePoller
       def initialize(client,listener)
         @client = client

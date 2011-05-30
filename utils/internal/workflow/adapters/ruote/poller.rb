@@ -2,34 +2,54 @@ module XYZ
   module WorkflowAdapter
     #generates polling requests that are listened to in reciever
     class RuotePoller
-      def initialize(poller,receiver)
-        @stop = nil
-        @poller = poller
-        @reciever = receiver
-        @thread = Thread.new { poll }
-        @thread.join
+      include RuoteCommon
+      def initialize(connection,receiver)
+        common_int()
+        @connection = connection
+        @receiver = receiver
+        @poll_items = Hash.new
+        @original_ids = Hash.new
+        @lock = Mutex.new()
         @cycle_time = 5
-      end
-
-      def stop()
-        @stop = true
       end
       
       def add_item(poll_item)
-        @reciever.subscribe(poll_item)
-        @poller.add_item(poll_item)
+        request_id = item.get_request_id()
+        @lock.synchronize do
+          @poll_items[request_id] = poll_item
+          @original_ids[request_id] = request_id
+        end
+        request_id
       end
       
-      def remove_item(msg)
-        @poller.remove_item(msg)
+      def remove_item(request_id)
+        @lock.synchronize do
+          match_cur,match_orig = @original_ids.find{|cur,orig|orig == request_id} 
+          if match_cur
+            @original_ids.delete(match_cur)
+            @poll_items.delete(match_cur)
+          end
+        end
       end
 
      private
       def poll
-        while not @stop
+        while not @is_stopped #TODO: dont think necsssary to put this test in mutex
           sleep @cycle_time
           #TODO: may splay for multiple items
-          @poller.send()
+          poll_items = nil
+          @lock.synchronize{poll_items = @poll_items.dup}
+          poll_items.each do |request_id,item|
+            @reciever.subscribe(request_id)
+            item.request(@connection)
+            new_request_id = item.get_request_id()
+            @lock.synchronize do
+              @poll_items.delete(request_id)
+              @poll_items[new_request_id] = item
+              original_id = @original_ids.delete(request_id)
+              @original_ids[new_request_id] = original_id
+            end
+          end
         end
       end
     end

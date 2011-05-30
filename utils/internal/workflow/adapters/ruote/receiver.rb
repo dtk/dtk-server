@@ -1,27 +1,21 @@
 module XYZ
   module WorkflowAdapter
     class RuoteReceiver < ::Ruote::Receiver
-      def initialize(engine,listener,poller=nil)
+      include RuoteCommon   
+      def initialize(engine,listener)
         super(engine)
-        @stop = nil
         @listener = listener
-        @poller = poller
-        @thread = Thread.new { listen }
-        @thread.join
-      end
-
-      def stop()
-        @stop = true
+        @request_ids = Array.new
+        common_init()
       end
      private
-      def listen
-        while not @stop
-          msg = @listener.process_event()
-          @poller.remove_item(msg) if @poller
-          reply_to_engine(workitem_from_msg(msg))
+      def loop
+        while not @is_stopped #TODO: dont think necsssary to put this test in mutex
+          msg,request_id = @listener.process_event()
+          reply_to_engine(workitem_from_msg(msg,request_id))
         end
       end
-      def workitem_from_msg(msg)
+      def workitem_from_msg(msg,request_id)
         #TODO: stub
         msg
       end

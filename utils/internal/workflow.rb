@@ -15,6 +15,7 @@ module XYZ
       @task.update(hash)
     end
 
+    attr_reader :task
    private
     klass = self
     begin

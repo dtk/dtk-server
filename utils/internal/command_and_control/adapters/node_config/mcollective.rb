@@ -54,6 +54,11 @@ module XYZ
         end
         ret
       end
+      
+      def self.poller_action_to_detect_node_ready?(node,client,listener)
+        filter = nil #TODO: stub
+        proc{McollectivePoller.new(client,listener).sendreq_discover(filter)}
+      end
 
       def  self.wait_for_node_to_be_ready(node)
         pp [:test1,node[:display_name]]

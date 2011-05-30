@@ -4,6 +4,10 @@ module XYZ
     def serialize_for_task()
     end
 
+    def poller_action_to_detect_compeletion?(client,listener)
+      nil
+    end
+
     #returns [adapter_type,adapter_name], adapter name optional in which it wil be looked up from config
     def ret_command_and_control_adapter_info()
      nil
@@ -74,6 +78,10 @@ module XYZ
           :node => state_change[:node]
         }
         super(hash)
+      end
+
+      def poller_action_to_detect_compeletion?(client,listener)
+        nil
       end
 
       def add_attribute!(attr)

@@ -4,14 +4,14 @@ module XYZ
       def initialize(client)
         @client = client
         @request_ids = Hash.new
-        @sema = Mutex.new
+        @lock = Mutex.new
       end
       def process_event()
         #pattern adapted from mcollective receive
         begin 
           msg = @client.receive
           match = nil
-          @sema.synchronize do 
+          @lock.synchronize do 
             match = @request_ids.has_key?(msg[:requestid])
             #TODO: put in logic to keep track of how many responses decrement expected count and if 0, delete
           end
@@ -19,13 +19,13 @@ module XYZ
          rescue MsgDoesNotMatchARequestID 
           retry
         end
-        msg
+        [msg,msg[:requestid]]
       end
 
       #TODO: for testing non private
       def add_request_id(request_id)
         #TODO: deal with expected count; nil is stub
-        @sema.synchronize{@request_ids[request_id] = {:expected_count => nil}}
+        @lock.synchronize{@request_ids[request_id] = {:expected_count => nil}}
       end
 
      private

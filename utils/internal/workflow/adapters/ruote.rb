@@ -1,4 +1,5 @@
 require 'ruote'
+require File.expand_path('ruote/common', File.dirname(__FILE__))
 require File.expand_path('ruote/receiver', File.dirname(__FILE__))
 require File.expand_path('ruote/poller', File.dirname(__FILE__))
 
@@ -6,13 +7,26 @@ require File.expand_path('ruote/poller', File.dirname(__FILE__))
 module XYZ 
   module WorkflowAdapter
     class Ruote < XYZ::Workflow
-      Global = {:foo => :a}
+      #TODO: need to clean up whether engine is persistent; whether execute can be called more than once for any insatnce
       def execute(top_task_idh=nil)
         @task.update(:status => "executing") #TODO: may handle this by inserting a start subtask
+        #TODO: may want to only create connection, poller and receiver on demand (if task needs it)
+        @connection ||= CommandAndControl.create_poller_listener_connection()
+        @listener ||= CommandAndControl.create_listener(@connection)
+        @receiver ||= RuoteReceiver.new(Engine,@listener)
+        @poller ||= RoutePoller.new(@connection,@receiver)
         wfid = Engine.launch(process_def)
         Engine.wait_for(wfid)
       end
+      attr_reader :listener,:poller,:connection
      private 
+      def initialize()
+        super
+        @connection = nil
+        @listener = nil
+        @poller = nil
+      end
+
       ObjectStore = Hash.new
       ObjectStoreLock = Mutex.new
       #TODO: make sure task id is globally unique

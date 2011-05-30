@@ -3,18 +3,14 @@ module XYZ
     class McollectiveListener
       def initialize(client)
         @client = client
-        @request_ids = Hash.new
+        @request_info_store = Hash.new
         @lock = Mutex.new
       end
       def process_event()
         #pattern adapted from mcollective receive
         begin 
           msg = @client.receive
-          match = nil
-          @lock.synchronize do 
-            match = @request_ids.has_key?(msg[:requestid])
-            #TODO: put in logic to keep track of how many responses decrement expected count and if 0, delete
-          end
+          match = update_if_match?(msg[:requestid])
           raise MsgDoesNotMatchARequestID unless match
          rescue MsgDoesNotMatchARequestID 
           retry
@@ -22,12 +18,32 @@ module XYZ
         [msg,msg[:requestid]]
       end
 
-      def add_request_id(request_id)
-        #TODO: deal with expected count; nil is stub
-        @lock.synchronize{@request_ids[request_id] = {:expected_count => nil}}
+      def add_request_id(request_id,opts={})
+        req_opts = {:expected_count => opts[:expected_count], :timeout => opts[:timeout]||DefaultTimeout}
+        request_info_set(request_id,req_opts)
       end
 
      private
+      def request_info_set(request_id,val)
+        @lock.synchronize{@request_info_store[request_id]=val}
+        val
+      end
+      def update_if_match(request_id)
+        #TODO: put in logic to deal with timouets 
+        ret = nil 
+        @lock.synchronize do 
+          if request_info = @request_info_store[request_id]
+            ret = true
+            if request_info[:expected_count]
+              request_info[:expected_count] -= 1
+              @request_info_store.delete(request_id) if request_info[:expected_count] < 1
+            end
+          end
+        end
+        ret
+      end
+
+      DefaultTimeout = 120
       class MsgDoesNotMatchARequestID < RuntimeError; end
     end
   end

@@ -8,21 +8,37 @@ module XYZ
         @listener = listener
         @request_ids = Array.new
         common_init()
+        @workitem_store = Hash.new
       end
-      def add_request_id(request_id)
-        @listener.add_request_id(request_id)
+      def add_request(request)
+        request_id = request.id
+        @workitem_store[request_id] = request.workitem
+        @listener.add_request_id(request_id,request.opts)
         start()
       end
      private
       def loop
         while not @is_stopped #TODO: dont think necsssary to put this test in mutex
-          msg,request_id = @listener.process_event()
-          reply_to_engine(workitem_from_msg(msg,request_id))
+          wait_and_process_message()
         end
       end
-      def workitem_from_msg(msg,request_id)
-        #TODO: stub
-        msg
+      def wait_and_process_message()
+        msg,request_id = @listener.process_event()
+        workitem = @workitem_store.delete(request_id)
+        if workitem
+          workitem.field["result"] = msg
+          reply_to_engine(workitem)
+        else
+          Log.error("could not find a workitem for request_id #{request_id.to_s}")
+        end
+      end
+    end
+    class RuoteReceiverRequest
+      attr_reader :id,:workitem, :opts
+      def initialize(request_id,workitem,opts={})
+        @id = request_id
+        @workitem = workitem
+        @opts = opts
       end
     end
   end

@@ -22,7 +22,6 @@ module XYZ
         [msg,msg[:requestid]]
       end
 
-      #TODO: for testing non private
       def add_request_id(request_id)
         #TODO: deal with expected count; nil is stub
         @lock.synchronize{@request_ids[request_id] = {:expected_count => nil}}

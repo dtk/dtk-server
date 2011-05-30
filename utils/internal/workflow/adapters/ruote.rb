@@ -57,8 +57,15 @@ module XYZ
             task_info = get_and_delete_from_object_store(task_id)
             action = task_info["action"]
             top_task_idh = task_info["top_task_idh"]
-            task = task_info["task"]
+            workflow = task_info["workflow"]
+            task = workflow.task
 
+            #logic should look at task and see if it uses a poller and/or reciever
+            #if just needs a listenet than flow is
+=begin
+           request_id = Workflow.initiate_executable_action(task,action,top_task_idh)
+           workflow.receiver.
+=end
             result = Workflow.process_executable_action(task,action,top_task_idh)
             workitem.fields[workitem.fields["params"]["action"]["id"]] = result
             reply_to_engine(workitem)
@@ -96,7 +103,7 @@ module XYZ
         if executable_action
           task_info = {
             "action" => executable_action,
-            "task" => task,
+            "workflow" => self,
             "top_task_idh" => top_task_idh
           }
           task_id = task.id()

@@ -4,9 +4,14 @@ module XYZ
       include RuoteCommon   
       def initialize(engine,listener)
         super(engine)
+        #TODO: might put operations on @listener in mutex
         @listener = listener
         @request_ids = Array.new
         common_init()
+      end
+      def add_request_id(request_id)
+        @listener.add_request_id(request_id)
+        start()
       end
      private
       def loop

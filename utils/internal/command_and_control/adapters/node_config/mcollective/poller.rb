@@ -8,7 +8,7 @@ module XYZ
       end
      private
       def sendreq_agent(agent,action,data,filter={})
-        msg = new_request(agent,action,data)
+        msg = Mcollective.new_request(agent,action,data)
         sendreq(msg, msg[:agent], filter)
       end
       def sendreq_discover(filter={})
@@ -20,14 +20,6 @@ module XYZ
         @client.sendreq_part2(reqid,target,req)
       end
 
-      #TODO: wrote own so can insert agent
-      def new_request(agent,action, data)
-        callerid = PluginManager["security_plugin"].callerid
-        {:agent  => agent,
-          :action => action,
-          :caller => callerid,
-          :data   => data}
-      end
     end
     class McollectivePollerNodeReady < McollectivePoller
       def send(filter={})

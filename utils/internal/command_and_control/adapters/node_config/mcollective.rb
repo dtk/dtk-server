@@ -54,8 +54,10 @@ module XYZ
         msg_content.merge!(:task_id => task_idh.get_id(),:top_task_id => top_task_idh.get_id(), :project => project)
 
         #make mcollective fire and forget request
-        filter = {"identity" => [target_identity], "agent" => [mcollective_agent]}
-        rpc_client.client.r8_sendreq("run",msg_content,filter,opts)
+        agent = mcollective_agent()
+        filter = {"identity" => [target_identity], "agent" => [agent]}
+        msg = new_request(agent,"run", msg_content)
+        rpc_client.client.r8_sendreq(msg,agent,filter,opts)
       end
 
       def self.create_poller_listener_connection()
@@ -148,6 +150,15 @@ TODO: deprecate because seems to block thread scheduling
       end
 =end
      private
+      #TODO: patched mcollective fn to put in agent
+      def self.new_request(agent,action, data)
+        callerid = PluginManager["security_plugin"].callerid
+        {:agent  => agent,
+          :action => action,
+          :caller => callerid,
+          :data   => data}
+      end
+
       #using code that puts in own agent 
       def self.ret_rpc_client(agent="all",&block)
         rpc_client = nil

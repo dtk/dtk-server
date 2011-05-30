@@ -59,16 +59,15 @@ module XYZ
             top_task_idh = task_info["top_task_idh"]
             workflow = task_info["workflow"]
             task = workflow.task
-
-            #logic should look at task and see if it uses a poller and/or reciever
-            #if just needs a listenet than flow is
-=begin
-           request_id = Workflow.initiate_executable_action(task,action,top_task_idh)
-           workflow.receiver.
-=end
-            result = Workflow.process_executable_action(task,action,top_task_idh)
-            workitem.fields[workitem.fields["params"]["action"]["id"]] = result
-            reply_to_engine(workitem)
+            if task.long_running?
+              request_id = Workflow.initiate_executable_action(task,action,top_task_idh)
+              request = RuoteReceiverRequest.new(request_id,workitem,{:expected_count => 1})
+              workflow.receiver.add_request(request)
+            else
+              result = Workflow.process_executable_action(task,action,top_task_idh)
+              workitem.fields[workitem.fields["params"]["action"]["id"]] = result
+              reply_to_engine(workitem)
+            end
           end
         end
       end

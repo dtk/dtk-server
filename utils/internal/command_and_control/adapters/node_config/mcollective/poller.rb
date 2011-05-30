@@ -37,25 +37,3 @@ module XYZ
   end
 end
 
-#monkey patch to avoid race condition TODO: if race condition not possible can remove
-module MCollective
-  class Client
-    def sendreq_part1(msg, agent, filter = {})
-      target = Util.make_target(agent, :command)
-      reqid = Digest::MD5.hexdigest("#{@config.identity}-#{Time.now.to_f.to_s}-#{target}")
-      req = @security.encoderequest(@config.identity, target, msg, reqid, filter)
-      @log.debug("Sending request #{reqid} to #{target}")
-      unless @subscriptions.include?(agent)
-        topic = Util.make_target(agent, :reply)
-        @log.debug("Subscribing to #{topic}")
-        @connection.subscribe(topic)
-        @subscriptions[agent] = 1
-      end
-      [reqid,target,req]
-    end
-    def sendreq_part2(reqid,target,req)
-      @connection.send(target, req)
-      reqid
-    end
-  end
-end

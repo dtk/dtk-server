@@ -1,4 +1,5 @@
 require 'mcollective'
+require File.expand_path('mcollective/monkey_patches', File.dirname(__FILE__))
 require File.expand_path('mcollective/listener', File.dirname(__FILE__))
 require File.expand_path('mcollective/poller', File.dirname(__FILE__))
 
@@ -198,77 +199,4 @@ TODO: deprecate because seems to block thread scheduling
     end
   end
 end
-
-######## Monkey patches 
-module MCollective
-  class Client
-    #so discover can exit when get max number of item
-    def discover(filter, timeout,opts={})
-      begin
-        reqid = sendreq("ping", "discovery", filter)
-        @log.debug("Waiting #{timeout} seconds for discovery replies to request #{reqid}")
-
-        hosts = []
-        Timeout.timeout(timeout) do
-          while opts[:max_hosts_count].nil? or opts[:max_hosts_count] > hosts.size
-            msg = receive(reqid)
-            @log.debug("Got discovery reply from #{msg[:senderid]}")
-            hosts << msg[:senderid]
-          end
-        end
-       rescue Timeout::Error => e
-        hosts.sort
-       rescue Exception => e
-        raise
-      end
-      hosts.sort
-    end
-    
-    #so can in threads have multiple instances of stomp connection
-    def initialize(configfile)
-      @config = Config.instance
-      @config.loadconfig(configfile) unless @config.configured
-      @log = Log.instance
-      @connection = PluginManager.new_instance("connector_plugin")
-
-      @security = PluginManager["security_plugin"]
-      @security.initiated_by = :client
-
-      @options = nil
-
-      @subscriptions = {}
-      
-      @connection.connect
-    end
-    
-    #so can pass nil argument and have it look for everything
-    def receive(requestid = nil)
-      msg = nil
-      begin
-        msg = @connection.receive
-        msg = @security.decodemsg(msg)
-        msg[:senderid] = Digest::MD5.hexdigest(msg[:senderid]) if ENV.include?("MCOLLECTIVE_ANON")
-        #line patched added clause: requestid and
-        raise(MsgDoesNotMatchRequestID, "Message reqid #{requestid} does not match our reqid #{msg[:requestid]}") if requestid and msg[:requestid] != requestid
-      rescue SecurityValidationFailed => e
-        @log.warn("Ignoring a message that did not pass security validations")
-        retry
-      rescue MsgDoesNotMatchRequestID => e
-        @log.debug("Ignoring a message for some other client")
-        retry
-      end
-      msg
-    end
-  end
-  
-  module PluginManager
-    def self.new_instance(plugin)
-      raise("No plugin #{plugin} defined") unless @plugins.include?(plugin)
-      
-      klass = @plugins[plugin][:class]
-      eval("#{klass}.new")
-    end
-  end
-end
-
 

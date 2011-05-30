@@ -4,6 +4,9 @@ module XYZ
     def serialize_for_task()
     end
 
+    def long_running?()
+      nil
+    end
     def poller_action_to_detect_compeletion?(client,listener)
       nil
     end
@@ -140,6 +143,10 @@ module XYZ
     end
 
     class ConfigNode < TaskActionNode
+      def long_running?()
+        true
+      end
+
       def self.add_attributes!(attr_mh,action_list)
         indexed_actions = Hash.new
         action_list.each do |config_node_action|

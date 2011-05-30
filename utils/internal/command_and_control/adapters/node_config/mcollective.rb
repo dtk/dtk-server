@@ -37,13 +37,28 @@ module XYZ
         [result,updated_attributes]
       end
 
+      def self.initiate_execution(rpc_client,task_idh,top_task_idh,config_node,attributes_to_set)
+        updated_attributes = Array.new
+        config_agent = ConfigAgent.load(config_node[:config_agent_type])
+
+        target_identity = ret_discovered_mcollective_id(config_node[:node],rpc_client)
+        raise ErrorCannotConnect.new() unless target_identity
+
+        project = {:ref => "project1"} #TODO: stub until get the relevant project
+
+        #push implementation
+        push_implementation(config_node,project)
+
+        msg_content =  config_agent.ret_msg_content(config_node)
+        msg_content.merge!(:task_id => task_idh.get_id(),:top_task_id => top_task_idh.get_id(), :project => project)
+
+        #make mcollective request
+        filter = {"identity" => [target_identity], "agent" => [mcollective_agent]}
+        rpc_client.custom_request("run",msg_content,target_identity,filter)
+      end
+
       def self.create_poller_listener_connection()
-        options = Aux::deep_copy(Options)
-        config = options[:config]
-        client = nil
-        Lock.synchronize{client = MCollective::Client.new(config)}
-        client.options = options
-        client
+        ret_rpc_client()
       end
 
       def self.create_listener(connection)
@@ -132,7 +147,8 @@ TODO: deprecate because seems to block thread scheduling
       end
 =end
      private
-      def self.ret_rpc_client(agent,&block)
+      #using code that puts in own agent 
+      def self.ret_rpc_client(agent="all",&block)
         rpc_client = nil
         Lock.synchronize do
           #lock is needed since Client.new is not thread safe

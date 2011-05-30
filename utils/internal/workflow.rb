@@ -66,8 +66,9 @@ module XYZ
       end
     end
 
-    def self.initiate_executable_action(task,executable_action,top_task_idh)
-      CommandAndControl.execute_task_action(executable_action,task,top_task_idh,:initiate_only => true)
+    def self.initiate_executable_action(connection,task,executable_action,top_task_idh)
+      opts = {:initiate_only => true, :connection => connection}
+      CommandAndControl.execute_task_action(executable_action,task,top_task_idh,opts)
     end
 
     def self.debug_pp(x)

@@ -12,24 +12,25 @@ module XYZ
         @task.update(:status => "executing") #TODO: may handle this by inserting a start subtask
         #TODO: may want to only create connection, poller and receiver on demand (if task needs it)
         begin
-          connection = CommandAndControl.create_poller_listener_connection()
-          listener = CommandAndControl.create_listener(connection)
+          @connection = CommandAndControl.create_poller_listener_connection()
+          listener = CommandAndControl.create_listener(@connection)
           @receiver = RuoteReceiver.new(Engine,listener)
-          @poller = RuotePoller.new(connection,@receiver)
-          wfid = Engine.launch(process_def)
+          @poller = RuotePoller.new(@connection,@receiver)
+          wfid = Engine.launch(process_def())
           Engine.wait_for(wfid)
          rescue Exception => e
           raise e
          ensure
           @poller.stop if @poller
           @receiver.stop if @receiver
-          connection.disconnect() if connection
+          @connection.disconnect() if @connection
         end
       end
-      attr_reader :listener,:poller
+      attr_reader :listener,:poller,:connection
      private 
       def initialize()
         super
+        @connection = nil
         @receiver = nil
         @poller = nil
       end
@@ -58,9 +59,8 @@ module XYZ
             action = task_info["action"]
             top_task_idh = task_info["top_task_idh"]
             workflow = task_info["workflow"]
-            task = workflow.task
             if task.long_running?
-              request_id = Workflow.initiate_executable_action(task,action,top_task_idh)
+              request_id = Workflow.initiate_executable_action(workflow.connection,workflow.task,action,top_task_idh)
               request = RuoteReceiverRequest.new(request_id,workitem,{:expected_count => 1})
               workflow.receiver.add_request(request)
             else

@@ -1,15 +1,15 @@
 module XYZ
   module CommandAndControlAdapter
     class McollectiveListener
-      def initialize(client)
-        @client = client
+      def initialize(rpc_client)
+        @rpc_client = rpc_client
         @request_info_store = Hash.new
         @lock = Mutex.new
       end
       def process_event()
         #pattern adapted from mcollective receive
         begin 
-          msg = @client.receive
+          msg = @rpc_client.client.receive
           match = update_if_match?(msg[:requestid])
           raise MsgDoesNotMatchARequestID unless match
          rescue MsgDoesNotMatchARequestID 

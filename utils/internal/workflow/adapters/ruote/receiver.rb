@@ -25,7 +25,7 @@ module XYZ
         msg,request_id = @listener.process_event()
         workitem = @workitem_store.delete(request_id)
         if workitem
-          workitem.field["result"] = msg
+          workitem.fields["result"] = msg
           reply_to_engine(workitem)
         else
           Log.error("could not find a workitem for request_id #{request_id.to_s}")

@@ -152,7 +152,7 @@ TODO: deprecate because seems to block thread scheduling
      private
       #TODO: patched mcollective fn to put in agent
       def self.new_request(agent,action, data)
-        callerid = PluginManager["security_plugin"].callerid
+        callerid = ::MCollective::PluginManager["security_plugin"].callerid
         {:agent  => agent,
           :action => action,
           :caller => callerid,

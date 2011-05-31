@@ -64,7 +64,7 @@ module MCollective
     def r8_sendreq(msg, agent, filter = {}, opts = {})
       target = Util.make_target(agent, :command)
       reqid = opts[:request_id] || Digest::MD5.hexdigest("#{@config.identity}-#{Time.now.to_f.to_s}-#{target}")
-pp [:sending_msg,reqid,msg]
+pp [:sending_msg,reqid]
       req = @security.encoderequest(@config.identity, target, msg, reqid, filter)
       @log.debug("Sending request #{reqid} to #{target}")
       if opts[:receiver]

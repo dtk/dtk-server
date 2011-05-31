@@ -16,7 +16,7 @@ module XYZ
         @listener.add_request_id(request_id,context.opts.merge(opts))
         start()
         timeout = opts[:timeout]||DefaultTimeout
-timeout = 20
+timeout = 5
         @timer_store[request_id] = R8EM.add_timer(timeout){process_request_timeout(request_id)}
       end
      private

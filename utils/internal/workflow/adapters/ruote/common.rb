@@ -13,7 +13,7 @@ module XYZ
       end
       #called inside loop
       def stop()
-        pp ["receiver is being stopped"]
+        pp ["receiver is being stopped"] unless @is_stopped
         @lock_is_stopped.synchronize{@is_stopped = true}
       end
       def is_stopped?()

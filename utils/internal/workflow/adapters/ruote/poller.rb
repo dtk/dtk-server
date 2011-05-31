@@ -1,3 +1,4 @@
+#TODO: rewrite using EM periodic timer
 module XYZ
   module WorkflowAdapter
     #generates polling requests that are listened to in reciever
@@ -34,7 +35,7 @@ module XYZ
 
      private
       def poll
-        while not @is_stopped #TODO: dont think necsssary to put this test in mutex
+        while not is_stopped?()
           sleep @cycle_time
           #TODO: may splay for multiple items
           poll_items = nil

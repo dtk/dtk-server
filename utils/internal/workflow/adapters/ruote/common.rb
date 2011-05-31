@@ -3,21 +3,30 @@ module XYZ
   module WorkflowAdapter
     module RuoteCommon
       def start
-        @is_stopped = false
-        return if @thread
-        @thread = CreateThread.defer do
-          loop
+        @lock_is_stopped.synchronize do
+          if @is_stopped
+            @is_stopped = false
+            @thread ||= CreateThread.defer{loop}
+          end
         end
-      end
-      def stop()
-        @is_stopped = true
-        return unless @thread
         @thread.join
+        @thread = nil
+      end
+      #called inside loop
+      def stop()
+        pp ["receiver is being stopped"]
+        @lock_is_stopped.synchronize{@is_stopped = true}
+      end
+      def is_stopped?()
+        ret = nil
+        @lock_is_stopped.synchronize{ret = @is_stopped}
+        ret
       end
      private
       def common_init()
         @is_stopped = true #initialized as stopped
         @thread = nil
+        @lock_is_stopped = Mutex.new
       end
     end
   end

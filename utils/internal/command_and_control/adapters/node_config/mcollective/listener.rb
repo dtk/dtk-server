@@ -19,10 +19,13 @@ module XYZ
       end
 
       def add_request_id(request_id,opts)
-        pp [:adding_req_id,request_id]
         @rpc_client.client.r8_add_subscription?(opts[:agent])
-        req_opts = {:expected_count => opts[:expected_count], :timeout => opts[:timeout]||DefaultTimeout}
+        req_opts = {:expected_count => opts[:expected_count], :timeout => opts[:timeout]}
         set_request_info(request_id,req_opts)
+      end
+      
+      def remove_request_id(request_id)
+        @lock.synchronize{@request_info_store.delete(request_id)}
       end
 
      private
@@ -47,7 +50,6 @@ module XYZ
         ret
       end
 
-      DefaultTimeout = 120
       class MsgDoesNotMatchARequestID < RuntimeError; end
     end
   end

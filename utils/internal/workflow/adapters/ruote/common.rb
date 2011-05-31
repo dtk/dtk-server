@@ -2,6 +2,7 @@
 module XYZ
   module WorkflowAdapter
     module RuoteCommon
+      #TODO: need to put in logic to kill the loop thread
       def start
         @lock_is_stopped.synchronize do
           if @is_stopped
@@ -9,8 +10,6 @@ module XYZ
             @thread ||= CreateThread.defer{loop}
           end
         end
-        @thread.join
-        @thread = nil
       end
       #called inside loop
       def stop()

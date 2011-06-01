@@ -38,8 +38,7 @@ module XYZ
       end
 
       def self.initiate_execution(task_idh,top_task_idh,config_node,attributes_to_set,opts)
-#ret_rpc_client do |rpc_client|
-       rpc_client = opts[:connection]
+        rpc_client = opts[:connection]
         updated_attributes = Array.new
         config_agent = ConfigAgent.load(config_node[:config_agent_type])
 
@@ -59,7 +58,6 @@ module XYZ
         filter = {"identity" => [target_identity], "agent" => [agent]}
         msg = new_request(agent,"run", msg_content)
         rpc_client.client.r8_sendreq(msg,agent,filter,opts)
-#end
       end
 
       def self.create_poller_listener_connection()

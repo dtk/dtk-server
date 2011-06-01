@@ -74,8 +74,55 @@ pp [:sending_msg,reqid]
       unless @subscriptions.include?(agent)
         topic = Util.make_target(agent, :reply, collective)
         Log.debug("Subscribing to #{topic}")
-        Util.subscribe(topic)
+        Util.subscribe(topic,@connection)
         @subscriptions[agent] = 1
+      end
+    end
+
+
+    #TODO: write below interms of pieces above
+    #monkey patched to use different subscribe
+    def sendreq(msg, agent, filter = {})
+      target = Util.make_target(agent, :command, collective)
+      reqid = Digest::MD5.hexdigest("#{@config.identity}-#{Time.now.to_f.to_s}-#{target}")
+
+      # Security plugins now accept an agent and collective, ones written for <= 1.1.4 dont
+      # but we still want to support them, try to call them in a compatible way if they
+      # dont support the new arguments
+      begin
+        req = @security.encoderequest(@config.identity, target, msg, reqid, filter, agent, collective)
+      rescue ArgumentError
+        req = @security.encoderequest(@config.identity, target, msg, reqid, filter)
+      end
+      
+      Log.debug("Sending request #{reqid} to #{target}")
+
+      unless @subscriptions.include?(agent)
+        topic = Util.make_target(agent, :reply, collective)
+        Log.debug("Subscribing to #{topic}")
+
+        Util.subscribe(topic,@connection)
+        @subscriptions[agent] = 1
+      end
+
+      Timeout.timeout(2) do
+        @connection.send(target, req)
+      end
+      
+      reqid
+    end
+  end
+
+  #patch to reuse a passed in connection
+  module Util
+    def self.subscribe(topics,connection=nil)
+      connection ||= PluginManager["connector_plugin"]
+      if topics.is_a?(Array)
+        topics.each do |topic|
+          connection.subscribe(topic)
+        end
+      else
+        connection.subscribe(topics)
       end
     end
   end

@@ -21,7 +21,7 @@ module XYZ
          rescue Exception => e
           raise e
          ensure
-         #TODO: since reactor not needed @poller.stop if @poller
+          @poller.stop if @poller
           @receiver.stop if @receiver
           @connection.disconnect() if @connection
         end

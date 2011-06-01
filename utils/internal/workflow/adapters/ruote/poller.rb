@@ -23,6 +23,10 @@ module XYZ
         timer.cancel()
         @timers.delete(timer)
       end
+
+      def stop()
+        @timers.keys.each{|t|remove_item(t)}
+      end
     end
   end
 end

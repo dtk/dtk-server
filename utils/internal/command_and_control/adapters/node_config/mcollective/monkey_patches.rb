@@ -79,6 +79,16 @@ pp [:sending_msg,reqid]
       end
     end
   end
+
+  #patch to allow multiple instances of client
+  module Connector
+    class Base
+      def self.inherited(klass)
+        # added :single_instance => false
+        PluginManager << {:type => "connector_plugin", :class => klass.to_s, :single_instance => false}
+      end
+    end
+  end
 end
 
 

@@ -5,14 +5,21 @@ module XYZ
       def initialize(engine,listener)
         super(engine)
         #TODO: might put operations on @listener in mutex
+        #TODO: put operations on workitem store and poller store in mutex
         @listener = listener
         @request_ids = Array.new
-        common_init()
+
         @workitem_store = Hash.new
         @timer_store = Hash.new
+        @poller_store = Hash.new
+
+        common_init()
       end
       def add_request(request_id,context,opts={})
         @workitem_store[request_id] = context.workitem
+        if opts[:from_poller]
+          @poller_store[request_id] = opts[:from_poller]
+        end
         @listener.add_request_id(request_id,context.opts.merge(opts))
         start()
         timeout = opts[:timeout]||DefaultTimeout
@@ -31,6 +38,9 @@ timeout = 5
       def process_request_timeout(request_id)
         pp [:timeout, request_id]
         cancel_timer(request_id, :is_expired => true)
+        if poller_info = @poller_store.delete(request_id)
+          poller_info[:poller].remove_item(poller_info[:key])
+        end
         @listener.remove_request_id(request_id)
         workitem = @workitem_store.delete(request_id)
         stop() if @workitem_store.empty?
@@ -42,6 +52,9 @@ timeout = 5
       def wait_and_process_message()
         msg,request_id = @listener.process_event()
         cancel_timer(request_id)
+        if poller_info = @poller_store.delete(request_id)
+          poller_info[:poller].remove_item(poller_info[:key])
+        end
         workitem = @workitem_store.delete(request_id)
         stop() if @workitem_store.empty?
         if workitem

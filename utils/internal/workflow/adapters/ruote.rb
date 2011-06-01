@@ -12,6 +12,8 @@ module XYZ
         @task.update(:status => "executing") #TODO: may handle this by inserting a start subtask
         #TODO: may want to only create connection, poller and receiver on demand (if task needs it)
         begin
+          #TODO: running into problem multiple times; dont know yet whetehr race condition max conditions
+          #or even lack of patch I had put in 1.1 that is no taken out
           @connection = CommandAndControl.create_poller_listener_connection()
           listener = CommandAndControl.create_listener(@connection)
           @receiver = RuoteReceiver.new(Engine,listener)

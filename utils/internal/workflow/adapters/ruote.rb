@@ -25,6 +25,7 @@ module XYZ
           @receiver.stop if @receiver
           @connection.disconnect() if @connection
         end
+        nil
       end
       attr_reader :listener,:poller
      private 
@@ -69,11 +70,19 @@ module XYZ
             end
           end
         end
+
+        class EndOfTask < Top
+          def consume(workitem)
+            pp workitem.fields
+            reply_to_engine(workitem)
+          end
+        end
       end
 
       #TODO: stubbed storage engine using hash store
       Engine = ::Ruote::Engine.new(::Ruote::Worker.new(::Ruote::HashStorage.new))
       Engine.register_participant :execute_on_node, Participant::ExecuteOnNode
+      Engine.register_participant :end_of_task, Participant::EndOfTask
 
 
       @@count = 0
@@ -87,13 +96,15 @@ module XYZ
       end
 
       def compute_process_def()
-        #TODO: see if we need to keep geenrating new ones or whether we can (delete) and reuse
+        #TODO: see if we need to keep generating new ones or whether we can (delete) and reuse
         @@count += 1
         top_task_idh = @task.id_handle()
         name = "process-#{@@count.to_s}"
         ["define", 
          {"name" => name},
-         [compute_process_body(@task,top_task_idh)]]
+         [["sequence", {}, 
+          [compute_process_body(@task,top_task_idh),
+           ["participant",{"ref" => "end_of_task"},[]]]]]]
       end
 
       def compute_process_body(task,top_task_idh)
@@ -125,7 +136,7 @@ module XYZ
         ["sequence", {}, subtasks.map{|t|compute_process_body(t,top_task_idh)}]
       end
       def compute_process_body_concurrent(subtasks,top_task_idh)
-        ["concurrence", {"merge_type"=>"mix"}, subtasks.map{|t|compute_process_body(t,top_task_idh)}]
+        ["concurrence", {"merge_type"=>"stack"}, subtasks.map{|t|compute_process_body(t,top_task_idh)}]
       end
     end
   end

@@ -23,12 +23,16 @@ module XYZ
          rescue Exception => e
           raise e
          ensure
-          @poller.stop if @poller
-          @receiver.stop if @receiver
-          @connection.disconnect() if @connection
         end
         nil
       end
+
+      def shutdown_defer_context()
+        @poller.stop if @poller
+        @receiver.stop if @receiver
+        @connection.disconnect() if @connection
+      end
+
       attr_reader :listener,:poller
      private 
       def initialize()
@@ -56,15 +60,31 @@ module XYZ
           end
         end
         class ExecuteOnNode < Top
+          LockforDebug = Mutex.new
           def consume(workitem)
+            LockforDebug.synchronize{pp [:in_consume, Thread.current, Thread.list];STDOUT.flush}
             task_id = workitem.fields["params"]["task_id"]
             task_info = get_and_delete_from_object_store(task_id)
             action = task_info["action"]
             top_task_idh = task_info["top_task_idh"]
             workflow = task_info["workflow"]
             if action.long_running?
-              context = RuoteReceiverContext.new(workitem,{:expected_count => 1})
-              workflow.initiate_executable_action(action,top_task_idh,context)
+              begin
+                context = RuoteReceiverContext.new(workitem,{:expected_count => 1})
+                #TODO: need to cleanup mechanism below that has receivers waiting for
+                #to get id back because since tehy share a connection tehy can eat each others replys
+                #think best solution is using async receiver; otherwise will need for them to create and destroy 
+                #their own connections
+                workflow.initiate_executable_action(action,top_task_idh,context)
+                #TODO: fix up how to best pass action state
+               rescue ErrorCannotConnect
+                workitem.fields["result"] = {"status" =>"failed", "error" => "cannot_connect"}  
+                reply_to_engine(workitem)
+               rescue Exception => e
+                pp e.backtrace[0..5]
+                workitem.fields["result"] = {"status" =>"failed"}
+                reply_to_engine(workitem)
+              end
             else
               result = process_executable_action(action,top_task_idh)
               workitem.fields[workitem.fields["params"]["action"]["id"]] = result

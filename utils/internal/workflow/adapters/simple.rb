@@ -54,8 +54,6 @@ pp [:threads, threads]
         @task.update(:status => status.to_s)
         status
       end
-
-
     end
   end
 end

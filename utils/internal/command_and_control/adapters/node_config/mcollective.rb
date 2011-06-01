@@ -11,29 +11,28 @@ module XYZ
       def self.execute(task_idh,top_task_idh,config_node,attributes_to_set)
         result = nil
         updated_attributes = Array.new
-        ret_rpc_client(mcollective_agent) do |rpc_client|
-          config_agent = ConfigAgent.load(config_node[:config_agent_type])
+        rpc_client = ret_rpc_client(mcollective_agent) 
+        config_agent = ConfigAgent.load(config_node[:config_agent_type])
 
-          target_identity = ret_discovered_mcollective_id(config_node[:node],rpc_client)
-          raise ErrorCannotConnect.new() unless target_identity
+        target_identity = ret_discovered_mcollective_id(config_node[:node],rpc_client)
+        raise ErrorCannotConnect.new() unless target_identity
 
-          project = {:ref => "project1"} #TODO: stub until get the relevant project
+        project = {:ref => "project1"} #TODO: stub until get the relevant project
 
-          #push implementation
-          push_implementation(config_node,project)
+        #push implementation
+        push_implementation(config_node,project)
 
-          msg_content =  config_agent.ret_msg_content(config_node)
-          msg_content.merge!(:task_id => task_idh.get_id(),:top_task_id => top_task_idh.get_id(), :project => project)
+        msg_content =  config_agent.ret_msg_content(config_node)
+        msg_content.merge!(:task_id => task_idh.get_id(),:top_task_id => top_task_idh.get_id(), :project => project)
 
-          #make mcollective request
-          filter = {"identity" => [target_identity], "agent" => [mcollective_agent]}
-          response = rpc_client.custom_request("run",msg_content,target_identity,filter).first
-          raise ErrorTimeout.new() unless response
-          raise Error.new() unless response[:data]
-
-          result = response[:data]
-          raise ErrorFailedResponse.new(result[:status],result[:error]) unless result[:status] == :succeeded 
-        end
+        #make mcollective request
+        filter = {"identity" => [target_identity], "agent" => [mcollective_agent]}
+        response = rpc_client.custom_request("run",msg_content,target_identity,filter).first
+        raise ErrorTimeout.new() unless response
+        raise Error.new() unless response[:data]
+        
+        result = response[:data]
+        raise ErrorFailedResponse.new(result[:status],result[:error]) unless result[:status] == :succeeded 
         [result,updated_attributes]
       end
 
@@ -70,32 +69,32 @@ module XYZ
 
       def self.get_logs(task,nodes)
         ret = nodes.inject({}){|h,n|h.merge(n[:id] => nil)}
-
         value = task.id_handle.get_id().to_s
         key = task[:executable_action_type] ? "task_id" : "top_task_id"
         msg_content = {:key => key, :value => value}
         agent = "get_log_fragment"
-        ret_rpc_client(agent) do |rpc_client|
-          pbuilderid_index = nodes.inject({}){|h,n|h.merge(pbuilderid(n) => n[:id])}
-          target_identities = ret_discovered_mcollective_ids(pbuilderid_index.keys,rpc_client)
-          unless target_identities.empty?
-            filter = {"identity" => /^(#{target_identities.join('|')})$/}
-            responses = rpc_client.custom_request("get",msg_content,target_identities,filter)
-            raise ErrorTimeout.new() unless responses #TODO: is this needed?
-            responses.each do |response|
-              node_id = pbuilderid_index[response[:data][:pbuilderid]]
-              ret[node_id] = response[:data]
-            end
+        rpc_client = ret_rpc_client(agent) 
+        pbuilderid_index = nodes.inject({}){|h,n|h.merge(pbuilderid(n) => n[:id])}
+        target_identities = ret_discovered_mcollective_ids(pbuilderid_index.keys,rpc_client)
+        unless target_identities.empty?
+          filter = {"identity" => /^(#{target_identities.join('|')})$/}
+          responses = rpc_client.custom_request("get",msg_content,target_identities,filter)
+          raise ErrorTimeout.new() unless responses #TODO: is this needed?
+          responses.each do |response|
+            node_id = pbuilderid_index[response[:data][:pbuilderid]]
+            ret[node_id] = response[:data]
           end
         end
         ret
       end
-      
+
+      #TDOO: think want to deprecate
       def self.poller_action_to_detect_node_ready?(node,client,listener)
         filter = nil #TODO: stub
         proc{McollectivePoller.new(client,listener).sendreq_discover(filter)}
       end
 
+    
       def  self.wait_for_node_to_be_ready(node)
         pp [:test1,node[:display_name]]
         target_identity = nil
@@ -123,32 +122,7 @@ module XYZ
         #TODO: want to delete node too in case timeout problem
         raise ErrorWhileCreatingNode unless target_identity
       end
-=begin
-TODO: deprecate because seems to block thread scheduling
-      def self.wait_for_node_to_be_ready(node)
-        target_identity = nil
-        begin
-          rpc_client = nil
-          Lock.synchronize do
-            #TODO: check if need lock for this
-            options =   Options.merge(:disctimeout=> 2)
-            rpc_client = rpcclient(mcollective_agent,:options => options)
-          end
-          #looping rather than just one discovery timeout because if node not connecetd msg lost
-          count = 0
-          while target_identity.nil? and count < 10
-            count += 1
-            target_identity = ret_discovered_mcollective_id(node,rpc_client)
-            sleep 5
-          end
-        ensure
-          rpc_client.disconnect() if rpc_client
-        end
-        pp [:new_node_target_idenity,target_identity]
-        #TODO: want to dleet node too in case timeout problem
-        raise ErrorWhileCreatingNode unless target_identity
-      end
-=end
+
      private
       #TODO: patched mcollective fn to put in agent
       def self.new_request(agent,action, data)
@@ -160,23 +134,14 @@ TODO: deprecate because seems to block thread scheduling
       end
 
       #using code that puts in own agent 
-      def self.ret_rpc_client(agent="all",&block)
-        rpc_client = nil
+      def self.ret_rpc_client(agent="all")
+        ret = nil
         Lock.synchronize do
           #lock is needed since Client.new is not thread safe
           #deep copy because rpcclient modifies options
-          rpc_client = rpcclient(agent,:options => Aux::deep_copy(Options))
+          ret = rpcclient(agent,:options => Aux::deep_copy(Options))
         end
-        unless block
-          rpc_client
-        else
-          begin
-            block.call(rpc_client)
-           ensure
-            rpc_client.disconnect() if rpc_client
-          end
-          nil
-        end
+        ret
       end
 
       #TODO: not sure if what name of agent is shoudl be configurable

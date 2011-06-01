@@ -671,28 +671,12 @@ pp datacenter
       pending_changes.each do |sc|
         test_str << "  type=#{sc[:type]}; id=#{(sc[:component]||sc[:node])[:id].to_s}; name=#{(sc[:component]||sc[:node])[:display_name]||'UNSET'}\n"
       end
-#=begin
+
       top_level_task.save!()
       workflow = Workflow.create(top_level_task)
-
-      CreateThread.defer do
-        begin
-          puts "in commit_changes defer"
-          top_task_id = top_level_task.id_handle.get_id()
-          puts "starting top_task_id = #{top_task_id.to_s}"
-          pp request.params
-          workflow.execute()
-        rescue Exception => e
-          Log.error("error in commit background job: #{e.inspect}")
-pp e.backtrace
-        end
-        puts "end of commit_changes defer"
-        puts "----------------"
-      end
-#=end
+      workflow.defer_execution(top_level_task)
 
       run_javascript("R8.Workspace.showAlert('Commit Logged,Pending Execution');")
- #     return {}
       return {
         'data'=>test_str
       }

@@ -63,6 +63,9 @@ module MCollective
 
           #modifications so connect at initialization and there is not multiple connections per thread
           def initialize
+            pp [:disconnect,Thread.current]
+            pp caller[0..3]
+
             @config = Config.instance
             @subscriptions = []
             if Thread.current[:stomp_client]
@@ -74,12 +77,11 @@ module MCollective
           end
 
           def disconnect
+            pp [:disconnect,Thread.current]
             pp caller[0..3]
-            return
+            #TODO: getting message receive failed: stream closed
             Log.debug("Disconnecting from Stomp")
             @connection.disconnect
-            #TODO: should be delete
-            Thread.current[:stomp_client] = nil
           end
 
             # Connects to the Stomp middleware

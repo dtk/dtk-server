@@ -21,6 +21,7 @@ module XYZ
           wfid = Engine.launch(process_def())
           Engine.wait_for(wfid)
          rescue Exception => e
+          pp [e,e.backtrace[0..3]]
           raise e
          ensure
         end
@@ -62,7 +63,7 @@ module XYZ
         class ExecuteOnNode < Top
           LockforDebug = Mutex.new
           def consume(workitem)
-            LockforDebug.synchronize{pp [:in_consume, Thread.current, Thread.list];STDOUT.flush}
+            #LockforDebug.synchronize{pp [:in_consume, Thread.current, Thread.list];STDOUT.flush}
             task_id = workitem.fields["params"]["task_id"]
             task_info = get_and_delete_from_object_store(task_id)
             action = task_info["action"]

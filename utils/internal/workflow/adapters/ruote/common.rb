@@ -15,6 +15,7 @@ module XYZ
       def stop()
         pp ["receiver is being stopped"] unless @is_stopped
         @lock_is_stopped.synchronize{@is_stopped = true}
+        @thread.kill if @thread
       end
       def is_stopped?()
         ret = nil

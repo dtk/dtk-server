@@ -5,29 +5,52 @@ module XYZ
       def initialize(engine,listener)
         super(engine)
         #TODO: might put operations on @listener in mutex
-        #TODO: put operations on workitem store and poller store in mutex
         @listener = listener
-        @request_ids = Array.new
-
-        @workitem_store = Hash.new
-        @timer_store = Hash.new
-        @poller_store = Hash.new
-
+        @callbacks = Hash.new
+        @lock = Mutex.new
         common_init()
       end
+
       def add_request(request_id,context,opts={})
-        @workitem_store[request_id] = context.workitem
-        if opts[:from_poller]
-          @poller_store[request_id] = opts[:from_poller]
-        end
         @listener.add_request_id(request_id,context.opts.merge(opts))
-        start()
+
+        callback_type = 
+          if opts[:from_poller] then :poller
+          else :workitem
+        end
+        callback = 
+          case callback_type
+            when :poller then callback_poller(request_id,context,opts)
+            when :workitem then callback_workitem(request_id,context,opts)
+        end
+
         timeout = opts[:timeout]||DefaultTimeout
-timeout = 5
-        @timer_store[request_id] = R8EM.add_timer(timeout){process_request_timeout(request_id)}
+        add_callback(request_id,callback,timeout)
+        start?()
       end
      private
-      DefaultTimeout = 120
+      DefaultTimeout = 60
+
+      def callback_poller(request_id,context,opts)
+        CallbackPoller.new(opts[:from_poller])
+      end 
+
+      def callback_workitem(request_id,context,opts)
+        CallbackWorkitem.new(:workitem => context.workitem)
+      end 
+
+      def add_callback(request_id,callback_x,timeout=nil)
+        callback = timeout ? 
+          callback_x.merge(:timer => R8EM.add_timer(timeout){process_request_timeout(request_id)}) :
+          callback_x
+        @lock.synchronize{@callbacks[request_id] = callback}
+      end
+
+      def get_and_remove_callback(request_id)
+        ret = nil
+        @lock.synchronize{ret = @callbacks.delete(request_id)}
+        ret
+      end
 
       def loop
         while not is_stopped?()
@@ -35,44 +58,55 @@ timeout = 5
         end
       end
 
-      def process_request_timeout(request_id)
-        pp [:timeout, request_id]
-        cancel_timer(request_id, :is_expired => true)
-        if poller_info = @poller_store.delete(request_id)
-          poller_info[:poller].remove_item(poller_info[:key])
-        end
-        @listener.remove_request_id(request_id)
-        workitem = @workitem_store.delete(request_id)
-        stop() if @workitem_store.empty?
-        if workitem
-          workitem.fields["result"] = {"status" => "timeout"} 
-          reply_to_engine(workitem)
-        end
-      end
       def wait_and_process_message()
         msg,request_id = @listener.process_event()
-        cancel_timer(request_id)
-        if poller_info = @poller_store.delete(request_id)
-          poller_info[:poller].remove_item(poller_info[:key])
-        end
-        workitem = @workitem_store.delete(request_id)
-        @workitem_store.empty?
-        if workitem
-          workitem.fields["result"] = msg[:body]
-          reply_to_engine(workitem)
-        else
-          Log.error("could not find a workitem for request_id #{request_id.to_s}")
+        callback = get_and_remove_callback(request_id)
+        callback.process_msg(msg,request_id,self)
+      end
+
+      def process_request_timeout(request_id)
+        pp [:timeout, request_id]
+        @listener.remove_request_id(request_id)
+        callback = get_and_remove_callback(request_id)
+        callback.process_timeout(request_id,self)
+      end
+
+      class Callback < HashObject
+        def cancel_timer(request_id,opts={})
+          timer = self[:timer]
+          unless opts[:is_expired]
+            R8EM.cancel_timer(timer) if timer
+          end
         end
       end
 
-      def cancel_timer(request_id,opts={})
-        timer = @timer_store.delete(request_id)
-        unless opts[:is_expired]
-          R8EM.cancel_timer(timer) if timer
+      class CallbackWorkitem < Callback
+        def process_msg(msg,request_id,receiver)
+          cancel_timer(request_id)
+          workitem = self[:workitem]
+          if workitem
+            workitem.fields["result"] = msg[:body]
+            receiver.reply_to_engine(workitem)
+          else
+            Log.error("could not find a workitem for request_id #{request_id.to_s}")
+          end
         end
+        def process_timeout(request_id,receiver)
+          workitem = self[:workitem]
+          if workitem
+            workitem.fields["result"] = {"status" => "timeout"} 
+            receiver.reply_to_engine(workitem)
+          else
+            Log.error("could not find a workitem for request_id #{request_id.to_s}")
+          end
+        end
+      end
+      class CallbackPoller < Callback
+        #TODO: write ruotine
+        #action for process timeout poller_info[:poller].remove_item(poller_info[:key])
       end
     end
-
+ 
     class RuoteReceiverContext < ReceiverContext
       attr_reader :workitem, :opts
       def initialize(workitem,opts={})
@@ -82,3 +116,4 @@ timeout = 5
     end
   end
 end
+

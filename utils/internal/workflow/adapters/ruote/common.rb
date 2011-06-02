@@ -3,7 +3,7 @@ module XYZ
   module WorkflowAdapter
     module RuoteCommon
       #TODO: need to put in logic to kill the loop thread
-      def start
+      def start?()
         @lock_is_stopped.synchronize do
           if @is_stopped
             @is_stopped = false

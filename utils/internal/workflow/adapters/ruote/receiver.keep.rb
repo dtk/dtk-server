@@ -5,28 +5,37 @@ module XYZ
       def initialize(engine,listener)
         super(engine)
         #TODO: might put operations on @listener in mutex
-        #TODO: put operations on workitem store and poller store in mutex
         @listener = listener
-        @request_ids = Array.new
-
-        @workitem_store = Hash.new
-        @timer_store = Hash.new
-        @poller_store = Hash.new
-
+        @callbacks = Hash.new
+        @lock = Mutex.new
         common_init()
       end
-      def add_request(request_id,context,opts={})
-        @workitem_store[request_id] = context.workitem
-        if opts[:from_poller]
-          @poller_store[request_id] = opts[:from_poller]
+
+      def add_request(request_id,callback_info)
+        listener_opts = callback_info.reject{|k,v| not [:agent,:expected_count].include?(k)}
+        @listener.add_request_id(request_id,listener_opts)
+        callback = Callback.create(callback_info)
+        if callback
+          timeout = callback_info[:timeout]||DefaultTimeout
+          add_callback(request_id,callback,timeout)
+          start?()
         end
-        @listener.add_request_id(request_id,context.opts.merge(opts))
-        start()
-        timeout = opts[:timeout]||DefaultTimeout
-        @timer_store[request_id] = R8EM.add_timer(timeout){process_request_timeout(request_id)}
       end
      private
       DefaultTimeout = 60
+
+      def add_callback(request_id,callback_x,timeout=nil)
+        callback = timeout ? 
+          callback_x.merge(:timer => R8EM.add_timer(timeout){process_request_timeout(request_id)}) :
+          callback_x
+        @lock.synchronize{@callbacks[request_id] = callback}
+      end
+
+      def get_and_remove_callback(request_id)
+        ret = nil
+        @lock.synchronize{ret = @callbacks.delete(request_id)}
+        ret
+      end
 
       def loop
         while not is_stopped?()
@@ -34,50 +43,64 @@ module XYZ
         end
       end
 
-      def process_request_timeout(request_id)
-        pp [:timeout, request_id]
-        cancel_timer(request_id, :is_expired => true)
-        if poller_info = @poller_store.delete(request_id)
-          poller_info[:poller].remove_item(poller_info[:key])
-        end
-        @listener.remove_request_id(request_id)
-        workitem = @workitem_store.delete(request_id)
-        stop() if @workitem_store.empty?
-        if workitem
-          workitem.fields["result"] = {"status" => "timeout"} 
-          reply_to_engine(workitem)
-        end
-      end
       def wait_and_process_message()
         msg,request_id = @listener.process_event()
-        cancel_timer(request_id)
-        if poller_info = @poller_store.delete(request_id)
-          poller_info[:poller].remove_item(poller_info[:key])
+        callback = get_and_remove_callback(request_id)
+        callback.process_msg(msg,request_id,self)
+      end
+
+      def process_request_timeout(request_id)
+        pp [:timeout, request_id]
+        @listener.remove_request_id(request_id)
+        callback = get_and_remove_callback(request_id)
+        callback.process_timeout(request_id,self)
+      end
+
+      class Callback < HashObject
+        def self.create(callback_info)
+          case callback_info[:type]
+          when :workitem then CallbackWorkitem.new(callback_info)
+          when :poller then CallbackPoller.new(callback_info)
+          else 
+            Log.error("unexpected callback type")
+            nil
+          end
         end
-        workitem = @workitem_store.delete(request_id)
-        @workitem_store.empty?
-        if workitem
-          workitem.fields["result"] = msg[:body]
-          reply_to_engine(workitem)
-        else
-          Log.error("could not find a workitem for request_id #{request_id.to_s}")
+
+        def cancel_timer(request_id,opts={})
+          timer = self[:timer]
+          unless opts[:is_expired]
+            R8EM.cancel_timer(timer) if timer
+          end
         end
       end
 
-      def cancel_timer(request_id,opts={})
-        timer = @timer_store.delete(request_id)
-        unless opts[:is_expired]
-          R8EM.cancel_timer(timer) if timer
+      class CallbackWorkitem < Callback
+        def process_msg(msg,request_id,receiver)
+          cancel_timer(request_id)
+          workitem = self[:workitem]
+          if workitem
+            workitem.fields["result"] = msg[:body].merge("task_id" => workitem.params["task_id"])
+            receiver.reply_to_engine(workitem)
+          else
+            Log.error("could not find a workitem for request_id #{request_id.to_s}")
+          end
+        end
+        def process_timeout(request_id,receiver)
+          workitem = self[:workitem]
+          if workitem
+            workitem.fields["result"] = {"status" => "timeout", "task_id" => workitem.params["task_id"]}
+            receiver.reply_to_engine(workitem)
+          else
+            Log.error("could not find a workitem for request_id #{request_id.to_s}")
+          end
         end
       end
-    end
-
-    class RuoteReceiverContext < ReceiverContext
-      attr_reader :workitem, :opts
-      def initialize(workitem,opts={})
-        @workitem = workitem
-        @opts = opts
+      class CallbackPoller < Callback
+        #TODO: write routine
+        #action for process timeout poller_info[:poller].remove_item(poller_info[:key])
       end
     end
   end
 end
+

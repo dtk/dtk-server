@@ -70,7 +70,19 @@ module XYZ
             top_task_idh = task_info["top_task_idh"]
             workflow = task_info["workflow"]
             if action.long_running?
-              context = {:type => :workitem, :workitem => workitem, :expected_count => 1}
+              callbacks = {
+                :on_msg_received => proc do |msg|
+                  workitem.fields["result"] = msg[:body].merge("task_id" => workitem.params["task_id"])
+                  self.reply_to_engine(workitem)
+                end,
+                :on_timeout => proc do 
+                  workitem.fields["result"] = {
+                    "status" => "timeout", 
+                    "task_id" => workitem.params["task_id"]}
+                  self.reply_to_engine(workitem)
+                end
+              }
+              context = {:callbacks => callbacks, :expected_count => 1}
               begin
                 #TODO: need to cleanup mechanism below that has receivers waiting for
                 #to get id back because since tehy share a connection tehy can eat each others replys

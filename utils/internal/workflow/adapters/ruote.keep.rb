@@ -1,50 +1,172 @@
 require 'ruote'
+require File.expand_path('ruote/common', File.dirname(__FILE__))
 require File.expand_path('ruote/receiver', File.dirname(__FILE__))
 require File.expand_path('ruote/poller', File.dirname(__FILE__))
 
-#TODO: below is broken because of new refactoring
 #TODO: switch action to node_actions
 module XYZ 
   module WorkflowAdapter
     class Ruote < XYZ::Workflow
-      def execute()
-        wfid = Engine.launch(@process_def)
-        Engine.wait_for(wfid)
-      end
-     private 
-      #TODO: stubbed storage engine
-      Engine = ::Ruote::Engine.new(::Ruote::Worker.new(::Ruote::HashStorage.new))
-      Engine.register_participant :execute_on_node do |workitem|
-        action = workitem.fields["params"]["action"]
-        result = create_or_execute_on_node(action)
-        workitem.fields[workitem.fields["params"]["action"]["id"]] = result 
-      end
-      Engine.register_participant :return_results do |workitem|
-        pp [:bravo,workitem.fields]
-      end
-      @@count = 0
-     def initialize(ordered_actions)
-        @process_def = ret_process_definition(ordered_actions)
+      #TODO: need to clean up whether engine is persistent; whether execute can be called more than once for any insatnce
+      def execute(top_task_idh=nil)
+        @task.update(:status => "executing") #TODO: may handle this by inserting a start subtask
+        #TODO: may want to only create connection, poller and receiver on demand (if task needs it)
+        begin
+          #TODO: running into problem multiple times; dont know yet whetehr race condition max conditions
+          #or even lack of patch I had put in 1.1 that is no taken out
+          @connection = CommandAndControl.create_poller_listener_connection()
+          listener = CommandAndControl.create_listener(@connection)
+          @receiver = RuoteReceiver.new(Engine,listener)
+          @poller = RuotePoller.new(@connection,@receiver)
+          wfid = Engine.launch(process_def())
+          Engine.wait_for(wfid)
+         rescue Exception => e
+          pp [e,e.backtrace[0..3]]
+          raise e
+         ensure
+        end
+        nil
       end
 
-      def ret_process_definition(ordered_actions)
-        @@count += 1
-        ::Ruote.process_definition :name => "process-#{@@count.to_s}" do
-          sequence do
-            if ordered_actions.is_single_state_change?()
-              participant :ref => :execute_on_node, :action => ordered_actions.single_state_change()
-            elsif ordered_actions.is_concurrent?()
-              concurrence :merge_type => :mix do
-                ordered_actions.subtasks.each{|action|participant :ref => :execute_on_node, :action => action}
-              end
-            elsif ordered_actions.is_sequential?()
-              sequence do
-                ordered_actions.subtasks.each{|action|participant :ref => :execute_on_node, :action => action}
-              end
-            end
-            participant :return_results
+      def shutdown_defer_context()
+        @poller.stop if @poller
+        @receiver.stop if @receiver
+        @connection.disconnect() if @connection
+      end
+
+      attr_reader :listener,:poller
+     private 
+      def initialize()
+        super
+        @connection = nil
+        @receiver = nil
+        @poller = nil
+      end
+
+      ObjectStore = Hash.new
+      ObjectStoreLock = Mutex.new
+      #TODO: make sure task id is globally unique
+      def self.push_on_object_store(task_id,task_info)
+        ObjectStoreLock.synchronize{ObjectStore[task_id] = task_info}
+      end
+      
+      module Participant
+        class Top
+          include ::Ruote::LocalParticipant
+         private 
+          def get_and_delete_from_object_store(task_id)
+            ret = nil
+            ObjectStoreLock.synchronize{ret = ObjectStore.delete(task_id)}
+            ret
           end
         end
+        class ExecuteOnNode < Top
+          LockforDebug = Mutex.new
+          def consume(workitem)
+            #LockforDebug.synchronize{pp [:in_consume, Thread.current, Thread.list];STDOUT.flush}
+            task_id = workitem.fields["params"]["task_id"]
+            task_info = get_and_delete_from_object_store(task_id)
+            action = task_info["action"]
+            top_task_idh = task_info["top_task_idh"]
+            workflow = task_info["workflow"]
+            if action.long_running?
+              context = {:type => :workitem, :workitem => workitem, :expected_count => 1}
+              begin
+                #TODO: need to cleanup mechanism below that has receivers waiting for
+                #to get id back because since tehy share a connection tehy can eat each others replys
+                #think best solution is using async receiver; otherwise will need for them to create and destroy 
+                #their own connections
+                workflow.initiate_executable_action(action,top_task_idh,context)
+                #TODO: fix up how to best pass action state
+               rescue CommandAndControl::ErrorCannotConnect
+                workitem.fields["result"] = {"status" =>"failed", "error" => "cannot_connect"}  
+                reply_to_engine(workitem)
+               rescue Exception => e
+                pp e.backtrace[0..5]
+                workitem.fields["result"] = {"status" =>"failed"}
+                reply_to_engine(workitem)
+              end
+            else
+              result = process_executable_action(action,top_task_idh)
+              workitem.fields[workitem.fields["params"]["action"]["id"]] = result
+              reply_to_engine(workitem)
+            end
+          end
+=begin
+#TODO: experimenting with turning this on and off
+          def do_not_thread
+            true
+          end
+=end
+
+        end
+
+        class EndOfTask < Top
+          def consume(workitem)
+            pp [workitem.fields,workitem.params]
+            reply_to_engine(workitem)
+          end
+        end
+      end
+
+      #TODO: stubbed storage engine using hash store
+      Engine = ::Ruote::Engine.new(::Ruote::Worker.new(::Ruote::HashStorage.new))
+      Engine.register_participant :execute_on_node, Participant::ExecuteOnNode
+      Engine.register_participant :end_of_task, Participant::EndOfTask
+
+
+      @@count = 0
+      def initialize(task)
+        super
+        @process_def = nil
+      end
+      
+      def process_def()
+        @process_def ||= compute_process_def()
+      end
+
+      def compute_process_def()
+        #TODO: see if we need to keep generating new ones or whether we can (delete) and reuse
+        @@count += 1
+        top_task_idh = @task.id_handle()
+        name = "process-#{@@count.to_s}"
+        ["define", 
+         {"name" => name},
+         [["sequence", {}, 
+          [compute_process_body(@task,top_task_idh),
+           ["participant",{"ref" => "end_of_task"},[]]]]]]
+      end
+
+      def compute_process_body(task,top_task_idh)
+        executable_action = task[:executable_action]
+        if executable_action
+          task_info = {
+            "action" => executable_action,
+            "workflow" => self,
+            "top_task_idh" => top_task_idh
+          }
+          task_id = task.id()
+          Ruote.push_on_object_store(task_id,task_info)
+
+          ["participant", 
+           {"ref" => "execute_on_node", 
+            "task_id" => task_id,
+             "top_task_idh" => top_task_idh
+           },
+           []]
+        elsif task[:temporal_order] == "sequential"
+          compute_process_body_sequential(task.subtasks,top_task_idh)
+        elsif task[:temporal_order] == "concurrent"
+          compute_process_body_concurrent(task.subtasks,top_task_idh)
+        else
+          Log.error("do not have rules to process task")
+        end
+      end
+      def compute_process_body_sequential(subtasks,top_task_idh)
+        ["sequence", {}, subtasks.map{|t|compute_process_body(t,top_task_idh)}]
+      end
+      def compute_process_body_concurrent(subtasks,top_task_idh)
+        ["concurrence", {"merge_type"=>"stack"}, subtasks.map{|t|compute_process_body(t,top_task_idh)}]
       end
     end
   end

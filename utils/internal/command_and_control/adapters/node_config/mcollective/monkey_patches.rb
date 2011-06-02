@@ -42,45 +42,6 @@ module MCollective
       msg
     end
 
-    #modified so that a receiver can be passed in
-    def r8_sendreq(msg, agent, filter = {}, opts = {})
-      target = Util.make_target(agent, :command, collective)
-      reqid = Digest::MD5.hexdigest("#{@config.identity}-#{Time.now.to_f.to_s}-#{target}")
-pp [:sending_msg,reqid]
-      # Security plugins now accept an agent and collective, ones written for <= 1.1.4 dont
-      # but we still want to support them, try to call them in a compatible way if they
-      # dont support the new arguments
-      begin
-        req = @security.encoderequest(@config.identity, target, msg, reqid, filter, agent, collective)
-       rescue ArgumentError
-        req = @security.encoderequest(@config.identity, target, msg, reqid, filter)
-      end
-      Log.debug("Sending request #{reqid} to #{target}")
-      if opts[:receiver]
-        opts[:receiver].add_request(reqid,opts[:receiver_context].merge(:agent => agent))
-      else
-        r8_add_subscription?(agent)
-      end
-
-      Timeout.timeout(2) do
-        @connection.send(target, req)
-      end
-
-      reqid
-    end
-
-    #add subscription is needed
-    def r8_add_subscription?(agent)
-      unless @subscriptions.include?(agent)
-        topic = Util.make_target(agent, :reply, collective)
-        Log.debug("Subscribing to #{topic}")
-        Util.subscribe(topic,@connection)
-        @subscriptions[agent] = 1
-      end
-    end
-
-
-    #TODO: write below interms of pieces above
     #monkey patched to use different subscribe
     def sendreq(msg, agent, filter = {})
       target = Util.make_target(agent, :command, collective)
@@ -111,8 +72,41 @@ pp [:sending_msg,reqid]
       
       reqid
     end
-  end
 
+##### new variants 
+    #modified so that a receiver can be passed in
+    def r8_sendreq(msg, agent, filter = {}, opts = {})
+      target = Util.make_target(agent, :command, collective)
+      reqid = Digest::MD5.hexdigest("#{@config.identity}-#{Time.now.to_f.to_s}-#{target}")
+      trigger = {
+        :generate_request_id => proc{reqid},
+        :send_message => proc do |reqid|
+          # Security plugins now accept an agent and collective, ones written for <= 1.1.4 dont
+          # but we still want to support them, try to call them in a compatible way if they
+          # dont support the new arguments
+          begin
+            req = @security.encoderequest(@config.identity, target, msg, reqid, filter, agent, collective)
+           rescue ArgumentError
+            req = @security.encoderequest(@config.identity, target, msg, reqid, filter)
+          end
+          Log.debug("Sending request #{reqid} to #{target}")
+          pp [:sending_msg,reqid]
+          @connection.send(target, req)
+        end
+      }
+      opts[:receiver].process_request(trigger,opts[:receiver_context].merge(:agent => agent))
+    end
+
+    #add subscription is needed
+    def r8_add_subscription?(agent)
+      unless @subscriptions.include?(agent)
+        topic = Util.make_target(agent, :reply, collective)
+        Log.debug("Subscribing to #{topic}")
+        Util.subscribe(topic,@connection)
+        @subscriptions[agent] = 1
+      end
+    end
+  end
   #patch to reuse a passed in connection
   module Util
     def self.subscribe(topics,connection=nil)

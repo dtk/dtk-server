@@ -65,7 +65,7 @@ module XYZ
           end
         end
 
-        class Test < Top
+        class DetectNodeReady < Top
           def consume(workitem)
             task_id = workitem.fields["params"]["task_id"]
             task_info = get_and_delete_from_object_store(task_id)
@@ -73,7 +73,7 @@ module XYZ
             workflow = task_info["workflow"]
             callbacks = {
               :on_msg_received => proc do |msg|
-                pp [:found,msg]
+                pp [:found,msg[:senderid]]
                 self.reply_to_engine(workitem)
               end,
               :on_timeout => proc do 
@@ -149,10 +149,9 @@ module XYZ
       #TODO: stubbed storage engine using hash store; look at alternatives like redis and
       #running with remote worker
       Engine = ::Ruote::Engine.new(::Ruote::Worker.new(::Ruote::HashStorage.new))
-      Engine.register_participant :execute_on_node, Participant::ExecuteOnNode
-      Engine.register_participant :end_of_task, Participant::EndOfTask
-      Engine.register_participant :test, Participant::Test
-
+      %w{ExecuteOnNode EndOfTask DetectNodeReady}.each do |w|
+        Engine.register_participant Aux.underscore(w), Participant.const_get(w)
+      end
 
       def initialize(task)
         super

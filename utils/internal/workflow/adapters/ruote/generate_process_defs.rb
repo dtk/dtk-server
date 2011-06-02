@@ -37,7 +37,7 @@ test_task_id = "#{task_id.to_s}-test"
 Ruote.push_on_object_store(test_task_id,task_info)
           ["sequence", {},
             [["participant",
-             {"ref" => "test",
+             {"ref" => "detect_node_ready",
                "task_id" => test_task_id,
                "top_task_idh" => top_task_idh
              },[]],

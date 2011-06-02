@@ -26,7 +26,11 @@ module XYZ
 
         #make mcollective fire and forget request
         agent = mcollective_agent()
-        filter = {"identity" => [target_identity], "agent" => [agent]}
+
+       #TODO: dont need target identity
+        #filter = {"identity" => [target_identity], "agent" => [agent]}
+        pbuilderid = pbuilderid(config_node[:node])
+        filter = BlankFilter.merge("fact" => [{:fact=>"pbuilderid",:value=>pbuilderid}],"agent" => [agent])
         msg = new_request(agent,"run", msg_content)
         rpc_client.client.r8_sendreq(msg,agent,filter,opts)
       end
@@ -49,15 +53,15 @@ module XYZ
           end
         }
         
-        send_opts_rc = rc.merge(:callbacks => callbacks)
-        send_opts = opts.merge(:receiver_context => send_opts_rc, :timeout => PollLengthDefault)
+        send_opts_rc = {:timeout => PollLengthDefault}.merge(rc).merge(:callbacks => callbacks)
+        send_opts = opts.merge(:receiver_context => send_opts_rc)
         pbuilderid = pbuilderid(node)
-        filter = Filter.merge("fact" => [{:fact=>"pbuilderid",:value=>pbuilderid}])
+        filter = BlankFilter.merge("fact" => [{:fact=>"pbuilderid",:value=>pbuilderid}])
         rpc_client.client.r8_sendreq("ping","discovery",filter,send_opts)
       end
 
-      PollLengthDefault = 10
-      PollCountDefault = 10
+      PollLengthDefault = 4
+      PollCountDefault = 5
 
       def self.create_poller_listener_connection()
         ret_rpc_client()
@@ -176,7 +180,7 @@ module XYZ
         ret = Array.new
         return ret if pbuilderids.empty?
         value_pattern = /^(#{pbuilderids.join('|')})$/
-        filter = Filter.merge("fact" => [{:fact=>"pbuilderid", :value=>value_pattern}])
+        filter = BlankFilter.merge("fact" => [{:fact=>"pbuilderid", :value=>value_pattern}])
         rpc_client.client.discover(filter,Options[:disctimeout],:max_hosts_count => pbuilderids.size)
       end
 
@@ -184,7 +188,7 @@ module XYZ
         return nil unless node
         pbuilderid = pbuilderid(node)
         return nil unless pbuilderid
-        filter = Filter.merge("fact" => [{:fact=>"pbuilderid", :value=>pbuilderid}])
+        filter = BlankFilter.merge("fact" => [{:fact=>"pbuilderid", :value=>pbuilderid}])
         rpc_client.client.discover(filter,Options[:disctimeout],:max_hosts_count => 1).first
       end
 
@@ -192,11 +196,11 @@ module XYZ
         (node[:external_ref]||{})[:instance_id]
       end
      
-      Filter = {"identity"=>[], "fact"=>[], "agent"=>[], "cf_class"=>[]}
+      BlankFilter = {"identity"=>[], "fact"=>[], "agent"=>[], "cf_class"=>[]}
       Options = {
         :disctimeout=>3,
         :config=>"/etc/mcollective/client.cfg",
-        :filter=> Filter,
+        :filter=> BlankFilter,
         :timeout=>120
       }  
       Lock = Mutex.new

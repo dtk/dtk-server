@@ -50,12 +50,13 @@ module XYZ
         }
         
         send_opts_rc = rc.merge(:callbacks => callbacks)
-        send_opts = opts.merge(:receiver_context => send_opts_rc)
+        send_opts = opts.merge(:receiver_context => send_opts_rc, :timeout => PollLengthDefault)
         pbuilderid = pbuilderid(node)
         filter = Filter.merge("fact" => [{:fact=>"pbuilderid",:value=>pbuilderid}])
         rpc_client.client.r8_sendreq("ping","discovery",filter,send_opts)
       end
 
+      PollLengthDefault = 10
       PollCountDefault = 10
 
       def self.create_poller_listener_connection()

@@ -17,7 +17,7 @@ module XYZ
         @listener.add_request_id(request_id,listener_opts)
         callbacks = Callbacks.create(context[:callbacks])
         timeout = context[:timeout]||DefaultTimeout
-timeout = 5
+timeout = 5 unless context[:timeout]
         add_reqid_callbacks(request_id,callbacks,timeout)
         start?()
         trigger[:send_message].call(request_id)

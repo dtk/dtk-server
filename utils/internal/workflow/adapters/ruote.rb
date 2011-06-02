@@ -1,8 +1,6 @@
 require 'ruote'
-require File.expand_path('ruote/common', File.dirname(__FILE__))
 require File.expand_path('ruote/receiver', File.dirname(__FILE__))
 require File.expand_path('ruote/generate_process_defs', File.dirname(__FILE__))
-require File.expand_path('ruote/poller', File.dirname(__FILE__))
 
 #TODO: switch action to node_actions
 module XYZ 
@@ -12,14 +10,12 @@ module XYZ
       #TODO: need to clean up whether engine is persistent; whether execute can be called more than once for any insatnce
       def execute(top_task_idh=nil)
         @task.update(:status => "executing") #TODO: may handle this by inserting a start subtask
-        #TODO: may want to only create connection, poller and receiver on demand (if task needs it)
         begin
           #TODO: running into problem multiple times; dont know yet whetehr race condition max conditions
           #or even lack of patch I had put in 1.1 that is no taken out
           @connection = CommandAndControl.create_poller_listener_connection()
           listener = CommandAndControl.create_listener(@connection)
           @receiver = RuoteReceiver.new(Engine,listener)
-          @poller = RuotePoller.new(@connection,@receiver)
           wfid = Engine.launch(process_def())
           Engine.wait_for(wfid)
          rescue Exception => e
@@ -31,18 +27,16 @@ module XYZ
       end
 
       def shutdown_defer_context()
-        @poller.stop if @poller
         @receiver.stop if @receiver
         @connection.disconnect() if @connection
       end
 
-      attr_reader :listener,:poller
+      attr_reader :listener
      private 
       def initialize()
         super
         @connection = nil
         @receiver = nil
-        @poller = nil
       end
 
       ObjectStore = Hash.new

@@ -1,7 +1,6 @@
 require 'mcollective'
 require File.expand_path('mcollective/monkey_patches', File.dirname(__FILE__))
 require File.expand_path('mcollective/listener', File.dirname(__FILE__))
-require File.expand_path('mcollective/poller', File.dirname(__FILE__))
 
 include MCollective::RPC
 

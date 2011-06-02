@@ -1,14 +1,36 @@
 module XYZ
   module WorkflowAdapter
     class RuoteReceiver < ::Ruote::Receiver
-      include RuoteCommon   
       def initialize(engine,listener)
         super(engine)
         #TODO: might put operations on @listener in mutex
         @listener = listener
         @callbacks_list = Hash.new
         @lock = Mutex.new
-        common_init()
+        @is_stopped = true #initialized as stopped
+        @thread = nil
+        @lock_is_stopped = Mutex.new
+      end
+
+      def start?()
+        @lock_is_stopped.synchronize do
+          if @is_stopped
+            @is_stopped = false
+            @thread ||= CreateThread.defer{loop}
+          end
+        end
+      end
+
+      def stop()
+        pp ["receiver is being stopped"] unless @is_stopped
+        @lock_is_stopped.synchronize{@is_stopped = true}
+        @thread.kill if @thread
+      end
+
+      def is_stopped?()
+        ret = nil
+        @lock_is_stopped.synchronize{ret = @is_stopped}
+        ret
       end
 
       def process_request(trigger,context)

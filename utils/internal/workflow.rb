@@ -1,11 +1,5 @@
 #TODO: need to pass back return for all actions; now if do create and update; only update put in
 module XYZ
-  module WorkflowAdapter
-    #abstarct class
-    class ReceiverContext 
-    end
-  end
-
   class Workflow
     def defer_execution(top_level_task)
       CreateThread.defer do
@@ -27,13 +21,11 @@ module XYZ
     #virtual fns that get ovewritten
     def execute(top_task_idh=nil)
     end
-
     ######
 
     def self.create(task)
       Adapter.new(task)
     end
-
 
     def update_task(hash)
       @task.update(hash)

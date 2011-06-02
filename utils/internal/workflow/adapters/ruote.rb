@@ -30,12 +30,21 @@ module XYZ
       end
 
       attr_reader :listener
-      private 
-      def initialize()
-        super
+     private 
+      def initialize(task)
+        super(task)
+        @process_def = nil
         @connection = nil
         @receiver = nil
       end
+      def process_def()
+        @process_def ||= compute_process_def(task)
+      end
+
+      #TODO: stubbed storage engine using hash store; look at alternatives like redis and
+      #running with remote worker
+      Engine = ::Ruote::Engine.new(::Ruote::Worker.new(::Ruote::HashStorage.new))
+
       class TaskInfo 
         @@count = 0
         Store = Hash.new
@@ -159,22 +168,9 @@ module XYZ
         end
       end
 
-      #TODO: stubbed storage engine using hash store; look at alternatives like redis and
-      #running with remote worker
-      Engine = ::Ruote::Engine.new(::Ruote::Worker.new(::Ruote::HashStorage.new))
       %w{ExecuteOnNode EndOfTask DetectNodeReady}.each do |w|
         Engine.register_participant Aux.underscore(w), Participant.const_get(w)
       end
-
-      def initialize(task)
-        super
-        @process_def = nil
-      end
-      
-      def process_def()
-        @process_def ||= compute_process_def()
-      end
-
     end
   end
 end

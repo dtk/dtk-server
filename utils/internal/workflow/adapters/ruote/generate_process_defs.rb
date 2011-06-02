@@ -2,17 +2,18 @@ module XYZ
   module WorkflowAdapter
     module RuoteGenerateProcessDefs
       @@count = 0
-      def compute_process_def()
-        #TODO: see if we need to keep generating new ones or whether we can (delete) and reuse
-        @@count += 1
-        top_task_idh = @task.id_handle()
-        name = "process-#{@@count.to_s}"
+      def compute_process_def(task)
+        count = @@count += 1 #TODO: see if we need to keep generating new ones or whether we can (delete) and reuse
+        task = task
+        top_task_idh = task.id_handle()
+        name = "process-#{count.to_s}"
         ["define", 
          {"name" => name},
          [["sequence", {}, 
-          [compute_process_body(@task,top_task_idh),
-           ["participant",{"ref" => "end_of_task"},[]]]]]]
+           [compute_process_body(task,top_task_idh),
+            ["participant",{"ref" => "end_of_task"},[]]]]]]
       end
+      private
       def compute_process_body(task,top_task_idh)
         executable_action = task[:executable_action]
         if executable_action

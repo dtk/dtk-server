@@ -8,34 +8,6 @@ include MCollective::RPC
 module XYZ
   module CommandAndControlAdapter
     class Mcollective < CommandAndControlNodeConfig
-      def self.execute(task_idh,top_task_idh,config_node,attributes_to_set)
-        result = nil
-        updated_attributes = Array.new
-        rpc_client = ret_rpc_client(mcollective_agent) 
-        config_agent = ConfigAgent.load(config_node[:config_agent_type])
-
-        target_identity = ret_discovered_mcollective_id(config_node[:node],rpc_client)
-        raise ErrorCannotConnect.new() unless target_identity
-
-        project = {:ref => "project1"} #TODO: stub until get the relevant project
-
-        #push implementation
-        push_implementation(config_node,project)
-
-        msg_content =  config_agent.ret_msg_content(config_node)
-        msg_content.merge!(:task_id => task_idh.get_id(),:top_task_id => top_task_idh.get_id(), :project => project)
-
-        #make mcollective request
-        filter = {"identity" => [target_identity], "agent" => [mcollective_agent]}
-        response = rpc_client.custom_request("run",msg_content,target_identity,filter).first
-        raise ErrorTimeout.new() unless response
-        raise Error.new() unless response[:data]
-        
-        result = response[:data]
-        raise ErrorFailedResponse.new(result[:status],result[:error]) unless result[:status] == :succeeded 
-        [result,updated_attributes]
-      end
-
       def self.initiate_execution(task_idh,top_task_idh,config_node,attributes_to_set,opts)
         rpc_client = opts[:connection]
         updated_attributes = Array.new
@@ -57,6 +29,28 @@ module XYZ
         filter = {"identity" => [target_identity], "agent" => [agent]}
         msg = new_request(agent,"run", msg_content)
         rpc_client.client.r8_sendreq(msg,agent,filter,opts)
+      end
+
+      def self.poll_to_detect_node_ready(node,opts,count=10)
+        rc = opts[:receiver_context]
+        callbacks = {
+          :on_msg_received => proc do |msg|
+            rc[:callbacks][:on_msg_received].call(msg)
+          end,
+          :on_timeout => proc do 
+            if count < 1
+              rc[:callbacks][:on_timeout].call
+            else
+              poll_to_detect_node_ready(node,count-1)
+            end
+          end
+        }
+        
+        send_opts_rc = rc.merge(:callbacks => callbacks)
+        sned_opts = opts.merge(:receiver_context => send_opts_rc)
+        pbuilderid = pbuilderid(node)
+        filter = Filter.merge("fact" => [{:fact=>"pbuilderid",:value=>pbuilderid}])
+        rpc_client.client.r8_sendreq("ping","discovery",filter,send_opts)
       end
 
       def self.create_poller_listener_connection()
@@ -88,13 +82,36 @@ module XYZ
         ret
       end
 
-      #TDOO: think want to deprecate
-      def self.poller_action_to_detect_node_ready?(node,client,listener)
-        filter = nil #TODO: stub
-        proc{McollectivePoller.new(client,listener).sendreq_discover(filter)}
+      #TODO: this wil be deprecated
+      def self.execute(task_idh,top_task_idh,config_node,attributes_to_set)
+        result = nil
+        updated_attributes = Array.new
+        rpc_client = ret_rpc_client(mcollective_agent) 
+        config_agent = ConfigAgent.load(config_node[:config_agent_type])
+
+        target_identity = ret_discovered_mcollective_id(config_node[:node],rpc_client)
+        raise ErrorCannotConnect.new() unless target_identity
+
+        project = {:ref => "project1"} #TODO: stub until get the relevant project
+
+        #push implementation
+        push_implementation(config_node,project)
+
+        msg_content =  config_agent.ret_msg_content(config_node)
+        msg_content.merge!(:task_id => task_idh.get_id(),:top_task_id => top_task_idh.get_id(), :project => project)
+
+        #make mcollective request
+        filter = {"identity" => [target_identity], "agent" => [mcollective_agent]}
+        response = rpc_client.custom_request("run",msg_content,target_identity,filter).first
+        raise ErrorTimeout.new() unless response
+        raise Error.new() unless response[:data]
+        
+        result = response[:data]
+        raise ErrorFailedResponse.new(result[:status],result[:error]) unless result[:status] == :succeeded 
+        [result,updated_attributes]
       end
 
-    
+      #TODO: this wil be deprecated
       def  self.wait_for_node_to_be_ready(node)
         pp [:test1,node[:display_name]]
         target_identity = nil

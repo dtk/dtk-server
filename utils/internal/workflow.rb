@@ -62,8 +62,9 @@ module XYZ
       type = R8::Config[:workflow][:type]
       require File.expand_path("#{UTILS_DIR}/internal/workflow/adapters/#{type}", File.dirname(__FILE__))
       klass = XYZ::WorkflowAdapter.const_get type.capitalize
-     rescue LoadError
-      Log.error("cannot find workflow adapter; loading null workflow class")
+     rescue LoadError => e
+      pp [e,e.backtrace[0..5]]
+      raise.Error.new("cannot find workflow adapter")
     end
     Adapter = klass
 

@@ -11,33 +11,18 @@ module XYZ
         common_init()
       end
 
-      def add_request(request_id,context,opts={})
-        @listener.add_request_id(request_id,context.opts.merge(opts))
-
-        callback_type = 
-          if opts[:from_poller] then :poller
-          else :workitem
+      def add_request(request_id,callback_info)
+        listener_opts = callback_info.reject{|k,v| not [:agent,:expected_count].include?(k)}
+        @listener.add_request_id(request_id,listener_opts)
+        callback = Callback.create(callback_info)
+        if callback
+          timeout = callback_info[:timeout]||DefaultTimeout
+          add_callback(request_id,callback,timeout)
+          start?()
         end
-        callback = 
-          case callback_type
-            when :poller then callback_poller(request_id,context,opts)
-            when :workitem then callback_workitem(request_id,context,opts)
-        end
-
-        timeout = opts[:timeout]||DefaultTimeout
-        add_callback(request_id,callback,timeout)
-        start?()
       end
      private
       DefaultTimeout = 60
-
-      def callback_poller(request_id,context,opts)
-        CallbackPoller.new(opts[:from_poller])
-      end 
-
-      def callback_workitem(request_id,context,opts)
-        CallbackWorkitem.new(:workitem => context.workitem)
-      end 
 
       def add_callback(request_id,callback_x,timeout=nil)
         callback = timeout ? 
@@ -72,6 +57,16 @@ module XYZ
       end
 
       class Callback < HashObject
+        def self.create(callback_info)
+          case callback_info[:type]
+          when :workitem then CallbackWorkitem.new(callback_info)
+          when :poller then CallbackPoller.new(callback_info)
+          else 
+            Log.error("unexpected callback type")
+            nil
+          end
+        end
+
         def cancel_timer(request_id,opts={})
           timer = self[:timer]
           unless opts[:is_expired]
@@ -85,7 +80,7 @@ module XYZ
           cancel_timer(request_id)
           workitem = self[:workitem]
           if workitem
-            workitem.fields["result"] = msg[:body]
+            workitem.fields["result"] = msg[:body].merge("task_id" => workitem.params["task_id"])
             receiver.reply_to_engine(workitem)
           else
             Log.error("could not find a workitem for request_id #{request_id.to_s}")
@@ -94,7 +89,7 @@ module XYZ
         def process_timeout(request_id,receiver)
           workitem = self[:workitem]
           if workitem
-            workitem.fields["result"] = {"status" => "timeout"} 
+            workitem.fields["result"] = {"status" => "timeout", "task_id" => workitem.params["task_id"]}
             receiver.reply_to_engine(workitem)
           else
             Log.error("could not find a workitem for request_id #{request_id.to_s}")
@@ -102,16 +97,8 @@ module XYZ
         end
       end
       class CallbackPoller < Callback
-        #TODO: write ruotine
+        #TODO: write routine
         #action for process timeout poller_info[:poller].remove_item(poller_info[:key])
-      end
-    end
- 
-    class RuoteReceiverContext < ReceiverContext
-      attr_reader :workitem, :opts
-      def initialize(workitem,opts={})
-        @workitem = workitem
-        @opts = opts
       end
     end
   end

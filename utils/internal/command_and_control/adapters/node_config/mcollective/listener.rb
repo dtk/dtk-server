@@ -20,7 +20,7 @@ module XYZ
 
       def add_request_id(request_id,opts)
         @rpc_client.client.r8_add_subscription?(opts[:agent])
-        req_opts = {:expected_count => opts[:expected_count], :timeout => opts[:timeout]}
+        req_opts = {:expected_count => opts[:expected_count]}
         set_request_info(request_id,req_opts)
       end
       

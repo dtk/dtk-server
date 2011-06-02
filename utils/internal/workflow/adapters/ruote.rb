@@ -70,7 +70,7 @@ module XYZ
             top_task_idh = task_info["top_task_idh"]
             workflow = task_info["workflow"]
             if action.long_running?
-              context = RuoteReceiverContext.new(workitem,{:expected_count => 1})
+              context = {:type => :workitem, :workitem => workitem, :expected_count => 1}
               begin
                 #TODO: need to cleanup mechanism below that has receivers waiting for
                 #to get id back because since tehy share a connection tehy can eat each others replys
@@ -103,7 +103,7 @@ module XYZ
 
         class EndOfTask < Top
           def consume(workitem)
-            pp workitem.fields
+            pp [workitem.fields,workitem.params]
             reply_to_engine(workitem)
           end
         end

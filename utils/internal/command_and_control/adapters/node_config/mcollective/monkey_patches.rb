@@ -57,7 +57,7 @@ pp [:sending_msg,reqid]
       end
       Log.debug("Sending request #{reqid} to #{target}")
       if opts[:receiver]
-        opts[:receiver].add_request(reqid,opts[:receiver_context],{:agent => agent})
+        opts[:receiver].add_request(reqid,opts[:receiver_context].merge(:agent => agent))
       else
         r8_add_subscription?(agent)
       end

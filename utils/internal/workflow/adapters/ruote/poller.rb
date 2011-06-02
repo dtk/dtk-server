@@ -12,8 +12,8 @@ module XYZ
       def add_item(poll_item,context,opts={})
         timer = R8EM.add_periodic_timer(@cycle_time) do
           request_id = poll_item.generate_request_id()
-          rec_opts = {:from_poller => {:poller => self, :key => timer}}
-          @receiver.add_request(request_id,context,rec_opts)
+          rec_opts = {:type => :poller, :poller => self, :key => timer}
+          @receiver.add_request(request_id,context.merge(rec_opts))
           poll_item.fire(request_id,@connection)
         end
         @timers[timer] = true

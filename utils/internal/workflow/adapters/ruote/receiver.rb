@@ -56,9 +56,9 @@ timeout = 5
           poller_info[:poller].remove_item(poller_info[:key])
         end
         workitem = @workitem_store.delete(request_id)
-        stop() if @workitem_store.empty?
+        @workitem_store.empty?
         if workitem
-          workitem.fields["result"] = msg
+          workitem.fields["result"] = msg[:body]
           reply_to_engine(workitem)
         else
           Log.error("could not find a workitem for request_id #{request_id.to_s}")

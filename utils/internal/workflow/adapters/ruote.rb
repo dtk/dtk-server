@@ -70,15 +70,15 @@ module XYZ
             top_task_idh = task_info["top_task_idh"]
             workflow = task_info["workflow"]
             if action.long_running?
+              context = RuoteReceiverContext.new(workitem,{:expected_count => 1})
               begin
-                context = RuoteReceiverContext.new(workitem,{:expected_count => 1})
                 #TODO: need to cleanup mechanism below that has receivers waiting for
                 #to get id back because since tehy share a connection tehy can eat each others replys
                 #think best solution is using async receiver; otherwise will need for them to create and destroy 
                 #their own connections
                 workflow.initiate_executable_action(action,top_task_idh,context)
                 #TODO: fix up how to best pass action state
-               rescue ErrorCannotConnect
+               rescue CommandAndControl::ErrorCannotConnect
                 workitem.fields["result"] = {"status" =>"failed", "error" => "cannot_connect"}  
                 reply_to_engine(workitem)
                rescue Exception => e
@@ -92,6 +92,13 @@ module XYZ
               reply_to_engine(workitem)
             end
           end
+=begin
+#TODO: experimenting with turning this on and off
+          def do_not_thread
+            true
+          end
+=end
+
         end
 
         class EndOfTask < Top

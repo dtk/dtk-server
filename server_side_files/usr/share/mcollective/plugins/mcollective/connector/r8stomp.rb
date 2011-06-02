@@ -63,23 +63,19 @@ module MCollective
 
           #modifications so connect at initialization and there is not multiple connections per thread
           def initialize
-            pp [:disconnect,Thread.current]
-            pp caller[0..3]
-
             @config = Config.instance
             @subscriptions = []
+            ###BEGIN R8 CUSTOMIZATION 
             if Thread.current[:stomp_client]
               @connection = Thread.current[:stomp_client]
             else
               connect()
               Thread.current[:stomp_client] = @connection
             end
+            ###END R8 CUSTOMIZATION 
           end
 
           def disconnect
-            pp [:disconnect,Thread.current]
-            pp caller[0..3]
-            #TODO: getting message receive failed: stream closed
             Log.debug("Disconnecting from Stomp")
             @connection.disconnect
           end

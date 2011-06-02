@@ -35,6 +35,12 @@ module XYZ
       klass.create_listener(connection)
     end
 
+    def self.poll_to_detect_node_ready(node,opts)
+      adapter_name = R8::Config[:command_and_control][:node_config][:type]
+      klass = load_for_aux(:node_config,adapter_name)
+      klass.poll_to_detect_node_ready(node,opts)
+    end
+
     #TODO: temp hack
     def self.wait_for_node_to_be_ready(node) 
       adapter_name = R8::Config[:command_and_control][:node_config][:type]

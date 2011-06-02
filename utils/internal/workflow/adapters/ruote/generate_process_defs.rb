@@ -31,6 +31,23 @@ module XYZ
              "top_task_idh" => top_task_idh
            },
            []]
+
+#test
+test_task_id = "#{task_id.to_s}-test"
+Ruote.push_on_object_store(test_task_id,task_info)
+          ["sequence", {},
+            [["participant",
+             {"ref" => "test",
+               "task_id" => test_task_id,
+               "top_task_idh" => top_task_idh
+             },[]],
+          ["participant", 
+           {"ref" => "execute_on_node", 
+            "task_id" => task_id,
+             "top_task_idh" => top_task_idh
+           },
+           []]]]
+
         elsif task[:temporal_order] == "sequential"
           compute_process_body_sequential(task.subtasks,top_task_idh)
         elsif task[:temporal_order] == "concurrent"

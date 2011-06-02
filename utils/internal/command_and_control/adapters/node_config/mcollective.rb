@@ -31,7 +31,9 @@ module XYZ
         rpc_client.client.r8_sendreq(msg,agent,filter,opts)
       end
 
-      def self.poll_to_detect_node_ready(node,opts,count=10)
+      def self.poll_to_detect_node_ready(node,opts)
+        count = opts[:count] || PollCountDefault
+        rpc_client = opts[:connection]
         rc = opts[:receiver_context]
         callbacks = {
           :on_msg_received => proc do |msg|
@@ -41,17 +43,20 @@ module XYZ
             if count < 1
               rc[:callbacks][:on_timeout].call
             else
-              poll_to_detect_node_ready(node,count-1)
+              new_opts = opts.merge(:count => count-1)
+              poll_to_detect_node_ready(node,new_opts)
             end
           end
         }
         
         send_opts_rc = rc.merge(:callbacks => callbacks)
-        sned_opts = opts.merge(:receiver_context => send_opts_rc)
+        send_opts = opts.merge(:receiver_context => send_opts_rc)
         pbuilderid = pbuilderid(node)
         filter = Filter.merge("fact" => [{:fact=>"pbuilderid",:value=>pbuilderid}])
         rpc_client.client.r8_sendreq("ping","discovery",filter,send_opts)
       end
+
+      PollCountDefault = 10
 
       def self.create_poller_listener_connection()
         ret_rpc_client()

@@ -48,18 +48,41 @@ module XYZ
       ObjectStore = Hash.new
       ObjectStoreLock = Mutex.new
       #TODO: make sure task id is globally unique
-      def self.push_on_object_store(task_id,task_info)
-        ObjectStoreLock.synchronize{ObjectStore[task_id] = task_info}
+      def self.push_on_object_store(task_key_x,task_info)
+        task_key = task_key_x.to_s
+        ObjectStoreLock.synchronize{ObjectStore[task_key] = task_info}
       end
       
       module Participant
         class Top
           include ::Ruote::LocalParticipant
          private 
-          def get_and_delete_from_object_store(task_id)
+          def get_and_delete_from_object_store(task_key_x)
+            task_key = task_key_x.to_s
             ret = nil
-            ObjectStoreLock.synchronize{ret = ObjectStore.delete(task_id)}
+            ObjectStoreLock.synchronize{ret = ObjectStore.delete(task_key)}
             ret
+          end
+        end
+
+        class Test < Top
+          def consume(workitem)
+            task_id = workitem.fields["params"]["task_id"]
+            task_info = get_and_delete_from_object_store(task_id)
+            action = task_info["action"]
+            workflow = task_info["workflow"]
+            callbacks = {
+              :on_msg_received => proc do |msg|
+                pp [:found,msg]
+                self.reply_to_engine(workitem)
+              end,
+              :on_timeout => proc do 
+                pp [:timeout]
+                self.reply_to_engine(workitem)
+              end
+            }
+            context = {:callbacks => callbacks, :expected_count => 1}
+            workflow.poll_to_detect_node_ready(action[:node],context)
           end
         end
         class ExecuteOnNode < Top
@@ -128,6 +151,8 @@ module XYZ
       Engine = ::Ruote::Engine.new(::Ruote::Worker.new(::Ruote::HashStorage.new))
       Engine.register_participant :execute_on_node, Participant::ExecuteOnNode
       Engine.register_participant :end_of_task, Participant::EndOfTask
+      Engine.register_participant :test, Participant::Test
+
 
       def initialize(task)
         super

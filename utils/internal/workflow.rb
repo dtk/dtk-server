@@ -56,6 +56,11 @@ module XYZ
       CommandAndControl.execute_task_action(executable_action,@task,top_task_idh,opts)
     end
 
+    def poll_to_detect_node_ready(node,receiver_context)
+      opts = {:initiate_only => true, :connection => @connection, :receiver => @receiver,:receiver_context => receiver_context}
+      CommandAndControl.poll_to_detect_node_ready(node,opts)
+    end
+
    private
     klass = self
     begin

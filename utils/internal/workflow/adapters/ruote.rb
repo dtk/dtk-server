@@ -7,9 +7,9 @@ module XYZ
   module WorkflowAdapter
     class Ruote < XYZ::Workflow
       include RuoteGenerateProcessDefs
-      #TODO: need to clean up whether engine is persistent; whether execute can be called more than once for any insatnce
       def execute(top_task_idh=nil)
         @task.update(:status => "executing") #TODO: may handle this by inserting a start subtask
+        TaskInfo.initialize_task_info()
         begin
           #TODO: running into problem multiple times; dont know yet whetehr race condition max conditions
           #or even lack of patch I had put in 1.1 that is no taken out
@@ -22,47 +22,66 @@ module XYZ
           pp [e,e.backtrace[0..3]]
           raise e
          ensure
+          @receiver.stop if @receiver
+          @connection.disconnect() if @connection
+          TaskInfo.clean
         end
         nil
       end
 
-      def shutdown_defer_context()
-        @receiver.stop if @receiver
-        @connection.disconnect() if @connection
-      end
-
       attr_reader :listener
-     private 
+      private 
       def initialize()
         super
         @connection = nil
         @receiver = nil
       end
-
-      ObjectStore = Hash.new
-      ObjectStoreLock = Mutex.new
-      #TODO: make sure task id is globally unique
-      def self.push_on_object_store(task_key_x,task_info)
-        task_key = task_key_x.to_s
-        ObjectStoreLock.synchronize{ObjectStore[task_key] = task_info}
+      class TaskInfo 
+        @@count = 0
+        Store = Hash.new
+        Lock = Mutex.new
+        def self.initialize_task_info()
+          Store[@@count] = Hash.new
+        end
+        def self.set(task_id,task_info,task_type=nil)
+          key = task_key(task_id,task_type)
+          Lock.synchronize{Store[@@count][key] = task_info}
+        end
+        def self.get_and_delete(task_id,task_type=nil)
+          key = task_key(task_id,task_type)
+          ret = nil
+          Lock.synchronize{ret = Store[@@count].delete(key)}
+          ret 
+        end
+        def self.clean()
+          Lock.synchronize{Store[@@count] = nil} 
+          @@count += 1
+        end
+       private
+        def self.task_key(task_id,task_type)
+          task_type ? "#{task_id.to_s}-#{task_type}" : task_id.to_s
+        end
       end
-      
+
       module Participant
         class Top
           include ::Ruote::LocalParticipant
-         private 
-          def get_and_delete_from_object_store(task_key_x)
-            task_key = task_key_x.to_s
-            ret = nil
-            ObjectStoreLock.synchronize{ret = ObjectStore.delete(task_key)}
-            ret
+          def initialize(opts=nil)
+            @opts = opts
+          end
+          def task_id(workitem)
+            workitem.params["task_id"]
+          end
+          def get_and_delete_task_info(workitem)
+            params = workitem.params
+            TaskInfo.get_and_delete(params["task_id"],params["task_type"])
           end
         end
 
         class DetectNodeReady < Top
           def consume(workitem)
-            task_id = workitem.fields["params"]["task_id"]
-            task_info = get_and_delete_from_object_store(task_id)
+            task_id = task_id(workitem)
+            task_info = get_and_delete_task_info(workitem)
             action = task_info["action"]
             workflow = task_info["workflow"]
             callbacks = {
@@ -83,8 +102,8 @@ module XYZ
           LockforDebug = Mutex.new
           def consume(workitem)
             #LockforDebug.synchronize{pp [:in_consume, Thread.current, Thread.list];STDOUT.flush}
-            task_id = workitem.fields["params"]["task_id"]
-            task_info = get_and_delete_from_object_store(task_id)
+            task_id = task_id(workitem)
+            task_info = get_and_delete_task_info(workitem)
             action = task_info["action"]
             top_task_idh = task_info["top_task_idh"]
             workflow = task_info["workflow"]

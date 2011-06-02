@@ -13,7 +13,6 @@ module XYZ
           [compute_process_body(@task,top_task_idh),
            ["participant",{"ref" => "end_of_task"},[]]]]]]
       end
-
       def compute_process_body(task,top_task_idh)
         executable_action = task[:executable_action]
         if executable_action
@@ -23,7 +22,7 @@ module XYZ
             "top_task_idh" => top_task_idh
           }
           task_id = task.id()
-          Ruote.push_on_object_store(task_id,task_info)
+          Ruote::TaskInfo.set(task_id,task_info)
 
           ["participant", 
            {"ref" => "execute_on_node", 
@@ -33,12 +32,12 @@ module XYZ
            []]
 
 #test
-test_task_id = "#{task_id.to_s}-test"
-Ruote.push_on_object_store(test_task_id,task_info)
+Ruote::TaskInfo.set(task_id,task_info,"test")
           ["sequence", {},
             [["participant",
              {"ref" => "detect_node_ready",
-               "task_id" => test_task_id,
+               "task_id" => task_id,
+               "task_type" => "test",
                "top_task_idh" => top_task_idh
              },[]],
           ["participant", 

@@ -1,12 +1,11 @@
 module XYZ
   module CommandAndControlAdapter
     class Ec2 < CommandAndControlIAAS
-      def self.execute(task_idh,top_task_idh,create_node,attributes_to_set)
-        task_mh = task_idh.createMH()
-        #handle case where node has been created already (and error mayu have been time out waiting for node to be up
-        node = create_node[:node]
+      def self.execute(task_idh,top_task_idh,task_action)
+        node = task_action[:node]
         external_ref = node[:external_ref]||{}
         instance_id = external_ref[:instance_id]
+
         if instance_id.nil?
           ami = external_ref[:image_id]
           unless ami
@@ -25,41 +24,41 @@ module XYZ
             :instance_id => instance_id,
             :type => "ec2_instance"
           })
-          Log.info("node #{node[:display_name]} (#{node[:id]}) with ec2 instance id #{instance_id}; waiting for it to be available")
-          pp [:node_created,response]
+          Log.info("#{node node_print_form} with ec2 instance id #{instance_id}; waiting for it to be available")
+          # pp [:node_created,response]
           node.merge!(:external_ref => external_ref)
-          create_node.save_new_node_info(task_mh)
+          task_action.save_new_node_info(task_idh.createMH())
         else
           Log.info("node already created with instance id #{instance_id}; waiting for it to be available")
         end
-        updated_server_state = conn().server_get(instance_id)
-        Log.info("node #{instance_id} is available")
-        pp [:updated_server_state,updated_server_state]
-
-        #updete attributes
-        updated_attributes = Array.new
-        attributes_to_set.each do |attr|
-          fn = AttributeToSetMapping[attr[:display_name]]
-          unless fn
-            Log.error("no rules to process attribute to set #{attr[:display_name]}")
-            next
-          end
-
-          new_value = fn.call(updated_server_state)
-          unless false #TODO: temp for testing attr[:value_asserted] == new_value
-            unless new_value.nil?
-              attr[:value_asserted] = new_value
-              updated_attributes << attr
-            end
-          end
-        end
-
-        result = {:status => "succeeded",
+        {:status => "succeeded",
           :node => {
             :external_ref => external_ref
           }
         }
-        [result,updated_attributes]
+      end
+
+      def self.get_updated_attributes(task_action)
+        node = task_action[:node]
+        instance_id = (node[:external_ref]||{})[:instance_id]
+        raise Error.new("get_updated_attributes called when #{node node_print_form} does not have insatnce id")
+        attributes_to_set = task_action.attributes_to_set()
+        updated_server_state = conn().server_get(instance_id)
+        ret = Array.new
+        attributes_to_set.each do |attr|
+          unless fn = AttributeToSetMapping[attr[:display_name]]
+            Log.error("no rules to process attribute to set #{attr[:display_name]}")
+          else
+            new_value = fn.call(updated_server_state)
+            unless false #TODO: temp for testing attr[:value_asserted] == new_value
+              unless new_value.nil?
+                attr[:value_asserted] = new_value
+                ret << attr
+              end
+            end
+          end
+        end
+        ret
       end
      private
 
@@ -67,6 +66,10 @@ module XYZ
       AttributeToSetMapping = {
         "host_addresses_ipv4" =>  lambda{|server|(server||{})[:dns_name] && [server[:dns_name]]} #null if no value
       }
+      
+      def self.node_print_form(node)
+        "#{node[:display_name]} (#{node[:id]}"
+      end
 
       #TODO: sharing ec2 connection with ec2 datasource
       def self.conn()

@@ -65,6 +65,7 @@ module XYZ
     end
 
     def self.process_executable_action(task,executable_action,top_task_idh)
+      #TODO: deterine what want treturn and update here
       debug_print_task_info = "task_id=#{task.id.to_s}; top_task_id=#{top_task_idh.get_id()}"
       begin 
         result_hash = CommandAndControl.execute_task_action(executable_action,task,top_task_idh)
@@ -72,10 +73,14 @@ module XYZ
           :status => "succeeded",
           :result => TaskAction::Result::Succeeded.new(result_hash)
         }
+=begin
+TODO: removed for testing: so can rerun task
+   also if this task is just "first part, like starting node may not want to update here
         task.update(update_hash)
         executable_action.update_state_change_status(task.model_handle,:completed)  #this send pending changes' states
+=end
         debug_pp [:task_succeeded,debug_print_task_info,result_hash]
-        :succeeded              
+        result_hash
       rescue CommandAndControl::Error => e
         update_hash = {
           :status => "failed",
@@ -83,15 +88,15 @@ module XYZ
         }
         task.update(update_hash)
         debug_pp [:task_failed,debug_print_task_info,e]
-        :failed
+        raise e
       rescue Exception => e
         update_hash = {
           :status => "failed",
           :result => TaskAction::Result::Failed.new(CommandAndControl::Error.new)
         }
         task.update(update_hash)
-        debug_pp [:task_failed_internal_error,debug_print_task_info,e,e.backtrace]
-        :failed
+        debug_pp [:task_failed_internal_error,debug_print_task_info,e,e.backtrace[0..5]]
+        raise e
       end
     end
 

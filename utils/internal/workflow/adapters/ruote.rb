@@ -131,10 +131,7 @@ module XYZ
                 context = {:callbacks => callbacks, :expected_count => 1}
                 workflow.initiate_executable_action(action,top_task_idh,context)
               else
-                #TODO: dont think we want upadted params here and insated after wait until ready
-                #then figure out how to propagate in ruote and/or r8 task; since
-                #ruote tasks are pointers by propgating in task object can serve the purpose
-                result,updated_attributes = workflow.process_executable_action(action,top_task_idh)
+                result = workflow.process_executable_action(action,top_task_idh)
                 workitem.fields["result"] = result
                 reply_to_engine(workitem)
               end

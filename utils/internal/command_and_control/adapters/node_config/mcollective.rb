@@ -7,9 +7,8 @@ include MCollective::RPC
 module XYZ
   module CommandAndControlAdapter
     class Mcollective < CommandAndControlNodeConfig
-      def self.initiate_execution(task_idh,top_task_idh,config_node,attributes_to_set,opts)
+      def self.initiate_execution(task_idh,top_task_idh,config_node,opts)
         rpc_client = opts[:connection]
-        updated_attributes = Array.new
         config_agent = ConfigAgent.load(config_node[:config_agent_type])
 
         project = {:ref => "project1"} #TODO: stub until get the relevant project
@@ -86,9 +85,8 @@ module XYZ
       end
 
       #TODO: this wil be deprecated
-      def self.execute(task_idh,top_task_idh,config_node,attributes_to_set)
+      def self.execute(task_idh,top_task_idh,config_node)
         result = nil
-        updated_attributes = Array.new
         rpc_client = ret_rpc_client(mcollective_agent) 
         config_agent = ConfigAgent.load(config_node[:config_agent_type])
 
@@ -111,36 +109,7 @@ module XYZ
         
         result = response[:data]
         raise ErrorFailedResponse.new(result[:status],result[:error]) unless result[:status] == :succeeded 
-        [result,updated_attributes]
-      end
-
-      #TODO: this wil be deprecated
-      def  self.wait_for_node_to_be_ready(node)
-        pp [:test1,node[:display_name]]
-        target_identity = nil
-        #looping rather than just one discovery timeout because if node not connecetd msg lost
-        count = 0
-        while target_identity.nil? and count < 10
-          pp [:test2,node[:display_name]]
-          count += 1
-          rpc_client = nil
-          rpc_opts =   Options.merge(:disctimeout=> 2)
-
-          begin
-            #creating and detsroying rpcclient in loop because when kept open looks liek blocking thread scheduling
-            Lock.synchronize do
-              #lock is needed since Client.new is not thread safe
-              rpc_client = rpcclient(mcollective_agent,:options => rpc_opts)
-            end
-            target_identity = ret_discovered_mcollective_id(node,rpc_client)
-           ensure
-            rpc_client.disconnect() if rpc_client
-          end
-          sleep 5
-        end
-        pp [:new_node_target_identity,target_identity]
-        #TODO: want to delete node too in case timeout problem
-        raise ErrorWhileCreatingNode unless target_identity
+        result
       end
 
      private

@@ -4,18 +4,22 @@ module XYZ
   class CommandAndControl
     def self.execute_task_action(task_action,task,top_task_idh,opts={})
       klass = load_for(task_action)
-      raise ErrorCannotLoadAdapter.new unless klass
       attributes_to_set = task_action.attributes_to_set()
       task_mh = task.model_handle()
       task_idh = task.id_handle()
       task_action.get_and_update_attributes(task_mh)
       if opts[:initiate_only]
-        klass.initiate_execution(task_idh,top_task_idh,task_action,attributes_to_set,opts)
+        klass.initiate_execution(task_idh,top_task_idh,task_action,opts)
       else
-        result,updated_attributes = klass.execute(task_idh,top_task_idh,task_action,attributes_to_set)
-        propagate_attributes(updated_attributes)
-        result
+        result = klass.execute(task_idh,top_task_idh,task_action)
+        result.merge(:task_id => task.id())
       end
+    end
+
+    def self.get_and_propagate_updated_attributes(task_action)
+      klass = load_for(task_action)
+      klass.get_updated_attributes(task_action)
+      propagate_attributes(updated_attributes)
     end
 
     def self.get_logs(task,nodes)
@@ -41,13 +45,6 @@ module XYZ
       klass.poll_to_detect_node_ready(node,opts)
     end
 
-    #TODO: temp hack
-    def self.wait_for_node_to_be_ready(node) 
-      adapter_name = R8::Config[:command_and_control][:node_config][:type]
-      klass = load_for_aux(:node_config,adapter_name)
-      klass.wait_for_node_to_be_ready(node)
-    end
-
    private
     def self.propagate_attributes(updated_attributes)
       return nil if updated_attributes.empty?
@@ -61,7 +58,7 @@ module XYZ
     def self.load_for(task_or_task_action)
       adapter_type,adapter_name = task_or_task_action.ret_command_and_control_adapter_info()
       adapter_name ||= R8::Config[:command_and_control][adapter_type][:type]
-      return nil unless adapter_type and adapter_name
+      raise ErrorCannotLoadAdapter.new unless adapter_type and adapter_name
       load_for_aux(adapter_type,adapter_name)
     end
 
@@ -112,3 +109,4 @@ module XYZ
   class CommandAndControlIAAS < CommandAndControl
   end
 end
+

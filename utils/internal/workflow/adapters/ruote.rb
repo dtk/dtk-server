@@ -18,7 +18,7 @@ module XYZ
           
           #detect if wait for finished due to normal execution or errors 
           errors = Engine.errors(wfid)
-          unless errors
+          if errors.nil? or errors.empty?
             pp :normal_completion
           else
             pp ["intercepted errors:", errors.map{|e|e.message}] 

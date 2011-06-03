@@ -11,9 +11,10 @@ module XYZ
          {"name" => name},
          [["sequence", {}, 
            [compute_process_body(task,top_task_idh),
-            ["participant",{"ref" => "end_of_task"},[]]]]]]
+            participant(:end_of_task)]]]]
       end
       private
+      
       def compute_process_body(task,top_task_idh)
         executable_action = task[:executable_action]
         if executable_action
@@ -25,13 +26,10 @@ module XYZ
           task_id = task.id()
           Ruote::TaskInfo.set(task_id,task_info)
 
-          ["participant", 
-           {"ref" => "execute_on_node", 
-            "task_id" => task_id,
-             "top_task_idh" => top_task_idh
-           },
-           []]
+          
+          participant(:execute_on_node,{:task_id => task_id,:top_task_idh => top_task_idh})
 
+=begin
 #test
 Ruote::TaskInfo.set(task_id,task_info,"test")
           ["sequence", {},
@@ -41,13 +39,8 @@ Ruote::TaskInfo.set(task_id,task_info,"test")
                "task_type" => "test",
                "top_task_idh" => top_task_idh
              },[]],
-          ["participant", 
-           {"ref" => "execute_on_node", 
-            "task_id" => task_id,
-             "top_task_idh" => top_task_idh
-           },
-           []]]]
-
+             participant(:execute_on_node,{:task_id => task_id,:top_task_idh => top_task_idh})]]
+=end
         elsif task[:temporal_order] == "sequential"
           compute_process_body_sequential(task.subtasks,top_task_idh)
         elsif task[:temporal_order] == "concurrent"
@@ -57,11 +50,30 @@ Ruote::TaskInfo.set(task_id,task_info,"test")
         end
       end
       def compute_process_body_sequential(subtasks,top_task_idh)
-        ["sequence", {}, subtasks.map{|t|compute_process_body(t,top_task_idh)}]
+        sequence(subtasks.map{|t|compute_process_body(t,top_task_idh)})
       end
       def compute_process_body_concurrent(subtasks,top_task_idh)
-        ["concurrence", {"merge_type"=>"stack"}, subtasks.map{|t|compute_process_body(t,top_task_idh)}]
+        concurrence(subtasks.map{|t|compute_process_body(t,top_task_idh)})
       end
+
+      #formatting fns
+      def participant(name,opts={})
+        ["participant",to_str_form({"ref" => name}.merge(opts)),[]]
+      end
+
+      def sequence(subtask_array)
+        ["sequence", {}, subtask_array]
+      end
+      def concurrence(subtask_array)
+        ["concurrence", {"merge_type"=>"stack"}, subtask_array]
+      end
+
+      def to_str_form(hash)
+        hash.inject({}) do |h,(k,v)|
+          h.merge((k.kind_of?(Symbol) ? k.to_s : k) => (v.kind_of?(Symbol) ? v.to_s : v))
+        end
+      end
+
     end
   end
 end

@@ -10,7 +10,7 @@ module XYZ
         tasks = sequence(compute_process_body(task,top_task_idh),
                           participant(:end_of_task))
         #for testing
-        tasks = concurrence(tasks,participant(:debug_task))
+        #tasks = concurrence(tasks,participant(:debug_task))
 
         ["define", {"name" => name}, [tasks]]
       end
@@ -20,7 +20,7 @@ module XYZ
       def decomposition(action,task,top_task_idh)
         if action.kind_of?(TaskAction::CreateNode)
           main = participant_executable_action(:execute_on_node,task,top_task_idh)
-          post_part = participant_executable_action(:detect_created_node_is_ready,task,top_task_idh)
+          post_part = participant_executable_action(:detect_created_node_is_ready,task,top_task_idh,:task_type => "post")
           sequence(main,post_part)
         end
       end
@@ -50,7 +50,7 @@ module XYZ
         decomposition(action,task,top_task_idh) || participant_executable_action(:execute_on_node,task,top_task_idh)
       end
       def participant_executable_action(name,task,top_task_idh,args={})
-        raise Error.new("unregistered participant name (#{name})") unless Ruote::Participants.include?(name) 
+        raise Error.new("unregistered participant name (#{name})") unless Ruote::Participant::List.include?(name) 
         executable_action = task[:executable_action]
         task_info = {
           "action" => executable_action,
@@ -71,10 +71,12 @@ module XYZ
         subtask_array = subtask_array_x.size == 1 ? subtask_array_x.first : subtask_array_x
         ["sequence", {}, subtask_array]
       end
+
       def concurrence(*subtask_array_x)
         subtask_array = subtask_array_x.size == 1 ? subtask_array_x.first : subtask_array_x
-        ["concurrence", {"merge_type"=>"stack"}, subtask_array]
+        ["concurrence", {"merge_type"=>ConcurrenceType}, subtask_array]
       end
+      ConcurrenceType = "stack" # "union" || "isolate" || "stack"
 
       def to_str_form(hash)
         hash.inject({}) do |h,(k,v)|

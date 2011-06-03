@@ -125,12 +125,26 @@ module XYZ
             params = workitem.params
             TaskInfo.get_and_delete(params["task_id"],params["task_type"])
           end
+
+          #TODO: may only save results in out datastructure; also pass in task to this method
+          def set_result(workitem,new_result)
+            #its setting must be coordinated with the merge type
+            set_result__stack(workitem,new_result)
+          end
+          def set_result__stack(workitem,new_result)
+            prev = workitem.fields["result"] || (workitem.fields["stack"] && workitem.fields["stack"].map{|x|x["result"]}) 
+            workitem.fields["result"] = prev ?
+              (prev.kind_of?(Hash) ? [prev,new_result] : prev + [new_result]) :
+              new_result
+          end
+         private
         end
 
         class DetectCreatedNodeIsReady < Top
           def consume(workitem)
             task_info = get_and_delete_task_info(workitem)
             workflow = task_info["workflow"]
+            action = task_info["action"]
             callbacks = {
               :on_msg_received => proc do |msg|
                 pp [:found,msg[:senderid]]
@@ -142,8 +156,8 @@ module XYZ
                 self.reply_to_engine(workitem)
               end
             }
-            num_poll_cycles = 6
-            poll_cycle = 10
+            num_poll_cycles = 10
+            poll_cycle = 6
             context = {:callbacks => callbacks, :expected_count => 1,:count => num_poll_cycles,:poll_cycle => poll_cycle} 
             workflow.poll_to_detect_node_ready(action[:node],context)
           end
@@ -153,6 +167,7 @@ module XYZ
           def consume(workitem)
             task_info = get_and_delete_task_info(workitem)
             workflow = task_info["workflow"]
+            action = task_info["action"]
             callbacks = {
               :on_msg_received => proc do |msg|
                 pp [:found,msg[:senderid]]
@@ -181,13 +196,14 @@ module XYZ
               if action.long_running?
                 callbacks = {
                   :on_msg_received => proc do |msg|
-                    workitem.fields["result"] = msg[:body].merge("task_id" => workitem.params["task_id"])
+                    set_result(workitem,msg[:body].merge("task_id" => workitem.params["task_id"]))
                     self.reply_to_engine(workitem)
                   end,
                   :on_timeout => proc do 
-                    workitem.fields["result"] = {
+                    result = {
                       "status" => "timeout", 
                       "task_id" => workitem.params["task_id"]}
+                    set_result(workitem,result)
                     self.reply_to_engine(workitem)
                   end
                 }
@@ -195,16 +211,11 @@ module XYZ
                 workflow.initiate_executable_action(action,top_task_idh,receiver_context)
               else
                 result = workflow.process_executable_action(action,top_task_idh)
-                workitem.fields["result"] = result
+                set_result(workitem,result)
                 reply_to_engine(workitem)
               end
              rescue Exception => e
-#TODO: figuring best way to handle errors
-raise e
-=begin
-              workitem.fields["result"] = {"status" =>"failed"}
-              reply_to_engine(workitem)
-=end
+              raise e
             end
           end
 
@@ -242,13 +253,15 @@ raise e
             @is_on = false
           end
         end
-      end
 
-      Participants = Array.new
-      %w{ExecuteOnNode EndOfTask DetectCreatedNodeIsReady DetectIfNodeIsResponding DebugTask}.each do |w|
-        participant = Aux.underscore(w).to_sym
-        Participants << participant
-        Engine.register_participant participant, Participant.const_get(w)
+        #register all the classes
+        List = Array.new
+        ObjectSpace.each_object(Module) do |m|
+          next unless m.ancestors.include? Participant::Top and  m != Top
+          participant = Aux.underscore(Aux.demodulize(m.to_s)).to_sym
+          List << participant
+          Engine.register_participant participant, m
+        end
       end
     end
   end

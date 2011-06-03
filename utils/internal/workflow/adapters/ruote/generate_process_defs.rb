@@ -36,6 +36,9 @@ module XYZ
       end
 
       def compute_process_executable_action(task,top_task_idh)
+        #TODO: as an alternative may have for each action type a lower level decomposition;
+        #by default just participant_executable_action(:execute_on_node,task,top_task_idh) produced
+        #figure out way that params may be passed
         executable_action = task[:executable_action]
         participant = participant_executable_action(:execute_on_node,task,top_task_idh)
         post_action_type = executable_action.post_action()

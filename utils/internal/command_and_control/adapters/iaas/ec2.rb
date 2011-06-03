@@ -47,8 +47,10 @@ module XYZ
 
           new_value = fn.call(updated_server_state)
           unless false #TODO: temp for testing attr[:value_asserted] == new_value
-            attr[:value_asserted] = new_value
-            updated_attributes << attr
+            unless new_value.nil?
+              attr[:value_asserted] = new_value
+              updated_attributes << attr
+            end
           end
         end
 
@@ -61,8 +63,9 @@ module XYZ
       end
      private
 
+      #TODO: if can legitimately have nil value then need to change updtae
       AttributeToSetMapping = {
-        "host_addresses_ipv4" =>  lambda{|server|[server[:dns_name]]}
+        "host_addresses_ipv4" =>  lambda{|server|(server||{})[:dns_name] && [server[:dns_name]]} #null if no value
       }
 
       #TODO: sharing ec2 connection with ec2 datasource

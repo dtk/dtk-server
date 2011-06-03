@@ -2,7 +2,6 @@ require 'ruote'
 require File.expand_path('ruote/receiver', File.dirname(__FILE__))
 require File.expand_path('ruote/generate_process_defs', File.dirname(__FILE__))
 
-#TODO: switch action to node_actions
 module XYZ 
   module WorkflowAdapter
     class Ruote < XYZ::Workflow
@@ -11,8 +10,6 @@ module XYZ
         @task.update(:status => "executing") #TODO: may handle this by inserting a start subtask
         TaskInfo.initialize_task_info()
         begin
-          #TODO: running into problem multiple times; dont know yet whetehr race condition max conditions
-          #or even lack of patch I had put in 1.1 that is no taken out
           @connection = CommandAndControl.create_poller_listener_connection()
           listener = CommandAndControl.create_listener(@connection)
           @receiver = RuoteReceiver.new(Engine,listener)
@@ -39,6 +36,7 @@ module XYZ
       end
       def process_def()
         @process_def ||= compute_process_def(task)
+        @process_def #TODO: just for testing so can checkpoint and see what it looks like
       end
 
       #TODO: stubbed storage engine using hash store; look at alternatives like redis and
@@ -131,29 +129,26 @@ module XYZ
                   end
                 }
                 context = {:callbacks => callbacks, :expected_count => 1}
-                #TODO: need to cleanup mechanism below that has receivers waiting for
-                #to get id back because since tehy share a connection tehy can eat each others replys
-                #think best solution is using async receiver; otherwise will need for them to create and destroy 
-                #their own connections
                 workflow.initiate_executable_action(action,top_task_idh,context)
-                #TODO: fix up how to best pass action state
               else
+                #TODO: dont think we want upadted params here and insated after wait until ready
+                #then figure out how to propagate in ruote and/or r8 task; since
+                #ruote tasks are pointers by propgating in task object can serve the purpose
                 result,updated_attributes = workflow.process_executable_action(action,top_task_idh)
                 workitem.fields["result"] = result
                 reply_to_engine(workitem)
               end
-              #TODO: this is not needed since we haev specfic action fro this
-=begin
-             rescue CommandAndControl::ErrorCannotConnect
-              workitem.fields["result"] = {"status" =>"failed", "error" => "cannot_connect"}  
-              reply_to_engine(workitem)
-=end
              rescue Exception => e
               pp [e,e.backtrace[0..5]]
               workitem.fields["result"] = {"status" =>"failed"}
               reply_to_engine(workitem)
             end
           end
+
+          #TODO: need to turn threading off for now because if dont can have two threads 
+          #eat ech others messages; may solve with existing mechism or go straight to
+          #using stomp event machine
+          #may even not be necessary to thread the consume since very fast
           def do_not_thread
             true
           end

@@ -19,21 +19,7 @@ module XYZ
       ####synactic processing
       def compute_process_body(task,top_task_idh)
         if task[:executable_action]
-          process_executable_action(:execute_on_node,task,top_task_idh)
-
-=begin
-#test
-TODO: put in semabic based whether theer are prefix or postfix actions
-Ruote::TaskInfo.set(task_id,task_info,"test")
-          ["sequence", {},
-            [["participant",
-             {"ref" => "detect_node_ready",
-               "task_id" => task_id,
-               "task_type" => "test",
-               "top_task_idh" => top_task_idh
-             },[]],
-             participant(:execute_on_node,{:task_id => task_id,:top_task_idh => top_task_idh})]]
-=end
+          compute_process_executable_action(task,top_task_idh)
         elsif task[:temporal_order] == "sequential"
           compute_process_body_sequential(task.subtasks,top_task_idh)
         elsif task[:temporal_order] == "concurrent"
@@ -49,7 +35,18 @@ Ruote::TaskInfo.set(task_id,task_info,"test")
         concurrence(subtasks.map{|t|compute_process_body(t,top_task_idh)})
       end
 
-      def process_executable_action(name,task,top_task_idh,args={})
+      def compute_process_executable_action(task,top_task_idh)
+        executable_action = task[:executable_action]
+        participant = participant_executable_action(:execute_on_node,task,top_task_idh)
+        post_action_type = executable_action.post_action()
+        if post_action_type
+          post_part = participant_executable_action(:execute_on_node,task,top_task_idh,:task_type => "post")
+          sequence(participant,post_part)
+        else
+          participant
+        end
+      end
+      def participant_executable_action(name,task,top_task_idh,args={})
         executable_action = task[:executable_action]
         task_info = {
           "action" => executable_action,

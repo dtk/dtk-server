@@ -26,15 +26,16 @@ module XYZ
             :type => "ec2_instance"
           })
           Log.info("node #{node[:display_name]} (#{node[:id]}) with ec2 instance id #{instance_id}; waiting for it to be available")
-          pp [:node_created,response]
+          #pp [:node_created,response]
           node.merge!(:external_ref => external_ref)
           create_node.save_new_node_info(task_mh)
         else
           Log.info("node already created with instance id #{instance_id}; waiting for it to be available")
         end
+        wait_for_node_to_be_ready(node)
         updated_server_state = conn().server_get(instance_id)
+        #pp [:updated_server_state,updated_server_state]
         Log.info("node #{instance_id} is available")
-        pp [:updated_server_state,updated_server_state]
 
         #updete attributes
         updated_attributes = Array.new
@@ -60,6 +61,9 @@ module XYZ
         [result,updated_attributes]
       end
      private
+      def self.wait_for_node_to_be_ready(node)
+        CommandAndControl.wait_for_node_to_be_ready(node)
+      end
 
       AttributeToSetMapping = {
         "host_addresses_ipv4" =>  lambda{|server|[server[:dns_name]]}

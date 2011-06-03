@@ -116,48 +116,42 @@ module XYZ
             action = task_info["action"]
             top_task_idh = task_info["top_task_idh"]
             workflow = task_info["workflow"]
-            if action.long_running?
-              callbacks = {
-                :on_msg_received => proc do |msg|
-                  workitem.fields["result"] = msg[:body].merge("task_id" => workitem.params["task_id"])
-                  self.reply_to_engine(workitem)
-                end,
-                :on_timeout => proc do 
-                  workitem.fields["result"] = {
-                    "status" => "timeout", 
-                    "task_id" => workitem.params["task_id"]}
-                  self.reply_to_engine(workitem)
-                end
-              }
-              context = {:callbacks => callbacks, :expected_count => 1}
-              begin
+            begin
+              if action.long_running?
+                callbacks = {
+                  :on_msg_received => proc do |msg|
+                    workitem.fields["result"] = msg[:body].merge("task_id" => workitem.params["task_id"])
+                    self.reply_to_engine(workitem)
+                  end,
+                  :on_timeout => proc do 
+                    workitem.fields["result"] = {
+                      "status" => "timeout", 
+                      "task_id" => workitem.params["task_id"]}
+                    self.reply_to_engine(workitem)
+                  end
+                }
+                context = {:callbacks => callbacks, :expected_count => 1}
                 #TODO: need to cleanup mechanism below that has receivers waiting for
                 #to get id back because since tehy share a connection tehy can eat each others replys
                 #think best solution is using async receiver; otherwise will need for them to create and destroy 
                 #their own connections
                 workflow.initiate_executable_action(action,top_task_idh,context)
                 #TODO: fix up how to best pass action state
-               rescue CommandAndControl::ErrorCannotConnect
-                workitem.fields["result"] = {"status" =>"failed", "error" => "cannot_connect"}  
-                reply_to_engine(workitem)
-               rescue Exception => e
-                pp e.backtrace[0..5]
-                workitem.fields["result"] = {"status" =>"failed"}
+              else
+                result,updated_attributes = workflow.process_executable_action(action,top_task_idh)
+                workitem.fields["result"] = result
                 reply_to_engine(workitem)
               end
-            else
-              result = process_executable_action(action,top_task_idh)
-              workitem.fields[workitem.fields["params"]["action"]["id"]] = result
+              #TODO: this is not needed since we haev specfic action fro this
+             rescue CommandAndControl::ErrorCannotConnect
+              workitem.fields["result"] = {"status" =>"failed", "error" => "cannot_connect"}  
+              reply_to_engine(workitem)
+             rescue Exception => e
+              pp [e,e.backtrace[0..5]]
+              workitem.fields["result"] = {"status" =>"failed"}
               reply_to_engine(workitem)
             end
           end
-=begin
-#TODO: experimenting with turning this on and off
-          def do_not_thread
-            true
-          end
-=end
-
         end
 
         class EndOfTask < Top

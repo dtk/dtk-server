@@ -7,7 +7,7 @@ module XYZ
     def long_running?()
       nil
     end
-    def poller_action_to_detect_compeletion?(client,listener)
+    def post_action()
       nil
     end
 
@@ -83,8 +83,8 @@ module XYZ
         super(hash)
       end
 
-      def poller_action_to_detect_compeletion?(client,listener)
-        nil
+      def post_action()
+        :detect_node_is_ready
       end
 
       def add_attribute!(attr)

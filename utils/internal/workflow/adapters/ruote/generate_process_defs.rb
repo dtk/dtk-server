@@ -17,6 +17,14 @@ module XYZ
       private
 
       ####semantic processing
+      def decomposition(action,task,top_task_idh)
+        if action.kind_of?(TaskAction::CreateNode)
+          main = participant_executable_action(:execute_on_node,task,top_task_idh)
+          post_part = participant_executable_action(:detect_created_node_is_ready,task,top_task_idh)
+          sequence(main,post_part)
+        end
+      end
+      #TODO: make this data driven like .. TaskAction::CreateNode => [:execute_on_node,:detect_created_node_is_ready]
 
       ####synactic processing
       def compute_process_body(task,top_task_idh)
@@ -38,18 +46,8 @@ module XYZ
       end
 
       def compute_process_executable_action(task,top_task_idh)
-        #TODO: as an alternative may have for each action type a lower level decomposition;
-        #by default just participant_executable_action(:execute_on_node,task,top_task_idh) produced
-        #figure out way that params may be passed
-        executable_action = task[:executable_action]
-        participant = participant_executable_action(:execute_on_node,task,top_task_idh)
-        post_action_type = executable_action.post_action()
-        if post_action_type
-          post_part = participant_executable_action(post_action_type,task,top_task_idh,:task_type => "post")
-          sequence(participant,post_part)
-        else
-          participant
-        end
+        action = task[:executable_action]
+        decomposition(action,task,top_task_idh) || participant_executable_action(:execute_on_node,task,top_task_idh)
       end
       def participant_executable_action(name,task,top_task_idh,args={})
         raise Error.new("unregistered participant name (#{name})") unless Ruote::Participants.include?(name) 

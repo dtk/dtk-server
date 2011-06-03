@@ -45,15 +45,15 @@ module XYZ
           end
         }
         
-        send_opts_rc = {:timeout => PollLengthDefault}.merge(rc).merge(:callbacks => callbacks)
+        send_opts_rc = {:timeout => opts[:poll_cycle]||PollCycleDefault}.merge(rc).merge(:callbacks => callbacks)
         send_opts = opts.merge(:receiver_context => send_opts_rc)
         pbuilderid = pbuilderid(node)
         filter = BlankFilter.merge("fact" => [{:fact=>"pbuilderid",:value=>pbuilderid}])
         rpc_client.client.r8_sendreq("ping","discovery",filter,send_opts)
       end
 
-      PollLengthDefault = 4
-      PollCountDefault = 5
+      PollCycleDefault = 10
+      PollCountDefault = 6
 
       def self.create_poller_listener_connection()
         ret_rpc_client()

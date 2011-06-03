@@ -26,11 +26,11 @@ module XYZ
             # one way is "fix error " ; engine.replay_at_error(err); engine.wait_for(wfid)
 
             #this is suppose to kill everything
-            #TODO: doe snot seem to work
+            #TODO: does not seem to work
             Engine.cancel_process(wfid)
           end
          rescue Exception => e
-          pp "error trap in ruore#execute"
+          pp "error trap in ruote#execute"
           pp [e,e.backtrace[0..3]]
          ensure
           @receiver.stop if @receiver
@@ -38,6 +38,24 @@ module XYZ
           TaskInfo.clean
         end
         nil
+      end
+      
+      def initiate_executable_action(action,top_task_idh,receiver_context)
+        opts = {
+          :initiate_only => true,
+          :connection => @connection,
+          :receiver => @receiver,
+          :receiver_context => receiver_context
+        }
+        CommandAndControl.execute_task_action(action,@task,top_task_idh,opts)
+      end
+
+      def poll_to_detect_node_ready(node,receiver_context,opts={})
+        poll_opts = opts.merge({
+          :connection => @connection, 
+          :receiver => @receiver,
+          :receiver_context => receiver_context})
+        CommandAndControl.poll_to_detect_node_ready(node,poll_opts)
       end
 
       attr_reader :listener
@@ -99,11 +117,31 @@ module XYZ
           end
         end
 
-        class DetectNodeIsReady < Top
+        class DetectCreatedNodeIsReady < Top
           def consume(workitem)
-            task_id = task_id(workitem)
             task_info = get_and_delete_task_info(workitem)
-            action = task_info["action"]
+            workflow = task_info["workflow"]
+            callbacks = {
+              :on_msg_received => proc do |msg|
+                pp [:found,msg[:senderid]]
+                #TODO: put in updating and propagating task attributes
+                self.reply_to_engine(workitem)
+              end,
+              :on_timeout => proc do 
+                pp [:timeout]
+                self.reply_to_engine(workitem)
+              end
+            }
+            num_poll_cycles = 6
+            poll_cycle = 10
+            context = {:callbacks => callbacks, :expected_count => 1,:count => num_poll_cycles,:poll_cycle => poll_cycle} 
+            workflow.poll_to_detect_node_ready(action[:node],context)
+          end
+        end
+
+        class DetectIfNodeIsResponding < Top
+          def consume(workitem)
+            task_info = get_and_delete_task_info(workitem)
             workflow = task_info["workflow"]
             callbacks = {
               :on_msg_received => proc do |msg|
@@ -115,7 +153,8 @@ module XYZ
                 self.reply_to_engine(workitem)
               end
             }
-            context = {:callbacks => callbacks, :expected_count => 1}
+            poll_cycle = 2
+            context = {:callbacks => callbacks, :expected_count => 1,:count => 1,:poll_cycle => poll_cycle} 
             workflow.poll_to_detect_node_ready(action[:node],context)
           end
         end
@@ -142,8 +181,8 @@ module XYZ
                     self.reply_to_engine(workitem)
                   end
                 }
-                context = {:callbacks => callbacks, :expected_count => 1}
-                workflow.initiate_executable_action(action,top_task_idh,context)
+                receiver_context = {:callbacks => callbacks, :expected_count => 1}
+                workflow.initiate_executable_action(action,top_task_idh,receiver_context)
               else
                 result = workflow.process_executable_action(action,top_task_idh)
                 workitem.fields["result"] = result
@@ -187,7 +226,7 @@ raise e
       end
 
       Participants = Array.new
-      %w{ExecuteOnNode EndOfTask DetectNodeIsReady DebugTask}.each do |w|
+      %w{ExecuteOnNode EndOfTask DetectCreatedNodeIsReady DetectIfNodeIsResponding DebugTask}.each do |w|
         participant = Aux.underscore(w).to_sym
         Participants << participant
         Engine.register_participant participant, Participant.const_get(w)

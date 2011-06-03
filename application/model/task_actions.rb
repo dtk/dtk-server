@@ -7,9 +7,6 @@ module XYZ
     def long_running?()
       nil
     end
-    def post_action()
-      nil
-    end
 
     #returns [adapter_type,adapter_name], adapter name optional in which it wil be looked up from config
     def ret_command_and_control_adapter_info()
@@ -81,10 +78,6 @@ module XYZ
           :node => state_change[:node]
         }
         super(hash)
-      end
-
-      def post_action()
-        :detect_node_is_ready
       end
 
       def add_attribute!(attr)

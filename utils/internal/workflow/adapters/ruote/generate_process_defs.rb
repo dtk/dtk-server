@@ -7,10 +7,12 @@ module XYZ
         task = task
         top_task_idh = task.id_handle()
         name = "process-#{count.to_s}"
-        ["define", 
-         {"name" => name},
-         [sequence(compute_process_body(task,top_task_idh),
-                   participant(:end_of_task))]]
+        tasks = sequence(compute_process_body(task,top_task_idh),
+                          participant(:end_of_task))
+        #for testing
+        tasks = concurrence(tasks,participant(:debug_task))
+
+        ["define", {"name" => name}, [tasks]]
       end
       private
 

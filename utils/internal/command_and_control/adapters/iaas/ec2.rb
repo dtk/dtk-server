@@ -24,12 +24,12 @@ module XYZ
             :instance_id => instance_id,
             :type => "ec2_instance"
           })
-          Log.info("#{node node_print_form} with ec2 instance id #{instance_id}; waiting for it to be available")
+          Log.info("#{node_print_form(node)} with ec2 instance id #{instance_id}; waiting for it to be available")
           # pp [:node_created,response]
           node.merge!(:external_ref => external_ref)
           task_action.save_new_node_info(task_idh.createMH())
         else
-          Log.info("node already created with instance id #{instance_id}; waiting for it to be available")
+          Log.info("node already created with instance id #{instance_id(node)}; waiting for it to be available")
         end
         {:status => "succeeded",
           :node => {
@@ -41,7 +41,7 @@ module XYZ
       def self.get_updated_attributes(task_action)
         node = task_action[:node]
         instance_id = (node[:external_ref]||{})[:instance_id]
-        raise Error.new("get_updated_attributes called when #{node node_print_form} does not have insatnce id")
+        raise Error.new("get_updated_attributes called when #{node_print_form} does not have instance id")
         attributes_to_set = task_action.attributes_to_set()
         updated_server_state = conn().server_get(instance_id)
         ret = Array.new

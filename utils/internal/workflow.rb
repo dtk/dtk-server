@@ -95,7 +95,7 @@ TODO: removed for testing: so can rerun task
           :result => TaskAction::Result::Failed.new(CommandAndControl::Error.new)
         }
         task.update(update_hash)
-        debug_pp [:task_failed_internal_error,debug_print_task_info,e,e.backtrace[0..5]]
+        debug_pp [:task_failed_internal_error,debug_print_task_info,e,e.backtrace[0..7]]
         raise e
       end
     end

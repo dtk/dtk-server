@@ -15,9 +15,23 @@ module XYZ
           @receiver = RuoteReceiver.new(Engine,listener)
           wfid = Engine.launch(process_def())
           Engine.wait_for(wfid)
+          
+          #detect if wait for finished due to normal execution or errors 
+          errors = Engine.errors(wfid)
+          unless errors
+            pp :normal_completion
+          else
+            pp ["intercepted errors:", errors.map{|e|e.message}] 
+            #different ways to continue
+            # one way is "fix error " ; engine.replay_at_error(err); engine.wait_for(wfid)
+
+            #this is suppose to kill everything
+            #TODO: doe snot seem to work
+            Engine.cancel_process(wfid)
+          end
          rescue Exception => e
+          pp "error trap in ruore#execute"
           pp [e,e.backtrace[0..3]]
-          raise e
          ensure
           @receiver.stop if @receiver
           @connection.disconnect() if @connection
@@ -136,9 +150,12 @@ module XYZ
                 reply_to_engine(workitem)
               end
              rescue Exception => e
-              pp [e,e.backtrace[0..5]]
+#TODO: figuring best way to handle errors
+raise e
+=begin
               workitem.fields["result"] = {"status" =>"failed"}
               reply_to_engine(workitem)
+=end
             end
           end
 
@@ -156,11 +173,21 @@ module XYZ
             pp [workitem.fields,workitem.params]
             reply_to_engine(workitem)
           end
+
+        end
+        class DebugTask < Top
+          def consume(workitem)
+            s = 15
+            pp "debug task sleep for #{s.to_s} seconds" 
+            sleep s
+            pp "debug task finished"
+            reply_to_engine(workitem)
+          end
         end
       end
 
       Participants = Array.new
-      %w{ExecuteOnNode EndOfTask DetectNodeIsReady}.each do |w|
+      %w{ExecuteOnNode EndOfTask DetectNodeIsReady DebugTask}.each do |w|
         participant = Aux.underscore(w).to_sym
         Participants << participant
         Engine.register_participant participant, Participant.const_get(w)

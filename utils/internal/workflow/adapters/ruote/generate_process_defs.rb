@@ -40,13 +40,14 @@ module XYZ
         participant = participant_executable_action(:execute_on_node,task,top_task_idh)
         post_action_type = executable_action.post_action()
         if post_action_type
-          post_part = participant_executable_action(:execute_on_node,task,top_task_idh,:task_type => "post")
+          post_part = participant_executable_action(post_action_type,task,top_task_idh,:task_type => "post")
           sequence(participant,post_part)
         else
           participant
         end
       end
       def participant_executable_action(name,task,top_task_idh,args={})
+        raise Error.new("unregistered participant name (#{name})") unless Ruote::Participants.include?(name) 
         executable_action = task[:executable_action]
         task_info = {
           "action" => executable_action,

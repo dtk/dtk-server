@@ -39,13 +39,12 @@ module XYZ
         @listener.add_request_id(request_id,listener_opts)
         callbacks = Callbacks.create(context[:callbacks])
         timeout = context[:timeout]||DefaultTimeout
-timeout = 5 unless context[:timeout]
         add_reqid_callbacks(request_id,callbacks,timeout)
         start?()
         trigger[:send_message].call(request_id)
       end
      private
-      DefaultTimeout = 60
+      DefaultTimeout = 15 #90
 
       def add_reqid_callbacks(request_id,callback_x,timeout=nil)
         callback = timeout ? 

@@ -87,7 +87,7 @@ module XYZ
           end
         end
 
-        class DetectNodeReady < Top
+        class DetectNodeIsReady < Top
           def consume(workitem)
             task_id = task_id(workitem)
             task_info = get_and_delete_task_info(workitem)
@@ -143,14 +143,19 @@ module XYZ
                 reply_to_engine(workitem)
               end
               #TODO: this is not needed since we haev specfic action fro this
+=begin
              rescue CommandAndControl::ErrorCannotConnect
               workitem.fields["result"] = {"status" =>"failed", "error" => "cannot_connect"}  
               reply_to_engine(workitem)
+=end
              rescue Exception => e
               pp [e,e.backtrace[0..5]]
               workitem.fields["result"] = {"status" =>"failed"}
               reply_to_engine(workitem)
             end
+          end
+          def do_not_thread
+            true
           end
         end
 
@@ -162,8 +167,11 @@ module XYZ
         end
       end
 
-      %w{ExecuteOnNode EndOfTask DetectNodeReady}.each do |w|
-        Engine.register_participant Aux.underscore(w), Participant.const_get(w)
+      Participants = Array.new
+      %w{ExecuteOnNode EndOfTask DetectNodeIsReady}.each do |w|
+        participant = Aux.underscore(w).to_sym
+        Participants << participant
+        Engine.register_participant participant, Participant.const_get(w)
       end
     end
   end

@@ -12,9 +12,6 @@ module XYZ
         updated_attributes = Array.new
         config_agent = ConfigAgent.load(config_node[:config_agent_type])
 
-        target_identity = ret_discovered_mcollective_id(config_node[:node],rpc_client)
-        raise ErrorCannotConnect.new() unless target_identity
-
         project = {:ref => "project1"} #TODO: stub until get the relevant project
 
         #push implementation
@@ -25,9 +22,6 @@ module XYZ
 
         #make mcollective fire and forget request
         agent = mcollective_agent()
-
-       #TODO: dont need target identity
-        #filter = {"identity" => [target_identity], "agent" => [agent]}
         pbuilderid = pbuilderid(config_node[:node])
         filter = BlankFilter.merge("fact" => [{:fact=>"pbuilderid",:value=>pbuilderid}],"agent" => [agent])
         msg = new_request(agent,"run", msg_content)

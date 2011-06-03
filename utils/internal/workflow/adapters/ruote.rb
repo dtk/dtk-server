@@ -21,12 +21,22 @@ module XYZ
           if errors.nil? or errors.empty?
             pp :normal_completion
           else
-            pp ["intercepted errors:", errors.map{|e|e.message}] 
+            p "intercepted errors:"
+            errors.each  do |e|
+              p e.message
+              depth = 5
+              e.trace.each do |l|
+                p l.chomp
+                depth -= 1
+                break if depth < 0
+              end
+              pp "----------------"
+            end
+
             #different ways to continue
             # one way is "fix error " ; engine.replay_at_error(err); engine.wait_for(wfid)
 
-            #this is suppose to kill everything
-            #TODO: does not seem to work
+            #this cancels everything
             Engine.cancel_process(wfid)
           end
          rescue Exception => e
@@ -216,11 +226,20 @@ raise e
         end
         class DebugTask < Top
           def consume(workitem)
-            s = 15
+            count = 15
             pp "debug task sleep for #{s.to_s} seconds" 
-            sleep s
+            @is_on = true
+            while @is_on and count > 0
+              sleep 1
+              count -= 1
+            end
             pp "debug task finished"
             reply_to_engine(workitem)
+          end
+          def cancel(fei, flavour)
+            pp "cancel called on debug task"
+            p @is_on
+            @is_on = false
           end
         end
       end

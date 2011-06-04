@@ -63,6 +63,7 @@ module XYZ
         McollectiveListener.new(connection)
       end
 
+      #TODO: need to rewrite; can omit ret_discovered_mcollective_ids, put may do so for a ping
       def self.get_logs(task,nodes)
         ret = nodes.inject({}){|h,n|h.merge(n[:id] => nil)}
         value = task.id_handle.get_id().to_s

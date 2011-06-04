@@ -190,7 +190,7 @@ module MCollective
                       private
             def msgheaders
                 headers = {}
-                headers = {"priority" => @msgpriority} if @msgpriority > 0
+                headers = {"priority" => @msgpriority} if  (@msgpriority and @msgpriority > 0)
 
                 return headers
             end

@@ -147,6 +147,7 @@ module XYZ
         #eat ech others messages; may solve with existing mechism or go straight to
         #using stomp event machine
         #may even not be necessary to thread the consume since very fast
+        #update: with change so taht subscriptions based on thread global; this may be no longer applicable
         def do_not_thread
           true
         end

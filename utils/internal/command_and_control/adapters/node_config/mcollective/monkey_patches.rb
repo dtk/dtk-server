@@ -31,6 +31,7 @@ module MCollective
         msg = @security.decodemsg(msg)
         msg[:senderid] = Digest::MD5.hexdigest(msg[:senderid]) if ENV.include?("MCOLLECTIVE_ANON")
         #line patched added clause: requestid and
+        #pp [:foo,:receive,msg[:senderid],@connection.object_id]
         raise(MsgDoesNotMatchRequestID, "Message reqid #{requestid} does not match our reqid #{msg[:requestid]}") if requestid and msg[:requestid] != requestid
       rescue SecurityValidationFailed => e
         Log.warn("Ignoring a message that did not pass security validations")
@@ -57,16 +58,21 @@ module MCollective
       end
       
       Log.debug("Sending request #{reqid} to #{target}")
-
-      unless @subscriptions.include?(agent)
+      #r8patch to take into account that subscription is on a per thread basis
+      #can change back by making subscriptions = @subscriptions
+      Thread.current[:mc_subscriptions] ||= Hash.new
+      subscriptions = Thread.current[:mc_subscriptions]
+      unless subscriptions.include?(agent)
         topic = Util.make_target(agent, :reply, collective)
         Log.debug("Subscribing to #{topic}")
-
+        #pp [:foo,topic,@connection.object_id]
         Util.subscribe(topic,@connection)
-        @subscriptions[agent] = 1
+        subscriptions[agent] = 1
       end
 
+      #TODO: this and otehr use of this timeout may be blocking so may look at use of event machine timeout
       Timeout.timeout(2) do
+        #pp [:foo,:send,target,agent,@connection.object_id]
         @connection.send(target, req)
       end
       
@@ -98,6 +104,8 @@ module MCollective
     end
 
     #add subscription is needed
+    #TODO: see if this shoudl be changed like the add subscriptions fragment ins send to use 
+    #thread global Thread.current[:mc_subscriptions]
     def r8_add_subscription?(agent)
       unless @subscriptions.include?(agent)
         topic = Util.make_target(agent, :reply, collective)

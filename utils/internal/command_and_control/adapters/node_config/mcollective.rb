@@ -63,23 +63,26 @@ module XYZ
         McollectiveListener.new(connection)
       end
 
-      #TODO: need to rewrite; can omit ret_discovered_mcollective_ids, put may do so for a ping
+      #TODO: looks liek can blog if called in middle of deployment
+      #TODO: look at having connection be created on a per thread basis and
+      #this leevraging it
       def self.get_logs(task,nodes)
         ret = nodes.inject({}){|h,n|h.merge(n[:id] => nil)}
         value = task.id_handle.get_id().to_s
         key = task[:executable_action_type] ? "task_id" : "top_task_id"
         msg_content = {:key => key, :value => value}
         agent = "get_log_fragment"
-        rpc_client = ret_rpc_client(agent) 
-        pbuilderid_index = nodes.inject({}){|h,n|h.merge(pbuilderid(n) => n[:id])}
-        target_identities = ret_discovered_mcollective_ids(pbuilderid_index.keys,rpc_client)
-        unless target_identities.empty?
-          filter = {"identity" => /^(#{target_identities.join('|')})$/}
-          responses = rpc_client.custom_request("get",msg_content,target_identities,filter)
-          raise ErrorTimeout.new() unless responses #TODO: is this needed?
-          responses.each do |response|
-            node_id = pbuilderid_index[response[:data][:pbuilderid]]
-            ret[node_id] = response[:data]
+        ret_rpc_client(agent) do |rpc_client| 
+          pbuilderid_index = nodes.inject({}){|h,n|h.merge(pbuilderid(n) => n[:id])}
+          target_identities = ret_discovered_mcollective_ids(pbuilderid_index.keys,rpc_client)
+          unless target_identities.empty?
+            filter = {"identity" => /^(#{target_identities.join('|')})$/}
+            responses = rpc_client.custom_request("get",msg_content,target_identities,filter)
+            raise ErrorTimeout.new() unless responses #TODO: is this needed?
+            responses.each do |response|
+              node_id = pbuilderid_index[response[:data][:pbuilderid]]
+              ret[node_id] = response[:data]
+            end
           end
         end
         ret
@@ -124,15 +127,24 @@ module XYZ
       end
 
       #using code that puts in own agent 
-      def self.ret_rpc_client(agent="all")
+      def self.ret_rpc_client(agent="all",&block)
         ret = nil
         Lock.synchronize do
           #lock is needed since Client.new is not thread safe
           #deep copy because rpcclient modifies options
           ret = rpcclient(agent,:options => Aux::deep_copy(Options))
         end
-        ret
+        unless block
+          ret
+        else
+          begin
+            block.call(ret)
+           ensure
+            ret.disconnect() if ret
+          end
+        end
       end
+
 
       #TODO: not sure if what name of agent is shoudl be configurable
       def self.mcollective_agent()

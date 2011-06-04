@@ -66,6 +66,8 @@ module XYZ
       #TODO: looks liek can blog if called in middle of deployment
       #TODO: look at having connection be created on a per thread basis and
       #this leevraging it
+      #looks like doing in defer thread works; will need a queeue to redirect it to
+      #alternatives to look at are using receiver connection or scheduling as another process in ruote
       def self.get_logs(task,nodes)
         ret = nodes.inject({}){|h,n|h.merge(n[:id] => nil)}
         value = task.id_handle.get_id().to_s

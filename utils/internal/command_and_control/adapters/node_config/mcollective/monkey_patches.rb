@@ -60,6 +60,8 @@ module MCollective
       Log.debug("Sending request #{reqid} to #{target}")
       #r8patch to take into account that subscription is on a per thread basis
       #can change back by making subscriptions = @subscriptions
+      #dig into whether mcollective or stomp using thread id as part of client id
+      #another alternative is explicitly unsubscribing
       Thread.current[:mc_subscriptions] ||= Hash.new
       subscriptions = Thread.current[:mc_subscriptions]
       unless subscriptions.include?(agent)

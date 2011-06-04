@@ -51,7 +51,7 @@ module XYZ
         decomposition(action,task,top_task_idh) || participant_executable_action(:execute_on_node,task,top_task_idh, :task_end => true)
       end
       def participant_executable_action(name,task,top_task_idh,args={})
-        raise Error.new("unregistered participant name (#{name})") unless Ruote::Participant::List.include?(name) 
+        raise Error.new("unregistered participant name (#{name})") unless Ruote::ParticipantList.include?(name) 
         executable_action = task[:executable_action]
         task_info = {
           "action" => executable_action,

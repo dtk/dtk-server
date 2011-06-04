@@ -52,7 +52,7 @@ module XYZ
               pp [:found,msg[:senderid]]
               result = {:type => :completed_create_node, :task_id => task_id} 
               set_result_succeeded(workitem,result,task,action)
-              #TODO: put in updating and propagating task attributes
+              CommandAndControl.get_and_propagate_updated_attributes(action)
               self.reply_to_engine(workitem)
             end,
             :on_timeout => proc do 

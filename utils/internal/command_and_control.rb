@@ -18,7 +18,7 @@ module XYZ
 
     def self.get_and_propagate_updated_attributes(task_action)
       klass = load_for(task_action)
-      klass.get_updated_attributes(task_action)
+      updated_attributes = klass.get_updated_attributes(task_action)
       propagate_attributes(updated_attributes)
     end
 

@@ -1,9 +1,10 @@
 module XYZ
   class TaskActionBase < HashObject 
-    #implemented functions
-    def serialize_for_task()
+    def type()
+      Aux.underscore(Aux.demodulize(self.class.to_s)).to_sym
     end
 
+    #implemented functions
     def long_running?()
       nil
     end

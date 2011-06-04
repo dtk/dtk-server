@@ -20,7 +20,8 @@ module XYZ
       def decomposition(action,task,top_task_idh)
         if action.kind_of?(TaskAction::CreateNode)
           main = participant_executable_action(:execute_on_node,task,top_task_idh)
-          post_part = participant_executable_action(:detect_created_node_is_ready,task,top_task_idh,:task_type => "post")
+          post_part_opts = {:task_type => "post", :task_end => true}
+          post_part = participant_executable_action(:detect_created_node_is_ready,task,top_task_idh, post_part_opts)
           sequence(main,post_part)
         end
       end
@@ -47,7 +48,7 @@ module XYZ
 
       def compute_process_executable_action(task,top_task_idh)
         action = task[:executable_action]
-        decomposition(action,task,top_task_idh) || participant_executable_action(:execute_on_node,task,top_task_idh)
+        decomposition(action,task,top_task_idh) || participant_executable_action(:execute_on_node,task,top_task_idh, :task_end => true)
       end
       def participant_executable_action(name,task,top_task_idh,args={})
         raise Error.new("unregistered participant name (#{name})") unless Ruote::Participant::List.include?(name) 

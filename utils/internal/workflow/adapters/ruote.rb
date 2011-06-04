@@ -126,13 +126,14 @@ module XYZ
             TaskInfo.get_and_delete(params["task_id"],params["task_type"])
           end
 
-          def set_result_succeeded(workitem,new_result,task)
+          def set_result_succeeded(workitem,new_result,task,action)
             update_hash = {
               :status => "succeeded",
               :result => TaskAction::Result::Succeeded.new(new_result)
             }             
             task.update(update_hash)
             #TODO: for testing removing so can rerun executable_action.update_state_change_status(task.model_handle,:completed)  #this send pending changes' states
+            set_result_succeeded__stack(workitem,new_result,task,action)
           end
 
           def set_result_timeout(workitem,new_result,task)
@@ -140,13 +141,9 @@ module XYZ
           end
 
          private
-          #TODO: may deprecate if not needing to update ruote fields with result
           #if use must cooridntae with concurrence merge type
-          def set_result__stack(workitem,new_result)
-            prev = workitem.fields["result"] || (workitem.fields["stack"] && workitem.fields["stack"].map{|x|x["result"]}) 
-            workitem.fields["result"] = prev ?
-              (prev.kind_of?(Hash) ? [prev,new_result] : prev + [new_result]) :
-              new_result
+          def set_result_succeeded__stack(workitem,new_result,task,action)
+            workitem.fields["result"] = {:action_completed => action.type}
           end
         end
 
@@ -154,10 +151,14 @@ module XYZ
           def consume(workitem)
             task_info = get_and_delete_task_info(workitem)
             workflow = task_info["workflow"]
+            task = workflow.task
+            task_id = task_id(workitem)
             action = task_info["action"]
             callbacks = {
               :on_msg_received => proc do |msg|
                 pp [:found,msg[:senderid]]
+                result = {:type => :completed_create_node, :task_id => task_id} 
+                set_result_succeeded(workitem,result,task,action)
                 #TODO: put in updating and propagating task attributes
                 self.reply_to_engine(workitem)
               end,
@@ -203,13 +204,13 @@ module XYZ
             top_task_idh = task_info["top_task_idh"]
             workflow = task_info["workflow"]
             task = workflow.task
-
+            task_end = workitem.params["task_end"]
             execution_context(task,top_task_idh) do
               if action.long_running?
                 callbacks = {
                   :on_msg_received => proc do |msg|
                     result = msg[:body].merge("task_id" => task_id)
-                    set_result_succeeded(workitem,result,task)
+                    set_result_succeeded(workitem,result,task,action) if task_end
                     self.reply_to_engine(workitem)
                   end,
                   :on_timeout => proc do 
@@ -224,7 +225,7 @@ module XYZ
                 workflow.initiate_executable_action(action,top_task_idh,receiver_context)
               else
                 result = workflow.process_executable_action(action,top_task_idh)
-                set_result_succeeded(workitem,result,task)
+                set_result_succeeded(workitem,result,task,action)
                 reply_to_engine(workitem)
               end
             end

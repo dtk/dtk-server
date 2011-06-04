@@ -6,16 +6,12 @@ module XYZ
         def initialize(opts=nil)
           @opts = opts
         end
-
-        def get_params(workitem)
-          task_info = get_and_delete_task_info(workitem)
-          params = {"task_id" => workitem.params["task_id"]}
-          workflow = task_info["workflow"]
-          params.merge!("workflow" => workflow)
-          params.merge!("task" => workflow.task)
-          params.merge!("action" => task_info["action"])
-          params.merge!("top_task_idh" => task_info["top_task_idh"])
-          params
+        def task_id(workitem)
+          workitem.params["task_id"]
+        end
+        def get_and_delete_task_info(workitem)
+          params = workitem.params
+          Ruote::TaskInfo.get_and_delete(params["task_id"],params["task_type"])
         end
 
         def set_result_succeeded(workitem,new_result,task,action)
@@ -37,16 +33,15 @@ module XYZ
         def set_result_succeeded__stack(workitem,new_result,task,action)
           workitem.fields["result"] = {:action_completed => action.type}
         end
-        def get_and_delete_task_info(workitem)
-          params = workitem.params
-          Ruote::TaskInfo.get_and_delete(params["task_id"],params["task_type"])
-        end
       end
 
       class DetectCreatedNodeIsReady < Top
         def consume(workitem)
-          params = get_params(workitem) 
-          task_id,action,workflow,task,task_end = %w{task_id action workflow task task_end}.map{|k|params[k]}
+          task_info = get_and_delete_task_info(workitem)
+          workflow = task_info["workflow"]
+          task = workflow.task
+          task_id = task_id(workitem)
+          action = task_info["action"]
           callbacks = {
             :on_msg_received => proc do |msg|
               pp [:found,msg[:senderid]]
@@ -69,8 +64,9 @@ module XYZ
 
       class DetectIfNodeIsResponding < Top
         def consume(workitem)
-          params = get_params(workitem) 
-          action,workflow = %w{action workflow}.map{|k|params[k]}
+          task_info = get_and_delete_task_info(workitem)
+          workflow = task_info["workflow"]
+          action = task_info["action"]
           callbacks = {
             :on_msg_received => proc do |msg|
               pp [:found,msg[:senderid]]
@@ -90,10 +86,14 @@ module XYZ
         #LockforDebug = Mutex.new
         def consume(workitem)
           #LockforDebug.synchronize{pp [:in_consume, Thread.current, Thread.list];STDOUT.flush}
-          params = get_params(workitem) 
-          task_id,action,workflow,task,task_end = %w{task_id action workflow task task_end}.map{|k|params[k]}
-
-          execution_context(task,params["top_task_idh"]) do
+          task_id = task_id(workitem)
+          task_info = get_and_delete_task_info(workitem)
+          action = task_info["action"]
+          top_task_idh = task_info["top_task_idh"]
+          workflow = task_info["workflow"]
+          task = workflow.task
+          task_end = workitem.params["task_end"]
+          execution_context(task,top_task_idh) do
             if action.long_running?
               callbacks = {
                 :on_msg_received => proc do |msg|
@@ -110,9 +110,9 @@ module XYZ
                 end
               }
               receiver_context = {:callbacks => callbacks, :expected_count => 1}
-              workflow.initiate_executable_action(action,params["top_task_idh"],receiver_context)
+              workflow.initiate_executable_action(action,top_task_idh,receiver_context)
             else
-              result = workflow.process_executable_action(action,params["top_task_idh"])
+              result = workflow.process_executable_action(action,top_task_idh)
               set_result_succeeded(workitem,result,task,action)
               reply_to_engine(workitem)
             end

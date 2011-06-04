@@ -7,7 +7,7 @@ module XYZ
     class Ruote < XYZ::Workflow
       include RuoteGenerateProcessDefs
       def execute(top_task_idh=nil)
-        @task.update(:status => "executing") #TODO: may handle this by inserting a start subtask
+        @task.update(:status => "executing") 
         TaskInfo.initialize_task_info()
         begin
           @connection = CommandAndControl.create_poller_listener_connection()
@@ -126,18 +126,28 @@ module XYZ
             TaskInfo.get_and_delete(params["task_id"],params["task_type"])
           end
 
-          #TODO: may only save results in out datastructure; also pass in task to this method
-          def set_result(workitem,new_result)
-            #its setting must be coordinated with the merge type
-            set_result__stack(workitem,new_result)
+          def set_result_succeeded(workitem,new_result,task)
+            update_hash = {
+              :status => "succeeded",
+              :result => TaskAction::Result::Succeeded.new(new_result)
+            }             
+            task.update(update_hash)
+            #TODO: for testing removing so can rerun executable_action.update_state_change_status(task.model_handle,:completed)  #this send pending changes' states
           end
+
+          def set_result_timeout(workitem,new_result,task)
+            #TODO: what should be set here; is no op fine
+          end
+
+         private
+          #TODO: may deprecate if not needing to update ruote fields with result
+          #if use must cooridntae with concurrence merge type
           def set_result__stack(workitem,new_result)
             prev = workitem.fields["result"] || (workitem.fields["stack"] && workitem.fields["stack"].map{|x|x["result"]}) 
             workitem.fields["result"] = prev ?
               (prev.kind_of?(Hash) ? [prev,new_result] : prev + [new_result]) :
               new_result
           end
-         private
         end
 
         class DetectCreatedNodeIsReady < Top
@@ -184,7 +194,7 @@ module XYZ
           end
         end
         class ExecuteOnNode < Top
-          LockforDebug = Mutex.new
+          #LockforDebug = Mutex.new
           def consume(workitem)
             #LockforDebug.synchronize{pp [:in_consume, Thread.current, Thread.list];STDOUT.flush}
             task_id = task_id(workitem)
@@ -192,18 +202,21 @@ module XYZ
             action = task_info["action"]
             top_task_idh = task_info["top_task_idh"]
             workflow = task_info["workflow"]
-            begin
+            task = workflow.task
+
+            execution_context(task,top_task_idh) do
               if action.long_running?
                 callbacks = {
                   :on_msg_received => proc do |msg|
-                    set_result(workitem,msg[:body].merge("task_id" => workitem.params["task_id"]))
+                    result = msg[:body].merge("task_id" => task_id)
+                    set_result_succeeded(workitem,result,task)
                     self.reply_to_engine(workitem)
                   end,
                   :on_timeout => proc do 
                     result = {
                       "status" => "timeout", 
-                      "task_id" => workitem.params["task_id"]}
-                    set_result(workitem,result)
+                      "task_id" => task_id}
+                    set_result_timeout(workitem,result,task)
                     self.reply_to_engine(workitem)
                   end
                 }
@@ -211,13 +224,35 @@ module XYZ
                 workflow.initiate_executable_action(action,top_task_idh,receiver_context)
               else
                 result = workflow.process_executable_action(action,top_task_idh)
-                set_result(workitem,result)
+                set_result_succeeded(workitem,result,task)
                 reply_to_engine(workitem)
               end
-             rescue Exception => e
+            end
+          end
+
+          def execution_context(task,top_task_idh,&body)
+            debug_print_task_info = "task_id=#{task.id.to_s}; top_task_id=#{top_task_idh.get_id()}"
+            begin
+              yield
+             rescue CommandAndControl::Error => e
+              update_hash = {
+                :status => "failed",
+                :result => TaskAction::Result::Failed.new(e)
+              }
+              task.update(update_hash)
+              pp [:task_failed,debug_print_task_info,e]
+              raise e
+            rescue Exception => e
+              update_hash = {
+                :status => "failed",
+                :result => TaskAction::Result::Failed.new(CommandAndControl::Error.new)
+              }
+              task.update(update_hash)
+              pp [:task_failed_internal_error,debug_print_task_info,e,e.backtrace[0..7]]
               raise e
             end
           end
+
 
           #TODO: need to turn threading off for now because if dont can have two threads 
           #eat ech others messages; may solve with existing mechism or go straight to

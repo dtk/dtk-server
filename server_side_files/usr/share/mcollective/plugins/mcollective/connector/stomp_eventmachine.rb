@@ -101,6 +101,7 @@ pp [:is_connecetd]
       def wait_until_connected?
         return if @connected
         loop do 
+          pp [:loop, @connection]
           return if @connected = @connection.is_connected?
           sleep 1
         end
@@ -120,13 +121,16 @@ pp [:is_connecetd]
         pp request      
       end
 
+      #TODO: make automic subscribe_and_send because need subscribe to happen before send does
       # Subscribe to a topic or queue
       def subscribe(source)
         unless @subscriptions.include?(source)
-          Log.debug("Subscribing to #{source}")
-          wait_until_connected?
-          @connection.subscribe(source)
-          @subscriptions << source
+          EM::defer do 
+            Log.debug("Subscribing to #{source}")
+            wait_until_connected?
+            @connection.subscribe(source)
+            @subscriptions << source
+          end
         end
       end
 

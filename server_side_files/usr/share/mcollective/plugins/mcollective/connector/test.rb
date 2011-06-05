@@ -16,10 +16,8 @@ require 'stomp_eventmachine'
 EventMachine::run {
   connection = MCollective::PluginManager["connector_plugin"]
   connection.connect
-  EM.add_timer(1) {
-    pp [:outside,connection]
-    connection.subscribe("/topic/mcollective.discovery.reply")
-  }
+  connection.subscribe("/topic/mcollective.discovery.reply")
+pp 'here'
 }
 
   

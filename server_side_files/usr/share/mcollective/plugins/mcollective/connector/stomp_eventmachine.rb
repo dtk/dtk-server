@@ -29,7 +29,9 @@ module MCollective
 
         def receive_msg msg
           if msg.command == "CONNECTED"
-            subscribe "/topic/mcollective.discovery.reply"
+#            subscribe "/topic/mcollective.discovery.reply"
+pp [:here,Thread.current,self]
+            $s = self
           else
             Stomp.process(msg) 
           end
@@ -52,6 +54,7 @@ module MCollective
           return
         end
         begin
+          @stomp_client = nil
           host = nil
           port = nil
           @@user = nil
@@ -73,7 +76,14 @@ module MCollective
           @@password = 'marionette'
 
           #TODO: assume reactor is running already
-          EM.connect host, port, StompClient
+pp [:heer2,Thread.current]
+          #TODO: try putting this in thread and then joining
+          Thread.new do
+          @stomp_client = EM.connect host, port, StompClient
+          end
+pp [:heer3]
+sleep 3
+pp $s
           @connected = true
           Log.debug("Connecting to #{host}:#{port}")
          rescue Exception => e
@@ -104,10 +114,11 @@ module MCollective
       end
 
       # Subscribe to a topic or queue
-      def subscribe_to(source)
+      def subscribe(source)
         unless @subscriptions.include?(source)
           Log.debug("Subscribing to #{source}")
-          subscribe(source)
+pp @stomp_client 
+         @stomp_client.subscribe(source)
           @subscriptions << source
         end
       end

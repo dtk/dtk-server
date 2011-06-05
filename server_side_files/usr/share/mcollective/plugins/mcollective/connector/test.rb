@@ -16,7 +16,8 @@ require 'stomp_eventmachine'
 EventMachine::run {
   connection = MCollective::PluginManager["connector_plugin"]
   connection.connect
-#  connection.subscribe_to("/topic/mcollective.discovery.reply")
+#sleep 5
+ # connection.subscribe("/topic/mcollective.discovery.reply")
 }
 
   

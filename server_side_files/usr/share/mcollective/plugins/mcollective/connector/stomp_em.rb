@@ -72,25 +72,18 @@ pp [:is_connecetd]
           user = nil
           password = nil
           @@base64 = false
-=begin
+
           @@base64 = get_bool_option("stomp.base64", false)
           @msgpriority = get_option("stomp.priority", 0).to_i
 
           # Maintain backward compat for older stomps
           host = get_env_or_option("STOMP_SERVER", "stomp.host")
           port = get_env_or_option("STOMP_PORT", "stomp.port", 6163).to_i
-          @@user = get_env_or_option("STOMP_USER", "stomp.user")
-          @@password = get_env_or_option("STOMP_PASSWORD", "stomp.password")
-=end
-          host = 'localhost'
-          port = 6163
-          user = 'mcollective'
-          password = 'marionette'
+          user = get_env_or_option("STOMP_USER", "stomp.user")
+          password = get_env_or_option("STOMP_PASSWORD", "stomp.password")
 
           #TODO: assume reactor is running already
-          pp [:heer1]
           @connection = EM.connect host, port, StompClient, :login => user, :passcode => password
-          pp [:heer2,@connection]
           Log.debug("Connecting to #{host}:#{port}")
          rescue Exception => e
           pp e.backtrace[0..5]
@@ -101,7 +94,6 @@ pp [:is_connecetd]
       def wait_until_connected?
         return if @connected
         loop do 
-          pp [:loop, @connection]
           return if @connected = @connection.is_connected?
           sleep 1
         end
@@ -147,9 +139,7 @@ pp [:is_connecetd]
 
       # Subscribe to a topic or queue
       def unsubscribe(source)
-        Log.debug("Unsubscribing from #{source}")
-        EM::Protocols::Stomp.unsubscribe(source)
-        @subscriptions.delete(source)
+        #TODO
       end
      private
       def get_env_or_option(env, opt, default=nil)

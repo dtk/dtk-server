@@ -4,6 +4,30 @@ require 'eventmachine'
 require 'pp'
 require 'mcollective'
 
+#monkey patch additions
+module MCollective
+  class Client
+    def r8_sendreq(msg, agent, filter = {})
+      target = Util.make_target(agent, :command, collective)
+
+      reqid = Digest::MD5.hexdigest("#{@config.identity}-#{Time.now.to_f.to_s}-#{target}")
+
+      # Security plugins now accept an agent and collective, ones written for <= 1.1.4 dont
+      # but we still want to support them, try to call them in a compatible way if they
+      # dont support the new arguments
+      begin
+        req = @security.encoderequest(@config.identity, target, msg, reqid, filter, agent, collective)
+      rescue ArgumentError
+        req = @security.encoderequest(@config.identity, target, msg, reqid, filter)
+      end
+
+      topic = Util.make_target(agent, :reply, collective)
+      Log.debug("Sending request #{reqid} to #{target}")
+      @connection.subscribe_and_send(topic,target,req)
+      reqid
+    end
+  end
+end
 BlankFilter = {"identity"=>[], "fact"=>[], "agent"=>[], "cf_class"=>[]}
 Options = {
         :disctimeout=>3,
@@ -12,35 +36,9 @@ Options = {
         :timeout=>120
 }
 
-require 'mcollective'
-######## Monkey patches for version 1.2 
-module MCollective
-  class Config
-    attr_writer :connector
-  end
-
-  class Client
-    def initialize(configfile)
-      @config = Config.instance
-      @config.loadconfig(configfile) unless @config.configured
-
-      #R8Change
-      pp @config.connector
-      @config.connector = "stomp_eventmachine"
-      pp @config.connector
-      #END R8Change
-  
-      @connection = PluginManager["connector_plugin"]
-      @security = PluginManager["security_plugin"]
-
-      @security.initiated_by = :client
-      @options = nil
-      @subscriptions = {}
-
-      @connection.connect
-    end
-  end
+EM.run do
+  include MCollective::RPC
+  rpc_client = rpcclient("discovery",:options => Options)
+  rpc_client.client.r8_sendreq("ping","discovery")
+  rpc_client.client.r8_sendreq("ping","discovery")
 end
-
-include MCollective::RPC
-rpc_client = rpcclient("discovery",:options => Options)

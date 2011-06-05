@@ -133,6 +133,17 @@ pp [:is_connecetd]
           end
         end
       end
+      def subscribe_and_send(source,destination,body,params={})
+        EM::defer do 
+          wait_until_connected?
+          unless @subscriptions.include?(source)
+            Log.debug("Subscribing to #{source}")
+            @connection.subscribe(source)
+            @subscriptions << source
+          end
+          @connection.send(destination,body,params)
+        end
+      end
 
       # Subscribe to a topic or queue
       def unsubscribe(source)

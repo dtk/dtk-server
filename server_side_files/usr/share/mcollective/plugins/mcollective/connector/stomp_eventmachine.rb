@@ -24,11 +24,15 @@ module MCollective
       module StompClient
         include EM::Protocols::Stomp
         def connection_completed
-          Stomp.login 
+          connect :login => Stomp.user, :passcode => Stomp.password
         end
 
         def receive_msg msg
-          Stomp.process(msg) unless msg.command == "CONNECTED"
+          if msg.command == "CONNECTED"
+            subscribe "/topic/mcollective.discovery.reply"
+          else
+            Stomp.process(msg) 
+          end
         end
       end
 
@@ -50,8 +54,10 @@ module MCollective
         begin
           host = nil
           port = nil
-          user = nil
-          password = nil
+          @@user = nil
+          @@password = nil
+          @@base64 = false
+=begin
           @@base64 = get_bool_option("stomp.base64", false)
           @msgpriority = get_option("stomp.priority", 0).to_i
 
@@ -60,18 +66,28 @@ module MCollective
           port = get_env_or_option("STOMP_PORT", "stomp.port", 6163).to_i
           @@user = get_env_or_option("STOMP_USER", "stomp.user")
           @@password = get_env_or_option("STOMP_PASSWORD", "stomp.password")
+=end
+          host = 'localhost'
+          port = 6163
+          @@user = 'mcollective'
+          @@password = 'marionette'
 
           #TODO: assume reactor is running already
           EM.connect host, port, StompClient
           @connected = true
           Log.debug("Connecting to #{host}:#{port}")
          rescue Exception => e
+          pp e.backtrace[0..5]
           raise("Could not connect to Stomp Server: #{e}")
         end
       end
 
-      def self.login 
-        connect :login => @@user, :passcode => @@password
+      def self.user
+        @@user
+      end
+
+      def self.password()
+        @@password
       end
 
       def self.process(msg)
@@ -88,10 +104,10 @@ module MCollective
       end
 
       # Subscribe to a topic or queue
-      def subscribe(source)
+      def subscribe_to(source)
         unless @subscriptions.include?(source)
           Log.debug("Subscribing to #{source}")
-          EM::Protocols::Stomp.subscribe(source)
+          subscribe(source)
           @subscriptions << source
         end
       end

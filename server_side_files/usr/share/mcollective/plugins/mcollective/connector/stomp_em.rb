@@ -38,7 +38,7 @@ module MCollective
 
         def receive_msg msg
           if msg.command == "CONNECTED"
-pp [:is_connecetd]
+pp [:is_connected]
             @connected = true
           else
             Stomp_em.process(msg) 
@@ -57,7 +57,12 @@ pp [:is_connecetd]
         @connection = nil
       end
 
+      def set_decode_context(context)
+        @@decode_context = context
+      end
+
       def disconnect
+        #TODO: need to write
       end
 
       # Connects to the Stomp middleware
@@ -104,13 +109,13 @@ pp [:is_connecetd]
         # STOMP puts the payload in the body variable, pass that
         # into the payload of MCollective::Request and discard all the
         # other headers etc that stomp provides
-        request = 
+        raw_msg = 
           if @@base64
             Request.new(SSL.base64_decode(msg.body))
           else
             Request.new(msg.body)
           end     
-        pp request      
+        pp @@decode_context.r8_decode_receive(raw_msg)
       end
 
       #TODO: make automic subscribe_and_send because need subscribe to happen before send does

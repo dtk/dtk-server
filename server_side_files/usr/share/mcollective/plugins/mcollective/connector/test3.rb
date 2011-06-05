@@ -7,6 +7,21 @@ require 'mcollective'
 #monkey patch additions
 module MCollective
   class Client
+    def r8_set_context()
+      @connection.set_decode_context(self)
+    end
+
+    def r8_decode_receive(msg)
+      begin
+        msg = @security.decodemsg(msg)
+        msg[:senderid] = Digest::MD5.hexdigest(msg[:senderid]) if ENV.include?("MCOLLECTIVE_ANON")
+      rescue Exception => e
+        Log.debug("decoding error")
+        msg = nil
+      end
+      msg
+    end
+
     def r8_sendreq(msg, agent, filter = {})
       target = Util.make_target(agent, :command, collective)
 
@@ -39,6 +54,8 @@ Options = {
 EM.run do
   include MCollective::RPC
   rpc_client = rpcclient("discovery",:options => Options)
+  rpc_client.client.r8_set_context()
+
   rpc_client.client.r8_sendreq("ping","discovery")
   rpc_client.client.r8_sendreq("ping","discovery")
 end

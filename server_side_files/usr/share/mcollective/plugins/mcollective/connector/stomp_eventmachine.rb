@@ -23,18 +23,30 @@ module MCollective
     class Stomp<Base
       module StompClient
         include EM::Protocols::Stomp
+        def initialize(*args)
+          super(*args)
+          #TODO: if cannot fidn user and log this shoudl be error
+          conn_opts = (args.last.kind_of?(Hash))? args.last : {}
+          @login = conn_opts[:login]
+          @passcode = conn_opts[:passcode]
+          @connected = false
+        end
+
         def connection_completed
-          connect :login => Stomp.user, :passcode => Stomp.password
+          connect :login => @login, :passcode => @passcode
         end
 
         def receive_msg msg
           if msg.command == "CONNECTED"
-#            subscribe "/topic/mcollective.discovery.reply"
-pp [:here,Thread.current,self]
-            $s = self
+pp [:is_connecetd]
+            @connected = true
           else
             Stomp.process(msg) 
           end
+        end
+
+        def is_connected?()
+          @connected
         end
       end
 
@@ -42,6 +54,7 @@ pp [:here,Thread.current,self]
         @config = Config.instance
         @subscriptions = []
         @connected = nil
+        @connection = nil
       end
 
       def disconnect
@@ -49,16 +62,15 @@ pp [:here,Thread.current,self]
 
       # Connects to the Stomp middleware
       def connect
-        if @connected
+        if @connection
           Log.debug("Already connection, not re-initializing connection")
           return
         end
         begin
-          @stomp_client = nil
           host = nil
           port = nil
-          @@user = nil
-          @@password = nil
+          user = nil
+          password = nil
           @@base64 = false
 =begin
           @@base64 = get_bool_option("stomp.base64", false)
@@ -72,19 +84,13 @@ pp [:here,Thread.current,self]
 =end
           host = 'localhost'
           port = 6163
-          @@user = 'mcollective'
-          @@password = 'marionette'
+          user = 'mcollective'
+          password = 'marionette'
 
           #TODO: assume reactor is running already
-pp [:heer2,Thread.current]
-          #TODO: try putting this in thread and then joining
-          Thread.new do
-          @stomp_client = EM.connect host, port, StompClient
-          end
-pp [:heer3]
-sleep 3
-pp $s
-          @connected = true
+          pp [:heer1]
+          @connection = EM.connect host, port, StompClient, :login => user, :passcode => password
+          pp [:heer2,@connection]
           Log.debug("Connecting to #{host}:#{port}")
          rescue Exception => e
           pp e.backtrace[0..5]
@@ -92,14 +98,15 @@ pp $s
         end
       end
 
-      def self.user
-        @@user
+      def wait_until_connected?
+        return if @connected
+        loop do 
+          return if @connected = @connection.is_connected?
+          sleep 1
+        end
       end
-
-      def self.password()
-        @@password
-      end
-
+    
+    
       def self.process(msg)
         # STOMP puts the payload in the body variable, pass that
         # into the payload of MCollective::Request and discard all the
@@ -117,8 +124,8 @@ pp $s
       def subscribe(source)
         unless @subscriptions.include?(source)
           Log.debug("Subscribing to #{source}")
-pp @stomp_client 
-         @stomp_client.subscribe(source)
+          wait_until_connected?
+          @connection.subscribe(source)
           @subscriptions << source
         end
       end

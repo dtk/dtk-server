@@ -20,7 +20,7 @@ module MCollective
         #
         #     plugin.stomp.priority = 4
         #
-    class Stomp<Base
+    class Stomp_em<Base
       module StompClient
         include EM::Protocols::Stomp
         def initialize(*args)
@@ -41,7 +41,7 @@ module MCollective
 pp [:is_connecetd]
             @connected = true
           else
-            Stomp.process(msg) 
+            Stomp_em.process(msg) 
           end
         end
 

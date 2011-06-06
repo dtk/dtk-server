@@ -12,9 +12,10 @@ module XYZ
         #TODO: think keep track of expected count here and coordinate with timeout
       end
 
+      #TODO: can simplify to have request params abnd callback; may model on syntax of EM:defer future signature
       def process_request(trigger,context)
         request_id = trigger[:generate_request_id].call
-        #TODO: handle context[:expected] count here
+        #TODO: handle context[:expected] count here buffer up and append responses until count is reached
         callbacks = Callbacks.create(context[:callbacks])
         timeout = context[:timeout]||DefaultTimeout
         add_reqid_callbacks(request_id,callbacks,timeout)

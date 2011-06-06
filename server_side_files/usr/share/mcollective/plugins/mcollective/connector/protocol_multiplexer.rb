@@ -3,23 +3,23 @@ module XYZ
   #TODO: look at making this close to EM deferanle or leverage it so can cancel requests; ware callbacks look very equivalent
   #change stomp_em to have handle on  MCollectiveMultiplexer rather than handler
   module CommandAndControlAdapter
-    class MCollectiveMultiplexer
+    class ProtocolMultiplexer
       def initialize(protocol_handler)
         #TODO: might put operations on @protocol_handler in mutex
         @protocol_handler = protocol_handler
         @callbacks_list = Hash.new
         @lock = Mutex.new
-        #TODO: think keep track of expected count here and coordinate with timeout
+        #TODO: keep track of expected count here and coordinate with timeout
       end
 
-      #TODO: can simplify to have request params abnd callback; may model on syntax of EM:defer future signature
+      #TODO: may model more closely to syntax of EM:defer future signature
       def process_request(trigger,context)
-        request_id = trigger[:generate_request_id].call
+        request_id = trigger[:generate_request_id].call(@protocol_handler)
         #TODO: handle context[:expected] count here buffer up and append responses until count is reached
         callbacks = Callbacks.create(context[:callbacks])
         timeout = context[:timeout]||DefaultTimeout
         add_reqid_callbacks(request_id,callbacks,timeout)
-        trigger[:send_message].call(request_id)
+        trigger[:send_message].call(@protocol_handler,request_id)
       end
      private
       DefaultTimeout = 15 #90
@@ -73,7 +73,9 @@ module XYZ
        private
         def cancel_timer(request_id)
           timer = self[:timer]
-          R8EM.cancel_timer(timer) if timer
+#          R8EM.cancel_timer(timer) if timer
+#for testing
+          EM.cancel_timer(timer) if timer
         end
       end
     end

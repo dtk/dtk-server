@@ -36,19 +36,19 @@ module XYZ
 
      private
       def process_request_timeout(request_id)
-        pp [:timeout, request_id]
+pp [:foo_timeout]
         callbacks = get_and_remove_reqid_callbacks(request_id)
-        callbacks.process_timeout(request_id)
+        if callbacks
+          pp [:timeout, request_id]
+          callbacks.process_timeout(request_id) 
+        end
       end
 
 
-      def add_reqid_callbacks(request_id,callbacks_x,timeout,expected_count)
-pp [:timeout, timeout]
-        R8EM.add_timer(timeout){process_request_timeout(request_id)}
-        callbacks = callbacks_x
-#        callbacks = callbacks_x.merge(:timer => R8EM.add_timer(timeout){process_request_timeout(request_id)}) 
+      def add_reqid_callbacks(request_id,callbacks,timeout,expected_count)
         @lock.synchronize do 
-          @callbacks_list[request_id] = callbacks 
+          timer = R8EM.add_timer(timeout){process_request_timeout(request_id)}
+          @callbacks_list[request_id] = callbacks.merge(:timer => timer) 
           @count_info[request_id] = expected_count
         end
       end
@@ -67,6 +67,7 @@ pp [:timeout, timeout]
           end
           if count == 0
             ret = @callbacks_list.delete(request_id)
+            ret.cancel_timer()
           elsif count > 0
             ret = @callbacks_list[request_id]
           end
@@ -81,7 +82,6 @@ pp [:timeout, timeout]
         end
 
         def process_msg(msg,request_id)
-          cancel_timer(request_id)
           callback = self[:on_msg_received]
           if callback
             callback.call(msg) 
@@ -97,8 +97,7 @@ pp [:timeout, timeout]
             Log.error("could not find timeout callback for request_id #{request_id.to_s}")
           end
         end
-       private
-        def cancel_timer(request_id)
+        def cancel_timer()
           timer = self[:timer]
           R8EM.cancel_timer(timer) if timer
         end

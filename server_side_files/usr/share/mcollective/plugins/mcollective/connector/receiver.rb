@@ -1,11 +1,12 @@
 module XYZ
   #TODO: may make this a singleton
+  #TODO: look at making this close to EM deferanle or leverage it so can cancel requests; ware callbacks look very equivalent
+  #change stomp_em to have handle on  MCollectiveMultiplexer rather than handler
   module CommandAndControlAdapter
-    class MCollectiveReceiver
-      def initialize(listener)
-        super(engine)
-        #TODO: might put operations on @listener in mutex
-        @listener = listener
+    class MCollectiveMultiplexer
+      def initialize(protocol_handler)
+        #TODO: might put operations on @protocol_handler in mutex
+        @protocol_handler = protocol_handler
         @callbacks_list = Hash.new
         @lock = Mutex.new
         #TODO: think keep track of expected count here and coordinate with timeout
@@ -13,8 +14,7 @@ module XYZ
 
       def process_request(trigger,context)
         request_id = trigger[:generate_request_id].call
-        listener_opts = context.reject{|k,v| not [:agent,:expected_count].include?(k)}
-        @listener.add_request_id(request_id,listener_opts)
+        #TODO: handle context[:expected] count here
         callbacks = Callbacks.create(context[:callbacks])
         timeout = context[:timeout]||DefaultTimeout
         add_reqid_callbacks(request_id,callbacks,timeout)
@@ -36,15 +36,13 @@ module XYZ
         ret
       end
 
-      def wait_and_process_message()
-        msg,request_id = @listener.process_event()
+      def process_message(msg,request_id)
         callbacks = get_and_remove_reqid_callbacks(request_id)
         callbacks.process_msg(msg,request_id)
       end
 
       def process_request_timeout(request_id)
         pp [:timeout, request_id]
-        @listener.remove_request_id(request_id)
         callbacks = get_and_remove_reqid_callbacks(request_id)
         callbacks.process_timeout(request_id)
       end

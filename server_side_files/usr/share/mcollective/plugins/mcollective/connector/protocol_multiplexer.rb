@@ -43,7 +43,10 @@ module XYZ
 
 
       def add_reqid_callbacks(request_id,callbacks_x,timeout,expected_count)
-        callbacks = callbacks_x.merge(:timer => R8EM.add_timer(timeout){process_request_timeout(request_id)}) 
+pp [:timeout, timeout]
+        R8EM.add_timer(timeout){process_request_timeout(request_id)}
+        callbacks = callbacks_x
+#        callbacks = callbacks_x.merge(:timer => R8EM.add_timer(timeout){process_request_timeout(request_id)}) 
         @lock.synchronize do 
           @callbacks_list[request_id] = callbacks 
           @count_info[request_id] = expected_count
@@ -98,7 +101,6 @@ module XYZ
         def cancel_timer(request_id)
           timer = self[:timer]
           R8EM.cancel_timer(timer) if timer
-          EM.cancel_timer(timer) if timer
         end
       end
     end

@@ -14,6 +14,8 @@ module XYZ
 
       #TODO: may model more closely to syntax of EM:defer future signature
       def process_request(trigger,context)
+        expected_count = context[:expected_count]||ExpectedCountDefault
+        raise Error.new("not yet implementended expected_count > 1") if ExpectedCountDefault > 1
         request_id = trigger[:generate_request_id].call(@protocol_handler)
         #TODO: handle context[:expected] count here buffer up and append responses until count is reached
         callbacks = Callbacks.create(context[:callbacks])
@@ -22,7 +24,8 @@ module XYZ
         trigger[:send_message].call(@protocol_handler,request_id)
       end
      private
-      DefaultTimeout = 15 #90
+      DefaultTimeout = 30 #90
+      ExpectedCountDefault = 1
 
       def add_reqid_callbacks(request_id,callback_x,timeout=nil)
         callback = timeout ? 
@@ -48,7 +51,8 @@ module XYZ
         callbacks.process_timeout(request_id)
       end
 
-      class Callbacks < HashObject
+      #TODO: temp until in rest of code
+      class Callbacks < XYZ::HashObject
         def self.create(callbacks_info)
           self.new(callbacks_info)
         end

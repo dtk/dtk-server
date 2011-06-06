@@ -4,6 +4,7 @@ module XYZ
   module CommandAndControlAdapter
     class MCollectiveMultiplexer < ProtocolMultiplexer
       include Singleton
+      include MCollective::RPC
       def initialize()
         #TODO: directly create MCollective::Cleint rather than rpcclient
         mcollective_client = rpcclient("discovery",:options => Options).client

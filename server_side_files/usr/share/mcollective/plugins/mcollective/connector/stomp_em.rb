@@ -21,6 +21,9 @@ module MCollective
         #     plugin.stomp.priority = 4
         #
     class Stomp_em<Base
+      #this is effectively a singleton, but not mixin in Singleton beacuse mcollective isstantiates with new
+      #TODO: may look at making singleton and patching with making :new public, recognizing that will only be called once
+
       module StompClient
         include EM::Protocols::Stomp
         def initialize(*args)
@@ -57,8 +60,9 @@ pp [:is_connected]
         @connection = nil
       end
 
-      def set_decode_context(context)
-        @@decode_context = context
+      def set_context(context)
+        @@decode_context = context[:decode_context]
+        @@multiplexer = context[:multiplexer]
       end
 
       def disconnect
@@ -79,7 +83,7 @@ pp [:is_connected]
           @@base64 = false
 
           @@base64 = get_bool_option("stomp.base64", false)
-          @msgpriority = get_option("stomp.priority", 0).to_i
+          @@msgpriority = get_option("stomp.priority", 0).to_i
 
           # Maintain backward compat for older stomps
           host = get_env_or_option("STOMP_SERVER", "stomp.host")
@@ -115,7 +119,8 @@ pp [:is_connected]
           else
             Request.new(msg.body)
           end     
-        pp @@decode_context.r8_decode_receive(raw_msg)
+        msg = @@decode_context.r8_decode_receive(raw_msg)
+        @@multiplexer.process_response(msg,msg[:requestid])
       end
 
       #TODO: make automic subscribe_and_send because need subscribe to happen before send does

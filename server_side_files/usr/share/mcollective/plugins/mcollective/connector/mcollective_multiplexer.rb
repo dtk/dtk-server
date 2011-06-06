@@ -8,8 +8,8 @@ module XYZ
       def initialize()
         #TODO: directly create MCollective::Cleint rather than rpcclient
         mcollective_client = rpcclient("discovery",:options => Options).client
-        mcollective_client.r8_set_context()
-        super(@mcollective_client)
+        mcollective_client.r8_set_context(self)
+        super(mcollective_client)
       end
       BlankFilter = {"identity"=>[], "fact"=>[], "agent"=>[], "cf_class"=>[]}
       Options = {
@@ -20,12 +20,11 @@ module XYZ
         :timeout=>120
       }
       def sendreq_with_callback(msg,agent,context_with_callbacks,filter={})
-        request_id = @mcollective_client.r8_generate_request_id(msg,agent,filter)
         trigger = {
           :generate_request_id => proc do |client|
             client.r8_generate_request_id(msg,agent,filter)
           end,
-          :sending_msg => proc do |client,reqid|
+          :send_message => proc do |client,reqid|
             client.r8_sendreq_give_reqid(reqid,msg,agent,filter)
           end
         }
@@ -38,8 +37,8 @@ end
 ####monkey patches
 module MCollective
   class Client
-    def r8_set_context()
-      @connection.set_decode_context(self)
+    def r8_set_context(multiplexer)
+      @connection.set_context(:decode_context => self,:multiplexer => multiplexer)
     end
 
     def r8_decode_receive(msg)

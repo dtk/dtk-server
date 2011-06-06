@@ -11,6 +11,6 @@ EM.run do
     :on_msg_received => proc{|msg|pp [:received,msg]},
     :on_timeout => proc{pp :timeout} 
   }
-  context = {:callbacks => callbacks, :expected_count => 3, :timeout => 5}
+  context = {:callbacks => callbacks, :expected_count => 1, :timeout => 5}
   handler.sendreq_with_callback("ping","discovery",context)
 end

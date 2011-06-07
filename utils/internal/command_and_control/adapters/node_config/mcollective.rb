@@ -1,8 +1,6 @@
 require 'mcollective'
 require File.expand_path('mcollective/multiplexer', File.dirname(__FILE__))
-#require File.expand_path('mcollective/monkey_patches', File.dirname(__FILE__))
-
-include MCollective::RPC
+require File.expand_path('mcollective/monkey_patches', File.dirname(__FILE__))
 
 module XYZ
   module CommandAndControlAdapter
@@ -74,12 +72,13 @@ module XYZ
         context = context_x.merge(:callbacks => callbacks)
         handler.sendreq_with_callback(msg,agent,context,filter)
       end
+      BlankFilter = {"identity"=>[], "fact"=>[], "agent"=>[], "cf_class"=>[]}
       @@handler = nil
       def self.handler()
         @@handler ||= MCollectiveMultiplexer.instance
       end
 
-      #TODO: not sure if what name of agent is shoudl be configurable
+      #TODO: not sure if what name of agent is should be configurable; also this is a specfic agent dependent on whetehr chef or puppet
       def self.mcollective_agent()
         @mcollective_agent ||= R8::Config[:command_and_control][:node_config][:mcollective][:agent]
       end
@@ -87,9 +86,6 @@ module XYZ
       def self.pbuilderid(node)
         (node[:external_ref]||{})[:instance_id]
       end
-
-      #TODO: this may be duplicate
-      BlankFilter = {"identity"=>[], "fact"=>[], "agent"=>[], "cf_class"=>[]}
 
       Lock = Mutex.new
       def self.push_implementation(config_node,project)

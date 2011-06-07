@@ -7,7 +7,6 @@ module XYZ
         @callbacks_list = Hash.new
         @count_info = Hash.new
         @lock = Mutex.new
-        #TODO: keep track of expected count here and coordinate with timeout
       end
 
       #TODO: may model more closely to syntax of EM:defer future signature
@@ -43,7 +42,6 @@ pp [:foo_timeout]
           callbacks.process_timeout(request_id) 
         end
       end
-
 
       def add_reqid_callbacks(request_id,callbacks,timeout,expected_count)
         @lock.synchronize do 

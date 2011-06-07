@@ -35,7 +35,6 @@ module XYZ
 
      private
       def process_request_timeout(request_id)
-pp [:foo_timeout]
         callbacks = get_and_remove_reqid_callbacks(request_id)
         if callbacks
           pp [:timeout, request_id]
@@ -73,8 +72,7 @@ pp [:foo_timeout]
         ret
       end
 
-      #TODO: XYZ prefix temp until in rest of code
-      class Callbacks < XYZ::HashObject
+      class Callbacks < HashObject
         def self.create(callbacks_info)
           self.new(callbacks_info)
         end
@@ -87,14 +85,12 @@ pp [:foo_timeout]
             Log.error("could not find process msg callback for request_id #{request_id.to_s}")
           end
         end
+
         def process_timeout(request_id)
           callback = self[:on_timeout]
-          if callback
-            callback.call()
-          else
-            Log.error("could not find timeout callback for request_id #{request_id.to_s}")
-          end
+          callback.call() if callback
         end
+
         def cancel_timer()
           timer = self[:timer]
           R8EM.cancel_timer(timer) if timer

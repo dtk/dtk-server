@@ -15,7 +15,7 @@ module XYZ
         msg_content =  config_agent.ret_msg_content(config_node)
         msg_content.merge!(:task_id => task_idh.get_id(),:top_task_id => top_task_idh.get_id(), :project => project)
 
-        pbuilderid = pbuilderid(config_node[:node])
+        pbuilderid = Node.pbuilderid(config_node[:node])
         filter = {"fact" => [{:fact=>"pbuilderid",:value=>pbuilderid}]}
         context = opts[:receiver_context]
         callbacks = context[:callbacks]
@@ -41,7 +41,7 @@ module XYZ
         }
         
         context = {:timeout => opts[:poll_cycle]||PollCycleDefault}.merge(rc)
-        pbuilderid = pbuilderid(node)
+        pbuilderid = Node.pbuilderid(node)
         filter = {"fact" => [{:fact=>"pbuilderid",:value=>pbuilderid}]}
         params = nil
         async_agent_call("discovery","ping",params,filter,callbacks,context)
@@ -49,23 +49,33 @@ module XYZ
       PollCycleDefault = 10
       PollCountDefault = 6
 
-      def self.get_logs(task,nodes)
+      def self.request__get_logs(task,nodes,callbacks,context)
+        log_agent = context[:log_type] && LogAgents[context[:log_type].to_sym]
+        raise Error.new("cannot find a mcollective agent to get logs of type #{context[:log_type]||"UNKNOWN"}") unless log_agent
         ret = nodes.inject({}){|h,n|h.merge(n[:id] => nil)}
         key = task[:executable_action_type] ? "task_id" : "top_task_id"
         params = {:key => key, :value => task.id_handle.get_id().to_s}
-        pbuilderids = nodes.map{|n|pbuilderid(n)}
+        pbuilderids = nodes.map{|n|Node.pbuilderid(n)}
         value_pattern = /^(#{pbuilderids.join('|')})$/
         filter = {"fact" => [{:fact=>"pbuilderid", :value=>value_pattern}]}
-        callbacks = {
-          :on_msg_received => proc{|msg|pp [:received,msg]},
-          :on_timeout => proc{pp :timeout}
-        }
-        context = {:expected_count => pbuilderids.size, :timeout => 2}        
-        async_agent_call("get_log_fragment","get",params,filter,callbacks,context)
-        []
+        async_context = {:expected_count => pbuilderids.size, :timeout => GetLogsTimeout}.merge(context)
+        async_agent_call(log_agent.to_s,"get",params,filter,callbacks,async_context)
+      end
+      LogAgents = {
+        :chef => :get_log_fragment
+      }
+      GetLogsTimeout = 3
+      def self.parse_response__get_logs(msg)
+        ret = Hash.new
+        #TODO: conditionalize on status
+        return ret.merge(:status => :notok) unless body = msg[:body]
+        payload = body[:data]
+        ret[:status] = (body[:statuscode] == 0 and payload and payload[:status] == :ok) ? :ok : :notok 
+        ret[:pbuilderid] = payload && payload[:pbuilderid]
+        ret[:log_content] = payload && payload[:data]
+        ret
       end
 
-     private
       def self.async_agent_call(agent,method,params,filter_x,callbacks,context_x)
         msg = params ? handler.new_request(agent,method,params) : method
         filter = BlankFilter.merge(filter_x).merge("agent" => [agent])
@@ -81,10 +91,6 @@ module XYZ
       #TODO: not sure if what name of agent is should be configurable; also this is a specfic agent dependent on whetehr chef or puppet
       def self.mcollective_agent()
         @mcollective_agent ||= R8::Config[:command_and_control][:node_config][:mcollective][:agent]
-      end
-
-      def self.pbuilderid(node)
-        (node[:external_ref]||{})[:instance_id]
       end
 
       Lock = Mutex.new

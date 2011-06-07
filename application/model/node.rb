@@ -326,6 +326,13 @@ module XYZ
     #######################
     ######### Model apis
     #attribute on node
+    def self.pbuilderid(node)
+      (node[:external_ref]||{})[:instance_id]
+    end
+    def pbuilderid()
+      Node.pbuilderid(self)
+    end
+    
     def get_virtual_attribute(attribute_name,cols,field_to_match=:display_name)
       sp_hash = {
         :model_name => :attribute,

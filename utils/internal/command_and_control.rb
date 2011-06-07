@@ -22,9 +22,13 @@ module XYZ
       propagate_attributes(updated_attributes)
     end
 
-    def self.get_logs(task,nodes)
+    def self.request__get_logs(task,nodes,callbacks,context)
       klass = load_for(task)
-      klass.get_logs(task,nodes)
+      klass.request__get_logs(task,nodes,callbacks,context)
+    end
+    def self.parse_response__get_logs(task,msg)
+      klass = load_for(task)
+      klass.parse_response__get_logs(msg)
     end
 
     def self.create_poller_listener_connection()

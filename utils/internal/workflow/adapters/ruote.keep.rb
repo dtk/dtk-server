@@ -1,7 +1,7 @@
 require 'ruote'
 require File.expand_path('ruote/participant', File.dirname(__FILE__))
+require File.expand_path('ruote/receiver', File.dirname(__FILE__))
 require File.expand_path('ruote/generate_process_defs', File.dirname(__FILE__))
-#require File.expand_path('ruote/receiver', File.dirname(__FILE__))
 
 module XYZ 
   module WorkflowAdapter
@@ -24,6 +24,9 @@ module XYZ
         @task.update(:status => "executing") 
         TaskInfo.initialize_task_info()
         begin
+          @connection = CommandAndControl.create_poller_listener_connection()
+          listener = CommandAndControl.create_listener(@connection)
+          @receiver = RuoteReceiver.new(Engine,listener)
           wfid = Engine.launch(process_def())
           Engine.wait_for(wfid)
           
@@ -54,6 +57,8 @@ module XYZ
           pp "error trap in ruote#execute"
           pp [e,e.backtrace[0..3]]
          ensure
+          @receiver.stop if @receiver
+          @connection.disconnect() if @connection
           TaskInfo.clean
         end
         nil
@@ -62,7 +67,8 @@ module XYZ
       def initiate_executable_action(action,top_task_idh,receiver_context)
         opts = {
           :initiate_only => true,
-          #:receiver => @receiver,
+          :connection => @connection,
+          :receiver => @receiver,
           :receiver_context => receiver_context
         }
         CommandAndControl.execute_task_action(action,@task,top_task_idh,opts)
@@ -70,7 +76,8 @@ module XYZ
 
       def poll_to_detect_node_ready(node,receiver_context,opts={})
         poll_opts = opts.merge({
-         # :receiver => @receiver,
+          :connection => @connection, 
+          :receiver => @receiver,
           :receiver_context => receiver_context})
         CommandAndControl.poll_to_detect_node_ready(node,poll_opts)
       end
@@ -80,6 +87,8 @@ module XYZ
       def initialize(task)
         super(task)
         @process_def = nil
+        @connection = nil
+        @receiver = nil
       end
       def process_def()
         @process_def ||= compute_process_def(task)

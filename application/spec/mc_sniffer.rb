@@ -3,8 +3,7 @@ require 'rubygems'
 require 'stomp'
 require 'pp'
 
-$agents = ["get_log_fragment"]
-#$agents = ["discovery"]
+$agents = ["get_log_fragment","discovery","chef_solo"]
 def receive()
   host = 'localhost'
   port = 6163

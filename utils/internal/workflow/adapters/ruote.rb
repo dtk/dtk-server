@@ -1,7 +1,6 @@
 require 'ruote'
 require File.expand_path('ruote/participant', File.dirname(__FILE__))
 require File.expand_path('ruote/generate_process_defs', File.dirname(__FILE__))
-#require File.expand_path('ruote/receiver', File.dirname(__FILE__))
 
 module XYZ 
   module WorkflowAdapter
@@ -62,7 +61,6 @@ module XYZ
       def initiate_executable_action(action,top_task_idh,receiver_context)
         opts = {
           :initiate_only => true,
-          #:receiver => @receiver,
           :receiver_context => receiver_context
         }
         CommandAndControl.execute_task_action(action,@task,top_task_idh,opts)
@@ -70,7 +68,6 @@ module XYZ
 
       def poll_to_detect_node_ready(node,receiver_context,opts={})
         poll_opts = opts.merge({
-         # :receiver => @receiver,
           :receiver_context => receiver_context})
         CommandAndControl.poll_to_detect_node_ready(node,poll_opts)
       end

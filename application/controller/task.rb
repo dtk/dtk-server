@@ -38,7 +38,8 @@ module XYZ
 
 #      if R8::Config[:command_and_control][:node_config][:type] == "mcollective"
       if R8::EnvironmentConfig::CommandAndControlMode == "mcollective"
-        logs = task ? CommandAndControl.get_logs(task,assoc_nodes) : []
+        #logs = task ? CommandAndControl.get_logs(task,assoc_nodes) : []
+        logs = task ? TaskLog.get_and_update_logs_content(task,assoc_nodes,:top_task_id => task.id()) : []
       else
         logs = get_logs_mock(assoc_nodes)
       end

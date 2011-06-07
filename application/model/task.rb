@@ -24,7 +24,7 @@ module XYZ
       get_objects_from_sp_hash(model_handle,sp_hash).reject{|k,v|k == :subtasks}
     end
 
-
+    #this also provides teh nodes task_id as an extra attributevalue
     def get_associated_nodes()
       exec_actions = Array.new
       #if executable level then get its executable_action
@@ -35,12 +35,15 @@ module XYZ
         end
       else
         exec_action = get_objects_col_from_sp_hash(:cols=>[:executable_action]).first
-        exec_actions <<  exec_action if exec_action
+        exec_actions <<  exec_action.merge(:task_id => id()) if exec_action
       end
 
       #if task does not have execuatble actions then get all subtasks
       if exec_actions.empty?
-        exec_actions = get_all_subtasks().map{|t|t[:executable_action]}.compact
+        exec_actions = get_all_subtasks().map do |t|
+          action = t[:executable_action]
+          action && action.merge(:task_id => t.id())
+        end.compact
       end
       
       #get all unique nodes; looking for attribute :external_ref
@@ -49,11 +52,11 @@ module XYZ
         next unless node = ea[:node]
         node_id = node[:id]
         unless indexed_nodes[node_id] and indexed_nodes[node_id][:external_ref]
-          indexed_nodes[node_id] = node
+          indexed_nodes[node_id] = node.merge(:task_id => ea[:task_id])
         end
       end
 
-      #need to query db if missing external_refs having isnatnce_id
+      #need to query db if missing external_refs having instance_id
       node_ids_missing_ext_refs = indexed_nodes.values.reject{|n|(n[:external_ref]||{})[:instance_id]}.map{|n|n[:id]}
       unless node_ids_missing_ext_refs.empty?
         sp_hash = {

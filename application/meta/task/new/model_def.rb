@@ -11,6 +11,6 @@
     :executable_action => {:type => :json}, #gets serialized version of TaskAction::Action
   },
   :many_to_one=>[:task],
-  :one_to_many => [:task, :task_event, :task_error]
+  :one_to_many => [:task, :task_log, :task_event, :task_error]
 }
 

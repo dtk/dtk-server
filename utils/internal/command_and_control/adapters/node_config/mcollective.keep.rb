@@ -66,32 +66,24 @@ module XYZ
 
       def self.get_logs(task,nodes)
         ret = nodes.inject({}){|h,n|h.merge(n[:id] => nil)}
+        value = task.id_handle.get_id().to_s
         key = task[:executable_action_type] ? "task_id" : "top_task_id"
-        params = {:key => key, :value => task.id_handle.get_id().to_s}
+        msg_content = {:key => key, :value => value}
+        agent = "get_log_fragment"
+        handler = MCollectiveMultiplexer.instance
+        msg = handler.new_request(agent,"get", msg_content)
+
         pbuilderids = nodes.map{|n|pbuilderid(n)}
         value_pattern = /^(#{pbuilderids.join('|')})$/
-        filter = {"fact" => [{:fact=>"pbuilderid", :value=>value_pattern}]}
+        filter = BlankFilter.merge("fact" => [{:fact=>"pbuilderid", :value=>value_pattern}],"agent" => [agent])
         callbacks = {
           :on_msg_received => proc{|msg|pp [:received,msg]},
           :on_timeout => proc{pp :timeout}
         }
-        context = {:expected_count => pbuilderids.size, :timeout => 2}        
-        async_agent_call("get_log_fragment","get",params,filter,callbacks,context)
-        []
-      end
-
-     private
-      def self.async_agent_call(agent,method,params,filter_x,callbacks,context_x)
-        msg = handler.new_request(agent,method,params)
-        filter = BlankFilter.merge(filter_x).merge("agent" => [agent])
-        context = context_x.merge(:callbacks => callbacks)
+        context = {:callbacks => callbacks, :expected_count => pbuilderids.size, :timeout => 2}
         handler.sendreq_with_callback(msg,agent,context,filter)
+        nil
       end
-      @@handler = nil
-      def self.handler()
-        @@handler ||= MCollectiveMultiplexer.instance
-      end
-      public
 
       #TODO: this wil be deprecated
       def self.execute(task_idh,top_task_idh,config_node)

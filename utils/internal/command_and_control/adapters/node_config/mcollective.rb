@@ -1,4 +1,5 @@
 require 'mcollective'
+require File.expand_path('mcollective/mcollective_multiplexer', File.dirname(__FILE__))
 require File.expand_path('mcollective/monkey_patches', File.dirname(__FILE__))
 require File.expand_path('mcollective/listener', File.dirname(__FILE__))
 
@@ -63,12 +64,30 @@ module XYZ
         McollectiveListener.new(connection)
       end
 
-      #TODO: looks liek can blog if called in middle of deployment
-      #TODO: look at having connection be created on a per thread basis and
-      #this leevraging it
-      #looks like doing in defer thread works; will need a queeue to redirect it to
-      #alternatives to look at are using receiver connection or scheduling as another process in ruote
       def self.get_logs(task,nodes)
+        ret = nodes.inject({}){|h,n|h.merge(n[:id] => nil)}
+        value = task.id_handle.get_id().to_s
+        key = task[:executable_action_type] ? "task_id" : "top_task_id"
+        msg_content = {:key => key, :value => value}
+        agent = "get_log_fragment"
+        handler = MCollectiveMultiplexer.instance
+        msg = handler.new_request(agent,"get", msg_content)
+
+        pbuilderids = nodes.map{|n|pbuilderid(n)}
+        value_pattern = /^(#{pbuilderids.join('|')})$/
+        filter = BlankFilter.merge("fact" => [{:fact=>"pbuilderid", :value=>value_pattern}],"agent" => [agent])
+        callbacks = {
+          :on_msg_received => proc{|msg|pp [:received,msg]},
+          :on_timeout => proc{pp :timeout}
+        }
+        context = {:callbacks => callbacks, :expected_count => pbuilderids.size, :timeout => 2}
+        handler.sendreq_with_callback(msg,agent,context,filter)
+        nil
+      end
+
+
+      #TODO: deprecate
+      def self.old_get_logs(task,nodes)
         ret = nodes.inject({}){|h,n|h.merge(n[:id] => nil)}
         value = task.id_handle.get_id().to_s
         key = task[:executable_action_type] ? "task_id" : "top_task_id"
@@ -120,6 +139,7 @@ module XYZ
 
      private
       #TODO: patched mcollective fn to put in agent
+      #TODO: depracatee
       def self.new_request(agent,action, data)
         callerid = ::MCollective::PluginManager["security_plugin"].callerid
         {:agent  => agent,

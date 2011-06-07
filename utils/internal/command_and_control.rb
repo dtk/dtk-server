@@ -68,8 +68,8 @@ module XYZ
       begin
         require File.expand_path("#{UTILS_DIR}/internal/command_and_control/adapters/#{adapter_type}/#{adapter_name}", File.dirname(__FILE__))
         Adapters[adapter_type][adapter_name] = XYZ::CommandAndControlAdapter.const_get adapter_name.to_s.capitalize
-       rescue LoadError
-        nil
+       rescue LoadError => e
+        raise e
        rescue Exception => e
         raise e
       end

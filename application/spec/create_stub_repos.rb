@@ -29,7 +29,7 @@ Dir.foreach(target_dir) do |dir|
   Dir.chdir(File.join(target_dir,dir)) do 
     `#{Git} init`
     `#{Git} add .`
-    `#{Git} commit -m 'initializing #{dir}'`
+    `#{Git} commit -m 'initializing-#{dir}'`
   end
 end
 

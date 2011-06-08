@@ -17,8 +17,12 @@ module XYZ
       end
       
       def self.log_complete?(lines)
-        #TODO: may be other signature for failure
-        lines.last and lines.last =~ /INFO: Report handlers complete/
+        #TODO: if need moer specific strings looking for
+        # /ERROR: Exception handlers complete/ or /INFO: Report handlers complete/ 
+        lines.reverse_each do |l|
+          return true if l =~ /handlers complete/
+        end
+        nil
       end
      private
       #order is important because of subsumption

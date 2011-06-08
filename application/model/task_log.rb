@@ -18,22 +18,25 @@ module XYZ
         ret_info[task_id].merge!(:log => task_log[:content],:status => task_log[:status])
       end
       incl_assoc_nodes = ret_info.values.reject{|t|t[:status] == "complete"}.map{|info|info[:node]}
-      task_pbuilderid_index = incl_assoc_nodes.inject({}){|h,n|h.merge(Node.pbuilderid(n) => n[:task_id])}
-      callbacks = {
-        :on_msg_received => proc do |msg|
-          response = CommandAndControl.parse_response__get_logs(task,msg)
-          if response[:status] == :ok
-            task_id = task_pbuilderid_index[response[:pbuilderid]]
-            task_idh = task.model_handle.createIDH(:id => task_id)
-            TaskLog.create_or_update(task_idh,log_type.to_s,response[:log_content])
-          else
-            Log.error("error response for request to get log")
-            #TODO: put some subset of this in error msg
-            pp msg
+      unless incl_assoc_nodes.empty?
+        #initiate defer task to get logs
+        task_pbuilderid_index = incl_assoc_nodes.inject({}){|h,n|h.merge(Node.pbuilderid(n) => n[:task_id])}
+        callbacks = {
+          :on_msg_received => proc do |msg|
+            response = CommandAndControl.parse_response__get_logs(task,msg)
+            if response[:status] == :ok
+              task_id = task_pbuilderid_index[response[:pbuilderid]]
+              task_idh = task.model_handle.createIDH(:id => task_id)
+              TaskLog.create_or_update(task_idh,log_type.to_s,response[:log_content])
+            else
+              Log.error("error response for request to get log")
+              #TODO: put some subset of this in error msg
+              pp msg
+            end
           end
-        end
-      }
-      CommandAndControl.request__get_logs(task,incl_assoc_nodes,callbacks,:log_type => log_type)
+        }
+        CommandAndControl.request__get_logs(task,incl_assoc_nodes,callbacks,:log_type => log_type)
+      end
       ret_info.values.inject({}){|h,log_info|h.merge(log_info[:node][:id] => log_info[:log])}
     end
 

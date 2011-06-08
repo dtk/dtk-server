@@ -17,7 +17,7 @@ module XYZ
       end
       
       def self.log_complete?(lines)
-        #TODO: if need moer specific strings looking for
+        #TODO: if need more specific strings to look for
         # /ERROR: Exception handlers complete/ or /INFO: Report handlers complete/ 
         lines.reverse_each do |l|
           return true if l =~ /handlers complete/

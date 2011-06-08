@@ -149,10 +149,10 @@ module XYZ
   end
   class RepoWindows  < Repo
    private
-    def initialize()
+    def initialize(full_path)
       raise Error.new("R8::EnvironmentConfig::GitExecutable not defined") unless defined? R8::EnvironmentConfig::GitExecutable
       @git = R8::EnvironmentConfig::GitExecutable
-      super
+      super(full_path)
     end
     attr_reader :git
     def git_command__checkout(branch_name)

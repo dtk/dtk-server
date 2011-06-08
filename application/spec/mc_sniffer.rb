@@ -3,16 +3,23 @@ require 'rubygems'
 require 'stomp'
 require 'pp'
 
-$agents = ["get_log_fragment","discovery","chef_solo"]
-def receive()
+msg_types = {
+  #:get_log_fragment => [:command],
+  :get_log_fragment => [],
+  :discovery => [],
+  :chef_solo => []
+}
+def listen_for(msg_types)
   host = 'localhost'
   port = 6163
   user = 'mcollective'
   password = 'marionette'
   connection = ::Stomp::Connection.new(user, password, host, port, true)
-  $agents.each do |a|
-    connection.subscribe("/topic/mcollective.#{a}.reply")
-    connection.subscribe("/topic/mcollective.#{a}.command")
+  msg_types.each do |a,dirs|
+    dirs =  [:command,:reply] if dirs.empty?
+    dirs.each do |dir|
+      connection.subscribe("/topic/mcollective.#{a}.#{dir}")
+    end
   end
   loop do
     msg = connection.receive
@@ -22,5 +29,5 @@ def receive()
   end
 end
 
-receive()
+listen_for(msg_types)
 

@@ -23,8 +23,6 @@ module XYZ
       level = "summary" if level == "undefined"
       level = level.to_sym
 
-      model_handle = ModelHandle.new(ret_session_context_id(),model_name)
-
       unless task_id
         tasks = Task.get_top_level_tasks(model_handle).sort{|a,b| b[:updated_at] <=> a[:updated_at]}
         task = tasks.first
@@ -38,6 +36,7 @@ module XYZ
 
 #      if R8::Config[:command_and_control][:node_config][:type] == "mcollective"
       if R8::EnvironmentConfig::CommandAndControlMode == "mcollective"
+        #TODO: do cases lower level
         #logs = task ? CommandAndControl.get_logs(task,assoc_nodes) : []
         logs = task ? TaskLog.get_and_update_logs_content(task,assoc_nodes,:top_task_id => task.id()) : []
       else
@@ -45,17 +44,17 @@ module XYZ
       end
 
       parsed_logs = {:no_data =>  Array.new,:ok => Array.new, :error => Array.new}
-      logs.each do |node_id,result|
+      logs.each do |node_id,log|
         node_name = ndx_node_names[node_id]
         pp "log for node #{node_name} (id=#{node_id.to_s})"
-        unless result and result[:data]
+        unless log
           pp "no log data"
           parsed_logs[:no_data] << {:node_id => node_id,:node_name => node_name}
           next
         end
-        pl = ParseLog.parse(result[:data])
+        pl = ParseLog.parse(:chef,log)
         STDOUT << pl.pp_form_summary
-        #          File.open("/tmp/raw#{node_id.to_s}.txt","w"){|f|result[:data].each{|l|f << l+"\n"}}
+        #          File.open("/tmp/raw#{node_id.to_s}.txt","w"){|f|log.each{|l|f << l+"\n"}}
         pp [:file_asset_if_error,pl.ret_file_asset_if_error(model_handle)]
         STDOUT << "----------------\n"
         #TODO: hack whete find error node and if no error node first node
@@ -150,11 +149,9 @@ module XYZ
         pp "log for node_id #{node[:id].to_s}"
         file = File.expand_path(SampleSets[i], File.dirname(__FILE__))
         raw_log = File.open(file){|f|f.read}
-        data = Array.new
-        raw_log.each_line{|l|data << l.chomp}
-        ret[node[:id]] = {
-          :data => data
-        }
+        log = Array.new
+        raw_log.each_line{|l|log << l.chomp}
+        ret[node[:id]] = log
         i += i
         break if i >= SampleSets.size
       end

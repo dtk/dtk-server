@@ -34,8 +34,9 @@ module XYZ
         end
       }
       CommandAndControl.request__get_logs(task,incl_assoc_nodes,callbacks,:log_type => log_type)
-      ret_info.values.map{|x|x[:log]}
+      ret_info.values.inject({}){|h,log_info|h.merge(log_info[:node][:id] => log_info[:log])}
     end
+
     def self.create_or_update(task_idh,log_type,log_content)
       task_id = task_idh.get_id()
       status = ParseLog.log_complete?(log_type,log_content) ? "complete" : "in_progress"

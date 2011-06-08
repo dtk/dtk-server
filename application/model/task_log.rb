@@ -15,9 +15,8 @@ module XYZ
       task_logs.each do |task_log|
         task_id = task_log[:task_id]
         #implicit assumption that only one log per task
-        ret_info[task_id] = {:log => task_log[:content],:status => task_log[:status]}
+        ret_info[task_id].merge!(:log => task_log[:content],:status => task_log[:status])
       end
-      #TODO: compute status from parent task
       incl_assoc_nodes = ret_info.values.reject{|t|t[:status] == "complete"}.map{|info|info[:node]}
       task_pbuilderid_index = incl_assoc_nodes.inject({}){|h,n|h.merge(Node.pbuilderid(n) => n[:task_id])}
       callbacks = {
@@ -38,19 +37,19 @@ module XYZ
       ret_info.values.map{|x|x[:log]}
     end
     def self.create_or_update(task_idh,log_type,log_content)
+      task_id = task_idh.get_id()
       status = ParseLog.log_complete?(log_type,log_content) ? "complete" : "in_progress"
-      #TODO: stub for testing
-      status = "in_progress"
 
       #create if needed
       sp_hash = {
         :cols => [:id],
-        :filter => [:eq, :type, log_type.to_s]
+        :filter => [:and, [:eq, :task_id, task_id],
+                    [:eq, :type, log_type.to_s]]
       }
       task_log_mh = task_idh.createMH(:task_log)
       existing = Model.get_objects_from_sp_hash(task_log_mh,sp_hash).first
       row = {
-        :task_id => task_idh.get_id,
+        :task_id => task_id,
         :status => status,
         :type => log_type.to_s,
         :content => log_content

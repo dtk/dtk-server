@@ -166,8 +166,10 @@ module XYZ
     def git_command__add(file_path)
       `#{git} add #{file_path}`
     end
-    def git_command__commit(message)
-      `#{git} commit -m #{message}`
+    def git_command__commit(message_x)
+      #TODO: looks like windows may not take spaces in message
+      message = message_x.gsub(' ','-')
+      `#{git} commit -m '#{message}'`
     end
     def git_command__push(branch)
       `#{git} push origin #{branch}:refs/heads/#{branch}`

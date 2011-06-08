@@ -61,7 +61,7 @@ module XYZ
         Model.update_from_rows(task_log_mh,[row])
       else
         row.merge!(:ref => log_type.to_s) 
-        ret = Model.create_from_rows(task_log_mh,[row]).first
+        ret = Model.create_from_rows(task_log_mh,[row],:convert => true).first
       end
       ret
     end

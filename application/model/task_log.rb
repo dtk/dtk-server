@@ -2,11 +2,11 @@ module XYZ
   class TaskLog < Model
     def self.get_and_update_logs_content(task,assoc_nodes,log_filter)
       ret_info = assoc_nodes.inject({}){|h,n|h.merge(n[:task_id] => {:node => n})}
-      log_type = "chef"  #TODO: stub to just get chef run logs
+      log_type = :chef  #TODO: stub to just get chef run logs
       sp_hash = {
         :cols => [:id,:status,:type,:content, :task_id],
         :filter => [:and, [:oneof, :task_id, assoc_nodes.map{|n|n[:task_id]}],
-                    [:eq, :type, "mcollective"]]
+                    [:eq, :type, log_type.to_s]]
       }
       task_log_mh = task.model_handle.createMH(:task_log)
       task_logs = Model.get_objects_from_sp_hash(task_log_mh,sp_hash)
@@ -20,21 +20,51 @@ module XYZ
       #TODO: compute status from parent task
       incl_assoc_nodes = ret_info.values.reject{|t|t[:status] == "complete"}.map{|info|info[:node]}
       task_pbuilderid_index = incl_assoc_nodes.inject({}){|h,n|h.merge(Node.pbuilderid(n) => n[:task_id])}
-      #TODO: stub
       callbacks = {
         :on_msg_received => proc do |msg|
-pp [:msg,msg]
           response = CommandAndControl.parse_response__get_logs(task,msg)
-          task_id = task_pbuilderid_index[response[:pbuilderid]]
-          pp [:received_get_logs,
-              {:task_id => task_id,
-                :status => response[:status],
-                :log_content => response[:log_content] 
-              }]
+          if response[:status] == :ok
+            task_id = task_pbuilderid_index[response[:pbuilderid]]
+            task_idh = task.model_handle.createIDH(:id => task_id)
+            TaskLog.create_or_update(task_idh,log_type.to_s,response[:log_content])
+          else
+            Log.error("error response for request to get log")
+            #TODO: put some subset of this in error msg
+            pp msg
+          end
         end
       }
       CommandAndControl.request__get_logs(task,incl_assoc_nodes,callbacks,:log_type => log_type)
       ret_info.values.map{|x|x[:log]}
+    end
+    def self.create_or_update(task_idh,log_type,log_content)
+      status = ParseLog.log_complete?(log_type,log_content) ? "complete" : "in_progress"
+      #TODO: stub for testing
+      status = "in_progress"
+
+      #create if needed
+      sp_hash = {
+        :cols => [:id],
+        :filter => [:eq, :type, log_type.to_s]
+      }
+      task_log_mh = task_idh.createMH(:task_log)
+      existing = Model.get_objects_from_sp_hash(task_log_mh,sp_hash).first
+      row = {
+        :task_id => task_idh.get_id,
+        :status => status,
+        :type => log_type.to_s,
+        :content => log_content
+      }
+      if existing
+        id = existing[:id]
+        ret = task_log_mh.createIDH(:id => id)
+        row.merge!(:id => id)
+        Model.update_from_rows(task_log_mh,[row])
+      else
+        row.merge!(:ref => log_type.to_s) 
+        ret = Model.create_from_rows(task_log_mh,[row]).first
+      end
+      ret
     end
   end
 end

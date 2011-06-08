@@ -15,6 +15,11 @@ module XYZ
         ret << current_segment if current_segment
         ret.post_process!()
       end
+      
+      def self.log_complete?(lines)
+        #TODO: may be other signature for failure
+        lines.last and lines.last =~ /INFO: Report handlers complete/
+      end
      private
       #order is important because of subsumption
       Pattern =  Aux::ordered_hash(

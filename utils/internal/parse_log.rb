@@ -1,11 +1,15 @@
 module XYZ
   class ParseLog
-    def self.parse(lines)
-      get_adapter().parse(lines)
+    
+    def self.parse(adapter_type,lines)
+      get_adapter(adapter_type).parse(lines)
+    end
+    def self.log_complete?(adapter_type,lines)
+      get_adapter(adapter_type).log_complete?(lines)
     end
    private
-    def self.get_adapter()
-      adapter_type = :chef #TODO stub
+    def self.get_adapter(adapter_type_x)
+      adapter_type = adapter_type_x.to_sym
       Adapters[adapter_type] ||= get_adapter_aux(adapter_type)
     end
     Adapters = Hash.new

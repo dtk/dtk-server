@@ -63,6 +63,7 @@ module XYZ
         new_version_num = get_new_version_num(library_idh)
         override_attrs={:version_num => new_version_num}
         new_impl_id = library_idh.create_object.clone_into(self,override_attrs)
+        #TODO: think need to create a new git branch
         ret = library_idh.createIDH(:model_name => :implemntation, :id => new_impl_id)
       else
         impl_obj = matching_library_template_exists?(self[:version_num],library_idh)

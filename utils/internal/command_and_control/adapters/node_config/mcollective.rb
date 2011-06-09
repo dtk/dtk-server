@@ -15,7 +15,7 @@ module XYZ
         msg_content.merge!(:task_id => task_idh.get_id(),:top_task_id => top_task_idh.get_id(), :version_context => version_context)
 
         pbuilderid = Node.pbuilderid(config_node[:node])
-        filter = {"fact" => [{:fact=>"pbuilderid",:value=>pbuilderid}]}
+        filter = filter_single_fact("pbuilderid",pbuilderid)
         context = opts[:receiver_context]
         callbacks = context[:callbacks]
         async_agent_call(mcollective_agent(),"run",msg_content,filter,callbacks,context)
@@ -41,7 +41,7 @@ module XYZ
         
         context = {:timeout => opts[:poll_cycle]||PollCycleDefault}.merge(rc)
         pbuilderid = Node.pbuilderid(node)
-        filter = {"fact" => [{:fact=>"pbuilderid",:value=>pbuilderid}]}
+        filter = filter_single_fact("pbuilderid",pbuilderid)
         params = nil
         async_agent_call("discovery","ping",params,filter,callbacks,context)
       end
@@ -56,7 +56,7 @@ module XYZ
         params = {:key => key, :value => task.id_handle.get_id().to_s}
         pbuilderids = nodes.map{|n|Node.pbuilderid(n)}
         value_pattern = /^(#{pbuilderids.join('|')})$/
-        filter = {"fact" => [{:fact=>"pbuilderid", :value=>value_pattern}]}
+        filter = filter_single_fact("pbuilderid",value_pattern)
         async_context = {:expected_count => pbuilderids.size, :timeout => GetLogsTimeout}.merge(context)
         async_agent_call(log_agent.to_s,"get",params,filter,callbacks,async_context)
       end
@@ -85,6 +85,19 @@ module XYZ
       @@handler = nil
       def self.handler()
         @@handler ||= MCollectiveMultiplexer.instance
+      end
+
+      def self.filter_single_fact(fact,value,operator=nil)
+        {"fact" => [format_fact_filter(fact,value,operator)]}
+      end
+      def self.format_fact_filter(fact,value,operator=nil)
+        if operator.nil?
+          operator = value.kind_of?(Regexp) ? "=~" : "=="
+        end
+        if value.kind_of?(Regexp)
+          value = "/#{value.source}/"
+        end
+        {:fact=>fact,:value=>value.to_s,:operator=>operator}
       end
 
       #TODO: not sure if what name of agent is should be configurable; also this is a specfic agent dependent on whetehr chef or puppet

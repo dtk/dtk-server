@@ -17,19 +17,11 @@ module XYZ
       ret
     end
 
-    def add_asset_file(path,content=nil)
-      impl_obj = add_cols_if_not_present(:type,:repo)
-      impl_type = impl_obj[:type]
-      file_asset_type = FileAssetType[impl_type.to_sym]
-      FileAsset.add(impl_obj,file_asset_type,path,content)
-    end
-   private
-    FileAssetType = { 
-      :chef_cookbook => "chef_file"
-    }
-   public
 
-    def find_match_in_project(project_idh)
+    def clone_into_project_if_needed(project)
+      proj_idh = project.id_handle()
+      #check if there is a matching implementation aready in the project
+      # mtach looks for match on rep and version
       base_sp_hash = {
         :model_name => :implementation,
         :filter => [:eq, :id, id()],
@@ -40,14 +32,37 @@ module XYZ
            :model_name => :implementation,
            :alias => :proj_impl,
            :convert => true,
-           :join_type => :inner,
-           :filter => [:eq, :project_project_id, project_idh.get_id()],
+           :join_type => :left_outer,
+           :filter => [:eq, :project_project_id, proj_idh.get_id()],
            :join_cond => {:repo => :implementation__repo, :version_num => :implementation__version_num},
            :cols => [:id,:repo,:version_num]
          }]
 
-      row = Model.get_objects_from_join_array(model_handle(),base_sp_hash,join_array).first
-      row && row[:proj_impl].id_handle()
+      augmented_impl = Model.get_objects_from_join_array(model_handle(),base_sp_hash,join_array).first
+      #return matching implementation idh if there is a match
+      return augmented_impl[:proj_impl].id_handle() if augmented_impl[:proj_impl]
+
+      #if reach here; no match and need to clone
+      new_branch = augmented_impl.project_branch_name(project)
+      override_attrs={:branch => new_branch}
+      new_impl_id = project.clone_into(self,override_attrs)
+      proj_idh.createIDH(:id => new_impl_id, :model => :implementation)
+    end
+
+    def add_asset_file(path,content=nil)
+      impl_obj = add_cols_if_not_present(:type,:repo)
+      impl_type = impl_obj[:type]
+      file_asset_type = FileAssetType[impl_type.to_sym]
+      FileAsset.add(impl_obj,file_asset_type,path,content)
+    end
+    FileAssetType = { 
+      :chef_cookbook => "chef_file"
+    }
+
+    def project_branch_name(project)
+      project.get_object_cols_and_update_ruby_obj!(:ref)
+      get_object_cols_and_update_ruby_obj!(:version_num,:repo)
+      "project-#{project[:ref]}-v#{self[:version_num].to_s}"
     end
 
     def add_model_specific_override_attrs!(override_attrs,target_obj)

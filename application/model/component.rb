@@ -624,14 +624,13 @@ module XYZ
       proj = node.get_project()
       proj_idh = proj.id_handle()
 
-      #find new implementation id
+      #create new project implementation if needed
       library_impl = id_handle.createIDH(:model_name => :implementation,:id => self[:implementation_id]).create_object()
-      proj_impl_idh = library_impl.find_match_in_project(proj_idh)
-      new_impl_id = proj_impl_idh ? proj_impl_idh.get_id() : proj.clone_into(library_impl)
+      new_impl_id = library_impl.clone_into_project_if_needed(proj).get_id()
 
       #find new ancestor_id
       library_cmp_tmpl_idh = id_handle.createIDH(:id => self[:ancestor_id])
-      #ok to do below because self and library_cmp_tmpl sahre attribute values
+      #ok to do below because self and library_cmp_tmpl share attribute values
       library_cmp_tmpl =  library_cmp_tmpl_idh.create_object.merge(:extended_base_id => self[:extended_base_id])
       proj_cmp_tmpl_idh = find_match_in_project(proj_idh)
       new_ancestor_id = proj_cmp_tmpl_idh ? proj_cmp_tmpl_idh.get_id() : proj.clone_into(library_cmp_tmpl,{:implementation_id => new_impl_id})

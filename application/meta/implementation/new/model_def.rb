@@ -4,6 +4,7 @@
   :columns=>{
     :type => {:type=>:varchar, :size => 25},
     :repo => {:type=>:varchar, :size => 25},
+    :branch => {:type=>:varchar, :size => 50, :default => "master"},
     :version_num => {:type=>:integer, :default => 1},
     :updated => {:type=>:boolean, :default => false}
   },

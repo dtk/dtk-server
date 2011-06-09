@@ -202,13 +202,6 @@ module XYZ
       Model.get_objects_from_sp_hash(model_handle(),sp_hash,opts)
     end
 
-
-    def add_cols_if_not_present(*cols)
-      cols_to_add = cols.reject{|col|self.has_key?(col)}
-      return self if cols_to_add.empty?
-      self.merge(get_objects_from_sp_hash(:cols => cols_to_add).first)
-    end
-
     def get_objects_col_from_sp_hash(sp_hash_x,col=nil,opts={})
       #if col not given assumption that sp_hash_x is of form {:cols => [col]}
       col ||= sp_hash_x[:cols].first

@@ -19,7 +19,7 @@ module XYZ
 
     ###
     def get_file_content(file_asset,context={})
-      branch_x = ret_branch(context)
+      branch_x = ret_branch(context[:project])
       branch = branch_exists?(branch_x) ? branch_x : "master"
       ret = nil
       checkout(branch) do
@@ -30,7 +30,7 @@ module XYZ
 
     def add_file(file_asset,content,context={})
       content ||= String.new
-      branch = ret_branch(context)
+      branch = ret_branch(context[:project])
       add_branch(branch) unless branch_exists?(branch) 
       checkout(branch) do
         File.open(file_asset[:path],"w"){|f|f << content}
@@ -43,7 +43,7 @@ module XYZ
     end
 
     def update_file_content(file_asset,content,context={})
-      branch = ret_branch(context)
+      branch = ret_branch(context[:project])
       add_branch(branch) unless branch_exists?(branch) 
       checkout(branch) do
         File.open(file_asset[:path],"w"){|f|f << content}
@@ -56,7 +56,7 @@ module XYZ
     end
 
     def push_implementation(context)
-      branch = ret_branch(context)
+      branch = ret_branch(context[:project])
       git_command__push(branch)
     end
 
@@ -78,8 +78,10 @@ module XYZ
     end
     CachedRepos = Hash.new
 
-    def ret_branch(context)
-      ((context||{})[:implementation]||{})[:branch]||"master"
+    def ret_branch(project)
+      #TODO: stub
+      project_ref = (project||{})[:ref]
+      project_ref ? "project-#{project_ref}" : "master"
     end
 
 

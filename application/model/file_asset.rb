@@ -6,8 +6,7 @@ module XYZ
       return self[:content] if self[:content]
       #TODO: can make more efficient to see if this object has the values that querying for an if so avoid db query
       file_obj = get_objects_from_sp_hash({:cols => [:path,:implementation_info]}).first
-      project = {:ref => "project1"} #TODO: stub until get the relevant project
-      content = Repo.get_file_content(file_obj,{:implementation => file_obj[:implementation], :project => project})
+      content = Repo.get_file_content(file_obj,{:implementation => file_obj[:implementation]})
       #TODO: determine whether makes sense to store newly gotten content in db or just do this if any changes
       content
     end
@@ -16,9 +15,8 @@ module XYZ
       update(:content => content)
       #TODO: can make more efficient to see if this object has the values that querying for an if so avoid db query
       file_obj = get_objects_from_sp_hash({:cols => [:path,:implementation_info]}).first
-      project = {:ref => "project1"} #TODO: stub until get the relevant project
       impl_obj = file_obj[:implementation]
-      Repo.update_file_content(self,content,{:implementation => impl_obj, :project => project})
+      Repo.update_file_content(self,content,{:implementation => impl_obj})
       impl_obj.set_to_indicate_updated()
       impl_obj.create_pending_change_item(self)
     end
@@ -37,8 +35,7 @@ module XYZ
       file_asset_mh = impl_obj.model_handle.createMH(:file_asset)
       new_file_asset_idh = create_from_rows(file_asset_mh,[hash]).first
       new_file_asset_obj = new_file_asset_idh.create_object().merge(hash)
-      project = {:ref => "project1"} #TODO: stub until get the relevant project
-      Repo.add_file(new_file_asset_obj,content,{:implementation => impl_obj, :project => project})
+      Repo.add_file(new_file_asset_obj,content,{:implementation => impl_obj})
       impl_obj.create_pending_change_item(new_file_asset_obj)
     end
    private

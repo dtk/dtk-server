@@ -50,10 +50,9 @@ module XYZ
     end
 
     def add_asset_file(path,content=nil)
-      impl_obj = add_cols_if_not_present(:type,:repo)
-      impl_type = impl_obj[:type]
-      file_asset_type = FileAssetType[impl_type.to_sym]
-      FileAsset.add(impl_obj,file_asset_type,path,content)
+      get_object_cols_and_update_ruby_obj!(:type,:repo,:branch)
+      file_asset_type = FileAssetType[self[:type].to_sym]
+      FileAsset.add(self,file_asset_type,path,content)
     end
     FileAssetType = { 
       :chef_cookbook => "chef_file"

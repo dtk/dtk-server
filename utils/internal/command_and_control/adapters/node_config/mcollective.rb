@@ -8,12 +8,11 @@ module XYZ
       #TODO: change signature to def self.async_execution(task_idh,top_task_idh,config_node,callbacks,context)
       def self.initiate_execution(task_idh,top_task_idh,config_node,opts)
         #push implementation
-        project = {:ref => "project1"} #TODO: stub until get the relevant project
-        push_implementation(config_node,project)
+        version_context = push_implementation(config_node)
 
         config_agent = ConfigAgent.load(config_node[:config_agent_type])
         msg_content =  config_agent.ret_msg_content(config_node)
-        msg_content.merge!(:task_id => task_idh.get_id(),:top_task_id => top_task_idh.get_id(), :project => project)
+        msg_content.merge!(:task_id => task_idh.get_id(),:top_task_id => top_task_idh.get_id(), :version_context => version_context)
 
         pbuilderid = Node.pbuilderid(config_node[:node])
         filter = {"fact" => [{:fact=>"pbuilderid",:value=>pbuilderid}]}
@@ -94,17 +93,21 @@ module XYZ
       end
 
       Lock = Mutex.new
-      def self.push_implementation(config_node,project)
-        return unless (config_node[:state_change_types] & ["install_component","update_implementation","rerun_component"]).size > 0
+      #returns version context, (repo branch pairs)
+      def self.push_implementation(config_node)
+        ret = Array.new
+        return ret unless (config_node[:state_change_types] & ["install_component","update_implementation","rerun_component"]).size > 0
         sample_idh = config_node[:component_actions].first[:component].id_handle
         impl_idhs = config_node[:component_actions].map{|x|x[:component][:implementation_id]}.uniq.map do |impl_id|
           sample_idh.createIDH(:model_name => :implementation, :id => impl_id)
         end
-        impls = Model.get_objects_in_set_from_sp_hash(impl_idhs,{:col => [:id, :repo]})
+        impls = Model.get_objects_in_set_from_sp_hash(impl_idhs,{:col => [:id, :repo, :branch]})
         impls.each do |impl|
-          context = {:implementation => impl, :project => project}
+          ret << {:repo => impl[:repo],:branch => impl[:branch]}
+          context = {:implementation => impl}
           Repo.push_implementation(context)
         end
+        ret
       end
     end
   end

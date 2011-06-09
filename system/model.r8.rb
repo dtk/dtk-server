@@ -191,7 +191,8 @@ module XYZ
     def get_object_cols_and_update_ruby_obj!(*cols)
       cols_to_get =  cols.reject{|col|self.has_key?(col)}
       return self if cols_to_get.empty?
-      vals = get_objects_from_sp_hash(:cols => cols_to_get).first
+      opts = (cols_to_get & [:ref,:ref_num]).empty? ? {} : {:keep_ref_cols => true}
+      vals = get_objects_from_sp_hash({:cols => cols_to_get},opts).first
       vals.each{|k,v|self[k]=v}
       self
     end

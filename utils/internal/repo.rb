@@ -2,25 +2,28 @@ require 'grit'
 module XYZ
   class Repo 
     def self.get_file_content(file_asset,context={})
-      get_repo(context[:implementation]).get_file_content(file_asset,context)
+      get_repo(context).get_file_content(file_asset)
     end
 
     def self.update_file_content(file_asset,content,context={})
-      get_repo(context[:implementation]).update_file_content(file_asset,content,context)
+      get_repo(context).update_file_content(file_asset,content)
     end
 
     def self.add_file(file_asset,content,context={})
-      get_repo(context[:implementation]).add_file(file_asset,content,context)
+      get_repo(context).add_file(file_asset,content)
     end
 
     def self.push_implementation(context={})
-      get_repo(context[:implementation]).push_implementation(context)
+      get_repo(context).push_implementation()
+    end
+
+    def self.delete(context)
+      get_repo(context).delete()
     end
 
     ###
-    def get_file_content(file_asset,context={})
-      branch_x = ret_branch(context)
-      branch = branch_exists?(branch_x) ? branch_x : "master"
+    def get_file_content(file_asset)
+      branch = branch_exists?(@branch) ? @branch : "master"
       ret = nil
       checkout(branch) do
         ret = File.open(file_asset[:path]){|f|f.read}
@@ -28,50 +31,55 @@ module XYZ
       ret
     end
 
-    def add_file(file_asset,content,context={})
+    def add_file(file_asset,content)
       content ||= String.new
-      branch = ret_branch(context)
-      add_branch(branch) unless branch_exists?(branch) 
-      checkout(branch) do
+      add_branch(@branch) unless branch_exists?(@branch) 
+      checkout(@branch) do
         File.open(file_asset[:path],"w"){|f|f << content}
         #TODO: commiting because it looks like file change visible in otehr branches until commit
         #should see if we can do more efficient job using @index.add(file_name,content)
-        message = "Adding #{file_asset[:path]} in #{branch}"
+        message = "Adding #{file_asset[:path]} in #{@branch}"
         git_command__add(file_asset[:path])
         git_command__commit(message)
       end
     end
 
-    def update_file_content(file_asset,content,context={})
-      branch = ret_branch(context)
-      add_branch(branch) unless branch_exists?(branch) 
-      checkout(branch) do
+    def update_file_content(file_asset,content)
+      add_branch(@branch) unless branch_exists?(@branch) 
+      checkout(@branch) do
         File.open(file_asset[:path],"w"){|f|f << content}
         #TODO: commiting because it looks like file change visible in otehr branches until commit
         #should see if we can do more efficient job using @index.add(file_name,content)
-        message = "Updating #{file_asset[:path]} in #{branch}"
+        message = "Updating #{file_asset[:path]} in #{@branch}"
         git_command__add(file_asset[:path])
         git_command__commit(message)
       end
     end
 
-    def push_implementation(context)
-      branch = ret_branch(context)
-      git_command__push(branch)
+    def push_implementation()
+      branch = ret_branch()
+      git_command__push(@branch)
+    end
+
+    def delete()
+      branch = ret_branch()
+      checkout(@branch)
+      git_command__delete_local_branch(@branch)      
+      git_command__delete_remote_branch(@branch)      
     end
 
    private
-    def self.get_repo(implementation)
-      index = implementation[:repo] || "__top"
-      CachedRepos[index] ||= get_repo_aux(index)
+    def self.get_repo(context)
+      index = (context[:implementation]||{})[:repo] || "__top"
+      CachedRepos[index] ||= get_repo_aux(index,context)
     end
-    def self.get_repo_aux(path)
+    def self.get_repo_aux(path,context)
       root = R8::EnvironmentConfig::CoreCookbooksRoot
       full_path = path == "__top" ? root : "#{root}/#{path}"
       if Aux::platform_is_linux?()
-        RepoLinux.new(full_path)
+        RepoLinux.new(full_path,context)
       elsif  Aux::platform_is_windows?()
-        RepoWindows.new(full_path)
+        RepoWindows.new(full_path,context)
       else
         raise Error.new("platform #{Aux::platform} not treated")
       end
@@ -84,12 +92,12 @@ module XYZ
 
 
     attr_reader :grit_repo
-    def initialize(path)
+    def initialize(path,context)
+      @branch = ret_branch(context)
       @path = path
       @grit_repo = Grit::Repo.new(path)
       @index = @grit_repo.index #creates new object so use @index, not grit_repo
     end
- 
 
     def checkout(branch_name,&block)
       Dir.chdir(@path) do 
@@ -139,18 +147,24 @@ module XYZ
     def git_command__commit(message)
       @grit_repo.commit_index(message)
     end
-    def git_command__push(branch)
-      git_command.push(CmdOpts,"origin", "#{branch}:refs/heads/#{branch}")
+    def git_command__push(branch_name)
+      git_command.push(CmdOpts,"origin", "#{branch_name}:refs/heads/#{branch_name}")
+    end
+    def git_command__delete_local_branch(branch_name)
+      git_command.branch(CmdOpts,"-D",branch_name)
+    end
+    def git_command__delete_remote_branch(branch_name)
+      git_command.push(CmdOpts,"origin",":refs/heads/#{branch_name}")
     end
     CmdOpts = {}
 
   end
   class RepoWindows  < Repo
    private
-    def initialize(full_path)
+    def initialize(full_path,context)
       raise Error.new("R8::EnvironmentConfig::GitExecutable not defined") unless defined? R8::EnvironmentConfig::GitExecutable
       @git = R8::EnvironmentConfig::GitExecutable
-      super(full_path)
+      super(full_path,context)
     end
     attr_reader :git
     def git_command__checkout(branch_name)
@@ -169,8 +183,8 @@ module XYZ
       message = message_x.gsub(' ','-')
       `#{git} commit -m '#{message}'`
     end
-    def git_command__push(branch)
-      `#{git} push origin #{branch}:refs/heads/#{branch}`
+    def git_command__push(branch_name)
+      `#{git} push origin #{branch}:refs/heads/#{branch_name}`
     end
   end
 end

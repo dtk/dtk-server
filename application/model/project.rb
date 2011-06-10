@@ -52,6 +52,16 @@ module XYZ
         t.merge(:nodes => nodes)
       end
     end
+
+    def delete_projects_repo_branches()
+      sp_hash = {
+        :cols => [:repo,:branch],
+        :filter => [:eq, :project_project_id, id()]
+      }
+      impl_mh = model_handle.createMH(:implementation)
+      impls = Model.get_objects_from_sp_hash(impl_mh,sp_hash)
+      impls.each{|impl|Repo.delete(:implementation => impl)}
+    end
   end
 end
 

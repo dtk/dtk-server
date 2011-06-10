@@ -17,9 +17,13 @@ module XYZ
       get_repo(context[:implementation]).push_implementation(context)
     end
 
+    def self.delete(context)
+      get_repo(context[:implementation]).delete(context)
+    end
+
     ###
     def get_file_content(file_asset,context={})
-      branch_x = ret_branch(context[:project])
+      branch_x = ret_branch(context)
       branch = branch_exists?(branch_x) ? branch_x : "master"
       ret = nil
       checkout(branch) do
@@ -30,7 +34,7 @@ module XYZ
 
     def add_file(file_asset,content,context={})
       content ||= String.new
-      branch = ret_branch(context[:project])
+      branch = ret_branch(context)
       add_branch(branch) unless branch_exists?(branch) 
       checkout(branch) do
         File.open(file_asset[:path],"w"){|f|f << content}
@@ -43,7 +47,7 @@ module XYZ
     end
 
     def update_file_content(file_asset,content,context={})
-      branch = ret_branch(context[:project])
+      branch = ret_branch(context)
       add_branch(branch) unless branch_exists?(branch) 
       checkout(branch) do
         File.open(file_asset[:path],"w"){|f|f << content}
@@ -56,8 +60,15 @@ module XYZ
     end
 
     def push_implementation(context)
-      branch = ret_branch(context[:project])
+      branch = ret_branch(context)
       git_command__push(branch)
+    end
+
+    def delete(context)
+      branch = ret_branch(context)
+      checkout(branch)
+      git_command__delete_local_branch(branch)      
+      git_command__delete_remote_branch(branch)      
     end
 
    private
@@ -78,10 +89,8 @@ module XYZ
     end
     CachedRepos = Hash.new
 
-    def ret_branch(project)
-      #TODO: stub
-      project_ref = (project||{})[:ref]
-      project_ref ? "project-#{project_ref}" : "master"
+    def ret_branch(context)
+      ((context||{})[:implementation]||{})[:branch]||"master"
     end
 
 
@@ -141,8 +150,14 @@ module XYZ
     def git_command__commit(message)
       @grit_repo.commit_index(message)
     end
-    def git_command__push(branch)
-      git_command.push(CmdOpts,"origin", "#{branch}:refs/heads/#{branch}")
+    def git_command__push(branch_name)
+      git_command.push(CmdOpts,"origin", "#{branch_name}:refs/heads/#{branch_name}")
+    end
+    def git_command__delete_local_branch(branch_name)
+      git_command.branch(CmdOpts,"-D",branch_name)
+    end
+    def git_command__delete_remote_branch(branch_name)
+      git_command.push(CmdOpts,"origin",":refs/heads/#{branch_name}")
     end
     CmdOpts = {}
 

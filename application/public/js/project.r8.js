@@ -141,7 +141,7 @@ console.log(_def);
 						'node_id': 'implementation-'+impDef.id,
 						'type': impDef.type,
 						'basic_type': impDef.type,
-						'name': 'cookbook'
+						'name': 'v'+componentTemplate.version
 					};
 					var impNode = R8.Utils.Y.Node.create(R8.Rtpl['project_tree_leaf']({'leaf_item': implementationLeaf}));
 					impNode.append(this.renderFileTree(impDef.file_assets));

@@ -46,7 +46,7 @@ module XYZ
       new_branch = augmented_impl.project_branch_name(project)
       override_attrs={:branch => new_branch}
       new_impl_id = project.clone_into(self,override_attrs)
-      proj_idh.createIDH(:id => new_impl_id, :model => :implementation)
+      id_handle(:id => new_impl_id, :model => :implementation)
     end
 
     def add_asset_file(path,content=nil)
@@ -78,7 +78,7 @@ module XYZ
         override_attrs={:version_num => new_version_num}
         new_impl_id = library_idh.create_object.clone_into(self,override_attrs)
         #TODO: think need to create a new git branch
-        ret = library_idh.createIDH(:model_name => :implemntation, :id => new_impl_id)
+        ret = id_handle(:model_name => :implemntation, :id => new_impl_id)
       else
         impl_obj = matching_library_template_exists?(self[:version_num],library_idh)
         raise Error.new("expected to find a matching library implemntation") unless impl_obj
@@ -91,7 +91,7 @@ module XYZ
       #TODO: short cut and avoid setting updated on project templates if impl set to updated already update({:updated => true},{:update_only_if_change => true})
       update(:updated => true)
       #set updated for the project templates that point to this implemntation
-      cmp_mh = model_handle.createMH(:component)
+      cmp_mh = model_handle(:component)
       filter = [:and, [:eq, :implementation_id, id()], [:eq, :type, "template"]]
       Model.update_rows_meeting_filter(cmp_mh,{:updated => true},filter)
     end
@@ -100,7 +100,7 @@ module XYZ
       #TODO: make more efficient by using StateChange.create_pending_change_items
       get_objects_from_sp_hash({:cols => [:component_info]}).each do |r|
         cmp_idh = r[:component].id_handle()
-        parent_idh = cmp_idh.createIDH(:model_name => :datacenter, :id => r[:node][:datacenter_datacenter_id])
+        parent_idh = id_handle(:model_name => :datacenter, :id => r[:node][:datacenter_datacenter_id])
         StateChange.create_pending_change_item(:new_item => cmp_idh, :parent => parent_idh, :type => "update_implementation")
       end
     end
@@ -115,8 +115,8 @@ module XYZ
                     [:eq, :library_library_id, library_idh.get_id()],
                     [:eq, :repo, self[:repo]]]
       }
-      impl_idh = library_idh.createMH(:implementatation)
-      existing_ver_nums = get_objects_from_sp_hash(impl_idh,sp_hash).map{|r|r[:version_num]}
+      impl_mh = model_handle(:implementatation)
+      existing_ver_nums = get_objects_from_sp_hash(impl_mh,sp_hash).map{|r|r[:version_num]}
       1 + (existing_ver_nums.max||0)
     end
 

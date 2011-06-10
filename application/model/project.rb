@@ -58,7 +58,7 @@ module XYZ
         :cols => [:repo,:branch],
         :filter => [:eq, :project_project_id, id()]
       }
-      impl_mh = model_handle.createMH(:implementation)
+      impl_mh = model_handle(:implementation)
       impls = Model.get_objects_from_sp_hash(impl_mh,sp_hash)
       impls.each{|impl|Repo.delete(:implementation => impl)}
     end

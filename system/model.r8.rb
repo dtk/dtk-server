@@ -50,12 +50,6 @@ module XYZ
     extend ModelDataClassMixins
     include ModelDataInstanceMixins
 
-    attr_reader :relation_type, :id_handle, :c
-
-    def get_parent_id_handle()
-      id_handle.get_parent_id_handle()
-    end
-
     #this may be overwritten by the models
     def self.create(hash_scalar_values,c,relation_type_x=model_name(),id_handle=nil)
       self.new(hash_scalar_values,c,relation_type_x,id_handle)
@@ -116,6 +110,9 @@ module XYZ
       subset(*keys)
     end
 
+    attr_reader :relation_type,:c
+
+    #id and mode_handle related methods
     def id()
       return self[:id] if self[:id] #short cicuit
       id_handle ? id_handle.get_id() : nil
@@ -125,9 +122,19 @@ module XYZ
       @id_handle = IDHandle[hash]
     end
 
-    def model_handle()
-      ModelHandle.new(@c,@relation_type)
+    def id_handle(hash_info=nil)
+      hash_info ? @id_handle.createIDH(hash_info) : @id_handle 
     end
+
+    def get_parent_id_handle()
+      id_handle.get_parent_id_handle()
+    end
+
+    def model_handle(mn=nil)
+      mh = ModelHandle.new(@c,@relation_type)
+      mn ? mh.createMH(mn) : mh
+    end
+    #######
 
     def self.update_from_rows(model_handle,rows,opts={})
       return nil if rows.empty?

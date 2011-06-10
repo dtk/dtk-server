@@ -57,12 +57,10 @@ module XYZ
     end
 
     def push_implementation()
-      branch = ret_branch()
       git_command__push(@branch)
     end
 
     def delete()
-      branch = ret_branch()
       checkout(@branch)
       git_command__delete_local_branch(@branch)      
       git_command__delete_remote_branch(@branch)      
@@ -86,17 +84,16 @@ module XYZ
     end
     CachedRepos = Hash.new
 
-    def ret_branch(context)
-      ((context||{})[:implementation]||{})[:branch]||"master"
-    end
-
-
     attr_reader :grit_repo
     def initialize(path,context)
       @branch = ret_branch(context)
       @path = path
       @grit_repo = Grit::Repo.new(path)
       @index = @grit_repo.index #creates new object so use @index, not grit_repo
+    end
+
+    def ret_branch(context)
+      ((context||{})[:implementation]||{})[:branch]||"master"
     end
 
     def checkout(branch_name,&block)

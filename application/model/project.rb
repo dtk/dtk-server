@@ -11,17 +11,16 @@ module XYZ
       unravelled_ret = get_objects_from_sp_hash(sp_hash)
       ret_hash = Hash.new
       unravelled_ret.each do |r|
-        #TODO: this needs to be modified now because of way we are allowing multiple versions of each component
-        #TODO: need to provide for case where two component vreions share same implementation and the we want to modify
-        #one's implementation; may be simpler to start where one implementation version per component template version
-        #only one instance of components with same component_type
+        #TODO: hack until determine right way to treat relationship between component and implementation versions
+        index = r[:component][:component_type]
+        cmp = ret_hash[index]
         #TODO: dont think ids are used; but for consistency using lowest id instance
-        cmp = ret_hash[r[:component][:component_type]] 
         if cmp.nil? or r[:component][:id] < cmp[:id] 
-          cmp = ret_hash[r[:component][:component_type]] = r[:component].reject{|k,v|[:node_node_id,:implementation_id].include?(k)}
+          cmp = ret_hash[index] = r[:component].reject{|k,v|[:node_node_id,:implementation_id].include?(k)}
         end
         impls = cmp[:implementations] ||= Hash.new
-        impls[r[:implementation][:id]] ||= r[:implementation]
+        #TODO: this is hack taht needs fixing
+        impls[r[:implementation][:id]] ||= r[:implementation].merge(:version => r[:component][:version])
       end
       ret = ret_hash.values.map{|ct|ct.merge(:implementations => ct[:implementations].values)}
       return ret unless opts[:include_file_assets]

@@ -17,7 +17,6 @@ module XYZ
       ret
     end
 
-
     def clone_into_project_if_needed(project)
       proj_idh = project.id_handle()
       #check if there is a matching implementation aready in the project
@@ -44,9 +43,31 @@ module XYZ
 
       #if reach here; no match and need to clone
       new_branch = augmented_impl.project_branch_name(project)
+      Repo.clone_branch({:implementation => self},new_branch)
       override_attrs={:branch => new_branch}
       new_impl_id = project.clone_into(self,override_attrs)
       id_handle(:id => new_impl_id, :model => :implementation)
+    end
+
+    #self is a project implementation; returns library implementation idh
+    def clone_into_library_if_needed(library_idh)
+      ret = nil
+      #if implementation is updated, need to create a new implemntation in library; otherwise use
+      get_object_cols_and_update_ruby_obj!(:updated,:repo,:branch)
+      if self[:updated]
+        new_version_num = get_new_version_num(library_idh)
+        new_branch = library_branch_name(new_version_num)
+        #TODO: assuming that implementaion files do not hvae any content that is not written to repo
+        Repo.clone_branch({:implementation => self},new_branch)
+        override_attrs={:version_num => new_version_num,:branch => new_branch}
+        new_impl_id = library_idh.create_object.clone_into(self,override_attrs)
+        ret = id_handle(:model_name => :implemntation, :id => new_impl_id)
+      else
+        impl_obj = matching_library_template_exists?(self[:version_num],library_idh)
+        raise Error.new("expected to find a matching library implemntation") unless impl_obj
+        ret = impl_obj.id_handle
+      end
+      ret
     end
 
     def add_asset_file(path,content=nil)
@@ -64,27 +85,12 @@ module XYZ
       "project-#{project[:ref]}-v#{self[:version_num].to_s}"
     end
 
-    def add_model_specific_override_attrs!(override_attrs,target_obj)
-      override_attrs[:updated] ||= false
+    def library_branch_name(new_version_num)
+      "v#{self[:new_version_num].to_s}"
     end
 
-    #self is a project implementation; returns library implementation idh
-    def clone_into_library_if_needed(library_idh)
-      ret = nil
-      #if implementation is updated, need to create a new implemntation in library; otherwise use
-      get_object_cols_and_update_ruby_obj!(:updated,:repo,:version_num)
-      if self[:updated]
-        new_version_num = get_new_version_num(library_idh)
-        override_attrs={:version_num => new_version_num}
-        new_impl_id = library_idh.create_object.clone_into(self,override_attrs)
-        #TODO: think need to create a new git branch
-        ret = id_handle(:model_name => :implemntation, :id => new_impl_id)
-      else
-        impl_obj = matching_library_template_exists?(self[:version_num],library_idh)
-        raise Error.new("expected to find a matching library implemntation") unless impl_obj
-        ret = impl_obj.id_handle
-      end
-      ret
+    def add_model_specific_override_attrs!(override_attrs,target_obj)
+      override_attrs[:updated] ||= false
     end
 
     def set_to_indicate_updated()

@@ -1,31 +1,33 @@
 require 'grit'
 module XYZ
   class Repo 
-    def self.get_file_content(file_asset,context={})
+    def self.get_file_content(file_asset,context)
       get_repo(context).get_file_content(file_asset)
     end
 
-    def self.update_file_content(file_asset,content,context={})
+    def self.update_file_content(file_asset,content,context)
       get_repo(context).update_file_content(file_asset,content)
     end
 
-    def self.add_file(file_asset,content,context={})
+    def self.add_file(file_asset,content,context)
       get_repo(context).add_file(file_asset,content)
     end
 
-    def self.push_implementation(context={})
+    def self.push_implementation(context)
       get_repo(context).push_implementation()
     end
 
+    def self.clone_branch(context,new_branch)
+      get_repo(context).clone_branch(new_branch)
+    end
     def self.delete(context)
       get_repo(context).delete()
     end
 
     ###
     def get_file_content(file_asset)
-      branch = branch_exists?(@branch) ? @branch : "master"
       ret = nil
-      checkout(branch) do
+      checkout(@branch) do
         ret = File.open(file_asset[:path]){|f|f.read}
       end
       ret
@@ -33,7 +35,6 @@ module XYZ
 
     def add_file(file_asset,content)
       content ||= String.new
-      add_branch(@branch) unless branch_exists?(@branch) 
       checkout(@branch) do
         File.open(file_asset[:path],"w"){|f|f << content}
         #TODO: commiting because it looks like file change visible in otehr branches until commit
@@ -45,7 +46,6 @@ module XYZ
     end
 
     def update_file_content(file_asset,content)
-      add_branch(@branch) unless branch_exists?(@branch) 
       checkout(@branch) do
         File.open(file_asset[:path],"w"){|f|f << content}
         #TODO: commiting because it looks like file change visible in otehr branches until commit
@@ -60,15 +60,22 @@ module XYZ
       git_command__push(@branch)
     end
 
+    def clone_branch(new_branch)
+      checkout(@branch) do
+        git_command__add_branch(new_branch)
+      end
+    end
+
     def delete()
       checkout(@branch)
       git_command__delete_local_branch(@branch)      
+      #TODO: need to make conditional on whether remote branch exists
       git_command__delete_remote_branch(@branch)      
     end
 
    private
     def self.get_repo(context)
-      index = (context[:implementation]||{})[:repo] || "__top"
+      index = (context[:implementation]||{})[:repo]||"__top"
       CachedRepos[index] ||= get_repo_aux(index,context)
     end
     def self.get_repo_aux(path,context)
@@ -93,13 +100,13 @@ module XYZ
     end
 
     def ret_branch(context)
-      ((context||{})[:implementation]||{})[:branch]||"master"
+      ret = ((context||{})[:implementation]||{})[:branch]
+      raise Error.new("cannot find branch in context") unless ret
+      ret
     end
 
     def checkout(branch_name,&block)
       Dir.chdir(@path) do 
-        branch_name ||= "master"
-
         current_head = @grit_repo.head.name
         #TODO: when get index mechanisms to work subsiture cmmited out for below
         #@index.read_tree(branch_name)
@@ -115,14 +122,6 @@ module XYZ
     def branch_exists?(branch_name)
       @grit_repo.heads.find{|h|h.name == branch_name} ? true : nil
     end
-
-    def add_branch(branch_name,start="master")
-      start ||= "master"
-      checkout(start)
-      message = "Adding branch #{branch_name}"
-      git_command__add_branch(branch_name,message,start)
-    end
-
     def git_command()
       @grit_repo.git
     end
@@ -132,10 +131,7 @@ module XYZ
     def git_command__checkout(branch_name)
       git_command.checkout(CmdOpts,branch_name)
     end
-    def git_command__add_branch(branch_name,message,start="master")
-      #TODO: check if this works when start is diffeernat than master
-      #TODO: looks like this not working: @index.commit(message, [@grit_repo.commits.first], nil, nil, branch_name)
-      #TODO: not taking into account message
+    def git_command__add_branch(branch_name)
       git_command.branch(CmdOpts,branch_name)
     end
     def git_command__add(file_path)
@@ -167,9 +163,7 @@ module XYZ
     def git_command__checkout(branch_name)
       `#{git} checkout #{branch_name}`
     end
-    def git_command__add_branch(branch_name,message,start="master")
-      #TODO: check if this works when start is diffeernat than master
-      #TODO: not adding message
+    def git_command__add_branch(branch_name)
       `#{git} branch #{branch_name}`
     end
     def git_command__add(file_path)

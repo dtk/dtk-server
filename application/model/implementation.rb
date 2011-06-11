@@ -56,7 +56,7 @@ module XYZ
       get_object_cols_and_update_ruby_obj!(:updated,:repo,:branch)
       if self[:updated]
         new_version_num = get_new_version_num(library_idh)
-        new_branch = library_branch_name(new_version_num)
+        new_branch = library_branch_name(new_version_num,library_idh)
         #TODO: assuming that implementaion files do not hvae any content that is not written to repo
         Repo.clone_branch({:implementation => self},new_branch)
         override_attrs={:version_num => new_version_num,:branch => new_branch}
@@ -85,8 +85,9 @@ module XYZ
       "project-#{project[:ref]}-v#{self[:version_num].to_s}"
     end
 
-    def library_branch_name(new_version_num)
-      "v#{self[:new_version_num].to_s}"
+    def library_branch_name(new_version_num,library_idh)
+      library = library_idh.create_object().get_object_cols_and_update_ruby_obj!(:ref)
+      "library-#{library[:ref]}-v#{new_version_num.to_s}"
     end
 
     def add_model_specific_override_attrs!(override_attrs,target_obj)

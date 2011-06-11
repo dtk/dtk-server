@@ -38,6 +38,7 @@ module XYZ
          }]
 
       augmented_impl = Model.get_objects_from_join_array(model_handle(),base_sp_hash,join_array).first
+      raise Error.new("No implementation for component") unless augmented_impl
       #return matching implementation idh if there is a match
       return augmented_impl[:proj_impl].id_handle() if augmented_impl[:proj_impl]
 

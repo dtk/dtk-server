@@ -533,17 +533,24 @@ module XYZ
       join_array = 
         [{
            :model_name => :component,
-           :alias => :target_component,
+           :alias => :project_template,
+           :join_type => :inner,
+           :join_cond => {:id => :component__id},
+           :cols => [:id,:ancestor_id]
+         },
+         {          
+           :model_name => :component,
+           :alias => :library_template,
            :join_type => :inner,
            :filter => [:eq, :extension_type, extension_type.to_s],
            :convert => true,
-           :join_cond => {:extended_base_id => :component__id},
+           :join_cond => {:extended_base_id => :project_template__ancestor_id},
            :cols => Aux.array_add?(cols,:extended_base_id)
          }
         ]
       rows = Model.get_objects_from_join_array(model_handle,base_sp_hash,join_array)
       Log.error("get extension library shoudl only match one component") if rows.size > 1
-      rows.first && rows.first[:target_component]
+      rows.first && rows.first[:library_template]
     end
 
    private

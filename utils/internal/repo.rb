@@ -67,7 +67,8 @@ module XYZ
     end
 
     def delete()
-      checkout(@branch)
+      raise Error.new("Cannot delete master branch") if @branch == "master"
+      checkout("master")
       git_command__delete_local_branch(@branch)      
       #TODO: need to make conditional on whether remote branch exists
       git_command__delete_remote_branch(@branch)      
@@ -75,16 +76,19 @@ module XYZ
 
    private
     def self.get_repo(context)
-      index = (context[:implementation]||{})[:repo]||"__top"
-      CachedRepos[index] ||= get_repo_aux(index,context)
+      repo = (context[:implementation]||{})[:repo]||"__top"
+      branch = (context[:implementation]||{})[:branch]
+      raise Error.new("cannot find branch in context") unless branch
+      CachedRepos[repo] ||= Hash.new
+      CachedRepos[repo][branch] ||= get_repo_aux(repo,branch)
     end
-    def self.get_repo_aux(path,context)
+    def self.get_repo_aux(path,branch)
       root = R8::EnvironmentConfig::CoreCookbooksRoot
       full_path = path == "__top" ? root : "#{root}/#{path}"
       if Aux::platform_is_linux?()
-        RepoLinux.new(full_path,context)
+        RepoLinux.new(full_path,branch)
       elsif  Aux::platform_is_windows?()
-        RepoWindows.new(full_path,context)
+        RepoWindows.new(full_path,branch)
       else
         raise Error.new("platform #{Aux::platform} not treated")
       end
@@ -92,17 +96,11 @@ module XYZ
     CachedRepos = Hash.new
 
     attr_reader :grit_repo
-    def initialize(path,context)
-      @branch = ret_branch(context)
+    def initialize(path,branch)
+      @branch = branch 
       @path = path
       @grit_repo = Grit::Repo.new(path)
       @index = @grit_repo.index #creates new object so use @index, not grit_repo
-    end
-
-    def ret_branch(context)
-      ret = ((context||{})[:implementation]||{})[:branch]
-      raise Error.new("cannot find branch in context") unless ret
-      ret
     end
 
     def checkout(branch_name,&block)
@@ -154,10 +152,10 @@ module XYZ
   end
   class RepoWindows  < Repo
    private
-    def initialize(full_path,context)
+    def initialize(full_path,branch)
       raise Error.new("R8::EnvironmentConfig::GitExecutable not defined") unless defined? R8::EnvironmentConfig::GitExecutable
       @git = R8::EnvironmentConfig::GitExecutable
-      super(full_path,context)
+      super(full_path,branch)
     end
     attr_reader :git
     def git_command__checkout(branch_name)

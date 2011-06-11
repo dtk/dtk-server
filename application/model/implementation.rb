@@ -24,7 +24,7 @@ module XYZ
       base_sp_hash = {
         :model_name => :implementation,
         :filter => [:eq, :id, id()],
-        :cols => [:repo, :version_num]
+        :cols => [:repo, :version_num, :branch]
       }
       join_array = 
         [{
@@ -43,7 +43,7 @@ module XYZ
 
       #if reach here; no match and need to clone
       new_branch = augmented_impl.project_branch_name(project)
-      Repo.clone_branch({:implementation => self},new_branch)
+      Repo.clone_branch({:implementation => augmented_impl},new_branch)
       override_attrs={:branch => new_branch}
       new_impl_id = project.clone_into(self,override_attrs)
       id_handle(:id => new_impl_id, :model => :implementation)

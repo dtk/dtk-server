@@ -140,28 +140,33 @@ module XYZ
             and_list = Array.new
             args.each do |el|
               el_op,el_args = get_filter_condition_op_and_args!(vcol_sql_fns,el,model_handle)
-              next if el_op.nil? #this can happen if el has a vcol in it
-              and_list << case el_op
-               when :eq
-                ret_eq_comparison(el_args[0],el_args[1])
-               when :neq
-                SQL.not(ret_eq_comparison(el_args[0],el_args[1]))
-               when :lt
-                el_args[0].to_s.lit < el_args[1].to_s.lit
-               when :lte
-                el_args[0].to_s.lit <= el_args[1].to_s.lit
-               when :gt
-                el_args[0].to_s.lit > el_args[1].to_s.lit
-               when :gte
-                el_args[0].to_s.lit >= el_args[1].to_s.lit
-               when "match-prefix".to_sym
-                Sequel::SQL::StringExpression.like(el_args[0],"#{el_args[1]}%",{:case_insensitive=>true})
-               when :regex
-                Sequel::SQL::StringExpression.like(el_args[0],Regexp.new(el_args[1]),{:case_insensitive=>true})
-               when :oneof
-                SQL.in(el_args[0],el_args[1])
-               else
-                raise ErrorPatternNotImplemented.new(:comparison_op,el_op) 
+              #processes nested ands and ors
+              if [:or,:and].include?(el_op)
+                and_list << ret_sequel_filter(el,model_handle,vcol_sql_fns)
+              else
+                next if el_op.nil? #this can happen if el has a vcol in it
+                and_list << case el_op
+                 when :eq
+                  ret_eq_comparison(el_args[0],el_args[1])
+                 when :neq
+                  SQL.not(ret_eq_comparison(el_args[0],el_args[1]))
+                 when :lt
+                  el_args[0].to_s.lit < el_args[1].to_s.lit
+                 when :lte
+                  el_args[0].to_s.lit <= el_args[1].to_s.lit
+                 when :gt
+                  el_args[0].to_s.lit > el_args[1].to_s.lit
+                 when :gte
+                  el_args[0].to_s.lit >= el_args[1].to_s.lit
+                 when "match-prefix".to_sym
+                  Sequel::SQL::StringExpression.like(el_args[0],"#{el_args[1]}%",{:case_insensitive=>true})
+                 when :regex
+                  Sequel::SQL::StringExpression.like(el_args[0],Regexp.new(el_args[1]),{:case_insensitive=>true})
+                 when :oneof
+                  SQL.in(el_args[0],el_args[1])
+                 else
+                  raise ErrorPatternNotImplemented.new(:comparison_op,el_op) 
+                end
               end
             end
             return nil if and_list.empty?

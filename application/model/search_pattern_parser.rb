@@ -207,18 +207,23 @@ module XYZ
         ret << op
         args.each do |el|
           el_op,el_args = get_op_and_args(el)
-          unless el_op and el_args and el_args.size == 2 and FilterOperationsParsed.include?(el_op)
-            log_parsing_error_to_skip(:expression,el)
-            next
-          end
-          if el_op == :oneof
-            unless el_args[1].kind_of?(Array)
-              log_parsing_error_to_skip(:argument_to_one_of,el_args[1])
+          #processing nested ands and ors
+          if [:and,:or].include?(el_op)
+            ret << ret_filter(:filter => el)
+          else
+            unless el_op and el_args and el_args.size == 2 and FilterOperationsParsed.include?(el_op)
+              log_parsing_error_to_skip(:expression,el)
               next
             end
-            ret << [el_op,ret_scalar(el_args[0]),el_args[1]]
-          else
-            ret << ([el_op] + el_args.map{|x|ret_scalar(x)})
+            if el_op == :oneof
+              unless el_args[1].kind_of?(Array)
+                log_parsing_error_to_skip(:argument_to_one_of,el_args[1])
+                next
+              end
+              ret << [el_op,ret_scalar(el_args[0]),el_args[1]]
+            else
+              ret << ([el_op] + el_args.map{|x|ret_scalar(x)})
+            end
           end
         end
       else

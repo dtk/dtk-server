@@ -237,10 +237,8 @@ module XYZ
       raise Error.new("cannot find node of type #{self[:node]} in context") unless node
 
       #clone component into node
-#      override_attrs = {:extended_base_id => base_component[:id]}
       override_attrs = {}
       #TODO: may put in flags to tell clone operation not to do any constraint checking
-#      clone_opts = {:ret_new_obj_with_cols => [:id,:display_name,:extended_base_id]}
       clone_opts = {:ret_new_obj_with_cols => [:id,:display_name,:extended_base,:implementation_id]}
       new_cmp = node.clone_into(component_extension,override_attrs,clone_opts)
 

@@ -147,9 +147,6 @@ module XYZ
           @component = local_cmp
         elsif @component_ref == link_info[:remote_type]
           @component = remote_cmp
-        else
-          #TODO: check if this shoudl be reported as error; may be for example mysql_db and one side mysql_server
-          Log.error("cannot find ref to component #{@component_ref}")
         end
       end
       

@@ -36,8 +36,8 @@ module XYZ
         virtual_column :multiple_instance_ref, :type => :integer ,:local_dependencies => [:ref_num]
 
         #used when this component is an extension
-        foreign_key :extended_base_id, :component, FK_SET_NULL_OPT
         column :extended_base, :varchar, :size => 30
+        virtual_column :extended_base_id, :type => ID_TYPES[:id] ,:local_dependencies => [:extended_base,:implementation_id]
         column :extension_type, :varchar, :size => 30
 
         column :uri, :varchar
@@ -265,7 +265,34 @@ module XYZ
       end
     end
     ##### Actions
+
     ### virtual column defs
+    #TODO: expiremting with implementing this 'local def differently  
+    def extended_base_id()
+      if self[:extended_base] and self[:implementation_id]
+        sp_hash = {
+          :cols => [:id],
+          :filter => [:and, [:eq, :implementation_id, self[:implementation_id]],
+                      [:eq, :component_type, self[:extended_base]]]
+        }
+        ret = Model.get_objects_from_sp_hash(model_handle,sp_hash).first[:id]
+      else
+        base_sp_hash = {
+          :cols => [:implementation_id,:extended_base]
+        }
+        join_array = 
+          [{
+             :model_name => :component,
+             :alias => :base_component,
+             :join_type => :inner,
+             :join_cond => {:implementation_id => :component__implementation_id, :component_type => :component__extended_base},
+             :cols => [:id,:implementation_id,:component_type]
+         }]
+        ret = Model.get_objects_from_join_array(model_handle,base_sp_hash,join_array).first[:base_component][:id]
+      end
+      self[:extended_base_id] = ret
+    end
+
     def view_def_key()
       self[:view_def_ref]||self[:component_type]||self[:id]
     end
@@ -386,8 +413,7 @@ module XYZ
     end
 
     def get_virtual_attributes__include_mixins(attribute_names,cols,field_to_match=:display_name,multiple_instance_clause=nil)
-      is_extension = self[:extended_base_id] ? true : false
-      is_extension ?
+      is_extension?() ?
         get_virtual_attributes_aux_extension(attribute_names,cols,field_to_match,multiple_instance_clause) :
         get_virtual_attributes_aux_base(attribute_names,cols,field_to_match,multiple_instance_clause)
     end
@@ -401,15 +427,17 @@ module XYZ
       cmp_id_to_equiv_class = Hash.new
       equiv_class_members = Hash.new
       ext_cmps = Array.new
-      base_cmp_ids = Array.new
+      base_cmp_info = Array.new
       components.each do |cmp|
         id = cmp[:id]
-        if cmp[:extended_base_id]
+        if cmp[:extended_base]
+          raise Error.new("cmp[:implementation_id] must be set") unless cmp[:implementation_id]
           ext_cmps << cmp
-          base_cmp_ids << cmp[:extended_base_id]
-          cmp_id_to_equiv_class[id] = (equiv_class_members[cmp[:extended_base_id]] ||= Array.new) << id
+          extended_base_id = cmp[:extended_base_id]
+          base_cmp_info << {:id => extended_base_id, :extended_base => cmp[:extended_base], :implementation_id => cmp[:implementation_id]}
+          cmp_id_to_equiv_class[id] = (equiv_class_members[extended_base_id] ||= Array.new) << id
         else
-          base_cmp_ids << cmp[:id]
+          base_cmp_info << {:id => cmp[:id]}
           cmp_id_to_equiv_class[id] = (equiv_class_members[id] ||= Array.new) << id
         end
       end
@@ -423,7 +451,7 @@ module XYZ
         end
       end
 
-      get_components_related_by_mixins_from_base(component_mh,base_cmp_ids,cols).each do |found_ext_cmp|
+      get_components_related_by_mixins_from_base(component_mh,base_cmp_info,cols).each do |found_ext_cmp|
         id = found_ext_cmp[:id]
         #if found_ext_cmp in components dont put in result
         unless cmp_id_to_equiv_class[id]
@@ -445,15 +473,27 @@ module XYZ
       get_objects_from_sp_hash(component_mh,sp_hash)
     end
 
-    def self.get_components_related_by_mixins_from_base(component_mh,base_cmp_ids,cols)
-      return Array.new if base_cmp_ids.empty?
+    def self.get_components_related_by_mixins_from_base(component_mh,base_cmp_info,cols)
+      return Array.new if base_cmp_info.empty?
+      filter = 
+        if base_cmp_info.size == 1
+          extended_base_id_filter(base_cmp_info.first)
+        else
+          [:or] + base_cmp_info.map{|item|extended_base_id_filter(item)}
+        end
       sp_hash = {
         :model_name => :component,
-        :filter => [:oneof, :extended_base_id, base_cmp_ids],
+        :filter => filter,
         :cols => Aux.array_add?(cols,[:id])
       }
       get_objects_from_sp_hash(component_mh,sp_hash)
     end
+
+    def extended_base_id_filter(base_cmp_info_item)
+      [:and,[:eq, :implementation_id, base_cmp_info_item[:implementation_id]],
+       [:eq,:extended_base, base_cmp_info_item[:extended_base]]]
+    end
+
 
     def get_virtual_attributes_aux_extension(attribute_names,cols,field_to_match=:display_name,multiple_instance_clause=nil)
       component_id = self[:id]
@@ -468,11 +508,13 @@ module XYZ
     end
 
     def get_virtual_attributes_aux_base(attribute_names,cols,field_to_match=:display_name,multiple_instance_clause=nil)
+      raise Error.new("Should not be called unless :component_type and :implementation_id are set") unless self[:component_type] and self[:implementation_id]
       component_id = self[:id]
       base_sp_hash = {
         :model_name => :component,
-        :filter => [:or, [:eq, :extended_base_id, component_id], [:eq, :id, component_id]],
-        :cols => [:id,:extended_base_id]
+        :filter => [:and, [:eq,:implementation_id, self[:implementation_id]],
+                    [:or, [:eq, :extended_base, self[:component_type]],[:eq, :id, self[:id]]]],
+        :cols => [:id,:extended_base,:implementation_id]
       }
       join_array = 
         [{
@@ -561,7 +603,7 @@ module XYZ
 
     def get_constraints!(opts={})
       #TODO: may see if precalculating more is more efficient
-      cmp_cols = [:only_one_per_node,:component_type,:extended_base,:implementation_id,:extended_base_id]
+      cmp_cols = [:only_one_per_node,:component_type,:extended_base,:implementation_id]
       rows = get_objects_from_sp_hash(:cols => [:dependencies] + cmp_cols)
       cmp_info = rows.first #just picking first since component info same for all rows
       cmp_cols.each{|col|self[col] = cmp_info[col]} if opts[:update_object]
@@ -638,7 +680,6 @@ module XYZ
       #find new ancestor_id
       library_cmp_tmpl_idh = id_handle(:id => self[:ancestor_id])
       #ok to do below because self and library_cmp_tmpl share attribute values
-    #  library_cmp_tmpl =  library_cmp_tmpl_idh.create_object.merge(:extended_base_id => self[:extended_base_id])
       library_cmp_tmpl =  library_cmp_tmpl_idh.create_object
       proj_cmp_tmpl_idh = find_match_in_project(proj_idh)
       new_ancestor_id = proj_cmp_tmpl_idh ? proj_cmp_tmpl_idh.get_id() : proj.clone_into(library_cmp_tmpl,{:implementation_id => new_impl_id,:extended_base => self[:extended_base]})
@@ -847,14 +888,6 @@ module XYZ
       override_attrs[:display_name] ||= SQL::ColRef.qualified_ref 
       override_attrs[:type] ||= (target_obj.model_handle[:model_name] == :node ? "instance" : "template")
       override_attrs[:updated] ||= false
-=begin
-TODO: deprecated as remove extended_base_id
-      #handle case if this is an extension
-      if is_extension?()
-        Log.error("not handling case where source component is extension and does not yet have :target_extended_base_id set") unless self[:target_extended_base_id]
-        override_attrs[:extended_base_id] ||= self[:target_extended_base_id] 
-      end
-=end
     end
 
     ###### Helper fns

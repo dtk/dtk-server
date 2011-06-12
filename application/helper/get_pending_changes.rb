@@ -76,7 +76,7 @@ module Ramaze::Helper
         end
       end
 
-      cols = [:id,:display_name,:basic_type,:external_ref,:node_node_id,:only_one_per_node,:extended_base_id]
+      cols = [:id,:display_name,:basic_type,:external_ref,:node_node_id,:only_one_per_node,:extended_base,:implementation_id]
       cmps_in_sc = component_index.values.map{|sc|sc[:component]}
       related_cmps = Component.get_components_related_by_mixins(cmps_in_sc,cols)
       #TODO: assumption that cmps only appear once in sc_with_direct_cmps

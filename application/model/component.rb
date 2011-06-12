@@ -278,6 +278,7 @@ module XYZ
         ret = Model.get_objects_from_sp_hash(model_handle,sp_hash).first[:id]
       else
         base_sp_hash = {
+          :model_name => :component,
           :cols => [:implementation_id,:extended_base]
         }
         join_array = 
@@ -489,11 +490,14 @@ module XYZ
       get_objects_from_sp_hash(component_mh,sp_hash)
     end
 
-    def extended_base_id_filter(base_cmp_info_item)
-      [:and,[:eq, :implementation_id, base_cmp_info_item[:implementation_id]],
-       [:eq,:extended_base, base_cmp_info_item[:extended_base]]]
+    def self.extended_base_id_filter(base_cmp_info_item)
+      if base_cmp_info_item[:extended_base] 
+        [:and,[:eq, :implementation_id, base_cmp_info_item[:implementation_id]],
+         [:eq,:extended_base, base_cmp_info_item[:extended_base]]]  
+      else
+      [:eq, :id, base_cmp_info_item[:id]]
+      end
     end
-
 
     def get_virtual_attributes_aux_extension(attribute_names,cols,field_to_match=:display_name,multiple_instance_clause=nil)
       component_id = self[:id]

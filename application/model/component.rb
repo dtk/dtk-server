@@ -38,6 +38,7 @@ module XYZ
         #used when this component is an extension
         column :extended_base, :varchar, :size => 30
         virtual_column :extended_base_id, :type => ID_TYPES[:id] ,:local_dependencies => [:extended_base,:implementation_id]
+        virtual_column :instance_extended_base_id, :type => ID_TYPES[:id] ,:local_dependencies => [:extended_base,:implementation_id,:node_node_id]
         column :extension_type, :varchar, :size => 30
 
         column :uri, :varchar
@@ -267,26 +268,33 @@ module XYZ
     ##### Actions
 
     ### virtual column defs
+    def instance_extended_base_id()
+      extended_base_id(:is_instance => true)
+    end
     #TODO: expiremting with implementing this 'local def differently  
-    def extended_base_id()
-      if self[:extended_base] and self[:implementation_id]
+    def extended_base_id(opts={})
+      if self[:extended_base] and self[:implementation_id] and (self[:node_node_id] or not opts[:is_instance]) 
         sp_hash = {
           :cols => [:id],
           :filter => [:and, [:eq, :implementation_id, self[:implementation_id]],
+                      [:eq, :node_node_id, self[:node_node_id]],
                       [:eq, :component_type, self[:extended_base]]]
         }
         ret = Model.get_objects_from_sp_hash(model_handle,sp_hash).first[:id]
       else
         base_sp_hash = {
           :model_name => :component,
-          :cols => [:implementation_id,:extended_base]
+          :cols => [:implementation_id,:extended_base,:node_node_id]
         }
         join_array = 
           [{
              :model_name => :component,
              :alias => :base_component,
              :join_type => :inner,
-             :join_cond => {:implementation_id => :component__implementation_id, :component_type => :component__extended_base},
+             :join_cond => {
+               :implementation_id => :component__implementation_id, 
+               :component_node_node_id => :component__node_node_id,
+               :component_type => :component__extended_base},
              :cols => [:id,:implementation_id,:component_type]
          }]
         ret = Model.get_objects_from_join_array(model_handle,base_sp_hash,join_array).first[:base_component][:id]
@@ -419,7 +427,7 @@ module XYZ
         get_virtual_attributes_aux_base(attribute_names,cols,field_to_match,multiple_instance_clause)
     end
 
-    def self.get_components_related_by_mixins(components,cols)
+    def self.get_component_instances_related_by_mixins(components,cols)
       return Array.new if components.empty?
       sample_cmp = components.first
       component_mh = sample_cmp.model_handle()
@@ -435,7 +443,7 @@ module XYZ
           raise Error.new("cmp[:implementation_id] must be set") unless cmp[:implementation_id]
           ext_cmps << cmp
           extended_base_id = cmp[:extended_base_id]
-          base_cmp_info << {:id => extended_base_id, :extended_base => cmp[:extended_base], :implementation_id => cmp[:implementation_id]}
+          base_cmp_info << {:id => extended_base_id, :node_node_id => cmp[:node_node_id], :extended_base => cmp[:extended_base], :implementation_id => cmp[:implementation_id]}
           cmp_id_to_equiv_class[id] = (equiv_class_members[extended_base_id] ||= Array.new) << id
         else
           base_cmp_info << {:id => cmp[:id]}
@@ -465,7 +473,7 @@ module XYZ
   private
     def self.get_components_related_by_mixins_from_extension(component_mh,extension_cmps,cols)
       return Array.new if extension_cmps.empty?
-      base_ids = extension_cmps.map{|cmp|cmp[:extended_base_id]}
+      base_ids = extension_cmps.map{|cmp|cmp[:instance_extended_base_id]}
       sp_hash = {
         :model_name => :component,
         :filter => [:oneof, :id, base_ids],
@@ -493,6 +501,7 @@ module XYZ
     def self.extended_base_id_filter(base_cmp_info_item)
       if base_cmp_info_item[:extended_base] 
         [:and,[:eq, :implementation_id, base_cmp_info_item[:implementation_id]],
+         [:eq,:node_node_id,base_cmp_info_item[:node_node_id]],
          [:eq,:extended_base, base_cmp_info_item[:extended_base]]]  
       else
       [:eq, :id, base_cmp_info_item[:id]]

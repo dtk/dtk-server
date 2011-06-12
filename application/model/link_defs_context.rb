@@ -149,7 +149,7 @@ module XYZ
           @component = remote_cmp
         else
           #TODO: check if this shoudl be reported as error; may be for example mysql_db and one side mysql_server
-          Log.error("cannot find ref to component #{@ref}")
+          Log.error("cannot find ref to component #{@component_ref}")
         end
       end
       

@@ -23,7 +23,9 @@ module XYZ
               :attribute_mappings => 
               [
             #   {":mysql__server.sap__l4" => ":java_webapp.sap_ref__l4"},
-               {":java_webapp.db_params" => ":mysql_db.db_params_ref"}
+               {":java_webapp.db_database" => ":mysql_db.db_params_ref.database"},
+               {":java_webapp.db_username" => ":mysql_db.db_params_ref.username"},
+               {":java_webapp.db_password" => ":mysql_db.db_params_ref.password"},
               ]
             }
           },

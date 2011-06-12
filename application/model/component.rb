@@ -37,6 +37,7 @@ module XYZ
 
         #used when this component is an extension
         foreign_key :extended_base_id, :component, FK_SET_NULL_OPT
+        column :extended_base, :varchar, :size => 30
         column :extension_type, :varchar, :size => 30
 
         column :uri, :varchar
@@ -566,14 +567,20 @@ module XYZ
 
     def get_constraints!(opts={})
       #TODO: may see if precalculating more is more efficient
-      cmp_cols = [:only_one_per_node,:component_type,:extended_base_id]
+      cmp_cols = [:only_one_per_node,:component_type,:extended_base,:implementation_id,:extended_base_id]
       rows = get_objects_from_sp_hash(:cols => [:dependencies] + cmp_cols)
       cmp_info = rows.first #just picking first since component info same for all rows
       cmp_cols.each{|col|self[col] = cmp_info[col]} if opts[:update_object]
 
       constraints = rows.map{|r|Constraint.create(r[:dependencies]) if r[:dependencies]}.compact
       constraints << Constraint::Macro.only_one_per_node(cmp_info[:component_type]) if cmp_info[:only_one_per_node]
-      constraints << Constraint::Macro.base_for_extension(cmp_info[:extended_base_id]) if cmp_info[:extended_base_id]
+      if cmp_info[:extended_base]
+#        impl_obj = id_handle(:id => cmp_info[:implementation_id],:model_name=>:implementation).create_object()
+ #       library_impl_id = impl_obj.get_objects_col_from_sp_hash(:ancestor_id).first
+        sp_hash = {:cols => [:id], :filter => [:eq, :ancestor_id, cmp_info[:implementation_id]]}
+        library_impl = Model.get_objects_from_sp_hash(model_handle(:implementation),sp_hash).first
+        constraints << Constraint::Macro.base_for_extension(cmp_info[:extended_base],library_impl[:id])
+      end
       return Constraints.new() if constraints.empty?
       Constraints.new(:and,constraints)
     end

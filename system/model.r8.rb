@@ -210,7 +210,10 @@ module XYZ
     end
 
     def get_objects_col_from_sp_hash(sp_hash_x,col=nil,opts={})
-      #if col not given assumption that sp_hash_x is of form {:cols => [col]}
+      #if col not given assumption that sp_hash_x is of form {:cols => [col]} or symbol
+      if sp_hash_x.kind_of?(Symbol)
+        sp_hash_x = {:cols => [sp_hash_x]}
+      end
       col ||= sp_hash_x[:cols].first
       get_objects_from_sp_hash(sp_hash_x,opts).map{|r|r[col]}.compact
     end

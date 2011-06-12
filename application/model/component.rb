@@ -360,8 +360,8 @@ module XYZ
     
     def is_extension?()
       return false if self.kind_of?(Assembly)
-      Log.error("this should not be called if :extended_base_id not set") unless self.has_key?(:extended_base_id)
-      self[:extended_base_id] ? true : false
+      Log.error("this should not be called if :extended_base is not set") unless self.has_key?(:extended_base)
+      self[:extended_base] ? true : false
     end
 
     #looks at 
@@ -527,29 +527,23 @@ module XYZ
     #TODO: extend with logic for multiple_instance_clause
     def get_extension_in_library(extension_type,cols=[:id,:display_name],multiple_instance_clause=nil)
       base_sp_hash = {
-        :model_name => :component,
-        :filter => [:eq, :id, self[:ancestor_id]],
-        :cols => [:id]
+        :model_name => :implementation,
+        :filter => [:eq, :id, self[:implementation_id]],
+        :cols => [:id,:ancestor_id]
       }
       join_array = 
-        [{
-           :model_name => :component,
-           :alias => :project_template,
-           :join_type => :inner,
-           :join_cond => {:id => :component__id},
-           :cols => [:id,:ancestor_id]
-         },
+        [
          {          
            :model_name => :component,
            :alias => :library_template,
            :join_type => :inner,
            :filter => [:eq, :extension_type, extension_type.to_s],
            :convert => true,
-           :join_cond => {:extended_base_id => :project_template__ancestor_id},
-           :cols => Aux.array_add?(cols,:extended_base_id)
+           :join_cond => {:implementation_id => :implementation__ancestor_id},
+           :cols => Aux.array_add?(cols,:implementation_id)
          }
         ]
-      rows = Model.get_objects_from_join_array(model_handle,base_sp_hash,join_array)
+      rows = Model.get_objects_from_join_array(model_handle(:implementation),base_sp_hash,join_array)
       Log.error("get extension library shoudl only match one component") if rows.size > 1
       rows.first && rows.first[:library_template]
     end
@@ -575,8 +569,6 @@ module XYZ
       constraints = rows.map{|r|Constraint.create(r[:dependencies]) if r[:dependencies]}.compact
       constraints << Constraint::Macro.only_one_per_node(cmp_info[:component_type]) if cmp_info[:only_one_per_node]
       if cmp_info[:extended_base]
-#        impl_obj = id_handle(:id => cmp_info[:implementation_id],:model_name=>:implementation).create_object()
- #       library_impl_id = impl_obj.get_objects_col_from_sp_hash(:ancestor_id).first
         sp_hash = {:cols => [:id], :filter => [:eq, :ancestor_id, cmp_info[:implementation_id]]}
         library_impl = Model.get_objects_from_sp_hash(model_handle(:implementation),sp_hash).first
         constraints << Constraint::Macro.base_for_extension(cmp_info[:extended_base],library_impl[:id])

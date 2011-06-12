@@ -632,15 +632,16 @@ module XYZ
       proj_idh = proj.id_handle()
 
       #create new project implementation if needed
-      library_impl = id_handle.createIDH(:model_name => :implementation,:id => self[:implementation_id]).create_object()
+      library_impl = id_handle(:model_name => :implementation,:id => self[:implementation_id]).create_object()
       new_impl_id = library_impl.clone_into_project_if_needed(proj).get_id()
 
       #find new ancestor_id
-      library_cmp_tmpl_idh = id_handle.createIDH(:id => self[:ancestor_id])
+      library_cmp_tmpl_idh = id_handle(:id => self[:ancestor_id])
       #ok to do below because self and library_cmp_tmpl share attribute values
-      library_cmp_tmpl =  library_cmp_tmpl_idh.create_object.merge(:extended_base_id => self[:extended_base_id])
+    #  library_cmp_tmpl =  library_cmp_tmpl_idh.create_object.merge(:extended_base_id => self[:extended_base_id])
+      library_cmp_tmpl =  library_cmp_tmpl_idh.create_object
       proj_cmp_tmpl_idh = find_match_in_project(proj_idh)
-      new_ancestor_id = proj_cmp_tmpl_idh ? proj_cmp_tmpl_idh.get_id() : proj.clone_into(library_cmp_tmpl,{:implementation_id => new_impl_id})
+      new_ancestor_id = proj_cmp_tmpl_idh ? proj_cmp_tmpl_idh.get_id() : proj.clone_into(library_cmp_tmpl,{:implementation_id => new_impl_id,:extended_base => self[:extended_base]})
 
       update_from_hash_assignments(:implementation_id => new_impl_id, :ancestor_id => new_ancestor_id)
     end
@@ -846,11 +847,14 @@ module XYZ
       override_attrs[:display_name] ||= SQL::ColRef.qualified_ref 
       override_attrs[:type] ||= (target_obj.model_handle[:model_name] == :node ? "instance" : "template")
       override_attrs[:updated] ||= false
+=begin
+TODO: deprecated as remove extended_base_id
       #handle case if this is an extension
       if is_extension?()
         Log.error("not handling case where source component is extension and does not yet have :target_extended_base_id set") unless self[:target_extended_base_id]
         override_attrs[:extended_base_id] ||= self[:target_extended_base_id] 
       end
+=end
     end
 
     ###### Helper fns

@@ -459,7 +459,7 @@ module XYZ
         end
         partial_update_rows.each do |r|
           attr_id = r[:id]
-          existing_val = ndx_attr_updates[attr_id] || ndx_existing_vals[attr_id]
+          existing_val = (ndx_attr_updates[attr_id]||{})[:value_derived] || ndx_existing_vals[attr_id]
           ndx_attr_updates[attr_id] = {
             :id => attr_id,
             :value_derived => r[:index_map].merge_into(existing_val,r[:output_value])

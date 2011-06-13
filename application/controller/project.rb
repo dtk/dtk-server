@@ -9,7 +9,9 @@ module XYZ
       commit_task = create_task_from_pending_changes(pending_changes)
 
       augmented_attr_list = Attribute.augmented_attribute_list_from_task(commit_task)
-      grouped_attrs = Attribute.ret_grouped_attributes(augmented_attr_list)
+      
+      opts = {:types_to_keep => [:unset_required]}
+      grouped_attrs = Attribute.ret_grouped_attributes(augmented_attr_list,opts)
       ##pp grouped_attrs.map{|attr|[attr[:display_name],attr[:attr_val_type]]}
 
       i18n_mapping = get_i18n_mappings_for_models(:attribute,:component)

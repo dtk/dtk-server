@@ -703,12 +703,6 @@ POSSIBLE CHANGES TO HASH
   -
 =end
 
-#### test of attribute groups
-
-augmented_attr_list = Attribute.augmented_attribute_list_from_task(commit_task)
-grouped_attrs = Attribute.ret_grouped_attributes(augmented_attr_list)
-grouped_attrs
-#################
 
 #default if nothing passed is json, make extensible for xml formatting for tuture possible integrations
 #          commit_tree = top_level_task.render_commit_tree()

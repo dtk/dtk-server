@@ -41,6 +41,8 @@ if (!R8.IDE) {
 //panel content specific.., should be moved out of here after flushing out details
 			_projectViewNode = null,
 
+			_editorPanelActive = false,
+
 			_regions = {
 				'top_full': {
 					'numPanels':0,
@@ -96,7 +98,7 @@ if (!R8.IDE) {
 					],
 					'viewFocus': 'projects'
 				}
-				, {
+				,{
 					'id': 'editor-panel',
 					'type': 'editor',
 					'pClass': 'foobut',
@@ -104,16 +106,20 @@ if (!R8.IDE) {
 					'minWidth': 300,
 					'relativePos': 'main',
 					'defaultHeight': .80,
-					'views': [{
+					'views': [
+/*
+					{
 						'id': 'editor',
 						'label': 'Editor',
 						'view': 'editorView',
 						'method': 'renderEditor',
 						'resizeMethod': 'resizeEditor'
 					}
+*/
 					],
 					'viewFocus': 'editor'
-				}, {
+				},
+/*				 {
 					'id': 'console-panel',
 					'pClass': 'tempclass',
 					'minHeight': 100,
@@ -127,7 +133,8 @@ if (!R8.IDE) {
 					}
 					],
 					'viewFocus': 'chef_debugger'
-				}]
+				}*/
+				]
 			};
 
 /*
@@ -341,12 +348,22 @@ if (!R8.IDE) {
 				for (var i in layoutDef.panels) {
 					var pDef = layoutDef.panels[i];
 
+					switch(pDef.type) {
+						case "editor":
+							_editorPanelActive = true;
+							_panels[pDef.id] = new R8.IDE.editorPanel(pDef);
+							break;
+						default:
+							_panels[pDef.id] = new R8.IDE.panel(pDef);
+							break;
+					}
+
 					switch (pDef.relativePos) {
 						case "left":
 							if(_regions.left.panelsRendered > 0) {
 								_lRegionNode.append('<div id="lr-resizer-'+_regions.left.panelsRendered+'" class="h-region-resizer"></div>');
 							}
-							_panels[pDef.id] = new R8.IDE.panel(pDef);
+//							_panels[pDef.id] = new R8.IDE.panel(pDef);
 							_lRegionPanels[pDef.id] = _panels[pDef.id];
 //							_lRegionPanels[pDef.id] = new R8.IDE.panel(pDef);
 							_lRegionNode.append(_lRegionPanels[pDef.id].render());
@@ -356,7 +373,7 @@ if (!R8.IDE) {
 							if(_regions.main.panelsRendered > 0) {
 								_mainRegionNode.append('<div id="mr-resizer-'+_regions.main.panelsRendered+'" class="h-region-resizer"></div>');
 							}
-							_panels[pDef.id] = new R8.IDE.panel(pDef);
+//							_panels[pDef.id] = new R8.IDE.panel(pDef);
 							_mainRegionPanels[pDef.id] = _panels[pDef.id];
 //							_mainRegionPanels[pDef.id] = new R8.IDE.panel(pDef);
 							_mainRegionNode.append(_mainRegionPanels[pDef.id].render());
@@ -429,7 +446,7 @@ if (!R8.IDE) {
 
 						that.resizePanels();
 					});
-
+/*
 					var editorResizer = new Y.DD.Drag({
 						node: '#mr-resizer-1'
 					});
@@ -454,12 +471,12 @@ if (!R8.IDE) {
 //						that.resizePanels();
 					});
 					editorResizer.on('drag:end',function(e){
-//DEBUG
 						var editorPanelNode = R8.Utils.Y.one('#editor-panel');
 						var editorHeight = editorPanelNode.getStyle('height');
 
 						R8.User.setSetting('editorPanelHeight',editorHeight);
 					});
+*/
 				});
 			},
 			toggleDetails: function(e) {
@@ -488,6 +505,17 @@ if (!R8.IDE) {
 //console.log(_contentList[selectedCat].getParams(_itemId));
 					R8.Ctrl.call(_contentList[selectedCat].getRoute(_itemId),params);
 //					console.log(selectedCat+' content isnt loaded yet...');
+				}
+			},
+			openFile: function(file_asset) {
+				if (_editorPanelActive) {
+					_panels['editor-panel'].loadView(file_asset);
+				}
+			},
+			openTarget: function(target) {
+				if (_editorPanelActive) {
+//					_panels['editor-panel'].pushTargetView(target);
+					_panels['editor-panel'].loadView(target);
 				}
 			},
 			getPanelContentRegion: function(type) {
@@ -544,7 +572,6 @@ if (!R8.IDE) {
 				R8.Editor.init({'containerNodeId':'editor-panel'});
 			},
 			resizePanelContent: function() {
-//DEBUG
 				var panelRegion = this.getPanelContentRegion('l-panel');
 //				_projectViewNode.setStyles({'height':panelRegion.height-6,'width':panelRegion.width});
 
@@ -574,7 +601,8 @@ if (!R8.IDE) {
 				}
 
 				this.refreshNotifications();
-			}
+			},
+			View: {}
 		}
 	}();
 }

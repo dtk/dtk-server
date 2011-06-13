@@ -34,7 +34,7 @@ if (!R8.User) {
 				_settingsUpdateList[key] = value;
 				_settings[key] = value;
 //DEBUG
-console.log('just set setting:'+key);
+//console.log('just set setting:'+key);
 			},
 			startUpdater: function() {
 				var that = this;
@@ -63,8 +63,8 @@ console.log('just set setting:'+key);
 				if (count > 0) {
 					YUI().use("json", function(Y) {
 //DEBUG
-console.log('going to pass back settings for persisting...');
-console.log(_settingsUpdateList);
+//console.log('going to pass back settings for persisting...');
+//console.log(_settingsUpdateList);
 						var reqParam = 'settings=' + Y.JSON.stringify(_settingsUpdateList);
 
 						var params = {

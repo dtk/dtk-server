@@ -11,7 +11,7 @@ if (!R8.Editor) {
 			_pageContainerNode = null,
 			_topbarWrapperNode = null,
 			_editorWrapperNode = null,
-
+			_editorWrapperNodeId = '',
 			_editorContainerNode = null,
 
 			_editorBtnNode = null,
@@ -55,12 +55,21 @@ if (!R8.Editor) {
 						</div>\
 					</div>',
 
+			_editorTpl = '<div id="editor" style="position: relative; float: left;"></div>',
+
+/*OLD
+			_editorTpl = '<div id="editor-wrapper" class="editor-wrapper">\
+							<div id="editor" style="position: relative; float: left;"></div>\
+						</div>',
+*/
+
+/*OLDEST
 			_editorTpl = '<div id="editor-wrapper" class="editor-wrapper">\
 							<div id="editor-header" class="editor-header" style="height: '+_editorHeaderHeight+'px;">\
 							</div>\
 							<div id="editor" style="position: relative; float: left;"></div>\
 						</div>',
-
+*/
 			_editorFormTpl = '<form id="hidden_editor_form" name="hidden_editor_form">\
 								<input type="hidden" id="editor_file_id" name="editor_file_id"/>\
 								<input type="hidden" id="editor_file_content" name="editor_file_content"/>\
@@ -69,11 +78,15 @@ if (!R8.Editor) {
 
 		return {
 			init: function(cfg) {
-				_editorContainerNode = R8.Utils.Y.one('#'+cfg.containerNodeId);
-				_editorContainerNode.append(_editorTpl);
+				_editorWrapperNodeId = cfg.editorWrapperNodeId;
 
-				_editorWrapperNode = R8.Utils.Y.one('#editor-wrapper');
-//				_editorHeaderNode = R8.Utils.Y.one('#editor-header');
+				_editorContainerNode = R8.Utils.Y.one('#'+cfg.containerNodeId);
+//				_editorContainerNode.append(_editorTpl);
+
+				_editorWrapperNode = R8.Utils.Y.one('#'+_editorWrapperNodeId);
+				_editorWrapperNode.append(_editorTpl);
+
+//				_editorHeaderNode = R8.Utils.Y.one('#'+_wrapperNodeId);
 				_editorNode = R8.Utils.Y.one('#editor');
 
 				_pageContainerNode = R8.Utils.Y.one('#page-container');
@@ -354,6 +367,16 @@ if(_editorContainerNode == null) return;
 
 //				_editorHeaderNode.append(tabTpl);
 			},
+			setEditorContent: function(content,lineNo) {
+				if(typeof(lineNo) == 'undefined') lineNo = 1;
+				_editor.getSession().setValue(content);
+/*
+				var callback = function() {
+					_editor.gotoLine(lineNo);
+				}
+				setTimeout(callback,150);
+*/
+			},
 			fileFocus: function(fileId) {
 				if(_currentFileFocus == fileId) return;
 
@@ -370,7 +393,7 @@ if(_editorContainerNode == null) return;
 				_currentFileFocus = fileId;
 */
 			},
-			loadFile: function(fileId) {
+			loadFile: function(fileId,fileView) {
 /*
 				if(typeof(_files[fileId]) != 'undefined') {
 					this.fileFocus(fileId);
@@ -382,7 +405,9 @@ if(_editorContainerNode == null) return;
 //					var file = response.application_component_get_cfg_file_contents.content[0].data;
 					var file = response.application_file_asset_get.content[0].data;
 
-					R8.Editor.fileInit(file);
+					fileView.setFile(file);
+
+//					R8.Editor.fileInit(file);
 //DEBUG
 //TODO: this is for when editor is docked on toolbar
 //					if(_editorOpen == false) { R8.Editor.toggleEditor(); }

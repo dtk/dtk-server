@@ -1,7 +1,7 @@
 
-if (!R8.IDE.panel) {
+if (!R8.IDE.editorPanel) {
 
-	R8.IDE.panel = function(panelDef) {
+	R8.IDE.editorPanel = function(panelDef) {
 		var _def = panelDef,
 			_id = _def.id,
 
@@ -13,11 +13,20 @@ if (!R8.IDE.panel) {
 
 			_node = null,
 			_headerNode = null,
+			_tabListNode = null,
 			_contentNode = null,
 			_viewContentNodes = {},
-			_currentView = '',
+			_currentView = null,
+			_lastView = null,
+
+			_views = {},
 
 			_contentList = {},
+
+			_fileList = [],
+			_fileAssets = {},
+
+			_targetList = [],
 
 			_panelTpl = '',
 /*
@@ -27,6 +36,9 @@ if (!R8.IDE.panel) {
 					</ul>\
 
  */
+			_emptyContentTpl = '<div id="editor-empty-bg" class="editor-empty-bg"></div>\
+			',
+
 			_initialized = false,
 			_events = {};
 
@@ -47,7 +59,33 @@ if (!R8.IDE.panel) {
 			init: function() {
 				_node = R8.Utils.Y.one('#'+_def.id);
 				_headerNode = R8.Utils.Y.one('#'+_def.id+'-header');
+				_tabListNode = R8.Utils.Y.one('#'+_def.id+'-tab-list');
+
 				_contentNode = R8.Utils.Y.one('#'+_def.id+'-content');
+				_contentNode.append(_emptyContentTpl);
+
+				_events['ftabMouseEnter'] = R8.Utils.Y.delegate('mouseenter',function(e){
+					e.currentTarget.addClass('show-close');
+				},_tabListNode,'.view-tab');
+
+				_events['ftabMouseLeave'] = R8.Utils.Y.delegate('mouseleave',function(e){
+					e.currentTarget.removeClass('show-close');
+				},_tabListNode,'.view-tab');
+
+				_events['ftabClick'] = R8.Utils.Y.delegate('click',function(e){
+					var tabNodeId = e.currentTarget.get('id');
+					var viewId = tabNodeId.replace(_id+'-tab-','');
+
+					this.setViewFocus(viewId);
+//					R8.Editor.fileFocus(fileId);
+				},_tabListNode,'.view-tab',this);
+
+				_events['fCloseClick'] = R8.Utils.Y.delegate('click',function(e){
+					var tabNodeId = e.currentTarget.get('id');
+					var fileId = tabNodeId.replace('close-file-','');
+
+					this.closeView(fileId);
+				},_tabListNode,'.view-tab .close-view',this);
 
 				this.initViews();
 				_initialized = true;
@@ -68,6 +106,10 @@ if (!R8.IDE.panel) {
 				var contentHeight = _node.get('region').height - _headerNode.get('region').height;
 				_contentNode.setStyles({'height':contentHeight,'width':_node.get('region').width,'backgroundColor':'#FFFFFF'});
 
+
+				if(_fileList.length > 0) R8.Editor.resize();
+
+/*
 				var numViews = _def.views.length;
 				for(var i=0; i < numViews; i++) {
 					if(_def.views[i].id == _currentView && typeof(_def.views[i].resizeMethod) != 'undefined') {
@@ -76,36 +118,59 @@ if (!R8.IDE.panel) {
 						i = numViews + 1;
 					}
 				}
+*/
 			},
 			render: function() {
-				this.setViewFocus();
+//				this.setViewFocus();
 				_panelTpl = R8.Rtpl['ide_panel_frame']({'panel': _def});
 
 				return _panelTpl;
 			},
 			get: function(key) {
 				switch(key) {
-					case "foo":
-						return "foo";
+					case "id":
+						return _id;
 						break;
 				}
 			},
-			setViewFocus: function() {
-				var numViews = _def.views.length;
-				if(typeof(_def.views) == 'undefined' || numViews == 0) return;
+			setViewFocus: function(viewId) {
+				if(viewId == _currentView) return;
 
-				if(typeof(_def.viewFocus) == 'undefined') {
-					_def.views[0]['tClass'] = _def.views[0]['tClass'] + ' active';
-					_currentView = _def.views[0].id;
-				}
-
-				for(var i=0; i < numViews; i++) {
-					if(_def.views[i].id == _def.viewFocus) {
-						_def.views[i]['tClass'] = _def.views[i]['tClass'] + ' active';
-						_currentView = _def.views[i].id;
-						i = numViews + 1;
+				if (this.numViews() > 1) {
+					for (var v in _views) {
+						var tabNode = R8.Utils.Y.one('#'+_id+'-tab-' + v);
+						tabNode.removeClass('active');
+						
+						_views[v].blur();
+/*
+						 if(_views[v].type == 'target') {
+							 R8.Utils.Y.one('#target-viewspace-'+v).setStyle('display','none');
+						 }
+*/
 					}
 				}
+				var tabNode = R8.Utils.Y.one('#'+_id+'-tab-'+viewId);
+				tabNode.addClass('active');
+				_views[viewId].focus();
+/*
+				if(_views[viewId].get('type') == 'file' && _fileList.length == 1) {
+					R8.Utils.Y.one('#editor-wrapper').setStyle('display','block');
+				} else if(_views[viewId].get('type') == 'file' && _fileList.length > 1) {
+					R8.Utils.Y.one('#editor-wrapper').setStyle('display','block');
+					if(typeof(_views[viewId].content) != 'undefined')
+						R8.Editor.setEditorContent(_views[viewId].content);
+				} else if(_views[viewId].get('type') == 'target') {
+//TODO: cleanup this hack
+					if(_fileList.length > 0) R8.Utils.Y.one('#editor-wrapper').setStyle('display','none');
+					R8.Utils.Y.one('#target-viewspace-'+viewId).setStyle('display','block');
+				}
+*/
+				if(_currentView == null) {
+					_lastView = viewId
+				} else {
+					_lastView = _currentView;
+				}
+				_currentView = viewId;
 			},
 			loadViews: function() {
 				for(var v in _def.views) {
@@ -113,6 +178,108 @@ if (!R8.IDE.panel) {
 					if(typeof(viewDef.method) == 'undefined') continue;
 					R8.IDE.views[viewDef.method](_viewContentNodes[viewDef.id]);
 				}
+			},
+			addTab: function(viewId) {
+				var tabTpl = '<li id="'+_id+'-tab-'+viewId+'" class="view-tab">'+_views[viewId].get('name')+'<div id="close-file-'+viewId+'" class="close-view"></div></li>';
+
+				_tabListNode.append(tabTpl);
+			},
+			numViews: function() {
+				var viewCount = 0;
+				for(var v in _views) viewCount++;
+
+				return viewCount;				
+			},
+			viewIsLoaded: function(viewId) {
+				if(typeof(_views[viewId]) == 'undefined') return false;
+				else return true;
+			},
+			loadView: function(view) {
+				if (this.viewIsLoaded(view.id)) {
+					this.setViewFocus(view.id);
+					return;
+				}
+				if(this.numViews() == 0) _contentNode.set('innerHTML','');
+
+				view.panel = this;
+				switch(view.type) {
+					case "file":
+						if(_fileList.length == 0) this.renderEditor();
+						if(!R8.Utils.inArray(_fileList,view.id)) _fileList.push(view.id);
+
+//						view.contentId = _id+'-'+view.id;
+						_views[view.id] = new R8.IDE.View.file(view);
+						break;
+					case "target":
+						_views[view.id] = new R8.IDE.View.target(view);
+						break;
+				}
+
+				var viewContent = _views[view.id].render();
+				if(viewContent != '') _contentNode.append(viewContent);
+				_views[view.id].init();
+
+				this.addTab(view.id);
+				this.setViewFocus(view.id);
+			},
+			closeView: function(viewId) {
+				switch(_views[viewId].get('type')) {
+					case "file":
+						var tempArray = [];
+						var activeIndex = null;
+						for(var i in _fileList) {
+							if(_fileList[i] != viewId) tempArray.push(_fileList[i]);
+							else activeIndex = i;
+						}
+						_fileList = tempArray;
+						if(_fileList.length === 0) R8.Editor.closeEditor();
+						break;
+				}
+
+				var tabNode = R8.Utils.Y.one('#'+_id+'-tab-'+viewId);
+				tabNode.purge(true);
+				tabNode.remove();
+				_views[viewId].close();
+				delete(_views[viewId]);
+
+				if(viewId == _currentView) _currentView = null;
+				if(this.numViews() == 0) {
+					_contentNode.append(_emptyContentTpl);
+					_lastView = null;
+				} else {
+					this.setViewFocus(_lastView);
+				}
+			},
+/*
+			viewFocus: function(viewId) {
+				if(_currentViewFocus == viewId) return;
+
+//				_editor.getSession().setValue(_files[fileId].get('content'));
+//				var callback = function() {
+//					_editor.gotoLine(1);
+//				}
+//				setTimeout(callback,150);
+
+				for(var v in _views) {
+					R8.Utils.Y.one('#view-tab-'+v).removeClass('focus');
+				}
+				R8.Utils.Y.one('#view-tab-'+viweId).addClass('focus');
+				_currentViewFocus = viewId;
+
+			},
+*/
+//----------------------------------------
+//Editor Panel Specific Functions
+//----------------------------------------
+			renderEditor: function() {
+					var editorTpl = '<div id="'+_id+'-editor-wrapper" class="editor-wrapper"></div>';
+					_contentNode.append(editorTpl);
+
+					var cfg = {'editorWrapperNodeId': _id+'-editor-wrapper','containerNodeId': _contentNode.get('id')};
+					R8.Editor.init(cfg);
+			},
+			setFileContent: function(fileId,fileContent) {
+				_views[fileId]['content'] = fileContent;
 			}
 		}
 	};

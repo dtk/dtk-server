@@ -103,7 +103,7 @@ body {
 	overflow: auto;
 }
 
-.panel .header {
+.panel .panel-header {
 	position: relative;
 	width: 100%;
 	height: 25px;
@@ -111,7 +111,7 @@ body {
 	background-color: #E4E4E4;
 }
 
-.panel .header .tab-list {
+.panel .panel-header .tab-list {
 	position: relative;
 	width: 100%;
 	height: 25px;
@@ -119,14 +119,15 @@ body {
 	
 	overflow-x: hidden;
 }
-.panel .header .tab-list li {
+.panel .panel-header .tab-list li {
 	list-style: none outside;
 	height: 25px;
-	padding: 5px 5px 0 5px;
+/*	padding: 5px 5px 0 5px;*/
+	padding: 0 5px 0 5px;
 	position: relative;
 	float: left;
 }
-.panel .header .tab-list li.active {
+.panel .panel-header .tab-list li.active {
 	border-top: 1px solid #343434;
 	border-left: 1px solid #343434;
 	border-right: 1px solid #343434;
@@ -164,6 +165,40 @@ body {
 	float: left;
 	font-size: 13px;
 }
+
+.editor-empty-bg {
+	background-image: url(../images/ide/reactor8-logo-trans.png);
+	height: 55px;
+	width: 350px;
+	margin: 60px auto 0 auto;
+}
+
+.tab-list .view-tab {
+	height: 25px;
+	border-left: 1px solid #333333;
+	border-right: 1px solid #333333;
+	float: left;
+	padding: 2px 5px 0 5px;
+	cursor: pointer;
+}
+.tab-list .view-tab.active {
+	background-color: #99B4D1;
+}
+.tab-list .view-tab.focus {
+	background-image: url(../images/editor/file-tab-focus-bg.png);
+	background-repeat: repeat-x;
+}
+
+.view-tab .close-view {
+	height: 16px;
+	width: 16px;
+	margin-left: 5px;
+	float: right;
+}
+.view-tab.show-close .close-view {
+	background-image: url(../images/editor/close-file-icon.png);
+}
+
 /*------------Form related-----------------*/
 
 

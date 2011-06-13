@@ -13,7 +13,14 @@ if (!R8.Target) {
 
 		return {
 			init: function() {
-				
+//				_viewNode = R8.Utils.Y.one('#'+cfg.containerNodeId);
+//				_editorContainerNode.append(_editorTpl);
+
+			},
+			renderView: function() {
+				var viewTpl = '<div id="target-viewspace-'+_def.id+'" class="target-viewspace"></div>';
+
+				return viewTpl;
 			},
 			get: function(key) {
 				switch(key) {

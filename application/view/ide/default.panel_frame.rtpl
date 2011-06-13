@@ -3,8 +3,8 @@
 <div id="{%=panel[:id]%}" class="panel {%=panel[:pClass]%}" 
 	style="height: {%=panel[:height]%}; width: {%=panel[:width]%};
 			min-height: {%=panel[:minHeight]%}; min-width: {%=panel[:minWidth]%};">
-	<div id="{%=panel[:id]%}-header" class="{%=panel[:headerClass]%} header">
-						<ul id="l-panel-tab-list" class="tab-list">
+	<div id="{%=panel[:id]%}-header" class="{%=panel[:headerClass]%} panel-header">
+						<ul id="{%=panel[:id]%}-tab-list" class="tab-list">
 							{%for view in panel[:views]%}
 								<li id="view-tab-{%=view[:id]%}" class="{%=view[:tClass]%}">{%=view[:label]%}</li>
 							{%end%}

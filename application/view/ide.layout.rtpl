@@ -18,6 +18,19 @@
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/cmdbar.css" />
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/toolbar.css" />
 
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/workspace.css" />
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/basic-component.css" />
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/basic-group.css" />
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/basic-node.css" />
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/basic-item.css" />
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/monitor.css" />
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/topbar.css" />
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/cmdbar.css" />
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/toolbar.css" />
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/notifications.css" />
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/dock.css" />
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/wspace_modal.css" />
+
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/editor.css" />
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/target.css" />
 
@@ -142,16 +155,20 @@ YUI_config = {
 
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.panel.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.editorPanel.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.View.file.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.View.target.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.viewspace.js"></script>
 
 
-
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/project.r8.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.project.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/target.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/node.r8.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/node2.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/component.r8.js"></script>
 
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/model.r8.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/canvas.r8.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/canvas2.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/cmdbar.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/maintoolbar.r8.js"></script>
 
@@ -161,7 +178,7 @@ YUI_config = {
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/topbar.r8.js"></script>
 
 
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/editor.r8.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.editor.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/file.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/toolbar.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/page.r8.js"></script>

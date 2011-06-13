@@ -24,6 +24,27 @@ module XYZ
       tpl_info = tpl.render()
       include_js_tpl(tpl_info[:src])
 
+#==========================
+#Include target specific js that will be needed
+#TODO: move out of here eventually
+      tpl_info_hash = Hash.new
+
+      tpl = R8Tpl::TemplateR8.new("node_group/wspace_display",user_context())
+      tpl.set_js_tpl_name("ng_wspace_display")
+      tpl_info_hash[:node_group] = tpl.render()
+      include_js_tpl(tpl_info_hash[:node_group][:src])
+
+      tpl = R8Tpl::TemplateR8.new("node/wspace_display",user_context())
+      tpl.set_js_tpl_name("node_wspace_display")
+      tpl_info_hash[:node] = tpl.render()
+      include_js_tpl(tpl_info_hash[:node][:src])
+
+      tpl = R8Tpl::TemplateR8.new("datacenter/wspace_monitor_display",user_context())
+      tpl.set_js_tpl_name("wspace_monitor_display")
+      tpl_info_hash[:monitor] = tpl.render()
+      include_js_tpl(tpl_info_hash[:monitor][:src])
+#==========================
+
       projects_json = JSON.generate(projects)
 #TODO: figure out why this user init isnt firing inside of bundle and return
 #DEBUG

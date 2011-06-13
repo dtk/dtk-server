@@ -1,7 +1,7 @@
 
-if (!R8.ViewSpace) {
+if (!R8.ViewSpace2) {
 
-	R8.ViewSpace = function(viewSpaceDef) {
+	R8.ViewSpace2 = function(viewSpaceDef) {
 		var _def = viewSpaceDef,
 			_id = _def['object']['id'],
 			_ui = _def.object.ui,
@@ -10,7 +10,7 @@ if (!R8.ViewSpace) {
 
 			_type = _def['type'],
 			_items = {},
-			_node = R8.Utils.Y.one('#viewspace'),
+			_node = R8.Utils.Y.one('#'+_def.containerNodeId),
 			_updateBackgroundCall = null,
 
 			_draggableItems = {},
@@ -80,10 +80,14 @@ if (!R8.ViewSpace) {
 			setupEvents: function() {
 
 				_events['item_click'] = R8.Utils.Y.delegate('click',this.updateSelectedItems,_node,'.vspace-item',this);
-				_events['vspace_click'] = R8.Utils.Y.delegate('click',this.clearSelectedItems,'body','#viewspace');
+				_events['vspace_click'] = R8.Utils.Y.delegate('click',this.clearSelectedItems,'body','#'+_node.get('id'));
+
+//DEBUG
+//TODO: mouse over popup screwed b/c of layout, disabling for now
+/*
 				_events['port_mover'] = R8.Utils.Y.delegate('mouseover',this.portMover,_node,'.port',this);
 				_events['port_mover'] = R8.Utils.Y.delegate('mouseout',this.portMout,_node,'.port',this);
-
+*/
 				_events['item_name_dblclick'] = R8.Utils.Y.delegate('dblclick',function(e){
 					var itemId = e.currentTarget.getAttribute('data-id'),
 						inputWrapperNode = R8.Utils.Y.one('#item-'+itemId+'-name-input-wrapper'),
@@ -108,7 +112,7 @@ if (!R8.ViewSpace) {
 				},_node,'.item-name',this);
 
 //				R8.Workspace.events['item_click'] = R8.Utils.Y.delegate('click',function(){console.log('clicked item');},R8.Workspace.viewSpaceNode,'.item, .connector');
-//				R8.Workspace.events['vspace_mdown'] = R8.Utils.Y.delegate('mousedown',R8.Workspace.checkMouseDownEvent,'body','#viewspace');
+//				R8.Workspace.events['vspace_mdown'] = R8.Utils.Y.delegate('mousedown',R8.Workspace.checkMouseDownEvent,'body','#'+_node.get('id'));
 			},
 /*
 			createLink: function() {
@@ -704,7 +708,9 @@ if (typeof(e) != 'undefined') {
 				if(e.ctrlKey == false) this.clearSelectedItems();
 				this.addSelectedItem(modelId,{'model':model,'id':modelId});
 
-				R8.Dock.focusChange(_selectedItems);
+//DEBUG
+//TODO: revisit once puting dock into place
+//				R8.Dock.focusChange(_selectedItems);
 
 				e.stopImmediatePropagation();
 			},
@@ -750,7 +756,7 @@ if (typeof(e) != 'undefined') {
 
 			addNode: function(node) {
 				var id = node['object']['id'];
-				_items[id] = new R8.Node(node,this);
+				_items[id] = new R8.Node2(node,this);
 				_node.append(_items[id].render());
 				_items[id].init();
 

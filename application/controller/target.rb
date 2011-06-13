@@ -89,5 +89,55 @@ module XYZ
       return {:data=>''}
     end
 
+    def get_view_items(id)
+      datacenter = id_handle(id,:datacenter).create_object()
+      datacenter_id = datacenter.id()
+
+      dc_hash = get_object_by_id(datacenter_id,:datacenter)
+
+      view_space = {
+        :type => 'datacenter',
+        :i18n => 'Environments',
+        :object => dc_hash
+      }
+      model_list = datacenter.get_items()
+
+      tpl_info_hash = {}
+      tpl = R8Tpl::TemplateR8.new("node_group/wspace_display",user_context())
+      tpl.set_js_tpl_name("ng_wspace_display")
+      tpl_info_hash[:node_group] = tpl.render()
+
+      tpl = R8Tpl::TemplateR8.new("node/wspace_display",user_context())
+      tpl.set_js_tpl_name("node_wspace_display")
+      tpl_info_hash[:node] = tpl.render()
+
+      tpl = R8Tpl::TemplateR8.new("datacenter/wspace_monitor_display",user_context())
+      tpl.set_js_tpl_name("wspace_monitor_display")
+      tpl_info_hash[:monitor] = tpl.render()
+
+      items = model_list.map do |object|
+        object_id_sym = object.id.to_s.to_sym
+        ui = ((dc_hash[:ui]||{})[:items]||{})[object_id_sym] || (object[:ui]||{})[datacenter_id.to_s.to_sym]
+
+        obj_tags = object[:display_name].split(',')
+        model_name = object.model_name
+        type = (obj_tags.include?("monitor")) ? :monitor : model_name
+        {
+          :type => type.to_s,
+          :model => model_name.to_s,
+          :object => object,
+#          :toolbar_def => toolbar_def,
+          :tpl_callback => tpl_info_hash[type][:template_callback],
+          :ui => ui,
+          :tags => obj_tags
+        }
+      end
+      view_space[:items] = items
+#      view_space_json = JSON.generate(view_space)
+#      run_javascript("R8.Workspace.pushViewSpace(#{view_space_json});")
+
+      return {:data=>view_space}
+    end
+
   end
 end

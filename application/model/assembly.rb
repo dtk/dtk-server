@@ -1,6 +1,14 @@
 module XYZ
   class Assembly < Component
 
+    #### for cloning
+    def add_model_specific_override_attrs!(override_attrs,target_obj)
+      override_attrs[:display_name] ||= SQL::ColRef.qualified_ref 
+      override_attrs[:updated] ||= false
+    end
+
+    ##############
+
     def is_assembly?()
       true
     end

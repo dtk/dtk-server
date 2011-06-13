@@ -819,32 +819,31 @@ POSSIBLE CHANGES TO HASH
       #TODO: stub
       icon_info = {"images" => {"display" => "generic-assembly.png","tiny" => "","tnail" => "generic-assembly.png"}}
 
-      library_id_handle = id_handle(hash["library_id"].to_i,:library)
+      library_id = hash["library_id"].to_i
+      library_idh = id_handle(library_id,:library)
       name = hash["name"] || "assembly"
-      create_hash = {
-        :component => {
-          name => {
-            :display_name => name,
-            :ui => icon_info,
-            :type => "composite"
-          }
-        }
+      create_row = {
+        :library_library_id => library_id,
+        :ref => name,
+        :display_name => name,
+        :ui => icon_info,
+        :type => "composite"
       }
-#TODO: getting json rather than hash
-item_list = JSON.parse(hash["item_list"])
-      node_id_handles = item_list.map{|item|id_handle(item["id"].to_i,item["model"].to_sym)}
-      connected_links,dangling_links = Node.get_external_connected_links(node_id_handles)
+      assembly_mh = library_idh.createMH(:model_name=>:component,:parent_model_name=>:library)
+      assembly_idh = Model.create_from_rows(assembly_mh,[create_row],:convert=>true).first
+
+      #TODO: getting json rather than hash
+      item_list = JSON.parse(hash["item_list"])
+      node_idhs = item_list.map{|item|id_handle(item["id"].to_i,item["model"].to_sym)}
+      connected_links,dangling_links = Node.get_external_connected_links(node_idhs)
       #TODO: raise error to user if dangling link
       Log.error("dangling links #{dangling_links.inspect}") unless dangling_links.empty?
-      link_id_handles = connected_links.map{|link|link.id_handle}
+      link_idhs = connected_links.map{|link|link.id_handle}
 
-      assembly_id = Component.create_from_hash(library_id_handle,create_hash).first[:id]
-      assembly_id_handle = id_handle(assembly_id,:component)
-
-      id_handles = node_id_handles + link_id_handles
-      library_object = library_id_handle.create_object()
+      id_handles = node_idhs + link_idhs
+      library_object = library_idh.create_object()
       #TODO: encapsulate some of above so ca just call library_object.clone_into(...
-      library_object.clone_into__top_object_exists(assembly_id_handle,id_handles)
+      library_object.clone_into__top_object_exists(assembly_idh,id_handles)
       return {:content => nil}
     end
   end

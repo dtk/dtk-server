@@ -104,7 +104,7 @@ module XYZ
           vc_val = scalar_assigns.delete(vc)
           path = virtual_col_defs[vc][:path]
           unless path
-            Log.info("no path definition for virtual column #{virtual_col}") 
+            Log.info("no path definition for virtual column #{vc}") 
             next
           end
           HashObject.set_nested_value!(scalar_assigns,path,vc_val)

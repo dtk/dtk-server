@@ -18,6 +18,7 @@ module XYZ
     end
 
     def self.clone_branch(context,new_branch)
+      return if (R8::Config[:repo]||{})[:type] == "mock"
       get_repo(context).clone_branch(new_branch)
     end
     def self.delete(context)

@@ -621,7 +621,6 @@ pp datacenter
     helper :create_tasks_from_pending_changes
 
     def commit_changes(datacenter_id=nil)
-#pp [:threads, Thread.list]
 #      context_type = request.params["context_type"]
       #TODO: either use param from context id or from what is posted
       #TODO: move to getting id of top level task
@@ -703,6 +702,11 @@ POSSIBLE CHANGES TO HASH
   -task_id to id
   -
 =end
+
+#### test of attribute groups
+
+#Attribute.augmented_attribute_list_from_task(commit_task)
+
 
 #default if nothing passed is json, make extensible for xml formatting for tuture possible integrations
 #          commit_tree = top_level_task.render_commit_tree()

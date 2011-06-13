@@ -1,5 +1,7 @@
+require  File.expand_path('attribute/group', File.dirname(__FILE__))
 module XYZ
   class Attribute < Model
+    extend AttributeGroupClassMixin
     set_relation_name(:attribute,:attribute)
     def self.up()
       external_ref_column_defs()

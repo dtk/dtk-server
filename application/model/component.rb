@@ -1,6 +1,6 @@
-require  File.expand_path('component/component_model_def_processor', File.dirname(__FILE__))
-require  File.expand_path('component/component_view_meta_processor', File.dirname(__FILE__))
-require  File.expand_path('component/component_template', File.dirname(__FILE__)) 
+require  File.expand_path('component/model_def_processor', File.dirname(__FILE__))
+require  File.expand_path('component/view_meta_processor', File.dirname(__FILE__))
+require  File.expand_path('component/template', File.dirname(__FILE__)) 
 
 module XYZ
   class Component < Model

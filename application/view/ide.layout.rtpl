@@ -156,8 +156,8 @@ YUI_config = {
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.panel.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.editorPanel.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.View.file.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.View.target.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.view.file.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.view.target.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.viewspace.js"></script>
 
 

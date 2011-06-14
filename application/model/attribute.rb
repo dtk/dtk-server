@@ -1,4 +1,5 @@
 require  File.expand_path('attribute/group', File.dirname(__FILE__))
+require  File.expand_path('attribute/complex_type', File.dirname(__FILE__))
 module XYZ
   class Attribute < Model
     include AttributeGroupInstanceMixin

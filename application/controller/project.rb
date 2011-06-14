@@ -36,10 +36,18 @@ module XYZ
     end
 
     def save_attributes(explicit_hash=nil)
-      hash = explicit_hash || request.params.dup
-      redirect = hash.delete("redirect")
-      pp hash
-      #TODO: stub to update and propagate vars
+      attr_val_hash = explicit_hash || request.params.dup
+      redirect = attr_val_hash.delete("redirect")
+      #convert empty strings to nils
+      attr_val_hash.each{|k,v|attr_val_hash[k] = nil if v.kind_of?(String) and v.empty?}
+
+      #TODO: if not using c_ prfix remove from view and remobe below
+      attr_val_hash = attr_val_hash.inject({}) do |h,(k,v)|
+        h.merge(k.gsub(/^c__[0-9]+__/,"") => v)
+      end
+
+      attribute_rows = AttributeComplexType.ravel_raw_post_hash(attr_val_hash,:attribute)
+      Attribute.update_and_propagate_attributes(model_handle(:attribute),attribute_rows)
       redirect redirect
     end
   end

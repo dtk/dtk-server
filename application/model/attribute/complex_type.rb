@@ -1,9 +1,5 @@
 module XYZ
-  #TODO: remove as model
-  class AttributeComplexType < Model 
-    set_relation_name(:attribute,:complex_type)
-    def self.up()
-    end
+  module AttributeComplexType
     def self.has_required_fields_given_semantic_type?(obj,semantic_type)
       pattern =  SemanticTypeSchema.create_from_semantic_type(semantic_type)
       return nil unless pattern
@@ -36,7 +32,7 @@ module XYZ
     end
 
    private
-
+    Delim = Model::Delim
     TypeMapping = {
       :attribute => :a,
       :component => :c
@@ -55,7 +51,11 @@ module XYZ
       attributes_hash.each do |k,attr_hash|
         id,path = (k =~ AttrIdRegexp) && [$1.to_i,$2]
         next unless id
-        ret[id] ||= {:id => id,DB.parent_field(:component,:attribute) => parent_id}
+        ret[id] ||= {:id => id}
+
+        ##TODO: see if parent_id is needed
+        ret[id].merge!(DB.parent_field(:component,:attribute) => parent_id) if parent_id
+
         if path.empty? 
           ret[id][:value_asserted] = attr_hash
         else

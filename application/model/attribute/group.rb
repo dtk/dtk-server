@@ -1,23 +1,30 @@
 module XYZ
   class AttrValType
-    def self.create(type)
+    def self.create(type,attr)
       klass = AttrValTypeMap[type.to_sym]
-      if klass then klass.new(type)
+      if klass then klass.new(type,attr)
       else raise Error.new("attribute value type (#{type}) not treated")
       end
     end
     def type_of?(*types)
       types.find do |type|
-        unless type_klass = AttrValTypeMap[type]
-          Log.error("illegal type given #{type}")
-          next
+        #procssing of types ortogonal to type hierarchy
+        if type == :required_not_dynamic
+          @required and not @dynamic
+        else
+          unless type_klass = AttrValTypeMap[type]
+            Log.error("illegal type given #{type}")
+            next
+          end
+          self.kind_of?(type_klass)
         end
-        self.kind_of?(type_klass)
       end ? true : nil
     end
    private
-    def initialize(type)
+    def initialize(type,attr)
       @type=type.to_sym
+      @required = attr[:required]
+      @dynamic = attr[:dynamic]
     end
   end
   #TODO: may add distinction between set through default value versus set directly
@@ -55,7 +62,7 @@ module XYZ
         else :unset_not_required
        end
       raise Error.new("Cannot detect type of attribute") unless type
-      AttrValType.create(type)
+      AttrValType.create(type,self)
     end
   end
   module AttributeGroupClassMixin

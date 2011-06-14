@@ -11,6 +11,7 @@ module XYZ
       augmented_attr_list = Attribute.augmented_attribute_list_from_task(commit_task)
       
       opts = {:types_to_keep => [:unset_required]}
+#      opts = {:types_to_keep => [:required_not_dynamic]}
       grouped_attrs = Attribute.ret_grouped_attributes(augmented_attr_list,opts)
       ##pp grouped_attrs.map{|attr|[attr[:display_name],attr[:attr_val_type]]}
 

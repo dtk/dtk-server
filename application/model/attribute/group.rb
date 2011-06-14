@@ -8,56 +8,48 @@ module XYZ
     end
     def type_of?(*types)
       types.find do |type|
-        #procssing of types ortogonal to type hierarchy
-        if type == :required_not_dynamic
-          @required and not @dynamic
-        else
-          unless type_klass = AttrValTypeMap[type]
-            Log.error("illegal type given #{type}")
-            next
-          end
-          self.kind_of?(type_klass)
+        unless type_klass = AttrValTypeMap[type]
+          Log.error("illegal type given #{type}")
+          next
         end
+        self.kind_of?(type_klass)
       end ? true : nil
     end
    private
     def initialize(type,attr)
       @type=type.to_sym
-      @required = attr[:required]
-      @dynamic = attr[:dynamic]
     end
   end
-  #TODO: may add distinction between set through default value versus set directly
+
+  class AttrValTypeSet < AttrValType
+  end
   class AttrValTypeUnset < AttrValType
   end
   class AttrValTypeUnsetRequired < AttrValTypeUnset
   end
+  class AttrValTypeUnsetDynamic < AttrValTypeUnset
+  end
+  class AttrValTypeUnsetLinked < AttrValTypeUnset
+  end
   class AttrValTypeUnsetNotRequired < AttrValTypeUnset
   end
-  class AttrValTypeSet < AttrValType
-  end
-  class AttrValTypeSetAsserted < AttrValTypeSet
-  end
-  class AttrValTypeSetDerived < AttrValTypeSet
-  end
-  class AttrValTypeSetDynamic < AttrValTypeSet
-  end
+
   AttrValTypeMap = {
+    :set => AttrValTypeSet,
     :unset_required => AttrValTypeUnsetRequired,
     :unset_not_required => AttrValTypeUnsetNotRequired,
-    :set => AttrValTypeSet,
-    :set_asserted => AttrValTypeSetAsserted,
-    :set_derived => AttrValTypeSetDerived,
-    :set_dynamic => AttrValTypeSetDynamic,
+    :unset_dynamic => AttrValTypeUnsetDynamic,
+    :unset_linked => AttrValTypeUnsetLinked,
   }
 
   module AttributeGroupInstanceMixin
     def attribute_value_type()
       #TODO: detecting legititamate null value
+      #TODO: need way to propagate required on inputs to outputs 
       type = 
-        if self[:value_asserted] then :set_asserted
-        elsif self[:value_derived] then :set_derived
-        elsif self[:dynamic] and self[:port_type] == "input" then :set_dynamic
+        if self[:attribute_value] then :set
+        elsif self[:dynamic] then :unset_dynamic
+        elsif self[:port_type] == "input" then :unset_linked
         elsif self[:required] then :unset_required
         else :unset_not_required
        end

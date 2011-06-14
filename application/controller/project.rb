@@ -11,7 +11,7 @@ module XYZ
       augmented_attr_list = Attribute.augmented_attribute_list_from_task(commit_task)
       
       opts = {:types_to_keep => [:unset_required]}
-      grouped_attrs = Attribute.ret_grouped_attributes(augmented_attr_list,opts)
+      grouped_attrs = Attribute.ret_grouped_attributes!(augmented_attr_list,opts)
      # pp grouped_attrs.each{|x| pp [x[:component][:display_name],x[:display_name],x[:attr_val_type]]}
 
       i18n_mapping = get_i18n_mappings_for_models(:attribute,:component)

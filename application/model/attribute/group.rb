@@ -58,8 +58,11 @@ module XYZ
     end
   end
   module AttributeGroupClassMixin
-    def ret_grouped_attributes(augmented_attr_list,opts={})
+    #marjked with "!" because augments info
+    def ret_grouped_attributes!(augmented_attr_list,opts={})
       prune_set = opts[:types_to_keep]
+      add_missing_info_for_group_attrs!(augmented_attr_list,prune_set)
+
       ret = Array.new
       augmented_attr_list.each do |attr|
         type = attr.attribute_value_type()
@@ -76,6 +79,23 @@ module XYZ
         end
       end
       ret
+    end
+   private
+    def add_missing_info_for_group_attrs!(augmented_attr_list,prune_set)
+      return
+      #TODO: add input direction if not present
+      #TODO: propagate back required
+      #TODO: can make more efficient by calling this just once and storing info in attributes;
+      #might put in some json attribute
+      #need analysis that looks at the index maps
+      attr_ids = augmented_attr_list.map{|a|a[:id]}.uniq
+      sp_hash = {
+        :cols => [:function,:index_map,:input_id,:output_id],
+        :filter => [:oneof ,:input_id, attr_ids]
+      }
+      sample_attr = augmented_attr_list.first
+      attr_link_mh = sample_attr.model_handle(:attribute_link)
+      pp get_objects_from_sp_hash(attr_link_mh,sp_hash)
     end
   end
 end

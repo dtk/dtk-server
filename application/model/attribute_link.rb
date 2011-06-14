@@ -8,7 +8,7 @@ module XYZ
       create_attr_links_aux!(rows_to_create,parent_idh,attr_mh,attr_info,opts)
     end
 
-    #TODO: after settle on exact semantics for ports; this can become conenction between two components
+    #TODO: after settle on exact semantics for ports; this can become connection between two components
     def self.create_port_and_attr_links(parent_idh,rows_to_create_x,opts={})
       rows_to_create = Aux::deep_copy(rows_to_create_x)
       attr_mh = parent_idh.createMH(:model_name => :attribute,:parent_model_name=>:component) #TODO: parent model name can also be node

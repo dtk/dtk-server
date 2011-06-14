@@ -25,7 +25,7 @@ module XYZ
       virtual_column :semantic_type_object, :type => :object, :hidden => true, :local_dependencies => [:semantic_type]
 
       ###cols that relate to who or what can or does change the attribute
-      #TODO: need to clearly relate these four
+      #TODO: need to clearly relate these four; may get rid of read_only
       column :read_only, :boolean, :default => false 
       column :dynamic, :boolean, :default => false #means dynamically set by an executable action
       virtual_column :port_type, :type => :varchar, :hidden => true, :local_dependencies => [:is_port,:semantic_type_summary]
@@ -252,6 +252,7 @@ module XYZ
       SemanticType.create_from_attribute(self)
     end
 
+    #TODO: deprecate
     def needs_to_be_set()
       attribute_value().nil? and self[:required] and not self[:read_only]
     end

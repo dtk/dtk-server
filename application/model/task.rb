@@ -1,6 +1,5 @@
 module XYZ
   class Task < Model
-
     def self.create_from_nodes_to_rerun(node_idhs)
       config_nodes_task = config_nodes_task(grouped_state_changes[TaskAction::ConfigNode])
       if create_nodes_task and config_nodes_task
@@ -24,7 +23,7 @@ module XYZ
       get_objects_from_sp_hash(model_handle,sp_hash).reject{|k,v|k == :subtasks}
     end
 
-    #this also provides teh nodes task_id as an extra attributevalue
+    #this also provides the nodes task_id and config_agent_type as extra attribute values
     def get_associated_nodes()
       exec_actions = Array.new
       #if executable level then get its executable_action
@@ -51,9 +50,9 @@ module XYZ
       exec_actions.each do |ea|
         next unless node = ea[:node]
         node_id = node[:id]
-        unless indexed_nodes[node_id] and indexed_nodes[node_id][:external_ref]
-          indexed_nodes[node_id] = node.merge(:task_id => ea[:task_id])
-        end
+        indexed_nodes[node_id] ||= node.merge(:task_id => ea[:task_id])
+        indexed_nodes[node_id][:external_ref] ||= node[:external_ref]
+        indexed_nodes[node_id][:config_agent_type] ||= get_config_agent_type(ea)
       end
 
       #need to query db if missing external_refs having instance_id
@@ -69,6 +68,12 @@ module XYZ
       end
       indexed_nodes.values
     end
+
+    def get_config_agent_type(executable_action)
+      #just takes one sample since assumes all component actions have same config agent
+      ((executable_action[:component_actions]||[]).first||{})[:on_node_config_agent_type]
+    end
+    private :get_config_agent_type
 
     #recursively walks structure, but returns them in flat list
     def get_all_subtasks()

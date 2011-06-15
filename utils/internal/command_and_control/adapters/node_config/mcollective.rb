@@ -61,7 +61,7 @@ module XYZ
         async_agent_call(log_agent.to_s,"get",params,filter,callbacks,async_context)
       end
       LogAgents = {
-        :chef => :get_log_fragment
+        :config_agent => :get_log_fragment
       }
       GetLogsTimeout = 3
       def self.parse_response__get_logs(msg)

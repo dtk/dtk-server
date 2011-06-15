@@ -38,13 +38,16 @@ module XYZ
       if R8::EnvironmentConfig::CommandAndControlMode == "mcollective"
         #TODO: do cases lower level
         #logs = task ? CommandAndControl.get_logs(task,assoc_nodes) : []
-        logs = task ? TaskLog.get_and_update_logs_content(task,assoc_nodes,:top_task_id => task.id()) : []
+        logs_info = task ? TaskLog.get_and_update_logs_content(task,assoc_nodes,:top_task_id => task.id()) : {}
       else
-        logs = get_logs_mock(assoc_nodes)
+        logs_info = get_logs_mock(assoc_nodes).inject({}) do |h,(k,v)|
+          h.merge(k => {:log => v, :type => "chef"})
+        end
       end
 
       parsed_logs = {:no_data =>  Array.new,:ok => Array.new, :error => Array.new}
-      logs.each do |node_id,log|
+      logs_info.each do |node_id,log_info|
+        log = log_info[:log]
         node_name = ndx_node_names[node_id]
         pp "log for node #{node_name} (id=#{node_id.to_s})"
         unless log
@@ -52,7 +55,8 @@ module XYZ
           parsed_logs[:no_data] << {:node_id => node_id,:node_name => node_name}
           next
         end
-        pl = ParseLog.parse(:chef,log)
+        log_type = log_info[:type].to_sym
+        pl = ParseLog.parse(log_type,log)
         STDOUT << pl.pp_form_summary
         #          File.open("/tmp/raw#{node_id.to_s}.txt","w"){|f|log.each{|l|f << l+"\n"}}
         pp [:file_asset_if_error,pl.ret_file_asset_if_error(model_handle)]

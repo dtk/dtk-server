@@ -5,7 +5,7 @@ require 'pp'
 
 msg_types = {
   :get_log_fragment => [:command],
-#  :get_log_fragment => [],
+  :get_log_fragment => [],
   :discovery => [],
   :chef_solo => [],
   :puppet_apply => [],

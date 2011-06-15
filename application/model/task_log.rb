@@ -2,11 +2,9 @@ module XYZ
   class TaskLog < Model
     def self.get_and_update_logs_content(task,assoc_nodes,log_filter)
       ret_info = assoc_nodes.inject({}){|h,n|h.merge(n[:task_id] => {:node => n})}
-      log_type = :chef  #TODO: stub to just get chef run logs
       sp_hash = {
         :cols => [:id,:status,:type,:content, :task_id],
-        :filter => [:and, [:oneof, :task_id, assoc_nodes.map{|n|n[:task_id]}],
-                    [:eq, :type, log_type.to_s]]
+        :filter => [:oneof, :task_id, assoc_nodes.map{|n|n[:task_id]}]
       }
       task_log_mh = task.model_handle.createMH(:task_log)
       task_logs = Model.get_objects_from_sp_hash(task_log_mh,sp_hash)
@@ -21,13 +19,15 @@ module XYZ
       unless incl_assoc_nodes.empty?
         #initiate defer task to get logs
         task_pbuilderid_index = incl_assoc_nodes.inject({}){|h,n|h.merge(Node.pbuilderid(n) => n[:task_id])}
+        config_agent_types = assoc_nodes.inject({}){|h,n|h.merge(n[:task_id] => n[:config_agent_type])}
         callbacks = {
           :on_msg_received => proc do |msg|
             response = CommandAndControl.parse_response__get_logs(task,msg)
             if response[:status] == :ok
               task_id = task_pbuilderid_index[response[:pbuilderid]]
               task_idh = task.model_handle.createIDH(:id => task_id)
-              TaskLog.create_or_update(task_idh,log_type.to_s,response[:log_content])
+              config_agent_type = config_agent_types[task_id]
+              TaskLog.create_or_update(task_idh,config_agent_type.to_s,response[:log_content])
             else
               Log.error("error response for request to get log")
               #TODO: put some subset of this in error msg
@@ -35,9 +35,9 @@ module XYZ
             end
           end
         }
-        CommandAndControl.request__get_logs(task,incl_assoc_nodes,callbacks,:log_type => log_type)
+        CommandAndControl.request__get_logs(task,incl_assoc_nodes,callbacks,:log_type => :config_agent)
       end
-      ret_info.values.inject({}){|h,log_info|h.merge(log_info[:node][:id] => log_info[:log])}
+      ret_info.values.inject({}){|h,log_info|h.merge(log_info[:node][:id] => log_info)}
     end
 
     def self.create_or_update(task_idh,log_type,log_content)

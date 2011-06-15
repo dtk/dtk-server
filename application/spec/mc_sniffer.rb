@@ -7,7 +7,8 @@ msg_types = {
   :get_log_fragment => [:command],
 #  :get_log_fragment => [],
   :discovery => [],
-  :chef_solo => []
+  :chef_solo => [],
+  :puppet_apply => [],
 }
 def listen_for(msg_types)
   host = 'localhost'

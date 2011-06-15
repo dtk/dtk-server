@@ -3,27 +3,29 @@ module XYZ
   module ConfigAgentAdapter
     class Puppet < ConfigAgent
       def ret_msg_content(config_node)
-        components_and_attrs = components_and_attributes(config_node)
-        {:attributes => components_and_attrs.attributes, :component_list => components_and_attrs.component_list}
+        {:components_with_attributes => components_with_attributes(config_node)}
       end
       def type()
         :puppet
       end
      private
-      def components_and_attributes(config_node)
-        config_node[:component_actions].inject(PuppetNodeActions.new()){|ret,component_action|ret.add_action(component_action)}
+      def components_with_attributes(config_node)
+        config_node[:component_actions].inject(PuppetNodeActions.new()) do |ret,component_action|
+          ret.add_action(component_action)
+        end.components_with_attributes()
       end
 
       class PuppetNodeActions 
-        attr_reader :attributes
         def initialize()
           @component_names = Array.new
           @common_attr_index = Hash.new
           @attributes = Hash.new
         end
 
-        def component_list()
-          @component_names
+        def components_with_attributes()
+          @component_names.inject({}) do |h,cmp|
+            h.merge(cmp => @attributes[cmp]||{})
+          end
         end
 
         def add_action(component_action)

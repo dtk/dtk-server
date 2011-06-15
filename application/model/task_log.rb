@@ -13,7 +13,7 @@ module XYZ
       task_logs.each do |task_log|
         task_id = task_log[:task_id]
         #implicit assumption that only one log per task
-        ret_info[task_id].merge!(:log => task_log[:content],:status => task_log[:status])
+        ret_info[task_id].merge!(task_log.slice({:content => :log},:status,:type))
       end
       incl_assoc_nodes = ret_info.values.reject{|t|t[:status] == "complete"}.map{|info|info[:node]}
       unless incl_assoc_nodes.empty?

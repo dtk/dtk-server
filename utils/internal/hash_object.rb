@@ -12,6 +12,18 @@ module XYZ
       frozen? ? (super if has_key?(x)) : super
     end
 
+    def slice(*slice_keys)
+      slice_keys.inject(HashObject.new()) do |h,k|
+        if k.kind_of?(Hash)
+          source_key = k.keys.first
+          target_key = k.values.first
+          self.has_key?(source_key) ? h.merge(target_key => self[source_key]) : h
+        else
+          self.has_key?(k) ? h.merge(k => self[k]) : h
+        end
+      end
+    end
+
     def nested_value(*path)
       return self if path.empty?
       self.class.nested_value_private!(self,path.dup)

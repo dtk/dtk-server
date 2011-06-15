@@ -114,15 +114,6 @@ module XYZ
         ret
       end
 
-      def create_object_slice(hash,slice_keys,opts={})
-        ret = Hash.new
-        slice_keys.each do |k|
-          val = hash[k]
-          ret[k] = val if (val or opts[:include_null_cols])
-        end
-        ret
-      end
-
       def pp_form(obj)
         require 'pp'
         x = ""

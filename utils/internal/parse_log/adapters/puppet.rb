@@ -28,13 +28,15 @@ module XYZ
       Prune =
         [
          /\/File\[\//,
-         /\/Stage\[\//,
         ]
 
       #order is important because of subsumption
       Pattern =  Aux::ordered_hash(
-        [{:debug => Regexp.new("Puppet (debug)")},
-         {:info => Regexp.new("Puppet (info)")}]
+        [
+         {:debug => /\(debug\)/},
+         {:info => /\(info\)/},
+         {:notice => /\(notice\)/},
+        ]
       )
      public
       class LogSegments < ::XYZ::LogSegments

@@ -21,10 +21,10 @@ module XYZ
       return {:data=>file_asset}
     end
 
-    def save_content(id)
+    def save_content()
 #      file_asset = get_object_by_id(id)
 #      file_asset.update_content(request.params["content"])
-
+      raise Error.new("no file id given") unless request.params["editor_file_id"]
       file_asset = get_object_by_id(request.params["editor_file_id"])
       file_asset.update_content(request.params["editor_file_content"])
 

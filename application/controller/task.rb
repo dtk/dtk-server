@@ -57,10 +57,10 @@ module XYZ
         end
         log_type = log_info[:type].to_sym
         pl = ParseLog.parse(log_type,log)
-        STDOUT << pl.pp_form_summary
+        ##STDOUT << pl.pp_form_summary
         #          File.open("/tmp/raw#{node_id.to_s}.txt","w"){|f|log.each{|l|f << l+"\n"}}
-        pp [:file_asset_if_error,pl.ret_file_asset_if_error(model_handle)]
-        STDOUT << "----------------\n"
+        ##pp [:file_asset_if_error,pl.ret_file_asset_if_error(model_handle)]
+        ##STDOUT << "----------------\n"
         #TODO: hack whete find error node and if no error node first node
         type = pl.find{|seg|seg.type == :error} ? :error : :ok
         parsed_logs[type] << {:node_id => node_id, :node_name => node_name,:parsed_log => pl}

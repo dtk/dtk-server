@@ -14,7 +14,6 @@ module XYZ
       end
     end
 
-
     def self.get_top_level_tasks(model_handle)
       sp_hash = {
         :cols => [:id,:display_name,:status,:updated_at,:executable_action_type],

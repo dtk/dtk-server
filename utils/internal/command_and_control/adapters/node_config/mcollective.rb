@@ -18,7 +18,7 @@ module XYZ
         filter = filter_single_fact("pbuilderid",pbuilderid)
         context = opts[:receiver_context]
         callbacks = context[:callbacks]
-        async_agent_call(mcollective_agent(),"run",msg_content,filter,callbacks,context)
+        async_agent_call(mcollective_agent(config_agent),"run",msg_content,filter,callbacks,context)
       end
 
       #TODO: change signature to poll_to_detect_node_ready(node,callbacks,context)
@@ -100,9 +100,12 @@ module XYZ
         {:fact=>fact,:value=>value.to_s,:operator=>operator}
       end
 
-      #TODO: not sure if what name of agent is should be configurable; also this is a specfic agent dependent on whetehr chef or puppet
-      def self.mcollective_agent()
-        @mcollective_agent ||= R8::Config[:command_and_control][:node_config][:mcollective][:agent]
+      def self.mcollective_agent(config_agent)
+        case config_agent.type()
+         when :chef then "chef_solo"
+         when :puppet then "puppet_apply"
+         else raise Error.new("unexpected config adapter")
+        end
       end
 
       Lock = Mutex.new

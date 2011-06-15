@@ -5,6 +5,9 @@ module XYZ
         recipes_and_attrs = recipes_and_attributes(config_node)
         {:attributes => recipes_and_attrs.attributes, :run_list => recipes_and_attrs.run_list}
       end
+      def type()
+        :chef
+      end
      private
       def recipes_and_attributes(config_node)
         config_node[:component_actions].inject(ChefNodeActions.new()){|ret,component_action|ret.add_action(component_action)}

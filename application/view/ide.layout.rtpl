@@ -15,7 +15,7 @@
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/ui.css" />
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/form.css" />
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/topbar.css" />
-<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/cmdbar.css" />
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/cmdbar2.css" />
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/toolbar.css" />
 
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/workspace.css" />
@@ -24,9 +24,6 @@
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/basic-node.css" />
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/basic-item.css" />
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/monitor.css" />
-<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/topbar.css" />
-<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/cmdbar.css" />
-<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/toolbar.css" />
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/notifications.css" />
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/dock.css" />
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/wspace_modal.css" />
@@ -52,7 +49,7 @@
 		<div id="page-topbar" class="top-bar">
 			<div id="menu-bar" class="yui3-g menu-bar grey">
 				<div class="yui3-u left-cap"></div>
-				<div id="menu-bar-body" class="yui3-u body">
+				<div id="menu-bar-body" class="toolbar yui3-u body">
 					<div class="logo black"></div>
 					<div id="main-menu-items" class="main-menu-items">
 						<div class="item"><a href="{%=_app[:base_uri]%}/xyz/component/list"  style="color: #4FA4D0">Library</a></div>
@@ -61,10 +58,12 @@
 						<div class="item"><a href="{%=_app[:base_uri]%}/xyz/node/list">Inventory</a></div>
 					</div>
 					<div class="divider"></div>
+<!--
 					<div class="sub-item"><a href="javascript:R8.Editor.saveFile();">Save</a></div>
 					<div class="sub-item"><a href="javascript:R8.IDE.refreshChefDebug('debug');">Refresh Chef Debug</a></div>
 					<div class="sub-item"><a href="javascript:R8.IDE.refreshChefDebug('info');">Refresh Chef Info</a></div>
 					<div class="sub-item"><a href="javascript:R8.IDE.refreshChefDebug('summary');">Refresh Chef Summary</a></div>
+-->
 				</div>
 				<div class="yui3-u right-cap"></div>
 			</div>
@@ -166,16 +165,18 @@ YUI_config = {
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/node.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/node2.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/component.r8.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/link.r8.js"></script>
 
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/model.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/canvas2.r8.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/cmdbar.r8.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/canvas.r8.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/cmdbar2.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/maintoolbar.r8.js"></script>
 
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/search.r8.js"></script>
 
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/toolbargroup.r8.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/topbar.r8.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.toolbargroup.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.topbar.js"></script>
 
 
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.editor.js"></script>

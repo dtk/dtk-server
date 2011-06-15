@@ -88,10 +88,6 @@ if(!R8.Link) {
 					'style':_linkObj.style
 				};
 
-//DEBUG
-console.log('have a link def:');
-console.log(_linkDef);
-
 //TODO: revisit after fully implementing link types and new meta
 				if (this.isTypeOf('monitor')) {
 					_linkDef.type = 'monitor';

@@ -5,8 +5,38 @@ if (!R8.IDE.View.target) {
 		var _view = view,
 			_id = _view.id,
 			_panel = _view.panel,
+			_pendingDelete = {},
 
-			_contentTpl = '<div id="'+_panel.get('id')+'-'+_view.id+'" class="target-viewspace"></div>',
+			_modalNoe = null,
+			_modalNodeId = 'target-'+_id+'-modal',
+			_shimNodeId = null,
+			_shimNode = null,
+
+			_alertNode = null,
+			_alertNodeId = null,
+
+//DEBUG
+//			_contentTpl = '<div id="'+_panel.get('id')+'-'+_view.id+'" class="target-viewspace"></div>',
+			_contentTpl = '<div id="'+_panel.get('id')+'-'+_view.id+'-wrapper" style="">\
+								<div id="'+_panel.get('id')+'-'+_view.id+'" class="target-viewspace">\
+									<div id="cmdbar-tabcontainer" style="bottom: 40px;">\
+										<div id="cmdbar-tabs-wrapper">\
+											<div id="cmdbar-tabs">\
+											</div>\
+										</div>\
+										<div id="cmdbar-tab-content-wrapper"></div>\
+									</div>\
+									<div id="cmdbar">\
+										<div class="cmdbar-input-wrapper">\
+											<form id="cmdbar_input_form" name="cmdbar_input_form" onsubmit="R8.Cmdbar2.submit(); return false;">\
+												<input type="text" value="" id="cmd" name="cmd" title="Enter Command"/>\
+											</form>\
+										</div>\
+									</div>\
+								</div>\
+						</div>',
+
+			_contentWrapperNode = null,
 			_contentNode = null,
 
 			_initialized = false,
@@ -17,13 +47,29 @@ if (!R8.IDE.View.target) {
 			_currentViewSpace = null,
 			_viewContext = 'node',
 
+			_cmdBar = null,
+
 			_events = {};
 
 		return {
 			init: function() {
 				_contentNode = R8.Utils.Y.one('#'+_panel.get('id')+'-'+_view.id);
+				_contentWrapperNode = R8.Utils.Y.one('#'+_panel.get('id')+'-'+_view.id+'-wrapper');
 
 				this.getWorkspaceDef();
+
+				var cmdbarDef = {
+					'containerNode': _contentNode,
+					'panel': _panel,
+					'viewSpace': this
+				};
+				_cmdBar = new R8.Cmdbar2(cmdbarDef);
+				_cmdBar.init();
+
+				document.getElementById('cmdbar_input_form').onsubmit = function() {
+					_cmdBar.submit();
+					return false;
+				};
 
 				_initialized = true;
 			},
@@ -32,6 +78,9 @@ if (!R8.IDE.View.target) {
 			},
 			resize: function() {
 				if(!_initialized) return;
+
+				var pRegion = _panel.get('node').get('region');
+				_contentWrapperNode.setStyles({'height':pRegion.height,'width':pRegion.width});
 
 /*
 				var contentHeight = _node.get('region').height - _headerNode.get('region').height;
@@ -50,14 +99,14 @@ if (!R8.IDE.View.target) {
 			},
 			focus: function() {
 				this.resize();
-				_contentNode.setStyle('display','block');
+				_contentWrapperNode.setStyle('display','block');
 			},
 			blur: function() {
-				_contentNode.setStyle('display','none');
+				_contentWrapperNode.setStyle('display','none');
 			},
 			close: function() {
-				_contentNode.purge(true);
-				_contentNode.remove();
+				_contentWrapperNode.purge(true);
+				_contentWrapperNode.remove();
 			},
 
 //------------------------------------------------------
@@ -131,6 +180,179 @@ if (!R8.IDE.View.target) {
 				}
 				_viewSpaces[vSpaceId].addItems(items);
 			},
+			addItemToViewSpace : function(clonedNode,viewSpaceId) {
+				var cleanupId = clonedNode.get('id'),
+					modelName = clonedNode.getAttribute('data-model'),
+					modelId = clonedNode.getAttribute('data-id'),
+					top = clonedNode.getStyle('top'),
+					left = clonedNode.getStyle('left'),
+					vspaceId = (typeof(viewSpaceId) == 'undefined') ? _currentViewSpace: viewSpaceId;
+					vspaceDef = _viewSpaces[vspaceId].get('def'),
+					vspaceId = _viewSpaces[vspaceId].get('id'),
+					vspaceType = vspaceDef['type'];
+
+				top = parseInt(top.replace('px',''));
+				left = parseInt(left.replace('px',''));
+
+				var ui = {};
+				var contextUIKey = (typeof(viewSpaceId) == 'undefined') ? _currentViewSpace : viewSpaceId;
+				ui[contextUIKey] = {'top':top,'left':left};
+
+				var that=this;
+				YUI().use("json", function(Y) {
+					var uiStr = Y.JSON.stringify(ui);
+					var queryParams = 'ui='+uiStr+'&id='+modelId+'&model='+modelName;
+					queryParams += '&model_redirect='+modelName+'&action_redirect=wspace_display_ide&id_redirect=*id';
+
+					var successCallback = function(ioId,responseObj){
+						eval("var response =" + responseObj.responseText);
+						var newItems = response['application_node_wspace_display_ide']['content'][0]['data'];
+
+						that.addItems(newItems);
+						that.setupNewItems();
+					}
+					var callbacks = {
+						'io:success' : successCallback
+					};
+
+					var params = {
+						'callbacks': callbacks,
+						'cfg': {
+							'data': queryParams
+						}
+					}
+//					R8.Ctrl.call(modelName+'/clone/'+modelId,params);
+					R8.Ctrl.call(vspaceType+'/add_item/'+vspaceId,params);
+				});
+			},
+			setupNewItems: function() {
+				var viewspaceNode = R8.Utils.Y.one('#'+_contentNode.get('id'));
+				var itemChildren = viewspaceNode.get('children');
+				itemChildren.each(function(){
+					var dataModel = this.getAttribute('data-model');
+					var status = this.getAttribute('data-status');
+
+					if(status == 'pending_delete') {
+						_pendingDelete[this.get('id')] = {
+							'top':this.getStyle('top'),
+							'left':this.getStyle('left')
+						}
+					}
+					if((dataModel == 'node' || dataModel == 'group') && status == 'pending_setup') {
+						var top = this.getStyle('top');
+						var left = this.getStyle('left');
+						for(item in _pendingDelete) {
+							if(_pendingDelete[item]['top'] == top && _pendingDelete[item]['left'] == left) {
+								var cleanupNode = R8.Utils.Y.one('#'+item);
+								cleanupNode.purge(true);
+								cleanupNode.remove();
+								delete(cleanupNode);
+								delete(_pendingDelete[item]);
+							}
+						}
+					}
+				});
+			},
+			addComponentToContainer : function(componentId,containerNode) {
+				var modelName = containerNode.getAttribute('data-model');
+				var modelId = containerNode.getAttribute('data-id');
+
+				var queryParams = 'target_model_name='+modelName+'&target_id='+modelId;
+				queryParams += '&model_redirect='+modelName+'&action_redirect=added_component_conf_ide&id_redirect='+modelId;
+
+				var that=this;
+				var successCallback = function(ioId, responseObj) {
+						eval("var response =" + responseObj.responseText);
+						var alertStr = response['application_node_added_component_conf_ide']['content'][0]['data'];
+
+						that.refreshItem(modelId);
+						that.showAlert(alertStr);
+//DEBUG
+//TODO: revisit when fixing up console debugger
+//					R8.Workspace.refreshNotifications();
+				}
+				var callbacks = {
+					'io:success' : successCallback
+				};
+
+				R8.Ctrl.call('component/clone/'+componentId,{
+					'callbacks': callbacks,
+					'cfg': {
+						'data': queryParams
+					}
+				});
+			},
+			refreshItem: function(itemId){
+				_viewSpaces[_currentViewSpace].items(itemId).refresh();
+			},
+//---------------------------------------------
+//alert/notification related
+//---------------------------------------------
+			showAlert: function(alertStr) {
+//DEBUG
+console.log('going to show alert:'+alertStr);
+
+				_alertNodeId = R8.Utils.Y.guid();
+
+				var alertTpl = '<div id="'+_alertNodeId+'" class="modal-alert-wrapper">\
+									<div class="l-cap"></div>\
+									<div class="body"><b>'+alertStr+'</b></div>\
+									<div class="r-cap"></div>\
+								</div>',
+
+					nodeRegion = _contentNode.get('region'),
+					height = nodeRegion.bottom - nodeRegion.top,
+					width = nodeRegion.right - nodeRegion.left,
+					aTop = 0,
+					aLeft = Math.floor((width-250)/2);
+
+//				containerNode.append(alertTpl);
+				_contentNode.append(alertTpl);
+				_alertNode = R8.Utils.Y.one('#'+_alertNodeId);
+				_alertNode.setStyles({'top':aTop,'left':aLeft,'display':'block'});
+//return;
+				YUI().use('anim', function(Y) {
+					var anim = new Y.Anim({
+						node: '#'+_alertNodeId,
+						to: { opacity: 0 },
+						duration: .5
+					});
+					anim.on('end', function(e) {
+						var node = this.get('node');
+						node.get('parentNode').removeChild(node);
+					});
+					var delayAnimRun = function(){
+							anim.run();
+						}
+					setTimeout(delayAnimRun,2000);
+				});
+//				alert(alertStr);
+			},
+
+			shimify: function(nodeId) {
+				var node = R8.Utils.Y.one('#'+nodeId),
+					_shimNodeId = R8.Utils.Y.guid(),
+					nodeRegion = node.get('region'),
+					height = nodeRegion.bottom - nodeRegion.top,
+					width = nodeRegion.right - nodeRegion.left;
+
+				node.append('<div id="'+_shimNodeId+'" class="wspace-shim" style="height:'+height+'; width:'+width+'"></div>');
+				_shimNode = R8.Utils.Y.one('#'+_shimNodeId);
+				_shimNode.setStyle('opacity','0.8');
+				_shimNode.on('click',function(Y){
+					R8.Workspace.destroyShim();
+				});
+			},
+			destroyShim: function() {
+				_modalNode.purge(true);
+				_modalNode.remove();
+				_modalNode = null,
+
+				_shimNode.purge(true);
+				_shimNode.remove();
+				_shimId = null;
+				_shimNode = null;
+			}
 
 		}
 	};

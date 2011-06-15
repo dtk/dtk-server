@@ -7,6 +7,11 @@ if (!R8.IDE) {
 			_mainBodyWrapperNode = null,
 			_viewportRegion = null,
 
+			_modalNode = null,
+			_modalNodeId = 'ide-modal',
+			_shimNodeId = null,
+			_shimNode = null,
+
 			_lRegionMinWidth = 150,
 			_lRegionMinHeight = 200,
 			_lRegionNode = null,
@@ -163,6 +168,11 @@ if (!R8.IDE) {
 			init: function(projects) {
 				R8.UI.init();
 
+				var toolbarDef = {
+					'toolbarNodeId': 'menu-bar-body'
+				};
+				R8.Topbar2.init(toolbarDef);
+
 //TODO: fogure out how to more gracefully load this
 				_projects = projects;
 
@@ -209,6 +219,13 @@ if (!R8.IDE) {
 				this.panelResizeInit();
 
 //				R8.Editor.init();
+			},
+			get: function(key) {
+				switch(key) {
+					case "topbarNodeId":
+						return 'page-topbar';
+						break;
+				}
 			},
 			setupPanels: function() {
 				this.setPanelCounts();
@@ -602,7 +619,57 @@ if (!R8.IDE) {
 
 				this.refreshNotifications();
 			},
-			View: {}
+			View: {},
+//---------------------------------------------
+//MODAL RELATED, used with toolbar and others
+//---------------------------------------------
+			shimify: function(nodeId) {
+				var node = R8.Utils.Y.one('#'+nodeId),
+					_shimNodeId = R8.Utils.Y.guid(),
+					nodeRegion = node.get('region'),
+					height = nodeRegion.bottom - nodeRegion.top,
+					width = nodeRegion.right - nodeRegion.left;
+
+				node.append('<div id="'+_shimNodeId+'" class="wspace-shim" style="height:'+height+'; width:'+width+'"></div>');
+				_shimNode = R8.Utils.Y.one('#'+_shimNodeId);
+				_shimNode.setStyle('opacity','0.8');
+				var that=this;
+				_shimNode.on('click',function(Y){
+					that.destroyShim();
+				});
+			},
+			destroyShim: function() {
+				_modalNode.purge(true);
+				_modalNode.remove();
+				_modalNode = null,
+
+				_shimNode.purge(true);
+				_shimNode.remove();
+				_shimId = null;
+				_shimNode = null;
+			},
+
+			renderModal: function() {
+				var modalTpl = '<div id="'+_modalNodeId+'" class="wspace-modal" style="display:none;">\
+									<div id="'+_modalNodeId+'-content" class="content"></div>\
+								</div>',
+					node = R8.Utils.Y.one('#main-body-wrapper'),
+					nodeRegion = node.get('region'),
+					height = nodeRegion.bottom - nodeRegion.top,
+					width = nodeRegion.right - nodeRegion.left,
+					mTop = Math.floor((height - 350)/2),
+					mLeft = Math.floor((width-700)/2);
+
+				this.shimify('main-body-wrapper');
+
+				node.append(modalTpl);
+				_modalNode = R8.Utils.Y.one('#'+_modalNodeId);
+				_modalNode.setStyles({'top':mTop,'left':mLeft,'display':'block'});
+
+				var contentNode = R8.Utils.Y.one('#'+_modalNodeId+'-content');
+
+				return contentNode;
+			}
 		}
 	}();
 }

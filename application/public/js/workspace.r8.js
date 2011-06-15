@@ -18,7 +18,7 @@ if (!R8.Workspace) {
 			_contextBarId = 'wspace-context',
 			_contextBarNode = null,
 
-			_modalNoe = null,
+			_modalNode = null,
 			_modalNodeId = 'wspace-modal',
 			_shimNodeId = null,
 			_shimNode = null,

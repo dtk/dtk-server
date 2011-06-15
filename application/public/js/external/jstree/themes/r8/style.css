@@ -150,7 +150,7 @@
 .jstree-r8 li[rel=chef_cookbook] > a > .jstree-icon {
 	background-position: 0 -126px;
 }
-.jstree-r8 li[rel=puppet] > a > .jstree-icon {
+.jstree-r8 li[rel=puppet_module] > a > .jstree-icon {
 	background-position: -36px -126px;
 }
 

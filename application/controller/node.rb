@@ -172,6 +172,45 @@ node[:model_name] = 'node'
       return {}
     end
 
+    def wspace_display_ide(id)
+#TODO: decide if toolbar is needed/used at node level
+      #need to augment for nodes that are in datacenter directly and not node groups
+      tpl = R8Tpl::TemplateR8.new("node/wspace_display",user_context())
+      tpl.set_js_tpl_name("node_wspace_display")
+      tpl_info = tpl.render()
+      include_js_tpl(tpl_info[:src])
+
+      field_set = Model::FieldSet.default(:node)
+      node = get_object_by_id(id,:node)
+#pp node_list
+      items = Array.new
+      item = {
+          :type => 'node',
+          :object => node,
+          :toolbar_def => {},
+          :tpl_callback => tpl_info[:template_callback],
+          :ui => node[:ui]
+      }
+#DEBUG
+=begin
+        item = {
+          :type => model_name.to_s,
+          :object => node,
+          :toolbar_def => toolbar_def,
+          :tpl_callback => tpl_info[:template_callback],
+          :ui => node[:ui][datacenter_id.to_sym]
+        }
+=end
+      items << item
+
+#      addItemsObj = JSON.generate(items)
+#      run_javascript("R8.Workspace.addItems(#{addItemsObj});")
+
+      #---------------------------------------------
+
+      return {:data=>items}
+    end
+
     def added_component_conf(id)
       node = get_object_by_id(id)
       display_name = node[:display_name]
@@ -179,6 +218,15 @@ node[:model_name] = 'node'
       run_javascript("R8.Workspace.showAlert('#{alert_str}');")
 
       return {}
+    end
+
+    def added_component_conf_ide(id)
+      node = get_object_by_id(id)
+      display_name = node[:display_name]
+      alert_str = 'Added Component to Node('+display_name+')'
+#      run_javascript("R8.Workspace.showAlert('#{alert_str}');")
+
+      return {:data=>alert_str}
     end
 
     def wspace_refresh(id)

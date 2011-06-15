@@ -109,6 +109,8 @@ if (!R8.IDE.editorPanel) {
 
 				if(_fileList.length > 0) R8.Editor.resize();
 
+				if(_currentView != null) _views[_currentView].resize();
+
 /*
 				var numViews = _def.views.length;
 				for(var i=0; i < numViews; i++) {
@@ -130,6 +132,9 @@ if (!R8.IDE.editorPanel) {
 				switch(key) {
 					case "id":
 						return _id;
+						break;
+					case "node":
+						return _contentNode;
 						break;
 				}
 			},

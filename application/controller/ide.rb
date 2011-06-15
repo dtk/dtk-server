@@ -45,6 +45,8 @@ module XYZ
       include_js_tpl(tpl_info_hash[:monitor][:src])
 #==========================
 
+      include_js('plugins/search.cmdhandler2')
+
       projects_json = JSON.generate(projects)
 #TODO: figure out why this user init isnt firing inside of bundle and return
 #DEBUG

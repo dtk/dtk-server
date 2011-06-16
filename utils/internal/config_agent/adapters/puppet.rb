@@ -24,7 +24,8 @@ module XYZ
 
         def components_with_attributes()
           @component_names.inject({}) do |h,cmp|
-            h.merge(cmp => @attributes[cmp]||{})
+            #remove nil attribute values
+            h.merge(cmp => (@attributes[cmp]||{}).reject{|k,v|v.nil?})
           end
         end
 

@@ -64,11 +64,17 @@ if(!R8.Topbar2) {
 					}},
 					{id:'commit',i18n:'Commit',contentLoader:function(contentNode){
 //						var route = 'workspace/commit/'+R8.Workspace.get('context_id'),
-//DEBUG
-//left off here
-						var activeTarget = R8.IDE.get('activeP');
-						if(activeTarget==null) alert('There is nothing to commit')
-						var route = 'workspace/commit/'+activeTargetId,
+
+						var currentView = R8.IDE.get('currentEditorView');
+						if (currentView == null) {
+							alert('There is nothing to commit');
+							return false;
+						} else if(currentView.get('type') != 'target') {
+							alert('Please open a target to commit its changes');
+							return false;
+						}
+
+						var route = 'workspace/commit_ide/'+currentView.get('id'),
 							params = {
 								'cfg':{
 									'data':'panel_id='+contentNode.get('id')

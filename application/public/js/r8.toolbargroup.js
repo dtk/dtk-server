@@ -66,7 +66,9 @@ if(!R8.ToolbarGroup2) {
 			},
 			open: function() {
 				_modalContentNode = R8.IDE.renderModal();
-				this.loadContent(_modalContentNode);
+console.log(_modalContentNode);
+				var result = this.loadContent(_modalContentNode);
+//				if(!result) R8.IDE.destroyShim();
 			},
 			loadContent: _cfg['contentLoader']
 		}

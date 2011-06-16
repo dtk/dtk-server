@@ -4,14 +4,14 @@
 	position: absolute;
 	top: 0px;
 	left: 0px;
-	z-index: 100;
+	z-index: 1000;
 }
 .wspace-modal {
 	height: 350px;
 	width: 700px;
 	background-color: #CCCCCC;
 	position: absolute;
-	z-index: 110;
+	z-index: 1100;
 /*	display: none;*/
 }
 .wspace-modal .content {

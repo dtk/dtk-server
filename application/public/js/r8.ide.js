@@ -12,6 +12,9 @@ if (!R8.IDE) {
 			_shimNodeId = null,
 			_shimNode = null,
 
+			_alertNode = null,
+			_alertNodeId = null,
+
 			_lRegionMinWidth = 150,
 			_lRegionMinHeight = 200,
 			_lRegionNode = null,
@@ -681,6 +684,43 @@ if (!R8.IDE) {
 				var contentNode = R8.Utils.Y.one('#'+_modalNodeId+'-content');
 
 				return contentNode;
+			},
+			showAlert: function(alertStr) {
+				_alertNodeId = R8.Utils.Y.guid();
+
+				var alertTpl = '<div id="'+_alertNodeId+'" class="modal-alert-wrapper">\
+									<div class="l-cap"></div>\
+									<div class="body"><b>'+alertStr+'</b></div>\
+									<div class="r-cap"></div>\
+								</div>',
+
+					nodeRegion = _mainBodyWrapperNode.get('region'),
+					height = nodeRegion.bottom - nodeRegion.top,
+					width = nodeRegion.right - nodeRegion.left,
+					aTop = 0,
+					aLeft = Math.floor((width-250)/2);
+
+//				containerNode.append(alertTpl);
+				_mainBodyWrapperNode.append(alertTpl);
+				_alertNode = R8.Utils.Y.one('#'+_alertNodeId);
+				_alertNode.setStyles({'top':aTop,'left':aLeft,'display':'block'});
+//return;
+				YUI().use('anim', function(Y) {
+					var anim = new Y.Anim({
+						node: '#'+_alertNodeId,
+						to: { opacity: 0 },
+						duration: .7
+					});
+					anim.on('end', function(e) {
+						var node = this.get('node');
+						node.get('parentNode').removeChild(node);
+					});
+					var delayAnimRun = function(){
+							anim.run();
+						}
+					setTimeout(delayAnimRun,2000);
+				});
+//				alert(alertStr);
 			}
 		}
 	}();

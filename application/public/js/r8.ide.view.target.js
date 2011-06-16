@@ -292,9 +292,6 @@ if (!R8.IDE.View.target) {
 //alert/notification related
 //---------------------------------------------
 			showAlert: function(alertStr) {
-//DEBUG
-console.log('going to show alert:'+alertStr);
-
 				_alertNodeId = R8.Utils.Y.guid();
 
 				var alertTpl = '<div id="'+_alertNodeId+'" class="modal-alert-wrapper">\
@@ -318,7 +315,7 @@ console.log('going to show alert:'+alertStr);
 					var anim = new Y.Anim({
 						node: '#'+_alertNodeId,
 						to: { opacity: 0 },
-						duration: .5
+						duration: .7
 					});
 					anim.on('end', function(e) {
 						var node = this.get('node');

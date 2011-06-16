@@ -424,7 +424,8 @@ if(_editorContainerNode == null) return;
 				R8.Ctrl.call('file_asset/get/'+fileId,params);
 			},
 			saveFile: function() {
-				var content = _editor.getSession().getValue();
+				var currentEditorView = R8.IDE.get('currentEditorView');
+				if(currentEditorView == null || currentEditorView.get('type') != 'file') return;
 
 				var callback = function(ioId,responseObj) {
 //					eval("var response =" + responseObj.responseText);
@@ -432,8 +433,10 @@ if(_editorContainerNode == null) return;
 
 					alert('File Saved');
 				}
-				document.getElementById('editor_file_id').value = _loadedFile;
+				var content = _editor.getSession().getValue();
+				document.getElementById('editor_file_id').value = currentEditorView.get('id');
 				document.getElementById('editor_file_content').value = content;
+
 				var params = {
 					'cfg' : {
 						method: 'POST',

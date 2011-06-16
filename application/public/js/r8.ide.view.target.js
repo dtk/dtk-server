@@ -89,6 +89,9 @@ if (!R8.IDE.View.target) {
 			},
 			get: function(key) {
 				switch(key) {
+					case "id":
+						return _id;
+						break;
 					case "name":
 						return _view.name;
 						break;

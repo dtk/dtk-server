@@ -136,6 +136,13 @@ if (!R8.IDE.editorPanel) {
 					case "node":
 						return _contentNode;
 						break;
+					case "type":
+						return "editor";
+						break;
+					case "currentView":
+						if(typeof(_views[_currentView]) == 'undefined') return null;
+						else return _views[_currentView];
+						break;
 				}
 			},
 			setViewFocus: function(viewId) {

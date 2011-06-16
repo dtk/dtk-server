@@ -146,8 +146,7 @@ if (!R8.Project) {
 				};
 				var leafNode = R8.Utils.Y.Node.create(R8.Rtpl['project_tree_leaf']({'leaf_item': componentLeaf}));
 				var ulNode = R8.Utils.Y.Node.create('<ul></ul>');
-//DEBUG
-console.log(componentTemplate.implementations);
+
 				for(var i in componentTemplate.implementations) {
 					var impDef = componentTemplate.implementations[i];
 					var implementationLeaf = {

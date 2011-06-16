@@ -225,6 +225,18 @@ if (!R8.IDE) {
 					case "topbarNodeId":
 						return 'page-topbar';
 						break;
+					case "currentEditorView":
+						if(!_editorPanelActive) return null;
+
+						for(var p in _mainRegionPanels) {
+							if(_mainRegionPanels[p].get('type') == 'editor') {
+								var currentView = _mainRegionPanels[p].get('currentView');
+								if(currentView != null) return currentView;
+								else return null;
+							}
+						}
+						return null;
+						break;
 				}
 			},
 			setupPanels: function() {

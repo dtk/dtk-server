@@ -58,8 +58,9 @@
 						<div class="item"><a href="{%=_app[:base_uri]%}/xyz/node/list">Inventory</a></div>
 					</div>
 					<div class="divider"></div>
-<!--
 					<div class="sub-item"><a href="javascript:R8.Editor.saveFile();">Save</a></div>
+					<div class="divider"></div>
+<!--
 					<div class="sub-item"><a href="javascript:R8.IDE.refreshChefDebug('debug');">Refresh Chef Debug</a></div>
 					<div class="sub-item"><a href="javascript:R8.IDE.refreshChefDebug('info');">Refresh Chef Info</a></div>
 					<div class="sub-item"><a href="javascript:R8.IDE.refreshChefDebug('summary');">Refresh Chef Summary</a></div>

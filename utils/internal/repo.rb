@@ -33,7 +33,7 @@ module XYZ
       repos.each do |repo|
         get_branches(repo).each do |branch|
           next if branch == "master"
-          pp "deleteing branch (#{branch}) on rep (#{repo})"
+          pp "deleting branch (#{branch}) on rep (#{repo})"
           context = {
             :implementation => {
             :repo => repo,

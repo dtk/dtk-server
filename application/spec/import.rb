@@ -9,7 +9,7 @@ Root = File.expand_path('../', File.dirname(__FILE__))
 require "#{Root}/config/environment_config.rb"
 
 BaseDir = R8::EnvironmentConfig::CoreCookbooksRoot
-Implementation = {:type => :chef, :version => "0.10.0"}
+Implementation = {:version => "0.10.0"}
 
 def add_user_and_group(username)
   exists_user,user_id = add_if_does_not_exist(:user,username,:username,username)
@@ -47,7 +47,7 @@ end
 
 
 def load_component_opts(type)
-  files = Dir.glob("#{BaseDir}/*/r8meta.#{TypeMapping[type]}")
+  files = Dir.glob("#{BaseDir}/*/r8meta.*.#{TypeMapping[type]}")
   if files.empty? 
     {} 
   else
@@ -70,7 +70,7 @@ user_obj = add_user_and_group(username)
 
 container_idh = XYZ::IDHandle[:c => 2, :uri => container_uri, :user_id => user_obj[:id], :group_ids => user_obj[:group_ids]]
 opts.merge!(:username => username)
-opts.merge!(:add_implementations => {:type => Implementation[:type], :version => Implementation[:version], :library => Library, :base_directory => BaseDir})
+opts.merge!(:add_implementations => {:version => Implementation[:version], :library => Library, :base_directory => BaseDir})
 
 XYZ::CurrentSession.new.set_user_object(user_obj)
 XYZ::Object.import_objects_from_file(container_idh,import_file,opts)

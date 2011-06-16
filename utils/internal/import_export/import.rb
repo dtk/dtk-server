@@ -25,14 +25,14 @@ module XYZ
       create_prefix_object_if_needed(target_id_handle,opts)
       hash_content = Aux::hash_from_file_with_json(json_file) 
       return nil unless hash_content
+      type_info = Hash.new
       add_r8meta!(hash_content,opts[:r8meta]) if opts[:r8meta]
       if opts[:add_implementations]
         impl_info = opts[:add_implementations]
         library = impl_info[:library]
         base_dir = impl_info[:base_directory]
-        type = impl_info[:type]
         version = impl_info[:version]
-        add_implementations!(hash_content,type,version,library,base_dir)
+        add_implementations!(hash_content,version,library,base_dir)
       end
       global_fks = Hash.new
       unless target_id_handle.is_top?
@@ -75,16 +75,11 @@ module XYZ
       end
     end
 
-    def add_implementations!(hash,type,version,library,base_dir)
-      case type
-       when :chef
-        ChefImplementation::add_implementations!(hash,version,library,base_dir)
-       else
-        raise Error.new("Implmentation type #{type} not implemented")
-      end
+    def add_implementations!(hash,version,library,base_dir)
+      Implementation::add_implementations!(hash,version,library,base_dir)
     end
 
-    module ChefImplementation
+    module Implementation
       def self.add_implementations!(hash,version,library,base_dir)
         file_paths = Array.new
         cur_dir = Dir.pwd
@@ -104,19 +99,24 @@ module XYZ
         
         #find components that correspond to an implementation 
         components_hash = hash["library"][library]["component"]
-        impl_cookbooks = components_hash.keys.map{|cmp_ref|cookbook_from_component_ref(cmp_ref)}.uniq & indexed_file_paths.keys
-        return unless impl_cookbooks
+        impl_repos = components_hash.keys.map{|cmp_ref|repo_from_component_ref(cmp_ref)}.uniq & indexed_file_paths.keys
+        return unless impl_repos
 
         #add implementation objects to hash
         implementation_hash = hash["library"][library]["implementation"] ||= Hash.new
-        impl_cookbooks.each do |cookbook|
-          next unless file_paths = indexed_file_paths[cookbook]
-          repo = cookbook
+        impl_repos.each do |repo|
+          next unless file_paths = indexed_file_paths[repo]
+          type = nil
           cmp_file_assets = file_paths.inject({}) do |h,file_path_x|
-            #if repo is null then want ful file path; otherwise we have repo per cookbook and
+            #if repo is null then want ful file path; otherwise we have repo per repo and
             #want to strip off leading repo
             file_path = repo ? file_path_x.gsub(Regexp.new("^#{repo}/"),"") : file_path_x
             file_name = file_path =~ Regexp.new("/([^/]+$)") ? $1 : file_path
+            unless type 
+              if file_name =~ /^r8meta.chef/ then type = "chef_cookbook"
+              elsif file_name =~ /^r8meta.puppet/ then type = "puppet_module"
+              end
+            end
             file_asset = {
               :type => "chef_file", 
               :display_name => file_name,
@@ -126,8 +126,12 @@ module XYZ
             file_asset_ref = file_path.gsub(Regexp.new("/"),"_") #removing "/" since they confuse processing
             h.merge(file_asset_ref => file_asset)
           end
-          implementation_hash[cookbook] = {
-            "type" => "chef_cookbook",
+          unless type
+            Log.error("cannot find valid r8meta file")
+            next
+          end
+          implementation_hash[repo] = {
+            "type" => type,
             "version" => version,
             "repo" => repo,
             "file_asset" => cmp_file_assets
@@ -136,12 +140,12 @@ module XYZ
 
         #add foreign key to components that reference an implementation
         components_hash.each do |cmp_ref, cmp_info|
-          cookbook = cookbook_from_component_ref(cmp_ref)
-          next unless impl_cookbooks.include?(cookbook)
-          cmp_info["*implementation_id"] = "/library/#{library}/implementation/#{cookbook}"
+          repo = repo_from_component_ref(cmp_ref)
+          next unless impl_repos.include?(repo)
+          cmp_info["*implementation_id"] = "/library/#{library}/implementation/#{repo}"
         end
       end
-      def self.cookbook_from_component_ref(cmp_ref)
+      def self.repo_from_component_ref(cmp_ref)
         cmp_ref.gsub(/__.+$/,"")
       end
     end

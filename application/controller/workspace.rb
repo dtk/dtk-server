@@ -723,7 +723,7 @@ pp datacenter
          }
         run_javascript("R8.IDE.showAlert(#{alert_msg});")
         error_list_json = JSON.generate(error_list)
-        run_javascript("R8.Notifications.addErrors(#{error_list_json});")
+#        run_javascript("R8.Notifications.addErrors(#{error_list_json});")
         return {}
       end
 

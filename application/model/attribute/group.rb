@@ -129,7 +129,8 @@ module XYZ
     def index_match(link,item_path)
       ret = nil
       case link[:function]
-       when "eq" then true
+       when "eq" 
+        ret = true
        when "eq_indexed"
         if (link[:index_map]||[]).size > 1
           Log.error("not treating index maps with multiple elements")

@@ -1,6 +1,14 @@
 module XYZ
   class NodeController < Controller
     helper :i18n_string_mapping
+
+    ###TODO test
+    def destroy_and_delete(id)
+      create_object_from_id(id).destroy_and_delete()
+      return {:content => {}}
+    end
+    ######
+
     def actest
       tpl = R8Tpl::TemplateR8.new("node/actest",user_context())
       tpl.assign(:_app,app_common())

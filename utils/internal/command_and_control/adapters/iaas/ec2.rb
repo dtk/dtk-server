@@ -38,6 +38,15 @@ module XYZ
         }
       end
 
+      #destroys the node if it exists
+      def self.destroy_node?(node)
+        instance_id = (node[:external_ref]||{})[:instance_id]
+        return true unless instance_id #return if instance does not exist
+        response = conn().server_destroy(instance_id)
+        Log.info("operation to destroy ec2 instance #{instance_id} had response: #{response.to_s}")
+        response
+      end
+
       def self.get_updated_attributes(task_action)
         node = task_action[:node]
         instance_id = (node[:external_ref]||{})[:instance_id]

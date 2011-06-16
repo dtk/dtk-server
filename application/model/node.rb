@@ -389,6 +389,12 @@ module XYZ
       row && row[:attribute]
     end
 
+    def destroy_and_delete()
+      get_object_cols_and_update_ruby_obj!(:external_ref)
+      suceeeded = CommandAndControl.destroy_node?(self)
+      Model.delete_instance(id_handle())if suceeeded
+    end
+
     def get_project()
       get_objects_col_from_sp_hash(:cols => [:project]).first
     end

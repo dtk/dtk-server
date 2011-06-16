@@ -16,6 +16,11 @@ module XYZ
       end
     end
 
+    def self.destroy_node?(node)
+      klass = load_iaas_for(:node => node)
+      klass.destroy_node?(node)
+    end
+
     def self.get_and_propagate_updated_attributes(task_action)
       klass = load_for(task_action)
       updated_attributes = klass.get_updated_attributes(task_action)
@@ -57,6 +62,23 @@ module XYZ
       update_rows = updated_attributes.map{|attr|{:id => attr[:id], :value_asserted => attr[:value_asserted]}}
       Model.update_from_rows(model_handle,update_rows)
       AttributeLink.propagate(updated_attributes.map{|attr|attr.id_handle()})
+    end
+
+    def self.load_iaas_for(key_val)
+      if key_val[:node]
+        node = key_val[:node]
+        ext_ref_type = (node[:external_ref]||{})[:type]
+        adapter_name = 
+          case ext_ref_type
+            when "ec2_instance" then :ec2
+            when "ec2_image" then :ec2 #TODO: kept in because staged node has this type, which should be changed
+           else raise Error.new("not treated")
+        end
+        adapter_type = :iaas
+        load_for_aux(adapter_type,adapter_name)
+      else
+        raise Error.new("not treated")
+      end
     end
 
     def self.load_for(task_or_task_action)

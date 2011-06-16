@@ -32,11 +32,17 @@ module XYZ
       def flavor_get(id)
         hash_form(@conn.flavors.get(id))
       end
+
       def image_get(id)
         hash_form(@conn.images.get(id))
       end
+
       def server_get(id)
         hash_form(@conn.servers.get(id))
+      end
+
+      def server_destroy(id)
+        @conn.servers.get(id).destroy
       end
 
       def server_create(options)

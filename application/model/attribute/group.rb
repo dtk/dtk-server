@@ -117,8 +117,18 @@ module XYZ
                 ((link[:index_map]||[]).first||{})[:output] == [])
           Log.error("can be error in treatment of matching output to link")
         end
-        if match_attr_out[:dynamic]
-          Log.info("dynamic endpoint #{match[:attr][:display_name]}")
+        if matching_attr_out[:dynamic]
+          task_guard = {
+            :condition => {
+              :task_type => :create_node, 
+              :node => matching_attr_out[:node]
+            },
+            :guarded_task => {
+              :task_type => :config_node,
+              :node => match[:attr][:node]
+            }
+          }
+          pp [:task_guard,task_guard]
         else
           matching_attr_out.merge!(:required => true)
           match[:attr].merge!(:port_type => "input")

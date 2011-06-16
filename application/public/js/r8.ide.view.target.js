@@ -288,6 +288,9 @@ if (!R8.IDE.View.target) {
 			refreshItem: function(itemId){
 				_viewSpaces[_currentViewSpace].items(itemId).refresh();
 			},
+			getSelectedItems: function() {
+				return _viewSpaces[_currentViewSpace].getSelectedItems();
+			},
 //---------------------------------------------
 //alert/notification related
 //---------------------------------------------

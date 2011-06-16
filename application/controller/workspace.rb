@@ -978,6 +978,36 @@ pp required_attr_list
       }
     end
 
+    def create_assembly_ide()
+
+      tpl = R8Tpl::TemplateR8.new("workspace/create_assembly",user_context())
+      tpl.assign(:_app,app_common())
+      panel_id = request.params['panel_id']
+
+      where_clause = {}
+      if where_clause
+        where_clause = where_clause.inject(nil){|h,o|SQL.and(h,SQL::WhereCondition.like(o[0],"#{o[1]}%"))}
+      end
+      library_list = get_objects(:library,where_clause)
+      lib_num = 1
+      library_list.each do |library|
+        library[:name] = "Library "+lib_num.to_s if library[:name].nil?
+        lib_num = lib_num+1
+      end
+      tpl.assign(:library_list,library_list)
+
+      include_js('plugins/assembly.tool2')
+#      include_js('external/jquery.treeview')
+#      include_css('jquery.treeview')
+
+      run_javascript('R8.AssemblyTool2.init();')
+
+      return {
+        :content=> tpl.render(),
+        :panel=>panel_id
+      }
+    end
+
     def clone_assembly(explicit_hash=nil)
       hash = explicit_hash || request.params
       #TODO: stub
@@ -1010,6 +1040,41 @@ pp required_attr_list
       library_object.clone_into__top_object_exists(assembly_idh,id_handles)
       return {:content => nil}
     end
+
+    def clone_assembly_ide(explicit_hash=nil)
+      hash = explicit_hash || request.params
+      #TODO: stub
+      icon_info = {"images" => {"display" => "generic-assembly.png","tiny" => "","tnail" => "generic-assembly.png"}}
+
+      library_id = hash["library_id"].to_i
+      library_idh = id_handle(library_id,:library)
+      name = hash["name"] || "assembly"
+      create_row = {
+        :library_library_id => library_id,
+        :ref => name,
+        :display_name => name,
+        :ui => icon_info,
+        :type => "composite"
+      }
+      assembly_mh = library_idh.createMH(:model_name=>:component,:parent_model_name=>:library)
+      assembly_idh = Model.create_from_rows(assembly_mh,[create_row],:convert=>true).first
+
+      #TODO: getting json rather than hash
+      item_list = JSON.parse(hash["item_list"])
+      node_idhs = item_list.map{|item|id_handle(item["id"].to_i,item["model"].to_sym)}
+      connected_links,dangling_links = Node.get_external_connected_links(node_idhs)
+      #TODO: raise error to user if dangling link
+      Log.error("dangling links #{dangling_links.inspect}") unless dangling_links.empty?
+      link_idhs = connected_links.map{|link|link.id_handle}
+
+      id_handles = node_idhs + link_idhs
+      library_object = library_idh.create_object()
+      #TODO: encapsulate some of above so ca just call library_object.clone_into(...
+      library_object.clone_into__top_object_exists(assembly_idh,id_handles)
+
+      return {:content => nil}
+    end
+
   end
 end
 

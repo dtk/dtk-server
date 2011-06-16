@@ -248,8 +248,6 @@ console.log(taskDef);
 				
 			},
 			formSubmit: function(e) {
-				this.cleanup();
-				R8.IDE.destroyShim();
 /*
 				var params = {
 					'cfg' : {
@@ -269,13 +267,20 @@ console.log(taskDef);
 				var currentView = R8.IDE.get('currentEditorView');
 				if (currentView == null) {
 					alert('There is nothing to commit');
+					this.cleanup();
+					R8.IDE.destroyShim();
 					return false;
 				} else if(currentView.get('type') != 'target') {
 					alert('Please open a target to commit its changes');
+					this.cleanup();
+					R8.IDE.destroyShim();
 					return false;
 				}
 
 				R8.Ctrl.call('workspace/commit_changes_ide/'+currentView.get('id'),params);
+
+				this.cleanup();
+				R8.IDE.destroyShim();
 			},
 
 			setupTreeDD: function(rootListNodeId) {

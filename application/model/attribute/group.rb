@@ -105,7 +105,21 @@ module XYZ
         link = find_matching_link(attr,links_to_trace)
         matches << {:link => link, :attr => attr} if link
       end
-      matches
+      matches.each do |match|
+        link = match[:link]
+        output_id =  link[:output_id] 
+        matching_out = augmented_attr_list.find{|attr| attr[:id] == output_id}
+        next unless matching_out
+
+        #TODO: handle if warning fires
+        unless link[:function] == "eq" or
+               (link[:function] == "eq_indexed" and
+                ((link[:index_map]||[]).first||{})[:output] == [])
+          Log.error("can be error in treatment of matching output to link")
+        end
+        matching_out.merge!(:required => true)
+        match[:attr].merge!(:port_type => "input")
+      end
     end
 
     def find_matching_link(attr,links)

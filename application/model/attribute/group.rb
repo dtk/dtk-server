@@ -109,31 +109,42 @@ module XYZ
         link = match[:link]
         output_id =  link[:output_id] 
         matching_attr_out = augmented_attr_list.find{|attr| attr[:id] == output_id}
-        next unless matching_attr_out
+        if matching_attr_out
+          #TODO: handle if warning fires
+          unless ["eq","select_one"].include?(link[:function]) or
+              (link[:function] == "eq_indexed" and
+               ((link[:index_map]||[]).first||{})[:output] == [])
+            Log.error("can be error in treatment of matching output to link")
+          end
 
-        #TODO: handle if warning fires
-        unless ["eq","select_one"].include?(link[:function]) or
-               (link[:function] == "eq_indexed" and
-                ((link[:index_map]||[]).first||{})[:output] == [])
-          Log.error("can be error in treatment of matching output to link")
-        end
-        if matching_attr_out[:dynamic]
-          task_guard = {
-            :condition => {
-              :task_type => :create_node, 
-              :node => matching_attr_out[:node]
-            },
-            :guarded_task => {
-              :task_type => :config_node,
-              :node => match[:attr][:node]
-            }
-          }
-          pp [:task_guard,task_guard]
-        else
-          matching_attr_out.merge!(:required => true)
           match[:attr].merge!(:port_type => "input")
+          if matching_attr_out[:dynamic]
+            add_task_guard__addr_for_config_node!(match[:attr],link,matching_attr_out)
+          else
+            matching_attr_out.merge!(:required => true)
+          end
+        else
+          add_task_guard__addr_for_config_node!(match[:attr],link)
         end
       end
+    end
+
+    def add_task_guard__addr_for_config_node!(guarded_attr,link,guard_attr=nil)
+      unless guard_attr
+        #TODO: lock up the info
+        guard_attr = {:node => "Need to compute"}
+      end
+      task_guard = {
+        :condition => {
+          :task_type => :create_node, 
+          :node => guard_attr[:node]
+        },
+        :guarded_task => {
+          :task_type => :config_node,
+          :node => guarded_attr[:node]
+        }
+      }
+      pp [:task_guard,task_guard]
     end
 
     def find_matching_link(attr,links)

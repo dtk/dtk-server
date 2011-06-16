@@ -106,6 +106,7 @@ module XYZ
         matches << {:link => link, :attr => attr} if link
       end
       matches.each do |match|
+        match[:attr].merge!(:port_type => "input")
         link = match[:link]
         output_id =  link[:output_id] 
         matching_attr_out = augmented_attr_list.find{|attr| attr[:id] == output_id}
@@ -117,7 +118,6 @@ module XYZ
             Log.error("can be error in treatment of matching output to link")
           end
 
-          match[:attr].merge!(:port_type => "input")
           if matching_attr_out[:dynamic]
             add_task_guard__addr_for_config_node!(match[:attr],link,matching_attr_out)
           else

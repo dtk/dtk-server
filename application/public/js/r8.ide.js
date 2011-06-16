@@ -50,6 +50,7 @@ if (!R8.IDE) {
 			_projectViewNode = null,
 
 			_editorPanelActive = false,
+			_consolePanelActive = false,
 
 			_regions = {
 				'top_full': {
@@ -133,12 +134,14 @@ if (!R8.IDE) {
 					'minHeight': 100,
 					'minWidth': 300,
 					'relativePos': 'main',
-					'views': [{
+					'views': [
+					{
 						'id': 'chef_debugger',
 						'label': 'Chef Debugger',
 						'view': 'chefDebuggerView',
 						'method': 'renderChefDebugger'
 					}
+
 					],
 					'viewFocus': 'chef_debugger'
 				}*/
@@ -385,6 +388,10 @@ if (!R8.IDE) {
 							_editorPanelActive = true;
 							_panels[pDef.id] = new R8.IDE.editorPanel(pDef);
 							break;
+						case "console":
+							_consolePanelActive = true;
+							_panels[pDef.id] = new R8.IDE.consolePanel(pDef);
+							break;
 						default:
 							_panels[pDef.id] = new R8.IDE.panel(pDef);
 							break;
@@ -478,8 +485,8 @@ if (!R8.IDE) {
 
 						that.resizePanels();
 					});
-/*
-					var editorResizer = new Y.DD.Drag({
+
+/*					var editorResizer = new Y.DD.Drag({
 						node: '#mr-resizer-1'
 					});
 					editorResizer.plug(Y.Plugin.DDProxy, {

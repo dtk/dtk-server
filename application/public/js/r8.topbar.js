@@ -93,7 +93,7 @@ if(!R8.Topbar2) {
 					}},
 */					{id:'create-assembly',i18n:'Create Assembly',contentLoader:function(contentNode){
 //						var route = 'workspace/create_assembly/'+R8.Workspace.get('context_id'),
-						var route = 'workspace/create_assembly',
+						var route = 'workspace/create_assembly_ide',
 							params = {
 								'cfg':{
 									'data':'panel_id='+contentNode.get('id')
@@ -174,7 +174,7 @@ _toolbarNode.append('<div class="divider"></div>');
 			addViewItem: function(def) {
 				_dropdowns[0].addItem(def);
 			}
-		}		
+		}
 	}();
 
 	})(R8)

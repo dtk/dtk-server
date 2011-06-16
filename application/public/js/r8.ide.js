@@ -127,7 +127,7 @@ if (!R8.IDE) {
 					],
 					'viewFocus': 'editor'
 				},
-/*				 {
+				 {
 					'id': 'console-panel',
 					'pClass': 'tempclass',
 					'minHeight': 100,
@@ -141,7 +141,7 @@ if (!R8.IDE) {
 					}
 					],
 					'viewFocus': 'chef_debugger'
-				}*/
+				}
 				]
 			};
 
@@ -478,7 +478,7 @@ if (!R8.IDE) {
 
 						that.resizePanels();
 					});
-/*
+
 					var editorResizer = new Y.DD.Drag({
 						node: '#mr-resizer-1'
 					});
@@ -508,7 +508,7 @@ if (!R8.IDE) {
 
 						R8.User.setSetting('editorPanelHeight',editorHeight);
 					});
-*/
+
 				});
 			},
 			toggleDetails: function(e) {

@@ -1,9 +1,9 @@
 
-if(!R8.CommitTool) {
+if(!R8.CommitTool2) {
 
 	(function(R8){
 
-	R8.CommitTool = function() {
+	R8.CommitTool2 = function() {
 		var _events = {},
 			_tabListNodeId = 'modal-tab-list',
 			_tabListNode = null,

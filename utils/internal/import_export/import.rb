@@ -131,6 +131,7 @@ module XYZ
             next
           end
           implementation_hash[repo] = {
+            "display_name" => repo,
             "type" => type,
             "version" => version,
             "repo" => repo,

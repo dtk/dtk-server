@@ -25,6 +25,26 @@ module XYZ
       get_repo(context).delete()
     end
 
+    def self.delete_all_branches()
+      repos = nil
+      Dir.chdir(R8::EnvironmentConfig::CoreCookbooksRoot) do
+        repos = Dir["*"].reject{|item|File.file?(item)}
+      end
+      repos.each do |repo|
+        get_branches(repo).each do |branch|
+          next if branch == "master"
+          pp "deleteing branch (#{branch}) on rep (#{repo})"
+          context = {
+            :implementation => {
+            :repo => repo,
+            :branch => branch
+            }
+          }
+          get_repo(context).delete()
+        end
+      end
+    end
+
     ###
     def get_file_content(file_asset)
       ret = nil
@@ -95,6 +115,11 @@ module XYZ
       end
     end
     CachedRepos = Hash.new
+
+    def self.get_branches(repo)
+      path = "#{R8::EnvironmentConfig::CoreCookbooksRoot}/#{repo}"
+      Grit::Repo.new(path).branches.map{|b|b.name}
+    end
 
     attr_reader :grit_repo
     def initialize(path,branch)

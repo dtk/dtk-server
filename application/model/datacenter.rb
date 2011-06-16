@@ -2,6 +2,11 @@ module XYZ
   class Datacenter < Model
 
     ######### Model apis
+    def destroy_and_delete_nodes()
+      nodes = get_objects_from_sp_hash(:cols => [:nodes]).map{|r|r[:node]}
+      nodes.each{|n|n.destroy_and_delete()}
+    end
+
     def get_violation_info(severity=nil)
       get_objects_from_sp_hash(:columns => [:violation_info]).map do |r|
         v = r[:violation]

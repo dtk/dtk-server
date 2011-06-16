@@ -55,6 +55,11 @@ module XYZ
       end
     end
 
+    def destroy_and_delete_nodes()
+      targets = get_objects_from_sp_hash(:cols => [:targets]).map{|r|r[:target]}
+      targets.each{|t|t.destroy_and_delete_nodes()}
+    end
+
     def delete_projects_repo_branches()
       sp_hash = {
         :cols => [:repo,:branch],

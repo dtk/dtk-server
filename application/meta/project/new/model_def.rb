@@ -6,6 +6,19 @@
   },
   :one_to_many=> [:implementation,:component],
   :virtual_columns=>{
+    :targets=>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [{
+         :model_name=>:datacenter,
+         :alias => :target,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:project_id=>:project__id},
+         :cols=>[:id,:display_name,:description,:project_id,:iaas_type]
+       }]
+    },
     :target_tree=>{
       :type=>:json,
       :hidden=>true,

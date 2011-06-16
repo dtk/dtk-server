@@ -53,5 +53,13 @@ module XYZ
       Attribute.update_and_propagate_attributes(model_handle(:attribute),attribute_rows)
       redirect redirect
     end
+
+    def destroy_and_delete_nodes(project_id=nil) #allowing to be nil for testing when only one project
+      unless project_id
+        project_id = Model.get_objects_from_sp_hash(model_handle,{:cols => [:id]}).first[:id]
+      end
+      create_object_from_id(project_id).destroy_and_delete_nodes()
+      return {:content => {}}
+    end
   end
 end

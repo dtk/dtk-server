@@ -4,10 +4,10 @@ module XYZ
     helper :create_tasks_from_pending_changes
 
     def test_group_attrs(datacenter_id=nil)
+      redirect = "/xyz/project/test_group_attrs/#{(datacenter_id||"").to_s}"
       unless datacenter_id
         datacenter_id = Model.get_objects_from_sp_hash(model_handle(:datacenter),{:cols => [:id]}).first[:id]
       end
-      redirect = "/xyz/project/test_group_attrs/#{datacenter_id.to_s}"
       pending_changes = flat_list_pending_changes_in_datacenter(datacenter_id.to_i)
       commit_task = create_task_from_pending_changes(pending_changes)
 

@@ -82,20 +82,54 @@ module XYZ
     end
    private
     def add_missing_info_for_group_attrs!(augmented_attr_list,prune_set)
-      return
       #TODO: add input direction if not present
       #TODO: propagate back required
       #TODO: can make more efficient by calling this just once and storing info in attributes;
       #might put in some json attribute
       #need analysis that looks at the index maps
-      attr_ids = augmented_attr_list.map{|a|a[:id]}.uniq
+
+      #find attributes that are required, but have no value
+      selected_attrs = augmented_attr_list.select{|a|a[:required] and a[:attribute_value].nil?}
+      return if selected_attrs.empty?
+      attr_ids = selected_attrs.map{|a|a[:id]}.uniq
       sp_hash = {
         :cols => [:function,:index_map,:input_id,:output_id],
         :filter => [:oneof ,:input_id, attr_ids]
       }
-      sample_attr = augmented_attr_list.first
+      sample_attr = selected_attrs.first
       attr_link_mh = sample_attr.model_handle(:attribute_link)
-      pp get_objects_from_sp_hash(attr_link_mh,sp_hash)
+      links_to_trace = get_objects_from_sp_hash(attr_link_mh,sp_hash)
+      
+      matches = Array.new
+      selected_attrs.each do |attr|
+        link = find_matching_link(attr,links_to_trace)
+        matches << {:link => link, :attr => attr} if link
+      end
+      matches
+    end
+
+    def find_matching_link(attr,links)
+      links.find{|link|link[:input_id] == attr[:id] and index_match(link,attr[:item_path])}
+    end
+    
+    def index_match(link,item_path)
+      ret = nil
+      case link[:function]
+       when "eq" then true
+       when "eq_indexed"
+        if (link[:index_map]||[]).size > 1
+          Log.error("not treating index maps with multiple elements")
+        end
+        if index_map = ((link[:index_map]||[]).first||{})[:input]
+          if item_path.kind_of?(Array) and index_map.size == item_path.size
+            item_path.each_with_index do |el,i|
+              return nil unless el.to_s == index_map[i].to_s
+            end
+            ret = true
+          end 
+        end
+      end
+      ret
     end
   end
 end

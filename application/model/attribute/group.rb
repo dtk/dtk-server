@@ -108,17 +108,21 @@ module XYZ
       matches.each do |match|
         link = match[:link]
         output_id =  link[:output_id] 
-        matching_out = augmented_attr_list.find{|attr| attr[:id] == output_id}
-        next unless matching_out
+        matching_attr_out = augmented_attr_list.find{|attr| attr[:id] == output_id}
+        next unless matching_attr_out
 
         #TODO: handle if warning fires
-        unless link[:function] == "eq" or
+        unless ["eq","select_one"].include?(link[:function]) or
                (link[:function] == "eq_indexed" and
                 ((link[:index_map]||[]).first||{})[:output] == [])
           Log.error("can be error in treatment of matching output to link")
         end
-        matching_out.merge!(:required => true)
-        match[:attr].merge!(:port_type => "input")
+        if match_attr_out[:dynamic]
+          Log.info("dynamic endpoint #{match[:attr][:display_name]}")
+        else
+          matching_attr_out.merge!(:required => true)
+          match[:attr].merge!(:port_type => "input")
+        end
       end
     end
 
@@ -129,7 +133,7 @@ module XYZ
     def index_match(link,item_path)
       ret = nil
       case link[:function]
-       when "eq" 
+       when "eq","select_one"
         ret = true
        when "eq_indexed"
         if (link[:index_map]||[]).size > 1

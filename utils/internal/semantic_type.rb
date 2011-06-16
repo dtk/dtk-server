@@ -285,7 +285,7 @@ rather than having or having two sap refs and user can remove or add to componen
           "username" => {:required => true, :type => :string},
           "password" => {:required => false, :type => :string},
           "inet_access" => {:required => true, :type => :boolean},
-          "client_host_addr" => {:required => false, :type => :string}
+          "client_host_addr" => {:required => true, :type => :string}
         }
       },
 

@@ -1,16 +1,16 @@
 
-if(!R8.CommitTool2) {
+if(!R8.CommitTool) {
 
 	(function(R8){
 
-	R8.CommitTool2 = function() {
+	R8.CommitTool = function() {
 		var _events = {},
 			_tabListNodeId = 'modal-tab-list',
 			_tabListNode = null,
 			_formNode = null,
 			_submitBtnNode = null;
 
-		var _tabs = ['change-list','required-attrs','details'];
+		var _tabs = ['change-list','details'];
 
 		return {
 			init: function() {
@@ -244,9 +244,12 @@ console.log(taskDef);
 				},this);
 //				formNode.setAttribute('onsubmit',this.formSubmit);
 			},
-
+			cleanup: function() {
+				
+			},
 			formSubmit: function(e) {
-				R8.Workspace.destroyShim();
+				this.cleanup();
+				R8.IDE.destroyShim();
 /*
 				var params = {
 					'cfg' : {
@@ -262,8 +265,17 @@ console.log(taskDef);
 						method : 'GET'
 					}
 				};
-				var datacenter_id = R8.Workspace.get('context_id');
-				R8.Ctrl.call('workspace/commit_changes/'+datacenter_id,params);
+
+				var currentView = R8.IDE.get('currentEditorView');
+				if (currentView == null) {
+					alert('There is nothing to commit');
+					return false;
+				} else if(currentView.get('type') != 'target') {
+					alert('Please open a target to commit its changes');
+					return false;
+				}
+
+				R8.Ctrl.call('workspace/commit_changes_ide/'+currentView.get('id'),params);
 			},
 
 			setupTreeDD: function(rootListNodeId) {

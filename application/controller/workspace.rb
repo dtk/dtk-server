@@ -681,6 +681,66 @@ pp datacenter
       }
     end
 
+    def commit_changes_ide(datacenter_id=nil)
+#      context_type = request.params["context_type"]
+      #TODO: either use param from context id or from what is posted
+      #TODO: move to getting id of top level task
+      context_id = request.params["context_id"]
+      datacenter_id ||= context_id
+
+      datacenter_id = datacenter_id && datacenter_id.to_i
+
+      pending_changes = flat_list_pending_changes_in_datacenter(datacenter_id)
+      if pending_changes.empty?
+        run_javascript("R8.IDE.showAlert('No Pending Changes to Commit');")
+        return {}
+      end
+
+      top_level_task = create_task_from_pending_changes(pending_changes)
+
+      errors = ValidationError.find_missing_required_attributes(top_level_task)
+      if errors
+        pp [:errors,errors]
+        error_list = []
+        #TODO: stub
+        i18n = {
+          "MissingRequiredAttribute"=>'is missing required Attribute'
+        }
+        alert_msg = "'Commit errors for missing attrs'"
+        error_str = "Commit errors for missing attrs<br/>"
+        errors.each { |e|
+          error_name = Aux::demodulize(e.class.to_s)
+          case error_name
+            when "MissingRequiredAttribute"
+              error_description = "Component <b>#{e[:component_name]}</b> on node <b>#{e[:node_name]}</b> "+i18n[error_name]+"#{e[:attribute_name]}"
+          end
+#TODO: revisit when fully implementing notifications/feed, right now warnings on component add are different then commit errors
+          e[:name] = error_name
+          e[:target_node_id] = e[:node_id]
+          e[:description] = error_description
+          e[:type] = "error"
+          error_list << e
+         }
+        run_javascript("R8.IDE.showAlert(#{alert_msg});")
+        error_list_json = JSON.generate(error_list)
+        run_javascript("R8.Notifications.addErrors(#{error_list_json});")
+        return {}
+      end
+
+      test_str = "pending changes:\n" 
+      pending_changes.each do |sc|
+        test_str << "  type=#{sc[:type]}; id=#{(sc[:component]||sc[:node])[:id].to_s}; name=#{(sc[:component]||sc[:node])[:display_name]||'UNSET'}\n"
+      end
+
+      top_level_task.save!()
+      workflow = Workflow.create(top_level_task)
+      workflow.defer_execution(top_level_task)
+
+      run_javascript("R8.IDE.showAlert('Commit Logged,Pending Execution');")
+      return {
+        'data'=>test_str
+      }
+    end
 
     def commit(datacenter_id=nil)
       commit_tree = Hash.new

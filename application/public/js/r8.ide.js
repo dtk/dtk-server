@@ -536,6 +536,7 @@ if (!R8.IDE) {
 						consolePanelNode.setStyle('height',(_mainRegionNode.get('region').height - (editorPanelNode.get('region').height+_resizerWidth)));
 
 						_mainRegionPanels['editor-panel'].resize();
+						_mainRegionPanels['console-panel'].resize();
 //						that.resizePanels();
 					});
 					editorResizer.on('drag:end',function(e){

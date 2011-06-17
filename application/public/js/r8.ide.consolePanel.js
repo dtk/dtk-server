@@ -114,7 +114,10 @@ if (!R8.IDE.consolePanel) {
 				_contentNode.setStyles({'height':contentHeight,'width':_node.get('region').width,'backgroundColor':'#FFFFFF'});
 
 
-				if(_currentView != null) _views[_currentView].resize();
+				if (_currentView != null) {
+//console.log('should be resizing debugger...');
+					_views[_currentView].resize();
+				}
 
 /*
 				var numViews = _def.views.length;

@@ -23,7 +23,7 @@ if (!R8.IDE.View.chefDebugger) {
 								<div id="'+_panel.get('id')+'-chef-debugger-header" class="view-header">\
 									<select id="'+_panel.get('id')+'-chef-debugger-available-nodes" name="'+_panel.get('id')+'-chef-debugger-available-nodes"></select>\
 								</div>\
-								<div id="'+_panel.get('id')+'-chef-debugger-content" style="overflow: auto;">\
+								<div id="'+_panel.get('id')+'-chef-debugger-content" style="overflow-y: scroll;">\
 								</div>\
 						</div>',
 

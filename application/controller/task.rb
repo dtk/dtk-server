@@ -15,7 +15,88 @@ module XYZ
       redirect "/xyz/workspace/commit_changes/#{datacenters.first[:id].to_s}"
     end
 
-    def get_logs(level="info",task_id=nil)
+
+    def get_logs(task_id=nil)
+      node_id = request.params["node_id"]
+      node_id = node_id && node_id.to_i
+
+      unless task_id
+        tasks = Task.get_top_level_tasks(model_handle).sort{|a,b| b[:updated_at] <=> a[:updated_at]}
+        task = tasks.first
+      else
+        raise Error.new("not implemented yet get_logs with task id given")
+      end
+
+      assoc_nodes = ((task && task.get_associated_nodes())||[]).select{|n|node_id.nil? or n[:id] == node_id}
+      ndx_node_names = assoc_nodes.inject({}){|h,n|h.merge(n[:id] => n[:display_name])}
+      parsed_log = nil
+      found_error = nil
+
+      if R8::EnvironmentConfig::CommandAndControlMode == "mcollective"
+        logs_info = task ? TaskLog.get_and_update_logs_content(task,assoc_nodes,:top_task_id => task.id()) : {}
+      else
+        logs_info = get_logs_mock(assoc_nodes).inject({}) do |h,(k,v)|
+          h.merge(k => {:log => v, :type => "chef"})
+        end
+      end
+
+      ####parse the logs
+      parsed_logs = {:no_data =>  Array.new,:ok => Array.new, :error => Array.new}
+      logs_info.each do |node_id,log_info|
+        log = log_info[:log]
+        node_name = ndx_node_names[node_id]
+        unless log
+          parsed_logs[:no_data] << {:node_id => node_id,:node_name => node_name}
+          next
+        end
+        log_type = log_info[:type].to_sym
+        pl = ParseLog.parse(log_type,log)
+        type = pl.find{|seg|seg.type == :error} ? :error : :ok
+        parsed_logs[type] << {:node_id => node_id, :node_name => node_name,:parsed_log => pl}
+      end
+      ### end parse logs
+      #put log in hash/array form
+      hash_form =  logs_in_hash_form(parsed_logs,node_id.nil?)
+      pp hash_form
+      {:content => {}}
+    end
+
+    def logs_in_hash_form(parsed_logs,is_single_node)
+      ret = Hash.new
+      parsed_logs.each do |type,logs|
+        logs.each do |log_info|
+          node_id = log_info[:node_id]
+          node_name = log_info[:node_name]
+          if type == :no_data
+            ret[node_id] = {
+              :node_name => node_name,
+              :summary => {
+                :type => :no_data
+              }
+            }
+          else
+            #TODO: change hash form so do not have to reformulate
+            pl = log_info[:parsed_log].hash_form
+            log_segments = pl[:log_segments]
+            error = nil
+            if log_segments.last[:type] == :error 
+              error = log_segments.last
+              log_segments = log_segments[1..log_segments.size-1]
+            end
+            summary = error ? error : {:type => :ok}
+            ret[node_id] = {
+              :node_name => node_name,
+              :log_segments => log_segments,
+              :complete => pl[:complete],
+              :summary => summary
+            }
+          end
+        end
+      end
+      is_single_node ? ret.values.first : ret
+    end
+
+    def get_logs_test(level="info",task_id=nil)
       
       #task_id is nil means get most recent task
       #TODO: hack
@@ -45,6 +126,7 @@ module XYZ
         end
       end
 
+      ####parse the logs
       parsed_logs = {:no_data =>  Array.new,:ok => Array.new, :error => Array.new}
       logs_info.each do |node_id,log_info|
         log = log_info[:log]
@@ -65,7 +147,7 @@ module XYZ
         type = pl.find{|seg|seg.type == :error} ? :error : :ok
         parsed_logs[type] << {:node_id => node_id, :node_name => node_name,:parsed_log => pl}
       end
-      
+      ### end parse logs
 
       view_type =  
         if no_results?(parsed_logs) then :simple 

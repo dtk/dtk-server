@@ -87,6 +87,7 @@ if (!R8.IDE.View.target) {
 				var pRegion = _panel.get('node').get('region');
 				_contentWrapperNode.setStyles({'height':pRegion.height-6,'width':pRegion.width-6});
 
+				R8.Dock2.realign();
 /*
 				var contentHeight = _node.get('region').height - _headerNode.get('region').height;
 				_contentNode.setStyles({'height':contentHeight,'width':_node.get('region').width,'backgroundColor':'#FFFFFF'});

@@ -155,7 +155,9 @@ if(!R8.Dock2) {
 					clickCallback: this.toggleDock
 				});
 			},
-
+			realign: function() {
+//				_overlay.set('align',{node: "#"+_dockAlignNodeId,points: ["tr", "tr"]});
+			},
 			get: function(item) {
 				switch(item) {
 					case "itemFocusList":

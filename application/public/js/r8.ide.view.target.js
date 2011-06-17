@@ -72,8 +72,9 @@ if (!R8.IDE.View.target) {
 				};
 
 //				_contentNode.append(R8.Dock.render({'display':'block','top':_topbarNode.get('region').bottom}));
-//				_contentNode.append(R8.Dock.render({'display':'block','top':_contentNode.get('region').top}));
-//				R8.Dock.init();
+//				_contentNode.append(R8.Dock2.render({'display':'block','top':_contentNode.get('region').top}));
+				_contentNode.append(R8.Dock2.render({'display':'block','top':40}));
+				R8.Dock2.init(_contentNode.get('id'));
 
 				_initialized = true;
 			},
@@ -406,8 +407,9 @@ if (!R8.IDE.View.target) {
 				node.append('<div id="'+_shimNodeId+'" class="wspace-shim" style="height:'+height+'; width:'+width+'"></div>');
 				_shimNode = R8.Utils.Y.one('#'+_shimNodeId);
 				_shimNode.setStyle('opacity','0.8');
+				var that=this;
 				_shimNode.on('click',function(Y){
-					R8.Workspace.destroyShim();
+					that.destroyShim();
 				});
 			},
 			destroyShim: function() {

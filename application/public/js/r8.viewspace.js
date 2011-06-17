@@ -710,7 +710,7 @@ if (typeof(e) != 'undefined') {
 
 //DEBUG
 //TODO: revisit once puting dock into place
-//				R8.Dock.focusChange(_selectedItems);
+				R8.Dock2.focusChange(_selectedItems);
 
 				e.stopImmediatePropagation();
 			},

@@ -182,6 +182,7 @@ YUI_config = {
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.topbar.js"></script>
 
 
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.dock.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.editor.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/file.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/toolbar.r8.js"></script>

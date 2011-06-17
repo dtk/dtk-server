@@ -98,6 +98,7 @@ body {
 
 
 .panel .content-wrapper {
+	overflow: hidden;
 }
 .panel .content {
 	overflow: auto;

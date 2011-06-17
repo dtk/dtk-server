@@ -99,7 +99,7 @@ module XYZ
                 :on_msg_received => proc do |msg|
                   result = msg[:body].merge("task_id" => task_id)
                   pp [:result,result]
-                  succeeded = result[:statusmsg] == "OK" and (result[:data]||{})[:status] == :ok
+                  succeeded = (result[:statusmsg] == "OK" and (result[:data]||{})[:status] == :ok)
                   set_result_succeeded(workitem,result,task,action) if succeeded
                   self.reply_to_engine(workitem)
                 end,

@@ -637,9 +637,12 @@ pp datacenter
 
       top_level_task = create_task_from_pending_changes(pending_changes)
 
+      #TODO: need to sync ValidationError with analysis done in group by
       errors = ValidationError.find_missing_required_attributes(top_level_task)
-      if errors
-        pp [:errors,errors]
+#TODO: removing for time being
+#      if errors
+      pp [:errors,errors] if errors
+      if false
         error_list = []
         #TODO: stub
         i18n = {

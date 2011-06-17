@@ -219,6 +219,21 @@ module XYZ
         end
       end
 
+      class ErrorMissingCookbook < ErrorChefLog 
+        def self.isa?(segments_from_error)
+          return nil unless segments_from_error.size > 1
+          line = segments_from_error[1].line
+          line =~ /Chef::Exceptions::CookbookNotFound/
+        end
+       private
+        def parse!(segments_from_error,prev_segment)
+          line = segments_from_error[1].line
+          if line =~ /Chef::Exceptions::CookbookNotFound: (.+$)/
+            @error_detail = $1
+          end
+        end
+      end
+
 
       #complication is that may not have uniq handle on file
       class ChefFileRef < HashObject
@@ -263,8 +278,8 @@ module XYZ
         end
       end
 
-      #order makes a differnce for parsing
-      PossibleErrors = [ErrorTemplate,ErrorRecipe,ErrorMissingRecipe,ErrorService,ErrorGeneric]
+      #order makes a difference for parsing
+      PossibleErrors = [ErrorTemplate,ErrorRecipe,ErrorMissingRecipe,ErrorMissingCookbook,ErrorService,ErrorGeneric]
     end
   end
 end

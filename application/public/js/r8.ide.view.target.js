@@ -193,6 +193,9 @@ if (!R8.IDE.View.target) {
 					return;
 				}
 				_viewSpaces[vSpaceId].addItems(items);
+
+//TODO: move to more event based handling
+				R8.IDE.targetItemsAdd(items);
 			},
 			addItemToViewSpace : function(clonedNode,viewSpaceId) {
 				var cleanupId = clonedNode.get('id'),

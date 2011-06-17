@@ -234,6 +234,19 @@ if (!R8.IDE) {
 					case "topbarNodeId":
 						return 'page-topbar';
 						break;
+					case "consolePanel":
+						if(!_consolePanelActive) return null;
+						for(var p in _mainRegionPanels) {
+							if(_mainRegionPanels[p].get('type') == 'console') {
+								return _mainRegionPanels[p];
+//								var currentView = _mainRegionPanels[p].get('currentView');
+//								if(currentView != null) return currentView;
+//								else return null;
+							}
+						}
+						return null;
+
+						break;
 					case "currentEditorView":
 						if(!_editorPanelActive) return null;
 
@@ -645,6 +658,19 @@ if (!R8.IDE) {
 					};
 					R8.Ctrl.call('task/get_logs/'+level,params);
 				},
+			},
+			targetItemsAdd: function(items) {
+//console.log(items);
+				var consolePanel = this.get('consolePanel');
+				if(consolePanel != null) {
+					var configDebuggerView = consolePanel.get('configDebuggerView');
+//console.log(configDebuggerView);
+					if(configDebuggerView == null) return;
+
+					for(var i in items) {
+						configDebuggerView.addNode(items[i].object);
+					}
+				}
 			},
 			updateTargetNodeName: function(nodeId) {
 				this.get('currentEditorView').updateItemName(nodeId);

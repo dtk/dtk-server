@@ -154,6 +154,10 @@ if (!R8.IDE.consolePanel) {
 						if(typeof(_views[_currentView]) == 'undefined') return null;
 						else return _views[_currentView];
 						break;
+					case "configDebuggerView":
+						if(typeof(_views['chef-debugger']) != 'undefined') return _views['chef-debugger'];
+						else return null;
+						break;
 				}
 			},
 			setViewFocus: function(viewId) {
@@ -284,7 +288,7 @@ if (!R8.IDE.consolePanel) {
 			toggleChefDebugger: function() {
 
 				if (_chefDebuggerLoaded) {
-				
+					
 				} else {
 					var viewDef = {
 						'id': 'chef-debugger',

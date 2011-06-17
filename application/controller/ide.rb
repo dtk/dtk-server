@@ -43,6 +43,11 @@ module XYZ
       tpl.set_js_tpl_name("wspace_monitor_display")
       tpl_info_hash[:monitor] = tpl.render()
       include_js_tpl(tpl_info_hash[:monitor][:src])
+
+      tpl = R8Tpl::TemplateR8.new("workspace/notification_list_ide",user_context())
+      tpl.set_js_tpl_name("notification_list_ide")
+      tpl_info = tpl.render()
+      include_js_tpl(tpl_info[:src])
 #==========================
 
       include_js('plugins/search.cmdhandler2')

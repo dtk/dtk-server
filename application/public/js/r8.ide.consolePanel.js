@@ -28,7 +28,8 @@ if (!R8.IDE.consolePanel) {
 
 			_panelTpl = '',
 
-			_chefDebuggerLoaded = false;
+			_chefDebuggerLoaded = false,
+			_jitterLoaded = false;
 /*
  					<ul id="l-panel-tab-list" class="l-panel-tab-list">\
 						<li id="project-view-tab" class="active">Project</li>\
@@ -92,6 +93,13 @@ if (!R8.IDE.consolePanel) {
 					i18n: 'Config Debugger',
 					visible: false,
 					clickCallback: this.toggleChefDebugger
+				});
+
+				R8.Topbar2.addViewItem({
+					id: 'jitter',
+					i18n: 'Jitter',
+					visible: false,
+					clickCallback: this.toggleJitter
 				});
 
 				this.initViews();
@@ -216,13 +224,16 @@ if (!R8.IDE.consolePanel) {
 				}
 				if(this.numViews() == 0) _contentNode.set('innerHTML','');
 
+				if(typeof(_views[view.id]) != 'undefined') {
+					return;
+				}
 				view.panel = this;
 				switch(view.type) {
 					case "chef-debugger":
-						if(typeof(_views[view.id]) != 'undefined') {
-							return;
-						}
 						_views[view.id] = new R8.IDE.View.chefDebugger(view);
+						break;
+					case "jitter":
+						_views[view.id] = new R8.IDE.View.jitter(view);
 						break;
 					case "target":
 						_views[view.id] = new R8.IDE.View.target(view);
@@ -297,6 +308,20 @@ if (!R8.IDE.consolePanel) {
 					};
 					R8.IDE.pushConsoleView(viewDef);
 					_chefDebuggerLoaded = true;
+				}
+			},
+			toggleJitter: function() {
+
+				if (_jitterLoaded) {
+					
+				} else {
+					var viewDef = {
+						'id': 'jitter',
+						'name': 'Jitter',
+						'type': 'jitter'
+					};
+					R8.IDE.pushConsoleView(viewDef);
+					_jitterLoaded = true;
 				}
 			}
 		}

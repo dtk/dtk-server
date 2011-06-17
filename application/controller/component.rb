@@ -620,8 +620,8 @@ pp request.params
       #TODO: assuming parent_id is a datacenter_id
       parent_id = request.params["parent_id"]
 
-      tpl = R8Tpl::TemplateR8.new("node/wspace_display",user_context())
-      tpl.set_js_tpl_name("node_wspace_display")
+      tpl = R8Tpl::TemplateR8.new("node/wspace_display_ide",user_context())
+      tpl.set_js_tpl_name("node_wspace_display_ide")
       tpl_info = tpl.render()
       include_js_tpl(tpl_info[:src])
 

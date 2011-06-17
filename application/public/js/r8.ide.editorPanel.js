@@ -104,7 +104,7 @@ if (!R8.IDE.editorPanel) {
 				if(!_initialized) return;
 
 				var contentHeight = _node.get('region').height - _headerNode.get('region').height;
-				_contentNode.setStyles({'height':contentHeight,'width':_node.get('region').width,'backgroundColor':'#FFFFFF'});
+				_contentNode.setStyles({'height':contentHeight-6,'width':_node.get('region').width-6,'backgroundColor':'#FFFFFF'});
 
 
 				if(_fileList.length > 0) R8.Editor.resize();

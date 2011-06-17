@@ -77,9 +77,9 @@ if (!R8.IDE.View.chefDebugger) {
 
 				var pRegion = _panel.get('node').get('region');
 
-				_contentWrapperNode.setStyles({'height':pRegion.height,'width':pRegion.width});
+				_contentWrapperNode.setStyles({'height':pRegion.height-6,'width':pRegion.width-6});
 //				_contentNode.setStyles({'height':pRegion.height,'width':pRegion.width});
-				_contentNode.setStyles({'height':pRegion.height-(1+_headerNode.get('region').height),'width':pRegion.width});
+				_contentNode.setStyles({'height':pRegion.height-(6+1+_headerNode.get('region').height),'width':pRegion.width-6});
 
 /*
 				var contentHeight = _node.get('region').height - _headerNode.get('region').height;

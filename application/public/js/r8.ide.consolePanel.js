@@ -2,8 +2,6 @@
 if (!R8.IDE.consolePanel) {
 
 	R8.IDE.consolePanel = function(panelDef) {
-//DEBUG
-console.log('instantiating a console panel....');
 		var _def = panelDef,
 			_id = _def.id,
 
@@ -29,6 +27,8 @@ console.log('instantiating a console panel....');
 			_nodeList = [],
 
 			_panelTpl = '',
+
+			_chefDebuggerLoaded = false;
 /*
  					<ul id="l-panel-tab-list" class="l-panel-tab-list">\
 						<li id="project-view-tab" class="active">Project</li>\
@@ -86,6 +86,14 @@ console.log('instantiating a console panel....');
 					this.closeView(fileId);
 				},_tabListNode,'.view-tab .close-view',this);
 
+
+				R8.Topbar2.addViewItem({
+					id: 'chef-debugger',
+					i18n: 'Chef Debugger',
+					visible: false,
+					clickCallback: this.toggleChefDebugger
+				});
+
 				this.initViews();
 				_initialized = true;
 
@@ -105,8 +113,6 @@ console.log('instantiating a console panel....');
 				var contentHeight = _node.get('region').height - _headerNode.get('region').height;
 				_contentNode.setStyles({'height':contentHeight,'width':_node.get('region').width,'backgroundColor':'#FFFFFF'});
 
-
-				if(_fileList.length > 0) R8.Editor.resize();
 
 				if(_currentView != null) _views[_currentView].resize();
 
@@ -202,12 +208,11 @@ console.log('instantiating a console panel....');
 
 				view.panel = this;
 				switch(view.type) {
-					case "file":
-						if(_fileList.length == 0) this.renderEditor();
-						if(!R8.Utils.inArray(_fileList,view.id)) _fileList.push(view.id);
-
-//						view.contentId = _id+'-'+view.id;
-						_views[view.id] = new R8.IDE.View.file(view);
+					case "chef-debugger":
+						if(typeof(_views[view.id]) != 'undefined') {
+							return;
+						}
+						_views[view.id] = new R8.IDE.View.chefDebugger(view);
 						break;
 					case "target":
 						_views[view.id] = new R8.IDE.View.target(view);
@@ -270,15 +275,19 @@ console.log('instantiating a console panel....');
 //----------------------------------------
 //Editor Panel Specific Functions
 //----------------------------------------
-			renderEditor: function() {
-					var editorTpl = '<div id="'+_id+'-editor-wrapper" class="editor-wrapper"></div>';
-					_contentNode.append(editorTpl);
+			toggleChefDebugger: function() {
 
-					var cfg = {'editorWrapperNodeId': _id+'-editor-wrapper','containerNodeId': _contentNode.get('id')};
-					R8.Editor.init(cfg);
-			},
-			setFileContent: function(fileId,fileContent) {
-				_views[fileId]['content'] = fileContent;
+				if (_chefDebuggerLoaded) {
+				
+				} else {
+					var viewDef = {
+						'id': 'chef-debugger',
+						'name': 'Chef Debugger',
+						'type': 'chef-debugger'
+					};
+					R8.IDE.pushConsoleView(viewDef);
+					_chefDebuggerLoaded = true;
+				}
 			}
 		}
 	};

@@ -127,26 +127,27 @@ if (!R8.IDE) {
 */
 					],
 					'viewFocus': 'editor'
-				}
-/*				 {
+				},
+				 {
 					'id': 'console-panel',
-					'pClass': 'tempclass',
+//					'pClass': 'tempclass',
+					'pClass': '',
 					'type': 'console',
 					'minHeight': 100,
 					'minWidth': 300,
 					'relativePos': 'main',
 					'views': [
-					{
+/*					{
 						'id': 'chef_debugger',
 						'label': 'Chef Debugger',
 						'view': 'chefDebuggerView',
 						'method': 'renderChefDebugger'
 					}
 
-					],
+*/					],
 //					'viewFocus': 'chef_debugger'
 				}
-*/				]
+				]
 			};
 
 /*
@@ -489,7 +490,7 @@ if (!R8.IDE) {
 
 //DEBUG
 //begin console panel handling
-/*					var editorResizer = new Y.DD.Drag({
+					var editorResizer = new Y.DD.Drag({
 						node: '#mr-resizer-1'
 					});
 					editorResizer.plug(Y.Plugin.DDProxy, {
@@ -519,7 +520,7 @@ if (!R8.IDE) {
 						R8.User.setSetting('editorPanelHeight',editorHeight);
 					});
 //end console panel handling
-*/				});
+				});
 			},
 			toggleDetails: function(e) {
 				var id = e.currentTarget.get('id'),
@@ -570,6 +571,16 @@ if (!R8.IDE) {
 						break;
 				}
 				return region;
+			},
+//TODO: this is temp until implementing context based func execution
+			pushConsoleView: function(viewDef) {
+				if(!_consolePanelActive) return;
+
+				for(var p in _mainRegionPanels) {
+					if(_mainRegionPanels[p].get('type') == 'console') {
+						_mainRegionPanels[p].loadView(viewDef);
+					}
+				}
 			},
 			refreshChefDebug: function(level) {
 				var tempNode = R8.Utils.Y.one('#view-content-chef_debugger');

@@ -98,7 +98,9 @@ module XYZ
               callbacks = {
                 :on_msg_received => proc do |msg|
                   result = msg[:body].merge("task_id" => task_id)
-                  set_result_succeeded(workitem,result,task,action)
+                  pp [:result,result]
+                  succeeded = result[:statusmsg] == "OK" and (result[:data]||{})[:status] == :ok
+                  set_result_succeeded(workitem,result,task,action) if succeeded
                   self.reply_to_engine(workitem)
                 end,
                 :on_timeout => proc do 

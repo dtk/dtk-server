@@ -24,6 +24,7 @@
          :model_name=>:node,
          :join_type=>:inner,
          :join_cond=>{:id=>:component__node_node_id},
+         :filter => [:neq,:datacenter_datacenter_id,nil],
          :cols=>[:id,:display_name,:datacenter_datacenter_id]
        }]
     },

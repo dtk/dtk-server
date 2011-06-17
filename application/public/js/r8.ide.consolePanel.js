@@ -89,7 +89,7 @@ if (!R8.IDE.consolePanel) {
 
 				R8.Topbar2.addViewItem({
 					id: 'chef-debugger',
-					i18n: 'Chef Debugger',
+					i18n: 'Config Debugger',
 					visible: false,
 					clickCallback: this.toggleChefDebugger
 				});
@@ -140,6 +140,9 @@ if (!R8.IDE.consolePanel) {
 						break;
 					case "node":
 						return _contentNode;
+						break;
+					case "views":
+						return _views;
 						break;
 					case "type":
 						return "console";
@@ -282,7 +285,7 @@ if (!R8.IDE.consolePanel) {
 				} else {
 					var viewDef = {
 						'id': 'chef-debugger',
-						'name': 'Chef Debugger',
+						'name': 'Config Debugger',
 						'type': 'chef-debugger'
 					};
 					R8.IDE.pushConsoleView(viewDef);

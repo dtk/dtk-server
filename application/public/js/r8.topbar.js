@@ -53,7 +53,7 @@ if(!R8.Topbar2) {
 							};
 						R8.Ctrl.call(route,params);
 					}},
-					{id:'add-environments',i18n:'Add Environment',contentLoader:function(contentNode){
+					{id:'add-environments',i18n:'Add Target',contentLoader:function(contentNode){
 						var route = 'datacenter/wspace_edit',
 							params = {
 								'cfg':{

@@ -15,14 +15,25 @@ if (!R8.IDE.View.chefDebugger) {
 			_alertNode = null,
 			_alertNodeId = null,
 
+			_nodeList = [],
+
 //DEBUG
 //			_contentTpl = '<div id="'+_panel.get('id')+'-'+_view.id+'" class="target-viewspace"></div>',
 			_contentTpl = '<div id="'+_panel.get('id')+'-chef-debugger-wrapper" style="">\
-								foobard!!!!!\
+								<div id="'+_panel.get('id')+'-chef-debugger-header" class="view-header">\
+									<select id="'+_panel.get('id')+'-chef-debugger-available-nodes" name="'+_panel.get('id')+'-chef-debugger-available-nodes"></select>\
+								</div>\
+								<div id="'+_panel.get('id')+'-chef-debugger-content" style="overflow: auto;">\
+								</div>\
 						</div>',
 
 			_contentWrapperNode = null,
 			_contentNode = null,
+			_headerNode = null,
+
+			_nodeSelect = null,
+			_currentNodeId = '',
+			_logContents = {},
 
 			_initialized = false,
 
@@ -34,12 +45,27 @@ if (!R8.IDE.View.chefDebugger) {
 
 			_cmdBar = null,
 
+			_logPollerTimeout = null,
 			_events = {};
 
 		return {
 			init: function() {
-//				_contentNode = R8.Utils.Y.one('#'+_panel.get('id')+'-'+_view.id);
+				_headerNode = R8.Utils.Y.one('#'+_panel.get('id')+'-'+_view.id+'-header');
+				_contentNode = R8.Utils.Y.one('#'+_panel.get('id')+'-'+_view.id+'-content');
 				_contentWrapperNode = R8.Utils.Y.one('#'+_panel.get('id')+'-'+_view.id+'-wrapper');
+
+				_nodeSelect = document.getElementById(_panel.get('id')+'-'+_view.id+'-available-nodes');
+				_nodeSelectYUI = R8.Utils.Y.one('#'+_panel.get('id')+'-'+_view.id+'-available-nodes');
+
+				var that=this;
+				_nodeSelect.onchange = function() {
+					that.changeLogFocus(this.options[this.selectedIndex].value);
+				}
+
+				var items = R8.IDE.get('nodesInEditor');
+				for(var i in items) {
+					this.addNode(items[i]);
+				}
 
 				_initialized = true;
 			},
@@ -50,7 +76,10 @@ if (!R8.IDE.View.chefDebugger) {
 				if(!_initialized) return;
 
 				var pRegion = _panel.get('node').get('region');
+
 				_contentWrapperNode.setStyles({'height':pRegion.height,'width':pRegion.width});
+//				_contentNode.setStyles({'height':pRegion.height,'width':pRegion.width});
+				_contentNode.setStyles({'height':pRegion.height-(1+_headerNode.get('region').height),'width':pRegion.width});
 
 /*
 				var contentHeight = _node.get('region').height - _headerNode.get('region').height;
@@ -73,9 +102,13 @@ if (!R8.IDE.View.chefDebugger) {
 			focus: function() {
 				this.resize();
 				_contentWrapperNode.setStyle('display','block');
+
+				this.startLogPoller();
 			},
 			blur: function() {
 				_contentWrapperNode.setStyle('display','none');
+//				clearTimeout(_logPollerTimeout);
+				this.stopLogPoller();
 			},
 			close: function() {
 				_contentWrapperNode.purge(true);
@@ -83,10 +116,112 @@ if (!R8.IDE.View.chefDebugger) {
 			},
 
 //------------------------------------------------------
-//these are target view specific functions
+//these are debugger view specific functions
 //------------------------------------------------------
+			startLogPoller: function() {
+				var that = this;
+				var fireLogPoller = function() {
+					that.pollLog();
+				}
+				_logPollerTimeout = setTimeout(fireLogPoller,2000);
+			},
 
+			stopLogPoller: function() {
+				clearTimeout(_logPollerTimeout);
+				_logPollerTimeout = null;
+			},
+/*
+				var that=this;
+				var pollerCallback = function() {
+					that.pollLog();
+				}
+				_logPollerTimeout = setTimeout(pollerCallback,3000);
+*/
+			changeLogFocus: function(nodeId) {
+				_currentNodeId = nodeId;
 
+				_contentNode.set('innerHTML','');
+
+				if(typeof(_logContents[nodeId]) != 'undefined') {
+					this.renderLogContents(nodeId);
+				}
+
+				if(_logPollerTimeout == null && (typeof(_logContents[nodeId]) == 'undefined' || _logContents[nodeId].complete != true)) {
+					this.startLogPoller();
+				}
+			},
+			pollLog: function() {
+				var that=this;
+				var fireLogPoller = function() {
+					that.pollLog();
+				}
+				_logPollerTimeout = setTimeout(fireLogPoller,2500);
+
+				if(_currentNodeId == '') return;
+
+				var setLogsCallback = function(ioId,responseObj) {
+					eval("var response =" + responseObj.responseText);
+					var logContent = response.application_task_get_logs.content[0].data;
+
+					that.setLogContent(logContent);
+//					contentNode.set('innerHTML',log_content);
+//					contentNode.append(log_content);
+				}
+				var params = {
+					'cfg': {
+						'data': 'node_id='+_currentNodeId
+					},
+					'callbacks': {
+						'io:success': setLogsCallback
+					}
+				};
+				R8.Ctrl.call('task/get_logs',params);
+//				R8.Ctrl.call('task/get_logs/'+level,params);
+			},
+			setLogContent: function(logContent) {
+				for(var l in logContent) {
+					_logContents[l] = logContent[l];
+				}
+
+				this.renderLogContents(_currentNodeId);
+
+				if(_logContents[_currentNodeId].complete == true) this.stopLogPoller();
+/*
+      {:type=>:error,
+      :error_file_ref=>
+       {:type=>:recipe, :cookbook=>"java_webapp", :file_name=>"default.rb"},
+       :error_type=>:error_recipe,
+      :error_line_num=>2,
+      :error_lines=>[],
+      :error_detail=>"syntax error, unexpected tEQQ, expecting $end"}],
+
+ */
+			},
+			addNode: function(nodeObj) {
+				_nodeList.push(nodeObj);
+
+				var newOptionStr = '<option value="'+nodeObj.id+'">'+nodeObj.display_name+'</option>';
+				_nodeSelectYUI.append(newOptionStr);
+//DEBUG
+//console.log(nodeObj);
+			},
+			renderLogContents: function(nodeId) {
+				for(var i in _logContents[_currentNodeId]['log_segments']) {
+					var logSegment = _logContents[_currentNodeId]['log_segments'][i];
+
+					switch(logSegment.type) {
+						case "debug":
+						case "info":
+							var logTpl = '<div style="width: 100%; height: 17px; white-space: nowrap>'+logSegment.line+'</div>';
+							break;
+						case "error":
+							var logTpl = '<div style="color: red; width: 100%; height: 17px; white-space: nowrap">'+logSegment.error_detail+'\ in file <a href="">'+logSegment.error_file_ref.file_name+'</a></div>';
+							break;
+					}
+
+					_contentNode.prepend(logTpl);
+				}
+			},
 //---------------------------------------------
 //alert/notification related
 //---------------------------------------------

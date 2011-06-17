@@ -106,6 +106,9 @@ if (!R8.IDE.View.target) {
 					case "node":
 						return _contentWrapperNode;
 						break;
+					case "items":
+						return _viewSpaces[_currentViewSpace].get('items');
+						break;
 				}
 			},
 			focus: function() {

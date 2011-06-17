@@ -68,6 +68,9 @@ if (!R8.ViewSpace2) {
 					case "node":
 						return _node;
 						break;
+					case "items":
+						return _items;
+						break;
 				}
 			},
 			items: function(itemId) {

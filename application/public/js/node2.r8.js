@@ -270,6 +270,9 @@ haveNewPorts = true;
 					case "id":
 						return _id;
 						break;
+					case "object":
+						return _object;
+						break;
 					case "type":
 						return "node";
 						break;

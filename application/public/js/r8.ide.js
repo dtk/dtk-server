@@ -135,6 +135,7 @@ if (!R8.IDE) {
 					'type': 'console',
 					'minHeight': 100,
 					'minWidth': 300,
+					'defaultHeight': .20,
 					'relativePos': 'main',
 					'views': [
 /*					{
@@ -245,6 +246,28 @@ if (!R8.IDE) {
 						}
 						return null;
 						break;
+					case "nodesInEditor":
+						var nodeList = [];
+						if(!_editorPanelActive) return nodeList;
+
+						for(var p in _mainRegionPanels) {
+							if(_mainRegionPanels[p].get('type') == 'editor') {
+								var views = _mainRegionPanels[p].get('views');
+
+								for(var v in views) {
+									if(views[v].get('type') != 'target') continue;
+									var items = views[v].get('items');
+
+									for(var i in items) {
+										if(items[i].get('type') == 'node') {
+											nodeList.push(items[i].get('object'));
+										}
+									}
+								}
+							}
+						}
+						return nodeList;
+						break;
 				}
 			},
 			setupPanels: function() {
@@ -328,11 +351,12 @@ if (!R8.IDE) {
 								numResizers++;
 								widthOffset = widthOffset + 0.25;
 							}
+/*
 							if (_numLeftPanels > 0) {
 								numResizers++;
 								widthOffset = widthOffset + 0.25;
 							}
-
+*/
 							resizerOffset = numResizers*_resizerWidth;
 							pDef.width = Math.floor(containerRegion.width*widthOffset)-resizerOffset;
 							break;
@@ -373,6 +397,7 @@ if (!R8.IDE) {
 							var containerRegion = _mainRegionNode.get('region');
 							var resizerOffset = (_regions.main.numPanels-1)*_resizerWidth;
 
+//							pDef.height = Math.floor((containerRegion.height-resizerOffset)*pDef.defaultHeight);
 							pDef.height = Math.floor((containerRegion.height-resizerOffset)/_regions.main.numPanels);
 
 							pDef.width = containerRegion.width;

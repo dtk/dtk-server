@@ -136,6 +136,8 @@ if (!R8.IDE.editorPanel) {
 					case "node":
 						return _contentNode;
 						break;
+					case "views":
+						return _views;
 					case "type":
 						return "editor";
 						break;

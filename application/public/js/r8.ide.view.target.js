@@ -71,6 +71,10 @@ if (!R8.IDE.View.target) {
 					return false;
 				};
 
+//				_contentNode.append(R8.Dock.render({'display':'block','top':_topbarNode.get('region').bottom}));
+//				_contentNode.append(R8.Dock.render({'display':'block','top':_contentNode.get('region').top}));
+//				R8.Dock.init();
+
 				_initialized = true;
 			},
 			render: function() {

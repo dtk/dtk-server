@@ -183,8 +183,8 @@ node[:model_name] = 'node'
     def wspace_display_ide(id)
 #TODO: decide if toolbar is needed/used at node level
       #need to augment for nodes that are in datacenter directly and not node groups
-      tpl = R8Tpl::TemplateR8.new("node/wspace_display",user_context())
-      tpl.set_js_tpl_name("node_wspace_display")
+      tpl = R8Tpl::TemplateR8.new("node/wspace_display_ide",user_context())
+      tpl.set_js_tpl_name("node_wspace_display_ide")
       tpl_info = tpl.render()
       include_js_tpl(tpl_info[:src])
 

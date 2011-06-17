@@ -232,7 +232,7 @@ if (!R8.IDE.View.chefDebugger) {
 							break;
 					}
 
-					_contentNode.prepend(logTpl);
+					_contentNode.append(logTpl);
 				}
 			},
 //---------------------------------------------

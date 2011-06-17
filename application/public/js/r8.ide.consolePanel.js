@@ -166,6 +166,10 @@ if (!R8.IDE.consolePanel) {
 						if(typeof(_views['chef-debugger']) != 'undefined') return _views['chef-debugger'];
 						else return null;
 						break;
+					case "jitterView":
+						if(typeof(_views['jitter']) != 'undefined') return _views['jitter'];
+						else return null;
+						break;
 				}
 			},
 			setViewFocus: function(viewId) {

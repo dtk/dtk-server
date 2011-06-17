@@ -1013,8 +1013,8 @@ if(startPortDef.direction == "output") {
 											});
 
 //DEBUG
-console.log('calling addLink with tempLinkObj:');
-console.log(_tempLinkObj);
+//console.log('calling addLink with tempLinkObj:');
+//console.log(_tempLinkObj);
 											_viewSpace.addLink(_tempLinkObj);
 
 //											R8.Canvas.renderLink(_tempLinkDef);
@@ -1103,10 +1103,10 @@ console.log('not a valid link.., mis-matched types...');
 */
 						var nodeTest = R8.Utils.Y.one('#port-'+mergePortObjId);
 //DEBUG
-console.log('Have a link merge scenario link changes are...');
-console.log(linkChanges);
-console.log('nodeTest:');
-console.log(nodeTest);
+//console.log('Have a link merge scenario link changes are...');
+//console.log(linkChanges);
+//console.log('nodeTest:');
+//console.log(nodeTest);
 						if(nodeTest != null) {
 							_viewSpace.mergePorts('port-' + mergePortObjId, 'port-' + targetPortObjId);
 						}

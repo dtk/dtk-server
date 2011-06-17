@@ -57,7 +57,8 @@ if (!R8.IDE.View.jitter) {
 				_nodeSelect = document.getElementById(_panel.get('id')+'-'+_view.id+'-available-nodes');
 				_nodeSelectYUI = R8.Utils.Y.one('#'+_panel.get('id')+'-'+_view.id+'-available-nodes');
 
-				this.startJitPoller();
+//				this.startJitPoller();
+				this.getCompilation();
 
 				_initialized = true;
 			},
@@ -111,11 +112,9 @@ if (!R8.IDE.View.jitter) {
 			startJitPoller: function() {
 				var that = this;
 				var fireJitPoller = function() {
-console.log('inside of setTimeout function to start poller...');
 					that.getCompilation();
 				}
-//DEBUG
-console.log('should be starting jit poller...');
+
 				_jitPollerTimeout = setTimeout(fireJitPoller,2000);
 			},
 
@@ -131,7 +130,6 @@ console.log('should be starting jit poller...');
 				_jitPollerTimeout = setTimeout(pollerCallback,3000);
 */
 			getCompilation: function() {
-console.log('at top of getCompilation func....');
 				var that=this;
 /*
 				var fireJitPoller = function() {

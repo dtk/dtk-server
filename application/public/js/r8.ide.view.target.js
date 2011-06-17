@@ -290,6 +290,7 @@ if (!R8.IDE.View.target) {
 
 						that.refreshItem(modelId);
 						that.showAlert(alertStr);
+						R8.IDE.triggerCompilation();
 //DEBUG
 //TODO: revisit when fixing up console debugger
 //					R8.Workspace.refreshNotifications();

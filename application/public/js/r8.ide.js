@@ -690,6 +690,15 @@ if (!R8.IDE) {
 			renderEditor: function() {
 				R8.Editor.init({'containerNodeId':'editor-panel'});
 			},
+			triggerCompilation: function() {
+				var consolePanel = this.get('consolePanel');
+				if(consolePanel == null) return;
+
+				var jitterView = consolePanel.get('jitterView');
+				if(jitterView == null) return;
+
+				jitterView.getCompilation();
+			},
 			resizePanelContent: function() {
 				var panelRegion = this.getPanelContentRegion('l-panel');
 //				_projectViewNode.setStyles({'height':panelRegion.height-6,'width':panelRegion.width});

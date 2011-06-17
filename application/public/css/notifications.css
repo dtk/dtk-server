@@ -81,7 +81,7 @@
 
 #jitter-panel .item {
 	width: 100%;
-	height: 30px;
+	height: 20px;
 	float: left;
 	padding: 5px 0;
 	cursor: pointer;
@@ -102,8 +102,7 @@
 }
 
 #jitter-panel .item .content {
-	width: 100%;
-	height: 30px;
+	height: 20px;
 	float: left;
 	margin-top: 5px;
 }

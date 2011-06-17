@@ -616,4 +616,73 @@ pp request.params
     return {}
   end
 
+    def add_assembly_items_ide(id=nil)
+      #TODO: assuming parent_id is a datacenter_id
+      parent_id = request.params["parent_id"]
+
+      tpl = R8Tpl::TemplateR8.new("node/wspace_display",user_context())
+      tpl.set_js_tpl_name("node_wspace_display")
+      tpl_info = tpl.render()
+      include_js_tpl(tpl_info[:src])
+
+      #compute uui positions
+      assembly_left_pos = request.params["assembly_left_pos"]
+    
+      node_list = get_objects(:node,{:assembly_id=>id})
+
+      dc_hash = get_object_by_id(parent_id,:datacenter)
+      raise Error.new("Not implemented when parent_id is not a datacenter") if dc_hash.nil?
+      #get the top most item in the list to set new positions
+      top_node = {}
+      top_most = 2000
+    
+      node_list.each do |node|
+        ui = node.get_ui_info(dc_hash)
+        if ui and (ui[:top].to_i < top_most.to_i)
+          left_diff = assembly_left_pos.to_i - ui[:left].to_i
+          top_node = {:id=>node[:id],:ui=>ui,:left_diff=>left_diff}
+          top_most = ui[:top]
+        end
+      end
+
+      items = Array.new
+      item_id_list = Array.new
+      node_list.each do |node|
+        item_id_list << node[:id]
+        ui = node.get_ui_info(dc_hash)
+        Log.error("no coordinates for node with id #{node[:id].to_s} in #{parent_id.to_s}") unless ui
+        if ui
+          if node[:id] == top_node[:id]
+            ui[:left] = assembly_left_pos.to_i
+          else
+            ui[:left] = ui[:left].to_i + top_node[:left_diff].to_i
+          end
+        end
+        node.update_ui_info!(ui,dc_hash)
+        item = {
+          :type => 'node',
+          :object => node,
+#          :toolbar_def => toolbar_def,
+          :tpl_callback => tpl_info[:template_callback],
+          :ui => ui
+        }
+        items << item
+      end
+
+#    p_str = JSON.generate(request.params)
+#    run_javascript("alert('Added assembly, here are req params:  #{p_str}');")
+
+#    addItemsObj = JSON.generate(items)
+#    run_javascript("R8.Workspace.addItems(#{addItemsObj});")
+
+#    item_id_list_json = JSON.generate(item_id_list)
+#    run_javascript("R8.Workspace.touchItems(#{item_id_list_json});")
+
+    ret_obj = Hash.new
+    ret_obj[:items] = items
+    ret_obj[:touch_items] = item_id_list
+
+    return {:data=>ret_obj}
+  end
+
 end

@@ -98,6 +98,9 @@ if (!R8.IDE.View.target) {
 					case "type":
 						return _view.type;
 						break;
+					case "node":
+						return _contentWrapperNode;
+						break;
 				}
 			},
 			focus: function() {
@@ -228,6 +231,11 @@ if (!R8.IDE.View.target) {
 					R8.Ctrl.call(vspaceType+'/add_item/'+vspaceId,params);
 				});
 			},
+			touchItems: function(itemList,viewSpaceId) {
+				var vSpaceId = (typeof(viewSpaceId) == 'undefined') ? _currentViewSpace : viewSpaceId;
+
+				_viewSpaces[vSpaceId].touchItems(itemList);
+			},
 			setupNewItems: function() {
 				var viewspaceNode = R8.Utils.Y.one('#'+_contentNode.get('id'));
 				var itemChildren = viewspaceNode.get('children');
@@ -284,6 +292,36 @@ if (!R8.IDE.View.target) {
 						'data': queryParams
 					}
 				});
+			},
+			addAssemblyToViewspace: function(componentId,assemblyContext,assemblyLeftPos,containerNode) {
+				if(_viewContext == assemblyContext) {
+					var queryParams = 'target_model_name=datacenter&target_id='+_currentViewSpace;
+					queryParams += '&model_redirect=component&action_redirect=add_assembly_items_ide&id_redirect=*id';
+					queryParams += '&parent_id='+_currentViewSpace+'&assembly_left_pos='+assemblyLeftPos
+
+					var that=this;
+					var successCallback = function(ioId, responseObj) {
+							eval("var response =" + responseObj.responseText);
+							var retObj = response['application_component_add_assembly_items_ide']['content'][0]['data'];
+	
+							that.addItems(retObj.items);
+							that.touchItems(retObj.touch_items);
+	//DEBUG
+	//TODO: revisit when fixing up console debugger
+	//					R8.Workspace.refreshNotifications();
+					}
+					var callbacks = {
+						'io:success' : successCallback
+					};
+					R8.Ctrl.call('component/clone/'+componentId,{
+						'callbacks': callbacks,
+						'cfg': {
+							'data': queryParams
+						}
+					});
+				} else {
+
+				}
 			},
 			refreshItem: function(itemId){
 				_viewSpaces[_currentViewSpace].items(itemId).refresh();

@@ -6,6 +6,8 @@ module XYZ
       else raise Error.new("attribute value type (#{type}) not treated")
       end
     end
+
+    #disjunction of types
     def type_of?(*types)
       types.find do |type|
         unless type_klass = AttrValTypeMap[type]
@@ -19,47 +21,34 @@ module XYZ
    private
     def initialize(type,attr)
       @type=type.to_sym
-      @required = attr[:required]
+      @is_set = attr[:attribute_value] ? true : false #TODO: handling legitimate nil values
     end
   end
 
-  class AttrValTypeSet < AttrValType
+  #TODO: if dont have type hierarchy then can simplify
+  class AttrValTypeRequired < AttrValType
   end
-  class AttrValTypeSetRequired < AttrValTypeSet
+  class AttrValTypeNotRequired < AttrValType
   end
-  class AttrValTypeSetNotRequired < AttrValTypeSet
+  class AttrValTypeDynamic < AttrValType
   end
-
-  class AttrValTypeUnset < AttrValType
-  end
-  class AttrValTypeUnsetRequired < AttrValTypeUnset
-  end
-  class AttrValTypeUnsetDynamic < AttrValTypeUnset
-  end
-  class AttrValTypeUnsetLinked < AttrValTypeUnset
-  end
-  class AttrValTypeUnsetNotRequired < AttrValTypeUnset
+  class AttrValTypeLinked < AttrValType
   end
 
   AttrValTypeMap = {
-    :set_required => AttrValTypeSetRequired,
-    :set_not_required => AttrValTypeSetNotRequired,
-    :unset_required => AttrValTypeUnsetRequired,
-    :unset_not_required => AttrValTypeUnsetNotRequired,
-    :unset_dynamic => AttrValTypeUnsetDynamic,
-    :unset_linked => AttrValTypeUnsetLinked,
+    :required => AttrValTypeRequired,
+    :not_required => AttrValTypeNotRequired,
+    :dynamic => AttrValTypeDynamic,
+    :linked => AttrValTypeLinked,
   }
 
   module AttributeGroupInstanceMixin
     def attribute_value_type()
-      #TODO: detecting legititamate null value
-      #TODO: need way to propagate required on inputs to outputs 
       type = 
-        if self[:attribute_value] then self[:required] ? :set_required : :set_not_required
-        elsif self[:dynamic] then :unset_dynamic
-        elsif self[:port_type] == "input" then :unset_linked
-        elsif self[:required] then :unset_required
-        else :unset_not_required
+        if self[:dynamic] then :dynamic
+        elsif self[:port_type] == "input" then :linked
+        elsif self[:required] then :required
+        else :not_required
        end
       raise Error.new("Cannot detect type of attribute") unless type
       AttrValType.create(type,self)
@@ -90,14 +79,8 @@ module XYZ
     end
    private
     def add_missing_info_for_group_attrs!(augmented_attr_list,prune_set)
-      #TODO: add input direction if not present
-      #TODO: propagate back required
-      #TODO: can make more efficient by calling this just once and storing info in attributes;
-      #might put in some json attribute
-      #need analysis that looks at the index maps
-
       #find attributes that are required, but have no value
-      selected_attrs = augmented_attr_list.select{|a|a[:required] and a[:attribute_value].nil?}
+      selected_attrs = augmented_attr_list.select{|a|a[:required]}
       return if selected_attrs.empty?
       attr_ids = selected_attrs.map{|a|a[:id]}.uniq
       sp_hash = {

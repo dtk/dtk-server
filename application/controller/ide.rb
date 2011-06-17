@@ -34,8 +34,8 @@ module XYZ
       tpl_info_hash[:node_group] = tpl.render()
       include_js_tpl(tpl_info_hash[:node_group][:src])
 
-      tpl = R8Tpl::TemplateR8.new("node/wspace_display",user_context())
-      tpl.set_js_tpl_name("node_wspace_display")
+      tpl = R8Tpl::TemplateR8.new("node/wspace_display_ide",user_context())
+      tpl.set_js_tpl_name("node_wspace_display_ide")
       tpl_info_hash[:node] = tpl.render()
       include_js_tpl(tpl_info_hash[:node][:src])
 

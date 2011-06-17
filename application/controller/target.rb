@@ -107,8 +107,8 @@ module XYZ
       tpl.set_js_tpl_name("ng_wspace_display")
       tpl_info_hash[:node_group] = tpl.render()
 
-      tpl = R8Tpl::TemplateR8.new("node/wspace_display",user_context())
-      tpl.set_js_tpl_name("node_wspace_display")
+      tpl = R8Tpl::TemplateR8.new("node/wspace_display_ide",user_context())
+      tpl.set_js_tpl_name("node_wspace_display_ide")
       tpl_info_hash[:node] = tpl.render()
 
       tpl = R8Tpl::TemplateR8.new("datacenter/wspace_monitor_display",user_context())

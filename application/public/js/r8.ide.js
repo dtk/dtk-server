@@ -620,7 +620,9 @@ if (!R8.IDE) {
 					R8.Ctrl.call('task/get_logs/'+level,params);
 				},
 			},
-
+			updateTargetNodeName: function(nodeId) {
+				this.get('currentEditorView').updateItemName(nodeId);
+			},
 			renderEditor: function() {
 				R8.Editor.init({'containerNodeId':'editor-panel'});
 			},

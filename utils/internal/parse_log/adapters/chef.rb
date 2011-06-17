@@ -123,9 +123,15 @@ module XYZ
         end
        private
         def parse!(segments_from_error,prev_segment)
-          segment = segments_from_error[0]
-          if segment.line =~ /ERROR: (.+$)/
+          line = segments_from_error[1] && segments_from_error[1].line
+          if line =~ /INFO: error: (.+$)/
             @error_detail = $1
+            return
+          end
+          line = segments_from_error[0].line
+          if line =~ /ERROR: (.+$)/
+            @error_detail = $1
+            return
           end
         end
       end

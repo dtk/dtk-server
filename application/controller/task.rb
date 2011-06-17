@@ -127,9 +127,9 @@ module XYZ
       :error_detail=>"syntax error, unexpected tEQQ, expecting $end"},
    :node_name=>"app"}}
 
-#      pp hash_form
-#      {:data => hash_form}
-      {:data => stub_log}
+      pp hash_form
+     {:data => hash_form}
+ #     {:data => stub_log}
     end
 
     def logs_in_hash_form(parsed_logs,is_single_node)

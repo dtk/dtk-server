@@ -6,7 +6,7 @@
 	<div id="{%=panel[:id]%}-header" class="{%=panel[:headerClass]%} panel-header">
 						<ul id="{%=panel[:id]%}-tab-list" class="tab-list">
 							{%for view in panel[:views]%}
-								<li id="view-tab-{%=view[:id]%}" class="{%=view[:tClass]%}">{%=view[:label]%}</li>
+								<li id="view-tab-{%=view[:id]%}" class="view-tab {%=view[:tClass]%}">{%=view[:label]%}</li>
 							{%end%}
 						</ul>
 	</div>

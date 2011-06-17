@@ -101,6 +101,7 @@ body {
 
 .panel .content-wrapper {
 	overflow: hidden;
+	border: 2px solid #99B4D1;
 }
 .panel .content {
 	overflow: auto;

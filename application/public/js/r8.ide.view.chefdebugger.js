@@ -223,7 +223,12 @@ if (!R8.IDE.View.chefDebugger) {
 							var logTpl = '<div style="width: 100%; height: 17px; white-space: nowrap>'+logSegment.line+'</div>';
 							break;
 						case "error":
-							var logTpl = '<div style="color: red; width: 100%; height: 17px; white-space: nowrap">'+logSegment.error_detail+'\ in file <a href="">'+logSegment.error_file_ref.file_name+'</a></div>';
+							if(typeof(logSegment.error_file_ref) == 'undefined') {
+								var logTpl = '<div style="color: red; width: 100%; height: 17px; white-space: nowrap">'+logSegment.error_detail+'</div>';
+							} else {
+								var logTpl = '<div style="color: red; width: 100%; height: 17px; white-space: nowrap">'+logSegment.error_detail+' in file <a href="">'+logSegment.error_file_ref.file_name+'</a></div>';
+							}
+							
 							break;
 					}
 

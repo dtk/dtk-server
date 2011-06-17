@@ -85,8 +85,9 @@ if (!R8.IDE.View.target) {
 				if(!_initialized) return;
 
 				var pRegion = _panel.get('node').get('region');
-				_contentWrapperNode.setStyles({'height':pRegion.height,'width':pRegion.width});
+				_contentWrapperNode.setStyles({'height':pRegion.height-6,'width':pRegion.width-6});
 
+				R8.Dock2.realign();
 /*
 				var contentHeight = _node.get('region').height - _headerNode.get('region').height;
 				_contentNode.setStyles({'height':contentHeight,'width':_node.get('region').width,'backgroundColor':'#FFFFFF'});
@@ -105,6 +106,9 @@ if (!R8.IDE.View.target) {
 						break;
 					case "node":
 						return _contentWrapperNode;
+						break;
+					case "items":
+						return _viewSpaces[_currentViewSpace].get('items');
 						break;
 				}
 			},
@@ -190,6 +194,9 @@ if (!R8.IDE.View.target) {
 					return;
 				}
 				_viewSpaces[vSpaceId].addItems(items);
+
+//TODO: move to more event based handling
+				R8.IDE.targetItemsAdd(items);
 			},
 			addItemToViewSpace : function(clonedNode,viewSpaceId) {
 				var cleanupId = clonedNode.get('id'),
@@ -355,6 +362,7 @@ if (!R8.IDE.View.target) {
 				};
 				R8.Ctrl.call('node/save',params);
 //console.log('gettin to wspace func to update name:'+id);
+				return newName;
 			},
 //---------------------------------------------
 //alert/notification related

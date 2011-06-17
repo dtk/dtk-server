@@ -135,6 +135,7 @@ if (!R8.IDE) {
 					'type': 'console',
 					'minHeight': 100,
 					'minWidth': 300,
+					'defaultHeight': .20,
 					'relativePos': 'main',
 					'views': [
 /*					{
@@ -233,6 +234,19 @@ if (!R8.IDE) {
 					case "topbarNodeId":
 						return 'page-topbar';
 						break;
+					case "consolePanel":
+						if(!_consolePanelActive) return null;
+						for(var p in _mainRegionPanels) {
+							if(_mainRegionPanels[p].get('type') == 'console') {
+								return _mainRegionPanels[p];
+//								var currentView = _mainRegionPanels[p].get('currentView');
+//								if(currentView != null) return currentView;
+//								else return null;
+							}
+						}
+						return null;
+
+						break;
 					case "currentEditorView":
 						if(!_editorPanelActive) return null;
 
@@ -244,6 +258,28 @@ if (!R8.IDE) {
 							}
 						}
 						return null;
+						break;
+					case "nodesInEditor":
+						var nodeList = [];
+						if(!_editorPanelActive) return nodeList;
+
+						for(var p in _mainRegionPanels) {
+							if(_mainRegionPanels[p].get('type') == 'editor') {
+								var views = _mainRegionPanels[p].get('views');
+
+								for(var v in views) {
+									if(views[v].get('type') != 'target') continue;
+									var items = views[v].get('items');
+
+									for(var i in items) {
+										if(items[i].get('type') == 'node') {
+											nodeList.push(items[i].get('object'));
+										}
+									}
+								}
+							}
+						}
+						return nodeList;
 						break;
 				}
 			},
@@ -328,11 +364,12 @@ if (!R8.IDE) {
 								numResizers++;
 								widthOffset = widthOffset + 0.25;
 							}
+/*
 							if (_numLeftPanels > 0) {
 								numResizers++;
 								widthOffset = widthOffset + 0.25;
 							}
-
+*/
 							resizerOffset = numResizers*_resizerWidth;
 							pDef.width = Math.floor(containerRegion.width*widthOffset)-resizerOffset;
 							break;
@@ -373,6 +410,7 @@ if (!R8.IDE) {
 							var containerRegion = _mainRegionNode.get('region');
 							var resizerOffset = (_regions.main.numPanels-1)*_resizerWidth;
 
+//							pDef.height = Math.floor((containerRegion.height-resizerOffset)*pDef.defaultHeight);
 							pDef.height = Math.floor((containerRegion.height-resizerOffset)/_regions.main.numPanels);
 
 							pDef.width = containerRegion.width;
@@ -511,6 +549,7 @@ if (!R8.IDE) {
 						consolePanelNode.setStyle('height',(_mainRegionNode.get('region').height - (editorPanelNode.get('region').height+_resizerWidth)));
 
 						_mainRegionPanels['editor-panel'].resize();
+						_mainRegionPanels['console-panel'].resize();
 //						that.resizePanels();
 					});
 					editorResizer.on('drag:end',function(e){
@@ -620,8 +659,33 @@ if (!R8.IDE) {
 					R8.Ctrl.call('task/get_logs/'+level,params);
 				},
 			},
+			targetItemsAdd: function(items) {
+//console.log(items);
+				var consolePanel = this.get('consolePanel');
+				if(consolePanel != null) {
+					var configDebuggerView = consolePanel.get('configDebuggerView');
+//console.log(configDebuggerView);
+					if(configDebuggerView == null) return;
+
+					for(var i in items) {
+						configDebuggerView.addNode(items[i].object);
+					}
+				}
+			},
+			updateNodeName: function(nodeId,nodeName) {
+				var consolePanel = this.get('consolePanel');
+				if(consolePanel != null) {
+					var configDebuggerView = consolePanel.get('configDebuggerView');
+//console.log(configDebuggerView);
+					if(configDebuggerView == null) return;
+
+					configDebuggerView.updateNodeName(nodeId,nodeName);
+				}
+			},
 			updateTargetNodeName: function(nodeId) {
-				this.get('currentEditorView').updateItemName(nodeId);
+				var newName = this.get('currentEditorView').updateItemName(nodeId);
+
+				this.updateNodeName(nodeId,newName);
 			},
 			renderEditor: function() {
 				R8.Editor.init({'containerNodeId':'editor-panel'});

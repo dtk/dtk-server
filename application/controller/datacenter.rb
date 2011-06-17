@@ -200,7 +200,7 @@ pp request.params
     def wspace_edit
       tpl = R8Tpl::TemplateR8.new("datacenter/wspace_edit",user_context())
       tpl.assign(:_app,app_common())
-      tpl.assign(:submit_label,"Create Environment")
+      tpl.assign(:submit_label,"Create Target")
       panel_id = request.params['panel_id']
 
       include_js('plugins/environment.tool')

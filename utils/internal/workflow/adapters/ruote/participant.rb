@@ -99,7 +99,8 @@ module XYZ
                 :on_msg_received => proc do |msg|
                   result = msg[:body].merge("task_id" => task_id)
                   pp [:result,result]
-                  succeeded = (result[:statusmsg] == "OK" and (result[:data]||{})[:status] == :ok)
+                  #TODO: cleanup and just ues ok or succeeded on agent
+                  succeeded = (result[:statusmsg] == "OK" and [:succeeded,:ok].include?((result[:data]||{})[:status]))
                   set_result_succeeded(workitem,result,task,action) if succeeded
                   self.reply_to_engine(workitem)
                 end,

@@ -1,14 +1,14 @@
 
-if (!R8.IDE.View.chefDebugger) {
+if (!R8.IDE.View.jitter) {
 
-	R8.IDE.View.chefDebugger = function(view) {
+	R8.IDE.View.jitter = function(view) {
 		var _view = view,
 			_id = _view.id,
 			_panel = _view.panel,
 			_pendingDelete = {},
 
 			_modalNoe = null,
-			_modalNodeId = 'chef-debugger-'+_id+'-modal',
+			_modalNodeId = 'jitter-'+_id+'-modal',
 			_shimNodeId = null,
 			_shimNode = null,
 
@@ -18,14 +18,12 @@ if (!R8.IDE.View.chefDebugger) {
 			_nodeList = [],
 
 //DEBUG
+//TODO: update the css from target-viewspace
 //			_contentTpl = '<div id="'+_panel.get('id')+'-'+_view.id+'" class="target-viewspace"></div>',
-			_contentTpl = '<div id="'+_panel.get('id')+'-chef-debugger-wrapper" style="">\
-								<div id="'+_panel.get('id')+'-chef-debugger-header" class="view-header">\
-									<select id="'+_panel.get('id')+'-chef-debugger-available-nodes" name="'+_panel.get('id')+'-chef-debugger-available-nodes">\
-										<option value="">-Node List-</option>\
-									</select>\
+			_contentTpl = '<div id="'+_panel.get('id')+'-'+_id+'-wrapper" style="">\
+								<div id="'+_panel.get('id')+'-'+_id+'-header" class="view-header">\
 								</div>\
-								<div id="'+_panel.get('id')+'-chef-debugger-content" style="overflow-y: scroll;">\
+								<div id="'+_panel.get('id')+'-'+_id+'-content" style="overflow-y: scroll;">\
 								</div>\
 						</div>',
 
@@ -35,7 +33,7 @@ if (!R8.IDE.View.chefDebugger) {
 
 			_nodeSelect = null,
 			_currentNodeId = '',
-			_logContents = {},
+			_jitContents = {},
 
 			_initialized = false,
 
@@ -47,7 +45,7 @@ if (!R8.IDE.View.chefDebugger) {
 
 			_cmdBar = null,
 
-			_logPollerTimeout = null,
+			_jitPollerTimeout = null,
 			_events = {};
 
 		return {
@@ -59,15 +57,7 @@ if (!R8.IDE.View.chefDebugger) {
 				_nodeSelect = document.getElementById(_panel.get('id')+'-'+_view.id+'-available-nodes');
 				_nodeSelectYUI = R8.Utils.Y.one('#'+_panel.get('id')+'-'+_view.id+'-available-nodes');
 
-				var that=this;
-				_nodeSelect.onchange = function() {
-					that.changeLogFocus(this.options[this.selectedIndex].value);
-				}
-
-				var items = R8.IDE.get('nodesInEditor');
-				for(var i in items) {
-					this.addNode(items[i]);
-				}
+				this.startJitPoller();
 
 				_initialized = true;
 			},
@@ -105,12 +95,10 @@ if (!R8.IDE.View.chefDebugger) {
 				this.resize();
 				_contentWrapperNode.setStyle('display','block');
 
-				this.startLogPoller();
 			},
 			blur: function() {
 				_contentWrapperNode.setStyle('display','none');
-//				clearTimeout(_logPollerTimeout);
-				this.stopLogPoller();
+
 			},
 			close: function() {
 				_contentWrapperNode.purge(true);
@@ -120,76 +108,68 @@ if (!R8.IDE.View.chefDebugger) {
 //------------------------------------------------------
 //these are debugger view specific functions
 //------------------------------------------------------
-			startLogPoller: function() {
+			startJitPoller: function() {
 				var that = this;
-				var fireLogPoller = function() {
-					that.pollLog();
+				var fireJitPoller = function() {
+console.log('inside of setTimeout function to start poller...');
+					that.getCompilation();
 				}
-				_logPollerTimeout = setTimeout(fireLogPoller,2000);
+//DEBUG
+console.log('should be starting jit poller...');
+				_jitPollerTimeout = setTimeout(fireJitPoller,2000);
 			},
 
-			stopLogPoller: function() {
-				clearTimeout(_logPollerTimeout);
-				_logPollerTimeout = null;
+			stopJitPoller: function() {
+				clearTimeout(_jitPollerTimeout);
+				_jitPollerTimeout = null;
 			},
 /*
 				var that=this;
 				var pollerCallback = function() {
-					that.pollLog();
+					that.getCompilation();
 				}
-				_logPollerTimeout = setTimeout(pollerCallback,3000);
+				_jitPollerTimeout = setTimeout(pollerCallback,3000);
 */
-			changeLogFocus: function(nodeId) {
-				if(nodeId == '') return;
-
-				_currentNodeId = nodeId;
-
-				_contentNode.set('innerHTML','');
-
-				if(typeof(_logContents[nodeId]) != 'undefined') {
-					this.renderLogContents(nodeId);
-				}
-
-				if(_logPollerTimeout == null && (typeof(_logContents[nodeId]) == 'undefined' || _logContents[nodeId].complete != true)) {
-					this.startLogPoller();
-				}
-			},
-			pollLog: function() {
+			getCompilation: function() {
+console.log('at top of getCompilation func....');
 				var that=this;
-				var fireLogPoller = function() {
-					that.pollLog();
+/*
+				var fireJitPoller = function() {
+					that.getCompilation();
 				}
-				_logPollerTimeout = setTimeout(fireLogPoller,2500);
+				_jitPollerTimeout = setTimeout(fireJitPoller,5000);
 
-				if(_currentNodeId == '') return;
+*/
+//				if(_currentNodeId == '') return;
 
-				var setLogsCallback = function(ioId,responseObj) {
-					eval("var response =" + responseObj.responseText);
-					var logContent = response.application_task_get_logs.content[0].data;
+				var targetView = R8.IDE.get('currentEditorView');
+				if(targetView == null || targetView.get('type') != 'target') return;
 
-					that.setLogContent(logContent);
-//					contentNode.set('innerHTML',log_content);
-//					contentNode.append(log_content);
-				}
+				var targetId = targetView.get('id');
+				var	that = this;
+				var	getJitCallback = function(ioId,responseObj) {
+						eval("var response =" + responseObj.responseText);
+						//TODO: revisit once controllers are reworked for cleaner result package
+						var jitContent = response['application_datacenter_get_warnings']['content'][0]['data'];
+//console.log(jitContent);
+//return;
+						that.setJitContent(jitContent);
+					}
 				var params = {
-					'cfg': {
-						'data': 'node_id='+_currentNodeId
-					},
 					'callbacks': {
-						'io:success': setLogsCallback
+						'io:success':getJitCallback
 					}
 				};
-				R8.Ctrl.call('task/get_logs',params);
-//				R8.Ctrl.call('task/get_logs/'+level,params);
+				R8.Ctrl.call('datacenter/get_warnings/'+targetId,params);
 			},
-			setLogContent: function(logContent) {
-				for(var l in logContent) {
-					_logContents[l] = logContent[l];
-				}
+			setJitContent: function(jitContent) {
+				var nWrapperNode = R8.Utils.Y.Node.create('<div id="jitter-panel"></div>');
+				_contentNode.set('innerHTML','');
+				_contentNode.append(nWrapperNode.append(R8.Rtpl.notification_list_ide({'notification_list':jitContent})));
 
-				this.renderLogContents(_currentNodeId);
+//				this.renderJitContents(_currentNodeId);
 
-				if(_logContents[_currentNodeId].complete == true) this.stopLogPoller();
+//				if(_jitContents[_currentNodeId].complete == true) this.stopLogPoller();
 /*
       {:type=>:error,
       :error_file_ref=>
@@ -218,8 +198,8 @@ if (!R8.IDE.View.chefDebugger) {
 				}
 			},
 			renderLogContents: function(nodeId) {
-				for(var i in _logContents[_currentNodeId]['log_segments']) {
-					var logSegment = _logContents[_currentNodeId]['log_segments'][i];
+				for(var i in _jitContents[_currentNodeId]['log_segments']) {
+					var logSegment = _jitContents[_currentNodeId]['log_segments'][i];
 
 					switch(logSegment.type) {
 						case "debug":

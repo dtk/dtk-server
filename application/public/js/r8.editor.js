@@ -291,8 +291,8 @@ alert('should create new attr for component...');
 if(_editorContainerNode == null) return;
 
 				var wrapperRegion = _editorContainerNode.get('region');
-				var editorWrapperHeight = wrapperRegion.height;
-				var editorWrapperWidth = wrapperRegion.width;
+				var editorWrapperHeight = wrapperRegion.height-6;
+				var editorWrapperWidth = wrapperRegion.width-6;
 /*
 				_editorWrapperNode.setStyles({
 					'height':editorWrapperHeight,

@@ -66,7 +66,7 @@ if (!R8.IDE.panel) {
 				if(!_initialized) return;
 
 				var contentHeight = _node.get('region').height - _headerNode.get('region').height;
-				_contentNode.setStyles({'height':contentHeight,'width':_node.get('region').width,'backgroundColor':'#FFFFFF'});
+				_contentNode.setStyles({'height':contentHeight-6,'width':_node.get('region').width-6,'backgroundColor':'#FFFFFF'});
 
 				var numViews = _def.views.length;
 				for(var i=0; i < numViews; i++) {

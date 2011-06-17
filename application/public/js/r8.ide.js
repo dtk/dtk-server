@@ -128,23 +128,24 @@ if (!R8.IDE) {
 					],
 					'viewFocus': 'editor'
 				},
-/*				 {
+				 {
 					'id': 'console-panel',
 					'pClass': 'tempclass',
+					'type': 'console',
 					'minHeight': 100,
 					'minWidth': 300,
 					'relativePos': 'main',
 					'views': [
-					{
+/*					{
 						'id': 'chef_debugger',
 						'label': 'Chef Debugger',
 						'view': 'chefDebuggerView',
 						'method': 'renderChefDebugger'
 					}
-
+*/
 					],
-					'viewFocus': 'chef_debugger'
-				}*/
+//					'viewFocus': 'chef_debugger'
+				}
 				]
 			};
 
@@ -383,12 +384,15 @@ if (!R8.IDE) {
 				for (var i in layoutDef.panels) {
 					var pDef = layoutDef.panels[i];
 
+console.log('panel:'+pDef.type);
 					switch(pDef.type) {
 						case "editor":
 							_editorPanelActive = true;
 							_panels[pDef.id] = new R8.IDE.editorPanel(pDef);
 							break;
 						case "console":
+//DEBUG
+console.log('have a console panel.., going to create a new one');
 							_consolePanelActive = true;
 							_panels[pDef.id] = new R8.IDE.consolePanel(pDef);
 							break;
@@ -486,7 +490,9 @@ if (!R8.IDE) {
 						that.resizePanels();
 					});
 
-/*					var editorResizer = new Y.DD.Drag({
+//DEBUG
+//begin console panel handling
+					var editorResizer = new Y.DD.Drag({
 						node: '#mr-resizer-1'
 					});
 					editorResizer.plug(Y.Plugin.DDProxy, {
@@ -515,7 +521,7 @@ if (!R8.IDE) {
 
 						R8.User.setSetting('editorPanelHeight',editorHeight);
 					});
-*/
+//end console panel handling
 				});
 			},
 			toggleDetails: function(e) {

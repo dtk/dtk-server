@@ -2,6 +2,8 @@
 if (!R8.IDE.consolePanel) {
 
 	R8.IDE.consolePanel = function(panelDef) {
+//DEBUG
+console.log('instantiating a console panel....');
 		var _def = panelDef,
 			_id = _def.id,
 

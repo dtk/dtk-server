@@ -260,7 +260,11 @@ console.log(taskDef);
 				};
 */				var params = {
 					'cfg' : {
-						method : 'GET'
+						method : 'POST',
+						form: {
+							id : 'modal-form',
+							upload: false
+						}
 					}
 				};
 

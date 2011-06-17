@@ -24,7 +24,7 @@ module XYZ
             :result => TaskAction::Result::Succeeded.new(new_result)
           }             
           task.update(update_hash)
-          action.update_state_change_status(task.model_handle,:completed)  #this send pending changes' states
+          action.update_state_change_status(task.model_handle,:completed)  #this updates pending state
           set_result_succeeded__stack(workitem,new_result,task,action)
         end
 
@@ -91,14 +91,14 @@ module XYZ
         def consume(workitem)
           #LockforDebug.synchronize{pp [:in_consume, Thread.current, Thread.list];STDOUT.flush}
           params = get_params(workitem) 
-          task_id,action,workflow,task,task_end = %w{task_id action workflow task task_end}.map{|k|params[k]}
+          task_id,action,workflow,task = %w{task_id action workflow task}.map{|k|params[k]}
 
           execution_context(task,params["top_task_idh"]) do
             if action.long_running?
               callbacks = {
                 :on_msg_received => proc do |msg|
                   result = msg[:body].merge("task_id" => task_id)
-                  set_result_succeeded(workitem,result,task,action) if task_end
+                  set_result_succeeded(workitem,result,task,action)
                   self.reply_to_engine(workitem)
                 end,
                 :on_timeout => proc do 

@@ -205,6 +205,14 @@ if (!R8.IDE.View.chefDebugger) {
 //DEBUG
 //console.log(nodeObj);
 			},
+			updateNodeName: function(nodeId,nodeName) {
+				var numNodes = _nodeSelect.options.length;
+				for(var i=0; i < numNodes; i++) {
+					if(_nodeSelect.options[i].value==nodeId) {
+						_nodeSelect.options[i].text = nodeName;
+					}
+				}
+			},
 			renderLogContents: function(nodeId) {
 				for(var i in _logContents[_currentNodeId]['log_segments']) {
 					var logSegment = _logContents[_currentNodeId]['log_segments'][i];

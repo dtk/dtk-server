@@ -361,6 +361,7 @@ if (!R8.IDE.View.target) {
 				};
 				R8.Ctrl.call('node/save',params);
 //console.log('gettin to wspace func to update name:'+id);
+				return newName;
 			},
 //---------------------------------------------
 //alert/notification related

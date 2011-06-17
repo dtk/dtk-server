@@ -29,10 +29,10 @@ if (!R8.Target) {
 				}
 			},
 			setLeafClickEvent: function() {
-console.log('setting event...:'+_leafBodyNode.get('id'));
+//console.log('setting event...:'+_leafBodyNode.get('id'));
 				_leafBodyNode = R8.Utils.Y.one('#'+_leafBodyNode.get('id'));
 				_leafBodyNode.on('click',function(e){
-alert('Booyaaaakashaaa!!!');
+//alert('Booyaaaakashaaa!!!');
 				});
 			},
 			renderTree: function() {

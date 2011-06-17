@@ -672,8 +672,20 @@ if (!R8.IDE) {
 					}
 				}
 			},
+			updateNodeName: function(nodeId,nodeName) {
+				var consolePanel = this.get('consolePanel');
+				if(consolePanel != null) {
+					var configDebuggerView = consolePanel.get('configDebuggerView');
+//console.log(configDebuggerView);
+					if(configDebuggerView == null) return;
+
+					configDebuggerView.updateNodeName(nodeId,nodeName);
+				}
+			},
 			updateTargetNodeName: function(nodeId) {
-				this.get('currentEditorView').updateItemName(nodeId);
+				var newName = this.get('currentEditorView').updateItemName(nodeId);
+
+				this.updateNodeName(nodeId,newName);
 			},
 			renderEditor: function() {
 				R8.Editor.init({'containerNodeId':'editor-panel'});

@@ -544,9 +544,12 @@ console.log('Have a drop hit for node!!!!');
 									var dropNode = e.drop.get('node');
 									var compNode = e.drag.get('dragNode').get('children').item(0);
 									var componentId = compNode.getAttribute('data-id');
-									var assemblyLeftPos = e.drag.get('dragNode').get('region').left;
+
+									var panelOffset = cmdbar.get('viewSpace').get('node').get('region').left;
+									var assemblyLeftPos = e.drag.get('dragNode').get('region').left-panelOffset;
 //DEBUG
 //									R8.Workspace.addAssemblyToViewspace(componentId,'node',assemblyLeftPos,dropNode);
+									cmdbar.get('viewSpace').addAssemblyToViewspace(componentId,'node',assemblyLeftPos,dropNode);
 								});
 							}
 						} else {

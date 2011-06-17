@@ -121,6 +121,7 @@ module XYZ
     end
 
     def add_task_guard__addr_for_config_node!(guarded_attr,link,guard_attr=nil)
+      #TODO: wil be used or leveraged when need guards
       unless guard_attr
         #TODO: lock up the info
         guard_attr = {:node => "Need to compute"}
@@ -135,7 +136,7 @@ module XYZ
           :node => guarded_attr[:node]
         }
       }
-      pp [:task_guard,task_guard]
+      #pp [:task_guard,task_guard]
     end
 
     def find_matching_link(attr,links)

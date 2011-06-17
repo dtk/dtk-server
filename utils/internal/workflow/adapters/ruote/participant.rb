@@ -24,12 +24,12 @@ module XYZ
             :result => TaskAction::Result::Succeeded.new(new_result)
           }             
           task.update(update_hash)
-          #TODO: for testing removing so can rerun executable_action.update_state_change_status(task.model_handle,:completed)  #this send pending changes' states
+          action.update_state_change_status(task.model_handle,:completed)  #this send pending changes' states
           set_result_succeeded__stack(workitem,new_result,task,action)
         end
 
         def set_result_timeout(workitem,new_result,task)
-            #TODO: what should be set here; is no op fine
+            #TODO: what should be set here; is no op fine?
         end
 
          private

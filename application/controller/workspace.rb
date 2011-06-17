@@ -832,62 +832,41 @@ POSSIBLE CHANGES TO HASH
 
     def commit_ide(datacenter_id=nil)
       commit_tree = Hash.new
+      required_attr_list = Array.new
       if datacenter_id
-#TODO: Move pending changes retrive inside of create_commit_task
         pending_changes = flat_list_pending_changes_in_datacenter(datacenter_id.to_i)
         unless pending_changes.empty?
-#TODO: cleanup interface to tasks/pending changes
-#          commit_task = create_commit_task()
-#default gets all pending changes since last commit by user
-
-#group can be either datacenter, node_group, node,
-#later figure out how to 
-#          commit_task = create_commit_task(group_id)
           commit_task = create_task_from_pending_changes(pending_changes)
           commit_task.save!()
-=begin
-POSSIBLE CHANGES TO HASH
-  -task_id to id
-  -
-=end
 
+          #handle missing required attrs
+          augmented_attr_list = Attribute.augmented_attribute_list_from_task(commit_task)
+        
+          opts = {:types_to_keep => [:required]}
+          grouped_attrs = Attribute.ret_grouped_attributes!(augmented_attr_list,opts)
+  
+          i18n_mapping = get_i18n_mappings_for_models(:attribute,:component)
+          required_attr_list = grouped_attrs.map do |a|
+            name = a[:display_name]
+            attr_i18n = i18n_string(i18n_mapping,:attribute,name)
+            component_i18n = i18n_string(i18n_mapping,:component,a[:component][:display_name])
+            node_i18n = a[:node][:display_name]
+            qualified_attr_i18n = "#{node_i18n}/#{component_i18n}/#{attr_i18n}"
+            {
+              :id => a[:unraveled_attribute_id],
+              :name =>  name,
+              :value => a[:attribute_value],
+              :i18n => qualified_attr_i18n
+            }
+          end
 
-#default if nothing passed is json, make extensible for xml formatting for tuture possible integrations
-#          commit_tree = top_level_task.render_commit_tree()
-#          commit_tree = top_level_task.render_commit_tree('xml | json')
+          #default if nothing passed is json, make extensible for xml formatting for tuture possible integrations
+          #commit_tree = top_level_task.render_commit_tree()
+          #commit_tree = top_level_task.render_commit_tree('xml | json')
           commit_tree = commit_task.render_form()
           add_i18n_strings_to_rendered_tasks!(commit_tree)
-#          pp [:commit_tree,commit_tree]
           delete_instance(commit_task.id())
         end
-
-#===============================================
-#This is code to handle missing required attrs
-#===============================================
-        pending_changes = flat_list_pending_changes_in_datacenter(datacenter_id.to_i)
-        commit_task = create_task_from_pending_changes(pending_changes)
-  
-        augmented_attr_list = Attribute.augmented_attribute_list_from_task(commit_task)
-        
-        opts = {:types_to_keep => [:required]}
-        grouped_attrs = Attribute.ret_grouped_attributes!(augmented_attr_list,opts)
-       # pp grouped_attrs.each{|x| pp [x[:component][:display_name],x[:display_name],x[:attr_val_type]]}
-  
-        i18n_mapping = get_i18n_mappings_for_models(:attribute,:component)
-        required_attr_list = grouped_attrs.map do |a|
-          name = a[:display_name]
-          attr_i18n = i18n_string(i18n_mapping,:attribute,name)
-          component_i18n = i18n_string(i18n_mapping,:component,a[:component][:display_name])
-          node_i18n = a[:node][:display_name]
-          qualified_attr_i18n = "#{node_i18n}/#{component_i18n}/#{attr_i18n}"
-          {
-            :id => a[:unraveled_attribute_id],
-            :name =>  name,
-            :value => a[:attribute_value],
-            :i18n => qualified_attr_i18n
-          }
-        end
-#pp required_attr_list
       end
 
 #      tpl = R8Tpl::TemplateR8.new("workspace/commit_test",user_context())

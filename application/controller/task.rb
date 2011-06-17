@@ -120,6 +120,7 @@ module XYZ
         errors = Array.new
         each_error_parsed_log(parsed_logs) do |node_info,parsed_log|
           hash_form = parsed_log.error_segment.hash_form()
+          pp [:error_info,hash_form]
           err = [:error_detail,:error_lines].inject(:node_info => node_info) do |h,val|
             h.merge(val => hash_form[val])
           end

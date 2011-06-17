@@ -21,7 +21,9 @@ if (!R8.IDE.View.chefDebugger) {
 //			_contentTpl = '<div id="'+_panel.get('id')+'-'+_view.id+'" class="target-viewspace"></div>',
 			_contentTpl = '<div id="'+_panel.get('id')+'-chef-debugger-wrapper" style="">\
 								<div id="'+_panel.get('id')+'-chef-debugger-header" class="view-header">\
-									<select id="'+_panel.get('id')+'-chef-debugger-available-nodes" name="'+_panel.get('id')+'-chef-debugger-available-nodes"></select>\
+									<select id="'+_panel.get('id')+'-chef-debugger-available-nodes" name="'+_panel.get('id')+'-chef-debugger-available-nodes">\
+										<option value="">-Node List-</option>\
+									</select>\
 								</div>\
 								<div id="'+_panel.get('id')+'-chef-debugger-content" style="overflow-y: scroll;">\
 								</div>\
@@ -138,6 +140,8 @@ if (!R8.IDE.View.chefDebugger) {
 				_logPollerTimeout = setTimeout(pollerCallback,3000);
 */
 			changeLogFocus: function(nodeId) {
+				if(nodeId == '') return;
+
 				_currentNodeId = nodeId;
 
 				_contentNode.set('innerHTML','');
@@ -223,17 +227,19 @@ if (!R8.IDE.View.chefDebugger) {
 							var logTpl = '<div style="width: 100%; height: 17px; white-space: nowrap>'+logSegment.line+'</div>';
 							break;
 						case "error":
-							if(typeof(logSegment.error_file_ref) == 'undefined') {
+							if(typeof(logSegment.error_file_ref) == 'undefined' || logSegment.error_file_ref == null || logSegment.error_file_ref == '') {
 								var logTpl = '<div style="color: red; width: 100%; height: 17px; white-space: nowrap">'+logSegment.error_detail+'</div>';
 							} else {
 								var logTpl = '<div style="color: red; width: 100%; height: 17px; white-space: nowrap">'+logSegment.error_detail+' in file <a href="">'+logSegment.error_file_ref.file_name+'</a></div>';
 							}
-							
+
 							break;
 					}
 
 					_contentNode.append(logTpl);
 				}
+				var contentDiv = document.getElementById(_contentNode.get('id'));
+				contentDiv.scrollTop = 5000;
 			},
 //---------------------------------------------
 //alert/notification related

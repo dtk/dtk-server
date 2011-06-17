@@ -178,29 +178,45 @@ module XYZ
       class ErrorRecipe < ErrorChefLog 
         def self.isa?(segments_from_error)
           line = segments_from_error.first.line
-          return true if line =~ Regexp.new("#{RecipeCache}[^/]+/recipes") #TODO: is this still a 0.10 error form?
           return true if line =~ Regexp.new("has had an error")
+          lines_to_check(segments_from_error).each do |line|
+            return true if line and line =~ Regexp.new("#{RecipeCache}[^/]+/recipes") 
+          end
           nil
         end
        private
         RecipeCache = "/var/chef/cookbooks/"
         def parse!(segments_from_error,prev_segment)
-          line = segments_from_error.first.line
-          if line =~ Regexp.new("#{RecipeCache}([^/]+)/recipes/([^:]+):([0-9]+):in `from_file'") #TODO: is this still a 0.10 error form?
-            cookbook = $1
-            recipe_filename = $2
-            @error_line_num = $3.to_i 
-            @error_file_ref = ChefFileRef.recipe(cookbook,recipe_filename)
-            @error_detail = segments_from_error.first.aux_data.first
-          elsif line =~ /\((.+)::(.+) line ([0-9]+)\) has had an error/
-            cookbook = $1
-            recipe_filename = "#{$2}.rb"
-            @error_line_num = $3.to_i 
-            @error_file_ref = ChefFileRef.recipe(cookbook,recipe_filename)
-            if segments_from_error[2] and segments_from_error[2].line =~ /INFO: error: (.+$)/
-              @error_detail = $1
+          ErrorRecipe.lines_to_check(segments_from_error).each do |line|
+            if line and line =~ Regexp.new("#{RecipeCache}([^/]+)/recipes/([^:]+):([0-9]+):in `from_file'") 
+              cookbook = $1
+              recipe_filename = $2
+              @error_line_num = $3.to_i 
+              @error_file_ref = ChefFileRef.recipe(cookbook,recipe_filename)
+              @error_detail = segments_from_error.first.aux_data.first
+              return
+            elsif line and line =~ Regexp.new("#{RecipeCache}([^/]+)/recipes/([^:]+):([0-9]+): (.+$)")
+              cookbook = $1
+              recipe_filename = $2
+              @error_line_num = $3.to_i 
+              @error_file_ref = ChefFileRef.recipe(cookbook,recipe_filename)
+              @error_detail = $4
+              return
+            elsif line and line =~ /\((.+)::(.+) line ([0-9]+)\) has had an error/
+              cookbook = $1
+              recipe_filename = "#{$2}.rb"
+              @error_line_num = $3.to_i 
+              @error_file_ref = ChefFileRef.recipe(cookbook,recipe_filename)
+              if segments_from_error[2] and segments_from_error[2].line =~ /INFO: error: (.+$)/
+                @error_detail = $1
+              end
+              return
             end
           end
+        end
+
+        def self.lines_to_check(segs_from_err)
+          [segs_from_err.first.line, segs_from_err[1] && (segs_from_err[1].aux_data||[]).first]
         end
       end
 

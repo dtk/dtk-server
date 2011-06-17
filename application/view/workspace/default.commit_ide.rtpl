@@ -17,7 +17,7 @@
 			<table class="edit">
 			{%for required_attr in required_attr_list%}
 				<tr><td class="label">{%=required_attr[:i18n]%}</td></tr>
-				<tr><td class="field"><input type="text" value="" size="40" id="{%=required_attr[:id]%}" name="{%=required_attr[:id]%}"/></td></tr>
+				<tr><td class="field"><input type="text" value="{%=required_attr[:value]%}" size="40" id="{%=required_attr[:id]%}" name="{%=required_attr[:id]%}"/></td></tr>
 			{%end%}
 			</table>
 		</div>

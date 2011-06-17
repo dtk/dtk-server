@@ -620,6 +620,7 @@ pp datacenter
     helper :get_pending_changes
     helper :create_tasks_from_pending_changes
 
+    #deprecate
     def commit_changes(datacenter_id=nil)
 #      context_type = request.params["context_type"]
       #TODO: either use param from context id or from what is posted
@@ -684,14 +685,22 @@ pp datacenter
       }
     end
 
-    def commit_changes_ide(datacenter_id=nil)
-#      context_type = request.params["context_type"]
-      #TODO: either use param from context id or from what is posted
-      #TODO: move to getting id of top level task
-      context_id = request.params["context_id"]
-      datacenter_id ||= context_id
-
+    def commit_changes_ide(datacenter_id)
       datacenter_id = datacenter_id && datacenter_id.to_i
+      hash = request.params.dup
+      commit_date = hash.delete("commit_date")
+      commit_msg = hash.delete("commit_msg")
+
+      #save any params given
+      attr_val_hash = hash
+      attr_val_hash.each{|k,v|attr_val_hash[k] = nil if v.kind_of?(String) and v.empty?}
+      #TODO: if not using c_ prfix remove from view and remobe below
+      attr_val_hash = attr_val_hash.inject({}) do |h,(k,v)|
+        h.merge(k.gsub(/^c__[0-9]+__/,"") => v)
+      end
+      attribute_rows = AttributeComplexType.ravel_raw_post_hash(attr_val_hash,:attribute)
+      Attribute.update_and_propagate_attributes(model_handle(:attribute),attribute_rows)
+      ######
 
       pending_changes = flat_list_pending_changes_in_datacenter(datacenter_id)
       if pending_changes.empty?
@@ -701,8 +710,11 @@ pp datacenter
 
       top_level_task = create_task_from_pending_changes(pending_changes)
 
+      #TODO: need to sync ValidationError with analysis done in group by
       errors = ValidationError.find_missing_required_attributes(top_level_task)
-      if errors
+      #TODO: removing for time being
+      #      if errors
+      if false #errors
         pp [:errors,errors]
         error_list = []
         #TODO: stub
@@ -857,7 +869,8 @@ POSSIBLE CHANGES TO HASH
   
         augmented_attr_list = Attribute.augmented_attribute_list_from_task(commit_task)
         
-        opts = {:types_to_keep => [:unset_required]}
+#        opts = {:types_to_keep => [:unset_required]}
+        opts = {:types_to_keep => [:set_required,:unset_required]}
         grouped_attrs = Attribute.ret_grouped_attributes!(augmented_attr_list,opts)
        # pp grouped_attrs.each{|x| pp [x[:component][:display_name],x[:display_name],x[:attr_val_type]]}
   
@@ -875,7 +888,7 @@ POSSIBLE CHANGES TO HASH
             :i18n => qualified_attr_i18n
           }
         end
-pp required_attr_list
+#pp required_attr_list
       end
 
 #      tpl = R8Tpl::TemplateR8.new("workspace/commit_test",user_context())

@@ -15,14 +15,21 @@ module XYZ
         self.kind_of?(type_klass)
       end ? true : nil
     end
+
    private
     def initialize(type,attr)
       @type=type.to_sym
+      @required = attr[:required]
     end
   end
 
   class AttrValTypeSet < AttrValType
   end
+  class AttrValTypeSetRequired < AttrValTypeSet
+  end
+  class AttrValTypeSetNotRequired < AttrValTypeSet
+  end
+
   class AttrValTypeUnset < AttrValType
   end
   class AttrValTypeUnsetRequired < AttrValTypeUnset
@@ -35,7 +42,8 @@ module XYZ
   end
 
   AttrValTypeMap = {
-    :set => AttrValTypeSet,
+    :set_required => AttrValTypeSetRequired,
+    :set_not_required => AttrValTypeSetNotRequired,
     :unset_required => AttrValTypeUnsetRequired,
     :unset_not_required => AttrValTypeUnsetNotRequired,
     :unset_dynamic => AttrValTypeUnsetDynamic,
@@ -47,7 +55,7 @@ module XYZ
       #TODO: detecting legititamate null value
       #TODO: need way to propagate required on inputs to outputs 
       type = 
-        if self[:attribute_value] then :set
+        if self[:attribute_value] then self[:required] ? :set_required : :set_not_required
         elsif self[:dynamic] then :unset_dynamic
         elsif self[:port_type] == "input" then :unset_linked
         elsif self[:required] then :unset_required

@@ -1,35 +1,36 @@
 #!/usr/bin/env ruby
 require 'rubygems'
-require 'digest/md5'
-require 'eventmachine'
+require 'stomp'
 require 'pp'
 
 module XYZ
-  module MCollectiveMockClients
-    include EM::Protocols::Stomp
+  class MockClient
     Msg_types = {
       :get_log_fragment => [:command],
       :discovery => [:command],
       :chef_solo => [:command],
       :puppet_apply => [:command],
     }
-   def connection_completed
-     connect :login => 'mcollective', :passcode => 'marionette'
-   end
-
-   def receive_msg msg
-     if msg.command == "CONNECTED"
-       Msg_types.each do |a,dirs|
-         dirs =  [:command,:reply] if dirs.empty?
-         dirs.each do |dir|
-           subscribe("/topic/mcollective.#{a}.#{dir}")
-         end
-       end
-     else
-       decoded_msg = Marshal.load(msg.body)#Security.decodemsg(msg.body)
-       decoded_msg[:body] = Marshal.load(decoded_msg[:body])
-       pp ['got a message', decoded_msg]
-       respond_to(decoded_msg)
+    def initialize()
+      host = 'localhost'
+      port = 6163
+      user = 'mcollective'
+      password = 'marionette'
+      @connection = ::Stomp::Connection.new(user, password, host, port, true)
+      Msg_types.each do |a,dirs|
+        dirs =  [:command,:reply] if dirs.empty?
+        dirs.each do |dir|
+          @connection.subscribe("/topic/mcollective.#{a}.#{dir}")
+        end
+      end
+    end
+    def listen_and_respond()
+      loop do
+        msg = @connection.receive
+        decoded_msg = Marshal.load(msg.body)#Security.decodemsg(msg.body)
+        decoded_msg[:body] = Marshal.load(decoded_msg[:body])
+        pp [:got_a_msg,decoded_msg]
+        respond_to(decoded_msg)
       end
     end
 
@@ -42,7 +43,7 @@ module XYZ
     end
     def respond_to__discovery(msg)
       reply,target = encodereply("discovery","pong",msg[:requestid])
-      send(target, reply)
+      @connection.send(target, reply)
     end
 
     def encodereply(agent, msg, requestid)
@@ -66,7 +67,5 @@ module XYZ
   end
 end
 
-EM.run{
-  EM.connect 'localhost', 6163, XYZ::MCollectiveMockClients
-}
+XYZ::MockClient.new.listen_and_respond()
 

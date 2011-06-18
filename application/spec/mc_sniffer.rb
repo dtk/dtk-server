@@ -27,6 +27,7 @@ def listen_for(msg_types)
     decoded_msg = Marshal.load(msg.body)#Security.decodemsg(msg.body)
     decoded_msg[:body] = Marshal.load(decoded_msg[:body])
     pp ['got a message', decoded_msg]
+    STDOUT.flush
   end
 end
 

@@ -127,9 +127,42 @@ module XYZ
       :error_detail=>"syntax error, unexpected tEQQ, expecting $end"},
    :node_name=>"app"}}
 
-      pp hash_form
+      #### hack to get file number
+
+      hash_form = stub_log
+      hash_form.each do |k,v|
+        if x=v[:summary][:error_file_ref]
+          file = ret_file_asset(x[:file_name],x[:type],x[:cookbook])
+          v[:summary][:error_file_ref][:file_id] = file[:id]
+        end
+      end
+
+#      pp hash_form
+#hash_form.values.first[:summary] = stub_log.values.first[:summary]
      {:data => hash_form}
- #     {:data => stub_log}
+
+    end
+
+    def ret_file_asset(file_name,type,cookbook)
+      file_asset_path = ret_file_asset_path(file_name,type)
+      return nil unless file_asset_path and cookbook
+      sp_hash = {
+        :filter => [:eq, :path, file_asset_path],
+        :cols => [:id,:path,:implementation_info]
+      }
+      file_asset_mh = model_handle.createMH(:file_asset)
+      Model.get_objects_from_sp_hash(file_asset_mh,sp_hash).find{|x|x[:implementation][:repo] == cookbook}
+    end
+
+    def ret_file_asset_path(file_name,type)
+      return nil unless file_name
+      case type
+      when :template
+        #TODO: stub; since does not handle case where multiple versions
+        "templates/default/#{file_name}"
+      when :recipe
+        "recipes/#{file_name}"
+      end
     end
 
     def logs_in_hash_form(parsed_logs,is_single_node)

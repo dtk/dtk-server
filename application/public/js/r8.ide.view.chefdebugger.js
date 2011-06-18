@@ -232,7 +232,14 @@ if (!R8.IDE.View.chefDebugger) {
 							if(typeof(logSegment.error_file_ref) == 'undefined' || logSegment.error_file_ref == null || logSegment.error_file_ref == '') {
 								var logTpl = '<div style="color: red; width: 100%; height: 17px; white-space: nowrap">'+logSegment.error_detail+'</div>';
 							} else {
-								var logTpl = '<div style="color: red; width: 100%; height: 17px; white-space: nowrap">'+logSegment.error_detail+' in file <a href="">'+logSegment.error_file_ref.file_name+'</a></div>';
+/*
+							R8.IDE.openFile({
+								'id': leafObjectId,
+								'name': leafLabel,
+								'type': 'file'
+							});
+*/
+								var logTpl = '<div style="color: red; width: 100%; height: 17px; white-space: nowrap">'+logSegment.error_detail+' in file <a href="javascript:R8.IDE.openFile({id:\''+logSegment.error_file_ref.file_id+'\',name:\''+logSegment.error_file_ref.file_name+'\',type:\'file\'});">'+logSegment.error_file_ref.file_name+'</a></div>';
 							}
 
 							break;

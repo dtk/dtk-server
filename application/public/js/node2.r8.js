@@ -1109,10 +1109,10 @@ console.log('not a valid link.., mis-matched types...');
 */
 						var nodeTest = R8.Utils.Y.one('#port-'+mergePortObjId);
 //DEBUG
-console.log('Have a link merge scenario link changes are...');
-console.log(linkChanges);
-console.log('nodeTest:');
-console.log(nodeTest);
+//console.log('Have a link merge scenario link changes are...');
+//console.log(linkChanges);
+//console.log('nodeTest:');
+//console.log(nodeTest);
 						if(nodeTest != null) {
 							_viewSpace.mergePorts('port-' + mergePortObjId, 'port-' + targetPortObjId);
 						}

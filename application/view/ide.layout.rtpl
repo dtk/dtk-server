@@ -52,8 +52,8 @@
 				<div id="menu-bar-body" class="toolbar yui3-u body">
 					<div class="logo black"></div>
 					<div id="main-menu-items" class="main-menu-items">
-						<div class="item"><a href="{%=_app[:base_uri]%}/xyz/component/list"  style="color: #4FA4D0">Library</a></div>
-						<div class="item"><a href="{%=_app[:base_uri]%}/xyz/workspace">Workspace</a></div>
+						<div class="item"><a href="{%=_app[:base_uri]%}/xyz/component/list">Library</a></div>
+<!--						<div class="item"><a href="{%=_app[:base_uri]%}/xyz/workspace">Workspace</a></div>-->
 						<div class="item"><a href="{%=_app[:base_uri]%}/xyz/datacenter/list">Dashboard</a></div>
 						<div class="item"><a href="{%=_app[:base_uri]%}/xyz/node/list">Inventory</a></div>
 					</div>

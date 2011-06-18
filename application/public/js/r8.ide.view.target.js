@@ -183,6 +183,18 @@ if (!R8.IDE.View.target) {
 
 //				this.refreshNotifications();
 			},
+			retrieveLinks: function(items,viewSpaceId) {
+				var vSpaceId = (typeof(viewSpaceId) == 'undefined') ? _currentViewSpace : viewSpaceId;
+				if(!_viewSpaces[vSpaceId].isReady()) {
+					var that = this;
+					var addItemsCallAgain = function() {
+						that.retrieveLinks(items,viewSpaceId);
+					}
+					setTimeout(addItemsCallAgain,20);
+					return;
+				}
+				_viewSpaces[vSpaceId].retrieveLinks(items);
+			},
 			addItems: function(items,viewSpaceId) {
 				var vSpaceId = (typeof(viewSpaceId) == 'undefined') ? _currentViewSpace : viewSpaceId;
 				if(!_viewSpaces[vSpaceId].isReady()) {
@@ -319,6 +331,7 @@ if (!R8.IDE.View.target) {
 	
 							that.addItems(retObj.items);
 							that.touchItems(retObj.touch_items);
+							that.retrieveLinks(retObj.items);
 	//DEBUG
 	//TODO: revisit when fixing up console debugger
 	//					R8.Workspace.refreshNotifications();

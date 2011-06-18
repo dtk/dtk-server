@@ -342,6 +342,8 @@ console.log(_items[mergePortDef.parentItemId]);
 			},
 
 			retrieveLinks: function(items) {
+//DEBUG
+//console.log('going to retreive links....');
 				var itemList = [];
 				if (typeof(items) == 'undefined') {
 					for (var i in _items) {
@@ -366,6 +368,11 @@ console.log(_items[mergePortDef.parentItemId]);
 //TODO: revisit, need to decouple rendering from retrieval
 //						that.renderLinks();
 					}
+//DEBUG
+//TODO: revisit, for some reason the items from assembly creation dont have model set
+for(var i in itemList) {
+	if(typeof(itemList[i].model) == 'undefined') itemList[i].model = 'node';
+}
 					var params = {
 						'callbacks': {
 							'io:success':linkCallback
@@ -385,6 +392,7 @@ console.log(_items[mergePortDef.parentItemId]);
 				var response = R8.Ctrl.callResults[ioId]['response'];
 //				var linkList = response['application_attribute_link_get_under_context_list']['content'][0]['data'];
 				var linkList = response['application_datacenter_get_links']['content'][0]['data'];
+
 //				var tempLinkList = {};
 				for(i in linkList) {
 //TODO: revisit when cleaning up actions for retrieving links

@@ -67,8 +67,12 @@ module XYZ
     end
     def respond_to__get_log_fragment(msg)
       find_pbuilderids(msg).each do |pbuilderid|
-        response = get_log_fragment_response(pbuilderid,msg)
-        reply,target = encodereply(pbuilderid,"chef_solo",response,msg[:requestid])
+        response = {
+          :statuscode=>0,
+          :data=> get_log_fragment_data(pbuilderid,msg),
+          :statusmsg=>"OK"
+        }
+        reply,target = encodereply(pbuilderid,"get_log_fragment",response,msg[:requestid])
         send(target, reply)
       end
     end
@@ -107,12 +111,12 @@ module XYZ
       [reply,target]
     end
 
-    def get_log_fragment_response(pbuilderid,msg)
+    def get_log_fragment_data(pbuilderid,msg)
       lines = get_log_fragment(msg)
       if lines.nil?
         error_msg = "Cannot find log fragment matching"
         error_response = {
-          :status => :failed, 
+          :status => :failed,
           :error => {
             :formatted_exception => error_msg
           },

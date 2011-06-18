@@ -99,7 +99,9 @@ taskDef.children[0].children[0].children = [];
 						editContent = '<input type="checkbox" id="'+taskId+'" name="'+taskId+'" value="true"/>';
 						break;
 					case "create_node":
-						taskI18n = '<b>Launch Node - '+taskDef.node_name+' ('+taskDef.image_name+')</b>';
+//						taskI18n = '<b>Launch Node - '+taskDef.node_name+' ('+taskDef.image_name+')</b>';
+						taskI18n = '<b>Launch Node - '+taskDef.node_name
+						if(typeof(taskDef.image_name) != 'undefined') taskI18n = taskI18n + ' ('+taskDef.image_name+')</b>';
 						taskClass = 'create-node';
 						editContent = '<input type="checkbox" id="'+taskId+'" name="'+taskId+'" value="true"/>';
 						break;

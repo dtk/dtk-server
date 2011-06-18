@@ -699,6 +699,10 @@ if (!R8.IDE) {
 
 				jitterView.getCompilation();
 			},
+			minimizePanel: function(panelId) {
+//console.log(_panels);
+				_panels[panelId].minimize();
+			},
 			resizePanelContent: function() {
 				var panelRegion = this.getPanelContentRegion('l-panel');
 //				_projectViewNode.setStyles({'height':panelRegion.height-6,'width':panelRegion.width});

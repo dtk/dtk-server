@@ -189,7 +189,7 @@ if (!R8.IDE.View.chefDebugger) {
 
 				this.renderLogContents(_currentNodeId);
 
-				if(_logContents[_currentNodeId].complete == true) this.stopLogPoller();
+				if(typeof(_logContents[_currentNodeId]) == 'undefined' || _logContents[_currentNodeId].complete == true) this.stopLogPoller();
 /*
       {:type=>:error,
       :error_file_ref=>
@@ -218,6 +218,8 @@ if (!R8.IDE.View.chefDebugger) {
 				}
 			},
 			renderLogContents: function(nodeId) {
+				if(typeof(_logContents[_currentNodeId]) == 'undefined') return;
+
 				for(var i in _logContents[_currentNodeId]['log_segments']) {
 					var logSegment = _logContents[_currentNodeId]['log_segments'][i];
 

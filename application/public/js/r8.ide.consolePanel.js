@@ -97,7 +97,7 @@ if (!R8.IDE.consolePanel) {
 
 				R8.Topbar2.addViewItem({
 					id: 'jitter',
-					i18n: 'Jitter',
+					i18n: 'Notifications',
 					visible: false,
 					clickCallback: this.toggleJitter
 				});
@@ -114,6 +114,9 @@ if (!R8.IDE.consolePanel) {
 					if(typeof(viewDef.method) == 'undefined') continue;
 					_viewContentNodes[viewDef.id] = R8.Utils.Y.one('#view-content-'+viewDef.id);
 				}
+			},
+			minimize: function() {
+				_contentNode.set('display','none');
 			},
 			resize: function() {
 				if(!_initialized) return;
@@ -321,7 +324,7 @@ if (!R8.IDE.consolePanel) {
 				} else {
 					var viewDef = {
 						'id': 'jitter',
-						'name': 'Jitter',
+						'name': 'Notifications',
 						'type': 'jitter'
 					};
 					R8.IDE.pushConsoleView(viewDef);

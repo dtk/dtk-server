@@ -14,7 +14,7 @@ module XYZ
       file_asset = get_object_by_id(id)
       file_asset[:name] = file_asset[:file_name]
 
-#      file_asset[:content] = file_asset.get_content()
+      file_asset[:content] = file_asset.get_content()
 
       file_asset[:content] ||= 'this is some stubbed file content to return something---'+id.to_s
 

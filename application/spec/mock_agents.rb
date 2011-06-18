@@ -36,17 +36,61 @@ module XYZ
     def respond_to(msg)
       if msg[:msgtarget] =~ /discovery.command$/
         respond_to__discovery(msg)
+      elsif msg[:msgtarget] =~ /chef_solo.command$/
+        respond_to__chef_solo(msg)
+      elsif msg[:msgtarget] =~ /puppet_apply.command$/
+        respond_to__puppet_apply(msg)
+      elsif msg[:msgtarget] =~ /get_log_fragment.command$/
+        respond_to__get_log_fragment(msg)
       else
-        pp ['got a message', msg]
+        pp ['cant treat msg', msg]
       end
     end
     def respond_to__discovery(msg)
-      reply,target = encodereply("discovery","pong",msg[:requestid])
-      send(target, reply)
+      find_pbuilderids(msg).each do |pbuilderid|
+        reply,target = encodereply(pbuilderid,"discovery","pong",msg[:requestid])
+        send(target, reply)
+      end
+    end
+    def respond_to__chef_solo(msg)
+      find_pbuilderids(msg).each do |pbuilderid|
+        response = {
+          :statuscode=>0,
+          :data=>
+          {:status=>:succeeded,
+            :node_name=>"domU-12-31-39-0B-F1-65.compute-1.internal"},
+          :statusmsg=>"OK"
+        }
+        reply,target = encodereply(pbuilderid,"chef_solo",response,msg[:requestid])
+        send(target, reply)
+      end
+    end
+    def respond_to__get_log_fragment(msg)
+      find_pbuilderids(msg).each do |pbuilderid|
+        response = get_log_fragment_response(pbuilderid,msg)
+        reply,target = encodereply(pbuilderid,"chef_solo",response,msg[:requestid])
+        send(target, reply)
+      end
     end
 
-    def encodereply(agent, msg, requestid)
-      sender_id = "foo"
+    def find_pbuilderids(msg)
+      pb_fact = ((msg[:filter]||{})["fact"]||[]).find{|f|f[:fact]=="pbuilderid"}
+      return Array.new unless pb_fact
+      if pb_fact[:operator] == "=="
+        [pb_fact[:value]]
+
+      elsif pb_fact[:operator] == "=~"
+        pbuilderids = Array.new
+        pb_fact[:value].gsub(/[A-Za-z0-9-]+/){|m|pbuilderids << m} 
+        pbuilderids
+      else
+        pp "got fact: #{pb_fact.inspect}"
+          []
+      end
+    end
+
+    def encodereply(pbuilderid,agent, msg, requestid)
+      sender_id = pbuilderid
       serialized  = Marshal.dump(msg)
       digest = Digest::MD5.hexdigest(serialized.to_s + "unset")
       target = "/topic/mcollective.#{agent}.reply"
@@ -62,7 +106,43 @@ module XYZ
       reply = Marshal.dump(req)
       [reply,target]
     end
-    
+
+    def get_log_fragment_response(pbuilderid,msg)
+      lines = get_log_fragment(msg)
+      if lines.nil?
+        error_msg = "Cannot find log fragment matching"
+        error_response = {
+          :status => :failed, 
+          :error => {
+            :formatted_exception => error_msg
+          },
+          :pbuilderid => pbuilderid
+        }
+        error_response
+      else
+        ok_response = {
+          :status => :ok,
+          :data => lines,
+          :pbuilderid => pbuilderid
+        }
+        ok_response
+      end
+    end
+
+    def get_log_fragment(msg)
+      ret = String.new
+      matching_file = nil
+      matching_file = "/root/r8client/mock_logs/error1.log"
+      begin
+        f = File.open(matching_file)
+        until f.eof
+          ret << f.readline.chop
+        end
+      ensure
+        f.close
+      end
+      ret
+    end
   end
 end
 

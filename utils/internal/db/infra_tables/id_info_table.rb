@@ -9,6 +9,11 @@ module XYZ
     def createIDH(x)
       IDHandle.new(self.merge(x))
     end
+    
+    def create_top()
+      IDHandle.new(:c => self[:c], :uri => "/")
+    end
+
     #has form hash or if just symbol then its the attribute :model_name
     def createMH(x={})
       x = {:model_name => x} if x.kind_of?(Symbol)

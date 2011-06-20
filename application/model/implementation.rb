@@ -54,7 +54,7 @@ module XYZ
     def clone_into_library_if_needed(library_idh)
       ret = nil
       #if implementation is updated, need to create a new implemntation in library; otherwise use
-      get_object_cols_and_update_ruby_obj!(:updated,:repo,:branch)
+      update_object!(:updated,:repo,:branch)
       if self[:updated]
         new_version_num = get_new_version_num(library_idh)
         new_branch = library_branch_name(new_version_num,library_idh)
@@ -72,7 +72,7 @@ module XYZ
     end
 
     def add_asset_file(path,content=nil)
-      get_object_cols_and_update_ruby_obj!(:type,:repo,:branch)
+      update_object!(:type,:repo,:branch)
       file_asset_type = FileAssetType[self[:type].to_sym]
       FileAsset.add(self,file_asset_type,path,content)
     end
@@ -81,13 +81,13 @@ module XYZ
     }
 
     def project_branch_name(project)
-      project.get_object_cols_and_update_ruby_obj!(:ref)
-      get_object_cols_and_update_ruby_obj!(:version_num,:repo)
+      project.update_object!(:ref)
+      update_object!(:version_num,:repo)
       "project-#{project[:ref]}-v#{self[:version_num].to_s}"
     end
 
     def library_branch_name(new_version_num,library_idh)
-      library = library_idh.create_object().get_object_cols_and_update_ruby_obj!(:ref)
+      library = library_idh.create_object().update_object!(:ref)
       "library-#{library[:ref]}-v#{new_version_num.to_s}"
     end
 

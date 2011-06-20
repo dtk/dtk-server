@@ -32,7 +32,7 @@ module XYZ
 
     def promote_template__new_version(new_version,library_idh)
       #TODO: can make more efficient by reducing number of seprate calss to db
-      get_object_cols_and_update_ruby_obj!(:component_type,:extended_base,:implementation_id)
+      update_object!(:component_type,:extended_base,:implementation_id)
       #check if version exists already
       raise Error.new("component template #{self[:component_type]} (#{new_version}) already exists") if  matching_library_template_exists?(new_version,library_idh)
 

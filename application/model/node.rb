@@ -390,7 +390,7 @@ module XYZ
     end
 
     def destroy_and_delete()
-      get_object_cols_and_update_ruby_obj!(:external_ref)
+      update_object!(:external_ref)
       suceeeded = CommandAndControl.destroy_node?(self)
       Model.delete_instance(id_handle())if suceeeded
     end

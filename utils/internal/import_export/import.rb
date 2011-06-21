@@ -29,10 +29,10 @@ module XYZ
       add_r8meta!(hash_content,opts[:r8meta]) if opts[:r8meta]
       if opts[:add_implementations]
         impl_info = opts[:add_implementations]
-        library = impl_info[:library]
+        library_ref = impl_info[:library]
         base_dir = impl_info[:base_directory]
         version = impl_info[:version]
-        add_implementations!(hash_content,version,library,base_dir)
+        add_implementations!(hash_content,version,library_ref,base_dir)
       end
       global_fks = Hash.new
       unless target_id_handle.is_top?
@@ -64,23 +64,23 @@ module XYZ
     def add_r8meta!(hash,r8meta)
       type = r8meta[:type]
       if type == :yaml
-        library = r8meta[:library]
+        library_ref = r8meta[:library]
         require 'yaml'
         r8meta[:files].each do |file|
           component_hash = YAML.load_file(file)
-          component_hash.each{|k,v|hash["library"][library]["component"][k] = v}
+          component_hash.each{|k,v|hash["library"][library_ref]["component"][k] = v}
         end 
       else
         raise Error.new("Type #{type} not supported")
       end
     end
 
-    def add_implementations!(hash,version,library,base_dir)
-      Implementation::add_implementations!(hash,version,library,base_dir)
+    def add_implementations!(hash,version,library_ref,base_dir)
+      Implementation::add_implementations!(hash,version,library_ref,base_dir)
     end
 
     module Implementation
-      def self.add_implementations!(hash,version,library,base_dir)
+      def self.add_implementations!(hash,version,library_ref,base_dir)
         file_paths = Array.new
         cur_dir = Dir.pwd
         begin
@@ -98,12 +98,12 @@ module XYZ
         end
         
         #find components that correspond to an implementation 
-        components_hash = hash["library"][library]["component"]
+        components_hash = hash["library"][library_ref]["component"]
         impl_repos = components_hash.keys.map{|cmp_ref|repo_from_component_ref(cmp_ref)}.uniq & indexed_file_paths.keys
         return unless impl_repos
 
         #add implementation objects to hash
-        implementation_hash = hash["library"][library]["implementation"] ||= Hash.new
+        implementation_hash = hash["library"][library_ref]["implementation"] ||= Hash.new
         impl_repos.each do |repo|
           next unless file_paths = indexed_file_paths[repo]
           type = nil
@@ -143,7 +143,7 @@ module XYZ
         components_hash.each do |cmp_ref, cmp_info|
           repo = repo_from_component_ref(cmp_ref)
           next unless impl_repos.include?(repo)
-          cmp_info["*implementation_id"] = "/library/#{library}/implementation/#{repo}"
+          cmp_info["*implementation_id"] = "/library/#{library_ref}/implementation/#{repo}"
         end
       end
       def self.repo_from_component_ref(cmp_ref)

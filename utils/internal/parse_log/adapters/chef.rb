@@ -193,10 +193,11 @@ module XYZ
        private
         RecipeCache = "/var/chef/cookbooks/"
         def parse!(segments_from_error,prev_segment)
+          if segments_from_error.last.line =~ /DEBUG: Re-raising exception: (.+$)/
+            @error_detail ||= $1
+          end
           ErrorRecipe.lines_to_check(segments_from_error).each do |line|
-            set_error_detail!(line,segments_from_error)
-            set_file_ref!(line)
-            return if @error_detail and @error_file_ref
+            return if set_file_ref!(line)
           end
         end
 
@@ -208,32 +209,25 @@ module XYZ
            segs_from_err[2] && (segs_from_err[2].aux_data||[])[1]].compact
         end
 
-        def set_error_detail!(line,segs_from_err)
-          if line =~ Regexp.new("#{RecipeCache}[^/]+/recipes/[^:]+:[0-9]+: (.+$)")
-            @error_detail ||= $1
-          elsif line =~ /INFO: error: (.+$)/
-            @error_detail ||= $1
-          else
-            @error_detail ||= segs_from_err.first.aux_data.first
-          end
-        end
-
         def set_file_ref!(line)
           if line =~ Regexp.new("#{RecipeCache}([^/]+)/recipes/([^:]+):([0-9]+):in `from_file'") 
             cookbook ||= $1
             recipe_filename ||= $2
             @error_line_num ||= $3.to_i 
             @error_file_ref ||= ChefFileRef.recipe(cookbook,recipe_filename)
+            true
           elsif line =~ Regexp.new("#{RecipeCache}([^/]+)/recipes/([^:]+):([0-9]+):")
             cookbook ||= $1
             recipe_filename ||= $2
             @error_line_num ||= $3.to_i 
             @error_file_ref ||= ChefFileRef.recipe(cookbook,recipe_filename)
+            true
           elsif line =~ /\((.+)::(.+) line ([0-9]+)\) has had an error/
             cookbook ||= $1
             recipe_filename ||= "#{$2}.rb"
             @error_line_num ||= $3.to_i 
             @error_file_ref ||= ChefFileRef.recipe(cookbook,recipe_filename)
+            true
           end
         end
       end

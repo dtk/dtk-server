@@ -6,19 +6,15 @@ module XYZ
       r8meta_type = :yaml #TODO: stub
 
       #put component meta info in hash
-      component_hash = get_r8meta_hash(impl_name,:r8meta_type => r8meta_type)
+      components_hash = get_r8meta_hash(impl_name,:r8meta_type => r8meta_type)
       library = library_idh.create_object().update_object!(:ref)
 
       #put implement info in hash
-      hash_content = {"library" => {library[:ref] => {"component" => component_hash}}}
+      hash_content = {"library" => {library[:ref] => {"component" => components_hash}}}
       Model.add_implementations!(hash_content,version,library[:ref],R8::EnvironmentConfig::CoreCookbooksRoot,impl_name)
 
       #create in db
-      top_idh = library_idh.create_top()
-      Model.update_from_hash_assignments(top_idh,hash_content)
-
-      #update db so the new compoennts point to the implementation_d
-      update_implementation_ids(component_hash,parent_idh,component_name)
+      Model.input_hash_content_into_model(library_idh.create_top(),hash_content)
     end
 
     def self.add_or_update_component(parent_idh,component_name,opts={})
@@ -70,13 +66,13 @@ module XYZ
       component_hash.merge!(:implementation_id => rows.first[:id])
     end
 
-    def self.update_implementation_ids(library_idh,impl_name,component_hash)
-      #TODO: can moer effiiently implement witrh update_from_select
+    def self.update_implementation_ids(library_idh,impl_name,component_refs)
+      #TODO: can more effiiently implement witrh update_from_select
       library_id = library_idh.get_id()
       cmp_mh = library_idh.createMH(:component)
       sp_hash = {
         :cols => [:id],
-        :filter => [:and, [:oneof, :ref, component_hash.keys],
+        :filter => [:and, [:oneof, :ref, component_refs],
                     [:eq, DB.parent_field(:library,:component), library_id]]
       }
       cmps = Model.get_objs(cmp_mh,sp_hash)

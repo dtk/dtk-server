@@ -1,5 +1,6 @@
 #TODO: unify relation_type and model_name
 module XYZ
+
   #TBD: should this class  be in this file or instead somewhere else
   module CommonMixin
     def [](x)
@@ -9,7 +10,7 @@ module XYZ
     def createIDH(x)
       IDHandle.new(self.merge(x))
     end
-    
+
     def create_top()
       IDHandle.new(:c => self[:c], :uri => "/")
     end

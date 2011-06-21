@@ -75,17 +75,18 @@ module XYZ
       end
     end
 
-    def add_implementations!(hash,version,library_ref,base_dir)
-      Implementation::add_implementations!(hash,version,library_ref,base_dir)
+    def add_implementations!(hash,version,library_ref,base_dir,impl_name=nil)
+      Implementation::add_implementations!(hash,version,library_ref,base_dir,impl_name)
     end
 
     module Implementation
-      def self.add_implementations!(hash,version,library_ref,base_dir)
+      def self.add_implementations!(hash,version,library_ref,base_dir,impl_name=nil)
         file_paths = Array.new
         cur_dir = Dir.pwd
         begin
           Dir.chdir(base_dir)
-          file_paths = Dir["**/*"].select{|item|File.file?(item)}
+          pattern = impl_name ? "#{impl_name}/**/*" : "**/*"
+          file_paths = Dir[pattern].select{|item|File.file?(item)}
          ensure
           Dir.chdir(cur_dir)
         end

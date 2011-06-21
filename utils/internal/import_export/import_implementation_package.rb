@@ -11,11 +11,11 @@ module XYZ
 
       #put implement info in hash
       hash_content = {"library" => {library[:ref] => {"component" => component_hash}}}
-      Model.add_implementations!(hash_content,version,library,impl_name)
+      Model.add_implementations!(hash_content,version,library[:ref],R8::EnvironmentConfig::CoreCookbooksRoot,impl_name)
 
       #create in db
       top_idh = library_idh.create_top()
-      Model.input_into_model(top_idh,hash_content)
+      Model.update_from_hash_assignments(top_idh,hash_content)
 
       #update db so the new compoennts point to the implementation_d
       update_implementation_ids(component_hash,parent_idh,component_name)

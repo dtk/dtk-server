@@ -22,8 +22,6 @@ module XYZ
 #TODO: why is this called object?
   #TBD: re-examine whether current scheme is best way to implement relationship between model top, specfic model classes and the XYZ::model utility class
   class Object < Model
-    extend ImportObject
-    extend ExportObject
     set_relation_as_top()
     class << self
       #### Actions

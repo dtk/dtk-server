@@ -6,12 +6,12 @@ module XYZ
       r8meta_type = :yaml #TODO: stub
 
       #put component meta info in hash
-      component_hash = ImportComponentMeta.get_r8meta_hash(impl_name,:r8meta_type => r8meta_type)
-      library = library_idh.create_object().update_object(:ref)
+      component_hash = get_r8meta_hash(impl_name,:r8meta_type => r8meta_type)
+      library = library_idh.create_object().update_object!(:ref)
 
       #put implement info in hash
       hash_content = {"library" => {library[:ref] => {"component" => component_hash}}}
-      add_implementations!(hash_content,version,library,impl_name)
+      Model.add_implementations!(hash_content,version,library,impl_name)
 
       #create in db
       top_idh = library_idh.create_top()
@@ -49,7 +49,7 @@ module XYZ
       files = Dir.glob("#{R8::EnvironmentConfig::CoreCookbooksRoot}/#{repo}/r8meta.*.#{file_ext}")
       if files.empty?
         raise Error.new("Cannot find valid r8meta file")
-      elsif files.szie > 1
+      elsif files.size > 1
         raise Error.new("Multiple r8meta files found")
       end
       files.first
@@ -65,7 +65,7 @@ module XYZ
         :filter => [:and, [:eq, :display_name, impl_display_name],
                     [:eq, DB.parent_field(parent_idh[:model_name],:implementation), parent_idh.get_id()]]
       }
-      rows = Model.get_objects_from_sp_hash(parent_idh.createMH(:implementation),sp_hash)
+      rows = Model.get_objs(parent_idh.createMH(:implementation),sp_hash)
       raise Error.new("Error in finding implementation for component #{component_name}") unless rows.size = 1
       component_hash.merge!(:implementation_id => rows.first[:id])
     end
@@ -79,14 +79,14 @@ module XYZ
         :filter => [:and, [:oneof, :ref, component_hash.keys],
                     [:eq, DB.parent_field(:library,:component), library_id]]
       }
-      cmps = Model.get_objects_from_sp_hash(cmp_mh,sp_hash)
+      cmps = Model.get_objs(cmp_mh,sp_hash)
 
       sp_hash = {
         :cols => [:id],
         :filter => [:and, [:eq, :display_name, impl_name],
                     [:eq, DB.parent_field(:library,:implementation), library_id]]
       }
-      impl_id = Model.get_objects_from_sp_hash(library_idh.createMH(:implementation),sp_hash).first[:id]
+      impl_id = Model.get_objs(library_idh.createMH(:implementation),sp_hash).first[:id]
 
       update_rows = cmps.map do |cmp|
         {

@@ -12,6 +12,8 @@ module XYZ
   class Model < HashObject 
     include R8Tpl::Utility::I18n
     extend R8Tpl::Utility::I18n
+    extend ImportObject
+    extend ExportObject
     class << self
       attr_reader :db
       #TODO: get benchmark from config file
@@ -204,6 +206,11 @@ module XYZ
       self
     end
 
+    def get_objs(sp_hash_x,opts={})
+      sp_hash = HashSearchPattern.add_to_filter(sp_hash_x,[:eq, :id, id()])
+      Model.get_objs(model_handle(),sp_hash,opts)
+    end
+    #TODO: remove below
     def get_objects_from_sp_hash(sp_hash_x,opts={})
       sp_hash = HashSearchPattern.add_to_filter(sp_hash_x,[:eq, :id, id()])
       Model.get_objects_from_sp_hash(model_handle(),sp_hash,opts)
@@ -226,6 +233,13 @@ module XYZ
       Model.get_objects_from_sp_hash(model_handle,sp_hash,opts)
     end
 
+    def self.get_objs(model_handle,sp_hash,opts={})
+      model_name = model_handle[:model_name]
+      hash = sp_hash.merge(:relation => model_name)
+      search_object = SearchObject.create_from_input_hash({"search_pattern" => hash},model_name,model_handle[:c])
+      Model.get_objects_from_search_object(search_object,opts)
+    end
+    #TODO: remove below
     def self.get_objects_from_sp_hash(model_handle,sp_hash,opts={})
       model_name = model_handle[:model_name]
       hash = sp_hash.merge(:relation => model_name)

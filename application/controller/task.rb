@@ -58,78 +58,7 @@ module XYZ
       #put log in hash/array form
       hash_form =  logs_in_hash_form(parsed_logs,node_id.nil?)
 
-#      stub_log = {2147535009=>
-      stub_log = {node_id=>
-  {:complete=>true,
-   :log_segments=>
-    [{:type=>:debug,
-      :line=>
-       "[Fri, 17 Jun 2011 05:29:23 +0000] DEBUG: Building node object for domU-12-31-39-0C-76-77.compute-1.internal",
-       :aux_data=>[]},
-     {:type=>:debug,
-      :line=>
-       "[Fri, 17 Jun 2011 05:29:23 +0000] DEBUG: Extracting run list from JSON attributes provided on command line",
-      :aux_data=>[]},
-      {:type=>:info,
-      :line=>
-       "[Fri, 17 Jun 2011 05:29:23 +0000] INFO: Setting the run_list to [\"recipe[java_webapp]\"] from JSON",
-      :aux_data=>[]},
-     {:type=>:debug,
-       :line=>
-       "[Fri, 17 Jun 2011 05:29:23 +0000] DEBUG: Applying attributes from json file",
-      :aux_data=>[]},
-     {:type=>:debug,
-      :line=>
-       "[Fri, 17 Jun 2011 05:29:23 +0000] DEBUG: Platform is ubuntu version 10.04",
-       :aux_data=>[]},
-     {:type=>:info,
-      :line=>
-       "[Fri, 17 Jun 2011 05:29:23 +0000] INFO: Run List is [recipe[java_webapp]]",
-      :aux_data=>[]},
-     {:type=>:info,
-       :line=>
-       "[Fri, 17 Jun 2011 05:29:23 +0000] INFO: Run List expands to [java_webapp]",
-      :aux_data=>[]},
-     {:type=>:info,
-      :line=>
-       "[Fri, 17 Jun 2011 05:29:23 +0000] INFO: Starting Chef Run for domU-12-31-39-0C-76-77.compute-1.internal",
-       :aux_data=>[]},
-     {:type=>:debug,
-      :line=>
-       "[Fri, 17 Jun 2011 05:29:23 +0000] DEBUG: No chefignore file found at /var/chef/cookbooks/chefignore no files will be ignored",
-       :aux_data=>[]},
-     {:type=>:debug,
-      :line=>
-       "[Fri, 17 Jun 2011 05:29:23 +0000] DEBUG: Node domU-12-31-39-0C-76-77.compute-1.internal loading cookbook java's attribute file /var/chef/cookbooks/java/attributes/default.rb",
-       :aux_data=>[]},
-     {:type=>:debug,
-      :line=>
-       "[Fri, 17 Jun 2011 05:29:23 +0000] DEBUG: Loading Recipe java_webapp via include_recipe",
-      :aux_data=>[]},
-     {:type=>:debug,
-       :line=>
-       "[Fri, 17 Jun 2011 05:29:23 +0000] DEBUG: Found recipe default in cookbook java_webapp",
-      :aux_data=>[]},
-     {:type=>:error,
-      :error_file_ref=>
-       {:type=>:recipe, :cookbook=>"java_webapp", :file_name=>"default.rb"},
-       :error_type=>:error_recipe,
-      :error_line_num=>2,
-      :error_lines=>[],
-      :error_detail=>"syntax error, unexpected tEQQ, expecting $end"}],
-   :summary=>
-    {:type=>:error,
-      :error_file_ref=>
-      {:type=>:recipe, :cookbook=>"java_webapp", :file_name=>"default.rb"},
-     :error_type=>:error_recipe,
-     :error_line_num=>2,
-     :error_lines=>[],
-      :error_detail=>"syntax error, unexpected tEQQ, expecting $end"},
-   :node_name=>"app"}}
-
-      #### hack to get file number
-
-      hash_form = stub_log
+      #### fidning file id TODO: this shoudl be pushed to lower level
       hash_form.each do |k,v|
         el = v[:log_segments].last
         if efr=el[:error_file_ref]
@@ -138,10 +67,7 @@ module XYZ
         end
       end
 
-#      pp hash_form
-#hash_form.values.first[:summary] = stub_log.values.first[:summary]
      {:data => hash_form}
-
     end
 
     def ret_file_asset(file_name,type,cookbook)

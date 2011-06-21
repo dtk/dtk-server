@@ -623,11 +623,8 @@ module XYZ
 
       constraints = rows.map{|r|Constraint.create(r[:dependencies]) if r[:dependencies]}.compact
       constraints << Constraint::Macro.only_one_per_node(cmp_info[:component_type]) if cmp_info[:only_one_per_node]
-      if cmp_info[:extended_base]
-        sp_hash = {:cols => [:id], :filter => [:eq, :ancestor_id, cmp_info[:implementation_id]]}
-        library_impl = Model.get_objects_from_sp_hash(model_handle(:implementation),sp_hash).first
-        constraints << Constraint::Macro.base_for_extension(cmp_info[:extended_base],library_impl[:id])
-      end
+      constraints << Constraint::Macro.base_for_extension(cmp_info) if cmp_info[:extended_base]
+
       return Constraints.new() if constraints.empty?
       Constraints.new(:and,constraints)
     end

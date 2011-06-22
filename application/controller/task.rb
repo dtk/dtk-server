@@ -109,9 +109,18 @@ module XYZ
             #TODO: change hash form so do not have to reformulate
             pl = log_info[:parsed_log].hash_form
             log_segments = pl[:log_segments]
+
+            #TODO: see what other chars that need to be removed; once finalize move this to under hash_form
+            log_segments = log_segments.map do |x|
+              line = x[:line] && x[:line].gsub(/["]/,"")
+              x.merge(:line => line)
+            end
+
             error = nil
             if log_segments.last[:type] == :error 
               error = log_segments.last
+pp [:log_error,error]
+              #TODO: this looks like error; should be log_segments = log_segments[0..log_segments.size-2]
               log_segments = log_segments[1..log_segments.size-1]
             end
             summary = error ? error : {:type => :ok}

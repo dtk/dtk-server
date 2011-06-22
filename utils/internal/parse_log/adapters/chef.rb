@@ -138,12 +138,12 @@ module XYZ
 
       class ErrorTemplate < ErrorChefLog 
         def self.isa?(segments_from_error)
-          line = segments_from_error[0].line
-          line =~ /ERROR: template/
+          line = segments_from_error.last.line
+          line =~ /Chef::Mixin::Template::TemplateError/
         end
        private
         def parse!(segments_from_error,prev_segment)
-          if segments_from_error.last.line =~ / Chef::Mixin::Template::TemplateError - (.+$)/
+          if segments_from_error.last.line =~ /Chef::Mixin::Template::TemplateError - (.+$)/
             @error_detail = "Template error: #{$1}"
           else
             @error_detail = "Template error" 

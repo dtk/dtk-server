@@ -1,5 +1,6 @@
 module XYZ
   #TODO: if commanality between this and Chef then move to parent class
+  #TODO!!!!: probably need to rewrite, like for chef to include all attributes; not just ones that changes
   module ConfigAgentAdapter
     class Puppet < ConfigAgent
       def ret_msg_content(config_node)

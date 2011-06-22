@@ -143,20 +143,28 @@ module XYZ
         end
        private
         def parse!(segments_from_error,prev_segment)
-          detail = nil
-          if segments_from_error.size > 2 
-            line = segments_from_error[2].line
-            if line =~ /INFO: error: Chef::Mixin::Template::TemplateError: (.+) for #/
-              detail = $1
-            end
+          if segments_from_error.last.line =~ / Chef::Mixin::Template::TemplateError - (.+$)/
+            @error_detail = "Template error: #{$1}"
+          else
+            @error_detail = "Template error" 
           end
+          self.class.lines_to_check(segments_from_error).each do |line|
+            return if set_file_ref_and_error_lines!(line)
+          end
+        end
 
-          @error_detail = "template error" + (detail ? ": #{detail}" : "")
-          line = segments_from_error[0].line
-          template_resource = line =~ /template\[([^\]]+)\]/ && $1
-          recipe = line =~ /template\[[^\]]+\] \((.+) line/ && $1
-          @error_lines << "template resource: #{template_resource}" if template_resource
-          @error_lines << "called from recipe: #{recipe}" if recipe
+        def self.lines_to_check(segs_from_err)
+          [segs_from_err[0].line]
+        end
+
+        def set_file_ref_and_error_lines!(line)
+          if line =~ /template\[([^\]]+)\] \((.+) line ([0-9]+)/
+            template_resource = $1
+            recipe = $2
+            reciple_line_num = $3
+            @error_lines << "template resource: #{template_resource}" if template_resource
+            @error_lines << "called from recipe: #{recipe} line #{reciple_line_num}" 
+          end
         end
       end
 
@@ -194,9 +202,11 @@ module XYZ
         RecipeCache = "/var/chef/cookbooks/"
         def parse!(segments_from_error,prev_segment)
           if segments_from_error.last.line =~ /DEBUG: Re-raising exception: (.+$)/
-            @error_detail ||= $1
+            @error_detail = $1
+          else
+            @error_detail = "recipe error"
           end
-          ErrorRecipe.lines_to_check(segments_from_error).each do |line|
+          self.class.lines_to_check(segments_from_error).each do |line|
             return if set_file_ref!(line)
           end
         end

@@ -1,43 +1,42 @@
+#TODO: can modify to make more efficient by having single db call
+#TODO: minimal conversion from form where just had change attributes; so room to simplify and make more efficient
 module XYZ
   module ConfigAgentAdapter
     class Chef < ConfigAgent
       def ret_msg_content(config_node)
-        recipes_and_attrs = recipes_and_attributes(config_node)
+        recipes_and_attrs = Processor.new(config_node)
         {:attributes => recipes_and_attrs.attributes, :run_list => recipes_and_attrs.run_list}
       end
       def type()
         :chef
       end
      private
-      def recipes_and_attributes(config_node)
-        config_node[:component_actions].inject(ChefNodeActions.new()){|ret,component_action|ret.add_action(component_action)}
-      end
-
-      class ChefNodeActions 
+      class Processor 
         attr_reader :attributes
-        def initialize()
-          @recipe_names = Array.new
+        def initialize(config_node)
+          #TODO: need to preserve order; only complication is removing duplicates
+          @recipe_names = config_node[:component_actions].map{|cmp_action|recipe(cmp_action[:component])}.uniq
           @common_attr_index = Hash.new
           @attributes = Hash.new
+          cmps_on_node = config_node[:node].get_children_objs(:component,{:cols=>[:id,:external_ref,:only_one_per_node]})
+          cmps_on_node.each{|cmp|add_action(cmp)}
         end
 
         def run_list()
           @recipe_names.map{|r|"recipe[#{r}]"}
         end
 
-        def add_action(component_action)
-          recipe_name = recipe(component_action)
+        def add_action(component)
+          recipe_name = recipe(component)
           if @common_attr_index[recipe_name]
             common_attr_val_list = @common_attr_index[recipe_name]
-            common_attr_val_list << ret_attributes(component_action, :strip_off_recipe_name => true)
-          elsif component_action[:component][:only_one_per_node]
-            @recipe_names << recipe_name
-            deep_merge!(@attributes,ret_attributes(component_action))
+            common_attr_val_list << ret_attributes(component, :strip_off_recipe_name => true)
+          elsif component[:only_one_per_node]
+            deep_merge!(@attributes,ret_attributes(component))
           else
-            @recipe_names << recipe_name
             list = Array.new
             @common_attr_index[recipe_name] = list
-            list << ret_attributes(component_action, :strip_off_recipe_name => true)
+            list << ret_attributes(component, :strip_off_recipe_name => true)
             if recipe_name =~ /(^.+)::(.+$)/
               cookbook_name = $1
               rcp_name = $2
@@ -59,12 +58,13 @@ module XYZ
           end
         end
 
-        def recipe(action)
-          ((action[:component]||{})[:external_ref]||{})[:recipe_name]
+        def recipe(component)
+          (component[:external_ref]||{})[:recipe_name]
         end
-        def ret_attributes(action,opts={})
+        def ret_attributes(component,opts={})
           ret = Hash.new
-          (action[:attributes]||[]).each do |attr|
+          attrs = component.get_children_objs(:attribute,{:cols=>[:external_ref,:attribute_value]})
+          attrs.each do |attr|
             var_name_path = (attr[:external_ref]||{})[:path]
             val = attr[:attribute_value]
             add_attribute!(ret,to_array_form(var_name_path,opts),val) if var_name_path

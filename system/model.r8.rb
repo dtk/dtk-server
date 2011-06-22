@@ -190,6 +190,13 @@ module XYZ
       dataset ? dataset.all(opts) : nil
     end
 
+    def get_children_objs(child_model_name,sp_hash_x,opts={})
+      parent_col_clause = [:eq, DB.parent_field(model_name,child_model_name),id()]
+      sp_hash = HashSearchPattern.add_to_filter(sp_hash_x,parent_col_clause)
+      child_model_handle = model_handle.createMH(child_model_name)
+      Model.get_objs(child_model_handle,sp_hash,opts)
+    end
+    #TODO: deprecate below
     def get_children_from_sp_hash(child_model_name,sp_hash_x,opts={})
       parent_col_clause = [:eq, DB.parent_field(model_name,child_model_name),id()]
       sp_hash = HashSearchPattern.add_to_filter(sp_hash_x,parent_col_clause)

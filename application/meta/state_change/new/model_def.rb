@@ -49,6 +49,7 @@
        },
        {
          :model_name=>:node,
+         :convert=>true,
          :join_type=>:inner,
          :join_cond=>{:id=>:component__node_node_id},
          :cols=>[:id, :display_name, :external_ref]
@@ -73,6 +74,7 @@
        },
        {
          :model_name=>:node,
+         :convert=>true,
          :join_type=>:inner,
          :join_cond=>{:id=>:component__node_node_id},
          :cols=>[:id, :display_name, :external_ref]
@@ -84,6 +86,7 @@
       :remote_dependencies=>
       [{
          :model_name=>:node,
+         :convert=>true,
          :join_type=>:inner,
          :join_cond=>{:id=>:state_change__node_id},
          :cols=>[:id,:display_name,:external_ref,:datacenter_datacenter_id,:ancestor_id]

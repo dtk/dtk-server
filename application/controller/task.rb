@@ -60,7 +60,7 @@ module XYZ
 
       #### fidning file id TODO: this shoudl be pushed to lower level
       hash_form.each do |k,v|
-        el = v[:log_segments].last
+        el = (v[:log_segments]||[]).last || {}
         if efr=el[:error_file_ref]
           file = ret_file_asset(efr[:file_name],efr[:type],efr[:cookbook])
           efr[:file_id] = file[:id]

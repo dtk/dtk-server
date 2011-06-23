@@ -240,11 +240,13 @@ module XYZ
           return true if line =~ Regexp.new("has had an error")
           lines_to_check(segments_from_error).each do |line|
             return true if line =~ Regexp.new("#{RecipeCache}[^/]+/recipes") 
+            return true if line =~ FromFilePat
           end
           nil
         end
        private
         RecipeCache = "/var/chef/cookbooks/"
+        FromFilePat = Regexp.new("#{RecipeCache}([^/]+)/recipes/([^:]+):([0-9]+):in `from_file'") 
         def parse!(segments_from_error,prev_segment)
           if segments_from_error.last.line =~ /DEBUG: Re-raising exception: (.+$)/
             @error_detail = $1
@@ -257,7 +259,9 @@ module XYZ
         end
 
         def self.lines_to_check(segs_from_err)
+          #TODO: can make more efficient and omit some of these and focus on last line
           [segs_from_err[0].line, 
+           (segs_from_err.last.aux_data||[]).find{|l|l =~ FromFilePat},
            segs_from_err[1] && (segs_from_err[1].aux_data||[])[0],
            segs_from_err[2] && segs_from_err[2].line,
            segs_from_err[2] && (segs_from_err[2].aux_data||[])[0],
@@ -265,7 +269,7 @@ module XYZ
         end
 
         def set_file_ref!(line)
-          if line =~ Regexp.new("#{RecipeCache}([^/]+)/recipes/([^:]+):([0-9]+):in `from_file'") 
+          if line =~ FromFilePat
             cookbook ||= $1
             recipe_filename ||= $2
             @error_line_num ||= $3.to_i 

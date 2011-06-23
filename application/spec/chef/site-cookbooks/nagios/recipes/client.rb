@@ -47,7 +47,6 @@ require 'pp'
       service_check_assocs[k]["attributes_to_monitor"] = v["attributes_to_monitor"] 
     end
   end
-
  #### using normalized info to parameterize nagios client
  
   %w{

@@ -1,3 +1,6 @@
+#TODO!!!: only need to pass params of cookbook included
+#TODO: need to be more sophsicticated on what recipes included (or take simple approach and include all)
+#for example need to include ones in same cookbook; may also want to include cookbook fro monitoring post check
 #TODO: can modify to make more efficient by having single db call
 #TODO: minimal conversion from form where just had change attributes; so room to simplify and make more efficient
 module XYZ

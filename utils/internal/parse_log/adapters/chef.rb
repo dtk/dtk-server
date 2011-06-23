@@ -136,6 +136,50 @@ module XYZ
         end
       end
 
+      #error in exec call can be from indirect call (like to load a package)
+      #TODO: see if this is signature for direct exec call
+      class ErrorExec < ErrorChefLog 
+        def self.isa?(segments_from_error)
+          line = segments_from_error.last.line
+          line =~ /Chef::Exceptions::Exec/
+        end
+       private
+        def parse!(segments_from_error,prev_segment)
+          if segments_from_error.last.line =~ /Chef::Exceptions::Exec - (.+$)/
+            @error_detail = "Exec error: #{$1}"
+          else
+            @error_detail = "Exec error" 
+          end
+          self.class.segments_to_check(segments_from_error).each do |segment|
+            return if set_file_ref_and_error_lines!(segment)
+          end
+        end
+
+        def self.segments_to_check(segs_from_err)
+          [segs_from_err.last]
+        end
+
+        def set_file_ref_and_error_lines!(segment)
+          if segment.line =~ /\((.+)::(.+) line ([0-9]+)\) had an error/
+            cookbook ||= $1
+            recipe_filename ||= "#{$2}.rb"
+            @error_line_num ||= $3.to_i 
+            @error_file_ref ||= ChefFileRef.recipe(cookbook,recipe_filename)
+            started = nil
+            (segment.aux_data||[]).each do |l|
+              if started
+                return true if l =~ /---- End/
+                @error_lines << l
+              else
+                started = true if l =~ /---- Begin/
+              end
+            end
+            true
+          end
+        end
+      end
+
+
       class ErrorTemplate < ErrorChefLog 
         def self.isa?(segments_from_error)
           line = segments_from_error.last.line
@@ -164,6 +208,7 @@ module XYZ
             reciple_line_num = $3
             @error_lines << "template resource: #{template_resource}" if template_resource
             @error_lines << "called from recipe: #{recipe} line #{reciple_line_num}" 
+            true
           end
         end
       end
@@ -317,7 +362,7 @@ module XYZ
       end
 
       #order makes a difference for parsing
-      PossibleErrors = [ErrorTemplate,ErrorRecipe,ErrorMissingRecipe,ErrorMissingCookbook,ErrorService,ErrorGeneric]
+      PossibleErrors = [ErrorTemplate,ErrorExec,ErrorRecipe,ErrorMissingRecipe,ErrorMissingCookbook,ErrorService,ErrorGeneric]
     end
   end
 end

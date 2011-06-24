@@ -90,8 +90,10 @@ module XYZ
         :attribute_mappings => 
         [
          #with seperate db this would be mysql__server.db_params[database=monitor]
-         {":mysql__server.monitor_db_params" => 
-           ":nagios__client.service_check_input.mysql__server[:component_index].db_params_ref"},
+         #TODO: allow contants on left hand side
+         # "root" => ":nagios__client.service_check_input.mysql__server[:component_index].username"
+         {":mysql__server.server_root_password" => 
+           ":nagios__client.service_check_input.mysql__server[:component_index].password"},
          {":mysql__server.sap_config__l4.0.port" =>
            ":nagios__client.service_check_input.mysql__server[:component_index].port"}
         ]

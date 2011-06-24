@@ -188,7 +188,7 @@ module XYZ
        private
         def parse!(segments_from_error,prev_segment)
           if segments_from_error.last.line =~ /Chef::Mixin::Template::TemplateError - (.+$)/
-            @error_detail = "Template error: #{$1}"
+            @error_detail = "Template error: #{$1}".gsub(/ for #<Erubis::Context:[^>]+>/,"")
           else
             @error_detail = "Template error" 
           end

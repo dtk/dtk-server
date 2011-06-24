@@ -249,12 +249,15 @@ module XYZ
         FromFilePat = Regexp.new("#{RecipeCache}([^/]+)/recipes/([^:]+):([0-9]+):in `from_file'") 
         def parse!(segments_from_error,prev_segment)
           if segments_from_error.last.line =~ /DEBUG: Re-raising exception: (.+$)/
-            @error_detail = $1
+            @error_detail = $1.gsub(/ for #<Chef::Recipe:[^>]+>/,"")
           else
             @error_detail = "recipe error"
           end
           self.class.lines_to_check(segments_from_error).each do |line|
-            return if set_file_ref!(line)
+            if set_file_ref!(line)
+              @error_detail << " (line #{@error_line_num.to_s})" if @error_line_num and @error_detail
+              return
+            end
           end
         end
 

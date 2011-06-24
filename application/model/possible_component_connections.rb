@@ -98,6 +98,17 @@ module XYZ
            ":nagios__client.service_check_input.mysql__server[:component_index].port"}
         ]
       }
-    }
+    },
+    :postgresql__server => {
+      :nagios__client  => {
+        :attribute_mappings => 
+        [
+         {":postgresql__server.monitor_db_params" => 
+           ":nagios__client.service_check_input.postgresql__server[:component_index].db_params_ref"},
+         {":postgresql__server.sap_config__l4.0.port" =>
+           ":nagios__client.service_check_input.postgresql__server[:component_index].port"}
+        ]
+      }
+    },
   }
 end

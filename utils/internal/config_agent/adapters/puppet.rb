@@ -1,5 +1,4 @@
 module XYZ
-  #TODO: if commanality between this and Chef then move to parent class
   #TODO!!!!: probably need to rewrite, like for chef to include all attributes; not just ones that changes
   module ConfigAgentAdapter
     class Puppet < ConfigAgent
@@ -20,13 +19,16 @@ module XYZ
         ((action[:component]||{})[:external_ref]||{})[:manifest_name]
       end
       def ret_attributes(action,opts={})
-        ret = Hash.new
+        qualified_ret = Hash.new
         (action[:attributes]||[]).each do |attr|
           var_name_path = (attr[:external_ref]||{})[:path]
-          val = attr[:attribute_value]
-          add_attribute!(ret,to_array_form(var_name_path,opts),val) if var_name_path
+          if val = attr[:attribute_value]
+            add_attribute!(qualified_ret,to_array_form(var_name_path,opts),val) if var_name_path
+          end
         end
-        ret
+        #TODO: this is based on chef convention of prefacing all attributes with implementation name
+        #consider of using refs such as node[:foo] rather than node[:impl][:foo]
+        qualified_ret.values.first || {}
       end
 
       def add_attribute!(ret,array_form_path,val)

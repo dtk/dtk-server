@@ -12,6 +12,8 @@
 			<li id="ssh-tab" class="tab">SSH</li>
 		</ul>
 	</div>
+	<form id="modal-form" name="modal-form" method="post" enctype="multipart/form-data" action="{%=_app[:base_uri]%}/xyz/component/edit_user">
+	<input type="hidden" value="" id="component_id" name="component_id"/>
 	<div class="content-wrapper">
 		<div id="general-tab-content" class="tab-content">
 			<table class="edit">
@@ -38,6 +40,7 @@
 					</td>
 				</tr>
 			</table>
+			<input id="modal-form-submit-btn" type="button" value="Create"/>
 		</div>
 		<div id="home-directory-tab-content" class="tab-content" style="display: none;">
 			<table class="edit">
@@ -54,4 +57,5 @@
 			</table>
 		</div>
 	</div>
+	</form>
 </div>

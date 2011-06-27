@@ -239,6 +239,7 @@ if (!R8.IDE.View.chefDebugger) {
 								'type': 'file'
 							});
 */
+//								var logTpl = '<div style="color: red; width: 100%; height: 17px; white-space: nowrap">'+logSegment.error_detail+' in file <a href="javascript:R8.IDE.openFile({id:\''+logSegment.error_file_ref.file_id+'\',name:\''+logSegment.error_file_ref.file_name+'\',type:\'file\',\'line\':'+logSegment.error_file_ref.error_line_num+'});">'+logSegment.error_file_ref.file_name+'</a></div>';
 								var logTpl = '<div style="color: red; width: 100%; height: 17px; white-space: nowrap">'+logSegment.error_detail+' in file <a href="javascript:R8.IDE.openFile({id:\''+logSegment.error_file_ref.file_id+'\',name:\''+logSegment.error_file_ref.file_name+'\',type:\'file\'});">'+logSegment.error_file_ref.file_name+'</a></div>';
 							}
 

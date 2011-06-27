@@ -89,7 +89,14 @@ if (!R8.IDE) {
 					'heightRemaining': 1
 				}
 			},
-
+/*
+			_ide_events = {
+				'node-add':'1',
+				'node-edit':'1',
+				'component-add':'1',
+				'component-edit':'1'
+			},
+*/
 			_events = {};
 
 			var layoutDef = {
@@ -282,6 +289,12 @@ if (!R8.IDE) {
 						return nodeList;
 						break;
 				}
+			},
+			on: function(eventName,callback,scope) {
+				
+			},
+			fire: function(eventName,eventParams) {
+				
 			},
 			setupPanels: function() {
 				this.setPanelCounts();

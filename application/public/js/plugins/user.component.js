@@ -6,7 +6,9 @@ if(!R8.UserComponent) {
 	R8.UserComponent = function() {
 		var _events = {},
 			_tabListNodeId = 'modal-tab-list',
-			_tabListNode = null;
+			_tabListNode = null,
+			_formNode = null,
+			_submitBtnNode = null;
 
 		var _tabs = ['general','home-directory','ssh'];
 
@@ -57,6 +59,31 @@ if(!R8.UserComponent) {
 					var usernameValue = e.currentTarget.get('value');
 					dirNameNode.set('value', usernameValue);
 				});
+
+				_formNode = R8.Utils.Y.one('#modal-form');
+				_submitBtnNode = R8.Utils.Y.one('#modal-form-submit-btn');
+				_submitBtnNode.on('click',function(e){
+					this.formSubmit();
+				},this);
+			},
+			cleanup: function() {
+				
+			},
+			formSubmit: function(e) {
+				var params = {
+					'cfg' : {
+						method : 'POST',
+						form: {
+							id : 'modal-form',
+							upload: false
+						}
+					}
+				};
+
+				R8.Ctrl.call('component/edit_user/',params);
+
+				this.cleanup();
+				R8.IDE.destroyShim();
 			}
 		}
 	}();

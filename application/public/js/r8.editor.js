@@ -377,6 +377,9 @@ if(_editorContainerNode == null) return;
 				setTimeout(callback,150);
 */
 			},
+			goToLine: function(lineNum) {
+				_editor.goToLine(lineNum);
+			},
 			fileFocus: function(fileId) {
 				if(_currentFileFocus == fileId) return;
 

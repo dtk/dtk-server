@@ -32,7 +32,7 @@ module XYZ
       cmp_external_ref_type = ((self[:component]||{})[:external_ref]||{})[:type]
       case cmp_external_ref_type
        when "chef_recipe" then :chef
-       when "puppet_manifest" then :puppet
+       when "puppet_class","puppet_definition" then :puppet
        else
         Log.error("cannot find a node_config_agent_type; defaulting to :chef")
       end

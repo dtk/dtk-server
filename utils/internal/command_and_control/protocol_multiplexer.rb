@@ -57,10 +57,15 @@ module XYZ
       def get_and_remove_reqid_callbacks?(request_id,opts={})
         ret = nil
         @lock.synchronize do
-          if opts[:force_delete]
+          if opts[:force_delete] 
             count = @count_info[request_id] = 0
           else
-            count = @count_info[request_id] -= 1
+            #TODO: protection from obscure error
+            if @count_info[request_id]
+              count = @count_info[request_id] -= 1
+            else
+              Log.error("@count_info[request_id] is null")
+            end
           end
           if count == 0
             ret = @callbacks_list.delete(request_id)

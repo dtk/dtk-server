@@ -12,7 +12,7 @@ module XYZ
       def components_with_attributes(config_node)
         config_node[:component_actions].map do |component_action|
           if cmp = component(component_action)
-            cmp.merge(:attributes => ret_attributes(component_action))
+            cmp.merge("attributes" => ret_attributes(component_action))
           end
         end.compact
       end
@@ -21,9 +21,9 @@ module XYZ
         if ext_ref = (action[:component]||{})[:external_ref]
           case ext_ref[:type]
             when "puppet_class"
-            {:component_type => "class", :name => ext_ref[:class_name]}
+            {"component_type" => "class", "name" => ext_ref[:class_name]}
             when "puppet_definition"
-            {:component_type => "definition", :name => ext_ref[:definition_name]}
+            {"component_type" => "definition", "name" => ext_ref[:definition_name]}
           end
         end
       end

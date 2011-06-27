@@ -24,7 +24,7 @@ module XYZ
       end
       return {:content => {}}
     end
-   private
+
     def ret_project_component_template(cmp_type,version)
       sp_hash = {
         :cols => [:id],
@@ -37,8 +37,13 @@ module XYZ
       raise Error.new("cannot find project template associated with #{cmp_type} (#{version})") unless ret
       ret
     end
-   public
+   private :ret_project_component_template
     ##############################
+    def edit_user
+      params = request.params.dup
+      Component.create_user_library_template(model_handle,params)
+      return {:content => {}}
+    end
     
     def details_old(id)
       component = get_object_by_id(id)

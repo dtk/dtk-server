@@ -1,12 +1,14 @@
 require  File.expand_path('component/model_def_processor', File.dirname(__FILE__))
 require  File.expand_path('component/view_meta_processor', File.dirname(__FILE__))
 require  File.expand_path('component/template', File.dirname(__FILE__)) 
+require  File.expand_path('component/user', File.dirname(__FILE__)) 
 
 module XYZ
   class Component < Model
     include ComponentModelDefProcessor
     include ComponentViewMetaProcessor
     include ComponentTemplate
+    extend ComponentUserClassMixin
     set_relation_name(:component,:component)
     class << self
       def up()

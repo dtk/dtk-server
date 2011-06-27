@@ -10,7 +10,7 @@ if(!R8.CommitTool2) {
 			_formNode = null,
 			_submitBtnNode = null;
 
-		var _tabs = ['change-list','details'];
+		var _tabs = ['change-list','required-attrs','details'];
 
 		return {
 			init: function() {

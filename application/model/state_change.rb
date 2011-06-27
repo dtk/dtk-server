@@ -29,14 +29,10 @@ module XYZ
     #object processing and access functions
     #######################
     def on_node_config_agent_type()
-      cmp_external_ref_type = ((self[:component]||{})[:external_ref]||{})[:type]
-      case cmp_external_ref_type
-       when "chef_recipe" then :chef
-       when "puppet_class","puppet_definition" then :puppet
-       else
-        Log.error("cannot find a node_config_agent_type; defaulting to :chef")
-      end
+      ret = (self[:component]||{})[:config_agent_type]
+      ret && ret.to_sym
     end
+
     def create_node_config_agent_type()
       #TODO: stub
       :ec2

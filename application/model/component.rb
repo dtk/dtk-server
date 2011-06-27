@@ -14,6 +14,7 @@ module XYZ
       def up()
         ds_column_defs :ds_attributes, :ds_key
         external_ref_column_defs()
+        virtual_column :config_agent_type, :type => :string, :local_dependencies => [:external_ref]
 
         #columns related to name/labels
         #specfic labels of components and its attributes
@@ -270,6 +271,14 @@ module XYZ
     ##### Actions
 
     ### virtual column defs
+    def config_agent_type()
+      cmp_external_ref_type = (self[:external_ref]||{})[:type]
+      case cmp_external_ref_type
+       when "chef_recipe" then "chef"
+       when "puppet_class","puppet_definition" then "puppet"
+      end
+    end
+
     def instance_extended_base_id()
       extended_base_id(:is_instance => true)
     end

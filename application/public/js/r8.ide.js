@@ -294,7 +294,9 @@ if (!R8.IDE) {
 				
 			},
 			fire: function(eventName,eventParams) {
-				
+console.log('going to fire  event:'+eventName+' with params:');
+console.log(eventParams);
+console.log('-------------------')
 			},
 			setupPanels: function() {
 				this.setPanelCounts();

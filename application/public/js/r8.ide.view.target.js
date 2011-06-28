@@ -229,6 +229,11 @@ if (!R8.IDE.View.target) {
 				ui[contextUIKey] = {'top':top,'left':left};
 
 				var that=this;
+				var addEventParams = {
+					'targetId':_id,
+					'viewSpaceId':viewSpaceId,
+					'node':clonedNode
+				};
 				YUI().use("json", function(Y) {
 					var uiStr = Y.JSON.stringify(ui);
 					var queryParams = 'ui='+uiStr+'&id='+modelId+'&model='+modelName;
@@ -240,6 +245,8 @@ if (!R8.IDE.View.target) {
 
 						that.addItems(newItems);
 						that.setupNewItems();
+						addEventParams.newItems = newItems;
+						R8.IDE.fire('node-add',addEventParams);
 					}
 					var callbacks = {
 						'io:success' : successCallback

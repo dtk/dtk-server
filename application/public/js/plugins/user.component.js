@@ -8,9 +8,13 @@ if(!R8.UserComponent) {
 			_tabListNodeId = 'modal-tab-list',
 			_tabListNode = null,
 			_formNode = null,
+
+			_addKeyBtnNode = null,
+			_numKeys = 1,
 			_submitBtnNode = null;
 
-		var _tabs = ['general','home-directory','ssh'];
+//		var _tabs = ['general','home-directory','ssh'];
+		var _tabs = ['general','ssh-keys'];
 
 		return {
 			init: function() {
@@ -65,6 +69,22 @@ if(!R8.UserComponent) {
 				_submitBtnNode.on('click',function(e){
 					this.formSubmit();
 				},this);
+				_addKeyBtnNode = R8.Utils.Y.one('#add-ssh-key-btn');
+				_addKeyBtnNode.on('click',function(e){
+					this.addKeyToForm();
+				},this);
+			},
+			addKeyToForm: function() {
+				_numKeys++;
+				var titleId = 'ssh_key_title_'+_numKeys, keyId = 'ssh_key_'+_numKeys;
+
+				var tableNode = R8.Utils.Y.one('#ssh-keys-table');
+				newKeyTpl = '<tr><td class="label">Key Title</td></tr>\
+							<tr><td class="field"><input type="text" value="" size="30" id="'+titleId+'" name="ssh_key_title[]"/></td></tr>\
+							<tr><td class="label">SSH Key</td></tr>\
+							<tr><td class="field"><textarea rows="8" cols="40" id="'+keyId+'" name="ssh_key[]"></textarea></td></tr>';
+
+				tableNode.append(newKeyTpl);
 			},
 			cleanup: function() {
 				

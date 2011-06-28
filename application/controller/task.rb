@@ -60,10 +60,21 @@ module XYZ
 
       #### fidning file id TODO: this shoudl be pushed to lower level
       hash_form.each do |k,v|
-        el = (v[:log_segments]||[]).last || {}
-        if efr=el[:error_file_ref]
+          el = (v[:log_segments]||[]).last || {}
+          if efr=el[:error_file_ref]
           file = ret_file_asset(efr[:file_name],efr[:type],efr[:cookbook])
           efr[:file_id] = file[:id]
+        end
+      end
+
+#TODO: temp hack so notice and err show for puppet logs
+      if (logs_info.values.first||{})[:type] == "puppet"
+        hash_form.each_value do |v|
+          (v[:log_segments]||[]).each do |seg|
+            if [:notice,:error].include?(seg[:type])
+              seg[:type] = :debug
+            end
+          end
         end
       end
 

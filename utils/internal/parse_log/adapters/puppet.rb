@@ -21,6 +21,7 @@ module XYZ
       def self.log_complete?(lines)
         lines.reverse_each do |l|
           return true if l =~ /Finished catalog run/
+          return true if l =~ /Puppet \(info\): \(end\)/
         end
         nil
       end
@@ -36,6 +37,7 @@ module XYZ
          {:debug => /\(debug\)/},
          {:info => /\(info\)/},
          {:notice => /\(notice\)/},
+         {:error => /\(err\)/},
         ]
       )
      public
@@ -89,9 +91,11 @@ module XYZ
         end
 
        private
+        #TODO: need to unify with self.log_complete?(lines)
         def complete?()
           return false if empty?
           return true if last.line =~ /Finished catalog run/
+          return true if last.line =~ /Puppet \(info\): \(end\)/
         end
 
         def find_error_position()

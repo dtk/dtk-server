@@ -40,7 +40,7 @@ module XYZ
    private :ret_project_component_template
     ##############################
     def edit_user
-      params = request.params.dup
+      params = request.params.reject{|k,v| v.nil? or v.empty?}
       Component.create_user_library_template(model_handle,params)
       return {:content => {}}
     end

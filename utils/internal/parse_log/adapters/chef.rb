@@ -97,6 +97,7 @@ module XYZ
         end
 
        private
+        #TODO: need to unify with self.log_complete?(lines)
         def complete?()
           return false if empty?
           return true if last.line =~ /handlers complete/

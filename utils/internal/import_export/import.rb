@@ -149,8 +149,10 @@ module XYZ
             file_asset_ref = file_path.gsub(Regexp.new("/"),"_") #removing "/" since they confuse processing
             h.merge(file_asset_ref => file_asset)
           end
+          #TDOO: simple way of getting implementation
+          impl_name = repo.gsub(/^puppet[-_]/,"").gsub(/^chef[-_]/,"")
           implementation_hash[repo] = {
-            "display_name" => repo,
+            "display_name" => impl_name,
             "type" => type[:implementation_type],
             "version" => version,
             "repo" => repo,

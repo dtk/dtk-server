@@ -112,7 +112,7 @@
       },
       "display_name": "test",
       "node": {
-        "ami-3ce01b55-micro": {
+        "ami-20db2049-micro": {
           "type": "image",
           "ds_source_obj_type": "image",
           "is_deployed": true,
@@ -129,7 +129,7 @@
           "external_ref": {
 	    "size": "t1.micro",
             "type": "ec2_image",
-            "image_id": "ami-3ce01b55"
+            "image_id": "ami-20db2049"
           },
           "node_interface": {
             "eth0": {
@@ -193,9 +193,9 @@
               "enabled": true
             }
           },
-          "ds_key": "[:user_data, \"/library/test/ami-3ce01b55\"]"
+          "ds_key": "[:user_data, \"/library/test/ami-20db2049\"]"
         },
-        "ami-3ce01b55-small": {
+        "ami-20db2049-small": {
           "type": "image",
           "ds_source_obj_type": "image",
           "is_deployed": true,
@@ -212,7 +212,7 @@
           "external_ref": {
 	    "size": "m1.small",
             "type": "ec2_image",
-            "image_id": "ami-3ce01b55"
+            "image_id": "ami-20db2049"
           },
           "node_interface": {
             "eth0": {
@@ -276,7 +276,7 @@
               "enabled": true
             }
           },
-          "ds_key": "[:user_data, \"/library/test/ami-3ce01b55\"]"
+          "ds_key": "[:user_data, \"/library/test/ami-20db2049\"]"
         },
         "ami-aa37c984": {
           "type": "image",

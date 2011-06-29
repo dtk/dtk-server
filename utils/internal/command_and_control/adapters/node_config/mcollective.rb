@@ -119,7 +119,7 @@ module XYZ
         end
         impls = Model.get_objects_in_set_from_sp_hash(impl_idhs,{:col => [:id, :repo, :branch]})
         impls.each do |impl|
-          ret << {:repo => impl[:repo],:branch => impl[:branch]}
+          ret << {:repo => impl[:repo],:branch => impl[:branch], :implementation => impl[:display_name]}
           context = {:implementation => impl}
           Repo.push_implementation(context)
         end

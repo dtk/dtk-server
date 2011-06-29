@@ -18,7 +18,8 @@ module XYZ
   #class mixin
   module ImportObject
     include CommonInputImport
-    #assumption is that target_id_handle is in uri form
+    #not idempotent
+    #TBD: assumption is that target_id_handle is in uri form
     def import_objects_from_file(target_id_handle,json_file,opts={})
       raise Error.new("file given #{json_file} does not exist") unless File.exists?(json_file)
       create_prefix_object_if_needed(target_id_handle,opts)
@@ -120,28 +121,29 @@ module XYZ
           dir = file_path =~ Regexp.new("(^[^/]+)/") ? $1 : nil
           (indexed_file_paths[dir] ||= Array.new) << file_path
         end
-        impl_repos = indexed_file_paths.keys
+        
+        #find components that correspond to an implementation 
+        components_hash = hash["library"][library_ref]["component"]
+        impl_repos = components_hash.keys.map{|cmp_ref|repo_from_component_ref(cmp_ref)}.uniq & indexed_file_paths.keys
         return unless impl_repos
 
         #add implementation objects to hash
         implementation_hash = hash["library"][library_ref]["implementation"] ||= Hash.new
         impl_repos.each do |repo|
           next unless file_paths = indexed_file_paths[repo]
-          
-          type = 
-            case file_paths.find{|fn|fn =~ Regexp.new("r8meta\.[^/]+$")}
-            when /r8meta.chef/ then ImportChefType.new()
-            when /r8meta.puppet/ then ImportPuppetType.new()
-          end
-          next unless type
-
+          type = nil
           cmp_file_assets = file_paths.inject({}) do |h,file_path_x|
             #if repo is null then want ful file path; otherwise we have repo per repo and
             #want to strip off leading repo
             file_path = repo ? file_path_x.gsub(Regexp.new("^#{repo}/"),"") : file_path_x
             file_name = file_path =~ Regexp.new("/([^/]+$)") ? $1 : file_path
+            unless type 
+              if file_name =~ /^r8meta.chef/ then type = "chef_cookbook"
+              elsif file_name =~ /^r8meta.puppet/ then type = "puppet_module"
+              end
+            end
             file_asset = {
-              :type => type[:file_type],
+              :type => "chef_file", 
               :display_name => file_name,
               :file_name => file_name,
               :path => file_path
@@ -149,9 +151,13 @@ module XYZ
             file_asset_ref = file_path.gsub(Regexp.new("/"),"_") #removing "/" since they confuse processing
             h.merge(file_asset_ref => file_asset)
           end
+          unless type
+            Log.error("cannot find valid r8meta file")
+            next
+          end
           implementation_hash[repo] = {
             "display_name" => repo,
-            "type" => type[:implementation_type],
+            "type" => type,
             "version" => version,
             "repo" => repo,
             "file_asset" => cmp_file_assets
@@ -159,22 +165,14 @@ module XYZ
         end
 
         #add foreign key to components that reference an implementation
-        components_hash = hash["library"][library_ref]["component"]
         components_hash.each do |cmp_ref, cmp_info|
-          repo = cmp_info["repo"]
-          next unless repo
+          repo = repo_from_component_ref(cmp_ref)
+          next unless impl_repos.include?(repo)
           cmp_info["*implementation_id"] = "/library/#{library_ref}/implementation/#{repo}"
         end
       end
-      class ImportChefType < HashObject
-        def initialize()
-          super(:file_type => "chef_file", :implementation_type => "chef_cookbook")
-        end
-      end
-      class ImportPuppetType < HashObject
-        def initialize()
-          super(:file_type => "puppet_file", :implementation_type => "puppet_module")
-        end
+      def self.repo_from_component_ref(cmp_ref)
+        cmp_ref.gsub(/__.+$/,"")
       end
     end
   end

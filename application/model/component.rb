@@ -18,7 +18,8 @@ module XYZ
 
         #columns related to name/labels
         #specfic labels of components and its attributes
-        column :i18n_labels,  :json, :ret_keys_as_symbols => false
+        column :keys, :json #only used if only_one_per_node is false; array of keys for displaying component name
+        column :i18n_labels, :json, :ret_keys_as_symbols => false
 
         #columns related to version
         column :version, :varchar, :size => 25, :default => "0.0.1" # version of underlying component (not chef recipe .... version)
@@ -53,9 +54,11 @@ module XYZ
         #TODO: change if multiple implementations per component
         foreign_key :implementation_id, :implementation, FK_SET_NULL_OPT
 
+        column :link_defs, :json
+        #deprecate below for above
         #TODO: for efficiency materialize and if so have two variants of :component_parent for attribute; one for input, which brings in :connectivity_profile and other for output which deos not
-        virtual_column :link_defs_external, :type => :json, :local_dependencies => [:component_type,:specific_type,:basic_type]
-        virtual_column :connectivity_profile_internal, :type => :json, :local_dependencies => [:component_type,:specific_type,:basic_type]
+        virtual_column :link_defs_external, :type => :json, :local_dependencies => [:link_defs,:component_type,:specific_type,:basic_type]
+        virtual_column :connectivity_profile_internal, :type => :json, :local_dependencies => [:link_defs,:component_type,:specific_type,:basic_type]
         virtual_column :most_specific_type, :type => :varchar, :local_dependencies => [:specific_type,:basic_type]
 
         many_to_one :component, :library, :node, :node_group, :datacenter, :project
@@ -322,10 +325,10 @@ module XYZ
     end
 
     def link_defs_external()
-      LinkDefsExternal.find(self[:component_type])
+      (self[:link_defs]||{})[:external] || LinkDefsExternal.find(self[:component_type])
     end
     def connectivity_profile_internal()
-      LinkDefsInternal.find(self[:component_type])
+      (self[:link_defs]||{})[:internal] || LinkDefsInternal.find(self[:component_type])
     end
     
     def multiple_instance_ref()

@@ -128,7 +128,7 @@ module XYZ
             end
 
             error = nil
-            if log_segments.last[:type] == :error 
+            if (log_segments.last||{})[:type] == :error 
               error = log_segments.last
 pp [:log_error,error]
               #TODO: this looks like error; should be log_segments = log_segments[0..log_segments.size-2]

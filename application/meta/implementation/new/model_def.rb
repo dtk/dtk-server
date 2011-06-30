@@ -28,6 +28,19 @@
          :cols=>[:id,:display_name,:datacenter_datacenter_id]
        }]
     },
+    :linked_library_implementation=>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [{
+         :model_name=>:implementation,
+         :alias => :library_implementation,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:id=>:implementation__ancestor_id},
+         :cols=>[:id,:repo,:branch]
+       }]
+    },
     :file_assets=>{
       :type=>:json,
       :hidden=>true,

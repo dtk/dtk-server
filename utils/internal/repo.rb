@@ -21,6 +21,11 @@ module XYZ
       return if (R8::Config[:repo]||{})[:type] == "mock"
       get_repo(context).clone_branch(new_branch)
     end
+
+    def self.merge_from_branch(context,branch_to_merge_from)
+      get_repo(context).merge_from_branch(branch_to_merge_from)
+    end
+
     def self.delete(context)
       get_repo(context).delete()
     end
@@ -79,6 +84,12 @@ module XYZ
 
     def push_implementation()
       git_command__push(@branch)
+    end
+
+    def merge_from_branch(branch_to_merge_from)
+      checkout(@branch) do
+        git_command__merge(branch_to_merge_from)
+      end
     end
 
     def clone_branch(new_branch)
@@ -167,6 +178,11 @@ module XYZ
     def git_command__push(branch_name)
       git_command.push(CmdOpts,"origin", "#{branch_name}:refs/heads/#{branch_name}")
     end
+
+    def git_command__merge(branch_to_merge_from)
+      git_command.merge(CmdOpts,branch_to_merge_from)
+    end
+
     def git_command__delete_local_branch(branch_name)
       git_command.branch(CmdOpts,"-D",branch_name)
     end

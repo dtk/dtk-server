@@ -176,6 +176,13 @@ pp [:debug_stored_new_pos,get_objects(model_name,SQL.in(:id,model_items.map{|ite
         name = model_list[index][:display_name]
         title = name.nil? ? "" : i18n_string(i18n,model_name.to_sym,name)
 
+        #TDOO: temprary to distingusih between chef and puppet components
+        if model_name.to_sym == :component
+          if config_agent_type = model_list[index][:config_agent_type]
+            title += " (#{config_agent_type[0].chr})" 
+          end
+        end
+        
 
 #TODO: change after implementing all the new types and making generic icons for them
         model_type = 'service'
@@ -186,7 +193,7 @@ pp [:debug_stored_new_pos,get_objects(model_name,SQL.in(:id,model_items.map{|ite
         R8::Config[:base_images_uri]+'/'+model_name+'Icons/'+model_list[index][:ui][:images][:tnail] : 
         R8::Config[:base_images_uri]+'/'+model_name+'Icons/unknown-'+model_type_str+'.png'
 
-        model_list[index][:i18n] = name.nil? ? "" : i18n_string(i18n,model_name.to_sym,name)
+        model_list[index][:i18n] = title
 
 =begin
         img_value = model_list[index][:ui][:images][:tnail] ? 

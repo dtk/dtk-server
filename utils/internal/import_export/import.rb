@@ -86,19 +86,21 @@ module XYZ
     end
 
     def add_r8meta!(hash,r8meta)
-      type = r8meta[:type]
-      if type == :yaml
+      format_type = r8meta[:type]
+      if format_type == :yaml
         library_ref = r8meta[:library]
         require 'yaml'
         r8meta[:files].each do |file|
           component_hash = YAML.load_file(file)
-          repo = (file =~ Regexp.new("([^/]+)/[^/]+$") && $1)
+          repo, config_agent_type = (file =~ Regexp.new("([^/]+)/r8meta\.(.+)\.yml") && [$1,$2])
+          raise Error.new("bad config agent type") unless config_agent_type
           component_hash.each do |k,v|
-            hash["library"][library_ref]["component"][k] = v.merge("repo" => repo)
+            cmp_ref = "#{config_agent_type}-#{k}"
+            hash["library"][library_ref]["component"][cmp_ref] = v.merge("repo" => repo)
           end
         end 
       else
-        raise Error.new("Type #{type} not supported")
+        raise Error.new("Format type #{format_type} not supported")
       end
     end
 
@@ -162,9 +164,8 @@ module XYZ
 
         #add foreign key to components that reference an implementation
         components_hash = hash["library"][library_ref]["component"]
-        components_hash.each do |cmp_ref, cmp_info|
-          repo = cmp_info["repo"]
-          next unless repo
+        components_hash.each_value do |cmp_info|
+          next unless repo = cmp_info["repo"]
           cmp_info["*implementation_id"] = "/library/#{library_ref}/implementation/#{repo}"
         end
       end

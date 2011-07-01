@@ -302,7 +302,12 @@ rather than having or having two sap refs and user can remove or add to componen
       },
       "db_params" => {
         :external => true,
-        :port_type => "input"
+        :port_type => "input",
+        :syntax => {
+          "database" => {:required => true, :type => :string},
+          "username" => {:required => true, :type => :string},
+          "password" => {:required => false, :type => :string}
+        }
       },
       "db_ref" => {
         :external => true,

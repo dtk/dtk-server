@@ -96,6 +96,10 @@ module XYZ
           raise Error.new("bad config agent type") unless config_agent_type
           component_hash.each do |k,v|
             cmp_ref = "#{config_agent_type}-#{k}"
+            if ext_link_defs = v.delete("external_link_defs")
+              v["link_defs"] ||= Hash.new
+              v["link_defs"]["external"] = ext_link_defs
+            end
             hash["library"][library_ref]["component"][cmp_ref] = v.merge("repo" => repo)
           end
         end 

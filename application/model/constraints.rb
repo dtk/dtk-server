@@ -147,7 +147,7 @@ module XYZ
         eps = external_link_defs.remote_components
         #no search pattern means 'necessarily fail'
         dep = {
-          :description => "Link must attach to node with a component of type (#{eps.join(", ")}",
+          :description => "Link must attach to node with a component of type (#{eps.join(", ")})",
           :severity => "error"
         }
         PortConstraint.new(dep)

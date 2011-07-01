@@ -11,7 +11,7 @@ module XYZ
       most_specific_type = component[:most_specific_type] && component[:most_specific_type].to_sym
 
       #TODO: not looking for multiple matches and just looking for first one (break out of loop when found
-      self.each do |one_match|
+      each do |one_match|
         next if link_type and not one_match[:type].to_s == link_type.to_s
         (one_match[:possible_links]||[]).each do |link|
           link_cmp_type = link.keys.first
@@ -39,20 +39,14 @@ module XYZ
   end
 
   class LinkDefsExternal < LinkDefs 
-    def self.find(component_type)
-      ret = nil
-      return ret if component_type.nil?
-      link_def_array = (get_component_external_link_defs(component_type.to_sym)||{})[:link_defs]
-      link_def_array ? self.new(link_def_array,component_type.to_sym) : nil
+    def self.find!(component)
+      component.update_object!(:link_defs,:component_type)
+      link_def_array = (component[:link_defs]||{})[:external]
+      link_def_array && self.new(link_def_array,component[:component_type].to_sym) 
     end
 
     def remote_components()
       map{|x|(x[:possible_links]||[]).map{|l|l.keys.first}}.flatten(1)
-    end
-
-   private
-    def self.get_component_external_link_defs(component_type)
-      XYZ::ComponentExternalLinkDefs[component_type]
     end
   end
   
@@ -290,7 +284,8 @@ module XYZ
     end
 
     def self.split_path(path,&block)
-      split = path.split(SplitPat).map do |el|
+      #doing path.to_s; beacuse conversion of json from db makes left hand sides into keys
+      split = path.to_s.split(SplitPat).map do |el|
         #process special symbols
         Log.error("unexpected token #{el}") unless el =~ AnyTokenRE
         if el =~ IndexedPatRE

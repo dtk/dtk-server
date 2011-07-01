@@ -325,10 +325,10 @@ module XYZ
     end
 
     def link_defs_external()
-      (self[:link_defs]||{})[:external] || LinkDefsExternal.find(self[:component_type])
+      LinkDefsExternal.find!(self)
     end
     def connectivity_profile_internal()
-      (self[:link_defs]||{})[:internal] || LinkDefsInternal.find(self[:component_type])
+      (self[:link_defs]||{})["internal"] || LinkDefsInternal.find(self[:component_type])
     end
     
     def multiple_instance_ref()

@@ -32,12 +32,33 @@ module XYZ
         (action[:attributes]||[]).each do |attr|
           var_name_path = (attr[:external_ref]||{})[:path]
           if val = attr[:attribute_value]
-            add_attribute!(qualified_ret,to_array_form(var_name_path,opts),val) if var_name_path
+            if var_name_path
+              array_form_path = to_array_form(var_name_path,opts)
+              add_attribute!(qualified_ret,array_form_path,val)
+              #info that is used to set the name param for the resource
+              if rsc_name_path = attr[:external_ref][:name]
+                if rsc_name_val = nested_value(val,rsc_name_path)
+                  add_attribute!(qualified_ret,[array_form_path[0],"name"],rsc_name_val)
+                end
+              end
+            end
           end
         end
         #TODO: this is based on chef convention of prefacing all attributes with implementation name
         #consider of using refs such as node[:foo] rather than node[:impl][:foo]
         qualified_ret.values.first || {}
+      end
+
+      #TDOO: may want to better unify how name is passed heer with 'param' and otehr way by setting node path with name last element]
+      def nested_value(val,rsc_name_path)
+        array_form = rsc_name_path.gsub(/^param\[/,"").gsub(/\]$/,"").split("][")
+        nested_value_aux(val,array_form)
+      end
+
+      def nested_value_aux(val,array_form,i=0)
+        return val unless val.kind_of?(Hash)
+        return nil if i >= array_form.size
+        nested_value_aux(val[array_form[i]],i+1)
       end
 
       def add_attribute!(ret,array_form_path,val)

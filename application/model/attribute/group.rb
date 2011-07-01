@@ -45,7 +45,9 @@ module XYZ
   module AttributeGroupInstanceMixin
     def attribute_value_type()
       type = 
-        if self[:dynamic] then :dynamic
+        #TODO: need to clean up special processing of sap__l4 because marked as otput port but also input port (from internal connections)
+        if self[:semantic_type_summary] == "sap__l4" then :linked
+        elsif self[:dynamic] then :dynamic
         elsif self[:port_type] == "input" then :linked
         elsif self[:required] then :required
         else :not_required
@@ -55,7 +57,7 @@ module XYZ
     end
   end
   module AttributeGroupClassMixin
-    #marjked with "!" because augments info
+    #marked with "!" because augments info
     def ret_grouped_attributes!(augmented_attr_list,opts={})
       prune_set = opts[:types_to_keep]
       add_missing_info_for_group_attrs!(augmented_attr_list,prune_set)
@@ -79,7 +81,7 @@ module XYZ
     end
    private
     def add_missing_info_for_group_attrs!(augmented_attr_list,prune_set)
-      #find attributes that are required, but have no value
+      #find attributes that are required
       selected_attrs = augmented_attr_list.select{|a|a[:required]}
       return if selected_attrs.empty?
       attr_ids = selected_attrs.map{|a|a[:id]}.uniq

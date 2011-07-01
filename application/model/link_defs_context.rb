@@ -50,6 +50,8 @@ module XYZ
     end
 
     def add_component_ref_and_value!(cmp_ref,cmp_value)
+      #TODO: put this in when converted to using links defs from r8meta file; cmp_ref now can be string such as if it is alias
+      cmp_ref = cmp_ref.to_sym
       term_index = normalize_term_index(cmp_ref)
       add_ref!(:component,term_index,cmp_ref).set_component_value!(cmp_value)
 

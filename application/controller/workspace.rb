@@ -692,6 +692,7 @@ pp datacenter
       }
     end
 
+    #TDOO: doing redundant work to what is done in commit_ide
     def commit_changes_ide(datacenter_id)
       datacenter_id = datacenter_id && datacenter_id.to_i
       hash = request.params.dup
@@ -718,6 +719,7 @@ pp datacenter
       top_level_task = create_task_from_pending_changes(pending_changes)
 
       #TODO: need to sync ValidationError with analysis done in group by
+      #TODO: just need to check if anything returned missing values
       errors = ValidationError.find_missing_required_attributes(top_level_task)
       #TODO: removing for time being
       #      if errors
@@ -755,6 +757,9 @@ pp datacenter
       end
 
       top_level_task.save!()
+
+      guards = Attribute.ret_attribute_guards(top_level_task)
+
       workflow = Workflow.create(top_level_task)
       workflow.defer_execution(top_level_task)
 

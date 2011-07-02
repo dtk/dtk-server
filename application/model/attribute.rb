@@ -1,9 +1,13 @@
+require  File.expand_path('attribute/dependency_analysis', File.dirname(__FILE__))
 require  File.expand_path('attribute/group', File.dirname(__FILE__))
+require  File.expand_path('attribute/guard', File.dirname(__FILE__))
 require  File.expand_path('attribute/complex_type', File.dirname(__FILE__))
 module XYZ
   class Attribute < Model
     include AttributeGroupInstanceMixin
+    extend AttrDepAnalaysisClassMixin
     extend AttributeGroupClassMixin
+    extend AttributeGuardClassMixin
 
     set_relation_name(:attribute,:attribute)
     def self.up()
@@ -28,7 +32,7 @@ module XYZ
       #TODO: need to clearly relate these four; may get rid of read_only
       column :read_only, :boolean, :default => false 
       column :dynamic, :boolean, :default => false #means dynamically set by an executable action
-      virtual_column :port_type, :type => :varchar, :hidden => true, :local_dependencies => [:is_port,:semantic_type_summary]
+      virtual_column :port_type, :type => :varchar, :hidden => true, :local_dependencies => [:dynamic,:is_port,:semantic_type_summary]
       column :cannot_change, :boolean, :default => false
 
 
@@ -264,6 +268,7 @@ module XYZ
     end
     def port_type()
       return nil unless self[:is_port]
+      return "output" if self[:dynamic]
       return nil unless self[:semantic_type_summary]
       (AttributeSemantic::Info[self[:semantic_type_summary]]||{})[:port_type]
     end

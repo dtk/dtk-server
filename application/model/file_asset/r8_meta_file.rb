@@ -9,30 +9,31 @@ module XYZ
         format_type = ExtensionToType[file_extension]
         raise Error.new("illegal fiel extension #{file_extension}") unless file_extension
         impl_idh = file_obj[:implementation].id_handle()
-        file_idh =  file_obj.id_handle()
         hash_content = convert_to_hash(format_type,content)
-        self.new(config_agent_type,impl_idh,file_idh,hash_content)
+        self.new(config_agent_type,impl_idh,hash_content)
       end
       ExtensionToType = {
         "yml" => :yaml
       }
 
-      def initialize(config_agent_type,impl_idh,file_idh,hash_content)
+      def initialize(config_agent_type,impl_idh,hash_content)
         @config_agent_type = config_agent_type
         @hash_content = hash_content
         @impl_idh = impl_idh
-        @file_idh = file_idh
       end
       def process()
         #TODO: right now just processing changes to link defs
         ndx_cmps_to_update = Hash.new
         process_external_link_defs!(ndx_cmps_to_update)
-        return if ndx_cmps_to_update.empty?
+        unless ndx_cmps_to_update.empty?
+          Model.update_from_rows(@impl_idh.createMH(:component),ndx_cmps_to_update.values,:partial_value=>true)
+        end
       end
      private
       def process_external_link_defs!(ndx_cmps_to_update)
         link_defs = @hash_content.inject({}) do |h,(cmp_type,info)|
-          h.merge(cmp_type => info["external_link_defs"])
+          ext_link_defs = info["external_link_defs"]
+          ext_link_defs ? h.merge(cmp_type => ext_link_defs) : h
         end
         return if link_defs.empty?
         #get the matching components in the project implementation and their instantaions

@@ -71,7 +71,7 @@ module XYZ
       ret
     end
 
-    #this is a project implementation
+    #self is a project implementation
     def replace_library_impl_with_proj_impl()
       impl_objs_info = get_objs(:cols=>[:linked_library_implementation,:repo,:branch]).first
       raise Error.new("Cannot find associated library implementation") unless impl_objs_info

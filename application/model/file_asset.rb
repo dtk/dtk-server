@@ -1,5 +1,7 @@
+require  File.expand_path('file_asset/r8_meta_file', File.dirname(__FILE__))
 module XYZ
   class FileAsset < Model
+    include FileAssetR8MetaFile
     #model apis
     def get_content()
       #if content stored in db then return that
@@ -18,6 +20,12 @@ module XYZ
       impl_obj = file_obj[:implementation]
       Repo.update_file_content(self,content,{:implementation => impl_obj})
       impl_obj.set_to_indicate_updated()
+
+      #special processing if this the meta file
+      if r8_meta = R8MetaFile.isa?(file_obj,content)
+        r8_meta.process()
+      end
+
       impl_obj.create_pending_change_item(self)
     end
 
@@ -67,15 +75,6 @@ module XYZ
         set_hierrachical_file_struct!(children,file_asset,path[1..path.size-1])
       end
     end
-
-
-#stubs for methods
-=begin
-    def rename(new_name)
-    end
-    def delete()
-    end
-=end
   end
 end
 

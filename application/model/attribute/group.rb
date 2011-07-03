@@ -1,4 +1,39 @@
 module XYZ
+  module AttributeGroupClassMixin
+    #marked with "!" because augments info
+    def ret_grouped_attributes!(augmented_attr_list,opts={})
+      prune_set = opts[:types_to_keep]
+      add_missing_info_for_group_attrs!(augmented_attr_list)
+
+      ret = Array.new
+      augmented_attr_list.each do |attr|
+        type = attr.attribute_value_type()
+        ret << attr.merge(:attr_val_type => type) if prune_set.nil? or type.type_of?(*prune_set)
+      end
+      ret
+    end
+    def augmented_attribute_list_from_task(task)
+      component_actions = task.component_actions
+      ret = Array.new 
+      component_actions.each do |action|
+        AttributeComplexType.flatten_attribute_list(action[:attributes],:flatten_nil_value=>true).each do |attr|
+          ret << attr.merge(:component => action[:component], :node => action[:node])
+        end
+      end
+      ret
+    end
+   private
+    #adds port type info and required
+    def add_missing_info_for_group_attrs!(augmented_attr_list)
+      dependency_analysis(augmented_attr_list) do |attr_in,link,attr_out|
+        attr_in.merge!(:port_type => "input")
+        if attr_out and not attr_out[:dynamic]
+          attr_out.merge!(:required => true)
+        end
+      end
+    end
+  end
+
   class AttrValType
     def self.create(type,attr)
       klass = AttrValTypeMap[type.to_sym]
@@ -54,51 +89,6 @@ module XYZ
        end
       raise Error.new("Cannot detect type of attribute") unless type
       AttrValType.create(type,self)
-    end
-  end
-  module AttributeGroupClassMixin
-    #marked with "!" because augments info
-    def ret_grouped_attributes!(augmented_attr_list,opts={})
-      prune_set = opts[:types_to_keep]
-      add_missing_info_for_group_attrs!(augmented_attr_list)
-
-      ret = Array.new
-      augmented_attr_list.each do |attr|
-        type = attr.attribute_value_type()
-        ret << attr.merge(:attr_val_type => type) if prune_set.nil? or type.type_of?(*prune_set)
-      end
-      ret
-    end
-    def augmented_attribute_list_from_task(task)
-      component_actions = task.component_actions
-      ret = Array.new 
-      component_actions.each do |action|
-        AttributeComplexType.flatten_attribute_list(action[:attributes],:flatten_nil_value=>true).each do |attr|
-          ret << attr.merge(:component => action[:component], :node => action[:node])
-        end
-      end
-      ret
-    end
-   private
-    def add_missing_info_for_group_attrs!(augmented_attr_list)
-      dependency_analysis(augmented_attr_list) do |match|
-        add_missing_info_aux!(augmented_attr_list,match)
-      end
-    end
-
-    #adds port type info and required
-    def add_missing_info_aux!(augmented_attr_list,match)
-      match[:attr].merge!(:port_type => "input")
-      link = match[:link]
-      output_id =  link[:output_id] 
-      matching_attr_out = augmented_attr_list.find{|attr| attr[:id] == output_id}
-      next unless matching_attr_out
-
-      debug_flag_unexpected_error(link)
-
-      unless matching_attr_out[:dynamic]
-        matching_attr_out.merge!(:required => true)
-      end
     end
   end
 end

@@ -18,7 +18,14 @@ module XYZ
         link = find_matching_link(attr,links_to_trace)
         matches << {:link => link, :attr => attr} if link
       end
-      matches.each{|match|block.call(match)}
+      matches.each do |match|
+        attr_in = match[:attr]
+        link = match[:link]
+        output_id =  link[:output_id] 
+        attr_out = augmented_attr_list.find{|attr| attr[:id] == output_id}
+        debug_flag_unexpected_error(link) if attr_out
+        block.call(attr_in,link,attr_out)
+      end
     end
 
    private

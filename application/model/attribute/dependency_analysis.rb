@@ -42,9 +42,10 @@ module XYZ
           end
         end
       end
+
       #TODO: remove these debug statements
-      l = lambda{|a| [a[:display_name],a[:node][:display_name],a[:item_path]]}
-      pp [link[:function],link[:index_map],l.call(attr_in), ret && l.call(ret)]
+      ##l = lambda{|a| [a[:display_name],a[:node][:display_name],a[:item_path]]}
+      ##pp [link[:function],link[:index_map],l.call(attr_in), ret && l.call(ret)]
 
       ret
     end

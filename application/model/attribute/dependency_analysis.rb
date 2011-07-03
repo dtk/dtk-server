@@ -21,21 +21,32 @@ module XYZ
       matches.each do |match|
         attr_in = match[:attr]
         link = match[:link]
-        output_id =  link[:output_id] 
-        attr_out = augmented_attr_list.find{|attr| attr[:id] == output_id}
-        debug_flag_unexpected_error(link) if attr_out
+        attr_out = find_matching_output_attr(augmented_attr_list,attr_in,link)
         block.call(attr_in,link,attr_out)
       end
     end
 
    private
-    def debug_flag_unexpected_error(link)
-      #TODO: handle if warning fires
-      unless ["eq","select_one"].include?(link[:function]) or
-          (link[:function] == "eq_indexed" and
-           ((link[:index_map]||[]).first||{})[:output] == [])
-        Log.error("can be error in treatment of matching output to link")
+    def find_matching_output_attr(augmented_attr_list,attr_in,link)
+      ret = nil
+      output_id =  link[:output_id] 
+      ret = augmented_attr_list.find do |attr|
+        if attr[:id] == output_id
+          case link[:function]
+           when "eq" then true
+           when "select_one" then 
+            out_item_path = attr[:item_path]
+            out_item_path and (attr_in[:item_path] == out_item_path[1,out_item_path.size-1])
+          else
+           Log.error("not teated when link function is #{link[:function]}")
+          end
+        end
       end
+      #TODO: remove these debug statements
+      l = lambda{|a| [a[:display_name],a[:node][:display_name],a[:item_path]]}
+      pp [link[:function],link[:index_map],l.call(attr_in), ret && l.call(ret)]
+
+      ret
     end
 
     def find_matching_link(attr,links)

@@ -8,8 +8,13 @@ class MyRemoteParticipant
  
   def consume(workitem)
     pp "enterring #{workitem.params["label"]}"
-    workitem.fields["label"] = workitem.params["label"]
-    sleep 2
+    label = workitem.params["label"]
+    workitem.fields["label"] = label
+    if label == 3
+      sleep 5
+    else
+      sleep 2
+    end
     pp "leaving #{workitem.params["label"]}"
    reply_to_engine(workitem)
   end
@@ -30,14 +35,17 @@ end
 pdef = Ruote.process_definition :name => 'test' do
   sequence do
     participant :start
-    concurrence :merge_type => :mix do
-      sequence do
-        participant :remote, :label => 1
+    participant :remote, :label => 1
+    concurrence :merge_type => :stack do
         participant :remote, :label => 2
-      end
-      sequence do
-        listen :to => 'remote', :where => '${label} == 2', :upon => "reply"
         participant :remote, :label => 3
+        participant :remote, :label => 4
+      sequence do
+        concurrence do
+          listen :to => 'remote', :where => '${label} == 3', :upon => "reply"
+          listen :to => 'remote', :where => '${label} == 2', :upon => "reply"
+        end
+        participant :remote, :label => 5
       end
     end
     participant :report

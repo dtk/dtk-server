@@ -7,7 +7,7 @@ module XYZ
         task = task
         top_task_idh = task.id_handle()
         name = "process-#{count.to_s}"
-        context = RuoteGenerateProcessDefsContext.new(guards,top_task_idh)
+        context = RuoteGenerateProcessDefsContext.create_top(guards,top_task_idh)
         tasks = sequence(compute_process_body(task,context),
                           participant(:end_of_task))
         #for testing
@@ -24,8 +24,12 @@ module XYZ
           post_part_opts = {:task_type => "post", :task_end => true}
           post_part = participant_executable_action(:detect_created_node_is_ready,task,context, post_part_opts)
           sequence(main,post_part)
+        elsif action.kind_of?(TaskAction::ConfigNode)
+          ##x = context.debug_pp_form()
+         ## pp x
         end
       end
+
       #TODO: make this data driven like .. TaskAction::CreateNode => [:execute_on_node,:detect_created_node_is_ready]
 
       ####synactic processing
@@ -40,11 +44,17 @@ module XYZ
           Log.error("do not have rules to process task")
         end
       end
+
       def compute_process_body_sequential(subtasks,context)
-        sequence(subtasks.map{|t|compute_process_body(t,context)})
+        sts = subtasks.map do |t|
+          new_context = context.new_sequential_context(t)
+          compute_process_body(t,new_context)
+        end
+        sequence(sts)
       end
       def compute_process_body_concurrent(subtasks,context)
-        concurrence(subtasks.map{|t|compute_process_body(t,context)})
+        new_context = context.new_concurrent_context(subtasks)
+        concurrence(subtasks.map{|t|compute_process_body(t,new_context)})
       end
 
       def compute_process_executable_action(task,context)
@@ -85,13 +95,44 @@ module XYZ
           h.merge((k.kind_of?(Symbol) ? k.to_s : k) => (v.kind_of?(Symbol) ? v.to_s : v))
         end
       end
-      class RuoteGenerateProcessDefsContext
-        def initialize(guards,top_task_idh)
-          @guards = guards
-          @top_task_idh = top_task_idh
+    end
+      class RuoteGenerateProcessDefsContext < HashObject
+        def self.create_top(guards,top_task_idh)
+          new(:guards => guards, :top_task_idh => top_task_idh)
         end
-        attr_reader :top_task_idh
+        def top_task_idh()
+          self[:top_task_idh]
+        end
+        def new_concurrent_context(task_list)
+          if self[:peer_tasks]
+            Log.error("nested concurrent under concurrent context not implemented")
+          end
+          self.class.new(self).merge(:peer_tasks => task_list) 
+        end
+        def new_sequential_context(task)
+          if self[:peer_tasks]
+            Log.error("nested sequential under concurrent context not implemented")
+          end
+          self
+        end
+        
+        def debug_pp_form()
+          if peer_tasks = self[:peer_tasks]
+            peer_tasks = peer_tasks.map do |t|
+              {
+                :task_id => t[:task_id],
+                :node => (t[:executable_action]||{})[:node],
+                :type => t[:executable_action] && t[:executable_action].class
+              }
+            end
+          end
+          {
+            :top_task_idh => self[:top_task_idh],
+            :guards => self[:guards],
+            :peer_tasks => peer_tasks
+          }
+        end
       end
     end
-  end
 end
+

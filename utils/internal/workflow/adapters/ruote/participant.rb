@@ -92,7 +92,6 @@ module XYZ
           #LockforDebug.synchronize{pp [:in_consume, Thread.current, Thread.list];STDOUT.flush}
           params = get_params(workitem) 
           task_id,action,workflow,task = %w{task_id action workflow task}.map{|k|params[k]}
-
           execution_context(task,params["top_task_idh"]) do
             if action.long_running?
               callbacks = {

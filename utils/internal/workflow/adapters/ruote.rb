@@ -74,12 +74,12 @@ module XYZ
 
       attr_reader :listener
      private 
-      def initialize(task)
-        super(task)
+      def initialize(task,guards)
+        super(task,guards)
         @process_def = nil
       end
       def process_def()
-        @process_def ||= compute_process_def(task)
+        @process_def ||= compute_process_def(task,guards)
         @process_def #TODO: just for testing so can checkpoint and see what it looks like
       end
 

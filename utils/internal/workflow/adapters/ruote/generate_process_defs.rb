@@ -2,7 +2,7 @@ module XYZ
   module WorkflowAdapter
     module RuoteGenerateProcessDefs
       @@count = 0
-      def compute_process_def(task)
+      def compute_process_def(task,guards)
         count = @@count += 1 #TODO: see if we need to keep generating new ones or whether we can (delete) and reuse
         task = task
         top_task_idh = task.id_handle()

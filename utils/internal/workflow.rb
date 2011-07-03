@@ -22,8 +22,8 @@ module XYZ
     end
     ######
 
-    def self.create(task)
-      Adapter.new(task)
+    def self.create(task,guards)
+      Adapter.new(task,guards)
     end
 
     def update_task(hash)
@@ -37,7 +37,7 @@ module XYZ
     end
 
    private
-
+    attr_reader :guards
     def self.process_executable_action(task,executable_action,top_task_idh)
       CommandAndControl.execute_task_action(executable_action,task,top_task_idh)
     end
@@ -53,8 +53,9 @@ module XYZ
     end
     Adapter = klass
 
-    def initialize(task)
+    def initialize(task,guards)
       @task = task
+      @guards = guards
     end
   end
 end

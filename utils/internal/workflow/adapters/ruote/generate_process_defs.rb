@@ -93,7 +93,7 @@ module XYZ
       def guard(task)
         participant = participants_for_tasks[task[:executable_action].class]
         raise Error.new("cannot find participant for task") unless participant
-        ["listen",{"to"=>participant.to_s, "upon"=>"reply", "where"=>"${guard_id} == #{task[:task_id].to_s}"},[]]
+        ["listen",{"to"=>participant.to_s, "upon"=>"reply", "where"=>"${guard_id} == #{task.id().to_s}"},[]]
       end
 
       def participants_for_tasks()
@@ -145,13 +145,13 @@ module XYZ
           #see if any of the guards are peers
           ndx_ret = Hash.new
           peer_tasks.each do |t|
-            task_id = t[:task_id]
+            task_id = t.id()
             next if ndx_ret[task_id]
             if ea = t[:executable_action]
               task_node_id = ea[:node][:id]
               task_type = ea.class
               if matching_guards.find{|g|g[:task_type] == task_type and g[:node][:id] == task_node_id}
-                ndx_ret[t[:task_id]] = t
+                ndx_ret[task_id] = t
               end
             end
           end

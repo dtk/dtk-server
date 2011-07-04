@@ -33,7 +33,7 @@ module XYZ
         end
 
          private
-        #if use must cooridntae with concurrence merge type
+        #if use must coordinate with concurrence merge type
         def set_result_succeeded__stack(workitem,new_result,task,action)
           workitem.fields["result"] = {:action_completed => action.type}
         end
@@ -92,6 +92,7 @@ module XYZ
           #LockforDebug.synchronize{pp [:in_consume, Thread.current, Thread.list];STDOUT.flush}
           params = get_params(workitem) 
           task_id,action,workflow,task = %w{task_id action workflow task}.map{|k|params[k]}
+          pp ["executing config on node", action[:node]]
           workitem.fields["guard_id"] = task_id # ${guard_id} is referenced if guard for execution of this
           execution_context(task,params["top_task_idh"]) do
             if action.long_running?

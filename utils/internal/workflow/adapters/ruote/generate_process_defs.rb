@@ -18,15 +18,19 @@ module XYZ
       private
 
       ####semantic processing
-      def decomposition(action,task,context)
+      def decomposition(task,context)
+        action = task[:executable_action]
         if action.kind_of?(TaskAction::CreateNode)
           main = participant_executable_action(:execute_on_node,task,context)
           post_part_opts = {:task_type => "post", :task_end => true}
           post_part = participant_executable_action(:detect_created_node_is_ready,task,context, post_part_opts)
           sequence(main,post_part)
         elsif action.kind_of?(TaskAction::ConfigNode)
-          ##x = context.debug_pp_form()
-         ## pp x
+          if guard_tasks = context.get_guard_tasks(action)
+            guards = ret_guards(guard_tasks)
+            main = participant_executable_action(:execute_on_node,task,context)
+            sequence(guards,main)
+          end
         end
       end
 
@@ -58,8 +62,7 @@ module XYZ
       end
 
       def compute_process_executable_action(task,context)
-        action = task[:executable_action]
-        decomposition(action,task,context) || participant_executable_action(:execute_on_node,task,context, :task_end => true)
+        decomposition(task,context) || participant_executable_action(:execute_on_node,task,context, :task_end => true)
       end
       def participant_executable_action(name,task,context,args={})
         raise Error.new("unregistered participant name (#{name})") unless Ruote::ParticipantList.include?(name) 
@@ -74,9 +77,32 @@ module XYZ
         participant(name,{:task_id => task_id,:top_task_idh => context.top_task_idh}.merge(args))
       end
 
+      def ret_guards(guard_tasks)
+        if guard_tasks.size == 1
+          guard(guard_tasks.first)
+        else
+          concurrence(*guard_tasks.map{|task|guard(task)})
+        end
+      end
+
       #formatting fns
       def participant(name,opts={})
         ["participant",to_str_form({"ref" => name}.merge(opts)),[]]
+      end
+
+      def guard(task)
+        participant = participants_for_tasks[task[:executable_action].class]
+        raise Error.new("cannot find participant for task") unless participant
+        ["listen",{"to"=>participant, "upon"=>"reply", "where"=>"${guard_id} == #{task[:task_id].to_s}"},[]]
+      end
+
+      def participants_for_tasks()
+        @participants_for_tasks ||= {
+          #TODO: need condition that signifies detect_created_node_is_ready succeeded
+          TaskAction::CreateNode => :detect_created_node_is_ready,
+          #TODO: need condition that signifies that execute node returned
+          TaskAction::ConfigNode => :execute_on_node
+        }
       end
 
       def sequence(*subtask_array_x)
@@ -103,6 +129,36 @@ module XYZ
         def top_task_idh()
           self[:top_task_idh]
         end
+
+        def get_guard_tasks(action)
+          ret = nil
+          #short cuircuit; must be multiple peers in order there to be guard tasks
+          return ret if peer_tasks.size < 2
+          node_id = action[:node][:id]
+          task_type = action.class
+          #find guards for this action
+          matching_guards = guards.select do |g|
+            guarded = g[:guarded]
+            guarded[:task_type] == task_type and guarded[:node][:id] == node_id
+          end.map{|g|g[:guard]}
+          return nil if matching_guards.empty?
+          
+          #see if any of the guards are peers
+          ndx_ret = Hash.new
+          peer_tasks.each do |t|
+            task_id = t[:task_id]
+            next if ndx_ret[task_id]
+            if ea = t[:executable_action]
+              task_node_id = ea[:node][:id]
+              task_type = ea.class
+              if matching_guards.find{|g|g[:task_type] == task_type and g[:node][:id] == task_node_id}
+                ndx_ret[t[:task_id]] = t
+              end
+            end
+          end
+          ndx_ret.empty? ? nil : ndx_ret.values
+        end
+
         def new_concurrent_context(task_list)
           if self[:peer_tasks]
             Log.error("nested concurrent under concurrent context not implemented")
@@ -115,22 +171,12 @@ module XYZ
           end
           self
         end
-        
-        def debug_pp_form()
-          if peer_tasks = self[:peer_tasks]
-            peer_tasks = peer_tasks.map do |t|
-              {
-                :task_id => t[:task_id],
-                :node => (t[:executable_action]||{})[:node],
-                :type => t[:executable_action] && t[:executable_action].class
-              }
-            end
-          end
-          {
-            :top_task_idh => self[:top_task_idh],
-            :guards => self[:guards],
-            :peer_tasks => peer_tasks
-          }
+       private
+        def guards()
+          self[:guards]||[]
+        end
+        def peer_tasks()
+          self[:peer_tasks] || []
         end
       end
     end

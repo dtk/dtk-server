@@ -23,15 +23,15 @@ module XYZ
         return nil
       end
       guarded = {
-        :task_type => :config_node
+        :task_type => TaskAction::ConfigNode
       }.merge(attr_info(guarded_attr))
 
       #need to case on whether teh dynamic attribute set by config_node or create_node
       if guarded_attr[:semantic_type_summary] == "sap_ref__l4" and (guarded_attr[:item_path]||[]).include?(:host_address)
-        task_type = :create_node
+        task_type = TaskAction::CreateNode
         attr_info_keys = [:node]
       else
-        task_type = :config_node
+        task_type = TaskAction::ConfigNode
         attr_info_keys = nil
       end
 

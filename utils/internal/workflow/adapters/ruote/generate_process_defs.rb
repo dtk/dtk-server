@@ -93,14 +93,13 @@ module XYZ
       def guard(task)
         participant = participants_for_tasks[task[:executable_action].class]
         raise Error.new("cannot find participant for task") unless participant
-        ["listen",{"to"=>participant, "upon"=>"reply", "where"=>"${guard_id} == #{task[:task_id].to_s}"},[]]
+        ["listen",{"to"=>participant.to_s, "upon"=>"reply", "where"=>"${guard_id} == #{task[:task_id].to_s}"},[]]
       end
 
       def participants_for_tasks()
         @participants_for_tasks ||= {
           #TODO: need condition that signifies detect_created_node_is_ready succeeded
           TaskAction::CreateNode => :detect_created_node_is_ready,
-          #TODO: need condition that signifies that execute node returned
           TaskAction::ConfigNode => :execute_on_node
         }
       end

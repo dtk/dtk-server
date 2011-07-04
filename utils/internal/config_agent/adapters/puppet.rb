@@ -12,7 +12,7 @@ module XYZ
       def components_with_attributes(config_node)
         config_node[:component_actions].map do |component_action|
           if cmp = component(component_action)
-            cmp.merge("attributes" => ret_attributes(component_action))
+            cmp.merge(ret_attributes(component_action))
           end
         end.compact
       end
@@ -27,18 +27,27 @@ module XYZ
           end
         end
       end
+      #returns both attributes to set on node and dynmic attributes that get set by the node
       def ret_attributes(action,opts={})
-        qualified_ret = Hash.new
+        #labeled as qualified attributes because first item is the module
+        qual_attrs = Hash.new
+        dynamic_attrs = Array.new
         (action[:attributes]||[]).each do |attr|
-          var_name_path = (attr[:external_ref]||{})[:path]
-          if val = attr[:attribute_value]
-            if var_name_path
-              array_form_path = to_array_form(var_name_path,opts)
-              add_attribute!(qualified_ret,array_form_path,val)
+          if var_name_path = (attr[:external_ref]||{})[:path]
+            array_form_path = to_array_form(var_name_path,opts)
+            if attr[:dynamic]
+              #TODO: ignoring ones set already; this implicitly captures assumption that dynamic attribute
+              #once set cnnot change
+              unless attr[:attribute_value]
+                #TODO: making assumption that dynamic attribute as array_form_path of form [<module>,<attrib_name>]
+                dynamic_attrs << array_form_path[1]
+              end
+            elsif val = attr[:attribute_value]
+              add_attribute!(qual_attrs,array_form_path,val)
               #info that is used to set the name param for the resource
               if rsc_name_path = attr[:external_ref][:name]
                 if rsc_name_val = nested_value(val,rsc_name_path)
-                  add_attribute!(qualified_ret,[array_form_path[0],"name"],rsc_name_val)
+                  add_attribute!(qual_attrs,[array_form_path[0],"name"],rsc_name_val)
                 end
               end
             end
@@ -46,7 +55,10 @@ module XYZ
         end
         #TODO: this is based on chef convention of prefacing all attributes with implementation name
         #consider of using refs such as node[:foo] rather than node[:impl][:foo]
-        qualified_ret.values.first || {}
+        ret = Hash.new
+        ret.merge!("attributes" => qual_attrs.values.first) unless qual_attrs.empty?
+        ret.merge!("dynamic_attributes" => dynamic_attrs) unless dynamic_attrs.empty?
+        ret
       end
 
       #TDOO: may want to better unify how name is passed heer with 'param' and otehr way by setting node path with name last element]

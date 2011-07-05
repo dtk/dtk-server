@@ -631,7 +631,7 @@ module XYZ
     def get_constraints!(opts={})
       #TODO: may see if precalculating more is more efficient
       cmp_cols = [:only_one_per_node,:component_type,:extended_base,:implementation_id]
-      rows = get_objects_from_sp_hash(:cols => [:dependencies] + cmp_cols)
+      rows = get_objs(:cols => [:dependencies] + cmp_cols)
       cmp_info = rows.first #just picking first since component info same for all rows
       cmp_cols.each{|col|self[col] = cmp_info[col]} if opts[:update_object]
 
@@ -641,6 +641,33 @@ module XYZ
 
       return Constraints.new() if constraints.empty?
       Constraints.new(:and,constraints)
+    end
+
+    #this provides for each component, what other components it depends on
+    def self.get_component_type_and_dependencies(id_handles)
+      ret = id_handles.inject({}) do |h,idh|
+        h.merge(idh.get_id() => {:component_dependencies => Array.new})
+      end
+
+      sample_idh = id_handles.first
+      sp_hash = {
+        :cols => [:id,:dependencies, :extended_base, :component_type],
+        :filter => [:oneof, :id, ret.keys]
+      }
+      rows = get_objs(sample_idh.createMH,sp_hash)
+      rows.each do |r|
+        id = r[:id]
+        ret[id][:component_type] = r[:component_type]
+        if r[:extended_base]
+          ret[id][:component_dependencies] << r[:extended_base]
+        else
+          #process dependencies
+          #TODO: hack until we haev macros which will stamp the dependency to make this easier to detect
+          #looking for signature where dependency does not have negate and has
+          #:search_pattern=>{:filter=>[:and, [:eq, :component_type, <component_type>]
+        end
+      end
+      ret
     end
 
     def get_containing_node_id()

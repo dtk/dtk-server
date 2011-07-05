@@ -203,10 +203,14 @@ module XYZ
 
     class ComponentAction < HashObject
       def self.order_and_group_by_component(state_change_list)
-        #TODO: stub for ordering that just takes order in which component state changes made
-        component_ids = state_change_list.map{|a|a[:component][:id]}.uniq
-        component_ids.map do |component_id| 
-          self.create(state_change_list.reject{|a|not a[:component][:id] == component_id}) 
+        ndx_cmp_idhs = Hash.new
+        state_change_list.each do |sc|
+          cmp = sc[:component]
+          ndx_cmp_idhs[cmp[:id]] ||= cmp.id_handle() 
+        end
+        cmp_deps = Component.get_component_type_and_dependencies(ndx_cmp_idhs.values)
+        generate_component_order(cmp_deps).map do |(component_id,deps)|
+          create(state_change_list.select{|a|a[:component][:id] == component_id},deps) 
         end
       end
 
@@ -215,7 +219,17 @@ module XYZ
       end
 
       private
-      def self.create(scs_same_cmp)
+      #returns array of form [component_id,deps]
+      def self.generate_component_order(cmp_deps,&block)
+        #TODO: assumption that only a singleton component can be a dependency -> match on component_type sufficient
+        #TODO: stub
+        deps = nil
+        cmp_deps.keys.map do |cmp_id|
+          [cmp_id,cmp_deps[cmp_id][:component_dependencies]]
+        end
+      end
+
+      def self.create(scs_same_cmp,deps)
         state_change = scs_same_cmp.first
         #TODO: may deprecate need for ||[sc[:id]
         pointer_ids = scs_same_cmp.map{|sc|sc[:linked_ids]||[sc[:id]]}.flatten
@@ -225,7 +239,9 @@ module XYZ
           :component => state_change[:component],
           :on_node_config_agent_type => state_change.on_node_config_agent_type(),
         }
-        #TODO: can get more sophsiticated and handle case where some components installed and otehr are incremental
+        hash.merge!(:component_dependencies => deps) if deps
+
+        #TODO: can get more sophsiticated and handle case where some components installed and other are incremental
         incremental_change = !scs_same_cmp.find{|sc|not sc[:type] == "setting"}
         if incremental_change
           hash.merge!(:changed_attribute_ids => scs_same_cmp.map{|sc|sc[:attribute_id]}) 

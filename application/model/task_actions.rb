@@ -222,9 +222,23 @@ module XYZ
       #returns array of form [component_id,deps]
       def self.generate_component_order(cmp_deps,&block)
         #TODO: assumption that only a singleton component can be a dependency -> match on component_type sufficient
-        #TODO: stub
-        deps = nil
-        cmp_deps.keys.map do |cmp_id|
+        #first build index from component_type to id; if missing any component types than raise constraint violation
+        cmp_type_to_id = Hash.new
+        cmp_deps.each do |id,info|
+          info[:component_dependencies].each do |ct|
+            cmp_type_to_id[ct] ||= (cmp_deps.find{|id_x,info_x|info_x[:component_type] == ct}||[]).first
+          end
+        end
+        missing_comp_types = cmp_type_to_id.map{|ct,id|ct if id.nil?}.compact
+        unless missing_comp_types.empty?
+          #TODO: stub to just use string as violation info
+          raise ErrorConstraintViolations.new("missing required components: (#{missing_comp_types.join(",")}")
+        end
+        
+        tsort_hash = TSortHash.new(cmp_deps.inject({}){|h,(id,info)|h.merge(id => info[:component_dependencies].map{|ct|cmp_type_to_id[ct]})})
+        ordered_cmp_ids = tsort_hash.tsort
+
+        ordered_cmp_ids.map do |cmp_id|
           [cmp_id,cmp_deps[cmp_id][:component_dependencies]]
         end
       end

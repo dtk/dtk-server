@@ -104,6 +104,20 @@ module XYZ
     end
   end
 
+  require 'tsort'
+  class TSortHash < Hash
+    #defining tsort on this
+    include TSort
+    def initialize(initial_val)
+      super()
+      replace(initial_val)
+    end
+    alias tsort_each_node each_key
+    def tsort_each_child(node, &block)
+      fetch(node).each(&block)
+    end
+  end
+
   #Used as input to data source normalizer
   class DataSourceUpdateHash < HashObject  
     #for efficiency not initializing @completeness_info = nil

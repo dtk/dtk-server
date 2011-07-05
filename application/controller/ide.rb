@@ -67,6 +67,91 @@ module XYZ
 #      return {:content=>''}
     end
 
+    def new_project()
+      tpl = R8Tpl::TemplateR8.new("ide/new_project",user_context())
+      tpl.assign(:_app,app_common())
+#      tpl.assign(:required_attr_list,required_attr_list)
+
+      targets = Array.new
+      targets = [{
+        :id => '234sadf',
+        :name => 'AWS 1 - East Region'
+      },
+      {
+        :id => '234sadf',
+        :name => 'AWS 1 - West Region'
+      },
+      {
+        :id => '234sadf',
+        :name => 'AWS 1 - EU West Region'
+      },
+      {
+        :id => '234sadf',
+        :name => 'AWS 1 - Asia (Singapore) Region'
+      },
+      {
+        :id => '234sadf',
+        :name => 'AWS 1 - Asia (Japan) Region'
+      }
+      ]
+      tpl.assign(:targets,targets)
+
+      panel_id = request.params['panel_id']
+
+      include_js('plugins/create_project.tool')
+
+      run_javascript("R8.CreateProjectTool.init();")
+#      run_javascript("R8.IDE.initCreateProject();")
+#      run_javascript("R8.CommitTool2.renderTree(#{commit_tree_json},'edit','change-list-tab-content');")
+
+      return {
+        :content=> tpl.render(),
+        :panel=>panel_id
+      }
+    end
+
+    def new_target()
+      tpl = R8Tpl::TemplateR8.new("ide/new_target",user_context())
+      tpl.assign(:_app,app_common())
+#      tpl.assign(:required_attr_list,required_attr_list)
+
+      targets = Array.new
+      targets = [{
+        :id => '234sadf',
+        :name => 'AWS 1 - East Region'
+      },
+      {
+        :id => '234sadf',
+        :name => 'AWS 1 - West Region'
+      },
+      {
+        :id => '234sadf',
+        :name => 'AWS 1 - EU West Region'
+      },
+      {
+        :id => '234sadf',
+        :name => 'AWS 1 - Asia (Singapore) Region'
+      },
+      {
+        :id => '234sadf',
+        :name => 'AWS 1 - Asia (Japan) Region'
+      }
+      ]
+      tpl.assign(:targets,targets)
+
+      panel_id = request.params['panel_id']
+
+      include_js('plugins/create_target.tool')
+
+      run_javascript("R8.CreateTargetTool.init();")
+#      run_javascript("R8.IDE.initCreateProject();")
+#      run_javascript("R8.CommitTool2.renderTree(#{commit_tree_json},'edit','change-list-tab-content');")
+
+      return {
+        :content=> tpl.render(),
+        :panel=>panel_id
+      }
+    end
 
     def test_tree()
 #      tpl = R8Tpl::TemplateR8.new("ide/test_tree",user_context())

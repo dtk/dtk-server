@@ -287,6 +287,7 @@ console.log(taskDef);
 
 				this.cleanup();
 				R8.IDE.destroyShim();
+				R8.IDE.fire('commit',{'targetId':currentView.get('id')});
 			},
 
 			setupTreeDD: function(rootListNodeId) {

@@ -53,6 +53,7 @@ if(!R8.Topbar2) {
 							};
 						R8.Ctrl.call(route,params);
 					}},
+/*
 					{id:'add-environments',i18n:'Add Target',contentLoader:function(contentNode){
 						var route = 'datacenter/wspace_edit',
 							params = {
@@ -62,6 +63,7 @@ if(!R8.Topbar2) {
 							};
 						R8.Ctrl.call(route,params);
 					}},
+*/
 					{id:'commit',i18n:'Commit',contentLoader:function(contentNode){
 //						var route = 'workspace/commit/'+R8.Workspace.get('context_id'),
 
@@ -94,6 +96,24 @@ if(!R8.Topbar2) {
 */					{id:'create-assembly',i18n:'Create Assembly',contentLoader:function(contentNode){
 //						var route = 'workspace/create_assembly/'+R8.Workspace.get('context_id'),
 						var route = 'workspace/create_assembly_ide',
+							params = {
+								'cfg':{
+									'data':'panel_id='+contentNode.get('id')
+								}
+							};
+						R8.Ctrl.call(route,params);
+					}},
+					{id:'create-project',i18n:'Create Project',contentLoader:function(contentNode){
+						var route = 'ide/new_project',
+							params = {
+								'cfg':{
+									'data':'panel_id='+contentNode.get('id')
+								}
+							};
+						R8.Ctrl.call(route,params);
+					}},
+					{id:'create-target',i18n:'Create Target',contentLoader:function(contentNode){
+						var route = 'ide/new_target',
 							params = {
 								'cfg':{
 									'data':'panel_id='+contentNode.get('id')

@@ -227,6 +227,9 @@ if (!R8.IDE.editorPanel) {
 					case "target":
 						_views[view.id] = new R8.IDE.View.target(view);
 						break;
+					case "component":
+						_views[view.id] = new R8.IDE.View.component(view);
+						break;
 				}
 
 				var viewContent = _views[view.id].render();

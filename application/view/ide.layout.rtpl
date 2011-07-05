@@ -138,6 +138,7 @@ YUI_config = {
 <script src="{%=_app[:base_js_uri]%}/external/jquery.js"></script>
 <script src="{%=_app[:base_js_uri]%}/external/jquery.cookie.js"></script>
 <script src="{%=_app[:base_js_uri]%}/external/jstree/jquery.jstree.js"></script>
+<script src="{%=_app[:base_js_uri]%}/external/jstree/_lib/jquery.hotkeys.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/external/yui/build/yui/yui.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/external/yui/build/loader/loader.js"></script>
 

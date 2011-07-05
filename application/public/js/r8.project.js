@@ -67,8 +67,22 @@ if (!R8.Project) {
 */
 
 				$('#project-tree-'+_def.id).jstree({
+//					'plugins': ["ui","themes","html_data","hotkeys","crrm","contextmenu"],
+					'plugins': ["themes","json_data","html_data","ui","crrm","cookies","search","hotkeys","contextmenu"],
+/*
+					"contextmenu":{
+						"items": {
+							"rename":{
+								"label": "Rename",
+								"action": function(obj) {
+									this.rename(obj);
+								}
+								
+							}
+						}
+					},
+*/
 					'core': {'animation':0},
-					'plugins': ["themes","html_data"],
 					'themes': {
 						'theme': "r8",
 						'dots': false
@@ -95,6 +109,13 @@ if (!R8.Project) {
 						case "file":
 							//this.loadFileInEditor(leafObjectId);
 							R8.IDE.openFile({
+								'id': leafObjectId,
+								'name': leafLabel,
+								'type': 'file'
+							});
+							break;
+						case "component":
+							R8.IDE.openComponent({
 								'id': leafObjectId,
 								'name': leafLabel,
 								'type': 'file'
@@ -138,6 +159,7 @@ if (!R8.Project) {
 				return ulNode2;
 			},
 			renderImplementationTree: function(componentTemplate) {
+/*
 				var componentLeaf = {
 					'node_id': 'component-template-'+componentTemplate.id,
 					'type': 'application',
@@ -145,7 +167,7 @@ if (!R8.Project) {
 					'name': componentTemplate.display_name
 				};
 				var leafNode = R8.Utils.Y.Node.create(R8.Rtpl['project_tree_leaf']({'leaf_item': componentLeaf}));
-				var ulNode = R8.Utils.Y.Node.create('<ul></ul>');
+*/				var ulNode = R8.Utils.Y.Node.create('<ul></ul>');
 
 				for(var i in componentTemplate.implementations) {
 					var impDef = componentTemplate.implementations[i];
@@ -153,21 +175,25 @@ if (!R8.Project) {
 						'node_id': 'implementation-'+impDef.id,
 						'type': impDef.type,
 						'basic_type': impDef.type,
-						'name': 'v'+impDef.version
+						'name': componentTemplate.display_name+'(v'+impDef.version+')'
 					};
 					var impNode = R8.Utils.Y.Node.create(R8.Rtpl['project_tree_leaf']({'leaf_item': implementationLeaf}));
 					impNode.append(this.renderFileTree(impDef.file_assets));
 					ulNode.append(impNode);
 				}
-				leafNode.append(ulNode);
+//				leafNode.append(ulNode);
 
-				return leafNode;
+//				return leafNode;
+				return ulNode;
+
 //				var ulNode2 = R8.Utils.Y.Node.create('<ul></ul>');
 //				ulNode2.append(leafNode);
 
 //				return ulNode2;
 			},
 			renderFileTree: function(file_assets) {
+				file_assets.sort(this.sortAssetTree);
+
 				var ulNode = R8.Utils.Y.Node.create('<ul></ul>');
 				for(var f in file_assets) {
 					switch(file_assets[f].model_name) {
@@ -199,6 +225,17 @@ if (!R8.Project) {
 					}
 				}
 				return ulNode;
+			},
+			sortAssetTree: function(itemA, itemB) {
+				if(itemA.model_name == 'directory_asset' && itemB.model_name == 'directory_asset') {
+					return itemA.display_name > itemB.display_name ? 1 : -1;
+				} else if(itemA.model_name == 'directory_asset' && itemB.model_name != 'directory_asset') {
+					return -1;
+				} else if(itemA.model_name != 'directory_asset' && itemB.model_name == 'directory_asset') {
+					return 1;
+				} else if(itemA.model_name == 'file_asset' && itemB.model_name == 'file_asset') {
+					return itemA.file_name > itemB.file_name ? 1 : -1;
+				}
 			}
 		}
 	};

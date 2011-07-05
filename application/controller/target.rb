@@ -139,5 +139,12 @@ module XYZ
       return {:data=>view_space}
     end
 
+    def create()
+pp '++++++++++++++++++++++++++++++++++++++'
+pp request.params
+
+      return {}
+    end
+
   end
 end

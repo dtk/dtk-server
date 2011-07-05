@@ -97,6 +97,10 @@ if (!R8.IDE) {
 				'component-edit':'1'
 			},
 */
+//EVENT HANDLING
+			_eventCallbacks = {},
+
+//END EVENT HANDLING
 			_events = {};
 
 			var layoutDef = {
@@ -291,12 +295,24 @@ if (!R8.IDE) {
 				}
 			},
 			on: function(eventName,callback,scope) {
-				
+				if(typeof(_eventCallbacks[eventName]) == 'undefined') _eventCallbacks[eventName] = [];
+
+				_eventCallbacks[eventName].push({
+					'callback': callback,
+					'scope': scope
+				});
 			},
-			fire: function(eventName,eventParams) {
-console.log('going to fire  event:'+eventName+' with params:');
-console.log(eventParams);
-console.log('-------------------')
+			fire: function(eventName,eventObj) {
+//DEBUG
+//console.log('going to fire  event:'+eventName+' with params:');
+//console.log(eventObj);
+//console.log('-------------------');
+				for(var i in _eventCallbacks[eventName]) {
+					var callbackObj = _eventCallbacks[eventName][i];
+					if(typeof(callbackObj.scope) != 'undefined') {
+						callbackObj.callback.call(callbackObj.scope,eventObj);
+					}
+				}
 			},
 			setupPanels: function() {
 				this.setPanelCounts();
@@ -615,6 +631,11 @@ console.log('-------------------')
 					_panels['editor-panel'].loadView(target);
 				}
 			},
+			openComponent: function(component) {
+				if (_editorPanelActive) {
+					_panels['editor-panel'].loadView(component);
+				}
+			},
 			getPanelContentRegion: function(type) {
 				switch(type) {
 					case "l-panel":
@@ -836,6 +857,12 @@ console.log('-------------------')
 					setTimeout(delayAnimRun,2000);
 				});
 //				alert(alertStr);
+			},
+//---------------------------------------------
+//IDE Toolbar button related
+//---------------------------------------------
+			initCreateProject: function() {
+console.log('hello there......');
 			}
 		}
 	}();

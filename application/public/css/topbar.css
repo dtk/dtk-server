@@ -253,6 +253,13 @@
 	background-image: url(../images/topbar/create-assembly-btn-sprite.png);
 }
 
+.tool-item .tool-btn.create-project {
+	background-image: url(../images/topbar/create-project-btn-sprite.png);
+}
+.tool-item .tool-btn.create-target {
+	background-image: url(../images/topbar/create-target-btn-sprite.png);
+}
+
 /*-------------------*/
 
 .toolbar .dropdown {

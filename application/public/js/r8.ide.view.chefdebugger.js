@@ -69,10 +69,18 @@ if (!R8.IDE.View.chefDebugger) {
 					this.addNode(items[i]);
 				}
 
+				R8.IDE.on('commit',this.resetLogger,this);
 				_initialized = true;
 			},
 			render: function() {
 				return _contentTpl;
+			},
+			resetLogger: function(e) {
+				for(var n in _logContents) {
+					delete(_logContents[n]);
+					//.complete = false;
+				}
+				this.startLogPoller();
 			},
 			resize: function() {
 				if(!_initialized) return;
@@ -245,11 +253,10 @@ if (!R8.IDE.View.chefDebugger) {
 
 							break;
 					}
-
 					_contentNode.append(logTpl);
 				}
 				var contentDiv = document.getElementById(_contentNode.get('id'));
-				contentDiv.scrollTop = 5000;
+				contentDiv.scrollTop = contentDiv.scrollHeight;
 			},
 //---------------------------------------------
 //alert/notification related

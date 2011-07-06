@@ -10,28 +10,34 @@ module XYZ
       end
      private
       def components_with_attributes(config_node)
-        config_node[:component_actions].map do |component_action|
-          if cmp = component(component_action)
-            cmp.merge(ret_attributes(component_action))
-          end
-        end.compact
+        cmp_actions = config_node[:component_actions]
+        ndx_cmps = cmp_actions.inject({}) do |h,cmp_action|
+          cmp = cmp_action[:component]
+          h.merge(cmp[:id] => cmp)
+        end
+        cmp_actions.map do |cmp_action|
+          component_with_deps(cmp_action,ndx_cmps).merge(ret_attributes(cmp_action))
+        end
       end
 
-      def component(action)
-        ret = nil
-        if ext_ref = (action[:component]||{})[:external_ref]
-          ret = case ext_ref[:type]
-            when "puppet_class"
-            {"component_type" => "class", "name" => ext_ref[:class_name]}
-            when "puppet_definition"
-            {"component_type" => "definition", "name" => ext_ref[:definition_name]}
-          end
-        end
+      def component_with_deps(action,ndx_components)
+        ret = component_external_ref(action[:component])
         cmp_deps = action[:component_dependencies]
-        if ret and cmp_deps and not cmp_deps.empty?
-          ret.merge!(:component_dependencies => cmp_deps) 
+        return ret unless cmp_deps and not cmp_deps.empty?
+        ret.merge(:component_dependencies => cmp_deps.map{|cmp_id|component_external_ref(ndx_components[cmp_id])})
+      end
+  
+      def component_external_ref(component)
+        ext_ref = component[:external_ref]
+        case ext_ref[:type]
+         when "puppet_class"
+          {"component_type" => "class", "name" => ext_ref[:class_name]}
+         when "puppet_definition"
+          {"component_type" => "definition", "name" => ext_ref[:definition_name]}
+          else
+          Log.error("unexepected external type #{ext_ref[:type]}")
+          nil
         end
-        ret
       end
 
       #returns both attributes to set on node and dynmic attributes that get set by the node

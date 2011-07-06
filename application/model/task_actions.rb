@@ -220,7 +220,7 @@ module XYZ
 
       private
       #returns array of form [component_id,deps]
-      def self.generate_component_order(cmp_deps,&block)
+      def self.generate_component_order(cmp_deps)
         #TODO: assumption that only a singleton component can be a dependency -> match on component_type sufficient
         #first build index from component_type to id
         cmp_type_to_id = Hash.new
@@ -234,14 +234,14 @@ module XYZ
 
         #note: dependencies can be omitted if they have already successfully completed; therefore only
         #looking for non-null deps
-        hash_input_for_tsort = cmp_deps.inject({}) do |h,(id,info)|
+        cmp_ids_with_deps = cmp_deps.inject({}) do |h,(id,info)|
           non_null_deps = info[:component_dependencies].map{|ct|cmp_type_to_id[ct]}.compact
           h.merge(id => non_null_deps)
         end
-        ordered_cmp_ids = TSortHash.new(hash_input_for_tsort).tsort
+        ordered_cmp_ids = TSortHash.new(cmp_ids_with_deps).tsort
 
         ordered_cmp_ids.map do |cmp_id|
-          [cmp_id,cmp_deps[cmp_id][:component_dependencies]]
+          [cmp_id,cmp_ids_with_deps[cmp_id]]
         end
       end
 

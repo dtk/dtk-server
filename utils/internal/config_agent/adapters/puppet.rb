@@ -18,15 +18,22 @@ module XYZ
       end
 
       def component(action)
+        ret = nil
         if ext_ref = (action[:component]||{})[:external_ref]
-          case ext_ref[:type]
+          ret = case ext_ref[:type]
             when "puppet_class"
             {"component_type" => "class", "name" => ext_ref[:class_name]}
             when "puppet_definition"
             {"component_type" => "definition", "name" => ext_ref[:definition_name]}
           end
         end
+        cmp_deps = action[:component_dependencies]
+        if ret and cmp_deps and not cmp_deps.empty?
+          ret.merge!(:component_dependencies => cmp_deps) 
+        end
+        ret
       end
+
       #returns both attributes to set on node and dynmic attributes that get set by the node
       def ret_attributes(action,opts={})
         #labeled as qualified attributes because first item is the module

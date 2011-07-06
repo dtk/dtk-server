@@ -24,7 +24,7 @@ module XYZ
         ret = component_external_ref(action[:component])
         cmp_deps = action[:component_dependencies]
         return ret unless cmp_deps and not cmp_deps.empty?
-        ret.merge(:component_dependencies => cmp_deps.map{|cmp_id|component_external_ref(ndx_components[cmp_id])})
+        ret.merge("component_dependencies" => cmp_deps.map{|cmp_id|component_external_ref(ndx_components[cmp_id])})
       end
   
       def component_external_ref(component)

@@ -222,21 +222,23 @@ module XYZ
       #returns array of form [component_id,deps]
       def self.generate_component_order(cmp_deps,&block)
         #TODO: assumption that only a singleton component can be a dependency -> match on component_type sufficient
-        #first build index from component_type to id; if missing any component types than raise constraint violation
+        #first build index from component_type to id
         cmp_type_to_id = Hash.new
         cmp_deps.each do |id,info|
           info[:component_dependencies].each do |ct|
-            cmp_type_to_id[ct] ||= (cmp_deps.find{|id_x,info_x|info_x[:component_type] == ct}||[]).first
+            unless cmp_type_to_id.has_key?(ct)
+              cmp_type_to_id[ct] = (cmp_deps.find{|id_x,info_x|info_x[:component_type] == ct}||[]).first
+            end
           end
         end
-        missing_comp_types = cmp_type_to_id.map{|ct,id|ct if id.nil?}.compact
-        unless missing_comp_types.empty?
-          #TODO: stub to just use string as violation info
-          raise ErrorConstraintViolations.new("missing required components: (#{missing_comp_types.join(",")}")
+
+        #note: dependencies can be omitted if they have already successfully completed; therefore only
+        #looking for non-null deps
+        hash_input_for_tsort = cmp_deps.inject({}) do |h,(id,info)|
+          non_null_deps = info[:component_dependencies].map{|ct|cmp_type_to_id[ct]}.compact
+          h.merge(id => non_null_deps)
         end
-        
-        tsort_hash = TSortHash.new(cmp_deps.inject({}){|h,(id,info)|h.merge(id => info[:component_dependencies].map{|ct|cmp_type_to_id[ct]})})
-        ordered_cmp_ids = tsort_hash.tsort
+        ordered_cmp_ids = TSortHash.new(hash_input_for_tsort).tsort
 
         ordered_cmp_ids.map do |cmp_id|
           [cmp_id,cmp_deps[cmp_id][:component_dependencies]]

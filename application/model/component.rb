@@ -660,11 +660,17 @@ module XYZ
         ret[id][:component_type] = r[:component_type]
         if r[:extended_base]
           ret[id][:component_dependencies] << r[:extended_base]
-        else
+        elsif deps = r[:dependencies]
           #process dependencies
           #TODO: hack until we haev macros which will stamp the dependency to make this easier to detect
-          #looking for signature where dependency does not have negate and has
+          #looking for signature where dependency has
           #:search_pattern=>{:filter=>[:and, [:eq, :component_type, <component_type>]
+          filter = (deps[:search_pattern]||{})[":filter".to_sym]
+          if filter and deps[:type] == "component"
+            if filter[0] == ":eq" and filter[1] == ":component_type"
+              ret[id][:component_dependencies] << filter[2]
+            end
+          end
         end
       end
       ret

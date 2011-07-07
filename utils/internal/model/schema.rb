@@ -170,6 +170,7 @@ module XYZ
         concrete_models = ret_concrete_models()
         concrete_models.each{|model| model.apply_migration_defs(:up)}
         concrete_models.each{|model| model.set_global_db_rel_info()}
+        DB_REL_DEF[:datacenter] = DB_REL_DEF[:target] #TODO: remove temp datacenter->target
         concrete_models.each{|model| model.preprocess!()}
         #returns model_names
         concrete_models.map{|klass|ret_relation_type(klass)}

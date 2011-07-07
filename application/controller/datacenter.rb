@@ -33,8 +33,8 @@ module XYZ
 
     def create(name)
       c = ret_session_context_id()
-      Datacenter.create(name,c)
-      "datacenter created with name #{name}"
+      Target.create(name,c)
+      "target created with name #{name}"
     end
 
     def get_warnings(id)

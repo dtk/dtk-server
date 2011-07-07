@@ -63,7 +63,7 @@ module XYZ
     ACTION_HANDLER_OBJ = {
       :import_chef_recipes => Library,
       :clone_component => Object,
-      :discover_nodes => Datacenter,
+      :discover_nodes => Target,
       :update_from_hash => Object,
       :create_attribute_link => AttributeLink,
       :create_simple => Object,

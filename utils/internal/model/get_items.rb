@@ -18,7 +18,8 @@ module XYZ
       end
     end
     SubItemModelNames = {
-      :datacenter => [:node,:node_group],
+      :target => [:node,:node_group],
+      :datacenter => [:node,:node_group], #TODO: remove temp datacenter->target
       :component => [:node,:component]
     }
     class DefaultPositions

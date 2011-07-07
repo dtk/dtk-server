@@ -15,8 +15,11 @@ module XYZ
           flavor_id = external_ref[:size] || R8::Config[:command_and_control][:iaas][:ec2][:default_image_size] 
           create_options = {:image_id => ami,:flavor_id => flavor_id}
 
-          #TODO: right now hardcoding groups
-          create_options.merge!(:groups => ["basic"])
+          create_options.merge!(:groups => external_ref[:security_group_set]||DefaultSecurityGroupSet)
+          avail_zone = external_ref[:availability_zone]
+          unless avail_zone.nil? or avail_zone == "automatic"
+            create_options.merge!(:availability_zone => avail_zone)
+          end
           response = conn().server_create(create_options)
           instance_id = response[:id]
           state = response[:state]
@@ -37,7 +40,7 @@ module XYZ
           }
         }
       end
-
+      DefaultSecurityGroupSet = ["default"] 
       #destroys the node if it exists
       def self.destroy_node?(node)
         instance_id = (node[:external_ref]||{})[:instance_id]

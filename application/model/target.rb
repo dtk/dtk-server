@@ -78,6 +78,17 @@ module XYZ
     def clone_post_copy_hook__node(clone_copy_output,opts)
       update_object!(:iaas_type,:iaas_parameters)
       new_id_handle = clone_copy_output.id_handles.first
+      #add external ref values from target to node if node does not have them
+      #assuming passed already check whether node consistent requirements with target
+      #TODO: not handling yet constraint form where set of possibilities given
+      node = clone_copy_output.objects.first
+      node_ext_ref = node[:external_ref]
+      self[:iaas_parameters].each do |k,v|
+        unless node_ext_ref.has_key?(k)
+          node_ext_ref[k] = v
+        end
+      end
+      node.update(:external_ref => node_ext_ref)
       StateChange.create_pending_change_item(:new_item => new_id_handle, :parent => id_handle())
     end
 

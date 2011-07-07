@@ -13,9 +13,12 @@ module XYZ
   end
   class GuardedAttribute < HashObject
     def self.create(guarded_attr,link,guard_attr)
-      unless guard_attr
-        Log.error("not treated when guard attribute is null")
-          return nil
+      #TODO: shouldnt this be error? or instaed if ran already than this attribute should be set
+      unless guard_attr #this can happen if guard attribute is in component that ran already
+        unless guarded_attr[:attribute_value]
+          Log.error("unexpected: if guard_attr is null then guarded_attrib #{guarded_attr[:display_name]} should have a value set")
+        end
+        return nil 
       end
       #gurading attributes that are unset and 
       #TODO: should we assume that what gets heer are only requierd attributes

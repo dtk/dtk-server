@@ -3,7 +3,7 @@
     "project1": {
       "display_name": "Project 1",
       "description": "Project 1",
-      "type": "chef"
+      "type": "puppet"
     }
   },
   "datacenter": {
@@ -11,6 +11,11 @@
       "display_name": "Staging East1",
       "description": "Staging East1",
       "iaas_type" : "ec2",
+      "iaas_parameters" : {
+        "region" : "us-east-1",
+        "availability_zone" : "us-east-1a",
+	"security_group_set" : ["default"] 
+      },     
       "type": "staging",
       "*project_id": "/project/project1"
     }

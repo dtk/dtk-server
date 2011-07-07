@@ -19,7 +19,10 @@
       :type=>:varchar,
       :length=>20
     },
-    :project_id=> { #TODO: when port datacenters to be target objects; project should be a parent
+    :iaas_parameters=>{
+      :type=>:json
+    },
+    :project_id=> { #TODO: should project be a parent?
       :type=>:bigint,
       :foreign_key_rel_type=>:project,
       :on_delete=>:set_null,

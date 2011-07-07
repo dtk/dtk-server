@@ -19,9 +19,56 @@ module XYZ
         :cols => [:id,:display_name,:status,:updated_at,:executable_action_type],
         :filter => [:eq,:task_id,nil] #so this is a top level task
       }
-      get_objects_from_sp_hash(model_handle,sp_hash).reject{|k,v|k == :subtasks}
+      get_objs(model_handle,sp_hash).reject{|k,v|k == :subtasks}
     end
 
+    def get_info_for_reporting()
+      exec_actions = Array.new
+      #if executable level then get its executable_action
+      if self.has_key?(:executable_action_type) 
+        #will have an executable action so if have it already
+        if self[:executable_action_type]
+          exec_actions << update_object!(:executable_action)[:executable_action]
+        end
+      else
+        if exec_action = update_object!(:executable_action)[:executable_action]
+          exec_actions <<  exec_action.merge(:task_id => id())
+        end
+      end
+
+      #if task does not have execuatble actions then get all subtasks
+      if exec_actions.empty?
+        exec_actions = get_all_subtasks().map do |t|
+          action = t[:executable_action]
+          action && action.merge(:task_id => t.id())
+        end.compact
+      end
+      
+      #get all unique nodes; looking for attribute :external_ref
+      indexed_nodes = Hash.new
+      exec_actions.each do |ea|
+        next unless node = ea[:node]
+        node_id = node[:id]
+        indexed_nodes[node_id] ||= node.merge(:task_id => ea[:task_id])
+        indexed_nodes[node_id][:external_ref] ||= node[:external_ref]
+        indexed_nodes[node_id][:config_agent_type] ||= get_config_agent_type(ea)
+      end
+
+      #need to query db if missing external_refs having instance_id
+      node_ids_missing_ext_refs = indexed_nodes.values.reject{|n|(n[:external_ref]||{})[:instance_id]}.map{|n|n[:id]}
+      unless node_ids_missing_ext_refs.empty?
+        sp_hash = {
+          :cols => [:id,:external_ref],
+          :filter => [:oneof, :id, node_ids_missing_ext_refs]
+        }
+        node_mh = model_handle.createMH(:node)
+        node_objs = Model.get_objs(node_mh,sp_hash)
+        node_objs.each{|r|indexed_nodes[r[:id]][:external_ref] = r[:external_ref]}
+      end
+      indexed_nodes.values
+    end
+
+    #TODO: may deprecate below and subsume by above
     #this also provides the nodes task_id and config_agent_type as extra attribute values
     def get_associated_nodes()
       exec_actions = Array.new
@@ -29,10 +76,10 @@ module XYZ
       if self.has_key?(:executable_action_type) 
         #will have an executable action so if have it already
         if self[:executable_action_type]
-          exec_actions << self[:executable_action] || get_objects_col_from_sp_hash(:cols=>[:executable_action]).first
+          exec_actions << self[:executable_action] || get_objs_col(:cols=>[:executable_action]).first
         end
       else
-        exec_action = get_objects_col_from_sp_hash(:cols=>[:executable_action]).first
+        exec_action = get_objs_col(:cols=>[:executable_action]).first
         exec_actions <<  exec_action.merge(:task_id => id()) if exec_action
       end
 
@@ -62,7 +109,7 @@ module XYZ
           :filter => [:oneof, :id, node_ids_missing_ext_refs]
         }
         node_mh = model_handle.createMH(:node)
-        node_objs = Model.get_objects_from_sp_hash(node_mh,sp_hash)
+        node_objs = Model.get_objs(node_mh,sp_hash)
         node_objs.each{|r|indexed_nodes[r[:id]][:external_ref] = r[:external_ref]}
       end
       indexed_nodes.values
@@ -84,7 +131,7 @@ module XYZ
         :cols => [:id,:display_name,:status,:updated_at,:task_id,:executable_action_type,:executable_action],
           :filter => [:oneof,:task_id,id_handles.map{|idh|idh.get_id}] 
         }
-        next_level_objs = Model.get_objects_from_sp_hash(model_handle,sp_hash).reject{|k,v|k == :subtasks}
+        next_level_objs = Model.get_objs(model_handle,sp_hash).reject{|k,v|k == :subtasks}
         id_handles = next_level_objs.map{|obj|obj.id_handle}
         ret += next_level_objs
       end

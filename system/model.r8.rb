@@ -217,12 +217,21 @@ module XYZ
       sp_hash = HashSearchPattern.add_to_filter(sp_hash_x,[:eq, :id, id()])
       Model.get_objs(model_handle(),sp_hash,opts)
     end
-    #TODO: remove below
+    #TODO: remove get_objects_from_sp_hash
     def get_objects_from_sp_hash(sp_hash_x,opts={})
       sp_hash = HashSearchPattern.add_to_filter(sp_hash_x,[:eq, :id, id()])
       Model.get_objects_from_sp_hash(model_handle(),sp_hash,opts)
     end
 
+    def get_objs_col(sp_hash_x,col=nil,opts={})
+      #if col not given assumption that sp_hash_x is of form {:cols => [col]} or symbol
+      if sp_hash_x.kind_of?(Symbol)
+        sp_hash_x = {:cols => [sp_hash_x]}
+      end
+      col ||= sp_hash_x[:cols].first
+      get_objs(sp_hash_x,opts).map{|r|r[col]}.compact
+    end
+    #TODO: removeg et_objects_col_from_sp_hash
     def get_objects_col_from_sp_hash(sp_hash_x,col=nil,opts={})
       #if col not given assumption that sp_hash_x is of form {:cols => [col]} or symbol
       if sp_hash_x.kind_of?(Symbol)

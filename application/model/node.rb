@@ -596,6 +596,9 @@ module XYZ
       override_attrs[:ref] ||= SQL::ColRef.concat("s-",:ref)
       override_attrs[:display_name] ||= SQL::ColRef.concat{|o|["s-",:display_name,o.case{[[{:ref_num=> nil},""],o.concat("-",:ref_num)]}]}
     end
+    def source_clone_info_opts()
+      {:ret_new_obj_with_cols => [:id,:external_ref]}
+    end
 
     def clone_post_copy_hook(clone_copy_output,opts={})
       cmp_obj = clone_copy_output.objects.first

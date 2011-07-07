@@ -140,12 +140,12 @@ pp request.params
 
     def add_item(id)
       #TODO: need to copy in avatar when hash["ui"] is non null
-      datacenter = id_handle(id).create_object()
+      target = id_handle(id).create_object()
 
       override_attrs = request.params["ui"] ? {:ui=>request.params["ui"]} : {}
 
       model_id_handle = id_handle(request.params["id"].to_i,request.params["model"].to_sym)
-      new_item_id = datacenter.add_item(model_id_handle,override_attrs)
+      new_item_id = target.add_item(model_id_handle,override_attrs)
 #      id = new_id if new_id
 
 #TODO: how do we get field info from model instance?

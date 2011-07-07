@@ -19,11 +19,13 @@ module XYZ
     end
 
 
-    def add_item(source_id_handle,override_attrs=nil)
+    def add_item(source_id_handle,override_attrs={})
       #TODO: need to copy in avatar when hash["ui"] is non null
-      override_attrs = {} if override_attrs.nil?
-
-      clone_into(source_id_handle.create_object(),override_attrs)
+      override_attrs ||= {}
+      source_obj = source_id_handle.create_object()
+      clone_opts = source_obj.source_clone_info_opts()
+      new_obj = clone_into(source_obj,override_attrs,clone_opts)
+      new_obj && new_obj.id()
     end
 
     def self.get_port_links(id_handles,type="l4")
@@ -64,6 +66,8 @@ module XYZ
       case clone_copy_output.model_name()
        when :component 
         clone_post_copy_hook__component(clone_copy_output,opts)
+       when :node
+        clone_post_copy_hook__node(clone_copy_output,opts)        
        else #TODO: catchall taht will be expanded
         new_id_handle = clone_copy_output.id_handles.first
         StateChange.create_pending_change_item(:new_item => new_id_handle, :parent => id_handle())
@@ -71,6 +75,11 @@ module XYZ
     end
 
    private
+    def clone_post_copy_hook__node(clone_copy_output,opts)
+      update_object!(:iaas_type,:iaas_parameters)
+      new_id_handle = clone_copy_output.id_handles.first
+      StateChange.create_pending_change_item(:new_item => new_id_handle, :parent => id_handle())
+    end
 
     def clone_post_copy_hook__component(clone_copy_output,opts)
       #TODO: right now this wil be just a composite component and clone_copy_output will be off form assembly - nodee - component

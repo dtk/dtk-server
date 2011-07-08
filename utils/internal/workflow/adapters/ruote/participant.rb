@@ -32,13 +32,13 @@ module XYZ
         def set_result_failed(workitem,new_result,task,action)
           error = 
             if not new_result[:statuscode] == 0
-              CommandAndControl::ErrorCannotConnect.new
+              CommandAndControl::Error::Communication.new
             else
               data = new_result[:data]
               if data and data[:status] == :failed and (data[:error]||{})[:formatted_exception]
-                CommandAndControl::ErrorFailedResponse.new(data[:error][:formatted_exception])
+                CommandAndControl::Error::FailedResponse.new(data[:error][:formatted_exception])
               else
-                CommandAndControl::Error.new 
+                CommandAndControl::Error::.new 
               end
           end
           update_hash = {
@@ -51,7 +51,7 @@ module XYZ
         def set_result_timeout(workitem,new_result,task)
           update_hash = {
             :status => "failed",
-            :result => TaskAction::Result::Failed.new(CommandAndControl::Timeout.new)
+            :result => TaskAction::Result::Failed.new(CommandAndControl::Error::Timeout.new)
           }             
           task.update(update_hash)
         end
@@ -124,8 +124,8 @@ module XYZ
                 :on_msg_received => proc do |msg|
                   result = msg[:body].merge("task_id" => task_id)
                   pp [:result,result]
-                  
-                  succeeded = (result[:statusmsg] == "OK" and [:succeeded,:ok].include?((result[:data]||{})[:status])) #TODO: cleanup and just ues ok or succeeded on agent
+                  #result[:statuscode] is for transport errors and data is for errors for agent
+                  succeeded = (result[:statuscode] == 0 and [:succeeded,:ok].include?((result[:data]||{})[:status]))
                   if succeeded
                     set_result_succeeded(workitem,result,task,action) 
                   else
@@ -157,7 +157,7 @@ module XYZ
           debug_print_task_info = "task_id=#{task.id.to_s}; top_task_id=#{top_task_idh.get_id()}"
           begin
             yield
-          rescue CommandAndControl::Error => e
+          rescue CommandAndControl::Error:: => e
             update_hash = {
               :status => "failed",
               :result => TaskAction::Result::Failed.new(e)

@@ -109,25 +109,27 @@ module XYZ
       def to_hash()
         {:error_type => Aux.demodulize(self.class.to_s)}
       end
-    end
-    class ErrorCannotConnect < Error
-    end
-    class ErrorCannotLoadAdapter < Error
-    end
-    class ErrorTimeout < Error
-    end
-    class ErrorFailedResponse < Error
-      def initialize(error_msg)
-        super()
-        @error_msg = error_msg
+      class CannotConnect < Error
       end
-      def to_hash()
-        super().merge(:error_msg => @error_msg)
-      end 
-    end
-    class ErrorCannotCreateNode < Error
-    end
-    class ErrorWhileCreatingNode < Error
+      class Communication < Error
+      end
+      class CannotLoadAdapter < Error
+      end
+      class Timeout < Error
+      end
+      class FailedResponse < Error
+        def initialize(error_msg)
+          super()
+          @error_msg = error_msg
+        end
+        def to_hash()
+          super().merge(:error_msg => @error_msg)
+        end 
+      end
+      class CannotCreateNode < Error
+      end
+      class WhileCreatingNode < Error
+      end
     end
   end
 

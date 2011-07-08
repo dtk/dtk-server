@@ -70,6 +70,7 @@ module XYZ
         task_info = {
           "action" => executable_action,
           "workflow" => self,
+          "task" => task,
           "top_task_idh" => context.top_task_idh
         }
         task_id = task.id()

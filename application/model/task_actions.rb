@@ -17,23 +17,24 @@ module XYZ
   module TaskAction
     module Result
       class ResultBase < HashObject
-        def initialize(hash)
+        def initialize(hash={})
           super(hash)
-          self[:result_type] = Aux.demodulize(self.class.to_s)
+          self[:result_type] = Aux.demodulize(self.class.to_s).downcase
         end
       end
       class Succeeded < ResultBase
-        def initialize(hash)
+        def initialize(hash={})
           super(hash)
         end
       end
       class Failed < ResultBase
-        def initialize(error_class)
-          #TODO: put error params in by invoking e.to_hash
-          super(:error_type => Aux.demodulize(error_class.class.to_s))
+        def initialize(error)
+          super()
+          self[:error] =  error.to_hash
         end
       end
     end
+
     class TaskActionNode < TaskActionBase
       def attributes_to_set()
         Array.new

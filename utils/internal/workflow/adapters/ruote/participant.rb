@@ -12,24 +12,48 @@ module XYZ
           params = {"task_id" => workitem.params["task_id"]}
           workflow = task_info["workflow"]
           params.merge!("workflow" => workflow)
-          params.merge!("task" => workflow.task)
+          params.merge!("task" => task_info["task"])
           params.merge!("action" => task_info["action"])
           params.merge!("top_task_idh" => task_info["top_task_idh"])
           params
         end
 
         def set_result_succeeded(workitem,new_result,task,action)
+          #TODO: want to put in any dynamic parameters produced
           update_hash = {
             :status => "succeeded",
-            :result => TaskAction::Result::Succeeded.new(new_result)
+            :result => TaskAction::Result::Succeeded.new()
           }             
           task.update(update_hash)
           action.update_state_change_status(task.model_handle,:completed)  #this updates pending state
           set_result_succeeded__stack(workitem,new_result,task,action)
         end
 
+        def set_result_failed(workitem,new_result,task,action)
+          error = 
+            if not new_result[:statuscode] == 0
+              CommandAndControl::ErrorCannotConnect.new
+            else
+              data = new_result[:data]
+              if data and data[:status] == :failed and (data[:error]||{})[:formatted_exception]
+                CommandAndControl::ErrorFailedResponse.new(data[:error][:formatted_exception])
+              else
+                CommandAndControl::Error.new 
+              end
+          end
+          update_hash = {
+            :status => "failed",
+            :result => TaskAction::Result::Failed.new(error)
+          }             
+          task.update(update_hash)
+        end
+
         def set_result_timeout(workitem,new_result,task)
-            #TODO: what should be set here; is no op fine?
+          update_hash = {
+            :status => "failed",
+            :result => TaskAction::Result::Failed.new(CommandAndControl::Timeout.new)
+          }             
+          task.update(update_hash)
         end
 
          private
@@ -100,15 +124,19 @@ module XYZ
                 :on_msg_received => proc do |msg|
                   result = msg[:body].merge("task_id" => task_id)
                   pp [:result,result]
-                  #TODO: cleanup and just ues ok or succeeded on agent
-                  succeeded = (result[:statusmsg] == "OK" and [:succeeded,:ok].include?((result[:data]||{})[:status]))
-                  set_result_succeeded(workitem,result,task,action) if succeeded
+                  
+                  succeeded = (result[:statusmsg] == "OK" and [:succeeded,:ok].include?((result[:data]||{})[:status])) #TODO: cleanup and just ues ok or succeeded on agent
+                  if succeeded
+                    set_result_succeeded(workitem,result,task,action) 
+                  else
+                    set_result_failed(workitem,result,task,action)
+                  end
                   self.reply_to_engine(workitem)
                 end,
                 :on_timeout => proc do 
                   result = {
-                    "status" => "timeout", 
-                    "task_id" => task_id}
+                    "status" => "timeout" 
+                  }
                   set_result_timeout(workitem,result,task)
                   self.reply_to_engine(workitem)
                 end
@@ -116,6 +144,8 @@ module XYZ
               receiver_context = {:callbacks => callbacks, :expected_count => 1}
               workflow.initiate_executable_action(action,params["top_task_idh"],receiver_context)
             else
+              Log.error("unexpected that this is called")
+              #If this is called then have to process case where result is failure
               result = workflow.process_executable_action(action,params["top_task_idh"])
               set_result_succeeded(workitem,result,task,action)
               reply_to_engine(workitem)

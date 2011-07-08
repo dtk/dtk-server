@@ -105,7 +105,10 @@ module XYZ
 
    public
     #### Error classes
-    class Error < Exception
+    class Error < XYZ::Error
+      def to_hash()
+        {:error_type => Aux.demodulize(self.class.to_s)}
+      end
     end
     class ErrorCannotConnect < Error
     end
@@ -114,14 +117,13 @@ module XYZ
     class ErrorTimeout < Error
     end
     class ErrorFailedResponse < Error
-      def initialize(response_status,response_error)
+      def initialize(error_msg)
         super()
-        @response_status = response_status
-        @response_error = response_error
+        @error_msg = error_msg
       end
-      def debug_pp_form()
-        [self.class,{:response_status => @response_status,:response_error => @response_error}]
-      end
+      def to_hash()
+        super().merge(:error_msg => @error_msg)
+      end 
     end
     class ErrorCannotCreateNode < Error
     end

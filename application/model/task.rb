@@ -22,7 +22,7 @@ module XYZ
       get_objs(model_handle,sp_hash).reject{|k,v|k == :subtasks}
     end
 
-    def get_info_for_reporting()
+    def get_per_node_info_for_reporting()
       exec_actions = Array.new
       #if executable level then get its executable_action
       if self.has_key?(:executable_action_type) 
@@ -71,16 +71,17 @@ module XYZ
     #TODO: may deprecate below and subsume by above
     #this also provides the nodes task_id and config_agent_type as extra attribute values
     def get_associated_nodes()
-      exec_actions = Array.new
+            exec_actions = Array.new
       #if executable level then get its executable_action
       if self.has_key?(:executable_action_type) 
         #will have an executable action so if have it already
         if self[:executable_action_type]
-          exec_actions << self[:executable_action] || get_objs_col(:cols=>[:executable_action]).first
+          exec_actions << update_object!(:executable_action)[:executable_action]
         end
       else
-        exec_action = get_objs_col(:cols=>[:executable_action]).first
-        exec_actions <<  exec_action.merge(:task_id => id()) if exec_action
+        if exec_action = update_object!(:executable_action)[:executable_action]
+          exec_actions <<  exec_action.merge(:task_id => id())
+        end
       end
 
       #if task does not have execuatble actions then get all subtasks
@@ -128,7 +129,7 @@ module XYZ
 
       until id_handles.empty?
         sp_hash = {
-        :cols => [:id,:display_name,:status,:updated_at,:task_id,:executable_action_type,:executable_action],
+        :cols => [:id,:display_name,:status,:result,:updated_at,:task_id,:executable_action_type,:executable_action],
           :filter => [:oneof,:task_id,id_handles.map{|idh|idh.get_id}] 
         }
         next_level_objs = Model.get_objs(model_handle,sp_hash).reject{|k,v|k == :subtasks}

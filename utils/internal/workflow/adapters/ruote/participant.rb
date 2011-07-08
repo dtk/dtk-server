@@ -19,7 +19,6 @@ module XYZ
         end
 
         def set_result_succeeded(workitem,new_result,task,action)
-          #TODO: want to put in any dynamic parameters produced
           update_hash = {
             :status => "succeeded",
             :result => TaskAction::Result::Succeeded.new()
@@ -38,7 +37,7 @@ module XYZ
               if data and data[:status] == :failed and (data[:error]||{})[:formatted_exception]
                 CommandAndControl::Error::FailedResponse.new(data[:error][:formatted_exception])
               else
-                CommandAndControl::Error::.new 
+                CommandAndControl::Error.new 
               end
           end
           update_hash = {
@@ -142,10 +141,9 @@ module XYZ
                 end
               }
               receiver_context = {:callbacks => callbacks, :expected_count => 1}
-              workflow.initiate_executable_action(action,params["top_task_idh"],receiver_context)
+              workflow.initiate_executable_action(action,task,params["top_task_idh"],receiver_context)
             else
-              Log.error("unexpected that this is called")
-              #If this is called then have to process case where result is failure
+              #TODO: need to handle failure case
               result = workflow.process_executable_action(action,params["top_task_idh"])
               set_result_succeeded(workitem,result,task,action)
               reply_to_engine(workitem)
@@ -157,7 +155,7 @@ module XYZ
           debug_print_task_info = "task_id=#{task.id.to_s}; top_task_id=#{top_task_idh.get_id()}"
           begin
             yield
-          rescue CommandAndControl::Error:: => e
+          rescue CommandAndControl::Error => e
             update_hash = {
               :status => "failed",
               :result => TaskAction::Result::Failed.new(e)

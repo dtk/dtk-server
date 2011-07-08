@@ -1,3 +1,4 @@
+#TODO: need to see whether we need both @task and task argument
 require 'ruote'
 require File.expand_path('ruote/participant', File.dirname(__FILE__))
 require File.expand_path('ruote/generate_process_defs', File.dirname(__FILE__))
@@ -58,12 +59,12 @@ module XYZ
         nil
       end
       
-      def initiate_executable_action(action,top_task_idh,receiver_context)
+      def initiate_executable_action(action,task,top_task_idh,receiver_context)
         opts = {
           :initiate_only => true,
           :receiver_context => receiver_context
         }
-        CommandAndControl.execute_task_action(action,@task,top_task_idh,opts)
+        CommandAndControl.execute_task_action(action,task,top_task_idh,opts)
       end
 
       def poll_to_detect_node_ready(node,receiver_context,opts={})

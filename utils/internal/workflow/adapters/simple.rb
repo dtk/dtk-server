@@ -2,12 +2,11 @@
 module XYZ 
   module WorkflowAdapter
     class Simple < XYZ::Workflow
-      def execute(top_task_idh=nil)
-        top_task_idh ||= @task.id_handle()
-        @task.update(:status => "executing")
+      def execute()
+        top_task_idh = @ttop_ask.id_handle()
         executable_action = @task[:executable_action]
         if executable_action
-          process_executable_action(executable_action,top_task_idh)
+          process_executable_action(@task,top_task_idh)
         elsif @task[:temporal_order] == "sequential"
           process_sequential(top_task_idh)
         elsif @task[:temporal_order] == "concurrent"
@@ -24,6 +23,7 @@ module XYZ
         @task.subtasks.each do |subtask|
           subtask_wf = Simple.new(subtask)
           if mark_as_not_reached
+            #TODO: Workflow#update_task has been removed
             subtask_wf.update_task(:status => "not_reached")
           else
             subtask_status = subtask_wf.execute(top_task_idh) 

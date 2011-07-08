@@ -1,12 +1,11 @@
 module XYZ
   class Workflow
-    def defer_execution(top_level_task)
+    def defer_execution()
       CreateThread.defer do
       #  pp [:new_thread_from_defer, Thread.current, Thread.list]
         raise Error.new("not implemented: putting block in reactor loop when not using eventmachine web server") unless R8EM.reactor_running?
         begin
-          top_task_id = top_level_task.id_handle.get_id()
-          pp "starting top_task_id = #{top_task_id.to_s}"
+          pp "starting top_task_id = #{@top_task.id.to_s}"
           execute()
          rescue Exception => e
           Log.error("error in commit background job: #{e.inspect}")
@@ -18,28 +17,21 @@ module XYZ
     end
 
     #virtual fns that get ovewritten
-    def execute(top_task_idh=nil)
+    def execute()
     end
     ######
 
-    def self.create(task,guards)
-      Adapter.new(task,guards)
+    def self.create(top_task,guards=nil)
+      Adapter.new(top_task,guards)
     end
 
-    def update_task(hash)
-      @task.update(hash)
-    end
-
-    attr_reader :task
-
-    def process_executable_action(executable_action,top_task_idh)
-      self.class.process_executable_action(@task,executable_action,top_task_idh)
+    def process_executable_action(task)
+      self.class.process_executable_action(task,top_task_idh)
     end
 
    private
-    attr_reader :guards
-    def self.process_executable_action(task,executable_action,top_task_idh)
-      CommandAndControl.execute_task_action(executable_action,task,top_task_idh)
+    def self.process_executable_action(task,top_task_idh)
+      CommandAndControl.execute_task_action(task,top_task_idh)
     end
 
     klass = self
@@ -53,10 +45,15 @@ module XYZ
     end
     Adapter = klass
 
-    def initialize(task,guards)
-      @task = task
+    def initialize(top_task,guards)
+      @top_task = top_task
       @guards = guards
     end
+
+    def top_task_idh()
+      @top_task.id_handle()
+    end
+
   end
 end
 

@@ -1,4 +1,3 @@
-#TODO: need to see whether we need both @task and task argument
 require 'ruote'
 require File.expand_path('ruote/participant', File.dirname(__FILE__))
 require File.expand_path('ruote/generate_process_defs', File.dirname(__FILE__))
@@ -20,8 +19,7 @@ module XYZ
         Engine.register_participant participant, m
       end
 
-      def execute(top_task_idh=nil)
-        @task.update(:status => "executing") 
+      def execute()
         TaskInfo.initialize_task_info()
         begin
           wfid = Engine.launch(process_def())
@@ -59,12 +57,12 @@ module XYZ
         nil
       end
       
-      def initiate_executable_action(action,task,top_task_idh,receiver_context)
+      def initiate_executable_action(task,receiver_context)
         opts = {
           :initiate_only => true,
           :receiver_context => receiver_context
         }
-        CommandAndControl.execute_task_action(action,task,top_task_idh,opts)
+        CommandAndControl.execute_task_action(task,top_task_idh,opts)
       end
 
       def poll_to_detect_node_ready(node,receiver_context,opts={})
@@ -73,14 +71,13 @@ module XYZ
         CommandAndControl.poll_to_detect_node_ready(node,poll_opts)
       end
 
-      attr_reader :listener
      private 
-      def initialize(task,guards)
-        super(task,guards)
+      def initialize(top_task,guards)
+        super(top_task,guards)
         @process_def = nil
       end
       def process_def()
-        @process_def ||= compute_process_def(task,guards)
+        @process_def ||= compute_process_def(@top_task,@guards)
         @process_def #TODO: just for testing so can checkpoint and see what it looks like
       end
 

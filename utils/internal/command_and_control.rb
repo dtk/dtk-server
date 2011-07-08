@@ -2,7 +2,8 @@ module XYZ
   module CommandAndControlAdapter
   end
   class CommandAndControl
-    def self.execute_task_action(task_action,task,top_task_idh,opts={})
+    def self.execute_task_action(task,top_task_idh,opts={})
+      task_action = task[:executable_action]
       klass = load_for(task_action)
       attributes_to_set = task_action.attributes_to_set()
       task_mh = task.model_handle()

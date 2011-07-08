@@ -684,7 +684,7 @@ pp datacenter
 
       top_level_task.save!()
       workflow = Workflow.create(top_level_task)
-      workflow.defer_execution(top_level_task)
+      workflow.defer_execution()
 
       run_javascript("R8.Workspace.showAlert('Commit Logged,Pending Execution');")
       return {
@@ -761,7 +761,7 @@ pp datacenter
       guards = Attribute.ret_attribute_guards(top_level_task)
 
       workflow = Workflow.create(top_level_task,guards)
-      workflow.defer_execution(top_level_task)
+      workflow.defer_execution()
 
       run_javascript("R8.IDE.showAlert('Commit Logged,Pending Execution');")
       return {

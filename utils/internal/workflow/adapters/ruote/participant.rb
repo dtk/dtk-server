@@ -117,7 +117,7 @@ module XYZ
           task_id,action,workflow,task = %w{task_id action workflow task}.map{|k|params[k]}
           pp ["executing config on node", task_id,action[:node]]
           workitem.fields["guard_id"] = task_id # ${guard_id} is referenced if guard for execution of this
-          execution_context(task,params["top_task_idh"]) do
+          execution_context(task) do
             if action.long_running?
               callbacks = {
                 :on_msg_received => proc do |msg|
@@ -141,18 +141,18 @@ module XYZ
                 end
               }
               receiver_context = {:callbacks => callbacks, :expected_count => 1}
-              workflow.initiate_executable_action(action,task,params["top_task_idh"],receiver_context)
+              workflow.initiate_executable_action(task,receiver_context)
             else
-              #TODO: need to handle failure case
-              result = workflow.process_executable_action(action,params["top_task_idh"])
-              set_result_succeeded(workitem,result,task,action)
+              result = workflow.process_executable_action(task)
+              #TODO: determien how or whether to set set on succeeded or failed
+              set_result_succeeded(workitem,result,task,action) 
               reply_to_engine(workitem)
             end
           end
         end
 
-        def execution_context(task,top_task_idh,&body)
-          debug_print_task_info = "task_id=#{task.id.to_s}; top_task_id=#{top_task_idh.get_id()}"
+        def execution_context(task,&body)
+          debug_print_task_info = "task_id=#{task.id.to_s}"
           begin
             yield
           rescue CommandAndControl::Error => e

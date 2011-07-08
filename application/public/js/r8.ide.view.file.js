@@ -50,10 +50,10 @@ if (!R8.IDE.View.file) {
 			},
 			blur: function() {
 				R8.Utils.Y.one('#'+_panel.get('id')+'-editor-wrapper').setStyle('display','none');
-				
+
 			},
 			close: function() {
-				
+
 			},
 
 //------------------------------------------------------

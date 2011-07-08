@@ -209,6 +209,41 @@ if (!R8.IDE.editorPanel) {
 				else return true;
 			},
 			loadView: function(view) {
+				var viewId = view.get('id');
+				if (this.viewIsLoaded(viewId)) {
+					this.setViewFocus(viewId);
+					return;
+				}
+				if(this.numViews() == 0) _contentNode.set('innerHTML','');
+
+				view.set('panel',this);
+				_views[view.get('id')] = view;
+/*
+				switch(view.type) {
+					case "file":
+						if(_fileList.length == 0) this.renderEditor();
+						if(!R8.Utils.inArray(_fileList,view.id)) _fileList.push(view.id);
+
+//						view.contentId = _id+'-'+view.id;
+						_views[view.id] = new R8.IDE.View.file(view);
+						break;
+					case "target":
+						_views[view.id] = new R8.IDE.View.target(view);
+						break;
+					case "component":
+						_views[view.id] = new R8.IDE.View.component(view);
+						break;
+				}
+*/
+
+				var viewContent = _views[view.get('id')].render();
+				if(viewContent != '') _contentNode.append(viewContent);
+				_views[view.get('id')].init();
+
+				this.addTab(view.get('id'));
+				this.setViewFocus(view.get('id'));
+			},
+			loadFileView: function(view) {
 				if (this.viewIsLoaded(view.id)) {
 					this.setViewFocus(view.id);
 					return;
@@ -223,12 +258,6 @@ if (!R8.IDE.editorPanel) {
 
 //						view.contentId = _id+'-'+view.id;
 						_views[view.id] = new R8.IDE.View.file(view);
-						break;
-					case "target":
-						_views[view.id] = new R8.IDE.View.target(view);
-						break;
-					case "component":
-						_views[view.id] = new R8.IDE.View.component(view);
 						break;
 				}
 

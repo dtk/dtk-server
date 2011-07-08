@@ -767,7 +767,10 @@ if (typeof(e) != 'undefined') {
 
 			addNode: function(node) {
 				var id = node['object']['id'];
-				_items[id] = new R8.Node2(node,this);
+
+				_items[id] = new R8.IDE.View.editor_target.node(node,this);
+
+//				_items[id] = new R8.Node2(node,this);
 				_node.append(_items[id].render());
 				_items[id].init();
 

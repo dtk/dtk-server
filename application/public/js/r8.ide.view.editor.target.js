@@ -1,13 +1,15 @@
 
-if (!R8.IDE.View.target) {
+if (!R8.IDE.View.editor) { R8.IDE.View.editor = {}; }
 
-	R8.IDE.View.target = function(view) {
-		var _view = view,
-			_id = _view.id,
-			_panel = _view.panel,
+if (!R8.IDE.View.editor.target) {
+
+	R8.IDE.View.editor.target = function(viewDef) {
+		var _obj = viewDef.obj,
+			_id = _obj.get('id'),
+			_panel = null,
 			_pendingDelete = {},
 
-			_modalNoe = null,
+			_modalNode = null,
 			_modalNodeId = 'target-'+_id+'-modal',
 			_shimNodeId = null,
 			_shimNode = null,
@@ -17,6 +19,8 @@ if (!R8.IDE.View.target) {
 
 //DEBUG
 //			_contentTpl = '<div id="'+_panel.get('id')+'-'+_view.id+'" class="target-viewspace"></div>',
+/*
+
 			_contentTpl = '<div id="'+_panel.get('id')+'-'+_view.id+'-wrapper" style="">\
 								<div id="'+_panel.get('id')+'-'+_view.id+'" class="target-viewspace">\
 									<div id="cmdbar-tabcontainer" style="bottom: 40px;">\
@@ -35,7 +39,7 @@ if (!R8.IDE.View.target) {
 									</div>\
 								</div>\
 						</div>',
-
+*/
 			_contentWrapperNode = null,
 			_contentNode = null,
 
@@ -53,8 +57,8 @@ if (!R8.IDE.View.target) {
 
 		return {
 			init: function() {
-				_contentNode = R8.Utils.Y.one('#'+_panel.get('id')+'-'+_view.id);
-				_contentWrapperNode = R8.Utils.Y.one('#'+_panel.get('id')+'-'+_view.id+'-wrapper');
+				_contentNode = R8.Utils.Y.one('#'+_panel.get('id')+'-'+_id);
+				_contentWrapperNode = R8.Utils.Y.one('#'+_panel.get('id')+'-'+_id+'-wrapper');
 
 				this.getWorkspaceDef();
 
@@ -77,8 +81,29 @@ if (!R8.IDE.View.target) {
 				R8.Dock2.init(_contentNode.get('id'));
 
 				_initialized = true;
+
+				return _initialized;
 			},
 			render: function() {
+				_contentTpl = '<div id="'+_panel.get('id')+'-'+_id+'-wrapper" style="">\
+									<div id="'+_panel.get('id')+'-'+_id+'" class="target-viewspace">\
+										<div id="cmdbar-tabcontainer" style="bottom: 40px;">\
+											<div id="cmdbar-tabs-wrapper">\
+												<div id="cmdbar-tabs">\
+												</div>\
+											</div>\
+											<div id="cmdbar-tab-content-wrapper"></div>\
+										</div>\
+										<div id="cmdbar">\
+											<div class="cmdbar-input-wrapper">\
+												<form id="cmdbar_input_form" name="cmdbar_input_form" onsubmit="R8.Cmdbar2.submit(); return false;">\
+													<input type="text" value="" id="cmd" name="cmd" title="Enter Command"/>\
+												</form>\
+											</div>\
+										</div>\
+									</div>\
+							</div>';
+
 				return _contentTpl;
 			},
 			resize: function() {
@@ -99,16 +124,23 @@ if (!R8.IDE.View.target) {
 						return _id;
 						break;
 					case "name":
-						return _view.name;
+						return _obj.get('name');
 						break;
 					case "type":
-						return _view.type;
+						return _obj.get('type');
 						break;
 					case "node":
 						return _contentWrapperNode;
 						break;
 					case "items":
 						return _viewSpaces[_currentViewSpace].get('items');
+						break;
+				}
+			},
+			set: function(key,value) {
+				switch(key) {
+					case "panel":
+						_panel = value;
 						break;
 				}
 			},
@@ -153,7 +185,7 @@ if (!R8.IDE.View.target) {
 						'io:success':callback
 					}
 				};
-				R8.Ctrl.call('target/get_view_items/'+_view.id,params);
+				R8.Ctrl.call('target/get_view_items/'+_obj.get('id'),params);
 			},
 			pushViewSpace: function(viewSpaceDef) {
 				if(_initialized == false) {

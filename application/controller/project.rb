@@ -6,7 +6,7 @@ module XYZ
     def test_group_attrs(datacenter_id=nil)
       redirect = "/xyz/project/test_group_attrs/#{(datacenter_id||"").to_s}"
       unless datacenter_id
-        datacenter_id = Model.get_objects_from_sp_hash(model_handle(:datacenter),{:cols => [:id]}).first[:id]
+        datacenter_id = Model.get_objs(model_handle(:datacenter),{:cols => [:id]}).first[:id]
       end
       pending_changes = flat_list_pending_changes_in_datacenter(datacenter_id.to_i)
       commit_task = create_task_from_pending_changes(pending_changes)
@@ -54,16 +54,17 @@ module XYZ
       redirect redirect
     end
 
-    def create()
-pp '++++++++++++++++++++++++++++++++++++++'
-pp request.params
+    def create(explicit_hash=nil)
 
+      params = request.params
+      pp ["project_create",params]
+      Project.create_new_project(model_handle,params["name"],params["type"])
       return {}
     end
 
     def destroy_and_delete_nodes(project_id=nil) #allowing to be nil for testing when only one project
       unless project_id
-        project_id = Model.get_objects_from_sp_hash(model_handle,{:cols => [:id]}).first[:id]
+        project_id = Model.get_objs(model_handle,{:cols => [:id]}).first[:id]
       end
       create_object_from_id(project_id).destroy_and_delete_nodes()
       return {:content => {}}

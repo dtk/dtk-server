@@ -1,6 +1,22 @@
 module XYZ
   class Project < Model
     #Model apis
+    def self.create_new_project(model_handle,name,type)
+      sp_hash = {
+        :cols => [:id],
+        :filter => [:eq,:display_name,name]
+      }
+      unless get_objs(model_handle,sp_hash).empty?
+        raise Error.new("project with name #{name} exists already")
+      end
+      row = {
+        :display_name => name,
+        :ref => name,
+        :type => type
+      }
+      create_from_rows(model_handle,[row]).first
+    end
+
     def self.get_all(model_handle)
       sp_hash = {:cols => [:id,:display_name,:type]}
       get_objects_from_sp_hash(model_handle,sp_hash)

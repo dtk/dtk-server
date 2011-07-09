@@ -117,8 +117,8 @@ if (!R8.Editor) {
 			initEditor: function() {
 				_editor = ace.edit("editor");
 				_editor.setShowPrintMargin(false);
-				_editor.setTheme("ace/theme/twilight");
-//				_editor.setTheme("ace/theme/cobalt");
+//				_editor.setTheme("ace/theme/twilight");
+				_editor.setTheme("ace/theme/cobalt");
 
 				var RubyScriptMode = require("ace/mode/ruby").Mode;
 				_editor.getSession().setMode(new RubyScriptMode());

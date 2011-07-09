@@ -7,13 +7,14 @@ if (!R8.Project) {
 			_rootNode = null,
 			_leafNode = null,
 
+			_implementations = {},
 			_targets = {},
 
 			_events = {};
 
 		return {
 			init: function() {
-				
+
 			},
 			get: function(key) {
 				switch(key) {
@@ -22,9 +23,6 @@ if (!R8.Project) {
 				}
 			},
 			renderTree: function(parentNode) {
-//DEBUG
-//console.log(_def);
-
 				var wrapperTpl = '<div id="project-tree-'+_def.id+'" class="project-view-content jstree jstree-default jstree-r8">\
 								  </div>';
 				_wrapperNode = R8.Utils.Y.Node.create(wrapperTpl);
@@ -52,8 +50,16 @@ if (!R8.Project) {
 				var targetsNode = R8.Utils.Y.Node.create('<ul></ul>');
 				for(var t in _def.tree.targets) {
 					var targetId = _def.tree.targets[t].id;
+
 					_targets[targetId] = new R8.Target(_def.tree.targets[t]);
-					targetsNode.append(_targets[targetId].renderTree());
+
+					//TODO: maybe pass init params to make for leaner loading at times
+					_targets[targetId].init({});
+
+					targetsNode.append(_targets[targetId].renderView('project'));
+
+//					targetsNode.append(_targets[targetId].renderTree());
+
 //					targetsContent = targetsContent + _targets[targetId].renderTree();
 				}
 
@@ -91,6 +97,11 @@ if (!R8.Project) {
 
 				_leafNode = R8.Utils.Y.one('#project-'+_def.id);
 
+				for(var t in _targets) {
+					_targets[targetId].initView('project');
+				}
+
+
 				_events['leaf_dblclick'] = R8.Utils.Y.delegate('dblclick',function(e){
 					var leafNodeId = e.currentTarget.get('id'),
 						leafType = e.currentTarget.getAttribute('type'),
@@ -98,14 +109,18 @@ if (!R8.Project) {
 						leafLabel = e.currentTarget.get('children').item(1).get('innerHTML');
 
 					switch(leafType) {
+/*
 						case "target":
 //							_targets[leafObjectId].loadMain();
+R8.IDE.openEditorView(_targets[targetId]);
+break;
 							R8.IDE.openTarget({
 								'id': leafObjectId,
 								'name': leafLabel,
 								'type': 'target'
 							});
 							break;
+*/
 						case "file":
 							//this.loadFileInEditor(leafObjectId);
 							R8.IDE.openFile({
@@ -114,6 +129,7 @@ if (!R8.Project) {
 								'type': 'file'
 							});
 							break;
+/*
 						case "component":
 							R8.IDE.openComponent({
 								'id': leafObjectId,
@@ -121,6 +137,7 @@ if (!R8.Project) {
 								'type': 'file'
 							});
 							break;
+*/
 					}
 					e.halt();
 					e.stopImmediatePropagation();

@@ -40,28 +40,9 @@ module XYZ
         Array.new
       end
 
-      def get_and_update_attributes(task_mh)
-        #find attributes that can be updated
-        #TODO: right now being conservative in including attributes that may not need to be set
-        indexed_attrs_to_update = Hash.new
-        (self[:component_actions]||[]).each do |action|
-          (action[:attributes]||[]).each do |attr|
-            if attr[:port_is_external] and attr[:port_type] == "input" and not attr[:value_asserted]
-              indexed_attrs_to_update[attr[:id]] = attr
-            end
-          end
-        end
-        return nil if indexed_attrs_to_update.empty?
-        sp_hash = {
-          :relation => :attribute,
-          :filter => [:and,[:oneof, :id, indexed_attrs_to_update.keys]],
-          :columns => [:id,:value_derived]
-        }
-        new_attr_vals = Model.get_objects_from_sp_hash(task_mh.createMH(:model_name => :attribute),sp_hash)
-        new_attr_vals.each do |a|
-          attr = indexed_attrs_to_update[a[:id]]
-          attr[:value_derived] = a[:value_derived]
-        end
+      #virtual gets overwritten
+      #updates object and the tasks in the model
+      def get_and_update_attributes!(task)
       end
 
       def update_state_change_status_aux(task_mh,status,state_change_ids)
@@ -123,7 +104,7 @@ module XYZ
           :columns => [:id,:display_name,parent_field_name,:external_ref,:attribute_value,:required,:dynamic]
         }
 
-        attrs = Model.get_objects_from_sp_hash(attr_mh,sp_hash)
+        attrs = Model.get_objs(attr_mh,sp_hash)
 
         attrs.each do |attr|
           action = indexed_actions[attr[parent_field_name]]
@@ -155,7 +136,7 @@ module XYZ
           :filter => [:oneof, parent_field_name, indexed_actions.keys],
           :columns => [:id,:display_name,parent_field_name,:external_ref,:attribute_value,:required,:dynamic,:port_type,:port_is_external, :data_type, :semantic_type, :hidden]
         }
-        attrs = Model.get_objects_from_sp_hash(attr_mh,sp_hash)
+        attrs = Model.get_objs(attr_mh,sp_hash)
 
         attrs.each do |attr|
           action = indexed_actions[attr[parent_field_name]]
@@ -164,7 +145,16 @@ module XYZ
 
       end
 
-      def get_and_update_attributes(task_mh)
+      def get_and_update_attributes!(task)
+        task_mh = task.model_handle()
+        #these two below update teh ruby obj
+        get_and_update_attributes__node_ext_ref!(task_mh)
+        get_and_update_attributes__cmp_attrs!(task_mh)
+        #this updates the task model
+        update_bound_input_attrs!(task)
+      end
+
+      def get_and_update_attributes__node_ext_ref!(task_mh)
         #TODO: may treat updating node as regular attribute
         #no up if already have the node's external ref
         unless ((self[:node]||{})[:external_ref]||{})[:instance_id]
@@ -176,7 +166,42 @@ module XYZ
             Log.error("cannot update task action's node id because do not have its id")
           end
         end
-        super(task_mh)
+      end
+
+      def get_and_update_attributes__cmp_attrs!(task_mh)
+        #find attributes that can be updated
+        #TODO: right now being conservative in including attributes that may not need to be set
+        indexed_attrs_to_update = Hash.new
+        (self[:component_actions]||[]).each do |action|
+          (action[:attributes]||[]).each do |attr|
+            if attr[:port_is_external] and attr[:port_type] == "input" and not attr[:value_asserted]
+              indexed_attrs_to_update[attr[:id]] = attr
+            end
+          end
+        end
+        return if indexed_attrs_to_update.empty?
+        sp_hash = {
+          :relation => :attribute,
+          :filter => [:and,[:oneof, :id, indexed_attrs_to_update.keys]],
+          :columns => [:id,:value_derived]
+        }
+        new_attr_vals = Model.get_objs(task_mh.createMH(:model_name => :attribute),sp_hash)
+        new_attr_vals.each do |a|
+          attr = indexed_attrs_to_update[a[:id]]
+          attr[:value_derived] = a[:value_derived]
+        end
+      end
+      def update_bound_input_attrs!(task)
+        bound_input_attrs = (self[:component_actions]||[]).map do |action|
+          (action[:attributes]||[]).map do |attr|
+            {
+              :component_display_name => action[:component][:display_name],
+              :attribute_display_name => attr[:display_name],
+              :attribute_value => attr[:attribute_value]
+            }
+          end
+        end.flatten(1)
+        task.update(:bound_input_attrs => bound_input_attrs)
       end
 
       def ret_command_and_control_adapter_info()

@@ -3,12 +3,10 @@ module XYZ
   end
   class CommandAndControl
     def self.execute_task_action(task,top_task_idh,opts={})
+      task.update_input_attributes!()
       task_action = task[:executable_action]
       klass = load_for(task_action)
-      attributes_to_set = task_action.attributes_to_set()
-      task_mh = task.model_handle()
       task_idh = task.id_handle()
-      task_action.get_and_update_attributes(task_mh)
       if opts[:initiate_only]
         klass.initiate_execution(task_idh,top_task_idh,task_action,opts)
       else

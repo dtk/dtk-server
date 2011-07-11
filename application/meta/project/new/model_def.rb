@@ -42,7 +42,7 @@
          :convert => true,
          :join_type=>:left_outer,
          :join_cond=>{:node_node_id=>:node__id},
-         :cols=>[:id,:display_name,:description,:node_node_id,:basic_type,:specific_type,:component_type]
+         :cols=>Component.common_columns
        }]
     },
     :implementation_tree=>{
@@ -67,7 +67,7 @@
          :convert => true,
          :join_type=>:inner,
          :join_cond=>{:node_node_id=>:node__id},
-         :cols=>[:id,:display_name,:version,:description,:ancestor_id,:basic_type,:specific_type,:component_type,:implementation_id]
+         :cols=>Component.common_columns()
        },
        {
          :model_name=>:implementation,

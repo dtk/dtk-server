@@ -32,7 +32,7 @@ module XYZ
         cmp = ret_hash[index]
         #TODO: dont think ids are used; but for consistency using lowest id instance
         if cmp.nil? or r[:component][:id] < cmp[:id] 
-          cmp = ret_hash[index] = r[:component].reject{|k,v|[:node_node_id,:implementation_id].include?(k)}
+          cmp = ret_hash[index] = r[:component].materialize!(*Component.common_columns())
         end
         impls = cmp[:implementations] ||= Hash.new
         #TODO: this is hack taht needs fixing
@@ -61,7 +61,7 @@ module XYZ
           node = nodes[r[:node][:id]] = r[:node].materialize!(*Node.common_columns())
         end
         components = node[:components] ||= Hash.new
-        components[r[:component][:id]] = r[:component].reject{|k,v|k == :node_node_id} if r[:component]
+        components[r[:component][:id]] = r[:component].materialize!(*Component.common_columns()) if r[:component]
       end
       ret_hash.values.map do |t|
         nodes = t[:nodes].values.map do |n|

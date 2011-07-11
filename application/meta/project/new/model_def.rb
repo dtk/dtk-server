@@ -35,7 +35,7 @@
          :convert => true,
          :join_type=>:left_outer,
          :join_cond=>{:datacenter_datacenter_id=>:target__id},
-         :cols=>Node::CommonColumns
+         :cols=>Node.common_columns
        },
        {
          :model_name=>:component,

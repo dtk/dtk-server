@@ -319,7 +319,7 @@ module XYZ
       one_to_many :attribute, :port, :attribute_link, :component, :node_interface, :address_access_point, :monitoring_item
     end
 
-    CommonColumns = 
+    def self.common_columns()
       [
        :id,
        :display_name,
@@ -331,6 +331,7 @@ module XYZ
        :target_id,
        :ui
       ]
+    end
 
     ### virtual column defs
     #######################
@@ -354,6 +355,7 @@ module XYZ
     #######################
     ######### Model apis
     #attribute on node
+
     def self.pbuilderid(node)
       (node[:external_ref]||{})[:instance_id]
     end

@@ -53,7 +53,7 @@
          :convert => true,
          :join_type=>:inner,
          :join_cond=>{:datacenter_datacenter_id=>:datacenter__id},
-         :cols=>Node::CommonColumns
+         :cols=>Node.common_columns
        }]
     },
     :node_groups=>{

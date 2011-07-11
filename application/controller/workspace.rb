@@ -98,100 +98,47 @@ pp [:debug_stored_new_pos,get_objects(model_name,SQL.in(:id,model_items.map{|ite
     end
 
     def search
-      model_name = request.params['model_name']
-      field_set = Model::FieldSet.default(model_name.to_sym)
-#      search_query = request.params['sq']
-
-      where_clause = Hash.new
-      request.params.each do |name,value|
-        where_clause[name.to_sym] = value  if field_set.include_col?(name.to_sym) 
-      end
-
+      params = request.params.dup
+      model_name = params.delete("model_name").to_sym
       #TODO: hack to get around restriction type = template does not allow one to see assemblies
       #TODO: need to determine how to handle an assembly that is a template; may just assume everything in library is template
       #and then do away with explicitly setting type to "template"
-      where_clause.delete(:type) if (request.params||{})["model_name"] == "component"
-
-#      where_clause = {:display_name => search_query}
-      if where_clause
-        where_clause = where_clause.inject(nil){|h,o|SQL.and(h,SQL::WhereCondition.like(o[0],"#{o[1]}%"))}
-      end
-      
+      params.delete("type") if model_name == :component
+      cols = model_class(model_name).common_columns()
+      filter_conjuncts = params.map do |name,value|
+        [:reqexp,name.to_sym,value] if cols.include?(name)
+      end.compact
       #restrict results to belong to library and not nested in assembly
-      where_clause = SQL.and(where_clause,SQL.not(:library_library_id => nil),{:assembly_id => nil})
+      filter_conjuncts += [[:neq,:library_library_id,nil],[:eq,:assembly_id,nil]]
+      sp_hash = {
+        :cols => cols,
+        :filter => [:and] + filter_conjuncts
+      }
+      model_list = Model.get_objs(model_handle(model_name),sp_hash).each{|r|r.materialize!(*cols)}
 
-      model_list = get_objects(model_name.to_sym,where_clause)
-
-###TODO: test for get_items on assemblies
-=begin
-      model_list.map do |obj|
-        if obj.is_assembly?()
-          pp [:composite_get_items,obj.id(),obj[:display_name],obj.get_items()]
-        end
-      end
-=end
-###### end ###TODO: test for get_items on assemblies
-
-###TODO: test for get_model_def on assemblies
-=begin
-      model_list.map do |obj|
-        if obj.is_base_component?()
-          pp [:get_model_def,obj.id(),obj[:display_name],obj.get_model_def()]
-        end
-      end
-=end
-###### end ###TODO: test for get_model_def on assemblies
-
-###TODO: test for get_field_def on base components
-=begin
-      model_list.map do |obj|
-        if obj.is_base_component?()
-          model_handle = nil
-          fd = obj.get_layouts(:edit)
-          puts "==============================================="
-          pp [:get_field_def,obj.id(),obj[:display_name],fd]
-
-        end
-      end
-=end
-###TODO: test for get_field_def on assemblies
-=begin
-      model_list.map do |obj_x|
-        if obj_x.is_assembly?()
-          obj = Assembly.new(obj_x,obj_x.c,:component,obj_x.id_handle)
-          fd = obj.get_layouts(:edit)
-          puts "==============================================="
-          pp [:get_field_def,obj.id(),obj[:display_name],fd]
-        end
-      end
-=end
-###### end ###TODO: test for get_field_def on assemblies
-
-      i18n = get_i18n_mappings_for_models(model_name.to_sym)
+      i18n = get_i18n_mappings_for_models(model_name)
       model_list.each_with_index do |model,index|
         model_list[index][:model_name] = model_name
         body_value = ''
         model_list[index][:ui] ||= {}
         model_list[index][:ui][:images] ||= {}
         name = model_list[index][:display_name]
-        title = name.nil? ? "" : i18n_string(i18n,model_name.to_sym,name)
+        title = name.nil? ? "" : i18n_string(i18n,model_name,name)
 
-        #TDOO: temprary to distingusih between chef and puppet components
-        if model_name.to_sym == :component
+        #TDOO: temporary to distingusih between chef and puppet components
+        if model_name == :component
           if config_agent_type = model_list[index][:config_agent_type]
             title += " (#{config_agent_type[0].chr})" 
           end
         end
         
-
 #TODO: change after implementing all the new types and making generic icons for them
         model_type = 'service'
         model_sub_type = 'db'
-        model_type_str = model_type+'-'+model_sub_type
-
-        model_list[index][:image_path] = model_list[index][:ui][:images][:tnail] ? 
-        R8::Config[:base_images_uri]+'/'+model_name+'Icons/'+model_list[index][:ui][:images][:tnail] : 
-        R8::Config[:base_images_uri]+'/'+model_name+'Icons/unknown-'+model_type_str+'.png'
+        model_type_str = "#{model_type}-#{model_sub_type}"
+        prefix = "#{R8::Config[:base_images_uri]}/#{model_name}Icons"
+        png = model_list[index][:ui][:images][:tnail] || "unknown-#{model_type_str}.png"
+        model_list[index][:image_path] = "#{prefix}/#{png}"
 
         model_list[index][:i18n] = title
 
@@ -220,11 +167,11 @@ pp [:debug_stored_new_pos,get_objects(model_name,SQL.in(:id,model_items.map{|ite
  # }
       _model_var = {}
       _model_var[:i18n] = get_model_i18n(model_name,user_context())
-      tpl.assign("_#{model_name().to_s}",_model_var)
-      tpl.assign("model_name",model_name)
+      tpl.assign("_workspace",_model_var)
+      tpl.assign("model_name",model_name.to_s)
 
       tpl_result = tpl.render()
-      tpl_result[:panel] = model_name+'-search-list-container'
+      tpl_result[:panel] = "#{model_name}-search-list-container"
       return tpl_result
     end
 

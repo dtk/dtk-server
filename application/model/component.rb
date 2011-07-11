@@ -14,6 +14,7 @@ module XYZ
       def up()
         ds_column_defs :ds_attributes, :ds_key
         external_ref_column_defs()
+        virtual_column :name, :type => :varchar, :local_dependencies => [:display_name]
         virtual_column :config_agent_type, :type => :string, :local_dependencies => [:external_ref]
 
         #columns related to name/labels
@@ -64,6 +65,10 @@ module XYZ
         many_to_one :component, :library, :node, :node_group, :datacenter, :project
         one_to_many :component, :attribute_link, :attribute, :port_link, :monitoring_item, :dependency, :layout, :file_asset
         one_to_many_clone_omit :layout
+
+        virtual_column :project_id, :type => ID_TYPES[:id], :local_dependencies => [:project_project_id]
+        virtual_column :node_id, :type => ID_TYPES[:id], :local_dependencies => [:node_node_id]
+        virtual_column :library_id, :type => ID_TYPES[:id], :local_dependencies => [:library_library_id]
         virtual_column :parent_name, :possible_parents => [:component,:library,:node,:node_group,:project]
 
         virtual_column :view_def_key, :type => :varchar, :hidden => true, :local_dependencies => [:id,:view_def_ref,:component_type] 
@@ -271,9 +276,43 @@ module XYZ
         set_submodel(:assembly)
       end
     end
-    ##### Actions
-
+        
+    def self.common_columns()
+      [
+       :id,
+       :display_name,
+       :name,
+       :basic_type,
+       :type, 
+       :component_type,
+       :specific_type,
+       :extended_base,
+       :extension_type,
+       :description,
+       :implementation_id,
+       :only_one_per_node,
+       :assembly_id,
+       :version,
+       :ancestor_id,
+       :library_id,
+       :node_id,
+       :project_id,
+       :ui
+      ]
+    end
     ### virtual column defs
+    def name()
+      self[:display_name]
+    end
+    def node_id()
+      self[:node_node_id]
+    end
+    def project_id()
+      self[:project_project_id]
+    end
+    def library_id()
+      self[:library_library_id]
+    end
     def config_agent_type()
       cmp_external_ref_type = (self[:external_ref]||{})[:type]
       case cmp_external_ref_type

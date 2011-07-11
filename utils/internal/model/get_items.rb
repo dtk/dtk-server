@@ -1,7 +1,8 @@
+#TODO: should this be put under model directory and pssiblty folded into specfic classes
 module XYZ
   module GetItemsInstanceMixins
     def get_items()
-      objects = SubItemModelNames[model_name].inject([]) do |r,m|
+      objects =  sub_item_model_names.inject([]) do |r,m|
         r + get_objects_col_from_sp_hash({:columns => ["#{m}s".to_sym]},m)
       end
       objects.each{|o|o[:model_name] = o.model_name}
@@ -17,11 +18,7 @@ module XYZ
         pos[:top] ||= default_pos.ret_and_increment(o.model_name,:top)
       end
     end
-    SubItemModelNames = {
-      :target => [:node,:node_group],
-      :datacenter => [:node,:node_group], #TODO: remove temp datacenter->target
-      :component => [:node,:component]
-    }
+
     class DefaultPositions
       def initialize(ws_model_name)
         #TODO: simplifying assumption that these are constant accross all workspaces; ws_model_name param is hook for handling this

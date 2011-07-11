@@ -18,7 +18,6 @@ module XYZ
       end.compact
     end
 
-
     def add_item(source_id_handle,override_attrs={})
       #TODO: need to copy in avatar when hash["ui"] is non null
       override_attrs ||= {}
@@ -75,6 +74,10 @@ module XYZ
     end
 
    private
+    def sub_item_model_names()
+      [:node,:node_group]
+    end
+
     def clone_post_copy_hook__node(clone_copy_output,opts)
       update_object!(:iaas_type,:iaas_parameters)
       new_id_handle = clone_copy_output.id_handles.first

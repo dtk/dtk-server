@@ -24,6 +24,7 @@ module Ramaze::Helper
 
     #helpers that interact with model
     def get_objects(model_name,where_clause={},opts={})
+      model_name = :datacenter if model_name == :target  #TODO: remove temp datacenter->target
       model_class(model_name).get_objects(model_handle(model_name),where_clause,opts)
     end
 
@@ -56,6 +57,7 @@ module Ramaze::Helper
     end
 
     def id_handle(id,i_model_name=model_name(),display_name=nil)
+      model_name = :datacenter if model_name == :target  #TODO: remove temp datacenter->target
       c = ret_session_context_id()
       hash = {:c => c,:guid => id.to_i, :model_name => i_model_name.to_sym}
       hash.merge!(:display_name => display_name) if display_name

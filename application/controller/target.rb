@@ -90,17 +90,17 @@ module XYZ
     end
 
     def get_view_items(id)
-      datacenter = id_handle(id,:datacenter).create_object()
-      datacenter_id = datacenter.id()
+      target = id_handle(id,:target).create_object()
+      target_id = target.id()
 
-      dc_hash = get_object_by_id(datacenter_id,:datacenter)
+      dc_hash = get_object_by_id(target_id,:target)
 
       view_space = {
         :type => 'datacenter',
         :i18n => 'Environments',
         :object => dc_hash
       }
-      model_list = datacenter.get_items()
+      model_list = target.get_items()
 
       tpl_info_hash = {}
       tpl = R8Tpl::TemplateR8.new("node_group/wspace_display",user_context())
@@ -117,7 +117,7 @@ module XYZ
 
       items = model_list.map do |object|
         object_id_sym = object.id.to_s.to_sym
-        ui = ((dc_hash[:ui]||{})[:items]||{})[object_id_sym] || (object[:ui]||{})[datacenter_id.to_s.to_sym]
+        ui = ((dc_hash[:ui]||{})[:items]||{})[object_id_sym] || (object[:ui]||{})[target_id.to_s.to_sym]
 
         obj_tags = object[:display_name].split(',')
         model_name = object.model_name

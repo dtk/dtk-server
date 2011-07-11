@@ -485,6 +485,10 @@ module XYZ
     end
 
   private
+    def sub_item_model_names()
+      [:node,:component]
+    end
+
     def self.get_components_related_by_mixins_from_extension(component_mh,extension_cmps,cols)
       return Array.new if extension_cmps.empty?
       base_ids = extension_cmps.map{|cmp|cmp[:instance_extended_base_id]}

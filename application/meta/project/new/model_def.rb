@@ -32,9 +32,10 @@
        },
        {
          :model_name=>:node,
+         :convert => true,
          :join_type=>:left_outer,
          :join_cond=>{:datacenter_datacenter_id=>:target__id},
-         :cols=>[:id,:display_name,:description,:datacenter_datacenter_id,:os_type]
+         :cols=>Node::CommonColumns
        },
        {
          :model_name=>:component,

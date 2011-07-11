@@ -345,20 +345,15 @@ module XYZ
         #first check if it has an explicit path or possible parents defined; otherwise look for fn
         return nested_value(*vc_info[:path]) if vc_info[:path]
         return ret_parent_name(vc_info[:possible_parents]) if vc_info[:possible_parents] and x == :parent_name
-        send(x) 
+        send(x) if respond_to?(x)
       else
         nil
       end
     end
 
-    def materialize_virtual_columns(*virtual_cols)
-      virtual_cols.inject(self){|h,vc|h.merge(vc => self[vc])}
-    end
-
-    def self.materialize_virtual_columns!(rows,virtual_cols)
-      rows.each do |r|
-        virtual_cols.each{|vc|r[vc] = r[vc]}
-      end
+    def materialize!(*cols)
+      cols.each{|col|self[col] = self[col] unless self.has_key?(col)}
+      self
     end
 
     def ret_info_if_is_virtual_column(col)

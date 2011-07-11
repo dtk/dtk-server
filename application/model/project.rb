@@ -58,7 +58,7 @@ module XYZ
         nodes = target[:nodes] ||= Hash.new
         next unless r[:node]
         unless node = nodes[r[:node][:id]] 
-          node = nodes[r[:node][:id]] = r[:node].reject{|k,v|[:datacenter_datacenter_id].include?(k)}
+          node = nodes[r[:node][:id]] = r[:node].materialize!(*Node::CommonColumns)
         end
         components = node[:components] ||= Hash.new
         components[r[:component][:id]] = r[:component].reject{|k,v|k == :node_node_id} if r[:component]

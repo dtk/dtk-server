@@ -6,20 +6,23 @@ module XYZ
     def self.up()
       ds_column_defs :ds_attributes, :ds_key, :data_source, :ds_source_obj_type
       external_ref_column_defs()
-
+      virtual_column :name, :type => :varchar, :local_dependencies => [:display_name]
       column :tag, :varchar
       #TODO: may change types; by virtue of being in alibrary we know about item; may need to distingusih between backed images versus barbones one; also may only treat node constraints with search objects
-      column :type, :varchar, :size => 25, :default => "instance" # | "image" | "staged" | "constraint" | "constraint-common-node"
+      column :type, :varchar, :size => 25, :default => "instance" # | "image" #TODO: any more states possible
       column :os_type, :varchar, :size => 25
-      #TODO: is_deployed may just be a virtual column that tests if :external_ref is null
-      column :is_deployed, :boolean
       column :architecture, :varchar, :size => 10 #e.g., 'i386'
       #TBD: in data source specfic now column :manifest, :varchar #e.g.,rnp-chef-server-0816-ubuntu-910-x86_32
       #TBD: experimenting whetehr better to make this actual or virtual columns
       column :image_size, :numeric, :size=>[8, 3] #in megs
+
+      #TODO: may replace is_deployed and operational_status with status
+      column :is_deployed, :boolean
       column :operational_status, :varchar, :size => 50
+      virtual_column :status, :type => :varchar, :local_dependencies => [:is_deployed,:operational_status]
       column :ui, :json
       foreign_key :assembly_id, :component, FK_SET_NULL_OPT
+      virtual_column :target_id, :type => ID_TYPES[:id], :local_dependencies => [:datacenter_datacenter_id]
       virtual_column :parent_name, :possible_parents => [:library,:datacenter]
       virtual_column :disk_size, :path => [:ds_attributes,:flavor,:disk] #in megs
       #TODO how to have this conditionally "show up"
@@ -316,11 +319,36 @@ module XYZ
       one_to_many :attribute, :port, :attribute_link, :component, :node_interface, :address_access_point, :monitoring_item
     end
 
+    CommonColumns = 
+      [
+       :id,
+       :display_name,
+       :name,
+       :os_type,
+       :type,
+       :description,
+       :status,
+       :target_id,
+       :ui
+      ]
+
     ### virtual column defs
     #######################
     #TODO: write as sql fn for efficiency
     def has_pending_change()
       ((self[:action]||{})[:count]||0) > 0
+    end
+
+    def status()
+      (not self[:is_deployed]) ? "staged" : self[:operational_status]
+    end
+
+    def target_id()
+      self[:datacenter_datacenter_id]
+    end
+
+    def name()
+      self[:display_name]
     end
 
     #######################

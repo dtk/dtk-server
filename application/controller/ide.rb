@@ -2,9 +2,7 @@ module XYZ
   class IdeController < Controller
 
     def index()
-      c = ret_session_context_id()
-      model_handle = ModelHandle.new(c,:project)
-      projects = Project.get_all(model_handle)
+      projects = Project.get_all(model_handle(:project))
       pp [:projects,projects]
 
       projects.each_with_index { |p,i|

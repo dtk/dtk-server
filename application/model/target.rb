@@ -3,6 +3,24 @@ module XYZ
     def model_name() #TODO: remove temp datacenter->target
       :datacenter
     end
+    ##
+    def self.common_columns()
+      [
+       :id,
+       :display_name,
+       :name,
+       :description,
+       :type,
+       :iaas_type,
+       :project_id,
+       :ui
+      ]
+    end
+    ### virtual column defs
+    def name()
+      self[:display_name]
+    end
+
     ######### Model apis
     def destroy_and_delete_nodes()
       nodes = get_objects_from_sp_hash(:cols => [:nodes]).map{|r|r[:node]}

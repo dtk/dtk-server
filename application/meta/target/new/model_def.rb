@@ -44,6 +44,11 @@
    :violation
   ],
   :virtual_columns=>{
+    :name=>{
+      :type=>:varchar,
+      :hidden=>true,
+      :local_dependencies => [:display_name]
+    },
     :nodes=>{
       :type=>:json,
       :hidden=>true,

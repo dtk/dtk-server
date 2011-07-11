@@ -26,9 +26,10 @@
       [{
          :model_name=>:datacenter,
          :alias => :target,
+         :convert => true,
          :join_type=>:inner,
          :join_cond=>{:project_id=>:project__id},
-         :cols=>[:id,:display_name,:description,:project_id,:iaas_type]
+         :cols=>Target.common_columns()
        },
        {
          :model_name=>:node,

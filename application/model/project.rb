@@ -53,7 +53,7 @@ module XYZ
       ret_hash = Hash.new
       unravelled_ret.each do |r|
         unless target = ret_hash[r[:target][:id]]
-          target = ret_hash[r[:target][:id]] ||= r[:target].reject{|k,v|k == :project_id}.merge(:model_name => "target")
+          target = ret_hash[r[:target][:id]] ||= r[:target].materialize!(*Target.common_columns()).merge(:model_name => "target")
         end
         nodes = target[:nodes] ||= Hash.new
         next unless r[:node]

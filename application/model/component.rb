@@ -293,6 +293,7 @@ module XYZ
        :only_one_per_node,
        :assembly_id,
        :version,
+       :config_agent_type,
        :ancestor_id,
        :library_id,
        :node_id,

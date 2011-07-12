@@ -30,6 +30,16 @@
       :hidden=>true,
       :local_dependencies => [:direction,:display_name]
     },
+    :name=>{
+      :type=>:varchar,
+      :hidden=>true,
+      :local_dependencies => [:display_name]
+    },
+    :node_id=>{
+      :type=>ID_TYPES[:id],
+      :hidden=>true,
+      :local_dependencies => [:node_node_id]
+    },
     :attribute=>{
       :type=>:json,
       :hidden=>true,

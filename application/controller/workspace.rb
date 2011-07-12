@@ -114,7 +114,7 @@ pp [:debug_stored_new_pos,get_objects(model_name,SQL.in(:id,model_items.map{|ite
         :cols => cols,
         :filter => [:and] + filter_conjuncts
       }
-      model_list = Model.get_objs(model_handle(model_name),sp_hash).each{|r|r.materialize!(*cols)}
+      model_list = Model.get_objs(model_handle(model_name),sp_hash).each{|r|r.materialize!(cols)}
 
       i18n = get_i18n_mappings_for_models(model_name)
       model_list.each_with_index do |model,index|

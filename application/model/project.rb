@@ -32,7 +32,7 @@ module XYZ
         cmp = ret_hash[index]
         #TODO: dont think ids are used; but for consistency using lowest id instance
         if cmp.nil? or r[:component][:id] < cmp[:id] 
-          cmp = ret_hash[index] = r[:component].materialize!(*Component.common_columns())
+          cmp = ret_hash[index] = r[:component].materialize!(Component.common_columns())
         end
         impls = cmp[:implementations] ||= Hash.new
         #TODO: this is hack taht needs fixing
@@ -53,15 +53,15 @@ module XYZ
       ret_hash = Hash.new
       unravelled_ret.each do |r|
         unless target = ret_hash[r[:target][:id]]
-          target = ret_hash[r[:target][:id]] ||= r[:target].materialize!(*Target.common_columns()).merge(:model_name => "target")
+          target = ret_hash[r[:target][:id]] ||= r[:target].materialize!(Target.common_columns()).merge(:model_name => "target")
         end
         nodes = target[:nodes] ||= Hash.new
         next unless r[:node]
         unless node = nodes[r[:node][:id]] 
-          node = nodes[r[:node][:id]] = r[:node].materialize!(*Node.common_columns())
+          node = nodes[r[:node][:id]] = r[:node].materialize!(Node.common_columns())
         end
         components = node[:components] ||= Hash.new
-        components[r[:component][:id]] = r[:component].materialize!(*Component.common_columns()) if r[:component]
+        components[r[:component][:id]] = r[:component].materialize!(Component.common_columns()) if r[:component]
       end
       ret_hash.values.map do |t|
         nodes = t[:nodes].values.map do |n|

@@ -73,6 +73,24 @@
          :cols=>[:id,:display_name,:ui,:type]
        }]
     },
+    :node_ports=>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [{
+         :model_name=>:node,
+         :join_type=>:inner,
+         :join_cond=>{:datacenter_datacenter_id=>:datacenter__id},
+         :cols=>[:id]
+       },
+       {
+         :model_name=>:port,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:node_node_id=>:node__id},
+         :cols=>Port.common_columns
+       }]
+    },
     :violation_info=>{
       :type=>:json,
       :hidden=>true,

@@ -241,6 +241,15 @@ module XYZ
       get_objects_from_sp_hash(sp_hash_x,opts).map{|r|r[col]}.compact
     end
 
+    def self.get_objs_in_set(id_handles,sp_hash_x,opts={})
+      return Array.new if id_handles.empty?
+      sample_idh = id_handles.first
+      model_handle = sample_idh.createMH()
+      sp_hash = HashSearchPattern.add_to_filter(sp_hash_x,[:oneof, :id, id_handles.map{|idh|idh.get_id()}])
+      get_objs(model_handle,sp_hash,opts)
+    end
+
+    #TODO: deprecate below
     def self.get_objects_in_set_from_sp_hash(id_handles,sp_hash_x,opts={})
       return Array.new if id_handles.empty?
       sample_idh = id_handles.first
@@ -351,7 +360,7 @@ module XYZ
       end
     end
 
-    def materialize!(*cols)
+    def materialize!(cols)
       cols.each{|col|self[col] = self[col] unless self.has_key?(col)}
       self
     end

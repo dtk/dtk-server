@@ -53,7 +53,7 @@ module XYZ
            :convert => true,
            :join_type => :inner,
            :join_cond=>{:node_node_id => q(:node,:id)},
-           :cols => [:id,:type,id(:node),:containing_port_id,:external_attribute_id,:direction,:location,:ref]
+           :cols => [:id,:type,id(:node),:containing_port_id,:external_attribute_id,:direction,:location,:ref,:display_name,:name,:description] #TODO: should we unify with Port.common_columns
          }]
 
       virtual_column :output_attrs_to_l4_input_ports, :type => :json, :hidden => true,
@@ -430,41 +430,22 @@ module XYZ
     end
 
     def self.get_ports(id_handles)
-      get_objects_in_set_from_sp_hash(id_handles,{:cols => [:ports]},{:keep_ref_cols => true}).map{|r|r[:port]}
+      get_objs_in_set(id_handles,{:cols => [:ports]},{:keep_ref_cols => true}).map{|r|r[:port]}
     end
 
     def get_ports(type=nil)
-      port_list = self.class.get_ports([id_handle]).select do |port|
-        type.nil? or 
-          case type
-            when "external" then port[:type] == "external"
-            #if type is l4 return l4 ports and external ones not yet placed under a l4 port
-            when "l4" then port[:type] == "l4" or (port[:type] == "external" and port[:containing_port_id].nil?)
-          end
-      end
-
+      port_list = self.class.get_ports([id_handle])
       i18n = get_i18n_mappings_for_models(:component,:attribute)
-
-      port_list.map do |port|
-        {
-          :description=>"",
-          :is_port=>true, #TODO: probably not needed
-          :location=> port[:location],
-          :display_name=> get_i18n_port_name(i18n,port),
-          :direction=> port[:direction], 
-          :port_type=> port[:direction], #TODO: deprecate in favor of direction
-          :id=> port[:id]
-        }
-      end
+      port_list.map{|port|port.filter_and_process!(type,i18n)}.compact
     end
 
     def self.get_port_links(id_handles,type="l4")
       raise Error.new("not implemented yet: get_port_links when type = #{type}") unless type == "l4"
 
-      input_port_rows =  get_objects_in_set_from_sp_hash(id_handles,:columns => [:id, :display_name, :input_port_link_info]).select do |r|
+      input_port_rows =  get_objs_in_set(id_handles,:columns => [:id, :display_name, :input_port_link_info]).select do |r|
         (r[:port]||{})[:type] == type
       end
-      output_port_rows =  get_objects_in_set_from_sp_hash(id_handles,:columns => [:id, :display_name, :output_port_link_info]).select do |r|
+      output_port_rows =  get_objs_in_set(id_handles,:columns => [:id, :display_name, :output_port_link_info]).select do |r|
         (r[:port]||{})[:type] == type
       end
       return Array.new if input_port_rows.empty? and output_port_rows.empty?
@@ -484,7 +465,7 @@ module XYZ
     end
 
     def self.get_output_attrs_to_l4_input_ports(id_handles)
-      rows = get_objects_in_set_from_sp_hash(id_handles,{:cols => [:output_attrs_to_l4_input_ports]},{:keep_ref_cols => true})
+      rows = get_objs_in_set(id_handles,{:cols => [:output_attrs_to_l4_input_ports]},{:keep_ref_cols => true})
       return Hash.new if rows.empty?
       #restructure so that get mapping from attribute_id to port
       ret = Hash.new
@@ -497,7 +478,7 @@ module XYZ
     end
 
     def self.get_violations(id_handles)
-      get_objects_in_set_from_sp_hash(id_handles,{:cols => [:violations]}).map{|r|r[:violation]}
+      get_objs_in_set(id_handles,{:cols => [:violations]}).map{|r|r[:violation]}
     end
 
     def get_ui_info(datacenter)
@@ -571,14 +552,14 @@ module XYZ
 
       in_port_cols = [:id, :display_name, :input_port_links]
       ndx_in_links = Hash.new
-      get_objects_in_set_from_sp_hash(id_handles,:columns => in_port_cols).each do |r|
+      get_objs_in_set(id_handles,:columns => in_port_cols).each do |r|
         link = r[:port_link]
         ndx_in_links[link[:id]] = link 
       end
 
       out_port_cols = [:id, :display_name, :output_port_links]
       ndx_out_links = Hash.new
-      get_objects_in_set_from_sp_hash(id_handles,:columns => out_port_cols).each do |r|
+      get_objs_in_set(id_handles,:columns => out_port_cols).each do |r|
         link = r[:port_link]
         ndx_out_links[link[:id]] = link 
       end
@@ -599,14 +580,14 @@ module XYZ
 
       in_port_cols = [:id, :display_name, :input_attribute_links]
       ndx_in_links = Hash.new
-      get_objects_in_set_from_sp_hash(id_handles,:columns => in_port_cols).each do |r|
+      get_objs_in_set(id_handles,:columns => in_port_cols).each do |r|
         link = r[:attribute_link]
         ndx_in_links[link[:id]] = link if link[:type] == "external"
       end
 
       out_port_cols = [:id, :display_name, :output_attribute_links]
       ndx_out_links = Hash.new
-      get_objects_in_set_from_sp_hash(id_handles,:columns => out_port_cols).each do |r|
+      get_objs_in_set(id_handles,:columns => out_port_cols).each do |r|
         link = r[:attribute_link]
         ndx_out_links[link[:id]] = link if link[:type] == "external"
       end

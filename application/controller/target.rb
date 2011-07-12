@@ -1,5 +1,11 @@
 module XYZ
   class TargetController < Controller
+    def get_ports(id)
+      target = create_object_from_id(id)
+      port_list = target.get_ports("l4")
+      pp port_list
+      return {:data=>port_list}
+    end
 
     def edit
       

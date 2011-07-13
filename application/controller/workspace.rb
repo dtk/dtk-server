@@ -106,7 +106,7 @@ pp [:debug_stored_new_pos,get_objects(model_name,SQL.in(:id,model_items.map{|ite
       params.delete("type") if model_name == :component
       cols = model_class(model_name).common_columns()
       filter_conjuncts = params.map do |name,value|
-        [:regex,name.to_sym,value] if cols.include?(name.to_sym)
+        [:regex,name.to_sym,"^#{value}"] if cols.include?(name.to_sym)
       end.compact
       #restrict results to belong to library and not nested in assembly
       filter_conjuncts += [[:neq,:library_library_id,nil],[:eq,:assembly_id,nil]]

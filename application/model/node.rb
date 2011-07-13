@@ -17,7 +17,7 @@ module XYZ
       column :image_size, :numeric, :size=>[8, 3] #in megs
 
       #TODO: may replace is_deployed and operational_status with status
-      column :is_deployed, :boolean
+      column :is_deployed, :boolean, :default => false
       column :operational_status, :varchar, :size => 50
       virtual_column :status, :type => :varchar, :local_dependencies => [:is_deployed,:operational_status]
       column :ui, :json
@@ -355,6 +355,10 @@ module XYZ
     #######################
     ######### Model apis
     #attribute on node
+    def update_operational_status!(op_status)
+      update(:operational_status => op_status.to_s)
+      self[:operational_status] = op_status.to_s
+    end
 
     def self.pbuilderid(node)
       (node[:external_ref]||{})[:instance_id]

@@ -120,7 +120,6 @@
         "ami-bb07c3d2-micro": {
           "type": "image",
           "ds_source_obj_type": "image",
-          "is_deployed": true,
 	  "os_type": "ubuntu",
           "ui": {
             "images": {
@@ -203,7 +202,6 @@
         "ami-bb07c3d2-small": {
           "type": "image",
           "ds_source_obj_type": "image",
-          "is_deployed": true,
 	  "os_type": "ubuntu",
           "ui": {
             "images": {
@@ -286,7 +284,6 @@
         "ami-aa37c984": {
           "type": "image",
           "ds_source_obj_type": "image",
-          "is_deployed": true,
 	  "os_type": "redhat",
           "ui": {
             "images": {
@@ -399,7 +396,6 @@
         "ami-1738c102": {
           "type": "image",
           "ds_source_obj_type": "image",
-          "is_deployed": true,
 	  "os_type": "centos",
           "ui": {
             "images": {

@@ -28,9 +28,14 @@ module XYZ
             :type => "ec2_instance"
           })
           Log.info("#{node_print_form(node)} with ec2 instance id #{instance_id}; waiting for it to be available")
-          # pp [:node_created,response]
-          node.merge!(:external_ref => external_ref)
-          task_action.save_new_node_info(task_idh.createMH())
+          node_update_hash = {
+            :external_ref => external_ref,
+            :type => "instance",
+            :is_deployed => true,
+            :operational_status => "being_powered_on"
+          }
+          node.merge!(node_update_hash)
+          node.update(node_update_hash)
         else
           Log.info("node already created with instance id #{instance_id}; waiting for it to be available")
         end

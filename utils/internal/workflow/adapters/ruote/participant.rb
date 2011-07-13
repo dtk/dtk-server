@@ -73,6 +73,7 @@ module XYZ
           callbacks = {
             :on_msg_received => proc do |msg|
               pp [:found,msg[:senderid]]
+              task[:executable_action][:node].update_operational_status!(:powered_on)
               result = {:type => :completed_create_node, :task_id => task_id} 
               set_result_succeeded(workitem,result,task,action)
               CommandAndControl.get_and_propagate_updated_attributes(action)
@@ -93,10 +94,11 @@ module XYZ
       class DetectIfNodeIsResponding < Top
         def consume(workitem)
           params = get_params(workitem) 
-          action,workflow = %w{action workflow}.map{|k|params[k]}
+          action,task,workflow = %w{action task workflow}.map{|k|params[k]}
           callbacks = {
             :on_msg_received => proc do |msg|
               pp [:found,msg[:senderid]]
+              task[:executable_action][:node].update_operational_status!(:powered_on)
               self.reply_to_engine(workitem)
             end,
             :on_timeout => proc do 

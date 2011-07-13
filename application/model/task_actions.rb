@@ -75,16 +75,6 @@ module XYZ
         [:iaas,R8::Config[:command_and_control][:iaas][:type].to_sym]
       end
 
-      def save_new_node_info(task_mh)
-        node = self[:node]
-        hash = {
-          :external_ref => node[:external_ref],
-          :type => "instance"
-        }
-        node_idh = task_mh.createIDH(:model_name => :node, :id => node[:id])
-        Model.update_from_hash_assignments(node_idh,hash)
-      end
-
       def update_state_change_status(task_mh,status)
         update_state_change_status_aux(task_mh,status,[self[:state_change_id]])
       end

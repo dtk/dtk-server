@@ -297,7 +297,7 @@ rather than having or having two sap refs and user can remove or add to componen
         :syntax => {
           "database" => {:required => true, :type => :string},
           "username" => {:required => true, :type => :string},
-          "password" => {:required => false, :type => :string}
+          "password" => {:required => true, :type => :string}
         }
       },
       "db_params" => {
@@ -306,7 +306,7 @@ rather than having or having two sap refs and user can remove or add to componen
         :syntax => {
           "database" => {:required => true, :type => :string},
           "username" => {:required => true, :type => :string},
-          "password" => {:required => false, :type => :string}
+          "password" => {:required => true, :type => :string}
         }
       },
       "db_ref" => {

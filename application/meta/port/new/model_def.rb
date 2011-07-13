@@ -16,6 +16,10 @@
       :on_delete=>:cascade,
       :on_update=>:cascade
     },
+    :location_asserted=>{
+      :type=>:varchar,
+      :size =>10
+     },
     :containing_port_id=>{
       :type=>:bigint,
       :foreign_key_rel_type=>:port,
@@ -28,7 +32,7 @@
     :location=>{
       :type=>:varchar,
       :hidden=>true,
-      :local_dependencies => [:direction,:display_name]
+      :local_dependencies => [:location_asserted,:direction,:display_name]
     },
     :name=>{
       :type=>:varchar,

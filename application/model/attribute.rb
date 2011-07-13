@@ -40,6 +40,8 @@ module XYZ
       column :hidden, :boolean, :default => false
 
       #columns related to links
+      #TODO: for succinctness may use less staorage and colapse a number of port attributes
+      column :port_location, :varchar, :size => 10 #if set is override for port direction: east | west | south | north
       column :is_port, :boolean, :default => false
       virtual_column :port_is_external, :type => :boolean, :hidden => true, :local_dependencies => [:is_port,:semantic_type_summary]
 

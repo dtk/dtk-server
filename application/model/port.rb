@@ -16,12 +16,11 @@ module XYZ
     end
     #virtual attribute defs
     def location()
+      return self[:location_asserted] if self[:location_asserted]
       #TODO: stub
       return "east" if self[:display_name] =~ /nagios__server/
       return "east" if self[:display_name] =~ /mysql__master/
       return "west" if self[:display_name] =~ /nagios__client/
-      return "west" if self[:display_name] =~ /mysql__slave/
-#      return "north" if self[:display_name] =~ /mysql__slave/
       case self[:direction]
         when "output" then "north"
         when "input" then "south"
@@ -79,6 +78,7 @@ module XYZ
           :node_node_id => node_id,
           :direction => attr[:port_type]
         }
+        hash.merge!(:location_asserted => attr[:port_location]) if attr[:port_location]
         hash.merge(attr[:port_type] == "input" ? {:external_attribute_id => attr[:id]} : {})
       end
       port_mh = node_id_handle.createMH(:model_name => :port, :parent_model_name => :node)

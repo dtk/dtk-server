@@ -1,36 +1,35 @@
 module XYZ
   module AttrDepAnalaysisClassMixin
-    def dependency_analysis(augmented_attr_list,&block)
+    def dependency_analysis(aug_attr_list,&block)
       #find attributes that are required
-      selected_attrs = augmented_attr_list.select{|a|a[:required]}
-      return if selected_attrs.empty?
-      attr_ids = selected_attrs.map{|a|a[:id]}.uniq
+      return if aug_attr_list.empty?
+      attr_ids = aug_attr_list.map{|a|a[:id]}.uniq
       sp_hash = {
         :cols => [:function,:index_map,:input_id,:output_id],
         :filter => [:oneof ,:input_id, attr_ids]
       }
-      sample_attr = selected_attrs.first
+      sample_attr = aug_attr_list.first
       attr_link_mh = sample_attr.model_handle(:attribute_link)
       links_to_trace = get_objects_from_sp_hash(attr_link_mh,sp_hash)
       
       matches = Array.new
-      selected_attrs.each do |attr|
+      aug_attr_list.each do |attr|
         link = find_matching_link(attr,links_to_trace)
         matches << {:link => link, :attr => attr} if link
       end
       matches.each do |match|
         attr_in = match[:attr]
         link = match[:link]
-        attr_out = find_matching_output_attr(augmented_attr_list,attr_in,link)
+        attr_out = find_matching_output_attr(aug_attr_list,attr_in,link)
         block.call(attr_in,link,attr_out)
       end
     end
 
    private
-    def find_matching_output_attr(augmented_attr_list,attr_in,link)
+    def find_matching_output_attr(aug_attr_list,attr_in,link)
       ret = nil
       output_id =  link[:output_id] 
-      ret = augmented_attr_list.find do |attr|
+      ret = aug_attr_list.find do |attr|
         if attr[:id] == output_id
           case link[:function]
            when "eq" then true

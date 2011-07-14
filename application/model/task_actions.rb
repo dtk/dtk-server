@@ -150,7 +150,7 @@ module XYZ
         ret = Array.new
         dyn_attrs = (result[:data]||{})[:dynamic_attributes]
         return ret if dyn_attrs.nil? or dyn_attrs.empty?
-        dyn_attrs.map{|a|{:id => a[:attribute_id], :value_asserted => a[:attribute_var]}}
+        dyn_attrs.map{|a|{:id => a[:attribute_id], :value_asserted => a[:attribute_val]}}
       end
 
       def self.add_attributes!(attr_mh,action_list)

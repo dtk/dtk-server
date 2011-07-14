@@ -20,12 +20,6 @@ module XYZ
         callbacks = context[:callbacks]
         async_agent_call(mcollective_agent(config_agent),"run",msg_content,filter,callbacks,context)
       end
-      def self.get_updated_attributes(task_action,result)
-        dyn_attrs = (result[:data]||{})[:dynamic_attributes]
-        return nil if dyn_attrs.nil? or dyn_attrs.empty?
-        #TODO: stub
-        nil
-      end
 
       #TODO: change signature to poll_to_detect_node_ready(node,callbacks,context)
       def self.poll_to_detect_node_ready(node,opts)

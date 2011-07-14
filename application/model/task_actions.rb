@@ -40,6 +40,16 @@ module XYZ
         Array.new
       end
 
+      def get_and_propagate_dynamic_attributes(result)
+        updated_attrs = get_dynamic_attributes(result)
+        return if updated_attrs.empty?
+        sample_attr = updated_attrs.first
+        attr_mh = sample_attr.model_handle
+        update_rows = updated_attrs.map{|attr|{:id => attr[:id], :value_asserted => attr[:value_asserted]}}
+        Model.update_from_rows(attr_mh,update_rows)
+        AttributeLink.propagate(updated_attrs.map{|attr|attr.id_handle()})
+      end
+
       #virtual gets overwritten
       #updates object and the tasks in the model
       def get_and_update_attributes!(task)
@@ -62,6 +72,30 @@ module XYZ
         }
         super(hash)
       end
+
+      def get_dynamic_attributes(result)
+        node = self[:node]
+        updated_node_state = CommandAndControl.get_node_state(node)
+        ret = Array.new
+        attributes_to_set().each do |attr|
+          unless fn = AttributeToSetMapping[attr[:display_name]]
+            Log.error("no rules to process attribute to set #{attr[:display_name]}")
+          else
+            new_value = fn.call(updated_node_state)
+            unless false #TODO: temp for testing attr[:value_asserted] == new_value
+              unless new_value.nil?
+                attr[:value_asserted] = new_value
+                ret << attr
+              end
+            end
+          end
+        end
+        ret
+      end
+      #TODO: if can legitimately have nil value then need to change update
+      AttributeToSetMapping = {
+        "host_addresses_ipv4" =>  lambda{|server|(server||{})[:dns_name] && [server[:dns_name]]} #null if no value
+      }
 
       def add_attribute!(attr)
         self[:attributes] << attr
@@ -111,6 +145,14 @@ module XYZ
     class ConfigNode < TaskActionNode
       def long_running?()
         true
+      end
+
+      def get_dynamic_attributes(result)
+        ret = Array.new
+        dyn_attrs = (result[:data]||{})[:dynamic_attributes]
+        return ret if dyn_attrs.nil? or dyn_attrs.empty?
+        #TODO: stub
+        ret
       end
 
       def self.add_attributes!(attr_mh,action_list)

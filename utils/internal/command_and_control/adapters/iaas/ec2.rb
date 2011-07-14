@@ -55,7 +55,7 @@ module XYZ
         response
       end
 
-      def self.get_updated_attributes(task_action)
+      def self.get_updated_attributes(task_action,result)
         node = task_action[:node]
         instance_id = (node[:external_ref]||{})[:instance_id]
         raise Error.new("get_updated_attributes called when #{node_print_form(node)} does not have instance id") unless instance_id

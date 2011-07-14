@@ -20,10 +20,10 @@ module XYZ
       klass.destroy_node?(node)
     end
 
-    def self.get_and_propagate_updated_attributes(task_action)
+    def self.get_and_propagate_updated_attributes(task_action,result)
       klass = load_for(task_action)
-      updated_attributes = klass.get_updated_attributes(task_action)
-      propagate_attributes(updated_attributes)
+      updated_attributes = klass.get_updated_attributes(task_action,result)
+      propagate_attributes(updated_attributes) if updated_attributes
     end
 
     def self.request__get_logs(task,nodes,callbacks,context)

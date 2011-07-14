@@ -76,8 +76,8 @@ module XYZ
               task[:executable_action][:node].update_operational_status!(:powered_on)
               result = {:type => :completed_create_node, :task_id => task_id} 
               set_result_succeeded(workitem,result,task,action)
-              CommandAndControl.get_and_propagate_updated_attributes(action)
-              self.reply_to_engine(workitem)
+              CommandAndControl.get_and_propagate_updated_attributes(action,result)
+             self.reply_to_engine(workitem)
             end,
             :on_timeout => proc do 
               pp [:timeout]
@@ -128,7 +128,8 @@ module XYZ
                   #result[:statuscode] is for transport errors and data is for errors for agent
                   succeeded = (result[:statuscode] == 0 and [:succeeded,:ok].include?((result[:data]||{})[:status]))
                   if succeeded
-                    set_result_succeeded(workitem,result,task,action) 
+#                    set_result_succeeded(workitem,result,task,action) 
+                    CommandAndControl.get_and_propagate_updated_attributes(action,result)          
                   else
                     set_result_failed(workitem,result,task,action)
                   end

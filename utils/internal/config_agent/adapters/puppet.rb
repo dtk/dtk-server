@@ -53,7 +53,7 @@ module XYZ
               #once set cnnot change
               unless attr[:attribute_value]
                 #TODO: making assumption that dynamic attribute as array_form_path of form [<module>,<attrib_name>]
-                dynamic_attrs << array_form_path[1]
+                dynamic_attrs << {:name => array_form_path[1], :id => attr[:id]}
               end
             elsif val = attr[:attribute_value]
               add_attribute!(qual_attrs,array_form_path,val)

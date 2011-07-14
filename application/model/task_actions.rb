@@ -43,11 +43,10 @@ module XYZ
       def get_and_propagate_dynamic_attributes(result)
         updated_attrs = get_dynamic_attributes(result)
         return if updated_attrs.empty?
-        sample_attr = updated_attrs.first
-        attr_mh = sample_attr.model_handle
+        attr_mh = self[:node].model_handle(:attribute)
         update_rows = updated_attrs.map{|attr|{:id => attr[:id], :value_asserted => attr[:value_asserted]}}
         Model.update_from_rows(attr_mh,update_rows)
-        AttributeLink.propagate(updated_attrs.map{|attr|attr.id_handle()})
+        AttributeLink.propagate(updated_attrs.map{|attr|attr_mh.createIDH(:id => attr[:id])})
       end
 
       #virtual gets overwritten
@@ -151,8 +150,7 @@ module XYZ
         ret = Array.new
         dyn_attrs = (result[:data]||{})[:dynamic_attributes]
         return ret if dyn_attrs.nil? or dyn_attrs.empty?
-        #TODO: stub
-        ret
+        dyn_attrs.map{|a|{:id => a[:attribute_id], :value_asserted => a[:attribute_var]}}
       end
 
       def self.add_attributes!(attr_mh,action_list)

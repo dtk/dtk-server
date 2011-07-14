@@ -19,7 +19,7 @@ module XYZ
         trigger[:send_message].call(@protocol_handler,request_id)
       end
      private
-      DefaultTimeout = 30 #90
+      DefaultTimeout = 120
       ExpectedCountDefault = 1
      public
 

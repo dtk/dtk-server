@@ -24,7 +24,7 @@ module XYZ
             :result => TaskAction::Result::Succeeded.new()
           }             
           task.update(update_hash)
-          action.update_state_change_status(task.model_handle,:completed)  #this updates pending state
+          #action.update_state_change_status(task.model_handle,:completed)  #this updates pending state
           set_result_succeeded__stack(workitem,new_result,task,action)
         end
 
@@ -117,7 +117,7 @@ module XYZ
           #LockforDebug.synchronize{pp [:in_consume, Thread.current, Thread.list];STDOUT.flush}
           params = get_params(workitem) 
           task_id,action,workflow,task = %w{task_id action workflow task}.map{|k|params[k]}
-          pp ["executing config on node", task_id,action[:node]]
+          pp ["executing #{action.class.to_s}", task_id,action[:node]]
           workitem.fields["guard_id"] = task_id # ${guard_id} is referenced if guard for execution of this
           execution_context(task) do
             if action.long_running?
@@ -128,7 +128,7 @@ module XYZ
                   #result[:statuscode] is for transport errors and data is for errors for agent
                   succeeded = (result[:statuscode] == 0 and [:succeeded,:ok].include?((result[:data]||{})[:status]))
                   if succeeded
-#                    set_result_succeeded(workitem,result,task,action) 
+                    set_result_succeeded(workitem,result,task,action) 
                     action.get_and_propagate_dynamic_attributes(result)
                   else
                     set_result_failed(workitem,result,task,action)

@@ -2,10 +2,16 @@ module XYZ
   class Task < Model
 
     def add_event(event_type,sub_task)
-      event = TaskEvent.create?(event_type,sub_task)
+      event = TaskEvent.create_event?(event_type,sub_task)
       return unless event
-      row = {:content => event.to_hash, :ref => "task_event", :type => event_type.to_s}
-      Model.create_from_rows(model_handle,[row],{:convert => true})
+      type = event.delete(:type)||event_type
+      row = {
+        :content => event.to_hash, 
+        :ref => "task_event", 
+        :type => type.to_s,
+        :task_id => id()
+      }
+      Model.create_from_rows(model_handle(:task_event),[row],{:convert => true})
     end
 
     def update_input_attributes!()

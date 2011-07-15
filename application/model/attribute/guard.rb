@@ -20,7 +20,7 @@ module XYZ
         end
         return nil 
       end
-      #gurading attributes that are unset and 
+      #guarding attributes that are unset and 
       #TODO: should we assume that what gets heer are only requierd attributes
       unless guard_attr[:dynamic] and (not guard_attr[:attribute_value]) and (not guarded_attr[:attribute_value])
         return nil

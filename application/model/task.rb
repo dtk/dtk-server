@@ -3,7 +3,7 @@ module XYZ
 
     def add_event(event_type,sub_task)
       event = TaskEvent.create_event?(event_type,sub_task)
-      return unless event
+      return nil unless event
       type = event.delete(:type)||event_type
       row = {
         :content => event.to_hash, 
@@ -12,6 +12,7 @@ module XYZ
         :task_id => id()
       }
       Model.create_from_rows(model_handle(:task_event),[row],{:convert => true})
+      event
     end
 
     def update_input_attributes!()

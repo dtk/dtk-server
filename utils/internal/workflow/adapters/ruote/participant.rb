@@ -118,8 +118,8 @@ module XYZ
           #LockforDebug.synchronize{pp [:in_consume, Thread.current, Thread.list];STDOUT.flush}
           params = get_params(workitem) 
           task_id,action,workflow,task,top_task = %w{task_id action workflow task top_task}.map{|k|params[k]}
-          pp ["executing #{action.class.to_s}", task_id,action[:node]]
-          top_task.add_event(:start,task)
+          event = top_task.add_event(:start,task)
+          pp ["executing #{action.class.to_s}", task_id,event] if event
           workitem.fields["guard_id"] = task_id # ${guard_id} is referenced if guard for execution of this
           execution_context(task) do
             if action.long_running?

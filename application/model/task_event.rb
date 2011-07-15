@@ -63,6 +63,22 @@ module XYZ
       end
     end
 
+    class EndCreateNode < Event
+      def initialize(action)
+        #TODO: stub
+        node = action[:node]
+        ext_ref = node[:external_ref]
+        ext_ref_type = ext_ref[:type]
+        hash = {
+          :action => "completed_create_node",
+          :node_name => node[:display_name],
+          :node_type => ext_ref_type.to_s,
+        }
+        hash.merge(attr_val_pairs(action[:attributes]))
+        super(hash)
+      end
+    end
+
     class StartConfigNode < Event
       def initialize(action)
         cmp_info = action[:component_actions].map do |cmp_attrs|

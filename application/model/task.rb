@@ -1,6 +1,13 @@
 module XYZ
   class Task < Model
 
+    def add_event(event_type,sub_task)
+      event = TaskEvent.create?(event_type,sub_task)
+      return unless event
+      row = {:content => event.to_hash, :ref => "task_event", :type => event_type.to_s}
+      Model.create_from_rows(model_handle,[row],{:convert => true})
+    end
+
     def update_input_attributes!()
       task_action = self[:executable_action]
       #updates ruby task object

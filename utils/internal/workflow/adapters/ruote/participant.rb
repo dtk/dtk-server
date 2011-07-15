@@ -15,6 +15,7 @@ module XYZ
           params.merge!("task" => task_info["task"])
           params.merge!("action" => task_info["action"])
           params.merge!("top_task_idh" => task_info["top_task_idh"])
+          params.merge!("top_task" => workflow.top_task)
           params
         end
 
@@ -116,8 +117,9 @@ module XYZ
         def consume(workitem)
           #LockforDebug.synchronize{pp [:in_consume, Thread.current, Thread.list];STDOUT.flush}
           params = get_params(workitem) 
-          task_id,action,workflow,task = %w{task_id action workflow task}.map{|k|params[k]}
+          task_id,action,workflow,task,top_task = %w{task_id action workflow task top_task}.map{|k|params[k]}
           pp ["executing #{action.class.to_s}", task_id,action[:node]]
+          top_task.add_event(:start,task)
           workitem.fields["guard_id"] = task_id # ${guard_id} is referenced if guard for execution of this
           execution_context(task) do
             if action.long_running?

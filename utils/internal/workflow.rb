@@ -29,6 +29,8 @@ module XYZ
       self.class.process_executable_action(task,top_task_idh)
     end
 
+    attr_reader :top_task
+
    private
     def self.process_executable_action(task,top_task_idh)
       CommandAndControl.execute_task_action(task,top_task_idh)

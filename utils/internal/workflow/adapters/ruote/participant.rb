@@ -25,7 +25,7 @@ module XYZ
             :result => TaskAction::Result::Succeeded.new()
           }             
           task.update(update_hash)
-          #action.update_state_change_status(task.model_handle,:completed)  #this updates pending state
+          action.update_state_change_status(task.model_handle,:completed)  #this updates pending state
           set_result_succeeded__stack(workitem,new_result,task,action)
         end
 
@@ -70,9 +70,10 @@ module XYZ
       class DetectCreatedNodeIsReady < Top
         def consume(workitem)
           params = get_params(workitem) 
-          task_id,action,workflow,task,task_end = %w{task_id action workflow task task_end}.map{|k|params[k]}
+          task_id,action,workflow,task,task_end,top_task = %w{task_id action workflow task task_end top_task}.map{|k|params[k]}
           callbacks = {
             :on_msg_received => proc do |msg|
+              event = top_task.add_event(:end, task)
               pp [:found,msg[:senderid]]
               task[:executable_action][:node].update_operational_status!(:powered_on)
               result = {:type => :completed_create_node, :task_id => task_id} 
@@ -92,6 +93,7 @@ module XYZ
         end
       end
 
+      #TODO: currently; just using above; either use this or get rid of it
       class DetectIfNodeIsResponding < Top
         def consume(workitem)
           params = get_params(workitem) 

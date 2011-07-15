@@ -3,10 +3,16 @@ module XYZ
     def self.create_event?(event_type,task)
       action = task[:executable_action]
       return nil unless action
-      if action.kind_of?(TaskAction::CreateNode) and event_type == :start
-        StartCreateNode.create?(action)
-      elsif action.kind_of?(TaskAction::ConfigNode) and event_type == :start
-        StartConfigNode.create?(action)
+      if action.kind_of?(TaskAction::CreateNode) 
+        case event_type
+          when :start then StartCreateNode.create?(action)
+          when :end then EndCreateNode.create?(action)
+        end
+      elsif action.kind_of?(TaskAction::ConfigNode)
+        case event_type
+          when :start then StartConfigNode.create?(action)
+          when :end then EndConfigNode.create?(action)
+        end
       end
     end
 
@@ -41,7 +47,7 @@ module XYZ
         ext_ref = node[:external_ref]
         ext_ref_type = ext_ref[:type]
         hash = {
-          :action => "create_node",
+          :action => "initiating_create_node",
           :node_name => node[:display_name],
           :node_type => ext_ref_type.to_s,
         }
@@ -62,7 +68,7 @@ module XYZ
         cmp_info = action[:component_actions].map do |cmp_attrs|
           {:component_name => cmp_attrs[:component][:display_name]}.merge(attr_val_pairs(cmp_attrs[:attributes]))
         end
-        super(:action => "config_node", :components => cmp_info)
+        super(:action => "initiating_config_node", :components => cmp_info)
       end
     end
   end

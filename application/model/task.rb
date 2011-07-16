@@ -1,6 +1,11 @@
 module XYZ
   class Task < Model
 
+    def get_events()
+      sp_hash = {:cols => [:created_at, :type, :content]}
+      Model.get_objs(model_handle(:task_event),sp_hash).sort{|a,b| a[:created_at] <=> b[:created_at]}
+    end
+
     def add_event(event_type,sub_task,result=nil)
       event = TaskEvent.create_event?(event_type,sub_task,result)
       return nil unless event

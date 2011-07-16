@@ -15,6 +15,17 @@ module XYZ
       redirect "/xyz/workspace/commit_changes/#{datacenters.first[:id].to_s}"
     end
 
+    def get_events(task_id=nil)
+      unless task_id
+        tasks = Task.get_top_level_tasks(model_handle).sort{|a,b| b[:updated_at] <=> a[:updated_at]}
+        task = tasks.first
+      else
+        raise Error.new("not implemented yet get_logs with task id given")
+      end
+      events = create_object_from_id(task_id).get_events
+      pp events
+      {:content => {}}
+    end
 
     def get_logs(task_id=nil)
       node_id = request.params["node_id"]

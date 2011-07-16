@@ -204,7 +204,8 @@ module XYZ
         indexed_attrs_to_update = Hash.new
         (self[:component_actions]||[]).each do |action|
           (action[:attributes]||[]).each do |attr|
-            if attr[:port_is_external] and attr[:port_type] == "input" and not attr[:value_asserted]
+#            if attr[:port_is_external] and attr[:port_type] == "input" and not attr[:value_asserted]
+            if attr[:is_port] and not attr[:value_asserted]
               indexed_attrs_to_update[attr[:id]] = attr
             end
           end

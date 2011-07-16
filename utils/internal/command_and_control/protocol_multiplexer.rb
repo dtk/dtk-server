@@ -37,7 +37,6 @@ module XYZ
       def process_request_timeout(request_id)
         callbacks = get_and_remove_reqid_callbacks(request_id)
         if callbacks
-          pp [:timeout, request_id]
           callbacks.process_timeout(request_id) 
         end
       end

@@ -1,8 +1,8 @@
 module XYZ
   class Task < Model
 
-    def add_event(event_type,sub_task)
-      event = TaskEvent.create_event?(event_type,sub_task)
+    def add_event(event_type,sub_task,result=nil)
+      event = TaskEvent.create_event?(event_type,sub_task,result)
       return nil unless event
       type = event.delete(:type)||event_type
       row = {

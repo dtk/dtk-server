@@ -73,16 +73,15 @@ module XYZ
           task_id,action,workflow,task,task_end,top_task = %w{task_id action workflow task task_end top_task}.map{|k|params[k]}
           callbacks = {
             :on_msg_received => proc do |msg|
-              event = top_task.add_event(:end, task)
+              result = {:type => :completed_create_node, :task_id => task_id} 
+              event = top_task.add_event(:complete_succeeded, task,result)
               pp [:found,msg[:senderid]]
               task[:executable_action][:node].update_operational_status!(:powered_on)
-              result = {:type => :completed_create_node, :task_id => task_id} 
               set_result_succeeded(workitem,result,task,action)
               action.get_and_propagate_dynamic_attributes(result)
               self.reply_to_engine(workitem)
             end,
             :on_timeout => proc do 
-              pp [:timeout]
               self.reply_to_engine(workitem)
             end
           }
@@ -105,7 +104,6 @@ module XYZ
               self.reply_to_engine(workitem)
             end,
             :on_timeout => proc do 
-              pp [:timeout]
               self.reply_to_engine(workitem)
             end
           }
@@ -129,13 +127,16 @@ module XYZ
               callbacks = {
                 :on_msg_received => proc do |msg|
                   result = msg[:body].merge("task_id" => task_id)
-                  pp [:result,result]
                   #result[:statuscode] is for transport errors and data is for errors for agent
                   succeeded = (result[:statuscode] == 0 and [:succeeded,:ok].include?((result[:data]||{})[:status]))
                   if succeeded
+                    event = top_task.add_event(:complete_succeeded,task,result)
+                    pp ["task_complete_succeeded #{action.class.to_s}", task_id,event] if event
                     set_result_succeeded(workitem,result,task,action) 
                     action.get_and_propagate_dynamic_attributes(result)
                   else
+                    event = top_task.add_event(:complete_failed,task,result)
+                    pp ["task_complete_failed #{action.class.to_s}", task_id,event] if event
                     set_result_failed(workitem,result,task,action)
                   end
                   self.reply_to_engine(workitem)
@@ -144,6 +145,8 @@ module XYZ
                   result = {
                     "status" => "timeout" 
                   }
+                  event = top_task.add_event(:complete_timeout,task,result)
+                  pp ["task_complete_timeout #{action.class.to_s}", task_id,event] if event
                   set_result_timeout(workitem,result,task)
                   self.reply_to_engine(workitem)
                 end
@@ -195,7 +198,8 @@ module XYZ
 
       class EndOfTask < Top
         def consume(workitem)
-          pp [workitem.fields,workitem.params]
+          #pp [workitem.fields,workitem.params]
+          pp "EndOfTask"
           reply_to_engine(workitem)
         end
 

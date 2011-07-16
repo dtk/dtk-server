@@ -1,24 +1,31 @@
 module XYZ
   class TaskEvent < Model
-    def self.create_event?(event_type,task)
+    def self.create_event?(event_type,task,result)
       action = task[:executable_action]
       return nil unless action
       if action.kind_of?(TaskAction::CreateNode) 
         case event_type
-          when :start then StartCreateNode.create?(action)
-          when :end then EndCreateNode.create?(action)
+         when :start 
+          StartCreateNode.create_start?(action)
+         when :complete_succeeded,:complete_failed,:complete_timeout
+          CompleteCreateNode.create_complete?(action,event_type,result)
         end
       elsif action.kind_of?(TaskAction::ConfigNode)
         case event_type
-          when :start then StartConfigNode.create?(action)
-          when :end then EndConfigNode.create?(action)
+         when :start 
+          StartConfigNode.create_start?(action)
+         when :complete_succeeded,:complete_failed,:complete_timeout 
+          CompleteConfigNode.create_complete?(action,event_type,result)
         end
       end
     end
 
     class Event < HashObject
-      def self.create?(action)
+      def self.create_start?(action)
         is_no_op?(action) ? nil : new(action)
+      end
+      def self.create_complete?(action,status,result)
+        is_no_op?(action) ? nil : new(action,status,result)
       end
      private
       #gets overritten if needed
@@ -47,7 +54,7 @@ module XYZ
         ext_ref = node[:external_ref]
         ext_ref_type = ext_ref[:type]
         hash = {
-          :action => "initiating_create_node",
+          :event => "initiating_create_node",
           :node_name => node[:display_name],
           :node_type => ext_ref_type.to_s,
         }
@@ -63,14 +70,14 @@ module XYZ
       end
     end
 
-    class EndCreateNode < Event
-      def initialize(action)
+    class CompleteCreateNode < Event
+      def initialize(action,status,result)
         #TODO: stub
         node = action[:node]
         ext_ref = node[:external_ref]
         ext_ref_type = ext_ref[:type]
         hash = {
-          :action => "completed_create_node",
+          :event => "completed_create_node",
           :node_name => node[:display_name],
           :node_type => ext_ref_type.to_s,
         }
@@ -82,9 +89,39 @@ module XYZ
     class StartConfigNode < Event
       def initialize(action)
         cmp_info = action[:component_actions].map do |cmp_attrs|
-          {:component_name => cmp_attrs[:component][:display_name]}.merge(attr_val_pairs(cmp_attrs[:attributes]))
+          attr_info = attr_val_pairs(cmp_attrs[:attributes].reject{|a|a[:dynamic]})
+          {:component_name => cmp_attrs[:component][:display_name]}.merge(attr_info)
         end
-        super(:action => "initiating_config_node", :components => cmp_info)
+        hash = {
+          :event => "initiating_config_node",
+          :node_name => action[:node][:display_name],
+          :components => cmp_info
+        }
+        super(hash)
+      end
+    end
+
+    class CompleteConfigNode < Event
+      def initialize(action,status,result)
+        hash = {
+          :event => status.to_s,
+          :node_name => action[:node][:display_name],
+          :components => action[:component_actions].map{|cmp_attrs| cmp_attrs[:component][:display_name]}
+        }
+        dyn_attrs = dynamic_attributes(status,result)
+        hash.merge!(:dynamic_attributes => dyn_attrs) unless dyn_attrs.empty?
+        super(hash)
+      end
+     private
+      def dynamic_attributes(status,result)
+        ret = Hash.new
+        return ret unless status == :compleet_succeeeded
+        return ret unless dyn_attrs = (result[:data]||{})[:dynamic_attributes]
+        dyn_attrs.each do |da|
+          cmp = ret[da[:component_name]] ||= Hash.new
+          cmp[da[:attribute_name]] = da[:attribute_val]
+        end
+        ret
       end
     end
   end

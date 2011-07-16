@@ -33,11 +33,22 @@ module XYZ
         if attr[:id] == output_id
           case link[:function]
            when "eq" then true
-           when "select_one" then 
+           when "eq_indexed"
+            if not (link[:index_map]||[]).size == 1
+              Log.error("not treating index maps with multiple elements")
+              nil
+            elsif (link[:index_map].first[:output]||[]).empty?
+              true
+            else
+              Log.error("not treated when link function is #{link[:function]} and output index map is non empty")
+              nil
+            end
+           when "select_one" 
             out_item_path = attr[:item_path]
             out_item_path and (attr_in[:item_path] == out_item_path[1,out_item_path.size-1])
           else
-           Log.error("not teated when link function is #{link[:function]}")
+           Log.error("not treated when link function is #{link[:function]}")
+            nil
           end
         end
       end

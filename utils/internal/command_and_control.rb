@@ -3,7 +3,6 @@ module XYZ
   end
   class CommandAndControl
     def self.execute_task_action(task,top_task_idh,opts={})
-      task.update_input_attributes!()
       task_action = task[:executable_action]
       klass = load_for(task_action)
       task_idh = task.id_handle()

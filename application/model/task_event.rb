@@ -115,7 +115,7 @@ module XYZ
      private
       def dynamic_attributes(status,result)
         ret = Hash.new
-        return ret unless status == :compleet_succeeeded
+        return ret unless status == :complete_succeeeded
         return ret unless dyn_attrs = (result[:data]||{})[:dynamic_attributes]
         dyn_attrs.each do |da|
           cmp = ret[da[:component_name]] ||= Hash.new

@@ -131,7 +131,8 @@ module XYZ
     end
 
     ##### helpers
-    NoAuth = [:user,:user_group,:user_group_relation]
+    #TODO complete hack to add :task_event NoAuth = [:user,:user_group,:user_group_relation]
+    NoAuth = [:user,:user_group,:user_group_relation,:task_event]
     def self.process_user_info_aux!(type,scalar_assignments,model_or_id_handle,columns=nil)
       to_add = Hash.new
       user_obj = CurrentSession.new.get_user_object()

@@ -110,3 +110,46 @@ module XYZ
     end
   end
 end
+
+###Monkey patches
+module Ruote
+  class DispatchPool
+    def do_threaded_dispatch(participant, msg)
+
+      msg = Rufus::Json.dup(msg)
+        #
+        # the thread gets its own copy of the message
+        # (especially important if the main thread does something with
+        # the message 'during' the dispatch)
+
+      # Maybe at some point a limit on the number of dispatch threads
+      # would be OK.
+      # Or maybe it's the job of an extension / subclass
+
+      Thread.new do
+        begin
+
+          do_dispatch(participant, msg)
+
+        rescue => exception
+          @context.error_handler.msg_handle(msg, exception)
+        end
+      end
+    end
+  end
+end
+require 'ruote/worker'
+module Ruote
+  class Worker
+    def run_in_thread
+
+      Thread.abort_on_exception = true
+        # TODO : remove me at some point
+
+      @running = true
+
+      @run_thread = Thread.new { run }
+    end
+  end
+end
+

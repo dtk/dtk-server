@@ -3,7 +3,7 @@ module XYZ
 
     def get_events()
       sp_hash = {:cols => [:created_at, :type, :content]}
-      Model.get_objs(model_handle(:task_event),sp_hash).sort{|a,b| a[:created_at] <=> b[:created_at]}
+      get_children_objs(:task_event,sp_hash).sort{|a,b| a[:created_at] <=> b[:created_at]}
     end
 
     def add_event(event_type,sub_task,result=nil)

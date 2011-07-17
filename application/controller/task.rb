@@ -18,7 +18,7 @@ module XYZ
     def get_events(task_id=nil)
       unless task_id
         tasks = Task.get_top_level_tasks(model_handle).sort{|a,b| b[:updated_at] <=> a[:updated_at]}
-        task = tasks.first
+        task_id = tasks.first[:id]
       else
         raise Error.new("not implemented yet get_logs with task id given")
       end

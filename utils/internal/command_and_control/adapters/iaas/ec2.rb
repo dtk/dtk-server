@@ -16,6 +16,8 @@ module XYZ
           create_options = {:image_id => ami,:flavor_id => flavor_id}
 
           create_options.merge!(:groups => external_ref[:security_group_set]||DefaultSecurityGroupSet)
+          #TODO: patch
+          create_options.merge!(:key_name => "rich-east")
           avail_zone = external_ref[:availability_zone]
           unless avail_zone.nil? or avail_zone == "automatic"
             create_options.merge!(:availability_zone => avail_zone)

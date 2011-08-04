@@ -3,20 +3,33 @@ if (!R8.IDE.View.editor) { R8.IDE.View.editor = {}; }
 
 if (!R8.IDE.View.editor.target) {
 
-	R8.IDE.View.editor.target = function(viewDef) {
-		var _obj = viewDef.obj,
-			_id = _obj.get('id'),
+	R8.IDE.View.editor.target = function(target) {
+		var _target = target,
+			_idPrefix = 'editor-target-',
 			_panel = null,
+			_contentWrapperNode = null,
+			_contentNode = null,
+
+			_initialized = false,
+
 			_pendingDelete = {},
 
+//TODO: maybe put UI updates directly into model, else some central updater
+			_ui = _target.get('ui'),
+			_uiCookie = {},
+			_cookieKey = '_uiCookie-'+_target.get('id'),
+			_updateBackgroundCall = null,
+
 			_modalNode = null,
-			_modalNodeId = 'target-'+_id+'-modal',
+			_modalNodeId = 'target-'+_target.get('id')+'-modal',
 			_shimNodeId = null,
 			_shimNode = null,
 
 			_alertNode = null,
 			_alertNodeId = null,
 
+			_items = {},
+			_draggableItems = {},
 //DEBUG
 //			_contentTpl = '<div id="'+_panel.get('id')+'-'+_view.id+'" class="target-viewspace"></div>',
 /*
@@ -40,10 +53,6 @@ if (!R8.IDE.View.editor.target) {
 								</div>\
 						</div>',
 */
-			_contentWrapperNode = null,
-			_contentNode = null,
-
-			_initialized = false,
 
 			//FROM WORKSPACE
 			_viewSpaces = {},
@@ -57,10 +66,42 @@ if (!R8.IDE.View.editor.target) {
 
 		return {
 			init: function() {
-				_contentNode = R8.Utils.Y.one('#'+_panel.get('id')+'-'+_id);
-				_contentWrapperNode = R8.Utils.Y.one('#'+_panel.get('id')+'-'+_id+'-wrapper');
+				_contentNode = R8.Utils.Y.one('#'+this.get('id'));
+				_contentWrapperNode = R8.Utils.Y.one('#'+this.get('id')+'-wrapper');
 
-				this.getWorkspaceDef();
+				if(_ui == null) _ui = {"items":{}};
+				var nodes = _target.get('nodes');
+
+				for(var n in nodes) {
+					this.addNode(nodes[n]);
+					this.addDrag(n);
+				}
+
+				this.setupEvents();
+				this.startUpdater();
+
+				YUI().use('cookie','json', function(Y){
+					var uiCookieJSON = Y.Cookie.get(_cookieKey);
+					_uiCookie = (uiCookieJSON == null) ? {} : Y.JSON.parse(uiCookieJSON);
+//					_itemPosUpdateListJSON = Y.Cookie.get("_itemPosUpdateList");
+//					_itemPosUpdateList = (_itemPosUpdateListJSON == null) ? {} : Y.JSON.parse(_itemPosUpdateListJSON);
+//TODO: cleanup after moving fully to new pos handling
+/*
+					for(var i in _itemPosUpdateList) {
+						_ui.items[i]['top'] = _itemPosUpdateList[i]['pos']['top'];
+						_ui.items[i]['left'] = _itemPosUpdateList[i]['pos']['left'];
+					}
+*/
+					for(var i in _uiCookie) {
+						_ui.items[i]['top'] = _uiCookie[i]['top'];
+						_ui.items[i]['left'] = _uiCookie[i]['left'];
+					}
+//					_isReady = true;
+				});
+
+//DEBUG
+//this is old
+//				this.getWorkspaceDef();
 
 				var cmdbarDef = {
 					'containerNode': _contentNode,
@@ -69,7 +110,7 @@ if (!R8.IDE.View.editor.target) {
 				};
 				_cmdBar = new R8.Cmdbar2(cmdbarDef);
 				_cmdBar.init();
-
+return;
 				document.getElementById('cmdbar_input_form').onsubmit = function() {
 					_cmdBar.submit();
 					return false;
@@ -85,8 +126,9 @@ if (!R8.IDE.View.editor.target) {
 				return _initialized;
 			},
 			render: function() {
-				_contentTpl = '<div id="'+_panel.get('id')+'-'+_id+'-wrapper" style="">\
-									<div id="'+_panel.get('id')+'-'+_id+'" class="target-viewspace">\
+				var id=this.get('id');
+				_contentTpl = '<div id="'+id+'-wrapper" style="">\
+									<div id="'+id+'" class="target-viewspace editor-target" data-id="'+_target.get('id')+'">\
 										<div id="cmdbar-tabcontainer" style="bottom: 40px;">\
 											<div id="cmdbar-tabs-wrapper">\
 												<div id="cmdbar-tabs">\
@@ -96,8 +138,8 @@ if (!R8.IDE.View.editor.target) {
 										</div>\
 										<div id="cmdbar">\
 											<div class="cmdbar-input-wrapper">\
-												<form id="cmdbar_input_form" name="cmdbar_input_form" onsubmit="R8.Cmdbar2.submit(); return false;">\
-													<input type="text" value="" id="cmd" name="cmd" title="Enter Command"/>\
+												<form id="'+id+'-cmdbar-form" name="'+id+'-cmdbar-form" onsubmit="return false;">\
+													<input type="text" value="" id="'+id+'-cmd" name="'+id+'-cmd" title="Enter Command"/>\
 												</form>\
 											</div>\
 										</div>\
@@ -105,6 +147,18 @@ if (!R8.IDE.View.editor.target) {
 							</div>';
 
 				return _contentTpl;
+
+//				_contentWrapperNode = R8.Utils.Y.Node.create(_contentTpl);
+//				_contentNode = _contentWrapperNode.get('children').item(0);
+
+				if(_ui == null) _ui = {"items":{}};
+				var nodes = _target.get('nodes');
+
+				for(var n in nodes) {
+					this.addItem(nodes[n]);
+					this.addDrag(n);
+				}
+				return _contentWrapperNode;
 			},
 			resize: function() {
 				if(!_initialized) return;
@@ -121,16 +175,18 @@ if (!R8.IDE.View.editor.target) {
 			get: function(key) {
 				switch(key) {
 					case "id":
-						return _id;
+						return _idPrefix+_target.get('id');
+//						return _target.get('id');
 						break;
 					case "name":
-						return _obj.get('name');
+						return _target.get('name');
 						break;
 					case "type":
-						return _obj.get('type');
+						return _target.get('type');
 						break;
 					case "node":
-						return _contentWrapperNode;
+//						return _contentWrapperNode;
+						return _contentNode;
 						break;
 					case "items":
 						return _viewSpaces[_currentViewSpace].get('items');
@@ -156,9 +212,181 @@ if (!R8.IDE.View.editor.target) {
 				_contentWrapperNode.remove();
 			},
 
-//------------------------------------------------------
-//these are target view specific functions
-//------------------------------------------------------
+//--------------------------------------
+//TARGET VIEW FUNCTIONS
+//--------------------------------------
+			addNode: function(item) {
+				var itemId = item.get('id');
+				item.requireView('editor_target');
+				var nodePos = _target.get('ui').items[itemId];
+
+				_items[itemId] = item.getView('editor_target');
+				_items[itemId].setParent(this);
+				var itemNode = R8.Utils.Y.Node.create(_items[itemId].render());
+				itemNode.setStyles({'top':nodePos.top,'left':nodePos.left});
+				_contentNode.append(itemNode);
+
+				_items[itemId].init();
+			},
+
+			/*
+			 * addDrag will make a item drag/droppable on a viewspace
+			 * @method addDrag
+			 * @param {string} An item id object, stored locally in _items
+			 */
+			addDrag: function(itemId) {
+				var draggableItems = _draggableItems, that=this;
+
+				YUI().use('dd-constrain','dd-drag','dd-plugin',function(Y){
+					draggableItems[itemId] = new Y.DD.Drag({
+						node: '#'+_items[itemId].get('id')
+					}).plug(Y.Plugin.DDConstrained, {
+						constrain2node: '#'+_contentNode.get('id')
+					});
+
+					//add invalid drag items here.., right now only ports
+					draggableItems[itemId].addInvalid('.port');
+
+//TODO: seems to be causing some error
+					//setup valid handles
+//					draggableItems[itemId].addHandle('.drag-handle');
+
+					draggableItems[itemId].on('drag:start',function(){
+						that.clearSelectedItems();
+						that.addSelectedItem(itemId);
+					});
+					draggableItems[itemId].on('drag:drag',function(){
+//TODO: revisit after implementing links
+//						_items[itemId].refreshLinks();
+					});
+					draggableItems[itemId].on('drag:end',function(e){
+						that.clearSelectedItems();
+						that.touchItems([itemId]);
+					});
+				});
+				_items[itemId].get('node').setAttribute('data-status','dd-ready');
+			},
+
+			setupEvents: function() {
+				_events['item_click'] = R8.Utils.Y.delegate('click',this.updateSelectedItems,_contentNode,'editor-target.item',this);
+				_events['vspace_click'] = R8.Utils.Y.delegate('click',this.clearSelectedItems,'body','#'+_contentNode.get('id'));
+
+//DEBUG
+//TODO: mouse over popup screwed b/c of layout, disabling for now
+/*
+				_events['port_mover'] = R8.Utils.Y.delegate('mouseover',this.portMover,_node,'.port',this);
+				_events['port_mover'] = R8.Utils.Y.delegate('mouseout',this.portMout,_node,'.port',this);
+
+				_events['item_name_dblclick'] = R8.Utils.Y.delegate('dblclick',function(e){
+					var itemId = e.currentTarget.getAttribute('data-id'),
+						inputWrapperNode = R8.Utils.Y.one('#item-'+itemId+'-name-input-wrapper'),
+						inputNode = R8.Utils.Y.one('#item-'+itemId+'-name-input');
+
+					e.currentTarget.setStyle('display','none');
+					inputWrapperNode.setStyle('display','block');
+					inputNode.focus();
+
+					if(inputNode.getAttribute('data-blursetup') == '') {
+						inputNode.on('blur',function(e){
+							var itemId = e.currentTarget.getAttribute('data-id'),
+								inputWrapperNode = R8.Utils.Y.one('#item-'+itemId+'-name-input-wrapper'),
+								nameWrapperNode = R8.Utils.Y.one('#item-'+itemId+'-name-wrapper');
+
+							inputWrapperNode.setStyle('display','none');
+							nameWrapperNode.setStyle('display','block');
+							e.currentTarget.setAttribute('data-blursetup','true');
+						});
+					}
+
+				},_node,'.item-name',this);
+*/
+
+//				R8.Workspace.events['item_click'] = R8.Utils.Y.delegate('click',function(){console.log('clicked item');},R8.Workspace.viewSpaceNode,'.item, .connector');
+//				R8.Workspace.events['vspace_mdown'] = R8.Utils.Y.delegate('mousedown',R8.Workspace.checkMouseDownEvent,'body','#'+_node.get('id'));
+			},
+
+			addSelectedItem: function(itemId,data) {
+//				_selectedItems[itemId] = data;
+//				_items[itemId].get('node').setStyle('zIndex',51);
+//				_items[itemId].get('node').addClass('focus');
+			},
+			clearSelectedItems: function(e) {
+/*
+				for(itemId in _selectedItems) {
+					_items[itemId].get('node').removeClass('focus');
+					_items[itemId].get('node').setStyle('zIndex',1);
+					delete(_selectedItems[itemId]);
+				}
+*/
+			},
+			updateSelectedItems: function(e) {
+/*
+				var itemNodeId = e.currentTarget.get('id'),
+					model = e.currentTarget.getAttribute('data-model'),
+					modelId = e.currentTarget.getAttribute('data-id');
+
+				if(e.ctrlKey == false) this.clearSelectedItems();
+				this.addSelectedItem(modelId,{'model':model,'id':modelId});
+*/
+
+//DEBUG
+//TODO: revisit once puting dock into place
+//				R8.Dock2.focusChange(_selectedItems);
+
+				e.stopImmediatePropagation();
+			},
+
+			purgeUIData: function(ioId,responseObj) {
+				_uiCookie = {};
+				YUI().use("cookie",function(Y){
+					Y.Cookie.remove(_cookieKey);
+				});
+			},
+
+			backgroundUpdater: function() {
+				var count = 0;
+				for(item in _uiCookie) {
+					count++;
+				}
+				var that = this;
+				if (count > 0) {
+					YUI().use("json", function(Y){
+//						var reqParam = 'item_list=' + Y.JSON.stringify(_itemPosUpdateList);
+						var reqParam = 'ui=' + Y.JSON.stringify(_ui);
+
+						var params = {
+							'cfg': {
+								'data': reqParam
+							},
+							'callbacks': {
+								'io:success':that.purgeUIData
+							}
+						};
+						//R8.Ctrl.call('viewspace/update_pos/' + _id, params);
+//						R8.Ctrl.call('workspace/update_pos/' + _id, params);
+						R8.Ctrl.call('datacenter/update_vspace_ui/' + _target.get('id'), params);
+					});
+				}
+
+				var fireBackgroundUpdate = function() {
+					that.backgroundUpdater();
+				}
+				_updateBackgroundCall = setTimeout(fireBackgroundUpdate,5000);
+			},
+
+			startUpdater: function() {
+				var that = this;
+				var fireBackgroundUpdate = function() {
+					that.backgroundUpdater();
+				}
+				_updateBackgroundCall = setTimeout(fireBackgroundUpdate,5000);
+			},
+
+			stopUpdater: function() {
+				clearTimeout(_updateBackgroundCall);
+			},
+
+
 /*
 				var contextTpl = '<span class="context-span">'+viewSpaceDef.i18n+' > '+viewSpaceDef.object.display_name+'</span>';
 				_contextBarNode.append(contextTpl);
@@ -185,7 +413,7 @@ if (!R8.IDE.View.editor.target) {
 						'io:success':callback
 					}
 				};
-				R8.Ctrl.call('target/get_view_items/'+_obj.get('id'),params);
+				R8.Ctrl.call('target/get_view_items/'+_target.get('id'),params);
 			},
 			pushViewSpace: function(viewSpaceDef) {
 				if(_initialized == false) {
@@ -197,6 +425,8 @@ if (!R8.IDE.View.editor.target) {
 					return;
 				}
 
+//DEBUG
+//console.log(viewSpaceDef);
 				viewSpaceDef.containerNodeId = _contentNode.get('id');
 
 				var id = viewSpaceDef['object']['id'];
@@ -262,7 +492,7 @@ if (!R8.IDE.View.editor.target) {
 
 				var that=this;
 				var addEventParams = {
-					'targetId':_id,
+					'targetId':_target.get('id'),
 					'viewSpaceId':viewSpaceId,
 					'node':clonedNode
 				};
@@ -294,10 +524,24 @@ if (!R8.IDE.View.editor.target) {
 					R8.Ctrl.call(vspaceType+'/add_item/'+vspaceId,params);
 				});
 			},
-			touchItems: function(itemList,viewSpaceId) {
-				var vSpaceId = (typeof(viewSpaceId) == 'undefined') ? _currentViewSpace : viewSpaceId;
+			touchItems: function(item_list) {
+				for(var i in item_list) {
+					var itemId = item_list[i],
+						itemNode = _items[itemId].get('node');
 
-				_viewSpaces[vSpaceId].touchItems(itemList);
+					if(typeof(_uiCookie[itemId]) == 'undefined') _uiCookie[itemId] = {};
+					_uiCookie[itemId]['top'] = itemNode.getStyle('top');
+					_uiCookie[itemId]['left'] = itemNode.getStyle('left');
+
+					var top = itemNode.getStyle('top');
+					var left = itemNode.getStyle('left');
+					_ui.items[itemId]['top'] = parseInt(top.replace('px',''));
+					_ui.items[itemId]['left'] = parseInt(left.replace('px',''));
+				}
+				YUI().use('json','cookie', function(Y){
+					var _uiCookieJSON = Y.JSON.stringify(_uiCookie);
+					Y.Cookie.set(_cookieKey, _uiCookieJSON);
+				});
 			},
 			setupNewItems: function() {
 				var viewspaceNode = R8.Utils.Y.one('#'+_contentNode.get('id'));

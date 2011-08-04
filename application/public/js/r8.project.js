@@ -14,7 +14,12 @@ if (!R8.Project) {
 
 		return {
 			init: function() {
-
+				for(var t in _targets) {
+//					_targets[targetId].initView('project');
+					_targets[t].getView('project').init();
+				}
+//DEBUG
+console.log('INIT CALLED INSIDE OF PROJECT....');
 			},
 			get: function(key) {
 				switch(key) {
@@ -96,11 +101,12 @@ if (!R8.Project) {
 				});
 
 				_leafNode = R8.Utils.Y.one('#project-'+_def.id);
-
+/*
 				for(var t in _targets) {
-					_targets[targetId].initView('project');
+//					_targets[targetId].initView('project');
+					_targets[t].getView('project').init();
 				}
-
+*/
 
 				_events['leaf_dblclick'] = R8.Utils.Y.delegate('dblclick',function(e){
 					var leafNodeId = e.currentTarget.get('id'),

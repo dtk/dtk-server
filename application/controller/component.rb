@@ -2,6 +2,12 @@ module XYZ
   class ComponentController < Controller
     helper :i18n_string_mapping
 
+    def get(id)
+      component = create_object_from_id(id)
+pp component.get_obj_with_common_cols()      
+      return {:data=>component.get_obj_with_common_cols()}
+    end
+
     #TODO: remove when finshed testing
     def test(action,*rest)
       hash = request.params

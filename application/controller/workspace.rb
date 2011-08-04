@@ -118,6 +118,7 @@ pp [:debug_stored_new_pos,get_objects(model_name,SQL.in(:id,model_items.map{|ite
 
       i18n = get_i18n_mappings_for_models(model_name)
       model_list.each_with_index do |model,index|
+#pp model
         model_list[index][:model_name] = model_name
         body_value = ''
         model_list[index][:ui] ||= {}
@@ -855,7 +856,7 @@ POSSIBLE CHANGES TO HASH
 
       panel_id = request.params['panel_id']
 
-      include_js('plugins/commit.tool2')
+      include_js('plugins/commit.tool3')
 #      include_js('plugins/commit.tool')
       include_js('external/jquery.treeview')
       include_css('jquery.treeview')
@@ -863,8 +864,8 @@ POSSIBLE CHANGES TO HASH
 #      run_javascript('setTimeout(initUserForm,500);')
       commit_tree_json = JSON.generate(commit_tree)
 
-      run_javascript("R8.CommitTool2.init();")
-      run_javascript("R8.CommitTool2.renderTree(#{commit_tree_json},'edit','change-list-tab-content');")
+      run_javascript("R8.CommitTool3.init();")
+      run_javascript("R8.CommitTool3.renderTree(#{commit_tree_json},'edit','change-list-tab-content');")
 
       return {
         :content=> tpl.render(),

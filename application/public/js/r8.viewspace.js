@@ -52,11 +52,9 @@ if (!R8.ViewSpace2) {
 					_isReady = true;
 				});
 			},
-
 			isReady: function() {
 				return _isReady;
 			},
-
 			get: function(itemToGet) {
 				switch(itemToGet) {
 					case "id":
@@ -766,6 +764,10 @@ if (typeof(e) != 'undefined') {
 			},
 
 			addNode: function(node) {
+//DEBUG
+//console.log('Adding node in viewspace...');
+//console.log(node);
+
 				var id = node['object']['id'];
 
 				_items[id] = new R8.IDE.View.editor_target.node(node,this);

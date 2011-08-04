@@ -152,5 +152,53 @@ pp request.params
       return {}
     end
 
+    def add_item(id)
+      #TODO: need to copy in avatar when hash["ui"] is non null
+      target = id_handle(id).create_object()
+
+      override_attrs = request.params["ui"] ? {:ui=>request.params["ui"]} : {}
+
+      model_id_handle = id_handle(request.params["model_id"].to_i,request.params["model"].to_sym)
+#      model_id_handle = id_handle(request.params["id"].to_i,request.params["model"].to_sym)
+      new_item_id = target.add_item(model_id_handle,override_attrs)
+#      id = new_id if new_id
+
+#TODO: how do we get field info from model instance?
+      dc_hash = get_object_by_id(id,:datacenter)
+      dc_ui = dc_hash[:ui].nil? ? {:items=>{}} : dc_hash[:ui]
+#TODO: cleanup later, right now ui req param indexed by dc id from old style
+      ui_params = JSON.parse(request.params["ui"])
+#      dc_ui[:items][new_item_id.to_s.to_sym] = ui_params[id.to_s]
+      dc_ui[:items][new_item_id.to_s.to_sym] = ui_params[id]
+#TODO: any way to update a model from its object once an instance is created?
+      update_from_hash(id,{:ui=>dc_ui})
+
+#TODO: clean this up,hack to update UI params for newly cloned object
+#      update_from_hash(id,{:ui=>hash["ui"]})
+
+#      hash["redirect"] ? redirect_route = "/xyz/#{hash["redirect"]}/#{id.to_s}" : redirect_route = "/xyz/#{model_name()}/display/#{id.to_s}"
+
+      if request.params["model_redirect"]
+        base_redirect = "/xyz/#{request.params["model_redirect"]}/#{request.params["action_redirect"]}"
+        redirect_id =  request.params["id_redirect"].match(/^\*/) ? new_item_id.to_s : request.params["id_redirect"]
+        redirect_route = "#{base_redirect}/#{redirect_id}"
+        request_params = ''
+        expected_params = ['model_redirect','action_redirect','id_redirect','target_id','target_model_name']
+        request.params.each do |name,value|
+          if !expected_params.include?(name)
+            request_params << '&' if request_params != ''
+            request_params << "#{name}=#{value}"
+          end
+        end
+        ajax_request? ? redirect_route += '.json' : nil
+        redirect_route << URI.encode("?#{request_params}") if request_params != ''
+      else
+        redirect_route = "/xyz/#{model_name()}/display/#{new_item_id.to_s}"
+        ajax_request? ? redirect_route += '.json' : nil
+      end
+
+      redirect redirect_route
+    end
+
   end
 end

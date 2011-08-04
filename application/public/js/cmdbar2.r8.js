@@ -1,13 +1,18 @@
- 
+
 if (!R8.Cmdbar2) {
 
 		R8.Cmdbar2 = function(params) {
+//DEBUG
+//console.log('inside of cmdbar2 create...');
+//console.log(params);
+
 			var _containerNode = params.containerNode,
 				_panel = params.panel,
+				_parentView = params.viewSpace,
 				_viewSpace = params.viewSpace;
 
 			return {
-				init : function() {
+				init: function() {
 					this.setupTabs();
 					this.setupCmdLine();
 
@@ -21,9 +26,12 @@ if (!R8.Cmdbar2) {
 						case "viewSpace":
 							return _viewSpace;
 							break;
+						case "parentView":
+							return _parentView;
+							break;
 					}
 				},
-				setupTabs : function() {
+				setupTabs: function() {
 					for(i in this.tabs) {
 						this.addTab(this.tabs[i]);
 					}
@@ -34,8 +42,7 @@ if (!R8.Cmdbar2) {
 						this.registerTabEvents(i);
 					}
 				},
-
-				addTab : function(tab) {
+				addTab: function(tab) {
 					var numTabs = this.loadedTabs.length;
 					var zIndex = 510 - numTabs;
 					var notFirstTab = '';
@@ -209,48 +216,59 @@ if (!R8.Cmdbar2) {
 				},
 
 				setupCmdLine : function() {
-					this.cmdr['node'] = R8.Utils.Y.one('#cmd');
-					var that=this;
+					this.cmdr['node'] = R8.Utils.Y.one('#'+_parentView.get('id')+'-cmd');
+					var _this=this;
 					YUI().use('node','event',function(Y){
-						that['cmdr']['events']['arrowUp'] = that['cmdr']['node'].on('keypress',function(e){
+						_this['cmdr']['events']['keyEntry'] = _this['cmdr']['node'].on('keypress',function(e){
+//DEBUG
+//console.log(e.charCode);
 
 							//arrow up
 							if(e.charCode == 38) {
 								e.halt();
-								var index = that.cmdr['qIndex'];
+								var index = _this.cmdr['qIndex'];
 								if (index == 0) {
-									that.cmdr['qIndex'] = 0;
-									var prevCmd = that.cmdr['queue'][0]['cmd'];
-									that.cmdr['node'].set('value',prevCmd);
+									_this.cmdr['qIndex'] = 0;
+									var prevCmd = _this.cmdr['queue'][0]['cmd'];
+									_this.cmdr['node'].set('value',prevCmd);
 									return;
 								}
 
-								var prevCmd = that.cmdr['queue'][index]['cmd'];
-								that.cmdr['node'].set('value',prevCmd);
-								that.cmdr['qIndex'] = (index-1);
+								var prevCmd = _this.cmdr['queue'][index]['cmd'];
+								_this.cmdr['node'].set('value',prevCmd);
+								_this.cmdr['qIndex'] = (index-1);
 							}
 							//arrow down
 							else if(e.charCode == 40) {
 								e.halt();
-								var index = that.cmdr['qIndex'];
-								var qMax = that.cmdr['queue'].length-1;
+								var index = _this.cmdr['qIndex'];
+								var qMax = _this.cmdr['queue'].length-1;
 								if (index == qMax) {
-									that.cmdr['qIndex'] = qMax;
-									that.cmdr['node'].set('value','');
+									_this.cmdr['qIndex'] = qMax;
+									_this.cmdr['node'].set('value','');
 									return;
 								}
 								var nextIndex = index+1;
-								that.cmdr['qIndex'] = nextIndex;
+								_this.cmdr['qIndex'] = nextIndex;
 
 								var nextCmd = this.cmdr['queue'][nextIndex]['cmd'];
-								that.cmdr['node'].set('value',nextCmd);
+								_this.cmdr['node'].set('value',nextCmd);
 							}
-						},that); 
+							//enter
+							else if(e.charCode == 13) {
+								e.halt();
+								_this.submit();
+							}
+						},_this);
 					});
 				},
 
-				submit : function() {
+				submit: function() {
 					var cmdStr = this.cmdr['node'].get('value');
+
+//DEBUG
+//console.log('submitting cmdbar:'+cmdStr);
+
 					var cmd = {
 						'cmd':cmdStr,
 						'status':'pending',

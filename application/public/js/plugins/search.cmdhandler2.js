@@ -201,7 +201,7 @@ R8.Commands.search = {
 				this.sliderSetup = false;
 				document.getElementById(this.name + '-list-container').innerHTML = '';
 			},
-				
+
 			initSlider: function(tabName,cmdbar){
 				var tIndex = cmdbar.getTabIndexByName(tabName);
 				if (document.getElementById(tabName + '-slide-bar') == null) {
@@ -260,6 +260,7 @@ R8.Commands.search = {
 							vspaceDrop.on('drop:hit', function(e){
 								var drop = e.drop.get('node');
 								var dragClone = e.drag.get('dragNode').get('children').item(0);
+								var itemNodeId = dragClone.get('id');
 								var new_comp_id = Y.guid();
 								dragClone.set('id', new_comp_id);
 		
@@ -274,9 +275,36 @@ R8.Commands.search = {
 									'top': dragTop + 'px',
 									'left': dragLeft + 'px'
 								});
-								drop.append(dragClone);
-								dragClone.setAttribute('data-status','pending_delete');
-								cmdbar.get('viewSpace').addItemToViewSpace(dragClone);
+var tempId = Y.guid();
+var newNodeDef = {
+	'id': tempId,
+//	'id': dragClone.getAttribute('data-id'),
+	'status': 'temp',
+	'is_deployed': false,
+	'node_id': dragClone.getAttribute('data-id'),
+	'data-model': dragClone.getAttribute('data-model'),
+	'name': R8.Utils.Y.one('#'+itemNodeId+' .node-image-name').get('innerHTML'),
+	'target': drop.getAttribute('data-id'),
+	'os_type': dragClone.getAttribute('data-os-type'),
+	'components': [],
+	'ui': {}
+};
+newNodeDef.ui['target-'+drop.getAttribute('data-id')] = {
+	'top': dragTop + 'px',
+	'left': dragLeft + 'px'
+};
+var e = {
+	'nodeDef': newNodeDef
+};
+R8.IDE.fire('target-'+newNodeDef.target+'-node-add',e);
+//DEBUG
+//console.log('got drop hit on target...');
+//console.log(newItemDef);
+
+//								drop.append(dragClone);
+//								dragClone.setAttribute('data-status','pending_delete');
+//								cmdbar.get('viewSpace').addItemToViewSpace(dragClone);
+//								cmdbar.get('parentView').addItem(dragClone);
 							});
 						}
 
@@ -555,6 +583,7 @@ console.log('Have a drop hit for node!!!!');
 						} else {
 							var dropGroup = 'dg-component';
 							var dropList = Y.all('#'+vspaceNode.get('id')+' div.'+dropGroup);
+
 							dropList.each(function(){
 								if(!this.hasClass('yui3-dd-drop')) {
 									var drop = new Y.DD.Drop({node:this});
@@ -566,8 +595,20 @@ console.log('Have a drop hit for node!!!!');
 										var compNode = e.drag.get('dragNode').get('children').item(0);
 										var componentId = compNode.getAttribute('data-id');
 //DEBUG
-//										R8.Workspace.addComponentToContainer(componentId,dropNode);
-										cmdbar.get('viewSpace').addComponentToContainer(componentId,dropNode);
+var tempId = Y.guid();
+var newComponentDef = {
+	'id': tempId,
+	'node_id': dropNode.getAttribute('data-id'),
+	'component_id': componentId,
+	'ui': {}
+};
+
+var e = {
+	'componentDef': newComponentDef
+};
+R8.IDE.fire('node-'+newComponentDef.node_id+'-component-add',e);
+
+//										cmdbar.get('viewSpace').addComponentToContainer(componentId,dropNode);
 									});
 								}
 							});

@@ -75,8 +75,10 @@ if(!R8.Topbar2) {
 							alert('Please open a target to commit its changes');
 							return false;
 						}
-
-						var route = 'workspace/commit_ide/'+currentView.get('id'),
+						var viewId = currentView.get('id');
+						var targetId = viewId.replace('editor-target-','');
+//						var route = 'workspace/commit_ide/'+currentView.get('id'),
+						var route = 'workspace/commit_ide/'+targetId,
 							params = {
 								'cfg':{
 									'data':'panel_id='+contentNode.get('id')

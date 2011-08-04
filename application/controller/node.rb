@@ -2,6 +2,13 @@ module XYZ
   class NodeController < Controller
     helper :i18n_string_mapping
 
+    def get(id)
+#      node = get_object_by_id(id,:node)
+      node = create_object_from_id(id)
+pp node.get_obj_with_common_cols()      
+      return {:data=>node.get_obj_with_common_cols()}
+    end
+
     ###TODO test
     def destroy_and_delete(id)
       create_object_from_id(id).destroy_and_delete()

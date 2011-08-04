@@ -162,15 +162,19 @@ YUI_config = {
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.view.editor.target.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.view.project.target.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.view.project.node.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.view.project.component.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.view.editor_target.node.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.view.editor_target.port.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.view.chefdebugger.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.view.jitter.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.viewspace.js"></script>
 
-
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.project.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.target.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.node.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.component.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.port.js"></script>
+
 <!--
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/node.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/node2.r8.js"></script>

@@ -680,6 +680,7 @@ if (!R8.IDE) {
 					for (var p in _projects) {
 						_loadedProjects[_projects[p].id] = new R8.Project(_projects[p]);
 						_loadedProjects[_projects[p].id].renderTree(contentNode);
+						_loadedProjects[_projects[p].id].init();
 					}
 				},
 			    renderChefDebugger: function(contentNode,level) {
@@ -797,6 +798,10 @@ if (!R8.IDE) {
 				});
 			},
 			destroyShim: function() {
+//DEBUG
+//TODO: THIS IS TEMP SOLUTION FOR MEMORY LEAK ISSUE ON COMMIT
+				$("#"+_modalNode.get('children').item(0).get('id')).remove();
+
 				_modalNode.purge(true);
 				_modalNode.remove();
 				_modalNode = null,

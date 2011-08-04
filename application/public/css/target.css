@@ -194,3 +194,25 @@
 .dragHandle {
 	background: url(../images/workspace/availDot.png) no-repeat;
 }
+
+/*-----------------TEMP---------------*/
+.editor-target .item.node.basic {
+	height: 60px;
+	width: 120px;
+	position: absolute;
+	background-color: #AABBCC;
+
+	border: 2px solid black;
+
+	-moz-border-radius-topleft: 5px;
+	-moz-border-radius-topright: 5px;
+	-moz-border-radius-bottomleft: 5px;
+	-moz-border-radius-bottomright: 5px;
+
+	-moz-box-shadow: 2px 2px 8px #000000;
+}
+.editor-target .node .name {
+	width: 100%;
+	height: 18px;
+	margin: 30px auto 0 auto;
+}

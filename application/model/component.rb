@@ -1049,6 +1049,13 @@ module XYZ
     def is_base_component?()
       not self[:type] == "composite"
     end
+
+    def get_obj_with_common_cols()
+      common_cols =  self.class.common_columns()
+      ret = get_objs(:cols => common_cols).first
+      ret.materialize!(common_cols)
+    end
+
   end
 end
 

@@ -117,7 +117,7 @@
       },
       "display_name": "test",
       "node": {
-        "ami-3967a150-micro": {
+        "ami-1f64a276-micro": {
           "type": "image",
           "ds_source_obj_type": "image",
 	  "os_type": "ubuntu",
@@ -133,7 +133,7 @@
           "external_ref": {
 	    "size": "t1.micro",
             "type": "ec2_image",
-            "image_id": "ami-3967a150"
+            "image_id": "ami-1f64a276"
           },
           "node_interface": {
             "eth0": {
@@ -197,7 +197,89 @@
               "enabled": true
             }
           },
-          "ds_key": "[:user_data, \"/library/test/ami-3967a150\"]"
+          "ds_key": "[:user_data, \"/library/test/ami-1f64a276\"]"
+        },
+        "ami-1f64a276-small": {
+          "type": "image",
+          "ds_source_obj_type": "image",
+	  "os_type": "ubuntu",
+          "ui": {
+            "images": {
+              "tnail": "ubuntu.png",
+              "display": "ubuntu.png",
+              "tiny": ""
+            }
+          },
+          "display_name": "Natty small",
+          "data_source": "user_data",
+          "external_ref": {
+	    "size": "m1.small",
+            "type": "ec2_image",
+            "image_id": "ami-1f64a276"
+          },
+          "node_interface": {
+            "eth0": {
+              "type": "ethernet",
+              "display_name": "eth0"
+            }
+          },
+          "attribute": {
+            "host_addresses_ipv4": {
+              "required": false,
+              "dynamic": true,
+              "semantic_type": {
+                ":array": "host_address_ipv4"
+              },
+              "display_name": "host_addresses_ipv4",
+              "value_asserted": [
+                null
+              ],
+              "cannot_change": false,
+              "is_port": true,
+              "read_only": true,
+              "data_type": "json",
+              "semantic_type_summary": "host_address_ipv4",
+              "hidden": false
+            }
+          },
+          "monitoring_item": {
+            "check_ping": {
+              "display_name": "check_ping",
+              "description": "ping",
+              "enabled": true
+            },
+            "check_mem": {
+              "display_name": "check_mem",
+              "description": "Free Memory",
+              "enabled": true
+            },
+            "check_local_procs": {
+              "display_name": "check_local_procs",
+              "description": "Processes",
+              "enabled": true
+            },
+            "check_all_disks": {
+              "display_name": "check_all_disks",
+              "description": "Free Space All Disks",
+              "enabled": true
+            },
+            "check_memory_profiler": {
+              "display_name": "check_memory_profiler",
+              "description": "Memory Profiler",
+              "enabled": true
+            },
+            "check_iostat": {
+              "display_name": "check_iostat",
+              "description": "Iostat",
+              "enabled": true
+            },
+            "check_ssh": {
+              "display_name": "check_ssh",
+              "description": "SSH",
+              "enabled": true
+            }
+          },
+          "ds_key": "[:user_data, \"/library/test/ami-1f64a276\"]"
         },
         "ami-674d8b0e-micro": {
           "type": "image",

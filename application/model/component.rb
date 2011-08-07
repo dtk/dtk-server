@@ -149,6 +149,7 @@ module XYZ
            node_assembly_parts,
            {
              :model_name => :attribute,
+             :convert => true,
              :join_type => :inner,
              :join_cond=>{:node_node_id => q(:node,:id)},
              :cols => [:id,:display_name,:dynamic,:attribute_value]
@@ -167,6 +168,7 @@ module XYZ
            },
            {
              :model_name => :attribute,
+             :convert => true,
              :join_type => :inner,
              :join_cond=>{:component_component_id => q(:component_part,:id)},
              :cols => [:id,:display_name,:dynamic,:attribute_value]

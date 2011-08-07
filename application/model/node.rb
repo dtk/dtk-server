@@ -642,14 +642,14 @@ module XYZ
 
     def create_needed_additional_links(cmp_id_handle)
       #TODO: more efficient would be to have clone object output have this info
-      component = cmp_id_handle.create_object().update_object!(:component_type,:extended_base,:implementation_id)
+      component = cmp_id_handle.create_object().update_object!(:component_type,:extended_base,:implementation_id,:node_node_id)
       conn_profile = component.get_objects_col_from_sp_hash({:cols => [:connectivity_profile_internal]}).first
       return unless conn_profile
       #get all other components on node
       sp_hash = {
         :model_name => :component,
         :filter => [:neq, :id, cmp_id_handle.get_id()],
-        :cols => [:component_type,:most_specific_type, :extended_base, :implementation_id]
+        :cols => [:component_type,:most_specific_type, :extended_base, :implementation_id, :node_node_id]
       }
       other_cmps = get_children_from_sp_hash(:component,sp_hash)
       conn_info_list = conn_profile.match_other_components(other_cmps)

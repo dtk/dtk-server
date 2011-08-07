@@ -39,7 +39,7 @@ module XYZ
     def process_dynamic_attributes(model_name,new_id_handle)
       if model_name == :component
         col = :node_assembly_parts_cmp_attrs
-      elsif component == :node
+      elsif model_name == :node
         col = :node_assembly_parts_node_attrs
       else
         raise Error.new("unexpected model_name #{model_name}")

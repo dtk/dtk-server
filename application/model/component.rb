@@ -139,18 +139,37 @@ module XYZ
           :cols => [:id,:display_name,:assembly_id]
         }
 
+
         virtual_column :node_assembly_parts, :type => :json, :hidden => true,
         :remote_dependencies => [node_assembly_parts]
 
-        virtual_column :node_assembly_parts_with_attrs, :type => :json, :hidden => true,
+        virtual_column :node_assembly_parts_node_attrs, :type => :json, :hidden => true,
         :remote_dependencies => 
           [
            node_assembly_parts,
            {
              :model_name => :attribute,
-             :join_type => :left_outer,
+             :join_type => :inner,
              :join_cond=>{:node_node_id => q(:node,:id)},
-             :cols => [:id,:display_name,:node_node_id,:value_asserted]
+             :cols => [:id,:display_name,:dynamic,:attribute_value]
+           }
+          ]
+        virtual_column :node_assembly_parts_cmp_attrs, :type => :json, :hidden => true,
+        :remote_dependencies => 
+          [
+           node_assembly_parts,
+           {
+             :model_name => :component,
+             :alias => :component_part,
+             :join_type => :inner,
+             :join_cond=>{:node_node_id => q(:node,:id)},
+             :cols => [:id]
+           },
+           {
+             :model_name => :attribute,
+             :join_type => :inner,
+             :join_cond=>{:component_component_id => q(:component_part,:id)},
+             :cols => [:id,:display_name,:dynamic,:attribute_value]
            }
           ]
 

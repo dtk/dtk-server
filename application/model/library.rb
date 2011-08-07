@@ -6,7 +6,7 @@ module XYZ
     def clone_post_copy_hook(clone_copy_output,opts={})
       new_id_handle = clone_copy_output.id_handles.first
       case new_id_handle[:model_name]
-       when :component then clone_post_copy_hook__component(new_id_handle,opts)
+       when :component then clear_dynamic_attributes(new_id_handle,opts)
       end
       level = 1
       node_hash_list = clone_copy_output.get_children_object_info(level,:node)
@@ -24,27 +24,46 @@ module XYZ
       Model.update_from_rows(node_mh,rows)
     end
 
-    def clone_post_copy_hook__component(new_id_handle,opts)
-      #TODO: may generalize and look for any dynamic attribute that neds to be reset when put in library
-      #find if assembly and if so get what it is directly linked to
+    def clear_dynamic_attributes(new_id_handle,opts)
+      attr_mh_to_propagate = Array.new
+      #process the dynamic node attributes
       sp_hash = {
         :relation => :component,
         :filter => [:and,[:eq, :id, new_id_handle.get_id()],[:eq, :type, "composite"]],
-        :columns => [:node_assembly_parts_with_attrs]
+        :columns => [:node_assembly_parts_node_attrs]
       }
-      node_assembly_parts = Model.get_objects_from_sp_hash(new_id_handle.createMH(:model_name => :component),sp_hash)
-      #TODO: probably move so can be used also when clone nodes dircetly into library
-      attrs_to_null = Array.new
-      node_assembly_parts.each do |r|
-        next unless attr = r[:attribute]
-        if attr[:display_name] == "host_addresses_ipv4" and not (attr[:value_asserted].nil? or attr[:value_derived] == [nil])
-          attrs_to_null << {:id => attr[:id],:value_asserted => [nil]}
+      node_attrs = Model.get_objs(new_id_handle.createMH(:component),sp_hash).map{|r|r[:attribute]}
+      attrs_to_null = node_attrs.map do |attr|
+        if attr[:dynamic] and not (attr[:value_asserted].nil? or attr[:value_derived] == [nil])
+          {:id => attr[:id],:value_asserted => [nil]}
         end
+      end.compact
+      unless attrs_to_null.empty?
+        attr_mh = new_id_handle.createMH(:model_name => :attribute,:parent_model_name => :node)
+        Model.update_from_rows(attr_mh,attrs_to_null)
+        attr_mh_to_propagate += attrs_to_null.map{|attr|attr_mh.createIDH(:id => attr[:id])}
       end
-      attr_mh = new_id_handle.createMH(:model_name => :attribute,:parent_model_name => :node)
-      Model.update_from_rows(attr_mh,attrs_to_null)
+
+      #process the dynamic component attributes
+      sp_hash = {
+        :relation => :component,
+        :filter => [:and,[:eq, :id, new_id_handle.get_id()],[:eq, :type, "composite"]],
+        :columns => [:node_assembly_parts_cmp_attrs]
+      }
+      cmp_attrs = Model.get_objs(new_id_handle.createMH(:component),sp_hash).map{|r|r[:attribute]}
+      attrs_to_null = cmp_attrs.map do |attr|
+        if attr[:dynamic] and not (attr[:value_asserted].nil? or attr[:value_derived] == [nil])
+          {:id => attr[:id],:value_asserted => [nil]}
+        end
+      end.compact
+      unless attrs_to_null.empty?
+        attr_mh = new_id_handle.createMH(:model_name => :attribute,:parent_model_name => :component)
+        Model.update_from_rows(attr_mh,attrs_to_null)
+        attr_mh_to_propagate += attrs_to_null.map{|attr|attr_mh.createIDH(:id => attr[:id])}
+      end
+  
       #TODO: switch over to AttributeLink.propagate
-      AttributeLink.propagate(attrs_to_null.map{|attr|attr_mh.createIDH(:id => attr[:id])})
+      AttributeLink.propagate(attr_mh_to_propagate) unless attr_mh_to_propagate.empty?
     end
   end
 end

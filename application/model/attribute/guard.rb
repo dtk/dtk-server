@@ -41,7 +41,7 @@ module XYZ
       guard = {
         :task_type => task_type
       }.merge(attr_info(guard_attr,attr_info_keys))
-      new(:guarded => guarded, :guard => guard)
+      new(:guarded => guarded, :guard => guard, :link => link)
     end
    private
     def self.attr_info(attr,keys=nil)

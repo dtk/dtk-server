@@ -26,6 +26,12 @@ module XYZ
       task_action.get_and_update_attributes!(self)
     end
 
+    def add_internal_guards!(guards)
+      task_action = self[:executable_action]
+      #updates ruby task object
+      task_action.add_internal_guards!(guards)
+    end
+
     def self.create_from_nodes_to_rerun(node_idhs)
       config_nodes_task = config_nodes_task(grouped_state_changes[TaskAction::ConfigNode])
       if create_nodes_task and config_nodes_task

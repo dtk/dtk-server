@@ -119,6 +119,7 @@ module XYZ
           params = get_params(workitem) 
           task_id,action,workflow,task,top_task = %w{task_id action workflow task top_task}.map{|k|params[k]}
           task.update_input_attributes!()
+          task.add_internal_guards!(workflow.guards[:internal])
           event = top_task.add_event(:start,task)
           pp ["executing #{action.class.to_s}", task_id,event] if event
           workitem.fields["guard_id"] = task_id # ${guard_id} is referenced if guard for execution of this

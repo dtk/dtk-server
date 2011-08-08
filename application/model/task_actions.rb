@@ -54,6 +54,10 @@ module XYZ
       def get_and_update_attributes!(task)
       end
 
+      #virtual gets overwritten
+      def add_internal_guards!(guards)
+      end
+
       def update_state_change_status_aux(task_mh,status,state_change_ids)
         rows = state_change_ids.map{|id|{:id => id, :status => status.to_s}}
         state_change_mh = task_mh.createMH(:model_name => :state_change)
@@ -175,9 +179,13 @@ module XYZ
 
       end
 
+      def add_internal_guards!(guards)
+        self[:internal_guards] = guards
+      end
+
       def get_and_update_attributes!(task)
         task_mh = task.model_handle()
-        #these two below update teh ruby obj
+        #these two below update the ruby obj
         get_and_update_attributes__node_ext_ref!(task_mh)
         get_and_update_attributes__cmp_attrs!(task_mh)
         #this updates the task model

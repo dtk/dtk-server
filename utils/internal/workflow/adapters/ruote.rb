@@ -77,7 +77,7 @@ module XYZ
         @process_def = nil
       end
       def process_def()
-        @process_def ||= compute_process_def(@top_task,@guards)
+        @process_def ||= compute_process_def(@top_task,@guards[:external])
         @process_def #TODO: just for testing so can checkpoint and see what it looks like
       end
 

@@ -46,7 +46,28 @@
          :cols=>Component.common_columns
        }]
     },
-    :implementation_tree=>{
+    :module_tree=>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [
+       {
+         :model_name=>:implementation,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:project_project_id=>:project__id},
+         :cols=>[:id,:display_name,:type]
+       },
+       {
+         :model_name=>:component,
+         :convert => true,
+         :join_type=>:inner,
+         :filter =>[:eq,:node_node_id,nil],
+         :join_cond=>{:implementation_id=>:implementation__id},
+         :cols=>Component.common_columns()
+       }]
+    },
+    :implementation_tree=>{ #TODO: deprecate
       :type=>:json,
       :hidden=>true,
       :remote_dependencies=>

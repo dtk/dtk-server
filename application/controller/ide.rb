@@ -9,7 +9,7 @@ module XYZ
         projects[i][:tree] = {}
         projects[i][:tree][:targets] = p.get_target_tree()
         projects[i][:tree][:component_templates] = p.get_implementaton_tree(:include_file_assets => true)
-pp p.get_module_tree(:include_file_assets => true)
+#pp p.get_module_tree(:include_file_assets => true)
         projects[i][:name] = projects[i][:display_name]
       }
 #pp projects

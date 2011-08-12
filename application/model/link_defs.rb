@@ -209,7 +209,7 @@ module XYZ
   class LinkDefEventExtendComponent < LinkDefEvent
     def initialize(hash,single_link_context)
       validate_top_level(hash)
-      remote_or_local = hash[:node] || :remote
+      remote_or_local = (hash[:node] || :remote).to_sym
       base_cmp = single_link_context[remote_or_local == :remote ? :remote_type : :local_type]
       new_hash = {
         :node => remote_or_local,
@@ -244,7 +244,7 @@ module XYZ
 
    private
     def validate_top_level(hash)
-     raise Error.new("node is set incorrectly") if hash[:node] and not [:local,:remote].include?(hash[:node])
+     raise Error.new("node is set incorrectly") if hash[:node] and not [:local,:remote].include?(hash[:node].to_sym)
       raise Error.new("no extension_type is given") unless hash[:extension_type]
     end
   end

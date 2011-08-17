@@ -27,22 +27,14 @@ module XYZ
 
    private
     def find_matching_output_attr(aug_attr_list,attr_in,link)
+      #TODO: to make moer efficient have other ind_matching_output_attr__[link_fn]
+      return find_matching_output_attr__eq_indexed(aug_attr_list,attr_in,link) if link[:function] == "eq_indexed"
       ret = nil
       output_id =  link[:output_id] 
       ret = aug_attr_list.find do |attr|
         if attr[:id] == output_id
           case link[:function]
            when "eq" then true
-           when "eq_indexed"
-            if not (link[:index_map]||[]).size == 1
-              Log.error("not treating index maps with multiple elements")
-              nil
-            elsif (link[:index_map].first[:output]||[]).empty?
-              true
-            else
-              Log.error("not treated when link function is #{link[:function]} and output index map is non empty")
-              nil
-            end
            when "select_one" 
             out_item_path = attr[:item_path]
             out_item_path and (attr_in[:item_path] == out_item_path[1,out_item_path.size-1])
@@ -59,6 +51,28 @@ module XYZ
 
       ret
     end
+
+    def find_matching_output_attr__eq_indexed(aug_attr_list,attr_in,link)
+      if not (link[:index_map]||[]).size == 1
+        Log.error("not treating index maps with multiple elements")
+        return nil
+      end
+      link_output_index_map =  link[:index_map].first[:output]||[]
+      output_id = link[:output_id]
+      aug_attr_list.find do |attr|
+        attr[:id] == output_id and matching_index_maps?(link_output_index_map,attr[:item_path]) 
+      end
+    end
+
+    def matching_index_maps?(index_map,item_path)
+      return true if index_map.empty?
+      return nil unless index_map.size == item_path.size
+      index_map.each_with_index do |el,i|
+        return nil unless item_path[i] == (el.kind_of?(String) ? el.to_sym : el) 
+      end
+      true
+    end
+
 
     def find_matching_link(attr,links)
       links.find{|link|link[:input_id] == attr[:id] and index_match(link,attr[:item_path])}

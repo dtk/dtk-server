@@ -186,6 +186,17 @@ return;
 				if(newNode == true) {
 					node.getView('project').init();
 				}
+			},
+//TODO: make remove evented like add using IDE event framework
+			removeNode: function(nodeRemoveId) {
+				_nodeListNode.get('children').each(function(){
+					var nodeLeafId = this.get('id');
+					var nodeLeafId = nodeLeafId.replace('node-leaf-','');
+					if(nodeLeafId == nodeRemoveId) {
+						this.purge(true);
+						this.remove();
+					}
+				});
 			}
 		}
 	};

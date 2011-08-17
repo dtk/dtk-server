@@ -50,7 +50,23 @@ console.log('should be renaming this tree node now.....');
 								"label": "Delete",
 								"action": function(obj) {
 console.log(obj.attr('id'));
-console.log('should be deleting this tree node now.....');
+var splitter = obj.attr('id').split('-');
+if(splitter.length === 3) {
+	var model = splitter[0];
+	var modelId = splitter[2];
+}
+switch(model) {
+	case "node":
+console.log('should be deleting node.....');
+		var targets = _project.get('targets');
+		for(var t in targets) {
+			if(targets[t].hasNode(modelId)) {
+				targets[t].deleteNode(modelId);
+			}
+console.log('have target:'+t);
+		}
+		break;
+}
 								}
 							},
 							"create":{

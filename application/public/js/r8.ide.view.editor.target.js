@@ -228,7 +228,22 @@ return;
 
 				_items[itemId].init();
 			},
-
+//TODO: make remove evented like add using IDE event framework
+			removeNode: function(nodeRemoveId) {
+				this.removeItem(nodeRemoveId);
+			},
+			removeItem: function(itemRemoveId) {
+				_contentNode.get('children').each(function() {
+					var itemNodeId = this.get('id');
+					var itemNodeId = itemNodeId.replace('node-','');
+//TODO: keep an eye out for leaks from this action.., lots going on with ports and links inside of nodes
+					if(itemNodeId == itemRemoveId) {
+						this.purge(true);						
+						this.remove();
+						delete(_items[itemRemoveId]);
+					}
+				});
+			},
 			/*
 			 * addDrag will make a item drag/droppable on a viewspace
 			 * @method addDrag

@@ -12,7 +12,7 @@ pp node.get_obj_with_common_cols()
     ###TODO test
     def destroy_and_delete(id)
       create_object_from_id(id).destroy_and_delete()
-      return {:content => {}}
+      return {:data => {:id=>id,:result=>true}}
     end
     ######
 

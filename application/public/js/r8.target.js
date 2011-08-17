@@ -89,6 +89,41 @@ if (!R8.Target) {
 //----------------------------------------------
 //TARGET SPECIFIC METHODS
 //----------------------------------------------
+			hasNode: function(nodeId) {
+				for(var n in _nodes) {
+					if(_nodes[n].get('id') == nodeId) return true;
+				}
+				return false;
+			},
+			deleteNode: function(nodeId) {
+				if(!this.hasNode(nodeId)) return false;
+
+				var _this=this;
+				var removeNodeFromViews = function(ioId,responseObj) {
+					eval("var response =" + responseObj.responseText);
+					var delete_result = response.application_node_destroy_and_delete.content[0].data;
+//DEBUG
+console.log(delete_result);
+if(delete_result.result == true) _this.purgeNode(delete_result.id);
+				}
+				var params = {
+					'cfg':{
+						'data':''
+					},
+					'callbacks': {
+						'io:success': removeNodeFromViews
+					}
+				};
+				R8.Ctrl.call('node/destroy_and_delete/'+nodeId,params);
+			},
+			purgeNode: function(nodeId) {
+//DEBUG
+console.log('should remove node from views....');				
+				for(var v in _views) {
+					_views[v].removeNode(nodeId);
+				}
+				delete(_nodes[nodeId]);
+			},
 			instantiateNode: function(e) {
 				var nodePos = e.nodeDef.ui['target-'+this.get('id')];
 				_def.ui.items[e.nodeDef.id] = nodePos;

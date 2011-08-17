@@ -9,7 +9,7 @@ module XYZ
       impl = create_object_from_id(implementation_id)
       opts = {:include_file_assets => true}
       impl_tree = impl.get_tree(opts)
-#pp impl_tree
+
       {:data => impl_tree}
     end
   end

@@ -21,26 +21,23 @@ module XYZ
         return nil 
       end
       #guarding attributes that are unset and 
-      #TODO: should we assume that what gets heer are only requierd attributes
+      #TODO: should we assume that what gets here are only requierd attributes
       unless guard_attr[:dynamic] and (not guard_attr[:attribute_value]) and (not guarded_attr[:attribute_value])
         return nil
       end
+
+      guard_task_type = (guard_attr[:semantic_type_summary] == "sap__l4" and (guard_attr[:item_path]||[]).include?(:host_address)) ? TaskAction::CreateNode : TaskAction::ConfigNode
+      #right now only using config node to config node guards
+      return nil if guard_task_type == TaskAction::CreateNode
+
+      guard = {
+        :task_type => guard_task_type
+      }.merge(attr_info(guard_attr))
+
       guarded = {
         :task_type => TaskAction::ConfigNode
       }.merge(attr_info(guarded_attr))
 
-      #need to case on whether teh dynamic attribute set by config_node or create_node
-      if guarded_attr[:semantic_type_summary] == "sap_ref__l4" and (guarded_attr[:item_path]||[]).include?(:host_address)
-        task_type = TaskAction::CreateNode
-        attr_info_keys = [:node]
-      else
-        task_type = TaskAction::ConfigNode
-        attr_info_keys = nil
-      end
-
-      guard = {
-        :task_type => task_type
-      }.merge(attr_info(guard_attr,attr_info_keys))
       new(:guarded => guarded, :guard => guard, :link => link)
     end
    private

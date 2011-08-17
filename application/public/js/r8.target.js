@@ -104,7 +104,7 @@ if (!R8.Target) {
 					var delete_result = response.application_node_destroy_and_delete.content[0].data;
 //DEBUG
 console.log(delete_result);
-if(delete_result.result == true) _this.purgeNode(delete_result.id);
+					if(delete_result.result == true) _this.purgeNode(delete_result.id);
 				}
 				var params = {
 					'cfg':{

@@ -148,10 +148,10 @@ console.log('should load target view....');
 				//TODO: revisit, temp hack to work over the top of jstree library
 //				if(_target.isInitialized()) {
 				if(newNode == true) {
-//					nodeLeafNode.get('children').item(0).prepend('<ins class="jstree-icon">&nbsp;</ins>');
-//					nodeLeafNode.prepend('<ins class="jstree-icon">&nbsp;</ins>');
+					nodeLeafNode.get('children').item(0).prepend('<ins class="jstree-icon">&nbsp;</ins>');
+					nodeLeafNode.prepend('<ins class="jstree-icon">&nbsp;</ins>');
+/*
 var projectId = _target.get('project').get('id');
-
 console.log('have project id:'+projectId)
 //$('#project-tree-'+projectId).jstree("create", null, "last", { "attr" : { "rel" : this.id.toString().replace("add_", "") } });
 
@@ -171,16 +171,17 @@ $('#project-tree-'+projectId).jstree(
 console.log('added a new node via jstree interface....');
 	}
 );
-*/
+
 return;
+*/
 				}
-/*
+
 				if(_nodeListNode == null) {
 					var tempNode = R8.Utils.Y.Node.create('<ul id="target-nodes-list-'+_target.get('id')+'"></ul>');
 					_nodesLeafNode.append(tempNode);
 					_nodeListNode = R8.Utils.Y.one('#target-nodes-list-'+_target.get('id'));
 				}
-*/
+
 				_nodeListNode.append(nodeLeafNode);
 
 				if(newNode == true) {

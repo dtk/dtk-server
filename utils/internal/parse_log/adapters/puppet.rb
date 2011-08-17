@@ -91,11 +91,12 @@ module XYZ
         end
 
        private
-        #TODO: need to unify with self.log_complete?(lines)
+        #TODO: need to unify with self.log_complete?(lines) and run status info
         def complete?()
           return false if empty?
           return true if last.line =~ /Finished catalog run/
           return true if last.line =~ /Puppet \(info\): \(end\)/
+          return true if last.line =~ /Puppet \(debug\): Finishing transaction/
         end
 
         def find_error_position()

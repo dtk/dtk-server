@@ -1,8 +1,9 @@
 
 if (!R8.Target) {
 
-	R8.Target = function(targetDef) {
+	R8.Target = function(targetDef,project) {
 		var _def = targetDef,
+			_project = project,
 			_views = {},
 			_events = {},
 			_initialized = false,
@@ -13,20 +14,19 @@ if (!R8.Target) {
 			_portDefs = null,
 			_linkDefs = null;
 
-//DEBUG
-//console.log('Creating target....');
-//console.log(_def);
 			if(_def.ui == null) _def.ui = {'items':{}};
 
 		return {
 			init: function() {
-				this.setupEvents();
-
 				for(var n in _def.nodes) {
-					this.addNode(_def.nodes[n]);
+					var node = _def.nodes[n];
+					_nodes[node.id] = new R8.Node(node,this)
+					_nodes[node.id].init();
 				}
 
+				this.setupEvents();
 				this.retrievePorts();
+
 				_initialized = true;
 			},
 			get: function(key) {
@@ -48,6 +48,9 @@ if (!R8.Target) {
 						break;
 					case "nodes":
 						return _nodes;
+						break;
+					case "project":
+						return _project;
 						break;
 				}
 			},
@@ -87,15 +90,11 @@ if (!R8.Target) {
 //TARGET SPECIFIC METHODS
 //----------------------------------------------
 			instantiateNode: function(e) {
-//DEBUG
-//console.log(e);
-var nodePos = e.nodeDef.ui['target-'+this.get('id')];
+				var nodePos = e.nodeDef.ui['target-'+this.get('id')];
+				_def.ui.items[e.nodeDef.id] = nodePos;
 
-_def.ui.items[e.nodeDef.id] = nodePos;
-
-				this.addNode(e.nodeDef);
-
-//----------------------------------------------------------------------
+				this.addNode(e.nodeDef,true);
+				//----------------------------------------------------------------------
 
 				var ui = {};
 				ui[this.get('id')] = nodePos;
@@ -141,12 +140,12 @@ _def.ui.items[e.nodeDef.id] = nodePos;
 				_nodes[newNodeDef.id].refresh(newNodeDef)
 			},
 //TODO: git rid of newNode, should just check if _initialized=true
-//^^^^^^WHY is node always initialized during render??????
-			addNode: function(nodeDef) {
-				_nodes[nodeDef.id] = new R8.Node(nodeDef);
+//WHY is node always initialized during render??????
+			addNode: function(nodeDef,newNode) {
+				_nodes[nodeDef.id] = new R8.Node(nodeDef,this);
 
 				for(var v in _views) {
-					_views[v].addNode(_nodes[nodeDef.id]);
+					_views[v].addNode(_nodes[nodeDef.id],newNode);
 				}
 
 				_nodes[nodeDef.id].init();

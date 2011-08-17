@@ -139,18 +139,39 @@ module XYZ
           :cols => [:id,:display_name,:assembly_id]
         }
 
+
         virtual_column :node_assembly_parts, :type => :json, :hidden => true,
         :remote_dependencies => [node_assembly_parts]
 
-        virtual_column :node_assembly_parts_with_attrs, :type => :json, :hidden => true,
+        virtual_column :node_assembly_parts_node_attrs, :type => :json, :hidden => true,
         :remote_dependencies => 
           [
            node_assembly_parts,
            {
              :model_name => :attribute,
-             :join_type => :left_outer,
+             :convert => true,
+             :join_type => :inner,
              :join_cond=>{:node_node_id => q(:node,:id)},
-             :cols => [:id,:display_name,:node_node_id,:value_asserted]
+             :cols => [:id,:display_name,:dynamic,:attribute_value]
+           }
+          ]
+        virtual_column :node_assembly_parts_cmp_attrs, :type => :json, :hidden => true,
+        :remote_dependencies => 
+          [
+           node_assembly_parts,
+           {
+             :model_name => :component,
+             :alias => :component_part,
+             :join_type => :inner,
+             :join_cond=>{:node_node_id => q(:node,:id)},
+             :cols => [:id]
+           },
+           {
+             :model_name => :attribute,
+             :convert => true,
+             :join_type => :inner,
+             :join_cond=>{:component_component_id => q(:component_part,:id)},
+             :cols => [:id,:display_name,:dynamic,:attribute_value]
            }
           ]
 
@@ -571,7 +592,9 @@ module XYZ
       base_id = self[:extended_base_id]
       sp_hash = {
         :model_name => :attribute,
-        :filter => [:and, [:oneof, field_to_match, attribute_names], [:oneof, :component_component_id, [component_id,base_id]]],
+        :filter => [:and, 
+                    [:oneof, field_to_match, attribute_names], 
+                    [:oneof, :component_component_id, [component_id,base_id]]],
         :cols => Aux.array_add?(cols,[:component_component_id,field_to_match])
       }
       attr_mh = model_handle().createMH(:attribute)
@@ -583,7 +606,9 @@ module XYZ
       component_id = self[:id]
       base_sp_hash = {
         :model_name => :component,
-        :filter => [:and, [:eq,:implementation_id, self[:implementation_id]],
+        :filter => [:and, 
+                    [:eq, :node_node_id, self[:node_node_id]], 
+                    [:eq, :implementation_id, self[:implementation_id]],
                     [:or, [:eq, :extended_base, self[:component_type]],[:eq, :id, self[:id]]]],
         :cols => [:id,:extended_base,:implementation_id]
       }

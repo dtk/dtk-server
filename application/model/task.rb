@@ -1,10 +1,35 @@
 module XYZ
   class Task < Model
 
+    def get_events()
+      sp_hash = {:cols => [:created_at, :type, :content]}
+      get_children_objs(:task_event,sp_hash).sort{|a,b| a[:created_at] <=> b[:created_at]}
+    end
+
+    def add_event(event_type,sub_task,result=nil)
+      event = TaskEvent.create_event?(event_type,sub_task,result)
+      return nil unless event
+      type = event.delete(:type)||event_type
+      row = {
+        :content => event.to_hash, 
+        :ref => "task_event", 
+        :type => type.to_s,
+        :task_id => id()
+      }
+      Model.create_from_rows(model_handle(:task_event),[row],{:convert => true})
+      event
+    end
+
     def update_input_attributes!()
       task_action = self[:executable_action]
       #updates ruby task object
       task_action.get_and_update_attributes!(self)
+    end
+
+    def add_internal_guards!(guards)
+      task_action = self[:executable_action]
+      #updates ruby task object
+      task_action.add_internal_guards!(guards)
     end
 
     def self.create_from_nodes_to_rerun(node_idhs)

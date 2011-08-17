@@ -11,9 +11,13 @@ if (!R8.IDE.View.project.node) {
 			_leafNode = null,
 			_leafBodyNodeId = '',
 			_leafBodyNode = null,
+			_childrenListNode = null,
+			_childrenListNodeId = '',
 
 			_applicationsLeafNode = null,
+			_applicationsLeafNodeId = '',
 			_applicationsListNode = null,
+			_applicationsListNodeId = '',
 
 			_leafDef = {
 				'node_id': _idPrefix+_node.get('id'),
@@ -31,14 +35,19 @@ if (!R8.IDE.View.project.node) {
 
 				_leafNode = R8.Utils.Y.one('#'+_leafNodeId);
 				_leafBodyNode = R8.Utils.Y.one('#'+_leafBodyNodeId);
-//DEBUG
-console.log('INSIDE OF INIT IN PROJECT.NODE view....');
-console.log('node-applications-list-'+_node.get('id'));
-				_applicationsLeafNode = R8.Utils.Y.one('#node-applications-'+_node.get('id'));
-				_applicationsListNode = R8.Utils.Y.one('#node-applications-list-'+_node.get('id'));
-console.log(_applicationsListNode);
-//console.log(_applicationsListNode.set('innerHTML','%%%%%%%%%%%%%%%%%%%%%%%'));
+				_childrenListNode = R8.Utils.Y.one('#'+_childrenListNodeId);
 
+				_applicationsLeafNode = R8.Utils.Y.one('#'+_applicationsLeafNodeId);
+				_applicationsListNode = R8.Utils.Y.one('#'+_applicationsListNodeId);
+//DEBUG
+/*
+				if(_applicationsListNode == null) {
+					_applicationsListNode = R8.Utils.Y.Node.create('<ul id="node-'+_node.get('id')+'-applications-list"></ul>');
+					_applicationsListNodeId = _applicationsListNode.get('id');
+					_applicationsLeafNode.append(_applicationsListNode);
+					_applicationsListNode = R8.Utils.Y.one('#'+_applicationsListNodeId);
+				}
+*/
 				this.setupEvents();
 				_initialized = true;
 
@@ -46,10 +55,8 @@ console.log(_applicationsListNode);
 				for(var a in applications) {
 					applications[a].getView('project').init();
 				}
-
 			},
 			setupEvents: function() {
-/*
 				_events['leaf_dblclick'] = _leafBodyNode.on('dblclick',function(e){
 
 					var leafNodeId = e.currentTarget.get('id'),
@@ -57,43 +64,49 @@ console.log(_applicationsListNode);
 						leafObjectId = leafNodeId.replace('leaf-body-'+leafType+'-',''),
 						leafLabel = e.currentTarget.get('children').item(1).get('innerHTML');
 
-					R8.IDE.openEditorView(_node);
+//DEBUG
+console.log('double clicked on node leaf:'+_node.get('id'));
+//					R8.IDE.openEditorView(_node);
 
 					e.halt();
 					e.stopImmediatePropagation();
 				},this);
-*/
 			},
-			render: function() {
+			render: function(newNode) {
 				_leafNode = R8.Utils.Y.Node.create(R8.Rtpl['project_tree_leaf']({'leaf_item': _leafDef}));
 				_leafNodeId = _leafNode.get('id');
 
 				_leafBodyNode = _leafNode.get('children').item(0);
 				_leafBodyNodeId = _leafBodyNode.get('id');
+				_childrenListNode = R8.Utils.Y.Node.create('<ul id="node-'+_node.get('id')+'-children"></ul>');
+				_childrenListNodeId = _childrenListNode.get('id');
 
 				var applicationsLeaf = {
 					'node_id': 'node-applications-'+_node.get('id'),
 					'type': 'applications',
 					'basic_type': 'components',
-					'name': 'Applications'
+					'name': 'Applications',
+//					'class': 'jstree-closed'
 				};
-				_applicationsLeafNode = R8.Utils.Y.Node.create('<ul>'+R8.Rtpl['project_tree_leaf']({'leaf_item': applicationsLeaf})+'</ul>');
+				_applicationsLeafNode = R8.Utils.Y.Node.create(R8.Rtpl['project_tree_leaf']({'leaf_item': applicationsLeaf}));
+				_applciationsLeafNodeId = _applicationsLeafNode.get('id');
 
-				_applicationsListNode = R8.Utils.Y.Node.create('<ul id="node-applications-list-'+_node.get('id')+'"></ul>');
+				if(newNode==true) {
+					_applicationsLeafNode.addClass('jstree-closed');
+					_applicationsLeafNode.get('children').item(0).prepend('<ins class="jstree-icon">&nbsp;</ins>');
+					_applicationsLeafNode.prepend('<ins class="jstree-icon">&nbsp;</ins>');
+				}
+				_applicationsListNode = R8.Utils.Y.Node.create('<ul id="node-'+_node.get('id')+'-applications-list"></ul>');
+				_applicationsListNodeId = _applicationsListNode.get('id');
 
 				var applications = _node.get('applications');
 				for(var a in applications) {
 					this.addApplication(applications[a]);
 				}
 
-				if(_applicationsListNode == null) {
-					_applicationsListNode = R8.Utils.Y.Node.create('<ul id="node-applications-list-'+_node.get('id')+'"></ul>');
-				}
-
-//DEBUG
-console.log('appending applications list node for node:'+_applicationsListNode.get('id'));
-				_applicationsLeafNode.get('children').item(0).append(_applicationsListNode);
-				_leafNode.append(_applicationsLeafNode);
+				_applicationsLeafNode.append(_applicationsListNode);
+				_childrenListNode.append(_applicationsLeafNode);
+				_leafNode.append(_childrenListNode);
 
 				return _leafNode;
 			},
@@ -103,9 +116,6 @@ console.log('appending applications list node for node:'+_applicationsListNode.g
 				switch(key) {
 					case "id":
 						return _id;
-						break;
-					case "id-prefix":
-						return "foo";
 						break;
 				}
 			},
@@ -128,42 +138,23 @@ console.log('appending applications list node for node:'+_applicationsListNode.g
 
 				_leafBodyNode.get('children').item(1).set('innerHTML',_node.get('name'));
 			},
-			addApplication: function(application,tester) {
-				var applicationLeaf = application.renderView('project');
+			addApplication: function(application,newApplication) {
+				var applicationLeafNode = application.getView('project').render();
 
-				//TODO: revisit, temp hack to work over the top of jstree library
-				if(_node.isInitialized()) {
-//console.log('node IS initialized.., going to do mish mosh for jstree...');
-					applicationLeaf.get('children').item(0).prepend('<ins class="jstree-icon">&nbsp;</ins>');
-					applicationLeaf.prepend('<ins class="jstree-icon">&nbsp;</ins>');
+				if(newApplication == true) {
+					applicationLeafNode.get('children').item(0).prepend('<ins class="jstree-icon">&nbsp;</ins>');
+					applicationLeafNode.prepend('<ins class="jstree-icon">&nbsp;</ins>');
 				}
 
-				if(_applicationsListNode == null) {
-//LEFT OFF HERE
-console.log('app list node is null, and project node view IS init');
-					_applicationsLeafNode.append(R8.Utils.Y.Node.create('<ul id="node-applications-list-'+_node.get('id')+'"></ul>'));
-					_applicationsLeafNode.get('children').item(0).prepend('<ins class="jstree-icon">&nbsp;</ins>');
-//					_applicationsLeafNode.prepend('<ins class="jstree-icon">&nbsp;</ins>');
+				_applicationsListNode.append(applicationLeafNode);
 
-					_applicationsListNode = R8.Utils.Y.one('#node-applications-list-'+_node.get('id'));
+				if(newApplication == true) {
+					application.getView('project').init();
 				}
-
-/*
-//DEBUG
-if (tester == true) {
-	console.log('Adding application....');
-	console.log(applicationLeaf);
-	console.log(_applicationsListNode);
-//	_applicationsListNode.set('innerHTML','&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&');
-}
-*/
-//LEFT OFF HERE
-				_applicationsListNode.append(applicationLeaf);
 			},
 //TODO: revisit to see best way to render types of components likes apps, languages, etc
-			addComponent: function(component,tester) {
-console.log('inside of addComponent in node, tester is:'+tester);
-				this.addApplication(component,tester);
+			addComponent: function(component,newComponent) {
+				this.addApplication(component,newComponent);
 			}
 /*
 			addApp: function(app) {

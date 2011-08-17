@@ -4,8 +4,18 @@ module XYZ
 
     def get(id)
       component = create_object_from_id(id)
-pp component.get_obj_with_common_cols()      
-      return {:data=>component.get_obj_with_common_cols()}
+      comp = component.get_obj_with_common_cols()
+=begin
+      impl = create_object_from_id(comp[:implementation_id], :implementation)
+      opts = {:include_file_assets => true}
+      impl_tree = impl.get_tree(opts)
+
+      ret_obj = Hash.new
+      ret_obj[:component] = comp
+      ret_obj[:implementation_tree] = impl_tree
+=end
+#pp component.get_obj_with_common_cols()
+      return {:data=>comp}
     end
 
     #TODO: remove when finshed testing

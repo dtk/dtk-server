@@ -15,6 +15,7 @@ module XYZ
           params.merge!("task" => task_info["task"])
           params.merge!("action" => task_info["action"])
           params.merge!("top_task_idh" => task_info["top_task_idh"])
+          params.merge!("top_task" => workflow.top_task)
           params
         end
 
@@ -69,17 +70,18 @@ module XYZ
       class DetectCreatedNodeIsReady < Top
         def consume(workitem)
           params = get_params(workitem) 
-          task_id,action,workflow,task,task_end = %w{task_id action workflow task task_end}.map{|k|params[k]}
+          task_id,action,workflow,task,task_end,top_task = %w{task_id action workflow task task_end top_task}.map{|k|params[k]}
           callbacks = {
             :on_msg_received => proc do |msg|
-              pp [:found,msg[:senderid]]
               result = {:type => :completed_create_node, :task_id => task_id} 
+              event = top_task.add_event(:complete_succeeded, task,result)
+              pp [:found,msg[:senderid]]
+              task[:executable_action][:node].update_operational_status!(:powered_on)
               set_result_succeeded(workitem,result,task,action)
-              CommandAndControl.get_and_propagate_updated_attributes(action)
+              action.get_and_propagate_dynamic_attributes(result)
               self.reply_to_engine(workitem)
             end,
             :on_timeout => proc do 
-              pp [:timeout]
               self.reply_to_engine(workitem)
             end
           }
@@ -90,17 +92,18 @@ module XYZ
         end
       end
 
+      #TODO: currently; just using above; either use this or get rid of it
       class DetectIfNodeIsResponding < Top
         def consume(workitem)
           params = get_params(workitem) 
-          action,workflow = %w{action workflow}.map{|k|params[k]}
+          action,task,workflow = %w{action task workflow}.map{|k|params[k]}
           callbacks = {
             :on_msg_received => proc do |msg|
               pp [:found,msg[:senderid]]
+              task[:executable_action][:node].update_operational_status!(:powered_on)
               self.reply_to_engine(workitem)
             end,
             :on_timeout => proc do 
-              pp [:timeout]
               self.reply_to_engine(workitem)
             end
           }
@@ -114,20 +117,27 @@ module XYZ
         def consume(workitem)
           #LockforDebug.synchronize{pp [:in_consume, Thread.current, Thread.list];STDOUT.flush}
           params = get_params(workitem) 
-          task_id,action,workflow,task = %w{task_id action workflow task}.map{|k|params[k]}
-          pp ["executing config on node", task_id,action[:node]]
+          task_id,action,workflow,task,top_task = %w{task_id action workflow task top_task}.map{|k|params[k]}
+          task.update_input_attributes!()
+          task.add_internal_guards!(workflow.guards[:internal])
+          event = top_task.add_event(:start,task)
+          pp ["executing #{action.class.to_s}", task_id,event] if event
           workitem.fields["guard_id"] = task_id # ${guard_id} is referenced if guard for execution of this
           execution_context(task) do
             if action.long_running?
               callbacks = {
                 :on_msg_received => proc do |msg|
                   result = msg[:body].merge("task_id" => task_id)
-                  pp [:result,result]
                   #result[:statuscode] is for transport errors and data is for errors for agent
                   succeeded = (result[:statuscode] == 0 and [:succeeded,:ok].include?((result[:data]||{})[:status]))
                   if succeeded
+                    event = top_task.add_event(:complete_succeeded,task,result)
+                    pp ["task_complete_succeeded #{action.class.to_s}", task_id,event] if event
                     set_result_succeeded(workitem,result,task,action) 
+                    action.get_and_propagate_dynamic_attributes(result)
                   else
+                    event = top_task.add_event(:complete_failed,task,result)
+                    pp ["task_complete_failed #{action.class.to_s}", task_id,event] if event
                     set_result_failed(workitem,result,task,action)
                   end
                   self.reply_to_engine(workitem)
@@ -136,6 +146,8 @@ module XYZ
                   result = {
                     "status" => "timeout" 
                   }
+                  event = top_task.add_event(:complete_timeout,task,result)
+                  pp ["task_complete_timeout #{action.class.to_s}", task_id,event] if event
                   set_result_timeout(workitem,result,task)
                   self.reply_to_engine(workitem)
                 end
@@ -187,7 +199,8 @@ module XYZ
 
       class EndOfTask < Top
         def consume(workitem)
-          pp [workitem.fields,workitem.params]
+          #pp [workitem.fields,workitem.params]
+          pp "EndOfTask"
           reply_to_engine(workitem)
         end
 

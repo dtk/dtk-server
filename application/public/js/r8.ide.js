@@ -40,7 +40,8 @@ if (!R8.IDE) {
 
 			_resizerWidth = 3,
 
-			_projects = [],
+//			_projects = [],
+			_projects = {},
 			_loadedProjects = {},
 
 			_panels = {},
@@ -193,8 +194,10 @@ if (!R8.IDE) {
 				};
 				R8.Topbar2.init(toolbarDef);
 
-//TODO: fogure out how to more gracefully load this
-				_projects = projects;
+				for(var i in projects) {
+					_projects[projects[i].id] = new R8.Project(projects[i]);
+					_projects[projects[i].id].init();
+				}
 
 				_pageContainerNode = R8.Utils.Y.one('#page-container');
 				_mainBodyWrapperNode = R8.Utils.Y.one('#main-body-wrapper');
@@ -678,9 +681,13 @@ if (!R8.IDE) {
 				},
 				renderProjectTree: function(contentNode) {
 					for (var p in _projects) {
-						_loadedProjects[_projects[p].id] = new R8.Project(_projects[p]);
+/*						_loadedProjects[_projects[p].id] = new R8.Project(_projects[p]);
+
 						_loadedProjects[_projects[p].id].renderTree(contentNode);
 						_loadedProjects[_projects[p].id].init();
+*/
+						contentNode.append(_projects[p].getView('project').render());
+						_projects[p].getView('project').init();
 					}
 				},
 			    renderChefDebugger: function(contentNode,level) {
@@ -800,7 +807,8 @@ if (!R8.IDE) {
 			destroyShim: function() {
 //DEBUG
 //TODO: THIS IS TEMP SOLUTION FOR MEMORY LEAK ISSUE ON COMMIT
-				$("#"+_modalNode.get('children').item(0).get('id')).remove();
+//console.log(jQuery("#"+_modalNode.get('children').item(0).get('id')));
+				jQuery("#"+_modalNode.get('children').item(0).get('id')).remove();
 
 				_modalNode.purge(true);
 				_modalNode.remove();

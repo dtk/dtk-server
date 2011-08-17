@@ -1,8 +1,9 @@
 
 if (!R8.Node) {
 
-	R8.Node = function(nodeDef) {
+	R8.Node = function(nodeDef,target) {
 		var _def = nodeDef,
+			_target = target,
 			_portDefs = null,
 			_ports = null,
 
@@ -49,8 +50,8 @@ if (!R8.Node) {
 					case "links":
 						return _links;
 						break;
-					case "applications":
-						return _applications;
+					case "target":
+						return _target;
 						break;
 				}
 			},
@@ -102,7 +103,18 @@ console.log(e);
 				var successCallback = function(ioId,responseObj) {
 						eval("var response =" + responseObj.responseText);
 						var newComponent = response.application_component_get.content[0]['data'];
-
+var project = _this.get('target').get('project');
+console.log('Have a project...');
+console.log(project);
+if(project.hasImplementation(newComponent.implementation_id)) {
+	console.log('Project '+project.get('id')+' has the imp we r looking for...');
+} else {
+	console.log('Need to retrieve the new implementation from the project '+project.get('id'));
+	project.instantiateImplementationById(newComponent.implementation_id);
+}
+//DEBUG
+console.log('going to add new component...');
+console.log(newComponent);
 						_this.addComponent(newComponent,true);
 //TODO: revisit for best way to do notification updates
 //					R8.Workspace.refreshItem(modelId);

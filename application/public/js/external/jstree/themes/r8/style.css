@@ -141,7 +141,7 @@
 	background-position: -90px -108px;
 }
 
-.jstree-r8 li[rel=components] > a > .jstree-icon {
+.jstree-r8 li[rel=component] > a > .jstree-icon {
 	background-position: -18px -126px;
 }
 .jstree-r8 li[rel=opscode] > a > .jstree-icon {
@@ -153,6 +153,13 @@
 .jstree-r8 li[rel=puppet_module] > a > .jstree-icon {
 	background-position: -36px -126px;
 }
+.jstree-r8 li[rel=implementations] > a > .jstree-icon {
+	background-position: -54px -126px;
+}
+.jstree-r8 li[rel=component_list] > a > .jstree-icon {
+	background-position: -72px -126px;
+}
+
 
 .jstree-r8 li[rel=file] > a > .jstree-icon {
 	background-position: 0 -144px;

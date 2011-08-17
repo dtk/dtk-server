@@ -11,11 +11,13 @@ if (!R8.IDE.View.project.target) {
 			_leafNode = null,
 			_leafBodyNodeId = '',
 			_leafBodyNode = null,
-			_nodesLeafNode = null,
-			_nodesListNode = null,
+			_childrenListNode = null,
+			_childrenListNodeId = '',
 
-//			_nodes = _target.get('nodes'),
-//			_nodeGroups = {},
+			_nodesLeafNode = null,
+			_nodesLeafNodeId = '',
+			_nodeListNode = null,
+			_nodeListNodeId = '',
 
 			_leafDef = {
 				'node_id': 'target-'+_target.get('id'),
@@ -28,17 +30,22 @@ if (!R8.IDE.View.project.target) {
 
 		return {
 			init: function() {
-//DEBUG
-console.log('INSIDE OF PROJECT.TARGET INIT....');
 //				_leafBodyNode = R8.Utils.Y.one('#'+_leafBodyNode.get('id'));
 
 				_leafNode = R8.Utils.Y.one('#'+_leafNodeId);
 				_leafBodyNode = R8.Utils.Y.one('#'+_leafBodyNodeId);
-				_nodesLeafNode = R8.Utils.Y.one('#target-nodes-'+_target.get('id'));
-				_nodesListNode = R8.Utils.Y.one('#target-nodes-list-'+_target.get('id'));
+				_childrenListNode = R8.Utils.Y.one('#'+_childrenListNodeId);
+
+				_nodesLeafNode = R8.Utils.Y.one('#'+_nodesLeafNodeId);
+				_nodeListNode = R8.Utils.Y.one('#'+_nodeListNodeId);
+
+				var nodes = _target.get('nodes');
+				for(var n in nodes) {
+					nodes[n].getView('project').init();
+				}
 
 //console.log('SHOULD HAVE nodesListNode...');
-//console.log(_nodesListNode);
+//console.log(_nodeListNode);
 
 /*
 				var nodes = _target.get('nodes');
@@ -47,14 +54,8 @@ console.log('INSIDE OF PROJECT.TARGET INIT....');
 				}
 */
 				this.setupEvents();
-
-
 				_initialized = true;
 
-				var nodes = _target.get('nodes');
-				for(var n in nodes) {
-					nodes[n].getView('project').init();
-				}
 //				node.getView('project').init();
 
 			},
@@ -91,44 +92,31 @@ console.log('INSIDE OF PROJECT.TARGET INIT....');
 console.log('should load target view....');
 				});
 */
+				_childrenListNode = R8.Utils.Y.Node.create('<ul id="target-'+_target.get('id')+'-children');
+				_childrenListNodeId = _childrenListNode.get('id');
 
 				var nodesLeaf = {
-					'node_id': 'target-nodes-'+_target.get('id'),
+					'node_id': 'target-'+_target.get('id')+'-nodes',
 					'type': 'nodes',
 					'basic_type': 'nodes',
-					'name': 'Nodes'
+					'name': 'Nodes',
+					'class': 'jstree-closed'
 				};
-				var nodeLeafNode = R8.Utils.Y.Node.create('<ul>'+R8.Rtpl['project_tree_leaf']({'leaf_item': nodesLeaf})+'</ul>');
+				_nodesLeafNode = R8.Utils.Y.Node.create(R8.Rtpl['project_tree_leaf']({'leaf_item': nodesLeaf}));
+				_nodesLeafNodeId = _nodesLeafNode.get('id');
+				_nodeListNode = R8.Utils.Y.Node.create('<ul id="target-'+_target.get('id')+'-node-list"></ul>');
+				_nodeListNodeId = _nodeListNode.get('id');
 
-				_nodesListNode = R8.Utils.Y.Node.create('<ul id="target-nodes-list-'+_target.get('id')+'"></ul>');
 				var nodes = _target.get('nodes');
-
 				for(var n in nodes) {
 					this.addNode(nodes[n]);
-//					var nodeId = nodes[n].id;
-//					_nodes[nodeId] = new R8.Node(nodes[n]);
-//					ulNode.append(_nodes[nodeId].renderTree());
 				}
-//DEBUG
-//console.log('+++++++++++++++++++');
-//console.log(_nodesLeafNode.get('children').item(0));
 
-				nodeLeafNode.get('children').item(0).append(_nodesListNode);
-//				_nodesLeafNode.append(_nodesListNode);
-console.log('Appending the nodesLeafNode to the target leaf node.....');
-				_leafNode.append(nodeLeafNode);
+				_nodesLeafNode.append(_nodeListNode);
+//				_nodesLeafNode.get('children').item(0).append(_nodeListNode);
+				_childrenListNode.append(_nodesLeafNode);
+				_leafNode.append(_childrenListNode);
 
-/*
-				for(var n in nodes) {
-					var nodeId = nodes[n].id;
-					_nodes[nodeId] = new R8.Node(nodes[n]);
-					ulNode.append(_nodes[nodeId].renderTree());
-				}
-				_nodesLeafNode.append(ulNode);
-				var ulNode2 = R8.Utils.Y.Node.create('<ul></ul>');
-				ulNode2.append(_nodesLeafNode);
-				_leafNode.append(ulNode2);
-*/
 				return _leafNode;
 			},
 			resize: function() {
@@ -153,24 +141,51 @@ console.log('Appending the nodesLeafNode to the target leaf node.....');
 //--------------------------------------
 //TARGET VIEW FUNCTIONS
 //--------------------------------------
-			addNode: function(node) {
-				var nodeLeaf = node.renderView('project');
+			addNode: function(node,newNode) {
+				var nodeLeafNode = node.getView('project').render(newNode);
+				nodeLeafNode.addClass('jstree-open');
 
 				//TODO: revisit, temp hack to work over the top of jstree library
-				if(_target.isInitialized()) {
-					nodeLeaf.get('children').item(0).prepend('<ins class="jstree-icon">&nbsp;</ins>');
-					nodeLeaf.prepend('<ins class="jstree-icon">&nbsp;</ins>');
-				}
+//				if(_target.isInitialized()) {
+				if(newNode == true) {
+//					nodeLeafNode.get('children').item(0).prepend('<ins class="jstree-icon">&nbsp;</ins>');
+//					nodeLeafNode.prepend('<ins class="jstree-icon">&nbsp;</ins>');
+var projectId = _target.get('project').get('id');
 
-				if(_nodesListNode == null) {
+console.log('have project id:'+projectId)
+//$('#project-tree-'+projectId).jstree("create", null, "last", { "attr" : { "rel" : this.id.toString().replace("add_", "") } });
+
+/*
+$('#project-tree-'+projectId).jstree(
+	"create",
+	"#"+_nodesLeafNode.get('id'),
+	"last",
+	{
+		"attr" : {
+			//"rel" : this.id.toString().replace("add_", ""),
+			"id": "foopaa"
+		},
+		"state": "open"
+	},
+	function() {
+console.log('added a new node via jstree interface....');
+	}
+);
+*/
+return;
+				}
+/*
+				if(_nodeListNode == null) {
 					var tempNode = R8.Utils.Y.Node.create('<ul id="target-nodes-list-'+_target.get('id')+'"></ul>');
 					_nodesLeafNode.append(tempNode);
-					_nodesListNode = R8.Utils.Y.one('#target-nodes-list-'+_target.get('id'));
+					_nodeListNode = R8.Utils.Y.one('#target-nodes-list-'+_target.get('id'));
 				}
-				
-				_nodesListNode.append(nodeLeaf);
+*/
+				_nodeListNode.append(nodeLeafNode);
 
-//				node.getView('project').init();
+				if(newNode == true) {
+					node.getView('project').init();
+				}
 			}
 		}
 	};

@@ -19,12 +19,13 @@ module XYZ
 
     def self.get_all(model_handle)
       sp_hash = {:cols => [:id,:display_name,:type]}
-      get_objects_from_sp_hash(model_handle,sp_hash)
+      get_objs(model_handle,sp_hash)
     end
 
+    #TODO: this wil be deprecated, but also looks like it gets wrong components
     def get_implementaton_tree(opts={})
       sp_hash = {:cols => [:id,:display_name,:type,:implementation_tree]}
-      unravelled_ret = get_objects_from_sp_hash(sp_hash)
+      unravelled_ret = get_objs(sp_hash)
       ret_hash = Hash.new
       unravelled_ret.each do |r|
         #TODO: hack until determine right way to treat relationship between component and implementation versions
@@ -47,9 +48,27 @@ module XYZ
       ret
     end
 
+    def get_module_tree(opts={})
+      ndx_ret = Hash.new
+      sp_hash = {:cols => [:id,:display_name,:type,:module_tree]}
+      unravelled_ret = get_objs(sp_hash)
+      unravelled_ret.each do |r|
+        impl_id = r[:implementation][:id]
+        cmps = (ndx_ret[impl_id] ||= r[:implementation].merge(:components => Array.new))[:components]
+        cmps << r[:component].materialize!(Component.common_columns())
+      end
+      ret = ndx_ret.values
+      return ret unless opts[:include_file_assets]
+      
+      impl_idhs = ret.map{|impl|impl.id_handle}
+      indexed_asset_files = Implementation.get_indexed_asset_files(impl_idhs)
+      ret.each{|impl|impl.merge!(:file_assets => indexed_asset_files[impl[:id]])}
+      ret
+    end
+
     def get_target_tree()
       sp_hash = {:cols => [:id,:display_name,:type,:target_tree]}
-      unravelled_ret = get_objects_from_sp_hash(sp_hash)
+      unravelled_ret = get_objs(sp_hash)
       ret_hash = Hash.new
       unravelled_ret.each do |r|
         unless target = ret_hash[r[:target][:id]]
@@ -72,7 +91,7 @@ module XYZ
     end
 
     def destroy_and_delete_nodes()
-      targets = get_objects_from_sp_hash(:cols => [:targets]).map{|r|r[:target]}
+      targets = get_objs(:cols => [:targets]).map{|r|r[:target]}
       targets.each{|t|t.destroy_and_delete_nodes()}
     end
 
@@ -82,7 +101,7 @@ module XYZ
         :filter => [:eq, :project_project_id, id()]
       }
       impl_mh = model_handle(:implementation)
-      impls = Model.get_objects_from_sp_hash(impl_mh,sp_hash)
+      impls = Model.get_objs(impl_mh,sp_hash)
       impls.each{|impl|Repo.delete(:implementation => impl)}
     end
   end

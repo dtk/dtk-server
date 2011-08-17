@@ -40,9 +40,22 @@ module XYZ
         Array.new
       end
 
+      def get_and_propagate_dynamic_attributes(result)
+        updated_attrs = get_dynamic_attributes(result)
+        return if updated_attrs.empty?
+        attr_mh = self[:node].model_handle(:attribute)
+        update_rows = updated_attrs.map{|attr|{:id => attr[:id], :value_asserted => attr[:value_asserted]}}
+        Model.update_from_rows(attr_mh,update_rows)
+        AttributeLink.propagate(updated_attrs.map{|attr|attr_mh.createIDH(:id => attr[:id])})
+      end
+
       #virtual gets overwritten
       #updates object and the tasks in the model
       def get_and_update_attributes!(task)
+      end
+
+      #virtual gets overwritten
+      def add_internal_guards!(guards)
       end
 
       def update_state_change_status_aux(task_mh,status,state_change_ids)
@@ -63,6 +76,30 @@ module XYZ
         super(hash)
       end
 
+      def get_dynamic_attributes(result)
+        node = self[:node]
+        updated_node_state = CommandAndControl.get_node_state(node)
+        ret = Array.new
+        attributes_to_set().each do |attr|
+          unless fn = AttributeToSetMapping[attr[:display_name]]
+            Log.error("no rules to process attribute to set #{attr[:display_name]}")
+          else
+            new_value = fn.call(updated_node_state)
+            unless false #TODO: temp for testing attr[:value_asserted] == new_value
+              unless new_value.nil?
+                attr[:value_asserted] = new_value
+                ret << attr
+              end
+            end
+          end
+        end
+        ret
+      end
+      #TODO: if can legitimately have nil value then need to change update
+      AttributeToSetMapping = {
+        "host_addresses_ipv4" =>  lambda{|server|(server||{})[:dns_name] && [server[:dns_name]]} #null if no value
+      }
+
       def add_attribute!(attr)
         self[:attributes] << attr
       end
@@ -73,16 +110,6 @@ module XYZ
 
       def ret_command_and_control_adapter_info()
         [:iaas,R8::Config[:command_and_control][:iaas][:type].to_sym]
-      end
-
-      def save_new_node_info(task_mh)
-        node = self[:node]
-        hash = {
-          :external_ref => node[:external_ref],
-          :type => "instance"
-        }
-        node_idh = task_mh.createIDH(:model_name => :node, :id => node[:id])
-        Model.update_from_hash_assignments(node_idh,hash)
       end
 
       def update_state_change_status(task_mh,status)
@@ -123,6 +150,13 @@ module XYZ
         true
       end
 
+      def get_dynamic_attributes(result)
+        ret = Array.new
+        dyn_attrs = (result[:data]||{})[:dynamic_attributes]
+        return ret if dyn_attrs.nil? or dyn_attrs.empty?
+        dyn_attrs.map{|a|{:id => a[:attribute_id], :value_asserted => a[:attribute_val]}}
+      end
+
       def self.add_attributes!(attr_mh,action_list)
         indexed_actions = Hash.new
         action_list.each do |config_node_action|
@@ -145,9 +179,13 @@ module XYZ
 
       end
 
+      def add_internal_guards!(guards)
+        self[:internal_guards] = guards
+      end
+
       def get_and_update_attributes!(task)
         task_mh = task.model_handle()
-        #these two below update teh ruby obj
+        #these two below update the ruby obj
         get_and_update_attributes__node_ext_ref!(task_mh)
         get_and_update_attributes__cmp_attrs!(task_mh)
         #this updates the task model
@@ -174,7 +212,8 @@ module XYZ
         indexed_attrs_to_update = Hash.new
         (self[:component_actions]||[]).each do |action|
           (action[:attributes]||[]).each do |attr|
-            if attr[:port_is_external] and attr[:port_type] == "input" and not attr[:value_asserted]
+#            if attr[:port_is_external] and attr[:port_type] == "input" and not attr[:value_asserted]
+            if attr[:is_port] and not attr[:value_asserted]
               indexed_attrs_to_update[attr[:id]] = attr
             end
           end

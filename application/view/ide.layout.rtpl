@@ -135,7 +135,7 @@ YUI_config = {
 
 <!-- JS -->
 
-<script src="{%=_app[:base_js_uri]%}/external/jquery.js"></script>
+<script src="{%=_app[:base_js_uri]%}/external/jquery-1.6.2.js"></script>
 <script src="{%=_app[:base_js_uri]%}/external/jquery.cookie.js"></script>
 <script src="{%=_app[:base_js_uri]%}/external/jstree/jquery.jstree.js"></script>
 <script src="{%=_app[:base_js_uri]%}/external/jstree/_lib/jquery.hotkeys.js"></script>
@@ -160,7 +160,10 @@ YUI_config = {
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.consolePanel.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.view.file.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.view.editor.target.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.view.editor.component.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.view.project.project.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.view.project.target.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.view.project.implementation.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.view.project.node.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.view.project.component.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.view.editor_target.node.js"></script>
@@ -173,6 +176,7 @@ YUI_config = {
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.target.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.node.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.component.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.implementation.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.port.js"></script>
 
 <!--

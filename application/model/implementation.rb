@@ -1,7 +1,19 @@
 module XYZ
   class Implementation < Model
+    def get_tree(opts={})
+      sp_hash = {:cols => [:id,:display_name,:component_template]}
+      rows = get_objs(sp_hash)
+      #all rows agree on everything but col
+      ret = rows.first.reject{|k,v|k == :component}
+      ret.merge!(:components => rows.map{|r|r[:component]})
+      if opts[:include_file_assets]
+        ret.merge!(:file_assets => self.class.get_indexed_asset_files([id_handle]))
+      end
+      ret
+    end
+
     def get_asset_files()
-      flat_file_assets = get_objects_col_from_sp_hash({:cols => [:file_assets]},:file_asset).reject{|k,v|k == :implementation_implementation_id}
+      flat_file_assets = get_objs_col({:cols => [:file_assets]},:file_asset).reject{|k,v|k == :implementation_implementation_id}
       FileAsset.ret_hierrachical_file_struct(flat_file_assets)
     end
 
@@ -116,7 +128,7 @@ module XYZ
 
     def create_pending_change_item(file_asset)
       #TODO: make more efficient by using StateChange.create_pending_change_items
-      get_objects_from_sp_hash({:cols => [:component_info]}).each do |r|
+      get_objects_from_sp_hash({:cols => [:component_summary_info]}).each do |r|
         cmp_idh = r[:component].id_handle()
         parent_idh = id_handle(:model_name => :datacenter, :id => r[:node][:datacenter_datacenter_id])
         StateChange.create_pending_change_item(:new_item => cmp_idh, :parent => parent_idh, :type => "update_implementation")

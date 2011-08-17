@@ -175,7 +175,8 @@ module XYZ
           if parent_idh
             self[:parent_model_name] = parent_idh[:model_name] 
           else
-            Log.error("cannot find parent info from #{self.inspect}")
+           #TODO: commented out beacuse noisy error
+            #Log.error("cannot find parent info from #{self.inspect}")
           end
         end
       end

@@ -29,6 +29,8 @@ module XYZ
       self.class.process_executable_action(task,top_task_idh)
     end
 
+    attr_reader :top_task, :guards
+
    private
     def self.process_executable_action(task,top_task_idh)
       CommandAndControl.execute_task_action(task,top_task_idh)
@@ -47,7 +49,11 @@ module XYZ
 
     def initialize(top_task,guards)
       @top_task = top_task
-      @guards = guards
+      @guards = {:internal => Array.new, :external => Array.new}
+      (guards||[]).each do |guard|
+        type = guard[:guarded][:node][:id] ==  guard[:guard][:node][:id] ? :internal : :external
+        @guards[type] << guard
+      end
     end
 
     def top_task_idh()

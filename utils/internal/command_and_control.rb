@@ -3,7 +3,6 @@ module XYZ
   end
   class CommandAndControl
     def self.execute_task_action(task,top_task_idh,opts={})
-      task.update_input_attributes!()
       task_action = task[:executable_action]
       klass = load_for(task_action)
       task_idh = task.id_handle()
@@ -20,10 +19,10 @@ module XYZ
       klass.destroy_node?(node)
     end
 
-    def self.get_and_propagate_updated_attributes(task_action)
-      klass = load_for(task_action)
-      updated_attributes = klass.get_updated_attributes(task_action)
-      propagate_attributes(updated_attributes)
+    def self.get_node_state(node)
+      adapter_name = R8::Config[:command_and_control][:iaas][:type]
+      klass = load_for_aux(:iaas,adapter_name)      
+      klass.get_node_state(node)
     end
 
     def self.request__get_logs(task,nodes,callbacks,context)
@@ -35,18 +34,6 @@ module XYZ
       klass.parse_response__get_logs(msg)
     end
 
-    def self.create_poller_listener_connection()
-      adapter_name = R8::Config[:command_and_control][:node_config][:type]
-      klass = load_for_aux(:node_config,adapter_name)
-      klass.create_poller_listener_connection()
-    end
-
-    def self.create_listener(connection)
-      adapter_name = R8::Config[:command_and_control][:node_config][:type]
-      klass = load_for_aux(:node_config,adapter_name)
-      klass.create_listener(connection)
-    end
-
     def self.poll_to_detect_node_ready(node,opts)
       adapter_name = R8::Config[:command_and_control][:node_config][:type]
       klass = load_for_aux(:node_config,adapter_name)
@@ -54,15 +41,6 @@ module XYZ
     end
 
    private
-    def self.propagate_attributes(updated_attributes)
-      return nil if updated_attributes.empty?
-      #set attributes
-      model_handle = updated_attributes.first.model_handle
-      update_rows = updated_attributes.map{|attr|{:id => attr[:id], :value_asserted => attr[:value_asserted]}}
-      Model.update_from_rows(model_handle,update_rows)
-      AttributeLink.propagate(updated_attributes.map{|attr|attr.id_handle()})
-    end
-
     def self.load_iaas_for(key_val)
       if key_val[:node]
         node = key_val[:node]

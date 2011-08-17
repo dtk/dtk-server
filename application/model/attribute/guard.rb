@@ -20,7 +20,7 @@ module XYZ
         end
         return nil 
       end
-      #gurading attributes that are unset and 
+      #guarding attributes that are unset and 
       #TODO: should we assume that what gets heer are only requierd attributes
       unless guard_attr[:dynamic] and (not guard_attr[:attribute_value]) and (not guarded_attr[:attribute_value])
         return nil
@@ -41,7 +41,7 @@ module XYZ
       guard = {
         :task_type => task_type
       }.merge(attr_info(guard_attr,attr_info_keys))
-      new(:guarded => guarded, :guard => guard)
+      new(:guarded => guarded, :guard => guard, :link => link)
     end
    private
     def self.attr_info(attr,keys=nil)

@@ -9,7 +9,7 @@
     :updated => {:type=>:boolean, :default => false}
   },
   :virtual_columns=>{
-    :component_info=>{
+    :component_summary_info=>{
       :type=>:json,
       :hidden=>true,
       :remote_dependencies=>
@@ -26,6 +26,20 @@
          :join_cond=>{:id=>:component__node_node_id},
          :filter => [:neq,:datacenter_datacenter_id,nil],
          :cols=>[:id,:display_name,:datacenter_datacenter_id]
+       }]
+    },
+    #getting just templates with this implementation
+    :component_template =>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [{
+         :model_name=>:component,
+         :convert => true,
+         :join_type=>:inner,
+         :filter => [:eq, :node_node_id, nil],
+         :join_cond=>{:implementation_id=>:implementation__id},
+         :cols=>Component.common_columns
        }]
     },
     :linked_library_implementation=>{

@@ -85,6 +85,14 @@ module XYZ
   }
   #TODO: making very simple and symetric now; wil figure out how to align with external links
   IntraNodeConnections = {
+    :java  => {
+      :hadoop_apache => {
+        :attribute_mappings => 
+        [
+         {":java.java_home" => ":hadoop_apache.java_home"}
+        ]
+      }
+    },
     :mysql__server => {
       :nagios__client  => {
         :attribute_mappings => 

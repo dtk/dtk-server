@@ -27,7 +27,7 @@ module XYZ
     def add_missing_info_for_group_attrs!(augmented_attr_list)
       dependency_analysis(augmented_attr_list) do |attr_in,link,attr_out|
         attr_in.merge!(:port_type => "input")
-        if attr_out and not attr_out[:dynamic]
+        if attr_in[:required] and attr_out and not attr_out[:dynamic]
           attr_out.merge!(:required => true)
         end
       end

@@ -107,7 +107,7 @@ module XYZ
     end
 
     def self.create_and_update_l4_ports_and_links?(parent_idh,attr_links)
-      ret = {:new_port_links => Array.new,:new_l4_ports => Array.new, :merged_external_ports => Array.new}
+      ret = {:new_port_links => Array.new,:new_l4_ports => Array.new, :merged_external_ports => Array.new, :existing_l4_link_ids => Array.new}
       return ret if attr_links.empty?
       sample_attr = attr_links.first[:input]
       node_mh = sample_attr.model_handle.createMH(:node)
@@ -148,6 +148,11 @@ module XYZ
 
         if matching_l4_port = (output_attr_to_l4_input_port[output_id]||[]).find{|p|p[:node_node_id] == input_node_id}
           state = :l4_link_exists
+          existing_l4_link = get_associated_l4_link(attr_link)
+          if existing_l4_link
+            id = existing_l4_link[:id]
+            ret[:existing_l4_link_ids] << id unless ret[:existing_l4_link_ids].include?(id)
+          end
         elsif matching_l4_port = indexed_input_ports[input_external_port[:containing_port_id]]
           state = :l4_port_exists
         end
@@ -195,6 +200,20 @@ module XYZ
       reroot_external_ports(port_mh,reroot_info)
       ret
     end
+
+    def self.get_associated_l4_link(attr_link)
+      input_port = (Attribute.get_port_info([attr_link[:input].id_handle]).first||{})[:port_l4]
+      return nil unless input_port
+      output_port = (Attribute.get_port_info([attr_link[:output].id_handle]).first||{})[:port_l4]
+      return nil unless output_port
+      sp_hash = {
+        :cols => [:id, :input_id, :output_id],
+        :filter => [:and, [:eq, :input_id, input_port[:id]], [:eq, :output_id, output_port[:id]]]
+      }
+      port_link_mh = attr_link[:input].model_handle(:port_link)
+      get_objs(port_link_mh,sp_hash).first
+    end
+
 =begin
     def self.create_and_update_l4_ports_and_links?(parent_idh,link_info_list)
       ret = {:new_port_links => Array.new,:new_l4_ports => Array.new, :merged_external_ports => Array.new}

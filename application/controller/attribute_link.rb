@@ -15,18 +15,57 @@ module XYZ
         :output_id => indexed_attrs[port_output_id][:attribute][:id]
       }
 
+      temp_link_id = hash["temp_link_id"]
+
       handle_errors do
         parent_id_handle = id_handle(hash["parent_id"],hash["parent_model_name"])
-        ret = AttributeLink.create_port_and_attr_links(parent_id_handle,[attr_link])
+        #TODO: many hacks to return new interface to front end
+        port_update = AttributeLink.create_port_and_attr_links(parent_id_handle,[attr_link])
+        new_id = port_update[:new_port_links].first
+        if new_id 
+          link = create_object_from_id(new_id,:port_link)
+          link.update_object!(:input_id,:output_id)
+
+          input_port = Port.create_object_from_id(link[:input_id])
+          input_port.update!(*Port.common_columns())
+          input_port_update_info =
+            if not port_update[:new_l4_ports].empty?
+              "replace_with_new"
+            elsif not port_update[:merged_external_ports].empty?
+              "merge"
+            else
+              "no_change"
+            end
+          input_port.merge!(:update_info => input_port_update_info)
+
+          output_port = Port.create_object_from_id(link[:output_id])
+          output_port.update!(*Port.common_columns())
+          #only new ports created on input side
+          output_port.merge!(:update_info => "no_change")
+          
+          ret = {
+            :state => "new_link",                                                               
+            :temp_link_id => temp_link_id,
+            :link => link,
+            :input_port => input_port,
+            :output_port => output_port,
+          }
+        else
+          ret = {
+            :state => "existing_link",                                                               
+            :temp_link_id => temp_link_id
+          }
+        end
+
 puts "-------------------------"
 pp ["new create link response:", ret]
 puts "-------------------------"
-        new_id = ret[:new_port_links].first
+
         if hash["return_model"] == "true"
           return {:data=> 
               {
                 :link =>get_object_by_id(new_id,:port_link),
-                :link_changes => ret
+                :link_changes => port_update
               }
             }
         end

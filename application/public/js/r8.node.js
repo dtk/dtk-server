@@ -4,10 +4,11 @@ if (!R8.Node) {
 	R8.Node = function(nodeDef,target) {
 		var _def = nodeDef,
 			_target = target,
+
 			_portDefs = null,
 			_ports = null,
-
 			_components = {},
+			_links = {},
 
 			_views = {},
 			_initialized = false,
@@ -23,7 +24,7 @@ if (!R8.Node) {
 				}
 				_initialized = true;
 			},
-			get: function(key) {
+			get: function(key,value) {
 				switch(key) {
 					case "id":
 						return _def.id;
@@ -44,6 +45,19 @@ if (!R8.Node) {
 					case "ports":
 						return _ports;
 						break;
+					case "port":
+						if(typeof(value) == 'undefined') return false;
+//DEBUG
+console.log('going to get port by id in node, portDefs are:');
+console.log(_ports);
+						for(var p in _ports) {
+							if (_ports[p].get('id') == value) {
+console.log('found a portdef, returning:');
+console.log(_ports[p]);
+								return _ports[p];
+							}
+						}
+						return false;
 					case "applications":
 						return _components;
 						break;
@@ -154,13 +168,16 @@ console.log(newComponent);
 
 				_ports = [];
 				for(var p in _portDefs) {
-					_ports.push(new R8.Port(_portDefs[p]));
+					_ports.push(new R8.Port(_portDefs[p],this));
 					_ports[p].init();
 				}
 //console.log('Setting portDefs for node:'+_def.id);
 //console.log(portDefs);
 //console.log('-----------------------------');
 
+			},
+			addLink: function(link) {
+				_links[link.get('id')] = link;
 			}
 		}
 	};

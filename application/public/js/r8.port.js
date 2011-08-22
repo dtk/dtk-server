@@ -1,8 +1,11 @@
 
 if (!R8.Port) {
 
-	R8.Port = function(portDef) {
+	R8.Port = function(portDef,node) {
+//DEBUG
+//console.log(portDef);
 		var _def = portDef,
+			_node = node,
 
 			_views = {},
 			_events = {};
@@ -30,6 +33,9 @@ if (!R8.Port) {
 						break;
 					case "def":
 						return _def;
+						break;
+					case "node":
+						return _node;
 						break;
 				}
 			},

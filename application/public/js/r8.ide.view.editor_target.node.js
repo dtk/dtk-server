@@ -159,7 +159,7 @@ if (!R8.IDE.View.editor_target.node) {
 		//--------------------------------------
 			loadPorts: function() {
 				var ports = _node.get('ports');
-
+/*
 				if(ports == null) {
 					var that = this;
 					var recall = function() {
@@ -168,7 +168,7 @@ if (!R8.IDE.View.editor_target.node) {
 					setTimeout(recall,250);
 					return;
 				}
-
+*/
 				_numPorts = ports.length;
 
 				_ports = {};
@@ -478,12 +478,26 @@ if (!R8.IDE.View.editor_target.node) {
 										var endNode = e.drop.get('node'),
 											startNode = e.drag.get('node'),
 											startNodeId = startNode.get('id'),
+											startPortId = startNodeId.replace('port-',''),
 											endNodeId = endNode.get('id');
 //										var dragNode = e.drag.get('dragNode');
 
 										var endParentId = endNode.get('parentNode').getAttribute('data-id');
-										var endPortDef = _viewSpace.getItemPortDef(endParentId,endNode.getAttribute('id'));
-										var startPortDef = _ports[startNodeId];
+										var pDefNodeId = endNode.getAttribute('id');
+										var portDefId  = pDefNodeId.replace('port-','');
+										if(_node.get('id') == endParentId) {
+											var endPort = _node.get('port',portDefId);
+										} else {
+											var endPort = _node.get('target').get('item',endParentId).get('port',portDefId);
+										}
+//DEBUG
+//console.log('Have an end Port:');
+//console.log(endPort);
+//										var endPortDef = _viewSpace.getItemPortDef(endParentId,endNode.getAttribute('id'));
+//										var startPortDef = _ports[startNodeId];
+										var startPort = _node.get('port',startPortId);
+//console.log('Have a start port:');
+//console.log(startPort);
 
 //										var startConnectorLocation = 'north';
 //										var startCompID = R8.Workspace.ports[startElemID].compID;
@@ -495,14 +509,14 @@ if (!R8.IDE.View.editor_target.node) {
 										_tempLinkId = date.getTime() + '-' + Math.floor(Math.random()*20);
 
 //TODO: temp hack to solve issue of connecting output port on node to input port on monitoring server
-if(startPortDef.direction == "output") {
-	var portId = endPortDef.id;
+if(startPort.get('direction') == "output") {
+	var portId = endPort.get('id');
 //	var itemId = endPortDef.parentItemId;
 	var itemId = endParentId;
-	var otherEndId = startPortDef.id;
+	var otherEndId = startPort.get('id');
 } else {
-	var portId = startPortDef.id;
-	var otherEndId = endPortDef.id;
+	var portId = startPort.get('id');
+	var otherEndId = endPort.get('id');
 	var itemId = _id;
 }
 
@@ -520,14 +534,14 @@ if(startPortDef.direction == "output") {
 											]
 										}
 
-										if((startPortDef['port_type'] == 'input' && endPortDef['port_type'] == 'output') || (startPortDef['port_type'] == 'output' && endPortDef['port_type'] == 'input')) {
-											var parent_id = _viewSpace.get('id'),
-												input_id = (startPortDef['port_type'] == 'input') ? startPortDef['id'] : endPortDef['id'],
-												output_id = (startPortDef['port_type'] == 'output') ? startPortDef['id'] : endPortDef['id'];
+										if((startPort.get('direction') == 'input' && endPort.get('direction') == 'output') || (startPort.get('direction') == 'output' && endPort.get('direction') == 'input')) {
+											var parent_id = _node.get('target').get('id'),
+												input_id = (startPort.get('direction') == 'input') ? startPort.get('id') : endPort.get('id'),
+												output_id = (startPort.get('direction') == 'output') ? startPort.get('id') : endPort.get('id');
 
 											YUI().use('json','io',function(Y){
 												var successCallback = function(ioId,returnObj) {
-													parentItem.linkCreateCallback(ioId,returnObj);
+													_this.linkCreateCallback(ioId,returnObj);
 												}
 												var params = {
 													'cfg': {
@@ -540,6 +554,7 @@ if(startPortDef.direction == "output") {
 												};
 												R8.Ctrl.call('attribute_link/save',params);
 											});
+											_node.get('target').addLink(_tempLinkObj);
 //DEBUG
 //UNCOMMENT WHEN ALL IS PORTED
 //											_viewSpace.addLink(_tempLinkObj);
@@ -655,7 +670,8 @@ return;
 //TODO: fix error/cleanup scenario with new handling of links
 				if(typeof(errorData) != 'undefined') {
 					R8.Utils.Y.one('#link-'+_tempLinkObj.id).remove();
-					R8.Workspace.showAlert(errorData.error_msg);
+//TODO: re-add error rendering once switch from IDE to workspace it made
+//					R8.Workspace.showAlert(errorData.error_msg);
 
 					var startPortNode = R8.Utils.Y.one('#port-'+_tempLinkObj.port_id);
 					var endPortNode = R8.Utils.Y.one('#port-'+_tempLinkObj.other_end_id);

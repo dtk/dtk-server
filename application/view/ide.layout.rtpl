@@ -178,13 +178,8 @@ YUI_config = {
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.component.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.implementation.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.port.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.link.js"></script>
 
-<!--
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/node.r8.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/node2.r8.js"></script>
--->
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/component.r8.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/link.r8.js"></script>
 
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/model.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/canvas2.r8.js"></script>

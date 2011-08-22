@@ -12,6 +12,7 @@ if (!R8.Target) {
 			_nodeGroups = {},
 			
 			_portDefs = null,
+			_links = {},
 			_linkDefs = null;
 
 			if(_def.ui == null) _def.ui = {'items':{}};
@@ -29,7 +30,7 @@ if (!R8.Target) {
 
 				_initialized = true;
 			},
-			get: function(key) {
+			get: function(key,value) {
 				switch(key) {
 					case "id":
 						return _def.id;
@@ -51,6 +52,25 @@ if (!R8.Target) {
 						break;
 					case "project":
 						return _project;
+						break;
+					case "item":
+						if (typeof(_nodes[value]) == 'undefined') {
+							return null;
+						} else {
+							//DEBUG
+							console.log('going to return item in target.get item:');
+							console.log(_nodes[value]);
+							return _nodes[value];
+						}
+						break;
+					case "port":
+						for(var n in _nodes) {
+							var ports = _nodes[n].get('ports');
+							for(var p in ports) {
+								if(ports[p].get('id') == value) return ports[p];
+							}
+						}
+						return null;
 						break;
 				}
 			},
@@ -184,6 +204,17 @@ console.log('should remove node from views....');
 				}
 
 				_nodes[nodeDef.id].init();
+			},
+			addLink: function(linkObj) {
+				var linkId = 'link-'+linkObj.id;
+				_links[linkId] = new R8.Link(linkObj,this);
+				_links[linkId].init();
+				_links[linkId].render();
+			},
+			addLinkToItems: function(link) {
+//TODO: revisit after implementing many end item links
+				_nodes[link.get('startPort').get('node').get('id')].addLink(link);
+				_nodes[link.get('endPort',0).get('node').get('id')].addLink(link);
 			},
 			retrievePorts: function() {
 				var that=this;

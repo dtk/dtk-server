@@ -43,6 +43,8 @@ if (!R8.Node) {
 //						return _def.display_name;
 						break;
 					case "ports":
+//TODO: revisit, dont know why _ports would be not defined
+						if(_ports == null) _ports = [];
 						return _ports;
 						break;
 					case "port":

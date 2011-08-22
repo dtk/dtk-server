@@ -169,9 +169,12 @@ if (!R8.IDE.View.editor_target.node) {
 					return;
 				}
 */
+				_ports = {};
+//TODO: revsiit why its null
+if(ports == null) return;
+
 				_numPorts = ports.length;
 
-				_ports = {};
 				for(var p in ports) {
 					var portId = ports[p].get('id');
 					_ports[portId] = ports[p].getView('editor_target');

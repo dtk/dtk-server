@@ -92,6 +92,16 @@ R8::Config[:command_and_control][:iaas][:ec2][:default_image_size] = "t1.micro"
 #these are used in template.r8.rb and view.r8.rb
 #R8::Config[:sys_root_path] = "C:/webroot/R8Server"
 
+#Link related config params
+R8::Config[:links] = Hash.new
+R8::Config[:links][:default_type] = "fullBezier"
+R8::Config[:links][:default_style] = Array.new
+R8::Config[:links][:default_style] = [
+  {:strokeStyle=>'#5BF300',:lineWidth=>3,:lineCap=>'round'},
+  {:strokeStyle=>'#25A3FC',:lineWidth=>1,:lineCap=>'round'}
+]
+
+
 #TODO: eventually cleanup to be more consise of use between root, path,dir, etc
 R8::Config[:sys_root_path] = R8::EnvironmentConfig::System_Root_Dir
 R8::Config[:app_root_path] = "#{R8::Config[:sys_root_path]}/#{R8::Config[:application_name]}"

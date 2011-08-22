@@ -21,41 +21,39 @@ module XYZ
         parent_id_handle = id_handle(hash["parent_id"],hash["parent_model_name"])
         #TODO: many hacks to return new interface to front end
         port_update = AttributeLink.create_port_and_attr_links(parent_id_handle,[attr_link])
-        new_id = port_update[:new_port_links].first
-        if new_id 
-          link = create_object_from_id(new_id,:port_link)
-          link.update_object!(:input_id,:output_id)
+        new_id = port_update[:new_port_links].first || port_update[:existing_l4_link_ids].first
 
-          input_port = Port.create_object_from_id(link[:input_id])
-          input_port.update!(*Port.common_columns())
-          input_port_update_info =
-            if not port_update[:new_l4_ports].empty?
-              "replace_with_new"
-            elsif not port_update[:merged_external_ports].empty?
-              "merge"
-            else
-              "no_change"
-            end
-          input_port.merge!(:update_info => input_port_update_info)
+        #TODO: more efficient if create_port_and_attr_links returns new or existing port_link
+        link = create_object_from_id(new_id,:port_link)
+        link.update_object!(:input_id,:output_id)
+        link[:ui] ||= {
+          :type => R8::Config[:links][:default_type],
+          :style => R8::Config[:links][:default_style]
+        }
 
-          output_port = Port.create_object_from_id(link[:output_id])
-          output_port.update!(*Port.common_columns())
-          #only new ports created on input side
-          output_port.merge!(:update_info => "no_change")
-          
-          ret = {
-            :state => "new_link",                                                               
-            :temp_link_id => temp_link_id,
-            :link => link,
-            :input_port => input_port,
-            :output_port => output_port,
-          }
+        input_port = create_object_from_id(link[:input_id],:port)
+        input_port.update_object!(*Port.common_columns())
+        
+        port_merge_info = port_update[:merged_external_ports].first
+        if not port_update[:new_l4_ports].empty?
+          input_port.merge!(:update_info => "replace_with_new", :replace_id => port_merge_info[:external_port_id])
+        elsif port_merge_info and not port_merge_info.empty?
+          input_port.merge!(:update_info => "merge", :merge_id => port_merge_info[:external_port_id])
         else
-          ret = {
-            :state => "existing_link",                                                               
-            :temp_link_id => temp_link_id
-          }
+          input_port.merge!(:update_info => "no_change")
         end
+        
+        output_port = create_object_from_id(link[:output_id],:port)
+        output_port.update_object!(*Port.common_columns())
+        #only new ports created on input side
+        output_port.merge!(:update_info => "no_change")
+          
+        ret = {
+          :temp_link_id => temp_link_id,
+          :link => link,
+          :input_port => input_port,
+          :output_port => output_port,
+        }
 
 puts "-------------------------"
 pp ["new create link response:", ret]

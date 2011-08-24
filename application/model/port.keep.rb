@@ -109,7 +109,6 @@ module XYZ
       ret
     end
 
-    #TODO: this needs to be cleaned up so is simpler
     def self.create_and_update_l4_ports_and_links?(parent_idh,attr_links)
       ret = {:new_port_links => Array.new,:new_l4_ports => Array.new, :merged_external_ports => Array.new, :existing_l4_link_ids => Array.new}
       return ret if attr_links.empty?
@@ -142,28 +141,27 @@ module XYZ
      input_attr_to_l4 = Hash.new
       indexed_l4_input_to_create = Hash.new
       attr_links.each do |attr_link|
-        #compute matching_l4_in_port and state (whether l4 and or link exists) , if it exists
-        matching_l4_in_port = state = nil
+        #compute matching_l4_port and state (whether l4 and or link exists) , if it exists
+        matching_l4_port = state = nil
         input_attr = attr_link[:input]
         input_id = input_attr[:id]
         input_external_port = indexed_input_external_ports[input_id]
         input_node_id = input_attr[:component_parent][:node_node_id]
         output_id = attr_link[:output][:id]
 
-        if matching_l4_in_port = (output_attr_to_l4_input_port[output_id]||[]).find{|p|p[:node_node_id] == input_node_id}
+        if matching_l4_port = (output_attr_to_l4_input_port[output_id]||[]).find{|p|p[:node_node_id] == input_node_id}
           state = :l4_link_exists
-          output_port = (Attribute.get_port_info([attr_link[:output].id_handle]).first||{})[:port_l4]
-          port_link_mh = attr_link[:input].model_handle(:port_link)
-          if existing_l4_link = get_associated_l4_link(port_link_mh,matching_l4_in_port,output_port)
+          existing_l4_link = get_associated_l4_link(attr_link)
+          if existing_l4_link
             id = existing_l4_link[:id]
             ret[:existing_l4_link_ids] << id unless ret[:existing_l4_link_ids].include?(id)
           end
-        elsif matching_l4_in_port = indexed_input_ports[input_external_port[:containing_port_id]]
+        elsif matching_l4_port = indexed_input_ports[input_external_port[:containing_port_id]]
           state = :l4_port_exists
         end
 
-        if matching_l4_in_port
-          input_attr_to_l4[input_id] ||= {:port_id => matching_l4_in_port[:id], :state => state} 
+        if matching_l4_port
+          input_attr_to_l4[input_id] ||= {:port_id => matching_l4_port[:id], :state => state} 
         else
           indexed_l4_input_to_create[input_id] ||= input_attr.merge(:port => input_external_port)
         end
@@ -206,14 +204,16 @@ module XYZ
       ret
     end
 
-    def self.get_associated_l4_link(port_link_mh,input_port,output_port)
-      return nil unless input_port and output_port
-
+    def self.get_associated_l4_link(attr_link)
+      input_port = (Attribute.get_port_info([attr_link[:input].id_handle]).first||{})[:port_l4]
+      return nil unless input_port
+      output_port = (Attribute.get_port_info([attr_link[:output].id_handle]).first||{})[:port_l4]
       return nil unless output_port
       sp_hash = {
         :cols => [:id, :input_id, :output_id],
         :filter => [:and, [:eq, :input_id, input_port[:id]], [:eq, :output_id, output_port[:id]]]
       }
+      port_link_mh = attr_link[:input].model_handle(:port_link)
       get_objs(port_link_mh,sp_hash).first
     end
 

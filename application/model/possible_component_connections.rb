@@ -86,10 +86,10 @@ module XYZ
   #TODO: making very simple and symetric now; wil figure out how to align with external links
   IntraNodeConnections = {
     :java  => {
-      :hadoop_apache => {
+      :hadoop => {
         :attribute_mappings => 
         [
-         {":java.java_home" => ":hadoop_apache.java_home"}
+         {":java.java_home" => ":hadoop.java_home"}
         ]
       }
     },

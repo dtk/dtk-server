@@ -36,7 +36,7 @@ module XYZ
         target_object = target_id_handle.create_object()
         clone_opts = {:ret_new_obj_with_cols => Component.common_columns()}
         component_obj = target_object.clone_into(id_handle.create_object(),override_attrs,clone_opts)
-        data => {
+        data = {
           :component => component_obj
         }
         {:data => data}

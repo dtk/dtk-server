@@ -114,7 +114,13 @@ console.log(e);
 				var _this = this;
 				var successCallback = function(ioId,responseObj) {
 						eval("var response =" + responseObj.responseText);
-						var newComponent = response.application_component_get.content[0]['data'];
+						var cloneResponse = response.application_component_get.content[0]['data'];
+
+//DEBUG
+console.log('going to instantiate new component....');
+console.log(cloneResponse);
+return;
+
 var project = _this.get('target').get('project');
 console.log('Have a project...');
 console.log(project);

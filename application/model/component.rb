@@ -323,7 +323,7 @@ module XYZ
       ]
     end
     def self.common_real_columns()
-      common_columns - [:name]
+      common_columns - [:name,:config_agent_type,:library_id,:node_id,:project_id,:instance_extended_base_id,:extended_base_id]
     end
     ### virtual column defs
     def name()

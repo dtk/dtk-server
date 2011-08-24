@@ -36,12 +36,16 @@ module XYZ
         target_object = target_id_handle.create_object()
 
         #TODO: push in logic that forces us heer to pass in real cols and tehn materialize
-        clone_opts = {:ret_new_obj_with_cols => Component.common_real_columns()}
+        clone_opts = {
+          :ret_new_obj_with_cols => Component.common_real_columns(),
+          :outermost_ports => Array.new
+        }
         component_obj = target_object.clone_into(id_handle.create_object(),override_attrs,clone_opts)
         component_obj.materialize!(Component.common_columns())
 
         data = {
-          :component => component_obj
+          :component => component_obj,
+          :ports => clone_opts[:outermost_ports]
         }
         {:data => data}
       end

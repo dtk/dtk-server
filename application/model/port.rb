@@ -34,7 +34,7 @@ module XYZ
     def node_id()
       self[:node_node_id]
     end
-
+    
     ###########
     #returns nil if filtered
     def filter_and_process!(type=nil,i18n=nil)
@@ -60,12 +60,14 @@ module XYZ
       end
     end
 
+    #returns array of ids of outermost ports created
     def self.create_ports_for_external_attributes(node_id_handle,cmp_id_handle)
+      ret = Array.new
       component = cmp_id_handle.create_object()
       attrs_external = component.get_attributes_ports().select do |attr|
         attr[:port_is_external] and attr[:has_port_object]
       end
-      return if attrs_external.empty?
+      return ret if attrs_external.empty?
       node_id = node_id_handle.get_id()
 
       new_ports = attrs_external.map do |attr|
@@ -84,10 +86,10 @@ module XYZ
       port_mh = node_id_handle.createMH(:model_name => :port, :parent_model_name => :node)
       opts = {:returning_sql_cols => [:ref,:id]}
       create_info = create_from_rows(port_mh,new_ports,opts)
-
+      ret = create_info.map{|obj_hash|obj_hash[:id]}
       #for output ports need to nest in l4 ports
       output_attrs = attrs_external.select{|a|a[:port_type] == "output"}
-      return if output_attrs.empty?
+      return ret if output_attrs.empty?
       new_port_index = create_info.inject({}){|h,ret_info|h.merge(strip_type(ret_info[:ref]) => ret_info[:id])}
 
       nested_ports = output_attrs.map do |attr|
@@ -104,6 +106,7 @@ module XYZ
         }
       end
       create_from_rows(port_mh,nested_ports)
+      ret
     end
 
     def self.create_and_update_l4_ports_and_links?(parent_idh,attr_links)

@@ -623,7 +623,14 @@ module XYZ
       cmp_id_handle = clone_copy_output.id_handles.first
       create_needed_l4_sap_attributes(cmp_id_handle)
       create_needed_additional_links(cmp_id_handle)
-      Port.create_ports_for_external_attributes(id_handle,cmp_id_handle)
+      new_outermost_port_ids = Port.create_ports_for_external_attributes(id_handle,cmp_id_handle)
+      if opts[:outermost_ports] and not new_outermost_port_ids.empty?
+        port_mh = model_handle(:port)
+        port_idhs = new_outermost_port_ids.map{|id|port_mh.createIDH(:id => id)}
+        new_ports = Model.get_objs_in_set(port_idhs, {:cols => Port.common_columns})
+        new_ports.map{|p|p.materialize!(Port.common_columns)}
+        opts[:outermost_ports] += new_ports
+      end
       parent_action_id_handle = get_parent_id_handle()
       StateChange.create_pending_change_item(:new_item => cmp_id_handle, :parent => parent_action_id_handle)
     end

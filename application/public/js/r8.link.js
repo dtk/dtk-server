@@ -272,10 +272,11 @@ if (monitorNode == null) {
 				canvasNode.remove();
 				delete(canvasNode);
 
-				_startNode.removeClass('connected');
-				_startNode.addClass('available');
-				_endNode.removeClass('connected');
-				_endNode.addClass('available');
+
+				_startPort.getView('editor_target').get('node').removeClass('connected');
+				_startPort.getView('editor_target').get('node').addClass('available');
+				_endPort.getView('editor_target').get('node').removeClass('connected');
+				_endPort.getView('editor_target').get('node').addClass('available');
 			},
 
 //-------------------------------------------------------

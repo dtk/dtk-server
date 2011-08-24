@@ -211,9 +211,10 @@ console.log('should remove node from views....');
 
 				_nodes[nodeDef.id].init();
 			},
-			addLink: function(linkObj) {
-				var linkId = 'link-'+linkObj.id;
-				_links[linkId] = new R8.Link(linkObj,this);
+			addLink: function(linkDef) {
+//				var linkId = 'link-'+linkObj.id;
+				var linkId = linkDef.id;
+				_links[linkId] = new R8.Link(linkDef,this);
 				_links[linkId].init();
 				_links[linkId].render();
 			},
@@ -221,6 +222,39 @@ console.log('should remove node from views....');
 //TODO: revisit after implementing many end item links
 				_nodes[link.get('startPort').get('node').get('id')].addLink(link);
 				_nodes[link.get('endPort',0).get('node').get('id')].addLink(link);
+			},
+			removeLink: function(linkId) {
+//				this.removeLinkFromItems(linkId);
+				_links[linkId].destroy();
+				delete(_links[linkId]);
+			},
+			removeLinkFromItems: function(linkId) {
+//TODO: revisit after implementing many end item links
+
+				var startItemId = _links2[linkId].get('startParentItemId');
+				var endItemId = _links2[linkId].get('endParentItemId');
+				_items[startItemId].removeLink(linkId);
+				_items[endItemId].removeLink(linkId);
+			},
+			hideLinks: function(fromPorts) {
+				for(var l in _links) {
+					R8.Utils.Y.one('#link-'+_links[l].id).setStyle('display','none');
+				}
+				if (typeof(fromPorts) == 'undefined') {
+					_userSettings.showLinks = false;
+				}
+			},
+			showLinks: function(fromPorts) {
+				if(_userSettings.showPorts == false && typeof(fromPorts) == 'undefined') {
+					_userSettings.showLinks = true;
+					return;
+				}
+
+				for (var l in _links) {
+					R8.Utils.Y.one('#link-' + _links[l].id).setStyle('display', 'block');
+				}
+
+				_userSettings.showLinks = true;
 			},
 			retrievePorts: function() {
 				var that=this;

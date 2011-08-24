@@ -734,21 +734,31 @@ console.log(response_data);
 						}
 */
 					var oldPort = _node.get('port',inputPortDef.replace_id);
-//DEBUG
-console.log('have an old port:');
-console.log(oldPort);
-
 					if(oldPort == null) {
-console.log('old port is on other node...');
 						//this is node for output port, need input one
 						var oppositeNode = _node.get('target').get('itemByPortId',inputPortDef.replace_id);
 						oppositeNode.swapInNewPort(inputPortDef.replace_id,inputPortDef);
-//						inputItem.swapExt4L4(swapDef);
 					} else {
 console.log('port is on this node.., gonna swap it out...');
 //						this.swapExt4L4(swapDef);
 					}
 				}
+
+
+//				var linkId = 'link-'+tempLinkObj.id;
+				_node.get('target').removeLink(tempLinkId);
+				_node.get('target').addLink(newLink);
+return;
+
+//TODO: temp hack b/c of differences between link object returned from create/save and get_links
+				newLink.item_id = _id
+				newLink.style =  [
+									{'strokeStyle':'#25A3FC','lineWidth':3,'lineCap':'round'},
+									{'strokeStyle':'#63E4FF','lineWidth':1,'lineCap':'round'}
+								];
+
+//-----------------------------------------------
+//-----------------------------------------------
 
 				if(typeof(linkChanges) != 'undefined') {
 					if (typeof(linkChanges.new_l4_ports) != 'undefined' && linkChanges.new_l4_ports.length > 0) {

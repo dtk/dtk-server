@@ -511,18 +511,20 @@ if(ports == null) return;
 //										_tempLinkId = 't-'+date.getTime() + '-' + Math.floor(Math.random()*20);
 										_tempLinkId = date.getTime() + '-' + Math.floor(Math.random()*20);
 
+/*
 //TODO: temp hack to solve issue of connecting output port on node to input port on monitoring server
 if(startPort.get('direction') == "output") {
 	var portId = endPort.get('id');
 //	var itemId = endPortDef.parentItemId;
-	var itemId = endParentId;
+//	var itemId = endParentId;
 	var otherEndId = startPort.get('id');
 } else {
 	var portId = startPort.get('id');
 	var otherEndId = endPort.get('id');
-	var itemId = _id;
+//	var itemId = _id;
 }
-
+*/
+/*
 										_tempLinkObj = {
 											id: _tempLinkId,
 											port_id: portId,
@@ -536,6 +538,24 @@ if(startPort.get('direction') == "output") {
 												{'strokeStyle':'#FF33FF','lineWidth':3,'lineCap':'round'}
 											]
 										}
+*/
+										_tempLinkObj = {
+											id: _tempLinkId,
+											start_id: startPort.get('id'),
+											end_id: endPort.get('id'),
+											ui: {
+												type: 'fullBezier',
+												style: [{
+													'strokeStyle': '#4EF7DE',
+													'lineWidth': 5,
+													'lineCap': 'round'
+												}, {
+													'strokeStyle': '#FF33FF',
+													'lineWidth': 3,
+													'lineCap': 'round'
+												}]
+											}
+										}
 
 										if((startPort.get('direction') == 'input' && endPort.get('direction') == 'output') || (startPort.get('direction') == 'output' && endPort.get('direction') == 'input')) {
 											var parent_id = _node.get('target').get('id'),
@@ -548,7 +568,7 @@ if(startPort.get('direction') == "output") {
 												}
 												var params = {
 													'cfg': {
-														'data': 'return_model=true&name=attribute_link&model=attribute_link&redirect=false&parent_model_name=datacenter&parent_id='+parent_id+'&input_id='+input_id+'&output_id='+output_id
+														'data': 'return_model=true&name=attribute_link&model=attribute_link&redirect=false&parent_model_name=datacenter&parent_id='+parent_id+'&input_id='+input_id+'&output_id='+output_id+'&temp_link_id='+_tempLinkId
 													},
 													'callbacks': {
 														'io:success': successCallback,
@@ -667,9 +687,19 @@ return;
 			},
 			linkCreateCallback: function(ioId,responseObj) {
 				eval("R8.Ctrl.callResults[ioId]['response'] =" + responseObj.responseText);
-				var response = R8.Ctrl.callResults[ioId]['response'];
-				var errorData = response.application_attribute_link_save.content[0].data.error;
+				var response_data = R8.Ctrl.callResults[ioId]['response'].application_attribute_link_save.content[0].data;
+//				var errorData = response.application_attribute_link_save.content[0].data.error;
 
+//DEBUG
+console.log(response_data);
+
+				var newLinkDef = response_data.link;
+				var tempLinkId = response_data.temp_link_id;
+				var inputPortDef = response_data.input_port;
+				var outputPortDef = response_data.output_port;
+
+
+/*
 //TODO: fix error/cleanup scenario with new handling of links
 				if(typeof(errorData) != 'undefined') {
 					R8.Utils.Y.one('#link-'+_tempLinkObj.id).remove();
@@ -687,10 +717,38 @@ return;
 
 					return;
 				}
+*/
 
 //TODO: revisit after cleaning up responses so dont have to traverse way down to get data
-				var linkResult = response.application_attribute_link_save.content[0].data,
-					linkChanges = linkResult.link_changes;
+//				var linkResult = response.application_attribute_link_save.content[0].data,
+//					linkChanges = linkResult.link_changes;
+
+				if(typeof(inputPortDef.replace_id) != 'undefined') {
+/*
+					var swapDef = {
+							'oldPortId': inputPort.replace_id,
+							'newPortId': inputPort.id,
+							'newPortDef': inputPort,
+							'tempLinkObj': _tempLinkObj,
+							'newLink': link
+						}
+*/
+					var oldPort = _node.get('port',inputPortDef.replace_id);
+//DEBUG
+console.log('have an old port:');
+console.log(oldPort);
+
+					if(oldPort == null) {
+console.log('old port is on other node...');
+						//this is node for output port, need input one
+						var oppositeNode = _node.get('target').get('itemByPortId',inputPortDef.replace_id);
+						oppositeNode.swapInNewPort(inputPortDef.replace_id,inputPortDef);
+//						inputItem.swapExt4L4(swapDef);
+					} else {
+console.log('port is on this node.., gonna swap it out...');
+//						this.swapExt4L4(swapDef);
+					}
+				}
 
 				if(typeof(linkChanges) != 'undefined') {
 					if (typeof(linkChanges.new_l4_ports) != 'undefined' && linkChanges.new_l4_ports.length > 0) {

@@ -58,12 +58,16 @@ if (!R8.Port) {
 			},
 			initView: function(viewType) {
 				return _views[viewType].init();
-			}
+			},
 
 //------------------------------------
 //PORT RELATED METHODS
 //------------------------------------
-
+			swapInNew: function(newPortDef) {
+//TODO: decide if each view function should have a swapInNew and merge function
+				this.getView('editor_target').get('node').set('id','port-'+newPortDef.id);
+				_def = newPortDef;
+			}
 		}
 	};
 }

@@ -100,12 +100,17 @@ if (!R8.IDE.editorPanel) {
 					_viewContentNodes[viewDef.id] = R8.Utils.Y.one('#view-content-'+viewDef.id);
 				}
 			},
-			resize: function() {
+			resize: function(resizeType) {
 				if(!_initialized) return;
 
 				var contentHeight = _node.get('region').height - _headerNode.get('region').height;
-				_contentNode.setStyles({'height':contentHeight-6,'width':_node.get('region').width-6,'backgroundColor':'#FFFFFF'});
-
+				if (typeof(resizeType) == 'undefined') {
+					_contentNode.setStyles({'height': contentHeight - 6,'width': _node.get('region').width - 6,'backgroundColor': '#FFFFFF'});
+				} else if(resizeType == 'width') {
+					_contentNode.setStyles({'width': _node.get('region').width - 6,'backgroundColor': '#FFFFFF'});
+				} else if(resizeType == 'height') {
+					_contentNode.setStyles({'height': contentHeight - 6,'backgroundColor': '#FFFFFF'});
+				}
 
 				if(_fileList.length > 0) R8.Editor.resize();
 

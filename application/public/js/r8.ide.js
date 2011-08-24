@@ -341,7 +341,7 @@ if (!R8.IDE) {
 					}
 				}
 			},
-			resizePanels: function() {
+			resizePanels: function(resizeType) {
 				this.setPanelSizings();
 
 				for (var i in layoutDef.panels) {
@@ -349,8 +349,14 @@ if (!R8.IDE) {
 
 					var tempNode = R8.Utils.Y.one('#'+pDef.id);
 //TODO: revisit, should push resizing function down to actual object to update
-					tempNode.setStyles({'height':pDef.height,'width':pDef.width});
-					_panels[pDef.id].resize();
+					if(typeof(resizeType) == 'undefined') {
+						tempNode.setStyles({'height':pDef.height,'width':pDef.width});
+					} else if(resizeType == 'width') {						
+						tempNode.setStyles({'width':pDef.width});
+					} else if(resizeType == 'height') {
+						tempNode.setStyles({'height':pDef.height});
+					}
+					_panels[pDef.id].resize(resizeType);
 				}
 			},
 			setPanelCounts: function() {
@@ -537,16 +543,18 @@ if (!R8.IDE) {
 				this.resizePanels();
 			},
 			panelResizeInit: function() {
-				var that = this;
+				var _this = this;
 				YUI().use('dd',function(Y){
 					var leftResizer = new Y.DD.Drag({
-						node: '#l-resizer'
-					});
-					leftResizer.plug(Y.Plugin.DDProxy, {
+						node: '#l-resizer',
+						
+					}).plug(Y.Plugin.DDConstrained, {
+						stickX: true
+					}).plug(Y.Plugin.DDProxy, {
 						moveOnEnd: false,
-						borderStyle: false,
+//						borderStyle: false,
 					});
-					leftResizer.on('drag:drag',function(e){
+					leftResizer.on('drag:end',function(e){
 //						var lRegionWidth = (e.pageX < _lPanelMinWidth) ? _lPanelMinWidth : e.pageX;
 						var lRegionWidth = e.pageX;
 
@@ -557,19 +565,20 @@ if (!R8.IDE) {
 						_lRegionNode.setStyle('width',(_viewportRegion.width-(mainWidth+_resizerWidth)));
 						_mainRegionNode.setStyle('width',(_viewportRegion.width-(_lRegionNode.get('region').width+_resizerWidth)));
 
-						that.resizePanels();
+						_this.resizePanels('width');
 					});
 
 //DEBUG
 //begin console panel handling
 					var editorResizer = new Y.DD.Drag({
 						node: '#mr-resizer-1'
-					});
-					editorResizer.plug(Y.Plugin.DDProxy, {
+					}).plug(Y.Plugin.DDConstrained, {
+						stickY: true
+					}).plug(Y.Plugin.DDProxy, {
 						moveOnEnd: false,
-						borderStyle: false,
+//						borderStyle: false,
 					});
-					editorResizer.on('drag:drag',function(e){
+					editorResizer.on('drag:end',function(e){
 						var editorHeight = e.pageY - _mainRegionNode.get('region').top;
 //						editorHeight = (editorHeight < _mainPanelMinHeight) ? _mainPanelMinHeight : editorHeight;
 
@@ -582,16 +591,18 @@ if (!R8.IDE) {
 						var consolePanelNode = R8.Utils.Y.one('#console-panel');
 						consolePanelNode.setStyle('height',(_mainRegionNode.get('region').height - (editorPanelNode.get('region').height+_resizerWidth)));
 
-						_mainRegionPanels['editor-panel'].resize();
-						_mainRegionPanels['console-panel'].resize();
+						_mainRegionPanels['editor-panel'].resize('height');
+						_mainRegionPanels['console-panel'].resize('height');
 //						that.resizePanels();
 					});
+/*
 					editorResizer.on('drag:end',function(e){
 						var editorPanelNode = R8.Utils.Y.one('#editor-panel');
 						var editorHeight = editorPanelNode.getStyle('height');
-
+//TODO: revisit to do more user settings work
 						R8.User.setSetting('editorPanelHeight',editorHeight);
 					});
+*/
 //end console panel handling
 				});
 			},

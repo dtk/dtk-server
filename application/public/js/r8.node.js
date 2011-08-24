@@ -48,18 +48,13 @@ if (!R8.Node) {
 						return _ports;
 						break;
 					case "port":
-						if(typeof(value) == 'undefined') return false;
-//DEBUG
-console.log('going to get port by id in node, portDefs are:');
-console.log(_ports);
+						if(typeof(value) == 'undefined') return null;
 						for(var p in _ports) {
 							if (_ports[p].get('id') == value) {
-console.log('found a portdef, returning:');
-console.log(_ports[p]);
 								return _ports[p];
 							}
 						}
-						return false;
+						return null;
 					case "applications":
 						return _components;
 						break;
@@ -106,6 +101,7 @@ console.log(_ports[p]);
 //------------------------------------
 			instantiateComponent: function(e) {
 //DEBUG
+console.log('going to instantiate a new component');
 console.log(e);
 
 //				var modelName = containerNode.getAttribute('data-model');
@@ -177,6 +173,37 @@ console.log(newComponent);
 //console.log(portDefs);
 //console.log('-----------------------------');
 
+			},
+			swapInNewPort: function(oldPortId,newPortDef) {
+/*
+				var oldPortId = swapDef.oldPortId,
+					newPortId = swapDef.newPortId,
+					tempLinkObj = swapDef.tempLinkObj,
+					newLink = swapDef.newLink;
+*/
+				for(var p in _ports) {
+					if(_ports[p].get('id') == oldPortId) {
+						_ports[p].swapInNew(newPortDef);
+					}
+				}
+//				_ports[newPortDef.id] = _ports[oldPortId];
+//				_ports[newPortDef.id].swapInNew(newPortDef);
+//				delete(_ports[oldPortId]);
+//				_ports[newPortId].id = newPortId;
+//				_ports[newPortId].nodeId = newPortId;
+
+/*
+				var linkId = 'link-'+tempLinkObj.id;
+				_target.removeLink(linkId);
+
+//TODO: temp hack b/c of differences between link object returned from create/save and get_links
+				newLink.item_id = _id
+				newLink.style =  [
+									{'strokeStyle':'#25A3FC','lineWidth':3,'lineCap':'round'},
+									{'strokeStyle':'#63E4FF','lineWidth':1,'lineCap':'round'}
+								];
+				_target.addLink(newLink);
+*/
 			},
 			addLink: function(link) {
 				_links[link.get('id')] = link;

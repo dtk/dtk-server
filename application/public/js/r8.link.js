@@ -10,42 +10,41 @@ if(!R8.Link) {
 		var BOTTOM_LEFT = 2;
 
 //TODO: cleanup linkObj, linkDef, still a mish mosh from old days like ports
-		var _linkObj = linkDef,
-			_linkDef = null,
-			_readyState = false,
+		var _def = linkDef,
 			_initialized = false,
 			_target = target,
 
-			_id = 'link-'+_linkObj.id,
-			_canvasNodeId = _id,
+			_idPrefix = 'link-',
+			_canvasNodeId = _idPrefix+_def.id,
+
 			_fullBezierClass = ['link','full-bezier'],
 			_fullBezierDef = null,
 			_halfBezierDef = null,
 			_hangerDef = null,
 
-			_portId = _linkObj.port_id,
-			_itemId = _linkObj.item_id,
+//			_portId = _def.start_id,
+//			_itemId = _def.item_id,
 
-			_startNode = null,
-			_startNodeId = 'port-'+_portId,
-			_startPort = null,
+//			_startNode = null,
+//			_startNodeId = 'port-'+_portId,
+			_startPort = _target.get('port',_def.start_id),
 
-			_endNode = null,
-			_otherEndId = _linkObj.other_end_id,
-			_endNodeId = 'port-'+_linkObj.other_end_id,
-			_endPort = null,
+//			_endNode = null,
+//			_otherEndId = _def.end_id,
+//			_endNodeId = 'port-'+_def.end_id,
+			_endPort = _target.get('port',_def.end_id),
 
 			_proxyNode = null,
-			_proxyId = _linkObj.other_end_id,
-			_proxyNodeId = 'port-'+_linkObj.other_end_id,
+			_proxyId = _def.end_id,
+			_proxyNodeId = 'port-'+_def.end_id,
 			_proxyPortDef = null,
 			_proxyPortLocation = '?',
 
 			//render related vars
 			_bzCtrlPtBaseValue = 100;
 
-			if(typeof(_linkObj.style) == 'undefined') {
-				_linkObj.style = [
+			if(typeof(_def.ui.style) == 'undefined') {
+				_def.ui.style = [
 					{'strokeStyle':'#25A3FC','lineWidth':3,'lineCap':'round'},
 					{'strokeStyle':'#000000','lineWidth':1,'lineCap':'round'}
 //					{'strokeStyle':'#63E4FF','lineWidth':1,'lineCap':'round'}
@@ -60,18 +59,20 @@ if(!R8.Link) {
 //				_startPort = _viewSpace.getPortDefById('port-'+_portId,true);
 //				_endPort = _viewSpace.getPortDefById('port-'+_linkObj.other_end_id,true);
 
-				_startPort = _target.get('port',_portId);
-				_endPort = _target.get('port',_linkObj.other_end_id);
+//				_startPort = _target.get('port',this.get('startPortId'));
+//				_endPort = _target.get('port',this.get('endPortId'));
+
 
 				if(_startPort == null || _endPort == null) {
-					var that = this;
+					var _this = this;
 					var portsNotReadyCallback = function() {
-						that.init();
+						_this.init();
 					}
 					setTimeout(portsNotReadyCallback,50);
 					return;
 				}
 
+/*
 				_linkDef = {
 					'id': _id,
 					'type': 'fullBezier',
@@ -87,19 +88,18 @@ if(!R8.Link) {
 					}],
 					'style':_linkObj.style
 				};
-
+*/
 //TODO: revisit after fully implementing link types and new meta
 				if (this.isTypeOf('monitor')) {
 					_linkDef.type = 'monitor';
 					_linkDef.style = _monitorDefaultStyle;
 				}
 
-				_startNode = R8.Utils.Y.one('#'+_startNodeId);
-				_endNode = R8.Utils.Y.one('#'+_endNodeId);
+//				_startNode = R8.Utils.Y.one('#'+_startNodeId);
+//				_endNode = R8.Utils.Y.one('#'+_endNodeId);
 
 //				_viewSpace.addLinkToItems(_linkDef);
 				_target.addLinkToItems(this);
-				_readyState = true;
 				_initialized = true;
 			},
 			isTypeOf: function(typeStr) {
@@ -112,16 +112,16 @@ return false;
 				return false;
 			},
 			render: function() {
-				if (_readyState == false) {
-					var that = this;
+				if (_initialized == false) {
+					var _this = this;
 					var notReadyCallback = function(){
-						that.render();
+						_this.render();
 					}
 					setTimeout(notReadyCallback, 50);
 					return;
 				}
 
-				switch(_linkDef.type) {
+				switch(this.get('type')) {
 					case "fullBezier":
 						this.setFullBezierDef();
 						R8.Canvas.drawFullBezier(_fullBezierDef);
@@ -133,36 +133,37 @@ return false;
 //							startPortDef = this.getPortDefById(_linkDef.endItems[0].nodeId);
 //						}
 						R8.Canvas.renderHanger(_linkDef,_endPort);
-var proxyNode = R8.Utils.Y.one('#port-proxy-'+_endPort.id);
-if (proxyNode == null) {
-	var portNodeID = 'port-proxy-' + _endPort.id,
-		portClass = 'monitor-port available',
-		proxyNode = new R8.Utils.Y.Node.create('<div>');
 
-	proxyNode.addClass(portClass);
-
-	var temp = _endNode.getStyle('left');
-	var pLeft = temp.replace('px', '');
-//	var cLeft = (pLeft - 39) + 'px';
-	var cLeft = (pLeft - 25) + 'px';
-	temp = _endNode.getStyle('top');
-	var pTop = temp.replace('px', '');
-	var cTop = (pTop-6) + 'px';
-//	var cTop = (parseInt(pTop)+1) + 'px';
-	proxyNode.setStyles({
-		'top': cTop,
-		'left': cLeft
-	});
-
-	R8.Utils.Y.one('#item-' + _linkDef.endItems[0].parentItemId).append(proxyNode);
-
-	proxyNode.on('mouseenter',function(e){
-		R8.Canvas.renderLine(_linkDef,_endPort);
-	},this);
-	proxyNode.on('mouseleave',function(e){
-console.log('left proxy node.., should delete temp link');
-	},this);
-}
+						var proxyNode = R8.Utils.Y.one('#port-proxy-'+_endPort.id);
+						if (proxyNode == null) {
+							var portNodeID = 'port-proxy-' + _endPort.id,
+								portClass = 'monitor-port available',
+								proxyNode = new R8.Utils.Y.Node.create('<div>');
+						
+							proxyNode.addClass(portClass);
+						
+							var temp = _endNode.getStyle('left');
+							var pLeft = temp.replace('px', '');
+						//	var cLeft = (pLeft - 39) + 'px';
+							var cLeft = (pLeft - 25) + 'px';
+							temp = _endNode.getStyle('top');
+							var pTop = temp.replace('px', '');
+							var cTop = (pTop-6) + 'px';
+						//	var cTop = (parseInt(pTop)+1) + 'px';
+							proxyNode.setStyles({
+								'top': cTop,
+								'left': cLeft
+							});
+						
+							R8.Utils.Y.one('#item-' + _linkDef.endItems[0].parentItemId).append(proxyNode);
+						
+							proxyNode.on('mouseenter',function(e){
+								R8.Canvas.renderLine(_linkDef,_endPort);
+							},this);
+							proxyNode.on('mouseleave',function(e){
+						console.log('left proxy node.., should delete temp link');
+							},this);
+						}
 /*
 var monitorNode = R8.Utils.Y.one('#link-'+_id+'-hangerPort');
 if (monitorNode == null) {
@@ -185,16 +186,24 @@ if (monitorNode == null) {
 */
 						break;
 				}
-
+/*
 				_startNode.removeClass('available');
 				_startNode.addClass('connected');
 				_endNode.removeClass('available');
 				_endNode.addClass('connected');
+*/
+				_startPort.getView('editor_target').get('node').removeClass('available');
+				_startPort.getView('editor_target').get('node').addClass('connected');
+				_endPort.getView('editor_target').get('node').removeClass('available');
+				_endPort.getView('editor_target').get('node').addClass('connected');
 			},
 			get: function(key) {
 				switch(key) {
 					case "id":
-						return _id;
+						return _def.id;
+						break;
+					case "type":
+						return _def.ui.type;
 						break;
 					case "canvasNodeId":
 						return _canvasNodeId;
@@ -220,8 +229,17 @@ if (monitorNode == null) {
 					case "startPort":
 						return _startPort;
 						break;
+					case "startPortId":
+						return _def.start_id;
+						break;
 					case "endPort":
 						return _endPort;
+						break;
+					case "EndPortId":
+						return _def.end_id;
+						break;
+					case "style":
+						return _def.ui.style;
 						break;
 				}
 			},
@@ -267,17 +285,17 @@ if (monitorNode == null) {
 //TODO: revisit when making viewspaces more extensible, dont use viewspace for node id
 				var vspaceXY = _target.getView('editor').get('node').getXY();
 
-				var tempXY = _startNode.getXY();
+				var tempXY = _startPort.getView('editor_target').get('node').getXY();
 				var startNodeXY = [(tempXY[0]-vspaceXY[0]),(tempXY[1]-vspaceXY[1])];
-				var tempXY = _endNode.getXY();
+				var tempXY = _endPort.getView('editor_target').get('node').getXY();
 				var endNodeXY = [(tempXY[0]-vspaceXY[0]),(tempXY[1]-vspaceXY[1])];
 
 				//get offset for 1/2 start and end node height/widths
-				var startNodeRegion = _startNode.get('region');
+				var startNodeRegion = _startPort.getView('editor_target').get('node').get('region');
 				var startNodeXOffset = Math.floor((startNodeRegion['right'] - startNodeRegion['left']) / 2);
 				var startNodeYOffset = Math.floor((startNodeRegion['bottom'] - startNodeRegion['top']) / 2);
 
-				var endNodeRegion = _endNode.get('region');
+				var endNodeRegion = _endPort.getView('editor_target').get('node').get('region');
 				var endNodeXOffset = Math.floor((endNodeRegion['right'] - endNodeRegion['left']) / 2);
 				var endNodeYOffset = Math.floor((endNodeRegion['bottom'] - endNodeRegion['top']) / 2);
 
@@ -1041,7 +1059,7 @@ if (monitorNode == null) {
 					'cpY2': cpY2,
 					'endX': endX,
 					'endY': endY,
-					'style': _linkDef.style
+					'style': this.get('style')
 				};
 			},
 		}

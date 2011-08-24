@@ -59,6 +59,8 @@ puts "-------------------------"
 pp ["new create link response:", ret]
 puts "-------------------------"
 
+        return {:data=>ret}
+
         if hash["return_model"] == "true"
           return {:data=> 
               {

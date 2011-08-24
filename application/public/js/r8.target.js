@@ -57,9 +57,6 @@ if (!R8.Target) {
 						if (typeof(_nodes[value]) == 'undefined') {
 							return null;
 						} else {
-							//DEBUG
-							console.log('going to return item in target.get item:');
-							console.log(_nodes[value]);
 							return _nodes[value];
 						}
 						break;
@@ -68,6 +65,15 @@ if (!R8.Target) {
 							var ports = _nodes[n].get('ports');
 							for(var p in ports) {
 								if(ports[p].get('id') == value) return ports[p];
+							}
+						}
+						return null;
+						break;
+					case "itemByPortId":
+						for(var n in _nodes) {
+							var ports = _nodes[n].get('ports');
+							for(var p in ports) {
+								if(ports[p].get('id') == value) return _nodes[n];
 							}
 						}
 						return null;

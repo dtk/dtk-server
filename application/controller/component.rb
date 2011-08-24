@@ -34,8 +34,12 @@ module XYZ
         #TODO: need to copy in avatar when hash["ui"] is non null
         override_attrs = hash["ui"] ? {:ui=>hash["ui"]} : {}
         target_object = target_id_handle.create_object()
-        clone_opts = {:ret_new_obj_with_cols => Component.common_columns()}
+
+        #TODO: push in logic that forces us heer to pass in real cols and tehn materialize
+        clone_opts = {:ret_new_obj_with_cols => Component.common_real_columns()}
         component_obj = target_object.clone_into(id_handle.create_object(),override_attrs,clone_opts)
+        component_obj.materialize!(Component.common_columns())
+
         data = {
           :component => component_obj
         }

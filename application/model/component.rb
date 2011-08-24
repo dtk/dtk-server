@@ -322,6 +322,9 @@ module XYZ
        :ui
       ]
     end
+    def self.common_real_columns()
+      common_columns - [:name]
+    end
     ### virtual column defs
     def name()
       self[:display_name]

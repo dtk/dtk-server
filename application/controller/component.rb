@@ -18,6 +18,31 @@ module XYZ
       return {:data=>comp}
     end
 
+    def clone(id)
+      handle_errors do
+        id_handle = id_handle(id)
+        hash = request.params
+        target_id_handle = nil
+        if hash["target_id"] and hash["target_model_name"]
+          input_target_id_handle = id_handle(hash["target_id"].to_i,hash["target_model_name"].to_sym)
+          target_id_handle = Model.find_real_target_id_handle(id_handle,input_target_id_handle)
+        else
+          Log.info("not implemented yet")
+          return redirect "/xyz/#{model_name()}/display/#{id.to_s}"
+        end
+
+        #TODO: need to copy in avatar when hash["ui"] is non null
+        override_attrs = hash["ui"] ? {:ui=>hash["ui"]} : {}
+        target_object = target_id_handle.create_object()
+        clone_opts = {:ret_new_obj_with_cols => Component.common_columns()}
+        component_obj = target_object.clone_into(id_handle.create_object(),override_attrs,clone_opts)
+        data => {
+          :component => component_obj
+        }
+        {:data => data}
+      end
+    end
+
     #TODO: remove when finshed testing
     def test(action,*rest)
       hash = request.params

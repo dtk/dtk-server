@@ -297,7 +297,7 @@ module XYZ
         set_submodel(:assembly)
       end
     end
-        
+
     def self.common_columns()
       [
        :id,
@@ -322,9 +322,30 @@ module XYZ
        :ui
       ]
     end
+    #TODO: need to maintain relationship fro maintainability
     def self.common_real_columns()
-      common_columns - [:name,:config_agent_type,:library_id,:node_id,:project_id,:instance_extended_base_id,:extended_base_id]
+      [
+       :id,
+       :display_name,
+       :extension_type,
+       :specific_type,
+       :type,
+       :component_type,
+       :ancestor_id,
+       :extended_base,
+       :implementation_id,
+       :assembly_id,
+       :ui,
+       :basic_type,
+       :only_one_per_node,
+       :version,
+       :external_ref,
+       :node_node_id,
+       :project_project_id,
+       :library_library_id
+      ]
     end
+
     ### virtual column defs
     def name()
       self[:display_name]

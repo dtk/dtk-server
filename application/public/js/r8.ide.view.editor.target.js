@@ -77,6 +77,12 @@ if (!R8.IDE.View.editor.target) {
 					this.addDrag(n);
 				}
 
+//TODO: revisit.., links need to be like other models and views, right now rendering is in target model
+				var links = _target.get('loadedLinks');
+				for(var l in links) {
+					_target.addLink(links[l]);
+				}
+
 				this.setupEvents();
 				this.startUpdater();
 

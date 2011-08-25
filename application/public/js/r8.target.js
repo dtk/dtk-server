@@ -13,6 +13,7 @@ if (!R8.Target) {
 			
 			_portDefs = null,
 			_links = {},
+			_loadedLinks = {},
 			_linkDefs = null;
 
 			if(_def.ui == null) _def.ui = {'items':{}};
@@ -60,6 +61,12 @@ if (!R8.Target) {
 						} else {
 							return _nodes[value];
 						}
+						break;
+					case "links":
+						return _links;
+						break;
+					case "loadedLinks":
+						return _loadedLinks;
 						break;
 					case "port":
 						for(var n in _nodes) {
@@ -329,15 +336,13 @@ console.log('should remove node from views....');
 				var response = R8.Ctrl.callResults[ioId]['response'];
 				var linkList = response['application_target_get_links']['content'][0]['data'];
 //DEBUG
-console.log('have links list for target...');
-console.log(linkList)
-return;
+//console.log('have links list for target...');
+//console.log(linkList)
+//return;
 				for(i in linkList) {
-					if(linkList[i]['id'] == '' || linkList[i]['hidden'] == true || linkList[i]['type'] == 'internal') continue;
-
-					this.addLink(linkList[i]);
+					_loadedLinks[linkList[i]['id']] = linkList[i];
+//					this.addLink(linkList[i]);
 				}
-				_links = {};
 			}
 		}
 	};

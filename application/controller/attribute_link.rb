@@ -32,7 +32,7 @@ module XYZ
         }
 
         input_port = create_object_from_id(link[:input_id],:port)
-        input_port.update_object!(*Port.common_columns())
+        input_port.update_and_materialize_object!(*Port.common_columns())
         
         port_merge_info = port_update[:merged_external_ports].first
         if not port_update[:new_l4_ports].empty?
@@ -42,13 +42,14 @@ module XYZ
         else
           input_port.merge!(:update_info => "no_change")
         end
-        
+
+
         output_port = create_object_from_id(link[:output_id],:port)
-        output_port.update_object!(*Port.common_columns())
+        output_port.update_and_materialize_object!(*Port.common_columns())
         #only new ports created on input side
         output_port.merge!(:update_info => "no_change")
           
-        ret = {
+       ret = {
           :temp_link_id => temp_link_id,
           :link => link,
           :input_port => input_port,

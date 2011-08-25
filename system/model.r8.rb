@@ -204,6 +204,7 @@ module XYZ
       Model.get_objects_from_sp_hash(child_model_handle,sp_hash,opts)
     end
 
+
     def update_object!(*cols)
       cols_to_get =  cols.reject{|col|self.has_key?(col)}
       return self if cols_to_get.empty?
@@ -211,6 +212,10 @@ module XYZ
       vals = get_objects_from_sp_hash({:cols => cols_to_get},opts).first
       vals.each{|k,v|self[k]=v}
       self
+    end
+
+    def update_and_materialize_object!(*cols)
+      update_object!(*cols).materialize!(cols)
     end
 
     def get_objs(sp_hash_x,opts={})

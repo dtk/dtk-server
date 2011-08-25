@@ -39,7 +39,7 @@ if (!R8.IDE.View.editor_target.node) {
 			var _dropList = {};
 
 			var _tempLinkDef = null;
-			var _tempLinkObj = null;
+			var _tempLinkDef = null;
 			var _tempLinkId = null;
 
 		return {
@@ -466,7 +466,7 @@ if(ports == null) return;
 						dragEvent.on('drag:mouseDown',function(e){
 							var dropList = Y.all('#'+_parentView.get('node').get('id')+' .port');
 							dropList.each(function(){
-								var dropGroup = 'foo';
+								var dropGroup = 'portDrop1';
 								var dropId = this.get('id');
 
 								if(typeof(_dropList[dropId]) == 'undefined') {
@@ -525,7 +525,7 @@ if(startPort.get('direction') == "output") {
 }
 */
 /*
-										_tempLinkObj = {
+										_tempLinkDef = {
 											id: _tempLinkId,
 											port_id: portId,
 //											port_id: startPortDef.id,
@@ -539,10 +539,10 @@ if(startPort.get('direction') == "output") {
 											]
 										}
 */
-										_tempLinkObj = {
+										_tempLinkDef = {
 											id: _tempLinkId,
-											start_id: startPort.get('id'),
-											end_id: endPort.get('id'),
+//											input_id: startPort.get('id'),
+//											output_id: endPort.get('id'),
 											ui: {
 												type: 'fullBezier',
 												style: [{
@@ -562,6 +562,9 @@ if(startPort.get('direction') == "output") {
 												input_id = (startPort.get('direction') == 'input') ? startPort.get('id') : endPort.get('id'),
 												output_id = (startPort.get('direction') == 'output') ? startPort.get('id') : endPort.get('id');
 
+											_tempLinkDef.input_id = input_id;
+											_tempLinkDef.output_id = output_id;
+
 											YUI().use('json','io',function(Y){
 												var successCallback = function(ioId,returnObj) {
 													_this.linkCreateCallback(ioId,returnObj);
@@ -577,10 +580,10 @@ if(startPort.get('direction') == "output") {
 												};
 												R8.Ctrl.call('attribute_link/save',params);
 											});
-											_node.get('target').addLink(_tempLinkObj);
+											_node.get('target').addLink(_tempLinkDef);
 //DEBUG
 //UNCOMMENT WHEN ALL IS PORTED
-//											_viewSpace.addLink(_tempLinkObj);
+//											_viewSpace.addLink(_tempLinkDef);
 										} else {
 //DEBUG
 console.log('not a valid link.., mis-matched types...');
@@ -691,6 +694,7 @@ return;
 //				var errorData = response.application_attribute_link_save.content[0].data.error;
 
 //DEBUG
+console.log('have response from link save call....');
 console.log(response_data);
 
 				var newLinkDef = response_data.link;
@@ -702,14 +706,14 @@ console.log(response_data);
 /*
 //TODO: fix error/cleanup scenario with new handling of links
 				if(typeof(errorData) != 'undefined') {
-					R8.Utils.Y.one('#link-'+_tempLinkObj.id).remove();
+					R8.Utils.Y.one('#link-'+_tempLinkDef.id).remove();
 //TODO: re-add error rendering once switch from IDE to workspace it made
 //					R8.Workspace.showAlert(errorData.error_msg);
 
-					var startPortNode = R8.Utils.Y.one('#port-'+_tempLinkObj.port_id);
-					var endPortNode = R8.Utils.Y.one('#port-'+_tempLinkObj.other_end_id);
-//					var startPortNode = R8.Utils.Y.one('#'+_tempLinkObj.startItem.nodeId);
-//					var endPortNode = R8.Utils.Y.one('#'+_tempLinkObj.endItems[0].nodeId);
+					var startPortNode = R8.Utils.Y.one('#port-'+_tempLinkDef.port_id);
+					var endPortNode = R8.Utils.Y.one('#port-'+_tempLinkDef.other_end_id);
+//					var startPortNode = R8.Utils.Y.one('#'+_tempLinkDef.startItem.nodeId);
+//					var endPortNode = R8.Utils.Y.one('#'+_tempLinkDef.endItems[0].nodeId);
 					startPortNode.removeClass('connected');
 					startPortNode.addClass('available');
 					endPortNode.removeClass('connected');
@@ -729,7 +733,7 @@ console.log(response_data);
 							'oldPortId': inputPort.replace_id,
 							'newPortId': inputPort.id,
 							'newPortDef': inputPort,
-							'tempLinkObj': _tempLinkObj,
+							'tempLinkObj': _tempLinkDef,
 							'newLink': link
 						}
 */
@@ -747,8 +751,11 @@ console.log('port is on this node.., gonna swap it out...');
 
 //				var linkId = 'link-'+tempLinkObj.id;
 				_node.get('target').removeLink(tempLinkId);
-				_node.get('target').addLink(newLink);
-return;
+//DEBUG
+console.log('just removed old temp link.., going to create the new one..');
+console.log(newLinkDef);
+				_node.get('target').addLink(newLinkDef);
+				return;
 
 //TODO: temp hack b/c of differences between link object returned from create/save and get_links
 				newLink.item_id = _id
@@ -774,7 +781,7 @@ return;
 						var swapDef = {
 								'oldPortId': oldPortId,
 								'newPortId': newPortId,
-								'tempLinkObj': _tempLinkObj,
+								'tempLinkObj': _tempLinkDef,
 								'newLink': newLink
 							}
 						if(typeof(_ports[oldPortId]) == 'undefined') {
@@ -843,8 +850,9 @@ return;
 				delete(_links[linkId]);
 			},
 			refreshLinks: function() {
-				for(var l in _links) {
-					_viewSpace.links(l).render();
+				var links = _node.get('links');
+				for(var l in links) {
+					links[l].render();
 				}
 			},
 /*

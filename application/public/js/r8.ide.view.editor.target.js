@@ -271,8 +271,7 @@ return;
 						that.addSelectedItem(itemId);
 					});
 					draggableItems[itemId].on('drag:drag',function(){
-//TODO: revisit after implementing links
-//						_items[itemId].refreshLinks();
+//						_items[itemId].get('view','editor_target').refreshLinks();
 					});
 					draggableItems[itemId].on('drag:end',function(e){
 						that.clearSelectedItems();

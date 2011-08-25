@@ -27,12 +27,12 @@ if(!R8.Link) {
 
 //			_startNode = null,
 //			_startNodeId = 'port-'+_portId,
-			_startPort = _target.get('port',_def.start_id),
+			_inputPort = _target.get('port',_def.input_id),
 
 //			_endNode = null,
 //			_otherEndId = _def.end_id,
 //			_endNodeId = 'port-'+_def.end_id,
-			_endPort = _target.get('port',_def.end_id),
+			_outputPort = _target.get('port',_def.output_id),
 
 			_proxyNode = null,
 			_proxyId = _def.end_id,
@@ -56,14 +56,14 @@ if(!R8.Link) {
 			];
 		return {
 			init: function() {
-//				_startPort = _viewSpace.getPortDefById('port-'+_portId,true);
-//				_endPort = _viewSpace.getPortDefById('port-'+_linkObj.other_end_id,true);
+//				_inputPort = _viewSpace.getPortDefById('port-'+_portId,true);
+//				_outputPort = _viewSpace.getPortDefById('port-'+_linkObj.other_end_id,true);
 
-//				_startPort = _target.get('port',this.get('startPortId'));
-//				_endPort = _target.get('port',this.get('endPortId'));
+//				_inputPort = _target.get('port',this.get('startPortId'));
+//				_outputPort = _target.get('port',this.get('endPortId'));
 
 
-				if(_startPort == null || _endPort == null) {
+				if(_inputPort == null || _outputPort == null) {
 					var _this = this;
 					var portsNotReadyCallback = function() {
 						_this.init();
@@ -78,12 +78,12 @@ if(!R8.Link) {
 					'type': 'fullBezier',
 					'startItem': {
 						'parentItemId': _itemId,
-						'location': _startPort.get('location'),
+						'location': _inputPort.get('location'),
 						'nodeId': _startNodeId
 					},
 					'endItems': [{
-						'parentItemId': _endPort.get('node').get('id'),
-						'location': _endPort.get('location'),
+						'parentItemId': _outputPort.get('node').get('id'),
+						'location': _outputPort.get('location'),
 						'nodeId': _endNodeId
 					}],
 					'style':_linkObj.style
@@ -132,11 +132,11 @@ return false;
 //						if(startPortDef.direction == "input") {
 //							startPortDef = this.getPortDefById(_linkDef.endItems[0].nodeId);
 //						}
-						R8.Canvas.renderHanger(_linkDef,_endPort);
+						R8.Canvas.renderHanger(_linkDef,_outputPort);
 
-						var proxyNode = R8.Utils.Y.one('#port-proxy-'+_endPort.id);
+						var proxyNode = R8.Utils.Y.one('#port-proxy-'+_outputPort.id);
 						if (proxyNode == null) {
-							var portNodeID = 'port-proxy-' + _endPort.id,
+							var portNodeID = 'port-proxy-' + _outputPort.id,
 								portClass = 'monitor-port available',
 								proxyNode = new R8.Utils.Y.Node.create('<div>');
 						
@@ -156,9 +156,9 @@ return false;
 							});
 						
 							R8.Utils.Y.one('#item-' + _linkDef.endItems[0].parentItemId).append(proxyNode);
-						
+
 							proxyNode.on('mouseenter',function(e){
-								R8.Canvas.renderLine(_linkDef,_endPort);
+								R8.Canvas.renderLine(_linkDef,_outputPort);
 							},this);
 							proxyNode.on('mouseleave',function(e){
 						console.log('left proxy node.., should delete temp link');
@@ -192,12 +192,12 @@ if (monitorNode == null) {
 				_endNode.removeClass('available');
 				_endNode.addClass('connected');
 */
-				_startPort.getView('editor_target').get('node').removeClass('available');
-				_startPort.getView('editor_target').get('node').addClass('connected');
-				_endPort.getView('editor_target').get('node').removeClass('available');
-				_endPort.getView('editor_target').get('node').addClass('connected');
+				_inputPort.getView('editor_target').get('node').removeClass('available');
+				_inputPort.getView('editor_target').get('node').addClass('connected');
+				_outputPort.getView('editor_target').get('node').removeClass('available');
+				_outputPort.getView('editor_target').get('node').addClass('connected');
 			},
-			get: function(key) {
+			get: function(key,value) {
 				switch(key) {
 					case "id":
 						return _def.id;
@@ -224,22 +224,33 @@ if (monitorNode == null) {
 						return _linkDef.endItems[0].parentItemId;
 						break;
 					case "endNodeId":
+//DEBUG
+return foopa;
 						return _linkDef.endItems[0].nodeId;
 						break;
-					case "startPort":
-						return _startPort;
+					case "inputPort":
+						return _inputPort;
 						break;
 					case "startPortId":
+//DEBUG
+return foopa;
 						return _def.start_id;
 						break;
-					case "endPort":
-						return _endPort;
+					case "outputPort":
+						return _outputPort;
 						break;
 					case "EndPortId":
+//DEBUG
+return foopa;
 						return _def.end_id;
 						break;
 					case "style":
 						return _def.ui.style;
+						break;
+					case "view":
+						if(typeof(_views[value]) == 'undefined') this.requireView(value);
+		
+						return _views[value];
 						break;
 				}
 			},
@@ -273,10 +284,10 @@ if (monitorNode == null) {
 				delete(canvasNode);
 
 
-				_startPort.getView('editor_target').get('node').removeClass('connected');
-				_startPort.getView('editor_target').get('node').addClass('available');
-				_endPort.getView('editor_target').get('node').removeClass('connected');
-				_endPort.getView('editor_target').get('node').addClass('available');
+				_inputPort.getView('editor_target').get('node').removeClass('connected');
+				_inputPort.getView('editor_target').get('node').addClass('available');
+				_outputPort.getView('editor_target').get('node').removeClass('connected');
+				_outputPort.getView('editor_target').get('node').addClass('available');
 			},
 
 //-------------------------------------------------------
@@ -284,19 +295,17 @@ if (monitorNode == null) {
 //-------------------------------------------------------
 			setFullBezierDef: function() {
 //TODO: revisit when making viewspaces more extensible, dont use viewspace for node id
-				var vspaceXY = _target.getView('editor').get('node').getXY();
-
-				var tempXY = _startPort.getView('editor_target').get('node').getXY();
+				var vspaceXY = _target.get('view','editor').get('node').getXY();
+				var tempXY = _inputPort.get('view','editor_target').get('node').getXY();
 				var startNodeXY = [(tempXY[0]-vspaceXY[0]),(tempXY[1]-vspaceXY[1])];
-				var tempXY = _endPort.getView('editor_target').get('node').getXY();
+				var tempXY = _outputPort.get('view','editor_target').get('node').getXY();
 				var endNodeXY = [(tempXY[0]-vspaceXY[0]),(tempXY[1]-vspaceXY[1])];
-
 				//get offset for 1/2 start and end node height/widths
-				var startNodeRegion = _startPort.getView('editor_target').get('node').get('region');
+				var startNodeRegion = _inputPort.get('view','editor_target').get('node').get('region');
 				var startNodeXOffset = Math.floor((startNodeRegion['right'] - startNodeRegion['left']) / 2);
 				var startNodeYOffset = Math.floor((startNodeRegion['bottom'] - startNodeRegion['top']) / 2);
 
-				var endNodeRegion = _endPort.getView('editor_target').get('node').get('region');
+				var endNodeRegion = _outputPort.get('view','editor_target').get('node').get('region');
 				var endNodeXOffset = Math.floor((endNodeRegion['right'] - endNodeRegion['left']) / 2);
 				var endNodeYOffset = Math.floor((endNodeRegion['bottom'] - endNodeRegion['top']) / 2);
 
@@ -324,7 +333,7 @@ if (monitorNode == null) {
 					//calculate bezier control point size here
 					var canvasBaseDiagonal = Math.sqrt(Math.pow(canvasBaseHeight, 2) + Math.pow(canvasBaseWidth, 2));
 
-					if((_startPort.get('location') == 'north' || _startPort.get('location') == 'south') && (_endPort.get('location') == 'north' || _endPort.get('location') == 'south')) {
+					if((_inputPort.get('location') == 'north' || _inputPort.get('location') == 'south') && (_outputPort.get('location') == 'north' || _outputPort.get('location') == 'south')) {
 						if (canvasBaseDiagonal > _bzCtrlPtBaseValue) {
 							var ctrlYPtOffset = _bzCtrlPtBaseValue;
 							var ctrlXPtOffset = _bzCtrlPtBaseValue;
@@ -333,7 +342,7 @@ if (monitorNode == null) {
 							var ctrlYPtOffset = canvasBaseDiagonal / 2;
 							var ctrlXPtOffset = ctrlYPtOffset;
 						}
-					} else if((_startPort.get('location') == 'west' || _startPort.get('location') == 'east') && (_endPort.get('location') == 'west' || _endPort.get('location') == 'east')) {
+					} else if((_inputPort.get('location') == 'west' || _inputPort.get('location') == 'east') && (_outputPort.get('location') == 'west' || _outputPort.get('location') == 'east')) {
 						if (canvasBaseDiagonal > _bzCtrlPtBaseValue) {
 							var ctrlYPtOffset = _bzCtrlPtBaseValue;
 							var ctrlXPtOffset = _bzCtrlPtBaseValue;
@@ -350,14 +359,14 @@ if (monitorNode == null) {
 						else var ctrlYPtOffset = canvasBaseHeight;
 					}
 
-					switch(_startPort.get('location')) {
+					switch(_inputPort.get('location')) {
 						case 'south':
-							if(_endPort.get('location') =='east')
+							if(_outputPort.get('location') =='east')
 								var canvasActualWidth = canvasBaseWidth + ctrlXPtOffset;
 							else
 								var canvasActualWidth = canvasBaseWidth;
 
-							if(_endPort.get('location') != 'north')
+							if(_outputPort.get('location') != 'north')
 								var canvasActualHeight = canvasBaseHeight + ctrlYPtOffset;
 							else
 								var canvasActualHeight = canvasBaseHeight + (2*ctrlYPtOffset);
@@ -365,7 +374,7 @@ if (monitorNode == null) {
 							var startX = startNodeXOffset;
 							var cpX1 = startX;
 							var canvasLeft = startNodeXY[0];
-							if(_endPort.get('location') == 'south') {
+							if(_outputPort.get('location') == 'south') {
 								var canvasTop = startNodeXY[1];
 								var startY = startNodeYOffset;
 								var cpY1 = startNodeYOffset + ctrlYPtOffset;
@@ -381,15 +390,15 @@ if (monitorNode == null) {
 							var cpX1 = startX;
 							var canvasLeft = startNodeXY[0];
 
-							if(_endPort.get('location') == 'south') var canvasActualHeight = canvasBaseHeight + (2*ctrlYPtOffset);
+							if(_outputPort.get('location') == 'south') var canvasActualHeight = canvasBaseHeight + (2*ctrlYPtOffset);
 							else var canvasActualHeight = canvasBaseHeight + ctrlYPtOffset;
 
-							if(_endPort.get('location') == 'east')
+							if(_outputPort.get('location') == 'east')
 								var canvasActualWidth = canvasBaseWidth + ctrlXPtOffset;
 							else var canvasActualWidth = canvasBaseWidth;
 
 							var canvasTop = startNodeXY[1] - ctrlYPtOffset;
-							if(_endPort.get('location') != 'south') {
+							if(_outputPort.get('location') != 'south') {
 								var startY = startNodeYOffset + ctrlYPtOffset;
 								var cpY1 = startY - ctrlYPtOffset;
 							} else {
@@ -398,10 +407,10 @@ if (monitorNode == null) {
 							}
 							break;
 						case 'west':
-							if(_endPort.get('location') == 'east') var canvasActualWidth = canvasBaseWidth + (2*ctrlXPtOffset);
+							if(_outputPort.get('location') == 'east') var canvasActualWidth = canvasBaseWidth + (2*ctrlXPtOffset);
 							else var canvasActualWidth = canvasBaseWidth + ctrlXPtOffset;
 
-							if (_endPort.get('location') != 'east') {
+							if (_outputPort.get('location') != 'east') {
 								var canvasActualHeight = canvasBaseHeight + ctrlYPtOffset;
 							} else {
 								var canvasActualHeight = canvasBaseHeight + (2 * ctrlYPtOffset);
@@ -410,7 +419,7 @@ if (monitorNode == null) {
 							var startY = startNodeYOffset + ctrlYPtOffset;
 							var cpY1 = startY;
 
-							if (_endPort.get('location') != 'east') {
+							if (_outputPort.get('location') != 'east') {
 								var canvasLeft = startNodeXY[0] - ctrlXPtOffset;
 								var startX = startNodeXOffset + ctrlXPtOffset;
 								var cpX1 = startX - ctrlXPtOffset;
@@ -426,15 +435,15 @@ if (monitorNode == null) {
 							var cpY1 = startY;
 							var canvasTop = startNodeXY[1];
 
-							if(_endPort.get('location') == 'east')
+							if(_outputPort.get('location') == 'east')
 								var canvasActualWidth = canvasBaseWidth + ctrlXPtOffset;
 							else var canvasActualWidth = canvasBaseWidth;
 
-							if(_endPort.get('location') == 'south')
+							if(_outputPort.get('location') == 'south')
 								var canvasActualHeight = canvasBaseHeight + ctrlYPtOffset;
 							else var canvasActualHeight = canvasBaseHeight;
 
-							if(_endPort.get('location') != 'west') {
+							if(_outputPort.get('location') != 'west') {
 								var canvasLeft = startNodeXY[0];
 								var startX = startNodeXOffset;
 								var cpX1 = startX + ctrlXPtOffset;
@@ -446,7 +455,7 @@ if (monitorNode == null) {
 							break;
 					}
 
-					switch(_endPort.get('location')) {
+					switch(_outputPort.get('location')) {
 						case 'south':
 							var endX = canvasActualWidth - endNodeXOffset;
 							var endY = canvasActualHeight - (ctrlYPtOffset + endNodeYOffset);
@@ -457,7 +466,7 @@ if (monitorNode == null) {
 						case 'north':
 							var endX = canvasActualWidth - endNodeXOffset;
 							var cpX2 = endX;
-							if(_startPort.get('location') == 'south') {
+							if(_inputPort.get('location') == 'south') {
 								var endY = canvasActualHeight - (ctrlYPtOffset + endNodeYOffset);
 								var cpY2 = endY - ctrlYPtOffset;
 							} else {
@@ -466,7 +475,7 @@ if (monitorNode == null) {
 							}
 							break;
 						case 'west':
-							if (_startPort.get('location') != 'east') {
+							if (_inputPort.get('location') != 'east') {
 								var endX = canvasActualWidth - endNodeXOffset;
 								var cpX2 = endX - ctrlXPtOffset;
 							} else {
@@ -479,7 +488,7 @@ if (monitorNode == null) {
 						case 'east':
 							var endX = canvasActualWidth - (ctrlXPtOffset + endNodeXOffset);
 							var cpX2 = endX + ctrlXPtOffset;
-							if(_startPort.get('location') != 'west')
+							if(_inputPort.get('location') != 'west')
 								var endY = canvasActualHeight - endNodeYOffset;
 							else var endY = canvasActualHeight - (ctrlYPtOffset + endNodeYOffset);
 							var cpY2 = endY;
@@ -499,7 +508,7 @@ if (monitorNode == null) {
 					//calculate bezier control point size here
 					var canvasBaseDiagonal = Math.sqrt(Math.pow(canvasBaseHeight, 2) + Math.pow(canvasBaseWidth, 2));
 
-					if((_startPort.get('location') == 'north' || _startPort.get('location') == 'south') && (_endPort.get('location') == 'north' || _endPort.get('location') == 'south')) {
+					if((_inputPort.get('location') == 'north' || _inputPort.get('location') == 'south') && (_outputPort.get('location') == 'north' || _outputPort.get('location') == 'south')) {
 						if (canvasBaseDiagonal > _bzCtrlPtBaseValue) {
 							var ctrlYPtOffset = _bzCtrlPtBaseValue;
 							var ctrlXPtOffset = _bzCtrlPtBaseValue;
@@ -508,7 +517,7 @@ if (monitorNode == null) {
 							var ctrlYPtOffset = canvasBaseDiagonal / 2;
 							var ctrlXPtOffset = ctrlYPtOffset;
 						}
-					} else if((_startPort.get('location') == 'west' || _startPort.get('location') == 'east') && (_endPort.get('location') == 'west' || _endPort.get('location') == 'east')) {
+					} else if((_inputPort.get('location') == 'west' || _inputPort.get('location') == 'east') && (_outputPort.get('location') == 'west' || _outputPort.get('location') == 'east')) {
 						if (canvasBaseDiagonal > _bzCtrlPtBaseValue) {
 							var ctrlYPtOffset = _bzCtrlPtBaseValue;
 							var ctrlXPtOffset = _bzCtrlPtBaseValue;
@@ -525,16 +534,16 @@ if (monitorNode == null) {
 						else var ctrlYPtOffset = canvasBaseHeight;
 					}
 
-					switch(_startPort.get('location')) {
+					switch(_inputPort.get('location')) {
 						case 'south':
-							if(_endPort.get('location') =='east')
+							if(_outputPort.get('location') =='east')
 								var canvasActualWidth = canvasBaseWidth + ctrlXPtOffset;
 							else
 								var canvasActualWidth = canvasBaseWidth;
 
-							if(_endPort.get('location') == 'south')
+							if(_outputPort.get('location') == 'south')
 								var canvasActualHeight = canvasBaseHeight + ctrlYPtOffset;
-							else if(_endPort.get('location') == 'north')
+							else if(_outputPort.get('location') == 'north')
 								var canvasActualHeight = canvasBaseHeight + (2*ctrlYPtOffset);
 							else
 								var canvasActualHeight = canvasBaseHeight + ctrlYPtOffset;
@@ -542,7 +551,7 @@ if (monitorNode == null) {
 							var startX = startNodeXOffset;
 							var cpX1 = startX;
 							var canvasLeft = startNodeXY[0];
-							if(_endPort.get('location') != 'north') {
+							if(_outputPort.get('location') != 'north') {
 								var canvasTop = endNodeXY[1];
 								var startY = canvasActualHeight - (ctrlYPtOffset + startNodeYOffset);
 								var cpY1 = startY + ctrlYPtOffset;
@@ -557,16 +566,16 @@ if (monitorNode == null) {
 							var cpX1 = startX;
 							var canvasLeft = startNodeXY[0];
 
-							if(_endPort.get('location') == 'east')
+							if(_outputPort.get('location') == 'east')
 								var canvasActualWidth = canvasBaseWidth + ctrlXPtOffset;
 							else var canvasActualWidth = canvasBaseWidth;
 
-							if (_endPort.get('location') == 'north') {
+							if (_outputPort.get('location') == 'north') {
 								var canvasActualHeight = canvasBaseHeight + ctrlYPtOffset;
 								var canvasTop = endNodeXY[1] - ctrlYPtOffset;
 								var startY = canvasActualHeight - startNodeYOffset;
 								var cpY1 = startY - ctrlYPtOffset;
-							} else if(_endPort.get('location') == 'south') {
+							} else if(_outputPort.get('location') == 'south') {
 								var canvasTop = endNodeXY[1] - ctrlYPtOffset;
 								var canvasActualHeight = canvasBaseHeight + (2*ctrlYPtOffset);
 								var startY = canvasActualHeight - (ctrlYPtOffset + startNodeYOffset);
@@ -579,10 +588,10 @@ if (monitorNode == null) {
 							}
 							break;
 						case 'west':
-							if(_endPort.get('location') == 'east') var canvasActualWidth = canvasBaseWidth + (2*ctrlXPtOffset);
+							if(_outputPort.get('location') == 'east') var canvasActualWidth = canvasBaseWidth + (2*ctrlXPtOffset);
 							else var canvasActualWidth = canvasBaseWidth + ctrlXPtOffset;
 
-							if (_endPort.get('location') == 'south' || _endPort.get('location') == 'north') {
+							if (_outputPort.get('location') == 'south' || _outputPort.get('location') == 'north') {
 								var canvasActualHeight = canvasBaseHeight + ctrlYPtOffset;
 								var canvasTop = endNodeXY[1] - ctrlYPtOffset;
 							} else {
@@ -593,7 +602,7 @@ if (monitorNode == null) {
 							var startY = canvasActualHeight - startNodeYOffset;
 							var cpY1 = startY;
 
-							if (_endPort.get('location') != 'east') {
+							if (_outputPort.get('location') != 'east') {
 								var canvasLeft = startNodeXY[0] - ctrlXPtOffset;
 								var startX = startNodeXOffset + ctrlXPtOffset;
 								var cpX1 = startX - ctrlXPtOffset;
@@ -606,13 +615,13 @@ if (monitorNode == null) {
 							break;
 						case 'east':
 
-							if(_endPort.get('location') == 'west')
+							if(_outputPort.get('location') == 'west')
 								var canvasActualWidth = canvasBaseWidth + (2*ctrlXPtOffset);
-							else if(_endPort.get('location') == 'east')
+							else if(_outputPort.get('location') == 'east')
 								var canvasActualWidth = canvasBaseWidth + ctrlXPtOffset;
 							else var canvasActualWidth = canvasBaseWidth;
 
-							if(_endPort.get('location') == 'north') {
+							if(_outputPort.get('location') == 'north') {
 								var canvasActualHeight = canvasBaseHeight + ctrlYPtOffset;
 								var canvasTop = endNodeXY[1] - ctrlYPtOffset;
 								var startY = canvasActualHeight - startNodeYOffset;
@@ -624,7 +633,7 @@ if (monitorNode == null) {
 								var cpY1 = startY;
 							}
 
-							if(_endPort.get('location') != 'west') {
+							if(_outputPort.get('location') != 'west') {
 								var canvasLeft = startNodeXY[0];
 								var startX = startNodeXOffset;
 								var cpX1 = startX + ctrlXPtOffset;
@@ -636,12 +645,12 @@ if (monitorNode == null) {
 							break;
 					}
 
-					switch(_endPort.get('location')) {
+					switch(_outputPort.get('location')) {
 						case 'south':
 							var endX = canvasActualWidth - endNodeXOffset;
 							var cpX2 = endX;
 
-							if(_startPort.get('location') == 'north') {
+							if(_inputPort.get('location') == 'north') {
 								var endY = ctrlYPtOffset + endNodeYOffset;
 								var cpY2 = endY + ctrlYPtOffset;
 							} else {
@@ -656,7 +665,7 @@ if (monitorNode == null) {
 							var cpY2 = endY - ctrlYPtOffset;
 							break;
 						case 'west':
-							if (_startPort.get('location') != 'east') {
+							if (_inputPort.get('location') != 'east') {
 								var endX = canvasActualWidth - endNodeXOffset;
 								var cpX2 = endX - ctrlXPtOffset;
 								var endY = endNodeYOffset;
@@ -689,7 +698,7 @@ if (monitorNode == null) {
 					//calculate bezier control point size here
 					var canvasBaseDiagonal = Math.sqrt(Math.pow(canvasBaseHeight, 2) + Math.pow(canvasBaseWidth, 2));
 
-					if((_startPort.get('location') == 'north' || _startPort.get('location') == 'south') && (_endPort.get('location') == 'north' || _endPort.get('location') == 'south')) {
+					if((_inputPort.get('location') == 'north' || _inputPort.get('location') == 'south') && (_outputPort.get('location') == 'north' || _outputPort.get('location') == 'south')) {
 						if (canvasBaseDiagonal > _bzCtrlPtBaseValue) {
 							var ctrlYPtOffset = _bzCtrlPtBaseValue;
 							var ctrlXPtOffset = _bzCtrlPtBaseValue;
@@ -698,7 +707,7 @@ if (monitorNode == null) {
 							var ctrlYPtOffset = canvasBaseDiagonal / 2;
 							var ctrlXPtOffset = ctrlYPtOffset;
 						}
-					} else if((_startPort.get('location') == 'west' || _startPort.get('location') == 'east') && (_endPort.get('location') == 'west' || _endPort.get('location') == 'east')) {
+					} else if((_inputPort.get('location') == 'west' || _inputPort.get('location') == 'east') && (_outputPort.get('location') == 'west' || _outputPort.get('location') == 'east')) {
 						if (canvasBaseDiagonal > _bzCtrlPtBaseValue) {
 							var ctrlYPtOffset = _bzCtrlPtBaseValue;
 							var ctrlXPtOffset = _bzCtrlPtBaseValue;
@@ -715,25 +724,26 @@ if (monitorNode == null) {
 						else var ctrlYPtOffset = canvasBaseHeight;
 					}
 
-					switch(_startPort.get('location')) {
+					switch(_inputPort.get('location')) {
 						case 'south':
-							if(_endPort.get('location') == 'west') {
+							if(_outputPort.get('location') == 'west') {
 								var canvasActualWidth = canvasBaseWidth + ctrlXPtOffset;
 								var canvasLeft = endNodeXY[0] - ctrlXPtOffset;
 							} else {
 								var canvasActualWidth = canvasBaseWidth;
 								var canvasLeft = endNodeXY[0];
 							}
-							if(_endPort.get('location') == 'south')
+							if(_outputPort.get('location') == 'south')
 								var canvasActualHeight = canvasBaseHeight + ctrlYPtOffset;
-							else if(_endPort.get('location') == 'north')
+							else if(_outputPort.get('location') == 'north')
 								var canvasActualHeight = canvasBaseHeight + (2*ctrlYPtOffset);
 							else
 								var canvasActualHeight = canvasBaseHeight;
 
 							var startX = canvasActualWidth - endNodeXOffset;
+console.log('have a startX of:'+startX);
 							var cpX1 = startX;
-							if(_endPort.get('location') != 'north') {
+							if(_outputPort.get('location') != 'north') {
 								var startY = endNodeYOffset;
 								var canvasTop = startNodeXY[1];
 							} else {
@@ -743,7 +753,7 @@ if (monitorNode == null) {
 							var cpY1 = startY + ctrlYPtOffset;
 							break;
 						case 'north':
-							if(_endPort.get('location') == 'west') {
+							if(_outputPort.get('location') == 'west') {
 								var canvasActualWidth = canvasBaseWidth + ctrlXPtOffset;
 								var canvasLeft = endNodeXY[0] - ctrlXPtOffset;
 							} else {
@@ -753,9 +763,9 @@ if (monitorNode == null) {
 							var startX = canvasActualWidth - startNodeXOffset;
 							var cpX1 = startX;
 
-							if (_endPort.get('location') == 'north') {
+							if (_outputPort.get('location') == 'north') {
 								var canvasActualHeight = canvasBaseHeight + ctrlYPtOffset;
-							} else if(_endPort.get('location') == 'south') {
+							} else if(_outputPort.get('location') == 'south') {
 								var canvasActualHeight = canvasBaseHeight + (2*ctrlYPtOffset);
 							} else {
 								var canvasActualHeight = canvasBaseHeight + ctrlYPtOffset;
@@ -765,11 +775,11 @@ if (monitorNode == null) {
 							var canvasTop = startNodeXY[1] - ctrlYPtOffset;
 							break;
 						case 'west':
-							if(_endPort.get('location') == 'east') {
+							if(_outputPort.get('location') == 'east') {
 								var canvasActualWidth = canvasBaseWidth + (2 * ctrlXPtOffset);
 								var canvasLeft = endNodeXY[0] - ctrlXPtOffset;
 								var startX = canvasActualWidth - (ctrlXPtOffset + endNodeXOffset);
-							} else if (_endPort.get('location') == 'west') {
+							} else if (_outputPort.get('location') == 'west') {
 								var canvasActualWidth = canvasBaseWidth + ctrlXPtOffset;
 								var canvasLeft = endNodeXY[0] - ctrlXPtOffset;
 								var startX = canvasActualWidth - endNodeXOffset;
@@ -780,7 +790,7 @@ if (monitorNode == null) {
 							}
 							var cpX1 = startX - ctrlXPtOffset;
 
-							if(_endPort.get('location') == 'south') {
+							if(_outputPort.get('location') == 'south') {
 								var canvasActualHeight = canvasBaseHeight + ctrlYPtOffset;
 								var startY = endNodeYOffset;
 								var cpY1 = startY;
@@ -797,7 +807,7 @@ if (monitorNode == null) {
 							var cpY1 = startY;
 							var canvasTop = startNodeXY[1];
 
-							if (_endPort.get('location') == 'west') {
+							if (_outputPort.get('location') == 'west') {
 								var canvasActualWidth = canvasBaseWidth + (2 * ctrlXPtOffset);
 								var canvasLeft = endNodeXY[0] - ctrlXPtOffset;
 							} else {
@@ -807,14 +817,14 @@ if (monitorNode == null) {
 							var startX = canvasActualWidth - (ctrlXPtOffset + startNodeXOffset);
 							var cpX1 = startX + ctrlXPtOffset;
 
-							if(_endPort.get('location') == 'south')
+							if(_outputPort.get('location') == 'south')
 								var canvasActualHeight = canvasBaseHeight + ctrlYPtOffset;
 							else var canvasActualHeight = canvasBaseHeight;
 
 							break;
 					}
 
-					switch(_endPort.get('location')) {
+					switch(_outputPort.get('location')) {
 						case 'south':
 							var endX =  endNodeXOffset;
 							var cpX2 = endX;
@@ -825,7 +835,7 @@ if (monitorNode == null) {
 						case 'north':
 							var endX = endNodeXOffset;
 							var cpX2 = endX;
-							if(_startPort.get('location') == 'south') {
+							if(_inputPort.get('location') == 'south') {
 								var endY = canvasActualHeight - (ctrlYPtOffset + endNodeYOffset);
 							} else {
 								var endY = canvasActualHeight - endNodeYOffset;
@@ -840,7 +850,7 @@ if (monitorNode == null) {
 							var cpY2 = endY;
 							break;
 						case 'east':
-							if(_startPort.get('location') == 'west') {
+							if(_inputPort.get('location') == 'west') {
 								var endX = endNodeXOffset + ctrlXPtOffset;
 							} else {
 								var endX = endNodeXOffset;
@@ -864,7 +874,7 @@ if (monitorNode == null) {
 					//calculate bezier control point size here
 					var canvasBaseDiagonal = Math.sqrt(Math.pow(canvasBaseHeight, 2) + Math.pow(canvasBaseWidth, 2));
 
-					if((_startPort.get('location') == 'north' || _startPort.get('location') == 'south') && (_endPort.get('location') == 'north' || _endPort.get('location') == 'south')) {
+					if((_inputPort.get('location') == 'north' || _inputPort.get('location') == 'south') && (_outputPort.get('location') == 'north' || _outputPort.get('location') == 'south')) {
 						if (canvasBaseDiagonal > _bzCtrlPtBaseValue) {
 							var ctrlYPtOffset = _bzCtrlPtBaseValue;
 							var ctrlXPtOffset = _bzCtrlPtBaseValue;
@@ -873,7 +883,7 @@ if (monitorNode == null) {
 							var ctrlYPtOffset = canvasBaseDiagonal / 2;
 							var ctrlXPtOffset = ctrlYPtOffset;
 						}
-					} else if((_startPort.get('location') == 'west' || _startPort.get('location') == 'east') && (_endPort.get('location') == 'west' || _endPort.get('location') == 'east')) {
+					} else if((_inputPort.get('location') == 'west' || _inputPort.get('location') == 'east') && (_outputPort.get('location') == 'west' || _outputPort.get('location') == 'east')) {
 						if (canvasBaseDiagonal > _bzCtrlPtBaseValue) {
 							var ctrlYPtOffset = _bzCtrlPtBaseValue;
 							var ctrlXPtOffset = _bzCtrlPtBaseValue;
@@ -890,23 +900,23 @@ if (monitorNode == null) {
 						else var ctrlYPtOffset = canvasBaseHeight;
 					}
 
-					switch(_startPort.get('location')) {
+					switch(_inputPort.get('location')) {
 						case 'south':
-							if(_endPort.get('location') == 'west') {
+							if(_outputPort.get('location') == 'west') {
 								var canvasActualWidth = canvasBaseWidth + ctrlXPtOffset;
 								var canvasLeft = endNodeXY[0] - ctrlXPtOffset;
 							} else {
 								var canvasActualWidth = canvasBaseWidth;
 								var canvasLeft = endNodeXY[0];
 							}
-							if(_endPort.get('location') == 'north')
+							if(_outputPort.get('location') == 'north')
 								var canvasActualHeight = canvasBaseHeight + (2*ctrlYPtOffset);
 							else
 								var canvasActualHeight = canvasBaseHeight + ctrlYPtOffset;
 
 							var startX = canvasActualWidth - endNodeXOffset;
 							var cpX1 = startX;
-							if(_endPort.get('location') != 'north') {
+							if(_outputPort.get('location') != 'north') {
 								var canvasTop = endNodeXY[1];
 							} else {
 								var canvasTop = endNodeXY[1] - ctrlYPtOffset;
@@ -915,7 +925,7 @@ if (monitorNode == null) {
 							var cpY1 = startY + ctrlYPtOffset;
 							break;
 						case 'north':
-							if(_endPort.get('location') == 'west') {
+							if(_outputPort.get('location') == 'west') {
 								var canvasActualWidth = canvasBaseWidth + ctrlXPtOffset;
 								var canvasLeft = endNodeXY[0] - ctrlXPtOffset;
 							} else {
@@ -925,11 +935,11 @@ if (monitorNode == null) {
 							var startX = canvasActualWidth - startNodeXOffset;
 							var cpX1 = startX;
 
-							if (_endPort.get('location') == 'north') {
+							if (_outputPort.get('location') == 'north') {
 								var canvasActualHeight = canvasBaseHeight + ctrlYPtOffset;
 								var startY = canvasActualHeight - startNodeYOffset;
 								var canvasTop = endNodeXY[1] - ctrlYPtOffset;
-							} else if(_endPort.get('location') == 'south') {
+							} else if(_outputPort.get('location') == 'south') {
 								var canvasActualHeight = canvasBaseHeight + (2*ctrlYPtOffset);
 								var startY = canvasActualHeight - (ctrlYPtOffset + startNodeYOffset);
 								var canvasTop = endNodeXY[1] - ctrlYPtOffset;
@@ -941,11 +951,11 @@ if (monitorNode == null) {
 							var cpY1 = startY - ctrlYPtOffset;
 							break;
 						case 'west':
-							if(_endPort.get('location') == 'east') {
+							if(_outputPort.get('location') == 'east') {
 								var canvasActualWidth = canvasBaseWidth + (2 * ctrlXPtOffset);
 								var canvasLeft = endNodeXY[0] - ctrlXPtOffset;
 								var startX = canvasActualWidth - (ctrlXPtOffset + endNodeXOffset);
-							} else if (_endPort.get('location') == 'west') {
+							} else if (_outputPort.get('location') == 'west') {
 								var canvasActualWidth = canvasBaseWidth + ctrlXPtOffset;
 								var canvasLeft = endNodeXY[0] - ctrlXPtOffset;
 								var startX = canvasActualWidth - endNodeXOffset;
@@ -956,11 +966,11 @@ if (monitorNode == null) {
 							}
 							var cpX1 = startX - ctrlXPtOffset;
 
-							if(_endPort.get('location') == 'south') {
+							if(_outputPort.get('location') == 'south') {
 								var canvasActualHeight = canvasBaseHeight + ctrlYPtOffset;
 								var canvasTop = endNodeXY[1];
 								var startY = canvasActualHeight - (ctrlYPtOffset + endNodeYOffset);
-							} else if (_endPort.get('location') == 'north') {
+							} else if (_outputPort.get('location') == 'north') {
 								var canvasActualHeight = canvasBaseHeight + ctrlYPtOffset;
 								var canvasTop = endNodeXY[1] - ctrlYPtOffset;
 								var startY = canvasActualHeight - endNodeYOffset;
@@ -973,7 +983,7 @@ if (monitorNode == null) {
 							var cpY1 = startY;
 							break;
 						case 'east':
-							if(_endPort.get('location') == 'north') {
+							if(_outputPort.get('location') == 'north') {
 								var canvasActualHeight = canvasBaseHeight + ctrlYPtOffset;
 							} else {
 								var canvasActualHeight = canvasBaseHeight;
@@ -981,11 +991,11 @@ if (monitorNode == null) {
 							var startY = canvasActualHeight - startNodeYOffset;
 							var cpY1 = startY;
 
-							if (_endPort.get('location') == 'west') {
+							if (_outputPort.get('location') == 'west') {
 								var canvasActualWidth = canvasBaseWidth + (2 * ctrlXPtOffset);
 								var canvasLeft = endNodeXY[0] - ctrlXPtOffset;
 								var canvasTop = endNodeXY[1];
-							} else if(_endPort.get('location') == 'north'){
+							} else if(_outputPort.get('location') == 'north'){
 								var canvasActualWidth = canvasBaseWidth + ctrlXPtOffset;
 								var canvasLeft = endNodeXY[0];
 								var canvasTop = endNodeXY[1] - ctrlYPtOffset;
@@ -1000,12 +1010,12 @@ if (monitorNode == null) {
 							break;
 					}
 
-					switch(_endPort.get('location')) {
+					switch(_outputPort.get('location')) {
 						case 'south':
 							var endX =  endNodeXOffset;
 							var cpX2 = endX;
 
-							if (_startPort.get('location') != 'north') {
+							if (_inputPort.get('location') != 'north') {
 								var endY = endNodeYOffset;
 								var cpY2 = endY + ctrlYPtOffset;
 							} else {
@@ -1022,7 +1032,7 @@ if (monitorNode == null) {
 						case 'west':
 							var endX = ctrlXPtOffset + endNodeXOffset;
 							var cpX2 = endX - ctrlXPtOffset;
-							if (_startPort.get('location') == 'north') {
+							if (_inputPort.get('location') == 'north') {
 								var endY = ctrlYPtOffset + endNodeYOffset;
 							} else {
 								var endY = endNodeYOffset;
@@ -1030,13 +1040,13 @@ if (monitorNode == null) {
 							var cpY2 = endY;
 							break;
 						case 'east':
-							if(_startPort.get('location') == 'west') {
+							if(_inputPort.get('location') == 'west') {
 								var endX = endNodeXOffset + ctrlXPtOffset;
 							} else {
 								var endX = endNodeXOffset;
 							}
 							var cpX2 = endX + ctrlXPtOffset;
-							if(_startPort.get('location') == 'north')
+							if(_inputPort.get('location') == 'north')
 								var endY = ctrlYPtOffset + endNodeYOffset;
 							else var endY = endNodeYOffset;
 							var cpY2 = endY;

@@ -27,6 +27,7 @@ if (!R8.Target) {
 
 				this.setupEvents();
 				this.retrievePorts();
+				this.retrieveLinks();
 
 				_initialized = true;
 			},
@@ -64,7 +65,9 @@ if (!R8.Target) {
 						for(var n in _nodes) {
 							var ports = _nodes[n].get('ports');
 							for(var p in ports) {
-								if(ports[p].get('id') == value) return ports[p];
+								if (ports[p].get('id') == value) {
+									return ports[p];
+								}
 							}
 						}
 						return null;
@@ -77,6 +80,11 @@ if (!R8.Target) {
 							}
 						}
 						return null;
+						break;
+					case "view":
+						if(typeof(_views[value]) == 'undefined') this.requireView(value);
+		
+						return _views[value];
 						break;
 				}
 			},
@@ -220,8 +228,8 @@ console.log('should remove node from views....');
 			},
 			addLinkToItems: function(link) {
 //TODO: revisit after implementing many end item links
-				_nodes[link.get('startPort').get('node').get('id')].addLink(link);
-				_nodes[link.get('endPort',0).get('node').get('id')].addLink(link);
+				_nodes[link.get('inputPort').get('node').get('id')].addLink(link);
+				_nodes[link.get('outputPort').get('node').get('id')].addLink(link);
 			},
 			removeLink: function(linkId) {
 //				this.removeLinkFromItems(linkId);
@@ -284,6 +292,56 @@ console.log('should remove node from views....');
 
 					_nodes[n].setPorts(nodePorts);
 				}
+			},
+			retrieveLinks: function(items) {
+				var itemList = [];
+				if (typeof(items) == 'undefined') {
+					for (var n in _nodes) {
+						if (_nodes[n].get('type') == 'node') 
+							itemList.push({
+								'id': _nodes[n].get('id'),
+								'model': _nodes[n].get('type')
+							});
+					}
+				} else {
+					for(var i in items) {
+						itemList.push({
+							'id': items[i].object.id,
+							'model': items[i].model
+						});
+					}
+				}
+				var _this = this;
+				YUI().use('json',function(Y){
+					var linkCallback = function(ioId,responseObj) {
+						_this.setLinks(ioId,responseObj);
+					}
+					var params = {
+						'callbacks': {
+							'io:success':linkCallback
+						},
+						'cfg': {
+							'data': 'item_list=' + Y.JSON.stringify(itemList)
+						}
+					};
+//					R8.Ctrl.call('attribute_link/get_under_context_list',params);
+					R8.Ctrl.call('target/get_links/'+_this.get('id'),params);
+				});
+			},
+			setLinks: function(ioId,responseObj) {
+				eval("R8.Ctrl.callResults[ioId]['response'] =" + responseObj.responseText);
+				var response = R8.Ctrl.callResults[ioId]['response'];
+				var linkList = response['application_target_get_links']['content'][0]['data'];
+//DEBUG
+console.log('have links list for target...');
+console.log(linkList)
+return;
+				for(i in linkList) {
+					if(linkList[i]['id'] == '' || linkList[i]['hidden'] == true || linkList[i]['type'] == 'internal') continue;
+
+					this.addLink(linkList[i]);
+				}
+				_links = {};
 			}
 		}
 	};

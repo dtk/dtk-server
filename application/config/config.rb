@@ -97,8 +97,8 @@ R8::Config[:links] = Hash.new
 R8::Config[:links][:default_type] = "fullBezier"
 R8::Config[:links][:default_style] = Array.new
 R8::Config[:links][:default_style] = [
-  {:strokeStyle=>'#5BF300',:lineWidth=>3,:lineCap=>'round'},
-  {:strokeStyle=>'#25A3FC',:lineWidth=>1,:lineCap=>'round'}
+  {:strokeStyle=>'#25A3FC',:lineWidth=>3,:lineCap=>'round'},
+  {:strokeStyle=>'#63E4FF',:lineWidth=>1,:lineCap=>'round'}
 ]
 
 

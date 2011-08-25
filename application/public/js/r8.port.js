@@ -14,7 +14,7 @@ if (!R8.Port) {
 			init: function() {
 //				this.requireView('editor_target');
 			},
-			get: function(key) {
+			get: function(key,value) {
 				switch(key) {
 					case "id":
 						return _def.id;
@@ -36,6 +36,11 @@ if (!R8.Port) {
 						break;
 					case "node":
 						return _node;
+						break;
+					case "view":
+						if(typeof(_views[value]) == 'undefined') this.requireView(value);
+		
+						return _views[value];
 						break;
 				}
 			},

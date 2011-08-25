@@ -64,6 +64,11 @@ if (!R8.Node) {
 					case "target":
 						return _target;
 						break;
+					case "view":
+						if(typeof(_views[value]) == 'undefined') this.requireView(value);
+		
+						return _views[value];
+						break;
 				}
 			},
 			setupEvents: function() {

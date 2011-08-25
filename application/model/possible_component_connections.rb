@@ -93,6 +93,14 @@ module XYZ
         ]
       }
     },
+    :hadoop__ganglia_monitoring  => {
+      :ganglia__monitor => {
+        :attribute_mappings => 
+        [
+         {":ganglia__monitor.gmond_listening_port" => ":hadoop__ganglia_monitoring.gmond_port"}
+        ]
+      }
+    },
     :mysql__server => {
       :nagios__client  => {
         :attribute_mappings => 

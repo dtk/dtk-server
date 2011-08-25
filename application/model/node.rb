@@ -443,15 +443,32 @@ module XYZ
       port_list.map{|port|port.filter_and_process!(type,i18n)}.compact
     end
 
+    #TODO: detrmine if need to break into input and output port links
     def self.get_port_links(id_handles,type="l4")
       raise Error.new("not implemented yet: get_port_links when type = #{type}") unless type == "l4"
 
       input_port_rows =  get_objs_in_set(id_handles,:columns => [:id, :display_name, :input_port_link_info]).select do |r|
         (r[:port]||{})[:type] == type
       end
+      #TODO: implement using PortLink.common_columns and materialize
+      input_port_rows.each do |r|
+        r[:port_link][:ui] ||= {
+          :type => R8::Config[:links][:default_type],
+          :style => R8::Config[:links][:default_style]
+        }
+      end
+      
       output_port_rows =  get_objs_in_set(id_handles,:columns => [:id, :display_name, :output_port_link_info]).select do |r|
         (r[:port]||{})[:type] == type
       end
+      #TODO: implement using PortLink.common_columns and materialize
+      output_port_rows.each do |r|
+        r[:port_link][:ui] ||= {
+          :type => R8::Config[:links][:default_type],
+          :style => R8::Config[:links][:default_style]
+        }
+      end
+
       return Array.new if input_port_rows.empty? and output_port_rows.empty?
 
       indexed_ret = Hash.new

@@ -271,7 +271,10 @@ return;
 						that.addSelectedItem(itemId);
 					});
 					draggableItems[itemId].on('drag:drag',function(){
-//						_items[itemId].get('view','editor_target').refreshLinks();
+						_items[itemId].refreshLinks();
+//						var foo = _items[itemId].get('view','editor_target');
+//						var foo = _items[itemId].get('type');
+//						console.log(foo);
 					});
 					draggableItems[itemId].on('drag:end',function(e){
 						that.clearSelectedItems();

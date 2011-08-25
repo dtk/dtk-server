@@ -694,8 +694,8 @@ return;
 //				var errorData = response.application_attribute_link_save.content[0].data.error;
 
 //DEBUG
-console.log('have response from link save call....');
-console.log(response_data);
+//console.log('have response from link save call....');
+//console.log(response_data);
 
 				var newLinkDef = response_data.link;
 				var tempLinkId = response_data.temp_link_id;
@@ -751,9 +751,6 @@ console.log('port is on this node.., gonna swap it out...');
 
 //				var linkId = 'link-'+tempLinkObj.id;
 				_node.get('target').removeLink(tempLinkId);
-//DEBUG
-console.log('just removed old temp link.., going to create the new one..');
-console.log(newLinkDef);
 				_node.get('target').addLink(newLinkDef);
 				return;
 

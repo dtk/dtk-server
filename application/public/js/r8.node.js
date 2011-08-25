@@ -218,6 +218,9 @@ console.log(newComponent);
 			},
 			addLink: function(link) {
 				_links[link.get('id')] = link;
+			},
+			removeLink: function(linkId) {
+				delete(_links[linkId]);
 			}
 		}
 	};

@@ -42,7 +42,7 @@ if(!R8.Link) {
 
 			//render related vars
 			_bzCtrlPtBaseValue = 100;
-
+/*
 			if(typeof(_def.ui.style) == 'undefined') {
 				_def.ui.style = [
 					{'strokeStyle':'#25A3FC','lineWidth':3,'lineCap':'round'},
@@ -54,6 +54,7 @@ if(!R8.Link) {
 					{'strokeStyle':'#5BF300','lineWidth':3,'lineCap':'round'},
 					{'strokeStyle':'#25A3FC','lineWidth':1,'lineCap':'round'}
 			];
+*/
 		return {
 			init: function() {
 //				_inputPort = _viewSpace.getPortDefById('port-'+_portId,true);
@@ -245,6 +246,8 @@ return foopa;
 						return _def.end_id;
 						break;
 					case "style":
+//DEBUG
+//console.log(_def.ui.style);
 						return _def.ui.style;
 						break;
 					case "view":
@@ -741,7 +744,6 @@ return foopa;
 								var canvasActualHeight = canvasBaseHeight;
 
 							var startX = canvasActualWidth - endNodeXOffset;
-console.log('have a startX of:'+startX);
 							var cpX1 = startX;
 							if(_outputPort.get('location') != 'north') {
 								var startY = endNodeYOffset;

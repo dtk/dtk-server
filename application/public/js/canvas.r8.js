@@ -159,9 +159,6 @@ if (!R8.Canvas) {
 
 				// use getContext to use the canvas for drawing
 				var ctx = document.getElementById(bezierDef.canvasNodeId).getContext('2d');
-//DEBUG
-console.log('INSIDE OF CANVAS RENDERIGN.., HAVE A BEZIERDEF OF:');
-console.log(bezierDef);
 				for (var i in bezierDef.style) {
 					var connectorCfg = bezierDef.style[i];
 					ctx.beginPath();

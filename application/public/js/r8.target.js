@@ -232,17 +232,13 @@ console.log('should remove node from views....');
 				_nodes[link.get('outputPort').get('node').get('id')].addLink(link);
 			},
 			removeLink: function(linkId) {
-//				this.removeLinkFromItems(linkId);
+				this.removeLinkFromItems(linkId);
 				_links[linkId].destroy();
 				delete(_links[linkId]);
 			},
 			removeLinkFromItems: function(linkId) {
-//TODO: revisit after implementing many end item links
-
-				var startItemId = _links2[linkId].get('startParentItemId');
-				var endItemId = _links2[linkId].get('endParentItemId');
-				_items[startItemId].removeLink(linkId);
-				_items[endItemId].removeLink(linkId);
+				this.get('itemByPortId',_links[linkId].get('inputPort').get('id')).removeLink(linkId);
+				this.get('itemByPortId',_links[linkId].get('outputPort').get('id')).removeLink(linkId);
 			},
 			hideLinks: function(fromPorts) {
 				for(var l in _links) {

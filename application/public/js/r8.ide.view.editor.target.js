@@ -294,6 +294,9 @@ return;
 				_events['item_click'] = R8.Utils.Y.delegate('click',this.updateSelectedItems,_contentNode,'editor-target.item',this);
 				_events['vspace_click'] = R8.Utils.Y.delegate('click',this.clearSelectedItems,'body','#'+_contentNode.get('id'));
 
+				_events['port_mover'] = R8.Utils.Y.delegate('mouseover',this.portMover,_contentNode,'.port',this);
+				_events['port_mout'] = R8.Utils.Y.delegate('mouseout',this.portMout,_contentNode,'.port',this);
+
 //DEBUG
 //TODO: mouse over popup screwed b/c of layout, disabling for now
 /*
@@ -326,6 +329,38 @@ return;
 
 //				R8.Workspace.events['item_click'] = R8.Utils.Y.delegate('click',function(){console.log('clicked item');},R8.Workspace.viewSpaceNode,'.item, .connector');
 //				R8.Workspace.events['vspace_mdown'] = R8.Utils.Y.delegate('mousedown',R8.Workspace.checkMouseDownEvent,'body','#'+_node.get('id'));
+			},
+			portMout: function(e) {
+				R8.Utils.Y.one('#port-modal').remove();
+			},
+			portMover: function(e) {
+				var portNode = e.currentTarget,
+					portNodeId = portNode.get('id'),
+					portId = portNodeId.replace('port-',''),
+					port = _target.get('port',portId),
+					left = e.clientX - 240,
+					top = e.clientY - 90;
+
+				var modalHTML = '<div id="port-modal" class="port-modal" style="top: 0px; right: 0px;">\
+									<div class="l-col">\
+										<div class="corner tl"></div>\
+										<div class="l-col-body"></div>\
+										<div class="corner bl"></div>\
+									</div>\
+									<div id="port-modal-body" class="body">\
+										<div class="header">'+port.get('name')+'</div>\
+										<div class=".body-content">\
+											<div>'+port.get('description')+'</div>\
+										</div>\
+									</div>\
+									<div class="r-col">\
+										<div class="corner tr"></div>\
+										<div class="r-col-body"></div>\
+										<div class="corner br"></div>\
+									</div>\
+							</div>';
+
+				_contentNode.append(modalHTML);
 			},
 
 			addSelectedItem: function(itemId,data) {
@@ -467,18 +502,6 @@ return;
 				}
 
 //				this.refreshNotifications();
-			},
-			retrieveLinks: function(items,viewSpaceId) {
-				var vSpaceId = (typeof(viewSpaceId) == 'undefined') ? _currentViewSpace : viewSpaceId;
-				if(!_viewSpaces[vSpaceId].isReady()) {
-					var that = this;
-					var addItemsCallAgain = function() {
-						that.retrieveLinks(items,viewSpaceId);
-					}
-					setTimeout(addItemsCallAgain,20);
-					return;
-				}
-				_viewSpaces[vSpaceId].retrieveLinks(items);
 			},
 			addItems: function(items,viewSpaceId) {
 				var vSpaceId = (typeof(viewSpaceId) == 'undefined') ? _currentViewSpace : viewSpaceId;
@@ -660,29 +683,6 @@ return;
 			},
 			getSelectedItems: function() {
 				return _viewSpaces[_currentViewSpace].getSelectedItems();
-			},
-			updateItemName: function(id) {
-				var nameInputId = 'item-'+id+'-name-input',
-					nameWrapperId = 'item-'+id+'-name-wrapper',
-					nameInputWrapperId = 'item-'+id+'-name-input-wrapper',
-					inputNode = R8.Utils.Y.one('#'+nameInputId),
-					nameWrapperNode = R8.Utils.Y.one('#'+nameWrapperId),
-					model = nameWrapperNode.getAttribute('data-model'),
-					nameInputWrapperNode = R8.Utils.Y.one('#'+nameInputWrapperId),
-					newName = inputNode.get('value');
-
-				nameWrapperNode.set('innerHTML',newName);
-				nameInputWrapperNode.setStyle('display','none');
-				nameWrapperNode.setStyle('display','block');
-
-				var params = {
-					'cfg': {
-						'data': 'model='+model+'&id='+id+'&display_name='+newName+'&redirect=false'
-					}
-				};
-				R8.Ctrl.call('node/save',params);
-//console.log('gettin to wspace func to update name:'+id);
-				return newName;
 			},
 //---------------------------------------------
 //alert/notification related

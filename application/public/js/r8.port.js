@@ -28,6 +28,9 @@ if (!R8.Port) {
 					case "direction":
 						return _def.direction;
 						break;
+					case "description":
+						return _def.description;
+						break;
 					case "name":
 						return _def.name;
 						break;

@@ -73,6 +73,7 @@ if (!R8.Node) {
 			},
 			setupEvents: function() {
 				R8.IDE.on('node-'+this.get('id')+'-component-add',this.instantiateComponent,this);
+				R8.IDE.on('node-'+this.get('id')+'-name-change',this.updateName,this);
 			},
 //-----------------------------------------------
 //VIEW RELATED METHODS-------------------
@@ -104,6 +105,22 @@ if (!R8.Node) {
 //------------------------------------
 //NODE RELATED METHODS
 //------------------------------------
+			updateName: function(e) {
+//DEBUG
+//console.log('going to update node name...');
+//console.log(e);
+				_def.name = e.name;
+				var params = {
+					'cfg': {
+						'data': 'model=node&id='+this.get('id')+'&display_name='+this.get('name')+'&redirect=false'
+					}
+				};
+				R8.Ctrl.call('node/save',params);
+
+				for(var v in _views) {
+					_views[v].updateName();
+				}
+			},
 			instantiateComponent: function(e) {
 //DEBUG
 console.log('going to instantiate a new component');
@@ -120,25 +137,32 @@ console.log(e);
 				var successCallback = function(ioId,responseObj) {
 						eval("var response =" + responseObj.responseText);
 						var cloneResponse = response.application_component_clone.content[0]['data'];
+						var newComponent = cloneResponse.component;
 
 //DEBUG
 console.log('going to instantiate new component....');
 console.log(cloneResponse);
-return;
+//return;
 
-var project = _this.get('target').get('project');
-console.log('Have a project...');
-console.log(project);
-if(project.hasImplementation(newComponent.implementation_id)) {
-	console.log('Project '+project.get('id')+' has the imp we r looking for...');
-} else {
-	console.log('Need to retrieve the new implementation from the project '+project.get('id'));
-	project.instantiateImplementationById(newComponent.implementation_id);
-}
+						var project = _this.get('target').get('project');
+//console.log('Have a project...');
+//console.log(project);
+						if(project.hasImplementation(newComponent.implementation_id)) {
+console.log('Project '+project.get('id')+' has the imp we r looking for...');
+						} else {
+console.log('Need to retrieve the new implementation from the project '+project.get('id'));
+							project.instantiateImplementationById(newComponent.implementation_id);
+						}
 //DEBUG
-console.log('going to add new component...');
-console.log(newComponent);
+//console.log('going to add new component...');
+//console.log(newComponent);
 						_this.addComponent(newComponent,true);
+						if(typeof(cloneResponse.ports)) {
+							_this.addPort(cloneResponse.ports[0]);
+						}
+
+						var alertMsg = 'Added component <b>'+newComponent.name+'</b> to node <b>'+_this.get('name')+'</b>';
+						R8.IDE.showAlert(alertMsg);
 //TODO: revisit for best way to do notification updates
 //					R8.Workspace.refreshItem(modelId);
 //					R8.Workspace.refreshNotifications();
@@ -155,10 +179,10 @@ console.log(newComponent);
 				});
 			},
 			refresh: function(newNodeDef) {
-				_def = newNodeDef;
-//DEBUG
-//console.log('going to refresh node...,');
-//console.log(newNodeDef);
+				if(typeof(newNodeDef) != 'undefined') {
+					_def = newNodeDef;
+				}
+
 				for(var v in _views) {
 					_views[v].refresh();
 				}
@@ -171,6 +195,15 @@ console.log(newComponent);
 				}
 
 				_components[componentDef.id].init();
+			},
+			addPort: function(portDef) {
+				_portDefs.push(portDef);
+				var newIndex = _portDefs.length-1;
+				_ports.push(new R8.Port(_portDefs[newIndex],this));
+				_ports[newIndex].init();
+//DEBUG
+console.log('just added  new port..need to refresh myself now');
+				this.refresh();
 			},
 			setPorts: function(portDefs) {
 				_portDefs = portDefs;

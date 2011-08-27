@@ -212,7 +212,9 @@
 	-moz-box-shadow: 2px 2px 8px #000000;
 }
 .editor-target .node .name {
-	width: 100%;
+	width: 75%;
 	height: 18px;
 	margin: 30px auto 0 auto;
+	overflow-x: hidden;
+	text-overflow: ellipsis;
 }

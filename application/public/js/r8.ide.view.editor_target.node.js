@@ -34,7 +34,8 @@ if (!R8.IDE.View.editor_target.node) {
 
 			_toolbar = null,
 
-			_links = {};
+			_links = {},
+			_initialized = false;
 
 			var _dropList = {};
 
@@ -47,8 +48,10 @@ if (!R8.IDE.View.editor_target.node) {
 				_contentNode = R8.Utils.Y.one('#'+_contentNodePrefix+_node.get('id'));
 				_nameNode = R8.Utils.Y.one('#'+_contentNodePrefix+_node.get('id')+'-name');
 
-				this.loadPorts();
+				this.renderPorts();
 
+
+				this.setupEvents();
 //				_status = _node.getAttribute('data-status');
 
 //				if(_status != 'pending_setup') return;
@@ -86,6 +89,24 @@ if (!R8.IDE.View.editor_target.node) {
 					})
 				}
 */
+				_initialized = true;
+			},
+			setupEvents: function() {
+				_nameNode.on('dblclick',function(e){
+					var inputId = e.currentTarget.get('id')+'-input';
+					var nameInputTpl = '<input id="'+inputId+'" type="text" size="20" value="'+_node.get('name')+'"/>'
+					e.currentTarget.set('innerHTML', nameInputTpl); 
+					var nameInputNode = R8.Utils.Y.one('#'+inputId);
+					nameInputNode.on('keypress',function(e){
+						if(e.charCode == 13) {
+							R8.IDE.fire('node-'+_node.get('id')+'-name-change',{name:e.currentTarget.get('value')});
+						}
+					},this);
+					nameInputNode.focus();
+					nameInputNode.on('blur',function(e) {
+						_nameNode.set('innerHTML',_node.get('name'));
+					},this);
+				},this);
 			},
 			render: function() {
 //				var tpl_callback = _node['tpl_callback'];
@@ -202,19 +223,34 @@ if(ports == null) return;
 				return _portsReady;
 			},
 			renderPorts: function() {
-/*
-				if(_portDefs == null) {
-					var that = this;
-					var recall = function() {
-						that.renderPorts();
+				var ports = _node.get('ports');
+				_ports = {};
+
+				//TODO: revsiit why its null
+				if(ports == null) return;
+
+				_numPorts = ports.length;
+
+				for(var p in ports) {
+					var portId = ports[p].get('id');
+					_ports[portId] = ports[p].getView('editor_target');
+
+					switch(ports[p].get('location')) {
+						case "north":
+							_northPorts.push(portId);
+							break;
+						case "south":
+							_southPorts.push(portId);
+							break;
+						case "east":
+							_eastPorts.push(portId);
+							break;
+						case "west":
+							_westPorts.push(portId);
+							break;
 					}
-					setTimeout(recall,250);
-					return;
 				}
 
-//				this.setupLoadedPorts();
-				if(_portDefs == null) return;
-*/
 				var nodeRegion = _contentNode.get('region'),
 					nodeWidth = nodeRegion.right - nodeRegion.left,
 					nodeHeight = nodeRegion.bottom - nodeRegion.top;
@@ -418,6 +454,8 @@ if(ports == null) return;
 					count++;
 				}
 				//END Rendering East Ports
+
+				this.registerPorts();
 			},
 			hidePorts: function() {
 				for(var p in _ports) {
@@ -597,12 +635,17 @@ console.log('not a valid link.., mis-matched types...');
 					_portsReady = true;
 				});
 			},
+			updateName: function() {
+				_nameNode.set('innerHTML',_node.get('name'));
+			},
 			refresh: function() {
 				_contentNode.set('id',_contentNodePrefix+_node.get('id'));
 				_nameNode.set('id',_contentNodePrefix+_node.get('id')+'-name');
 
 				_nameNode.set('innerHTML',_node.get('name'));
-
+//DEBUG
+console.log('inside of refresh node....');
+				this.reflowPorts();
 return;
 				var that = this;
 				this.retrievePorts(function(ioId,responseObj) {
@@ -619,21 +662,8 @@ return;
 							haveNewPorts = true;
 						}
 					}
-//DEBUG
-//	haveNewPorts = true;
 					if(haveNewPorts == true) {
 						that.reflowPorts();
-//						that.clearPorts();
-//						that.renderPorts();
-//						that.refreshLinks();
-
-/*
-						var testcb = function() {
-							that.renderPorts();
-							that.refreshLinks();
-						}
-						setTimeout(testcb,1000);
-*/
 					}
 				});
 			},
@@ -654,7 +684,7 @@ return;
 			reflowPorts: function() {
 				this.clearPorts();
 				this.renderPorts();
-				this.updateLinkNodeRefs();
+//				this.updateLinkNodeRefs();
 				this.refreshLinks();
 			},
 			updateLinkNodeRefs: function() {
@@ -743,8 +773,7 @@ return;
 						var oppositeNode = _node.get('target').get('itemByPortId',inputPortDef.replace_id);
 						oppositeNode.swapInNewPort(inputPortDef.replace_id,inputPortDef);
 					} else {
-console.log('port is on this node.., gonna swap it out...');
-//						this.swapExt4L4(swapDef);
+						_node.swapInNewPort(inputPortDef.replace_id,inputPortDef);
 					}
 				}
 

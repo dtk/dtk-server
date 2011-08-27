@@ -99,7 +99,7 @@ if (!R8.Project) {
 //DEBUG
 console.log('going to add new implementation tree...');
 console.log(impTree);
-						_this.addImplementation(impTree);
+//						_this.addImplementation(impTree);
 				}
 				var callbacks = {
 					'io:success' : successCallback

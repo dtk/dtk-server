@@ -1,4 +1,7 @@
 module XYZ
+  class LinkDefTemplate < Model
+  end
+
   class LinkDefs < ArrayObject
     def initialize(link_def_array,local_type)
       super(link_def_array)

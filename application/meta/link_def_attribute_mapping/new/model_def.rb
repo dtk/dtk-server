@@ -8,15 +8,19 @@
       :on_delete=>:cascade,
       :on_update=>:cascade
     },
-    :output_path => {:type => :varchar, :size => 25},
-    :output_contant => {:type => :varchar}, #if this is non null then meaning is to set input to contant value (and output_attribute_id and output_path will be null
+    :output_component_name => {:type => :varchar, :size => 50},
+    :output_attribute_name => {:type => :varchar, :size => 50},
+    :output_path => {:type => :varchar, :size => 50},
+    :output_contant => {:type => :varchar}, #if this is non null that means that input set to a constant value
     :input_attribute_id => {
       :type=>:bigint,
       :foreign_key_rel_type=>:attribute,
       :on_delete=>:cascade,
       :on_update=>:cascade
     },
-    :input_path => {:type => :varchar, :size => 25},
+    :input_component_name => {:type => :varchar, :size => 50},
+    :input_attribute_name => {:type => :varchar, :size => 50},
+    :input_path => {:type => :varchar, :size => 50},
   },
   :many_to_one=>[:link_def_possible_link]
 }

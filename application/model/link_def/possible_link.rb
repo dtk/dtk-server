@@ -24,10 +24,15 @@ module XYZ
         :remote_component_id => remote_component[:id]
       }
       possible_link_idh = create_from_row(model_handle,row)
-      attr_mappings = possible_link[:attribute_mappings]||[]
-      LinkDefAttributeMapping.create_from_serialized_form(possible_link_idh,attr_mappings) unless attr_mappings.empty?
       events = possible_link[:events]||[]
       LinkDefEvent.create_from_serialized_form(possible_link_idh,events) unless events.empty?
+      attr_mappings = possible_link[:attribute_mappings]||[]
+      context = {
+        :local_component_idh => component.id_handle,
+        :remote_component => remote_component.id_handle,
+        :events => events
+      }
+      LinkDefAttributeMapping.create_from_serialized_form(possible_link_idh,attr_mappings,context) unless attr_mappings.empty?
     end
   end
 end

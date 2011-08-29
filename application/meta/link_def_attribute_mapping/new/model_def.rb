@@ -21,6 +21,7 @@
     :input_component_name => {:type => :varchar, :size => 50},
     :input_attribute_name => {:type => :varchar, :size => 50},
     :input_path => {:type => :varchar, :size => 50},
+    :function => {:type => :varchar, :default => "equal"}
   },
   :many_to_one=>[:link_def_possible_link]
 }

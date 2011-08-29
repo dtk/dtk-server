@@ -168,6 +168,10 @@ module XYZ
       create_from_select(model_handle,field_set,select_ds,override_attrs,create_opts)
     end
 
+    def self.create_from_row(model_handle,row,opts={})
+      create_from_rows(model_handle,[row],opts).first
+    end
+
     def self.select_process_and_update(model_handle,cols_x,id_list,opts={},&block)
       cols = cols_x.include?(:id) ? cols_x : cols_x +[:id]
       fs = Model::FieldSet.opt(cols,model_handle[:model_name])

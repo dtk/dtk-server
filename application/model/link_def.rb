@@ -1,5 +1,5 @@
 module XYZ
-  class LinkDefTemplate < Model
+  class LinkDef < Model
   end
 
   class LinkDefs < ArrayObject

@@ -1,4 +1,3 @@
-require  File.expand_path('parse_serialized_form', File.dirname(__FILE__))
 module XYZ
   class LinkDefPossibleLink < Model
     include LinkDefParseSerializedForm
@@ -26,8 +25,8 @@ module XYZ
         :remote_component_id => remote_component[:id]
       }
       possible_link_idh = create_from_row(model_handle,row)
-      parsed_events = parse_events(possible_link[:events]||)
-      LinkDefEvent.create_from_serialized_form(possible_link_idh,parsed_events) unless parsed_events.empty?
+      events = ossible_link[:events]||[]
+      parsed_events = LinkDefEvent.create_from_serialized_form(possible_link_idh,events) unless events.empty?
       attr_mappings = possible_link[:attribute_mappings]||[]
       context = {
         :local_component => component,

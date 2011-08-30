@@ -1,11 +1,11 @@
 module XYZ
   class Attribute_linkController < Controller
     helper :ports
+    #TODO: deprecate to be replaced by port_link#save
     def save(explicit_hash=nil,opts={})
       hash = explicit_hash || request.params.dup
       return Error.new("not implemented update of attribute link") if hash["id"]
 
-      #TODO: right now call reaching here has port link attributes not attribute links; so should probably move this to under port link controller
       port_input_id,port_output_id = [hash["input_id"].to_i,hash["output_id"].to_i]
       port_idhs = [port_input_id,port_output_id].map{|id|id_handle(id,:port)}
       indexed_attrs = Port.get_attribute_info(port_idhs).inject({}){|h,r|h.merge(r[:id] => r)}

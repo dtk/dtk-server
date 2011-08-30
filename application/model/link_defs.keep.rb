@@ -1,4 +1,3 @@
-require  File.expand_path('link_defs/context', File.dirname(__FILE__))
 module XYZ
   class LinkDefs < ArrayObject
     def initialize(link_def_array,local_type)

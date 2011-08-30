@@ -1,10 +1,16 @@
 module XYZ
-  module LinkParseSerializedForm
+  module LinkDefParseSerializedForm
     def self.parse_attribute_mapping(mapping)
       {
         :output => parse_attribute_term(mapping.keys.first),
         :input => parse_attribute_term(mapping.values.first)
       }
+    end
+    def self.parse_events(events)
+      ret = Array.new
+      return ret if events.empty?
+      #TODO: stub
+      ret
     end
     private
     #returns node_name, component_name, attribute_name, path; where component_name xor node_name is null depending on whether it is a node or component attribute

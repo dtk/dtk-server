@@ -1,5 +1,7 @@
+require  File.expand_path('parse_serialized_form', File.dirname(__FILE__))
 module XYZ
   class LinkDefPossibleLink < Model
+    include LinkDefParseSerializedForm
     def self.create_from_serialized_form(component,link_def_idh,possible_link)
       component.update_object!(:library_library_id)
       remote_component_name = possible_link.keys.first
@@ -7,8 +9,8 @@ module XYZ
 
       #find the remote_component_id
       sp_hash = {
-        :cols => [:id]
-        :filter => [:and, [:eq, :display_name, remote_component_name],
+        :cols => [:id,:component_type]
+        :filter => [:and, [:eq, :component_type, remote_component_name],
                     [:eq, :library_library_id, component[:library_library_id]]]
       }
       remote_component = Model.get_objs(component.model_handle,sp_hash).first
@@ -24,13 +26,13 @@ module XYZ
         :remote_component_id => remote_component[:id]
       }
       possible_link_idh = create_from_row(model_handle,row)
-      events = possible_link[:events]||[]
-      LinkDefEvent.create_from_serialized_form(possible_link_idh,events) unless events.empty?
+      parsed_events = parse_events(possible_link[:events]||)
+      LinkDefEvent.create_from_serialized_form(possible_link_idh,parsed_events) unless parsed_events.empty?
       attr_mappings = possible_link[:attribute_mappings]||[]
       context = {
-        :local_component_idh => component.id_handle,
-        :remote_component => remote_component.id_handle,
-        :events => events
+        :local_component => component,
+        :remote_component => remote_component,
+        :parsed_events => parsed_events
       }
       LinkDefAttributeMapping.create_from_serialized_form(possible_link_idh,attr_mappings,context) unless attr_mappings.empty?
     end

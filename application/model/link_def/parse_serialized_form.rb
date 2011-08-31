@@ -1,5 +1,7 @@
 module XYZ
   module LinkDefParseSerializedForm
+    def self.parse_possible_link(possible_link)
+    end
     def self.parse_attribute_mapping(mapping)
       {
         :output => parse_attribute_term(mapping.keys.first),

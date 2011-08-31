@@ -4,7 +4,7 @@
   :columns=>{
     :position => {:type =>:integer},
     :content => {:type => :json},
-    :internal_external => {:type=>:varchar, :size => 10}, #internal || external || either
+    :type => {:type=>:varchar, :size => 10}, #internal || external || either
   },
   :many_to_one=>[:link_def]
 }

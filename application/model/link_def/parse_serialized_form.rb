@@ -1,22 +1,60 @@
 module XYZ
-  module LinkDefParseSerializedForm
-    def self.parse_possible_link(possible_link)
+  module LinkDefParseSerializedFormMixin
+    def parse_link_defs(link_defs)
+      link_defs.injet({}) do |h,link_def|
+        ref = link_def[:type] 
+        el = {
+          :display_name => name,
+          :possible_link => parse_possible_links(link_def[:possible_links])
+        }
+        el.merge!(:required => link_def[:required]) if link_def.has_key?(:required)
+        h.merge(ref => el)
+      end
     end
-    def self.parse_attribute_mapping(mapping)
+   private
+    def parse_possible_links(possible_links)
+      position = 0
+      possible_links.injet({}) do |h,possible_link|
+        position += 1
+        ref = possible_link.keys.first
+        possible_link_info = possible_link.va;lues.first
+        el = {
+          :position => position,
+          :content => parse_possible_link_content(possible_link_info),
+          :type => "external" #TODO: hard wired for first test
+        }
+        h.merge(ref => el)
+      end
+    end
+
+    def parse_possible_link_content(possible_link)
+      ret = Hash.new
+      events = ret[:events]||[]
+      unless events.empty?
+        ret[:events] = events.map{|ev|parse_possible_link_event(ev)}
+      end
+      attribute_mappings = ret[:attribute_mappings]||[]
+      unless attribute_mappings.empty?
+        ret[:attribute_mappings] = attribute_mappings.map{|am|parse_possible_link_attribute_mapping(am)}
+      end
+      ret
+    end
+
+    def parse_possible_link_attribute_mapping(mapping)
       {
         :output => parse_attribute_term(mapping.keys.first),
         :input => parse_attribute_term(mapping.values.first)
       }
     end
-    def self.parse_events(events)
+    def parse_possible_link_event(events)
       ret = Array.new
       return ret if events.empty?
       #TODO: stub
       ret
     end
-    private
+
     #returns node_name, component_name, attribute_name, path; where component_name xor node_name is null depending on whether it is a node or component attribute
-    def self.parse_attribute_term(term_x)
+    def parse_attribute_term(term_x)
       ret = Hash.new
       term = term_x.to_s.gsub(/^:/,"")
       split = term.split(SplitTerm)

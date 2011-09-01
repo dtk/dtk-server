@@ -99,7 +99,7 @@ module XYZ
             cmp_ref = "#{config_agent_type}-#{k}"
             if ext_link_defs = v.delete("external_link_defs")
               #TODO: feed in link defs which are both internal and external
-              v["link_def"] = LinkDef.parse_serialized_form(ext_link_defs)
+             # v["link_def"] = LinkDef.parse_serialized_form(ext_link_defs)
               #TODO: deprecate below
               v["link_defs"] ||= Hash.new
               v["link_defs"]["external"] = ext_link_defs

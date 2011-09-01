@@ -2,12 +2,12 @@ module XYZ
   module LinkDefParseSerializedForm
     def parse_serialized_form(link_defs)
       link_defs.inject({}) do |h,link_def|
-        ref = link_def[:type] 
+        ref = link_def["type"] 
         el = {
           :display_name => name,
-          :possible_link => parse_possible_links(link_def[:possible_links])
+          :possible_link => parse_possible_links(link_def["possible_links"])
         }
-        el.merge!(:required => link_def[:required]) if link_def.has_key?(:required)
+        el.merge!(:required => link_def["required"]) if link_def.has_key?("required")
         h.merge(ref => el)
       end
     end
@@ -29,11 +29,11 @@ module XYZ
 
     def parse_possible_link_content(possible_link)
       ret = Hash.new
-      events = ret[:events]||[]
+      events = ret["events"]||[]
       unless events.empty?
         ret[:events] = events.map{|ev|parse_possible_link_event(ev)}
       end
-      attribute_mappings = ret[:attribute_mappings]||[]
+      attribute_mappings = ret["attribute_mappings"]||[]
       unless attribute_mappings.empty?
         ret[:attribute_mappings] = attribute_mappings.map{|am|parse_possible_link_attribute_mapping(am)}
       end

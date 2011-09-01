@@ -4,8 +4,8 @@ module XYZ
       link_defs.inject({}) do |h,link_def|
         ref = link_def["type"] 
         el = {
-          :display_name => name,
-          :possible_link => parse_possible_links(link_def["possible_links"])
+          :display_name => ref,
+          :link_def_possible_link => parse_possible_links(link_def["possible_links"])
         }
         el.merge!(:required => link_def["required"]) if link_def.has_key?("required")
         h.merge(ref => el)
@@ -17,8 +17,9 @@ module XYZ
       possible_links.inject({}) do |h,possible_link|
         position += 1
         ref = possible_link.keys.first
-        possible_link_info = possible_link.va;lues.first
+        possible_link_info = possible_link.values.first
         el = {
+          :display_name => ref,
           :position => position,
           :content => parse_possible_link_content(possible_link_info),
           :type => "external" #TODO: hard wired for first test
@@ -29,11 +30,11 @@ module XYZ
 
     def parse_possible_link_content(possible_link)
       ret = Hash.new
-      events = ret["events"]||[]
+      events = possible_link["events"]||[]
       unless events.empty?
         ret[:events] = events.map{|ev|parse_possible_link_event(ev)}
       end
-      attribute_mappings = ret["attribute_mappings"]||[]
+      attribute_mappings = possible_link["attribute_mappings"]||[]
       unless attribute_mappings.empty?
         ret[:attribute_mappings] = attribute_mappings.map{|am|parse_possible_link_attribute_mapping(am)}
       end
@@ -57,11 +58,11 @@ module XYZ
     def parse_attribute_term(term_x)
       ret = Hash.new
       term = term_x.to_s.gsub(/^:/,"")
-      split = term.split(SplitTerm)
+      split = term.split(SplitPat)
 
       if split[0] =~ NodeTermRE
         ret[:node_name] = $1
-      elseif split[0] =~ ComponentTermRE
+      elsif split[0] =~ ComponentTermRE
         ret[:component_name] = $1
       else
         raise Error.new("unexpected form")

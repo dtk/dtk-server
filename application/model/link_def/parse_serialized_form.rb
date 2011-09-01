@@ -1,24 +1,36 @@
 module XYZ
   module LinkDefParseSerializedForm
-    def parse_serialized_form(link_defs)
+    def parse_serialized_form_local(link_defs,remote_link_defs)
       link_defs.inject({}) do |h,link_def|
-        type = link_def["type"]
-        ref = type
+        link_type = link_def["type"]
+        ref = "local_#{link_type}"
         el = {
           :display_name => ref,
-          :type => type,
-          :link_def_possible_link => parse_possible_links(link_def["possible_links"])
+          :local_or_remote => "local",
+          :link_type => link_type,
+          :link_def_possible_link => parse_possible_links_local(link_def["possible_links"],link_type,remote_link_defs)
         }
         el.merge!(:required => link_def["required"]) if link_def.has_key?("required")
         h.merge(ref => el)
       end
     end
    private
-    def parse_possible_links(possible_links)
+    def add_remote_link_def?(remote_link_defs,remote_component_type,link_type)
+      pointer = remote_link_defs[remote_component_type] ||= Hash.new
+      ref = "remote_#{link_type}"
+      pointer[ref] ||= {
+        :display_name => ref,
+        :local_or_remote => "remote",
+        :link_type => link_type,
+      }
+    end
+
+    def parse_possible_links_local(possible_links,link_type,remote_link_defs)
       position = 0
       possible_links.inject({}) do |h,possible_link|
         position += 1
         remote_component_type = possible_link.keys.first
+        add_remote_link_def?(remote_link_defs,remote_component_type,link_type)
         ref = remote_component_type
         possible_link_info = possible_link.values.first
         el = {

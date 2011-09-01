@@ -100,7 +100,9 @@ module XYZ
            :filter => [:eq, :is_port, true],
            :cols => [:id,:display_name,id(:component),:port_is_external,:port_type,:has_port_object,:port_location]
          )]
-        ###### end of virtual columns related to attributes
+
+
+      ###### end of virtual columns related to attributes, ports, and link_defs
 
       virtual_column :implementation_file_paths, :type => :json, :hidden => true,
       :remote_dependencies =>

@@ -60,7 +60,7 @@ module XYZ
       end
     end
 
-    def self.create_component_external_port?(node_idh,component_idh)
+    def self.create_component_external_ports?(node_idh,component_idh)
     end
     #TODO: deprecate for above
     def self.create_ports_for_external_attributes(node_idh,component_idh)

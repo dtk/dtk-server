@@ -129,7 +129,7 @@ module XYZ
               r_cmps = cmp_pointer["link_def_remote_component"] = Hash.new
               local_list.each{|local|r_cmps.merge!(local["local_component_type"] => local)} 
             else
-              raise Error.new("link def references a remote component that does not exist")
+              Log.error("link def references a remote component (#{remote_cmp_ref}) that does not exist")
             end
           end
         end 

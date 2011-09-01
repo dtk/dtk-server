@@ -1,7 +1,7 @@
 module XYZ
-  module LinkDefParseSerializedFormMixin
-    def parse_link_defs(link_defs)
-      link_defs.injet({}) do |h,link_def|
+  module LinkDefParseSerializedForm
+    def parse_serialized_form(link_defs)
+      link_defs.inject({}) do |h,link_def|
         ref = link_def[:type] 
         el = {
           :display_name => name,
@@ -14,7 +14,7 @@ module XYZ
    private
     def parse_possible_links(possible_links)
       position = 0
-      possible_links.injet({}) do |h,possible_link|
+      possible_links.inject({}) do |h,possible_link|
         position += 1
         ref = possible_link.keys.first
         possible_link_info = possible_link.va;lues.first

@@ -2,9 +2,11 @@ module XYZ
   module LinkDefParseSerializedForm
     def parse_serialized_form(link_defs)
       link_defs.inject({}) do |h,link_def|
-        ref = link_def["type"] 
+        type = link_def["type"]
+        ref = type
         el = {
           :display_name => ref,
+          :type => type,
           :link_def_possible_link => parse_possible_links(link_def["possible_links"])
         }
         el.merge!(:required => link_def["required"]) if link_def.has_key?("required")
@@ -16,13 +18,15 @@ module XYZ
       position = 0
       possible_links.inject({}) do |h,possible_link|
         position += 1
-        ref = possible_link.keys.first
+        remote_component_type = possible_link.keys.first
+        ref = remote_component_type
         possible_link_info = possible_link.values.first
         el = {
           :display_name => ref,
+          :remote_component_type => remote_component_type,
           :position => position,
           :content => parse_possible_link_content(possible_link_info),
-          :type => "external" #TODO: hard wired for first test
+          :type => possible_link["type"]
         }
         h.merge(ref => el)
       end

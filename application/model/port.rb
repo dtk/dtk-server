@@ -60,13 +60,16 @@ module XYZ
       end
     end
 
-    def self.create_ports_for_external_attributes(node_id_handle,cmp_id_handle)
-      component = cmp_id_handle.create_object()
+    def self.create_component_external_port?(node_idh,component_idh)
+    end
+    #TODO: deprecate for above
+    def self.create_ports_for_external_attributes(node_idh,component_idh)
+      component = component_idh.create_object()
       attrs_external = component.get_attributes_ports().select do |attr|
         attr[:port_is_external] and attr[:has_port_object]
       end
       return if attrs_external.empty?
-      node_id = node_id_handle.get_id()
+      node_id = node_idh.get_id()
 
       new_ports = attrs_external.map do |attr|
         type = attr[:port_type] == "output" ? "l4" : "external"
@@ -81,7 +84,7 @@ module XYZ
         hash.merge!(:location_asserted => attr[:port_location]) if attr[:port_location]
         hash.merge(attr[:port_type] == "input" ? {:external_attribute_id => attr[:id]} : {})
       end
-      port_mh = node_id_handle.createMH(:model_name => :port, :parent_model_name => :node)
+      port_mh = node_idh.createMH(:model_name => :port, :parent_model_name => :node)
       opts = {:returning_sql_cols => [:ref,:id]}
       create_info = create_from_rows(port_mh,new_ports,opts)
 

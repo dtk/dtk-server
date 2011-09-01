@@ -63,7 +63,7 @@ module XYZ
         virtual_column :most_specific_type, :type => :varchar, :local_dependencies => [:specific_type,:basic_type]
 
         many_to_one :component, :library, :node, :node_group, :datacenter, :project
-        one_to_many :component, :attribute_link, :attribute, :port_link, :monitoring_item, :dependency, :layout, :file_asset, :link_def
+        one_to_many :component, :attribute_link, :attribute, :port_link, :monitoring_item, :dependency, :layout, :file_asset, :link_def, :link_def_remote_component
         one_to_many_clone_omit :layout
 
         virtual_column :project_id, :type => ID_TYPES[:id], :local_dependencies => [:project_project_id]

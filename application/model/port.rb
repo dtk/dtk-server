@@ -76,7 +76,7 @@ module XYZ
         :filter => [:and, [:eq, :node_node_id, node_id],
                     [:eq, :type, "component_external"]]
       }
-      port_mh = node_idh.createMH(:port)
+      port_mh = node_idh.create_childMH(:port)
       existing_ports = get_objs(port_mh,sp_hash)
       unless existing_ports.empty?
         existing_tags = existing_ports.map{|r|r[:tag]}
@@ -86,10 +86,10 @@ module XYZ
       
       rows = link_defs.map do |ld|
         {
-          :ref => ld[:tag],
+          :ref => ld[:link_type], #TODO: may make this component_name-link_type
           :node_node_id => node_id,
           :type => "component_external",
-          :tag => ld[:tag]
+          :tag => ld[:link_type]
         }
       end
       create_from_rows(port_mh,rows)

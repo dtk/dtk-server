@@ -63,7 +63,7 @@ module XYZ
     def self.create_component_external_ports?(node_idh,component_idh)
       ret = Array.new
       sp_hash = {
-        :cols => [:link_type],
+        :cols => [:link_type, :local_or_remote],
         :filter => [:and, [:eq, :component_component_id, component_idh.get_id()],
                     [:eq, :has_external_link, true]]
       }
@@ -85,8 +85,12 @@ module XYZ
       end
       
       rows = link_defs.map do |ld|
+        ref = ld[:link_type] #TODO: may make this component_name-link_type
+        #TODO: just hueristc for computing dir; also need to upport "<>" (bidirectional)
+        dir = ld[:local_or_remote] == "local" ?  "input" : "output"
         {
-          :ref => ld[:link_type], #TODO: may make this component_name-link_type
+          :ref => ref,
+          :direction => dir,
           :node_node_id => node_id,
           :type => "component_external",
           :tag => ld[:link_type]

@@ -61,7 +61,40 @@ module XYZ
     end
 
     def self.create_component_external_ports?(node_idh,component_idh)
+      ret = Array.new
+      sp_hash = {
+        :cols => [:link_type],
+        :filter => [:and, [:eq, :component_component_id, component_idh.get_id()]
+                    [:eq, :has_external_link, true]]
+      }
+      link_defs = get_objs(node_idh.createMH(:link_def),sp_hash)
+      return ret if link_defs.empty?
+      #only create if doesnt exist
+      node_id = node_idh.get_id()
+      sp_hash = {
+        :cols => [:tag],
+        :filter => [:and, [:eq, :node_node_id, node_id],
+                    [:eq, :type, "component_external"]]
+      }
+      port_mh = node_idh.createMH(:port)
+      existing_ports = get_objs(port_mh,sp_hash)
+      unless existing_ports.empty?
+        existing_tags = existing_ports.map{|r|r[:tag]}
+        link_defs.reject!{|r|existing_tags.include?(r[:link_type])}
+        return ret if link_defs.empty?
+      end
+      
+      rows = link_defs.map do |ld|
+        {
+          :ref => ld[:tag],
+          :node_node_id => node_id,
+          :type => "component_external",
+          :tag => ld[:tag]
+        }
+      end
+      create_from_rows(port_mh,rows)
     end
+
     #TODO: deprecate for above
     def self.create_ports_for_external_attributes(node_idh,component_idh)
       component = component_idh.create_object()

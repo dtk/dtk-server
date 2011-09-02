@@ -4,6 +4,8 @@
   :columns => {
     :remote_or_local => {:type=>:varchar, :size => 10},
     :link_type => {:type=>:varchar, :size => 50},
+    :has_external_link => {:type => :boolean},
+    :has_internal_link => {:type => :boolean}
   },
   :many_to_one=>[:component],
   :one_to_many=>[:link_def_possible_link]

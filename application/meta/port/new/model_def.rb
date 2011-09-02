@@ -10,6 +10,7 @@
       :type=>:varchar,
       :size =>10
     },
+    :tag => {:type=>:varchar},
     :external_attribute_id=>{
       :type=>:bigint,
       :foreign_key_rel_type=>:attribute,

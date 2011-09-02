@@ -64,7 +64,7 @@ module XYZ
       ret = Array.new
       sp_hash = {
         :cols => [:link_type],
-        :filter => [:and, [:eq, :component_component_id, component_idh.get_id()]
+        :filter => [:and, [:eq, :component_component_id, component_idh.get_id()],
                     [:eq, :has_external_link, true]]
       }
       link_defs = get_objs(node_idh.createMH(:link_def),sp_hash)

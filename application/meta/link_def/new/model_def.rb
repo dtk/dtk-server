@@ -2,7 +2,7 @@
   :schema=>:link_def,
   :table=>:link_def,
   :columns => {
-    :remote_or_local => {:type=>:varchar, :size => 10},
+    :local_or_remote => {:type=>:varchar, :size => 10},
     :link_type => {:type=>:varchar, :size => 50},
     :has_external_link => {:type => :boolean},
     :has_internal_link => {:type => :boolean}

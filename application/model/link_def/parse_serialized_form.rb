@@ -3,14 +3,14 @@ module XYZ
     def parse_serialized_form_local(link_defs,remote_link_defs)
       link_defs.inject({}) do |h,link_def|
         link_def_type = link_def["type"]
-        ref = "local_#{link_type}"
+        ref = "local_#{link_def_type}"
         has_external_internal = Hash.new
         possible_link = parse_possible_links_local(link_def["possible_links"],link_def_type,remote_link_defs,has_external_internal)
         el = {
           :display_name => ref,
           :local_or_remote => "local",
           :link_type => link_def_type,
-          :link_def_possible_link => 
+          :link_def_possible_link => possible_link
         }.merge(has_external_internal)
         el.merge!(:required => link_def["required"]) if link_def.has_key?("required")
         h.merge(ref => el)

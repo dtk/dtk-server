@@ -629,6 +629,21 @@ module XYZ
       Port.create_ports_for_external_attributes(id_handle,cmp_id_handle)
       parent_action_id_handle = get_parent_id_handle()
       StateChange.create_pending_change_item(:new_item => cmp_id_handle, :parent => parent_action_id_handle)
+
+    end
+    #TODO: deprecate below
+    def old_clone_post_copy_hook(clone_copy_output,opts={})
+      cmp_obj = clone_copy_output.objects.first
+      #handles copying over if needed component template and implementation into project
+      cmp_obj.clone_post_copy_hook_into_node(self)
+
+      cmp_id_handle = clone_copy_output.id_handles.first
+      create_needed_l4_sap_attributes(cmp_id_handle)
+      create_needed_additional_links(cmp_id_handle)
+
+      Port.create_ports_for_external_attributes(id_handle,cmp_id_handle)
+      parent_action_id_handle = get_parent_id_handle()
+      StateChange.create_pending_change_item(:new_item => cmp_id_handle, :parent => parent_action_id_handle)
     end
     ########################################
 

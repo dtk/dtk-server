@@ -98,13 +98,19 @@ module XYZ
           remote_link_defs = Hash.new
           component_hash.each do |local_cmp_type,v|
             cmp_ref = "#{config_agent_type}-#{local_cmp_type}"
-            #TODO: feed in link defs which are both internal and external
+            #TODO: right now; links defs just have internal
+            if link_defs = v.delete("link_defs")
+              parsed_link_def = LinkDef.parse_serialized_form_local(link_defs,remote_link_defs)
+              (v["link_def"] ||= Hash.new).merge!(parsed_link_def)
+            end
+            #TODO: when link_defs have externa;l deprecate below
             if ext_link_defs = v.delete("external_link_defs")
               #TODO: temp hack to put in type = "external"
               ext_link_defs.each do |ld|
                 (ld["possible_links"]||[]).each{|pl|pl.values.first["type"] = "external"}
               end
-              v["link_def"] = LinkDef.parse_serialized_form_local(ext_link_defs,remote_link_defs)
+              parsed_link_def = LinkDef.parse_serialized_form_local(ext_link_defs,remote_link_defs)
+              (v["link_def"] ||= Hash.new).merge!(parsed_link_def)
               #TODO: deprecate below
               v["link_defs"] ||= Hash.new
               v["link_defs"]["external"] = ext_link_defs

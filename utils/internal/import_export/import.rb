@@ -91,16 +91,16 @@ module XYZ
       if format_type == :yaml
         library_ref = r8meta[:library]
         require 'yaml'
+        remote_link_defs = Hash.new
         r8meta[:files].each do |file|
           component_hash = YAML.load_file(file)
           repo, config_agent_type = (file =~ Regexp.new("([^/]+)/r8meta\.(.+)\.yml") && [$1,$2])
           raise Error.new("bad config agent type") unless config_agent_type
-          remote_link_defs = Hash.new
           component_hash.each do |local_cmp_type,v|
             cmp_ref = "#{config_agent_type}-#{local_cmp_type}"
             #TODO: right now; links defs just have internal
             if link_defs = v.delete("link_defs")
-              parsed_link_def = LinkDef.parse_serialized_form_local(link_defs,remote_link_defs)
+              parsed_link_def = LinkDef.parse_serialized_form_local(link_defs,config_agent_type,remote_link_defs)
               (v["link_def"] ||= Hash.new).merge!(parsed_link_def)
             end
             #TODO: when link_defs have externa;l deprecate below
@@ -109,7 +109,7 @@ module XYZ
               ext_link_defs.each do |ld|
                 (ld["possible_links"]||[]).each{|pl|pl.values.first["type"] = "external"}
               end
-              parsed_link_def = LinkDef.parse_serialized_form_local(ext_link_defs,remote_link_defs)
+              parsed_link_def = LinkDef.parse_serialized_form_local(ext_link_defs,config_agent_type,remote_link_defs)
               (v["link_def"] ||= Hash.new).merge!(parsed_link_def)
               #TODO: deprecate below
               v["link_defs"] ||= Hash.new
@@ -117,15 +117,16 @@ module XYZ
             end
             hash["library"][library_ref]["component"][cmp_ref] = v.merge("repo" => repo)
           end
-          #process the link defs for remote components
-          remote_link_defs.each do |remote_cmp_type,remote_link_def|
-            remote_cmp_ref = "#{config_agent_type}-#{remote_cmp_type}"
-            cmp_pointer = hash["library"][library_ref]["component"][remote_cmp_ref]
-            if cmp_pointer
-              (cmp_pointer["link_def"] ||= Hash.new).merge!(remote_link_def)
-            else
-              Log.error("link def references a remote component (#{remote_cmp_ref}) that does not exist")
-            end
+        end
+        #process the link defs for remote components
+        remote_link_defs.each do |remote_cmp_type,remote_link_def|
+          config_agent_type = remote_link_def.values.first.delete(:config_agent_type)
+          remote_cmp_ref = "#{config_agent_type}-#{remote_cmp_type}"
+          cmp_pointer = hash["library"][library_ref]["component"][remote_cmp_ref]
+          if cmp_pointer
+            (cmp_pointer["link_def"] ||= Hash.new).merge!(remote_link_def)
+          else
+            Log.error("link def references a remote component (#{remote_cmp_ref}) that does not exist")
           end
         end 
       else

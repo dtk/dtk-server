@@ -17,6 +17,12 @@
       :on_delete=>:cascade,
       :on_update=>:cascade
     },
+    :component_id=>{
+      :type=>:bigint,
+      :foreign_key_rel_type=>:component,
+      :on_delete=>:cascade,
+      :on_update=>:cascade
+    },
     :location_asserted=>{
       :type=>:varchar,
       :size =>10

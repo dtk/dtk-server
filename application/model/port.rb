@@ -69,20 +69,10 @@ module XYZ
       }
       link_defs = get_objs(node_idh.createMH(:link_def),sp_hash)
       return ret if link_defs.empty?
-      #only create if doesnt exist
+
       node_id = node_idh.get_id()
-      sp_hash = {
-        :cols => [:tag],
-        :filter => [:and, [:eq, :node_node_id, node_id],
-                    [:eq, :type, "component_external"]]
-      }
+      component_id = component_idh.get_id()
       port_mh = node_idh.create_childMH(:port)
-      existing_ports = get_objs(port_mh,sp_hash)
-      unless existing_ports.empty?
-        existing_tags = existing_ports.map{|r|r[:tag]}
-        link_defs.reject!{|r|existing_tags.include?(r[:link_type])}
-        return ret if link_defs.empty?
-      end
       
       rows = link_defs.map do |ld|
         ref = ld[:link_type] #TODO: may make this component_name-link_type
@@ -91,6 +81,7 @@ module XYZ
         {
           :ref => ref,
           :direction => dir,
+          :component_id => component_id,
           :node_node_id => node_id,
           :type => "component_external",
           :tag => ld[:link_type]

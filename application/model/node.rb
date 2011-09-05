@@ -639,12 +639,14 @@ module XYZ
 
       #get the link defs associated with components on the node; this is used
       #to determine if need to add internal links and for port processing
-      link_defs = get_objs(:cols => [:link_defs])
+      node_link_defs = get_objs(:cols => [:link_defs])
 
       cmp_id_handle = clone_copy_output.id_handles.first
       create_needed_l4_sap_attributes(cmp_id_handle)
-      create_needed_additional_links(cmp_id_handle)
 
+      create_needed_internal_links(cmp_id_handle,node_link_defs)
+
+      #TODO: pass node_link_defs into create_component_external_ports?
       Port.create_component_external_ports?(id_handle,cmp_id_handle)
       #TODO: deprecate beloww for above
       Port.create_ports_for_external_attributes(id_handle,cmp_id_handle)
@@ -679,6 +681,49 @@ module XYZ
       new_sap_attr_idh
     end
 
+
+    def create_needed_internal_links(cmp_id_handle,node_link_defs)
+      internal_link_defs = node_link_defs.select{|r|r[:link_def][:has_internal_link]}
+      return if internal_link_defs.empty?
+
+      lds_with_attr_mappings = internal_link_defs.map do |r|
+        link_def = r[:link_def]
+        link_def[:id] if link_def[:local_or_remote] == "local"
+      end.compact
+
+      #TODO: may put on tighter filter so only ones that involve component being addded
+      #.. link_def_id is ones on current component or :remote_component_type is current component
+      sp_hash = {
+        :cols => [:link_def_id, :remote_component_type,:position,:content,:type],
+        :filter => [:oneof, :link_def_id,lds_with_attr_mappings] 
+      }
+      poss_links = Model.get_objs(model_handle(:link_def_possible_link),sp_hash)
+
+      #TODO: gort here
+      #TODO: more efficient would be to have clone object output have this info
+      component = cmp_id_handle.create_object().update_object!(:component_type,:extended_base,:implementation_id,:node_node_id)
+      conn_profile = component.get_objects_col_from_sp_hash({:cols => [:connectivity_profile_internal]}).first
+      return unless conn_profile
+      #get all other components on node
+      sp_hash = {
+        :model_name => :component,
+        :filter => [:neq, :id, cmp_id_handle.get_id()],
+        :cols => [:component_type,:most_specific_type, :extended_base, :implementation_id, :node_node_id]
+      }
+      other_cmps = get_children_from_sp_hash(:component,sp_hash)
+      conn_info_list = conn_profile.match_other_components(other_cmps)
+      return if conn_info_list.empty?
+      parent_idh = cmp_id_handle.get_parent_id_handle
+
+      conn_info_list.each do |conn_info|
+        context = conn_info.get_context(component,conn_info[:other_component])
+        (conn_info[:attribute_mappings]||[]).each do |attr_mapping|
+          link = attr_mapping.ret_link(context)
+          AttributeLink.create_attr_links(parent_idh,[link])
+        end
+      end
+    end
+    #TODO: deprecate below for above
     def create_needed_additional_links(cmp_id_handle)
       #TODO: more efficient would be to have clone object output have this info
       component = cmp_id_handle.create_object().update_object!(:component_type,:extended_base,:implementation_id,:node_node_id)

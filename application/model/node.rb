@@ -45,6 +45,23 @@ module XYZ
          }]
 
       ##### for connection to ports and port links
+      virtual_column :link_defs, :type => :json, :hidden => true, 
+        :remote_dependencies => 
+        [
+         {
+           :model_name => :component,
+           :join_type => :inner,
+           :join_cond=>{:node_node_id => q(:node,:id)},
+           :cols => [:id,:display_name]
+         },
+         {
+           :model_name => :link_def,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond=>{:component_component_id => q(:component,:id)},
+           :cols => [:id,id(:component),:local_or_remote,:link_type,:has_external_link,:has_internal_link]
+         }]
+
       virtual_column :ports, :type => :json, :hidden => true, 
         :remote_dependencies => 
         [
@@ -619,6 +636,10 @@ module XYZ
       cmp_obj = clone_copy_output.objects.first
       #handles copying over if needed component template and implementation into project
       cmp_obj.clone_post_copy_hook_into_node(self)
+
+      #get the link defs associated with components on the node; this is used
+      #to determine if need to add internal links and for port processing
+      link_defs = get_objs(:cols => [:link_defs])
 
       cmp_id_handle = clone_copy_output.id_handles.first
       create_needed_l4_sap_attributes(cmp_id_handle)

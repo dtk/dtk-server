@@ -708,22 +708,40 @@ module XYZ
     end
 
 
-    def create_needed_internal_links(cmp_obj,link_defs_info)
-      internal_link_defs = link_defs_info.select{|r|r[:link_def][:has_internal_link]}
-      return if internal_link_defs.empty?
+    def create_needed_internal_links(component,node_link_defs_info)
+      #shortcut; no links to create if less than two internal ports
+      return if node_link_defs_info.size < 2
 
-      lds_with_attr_mappings = internal_link_defs.map do |r|
+      #### get relevant link def possible links
+      #find all link def ids that can be internal, local, and not connected already 
+      component_id = component.id
+      component_type = (component.update_object!(:component_type))[:component_type]
+      relevant_link_def_ids = Array.new
+      cmp_link_def_ids = Array.new # subset of above on this component
+      #these are the ones for which the possible links shoudl be found
+      node_link_defs_info.each do |r|
+        port = r[:port]
         link_def = r[:link_def]
-        link_def[:id] if link_def[:local_or_remote] == "local"
-      end.compact
+        if %w{component_internal component_either}.include?(port[:type]) and
+            link_def[:local_or_remote] == "local" and
+            not port[:connected]
+          relevant_link_def_ids << link_def[:id]
+          cmp_link_def_ids << link_def[:id] if link_def[:component_component_id] == component_id
+        end
+      end
+      return if relevant_link_def_ids.empty?
 
-      #TODO: may put on tighter filter so only ones that involve component being addded
-      #.. link_def_id is ones on current component or :remote_component_type is current component
+      #get relevant possible_link link defs; these are ones that 
+      #are children of relevant_link_def_ids and
+      #either have link_def_id in cmp_link_def_ids or remote_component_type == component_type
       sp_hash = {
         :cols => [:link_def_id, :remote_component_type,:position,:content,:type],
-        :filter => [:oneof, :link_def_id,lds_with_attr_mappings] 
+        :filter => [:and, [:oneof, :link_def_id, relevant_link_def_ids],
+                          [:or, [:eq,:remote_component_type,component_type],
+                                [:oneof, :link_def_id,cmp_link_def_ids]]]
       }
       poss_links = Model.get_objs(model_handle(:link_def_possible_link),sp_hash)
+      #### end get relevant link def possible links
 
       #TODO: gort here
       #TODO: more efficient would be to have clone object output have this info

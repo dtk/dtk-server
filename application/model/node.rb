@@ -45,7 +45,7 @@ module XYZ
          }]
 
       ##### for connection to ports and port links
-      virtual_column :link_defs, :type => :json, :hidden => true, 
+      virtual_column :link_defs_and_component_ports, :type => :json, :hidden => true, 
         :remote_dependencies => 
         [
          {
@@ -60,6 +60,13 @@ module XYZ
            :join_type => :inner,
            :join_cond=>{:component_component_id => q(:component,:id)},
            :cols => [:id,id(:component),:local_or_remote,:link_type,:has_external_link,:has_internal_link]
+         },
+         {
+           :model_name => :port,
+           :convert => true,
+           :join_type => :left_outer
+           :join_cond=>{:link_def_id => q(:link_def,:id)},
+           :cols => [:id,:display_name,:type,:connected]
          }]
 
       virtual_column :ports, :type => :json, :hidden => true, 
@@ -637,21 +644,40 @@ module XYZ
       #handles copying over if needed component template and implementation into project
       cmp_obj.clone_post_copy_hook_into_node(self)
 
-      #get the link defs associated with components on the node; this is used
+      component_idh = clone_copy_output.id_handles.first
+      create_needed_l4_sap_attributes(component_idh)
+
+      #get the link defs/component_ports associated with components on the node; this is used
       #to determine if need to add internal links and for port processing
-      node_link_defs = get_objs(:cols => [:link_defs])
+      node_link_defs_info = get_objs(:cols => [:link_defs_and_component_ports])
+      component_id = component.id()
+      
+      ###create needed component ports
+      ndx_for_port_update = Hash.new
+      component_link_defs = node_link_defs_info.map  do |r|
+        link_def = r[:link_def]
+        if link_def[:compoent_component_id] == component_id
+          ndx_for_port_update[link_def[:id]] = r
+          link_def 
+        end
+      end.compact
 
-      cmp_id_handle = clone_copy_output.id_handles.first
-      create_needed_l4_sap_attributes(cmp_id_handle)
+      opts = {:returning_sql_cols => [:link_def_id,:id,:display_name,:type,:connected]}
+      new_cmp_ports = Port.create_needed_component_ports(component_link_defs_info,self,cmp_obj,opts)
 
-      create_needed_internal_links(cmp_id_handle,node_link_defs)
+      #update node_link_defs_info with new ports
+      new_cmp_ports.each do |port|
+        ndx_for_port_update[port[:link_def_id]].merge!(:port => port)
+      end
+      #### end create needed component ports ####
+                                                             
+      create_needed_internal_links(cmp_obj,node_link_defs_info)
 
       #TODO: pass node_link_defs into create_component_external_ports?
-      Port.create_component_external_ports?(id_handle,cmp_id_handle)
       #TODO: deprecate beloww for above
-      Port.create_ports_for_external_attributes(id_handle,cmp_id_handle)
+      Port.create_ports_for_external_attributes(id_handle,component_idh)
       parent_action_id_handle = get_parent_id_handle()
-      StateChange.create_pending_change_item(:new_item => cmp_id_handle, :parent => parent_action_id_handle)
+      StateChange.create_pending_change_item(:new_item => component_idh, :parent => parent_action_id_handle)
 
     end
     #TODO: deprecate below
@@ -682,8 +708,8 @@ module XYZ
     end
 
 
-    def create_needed_internal_links(cmp_id_handle,node_link_defs)
-      internal_link_defs = node_link_defs.select{|r|r[:link_def][:has_internal_link]}
+    def create_needed_internal_links(cmp_obj,link_defs_info)
+      internal_link_defs = link_defs_info.select{|r|r[:link_def][:has_internal_link]}
       return if internal_link_defs.empty?
 
       lds_with_attr_mappings = internal_link_defs.map do |r|

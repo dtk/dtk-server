@@ -10,16 +10,16 @@
       :type=>:varchar,
       :size =>10
     },
-    :tag => {:type=>:varchar},
+    :connected => {:type=>:boolean},
     :external_attribute_id=>{
       :type=>:bigint,
       :foreign_key_rel_type=>:attribute,
       :on_delete=>:cascade,
       :on_update=>:cascade
     },
-    :component_id=>{
+    :link_def_id=>{
       :type=>:bigint,
-      :foreign_key_rel_type=>:component,
+      :foreign_key_rel_type=>:link_def,
       :on_delete=>:cascade,
       :on_update=>:cascade
     },

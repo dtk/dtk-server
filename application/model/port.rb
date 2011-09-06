@@ -60,34 +60,33 @@ module XYZ
       end
     end
 
-    def self.create_component_external_ports?(node_idh,component_idh)
+    #creates need component Pports and updates node_link_defs_info
+    def self.create_needed_component_ports!(component_link_defs,node,component,opts={})
       ret = Array.new
-      sp_hash = {
-        :cols => [:link_type, :local_or_remote],
-        :filter => [:and, [:eq, :component_component_id, component_idh.get_id()],
-                    [:eq, :has_external_link, true]]
-      }
-      link_defs = get_objs(node_idh.createMH(:link_def),sp_hash)
-      return ret if link_defs.empty?
+      return ret if component_link_defs.empty?
 
-      node_id = node_idh.get_id()
-      component_id = component_idh.get_id()
-      port_mh = node_idh.create_childMH(:port)
-      
-      rows = link_defs.map do |ld|
-        ref = ld[:link_type] #TODO: may make this component_name-link_type
+      node_id = node.id()
+      port_mh = node.model_handle.create_childMH(:port)
+      component_type = (component.update_object!(:component_type))[:component_type]
+      rows = component_link_defs.map do |link_def|
+        ref = "#{component_type}-#{link_def[:type]}"
         #TODO: just hueristc for computing dir; also need to upport "<>" (bidirectional)
-        dir = ld[:local_or_remote] == "local" ?  "input" : "output"
+        dir = link_def[:local_or_remote] == "local" ?  "input" : "output"
+        type = 
+          if link_def[:has_external_link]
+            link_def[:has_internal_link] ? "component_either" : "component_external"
+          else #will be just link_def[:has_internal_link]
+            "component_internal"
+          end
         {
           :ref => ref,
           :direction => dir,
-          :component_id => component_id,
+          :link_def_id => link_def[:id],
           :node_node_id => node_id,
           :type => "component_external",
-          :tag => ld[:link_type]
         }
       end
-      create_from_rows(port_mh,rows)
+      create_from_rows(port_mh,rows,opts)
     end
 
     #TODO: deprecate for above

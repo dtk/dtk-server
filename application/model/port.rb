@@ -61,7 +61,7 @@ module XYZ
     end
 
     #creates need component Pports and updates node_link_defs_info
-    def self.create_needed_component_ports!(component_link_defs,node,component,opts={})
+    def self.create_needed_component_ports(component_link_defs,node,component,opts={})
       ret = Array.new
       return ret if component_link_defs.empty?
 
@@ -83,7 +83,7 @@ module XYZ
           :direction => dir,
           :link_def_id => link_def[:id],
           :node_node_id => node_id,
-          :type => "component_external",
+          :type => type
         }
       end
       create_from_rows(port_mh,rows,opts)

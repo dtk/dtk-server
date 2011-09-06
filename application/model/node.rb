@@ -64,7 +64,7 @@ module XYZ
          {
            :model_name => :port,
            :convert => true,
-           :join_type => :left_outer
+           :join_type => :left_outer,
            :join_cond=>{:link_def_id => q(:link_def,:id)},
            :cols => [:id,:display_name,:type,:connected]
          }]
@@ -640,9 +640,9 @@ module XYZ
     end
 
     def clone_post_copy_hook(clone_copy_output,opts={})
-      cmp_obj = clone_copy_output.objects.first
+      component = clone_copy_output.objects.first
       #handles copying over if needed component template and implementation into project
-      cmp_obj.clone_post_copy_hook_into_node(self)
+      component.clone_post_copy_hook_into_node(self)
 
       component_idh = clone_copy_output.id_handles.first
       create_needed_l4_sap_attributes(component_idh)
@@ -656,14 +656,14 @@ module XYZ
       ndx_for_port_update = Hash.new
       component_link_defs = node_link_defs_info.map  do |r|
         link_def = r[:link_def]
-        if link_def[:compoent_component_id] == component_id
+        if link_def[:component_component_id] == component_id
           ndx_for_port_update[link_def[:id]] = r
           link_def 
         end
       end.compact
 
       opts = {:returning_sql_cols => [:link_def_id,:id,:display_name,:type,:connected]}
-      new_cmp_ports = Port.create_needed_component_ports(component_link_defs_info,self,cmp_obj,opts)
+      new_cmp_ports = Port.create_needed_component_ports(component_link_defs,self,component,opts)
 
       #update node_link_defs_info with new ports
       new_cmp_ports.each do |port|
@@ -671,7 +671,7 @@ module XYZ
       end
       #### end create needed component ports ####
                                                              
-      create_needed_internal_links(cmp_obj,node_link_defs_info)
+      create_needed_internal_links(component,node_link_defs_info)
 
       #TODO: pass node_link_defs into create_component_external_ports?
       #TODO: deprecate beloww for above

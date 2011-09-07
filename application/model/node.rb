@@ -708,45 +708,16 @@ module XYZ
 
 
     def create_needed_internal_links(component,node_link_defs_info)
-      #shortcut; no links to create if less than two internal ports
-      return if node_link_defs_info.size < 2
-
-      #### get relevant link def possible links
-      #find all link def ids that can be internal, local, and not connected already 
-      component_id = component.id
-      component_type = (component.update_object!(:component_type))[:component_type]
-      relevant_link_def_ids = Array.new
-      cmp_link_def_ids = Array.new # subset of above on this component
-      #these are the ones for which the possible links shoudl be found
-      node_link_defs_info.each do |r|
-        port = r[:port]
-        link_def = r[:link_def]
-        if %w{component_internal component_either}.include?(port[:type]) and
-            link_def[:local_or_remote] == "local" and
-            not port[:connected]
-          relevant_link_def_ids << link_def[:id]
-          cmp_link_def_ids << link_def[:id] if link_def[:component_component_id] == component_id
-        end
-      end
-      return if relevant_link_def_ids.empty?
-
-      #get relevant possible_link link defs; these are ones that 
-      #are children of relevant_link_def_ids and
-      #either have link_def_id in cmp_link_def_ids or remote_component_type == component_type
-      sp_hash = {
-        :cols => [:link_def_id, :remote_component_type,:position,:content,:type],
-        :filter => [:and, [:oneof, :link_def_id, relevant_link_def_ids],
-                          [:or, [:eq,:remote_component_type,component_type],
-                                [:oneof, :link_def_id,cmp_link_def_ids]]],
-        :order_by => [{:field => :position, :ordet => "ASC"}]
-      }
-      poss_links = Model.get_objs(model_handle(:link_def_possible_link),sp_hash)
-      return if poss_links.empty?
-      #### end get relevant link def possible links
-      poss_links.each do |poss_link|
-      end
+      #get link_defs in node_link_defs_info that relate to internal links not linked already that connect to component
+      #on either end. what is returned arelink defs annotated with their possible links
+      relevant_link_defs = get_annotated_internal_link_defs(component,node_link_defs_info)
+      return if relevant_link_defs.empty?
+      #for each link def with multiple possibel link defs find the match; 
+      #TODO: find good mechanism to get user input if there is a choice such as whether it is internal or external
+      #currently passing in "stratagy" which indicate sto pick internal if teher is choice of "eiether"
 
       #TODO: got here
+
       #TODO: more efficient would be to have clone object output have this info
       component.update_object!(:component_type,:extended_base,:implementation_id,:node_node_id)
       conn_profile = component.get_objects_col_from_sp_hash({:cols => [:connectivity_profile_internal]}).first
@@ -770,6 +741,58 @@ module XYZ
         end
       end
     end
+
+    def get_annotated_internal_link_defs(component,node_link_defs_info)
+      ret = Array.new
+      #shortcut; no links to create if less than two internal ports
+      return ret if node_link_defs_info.size < 2
+
+      #### get relevant link def possible links
+      #find all link def ids that can be internal, local, and not connected already 
+      component_id = component.id
+      component_type = (component.update_object!(:component_type))[:component_type]
+      relevant_link_def_ids = Array.new
+      cmp_link_def_ids = Array.new # subset of above on this component
+      ndx_relevant_link_defs = Hash.new #for splicing in possible_links TODO: see if more efficient to get possible_links
+      #in intial call to get node_link_defs_info
+      #these are the ones for which the possible links shoudl be found
+      node_link_defs_info.each do |r|
+        port = r[:port]
+        link_def = r[:link_def]
+        if %w{component_internal component_either}.include?(port[:type]) and
+            link_def[:local_or_remote] == "local" and
+            not port[:connected]
+          link_def_id = link_def[:id]
+          relevant_link_def_ids << link_def_id
+          ndx_relevant_link_defs[link_def_id] = link_def
+          cmp_link_def_ids << link_def_id if link_def[:component_component_id] == component_id
+        end
+      end
+      return ret if relevant_link_def_ids.empty?
+
+      #get relevant possible_link link defs; these are ones that 
+      #are children of relevant_link_def_ids and
+      #either have link_def_id in cmp_link_def_ids or remote_component_type == component_type
+      sp_hash = {
+        :cols => [:link_def_id, :remote_component_type,:position,:content,:type],
+        :filter => [:and, [:oneof, :type, %{internal either}],
+                          [:oneof, :link_def_id, relevant_link_def_ids],
+                          [:or, [:eq,:remote_component_type,component_type],
+                                [:oneof, :link_def_id,cmp_link_def_ids]]],
+        :order_by => [{:field => :position, :ordet => "ASC"}]
+      }
+      poss_links = Model.get_objs(model_handle(:link_def_possible_link),sp_hash)
+      return ret if poss_links.empty?
+      #splice in possible links
+      poss_links.each do |poss_link|
+        (ndx_relevant_link_defs[poss_link[:link_def_id]][:possible_links] ||= Array.new) << poss_link
+      end
+      
+      #relevant link defs are ones that are in ndx_relevant_link_defs_info and have a possible link
+      ret = ndx_relevant_link_defs.reject{|k,v|not v.has_key?(:possible_links)}.values
+      ret
+    end
+
     #TODO: deprecate below for above
     def create_needed_additional_links(cmp_id_handle)
       #TODO: more efficient would be to have clone object output have this info

@@ -678,7 +678,6 @@ module XYZ
       Port.create_ports_for_external_attributes(id_handle,component_idh)
       parent_action_id_handle = get_parent_id_handle()
       StateChange.create_pending_change_item(:new_item => component_idh, :parent => parent_action_id_handle)
-
     end
     #TODO: deprecate below
     def old_clone_post_copy_hook(clone_copy_output,opts={})
@@ -738,12 +737,16 @@ module XYZ
         :cols => [:link_def_id, :remote_component_type,:position,:content,:type],
         :filter => [:and, [:oneof, :link_def_id, relevant_link_def_ids],
                           [:or, [:eq,:remote_component_type,component_type],
-                                [:oneof, :link_def_id,cmp_link_def_ids]]]
+                                [:oneof, :link_def_id,cmp_link_def_ids]]],
+        :order_by => [{:field => :position, :ordet => "ASC"}]
       }
       poss_links = Model.get_objs(model_handle(:link_def_possible_link),sp_hash)
+      return if poss_links.empty?
       #### end get relevant link def possible links
+      poss_links.each do |poss_link|
+      end
 
-      #TODO: gort here
+      #TODO: got here
       #TODO: more efficient would be to have clone object output have this info
       component.update_object!(:component_type,:extended_base,:implementation_id,:node_node_id)
       conn_profile = component.get_objects_col_from_sp_hash({:cols => [:connectivity_profile_internal]}).first

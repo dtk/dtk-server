@@ -85,11 +85,14 @@ module XYZ
     def parse_attribute_term(term_x)
       ret = Hash.new
       term = term_x.to_s.gsub(/^:/,"")
+      ret[:term_index] = term
       split = term.split(SplitPat)
 
       if split[0] =~ NodeTermRE
+        ret[:type] = "node_attribute"
         ret[:node_name] = $1
       elsif split[0] =~ ComponentTermRE
+        ret[:type] = "component_attribute"
         ret[:component_name] = $1
       else
         raise Error.new("unexpected form")

@@ -1,3 +1,4 @@
+require  File.expand_path('link_def/context', File.dirname(__FILE__))
 module XYZ
   class LinkDefPossibleLink < Model
     include LinkDefParseSerializedForm
@@ -9,6 +10,24 @@ module XYZ
         r[:link_def_id] = link_def_id
       end
       create_from_rows(model_handle,rows)
+    end
+
+    def get_context()
+      ret = LinkDefContext.new()
+      content = self[:content]
+     # convert_to_parsed_form_parsed_form?()
+     # constraints = self[:constraints]
+     # constraints.each{|cnstr|cnstr.get_context_refs!(ret)} if constraints
+      ams = content[:attribute_mappings]
+      ams.each{|am|AttributeMapping.new(am).get_context_refs!(ret)} if ams
+#      ret.set_values!(self,local_cmp,remote_cmp)
+    end
+
+    class AttributeMapping < HashObject
+      def get_context_refs!(ret)
+        ret.add_ref!(self[:input])
+        ret.add_ref!(self[:output])
+      end
     end
   end
 end

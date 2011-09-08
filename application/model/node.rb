@@ -718,12 +718,12 @@ module XYZ
       strategy = {:either_becomes_internal => true,:select_first => true}
       relevant_link_defs.each do |link_def|
         chosen_link = link_def.choose_internal_link(link_def[:possible_links], strategy)
-        link_def[:chosen_link] = chosen_link if chosen_link #chosen link can be null if for example link has :type="either" and 
-        #external link is prefered"
+        link_def[:chosen_link] = chosen_link if chosen_link #chosen link can be null if for example link has :type="either" and external link is prefered"
       end
 
       relevant_link_defs.each do |link_def|
         next unless link = link_def[:chosen_link]
+        context = link.get_context()
       end
 
       #TODO: got here
@@ -733,6 +733,7 @@ module XYZ
       conn_profile = component.get_objects_col_from_sp_hash({:cols => [:connectivity_profile_internal]}).first
       return unless conn_profile
       #get all other components on node
+      component_id = component.id
       sp_hash = {
         :model_name => :component,
         :filter => [:neq, :id, component_id],
@@ -785,7 +786,7 @@ module XYZ
       #either have link_def_id in cmp_link_def_ids or remote_component_type == component_type
       sp_hash = {
         :cols => [:link_def_id, :remote_component_type,:position,:content,:type],
-        :filter => [:and, [:oneof, :type, %{internal either}],
+        :filter => [:and, [:oneof, :type, %w{internal either}],
                           [:oneof, :link_def_id, relevant_link_def_ids],
                           [:or, [:eq,:remote_component_type,component_type],
                                 [:oneof, :link_def_id,cmp_link_def_ids]]],

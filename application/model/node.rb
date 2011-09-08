@@ -714,7 +714,17 @@ module XYZ
       return if relevant_link_defs.empty?
       #for each link def with multiple possibel link defs find the match; 
       #TODO: find good mechanism to get user input if there is a choice such as whether it is internal or external
-      #currently passing in "stratagy" which indicate sto pick internal if teher is choice of "eiether"
+      #look art passing in "stratagy" object which for example can idicate to make all "eithers internal"
+      strategy = {:either_becomes_internal => true,:select_first => true}
+      relevant_link_defs.each do |link_def|
+        chosen_link = link_def.choose_internal_link(link_def[:possible_links], strategy)
+        link_def[:chosen_link] = chosen_link if chosen_link #chosen link can be null if for example link has :type="either" and 
+        #external link is prefered"
+      end
+
+      relevant_link_defs.each do |link_def|
+        next unless link = link_def[:chosen_link]
+      end
 
       #TODO: got here
 

@@ -11,28 +11,32 @@ module XYZ
       value = @term_mappings[term_index] ||= Value.create(term)
       value.update_component_attr_index!(self)
     end
+    def add_ref_component!(component_type)
+      term_index = component_type
+      value = @term_mappings[term_index] ||= ValueComponent.new(:component_type => component_type)
+    end
 
     attr_reader :component_attr_index
 
     def set_values!(link,link_defs_info)
-      link_defs_info
-return
+      local_cmp_type = link[:local_component_type]
+      local_cmp = get_component(local_cmp_type,link_defs_info)
+      remote_cmp_type = link[:remote_component_type]
+      remote_cmp = get_component(remote_cmp_type,link_defs_info)
 
-#TODO: old fn taht needs to be refactored
-      [link_info[:local_type],link_info[:remote_type]].each{|t|add_ref!(:component,t,t)}
-
+      [local_cmp_type,remote_cmp_type].each{|t|add_ref_component!(t)}
 
       @node_mappings = {
         :local => create_node_object(local_cmp),
         :remote => create_node_object(remote_cmp)
       }
       @term_mappings.values.each do |v| 
-        v.set_component_remote_and_local_value!(link_info,local_cmp,remote_cmp)
+        v.set_component_remote_and_local_value!(link,local_cmp,remote_cmp)
       end
-      #set (component) attributes
+      #set component attributes
       attrs_to_get = Hash.new
       @term_mappings.each_value do |v|
-        if v.kind_of?(ValueAttribute)
+        if v.kind_of?(ValueComponentAttribute)
           #v.component can be null if refers to component created by an event
           next unless cmp = v.component
           a = (attrs_to_get[cmp[:id]] ||= {:component => cmp, :attribute_info => Array.new})[:attribute_info]
@@ -60,6 +64,23 @@ return
     end
 
    private
+    def get_component(component_type,link_defs_info)
+      match = link_defs_info.find{|r|component_type == r[:component][:component_type]}
+      match && match[:component]
+    end
+
+    def create_node_object(component)
+      component.id_handle.createIDH(:model_name => :node, :id => component[:node_node_id]).create_object()
+    end
+
+    def set_component_remote_and_local_value!(link,local_cmp,remote_cmp)
+      return if @component_ref.nil? #would fire if this is a NodeAttribute
+      if @component_ref == link[:local_component_type]
+        @component = local_cmp
+      elsif @component_ref == link[:remote_component__type]
+        @component = remote_cmp
+      end
+    end
 
     class Value 
       attr_reader :component
@@ -94,7 +115,7 @@ return
 
     class ValueComponent < Value
       def initialize(term)
-        super(term[:component_name])
+        super(term[:component_type])
       end
       def value()
         @component
@@ -104,7 +125,7 @@ return
     class ValueComponentAttribute < Value
       attr_reader :attribute_ref
       def initialize(term)
-        super(term[:component_name])
+        super(term[:component_type])
         @attribute_ref = term[:attribute_name]
       end
       def value()
@@ -131,7 +152,7 @@ return
 
     class ValueLinkCardinality < Value
       def initialize(term)
-        super(term[:component_name])
+        super(term[:component_type])
         @attribute_ref = term[:attribute_name]
       end
     end

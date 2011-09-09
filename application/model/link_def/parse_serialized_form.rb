@@ -93,7 +93,7 @@ module XYZ
         ret[:node_name] = $1
       elsif split[0] =~ ComponentTermRE
         ret[:type] = "component_attribute"
-        ret[:component_name] = $1
+        ret[:component_type] = $1
       else
         raise Error.new("unexpected form")
       end

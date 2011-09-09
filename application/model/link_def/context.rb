@@ -67,7 +67,7 @@ module XYZ
       end
 
       def update_component_attr_index!(link_def_context)
-        p = link_def_context.component_attr_index[@component] ||= Array.new
+        p = link_def_context.component_attr_index[@component_ref] ||= Array.new
         p << {:attribute_name => @attribute_ref, :value_object => self}
       end
     end

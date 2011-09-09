@@ -724,6 +724,7 @@ module XYZ
       relevant_link_defs.each do |link_def|
         next unless link = link_def[:chosen_link]
         context = link.get_context()
+        context #TODO: stub
       end
 
       #TODO: got here

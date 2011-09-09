@@ -15,12 +15,13 @@ module XYZ
     def get_context()
       ret = LinkDefContext.new()
       content = self[:content]
-     # convert_to_parsed_form_parsed_form?()
-     # constraints = self[:constraints]
+      #TODO: add back in commented out parts
+     # constraints = content[:constraints]
      # constraints.each{|cnstr|cnstr.get_context_refs!(ret)} if constraints
       ams = content[:attribute_mappings]
       ams.each{|am|AttributeMapping.new(am).get_context_refs!(ret)} if ams
 #      ret.set_values!(self,local_cmp,remote_cmp)
+      ret
     end
 
     class AttributeMapping < HashObject

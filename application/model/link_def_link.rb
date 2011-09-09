@@ -1,6 +1,6 @@
 require  File.expand_path('link_def/context', File.dirname(__FILE__))
 module XYZ
-  class LinkDefPossibleLink < Model
+  class LinkDefLink < Model
     include LinkDefParseSerializedForm
     def self.create_from_serialized_form(link_def_idh,possible_links)
       rows = parse_possible_links(possible_links)
@@ -12,7 +12,7 @@ module XYZ
       create_from_rows(model_handle,rows)
     end
 
-    def get_context()
+    def get_context(components)
       ret = LinkDefContext.new()
       content = self[:content]
       #TODO: add back in commented out parts

@@ -10,7 +10,7 @@ module XYZ
           :display_name => ref,
           :local_or_remote => "local",
           :link_type => link_def_type,
-          :link_def_possible_link => possible_link
+          :link_def_link => possible_link
         }.merge(has_external_internal)
         el.merge!(:required => link_def["required"]) if link_def.has_key?("required")
         h.merge(ref => el)

@@ -1,6 +1,6 @@
 {
   :schema=>:link_def,
-  :table=>:posible_link,
+  :table=>:link,
   :columns=>{
     :remote_component_type => {:type=>:varchar, :size => 50},
     :position => {:type =>:integer},

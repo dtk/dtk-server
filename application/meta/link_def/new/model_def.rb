@@ -8,6 +8,6 @@
     :has_internal_link => {:type => :boolean}
   },
   :many_to_one=>[:component],
-  :one_to_many=>[:link_def_possible_link]
+  :one_to_many=>[:link_def_link]
 }
 

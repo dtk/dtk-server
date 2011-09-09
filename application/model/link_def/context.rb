@@ -7,6 +7,7 @@ module XYZ
       @component_attr_index = Hash.new
     end
     def add_ref!(term)
+      #TODO: see if theer can be name conflicts between different types in which nmay want to prefix with type (type's initials, like CA for componanet attribute)
       term_index = term[:term_index]
       value = @term_mappings[term_index] ||= Value.create(term)
       value.update_component_attr_index!(self)
@@ -73,15 +74,6 @@ module XYZ
       component.id_handle.createIDH(:model_name => :node, :id => component[:node_node_id]).create_object()
     end
 
-    def set_component_remote_and_local_value!(link,local_cmp,remote_cmp)
-      return if @component_ref.nil? #would fire if this is a NodeAttribute
-      if @component_ref == link[:local_component_type]
-        @component = local_cmp
-      elsif @component_ref == link[:remote_component__type]
-        @component = remote_cmp
-      end
-    end
-
     class Value 
       attr_reader :component
       def initialize(component_ref)
@@ -102,6 +94,15 @@ module XYZ
          else
           Log.error("unexpected type #{type}")
           nil
+        end
+      end
+
+      def set_component_remote_and_local_value!(link,local_cmp,remote_cmp)
+        return if @component_ref.nil? #would fire if this is a NodeAttribute
+        if @component_ref == link[:local_component_type]
+          @component = local_cmp
+        elsif @component_ref == link[:remote_component_type]
+          @component = remote_cmp
         end
       end
 

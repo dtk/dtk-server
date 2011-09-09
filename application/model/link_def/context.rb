@@ -7,7 +7,7 @@ module XYZ
       @component_attr_index = Hash.new
     end
     def add_ref!(term)
-      #TODO: see if theer can be name conflicts between different types in which nmay want to prefix with type (type's initials, like CA for componanet attribute)
+      #TODO: see if there can be name conflicts between different types in which nmay want to prefix with type (type's initials, like CA for componanet attribute)
       term_index = term[:term_index]
       value = @term_mappings[term_index] ||= Value.create(term)
       value.update_component_attr_index!(self)
@@ -74,6 +74,32 @@ module XYZ
       component.id_handle.createIDH(:model_name => :node, :id => component[:node_node_id]).create_object()
     end
 
+    def get_and_update_component_virtual_attributes!(attrs_to_get)
+      return if attrs_to_get.empty?
+      cols = [:id,:value_derived,:value_asserted]
+      from_db = Component.get_virtual_attributes__include_mixins(attrs_to_get,cols)
+      attrs_to_get.each do |component_id,hash_val|
+        next unless cmp_info = from_db[component_id]
+        hash_val[:attribute_info].each do |a|
+          attr_name = a[:attribute_name]
+          a[:value_object].set_attribute_value!(cmp_info[attr_name]) if cmp_info.has_key?(attr_name)
+        end
+      end
+    end
+
+    def get_and_update_node_virtual_attributes!(attrs_to_get)
+      return if attrs_to_get.empty?
+      cols = [:id,:value_derived,:value_asserted]
+      from_db = Node.get_virtual_attributes(attrs_to_get,cols)
+      attrs_to_get.each do |node_id,hash_val|
+        next unless node_info = from_db[node_id]
+        hash_val[:attribute_info].each do |a|
+          attr_name = a[:attribute_name]
+          a[:value_object].set_attribute_value!(node_info[attr_name]) if node_info.has_key?(attr_name)
+        end
+      end
+    end
+
     class Value 
       attr_reader :component
       def initialize(component_ref)
@@ -129,10 +155,12 @@ module XYZ
         super(term[:component_type])
         @attribute_ref = term[:attribute_name]
       end
+      def set_attribute_value!(attribute)
+        @attribute = attribute
+      end
       def value()
         @attribute
       end
-
       def update_component_attr_index!(link_def_context)
         p = link_def_context.component_attr_index[@component_ref] ||= Array.new
         p << {:attribute_name => @attribute_ref, :value_object => self}
@@ -146,6 +174,9 @@ module XYZ
         @node_ref = term[:node_name]
         @attribute_ref = term[:attribute_name]
       end
+      def set_attribute_value!(attribute)
+        @attribute = attribute
+      end
       def value()
         @attribute
       end
@@ -155,6 +186,9 @@ module XYZ
       def initialize(term)
         super(term[:component_type])
         @attribute_ref = term[:attribute_name]
+      end
+      def set_attribute_value!(attr)
+        @attribute =  attr
       end
     end
   end

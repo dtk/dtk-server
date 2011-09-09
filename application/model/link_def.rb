@@ -16,20 +16,9 @@ module XYZ
         link_def[:chosen_link] = chosen_link if chosen_link #chosen link can be null if for example link has :type="internal_external" and external link is prefered"
       end
 
-      #get all other components onnode that can be linked
-      component.update_object!(:component_type, :extended_base, :implementation_id)
-      component_id = component.id
-      node_id = node.id
-      sp_hash = {
-        :model_name => :component,
-        :filter => [:and, [:eq, :node_node_id, node_id],[:neq, :id, component_id]],
-        :cols => [:component_type, :extended_base, :implementation_id, :node_node_id]
-      }
-      components = get_objs(component.model_handle,sp_hash) 
-      components << component
       relevant_link_defs.each do |link_def|
         next unless link = link_def[:chosen_link]
-        context = link.get_context(components)
+        context = link.get_context(node_link_defs_info)
         context #TODO: stub
       end
 

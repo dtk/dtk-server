@@ -12,7 +12,8 @@ module XYZ
       create_from_rows(model_handle,rows)
     end
 
-    def get_context(components)
+    #TODO: instaed pass in node_link_defs_info
+    def get_context(link_defs_info)
       ret = LinkDefContext.new()
       content = self[:content]
       #TODO: add back in commented out parts
@@ -21,7 +22,7 @@ module XYZ
       ams = content[:attribute_mappings]
       ams.each{|am|AttributeMapping.new(am).get_context_refs!(ret)} if ams
       
-#      ret.set_values!(self,local_cmp,remote_cmp)
+      ret.set_values!(self,link_defs_info)
       ret
     end
 

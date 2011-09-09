@@ -45,14 +45,15 @@ module XYZ
          }]
 
       ##### for connection to ports and port links
-      virtual_column :link_defs_and_component_ports, :type => :json, :hidden => true, 
+      virtual_column :node_link_defs_info, :type => :json, :hidden => true, 
         :remote_dependencies => 
         [
          {
            :model_name => :component,
+           :convert => true,
            :join_type => :inner,
            :join_cond=>{:node_node_id => q(:node,:id)},
-           :cols => [:id,:display_name]
+           :cols => [:id,:display_name,:component_type, :extended_base, :implementation_id, :node_node_id]
          },
          {
            :model_name => :link_def,
@@ -649,7 +650,7 @@ module XYZ
 
       #get the link defs/component_ports associated with components on the node; this is used
       #to determine if need to add internal links and for port processing
-      node_link_defs_info = get_objs(:cols => [:link_defs_and_component_ports])
+      node_link_defs_info = get_objs(:cols => [:node_link_defs_info])
       component_id = component.id()
       
       ###create needed component ports

@@ -14,7 +14,10 @@ module XYZ
 
     attr_reader :component_attr_index
 
-    def set_values!(link_info,local_cmp,remote_cmp)
+    def set_values!(link,link_defs_info)
+      link_defs_info
+return
+
 #TODO: old fn taht needs to be refactored
       [link_info[:local_type],link_info[:remote_type]].each{|t|add_ref!(:component,t,t)}
 

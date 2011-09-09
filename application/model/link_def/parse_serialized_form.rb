@@ -26,8 +26,8 @@ module XYZ
         :local_or_remote => "remote",
         :link_type => link_def_type,
       }
-      pointer[ref][:has_internal_link] = true if %w{internal either}.include?(possible_link_type)
-      pointer[ref][:has_external_link] = true if %w{external either}.include?(possible_link_type)
+      pointer[ref][:has_internal_link] = true if %w{internal internal_external}.include?(possible_link_type)
+      pointer[ref][:has_external_link] = true if %w{external internal_external}.include?(possible_link_type)
     end
 
     def parse_possible_links_local(possible_links,link_def_type,config_agent_type,remote_link_defs,has_external_internal)
@@ -39,8 +39,8 @@ module XYZ
 
         add_remote_link_def?(remote_link_defs,config_agent_type,remote_component_type,link_def_type,possible_link_type)
 
-        has_external_internal[:has_internal_link] = true if %w{internal either}.include?(possible_link_type)
-        has_external_internal[:has_external_link] = true if %w{external either}.include?(possible_link_type)
+        has_external_internal[:has_internal_link] = true if %w{internal internal_external}.include?(possible_link_type)
+        has_external_internal[:has_external_link] = true if %w{external internal_external}.include?(possible_link_type)
 
         position += 1
         ref = remote_component_type

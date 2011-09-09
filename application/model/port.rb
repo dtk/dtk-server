@@ -74,7 +74,7 @@ module XYZ
         dir = link_def[:local_or_remote] == "local" ?  "input" : "output"
         type = 
           if link_def[:has_external_link]
-            link_def[:has_internal_link] ? "component_either" : "component_external"
+            link_def[:has_internal_link] ? "component_internal_external" : "component_external"
           else #will be just link_def[:has_internal_link]
             "component_internal"
           end

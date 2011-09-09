@@ -714,11 +714,11 @@ module XYZ
       return if relevant_link_defs.empty?
       #for each link def with multiple possibel link defs find the match; 
       #TODO: find good mechanism to get user input if there is a choice such as whether it is internal or external
-      #look art passing in "stratagy" object which for example can idicate to make all "eithers internal"
-      strategy = {:either_becomes_internal => true,:select_first => true}
+      #look art passing in "stratagy" object which for example can indicate to make all "internal_external internal"
+      strategy = {:internal_external_becomes_internal => true,:select_first => true}
       relevant_link_defs.each do |link_def|
         chosen_link = link_def.choose_internal_link(link_def[:possible_links], strategy)
-        link_def[:chosen_link] = chosen_link if chosen_link #chosen link can be null if for example link has :type="either" and external link is prefered"
+        link_def[:chosen_link] = chosen_link if chosen_link #chosen link can be null if for example link has :type="internal_external" and external link is prefered"
       end
 
       relevant_link_defs.each do |link_def|
@@ -771,7 +771,7 @@ module XYZ
       node_link_defs_info.each do |r|
         port = r[:port]
         link_def = r[:link_def]
-        if %w{component_internal component_either}.include?(port[:type]) and
+        if %w{component_internal component_internal_external}.include?(port[:type]) and
             link_def[:local_or_remote] == "local" and
             not port[:connected]
           link_def_id = link_def[:id]
@@ -784,10 +784,10 @@ module XYZ
 
       #get relevant possible_link link defs; these are ones that 
       #are children of relevant_link_def_ids and
-      #either have link_def_id in cmp_link_def_ids or remote_component_type == component_type
+      #internal_external have link_def_id in cmp_link_def_ids or remote_component_type == component_type
       sp_hash = {
         :cols => [:link_def_id, :remote_component_type,:position,:content,:type],
-        :filter => [:and, [:oneof, :type, %w{internal either}],
+        :filter => [:and, [:oneof, :type, %w{internal internal_external}],
                           [:oneof, :link_def_id, relevant_link_def_ids],
                           [:or, [:eq,:remote_component_type,component_type],
                                 [:oneof, :link_def_id,cmp_link_def_ids]]],

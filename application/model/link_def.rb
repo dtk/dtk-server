@@ -8,8 +8,8 @@ module XYZ
       return ret if possible_links.empty?
       raise Error.new("only select_first strataggy currently implemented") unless strategy[:select_first]
       ret = possible_links.first
-      if ret[:type] == "either"
-        raise Error.new("only strategy either_becomes_internal implemented") unless stratagy[:either_becomes_internal]
+      if ret[:type] == "internal_external"
+        raise Error.new("only strategy internal_external_becomes_internal implemented") unless stratagy[:internal_external_becomes_internal]
       end
       ret
     end

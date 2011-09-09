@@ -14,6 +14,48 @@ module XYZ
 
     attr_reader :component_attr_index
 
+    def set_values!(link_info,local_cmp,remote_cmp)
+#TODO: old fn taht needs to be refactored
+      [link_info[:local_type],link_info[:remote_type]].each{|t|add_ref!(:component,t,t)}
+
+
+      @node_mappings = {
+        :local => create_node_object(local_cmp),
+        :remote => create_node_object(remote_cmp)
+      }
+      @term_mappings.values.each do |v| 
+        v.set_component_remote_and_local_value!(link_info,local_cmp,remote_cmp)
+      end
+      #set (component) attributes
+      attrs_to_get = Hash.new
+      @term_mappings.each_value do |v|
+        if v.kind_of?(ValueAttribute)
+          #v.component can be null if refers to component created by an event
+          next unless cmp = v.component
+          a = (attrs_to_get[cmp[:id]] ||= {:component => cmp, :attribute_info => Array.new})[:attribute_info]
+          a << {:attribute_name => v.attribute_ref.to_s, :value_object => v}
+        end
+      end
+      get_and_update_component_virtual_attributes!(attrs_to_get)
+
+      #set node attributes
+      attrs_to_get = Hash.new
+      @term_mappings.each_value do |v|
+        if v.kind_of?(ValueNodeAttribute)
+          node = @node_mappings[v.node_ref]
+          unless node
+            Log.error("cannot find node associated with node ref")
+            next
+          end
+          a = (attrs_to_get[node[:id]] ||= {:node => node, :attribute_info => Array.new})[:attribute_info]
+          a << {:attribute_name => v.attribute_ref.to_s, :value_object => v}
+        end
+      end
+      get_and_update_node_virtual_attributes!(attrs_to_get)
+
+      self
+    end
+
    private
 
     class Value 

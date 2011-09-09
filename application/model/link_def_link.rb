@@ -20,6 +20,7 @@ module XYZ
      # constraints.each{|cnstr|cnstr.get_context_refs!(ret)} if constraints
       ams = content[:attribute_mappings]
       ams.each{|am|AttributeMapping.new(am).get_context_refs!(ret)} if ams
+      
 #      ret.set_values!(self,local_cmp,remote_cmp)
       ret
     end

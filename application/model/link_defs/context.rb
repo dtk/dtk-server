@@ -99,6 +99,7 @@ module XYZ
 
       self
     end
+
    private
 
     def get_and_update_component_virtual_attributes!(attrs_to_get)

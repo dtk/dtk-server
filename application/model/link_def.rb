@@ -12,7 +12,7 @@ module XYZ
       #look art passing in "stratagy" object which for example can indicate to make all "internal_external internal"
       strategy = {:internal_external_becomes_internal => true,:select_first => true}
       relevant_link_defs.each do |link_def|
-        chosen_link = link_def.choose_internal_link(link_def[:possible_links], strategy)
+        chosen_link = link_def.choose_internal_link(link_def[:possible_links],component,strategy)
         link_def[:chosen_link] = chosen_link if chosen_link #chosen link can be null if for example link has :type="internal_external" and external link is prefered"
       end
 
@@ -61,7 +61,7 @@ module XYZ
 =end
     end
 
-    def choose_internal_link(possible_links, strategy)
+    def choose_internal_link(possible_links,component,strategy)
       #TODO: mostly stubbed fn
       #TODO: need to check if has contraint
       ret = nil
@@ -71,7 +71,8 @@ module XYZ
       if ret[:type] == "internal_external"
         raise Error.new("only strategy internal_external_becomes_internal implemented") unless stratagy[:internal_external_becomes_internal]
       end
-      ret
+      component.update_object!(:component_type)
+      ret.merge(:local_component_type => component[:component_type])
     end
   private
 

@@ -60,7 +60,6 @@ module XYZ
         end
       end
       get_and_update_node_virtual_attributes!(attrs_to_get)
-
       self
     end
 

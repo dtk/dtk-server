@@ -12,42 +12,13 @@ module XYZ
       #look art passing in "stratagy" object which for example can indicate to make all "internal_external internal"
       strategy = {:internal_external_becomes_internal => true,:select_first => true}
       relevant_link_defs.each do |link_def|
-        chosen_link = link_def.choose_internal_link(link_def[:possible_links],component,strategy)
-        link_def[:chosen_link] = chosen_link if chosen_link #chosen link can be null if for example link has :type="internal_external" and external link is prefered"
-      end
-
-      relevant_link_defs.each do |link_def|
-        next unless link = link_def[:chosen_link]
-        context = link.get_context(node_link_defs_info)
-        context #TODO: stub
-      end
-
-      #TODO: got here
-=begin
-      #TODO: more efficient would be to have clone object output have this info
-      component.update_object!(:component_type,:extended_base,:implementation_id,:node_node_id)
-      conn_profile = component.get_objects_col_from_sp_hash({:cols => [:connectivity_profile_internal]}).first
-      return unless conn_profile
-      #get all other components on node
-      component_id = component.id
-      sp_hash = {
-        :model_name => :component,
-        :filter => [:neq, :id, component_id],
-        :cols => [:component_type,:most_specific_type, :extended_base, :implementation_id, :node_node_id]
-      }
-      other_cmps = get_children_from_sp_hash(:component,sp_hash)
-      conn_info_list = conn_profile.match_other_components(other_cmps)
-      return if conn_info_list.empty?
-      parent_idh = component.id_handle.get_parent_id_handle
-
-      conn_info_list.each do |conn_info|
-        context = conn_info.get_context(component,conn_info[:other_component])
-        (conn_info[:attribute_mappings]||[]).each do |attr_mapping|
-          link = attr_mapping.ret_link(context)
-          AttributeLink.create_attr_links(parent_idh,[link])
+        next unless link_def_link = link_def.choose_internal_link(link_def[:possible_links],component,strategy)
+        context = link_def_link.get_context(node_link_defs_info)
+        link_def_link.attribute_mappings.each do |attr_mapping|
+          attr_link = attr_mapping.ret_link(context)
+          AttributeLink.create_attr_links(parent_idh,[attr_link])
         end
       end
-=end
     end
 
     def choose_internal_link(possible_links,component,strategy)
@@ -55,7 +26,7 @@ module XYZ
       #TODO: need to check if has contraint
       ret = nil
       return ret if possible_links.empty?
-      raise Error.new("only select_first strataggy currently implemented") unless strategy[:select_first]
+      raise Error.new("only select_first stratagy currently implemented") unless strategy[:select_first]
       ret = possible_links.first
       if ret[:type] == "internal_external"
         raise Error.new("only strategy internal_external_becomes_internal implemented") unless stratagy[:internal_external_becomes_internal]

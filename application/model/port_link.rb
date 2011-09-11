@@ -2,8 +2,6 @@ module XYZ
   class PortLink < Model
     def self.create_port_and_attr_links(parent_idh,port_links_to_create,opts={})
       #make sure that there is a possible link that corresponds to the drawn port link
-
-
       attr_mh = parent_idh.createMH(:model_name => :attribute,:parent_model_name=>:component) #TODO: parent model name can also be node
       attr_info = get_attribute_info(attr_mh,port_links_to_create)
       set_external_link_info!(port_links_to_create,attr_info)

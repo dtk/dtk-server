@@ -41,6 +41,19 @@ module XYZ
         ret.merge!(:output_path => output_path) if output_path
         ret
       end
+     private
+      #returns [attribute,unravel_path]
+      def get_attribute_with_unravel_path(dir,context)
+        index_map_path = nil
+        attr = nil
+        ret = [attr,index_map_path]
+        attr = context.find_attribute(self[dir][:term_index])
+        if self[:path]
+          #TODO: if treat :create_component_index need to put in here process_unravel_path and process_create_component_index (from link_defs.rb)
+          index_map_path = self[:path]
+        end
+        [attr,index_map_path && AttributeLink::IndexMapPath.create_from_array(index_map_path)]
+      end
     end
   end
 end

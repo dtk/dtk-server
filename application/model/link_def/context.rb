@@ -6,6 +6,10 @@ module XYZ
       @node_mappings = Hash.new
       @component_attr_index = Hash.new
     end
+    def find_attribute(term_index)
+      match = @term_mappings[term_index]
+      match && match.value
+    end
     def add_ref!(term)
       #TODO: see if there can be name conflicts between different types in which nmay want to prefix with type (type's initials, like CA for componanet attribute)
       term_index = term[:term_index]

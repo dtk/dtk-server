@@ -22,10 +22,10 @@ module XYZ
     end
 
     ######### Model apis
-    def get_ports(*types)
+    def get_ports(type=nil)
       port_list = get_objs(:cols => [:node_ports]).map{|r|r[:port]}
       i18n = get_i18n_mappings_for_models(:component,:attribute)
-      port_list.map{|port|port.filter_and_process!(i18n,*types)}.compact
+      port_list.map{|port|port.filter_and_process!(type,i18n)}.compact
     end
 
     def destroy_and_delete_nodes()
@@ -61,27 +61,13 @@ module XYZ
       end
 
       raw_link_list = Node.get_port_links(node_id_handles,type)
-
-      link_list = Array.new
+      ndx_ret = Hash.new
       raw_link_list.each do |el|
         [:input_port_links,:output_port_links].each do |dir|
-          next unless el.has_key?(dir)
-          el[dir].each do |port_link|
-            port_dir = dir == :input_port_links ? "input" : "output"
-            port_id = dir == :input_port_links ? port_link[:input_id] : port_link[:output_id]
-            other_end_id = dir == :input_port_links ? port_link[:output_id] : port_link[:input_id]
-            link_list << {
-              :id => port_link[:id],
-              :item_id => el[:id],
-              :port_id => port_id,
-              :type => type,
-              :port_dir => port_dir,
-              :other_end_id => other_end_id
-            }
-          end
+          (el[dir]||[]).each{|port_link|ndx_ret[port_link[:id]] ||= port_link}
         end
       end
-      link_list
+      ndx_ret.values
     end
 
     #### clone helping functions

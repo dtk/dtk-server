@@ -462,10 +462,10 @@ module XYZ
       get_objs_in_set(id_handles,{:cols => [:ports]},{:keep_ref_cols => true}).map{|r|r[:port]}
     end
 
-    def get_ports(type=nil)
+    def get_ports(*types)
       port_list = self.class.get_ports([id_handle])
       i18n = get_i18n_mappings_for_models(:component,:attribute)
-      port_list.map{|port|port.filter_and_process!(type,i18n)}.compact
+      port_list.map{|port|port.filter_and_process!(i18n,*types)}.compact
     end
 
     def self.get_port_links(id_handles,type="l4")

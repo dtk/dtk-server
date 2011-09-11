@@ -37,15 +37,14 @@ module XYZ
 
     ###########
     #returns nil if filtered
-    def filter_and_process!(type=nil,i18n=nil)
-      keep = 
-        (type.nil? or 
-          case type
-            when "external" then self[:type] == "external"
-            #if type is l4 return l4 ports and external ones not yet placed under a l4 port
-            when "l4" then self[:type] == "l4" or (self[:type] == "external" and self[:containing_port_id].nil?)
-          end)
-      return nil unless keep
+    def filter_and_process!(i18n,*types)
+      unless types.empty?  
+        return nil unless types.include?(self[:type])
+        if types.include?("external") #TODO: this special case may go away
+          return nil if self[:containing_port_id].nil? 
+        end
+      end
+
       merge!(:display_name => get_i18n_port_name(i18n,self)) if i18n
       merge!(:port_type=> self[:direction]) #TODO: should probably deprecate after get rid of using in front end
       materialize!(self.class.common_columns())

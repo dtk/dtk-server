@@ -18,6 +18,7 @@ module XYZ
     def self.create_port_and_attr_links(parent_idh,port_link_hash,opts={})
       #get the associated link_def_link TODO: if it does not exist means contraint violation
       link_def_link = get_associated_link_def_link(parent_idh,port_link_hash)
+      raise PortLinkError.new("Illegal link") unless link_def_link
 #TODO: incrementally putting back in
 =begin
       #make sure that there is a possible link that corresponds to the drawn port link
@@ -41,7 +42,20 @@ module XYZ
         :filter => [:oneof, :id, [port_link_hash[:input_id],port_link_hash[:output_id]]]
       }
       link_def_info = get_objs(parent_idh.createMH(:port),sp_hash)
-      link_def_info
+      #local_cmp_info wil haev a row per link_def_link associated with it (link_def_link under local link defs, not remote ones)
+      local_cmp_info = link_def_info.select{|r|r[:link_def][:local_or_remote] == "local"}
+      return nil if local_cmp_info.empty?
+      remote_cmp_info = link_def_info.find{|r|r[:link_def][:local_or_remote] == "remote"}
+      return nil unless remote_cmp_info
+      return nil unless local_cmp_info.first[:link_def][:link_type] == remote_cmp_info[:link_def][:link_type]
+      #find the matching link_def_link
+      remote_cmp_type = remote_cmp_info[:component][:component_type]
+      match = local_cmp_info.find{|r|(r[:link_def_link]||{})[:remote_component_type] == remote_cmp_type} 
+      return nil unless match
+      match[:link_def_link].merge(:local_component => local_cmp_info.first[:component], :remote_component => remote_cmp_info[:component])
     end
+  end
+
+  class PortLinkError < ErrorForUser
   end
 end

@@ -16,6 +16,8 @@ module XYZ
       self[:attribute_mappings] ||= (self[:content][:attribute_mappings]||[]).map{|am|AttributeMapping.new(am)}
     end
 
+    #TODO: this is making too many assumptions about form of link_defs_info
+    #and that self has stra field local_component_type
     def get_context(link_defs_info)
       ret = LinkDefContext.new()
       #TODO: add back in commented out parts

@@ -68,17 +68,21 @@ module XYZ
       port_mh = node.model_handle.create_childMH(:port)
       component_type = (component.update_object!(:component_type))[:component_type]
       rows = component_link_defs.map do |link_def|
-        ref = "#{component_type}-#{link_def[:type]}"
-        #TODO: just hueristc for computing dir; also need to upport "<>" (bidirectional)
-        dir = link_def[:local_or_remote] == "local" ?  "input" : "output"
         type = 
           if link_def[:has_external_link]
             link_def[:has_internal_link] ? "component_internal_external" : "component_external"
           else #will be just link_def[:has_internal_link]
             "component_internal"
           end
+
+        ref = "#{type}___#{component_type}___#{link_def[:link_type]}"
+        display_name = ref #TODO: rather than encoded name to component i18n name, make add a structured column likne name_context
+        #TODO: just hueristc for computing dir; also need to upport "<>" (bidirectional)
+        dir = link_def[:local_or_remote] == "local" ?  "input" : "output"
+
         {
           :ref => ref,
+          :display_name => display_name,
           :direction => dir,
           :link_def_id => link_def[:id],
           :node_node_id => node_id,

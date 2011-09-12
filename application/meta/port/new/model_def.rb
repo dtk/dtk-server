@@ -60,7 +60,7 @@
          :convert => true,
          :join_type=>:inner,
          :join_cond=>{:id =>:port__link_def_id},
-         :cols=>[:id,:display_name,:component_component_id,:link_type,:has_external_link,:has_internal_link]
+         :cols=>[:id,:display_name,:component_component_id,:link_type,:has_external_link,:has_internal_link,:local_or_remote]
        },
        {
          :model_name=>:component,

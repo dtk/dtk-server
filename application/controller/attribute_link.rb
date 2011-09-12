@@ -9,7 +9,7 @@ module XYZ
 
       port_link_hash = {
         :input_id => hash["input_id"].to_i,
-        :ouput_id => hash["output_id"].to_i
+        :output_id => hash["output_id"].to_i
       }
       parent_id_handle = id_handle(hash["parent_id"],hash["parent_model_name"])
       handle_errors do

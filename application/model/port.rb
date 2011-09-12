@@ -59,7 +59,8 @@ module XYZ
       end
     end
 
-    #creates need component Pports and updates node_link_defs_info
+
+    #creates need component Ports and updates node_link_defs_info
     def self.create_needed_component_ports(component_link_defs,node,component,opts={})
       ret = Array.new
       return ret if component_link_defs.empty?

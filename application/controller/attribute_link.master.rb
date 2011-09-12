@@ -1,30 +1,74 @@
 module XYZ
   class Attribute_linkController < Controller
     helper :ports
-
-    #deprecate for Port_linkController#save
     def save(explicit_hash=nil,opts={})
-      hash = explicit_hash || request.params
-      return Error.new("not implemented update of port link") if hash["id"]
+      hash = explicit_hash || request.params.dup
+      return Error.new("not implemented update of attribute link") if hash["id"]
 
-      port_link_hash = {
-        :input_id => hash["input_id"].to_i,
-        :ouput_id => hash["output_id"].to_i
+      #TODO: right now call reaching here has port link attributes not attribute links; so should probably move this to under port link controller
+      port_input_id,port_output_id = [hash["input_id"].to_i,hash["output_id"].to_i]
+      port_idhs = [port_input_id,port_output_id].map{|id|id_handle(id,:port)}
+      indexed_attrs = Port.get_attribute_info(port_idhs).inject({}){|h,r|h.merge(r[:id] => r)}
+      attr_link = {
+        :display_name => hash["name"],
+        :input_id => indexed_attrs[port_input_id][:attribute][:id],
+        :output_id => indexed_attrs[port_output_id][:attribute][:id]
       }
-      parent_id_handle = id_handle(hash["parent_id"],hash["parent_model_name"])
+
+      temp_link_id = hash["temp_link_id"]
+
       handle_errors do
-        ret = PortLink.create_port_and_attr_links(parent_id_handle,port_link_hash)
-        puts "-------------------------"
-        pp ["new create link response:", ret]
-        puts "-------------------------"
-        new_id = ret[:new_port_links].first
+        parent_id_handle = id_handle(hash["parent_id"],hash["parent_model_name"])
+        #TODO: many hacks to return new interface to front end
+        port_update = AttributeLink.create_port_and_attr_links(parent_id_handle,[attr_link])
+        new_id = port_update[:new_port_links].first || port_update[:existing_l4_link_ids].first
+
+        #TODO: more efficient if create_port_and_attr_links returns new or existing port_link
+        link = create_object_from_id(new_id,:port_link)
+        link.update_object!(:input_id,:output_id)
+        link[:ui] ||= {
+          :type => R8::Config[:links][:default_type],
+          :style => R8::Config[:links][:default_style]
+        }
+
+        input_port = create_object_from_id(link[:input_id],:port)
+        input_port.update_and_materialize_object!(*Port.common_columns())
+        
+        port_merge_info = port_update[:merged_external_ports].first
+        if not port_update[:new_l4_ports].empty?
+          input_port.merge!(:update_info => "replace_with_new", :replace_id => port_merge_info[:external_port_id])
+        elsif port_merge_info and not port_merge_info.empty?
+          input_port.merge!(:update_info => "merge", :merge_id => port_merge_info[:external_port_id])
+        else
+          input_port.merge!(:update_info => "no_change")
+        end
+
+
+        output_port = create_object_from_id(link[:output_id],:port)
+        output_port.update_and_materialize_object!(*Port.common_columns())
+        #only new ports created on input side
+        output_port.merge!(:update_info => "no_change")
+          
+       ret = {
+          :temp_link_id => temp_link_id,
+          :link => link,
+          :input_port => input_port,
+          :output_port => output_port,
+        }
+
+puts "-------------------------"
+pp ["new create link response:", ret]
+puts "-------------------------"
+
+        return {:data=>ret}
+
         if hash["return_model"] == "true"
           return {:data=> 
-            {
-              :link =>get_object_by_id(new_id,:port_link),
-              :link_changes => ret
+              {
+                :link =>get_object_by_id(new_id,:port_link),
+                :link_changes => port_update
+              }
             }
-          }
         end
     
         return new_id if opts[:return_id]

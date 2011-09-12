@@ -51,6 +51,32 @@
       :hidden=>true,
       :local_dependencies => [:node_node_id]
     },
+    :link_def_info=>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [{
+         :model_name=>:link_def,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:id =>:port__link_def_id},
+         :cols=>[:id,:display_name,:component_component_id,:link_type,:has_external_link,:has_internal_link]
+       },
+       {
+         :model_name=>:component,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:id => :link_def__component_component_id},
+         :cols=>[:id,:display_name,:component_type]
+       },
+       {
+         :model_name=>:link_def_link,
+         :convert => true,
+         :join_type=>:left_outer,
+         :join_cond=>{:link_def_id=>:link_def__id},
+         :cols=>[:id,:display_name,:remote_component_type,:position,:content,:type]
+       }]
+    },
     :attribute=>{
       :type=>:json,
       :hidden=>true,

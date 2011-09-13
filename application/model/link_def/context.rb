@@ -172,7 +172,7 @@ module XYZ
 
     class ValueNodeAttribute < Value
       attr_reader :attribute_ref, :node_ref
-      def initialize(node_ref,attr_ref)
+      def initialize(term)
         super(nil)
         @node_ref = term[:node_name]
         @attribute_ref = term[:attribute_name]

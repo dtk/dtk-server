@@ -58,8 +58,12 @@ module XYZ
     def parse_possible_link_content(possible_link)
       ret = Hash.new
       events = possible_link["events"]||[]
-      unless events.empty?
-        ret[:events] = events.map{|ev|parse_possible_link_event(ev)}
+      events.each do |evs|
+        parsed_evs = parse_possible_link_on_create_events(evs)
+        unless parsed_evs.empty?
+          on_create_evs = (ret[:events] ||= Hash.new)[:on_create] ||= Array.new
+          on_create_evs += parsed_evs
+        end
       end
       attribute_mappings = possible_link["attribute_mappings"]||[]
       unless attribute_mappings.empty?
@@ -74,10 +78,38 @@ module XYZ
         :input => parse_attribute_term(mapping.values.first)
       }
     end
-    def parse_possible_link_event(events)
+    def parse_possible_link_on_create_events(events)
+      trigger = events.first
+      case trigger
+       when "on_create_link" then parse_events(events[1])
+       else
+        Log.error("unexpected event trigger: #{trigger}")
+        Array.new
+      end
+    end 
+
+    def parse_events(events)
       ret = Array.new
-      return ret if events.empty?
-      #TODO: stub
+      events.each do |ev_type, ev_content|
+        case ev_type
+         when "extend_component" 
+          parsed_ev = parse_event_extend_component(ev_content)
+          ret << parsed_ev if parsed_ev
+         else
+          Log.error("unexpected event type: #{ev_type}")
+        end
+      end
+      ret
+    end
+
+    def parse_event_extend_component(ev_content)
+      remote_or_local = ev_content[:node] || :remote
+      ret = {
+        :event_type => "extend_component",
+        :node => remote_or_local,
+        :extension_type => ev_content[:extension_type],
+      }
+      ret.merge!(:alias => ev_content[:alias]) if ev_content.has_key?(:alias)
       ret
     end
 

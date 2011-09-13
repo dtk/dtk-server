@@ -17,7 +17,7 @@ module XYZ
       get_context!(rows_to_create,attr_info)
       check_constraints(attr_mh,rows_to_create)
       create_attr_links_aux!(rows_to_create,parent_idh,attr_mh,attr_info,opts)
-      process_external_link_defs?(parent_idh,rows_to_create,attr_info)
+      process_external_link_defs?(parent_idh,rows_to_create)
 
       #TODO: assumption is that what is created by process_external_link_defs? has no bearing on l4 ports (as manifsted by using attr_links arg computred before process_external_link_defs? call
       attr_links = rows_to_create.map{|r|{:input => attr_info[r[:input_id]],:output => attr_info[r[:output_id]]}}
@@ -116,8 +116,9 @@ module XYZ
     add_to_remove_keys :input_path,:output_path
 
 
+    #TODO: deprecate below for above for AttributeLink.create_attr_links_from_link_def
     #TODO: can better bulk up operations
-    def self.process_external_link_defs?(parent_idh,rows_to_create,attr_info)
+    def self.process_external_link_defs?(parent_idh,rows_to_create)
       rows_to_create.each do |row|
         conn_info = row[:conn_info]
         next unless conn_info

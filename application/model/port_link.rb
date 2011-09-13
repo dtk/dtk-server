@@ -19,10 +19,7 @@ module XYZ
       #get the associated link_def_link TODO: if it does not exist means contraint violation
       link_def_link, components = get_link_def_and_components(parent_idh,port_link_hash)
       raise PortLinkError.new("Illegal link") unless link_def_link
-      link_defs_info = components.map{|cmp| {:component => cmp}}
-      context = link_def_link.get_context(link_defs_info)
-      context
-
+      AttributeLink.create_attr_links_from_external_link_def(parent_idh,link_def_link,components)
 #TODO: incrementally putting back in
 =begin
       #make sure that there is a possible link that corresponds to the drawn port link
@@ -32,7 +29,7 @@ module XYZ
       get_context!(port_link_hash,attr_info)
       check_constraints(attr_mh,port_link_hash)
       create_attr_links_aux!(port_link_hash,parent_idh,attr_mh,attr_info,opts)
-      process_external_link_defs?(parent_idh,port_link_hash,attr_info)
+      process_external_link_defs?(parent_idh,port_link_hash)
 
       #TODO: assumption is that what is created by process_external_link_defs? has no bearing on l4 ports (as manifsted by using attr_links arg computred before process_external_link_defs? call
       attr_links = port_link_hash.map{|r|{:input => attr_info[r[:input_id]],:output => attr_info[r[:output_id]]}}

@@ -74,35 +74,22 @@ module XYZ
     end
 
     class Event < HashObject
-      def self.parse_and_create(trigger,rhs,single_link_context)
-        if trigger == :on_create_link 
-          if rhs.keys.first.to_sym == :extend_component
-            EventExtendComponent.new(rhs.values.first,single_link_context)
+      def self.create(event,link_def_link)
+        case event["event_type"]
+          when "extend_component" then EventExtendComponent.new(event,link_def_link)
           else
-            raise Error.new("unexpected link definition right hand side type #{rhs.keys.first}")
-          end
-        else
-          raise Error.new("unexpected link definition event trigger #{hash.keys.first}")
+            raise Error.new("unexpecetd event type")
         end
       end
-      #processes event and updates context; needs to be overritten
       def process!(context)
         raise Error.new("Needs to be overwritten")
       end
     end
 
     class EventExtendComponent < Event
-      def initialize(hash,single_link_context)
-        validate_top_level(hash)
-        remote_or_local = (hash[:node] || :remote).to_sym
-        base_cmp = single_link_context[remote_or_local == :remote ? :remote_type : :local_type]
-        new_hash = {
-          :node => remote_or_local,
-          :extension_type => hash[:extension_type],
-          :base_component => base_cmp
-        }
-        new_hash.merge!(:alias => hash[:alias]) if hash.has_key?(:alias)
-        super(new_hash)
+      def initialize(event,link_def_link)
+        base_cmp = link_def_link[event["node"] == "remote" ? "remote_type" : "local_type"]
+        super(event.merge("base_component" =>  base_cmp))
       end
 
       def process!(context)

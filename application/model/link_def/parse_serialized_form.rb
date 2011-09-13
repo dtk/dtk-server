@@ -90,7 +90,9 @@ module XYZ
 
     def parse_events(events)
       ret = Array.new
-      events.each do |ev_type, ev_content|
+      events.each do |ev|
+        ev_type = ev.keys.first
+        ev_content = ev.values.first
         case ev_type
          when "extend_component" 
           parsed_ev = parse_event_extend_component(ev_content)
@@ -107,9 +109,9 @@ module XYZ
       ret = {
         :event_type => "extend_component",
         :node => remote_or_local,
-        :extension_type => ev_content[:extension_type],
+        :extension_type => ev_content["extension_type"],
       }
-      ret.merge!(:alias => ev_content[:alias]) if ev_content.has_key?(:alias)
+      ret.merge!(:alias => ev_content["alias"]) if ev_content.has_key?("alias")
       ret
     end
 

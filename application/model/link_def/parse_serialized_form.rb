@@ -60,10 +60,7 @@ module XYZ
       events = possible_link["events"]||[]
       events.each do |evs|
         parsed_evs = parse_possible_link_on_create_events(evs)
-        unless parsed_evs.empty?
-          on_create_evs = (ret[:events] ||= Hash.new)[:on_create] ||= Array.new
-          on_create_evs += parsed_evs
-        end
+        (ret[:events] ||= Hash.new).merge!(parsed_evs) if parsed_evs
       end
       attribute_mappings = possible_link["attribute_mappings"]||[]
       unless attribute_mappings.empty?
@@ -81,10 +78,11 @@ module XYZ
     def parse_possible_link_on_create_events(events)
       trigger = events.first
       case trigger
-       when "on_create_link" then parse_events(events[1])
+       when "on_create_link"
+        {:on_create => parse_events(events[1])}
        else
         Log.error("unexpected event trigger: #{trigger}")
-        Array.new
+        nil
       end
     end 
 

@@ -19,7 +19,7 @@ module XYZ
       #get the associated link_def_link TODO: if it does not exist means contraint violation
       link_def_link, components = get_link_def_and_components(parent_idh,port_link_hash)
       raise PortLinkError.new("Illegal link") unless link_def_link
-      AttributeLink.create_attr_links_from_external_link_def(parent_idh,link_def_link,components)
+      link_def_link.process(parent_idh,components)
 #TODO: incrementally putting back in
 =begin
       #make sure that there is a possible link that corresponds to the drawn port link

@@ -12,10 +12,10 @@ module XYZ
       create_from_rows(model_handle,rows)
     end
 
-    def create_attr_links_from_external_link_def(parent_idhcomponents)
+    def process(parent_idh,components)
       link_defs_info = components.map{|cmp| {:component => cmp}}
       context = get_context(link_defs_info)
-      events.each{|ev|ev.process!(context)}
+      on_create_events.each{|ev|ev.process!(context)}
       attribute_mappings.each do |attr_mapping|
         link = attr_mapping.ret_link(context)
         PortLink.create_attr_links(parent_idh,[link])
@@ -27,8 +27,8 @@ module XYZ
       self[:attribute_mappings] ||= (self[:content][:attribute_mappings]||[]).map{|am|AttributeMapping.new(am)}
     end
 
-    def events()
-      self[:events]||= (self[:content][:events]||[]).map{|ev|AttributeMapping.new(ev)}
+    def on_create_events()
+      self[:on_create_events]||= ((self[:content][:events]||{})[:on_create]||[]).map{|ev|Event.create(ev,self)}
     end
 
     #TODO: this is making too many assumptions about form of link_defs_info
@@ -75,7 +75,7 @@ module XYZ
 
     class Event < HashObject
       def self.create(event,link_def_link)
-        case event["event_type"]
+        case event[:event_type]
           when "extend_component" then EventExtendComponent.new(event,link_def_link)
           else
             raise Error.new("unexpecetd event type")
@@ -88,8 +88,8 @@ module XYZ
 
     class EventExtendComponent < Event
       def initialize(event,link_def_link)
-        base_cmp = link_def_link[event["node"] == "remote" ? "remote_type" : "local_type"]
-        super(event.merge("base_component" =>  base_cmp))
+        base_cmp = link_def_link[event[:node] == "remote" ? :remote_component_type : :local_component_type]
+        super(event.merge(:base_component =>  base_cmp))
       end
 
       def process!(context)

@@ -10,6 +10,26 @@ module XYZ
       match = @term_mappings[term_index]
       match && match.value
     end
+    def find_component(term_index)
+      match = @term_mappings[term_index]
+      match && match.value
+    end
+    def remote_node()
+      @node_mappings[:remote]
+    end
+    def local_node()
+      @node_mappings[:local]
+    end
+
+    def add_component_ref_and_value!(component_type,component)
+      add_ref_component!(component_type).set_component_value!(component)
+
+      #update all attributes that ref this component
+      cmp_id = component[:id]
+      attrs_to_get = {cmp_id => {:component => component, :attribute_info => @component_attr_index[component_type]}}
+      get_and_update_component_virtual_attributes!(attrs_to_get)
+    end
+
     def add_ref!(term)
       #TODO: see if there can be name conflicts between different types in which nmay want to prefix with type (type's initials, like CA for componanet attribute)
       term_index = term[:term_index]
@@ -18,7 +38,7 @@ module XYZ
     end
     def add_ref_component!(component_type)
       term_index = component_type
-      value = @term_mappings[term_index] ||= ValueComponent.new(:component_type => component_type)
+      @term_mappings[term_index] ||= ValueComponent.new(:component_type => component_type)
     end
 
     attr_reader :component_attr_index
@@ -133,6 +153,10 @@ module XYZ
         elsif @component_ref == link[:remote_component_type]
           @component = remote_cmp
         end
+      end
+
+      def set_component_value!(component)
+        @component = component
       end
 
       #no op unless overwritetn

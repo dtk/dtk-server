@@ -16,10 +16,14 @@ module XYZ
       link_defs_info = components.map{|cmp| {:component => cmp}}
       context = get_context(link_defs_info)
       on_create_events.each{|ev|ev.process!(context)}
+=begin
       attribute_mappings.each do |attr_mapping|
         link = attr_mapping.ret_link(context)
-        PortLink.create_attr_links(parent_idh,[link])
+        AttributeLink.create_attr_links(parent_idh,[link])
       end
+=end
+      links = attribute_mappings.map{|am|am.ret_link(context)}
+      AttributeLink.create_attr_links(parent_idh,links)
     end
 
 
@@ -99,7 +103,7 @@ module XYZ
         raise Error.new("cannot find library extension of type #{self[:extension_type]} to #{self[:base_component]} in library") unless component_extension
 
         #find node to clone it into
-        node = (self[:node] == :local) ? context.local_node : context.remote_node
+        node = (self[:node] == "local") ? context.local_node : context.remote_node
         raise Error.new("cannot find node of type #{self[:node]} in context") unless node
 
         #clone component into node

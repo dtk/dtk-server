@@ -16,13 +16,9 @@ module XYZ
       link_defs_info = components.map{|cmp| {:component => cmp}}
       context = get_context(link_defs_info)
       on_create_events.each{|ev|ev.process!(context)}
-=begin
-      attribute_mappings.each do |attr_mapping|
-        link = attr_mapping.ret_link(context)
-        AttributeLink.create_attr_links(parent_idh,[link])
-      end
-=end
-      links = attribute_mappings.map{|am|am.ret_link(context)}
+      #ret_links returns nil only if error such as not being able to find input_id or output_id
+      links = attribute_mappings.map{|am|am.ret_link(context)}.compact
+      return if links.empty?
       AttributeLink.create_attr_links(parent_idh,links)
     end
 
@@ -55,8 +51,14 @@ module XYZ
       def ret_link(context)
         input_attr,input_path = get_attribute_with_unravel_path(:input,context)
         output_attr,output_path = get_attribute_with_unravel_path(:output,context)
-        raise Error.new("cannot find input_id") unless input_attr
-        raise Error.new("cannot find output_id") unless output_attr
+        unless input_attr
+          Log.error("cannot find input_id") 
+          return nil
+        end
+        unless output_attr
+          Log.error("cannot find output_id")
+          return nil
+        end
         ret = {:input_id => input_attr[:id],:output_id => output_attr[:id]}
         ret.merge!(:input_path => input_path) if input_path
         ret.merge!(:output_path => output_path) if output_path

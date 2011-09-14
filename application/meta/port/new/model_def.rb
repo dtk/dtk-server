@@ -67,7 +67,7 @@
          :convert => true,
          :join_type=>:inner,
          :join_cond=>{:id => :link_def__component_component_id},
-         :cols=>[:id,:display_name,:component_type,:node_node_id,:implementation_id]
+         :cols=>[:id,:display_name,:component_type,:node_node_id,:implementation_id,:extended_base]
        },
        {
          :model_name=>:link_def_link,

@@ -74,7 +74,7 @@ module XYZ
       attrs_to_get = Hash.new
       @term_mappings.each_value do |v|
         if v.kind_of?(ValueNodeAttribute)
-          node = @node_mappings[v.node_ref]
+          node = @node_mappings[v.node_ref.to_sym]
           unless node
             Log.error("cannot find node associated with node ref")
             next

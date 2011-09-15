@@ -58,7 +58,7 @@ module XYZ
     #TODO: stub implementation
     #given link_def_type returns the basic type that can the endpoint
     TypeHierarchyPossRemoteComponentTypes = {
-      :database => database
+      :database => :database
     }
   end
   class ComponentTypeHierarchy

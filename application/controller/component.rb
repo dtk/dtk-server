@@ -4,8 +4,15 @@ module XYZ
 
     def get_possible_link_defs(id)
       component = create_object_from_id(id)
-      possible_link_defs =  ComponentTypeHierarchy.possible_link_defs(component)
-      {:data => possible_link_defs}
+      poss_link_defs =  ComponentTypeHierarchy.possible_link_defs(component)
+      {:data => poss_link_defs}
+    end
+
+    def get_posible_link_def_remote_components(link_def_type)
+      #TODO: searching in user's library
+      library_idh = Model.get_objs(model_handle(:library),{:cols => [:id]}).first.id_handle
+      poss_remote_cmps = ComponentTypeHierarchy.possible_link_def_remote_components(link_def_type,library_idh)
+      {:data =>poss_remote_cmps}
     end
 
     def get(id)

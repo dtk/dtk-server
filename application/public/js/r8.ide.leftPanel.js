@@ -1,7 +1,7 @@
 
-if (!R8.IDE.panel) {
+if (!R8.IDE.leftPanel) {
 
-	R8.IDE.panel = function(panelDef) {
+	R8.IDE.leftPanel = function(panelDef) {
 		var _def = panelDef,
 			_id = _def.id,
 
@@ -52,7 +52,7 @@ if (!R8.IDE.panel) {
 				this.initViews();
 				_initialized = true;
 
-				this.resize();
+//				this.resize();
 				this.loadViews();
 			},
 			initViews: function() {
@@ -112,7 +112,8 @@ if (!R8.IDE.panel) {
 				for(var v in _def.views) {
 					var viewDef = _def.views[v];
 					if(typeof(viewDef.method) == 'undefined') continue;
-					R8.IDE.views[viewDef.method](_viewContentNodes[viewDef.id]);
+//					R8.IDE.views[viewDef.method](_viewContentNodes[viewDef.id]);
+					R8.IDE.views[viewDef.method](_contentNode);
 				}
 			}
 		}

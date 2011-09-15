@@ -1,7 +1,7 @@
 
 if (!R8.IDE.View.editor) { R8.IDE.View.editor = {}; }
 
-if (!R8.IDE.View.editor.componentz) {
+if (!R8.IDE.View.editor.component) {
 
 	R8.IDE.View.editor.component = function(component) {
 		var _component = component,

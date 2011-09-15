@@ -59,6 +59,7 @@ if (!R8.IDE.editorPanel) {
 			init: function() {
 				_node = R8.Utils.Y.one('#'+_def.id);
 				_headerNode = R8.Utils.Y.one('#'+_def.id+'-header');
+
 				_tabListNode = R8.Utils.Y.one('#'+_def.id+'-tab-list');
 
 				_contentNode = R8.Utils.Y.one('#'+_def.id+'-content');
@@ -66,11 +67,11 @@ if (!R8.IDE.editorPanel) {
 
 				_events['ftabMouseEnter'] = R8.Utils.Y.delegate('mouseenter',function(e){
 					e.currentTarget.addClass('show-close');
-				},_tabListNode,'.view-tab');
+				},_tabListNode,'.panel-tab-body');
 
 				_events['ftabMouseLeave'] = R8.Utils.Y.delegate('mouseleave',function(e){
 					e.currentTarget.removeClass('show-close');
-				},_tabListNode,'.view-tab');
+				},_tabListNode,'.panel-tab-body');
 
 				_events['ftabClick'] = R8.Utils.Y.delegate('click',function(e){
 					var tabNodeId = e.currentTarget.get('id');
@@ -78,19 +79,19 @@ if (!R8.IDE.editorPanel) {
 
 					this.setViewFocus(viewId);
 //					R8.Editor.fileFocus(fileId);
-				},_tabListNode,'.view-tab',this);
+				},_tabListNode,'.panel-tab-body',this);
 
 				_events['fCloseClick'] = R8.Utils.Y.delegate('click',function(e){
 					var tabNodeId = e.currentTarget.get('id');
 					var fileId = tabNodeId.replace('close-file-','');
 
 					this.closeView(fileId);
-				},_tabListNode,'.view-tab .close-view',this);
+				},_tabListNode,'.panel-tab-body .close-view',this);
 
 				this.initViews();
 				_initialized = true;
-
-				this.resize();
+//DEBUG
+//				this.resize();
 				this.loadViews();
 			},
 			initViews: function() {
@@ -129,7 +130,7 @@ if (!R8.IDE.editorPanel) {
 			},
 			render: function() {
 //				this.setViewFocus();
-				_panelTpl = R8.Rtpl['ide_panel_frame']({'panel': _def});
+				_panelTpl = R8.Rtpl[_def.tplName]({'panel': _def});
 
 				return _panelTpl;
 			},
@@ -199,7 +200,11 @@ if (!R8.IDE.editorPanel) {
 				}
 			},
 			addTab: function(viewId) {
-				var tabTpl = '<li id="'+_id+'-tab-'+viewId+'" class="view-tab">'+_views[viewId].get('name')+'<div id="close-file-'+viewId+'" class="close-view"></div></li>';
+//				var tabTpl = '<li id="'+_id+'-tab-'+viewId+'" class="view-tab">'+_views[viewId].get('name')+'<div id="close-file-'+viewId+'" class="close-view"></div></li>';
+
+				var tabTpl = '<li id="'+_id+'-tab-'+viewId+'" class="active">\
+								<div class="panel-tab-body" style="margin: 7px 3px 0 3px;">'+_views[viewId].get('name')+'<div id="close-file-'+viewId+'" class="close-view"></div></div>\
+							</li>';
 
 				_tabListNode.append(tabTpl);
 			},

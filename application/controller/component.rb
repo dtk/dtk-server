@@ -15,6 +15,29 @@ module XYZ
       {:data =>poss_remote_cmps}
     end
 
+    def link_defs_editor(id)
+      component = create_object_from_id(id)
+      possible_link_defs =  ComponentTypeHierarchy.possible_link_defs(component)
+      possible_link_defs = Array.new
+      possible_link_defs[0] = {:type=>:database,:i18n=>'Database'}
+
+      tpl = R8Tpl::TemplateR8.new("component/link_def_editor",user_context())
+      tpl.assign(:possible_link_defs,possible_link_defs)
+
+      return {
+        :content=>tpl.render(),
+        :panel=>request.params["panel_id"]
+      }
+    end
+
+    def get_by_type(type)
+      #TODO: searching in user's library
+      library_idh = Model.get_objs(model_handle(:library),{:cols => [:id]}).first.id_handle
+      poss_remote_cmps = ComponentTypeHierarchy.possible_link_def_remote_components(type,library_idh)
+pp poss_remote_cmps
+      {:data =>poss_remote_cmps}
+    end
+
     def get(id)
       component = create_object_from_id(id)
       comp = component.get_obj_with_common_cols()

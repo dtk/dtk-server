@@ -21,8 +21,15 @@ module XYZ
       tpl_info = tpl.render()
       include_js_tpl(tpl_info[:src])
 
-      tpl = R8Tpl::TemplateR8.new("ide/panel_frame",user_context())
-      tpl.set_js_tpl_name("ide_panel_frame")
+      tpl = R8Tpl::TemplateR8.new("ide/l_panel",user_context())
+      tpl.set_js_tpl_name("l_panel")
+#      tpl = R8Tpl::TemplateR8.new("ide/panel_frame",user_context())
+#      tpl.set_js_tpl_name("ide_panel_frame")
+      tpl_info = tpl.render()
+      include_js_tpl(tpl_info[:src])
+
+      tpl = R8Tpl::TemplateR8.new("ide/editor_panel",user_context())
+      tpl.set_js_tpl_name("editor_panel")
       tpl_info = tpl.render()
       include_js_tpl(tpl_info[:src])
 
@@ -59,6 +66,7 @@ module XYZ
 #DEBUG
       run_javascript("R8.User.init();")
       run_javascript("R8.IDE.init(#{projects_json});")
+
 #      run_javascript("R8.IDE.addProjects(#{projects_json});")
 
 #      tpl = R8Tpl::TemplateR8.new("ide/test_tree2",user_context())

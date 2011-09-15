@@ -201,7 +201,8 @@ R8::Routes["editor/index"] = {
 }
 
 R8::Routes["ide/index"] = {
-  :layout => 'ide'
+#  :layout => 'ide'
+  :layout => 'workspace2'
 }
 R8::Routes["ide/test_tree"] = {
   :layout => 'ide'

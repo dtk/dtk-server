@@ -32,7 +32,9 @@ if (!R8.Component) {
 			requireView: function(viewType) {
 				if(typeof(_views[viewType]) == 'undefined') _views[viewType] = {};
 
-				_views[viewType] = new R8.IDE.View[viewType].component(this);
+//				_views[viewType] = new R8.IDE.View[viewType].component(this);
+//console.log(viewType);
+				_views[viewType] = new R8.IDE.View.component[viewType](this);
 
 			},
 			getView: function(viewType) {

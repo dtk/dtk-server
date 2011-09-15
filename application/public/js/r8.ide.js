@@ -105,8 +105,11 @@ if (!R8.IDE) {
 			_events = {};
 
 			var layoutDef = {
-				'panels': [{
-					'id': 'l-panel',
+				'panels': [
+				{
+//					'id': 'l-panel',
+					'id': 'l-panel-content',
+					'tplName': 'l_panel',
 					'minHeight': 200,
 					'minWidth': 150,
 					'relativePos': 'left',
@@ -118,15 +121,15 @@ if (!R8.IDE) {
 					}
 					],
 					'viewFocus': 'projects'
-				}
-				,{
+				},
+				{
 					'id': 'editor-panel',
 					'type': 'editor',
-					'pClass': 'foobut',
+					'pClass': '',
 					'minHeight': 100,
 					'minWidth': 300,
 					'relativePos': 'main',
-					'defaultHeight': .80,
+//					'defaultHeight': .80,
 					'views': [
 /*
 					{
@@ -139,8 +142,8 @@ if (!R8.IDE) {
 */
 					],
 					'viewFocus': 'editor'
-				},
-				 {
+				}
+/*				 {
 					'id': 'console-panel',
 //					'pClass': 'tempclass',
 					'pClass': '',
@@ -150,17 +153,17 @@ if (!R8.IDE) {
 					'defaultHeight': .20,
 					'relativePos': 'main',
 					'views': [
-/*					{
+					{
 						'id': 'chef_debugger',
 						'label': 'Chef Debugger',
 						'view': 'chefDebuggerView',
 						'method': 'renderChefDebugger'
 					}
 
-*/					],
+					],
 //					'viewFocus': 'chef_debugger'
 				}
-				]
+*/				]
 			};
 
 /*
@@ -189,15 +192,18 @@ if (!R8.IDE) {
 			init: function(projects) {
 				R8.UI.init();
 
+/*
 				var toolbarDef = {
 					'toolbarNodeId': 'menu-bar-body'
 				};
 				R8.Topbar2.init(toolbarDef);
-
+*/
 				for(var i in projects) {
 					_projects[projects[i].id] = new R8.Project(projects[i]);
 					_projects[projects[i].id].init();
 				}
+//				var _lPanelContentNode = R8.Utils.Y.one('#l-panel-content');
+//				this.views.renderProjectTree(_lPanelContentNode);
 
 				_pageContainerNode = R8.Utils.Y.one('#page-container');
 				_mainBodyWrapperNode = R8.Utils.Y.one('#main-body-wrapper');
@@ -216,21 +222,79 @@ if (!R8.IDE) {
 
 
 //Init Panel Nodes, should probalby be objectified in near future
-				_lRegionNode = R8.Utils.Y.one('#l-region');
+//				_lRegionNode = R8.Utils.Y.one('#l-region');
+				_lRegionNode = R8.Utils.Y.one('#l-panel-content');
 
 				_mainRegionNode = R8.Utils.Y.one('#main-region');
 
 //				_consolePanelNode = R8.Utils.Y.one('#console-panel');
 
+				var lPanelDef = {
+					'id': 'l-panel',
+					'tplName': 'l_panel',
+					'minHeight': 200,
+					'minWidth': 150,
+					'relativePos': 'left',
+					'views': [{
+						'id': 'projects',
+						'label': 'Projects',
+						'view': 'projectsView',
+						'method': 'renderProjectTree'
+					}
+					],
+					'viewFocus': 'projects'
+				};
+				_panels['left'] = new R8.IDE.leftPanel(lPanelDef);
+				_mainBodyWrapperNode.append(_panels['left'].render());
+				_panels['left'].init();
+
+				var resizeTpl = '\
+					<div id="l-resizer" class="v-region-resizer">\
+						<div class="lines"></div>\
+					</div>';
+
+				_mainBodyWrapperNode.append(resizeTpl);
 				_lResizerNode = R8.Utils.Y.one('#l-resizer');
 				_resizerWidth = _lResizerNode.get('region').width;
+
+
+				var ePanelDef = {
+					'id': 'editor-panel',
+					'tplName': 'editor_panel',
+					'type': 'editor',
+					'pClass': '',
+					'minHeight': 100,
+					'minWidth': 300,
+					'relativePos': 'main',
+//					'defaultHeight': .80,
+					'views': [
+/*
+					{
+						'id': 'editor',
+						'label': 'Editor',
+						'view': 'editorView',
+						'method': 'renderEditor',
+						'resizeMethod': 'resizeEditor'
+					}
+*/
+					],
+					'viewFocus': 'editor'
+				};
+				_panels['editor'] = new R8.IDE.editorPanel(ePanelDef);
+				_mainBodyWrapperNode.append(_panels['editor'].render());
+				_panels['editor'].init();
+
+//				this.setPanelSizings();
 
 
 //TODO: revisit to have pluggable clean setup after more fully implementing IDE
 //				this.initPanelContents();
 //-------END INIT OF PANEL CONTENTS----------------------
 
-				this.setupPanels();
+//				this.setupPanels();
+
+//				this.initPanels();
+/*
 
 				var that = this;
 				R8.Utils.Y.one(window).on('resize',function(e){
@@ -240,7 +304,7 @@ if (!R8.IDE) {
 
 				this.initPanels();
 				this.panelResizeInit();
-
+*/
 //				R8.Editor.init();
 			},
 			get: function(key) {
@@ -318,7 +382,7 @@ if (!R8.IDE) {
 				}
 			},
 			setupPanels: function() {
-				this.setPanelCounts();
+//				this.setPanelCounts();
 				this.setPanelSizings();
 				this.renderPanels();
 //				this.initPanels();
@@ -455,17 +519,17 @@ if (!R8.IDE) {
 
 							pDef.width = containerRegion.width;
 							break;
-					}					
+					}
 					layoutDef.panels[i] = pDef;
 				}
 			},
 			renderPanels: function() {
 				for (var i in layoutDef.panels) {
 					var pDef = layoutDef.panels[i];
-
 					switch(pDef.type) {
 						case "editor":
-							_editorPanelActive = true;
+//DEBUG
+//							_editorPanelActive = true;
 							_panels[pDef.id] = new R8.IDE.editorPanel(pDef);
 							break;
 						case "console":
@@ -479,23 +543,28 @@ if (!R8.IDE) {
 
 					switch (pDef.relativePos) {
 						case "left":
-							if(_regions.left.panelsRendered > 0) {
-								_lRegionNode.append('<div id="lr-resizer-'+_regions.left.panelsRendered+'" class="h-region-resizer"></div>');
-							}
+//							if(_regions.left.panelsRendered > 0) {
+//								_lRegionNode.append('<div id="lr-resizer-'+_regions.left.panelsRendered+'" class="h-region-resizer"></div>');
+//							}
 //							_panels[pDef.id] = new R8.IDE.panel(pDef);
 							_lRegionPanels[pDef.id] = _panels[pDef.id];
 //							_lRegionPanels[pDef.id] = new R8.IDE.panel(pDef);
-							_lRegionNode.append(_lRegionPanels[pDef.id].render());
+//DEBUG
+//console.log(pDef);
+
+//							_lRegionNode.append(_lRegionPanels[pDef.id].render());
 							_regions.left.panelsRendered++;
 							break;
 						case "main":
-							if(_regions.main.panelsRendered > 0) {
-								_mainRegionNode.append('<div id="mr-resizer-'+_regions.main.panelsRendered+'" class="h-region-resizer"></div>');
-							}
+//							if(_regions.main.panelsRendered > 0) {
+//								_mainRegionNode.append('<div id="mr-resizer-'+_regions.main.panelsRendered+'" class="h-region-resizer"></div>');
+//							}
 //							_panels[pDef.id] = new R8.IDE.panel(pDef);
 							_mainRegionPanels[pDef.id] = _panels[pDef.id];
 //							_mainRegionPanels[pDef.id] = new R8.IDE.panel(pDef);
-							_mainRegionNode.append(_mainRegionPanels[pDef.id].render());
+
+//DEBUG - porting over new UI
+//							_mainRegionNode.append(_mainRegionPanels[pDef.id].render());
 							_regions.main.panelsRendered++;
 							break;
 					}
@@ -640,11 +709,15 @@ if (!R8.IDE) {
 					_panels['editor-panel'].loadFileView(file_asset);
 				}
 			},
-			openEditorView: function(obj) {
-				if (_editorPanelActive) {
+			openEditorView: function(obj,viewName) {
+//				if (_editorPanelActive) {
 //					_panels['editor-panel'].pushTargetView(target);
-					_panels['editor-panel'].loadView(obj.getView('editor'));
-				}
+					if(typeof(viewName) != 'undefined') {
+						_panels['editor'].loadView(obj.getView(viewName));
+					} else {
+						_panels['editor'].loadView(obj.getView('editor'));
+					}
+//				}
 			},
 			openTarget: function(target) {
 				if (_editorPanelActive) {

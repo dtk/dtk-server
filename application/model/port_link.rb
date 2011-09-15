@@ -19,8 +19,8 @@ module XYZ
       #get the associated link_def_link TODO: if it does not exist means contraint violation
       link_def_link, components = get_link_def_and_components(parent_idh,port_link_hash)
       raise PortLinkError.new("Illegal link") unless link_def_link
-      port_link = create_from_links_hash(parent_idh,[port_link_hash])
-      link_def_link.process(parent_idh,components)
+      port_link_idh = create_from_links_hash(parent_idh,[port_link_hash]).first
+      link_def_link.process(parent_idh,components,port_link_idh)
     end
 
     def self.get_link_def_and_components(parent_idh,port_link_hash)

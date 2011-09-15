@@ -12,13 +12,17 @@ module XYZ
       create_from_rows(model_handle,rows)
     end
 
-    def process(parent_idh,components)
+    def process(parent_idh,components,port_link_idh=nil)
       link_defs_info = components.map{|cmp| {:component => cmp}}
       context = get_context(link_defs_info)
       on_create_events.each{|ev|ev.process!(context)}
       #ret_links returns nil only if error such as not being able to find input_id or output_id
       links = attribute_mappings.map{|am|am.ret_link(context)}.compact
       return if links.empty?
+      if port_link_idh
+        port_link_id = port_link_idh.get_id()
+        links.each{|link|link[:port_link_id] = port_link_id}
+      end
       AttributeLink.create_attribute_links(parent_idh,links)
     end
 

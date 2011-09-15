@@ -36,6 +36,31 @@ module XYZ
     end
 
     ###########
+   public
+    #TODO: assumption that ref and display_name are teh same
+    def component_name()
+      self[:display_name].split("___")[1]
+    end
+    def attribute_name()
+      self[:display_name].split("___")[2]
+    end
+    def ref_num()
+      self[:display_name].split("___")[3].to_i
+    end
+   private
+    def self.port_ref(type,attr)
+      ref_num = (attr[:component_ref_num]||1).to_s
+      "#{type}___#{attr[:component_ref]}___#{attr[:display_name]}___#{ref_num}"
+    end
+    
+    def self.strip_type(ref)
+      ref.gsub(/^[^_]+___/,"")
+    end
+
+    def self.add_type(type,stripped_ref)
+      "#{type}___#{stripped_ref}"
+    end
+   public
     #returns nil if filtered
     def filter_and_process!(i18n,*types)
       unless types.empty?  
@@ -58,7 +83,6 @@ module XYZ
         }
       end
     end
-
 
     #creates need component Ports and updates node_link_defs_info
     def self.create_needed_component_ports(component_link_defs,node,component,opts={})
@@ -140,6 +164,7 @@ module XYZ
       create_from_rows(port_mh,nested_ports)
     end
 
+=begin DEPRECATED
     def self.create_and_update_l4_ports_and_links?(parent_idh,attr_links)
       ret = {:new_port_links => Array.new,:new_l4_ports => Array.new, :merged_external_ports => Array.new}
       return ret if attr_links.empty?
@@ -229,7 +254,6 @@ module XYZ
       reroot_external_ports(port_mh,reroot_info)
       ret
     end
-
    private
     def self.reroot_external_ports(port_mh,reroot_info)
       return if reroot_info.empty?
@@ -241,7 +265,6 @@ module XYZ
       end
        update_from_rows(port_mh,update_rows)
     end
-
     def self.create_l4_input_ports(attrs_external)
       return Array.new if attrs_external.empty?
       new_l4_ports = attrs_external.map do |attr|
@@ -260,29 +283,7 @@ module XYZ
       model_handle = sample.model_handle.createMH(:model_name => :port, :parent_model_name => :node)
       create_from_rows(model_handle,new_l4_ports)
     end
-   public
-    #TODO: assumption that ref and display_name are teh same
-    def component_name()
-      self[:display_name].split("___")[1]
-    end
-    def attribute_name()
-      self[:display_name].split("___")[2]
-    end
-    def ref_num()
-      self[:display_name].split("___")[3].to_i
-    end
-   private
-    def self.port_ref(type,attr)
-      ref_num = (attr[:component_ref_num]||1).to_s
-      "#{type}___#{attr[:component_ref]}___#{attr[:display_name]}___#{ref_num}"
-    end
-    
-    def self.strip_type(ref)
-      ref.gsub(/^[^_]+___/,"")
-    end
+=end
 
-    def self.add_type(type,stripped_ref)
-      "#{type}___#{stripped_ref}"
-    end
   end
 end

@@ -12,15 +12,16 @@ module XYZ
       #below is exeperimenting with passing in "stratagy" object, which for example can indicate to make all "internal_external internal"
       strategy = {:internal_external_becomes_internal => true,:select_first => true}
       parent_idh = component.id_handle.get_parent_id_handle
+      attr_links = Array.new
       relevant_link_defs.each do |link_def|
-        next unless link_def_link = link_def.choose_internal_link(link_def[:possible_links],component,strategy)
-        context = link_def_link.get_context(node_link_defs_info)
-        link_def_link.attribute_mappings.each do |attr_mapping|
-          attr_link = attr_mapping.ret_link(context)
-          #TODO: for efficiency take thios out of loop
-          AttributeLink.create_attr_links(parent_idh,[attr_link])
+        if link_def_link = link_def.choose_internal_link(link_def[:possible_links],component,strategy)
+          context = link_def_link.get_context(node_link_defs_info)
+          link_def_link.attribute_mappings.each do |attr_mapping|
+            attr_links << attr_mapping.ret_link(context)
+          end
         end
       end
+      AttributeLink.create_attribute_links(parent_idh,attr_links)
     end
 
     def choose_internal_link(possible_links,component,strategy)

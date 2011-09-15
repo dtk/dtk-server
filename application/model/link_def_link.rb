@@ -19,7 +19,7 @@ module XYZ
       #ret_links returns nil only if error such as not being able to find input_id or output_id
       links = attribute_mappings.map{|am|am.ret_link(context)}.compact
       return if links.empty?
-      AttributeLink.create_attr_links(parent_idh,links)
+      AttributeLink.create_attribute_links(parent_idh,links)
     end
 
 

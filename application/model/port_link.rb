@@ -20,21 +20,8 @@ module XYZ
       link_def_link, components = get_link_def_and_components(parent_idh,port_link_hash)
       raise PortLinkError.new("Illegal link") unless link_def_link
       link_def_link.process(parent_idh,components)
-#TODO: incrementally putting back in
-=begin
-      #make sure that there is a possible link that corresponds to the drawn port link
-      attr_mh = parent_idh.createMH(:model_name => :attribute,:parent_model_name=>:component) #TODO: parent model name can also be node
-      attr_info = get_attribute_info(attr_mh,port_link_hash)
-      set_external_link_info!(port_link_hash,attr_info)
-      get_context!(port_link_hash,attr_info)
-      check_constraints(attr_mh,port_link_hash)
-      create_attr_links_aux!(port_link_hash,parent_idh,attr_mh,attr_info,opts)
-      process_external_link_defs?(parent_idh,port_link_hash)
-
-      #TODO: assumption is that what is created by process_external_link_defs? has no bearing on l4 ports (as manifsted by using attr_links arg computred before process_external_link_defs? call
-      attr_links = port_link_hash.map{|r|{:input => attr_info[r[:input_id]],:output => attr_info[r[:output_id]]}}
-      Port.create_and_update_l4_ports_and_links?(parent_idh,attr_links)
-=end
+      #TODO: put in code that creates port link
+      # old Port.create_and_update_l4_ports_and_links?(parent_idh,attr_links)
     end
 
     def self.get_link_def_and_components(parent_idh,port_link_hash)

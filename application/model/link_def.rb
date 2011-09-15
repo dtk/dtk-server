@@ -14,7 +14,7 @@ module XYZ
       parent_idh = component.id_handle.get_parent_id_handle
       attr_links = Array.new
       relevant_link_defs.each do |link_def|
-        if link_def_link = link_def.choose_internal_link(link_def[:possible_links],component,strategy)
+        if link_def_link = link_def.choose_internal_link(link_def[:possible_links],link_def[:component],strategy)
           context = link_def_link.get_context(node_link_defs_info)
           link_def_link.attribute_mappings.each do |attr_mapping|
             attr_links << attr_mapping.ret_link(context)
@@ -24,7 +24,7 @@ module XYZ
       AttributeLink.create_attribute_links(parent_idh,attr_links)
     end
 
-    def choose_internal_link(possible_links,component,strategy)
+    def choose_internal_link(possible_links,link_base_cmp,strategy)
       #TODO: mostly stubbed fn
       #TODO: need to check if has contraint
       ret = nil
@@ -34,8 +34,8 @@ module XYZ
       if ret[:type] == "internal_external"
         raise Error.new("only strategy internal_external_becomes_internal implemented") unless stratagy[:internal_external_becomes_internal]
       end
-      component.update_object!(:component_type)
-      ret.merge(:local_component_type => component[:component_type])
+      link_base_cmp.update_object!(:component_type)
+      ret.merge(:local_component_type => link_base_cmp[:component_type])
     end
   private
 
@@ -56,12 +56,13 @@ module XYZ
       node_link_defs_info.each do |r|
         port = r[:port]
         link_def = r[:link_def]
+        component = r[:component]
         if %w{component_internal component_internal_external}.include?(port[:type]) and
             link_def[:local_or_remote] == "local" and
             not port[:connected]
           link_def_id = link_def[:id]
           relevant_link_def_ids << link_def_id
-          ndx_relevant_link_defs[link_def_id] = link_def
+          ndx_relevant_link_defs[link_def_id] = link_def.merge(:component => component)
           cmp_link_def_ids << link_def_id if link_def[:component_component_id] == component_id
         end
       end

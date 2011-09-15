@@ -2,6 +2,12 @@ module XYZ
   class ComponentController < Controller
     helper :i18n_string_mapping
 
+    def get_possible_link_defs(id)
+      component = create_object_from_id(id)
+      possible_link_defs =  ComponentTypeHierarchy.possible_link_defs(component)
+      {:data => possible_link_defs}
+    end
+
     def get(id)
       component = create_object_from_id(id)
       comp = component.get_obj_with_common_cols()

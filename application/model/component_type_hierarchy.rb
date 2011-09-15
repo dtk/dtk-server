@@ -48,9 +48,22 @@ module XYZ
 
       :user => {}
     }
+
+    TypeHierarchyPossLinkDefs = {
+      :application => [
+        :database
+      ]
+    }
   end
   class ComponentTypeHierarchy
     include TypeHierarchyDefMixin
+
+    def self.possible_link_defs(component)
+      ret = Array.new
+      basic_type = component.update_object!(:basic_type)[:basic_type]
+      return ret unless basic_type
+      TypeHierarchyPossLinkDefs[basic_type.to_sym]||Array.new
+    end
 
     def self.basic_type(specific_type)
       ret_basic_type[specific_type.to_sym]

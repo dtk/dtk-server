@@ -71,10 +71,8 @@ module XYZ
         attr = nil
         ret = [attr,index_map_path]
         attr = context.find_attribute(self[dir][:term_index])
-        if self[:path]
-          #TODO: if treat :create_component_index need to put in here process_unravel_path and process_create_component_index (from link_defs.rb)
-          index_map_path = self[:path]
-        end
+        index_map_path = self[dir][:path]
+        #TODO: if treat :create_component_index need to put in here process_unravel_path and process_create_component_index (from link_defs.rb)
         [attr,index_map_path && AttributeLink::IndexMapPath.create_from_array(index_map_path)]
       end
     end

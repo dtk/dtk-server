@@ -4,9 +4,28 @@ module XYZ
     def self.create_attribute_links(parent_idh,rows_to_create,opts={})
       return Array.new if rows_to_create.empty?
       attr_mh = parent_idh.createMH(:attribute)
+      attr_link_mh = parent_idh.create_childMH(:attribute_link)
+
       attr_info = get_attribute_info(attr_mh,rows_to_create)
       add_link_fns!(rows_to_create,attr_info)
-      create_attr_links_aux!(rows_to_create,parent_idh,attr_info,opts)
+
+      #add parent_col and ref
+      parent_col = attr_link_mh.parent_id_field_name()
+      parent_id = parent_idh.get_id()
+      rows_to_create.each do |row|
+        row[parent_col] ||= parent_id
+        row[:ref] ||= "attribute_link:#{row[:input_id]}-#{row[:output_id]}"
+      end
+
+      rows_for_array_ds = rows_to_create.map{|row|Aux::hash_subset(row,row.keys - remove_keys)}
+      select_ds = SQL::ArrayDataset.create(db,rows_for_array_ds,attr_link_mh,:convert_for_create => true)
+      override_attrs = {}
+      field_set = FieldSet.new(model_name,rows_for_array_ds.first.keys)
+      returning_ids = create_from_select(attr_link_mh,field_set,select_ds,override_attrs,:returning_sql_cols=> [:id])
+      #insert the new ids into rows_to_create
+      returning_ids.each_with_index{|id_info,i|rows_to_create[i][:id] = id_info[:id]}
+
+      propagate_from_create(attr_mh,attr_info,rows_to_create)
     end
 
    private
@@ -56,28 +75,6 @@ module XYZ
       end
     end
     add_to_remove_keys :input_path,:output_path
-
-    def self.create_attr_links_aux!(rows_to_create,parent_idh,attr_info,opts={})
-      attr_link_mh = parent_idh.create_childMH(:attribute_link)
-      parent_col = attr_link_mh.parent_id_field_name()
-      parent_id = parent_idh.get_id()
-
-      rows_to_create.each do |row|
-        row[parent_col] ||= parent_id
-        row[:ref] ||= "attribute_link:#{row[:input_id]}-#{row[:output_id]}"
-      end
-
-      rows_for_array_ds = rows_to_create.map{|row|Aux::hash_subset(row,row.keys - remove_keys)}
-      select_ds = SQL::ArrayDataset.create(db,rows_for_array_ds,attr_link_mh,:convert_for_create => true)
-      override_attrs = {}
-      field_set = FieldSet.new(model_name,rows_for_array_ds.first.keys)
-      returning_ids = create_from_select(attr_link_mh,field_set,select_ds,override_attrs,:returning_sql_cols=> [:id])
-      #insert the new ids into rows_to_create
-      returning_ids.each_with_index{|id_info,i|rows_to_create[i][:id] = id_info[:id]}
-
-      attr_mh = parent_idh.create_childMH(:attribute)
-      propagate_from_create(attr_mh,attr_info,rows_to_create)
-    end
 
 
 ####################

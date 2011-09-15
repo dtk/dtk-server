@@ -10,9 +10,16 @@
       :type=>:varchar,
       :size =>10
     },
+    :connected => {:type=>:boolean},
     :external_attribute_id=>{
       :type=>:bigint,
       :foreign_key_rel_type=>:attribute,
+      :on_delete=>:cascade,
+      :on_update=>:cascade
+    },
+    :link_def_id=>{
+      :type=>:bigint,
+      :foreign_key_rel_type=>:link_def,
       :on_delete=>:cascade,
       :on_update=>:cascade
     },
@@ -43,6 +50,32 @@
       :type=>ID_TYPES[:id],
       :hidden=>true,
       :local_dependencies => [:node_node_id]
+    },
+    :link_def_info=>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [{
+         :model_name=>:link_def,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:id =>:port__link_def_id},
+         :cols=>[:id,:display_name,:component_component_id,:link_type,:has_external_link,:has_internal_link,:local_or_remote]
+       },
+       {
+         :model_name=>:component,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:id => :link_def__component_component_id},
+         :cols=>[:id,:display_name,:component_type,:node_node_id,:implementation_id,:extended_base]
+       },
+       {
+         :model_name=>:link_def_link,
+         :convert => true,
+         :join_type=>:left_outer,
+         :join_cond=>{:link_def_id=>:link_def__id},
+         :cols=>[:id,:display_name,:remote_component_type,:position,:content,:type]
+       }]
     },
     :attribute=>{
       :type=>:json,

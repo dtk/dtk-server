@@ -45,6 +45,31 @@ module XYZ
          }]
 
       ##### for connection to ports and port links
+      virtual_column :node_link_defs_info, :type => :json, :hidden => true, 
+        :remote_dependencies => 
+        [
+         {
+           :model_name => :component,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond=>{:node_node_id => q(:node,:id)},
+           :cols => [:id,:display_name,:component_type, :extended_base, :implementation_id, :node_node_id]
+         },
+         {
+           :model_name => :link_def,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond=>{:component_component_id => q(:component,:id)},
+           :cols => [:id,id(:component),:local_or_remote,:link_type,:has_external_link,:has_internal_link]
+         },
+         {
+           :model_name => :port,
+           :convert => true,
+           :join_type => :left_outer,
+           :join_cond=>{:link_def_id => q(:link_def,:id)},
+           :cols => [:id,:display_name,:type,:connected]
+         }]
+
       virtual_column :ports, :type => :json, :hidden => true, 
         :remote_dependencies => 
         [
@@ -437,10 +462,10 @@ module XYZ
       get_objs_in_set(id_handles,{:cols => [:ports]},{:keep_ref_cols => true}).map{|r|r[:port]}
     end
 
-    def get_ports(type=nil)
+    def get_ports(*types)
       port_list = self.class.get_ports([id_handle])
       i18n = get_i18n_mappings_for_models(:component,:attribute)
-      port_list.map{|port|port.filter_and_process!(type,i18n)}.compact
+      port_list.map{|port|port.filter_and_process!(i18n,*types)}.compact
     end
 
     #TODO: detrmine if need to break into input and output port links
@@ -633,37 +658,47 @@ module XYZ
     end
 
     def clone_post_copy_hook(clone_copy_output,opts={})
-      cmp_obj = clone_copy_output.objects.first
+      component = clone_copy_output.objects.first
       #handles copying over if needed component template and implementation into project
-      cmp_obj.clone_post_copy_hook_into_node(self)
+      component.clone_post_copy_hook_into_node(self)
 
-      cmp_id_handle = clone_copy_output.id_handles.first
-      create_needed_l4_sap_attributes(cmp_id_handle)
-      create_needed_additional_links(cmp_id_handle)
-      new_outermost_port_ids = Port.create_ports_for_external_attributes(id_handle,cmp_id_handle)
-      if opts[:outermost_ports] and not new_outermost_port_ids.empty?
-        port_mh = model_handle(:port)
-        port_idhs = new_outermost_port_ids.map{|id|port_mh.createIDH(:id => id)}
-        new_ports = Model.get_objs_in_set(port_idhs, {:cols => Port.common_columns})
-        new_ports.map{|p|p.materialize!(Port.common_columns)}
-        opts[:outermost_ports] += new_ports
+      component_idh = clone_copy_output.id_handles.first
+      create_needed_l4_sap_attributes(component_idh)
+
+      #get the link defs/component_ports associated with components on the node; this is used
+      #to determine if need to add internal links and for port processing
+      node_link_defs_info = get_objs(:cols => [:node_link_defs_info])
+      component_id = component.id()
+      
+      ###create needed component ports
+      ndx_for_port_update = Hash.new
+      component_link_defs = node_link_defs_info.map  do |r|
+        link_def = r[:link_def]
+        if link_def[:component_component_id] == component_id
+          ndx_for_port_update[link_def[:id]] = r
+          link_def 
+        end
+      end.compact
+
+      opts = {:returning_sql_cols => [:link_def_id,:id,:display_name,:type,:connected]}
+      new_cmp_ports = Port.create_needed_component_ports(component_link_defs,self,component,opts)
+
+      #update node_link_defs_info with new ports
+      new_cmp_ports.each do |port|
+        ndx_for_port_update[port[:link_def_id]].merge!(:port => port)
       end
+      #### end create needed component ports ####
+                                                             
+      LinkDef.create_needed_internal_links(self,component,node_link_defs_info)
+
+      #TODO: pass node_link_defs into create_component_external_ports?
+      #TODO: deprecate beloww for above
+      #Port.create_ports_for_external_attributes(id_handle,component_idh)
       parent_action_id_handle = get_parent_id_handle()
-      StateChange.create_pending_change_item(:new_item => cmp_id_handle, :parent => parent_action_id_handle)
-    end
-    ########################################
-
-    def create_needed_l4_sap_attributes(cmp_id_handle)
-      ipv4_host_addrs_info = get_virtual_attribute("host_address_ipv4",[:id,:attribute_value],:semantic_type_summary)
-      return nil unless ipv4_host_addrs_info
-      ipv4_host_addrs = ipv4_host_addrs_info[:attribute_value]
-      ipv4_host_addrs_idh = cmp_id_handle.createIDH({:id => ipv4_host_addrs_info[:id], :model_name => :attribute, :parent_model_name => :node})
-      sap_config_attr_idh, new_sap_attr_idh = Attribute.create_needed_l4_sap_attributes(cmp_id_handle,ipv4_host_addrs)
-      return nil unless new_sap_attr_idh
-      AttributeLink.create_links_l4_sap(new_sap_attr_idh,sap_config_attr_idh,ipv4_host_addrs_idh,id_handle)
-      new_sap_attr_idh
+      StateChange.create_pending_change_item(:new_item => component_idh, :parent => parent_action_id_handle)
     end
 
+    #TODO: deprecate below for LinkDef.get_annotated_internal_link_defs(
     def create_needed_additional_links(cmp_id_handle)
       #TODO: more efficient would be to have clone object output have this info
       component = cmp_id_handle.create_object().update_object!(:component_type,:extended_base,:implementation_id,:node_node_id)

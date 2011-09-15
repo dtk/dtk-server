@@ -1,15 +1,18 @@
 module XYZ
   class Attribute_linkController < Controller
     helper :ports
-
-    #deprecate for Port_linkController#save
     def save(explicit_hash=nil,opts={})
-      hash = explicit_hash || request.params
-      return Error.new("not implemented update of port link") if hash["id"]
+      hash = explicit_hash || request.params.dup
+      return Error.new("not implemented update of attribute link") if hash["id"]
 
-      port_link_hash = {
-        :input_id => hash["input_id"].to_i,
-        :output_id => hash["output_id"].to_i
+      #TODO: right now call reaching here has port link attributes not attribute links; so should probably move this to under port link controller
+      port_input_id,port_output_id = [hash["input_id"].to_i,hash["output_id"].to_i]
+      port_idhs = [port_input_id,port_output_id].map{|id|id_handle(id,:port)}
+      indexed_attrs = Port.get_attribute_info(port_idhs).inject({}){|h,r|h.merge(r[:id] => r)}
+      attr_link = {
+        :display_name => hash["name"],
+        :input_id => indexed_attrs[port_input_id][:attribute][:id],
+        :output_id => indexed_attrs[port_output_id][:attribute][:id]
       }
 
       temp_link_id = hash["temp_link_id"]
@@ -17,10 +20,8 @@ module XYZ
       handle_errors do
         parent_id_handle = id_handle(hash["parent_id"],hash["parent_model_name"])
         #TODO: many hacks to return new interface to front end
-        port_update = PortLink.create_port_and_attr_links(parent_id_handle,port_link_hash)
+        port_update = AttributeLink.create_port_and_attr_links(parent_id_handle,[attr_link])
         new_id = port_update[:new_port_links].first || port_update[:existing_l4_link_ids].first
-
-
 
         #TODO: more efficient if create_port_and_attr_links returns new or existing port_link
         link = create_object_from_id(new_id,:port_link)
@@ -62,12 +63,12 @@ puts "-------------------------"
         return {:data=>ret}
 
         if hash["return_model"] == "true"
-          return {
-            :data=> {
-              :link =>get_object_by_id(new_id,:port_link),
-              :link_changes => port_update
+          return {:data=> 
+              {
+                :link =>get_object_by_id(new_id,:port_link),
+                :link_changes => port_update
+              }
             }
-          }
         end
     
         return new_id if opts[:return_id]

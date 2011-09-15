@@ -14,7 +14,7 @@ module XYZ
         :ref => name,
         :type => type
       }
-      create_from_rows(model_handle,[row]).first
+      create_from_row(model_handle,row)
     end
 
     def self.get_all(model_handle)

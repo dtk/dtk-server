@@ -33,6 +33,7 @@ module R8Tpl
       end
 
       def get_i18n_port_name(i18n,port)
+        #TODO: this has implcit assumption that port is associated with a certain attribute and component
         attr_name = port.attribute_name()
         cmp_name = port.component_name()
         attr_i18n = I18nAux::i18n_string_attribute(i18n,attr_name)||attr_name
@@ -64,6 +65,7 @@ module R8Tpl
         end
         
         def self.translate_input(i18n,model_name,input_string)
+          return nil unless input_string and not input_string.empty?
           i18n[model_name][input_string.to_sym]
         end
     

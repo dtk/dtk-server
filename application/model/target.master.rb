@@ -22,10 +22,10 @@ module XYZ
     end
 
     ######### Model apis
-    def get_ports(*types)
+    def get_ports(type=nil)
       port_list = get_objs(:cols => [:node_ports]).map{|r|r[:port]}
       i18n = get_i18n_mappings_for_models(:component,:attribute)
-      port_list.map{|port|port.filter_and_process!(i18n,*types)}.compact
+      port_list.map{|port|port.filter_and_process!(type,i18n)}.compact
     end
 
     def destroy_and_delete_nodes()

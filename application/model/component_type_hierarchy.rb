@@ -48,21 +48,45 @@ module XYZ
 
       :user => {}
     }
-
+    #TODO: stub implementation
+    #given basic type give lsits of link_def_types
     TypeHierarchyPossLinkDefs = {
       :application => [
         :database
       ]
     }
+    #TODO: stub implementation
+    #given link_def_type returns the basic type that can the endpoint
+    TypeHierarchyPossRemoteComponentTypes = {
+      :database => database
+    }
   end
   class ComponentTypeHierarchy
     include TypeHierarchyDefMixin
 
+    #TODO: stub; only uses one level; not hirerarchical structure
     def self.possible_link_defs(component)
       ret = Array.new
       basic_type = component.update_object!(:basic_type)[:basic_type]
       return ret unless basic_type
       TypeHierarchyPossLinkDefs[basic_type.to_sym]||Array.new
+    end
+
+    #cmps_parent_idh can be a library or project
+    #returns an array (possibley empty of components
+    #TODO: stub; only uses one level; not hirerarchical structure
+    def self.possible_link_def_remote_components(link_def_type,cmps_parent_idh)
+      ret = Array.new
+      basic_type = TypeHierarchyPossRemoteComponentTypes[link_def_type.to_sym]
+      return ret unless basic_type
+      cmp_mh = cmps_parent_idh.create_childMH(:component) 
+      parent_col = cmp_mh.parent_id_field_name()
+      sp_hash = {
+        :cols => Component.common_columns(),
+        :filter => [:and, [:eq, parent_col, cmps_parent_idh.get_id()],
+                     [:eq, :basic_type, basic_type.to_s]]
+      }
+      Model.get_objs(cmp_mh,sp_hash)
     end
 
     def self.basic_type(specific_type)

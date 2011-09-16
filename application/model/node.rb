@@ -468,12 +468,9 @@ module XYZ
       port_list.map{|port|port.filter_and_process!(i18n,*types)}.compact
     end
 
-    #TODO: detrmine if need to break into input and output port links
-    def self.get_port_links(id_handles,type="l4")
-      raise Error.new("not implemented yet: get_port_links when type = #{type}") unless type == "l4"
-
+    def self.get_port_links(id_handles,*port_types)
       input_port_rows =  get_objs_in_set(id_handles,:columns => [:id, :display_name, :input_port_link_info]).select do |r|
-        (r[:port]||{})[:type] == type
+        port_types.include?((r[:port]||{})[:type])
       end
       #TODO: implement using PortLink.common_columns and materialize
       input_port_rows.each do |r|
@@ -484,7 +481,7 @@ module XYZ
       end
       
       output_port_rows =  get_objs_in_set(id_handles,:columns => [:id, :display_name, :output_port_link_info]).select do |r|
-        (r[:port]||{})[:type] == type
+        port_types.include?((r[:port]||{})[:type])
       end
       #TODO: implement using PortLink.common_columns and materialize
       output_port_rows.each do |r|

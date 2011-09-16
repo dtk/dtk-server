@@ -663,7 +663,7 @@ module XYZ
       component.clone_post_copy_hook_into_node(self)
 
       component_idh = clone_copy_output.id_handles.first
-      create_needed_l4_sap_attributes(component_idh)
+     #TODO: deprecated create_needed_l4_sap_attributes(component_idh)
 
       #get the link defs/component_ports associated with components on the node; this is used
       #to determine if need to add internal links and for port processing
@@ -696,32 +696,6 @@ module XYZ
       #Port.create_ports_for_external_attributes(id_handle,component_idh)
       parent_action_id_handle = get_parent_id_handle()
       StateChange.create_pending_change_item(:new_item => component_idh, :parent => parent_action_id_handle)
-    end
-
-    #TODO: deprecate below for LinkDef.get_annotated_internal_link_defs(
-    def create_needed_additional_links(cmp_id_handle)
-      #TODO: more efficient would be to have clone object output have this info
-      component = cmp_id_handle.create_object().update_object!(:component_type,:extended_base,:implementation_id,:node_node_id)
-      conn_profile = component.get_objects_col_from_sp_hash({:cols => [:connectivity_profile_internal]}).first
-      return unless conn_profile
-      #get all other components on node
-      sp_hash = {
-        :model_name => :component,
-        :filter => [:neq, :id, cmp_id_handle.get_id()],
-        :cols => [:component_type,:most_specific_type, :extended_base, :implementation_id, :node_node_id]
-      }
-      other_cmps = get_children_from_sp_hash(:component,sp_hash)
-      conn_info_list = conn_profile.match_other_components(other_cmps)
-      return if conn_info_list.empty?
-      parent_idh = cmp_id_handle.get_parent_id_handle
-
-      conn_info_list.each do |conn_info|
-        context = conn_info.get_context(component,conn_info[:other_component])
-        (conn_info[:attribute_mappings]||[]).each do |attr_mapping|
-          link = attr_mapping.ret_link(context)
-          AttributeLink.create_attr_links(parent_idh,[link])
-        end
-      end
     end
 
     #TODO: quick hack

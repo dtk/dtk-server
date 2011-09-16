@@ -12,15 +12,18 @@ module XYZ
           :ref => "port_link:#{link[:input_id]}-#{link[:output_id]}"
         }
       end
-      create_from_rows(port_link_mh,rows)
+      create_opts = {:returning_sql_cols => [:id,:input_id,:output_id]}
+      #TODO: push in use of :c into create_from_rows
+      create_from_rows(port_link_mh,rows,create_opts).map{|hash|new(hash,port_link_mh[:c])}
     end
 
     def self.create_port_and_attr_links(parent_idh,port_link_hash,opts={})
       #get the associated link_def_link TODO: if it does not exist means contraint violation
       link_def_link, components = get_link_def_and_components(parent_idh,port_link_hash)
       raise PortLinkError.new("Illegal link") unless link_def_link
-      port_link_idh = create_from_links_hash(parent_idh,[port_link_hash]).first
-      link_def_link.process(parent_idh,components,port_link_idh)
+      port_link = create_from_links_hash(parent_idh,[port_link_hash]).first
+      link_def_link.process(parent_idh,components,port_link.id_handle)
+      port_link
     end
 
     def self.get_link_def_and_components(parent_idh,port_link_hash)

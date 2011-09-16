@@ -17,13 +17,9 @@ module XYZ
       handle_errors do
         parent_id_handle = id_handle(hash["parent_id"],hash["parent_model_name"])
         #TODO: many hacks to return new interface to front end
-        port_update = PortLink.create_port_and_attr_links(parent_id_handle,port_link_hash)
-        new_id = port_update[:new_port_links].first || port_update[:existing_l4_link_ids].first
+        link = PortLink.create_port_and_attr_links(parent_id_handle,port_link_hash)
+        new_id = link.id
 
-
-
-        #TODO: more efficient if create_port_and_attr_links returns new or existing port_link
-        link = create_object_from_id(new_id,:port_link)
         link.update_object!(:input_id,:output_id)
         link[:ui] ||= {
           :type => R8::Config[:links][:default_type],
@@ -32,7 +28,8 @@ module XYZ
 
         input_port = create_object_from_id(link[:input_id],:port)
         input_port.update_and_materialize_object!(*Port.common_columns())
-        
+
+=begin TODO: needs to be removed or modified        
         port_merge_info = port_update[:merged_external_ports].first
         if not port_update[:new_l4_ports].empty?
           input_port.merge!(:update_info => "replace_with_new", :replace_id => port_merge_info[:external_port_id])
@@ -41,7 +38,8 @@ module XYZ
         else
           input_port.merge!(:update_info => "no_change")
         end
-
+=end
+        input_port.merge!(:update_info => "no_change")
 
         output_port = create_object_from_id(link[:output_id],:port)
         output_port.update_and_materialize_object!(*Port.common_columns())
@@ -60,19 +58,6 @@ pp ["new create link response:", ret]
 puts "-------------------------"
 
         return {:data=>ret}
-
-        if hash["return_model"] == "true"
-          return {
-            :data=> {
-              :link =>get_object_by_id(new_id,:port_link),
-              :link_changes => port_update
-            }
-          }
-        end
-    
-        return new_id if opts[:return_id]
-        redirect = (not (hash["redirect"].to_s == "false"))
-        redirect "/xyz/#{model_name()}/display/#{new_id.to_s}" if redirect
       end
     end
 

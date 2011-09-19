@@ -380,6 +380,7 @@ module XYZ
       type_info = AttributeDatatype.attr_def_to_internal_form(hash)
       type_info.each{|k,v|ret[k] = v}
       ret[:external_ref] = attr_def_to_internal_form__external_ref(hash)
+      ret[:value_asserted] = hash[:default_info] if hash.has_key?(:default_info)
       ret
     end
 

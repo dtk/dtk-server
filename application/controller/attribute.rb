@@ -10,6 +10,51 @@ module XYZ
       {:data => attr_def}
     end
 
+    #TODO: cleanup so dont have as much duplication with what is on init; wrote here becse not all cols for attribute save/update are actual columns
+    #update or create depending on whether id is in post content
+    def save(explicit_hash=nil,opts={})
+      hash = explicit_hash || request.params.dup
+      ### special fields
+      id = hash.delete("id")
+      id = nil if id.kind_of?(String) and id.empty?
+      parent_id = hash.delete("parent_id")
+      parent_model_name = hash.delete("parent_model_name")
+      model_name = hash.delete("model")
+      name = hash.delete("name") || hash["display_name"]
+      redirect = (not (hash.delete("redirect").to_s == "false"))
+
+      #TODO: revisit during cleanup, return_model used for creating links
+      rm_val = hash.delete("return_model")
+      return_model = rm_val && rm_val == "true"
+      
+      if id 
+        #update
+        update_from_hash(id.to_i,hash)
+      else
+        #create
+        #TODO: cleanup confusion over hash and string leys
+        hash.merge!({:display_name => name}) unless (hash.has_key?(:display_name) or hash.has_key?("display_name"))
+        parent_id_handle = nil
+        create_hash = nil
+        if parent_id
+          parent_id_handle = id_handle(parent_id,parent_model_name)
+          create_hash = {model_name.to_sym => {name => hash}}
+        else
+          parent_id_handle = top_level_factory_id_handle()
+          create_hash = {name.to_sym => hash}
+        end
+        new_id = create_from_hash(parent_id_handle,create_hash)
+        id = new_id if new_id
+      end
+
+      if return_model
+        return {:data=> get_object_by_id(id)}
+      end
+    
+      return id if opts[:return_id]
+      redirect "/xyz/#{model_name()}/display/#{id.to_s}" if redirect
+    end
+
     def list_under_component(component_id)
 pp get_base_object_dataset_needs_to_be_set(:component).ppsql
     end

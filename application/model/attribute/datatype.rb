@@ -37,6 +37,24 @@ module XYZ
     end
 
     def self.attr_def_to_internal_form(hash)
+      ret = Hash.new
+      #check if it is an array
+      #TODO: stub fn to check if array
+      datatype = hash[:datatype]
+      return ret unless datatype
+      is_array = nil
+      if datatype =~ /^array\((.+)\)$/
+        datatype = $1
+        is_array = true
+      end
+      if ret_builtin_scalar_types().include?(datatype)
+        ret[:data_type] = datatype
+      else
+        ret[:data_type] = "json"
+        ret[:semantic_type_summary] = datatype
+        ret[:semantic_type] = is_array ? {":array".to_sym => datatype} : datatype
+      end
+      ret
     end
 
    private

@@ -21,7 +21,7 @@ module XYZ
         module_name = hash[:component_type].gsub(/__.+$/,"")
         {
           :type => "#{type}_attribute",
-          :path =>  "node[#module_type}][#{hash[:field_name]}]"
+          :path =>  "node[#{module_name}][#{hash[:field_name]}]"
         }             
       end
 

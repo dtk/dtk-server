@@ -335,9 +335,11 @@ module XYZ
       update_attribute_def(id_handle,hash,opts)
     end
     def self.update_attribute_def(id_handle,hash,opts={})
-      config_agent_type = id_handle.create_object().update_object!(:config_agent_type)[:config_agent_type]
-      internal_form = attr_def_to_internal_form(id_handle.createMH(),hash.merge(:config_agent_type => config_agent_type))
-      Model.update_from_hash_assignments(id_handle,internal_form,opts)
+      attr = id_handle.create_object().update_object!(:config_agent_type,:component_parent)
+      aug_hash = hash.merge(:config_agent_type => attr[:config_agent_type], :component_type => attr[:component_parent][:component_type])
+      internal_form = attr_def_to_internal_form(aug_hash)
+      internal_form
+#      Model.update_from_hash_assignments(id_handle,internal_form,opts)
     end
 
     def get_attribute_def()
@@ -371,23 +373,19 @@ module XYZ
     end
 
 
-    def self.attr_def_to_internal_form(model_handle,hash)
+    def self.attr_def_to_internal_form(hash)
       ret = Hash.new
       [:required,:id].each{|k|ret[k] = hash[k] if hash.has_key?(k)}
       ret[:display_name] = hash[:field_name] if hash.has_key?(:field_name)
       type_info = AttributeDatatype.attr_def_to_internal_form(hash)
       type_info.each{|k,v|ret[k] = v}
-      ret[:external_ref] = attr_def_to_internal_form_external_ref(model_handle,hash)
+      ret[:external_ref] = attr_def_to_internal_form__external_ref(hash)
       ret
     end
 
-    def self.attr_def_to_internal_form__external_ref(model_handle,hash)
-      #need to get the component parent type
-      sp_hash = {:cols => [:component_type]}
-      cmp_idh =  model_handle.createIDH(:model_name => :component, :id => hash[:parent_id])
-      component_type = cmp_idh.create_object.update_object!(:component_type)[:component_type]
+    def self.attr_def_to_internal_form__external_ref(hash)
       config_agent = ConfigAgent.load(hash[:config_agent_type])
-      config_agent.ret_attribute_external_ref(:component_type => component_type, :field_name => hash[:field_name])
+      config_agent.ret_attribute_external_ref(:component_type => hash[:component_type], :field_name => hash[:field_name])
     end
 
     #####################

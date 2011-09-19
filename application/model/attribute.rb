@@ -6,6 +6,7 @@ require  File.expand_path('attribute/datatype', File.dirname(__FILE__))
 module XYZ
   class Attribute < Model
     include AttributeGroupInstanceMixin
+    include AttributeDatatypeInstanceMixin
     extend AttrDepAnalaysisClassMixin
     extend AttributeGroupClassMixin
     extend AttributeGuardClassMixin
@@ -333,16 +334,31 @@ module XYZ
     def get_attribute_def()
       update_object!(:id,:display_name,:value_asserted,:required,:external_ref,:dyanmic,:semantic_type,:semantic_type_summary,:config_agent_type)
       ret = Hash.new
-      [:id,:required,:dyanmic].each{|k|ret[k] = self[k]}
-      impl_name = get_implementation_attribute_name()
-      self
+      [:id,:required,:dyanmic].each{|k|ret[k] = self[k] if self[k]}
+      ret.merge!(:field_name => self[:display_name])
+
+      #put in optional key that inidcates implementation attribute
+      impl_attr = ret_implementation_attribute_name_and_type()
+      #default is that implementation attribute name same as r8 attribute name; so omit if default
+      unless self[:display_name] == impl_attr[:name]
+        case impl_attr[:type].to_sym
+          when :puppet then ret.merge!(:puppet_attribute_name => impl_attr[:name])
+          when :chef then ret.merge!(:chef_attribute_name => impl_attr[:name])
+        end
+      end
+      ret.merge!(:datatype => ret_datatype())
+
+      default_info = ret_default_info()
+      ret.merge!(:default_info => default_info) if default_info
+
+      ret
     end
 
-    def get_implementation_attribute_name()
+    def ret_implementation_attribute_name_and_type()
       config_agent = ConfigAgent.load(self[:config_agent_type])
-      pp config_agent
+      config_agent && config_agent.ret_attribute_name_and_type(self)
     end
-    private :get_implementation_attribute_name
+    private :ret_implementation_attribute_name_and_type
 
     def get_constraints!(opts={})
       Log.error("opts not implemented yet") unless opts.empty?

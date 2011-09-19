@@ -8,6 +8,15 @@ module XYZ
       def type()
         :puppet
       end
+
+      def ret_attribute_name_and_type(attribute)
+        var_name_path = (attribute[:external_ref]||{})[:path]
+        if var_name_path 
+          array_form = to_array_form(var_name_path)
+          {:name => array_form && array_form[1], :type => type()}
+        end
+      end
+
      private
       def components_with_attributes(config_node)
         cmp_actions = config_node[:component_actions]

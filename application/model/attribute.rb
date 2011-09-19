@@ -332,7 +332,7 @@ module XYZ
     #######################
     ######### Model apis
     def get_attribute_def()
-      update_object!(:id,:display_name,:value_asserted,:required,:external_ref,:dyanmic,:semantic_type,:semantic_type_summary,:config_agent_type)
+      update_object!(:id,:display_name,:value_asserted,:required,:external_ref,:dyanmic,:data_type,:semantic_type,:semantic_type_summary,:config_agent_type)
       ret = Hash.new
       [:id,:required,:dyanmic].each{|k|ret[k] = self[k] if self[k]}
       ret.merge!(:field_name => self[:display_name])

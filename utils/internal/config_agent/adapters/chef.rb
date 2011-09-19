@@ -20,8 +20,15 @@ module XYZ
           {:name => array_form && array_form[1], :type => type()}
         end
       end
-
      private
+      #TODO: collapse with other versions of this
+      def to_array_form(external_ref_path,opts={})
+        #TODO: use regexp disjunction
+        ret = external_ref_path.gsub(/^node\[/,"").gsub(/^service\[/,"").gsub(/\]$/,"").split("][")
+        ret.shift if opts[:strip_off_recipe_name]
+        ret
+      end
+
       class Processor 
         attr_reader :attributes
         def initialize(config_node)

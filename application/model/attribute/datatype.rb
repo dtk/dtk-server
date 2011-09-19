@@ -7,13 +7,11 @@ module XYZ
       return self[:data_type] unless st_summary
       is_array? ? "array(#{st_summary})" : st_summary
     end
-    def ret_default_info()
-    end
-
     def self.ret_datatypes()
     end
 
-    def self.ret_default_info(datatype)
+    def ret_default_info()
+      self[:value_asserted]
     end
    private
     def semantic_type()

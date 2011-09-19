@@ -20,6 +20,15 @@ module XYZ
           {:name => array_form && array_form[1], :type => type()}
         end
       end
+
+      def ret_attribute_external_ref(hash)
+        module_name = hash[:component_type].gsub(/__.+$/,"")
+        {
+          :type => "#{type}_attribute",
+          :path =>  "node[#module_type}][#{hash[:field_name]}]"
+        }             
+      end
+
      private
       #TODO: collapse with other versions of this
       def to_array_form(external_ref_path,opts={})

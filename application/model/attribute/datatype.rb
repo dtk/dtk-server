@@ -36,6 +36,9 @@ module XYZ
       end
     end
 
+    def self.attr_def_to_internal_form(hash)
+    end
+
    private
     def self.ret_builtin_scalar_types()
       [

@@ -331,12 +331,21 @@ module XYZ
 
     #######################
     ######### Model apis
+    def self.update_from_hash_assignments(id_handle,hash,opts={})
+      update_attribute_def(id_handle,hash,opts)
+    end
+    def self.update_attribute_def(id_handle,hash,opts={})
+      config_agent_type = id_handle.create_object().update_object!(:config_agent_type)[:config_agent_type]
+      internal_form = attr_def_to_internal_form(id_handle.createMH(),hash.merge(:config_agent_type => config_agent_type))
+      Model.update_from_hash_assignments(id_handle,internal_form,opts)
+    end
+
     def get_attribute_def()
       update_object!(:id,:display_name,:value_asserted,:required,:external_ref,:dyanmic,:data_type,:semantic_type,:semantic_type_summary,:config_agent_type)
       ret = Hash.new
       [:id,:required,:dyanmic].each{|k|ret[k] = self[k] if self[k]}
-      ret.merge!(:field_name => self[:display_name])
-
+      ret[:field_name] = self[:display_name]
+      
       #put in optional key that inidcates implementation attribute
       impl_attr = ret_implementation_attribute_name_and_type()
       #default is that implementation attribute name same as r8 attribute name; so omit if default
@@ -346,20 +355,43 @@ module XYZ
           when :chef then ret.merge!(:chef_attribute_name => impl_attr[:name])
         end
       end
-      ret.merge!(:datatype => ret_datatype())
+      ret[:datatype] = ret_datatype()
 
       default_info = ret_default_info()
-      ret.merge!(:default_info => default_info) if default_info
-
+      ret[:default_info] = default_info if default_info
+      
       ret
     end
-
+    
+    #============= 
+   private
     def ret_implementation_attribute_name_and_type()
       config_agent = ConfigAgent.load(self[:config_agent_type])
       config_agent && config_agent.ret_attribute_name_and_type(self)
     end
-    private :ret_implementation_attribute_name_and_type
 
+
+    def self.attr_def_to_internal_form(model_handle,hash)
+      ret = Hash.new
+      [:required,:id].each{|k|ret[k] = hash[k] if hash.has_key?(k)}
+      ret[:display_name] = hash[:field_name] if hash.has_key?(:field_name)
+      type_info = AttributeDatatype.attr_def_to_internal_form(hash)
+      type_info.each{|k,v|ret[k] = v}
+      ret[:external_ref] = attr_def_to_internal_form_external_ref(model_handle,hash)
+      ret
+    end
+
+    def self.attr_def_to_internal_form__external_ref(model_handle,hash)
+      #need to get the component parent type
+      sp_hash = {:cols => [:component_type]}
+      cmp_idh =  model_handle.createIDH(:model_name => :component, :id => hash[:parent_id])
+      component_type = cmp_idh.create_object.update_object!(:component_type)[:component_type]
+      config_agent = ConfigAgent.load(hash[:config_agent_type])
+      config_agent.ret_attribute_external_ref(:component_type => component_type, :field_name => hash[:field_name])
+    end
+
+    #####################
+   public
     def get_constraints!(opts={})
       Log.error("opts not implemented yet") unless opts.empty?
       dependency_list = get_objects_col_from_sp_hash({:columns => [:dependencies]},:dependencies)

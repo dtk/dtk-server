@@ -17,6 +17,14 @@ module XYZ
         end
       end
 
+      def ret_attribute_external_ref(hash)
+        module_name = hash[:component_type].gsub(/__.+$/,"")
+        {
+          :type => "#{type}_attribute",
+          :path =>  "node[#module_type}][#{hash[:field_name]}]"
+        }             
+      end
+
      private
       def components_with_attributes(config_node)
         cmp_actions = config_node[:component_actions]

@@ -1,5 +1,9 @@
 module XYZ
   class AttributeController < Controller
+    def get(attribute_id)
+      attr_def =  create_object_from_id(attribute_id).get_attribute_def()
+      {:data => attr_def}
+    end
 
     def list_under_component(component_id)
 pp get_base_object_dataset_needs_to_be_set(:component).ppsql

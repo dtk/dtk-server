@@ -2,6 +2,7 @@ require  File.expand_path('attribute/dependency_analysis', File.dirname(__FILE__
 require  File.expand_path('attribute/group', File.dirname(__FILE__))
 require  File.expand_path('attribute/guard', File.dirname(__FILE__))
 require  File.expand_path('attribute/complex_type', File.dirname(__FILE__))
+require  File.expand_path('attribute/datatype', File.dirname(__FILE__))
 module XYZ
   class Attribute < Model
     include AttributeGroupInstanceMixin
@@ -12,6 +13,7 @@ module XYZ
     set_relation_name(:attribute,:attribute)
     def self.up()
       external_ref_column_defs()
+      virtual_column :config_agent_type, :type => :string, :local_dependencies => [:external_ref]
 
       #columns related to the value
       column :value_asserted, :json, :ret_keys_as_symbols => false
@@ -244,6 +246,13 @@ module XYZ
     end
 
     ### virtual column defs
+    def config_agent_type()
+      external_ref_type = (self[:external_ref]||{})[:type]
+      case external_ref_type
+       when "chef_attribute" then "chef"
+       when "puppet_attribute" then "puppet"
+      end
+    end
 
     #TODO: collapse this and 4 fields used here
     def is_readonly?()
@@ -321,6 +330,19 @@ module XYZ
 
     #######################
     ######### Model apis
+    def get_attribute_def()
+      update_object!(:id,:display_name,:value_asserted,:required,:external_ref,:dyanmic,:semantic_type,:semantic_type_summary,:config_agent_type)
+      ret = Hash.new
+      [:id,:required,:dyanmic].each{|k|ret[k] = self[k]}
+      impl_name = get_implementation_attribute_name()
+      self
+    end
+
+    def get_implementation_attribute_name()
+      config_agent = ConfigAgent.load(self[:config_agent_type])
+      pp config_agent
+    end
+    private :get_implementation_attribute_name
 
     def get_constraints!(opts={})
       Log.error("opts not implemented yet") unless opts.empty?

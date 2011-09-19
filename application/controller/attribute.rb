@@ -1,5 +1,10 @@
 module XYZ
   class AttributeController < Controller
+    def get_datatypes()
+      datatypes = AttributeDatatype.ret_datatypes()
+      {:data => datatypes}
+    end
+
     def get(attribute_id)
       attr_def =  create_object_from_id(attribute_id).get_attribute_def()
       {:data => attr_def}

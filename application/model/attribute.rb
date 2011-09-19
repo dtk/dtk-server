@@ -6,7 +6,7 @@ require  File.expand_path('attribute/datatype', File.dirname(__FILE__))
 module XYZ
   class Attribute < Model
     include AttributeGroupInstanceMixin
-    include AttributeDatatypeInstanceMixin
+    include AttributeDatatype
     extend AttrDepAnalaysisClassMixin
     extend AttributeGroupClassMixin
     extend AttributeGuardClassMixin

@@ -367,6 +367,10 @@ rather than having or having two sap refs and user can remove or add to componen
       [values.first,false]
     end
 
+    def self.ret_scalar_defined_datatypes()
+      TranslationToSchema.keys
+    end
+
     private
 
     def self.semantic_type_key(semantic_type)

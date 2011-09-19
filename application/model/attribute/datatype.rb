@@ -1,13 +1,22 @@
 #TODO: initially scafolds SemanticType then wil replace
 #TODO: initially form sap from sap config then move to model where datatype has dynamic attribute that gets filled in
 module XYZ
-  module AttributeDatatypeInstanceMixin
+  module AttributeDatatype
+    def self.ret_datatypes()
+      scalar_types = SemanticTypeSchema.ret_scalar_defined_datatypes()
+      scalar_types += ret_builtin_scalar_types()
+      ret = Array.new
+      scalar_types.each do |t|
+        ret << t
+        ret << "array(#{t})"
+      end
+      ret
+    end
+
     def ret_datatype()
       st_summary = self[:semantic_type_summary]
       return self[:data_type] unless st_summary
       is_array? ? "array(#{st_summary})" : st_summary
-    end
-    def self.ret_datatypes()
     end
 
     def ret_default_info()
@@ -28,6 +37,13 @@ module XYZ
     end
 
    private
+    def self.ret_builtin_scalar_types()
+      [
+       "string",
+       "integer",
+       "boolean"
+      ]
+    end
 
     def ret_default_info__hash(hash_semantic_type,default)
       hash_semantic_type.inject({}) do |h,(k,v)|

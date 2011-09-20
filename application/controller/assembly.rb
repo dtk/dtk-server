@@ -19,7 +19,7 @@ module XYZ
       end.compact
 
       #restrict results to belong to library and not nested in assembly
-      filter_conjuncts += [[:neq,:library_library_id,nil],[:eq,:assembly_id,nil]]
+      filter_conjuncts += [[:eq,:type,"composite"],[:neq,:library_library_id,nil],[:eq,:assembly_id,nil]]
       sp_hash = {
         :cols => cols,
         :filter => [:and] + filter_conjuncts

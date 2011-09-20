@@ -73,20 +73,21 @@ if (!R8.IDE.editorPanel) {
 					e.currentTarget.removeClass('show-close');
 				},_tabListNode,'.panel-tab-body');
 
+				_events['fCloseClick'] = R8.Utils.Y.delegate('click',function(e){
+					var tabNodeId = e.currentTarget.get('id');
+					var viewId = tabNodeId.replace('close-file-','');
+
+					this.closeView(viewId);
+					e.halt();
+				},_tabListNode,'.close-view',this);
+
 				_events['ftabClick'] = R8.Utils.Y.delegate('click',function(e){
 					var tabNodeId = e.currentTarget.get('id');
 					var viewId = tabNodeId.replace(_id+'-tab-','');
 
 					this.setViewFocus(viewId);
 //					R8.Editor.fileFocus(fileId);
-				},_tabListNode,'.panel-tab-body',this);
-
-				_events['fCloseClick'] = R8.Utils.Y.delegate('click',function(e){
-					var tabNodeId = e.currentTarget.get('id');
-					var fileId = tabNodeId.replace('close-file-','');
-
-					this.closeView(fileId);
-				},_tabListNode,'.panel-tab-body .close-view',this);
+				},_tabListNode,'.panel-tab',this);
 
 				this.initViews();
 				_initialized = true;
@@ -202,7 +203,7 @@ if (!R8.IDE.editorPanel) {
 			addTab: function(viewId) {
 //				var tabTpl = '<li id="'+_id+'-tab-'+viewId+'" class="view-tab">'+_views[viewId].get('name')+'<div id="close-file-'+viewId+'" class="close-view"></div></li>';
 
-				var tabTpl = '<li id="'+_id+'-tab-'+viewId+'" class="active">\
+				var tabTpl = '<li id="'+_id+'-tab-'+viewId+'" class="active panel-tab">\
 								<div class="panel-tab-body" style="margin: 7px 3px 0 3px;">'+_views[viewId].get('name')+'<div id="close-file-'+viewId+'" class="close-view"></div></div>\
 							</li>';
 

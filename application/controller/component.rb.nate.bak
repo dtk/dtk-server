@@ -2,13 +2,6 @@ module XYZ
   class ComponentController < Controller
     helper :i18n_string_mapping
 
-    def get_attributes_for_attr_mappings(component_id)
-      component = create_object_from_id(component_id)
-      to_set = {}
-      attr_list = component.get_attributes_unraveled(to_set,:flatten_nil_value => true)
-      {:data => attr_list}
-    end
-
     def get_possible_link_defs(id)
       component = create_object_from_id(id)
       poss_link_defs =  ComponentTypeHierarchy.possible_link_defs(component)

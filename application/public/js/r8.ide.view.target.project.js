@@ -1,9 +1,9 @@
 
-if (!R8.IDE.View.project) { R8.IDE.View.project = {}; }
+if (!R8.IDE.View.target) { R8.IDE.View.target = {}; }
 
-if (!R8.IDE.View.project.target) {
+if (!R8.IDE.View.target.project) {
 
-	R8.IDE.View.project.target = function(target) {
+	R8.IDE.View.target.project = function(target) {
 		var _target = target,
 			_idPrefix = "target-leaf-",
 

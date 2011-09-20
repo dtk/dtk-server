@@ -57,6 +57,21 @@ module XYZ
       tpl.set_js_tpl_name("notification_list_ide")
       tpl_info = tpl.render()
       include_js_tpl(tpl_info[:src])
+
+      tpl = R8Tpl::TemplateR8.new("component/library_search",user_context())
+      tpl.set_js_tpl_name("component_library_search")
+      tpl_info = tpl.render()
+      include_js_tpl(tpl_info[:src])
+
+      tpl = R8Tpl::TemplateR8.new("node/library_search",user_context())
+      tpl.set_js_tpl_name("node_library_search")
+      tpl_info = tpl.render()
+      include_js_tpl(tpl_info[:src])
+
+      tpl = R8Tpl::TemplateR8.new("assembly/library_search",user_context())
+      tpl.set_js_tpl_name("assembly_library_search")
+      tpl_info = tpl.render()
+      include_js_tpl(tpl_info[:src])
 #==========================
 
       include_js('plugins/search.cmdhandler2')

@@ -1,9 +1,9 @@
 
 if (!R8.IDE.View.node) { R8.IDE.View.node = {}; }
 
-if (!R8.IDE.View.project.node) {
+if (!R8.IDE.View.node.project) {
 
-	R8.IDE.View.project.node = function(node) {
+	R8.IDE.View.node.project = function(node) {
 		var _node = node,
 			_idPrefix = "node-leaf-",
 

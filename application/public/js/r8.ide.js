@@ -704,10 +704,10 @@ if (!R8.IDE) {
 				}
 			},
 			openFile: function(file_asset) {
-				if (_editorPanelActive) {
+//				if (_editorPanelActive) {
 //					_panels['editor-panel'].loadView(file_asset);
-					_panels['editor-panel'].loadFileView(file_asset);
-				}
+					_panels['editor'].loadFileView(file_asset);
+//				}
 			},
 			openEditorView: function(obj,viewName) {
 //				if (_editorPanelActive) {

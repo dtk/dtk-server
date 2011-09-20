@@ -169,9 +169,10 @@ body {
 	float: left;
 }
 
-.plugin-bar .item-wrapper {
+.plugin-bar .plugin {
 	float: left;
 	height: 100%;
+	cursor: pointer;
 
 	text-decoration: none;
 	font-family: "Trebuchet MS",Helvetica,Jamrul,sans-serif;
@@ -210,9 +211,10 @@ body {
 .plugin-content-wrapper {
 	position: absolute;
 	bottom: 48px;
-	height: 80px;
+	height: 2px;
 	width: 100%;
 	background-color: #4e87a7;
+	overflow: hidden;
 }
 
 #node-list-container {
@@ -257,12 +259,14 @@ body {
 	height: 75px;
 	width: 965px;
 	float: left;
+	overflow: hidden;
 /*	background-color: yellow;*/
 }
 
 #list-body {
 	height: 75px;
-	width: 965px;
+/*	width: 965px;*/
+	width: 100%;
 	float: left;
 }
 
@@ -293,6 +297,20 @@ body {
 	width: 104px;
 	float: left;
 }
+.component-result .main-content .component-icon{
+	height: 36px;
+	width: 100px;
+	margin: 0 2px;
+	float: left;
+}
+.component-result .main-content .component-icon img {
+	height: 36px;
+	width: 100px;
+	margin: 0 2px;
+	float: left;
+	border: 0;
+}
+
 .component-result .main-content .php-icon{
 	height: 36px;
 	width: 100px;
@@ -372,6 +390,13 @@ body {
 	float: left;
 }
 
+.component-result.null .implementations .chef {
+	display: none;
+}
+
+.component-result.chef .implementations .puppet {
+	display: none;
+}
 /*
  * END PLUGIN BAR RELATED
  */
@@ -385,6 +410,7 @@ body {
 	width: 160px;
 	border: 2px solid #8d8d8d;
 	position: absolute;
+	z-index: 10;
 
 	background: repeat-x url(../images/v1/node-bg-grey.jpg);
 
@@ -489,16 +515,16 @@ body {
 	position: absolute;
 	z-index: 10;
 }
-.node .port.north {
+.node .port.north,.node .port.input-north,.node .port.output-north {
 	background-position: 0px 0px;
 }
-.node .port.south {
+.node .port.south,.node .port.input-south,.node .port.output-south {
 	background-position: -54px 0px;
 }
-.node .port.west {
+.node .port.west,.node .port.input-west,.node .port.output-west {
 	background-position: -18px 0px;
 }
-.node .port.east {
+.node .port.east,.node .port.input-east,.node .port.output-east {
 	background-position: -36px 0px;
 }
 
@@ -606,13 +632,14 @@ body {
 	color: #333333;
 	text-shadow: 0px 1px 1px #FFFFFF;
 	filter: dropshadow(color=#FFFFFF, offx=0, offy=1);
+
+	-moz-border-radius-topleft: 5px;
+	-moz-border-radius-topright: 5px;
 }
 .panel .header .tab-list li.active {
 	border-top: 2px solid #31658c;
 	border-left: 2px solid #31658c;
 	border-right: 2px solid #31658c;
-	-moz-border-radius-topleft: 5px;
-	-moz-border-radius-topright: 5px;
 }
 
 .panel-tab-body .close-view {

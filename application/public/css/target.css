@@ -112,7 +112,7 @@
 }
 
 
-
+/*
 .target-viewspace {
 	width: 100%;
 	height: 100%;
@@ -121,6 +121,21 @@
 	position: relative;
 	background: url(../images/workspace/wspace-bg-3.png);
 	display: block;
+}
+*/
+
+.editor-target {
+	min-width: 100px;
+	position: relative;
+	background-color: #FFFFFF;
+	float: left;
+	width: 100%;
+	height: 533px;
+	-moz-border-radius-bottomleft: 5px;
+	-moz-border-radius-bottomright: 5px;
+
+	background-image: url(../images/v1/target-editor-bg-01.jpg);
+	background-repeat: repeat;
 }
 
 .selectionBox {
@@ -214,7 +229,7 @@
 .editor-target .node .name {
 	width: 75%;
 	height: 18px;
-	margin: 30px auto 0 auto;
+/*	margin: 30px auto 0 auto;*/
 	overflow-x: hidden;
 	text-overflow: ellipsis;
 }

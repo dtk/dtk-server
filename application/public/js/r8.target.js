@@ -105,7 +105,7 @@ if (!R8.Target) {
 			requireView: function(viewType) {
 				if(typeof(_views[viewType]) == 'undefined') _views[viewType] = {};
 
-				_views[viewType] = new R8.IDE.View[viewType].target(this);
+				_views[viewType] = new R8.IDE.View.target[viewType](this);
 			},
 			getView: function(viewType) {
 				if(typeof(_views[viewType]) == 'undefined') this.requireView(viewType);

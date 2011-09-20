@@ -31,7 +31,6 @@
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/wspace_modal.css" />
 
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/editor.css" />
-
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/target.css" />
 
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/list.css" />
@@ -238,11 +237,8 @@ YUI_config = {
 
 <script src="{%=_app[:base_js_uri]%}/external/ace/src/ace.js" type="text/javascript" charset="utf-8"></script>
 <script src="{%=_app[:base_js_uri]%}/external/ace/src/mode-ruby.js" type="text/javascript" charset="utf-8"></script>
-<!--
 <script src="{%=_app[:base_js_uri]%}/external/ace/src/theme-twilight.js" type="text/javascript" charset="utf-8"></script>
 <script src="{%=_app[:base_js_uri]%}/external/ace/src/theme-cobalt.js" type="text/javascript" charset="utf-8"></script>
--->
-<script src="{%=_app[:base_js_uri]%}/external/ace/src/theme-eclipse.js" type="text/javascript" charset="utf-8"></script>
 
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/ctrl.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.user.js"></script>
@@ -263,9 +259,9 @@ YUI_config = {
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.view.component.project.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.view.project.project.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.view.project.implementation.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.view.node.project.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.view.node.editor_target.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.view.port.editor_target.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.view.project.node.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.view.editor_target.node.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.view.editor_target.port.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.view.chefdebugger.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.view.jitter.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.viewspace.js"></script>

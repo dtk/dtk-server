@@ -1,9 +1,9 @@
 
-if (!R8.IDE.View.editor_target) { R8.IDE.View.editor_target = {}; }
+if (!R8.IDE.View.port) { R8.IDE.View.port = {}; }
 
-if (!R8.IDE.View.editor_target.port) {
+if (!R8.IDE.View.port.editor_target) {
 
-	R8.IDE.View.editor_target.port = function(port,node) {
+	R8.IDE.View.port.editor_target = function(port,node) {
 		var _panel = null,
 			_port = port,
 			_node = node,
@@ -42,7 +42,8 @@ if (!R8.IDE.View.editor_target.port) {
 */
 			},
 			render: function() {
-				var basicPortTpl = '<div id="'+_nodeId+'" class="basic-port port available '+_port.get('direction')+'-'+_port.get('location')+'"></div>';
+//				var basicPortTpl = '<div id="'+_nodeId+'" class="basic-port port available '+_port.get('direction')+'-'+_port.get('location')+'"></div>';
+				var basicPortTpl = '<div id="'+_nodeId+'" class="port available '+_port.get('direction')+'-'+_port.get('location')+'"></div>';
 				_node = R8.Utils.Y.Node.create(basicPortTpl);
 
 				return _node;

@@ -53,7 +53,7 @@ if (!R8.Port) {
 			requireView: function(viewType) {
 				if(typeof(_views[viewType]) == 'undefined') _views[viewType] = {};
 
-				_views[viewType] = new R8.IDE.View[viewType].port(this);
+				_views[viewType] = new R8.IDE.View.port[viewType](this);
 
 			},
 			getView: function(viewType) {

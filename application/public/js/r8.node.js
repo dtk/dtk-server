@@ -81,7 +81,7 @@ if (!R8.Node) {
 			requireView: function(viewType) {
 				if(typeof(_views[viewType]) == 'undefined') _views[viewType] = {};
 
-				_views[viewType] = new R8.IDE.View[viewType].node(this);
+				_views[viewType] = new R8.IDE.View.node[viewType](this);
 
 			},
 			getView: function(viewType) {

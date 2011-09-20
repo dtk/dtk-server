@@ -1,9 +1,9 @@
 
-if (!R8.IDE.View.editor_target) { R8.IDE.View.editor_target = {}; }
+if (!R8.IDE.View.node) { R8.IDE.View.node = {}; }
 
-if (!R8.IDE.View.editor_target.node) {
+if (!R8.IDE.View.node.editor_target) {
 
-	R8.IDE.View.editor_target.node = function(node) {
+	R8.IDE.View.node.editor_target = function(node) {
 		var _node = node,
 			_parentView = null,
 			_contentNode = null,
@@ -26,7 +26,7 @@ if (!R8.IDE.View.editor_target.node) {
 			_portDragDelegate = null,
 			_portsReady = false,
 //TODO: make this some config param
-			_portSpacer = 2,
+			_portSpacer = 0,
 
 //TODO: revisit.., link creation depends on this for drop setup/detection
 			_applications = {},
@@ -116,9 +116,24 @@ if (!R8.IDE.View.editor_target.node) {
 									<div id="'+_contentNodePrefix+_node.get('id')+'-name" class="name">'+_node.get('name')+'</div>\
 							</div>';
 
+				var tpl = '<div id="'+_contentNodePrefix+_node.get('id')+'" class="dg-component node active hover" data-id="'+_node.get('id')+'">\
+							<div class="node-header">\
+								<div class="action-btn">\
+									<div class="action-btn-arrow"></div>\
+								</div>\
+								<div class="node-status"></div>\
+							</div>\
+							<div class="node-body">\
+								<div class="name-wrapper">\
+									<div id="'+_contentNodePrefix+_node.get('id')+'-name" class="name" title="'+_node.get('name')+'">'+_node.get('name')+'</div>\
+									<div class="contents-list-wrapper"></div>\
+								</div>\
+							</div>\
+						</div>';
+
 				//DEBUG
 				//console.log(testTpl);
-				return testTpl;
+				return tpl;
 			},
 			get: function(key,param) {
 				switch(key) {
@@ -329,7 +344,7 @@ if(ports == null) return;
 					portObjs[portId].height = portRegion.bottom - portRegion.top;
 					portObjs[portId].width = portRegion.right - portRegion.left;
 					portObjs[portId].wOffset = Math.floor(portObjs[portId].width/2);
-					portObjs[portId].hOffset = Math.floor(portObjs[portId].height/2)+3;
+					portObjs[portId].hOffset = Math.floor(portObjs[portId].height/2)+5;
 
 					totalPortWidth += portObjs[portId].width;
 					count++;

@@ -1,0 +1,18 @@
+
+
+<div id="assembly-{%=assembly[:id]%}" class="component-result">
+	<div class="body">
+		<div class="main-content">
+			<div class="component-icon">
+				<img title="{%=assembly[:i18n]%}" src="{%=assembly[:image_path]%}"/>
+			</div>
+			<div class="icon-divider"></div>
+			<div class="name-wrapper" title="{%=assembly[:i18n]%}">{%=assembly[:i18n]%}</div>
+		</div>
+		<div class="right-bar">
+			<div class="plus"></div>
+			<div class="implementations">
+			</div>
+		</div>
+	</div>
+</div>

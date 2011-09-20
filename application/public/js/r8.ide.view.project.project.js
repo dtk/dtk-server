@@ -35,7 +35,8 @@ if (!R8.IDE.View.project.project) {
 				//-------------------------------------------------------------------
 				$('#project-tree-'+_project.get('id')).jstree({
 //					'plugins': ["ui","themes","html_data","hotkeys","crrm","contextmenu"],
-					'plugins': ["themes","json_data","html_data","ui","crrm","cookies","search","hotkeys","contextmenu"],
+//					'plugins': ["themes","json_data","html_data","ui","crrm","cookies","search","hotkeys","contextmenu"],
+					'plugins': ["themes","json_data","html_data","ui","crrm","cookies","search","contextmenu"],
 
 					"contextmenu":{
 						"items": {
@@ -124,14 +125,15 @@ console.log('double clicked on project leaf:'+leafNodeId);
 					e.halt();
 					e.stopImmediatePropagation();
 				},this);
-/*
-				_events['leaf_dblclick'] = R8.Utils.Y.delegate('dblclick',function(e) {
+
+				_events['t_leaf_dblclick'] = R8.Utils.Y.delegate('dblclick',function(e) {
 					var leafNodeId = e.currentTarget.get('id'),
 						leafType = e.currentTarget.getAttribute('type'),
 						leafObjectId = leafNodeId.replace('leaf-body-'+leafType+'-',''),
 						leafLabel = e.currentTarget.get('children').item(1).get('innerHTML');
 
 					switch(leafType) {
+/*
 						case "target":
 //							_targets[leafObjectId].loadMain();
 R8.IDE.openEditorView(_targets[targetId]);
@@ -142,6 +144,7 @@ break;
 								'type': 'target'
 							});
 							break;
+*/
 						case "file":
 							//this.loadFileInEditor(leafObjectId);
 							R8.IDE.openFile({
@@ -150,6 +153,7 @@ break;
 								'type': 'file'
 							});
 							break;
+/*
 						case "component":
 							R8.IDE.openComponent({
 								'id': leafObjectId,
@@ -157,12 +161,12 @@ break;
 								'type': 'file'
 							});
 							break;
-
+*/
 					}
 					e.halt();
 					e.stopImmediatePropagation();
 				},_leafNode,'.leaf-body',this);
-*/
+
 			},
 			render: function() {
 				var treeNodeTpl = '<div id="project-tree-'+_project.get('id')+'" class="project-view-content jstree jstree-default jstree-r8">\

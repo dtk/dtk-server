@@ -31,6 +31,8 @@ if (!R8.IDE) {
 //			_mainPanelContentNode = null,
 			_mainRegionPanels = {},
 
+			_editorRegionNode = null,
+
 			_bottomPaneMinWidth = 300,
 			_bottomPaneMinHeight = 100,
 			_bottomPanelNode = null,
@@ -223,9 +225,9 @@ if (!R8.IDE) {
 
 //Init Panel Nodes, should probalby be objectified in near future
 //				_lRegionNode = R8.Utils.Y.one('#l-region');
-				_lRegionNode = R8.Utils.Y.one('#l-panel-content');
+//				_lRegionNode = R8.Utils.Y.one('#l-panel-content');
 
-				_mainRegionNode = R8.Utils.Y.one('#main-region');
+//				_mainRegionNode = R8.Utils.Y.one('#main-region');
 
 //				_consolePanelNode = R8.Utils.Y.one('#console-panel');
 
@@ -283,6 +285,15 @@ if (!R8.IDE) {
 				_panels['editor'] = new R8.IDE.editorPanel(ePanelDef);
 				_mainBodyWrapperNode.append(_panels['editor'].render());
 				_panels['editor'].init();
+
+				_lRegionNode = R8.Utils.Y.one('#l-panel-wrapper');
+				_editorRegionNode = R8.Utils.Y.one('#editor-panel-wrapper');
+
+				this.resizePage();
+
+				R8.Utils.Y.one(window).on('resize',function(e){
+					this.resizePage();
+				},this);
 
 //				this.setPanelSizings();
 
@@ -361,13 +372,34 @@ if (!R8.IDE) {
 						break;
 				}
 			},
+			purgeEvent: function(eventName,id) {
+				if(typeof(_eventCallbacks[eventName]) == 'undefined') return;
+
+				for(var i in _eventCallbacks[eventName]) {
+					var eventObj = _eventCallbacks[eventName][i];
+					if(eventObj.id == id) {
+						R8.Utils.arrayRemove(_eventCallbacks[eventName],i);
+					}
+				}
+			},
 			on: function(eventName,callback,scope) {
 				if(typeof(_eventCallbacks[eventName]) == 'undefined') _eventCallbacks[eventName] = [];
 
-				_eventCallbacks[eventName].push({
+				var eventObj = {
+					'id': R8.Utils.Y.guid(),
 					'callback': callback,
 					'scope': scope
-				});
+				}
+				_eventCallbacks[eventName].push(eventObj);
+
+				var _this = this;
+				var retObj = {
+					'id': eventObj.id,
+					'eventName': eventName,
+					'detach': function() {
+						_this.purgeEvent(this.eventName,this.id)
+					}
+				}
 			},
 			fire: function(eventName,eventObj) {
 //DEBUG
@@ -597,19 +629,57 @@ if (!R8.IDE) {
 				var mainBodyWrapperHeight = vportHeight - (topbarRegion['height']);
 				_mainBodyWrapperNode.setStyles({'height':mainBodyWrapperHeight});
 
-				_lRegionNode.setStyle('height',mainBodyWrapperHeight);
+				var _lRegionHeightMargin = 20;
+				var _lRegionWidthMargin = 15;
+				var lPanelHeight = mainBodyWrapperHeight-_lRegionHeightMargin
+				_lRegionNode.setStyle('height',lPanelHeight);
+
+				var lPanelHeaderNode = R8.Utils.Y.one('#l-panel-header');
+				var lPanelHeaderRegion = lPanelHeaderNode.get('region');
+				var lPanelContentNode = R8.Utils.Y.one('#l-panel-content');
+				var lPanelContentRegion = lPanelContentNode.get('region')
+
+				lPanelContentNode.setStyle('height',(lPanelHeight-lPanelHeaderRegion.height+2))
+
+				var _editorRegionHeightMargin = 15;
+				var _editorRegionWidthMargin = 15;
+				var resizeWidth = _lResizerNode.get('region').width;
+				var lPanelRegion = _lRegionNode.get('region');
+
+				var editorPanelWidth = vportWidth - (lPanelRegion.width+_lRegionWidthMargin+resizeWidth+_editorRegionWidthMargin);
+				var editorPanelHeight = mainBodyWrapperHeight-_editorRegionHeightMargin;
+				_lRegionNode.setStyle('height',lPanelHeight);
+				_editorRegionNode.setStyles({'height':editorPanelHeight,'width':editorPanelWidth});
+
+				var editorPanelHeaderNode = R8.Utils.Y.one('#editor-panel-header');
+				var editorPanelHeaderRegion = editorPanelHeaderNode.get('region');
+				var editorPanelContentNode = R8.Utils.Y.one('#editor-panel-content');
+				var editorPanelContentRegion = editorPanelContentNode.get('region')
+
+				editorPanelHeaderNode.setStyle('width',editorPanelWidth-2);
+				editorPanelContentNode.setStyles({
+					'width': editorPanelWidth,
+					'height': (editorPanelHeight - (editorPanelHeaderRegion.height + 2))
+				});
+
+				var e = {
+					'editorRegion': _editorRegionNode.get('region'),
+					'contentRegion': editorPanelContentNode.get('region')
+				};
+				R8.IDE.fire('editorResize',e);
+/*
 				var lRegionWidth = _lRegionNode.get('region').width;
-
 				var mainRegionWidth = vportWidth - lRegionWidth - _resizerWidth;
-
 				_mainRegionNode.setStyles({'height':mainBodyWrapperHeight,'width':mainRegionWidth});
+*/
 
 //				var editorNodeHeight = mainBodyWrapperHeight - (_consolePanelNode.get('region').height+_resizerWidth);
 //				_mainPanelNode.setStyle('height',editorNodeHeight);
 
 //TODO: revisit to cleanup after more fully implementing IDE
 //				this.resizePanelContent();
-				this.resizePanels();
+
+//				this.resizePanels();
 			},
 			panelResizeInit: function() {
 				var _this = this;

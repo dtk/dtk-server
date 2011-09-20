@@ -391,11 +391,7 @@ module XYZ
 
     def get_and_update_operational_status!()
       update_object!(:external_ref,:operational_status)
-      #TODO: get node state returns much more info then just op state; may write more targeted get
-      state = CommandAndControl.get_node_state(self)
-      op_status = state && state[:state]
-#TODO: move to CommandAndControl
-      op_status = StateTranslation[op_status] || op_status
+      op_status = CommandAndControl.get_node_operational_status(self)
       if op_status
         unless self[:operational_status] == op_status
           update_operational_status!(op_status)
@@ -403,10 +399,6 @@ module XYZ
       end
       op_status
     end
-    StateTranslation = {
-      "pending" => "starting",
-      "shutting-down" => "stopping"
-    } 
 
     #attribute on node
     def update_operational_status!(op_status)

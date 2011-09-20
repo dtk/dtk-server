@@ -42,7 +42,12 @@ module XYZ
       end
 
       def server_destroy(id)
-        @conn.servers.get(id).destroy
+        server = @conn.servers.get(id)
+        if server
+          server.destroy
+        else
+          :server_does_not_exist
+        end
       end
 
       def server_create(options)

@@ -25,6 +25,12 @@ module XYZ
       klass.get_node_state(node)
     end
 
+    def self.get_node_operational_status(node)
+      adapter_name = R8::Config[:command_and_control][:iaas][:type]
+      klass = load_for_aux(:iaas,adapter_name)      
+      klass.get_node_operational_status(node)
+    end
+
     def self.request__get_logs(task,nodes,callbacks,context)
       klass = load_for(task)
       klass.request__get_logs(task,nodes,callbacks,context)

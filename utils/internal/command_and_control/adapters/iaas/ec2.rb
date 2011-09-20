@@ -59,9 +59,28 @@ module XYZ
 
       def self.get_node_state(node)
         instance_id = (node[:external_ref]||{})[:instance_id]
-        raise Error.new("get_node_state called when #{node_print_form(node)} does not have instance id") unless instance_id
+        unless instance_id
+          Log.error("get_node_state called when #{node_print_form(node)} does not have instance id")
+          return nil
+        end
         conn().server_get(instance_id)
       end
+
+      def self.get_node_operational_status(node)
+        instance_id = (node[:external_ref]||{})[:instance_id]
+        unless instance_id
+          Log.error("get_node_state called when #{node_print_form(node)} does not have instance id")
+          return nil
+        end
+        #TODO: see if more targeted get to just get operational status
+        state = conn().server_get(instance_id)
+        op_status = state && state[:state]
+        StateTranslation[op_status] || op_status
+      end
+      StateTranslation = {
+        "pending" => "starting",
+        "shutting-down" => "stopping"
+      } 
 
       def self.node_print_form(node)
         "#{node[:display_name]} (#{node[:id]}"

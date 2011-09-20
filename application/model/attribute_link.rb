@@ -393,7 +393,12 @@ module XYZ
       def self.create_from_array(a)
         ret = new()
         return ret unless a
-        a.each{|el| ret << el}
+        a.each do |el| 
+          if el.kind_of?(String) and el =~ /^[0-9]+$/
+            el = el.to_i
+          end
+          ret << el
+        end
         ret
       end
 
@@ -405,7 +410,7 @@ module XYZ
       end
     end
 
-######################## TODO: see whichj of below is tsil used
+######################## TODO: see whichj of below is still used
     def self.get_legal_connections(parent_id_handle)
       c = parent_id_handle[:c]
       parent_id = IDInfoTable.get_id_from_id_handle(parent_id_handle)

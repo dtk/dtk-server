@@ -137,6 +137,10 @@ pp poss_remote_cmps
       tpl_result[:panel] = "#{model_name}-search-list-container"
       return tpl_result
 =end
+#RICHTEMP
+#      keep = %w{java_webapp mysql__server}
+#component_list.reject!{|x| not (x[:config_agent_type] == "puppet" and keep.include?(x[:display_name]))}
+
       return {:data=>component_list}
     end
 

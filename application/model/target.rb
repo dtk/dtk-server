@@ -30,7 +30,7 @@ module XYZ
 
     def get_and_update_nodes_status()
       nodes = get_objects_from_sp_hash(:cols => [:nodes]).map{|r|r[:node]}
-      nodes.inject{|h,n|h.merge(n.id => n.get_and_update_status!())}
+      nodes.inject({}){|h,n|h.merge(n.id => n.get_and_update_status!())}
     end
 
     def destroy_and_delete_nodes()

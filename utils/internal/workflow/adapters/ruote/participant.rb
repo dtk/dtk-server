@@ -76,7 +76,7 @@ module XYZ
               result = {:type => :completed_create_node, :task_id => task_id} 
               event = top_task.add_event(:complete_succeeded, task,result)
               pp [:found,msg[:senderid]]
-              task[:executable_action][:node].update_operational_status!(:powered_on)
+              task[:executable_action][:node].update_operational_status!(:running)
               set_result_succeeded(workitem,result,task,action)
               action.get_and_propagate_dynamic_attributes(result)
               self.reply_to_engine(workitem)
@@ -100,7 +100,7 @@ module XYZ
           callbacks = {
             :on_msg_received => proc do |msg|
               pp [:found,msg[:senderid]]
-              task[:executable_action][:node].update_operational_status!(:powered_on)
+              task[:executable_action][:node].update_operational_status!(:running)
               self.reply_to_engine(workitem)
             end,
             :on_timeout => proc do 

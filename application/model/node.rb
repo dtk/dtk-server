@@ -379,6 +379,29 @@ module XYZ
 
     #######################
     ######### Model apis
+    def get_and_update_status!()
+      #shortcut
+      if has_key?(:is_deployed)
+        return  "staged" if not self[:is_deployed]
+      end
+      update_object!(:is_deployed,:external_ref,:operational_status)
+      return  "staged" if not self[:is_deployed]
+      get_and_update_operational_status!()
+    end
+
+    def get_and_update_operational_status!()
+      update_object!(:external_ref,:operational_status)
+      #TODO: get node state returns much more info then just op state; may write more targeted get
+      state = CommandAndControl.get_node_state(self)
+      op_status = state && state[:state]
+      if op_status
+        unless self[:operational_status] == op_status
+          update_operational_status!(op_status)
+        end
+      end
+      op_status
+    end
+
     #attribute on node
     def update_operational_status!(op_status)
       update(:operational_status => op_status.to_s)

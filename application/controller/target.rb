@@ -3,8 +3,13 @@ module XYZ
     def get_ports(id)
       target = create_object_from_id(id)
       port_list = target.get_ports("component_external","component_internal_external")
-      pp port_list
       return {:data=>port_list}
+    end
+
+    def get_nodes_status(id)
+      target = create_object_from_id(id)
+      nodes_status = target.get_and_update_nodes_status()
+      return {:data=>nodes_status}
     end
 
     def edit

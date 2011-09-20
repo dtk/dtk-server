@@ -138,6 +138,9 @@ if (!R8.IDE.View.target.editor) {
 				_contentNode = R8.Utils.Y.one('#'+this.get('id'));
 				_contentWrapperNode = R8.Utils.Y.one('#'+this.get('id')+'-wrapper');
 
+				var editorContentRegion = R8.Utils.Y.one('#editor-panel-content').get('region');
+				_contentNode.setStyles({'height':editorContentRegion.height,'width':editorContentRegion.width});
+
 				_pluginBarNode = R8.Utils.Y.one('#'+_pluginBarNodeId);
 				_pluginContentNode = R8.Utils.Y.one('#'+_pluginContentNodeId);
 
@@ -475,6 +478,7 @@ return;
 
 				_events['plugin_click'] = R8.Utils.Y.delegate('click',this.pluginClick,'#'+this.get('id')+'-plugin-bar','.plugin',this);
 
+				_events['editorResize'] = R8.IDE.on('editorResize',this.editorResize,this);
 //DEBUG
 //TODO: mouse over popup screwed b/c of layout, disabling for now
 /*
@@ -507,6 +511,23 @@ return;
 
 //				R8.Workspace.events['item_click'] = R8.Utils.Y.delegate('click',function(){console.log('clicked item');},R8.Workspace.viewSpaceNode,'.item, .connector');
 //				R8.Workspace.events['vspace_mdown'] = R8.Utils.Y.delegate('mousedown',R8.Workspace.checkMouseDownEvent,'body','#'+_node.get('id'));
+			},
+			editorResize: function(e) {
+				_contentNode.setStyles({'height':e.contentRegion.height,'width':e.contentRegion.width});
+
+				var itemListContainerNode = R8.Utils.Y.one('#node-list-container');
+				if(itemListContainerNode == null) return;
+
+				var targetRegion = this.get('node').get('region');
+				var targetWidth = targetRegion.width;
+				itemListContainerNode.setStyle('width',targetWidth);
+				R8.Utils.Y.one('#list-body-wrapper').setStyle('width',(targetWidth-80));
+
+				var id=this.get('id');
+				var resultListNode = R8.Utils.Y.one('#'+id+'-list-body');
+				var resultListWidth = resultListNode.get('region').width;
+				var limit = Math.floor(resultListWidth/138)+1;
+				resultListNode.setStyle('width',((limit+1)*138));
 			},
 			portMout: function(e) {
 				R8.Utils.Y.one('#port-modal').remove();
@@ -972,12 +993,14 @@ return;
 			},
 			searchComponentsFocus: function() {
 				var id=this.get('id');
-				var listTpl = '<div id="node-list-container">\
+				var targetRegion = this.get('node').get('region');
+				var targetWidth = targetRegion.width;
+				var listTpl = '<div id="node-list-container" style="width:'+targetWidth+'px;">\
 								 <div id="list-l-arrow-wrapper">\
 									<div id="list-l-arrow"></div>\
 								 </div>\
-								<div id="list-body-wrapper">\
-									<div id="'+id+'-list-body">\
+								<div id="list-body-wrapper" style="width:'+(targetWidth-80)+'px;">\
+									<div id="'+id+'-list-body" style="width:'+(targetWidth-80)+'px;">\
 									</div>\
 								</div>\
 								<div id="list-r-arrow-wrapper">\
@@ -1085,6 +1108,7 @@ return;
 			},
 			searchAssembliesFocus: function() {
 				var id=this.get('id');
+				var targetRegion = this.get('node').get('region');
 				var listTpl = '<div id="node-list-container">\
 								 <div id="list-l-arrow-wrapper">\
 									<div id="list-l-arrow"></div>\

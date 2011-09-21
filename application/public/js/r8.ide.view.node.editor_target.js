@@ -728,7 +728,7 @@ return;
 			},
 			clearPorts: function() {
 				for(var p in _ports) {
-					var portNode = R8.Utils.Y.one('#'+_ports[p].nodeId);
+					var portNode = R8.Utils.Y.one('#'+_ports[p].get('id'));
 						portNode.purge(true);
 						portNode.remove();
 					delete(_ports[p]);

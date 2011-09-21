@@ -610,7 +610,7 @@ pp request.params
       Attribute.update_and_propagate_attributes(attr_mh,attribute_rows)
       redirect "/xyz/component/edit/#{component_id.to_s}"
     end
-
+=begin
     def instance_edit_test(id,virtual_col_name=nil)
       if virtual_col_name
         id_handle = id_handle(id)
@@ -632,6 +632,49 @@ pp request.params
       return {:content => tpl.render()}
 
     end
+=end
+    def instance_edit_test(component_id)
+      component = create_object_from_id(component_id)
+      to_set = {}
+      attr_list_x = component.get_attributes_unraveled(to_set,:flatten_nil_value => true)
+      #TODO:" temp
+      attr_list = attr_list_x.map do |a|
+        disabled_info = {
+          :disabled_attribute => a[:is_readonly] ? "disabled" : "",
+        }
+        Aux::hash_subset(a,[:id,:name,:value,:i18n,:is_readonly]).merge(disabled_info)
+      end
+
+      #TODO strawman ordering; puts readonly at bottom
+      ordered_attr_list = attr_list.sort do |a,b|
+        if a[:disabled_attribute] == b[:disabled_attribute]
+        (a[:name]||"_") <=> (b[:name]||"_")
+        elsif a[:disabled_attribute].empty?
+          -1
+        else
+          1
+        end
+      end
+
+      tpl = R8Tpl::TemplateR8.new("component/component_edit",user_context())
+      tpl.assign("field_list",ordered_attr_list)
+      tpl.assign("component_id",component_id)
+      return {:content => tpl.render()}
+    end
+
+    def save_attributes_test(explicit_hash=nil)
+      attr_val_hash = explicit_hash || request.params.dup
+      #TODO: can thsi be handled another way
+      #convert empty strings to nils
+      attr_val_hash.each{|k,v|attr_val_hash[k] = nil if v.kind_of?(String) and v.empty?}
+      component_id = attr_val_hash.delete("component_id").to_i
+      attribute_rows = AttributeComplexType.ravel_raw_post_hash(attr_val_hash,:attribute,component_id)
+      attr_mh = ModelHandle.new(ret_session_context_id(),:attribute)
+      #TODO: need way to mark which ones are instance vars vs which ones are defaults
+      Attribute.update_and_propagate_attributes(attr_mh,attribute_rows)
+      redirect "/xyz/component/instance_edit_test/#{component_id.to_s}"
+    end
+
    ####### end TODO for testing 
 
     def dock_edit(component_id)

@@ -14,6 +14,8 @@ if (!R8.IDE.View.target.editor) {
 
 			_pendingDelete = {},
 
+			_selectedItems = {},
+
 //TODO: maybe put UI updates directly into model, else some central updater
 			_ui = _target.get('ui'),
 			_uiCookie = {},
@@ -68,6 +70,7 @@ if (!R8.IDE.View.target.editor) {
 			_pluginContentNodeId = _idPrefix+_target.get('id')+'-plugin-content-wrapper',
 			_pluginContentNode = null,
 			_pluginContentOpen = false,
+			_pluginInputNode = null,
 			_activePlugin = '',
 			_closedPluginContentHeight = 2,
 			_pluginDefs = {
@@ -79,6 +82,7 @@ if (!R8.IDE.View.target.editor) {
 					'events': {},
 					'data': {},
 					'blurCallback': 'searchNodesBlur',
+					'renderCallback': 'renderNodeResults',
 					'getData': function(key) {
 						return this.data[key];
 					},
@@ -95,6 +99,7 @@ if (!R8.IDE.View.target.editor) {
 					'resizeable': false,
 					'i18n': 'Components',
 					'loadCallback': 'searchComponents',
+					'renderCallback': 'renderComponentResults',
 					'events': {},
 					'data': {},
 					'blurCallback': 'searchComponentsBlur',
@@ -114,6 +119,7 @@ if (!R8.IDE.View.target.editor) {
 					'resizeable': false,
 					'i18n': 'Assemblies',
 					'loadCallback': 'searchAssemblies',
+					'renderCallback': 'renderAssemblyResults',
 					'events': {},
 					'data': {},
 					'blurCallback': 'searchAssembliesBlur',
@@ -147,14 +153,14 @@ if (!R8.IDE.View.target.editor) {
 							delete(this.data[key]);
 					}
 				},
-				'cfg-status': {
+				'cfg-debug': {
 					'default_height': 200,
 					'resizeable': false,
-					'i18n': 'Cfg Status',
-					'loadCallback': 'getCfgStatus',
+					'i18n': 'Cfg Debug',
+					'loadCallback': 'getCfgDebug',
 					'events': {},
 					'data': {},
-					'blurCallback': 'getCfgStatusBlur',
+					'blurCallback': 'getCfgDebugBlur',
 					'getData': function(key) {
 						return this.data[key];
 					},
@@ -181,6 +187,8 @@ if (!R8.IDE.View.target.editor) {
 
 				_pluginBarNode = R8.Utils.Y.one('#'+_pluginBarNodeId);
 				_pluginContentNode = R8.Utils.Y.one('#'+_pluginContentNodeId);
+
+				_pluginInputNode = R8.Utils.Y.one('#'+this.get('id')+'-plugin-input');
 
 				for(var p in _pluginDefs) {
 					_plugins[p] = _pluginDefs[p];
@@ -341,8 +349,8 @@ return;
 										<div id="'+id+'-plugin-logging" class="item-wrapper plugin">\
 											<div id="" class="item">Logging</div>\
 										</div>\
-										<div id="'+id+'-plugin-cfg-status" class="item-wrapper plugin">\
-											<div id="" class="item">Cfg Status</div>\
+										<div id="'+id+'-plugin-cfg-debug" class="item-wrapper plugin">\
+											<div id="" class="item">Cfg Debug</div>\
 										</div>\
 										<div id="" class="divider"></div>\
 									</div>\
@@ -356,7 +364,9 @@ return;
 									<div id="'+id+'-plugin-bar" class="plugin-bar">\
 										<div id="'+id+'-plugin-input-content" class="input-content">\
 											<div id="'+id+'-plugin-input-wrapper" class="plugin-input-wrapper">\
+												<form id="'+id+'-plugin-input-form">\
 												<input id="'+id+'-plugin-input" name="plugin-input" type="text" class="plugin-input"/>\
+												</form>\
 											</div>\
 										</div>\
 										<div id="" class="divider"></div>\
@@ -376,8 +386,8 @@ return;
 											<div id="" class="item">Logging</div>\
 										</div>\
 										<div id="" class="divider"></div>\
-										<div id="'+id+'-plugin-cfg-status" class="item-wrapper plugin">\
-											<div id="" class="item">Cfg Status</div>\
+										<div id="'+id+'-plugin-cfg-debug" class="item-wrapper plugin">\
+											<div id="" class="item">Cfg Debug</div>\
 										</div>\
 										<div id="" class="divider"></div>\
 									</div>\
@@ -520,9 +530,15 @@ return;
 				});
 				_items[itemId].get('node').setAttribute('data-status','dd-ready');
 			},
+			setupPluginInputEvents: function() {
 
+			},
+			tearDownPluginInputEvents: function() {
+				
+			},
 			setupEvents: function() {
-				_events['item_click'] = R8.Utils.Y.delegate('click',this.updateSelectedItems,_contentNode,'editor-target.item',this);
+				_events['item_click'] = R8.Utils.Y.delegate('click',this.updateSelectedItems,_contentNode,'.node',this);
+//				_events['item_click'] = R8.Utils.Y.delegate('click',this.updateSelectedItems,_contentNode,'editor-target.item',this);
 				_events['vspace_click'] = R8.Utils.Y.delegate('click',this.clearSelectedItems,'body','#'+_contentNode.get('id'));
 
 				_events['port_mover'] = R8.Utils.Y.delegate('mouseover',this.portMover,_contentNode,'.port',this);
@@ -531,6 +547,33 @@ return;
 				_events['plugin_click'] = R8.Utils.Y.delegate('click',this.pluginClick,'#'+this.get('id')+'-plugin-bar','.plugin',this);
 
 				_events['editorResize'] = R8.IDE.on('editorResize',this.editorResize,this);
+
+				_events['pluginInputFocus'] = _pluginInputNode.on('focus',function(e){
+
+				},this);
+
+				_events['pluginInputBlur'] = _pluginInputNode.on('blur',function(e){
+
+				},this);
+
+				_events['pluginInputFormSubmit'] = R8.Utils.Y.one('#'+this.get('id')+'-plugin-input-form').on('submit',function(e){
+					var inputValue = _pluginInputNode.get('value');
+					if (_activePlugin != '') {
+						var item_list = _plugins[_activePlugin].getData('itemList');
+						var match_list = [];
+						for(var i in item_list) {
+							if(R8.Utils.stringStartsWith(item_list[i].name,inputValue)) {
+								match_list.push(item_list[i]);
+							}
+						}
+						_plugins[_activePlugin].setData('renderList',match_list);
+						this[_plugins[_activePlugin].renderCallback]();
+					}
+
+					_pluginInputNode.set('value','');
+					e.halt();
+					return false;
+				},this);
 //DEBUG
 //TODO: mouse over popup screwed b/c of layout, disabling for now
 /*
@@ -615,28 +658,27 @@ return;
 			},
 
 			addSelectedItem: function(itemId,data) {
-//				_selectedItems[itemId] = data;
-//				_items[itemId].get('node').setStyle('zIndex',51);
-//				_items[itemId].get('node').addClass('focus');
+				_selectedItems[itemId] = data;
+				_items[itemId].get('node').setStyle('zIndex',51);
+				_items[itemId].get('node').addClass('focus');
+//				_items[itemId].get('node').addClass('hover');
 			},
 			clearSelectedItems: function(e) {
-/*
 				for(itemId in _selectedItems) {
+//					_items[itemId].get('node').removeClass('hover');
 					_items[itemId].get('node').removeClass('focus');
 					_items[itemId].get('node').setStyle('zIndex',1);
 					delete(_selectedItems[itemId]);
 				}
-*/
 			},
 			updateSelectedItems: function(e) {
-/*
 				var itemNodeId = e.currentTarget.get('id'),
 					model = e.currentTarget.getAttribute('data-model'),
 					modelId = e.currentTarget.getAttribute('data-id');
 
 				if(e.ctrlKey == false) this.clearSelectedItems();
 				this.addSelectedItem(modelId,{'model':model,'id':modelId});
-*/
+
 
 //DEBUG
 //TODO: revisit once puting dock into place
@@ -1074,7 +1116,7 @@ return;
 						}
 						else if (e.keyCode == 39) {
 							var selectedIndex = _plugins['component-search'].getData('selectedIndex');
-							var maxIndex = _plugins['component-search'].getData('componentList').length-1;
+							var maxIndex = _plugins['component-search'].getData('renderList').length-1;
 
 							if ((selectedIndex + 1) > maxIndex) {
 								e.halt();
@@ -1085,7 +1127,7 @@ return;
 							this.renderComponentResults();
 							e.halt();
 						} else if(e.keyCode == 35) {
-							var maxIndex = _plugins['component-search'].getData('componentList').length-1;
+							var maxIndex = _plugins['component-search'].getData('renderList').length-1;
 							_plugins['component-search'].setData('selectedIndex',maxIndex);
 							this.renderComponentResults();
 						} else if(e.keyCode == 36) {
@@ -1132,7 +1174,7 @@ return;
 						}
 						else if (e.keyCode == 39) {
 							var selectedIndex = _plugins['node-search'].getData('selectedIndex');
-							var maxIndex = _plugins['node-search'].getData('nodeList').length-1;
+							var maxIndex = _plugins['node-search'].getData('renderList').length-1;
 
 							if ((selectedIndex + 1) > maxIndex) {
 								e.halt();
@@ -1143,7 +1185,7 @@ return;
 							this.renderNodeResults();
 							e.halt();
 						} else if(e.keyCode == 35) {
-							var maxIndex = _plugins['node-search'].getData('nodeList').length-1;
+							var maxIndex = _plugins['node-search'].getData('renderList').length-1;
 							_plugins['node-search'].setData('selectedIndex',maxIndex);
 							this.renderNodeResults();
 						} else if(e.keyCode == 36) {
@@ -1189,7 +1231,7 @@ return;
 						}
 						else if (e.keyCode == 39) {
 							var selectedIndex = _plugins['assembly-search'].getData('selectedIndex');
-							var maxIndex = _plugins['assembly-search'].getData('assemblyList').length-1;
+							var maxIndex = _plugins['assembly-search'].getData('renderList').length-1;
 
 							if ((selectedIndex + 1) > maxIndex) {
 								e.halt();
@@ -1200,7 +1242,7 @@ return;
 							this.renderAssemblyResults();
 							e.halt();
 						} else if(e.keyCode == 35) {
-							var maxIndex = _plugins['assembly-search'].getData('assemblyList').length-1;
+							var maxIndex = _plugins['assembly-search'].getData('renderList').length-1;
 							_plugins['assembly-search'].setData('selectedIndex',maxIndex);
 							this.renderComponentResults();
 						} else if(e.keyCode == 36) {
@@ -1222,7 +1264,8 @@ return;
 
 				resultListNode.setStyle('width',((limit+1)*138));
 
-				_plugins['component-search'].setData('componentList',component_list);
+				_plugins['component-search'].setData('renderList',component_list);
+				_plugins['component-search'].setData('itemList',component_list);
 				_plugins['component-search'].setData('selectedIndex',0);
 				_plugins['component-search'].setData('oldSelectedIndex',0);
 				_plugins['component-search'].setData('renderLimit',limit);
@@ -1241,7 +1284,8 @@ return;
 
 				resultListNode.setStyle('width',((limit+1)*138));
 
-				_plugins['node-search'].setData('nodeList',node_list);
+				_plugins['node-search'].setData('renderList',node_list);
+				_plugins['node-search'].setData('itemList',node_list);
 				_plugins['node-search'].setData('selectedIndex',0);
 				_plugins['node-search'].setData('oldSelectedIndex',0);
 				_plugins['node-search'].setData('renderLimit',limit);
@@ -1260,7 +1304,8 @@ return;
 
 				resultListNode.setStyle('width',((limit+1)*138));
 
-				_plugins['assembly-search'].setData('assemblyList',assembly_list);
+				_plugins['assembly-search'].setData('renderList',assembly_list);
+				_plugins['assembly-search'].setData('itemList',assembly_list);
 				_plugins['assembly-search'].setData('selectedIndex',0);
 				_plugins['assembly-search'].setData('oldSelectedIndex',0);
 				_plugins['assembly-search'].setData('renderLimit',limit);
@@ -1271,7 +1316,12 @@ return;
 				var id=this.get('id');
 				var resultListNode = R8.Utils.Y.one('#'+id+'-list-body');
 
-				var itemList = _plugins['component-search'].getData('componentList');
+				var itemList = _plugins['component-search'].getData('renderList');
+				if (itemList.length == 0) {
+					resultListNode.set('innerHTML','');
+					return;
+				}
+
 				var selectedIndex = _plugins['component-search'].getData('selectedIndex');
 				var renderLimit = _plugins['component-search'].getData('renderLimit');
 				var renderStartIndex = selectedIndex - (renderLimit-2);
@@ -1296,7 +1346,12 @@ return;
 				var id=this.get('id');
 				var resultListNode = R8.Utils.Y.one('#'+id+'-list-body');
 
-				var itemList = _plugins['node-search'].getData('nodeList');
+				var itemList = _plugins['node-search'].getData('renderList');
+				if (itemList.length == 0) {
+					resultListNode.set('innerHTML','');
+					return;
+				}
+
 				var selectedIndex = _plugins['node-search'].getData('selectedIndex');
 				var renderLimit = _plugins['node-search'].getData('renderLimit');
 				var renderStartIndex = selectedIndex - (renderLimit-2);
@@ -1314,7 +1369,12 @@ return;
 				var id=this.get('id');
 				var resultListNode = R8.Utils.Y.one('#'+id+'-list-body');
 
-				var itemList = _plugins['assembly-search'].getData('assemblyList');
+				var itemList = _plugins['assembly-search'].getData('renderList');
+				if (itemList.length == 0) {
+					resultListNode.set('innerHTML','');
+					return;
+				}
+
 				var selectedIndex = _plugins['assembly-search'].getData('selectedIndex');
 				var renderLimit = _plugins['assembly-search'].getData('renderLimit');
 				var renderStartIndex = selectedIndex - (renderLimit-2);

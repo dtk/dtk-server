@@ -492,6 +492,15 @@ body {
 	background-position: -6px 0;
 }
 
+.node.focus .node-body {
+	background-color: #c0d1e1;
+}
+.node.focus .action-btn {
+	border-left: 1px solid #7e96ab;
+	border-bottom: 1px solid #7e96ab;
+	background-color: #c0d1e1;
+}
+
 .node .name-wrapper {
 	height: 26px;
 	width: 100%;
@@ -630,6 +639,7 @@ body {
 	margin-left: 10px;
 }
 .panel .header .tab-list li {
+	cursor: pointer;
 	list-style: none outside;
 	height: 30px;
 /*	padding: 5px 5px 0 5px;*/

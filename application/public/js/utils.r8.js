@@ -104,6 +104,20 @@ if (!R8.Utils) {
 				return YUI().Lang.isString(inputVar);
 			},
 
+			stringStartsWith: function(string,startsWith,caseSensitive) {
+				if(typeof(caseSensitive) != 'undefined' && caseSensitive==true)
+					return string.slice(0,startsWith.length) == startsWith;
+				else {
+					var strSlice = string.slice(0,startsWith.length).toLowerCase();
+					return strSlice == startsWith.toLowerCase();
+				}
+/*
+String.prototype.startsWith = function (str){
+    return this.slice(0, str.length) == str;
+};
+*/
+			},
+
 			/*
 			 * Wrapper function to YUI().Lang.later
 			 * 

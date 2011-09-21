@@ -698,13 +698,23 @@ module XYZ
         end
       end.compact
 
-      opts = {:returning_sql_cols => [:link_def_id,:id,:display_name,:type,:connected]}
-      new_cmp_ports = Port.create_needed_component_ports(component_link_defs,self,component,opts)
+      create_opts = {:returning_sql_cols => [:link_def_id,:id,:display_name,:type,:connected]}
+      new_cmp_ports = Port.create_needed_component_ports(component_link_defs,self,component,create_opts)
 
       #update node_link_defs_info with new ports
       new_cmp_ports.each do |port|
         ndx_for_port_update[port[:link_def_id]].merge!(:port => port)
       end
+
+      #TODO: more efficient way to do this; instead include all needed columns in :returning_sql_cols above
+      if opts[:outermost_ports] and not new_cmp_ports.empty?
+        port_mh = model_handle(:port)
+        port_idhs = new_cmp_ports.map{|port_hash|port_mh.createIDH(:id => port_hash[:id])}
+        new_ports = Model.get_objs_in_set(port_idhs, {:cols => Port.common_columns})
+        new_ports.map{|p|p.materialize!(Port.common_columns)}
+        opts[:outermost_ports] += new_ports
+      end
+
       #### end create needed component ports ####
                                                              
       LinkDef.create_needed_internal_links(self,component,node_link_defs_info)

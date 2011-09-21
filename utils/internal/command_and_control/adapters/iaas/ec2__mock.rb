@@ -3,6 +3,10 @@ require 'ipaddr'
 module XYZ
   module CommandAndControlAdapter
     class Ec2__mock < Ec2
+      def self.get_node_operational_status(node)
+        nil
+      end
+
      private
       def self.wait_for_node_to_be_ready(node)
         sleep(5)

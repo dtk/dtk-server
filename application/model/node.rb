@@ -397,7 +397,7 @@ module XYZ
           update_operational_status!(op_status)
         end
       end
-      op_status
+      op_status || self[:operational_status]
     end
 
     #attribute on node

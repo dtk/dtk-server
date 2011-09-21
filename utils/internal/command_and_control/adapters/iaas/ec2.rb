@@ -34,7 +34,7 @@ module XYZ
             :external_ref => external_ref,
             :type => "instance",
             :is_deployed => true,
-            :operational_status => "being_powered_on"
+            :operational_status => "starting"
           }
           node.merge!(node_update_hash)
           node.update(node_update_hash)

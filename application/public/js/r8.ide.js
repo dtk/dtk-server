@@ -337,7 +337,7 @@ if (!R8.IDE) {
 
 						break;
 					case "currentEditorView":
-						if(!_editorPanelActive) return null;
+/*						if(!_editorPanelActive) return null;
 
 						for(var p in _mainRegionPanels) {
 							if(_mainRegionPanels[p].get('type') == 'editor') {
@@ -346,6 +346,10 @@ if (!R8.IDE) {
 								else return null;
 							}
 						}
+*/
+						var currentView = _panels['editor'].get('currentView');
+						if(currentView != null) return currentView;
+
 						return null;
 						break;
 					case "nodesInEditor":

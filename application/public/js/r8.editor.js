@@ -429,6 +429,9 @@ if(_editorContainerNode == null) return;
 			},
 			saveFile: function() {
 				var currentEditorView = R8.IDE.get('currentEditorView');
+//DEBUG
+//console.log('currentEditorView:');
+//console.log(currentEditorView);
 				if(currentEditorView == null || currentEditorView.get('type') != 'file') return;
 
 				var callback = function(ioId,responseObj) {

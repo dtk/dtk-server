@@ -128,6 +128,8 @@ if(!R8.Topbar2) {
 						i18n:'Save File',
 						type: 'exe',
 						execCallback: function(){
+//DEBUG
+console.log('giong to call editor.saveFile....');
 							R8.Editor.saveFile();
 					}}
 				],

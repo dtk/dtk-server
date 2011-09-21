@@ -2,9 +2,6 @@
 if (!R8.Port) {
 
 	R8.Port = function(portDef,node) {
-//DEBUG
-console.log('inside of port instantiation...');
-console.log(portDef);
 		var _def = portDef,
 			_node = node,
 

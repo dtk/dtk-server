@@ -128,6 +128,44 @@ if (!R8.IDE.View.target.editor) {
 							delete(this.data[key]);
 					}
 				},
+				'logging': {
+					'default_height': 200,
+					'resizeable': false,
+					'i18n': 'Logging',
+					'loadCallback': 'showLogs',
+					'events': {},
+					'data': {},
+					'blurCallback': 'showLogsBlur',
+					'getData': function(key) {
+						return this.data[key];
+					},
+					'setData': function(key,value) {
+						this.data[key] = value;
+					},
+					'purgeData': function(key) {
+						if(typeof(this.data[key]) !='undefined')
+							delete(this.data[key]);
+					}
+				},
+				'cfg-status': {
+					'default_height': 200,
+					'resizeable': false,
+					'i18n': 'Cfg Status',
+					'loadCallback': 'getCfgStatus',
+					'events': {},
+					'data': {},
+					'blurCallback': 'getCfgStatusBlur',
+					'getData': function(key) {
+						return this.data[key];
+					},
+					'setData': function(key,value) {
+						this.data[key] = value;
+					},
+					'purgeData': function(key) {
+						if(typeof(this.data[key]) !='undefined')
+							delete(this.data[key]);
+					}
+				}
 			},
 			_plugins = {},
 
@@ -300,6 +338,12 @@ return;
 										<div id="'+id+'-plugin-assembly-search" class="item-wrapper plugin">\
 											<div id="" class="item">Assemblies</div>\
 										</div>\
+										<div id="'+id+'-plugin-logging" class="item-wrapper plugin">\
+											<div id="" class="item">Logging</div>\
+										</div>\
+										<div id="'+id+'-plugin-cfg-status" class="item-wrapper plugin">\
+											<div id="" class="item">Cfg Status</div>\
+										</div>\
 										<div id="" class="divider"></div>\
 									</div>\
 							</div>';
@@ -326,6 +370,14 @@ return;
 										<div id="" class="divider"></div>\
 										<div id="'+id+'-plugin-assembly-search" class="item-wrapper plugin">\
 											<div id="" class="item">Assemblies</div>\
+										</div>\
+										<div id="" class="divider"></div>\
+										<div id="'+id+'-plugin-logging" class="item-wrapper plugin">\
+											<div id="" class="item">Logging</div>\
+										</div>\
+										<div id="" class="divider"></div>\
+										<div id="'+id+'-plugin-cfg-status" class="item-wrapper plugin">\
+											<div id="" class="item">Cfg Status</div>\
 										</div>\
 										<div id="" class="divider"></div>\
 									</div>\
@@ -1441,6 +1493,39 @@ return;
 					});
 				});
 			},
+			showLogsBlur: function() {
+				
+			},
+			showLogs: function() {
+				var id=this.get('id');
+				var targetRegion = this.get('node').get('region');
+				var targetWidth = targetRegion.width;
+				var listTpl = '<div id="node-list-container" style="width:'+targetWidth+'px;">\
+								 <div id="list-l-arrow-wrapper">\
+									<div id="list-l-arrow"></div>\
+								 </div>\
+								<div id="list-body-wrapper" style="width:'+(targetWidth-80)+'px;">\
+									<div id="'+id+'-list-body" style="width:'+(targetWidth-80)+'px;">\
+									</div>\
+								</div>\
+								<div id="list-r-arrow-wrapper">\
+									<div id="list-r-arrow"></div>\
+								</div>\
+							</div>';
+
+				var contentTpl = '<div id="'+id+'-logger-wrapper" style="width:'+targetWidth+'px; height: 197px; margin-top: 3px; background-color: #D8DBE3">\
+									<div id="'+id+'-chef-debugger-header" class="view-header">\
+										<select id="'+id+'-logger-available-nodes" name="'+id+'-logger-available-nodes">\
+											<option value="">-Node List-</option>\
+										</select>\
+									</div>\
+									<div id="'+id+'-logging-content" style="overflow-y: scroll; background-color: #FFFFFF; height: 173px;">\
+									</div>\
+								</div>';
+
+				_pluginContentNode.set('innerHTML',contentTpl);
+			},
+
 //---------------------------------------------
 //alert/notification related
 //---------------------------------------------

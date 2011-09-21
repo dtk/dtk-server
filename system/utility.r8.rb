@@ -38,7 +38,8 @@ module R8Tpl
         cmp_name = port.component_name()
         attr_i18n = I18nAux::i18n_string_attribute(i18n,attr_name)||attr_name
         cmp_i18n = I18nAux::i18n_string_component(i18n,cmp_name)||cmp_name
-        if port[:type] == "l4"
+        #TODO: needs revision; also probably move to model/port
+        if [ "component_external", "component_internal_external"].include?(port[:type])
           "#{cmp_i18n} / #{attr_i18n}"
         else
           "#{cmp_i18n} #{port.ref_num().to_s} / #{attr_i18n}"

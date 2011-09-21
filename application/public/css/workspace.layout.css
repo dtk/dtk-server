@@ -210,6 +210,7 @@ body {
 
 .plugin-content-wrapper {
 	position: absolute;
+	z-index: 100;
 	bottom: 48px;
 	height: 2px;
 	width: 100%;
@@ -450,9 +451,21 @@ body {
 	margin: 3px 5px;
 }
 
-.node.active .node-status {
+.node.running .node-status {
 	background: no-repeat url(../images/v1/node-active-status-bg.jpg);
 }
+.node.terminated .node-status {
+	background: red;
+}
+.node.staged .node-status,.node.stopped .node-status {
+	background-color: #CCCCCC;
+}
+.node.starting .node-status,.node.stopping .node-status {
+	background-color: yellow;
+}
+
+
+
 
 .node .action-btn {
 	height: 13px;

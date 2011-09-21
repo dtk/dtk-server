@@ -122,10 +122,6 @@ if (!R8.Node) {
 				}
 			},
 			instantiateComponent: function(e) {
-//DEBUG
-console.log('going to instantiate a new component');
-console.log(e);
-
 //				var modelName = containerNode.getAttribute('data-model');
 //				var modelId = containerNode.getAttribute('data-id');
 
@@ -139,25 +135,20 @@ console.log(e);
 						var cloneResponse = response.application_component_clone.content[0]['data'];
 						var newComponent = cloneResponse.component;
 
-//DEBUG
-console.log('going to instantiate new component....');
-console.log(cloneResponse);
-//return;
-
 						var project = _this.get('target').get('project');
 //console.log('Have a project...');
 //console.log(project);
 						if(project.hasImplementation(newComponent.implementation_id)) {
-console.log('Project '+project.get('id')+' has the imp we r looking for...');
+//console.log('Project '+project.get('id')+' has the imp we r looking for...');
 						} else {
-console.log('Need to retrieve the new implementation from the project '+project.get('id'));
+//console.log('Need to retrieve the new implementation from the project '+project.get('id'));
 							project.instantiateImplementationById(newComponent.implementation_id);
 						}
 //DEBUG
-//console.log('going to add new component...');
-//console.log(newComponent);
+console.log('going to add new component, have a clone response...');
+console.log(cloneResponse);
 						_this.addComponent(newComponent,true);
-						if(typeof(cloneResponse.ports)) {
+						if(typeof(cloneResponse.ports) != 'undefined') {
 							_this.addPort(cloneResponse.ports[0]);
 						}
 
@@ -179,6 +170,9 @@ console.log('Need to retrieve the new implementation from the project '+project.
 				});
 			},
 			refresh: function(newNodeDef) {
+				R8.IDE.clearEvent('node-'+this.get('id')+'-component-add');
+				R8.IDE.clearEvent('node-'+this.get('id')+'-name-change');
+
 				if(typeof(newNodeDef) != 'undefined') {
 					_def = newNodeDef;
 				}
@@ -186,6 +180,8 @@ console.log('Need to retrieve the new implementation from the project '+project.
 				for(var v in _views) {
 					_views[v].refresh();
 				}
+
+				this.setupEvents();
 			},
 			addComponent: function(componentDef,tester) {
 				_components[componentDef.id] = new R8.Component(componentDef);
@@ -197,12 +193,16 @@ console.log('Need to retrieve the new implementation from the project '+project.
 				_components[componentDef.id].init();
 			},
 			addPort: function(portDef) {
+				if(_portDefs == null) _portDefs = [];
+//DEBUG
+console.log('adding port...');
+console.log(portDef);
 				_portDefs.push(portDef);
 				var newIndex = _portDefs.length-1;
 				_ports.push(new R8.Port(_portDefs[newIndex],this));
 				_ports[newIndex].init();
 //DEBUG
-console.log('just added  new port..need to refresh myself now');
+//console.log('just added  new port..need to refresh myself now');
 				this.refresh();
 			},
 			setPorts: function(portDefs) {

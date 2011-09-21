@@ -382,6 +382,9 @@ if (!R8.IDE) {
 					}
 				}
 			},
+			clearEvent: function(eventName) {
+				delete(_eventCallbacks[eventName]);
+			},
 			on: function(eventName,callback,scope) {
 				if(typeof(_eventCallbacks[eventName]) == 'undefined') _eventCallbacks[eventName] = [];
 

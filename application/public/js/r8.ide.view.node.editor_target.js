@@ -116,12 +116,12 @@ if (!R8.IDE.View.node.editor_target) {
 									<div id="'+_contentNodePrefix+_node.get('id')+'-name" class="name">'+_node.get('name')+'</div>\
 							</div>';
 
-				var tpl = '<div id="'+_contentNodePrefix+_node.get('id')+'" class="dg-component node active hover" data-id="'+_node.get('id')+'">\
+				var tpl = '<div id="'+_contentNodePrefix+_node.get('id')+'" class="dg-component node '+_node.get('status')+' hover" data-id="'+_node.get('id')+'">\
 							<div class="node-header">\
 								<div class="action-btn">\
 									<div class="action-btn-arrow"></div>\
 								</div>\
-								<div class="node-status"></div>\
+								<div class="node-status" title="'+_node.get('status')+'"></div>\
 							</div>\
 							<div class="node-body">\
 								<div class="name-wrapper">\
@@ -655,11 +655,12 @@ console.log('not a valid link.., mis-matched types...');
 			},
 			refresh: function() {
 				_contentNode.set('id',_contentNodePrefix+_node.get('id'));
+				_contentNode.setAttribute('data-id',_node.get('id'));
 				_nameNode.set('id',_contentNodePrefix+_node.get('id')+'-name');
 
 				_nameNode.set('innerHTML',_node.get('name'));
 //DEBUG
-console.log('inside of refresh node....');
+//console.log('inside of refresh node....');
 				this.reflowPorts();
 return;
 				var that = this;

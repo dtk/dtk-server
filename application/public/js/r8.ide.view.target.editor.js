@@ -1048,6 +1048,7 @@ return;
 				_plugins['node-search']['events']['key_press'].detach();
 				delete(_plugins['node-search']['events']['key_press']);
 				_pluginContentNode.set('innerHTML','');
+				_plugins['node-search'].getData('nodeDDel').destroy();
 				_plugins['node-search'].purgeData('nodeDDel');
 			},
 			searchNodesFocus: function() {
@@ -1339,6 +1340,8 @@ return;
 											'componentDef': newComponentDef
 										};
 										R8.IDE.fire('node-'+newComponentDef.node_id+'-component-add',e);
+//DEBUG
+//console.log(e);
 									});
 								}
 							});

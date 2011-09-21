@@ -44,7 +44,7 @@ if(!R8.Topbar2) {
 
 		var toolbarDef = {
 				tools:[
-					{id:'add-users',i18n:'Create User',contentLoader:function(contentNode){
+					{id:'add-users',type:'modal',i18n:'Create User',contentLoader:function(contentNode){
 						var route = 'user/edit',
 							params = {
 								'cfg':{
@@ -64,7 +64,7 @@ if(!R8.Topbar2) {
 						R8.Ctrl.call(route,params);
 					}},
 */
-					{id:'commit',i18n:'Commit',contentLoader:function(contentNode){
+					{id:'commit',type:'modal',i18n:'Commit',contentLoader:function(contentNode){
 //						var route = 'workspace/commit/'+R8.Workspace.get('context_id'),
 
 						var currentView = R8.IDE.get('currentEditorView');
@@ -95,7 +95,7 @@ if(!R8.Topbar2) {
 							};
 						R8.Ctrl.call(route,params);
 					}},
-*/					{id:'create-assembly',i18n:'Create Assembly',contentLoader:function(contentNode){
+*/					{id:'create-assembly',type:'modal',i18n:'Create Assembly',contentLoader:function(contentNode){
 //						var route = 'workspace/create_assembly/'+R8.Workspace.get('context_id'),
 						var route = 'workspace/create_assembly_ide',
 							params = {
@@ -105,7 +105,7 @@ if(!R8.Topbar2) {
 							};
 						R8.Ctrl.call(route,params);
 					}},
-					{id:'create-project',i18n:'Create Project',contentLoader:function(contentNode){
+					{id:'create-project',type:'modal',i18n:'Create Project',contentLoader:function(contentNode){
 						var route = 'ide/new_project',
 							params = {
 								'cfg':{
@@ -114,7 +114,7 @@ if(!R8.Topbar2) {
 							};
 						R8.Ctrl.call(route,params);
 					}},
-					{id:'create-target',i18n:'Create Target',contentLoader:function(contentNode){
+					{id:'create-target',type:'modal',i18n:'Create Target',contentLoader:function(contentNode){
 						var route = 'ide/new_target',
 							params = {
 								'cfg':{
@@ -122,6 +122,13 @@ if(!R8.Topbar2) {
 								}
 							};
 						R8.Ctrl.call(route,params);
+					}},
+					{
+						id:'save-file',
+						i18n:'Save File',
+						type: 'exe',
+						execCallback: function(){
+							R8.Editor.saveFile();
 					}}
 				],
 			};
@@ -145,12 +152,14 @@ if(!R8.Topbar2) {
 				_node = R8.Utils.Y.one('#'+_id);
 				_toolbarNode = R8.Utils.Y.one('#'+_toolbarNodeId);
 
+/*
 				_dropdowns[0] = new R8.Dropdown(dropdownDef);
 				_toolbarNode.append(_dropdowns[0].render());
 				_dropdowns[0].init();
+*/
 
 //TODO: revisit to cleanup later
-_toolbarNode.append('<div class="divider"></div>');
+//_toolbarNode.append('<div class="divider"></div>');
 
 				_toolbars[0] = new R8.ToolbarGroup2(toolbarDef);
 				_toolbarNode.append(_toolbars[0].render());

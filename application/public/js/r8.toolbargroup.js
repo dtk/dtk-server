@@ -3,7 +3,8 @@ if(!R8.ToolbarGroup2) {
 
 	R8.ToolbarGroup2 = function(cfg) {
 		var _cfg = cfg,
-			_id = cfg['id'],
+//			_id = cfg['id'],
+			_id = 'main-toolbar-group',
 			_listNode = null,
 			_height = null,
 			_tpl = '<div id="'+_id+'" class="toolbar-group">\
@@ -34,10 +35,13 @@ if(!R8.ToolbarGroup2) {
 					var toolNodeId = e.currentTarget.get('id');
 					var toolId = toolNodeId.replace('-tool','');
 
-					_tools[toolId].open();
+					if(_tools[toolId].get('type') == 'modal') {
+						_tools[toolId].open();
+					} else if(_tools[toolId].get('type') == 'exe') {
+						_tools[toolId].exec();
+					}
 
 				},_listNode,'.tool-item');
-
 			},
 			render: function() {
 				return _tpl;
@@ -61,6 +65,13 @@ if(!R8.ToolbarGroup2) {
 			init: function() {
 				
 			},
+			get: function(key) {
+				switch(key) {
+					case "type":
+						return _cfg['type'];
+						break;
+				}
+			},
 			render: function() {
 				return _tpl;
 			},
@@ -68,6 +79,9 @@ if(!R8.ToolbarGroup2) {
 				_modalContentNode = R8.IDE.renderModal();
 				var result = this.loadContent(_modalContentNode);
 //				if(!result) R8.IDE.destroyShim();
+			},
+			exec: function() {
+				_cfg['execCallback']();
 			},
 			loadContent: _cfg['contentLoader']
 		}

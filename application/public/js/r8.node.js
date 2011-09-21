@@ -145,11 +145,12 @@ if (!R8.Node) {
 							project.instantiateImplementationById(newComponent.implementation_id);
 						}
 //DEBUG
-console.log('going to add new component, have a clone response...');
-console.log(cloneResponse);
+//console.log('going to add new component, have a clone response...');
+//console.log(cloneResponse);
 						_this.addComponent(newComponent,true);
 						if(typeof(cloneResponse.ports) != 'undefined') {
-							_this.addPort(cloneResponse.ports[0]);
+//							_this.addPort(cloneResponse.ports[0]);
+							_this.addPorts(cloneResponse.ports);
 						}
 
 						var alertMsg = 'Added component <b>'+newComponent.name+'</b> to node <b>'+_this.get('name')+'</b>';
@@ -192,11 +193,16 @@ console.log(cloneResponse);
 
 				_components[componentDef.id].init();
 			},
+			addPorts: function(ports) {
+				for(var i in ports) {
+					this.addPort(ports[i]);
+				}
+			},
 			addPort: function(portDef) {
 				if(_portDefs == null) _portDefs = [];
 //DEBUG
-console.log('adding port...');
-console.log(portDef);
+//console.log('adding port...');
+//console.log(portDef);
 				_portDefs.push(portDef);
 				var newIndex = _portDefs.length-1;
 				_ports.push(new R8.Port(_portDefs[newIndex],this));

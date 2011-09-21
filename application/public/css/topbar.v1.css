@@ -56,7 +56,7 @@
 
 .menu-bar .item.active .overlay {
 	height: 35px;
-	width: 100%;
+/*	width: 100%;*/
 	position: absolute;
 	z-index: 2;
 	margin-left: -5px;
@@ -319,6 +319,9 @@
 }
 .tool-item .tool-btn.create-target {
 	background-image: url(../images/topbar/create-target-btn-sprite.png);
+}
+.tool-item .tool-btn.save-file {
+	background-image: url(../images/topbar/save-file-btn-sprite.png);
 }
 
 /*-------------------*/

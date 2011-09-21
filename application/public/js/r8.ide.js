@@ -194,12 +194,12 @@ if (!R8.IDE) {
 			init: function(projects) {
 				R8.UI.init();
 
-/*
+
 				var toolbarDef = {
 					'toolbarNodeId': 'menu-bar-body'
 				};
 				R8.Topbar2.init(toolbarDef);
-*/
+
 				for(var i in projects) {
 					_projects[projects[i].id] = new R8.Project(projects[i]);
 					_projects[projects[i].id].init();

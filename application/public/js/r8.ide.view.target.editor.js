@@ -975,7 +975,8 @@ return;
 				_viewSpaces[_currentViewSpace].items(itemId).refresh();
 			},
 			getSelectedItems: function() {
-				return _viewSpaces[_currentViewSpace].getSelectedItems();
+				return _selectedItems;
+//				return _viewSpaces[_currentViewSpace].getSelectedItems();
 			},
 //---------------------------------------------
 //Plugin Bar Related

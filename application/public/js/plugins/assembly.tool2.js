@@ -95,21 +95,32 @@ if(!R8.AssemblyTool2) {
 				for(var i in items) {
 					item_list.push(items[i]);
 				}
-				var that=this;
+
+				var _this=this;
 				YUI().use("json","node", function (Y) {
+console.log(item_list);
 					Y.one('#item_list').set('value',Y.JSON.stringify(item_list));
 
+					var successCallback = function(ioId,responseObj) {
+//						_this.setNodeSearchResults(ioId,responseObj);
+console.log('should be getting to showign alert...');
+						R8.IDE.showAlert('Created Assembly');
+					}
+					var callbacks = {
+						'io:success': successCallback
+					};
 					var params = {
 						'cfg' : {
 							method : 'POST',
 							form: {
 								id : 'modal-form',
-								upload: true
+//								upload: true
 							}
-						}
+						},
+						'callbacks': callbacks
 					};
 					R8.Ctrl.call('workspace/clone_assembly_ide',params);
-					that.cleanup();
+					_this.cleanup();
 					R8.IDE.destroyShim();
 				});
 				return;

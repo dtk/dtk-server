@@ -707,12 +707,16 @@ module XYZ
       end
 
       #TODO: more efficient way to do this; instead include all needed columns in :returning_sql_cols above
-      if opts[:outermost_ports] and not new_cmp_ports.empty?
+      if opts[:outermost_ports] 
         port_mh = model_handle(:port)
-        port_idhs = new_cmp_ports.map{|port_hash|port_mh.createIDH(:id => port_hash[:id])}
-        new_ports = Model.get_objs_in_set(port_idhs, {:cols => Port.common_columns})
-        new_ports.map{|p|p.materialize!(Port.common_columns)}
-        opts[:outermost_ports] += new_ports
+        external_port_idhs = new_cmp_ports.map do |port_hash|
+          port_mh.createIDH(:id => port_hash[:id]) if ["component_internal_external","component_external"].include?(port_hash[:type])
+        end.compact
+        unless external_port_idhs.empty?
+          new_ports = Model.get_objs_in_set(external_port_idhs, {:cols => Port.common_columns})
+          new_ports.map{|p|p.materialize!(Port.common_columns)}
+          opts[:outermost_ports] += new_ports
+        end
       end
 
       #### end create needed component ports ####

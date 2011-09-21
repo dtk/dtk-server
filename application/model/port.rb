@@ -104,8 +104,8 @@ module XYZ
         display_name = ref #TODO: rather than encoded name to component i18n name, make add a structured column likne name_context
         #TODO: just hueristc for computing dir; also need to upport "<>" (bidirectional)
         dir = link_def[:local_or_remote] == "local" ?  "input" : "output"
-
-        {
+        location_asserted = ret_location_asserted(component_type,link_def[:link_type])
+        row = {
           :ref => ref,
           :display_name => display_name,
           :direction => dir,
@@ -113,8 +113,23 @@ module XYZ
           :node_node_id => node_id,
           :type => type
         }
+        row[:location_asserted] = location_asserted if location_asserted
+        row
       end
       create_from_rows(port_mh,rows,opts)
     end
+   private
+    #TODO: this should be in link defs
+    def self.ret_location_asserted(component_type,link_type)
+      (LocationMapping[component_type.to_sym]||{})[link_type.to_sym]
+    end
+    LocationMapping = {
+      :mysql__master => {
+        :master_connection => "east"
+      },
+      :mysql__slave => {
+        :master_connection => "west"
+      }
+    }
   end
 end

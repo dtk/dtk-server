@@ -642,6 +642,8 @@ pp datacenter
 
     #TDOO: doing redundant work to what is done in commit_ide
     def commit_changes_ide(datacenter_id)
+      datacenter_id = datacenter_id.gsub(/editor-target-/,"") #TODO: temp to compensate front end error
+
       datacenter_id = datacenter_id && datacenter_id.to_i
       hash = request.params.dup
       commit_date = hash.delete("commit_date")

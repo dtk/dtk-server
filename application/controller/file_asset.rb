@@ -3,25 +3,16 @@ module XYZ
     helper :i18n_string_mapping
 
     def get(id)
-=begin
-      return {:data=>{
-        :id => '12345',
-        :name => 'Some File.rb',
-        :content => 'this is some content ; and some more content ; asdfasfdasfd'
-      }}
-=end
-
-=begin
       file_asset = get_object_by_id(id)
       file_asset[:name] = file_asset[:file_name]
 
       file_asset[:content] = file_asset.get_content()
 
       file_asset[:content] ||= 'this is some stubbed file content to return something---'+id.to_s
-=end
+=begin TODO FOR debugging
       file_asset = {}
       file_asset[:content] = 'this is some stubbed file content to return something---'+id.to_s
-
+=end
       return {:data=>file_asset}
     end
 

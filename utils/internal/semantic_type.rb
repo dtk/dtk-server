@@ -234,7 +234,6 @@ module XYZ
       "sap__l4" => {
         :external => true,
         :port_type => "output",
-        :has_port_object => true,
         :syntax =>  {
           "port" => {:required => true, :type => :integer},
           "protocol" => {:required => true, :type => :string},
@@ -246,7 +245,6 @@ rather than having or having two sap refs and user can remove or add to componen
       "sap_ref__l4" => {
         :external => true,
         :port_type => "input", 
-        :has_port_object => true,
         :syntax => { 
           :or => 
           [{
@@ -262,7 +260,6 @@ rather than having or having two sap refs and user can remove or add to componen
       "sap_ref__l4" => {
         :external => true,
         :port_type => "input", 
-        :has_port_object => true,
         :syntax => { 
            "port" => {:required => true, :type => :integer},
            "protocol" => {:required => true, :type => :string},

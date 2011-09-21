@@ -98,7 +98,7 @@ module XYZ
         :remote_dependencies => 
         [attributes_def.merge(
            :filter => [:eq, :is_port, true],
-           :cols => [:id,:display_name,id(:component),:port_is_external,:port_type,:has_port_object,:port_location]
+           :cols => [:id,:display_name,id(:component),:port_is_external,:port_type,:port_location]
          )]
 
 

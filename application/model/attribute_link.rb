@@ -25,6 +25,9 @@ module XYZ
       #insert the new ids into rows_to_create
       returning_ids.each_with_index{|id_info,i|rows_to_create[i][:id] = id_info[:id]}
 
+      #augment attributes with port info; this is needed only if port is external
+      Attribute.update_port_info(attr_mh,rows_to_create)
+
       propagate_from_create(attr_mh,attr_info,rows_to_create)
     end
 

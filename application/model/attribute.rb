@@ -35,7 +35,6 @@ module XYZ
       #TODO: need to clearly relate these four; may get rid of read_only
       column :read_only, :boolean, :default => false 
       column :dynamic, :boolean, :default => false #means dynamically set by an executable action
-      virtual_column :port_type, :type => :varchar, :hidden => true, :local_dependencies => [:dynamic,:is_port,:semantic_type_summary]
       column :cannot_change, :boolean, :default => false
 
 
@@ -46,10 +45,10 @@ module XYZ
       #TODO: for succinctness may use less staorage and colapse a number of port attributes
       column :port_location, :varchar, :size => 10 #if set is override for port direction: east | west | south | north
       column :is_port, :boolean, :default => false
-      virtual_column :port_is_external, :type => :boolean, :hidden => true, :local_dependencies => [:is_port,:semantic_type_summary]
-
-
-      virtual_column :has_port_object, :type => :booelan, :hidden => true, :local_dependencies => [:is_port,:semantic_type_summary]
+      column :port_type_asserted, :varchar, :size => 10
+      column :is_external, :boolean
+      virtual_column :port_type, :type => :varchar, :hidden => true, :local_dependencies => [:dynamic,:is_port,:port_type_asserted,:semantic_type_summary]
+      virtual_column :port_is_external, :type => :boolean, :hidden => true, :local_dependencies => [:is_port,:is_external,:semantic_type_summary]
 
       virtual_column :is_unset, :type => :boolean, :hidden => true, :local_dependencies => [:value_asserted,:value_derived,:data_type,:semantic_type]
 
@@ -273,21 +272,20 @@ module XYZ
       attribute_value().nil? and self[:required] and not self[:read_only]
     end
 
+    #TODO: modify these so dont look up AttributeSemantic
     def port_is_external()
+      return self[:is_external] unless self[:is_external].nil?
       return nil unless self[:is_port]
       return nil unless self[:semantic_type_summary]
       (AttributeSemantic::Info[self[:semantic_type_summary]]||{})[:external]
     end
+    #TODO: modify these so dont look up AttributeSemantic
     def port_type()
+      return self[:port_type_asserted] unless self[:port_type_asserted].nil?
       return nil unless self[:is_port]
       return "output" if self[:dynamic]
       return nil unless self[:semantic_type_summary]
       (AttributeSemantic::Info[self[:semantic_type_summary]]||{})[:port_type]
-    end
-    def has_port_object()
-      return nil unless self[:is_port]
-      return nil unless self[:semantic_type_summary]
-      (AttributeSemantic::Info[self[:semantic_type_summary]]||{})[:has_port_object]
     end
 
     def is_unset()
@@ -366,6 +364,19 @@ module XYZ
     end
     
     #============= 
+    def self.update_port_info(attr_mh,attr_link_rows_created)
+      attr_port_info = Array.new
+      attr_link_rows_created.each do |row|
+        #TODO: row[:type].nil? test need sto be changed if attribute link type default is no longer "external"
+        if row[:type].nil? or row[:type] == "external"
+          [["input",row[:input_id]],["output",row[:output_id]]].each do |(dir,id)|
+            attr_port_info << {:id => id, :port_type_asserted => dir, :is_port => true, :is_external => true}
+          end 
+        end
+      end
+      update_from_rows(attr_mh,attr_port_info) unless attr_port_info.empty?
+    end
+
    private
     def ret_implementation_attribute_name_and_type()
       config_agent = ConfigAgent.load(self[:config_agent_type])

@@ -1575,8 +1575,8 @@ return;
 							</div>';
 
 				var contentTpl = '<div id="'+id+'-logger-wrapper" style="width:'+targetWidth+'px; height: 197px; margin-top: 3px; background-color: #D8DBE3">\
-									<div id="'+id+'-chef-debugger-header" class="view-header">\
-										<select id="'+id+'-logger-available-nodes" name="'+id+'-logger-available-nodes">\
+									<div id="'+id+'-logging-header" class="view-header">\
+										<select id="'+id+'-logging-available-nodes" name="'+id+'-logger-available-nodes">\
 											<option value="">-Node List-</option>\
 										</select>\
 									</div>\
@@ -1585,8 +1585,131 @@ return;
 								</div>';
 
 				_pluginContentNode.set('innerHTML',contentTpl);
-			},
 
+				_plugins['logging'].setData('nodeSelect',document.getElementById(id+'-logging-available-nodes'));
+				_plugins['logging'].setData('nodeSelectYUI',R8.Utils.Y.one('#'+id+'-logging-available-nodes'));
+
+				var node_list = _target.get('nodes');
+				var optionsStr = '';
+				for(var n in node_list) {
+					optionsStr = optionsStr + '<option value="'+node_list[n].get('id')+'">'+node_list[n].get('name')+'</option>';
+				}
+				_plugins['logging'].getData('nodeSelectYUI').append(optionsStr);
+
+				var _this = this;
+				_plugins['logging'].getData('nodeSelect').onchange = function() {
+					_this.changeLogFocus(this.options[this.selectedIndex].value);
+				}
+
+				if(typeof(_plugins['logging'].getData('logContent')) == 'undefined')
+					_plugins['logging'].setData('logContent',{});
+
+				this.startLogPoller();
+			},
+			changeLogFocus: function(nodeId) {
+//DEBUG
+console.log('changingLogFocus.., setting plugActiveLogId to:'+nodeId);
+				_plugins['logging'].setData('pluginActiveLogId',nodeId);
+			},
+			startLogPoller: function() {
+				var _this = this;
+				var fireLogPoller = function() {
+					_this.pollLog();
+				}
+				_plugins['logging'].setData('logPollerTimeout',setTimeout(fireLogPoller,2000));
+			},
+			pollLog: function() {
+				var _this=this;
+				var fireLogPoller = function() {
+					_this.pollLog();
+				}
+				_plugins['logging'].setData('logPollerTimeout',setTimeout(fireLogPoller,2500));
+
+				var currentNodeId = _plugins['logging'].getData('pluginActiveLogId');
+//DEBUG
+console.log('inside of pollLog currentNodeId is:'+currentNodeId);
+				if(currentNodeId == '' || currentNodeId == null) return;
+
+				var setLogsCallback = function(ioId,responseObj) {
+					eval("var response =" + responseObj.responseText);
+					var logContent = response.application_task_get_logs.content[0].data;
+
+					_this.setLogContent(logContent);
+//					contentNode.set('innerHTML',log_content);
+//					contentNode.append(log_content);
+				}
+				var params = {
+					'cfg': {
+						'data': 'node_id='+currentNodeId
+					},
+					'callbacks': {
+						'io:success': setLogsCallback
+					}
+				};
+				R8.Ctrl.call('task/get_logs',params);
+			},
+			stopLogPoller: function() {
+				clearTimeout(_plugins['logging'].getData('logPollerTimeout'));
+				_plugins['logging'].setData('logPollerTimeout',null);
+			},
+			setLogContent: function(logContent) {
+				var logContent = _plugins['logging'].getData('logContent');
+				for(var l in logContent) {
+					logContent[l] = logContent[l];
+				}
+				_plugins['logging'].setData('logContent',logContent);
+
+				var currentNodeId = _plugins['logging'].getData('pluginActiveLogId');
+				this.renderLogContents(currentNodeId);
+//DEBUG
+console.log('inside of setLogContents..');
+console.log('curentNodeId is:'+currentNodeId);
+console.log(logContent);
+logContent[currentNodeId].complete = false;
+
+				if(typeof(logContent[currentNodeId]) == 'undefined' || logContent[currentNodeId].complete == true) this.stopLogPoller();
+			},
+			renderLogContents: function(nodeId) {
+				var logContent = _plugins['logging'].getData('logContent');
+				var currentNodeId = _plugins['logging'].getData('pluginActiveLogId');
+				if(typeof(logContent[currentNodeId]) == 'undefined') return;
+
+				var logContentNode = R8.Utils.Y.one('#'+this.get('id')+'-logging-content');
+//DEBUG
+console.log('inside of renderLogContents..');
+console.log('curentNodeId is:'+currentNodeId);
+console.log(logContent[currentNodeId]);
+
+				for(var i in logContent[currentNodeId]['log_segments']) {
+					var logSegment = logContent[currentNodeId]['log_segments'][i];
+
+					switch(logSegment.type) {
+						case "debug":
+						case "info":
+							var logTpl = '<div style="width: 100%; height: 17px; white-space: nowrap>'+logSegment.line+'</div>';
+							break;
+						case "error":
+							if(typeof(logSegment.error_file_ref) == 'undefined' || logSegment.error_file_ref == null || logSegment.error_file_ref == '') {
+								var logTpl = '<div style="color: red; width: 100%; height: 17px; white-space: nowrap">'+logSegment.error_detail+'</div>';
+							} else {
+/*
+							R8.IDE.openFile({
+								'id': leafObjectId,
+								'name': leafLabel,
+								'type': 'file'
+							});
+*/
+//								var logTpl = '<div style="color: red; width: 100%; height: 17px; white-space: nowrap">'+logSegment.error_detail+' in file <a href="javascript:R8.IDE.openFile({id:\''+logSegment.error_file_ref.file_id+'\',name:\''+logSegment.error_file_ref.file_name+'\',type:\'file\',\'line\':'+logSegment.error_file_ref.error_line_num+'});">'+logSegment.error_file_ref.file_name+'</a></div>';
+								var logTpl = '<div style="color: red; width: 100%; height: 17px; white-space: nowrap">'+logSegment.error_detail+' in file <a href="javascript:R8.IDE.openFile({id:\''+logSegment.error_file_ref.file_id+'\',name:\''+logSegment.error_file_ref.file_name+'\',type:\'file\'});">'+logSegment.error_file_ref.file_name+'</a></div>';
+							}
+
+							break;
+					}
+					logContentNode.append(logTpl);
+				}
+				var contentDiv = document.getElementById(logContentNode.get('id'));
+				contentDiv.scrollTop = contentDiv.scrollHeight;
+			},
 //---------------------------------------------
 //alert/notification related
 //---------------------------------------------

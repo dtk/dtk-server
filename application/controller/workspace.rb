@@ -1017,7 +1017,12 @@ POSSIBLE CHANGES TO HASH
 
       #TODO: getting json rather than hash
       item_list = JSON.parse(hash["item_list"])
-      node_idhs = item_list.map{|item|id_handle(item["id"].to_i,item["model"].to_sym)}
+      #TODO remove DEMOHACK
+      node_idhs = item_list.map do |item|
+        id = item["id"].to_i
+        model = (item["model"].nil? or item["model"].empty?) ? :node : item["model"].to_sym
+        id_handle(id,model)
+      end
       connected_links,dangling_links = Node.get_external_connected_links(node_idhs)
       #TODO: raise error to user if dangling link
       Log.error("dangling links #{dangling_links.inspect}") unless dangling_links.empty?

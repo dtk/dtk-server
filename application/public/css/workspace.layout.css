@@ -394,6 +394,9 @@ body {
 .component-result.null .implementations .chef {
 	display: none;
 }
+.component-result.puppet .implementations .chef {
+	display: none;
+}
 
 .component-result.chef .implementations .puppet {
 	display: none;

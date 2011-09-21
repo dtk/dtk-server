@@ -1555,7 +1555,7 @@ return;
 				});
 			},
 			showLogsBlur: function() {
-				
+				this.stopLogPoller();
 			},
 			showLogs: function() {
 				var id=this.get('id');
@@ -1607,8 +1607,6 @@ return;
 				this.startLogPoller();
 			},
 			changeLogFocus: function(nodeId) {
-//DEBUG
-console.log('changingLogFocus.., setting plugActiveLogId to:'+nodeId);
 				_plugins['logging'].setData('pluginActiveLogId',nodeId);
 			},
 			startLogPoller: function() {
@@ -1626,8 +1624,7 @@ console.log('changingLogFocus.., setting plugActiveLogId to:'+nodeId);
 				_plugins['logging'].setData('logPollerTimeout',setTimeout(fireLogPoller,2500));
 
 				var currentNodeId = _plugins['logging'].getData('pluginActiveLogId');
-//DEBUG
-console.log('inside of pollLog currentNodeId is:'+currentNodeId);
+
 				if(currentNodeId == '' || currentNodeId == null) return;
 
 				var setLogsCallback = function(ioId,responseObj) {
@@ -1652,20 +1649,15 @@ console.log('inside of pollLog currentNodeId is:'+currentNodeId);
 				clearTimeout(_plugins['logging'].getData('logPollerTimeout'));
 				_plugins['logging'].setData('logPollerTimeout',null);
 			},
-			setLogContent: function(logContent) {
+			setLogContent: function(logContents) {
 				var logContent = _plugins['logging'].getData('logContent');
-				for(var l in logContent) {
-					logContent[l] = logContent[l];
+				for(var l in logContents) {
+					logContent[l] = logContents[l];
 				}
 				_plugins['logging'].setData('logContent',logContent);
 
 				var currentNodeId = _plugins['logging'].getData('pluginActiveLogId');
 				this.renderLogContents(currentNodeId);
-//DEBUG
-console.log('inside of setLogContents..');
-console.log('curentNodeId is:'+currentNodeId);
-console.log(logContent);
-logContent[currentNodeId].complete = false;
 
 				if(typeof(logContent[currentNodeId]) == 'undefined' || logContent[currentNodeId].complete == true) this.stopLogPoller();
 			},
@@ -1675,10 +1667,6 @@ logContent[currentNodeId].complete = false;
 				if(typeof(logContent[currentNodeId]) == 'undefined') return;
 
 				var logContentNode = R8.Utils.Y.one('#'+this.get('id')+'-logging-content');
-//DEBUG
-console.log('inside of renderLogContents..');
-console.log('curentNodeId is:'+currentNodeId);
-console.log(logContent[currentNodeId]);
 
 				for(var i in logContent[currentNodeId]['log_segments']) {
 					var logSegment = logContent[currentNodeId]['log_segments'][i];

@@ -153,14 +153,14 @@ if (!R8.IDE.View.target.editor) {
 							delete(this.data[key]);
 					}
 				},
-				'cfg-debug': {
+				'dependencies': {
 					'default_height': 200,
 					'resizeable': false,
-					'i18n': 'Cfg Debug',
-					'loadCallback': 'getCfgDebug',
+					'i18n': 'Dependencies',
+					'loadCallback': 'showDependencies',
 					'events': {},
 					'data': {},
-					'blurCallback': 'getCfgDebugBlur',
+					'blurCallback': 'showDependenciesBlur',
 					'getData': function(key) {
 						return this.data[key];
 					},
@@ -349,8 +349,8 @@ return;
 										<div id="'+id+'-plugin-logging" class="item-wrapper plugin">\
 											<div id="" class="item">Logging</div>\
 										</div>\
-										<div id="'+id+'-plugin-cfg-debug" class="item-wrapper plugin">\
-											<div id="" class="item">Cfg Debug</div>\
+										<div id="'+id+'-plugin-dependencies" class="item-wrapper plugin">\
+											<div id="" class="item">Dependencies</div>\
 										</div>\
 										<div id="" class="divider"></div>\
 									</div>\
@@ -386,8 +386,8 @@ return;
 											<div id="" class="item">Logging</div>\
 										</div>\
 										<div id="" class="divider"></div>\
-										<div id="'+id+'-plugin-cfg-debug" class="item-wrapper plugin">\
-											<div id="" class="item">Cfg Debug</div>\
+										<div id="'+id+'-plugin-dependencies" class="item-wrapper plugin">\
+											<div id="" class="item">Dependencies</div>\
 										</div>\
 										<div id="" class="divider"></div>\
 									</div>\
@@ -562,7 +562,7 @@ return;
 						var item_list = _plugins[_activePlugin].getData('itemList');
 						var match_list = [];
 						for(var i in item_list) {
-							if(R8.Utils.stringStartsWith(item_list[i].name,inputValue)) {
+							if(R8.Utils.stringStartsWith(item_list[i].i18n,inputValue)) {
 								match_list.push(item_list[i]);
 							}
 						}
@@ -1084,9 +1084,11 @@ return;
 				_plugins['component-search']['events']['key_press'].detach();
 				delete(_plugins['component-search']['events']['key_press']);
 				_pluginContentNode.set('innerHTML','');
-				_plugins['node-search'].purgeData('compDDel');
+				_plugins['component-search'].purgeData('compDDel');
 			},
 			searchComponentsFocus: function() {
+				_pluginInputNode.focus();
+
 				var id=this.get('id');
 				var targetRegion = this.get('node').get('region');
 				var targetWidth = targetRegion.width;
@@ -1147,6 +1149,8 @@ return;
 				_plugins['node-search'].purgeData('nodeDDel');
 			},
 			searchNodesFocus: function() {
+				_pluginInputNode.focus();
+
 				var id=this.get('id');
 				var listTpl = '<div id="node-list-container">\
 								 <div id="list-l-arrow-wrapper">\
@@ -1201,8 +1205,11 @@ return;
 				_plugins['assembly-search']['events']['key_press'].detach();
 				delete(_plugins['assembly-search']['events']['key_press']);
 				_pluginContentNode.set('innerHTML','');
+				_plugins['assembly-search'].purgeData('compDDel');
 			},
 			searchAssembliesFocus: function() {
+				_pluginInputNode.focus();
+
 				var id=this.get('id');
 				var targetRegion = this.get('node').get('region');
 				var listTpl = '<div id="node-list-container">\
@@ -1252,6 +1259,7 @@ return;
 						}
 					},_this);
 				});
+				this.setupSearchAssembliesDD();
 			},
 			setComponentSearchResults: function(ioId,responseObj) {
 				eval("var response =" + responseObj.responseText);
@@ -1554,6 +1562,109 @@ return;
 					});
 				});
 			},
+			setupSearchAssembliesDD: function(){
+				var id=this.get('id');
+				YUI().use('dd-delegate', 'dd-proxy', 'node', 'dd-drop-plugin', function(Y){
+					var compDDel = new Y.DD.Delegate({
+						cont: '#'+id+'-list-body',
+						nodes: 'div.component-result',
+					});
+					_plugins['assembly-search'].setData('compDDel',compDDel);
+					_plugins['assembly-search'].getData('compDDel').dd.plug(Y.Plugin.DDProxy, {
+						moveOnEnd: false,
+						borderStyle: false,
+					});
+
+					_plugins['assembly-search'].getData('compDDel').on('drag:mouseDown', function(e){
+						var componentType = this.get('currentNode').get('children').item(0).getAttribute('data-type');
+						componentType='composite';
+						var targetNode = Y.one('#'+id);
+
+						if(componentType == 'composite') {
+							var dropGroup = 'dg-node-assembly';
+							if(!targetNode.hasClass('yui3-dd-drop')) {
+								var drop = new Y.DD.Drop({node:targetNode});
+								drop.addToGroup([dropGroup]);
+								drop.on('drop:enter',function(e){
+								});
+								drop.on('drop:hit',function(e){
+									var dropNode = e.drop.get('node');
+									var compNode = e.drag.get('dragNode').get('children').item(0);
+									var componentId = compNode.getAttribute('data-id');
+
+//									var panelOffset = cmdbar.get('viewSpace').get('node').get('region').left;
+									var panelOffset = targetNode.get('region').left;
+									var assemblyLeftPos = e.drag.get('dragNode').get('region').left-panelOffset;
+
+									//DEBUG
+									var tempId = Y.guid();
+/*
+									var newComponentDef = {
+										'id': tempId,
+										'node_id': dropNode.getAttribute('data-id'),
+										'component_id': componentId,
+										'ui': {}
+									};
+*/
+									var e = {
+										'componentId': componentId,
+//										'componentDef': newComponentDef,
+										'assemblyLeftPos': assemblyLeftPos
+									};
+									R8.IDE.fire('target-'+_target.get('id')+'-assembly-add',e);
+//DEBUG
+//console.log(e);
+//DEBUG
+//									R8.Workspace.addAssemblyToViewspace(componentId,'node',assemblyLeftPos,dropNode);
+//									cmdbar.get('viewSpace').addAssemblyToViewspace(componentId,'node',assemblyLeftPos,dropNode);
+								});
+							}
+						} else {
+							var dropGroup = 'dg-component';
+							var dropList = Y.all('#'+targetNode.get('id')+' div.'+dropGroup);
+
+							dropList.each(function(){
+								if(!this.hasClass('yui3-dd-drop')) {
+									var drop = new Y.DD.Drop({node:this});
+									drop.addToGroup([dropGroup]);
+									drop.on('drop:enter',function(e){
+									});
+									drop.on('drop:hit',function(e){
+										var dropNode = e.drop.get('node');
+										var compNode = e.drag.get('dragNode').get('children').item(0);
+										var componentId = compNode.getAttribute('data-id');
+
+										//DEBUG
+										var tempId = Y.guid();
+										var newComponentDef = {
+											'id': tempId,
+											'node_id': dropNode.getAttribute('data-id'),
+											'component_id': componentId,
+											'ui': {}
+										};
+										var e = {
+											'componentDef': newComponentDef
+										};
+										R8.IDE.fire('node-'+newComponentDef.node_id+'-component-add',e);
+//DEBUG
+//console.log(e);
+									});
+								}
+							});
+						}
+					});
+
+					_plugins['assembly-search'].getData('compDDel').on('drag:start', function(e){
+						var drag = this.get('dragNode'), c = this.get('currentNode');
+						drag.set('innerHTML',c.get('innerHTML'));
+						drag.setAttribute('class', c.getAttribute('class')+' selected');
+						this.dd.addToGroup('dg-node-assembly');
+						drag.setStyles({
+							opacity: .5,
+						});
+					});
+				});
+			},
 			showLogsBlur: function() {
 				this.stopLogPoller();
 			},
@@ -1697,6 +1808,12 @@ return;
 				}
 				var contentDiv = document.getElementById(logContentNode.get('id'));
 				contentDiv.scrollTop = contentDiv.scrollHeight;
+			},
+			showDependencies: function() {
+				
+			},
+			showDependenciesBlur: function() {
+				
 			},
 //---------------------------------------------
 //alert/notification related

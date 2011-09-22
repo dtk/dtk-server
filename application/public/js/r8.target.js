@@ -98,6 +98,7 @@ if (!R8.Target) {
 			setupEvents: function() {
 //			on: function(eventName,callback,scope) {
 				R8.IDE.on('target-'+this.get('id')+'-node-add',this.instantiateNode,this);
+				R8.IDE.on('target-'+this.get('id')+'-assembly-add',this.instantiateAssembly,this);
 			},
 //-----------------------------------------------
 //VIEW RELATED METHODS-------------------
@@ -214,6 +215,35 @@ console.log('should remove node from views....');
 				delete(_nodes[tempId]);
 
 				_nodes[newNodeDef.id].refresh(newNodeDef)
+			},
+			instantiateAssembly: function(e) {
+//DEBUG
+console.log('inside of target.instantiateAssembly...');
+console.log(e);
+//return;
+				var queryParams = 'target_model_name=datacenter&target_id='+this.get('id');
+//					queryParams += '&model_redirect=component&action_redirect=add_assembly_items&id_redirect='+componentId;
+					queryParams += '&model_redirect=asssembly&action_redirect=get_tree&id_redirect=*id';
+					queryParams += '&parent_id='+this.get('id')+'&assembly_left_pos='+e.assemblyLeftPos
+
+				var successCallback = function(ioId,repsonseObj) {
+					eval("var response =" + responseObj.responseText);
+					var assembly_tree = response.application_assembly_get_tree.content[0].data;
+//DEBUG
+console.log('getting response from assembly clone...');
+console.log(assembly_tree);
+//						R8.Workspace.refreshItem(modelId);
+					}
+				var callbacks = {
+						'io:success' : successCallback
+					};
+				R8.Ctrl.call('asssembly/clone/'+e.componentId,{
+//					'callbacks': callbacks,
+					'cfg': {
+						'data': queryParams
+					}
+				});
+				R8.IDE.showAlert('Cloning Assembly...');
 			},
 //TODO: git rid of newNode, should just check if _initialized=true
 //WHY is node always initialized during render??????

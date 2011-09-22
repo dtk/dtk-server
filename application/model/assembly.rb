@@ -8,6 +8,10 @@ module XYZ
     end
 
     ##############
+    def get_node_assembly_nested_objects()
+      sp_hash = {:cols => [:node_assembly_nested_objects]}
+      get_objs(sp_hash)
+    end
 
     def is_assembly?()
       true

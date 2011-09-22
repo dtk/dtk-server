@@ -1,5 +1,9 @@
 module XYZ
   class PortLink < Model
+    def self.common_columns()
+      [:id,:input_id,:output_id]
+    end
+
     def self.create_from_links_hash(parent_idh,links_to_create)
       parent_mn =  parent_idh[:model_name]
       parent_id = parent_idh.get_id()

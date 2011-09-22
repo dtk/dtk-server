@@ -103,6 +103,36 @@ module XYZ
 
 
       ###### end of virtual columns related to attributes, ports, and link_defs
+      #TODO: see if coudl be virtual column on assembly object
+      virtual_column :node_assembly_nested_objects, :type => :json, :hidden => true,
+       :remote_dependencies =>
+        [
+         {
+           :model_name => :node,
+           :join_type => :inner,
+           :join_cond=>{:id => q(:component,:assembly_id)},
+           :cols => Node.common_columns
+         },
+         {
+           :model_name => :port_link,
+           :join_type => :left_outer,
+           :join_cond=>{:id => q(:component,:assembly_id)},
+           :cols => PortLink.common_columns
+         },
+         {
+           :model_name => :port,
+           :join_type => :left_outer,
+           :join_cond=>{:id => p(:port,:node)},
+           :cols => Port.common_columns
+         },
+         {
+           :model_name => :component,
+           :alias => :nested_component,
+           :join_type => :inner,
+           :join_cond=>{:id => p(:component,:node)},
+           :cols => Component.common_columns
+         }]
+
 
       virtual_column :implementation_file_paths, :type => :json, :hidden => true,
       :remote_dependencies =>

@@ -70,9 +70,9 @@ module XYZ
         override_attrs = hash["ui"] ? {:ui=>hash["ui"]} : {}
         target_object = target_id_handle.create_object()
         clone_opts = {:ret_new_obj_with_cols => [:id]}
-        new_obj = target_object.clone_into(id_handle.create_object(),override_attrs,clone_opts)
-        id = new_obj && new_obj.id()
-
+        new_assembly_obj = target_object.clone_into(id_handle.create_object(),override_attrs,clone_opts)
+        id = new_assembly_obj && new_assembly_obj.id()
+        nested_objs = new_assembly_obj.get_node_assembly_nested_objects()
 #TODO: clean this up,hack to update UI params for newly cloned object
 #      update_from_hash(id,{:ui=>hash["ui"]})
 

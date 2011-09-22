@@ -69,7 +69,7 @@ module XYZ
         #TODO: need to copy in avatar when hash["ui"] is non null
         override_attrs = hash["ui"] ? {:ui=>hash["ui"]} : {}
         target_object = target_id_handle.create_object()
-        clone_opts = id_handle.create_object().source_clone_info_opts()
+        clone_opts = {:ret_new_obj_with_cols => [:id]}
         new_obj = target_object.clone_into(id_handle.create_object(),override_attrs,clone_opts)
         id = new_obj && new_obj.id()
 

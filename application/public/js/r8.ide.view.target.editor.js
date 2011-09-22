@@ -473,6 +473,12 @@ return;
 				_items[itemId] = item.getView('editor_target');
 				_items[itemId].setParent(this);
 				var itemNode = R8.Utils.Y.Node.create(_items[itemId].render());
+
+//DEBUG
+//Temp hack b/c of issues with assembly node position
+				if(typeof(nodePos) == 'undefined') {
+					nodePos = {'top':50,'left':50};
+				}
 				itemNode.setStyles({'top':nodePos.top,'left':nodePos.left});
 				_contentNode.append(itemNode);
 
@@ -494,12 +500,19 @@ return;
 					}
 				});
 			},
+			swapNewNode: function(tempId,newId) {
+				_items[newId] = _items[tempId];
+				delete(_items[tempId]);
+			},
 			/*
 			 * addDrag will make a item drag/droppable on a viewspace
 			 * @method addDrag
 			 * @param {string} An item id object, stored locally in _items
 			 */
 			addDrag: function(itemId) {
+//DEBUG
+console.log('going to add drag to itemId:'+itemId);
+console.log(_items);
 				var draggableItems = _draggableItems, that=this;
 
 				YUI().use('dd-constrain','dd-drag','dd-plugin',function(Y){

@@ -73,6 +73,46 @@ module XYZ
         new_assembly_obj = target_object.clone_into(id_handle.create_object(),override_attrs,clone_opts)
         id = new_assembly_obj && new_assembly_obj.id()
         nested_objs = new_assembly_obj.get_node_assembly_nested_objects()
+pp nested_objs
+#TODO: get node positions going for assemblies
+        #compute uui positions
+        parent_id = request.params["parent_id"]
+        assembly_left_pos = request.params["assembly_left_pos"]
+#        node_list = get_objects(:node,{:assembly_id=>id})
+  
+        dc_hash = get_object_by_id(parent_id,:datacenter)
+        raise Error.new("Not implemented when parent_id is not a datacenter") if dc_hash.nil?
+
+        #get the top most item in the list to set new positions
+        top_node = {}
+        top_most = 2000
+      
+#        node_list.each do |node|
+        nested_objs[:nodes].each do |node|
+#          node = create_object_from_id(node_hash[:id],:node)
+          ui = node.get_ui_info(dc_hash)
+          if ui and (ui[:top].to_i < top_most.to_i)
+            left_diff = assembly_left_pos.to_i - ui[:left].to_i
+            top_node = {:id=>node[:id],:ui=>ui,:left_diff=>left_diff}
+            top_most = ui[:top]
+          end
+        end
+  
+        nested_objs[:nodes].each_with_index do |node,i|
+          ui = node.get_ui_info(dc_hash)
+          Log.error("no coordinates for node with id #{node[:id].to_s} in #{parent_id.to_s}") unless ui
+          if ui
+            if node[:id] == top_node[:id]
+              ui[:left] = assembly_left_pos.to_i
+            else
+              ui[:left] = ui[:left].to_i + top_node[:left_diff].to_i
+            end
+          end
+          node.update_ui_info!(ui,dc_hash)
+          nested_objs[:nodes][i][:assembly_ui] = ui
+        end
+
+        return {:data=>nested_objs}
 #TODO: clean this up,hack to update UI params for newly cloned object
 #      update_from_hash(id,{:ui=>hash["ui"]})
 

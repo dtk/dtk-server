@@ -227,36 +227,49 @@ console.log('should remove node from views....');
 				_nodes[newNodeDef.id] = _nodes[tempId];
 				delete(_nodes[tempId]);
 
-				_nodes[newNodeDef.id].refresh(newNodeDef)
+				_nodes[newNodeDef.id].refresh(newNodeDef);
+				this.getView('editor').swapNewNode(tempId,newNodeDef.id);
+				this.getView('editor').addDrag(newNodeDef.id);
 			},
 			instantiateAssembly: function(e) {
 //DEBUG
-console.log('inside of target.instantiateAssembly...');
-console.log(e);
+//console.log('inside of target.instantiateAssembly...');
+//console.log(e);
 //return;
 				var queryParams = 'target_model_name=datacenter&target_id='+this.get('id');
 //					queryParams += '&model_redirect=component&action_redirect=add_assembly_items&id_redirect='+componentId;
 					queryParams += '&model_redirect=assembly&action_redirect=get_tree&id_redirect=*id';
 					queryParams += '&parent_id='+this.get('id')+'&assembly_left_pos='+e.assemblyLeftPos
 
-				var successCallback = function(ioId,repsonseObj) {
-					eval("var response =" + responseObj.responseText);
-					var assembly_tree = response.application_assembly_get_tree.content[0].data;
+				var _this=this;
+				var successCallback = function(ioId,responseObj) {
+						eval("var response =" + responseObj.responseText);
+//					var assembly_tree = response.application_assembly_get_tree.content[0].data;
+						var assembly_tree = response.application_assembly_clone.content[0].data;
 //DEBUG
-console.log('getting response from assembly clone...');
-console.log(assembly_tree);
+//console.log('getting response from assembly clone...');
+//console.log(assembly_tree);
+						_this.addAssemblyItems(assembly_tree);
 //						R8.Workspace.refreshItem(modelId);
 					}
 				var callbacks = {
 						'io:success' : successCallback
 					};
 				R8.Ctrl.call('assembly/clone/'+e.componentId,{
-//					'callbacks': callbacks,
+					'callbacks': callbacks,
 					'cfg': {
 						'data': queryParams
 					}
 				});
 				R8.IDE.showAlert('Cloning Assembly...');
+			},
+			addAssemblyItems: function(assembly_tree) {
+				for(var i in assembly_tree.nodes) {
+					var nodeDef = assembly_tree.nodes[i];
+					_def.ui.items[nodeDef.id] = nodeDef.assembly_ui;
+					this.addNode(nodeDef,true);
+					this.getView('editor').addDrag(nodeDef.id);
+				}
 			},
 //TODO: git rid of newNode, should just check if _initialized=true
 //WHY is node always initialized during render??????

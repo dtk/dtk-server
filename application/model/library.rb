@@ -3,8 +3,11 @@ module XYZ
 #    set_relation_name(:library,:library)
 
     ##### Actions
+    #TODO: this jsut for assemblies shoudl shoudl probably be reanmed
     def clone_post_copy_hook(clone_copy_output,opts={})
       new_id_handle = clone_copy_output.id_handles.first
+      #TODO: hack; this should be optained from clone_copy_output
+      new_assembly_obj = new_id_handle.create_object().update_object!(:display_name)
       case new_id_handle[:model_name]
        when :component then clear_dynamic_attributes(new_id_handle,opts)
       end
@@ -12,14 +15,22 @@ module XYZ
       node_hash_list = clone_copy_output.get_children_object_info(level,:node)
       unless node_hash_list.empty?
         node_mh = new_id_handle.createMH(:node)
-        clone_post_copy_hook__child_nodes(node_mh,node_hash_list) 
+        clone_post_copy_hook__child_nodes(node_mh,node_hash_list,new_assembly_obj) 
       end
     end
    private
-    def clone_post_copy_hook__child_nodes(node_mh,node_hash_list)
+    def clone_post_copy_hook__child_nodes(node_mh,node_hash_list,new_assembly_obj)
       rows = node_hash_list.map do |r|
         ext_ref = r[:external_ref] && r[:external_ref].reject{|k,v|k == :instance_id}.merge(:type => "ec2_image")
-        {:id => r[:id],:external_ref =>  ext_ref}
+        update_row = {
+          :id => r[:id],
+          :external_ref =>  ext_ref,
+          :operational_status => nil,
+          :is_deployed => false
+        }
+        assembly_name = new_assembly_obj[:display_name]
+        update_row[:display_name] = "#{assembly_name}-#{r[:display_name]}" if assembly_name and r[:display_name]
+        update_row
       end
       Model.update_from_rows(node_mh,rows)
     end

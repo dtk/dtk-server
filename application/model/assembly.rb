@@ -9,8 +9,30 @@ module XYZ
 
     ##############
     def get_node_assembly_nested_objects()
-      sp_hash = {:cols => [:node_assembly_nested_objects]}
-      get_objs(sp_hash)
+      ndx_nodes = Hash.new
+      sp_hash = {:cols => [:node_assembly_nested_nodes_and_cmps]}
+      node_col_rows = get_objs(sp_hash)
+      node_col_rows.each do |r|
+        node = ndx_nodes[r[:node][:id]] ||= r[:node].merge(:components => Array.new)
+        node[:components] << r[:nested_components]
+      end
+
+      nested_node_ids = ndx_nodes.keys
+      sp_hash = {
+        :cols => Port.common_columns(),
+        :filter => [:oneof, :node_node_id, nested_node_ids]
+      }
+      port_rows = Model.get_objs(model_handle(:port),sp_hash)
+      port_rows.each do |r|
+        node = ndx_nodes[r[:node_node_id]]
+        (node[:ports] ||= Array.new) << r
+      end
+      sp_hash = {
+        :cols => PortLink.common_columns(),
+        :filter => [:eq, :assembly_id, id()]
+      }
+      port_links = port_rows = Model.get_objs(model_handle(:port_link),sp_hash)
+      {:nodes => ndx_nodes.values, :port_links => port_links}
     end
 
     def is_assembly?()

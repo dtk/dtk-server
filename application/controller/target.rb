@@ -218,5 +218,16 @@ pp request.params
       return {'data'=>link_list}
     end
 
+    def get_warnings(id)
+      datacenter = get_object_by_id(id,:datacenter)
+      notification_list = datacenter.get_violation_info("warning")
+      notification_list.each_with_index do |n,index|
+        notification_list[index][:type] = "warning"
+      end
+#DEBUG
+#pp [:warnings,notification_list]
+      return {:data=>notification_list}
+    end
+
   end
 end

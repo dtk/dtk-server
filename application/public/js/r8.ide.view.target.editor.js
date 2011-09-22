@@ -153,14 +153,14 @@ if (!R8.IDE.View.target.editor) {
 							delete(this.data[key]);
 					}
 				},
-				'dependencies': {
-					'default_height': 200,
+				'notifications': {
+					'default_height': 125,
 					'resizeable': false,
 					'i18n': 'Dependencies',
-					'loadCallback': 'showDependencies',
+					'loadCallback': 'showNotifications',
 					'events': {},
 					'data': {},
-					'blurCallback': 'showDependenciesBlur',
+					'blurCallback': 'showNotificationsBlur',
 					'getData': function(key) {
 						return this.data[key];
 					},
@@ -349,8 +349,8 @@ return;
 										<div id="'+id+'-plugin-logging" class="item-wrapper plugin">\
 											<div id="" class="item">Logging</div>\
 										</div>\
-										<div id="'+id+'-plugin-dependencies" class="item-wrapper plugin">\
-											<div id="" class="item">Dependencies</div>\
+										<div id="'+id+'-plugin-notifications" class="item-wrapper plugin">\
+											<div id="" class="item">Notifications</div>\
 										</div>\
 										<div id="" class="divider"></div>\
 									</div>\
@@ -386,8 +386,8 @@ return;
 											<div id="" class="item">Logging</div>\
 										</div>\
 										<div id="" class="divider"></div>\
-										<div id="'+id+'-plugin-dependencies" class="item-wrapper plugin">\
-											<div id="" class="item">Dependencies</div>\
+										<div id="'+id+'-plugin-notifications" class="item-wrapper plugin">\
+											<div id="" class="item">Notifications</div>\
 										</div>\
 										<div id="" class="divider"></div>\
 									</div>\
@@ -1809,11 +1809,83 @@ return;
 				var contentDiv = document.getElementById(logContentNode.get('id'));
 				contentDiv.scrollTop = contentDiv.scrollHeight;
 			},
-			showDependencies: function() {
+			showNotifications: function() {
+				var id=this.get('id');
+				var targetRegion = this.get('node').get('region');
+				var targetWidth = targetRegion.width;
+
+				var contentTpl = '<div id="'+id+'-notifications-wrapper" style="width:'+targetWidth+'px; height: 122px; margin-top: 3px; background-color: #D8DBE3">\
+									<div id="'+id+'-notifications-header" class="view-header">\
+									</div>\
+									<div id="'+id+'-notifications-content" class="notification-content" style="overflow-y: scroll; background-color: #FFFFFF; height: 98px;">\
+									</div>\
+								</div>';
+
+				_pluginContentNode.set('innerHTML',contentTpl);
+				_plugins['notifications'].setData('notificationContentNode',R8.Utils.Y.one('#'+this.get('id')+'-notifications-content'));
+				this.getNotifications();
+			},
+			showNotificationsFocus: function() {
+				_plugins['notifications'].setData(
+					'itemMouseEnter',
+					R8.Utils.Y.delegate(
+						'mouseenter',
+						this.notificationMouseEnter,
+						_plugins['notifications'].getData('notificationContentNode'),
+						'.item',
+						this
+					)
+				);
+				_plugins['notifications'].setData(
+					'itemMouseLeave',
+					R8.Utils.Y.delegate(
+						'mouseleave',
+						this.notificationMouseLeave,
+						_plugins['notifications'].getData('notificationContentNode'),
+						'.item',
+						this
+					)
+				);
 				
 			},
-			showDependenciesBlur: function() {
-				
+			showNotificationsBlur: function() {
+				_plugins['notifications'].getData('itemMouseLeave').detach();
+				_plugins['notifications'].purgeData('itemMouseLeave').detach();
+				_plugins['notifications'].getData('itemMouseEnter').detach();
+				_plugins['notifications'].purgeData('itemMouseEnter').detach();
+			},
+			notificationMouseLeave: function(e) {
+				var nodeId = e.currentTarget.getAttribute('data-node-id');
+				_items[nodeId].get('node').removeClass('focus');
+			},
+			notificationMouseEnter: function(e) {
+				var nodeId = e.currentTarget.getAttribute('data-node-id');
+				_items[nodeId].get('node').addClass('focus');
+			},
+			getNotifications: function() {
+				this.showNotificationsFocus();
+				var _this=this;
+				var	successCallback = function(ioId,responseObj) {
+						eval("var response =" + responseObj.responseText);
+						//TODO: revisit once controllers are reworked for cleaner result package
+						var notification_content = response['application_target_get_warnings']['content'][0]['data'];
+
+						_plugins['notifications'].setData('notificationContent',notification_content);
+						_plugins['notifications'].setData('renderContent',notification_content);
+						_this.renderNotifications();
+					}
+				var params = {
+					'callbacks': {
+						'io:success':successCallback
+					}
+				};
+				R8.Ctrl.call('target/get_warnings/'+_target.get('id'),params);
+			},
+			renderNotifications: function() {
+				var notifcationContent = _plugins['notifications'].getData('renderContent');
+				var notificationContentNode = _plugins['notifications'].getData('notificationContentNode');
+				notificationContentNode.set('innerHTML','');
+				notificationContentNode.append(R8.Rtpl.notification_list_ide({'notification_list':notifcationContent}));
 			},
 //---------------------------------------------
 //alert/notification related

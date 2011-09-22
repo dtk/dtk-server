@@ -511,8 +511,8 @@ return;
 			 */
 			addDrag: function(itemId) {
 //DEBUG
-console.log('going to add drag to itemId:'+itemId);
-console.log(_items);
+//console.log('going to add drag to itemId:'+itemId);
+//console.log(_items);
 				var draggableItems = _draggableItems, that=this;
 
 				YUI().use('dd-constrain','dd-drag','dd-plugin',function(Y){
@@ -916,6 +916,9 @@ console.log(_items);
 				});
 			},
 			touchItems: function(item_list) {
+//DEBUG
+console.log('inside of touchItems...');
+console.log(item_list);
 				for(var i in item_list) {
 					var itemId = item_list[i],
 						itemNode = _items[itemId].get('node');

@@ -264,12 +264,15 @@ console.log('should remove node from views....');
 				R8.IDE.showAlert('Cloning Assembly...');
 			},
 			addAssemblyItems: function(assembly_tree) {
+				var touchItems = [];
 				for(var i in assembly_tree.nodes) {
 					var nodeDef = assembly_tree.nodes[i];
 					_def.ui.items[nodeDef.id] = nodeDef.assembly_ui;
 					this.addNode(nodeDef,true);
 					this.getView('editor').addDrag(nodeDef.id);
+					touchItems.push(nodeDef.id);
 				}
+				this.getView('editor').touchItems(touchItems);
 			},
 //TODO: git rid of newNode, should just check if _initialized=true
 //WHY is node always initialized during render??????

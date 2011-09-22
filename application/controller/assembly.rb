@@ -112,6 +112,13 @@ pp nested_objs
           nested_objs[:nodes][i][:assembly_ui] = ui
         end
 
+        nested_objs[:port_links].each_with_index do |link,i|
+          nested_objs[:port_links][i][:ui] ||= {
+            :type => R8::Config[:links][:default_type],
+            :style => R8::Config[:links][:default_style]
+          }
+        end
+
         return {:data=>nested_objs}
 #TODO: clean this up,hack to update UI params for newly cloned object
 #      update_from_hash(id,{:ui=>hash["ui"]})

@@ -138,6 +138,9 @@ if (!R8.Target) {
 //----------------------------------------------
 			updateNodesStatus: function(nodesStatusList) {
 				for(var nId in nodesStatusList) {
+//TODO: revisit, seems to be race condition that throws error sometimes on assembly create
+					if(typeof(_nodes[nId]) == 'undefined') continue;
+
 					if(nodesStatusList[nId] != _nodes[nId].get('status')) {
 						_nodes[nId].updateStatus(nodesStatusList[nId]);
 //						_nodes[nId].updateStatus('running');
@@ -271,8 +274,12 @@ console.log('should remove node from views....');
 					this.addNode(nodeDef,true);
 					this.getView('editor').addDrag(nodeDef.id);
 					touchItems.push(nodeDef.id);
+
+					_nodes[nodeDef.id].addPorts(assembly_tree.nodes[i].ports);
+					_nodes[nodeDef.id].addComponents(assembly_tree.nodes[i].components,true);
 				}
 				this.getView('editor').touchItems(touchItems);
+				this.addLinks(assembly_tree.port_links);
 			},
 //TODO: git rid of newNode, should just check if _initialized=true
 //WHY is node always initialized during render??????
@@ -284,6 +291,11 @@ console.log('should remove node from views....');
 				}
 
 				_nodes[nodeDef.id].init();
+			},
+			addLinks: function(linkDef_list) {
+				for(var i in linkDef_list) {
+					this.addLink(linkDef_list[i]);
+				}
 			},
 			addLink: function(linkDef) {
 //				var linkId = 'link-'+linkObj.id;

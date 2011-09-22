@@ -1,6 +1,6 @@
 
 
-<div id="assembly-{%=assembly[:id]%}" class="component-result" data-id="{%=assembly[:id]%}">
+<div id="search-assembly-{%=assembly[:id]%}" class="component-result" data-id="{%=assembly[:id]%}">
 	<div class="body" data-id="{%=assembly[:id]%}">
 		<div class="main-content">
 			<div class="component-icon">

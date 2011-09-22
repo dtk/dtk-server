@@ -917,8 +917,8 @@ return;
 			},
 			touchItems: function(item_list) {
 //DEBUG
-console.log('inside of touchItems...');
-console.log(item_list);
+//console.log('inside of touchItems...');
+//console.log(item_list);
 				for(var i in item_list) {
 					var itemId = item_list[i],
 						itemNode = _items[itemId].get('node');

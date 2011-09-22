@@ -1527,6 +1527,8 @@ return;
 					});
 
 					_plugins['component-search'].getData('compDDel').on('drag:start', function(e){
+//DEBUG
+console.log('drag start on component is happening....');
 						var drag = this.get('dragNode'), c = this.get('currentNode');
 						drag.set('innerHTML',c.get('innerHTML'));
 						drag.setAttribute('class', c.getAttribute('class')+' selected');
@@ -1745,10 +1747,11 @@ return;
 				var contentTpl = '<div id="'+id+'-logger-wrapper" style="width:'+targetWidth+'px; height: 197px; margin-top: 3px; background-color: #D8DBE3">\
 									<div id="'+id+'-logging-header" class="view-header">\
 										<select id="'+id+'-logging-available-nodes" name="'+id+'-logger-available-nodes">\
-											<option value="">-Node List-</option>\
+											<option value="" selected="true">-Node List-</option>\
 										</select>\
 									</div>\
 									<div id="'+id+'-logging-content" style="overflow-y: scroll; background-color: #FFFFFF; height: 173px;">\
+										(logs not available yet....)\
 									</div>\
 								</div>';
 
@@ -1776,6 +1779,8 @@ return;
 			},
 			changeLogFocus: function(nodeId) {
 				_plugins['logging'].setData('pluginActiveLogId',nodeId);
+				var logContentNode = R8.Utils.Y.one('#'+this.get('id')+'-logging-content');
+				logContentNode.set('innerHTML','(logs not available yet....)');
 			},
 			startLogPoller: function() {
 				var _this = this;

@@ -1084,6 +1084,7 @@ return;
 				_plugins['component-search']['events']['key_press'].detach();
 				delete(_plugins['component-search']['events']['key_press']);
 				_pluginContentNode.set('innerHTML','');
+				_plugins['component-search'].getData('compDDel').destroy();
 				_plugins['component-search'].purgeData('compDDel');
 			},
 			searchComponentsFocus: function() {
@@ -1205,7 +1206,8 @@ return;
 				_plugins['assembly-search']['events']['key_press'].detach();
 				delete(_plugins['assembly-search']['events']['key_press']);
 				_pluginContentNode.set('innerHTML','');
-				_plugins['assembly-search'].purgeData('compDDel');
+				_plugins['assembly-search'].getData('assemblyDDel').destroy();
+				_plugins['assembly-search'].purgeData('assemblyDDel');
 			},
 			searchAssembliesFocus: function() {
 				_pluginInputNode.focus();
@@ -1565,17 +1567,17 @@ return;
 			setupSearchAssembliesDD: function(){
 				var id=this.get('id');
 				YUI().use('dd-delegate', 'dd-proxy', 'node', 'dd-drop-plugin', function(Y){
-					var compDDel = new Y.DD.Delegate({
+					var assemblyDDel = new Y.DD.Delegate({
 						cont: '#'+id+'-list-body',
 						nodes: 'div.component-result',
 					});
-					_plugins['assembly-search'].setData('compDDel',compDDel);
-					_plugins['assembly-search'].getData('compDDel').dd.plug(Y.Plugin.DDProxy, {
+					_plugins['assembly-search'].setData('assemblyDDel',assemblyDDel);
+					_plugins['assembly-search'].getData('assemblyDDel').dd.plug(Y.Plugin.DDProxy, {
 						moveOnEnd: false,
 						borderStyle: false,
 					});
 
-					_plugins['assembly-search'].getData('compDDel').on('drag:mouseDown', function(e){
+					_plugins['assembly-search'].getData('assemblyDDel').on('drag:mouseDown', function(e){
 						var componentType = this.get('currentNode').get('children').item(0).getAttribute('data-type');
 						componentType='composite';
 						var targetNode = Y.one('#'+id);
@@ -1654,7 +1656,7 @@ return;
 						}
 					});
 
-					_plugins['assembly-search'].getData('compDDel').on('drag:start', function(e){
+					_plugins['assembly-search'].getData('assemblyDDel').on('drag:start', function(e){
 						var drag = this.get('dragNode'), c = this.get('currentNode');
 						drag.set('innerHTML',c.get('innerHTML'));
 						drag.setAttribute('class', c.getAttribute('class')+' selected');
@@ -1850,9 +1852,9 @@ return;
 			},
 			showNotificationsBlur: function() {
 				_plugins['notifications'].getData('itemMouseLeave').detach();
-				_plugins['notifications'].purgeData('itemMouseLeave').detach();
+				_plugins['notifications'].purgeData('itemMouseLeave');
 				_plugins['notifications'].getData('itemMouseEnter').detach();
-				_plugins['notifications'].purgeData('itemMouseEnter').detach();
+				_plugins['notifications'].purgeData('itemMouseEnter');
 			},
 			notificationMouseLeave: function(e) {
 				var nodeId = e.currentTarget.getAttribute('data-node-id');

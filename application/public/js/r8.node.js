@@ -105,6 +105,13 @@ if (!R8.Node) {
 //------------------------------------
 //NODE RELATED METHODS
 //------------------------------------
+			updateStatus: function(newStatus) {
+				for(var v in _views) {
+					_views[v].updateStatus(_def.status,newStatus);
+				}
+				_def.status = newStatus;
+				R8.IDE.showAlert(this.get('name')+' status has changed to '+newStatus);
+			},
 			updateName: function(e) {
 //DEBUG
 //console.log('going to update node name...');

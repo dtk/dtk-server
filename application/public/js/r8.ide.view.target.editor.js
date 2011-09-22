@@ -21,6 +21,7 @@ if (!R8.IDE.View.target.editor) {
 			_uiCookie = {},
 			_cookieKey = '_uiCookie-'+_target.get('id'),
 			_updateBackgroundCall = null,
+			_statusPollerTimeout = null,
 
 			_modalNode = null,
 			_modalNodeId = 'target-'+_target.get('id')+'-modal',
@@ -243,6 +244,8 @@ if (!R8.IDE.View.target.editor) {
 				_cmdBar = new R8.Cmdbar2(cmdbarDef);
 				_cmdBar.init();
 */
+
+				this.startStatusPoller();
 return;
 				document.getElementById('cmdbar_input_form').onsubmit = function() {
 					_cmdBar.submit();
@@ -735,6 +738,42 @@ return;
 
 			stopUpdater: function() {
 				clearTimeout(_updateBackgroundCall);
+			},
+
+			startStatusPoller: function() {
+				var _this = this;
+				var fireStatusPoller = function() {
+					_this.pollNodesStatus();
+				}
+				_statusPollerTimeout = setTimeout(fireStatusPoller,7500);
+			},
+			pollNodesStatus: function() {
+				var _this=this;
+				var fireStatusPoller = function() {
+					_this.pollNodesStatus();
+				}
+				_statusPollerTimeout = setTimeout(fireStatusPoller,7500);
+
+				if(_target.get('numNodes') == 0) return;
+
+				var successCallback = function(ioId,responseObj) {
+					eval("var response =" + responseObj.responseText);
+					var nodesStatusList = response.application_target_get_nodes_status.content[0].data;
+					_target.updateNodesStatus(nodesStatusList);
+				}
+				var params = {
+					'cfg': {
+						'data': ''
+					},
+					'callbacks': {
+						'io:success': successCallback
+					}
+				};
+				R8.Ctrl.call('target/get_nodes_status/'+_target.get('id'),params);
+			},
+			stopStatusPoller: function() {
+				clearTimeout(_statusPollerTimeout);
+				_statusPollerTimeout = null;
 			},
 
 

@@ -650,6 +650,12 @@ console.log('not a valid link.., mis-matched types...');
 					_portsReady = true;
 				});
 			},
+			updateStatus: function(oldStatus,newStatus) {
+//DEBUG
+console.log('updating status on a node...');
+				_contentNode.addClass(newStatus);
+				_contentNode.removeClass(oldStatus);
+			},
 			updateName: function() {
 				_nameNode.set('innerHTML',_node.get('name'));
 			},

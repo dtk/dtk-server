@@ -138,6 +138,9 @@ console.log('double clicked on node leaf:'+_node.get('id'));
 
 				_leafBodyNode.get('children').item(1).set('innerHTML',_node.get('name'));
 			},
+			updateStatus: function(oldStatus,newStatus) {
+
+			},
 			updateName: function() {
 				_leafBodyNode.get('children').item(1).set('innerHTML',_node.get('name'));
 			},

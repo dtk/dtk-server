@@ -52,6 +52,11 @@ if (!R8.Target) {
 					case "nodes":
 						return _nodes;
 						break;
+					case "numNodes":
+						var num=0;
+						for(var n in _nodes) num++;
+						return num;
+						break;
 					case "project":
 						return _project;
 						break;
@@ -131,6 +136,14 @@ if (!R8.Target) {
 //----------------------------------------------
 //TARGET SPECIFIC METHODS
 //----------------------------------------------
+			updateNodesStatus: function(nodesStatusList) {
+				for(var nId in nodesStatusList) {
+					if(nodesStatusList[nId] != _nodes[nId].get('status')) {
+						_nodes[nId].updateStatus(nodesStatusList[nId]);
+//						_nodes[nId].updateStatus('running');
+					}
+				}
+			},
 			hasNode: function(nodeId) {
 				for(var n in _nodes) {
 					if(_nodes[n].get('id') == nodeId) return true;

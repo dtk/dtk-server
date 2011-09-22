@@ -41,11 +41,11 @@ if (!R8.IDE.View.component.project) {
 				_leafNode = R8.Utils.Y.one('#'+_leafNodeId);
 				_leafBodyNode = R8.Utils.Y.one('#'+_leafBodyNodeId);
 
-				_childrenListNode = R8.Utils.Y.one('#'+_childrenListNodeId);
-				_interfaceLeafNode = R8.Utils.Y.one('#'+_interfaceLeafNodeId);
-				_interfaceListNode = R8.Utils.Y.one('#'+_interfaceListNodeId);
-				_linkDefsLeafNode = R8.Utils.Y.one('#'+_linkDefsLeafNodeId);
-				_attributesLeafNode = R8.Utils.Y.one('#'+_attributesLeafNodeId);
+//				_childrenListNode = R8.Utils.Y.one('#'+_childrenListNodeId);
+//				_interfaceLeafNode = R8.Utils.Y.one('#'+_interfaceLeafNodeId);
+//				_interfaceListNode = R8.Utils.Y.one('#'+_interfaceListNodeId);
+//				_linkDefsLeafNode = R8.Utils.Y.one('#'+_linkDefsLeafNodeId);
+//				_attributesLeafNode = R8.Utils.Y.one('#'+_attributesLeafNodeId);
 
 //				_applicationsListNode = R8.Utils.Y.one('#node-applications-list-'+_node.get('id'));
 
@@ -67,7 +67,7 @@ console.log('double clicked a compoennt:'+leafObjectId);
 					e.halt();
 					e.stopImmediatePropagation();
 				},this);
-
+/*
 				_events['linkdefs_dblclick'] = _linkDefsLeafNode.on('dblclick',function(e) {
 
 					var leafNodeId = e.currentTarget.get('id'),
@@ -82,15 +82,20 @@ console.log('double clicked on compoennt link defs:'+leafObjectId);
 					e.halt();
 					e.stopImmediatePropagation();
 				},this);
-
+*/
 			},
-			render: function() {
+			render: function(newApplication) {
 				_leafNode = R8.Utils.Y.Node.create(R8.Rtpl['project_tree_leaf']({'leaf_item': _leafDef}));
 				_leafNodeId = _leafNode.get('id');
 
 				_leafBodyNode = _leafNode.get('children').item(0);
 				_leafBodyNodeId = _leafBodyNode.get('id');
 
+				if(newApplication==true) {
+					_leafNode.addClass('jstree-leaf');
+				}
+
+/*
 				_childrenListNode = R8.Utils.Y.Node.create('<ul id="'+_idPrefix+_component.get('id')+'-children"></ul>');
 				_childrenListNodeId = _childrenListNode.get('id');
 
@@ -130,7 +135,7 @@ console.log('double clicked on compoennt link defs:'+leafObjectId);
 
 				_interfaceLeafNode.append(_interfaceListNode);
 				_childrenListNode.append(_interfaceLeafNode);
-				_leafNode.append(_childrenListNode);
+*/				_leafNode.append(_childrenListNode);
 
 				return _leafNode;
 			},

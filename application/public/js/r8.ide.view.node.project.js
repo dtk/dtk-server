@@ -38,7 +38,11 @@ if (!R8.IDE.View.node.project) {
 				_childrenListNode = R8.Utils.Y.one('#'+_childrenListNodeId);
 
 				_applicationsLeafNode = R8.Utils.Y.one('#'+_applicationsLeafNodeId);
+				_applicationsLeafNode.removeClass('jstree-leaf');
+				_applicationsLeafNode.addClass('jstree-open');
+
 				_applicationsListNode = R8.Utils.Y.one('#'+_applicationsListNodeId);
+
 //DEBUG
 /*
 				if(_applicationsListNode == null) {
@@ -89,7 +93,7 @@ console.log('double clicked on node leaf:'+_node.get('id'));
 //					'class': 'jstree-closed'
 				};
 				_applicationsLeafNode = R8.Utils.Y.Node.create(R8.Rtpl['project_tree_leaf']({'leaf_item': applicationsLeaf}));
-				_applciationsLeafNodeId = _applicationsLeafNode.get('id');
+				_applicationsLeafNodeId = _applicationsLeafNode.get('id');
 
 				if(newNode==true) {
 					_applicationsLeafNode.addClass('jstree-closed');
@@ -145,11 +149,17 @@ console.log('double clicked on node leaf:'+_node.get('id'));
 				_leafBodyNode.get('children').item(1).set('innerHTML',_node.get('name'));
 			},
 			addApplication: function(application,newApplication) {
-				var applicationLeafNode = application.getView('project').render();
+				var applicationLeafNode = application.getView('project').render(newApplication);
 
 				if(newApplication == true) {
 					applicationLeafNode.get('children').item(0).prepend('<ins class="jstree-icon">&nbsp;</ins>');
 					applicationLeafNode.prepend('<ins class="jstree-icon">&nbsp;</ins>');
+				}
+
+				if(_applicationsListNode == null) {
+					var tempNode = R8.Utils.Y.Node.create('<ul id="'+_applicationsListNodeId+'"></ul>');
+					_applicationsLeafNode.append(tempNode);
+					_applicationsListNode = R8.Utils.Y.one('#'+_applicationsListNodeId);
 				}
 
 				_applicationsListNode.append(applicationLeafNode);

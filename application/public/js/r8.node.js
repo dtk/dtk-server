@@ -191,11 +191,11 @@ if (!R8.Node) {
 
 				this.setupEvents();
 			},
-			addComponent: function(componentDef,tester) {
+			addComponent: function(componentDef,newComponent) {
 				_components[componentDef.id] = new R8.Component(componentDef);
 
 				for(var v in _views) {
-					_views[v].addComponent(_components[componentDef.id],tester);
+					_views[v].addComponent(_components[componentDef.id],newComponent);
 				}
 
 				_components[componentDef.id].init();

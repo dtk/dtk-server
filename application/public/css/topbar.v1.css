@@ -147,6 +147,10 @@
 	filter: dropshadow(color=#fff, offx=0, offy=1);
 }
 
+.menu-bar .item.disabled a {
+	color: #CCC;
+}
+
 .menu-bar .item.active a {
 	text-decoration: none;
 	font-family: "Trebuchet MS",Helvetica,Jamrul,sans-serif;

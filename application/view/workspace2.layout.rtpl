@@ -65,7 +65,7 @@
 						<div class="item-divider"></div>
 						<div class="item"><a href="{%=_app[:base_uri]%}/xyz/component/list">Library</a></div>
 						<div class="item-divider"></div>
-						<div class="item"><a href="{%=_app[:base_uri]%}/xyz/datacenter/list">Dashboard</a></div>
+						<div class="item disabled"><a href="{%=_app[:base_uri]%}/xyz/datacenter/list">Dashboard</a></div>
 					</div>
 					<div class="nav-divider"></div>
 <!--					<div class="sub-item"><a href="javascript:R8.Editor.saveFile();">Save</a></div>-->

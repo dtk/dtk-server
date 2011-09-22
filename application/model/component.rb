@@ -109,12 +109,14 @@ module XYZ
         [
          {
            :model_name => :node,
+           :convert => true,
            :join_type => :inner,
            :join_cond=>{:assembly_id => q(:component,:id)},
            :cols => Node.common_columns
          },
          {
            :model_name => :component,
+           :convert => true,
            :alias => :nested_component,
            :join_type => :inner,
            :join_cond=>{:node_node_id => q(:node,:id)},

@@ -13,8 +13,9 @@ module XYZ
       sp_hash = {:cols => [:node_assembly_nested_nodes_and_cmps]}
       node_col_rows = get_objs(sp_hash)
       node_col_rows.each do |r|
-        node = ndx_nodes[r[:node][:id]] ||= r[:node].merge(:components => Array.new)
-        node[:components] << r[:nested_components]
+        n = r[:node].materialize!(Node.common_columns)
+        node = ndx_nodes[n[:id]] ||= n.merge(:components => Array.new)
+        node[:components] << r[:nested_component].materialize!(Component.common_columns())
       end
 
       nested_node_ids = ndx_nodes.keys
@@ -25,13 +26,14 @@ module XYZ
       port_rows = Model.get_objs(model_handle(:port),sp_hash)
       port_rows.each do |r|
         node = ndx_nodes[r[:node_node_id]]
-        (node[:ports] ||= Array.new) << r
+        (node[:ports] ||= Array.new) << r.materialize!(Port.common_columns())
       end
       sp_hash = {
         :cols => PortLink.common_columns(),
         :filter => [:eq, :assembly_id, id()]
       }
-      port_links = port_rows = Model.get_objs(model_handle(:port_link),sp_hash)
+      port_links = Model.get_objs(model_handle(:port_link),sp_hash)
+      port_links.each{|pl|pl.materialize!(PortLink.common_columns())}
       {:nodes => ndx_nodes.values, :port_links => port_links}
     end
 

@@ -161,7 +161,7 @@ if (!R8.Target) {
 					eval("var response =" + responseObj.responseText);
 					var delete_result = response.application_node_destroy_and_delete.content[0].data;
 //DEBUG
-console.log(delete_result);
+//console.log(delete_result);
 					if(delete_result.result == true) _this.purgeNode(delete_result.id);
 				}
 				var params = {
@@ -176,11 +176,18 @@ console.log(delete_result);
 			},
 			purgeNode: function(nodeId) {
 //DEBUG
-console.log('should remove node from views....');				
+//console.log('should remove node from views....');
 				for(var v in _views) {
 					_views[v].removeNode(nodeId);
 				}
 				delete(_nodes[nodeId]);
+/*
+				for(var l in _links) {
+					for(var v in _views) {
+						_views[v].removeLink(nodeId);
+					}
+				}
+*/
 			},
 			instantiateNode: function(e) {
 				var nodePos = e.nodeDef.ui['target-'+this.get('id')];

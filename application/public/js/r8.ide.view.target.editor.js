@@ -670,6 +670,24 @@ return;
 									</div>\
 							</div>';
 
+				var modalHTML = '<div id="port-modal" class="port-modal" style="top: 0px; right: 0px;">\
+									<div class="l-col">\
+										<div class="corner tl"></div>\
+										<div class="l-col-body"></div>\
+										<div class="corner bl"></div>\
+									</div>\
+									<div id="port-modal-body" class="body">\
+										<div class="header">'+port.get('name')+'</div>\
+										<div class=".body-content">\
+										</div>\
+									</div>\
+									<div class="r-col">\
+										<div class="corner tr"></div>\
+										<div class="r-col-body"></div>\
+										<div class="corner br"></div>\
+									</div>\
+							</div>';
+
 				_contentNode.append(modalHTML);
 			},
 

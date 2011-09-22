@@ -223,7 +223,7 @@ console.log(e);
 //return;
 				var queryParams = 'target_model_name=datacenter&target_id='+this.get('id');
 //					queryParams += '&model_redirect=component&action_redirect=add_assembly_items&id_redirect='+componentId;
-					queryParams += '&model_redirect=asssembly&action_redirect=get_tree&id_redirect=*id';
+					queryParams += '&model_redirect=assembly&action_redirect=get_tree&id_redirect=*id';
 					queryParams += '&parent_id='+this.get('id')+'&assembly_left_pos='+e.assemblyLeftPos
 
 				var successCallback = function(ioId,repsonseObj) {
@@ -237,7 +237,7 @@ console.log(assembly_tree);
 				var callbacks = {
 						'io:success' : successCallback
 					};
-				R8.Ctrl.call('asssembly/clone/'+e.componentId,{
+				R8.Ctrl.call('assembly/clone/'+e.componentId,{
 //					'callbacks': callbacks,
 					'cfg': {
 						'data': queryParams

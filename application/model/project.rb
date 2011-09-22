@@ -27,6 +27,8 @@ module XYZ
       sp_hash = {:cols => [:id,:display_name,:type,:implementation_tree]}
       unravelled_ret = get_objs(sp_hash)
       ret_hash = Hash.new
+
+      i18n = get_i18n_mappings_for_models(:component)
       unravelled_ret.each do |r|
         #TODO: hack until determine right way to treat relationship between component and implementation versions
         index = r[:component][:component_type]
@@ -34,6 +36,8 @@ module XYZ
         #TODO: dont think ids are used; but for consistency using lowest id instance
         if cmp.nil? or r[:component][:id] < cmp[:id] 
           cmp = ret_hash[index] = r[:component].materialize!(Component.common_columns())
+          #TODO: see if cleaner way to put in i18n names
+          cmp[:name] = i18n_string(i18n,:component, cmp[:name])
         end
         impls = cmp[:implementations] ||= Hash.new
         #TODO: this is hack taht needs fixing
@@ -52,10 +56,14 @@ module XYZ
       ndx_ret = Hash.new
       sp_hash = {:cols => [:id,:display_name,:type,:module_tree]}
       unravelled_ret = get_objs(sp_hash)
+      i18n = get_i18n_mappings_for_models(:component)
       unravelled_ret.each do |r|
         impl_id = r[:implementation][:id]
         cmps = (ndx_ret[impl_id] ||= r[:implementation].merge(:components => Array.new))[:components]
-        cmps << r[:component].materialize!(Component.common_columns())
+        cmp = r[:component].materialize!(Component.common_columns())
+        #TODO: see if cleaner way to put in i18n names
+        cmp[:name] = i18n_string(i18n,:component, cmp[:name])
+        cmps << cmp
       end
       ret = ndx_ret.values
       return ret unless opts[:include_file_assets]

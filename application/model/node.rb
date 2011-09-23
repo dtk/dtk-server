@@ -714,7 +714,11 @@ module XYZ
         end.compact
         unless external_port_idhs.empty?
           new_ports = Model.get_objs_in_set(external_port_idhs, {:cols => Port.common_columns})
-          new_ports.map{|p|p.materialize!(Port.common_columns)}
+          i18n = get_i18n_mappings_for_models(:component,:attribute)
+          new_ports.map do |port|
+            port.materialize!(Port.common_columns)
+            port[:name] = get_i18n_port_name(i18n,port)
+          end
           opts[:outermost_ports] += new_ports
         end
       end

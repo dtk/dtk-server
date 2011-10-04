@@ -5,20 +5,10 @@ require 'puppet'
 module XYZ
   class Puppet
     class ParseStructure < Hash
-      def self.puppet_type?(ast_item,type)
-        puppet_ast_class = TreatedPuppetTypes[type]
-        unless puppet_ast_class
-          raise Error.new("type #{type} not treated")
-        end
-        ast_item.kind_of?(puppet_ast_class)
-      end
-      def puppet_type?(ast_item,type)
-        self.class.puppet_type?(ast_item,type)
-      end
     end
 
     class ComponentPS < ParseStructure
-      #TODO: use opts to indiacte what to parse
+      #TODO: use opts to specify what to parse and what to ignore
       def initialize(ast_item,opts={})
         type =
           if puppet_type?(ast_item,:hostclass)
@@ -45,21 +35,32 @@ module XYZ
         end
         ret
       end 
+      def process_fn(ast_item,opts) 
+        #TODO: make what is ignored and treated fn of opts
+        types_to_ignore = [:var_def,:relationship]
+        types_to_process = [:collection,:resource,:if_statement,:case_statement,:function]
+        return nil if puppet_type?(ast_item,types_to_ignore)
+        if type = puppet_type?(ast_item,types_to_process)
+          "parse__#{type}".to_sym
+        else
+          raise Error.new("unexpected ast type (#{ast_item.class.to_s})")
+        end
+      end
 
-      def parse_collection(ast_item,opts)
+      def parse__collection(ast_item,opts)
         if ast_item.form == :exported
           ExportedCollectionPS.new(ast_item,opts)
         end
       end
 
-      def parse_resource(ast_item,opts)
+      def parse__resource(ast_item,opts)
         #TODO: case on opts what is returned; here we are casing on just external resources
         if ast_item.exported
           ExportedResourcePS.new(ast_item,opts)
         end
       end
 
-      def parse_ifstatement(ast_item,opts)
+      def parse__if_statement(ast_item,opts)
         #TODO: this flattens the "if call" and returns both sides; whether this shoudl be done may be dependent on ops
         ret = Array.new
         IfStatementPS.flat_statement_iter(ast_item,opts) do |child_ast_item|
@@ -67,7 +68,7 @@ module XYZ
             if parse_rsc = parse_resource(child_ast_item,opts)
               ret << parse_rsc 
             end
-          elsif puppet_type?(child_ast_item,:function) and child_ast_item.name == "include"
+          elsif puppet_type?(child_ast_item,:function) and ["include","require"].include?(child_ast_item.name)
             #TODO: not sure if need to explicitly load in what is included 
             nil
           else
@@ -76,29 +77,8 @@ module XYZ
         end
         ret
       end
-
-      def process_fn(ast_item,opts) 
-        return nil if IgnoreListWhenNested.find{|klass|ast_item.kind_of?(klass)}
-        if puppet_type?(ast_item,:collection)
-          :parse_collection
-        elsif puppet_type?(ast_item,:resource)
-          :parse_resource
-        elsif puppet_type?(ast_item,:if_statement)
-          :parse_ifstatement
-        else
-          raise Error.new("unexpected ast type (#{ast_item.class.to_s})")
-        end
-      end
-      #TODO: make  list function of opts
-      #btter unify with TreatedPuppetTypes
-      IgnoreListWhenNested = 
-        [
-         ::Puppet::Parser::AST::CaseStatement,
-         ::Puppet::Parser::AST::Function,
-         ::Puppet::Parser::AST::VarDef,
-         ::Puppet::Parser::AST::Relationship
-        ]
     end
+
     class ExportedResourcePS < ParseStructure
       def initialize(ast_resource,opts={})
         self[:type] = ast_resource.type
@@ -184,7 +164,24 @@ module XYZ
         end
       end
     end
+
     class ParseStructure < Hash
+      #TODO: temp if not called as stand alone utility
+      class Error < NameError
+      end
+
+      def self.puppet_type?(ast_item,types)
+        types = Array(types)
+        puppet_ast_classes = Array(types).inject({}){|h,t|h.merge(t => TreatedPuppetTypes[t])}
+        puppet_ast_classes.each do |type, klass|
+          raise Error.new("type #{type} not treated") if klass.nil?
+          return type if ast_item.kind_of?(klass)
+        end
+        nil
+      end
+      def puppet_type?(ast_item,types)
+        self.class.puppet_type?(ast_item,types)
+      end
       TreatedPuppetTypes = {
         :hostclass => ::Puppet::Parser::AST::Hostclass,
         :definition => ::Puppet::Parser::AST::Definition,
@@ -195,6 +192,8 @@ module XYZ
         :string => ::Puppet::Parser::AST::String,
         :name => ::Puppet::Parser::AST::Name,
         :function => ::Puppet::Parser::AST::Function,
+        :var_def => ::Puppet::Parser::AST::VarDef,
+        :relationship => ::Puppet::Parser::AST::Relationship,
       }
     end
   end

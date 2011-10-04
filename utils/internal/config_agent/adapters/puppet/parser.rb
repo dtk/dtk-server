@@ -7,7 +7,8 @@ module XYZ
     class ParseStructure < Hash
     end
     class ComponentPS < ParseStructure
-      def initialize(ast_item)
+      #TODO: use opts to indiacte what to parse
+      def initialize(ast_item,opts={})
         type =
           if ast_item.kind_of?(::Puppet::Parser::AST::Hostclass)
             "puppet_class"
@@ -16,14 +17,52 @@ module XYZ
           else
             raise Error.new("unexpected type for ast_item")
           end
-          self[:type] = type
-          self[:name] = ast_item.name
-          self[:attributes] = (ast_item.context[:arguments]||[]).map{|arg|AttributePS.new(arg)}
+        self[:type] = type
+        self[:name] = ast_item.name
+        self[:attributes] = (ast_item.context[:arguments]||[]).map{|arg|AttributePS.new(arg,opts)}
+        children = parse_children(ast_item,opts)
+        self[:children] = children if children and not children.empty?
       end
-    end 
+     private
+      def parse_children(ast_item,opts)
+        return nil unless code = ast_item.context[:code]
+        (code.children||[]).map do |child_ast_item|
+          if fn = process_fn(child_ast_item,opts)
+            send(fn,child_ast_item,opts)
+          end
+        end.compact
+      end 
+
+      def parse_collection(ast_item,opt)
+        [ast_item.class,ast_item.instance_variables]
+      end
+
+      def parse_debug(ast_item,opts)
+        [ast_item.type,ast_item.class,ast_item.instance_variables]
+      end
+
+      def process_fn(ast_item,opts={}) 
+        return nil if IgnoreListWhenNested.find{|klass|ast_item.kind_of?(klass)}
+        if ast_item.kind_of?(::Puppet::Parser::AST::Collection)
+          :parse_collection
+        elsif ast_item.kind_of?(::Puppet::Parser::AST::Resource)
+          :parse_debug
+        else
+          raise Error.new("unexpected ast type (#{ast_item.class.to_s})")
+        end
+      end
+      #TODO: make inotre list function of opts
+      IgnoreListWhenNested = 
+        [
+         ::Puppet::Parser::AST::CaseStatement,
+         ::Puppet::Parser::AST::Function,
+         ::Puppet::Parser::AST::VarDef,
+         ::Puppet::Parser::AST::Relationship
+        ]
+    end
 
     class AttributePS < ParseStructure
-      def initialize(arg)
+      def initialize(arg,opts={})
         self[:name] = arg[0]
         self[:default] =  default_value(arg[1]) if arg[1]
       end
@@ -55,6 +94,6 @@ environment = "production"
 krt = Puppet::Node::Environment.new(environment).known_resource_types
 krt_code = krt.hostclass("").code
 krt_code.children.each do |ast_item|
-    pp XYZ::Puppet::ComponentPS.new(ast_item)
+  pp  XYZ::Puppet::ComponentPS.new(ast_item,{:foo => true})
 end
 #pp krt_code

@@ -33,20 +33,27 @@ module XYZ
         end.compact
       end 
 
-      def parse_collection(ast_item,opt)
+      def parse_collection(ast_item,opts)
         [ast_item.class,ast_item.instance_variables]
+      end
+
+      def parse_resource(ast_item,opts)
+        #TODO: case on opts what is returned; here we are casing on just external resources
+        if ast_item.exported
+          ExportedResourcePS.new(ast_item,opts)
+        end
       end
 
       def parse_debug(ast_item,opts)
         [ast_item.type,ast_item.class,ast_item.instance_variables]
       end
 
-      def process_fn(ast_item,opts={}) 
+      def process_fn(ast_item,opts) 
         return nil if IgnoreListWhenNested.find{|klass|ast_item.kind_of?(klass)}
         if ast_item.kind_of?(::Puppet::Parser::AST::Collection)
           :parse_collection
         elsif ast_item.kind_of?(::Puppet::Parser::AST::Resource)
-          :parse_debug
+          :parse_resource
         else
           raise Error.new("unexpected ast type (#{ast_item.class.to_s})")
         end
@@ -59,6 +66,30 @@ module XYZ
          ::Puppet::Parser::AST::VarDef,
          ::Puppet::Parser::AST::Relationship
         ]
+    end
+    class ExportedResourcePS < ParseStructure
+      def initialize(ast_resource,opts={})
+        self[:type] = ast_resource.type
+        self[:paramters] =  resource_parameters(ast_resource,opts)
+        #TODO: for bedugging to make sure we did no miss an impofrtant paramter
+        self[:fields] = ast_resource.instance_variables 
+      end
+     private
+      def resource_parameters(ast_resource,opts)
+        children = ast_resource.instances.children
+        unless children.size == 1
+          raise Error.new("unexpected to have number of resource children neq to 1")
+        end
+        params = children.first.parameters.children
+        params.map do |ast_rsc_param|
+          if ast_rsc_param.kind_of?(::Puppet::Parser::AST::ResourceParam)
+            #TODO: stub
+            [:resource_param,ast_rsc_param.instance_variables]
+          else
+            raise Error.new("Unexpected child of resource (#{ast_rsc_param.class.to_s})")
+          end
+        end
+      end
     end
 
     class AttributePS < ParseStructure

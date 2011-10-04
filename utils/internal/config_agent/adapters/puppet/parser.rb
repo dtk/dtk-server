@@ -47,7 +47,9 @@ module XYZ
       end 
 
       def parse_collection(ast_item,opts)
-        [ast_item.class,ast_item.instance_variables]
+        if ast_item.form == :exported
+          ExportedCollectionPS.new(ast_item,opts)
+        end
       end
 
       def parse_resource(ast_item,opts)
@@ -59,16 +61,20 @@ module XYZ
 
       def parse_ifstatement(ast_item,opts)
         #TODO: this flattens the "if call" and returns both sides; whether this shoudl be done may be dependent on ops
+        ret = Array.new
         IfStatementPS.flat_statement_iter(ast_item,opts) do |child_ast_item|
           if puppet_type?(child_ast_item,:resource)
-            parse_resource(child_ast_item,opts)
+            if parse_rsc = parse_resource(child_ast_item,opts)
+              ret << parse_rsc 
+            end
           elsif puppet_type?(child_ast_item,:function) and child_ast_item.name == "include"
-            #TODO: not sure if need to load in what is included
+            #TODO: not sure if need to explicitly load in what is included 
             nil
           else
             raise Error.new("unexpceted statement in 'if statement' body")
           end
-        end.compact
+        end
+        ret
       end
 
       def process_fn(ast_item,opts) 
@@ -115,6 +121,13 @@ module XYZ
       end
     end
 
+    class ExportedCollectionPS < ParseStructure
+      def initialize(ast_coll,opts={})
+        self[:type] = ast_coll.type
+        self[:query] =  ast_coll.query
+      end
+    end
+
     module ConditionalStatementsMixin
       def flat_statement_iter(ast_item,opts={},&block)
         next_level_statements(ast_item).each do |child_ast_item|
@@ -127,7 +140,7 @@ module XYZ
           elsif puppet_type?(child_ast_item,:case_statement)
             CaseStatementPS.flat_statement_iter(child_ast_item,opts,&block)
           else
-            raise Error.new("unexpceted statement in 'if statement' body")
+            raise Error.new("unexpected statement in 'if statement' body")
           end
         end
       end      
@@ -189,10 +202,6 @@ end
 
 #monkey patches
 class Puppet::Parser::AST::Definition
-  attr_reader :name
-end
-
-class Puppet::Parser::AST::ResourceParam
   attr_reader :name
 end
 

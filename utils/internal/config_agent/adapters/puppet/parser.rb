@@ -20,7 +20,7 @@ module XYZ
           end
         self[:type] = type
         self[:name] = ast_item.name
-        self[:attributes] = (ast_item.context[:arguments]||[]).map{|arg|AttributePS.new(arg,opts)}
+        self[:attributes] = (ast_item.context[:arguments]||[]).map{|arg|AttributePS.create(arg,opts)}
         children = parse_children(ast_item,opts)
         self[:children] = children if children and not children.empty?
       end
@@ -29,12 +29,19 @@ module XYZ
         return nil unless code = ast_item.context[:code]
         ret = Array.new
         (code.children||[]).each do |child_ast_item|
-          if fn = process_fn(child_ast_item,opts)
-            ret += Array(send(fn,child_ast_item,opts))
-          end
+          ret += parse_child(child_ast_item,opts)
         end
         ret
       end 
+
+      def parse_child(child_ast_item,opts)
+        ret = Array.new
+        if fn = process_fn(child_ast_item,opts)
+          ret += Array(send(fn,child_ast_item,opts))
+        end
+        ret
+      end
+
       def process_fn(ast_item,opts) 
         #TODO: make what is ignored and treated fn of opts
         types_to_ignore = [:var_def,:relationship]
@@ -49,23 +56,49 @@ module XYZ
 
       def parse__collection(ast_item,opts)
         if ast_item.form == :exported
-          ExportedCollectionPS.new(ast_item,opts)
+          ExportedCollectionPS.create(ast_item,opts)
         end
       end
 
       def parse__resource(ast_item,opts)
         #TODO: case on opts what is returned; here we are casing on just external resources
         if ast_item.exported
-          ExportedResourcePS.new(ast_item,opts)
+          ExportedResourcePS.create(ast_item,opts)
         end
       end
 
+      def parse__function(ast_fn,opts)
+        case ast_fn.name
+          when "require" then RequireStatementPS.create(ast_fn,opts) 
+          when "include" then IncludeStatementPS.create(ast_fn,opts) 
+        else
+          nil #ignore all others
+        end
+      end
+      def parse__if_statement(ast_item,opts)
+        #TODO: this flattens the "if call" and returns both sides; whether this shoudl be done may be dependent on ops
+        ret = Array.new
+        IfStatementPS.flat_statement_iter(ast_item,opts) do |child_ast_item|
+          ret += parse_child(child_ast_item,opts)
+        end
+        ret
+      end
+
+      def parse__case_statement(ast_item,opts)
+        #TODO: this flattens the "if call" and returns both sides; whether this shoudl be done may be dependent on ops
+        ret = Array.new
+        CaseStatementPS.flat_statement_iter(ast_item,opts) do |child_ast_item|
+          ret += parse_child(child_ast_item,opts)
+        end
+        ret
+      end
+=begin
       def parse__if_statement(ast_item,opts)
         #TODO: this flattens the "if call" and returns both sides; whether this shoudl be done may be dependent on ops
         ret = Array.new
         IfStatementPS.flat_statement_iter(ast_item,opts) do |child_ast_item|
           if puppet_type?(child_ast_item,:resource)
-            if parse_rsc = parse_resource(child_ast_item,opts)
+            if parse_rsc = parse__resource(child_ast_item,opts)
               ret << parse_rsc 
             end
           elsif puppet_type?(child_ast_item,:function) and ["include","require"].include?(child_ast_item.name)
@@ -77,6 +110,7 @@ module XYZ
         end
         ret
       end
+=end
     end
 
     class ExportedResourcePS < ParseStructure
@@ -93,7 +127,7 @@ module XYZ
         params = children.first.parameters.children
         params.map do |ast_rsc_param|
           if ast_rsc_param.kind_of?(::Puppet::Parser::AST::ResourceParam)
-            ResourceParamPS.new(ast_rsc_param,opts)
+            ResourceParamPS.create(ast_rsc_param,opts)
           else
             raise Error.new("Unexpected child of resource (#{ast_rsc_param.class.to_s})")
           end
@@ -111,16 +145,15 @@ module XYZ
     module ConditionalStatementsMixin
       def flat_statement_iter(ast_item,opts={},&block)
         next_level_statements(ast_item).each do |child_ast_item|
-          if puppet_type?(child_ast_item,:resource)
-            block.call(child_ast_item)
-          elsif puppet_type?(child_ast_item,:function)
+          just_pass_thru = puppet_type?(child_ast_item,[:resource,:function,:collection])
+          if just_pass_thru
             block.call(child_ast_item)
           elsif puppet_type?(child_ast_item,:if_statement)
             IfStatementPS.flat_statement_iter(child_ast_item,opts,&block)
           elsif puppet_type?(child_ast_item,:case_statement)
             CaseStatementPS.flat_statement_iter(child_ast_item,opts,&block)
           else
-            raise Error.new("unexpected statement in 'if statement' body")
+            raise Error.new("unexpected statement in 'if statement' body having ast class (#{child_ast_item.class.to_s})")
           end
         end
       end      
@@ -164,10 +197,42 @@ module XYZ
         end
       end
     end
+    class RequireStatementPS < ParseStructure
+    end
+    class IncludeStatementPS < ParseStructure
+    end
 
     class ParseStructure < Hash
       #TODO: temp if not called as stand alone utility
       class Error < NameError
+      end
+      #TODO: for debugging until override
+      def initialize(ast_item=nil,opts={})
+        return super() if ast_item.nil? 
+        [ast_item.class,ast_item.instance_variables]
+      end
+
+      ###hacks for pp
+      def pretty_print(q)      
+        #TODO: may return an ordered hash
+        pp_form().pretty_print(q)
+      end
+      def pp_form
+        ret = Hash.new
+        each do |k,v|
+          ret[k] = 
+            if v.kind_of?(ParseStructure) then v.pp_form
+            elsif v.kind_of?(Array) 
+              v.map{|x|x.kind_of?(ParseStructure) ? x.pp_form : x}
+            else v
+          end
+        end
+        ret.merge(:r8class => self.class.to_s.gsub("XYZ::Puppet::","").to_sym)
+      end
+      ######
+
+      def self.create(ast_fn,opts={})
+        new(ast_fn,opts)
       end
 
       def self.puppet_type?(ast_item,types)
@@ -213,6 +278,7 @@ environment = "production"
 krt = Puppet::Node::Environment.new(environment).known_resource_types
 krt_code = krt.hostclass("").code
 krt_code.children.each do |ast_item|
-  pp  XYZ::Puppet::ComponentPS.new(ast_item,{:foo => true})
+  r8_parse = XYZ::Puppet::ComponentPS.create(ast_item,{:foo => true})
+  pp r8_parse
 end
 #pp krt_code

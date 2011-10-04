@@ -23,6 +23,7 @@ module XYZ
         self[:attributes] = (ast_item.context[:arguments]||[]).map{|arg|AttributePS.create(arg,opts)}
         children = parse_children(ast_item,opts)
         self[:children] = children if children and not children.empty?
+        super
       end
      private
       def parse_children(ast_item,opts)
@@ -92,31 +93,13 @@ module XYZ
         end
         ret
       end
-=begin
-      def parse__if_statement(ast_item,opts)
-        #TODO: this flattens the "if call" and returns both sides; whether this shoudl be done may be dependent on ops
-        ret = Array.new
-        IfStatementPS.flat_statement_iter(ast_item,opts) do |child_ast_item|
-          if puppet_type?(child_ast_item,:resource)
-            if parse_rsc = parse__resource(child_ast_item,opts)
-              ret << parse_rsc 
-            end
-          elsif puppet_type?(child_ast_item,:function) and ["include","require"].include?(child_ast_item.name)
-            #TODO: not sure if need to explicitly load in what is included 
-            nil
-          else
-            raise Error.new("unexpceted statement in 'if statement' body")
-          end
-        end
-        ret
-      end
-=end
     end
 
     class ExportedResourcePS < ParseStructure
       def initialize(ast_resource,opts={})
         self[:type] = ast_resource.type
         self[:paramters] =  resource_parameters(ast_resource,opts)
+        super
       end
      private
       def resource_parameters(ast_resource,opts)
@@ -139,6 +122,7 @@ module XYZ
       def initialize(ast_coll,opts={})
         self[:type] = ast_coll.type
         self[:query] =  ast_coll.query
+        super
       end
     end
 
@@ -178,6 +162,7 @@ module XYZ
         self[:name] = ast_rsc_param.param
         #TODO: not sure if we need value
         #self[:value] = parse ..(ast_rsc_param.value,opts)
+        super
       end
     end
 
@@ -185,6 +170,7 @@ module XYZ
       def initialize(arg,opts={})
         self[:name] = arg[0]
         self[:default] =  default_value(arg[1]) if arg[1]
+        super
       end
      private
       def default_value(default_obj)
@@ -209,7 +195,11 @@ module XYZ
       #TODO: for debugging until override
       def initialize(ast_item=nil,opts={})
         return super() if ast_item.nil? 
-        [ast_item.class,ast_item.instance_variables]
+        #TODO: just for debugging
+        if keys.size == 0 #test to see if this is coming from a child calling super
+          self[:instance_variables] = ast_item.instance_variables
+        end
+        self[:r8class] = self.class.to_s.gsub("XYZ::Puppet::","").to_sym
       end
 
       ###hacks for pp
@@ -217,9 +207,14 @@ module XYZ
         #TODO: may return an ordered hash
         pp_form().pretty_print(q)
       end
+
       def pp_form
-        ret = Hash.new
+        require '/root/R8Server/utils/internal/auxiliary.rb' #TODO: this must be taken out
+        ret =  ActiveSupport::OrderedHash.new()
+        #TODO: have each class optionally have klass.pp_key_order
+        ret[:r8class] = self[:r8class] || self.class.to_s.gsub("XYZ::Puppet::","").to_sym
         each do |k,v|
+          next if k == :r8class
           ret[k] = 
             if v.kind_of?(ParseStructure) then v.pp_form
             elsif v.kind_of?(Array) 
@@ -227,7 +222,7 @@ module XYZ
             else v
           end
         end
-        ret.merge(:r8class => self.class.to_s.gsub("XYZ::Puppet::","").to_sym)
+        ret
       end
       ######
 

@@ -16,7 +16,7 @@ module XYZ
           elsif puppet_type?(ast_item,:definition)
             "puppet_definition"
           else
-            raise Error.new("unexpected type for ast_item")
+            raise ParseError.new("unexpected type for ast_item")
           end
         self[:type] = type
         self[:name] = ast_item.name
@@ -36,11 +36,12 @@ module XYZ
       end 
 
       def parse_child(child_ast_item,opts)
-        ret = Array.new
         if fn = process_fn(child_ast_item,opts)
-          ret += Array(send(fn,child_ast_item,opts))
+          child_parse = send(fn,child_ast_item,opts)
+          child_parse.kind_of?(Array) ? child_parse : [child_parse]
+        else
+          Array.new
         end
-        ret
       end
 
       def process_fn(ast_item,opts) 
@@ -51,7 +52,7 @@ module XYZ
         if type = puppet_type?(ast_item,types_to_process)
           "parse__#{type}".to_sym
         else
-          raise Error.new("unexpected ast type (#{ast_item.class.to_s})")
+          raise ParseError.new("unexpected ast type (#{ast_item.class.to_s})")
         end
       end
 
@@ -105,14 +106,14 @@ module XYZ
       def resource_parameters(ast_resource,opts)
         children = ast_resource.instances.children
         unless children.size == 1
-          raise Error.new("unexpected to have number of resource children neq to 1")
+          raise ParseError.new("unexpected to have number of resource children neq to 1")
         end
         params = children.first.parameters.children
         params.map do |ast_rsc_param|
           if ast_rsc_param.kind_of?(::Puppet::Parser::AST::ResourceParam)
             ResourceParamPS.create(ast_rsc_param,opts)
           else
-            raise Error.new("Unexpected child of resource (#{ast_rsc_param.class.to_s})")
+            raise ParseError.new("Unexpected child of resource (#{ast_rsc_param.class.to_s})")
           end
         end
       end
@@ -137,7 +138,7 @@ module XYZ
           elsif puppet_type?(child_ast_item,:case_statement)
             CaseStatementPS.flat_statement_iter(child_ast_item,opts,&block)
           else
-            raise Error.new("unexpected statement in 'if statement' body having ast class (#{child_ast_item.class.to_s})")
+            raise ParseError.new("unexpected statement in 'if statement' body having ast class (#{child_ast_item.class.to_s})")
           end
         end
       end      
@@ -179,18 +180,22 @@ module XYZ
         elsif puppet_type?(default_obj,:name)
           default_obj.value
         else
-          raise Error.new("unexpected type for an attribute default")
+          raise ParseError.new("unexpected type for an attribute default")
         end
       end
     end
     class RequireStatementPS < ParseStructure
     end
     class IncludeStatementPS < ParseStructure
+      def initialize(ast_fn,opts={})
+        self[:arguments] = ast_fn.arguments
+        super
+      end
     end
 
     class ParseStructure < Hash
       #TODO: temp if not called as stand alone utility
-      class Error < NameError
+      class ParseError < NameError
       end
       #TODO: for debugging until override
       def initialize(ast_item=nil,opts={})
@@ -234,7 +239,7 @@ module XYZ
         types = Array(types)
         puppet_ast_classes = Array(types).inject({}){|h,t|h.merge(t => TreatedPuppetTypes[t])}
         puppet_ast_classes.each do |type, klass|
-          raise Error.new("type #{type} not treated") if klass.nil?
+          raise ParseError.new("type #{type} not treated") if klass.nil?
           return type if ast_item.kind_of?(klass)
         end
         nil
@@ -263,7 +268,6 @@ end
 class Puppet::Parser::AST::Definition
   attr_reader :name
 end
-
 ####
 
 file = ARGV[0]

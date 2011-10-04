@@ -188,18 +188,18 @@ module XYZ
     module RequireIncludeClassMixin
       #defining create to handle case that there could be multiple items created
       def create(ast_fn,opts={})
-        each_file_name(ast_fn,opts).map{|fn|new(fn,ast_fn,opts)}
+        arguments(ast_fn,opts).map{|fn|new(fn,ast_fn,opts)}
       end
       private
-      def each_file_name(ast_fn,opts)
-        ["foo"]
+      def arguments(ast_fn,opts)
+        ast_fn.arguments.children
       end
     end
     module RequireIncludeInstanceMixin
       private
       def initialize(fn,ast_fn,opts={})
         self[:file_name] = fn
-        self[:arguments] =  ast_fn.arguments #TODO: debug
+#        self[:arguments] =  ast_fn.arguments #TODO: debug
         super(ast_fn,opts)
       end
     end

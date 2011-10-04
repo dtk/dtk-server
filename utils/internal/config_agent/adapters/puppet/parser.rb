@@ -184,11 +184,63 @@ module XYZ
         end
       end
     end
+
+    module RequireIncludeClassMixin
+      #defining create to handle case that there could be multiple items created
+      def create(ast_fn,opts={})
+        each_file_name(ast_fn,opts).map{|fn|new(fn,ast_fn,opts)}
+      end
+      private
+      def each_file_name(ast_fn,opts)
+        ["foo"]
+      end
+    end
+    module RequireIncludeInstanceMixin
+      private
+      def initialize(fn,ast_fn,opts={})
+        self[:file_name] = fn
+        self[:arguments] =  ast_fn.arguments #TODO: debug
+        super(ast_fn,opts)
+      end
+    end
+
     class RequireStatementPS < ParseStructure
+      extend RequireIncludeClassMixin; include RequireIncludeInstanceMixin
     end
     class IncludeStatementPS < ParseStructure
-      def initialize(ast_fn,opts={})
-        self[:arguments] = ast_fn.arguments
+      extend RequireIncludeClassMixin; include RequireIncludeInstanceMixin
+    end
+
+    class TermPS < ParseStructure
+      def self.create(ast_term,opts={})
+        treated_type = puppet_type?(ast_term,[:variable,:name,:string,:concat])
+        case treated_type
+         when :variable then VariablePS.new(ast_term,opts)
+         when :name then NamePS.new(ast_term,opts)
+         when :concat then ConcatPS.new(ast_term,opts)
+         when :string then ast_term.value
+         else raise ParseError.new("type not treated as a term (#{ast_term.class.to_s})")
+        end
+      end
+    end
+
+    class VariablePS < TermPS
+      def initialize(var_ast,opts={})
+        self[:value] = var_ast.value
+        super
+      end
+    end
+
+    class NamePS < TermPS
+      def initialize(name_ast,opts={})
+        self[:value] = name_ast.value
+        super
+      end
+    end
+
+    class ConcatPS < TermPS
+      def initialize(concat_ast,opts={})
+        self[:terms] = concat_ast.children.map{|term_ast|TermPS.create(term_ast,opts)}
         super
       end
     end
@@ -254,11 +306,13 @@ module XYZ
         :collection => ::Puppet::Parser::AST::Collection,
         :if_statement => ::Puppet::Parser::AST::IfStatement,
         :case_statement => ::Puppet::Parser::AST::CaseStatement,
+        :relationship => ::Puppet::Parser::AST::Relationship,
         :string => ::Puppet::Parser::AST::String,
         :name => ::Puppet::Parser::AST::Name,
+        :variable => ::Puppet::Parser::AST::Variable,
+        :concat => ::Puppet::Parser::AST::Concat,
         :function => ::Puppet::Parser::AST::Function,
         :var_def => ::Puppet::Parser::AST::VarDef,
-        :relationship => ::Puppet::Parser::AST::Relationship,
       }
     end
   end

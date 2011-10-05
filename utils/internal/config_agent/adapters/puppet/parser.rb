@@ -38,7 +38,7 @@ module XYZ
       def parse_child(child_ast_item,opts)
         if fn = process_fn(child_ast_item,opts)
           child_parse = send(fn,child_ast_item,opts)
-          child_parse.kind_of?(Array) ? child_parse : [child_parse]
+          child_parse.kind_of?(Array) ? child_parse : (child_parse ? [child_parse] : Array.new)
         else
           Array.new
         end
@@ -122,7 +122,37 @@ module XYZ
     class ExportedCollectionPS < ParseStructure
       def initialize(ast_coll,opts={})
         self[:type] = ast_coll.type
-        self[:query] =  ast_coll.query
+        query = ast_coll.query
+        type = puppet_type?(query,:coll_expr)
+        self[:query] =  
+          case type
+           when :coll_expr then CollExprPS.create(query,opts)
+          else raise ParseError.new("Unexpected type (#{query.class.to_s}) in query argument of collection")
+        end 
+       super
+      end
+    end
+
+    class CollExprPS < ParseStructure
+      def initialize(coll_expr_ast,opts={})
+        name = nil
+        value_ast = nil
+        if puppet_type?(coll_expr_ast.test1,:name)
+          unless puppet_type?(coll_expr_ast.test2,:name)
+            name = coll_expr_ast.test1.value
+            value_ast = coll_expr_ast.test2
+          end
+        elsif puppet_type?(coll_expr_ast.test2,:name)
+          unless puppet_type?(coll_expr_ast.test1,:name)
+            name = coll_expr_ast.test2.value
+            value_ast = coll_expr_ast.test1
+          end
+        end
+        unless name and value_ast and (coll_expr_ast.oper == "==")
+          raise ParseError.new("unexpected type for collection expression")
+        end
+        self[:name] = name
+        self[:value] = TermPS.create(value_ast,opts)
         super
       end
     end
@@ -268,7 +298,7 @@ module XYZ
         require '/root/R8Server/utils/internal/auxiliary.rb' #TODO: this must be taken out
         ret =  ActiveSupport::OrderedHash.new()
         #TODO: have each class optionally have klass.pp_key_order
-        ret[:r8class] = self[:r8class] || self.class.to_s.gsub("XYZ::Puppet::","").to_sym
+        ret[:r8class] = self[:r8class] || self.class.to_s.gsub("XYZ::Puppet::","").gsub(/PS$/,"").to_sym
         each do |k,v|
           next if k == :r8class
           ret[k] = 
@@ -303,6 +333,7 @@ module XYZ
         :definition => ::Puppet::Parser::AST::Definition,
         :resource => ::Puppet::Parser::AST::Resource,
         :collection => ::Puppet::Parser::AST::Collection,
+        :coll_expr => ::Puppet::Parser::AST::CollExpr,
         :if_statement => ::Puppet::Parser::AST::IfStatement,
         :case_statement => ::Puppet::Parser::AST::CaseStatement,
         :relationship => ::Puppet::Parser::AST::Relationship,

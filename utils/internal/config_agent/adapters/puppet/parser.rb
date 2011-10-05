@@ -135,6 +135,14 @@ module XYZ
 
     class CollExprPS < ParseStructure
       def initialize(coll_expr_ast,opts={})
+        case coll_expr_ast.oper
+          when "==" then initialize__eq_op(coll_expr_ast,opts)
+          else raise ParseError.new("unexpected operation (#{coll_expr_ast.oper}) for collection expression")
+        end
+        super
+      end
+     private
+      def initialize__eq_op(coll_expr_ast,opts)
         name = nil
         value_ast = nil
         if puppet_type?(coll_expr_ast.test1,:name)
@@ -148,12 +156,11 @@ module XYZ
             value_ast = coll_expr_ast.test1
           end
         end
-        unless name and value_ast and (coll_expr_ast.oper == "==")
+        unless name and value_ast
           raise ParseError.new("unexpected type for collection expression")
         end
         self[:name] = name
         self[:value] = TermPS.create(value_ast,opts)
-        super
       end
     end
 

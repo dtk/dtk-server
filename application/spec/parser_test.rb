@@ -13,8 +13,5 @@ Puppet[:manifest] = file
 environment = "production"
 krt = Puppet::Node::Environment.new(environment).known_resource_types
 krt_code = krt.hostclass("").code
-krt_code.children.each do |ast_item|
-  r8_parse = XYZ::Puppet::ComponentPS.create(ast_item,{:foo => true})
-  pp r8_parse
-end
-#pp krt_code
+r8_parse = XYZ::Puppet::ModulePS.new(krt_code)
+pp r8_parse

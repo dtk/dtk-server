@@ -4,8 +4,90 @@ require 'puppet'
 
 module XYZ
   class Puppet
-    class ParseStructure < Hash
+    class ParseStructure < SimpleHashObject
+      #TODO: temp if not called as stand alone utility
+      class ParseError < NameError
+      end
+      #TODO: for debugging until override
+      def initialize(ast_item=nil,opts={})
+        return super() if ast_item.nil? 
+        #TODO: just for debugging
+        if keys.size == 0 #test to see if this is coming from a child calling super
+          self[:instance_variables] = ast_item.instance_variables
+        end
+      end
+
+      ###hacks for pp
+      def pretty_print(q)      
+        #TODO: may return an ordered hash
+        pp_form().pretty_print(q)
+      end
+
+      def pp_form
+        ret =  ActiveSupport::OrderedHash.new()
+        #TODO: have each class optionally have klass.pp_key_order
+        ret[:r8class] = self[:r8class] || self.class.to_s.gsub("XYZ::Puppet::","").gsub(/PS$/,"").to_sym
+        each do |k,v|
+          next if k == :r8class
+          ret[k] = 
+            if v.kind_of?(ParseStructure) then v.pp_form
+            elsif v.kind_of?(Array) 
+              v.map{|x|x.kind_of?(ParseStructure) ? x.pp_form : x}
+            else v
+          end
+        end
+        ret
+      end
+      ######
+
+      def self.create(ast_fn,opts={})
+        new(ast_fn,opts)
+      end
+
+      def self.puppet_type?(ast_item,types)
+        types = Array(types)
+        puppet_ast_classes = Array(types).inject({}){|h,t|h.merge(t => TreatedPuppetTypes[t])}
+        puppet_ast_classes.each do |type, klass|
+          raise ParseError.new("type #{type} not treated") if klass.nil?
+          return type if ast_item.kind_of?(klass)
+        end
+        nil
+      end
+      def puppet_type?(ast_item,types)
+        self.class.puppet_type?(ast_item,types)
+      end
+      TreatedPuppetTypes = {
+        :hostclass => ::Puppet::Parser::AST::Hostclass,
+        :definition => ::Puppet::Parser::AST::Definition,
+        :resource => ::Puppet::Parser::AST::Resource,
+        :collection => ::Puppet::Parser::AST::Collection,
+        :coll_expr => ::Puppet::Parser::AST::CollExpr,
+        :if_statement => ::Puppet::Parser::AST::IfStatement,
+        :case_statement => ::Puppet::Parser::AST::CaseStatement,
+        :relationship => ::Puppet::Parser::AST::Relationship,
+        :string => ::Puppet::Parser::AST::String,
+        :name => ::Puppet::Parser::AST::Name,
+        :variable => ::Puppet::Parser::AST::Variable,
+        :concat => ::Puppet::Parser::AST::Concat,
+        :function => ::Puppet::Parser::AST::Function,
+        :var_def => ::Puppet::Parser::AST::VarDef,
+      }
     end
+
+    class ModulePS < ParseStructure
+      def initialize(ast_array,opts={})
+        children = ast_array.children.map do |ast_item|
+          if puppet_type?(ast_item,[:hostclass,:definition])
+            XYZ::Puppet::ComponentPS.create(ast_item,opts)
+          else
+            raise ParseError("Unexpected top level ast type (#{ast_item.class.to_s})")
+          end
+        end.compact
+        self[:children] = children
+        super
+      end
+    end
+
 
     class ComponentPS < ParseStructure
       #TODO: use opts to specify what to parse and what to ignore
@@ -280,76 +362,6 @@ module XYZ
         self[:terms] = concat_ast.value.map{|term_ast|TermPS.create(term_ast,opts)}
         super
       end
-    end
-
-    class ParseStructure < Hash
-      #TODO: temp if not called as stand alone utility
-      class ParseError < NameError
-      end
-      #TODO: for debugging until override
-      def initialize(ast_item=nil,opts={})
-        return super() if ast_item.nil? 
-        #TODO: just for debugging
-        if keys.size == 0 #test to see if this is coming from a child calling super
-          self[:instance_variables] = ast_item.instance_variables
-        end
-      end
-
-      ###hacks for pp
-      def pretty_print(q)      
-        #TODO: may return an ordered hash
-        pp_form().pretty_print(q)
-      end
-
-      def pp_form
-        ret =  ActiveSupport::OrderedHash.new()
-        #TODO: have each class optionally have klass.pp_key_order
-        ret[:r8class] = self[:r8class] || self.class.to_s.gsub("XYZ::Puppet::","").gsub(/PS$/,"").to_sym
-        each do |k,v|
-          next if k == :r8class
-          ret[k] = 
-            if v.kind_of?(ParseStructure) then v.pp_form
-            elsif v.kind_of?(Array) 
-              v.map{|x|x.kind_of?(ParseStructure) ? x.pp_form : x}
-            else v
-          end
-        end
-        ret
-      end
-      ######
-
-      def self.create(ast_fn,opts={})
-        new(ast_fn,opts)
-      end
-
-      def self.puppet_type?(ast_item,types)
-        types = Array(types)
-        puppet_ast_classes = Array(types).inject({}){|h,t|h.merge(t => TreatedPuppetTypes[t])}
-        puppet_ast_classes.each do |type, klass|
-          raise ParseError.new("type #{type} not treated") if klass.nil?
-          return type if ast_item.kind_of?(klass)
-        end
-        nil
-      end
-      def puppet_type?(ast_item,types)
-        self.class.puppet_type?(ast_item,types)
-      end
-      TreatedPuppetTypes = {
-        :hostclass => ::Puppet::Parser::AST::Hostclass,
-        :definition => ::Puppet::Parser::AST::Definition,
-        :resource => ::Puppet::Parser::AST::Resource,
-        :collection => ::Puppet::Parser::AST::Collection,
-        :coll_expr => ::Puppet::Parser::AST::CollExpr,
-        :if_statement => ::Puppet::Parser::AST::IfStatement,
-        :case_statement => ::Puppet::Parser::AST::CaseStatement,
-        :relationship => ::Puppet::Parser::AST::Relationship,
-        :string => ::Puppet::Parser::AST::String,
-        :name => ::Puppet::Parser::AST::Name,
-        :variable => ::Puppet::Parser::AST::Variable,
-        :concat => ::Puppet::Parser::AST::Concat,
-        :function => ::Puppet::Parser::AST::Function,
-        :var_def => ::Puppet::Parser::AST::VarDef,
-      }
     end
   end
 end

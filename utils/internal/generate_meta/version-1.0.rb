@@ -3,12 +3,14 @@ module XYZ
     class ModuleMeta < ::XYZ::ModuleMeta
     end
     class ComponentMeta < ::XYZ::ComponentMeta
-      def hash_render()
+      def initialize(component_ps,context)
+        super(context)
+        set_hash_key(component_ps[:name])
+        self[:display_name] = t(component_ps[:name])
+        self[:description] = unknown
       end
     end
     class AttributeMeta < ::XYZ::AttributeMeta
-      def hash_render()
-      end
     end
   end
 end

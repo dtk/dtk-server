@@ -86,6 +86,13 @@ module XYZ
         self[:children] = children
         super
       end
+      def each_component(&block)
+        (self[:children]||[]).each do |component_ps|
+          if component_ps.kind_of?(ComponentPS)
+            block.call(component_ps)
+          end
+        end
+      end
     end
 
 

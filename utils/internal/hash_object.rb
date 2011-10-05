@@ -9,6 +9,10 @@ module XYZ
     end
   end
 
+  require 'active_support/ordered_hash'
+  class SimpleOrderedHash < ::ActiveSupport::OrderedHash
+  end
+
   class HashObject < Hash
     def initialize(initial_val=nil,convert_initial=false,&block)
       block ? super(&block) : super()

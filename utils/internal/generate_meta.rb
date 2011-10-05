@@ -3,28 +3,39 @@ module XYZ
     def self.create(version)
       case version
       when "1.0" then new(version)
-        else rase Error.new("Unexpected version (#{version})")
+        else raise Error.new("Unexpected version (#{version})")
       end
     end
 
     def generate_hash(parse_struct)
-      MetaObject.new(:version => @version).create(:module,parse_structure)
+      MetaObject.new(:version => @version).create(:module,parse_struct)
     end
 
    private
-    def initilaize(version)
+    def initialize(version)
       @version = version
     end
   end
 
-  class MetaObject < SimpleHashObject
+  class MetaObject < SimpleOrderedHash
     def initialize(context)
+      super()
       @context = context
     end
     def create(type,parse_struct)
       klass(type).new(parse_struct,@context)
     end
    private
+    def set_hash_key(key)
+      self[:hash_key] = key
+    end
+    def t(term)
+      MetaTerm.new(term)
+    end
+    def unknown
+      MetaTerm.create_unknown
+    end
+
     def klass(type)
       mod = XYZ.const_get "V#{version.gsub(".","_")}"
       mod.const_get "#{type.to_s.capitalize}Meta"
@@ -36,6 +47,7 @@ module XYZ
   class ModuleMeta < MetaObject
     def initialize(top_parse_struct,context)
       super(context)
+      self[:version] = context[:version]
       top_parse_struct.each_component do |component_ps|
         (self[:components] ||= Array.new) << create(:component,component_ps)
       end
@@ -45,18 +57,18 @@ module XYZ
     end
   end
   class ComponentMeta < MetaObject
-    def initialize(component_ps,context)
-      super(context)
-    end
   end
   class AttributeMeta < MetaObject
   end
 
-  #handles intermediate state where objects may be unkonw an djust need users input
+  #handles intermediate state where objects may be unknown and just need users input
   class MetaTerm < SimpleHashObject
     def initialize(value,state=:known)
-      self[:value] = value
+      self[:value] = value if state == :known
       self[:state] = state
+    end
+    def self.create_unknown()
+      new(nil,:unknown)
     end
   end
 end

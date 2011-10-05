@@ -1,4 +1,14 @@
 module XYZ
+  #NOTE: either extend or put in another object that handles virtual attributes but not autovivication to be used in most places
+  class SimpleHashObject < Hash
+    def initialize(initial_val=nil,&block)
+      block ? super(&block) : super()
+      if initial_val
+        replace(convert_initial)
+      end
+    end
+  end
+
   class HashObject < Hash
     def initialize(initial_val=nil,convert_initial=false,&block)
       block ? super(&block) : super()

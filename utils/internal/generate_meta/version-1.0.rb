@@ -1,15 +1,14 @@
 module XYZ
-  class GenerateMetaV1_0 < GenerateMetaVersion
-    def generate(parse_struct)
+  module V1_0
+    class ModuleMeta < ::XYZ::ModuleMeta
     end
-  end
-
-  class ComponentMetaV1_0 < ComponentMeta
-    def hash_render()
+    class ComponentMeta < ::XYZ::ComponentMeta
+      def hash_render()
+      end
     end
-  end
-  class AttributeMetaV1_0 < AttributeMeta
-    def hash_render()
+    class AttributeMeta < ::XYZ::AttributeMeta
+      def hash_render()
+      end
     end
   end
 end

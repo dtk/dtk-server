@@ -302,7 +302,6 @@ module XYZ
       end
 
       def pp_form
-        require '/root/R8Server/utils/internal/auxiliary.rb' #TODO: this must be taken out
         ret =  ActiveSupport::OrderedHash.new()
         #TODO: have each class optionally have klass.pp_key_order
         ret[:r8class] = self[:r8class] || self.class.to_s.gsub("XYZ::Puppet::","").gsub(/PS$/,"").to_sym
@@ -360,15 +359,3 @@ class Puppet::Parser::AST::Definition
   attr_reader :name
 end
 ####
-
-file = ARGV[0]
-file ||= "/root/r8server-repo/puppet-mysql/manifests/classes/master.pp"
-Puppet[:manifest] = file
-environment = "production"
-krt = Puppet::Node::Environment.new(environment).known_resource_types
-krt_code = krt.hostclass("").code
-krt_code.children.each do |ast_item|
-  r8_parse = XYZ::Puppet::ComponentPS.create(ast_item,{:foo => true})
-  pp r8_parse
-end
-#pp krt_code

@@ -2,10 +2,15 @@ module XYZ
   class GenerateMeta
     def self.create(version)
       case version
-        when "1.0" then GenerateMetaVersion_1_0.new(version)
+      when "1.0" then new(version)
         else rase Error.new("Unexpected version (#{version})")
       end
     end
+
+    def generate_hash(parse_struct)
+      MetaObject.new(:version => @version).create(:module,parse_structure)
+    end
+
    private
     def initilaize(version)
       @version = version
@@ -17,11 +22,13 @@ module XYZ
       @context = context
     end
     def create(type,parse_struct)
-      version_suffix = version ? "V#{version.gsub(".","_")}" : ""
-      klass = XYZ.const_get "#{type.to_s.capitalize}Meta#{version_suffix}"
-      klass.new(parse_struct,@context)
+      klass(type).new(parse_struct,@context)
     end
    private
+    def klass(type)
+      mod = XYZ.const_get "V#{version.gsub(".","_")}"
+      mod.const_get "#{type.to_s.capitalize}Meta"
+    end
     def version()
       (@context||{})[:version]
     end

@@ -188,18 +188,18 @@ module XYZ
     module RequireIncludeClassMixin
       #defining create to handle case that there could be multiple items created
       def create(ast_fn,opts={})
-        arguments(ast_fn,opts).map{|fn|new(fn,ast_fn,opts)}
+        ast_fn.arguments.children.map do |term_ast|
+          if parsed_term = TermPS.create(term_ast,opts)
+            new(parsed_term,ast_fn,opts)
+          end
+        end.compact
       end
       private
-      def arguments(ast_fn,opts)
-        ast_fn.arguments.children
-      end
     end
     module RequireIncludeInstanceMixin
       private
-      def initialize(fn,ast_fn,opts={})
-        self[:file_name] = fn
-#        self[:arguments] =  ast_fn.arguments #TODO: debug
+      def initialize(parsed_term,ast_fn,opts={})
+        self[:term] = parsed_term
         super(ast_fn,opts)
       end
     end
@@ -240,7 +240,7 @@ module XYZ
 
     class ConcatPS < TermPS
       def initialize(concat_ast,opts={})
-        self[:terms] = concat_ast.children.map{|term_ast|TermPS.create(term_ast,opts)}
+        self[:terms] = concat_ast.value.map{|term_ast|TermPS.create(term_ast,opts)}
         super
       end
     end
@@ -256,7 +256,6 @@ module XYZ
         if keys.size == 0 #test to see if this is coming from a child calling super
           self[:instance_variables] = ast_item.instance_variables
         end
-        self[:r8class] = self.class.to_s.gsub("XYZ::Puppet::","").to_sym
       end
 
       ###hacks for pp

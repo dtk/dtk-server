@@ -103,9 +103,9 @@ module XYZ
       def initialize(ast_item,opts={})
         type =
           if puppet_type?(ast_item,:hostclass)
-            "puppet_class"
+            "class"
           elsif puppet_type?(ast_item,:definition)
-            "puppet_definition"
+            "definition"
           else
             raise ParseError.new("unexpected type for ast_item")
           end
@@ -198,17 +198,61 @@ module XYZ
       def self.builtin?(ast_resource)
         ::Puppet::Type.type(ast_resource.type)
       end
+     private
+      def name(ast_resource)
+        ret = ast_resource.type
+        if ret == "class"
+          ast_title = ast_title(ast_resource)
+          raise ParseError.new("unexpected title ast type (#{ast_title.class.to_s})") unless puppet_type?(ast_title,AstTerm)
+          ret = ast_title.value
+        end
+        ret
+      end
+      def resource_parameters(ast_resource,opts={})
+        ret = Array.new
+        if ast_title = ast_title(ast_resource,opts)
+          ret << ResourceTitlePS.create(ast_title,opts)
+        end
+        ast_params(ast_resource,opts).each do |ast_rsc_param|
+          if puppet_type?(ast_rsc_param,:resource_param)
+            ret << ResourceParamPS.create(ast_rsc_param,opts)
+          else
+            raise ParseError.new("Unexpected child of resource (#{ast_rsc_param.class.to_s})")
+          end
+        end
+        ret
+      end
+
+      def ast_params(ast_resource,opts={})
+        children = ast_resource.instances.children
+        unless children.size == 1
+          raise ParseError.new("unexpected to have number of resource children neq to 1")
+        end
+        children.first.parameters.children
+      end
+      def ast_title(ast_resource,opts={})
+        children = ast_resource.instances.children
+        unless children.size == 1
+          raise ParseError.new("unexpected to have number of resource children neq to 1")
+        end
+        children.first.title
+      end
     end
 
     class DefinedResourcePS < ResourcePS
       def initialize(ast_resource,opts={})
-        self[:type] = ast_resource.type
+        self[:name] = name(ast_resource)
+        self[:type] = type(ast_resource)
         super
+      end
+     private
+      def type(ast_resource)
+        ast_resource.type == "class" ? "definition" : "class"
       end
     end
     class ExportedResourcePS < ResourcePS
       def initialize(ast_resource,opts={})
-        self[:type] = ast_resource.type
+        self[:name] = name(ast_resource)
         self[:paramters] =  resource_parameters(ast_resource,opts)
         super
       end
@@ -234,35 +278,6 @@ module XYZ
         else
           raise ParseError.new("unexpected type for an attribute default")
         end
-      end
-    end
-
-
-    class ResourcePS < ParseStructure
-     private
-      def resource_parameters(ast_resource,opts)
-        children = ast_resource.instances.children
-        unless children.size == 1
-          raise ParseError.new("unexpected to have number of resource children neq to 1")
-        end
-        ret = Array.new
-        if ast_title = children.first.title
-          if puppet_type?(ast_title,AstTerm)
-            ret << ResourceTitlePS.create(ast_title,opts)
-          else
-            raise ParseError.new("Unexpected resource title type (#{ast_title.class.to_s})")
-          end
-        end
-
-        params = children.first.parameters.children
-        params.each do |ast_rsc_param|
-          if puppet_type?(ast_rsc_param,:resource_param)
-            ret << ResourceParamPS.create(ast_rsc_param,opts)
-          else
-            raise ParseError.new("Unexpected child of resource (#{ast_rsc_param.class.to_s})")
-          end
-        end
-        ret
       end
     end
 

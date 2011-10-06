@@ -47,7 +47,7 @@ module XYZ
     def version()
       (@context||{})[:version]
     end
-    def moudle_name()
+    def module_name()
       (@context||{})[:module_name]
     end
   end

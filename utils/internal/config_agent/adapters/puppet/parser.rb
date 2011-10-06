@@ -155,7 +155,14 @@ module XYZ
         #TODO: case on opts what is returned; here we are casing on just external resources
         if ast_item.exported
           ExportedResourcePS.create(ast_item,opts)
+        elsif resource_instance_foreign_module?(ast_item)
+          ForeignResourcePS.create(ast_item,opts)
         end
+      end
+
+      def resource_instance_foreign_module?(ast_item)
+        #TODO: think this needs refinement; also see if we can simple test to rule out builtin
+        ast_item.type =~ /::/
       end
 
       def parse__function(ast_fn,opts)
@@ -182,6 +189,13 @@ module XYZ
           ret += parse_child(child_ast_item,opts)
         end
         ret
+      end
+    end
+
+    class ForeignResourcePS < ParseStructure
+      def initialize(ast_resource,opts={})
+        self[:type] = ast_resource.type
+        super
       end
     end
 

@@ -111,7 +111,12 @@ module XYZ
           end
         self[:type] = type
         self[:name] = ast_item.name
-        self[:attributes] = (ast_item.context[:arguments]||[]).map{|arg|AttributePS.create(arg,opts)}
+
+        attributes = Array.new
+        attributes << AttributePS.create_name_attribute() if puppet_type?(ast_item,:definition)
+        (ast_item.context[:arguments]||[]).each{|arg|attributes << AttributePS.create(arg,opts)}
+        self[:attributes] = attributes
+
         children = parse_children(ast_item,opts)
         self[:children] = children if children and not children.empty?
         super
@@ -200,6 +205,30 @@ module XYZ
         super
       end
     end
+
+    class AttributePS < ParseStructure
+      def initialize(arg,opts={})
+        self[:name] = arg[0]
+        self[:default] =  default_value(arg[1]) if arg[1]
+        self[:required] = opts[:required] if opts.has_key?(:required)
+        super
+      end
+
+      def self.create_name_attribute()
+        new(["name"],{:required => true})
+      end
+     private
+      def default_value(default_obj)
+        if puppet_type?(default_obj,:string)
+          default_obj.value
+        elsif puppet_type?(default_obj,:name)
+          default_obj.value
+        else
+          raise ParseError.new("unexpected type for an attribute default")
+        end
+      end
+    end
+
 
     class ResourcePS < ParseStructure
      private
@@ -328,24 +357,6 @@ module XYZ
         #TODO: not sure if we need value
         #self[:value] = parse ..(ast_term,opts)
         super
-      end
-    end
-
-    class AttributePS < ParseStructure
-      def initialize(arg,opts={})
-        self[:name] = arg[0]
-        self[:default] =  default_value(arg[1]) if arg[1]
-        super
-      end
-     private
-      def default_value(default_obj)
-        if puppet_type?(default_obj,:string)
-          default_obj.value
-        elsif puppet_type?(default_obj,:name)
-          default_obj.value
-        else
-          raise ParseError.new("unexpected type for an attribute default")
-        end
       end
     end
 

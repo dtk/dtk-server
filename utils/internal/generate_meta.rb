@@ -39,7 +39,9 @@ module XYZ
     def unknown
       MetaTerm.create_unknown
     end
-
+    def nailed(term)
+      term #TODO: may also make this a MetaTerm obj
+    end
     def klass(type)
       mod = XYZ.const_get "V#{version.gsub(".","_")}"
       mod.const_get "#{type.to_s.capitalize}Meta"
@@ -65,8 +67,45 @@ module XYZ
     end
   end
   class ComponentMeta < MetaObject
+    def initialize(component_ps,context)
+      super(context)
+      processed_name = component_ps[:name]
+      #if qualified name make sure matches module name
+      if processed_name =~ /(^.+)::(.+$)/
+        prefix = $1
+        unqual_name = $2
+        if processed_name =~ /::.+::/
+          raise Error.new("unexpected class or definition name #{processed_name})")
+        end
+        unless prefix == module_name
+          raise Error.new("prefix (#{prefix}) not equal to module name (#{module_name})")
+        end 
+        processed_name = "#{module_name}__#{unqual_name}"
+      end
+
+      set_hash_key(processed_name)
+      self[:display_name] = t(processed_name) #TODO: might instead put in label
+      self[:description] = unknown
+      external_ref = SimpleOrderedHash.new().merge(:name => component_ps[:name]).merge(:type => component_ps[:type])
+      self[:external_ref] = nailed(external_ref) 
+      attributes = (component_ps[:attributes]||[]).map{|attr_ps|create(:attribute,attr_ps)}
+      self[:attributes] = attributes unless attributes.empty?
+    end
   end
+
   class AttributeMeta < MetaObject
+    def initialize(attr_ps,context)
+      super(context)
+      name = attr_ps[:name]
+      set_hash_key(name)
+      self[:display_name] = t(name) 
+      self[:description] = unknown
+      if default = attr_ps[:default]
+        self[:default] = t(default)
+      end
+      self[:required] = (attr_ps.has_key?(:required) ? nailed(attr_ps[:required]) : unknown)
+      self[:external_ref] = nailed(SimpleOrderedHash.new().merge(:name => attr_ps[:name]))
+    end
   end
 
   #handles intermediate state where objects may be unknown and just need users input

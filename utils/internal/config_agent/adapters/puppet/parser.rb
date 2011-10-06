@@ -24,7 +24,7 @@ module XYZ
       end
 
       def pp_form
-        ret =  ActiveSupport::OrderedHash.new()
+        ret =  SimpleOrderedHash.new()
         #TODO: have each class optionally have klass.pp_key_order
         ret[:r8class] = self[:r8class] || self.class.to_s.gsub("XYZ::Puppet::","").gsub(/PS$/,"").to_sym
         each do |k,v|
@@ -60,6 +60,7 @@ module XYZ
         :hostclass => ::Puppet::Parser::AST::Hostclass,
         :definition => ::Puppet::Parser::AST::Definition,
         :resource => ::Puppet::Parser::AST::Resource,
+        :resource_param => ::Puppet::Parser::AST::ResourceParam,
         :collection => ::Puppet::Parser::AST::Collection,
         :coll_expr => ::Puppet::Parser::AST::CollExpr,
         :if_statement => ::Puppet::Parser::AST::IfStatement,
@@ -72,13 +73,14 @@ module XYZ
         :function => ::Puppet::Parser::AST::Function,
         :var_def => ::Puppet::Parser::AST::VarDef,
       }
+      AstTerm = [:string,:name,:variable,:concat]
     end
 
     class ModulePS < ParseStructure
       def initialize(ast_array,opts={})
         children = ast_array.children.map do |ast_item|
           if puppet_type?(ast_item,[:hostclass,:definition])
-            XYZ::Puppet::ComponentPS.create(ast_item,opts)
+            ComponentPS.create(ast_item,opts)
           else
             raise ParseError("Unexpected top level ast type (#{ast_item.class.to_s})")
           end
@@ -199,30 +201,43 @@ module XYZ
       end
     end
 
-    class ExportedResourcePS < ParseStructure
-      def initialize(ast_resource,opts={})
-        self[:type] = ast_resource.type
-        self[:paramters] =  resource_parameters(ast_resource,opts)
-        super
-      end
+    class ResourcePS < ParseStructure
      private
       def resource_parameters(ast_resource,opts)
         children = ast_resource.instances.children
         unless children.size == 1
           raise ParseError.new("unexpected to have number of resource children neq to 1")
         end
+        ret = Array.new
+        if ast_title = children.first.title
+          if puppet_type?(ast_title,AstTerm)
+            ret << ResourceTitlePS.create(ast_title,opts)
+          else
+            raise ParseError.new("Unexpected resource title type (#{ast_title.class.to_s})")
+          end
+        end
+
         params = children.first.parameters.children
-        params.map do |ast_rsc_param|
-          if ast_rsc_param.kind_of?(::Puppet::Parser::AST::ResourceParam)
-            ResourceParamPS.create(ast_rsc_param,opts)
+        params.each do |ast_rsc_param|
+          if puppet_type?(ast_rsc_param,:resource_param)
+            ret << ResourceParamPS.create(ast_rsc_param,opts)
           else
             raise ParseError.new("Unexpected child of resource (#{ast_rsc_param.class.to_s})")
           end
         end
+        ret
       end
     end
 
-    class ExportedCollectionPS < ParseStructure
+    class ExportedResourcePS < ResourcePS
+      def initialize(ast_resource,opts={})
+        self[:type] = ast_resource.type
+        self[:paramters] =  resource_parameters(ast_resource,opts)
+        super
+      end
+    end
+
+    class ExportedCollectionPS < ResourcePS
       def initialize(ast_coll,opts={})
         self[:type] = ast_coll.type
         query = ast_coll.query
@@ -307,6 +322,15 @@ module XYZ
       end
     end
 
+    class ResourceTitlePS < ParseStructure
+      def initialize(ast_term,opts={})
+        self[:name] = "title"
+        #TODO: not sure if we need value
+        #self[:value] = parse ..(ast_term,opts)
+        super
+      end
+    end
+
     class AttributePS < ParseStructure
       def initialize(arg,opts={})
         self[:name] = arg[0]
@@ -353,7 +377,7 @@ module XYZ
 
     class TermPS < ParseStructure
       def self.create(ast_term,opts={})
-        treated_type = puppet_type?(ast_term,[:variable,:name,:string,:concat])
+        treated_type = puppet_type?(ast_term,AstTerm)
         case treated_type
          when :variable then VariablePS.new(ast_term,opts)
          when :name then NamePS.new(ast_term,opts)

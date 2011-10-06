@@ -7,8 +7,12 @@ module XYZ
       end
     end
 
-    def generate_hash(parse_struct)
-      MetaObject.new(:version => @version).create(:module,parse_struct)
+    def generate_hash(parse_struct,module_name)
+      context = {
+        :version => @version,
+        :module_name => module_name
+      }
+      MetaObject.new(context).create(:module,parse_struct)
     end
 
    private
@@ -43,7 +47,11 @@ module XYZ
     def version()
       (@context||{})[:version]
     end
+    def moudle_name()
+      (@context||{})[:module_name]
+    end
   end
+
   class ModuleMeta < MetaObject
     def initialize(top_parse_struct,context)
       super(context)

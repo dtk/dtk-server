@@ -285,7 +285,7 @@ module XYZ
     module ConditionalStatementsMixin
       def flat_statement_iter(ast_item,opts={},&block)
         next_level_statements(ast_item).each do |child_ast_item|
-          just_pass_thru = puppet_type?(child_ast_item,[:resource,:function,:collection])
+          just_pass_thru = puppet_type?(child_ast_item,[:resource,:function,:collection,:var_def])
           if just_pass_thru
             block.call(child_ast_item)
           elsif puppet_type?(child_ast_item,:if_statement)

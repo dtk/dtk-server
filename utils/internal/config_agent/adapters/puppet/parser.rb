@@ -162,14 +162,9 @@ module XYZ
         #TODO: case on opts what is returned; here we are casing on just external resources
         if ast_item.exported
           ExportedResourcePS.create(ast_item,opts)
-        elsif resource_instance_foreign_module?(ast_item)
-          ForeignResourcePS.create(ast_item,opts)
+        elsif not ResourcePS.builtin?(ast_item)
+          DefinedResourcePS.create(ast_item,opts)
         end
-      end
-
-      def resource_instance_foreign_module?(ast_item)
-        #TODO: think this needs refinement; also see if we can simple test to rule out builtin
-        ast_item.type =~ /::/
       end
 
       def parse__function(ast_fn,opts)
@@ -199,9 +194,22 @@ module XYZ
       end
     end
 
-    class ForeignResourcePS < ParseStructure
+    class ResourcePS < ParseStructure
+      def self.builtin?(ast_resource)
+        ::Puppet::Type.type(ast_resource.type)
+      end
+    end
+
+    class DefinedResourcePS < ResourcePS
       def initialize(ast_resource,opts={})
         self[:type] = ast_resource.type
+        super
+      end
+    end
+    class ExportedResourcePS < ResourcePS
+      def initialize(ast_resource,opts={})
+        self[:type] = ast_resource.type
+        self[:paramters] =  resource_parameters(ast_resource,opts)
         super
       end
     end
@@ -258,13 +266,6 @@ module XYZ
       end
     end
 
-    class ExportedResourcePS < ResourcePS
-      def initialize(ast_resource,opts={})
-        self[:type] = ast_resource.type
-        self[:paramters] =  resource_parameters(ast_resource,opts)
-        super
-      end
-    end
 
     class ExportedCollectionPS < ResourcePS
       def initialize(ast_coll,opts={})

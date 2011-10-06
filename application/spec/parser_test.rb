@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 require 'rubygems'
 require 'pp'
+
 Root = File.expand_path('../../', File.dirname(__FILE__))
 require "#{Root}/utils/internal/auxiliary.rb"
 require "#{Root}/utils/internal/hash_object.rb"
@@ -18,7 +19,9 @@ environment = "production"
 krt = Puppet::Node::Environment.new(environment).known_resource_types
 krt_code = krt.hostclass("").code
 r8_parse = XYZ::Puppet::ModulePS.new(krt_code)
-#pp r8_parse
+pp r8_parse
+=begin
 meta_generator = XYZ::GenerateMeta.create("1.0")
 meta_hash = meta_generator.generate_hash(r8_parse,module_name)
 pp meta_hash
+=end

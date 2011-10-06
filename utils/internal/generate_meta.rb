@@ -7,10 +7,11 @@ module XYZ
       end
     end
 
-    def generate_hash(parse_struct,module_name)
+    def generate_hash(parse_struct,module_name,config_agent_type)
       context = {
         :version => @version,
-        :module_name => module_name
+        :module_name => module_name,
+        :config_agent_type => config_agent_type
       }
       MetaObject.new(context).create(:module,parse_struct)
     end
@@ -46,11 +47,16 @@ module XYZ
       mod = XYZ.const_get "V#{version.gsub(".","_")}"
       mod.const_get "#{type.to_s.capitalize}Meta"
     end
+    
+    #context
     def version()
       (@context||{})[:version]
     end
     def module_name()
       (@context||{})[:module_name]
+    end
+    def config_agent_type()
+      (@context||{})[:config_agent_type]
     end
   end
 
@@ -84,9 +90,11 @@ module XYZ
       end
 
       set_hash_key(processed_name)
+      self[:required] = unknown
       self[:display_name] = t(processed_name) #TODO: might instead put in label
       self[:description] = unknown
-      external_ref = SimpleOrderedHash.new().merge(:name => component_ps[:name]).merge(:type => component_ps[:type])
+      type = "#{config_agent_type}_#{component_ps[:type]}"
+      external_ref = SimpleOrderedHash.new().merge(:name => component_ps[:name]).merge(:type => type)
       self[:external_ref] = nailed(external_ref) 
       attributes = (component_ps[:attributes]||[]).map{|attr_ps|create(:attribute,attr_ps)}
       self[:attributes] = attributes unless attributes.empty?

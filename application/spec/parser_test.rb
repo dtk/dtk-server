@@ -19,9 +19,10 @@ environment = "production"
 krt = Puppet::Node::Environment.new(environment).known_resource_types
 krt_code = krt.hostclass("").code
 r8_parse = XYZ::Puppet::ModulePS.new(krt_code)
-pp r8_parse
-=begin
+#pp r8_parse
+begin
 meta_generator = XYZ::GenerateMeta.create("1.0")
-meta_hash = meta_generator.generate_hash(r8_parse,module_name)
+#TODO: should be able to figure this out "puppet" from r8_parse
+meta_hash = meta_generator.generate_hash(r8_parse,module_name,"puppet")
 pp meta_hash
-=end
+end

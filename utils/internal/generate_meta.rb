@@ -30,10 +30,25 @@ module XYZ
     def create(type,parse_struct)
       klass(type).new(parse_struct,@context)
     end
+
    private
+    ###utilities
+    def is_foreign_component_name?(name)
+      if name =~ /(^.+)::.+$/
+        prefix = $1
+        prefix == module_name ? nil : true
+      end
+    end
+
     def set_hash_key(key)
       self[:hash_key] = key
     end
+    def klass(type)
+      mod = XYZ.const_get "V#{version.gsub(".","_")}"
+      mod.const_get "#{type.to_s.capitalize}Meta"
+    end
+
+    #wrappers for terms
     def t(term)
       MetaTerm.new(term)
     end
@@ -42,10 +57,6 @@ module XYZ
     end
     def nailed(term)
       term #TODO: may also make this a MetaTerm obj
-    end
-    def klass(type)
-      mod = XYZ.const_get "V#{version.gsub(".","_")}"
-      mod.const_get "#{type.to_s.capitalize}Meta"
     end
     
     #context
@@ -60,6 +71,7 @@ module XYZ
     end
   end
 
+  
   class ModuleMeta < MetaObject
     def initialize(top_parse_struct,context)
       super(context)
@@ -90,14 +102,46 @@ module XYZ
       end
 
       set_hash_key(processed_name)
-      self[:required] = unknown
+      self[:include] = unknown 
       self[:display_name] = t(processed_name) #TODO: might instead put in label
       self[:description] = unknown
       type = "#{config_agent_type}_#{component_ps[:type]}"
       external_ref = SimpleOrderedHash.new().merge(:name => component_ps[:name]).merge(:type => type)
       self[:external_ref] = nailed(external_ref) 
+      dependencies = create_dependencies(component_ps)
+      self[:dependencies] = dependencies unless dependencies.empty?
       attributes = (component_ps[:attributes]||[]).map{|attr_ps|create(:attribute,attr_ps)}
       self[:attributes] = attributes unless attributes.empty?
+    end
+   private
+    def create_dependencies(component_ps)
+      ret = Array.new
+      ret += find_foreign_resource_names(component_ps).map{|name|create(:dependency,{:type => :foreign_dependency, :name => name})}
+      #TODO: may be more  dependency types
+      ret
+    end
+    private
+    def find_foreign_resource_names(component_ps)
+      ret = Array.new
+      (component_ps[:children]||[]).each do |child|
+        next unless child.is_defined_resource?()
+        name = child[:name]
+        next unless is_foreign_component_name?(name)
+        ret << name unless ret.include?(name)
+      end
+      ret
+    end
+  end
+
+  class DependencyMeta < MetaObject
+    def initialize(data,context)
+      super(context)
+      self[:type] = nail(data[:type].to_s)
+      case data[:type]
+        when :foreign_dependency
+          self[:name] = data[:name]
+        else raise Error.new("Unexpected dependency type (#{data[:type]})")
+      end
     end
   end
 

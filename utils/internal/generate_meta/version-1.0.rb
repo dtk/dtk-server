@@ -6,6 +6,8 @@ module XYZ
     end
     class ComponentMeta < ::XYZ::ComponentMeta
     end
+    class  DependencyMeta < ::XYZ::AttributeMeta
+    end
     class AttributeMeta < ::XYZ::AttributeMeta
     end
   end

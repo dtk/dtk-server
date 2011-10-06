@@ -1,5 +1,5 @@
+#TODO: think better to move assumptions about ast form into the initialization functions to capture their assumptions
 require 'rubygems'
-require 'pp'
 require 'puppet'
 
 module XYZ
@@ -15,6 +15,11 @@ module XYZ
         if keys.size == 0 #test to see if this is coming from a child calling super
           self[:instance_variables] = ast_item.instance_variables
         end
+      end
+
+      #### used in generate_meta
+      def is_defined_resource?() #overwritten on class
+        nil
       end
 
       ###hacks for pp
@@ -244,6 +249,9 @@ module XYZ
         self[:name] = name(ast_resource)
         self[:type] = type(ast_resource)
         super
+      end
+      def is_defined_resource?() 
+        true
       end
      private
       def type(ast_resource)

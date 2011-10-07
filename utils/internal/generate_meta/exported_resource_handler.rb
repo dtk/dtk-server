@@ -8,7 +8,7 @@ module XYZ
       def self.ret_klass(type)
         ret = nil
         begin
-          ret = XYZ.const_get "#{type.capitalize}ERH"
+          ret = XYZ::ExportedResourceHandlerMixin.const_get "#{type.capitalize}ERH"
         rescue
           raise Error.new("processor for builtin type (#{type}) not treated yet")
         end

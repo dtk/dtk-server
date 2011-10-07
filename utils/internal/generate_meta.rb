@@ -1,3 +1,4 @@
+require File.expand_path("generate_meta/exported_resource_handler", File.dirname(__FILE__))
 module XYZ
   class GenerateMeta
     def self.create(version)
@@ -23,6 +24,7 @@ module XYZ
   end
 
   class MetaObject < SimpleOrderedHash
+    include ExportedResourceHandlerMixin
     def initialize(context)
       super()
       @context = context
@@ -185,8 +187,7 @@ module XYZ
       self[:external_ref] = nailed(SimpleOrderedHash.new().merge(:name => attr_ps[:name]))
     end
     def initialize__from_exported_resource(exp_rsc_ps)
-      #TODO: stub
-      exp_rsc_ps
+      ExportedResourceHandler.create_attribute(exp_rsc_ps)
     end
     def initialize__from_imported_collection(imp_coll_ps)
       #TODO: stub

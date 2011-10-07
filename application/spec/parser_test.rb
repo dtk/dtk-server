@@ -3,10 +3,9 @@ require 'rubygems'
 require 'pp'
 
 Root = File.expand_path('../../', File.dirname(__FILE__))
-require "#{Root}/utils/internal/auxiliary.rb"
-require "#{Root}/utils/internal/hash_object.rb"
-require "#{Root}/utils/internal/generate_meta.rb"
-require "#{Root}/utils/internal/config_agent/adapters/puppet/parser.rb"
+["auxiliary", "errors", "hash_object", "generate_meta", "config_agent/adapters/puppet/parser"].each do |f|
+  require "#{Root}/utils/internal/#{f}.rb"
+end
 
 module_path_or_file = ARGV[0].gsub(/\/$/,"")
 file = module_name = nil

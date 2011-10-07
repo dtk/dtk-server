@@ -8,12 +8,19 @@ require "#{Root}/utils/internal/hash_object.rb"
 require "#{Root}/utils/internal/generate_meta.rb"
 require "#{Root}/utils/internal/config_agent/adapters/puppet/parser.rb"
 
-module_path = ARGV[0].gsub(/\/$/,"")
-file = "#{module_path}/manifests/init.pp"
-if module_path =~ /.+\/(.+$)/
-  module_name = $1
-  module_name.gsub!(/^puppet-/,"")
+module_path_or_file = ARGV[0].gsub(/\/$/,"")
+file = module_name = nil
+if File.file?(module_path_or_file)
+  file = module_path_or_file
+  module_name = ARGV[1]
+else
+  file = "#{module_path_or_file}/manifests/init.pp"
+  if module_path_or_file =~ /.+\/(.+$)/
+    module_name = $1
+  end
 end
+module_name.gsub!(/^puppet-/,"")
+
 Puppet[:manifest] = file
 environment = "production"
 krt = Puppet::Node::Environment.new(environment).known_resource_types

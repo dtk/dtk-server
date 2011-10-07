@@ -116,7 +116,9 @@ module XYZ
    private
     def create_dependencies(component_ps)
       ret = Array.new
-      ret += find_foreign_resource_names(component_ps).map{|name|create(:dependency,{:type => :foreign_dependency, :name => name})}
+      ret += find_foreign_resource_names(component_ps).map do |name|
+        create(:dependency,{:type => :foreign_dependency, :name => name})
+      end
       #TODO: may be more  dependency types
       ret
     end
@@ -136,7 +138,7 @@ module XYZ
   class DependencyMeta < MetaObject
     def initialize(data,context)
       super(context)
-      self[:type] = nail(data[:type].to_s)
+      self[:type] = nailed(data[:type].to_s)
       case data[:type]
         when :foreign_dependency
           self[:name] = data[:name]

@@ -18,10 +18,20 @@ module XYZ
       end
 
       #### used in generate_meta
-      def is_defined_resource?() #overwritten on class
+      #These all get ovewritten for matching class
+      def is_defined_resource?() 
         nil
       end
-
+      def is_exported_resource?()
+        nil
+      end
+      def is_imported_collection?()
+        nil
+      end
+      def is_attribute?()
+        nil
+      end
+      ######
       ###hacks for pp
       def pretty_print(q)      
         #TODO: may return an ordered hash
@@ -45,8 +55,8 @@ module XYZ
       end
       ######
 
-      def self.create(ast_fn,opts={})
-        new(ast_fn,opts)
+      def self.create(ast_obj,opts={})
+        new(ast_obj,opts)
       end
 
       def self.puppet_type?(ast_item,types)
@@ -159,7 +169,7 @@ module XYZ
 
       def parse__collection(ast_item,opts)
         if ast_item.form == :exported
-          ExportedCollectionPS.create(ast_item,opts)
+          ImportedCollectionPS.create(ast_item,opts)
         end
       end
 
@@ -200,6 +210,7 @@ module XYZ
     end
 
     class ResourcePS < ParseStructure
+
       def self.builtin?(ast_resource)
         ::Puppet::Type.type(ast_resource.type)
       end
@@ -220,7 +231,8 @@ module XYZ
         end
         ast_params(ast_resource,opts).each do |ast_rsc_param|
           if puppet_type?(ast_rsc_param,:resource_param)
-            ret << ResourceParamPS.create(ast_rsc_param,opts)
+            param = ResourceParamPS.create(ast_rsc_param,opts)
+            ret << param if param
           else
             raise ParseError.new("Unexpected child of resource (#{ast_rsc_param.class.to_s})")
           end
@@ -264,6 +276,9 @@ module XYZ
         self[:paramters] =  resource_parameters(ast_resource,opts)
         super
       end
+      def is_exported_resource?() 
+        true
+      end
     end
 
     class AttributePS < ParseStructure
@@ -272,6 +287,9 @@ module XYZ
         self[:default] =  default_value(arg[1]) if arg[1]
         self[:required] = opts[:required] if opts.has_key?(:required)
         super
+      end
+      def is_attribute?() 
+        true
       end
 
       def self.create_name_attribute()
@@ -290,7 +308,7 @@ module XYZ
     end
 
 
-    class ExportedCollectionPS < ResourcePS
+    class ImportedCollectionPS < ResourcePS
       def initialize(ast_coll,opts={})
         self[:type] = ast_coll.type
         query = ast_coll.query
@@ -301,6 +319,9 @@ module XYZ
           else raise ParseError.new("Unexpected type (#{query.class.to_s}) in query argument of collection")
         end 
        super
+      end
+      def is_imported_collection?()
+        true
       end
     end
 
@@ -367,10 +388,18 @@ module XYZ
     end
 
     class ResourceParamPS < ParseStructure
+      def self.create(ast_rsc_param,opts={})
+        #TODO: ccurrently throwing out require; this should be used to look for foreign resources
+        if ast_rsc_param.param == "require"
+          nil
+        else
+          new(ast_rsc_param,opts)
+        end
+      end
       def initialize(ast_rsc_param,opts={})
         self[:name] = ast_rsc_param.param
-        #TODO: not sure if we need value
-        #self[:value] = parse ..(ast_rsc_param.value,opts)
+        ast_term = ast_rsc_param.value
+        self[:value] = TermPS.create(ast_term,opts) if ast_term
         super
       end
     end
@@ -378,8 +407,7 @@ module XYZ
     class ResourceTitlePS < ParseStructure
       def initialize(ast_term,opts={})
         self[:name] = "title"
-        #TODO: not sure if we need value
-        #self[:value] = parse ..(ast_term,opts)
+        self[:value] = TermPS.create(ast_term,opts) if ast_term
         super
       end
     end

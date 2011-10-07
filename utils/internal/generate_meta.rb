@@ -108,13 +108,13 @@ module XYZ
       type = "#{config_agent_type}_#{component_ps[:type]}"
       external_ref = SimpleOrderedHash.new().merge(:name => component_ps[:name]).merge(:type => type)
       self[:external_ref] = nailed(external_ref) 
-      dependencies = create_dependencies(component_ps)
+      dependencies = dependencies(component_ps)
       self[:dependencies] = dependencies unless dependencies.empty?
-      attributes = (component_ps[:attributes]||[]).map{|attr_ps|create(:attribute,attr_ps)}
+      attributes = attributes(component_ps)
       self[:attributes] = attributes unless attributes.empty?
     end
    private
-    def create_dependencies(component_ps)
+    def dependencies(component_ps)
       ret = Array.new
       ret += find_foreign_resource_names(component_ps).map do |name|
         create(:dependency,{:type => :foreign_dependency, :name => name})
@@ -122,7 +122,19 @@ module XYZ
       #TODO: may be more  dependency types
       ret
     end
-    private
+    
+    def attributes(component_ps)
+      ret = (component_ps[:attributes]||[]).map{|attr_ps|create(:attribute,attr_ps)}
+      (component_ps[:children]||[]).each do |child_ps|
+        if child_ps.is_imported_collection?()
+          ret << create(:attribute,child_ps)
+        elsif child_ps.is_exported_resource?()
+          ret << create(:attribute,child_ps)
+        end
+      end
+      ret
+    end
+
     def find_foreign_resource_names(component_ps)
       ret = Array.new
       (component_ps[:children]||[]).each do |child|
@@ -148,8 +160,20 @@ module XYZ
   end
 
   class AttributeMeta < MetaObject
-    def initialize(attr_ps,context)
+    def initialize(parse_struct,context)
       super(context)
+      if parse_struct.is_attribute?()
+        initialize__from_attribute(parse_struct)
+      elsif parse_struct.is_exported_resource?()
+        initialize__from_exported_resource(parse_struct)
+      elsif parse_struct.is_imported_collection?()
+        initialize__from_imported_collection(parse_struct)
+      else
+        raise Error.new("Unexpected parse structure type (#{parse_struct.class.to_s})")
+      end  
+    end
+   private
+    def initialize__from_attribute(attr_ps)
       name = attr_ps[:name]
       set_hash_key(name)
       self[:display_name] = t(name) 
@@ -160,8 +184,15 @@ module XYZ
       self[:required] = (attr_ps.has_key?(:required) ? nailed(attr_ps[:required]) : unknown)
       self[:external_ref] = nailed(SimpleOrderedHash.new().merge(:name => attr_ps[:name]))
     end
+    def initialize__from_exported_resource(exp_rsc_ps)
+      #TODO: stub
+      exp_rsc_ps
+    end
+    def initialize__from_imported_collection(imp_coll_ps)
+      #TODO: stub
+      imp_coll_ps
+    end
   end
-
   #handles intermediate state where objects may be unknown and just need users input
   class MetaTerm < SimpleHashObject
     def initialize(value,state=:known)
@@ -173,5 +204,5 @@ module XYZ
     end
   end
 end
-require File.expand_path("generate_meta/version-1.0.rb", File.dirname(__FILE__))
+require File.expand_path("generate_meta/versions/V1.0.rb", File.dirname(__FILE__))
 

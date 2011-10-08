@@ -19,7 +19,7 @@ module XYZ
       def self.process!(attr_meta,exp_rsc_ps)
       #just want info from a few keys: title and tag
         #TODO: stub
-        attr_meta[:source_ref] = exp_rsc_ps[:paramters].map{|p|{p[:name] => p[:value].to_s}}
+        attr_meta[:source_ref] = exp_rsc_ps[:paramters].inject({}){|h,p|h.merge(p[:name] => p[:value].to_s)}
         attr_meta[:source_type] = exp_rsc_ps.config_agent_type
       end
     end 

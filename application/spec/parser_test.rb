@@ -29,6 +29,6 @@ r8_parse = XYZ::Puppet::ModulePS.new(krt_code)
 begin
 meta_generator = XYZ::GenerateMeta.create("1.0")
 #TODO: should be able to figure this out "puppet" from r8_parse
-meta_hash = meta_generator.generate_hash(r8_parse,module_name,"puppet")
+meta_hash = meta_generator.generate_hash(r8_parse,module_name)
 pp meta_hash
 end

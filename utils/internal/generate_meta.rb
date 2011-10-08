@@ -8,11 +8,10 @@ module XYZ
       end
     end
 
-    def generate_hash(parse_struct,module_name,config_agent_type)
+    def generate_hash(parse_struct,module_name)
       context = {
         :version => @version,
-        :module_name => module_name,
-        :config_agent_type => config_agent_type
+        :module_name => module_name
       }
       MetaObject.new(context).create(:module,parse_struct)
     end
@@ -68,9 +67,6 @@ module XYZ
     def module_name()
       (@context||{})[:module_name]
     end
-    def config_agent_type()
-      (@context||{})[:config_agent_type]
-    end
   end
 
   
@@ -107,7 +103,7 @@ module XYZ
       self[:include] = unknown 
       self[:display_name] = t(processed_name) #TODO: might instead put in label
       self[:description] = unknown
-      type = "#{config_agent_type}_#{component_ps[:type]}"
+      type = "#{component_ps.config_agent_type}_#{component_ps[:type]}"
       external_ref = SimpleOrderedHash.new().merge(:name => component_ps[:name]).merge(:type => type)
       self[:external_ref] = nailed(external_ref) 
       dependencies = dependencies(component_ps)

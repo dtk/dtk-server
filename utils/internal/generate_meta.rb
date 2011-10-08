@@ -1,4 +1,4 @@
-require File.expand_path("generate_meta/exported_resource_handler", File.dirname(__FILE__))
+require File.expand_path("generate_meta/store_config_handler", File.dirname(__FILE__))
 module XYZ
   class GenerateMeta
     def self.create(version)
@@ -23,7 +23,7 @@ module XYZ
   end
 
   class MetaObject < SimpleOrderedHash
-    include ExportedResourceHandlerMixin
+    include StoreConfigHandlerMixin
     def initialize(context)
       super()
       @context = context
@@ -183,11 +183,10 @@ module XYZ
       self[:external_ref] = nailed(SimpleOrderedHash.new().merge(:name => attr_ps[:name]))
     end
     def initialize__from_exported_resource(exp_rsc_ps)
-      ExportedResourceHandler.set_attribute!(self,exp_rsc_ps)
+      StoreConfigHandler.set_output_attribute!(self,exp_rsc_ps)
     end
     def initialize__from_imported_collection(imp_coll_ps)
-      #TODO: stub
-      imp_coll_ps
+      StoreConfigHandler.set_intput_attribute!(self,imp_coll_ps)
     end
   end
   #handles intermediate state where objects may be unknown and just need users input

@@ -11,6 +11,10 @@ module XYZ
 
   require 'active_support/ordered_hash'
   class SimpleOrderedHash < ::ActiveSupport::OrderedHash
+    def initialize(elements=[])
+      super()
+      elements.each{|el|self[el.keys.first] = el.values.first}
+    end
   end
 
   class HashObject < Hash

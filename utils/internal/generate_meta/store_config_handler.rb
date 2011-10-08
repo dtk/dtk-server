@@ -18,18 +18,26 @@ module XYZ
         end
         ret  
       end
+      private
+      def self.source_ref_object(parse_struct,resource_type)
+        SimpleOrderedHash.new([{:config_agent_type => parse_struct.config_agent_type.to_s},{:resource_type => resource_type}])
+      end
+
     end
     class FileERH < StoreConfigHandler
       def self.process_output_attr!(attr_meta,exp_rsc_ps)
       #just want info from a few keys: title and tag
         #TODO: stub
-        attr_meta[:source_resource_type] = exp_rsc_ps[:name] 
-        attr_meta[:source_ref] = exp_rsc_ps[:paramters].inject({}){|h,p|h.merge(p[:name] => p[:value].to_s)}
-        attr_meta[:source_type] = exp_rsc_ps.config_agent_type.to_s
-        #TODO: may haev super that does things like source type and source resource type
+        resource_type = exp_rsc_ps[:name]
+        source_ref = source_ref_object(exp_rsc_ps,resource_type)
+        source_ref[:parameters] = exp_rsc_ps[:paramters].inject({}){|h,p|h.merge(p[:name] => p[:value].to_s)}
+        attr_meta[:source_ref] = source_ref
       end
       def self.process_input_attr!(attr_meta,imp_coll_ps)
-        attr_meta[:test] = imp_coll_ps
+        resource_type = imp_coll_ps[:type]
+        source_ref = source_ref_object(imp_coll_ps,resource_type)
+        source_ref[:parameters] = imp_coll_ps[:query] #TODO: stub
+        attr_meta[:source_ref] = source_ref
       end
     end 
   end

@@ -36,7 +36,7 @@ module XYZ
       def self.process_input_attr!(attr_meta,imp_coll_ps)
         resource_type = imp_coll_ps[:type]
         source_ref = source_ref_object(imp_coll_ps,resource_type)
-        source_ref[:parameters] = imp_coll_ps[:query] #TODO: stub
+        source_ref[:parameters] = imp_coll_ps[:query].attribute_expressions()
         attr_meta[:source_ref] = source_ref
       end
     end 

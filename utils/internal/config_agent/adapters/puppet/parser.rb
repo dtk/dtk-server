@@ -337,33 +337,59 @@ module XYZ
     end
 
     class CollExprPS < ParseStructure
-      def initialize(coll_expr_ast,opts={})
+      def self.create(coll_expr_ast,opts={})
         case coll_expr_ast.oper
-          when "==" then initialize__eq_op(coll_expr_ast,opts)
+          when "==" then CollExprAttributeExpressionPS.new(coll_expr_ast,opts)
+          when "and", "or" then CollExprLogicalConnectivePS.new(coll_expr_ast,opts)
           else raise ParseError.new("unexpected operation (#{coll_expr_ast.oper}) for collection expression")
         end
-        super
       end
-     private
-      def initialize__eq_op(coll_expr_ast,opts)
+    end
+    
+    class CollExprAttributeExpressionPS < CollExprPS
+      def initialize(coll_expr_ast,opts)
+        #TODO: if both test1 and test2 are names guessing that first one is attribute name
         name = nil
         value_ast = nil
         if puppet_type?(coll_expr_ast.test1,:name)
-          unless puppet_type?(coll_expr_ast.test2,:name)
-            name = coll_expr_ast.test1.value
-            value_ast = coll_expr_ast.test2
-          end
+          name = coll_expr_ast.test1.value
+          value_ast = coll_expr_ast.test2
         elsif puppet_type?(coll_expr_ast.test2,:name)
-          unless puppet_type?(coll_expr_ast.test1,:name)
-            name = coll_expr_ast.test2.value
-            value_ast = coll_expr_ast.test1
-          end
+          name = coll_expr_ast.test2.value
+          value_ast = coll_expr_ast.test1
         end
         unless name and value_ast
           raise ParseError.new("unexpected type for collection expression")
         end
+        self[:operation] = "=="
         self[:name] = name
         self[:value] = TermPS.create(value_ast,opts)
+        super
+      end
+      def attribute_expressions()
+        if self[:operation] = "=="
+          {self[:name] => self[:value].to_s}
+        else
+          SimpleOrderedHash.new([{:name => self[:name]}, {:op => self[:operation]}, {:value => self[:value]}])
+        end
+       end
+     end
+     class CollExprLogicalConnectivePS < CollExprPS
+      def initialize(coll_expr_ast,opts)
+        self[:operation] = coll_expr_ast.oper
+        self[:arg1]  = CollExprPS.create(coll_expr_ast.test1,opts)
+        self[:arg2]  = CollExprPS.create(coll_expr_ast.test2,opts)
+        super
+      end
+      def attribute_expressions()
+        ret = Array.new
+        [:arg1,:arg2].each do |index|
+          expr = self[index].attribute_expressions()
+          if expr.kind_of?(Array) then ret += expr
+          else ret << expr
+          end
+        end
+        ret
       end
     end
 

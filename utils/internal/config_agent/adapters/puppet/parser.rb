@@ -18,6 +18,9 @@ module XYZ
       end
 
       #### used in generate_meta
+      def config_agent_type()
+        :puppet
+      end
       #These all get ovewritten for matching class
       def is_defined_resource?() 
         nil
@@ -464,6 +467,10 @@ module XYZ
         self[:value] = var_ast.value
         super
       end
+      def to_s(opts={})
+        val = self[:value]
+        opts[:in_string] ? "${#{val}}" : "$#{val}"
+      end
     end
 
     class NamePS < TermPS
@@ -471,12 +478,20 @@ module XYZ
         self[:value] = name_ast.value
         super
       end
+      def to_s(opts={})
+        self[:value]
+      end
     end
 
     class ConcatPS < TermPS
       def initialize(concat_ast,opts={})
         self[:terms] = concat_ast.value.map{|term_ast|TermPS.create(term_ast,opts)}
         super
+      end
+      def to_s(opts={})
+        self[:terms].map do |t|
+          t.kind_of?(TermPS) ? t.to_s(:in_string => true) : t.to_s
+        end.join("")
       end
     end
   end

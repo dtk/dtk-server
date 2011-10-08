@@ -18,7 +18,11 @@ module XYZ
     class FileERH < ExportedResourceHandler
       def self.process(exp_rsc_ps)
       #just want info from a few keys: title and tag
-        pp exp_rsc_ps
+        #TODO: stub
+#          pp {:source_ref => exp_rsc_ps[:paramters].map{|p|{p[:name] => p[:value].to_s}},
+ #           :source_type => exp_rsc_ps.config_agent_type}
+        
+    
         nil
       end
     end 

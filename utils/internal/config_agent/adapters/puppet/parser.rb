@@ -147,18 +147,19 @@ module XYZ
       end 
 
       def parse_child(child_ast_item,opts)
+        ret = Array.new
+        return ret unless child_ast_item
         if fn = process_fn(child_ast_item,opts)
           child_parse = send(fn,child_ast_item,opts)
-          child_parse.kind_of?(Array) ? child_parse : (child_parse ? [child_parse] : Array.new)
-        else
-          Array.new
+          ret = child_parse.kind_of?(Array) ? child_parse : (child_parse ? [child_parse] : Array.new)
         end
+        ret
       end
 
       def process_fn(ast_item,opts) 
         #TODO: make what is ignored and treated fn of opts
-        types_to_ignore = [:var_def,:relationship]
-        types_to_process = [:collection,:resource,:if_statement,:case_statement,:function]
+        types_to_ignore = [:var_def]
+        types_to_process = [:collection,:resource,:if_statement,:case_statement,:function,:relationship]
         return nil if puppet_type?(ast_item,types_to_ignore)
         if type = puppet_type?(ast_item,types_to_process)
           "parse__#{type}".to_sym
@@ -205,6 +206,13 @@ module XYZ
         CaseStatementPS.flat_statement_iter(ast_item,opts) do |child_ast_item|
           ret += parse_child(child_ast_item,opts)
         end
+        ret
+      end
+
+      def parse__relationship(ast_item,opts)
+        ret = Array.new
+        ret += parse_child(ast_item.left,opts) 
+        ret += parse_child(ast_item.right,opts) 
         ret
       end
     end

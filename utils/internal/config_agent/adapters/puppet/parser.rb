@@ -67,7 +67,7 @@ module XYZ
         puppet_ast_classes = Array(types).inject({}){|h,t|h.merge(t => TreatedPuppetTypes[t])}
         puppet_ast_classes.each do |type, klass|
           raise ParseError.new("type #{type} not treated") if klass.nil?
-          return type if ast_item.kind_of?(klass)
+          return type if ast_item.class == klass
         end
         nil
       end
@@ -307,11 +307,9 @@ module XYZ
         new(["name"],{:required => true})
       end
      private
-      def default_value(default_obj)
-        if puppet_type?(default_obj,:string)
-          default_obj.value
-        elsif puppet_type?(default_obj,:name)
-          default_obj.value
+      def default_value(default_ast_obj)
+        if puppet_type?(default_ast_obj,[:string,:name,:variable])
+          TermPS.create(default_ast_obj)
         else
           raise ParseError.new("unexpected type for an attribute default")
         end

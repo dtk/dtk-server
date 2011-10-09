@@ -242,7 +242,7 @@ module XYZ
         end
         ast_params(ast_resource,opts).each do |ast_rsc_param|
           if puppet_type?(ast_rsc_param,:resource_param)
-            param = ResourceParamPS.create(ast_rsc_param,opts)
+            param = ResourceParamNonTitlePS.create(ast_rsc_param,opts)
             ret << param if param
           else
             raise ParseError.new("Unexpected child of resource (#{ast_rsc_param.class.to_s})")
@@ -291,6 +291,34 @@ module XYZ
         true
       end
     end
+
+    class ResourceParamPS < ParseStructure
+      def initialize(name,value_ast_term,ast_rsc_param,opts={})
+        self[:name] = name
+        self[:value] = TermPS.create(value_ast_term,opts) if value_ast_term
+        super(ast_rsc_param,opts)
+      end
+    end
+
+    class ResourceParamNonTitlePS < ResourceParamPS
+      def self.create(ast_rsc_param,opts={})
+        #TODO: ccurrently throwing out require; this should be used to look for foreign resources
+        if ast_rsc_param.param == "require"
+          nil
+        else
+          name = ast_rsc_param.param        
+          value_ast_term = ast_rsc_param.value
+          new(name,value_ast_term,ast_rsc_param,opts)
+        end
+      end
+    end
+
+    class ResourceTitlePS < ResourceParamPS
+      def self.create(value_ast_term,opts={})
+        new("title",value_ast_term,value_ast_term,opts)
+      end
+    end
+
 
     class AttributePS < ParseStructure
       def initialize(arg,opts={})
@@ -410,31 +438,6 @@ module XYZ
       extend ConditionalStatementsMixin
       def self.next_level_statements(ast_case_stmt)
         ast_case_stmt.options.children.map{|x|x.statements.children}.flatten(1)
-      end
-    end
-
-    class ResourceParamPS < ParseStructure
-      def self.create(ast_rsc_param,opts={})
-        #TODO: ccurrently throwing out require; this should be used to look for foreign resources
-        if ast_rsc_param.param == "require"
-          nil
-        else
-          new(ast_rsc_param,opts)
-        end
-      end
-      def initialize(ast_rsc_param,opts={})
-        self[:name] = ast_rsc_param.param
-        ast_term = ast_rsc_param.value
-        self[:value] = TermPS.create(ast_term,opts) if ast_term
-        super
-      end
-    end
-
-    class ResourceTitlePS < ParseStructure
-      def initialize(ast_term,opts={})
-        self[:name] = "title"
-        self[:value] = TermPS.create(ast_term,opts) if ast_term
-        super
       end
     end
 

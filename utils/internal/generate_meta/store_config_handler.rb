@@ -36,31 +36,41 @@ module XYZ
         #set source ref
         resource_type = exp_rsc_ps[:name]
         source_ref = source_ref_object(exp_rsc_ps,resource_type)
-        source_ref[:parameters] = exp_rsc_ps[:paramters]
+        params = source_ref[:parameters] = exp_rsc_ps[:paramters]
 
-        key = t(heuristic_to_guess_input_attr_key(source_ref)) || unknown
+        key = t(heuristic_to_guess_output_attr_key(source_ref)) || unknown
         attr_meta.set_hash_key(key)
         attr_meta[:display_name] = key
         attr_meta[:display_name] = unknown
         attr_meta[:description] = unknown
         attr_meta[:dynamic] = nailed(true)
         attr_meta[:external_ref] = unknown #TODO: stub; when known its factor var than put this val in external ref
-        attr_meta[:source_ref] = source_ref
+        attr_meta[:source_ref] = source_ref.merge(:parameters => param_values_to_s(params))
       end
       def self.process_input_attr!(attr_meta,imp_coll_ps)
         #set source ref
         resource_type = imp_coll_ps[:type]
         source_ref = source_ref_object(imp_coll_ps,resource_type)
-        source_ref[:attr_exprs] = imp_coll_ps[:query].attribute_expressions()
+        attr_exprs = source_ref[:attr_exprs] = imp_coll_ps[:query].attribute_expressions()
 
         key = t(heuristic_to_guess_input_attr_key(source_ref)) || unknown
         attr_meta.set_hash_key(key)
         attr_meta[:display_name] = key
         attr_meta[:description] = unknown
         attr_meta[:external_ref] = unknown #TODO: stub; when known its factor var than put this val in external ref
-        attr_meta[:source_ref] = source_ref
+        attr_meta[:source_ref] = source_ref.merge(:attr_exprs => attr_expr_values_to_s(attr_exprs))
       end
      private
+      def self.param_values_to_s(params)
+        params.map{|p|SimpleOrderedHash.new([{:name => p[:name]},{:value => p[:value].to_s}])}
+      end
+      def self.attr_expr_values_to_s(attr_exprs)
+        attr_exprs.map{|a|SimpleOrderedHash.new([{:name => a[:name]},{:op => a[:op]},{:value => a[:value].to_s}])}
+      end
+      def self.heuristic_to_guess_output_attr_key(source_ref)
+        tag_param = (source_ref[:parameters]||[]).find{|exp|exp[:name] == "tag"}
+        tag_param[:value].to_s if tag_param
+      end
       def self.heuristic_to_guess_input_attr_key(source_ref)
         tag_param = (source_ref[:attr_exprs]||[]).find{|exp|exp[:name] == "tag"}
         tag_param[:value].to_s if tag_param

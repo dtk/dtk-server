@@ -366,9 +366,9 @@ module XYZ
       end
       def attribute_expressions()
         if self[:operation] = "=="
-          {self[:name] => self[:value].to_s}
+          [{self[:name] => self[:value].to_s}]
         else
-          SimpleOrderedHash.new([{:name => self[:name]}, {:op => self[:operation]}, {:value => self[:value]}])
+          [SimpleOrderedHash.new([{:name => self[:name]}, {:op => self[:operation]}, {:value => self[:value]}])]
         end
        end
      end
@@ -381,12 +381,7 @@ module XYZ
       end
       def attribute_expressions()
         ret = Array.new
-        [:arg1,:arg2].each do |index|
-          expr = self[index].attribute_expressions()
-          if expr.kind_of?(Array) then ret += expr
-          else ret << expr
-          end
-        end
+        [:arg1,:arg2].each{|index|ret += self[index].attribute_expressions()}
         ret
       end
     end

@@ -1,5 +1,21 @@
-require File.expand_path("generate_meta/store_config_handler", File.dirname(__FILE__))
 module XYZ
+  module TermStateHelpersMixin
+    def t(term)
+      return nil unless term
+      MetaTerm.new(term)
+    end
+    def unknown
+      MetaTerm.create_unknown
+    end
+    def nailed(term)
+      term #TODO: may also make this a MetaTerm obj
+    end
+
+    def set_hash_key(key)
+      self[:hash_key] = key
+    end
+  end
+  require File.expand_path("generate_meta/store_config_handler", File.dirname(__FILE__))
   class GenerateMeta
     def self.create(version)
       case version
@@ -23,6 +39,7 @@ module XYZ
   end
 
   class MetaObject < SimpleOrderedHash
+    include TermStateHelpersMixin
     include StoreConfigHandlerMixin
     def initialize(context)
       super()
@@ -41,25 +58,11 @@ module XYZ
       end
     end
 
-    def set_hash_key(key)
-      self[:hash_key] = key
-    end
     def klass(type)
       mod = XYZ.const_get "V#{version.gsub(".","_")}"
       mod.const_get "#{type.to_s.capitalize}Meta"
     end
 
-    #wrappers for terms
-    def t(term)
-      MetaTerm.new(term)
-    end
-    def unknown
-      MetaTerm.create_unknown
-    end
-    def nailed(term)
-      term #TODO: may also make this a MetaTerm obj
-    end
-    
     #context
     def version()
       (@context||{})[:version]

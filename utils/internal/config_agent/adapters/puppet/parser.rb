@@ -359,22 +359,18 @@ module XYZ
         unless name and value_ast
           raise ParseError.new("unexpected type for collection expression")
         end
-        self[:operation] = "=="
+        self[:op] = "=="
         self[:name] = name
         self[:value] = TermPS.create(value_ast,opts)
         super
       end
       def attribute_expressions()
-        if self[:operation] = "=="
-          [{self[:name] => self[:value].to_s}]
-        else
-          [SimpleOrderedHash.new([{:name => self[:name]}, {:op => self[:operation]}, {:value => self[:value]}])]
-        end
-       end
+        [SimpleOrderedHash.new([{:name => self[:name]}, {:op => self[:op]}, {:value => self[:value]}])]
+      end
      end
      class CollExprLogicalConnectivePS < CollExprPS
       def initialize(coll_expr_ast,opts)
-        self[:operation] = coll_expr_ast.oper
+        self[:op] = coll_expr_ast.oper
         self[:arg1]  = CollExprPS.create(coll_expr_ast.test1,opts)
         self[:arg2]  = CollExprPS.create(coll_expr_ast.test2,opts)
         super

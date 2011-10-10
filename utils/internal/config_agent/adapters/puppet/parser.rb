@@ -479,11 +479,7 @@ module XYZ
         end
       end
       def contains_variable?()
-        type = puppet_type?(ast_term,AstTerm)
-        case type
-          when :variable then true
-          when :name,:string then nil
-        end
+        nil
       end
     end
 
@@ -491,6 +487,9 @@ module XYZ
       def initialize(var_ast,opts={})
         self[:value] = var_ast.value
         super
+      end
+      def contains_variable?()
+        true
       end
       def to_s(opts={})
         val = self[:value]

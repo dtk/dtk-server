@@ -1,7 +1,7 @@
 module XYZ
   module TermStateHelpersMixin
     def t(term)
-      return nil unless term
+      return nil if term.nil?
       MetaTerm.new(term)
     end
     def unknown
@@ -184,11 +184,20 @@ module XYZ
       self[:label] = t(name) 
       self[:description] = unknown
       self[:type] = t("string") #TODO: stub
+      var_default = nil
       if default = attr_ps[:default]
-        self[:default_info] = t(default) #TODO: need to case on state where default is a variable
+        var_default = default.contains_variable?()
+        self[:default_info] = var_default ? unknown : t(default.to_s) 
       end
-      self[:required] = (attr_ps.has_key?(:required) ? nailed(attr_ps[:required]) : unknown)
+      if var_default
+        self[:required] = t(false)
+      else
+        self[:required] = (attr_ps.has_key?(:required) ? nailed(attr_ps[:required]) : unknown)
+      end
       self[:external_ref] = nailed(SimpleOrderedHash.new().merge(:name => attr_ps[:name]))
+      if var_default
+        self[:source_ref] = source_ref_object_base(attr_ps).merge(:default_variable => default.to_s)
+      end
     end
     def initialize__from_exported_resource(exp_rsc_ps)
       StoreConfigHandler.set_output_attribute!(self,exp_rsc_ps)

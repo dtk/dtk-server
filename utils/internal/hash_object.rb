@@ -13,6 +13,7 @@ module XYZ
   class SimpleOrderedHash < ::ActiveSupport::OrderedHash
     def initialize(elements=[])
       super()
+      elements = [elements] unless elements.kind_of?(Array)
       elements.each{|el|self[el.keys.first] = el.values.first}
     end
   end

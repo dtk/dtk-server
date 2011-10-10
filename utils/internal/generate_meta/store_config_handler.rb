@@ -21,8 +21,9 @@ module XYZ
       end
       private
       def self.source_ref_object(parse_struct,resource_type)
-        SimpleOrderedHash.new([{:config_agent_type => parse_struct.config_agent_type.to_s},{:resource_type => resource_type}])
+        source_ref_object_base(parse_struct).merge(:resource_type => resource_type)
       end
+
       #can be overwritten
       def self.heuristic_to_guess_input_attr_key(source_ref)
         nil
@@ -40,9 +41,10 @@ module XYZ
 
         key = t(heuristic_to_guess_output_attr_key(source_ref)) || unknown
         attr_meta.set_hash_key(key)
-        attr_meta[:display_name] = key
-        attr_meta[:display_name] = unknown
+        attr_meta[:field_name] = key
+        attr_meta[:label] = key
         attr_meta[:description] = unknown
+        attr_meta[:type] = t("string") #TODO: stub
         attr_meta[:dynamic] = nailed(true)
         attr_meta[:external_ref] = unknown #TODO: stub; when known its factor var than put this val in external ref
         attr_meta[:source_ref] = source_ref.merge(:parameters => param_values_to_s(params))
@@ -55,8 +57,10 @@ module XYZ
 
         key = t(heuristic_to_guess_input_attr_key(source_ref)) || unknown
         attr_meta.set_hash_key(key)
-        attr_meta[:display_name] = key
+        attr_meta[:field_name] = key
+        attr_meta[:label] = key
         attr_meta[:description] = unknown
+        attr_meta[:type] = t("string") #TODO: stub
         attr_meta[:external_ref] = unknown #TODO: stub; when known its factor var than put this val in external ref
         attr_meta[:source_ref] = source_ref.merge(:attr_exprs => attr_expr_values_to_s(attr_exprs))
       end

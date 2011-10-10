@@ -478,6 +478,13 @@ module XYZ
          else raise ParseError.new("type not treated as a term (#{ast_term.class.to_s})")
         end
       end
+      def contains_variable?()
+        type = puppet_type?(ast_term,AstTerm)
+        case type
+          when :variable then true
+          when :name,:string then nil
+        end
+      end
     end
 
     class VariablePS < TermPS
@@ -510,6 +517,14 @@ module XYZ
         self[:terms].map do |t|
           t.kind_of?(TermPS) ? t.to_s(:in_string => true) : t.to_s
         end.join("")
+      end
+      def contains_variable?()
+        self[:terms].each do |t|
+          if t.kind_of?(TermPS)
+            return true if t.contains_variable?()
+          end
+        end
+        nil
       end
     end
   end

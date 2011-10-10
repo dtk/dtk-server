@@ -14,6 +14,9 @@ module XYZ
     def set_hash_key(key)
       self[:hash_key] = key
     end
+    def source_ref_object_base(parse_struct)
+      SimpleOrderedHash.new(:config_agent_type => parse_struct.config_agent_type.to_s)
+    end
   end
   require File.expand_path("generate_meta/store_config_handler", File.dirname(__FILE__))
   class GenerateMeta
@@ -177,10 +180,12 @@ module XYZ
     def initialize__from_attribute(attr_ps)
       name = attr_ps[:name]
       set_hash_key(name)
-      self[:display_name] = t(name) 
+      self[:field_name] = t(name) 
+      self[:label] = t(name) 
       self[:description] = unknown
+      self[:type] = t("string") #TODO: stub
       if default = attr_ps[:default]
-        self[:default] = t(default)
+        self[:default_info] = t(default) #TODO: need to case on state where default is a variable
       end
       self[:required] = (attr_ps.has_key?(:required) ? nailed(attr_ps[:required]) : unknown)
       self[:external_ref] = nailed(SimpleOrderedHash.new().merge(:name => attr_ps[:name]))

@@ -32,5 +32,7 @@ meta_generator = XYZ::GenerateMeta.create("1.0")
 refinement_hash = meta_generator.generate_refinement_hash(r8_parse,module_name)
 #in between here refinement has would have through user interaction the user set the needed unknowns
 render_hash = refinement_hash.render_hash_form()
-pp render_hash
+require 'YAML'
+YAML::dump(render_hash,STDOUT)
+
 end

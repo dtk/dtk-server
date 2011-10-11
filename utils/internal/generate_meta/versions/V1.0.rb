@@ -7,7 +7,7 @@ module XYZ
         ret = SimpleOrderedHash.new
         ret["version"] = "1.0"
         self[:components].each do |cmp|
-          unless (not value(:include).nil?) and not value(:include)
+          if cmp.value(:include).nil? or cmp.value(:include)
             hash_key = cmp.required_value(:hash_key)
             ret[hash_key] = cmp.render_hash_form(opts)
           end
@@ -22,9 +22,25 @@ module XYZ
         ret.set?("description",value(:description))
         ext_ref = required_value(:external_ref)
         ret["external_ref"] = convert_external_ref(ext_ref)
+        ret.set?("ui",value(:ui))
+        ret.set?("basic_type",value(:basic_type))
+        ret["component_type"] = required_value(:component_type)
+        ret.set?("attribute",convert_attributes(self[:attributes],opts))
         ret
       end
+
       private
+      def convert_attributes(attrs,opts)
+        return nil if attrs.nil? or attrs.empty?
+        ret = SimpleOrderedHash.new
+        attrs.each do |attr|
+          if attr.value(:include).nil? or attr.value(:include)
+            hash_key = attr.required_value(:hash_key)
+            ret[hash_key] = attr.render_hash_form(opts)
+          end
+        end
+        ret
+      end
       def convert_external_ref(ext_ref)
         ret = SimpleOrderedHash.new
         ext_ref_key = 

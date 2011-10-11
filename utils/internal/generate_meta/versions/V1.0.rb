@@ -7,8 +7,10 @@ module XYZ
         ret = SimpleOrderedHash.new
         ret[:version] = value(:version)
         self[:components].each do |cmp|
-          hash_key = cmp.required_value(:hash_key)
-          ret[hash_key] = cmp.render_hash_form(opts)
+          unless (not value(:include).nil?) and not value(:include)
+            hash_key = cmp.required_value(:hash_key)
+            ret[hash_key] = cmp.render_hash_form(opts)
+          end
         end
         ret
       end
@@ -16,7 +18,7 @@ module XYZ
     class ComponentMeta < ::XYZ::ComponentMeta
       def render_hash_form(opts={})
         ret = SimpleOrderedHash.new
-        
+        ret[:display_name] = required_value(:display_name)
         ret
       end
     end

@@ -27,7 +27,7 @@ module XYZ
       end
     end
 
-    def generate_normalized_hash(parse_struct,module_name)
+    def generate_refinement_hash(parse_struct,module_name)
       context = {
         :version => @version,
         :module_name => module_name
@@ -129,9 +129,12 @@ module XYZ
       self[:include] = unknown 
       self[:display_name] = t(processed_name) #TODO: might instead put in label
       self[:description] = unknown
+      self[:ui_png] = unknown
       type = "#{component_ps.config_agent_type}_#{component_ps[:type]}"
       external_ref = SimpleOrderedHash.new().merge(:name => component_ps[:name]).merge(:type => type)
       self[:external_ref] = nailed(external_ref) 
+      self[:basic_type] = unknown
+      self[:component_type] = t(processed_name)
       dependencies = dependencies(component_ps)
       self[:dependencies] = dependencies unless dependencies.empty?
       attributes = attributes(component_ps)
@@ -236,9 +239,11 @@ module XYZ
       new(nil,:unknown)
     end
 
-    attr_reader :value
+    def value()
+      self[:value]
+    end
     def is_known?()
-      self[:stat] == :known
+      self[:state] == :known
     end
   end
 end

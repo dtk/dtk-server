@@ -99,7 +99,6 @@ module XYZ
   class ModuleMeta < MetaObject
     def initialize(top_parse_struct,context)
       super(context)
-      self[:version] = context[:version]
       top_parse_struct.each_component do |component_ps|
         (self[:components] ||= Array.new) << create(:component,component_ps)
       end

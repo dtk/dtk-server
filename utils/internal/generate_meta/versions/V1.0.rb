@@ -5,7 +5,7 @@ module XYZ
     class ModuleMeta < ::XYZ::ModuleMeta
       def render_hash_form(opts={})
         ret = SimpleOrderedHash.new
-        ret[:version] = value(:version)
+        ret[:version] = "1.0"
         self[:components].each do |cmp|
           unless (not value(:include).nil?) and not value(:include)
             hash_key = cmp.required_value(:hash_key)

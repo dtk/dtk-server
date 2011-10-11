@@ -52,6 +52,7 @@ module XYZ
       klass(type).new(parse_struct,@context)
     end
 
+    #dup used because yaml generation is upstream and dont want string refs
     def required_value(key)
       unless has_key?(key)
         raise Error.new("meta object does not have key #{key}") 
@@ -59,17 +60,18 @@ module XYZ
 
       value_term = self[key]
       raise Error.new("meta object with key #{key} is null") if value_term.nil? 
-      return value_term unless value_term.kind_of?(MetaTerm)
+      return value_term.dup unless value_term.kind_of?(MetaTerm)
       
       unless value_term.is_known?()
         raise Error.new("meta object with key #{key} has unknown value")
       end
-      value_term.value
+      value_term.value.dup
     end
     def value(key)
       value_term = self[key]
-      return value_term unless value_term.kind_of?(MetaTerm)
-      value_term.is_known?() ? value_term.value : nil
+      return nil if value_term.nil?
+      return value_term.dup unless value_term.kind_of?(MetaTerm)
+      value_term.is_known?() ? value_term.value.dup : nil
     end
 
    private

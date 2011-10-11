@@ -27,7 +27,7 @@ module XYZ
       end
     end
 
-    def generate_hash(parse_struct,module_name)
+    def generate_normalized_hash(parse_struct,module_name)
       context = {
         :version => @version,
         :module_name => module_name
@@ -50,6 +50,26 @@ module XYZ
     end
     def create(type,parse_struct)
       klass(type).new(parse_struct,@context)
+    end
+
+    def required_value(key)
+      unless has_key?(key)
+        raise Error.new("meta object does not have key #{key}") 
+      end
+
+      value_term = self[key]
+      raise Error.new("meta object with key #{key} is null") if value_term.nil? 
+      return value_term unless value_term.kind_of?(MetaTerm)
+      
+      unless value_term.is_known?()
+        raise Error.new("meta object with key #{key} has unknown value")
+      end
+      value_term.value
+    end
+    def value(key)
+      value_term = self[key]
+      return value_term unless value_term.kind_of?(MetaTerm)
+      value_term.is_known?() ? value_term.value : nil
     end
 
    private
@@ -214,6 +234,11 @@ module XYZ
     end
     def self.create_unknown()
       new(nil,:unknown)
+    end
+
+    attr_reader :value
+    def is_known?()
+      self[:stat] == :known
     end
   end
 end

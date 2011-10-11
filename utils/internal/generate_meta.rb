@@ -30,7 +30,8 @@ module XYZ
     def generate_refinement_hash(parse_struct,module_name)
       context = {
         :version => @version,
-        :module_name => module_name
+        :module_name => module_name,
+        :config_agent_type => parse_struct.config_agent_type
       }
       MetaObject.new(context).create(:module,parse_struct)
     end
@@ -48,8 +49,8 @@ module XYZ
       super()
       @context = context
     end
-    def create(type,parse_struct)
-      klass(type).new(parse_struct,@context)
+    def create(type,parse_struct,opts={})
+      klass(type).new(parse_struct,@context.merge(opts))
     end
 
     #dup used because yaml generation is upstream and dont want string refs
@@ -95,8 +96,10 @@ module XYZ
     def module_name()
       (@context||{})[:module_name]
     end
+    def config_agent_type()
+      (@context||{})[:config_agent_type]
+    end
   end
-
   
   class ModuleMeta < MetaObject
     def initialize(top_parse_struct,context)
@@ -152,12 +155,19 @@ module XYZ
     end
     
     def attributes(component_ps)
-      ret = (component_ps[:attributes]||[]).map{|attr_ps|create(:attribute,attr_ps)}
+      ret = Array.new
+      attr_num = 0
+      (component_ps[:attributes]||[]).each do |attr_ps|
+        attr_num += 1
+        create(:attribute,attr_ps,:attr_num => attr_num)
+      end
       (component_ps[:children]||[]).each do |child_ps|
         if child_ps.is_imported_collection?()
-          ret << create(:attribute,child_ps)
+          attr_num += 1
+          ret << create(:attribute,child_ps,:attr_num => attr_num)
         elsif child_ps.is_exported_resource?()
-          ret << create(:attribute,child_ps)
+          attr_num += 1
+          ret << create(:attribute,child_ps,:attr_num => attr_num)
         end
       end
       ret
@@ -200,6 +210,10 @@ module XYZ
         raise Error.new("Unexpected parse structure type (#{parse_struct.class.to_s})")
       end  
     end
+
+    def attr_num()
+      (@context||[])[:attr_num]
+    end
    private
     def initialize__from_attribute(attr_ps)
       name = attr_ps[:name]
@@ -238,6 +252,11 @@ module XYZ
     end
     def self.create_unknown()
       new(nil,:unknown)
+    end
+
+    def set_value(v)
+      self[:state] = :known
+      self[:value] = v
     end
 
     def value()

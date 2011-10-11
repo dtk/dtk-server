@@ -19,29 +19,19 @@ module XYZ
       def render_hash_form(opts={})
         ret = SimpleOrderedHash.new
         ret["display_name"] = required_value(:display_name)
+        ret.set?("label",value(:label))
         ret.set?("description",value(:description))
-        ext_ref = required_value(:external_ref)
-        ret["external_ref"] = convert_external_ref(ext_ref)
+        ret["external_ref"] = converted_external_ref()
         ret.set?("ui",value(:ui))
         ret.set?("basic_type",value(:basic_type))
         ret["component_type"] = required_value(:component_type)
-        ret.set?("attribute",convert_attributes(self[:attributes],opts))
+        ret.set?("attribute",converted_attributes(opts))
         ret
       end
 
       private
-      def convert_attributes(attrs,opts)
-        return nil if attrs.nil? or attrs.empty?
-        ret = SimpleOrderedHash.new
-        attrs.each do |attr|
-          if attr.value(:include).nil? or attr.value(:include)
-            hash_key = attr.required_value(:hash_key)
-            ret[hash_key] = attr.render_hash_form(opts)
-          end
-        end
-        ret
-      end
-      def convert_external_ref(ext_ref)
+      def converted_external_ref()
+        ext_ref = required_value(:external_ref)
         ret = SimpleOrderedHash.new
         ext_ref_key = 
           case ext_ref[:type]
@@ -54,9 +44,23 @@ module XYZ
         ret["type"] = ext_ref[:type]
         ret
       end
+
+      def converted_attributes(opts)
+        attrs = self[:attributes]
+        return nil if attrs.nil? or attrs.empty?
+        ret = SimpleOrderedHash.new
+        attrs.each do |attr|
+          if attr.value(:include).nil? or attr.value(:include)
+            hash_key = attr.required_value(:hash_key)
+            ret[hash_key] = attr.render_hash_form(opts)
+          end
+        end
+        ret
+      end
     end
     class DependencyMeta < ::XYZ::DependencyMeta
       def render_hash_form(opts={})
+        #TODO: stub
         ret = SimpleOrderedHash.new
         ret
       end
@@ -64,7 +68,19 @@ module XYZ
     class AttributeMeta < ::XYZ::AttributeMeta
       def render_hash_form(opts={})
         ret = SimpleOrderedHash.new
+        ret["display_name"] = required_value(:field_name)
+        ret.set?("label",value(:label))
+        ret.set?("description",value(:description))
+        ret["data_type"] = required_value(:type)
+        ret["external_ref"] = converted_external_ref()
         ret
+      end
+     private
+      def converted_external_ref()
+        ext_ref = required_value(:external_ref)
+        ret = SimpleOrderedHash.new
+        ret["type"] = "#{config_agent_type}_attribute"
+        ret["path"] = "node[#{module_name}][#{ext_ref[:name]}]"
       end
     end
   end

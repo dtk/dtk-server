@@ -16,6 +16,11 @@ module XYZ
       elements = [elements] unless elements.kind_of?(Array)
       elements.each{|el|self[el.keys.first] = el.values.first}
     end
+    
+    #set if non null
+    def set?(k,v)
+      self[k] = v unless v.nil?
+    end
   end
 
   class HashObject < Hash

@@ -84,6 +84,7 @@ module XYZ
         :if_statement => ::Puppet::Parser::AST::IfStatement,
         :case_statement => ::Puppet::Parser::AST::CaseStatement,
         :relationship => ::Puppet::Parser::AST::Relationship,
+        :resource_reference => ::Puppet::Parser::AST::ResourceReference,
         :string => ::Puppet::Parser::AST::String,
         :name => ::Puppet::Parser::AST::Name,
         :variable => ::Puppet::Parser::AST::Variable,
@@ -162,7 +163,7 @@ module XYZ
       def process_fn(ast_item,opts) 
         #TODO: make what is ignored and treated fn of opts
         types_to_ignore = [:var_def]
-        types_to_process = [:collection,:resource,:if_statement,:case_statement,:function,:relationship]
+        types_to_process = [:collection,:resource,:if_statement,:case_statement,:function,:relationship,:resource_reference]
         return nil if puppet_type?(ast_item,types_to_ignore)
         if type = puppet_type?(ast_item,types_to_process)
           "parse__#{type}".to_sym
@@ -216,6 +217,12 @@ module XYZ
         ret = Array.new
         ret += parse_child(ast_item.left,opts) 
         ret += parse_child(ast_item.right,opts) 
+        ret
+      end
+      def parse__resource_reference(ast_item,opts)
+        ret = Array.new
+        rsc_ref = ResourceReferencePS.create(ast_item,opts)
+        ret << rsc_ref if rsc_ref
         ret
       end
     end
@@ -319,6 +326,32 @@ module XYZ
       end
     end
 
+    class ResourceReferencePS < ParseStructure
+      def initialize(ast_rsc_ref,opts={})
+        self[:name] = name(ast_rsc_ref)
+        super
+      end
+     private
+      def name(ast_rsc_ref)
+        ret = ast_rsc_ref.type
+        if ret == "Class"
+          ast_title = ast_title(ast_rsc_ref)
+          raise ParseError.new("unexpected title ast type (#{ast_title.class.to_s})") unless puppet_type?(ast_title,AstTerm)
+          ret = ast_title.value
+        end
+        ret
+      end
+      def ast_title(ast_rsc_ref)
+        unless ast_rsc_ref.title
+          raise ParseError.new("unexpected to not have title on resource reference")
+        end
+        children = ast_rsc_ref.title.children
+        unless children.size == 1
+          raise ParseError.new("unexpected to have number of resource ref children neq to 1")
+        end
+        children.first
+      end
+    end
 
     class AttributePS < ParseStructure
       def initialize(arg,opts={})
@@ -474,7 +507,7 @@ module XYZ
          when :variable then VariablePS.new(ast_term,opts)
          when :name then NamePS.new(ast_term,opts)
          when :concat then ConcatPS.new(ast_term,opts)
-         when :string then ast_term.value
+         when :string then StringPS.new(ast_term,opts)
          else raise ParseError.new("type not treated as a term (#{ast_term.class.to_s})")
         end
       end
@@ -501,6 +534,16 @@ module XYZ
     class NamePS < TermPS
       def initialize(name_ast,opts={})
         self[:value] = name_ast.value
+        super
+      end
+      def to_s(opts={})
+        self[:value]
+      end
+    end
+
+    class StringPS < TermPS
+      def initialize(string_ast,opts={})
+        self[:value] = string_ast.value
         super
       end
       def to_s(opts={})

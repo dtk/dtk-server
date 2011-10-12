@@ -69,9 +69,9 @@ module XYZ
       def render_hash_form(opts={})
         ret = SimpleOrderedHash.new
         ret["display_name"] = required_value(:field_name)
-        ret.set?("label",value(:label))
         ret.set?("description",value(:description))
         ret["data_type"] = required_value(:type)
+        ret.set?("value_asserted",value(:default_info))
         ret["external_ref"] = converted_external_ref()
         ret
       end

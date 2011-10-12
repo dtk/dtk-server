@@ -518,6 +518,9 @@ module XYZ
       def variable_list()
         Array.new
       end
+      def template?()
+        nil
+      end
     end
 
     class VariablePS < TermPS
@@ -598,6 +601,9 @@ module XYZ
           t.kind_of?(TermPS) ? t.to_s(opts.merge(:in_string => true)) : t.to_s
         end.join(",")
         "#{self[:name]}(#{args})"
+      end
+      def template?()
+        self[:name] == "template" ? self[:terms].first : nil
       end
     end
   end

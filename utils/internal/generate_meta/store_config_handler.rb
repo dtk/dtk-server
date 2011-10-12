@@ -92,9 +92,14 @@ module XYZ
 
       def self.content_variables_in_output_var(source_ref,attr_meta)
         content = (source_ref[:parameters]||[]).find{|exp|exp[:name] == "content"}
-        return Array.new unless content
-        ret = content[:value] ? content[:value].variable_list() : nil
-        return Array.new if ret.nil? or ret.empty?
+        return Array.new unless content and content[:value]
+        
+        if template = content[:value].template?()
+          pp "debug: handle content with template #{template.to_s}"
+          return Array.new
+        end
+        ret = content[:value].variable_list()
+        return Array.new if ret.empty?
         #prune variables that appear already; need parent source
         existing_attr_names = (attr_meta.parent_source||{})[:attributes].map{|a|a[:name]}
         ret.reject{|v|existing_attr_names.include?(v)}

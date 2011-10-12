@@ -99,6 +99,9 @@ module XYZ
     def config_agent_type()
       (@context||{})[:config_agent_type]
     end
+    def parent()
+      (@context||{})[:parent]
+    end
   end
   
   class ModuleMeta < MetaObject
@@ -135,14 +138,13 @@ module XYZ
       self[:description] = unknown
       self[:ui_png] = unknown
       type = "#{component_ps.config_agent_type}_#{component_ps[:type]}"
-      external_ref = SimpleOrderedHash.new().merge(:name => component_ps[:name]).merge(:type => type)
+      external_ref = SimpleOrderedHash.new([{:name => component_ps[:name]},{:type => type}])
       self[:external_ref] = nailed(external_ref) 
       self[:basic_type] = unknown
       self[:component_type] = t(processed_name)
       dependencies = dependencies(component_ps)
       self[:dependencies] = dependencies unless dependencies.empty?
-      attributes = attributes(component_ps)
-      self[:attributes] = attributes unless attributes.empty?
+      set_attributes(component_ps)
     end
    private
     def dependencies(component_ps)
@@ -153,24 +155,23 @@ module XYZ
       #TODO: may be more  dependency types
       ret
     end
-    
-    def attributes(component_ps)
-      ret = Array.new
+
+    def set_attributes(component_ps)
       attr_num = 0
-      (component_ps[:attributes]||[]).each do |attr_ps|
-        attr_num += 1
-        create(:attribute,attr_ps,:attr_num => attr_num)
-      end
+      (component_ps[:attributes]||[]).each{|attr_ps|add_attribute(attr_ps,attr_num+=1)}
+
       (component_ps[:children]||[]).each do |child_ps|
         if child_ps.is_imported_collection?()
-          attr_num += 1
-          ret << create(:attribute,child_ps,:attr_num => attr_num)
+          add_attribute(child_ps,attr_num+=1)
         elsif child_ps.is_exported_resource?()
-          attr_num += 1
-          ret << create(:attribute,child_ps,:attr_num => attr_num)
+          add_attribute(child_ps,attr_num+=1)
         end
       end
-      ret
+    end
+
+    def add_attribute(parse_structure,attr_num)
+      opts = {:attr_num => attr_num, :parent => self}
+      (self[:attributes] ||= Array.new) << create(:attribute,parse_structure,opts)
     end
 
     def find_foreign_resource_names(component_ps)
@@ -214,6 +215,13 @@ module XYZ
     def attr_num()
       (@context||[])[:attr_num]
     end
+
+    def set_hash_key(key)
+      #TODO: make sure that key is unique; if not bump up
+      raise Error.new("key (#{key}) is a duplicate") if existing_hash_keys().include?(key)
+      super
+    end
+
    private
     def initialize__from_attribute(attr_ps)
       name = attr_ps[:name]
@@ -232,7 +240,7 @@ module XYZ
       else
         self[:required] = (attr_ps.has_key?(:required) ? nailed(attr_ps[:required]) : unknown)
       end
-      self[:external_ref] = nailed(SimpleOrderedHash.new().merge(:name => attr_ps[:name]))
+      self[:external_ref] = nailed(SimpleOrderedHash.new(:name => attr_ps[:name]))
       if var_default
         self[:source_ref] = source_ref_object_base(attr_ps).merge(:default_variable => default.to_s)
       end
@@ -242,6 +250,10 @@ module XYZ
     end
     def initialize__from_imported_collection(imp_coll_ps)
       StoreConfigHandler.set_intput_attribute!(self,imp_coll_ps)
+    end
+
+    def existing_hash_keys()
+      ((parent||{})[:attributes]||[]).map{|a|a[:hash_key]}.compact
     end
   end
   #handles intermediate state where objects may be unknown and just need users input

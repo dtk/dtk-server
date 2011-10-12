@@ -20,18 +20,6 @@ else
 end
 module_name.gsub!(/^puppet-/,"")
 
-def mock_user_updates_hash!(refinement_hash)
-  (refinement_hash[:components]||[]).each do |cmp|
-    (cmp[:attributes]||[]).each do |attr|
-      if ext_ref = attr[:external_ref]
-        if ext_ref.kind_of?(XYZ::MetaTerm) and not ext_ref.is_known?()
-          ext_ref.set_value(attr[:hash_key])
-        end
-      end
-    end
-  end
-end
-
 Puppet[:manifest] = file
 environment = "production"
 krt = Puppet::Node::Environment.new(environment).known_resource_types
@@ -43,9 +31,9 @@ meta_generator = XYZ::GenerateMeta.create("1.0")
 #TODO: should be able to figure this out "puppet" from r8_parse
 refinement_hash = meta_generator.generate_refinement_hash(r8_parse,module_name)
 #in between here refinement has would have through user interaction the user set the needed unknowns
-mock_user_updates_hash!(refinement_hash)
+#mock_user_updates_hash!(refinement_hash)
 render_hash = refinement_hash.render_hash_form()
 require 'yaml'
 YAML::dump(render_hash,STDOUT)
-
+STDOUT << "\n"
 end

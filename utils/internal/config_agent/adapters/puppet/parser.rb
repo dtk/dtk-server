@@ -493,6 +493,7 @@ module XYZ
       end
       def to_s(opts={})
         val = self[:value]
+        return val if opts[:just_variable_name]
         opts[:in_string] ? "${#{val}}" : "$#{val}"
       end
     end
@@ -514,7 +515,7 @@ module XYZ
       end
       def to_s(opts={})
         self[:terms].map do |t|
-          t.kind_of?(TermPS) ? t.to_s(:in_string => true) : t.to_s
+          t.kind_of?(TermPS) ? t.to_s(opts.merge(:in_string => true)) : t.to_s
         end.join("")
       end
       def contains_variable?()

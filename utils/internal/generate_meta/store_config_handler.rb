@@ -42,11 +42,10 @@ module XYZ
         name = heuristic_to_guess_output_attr_name(source_ref,attr_meta)
         attr_meta.set_hash_key(name)
         attr_meta[:field_name] = t(name)
-        attr_meta[:label] = t(name)
         attr_meta[:description] = unknown
         attr_meta[:type] = t("string") #TODO: stub
         attr_meta[:dynamic] = nailed(true)
-        attr_meta[:external_ref] = unknown #TODO: stub; when known its factor var than put this val in external ref
+        attr_meta[:external_ref] = t(SimpleOrderedHash.new(:name => name)) #TODO: stub; when known its factor var than put this val in external ref
         attr_meta[:source_ref] = source_ref.merge(:parameters => param_values_to_s(params))
       end
       def self.process_input_attr!(attr_meta,imp_coll_ps)
@@ -58,10 +57,9 @@ module XYZ
         name = heuristic_to_guess_input_attr_name(source_ref,attr_meta)
         attr_meta.set_hash_key(name)
         attr_meta[:field_name] = t(name)
-        attr_meta[:label] = t(name)
         attr_meta[:description] = unknown
         attr_meta[:type] = t("string") #TODO: stub
-        attr_meta[:external_ref] = unknown #TODO: stub; when known its factor var than put this val in external ref
+        attr_meta[:external_ref] = t(SimpleOrderedHash.new(:name => name)) #TODO: stub; when known its factor var than put this val in external ref
         attr_meta[:source_ref] = source_ref.merge(:attr_exprs => attr_expr_values_to_s(attr_exprs))
       end
      private
@@ -82,7 +80,7 @@ module XYZ
       
       def self.ret_tag_value_or_gen_sym(tag_param,attr_meta)
         if tag_param
-          tag_param[:value].to_s 
+          tag_param[:value].to_s(:just_variable_name => true) 
         else
           attr_num = attr_meta.attr_num
           raise Error.new("no tag param or attribute num") unless attr_num

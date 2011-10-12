@@ -81,6 +81,7 @@ module XYZ
         ret = SimpleOrderedHash.new
         ret["type"] = "#{config_agent_type}_attribute"
         ret["path"] = "node[#{module_name}][#{ext_ref[:name]}]"
+        ret
       end
     end
   end

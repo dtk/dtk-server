@@ -514,6 +514,9 @@ module XYZ
       def contains_variable?()
         nil
       end
+      def variable_list()
+        Array.new
+      end
     end
 
     class VariablePS < TermPS
@@ -523,6 +526,9 @@ module XYZ
       end
       def contains_variable?()
         true
+      end
+      def variable_list()
+        [self[:value]]
       end
       def to_s(opts={})
         val = self[:value]
@@ -568,6 +574,11 @@ module XYZ
           end
         end
         nil
+      end
+      def variable_list()
+        ret = Array.new
+        self[:terms].each{|t|ret += t.variable_list()}
+        ret
       end
     end
   end

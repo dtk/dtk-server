@@ -102,6 +102,10 @@ module XYZ
     def parent()
       (@context||{})[:parent]
     end
+   public
+    def parent_source()
+      (@context||{})[:parent_source]
+    end
   end
   
   class ModuleMeta < MetaObject
@@ -158,19 +162,19 @@ module XYZ
 
     def set_attributes(component_ps)
       attr_num = 0
-      (component_ps[:attributes]||[]).each{|attr_ps|add_attribute(attr_ps,attr_num+=1)}
+      (component_ps[:attributes]||[]).each{|attr_ps|add_attribute(attr_ps,component_ps,attr_num+=1)}
 
       (component_ps[:children]||[]).each do |child_ps|
         if child_ps.is_imported_collection?()
-          add_attribute(child_ps,attr_num+=1)
+          add_attribute(child_ps,component_ps,attr_num+=1)
         elsif child_ps.is_exported_resource?()
-          add_attribute(child_ps,attr_num+=1)
+          add_attribute(child_ps,component_ps,attr_num+=1)
         end
       end
     end
 
-    def add_attribute(parse_structure,attr_num)
-      opts = {:attr_num => attr_num, :parent => self}
+    def add_attribute(parse_structure,component_ps,attr_num)
+      opts = {:attr_num => attr_num, :parent => self, :parent_source => component_ps}
       (self[:attributes] ||= Array.new) << create(:attribute,parse_structure,opts)
     end
 

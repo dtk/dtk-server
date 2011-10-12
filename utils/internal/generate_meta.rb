@@ -220,10 +220,14 @@ module XYZ
       (@context||[])[:attr_num]
     end
 
-    def set_hash_key(key)
-      #TODO: make sure that key is unique; if not bump up
-      raise Error.new("key (#{key}) is a duplicate") if existing_hash_keys().include?(key)
-      super
+    def set_hash_key(key_x)
+      key = key_x
+      num = 1
+      existing_keys = existing_hash_keys()
+      while existing_hash_keys().include?(key)
+        key = "#{key_x}#{(num+=1).to_s}"
+      end
+      super(key)
     end
 
    private

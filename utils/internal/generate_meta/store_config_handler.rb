@@ -72,6 +72,7 @@ module XYZ
       def self.heuristic_to_guess_output_attr_name(source_ref,attr_meta)
         #check if there is content field that has variables
         content_vars = content_variables_in_output_var(source_ref,attr_meta)
+        return content_vars.first if content_vars.size == 1 #TODO: stub
         tag_param = (source_ref[:parameters]||[]).find{|exp|exp[:name] == "tag"}
         ret_tag_value_or_gen_sym(tag_param,attr_meta)
       end
@@ -82,9 +83,9 @@ module XYZ
 
       def self.content_variables_in_output_var(source_ref,attr_meta)
         content = (source_ref[:parameters]||[]).find{|exp|exp[:name] == "content"}
-        return nil unless content
+        return Array.new unless content
         ret = content[:value] ? content[:value].variable_list() : nil
-        return ret if ret.nil? or ret.empty?
+        return Array.new if ret.nil? or ret.empty?
         #prune variables that appear already; need parent source
         existing_attr_names = (attr_meta.parent_source||{})[:attributes].map{|a|a[:name]}
         ret.reject{|v|existing_attr_names.include?(v)}

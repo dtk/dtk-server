@@ -38,14 +38,26 @@ module XYZ
         resource_type = exp_rsc_ps[:name]
         source_ref = source_ref_object(exp_rsc_ps,resource_type)
         params = source_ref[:parameters] = exp_rsc_ps[:paramters]
-
-        name = heuristic_to_guess_output_attr_name(source_ref,attr_meta)
+        name = nil
+        exported_vars = nil #alternative is that export through exec piping to file
+        #check if there is content field that has variables
+        content_vars = content_variables_in_output_var(source_ref,attr_meta)
+        if content_vars.size > 0
+          name = content_vars.first if content_vars.size == 1 #TODO: stub; fine to have multiple vars
+          exported_vars = content_vars
+          pp "debug: multiple output vars in resource export: #{content_vars.size}" if content_vars.size > 1
+        end
+        name ||= heuristic_to_guess_output_attr_name(source_ref,attr_meta)
         attr_meta.set_hash_key(name)
         attr_meta[:field_name] = t(name)
         attr_meta[:description] = unknown
         attr_meta[:type] = t("string") #TODO: stub
         attr_meta[:dynamic] = nailed(true)
-        attr_meta[:external_ref] = t(SimpleOrderedHash.new(:name => name)) #TODO: stub; when known its factor var than put this val in external ref
+
+        ext_ref = SimpleOrderedHash.new(:name => name)
+        ext_ref.merge!(:exported_vars => exported_vars) if exported_vars
+        attr_meta[:external_ref] = t(ext_ref)
+
         attr_meta[:source_ref] = source_ref.merge(:parameters => param_values_to_s(params))
       end
       def self.process_input_attr!(attr_meta,imp_coll_ps)
@@ -70,9 +82,6 @@ module XYZ
         attr_exprs.map{|a|SimpleOrderedHash.new([{:name => a[:name]},{:op => a[:op]},{:value => a[:value].to_s}])}
       end
       def self.heuristic_to_guess_output_attr_name(source_ref,attr_meta)
-        #check if there is content field that has variables
-        content_vars = content_variables_in_output_var(source_ref,attr_meta)
-        return content_vars.first if content_vars.size == 1 #TODO: stub
         tag_param = (source_ref[:parameters]||[]).find{|exp|exp[:name] == "tag"}
         ret_tag_value_or_gen_sym(tag_param,attr_meta)
       end

@@ -92,7 +92,7 @@ module XYZ
         :function => ::Puppet::Parser::AST::Function,
         :var_def => ::Puppet::Parser::AST::VarDef,
       }
-      AstTerm = [:string,:name,:variable,:concat]
+      AstTerm = [:string,:name,:variable,:concat,:function]
     end
 
     class ModulePS < ParseStructure
@@ -508,6 +508,7 @@ module XYZ
          when :name then NamePS.new(ast_term,opts)
          when :concat then ConcatPS.new(ast_term,opts)
          when :string then StringPS.new(ast_term,opts)
+         when :function then FunctionPS.new(ast_term,opts)
          else raise ParseError.new("type not treated as a term (#{ast_term.class.to_s})")
         end
       end
@@ -557,16 +558,7 @@ module XYZ
       end
     end
 
-    class ConcatPS < TermPS
-      def initialize(concat_ast,opts={})
-        self[:terms] = concat_ast.value.map{|term_ast|TermPS.create(term_ast,opts)}
-        super
-      end
-      def to_s(opts={})
-        self[:terms].map do |t|
-          t.kind_of?(TermPS) ? t.to_s(opts.merge(:in_string => true)) : t.to_s
-        end.join("")
-      end
+    module ConcatFunctionMixin
       def contains_variable?()
         self[:terms].each do |t|
           if t.kind_of?(TermPS)
@@ -579,6 +571,33 @@ module XYZ
         ret = Array.new
         self[:terms].each{|t|ret += t.variable_list()}
         ret
+      end
+    end
+
+    class ConcatPS < TermPS
+      include ConcatFunctionMixin
+      def initialize(concat_ast,opts={})
+        self[:terms] = concat_ast.value.map{|term_ast|TermPS.create(term_ast,opts)}
+        super
+      end
+      def to_s(opts={})
+        self[:terms].map do |t|
+          t.kind_of?(TermPS) ? t.to_s(opts.merge(:in_string => true)) : t.to_s
+        end.join("")
+      end
+    end
+    class FunctionPS < TermPS
+      include ConcatFunctionMixin
+      def initialize(fn_ast,opts={})
+        self[:name] = fn_ast.name
+        self[:terms] = fn_ast.arguments.children.map{|term_ast|TermPS.create(term_ast,opts)}
+        super
+      end
+      def to_s(opts={})
+        args = self[:terms].map do |t|
+          t.kind_of?(TermPS) ? t.to_s(opts.merge(:in_string => true)) : t.to_s
+        end.join(",")
+        "#{self[:name]}(#{args})"
       end
     end
   end

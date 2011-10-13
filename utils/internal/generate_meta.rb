@@ -14,9 +14,6 @@ module XYZ
     def set_hash_key(key)
       self[:hash_key] = key
     end
-    def source_ref_object_base(parse_struct)
-      SimpleOrderedHash.new(:config_agent_type => parse_struct.config_agent_type.to_s)
-    end
   end
   require File.expand_path("generate_meta/store_config_handler", File.dirname(__FILE__))
   class GenerateMeta
@@ -75,6 +72,10 @@ module XYZ
       value_term.is_known?() ? value_term.value.dup : nil
     end
 
+    def set_source_ref(parse_struct)
+      @context[:source_ref] = parse_struct
+    end
+
    private
     ###utilities
     def is_foreign_component_name?(name)
@@ -105,6 +106,9 @@ module XYZ
    public
     def parent_source()
       (@context||{})[:parent_source]
+    end
+    def source_ref()
+      (@context||{})[:source_ref]
     end
   end
   
@@ -205,6 +209,7 @@ module XYZ
   class AttributeMeta < MetaObject
     def initialize(parse_struct,context)
       super(context)
+      set_source_ref(parse_struct)
       if parse_struct.is_attribute?()
         initialize__from_attribute(parse_struct)
       elsif parse_struct.is_exported_resource?()
@@ -248,10 +253,10 @@ module XYZ
       else
         self[:required] = (attr_ps.has_key?(:required) ? nailed(attr_ps[:required]) : unknown)
       end
-      self[:external_ref] = nailed(SimpleOrderedHash.new(:name => attr_ps[:name]))
-      if var_default
-        self[:source_ref] = source_ref_object_base(attr_ps).merge(:default_variable => default.to_s)
-      end
+
+      ext_ref = SimpleOrderedHash.new(:name => attr_ps[:name])
+      ext_ref.merge!(:default_variable => default.to_s) if var_default
+      self[:external_ref] = nailed(ext_ref)
     end
     def initialize__from_exported_resource(exp_rsc_ps)
       StoreConfigHandler.set_output_attribute!(self,exp_rsc_ps)

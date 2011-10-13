@@ -20,20 +20,34 @@ module XYZ
         ret  
       end
       private
+      def self.source_ref_object(parse_struct,resource_type)
+        source_ref_object_base(parse_struct).merge(:resource_type => resource_type)
+      end
+
+      #can be overwritten
+      def self.heuristic_to_guess_input_attr_key(source_ref)
+        nil
+      end
+      def self.heuristic_to_guess_output_attr_key(source_ref)
+        nil
+      end
     end
     class FileERH < StoreConfigHandler
       def self.process_output_attr!(attr_meta,exp_rsc_ps)
         #set source ref
+        resource_type = exp_rsc_ps[:name]
+        source_ref = source_ref_object(exp_rsc_ps,resource_type)
+        params = source_ref[:parameters] = exp_rsc_ps[:paramters]
         name = nil
         exported_vars = nil #alternative is that export through exec piping to file
         #check if there is content field that has variables
-        content_vars = content_variables_in_output_var(exp_rsc_ps,attr_meta)
+        content_vars = content_variables_in_output_var(source_ref,attr_meta)
         if content_vars.size > 0
           name = content_vars.first if content_vars.size == 1 #TODO: stub; fine to have multiple vars
           exported_vars = content_vars
           pp "debug: multiple output vars in resource export: #{content_vars.size}" if content_vars.size > 1
         end
-        name ||= heuristic_to_guess_output_attr_name(exp_rsc_ps,attr_meta)
+        name ||= heuristic_to_guess_output_attr_name(source_ref,attr_meta)
         attr_meta.set_hash_key(name)
         attr_meta[:field_name] = t(name)
         attr_meta[:description] = unknown
@@ -43,15 +57,22 @@ module XYZ
         ext_ref = SimpleOrderedHash.new(:name => name)
         ext_ref.merge!(:exported_vars => exported_vars) if exported_vars
         attr_meta[:external_ref] = t(ext_ref)
-      end
 
+        attr_meta[:source_ref] = source_ref.merge(:parameters => param_values_to_s(params))
+      end
       def self.process_input_attr!(attr_meta,imp_coll_ps)
-        name = heuristic_to_guess_input_attr_name(imp_coll_ps,attr_meta)
+        #set source ref
+        resource_type = imp_coll_ps[:type]
+        source_ref = source_ref_object(imp_coll_ps,resource_type)
+        attr_exprs = source_ref[:attr_exprs] = imp_coll_ps[:query].attribute_expressions()
+
+        name = heuristic_to_guess_input_attr_name(source_ref,attr_meta)
         attr_meta.set_hash_key(name)
         attr_meta[:field_name] = t(name)
         attr_meta[:description] = unknown
         attr_meta[:type] = t("string") #TODO: stub
         attr_meta[:external_ref] = t(SimpleOrderedHash.new(:name => name)) #TODO: stub; when known its factor var than put this val in external ref
+        attr_meta[:source_ref] = source_ref.merge(:attr_exprs => attr_expr_values_to_s(attr_exprs))
       end
      private
       def self.param_values_to_s(params)
@@ -60,18 +81,17 @@ module XYZ
       def self.attr_expr_values_to_s(attr_exprs)
         attr_exprs.map{|a|SimpleOrderedHash.new([{:name => a[:name]},{:op => a[:op]},{:value => a[:value].to_s}])}
       end
-      def self.heuristic_to_guess_output_attr_name(exp_rsc_ps,attr_meta)
-        tag_param = (exp_rsc_ps[:parameters]||[]).find{|exp|exp[:name] == "tag"}
+      def self.heuristic_to_guess_output_attr_name(source_ref,attr_meta)
+        tag_param = (source_ref[:parameters]||[]).find{|exp|exp[:name] == "tag"}
         ret_tag_value_or_gen_sym(tag_param,attr_meta)
       end
-      def self.heuristic_to_guess_input_attr_name(imp_coll_ps,attr_meta)
-        attr_exprs = imp_coll_ps[:query].attribute_expressions()||[]
-        tag_param = attr_exprs.find{|exp|exp[:name] == "tag"}
+      def self.heuristic_to_guess_input_attr_name(source_ref,attr_meta)
+        tag_param = (source_ref[:attr_exprs]||[]).find{|exp|exp[:name] == "tag"}
         ret_tag_value_or_gen_sym(tag_param,attr_meta)
       end
 
-      def self.content_variables_in_output_var(exp_rsc_ps,attr_meta)
-        content = (exp_rsc_ps[:parameters]||[]).find{|exp|exp[:name] == "content"}
+      def self.content_variables_in_output_var(source_ref,attr_meta)
+        content = (source_ref[:parameters]||[]).find{|exp|exp[:name] == "content"}
         return Array.new unless content and content[:value]
         
         if template = content[:value].template?()

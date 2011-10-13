@@ -291,7 +291,7 @@ module XYZ
     class ExportedResourcePS < ResourcePS
       def initialize(ast_resource,opts={})
         self[:name] = name(ast_resource)
-        self[:paramters] =  resource_parameters(ast_resource,opts)
+        self[:parameters] =  resource_parameters(ast_resource,opts)
         super
       end
       def is_exported_resource?() 

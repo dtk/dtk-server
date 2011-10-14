@@ -573,9 +573,8 @@ module XYZ
         self[:value]
       end
       def can_match?(ast_term)
-        case as_term.class
-          when NamePS,StringPS then self[:value] == ast_term[:value]
-          when VariablePS then true
+        if ast_term.kind_of?(NamePS) or ast_term.kind_of?(StringPS) then self[:value] == ast_term[:value]
+        elsif ast_term.kind_of?(VariablePS) then true
         end
       end
     end
@@ -589,9 +588,8 @@ module XYZ
         self[:value]
       end
       def can_match?(ast_term)
-        case as_term.class
-          when NamePS,StringPS then self[:value] == ast_term[:value]
-          when VariablePS then true
+        if ast_term.kind_of?(NamePS) or ast_term.kind_of?(StringPS) then self[:value] == ast_term[:value]
+        elsif ast_term.kind_of?(VariablePS) then true
         end
       end
     end
@@ -624,13 +622,12 @@ module XYZ
         end.join("")
       end
       def can_match?(ast_term)
-        case ast_term.class
-          when VariablePS then true
-          when ConcatPS
-            #TODO: can be other ways to match
-            return nil unless self[:terms].size == ast_term[:terms].size
-            self[:terms].each_with_index{|t,i|return nil unless t.can_match?(ast_term[:terms][i])}
-            true
+        if ast_term.kind_of?(VariablePS) then true
+        elsif ast_term.kind_of?(ConcatPS)
+          #TODO: can be other ways to match
+          return nil unless self[:terms].size == ast_term[:terms].size
+          self[:terms].each_with_index{|t,i|return nil unless t.can_match?(ast_term[:terms][i])}
+          true
         end
       end
     end
@@ -651,14 +648,13 @@ module XYZ
         self[:name] == "template" ? self[:terms].first : nil
       end
       def can_match?(ast_term)
-        case as_term.class
-          when VariablePS then true
-          when FunctionPS
-            #TODO: can be other ways to match
-            return nil unless self[:name] == ast_term[:name]
-            return nil unless self[:terms].size == ast_term[:terms].size
-            self[:terms].each_with_index{|t,i|return nil unless t.can_match?(ast_term[:terms][i])}
-            true
+        if ast_term.kind_of?(VariablePS) then true
+        elsif ast_term.kind_of?(FunctionPS)
+          #TODO: can be other ways to match
+          return nil unless self[:name] == ast_term[:name]
+          return nil unless self[:terms].size == ast_term[:terms].size
+          self[:terms].each_with_index{|t,i|return nil unless t.can_match?(ast_term[:terms][i])}
+          true
         end
       end
     end

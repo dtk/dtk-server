@@ -390,6 +390,13 @@ module XYZ
         end 
        super
       end
+
+      def match_exported?(exp_rsc)
+        #TODO: stub
+        pp [self,exp_rsc]
+        nil
+      end
+
       def is_imported_collection?()
         true
       end

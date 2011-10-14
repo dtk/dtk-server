@@ -118,9 +118,36 @@ module XYZ
       top_parse_struct.each_component do |component_ps|
         (self[:components] ||= Array.new) << create(:component,component_ps)
       end
+      process_imported_resources()
     end
 
     def render_to_file(file,format)
+    end
+   private
+    def process_imported_resources()
+      #first get all the exported resources and imported resources
+      #TODO: more efficient to store these in first phase
+      exp_rscs = Array.new
+      imp_colls = Array.new
+      (self[:components]||[]).each do |cmp|
+        (cmp[:attributes]||[]).each do |attr|
+          parse_struct = attr.source_ref
+          if parse_struct
+            if parse_struct.is_exported_resource?()
+              exp_rscs << parse_struct
+            elsif parse_struct.is_imported_collection?()
+              imp_colls << parse_struct
+            end
+          end
+        end
+      end
+      return if exp_rscs.empty? or imp_colls.empty?
+      matches = Array.new
+      imp_colls.each do |attr_imp_coll|
+        match = exp_rscs.find{|attr_exp_rsc|AttributeMeta.matching_imported_exported(attr_imp_coll,attr_exp_rsc)}
+        matches << {:attr_imp_coll => attr_imp_coll, :attr_exp_rsc => attr_exp_rsc} if match
+      end
+      return if matches.empty?
     end
   end
   class ComponentMeta < MetaObject
@@ -219,6 +246,11 @@ module XYZ
       else
         raise Error.new("Unexpected parse structure type (#{parse_struct.class.to_s})")
       end  
+    end
+
+    def self.matching_imported_exported(attr_imp_coll,attr_exp_rsc)
+      #TODO: stub
+      nil
     end
 
     def attr_num()

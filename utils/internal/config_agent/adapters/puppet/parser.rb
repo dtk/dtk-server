@@ -392,9 +392,9 @@ module XYZ
       end
 
       def match_exported?(exp_rsc)
-        #TODO: stub
-        pp [self,exp_rsc]
-        nil
+        return nil unless self[:type] == exp_rsc[:name]
+        return true if self[:query].nil?
+        self[:query].match_exported?(exp_rsc[:parameters])
       end
 
       def is_imported_collection?()
@@ -435,8 +435,15 @@ module XYZ
       def attribute_expressions()
         [SimpleOrderedHash.new([{:name => self[:name]}, {:op => self[:op]}, {:value => self[:value]}])]
       end
-     end
-     class CollExprLogicalConnectivePS < CollExprPS
+      def match_exported?(exp_rsc_params)
+        #TODO: treat ops other than  "=="
+        return nil unless self[:op] == "=="
+        matching_param = exp_rsc_params.find{|p|p[:name] == self[:name]}
+        matching_param && matching_param[:value].can_match?(self[:value])
+      end
+    end
+
+    class CollExprLogicalConnectivePS < CollExprPS
       def initialize(coll_expr_ast,opts)
         self[:op] = coll_expr_ast.oper
         self[:arg1]  = CollExprPS.create(coll_expr_ast.test1,opts)
@@ -447,6 +454,12 @@ module XYZ
         ret = Array.new
         [:arg1,:arg2].each{|index|ret += self[index].attribute_expressions()}
         ret
+      end
+      def match_exported?(exp_rsc_params)
+        case self[:op]
+          when "and" then self[:arg1].match_exported?(exp_rsc_params) and self[:arg2].match_exported?(exp_rsc_params)
+          when "or" then self[:arg1].match_exported?(exp_rsc_params) or self[:arg2].match_exported?(exp_rsc_params)
+        end
       end
     end
 
@@ -611,7 +624,7 @@ module XYZ
         end.join("")
       end
       def can_match?(ast_term)
-        case as_term.class
+        case ast_term.class
           when VariablePS then true
           when ConcatPS
             #TODO: can be other ways to match

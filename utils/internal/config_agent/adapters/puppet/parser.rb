@@ -546,6 +546,9 @@ module XYZ
         return val if opts[:just_variable_name]
         opts[:in_string] ? "${#{val}}" : "$#{val}"
       end
+      def can_match?(ast_term)
+        true
+      end
     end
 
     class NamePS < TermPS
@@ -556,6 +559,12 @@ module XYZ
       def to_s(opts={})
         self[:value]
       end
+      def can_match?(ast_term)
+        case as_term.class
+          when NamePS,StringPS then self[:value] == ast_term[:value]
+          when VariablePS then true
+        end
+      end
     end
 
     class StringPS < TermPS
@@ -565,6 +574,12 @@ module XYZ
       end
       def to_s(opts={})
         self[:value]
+      end
+      def can_match?(ast_term)
+        case as_term.class
+          when NamePS,StringPS then self[:value] == ast_term[:value]
+          when VariablePS then true
+        end
       end
     end
 
@@ -595,6 +610,16 @@ module XYZ
           t.kind_of?(TermPS) ? t.to_s(opts.merge(:in_string => true)) : t.to_s
         end.join("")
       end
+      def can_match?(ast_term)
+        case as_term.class
+          when VariablePS then true
+          when ConcatPS
+            #TODO: can be other ways to match
+            return nil unless self[:terms].size == ast_term[:terms].size
+            self[:terms].each_with_index{|t,i|return nil unless t.can_match?(ast_term[:terms][i])}
+            true
+        end
+      end
     end
     class FunctionPS < TermPS
       include ConcatFunctionMixin
@@ -611,6 +636,17 @@ module XYZ
       end
       def template?()
         self[:name] == "template" ? self[:terms].first : nil
+      end
+      def can_match?(ast_term)
+        case as_term.class
+          when VariablePS then true
+          when FunctionPS
+            #TODO: can be other ways to match
+            return nil unless self[:name] == ast_term[:name]
+            return nil unless self[:terms].size == ast_term[:terms].size
+            self[:terms].each_with_index{|t,i|return nil unless t.can_match?(ast_term[:terms][i])}
+            true
+        end
       end
     end
   end

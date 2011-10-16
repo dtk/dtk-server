@@ -435,6 +435,10 @@ module XYZ
       def attribute_expressions()
         [SimpleOrderedHash.new([{:name => self[:name]}, {:op => self[:op]}, {:value => self[:value]}])]
       end
+      def array_form()
+        [self[:name],self[:op],self[:value].to_s]
+      end
+
       def match_exported?(exp_rsc_params)
         #TODO: treat ops other than  "=="
         return nil unless self[:op] == "=="
@@ -455,6 +459,10 @@ module XYZ
         [:arg1,:arg2].each{|index|ret += self[index].attribute_expressions()}
         ret
       end
+      def array_form()
+        [self[:arg1].array_form(),self[:op],self[:arg2].array_form()]
+      end
+
       def match_exported?(exp_rsc_params)
         case self[:op]
           when "and" then self[:arg1].match_exported?(exp_rsc_params) and self[:arg2].match_exported?(exp_rsc_params)

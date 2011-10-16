@@ -30,9 +30,8 @@ module XYZ
         attr_meta[:description] = unknown
         attr_meta[:type] = t("string") #TODO: stub
         attr_meta[:dynamic] = nailed(true)
-
         ext_ref = SimpleOrderedHash.new(:name => name)
-#        ext_ref.merge!(:exported_vars => exported_vars) if exported_vars
+        augment_ext_ref_for_output_attr!(ext_ref,exp_rsc_ps)
         attr_meta[:external_ref] = t(ext_ref)
       end
 
@@ -44,7 +43,25 @@ module XYZ
         attr_meta[:field_name] = t(name)
         attr_meta[:description] = unknown
         attr_meta[:type] = t("string") #TODO: stub
-        attr_meta[:external_ref] = t(SimpleOrderedHash.new(:name => name)) #TODO: stub; when known its factor var than put this val in external ref
+        ext_ref = SimpleOrderedHash.new(:name => name) #TODO: may add also the query string
+        attr_meta[:external_ref] = t(ext_ref)
+
+      end
+      def self.hash_key_for_output_attr(exp_rsc_ps)
+        title_param = (exp_rsc_ps[:parameters]||[]).find{|exp|exp[:name] == "title"}
+        "#{exp_rsc_ps[:name]}--#{title_param[:value].to_s(:just_variable_name => true)}"
+      end
+      def self.augment_ext_ref_for_output_attr!(ext_ref,exp_rsc_ps)
+        title_param = (exp_rsc_ps[:parameters]||[]).find{|exp|exp[:name] == "title"}
+        ext_ref[:resource_type] = exp_rsc_ps[:name]
+        ext_ref[:title_with_vars] = title_param[:value].to_s()
+        ext_ref
+      end
+
+      def self.hash_key_for_input_attr(imp_coll_ps)
+        attr_exprs = imp_coll_ps[:query].attribute_expressions()||[]
+        postfix = attr_exprs.map{|a|"#{a[:name]}__#{a[:value].to_s(:just_variable_name => true)}"}.join("--")
+        "#{imp_coll_ps[:type]}--#{postfix}"
       end
 
       def self.param_values_to_s(params)
@@ -53,15 +70,7 @@ module XYZ
       def self.attr_expr_values_to_s(attr_exprs)
         attr_exprs.map{|a|SimpleOrderedHash.new([{:name => a[:name]},{:op => a[:op]},{:value => a[:value].to_s}])}
       end
-      def self.hash_key_for_output_attr(exp_rsc_ps)
-        title_param = (exp_rsc_ps[:parameters]||[]).find{|exp|exp[:name] == "title"}
-        title_param[:value].to_s(:just_variable_name => true)
-      end
-      def self.hash_key_for_input_attr(imp_coll_ps)
-        attr_exprs = imp_coll_ps[:query].attribute_expressions()||[]
-        postfix = attr_exprs.map{|a|"#{a[:name]}__#{a[:value].to_s(:just_variable_name => true)}"}.join("--")
-        "#{imp_coll_ps[:type]}--#{postfix}"
-      end
+
 
       def self.content_variables_in_output_var(exp_rsc_ps,attr_meta)
         content = (exp_rsc_ps[:parameters]||[]).find{|exp|exp[:name] == "content"}

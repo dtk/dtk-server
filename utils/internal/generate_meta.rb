@@ -13,6 +13,7 @@ module XYZ
 
     def set_hash_key(key)
       self[:id] = key
+      key
     end
     def hash_key()
       self[:id]

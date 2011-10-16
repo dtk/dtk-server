@@ -8,7 +8,7 @@ module XYZ
         ret["version"] = "1.0"
         self[:components].each do |cmp|
           if cmp.value(:include).nil? or cmp.value(:include)
-            hash_key = cmp.required_value(:hash_key)
+            hash_key = cmp.hash_key
             ret[hash_key] = cmp.render_hash_form(opts)
           end
         end
@@ -51,7 +51,7 @@ module XYZ
         ret = SimpleOrderedHash.new
         attrs.each do |attr|
           if attr.value(:include).nil? or attr.value(:include)
-            hash_key = attr.required_value(:hash_key)
+            hash_key = attr.hash_key
             ret[hash_key] = attr.render_hash_form(opts)
           end
         end

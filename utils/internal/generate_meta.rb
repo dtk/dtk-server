@@ -12,7 +12,10 @@ module XYZ
     end
 
     def set_hash_key(key)
-      self[:hash_key] = key
+      self[:id] = key
+    end
+    def hash_key()
+      self[:id]
     end
   end
   require File.expand_path("generate_meta/store_config_handler", File.dirname(__FILE__))
@@ -294,7 +297,7 @@ module XYZ
     end
 
     def existing_hash_keys()
-      ((parent||{})[:attributes]||[]).map{|a|a[:hash_key]}.compact
+      ((parent||{})[:attributes]||[]).map{|a|a.hash_key}.compact
     end
   end
   #handles intermediate state where objects may be unknown and just need users input

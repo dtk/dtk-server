@@ -31,6 +31,7 @@ module XYZ
         attr_meta[:type] = t("string") #TODO: stub
         attr_meta[:dynamic] = nailed(true)
         ext_ref = SimpleOrderedHash.new(:name => name)
+        augment_ext_ref_for_output_attr!(ext_ref,exp_rsc_ps)
         attr_meta[:external_ref] = t(ext_ref)
       end
 
@@ -50,6 +51,12 @@ module XYZ
       def self.hash_key_for_output_attr(exp_rsc_ps)
         title_param = (exp_rsc_ps[:parameters]||[]).find{|exp|exp[:name] == "title"}
         "#{exp_rsc_ps[:name]}--#{title_param[:value].to_s(:just_variable_name => true)}"
+      end
+      def self.augment_ext_ref_for_output_attr!(ext_ref,exp_rsc_ps)
+        title_param = (exp_rsc_ps[:parameters]||[]).find{|exp|exp[:name] == "title"}
+        ext_ref[:resource_type] = exp_rsc_ps[:name]
+        ext_ref[:title_with_vars] = title_param[:value].to_s()
+        ext_ref
       end
 
       def self.hash_key_for_input_attr(imp_coll_ps)

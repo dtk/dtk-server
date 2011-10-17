@@ -32,7 +32,7 @@ module XYZ
         attr_meta[:dynamic] = nailed(true)
         ext_ref = SimpleOrderedHash.new(:name => name)
         augment_ext_ref_for_output_attr!(ext_ref,exp_rsc_ps)
-        attr_meta[:external_ref] = t(ext_ref)
+        attr_meta[:external_ref] = nailed(ext_ref)
       end
 
       def self.process_input_attr!(attr_meta,imp_coll_ps)
@@ -45,7 +45,7 @@ module XYZ
         attr_meta[:type] = t("string") #TODO: stub
         ext_ref = SimpleOrderedHash.new(:name => name) 
         augment_ext_ref_for_input_attr!(ext_ref,imp_coll_ps)
-        attr_meta[:external_ref] = t(ext_ref)
+        attr_meta[:external_ref] = nailed(ext_ref)
       end
 
       def self.hash_key_for_output_attr(exp_rsc_ps)

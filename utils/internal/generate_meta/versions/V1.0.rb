@@ -65,6 +65,22 @@ module XYZ
         ret
       end
     end
+
+    class LinkDefMeta < ::XYZ::LinkDefMeta
+      def render_hash_form(opts={})
+        #TODO: stub
+        ret = SimpleOrderedHash.new
+        ret
+      end
+    end
+    class LinkDefPossibleLinkMeta < ::XYZ::LinkDefPossibleLinkMeta
+      def render_hash_form(opts={})
+        #TODO: stub
+        ret = SimpleOrderedHash.new
+        ret
+      end
+    end
+
     class AttributeMeta < ::XYZ::AttributeMeta
       def render_hash_form(opts={})
         ret = SimpleOrderedHash.new

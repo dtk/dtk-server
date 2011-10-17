@@ -91,7 +91,8 @@ module XYZ
 
     def klass(type)
       mod = XYZ.const_get "V#{version.gsub(".","_")}"
-      mod.const_get "#{type.to_s.capitalize}Meta"
+      cap_type = type.to_s.split("_").map{|t|t.capitalize}.join("")
+      mod.const_get "#{cap_type}Meta"
     end
 
     #context
@@ -104,10 +105,10 @@ module XYZ
     def config_agent_type()
       (@context||{})[:config_agent_type]
     end
+   public
     def parent()
       (@context||{})[:parent]
     end
-   public
     def parent_source()
       (@context||{})[:parent_source]
     end
@@ -149,10 +150,11 @@ module XYZ
       matches = Array.new
       attr_imp_colls.each do |attr_imp_coll|
         if matching_attr_exp_rsc = attr_exp_rscs.find{|attr_exp_rsc|attr_imp_coll.source_ref.match_exported?(attr_exp_rsc.source_ref)}
-          matches << {:attr_imp_coll => attr_imp_coll, :attr_exp_rsc => matching_attr_exp_rsc} 
+          if link_def = create(:link_def,{:type => :imported_collection, :attr_imp_coll => attr_imp_coll, :attr_exp_rsc => matching_attr_exp_rsc})
+            (attr_imp_coll.parent[:link_defs] ||= Array.new) << link_def
+          end
         end
       end
-      return if matches.empty?
     end
   end
   class ComponentMeta < MetaObject
@@ -235,6 +237,44 @@ module XYZ
           self[:name] = data[:name]
         else raise Error.new("Unexpected dependency type (#{data[:type]})")
       end
+    end
+  end
+
+  #TODO: see if makes sense to handle the exported resource link defs heere while using store confif helper file to deal with attributes
+  module LinkDefMetaMixin
+    def initialize(data,context)
+      super(context)
+      case data[:type]
+        when :imported_collection then initialize__imported_collection(data)
+        else raise Error.new("unexpeced link def type (#{data[:type]})")
+      end
+    end
+  end
+
+  class LinkDefMeta < MetaObject
+    include LinkDefMetaMixin
+   private
+    def initialize__imported_collection(data)
+      self[:required] = nailed(true)
+      self[:type] = t(data[:attr_exp_rsc].parent.hash_key)
+      self[:possible_links] = [create(:link_def_possible_link,data)]
+    end
+  end
+  class LinkDefPossibleLinkMeta < MetaObject
+    include LinkDefMetaMixin
+    def initialize__imported_collection(data)
+      output_component = data[:attr_exp_rsc].parent.hash_key
+      set_hash_key(output_component)
+      self[:type] = nailed("external")
+      self[:attribute_mappings] = Array.new
+      #TODO: provide for having multiple attributes (such as deployment/custerid)
+      input = {:component => data[:attr_imp_coll].parent.hash_key, :attribute => data[:attr_imp_coll].hash_key}
+      output = {:component => output_component, :attribute => data[:attr_exp_rsc].hash_key}
+      self[:attribute_mappings] << attribute_mapping(input,output)
+    end
+   private
+    def attribute_mapping(input,output)
+      SimpleOrderedHash.new([{:output => output},{:input => input}])
     end
   end
 

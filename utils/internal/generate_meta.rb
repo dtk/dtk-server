@@ -18,9 +18,6 @@ module XYZ
     def hash_key()
       self[:id]
     end
-    def hash_key_dup?()
-      self[:id].dup?
-    end
   end
   require File.expand_path("generate_meta/store_config_handler", File.dirname(__FILE__))
   class GenerateMeta
@@ -72,12 +69,11 @@ module XYZ
       value_term.value.dup
     end
 
-    #note: has dup in it to produce yaml without refs
     def value(key)
       value_term = self[key]
       return nil if value_term.nil?
-      return value_term.dup?() unless value_term.kind_of?(MetaTerm)
-      value_term.is_known?() ? value_term.value.dup?() : nil
+      return value_term unless value_term.kind_of?(MetaTerm)
+      value_term.is_known?() ? value_term.value : nil
     end
 
     #whether to include is three-state; do not include returns false if this is unknown
@@ -373,6 +369,33 @@ module XYZ
       self[:state] == :known
     end
   end
+
+  class RenderHash < SimpleOrderedHash
+    def write_yaml(io)
+      require 'yaml'
+      YAML::dump(yaml_form(),io)
+      io << "\n"
+    end
+  protected
+    #since zaml generator is beiung used waht to remove references so dont generate yaml with labels
+    def yaml_form()
+      ret = RenderHash.new
+      each do |k,v|
+        converted_val = 
+          if v.kind_of?(RenderHash)
+            v.yaml_form()
+          elsif v.kind_of?(Array)
+            v.map{|el|el.kind_of?(RenderHash) ? el.yaml_form() : el.dup?}
+          else 
+            v.dup?
+          end
+        ret[k.dup?] = converted_val 
+      end
+      ret
+      end
+  end
 end
+
+#TODO: when have multiple versions may dynamically load
 require File.expand_path("generate_meta/versions/V1.0.rb", File.dirname(__FILE__))
 

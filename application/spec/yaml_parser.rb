@@ -35,8 +35,5 @@ refinement_hash = meta_generator.generate_refinement_hash(r8_parse,module_name)
 #in between here refinement has would have through user interaction the user set the needed unknowns
 #mock_user_updates_hash!(refinement_hash)
 render_hash = refinement_hash.render_hash_form()
-#TODO: consider directly calling yaml
-require 'yaml'
-YAML::dump(render_hash,STDOUT)
-STDOUT << "\n"
+render_hash.write_yaml(STDOUT)
 end

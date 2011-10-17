@@ -4,11 +4,11 @@ module XYZ
   module V1_0
     class ModuleMeta < ::XYZ::ModuleMeta
       def render_hash_form(opts={})
-        ret = SimpleOrderedHash.new
+        ret = RenderHash.new
         ret["version"] = "1.0"
         self[:components].each do |cmp|
           unless cmp.do_not_include?()
-            hash_key = cmp.hash_key_dup?
+            hash_key = cmp.hash_key
             ret[hash_key] = cmp.render_hash_form(opts)
           end
         end
@@ -17,7 +17,7 @@ module XYZ
     end
     class ComponentMeta < ::XYZ::ComponentMeta
       def render_hash_form(opts={})
-        ret = SimpleOrderedHash.new
+        ret = RenderHash.new
         ret["display_name"] = required_value(:display_name)
         ret.set?("label",value(:label))
         ret.set?("description",value(:description))
@@ -34,7 +34,7 @@ module XYZ
       private
       def converted_external_ref()
         ext_ref = required_value(:external_ref)
-        ret = SimpleOrderedHash.new
+        ret = RenderHash.new
         ext_ref_key = 
           case ext_ref[:type]
             when "puppet_class" then "class_name"
@@ -60,10 +60,10 @@ module XYZ
       def converted_attributes(opts)
         attrs = self[:attributes]
         return nil if attrs.nil? or attrs.empty?
-        ret = SimpleOrderedHash.new
+        ret = RenderHash.new
         attrs.each do |attr|
           unless attr.do_not_include?()
-            hash_key = attr.hash_key_dup?
+            hash_key = attr.hash_key
             ret[hash_key] = attr.render_hash_form(opts)
           end
         end
@@ -74,19 +74,19 @@ module XYZ
     class DependencyMeta < ::XYZ::DependencyMeta
       def render_hash_form(opts={})
         #TODO: stub
-        ret = SimpleOrderedHash.new
+        ret = RenderHash.new
         ret
       end
     end
 
     class LinkDefMeta < ::XYZ::LinkDefMeta
       def render_hash_form(opts={})
-        ret = SimpleOrderedHash.new
+        ret = RenderHash.new
         ret["type"] = required_value(:type)
         ret.set?("required",value(:required))
         self[:possible_links].each do |link|
           unless link.do_not_include?()
-            hash_key = link.hash_key_dup?
+            hash_key = link.hash_key
             ret[hash_key] = link.render_hash_form(opts)
           end
         end
@@ -96,7 +96,7 @@ module XYZ
 
     class LinkDefPossibleLinkMeta < ::XYZ::LinkDefPossibleLinkMeta
       def render_hash_form(opts={})
-        ret = SimpleOrderedHash.new
+        ret = RenderHash.new
         ret["type"] = required_value(:type)
         attr_mappings = (self[:attribute_mappings]||[]).map{|am|converted_attribute_mapping(am)}
         ret["attribute_mappings"] = attr_mappings unless attr_mappings.empty?
@@ -108,7 +108,7 @@ module XYZ
         in_attr = attr_mapping[:input][:attribute]
         out_cmp = attr_mapping[:output][:component]
         out_attr = attr_mapping[:output][:attribute]
-        SimpleOrderedHash.new(attr_ref(out_cmp,out_attr) => attr_ref(in_cmp,in_attr))
+        RenderHash.new(attr_ref(out_cmp,out_attr) => attr_ref(in_cmp,in_attr))
       end
       def attr_ref(cmp,attr)
         ":#{cmp}.#{attr}"
@@ -117,7 +117,7 @@ module XYZ
 
     class AttributeMeta < ::XYZ::AttributeMeta
       def render_hash_form(opts={})
-        ret = SimpleOrderedHash.new
+        ret = RenderHash.new
         ret["display_name"] = required_value(:field_name)
         ret.set?("description",value(:description))
         ret["data_type"] = required_value(:type)
@@ -128,7 +128,7 @@ module XYZ
      private
       def converted_external_ref()
         ext_ref = required_value(:external_ref)
-        ret = SimpleOrderedHash.new
+        ret = RenderHash.new
         ret["type"] = "#{config_agent_type}_attribute"
         ret["path"] = "node[#{module_name}][#{ext_ref[:name]}]"
         (ext_ref.keys - [:name]).each{|k|ret[k] = ext_ref[k].dup?}

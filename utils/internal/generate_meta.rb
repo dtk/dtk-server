@@ -77,7 +77,7 @@ module XYZ
       value_term.is_known?() ? value_term.value.dup?() : nil
     end
 
-    #whetehr to include is three-state; do not include returns false if this is unknown
+    #whether to include is three-state; do not include returns false if this is unknown
     def do_not_include?()
       not (value(:include).nil? or value(:include))
     end

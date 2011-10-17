@@ -95,9 +95,22 @@ module XYZ
 
     class LinkDefPossibleLinkMeta < ::XYZ::LinkDefPossibleLinkMeta
       def render_hash_form(opts={})
-        #TODO: stub
         ret = SimpleOrderedHash.new
+        ret["type"] = required_value(:type)
+        attr_mappings = (self[:attribute_mappings]||[]).map{|am|converted_attribute_mapping(am)}
+        ret["attribute_mappings"] = attr_mappings unless attr_mappings.empty?
         ret
+      end
+     private
+      def converted_attribute_mapping(attr_mapping)
+        in_cmp = attr_mapping[:input][:component]
+        in_attr = attr_mapping[:input][:attribute]
+        out_cmp = attr_mapping[:output][:component]
+        out_attr = attr_mapping[:output][:attribute]
+        SimpleOrderedHash.new(attr_ref(out_cmp,out_attr) => attr_ref(in_cmp,in_attr))
+      end
+      def attr_ref(cmp,attr)
+        ":#{cmp}.#{attr}"
       end
     end
 

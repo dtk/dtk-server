@@ -18,6 +18,9 @@ module XYZ
     def hash_key()
       self[:id]
     end
+    def attribute_mapping(input,output)
+      RenderHash.new([{:output => output},{:input => input}])
+    end
   end
   require File.expand_path("generate_meta/store_config_handler", File.dirname(__FILE__))
   class GenerateMeta
@@ -156,8 +159,13 @@ module XYZ
       matches = Array.new
       attr_imp_colls.each do |attr_imp_coll|
         if match = matching_storeconfig_vars?(attr_imp_coll,attr_exp_rscs)
-          pp [:matching_vars,match[:vars]]
-          if link_def = create(:link_def,{:type => :imported_collection, :attr_imp_coll => attr_imp_coll, :attr_exp_rsc => match[:attr_exp_rsc]})
+          data = {
+            :type => :imported_collection, 
+            :attr_imp_coll => attr_imp_coll, 
+            :attr_exp_rsc => match[:attr_exp_rsc],
+            :matching_vars => match[:vars]
+          }
+          if link_def = create(:link_def,data)
             (attr_imp_coll.parent[:link_defs] ||= Array.new) << link_def
           end
         end
@@ -196,7 +204,7 @@ module XYZ
       self[:description] = unknown
       self[:ui_png] = unknown
       type = "#{component_ps.config_agent_type}_#{component_ps[:type]}"
-      external_ref = SimpleOrderedHash.new([{:name => component_ps[:name]},{:type => type}])
+      external_ref = RenderHash.new([{:name => component_ps[:name]},{:type => type}])
       self[:external_ref] = nailed(external_ref) 
       self[:basic_type] = unknown
       self[:component_type] = t(processed_name)
@@ -283,14 +291,11 @@ module XYZ
       set_hash_key(output_component)
       self[:type] = nailed("external")
       self[:attribute_mappings] = Array.new
-      #TODO: provide for having multiple attributes (such as deployment/custerid)
       input = {:component => data[:attr_imp_coll].parent.hash_key, :attribute => data[:attr_imp_coll].hash_key}
       output = {:component => output_component, :attribute => data[:attr_exp_rsc].hash_key}
       self[:attribute_mappings] << attribute_mapping(input,output)
-    end
-   private
-    def attribute_mapping(input,output)
-      SimpleOrderedHash.new([{:output => output},{:input => input}])
+      imp_coll_ps = data[:attr_imp_coll].source_ref
+      StoreConfigHandler.add_extra_attr_mappings!(self[:attribute_mappings],data)
     end
   end
 
@@ -342,7 +347,7 @@ module XYZ
         self[:required] = (attr_ps.has_key?(:required) ? nailed(attr_ps[:required]) : unknown)
       end
 
-      ext_ref = SimpleOrderedHash.new(:name => attr_ps[:name])
+      ext_ref = RenderHash.new(:name => attr_ps[:name])
       ext_ref.merge!("default_variable" => default.to_s) if var_default
       self[:external_ref] = nailed(ext_ref)
     end

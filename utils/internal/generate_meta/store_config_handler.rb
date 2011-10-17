@@ -10,6 +10,14 @@ module XYZ
         klass = ret_klass(imp_coll_ps[:type])
         klass.process_input_attr!(attribute_meta,imp_coll_ps)
       end
+
+      def self.add_extra_attr_mappings!(attr_mappings,data)
+        matching_vars = data[:matching_vars]
+        return if matching_vars.nil? or matching_vars.empty?
+        resource_type = data[:attr_imp_coll].source_ref[:type]
+        klass = ret_klass(resource_type)
+        matching_vars.each{|match|klass.process_extra_attr_mapping!(attr_mappings,match,data)}
+      end
      private
       def self.ret_klass(type)
         ret = nil
@@ -94,6 +102,14 @@ module XYZ
       end
     end
     class FileERH < StoreConfigHandler
+      def self.process_extra_attr_mapping!(attr_mappings,match,data)
+        return unless match[:name] == "tag" and match[:input_var].is_variable? and match[:output_var].is_variable?
+        input_component = data[:attr_imp_coll].parent.hash_key
+        input = {:component =>  input_component,:attribute => match[:input_var][:value]}
+        output_component = data[:attr_exp_rsc].parent.hash_key
+        output = {:component =>  output_component,:attribute => match[:output_var][:value]}
+        attr_mappings << attribute_mapping(input,output) 
+      end
     end 
   end
 end

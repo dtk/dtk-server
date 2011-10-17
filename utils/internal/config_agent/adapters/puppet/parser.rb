@@ -444,7 +444,8 @@ module XYZ
         #TODO: treat ops other than  "=="
         return nil unless self[:op] == "=="
         matching_param = exp_rsc_params.find{|p|p[:name] == self[:name]}
-        matching_param && matching_param[:value].can_match?(self[:value])
+        ret = matching_param && matching_param[:value].can_match?(self[:value])
+        ret && ret.map{|x|x.merge(:name => self[:name])}
       end
     end
 
@@ -550,6 +551,9 @@ module XYZ
       def contains_variable?()
         nil
       end
+      def is_variable?()
+        nil
+      end
       def variable_list()
         Array.new
       end
@@ -564,6 +568,9 @@ module XYZ
         super
       end
       def contains_variable?()
+        true
+      end
+      def is_variable?()
         true
       end
       def variable_list()

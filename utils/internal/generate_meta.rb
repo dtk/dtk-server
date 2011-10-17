@@ -18,6 +18,9 @@ module XYZ
     def hash_key()
       self[:id]
     end
+    def hash_key_dup?()
+      self[:id].dup?
+    end
   end
   require File.expand_path("generate_meta/store_config_handler", File.dirname(__FILE__))
   class GenerateMeta

@@ -8,7 +8,7 @@ module XYZ
         ret["version"] = "1.0"
         self[:components].each do |cmp|
           unless cmp.do_not_include?()
-            hash_key = cmp.hash_key
+            hash_key = cmp.hash_key_dup?
             ret[hash_key] = cmp.render_hash_form(opts)
           end
         end
@@ -42,8 +42,8 @@ module XYZ
             else raise Error.new("unexpected component type (#{ext_ref[:type]})")
           end
         #TODO: may need to append module name
-        ret[ext_ref_key] = ext_ref[:name]
-        ret["type"] = ext_ref[:type]
+        ret[ext_ref_key] = ext_ref[:name].dup?
+        ret["type"] = ext_ref[:type].dup?
         ret
       end
 
@@ -62,7 +62,7 @@ module XYZ
         ret = SimpleOrderedHash.new
         attrs.each do |attr|
           unless attr.do_not_include?()
-            hash_key = attr.hash_key
+            hash_key = attr.hash_key_dup?
             ret[hash_key] = attr.render_hash_form(opts)
           end
         end
@@ -85,7 +85,7 @@ module XYZ
         ret.set?("required",value(:required))
         self[:possible_links].each do |link|
           unless link.do_not_include?()
-            hash_key = link.hash_key
+            hash_key = link.hash_key_dup?
             ret[hash_key] = link.render_hash_form(opts)
           end
         end

@@ -52,16 +52,8 @@ module XYZ
       end
 
       def converted_link_defs(opts)
-        lds = self[:link_defs]
-        return nil if lds.nil? or lds.empty? 
-        ret = SimpleOrderedHash.new
-        lds.each do |ld|
-          unless ld.do_not_include?()
-            hash_key = ld.hash_key
-            ret[hash_key] = ld.render_hash_form(opts)
-          end
-        end
-        ret
+        return nil unless lds = self[:link_defs]
+        lds.reject{|ld|ld.do_not_include?}.map{|ld|ld.render_hash_form(opts)}
       end
 
       def converted_attributes(opts)
@@ -88,11 +80,19 @@ module XYZ
 
     class LinkDefMeta < ::XYZ::LinkDefMeta
       def render_hash_form(opts={})
-        #TODO: stub
         ret = SimpleOrderedHash.new
+        ret["type"] = required_value(:type)
+        ret.set?("required",value(:required))
+        self[:possible_links].each do |link|
+          unless link.do_not_include?()
+            hash_key = link.hash_key
+            ret[hash_key] = link.render_hash_form(opts)
+          end
+        end
         ret
       end
     end
+
     class LinkDefPossibleLinkMeta < ::XYZ::LinkDefPossibleLinkMeta
       def render_hash_form(opts={})
         #TODO: stub

@@ -312,6 +312,17 @@ module ActiveSupport
     end
   end
 end
+
+class Object
+  #dups only if object responds to dup
+  def dup?()
+    return self unless respond_to?(:dup)
+    #put in because bug in respond to with boolean insatnces
+    return self if kind_of?(TrueClass) or kind_of?(FalseClass)
+    dup
+  end
+end
+
 =begin
 TODO: remove
 require 'rack'

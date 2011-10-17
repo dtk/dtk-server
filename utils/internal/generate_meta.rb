@@ -68,19 +68,13 @@ module XYZ
       end
       value_term.value.dup
     end
+
+    #note: has dup in it to produce yaml without refs
     def value(key)
       value_term = self[key]
       return nil if value_term.nil?
-      unless value_term.kind_of?(MetaTerm)
-        return respond_to_dup?(value_term) ? value_term.dup : value_term
-      end
-      value_term.is_known?() ? value_term.value.dup : nil
-    end
-
-    def respond_to_dup?(val)
-      #think bug in having TrueClass and FalseClass respond to dup
-      return nil if val.kind_of?(FalseClass) or val.kind_of?(TrueClass)
-      val.respond_to?(:dup)
+      return value_term.dup?() unless value_term.kind_of?(MetaTerm)
+      value_term.is_known?() ? value_term.value.dup?() : nil
     end
 
     #whetehr to include is three-state; do not include returns false if this is unknown

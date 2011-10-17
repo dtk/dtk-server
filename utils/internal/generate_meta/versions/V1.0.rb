@@ -7,7 +7,7 @@ module XYZ
         ret = SimpleOrderedHash.new
         ret["version"] = "1.0"
         self[:components].each do |cmp|
-          if cmp.value(:include).nil? or cmp.value(:include)
+          unless cmp.do_not_include?()
             hash_key = cmp.hash_key
             ret[hash_key] = cmp.render_hash_form(opts)
           end
@@ -25,6 +25,8 @@ module XYZ
         ret.set?("ui",value(:ui))
         ret.set?("basic_type",value(:basic_type))
         ret["component_type"] = required_value(:component_type)
+        ret.set?("dependency",converted_dependencies(opts))
+        ret.set?("link_defs",converted_link_defs(opts))
         ret.set?("attribute",converted_attributes(opts))
         ret
       end
@@ -45,12 +47,29 @@ module XYZ
         ret
       end
 
+      def converted_dependencies(opts)
+        nil #TODO: stub
+      end
+
+      def converted_link_defs(opts)
+        lds = self[:link_defs]
+        return nil if lds.nil? or lds.empty? 
+        ret = SimpleOrderedHash.new
+        lds.each do |ld|
+          unless ld.do_not_include?()
+            hash_key = ld.hash_key
+            ret[hash_key] = ld.render_hash_form(opts)
+          end
+        end
+        ret
+      end
+
       def converted_attributes(opts)
         attrs = self[:attributes]
         return nil if attrs.nil? or attrs.empty?
         ret = SimpleOrderedHash.new
         attrs.each do |attr|
-          if attr.value(:include).nil? or attr.value(:include)
+          unless attr.do_not_include?()
             hash_key = attr.hash_key
             ret[hash_key] = attr.render_hash_form(opts)
           end
@@ -58,6 +77,7 @@ module XYZ
         ret
       end
     end
+
     class DependencyMeta < ::XYZ::DependencyMeta
       def render_hash_form(opts={})
         #TODO: stub

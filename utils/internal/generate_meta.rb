@@ -27,7 +27,6 @@ module XYZ
         else raise Error.new("Unexpected version (#{version})")
       end
     end
-
     def generate_refinement_hash(parse_struct,module_name)
       context = {
         :version => @version,
@@ -75,6 +74,12 @@ module XYZ
       return value_term.dup unless value_term.kind_of?(MetaTerm)
       value_term.is_known?() ? value_term.value.dup : nil
     end
+
+    #whetehr to include is three-state; do not include returns false if this is unknown
+    def do_not_include?()
+      not (value(:include).nil? or value(:include))
+    end
+
 
     def set_source_ref(parse_struct)
       @context[:source_ref] = parse_struct

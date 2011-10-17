@@ -391,9 +391,10 @@ module XYZ
        super
       end
 
+      #returns var bindings if any of there is a match
       def match_exported?(exp_rsc)
         return nil unless self[:type] == exp_rsc[:name]
-        return true if self[:query].nil?
+        return VarMatches.new if self[:query].nil?
         self[:query].match_exported?(exp_rsc[:parameters])
       end
 
@@ -465,8 +466,14 @@ module XYZ
 
       def match_exported?(exp_rsc_params)
         case self[:op]
-          when "and" then self[:arg1].match_exported?(exp_rsc_params) and self[:arg2].match_exported?(exp_rsc_params)
-          when "or" then self[:arg1].match_exported?(exp_rsc_params) or self[:arg2].match_exported?(exp_rsc_params)
+         when "and" then 
+          if match1 = self[:arg1].match_exported?(exp_rsc_params) 
+            if match2 = self[:arg2].match_exported?(exp_rsc_params)
+              match1 + match2
+            end
+          end
+         when "or" 
+          self[:arg1].match_exported?(exp_rsc_params) ||self[:arg2].match_exported?(exp_rsc_params)
         end
       end
     end
@@ -568,37 +575,36 @@ module XYZ
         opts[:in_string] ? "${#{val}}" : "$#{val}"
       end
       def can_match?(ast_term)
-        true
+        VarMatches.new.add(self,ast_term)
+      end
+    end
+
+    module NameStringMixin
+      def to_s(opts={})
+        self[:value]
+      end
+      def can_match?(ast_term)
+        if ast_term.kind_of?(NamePS) or ast_term.kind_of?(StringPS) 
+          self[:value] == ast_term[:value] ? VarMatches.new : nil
+        elsif ast_term.kind_of?(VariablePS) 
+          VarMatches.new.add(self,ast_term)
+        end
       end
     end
 
     class NamePS < TermPS
+      include NameStringMixin
       def initialize(name_ast,opts={})
         self[:value] = name_ast.value
         super
       end
-      def to_s(opts={})
-        self[:value]
-      end
-      def can_match?(ast_term)
-        if ast_term.kind_of?(NamePS) or ast_term.kind_of?(StringPS) then self[:value] == ast_term[:value]
-        elsif ast_term.kind_of?(VariablePS) then true
-        end
-      end
     end
 
     class StringPS < TermPS
+      include NameStringMixin
       def initialize(string_ast,opts={})
         self[:value] = string_ast.value
         super
-      end
-      def to_s(opts={})
-        self[:value]
-      end
-      def can_match?(ast_term)
-        if ast_term.kind_of?(NamePS) or ast_term.kind_of?(StringPS) then self[:value] == ast_term[:value]
-        elsif ast_term.kind_of?(VariablePS) then true
-        end
       end
     end
 
@@ -630,12 +636,17 @@ module XYZ
         end.join("")
       end
       def can_match?(ast_term)
-        if ast_term.kind_of?(VariablePS) then true
+        if ast_term.kind_of?(VariablePS) 
+          VarMatches.new.add(self,ast_term)
         elsif ast_term.kind_of?(ConcatPS)
           #TODO: can be other ways to match
           return nil unless self[:terms].size == ast_term[:terms].size
-          self[:terms].each_with_index{|t,i|return nil unless t.can_match?(ast_term[:terms][i])}
-          true
+          ret = nil
+          self[:terms].each_with_index do |t,i|
+            return nil unless match = t.can_match?(ast_term[:terms][i])
+            ret = (ret ? ret + match : match)
+          end
+          ret
         end
       end
     end

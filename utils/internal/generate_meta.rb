@@ -155,14 +155,24 @@ module XYZ
       return if attr_exp_rscs.empty? or attr_imp_colls.empty?
       matches = Array.new
       attr_imp_colls.each do |attr_imp_coll|
-        if matching_attr_exp_rsc = attr_exp_rscs.find{|attr_exp_rsc|attr_imp_coll.source_ref.match_exported?(attr_exp_rsc.source_ref)}
-          if link_def = create(:link_def,{:type => :imported_collection, :attr_imp_coll => attr_imp_coll, :attr_exp_rsc => matching_attr_exp_rsc})
+        if match = matching_storeconfig_vars?(attr_imp_coll,attr_exp_rscs)
+          pp [:matching_vars,match[:vars]]
+          if link_def = create(:link_def,{:type => :imported_collection, :attr_imp_coll => attr_imp_coll, :attr_exp_rsc => match[:attr_exp_rsc]})
             (attr_imp_coll.parent[:link_defs] ||= Array.new) << link_def
           end
         end
       end
     end
+    def matching_storeconfig_vars?(attr_imp_coll,attr_exp_rscs)
+      attr_exp_rscs.each do |attr_exp_rsc|
+        if matching_vars = attr_imp_coll.source_ref.match_exported?(attr_exp_rsc.source_ref)
+          return {:vars => matching_vars, :attr_exp_rsc => attr_exp_rsc} 
+        end
+      end
+      nil
+    end
   end
+
   class ComponentMeta < MetaObject
     def initialize(component_ps,context)
       super(context)
@@ -367,6 +377,19 @@ module XYZ
     end
     def is_known?()
       self[:state] == :known
+    end
+  end
+
+  class VarMatches < Array
+    def add(input_var,output_var)
+      self << {:input_var => input_var,:output_var => output_var}
+      self
+    end
+    def +(a2)
+      ret = VarMatches.new
+      each{|x|ret << x}
+      a2.each{|x|ret << x}
+      ret
     end
   end
 

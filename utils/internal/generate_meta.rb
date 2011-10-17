@@ -337,7 +337,7 @@ module XYZ
       end
 
       ext_ref = SimpleOrderedHash.new(:name => attr_ps[:name])
-      ext_ref.merge!(:default_variable => default.to_s) if var_default
+      ext_ref.merge!("default_variable" => default.to_s) if var_default
       self[:external_ref] = nailed(ext_ref)
     end
     def initialize__from_exported_resource(exp_rsc_ps)

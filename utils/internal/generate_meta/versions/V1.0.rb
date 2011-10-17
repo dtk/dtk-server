@@ -44,6 +44,7 @@ module XYZ
         #TODO: may need to append module name
         ret[ext_ref_key] = ext_ref[:name].dup?
         ret["type"] = ext_ref[:type].dup?
+        (ext_ref.keys - [:name,:type]).each{|k|ret[k] = ext_ref[k].dup?}
         ret
       end
 
@@ -130,6 +131,7 @@ module XYZ
         ret = SimpleOrderedHash.new
         ret["type"] = "#{config_agent_type}_attribute"
         ret["path"] = "node[#{module_name}][#{ext_ref[:name]}]"
+        (ext_ref.keys - [:name]).each{|k|ret[k] = ext_ref[k].dup?}
         ret
       end
     end

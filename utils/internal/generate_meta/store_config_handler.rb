@@ -54,8 +54,8 @@ module XYZ
       end
       def self.augment_ext_ref_for_output_attr!(ext_ref,exp_rsc_ps)
         title_param = (exp_rsc_ps[:parameters]||[]).find{|exp|exp[:name] == "title"}
-        ext_ref[:resource_type] = exp_rsc_ps[:name]
-        ext_ref[:title_with_vars] = title_param[:value].to_s()
+        ext_ref["resource_type"] = exp_rsc_ps[:name]
+        ext_ref["title_with_vars"] = title_param[:value].to_s()
         ext_ref
       end
 
@@ -65,8 +65,8 @@ module XYZ
         "#{imp_coll_ps[:type]}--#{postfix}"
       end
       def self.augment_ext_ref_for_input_attr!(ext_ref,imp_coll_ps)
-        ext_ref[:resource_type] = imp_coll_ps[:type]
-        ext_ref[:import_coll_query] = imp_coll_ps[:query].array_form()
+        ext_ref["resource_type"] = imp_coll_ps[:type]
+        ext_ref["import_coll_query"] = imp_coll_ps[:query].array_form()
         ext_ref
       end
 

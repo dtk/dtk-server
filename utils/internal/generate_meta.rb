@@ -1,5 +1,5 @@
 module XYZ
-  module TermStateHelpersMixin
+  module CommonGenerateMetaMixin
     def t(term)
       return nil if term.nil?
       MetaTerm.new(term)
@@ -20,6 +20,10 @@ module XYZ
     end
     def attribute_mapping(input,output)
       RenderHash.new([{:output => output},{:input => input}])
+    end
+
+    def sanitize_attribute(attr)
+      attr.gsub(/[^a-zA-Z0-9_-]/,"-")
     end
   end
   require File.expand_path("generate_meta/store_config_handler", File.dirname(__FILE__))
@@ -46,7 +50,7 @@ module XYZ
   end
 
   class MetaObject < SimpleOrderedHash
-    include TermStateHelpersMixin
+    include CommonGenerateMetaMixin
     include StoreConfigHandlerMixin
     def initialize(context)
       super()
@@ -330,7 +334,7 @@ module XYZ
 
    private
     def initialize__from_attribute(attr_ps)
-      name = attr_ps[:name]
+      name = sanitize_attribute(attr_ps[:name])
       set_hash_key(name)
       self[:field_name] = t(name) 
       self[:label] = t(name) 

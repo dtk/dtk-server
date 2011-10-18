@@ -1,7 +1,7 @@
 module XYZ
   module StoreConfigHandlerMixin
     class StoreConfigHandler
-      extend TermStateHelpersMixin
+      extend CommonGenerateMetaMixin
       def self.set_output_attribute!(attribute_meta,exp_rsc_ps)
         klass = ret_klass(exp_rsc_ps[:name])
         klass.process_output_attr!(attribute_meta,exp_rsc_ps)
@@ -58,7 +58,7 @@ module XYZ
 
       def self.hash_key_for_output_attr(exp_rsc_ps)
         title_param = (exp_rsc_ps[:parameters]||[]).find{|exp|exp[:name] == "title"}
-        "#{exp_rsc_ps[:name]}--#{title_param[:value].to_s(:just_variable_name => true)}"
+        sanitize_attribute("#{exp_rsc_ps[:name]}--#{title_param[:value].to_s(:just_variable_name => true)}")
       end
       def self.augment_ext_ref_for_output_attr!(ext_ref,exp_rsc_ps)
         title_param = (exp_rsc_ps[:parameters]||[]).find{|exp|exp[:name] == "title"}
@@ -70,7 +70,7 @@ module XYZ
       def self.hash_key_for_input_attr(imp_coll_ps)
         attr_exprs = imp_coll_ps[:query].attribute_expressions()||[]
         postfix = attr_exprs.map{|a|"#{a[:name]}__#{a[:value].to_s(:just_variable_name => true)}"}.join("--")
-        "#{imp_coll_ps[:type]}--#{postfix}"
+        sanitize_attribute("#{imp_coll_ps[:type]}--#{postfix}")
       end
       def self.augment_ext_ref_for_input_attr!(ext_ref,imp_coll_ps)
         ext_ref["resource_type"] = imp_coll_ps[:type]

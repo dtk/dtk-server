@@ -86,8 +86,7 @@ module XYZ
         ret.set?("required",value(:required))
         self[:possible_links].each do |link|
           unless link.do_not_include?()
-            hash_key = link.hash_key
-            ret[hash_key] = link.render_hash_form(opts)
+            (ret["possible_links"] ||= Array.new) << {link.hash_key => link.render_hash_form(opts)}
           end
         end
         ret

@@ -34,6 +34,7 @@ module XYZ
         #resassign hash_key because attr_meta.set_hash_key can renumber for dups
         hash_key = attr_meta.set_hash_key(hash_key)
         name = hash_key
+        attr_meta[:include] = nailed(true)
         attr_meta[:field_name] = t(name)
         attr_meta[:description] = unknown
         attr_meta[:type] = t("string") #TODO: stub
@@ -48,6 +49,7 @@ module XYZ
         #resassign hash_key because attr_meta.set_hash_key can renumber for dups
         hash_key = attr_meta.set_hash_key(hash_key)
         name = hash_key
+        attr_meta[:include] = nailed(true)
         attr_meta[:field_name] = t(name)
         attr_meta[:description] = unknown
         attr_meta[:type] = t("string") #TODO: stub

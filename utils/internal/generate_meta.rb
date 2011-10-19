@@ -50,8 +50,9 @@ module XYZ
   end
 
   class MetaStructObject < SimpleOrderedHash
-    def initialize(content,required=nil)
-      super([{:required => required},{:content => content}])
+    def initialize(content)
+      super([{:required => nil},{:content => content}])
+      self[:required] = content.delete(:include)
     end
     
     def hash_key()
@@ -67,7 +68,7 @@ module XYZ
       @context = context
     end
     def create(type,parse_struct,opts={})
-      MetaStructObject.new(klass(type).new(parse_struct,@context.merge(opts)),opts[:required])
+      MetaStructObject.new(klass(type).new(parse_struct,@context.merge(opts)))
     end
 
     #dup used because yaml generation is upstream and dont want string refs
@@ -358,6 +359,7 @@ module XYZ
         self[:required] = t(false)
       else
         self[:required] = (attr_ps.has_key?(:required) ? nailed(attr_ps[:required]) : unknown)
+        self[:include] = true if attr_ps[:required]
       end
 
       ext_ref = RenderHash.new(:name => attr_ps[:name])

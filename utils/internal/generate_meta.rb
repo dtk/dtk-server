@@ -60,6 +60,23 @@ module XYZ
     end
   end
 
+  class MetaArray < Array
+    def each_element(opts={},&block)
+      each do |el|
+        unless opts[:skip_required_is_false] and (not el.nil?) and not el
+          block.call(el[:content]) 
+        end
+      end
+    end
+
+    def  +(a2)
+      ret = self.class.new
+      each{|x|ret << x}
+      a2.each{|x|ret << x}
+      ret
+    end
+  end
+
   class MetaObject < SimpleOrderedHash
     include CommonGenerateMetaMixin
     include StoreConfigHandlerMixin
@@ -145,7 +162,7 @@ module XYZ
     def initialize(top_parse_struct,context)
       super(context)
       top_parse_struct.each_component do |component_ps|
-        (self[:components] ||= Array.new) << create(:component,component_ps)
+        (self[:components] ||= MetaArray.new) << create(:component,component_ps)
       end
       process_imported_resources()
     end
@@ -158,8 +175,8 @@ module XYZ
       #TODO: more efficient to store these in first phase
       attr_exp_rscs = Array.new
       attr_imp_colls = Array.new
-      (self[:components]||[]).each do |cmp|
-        (cmp[:attributes]||[]).each do |attr|
+      (self[:components]||[]).each_element do |cmp|
+        (cmp[:attributes]||[]).each_element do |attr|
           parse_struct = attr.source_ref
           if parse_struct
             if parse_struct.is_exported_resource?()
@@ -181,7 +198,7 @@ module XYZ
             :matching_vars => match[:vars]
           }
           if link_def = create(:link_def,data)
-            (attr_imp_coll.parent[:link_defs] ||= Array.new) << link_def
+            (attr_imp_coll.parent[:link_defs] ||= MetaArray.new) << link_def
           end
         end
       end
@@ -228,7 +245,7 @@ module XYZ
     end
    private
     def dependencies(component_ps)
-      ret = Array.new
+      ret = MetaArray.new
       ret += find_foreign_resource_names(component_ps).map do |name|
         create(:dependency,{:type => :foreign_dependency, :name => name})
       end
@@ -251,7 +268,7 @@ module XYZ
 
     def add_attribute(parse_structure,component_ps,attr_num)
       opts = {:attr_num => attr_num, :parent => self, :parent_source => component_ps}
-      (self[:attributes] ||= Array.new) << create(:attribute,parse_structure,opts)
+      (self[:attributes] ||= MetaArray.new) << create(:attribute,parse_structure,opts)
     end
 
     def find_foreign_resource_names(component_ps)
@@ -406,7 +423,7 @@ module XYZ
       self
     end
     def +(a2)
-      ret = VarMatches.new
+      ret = self.class.new
       each{|x|ret << x}
       a2.each{|x|ret << x}
       ret

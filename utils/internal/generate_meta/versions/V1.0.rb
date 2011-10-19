@@ -6,11 +6,9 @@ module XYZ
       def render_hash_form(opts={})
         ret = RenderHash.new
         ret["version"] = "1.0"
-        self[:components].each do |cmp|
-          unless cmp.do_not_include?()
-            hash_key = cmp.hash_key
-            ret[hash_key] = cmp.render_hash_form(opts)
-          end
+        self[:components].each_element(:skip_required_is_false => true) do |cmp|
+          hash_key = cmp.hash_key
+          ret[hash_key] = cmp.render_hash_form(opts)
         end
         ret
       end
@@ -54,18 +52,16 @@ module XYZ
 
       def converted_link_defs(opts)
         return nil unless lds = self[:link_defs]
-        lds.reject{|ld|ld.do_not_include?}.map{|ld|ld.render_hash_form(opts)}
+        lds.map_element(:skip_required_is_false => true){|ld|ld.render_hash_form(opts)}
       end
 
       def converted_attributes(opts)
         attrs = self[:attributes]
         return nil if attrs.nil? or attrs.empty?
         ret = RenderHash.new
-        attrs.each do |attr|
-          unless attr.do_not_include?()
-            hash_key = attr.hash_key
-            ret[hash_key] = attr.render_hash_form(opts)
-          end
+        attrs.each_element(:skip_required_is_false => true) do |attr|
+          hash_key = attr.hash_key
+          ret[hash_key] = attr.render_hash_form(opts)
         end
         ret
       end
@@ -84,10 +80,8 @@ module XYZ
         ret = RenderHash.new
         ret["type"] = required_value(:type)
         ret.set?("required",value(:required))
-        self[:possible_links].each do |link|
-          unless link.do_not_include?()
-            (ret["possible_links"] ||= Array.new) << {link.hash_key => link.render_hash_form(opts)}
-          end
+        self[:possible_links].each_element(:skip_required_is_false => true) do |link|
+          (ret["possible_links"] ||= Array.new) << {link.hash_key => link.render_hash_form(opts)}
         end
         ret
       end

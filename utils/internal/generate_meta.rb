@@ -58,6 +58,10 @@ module XYZ
     def hash_key()
       self[:content].hash_key()
     end
+
+    def render_hash_form()
+      self[:content].render_hash_form()
+    end
   end
 
   class MetaArray < Array
@@ -67,6 +71,16 @@ module XYZ
           block.call(el[:content]) 
         end
       end
+    end
+
+    def map_element(opts={},&block)
+      ret = Array.new
+      each do |el|
+        unless opts[:skip_required_is_false] and (not el.nil?) and not el
+          ret << block.call(el[:content]) 
+        end
+      end
+      ret
     end
 
     def  +(a2)
@@ -110,12 +124,6 @@ module XYZ
       return value_term unless value_term.kind_of?(MetaTerm)
       value_term.is_known?() ? value_term.value : nil
     end
-
-    #whether to include is three-state; do not include returns false if this is unknown
-    def do_not_include?()
-      not (value(:include).nil? or value(:include))
-    end
-
 
     def set_source_ref(parse_struct)
       @context[:source_ref] = parse_struct
@@ -312,7 +320,7 @@ module XYZ
     def initialize__imported_collection(data)
       self[:required] = nailed(true)
       self[:type] = t(data[:attr_exp_rsc].parent.hash_key)
-      self[:possible_links] = [create(:link_def_possible_link,data)]
+      self[:possible_links] = (MetaArray.new << create(:link_def_possible_link,data))
     end
   end
   class LinkDefPossibleLinkMeta < MetaObject

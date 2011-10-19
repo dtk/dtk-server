@@ -49,6 +49,16 @@ module XYZ
     end
   end
 
+  class MetaStructObject < SimpleOrderedHash
+    def initialize(content,required=nil)
+      super([{:required => required},{:content => content}])
+    end
+    
+    def hash_key()
+      self[:content].hash_key()
+    end
+  end
+
   class MetaObject < SimpleOrderedHash
     include CommonGenerateMetaMixin
     include StoreConfigHandlerMixin
@@ -57,7 +67,7 @@ module XYZ
       @context = context
     end
     def create(type,parse_struct,opts={})
-      klass(type).new(parse_struct,@context.merge(opts))
+      MetaStructObject.new(klass(type).new(parse_struct,@context.merge(opts)),opts[:required])
     end
 
     #dup used because yaml generation is upstream and dont want string refs
@@ -203,7 +213,6 @@ module XYZ
       end
 
       set_hash_key(processed_name)
-      self[:include] = unknown 
       self[:display_name] = t(processed_name) #TODO: might instead put in label
       self[:description] = unknown
       self[:ui_png] = unknown

@@ -58,8 +58,8 @@ module XYZ
       self[:content].hash_key()
     end
 
-    def render_hash_form()
-      self[:content].render_hash_form()
+    def render_hash_form(opts={})
+      self[:content].render_hash_form(opts)
     end
   end
 

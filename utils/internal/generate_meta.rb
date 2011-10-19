@@ -20,9 +20,6 @@ module XYZ
     def hash_key()
       self[:id]
     end
-    def attribute_mapping(input,output)
-      RenderHash.new([{:output => output},{:input => input}])
-    end
 
     def sanitize_attribute(attr)
       attr.gsub(/[^a-zA-Z0-9_-]/,"-")
@@ -322,6 +319,7 @@ module XYZ
     include LinkDefMetaMixin
    private
     def initialize__imported_collection(data)
+      self[:include] = true
       self[:required] = nailed(true)
       self[:type] = t(data[:attr_exp_rsc].parent.hash_key)
       self[:possible_links] = (MetaArray.new << create(:link_def_possible_link,data))
@@ -330,17 +328,28 @@ module XYZ
   class LinkDefPossibleLinkMeta < MetaObject
     include LinkDefMetaMixin
     def initialize__imported_collection(data)
+      self[:include] = true
       output_component = data[:attr_exp_rsc].parent.hash_key
       set_hash_key(output_component)
       self[:type] = nailed("external")
-      self[:attribute_mappings] = Array.new
-      input = {:component => data[:attr_imp_coll].parent.hash_key, :attribute => data[:attr_imp_coll].hash_key}
-      output = {:component => output_component, :attribute => data[:attr_exp_rsc].hash_key}
-      self[:attribute_mappings] << attribute_mapping(input,output)
-      imp_coll_ps = data[:attr_imp_coll].source_ref
-      StoreConfigHandler.add_extra_attr_mappings!(self[:attribute_mappings],data)
+      StoreConfigHandler.add_attribute_mappings!(self,data)
+    end
+    def create_attribute_mapping(input,output,opts={})
+      data = {:input => input, :output => output}
+      data.merge!(:include => true) if opts[:include]
+      create(:link_def_attribute_mapping,data)
     end
   end
+
+  class LinkDefAttributeMappingMeta  < MetaObject
+    def initialize(data,context)
+      super(context)
+      self[:include] = true if data[:include]
+      self[:output] = data[:output]
+      self[:input] = data[:input]
+    end
+  end
+
 
   class AttributeMeta < MetaObject
     def initialize(parse_struct,context)
@@ -406,6 +415,8 @@ module XYZ
       ((parent||{})[:attributes]||[]).map{|a|a.hash_key}.compact
     end
   end
+
+  #TODO: may deprecate
   #handles intermediate state where objects may be unknown and just need users input
   class MetaTerm < SimpleHashObject
     def initialize(value,state=:known)

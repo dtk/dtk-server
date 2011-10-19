@@ -11,12 +11,11 @@ module XYZ
         klass.process_input_attr!(attribute_meta,imp_coll_ps)
       end
 
-      def self.add_extra_attr_mappings!(attr_mappings,data)
-        matching_vars = data[:matching_vars]
-        return if matching_vars.nil? or matching_vars.empty?
+      def self.add_attribute_mappings!(link_def_poss_link,data)
         resource_type = data[:attr_imp_coll].source_ref[:type]
         klass = ret_klass(resource_type)
-        matching_vars.each{|match|klass.process_extra_attr_mapping!(attr_mappings,match,data)}
+        klass.process_storeconfig_attr_mapping!(link_def_poss_link,data)
+        klass.process_extra_attr_mappings!(link_def_poss_link,data)
       end
      private
       def self.ret_klass(type)
@@ -56,6 +55,19 @@ module XYZ
         ext_ref = SimpleOrderedHash.new(:name => name) 
         augment_ext_ref_for_input_attr!(ext_ref,imp_coll_ps)
         attr_meta[:external_ref] = nailed(ext_ref)
+      end
+
+      def self.process_storeconfig_attr_mapping!(link_def_poss_link,data)
+        attr_mappings = link_def_poss_link[:attribute_mappings] ||= MetaArray.new
+        input = {:component => data[:attr_imp_coll].parent.hash_key, :attribute => data[:attr_imp_coll].hash_key}
+        output = {:component => data[:attr_exp_rsc].parent.hash_key, :attribute => data[:attr_exp_rsc].hash_key}
+        attr_mappings << link_def_poss_link.create_attribute_mapping(input,output,{:include => true})
+      end
+
+      def self.process_extra_attr_mappings!(link_def_poss_link,data)
+        matching_vars = data[:matching_vars]
+        return if matching_vars.nil? or matching_vars.empty?
+        matching_vars.each{|match|process_extra_attr_mapping!(link_def_poss_link,match,data)}
       end
 
       def self.hash_key_for_output_attr(exp_rsc_ps)
@@ -104,13 +116,14 @@ module XYZ
       end
     end
     class FileERH < StoreConfigHandler
-      def self.process_extra_attr_mapping!(attr_mappings,match,data)
+      def self.process_extra_attr_mapping!(link_def_poss_link,match,data)
+        attr_mappings = link_def_poss_link[:attribute_mappings] ||= MetaArray.new
         return unless match[:name] == "tag" and match[:input_var].is_variable? and match[:output_var].is_variable?
         input_component = data[:attr_imp_coll].parent.hash_key
         input = {:component =>  input_component,:attribute => match[:input_var][:value]}
         output_component = data[:attr_exp_rsc].parent.hash_key
         output = {:component =>  output_component,:attribute => match[:output_var][:value]}
-        attr_mappings << attribute_mapping(input,output) 
+        attr_mappings << link_def_poss_link.create_attribute_mapping(input,output) 
       end
     end 
   end

@@ -91,18 +91,21 @@ module XYZ
       def render_hash_form(opts={})
         ret = RenderHash.new
         ret["type"] = required_value(:type)
-        attr_mappings = (self[:attribute_mappings]||[]).map{|am|converted_attribute_mapping(am)}
+        attr_mappings = (self[:attribute_mappings]||[]).map{|am|am.render_hash_form(opts)}
         ret["attribute_mappings"] = attr_mappings unless attr_mappings.empty?
         ret
       end
-     private
-      def converted_attribute_mapping(attr_mapping)
-        in_cmp = attr_mapping[:input][:component]
-        in_attr = attr_mapping[:input][:attribute]
-        out_cmp = attr_mapping[:output][:component]
-        out_attr = attr_mapping[:output][:attribute]
+    end
+
+    class LinkDefAttributeMappingMeta  < ::XYZ::LinkDefAttributeMappingMeta
+      def render_hash_form(opts={})
+        in_cmp = self[:input][:component]
+        in_attr = self[:input][:attribute]
+        out_cmp = self[:output][:component]
+        out_attr = self[:output][:attribute]
         RenderHash.new(attr_ref(out_cmp,out_attr) => attr_ref(in_cmp,in_attr))
       end
+      private
       def attr_ref(cmp,attr)
         ":#{cmp}.#{attr}"
       end

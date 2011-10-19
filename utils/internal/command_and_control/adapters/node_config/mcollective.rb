@@ -7,11 +7,14 @@ module XYZ
     class Mcollective < CommandAndControlNodeConfig
       #TODO: change signature to def self.async_execution(task_idh,top_task_idh,config_node,callbacks,context)
       def self.initiate_execution(task_idh,top_task_idh,config_node,opts)
+        
+        #TODO: getting out implemention info not needed if put module names in component ext refs
+        impl_info = get_relevant_impl_info(config_node)
         #push implementation
-        version_context = push_implementation(config_node)
+        version_context = push_implementation(impl_info)
 
         config_agent = ConfigAgent.load(config_node[:config_agent_type])
-        msg_content =  config_agent.ret_msg_content(config_node)
+        msg_content =  config_agent.ret_msg_content(config_node,impl_info)
         msg_content.merge!(:task_id => task_idh.get_id(),:top_task_id => top_task_idh.get_id(), :version_context => version_context)
 
         pbuilderid = Node.pbuilderid(config_node[:node])
@@ -110,15 +113,18 @@ module XYZ
 
       Lock = Mutex.new
       #returns version context, (repo branch pairs)
-      def self.push_implementation(config_node)
+      def self.get_relevant_impl_info(config_node)
         ret = Array.new
         return ret unless (config_node[:state_change_types] & ["install_component","update_implementation","rerun_component"]).size > 0
         sample_idh = config_node[:component_actions].first[:component].id_handle
         impl_idhs = config_node[:component_actions].map{|x|x[:component][:implementation_id]}.uniq.map do |impl_id|
           sample_idh.createIDH(:model_name => :implementation, :id => impl_id)
         end
-        impls = Model.get_objects_in_set_from_sp_hash(impl_idhs,{:col => [:id, :repo, :branch]})
-        impls.each do |impl|
+        Model.get_objects_in_set_from_sp_hash(impl_idhs,{:col => [:id, :repo, :branch]})
+      end
+      def self.push_implementation(impl_info)
+        ret = Array.new
+        impl_info.each do |impl|
           ret << {:repo => impl[:repo],:branch => impl[:branch], :implementation => impl[:display_name]}
           context = {:implementation => impl}
           Repo.push_implementation(context)

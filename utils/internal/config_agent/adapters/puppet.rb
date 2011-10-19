@@ -2,8 +2,8 @@ module XYZ
   #TODO!!!!: probably need to rewrite, like for chef to include all attributes; not just ones that changes
   module ConfigAgentAdapter
     class Puppet < ConfigAgent
-      def ret_msg_content(config_node)
-        {:components_with_attributes => components_with_attributes(config_node)}
+      def ret_msg_content(config_node,impl_info)
+        {:components_with_attributes => components_with_attributes(config_node,impl_info)}
       end
       def type()
         :puppet
@@ -26,8 +26,9 @@ module XYZ
       end
 
      private
-      def components_with_attributes(config_node)
+      def components_with_attributes(config_node,impl_info)
         cmp_actions = config_node[:component_actions]
+        ndx_impl_info = impl_info.inject({}){|h,impl|h.merge(impl[:id] => impl)}
         ndx_cmps = cmp_actions.inject({}) do |h,cmp_action|
           cmp = cmp_action[:component]
           h.merge(cmp[:id] => cmp)
@@ -39,12 +40,14 @@ module XYZ
           attrs_for_guards = cmp_actions.map{|cmp_action| cmp_action[:attributes]}.flatten(1)
         end
         cmp_actions.map do |cmp_action|
-          component_with_deps(cmp_action,ndx_cmps).merge(ret_attributes(cmp_action,internal_guards,attrs_for_guards))
+          component_with_deps(cmp_action,ndx_cmps,ndx_impl_info).merge(ret_attributes(cmp_action,internal_guards,attrs_for_guards))
         end
       end
 
-      def component_with_deps(action,ndx_components)
-        ret = component_external_ref(action[:component])
+      def component_with_deps(action,ndx_components,ndx_impl_info)
+        cmp = action[:component]
+        ret = component_external_ref(cmp)
+        ret.merge!("module_name" => (ndx_impl_info[cmp[:implementation_id]]||{})[:display_name])
         cmp_deps = action[:component_dependencies]
         return ret unless cmp_deps and not cmp_deps.empty?
         ret.merge("component_dependencies" => cmp_deps.map{|cmp_id|component_external_ref(ndx_components[cmp_id])})

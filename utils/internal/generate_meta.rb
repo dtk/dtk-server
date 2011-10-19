@@ -1,11 +1,13 @@
 module XYZ
   module CommonGenerateMetaMixin
     def t(term)
-      return nil if term.nil?
-      MetaTerm.new(term)
+      term
+      #TODO probably remove return nil if term.nil?
+      #MetaTerm.new(term)
     end
     def unknown
-      MetaTerm.create_unknown
+      nil
+      #TODO: probably remove MetaTerm.create_unknown
     end
     def nailed(term)
       term #TODO: may also make this a MetaTerm obj
@@ -169,8 +171,9 @@ module XYZ
   class ModuleMeta < MetaObject
     def initialize(top_parse_struct,context)
       super(context)
+      self[:components] = MetaArray.new
       top_parse_struct.each_component do |component_ps|
-        (self[:components] ||= MetaArray.new) << create(:component,component_ps)
+        self[:components] << create(:component,component_ps)
       end
       process_imported_resources()
     end
@@ -183,8 +186,8 @@ module XYZ
       #TODO: more efficient to store these in first phase
       attr_exp_rscs = Array.new
       attr_imp_colls = Array.new
-      (self[:components]||[]).each_element do |cmp|
-        (cmp[:attributes]||[]).each_element do |attr|
+      self[:components].each_element do |cmp|
+        cmp[:attributes].each_element do |attr|
           parse_struct = attr.source_ref
           if parse_struct
             if parse_struct.is_exported_resource?()
@@ -263,6 +266,7 @@ module XYZ
 
     def set_attributes(component_ps)
       attr_num = 0
+      self[:attributes] = MetaArray.new
       (component_ps[:attributes]||[]).each{|attr_ps|add_attribute(attr_ps,component_ps,attr_num+=1)}
 
       (component_ps[:children]||[]).each do |child_ps|
@@ -276,7 +280,7 @@ module XYZ
 
     def add_attribute(parse_structure,component_ps,attr_num)
       opts = {:attr_num => attr_num, :parent => self, :parent_source => component_ps}
-      (self[:attributes] ||= MetaArray.new) << create(:attribute,parse_structure,opts)
+      self[:attributes] << create(:attribute,parse_structure,opts)
     end
 
     def find_foreign_resource_names(component_ps)

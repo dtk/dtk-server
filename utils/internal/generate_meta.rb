@@ -1,5 +1,20 @@
 module XYZ
   module CommonGenerateMetaMixin
+    def set_hash_key(key)
+      self[:id] = key
+      key
+    end
+    def hash_key()
+      self[:id]
+    end
+
+    def create_external_ref(name,type)
+      RenderHash.new([{"name" => name},{"type" => type}])
+    end
+
+    def sanitize_attribute(attr)
+      attr.gsub(/[^a-zA-Z0-9_-]/,"-")
+    end
     def t(term)
       term
       #TODO probably remove return nil if term.nil?
@@ -11,18 +26,6 @@ module XYZ
     end
     def nailed(term)
       term #TODO: may also make this a MetaTerm obj
-    end
-
-    def set_hash_key(key)
-      self[:id] = key
-      key
-    end
-    def hash_key()
-      self[:id]
-    end
-
-    def sanitize_attribute(attr)
-      attr.gsub(/[^a-zA-Z0-9_-]/,"-")
     end
   end
   require File.expand_path("generate_meta/store_config_handler", File.dirname(__FILE__))
@@ -50,16 +53,16 @@ module XYZ
 
   class MetaStructObject < SimpleOrderedHash
     def initialize(content)
-      super([{:required => nil},{:content => content}])
+      super([{:required => nil},{:def => content}])
       self[:required] = content.delete(:include)
     end
     
     def hash_key()
-      self[:content].hash_key()
+      self[:def].hash_key()
     end
 
     def render_hash_form(opts={})
-      self[:content].render_hash_form(opts)
+      self[:def].render_hash_form(opts)
     end
   end
 
@@ -67,7 +70,7 @@ module XYZ
     def each_element(opts={},&block)
       each do |el|
         unless opts[:skip_required_is_false] and (not el.nil?) and not el
-          block.call(el[:content]) 
+          block.call(el[:def]) 
         end
       end
     end
@@ -76,7 +79,7 @@ module XYZ
       ret = Array.new
       each do |el|
         unless opts[:skip_required_is_false] and (not el.nil?) and not el
-          ret << block.call(el[:content]) 
+          ret << block.call(el[:def]) 
         end
       end
       ret
@@ -243,7 +246,7 @@ module XYZ
       self[:description] = unknown
       self[:ui_png] = unknown
       type = "#{component_ps.config_agent_type}_#{component_ps[:type]}"
-      external_ref = RenderHash.new([{:name => component_ps[:name]},{:type => type}])
+      external_ref = create_external_ref(component_ps[:name],type)
       self[:external_ref] = nailed(external_ref) 
       self[:basic_type] = unknown
       self[:component_type] = t(processed_name)
@@ -400,7 +403,8 @@ module XYZ
         self[:include] = true if attr_ps[:required]
       end
 
-      ext_ref = RenderHash.new(:name => attr_ps[:name])
+      type = "#{config_agent_type}_attribute"
+      ext_ref = create_external_ref(attr_ps[:name],type)
       ext_ref.merge!("default_variable" => default.to_s) if var_default
       self[:external_ref] = nailed(ext_ref)
     end

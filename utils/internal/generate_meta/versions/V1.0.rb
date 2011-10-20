@@ -29,23 +29,22 @@ module XYZ
         ret
       end
 
-      private
+     private
       def converted_external_ref()
         ext_ref = required_value(:external_ref)
         ret = RenderHash.new
         ext_ref_key = 
-          case ext_ref[:type]
+          case ext_ref["type"]
             when "puppet_class" then "class_name"
             when "puppet_definition" then "definition_name"
-            else raise Error.new("unexpected component type (#{ext_ref[:type]})")
+            else raise Error.new("unexpected component type (#{ext_ref["type"]})")
           end
         #TODO: may need to append module name
-        ret[ext_ref_key] = ext_ref[:name].dup?
-        ret["type"] = ext_ref[:type].dup?
-        (ext_ref.keys - [:name,:type]).each{|k|ret[k] = ext_ref[k].dup?}
+        ret[ext_ref_key] = ext_ref["name"]
+        ret["type"] = ext_ref["type"]
+        (ext_ref.keys - ["name","type"]).each{|k|ret[k] = ext_ref[k]}
         ret
       end
-
       def converted_dependencies(opts)
         nil #TODO: stub
       end
@@ -125,9 +124,9 @@ module XYZ
       def converted_external_ref()
         ext_ref = required_value(:external_ref)
         ret = RenderHash.new
-        ret["type"] = "#{config_agent_type}_attribute"
-        ret["path"] = "node[#{module_name}][#{ext_ref[:name]}]"
-        (ext_ref.keys - [:name]).each{|k|ret[k] = ext_ref[k].dup?}
+        ret["type"] = ext_ref["type"]
+        ret["path"] = "node[#{module_name}][#{ext_ref["name"]}]"
+        (ext_ref.keys - ["name","type"]).each{|k|ret[k] = ext_ref[k]}
         ret
       end
     end

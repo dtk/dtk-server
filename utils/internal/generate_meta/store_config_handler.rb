@@ -38,7 +38,7 @@ module XYZ
         attr_meta[:description] = unknown
         attr_meta[:type] = t("string") #TODO: stub
         attr_meta[:dynamic] = nailed(true)
-        ext_ref = SimpleOrderedHash.new(:name => name)
+        ext_ref = create_external_ref(name,"puppet_exported_resource")
         augment_ext_ref_for_output_attr!(ext_ref,exp_rsc_ps)
         attr_meta[:external_ref] = nailed(ext_ref)
       end
@@ -52,7 +52,7 @@ module XYZ
         attr_meta[:field_name] = t(name)
         attr_meta[:description] = unknown
         attr_meta[:type] = t("string") #TODO: stub
-        ext_ref = SimpleOrderedHash.new(:name => name) 
+        ext_ref = create_external_ref(name,"puppet_imported_collection")
         augment_ext_ref_for_input_attr!(ext_ref,imp_coll_ps)
         attr_meta[:external_ref] = nailed(ext_ref)
       end

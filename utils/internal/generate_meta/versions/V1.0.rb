@@ -24,8 +24,8 @@ module XYZ
         ret.set?("basic_type",value(:basic_type))
         ret["component_type"] = required_value(:component_type)
         ret.set?("dependency",converted_dependencies(opts))
-        ret.set?("link_defs",converted_link_defs(opts))
         ret.set?("attribute",converted_attributes(opts))
+        ret.set?("link_defs",converted_link_defs(opts))
         ret
       end
 
@@ -117,6 +117,7 @@ module XYZ
         ret.set?("description",value(:description))
         ret["data_type"] = required_value(:type)
         ret.set?("value_asserted",value(:default_info))
+        ret.set?("dynamic",value(:dynamic))
         ret["external_ref"] = converted_external_ref()
         ret
       end

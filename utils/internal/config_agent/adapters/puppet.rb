@@ -74,14 +74,25 @@ module XYZ
         (action[:attributes]||[]).each do |attr|
           if var_name_path = (attr[:external_ref]||{})[:path]
             array_form_path = to_array_form(var_name_path)
-            if attr[:dynamic]
+            ext_ref = attr[:external_ref]
+            val = attr[:attribute_value]
+            #second clause is to handle case where theer is a default just in puppet and header and since not overwritten acts as dynamic attr
+            if attr[:dynamic] or (ext_ref[:default_variable] and val.nil?) 
               #TODO: ignoring ones set already; this implicitly captures assumption that dynamic attribute
               #once set cnnot change
-              unless attr[:attribute_value]
+              unless val
+                type = 
+                  if ext_ref[:type] == "puppet_exported_resource"
+                    "exported_resource"
+                  elsif ext_ref[:default_variable] and val.nil?
+                    "default_variable"
+                  else
+                    "dynamic"
+                  end
                 #TODO: making assumption that dynamic attribute as array_form_path of form [<module>,<attrib_name>]
-                dynamic_attrs << {:name => array_form_path[1], :id => attr[:id]}
+                dynamic_attrs << {:name => array_form_path[1], :id => attr[:id], :type => type}
               end
-            elsif val = attr[:attribute_value]
+            elsif val
               add_attribute!(qual_attrs,array_form_path,val)
               #info that is used to set the name param for the resource
               if rsc_name_path = attr[:external_ref][:name]

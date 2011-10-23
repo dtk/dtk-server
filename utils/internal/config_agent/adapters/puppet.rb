@@ -81,16 +81,17 @@ module XYZ
               #TODO: ignoring ones set already; this implicitly captures assumption that dynamic attribute
               #once set cnnot change
               unless val
-                type = 
-                  if ext_ref[:type] == "puppet_exported_resource"
-                    "exported_resource"
-                  elsif ext_ref[:default_variable] and val.nil?
-                    "default_variable"
-                  else
-                    "dynamic"
-                  end
                 #TODO: making assumption that dynamic attribute as array_form_path of form [<module>,<attrib_name>]
-                dynamic_attrs << {:name => array_form_path[1], :id => attr[:id], :type => type}
+                dyn_attr = {:name => array_form_path[1], :id => attr[:id]}
+                if ext_ref[:type] == "puppet_exported_resource"
+                  type = "exported_resource"
+                  dyn_attr.merge!(:type => "exported_resource", :title_with_vars => ext_ref[:title_with_vars])
+                elsif ext_ref[:default_variable] and val.nil?
+                  dyn_attr.merge!(:type => "default_variable")
+                else
+                  dyn_attr.merge!(:type => "dynamic")
+                end
+                dynamic_attrs << dyn_attr
               end
             elsif val
               add_attribute!(qual_attrs,array_form_path,val)

@@ -581,6 +581,11 @@ module XYZ
         return val if opts[:just_variable_name]
         opts[:in_string] ? "${#{val}}" : "$#{val}"
       end
+
+      def structured_form()
+        ["variable",self[:value]]
+      end
+
       def can_match?(ast_term)
         VarMatches.new.add(self,ast_term)
       end
@@ -590,6 +595,10 @@ module XYZ
       def to_s(opts={})
         self[:value]
       end
+      def structured_form()
+        self[:value]
+      end
+                          
       def can_match?(ast_term)
         if ast_term.kind_of?(NamePS) or ast_term.kind_of?(StringPS) 
           self[:value] == ast_term[:value] ? VarMatches.new : nil
@@ -642,6 +651,11 @@ module XYZ
           t.kind_of?(TermPS) ? t.to_s(opts.merge(:in_string => true)) : t.to_s
         end.join("")
       end
+
+      def structured_form()
+        ["fn","concat"] + self[:terms].map{|t|t.structured_form()}
+      end
+
       def can_match?(ast_term)
         if ast_term.kind_of?(VariablePS) 
           VarMatches.new.add(self,ast_term)
@@ -669,6 +683,9 @@ module XYZ
           t.kind_of?(TermPS) ? t.to_s(opts.merge(:in_string => true)) : t.to_s
         end.join(",")
         "#{self[:name]}(#{args})"
+      end
+       def structured_form()
+         ["fn",self[:name]] + self[:terms].map{|t|t.structured_form()}
       end
       def template?()
         self[:name] == "template" ? self[:terms].first : nil

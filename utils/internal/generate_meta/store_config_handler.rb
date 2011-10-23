@@ -77,7 +77,7 @@ module XYZ
       def self.augment_ext_ref_for_output_attr!(ext_ref,exp_rsc_ps)
         title_param = (exp_rsc_ps[:parameters]||[]).find{|exp|exp[:name] == "title"}
         ext_ref["resource_type"] = exp_rsc_ps[:name]
-        ext_ref["title_with_vars"] = title_param[:value].to_s()
+        ext_ref["title_with_vars"] = title_param[:value].structured_form()
         ext_ref
       end
 

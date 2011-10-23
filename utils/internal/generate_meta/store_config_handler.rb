@@ -88,7 +88,7 @@ module XYZ
       end
       def self.augment_ext_ref_for_input_attr!(ext_ref,imp_coll_ps)
         ext_ref["resource_type"] = imp_coll_ps[:type]
-        ext_ref["import_coll_query"] = imp_coll_ps[:query].array_form()
+        ext_ref["import_coll_query"] = imp_coll_ps[:query].structured_form()
         ext_ref
       end
 

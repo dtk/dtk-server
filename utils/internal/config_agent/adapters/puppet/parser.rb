@@ -436,8 +436,8 @@ module XYZ
       def attribute_expressions()
         [SimpleOrderedHash.new([{:name => self[:name]}, {:op => self[:op]}, {:value => self[:value]}])]
       end
-      def array_form()
-        [self[:name],self[:op],self[:value].to_s]
+      def structured_form()
+        ["op",self[:op],self[:name],self[:value].structured_form()]
       end
 
       def match_exported?(exp_rsc_params)
@@ -461,8 +461,8 @@ module XYZ
         [:arg1,:arg2].each{|index|ret += self[index].attribute_expressions()}
         ret
       end
-      def array_form()
-        [self[:arg1].array_form(),self[:op],self[:arg2].array_form()]
+      def structured_form()
+        ["op",self[:op],self[:arg1].structured_form(),self[:arg2].structured_form()]
       end
 
       def match_exported?(exp_rsc_params)

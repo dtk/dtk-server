@@ -72,9 +72,9 @@ module XYZ
         qual_attrs = Hash.new
         dynamic_attrs = Array.new
         (action[:attributes]||[]).each do |attr|
-          if var_name_path = (attr[:external_ref]||{})[:path]
+          ext_ref = attr[:external_ref]||{}
+          if var_name_path = ext_ref[:path]
             array_form_path = to_array_form(var_name_path)
-            ext_ref = attr[:external_ref]
             val = attr[:attribute_value]
             #second clause is to handle case where theer is a default just in puppet and header and since not overwritten acts as dynamic attr
             if attr[:dynamic] or (ext_ref[:default_variable] and val.nil?) 
@@ -110,8 +110,48 @@ module XYZ
         #TODO: this is based on chef convention of prefacing all attributes with implementation name
         #consider of using refs such as node[:foo] rather than node[:impl][:foo]
         ret = Hash.new
-        ret.merge!("attributes" => qual_attrs.values.first) unless qual_attrs.empty?
+        attributes = ret_attributes_with_type_info(qual_attrs,action[:attributes])
+        ret.merge!("attributes" => attributes) unless attributes.empty?
         ret.merge!("dynamic_attributes" => dynamic_attrs) unless dynamic_attrs.empty?
+        ret
+      end
+
+      def ret_attributes_with_type_info(qual_attrs,attr_info)
+        #TODO: complicated because doing deep merge of values that share common base; can be more efficient way to do this
+        #strips module off
+        top_level_attrs = qual_attrs.values.first
+        return nil unless top_level_attrs
+        #TODO: make sure works with deep merge cases
+        ndx_attr_info = Hash.new
+        attr_info.each do |attr| 
+          ext_ref = attr[:external_ref]||{}
+          unless var_name_path = ext_ref[:path]
+            Log.error("unexpected missing ext ref path")
+            next
+          end
+          array_form_path = to_array_form(var_name_path)
+          unless array_form_path.size > 1
+            Log.error("unexpected size of array_form_path")
+            next
+          end
+          ndx = array_form_path[1]
+          info = 
+            case ext_ref[:type] 
+             when "puppet_attribute"
+              {"type" => "attribute"}
+             when "puppet_imported_collection" 
+              {"type" => "imported_collection",
+              "resource_type" =>  ext_ref[:resource_type],
+              "import_coll_query" => ext_ref[:import_coll_query]}
+             else 
+              raise Error.new("unexpected attribute type (#{ext_ref[:type]})")
+            end
+          ndx_attr_info[ndx] = info
+        end
+        ret = Array.new
+        top_level_attrs.each do |name,val|
+          ret << {"name" => name, "value" => val}.merge(ndx_attr_info[name]||{})
+        end
         ret
       end
       

@@ -68,8 +68,7 @@ module XYZ
 
       #returns both attributes to set on node and dynmic attributes that get set by the node
       def ret_attributes(action,internal_guards,attrs_for_guards)
-        #labeled as qualified attributes because first item is the module
-        qual_attrs = Hash.new
+        ndx_attributes = Hash.new
         dynamic_attrs = Array.new
         (action[:attributes]||[]).each do |attr|
           ext_ref = attr[:external_ref]||{}
@@ -94,67 +93,25 @@ module XYZ
                 dynamic_attrs << dyn_attr
               end
             elsif val
-              add_attribute!(qual_attrs,array_form_path,val)
+              add_attribute!(ndx_attributes,array_form_path,val,ext_ref)
               #info that is used to set the name param for the resource
               if rsc_name_path = attr[:external_ref][:name]
                 if rsc_name_val = nested_value(val,rsc_name_path)
-                  add_attribute!(qual_attrs,[array_form_path[0],"name"],rsc_name_val)
+                  add_attribute!(ndx_attributes,[array_form_path[0],"name"],rsc_name_val,ext_ref)
                 end
               end
             elsif guard = internal_guards.find{|g|attr[:id] == g[:guarded][:attribute][:id]}
               val = find_reference_to_guard(guard,attrs_for_guards)
-              add_attribute!(qual_attrs,array_form_path,val) if val
+              add_attribute!(ndx_attributes,array_form_path,val,ext_ref) if val
             end
           end
         end
-        #TODO: this is based on chef convention of prefacing all attributes with implementation name
-        #consider of using refs such as node[:foo] rather than node[:impl][:foo]
         ret = Hash.new
-        attributes = ret_attributes_with_type_info(qual_attrs,action[:attributes])
-        ret.merge!("attributes" => attributes) unless attributes.empty?
+        ret.merge!("attributes" => ndx_attributes.values) unless ndx_attributes.empty?
         ret.merge!("dynamic_attributes" => dynamic_attrs) unless dynamic_attrs.empty?
         ret
       end
 
-      def ret_attributes_with_type_info(qual_attrs,attr_info)
-        #TODO: complicated because doing deep merge of values that share common base; can be more efficient way to do this
-        #strips module off
-        top_level_attrs = qual_attrs.values.first
-        return nil unless top_level_attrs
-        #TODO: make sure works with deep merge cases
-        ndx_attr_info = Hash.new
-        attr_info.each do |attr| 
-          ext_ref = attr[:external_ref]||{}
-          unless var_name_path = ext_ref[:path]
-            Log.error("unexpected missing ext ref path")
-            next
-          end
-          array_form_path = to_array_form(var_name_path)
-          unless array_form_path.size > 1
-            Log.error("unexpected size of array_form_path")
-            next
-          end
-          ndx = array_form_path[1]
-          info = 
-            case ext_ref[:type] 
-             when "puppet_attribute"
-              {"type" => "attribute"}
-             when "puppet_imported_collection" 
-              {"type" => "imported_collection",
-              "resource_type" =>  ext_ref[:resource_type],
-              "import_coll_query" => ext_ref[:import_coll_query]}
-             else 
-              raise Error.new("unexpected attribute type (#{ext_ref[:type]})")
-            end
-          ndx_attr_info[ndx] = info
-        end
-        ret = Array.new
-        top_level_attrs.each do |name,val|
-          ret << {"name" => name, "value" => val}.merge(ndx_attr_info[name]||{})
-        end
-        ret
-      end
-      
       def find_reference_to_guard(guard,attributes)
         ret = nil
         unless guard[:link][:function] == "eq"
@@ -184,14 +141,42 @@ module XYZ
         nested_value_aux(val[array_form[i]],i+1)
       end
 
-      def add_attribute!(ret,array_form_path,val)
+
+      #this is top level; it also class add_attribute_aux for nested values
+      def add_attribute!(ndx_attributes,array_form_path_x,val,ext_ref)
+        #strip of first element which is module
+        array_form_path = array_form_path_x[1..array_form_path_x.size-1]
+        extra_info = Hash.new
+        ndx = array_form_path.first
+        unless ndx_attributes.has_key?(ndx) 
+          extra_info = 
+            case ext_ref[:type] 
+             when "puppet_attribute"
+              {"type" => "attribute"}
+             when "puppet_imported_collection" 
+              {"type" => "imported_collection",
+              "resource_type" =>  ext_ref[:resource_type],
+              "import_coll_query" => ext_ref[:import_coll_query]}
+             else 
+              raise Error.new("unexpected attribute type (#{ext_ref[:type]})")
+            end
+        end
         size = array_form_path.size
         if size == 1
-          #TODO: after testing remove setting nils
-          ret[array_form_path.first] = val
+          ndx_attributes[ndx] = {"name" => ndx, "value" => val}.merge(extra_info)
         else
-          ret[array_form_path.first] ||= Hash.new
-          add_attribute!(ret[array_form_path.first],array_form_path[1..size-1],val)
+          p = ndx_attributes[ndx] ||= {"name" => ndx, "value" => Hash.new}.merge(extra_info)
+          add_attribute_aux!(p["value"],array_form_path[1..size-1],val)
+        end
+      end
+      def add_attribute_aux!(attr_nested_hash,array_form_path,val)
+        size = array_form_path.size
+        ndx = array_form_path.first
+        if size == 1
+          attr_nested_hash[ndx] = val
+        else
+          attr_nested_hash[ndx] ||= Hash.new
+          add_attribute_aux!(attr_nested_hash[ndx],array_form_path[1..size-1],val)
         end
       end
 

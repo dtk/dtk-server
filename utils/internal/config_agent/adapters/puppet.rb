@@ -155,8 +155,7 @@ module XYZ
               {"type" => "attribute"}
              when "puppet_imported_collection" 
               {"type" => "imported_collection",
-              "resource_type" =>  ext_ref[:resource_type],
-              "import_coll_query" => ext_ref[:import_coll_query]}
+              "resource_type" =>  ext_ref[:resource_type]}
              else 
               raise Error.new("unexpected attribute type (#{ext_ref[:type]})")
             end

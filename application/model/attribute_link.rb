@@ -289,6 +289,10 @@ module XYZ
       def self.generate_from_bounds(lower_bound,upper_bound,offset)
         create_from_array((lower_bound..upper_bound).map{|i|{:output => [i], :input => [i+offset]}})
       end
+      #TODO: may be able to be simplified because may only called be caleld with upper_bound == 0
+      def self.generate_for_output_scalar(lower_bound,upper_bound,offset)
+        create_from_array((0..upper_bound).map{|i|{:output => [], :input => [i+offset]}})
+      end
 
       def input_array_indexes()
         ret = Array.new

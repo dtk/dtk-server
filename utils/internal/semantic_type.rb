@@ -1,3 +1,4 @@
+#TODO: chaneg name from semantio type to data type
 module XYZ
   class PropagateProcessor
     class Output < HashObject
@@ -23,6 +24,8 @@ module XYZ
           propagate_when_select_one()
          when "eq_indexed"
           propagate_when_eq_indexed()
+         when "array_append"
+          propagate_when_array_append()
          when "sap_conn__l4__db" 
           propagate_when_sap_conn__l4__db()
          when "sap_config_conn__db"
@@ -118,6 +121,18 @@ module XYZ
       end
     end
 
+    def propagate_when_array_append()
+      #TODO: may flag more explicitly if from create or propagate vars
+      if @index_map.nil? and (@input_path.nil? or @input_path.empty?) and (@output_path.nil? or @output_path.empty?)
+        new_row = output_value()
+        OutputArrayAppend.new(:array_slice => [new_row], :attr_link_id => @attr_link_id, :output_is_scalar => true)
+      else
+        index_map_persisted = @index_map ? true : false
+        index_map = @index_map || AttributeLink::IndexMap.generate_from_paths(@input_path,@output_path)
+        OutputPartial.new(:attr_link_id => @attr_link_id, :output_value => output_value, :index_map => index_map, :index_map_persisted => index_map_persisted)
+      end
+    end
+
     ###### helper fns for propagation fns
     def ret_cartesian_product()
       output_v = 
@@ -188,6 +203,8 @@ module XYZ
         "select_one"
       elsif  output_sem_type.is_array? and input_sem_type.is_array?
         "eq_indexed"
+      elsif  (not output_sem_type.is_array?) and input_sem_type.is_array?
+        "array_append"
       elsif  (not output_sem_type.is_array?) and (not input_sem_type.is_array?)
         "eq"
       else

@@ -3,7 +3,6 @@ require  File.expand_path('attribute/group', File.dirname(__FILE__))
 require  File.expand_path('attribute/guard', File.dirname(__FILE__))
 require  File.expand_path('attribute/complex_type', File.dirname(__FILE__))
 require  File.expand_path('attribute/datatype', File.dirname(__FILE__))
-require  File.expand_path('attribute/update_values', File.dirname(__FILE__))
 module XYZ
   class Attribute < Model
     include AttributeGroupInstanceMixin
@@ -11,10 +10,8 @@ module XYZ
     extend AttrDepAnalaysisClassMixin
     extend AttributeGroupClassMixin
     extend AttributeGuardClassMixin
-    extend AttributeUpdateValuesClassMixin
 
     set_relation_name(:attribute,:attribute)
-
     def self.up()
       external_ref_column_defs()
       virtual_column :config_agent_type, :type => :string, :local_dependencies => [:external_ref]
@@ -497,6 +494,35 @@ module XYZ
       StateChange.create_pending_change_items(nested_changes.values)
     end
 
+    def self.update_attribute_values(attr_mh,new_val_rows,cols_x,opts={})
+      #break up by type of row and process and aggregate
+      return Array.new if new_val_rows.empty?
+      cols = Array(cols_x)
+      ndx_new_val_rows = new_val_rows.inject({}) do |h,r|
+        index = Aux::demodulize(r.class.to_s)
+        (h[index] ||= Array.new) << r
+        h
+      end
+      ndx_new_val_rows.map do |type,rows|
+        update_attribute_values_aux(type,attr_mh,rows,cols,opts)
+      end.flatten
+    end
+
+   private
+    def self.update_attribute_values_aux(type,attr_mh,new_val_rows,cols,opts={})
+      case type
+        when "OutputArraySlice"
+          update_attribute_values_array_slice(attr_mh,new_val_rows,cols,opts)
+        when "OutputArrayAppend"
+          update_attribute_values_array_append(attr_mh,new_val_rows,cols,opts)
+        when "OutputPartial"
+          update_attribute_values_partial(attr_mh,new_val_rows,cols,opts)
+        else
+        update_select_ds = SQL::ArrayDataset.create(db,new_val_rows,attr_mh,:convert_for_update => true)
+        update_from_select(attr_mh,FieldSet.new(:attribute,cols),update_select_ds,opts)
+      end
+    end
+
     def self.unravelled_value(val,path)
       return nil unless Aux.can_take_index?(val)
       path.size == 1 ? val[path.first] : unravelled_value(val[path.first],path[1..path.size-1])
@@ -509,8 +535,137 @@ module XYZ
         x
       end
     end
+    def self.json_generate(v)
+      (v.kind_of?(Hash) or v.kind_of?(Array)) ? JSON.generate(v) : v
+    end
 
+    def self.update_attribute_values_partial(attr_mh,partial_update_rows,cols,opts={})
+      index_map_list = partial_update_rows.map{|r|r[:index_map] unless r[:index_map_persisted]}.compact
+      cmp_mh = attr_mh.createMH(:component)
+      AttributeLink::IndexMap.resolve_input_paths!(index_map_list,cmp_mh)
+      id_list = partial_update_rows.map{|r|r[:id]}
+
+      ndx_attr_updates = Hash.new
+      select_process_and_update(attr_mh,[:id,:value_derived],id_list) do |existing_vals|
+        ndx_existing_vals = existing_vals.inject({}) do |h,r|
+          h.merge(r[:id] => r[:value_derived])
+        end
+        partial_update_rows.each do |r|
+          attr_id = r[:id]
+          existing_val = (ndx_attr_updates[attr_id]||{})[:value_derived] || ndx_existing_vals[attr_id]
+          ndx_attr_updates[attr_id] = {
+            :id => attr_id,
+            :value_derived => r[:index_map].merge_into(existing_val,r[:output_value])
+          }
+        end
+        ndx_attr_updates.values
+      end
+      attr_updates = ndx_attr_updates.values
+
+      attr_link_updates = Array.new
+      ndx_attr_updates = Hash.new
+      attr_link_updates = partial_update_rows.map do |r|
+        unless r[:index_map_persisted]
+          {
+            :id => r[:attr_link_id],
+            :index_map => r[:index_map]
+          }
+        end
+      end.compact
+      unless attr_link_updates.empty?
+        update_from_rows(attr_mh.createMH(:attribute_link),attr_link_updates)
+      end
+
+      #TODO: need to check what really changed
+      attr_updates.map{|r|Aux.hash_subset(r,[:id])}
+    end
+
+
+    #appends value to any array type; if the array does not exist already it creates it from fresh
+    def self.update_attribute_values_array_append(attr_mh,array_slice_rows,cols,opts={})
+      #TODO: make sure cols is what expect
+      #raise Error.new unless cols == [:value_derived]
+      attr_link_updates = Array.new
+      array_slice_rows.each do |r|
+        offset = execute_function(:append_to_array_value,attr_mh,r[:id],json_generate(r[:array_slice]))
+        last_el = r[:array_slice].size-1
+        index_map = r[:output_is_scalar] ?
+          AttributeLink::IndexMap.generate_for_output_scalar(last_el,offset) :
+          AttributeLink::IndexMap.generate_from_bounds(0,last_el,offset) 
+        attr_link_update = {
+          :id => r[:attr_link_id],
+          :index_map => index_map
+        }
+        attr_link_updates << attr_link_update
+      end
+      attr_link_mh = attr_mh.createMH(:attribute_link)
+      update_from_rows(attr_link_mh,attr_link_updates)
+    end
+
+    #TODO: may deprecate or use as special purpose case since now subsumed to partial variant
+    def self.update_attribute_values_array_slice(attr_mh,array_slice_rows,cols_x,opts={})
+      cols = cols_x
+      cols += [:id] unless cols_x.include?(:id)
+      update_rows = array_slice_rows.map do |r|
+        index_map = AttributeLink::IndexMap.convert_if_needed(r[:index_map])
+        value = incremental_value(:value_derived,index_map,r[:array_slice])
+        #TODO: unify with code in SQL::ArrayDataset
+        (cols-[:value_derived]).inject({:value_derived => value}) do |h,col|
+          v = r[col]
+          h.merge(col => json_generate(v))
+        end
+      end
+
+      #TODO: see if can optimize to do multiple rows at once
+      update_rows.map do |r|
+        fs = Model::FieldSet.opt([:id]+(cols-[:id]).map{|col|{r[col] => col}},:attribute)
+        wc={:id => r[:id]}
+        update_select_ds = Model.get_objects_just_dataset(attr_mh,wc,fs)
+        update_from_select(attr_mh,FieldSet.new(:attribute,cols-[:id]),update_select_ds,opts)
+      end.flatten
+    end
+
+    #TODO: this should probably go in db../update or sql
+    def self.incremental_value(col,index_map,array_slice)
+      raise Error.new("unexpected that index_map is null") if index_map.nil?
+      indexes = index_map.input_array_indexes()
+
+      pattern = Array.new
+      replace = Array.new
+      array_slice_ndx = 0
+      replace_ndx = 1
+      (0..indexes.max).each do |i|
+        if indexes.include?(i)
+          pattern << "{.+?}"
+          replace << json_generate(array_slice[array_slice_ndx])
+          array_slice_ndx += 1
+        else
+          pattern << "({.+?})"
+          replace << "\\#{replace_ndx}"
+          replace_ndx += 1
+        end
+      end
+      :regexp_replace.sql_function(:value_derived,pattern.join(","),replace.join(","))
+    end
    public
+
+=begin
+TODO: these should be deprecated
+
+    def self.get_attribute_with_base_object(attr_idh,base_model_name)
+      field_set = FieldSet.new(:attribute,[:id,:display_name,:value_asserted,"base_object_#{base_model_name}".to_sym])
+      filter = [:and,[:eq,:id,attr_idh.get_id()]]
+      ds = SearchObject.create_from_field_set(field_set,attr_idh[:c],filter).create_dataset()
+      ds.all.first
+    end
+
+    def self.get_attributes_with_base_objects(attr_model_handle,attr_id_list,base_model_name)
+      field_set = FieldSet.new(:attribute,[:id,:display_name,:value_asserted,"base_object_#{base_model_name}".to_sym])
+      filter = [:or] + attr_id_list.map{|id|[:eq,:id,id]}
+      ds = SearchObject.create_from_field_set(field_set,attr_model_handle[:c],filter).create_dataset()
+      ds.all
+    end
+=end
 
     def self.create_needed_l4_sap_attributes(cmp_id_handle,ipv4_host_addresses)
       component_id = cmp_id_handle.get_id()

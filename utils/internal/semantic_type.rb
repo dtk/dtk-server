@@ -3,8 +3,6 @@ module XYZ
   class PropagateProcessor
     class Output < HashObject
     end
-    class OutputArraySlice < Output
-    end
     class OutputArrayAppend < Output
     end
     class OutputPartial < Output
@@ -20,12 +18,12 @@ module XYZ
           propagate_when_eq_indexed()
          when "array_append"
           propagate_when_array_append()
+         when "select_one"
+          propagate_when_select_one()
          when "sap_config__l4" 
           propagate_when_sap_config__l4()
          when "host_address_ipv4"
           propagate_when_host_address_ipv4()
-         when "select_one"
-          propagate_when_select_one()
          when "sap_conn__l4__db" 
           propagate_when_sap_conn__l4__db()
          when "sap_config_conn__db"
@@ -109,7 +107,7 @@ module XYZ
       {:value_derived => output_value ? output_value().first : nil}
     end
 
-    #called when it is an equlaity setting between indexed values on input and output side. Can be teh null index on one of them meaning to take whole value
+    #called when it is an equlaity setting between indexed values on input and output side. Can be the null index on one of the sides meaning to take whole value
     def propagate_when_eq_indexed()
       #TODO: may flag more explicitly if from create or propagate vars
       if @index_map.nil? and (@input_path.nil? or @input_path.empty?) and (@output_path.nil? or @output_path.empty?)

@@ -16,16 +16,16 @@ module XYZ
       return {:value_derived => output_value_aux()} if function == "eq"
       hash_ret = 
         case function
+         when "eq_indexed"
+          propagate_when_eq_indexed()
+         when "array_append"
+          propagate_when_array_append()
          when "sap_config__l4" 
           propagate_when_sap_config__l4()
          when "host_address_ipv4"
           propagate_when_host_address_ipv4()
          when "select_one"
           propagate_when_select_one()
-         when "eq_indexed"
-          propagate_when_eq_indexed()
-         when "array_append"
-          propagate_when_array_append()
          when "sap_conn__l4__db" 
           propagate_when_sap_conn__l4__db()
          when "sap_config_conn__db"
@@ -109,6 +109,7 @@ module XYZ
       {:value_derived => output_value ? output_value().first : nil}
     end
 
+    #called when it is an equlaity setting between indexed values on input and output side. Can be teh null index on one of them meaning to take whole value
     def propagate_when_eq_indexed()
       #TODO: may flag more explicitly if from create or propagate vars
       if @index_map.nil? and (@input_path.nil? or @input_path.empty?) and (@output_path.nil? or @output_path.empty?)
@@ -121,14 +122,15 @@ module XYZ
       end
     end
 
+    #called when input is an array and each link into it appends teh value in
     def propagate_when_array_append()
       #TODO: may flag more explicitly if from create or propagate vars
-      if @index_map.nil? and (@input_path.nil? or @input_path.empty?) and (@output_path.nil? or @output_path.empty?)
+      if @index_map.nil? and (@input_path.nil? or @input_path.empty?)
         new_row = output_value()
         OutputArrayAppend.new(:array_slice => [new_row], :attr_link_id => @attr_link_id, :output_is_scalar => true)
       else
         index_map_persisted = @index_map ? true : false
-        index_map = @index_map || AttributeLink::IndexMap.generate_from_paths(@input_path,@output_path)
+        index_map = @index_map || AttributeLink::IndexMap.generate_from_paths(@input_path,nil)
         OutputPartial.new(:attr_link_id => @attr_link_id, :output_value => output_value, :index_map => index_map, :index_map_persisted => index_map_persisted)
       end
     end
@@ -195,28 +197,33 @@ module XYZ
     end
 
     def self.find_link_function(input_attr,output_attr)
-      input_sem_type = input_attr[:semantic_type_object]
-      output_sem_type = output_attr[:semantic_type_object]
-      if input_attr[:input_path] or output_attr[:output_path]
-        "eq_indexed"
-      elsif output_sem_type.is_array? and not input_sem_type.is_array?
-        "select_one"
-      elsif  output_sem_type.is_array? and input_sem_type.is_array?
-        "eq_indexed"
-      elsif  (not output_sem_type.is_array?) and input_sem_type.is_array?
-        "array_append"
-      elsif  (not output_sem_type.is_array?) and (not input_sem_type.is_array?)
-        "eq"
-      else
-        raise ErrorNotImplemented.new("find_link_function for input #{input_sem_type.inspect} and output #{output_sem_type.inspect}")
-      end
+      input_type = attribute_index_type(input_attr)
+      output_type = attribute_index_type(output_attr)
+      LinkFunctionMatrix[input_type][output_type]
     end
+    LinkFunctionMatrix = {
+      :scalar => {
+        :scalar => "eq", :indexed => "eq_indexed", :array => "select_one"
+      },
+      :indexed => {
+        :scalar => "eq_indexed", :indexed => "eq_indexed", :array => "select_one"
+      },
+      :array => {
+        :scalar => "array_append", :indexed => "array_append", :array => "array_append"
+      }
+    }
 
     def is_atomic?()
       nil
     end
 
    private
+    def self.attribute_index_type(attr)
+      if attr[:input_path] then :indexed
+      else attr[:semantic_type_object].is_array?() ? :array : :scalar
+      end
+    end
+
     def self.convert_hash(item)
       return item unless item.kind_of?(Hash)
       item.inject({}) do |h,kv|

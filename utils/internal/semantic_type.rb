@@ -125,9 +125,9 @@ module XYZ
     def propagate_when_array_append()
       #TODO: may flag more explicitly if from create or propagate vars
       if @index_map.nil? and (@input_path.nil? or @input_path.empty?)
-        new_row = output_value()
+        new_rows = output_value().nil? ? [nil] : (output_semantic_type().is_array? ?  output_value() : [output_value()])
         output_is_array = @output_attr[:semantic_type_object].is_array?()
-        OutputArrayAppend.new(:array_slice => [new_row], :attr_link_id => @attr_link_id, :output_is_array => output_is_array)
+        OutputArrayAppend.new(:array_slice => new_rows, :attr_link_id => @attr_link_id, :output_is_array => output_is_array)
       else
         index_map_persisted = @index_map ? true : false
         index_map = @index_map || AttributeLink::IndexMap.generate_from_paths(@input_path,nil)

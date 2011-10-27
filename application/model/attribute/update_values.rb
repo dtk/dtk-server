@@ -34,9 +34,9 @@ module XYZ
       array_slice_rows.each do |r|
         offset = execute_function(:append_to_array_value,attr_mh,r[:id],json_generate(r[:array_slice]))
         last_el = r[:array_slice].size-1
-        index_map = r[:output_is_scalar] ?
-          AttributeLink::IndexMap.generate_for_output_scalar(last_el,offset) :
-          AttributeLink::IndexMap.generate_from_bounds(0,last_el,offset) 
+        index_map = r[:output_is_array] ?
+          AttributeLink::IndexMap.generate_from_bounds(0,last_el,offset) :
+          AttributeLink::IndexMap.generate_for_output_scalar(last_el,offset) 
         attr_link_update = {
           :id => r[:attr_link_id],
           :index_map => index_map

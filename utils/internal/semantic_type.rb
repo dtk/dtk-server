@@ -108,6 +108,7 @@ module XYZ
     end
 
     #called when it is an equlaity setting between indexed values on input and output side. Can be the null index on one of the sides meaning to take whole value
+    #TODO: can simplify because only will be called when input is not an array
     def propagate_when_eq_indexed()
       #TODO: may flag more explicitly if from create or propagate vars
       if @index_map.nil? and (@input_path.nil? or @input_path.empty?) and (@output_path.nil? or @output_path.empty?)
@@ -125,7 +126,8 @@ module XYZ
       #TODO: may flag more explicitly if from create or propagate vars
       if @index_map.nil? and (@input_path.nil? or @input_path.empty?)
         new_row = output_value()
-        OutputArrayAppend.new(:array_slice => [new_row], :attr_link_id => @attr_link_id, :output_is_scalar => true)
+        output_is_array = @output_attr[:semantic_type_object].is_array?()
+        OutputArrayAppend.new(:array_slice => [new_row], :attr_link_id => @attr_link_id, :output_is_array => output_is_array)
       else
         index_map_persisted = @index_map ? true : false
         index_map = @index_map || AttributeLink::IndexMap.generate_from_paths(@input_path,nil)
@@ -133,7 +135,8 @@ module XYZ
       end
     end
 
-    ###### helper fns for propagation fns
+
+
     def ret_cartesian_product()
       output_v = 
         if output_semantic_type().is_array? 

@@ -523,16 +523,16 @@ update_dangling_links(); return #TODO: for debugging
     end
 
     def update_dangling_links()
-      dangling_link_info_cmps = get_objs(:cols => [:dangling_input_links_from_components])
-      dangling_link_info_nodes = get_objs(:cols => [:dangling_input_links_from_nodes])
+      dangling_links_info_cmps = get_objs(:cols => [:dangling_input_links_from_components])
+      dangling_links_info_nodes = get_objs(:cols => [:dangling_input_links_from_nodes])
 
       #TODO: if only keeping external more efficeint to filter in sql query
-      ndx_dangling_link_info = Hash.new
-      (dangling_link_info_cmps + dangling_link_info_nodes).each do |r|
+      ndx_dangling_links_info = Hash.new
+      (dangling_links_info_cmps + dangling_links_info_nodes).each do |r|
         link = r[:all_input_links]
         if link[:type] == "external"
           attr_id = link[:input_id]
-          p = ndx_dangling_link_info[attr_id] ||= {:attribute_id => attr_id, :other_links => Array.new}
+          p = ndx_dangling_links_info[attr_id] ||= {:attribute_id => attr_id, :other_links => Array.new}
           new_el = {
             :attribute_link_id => link[:id], 
             :index_map => link[:index_map], 
@@ -544,7 +544,7 @@ update_dangling_links(); return #TODO: for debugging
           end
         end
       end
-      Attribute.update_attribute_for_delete_link(model_handle(:attribute),ndx_dangling_link_info.values)
+      Attribute.update_attributes_for_delete_links(model_handle(:attribute),ndx_dangling_links_info.values)
     end
     private :update_dangling_links
 

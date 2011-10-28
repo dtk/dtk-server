@@ -14,9 +14,34 @@ module XYZ
       end.flatten
     end
 
+    def update_attributes_for_delete_links(attr_mh,links_info)
+      links_info.each{|link_info|update_attr_for_delete_link(attr_mh,link_info)}
+    end
+   private
+    def update_attr_for_delete_link(attr_mh,link_info)
+      #if (input) attribute is array then need to splice out; otherwise just need to set to null
+      input_index = input_index(link_info[:deleted_link])
+      if input_index.nil? or input_index.empty?
+        update_attr_for_delete_link__set_to_null(attr_mh,link_info)
+      else
+        update_attr_for_delete_link__splice_out(attr_mh,link_info,input_index)
+      end
+    end
 
-    def update_attribute_for_delete_link(attr_mh,link_info)
-      link_info #TODO: stub
+    def input_index(link_hash)
+      index_map = link_hash[:index_map]
+      unless index_map.size == 1
+        raise Error.new("not treating update_for_delete_link when index_map size is unequal to 1")
+      end   
+      index_map.first && index_map.first[:input]
+    end
+
+    def update_attr_for_delete_link__set_to_null(attr_mh,link_info)
+      nil #TODO: stub
+    end
+
+    def update_attr_for_delete_link__splice_out(attr_mh,link_info,input_index)
+      nil #TODO: stub
     end
 =begin
 sample link_info
@@ -35,7 +60,6 @@ sample link_info
    {:attribute_link_id=>2147498718, :index_map=>[{:output=>[], :input=>[0]}]}}]
 =end
 
-   private
     def update_attribute_values_aux(type,attr_mh,new_val_rows,cols,opts={})
       case type
         when "OutputArrayAppend"

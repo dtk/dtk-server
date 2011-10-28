@@ -200,6 +200,51 @@ module XYZ
            :cols => [:id,:display_name, :type, :input_id,:output_id]
          }]
 
+      #used when node is deleted to find and update dangling attribute linkss
+      virtual_column :dangling_input_links_from_components, :type => :json, :hidden => true, 
+      :remote_dependencies => 
+        cmp_attrs_on_node_def +
+        [
+         {
+           :model_name => :attribute_link,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond=>{:output_id => q(:attribute,:id)},
+           :cols => [:id, :type, :input_id,:index_map]
+         },
+         {
+           :model_name => :attribute_link,
+           :alias => :all_input_links,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond=>{:input_id => q(:attribute_link,:input_id)},
+           :cols => [:id,:type, :input_id,:index_map]
+         }]
+
+      virtual_column :dangling_input_links_from_nodes, :type => :json, :hidden => true, 
+      :remote_dependencies => 
+         [{
+           :model_name => :attribute,
+           :join_type => :inner,
+           :join_cond=>{:node_node_id => q(:node,:id)},
+           :cols => [:id,:display_name]
+          },
+         {
+           :model_name => :attribute_link,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond=>{:output_id => q(:attribute,:id)},
+           :cols => [:id, :type, :input_id,:index_map]
+         },
+         {
+           :model_name => :attribute_link,
+           :alias => :all_input_links,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond=>{:input_id => q(:attribute_link,:input_id)},
+           :cols => [:id,:type, :input_id,:index_map]
+         }]
+
 
       ##### end of for connection to ports and port links
 
@@ -471,10 +516,26 @@ module XYZ
 
     def destroy_and_delete()
       update_object!(:external_ref)
+
+update_dangling_links(); return #TODO: for debugging
       suceeeded = CommandAndControl.destroy_node?(self)
       Model.delete_instance(id_handle())if suceeeded
     end
 
+    def update_dangling_links()
+      dangling_link_info_cmps = get_objs(:cols => [:dangling_input_links_from_components])
+      dangling_link_info_nodes = get_objs(:cols => [:dangling_input_links_from_nodes])
+
+      #TODO: if only keeping external more efficeint to filter in sql query
+      dangling_link_info = (dangling_link_info_cmps + dangling_link_info_nodes).map do |r|
+        link = r[:all_input_links]
+        if link[:type] == "external"
+          link.merge(:deleted_link => link[:id] == r[:attribute_link][:id])
+        end
+      end.compact
+      nil
+    end
+    private :update_dangling_links
     def get_project()
       get_objects_col_from_sp_hash(:cols => [:project]).first
     end

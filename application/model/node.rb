@@ -516,10 +516,11 @@ module XYZ
 
     def destroy_and_delete()
       update_object!(:external_ref)
-
-update_dangling_links(); return #TODO: for debugging
       suceeeded = CommandAndControl.destroy_node?(self)
-      Model.delete_instance(id_handle())if suceeeded
+      if suceeeded
+        update_dangling_links()
+        Model.delete_instance(id_handle())
+      end
     end
 
     def update_dangling_links()

@@ -1,3 +1,10 @@
+#TODO: need to reaxmine the solutions below to handle race condition where multiple threads may be
+#simultaneously updating same attribute value; approaches used are
+#   select_process_and_update and use of sql fn :append_to_array_value
+# think can do away with need for sql fn by updating select_process_and_update to use transactions
+# however in all cases need to look at whether boundary of transaction needs to span more than db ops and
+# instead use thread critical sections  
+
 module XYZ
   module AttributeUpdateValuesClassMixin
     def update_attribute_values(attr_mh,new_val_rows,cols_x,opts={})
@@ -37,10 +44,25 @@ module XYZ
     end
 
     def update_attr_for_delete_link__set_to_null(attr_mh,link_info)
-      nil #TODO: stub
+      row_to_update = {
+        :id =>link_info[:attribute_id],
+        :value_derived => nil
+      }
+      Model.update_from_rows(attr_mh,[row_to_update])
     end
 
     def update_attr_for_delete_link__splice_out(attr_mh,link_info,input_index)
+      #if this is last link in output then null out
+      if link_info[:other_links].empty?
+        update_attr_for_delete_link__set_to_null(attr_mh,link_info)
+        return
+      end
+
+      pos_to_delete = input_index.first 
+      select_process_and_update(attr_mh,[:id,:value_derived],[link_info[:attribute_id]]) do |r|
+        r #TODO: stub
+      end
+      #splice out the value from teh deleted link and renumber if necssary
       nil #TODO: stub
     end
 =begin
@@ -66,7 +88,7 @@ sample link_info
           update_attribute_values_array_append(attr_mh,new_val_rows,cols,opts)
         when "OutputPartial"
           update_attribute_values_partial(attr_mh,new_val_rows,cols,opts)
-        else
+        else #TODO: below is for legacy form befor had Output objects; may convert to Output form
         update_select_ds = SQL::ArrayDataset.create(db,new_val_rows,attr_mh,:convert_for_update => true)
         update_from_select(attr_mh,FieldSet.new(:attribute,cols),update_select_ds,opts)
       end

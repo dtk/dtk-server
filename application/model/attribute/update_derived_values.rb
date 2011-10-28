@@ -1,6 +1,27 @@
 module XYZ
   class AttributeUpdateDerivedValues
     def self.update(attr_mh,new_val_rows,cols_x,opts={})
+      attr_ids = new_val_rows.map{|r|r[:id]}
+      critical_section(attr_ids) do
+        update_in_critical_section(attr_mh,new_val_rows,cols_x,opts={})
+      end
+    end
+
+    def self.update_for_delete_links(attr_mh,links_info)
+      attr_ids = links_info.map{|l|l[:attribute_id]}
+      critical_section(attr_ids) do
+        links_info.each{|link_info|update_attr_for_delete_link(attr_mh,link_info)}
+      end
+    end
+
+   private
+    Lock = Mutex.new
+    def self.critical_section(attr_ids,&block)
+      #passing in attr_ids, but not using now; may use if better to lock on per attribute basis
+      Lock.synchronize{yield}
+    end
+
+    def self.update_in_critical_section(attr_mh,new_val_rows,cols_x,opts={})
       #break up by type of row and process and aggregate
       return Array.new if new_val_rows.empty?
       cols = Array(cols_x)
@@ -14,11 +35,6 @@ module XYZ
       end.flatten
     end
 
-    def self.update_for_delete_links(attr_mh,links_info)
-      links_info.each{|link_info|update_attr_for_delete_link(attr_mh,link_info)}
-    end
-
-   private
     def self.update_attr_for_delete_link(attr_mh,link_info)
       #if (input) attribute is array then need to splice out; otherwise just need to set to null
       input_index = input_index(link_info[:deleted_link])

@@ -36,7 +36,7 @@ module XYZ
     end
 
     def input_index(link_hash)
-      input_output_index_aux(link_hash,:intput)
+      input_output_index_aux(link_hash,:input)
     end
     def output_index(link_hash)
       input_output_index_aux(link_hash,:output)
@@ -70,42 +70,25 @@ module XYZ
         #will only be one row; putting in 'each' just for coding succinctness
         rows.each{|r|r[:value_derived].delete_at(pos_to_delete)}
         rows
-        [] #TODO: for testing
       end
       #renumber other links (ones not deleted) if necessary
       links_to_renumber = link_info[:other_links].select do |other_link| 
-        input_index(link_hash).first > pos_to_delete
+        input_index(other_link).first > pos_to_delete
       end
       return if links_to_renumber.empty?
       renumber_links(attr_mh,links_to_renumber)
     end
 
-    def renumber_links(links_to_renumber)
+    def renumber_links(attr_mh,links_to_renumber)
       rows_to_update = links_to_renumber.map do |l|
         new_input_index = input_index(l).dup
-        new_input_index[0] += 1
+        new_input_index[0] -= 1
         new_index_map = [{:output => output_index(l), :input => new_input_index}]
         {:id => l[:attribute_link_id], :index_map => new_index_map}
       end
-      rows_to_update #TODO: stub
+      Model.update_from_rows(attr_mh.createMH(:attribute_link),rows_to_update)
     end
 
-=begin
-sample link_info
-[{:attribute_id=>2147498712,
-  :other_links=>
-   [{:attribute_link_id=>2147498722,
-     :index_map=>[{:output=>[0], :input=>[1]}]}],
-  :deleted_link=>
-   {:attribute_link_id=>2147498719,
-    :index_map=>[{:output=>[0], :input=>[0]}]}},
- {:attribute_id=>2147498713,
-  :other_links=>
-   [{:attribute_link_id=>2147498721,
-     :index_map=>[{:output=>[], :input=>[1]}]}],
-  :deleted_link=>
-   {:attribute_link_id=>2147498718, :index_map=>[{:output=>[], :input=>[0]}]}}]
-=end
 
     def update_attribute_values_aux(type,attr_mh,new_val_rows,cols,opts={})
       case type

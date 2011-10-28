@@ -1,4 +1,6 @@
 #TODO: need to reaxmine the solutions below to handle race condition where multiple threads may be
+#NOTE: removed call to :append_to_array_value and replaced with  select_process_and_update because did not work
+#for array of scalars and there could be other parsing errors
 #simultaneously updating same attribute value; approaches used are
 #   select_process_and_update and use of sql fn :append_to_array_value
 # think can do away with need for sql fn by updating select_process_and_update to use transactions
@@ -106,18 +108,32 @@ module XYZ
       #TODO: make sure cols is what expect
       #raise Error.new unless cols == [:value_derived]
       attr_link_updates = Array.new
-      array_slice_rows.each do |r|
-        offset = execute_function(:append_to_array_value,attr_mh,r[:id],json_generate(r[:array_slice]))
-        last_el = r[:array_slice].size-1
-        index_map = r[:output_is_array] ?
+      id_list = array_slice_rows.map{|r|r[:id]}
+      select_process_and_update(attr_mh,[:id,:value_derived],id_list) do |existing_vals|
+        ndx_existing_vals = existing_vals.inject({}) do |h,r|
+          h.merge(r[:id] => r[:value_derived])
+        end
+        attr_updates = array_slice_rows.map do |r|
+          attr_id = r[:id]
+          existing_val = ndx_existing_vals[attr_id]||[]
+          offset = existing_val.size
+          last_el = r[:array_slice].size-1
+          index_map = r[:output_is_array] ?
           AttributeLink::IndexMap.generate_from_bounds(0,last_el,offset) :
-          AttributeLink::IndexMap.generate_for_output_scalar(last_el,offset) 
-        attr_link_update = {
-          :id => r[:attr_link_id],
-          :index_map => index_map
-        }
-        attr_link_updates << attr_link_update
+            AttributeLink::IndexMap.generate_for_output_scalar(last_el,offset) 
+          attr_link_update = {
+            :id => r[:attr_link_id],
+            :index_map => index_map
+          }
+          attr_link_updates << attr_link_update
+          
+          #a row in new array
+          {:id => attr_id, :value_derived => existing_val + r[:array_slice]}
+        end
+        attr_updates
       end
+
+      #update the index_maps on teh links
       attr_link_mh = attr_mh.createMH(:attribute_link)
       update_from_rows(attr_link_mh,attr_link_updates)
     end

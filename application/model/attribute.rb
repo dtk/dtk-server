@@ -3,7 +3,7 @@ require  File.expand_path('attribute/group', File.dirname(__FILE__))
 require  File.expand_path('attribute/guard', File.dirname(__FILE__))
 require  File.expand_path('attribute/complex_type', File.dirname(__FILE__))
 require  File.expand_path('attribute/datatype', File.dirname(__FILE__))
-require  File.expand_path('attribute/update_values', File.dirname(__FILE__))
+require  File.expand_path('attribute/update_derived_values', File.dirname(__FILE__))
 module XYZ
   class Attribute < Model
     include AttributeGroupInstanceMixin
@@ -11,7 +11,6 @@ module XYZ
     extend AttrDepAnalaysisClassMixin
     extend AttributeGroupClassMixin
     extend AttributeGuardClassMixin
-    extend AttributeUpdateValuesClassMixin
 
     set_relation_name(:attribute,:attribute)
 

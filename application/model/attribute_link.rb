@@ -196,7 +196,7 @@ module XYZ
         propagate_proc.propagate().merge(:id => input_attr[:id])
       end
       return Array.new if new_val_rows.empty?
-      Attribute.update_attribute_values(attr_mh,new_val_rows,[:value_derived])
+      AttributeUpdateDerivedValues.update(attr_mh,new_val_rows,[:value_derived])
     end
 
 
@@ -247,7 +247,7 @@ module XYZ
 
       return Hash.new if new_val_rows.empty?
       opts = {:update_only_if_change => [:value_derived],:returning_cols => [:id]}
-      changed_ids = Attribute.update_attribute_values(attr_mh,new_val_rows,:value_derived,opts)
+      changed_ids = AttributeUpdateDerivedValues.update(attr_mh,new_val_rows,:value_derived,opts)
       #if no changes exit, otherwise recursively call propagate
       return Hash.new if changed_ids.empty?
 

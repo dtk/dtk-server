@@ -545,7 +545,8 @@ module XYZ
           end
         end
       end
-      Attribute.update_attributes_for_delete_links(model_handle(:attribute),ndx_dangling_links_info.values)
+      #TODO: need to get updated attributes to put on change list
+      AttributeUpdateDerivedValues.update_for_delete_links(model_handle(:attribute),ndx_dangling_links_info.values)
     end
     private :update_dangling_links
 

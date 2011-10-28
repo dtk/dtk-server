@@ -1,15 +1,6 @@
-#TODO: need to reaxmine the solutions below to handle race condition where multiple threads may be
-#NOTE: removed call to :append_to_array_value and replaced with  select_process_and_update because did not work
-#for array of scalars and there could be other parsing errors
-#simultaneously updating same attribute value; approaches used are
-#   select_process_and_update and use of sql fn :append_to_array_value
-# think can do away with need for sql fn by updating select_process_and_update to use transactions
-# however in all cases need to look at whether boundary of transaction needs to span more than db ops and
-# instead use thread critical sections  
-
 module XYZ
-  module AttributeUpdateValuesClassMixin
-    def update_attribute_values(attr_mh,new_val_rows,cols_x,opts={})
+  class AttributeUpdateDerivedValues
+    def self.update(attr_mh,new_val_rows,cols_x,opts={})
       #break up by type of row and process and aggregate
       return Array.new if new_val_rows.empty?
       cols = Array(cols_x)
@@ -23,11 +14,12 @@ module XYZ
       end.flatten
     end
 
-    def update_attributes_for_delete_links(attr_mh,links_info)
+    def self.update_for_delete_links(attr_mh,links_info)
       links_info.each{|link_info|update_attr_for_delete_link(attr_mh,link_info)}
     end
+
    private
-    def update_attr_for_delete_link(attr_mh,link_info)
+    def self.update_attr_for_delete_link(attr_mh,link_info)
       #if (input) attribute is array then need to splice out; otherwise just need to set to null
       input_index = input_index(link_info[:deleted_link])
       if input_index.nil? or input_index.empty?
@@ -37,13 +29,13 @@ module XYZ
       end
     end
 
-    def input_index(link_hash)
+    def self.input_index(link_hash)
       input_output_index_aux(link_hash,:input)
     end
-    def output_index(link_hash)
+    def self.output_index(link_hash)
       input_output_index_aux(link_hash,:output)
     end
-    def input_output_index_aux(link_hash,dir)
+    def self.input_output_index_aux(link_hash,dir)
       index_map = link_hash[:index_map]
       unless index_map.size == 1
         raise Error.new("not treating update_for_delete_link when index_map size is unequal to 1")
@@ -51,7 +43,7 @@ module XYZ
       index_map.first && index_map.first[dir]
     end
 
-    def update_attr_for_delete_link__set_to_null(attr_mh,link_info)
+    def self.update_attr_for_delete_link__set_to_null(attr_mh,link_info)
       row_to_update = {
         :id =>link_info[:attribute_id],
         :value_derived => nil
@@ -59,7 +51,7 @@ module XYZ
       Model.update_from_rows(attr_mh,[row_to_update])
     end
 
-    def update_attr_for_delete_link__splice_out(attr_mh,link_info,input_index)
+    def self.update_attr_for_delete_link__splice_out(attr_mh,link_info,input_index)
       #if this is last link in output then null out
       if link_info[:other_links].empty?
         update_attr_for_delete_link__set_to_null(attr_mh,link_info)
@@ -68,7 +60,7 @@ module XYZ
 
       #splice out the value from teh deleted link
       pos_to_delete = input_index.first 
-      select_process_and_update(attr_mh,[:id,:value_derived],[link_info[:attribute_id]]) do |rows|
+      Model.select_process_and_update(attr_mh,[:id,:value_derived],[link_info[:attribute_id]]) do |rows|
         #will only be one row; putting in 'each' just for coding succinctness
         rows.each{|r|r[:value_derived].delete_at(pos_to_delete)}
         rows
@@ -81,7 +73,7 @@ module XYZ
       renumber_links(attr_mh,links_to_renumber)
     end
 
-    def renumber_links(attr_mh,links_to_renumber)
+    def self.renumber_links(attr_mh,links_to_renumber)
       rows_to_update = links_to_renumber.map do |l|
         new_input_index = input_index(l).dup
         new_input_index[0] -= 1
@@ -92,7 +84,7 @@ module XYZ
     end
 
 
-    def update_attribute_values_aux(type,attr_mh,new_val_rows,cols,opts={})
+    def self.update_attribute_values_aux(type,attr_mh,new_val_rows,cols,opts={})
       case type
         when "OutputArrayAppend"
           update_attribute_values_array_append(attr_mh,new_val_rows,cols,opts)
@@ -100,16 +92,16 @@ module XYZ
           update_attribute_values_partial(attr_mh,new_val_rows,cols,opts)
         else #TODO: below is for legacy form befor had Output objects; may convert to Output form
         update_select_ds = SQL::ArrayDataset.create(db,new_val_rows,attr_mh,:convert_for_update => true)
-        update_from_select(attr_mh,FieldSet.new(:attribute,cols),update_select_ds,opts)
+        Model.update_from_select(attr_mh,FieldSet.new(:attribute,cols),update_select_ds,opts)
       end
     end
     #appends value to any array type; if the array does not exist already it creates it from fresh
-    def update_attribute_values_array_append(attr_mh,array_slice_rows,cols,opts={})
+    def self.update_attribute_values_array_append(attr_mh,array_slice_rows,cols,opts={})
       #TODO: make sure cols is what expect
       #raise Error.new unless cols == [:value_derived]
       attr_link_updates = Array.new
       id_list = array_slice_rows.map{|r|r[:id]}
-      select_process_and_update(attr_mh,[:id,:value_derived],id_list) do |existing_vals|
+      Model.select_process_and_update(attr_mh,[:id,:value_derived],id_list) do |existing_vals|
         ndx_existing_vals = existing_vals.inject({}) do |h,r|
           h.merge(r[:id] => r[:value_derived])
         end
@@ -133,19 +125,18 @@ module XYZ
         attr_updates
       end
 
-      #update the index_maps on teh links
-      attr_link_mh = attr_mh.createMH(:attribute_link)
-      update_from_rows(attr_link_mh,attr_link_updates)
+      #update the index_maps on the links
+      Model.update_from_rows(attr_mh.createMH(:attribute_link),attr_link_updates)
     end
 
-    def update_attribute_values_partial(attr_mh,partial_update_rows,cols,opts={})
+    def self.update_attribute_values_partial(attr_mh,partial_update_rows,cols,opts={})
       index_map_list = partial_update_rows.map{|r|r[:index_map] unless r[:index_map_persisted]}.compact
       cmp_mh = attr_mh.createMH(:component)
       AttributeLink::IndexMap.resolve_input_paths!(index_map_list,cmp_mh)
       id_list = partial_update_rows.map{|r|r[:id]}
 
       ndx_attr_updates = Hash.new
-      select_process_and_update(attr_mh,[:id,:value_derived],id_list) do |existing_vals|
+      Model.select_process_and_update(attr_mh,[:id,:value_derived],id_list) do |existing_vals|
         ndx_existing_vals = existing_vals.inject({}) do |h,r|
           h.merge(r[:id] => r[:value_derived])
         end
@@ -172,15 +163,11 @@ module XYZ
         end
       end.compact
       unless attr_link_updates.empty?
-        update_from_rows(attr_mh.createMH(:attribute_link),attr_link_updates)
+        Model.update_from_rows(attr_mh.createMH(:attribute_link),attr_link_updates)
       end
 
       #TODO: need to check what really changed
       attr_updates.map{|r|Aux.hash_subset(r,[:id])}
-    end
-
-    def json_generate(v)
-      (v.kind_of?(Hash) or v.kind_of?(Array)) ? JSON.generate(v) : v
     end
   end
 end

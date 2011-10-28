@@ -36,7 +36,7 @@ module XYZ
       create_sequence?(TOP_LOCAL_ID_SEQ,ID_TYPES[:local_id]) 
       
       #custom functions
-      # [none now]
+      create_custom_function__append_to_array_value?()
     end
 
     def create_table_common_extras?(db_rel)
@@ -231,6 +231,39 @@ module XYZ
       fn.kind_of?(Hash) ? fn : {:schema => :public, :fn => :fn}
     end
 #####custom functions
-    #[none now]
+    def create_custom_function__append_to_array_value?()
+      fn_args =
+        [
+         {:schema => FUNCTION_SCHEMA,:fn => :append_to_array_value},
+         "DECLARE
+    arr varchar[];
+    ret integer;
+    new_vals varchar;
+    max_index integer := 0;
+   BEGIN
+   SELECT  regexp_split_to_array(regexp_replace(value_derived,'.$',''),'},{')
+     INTO arr
+     FROM attribute.attribute WHERE id = _id and c = _c;
+   IF arr IS NULL THEN
+     ret := 0;
+     new_vals := _vals_to_app;
+   ELSE
+    ret := array_upper(arr,1);
+    new_vals := array_to_string(arr,'},{') || regexp_replace(_vals_to_app,'^.',',');
+  END IF;
+
+   UPDATE attribute.attribute SET value_derived = new_vals
+    WHERE id = _id and c = _c;
+   RETURN ret;
+  END",
+         {
+           :returns => :integer, 
+           :language => "plpgsql",
+           :behavior => :VOLATILE, 
+           :args => [{:_c => :integer}, {:_id => ID_TYPES[:id]},{:_vals_to_app => :varchar}]
+         }
+        ]
+      create_function?(*fn_args)
+    end
   end
 end

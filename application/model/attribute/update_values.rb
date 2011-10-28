@@ -36,11 +36,17 @@ module XYZ
     end
 
     def input_index(link_hash)
+      input_output_index_aux(link_hash,:intput)
+    end
+    def output_index(link_hash)
+      input_output_index_aux(link_hash,:output)
+    end
+    def input_output_index_aux(link_hash,dir)
       index_map = link_hash[:index_map]
       unless index_map.size == 1
         raise Error.new("not treating update_for_delete_link when index_map size is unequal to 1")
       end   
-      index_map.first && index_map.first[:input]
+      index_map.first && index_map.first[dir]
     end
 
     def update_attr_for_delete_link__set_to_null(attr_mh,link_info)
@@ -58,13 +64,32 @@ module XYZ
         return
       end
 
+      #splice out the value from teh deleted link
       pos_to_delete = input_index.first 
-      select_process_and_update(attr_mh,[:id,:value_derived],[link_info[:attribute_id]]) do |r|
-        r #TODO: stub
+      select_process_and_update(attr_mh,[:id,:value_derived],[link_info[:attribute_id]]) do |rows|
+        #will only be one row; putting in 'each' just for coding succinctness
+        rows.each{|r|r[:value_derived].delete_at(pos_to_delete)}
+        rows
+        [] #TODO: for testing
       end
-      #splice out the value from teh deleted link and renumber if necssary
-      nil #TODO: stub
+      #renumber other links (ones not deleted) if necessary
+      links_to_renumber = link_info[:other_links].select do |other_link| 
+        input_index(link_hash).first > pos_to_delete
+      end
+      return if links_to_renumber.empty?
+      renumber_links(attr_mh,links_to_renumber)
     end
+
+    def renumber_links(links_to_renumber)
+      rows_to_update = links_to_renumber.map do |l|
+        new_input_index = input_index(l).dup
+        new_input_index[0] += 1
+        new_index_map = [{:output => output_index(l), :input => new_input_index}]
+        {:id => l[:attribute_link_id], :index_map => new_index_map}
+      end
+      rows_to_update #TODO: stub
+    end
+
 =begin
 sample link_info
 [{:attribute_id=>2147498712,

@@ -14,6 +14,27 @@ module XYZ
       end.flatten
     end
 
+
+    def update_attribute_for_delete_link(attr_mh,link_info)
+      link_info #TODO: stub
+    end
+=begin
+sample link_info
+[{:attribute_id=>2147498712,
+  :other_links=>
+   [{:attribute_link_id=>2147498722,
+     :index_map=>[{:output=>[0], :input=>[1]}]}],
+  :deleted_link=>
+   {:attribute_link_id=>2147498719,
+    :index_map=>[{:output=>[0], :input=>[0]}]}},
+ {:attribute_id=>2147498713,
+  :other_links=>
+   [{:attribute_link_id=>2147498721,
+     :index_map=>[{:output=>[], :input=>[1]}]}],
+  :deleted_link=>
+   {:attribute_link_id=>2147498718, :index_map=>[{:output=>[], :input=>[0]}]}}]
+=end
+
    private
     def update_attribute_values_aux(type,attr_mh,new_val_rows,cols,opts={})
       case type

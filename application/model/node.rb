@@ -527,15 +527,27 @@ update_dangling_links(); return #TODO: for debugging
       dangling_link_info_nodes = get_objs(:cols => [:dangling_input_links_from_nodes])
 
       #TODO: if only keeping external more efficeint to filter in sql query
-      dangling_link_info = (dangling_link_info_cmps + dangling_link_info_nodes).map do |r|
+      ndx_dangling_link_info = Hash.new
+      (dangling_link_info_cmps + dangling_link_info_nodes).each do |r|
         link = r[:all_input_links]
         if link[:type] == "external"
-          link.merge(:deleted_link => link[:id] == r[:attribute_link][:id])
+          attr_id = link[:input_id]
+          p = ndx_dangling_link_info[attr_id] ||= {:attribute_id => attr_id, :other_links => Array.new}
+          new_el = {
+            :attribute_link_id => link[:id], 
+            :index_map => link[:index_map], 
+          }
+          if link[:id] == r[:attribute_link][:id]
+            p[:deleted_link] = new_el
+          else
+            p[:other_links] << new_el
+          end
         end
-      end.compact
-      nil
+      end
+      Attribute.update_attribute_for_delete_link(model_handle(:attribute),ndx_dangling_link_info.values)
     end
     private :update_dangling_links
+
     def get_project()
       get_objects_col_from_sp_hash(:cols => [:project]).first
     end

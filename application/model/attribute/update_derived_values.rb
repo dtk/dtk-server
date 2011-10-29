@@ -1,9 +1,9 @@
 module XYZ
   class AttributeUpdateDerivedValues
-    def self.update(attr_mh,new_val_rows,cols_x,opts={})
+    def self.update(attr_mh,new_val_rows,opts={})
       attr_ids = new_val_rows.map{|r|r[:id]}
       critical_section(attr_ids) do
-        update_in_critical_section(attr_mh,new_val_rows,cols_x,opts={})
+        update_in_critical_section(attr_mh,new_val_rows,opts={})
       end
     end
 
@@ -21,17 +21,16 @@ module XYZ
       Lock.synchronize{yield}
     end
 
-    def self.update_in_critical_section(attr_mh,new_val_rows,cols_x,opts={})
+    def self.update_in_critical_section(attr_mh,new_val_rows,opts={})
       #break up by type of row and process and aggregate
       return Array.new if new_val_rows.empty?
-      cols = Array(cols_x)
       ndx_new_val_rows = new_val_rows.inject({}) do |h,r|
         index = Aux::demodulize(r.class.to_s)
         (h[index] ||= Array.new) << r
         h
       end
       ndx_new_val_rows.map do |type,rows|
-        update_attribute_values_aux(type,attr_mh,rows,cols,opts)
+        update_attribute_values_aux(type,attr_mh,rows,opts)
       end.flatten
     end
 
@@ -100,21 +99,19 @@ module XYZ
     end
 
 
-    def self.update_attribute_values_aux(type,attr_mh,new_val_rows,cols,opts={})
+    def self.update_attribute_values_aux(type,attr_mh,new_val_rows,opts={})
       case type
         when "OutputArrayAppend"
-          update_attribute_values_array_append(attr_mh,new_val_rows,cols,opts)
+          update_attribute_values_array_append(attr_mh,new_val_rows,opts)
         when "OutputPartial"
-          update_attribute_values_partial(attr_mh,new_val_rows,cols,opts)
+          update_attribute_values_partial(attr_mh,new_val_rows,opts)
         else #TODO: below is for legacy form befor had Output objects; may convert to Output form
         update_select_ds = SQL::ArrayDataset.create(db,new_val_rows,attr_mh,:convert_for_update => true)
-        Model.update_from_select(attr_mh,FieldSet.new(:attribute,cols),update_select_ds,opts)
+        Model.update_from_select(attr_mh,FieldSet.new(:attribute,[:value_derived]),update_select_ds,opts)
       end
     end
     #appends value to any array type; if the array does not exist already it creates it from fresh
-    def self.update_attribute_values_array_append(attr_mh,array_slice_rows,cols,opts={})
-      #TODO: make sure cols is what expect
-      #raise Error.new unless cols == [:value_derived]
+    def self.update_attribute_values_array_append(attr_mh,array_slice_rows,opts={})
       attr_link_updates = Array.new
       id_list = array_slice_rows.map{|r|r[:id]}
       Model.select_process_and_update(attr_mh,[:id,:value_derived],id_list) do |existing_vals|
@@ -145,7 +142,7 @@ module XYZ
       Model.update_from_rows(attr_mh.createMH(:attribute_link),attr_link_updates)
     end
 
-    def self.update_attribute_values_partial(attr_mh,partial_update_rows,cols,opts={})
+    def self.update_attribute_values_partial(attr_mh,partial_update_rows,opts={})
       index_map_list = partial_update_rows.map{|r|r[:index_map] unless r[:index_map_persisted]}.compact
       cmp_mh = attr_mh.createMH(:component)
       AttributeLink::IndexMap.resolve_input_paths!(index_map_list,cmp_mh)

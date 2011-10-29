@@ -1,60 +1,58 @@
 module XYZ
   class AttributeLink < Model
     ##########################  add new links ##################
-    def self.create_attr_links(parent_idh,rows_to_create,opts={})
-      attr_info = get_attribute_info(parent_idh,rows_to_create)
-      create_attr_links_aux!(rows_to_create,parent_idh,attr_info,opts)
-    end
-
-    def self.create_port_and_attr_links(parent_idh,rows_to_create_x,opts={})
-      rows_to_create = Aux::deep_copy(rows_to_create_x)
-      attr_info = get_attribute_info(parent_idh,rows_to_create)
-      set_external_link_info!(rows_to_create,attr_info)
-      check_constraints(parent_idh,rows_to_create)
-      create_attr_links_aux!(rows_to_create,parent_idh,attr_info,opts)
-      process_external_link_defs?(parent_idh,rows_to_create,attr_info)
-
-      #TODO: assumption is that what is created by process_external_link_defs? has no bearing on l4 ports (as manifsted by using attr_links arg computred before process_external_link_defs? call
-      attr_links = rows_to_create.map{|r|{:input => attr_info[r[:input_id]],:output => attr_info[r[:output_id]]}}
-      Port.create_and_update_l4_ports_and_links?(parent_idh,attr_links)
-    end
-
-   private
-    def self.get_attribute_info(parent_idh,rows_to_create)
+    def self.create_attribute_links(parent_idh,rows_to_create,opts={})
+      return Array.new if rows_to_create.empty?
+      attr_mh = parent_idh.createMH(:attribute)
       attr_link_mh = parent_idh.create_childMH(:attribute_link)
-      #TODO: parent model name can also be node
-      attr_mh = attr_link_mh.createMH(:model_name => :attribute,:parent_model_name=>:component)
 
-      #set the parent id and ref and make 
+      attr_info = get_attribute_info(attr_mh,rows_to_create)
+      add_link_fns!(rows_to_create,attr_info)
+
+      #add parent_col and ref
       parent_col = attr_link_mh.parent_id_field_name()
       parent_id = parent_idh.get_id()
       rows_to_create.each do |row|
         row[parent_col] ||= parent_id
-        row[:ref] = "attribute_link:#{row[:input_id]}-#{row[:output_id]}"
+        row[:ref] ||= "attribute_link:#{row[:input_id]}-#{row[:output_id]}"
       end
 
+      rows_for_array_ds = rows_to_create.map{|row|Aux::hash_subset(row,row.keys - remove_keys)}
+      select_ds = SQL::ArrayDataset.create(db,rows_for_array_ds,attr_link_mh,:convert_for_create => true)
+      override_attrs = {}
+      field_set = FieldSet.new(model_name,rows_for_array_ds.first.keys)
+      returning_ids = create_from_select(attr_link_mh,field_set,select_ds,override_attrs,:returning_sql_cols=> [:id])
+      #insert the new ids into rows_to_create
+      returning_ids.each_with_index{|id_info,i|rows_to_create[i][:id] = id_info[:id]}
+
+      #augment attributes with port info; this is needed only if port is external
+      Attribute.update_port_info(attr_mh,rows_to_create)
+
+      propagate_from_create(attr_mh,attr_info,rows_to_create)
+    end
+
+   private
+    #mechanism to compensate for fact that cols arer being added by processing fns to rows_to_create that
+    #must be removed before they are saved
+    RemoveKeys = Array.new
+    def self.remove_keys()
+      RemoveKeys
+    end
+    def self.add_to_remove_keys(*keys)
+      keys.each{|k|RemoveKeys << k unless RemoveKeys.include?(k)}
+    end
+
+    def self.get_attribute_info(attr_mh,rows_to_create)
       endpoint_ids = rows_to_create.map{|r|[r[:input_id],r[:output_id]]}.flatten.uniq
       sp_hash = {
         :columns => [:id,:attribute_value,:semantic_type_object,:component_parent],
         :filter => [:oneof, :id, endpoint_ids]
       }
-      attr_rows = get_objects_from_sp_hash(attr_mh,sp_hash)
+      attr_rows = get_objs(attr_mh,sp_hash)
       attr_rows.inject({}){|h,attr|h.merge(attr[:id] => attr)}
     end
 
-    def self.set_external_link_info!(rows_to_create,attr_info)
-      rows_to_create.each do |row|
-        input_attr = attr_info[row[:input_id]]
-        output_attr = attr_info[row[:output_id]]
-        output_cmp = output_attr[:component_parent]
-        row[:link_defs] = input_attr[:component_parent][:link_defs_external]
-        conn_info = row[:link_defs] && row[:link_defs].match_component(output_cmp)
-        row[:conn_info] = conn_info if conn_info
-      end
-    end
-
-    def self.check_constraints(parent_idh,rows_to_create)
-      attr_mh = parent_idh.createMH(:model_name => :attribute,:parent_model_name=>:component)
+    def self.check_constraints(attr_mh,rows_to_create)
       #TODO: may modify to get all constraints from  conn_info_list
       rows_to_create.each do |row| 
         #TODO: right now constraints just on input, not output, attributes
@@ -72,49 +70,15 @@ module XYZ
       end
     end
 
-    #modifies rows_to_create by inserting created ids and link fn in it
-    def self.create_attr_links_aux!(rows_to_create,parent_idh,attr_info,opts={})
-      #form create rows_to_create by adding link function and removing :input_path,:output_path
+    def self.add_link_fns!(rows_to_create,attr_info)
       rows_to_create.each do |row|
         input_attr = attr_info[row[:input_id]].merge(row[:input_path] ? {:input_path => row[:input_path]} : {})
         output_attr = attr_info[row[:output_id]].merge(row[:output_path] ? {:output_path => row[:output_path]} : {})
         row[:function] = SemanticType.find_link_function(input_attr,output_attr)
       end
-
-      #create attribute_links
-      remove_keys = [:input_path,:output_path,:conn_info, :link_defs]
-      rows_for_array_ds = rows_to_create.map{|row|Aux::hash_subset(row,row.keys - remove_keys)}
-      attr_link_mh = parent_idh.create_childMH(:attribute_link)
-      select_ds = SQL::ArrayDataset.create(db,rows_for_array_ds,attr_link_mh,:convert_for_create => true)
-      override_attrs = {}
-      field_set = FieldSet.new(attr_link_mh[:model_name],rows_for_array_ds.first.keys)
-      returning_ids = create_from_select(attr_link_mh,field_set,select_ds,override_attrs,:returning_sql_cols=> [:id])
-      #insert the new ids into rows_to_create
-      returning_ids.each_with_index{|id_info,i|rows_to_create[i][:id] = id_info[:id]}
-
-      attr_mh = attr_link_mh.createMH(:model_name => :attribute,:parent_model_name=>:component)
-      propagate_from_create(attr_mh,attr_info,rows_to_create)
     end
+    add_to_remove_keys :input_path,:output_path
 
-    def self.process_external_link_defs?(parent_idh,rows_to_create,attr_info)
-      rows_to_create.each do |row|
-        process_external_link_defs_aux?(parent_idh,row,attr_info)
-      end
-    end
-
-    #TODO: can better bulk up operations
-    def self.process_external_link_defs_aux?(parent_idh,attr_link,attr_info)
-      conn_info = attr_link[:conn_info]
-      return unless conn_info
-      local_cmp = attr_info[attr_link[:input_id]][:component_parent]
-      remote_cmp = attr_info[attr_link[:output_id]][:component_parent]
-      context = ExternalLinkDefContext.new(local_cmp,remote_cmp,conn_info[:local_type],conn_info[:remote_type])
-      (conn_info[:events]||[]).each{|ev|ev.process!(context)}
-      conn_info[:attribute_mappings].each do |attr_mapping|
-        link = attr_mapping.ret_link(context)
-        create_attr_links(parent_idh,[link])
-      end
-    end
 
 ####################
    public
@@ -232,7 +196,7 @@ module XYZ
         propagate_proc.propagate().merge(:id => input_attr[:id])
       end
       return Array.new if new_val_rows.empty?
-      Attribute.update_attribute_values(attr_mh,new_val_rows,[:value_derived])
+      AttributeUpdateDerivedValues.update(attr_mh,new_val_rows,[:value_derived])
     end
 
 
@@ -283,7 +247,7 @@ module XYZ
 
       return Hash.new if new_val_rows.empty?
       opts = {:update_only_if_change => [:value_derived],:returning_cols => [:id]}
-      changed_ids = Attribute.update_attribute_values(attr_mh,new_val_rows,:value_derived,opts)
+      changed_ids = AttributeUpdateDerivedValues.update(attr_mh,new_val_rows,:value_derived,opts)
       #if no changes exit, otherwise recursively call propagate
       return Hash.new if changed_ids.empty?
 
@@ -325,6 +289,10 @@ module XYZ
       def self.generate_from_bounds(lower_bound,upper_bound,offset)
         create_from_array((lower_bound..upper_bound).map{|i|{:output => [i], :input => [i+offset]}})
       end
+      #TODO: may be able to be simplified because may only called be caleld with upper_bound == 0
+      def self.generate_for_output_scalar(upper_bound,offset)
+        create_from_array((0..upper_bound).map{|i|{:output => [], :input => [i+offset]}})
+      end
 
       def input_array_indexes()
         ret = Array.new
@@ -334,11 +302,11 @@ module XYZ
         end 
       end
 
-      def self.resolve_input_paths!(index_map_list)
+      def self.resolve_input_paths!(index_map_list,component_mh)
         return if index_map_list.empty?
         paths = Array.new
         index_map_list.each{|im|im.each{|im_el|paths << im_el[:input]}}
-        IndexMapPath.resolve_paths!(paths)
+        IndexMapPath.resolve_paths!(paths,component_mh)
       end
 
      private
@@ -406,14 +374,13 @@ module XYZ
       end
 
       #TODO: more efficient and not needed if can be resolved when get index
-      def self.resolve_paths!(path_list)
+      def self.resolve_paths!(path_list,component_mh)
         ndx_cmp_idhs = Hash.new
         path_list.each do |index_map_path|
           index_map_path.each_with_index do |el,i|
             next unless el.kind_of?(Hash)
-            next unless idh = (el[:create_component_index]||{})[:component_idh] 
-            id = idh.get_id()
-            ndx_cmp_idhs[id] ||= {:idh => idh, :elements => Array.new}
+            next unless id = (el[:create_component_index]||{})[:component_id] 
+            ndx_cmp_idhs[id] ||= {:idh => component_mh.createIDH(:id => id), :elements => Array.new}
             ndx_cmp_idhs[id][:elements] << {:path => index_map_path, :i => i}
           end
         end
@@ -433,7 +400,12 @@ module XYZ
       def self.create_from_array(a)
         ret = new()
         return ret unless a
-        a.each{|el| ret << el}
+        a.each do |el| 
+          if el.kind_of?(String) and el =~ /^[0-9]+$/
+            el = el.to_i
+          end
+          ret << el
+        end
         ret
       end
 
@@ -445,7 +417,7 @@ module XYZ
       end
     end
 
-######################## TODO: see whichj of below is tsil used
+######################## TODO: see whichj of below is still used
     def self.get_legal_connections(parent_id_handle)
       c = parent_id_handle[:c]
       parent_id = IDInfoTable.get_id_from_id_handle(parent_id_handle)

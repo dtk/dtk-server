@@ -3,6 +3,7 @@ module XYZ
     #returns all changes
     #TODO: flat list now; look at nested list reflecting hierarchical plan decomposition
     #TODO: rather than needing look up existing values for output vars; might allow change/new values to be provided as function arguments
+    #TODO: may clean up to avoid needing two eqal length arrays: output_attr_id_handles,parent_id_handles (when later is not nil)
     def propagate(output_attr_id_handles,parent_id_handles=nil)
       ret = Hash.new
       return ret if output_attr_id_handles.empty?
@@ -33,62 +34,31 @@ module XYZ
       if parent_id_handles
         output_attr_ids.each_with_index{|id,i|output_id__parent_idhs[id] = parent_id_handles[i]}
       end
-      ret
-    end
-=begin
 
-
+      #compute direct changes and input for nested propagation
       direct_changes = Hash.new
       nested_parent_idhs = nil
-      nested_idhs = Array.new
-      changed_ids.each do |r|
+      nested_idhs = changed_input_attrs.map do |r|
         id = r[:id]
-        direct_changes[id] = change_info[id]
-        nested_idhs << attr_mh.createIDH(:id => id)
-        if parent_idh = change_info[id][:parent]
-          nested_parent_idhs ||= Array.new
-          nested_parent_idhs << parent_idh
+        change = {
+          :new_item => attr_mh.createIDH(:id => r[:id]),
+          :change => {:old => r[:old_value_derived], :new => r[:value_derived]}
+        }
+        if parent_idh = output_id__parent_idhs[r[:source_output_id]]
+          change.merge!(:parent => parent_idh)
+          #assumption if this fires for one element it fires from them all (if one has a parent, they all do)
+          (nested_parent_idhs ||= Array.new) << parent_idh
         end
+        direct_changes[id] = change 
+        attr_mh.createIDH(:id => id)
       end
       
+      #nested (recursive) propagatation call
       propagated_changes = propagate(nested_idhs,nested_parent_idhs)
       #return all changes
       #TODO: using flat structure wrt to parents; so if parents pushed down use parents associated with trigger for change
       direct_changes.merge(propagated_changes)
-
-      change_info = Hash.new
-      new_val_rows = Array.new
-      
-
-        change = {
-          :new_item => attr_mh.createIDH(:guid => input_attr_row[:id], :display_name => input_attr_row[:display_name]),
-          :change => {:old => input_attr_row[:value_derived], :new => new_value_row[:value_derived]}
-        }
-        change.merge!(:parent => ndx_parent_idhs[row[:id]]) if ndx_parent_idhs[row[:id]]
-        change_info[input_attr_row[:id]] = change
-      end
     end
-
-
-
-      attrs_to_update.each_with_index do |row,i|
-        input_attr_row = row[:input_attribute]
-        output_attr_row = row
-        propagate_proc = PropagateProcessor.new(row[:attribute_link],input_attr_row,output_attr_row)
-
-        new_value_row = propagate_proc.propagate().merge(:id => input_attr_row[:id])
-
-        new_val_rows << new_value_row
-
-        change = {
-          :new_item => attr_mh.createIDH(:guid => input_attr_row[:id], :display_name => input_attr_row[:display_name]),
-          :change => {:old => input_attr_row[:value_derived], :new => new_value_row[:value_derived]}
-        }
-        change.merge!(:parent => parent_map[row[:id]]) if parent_map[row[:id]]
-        change_info[input_attr_row[:id]] = change
-      end
-=end
-
 
     def propagate_from_create(attr_mh,attr_info,attr_link_rows)
       new_val_rows = attr_link_rows.map do |attr_link_row|

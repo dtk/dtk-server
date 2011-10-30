@@ -1,5 +1,5 @@
 module XYZ
-  module AttrLinkPropagateChangesClassMixn
+  module AttrLinkPropagateChangesClassMixin
     #returns all changes
     #TODO: flat list now; look at nested list reflecting hierarchical plan decomposition
     #TODO: rather than needing look up existing values for output vars; might allow change/new values to be provided as function arguments
@@ -21,18 +21,40 @@ module XYZ
       #compute update deltas
       update_deltas = compute_update_deltas(attrs_to_update)
 
+      #make actual changes
       opts = {:update_only_if_change => [:value_derived],:returning_cols => [:id]}
-      changed_ids = AttributeUpdateDerivedValues.update(attr_mh,update_deltas,opts)
+      changed_input_attrs = AttributeUpdateDerivedValues.update(attr_mh,update_deltas,opts)
+
       #if no changes exit, otherwise recursively call propagate
-      return ret if changed_ids.empty?
+      return ret if changed_input_attrs.empty?
 
-
-      parent_map = Hash.new
+      #input attr parents are set to associated output attrs parent
+      output_id__parent_idhs = Hash.new
       if parent_id_handles
-        output_attr_ids.each_with_index{|id,i|parent_map[id] = parent_id_handles[i]}
+        output_attr_ids.each_with_index{|id,i|output_id__parent_idhs[id] = parent_id_handles[i]}
       end
+      ret
+    end
+=begin
 
 
+      direct_changes = Hash.new
+      nested_parent_idhs = nil
+      nested_idhs = Array.new
+      changed_ids.each do |r|
+        id = r[:id]
+        direct_changes[id] = change_info[id]
+        nested_idhs << attr_mh.createIDH(:id => id)
+        if parent_idh = change_info[id][:parent]
+          nested_parent_idhs ||= Array.new
+          nested_parent_idhs << parent_idh
+        end
+      end
+      
+      propagated_changes = propagate(nested_idhs,nested_parent_idhs)
+      #return all changes
+      #TODO: using flat structure wrt to parents; so if parents pushed down use parents associated with trigger for change
+      direct_changes.merge(propagated_changes)
 
       change_info = Hash.new
       new_val_rows = Array.new
@@ -42,10 +64,13 @@ module XYZ
           :new_item => attr_mh.createIDH(:guid => input_attr_row[:id], :display_name => input_attr_row[:display_name]),
           :change => {:old => input_attr_row[:value_derived], :new => new_value_row[:value_derived]}
         }
-        change.merge!(:parent => parent_map[row[:id]]) if parent_map[row[:id]]
+        change.merge!(:parent => ndx_parent_idhs[row[:id]]) if ndx_parent_idhs[row[:id]]
         change_info[input_attr_row[:id]] = change
       end
-=begin
+    end
+
+
+
       attrs_to_update.each_with_index do |row,i|
         input_attr_row = row[:input_attribute]
         output_attr_row = row
@@ -65,24 +90,6 @@ module XYZ
 =end
 
 
-      #TODO: using flat structure wrt to parents; so if parents pushed down use parents associated with trigger for change
-      pruned_changes = Hash.new
-      nested_parent_idhs = nil
-      nested_idhs = Array.new
-      changed_ids.each do |r|
-        id = r[:id]
-        pruned_changes[id] = change_info[id]
-        nested_idhs << attr_mh.createIDH(:id => id)
-        if parent_idh = change_info[id][:parent]
-          nested_parent_idhs ||= Array.new
-          nested_parent_idhs << parent_idh
-        end
-      end
-      
-      propagated_changes = propagate(nested_idhs,nested_parent_idhs)
-      pruned_changes.merge(propagated_changes)
-    end
-
     def propagate_from_create(attr_mh,attr_info,attr_link_rows)
       new_val_rows = attr_link_rows.map do |attr_link_row|
         input_attr = attr_info[attr_link_row[:input_id]]
@@ -99,7 +106,7 @@ module XYZ
         input_attr_row = row[:input_attribute]
         output_attr_row = row
         propagate_proc = PropagateProcessor.new(row[:attribute_link],input_attr_row,output_attr_row)
-        propagate_proc.propagate().merge(:id => input_attr_row[:id])
+        propagate_proc.propagate().merge(:id => input_attr_row[:id], :source_output_id => row[:id])
       end
     end
   end

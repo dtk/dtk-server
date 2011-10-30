@@ -1,7 +1,7 @@
 require  File.expand_path('attribute_link/propagate_changes', File.dirname(__FILE__))
 module XYZ
   class AttributeLink < Model
-    extend AttrLinkPropagateChangesClassMixn
+    extend AttrLinkPropagateChangesClassMixin
 
     ##########################  add new links ##################
     def self.create_attribute_links(parent_idh,rows_to_create,opts={})

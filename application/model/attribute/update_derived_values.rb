@@ -1,17 +1,21 @@
 module XYZ
   class AttributeUpdateDerivedValues
     def self.update(attr_mh,update_deltas,opts={})
+      ret = Array.new
       attr_ids = update_deltas.map{|r|r[:id]}
       critical_section(attr_ids) do
-        update_in_critical_section(attr_mh,update_deltas,opts={})
+        ret = update_in_critical_section(attr_mh,update_deltas,opts={})
       end
+      ret
     end
 
     def self.update_for_delete_links(attr_mh,links_info)
+      ret = Array.new
       attr_ids = links_info.map{|l|l[:attribute_id]}
       critical_section(attr_ids) do
-        links_info.each{|link_info|update_attr_for_delete_link(attr_mh,link_info)}
+        ret = links_info.each{|link_info|update_attr_for_delete_link(attr_mh,link_info)}
       end
+      ret
     end
 
    private

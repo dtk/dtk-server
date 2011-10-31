@@ -1,5 +1,6 @@
 #TODO: chaneg name from semantio type to data type
 module XYZ
+  #TODO: may move PropagateProcessor under model/attribute_link
   class PropagateProcessor
     class Output < HashObject
     end
@@ -18,6 +19,7 @@ module XYZ
           propagate_when_eq_indexed()
          when "array_append"
           propagate_when_array_append()
+          #TODO: may deprecate rest
          when "select_one"
           propagate_when_select_one()
          when "sap_config__l4" 

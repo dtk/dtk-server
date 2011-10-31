@@ -3,6 +3,7 @@ require  File.expand_path('attribute/group', File.dirname(__FILE__))
 require  File.expand_path('attribute/guard', File.dirname(__FILE__))
 require  File.expand_path('attribute/complex_type', File.dirname(__FILE__))
 require  File.expand_path('attribute/datatype', File.dirname(__FILE__))
+require  File.expand_path('attribute/propagate_changes', File.dirname(__FILE__))
 require  File.expand_path('attribute/update_derived_values', File.dirname(__FILE__))
 module XYZ
   class Attribute < Model
@@ -11,6 +12,7 @@ module XYZ
     extend AttrDepAnalaysisClassMixin
     extend AttributeGroupClassMixin
     extend AttributeGuardClassMixin
+    extend  AttrPropagateChangesClassMixin
 
     set_relation_name(:attribute,:attribute)
 
@@ -433,69 +435,6 @@ module XYZ
       AttributeComplexType.serialze(token_array)
     end
 
-    #TODO: want to rename to indicate this is propgate while logging state changes; or have a flag to control whether state changes are logged
-    def self.update_and_propagate_attributes(attr_mh,attribute_rows)
-      return Array.new if attribute_rows.empty?
-      attr_idhs = attribute_rows.map{|r|attr_mh.createIDH(:id => r[:id])}
-      existing_values = get_objects_in_set_from_sp_hash(attr_idhs,:columns => [:id,:value_asserted]).inject({}) do |h,r|
-        h.merge(r[:id] => r)
-      end
-
-      #prune tattributes change paths for attrribues taht have not changed
-      ndx_ch_attr_info = Hash.new
-      attribute_rows.each do |r|
-        id = r[:id]
-        if existing_values[id].nil?
-          ndx_ch_attr_info[id] = Aux::hash_subset(r,[:id,:value_asserted])
-          next
-        end
-
-        new_val = r[:value_asserted]
-        existing_val = existing_values[id][:value_asserted]
-        if r[:change_paths]
-          r[:change_paths].each do |path|
-            next if unravelled_value(new_val,path) == unravelled_value(existing_val,path)
-            ndx_ch_attr_info[id] ||= Aux::hash_subset(r,[:id,:value_asserted]).merge(:change_paths => Array.new,:old_value_asserted => existing_val)
-            ndx_ch_attr_info[id][:change_paths] << path
-          end
-        elsif not (existing_val == new_val)
-          ndx_ch_attr_info[id] = Aux::hash_subset(r,[:id,:value_asserted]).merge(:old_value_asserted => existing_val) 
-        end
-      end
-
-      return nil if ndx_ch_attr_info.empty?
-      changed_attrs_info = ndx_ch_attr_info.values
-      #TODO: when have comprehensive incremental change use Attribute.update_changed_values (and generalzie to take asserted as well as derived attributes)
-      update_rows = changed_attrs_info.map{|r|Aux::hash_subset(r,[:id,:value_asserted])}
-      update_from_rows(attr_mh,update_rows,:partial_value => true)
-
-      #use sample attribute to find containing datacenter
-      sample_attr_idh = attr_mh.createIDH(:id => changed_attrs_info.first[:id])
-      #TODO: anymore efficieny way do do this; can pass datacenter in fn
-      parent_idh = sample_attr_idh.get_top_container_id_handle(:datacenter)
-
-      changes = changed_attrs_info.map do |r|
-        hash = {
-          :new_item => attr_mh.createIDH(:id => r[:id]),
-          :parent => parent_idh,
-          :change => {
-            :old => json_form(r[:old_value_asserted]),
-            :new => json_form(r[:value_asserted])
-          }
-        }
-        hash.merge!(:change_paths => r[:change_paths]) if r[:change_paths]
-        hash
-      end
-      change_idhs = StateChange.create_pending_change_items(changes)
-      changes_to_propagate = Array.new
-      change_idhs.each_with_index do |change_idh,i|
-        change = changes[i]
-        changes_to_propagate << AttributeChange.new(change[:new_item],change[:change][:new],change_idh)
-      end
-      nested_changes = propagate_changes(changes_to_propagate)
-      StateChange.create_pending_change_items(nested_changes.values)
-    end
-
     def self.unravelled_value(val,path)
       return nil unless Aux.can_take_index?(val)
       path.size == 1 ? val[path.first] : unravelled_value(val[path.first],path[1..path.size-1])
@@ -560,12 +499,6 @@ module XYZ
       new_sap_attr_idh = create_from_rows(attr_mh,new_sap_attr_rows, :convert => true).first
       
       [sap_config_attr_idh,new_sap_attr_idh]
-    end
-
-   private
-    ###### helper fns
-    def self.propagate_changes(attr_changes) 
-      AttributeLink.propagate(attr_changes.map{|x|x.id_handle},attr_changes.map{|x|x.state_change_id_handle})
     end
 
 ###################################################################

@@ -46,6 +46,7 @@ module XYZ
         attr_mh = self[:node].model_handle(:attribute)
         update_rows = updated_attrs.map{|attr|{:id => attr[:id], :value_asserted => attr[:value_asserted]}}
         Model.update_from_rows(attr_mh,update_rows)
+        #TODO: need to determine whether want to create state change objects and if so whether want to link to state change parents
         AttributeLink.propagate(updated_attrs.map{|attr|attr_mh.createIDH(:id => attr[:id])})
       end
 

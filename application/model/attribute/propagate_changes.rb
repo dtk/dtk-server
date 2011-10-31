@@ -36,38 +36,71 @@ module XYZ
       #TODO: when have comprehensive incremental change use Attribute.update_changed_values (and generalzie to take asserted as well as derived attributes)
       update_rows = changed_attrs_info.map{|r|Aux::hash_subset(r,[:id,:value_asserted])}
 
-      #make acual cahnges in database
+      #make acual changes in database
       update_from_rows(attr_mh,update_rows,:partial_value => true)
 
+      change_hashes_to_propagate = create_change_hashes(attr_mh,changed_attrs_info,:value_type => :asserted)
+      direct_scs = StateChange.create_pending_change_items(change_hashes_to_propagate)
+
+      ndx_nested_change_hashes = propagate_changes(change_hashes_to_propagate)
+
+      #TODO: need to figure ebst place to put persistence statement for state changes; complication where later state changes reference earlier ones; otherwise we can just do peristsnec at the end for whole list
+      direct_scs + StateChange.create_pending_change_items(ndx_nested_change_hashes.values)
+    end
+
+    def propagate_changes(change_hashes) 
+      ret = Hash.new
+      return ret if change_hashes.empty?
+      output_attr_idhs = change_hashes.map{|ch|ch[:new_item]}
+      scalar_attrs = [:id,:value_asserted,:value_derived,:semantic_type]
+      attr_link_rows = get_objs_in_set(output_attr_idhs,:columns => scalar_attrs + [:linked_attributes])
+
+      #dont propagate to attributes with asserted values TODO: push this restriction into search pattern
+      attr_link_rows.reject!{|r|(r[:input_attribute]||{})[:value_asserted]}
+      return ret if attr_link_rows.empty?
+
+      #output_id__parent_idhs used to splice in parent_id (if it exists
+      output_id__parent_idhs =  change_hashes.inject({}) do |h,ch|
+        h.merge(ch[:new_item].get_id() => ch[:parent])
+      end
+
+      attrs_links_to_update = attr_link_rows.map do |r|
+        output_attr = Aux::hash_subset(r,scalar_attrs)
+        {
+          :input_attribute => r[:input_attribute],
+          :output_attribute => output_attr,
+          :attribute_link => r[:attribute_link],
+          :parent_idh => output_id__parent_idhs[output_attr[:id]]
+        }
+      end
+      attr_mh = output_attr_idhs.first.createMH() #first is just a sample
+      AttributeLink.propagate(attr_mh,attrs_links_to_update)
+    end
+
+    private
+    def create_change_hashes(attr_mh,changed_attrs_info,opts={})
+      ret = Array.new
       #use sample attribute to find containing datacenter
       sample_attr_idh = attr_mh.createIDH(:id => changed_attrs_info.first[:id])
       #TODO: anymore efficieny way do do this; can pass datacenter in fn
+      #TODO: when in nested call want to use passed in pareent
       parent_idh = sample_attr_idh.get_top_container_id_handle(:datacenter)
-
-      changes = changed_attrs_info.map do |r|
+      val_index = (opts[:value_type] == :asserted ? :value_asserted : :value_derived)
+      old_val_index = (opts[:value_type] == :asserted ? :old_value_asserted : :old_value_derived)
+      changed_attrs_info.map do |r|
         hash = {
           :new_item => attr_mh.createIDH(:id => r[:id]),
           :parent => parent_idh,
           :change => {
-            :old => json_form(r[:old_value_asserted]),
-            :new => json_form(r[:value_asserted])
+            :old => json_form(r[old_val_index]),
+            :new => json_form(r[val_index])
           }
         }
         hash.merge!(:change_paths => r[:change_paths]) if r[:change_paths]
         hash
       end
-      change_idhs = StateChange.create_pending_change_items(changes)
-      changes_to_propagate = Array.new
-      change_idhs.each_with_index do |change_idh,i|
-        change = changes[i]
-        changes_to_propagate << AttributeChange.new(change[:new_item],change[:change][:new],change_idh)
-      end
-      nested_changes = propagate_changes(changes_to_propagate)
-      StateChange.create_pending_change_items(nested_changes.values)
     end
-   private
-    def propagate_changes(attr_changes) 
-      AttributeLink.propagate(attr_changes.map{|x|x.id_handle},attr_changes.map{|x|x.state_change_id_handle})
-    end
+
+
   end
 end

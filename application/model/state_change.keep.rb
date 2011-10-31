@@ -94,4 +94,12 @@ module XYZ
       create_from_rows(model_handle,rows,{:convert => true})
     end
   end
+  class AttributeChange 
+    attr_reader :id_handle,:changed_value,:state_change_id_handle
+    def initialize(id_handle,changed_value,state_change_id_handle)
+      @id_handle = id_handle
+      @changed_value = changed_value
+      @state_change_id_handle = state_change_id_handle
+    end
+  end
 end

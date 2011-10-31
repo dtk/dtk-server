@@ -76,6 +76,7 @@ module XYZ
         ref = "#{ref_prefix}#{(i+=1).to_s}"
         id = item[:new_item].get_id()
         parent_id = item[:parent].get_id()
+        #TODO: think wil change to have display name derived on spot; problem is for example name of node changes after state change saved
         display_name = display_name_prefix + (item[:new_item][:display_name] ? "(#{item[:new_item][:display_name]})" : "")
         hash = {
           :ref => ref,

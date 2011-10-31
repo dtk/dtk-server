@@ -83,7 +83,7 @@ module XYZ
       #use sample attribute to find containing datacenter
       sample_attr_idh = attr_mh.createIDH(:id => changed_attrs_info.first[:id])
       #TODO: anymore efficieny way do do this; can pass datacenter in fn
-      #TODO: when in nested call want to use passed in pareent
+      #TODO: when in nested call want to use passed in parent
       parent_idh = sample_attr_idh.get_top_container_id_handle(:datacenter)
       val_index = (opts[:value_type] == :asserted ? :value_asserted : :value_derived)
       old_val_index = (opts[:value_type] == :asserted ? :old_value_asserted : :old_value_derived)
@@ -92,8 +92,11 @@ module XYZ
           :new_item => attr_mh.createIDH(:id => r[:id]),
           :parent => parent_idh,
           :change => {
-            :old => json_form(r[old_val_index]),
-            :new => json_form(r[val_index])
+            #TODO: check will before it had a json encode on values
+            :old => r[old_val_index],
+            :new => r[val_index],
+#            :old => json_form(r[old_val_index]),
+#            :new => json_form(r[val_index])
           }
         }
         hash.merge!(:change_paths => r[:change_paths]) if r[:change_paths]

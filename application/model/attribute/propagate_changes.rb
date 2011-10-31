@@ -103,7 +103,5 @@ module XYZ
         hash
       end
     end
-
-
   end
 end

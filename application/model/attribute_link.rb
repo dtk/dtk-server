@@ -31,10 +31,27 @@ module XYZ
       #augment attributes with port info; this is needed only if port is external
       Attribute.update_port_info(attr_mh,rows_to_create)
 
-      propagate_from_create(attr_mh,attr_info,rows_to_create)
+      #propagate attribute values
+      #TODO: last arg is stubb; need target above it
+      ndx_nested_change_hashes = propagate_from_create(attr_mh,attr_info,rows_to_create,parent_idh)
+      StateChange.create_pending_change_items(ndx_nested_change_hashes.values)
     end
 
    private
+    def  self.propagate_from_create(attr_mh,attr_info,attr_links,change_parent_idh)
+      attrs_links_to_update = attr_links.map do |attr_link|
+        input_attr = attr_info[attr_link[:input_id]]
+        output_attr = attr_info[attr_link[:output_id]]
+        {
+          :input_attribute => input_attr,
+          :output_attribute => output_attr,
+          :attribute_link => attr_link,
+          :parent_idh => change_parent_idh
+        }
+      end
+      AttributeLink.propagate(attr_mh,attrs_links_to_update)
+    end
+
     #mechanism to compensate for fact that cols arer being added by processing fns to rows_to_create that
     #must be removed before they are saved
     RemoveKeys = Array.new

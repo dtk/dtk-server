@@ -49,16 +49,5 @@ module XYZ
         propagate_proc.propagate().merge(:id => input_attr[:id], :source_output_id => output_attr[:id])
       end
     end
-
-    def propagate_from_create(attr_mh,attr_info,attr_link_rows)
-      new_val_rows = attr_link_rows.map do |attr_link_row|
-        input_attr = attr_info[attr_link_row[:input_id]]
-        output_attr = attr_info[attr_link_row[:output_id]]
-        propagate_proc = PropagateProcessor.new(attr_link_row,input_attr,output_attr)
-        propagate_proc.propagate().merge(:id => input_attr[:id])
-      end
-      return Array.new if new_val_rows.empty?
-      AttributeUpdateDerivedValues.update(attr_mh,new_val_rows)
-    end
   end
 end

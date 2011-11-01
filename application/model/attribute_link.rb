@@ -32,7 +32,6 @@ module XYZ
       Attribute.update_port_info(attr_mh,rows_to_create)
 
       #propagate attribute values
-      #TODO: last arg is stubb; need target above it
       ndx_nested_change_hashes = propagate_from_create(attr_mh,attr_info,rows_to_create,parent_idh)
       StateChange.create_pending_change_items(ndx_nested_change_hashes.values)
     end

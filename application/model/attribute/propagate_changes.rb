@@ -39,7 +39,7 @@ module XYZ
       #make acual changes in database
       update_from_rows(attr_mh,update_rows,:partial_value => true)
 
-      change_hashes_to_propagate = create_change_hashes(attr_mh,changed_attrs_info,:value_type => :asserted)
+      change_hashes_to_propagate = create_change_hashes(attr_mh,changed_attrs_info)
       direct_scs = StateChange.create_pending_change_items(change_hashes_to_propagate)
 
       ndx_nested_change_hashes = propagate_changes(change_hashes_to_propagate)
@@ -47,6 +47,7 @@ module XYZ
       #TODO: need to figure ebst place to put persistence statement for state changes; complication where later state changes reference earlier ones; otherwise we can just do peristsnec at the end for whole list
       direct_scs + StateChange.create_pending_change_items(ndx_nested_change_hashes.values)
     end
+
 
     def propagate_changes(change_hashes) 
       ret = Hash.new
@@ -77,16 +78,15 @@ module XYZ
       AttributeLink.propagate(attr_mh,attrs_links_to_update)
     end
 
-    private
-    def create_change_hashes(attr_mh,changed_attrs_info,opts={})
+    def create_change_hashes(attr_mh,changed_attrs_info)
       ret = Array.new
       #use sample attribute to find containing datacenter
       sample_attr_idh = attr_mh.createIDH(:id => changed_attrs_info.first[:id])
       #TODO: anymore efficieny way do do this; can pass datacenter in fn
       #TODO: when in nested call want to use passed in parent
       parent_idh = sample_attr_idh.get_top_container_id_handle(:datacenter)
-      val_index = (opts[:value_type] == :asserted ? :value_asserted : :value_derived)
-      old_val_index = (opts[:value_type] == :asserted ? :old_value_asserted : :old_value_derived)
+      val_index = :value_asserted
+      old_val_index = :old_value_asserted
       changed_attrs_info.map do |r|
         hash = {
           :new_item => attr_mh.createIDH(:id => r[:id]),

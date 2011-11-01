@@ -199,25 +199,18 @@ module XYZ
         end
       end
       return if attr_exp_rscs.empty? or attr_imp_colls.empty?
-      #get all teh matches
       matches = Array.new
-      matches = attr_imp_colls.map do |attr_imp_coll|
+      attr_imp_colls.each do |attr_imp_coll|
         if match = matching_storeconfig_vars?(attr_imp_coll,attr_exp_rscs)
-          {
+          data = {
             :type => :imported_collection, 
             :attr_imp_coll => attr_imp_coll, 
             :attr_exp_rsc => match[:attr_exp_rsc],
             :matching_vars => match[:vars]
           }
-        end
-      end.compact
-      return if matches.empty?
-      set_user_friendly_names_for_storeconfig_vars!(matches)
-
-      #create link defs
-      matches.each do |match|
-        if link_def = create(:link_def,match)
-          (match[:attr_imp_coll].parent[:link_defs] ||= MetaArray.new) << link_def
+          if link_def = create(:link_def,data)
+            (attr_imp_coll.parent[:link_defs] ||= MetaArray.new) << link_def
+          end
         end
       end
     end
@@ -228,22 +221,6 @@ module XYZ
         end
       end
       nil
-    end
-
-    def set_user_friendly_names_for_storeconfig_vars!(matches)
-      translated_ids = Array.new
-      matches.each do |match|
-        imp_attr = match[:attr_imp_coll]
-        exp_attr = match[:attr_exp_rsc]
-        unless translated_ids.include?(imp_attr[:id])
-          translated_ids << imp_attr[:id]
-          imp_attr.reset_hash_key_and_name_fields("import_from_#{exp_attr.parent[:id]}")
-        end
-        unless translated_ids.include?(exp_attr[:id])
-          translated_ids << exp_attr[:id]
-          exp_attr.reset_hash_key_and_name_fields("export_to_#{imp_attr.parent[:id]}")
-        end
-      end
     end
   end
 
@@ -396,13 +373,6 @@ module XYZ
       (@context||[])[:attr_num]
     end
 
-    def reset_hash_key_and_name_fields(new_key_x)
-      new_key = set_hash_key(new_key_x)
-      set_field_name(new_key)
-      set_label(new_key)
-      set_external_ref_name(new_key)
-    end
-
     def set_hash_key(key_x)
       key = key_x
       num = 1
@@ -417,8 +387,7 @@ module XYZ
     def initialize__from_attribute(attr_ps)
       name = sanitize_attribute(attr_ps[:name])
       set_hash_key(name)
-      set_field_name(name)
-      set_label(name)
+      self[:field_name] = t(name) 
       self[:label] = t(name) 
       self[:description] = unknown
       self[:type] = t("string") #TODO: stub
@@ -439,19 +408,6 @@ module XYZ
       ext_ref.merge!("default_variable" => default.to_s) if var_default
       self[:external_ref] = nailed(ext_ref)
     end
-
-    def set_field_name(name)
-      self[:field_name] = t(name)
-    end
-    
-    def set_label(label)
-      self[:label] = t(label)
-    end
-
-    def set_external_ref_name(name)
-      self[:external_ref] && self[:external_ref]["name"] = name
-    end
-
     def initialize__from_exported_resource(exp_rsc_ps)
       StoreConfigHandler.set_output_attribute!(self,exp_rsc_ps)
     end

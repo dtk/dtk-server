@@ -50,7 +50,8 @@ module XYZ
     end
     #assumption is that all parents are of same type and all changed items of same type
     def self.create_pending_change_items(new_item_hashes)
-      return nil if new_item_hashes.empty? 
+      ret = Array.new
+      return ret if new_item_hashes.empty? 
       parent_model_name = new_item_hashes.first[:parent][:model_name]
       model_handle = new_item_hashes.first[:parent].createMH({:model_name => :state_change, :parent_model_name => parent_model_name})
       object_model_name = new_item_hashes.first[:new_item][:model_name]

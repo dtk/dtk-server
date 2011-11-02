@@ -23,6 +23,25 @@ module XYZ
     end
   end
 
+  class PrettyPrintHash < SimpleOrderedHash
+    #field with '?' suffix means optioanlly add depending on whether name present in source
+    #if block is given then apply to source[name] rather than returning just source[name]
+    def add(model_object,*keys,&block)
+      keys.each do |key|
+
+        #if marked as optional skip if not present
+        if key.to_s =~ /(^.+)\?$/
+          key = $1.to_sym
+          next if not model_object.has_key?(key)
+        end
+        #special treatment of :id
+        val = (key == :id ? model_object.id : model_object[key]) 
+        self[key] = (block ? block.call(val) : val)
+      end
+      self
+    end
+  end
+
   class HashObject < Hash
     def initialize(initial_val=nil,convert_initial=false,&block)
       block ? super(&block) : super()

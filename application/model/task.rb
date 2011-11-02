@@ -1,6 +1,22 @@
 module XYZ
   class Task < Model
 
+    #for debugging
+    def pretty_print_hash()
+      ret = PrettyPrintHash.new
+      ret.add(self,:id,:display_name?,:status)
+      num_subtasks = (self[:subtasks]||[]).size
+      #only include :temporal_order if more than 1 subtask
+      ret.add(self,:temporal_order) if num_subtasks > 1
+      if num_subtasks > 0
+        ret.add(self,:subtasks) do |subtasks|
+        #TODO: may need to order by position
+          subtasks.map{|st|st.pretty_print_hash()}
+        end
+      end
+      ret
+    end
+
     def get_events()
       sp_hash = {:cols => [:created_at, :type, :content]}
       get_children_objs(:task_event,sp_hash).sort{|a,b| a[:created_at] <=> b[:created_at]}

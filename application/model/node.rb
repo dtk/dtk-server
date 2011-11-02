@@ -230,7 +230,7 @@ module XYZ
            :alias => :input_attribute,
            :join_type => :inner,
            :join_cond=>{:component_component_id => q(:component,:id)},
-           :cols => [:id,:display_name,:value_asserted,:value_derived,:semantic_type]
+           :cols => [:id,:display_name]
          }] + for_dangling_links
 
       virtual_column :dangling_input_links_from_nodes, :type => :json, :hidden => true, 
@@ -240,7 +240,7 @@ module XYZ
            :alias => :input_attribute,
            :join_type => :inner,
            :join_cond=>{:node_node_id => q(:node,:id)},
-           :cols => [:id,:display_name,:value_asserted,:value_derived,:semantic_type]
+           :cols => [:id,:display_name]
           }] + for_dangling_links
 
 
@@ -543,8 +543,11 @@ module XYZ
           end
         end
       end
-      updated_attrs = AttributeUpdateDerivedValues.update_for_delete_links(model_handle(:attribute),ndx_dangling_links_info.values)
-      updated_attrs #TODO: stub
+      attr_mh = model_handle(:attribute)
+      #update attribles connected to dangling links on input side
+      updated_attrs = AttributeUpdateDerivedValues.update_for_delete_links(attr_mh,ndx_dangling_links_info.values)
+      #add state changes for updated attributes and see if any connected attributes
+      Attribute.add_attr_state_changes_and_propagate(attr_mh,updated_attrs)
     end
     private :update_dangling_links
 

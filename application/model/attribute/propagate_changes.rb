@@ -33,21 +33,23 @@ module XYZ
 
       return ret if ndx_ch_attr_info.empty?
       changed_attrs_info = ndx_ch_attr_info.values
-      #TODO: when have comprehensive incremental change use Attribute.update_changed_values (and generalzie to take asserted as well as derived attributes)
+
       update_rows = changed_attrs_info.map{|r|Aux::hash_subset(r,[:id,:value_asserted])}
 
       #make acual changes in database
       update_from_rows(attr_mh,update_rows,:partial_value => true)
 
+      add_attr_state_changes_and_propagate(attr_mh,changed_attrs_info)
+    end
+
+    def add_attr_state_changes_and_propagate(attr_mh,changed_attrs_info)
+      return Array.new if changed_attrs_info.empty?
       change_hashes_to_propagate = create_change_hashes(attr_mh,changed_attrs_info)
       direct_scs = StateChange.create_pending_change_items(change_hashes_to_propagate)
-
       ndx_nested_change_hashes = propagate_changes(change_hashes_to_propagate)
-
       #TODO: need to figure ebst place to put persistence statement for state changes; complication where later state changes reference earlier ones; otherwise we can just do peristsnec at the end for whole list
       direct_scs + StateChange.create_pending_change_items(ndx_nested_change_hashes.values)
     end
-
 
     def propagate_changes(change_hashes) 
       ret = Hash.new
@@ -85,18 +87,17 @@ module XYZ
       #TODO: anymore efficieny way do do this; can pass datacenter in fn
       #TODO: when in nested call want to use passed in parent
       parent_idh = sample_attr_idh.get_top_container_id_handle(:datacenter)
-      val_index = :value_asserted
-      old_val_index = :old_value_asserted
       changed_attrs_info.map do |r|
         hash = {
           :new_item => attr_mh.createIDH(:id => r[:id]),
           :parent => parent_idh,
           :change => {
-            #TODO: check will before it had a json encode on values
-            :old => r[old_val_index],
-            :new => r[val_index],
+            #TODO: check why before it had a json encode on values
+            #think can then just remove below
 #            :old => json_form(r[old_val_index]),
 #            :new => json_form(r[val_index])
+            :old => r[:old_value_asserted] || r[:old_value_derived],
+            :new => r[:value_asserted] || r[:value_derived]
           }
         }
         hash.merge!(:change_paths => r[:change_paths]) if r[:change_paths]

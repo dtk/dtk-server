@@ -527,7 +527,7 @@ module XYZ
       dangling_links_info_cmps = get_objs(:cols => [:dangling_input_links_from_components])
       dangling_links_info_nodes = get_objs(:cols => [:dangling_input_links_from_nodes])
 
-      #TODO: if only keeping external more efficeint to filter in sql query
+      #TODO: if only processing external links, more efficeint to filter in sql query
       ndx_dangling_links_info = Hash.new
       (dangling_links_info_cmps + dangling_links_info_nodes).each do |r|
         link = r[:all_input_links]

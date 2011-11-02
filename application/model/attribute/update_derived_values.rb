@@ -9,11 +9,12 @@ module XYZ
       ret
     end
 
+    #TODO: may move part that deals with links to attribute_link/propgate.. and which woudl then use call to AttributeUpdateDerivedValues.update
     def self.update_for_delete_links(attr_mh,links_info)
       ret = Array.new
       attr_ids = links_info.map{|l|l[:attribute_id]}
       critical_section(attr_ids) do
-        ret = links_info.each{|link_info|update_attr_for_delete_link(attr_mh,link_info)}
+        ret = links_info.map{|link_info|update_attr_for_delete_link(attr_mh,link_info)}
       end
       ret
     end
@@ -37,17 +38,6 @@ module XYZ
         update_attribute_values_aux(type,attr_mh,rows,opts)
       end.flatten
     end
-
-    def self.update_attr_for_delete_link(attr_mh,link_info)
-      #if (input) attribute is array then need to splice out; otherwise just need to set to null
-      input_index = input_index(link_info[:deleted_link])
-      if input_index.nil? or input_index.empty?
-        update_attr_for_delete_link__set_to_null(attr_mh,link_info)
-      else
-        update_attr_for_delete_link__splice_out(attr_mh,link_info,input_index)
-      end
-    end
-
 
     def self.update_attribute_values_aux(type,attr_mh,update_deltas,opts={})
       case type
@@ -151,6 +141,17 @@ module XYZ
         raise Error.new("not treating update_for_delete_link when index_map size is unequal to 1")
       end   
       index_map.first && index_map.first[dir]
+    end
+
+
+    def self.update_attr_for_delete_link(attr_mh,link_info)
+      #if (input) attribute is array then need to splice out; otherwise just need to set to null
+      input_index = input_index(link_info[:deleted_link])
+      if input_index.nil? or input_index.empty?
+        update_attr_for_delete_link__set_to_null(attr_mh,link_info)
+      else
+        update_attr_for_delete_link__splice_out(attr_mh,link_info,input_index)
+      end
     end
 
     def self.update_attr_for_delete_link__set_to_null(attr_mh,link_info)

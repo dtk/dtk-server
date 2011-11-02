@@ -9,7 +9,6 @@ module XYZ
       ret
     end
 
-    #TODO: may move part that deals with links to attribute_link/propgate.. and which woudl then use call to AttributeUpdateDerivedValues.update
     def self.update_for_delete_links(attr_mh,links_info)
       ret = Array.new
       attr_ids = links_info.map{|l|l[:attribute_id]}
@@ -143,6 +142,7 @@ module XYZ
       index_map.first && index_map.first[dir]
     end
 
+    #for processing deleting of links
 
     def self.update_attr_for_delete_link(attr_mh,link_info)
       #if (input) attribute is array then need to splice out; otherwise just need to set to null
@@ -160,28 +160,35 @@ module XYZ
         :value_derived => nil
       }
       Model.update_from_rows(attr_mh,[row_to_update])
+      old_value_derived = link_info[:input_attribute][:value_derived]
+      row_to_update.merge(:old_value_derived => old_value_derived)
     end
 
     def self.update_attr_for_delete_link__splice_out(attr_mh,link_info,input_index)
       #if this is last link in output then null out
       if link_info[:other_links].empty?
-        update_attr_for_delete_link__set_to_null(attr_mh,link_info)
-        return
+        return update_attr_for_delete_link__set_to_null(attr_mh,link_info)
       end
 
       #splice out the value from teh deleted link
       pos_to_delete = input_index.first 
+      ret = nil
       Model.select_process_and_update(attr_mh,[:id,:value_derived],[link_info[:attribute_id]]) do |rows|
-        #will only be one row; putting in 'each' just for coding succinctness
-        rows.each{|r|r[:value_derived].delete_at(pos_to_delete)}
-        rows
+        #will only be one row; 
+        row = rows.first
+        val = row[:value_derived]
+        ret = {:id => row[:id], :old_value_derived => val.dup}
+        val.delete_at(pos_to_delete)
+        ret.merge!(:value_derived => val)
+        [row] #row with changed :value_derived
       end
       #renumber other links (ones not deleted) if necessary
       links_to_renumber = link_info[:other_links].select do |other_link| 
         input_index(other_link).first > pos_to_delete
       end
-      return if links_to_renumber.empty?
-      renumber_links(attr_mh,links_to_renumber)
+
+      renumber_links(attr_mh,links_to_renumber) unless links_to_renumber.empty?
+      ret
     end
 
     def self.renumber_links(attr_mh,links_to_renumber)

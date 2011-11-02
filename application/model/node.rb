@@ -201,15 +201,12 @@ module XYZ
          }]
 
       #used when node is deleted to find and update dangling attribute linkss
-      virtual_column :dangling_input_links_from_components, :type => :json, :hidden => true, 
-      :remote_dependencies => 
-        cmp_attrs_on_node_def +
-        [
-         {
+      for_dangling_links =
+        [{
            :model_name => :attribute_link,
            :convert => true,
            :join_type => :inner,
-           :join_cond=>{:output_id => q(:attribute,:id)},
+           :join_cond=>{:output_id => q(:input_attribute,:id)},
            :cols => [:id, :type, :input_id,:index_map]
          },
          {
@@ -220,30 +217,31 @@ module XYZ
            :join_cond=>{:input_id => q(:attribute_link,:input_id)},
            :cols => [:id,:type, :input_id,:index_map]
          }]
+      virtual_column :dangling_input_links_from_components, :type => :json, :hidden => true, 
+      :remote_dependencies => 
+        [{
+           :model_name => :component,
+           :join_type => :inner,
+           :join_cond=>{:node_node_id => q(:node,:id)},
+           :cols => [:id,:display_name, :component_type, id(:node)]
+         },
+         {
+           :model_name => :attribute,
+           :alias => :input_attribute,
+           :join_type => :inner,
+           :join_cond=>{:component_component_id => q(:component,:id)},
+           :cols => [:id,:display_name,:value_asserted,:value_derived,:semantic_type]
+         }] + for_dangling_links
 
       virtual_column :dangling_input_links_from_nodes, :type => :json, :hidden => true, 
       :remote_dependencies => 
          [{
            :model_name => :attribute,
+           :alias => :input_attribute,
            :join_type => :inner,
            :join_cond=>{:node_node_id => q(:node,:id)},
-           :cols => [:id,:display_name]
-          },
-         {
-           :model_name => :attribute_link,
-           :convert => true,
-           :join_type => :inner,
-           :join_cond=>{:output_id => q(:attribute,:id)},
-           :cols => [:id, :type, :input_id,:index_map]
-         },
-         {
-           :model_name => :attribute_link,
-           :alias => :all_input_links,
-           :convert => true,
-           :join_type => :inner,
-           :join_cond=>{:input_id => q(:attribute_link,:input_id)},
-           :cols => [:id,:type, :input_id,:index_map]
-         }]
+           :cols => [:id,:display_name,:value_asserted,:value_derived,:semantic_type]
+          }] + for_dangling_links
 
 
       ##### end of for connection to ports and port links
@@ -545,8 +543,8 @@ module XYZ
           end
         end
       end
-      #TODO: need to get updated attributes to put on change list
-      AttributeUpdateDerivedValues.update_for_delete_links(model_handle(:attribute),ndx_dangling_links_info.values)
+      updated_attrs = AttributeUpdateDerivedValues.update_for_delete_links(model_handle(:attribute),ndx_dangling_links_info.values)
+      updated_attrs #TODO: stub
     end
     private :update_dangling_links
 

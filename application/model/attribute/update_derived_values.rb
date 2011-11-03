@@ -44,11 +44,26 @@ module XYZ
           update_attribute_values_array_append(attr_mh,update_deltas,opts)
         when "OutputPartial"
           update_attribute_values_partial(attr_mh,update_deltas,opts)
-        else #TODO: below is for legacy form befor had Output objects; may convert to Output form
-        raise Errow.new("Need to refactor to handle use of source_output_id")
-        update_select_ds = SQL::ArrayDataset.create(db,update_deltas,attr_mh,:convert_for_update => true)
-        Model.update_from_select(attr_mh,FieldSet.new(:attribute,[:value_derived]),update_select_ds,opts)
+        else 
+          update_attribute_values_simple(attr_mh,update_deltas,opts)
       end
+    end
+
+
+    def self.update_attribute_values_simple(attr_mh,update_hashes,opts={})
+      ret = Array.new
+      id_list = update_hashes.map{|r|r[:id]}
+      Model.select_process_and_update(attr_mh,[:id,:value_derived],id_list) do |existing_vals|
+        ndx_existing_vals = existing_vals.inject({}){|h,r|h.merge(r[:id] => r[:value_derived])}
+        update_hashes.map do |r|
+          attr_id = r[:id]
+          existing_val = ndx_existing_vals[attr_id]
+          replacement_row = {:id => attr_id, :value_derived => r[:value_derived]}
+          ret << replacement_row.merge(:source_output_id => r[:source_output_id], :old_value_derived => existing_val)
+          replacement_row
+        end
+      end
+      ret
     end
 
     #appends value to any array type; if the array does not exist already it creates it from fresh
@@ -57,9 +72,7 @@ module XYZ
       attr_link_updates = Array.new
       id_list = array_slice_rows.map{|r|r[:id]}
       Model.select_process_and_update(attr_mh,[:id,:value_derived],id_list) do |existing_vals|
-        ndx_existing_vals = existing_vals.inject({}) do |h,r|
-          h.merge(r[:id] => r[:value_derived])
-        end
+        ndx_existing_vals = existing_vals.inject({}){|h,r|h.merge(r[:id] => r[:value_derived])}
         attr_updates = array_slice_rows.map do |r|
           attr_id = r[:id]
           existing_val = ndx_existing_vals[attr_id]||[]

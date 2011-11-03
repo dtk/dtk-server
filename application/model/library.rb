@@ -42,7 +42,6 @@ module XYZ
       #process the dynamic component attributes
       attr_mh_to_propagate += process_dynamic_attributes(:component,new_id_handle)
   
-      #TODO: think this shold be "propagate but dont create state change objects"
       AttributeLink.propagate(attr_mh_to_propagate) unless attr_mh_to_propagate.empty?
     end
    private

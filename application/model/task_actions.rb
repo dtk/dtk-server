@@ -78,6 +78,14 @@ module XYZ
         super(hash)
       end
 
+
+      #for debugging
+      def self.pretty_print_hash(object)
+        ret = PrettyPrintHash.new
+        ret[:node] = (object[:node]||{})[:display_name]
+        ret
+      end
+
       def get_dynamic_attributes(result)
         node = self[:node]
         updated_node_state = CommandAndControl.get_node_state(node)
@@ -286,6 +294,7 @@ module XYZ
         ret[:component] = (object[:component]||{})[:display_name]
         ret[:attributes]  = (object[:attributes]||[]).map do |attr|
           ret_attr = PrettyPrintHash.new
+          #TODO: need to pull values from db because these may not be up to data
           ret_attr.add(attr,:display_name,:value_asserted,:value_derived)
         end
         ret

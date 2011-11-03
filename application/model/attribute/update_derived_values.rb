@@ -148,7 +148,9 @@ module XYZ
       input_output_index_aux(link_hash,:output)
     end
     def self.input_output_index_aux(link_hash,dir)
+      ret = nil
       index_map = link_hash[:index_map]
+      return ret unless index_map 
       unless index_map.size == 1
         raise Error.new("not treating update_for_delete_link when index_map size is unequal to 1")
       end   

@@ -23,8 +23,9 @@ module XYZ
       end
       top_task_idh = id_handle(task_id)
       task_structure = Task.get_hierarchical_structure(top_task_idh)
-      pp task_structure.pretty_print_hash()
-      {:content => nil}
+      pp_hash = task_structure.pretty_print_hash()
+      pp pp_hash
+      {:content => JSON.generate(pp_hash)}
     end
 
     def get_events(task_id=nil)

@@ -148,12 +148,13 @@ module XYZ
     end
 
     class ConfigNode < TaskActionNode
+
+      #for debugging
       def self.pretty_print_hash(object)
         ret = PrettyPrintHash.new
         ret[:node] = (object[:node]||{})[:display_name]
         ret[:component_actions] = (object[:component_actions]||[]).map do |component_action|
-          #TODO: stub
-          PrettyPrintHash.new.add(component_action,:component,:attributes)
+          ComponentAction.pretty_print_hash(component_action)
         end
         ret
       end
@@ -279,6 +280,17 @@ module XYZ
     end
 
     class ComponentAction < HashObject
+      #for debugging
+      def self.pretty_print_hash(object)
+        ret = PrettyPrintHash.new
+        ret[:component] = (object[:component]||{})[:display_name]
+        ret[:attributes]  = (object[:attributes]||[]).map do |attr|
+          ret_attr = PrettyPrintHash.new
+          ret_attr.add(attr,:display_name,:value_asserted,:value_derived)
+        end
+        ret
+      end
+
       def self.order_and_group_by_component(state_change_list)
         ndx_cmp_idhs = Hash.new
         state_change_list.each do |sc|

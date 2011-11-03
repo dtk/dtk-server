@@ -4,7 +4,7 @@ module XYZ
     #for debugging
     def pretty_print_hash()
       ret = PrettyPrintHash.new
-      ret.add(self,:id,:display_name?,:status)
+      ret.add(self,:id,:status)
       num_subtasks = (self[:subtasks]||[]).size
       #only include :temporal_order if more than 1 subtask
       ret.add(self,:temporal_order) if num_subtasks > 1

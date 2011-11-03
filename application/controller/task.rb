@@ -11,8 +11,20 @@ module XYZ
     def commit()
       model_handle = ModelHandle.new(ret_session_context_id(),:datacenter)
       datacenters = Model.get_objects_from_sp_hash(model_handle,{:cols =>[:id]})
-      raise Error.new("only can be called when teher is one datacenter") unless datacenters.size == 1
+      raise Error.new("only can be called when there is one datacenter") unless datacenters.size == 1
       redirect "/xyz/workspace/commit_changes/#{datacenters.first[:id].to_s}"
+    end
+
+    #TODO: test stub
+    def pretty_print(task_id=nil)
+      unless task_id
+        tasks = Task.get_top_level_tasks(model_handle).sort{|a,b| b[:updated_at] <=> a[:updated_at]}
+        task_id = tasks.first[:id]
+      end
+      top_task_idh = id_handle(task_id)
+      task_structure = Task.get_hierarchical_structure(top_task_idh)
+      pp task_structure.pretty_print_hash()
+      {:content => nil}
     end
 
     def get_events(task_id=nil)

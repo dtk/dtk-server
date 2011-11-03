@@ -119,7 +119,7 @@ module XYZ
     #TODO: may deprecate below and subsume by above
     #this also provides the nodes task_id and config_agent_type as extra attribute values
     def get_associated_nodes()
-            exec_actions = Array.new
+      exec_actions = Array.new
       #if executable level then get its executable_action
       if self.has_key?(:executable_action_type) 
         #will have an executable action so if have it already
@@ -177,7 +177,7 @@ module XYZ
 
       until id_handles.empty?
         sp_hash = {
-        :cols => [:id,:display_name,:status,:result,:updated_at,:task_id,:executable_action_type,:executable_action],
+          :cols => Task.common_columns(),
           :filter => [:oneof,:task_id,id_handles.map{|idh|idh.get_id}] 
         }
         next_level_objs = Model.get_objs(model_handle,sp_hash).reject{|k,v|k == :subtasks}
@@ -186,6 +186,36 @@ module XYZ
       end
       ret
     end
+    
+    def self.get_hierarchical_structure(top_task_idh)
+      sp_hash = {
+        :cols => Task.common_columns(),
+        :filter => [:eq,:id,top_task_idh.get_id()]
+      }
+      top_task = get_objs(top_task_idh.createMH(),sp_hash).first
+      flat_subtask_list = top_task.get_all_subtasks()
+      ndx_task_list = flat_subtask_list.inject({top_task.id => top_task}){|h,t|h.merge(t.id => t)}
+      flat_subtask_list.each do |subtask|
+        parent_id = subtask[:task_id]
+        (ndx_task_list[parent_id][:subtasks] ||= Array.new) << subtask
+      end
+      top_task
+    end
+
+    def self.common_columns()
+      [
+       :id,
+       :display_name,
+       :status,
+       :result,
+       :updated_at,
+       :task_id,
+       :executable_action_type,
+       :executable_action
+      ]
+    end
+
+
 
     def ret_command_and_control_adapter_info()
       #TODO: stub

@@ -91,9 +91,9 @@ pp ')))))))))))))))))))))))))))))))))))))))))))))'
       action_set_params = ret_search_object(processed_params,model_name,parent_model_name)
       uri_params = ret_uri_params(processed_params)
 #DEBUG
-p '++++++++++++++++++++++++'
-pp uri_params
-p '++++++++++++++++++++++++'
+#p '++++++++++++++++++++++++'
+#pp uri_params
+#p '++++++++++++++++++++++++'
 
       a = Ramaze::Action.create(
         :node => XYZ.const_get("#{model.capitalize}Controller"),

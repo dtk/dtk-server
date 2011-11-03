@@ -25,8 +25,7 @@ module XYZ
       if r8_meta = R8MetaFile.isa?(file_obj,content)
         r8_meta.process()
       end
-
-      impl_obj.create_pending_change_item(self)
+      impl_obj.create_pending_changes_and_clear_dynamic_attrs(self)
     end
 
     def self.add(impl_obj,type,path,content)
@@ -44,7 +43,7 @@ module XYZ
       new_file_asset_idh = create_from_rows(file_asset_mh,[hash]).first
       new_file_asset_obj = new_file_asset_idh.create_object().merge(hash)
       Repo.add_file(new_file_asset_obj,content,{:implementation => impl_obj})
-      impl_obj.create_pending_change_item(new_file_asset_obj)
+      impl_obj.create_pending_changes_and_clear_dynamic_attrs(new_file_asset_obj)
     end
    private
     def self.file_asset_ref(path)

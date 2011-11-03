@@ -102,6 +102,17 @@ module XYZ
          )]
 
 
+      virtual_column :dynamic_attributes, :type => :json, :hidden => true,
+        :remote_dependencies =>
+        [
+         { :model_name => :attribute,
+           :convert => true,
+           :join_type => :inner,
+           :filter => [:eq,:dynamic, true],
+           :join_cond=>{:component_component_id => q(:component,:id)} ,
+           :cols => [:id,:display_name]
+         }]
+
       ###### end of virtual columns related to attributes, ports, and link_defs
       #TODO: see if coudl be virtual column on assembly object
       virtual_column :node_assembly_nested_nodes_and_cmps, :type => :json, :hidden => true,
@@ -504,6 +515,11 @@ module XYZ
         :cols => cols
       }
       get_children_from_sp_hash(:file_asset,sp_hash)
+    end
+
+    def self.clear_dynamic_attributes_and_their_dependents(cmp_idhs)
+      dynamic_attr_idhs = get_objs_in_set(cmp_idhs,{:cols => [:dynamic_attributes]}).map{|r|r[:attribute].id_handle()}
+      Attribute.clear_dynamic_attributes_and_their_dependents(dynamic_attr_idhs)
     end
 
     def get_virtual_attribute(attribute_name,cols,field_to_match=:display_name)

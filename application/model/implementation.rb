@@ -126,9 +126,23 @@ module XYZ
       Model.update_rows_meeting_filter(cmp_mh,{:updated => true},filter)
     end
 
+    def create_pending_changes_and_clear_dynamic_attrs(file_asset)
+      cmp_rows = get_objs({:cols => [:component_summary_info]})
+
+      #TODO: commited out until fully tested
+      #Component.clear_dynamic_attributes_and_their_dependents(cmp_rows.map{|r|r[:component].id_handle()})
+
+      #TODO: make more efficient by using StateChange.create_pending_change_items
+      cmp_rows.each do |r|
+        cmp_idh = r[:component].id_handle()
+        parent_idh = id_handle(:model_name => :datacenter, :id => r[:node][:datacenter_datacenter_id])
+        StateChange.create_pending_change_item(:new_item => cmp_idh, :parent => parent_idh, :type => "update_implementation")
+      end
+    end
+    #TODO: deprecate below and replace by above
     def create_pending_change_item(file_asset)
       #TODO: make more efficient by using StateChange.create_pending_change_items
-      get_objects_from_sp_hash({:cols => [:component_summary_info]}).each do |r|
+      get_objs({:cols => [:component_summary_info]}).each do |r|
         cmp_idh = r[:component].id_handle()
         parent_idh = id_handle(:model_name => :datacenter, :id => r[:node][:datacenter_datacenter_id])
         StateChange.create_pending_change_item(:new_item => cmp_idh, :parent => parent_idh, :type => "update_implementation")
@@ -146,7 +160,7 @@ module XYZ
                     [:eq, :repo, self[:repo]]]
       }
       impl_mh = model_handle(:implementatation)
-      existing_ver_nums = get_objects_from_sp_hash(impl_mh,sp_hash).map{|r|r[:version_num]}
+      existing_ver_nums = get_objs(impl_mh,sp_hash).map{|r|r[:version_num]}
       1 + (existing_ver_nums.max||0)
     end
 
@@ -158,7 +172,7 @@ module XYZ
                      [:eq, :version_num, version_num],
                      [:eq, :repo, self[:repo]]]
       }
-      Model.get_objects_from_sp_hash(model_handle,sp_hash).first
+      Model.get_objs(model_handle,sp_hash).first
     end
   end
 end

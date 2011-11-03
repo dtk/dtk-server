@@ -292,9 +292,11 @@ module XYZ
       def self.pretty_print_hash(object)
         ret = PrettyPrintHash.new
         ret[:component] = (object[:component]||{})[:display_name]
+
+        #TODO: should get attribute values from attribute object since task info can be stale
+        
         ret[:attributes]  = (object[:attributes]||[]).map do |attr|
           ret_attr = PrettyPrintHash.new
-          #TODO: need to pull values from db because these may not be up to data
           ret_attr.add(attr,:display_name,:value_asserted,:value_derived)
         end
         ret

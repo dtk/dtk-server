@@ -148,6 +148,16 @@ module XYZ
     end
 
     class ConfigNode < TaskActionNode
+      def self.pretty_print_hash(object)
+        ret = PrettyPrintHash.new
+        ret[:node] = (object[:node]||{})[:display_name]
+        ret[:component_actions] = (object[:component_actions]||[]).map do |component_action|
+          #TODO: stub
+          PrettyPrintHash.new.add(component_action,:component,:attributes)
+        end
+        ret
+      end
+
       def long_running?()
         true
       end
@@ -331,7 +341,6 @@ module XYZ
         end
         self.new(hash)
       end
-
     end
   end
 end

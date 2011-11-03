@@ -24,15 +24,14 @@ module XYZ
   end
 
   class PrettyPrintHash < SimpleOrderedHash
-    #field with '?' suffix means optioanlly add depending on whether name present in source
+    #field with '?' suffix means optioanlly add depending on whether name present and non-null in source
     #if block is given then apply to source[name] rather than returning just source[name]
     def add(model_object,*keys,&block)
       keys.each do |key|
-
         #if marked as optional skip if not present
         if key.to_s =~ /(^.+)\?$/
           key = $1.to_sym
-          next if not model_object.has_key?(key)
+          next unless model_object[key]
         end
         #special treatment of :id
         val = (key == :id ? model_object.id : model_object[key]) 

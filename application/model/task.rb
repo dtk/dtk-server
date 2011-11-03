@@ -14,6 +14,7 @@ module XYZ
           subtasks.map{|st|st.pretty_print_hash()}
         end
       end
+      ret.add(self,:executable_action_type?,:executable_action?)
       ret
     end
 
@@ -210,6 +211,8 @@ module XYZ
        :result,
        :updated_at,
        :task_id,
+       :temporal_order,
+       :position,
        :executable_action_type,
        :executable_action
       ]

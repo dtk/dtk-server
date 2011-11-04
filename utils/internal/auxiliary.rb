@@ -317,8 +317,8 @@ class Object
   #dups only if object responds to dup
   def dup?()
     return self unless respond_to?(:dup)
-    #put in because bug in respond to with boolean insatnces
-    return self if kind_of?(TrueClass) or kind_of?(FalseClass)
+    #put in because bug or unexpected result in respond_to? with boolean instances and nil
+    return self if nil? or kind_of?(TrueClass) or kind_of?(FalseClass)
     dup
   end
 end

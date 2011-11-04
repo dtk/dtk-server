@@ -192,7 +192,7 @@ module XYZ
         #will only be one row; 
         row = rows.first
         val = row[:value_derived]
-        ret = {:id => row[:id], :old_value_derived => val.dup}
+        ret = {:id => row[:id], :old_value_derived => val.dup?}
         val.delete_at(pos_to_delete)
         ret.merge!(:value_derived => val)
         [row] #row with changed :value_derived

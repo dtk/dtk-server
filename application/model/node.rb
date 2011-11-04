@@ -230,7 +230,7 @@ module XYZ
            :alias => :input_attribute,
            :join_type => :inner,
            :join_cond=>{:component_component_id => q(:component,:id)},
-           :cols => [:id,:display_name]
+           :cols => [:id,:display_name,:value_derived]
          }] + for_dangling_links
 
       virtual_column :dangling_input_links_from_nodes, :type => :json, :hidden => true, 
@@ -240,7 +240,7 @@ module XYZ
            :alias => :input_attribute,
            :join_type => :inner,
            :join_cond=>{:node_node_id => q(:node,:id)},
-           :cols => [:id,:display_name]
+           :cols => [:id,:display_name,:value_derived]
           }] + for_dangling_links
 
 
@@ -531,7 +531,7 @@ module XYZ
         link = r[:all_input_links]
         if link[:type] == "external"
           attr_id = link[:input_id]
-          p = ndx_dangling_links_info[attr_id] ||= {:attribute_id => attr_id, :other_links => Array.new}
+          p = ndx_dangling_links_info[attr_id] ||= {:input_attribute => r[:input_attribute], :other_links => Array.new}
           new_el = {
             :attribute_link_id => link[:id], 
             :index_map => link[:index_map], 

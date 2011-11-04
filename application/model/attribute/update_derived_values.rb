@@ -11,7 +11,7 @@ module XYZ
 
     def self.update_for_delete_links(attr_mh,links_info)
       ret = Array.new
-      attr_ids = links_info.map{|l|l[:attribute_id]}
+      attr_ids = links_info.map{|l|l[:input_attribute][:id]}
       critical_section(attr_ids) do
         ret = links_info.map{|link_info|update_attr_for_delete_link(attr_mh,link_info)}
       end
@@ -171,7 +171,7 @@ module XYZ
 
     def self.update_attr_for_delete_link__set_to_null(attr_mh,link_info)
       row_to_update = {
-        :id =>link_info[:attribute_id],
+        :id =>link_info[:input_attribute][:id],
         :value_derived => nil
       }
       Model.update_from_rows(attr_mh,[row_to_update])
@@ -188,7 +188,7 @@ module XYZ
       #splice out the value from teh deleted link
       pos_to_delete = input_index.first 
       ret = nil
-      Model.select_process_and_update(attr_mh,[:id,:value_derived],[link_info[:attribute_id]]) do |rows|
+      Model.select_process_and_update(attr_mh,[:id,:value_derived],[link_info[:input_attribute][:id]]) do |rows|
         #will only be one row; 
         row = rows.first
         val = row[:value_derived]

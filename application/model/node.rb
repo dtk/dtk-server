@@ -206,8 +206,15 @@ module XYZ
            :model_name => :attribute_link,
            :convert => true,
            :join_type => :inner,
-           :join_cond=>{:output_id => q(:input_attribute,:id)},
+           :join_cond=>{:output_id => q(:output_attribute,:id)},
            :cols => [:id, :type, :input_id,:index_map]
+         },
+         {
+           :model_name => :attribute,
+           :alias => :input_attribute,
+           :join_type => :inner,
+           :join_cond=>{:id => q(:attribute_link,:input_id)},
+           :cols => [:id,:display_name,:value_derived]
          },
          {
            :model_name => :attribute_link,
@@ -227,22 +234,21 @@ module XYZ
          },
          {
            :model_name => :attribute,
-           :alias => :input_attribute,
+           :alias => :output_attribute,
            :join_type => :inner,
            :join_cond=>{:component_component_id => q(:component,:id)},
-           :cols => [:id,:display_name,:value_derived]
+           :cols => [:id,:display_name]
          }] + for_dangling_links
 
       virtual_column :dangling_input_links_from_nodes, :type => :json, :hidden => true, 
       :remote_dependencies => 
          [{
            :model_name => :attribute,
-           :alias => :input_attribute,
+           :alias => :output_attribute,
            :join_type => :inner,
            :join_cond=>{:node_node_id => q(:node,:id)},
-           :cols => [:id,:display_name,:value_derived]
+           :cols => [:id,:display_name]
           }] + for_dangling_links
-
 
       ##### end of for connection to ports and port links
 

@@ -124,11 +124,11 @@ module XYZ
     end
     private
 
-    #TODO: check the applicability of following code which removed from model/library code that iupdated row
+    #TODO: may need to add in following code, because null state of arrays may be [nil,nil];
+    #to do this have to make dynamic_attribute_clear_value() functionb of existing values
     #nulled_val = val.kind_of?(Array) ? val.map{|x|nil} : nil
-    #    unless val == nulled_val
-     #     {:id => attr[:id],:value_asserted => nulled_val}
-     #   end
+    #if do this must effecient to have clear_dynamic_attributes_and_their_dependents take attribute with its values
+    #as opposed to idhs
     def dynamic_attribute_clear_value()
       nil
     end

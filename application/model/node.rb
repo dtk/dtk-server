@@ -164,6 +164,15 @@ module XYZ
          }]
 
 
+
+
+      node_attrs_on_node_def = 
+        [{
+           :model_name => :attribute,
+           :join_type => :inner,
+           :join_cond=>{:node_node_id => q(:node,:id)},
+           :cols => [:id,:display_name]
+         }]
       cmp_attrs_on_node_def = 
         [{
            :model_name => :component,
@@ -177,7 +186,7 @@ module XYZ
            :join_cond=>{:component_component_id => q(:component,:id)},
            :cols => [:id,:display_name]
          }]
-      virtual_column :input_attribute_links, :type => :json, :hidden => true, 
+      virtual_column :input_attribute_links_cmp, :type => :json, :hidden => true, 
       :remote_dependencies => 
         cmp_attrs_on_node_def +
         [
@@ -188,7 +197,18 @@ module XYZ
            :join_cond=>{:input_id => q(:attribute,:id)},
            :cols => [:id,:display_name, :type, :input_id,:output_id]
          }]
-      virtual_column :output_attribute_links, :type => :json, :hidden => true, 
+      virtual_column :input_attribute_links_node, :type => :json, :hidden => true, 
+      :remote_dependencies => 
+        node_attrs_on_node_def +
+        [
+         {
+           :model_name => :attribute_link,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond=>{:input_id => q(:attribute,:id)},
+           :cols => [:id,:display_name, :type, :input_id,:output_id]
+         }]
+      virtual_column :output_attribute_links_cmp, :type => :json, :hidden => true, 
       :remote_dependencies => 
         cmp_attrs_on_node_def +
         [
@@ -199,8 +219,19 @@ module XYZ
            :join_cond=>{:output_id => q(:attribute,:id)},
            :cols => [:id,:display_name, :type, :input_id,:output_id]
          }]
+      virtual_column :output_attribute_links_node, :type => :json, :hidden => true, 
+      :remote_dependencies => 
+        node_attrs_on_node_def +
+        [
+         {
+           :model_name => :attribute_link,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond=>{:output_id => q(:attribute,:id)},
+           :cols => [:id,:display_name, :type, :input_id,:output_id]
+         }]
 
-      #used when node is deleted to find and update dangling attribute linkss
+      #used when node is deleted to find and update dangling attribute links
       for_dangling_links =
         [{
            :model_name => :attribute_link,
@@ -724,18 +755,22 @@ module XYZ
     def self.get_conn_external_attr_links(id_handles)
       ret = [Array.new,Array.new]
 
-      in_port_cols = [:id, :display_name, :input_attribute_links]
-      ndx_in_links = Hash.new
-      get_objs_in_set(id_handles,:columns => in_port_cols).each do |r|
+      ndx_in_links = get_objs_in_set(id_handles,:cols => [:id,:input_attribute_links_cmp]).inject({}) do |h,r|
         link = r[:attribute_link]
-        ndx_in_links[link[:id]] = link if link[:type] == "external"
+        link[:type] == "external" ? h.merge(link[:id] => link) : h
+      end
+      ndx_in_links = get_objs_in_set(id_handles,:cols => [:id,:input_attribute_links_node]).inject(ndx_in_links) do |h,r|
+        link = r[:attribute_link]
+        link[:type] == "external" ? h.merge(link[:id] => link) : h
       end
 
-      out_port_cols = [:id, :display_name, :output_attribute_links]
-      ndx_out_links = Hash.new
-      get_objs_in_set(id_handles,:columns => out_port_cols).each do |r|
+      ndx_out_links = get_objs_in_set(id_handles,:cols => [:id,:output_attribute_links_cmp]).inject({}) do |h,r|
         link = r[:attribute_link]
-        ndx_out_links[link[:id]] = link if link[:type] == "external"
+        link[:type] == "external" ? h.merge(link[:id] => link) : h
+      end
+      ndx_out_links = get_objs_in_set(id_handles,:cols => [:id,:output_attribute_links_node]).inject(ndx_out_links) do |h,r|
+        link = r[:attribute_link]
+        link[:type] == "external" ? h.merge(link[:id] => link) : h
       end
 
       return ret if ndx_in_links.empty? and ndx_out_links.empty?

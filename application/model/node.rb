@@ -553,7 +553,7 @@ module XYZ
       #update attribles connected to dangling links on input side
       updated_attrs = AttributeUpdateDerivedValues.update_for_delete_links(attr_mh,ndx_dangling_links_info.values)
       #add state changes for updated attributes and see if any connected attributes
-      Attribute.add_attr_state_changes_and_propagate(attr_mh,updated_attrs)
+      Attribute.propagate_and_optionally_add_state_changes(attr_mh,updated_attrs,:add_state_changes => true)
     end
     private :update_dangling_links
 

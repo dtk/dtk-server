@@ -1,11 +1,15 @@
 module XYZ
   module AttrPropagateChangesClassMixin
-    #TODO: may want to rename to indicate this is propgate while logging state changes; or have a flag to control whether state changes are logged
-    def update_and_propagate_attributes(attr_mh,attribute_rows)
+    #assume attribute_rows  all have :value_asserted or all have :value_derived
+    def update_and_propagate_attributes(attr_mh,attribute_rows,opts={})
       ret = Array.new
       return ret if attribute_rows.empty?
+      sample = attribute_rows.first
+      val_field = (sample.has_key?(:value_asserted) ? :value_asserted : :value_derived)
+      old_val_field = "old_#{val_field}".to_sym 
+      
       attr_idhs = attribute_rows.map{|r|attr_mh.createIDH(:id => r[:id])}
-      ndx_existing_values = get_objs_in_set(attr_idhs,:columns => [:id,:value_asserted]).inject({}) do |h,r|
+      ndx_existing_values = get_objs_in_set(attr_idhs,:columns => [:id,val_field]).inject({}) do |h,r|
         h.merge(r[:id] => r)
       end
 
@@ -14,44 +18,48 @@ module XYZ
       attribute_rows.each do |r|
         id = r[:id]
         if ndx_existing_values[id].nil?
-          ndx_ch_attr_info[id] = Aux::hash_subset(r,[:id,:value_asserted])
+          ndx_ch_attr_info[id] = Aux::hash_subset(r,[:id,val_field])
           next
         end
 
-        new_val = r[:value_asserted]
-        existing_val = ndx_existing_values[id][:value_asserted]
+        new_val = r[val_field]
+        existing_val = ndx_existing_values[id][val_field]
         if r[:change_paths]
           r[:change_paths].each do |path|
             next if unravelled_value(new_val,path) == unravelled_value(existing_val,path)
-            ndx_ch_attr_info[id] ||= Aux::hash_subset(r,[:id,:value_asserted]).merge(:change_paths => Array.new,:old_value_asserted => existing_val)
+            ndx_ch_attr_info[id] ||= Aux::hash_subset(r,[:id,val_field]).merge(:change_paths => Array.new,old_val_field => existing_val)
             ndx_ch_attr_info[id][:change_paths] << path
           end
         elsif not (existing_val == new_val)
-          ndx_ch_attr_info[id] = Aux::hash_subset(r,[:id,:value_asserted]).merge(:old_value_asserted => existing_val) 
+          ndx_ch_attr_info[id] = Aux::hash_subset(r,[:id,val_field]).merge(old_val_field => existing_val) 
         end
       end
 
       return ret if ndx_ch_attr_info.empty?
       changed_attrs_info = ndx_ch_attr_info.values
 
-      update_rows = changed_attrs_info.map{|r|Aux::hash_subset(r,[:id,:value_asserted])}
+      update_rows = changed_attrs_info.map{|r|Aux::hash_subset(r,[:id,val_field])}
 
-      #make acual changes in database
+      #make actual changes in database
       update_from_rows(attr_mh,update_rows,:partial_value => true)
 
-      add_attr_state_changes_and_propagate(attr_mh,changed_attrs_info)
+      propagate_and_optionally_add_state_changes(attr_mh,changed_attrs_info,opts)
     end
 
-    def add_attr_state_changes_and_propagate(attr_mh,changed_attrs_info)
+    def propagate_and_optionally_add_state_changes(attr_mh,changed_attrs_info,opts={})
       return Array.new if changed_attrs_info.empty?
+      #default is to add state changes
+      add_state_changes = (not opts.has_key?(:add_state_changes)) or opts[:add_state_changes]
+
       change_hashes_to_propagate = create_change_hashes(attr_mh,changed_attrs_info)
-      direct_scs = StateChange.create_pending_change_items(change_hashes_to_propagate)
+      direct_scs = (add_state_changes ? StateChange.create_pending_change_items(change_hashes_to_propagate) : Array.new)
       ndx_nested_change_hashes = propagate_changes(change_hashes_to_propagate)
       #TODO: need to figure ebst place to put persistence statement for state changes; complication where later state changes reference earlier ones; otherwise we can just do peristsnec at the end for whole list
-      direct_scs + StateChange.create_pending_change_items(ndx_nested_change_hashes.values)
+      indirect_scs = (add_state_changes ? StateChange.create_pending_change_items(ndx_nested_change_hashes.values) : Array.new)
+      direct_scs + indirect_scs
     end
 
-    def propagate_changes(change_hashes) 
+    def propagate_changes(change_hashes)
       ret = Hash.new
       return ret if change_hashes.empty?
       output_attr_idhs = change_hashes.map{|ch|ch[:new_item]}
@@ -105,17 +113,22 @@ module XYZ
       end
     end
 
-
-    def clear_dynamic_attributes_and_their_dependents(attr_idhs)    
+    def clear_dynamic_attributes_and_their_dependents(attr_idhs,opts={})    
       ret = Array.new
       return ret if attr_idhs.empty?
       clear_val = dynamic_attribute_clear_value()
+      #TODO: spot to change if switch dynamic attributes to be under :value_derived
       attribute_rows = attr_idhs.map{|attr_idh|{:id => attr_idh.get_id(), :value_asserted => clear_val}}
       attr_mh = attr_idhs.first.createMH()
-      update_and_propagate_attributes(attr_mh,attribute_rows)
+      update_and_propagate_attributes(attr_mh,attribute_rows,opts)
     end
     private
 
+    #TODO: check the applicability of following code which removed from model/library code that iupdated row
+    #nulled_val = val.kind_of?(Array) ? val.map{|x|nil} : nil
+    #    unless val == nulled_val
+     #     {:id => attr[:id],:value_asserted => nulled_val}
+     #   end
     def dynamic_attribute_clear_value()
       nil
     end

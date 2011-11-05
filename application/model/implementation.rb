@@ -129,8 +129,7 @@ module XYZ
     def create_pending_changes_and_clear_dynamic_attrs(file_asset)
       cmp_rows = get_objs({:cols => [:component_summary_info]})
 
-      #TODO: commited out until fully tested
-      #Component.clear_dynamic_attributes_and_their_dependents(cmp_rows.map{|r|r[:component].id_handle()})
+      Component.clear_dynamic_attributes_and_their_dependents(cmp_rows.map{|r|r[:component].id_handle()})
 
       #TODO: make more efficient by using StateChange.create_pending_change_items
       cmp_rows.each do |r|

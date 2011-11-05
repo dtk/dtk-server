@@ -110,9 +110,9 @@ module XYZ
       ret = Array.new
       return ret if attr_idhs.empty?
       clear_val = dynamic_attribute_clear_value()
-      changed_attrs_info = attr_idhs.map{|attr_idh|{:id => attr_idh.get_id(), :value_asserted => clear_val}}
+      attribute_rows = attr_idhs.map{|attr_idh|{:id => attr_idh.get_id(), :value_asserted => clear_val}}
       attr_mh = attr_idhs.first.createMH()
-      add_attr_state_changes_and_propagate(attr_mh,changed_attrs_info)
+      update_and_propagate_attributes(attr_mh,attribute_rows)
     end
     private
 

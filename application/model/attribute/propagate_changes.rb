@@ -51,10 +51,9 @@ module XYZ
       #default is to add state changes
       add_state_changes = (not opts.has_key?(:add_state_changes)) or opts[:add_state_changes]
 
-      change_hashes_to_propagate = create_change_hashes(attr_mh,changed_attrs_info)
+      change_hashes_to_propagate = create_change_hashes(attr_mh,changed_attrs_info,opts)
       direct_scs = (add_state_changes ? StateChange.create_pending_change_items(change_hashes_to_propagate) : Array.new)
       ndx_nested_change_hashes = propagate_changes(change_hashes_to_propagate)
-      #TODO: need to figure ebst place to put persistence statement for state changes; complication where later state changes reference earlier ones; otherwise we can just do peristsnec at the end for whole list
       indirect_scs = (add_state_changes ? StateChange.create_pending_change_items(ndx_nested_change_hashes.values) : Array.new)
       direct_scs + indirect_scs
     end
@@ -88,13 +87,15 @@ module XYZ
       AttributeLink.propagate(attr_mh,attrs_links_to_update)
     end
 
-    def create_change_hashes(attr_mh,changed_attrs_info)
+    def create_change_hashes(attr_mh,changed_attrs_info,opts={})
       ret = Array.new
       #use sample attribute to find containing datacenter
       sample_attr_idh = attr_mh.createIDH(:id => changed_attrs_info.first[:id])
+
+      add_state_changes = (not opts.has_key?(:add_state_changes)) or opts[:add_state_changes]
       #TODO: anymore efficieny way do do this; can pass datacenter in fn
       #TODO: when in nested call want to use passed in parent
-      parent_idh = sample_attr_idh.get_top_container_id_handle(:datacenter)
+      parent_idh = (add_state_changes ? sample_attr_idh.get_top_container_id_handle(:datacenter) : nil)
       changed_attrs_info.map do |r|
         hash = {
           :new_item => attr_mh.createIDH(:id => r[:id]),
@@ -113,24 +114,26 @@ module XYZ
       end
     end
 
-    def clear_dynamic_attributes_and_their_dependents(attr_idhs,opts={})    
+    def clear_dynamic_attributes_and_their_dependents(attrs,opts={})    
       ret = Array.new
-      return ret if attr_idhs.empty?
-      clear_val = dynamic_attribute_clear_value()
-      #TODO: spot to change if switch dynamic attributes to be under :value_derived
-      attribute_rows = attr_idhs.map{|attr_idh|{:id => attr_idh.get_id(), :value_asserted => clear_val}}
-      attr_mh = attr_idhs.first.createMH()
+      return ret if attrs.empty?
+      attribute_rows = attrs.map do |attr|
+        {
+          :id => attr[:id], 
+          dynamic_attribute_value_field() => dynamic_attribute_clear_value(attr)
+        }
+      end
+      attr_mh = attrs.first.model_handle()
       update_and_propagate_attributes(attr_mh,attribute_rows,opts)
     end
     private
 
-    #TODO: may need to add in following code, because null state of arrays may be [nil,nil];
-    #to do this have to make dynamic_attribute_clear_value() functionb of existing values
-    #nulled_val = val.kind_of?(Array) ? val.map{|x|nil} : nil
-    #if do this must effecient to have clear_dynamic_attributes_and_their_dependents take attribute with its values
-    #as opposed to idhs
-    def dynamic_attribute_clear_value()
-      nil
+    def dynamic_attribute_clear_value(attr)
+      attr.kind_of?(Array) ? attr.map{|x|nil} : nil
+    end
+
+    def dynamic_attribute_value_field()
+      :value_asserted
     end
   end
 end

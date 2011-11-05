@@ -518,8 +518,8 @@ module XYZ
     end
 
     def self.clear_dynamic_attributes_and_their_dependents(cmp_idhs)
-      dynamic_attr_idhs = get_objs_in_set(cmp_idhs,{:cols => [:dynamic_attributes]}).map{|r|r[:attribute].id_handle()}
-      Attribute.clear_dynamic_attributes_and_their_dependents(dynamic_attr_idhs)
+      dynamic_attrs = get_objs_in_set(cmp_idhs,{:cols => [:dynamic_attributes]}).map{|r|r[:attribute]}
+      Attribute.clear_dynamic_attributes_and_their_dependents(dynamic_attrs)
     end
 
     def get_virtual_attribute(attribute_name,cols,field_to_match=:display_name)

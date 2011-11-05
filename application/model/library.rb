@@ -36,11 +36,11 @@ module XYZ
     end
 
     def clear_dynamic_attributes(new_id_handle,opts)
-      attr_idhs_to_clear = get_dynamic_attributes(:node,new_id_handle) + get_dynamic_attributes(:component,new_id_handle)
-      Attribute.clear_dynamic_attributes_and_their_dependents(attr_idhs_to_clear,:add_state_changes => false)
+      attrs_to_clear = get_dynamic_attributes(:node,new_id_handle) + get_dynamic_attributes(:component,new_id_handle)
+      Attribute.clear_dynamic_attributes_and_their_dependents(attrs_to_clear,:add_state_changes => false)
     end
    private
-    #returns id_handles of attributes to null
+    #returns attributes that will be cleared
     def get_dynamic_attributes(model_name,new_id_handle)
       if model_name == :component
         col = :node_assembly_parts_cmp_attrs
@@ -54,12 +54,10 @@ module XYZ
         :columns => [col]
       }
       cmp_mh = new_id_handle.createMH(:component)
-      attrs_to_null = Model.get_objs(cmp_mh,sp_hash).map do |r|
+      Model.get_objs(cmp_mh,sp_hash).map do |r|
         attr = r[:attribute]
         attr if attr[:dynamic]
       end.compact
-      attr_mh = cmp_mh.createMH(:attribute)
-      attrs_to_null.map{|attr|attr_mh.createIDH(:id => attr[:id])}
     end
   end
 end

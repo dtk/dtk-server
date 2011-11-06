@@ -41,14 +41,10 @@ module XYZ
       end
 
       def get_and_propagate_dynamic_attributes(result)
-        updated_attrs = get_dynamic_attributes(result)
-        return if updated_attrs.empty?
+        dyn_attr_val_info = get_dynamic_attributes(result)
+        return if dyn_attr_val_info.empty?
         attr_mh = self[:node].model_handle(:attribute)
-        update_rows = updated_attrs.map{|attr|{:id => attr[:id], :value_asserted => attr[:value_asserted]}}
-        Model.update_from_rows(attr_mh,update_rows)
-
-        change_hashes_to_propagate = Attribute.create_change_hashes(attr_mh,update_rows)
-        Attribute.propagate_changes(change_hashes_to_propagate)
+        Attribute.update_and_propagate_dynamic_attributes(attr_mh,dyn_attr_val_info)
       end
 
       #virtual gets overwritten
@@ -97,7 +93,7 @@ module XYZ
             new_value = fn.call(updated_node_state)
             unless false #TODO: temp for testing attr[:value_asserted] == new_value
               unless new_value.nil?
-                attr[:value_asserted] = new_value
+                attr[:attribute_value] = new_value
                 ret << attr
               end
             end
@@ -175,7 +171,7 @@ module XYZ
         ret = Array.new
         dyn_attrs = (result[:data]||{})[:dynamic_attributes]
         return ret if dyn_attrs.nil? or dyn_attrs.empty?
-        dyn_attrs.map{|a|{:id => a[:attribute_id], :value_asserted => a[:attribute_val]}}
+        dyn_attrs.map{|a|{:id => a[:attribute_id], :attribute_value => a[:attribute_val]}}
       end
 
       def self.add_attributes!(attr_mh,action_list)

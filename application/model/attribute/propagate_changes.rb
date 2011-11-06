@@ -46,6 +46,11 @@ module XYZ
       propagate_and_optionally_add_state_changes(attr_mh,changed_attrs_info,opts)
     end
 
+    def update_and_propagate_dynamic_attributes(attr_mh,dyn_attr_val_info)
+      attribute_rows = dyn_attr_val_info.map{|r|{:id => r[:id], dynamic_attribute_value_field() => r[:attribute_value]}}
+      update_and_propagate_attributes(attr_mh,attribute_rows,:add_state_changes => false)
+    end
+
     def propagate_and_optionally_add_state_changes(attr_mh,changed_attrs_info,opts={})
       return Array.new if changed_attrs_info.empty?
       #default is to add state changes
@@ -87,6 +92,20 @@ module XYZ
       AttributeLink.propagate(attr_mh,attrs_links_to_update)
     end
 
+    def clear_dynamic_attributes_and_their_dependents(attrs,opts={})    
+      ret = Array.new
+      return ret if attrs.empty?
+      attribute_rows = attrs.map do |attr|
+        {
+          :id => attr[:id], 
+          dynamic_attribute_value_field() => dynamic_attribute_clear_value(attr)
+        }
+      end
+      attr_mh = attrs.first.model_handle()
+      update_and_propagate_attributes(attr_mh,attribute_rows,opts)
+    end
+   private
+
     def create_change_hashes(attr_mh,changed_attrs_info,opts={})
       ret = Array.new
       #use sample attribute to find containing datacenter
@@ -114,26 +133,11 @@ module XYZ
       end
     end
 
-    def clear_dynamic_attributes_and_their_dependents(attrs,opts={})    
-      ret = Array.new
-      return ret if attrs.empty?
-      attribute_rows = attrs.map do |attr|
-        {
-          :id => attr[:id], 
-          dynamic_attribute_value_field() => dynamic_attribute_clear_value(attr)
-        }
-      end
-      attr_mh = attrs.first.model_handle()
-      update_and_propagate_attributes(attr_mh,attribute_rows,opts)
+    def dynamic_attribute_value_field()
+      :value_derived
     end
-    private
-
     def dynamic_attribute_clear_value(attr)
       attr.kind_of?(Array) ? attr.map{|x|nil} : nil
-    end
-
-    def dynamic_attribute_value_field()
-      :value_asserted
     end
   end
 end

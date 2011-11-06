@@ -49,7 +49,7 @@ module XYZ
     def propagate_and_optionally_add_state_changes(attr_mh,changed_attrs_info,opts={})
       return Array.new if changed_attrs_info.empty?
       #default is to add state changes
-      add_state_changes = (not opts.has_key?(:add_state_changes)) or opts[:add_state_changes]
+      add_state_changes = ((not opts.has_key?(:add_state_changes)) or opts[:add_state_changes])
 
       change_hashes_to_propagate = create_change_hashes(attr_mh,changed_attrs_info,opts)
       direct_scs = (add_state_changes ? StateChange.create_pending_change_items(change_hashes_to_propagate) : Array.new)
@@ -92,7 +92,7 @@ module XYZ
       #use sample attribute to find containing datacenter
       sample_attr_idh = attr_mh.createIDH(:id => changed_attrs_info.first[:id])
 
-      add_state_changes = (not opts.has_key?(:add_state_changes)) or opts[:add_state_changes]
+      add_state_changes = ((not opts.has_key?(:add_state_changes)) or opts[:add_state_changes])
       #TODO: anymore efficieny way do do this; can pass datacenter in fn
       #TODO: when in nested call want to use passed in parent
       parent_idh = (add_state_changes ? sample_attr_idh.get_top_container_id_handle(:datacenter) : nil)

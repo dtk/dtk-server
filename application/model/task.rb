@@ -45,6 +45,14 @@ module XYZ
       Model.create_from_rows(model_handle(:task_event),[row],{:convert => true})
       event
     end
+    
+    #returns [event,error-array]
+    def add_event_and_errors(event_type,sub_task,result=nil)
+      ret = [nil,nil]
+      #stub strip out error information
+      ret[0] = add_event(event_type,sub_task,result)
+      ret
+    end
 
     def update_input_attributes!()
       task_action = self[:executable_action]

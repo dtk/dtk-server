@@ -51,7 +51,7 @@ module XYZ
       ret = [nil,nil]
       #process errors and strip out from what is passed to add event
       if errors_in_result = ((result||{})[:data]||{})[:errors]
-        normalized_errors = get_config_agent_class.interpret_errors(errors_in_result)
+        normalized_errors = get_config_agent.interpret_errors(errors_in_result,self)
         ret[1] = add_errors(normalized_errors)
         result_wo_errors = result.dup[:data].delete(:errors) 
       else
@@ -197,10 +197,10 @@ module XYZ
       #just takes one sample since assumes all component actions have same config agent
       ((executable_action[:component_actions]||[]).first||{})[:on_node_config_agent_type]
     end
-    def get_config_agent_class()
-      CommandAndControl.get_config_agent_class(self)
+    def get_config_agent()
+      ConfigAgent.load(get_config_agent_type())
     end
-    private :get_config_agent_type, :get_config_agent_class
+    private :get_config_agent_type, :get_config_agent
 
     #recursively walks structure, but returns them in flat list
     def get_all_subtasks()

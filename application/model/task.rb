@@ -53,15 +53,27 @@ module XYZ
       if errors_in_result = ((result||{})[:data]||{})[:errors]
         normalized_errors = get_config_agent.interpret_errors(errors_in_result,self)
         ret[1] = add_errors(normalized_errors)
-        result_wo_errors = result.dup[:data].delete(:errors) 
+        result_wo_errors = result.dup[:data]
+        result_wo_errors.delete(:errors)
       else
         result_wo_errors = result
       end
       ret[0] = add_event(event_type,top_task,result_wo_errors)
       ret
     end
+
     def add_errors(normalized_errors)
-      normalized_errors #stub
+      ret = nil
+      return ret unless normalized_errors and not normalized_errors.empty?
+      rows = normalized_errors.map do |err|
+        {
+          :content => err,
+          :ref => "task_error", 
+          :task_id => id()
+        }
+      end
+      Model.create_from_rows(model_handle(:task_error),rows,{:convert => true})
+      normalized_errors 
     end
 
     def update_input_attributes!()

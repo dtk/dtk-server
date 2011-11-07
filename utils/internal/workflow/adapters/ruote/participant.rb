@@ -137,7 +137,7 @@ module XYZ
                     action.get_and_propagate_dynamic_attributes(result)
                   else
                     event,errors = task.add_event_and_errors(:complete_failed,top_task,result)
-                    pp ["task_complete_failed #{action.class.to_s}", task_id,event] if event
+                    pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event
                     set_result_failed(workitem,result,task,action)
                   end
                   self.reply_to_engine(workitem)
@@ -147,7 +147,7 @@ module XYZ
                     "status" => "timeout" 
                   }
                   event,errors = task.add_event_and_errors(:complete_timeout,top_task,result)
-                  pp ["task_complete_timeout #{action.class.to_s}", task_id,event] if event
+                  pp ["task_complete_timeout #{action.class.to_s}", task_id,event,{:errors => errors}] if event
                   set_result_timeout(workitem,result,task)
                   self.reply_to_engine(workitem)
                 end

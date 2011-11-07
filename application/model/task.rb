@@ -51,7 +51,9 @@ module XYZ
       ret = [nil,nil]
       #process errors and strip out from what is passed to add event
       if errors_in_result = ((result||{})[:data]||{})[:errors]
-        normalized_errors = get_config_agent.interpret_errors(errors_in_result,self)
+        config_agent = get_config_agent
+        components = component_actions().map{|a|a[:component]}
+        normalized_errors = errors_in_result.map{|err|config_agent.interpret_error(err,components)}
         ret[1] = add_errors(normalized_errors)
         result_wo_errors = result.dup[:data]
         result_wo_errors.delete(:errors)

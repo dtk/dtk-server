@@ -3,7 +3,7 @@ module XYZ
   #TODO!!!!: probably need to rewrite, like for chef to include all attributes; not just ones that changes
   module ConfigAgentAdapter
     class Puppet < ConfigAgent
-      include PuppetErrorProcessing
+      extend PuppetErrorProcessingClassMixin
       def ret_msg_content(config_node,impl_info)
         {:components_with_attributes => components_with_attributes(config_node,impl_info)}
       end

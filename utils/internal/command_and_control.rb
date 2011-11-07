@@ -2,6 +2,11 @@ module XYZ
   module CommandAndControlAdapter
   end
   class CommandAndControl
+    def self.get_config_agent_class(task)
+      task_action = task[:executable_action]
+      klass = load_for(task_action)
+    end
+
     def self.execute_task_action(task,top_task_idh,opts={})
       task_action = task[:executable_action]
       klass = load_for(task_action)

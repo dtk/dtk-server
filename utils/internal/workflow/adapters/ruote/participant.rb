@@ -74,7 +74,7 @@ module XYZ
           callbacks = {
             :on_msg_received => proc do |msg|
               result = {:type => :completed_create_node, :task_id => task_id} 
-              event = top_task.add_event(:complete_succeeded, task,result)
+              event = task.add_event(:complete_succeeded, top_task,result)
               pp [:found,msg[:senderid]]
               task[:executable_action][:node].update_operational_status!(:running)
               set_result_succeeded(workitem,result,task,action)
@@ -120,7 +120,7 @@ module XYZ
           task_id,action,workflow,task,top_task = %w{task_id action workflow task top_task}.map{|k|params[k]}
           task.update_input_attributes!()
           task.add_internal_guards!(workflow.guards[:internal])
-          event = top_task.add_event(:start,task)
+          event = task.add_event(:start,top_task)
           pp ["executing #{action.class.to_s}", task_id,event] if event
           workitem.fields["guard_id"] = task_id # ${guard_id} is referenced if guard for execution of this
           execution_context(task) do
@@ -136,7 +136,7 @@ module XYZ
                     set_result_succeeded(workitem,result,task,action) 
                     action.get_and_propagate_dynamic_attributes(result)
                   else
-                    event,errors = top_task.add_event_and_errors(:complete_failed,task,result)
+                    event,errors = task.add_event_and_errors(:complete_failed,top_task,result)
                     pp ["task_complete_failed #{action.class.to_s}", task_id,event] if event
                     set_result_failed(workitem,result,task,action)
                   end
@@ -146,7 +146,7 @@ module XYZ
                   result = {
                     "status" => "timeout" 
                   }
-                  event,errors = top_task.add_event_and_errors(:complete_timeout,task,result)
+                  event,errors = task.add_event_and_errors(:complete_timeout,top_task,result)
                   pp ["task_complete_timeout #{action.class.to_s}", task_id,event] if event
                   set_result_timeout(workitem,result,task)
                   self.reply_to_engine(workitem)

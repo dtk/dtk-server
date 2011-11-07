@@ -32,8 +32,8 @@ module XYZ
       get_children_objs(:task_event,sp_hash).sort{|a,b| a[:created_at] <=> b[:created_at]}
     end
 
-    def add_event(event_type,sub_task,result=nil)
-      event = TaskEvent.create_event?(event_type,sub_task,result)
+    def add_event(event_type,top_task,result=nil)
+      event = TaskEvent.create_event?(event_type,self,result)
       return nil unless event
       type = event.delete(:type)||event_type
       row = {
@@ -47,11 +47,21 @@ module XYZ
     end
     
     #returns [event,error-array]
-    def add_event_and_errors(event_type,sub_task,result=nil)
+    def add_event_and_errors(event_type,top_task,result=nil)
       ret = [nil,nil]
-      #stub strip out error information
-      ret[0] = add_event(event_type,sub_task,result)
+      #process errors and strip out from what is passed to add event
+      if errors_in_result = ((result||{})[:data]||{})[:errors]
+        normalized_errors = get_config_agent_class.interpret_errors(errors_in_result)
+        ret[1] = add_errors(normalized_errors)
+        result_wo_errors = result.dup[:data].delete(:errors) 
+      else
+        result_wo_errors = result
+      end
+      ret[0] = add_event(event_type,top_task,result_wo_errors)
       ret
+    end
+    def add_errors(normalized_errors)
+      normalized_errors #stub
     end
 
     def update_input_attributes!()
@@ -182,11 +192,15 @@ module XYZ
       indexed_nodes.values
     end
 
-    def get_config_agent_type(executable_action)
+    def get_config_agent_type(executable_action=nil)
+      executable_action ||= self[:executable_action]
       #just takes one sample since assumes all component actions have same config agent
       ((executable_action[:component_actions]||[]).first||{})[:on_node_config_agent_type]
     end
-    private :get_config_agent_type
+    def get_config_agent_class()
+      CommandAndControl.get_config_agent_class(self)
+    end
+    private :get_config_agent_type, :get_config_agent_class
 
     #recursively walks structure, but returns them in flat list
     def get_all_subtasks()

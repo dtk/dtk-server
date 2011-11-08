@@ -131,7 +131,7 @@ module XYZ
                   #result[:statuscode] is for transport errors and data is for errors for agent
                   succeeded = (result[:statuscode] == 0 and [:succeeded,:ok].include?((result[:data]||{})[:status]))
                   if succeeded
-                    event = top_task.add_event(:complete_succeeded,task,result)
+                    event = task.add_event(:complete_succeeded,top_task,result)
                     pp ["task_complete_succeeded #{action.class.to_s}", task_id,event] if event
                     set_result_succeeded(workitem,result,task,action) 
                     action.get_and_propagate_dynamic_attributes(result)

@@ -73,7 +73,10 @@ module XYZ
         new_assembly_obj = target_object.clone_into(id_handle.create_object(),override_attrs,clone_opts)
         id = new_assembly_obj && new_assembly_obj.id()
         nested_objs = new_assembly_obj.get_node_assembly_nested_objects()
-pp nested_objs
+
+        #just want external ports
+        (nested_objs[:nodes]||[]).each{|n|(n[:ports]||[]).reject!{|p|p[:type] == "component_internal"}}
+
 #TODO: get node positions going for assemblies
         #compute uui positions
         parent_id = request.params["parent_id"]

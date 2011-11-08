@@ -10,7 +10,7 @@ module XYZ
       ret.add(self,:temporal_order) if num_subtasks > 1
       if num_subtasks > 0
         ret.add(self,:subtasks) do |subtasks|
-          subtasks.sort{|a,b| a[:position]||0 <=> b[:position]||0}.map{|st|st.pretty_print_hash()}
+          subtasks.sort{|a,b| b[:position]||0 <=> a[:position]||0}.map{|st|st.pretty_print_hash()}
         end
       end
       action_type = self[:executable_action_type]

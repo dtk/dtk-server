@@ -4,8 +4,9 @@ module XYZ
     def interpret_error(error_in_result,components)
       ret = error_in_result
       source = error_in_result["source"]
-      if source =~ Regexp.new("^/Stage\[([0-9]+)\]")
-        index = $1.to_i -1
+      #working under assumption that stage assignment same as order in components
+      if source =~ Regexp.new("^/Stage\\[([0-9]+)\\]")
+        index = ($1.to_i) -1
         if cmp_with_error = components[index]
           ret = error_in_result.inject({}) do |h,(k,v)|
             ["source","tags","time"].include?(k) ? h : h.merge(k => v)

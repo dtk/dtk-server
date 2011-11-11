@@ -4,7 +4,7 @@ require 'puppet' #TODO: get only what is needed from puppet
 module XYZ
   module PuppetParser
     def parse_given_filename(filename)
-      handle_puppet_globals(:manifest => filename) do 
+      synchronize_and_handle_puppet_globals(:manifest => filename) do 
         environment = "production"
         krt = Puppet::Node::Environment.new(environment).known_resource_types
         krt_code = krt.hostclass("").code
@@ -24,23 +24,37 @@ module XYZ
    private
 
     def parse_given_file_content__manifest(file_content)
-      handle_puppet_globals(:code => file_content, :ignoreimport => true) do 
+      synchronize_and_handle_puppet_globals(:code => file_content, :ignoreimport => false) do
         environment = "production"
-        krt = Puppet::Node::Environment.new(environment).known_resource_types
-        krt_code = krt.hostclass("").code
+        node_env = Puppet::Node::Environment.new(environment)
+        known_resource_types = Puppet::Resource::TypeCollection.new(node_env)
+        #needed to make more complicared because cannot call krt = Puppet::Node::Environment.new(environment).known_resource_types because perform_initial_import needs import set to false, but rest needs it set to true
+        #fragment from perform_initial_import call with Puppet[:ignoreimport] = true set in middle
+        parser = Puppet::Parser::Parser.new(node_env)
+        parser.string = file_content
+        Puppet[:ignoreimport] = true
+        initial_import = parser.parse
+
+        known_resource_types.import_ast(initial_import,"")
+        krt_code = known_resource_types.hostclass("").code
         ModulePS.new(krt_code)
       end
     end
 
-    def handle_puppet_globals(global_assignments,&block)
+    def synchronize_and_handle_puppet_globals(global_assignments,&block)
       ret = nil
       PuppetParserLock.synchronize do
         begin
           current_vals = global_assignments.keys.inject({}){|h,k|h.merge(k => Puppet[k])}
+          curent_krt = Thread.current[:known_resource_types]
           global_assignments.each{|k,v|Puppet[k]=v}
+          Thread.current[:known_resource_types] = nil
           ret = yield
+         rescue Exception => e
+          raise e
          ensure
           current_vals.each{|k,v|Puppet[k]=v}
+          Thread.current[:known_resource_types] = curent_krt
         end
       end
       ret

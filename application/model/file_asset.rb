@@ -19,7 +19,9 @@ module XYZ
       file_obj = get_objects_from_sp_hash({:cols => [:path,:implementation_info]}).first
 
       #TODO: trap parse errors and then do consitemncy check with meta
-      #r8_parse = ConfigAgent.parse_given_file_content(file_obj.config_agent_type(),content)
+      config_agent_type = file_obj.config_agent_type()
+      file_path = file_obj[:path]
+      file_config_type, r8_parse = ConfigAgent.parse_given_file_content(config_agent_type,file_path,content)
 
       impl_obj = file_obj[:implementation]
       Repo.update_file_content(self,content,{:implementation => impl_obj})

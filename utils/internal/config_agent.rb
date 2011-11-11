@@ -3,10 +3,11 @@ module XYZ
     def self.parse_given_filename(type,filename)
       load(type).parse_given_filename(filename)
     end
-    def self.parse_given_file_content(type,file_content)
-      load(type).parse_given_file_content(file_content)
+    def self.parse_given_file_content(type,file_path,file_content)
+      load(type).parse_given_file_content(file_path,file_content)
     end
 
+    #TODO: make private and wrap as ConfigAgent method like do for parse
     def self.load(type)
       return nil unless type
       return Agents[type] if Agents[type]

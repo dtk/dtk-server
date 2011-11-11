@@ -4,22 +4,32 @@ require 'puppet' #TODO: get only what is needed from puppet
 module XYZ
   module PuppetParser
     def parse_given_filename(filename)
+      #TODO: need to lock I think to be thread safe
       Puppet[:manifest] = filename
       environment = "production"
       krt = Puppet::Node::Environment.new(environment).known_resource_types
       krt_code = krt.hostclass("").code
       ModulePS.new(krt_code)
     end
-    def parse_given_file_content(file_content)
-      nil
-=begin      
-      Puppet[:manifest] = filename
+    #returns [config agent type, parse]
+    #types are :component_defs, :template, :r8meta
+    def parse_given_file_content(file_path,file_content)
+      ret = [nil,nil]
+      if file_path =~ /\.pp$/
+        ret[0] = :component_defs
+        ret[1] = parse_given_file_content__manifest(file_content)
+      end
+      ret
+    end
+    def parse_given_file_content__manifest(file_content)
+      #TODO: need to lock I think to be thread safe
+      Puppet[:code] = file_content
       environment = "production"
       krt = Puppet::Node::Environment.new(environment).known_resource_types
       krt_code = krt.hostclass("").code
       ModulePS.new(krt_code)
-=end
     end
+    private :parse_given_file_content__manifest
 
     class ParseStructure < SimpleHashObject
       #TODO: temp if not called as stand alone utility

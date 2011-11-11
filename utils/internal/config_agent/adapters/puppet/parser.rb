@@ -4,12 +4,12 @@ require 'puppet' #TODO: get only what is needed from puppet
 module XYZ
   module PuppetParser
     def parse_given_filename(filename)
-      #TODO: need to lock I think to be thread safe
-      Puppet[:manifest] = filename
-      environment = "production"
-      krt = Puppet::Node::Environment.new(environment).known_resource_types
-      krt_code = krt.hostclass("").code
-      ModulePS.new(krt_code)
+      handle_puppet_globals(:manifest => filename) do 
+        environment = "production"
+        krt = Puppet::Node::Environment.new(environment).known_resource_types
+        krt_code = krt.hostclass("").code
+        ModulePS.new(krt_code)
+      end
     end
     #returns [config agent type, parse]
     #types are :component_defs, :template, :r8meta
@@ -21,16 +21,33 @@ module XYZ
       end
       ret
     end
-    def parse_given_file_content__manifest(file_content)
-      #TODO: need to lock I think to be thread safe
-      Puppet[:code] = file_content
-      environment = "production"
-      krt = Puppet::Node::Environment.new(environment).known_resource_types
-      krt_code = krt.hostclass("").code
-      ModulePS.new(krt_code)
-    end
-    private :parse_given_file_content__manifest
+   private
 
+    def parse_given_file_content__manifest(file_content)
+      handle_puppet_globals(:code => file_content, :ignoreimport => true) do 
+        environment = "production"
+        krt = Puppet::Node::Environment.new(environment).known_resource_types
+        krt_code = krt.hostclass("").code
+        ModulePS.new(krt_code)
+      end
+    end
+
+    def handle_puppet_globals(global_assignments,&block)
+      ret = nil
+      PuppetParserLock.synchronize do
+        begin
+          current_vals = global_assignments.keys.inject({}){|h,k|h.merge(k => Puppet[k])}
+          global_assignments.each{|k,v|Puppet[k]=v}
+          ret = yield
+         ensure
+          current_vals.each{|k,v|Puppet[k]=v}
+        end
+      end
+      ret
+    end
+    PuppetParserLock = Mutex.new
+
+   public
     class ParseStructure < SimpleHashObject
       #TODO: temp if not called as stand alone utility
       class ParseError < NameError

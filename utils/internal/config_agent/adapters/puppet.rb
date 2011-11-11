@@ -1,8 +1,10 @@
 require File.expand_path('puppet/error_processing', File.dirname(__FILE__))
+require File.expand_path('puppet/parser', File.dirname(__FILE__))
 module XYZ
   #TODO!!!!: probably need to rewrite, like for chef to include all attributes; not just ones that changes
   module ConfigAgentAdapter
     class Puppet < ConfigAgent
+      include PuppetParser
       include PuppetErrorProcessing
       def ret_msg_content(config_node,impl_info)
         {:components_with_attributes => components_with_attributes(config_node,impl_info)}

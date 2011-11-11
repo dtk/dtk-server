@@ -1,9 +1,26 @@
 #TODO: think better to move assumptions about ast form into the initialization functions to capture their assumptions
-require 'rubygems'
-require 'puppet'
+require 'puppet' #TODO: get only what is needed from puppet
 
 module XYZ
-  class Puppet
+  module PuppetParser
+    def parse_given_filename(filename)
+      Puppet[:manifest] = filename
+      environment = "production"
+      krt = Puppet::Node::Environment.new(environment).known_resource_types
+      krt_code = krt.hostclass("").code
+      ModulePS.new(krt_code)
+    end
+    def parse_given_file_content(file_content)
+      nil
+=begin      
+      Puppet[:manifest] = filename
+      environment = "production"
+      krt = Puppet::Node::Environment.new(environment).known_resource_types
+      krt_code = krt.hostclass("").code
+      ModulePS.new(krt_code)
+=end
+    end
+
     class ParseStructure < SimpleHashObject
       #TODO: temp if not called as stand alone utility
       class ParseError < NameError

@@ -1,5 +1,12 @@
 module XYZ
   class ConfigAgent
+    def self.parse_given_filename(type,filename)
+      load(type).parse_given_filename(filename)
+    end
+    def self.parse_given_file_content(type,file_content)
+      load(type).parse_given_file_content(file_content)
+    end
+
     def self.load(type)
       return nil unless type
       return Agents[type] if Agents[type]

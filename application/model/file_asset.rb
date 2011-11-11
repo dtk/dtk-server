@@ -17,6 +17,10 @@ module XYZ
       update(:content => content)
       #TODO: can make more efficient to see if this object has the values that querying for an if so avoid db query
       file_obj = get_objects_from_sp_hash({:cols => [:path,:implementation_info]}).first
+
+      #TODO: trap parse errors and then do consitemncy check with meta
+      #r8_parse = ConfigAgent.parse_given_file_content(file_obj.config_agent_type(),content)
+
       impl_obj = file_obj[:implementation]
       Repo.update_file_content(self,content,{:implementation => impl_obj})
       impl_obj.set_to_indicate_updated()
@@ -45,11 +49,6 @@ module XYZ
       Repo.add_file(new_file_asset_obj,content,{:implementation => impl_obj})
       impl_obj.create_pending_changes_and_clear_dynamic_attrs(new_file_asset_obj)
     end
-   private
-    def self.file_asset_ref(path)
-      path.gsub(Regexp.new("/"),"_")
-    end
-   public
 
     def self.ret_hierrachical_file_struct(flat_file_assets)
       ret = Array.new
@@ -74,6 +73,21 @@ module XYZ
         set_hierrachical_file_struct!(children,file_asset,path[1..path.size-1])
       end
     end
-  end
+
+   protected
+    def config_agent_type()
+      update_object!(:type)
+      case self[:type]
+        when "puppet_file" then :puppet
+        when "chef_file" then :chef
+        else raise Error.new("Unexpected type (#{self[:type]})")
+      end
+    end
+
+  private
+   def self.file_asset_ref(path)
+     path.gsub(Regexp.new("/"),"_")
+   end
+ end
 end
 

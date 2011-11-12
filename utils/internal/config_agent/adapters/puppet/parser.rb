@@ -8,7 +8,7 @@ module XYZ
         environment = "production"
         krt = Puppet::Node::Environment.new(environment).known_resource_types
         krt_code = krt.hostclass("").code
-        ModulePS.new(krt_code)
+        TopPS.new(krt_code)
       end
     end
     #returns [config agent type, parse]
@@ -37,7 +37,7 @@ module XYZ
 
         known_resource_types.import_ast(initial_import,"")
         krt_code = known_resource_types.hostclass("").code
-        ModulePS.new(krt_code)
+        TopPS.new(krt_code)
       end
     end
 
@@ -153,7 +153,8 @@ module XYZ
       AstTerm = [:string,:name,:variable,:concat,:function]
     end
 
-    class ModulePS < ParseStructure
+    #can be module or file
+    class TopPS < ParseStructure
       def initialize(ast_array,opts={})
         children = ast_array.children.map do |ast_item|
           if puppet_type?(ast_item,[:hostclass,:definition])

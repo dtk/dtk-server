@@ -20,11 +20,8 @@ else
 end
 module_name.gsub!(/^puppet-/,"")
 
-Puppet[:manifest] = file
-environment = "production"
-krt = Puppet::Node::Environment.new(environment).known_resource_types
-krt_code = krt.hostclass("").code
-r8_parse = XYZ::Puppet::ModulePS.new(krt_code)
+include XYZ::PuppetParser
+r8_parse = parse_given_filename(file)
 #pp r8_parse
 begin
 meta_generator = XYZ::GenerateMeta.create("1.0")

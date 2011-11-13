@@ -236,12 +236,8 @@ module XYZ
       def parse__resource(ast_item,opts)
         #TODO: case on opts what is returned; here we are casing on just external resources
         return ExportedResourcePS.create(ast_item,opts) if ast_item.exported
-        if builtin_class = ResourcePS.builtin?(ast_item)
-          case builtin_class
-            when :stage then StageResourcePS.create(ast_item,opts)
-          end
-        else
-          DefinedResourcePS.create(ast_item,opts)
+        if ResourcePS.builtin?(ast_item)
+        else DefinedResourcePS.create(ast_item,opts)
         end
       end
 
@@ -303,8 +299,10 @@ module XYZ
       end
       def resource_parameters(ast_resource,opts={})
         ret = Array.new
-        if ast_title = ast_title(ast_resource,opts)
-          ret << ResourceTitlePS.create(ast_title,opts)
+        unless opts[:no_title]
+          if ast_title = ast_title(ast_resource,opts)
+            ret << ResourceTitlePS.create(ast_title,opts)
+          end
         end
         ast_params(ast_resource,opts).each do |ast_rsc_param|
           if puppet_type?(ast_rsc_param,:resource_param)
@@ -333,18 +331,18 @@ module XYZ
       end
     end
 
-    class StageResourcePS < ResourcePS
-      def initialize(ast_resource,opts={})
-        ast_title = ast_title(ast_resource)
-        self[:name] = (ast_title && ast_title.to_s)
-        super
-      end
-    end
-
     class DefinedResourcePS < ResourcePS
       def initialize(ast_resource,opts={})
         self[:name] = name(ast_resource)
         self[:type] = type(ast_resource)
+        params = resource_parameters(ast_resource,opts.merge(:no_title => true))
+        (params||[]).each do |p|
+          if p.kind_of?(StageResourceParam)
+            self[:stage] = p
+          else
+            (self[:parameters] ||= Array.new) << p
+          end
+        end
         super
       end
       def is_defined_resource?() 
@@ -376,10 +374,11 @@ module XYZ
 
     class ResourceParamNonTitlePS < ResourceParamPS
       def self.create(ast_rsc_param,opts={})
-        #TODO: ccurrently throwing out require; this should be used to look for foreign resources
-        if ast_rsc_param.param == "require"
-          nil
-        else
+        case ast_rsc_param.param 
+         #TODO: ccurrently throwing out require; this should be used to look for foreign resources
+         when "require" then nil
+         when "stage" then StageResourceParam.create(ast_rsc_param,opts)
+         else
           name = ast_rsc_param.param        
           value_ast_term = ast_rsc_param.value
           new(name,value_ast_term,ast_rsc_param,opts)
@@ -390,6 +389,12 @@ module XYZ
     class ResourceTitlePS < ResourceParamPS
       def self.create(value_ast_term,opts={})
         new("title",value_ast_term,value_ast_term,opts)
+      end
+    end
+
+    class StageResourceParam < ResourceParamPS
+      def initialize(ast_rsc_ref,opts={})
+        self[:name] = ast_rsc_ref.value.value
       end
     end
 

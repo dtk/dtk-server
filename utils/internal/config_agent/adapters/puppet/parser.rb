@@ -69,10 +69,6 @@ module XYZ
       #TODO: for debugging until override
       def initialize(ast_item=nil,opts={})
         return super() if ast_item.nil? 
-        #TODO: just for debugging
-        if keys.size == 0 #test to see if this is coming from a child calling super
-          self[:instance_variables] = ast_item.instance_variables
-        end
       end
 
       #### used in generate_meta
@@ -239,9 +235,12 @@ module XYZ
 
       def parse__resource(ast_item,opts)
         #TODO: case on opts what is returned; here we are casing on just external resources
-        if ast_item.exported
-          ExportedResourcePS.create(ast_item,opts)
-        elsif not ResourcePS.builtin?(ast_item)
+        return ExportedResourcePS.create(ast_item,opts) if ast_item.exported
+        if builtin_class = ResourcePS.builtin?(ast_item)
+          case builtin_class
+            when :stage then StageResourcePS.create(ast_item,opts)
+          end
+        else
           DefinedResourcePS.create(ast_item,opts)
         end
       end
@@ -287,10 +286,11 @@ module XYZ
     end
 
     class ResourcePS < ParseStructure
-
       def self.builtin?(ast_resource)
-        ::Puppet::Type.type(ast_resource.type)
+        puppet_type = ::Puppet::Type.type(ast_resource.type)
+        puppet_type && puppet_type.to_s.gsub(/Puppet::Type::/,"").downcase.to_sym
       end
+
      private
       def name(ast_resource)
         ret = ast_resource.type
@@ -330,6 +330,14 @@ module XYZ
           raise ParseError.new("unexpected to have number of resource children neq to 1")
         end
         children.first.title
+      end
+    end
+
+    class StageResourcePS < ResourcePS
+      def initialize(ast_resource,opts={})
+        ast_title = ast_title(ast_resource)
+        self[:name] = (ast_title && ast_title.to_s)
+        super
       end
     end
 

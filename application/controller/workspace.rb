@@ -980,7 +980,7 @@ POSSIBLE CHANGES TO HASH
         :type => "composite"
       }
       assembly_mh = library_idh.createMH(:model_name=>:component,:parent_model_name=>:library)
-      assembly_idh = Model.create_from_rows(assembly_mh,[create_row],:convert=>true).first
+      assembly_idh = Model.create_from_row(assembly_mh,create_row,:convert=>true)
 
       #TODO: getting json rather than hash
       item_list = JSON.parse(hash["item_list"])
@@ -1013,7 +1013,7 @@ POSSIBLE CHANGES TO HASH
         :type => "composite"
       }
       assembly_mh = library_idh.createMH(:model_name=>:component,:parent_model_name=>:library)
-      assembly_idh = Model.create_from_rows(assembly_mh,[create_row],:convert=>true).first
+      assembly_idh = Model.create_from_row(assembly_mh,create_row,:convert=>true)
 
       #TODO: getting json rather than hash
       item_list = JSON.parse(hash["item_list"])

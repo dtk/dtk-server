@@ -495,7 +495,7 @@ module XYZ
       }
 
       file_asset_mh = id_handle().create_childMH(:file_asset)
-      Model.create_from_rows(file_asset_mh,[create_row])
+      Model.create_from_row(file_asset_mh,create_row)
     end
 
     def get_config_file(file_name)
@@ -925,7 +925,7 @@ module XYZ
          :data_type => "json")
 
       attr_mh = component_idh.createMH(:model_name => :attribute, :parent_model_name => :component)
-      sap_attr_idh = self.class.create_from_rows(attr_mh,[sap_attr_row], :convert => true).first
+      sap_attr_idh = self.class.create_from_row(attr_mh,sap_attr_row, :convert => true)
 
       return nil unless sap_attr_idh
       AttributeLink.create_links_sap(basic_type_info,sap_attr_idh,sap_config_attr.id_handle(),par_attr.id_handle(),node.id_handle())

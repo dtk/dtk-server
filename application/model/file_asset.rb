@@ -46,7 +46,7 @@ module XYZ
         :implementation_implementation_id => impl_obj.id()
       }
       file_asset_mh = impl_obj.model_handle.createMH(:file_asset)
-      new_file_asset_idh = create_from_rows(file_asset_mh,[hash]).first
+      new_file_asset_idh = create_from_row(file_asset_mh,hash)
       new_file_asset_obj = new_file_asset_idh.create_object().merge(hash)
       Repo.add_file(new_file_asset_obj,content,{:implementation => impl_obj})
       impl_obj.create_pending_changes_and_clear_dynamic_attrs(new_file_asset_obj)

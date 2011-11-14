@@ -13,11 +13,11 @@ require "#{Root}/config/environment_config.rb"
 BaseDir = R8::EnvironmentConfig::CoreCookbooksRoot
 Implementation = {:version => "0.10.0"}
 
-def add_user_and_group(username)
+def add_user_in_group(username,groupname)
   exists_user,user_id = add_if_does_not_exist(:user,username,:username,username)
-  exists_group,group_id = add_if_does_not_exist(:user_group,username,:groupname,username)
+  exists_group,group_id = add_if_does_not_exist(:user_group,groupname,:groupname,groupname)
   unless exists_user and exists_group
-    create_row(model_handle(:user_group_relation),{:ref => "#{username}-#{username}",:user_id => user_id, :user_group_id => group_id})
+    create_row(model_handle(:user_group_relation),{:ref => "#{username}-#{groupname}",:user_id => user_id, :user_group_id => group_id})
   end
   XYZ::User.get_user(model_handle(:user),username)
 end

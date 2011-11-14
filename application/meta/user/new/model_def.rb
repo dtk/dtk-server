@@ -29,5 +29,6 @@
          :cols=>[:id]
        }]
     }
-  }
+  },
+  :one_to_many => [:access_rule]
 }

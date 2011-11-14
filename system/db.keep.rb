@@ -1,8 +1,9 @@
 require 'sequel'
 #TODO: can probably get rid of internal dir, cleanup in next pass
-%w{schema_processing data_processing associations infra_tables authorization}.each do |filename|
-  require File.expand_path("#{UTILS_DIR}/internal/db/#{filename}", File.dirname(__FILE__))
-end
+require File.expand_path(UTILS_DIR+'/internal/db/schema_processing', File.dirname(__FILE__))
+require File.expand_path(UTILS_DIR+'/internal/db/data_processing', File.dirname(__FILE__))
+require File.expand_path(UTILS_DIR+'/internal/db/associations', File.dirname(__FILE__))
+require File.expand_path(UTILS_DIR+'/internal/db/infra_tables', File.dirname(__FILE__))
 
 module XYZ
   class DB
@@ -35,7 +36,6 @@ module XYZ
     include DataProcessing unless included_modules.include?(DataProcessing)
     include Associations unless included_modules.include?(Associations)
     include RestURI unless included_modules.include?(RestURI)
-    extend DBAuthorizationClassMixin
 
     #TODO: may move to dataset_from_search_pattern.rb
     def self.ret_paging_and_order_added_to_dataset(ds,opts,any_change={})
@@ -102,10 +102,9 @@ module XYZ
     def ret_parent_id_field_name(parent_db_rel,db_rel)
       self.class.ret_parent_id_field_name(parent_db_rel,db_rel)
     end
+  private
 
-
-   private
-    ########## Authorization/user related methods ======================
+    ########## Authorization/user info related methods ======================
     def self.add_assignments_for_user_info(scalar_assignments,factory_id_handle)
       process_user_info_aux!(:assignments,scalar_assignments,factory_id_handle)
     end
@@ -115,6 +114,31 @@ module XYZ
       add_to.empty? ? sequel_select : sequel_select.select_more(add_to).from_self
     end
     
+    def self.augment_for_authorization(where_clause,model_handle)
+      conjoin_set = where_clause ? [where_clause] : Array.new 
+      session = CurrentSession.new
+      auth_filters = NoAuth.include?(model_handle[:model_name]) ? nil : session.get_auth_filters()
+      if auth_filters 
+=begin
+create_dataset_found = caller.select{|x|x =~ /create_dataset'/}
+caller_info = (create_dataset_found ? "CREATE_DATASET_FOUND" : caller[0..15])
+pp [:auth,model_handle[:model_name],auth_filters,caller_info]
+=end
+
+        conjoin_set += process_session_auth(session,auth_filters)
+      else
+        conjoin_set << {CONTEXT_ID => model_handle[:c]} if model_handle[:c]
+      end
+      case conjoin_set.size 
+        when 0 then {}
+        when 1 then conjoin_set.first
+        else SQL.and(*conjoin_set)
+      end
+    end
+
+    ##### helpers
+    #TODO complete hack to add :task_event NoAuth = [:user,:user_group,:user_group_relation]
+    NoAuth = [:user,:user_group,:user_group_relation,:task_event]
     def self.process_user_info_aux!(type,scalar_assignments,model_or_id_handle,columns=nil)
       to_add = Hash.new
       user_obj = CurrentSession.new.get_user_object()
@@ -127,6 +151,7 @@ module XYZ
       end
       scalar_assignments.merge(to_add)
     end
+
 
     def self.update_if_needed!(type,to_add,columns,col,val)
       if val and not (columns and columns.include?(col))
@@ -146,6 +171,25 @@ module XYZ
       update_if_needed!(type,to_add,columns,:group_id,val)
     end
 
+    def self.process_session_auth(session,auth_filters)
+      ret =  Array.new
+      user_obj = session.get_user_object()
+      return ret unless user_obj
+      auth_filters.each do |auth_filter|
+        if auth = auth_context[auth_filter]
+          ret << {auth[1] => user_obj[auth[0]]} if user_obj[auth[0]]
+        elsif auth_filter == :group_ids
+          if group_ids = user_obj[:group_ids]
+            if group_ids.size == 1 
+              ret << {:group_id => group_ids.first}
+            elsif group_ids.size > 1 
+              Log.error("currently not treating case where multiple members of group_ids")
+            end
+          end
+        end
+      end
+      ret
+    end
     def self.auth_context()
       @auth_context ||= {
         :c => [:c,CONTEXT_ID],
@@ -155,7 +199,7 @@ module XYZ
     end
 
 
-    ########## end: Authorization/user related methods ======================
+    ########## end: Authorization related methods ======================
 
     def self.ret_keys_as_symbols(obj)
       return obj.map{|x|ret_keys_as_symbols(x)} if obj.kind_of?(Array)

@@ -18,7 +18,9 @@ if controller_line =~ /controller\/(.+)\.rb:.+`(.+)'/
   fn = $2
   controller = "#{model}##{fn}"
 end
-pp [:auth,model_handle[:model_name],controller]
+unless ["target#get_nodes_status"].include?(controller) #ignore list
+  pp [:auth,model_handle[:model_name],controller]
+end
 #=end
         conjoin_set += process_session_auth(session,auth_filters)
       else

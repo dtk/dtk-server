@@ -374,8 +374,11 @@ ie: get_components(['language'])
         [:regex,name.to_sym,"^#{value}"] if cols.include?(name.to_sym)
       end.compact
 
-      #restrict results to belong to library and not nested in assembly
-      filter_conjuncts += [[:neq,:library_library_id,nil],[:eq,:assembly_id,nil]]
+      #restrict results do not nested in assembly
+      filter_conjuncts << [:eq,:assembly_id,nil]
+      #including library forces join and filter on library; so makes sure only nodes from library returned and ones
+      #that the user is authorized to see
+      cols << :library unless cols.include?(:library)
       sp_hash = {
         :cols => cols,
         :filter => [:and] + filter_conjuncts

@@ -44,6 +44,15 @@ module XYZ
            :cols => [:id,:display_name,:type]
          }]
 
+      virtual_column :library, :type => :json, :hidden => true,
+        :remote_dependencies =>
+        [{
+           :model_name => :library,
+           :join_type => :inner,
+           :join_cond => {:id => p(:node,:library)},
+           :cols => [:id,:display_name]
+         }]
+
       ##### for connection to ports and port links
       virtual_column :node_link_defs_info, :type => :json, :hidden => true, 
         :remote_dependencies => 

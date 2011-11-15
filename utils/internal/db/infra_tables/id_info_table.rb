@@ -22,19 +22,25 @@ module XYZ
       vals.merge!(x)
       vals[:parent_model_name] ||= get_parent_model_name()
       vals[:model_name] ||= get_model_name()
-      ModelHandle.new(vals[:c],vals[:model_name],vals[:parent_model_name])
+      user_info = {:group_id => self[:group_id]}
+      ModelHandle.new(vals[:c],vals[:model_name],vals[:parent_model_name],user_info)
     end
 
     def create_childMH(child_model_name)
-      ModelHandle.new(self[:c],child_model_name,self[:model_name])
+      user_info = {:group_id => self[:group_id]}
+      ModelHandle.new(self[:c],child_model_name,self[:model_name],user_info)
     end
 
     def create_peerMH(model_name)
-      ModelHandle.new(self[:c],model_name,self[:parent_model_name])
+      user_info = {:group_id => self[:group_id]}
+      ModelHandle.new(self[:c],model_name,self[:parent_model_name],user_info)
     end
 
     def get_children_model_handles(opts={})
-      get_children_model_names(opts).map{|child_model_name|ModelHandle.new(self[:c],child_model_name,self[:model_name])}
+      get_children_model_names(opts).map do |child_model_name|
+        user_info = {:group_id => self[:group_id]}
+        ModelHandle.new(self[:c],child_model_name,self[:model_name],user_info)
+      end
     end
 
     def db()
@@ -141,7 +147,7 @@ module XYZ
           self[:guid] = IDInfoTable.ret_guid_from_db_id(id_info[:id],model_name)
           self[:model_name] = model_name
           self[:parent_model_name] = get_parent_id_handle()[:model_name] if opts[:set_parent_model_name]
-          return freeze
+          #TODO: removed freeze
         end
       end
 
@@ -180,7 +186,7 @@ module XYZ
           end
         end
       end
-      freeze
+      #TODO: removed freeze
     end
 
     def self.[](x)
@@ -204,11 +210,10 @@ module XYZ
       self[:model_name] = model_name.to_sym
       self[:parent_model_name] = parent_model_name.to_sym if parent_model_name
       if user
-        raise Error.new("need to remove user[:group_ids] ref in model handle") 
         self[:user_id] = user[:id] if  user[:id]
-        self[:group_ids] =  user[:group_ids] if user[:group_ids]
+        self[:group_id] =  user[:group_id] if user[:group_id]
       end
-      freeze
+      self #TODO: removed freeze
     end
 
     def self.create_from_user(user,model_name)

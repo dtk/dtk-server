@@ -57,7 +57,6 @@ module XYZ
       self.new(hash_scalar_values,c,relation_type_x,id_handle)
     end
     #TODO: make initialize and use create
-    #TODO: check why relation_type=model_name does not work
     def initialize(hash_scalar_values,c,relation_type_x=model_name(),id_handle=nil)
       return nil if hash_scalar_values.nil?
       super(hash_scalar_values)
@@ -126,6 +125,14 @@ module XYZ
 
     def id_handle(hash_info=nil)
       hash_info ? @id_handle.createIDH(hash_info) : @id_handle 
+    end
+
+    def id_handle_with_auth_info()
+      #TODO: can be made more efficient by putting this info in @id_handle during initial create
+      return @id_handle if @id_handle[:user_id] and @id_handle[:group_id]
+      update_object!(:group_id)
+      @id_handle.merge!(:group_id => self[:group_id]) if self[:group_id]
+      @id_handle
     end
 
     def get_parent_id_handle()

@@ -21,7 +21,6 @@ def model_handle(model_name)
   XYZ::ModelHandle.new(c,model_name)
 end
 
-
 require Root + '/app'
 user_obj, user_group_id = add_user_in_group?(username,"user-#{username}")
 

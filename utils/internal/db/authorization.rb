@@ -83,11 +83,7 @@ end
           ret << {auth[1] => user_obj[auth[0]]} if user_obj[auth[0]]
         elsif auth_filter == :group_ids
           if group_ids = user_obj[:group_ids]
-            if group_ids.size == 1 
-              ret << {:group_id => group_ids.first}
-            elsif group_ids.size > 1 
-              Log.error("currently not treating case where multiple members of group_ids")
-            end
+            ret << {:group_id => group_ids}
           end
         end
       end

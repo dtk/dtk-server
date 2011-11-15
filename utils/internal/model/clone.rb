@@ -12,7 +12,7 @@ module XYZ
 
   module CloneInstanceMixins
     def clone_into(clone_source_object,override_attrs={},opts={})
-      target_id_handle = id_handle()
+      target_id_handle = id_handle_with_auth_info()
        ##constraints
       if clone_source_object.class == Component and target_id_handle[:model_name] == :node
         constraints = clone_source_object.get_constraints!(:update_object => true)
@@ -190,7 +190,7 @@ module XYZ
         #all targets will have same model handle
         sample_target =  targets.first
         target_parent_mh = sample_target.createMH()
-        target_mh = source_id_handle.createMH(:parent_model_name => target_parent_mh[:model_name])
+        target_mh = target_parent_mh.create_childMH(source_id_handle[:model_name])
         target_parent_id_col = target_mh.parent_id_field_name()
         targets_rows = targets.map{|id_handle|{target_parent_id_col => id_handle.get_id()}}
         targets_ds = SQL::ArrayDataset.create(db,targets_rows,ModelHandle.new(source_id_handle[:c],:target))

@@ -13,14 +13,15 @@ require "#{Root}/config/environment_config.rb"
 BaseDir = R8::EnvironmentConfig::CoreCookbooksRoot
 Implementation = {:version => "0.10.0"}
 
-def add_and_return_user?(username)
-  mh = model_handle(:user)
-  XYZ::Model.create_from_row?(mh,username,{:username => username})
-  XYZ::User.get_user(mh,username)
+def add_user_in_group?(username,groupname)
+  user_mh = model_handle(:user)
+  user_id = XYZ::Model.create_from_row?(user_mh,username,{:username => username}).get_id()
+  group_id = XYZ::Model.create_from_row?(model_handle(:user_group),groupname,{:groupname => groupname}).get_id()
+  XYZ::Model.create_from_row?(model_handle(:user_group_relation),"#{username}-#{groupname}",{:user_id => user_id, :user_group_id => group_id})
+  XYZ::User.get_user(user_mh,username)
 end
 
 def add_and_return_group_id?(groupname)
-  XYZ::Model.create_from_row?(model_handle(:user_group),groupname,{:groupname => groupname}).get_id()
 end
 
 def model_handle(model_name)
@@ -49,8 +50,7 @@ opts =
   end
 
 require Root + '/app'
-user_obj = add_and_return_user?(username)
-group_id = add_and_return_group_id?("all")
+user_obj = add_user_in_group?(username,"all")
 
 container_idh = XYZ::IDHandle[:c => 2, :uri => container_uri, :user_id => user_obj[:id], :group_ids => user_obj[:group_ids]]
 opts.merge!(:username => username)

@@ -18,7 +18,7 @@ def add_user_in_group?(username,groupname)
   user_id = XYZ::Model.create_from_row?(user_mh,username,{:username => username}).get_id()
   group_id = XYZ::Model.create_from_row?(model_handle(:user_group),groupname,{:groupname => groupname}).get_id()
   XYZ::Model.create_from_row?(model_handle(:user_group_relation),"#{username}-#{groupname}",{:user_id => user_id, :user_group_id => group_id})
-  XYZ::User.get_user(user_mh,username)
+  [XYZ::User.get_user(user_mh,username),group_id]
 end
 
 def add_and_return_group_id?(groupname)
@@ -50,9 +50,11 @@ opts =
   end
 
 require Root + '/app'
-user_obj = add_user_in_group?(username,"all")
+add_user_in_group?(username,"user-#{username}")
+user_obj,all_group_id = add_user_in_group?(username,"all")
 
-container_idh = XYZ::IDHandle[:c => 2, :uri => container_uri, :user_id => user_obj[:id], :group_ids => user_obj[:group_ids]]
+
+container_idh = XYZ::IDHandle[:c => 2, :uri => container_uri, :user_id => user_obj[:id], :group_id => all_group_id]
 opts.merge!(:username => username)
 opts.merge!(:add_implementations => {:version => Implementation[:version], :library => Library, :base_directory => BaseDir})
 

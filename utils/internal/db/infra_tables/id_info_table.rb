@@ -168,7 +168,7 @@ module XYZ
       self[:parent_guid] = x[:parent_guid].to_i if x[:parent_guid]
       self[:parent_model_name] = x[:parent_model_name].to_sym if x[:parent_model_name]
       self[:user_id] = x[:user_id] if x[:user_id]
-      self[:group_ids] = x[:group_ids] if x[:group_ids]
+      self[:group_id] = x[:group_id] if x[:group_id]
       if opts[:set_parent_model_name]
         unless self[:parent_model_name]
           parent_idh = get_parent_id_handle()
@@ -204,6 +204,7 @@ module XYZ
       self[:model_name] = model_name.to_sym
       self[:parent_model_name] = parent_model_name.to_sym if parent_model_name
       if user
+        raise Error.new("need to remove user[:group_ids] ref in model handle") 
         self[:user_id] = user[:id] if  user[:id]
         self[:group_ids] =  user[:group_ids] if user[:group_ids]
       end

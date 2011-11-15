@@ -103,59 +103,7 @@ module XYZ
       self.class.ret_parent_id_field_name(parent_db_rel,db_rel)
     end
 
-
    private
-    ########## Authorization/user related methods ======================
-    def self.add_assignments_for_user_info(scalar_assignments,factory_id_handle)
-      process_user_info_aux!(:assignments,scalar_assignments,factory_id_handle)
-    end
-
-    def self.update_create_info_for_user_info!(columns,sequel_select,model_handle)
-      add_to = process_user_info_aux!(:sequel_select,{},model_handle,columns)
-      add_to.empty? ? sequel_select : sequel_select.select_more(add_to).from_self
-    end
-    
-    def self.process_user_info_aux!(type,scalar_assignments,model_or_id_handle,columns=nil)
-      to_add = Hash.new
-      user_obj = CurrentSession.new.get_user_object()
-      if user_obj
-        update_if_needed!(type,to_add,columns,CONTEXT_ID,user_obj[:c])
-        update_if_needed!(type,to_add,columns,:owner_id,user_obj[:id])
-        update_if_needed_group_id!(type,to_add,columns,user_obj[:group_ids])
-      else
-        update_if_needed!(type,to_add,columns,CONTEXT_ID,model_or_id_handle[:c])
-      end
-      scalar_assignments.merge(to_add)
-    end
-
-    def self.update_if_needed!(type,to_add,columns,col,val)
-      if val and not (columns and columns.include?(col))
-        to_add.merge!(type == :sequel_select ? {val => col} : {col => val})
-        columns << col if columns
-      end   
-    end
-    
-    def self.update_if_needed_group_id!(type,to_add,columns,group_ids)
-      return unless group_ids
-      val = nil
-      if group_ids.size == 1 
-        val = group_ids.first
-      elsif group_ids.size > 1 
-        Log.error("currently not treating case where multiple members of group_ids")
-      end
-      update_if_needed!(type,to_add,columns,:group_id,val)
-    end
-
-    def self.auth_context()
-      @auth_context ||= {
-        :c => [:c,CONTEXT_ID],
-        :user_id => [:id,:owner_id]
-        #special process of :group_id
-      }
-    end
-
-
-    ########## end: Authorization/user related methods ======================
 
     def self.ret_keys_as_symbols(obj)
       return obj.map{|x|ret_keys_as_symbols(x)} if obj.kind_of?(Array)

@@ -214,8 +214,8 @@ module XYZ
         fk_info.add_id_handles(new_id_handles) #TODO: may be more efficient adding only id handles assciated with foreign keys
 
         #iterate over all nested objects which includes children object plus, for example, components for composite components
-        get_nested_objects__all(source_model_handle,target_parent_mh,new_objs_info,recursive_override_attrs).each do |child_context|
-#***TODO: put this in        get_nested_objects__all(target_mh,target_parent_mh,new_objs_info,recursive_override_attrs).each do |child_context|
+#***TODO: double check this change        get_nested_objects__all(source_model_handle,target_parent_mh,new_objs_info,recursive_override_attrs).each do |child_context|
+        get_nested_objects__all(target_mh,target_parent_mh,new_objs_info,recursive_override_attrs).each do |child_context|
           clone_copy_child_objects(child_context)
         end
         fk_info.shift_foregn_keys()

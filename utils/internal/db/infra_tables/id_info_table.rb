@@ -147,7 +147,7 @@ module XYZ
           self[:guid] = IDInfoTable.ret_guid_from_db_id(id_info[:id],model_name)
           self[:model_name] = model_name
           self[:parent_model_name] = get_parent_id_handle()[:model_name] if opts[:set_parent_model_name]
-          #TODO: removed freeze
+          return #TODO: removed freeze
         end
       end
 
@@ -213,7 +213,7 @@ module XYZ
         self[:user_id] = user[:id] if  user[:id]
         self[:group_id] =  user[:group_id] if user[:group_id]
       end
-      self #TODO: removed freeze
+      #TODO: removed freeze
     end
 
     def self.create_from_user(user,model_name)

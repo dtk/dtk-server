@@ -26,17 +26,20 @@ module XYZ
 
       def create_from_select(model_handle,field_set,select_ds,override_attrs={},opts={})
         duplicate_refs = opts[:duplicate_refs] || :allow #other alternatives: #:no_check | :error_on_duplicate | :prune_duplicates
-        overrides = DB.add_user_info_to_overrides(override_attrs.dup,model_handle)
+        columns = field_set.cols
         sequel_select = select_ds.sequel_ds.ungraphed.from_self #ungraphed and from_self just to be safe
-        columns = (field_set.cols - overrides.keys) + overrides.keys
-
-        #processing to take into account c
-        proc_cols = columns.map{|col|col == :c ? {overrides[:c] => :c} : col}
-        sequel_select = sequel_select.select(*proc_cols).from_self
-
+=begin
+        #add :c if not present
+        unless columns.include?(:c)
+          sequel_select = sequel_select.select(*columns).select_more(model_handle[:c] => :c).from_self
+          columns << :c
+        end
+=end
+        sequel_select = DB.update_create_info_for_user_info!(columns,sequel_select.select(*columns),model_handle)
         #parent_id_col can be null
         parent_id_col = model_handle.parent_id_field_name()
 
+        overrides = override_attrs.dup
         db_rel = DB_REL_DEF[model_handle[:model_name]]
         ds = dataset(db_rel)
         #modify sequel_select to reflect duplicate_refs setting

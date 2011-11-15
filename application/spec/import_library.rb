@@ -49,7 +49,7 @@ opts =
   end
 
 require Root + '/app'
-user_obj = add_abnd_return_user?(username)
+user_obj = add_and_return_user?(username)
 group_id = add_and_return_group_id?("all")
 
 container_idh = XYZ::IDHandle[:c => 2, :uri => container_uri, :user_id => user_obj[:id], :group_ids => user_obj[:group_ids]]

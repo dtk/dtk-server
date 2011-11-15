@@ -54,7 +54,10 @@ module Ramaze::Helper
       c = ret_session_context_id()
       hash = {:c => c,:guid => id.to_i, :model_name => i_model_name.to_sym}
       hash.merge!(:display_name => display_name) if display_name
-      IDHandle.new(hash,{:set_parent_model_name => true})
+      idh = IDHandle.new(hash,{:set_parent_model_name => true})
+      obj = idh.create_object().update_object!(:group_id)
+      idh.merge!(:group_id => obj[:group_id]) if obj[:group_id]
+      idh
     end
 
     def top_level_factory_id_handle()

@@ -668,8 +668,9 @@ pp request.params
       #convert empty strings to nils
       attr_val_hash.each{|k,v|attr_val_hash[k] = nil if v.kind_of?(String) and v.empty?}
       component_id = attr_val_hash.delete("component_id").to_i
+      component_idh = id_handle(component_id)
+      attr_mh = component_idh.create_childMH(:attribute)
       attribute_rows = AttributeComplexType.ravel_raw_post_hash(attr_val_hash,:attribute,component_id)
-      attr_mh = ModelHandle.new(ret_session_context_id(),:attribute)
       #TODO: need way to mark which ones are instance vars vs which ones are defaults
       Attribute.update_and_propagate_attributes(attr_mh,attribute_rows)
       redirect "/xyz/component/instance_edit_test/#{component_id.to_s}"

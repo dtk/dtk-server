@@ -33,7 +33,7 @@ module XYZ
         #modify ds and its columns in concert
         select_info = {:cols =>  field_set.cols, :ds => select_ds.sequel_ds.ungraphed.from_self} #ungraphed and from_self just to be safe
         #processing to take into account c
-        add_cols_to_select!(select_info,{:c => user_info_assigns[:c]})
+        add_cols_to_select!(select_info,{:c => user_info_assigns[:c]},{:from_self => [:end]})
 
         #parent_id_col can be null
         parent_id_col = model_handle.parent_id_field_name()
@@ -45,7 +45,7 @@ module XYZ
           match_cols = [:c,:ref,parent_id_col].compact
           #need special processing of ref override; need to modify match_cols and select_on_match_cols
           if ref_override =  overrides.delete(:ref)
-            add_cols_to_select!(select_info,{:ref => ref_override},{:dont_add_cols => true})
+            add_cols_to_select!(select_info,{:ref => ref_override},{:dont_add_cols => true, :from_self => [:end]})
           end
 
           case duplicate_refs
@@ -63,14 +63,14 @@ module XYZ
             max_col = SQL::ColRef.max{|o|o.coalesce(:existing__ref_num,1)}
             max_ref_num_ds = ds_to_group.group(*match_cols).select(*(match_cols+[max_col]))
 
-            add_cols_to_select!(select_info,{:ref_num =>SQL::ColRef.case{[[{:max => nil},nil],:max+1]}},{:no_from_self => true})
+            add_cols_to_select!(select_info,{:ref_num =>SQL::ColRef.case{[[{:max => nil},nil],:max+1]}})
             select_info[:ds] = select_info[:ds].join_table(:left_outer,max_ref_num_ds,match_cols)
           end
         end
 
         #process overrides
         #TODO: may need a from self prefix instead of optional from_self post fix and in general try to remove unnecessay from selfs
-        add_cols_to_select!(select_info,user_info_assigns.merge(overrides),{:no_from_self => true})
+        add_cols_to_select!(select_info,user_info_assigns.merge(overrides),{:from_self => [:beg]})
 
         # final ones to select and add  
         sequel_select_with_cols = select_info[:ds]
@@ -104,26 +104,27 @@ module XYZ
 
       private
       def add_cols_to_select!(select_info,default_assigns,opts={})
-        if default_assigns.empty?
-          proc_cols = select_info[:cols]
-        else
-          cols = select_info[:cols]
-          not_found = default_assigns.dup
-          proc_cols = select_info[:cols].map do |col|
-            if not_found.has_key?(col) #using has_key? to take into account null vals
-              def_val = not_found.delete(col)
-              {def_val => col}
-            else
-              col
-            end
-          end
-          not_found.each do |col,val|
-            cols << col unless opts[:donot_add_cols]
-            proc_cols << {val => col}
+        cols = select_info[:cols]
+        not_found = default_assigns.dup
+        proc_cols = select_info[:cols].map do |col|
+          if not_found.has_key?(col) #using has_key? to take into account null vals
+            def_val = not_found.delete(col)
+            {def_val => col}
+          else
+            col
           end
         end
-        select_with_cols = select_info[:ds].select(*proc_cols)
-        select_info[:ds] = opts[:no_from_self] ? select_with_cols : select_with_cols.from_self
+        not_found.each do |col,val|
+          cols << col unless opts[:donot_add_cols]
+          proc_cols << {val => col}
+        end
+        #TODO: see if we can simplify use of from self
+        from_self_beg = opts[:from_self] and opts[:from_self].include?(:beg)
+        from_self_end = opts[:from_self] and opts[:from_self].include?(:end)
+        select_info[:ds] = select_info[:ds].from_self if from_self_beg
+        select_info[:ds] = select_info[:ds].select(*proc_cols)
+        select_info[:ds] = select_info[:ds].from_self if from_self_end
+        select_info
       end
 
        def process_json_fields_in_returning_ids!(returning_ids,db_rel)

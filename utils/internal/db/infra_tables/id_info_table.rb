@@ -85,7 +85,7 @@ module XYZ
         else
           self[:model_name]
         end
-      Model.model_class( model_name).new({:id => get_id()},self[:c])
+      Model.model_class(model_name).new({:id => get_id()},self[:c],nil,self)
     end
 
     def i18n_language()

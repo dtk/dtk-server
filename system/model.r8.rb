@@ -57,9 +57,10 @@ module XYZ
       self.new(hash_scalar_values,c,relation_type_x,id_handle)
     end
     #TODO: make initialize and use create
-    def initialize(hash_scalar_values,c,relation_type_x=model_name(),id_handle=nil)
+    def initialize(hash_scalar_values,c,relation_type_x=nil,id_handle=nil)
       return nil if hash_scalar_values.nil?
       super(hash_scalar_values)
+      relation_type_x ||= model_name()
       relation_type = SubClassRelations[relation_type_x]||relation_type_x
       @c = c
       @relation_type = relation_type

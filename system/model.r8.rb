@@ -130,9 +130,9 @@ module XYZ
 
     def id_handle_with_auth_info()
       #TODO: can be made more efficient by putting this info in @id_handle during initial create
-      return @id_handle if @id_handle[:user_id] and @id_handle[:group_id]
-      update_object!(:group_id)
-      @id_handle.merge!(:group_id => self[:group_id]) if self[:group_id]
+      return @id_handle if @id_handle[:group_id]
+      group_id = group_id() ||(update_object!(:group_id))[:group_id]
+      @id_handle.merge!(:group_id => group_id) if group_id
       @id_handle
     end
 
@@ -141,16 +141,22 @@ module XYZ
     end
 
     def model_handle(mn=nil)
-      user_info = (self[:group_id] ? {:group_id => self[:group_id]} : nil)
+      group_id = group_id()
+      user_info = (group_id ? {:group_id => group_id} : nil)
       mh = ModelHandle.new(@c,@relation_type,nil,user_info)
       mn ? mh.createMH(mn) : mh
     end
     def model_handle_with_auth_info(mn=nil)
-      update_object!(:group_id)
-      user_info = {:group_id => self[:group_id]}
+      group_id = group_id() ||(update_object!(:group_id))[:group_id]
+      user_info = {:group_id => group_id}
       mh = ModelHandle.new(@c,@relation_type,nil,user_info)
       mn ? mh.createMH(mn) : mh
     end
+    def group_id()
+      self[:group_id] || (@id_handle && @id_handle[:group_id])
+    end
+    private :group_id
+
     #######
 
     def self.update_from_rows(model_handle,rows,opts={})

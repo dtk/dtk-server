@@ -116,7 +116,7 @@ module XYZ
 
     def self.save_list(parent,expression_list,opts={})
       #each element of expression_list will either be constraint or a disjunction
-      parent_idh = parent.id_handle()
+      parent_idh = parent.id_handle_with_auth_info()
       parent_mn = parent_idh[:model_name]
       violation_mh = parent_idh.create_childMH(:violation)
       parent_id = parent_idh.get_id()

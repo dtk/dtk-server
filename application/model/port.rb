@@ -90,7 +90,7 @@ module XYZ
       return ret if component_link_defs.empty?
 
       node_id = node.id()
-      port_mh = node.model_handle.create_childMH(:port)
+      port_mh = node.model_handle_with_auth_info.create_childMH(:port)
       component_type = (component.update_object!(:component_type))[:component_type]
       rows = component_link_defs.map do |link_def|
         type = 

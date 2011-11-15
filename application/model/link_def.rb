@@ -11,7 +11,7 @@ module XYZ
       #TODO: find good mechanism to get user input if there is a choice such as whether it is internal or external
       #below is exeperimenting with passing in "stratagy" object, which for example can indicate to make all "internal_external internal"
       strategy = {:internal_external_becomes_internal => true,:select_first => true}
-      parent_idh = component.id_handle.get_parent_id_handle
+      parent_idh = component.id_handle.get_parent_id_handle_with_auth_info()
       attr_links = Array.new
       relevant_link_defs.each do |link_def|
         if link_def_link = link_def.choose_internal_link(link_def[:possible_links],link_def[:component],strategy)

@@ -112,6 +112,11 @@ module XYZ
       return nil unless id_info and id_info[:parent_relation_type] and id_info[:parent_id] 
       IDHandle[:c => c, :id => id_info[:parent_id], :model_name => id_info[:parent_relation_type]]
     end
+    def get_parent_id_handle_with_auth_info()
+      idh = get_parent_id_handle()
+      obj = idh.create_object().update_object!(:group_id)
+      idh.createIDH(:group_id => obj[:group_id])
+    end
     def get_parent_id_handle_with_display_name()
       idh = get_parent_id_handle()
       idh.createIDH(:display_name =>  Model.get_display_name(idh))

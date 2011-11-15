@@ -140,7 +140,14 @@ module XYZ
     end
 
     def model_handle(mn=nil)
-      mh = ModelHandle.new(@c,@relation_type)
+      user_info = (self[:group_id] ? {:group_id => self[:group_id]} : nil)
+      mh = ModelHandle.new(@c,@relation_type,nil,user_info)
+      mn ? mh.createMH(mn) : mh
+    end
+    def model_handle_with_auth_info(mn=nil)
+      update_object!(:group_id)
+      user_info = {:group_id => self[:group_id]}
+      mh = ModelHandle.new(@c,@relation_type,nil,user_info)
       mn ? mh.createMH(mn) : mh
     end
     #######

@@ -6,7 +6,7 @@ module XYZ
       sp_hash = {
         :cols => [:id,:datacenter_datacenter_id,:components]
       }
-      new_item_hashes = Model.get_objects_in_set_from_sp_hash(node_idhs,sp_hash).map do |r|
+      new_item_hashes = Model.get_objs_in_set(node_idhs,sp_hash).map do |r|
         {
           :new_item => r[:component].id_handle(), 
           :parent => sample_idh.createIDH(:model_name => :datacenter, :id=> r[:datacenter_datacenter_id]),
@@ -53,7 +53,7 @@ module XYZ
       ret = Array.new
       return ret if new_item_hashes.empty? 
       parent_model_name = new_item_hashes.first[:parent][:model_name]
-      model_handle = new_item_hashes.first[:parent].createMH({:model_name => :state_change, :parent_model_name => parent_model_name})
+      model_handle = new_item_hashes.first[:new_item].createMH({:model_name => :state_change, :parent_model_name => parent_model_name})
       object_model_name = new_item_hashes.first[:new_item][:model_name]
       object_id_col = "#{object_model_name}_id".to_sym
       parent_id_col = model_handle.parent_id_field_name()

@@ -26,13 +26,13 @@ module XYZ
 
       def create_from_select(model_handle,field_set,select_ds,override_attrs={},opts={})
         duplicate_refs = opts[:duplicate_refs] || :allow #other alternatives: #:no_check | :error_on_duplicate | :prune_duplicates
+        fs_cols = field_set.cols
         overrides = DB.add_user_info_to_overrides(override_attrs.dup,model_handle)
-        sequel_select = select_ds.sequel_ds.ungraphed.from_self #ungraphed and from_self just to be safe
-        columns = (field_set.cols - overrides.keys) + overrides.keys
+        columns = (fs_cols - overrides.keys) + overrides.keys
 
+        sequel_select = select_ds.sequel_ds.ungraphed.from_self #ungraphed and from_self just to be safe
         #processing to take into account c
-        proc_cols = columns.map{|col|col == :c ? {overrides[:c] => :c} : col}
-        sequel_select = sequel_select.select(*proc_cols).from_self
+        sequel_select = sequel_select.select(*(fs_cols-[:c]) + [{overrides[:c] => :c}]).from_self
 
         #parent_id_col can be null
         parent_id_col = model_handle.parent_id_field_name()

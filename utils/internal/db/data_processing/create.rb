@@ -50,31 +50,31 @@ module XYZ
 
           case duplicate_refs
            when :prune_duplicates
-            sequel_info[:ds] = sequel_info[:ds].join_table(:left_outer,ds,match_cols,{:table_alias => :existing}).where({:existing__c => nil})
+            select_info[:ds] = select_info[:ds].join_table(:left_outer,ds,match_cols,{:table_alias => :existing}).where({:existing__c => nil})
            when :error_on_duplicate
             #TODO: not right yet
-            duplicate_count = sequel_info[:ds].join_table(:inner,ds,match_cols).count
+            duplicate_count = select_info[:ds].join_table(:inner,ds,match_cols).count
             if duplicate_count > 0
               #TODO: make this a specfic error 
               raise Error.new("found #{duplicate_count.to_s} duplicates")
             end
            when :allow
-            ds_to_group = sequel_info[:ds].join_table(:inner,ds,match_cols,{:table_alias => :existing})
+            ds_to_group = select_info[:ds].join_table(:inner,ds,match_cols,{:table_alias => :existing})
             max_col = SQL::ColRef.max{|o|o.coalesce(:existing__ref_num,1)}
             max_ref_num_ds = ds_to_group.group(*match_cols).select(*(match_cols+[max_col]))
 
             add_cols_to_select!(select_info,{:ref_num =>SQL::ColRef.case{[[{:max => nil},nil],:max+1]}},{:no_from_self => true})
-            sequel_info[:ds] = sequel_info[:ds].join_table(:left_outer,max_ref_num_ds,match_cols)
+            select_info[:ds] = select_info[:ds].join_table(:left_outer,max_ref_num_ds,match_cols)
           end
         end
 
         #process overrides
         #TODO: may need a from self prefix instead of optional from_self post fix and in general try to remove unnecessay from selfs
-        add_cols_to_select!(sequel_info,user_info_assigns.merge(overrides),{no_from_self => true})
+        add_cols_to_select!(select_info,user_info_assigns.merge(overrides),{:no_from_self => true})
 
         # final ones to select and add  
-        sequel_select_with_cols = sequel_info[:ds]
-        columns = sequel_info[:cols]
+        sequel_select_with_cols = select_info[:ds]
+        columns = select_info[:cols]
 
         #fn tries to return ids depending on whether db adater supports returning_id
         ret = nil
@@ -101,15 +101,15 @@ module XYZ
         end
         ret
       end
-      private
 
-      def add_cols_to_select!(sequel_info,default_assigns,opts={})
+      private
+      def add_cols_to_select!(select_info,default_assigns,opts={})
         if default_assigns.empty?
-          proc_cols = sequel_info[:cols]
+          proc_cols = select_info[:cols]
         else
-          cols = sequel_info[:cols]
+          cols = select_info[:cols]
           not_found = default_assigns.dup
-          proc_cols = sequel_info[:cols].map do |col|
+          proc_cols = select_info[:cols].map do |col|
             if not_found.has_key?(col) #using has_key? to take into account null vals
               def_val = not_found.delete(col)
               {def_val => col}
@@ -119,7 +119,7 @@ module XYZ
           end
           not_found.each do |col,val|
             cols << col unless opts[:donot_add_cols]
-            proc_cols << {col => val}
+            proc_cols << {val => col}
           end
         end
         select_with_cols = select_info[:ds].select(*proc_cols)

@@ -1,13 +1,14 @@
 module XYZ
   module DBAuthorizationClassMixin
+
     def add_assignments_for_user_info(scalar_assigns,factory_id_handle)
-      scalar_assigns.merge(process_user_info_aux(scalar_assigns,factory_id_handle)
+      scalar_assigns.merge(process_user_info_aux(scalar_assigns,factory_id_handle))
     end
 
     def user_info_for_create_seleect(overrides,model_handle)
       process_user_info_aux(overrides,model_handle)
     end
-    
+
     def process_user_info_aux(scalar_assigns,model_or_id_handle)
       to_add = Hash.new
       #cleanup if everything should come from model or id handle

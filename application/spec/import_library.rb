@@ -13,33 +13,14 @@ require "#{Root}/config/environment_config.rb"
 BaseDir = R8::EnvironmentConfig::CoreCookbooksRoot
 Implementation = {:version => "0.10.0"}
 
-def add_user_in_group(username,groupname)
-  exists_user,user_id = add_if_does_not_exist(:user,username,:username,username)
-  exists_group,group_id = add_if_does_not_exist(:user_group,groupname,:groupname,groupname)
-  unless exists_user and exists_group
-    create_row(model_handle(:user_group_relation),{:ref => "#{username}-#{groupname}",:user_id => user_id, :user_group_id => group_id})
-  end
-  XYZ::User.get_user(model_handle(:user),username)
+def add_and_return_user?(username)
+  mh = model_handle(:user)
+  XYZ::Model.create_from_row?(mh,username,{:username => username})
+  XYZ::User.get_user(mh,username)
 end
 
-def add_if_does_not_exist(model_name,ref,attr,val)
-  sp_hash = {:cols => [:id],:filter => [:eq,attr,val]}
-  mh = model_handle(model_name)
-  matching_obj = XYZ::Model.get_objs(mh,sp_hash).first
-  if id = matching_obj && matching_obj[:id]
-    exists = true
-  else
-    exists = false
-    id = create_row(mh,{:ref => ref, attr => val}).first[:id]
-  end
-  [exists,id]
-end
-
-def create_row(model_handle,scalar_assigns_x)
-  scalar_assigns = scalar_assigns_x.dup
-  ref = scalar_assigns.delete(:ref)
-  factory = XYZ::IDHandle[:c => model_handle[:c],:uri => "/#{model_handle[:model_name]}", :is_factory => true]
-  XYZ::Model.create_from_hash(factory,{ref => scalar_assigns}) 
+def add_and_return_group_id?(groupname)
+  XYZ::Model.create_from_row?(model_handle(:user_group),groupname,{:groupname => groupname}).get_id()
 end
 
 def model_handle(model_name)
@@ -68,7 +49,8 @@ opts =
   end
 
 require Root + '/app'
-user_obj = add_user_and_group(username)
+user_obj = add_abnd_return_user?(username)
+group_id = add_and_return_group_id?("all")
 
 container_idh = XYZ::IDHandle[:c => 2, :uri => container_uri, :user_id => user_obj[:id], :group_ids => user_obj[:group_ids]]
 opts.merge!(:username => username)

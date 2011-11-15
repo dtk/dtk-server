@@ -172,6 +172,20 @@ module XYZ
       create_from_rows(model_handle,[row],opts).first
     end
 
+    #creates if does not exist using match_assigns; in eitehr case returns id_handle 
+    def self.create_from_row?(model_handle,ref,match_assigns,other_assigns={},opts={})
+      sp_hash = {:cols => [:id]}
+      filter_els = match_assigns.map{|k,v|[:eq,k,v]}
+      if filter_els.size > 0
+        sp_hash.merge!(:filter => filter_els.size == 1 ? filter_els.first : [:and] + filter_els)
+      end
+      if matching_obj = get_obj(model_handle,sp_hash)
+        matching_obj.id_handle()
+      else
+        create_from_row(model_handle,{:ref => ref}.merge(match_assigns).merge(other_assigns),opts)
+      end
+    end
+
     def self.select_process_and_update(model_handle,cols_x,id_list,opts={},&block)
       cols = cols_x.include?(:id) ? cols_x : cols_x +[:id]
       fs = Model::FieldSet.opt(cols,model_handle[:model_name])
@@ -267,6 +281,9 @@ module XYZ
       Model.get_objects_from_sp_hash(model_handle,sp_hash,opts)
     end
 
+    def self.get_obj(model_handle,sp_hash,opts={})
+      get_objs(model_handle,sp_hash,opts).first
+    end
     def self.get_objs(model_handle,sp_hash,opts={})
       model_name = model_handle[:model_name]
       hash = sp_hash.merge(:relation => model_name)

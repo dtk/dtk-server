@@ -215,6 +215,7 @@ module XYZ
 
         #iterate over all nested objects which includes children object plus, for example, components for composite components
         get_nested_objects__all(source_model_handle,target_parent_mh,new_objs_info,recursive_override_attrs).each do |child_context|
+#***TODO: put this in        get_nested_objects__all(target_mh,target_parent_mh,new_objs_info,recursive_override_attrs).each do |child_context|
           clone_copy_child_objects(child_context)
         end
         fk_info.shift_foregn_keys()

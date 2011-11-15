@@ -123,13 +123,17 @@ module XYZ
     end
 
     #returns nil if model_name given and top does not mactch it
-    def get_top_container_id_handle(model_name=nil)
+    def get_top_container_id_handle(model_name=nil,opts={})
       uri = get_uri()
       top_model_name = RestURI.ret_top_container_relation_type(uri)
       return nil if model_name and not model_name == top_model_name
       c = self[:c]
       top_container_uri = RestURI.ret_top_container_uri(uri)
-      IDHandle[:c => c, :model_name => top_model_name, :uri => top_container_uri]
+      hash_info = {:c => c, :model_name => top_model_name, :uri => top_container_uri}
+      if opts[:auth_info_from_self]
+        hash_info.merge!(:group_id => self[:group_id]) if self[:group_id]
+      end
+      IDHandle[hash_info]
     end
 
     def get_parent_id_info()

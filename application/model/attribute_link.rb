@@ -6,7 +6,7 @@ module XYZ
     ##########################  add new links ##################
     def self.create_attribute_links(parent_idh,rows_to_create,opts={})
       return Array.new if rows_to_create.empty?
-      attr_mh = parent_idh.createMH(:attribute)
+      attr_mh = parent_idh.create_childMH(:attribute)
       attr_link_mh = parent_idh.create_childMH(:attribute_link)
 
       attr_info = get_attribute_info(attr_mh,rows_to_create)
@@ -31,8 +31,10 @@ module XYZ
       #augment attributes with port info; this is needed only if port is external
       Attribute.update_port_info(attr_mh,rows_to_create)
 
+      #want to use auth_info from parent_idh in case more specific than datacenter
+      change_parent_idh = parent_idh.get_top_container_id_handle(:datacenter,:auth_info_from_self => true)
       #propagate attribute values
-      ndx_nested_change_hashes = propagate_from_create(attr_mh,attr_info,rows_to_create,parent_idh)
+      ndx_nested_change_hashes = propagate_from_create(attr_mh,attr_info,rows_to_create,change_parent_idh)
       StateChange.create_pending_change_items(ndx_nested_change_hashes.values)
     end
 

@@ -1,27 +1,42 @@
 module XYZ
   module DBAuthorizationClassMixin
     def add_assignments_for_user_info(scalar_assigns,factory_id_handle)
-      scalar_assigns.merge(process_user_info_aux(scalar_assigns,factory_id_handle)
+      process_user_info_aux!(scalar_assigns,factory_id_handle)
     end
 
-    def user_info_for_create_seleect(overrides,model_handle)
-      process_user_info_aux(overrides,model_handle)
+    def update_create_info_for_user_info!(columns,sequel_select,overrides,model_handle)
+      add_to = process_user_info_aux!(overrides,model_handle,columns)
+      return sequel_select if add_to.empty? 
+      add_to.inject(sequel_select){|ret,(col,val)|ret.select_more(val => col)}
+    end
+
+    def update_overrides_and_cols_for_user_info!(overrides,columns,model_handle)
+      add_to = process_user_info_aux!(overrides,model_handle,columns)
+      overrides.merge!(add_to) unless add_to.empty? 
+      overrides
     end
     
-    def process_user_info_aux(scalar_assigns,model_or_id_handle)
+    def process_user_info_aux!(scalar_assigns,model_or_id_handle,columns=nil)
       to_add = Hash.new
       #cleanup if everything should come from model or id handle
       user_obj = CurrentSession.new.get_user_object()
-      assigns = Hash.new
       if user_obj
-        assigns.merge!(CONTEXT_ID => user_obj[:c],:owner_id => user_obj[:id])
+        update_if_needed!(to_add,columns,scalar_assigns,CONTEXT_ID,user_obj[:c])
+        update_if_needed!(to_add,columns,scalar_assigns,:owner_id,user_obj[:id])
       else
-        assigns.merge!(CONTEXT_ID => model_or_id_handle[:c])
+        update_if_needed!(to_add,columns,scalar_assigns,CONTEXT_ID,model_or_id_handle[:c])
       end
       raise Error.new("model_or_id_handle[:group_id] not set for #{model_or_id_handle[:model_name]}") unless model_or_id_handle[:group_id] or [:user,:user_group,:user_group_relation].include?( model_or_id_handle[:model_name])#TODO: temp until make sure that this is alwats set
-      assigns.merge!(:group_id => model_or_id_handle[:group_id])
-      #remove if in overrides or null val
-      assigns.inject({}){|h,(col,val)| (val and not scalar_assigns.has_key?(col)) ? h.merge(col => val) : h}
+      update_if_needed!(to_add,columns,scalar_assigns,:group_id,model_or_id_handle[:group_id])
+
+      scalar_assigns.merge(to_add)
+    end
+
+    def update_if_needed!(to_add,columns,scalar_assigns,col,val)
+      if val and not scalar_assigns.has_key?(col)
+        to_add.merge!(col => val)
+        columns << col if columns and not columns.include?(col)
+      end   
     end
     
     def auth_context()

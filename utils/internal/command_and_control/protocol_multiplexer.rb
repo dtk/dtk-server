@@ -24,12 +24,17 @@ module XYZ
      public
 
       def process_response(msg,request_id)
-        callbacks = get_and_remove_reqid_callbacks?(request_id)
-        if callbacks
-          callbacks.process_msg(msg,request_id)
-        else
-          pp "max count or timeout reached: dropping msg"
-          pp msg
+        begin
+          callbacks = get_and_remove_reqid_callbacks?(request_id)
+          if callbacks
+            callbacks.process_msg(msg,request_id)
+          else
+            pp "max count or timeout reached: dropping msg"
+            pp msg
+          end
+         rescue Exception => e
+          #TODO: more advanced would set failyue state on (sub)task
+          Log.error("error in proceess_response: #{e.inspect}")
         end
       end
 

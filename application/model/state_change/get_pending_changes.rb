@@ -1,65 +1,61 @@
-#TODO: depracte
-module Ramaze::Helper
-  module GetPendingChanges
-    include XYZ
-    def flat_list_pending_changes_in_datacenter(datacenter_id)
-      last_level = pending_changes_one_level_raw(:datacenter,[datacenter_id])
+module XYZ
+  module GetPendingChangesClassMixn
+    def flat_list_pending_changes_in_datacenter(target_idh)
+      target_mh = target_idh.createMH()
+      last_level = pending_changes_one_level_raw(target_mh,[target_idh])
       ret = Array.new
+      state_change_mh = target_mh.create_childMH(:state_change)
       while not last_level.empty?
         ret += last_level
-        last_level = pending_changes_one_level_raw(:state_change,last_level.map{|x|x[:id]})
+        last_level = pending_changes_one_level_raw(state_change_mh,last_level.map{|obj|obj.id_handle()})
       end
       remove_dups_and_proc_related_components(ret)
     end
 
-
-    def pending_changes_one_level_raw(parent_model_name,id_list)
-      pending_create_node(parent_model_name,id_list) + 
-        pending_changed_component(parent_model_name,id_list) +
-        pending_changed_attribute(parent_model_name,id_list)
+    def pending_changes_one_level_raw(parent_mh,idh_list)
+      pending_create_node(parent_mh,idh_list) + 
+        pending_changed_component(parent_mh,idh_list) +
+        pending_changed_attribute(parent_mh,idh_list)
     end
 
-    def pending_create_node(parent_model_name,id_list)
-      parent_field_name = XYZ::DB.parent_field(parent_model_name,:state_change)
+    def pending_create_node(parent_mh,idh_list)
+      parent_field_name = DB.parent_field(parent_mh[:model_name],:state_change)
       sp_hash = {
-        :relation => :state_change,
         :filter => [:and,
-                    [:oneof, parent_field_name,id_list],
+                    [:oneof, parent_field_name,idh_list.map{|idh|idh.get_id()}],
                     [:eq, :type, "create_node"],
                     [:eq, :status, "pending"]],
-        :columns => [:id,:relative_order,:type,:created_node,parent_field_name,:state_change_id].uniq
+        :cols => [:id,:relative_order,:type,:created_node,parent_field_name,:state_change_id].uniq
       }
-      state_change_mh = model_handle(:state_change)
-      Model.get_objects_from_sp_hash(state_change_mh,sp_hash)
+      state_change_mh = parent_mh.createMH(:state_change)
+      get_objs(state_change_mh,sp_hash)
     end
 
-    def pending_changed_component(parent_model_name,id_list)
-      parent_field_name = XYZ::DB.parent_field(parent_model_name,:state_change)
+    def pending_changed_component(parent_mh,idh_list)
+      parent_field_name = DB.parent_field(parent_mh[:model_name],:state_change)
       sp_hash = {
-        :relation => :state_change,
         :filter => [:and,
-                    [:oneof, parent_field_name, id_list],
+                    [:oneof, parent_field_name,idh_list.map{|idh|idh.get_id()}],
                     [:oneof, :type, ["install_component", "update_implementation","rerun_component"]],
                     [:eq, :status, "pending"]],
         :columns => [:id, :relative_order,:type,:changed_component,parent_field_name,:state_change_id].uniq
       }
-      state_change_mh = model_handle(:state_change)
-      sc_with_direct_cmps = Model.get_objects_from_sp_hash(state_change_mh,sp_hash)
+      state_change_mh = parent_mh.createMH(:state_change)
+      sc_with_direct_cmps = get_objs(state_change_mh,sp_hash)
       add_related_components(sc_with_direct_cmps)
     end
 
-    def pending_changed_attribute(parent_model_name,id_list)
-      parent_field_name = XYZ::DB.parent_field(parent_model_name,:state_change)
+    def pending_changed_attribute(parent_mh,idh_list)
+      parent_field_name = DB.parent_field(parent_mh[:model_name],:state_change)
       sp_hash = {
-        :relation => :state_change,
         :filter => [:and,
-                    [:oneof, parent_field_name, id_list],
+                    [:oneof, parent_field_name,idh_list.map{|idh|idh.get_id()}],
                     [:eq, :type, "setting"],
                     [:eq, :status, "pending"]],
         :columns => [:id, :relative_order,:type,:changed_attribute,parent_field_name,:state_change_id].uniq
       }      
-      state_change_mh = model_handle(:state_change)
-      sc_with_direct_cmps = Model.get_objects_from_sp_hash(state_change_mh,sp_hash)
+      state_change_mh = parent_mh.createMH(:state_change)
+      sc_with_direct_cmps = get_objs(state_change_mh,sp_hash)
       add_related_components(sc_with_direct_cmps)
     end
 

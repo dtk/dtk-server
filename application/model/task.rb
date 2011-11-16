@@ -1,6 +1,7 @@
+require  File.expand_path('task/create', File.dirname(__FILE__))
 module XYZ
   class Task < Model
-
+    extend TaskCreateClassMixin
     #for debugging
     def pretty_print_hash()
       ret = PrettyPrintHash.new

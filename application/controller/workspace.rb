@@ -572,7 +572,6 @@ pp datacenter
     end
 
    #### actions to process pending changes
-    helper :get_pending_changes
     helper :create_tasks_from_pending_changes
 
     #deprecate
@@ -792,13 +791,14 @@ POSSIBLE CHANGES TO HASH
       }
     end
 
-    def commit_ide(datacenter_id=nil)
+    def commit_ide(target_id=nil)
       commit_tree = Hash.new
       required_attr_list = Array.new
-      if datacenter_id
-        pending_changes = flat_list_pending_changes_in_datacenter(datacenter_id.to_i)
+      if target_id
+        target_idh = id_handle(target_id,:target)
+        pending_changes = StateChange.flat_list_pending_changes(target_idh)
         unless pending_changes.empty?
-          commit_task = create_task_from_pending_changes(pending_changes)
+          commit_task = Task.create_from_pending_changes(target_idh,pending_changes)
           commit_task.save!()
 
           #handle missing required attrs
@@ -840,7 +840,7 @@ POSSIBLE CHANGES TO HASH
       tpl.assign(:required_attr_list,required_attr_list)
 
 #TODO: using datacenters as environments right now, redo later on
-      dc_hash = get_object_by_id(datacenter_id,:datacenter)
+      dc_hash = get_object_by_id(target_id,:datacenter)
       if dc_hash[:type] == 'production'
         commit_content = '<tr><td class="label">Maintenance Window</td></tr>
                           <tr><td class="field"><select id="commit_date" name="commit_date">

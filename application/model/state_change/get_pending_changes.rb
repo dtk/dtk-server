@@ -1,6 +1,6 @@
 module XYZ
-  module GetPendingChangesClassMixn
-    def flat_list_pending_changes_in_datacenter(target_idh)
+  module GetPendingChangesClassMixin
+    def flat_list_pending_changes(target_idh)
       target_mh = target_idh.createMH()
       last_level = pending_changes_one_level_raw(target_mh,[target_idh])
       ret = Array.new

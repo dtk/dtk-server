@@ -1,6 +1,7 @@
+require  File.expand_path('state_change/get_pending_changes', File.dirname(__FILE__))
 module XYZ
   class StateChange < Model
-
+    extend GetPendingChangesClassMixin
     def self.create_rerun_state_changes(node_idhs)
       sample_idh = node_idhs.first()
       sp_hash = {

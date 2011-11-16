@@ -107,7 +107,7 @@ module XYZ
 
     def self.get_top_level_tasks(model_handle)
       sp_hash = {
-        :cols => [:id,:display_name,:status,:updated_at,:executable_action_type],
+        :cols => [:id,:group_id,:display_name,:status,:updated_at,:executable_action_type],
         :filter => [:eq,:task_id,nil] #so this is a top level task
       }
       get_objs(model_handle,sp_hash).reject{|k,v|k == :subtasks}

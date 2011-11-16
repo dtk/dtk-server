@@ -76,6 +76,9 @@ module XYZ
         else
           nil
         end
+      if @id_handle 
+        @id_handle[:group_id] ||= hash_scalar_values[:group_id] if hash_scalar_values[:group_id]
+      end
     end
 
     def self.create_from_model_handle(hash_scalar_values,model_handle)

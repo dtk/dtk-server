@@ -1,5 +1,6 @@
 module XYZ
   class TaskController < Controller
+    helper :task_helper
     #TODO: test stub
     def rerun_components(node_id)
       node_idh = id_handle(node_id,:node)
@@ -45,8 +46,7 @@ module XYZ
       node_id = node_id && node_id.to_i
 
       unless task_id
-        tasks = Task.get_top_level_tasks(model_handle).sort{|a,b| b[:updated_at] <=> a[:updated_at]}
-        task = tasks.first
+        task = get_most_recent_task()
       else
         raise Error.new("not implemented yet get_logs with task id given")
       end

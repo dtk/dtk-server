@@ -638,10 +638,10 @@ pp datacenter
     end
 
     #TDOO: doing redundant work to what is done in commit_ide
-    def commit_changes_ide(datacenter_id)
-      datacenter_id = datacenter_id.gsub(/editor-target-/,"") #TODO: temp to compensate front end error
+    def commit_changes_ide(target_id)
+      target_id = target_id.gsub(/editor-target-/,"") #TODO: temp to compensate front end error
 
-      datacenter_id = datacenter_id && datacenter_id.to_i
+      target_idh = id_handle(target_id,:target) 
       hash = request.params.dup
       commit_date = hash.delete("commit_date")
       commit_msg = hash.delete("commit_msg")
@@ -656,14 +656,13 @@ pp datacenter
       attribute_rows = AttributeComplexType.ravel_raw_post_hash(attr_val_hash,:attribute)
       Attribute.update_and_propagate_attributes(model_handle(:attribute),attribute_rows)
       ######
-
-      pending_changes = flat_list_pending_changes_in_datacenter(datacenter_id)
+      pending_changes = StateChange.flat_list_pending_changes(target_idh)
       if pending_changes.empty?
         run_javascript("R8.IDE.showAlert('No Pending Changes to Commit');")
         return {}
       end
 
-      top_level_task = create_task_from_pending_changes(pending_changes)
+      top_level_task = Task.create_from_pending_changes(target_idh,pending_changes)
 
       #TODO: need to sync ValidationError with analysis done in group by
       #TODO: just need to check if anything returned missing values

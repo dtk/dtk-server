@@ -1,7 +1,5 @@
 module XYZ
   class ProjectController < Controller
-    helper :create_tasks_from_pending_changes
-
     def test_group_attrs(datacenter_id=nil)
       redirect = "/xyz/project/test_group_attrs/#{(datacenter_id||"").to_s}"
       unless datacenter_id

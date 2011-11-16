@@ -264,19 +264,17 @@ module XYZ
       ]
     end
 
-
-
     def ret_command_and_control_adapter_info()
       #TODO: stub
       [:node_config,nil]
     end
 
-    def initialize(hash_scalar_values,c,model=:task)
+    def initialize(hash_scalar_values,c,model=:task,id_handle=nil)
       defaults = { 
         :status => "created",
         :action_on_failure => "abort"
       }
-      super(defaults.merge(hash_scalar_values),c,model)
+      super(defaults.merge(hash_scalar_values),c,model,id_handle)
       self[:subtasks] = Array.new
     end
 

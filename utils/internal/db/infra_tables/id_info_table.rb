@@ -7,6 +7,13 @@ module XYZ
       super(x.to_sym)
     end
 
+    #used when first creating without id (i.e. created before saving)
+    def create_stubIDH()
+      args = {:model_name => self[:model_name], :c => self[:c]}
+      args.merge!(:group_id => self[:group_id]) if self[:group_id]
+      IDHandle.new(args,:no_id => true)
+    end
+
     def createIDH(x)
       IDHandle.new(self.merge(x))
     end
@@ -148,7 +155,7 @@ module XYZ
 
     def initialize(x,opts={})
       super()
-      #TODO: cleanup to take into account of this can be factory and whether enforce this must has model_name and perant_model_nmae
+      #TODO: cleanup to take into account of this can be factory and whether enforce this must has model_name and parent_model_nmae
       if x[:id_info]
         id_info = x[:id_info]
         if id_info[:c] and id_info[:relation_type] and id_info[:id]
@@ -157,11 +164,16 @@ module XYZ
           self[:guid] = IDInfoTable.ret_guid_from_db_id(id_info[:id],model_name)
           self[:model_name] = model_name
           self[:parent_model_name] = get_parent_id_handle()[:model_name] if opts[:set_parent_model_name]
-          return #TODO: removed freeze
+          return 
         end
       end
 
       raise_has_illegal_form(x) unless self[:c] = x[:c]
+      if opts[:no_id]
+        raise_has_illegal_form(x) unless self[:model_name] = x[:model_name] && x[:model_name].to_sym
+        self[:group_id] = x[:group_id] if x[:group_id]
+        return
+      end
 
       if x[:id] and x[:model_name]
         model_name = x[:model_name].to_sym

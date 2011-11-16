@@ -1,6 +1,7 @@
 module XYZ
   module TaskCreateClassMixin
     def create_from_pending_changes(parent_idh,state_change_list)
+      task_mh = parent_idh.create_childMH(:task)
       grouped_state_changes = group_by_node_and_type(state_change_list)
       grouped_state_changes.each_key do |type|
         unless [TaskAction::CreateNode,TaskAction::ConfigNode].include?(type)
@@ -10,21 +11,21 @@ module XYZ
         end
       end
       #if have both create_node and config node then top level has two stages create_node then config node
-      create_nodes_task = create_nodes_task(grouped_state_changes[TaskAction::CreateNode])
-      config_nodes_task = config_nodes_task(grouped_state_changes[TaskAction::ConfigNode])
+      create_nodes_task = create_nodes_task(task_mh,grouped_state_changes[TaskAction::CreateNode])
+      config_nodes_task = config_nodes_task(task_mh,grouped_state_changes[TaskAction::ConfigNode])
       if create_nodes_task and config_nodes_task
-        ret = create_new_task(:temporal_order => "sequential")
+        ret = create_new_task(task_mh,:temporal_order => "sequential")
         ret.add_subtask(create_nodes_task)
         ret.add_subtask(config_nodes_task)
         ret
       else
-        ret = create_new_task(:temporal_order => "sequential")
+        ret = create_new_task(task_mh,:temporal_order => "sequential")
         ret.add_subtask(create_nodes_task||config_nodes_task) #only one wil be non null
         ret
       end
     end
 
-    def create_nodes_task(state_change_list)
+    def create_nodes_task(task_mh,state_change_list)
       return nil unless state_change_list and not state_change_list.empty?
       #each element will be list with single element
       ret = nil
@@ -32,37 +33,37 @@ module XYZ
       if state_change_list.size == 1
         executable_action = TaskAction::CreateNode.new(state_change_list.first.first)
         all_actions << executable_action
-        ret = create_new_task(:executable_action => executable_action) 
+        ret = create_new_task(task_mh,:executable_action => executable_action) 
       else
-        ret = create_new_task(:display_name => "create_node_stage", :temporal_order => "concurrent")
+        ret = create_new_task(task_mh,:display_name => "create_node_stage", :temporal_order => "concurrent")
         state_change_list.each do |sc|
           executable_action = TaskAction::CreateNode.new(sc.first)
           all_actions << executable_action
           ret.add_subtask_from_hash(:executable_action => executable_action)
           end
       end
-      attr_mh = ModelHandle.new(ret_session_context_id(),:attribute)
+      attr_mh = task_mh.createMH(:attribute)
       TaskAction::CreateNode.add_attributes!(attr_mh,all_actions)
       ret
     end
 
-    def config_nodes_task(state_change_list)
+    def config_nodes_task(task_mh,state_change_list)
       return nil unless state_change_list and not state_change_list.empty?
       ret = nil
       all_actions = Array.new
       if state_change_list.size == 1
         executable_action = TaskAction::ConfigNode.new(state_change_list.first)
         all_actions << executable_action
-        ret = create_new_task(:executable_action => executable_action) 
+        ret = create_new_task(task_mh,:executable_action => executable_action) 
       else
-        ret = create_new_task(:display_name => "config_node_stage", :temporal_order => "concurrent")
+        ret = create_new_task(task_mh,:display_name => "config_node_stage", :temporal_order => "concurrent")
         state_change_list.each do |sc|
           executable_action = TaskAction::ConfigNode.new(sc)
           all_actions << executable_action
           ret.add_subtask_from_hash(:executable_action => executable_action)
           end
       end
-      attr_mh = ModelHandle.new(ret_session_context_id(),:attribute)
+      attr_mh = task_mh.createMH(:attribute)
       TaskAction::ConfigNode.add_attributes!(attr_mh,all_actions)
       ret
     end
@@ -94,8 +95,8 @@ module XYZ
       @mapping_sc_to_task_action[state_change]
     end
 
-    def create_new_task(hash)
-      Task.new(hash,ret_session_context_id())
+    def create_new_task(task_mh,hash)
+      create_stub(task_mh,hash)
     end
   end
 end

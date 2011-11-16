@@ -571,8 +571,6 @@ pp datacenter
       SearchObject.create_from_input_hash(hash,:workspace,ret_session_context_id())
     end
 
-   #### actions to process pending changes
-    helper :create_tasks_from_pending_changes
 
     #deprecate
     def commit_changes(datacenter_id=nil)

@@ -297,9 +297,9 @@ module XYZ
         cols.each{|col|row.merge!(col => hash_row[col])}
         row
       end
-      id_info_list = Model.create_from_rows(model_handle,rows,{:convert => true,:do_not_update_info_table => true})
+      new_idhs = Model.create_from_rows(model_handle,rows,{:convert => true,:do_not_update_info_table => true})
       #set ids
-      unrolled_tasks.each_with_index{|task,i|task.set_id_handle(id_info_list[i])}
+      unrolled_tasks.each_with_index{|task,i|task.set_id_handle(new_idhs[i])}
 
       #set parent relationship
       par_rel_rows_for_id_info = set_and_ret_parents!()

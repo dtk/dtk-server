@@ -3,10 +3,17 @@
   :table=>:implementation,
   :columns=>{
     :type => {:type=>:varchar, :size => 25},
-    :repo => {:type=>:varchar, :size => 25},
+    :repo => {:type=>:varchar, :size => 25}, #TODO: not normalized not that repo_id added; may deprecate
+    :module_name => {:type=>:varchar, :size => 25}, 
     :branch => {:type=>:varchar, :size => 50, :default => "master"},
     :version_num => {:type=>:integer, :default => 1},
     :updated => {:type=>:boolean, :default => false}
+  },
+  :repo_id=>{
+    :type=>:bigint,
+    :foreign_key_rel_type=>:attribute,
+    :on_delete=>:set_null,
+    :on_update=>:set_null
   },
   :virtual_columns=>{
     :component_summary_info=>{

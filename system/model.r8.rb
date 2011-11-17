@@ -255,8 +255,8 @@ module XYZ
       cols_to_get =  cols.reject{|col|self.has_key?(col)}
       return self if cols_to_get.empty?
       opts = (cols_to_get & [:ref,:ref_num]).empty? ? {} : {:keep_ref_cols => true}
-      vals = get_objects_from_sp_hash({:cols => cols_to_get},opts).first
-      vals.each{|k,v|self[k]=v}
+      vals = get_objs({:cols => cols_to_get},opts).first
+      vals.each{|k,v|self[k]=v} if vals
       self
     end
 

@@ -20,7 +20,6 @@ files =
    'current_session', 
    'create_thread', 
    'eventmachine_helper',
-   'gitolite'
   ]
 r8_nested_require('internal',files)
 

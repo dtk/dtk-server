@@ -1,27 +1,34 @@
-require File.expand_path('internal/errors', File.dirname(__FILE__))
-require File.expand_path('internal/auxiliary', File.dirname(__FILE__))
-require File.expand_path('internal/sql', File.dirname(__FILE__))
-require File.expand_path('internal/dataset_from_search_pattern', File.dirname(__FILE__))
-require File.expand_path('internal/hash_object', File.dirname(__FILE__))
-require File.expand_path('internal/array_object', File.dirname(__FILE__))
-require File.expand_path('internal/rest_uri', File.dirname(__FILE__))
-require File.expand_path('internal/serialize_to_json', File.dirname(__FILE__))
-require File.expand_path('internal/import_export', File.dirname(__FILE__))
-require File.expand_path('internal/semantic_type', File.dirname(__FILE__))
-require File.expand_path('internal/workflow', File.dirname(__FILE__))
-require File.expand_path('internal/command_and_control', File.dirname(__FILE__))
-require File.expand_path('internal/config_agent', File.dirname(__FILE__))
-require File.expand_path('internal/cloud_connect', File.dirname(__FILE__))
-require File.expand_path('internal/view_def_processor', File.dirname(__FILE__))
-require File.expand_path('internal/repo', File.dirname(__FILE__))
-require File.expand_path('internal/parse_log', File.dirname(__FILE__))
-require File.expand_path('internal/current_session', File.dirname(__FILE__))
-require File.expand_path('internal/create_thread', File.dirname(__FILE__))
-require File.expand_path('internal/eventmachine_helper', File.dirname(__FILE__))
+files = 
+  [
+   'errors', 
+   'auxiliary', 
+   'sql', 
+   'dataset_from_search_pattern', 
+   'hash_object', 
+   'array_object', 
+   'rest_uri', 
+   'serialize_to_json', 
+   'import_export', 
+   'semantic_type', 
+   'workflow', 
+   'command_and_control', 
+   'config_agent', 
+   'cloud_connect', 
+   'view_def_processor', 
+   'repo', 
+   'parse_log', 
+   'current_session', 
+   'create_thread', 
+   'eventmachine_helper',
+   'gitolite'
+  ]
+r8_nested_require('internal',files)
+
+
 
 #just load base classes; specific models dynamically loaded on need basis
-require File.expand_path('internal/data_sources', File.dirname(__FILE__))
+r8_nested_require('internal','data_sources') 
 
 ##monkey patches; shoudl be last
 #TODO: make sure not patching dyanmically loaded classes
-require File.expand_path('internal/timeout', File.dirname(__FILE__))
+r8_nested_require('internal','timeout') 

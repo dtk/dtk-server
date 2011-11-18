@@ -134,7 +134,7 @@ module XYZ
       #TODO: make more efficient by using StateChange.create_pending_change_items
       cmp_rows.each do |r|
         cmp_idh = r[:component].id_handle()
-        parent_idh = id_handle(:model_name => :datacenter, :id => r[:node][:datacenter_datacenter_id])
+        parent_idh = cmp_idh.createIDH(:model_name => :datacenter, :id => r[:node][:datacenter_datacenter_id])
         StateChange.create_pending_change_item(:new_item => cmp_idh, :parent => parent_idh, :type => "update_implementation")
       end
     end

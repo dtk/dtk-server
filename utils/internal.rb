@@ -1,5 +1,6 @@
 files = 
   [
+   'dynamic_loader',
    'errors', 
    'auxiliary', 
    'sql', 
@@ -20,11 +21,8 @@ files =
    'current_session', 
    'create_thread', 
    'eventmachine_helper',
-   'dynamic_loader',
   ]
 r8_nested_require('internal',files)
-
-
 
 #just load base classes; specific models dynamically loaded on need basis
 r8_nested_require('internal','data_sources') 

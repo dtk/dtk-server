@@ -1,4 +1,4 @@
-require  File.expand_path('file_asset/r8_meta_file', File.dirname(__FILE__))
+r8_nested_require('file_asset','r8_meta_file')
 module XYZ
   class FileAsset < Model
     include FileAssetR8MetaFile
@@ -6,29 +6,27 @@ module XYZ
     def get_content()
       #if content stored in db then return that
       return self[:content] if self[:content]
-      #TODO: can make more efficient to see if this object has the values that querying for an if so avoid db query
-      file_obj = get_objects_from_sp_hash({:cols => [:path,:implementation_info]}).first
-      content = Repo.get_file_content(file_obj,{:implementation => file_obj[:implementation]})
+      update_object!(:path,:implementation_info)
+      content = Repo.get_file_content(self,{:implementation => self[:implementation]})
       #TODO: determine whether makes sense to store newly gotten content in db or just do this if any changes
       content
     end
 
     def update_content(content)
       update(:content => content)
-      #TODO: can make more efficient to see if this object has the values that querying for an if so avoid db query
-      file_obj = get_objects_from_sp_hash({:cols => [:path,:implementation_info]}).first
+      update_object!(:path,:implementation_info)
 
       #TODO: trap parse errors and then do consitemncy check with meta
-      config_agent_type = file_obj.config_agent_type()
-      file_path = file_obj[:path]
+      config_agent_type = config_agent_type()
+      file_path = self[:path]
       file_config_type, r8_parse = ConfigAgent.parse_given_file_content(config_agent_type,file_path,content)
 
-      impl_obj = file_obj[:implementation]
+      impl_obj = self[:implementation]
       Repo.update_file_content(self,content,{:implementation => impl_obj})
       impl_obj.set_to_indicate_updated()
 
       #special processing if this the meta file
-      if r8_meta = R8MetaFile.isa?(file_obj,content)
+      if r8_meta = R8MetaFile.isa?(self,content)
         r8_meta.process()
       end
       impl_obj.create_pending_changes_and_clear_dynamic_attrs(self)

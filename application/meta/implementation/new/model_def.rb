@@ -25,14 +25,14 @@
          :convert => true,
          :join_type=>:inner,
          :join_cond=>{:implementation_id=>:implementation__id},
-         :cols=>[:id,:display_name,:node_node_id]
+         :cols=>[:id,:group_id,:display_name,:node_node_id]
        },
        {
          :model_name=>:node,
          :join_type=>:inner,
          :join_cond=>{:id=>:component__node_node_id},
          :filter => [:neq,:datacenter_datacenter_id,nil],
-         :cols=>[:id,:display_name,:datacenter_datacenter_id]
+         :cols=>[:id,:group_id,:display_name,:datacenter_datacenter_id]
        }]
     },
     #getting just templates with this implementation

@@ -250,8 +250,8 @@ module XYZ
       Model.get_objects_from_sp_hash(child_model_handle,sp_hash,opts)
     end
 
-
-    def update_object!(*cols)
+    def update_object!(*cols_x)
+      cols = (cols_x.include?(:group_id) ? cols_x : cols_x + [:group_id]) #always good to get group_id
       cols_to_get =  cols.reject{|col|self.has_key?(col)}
       return self if cols_to_get.empty?
       opts = (cols_to_get & [:ref,:ref_num]).empty? ? {} : {:keep_ref_cols => true}
@@ -264,6 +264,9 @@ module XYZ
       update_object!(*cols).materialize!(cols)
     end
 
+    def get_obj(sp_hash_x,opts={})
+      get_objs(sp_hash_x,opts).first
+    end
     def get_objs(sp_hash_x,opts={})
       sp_hash = HashSearchPattern.add_to_filter(sp_hash_x,[:eq, :id, id()])
       Model.get_objs(model_handle(),sp_hash,opts)

@@ -53,8 +53,9 @@ module XYZ
     include ModelDataInstanceMixins
 
     #created before has id
-    def self.create_stub(model_handle,hash_scalar_values)
-      self.new(hash_scalar_values,model_handle[:c],model_name(),model_handle.create_stubIDH())
+    #use param name hash_values rather than hash_scalar_values because can have netsed objects
+    def self.create_stub(model_handle,hash_values)
+      self.new(hash_values,model_handle[:c],model_name(),model_handle.create_stubIDH())
     end
     #this may be overwritten by the models
     def self.create(hash_scalar_values,c,relation_type_x=model_name(),id_handle=nil)

@@ -1,6 +1,6 @@
 module XYZ
   module RepoGitManageClassMixin
-    def self.create_repo(create_context)
+    def create_empty_repo(repo_obj)
     end
   end
 end

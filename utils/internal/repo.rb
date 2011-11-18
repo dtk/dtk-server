@@ -50,15 +50,16 @@ module XYZ
     end
 
     ###### for creating and deleting repositories
-    def self.create_repo?(model_handle,repo,create_context)
+    def self.create_repo?(model_handle,repo_name,hash_values)
       klass = load_and_return_adapter_class()
-      return if RepoMeta.get_all_repo_names().include?(repo) 
-      create_repo(model_handle,repo,create_context,klass)
+      return if RepoMeta.get_all_repo_names().include?(repo_name) 
+      create_repo(model_handle,repo_name,hash_values,klass)
     end
-    def self.create_repo(model_handle,repo,create_context,klass=nil)
+    def self.create_repo(model_handle,repo_name,hash_values,klass=nil)
       klass ||= load_and_return_adapter_class()
-      new_repo = klass.create_repo(repo,create_context)
-      RepoMeta.add_new_repo(model_handle,new_repo,create_context)
+      repo_obj = Model.create_stub(model_handle,{:repo_name => repo_name}.merge(hash_values))
+      repo_details = klass.create_empty_repo(repo_obj)
+      repo_obj.merge(repo_details).save!()
     end
 
     def self.get_repo(context)

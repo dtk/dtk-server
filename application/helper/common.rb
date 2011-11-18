@@ -240,8 +240,15 @@ limit = TestOveride if TestOveride
    end
 
    def model_name
-      @model_name ||= Aux.demodulize(self.class.to_s).gsub(/Controller$/,"").downcase.to_sym
+     return @model_name if @model_name
+     model_name_x = Aux.demodulize(self.class.to_s).gsub(/Controller$/,"").downcase.to_sym
+     @model_name =  ConvertFromSubtypeModelName[model_name_x]||model_name_x
    end
+
+   #TODO: unify with  SubClassRelations in system/model
+   ConvertFromSubtypeModelName = {
+     :assembly => :component
+   }
   end
 end
 

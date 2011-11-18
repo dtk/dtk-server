@@ -50,9 +50,17 @@ module XYZ
     end
 
     ###### for creating and deleting repositories
+    def self.create_repo?(model_handle,repo,create_context)
+      klass = load_and_return_adapter_class()
+      return if RepoMeta.get_all_repo_names().include?(repo) 
+      create_repo(model_handle,repo,create_context,klass)
+    end
+    def self.create_repo(model_handle,repo,create_context,klass=nil)
+      klass ||= load_and_return_adapter_class()
+      new_repo = klass.create_repo(repo,create_context)
+      RepoMeta.add_new_repo(model_handle,new_repo,create_context)
+    end
 
-
-   private
     def self.get_repo(context)
       #TODO: do we still need __top
       repo = (context[:implementation]||{})[:repo]||"__top"

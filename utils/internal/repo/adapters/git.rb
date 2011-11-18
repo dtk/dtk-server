@@ -2,7 +2,7 @@ require 'grit'
 r8_nested_require('git','create_and_delete_repos')
 module XYZ
   class RepoGit < Repo
-    extend RepoGitCreateAndDeleteClassMixin
+    extend RepoGitManageClassMixin
     def self.create(path,branch)
       root = R8::EnvironmentConfig::CoreCookbooksRoot
       full_path = path == "__top" ? root : "#{root}/#{path}"

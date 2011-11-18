@@ -1,6 +1,8 @@
 require 'grit'
+r8_nested_require('git','create_and_delete_repos')
 module XYZ
   class RepoGit < Repo
+    extend RepoGitCreateAndDeleteClassMixin
     def self.create(path,branch)
       root = R8::EnvironmentConfig::CoreCookbooksRoot
       full_path = path == "__top" ? root : "#{root}/#{path}"
@@ -60,7 +62,7 @@ module XYZ
       end
     end
 
-    def delete()
+    def delete_branch()
       raise Error.new("Cannot delete master branch") if @branch == "master"
       checkout("master")
       git_command__delete_local_branch(@branch)      

@@ -1,5 +1,6 @@
 module XYZ
   class Repo 
+    #### for interacting with existing repos"
     def self.get_file_content(file_asset,context)
       get_repo(context).get_file_content(file_asset)
     end
@@ -24,15 +25,15 @@ module XYZ
       get_repo(context).merge_from_branch(branch_to_merge_from)
     end
 
-    def self.delete(context)
-      get_repo(context).delete()
+    def self.delete_branch(context)
+      get_repo(context).delete_branch()
     end
 
     def self.delete_all_branches()
-      repos = nil
-      Dir.chdir(R8::EnvironmentConfig::CoreCookbooksRoot) do
-        repos = Dir["*"].reject{|item|File.file?(item)}
-      end
+      repos = load_and_return_adapter_class().get_all_repos()
+      delete_branches(*repos)
+    end
+    def self.delete_branches(*repos)
       repos.each do |repo|
         get_branches(repo).each do |branch|
           next if branch == "master"
@@ -43,10 +44,14 @@ module XYZ
             :branch => branch
             }
           }
-          get_repo(context).delete()
+          get_repo(context).delete_branch()
         end
       end
     end
+
+    ###### for creating and deleting repositories
+
+
    private
     def self.get_repo(context)
       #TODO: do we still need __top
@@ -56,12 +61,17 @@ module XYZ
       CachedRepoObjects[repo] ||= Hash.new
       CachedRepoObjects[repo][branch] ||= load_and_create(repo,branch)
     end
-
     CachedRepoObjects = Hash.new
-    def self.load_and_create(path,branch)
+
+    def self.load_and_return_adapter_class()
+      return @cached_adpater_class if @cached_adpater_class
       adapter_name = (R8::Config[:repo]||{})[:type]
       raise Error.new("No repo adapter specified") unless adapter_name
-      klass = DynamicLoader.load_and_return_adapter_class("repo",adapter_name)
+      @cached_adpater_class = DynamicLoader.load_and_return_adapter_class("repo",adapter_name)
+    end
+
+    def self.load_and_create(path,branch)
+      klass = load_and_return_adapter_class() 
       klass.create(path,branch)
     end
   end

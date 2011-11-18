@@ -59,15 +59,9 @@ module XYZ
 
     CachedRepoObjects = Hash.new
     def self.load_and_create(path,branch)
-      type = (R8::Config[:repo]||{})[:type]
-      raise Error.new("No repo adapter specified") unless type
-      klass = self
-      begin
-        Lock.synchronize{r8_nested_require("repo/adapters",type)}
-        klass = XYZ.const_get "Repo#{type.to_s.capitalize}"
-      rescue LoadError
-        raise Error.new("cannot find repo adapter (#{type})")
-      end
+      adapter_name = (R8::Config[:repo]||{})[:type]
+      raise Error.new("No repo adapter specified") unless adapter_name
+      klass = DynamicLoader.load_and_return_adapter_class("repo",adapter_name)
       klass.create(path,branch)
     end
   end

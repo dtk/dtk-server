@@ -20,6 +20,7 @@ files =
    'current_session', 
    'create_thread', 
    'eventmachine_helper',
+   'dynamic_loader',
   ]
 r8_nested_require('internal',files)
 

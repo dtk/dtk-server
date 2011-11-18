@@ -1,6 +1,4 @@
-#require File.expand_path('user_specific.rb',  File.dirname(__FILE__))
-
-require File.expand_path('environment_config.rb',  File.dirname(__FILE__))
+r8_require('environment_config')
 
 module XYZ 
   class Config 
@@ -71,6 +69,10 @@ R8::Config[:database][:type] = "postgres"
 R8::Config[:workflow] = Hash.new
 R8::Config[:workflow][:type] = "ruote"
 #R8::Config[:workflow][:type] = "simple"
+
+R8::Config[:repo] = Hash.new
+R8::Config[:repo][:type] = "git"
+#R8::Config[:repo][:type] = "mock"
 
 #Command and control related parameters
 R8::Config[:command_and_control] ||= Hash.new

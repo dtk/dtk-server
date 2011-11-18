@@ -1,56 +1,18 @@
 require 'grit'
 module XYZ
-  class Repo 
-    def self.get_file_content(file_asset,context)
-      get_repo(context).get_file_content(file_asset)
-    end
-
-    def self.update_file_content(file_asset,content,context)
-      get_repo(context).update_file_content(file_asset,content)
-    end
-
-    def self.add_file(file_asset,content,context)
-      get_repo(context).add_file(file_asset,content)
-    end
-
-    def self.push_implementation(context)
-      get_repo(context).push_implementation()
-    end
-
-    def self.clone_branch(context,new_branch)
-      return if (R8::Config[:repo]||{})[:type] == "mock"
-      get_repo(context).clone_branch(new_branch)
-    end
-
-    def self.merge_from_branch(context,branch_to_merge_from)
-      get_repo(context).merge_from_branch(branch_to_merge_from)
-    end
-
-    def self.delete(context)
-      get_repo(context).delete()
-    end
-
-    def self.delete_all_branches()
-      repos = nil
-      Dir.chdir(R8::EnvironmentConfig::CoreCookbooksRoot) do
-        repos = Dir["*"].reject{|item|File.file?(item)}
-      end
-      repos.each do |repo|
-        get_branches(repo).each do |branch|
-          next if branch == "master"
-          pp "deleting branch (#{branch}) in repo (#{repo})"
-          context = {
-            :implementation => {
-            :repo => repo,
-            :branch => branch
-            }
-          }
-          get_repo(context).delete()
-        end
+  class RepoGit < Repo
+    def self.create(path,branch)
+      root = R8::EnvironmentConfig::CoreCookbooksRoot
+      full_path = path == "__top" ? root : "#{root}/#{path}"
+      if Aux::platform_is_linux?()
+        RepoGitLinux.new(full_path,branch)
+      elsif  Aux::platform_is_windows?()
+        RepoGitWindows.new(full_path,branch)
+      else
+        raise Error.new("platform #{Aux::platform} not treated")
       end
     end
 
-    ###
     def get_file_content(file_asset)
       ret = nil
       checkout(@branch) do
@@ -107,26 +69,6 @@ module XYZ
     end
 
    private
-    def self.get_repo(context)
-      repo = (context[:implementation]||{})[:repo]||"__top"
-      branch = (context[:implementation]||{})[:branch]
-      raise Error.new("cannot find branch in context") unless branch
-      CachedRepos[repo] ||= Hash.new
-      CachedRepos[repo][branch] ||= get_repo_aux(repo,branch)
-    end
-    def self.get_repo_aux(path,branch)
-      root = R8::EnvironmentConfig::CoreCookbooksRoot
-      full_path = path == "__top" ? root : "#{root}/#{path}"
-      if Aux::platform_is_linux?()
-        RepoLinux.new(full_path,branch)
-      elsif  Aux::platform_is_windows?()
-        RepoWindows.new(full_path,branch)
-      else
-        raise Error.new("platform #{Aux::platform} not treated")
-      end
-    end
-    CachedRepos = Hash.new
-
     def self.get_branches(repo)
       path = "#{R8::EnvironmentConfig::CoreCookbooksRoot}/#{repo}"
       Grit::Repo.new(path).branches.map{|b|b.name}
@@ -161,7 +103,7 @@ module XYZ
       @grit_repo.git
     end
   end
-  class RepoLinux < Repo
+  class RepoGitLinux < RepoGit
    private
     def git_command__checkout(branch_name)
       git_command.checkout(CmdOpts,branch_name)
@@ -192,7 +134,7 @@ module XYZ
     CmdOpts = {}
 
   end
-  class RepoWindows  < Repo
+  class RepoGitWindows  < RepoGit
    private
     def initialize(full_path,branch)
       raise Error.new("R8::EnvironmentConfig::GitExecutable not defined") unless defined? R8::EnvironmentConfig::GitExecutable

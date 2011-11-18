@@ -185,12 +185,11 @@ module XYZ
         source_model_handle = source_id_handle.createMH()
         source_parent_id_col = source_model_handle.parent_id_field_name()
 
-        override_attrs = ret_real_columns(source_model_handle,recursive_override_attrs)
-
         #all targets will have same model handle
         sample_target =  targets.first
         target_parent_mh = sample_target.createMH()
         target_mh = target_parent_mh.create_childMH(source_id_handle[:model_name])
+
         target_parent_id_col = target_mh.parent_id_field_name()
         targets_rows = targets.map{|id_handle|{target_parent_id_col => id_handle.get_id()}}
         targets_ds = SQL::ArrayDataset.create(db,targets_rows,ModelHandle.new(source_id_handle[:c],:target))
@@ -204,6 +203,10 @@ module XYZ
         source_ds = Model.get_objects_just_dataset(source_model_handle,source_wc,source_fs)
 
         select_ds = targets_ds.join_table(:inner,source_ds)
+
+        #process overrides
+        override_attrs = ret_real_columns(source_model_handle,recursive_override_attrs)
+        override_attrs = add_to_overrides_null_other_parents(override_attrs,target_mh,target_parent_id_col)
         create_override_attrs = override_attrs.merge(:ancestor_id => source_id_handle.get_id()) 
 
         new_objs_info = Model.create_from_select(target_mh,field_set_to_copy,select_ds,create_override_attrs,create_opts_for_top())
@@ -255,6 +258,19 @@ module XYZ
         @ret
       end
 
+      def add_to_overrides_null_other_parents(overrides,target_mh,target_par_id_col)
+        model_name = target_mh[:model_name]
+        many_to_one = DB_REL_DEF[model_name][:many_to_one]||[]
+        many_to_one.inject(overrides) do |ret_hash,par_mn|
+          par_id_col = DB.parent_field(par_mn,model_name)
+          if target_par_id_col == par_id_col or overrides.has_key?(par_id_col)
+            ret_hash
+          else
+            ret_hash.merge(par_id_col => SQL::ColRef.null_id)
+          end
+        end
+      end
+
       def ret_child_context(id_handles,target_id_handle,existing_override_attrs={})
         #assuming all id_handles have same model_handle
         sample_idh = id_handles.first
@@ -264,7 +280,7 @@ module XYZ
         #compute override_attrs
         many_to_one =  DB_REL_DEF[model_handle[:model_name]][:many_to_one]||[]
         override_attrs = many_to_one.inject(existing_override_attrs) do |hash,pos_par|
-          val = (pos_par == target_mn ? target_id_handle.get_id() : SQL::ColRef.cast(nil,ID_TYPES[:id]))
+          val = (pos_par == target_mn ? target_id_handle.get_id() : SQL::ColRef.null_id)
           hash.merge({DB.parent_field(pos_par,model_name) => val})
         end
 
@@ -306,7 +322,7 @@ module XYZ
           create_opts = {:duplicate_refs => :allow, :returning_sql_cols => [:ancestor_id,clone_par_col]}
           #putting in nulls to null-out; more efficient to omit this columns in create
           common_settings = (DB_REL_DEF[nested_model_name][:many_to_one]||[]).inject({}) do |hash,pos_par|
-            hash.merge(pos_par == target_parent_mn ? {} : {DB.parent_field(pos_par,model_name) => SQL::ColRef.cast(nil,ID_TYPES[:id])})
+            hash.merge(pos_par == target_parent_mn ? {} : {DB.parent_field(pos_par,model_name) => SQL::ColRef.null_id})
           end
           parent_rels = objs_info.map do |row|
             common_settings.merge(clone_par_col => row[:id],:old_par_id => row[:ancestor_id], parent_id_col => row[:parent_id])

@@ -1078,7 +1078,8 @@ module XYZ
       #TODO: think want to add way for components that can have many attributes to have this based on value of the 
       #attribut ethat serves as the key
       #override_attrs[:display_name] ||= SQL::ColRef.qualified_ref 
-      override_attrs[:type] ||= (target_obj.model_handle[:model_name] == :node ? "instance" : "template")
+      into_node = (target_obj.model_handle[:model_name] == :node)
+      override_attrs[:type] ||= (into_node ? "instance" : "template")
       override_attrs[:updated] ||= false
     end
 

@@ -59,6 +59,10 @@ module XYZ
         x.to_s.lit + y
       end
 
+      def self.null_id()
+        cast(nil,ID_TYPES[:id])
+      end
+
       def self.max(arg=nil,&block)
         return max(block.call(self)) if block
         :Max.sql_function(arg)

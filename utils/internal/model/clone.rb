@@ -206,7 +206,7 @@ module XYZ
 
         #process overrides
         override_attrs = ret_real_columns(source_model_handle,recursive_override_attrs)
-        override_attrs = add_to_overrides_null_other_parents(override_attrs,target_mh,target_parent_id_col)
+        override_attrs = add_to_overrides_null_other_parents(override_attrs,target_mh[:model_name],target_parent_id_col)
         create_override_attrs = override_attrs.merge(:ancestor_id => source_id_handle.get_id()) 
 
         new_objs_info = Model.create_from_select(target_mh,field_set_to_copy,select_ds,create_override_attrs,create_opts_for_top())
@@ -258,12 +258,11 @@ module XYZ
         @ret
       end
 
-      def add_to_overrides_null_other_parents(overrides,target_mh,target_par_id_col)
-        model_name = target_mh[:model_name]
+      def add_to_overrides_null_other_parents(overrides,model_name,selected_par_id_col)
         many_to_one = DB_REL_DEF[model_name][:many_to_one]||[]
         many_to_one.inject(overrides) do |ret_hash,par_mn|
           par_id_col = DB.parent_field(par_mn,model_name)
-          if target_par_id_col == par_id_col or overrides.has_key?(par_id_col)
+          if selected_par_id_col == par_id_col or overrides.has_key?(par_id_col)
             ret_hash
           else
             ret_hash.merge(par_id_col => SQL::ColRef.null_id)
@@ -271,22 +270,19 @@ module XYZ
         end
       end
 
-      def ret_child_context(id_handles,target_id_handle,existing_override_attrs={})
+      def ret_child_context(id_handles,target_idh,existing_override_attrs={})
         #assuming all id_handles have same model_handle
         sample_idh = id_handles.first
-        model_handle = sample_idh.createMH()
-        target_mn = target_id_handle[:model_name]
+        model_name = sample_idh[:model_name]
+        #so model_handle gets auth context from target_idh
+        model_handle = target_idh.create_childMH(model_name)
 
-        #compute override_attrs
-        many_to_one =  DB_REL_DEF[model_handle[:model_name]][:many_to_one]||[]
-        override_attrs = many_to_one.inject(existing_override_attrs) do |hash,pos_par|
-          val = (pos_par == target_mn ? target_id_handle.get_id() : SQL::ColRef.null_id)
-          hash.merge({DB.parent_field(pos_par,model_name) => val})
-        end
-
+        par_id_col = DB.parent_field(target_idh[:model_name],model_name)
+        override_attrs = add_to_overrides_null_other_parents(existing_override_attrs,model_name,par_id_col)
+        override_attrs.merge!(par_id_col => target_idh.get_id())
 
         ret_sql_cols = [:ancestor_id]
-        case model_handle[:model_name]
+        case model_name
           when :node then ret_sql_cols << :external_ref
         end
         create_opts = {:duplicate_refs => :allow, :returning_sql_cols => ret_sql_cols}

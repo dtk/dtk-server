@@ -4,11 +4,6 @@ module XYZ
   class RepoGit < Repo
     extend RepoGitManageClassMixin
     def self.create(path,branch)
-
-      ##TODO: remove 
-      pp  git_server_class()
-
-
       root = R8::Config[:repo][:base_directory]
       full_path = path == "__top" ? root : "#{root}/#{path}"
       if Aux::platform_is_linux?()

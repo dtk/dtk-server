@@ -1,9 +1,13 @@
 require 'grit'
-r8_nested_require('git','manage_gitserver')
+r8_nested_require('git','manage_git_server')
 module XYZ
   class RepoGit < Repo
     extend RepoGitManageClassMixin
     def self.create(path,branch)
+
+      ##TODO: fix pp  git_server_class()
+
+
       root = R8::Config[:repo][:base_directory]
       full_path = path == "__top" ? root : "#{root}/#{path}"
       if Aux::platform_is_linux?()

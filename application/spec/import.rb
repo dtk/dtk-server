@@ -6,9 +6,9 @@ flag = "r8meta_yaml"
 Library = "test" #TODO: stub 
 
 Root = File.expand_path('../', File.dirname(__FILE__))
-require "#{Root}/config/environment_config.rb"
+require "#{Root}/config/config.rb"
 
-BaseDir = R8::EnvironmentConfig::CoreCookbooksRoot
+BaseDir = R8::Config[:repo][:base_directory]
 Implementation = {:version => "0.10.0"}
 
 def add_user_and_group(username)

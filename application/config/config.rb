@@ -1,5 +1,4 @@
-r8_require('environment_config')
-
+require File.expand_path('environment_config',File.dirname(__FILE__))
 module XYZ 
   class Config 
     @@configuration = {} unless defined?(@@configuration)
@@ -71,7 +70,10 @@ R8::Config[:workflow][:type] = "ruote"
 #R8::Config[:workflow][:type] = "simple"
 
 R8::Config[:repo] = Hash.new
+R8::Config[:repo][:base_directory] = "/root/r8server-repo"
 R8::Config[:repo][:type] = "git"
+R8::Config[:repo][:git] = Hash.new
+R8::Config[:repo][:git][:server_type] = "gitolite"
 #R8::Config[:repo][:type] = "mock"
 
 #Command and control related parameters

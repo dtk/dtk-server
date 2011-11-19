@@ -2,7 +2,7 @@ module XYZ
   class RepoMeta < Model
     def self.get_all_repo_names()
       #TODO: stub until get info in db
-      Dir.chdir(R8::EnvironmentConfig::CoreCookbooksRoot) do
+      Dir.chdir(R8::Config[:repo][:base_directory]) do
         Dir["*"].reject{|item|File.file?(item)}
       end
     end

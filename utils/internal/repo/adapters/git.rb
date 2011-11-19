@@ -1,10 +1,10 @@
 require 'grit'
-r8_nested_require('git','create_and_delete_repos')
+r8_nested_require('git','manage_gitserver')
 module XYZ
   class RepoGit < Repo
     extend RepoGitManageClassMixin
     def self.create(path,branch)
-      root = R8::EnvironmentConfig::CoreCookbooksRoot
+      root = R8::Config[:repo][:base_directory]
       full_path = path == "__top" ? root : "#{root}/#{path}"
       if Aux::platform_is_linux?()
         RepoGitLinux.new(full_path,branch)
@@ -72,7 +72,7 @@ module XYZ
 
    private
     def self.get_branches(repo)
-      path = "#{R8::EnvironmentConfig::CoreCookbooksRoot}/#{repo}"
+      path = "#{R8::Config[:repo][:base_directory]}/#{repo}"
       Grit::Repo.new(path).branches.map{|b|b.name}
     end
 

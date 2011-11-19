@@ -1,6 +1,6 @@
 module XYZ
   module ImportImplementationPackage
-    #this should be precded by fn that adds the component to CoreCookbooksRoot location
+    #this should be precded by fn that adds the component to R8::Config[:repo][:base_directory] location
     def self.add(library_idh,impl_name)
       version = "0.0.1" #TODO: stub
       r8meta_type = :yaml #TODO: stub
@@ -11,7 +11,7 @@ module XYZ
 
       #put implement info in hash
       hash_content = {"library" => {library[:ref] => {"component" => components_hash}}}
-      Model.add_implementations!(hash_content,version,library[:ref],R8::EnvironmentConfig::CoreCookbooksRoot,impl_name)
+      Model.add_implementations!(hash_content,version,library[:ref],R8::Config[:repo][:base_directory],impl_name)
 
       #create in db
       Model.input_hash_content_into_model(library_idh.create_top(),hash_content)
@@ -42,7 +42,7 @@ module XYZ
       file_ext = TypeMapping[r8meta_type]
       raise Error.new("illegal type extension") unless file_ext
       repo = cmp_or_impl_name.gsub(/__.+$/,"")
-      files = Dir.glob("#{R8::EnvironmentConfig::CoreCookbooksRoot}/#{repo}/r8meta.*.#{file_ext}")
+      files = Dir.glob("#{R8::Config[:repo][:base_directory]}/#{repo}/r8meta.*.#{file_ext}")
       if files.empty?
         raise Error.new("Cannot find valid r8meta file")
       elsif files.size > 1

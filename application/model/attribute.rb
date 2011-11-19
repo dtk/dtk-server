@@ -1,10 +1,14 @@
-require  File.expand_path('attribute/dependency_analysis', File.dirname(__FILE__))
-require  File.expand_path('attribute/group', File.dirname(__FILE__))
-require  File.expand_path('attribute/guard', File.dirname(__FILE__))
-require  File.expand_path('attribute/complex_type', File.dirname(__FILE__))
-require  File.expand_path('attribute/datatype', File.dirname(__FILE__))
-require  File.expand_path('attribute/propagate_changes', File.dirname(__FILE__))
-require  File.expand_path('attribute/update_derived_values', File.dirname(__FILE__))
+files =
+  [
+   'dependency_analysis',
+   'group',
+   'guard',
+   'complex_type',
+   'datatype',
+   'propagate_changes',
+   'update_derived_values',
+  ]
+r8_nested_require('attribute',files)
 module XYZ
   class Attribute < Model
     include AttributeGroupInstanceMixin

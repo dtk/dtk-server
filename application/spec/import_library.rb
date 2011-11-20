@@ -8,6 +8,7 @@ flag = "r8meta_yaml"
 Library = "test" #TODO: stub 
 
 Root = File.expand_path('../', File.dirname(__FILE__))
+require 'rubygems'
 require "#{Root}/config/config.rb"
 
 BaseDir = R8::Config[:repo][:base_directory]

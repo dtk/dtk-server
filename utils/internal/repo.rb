@@ -1,6 +1,6 @@
 module XYZ
   class Repo 
-    #### for interacting with existing repos"
+    #### for interacting with existing repos
     def self.get_file_content(file_asset,context)
       get_repo(context).get_file_content(file_asset)
     end

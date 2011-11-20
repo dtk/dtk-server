@@ -29,7 +29,7 @@ require UTILS_DIR + '/internal/log.rb'
 
 #TODO: should load application strings here
 #user_lang should be in user prefs, or pulled/set from app default in config
-user_lang = R8::Config[:default_language] = "en.us"
+user_lang = R8::Config[:default_language] || "en.us"
 #require 'i18n/' + user_lang + '.rb' #TBD: should be conditionally loaded
 
 # Here goes your database connection and options:

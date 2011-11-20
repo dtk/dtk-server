@@ -1,6 +1,6 @@
 require File.expand_path('../require_first',File.dirname(__FILE__))
 r8_require('../../utils/internal/log')
-r8_require('environment_config')
+r8_require('../../utils/internal/hash_object')
 module XYZ 
   class Config 
     @@configuration = {} unless defined?(@@configuration)
@@ -28,11 +28,11 @@ module XYZ
 end
 
 
-#need to rework/architect as needed, this is from first test pass
-
 module R8
-  Config = Hash.new unless defined? ::R8::Config
+  Config = XYZ::HashObject.create_with_auto_vivification()
 end
+
+r8_require('environment_config')
 
 #Application defaults
 R8::Config[:application_name] = "application"
@@ -58,7 +58,7 @@ R8::Config[:login][:redirect] = "/xyz/workspace/index"
 
 
 #Database related config params
-R8::Config[:database] = Hash.new
+#R8::Config[:database] = Hash.new
 R8::Config[:database][:hostname] = "127.0.0.1"
 #R8::Config[:database][:hostname] = "ec2-174-129-28-204.compute-1.amazonaws.com"
 R8::Config[:database][:user] = "postgres"
@@ -131,3 +131,7 @@ R8::Config[:editor_file_path] = "#{R8::Config[:app_root_path]}/editor"
 R8::Config[:config_file_path] = "#{R8::Config[:app_root_path]}/config_upload"
 
 R8::Config[:page_limit] = 20
+
+R8::Config[:default_language] = "en.us"
+#freeze
+R8::Config.freeze

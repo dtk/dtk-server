@@ -71,6 +71,11 @@
           "*repo_meta_user_id": "/repo_meta_user/gitolite-admin",
           "display_name": "gitolite-admin_gitolite-admin",
           "access_rights": "RW+"
+        },
+        "gitolite-admin_r8server": {
+          "*repo_meta_user_id": "/repo_meta_user/r8server",
+          "display_name": "gitolite-admin_r8server",
+          "access_rights": "RW+"
         }
       },
       "display_name": "gitolite-admin"

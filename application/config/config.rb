@@ -1,11 +1,13 @@
-require File.expand_path('environment_config',File.dirname(__FILE__))
+require File.expand_path('../require_first',File.dirname(__FILE__))
+r8_require('../../utils/internal/log')
+r8_require('environment_config')
 module XYZ 
   class Config 
     @@configuration = {} unless defined?(@@configuration)
     class << self
       def process_config_file(file_name)
         unless File.exists?(file_name)
-    Log("config file #{file_name} does not exist")
+          Log("config file #{file_name} does not exist")
           return nil
         end
         instance_eval(IO.read(file_name), file_name, 1)

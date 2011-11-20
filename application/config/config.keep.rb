@@ -1,7 +1,4 @@
-#require File.expand_path('user_specific.rb',  File.dirname(__FILE__))
-
-require File.expand_path('environment_config.rb',  File.dirname(__FILE__))
-
+require File.expand_path('environment_config',File.dirname(__FILE__))
 module XYZ 
   class Config 
     @@configuration = {} unless defined?(@@configuration)
@@ -69,19 +66,28 @@ R8::Config[:database][:type] = "postgres"
 
 #Workflow related parameters
 R8::Config[:workflow] = Hash.new
-#R8::Config[:workflow][:type] = "ruote"
-R8::Config[:workflow][:type] = "simple"
+R8::Config[:workflow][:type] = "ruote"
+#R8::Config[:workflow][:type] = "simple"
+
+R8::Config[:repo] = Hash.new
+R8::Config[:repo][:base_directory] = "/root/r8server-repo"
+R8::Config[:repo][:type] = "git"
+R8::Config[:repo][:git] = Hash.new
+R8::Config[:repo][:git][:server_type] = "gitolite"
+#R8::Config[:repo][:type] = "mock"
 
 #Command and control related parameters
-R8::Config[:command_and_control] = Hash.new
-R8::Config[:command_and_control][:node_config] = Hash.new
-R8::Config[:command_and_control][:node_config][:type] = "mcollective"
-#R8::Config[:command_and_control][:node_config][:type] = "mcollective__mock"
+R8::Config[:command_and_control] ||= Hash.new
+R8::Config[:command_and_control][:node_config] ||= Hash.new
+#R8::Config[:command_and_control][:node_config][:type] ||= "mcollective"
+R8::Config[:command_and_control][:node_config][:type] ||= "mcollective__mock"
 
-R8::Config[:command_and_control][:iaas] = Hash.new
+R8::Config[:command_and_control][:iaas] ||= Hash.new
 #TODO: put in provisions to have multiple iias providers at same time
-R8::Config[:command_and_control][:iaas][:type] = "ec2" 
-#R8::Config[:command_and_control][:iaas][:type] = "ec2__mock" 
+R8::Config[:command_and_control][:iaas][:type] ||= "ec2"
+R8::Config[:command_and_control][:iaas][:ec2] ||= Hash.new
+R8::Config[:command_and_control][:iaas][:ec2][:default_image_size] = "t1.micro"
+#R8::Config[:command_and_control][:iaas][:type] ||= "ec2__mock" 
 
 #optional timer plug
 #R8::Config[:timer] = Hash.new
@@ -89,6 +95,16 @@ R8::Config[:command_and_control][:iaas][:type] = "ec2"
 
 #these are used in template.r8.rb and view.r8.rb
 #R8::Config[:sys_root_path] = "C:/webroot/R8Server"
+
+#Link related config params
+R8::Config[:links] = Hash.new
+R8::Config[:links][:default_type] = "fullBezier"
+R8::Config[:links][:default_style] = Array.new
+R8::Config[:links][:default_style] = [
+  {:strokeStyle=>'#25A3FC',:lineWidth=>3,:lineCap=>'round'},
+  {:strokeStyle=>'#63E4FF',:lineWidth=>1,:lineCap=>'round'}
+]
+
 
 #TODO: eventually cleanup to be more consise of use between root, path,dir, etc
 R8::Config[:sys_root_path] = R8::EnvironmentConfig::System_Root_Dir

@@ -1,32 +1,6 @@
 require File.expand_path('../require_first',File.dirname(__FILE__))
 r8_require('../../utils/internal/log')
 r8_require('../../utils/internal/hash_object')
-module XYZ 
-  class Config 
-    @@configuration = {} unless defined?(@@configuration)
-    class << self
-      def process_config_file(file_name)
-        unless File.exists?(file_name)
-          Log("config file #{file_name} does not exist")
-          return nil
-        end
-        instance_eval(IO.read(file_name), file_name, 1)
-      end
-      def [](x)
-        @@configuration[x]
-      end
-      def get_params()
-        @@configuration.keys()
-      end
-     private
-      def method_missing(method_id,*args)
-        raise Error.new("wrong number of args") unless args.size == 1
-        @@configuration[method_id] = args[0]
-      end
-    end
-  end
-end
-
 
 module R8
   Config = XYZ::HashObject.create_with_auto_vivification()
@@ -50,7 +24,6 @@ R8::Config[:node_images_uri] = R8::Config[:base_uri] + "/images/nodeIcons"
 R8::Config[:component_images_uri] = R8::Config[:base_uri] + "/images/componentIcons"
 R8::Config[:avatar_base_uri] = R8::Config[:base_uri] + "/images/user_avatars"
 
-R8::Config[:login] = Hash.new
 R8::Config[:login][:path] = "/xyz/user/login"
 R8::Config[:login][:resgister] = "/xyz/user/register"
 #TODO: below is stub
@@ -58,7 +31,6 @@ R8::Config[:login][:redirect] = "/xyz/workspace/index"
 
 
 #Database related config params
-#R8::Config[:database] = Hash.new
 R8::Config[:database][:hostname] = "127.0.0.1"
 #R8::Config[:database][:hostname] = "ec2-174-129-28-204.compute-1.amazonaws.com"
 R8::Config[:database][:user] = "postgres"
@@ -67,39 +39,30 @@ R8::Config[:database][:name] = "db_main"
 R8::Config[:database][:type] = "postgres"
 
 #Workflow related parameters
-R8::Config[:workflow] = Hash.new
 R8::Config[:workflow][:type] = "ruote"
 #R8::Config[:workflow][:type] = "simple"
 
-R8::Config[:repo] = Hash.new
 R8::Config[:repo][:base_directory] = "/root/r8server-repo"
 R8::Config[:repo][:type] = "git"
-R8::Config[:repo][:git] = Hash.new
 R8::Config[:repo][:git][:server_type] = "gitolite"
 #R8::Config[:repo][:type] = "mock"
 
 #Command and control related parameters
-R8::Config[:command_and_control] ||= Hash.new
-R8::Config[:command_and_control][:node_config] ||= Hash.new
 #R8::Config[:command_and_control][:node_config][:type] ||= "mcollective"
 R8::Config[:command_and_control][:node_config][:type] ||= "mcollective__mock"
 
-R8::Config[:command_and_control][:iaas] ||= Hash.new
 #TODO: put in provisions to have multiple iias providers at same time
 R8::Config[:command_and_control][:iaas][:type] ||= "ec2"
-R8::Config[:command_and_control][:iaas][:ec2] ||= Hash.new
 R8::Config[:command_and_control][:iaas][:ec2][:default_image_size] = "t1.micro"
 #R8::Config[:command_and_control][:iaas][:type] ||= "ec2__mock" 
 
 #optional timer plug
-#R8::Config[:timer] = Hash.new
 #R8::Config[:timer][:type] = "debug_timeout" # "system_timer"
 
 #these are used in template.r8.rb and view.r8.rb
 #R8::Config[:sys_root_path] = "C:/webroot/R8Server"
 
 #Link related config params
-R8::Config[:links] = Hash.new
 R8::Config[:links][:default_type] = "fullBezier"
 R8::Config[:links][:default_style] = Array.new
 R8::Config[:links][:default_style] = [
@@ -132,6 +95,5 @@ R8::Config[:config_file_path] = "#{R8::Config[:app_root_path]}/config_upload"
 
 R8::Config[:page_limit] = 20
 
-R8::Config[:default_language] = "en.us"
 #freeze
 R8::Config.freeze

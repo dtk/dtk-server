@@ -17,15 +17,15 @@ module XYZ
       def render_hash_form(opts={})
         ret = RenderHash.new
         ret["display_name"] = required_value(:display_name)
-        ret.set?("label",value(:label))
-        ret.set?("description",value(:description))
+        ret.set_unless_nil("label",value(:label))
+        ret.set_unless_nil("description",value(:description))
         ret["external_ref"] = converted_external_ref()
-        ret.set?("ui",value(:ui))
-        ret.set?("basic_type",value(:basic_type))
+        ret.set_unless_nil("ui",value(:ui))
+        ret.set_unless_nil("basic_type",value(:basic_type))
         ret["component_type"] = required_value(:component_type)
-        ret.set?("dependency",converted_dependencies(opts))
-        ret.set?("attribute",converted_attributes(opts))
-        ret.set?("link_defs",converted_link_defs(opts))
+        ret.set_unless_nil("dependency",converted_dependencies(opts))
+        ret.set_unless_nil("attribute",converted_attributes(opts))
+        ret.set_unless_nil("link_defs",converted_link_defs(opts))
         ret
       end
 
@@ -78,7 +78,7 @@ module XYZ
       def render_hash_form(opts={})
         ret = RenderHash.new
         ret["type"] = required_value(:type)
-        ret.set?("required",value(:required))
+        ret.set_unless_nil("required",value(:required))
         self[:possible_links].each_element(:skip_required_is_false => true) do |link|
           (ret["possible_links"] ||= Array.new) << {link.hash_key => link.render_hash_form(opts)}
         end
@@ -114,10 +114,10 @@ module XYZ
       def render_hash_form(opts={})
         ret = RenderHash.new
         ret["display_name"] = required_value(:field_name)
-        ret.set?("description",value(:description))
+        ret.set_unless_nil("description",value(:description))
         ret["data_type"] = required_value(:type)
-        ret.set?("value_asserted",value(:default_info))
-        ret.set?("dynamic",value(:dynamic))
+        ret.set_unless_nil("value_asserted",value(:default_info))
+        ret.set_unless_nil("dynamic",value(:dynamic))
         ret["external_ref"] = converted_external_ref()
         ret
       end

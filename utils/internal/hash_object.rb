@@ -17,8 +17,8 @@ module XYZ
       elements.each{|el|self[el.keys.first] = el.values.first}
     end
     
-    #set if non null
-    def set?(k,v)
+    #set unless value is nill
+    def set_unless_nil(k,v)
       self[k] = v unless v.nil?
     end
   end
@@ -76,6 +76,10 @@ module XYZ
     end
     def do_not_extend()
       false
+    end
+
+    def set?(k,v)
+      self[k] = v unless has_key?(k)
     end
 
     class << self

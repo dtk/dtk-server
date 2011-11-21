@@ -49,6 +49,10 @@ module XYZ
       end
     end
 
+    def push_changes()
+      git_command__push(@branch)
+    end
+
     def push_implementation()
       git_command__push(@branch)
     end

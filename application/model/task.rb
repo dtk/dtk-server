@@ -51,7 +51,9 @@ module XYZ
     def add_event_and_errors(event_type,top_task,result=nil)
       ret = [nil,nil]
       #process errors and strip out from what is passed to add event
-      if errors_in_result = ((result||{})[:data]||{})[:errors]
+      #TODO: change client so just returns :errors not sither :error or :errors
+      error = ((result||{})[:data]||{})[:error]
+      if errors_in_result = (error ? [error] : ((result||{})[:data]||{})[:errors])
         config_agent = get_config_agent
         components = component_actions().map{|a|a[:component]}
         normalized_errors = errors_in_result.map{|err|config_agent.interpret_error(err,components)}

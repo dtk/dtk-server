@@ -29,18 +29,20 @@ module XYZ
       get_repo(context).delete_branch()
     end
 
-    def self.delete_all_branches()
-      repos = load_and_return_adapter_class().get_all_repos()
-      delete_branches(*repos)
+    def self.delete_all_branches(model_handle)
+      repo_names = get_all_repo_names()
+      delete_branches(model_handle,*repo_names)
     end
-    def self.delete_branches(*repos)
-      repos.each do |repo|
-        get_branches(repo).each do |branch|
+    def self.delete_branches(model_handle,*repo_names)
+      klass = load_and_return_adapter_class()
+      repo_names.each do |repo_name|
+        #TODO: change so this from RepoMeta if want to put in hooks for per branch auth
+        klass.get_branches(repo_name).each do |branch|
           next if branch == "master"
-          pp "deleting branch (#{branch}) in repo (#{repo})"
+          pp "deleting branch (#{branch}) in repo (#{repo_name})"
           context = {
             :implementation => {
-            :repo => repo,
+            :repo => repo_name,
             :branch => branch
             }
           }
@@ -50,9 +52,14 @@ module XYZ
     end
 
     ###### for creating and deleting repositories
+    def self.test_pp_config()
+      klass = load_and_return_adapter_class()
+      klass.test_pp_config()
+    end
+
     def self.create_repo?(model_handle,repo_name,hash_values)
       klass = load_and_return_adapter_class()
-      return if RepoMeta.get_all_repo_names().include?(repo_name) 
+      return if get_all_repo_names(model_handle).include?(repo_name) 
       create_repo(model_handle,repo_name,hash_values,klass)
     end
     def self.create_repo(model_handle,repo_name,hash_values,klass=nil)
@@ -70,6 +77,7 @@ module XYZ
       CachedRepoObjects[repo] ||= Hash.new
       CachedRepoObjects[repo][branch] ||= load_and_create(repo,branch)
     end
+   private
     CachedRepoObjects = Hash.new
 
     def self.load_and_return_adapter_class()
@@ -82,6 +90,10 @@ module XYZ
     def self.load_and_create(path,branch)
       klass = load_and_return_adapter_class() 
       klass.create(path,branch)
+    end
+
+    def self.get_all_repo_names(model_handle)
+      RepoMeta.get_all_repo_names(model_handle)
     end
   end
 end

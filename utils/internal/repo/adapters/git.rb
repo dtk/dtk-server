@@ -3,9 +3,12 @@ r8_nested_require('git','manage_git_server')
 module XYZ
   class RepoGit < Repo
     extend RepoGitManageClassMixin
-    def self.create(path,branch)
+    def self.create(path,branch,opts={})
       root = R8::Config[:repo][:base_directory]
-      full_path = path == "__top" ? root : "#{root}/#{path}"
+      full_path = 
+        if opts[:absolute_path] then path
+        else (path == "__top" ? root : "#{root}/#{path}")
+        end
       if Aux::platform_is_linux?()
         RepoGitLinux.new(full_path,branch)
       elsif  Aux::platform_is_windows?()
@@ -70,11 +73,13 @@ module XYZ
       git_command__delete_remote_branch(@branch)      
     end
 
-   private
+    #TODO: change so this is gotten from db to if want to put in hooks for per branch auth
     def self.get_branches(repo)
       path = "#{R8::Config[:repo][:base_directory]}/#{repo}"
       Grit::Repo.new(path).branches.map{|b|b.name}
     end
+
+   private
 
     attr_reader :grit_repo
     def initialize(path,branch)

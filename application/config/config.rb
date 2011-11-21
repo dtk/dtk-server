@@ -45,7 +45,10 @@ R8::Config[:workflow][:type] = "ruote"
 R8::Config[:repo][:base_directory] = "/root/r8server-repo"
 R8::Config[:repo][:type] = "git"
 R8::Config[:repo][:git][:server_type] = "gitolite"
+R8::Config[:repo][:git][:gitolite][:hostname] = "127.0.0.1"
+R8::Config[:repo][:git][:gitolite][:admin_directory] = "/root/r8_gitolite_admin"
 #R8::Config[:repo][:type] = "mock"
+
 
 #Command and control related parameters
 #R8::Config[:command_and_control][:node_config].set?(:type,"mcollective")

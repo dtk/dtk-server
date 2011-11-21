@@ -53,7 +53,7 @@ module XYZ
         repo_obj[:repo_user_acls].each do |acl|
           (users_rights[acl[:access_rights]] ||= Array.new) << acl[:user_name]
         end
-        ConfigFileTemplate.result(:repo_name => repo_obj[:actaul_repo_name],:user_rights => users_rights)
+        ConfigFileTemplate.result(:repo_name => repo_obj[:actual_repo_name],:user_rights => users_rights)
       end
 
 ConfigFileTemplate = Erubis::Eruby.new <<eos

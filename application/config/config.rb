@@ -45,7 +45,13 @@ R8::Config[:workflow][:type] = "ruote"
 R8::Config[:repo][:base_directory] = "/root/r8server-repo"
 R8::Config[:repo][:type] = "git"
 R8::Config[:repo][:git][:server_type] = "gitolite"
-R8::Config[:repo][:git][:gitolite][:hostname] = "127.0.0.1"
+
+#TODO: temp for testing
+R8::Config[:repo][:git][:gitolite][:hostname] = "ec2-107-22-254-226.compute-1.amazonaws.com"
+R8::Config[:repo][:base_directory_test] = "/root/r8server-repo-test"
+########end test
+
+#R8::Config[:repo][:git][:gitolite][:hostname] = "127.0.0.1"
 R8::Config[:repo][:git][:gitolite][:admin_directory] = "/root/r8_gitolite_admin"
 #R8::Config[:repo][:type] = "mock"
 

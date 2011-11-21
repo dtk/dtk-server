@@ -52,21 +52,31 @@ module XYZ
     end
 
     ###### for creating and deleting repositories
-    def self.test_pp_config()
+    def self.test_pp_config(model_handle,repo_name)
       klass = load_and_return_adapter_class()
-      klass.test_pp_config()
+      users = %w{root remote-server r8server r8client} 
+      repo_user_acls = users.map{|u|{:access_rights => "RW+", :user_name => u}}
+      hash_values = {
+        :config_agent_type => "puppet",
+        :repo_name => repo_name,
+        :repo_user_acls => repo_user_acls
+      }
+      create_repo?(model_handle,hash_values)
     end
 
-    def self.create_repo?(model_handle,repo_name,hash_values)
+    def self.create_repo?(model_handle,hash_values)
       klass = load_and_return_adapter_class()
-      return if get_all_repo_names(model_handle).include?(repo_name) 
-      create_repo(model_handle,repo_name,hash_values,klass)
+      actual_repo_name = klass.actual_repo_name(hash_values)
+      return if get_all_repo_names(model_handle).include?(actual_repo_name) 
+      create_repo(model_handle,hash_values,actual_repo_name,klass)
     end
-    def self.create_repo(model_handle,repo_name,hash_values,klass=nil)
+    def self.create_repo(model_handle,hash_values,actual_repo_name=nil,klass=nil)
       klass ||= load_and_return_adapter_class()
-      repo_obj = Model.create_stub(model_handle,{:repo_name => repo_name}.merge(hash_values))
-      repo_details = klass.create_empty_repo(repo_obj)
-      repo_obj.merge(repo_details).save!()
+      actual_repo_name ||= klass.actual_repo_name(hash_values)
+      augmented_hash_values = {:actual_repo_name => actual_repo_name}.merge(hash_values)
+      repo_obj = Model.create_stub(model_handle,augmented_hash_values)
+      klass.create_empty_repo(repo_obj)
+#      repo_obj.save!()
     end
 
     def self.get_repo(context)

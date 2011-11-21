@@ -1,7 +1,7 @@
 module XYZ
   module RepoGitManageClassMixin
-    def test_pp_config()
-      git_server_class().test_pp_config()
+    def actual_repo_name(hash_values)
+      git_server_class().actual_repo_name(hash_values)
     end
     def create_empty_repo(repo_obj)
       git_server_class().create_empty_repo(repo_obj)

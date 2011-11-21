@@ -1,7 +1,7 @@
 module XYZ
   class ImplementationController < Controller
-    def test()
-      Repo.test_pp_config()
+    def test(repo_name)
+      Repo.test_pp_config(model_handle(:repo_meta),repo_name)
       {:content => {}}
     end
 

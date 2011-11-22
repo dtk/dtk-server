@@ -138,12 +138,13 @@ module XYZ
         :resource_reference => ::Puppet::Parser::AST::ResourceReference,
         :string => ::Puppet::Parser::AST::String,
         :name => ::Puppet::Parser::AST::Name,
+        :boolean => ::Puppet::Parser::AST::Boolean,
         :variable => ::Puppet::Parser::AST::Variable,
         :concat => ::Puppet::Parser::AST::Concat,
         :function => ::Puppet::Parser::AST::Function,
         :var_def => ::Puppet::Parser::AST::VarDef,
       }
-      AstTerm = [:string,:name,:variable,:concat,:function]
+      AstTerm = [:string,:name,:variable,:concat,:function,:boolean]
     end
 
     #can be module or file
@@ -232,6 +233,7 @@ module XYZ
         end
       end
 
+      ###***** Need to change so ExportedResourcePS.create and DefinedResourcePS.create become ..create_instances, and array
       def parse__resource(ast_item,opts)
         #TODO: case on opts what is returned; here we are casing on just external resources
         return ExportedResourcePS.create(ast_item,opts) if ast_item.exported
@@ -331,6 +333,12 @@ module XYZ
     end
 
     class DefinedResourcePS < ResourcePS
+      def self.create_instances(ast_resource,opts={})
+      end
+      #Deprecate below
+      def self.create(ast_resource,opts={})
+      end
+
       def initialize(ast_resource,opts={})
         self[:name] = name(ast_resource)
         self[:type] = type(ast_resource)
@@ -449,14 +457,13 @@ module XYZ
       end
      private
       def default_value(default_ast_obj)
-        if puppet_type?(default_ast_obj,[:string,:name,:variable])
+        if puppet_type?(default_ast_obj,[:string,:name,:variable,:boolean])
           TermPS.create(default_ast_obj)
         else
           raise R8ParseError.new("unexpected type for an attribute default")
         end
       end
     end
-
 
     class ImportedCollectionPS < ResourcePS
       def initialize(ast_coll,opts={})
@@ -624,6 +631,7 @@ module XYZ
          when :name then NamePS.new(ast_term,opts)
          when :concat then ConcatPS.new(ast_term,opts)
          when :string then StringPS.new(ast_term,opts)
+         when :boolean then BooleanPS.new(ast_term,opts)
          when :function then FunctionPS.new(ast_term,opts)
          else raise R8ParseError.new("type not treated as a term (#{ast_term.class.to_s})")
         end
@@ -700,6 +708,13 @@ module XYZ
       include NameStringMixin
       def initialize(string_ast,opts={})
         self[:value] = string_ast.value
+        super
+      end
+    end
+
+    class BooleanPS < TermPS
+      def initialize(boolean_ast,opts={})
+        self[:value] = boolean_ast.value
         super
       end
     end

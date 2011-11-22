@@ -1,10 +1,31 @@
 module XYZ
   class Extract
     class << self 
+      def single_module_into_directory(compressed_file,repo_name,base_dir,opts)
+        raise Error.new("directory (#{base_dir}) does not exist") unless File.directory?(base_dir)
+        raise Error.new("directory (#{base_dir}) is not fully qualified") unless fully_qualified_dir_path?(base_dir)
+        target_dir = "#{base_dir}/#{repo_name}"
+        if File.exists?(target_dir)
+          raise Error.new("Non-empty directory for repo (#{target_dir}) exists already") unless empty_dir?(target_dir)
+        else
+          Dir.mkdir(target_dir)
+        end
+        into_directory(compressed_file,target_dir,opts)
+      end
       def into_directory(compressed_file,target_dir,opts={})
+        raise Error.new("directory (#{target_dir}) does not exist") unless File.directory?(target_dir)
+        raise Error.new("directory (#{target_dir}) is not fully qualified") unless fully_qualified_dir_path?(target_dir)
         load_and_return_adapter_class(compressed_file).into_directory(compressed_file,target_dir,opts)
       end
      private
+      def empty_dir?(path)
+        return nil unless File.directory?(path)
+        Dir.foreach(path){|f|return nil  unless f =~ /^\./}
+        true
+      end
+      def fully_qualified_dir_path?(path)
+        path[0,1] == "/"
+      end
       def load_and_return_adapter_class(compressed_file)
         adapter_name = 
           if compressed_file =~ /\.tar\.gz$/ then :tar_gz
@@ -15,13 +36,23 @@ module XYZ
       end
       CachedAdapterClasses = Hash.new
 
-      def ret_qualified_filename(entry_name,opts)
+      def ret_relative_path(entry_name,opts)
         return entry_name unless strip_count = opts[:strip_prefix_count]
         split = entry_name.split("/")
         split[strip_count..split.size-strip_count].join("/")
       end
-      def skip(qualified_filename,opts)
+      def skip(relative_path,opts)
+        #strip out the empty top directory
+        return true if relative_path.empty?
+        #allows strip out .git directories
+        return true if relative_path.split("/").first == ".git"
         return nil unless filter = opts[:filter]
+        #TODO: starting very simple
+        if filter.size == 1 and filter.keys.first == :modules
+          not filter[:modules].include?(relative_path.split("/").first)
+        else
+          raise Error.new("Not treating filter: #{filter.inspect}")
+        end
       end
     end
   end

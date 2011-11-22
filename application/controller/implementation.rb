@@ -6,10 +6,12 @@ module XYZ
       {:content => {}}
     end
 
-    def test_extract(*compressed_file_x)
-      compressed_file = "/" + compressed_file_x.join("/")
+    def test_extract(module_name)
+      compressed_file = "/tmp/#{module_name}.tar.gz"
+      username = CurrentSession.new.get_user_object()[:username]
+      repo_name =  "#{username}-puppet-#{module_name}"
       opts = {:strip_prefix_count => 1} 
-      Extract.into_directory(compressed_file,"/tmp/test",opts)
+      Extract.single_module_into_directory(compressed_file,repo_name,"/tmp/test",opts)
     end
 ###################
     def replace_library_implementation(proj_impl_id)

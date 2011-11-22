@@ -35,6 +35,11 @@ module XYZ
       input_hash_content_into_model(top_container_idh,hash_content)
     end
 
+    def add_library_components_from_r8meta(top_container_idh,r8meta_hash)
+      #TODO: stub; need to process link defs and also to prefix with puppet or chef if refs in r8 hash not done so already
+      pp r8meta_hash
+    end
+
     #assumption is that target_id_handle is in uri form
     def import_objects_from_file(target_id_handle,json_file,opts={})
       raise Error.new("file given #{json_file} does not exist") unless File.exists?(json_file)
@@ -149,6 +154,7 @@ module XYZ
         raise Error.new("Format type #{format_type} not supported")
       end
     end
+
 
     def add_implementations!(hash,version,library_ref,base_dir,impl_name=nil)
       Implementation::add_implementations!(hash,version,library_ref,base_dir,impl_name)

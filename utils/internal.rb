@@ -21,7 +21,8 @@ files =
    'current_session', 
    'create_thread', 
    'eventmachine_helper',
-   'extract'
+   'extract',
+   'generate_meta'
   ]
 r8_nested_require('internal',files)
 

@@ -17,6 +17,9 @@ module XYZ
       end
     end
   end
+
+  class R8ParseError < Error
+  end
   class ErrorForUser < Error
   end
 

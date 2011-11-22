@@ -1,1 +1,1 @@
-require File.expand_path('errors/errors', File.dirname(__FILE__))
+r8_nested_require('errors','errors')

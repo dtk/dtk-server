@@ -11,8 +11,38 @@ module XYZ
       username = CurrentSession.new.get_user_object()[:username]
       repo_name =  "#{username}-puppet-#{module_name}"
       opts = {:strip_prefix_count => 1} 
-      Extract.single_module_into_directory(compressed_file,repo_name,"/tmp/test",opts)
+      base_dir = "/tmp/test"
+
+      #begin capture here so can rerun even after loading in dir already
+      begin
+        #extract tar.gz file into directory
+        Extract.single_module_into_directory(compressed_file,repo_name,base_dir,opts)
+      rescue
+      end
+      module_init_file = "#{base_dir}/#{repo_name}/manifests/init.pp"
+      begin
+        r8_parse = ConfigAgent.parse_given_filename(:puppet,module_init_file)
+       rescue R8ParseError => e
+        pp [:r8_parse_error, e.to_s]
+        return {:content => {}}
+      end
+      pp r8_parse
+=begin
+      #pp r8_parse
+      begin
+        meta_generator = XYZ::GenerateMeta.create("1.0")
+        #TODO: should be able to figure this out "puppet" from r8_parse
+        refinement_hash = meta_generator.generate_refinement_hash(r8_parse,module_name)
+        #pp refinement_hash
+        
+        #in between here refinement has would have through user interaction the user set the needed unknowns
+        #mock_user_updates_hash!(refinement_hash)
+        render_hash = refinement_hash.render_hash_form()
+        render_hash.write_yaml(STDOUT)
+=end
+  {:content => {}}
     end
+
 ###################
     def replace_library_implementation(proj_impl_id)
       create_object_from_id(proj_impl_id).replace_library_impl_with_proj_impl()

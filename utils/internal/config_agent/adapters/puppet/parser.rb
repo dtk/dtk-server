@@ -1,5 +1,5 @@
 #TODO: think better to move assumptions about ast form into the initialization functions to capture their assumptions
-require 'puppet' #TODO: get only what is needed from puppet
+require 'puppet/parser'
 
 module XYZ
   module PuppetParser
@@ -63,9 +63,6 @@ module XYZ
 
    public
     class ParseStructure < SimpleHashObject
-      #TODO: temp if not called as stand alone utility
-      class ParseError < NameError
-      end
       #TODO: for debugging until override
       def initialize(ast_item=nil,opts={})
         return super() if ast_item.nil? 
@@ -120,7 +117,7 @@ module XYZ
         types = Array(types)
         puppet_ast_classes = Array(types).inject({}){|h,t|h.merge(t => TreatedPuppetTypes[t])}
         puppet_ast_classes.each do |type, klass|
-          raise ParseError.new("type #{type} not treated") if klass.nil?
+          raise R8ParseError.new("type #{type} not treated") if klass.nil?
           return type if ast_item.class == klass
         end
         nil
@@ -156,7 +153,7 @@ module XYZ
           if puppet_type?(ast_item,[:hostclass,:definition])
             ComponentPS.create(ast_item,opts)
           else
-            raise ParseError("Unexpected top level ast type (#{ast_item.class.to_s})")
+            raise R8ParseError.new("Unexpected top level ast type (#{ast_item.class.to_s})")
           end
         end.compact
         self[:children] = children
@@ -181,7 +178,7 @@ module XYZ
           elsif puppet_type?(ast_item,:definition)
             "definition"
           else
-            raise ParseError.new("unexpected type for ast_item")
+            raise R8ParseError.new("unexpected type for ast_item")
           end
         self[:type] = type
         self[:name] = ast_item.name
@@ -223,7 +220,7 @@ module XYZ
         if type = puppet_type?(ast_item,types_to_process)
           "parse__#{type}".to_sym
         else
-          raise ParseError.new("unexpected ast type (#{ast_item.class.to_s})")
+          raise R8ParseError.new("unexpected ast type (#{ast_item.class.to_s})")
         end
       end
 
@@ -292,7 +289,7 @@ module XYZ
         ret = ast_resource.type
         if ret == "class"
           ast_title = ast_title(ast_resource)
-          raise ParseError.new("unexpected title ast type (#{ast_title.class.to_s})") unless puppet_type?(ast_title,AstTerm)
+          raise R8ParseError.new("unexpected title ast type (#{ast_title.class.to_s})") unless puppet_type?(ast_title,AstTerm)
           ret = ast_title.value
         end
         ret
@@ -309,7 +306,7 @@ module XYZ
             param = ResourceParamNonTitlePS.create(ast_rsc_param,opts)
             ret << param if param
           else
-            raise ParseError.new("Unexpected child of resource (#{ast_rsc_param.class.to_s})")
+            raise R8ParseError.new("Unexpected child of resource (#{ast_rsc_param.class.to_s})")
           end
         end
         ret
@@ -318,14 +315,14 @@ module XYZ
       def ast_params(ast_resource,opts={})
         children = ast_resource.instances.children
         unless children.size == 1
-          raise ParseError.new("unexpected to have number of resource children neq to 1")
+          raise R8ParseError.new("unexpected to have number of resource children neq to 1")
         end
         children.first.parameters.children
       end
       def ast_title(ast_resource,opts={})
         children = ast_resource.instances.children
         unless children.size == 1
-          raise ParseError.new("unexpected to have number of resource children neq to 1")
+          raise R8ParseError.new("unexpected to have number of resource children neq to 1")
         end
         children.first.title
       end
@@ -408,18 +405,18 @@ module XYZ
         ret = ast_rsc_ref.type
         if ret == "Class"
           ast_title = ast_title(ast_rsc_ref)
-          raise ParseError.new("unexpected title ast type (#{ast_title.class.to_s})") unless puppet_type?(ast_title,AstTerm)
+          raise R8ParseError.new("unexpected title ast type (#{ast_title.class.to_s})") unless puppet_type?(ast_title,AstTerm)
           ret = ast_title.value
         end
         ret
       end
       def ast_title(ast_rsc_ref)
         unless ast_rsc_ref.title
-          raise ParseError.new("unexpected to not have title on resource reference")
+          raise R8ParseError.new("unexpected to not have title on resource reference")
         end
         children = ast_rsc_ref.title.children
         unless children.size == 1
-          raise ParseError.new("unexpected to have number of resource ref children neq to 1")
+          raise R8ParseError.new("unexpected to have number of resource ref children neq to 1")
         end
         children.first
       end
@@ -444,7 +441,7 @@ module XYZ
         if puppet_type?(default_ast_obj,[:string,:name,:variable])
           TermPS.create(default_ast_obj)
         else
-          raise ParseError.new("unexpected type for an attribute default")
+          raise R8ParseError.new("unexpected type for an attribute default")
         end
       end
     end
@@ -458,7 +455,7 @@ module XYZ
         self[:query] =  
           case type
            when :coll_expr then CollExprPS.create(query,opts)
-          else raise ParseError.new("Unexpected type (#{query.class.to_s}) in query argument of collection")
+          else raise R8ParseError.new("Unexpected type (#{query.class.to_s}) in query argument of collection")
         end 
        super
       end
@@ -480,7 +477,7 @@ module XYZ
         case coll_expr_ast.oper
           when "==" then CollExprAttributeExpressionPS.new(coll_expr_ast,opts)
           when "and", "or" then CollExprLogicalConnectivePS.new(coll_expr_ast,opts)
-          else raise ParseError.new("unexpected operation (#{coll_expr_ast.oper}) for collection expression")
+          else raise R8ParseError.new("unexpected operation (#{coll_expr_ast.oper}) for collection expression")
         end
       end
     end
@@ -498,7 +495,7 @@ module XYZ
           value_ast = coll_expr_ast.test1
         end
         unless name and value_ast
-          raise ParseError.new("unexpected type for collection expression")
+          raise R8ParseError.new("unexpected type for collection expression")
         end
         self[:op] = "=="
         self[:name] = name
@@ -562,7 +559,7 @@ module XYZ
           elsif puppet_type?(child_ast_item,:case_statement)
             CaseStatementPS.flat_statement_iter(child_ast_item,opts,&block)
           else
-            raise ParseError.new("unexpected statement in 'if statement' body having ast class (#{child_ast_item.class.to_s})")
+            raise R8ParseError.new("unexpected statement in 'if statement' body having ast class (#{child_ast_item.class.to_s})")
           end
         end
       end      
@@ -617,7 +614,7 @@ module XYZ
          when :concat then ConcatPS.new(ast_term,opts)
          when :string then StringPS.new(ast_term,opts)
          when :function then FunctionPS.new(ast_term,opts)
-         else raise ParseError.new("type not treated as a term (#{ast_term.class.to_s})")
+         else raise R8ParseError.new("type not treated as a term (#{ast_term.class.to_s})")
         end
       end
       def contains_variable?()

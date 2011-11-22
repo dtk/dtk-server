@@ -14,6 +14,15 @@ module XYZ
         CachedAdapterClasses[adapter_name] ||= DynamicLoader.load_and_return_adapter_class("extract",adapter_name)
       end
       CachedAdapterClasses = Hash.new
+
+      def ret_qualified_filename(entry_name,opts)
+        return entry_name unless strip_count = opts[:strip_prefix_count]
+        split = entry_name.split("/")
+        split[strip_count..split.size-strip_count].join("/")
+      end
+      def skip(qualified_filename,opts)
+        return nil unless filter = opts[:filter]
+      end
     end
   end
 end

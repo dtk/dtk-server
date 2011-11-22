@@ -8,7 +8,8 @@ module XYZ
 
     def test_extract(*compressed_file_x)
       compressed_file = "/" + compressed_file_x.join("/")
-      Extract.into_directory(compressed_file,"/tmp/test")
+      opts = {:strip_prefix_count => 1} 
+      Extract.into_directory(compressed_file,"/tmp/test",opts)
     end
 ###################
     def replace_library_implementation(proj_impl_id)

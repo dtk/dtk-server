@@ -19,7 +19,7 @@ module XYZ
   #class mixin
   module ImportObject
     include CommonInputImport
-
+    #assumption is that top_container_idh is in uri form
     def add_library_files_from_directory(top_container_idh,module_dir,module_name,config_agent_type)
       library_impl_hash = Implementation::ret_library_implementation_hash(module_dir,module_name,config_agent_type)
       username = CurrentSession.new.get_user_object()[:username]

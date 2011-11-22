@@ -19,6 +19,12 @@ module XYZ
   #class mixin
   module ImportObject
     include CommonInputImport
+
+    def add_library_files_from_directory(module_dir,module_name,config_agent_type)
+      library_impl_hash = Implementation::ret_library_implementation_hash(module_dir,module_name,config_agent_type)
+pp      library_impl_hash
+    end
+
     #assumption is that target_id_handle is in uri form
     def import_objects_from_file(target_id_handle,json_file,opts={})
       raise Error.new("file given #{json_file} does not exist") unless File.exists?(json_file)
@@ -199,6 +205,37 @@ module XYZ
           cmp_info["*implementation_id"] = "/library/#{library_ref}/implementation/#{repo}"
         end
       end
+
+      def self.ret_library_implementation_hash(module_dir,module_name,config_agent_type)
+        file_paths = Array.new
+        Dir.chdir(module_dir) do
+          pattern = "**/*"
+          file_paths = Dir[pattern].select{|item|File.file?(item)}
+        end
+
+        file_type = "#{config_agent_type}_file"
+        file_assets = file_paths.inject({}) do |h,file_path|
+          file_name = file_path =~ Regexp.new("/([^/]+$)") ? $1 : file_path
+          file_asset = {
+            :type => file_type,
+            :display_name => file_name,
+            :file_name => file_name,
+            :path => file_path
+          }
+          file_asset_ref = file_path.gsub(Regexp.new("/"),"_") #removing "/" since they confuse processing
+          h.merge(file_asset_ref => file_asset)
+        end
+        repo = module_dir.split("/").last
+        {repo => {
+            "display_name" => repo,
+            "module_name" => module_name,
+            "type" => config_agent_type.to_s,
+            "repo" => repo,
+            "file_asset" => file_assets
+          }
+        }
+      end
+
       class ImportChefType < HashObject
         def initialize()
           super(:file_type => "chef_file", :implementation_type => "chef_cookbook")

@@ -1,4 +1,7 @@
-require File.expand_path('import_export/import', File.dirname(__FILE__))
-require File.expand_path('import_export/export', File.dirname(__FILE__))
-require File.expand_path('import_export/import_implementation_package', File.dirname(__FILE__))
-
+files =
+  [
+   'import',
+   'export',
+   'import_implementation_package'
+  ]
+r8_nested_require('import_export',files)

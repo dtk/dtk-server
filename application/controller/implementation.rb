@@ -8,8 +8,9 @@ module XYZ
 
     def test_extract(module_name)
       compressed_file = "/tmp/#{module_name}.tar.gz"
+      config_agent_type = :puppet
       username = CurrentSession.new.get_user_object()[:username]
-      repo_name =  "#{username}-puppet-#{module_name}"
+      repo_name =  "#{username}-#{config_agent_type}-#{module_name}"
       opts = {:strip_prefix_count => 1} 
       base_dir = "/tmp/test"
 
@@ -19,9 +20,14 @@ module XYZ
         Extract.single_module_into_directory(compressed_file,repo_name,base_dir,opts)
       rescue
       end
-      module_init_file = "#{base_dir}/#{repo_name}/manifests/init.pp"
+      
+      module_dir = "#{base_dir}/#{repo_name}"
+      Model.add_library_files_from_directory(module_dir,module_name,config_agent_type)
+    return {:content => {}}
+      #parsing
       begin
-        r8_parse = ConfigAgent.parse_given_filename(:puppet,module_init_file)
+        module_init_file = "#{module_dir}/manifests/init.pp"
+        r8_parse = ConfigAgent.parse_given_filename(config_agent_type,module_init_file)
        rescue ::Puppet::Error => e
         pp [:puppet_error,e.to_s]
         return {:content => {}}

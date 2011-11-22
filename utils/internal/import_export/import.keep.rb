@@ -1,3 +1,4 @@
+#TODO: unify with file_asset/r8_meta
 module XYZ
   module CommonInputImport
     def uri_qualified_by_username(relation_type,ref,username)
@@ -18,8 +19,7 @@ module XYZ
   #class mixin
   module ImportObject
     include CommonInputImport
-    #not idempotent
-    #TBD: assumption is that target_id_handle is in uri form
+    #assumption is that target_id_handle is in uri form
     def import_objects_from_file(target_id_handle,json_file,opts={})
       raise Error.new("file given #{json_file} does not exist") unless File.exists?(json_file)
       create_prefix_object_if_needed(target_id_handle,opts)
@@ -87,19 +87,50 @@ module XYZ
     end
 
     def add_r8meta!(hash,r8meta)
-      type = r8meta[:type]
-      if type == :yaml
+      format_type = r8meta[:type]
+      if format_type == :yaml
         library_ref = r8meta[:library]
         require 'yaml'
+        remote_link_defs = Hash.new
         r8meta[:files].each do |file|
           component_hash = YAML.load_file(file)
-          repo = (file =~ Regexp.new("([^/]+)/[^/]+$") && $1)
-          component_hash.each do |k,v|
-            hash["library"][library_ref]["component"][k] = v.merge("repo" => repo)
+          repo, config_agent_type = (file =~ Regexp.new("([^/]+)/r8meta\.(.+)\.yml") && [$1,$2])
+          raise Error.new("bad config agent type") unless config_agent_type
+          component_hash.each do |local_cmp_type,v|
+            cmp_ref = "#{config_agent_type}-#{local_cmp_type}"
+            #TODO: right now; links defs just have internal
+            if link_defs = v.delete("link_defs")
+              parsed_link_def = LinkDef.parse_serialized_form_local(link_defs,config_agent_type,remote_link_defs)
+              (v["link_def"] ||= Hash.new).merge!(parsed_link_def)
+            end
+            #TODO: when link_defs have externa;l deprecate below
+            if ext_link_defs = v.delete("external_link_defs")
+              #TODO: temp hack to put in type = "external"
+              ext_link_defs.each do |ld|
+                (ld["possible_links"]||[]).each{|pl|pl.values.first["type"] = "external"}
+              end
+              parsed_link_def = LinkDef.parse_serialized_form_local(ext_link_defs,config_agent_type,remote_link_defs)
+              (v["link_def"] ||= Hash.new).merge!(parsed_link_def)
+              #TODO: deprecate below
+              v["link_defs"] ||= Hash.new
+              v["link_defs"]["external"] = ext_link_defs
+            end
+            hash["library"][library_ref]["component"][cmp_ref] = v.merge("repo" => repo)
+          end
+        end
+        #process the link defs for remote components
+        remote_link_defs.each do |remote_cmp_type,remote_link_def|
+          config_agent_type = remote_link_def.values.first.delete(:config_agent_type)
+          remote_cmp_ref = "#{config_agent_type}-#{remote_cmp_type}"
+          cmp_pointer = hash["library"][library_ref]["component"][remote_cmp_ref]
+          if cmp_pointer
+            (cmp_pointer["link_def"] ||= Hash.new).merge!(remote_link_def)
+          else
+            Log.error("link def references a remote component (#{remote_cmp_ref}) that does not exist")
           end
         end 
       else
-        raise Error.new("Type #{type} not supported")
+        raise Error.new("Format type #{format_type} not supported")
       end
     end
 
@@ -121,29 +152,28 @@ module XYZ
           dir = file_path =~ Regexp.new("(^[^/]+)/") ? $1 : nil
           (indexed_file_paths[dir] ||= Array.new) << file_path
         end
-        
-        #find components that correspond to an implementation 
-        components_hash = hash["library"][library_ref]["component"]
-        impl_repos = components_hash.keys.map{|cmp_ref|repo_from_component_ref(cmp_ref)}.uniq & indexed_file_paths.keys
+        impl_repos = indexed_file_paths.keys
         return unless impl_repos
 
         #add implementation objects to hash
         implementation_hash = hash["library"][library_ref]["implementation"] ||= Hash.new
         impl_repos.each do |repo|
           next unless file_paths = indexed_file_paths[repo]
-          type = nil
+          
+          type = 
+            case file_paths.find{|fn|fn =~ Regexp.new("r8meta\.[^/]+$")}
+            when /r8meta.chef/ then ImportChefType.new()
+            when /r8meta.puppet/ then ImportPuppetType.new()
+          end
+          next unless type
+
           cmp_file_assets = file_paths.inject({}) do |h,file_path_x|
             #if repo is null then want ful file path; otherwise we have repo per repo and
             #want to strip off leading repo
             file_path = repo ? file_path_x.gsub(Regexp.new("^#{repo}/"),"") : file_path_x
             file_name = file_path =~ Regexp.new("/([^/]+$)") ? $1 : file_path
-            unless type 
-              if file_name =~ /^r8meta.chef/ then type = "chef_cookbook"
-              elsif file_name =~ /^r8meta.puppet/ then type = "puppet_module"
-              end
-            end
             file_asset = {
-              :type => "chef_file", 
+              :type => type[:file_type],
               :display_name => file_name,
               :file_name => file_name,
               :path => file_path
@@ -151,13 +181,11 @@ module XYZ
             file_asset_ref = file_path.gsub(Regexp.new("/"),"_") #removing "/" since they confuse processing
             h.merge(file_asset_ref => file_asset)
           end
-          unless type
-            Log.error("cannot find valid r8meta file")
-            next
-          end
+          #TDOO: simple way of getting implementation
+          impl_name = repo.gsub(/^puppet[-_]/,"").gsub(/^chef[-_]/,"")
           implementation_hash[repo] = {
-            "display_name" => repo,
-            "type" => type,
+            "display_name" => impl_name,
+            "type" => type[:implementation_type],
             "version" => version,
             "repo" => repo,
             "file_asset" => cmp_file_assets
@@ -165,14 +193,21 @@ module XYZ
         end
 
         #add foreign key to components that reference an implementation
-        components_hash.each do |cmp_ref, cmp_info|
-          repo = repo_from_component_ref(cmp_ref)
-          next unless impl_repos.include?(repo)
+        components_hash = hash["library"][library_ref]["component"]
+        components_hash.each_value do |cmp_info|
+          next unless repo = cmp_info["repo"]
           cmp_info["*implementation_id"] = "/library/#{library_ref}/implementation/#{repo}"
         end
       end
-      def self.repo_from_component_ref(cmp_ref)
-        cmp_ref.gsub(/__.+$/,"")
+      class ImportChefType < HashObject
+        def initialize()
+          super(:file_type => "chef_file", :implementation_type => "chef_cookbook")
+        end
+      end
+      class ImportPuppetType < HashObject
+        def initialize()
+          super(:file_type => "puppet_file", :implementation_type => "puppet_module")
+        end
       end
     end
   end

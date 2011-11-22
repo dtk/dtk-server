@@ -26,8 +26,9 @@ module XYZ
       user_group = user_obj.get_private_group()
       user_group_id = user_group && user_group[:id]
       top_container_idh = top_id_handle(:group_id => user_group_id)
-      Model.add_library_files_from_directory(top_container_idh,module_dir,module_name,config_agent_type)
-
+      x = Model.add_library_files_from_directory(top_container_idh,module_dir,module_name,config_agent_type)
+      #TODO: testing; want to get implementatio_id so can insert into components
+      pp [:add_model,x]
       #parsing
       begin
         module_init_file = "#{module_dir}/manifests/init.pp"

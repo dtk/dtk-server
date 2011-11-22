@@ -49,10 +49,11 @@ controller = controller_line
 if controller_line =~ /controller\/(.+)\.rb:.+`(.+)'/
   model = $1
   fn = $2
-  controller = "#{model}##{fn}"
+  controller_action = "#{model}##{fn}"
 end
-unless ["target#get_nodes_status"].include?(controller) #ignore list
-  pp [:auth,model_handle[:model_name],controller]
+mn = model_handle[:model_name]
+unless [:task_log].include?(mn) or ["target#get_nodes_status", "task#get_logs"].include?(controller_action) #ignore list
+  pp [:auth,mn,controller_action]
 end
 #=end
         conjoin_set += process_session_auth(session,auth_filters)

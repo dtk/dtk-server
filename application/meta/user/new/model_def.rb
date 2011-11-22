@@ -24,9 +24,10 @@
        },
        {
          :model_name=>:user_group,
+         :convert => true,
          :join_type=>:left_outer,
          :join_cond=>{:id=>:user_group_relation__user_group_id},
-         :cols=>[:id]
+         :cols=>[:id,:groupname]
        }]
     }
   },

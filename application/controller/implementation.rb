@@ -9,7 +9,8 @@ module XYZ
     def test_extract(module_name)
       compressed_file = "/tmp/#{module_name}.tar.gz"
       config_agent_type = :puppet
-      username = CurrentSession.new.get_user_object()[:username]
+      user_obj = CurrentSession.new.get_user_object()
+      username = user_obj[:username]
       repo_name =  "#{username}-#{config_agent_type}-#{module_name}"
       opts = {:strip_prefix_count => 1} 
       base_dir = "/tmp/test"
@@ -22,7 +23,10 @@ module XYZ
       end
       
       module_dir = "#{base_dir}/#{repo_name}"
-      Model.add_library_files_from_directory(module_dir,module_name,config_agent_type)
+      user_group = user_obj.get_private_group()
+      user_group_id = user_group && user_group[:id]
+      top_container_idh = top_id_handle(:group_id => user_group_id)
+      Model.add_library_files_from_directory(top_container_idh,module_dir,module_name,config_agent_type)
     return {:content => {}}
       #parsing
       begin

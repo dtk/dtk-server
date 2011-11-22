@@ -65,9 +65,11 @@ module Ramaze::Helper
       IDHandle[:c => c,:uri => "/#{model_name()}", :is_factory => true]
     end
 
-    def top_id_handle()
+    def top_id_handle(opts={})
       c = ret_session_context_id()
-      IDHandle[:c => c,:uri => "/"]
+      idh = IDHandle[:c => c,:uri => "/"]
+      idh.merge!(:group_id => opts[:group_id]) if opts[:group_id]
+      idh
     end
 
     def ret_id_from_uri(uri)

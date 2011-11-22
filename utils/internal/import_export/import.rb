@@ -22,7 +22,17 @@ module XYZ
 
     def add_library_files_from_directory(top_container_idh,module_dir,module_name,config_agent_type)
       library_impl_hash = Implementation::ret_library_implementation_hash(module_dir,module_name,config_agent_type)
-pp      library_impl_hash
+      username = CurrentSession.new.get_user_object()[:username]
+      users_private_lib_name = "private-#{username}"
+      hash_content = {
+        "library" => {
+          users_private_lib_name => {
+            "display_name" => users_private_lib_name,
+            "implementation" => library_impl_hash
+          }
+        } 
+      }
+      input_hash_content_into_model(top_container_idh,hash_content)
     end
 
     #assumption is that target_id_handle is in uri form

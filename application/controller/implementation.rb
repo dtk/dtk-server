@@ -22,6 +22,9 @@ module XYZ
       module_init_file = "#{base_dir}/#{repo_name}/manifests/init.pp"
       begin
         r8_parse = ConfigAgent.parse_given_filename(:puppet,module_init_file)
+       rescue ::Puppet::Error => e
+        pp [:puppet_error,e.to_s]
+        return {:content => {}}
        rescue R8ParseError => e
         pp [:r8_parse_error, e.to_s]
         return {:content => {}}

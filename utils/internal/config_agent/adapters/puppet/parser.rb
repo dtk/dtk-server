@@ -152,6 +152,8 @@ module XYZ
         children = ast_array.children.map do |ast_item|
           if puppet_type?(ast_item,[:hostclass,:definition])
             ComponentPS.create(ast_item,opts)
+          elsif puppet_type?(ast_item,[:var_def])
+            #TODO: should this be ignored?
           else
             raise R8ParseError.new("Unexpected top level ast type (#{ast_item.class.to_s})")
           end

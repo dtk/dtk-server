@@ -53,7 +53,7 @@ module XYZ
       raise Error.new("library_uri_idh is expected to have a uri") unless library_uri = library_uri_idh[:uri]
       library_ref = library_uri.split("/").last
       impl_id = implementation_idh.get_id()
-      cmps_hash = r8meta_hash.inject do |h, (cmp_ref,cmp_info)|
+      cmps_hash = r8meta_hash.inject({}) do |h, (cmp_ref,cmp_info)|
         #TODO: for now just removing the link defs
         info = cmp_info.inject({}) do |r,(k,v)|
           ["link_defs", "external_link_defs"].include?(k) ? r : r.merge(k => v)

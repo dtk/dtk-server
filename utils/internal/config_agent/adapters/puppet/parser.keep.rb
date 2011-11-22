@@ -290,9 +290,6 @@ module XYZ
 
      private
       def name(ast_resource)
-        self.class.name(ast_resource)
-      end
-      def self.name(ast_resource)
         ret = ast_resource.type
         if ret == "class"
           ast_title = ast_title(ast_resource)
@@ -301,7 +298,7 @@ module XYZ
         end
         ret
       end
-      def self.resource_parameters(ast_resource,opts={})
+      def resource_parameters(ast_resource,opts={})
         ret = Array.new
         unless opts[:no_title]
           if ast_title = ast_title(ast_resource,opts)
@@ -319,23 +316,14 @@ module XYZ
         ret
       end
 
-      def self.ast_params_and_title_array(ast_resource,opts={})
-        children = ast_resource.instances.children
-        children.map do |ch|
-          params = ch.parameters.children
-          params << ch.title unless opts[:no_title]
-          params
-        end
-      end
-      #TODO: deprecate two below for above
-      def self.ast_params(ast_resource,opts={})
+      def ast_params(ast_resource,opts={})
         children = ast_resource.instances.children
         unless children.size == 1
           raise R8ParseError.new("unexpected to have number of resource children neq to 1")
         end
         children.first.parameters.children
       end
-      def self.ast_title(ast_resource,opts={})
+      def ast_title(ast_resource,opts={})
         children = ast_resource.instances.children
         unless children.size == 1
           raise R8ParseError.new("unexpected to have number of resource children neq to 1")
@@ -347,15 +335,14 @@ module XYZ
     class DefinedResourcePS < ResourcePS
       def self.create_instances(ast_resource,opts={})
       end
-      #Deprecate below in favor of above
+      #Deprecate below
       def self.create(ast_resource,opts={})
-        params = resource_parameters(ast_resource,opts.merge(:no_title => true))
-        new(ast_resource,params,opts)
       end
-      
-      def initialize(ast_resource,params,opts={})
+
+      def initialize(ast_resource,opts={})
         self[:name] = name(ast_resource)
         self[:type] = type(ast_resource)
+        params = resource_parameters(ast_resource,opts.merge(:no_title => true))
         (params||[]).each do |p|
           if p.kind_of?(StageResourceParam)
             self[:stage] = p
@@ -363,7 +350,7 @@ module XYZ
             (self[:parameters] ||= Array.new) << p
           end
         end
-        super(ast_resource,opts)
+        super
       end
       def is_defined_resource?() 
         true
@@ -374,14 +361,10 @@ module XYZ
       end
     end
     class ExportedResourcePS < ResourcePS
-      def self.create(ast_resource,opts={})
-        params = resource_parameters(ast_resource,opts)
-        new(ast_resource,params,opts)
-      end
-      def initialize(ast_resource,params,opts={})
+      def initialize(ast_resource,opts={})
         self[:name] = name(ast_resource)
-        self[:parameters] =  params
-        super(ast_resource,opts)
+        self[:parameters] =  resource_parameters(ast_resource,opts)
+        super
       end
       def is_exported_resource?() 
         true

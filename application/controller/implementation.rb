@@ -26,9 +26,7 @@ module XYZ
       user_group = user_obj.get_private_group()
       user_group_id = user_group && user_group[:id]
       top_container_idh = top_id_handle(:group_id => user_group_id)
-      x = Model.add_library_files_from_directory(top_container_idh,module_dir,module_name,config_agent_type)
-      #TODO: testing; want to get implementatio_id so can insert into components
-      pp [:add_model,x]
+      library_idh,impl_idh = Model.add_library_files_from_directory(top_container_idh,module_dir,module_name,config_agent_type)
       #parsing
       begin
         module_init_file = "#{module_dir}/manifests/init.pp"
@@ -52,7 +50,7 @@ module XYZ
       r8meta_hash.delete("version")
       r8meta_path = "#{module_dir}/r8meta.#{config_agent_type}.yml"
       File.open(r8meta_path,"w"){|f|r8meta_hash.write_yaml(f)}
-      Model.add_library_components_from_r8meta(top_container_idh,r8meta_hash)
+      Model.add_library_components_from_r8meta(config_agent_type,top_container_idh,library_idh,impl_idh,r8meta_hash)
       {:content => {}}
     end
 

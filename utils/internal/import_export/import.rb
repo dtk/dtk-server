@@ -20,6 +20,7 @@ module XYZ
   module ImportObject
     include CommonInputImport
     #assumption is that top_container_idh is in uri form
+    #returns [library_idh,implementation_idh]
     def add_library_files_from_directory(top_container_idh,module_dir,module_name,config_agent_type)
       library_impl_hash = Implementation::ret_library_implementation_hash(module_dir,module_name,config_agent_type)
       username = CurrentSession.new.get_user_object()[:username]
@@ -33,11 +34,42 @@ module XYZ
         } 
       }
       input_hash_content_into_model(top_container_idh,hash_content)
+      library_ref = users_private_lib_name
+      #assumption is that library_impl_hash only has one impleemntation in it
+      impl_ref = library_impl_hash.keys.first
+      ret_library_and_impl_id_handles(top_container_idh,library_ref,impl_ref)
     end
 
-    def add_library_components_from_r8meta(top_container_idh,r8meta_hash)
-      #TODO: stub; need to process link defs and also to prefix with puppet or chef if refs in r8 hash not done so already
-      pp r8meta_hash
+    #TODO: this is somewhatr of a hack; better is if input_hash_content_into_model gave this info
+    def ret_library_and_impl_id_handles(top_container_idh,library_ref,impl_ref)
+      library_uri = "/library/#{library_ref}"
+      impl_uri = "#{library_uri}/implementation/#{impl_ref}"
+      [[:library,library_uri],[:implementation,impl_uri]].map do |mn,uri|
+        top_container_idh.createIDH(:model_name => mn, :uri => uri)
+      end
+    end
+    #TODO: fix so has less arguments
+    def add_library_components_from_r8meta(config_agent_type,top_container_idh,library_uri_idh,implementation_idh,r8meta_hash)
+      raise Error.new("library_uri_idh is expected to have a uri") unless library_uri = library_uri_idh[:uri]
+      library_ref = library_uri.split("/").last
+      impl_id = implementation_idh.get_id()
+      cmps_hash = r8meta_hash.inject do |h, (cmp_ref,cmp_info)|
+        #TODO: for now just removing the link defs
+        info = cmp_info.inject({}) do |r,(k,v)|
+          ["link_defs", "external_link_defs"].include?(k) ? r : r.merge(k => v)
+        end
+        info.merge!(:implementation_id => impl_id)
+        #TODO: may be better to have these prefixes already in r8 meta file
+        h.merge("#{config_agent_type}-#{cmp_ref}" => info)
+      end
+      hash_content = {
+        "library" => {
+            library_ref => {
+            "component" => cmps_hash 
+          }
+        } 
+      }
+      input_hash_content_into_model(top_container_idh,hash_content)
     end
 
     #assumption is that target_id_handle is in uri form
@@ -244,6 +276,7 @@ module XYZ
         repo = module_dir.split("/").last
         {repo => {
             "display_name" => repo,
+            "parse_state" => "unparsed",
             "module_name" => module_name,
             "type" => config_agent_type.to_s,
             "repo" => repo,

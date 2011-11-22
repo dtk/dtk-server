@@ -364,10 +364,19 @@ module XYZ
     end
 
     class ResourceParamPS < ParseStructure
-      def initialize(name,value_ast_term,ast_rsc_param,opts={})
+      def initialize(name,value_ast,ast_rsc_param,opts={})
         self[:name] = name
-        self[:value] = TermPS.create(value_ast_term,opts) if value_ast_term
+        val = value(value_ast,opts)
+        self[:value] = val if val
         super(ast_rsc_param,opts)
+      end
+     private
+      def value(value_ast,opts)
+        if puppet_type?(value_ast,:resource_reference)
+          ResourceReferencePS.create(value_ast,opts)
+        else
+          TermPS.create(value_ast,opts) 
+        end
       end
     end
 

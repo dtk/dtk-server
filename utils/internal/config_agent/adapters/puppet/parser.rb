@@ -233,12 +233,11 @@ module XYZ
         end
       end
 
-      ###***** Need to change so ExportedResourcePS.create and DefinedResourcePS.create become ..create_instances, and array
       def parse__resource(ast_item,opts)
         #TODO: case on opts what is returned; here we are casing on just external resources
-        return ExportedResourcePS.create(ast_item,opts) if ast_item.exported
+        return ExportedResourcePS.create_instances(ast_item,opts) if ast_item.exported
         if ResourcePS.builtin?(ast_item)
-        else DefinedResourcePS.create(ast_item,opts)
+        else DefinedResourcePS.create_instances(ast_item,opts)
         end
       end
 
@@ -289,10 +288,17 @@ module XYZ
       end
 
      private
-      def name(ast_resource)
-        self.class.name(ast_resource)
+      def self.resource_parameters_array(ast_resource,opts={})
+        children = ast_resource.instances.children
+        children.map do |ch|
+          params = ch.parameters.children.map do |ast_rsc_param|
+            ResourceParamNonTitlePS.create(ast_rsc_param,opts)
+          end.compact
+          params <<  ResourceTitlePS.create(ch.title,opts) unless opts[:no_title]
+          params
+        end
       end
-      def self.name(ast_resource)
+      def name(ast_resource)
         ret = ast_resource.type
         if ret == "class"
           ast_title = ast_title(ast_resource)
@@ -301,56 +307,20 @@ module XYZ
         end
         ret
       end
-      def self.resource_parameters(ast_resource,opts={})
-        ret = Array.new
-        unless opts[:no_title]
-          if ast_title = ast_title(ast_resource,opts)
-            ret << ResourceTitlePS.create(ast_title,opts)
-          end
-        end
-        ast_params(ast_resource,opts).each do |ast_rsc_param|
-          if puppet_type?(ast_rsc_param,:resource_param)
-            param = ResourceParamNonTitlePS.create(ast_rsc_param,opts)
-            ret << param if param
-          else
-            raise R8ParseError.new("Unexpected child of resource (#{ast_rsc_param.class.to_s})")
-          end
-        end
-        ret
-      end
 
-      def self.ast_params_and_title_array(ast_resource,opts={})
+      def ast_title(ast_resource,opts={})
         children = ast_resource.instances.children
-        children.map do |ch|
-          params = ch.parameters.children
-          params << ch.title unless opts[:no_title]
-          params
-        end
-      end
-      #TODO: deprecate two below for above
-      def self.ast_params(ast_resource,opts={})
-        children = ast_resource.instances.children
-        unless children.size == 1
-          raise R8ParseError.new("unexpected to have number of resource children neq to 1")
-        end
-        children.first.parameters.children
-      end
-      def self.ast_title(ast_resource,opts={})
-        children = ast_resource.instances.children
-        unless children.size == 1
-          raise R8ParseError.new("unexpected to have number of resource children neq to 1")
-        end
-        children.first.title
+        #if this is called all children will agree on the title
+        sample_child = children.first
+        sample_child.title
       end
     end
 
     class DefinedResourcePS < ResourcePS
       def self.create_instances(ast_resource,opts={})
-      end
-      #Deprecate below in favor of above
-      def self.create(ast_resource,opts={})
-        params = resource_parameters(ast_resource,opts.merge(:no_title => true))
-        new(ast_resource,params,opts)
+        resource_parameters_array(ast_resource,opts.merge(:no_title => true)).map do |params|
+          new(ast_resource,params,opts)
+        end
       end
       
       def initialize(ast_resource,params,opts={})
@@ -373,11 +343,14 @@ module XYZ
         ast_resource.type == "class" ? "definition" : "class"
       end
     end
+
     class ExportedResourcePS < ResourcePS
-      def self.create(ast_resource,opts={})
-        params = resource_parameters(ast_resource,opts)
-        new(ast_resource,params,opts)
+      def self.create_instances(ast_resource,opts={})
+        resource_parameters_array(ast_resource,opts).map do |params|
+          new(ast_resource,params,opts)
+        end
       end
+
       def initialize(ast_resource,params,opts={})
         self[:name] = name(ast_resource)
         self[:parameters] =  params

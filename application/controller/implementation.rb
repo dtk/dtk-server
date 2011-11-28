@@ -7,7 +7,11 @@ module XYZ
     end
 
     def test_extract(module_name)
-      compressed_file = "/#{R8::EnvironmentConfig::CompressedFileStore}/#{module_name}.tar.gz"
+      if Aux::platform_is_linux?()
+        compressed_file = "/#{R8::EnvironmentConfig::CompressedFileStore}/#{module_name}.tar.gz"
+      elsif Aux::platform_is_windows?()
+        compressed_file = "#{R8::EnvironmentConfig::CompressedFileStore}/#{module_name}.tar.gz"
+      end
       config_agent_type = :puppet
       user_obj = CurrentSession.new.get_user_object()
       username = user_obj[:username]

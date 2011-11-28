@@ -24,7 +24,7 @@ module XYZ
         #extract tar.gz file into directory
         Extract.single_module_into_directory(compressed_file,repo_name,base_dir,opts)
       rescue Exception => e
-        raise e
+        #raise e
       end
       
       module_dir = "#{base_dir}/#{repo_name}"

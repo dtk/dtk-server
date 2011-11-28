@@ -13,7 +13,7 @@ module XYZ
       username = user_obj[:username]
       repo_name =  "#{username}-#{config_agent_type}-#{module_name}"
       opts = {:strip_prefix_count => 1} 
-      base_dir = "/tmp/test"
+      base_dir = R8::EnvironmentConfig::ImportTestBaseDir
 
       #begin capture here so can rerun even after loading in dir already
       begin

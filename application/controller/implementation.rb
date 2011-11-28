@@ -33,9 +33,11 @@ module XYZ
         r8_parse = ConfigAgent.parse_given_filename(config_agent_type,module_init_file)
        rescue ::Puppet::Error => e
         pp [:puppet_error,e.to_s]
+        raise e
         return {:content => {}}
        rescue R8ParseError => e
         pp [:r8_parse_error, e.to_s]
+        raise e
         return {:content => {}}
       end
 

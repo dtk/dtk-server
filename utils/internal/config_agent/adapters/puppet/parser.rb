@@ -3,34 +3,17 @@ require 'puppet/parser'
 
 module XYZ
   module PuppetParser
-=begin
-    def parse_given_module_directory(dir)
+    def parse_given_module_directory(module_dir)
       #TODO: only handling parsing of .pp now
-      manifest_file_names = Dir.chdir(dir){Dir["**/*"].select{|i|File.file?(i) and i =~ /\.pp$/}}
-      seed_content = manifest_file_names.map{|fn|"import '#{dir}/#{fn}'"}.join("\n")
+      manifest_dir = "#{module_dir}/manifests"
+      manifest_file_names = Dir.chdir(manifest_dir){Dir["**/*"].select{|i|File.file?(i) and i =~ /\.pp$/}.map{|fn|"#{manifest_dir}/#{fn}"}}
+      seed_content = manifest_file_names.map{|fn|"import '#{fn}'"}.join("\n")
       synchronize_and_handle_puppet_globals(:code => seed_content) do
         environment = "production"
         krt = Puppet::Node::Environment.new(environment).known_resource_types
         krt_code = krt.hostclass("").code
           TopPS.new(krt_code)
       end
-    end
-=end
-    def parse_given_module_directory(dir)
-      #TODO: only handling parsing of .pp now
-      manifest_file_names = Dir.chdir(dir){Dir["**/*"].select{|i|File.file?(i) and i =~ /\.pp$/}.map{|fn|"#{dir}/#{fn}"}}
-      ret = nil
-      manifest_file_names.each do |filename|
-        begin
-          ret = parse_given_filename(filename)
-          pp ret
-         rescue ::Puppet::Error => e
-            pp [:puppet_error,e.to_s]
-         rescue R8ParseError => e
-          pp [:r8_parse_error, e.to_s]
-        end
-      end
-      ret
     end
 
     def parse_given_filename(filename)

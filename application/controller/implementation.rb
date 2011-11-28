@@ -19,7 +19,8 @@ module XYZ
       begin
         #extract tar.gz file into directory
         Extract.single_module_into_directory(compressed_file,repo_name,base_dir,opts)
-      rescue
+      rescue Exception => e
+        raise e
       end
       
       module_dir = "#{base_dir}/#{repo_name}"
@@ -33,11 +34,9 @@ module XYZ
         r8_parse = ConfigAgent.parse_given_filename(config_agent_type,module_init_file)
        rescue ::Puppet::Error => e
         pp [:puppet_error,e.to_s]
-        raise e
         return {:content => {}}
        rescue R8ParseError => e
         pp [:r8_parse_error, e.to_s]
-        raise e
         return {:content => {}}
       end
 

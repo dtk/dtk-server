@@ -7,11 +7,7 @@ module XYZ
     end
 
     def test_extract(module_name)
-      if Aux::platform_is_linux?()
-        compressed_file = "/#{R8::EnvironmentConfig::CompressedFileStore}/#{module_name}.tar.gz"
-      elsif Aux::platform_is_windows?()
-        compressed_file = "#{R8::EnvironmentConfig::CompressedFileStore}/#{module_name}.tar.gz"
-      end
+      compressed_file = "#{R8::EnvironmentConfig::CompressedFileStore}/#{module_name}.tar.gz"
       config_agent_type = :puppet
       user_obj = CurrentSession.new.get_user_object()
       username = user_obj[:username]
@@ -34,8 +30,7 @@ module XYZ
       library_idh,impl_idh = Model.add_library_files_from_directory(top_container_idh,module_dir,module_name,config_agent_type)
       #parsing
       begin
-        module_init_file = "#{module_dir}/manifests/init.pp"
-        r8_parse = ConfigAgent.parse_given_filename(config_agent_type,module_init_file)
+        r8_parse = ConfigAgent.parse_given_module_directory(config_agent_type,module_dir)
        rescue ::Puppet::Error => e
         pp [:puppet_error,e.to_s]
         return {:content => {}}

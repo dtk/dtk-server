@@ -1,5 +1,8 @@
 module XYZ
   class ConfigAgent
+    def self.parse_given_module_directory(type,dir)
+      load(type).parse_given_module_directory(dir)
+    end
     def self.parse_given_filename(type,filename)
       load(type).parse_given_filename(filename)
     end

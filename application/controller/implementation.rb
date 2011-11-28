@@ -49,6 +49,7 @@ module XYZ
       #TODO: currently version not handled
       r8meta_hash.delete("version")
       r8meta_path = "#{module_dir}/r8meta.#{config_agent_type}.yml"
+      r8meta_hash.write_yaml(STDOUT)
       File.open(r8meta_path,"w"){|f|r8meta_hash.write_yaml(f)}
       Model.add_library_components_from_r8meta(config_agent_type,top_container_idh,library_idh,impl_idh,r8meta_hash)
       {:content => {}}

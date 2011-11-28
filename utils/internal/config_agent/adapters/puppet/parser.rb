@@ -3,6 +3,7 @@ require 'puppet/parser'
 
 module XYZ
   module PuppetParser
+=begin
     def parse_given_module_directory(dir)
       #TODO: only handling parsing of .pp now
       manifest_file_names = Dir.chdir(dir){Dir["**/*"].select{|i|File.file?(i) and i =~ /\.pp$/}}
@@ -14,6 +15,24 @@ module XYZ
           TopPS.new(krt_code)
       end
     end
+=end
+    def parse_given_module_directory(dir)
+      #TODO: only handling parsing of .pp now
+      manifest_file_names = Dir.chdir(dir){Dir["**/*"].select{|i|File.file?(i) and i =~ /\.pp$/}.map{|fn|"#{dir}/#{fn}"}}
+      ret = nil
+      manifest_file_names.each do |filename|
+        begin
+          ret = parse_given_filename(filename)
+          pp ret
+         rescue ::Puppet::Error => e
+            pp [:puppet_error,e.to_s]
+         rescue R8ParseError => e
+          pp [:r8_parse_error, e.to_s]
+        end
+      end
+      ret
+    end
+
     def parse_given_filename(filename)
       synchronize_and_handle_puppet_globals(:manifest => filename) do 
         environment = "production"

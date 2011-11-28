@@ -30,7 +30,9 @@ module XYZ
       library_idh,impl_idh = Model.add_library_files_from_directory(top_container_idh,module_dir,module_name,config_agent_type)
       #parsing
       begin
-        r8_parse = ConfigAgent.parse_given_module_directory(config_agent_type,module_dir)
+        module_init_file = "#{module_dir}/manifests/init.pp"
+        r8_parse = ConfigAgent.parse_given_filename(config_agent_type,module_init_file)
+#        r8_parse = ConfigAgent.parse_given_module_directory(config_agent_type,module_dir)
        rescue ::Puppet::Error => e
         pp [:puppet_error,e.to_s]
         return {:content => {}}

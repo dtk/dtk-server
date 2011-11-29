@@ -32,10 +32,36 @@ module XYZ
       (node[:external_ref]||{})[:instance_id]
     end
 
-    private
-     Lock = Mutex.new
-     Agents = Hash.new
+    Lock = Mutex.new
+    Agents = Hash.new
+
+    class ParseError < Error
+      attr_reader :msg, :filename, :line
+      def initialize(msg,filename=nil,line=nil)
+        @msg = msg
+        @filename = filename
+        @line = line
+      end
+
+      def to_s()
+        ret = msg
+        ret << "; filename=#{filename}" if filename
+        ret << ";line=#{line.to_s}" if line
+        ret
+      end
+    end
+    class ParseErrors < Error
+      attr_reader :error_list
+      def initialize()
+        @error_list = Array.new
+      end
+      def add(error)
+        @error_list << error
+        self
+      end
+    end
   end
+
   module ConfigAgentAdapter
   end
 end

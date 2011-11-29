@@ -33,8 +33,8 @@ module XYZ
 #        module_init_file = "#{module_dir}/manifests/init.pp"
 #        r8_parse = ConfigAgent.parse_given_filename(config_agent_type,module_init_file)
         r8_parse = ConfigAgent.parse_given_module_directory(config_agent_type,module_dir)
-       rescue ::Puppet::Error => e
-        pp [:puppet_error,e.to_s]
+       rescue ConfigAgent::ParseErrors => errors
+        pp [:puppet_error,errors.error_list.map{|e|e.to_s}]
         return {:content => {}}
        rescue R8ParseError => e
         pp [:r8_parse_error, e.to_s]

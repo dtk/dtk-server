@@ -12,7 +12,7 @@ module XYZ
         environment = "production"
         krt = Puppet::Node::Environment.new(environment).known_resource_types
         krt_code = krt.hostclass("").code
-          TopPS.new(krt_code)
+        TopPS.new(krt_code)
       end
     end
 
@@ -35,6 +35,8 @@ module XYZ
       ret
     end
    private
+
+    PuppetParserLock = Mutex.new
 
     def parse_given_file_content__manifest(file_content)
       synchronize_and_handle_puppet_globals(:code => file_content, :ignoreimport => false) do
@@ -63,6 +65,8 @@ module XYZ
           global_assignments.each{|k,v|Puppet[k]=v}
           Thread.current[:known_resource_types] = nil
           ret = yield
+         rescue ::Puppet::Error => e
+          raise normalize_puppet_error(e) 
          rescue Exception => e
           raise e
          ensure
@@ -72,8 +76,35 @@ module XYZ
       end
       ret
     end
-    PuppetParserLock = Mutex.new
 
+    def normalize_puppet_error(puppet_error)
+      filename = puppet_error.file || find_filename(puppet_error.message)
+      line = puppet_error.line || find_line(puppet_error.message)
+      #TODO: strip stuff off error message
+      msg = strip_message(puppet_error.message)
+      single_error = ConfigAgent::ParseError.new(msg,filename,line)
+      #TODO: change when handle multiple errors
+      ConfigAgent::ParseErrors.new().add(single_error)
+    end
+
+    def find_filename(msg)
+      if msg =~ /at ([^ ]+):[0-9]+$/ 
+        $1
+      end
+    end
+
+    def  find_line(msg)
+      if msg =~ /:([0-9]+$)/
+        $1
+      end
+    end
+
+    def strip_message(msg)
+      ret = msg
+      ret = ret.gsub(/Could not parse for environment production: /,"")
+      ret = ret.gsub(/at [^ ]+:[0-9]+$/,"")
+      ret
+    end
    public
     class ParseStructure < SimpleHashObject
       #TODO: for debugging until override

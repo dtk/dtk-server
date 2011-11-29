@@ -44,10 +44,10 @@ module XYZ
       end
 
       def to_s()
-        ret = msg
-        ret << "; filename=#{filename}" if filename
-        ret << ";line=#{line.to_s}" if line
-        ret
+        [:msg, :filename, :line].map do |k|
+          val = send(k)
+          "#{k}=#{val}" if val
+        end.compact.join("; ")
       end
     end
     class ParseErrors < Error

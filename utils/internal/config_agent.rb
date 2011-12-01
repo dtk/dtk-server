@@ -36,18 +36,49 @@ module XYZ
     Agents = Hash.new
 
     class ParseError < Error
-      attr_reader :msg, :filename, :line
-      def initialize(msg,filename=nil,line=nil)
+      attr_reader :msg, :filename, :file_asset_id, :line
+      def initialize(msg,file_path=nil,line=nil)
         @msg = msg
-        @filename = filename
-        @line = line
+        if filename = get_filename(file_path)
+          @filename = filename
+          @repo = get_repo(file_path)
+          @line = line
+        end
+      end
+
+      def set_file_asset_id!(model_handle)
+        return unless @filename and @repo
+        sp_hash = {
+          :cols => [:id],
+          :filter => [:eq,:display_name,@repo]
+        }
+        return unless impl = Model.get_obj(model_handle.createMH(:implementation),sp_hash)
+        sp_hash = {
+          :cols => [:id],
+          :filter => [:eq,:path,@filename]
+        }        
+        file = impl.get_children_objs(:file_asset,sp_hash).first
+        @file_asset_id = file[:id] if file
       end
 
       def to_s()
-        [:msg, :filename, :line].map do |k|
+        [:msg, :filename, :file_asset_id, :line].map do |k|
           val = send(k)
           "#{k}=#{val}" if val
         end.compact.join("; ")
+      end
+      private
+      def get_filename(file_path)
+        return nil unless file_path
+        if file_path =~ Regexp.new("#{R8::EnvironmentConfig::ImportTestBaseDir}/[^/]+/(.+$)")
+          $1
+        end
+      end
+      def get_repo(file_path)
+        return nil unless file_path
+        if file_path =~ Regexp.new("#{R8::EnvironmentConfig::ImportTestBaseDir}/([^/]+)")
+          $1
+        end
       end
     end
     class ParseErrors < Error
@@ -58,6 +89,9 @@ module XYZ
       def add(error)
         @error_list << error
         self
+      end
+      def set_file_asset_ids!(model_handle)
+        @error_list.each{|e|e.set_file_asset_id!(model_handle)}
       end
     end
   end

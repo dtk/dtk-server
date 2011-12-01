@@ -32,6 +32,7 @@ module XYZ
       begin
         r8_parse = ConfigAgent.parse_given_module_directory(config_agent_type,module_dir)
        rescue ConfigAgent::ParseErrors => errors
+        errors.set_file_asset_ids!(model_handle)
         pp [:puppet_error,errors.error_list.map{|e|e.to_s}]
         return {:content => {}}
        rescue R8ParseError => e
@@ -54,6 +55,7 @@ module XYZ
       Model.add_library_components_from_r8meta(config_agent_type,top_container_idh,library_idh,impl_idh,r8meta_hash)
       {:content => {}}
     end
+
 
 ###################
     def replace_library_implementation(proj_impl_id)

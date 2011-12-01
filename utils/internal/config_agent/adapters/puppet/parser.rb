@@ -78,16 +78,16 @@ module XYZ
     end
 
     def normalize_puppet_error(puppet_error)
-      filename = puppet_error.file || find_filename(puppet_error.message)
+      file_path = puppet_error.file || find_file_path(puppet_error.message)
       line = puppet_error.line || find_line(puppet_error.message)
       #TODO: strip stuff off error message
       msg = strip_message(puppet_error.message)
-      single_error = ConfigAgent::ParseError.new(msg,filename,line)
+      single_error = ConfigAgent::ParseError.new(msg,file_path,line)
       #TODO: change when handle multiple errors
       ConfigAgent::ParseErrors.new().add(single_error)
     end
 
-    def find_filename(msg)
+    def find_file_path(msg)
       if msg =~ /at ([^ ]+):[0-9]+$/ 
         $1
       end

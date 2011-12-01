@@ -75,7 +75,7 @@ module XYZ
         tmp_file_handle.close
       end
 =end
-      FileUtils.mv tmp_path pkg_upload_path
+      FileUtils.mv tmp_path, pkg_upload_path
 
       pkg_root = module_upload[:filename]
       pkg_root[".tar.gz"] = ""

@@ -61,7 +61,11 @@ module XYZ
 #pp module_upload
       pkg_filename = module_upload[:filename]
       tmp_file_handle = module_upload[:tempfile]
+      tmp_path = tmp_file_handle.path
+      tmp_file_handle.close
+
       pkg_upload_path = R8::EnvironmentConfig::CompressedFileStore+'/'+pkg_filename
+=begin
 #      file_contents=IO.read(tmp_file_handle.path)
       begin
         File.open(pkg_upload_path, 'w') do |f|  
@@ -70,6 +74,8 @@ module XYZ
       ensure
         tmp_file_handle.close
       end
+=end
+      FileUtils.mv tmp_path pkg_upload_path
 
       pkg_root = module_upload[:filename]
       pkg_root[".tar.gz"] = ""

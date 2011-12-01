@@ -42,8 +42,12 @@ R8::Config[:database][:type] = "postgres"
 R8::Config[:workflow][:type] = "ruote"
 #R8::Config[:workflow][:type] = "simple"
 
-R8::Config[:repo][:base_directory] = "/root/r8server-repo"
-R8::Config[:repo][:type] = "git"
+if defined? R8::EnvironmentConfig::ImportTestBaseDir
+  R8::Config[:repo].set?(:base_directory,R8::EnvironmentConfig::ImportTestBaseDir)
+else
+  R8::Config[:repo].set?(:base_directory,"/root/r8server-repo")
+end
+R8::Config[:repo].set?(:type,"git")
 R8::Config[:repo][:git][:server_type] = "gitolite"
 
 #TODO: temp for testing
@@ -53,7 +57,6 @@ R8::Config[:repo][:base_directory_test] = "/root/r8server-repo-test"
 
 #R8::Config[:repo][:git][:gitolite][:hostname] = "127.0.0.1"
 R8::Config[:repo][:git][:gitolite][:admin_directory] = "/root/r8_gitolite_admin"
-#R8::Config[:repo][:type] = "mock"
 
 
 #Command and control related parameters

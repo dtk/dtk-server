@@ -61,14 +61,14 @@ module XYZ
 #pp module_upload
       pkg_filename = module_upload[:filename]
       tmp_file_handle = module_upload[:tempfile]
-pp tmp_file_handle.path
       pkg_upload_path = R8::EnvironmentConfig::CompressedFileStore+'/'+pkg_filename
 #      file_contents=IO.read(tmp_file_handle.path)
-      file_contents=tmp_file_handle.read
-
-      File.open(pkg_upload_path, 'w') do |f|  
-        f.puts file_contents
-        f.close()
+      begin
+        File.open(pkg_upload_path, 'w') do |f|  
+          f << tmp_file_handle.read
+        end
+      ensure
+        tmp_file_handle.close
       end
 
       pkg_root = module_upload[:filename]

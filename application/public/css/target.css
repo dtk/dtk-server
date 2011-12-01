@@ -162,6 +162,13 @@
 .link.full-bezier {
 /*	border: 1px solid red;*/
 }
+#tmp-circle {
+	position: absolute;
+	z-index: 20;
+	background: url(../images/temp-blue-circle2.png) no-repeat;
+	height: 12px;
+	width: 12px;
+}
 .link.hanger {
 /*	border: 1px solid red;*/
 }

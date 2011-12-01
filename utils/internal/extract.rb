@@ -2,13 +2,17 @@ module XYZ
   class Extract
     class << self 
       def single_module_into_directory(compressed_file,repo_name,base_dir,opts)
+pp "INSIDE EXTRACTION, base dir is:"+base_dir.to_s
         raise Error.new("directory (#{base_dir}) does not exist") unless File.directory?(base_dir)
         #TODO: rmove or make work with windows  raise Error.new("directory (#{base_dir}) is not fully qualified") unless fully_qualified_dir_path?(base_dir)
         target_dir = "#{base_dir}/#{repo_name}"
+pp "HAVE A TARGET DIR INSIDE single_module_into_director:"+target_dir.to_s
         if File.exists?(target_dir)
           raise Error.new("Non-empty directory for repo (#{target_dir}) exists already") unless empty_dir?(target_dir)
         else
           Dir.mkdir(target_dir)
+#DEBUG
+pp "SHOULD HAVE MADE DIR:"+target_dir.to_s
         end
         into_directory(compressed_file,target_dir,opts)
       end
@@ -33,6 +37,9 @@ module XYZ
           else
             raise Error.new("not treating compressed file (#{compressed_file})")
           end
+#DEBUG
+pp "INSIDE OF LOAD AND RETURN ADAPTER CLASS, SHOULD B LOADING adapter name:"+adapter_name.to_s
+
         CachedAdapterClasses[adapter_name] ||= DynamicLoader.load_and_return_adapter_class("extract",adapter_name)
       end
       CachedAdapterClasses = Hash.new

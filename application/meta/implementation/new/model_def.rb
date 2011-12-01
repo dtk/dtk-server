@@ -3,8 +3,8 @@
   :table=>:implementation,
   :columns=>{
     :type => {:type=>:varchar, :size => 25},
-    :repo => {:type=>:varchar, :size => 25}, #TODO: not normalized not that repo_id added; may deprecate
-    :module_name => {:type=>:varchar, :size => 25}, 
+    :repo => {:type=>:varchar, :size => 50}, #TODO: not normalized not that repo_id added; may deprecate
+    :module_name => {:type=>:varchar, :size => 50}, 
     :parse_state => {:type=>:varchar, :size => 25},
     :branch => {:type=>:varchar, :size => 50, :default => "master"}, 
     :version_num => {:type=>:integer, :default => 1},

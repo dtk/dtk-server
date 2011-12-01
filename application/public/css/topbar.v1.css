@@ -74,6 +74,14 @@
 	float: left;
 	background: url(../images/v1/menu-item-active-overlay-bg.png) repeat-x;
 }
+
+.menu-bar .item.active .overlay.library .bg {
+	height: 35px;
+	width: 54px;
+	float: left;
+	background: url(../images/v1/menu-item-active-overlay-bg.png) repeat-x;
+}
+
 .menu-bar .item.active .overlay .r-cap {
 	height: 35px;
 	width: 7px;

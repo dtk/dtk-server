@@ -208,21 +208,5 @@ R8::Routes["ide/test_tree"] = {
   :layout => 'ide'
 }
 
-R8::Routes["import/index"] = {
-  :layout => 'import'
-}
-R8::Routes["import/load_wizard"] = {
-  :layout => 'import'
-}
-R8::Routes["import/step_one"] = {
-  :layout => 'import'
-}
-R8::Routes["import/step_two"] = {
-  :layout => 'import'
-}
-R8::Routes["import/step_three"] = {
-  :layout => 'import'
-}
-
 R8::Routes.freeze
 

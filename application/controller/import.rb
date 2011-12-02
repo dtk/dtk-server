@@ -58,40 +58,32 @@ module XYZ
 
     def step_one()
       module_upload = request.params["module_package"]
-#pp module_upload
       pkg_filename = module_upload[:filename]
       tmp_file_handle = module_upload[:tempfile]
+
+      #mv the tmp file to under CompressedFileStore
       tmp_path = tmp_file_handle.path
       tmp_file_handle.close
-
-      pkg_upload_path = R8::EnvironmentConfig::CompressedFileStore+'/'+pkg_filename
-=begin
-#      file_contents=IO.read(tmp_file_handle.path)
-      begin
-        File.open(pkg_upload_path, 'w') do |f|  
-          f << tmp_file_handle.read
-        end
-      ensure
-        tmp_file_handle.close
-      end
-=end
-      FileUtils.mv tmp_path, pkg_upload_path
-
-      pkg_root = module_upload[:filename]
-      pkg_root[".tar.gz"] = ""
+      compressed_file = "#{R8::EnvironmentConfig::CompressedFileStore}/#{pkg_filename}"
+      FileUtils.mv tmp_path, compressed_file
+    
 #EXTRACT AND PARSE CODE-----------------------------
+      module_name = pkg_filename.gsub(/\.tar\.gz$/,"")
+      #TODO: temp hack to get module_name until parse module file
+      if module_name =~ /-(.+)-[0-9]+\.[0-9]+\.[0-9]$/
+        module_name = $1
+      end
       config_agent_type = :puppet
       user_obj = CurrentSession.new.get_user_object()
       username = user_obj[:username]
-      repo_name =  "#{username}-#{config_agent_type}-#{pkg_root}"
+      repo_name =  "#{username}-#{config_agent_type}-#{module_name}"
+
       opts = {:strip_prefix_count => 1} 
       base_dir = R8::EnvironmentConfig::ImportTestBaseDir
 
       #begin capture here so can rerun even after loading in dir already
       begin
-pp "INSIDE OF CTRL'R, SHOULD CALL EXTRACT NOW:"+base_dir+'/'+repo_name
         #extract tar.gz file into directory
-        compressed_file = "#{R8::EnvironmentConfig::CompressedFileStore}/#{pkg_root}.tar.gz"
         Extract.single_module_into_directory(compressed_file,repo_name,base_dir,opts)
       rescue Exception => e
         #raise e
@@ -101,7 +93,7 @@ pp "INSIDE OF CTRL'R, SHOULD CALL EXTRACT NOW:"+base_dir+'/'+repo_name
       user_group = user_obj.get_private_group()
       user_group_id = user_group && user_group[:id]
       top_container_idh = top_id_handle(:group_id => user_group_id)
-      library_idh,impl_idh = Model.add_library_files_from_directory(top_container_idh,module_dir,pkg_root,config_agent_type)
+      library_idh,impl_idh = Model.add_library_files_from_directory(top_container_idh,module_dir,module_name,config_agent_type)
       #parsing
       begin
         r8_parse = ConfigAgent.parse_given_module_directory(config_agent_type,module_dir)
@@ -114,24 +106,26 @@ pp "INSIDE OF CTRL'R, SHOULD CALL EXTRACT NOW:"+base_dir+'/'+repo_name
       end
 
       meta_generator = GenerateMeta.create("1.0")
-      refinement_hash = meta_generator.generate_refinement_hash(r8_parse,pkg_root)
+      refinement_hash = meta_generator.generate_refinement_hash(r8_parse,module_name)
       #pp refinement_hash
         
         #in between here refinement has would have through user interaction the user set the needed unknowns
         #mock_user_updates_hash!(refinement_hash)
       r8meta_hash = refinement_hash.render_hash_form()
-
+      pp r8meta_hash
       return {
         :data=> {
           :import_def=>r8meta_hash
         }
       }
-
+=begin
+Not reached
       return {
         :data=> {
           :import_id=>pkg_root
         }
       }
+=end
     end
 
     def step_two(id)

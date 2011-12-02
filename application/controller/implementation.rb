@@ -12,6 +12,7 @@ module XYZ
       user_obj = CurrentSession.new.get_user_object()
       username = user_obj[:username]
       repo_name =  "#{username}-#{config_agent_type}-#{module_name}"
+
       opts = {:strip_prefix_count => 1} 
       base_dir = R8::EnvironmentConfig::ImportTestBaseDir
 
@@ -22,12 +23,30 @@ module XYZ
       rescue Exception => e
         #raise e
       end
-      
       module_dir = "#{base_dir}/#{repo_name}"
+
       user_group = user_obj.get_private_group()
       user_group_id = user_group && user_group[:id]
       top_container_idh = top_id_handle(:group_id => user_group_id)
       library_idh,impl_idh = Model.add_library_files_from_directory(top_container_idh,module_dir,module_name,config_agent_type)
+
+      #create repo if it does not exist
+      repo_meta_user_mh = top_container_idh.createMH(:repo_meta_user)
+      repo_hash = {
+        :config_agent_type => config_agent_type,
+        :repo_name => module_name, #TODO: need to fix where the map from unqualified to qualified module names treated
+        :repo_meta_user_acls =>
+        %w{r8client r8server}.map do |repo_user|
+          {:display_name => repo_user,
+            #TODO: this should be done before hand and owner shoudl not be current user
+            :repo_meta_user_id => RepoMetaUser.create?(repo_meta_user_mh,repo_user)[:id],
+            :access_rights => "RW+"
+          }
+        end
+      }
+      
+      Repo.create_repo?(top_container_idh.createMH(:repo_meta),repo_hash)
+
       #parsing
       begin
         r8_parse = ConfigAgent.parse_given_module_directory(config_agent_type,module_dir)

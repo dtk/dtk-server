@@ -76,7 +76,7 @@ module XYZ
       augmented_hash_values = {:actual_repo_name => actual_repo_name}.merge(hash_values)
       repo_obj = Model.create_stub(model_handle,augmented_hash_values)
       klass.create_empty_repo(repo_obj)
-#      repo_obj.save!()
+      repo_obj.save!()
     end
 
     def self.get_repo(context)

@@ -3,20 +3,6 @@ require 'puppet/parser'
 
 module XYZ
   module PuppetParser
-=begin
-    def parse_given_module_directory(module_dir)
-      #TODO: only handling parsing of .pp now
-      manifest_dir = "#{module_dir}/manifests"
-      manifest_file_names = Dir.chdir(manifest_dir){Dir["**/*"].select{|i|File.file?(i) and i =~ /\.pp$/}.map{|fn|"#{manifest_dir}/#{fn}"}}
-      seed_content = manifest_file_names.map{|fn|"import '#{fn}'"}.join("\n")
-      synchronize_and_handle_puppet_globals(:code => seed_content) do
-        environment = "production"
-        krt = Puppet::Node::Environment.new(environment).known_resource_types
-        krt_code = krt.hostclass("").code
-        TopPS.new(krt_code)
-      end
-    end
-=end
     def parse_given_module_directory(module_dir)
       #TODO: only handling parsing of .pp now
       manifest_dir = "#{module_dir}/manifests"
@@ -26,7 +12,7 @@ module XYZ
       all_errors = nil
       manifest_file_names.each do |filename|
         begin
-          krt_code = parse_given_filename(filename,opts)
+          krt_code = parse_given_filename__manifest(filename,opts)
           ret.add_children(krt_code)
         rescue ConfigAgent::ParseErrors => errors
           #TODO: test that takes first error
@@ -35,15 +21,6 @@ module XYZ
       end
       raise all_errors if all_errors
       ret
-    end
-
-    def parse_given_filename(filename,opts={})
-      synchronize_and_handle_puppet_globals(:manifest => filename) do 
-        environment = "production"
-        krt = Puppet::Node::Environment.new(environment).known_resource_types
-        krt_code = krt.hostclass("").code
-        opts[:just_krt_code] ? krt_code : TopPS.new(krt_code)
-      end
     end
 
     #returns [config agent type, parse]
@@ -60,7 +37,12 @@ module XYZ
 
     PuppetParserLock = Mutex.new
 
-    def parse_given_file_content__manifest(file_content)
+    def parse_given_filename__manifest(filename,opts={})
+      file_content = File.open(filename,"r"){|f|f.read}
+      parse_given_file_content__manifest(file_content,opts)
+    end
+
+    def parse_given_file_content__manifest(file_content,opts={})
       synchronize_and_handle_puppet_globals(:code => file_content, :ignoreimport => false) do
         environment = "production"
         node_env = Puppet::Node::Environment.new(environment)
@@ -74,7 +56,7 @@ module XYZ
 
         known_resource_types.import_ast(initial_import,"")
         krt_code = known_resource_types.hostclass("").code
-        TopPS.new(krt_code)
+        opts[:just_krt_code] ? krt_code : TopPS.new(krt_code)
       end
     end
 

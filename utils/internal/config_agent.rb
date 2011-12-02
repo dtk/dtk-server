@@ -86,8 +86,12 @@ module XYZ
       def initialize()
         @error_list = Array.new
       end
-      def add(error)
-        @error_list << error
+      def add(error_info)
+        if error_info.kind_of?(ParseError)
+          @error_list << error_info
+        elsif error_info.kind_of?(ParseErrors)
+          @error_list += error_info.error_list
+        end
         self
       end
       def set_file_asset_ids!(model_handle)

@@ -12,11 +12,10 @@ module XYZ
       all_errors = nil
       manifest_file_names.each do |filename|
         begin
-          krt_code = parse_given_filename__manifest(filename,opts)
-          ret.add_children(krt_code)
+          krt_code = parse_given_file_path__manifest(filename,opts)
+          ret.add_children(krt_code) unless all_errors #short-circuiot once first error found
         rescue ConfigAgent::ParseErrors => errors
-          #TODO: test that takes first error
-          all_errors ||= errors
+          all_errors = (all_errors ? all_errors.add(errors) : errors)
         end
       end
       raise all_errors if all_errors
@@ -37,13 +36,13 @@ module XYZ
 
     PuppetParserLock = Mutex.new
 
-    def parse_given_filename__manifest(filename,opts={})
-      file_content = File.open(filename,"r"){|f|f.read}
-      parse_given_file_content__manifest(file_content,opts)
+    def parse_given_file_path__manifest(file_path,opts={})
+      file_content = File.open(file_path,"r"){|f|f.read}
+      parse_given_file_content__manifest(file_content,opts.merge(:file_path => file_path))
     end
 
     def parse_given_file_content__manifest(file_content,opts={})
-      synchronize_and_handle_puppet_globals(:code => file_content, :ignoreimport => false) do
+      synchronize_and_handle_puppet_globals({:code => file_content, :ignoreimport => false},opts) do
         environment = "production"
         node_env = Puppet::Node::Environment.new(environment)
         known_resource_types = Puppet::Resource::TypeCollection.new(node_env)
@@ -60,7 +59,7 @@ module XYZ
       end
     end
 
-    def synchronize_and_handle_puppet_globals(global_assignments,&block)
+    def synchronize_and_handle_puppet_globals(global_assignments,opts={},&block)
       ret = nil
       PuppetParserLock.synchronize do
         begin
@@ -70,7 +69,7 @@ module XYZ
           Thread.current[:known_resource_types] = nil
           ret = yield
          rescue ::Puppet::Error => e
-          raise normalize_puppet_error(e) 
+          raise normalize_puppet_error(e,opts[:file_path]) 
          rescue Exception => e
           raise e
          ensure
@@ -81,8 +80,8 @@ module XYZ
       ret
     end
 
-    def normalize_puppet_error(puppet_error)
-      file_path = puppet_error.file || find_file_path(puppet_error.message)
+    def normalize_puppet_error(puppet_error,file_path)
+      file_path ||= puppet_error.file || find_file_path(puppet_error.message)
       line = puppet_error.line || find_line(puppet_error.message)
       #TODO: strip stuff off error message
       msg = strip_message(puppet_error.message)

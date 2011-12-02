@@ -3,6 +3,7 @@ require 'puppet/parser'
 
 module XYZ
   module PuppetParser
+=begin
     def parse_given_module_directory(module_dir)
       #TODO: only handling parsing of .pp now
       manifest_dir = "#{module_dir}/manifests"
@@ -15,15 +16,36 @@ module XYZ
         TopPS.new(krt_code)
       end
     end
+=end
+    def parse_given_module_directory(module_dir)
+      #TODO: only handling parsing of .pp now
+      manifest_dir = "#{module_dir}/manifests"
+      manifest_file_names = Dir.chdir(manifest_dir){Dir["**/*"].select{|i|File.file?(i) and i =~ /\.pp$/}.map{|fn|"#{manifest_dir}/#{fn}"}}
+      ret = TopPS.new()
+      opts = {:just_krt_code => true}
+      all_errors = nil
+      manifest_file_names.each do |filename|
+        begin
+          krt_code = parse_given_filename(filename,opts)
+          ret.add_children(krt_code)
+        rescue ConfigAgent::ParseErrors => errors
+          #TODO: test that takes first error
+          all_errors ||= errors
+        end
+      end
+      raise all_errors if all_errors
+      ret
+    end
 
-    def parse_given_filename(filename)
+    def parse_given_filename(filename,opts={})
       synchronize_and_handle_puppet_globals(:manifest => filename) do 
         environment = "production"
         krt = Puppet::Node::Environment.new(environment).known_resource_types
         krt_code = krt.hostclass("").code
-        TopPS.new(krt_code)
+        opts[:just_krt_code] ? krt_code : TopPS.new(krt_code)
       end
     end
+
     #returns [config agent type, parse]
     #types are :component_defs, :template, :r8meta
     def parse_given_file_content(file_path,file_content)
@@ -193,21 +215,30 @@ module XYZ
 
     #can be module or file
     class TopPS < ParseStructure
-      def initialize(ast_array,opts={})
-        children = ast_array.children.map do |ast_item|
-          if puppet_type?(ast_item,[:hostclass,:definition])
-            ComponentPS.create(ast_item,opts)
-          elsif puppet_type?(ast_item,[:var_def])
-            #TODO: should this be ignored?
-          else
-            raise R8ParseError.new("Unexpected top level ast type (#{ast_item.class.to_s})")
-          end
-        end.compact
-        self[:children] = children
+      def initialize(ast_array=nil,opts={})
+        self[:children] = Array.new
+        add_children(ast_array,opts)
         super
       end
+
+      def add_children(ast_array,opts={})
+        return unless ast_array
+        ast_array.each do |ast_item|
+          child = 
+            if puppet_type?(ast_item,[:hostclass,:definition])
+              ComponentPS.create(ast_item,opts)
+            elsif puppet_type?(ast_item,[:var_def])
+              nil
+              #TODO: should this be ignored?
+            else
+              raise R8ParseError.new("Unexpected top level ast type (#{ast_item.class.to_s})")
+            end
+          self[:children] << child if child
+        end
+      end
+
       def each_component(&block)
-        (self[:children]||[]).each do |component_ps|
+        self[:children].each do |component_ps|
           if component_ps.kind_of?(ComponentPS)
             block.call(component_ps)
           end
@@ -838,3 +869,4 @@ class Puppet::Parser::AST::Definition
   attr_reader :name
 end
 ####
+

@@ -1,5 +1,5 @@
 module XYZ
-  class RepoMeta < Model
+  class Repo < Model
     def self.get_all_repo_names(model_handle)
       get_objs(model_handle,:cols => [:repo_name]).map{|r|r[:repo_name]}
     end

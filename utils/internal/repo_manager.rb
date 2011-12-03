@@ -36,7 +36,7 @@ module XYZ
     def self.delete_branches(model_handle,*repo_names)
       klass = load_and_return_adapter_class()
       repo_names.each do |repo_name|
-        #TODO: change so this from RepoMeta if want to put in hooks for per branch auth
+        #TODO: change so this from Repo if want to put in hooks for per branch auth
         klass.get_branches(repo_name).each do |branch|
           next if branch == "master"
           pp "deleting branch (#{branch}) in repo (#{repo_name})"

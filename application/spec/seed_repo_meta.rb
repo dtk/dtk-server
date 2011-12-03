@@ -85,7 +85,7 @@ x.each do |k_x,v|
       "#{k}_#{u}" => {
         "display_name" => "#{k}_#{u}",
         "access_rights" => v[:access_rights],
-        "*repo_meta_user_id" => "/repo_meta_user/#{u}"
+        "*repo_user_id" => "/repo_user/#{u}"
       }
     }
     h.merge(acl)
@@ -93,10 +93,10 @@ x.each do |k_x,v|
   repos[k] = {
     "display_name" => k,
     "repo_name" => k,
-    "repo_meta_user_acl" => acls
+    "repo_user_acl" => acls
   }
 end
-output_hash = {"repo_meta" => repos, "repo_meta_user" => users}
+output_hash = {"repo" => repos, "repo_user" => users}
 outfile = ARGV[0]
 File.open(outfile,"w"){|f|f.puts(JSON.pretty_generate(output_hash))}
 

@@ -19,5 +19,5 @@ all_group_obj = UserGroup.get_by_groupname(user_mh.createMH(:user_group),"all")
 
 #create r8_server object under superuser, group all
 CurrentSession.new.set_user_object(super_user_obj)
-repo_meta_user_mh = user_mh.createMH(:model_name => :repo_meta_user, :group_id => all_group_obj[:id])
-RepoMetaUser.create?(repo_meta_user_mh,"r8server")
+repo_user_mh = user_mh.createMH(:model_name => :repo_user, :group_id => all_group_obj[:id])
+RepoUser.create?(repo_user_mh,"r8server")

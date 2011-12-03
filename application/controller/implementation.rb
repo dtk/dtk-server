@@ -2,7 +2,7 @@ module XYZ
   class ImplementationController < Controller
 ###TODO: for testing
     def test(repo_name)
-      RepoManager.test_pp_config(model_handle(:repo_meta),repo_name)
+      RepoManager.test_pp_config(model_handle(:repo),repo_name)
       {:content => {}}
     end
 
@@ -12,22 +12,22 @@ module XYZ
       user_group_id = user_group && user_group[:id]
       top_container_idh = top_id_handle(:group_id => user_group_id)
 
-      repo_meta_user_mh = top_container_idh.createMH(:repo_meta_user)
+      repo_user_mh = top_container_idh.createMH(:repo_user)
       #TODO: hide must this structure in RepoManager.create_repo?; give it module_name, config_agent_type and acl list in terms of :repo_username
       #may or may not have attribute module_name
       repo_hash = {
         :config_agent_type => config_agent_type,
         :repo_name => module_name, #TODO: need to fix where the map from unqualified to qualified module names treated
-        :repo_meta_user_acls =>
+        :repo_user_acls =>
         %w{r8server}.map do |repo_user|
           {:username => repo_user,
-            :repo_meta_user_id => RepoMetaUser.get_by_username(repo_meta_user_mh,repo_user)[:id],
+            :repo_user_id => RepoUser.get_by_username(repo_user_mh,repo_user)[:id],
             :access_rights => "RW+"
           }
         end
       }
       
-      RepoManager.create_repo?(top_container_idh.createMH(:repo_meta),repo_hash)
+      RepoManager.create_repo?(top_container_idh.createMH(:repo),repo_hash)
 
       compressed_file = "#{R8::EnvironmentConfig::CompressedFileStore}/#{module_name}.tar.gz"
 

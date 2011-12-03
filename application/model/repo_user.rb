@@ -1,5 +1,5 @@
 module XYZ
-  class RepoMetaUser < Model
+  class RepoUser < Model
     def self.create?(model_handle,name)
       create_from_row?(model_handle,name,{:display_name => name, :username => name})
     end

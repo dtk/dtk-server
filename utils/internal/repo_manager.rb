@@ -52,18 +52,6 @@ module XYZ
     end
 
     ###### for creating and deleting repositories
-    def self.test_pp_config(model_handle,repo_name)
-      klass = load_and_return_adapter_class()
-      users = %w{root remote-server r8server r8client} 
-      repo_user_acls = users.map{|u|{:access_rights => "RW+", :user_name => u}}
-      hash_values = {
-        :config_agent_type => "puppet",
-        :repo_name => repo_name,
-        :repo_user_acls => repo_user_acls
-      }
-      create_repo?(model_handle,hash_values)
-    end
-
     def self.create_repo?(model_handle,hash_values)
       klass = load_and_return_adapter_class()
       actual_repo_name = klass.actual_repo_name(hash_values)

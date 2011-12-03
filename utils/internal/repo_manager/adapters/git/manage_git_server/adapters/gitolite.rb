@@ -2,13 +2,11 @@ module XYZ
   class ManageGitServerGitolite < ManageGitServer
     class << self
       #this gets changed if for example we are able to do per branch read auth
-      def actual_repo_name(repo_obj)
-        username = CurrentSession.new.get_user_object()[:username]
-        raise Error.new("missing config agent type") unless config_agent_type = repo_obj[:config_agent_type] 
-        raise Error.new("missing repo name") unless repo_name = repo_obj[:repo_name]
-        "#{username}-#{config_agent_type}-#{repo_name}"
+      def repo_name(username,config_agent_type,module_name)
+        "#{username}-#{config_agent_type}-#{module_name}"
       end
-
+=begin
+TODO: deprecate
       def create_empty_repo(repo_obj)
         raise Error.new("missing actual_repo_name") unless actual_repo_name = repo_obj[:actual_repo_name]
         raise Error.new("trying to create repo (#{actual_repo_name} that exists already") if repos_having_config_files().include?(actual_repo_name)
@@ -18,7 +16,7 @@ module XYZ
         admin_repo.push_changes()
         actual_repo_name
       end
-
+=end
       def set_git_class(git_class)
         @git_class = git_class
       end
@@ -43,8 +41,8 @@ module XYZ
       def repos_having_config_files()
         repo_config_files().map{|fn|fn.gsub(/\.conf/,"")}
       end
-      def repo_config_file_relative_path(actual_repo_name)
-        "#{repo_config_relative_path}/#{actual_repo_name}.conf"
+      def repo_config_file_relative_path(repo_name)
+        "#{repo_config_relative_path}/#{repo_name}.conf"
       end
 
       def config_file_content(repo_obj)
@@ -53,7 +51,7 @@ module XYZ
         repo_obj[:repo_user_acls].each do |acl|
           (users_rights[acl[:access_rights]] ||= Array.new) << acl[:username]
         end
-        ConfigFileTemplate.result(:repo_name => repo_obj[:actual_repo_name],:user_rights => users_rights)
+        ConfigFileTemplate.result(:repo_name => repo_obj[:repo_name],:user_rights => users_rights)
       end
 
 ConfigFileTemplate = Erubis::Eruby.new <<eos

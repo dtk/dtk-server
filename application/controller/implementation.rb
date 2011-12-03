@@ -1,11 +1,6 @@
 module XYZ
   class ImplementationController < Controller
 ###TODO: for testing
-    def test(repo_name)
-      RepoManager.test_pp_config(model_handle(:repo),repo_name)
-      {:content => {}}
-    end
-
     def test_extract(module_name)
       #create repo if it does not exist
       user_group = user_obj.get_private_group()

@@ -50,8 +50,8 @@ module XYZ
       def config_file_content(repo_obj)
         #group users by user rights
         users_rights = Hash.new
-        repo_obj[:repo_user_acls].each do |acl|
-          (users_rights[acl[:access_rights]] ||= Array.new) << acl[:user_name]
+        repo_obj[:repo_meta_user_acls].each do |acl|
+          (users_rights[acl[:access_rights]] ||= Array.new) << acl[:username]
         end
         ConfigFileTemplate.result(:repo_name => repo_obj[:actual_repo_name],:user_rights => users_rights)
       end

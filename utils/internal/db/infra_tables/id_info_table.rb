@@ -29,7 +29,7 @@ module XYZ
       vals.merge!(x)
       vals[:parent_model_name] ||= get_parent_model_name()
       vals[:model_name] ||= get_model_name()
-      user_info = {:group_id => self[:group_id]}
+      user_info = {:group_id => self[:group_id]||vals[:group_id]}
       ModelHandle.new(vals[:c],vals[:model_name],vals[:parent_model_name],user_info)
     end
 

@@ -1,6 +1,6 @@
 module XYZ
   class UserGroup < Model
-    def self.get_from_groupname(model_handle,groupname)
+    def self.get_by_groupname(model_handle,groupname)
       sp_hash = {
         :cols => [:id, :groupname],
         :filter => [:eq, :groupname,groupname]

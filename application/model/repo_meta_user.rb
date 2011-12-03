@@ -1,9 +1,15 @@
 module XYZ
   class RepoMetaUser < Model
-    def self.create?(model_handle,ref)
-      uri_id_handle = model_handle.createIDH(:uri => "/repo_meta_user/#{ref}")
-      #TODO: wrong function because just returns a uri; when it exists
-      create_simple_instance?(uri_id_handle)
+    def self.create?(model_handle,name)
+      create_from_row?(model_handle,name,{:display_name => name, :username => name})
+    end
+
+    def self.get_by_username(model_handle,username)
+      sp_hash = {
+        :cols => [:id,:username],
+        :filter => [:eq,:username,username]
+      }
+      get_obj(model_handle,sp_hash)
     end
   end
 end

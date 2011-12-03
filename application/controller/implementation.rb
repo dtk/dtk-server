@@ -36,10 +36,9 @@ module XYZ
         :config_agent_type => config_agent_type,
         :repo_name => module_name, #TODO: need to fix where the map from unqualified to qualified module names treated
         :repo_meta_user_acls =>
-        %w{r8client r8server}.map do |repo_user|
-          {:display_name => repo_user,
-            #TODO: this should be done before hand and owner shoudl not be current user
-            :repo_meta_user_id => RepoMetaUser.create?(repo_meta_user_mh,repo_user)[:id],
+        %w{r8server}.map do |repo_user|
+          {:username => repo_user,
+            :repo_meta_user_id => RepoMetaUser.get_by_username(repo_meta_user_mh,repo_user)[:id],
             :access_rights => "RW+"
           }
         end

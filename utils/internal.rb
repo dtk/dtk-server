@@ -16,7 +16,7 @@ files =
    'config_agent', 
    'cloud_connect', 
    'view_def_processor', 
-   'repo', 
+   'repo_manager', 
    'parse_log', 
    'current_session', 
    'create_thread', 

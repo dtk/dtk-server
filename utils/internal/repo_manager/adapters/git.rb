@@ -1,7 +1,7 @@
 require 'grit'
 r8_nested_require('git','manage_git_server')
 module XYZ
-  class RepoGit < Repo
+  class RepoManagerGit < RepoManager
     extend RepoGitManageClassMixin
     def self.create(path,branch,opts={})
       root = R8::Config[:repo][:base_directory]

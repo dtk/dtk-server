@@ -8,4 +8,4 @@ require "#{Root}/config/environment_config.rb"
 require "#{Root}/../utils/internal/auxiliary.rb"
 require "#{Root}/../utils/internal/repo.rb"
 
-XYZ::Repo.delete_all_branches()
+XYZ::RepoManager.delete_all_branches()

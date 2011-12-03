@@ -7,7 +7,7 @@ module XYZ
       #if content stored in db then return that
       return self[:content] if self[:content]
       update_object!(:path,:implementation_info)
-      content = Repo.get_file_content(self,{:implementation => self[:implementation]})
+      content = RepoManager.get_file_content(self,{:implementation => self[:implementation]})
       #TODO: determine whether makes sense to store newly gotten content in db or just do this if any changes
       content
     end
@@ -22,7 +22,7 @@ module XYZ
       file_config_type, r8_parse = ConfigAgent.parse_given_file_content(config_agent_type,file_path,content)
 
       impl_obj = self[:implementation]
-      Repo.update_file_content(self,content,{:implementation => impl_obj})
+      RepoManager.update_file_content(self,content,{:implementation => impl_obj})
       impl_obj.set_to_indicate_updated()
 
       #special processing if this the meta file
@@ -46,7 +46,7 @@ module XYZ
       file_asset_mh = impl_obj.model_handle.createMH(:file_asset)
       new_file_asset_idh = create_from_row(file_asset_mh,hash)
       new_file_asset_obj = new_file_asset_idh.create_object().merge(hash)
-      Repo.add_file(new_file_asset_obj,content,{:implementation => impl_obj})
+      RepoManager.add_file(new_file_asset_obj,content,{:implementation => impl_obj})
       impl_obj.create_pending_changes_and_clear_dynamic_attrs(new_file_asset_obj)
     end
 

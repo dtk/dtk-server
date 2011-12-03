@@ -127,7 +127,7 @@ module XYZ
         impl_info.each do |impl|
           ret << {:repo => impl[:repo],:branch => impl[:branch], :implementation => impl[:display_name]}
           context = {:implementation => impl}
-          Repo.push_implementation(context)
+          RepoManager.push_implementation(context)
         end
         ret
       end

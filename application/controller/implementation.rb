@@ -2,12 +2,36 @@ module XYZ
   class ImplementationController < Controller
 ###TODO: for testing
     def test(repo_name)
-      Repo.test_pp_config(model_handle(:repo_meta),repo_name)
+      RepoManager.test_pp_config(model_handle(:repo_meta),repo_name)
       {:content => {}}
     end
 
     def test_extract(module_name)
+      #create repo if it does not exist
+      user_group = user_obj.get_private_group()
+      user_group_id = user_group && user_group[:id]
+      top_container_idh = top_id_handle(:group_id => user_group_id)
+
+      repo_meta_user_mh = top_container_idh.createMH(:repo_meta_user)
+      #TODO: hide must this structure in RepoManager.create_repo?; give it module_name, config_agent_type and acl list in terms of :repo_username
+      #may or may not have attribute module_name
+      repo_hash = {
+        :config_agent_type => config_agent_type,
+        :repo_name => module_name, #TODO: need to fix where the map from unqualified to qualified module names treated
+        :repo_meta_user_acls =>
+        %w{r8server}.map do |repo_user|
+          {:username => repo_user,
+            :repo_meta_user_id => RepoMetaUser.get_by_username(repo_meta_user_mh,repo_user)[:id],
+            :access_rights => "RW+"
+          }
+        end
+      }
+      
+      RepoManager.create_repo?(top_container_idh.createMH(:repo_meta),repo_hash)
+
       compressed_file = "#{R8::EnvironmentConfig::CompressedFileStore}/#{module_name}.tar.gz"
+
+      #TODO: change by first creating empty repo object and then querying tpo get its path
       config_agent_type = :puppet
       user_obj = CurrentSession.new.get_user_object()
       username = user_obj[:username]
@@ -25,26 +49,7 @@ module XYZ
       end
       module_dir = "#{base_dir}/#{repo_name}"
 
-      user_group = user_obj.get_private_group()
-      user_group_id = user_group && user_group[:id]
-      top_container_idh = top_id_handle(:group_id => user_group_id)
       library_idh,impl_idh = Model.add_library_files_from_directory(top_container_idh,module_dir,module_name,config_agent_type)
-
-      #create repo if it does not exist
-      repo_meta_user_mh = top_container_idh.createMH(:repo_meta_user)
-      repo_hash = {
-        :config_agent_type => config_agent_type,
-        :repo_name => module_name, #TODO: need to fix where the map from unqualified to qualified module names treated
-        :repo_meta_user_acls =>
-        %w{r8server}.map do |repo_user|
-          {:username => repo_user,
-            :repo_meta_user_id => RepoMetaUser.get_by_username(repo_meta_user_mh,repo_user)[:id],
-            :access_rights => "RW+"
-          }
-        end
-      }
-      
-      Repo.create_repo?(top_container_idh.createMH(:repo_meta),repo_hash)
 
       #parsing
       begin

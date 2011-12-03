@@ -1,5 +1,5 @@
 module XYZ
-  class Repo 
+  class RepoManager 
     #### for interacting with existing repos
     def self.get_file_content(file_asset,context)
       get_repo(context).get_file_content(file_asset)
@@ -94,7 +94,7 @@ module XYZ
       return @cached_adpater_class if @cached_adpater_class
       adapter_name = (R8::Config[:repo]||{})[:type]
       raise Error.new("No repo adapter specified") unless adapter_name
-      @cached_adpater_class = DynamicLoader.load_and_return_adapter_class("repo",adapter_name)
+      @cached_adpater_class = DynamicLoader.load_and_return_adapter_class("repo_manager",adapter_name)
     end
 
     def self.load_and_create(path,branch)
@@ -103,7 +103,7 @@ module XYZ
     end
 
     def self.get_all_repo_names(model_handle)
-      RepoMeta.get_all_repo_names(model_handle)
+      Repo.get_all_repo_names(model_handle)
     end
   end
 end

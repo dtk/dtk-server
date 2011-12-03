@@ -9,7 +9,7 @@ impls = XYZ::Model.get_objects_from_sp_hash(impl_mh,sp_hash)
 impls.each do |impl|
   next if impl[:branch] == "master"
   pp "deleting repo #{impl[:repo]} branch #{impl[:branch]}"
-  XYZ::Repo.delete(:implementation => impl)
+  XYZ::RepoManager.delete(:implementation => impl)
 end
 
 

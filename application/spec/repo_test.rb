@@ -62,7 +62,7 @@ def edit_file(options)
   if options[:push]
     #TODO: project stubbed
     context = {:implementation => file_asset[:implementation], :project => {:ref => "project1"}}
-    Repo.push_implementation(context)
+    RepoManager.push_implementation(context)
   end
 
 end

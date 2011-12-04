@@ -33,13 +33,12 @@ module XYZ
         {
           :ref => repo_username,
           :display_name => repo_username,
-          :username => repo_username,
           :repo_id => repo_id,
           :repo_user_id => repo_user_obj[:id],
           :access_rights => acl[:access_rights]
         }
       end
-      create_from_rows(model_handle.create_MH(:repo_user_acl),repo_user_acl_rows)
+      create_from_rows(model_handle.createMH(:repo_user_acl),repo_user_acl_rows)
       RepoManager.create_repo?(repo_obj,repo_user_acls) #using '?' form for resilency
       ret
     end

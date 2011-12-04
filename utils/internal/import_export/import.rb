@@ -110,26 +110,6 @@ module XYZ
       process_global_keys(global_fks,target_id_handle[:c]) unless global_fks.nil? or global_fks.empty?
     end
 
-    def input_hash_content_into_model(target_id_handle,hash_content,opts={})
-      global_fks = Hash.new
-      unless target_id_handle.is_top?
-        #TODO: do we need to factor in opts[:username] here?
-        global_fks = input_into_model(target_id_handle,hash_content) 
-      else
-        hash_content.each do |relation_type,info|
-          info.each do |ref,child_hash_content|
-            child_uri = uri_qualified_by_username(relation_type,ref,opts[:username])
-            child_target_id_handle = target_id_handle.createIDH(:uri => child_uri)
-            create_prefix_object_if_needed(child_target_id_handle,opts)
-            input_opts = {:ret_global_fks => true}.merge(opts.reject{|k,v| not k == :username})
-            r = input_into_model(child_target_id_handle,child_hash_content,input_opts)
-            global_fks.merge!(r) if r
-          end
-        end
-      end
-      process_global_keys(global_fks,target_id_handle[:c]) unless global_fks.nil? or global_fks.empty?
-    end
-
     def create_prefix_object_if_needed(target_id_handle,opts={})
       return nil if exists? target_id_handle 
       if opts[:delete]

@@ -5,18 +5,22 @@ module XYZ
       def repo_name(username,config_agent_type,module_name)
         "#{username}-#{config_agent_type}-#{module_name}"
       end
-=begin
-TODO: deprecate
-      def create_empty_repo(repo_obj)
-        raise Error.new("missing actual_repo_name") unless actual_repo_name = repo_obj[:actual_repo_name]
-        raise Error.new("trying to create repo (#{actual_repo_name} that exists already") if repos_having_config_files().include?(actual_repo_name)
-        file_asset_hash = {:path => repo_config_file_relative_path(actual_repo_name)}
+      def create_empty_repo(repo_obj,repo_user_acls,opts={})
+        ret = repo_name = repo_obj[:repo_name]
+        if repos_having_config_files().include?(repo_name)
+          if opts[:error_if_exists]
+            raise Error.new("trying to create repo (#{actual_repo_name} that exists already") 
+          else
+            return ret
+          end
+        end
+        file_asset_hash = {:path => repo_config_file_relative_path(repo_name)}
         content = config_file_content(repo_obj)
         admin_repo.add_file(file_asset_hash,content)
         admin_repo.push_changes()
-        actual_repo_name
+        ret
       end
-=end
+
       def set_git_class(git_class)
         @git_class = git_class
       end

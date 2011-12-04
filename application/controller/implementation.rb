@@ -3,34 +3,27 @@ module XYZ
 ###TODO: for testing
     def test_extract(module_name)
       #create repo if it does not exist
+
+      user_obj = CurrentSession.new.get_user_object()
       user_group = user_obj.get_private_group()
       user_group_id = user_group && user_group[:id]
       top_container_idh = top_id_handle(:group_id => user_group_id)
 
-      repo_user_mh = top_container_idh.createMH(:repo_user)
-      #TODO: hide must this structure in RepoManager.create_repo?; give it module_name, config_agent_type and acl list in terms of :repo_username
-      #may or may not have attribute module_name
-      repo_hash = {
-        :config_agent_type => config_agent_type,
-        :repo_name => module_name, #TODO: need to fix where the map from unqualified to qualified module names treated
-        :repo_user_acls =>
-        %w{r8server}.map do |repo_user|
-          {:username => repo_user,
-            :repo_user_id => RepoUser.get_by_username(repo_user_mh,repo_user)[:id],
-            :access_rights => "RW+"
-          }
-        end
-      }
-      
-      RepoManager.create_repo?(top_container_idh.createMH(:repo),repo_hash)
+      repo_mh = top_container_idh.createMH(:repo)
+      repo_user_acls = %w{r8server}.map do |repo_username|
+        {
+          :repo_username => repo_username,
+          :access_rights => "RW+"
+        }
+      end
+      config_agent_type = :puppet
+      repo_obj = Repo.create?(repo_mh,module_name,config_agent_type,repo_user_acls)
+
+      return {:content => {}}
 
       compressed_file = "#{R8::EnvironmentConfig::CompressedFileStore}/#{module_name}.tar.gz"
 
-      #TODO: change by first creating empty repo object and then querying tpo get its path
-      config_agent_type = :puppet
-      user_obj = CurrentSession.new.get_user_object()
-      username = user_obj[:username]
-      repo_name =  "#{username}-#{config_agent_type}-#{module_name}"
+
 
       opts = {:strip_prefix_count => 1} 
       base_dir = R8::EnvironmentConfig::ImportTestBaseDir

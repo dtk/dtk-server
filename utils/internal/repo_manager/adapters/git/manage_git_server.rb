@@ -1,10 +1,10 @@
 module XYZ
   module RepoGitManageClassMixin
-    def actual_repo_name(hash_values)
-      git_server_class().actual_repo_name(hash_values)
+    def repo_name(username,config_agent_type,module_name)
+      git_server_class().repo_name(username,config_agent_type,module_name)
     end
-    def create_empty_repo(repo_obj)
-      git_server_class().create_empty_repo(repo_obj)
+    def create_empty_repo(repo_obj,repo_user_acls)
+      git_server_class().create_empty_repo(repo_obj,repo_user_acls)
     end
    private
     def git_server_class()

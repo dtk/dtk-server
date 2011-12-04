@@ -10,9 +10,9 @@ module XYZ
         else (path == "__top" ? root : "#{root}/#{path}")
         end
       if Aux::platform_is_linux?()
-        RepoGitLinux.new(full_path,branch)
+        RepomanagerGitLinux.new(full_path,branch)
       elsif  Aux::platform_is_windows?()
-        RepoGitWindows.new(full_path,branch)
+        RepoManagerGitWindows.new(full_path,branch)
       else
         raise Error.new("platform #{Aux::platform} not treated")
       end
@@ -114,7 +114,7 @@ module XYZ
       @grit_repo.git
     end
   end
-  class RepoGitLinux < RepoGit
+  class RepomanagerGitLinux < RepoManagerGit
    private
     def git_command__checkout(branch_name)
       git_command.checkout(CmdOpts,branch_name)
@@ -145,7 +145,7 @@ module XYZ
     CmdOpts = {}
 
   end
-  class RepoGitWindows  < RepoGit
+  class RepoManagerGitWindows  < RepoManagerGit
    private
     def initialize(full_path,branch)
       raise Error.new("R8::EnvironmentConfig::GitExecutable not defined") unless defined? R8::EnvironmentConfig::GitExecutable

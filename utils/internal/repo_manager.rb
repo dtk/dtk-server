@@ -52,19 +52,18 @@ module XYZ
     end
 
     ###### for creating and deleting repositories
-    def self.create_repo?(model_handle,hash_values)
+    def self.repo_name(username,config_agent_type,module_name)
       klass = load_and_return_adapter_class()
-      actual_repo_name = klass.actual_repo_name(hash_values)
-      return if get_all_repo_names(model_handle).include?(actual_repo_name) 
-      create_repo(model_handle,hash_values,actual_repo_name,klass)
+      klass.repo_name(username,config_agent_type,module_name)
     end
-    def self.create_repo(model_handle,hash_values,actual_repo_name=nil,klass=nil)
-      klass ||= load_and_return_adapter_class()
-      actual_repo_name ||= klass.actual_repo_name(hash_values)
-      augmented_hash_values = {:actual_repo_name => actual_repo_name}.merge(hash_values)
-      repo_obj = Model.create_stub(model_handle,augmented_hash_values)
-      klass.create_empty_repo(repo_obj)
-      repo_obj.save!()
+
+    def self.create_repo(repo_obj,repo_user_acls)
+      klass = load_and_return_adapter_class()
+      klass.create_empty_repo(repo_obj,repo_user_acls,:error_if_exists => true)
+    end
+    def self.create_repo?(repo_obj,repo_user_acls)
+      klass = load_and_return_adapter_class()
+      klass.create_empty_repo(repo_obj,repo_user_acls,:error_if_exists => false)
     end
 
     def self.get_repo(context)

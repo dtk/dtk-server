@@ -15,7 +15,7 @@ module XYZ
           end
         end
         file_asset_hash = {:path => repo_config_file_relative_path(repo_name)}
-        content = config_file_content(repo_obj)
+        content = config_file_content(repo_name,repo_user_acls)
         admin_repo.add_file(file_asset_hash,content)
         admin_repo.push_changes()
         ret
@@ -49,13 +49,13 @@ module XYZ
         "#{repo_config_relative_path}/#{repo_name}.conf"
       end
 
-      def config_file_content(repo_obj)
+      def config_file_content(repo_name,repo_user_acls)
         #group users by user rights
         users_rights = Hash.new
-        repo_obj[:repo_user_acls].each do |acl|
-          (users_rights[acl[:access_rights]] ||= Array.new) << acl[:username]
+        repo_user_acls.each do |acl|
+          (users_rights[acl[:access_rights]] ||= Array.new) << acl[:repo_username]
         end
-        ConfigFileTemplate.result(:repo_name => repo_obj[:repo_name],:user_rights => users_rights)
+        ConfigFileTemplate.result(:repo_name => repo_name,:user_rights => users_rights)
       end
 
 ConfigFileTemplate = Erubis::Eruby.new <<eos

@@ -1,5 +1,10 @@
 module XYZ
   class Repo < Model
+    ###virtual columns
+    def base_dir()
+      self[:local_dir].gsub(/\/[^\/]+$/,"")
+    end
+    ####
     def self.get_all_repo_names(model_handle)
       get_objs(model_handle,:cols => [:repo_name]).map{|r|r[:repo_name]}
     end
@@ -7,47 +12,10 @@ module XYZ
     def self.create?(model_handle,module_name,config_agent_type,repo_user_acls)
       repo_name = repo_name(config_agent_type,module_name)
       repo_obj = create_repo_obj?(model_handle,repo_name)
-      repo_obj.set_repo_user_acls(repo_user_acls)
+      repo_idh = model_handle.createIDH(:id => repo_obj[:id])
+      RepoUserAcl.modify(repo_idh,repo_user_acls)
       RepoManager.create_repo?(repo_obj,repo_user_acls) 
       repo_obj
-    end
-
-    def set_repo_user_acls(repo_user_acls)
-      repo_id = id()
-      #TODO: more efficient if RepoUser.get_by_username takes a list
-      repo_user_mh = model_handle(:repo_user)
-      unpruned_rows = repo_user_acls.map do |acl|
-        repo_username = acl[:repo_username]
-        unless repo_user_obj = RepoUser.get_by_username(repo_user_mh,repo_username)
-          raise Error.new("Unknown repo user (#{repo_username})")
-        end
-        {
-          :ref => repo_username,
-          :display_name => repo_username,
-          :repo_id => repo_id,
-          :repo_user_id => repo_user_obj[:id],
-          :access_rights => acl[:access_rights]
-        }
-      end
-
-      sp_hash = {
-        :cols => [:id,:repo_user_id],
-        :filter => [:and, [:eq, :repo_id, repo_id], [:oneof, :repo_user_id, unpruned_rows.map{|r|r[:repo_user_id]}]]
-      }
-      existing_acls = Model.get_objs(model_handle(:repo_user_acl),sp_hash)
-      if existing_acls.empty? #short circuit
-        Model.create_from_rows(model_handle(:repo_user_acl),unpruned_rows)
-      else
-        #create ones that dont exist
-        existing_repo_user_ids = existing_acls.map{|r|r[:repo_user_id]}
-        rows = unpruned_rows.reject{|r|existing_repo_user_ids.include?(r[:repo_user_id])}
-        Model.create_from_rows(model_handle(:repo_user_acl),rows) unless rows.empty?
-        #delete ones that should not exist
-        new_repo_user_ids = unpruned_rows.map{|r|r[:repo_user_id]}
-        delete_idhs = existing_acls.reject{|r|new_repo_user_ids.include?(r[:repo_user_id])}.map{|r|model_handle.createIDH(:id => r[:id])}
-        Model.delete_instances(delete_idhs) unless delete_idhs.empty?
-      end
-      nil
     end
 
    private    

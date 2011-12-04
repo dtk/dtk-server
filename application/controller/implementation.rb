@@ -18,15 +18,13 @@ module XYZ
       end
       config_agent_type = :puppet
       repo_obj = Repo.create?(repo_mh,module_name,config_agent_type,repo_user_acls)
-
-      return {:content => {}}
+      repo_name = repo_obj[:repo_name]
+      module_dir = repo_obj[:local_dir]
+      base_dir = repo_obj[:base_dir]
 
       compressed_file = "#{R8::EnvironmentConfig::CompressedFileStore}/#{module_name}.tar.gz"
 
-
-
       opts = {:strip_prefix_count => 1} 
-      base_dir = R8::EnvironmentConfig::ImportTestBaseDir
 
       #begin capture here so can rerun even after loading in dir already
       begin
@@ -35,8 +33,8 @@ module XYZ
       rescue Exception => e
         #raise e
       end
-      module_dir = "#{base_dir}/#{repo_name}"
 
+      #TODO: update so that takes repo_obj (and then can remove somne params; so can link from implementation to repo it uses 
       library_idh,impl_idh = Model.add_library_files_from_directory(top_container_idh,module_dir,module_name,config_agent_type)
 
       #parsing
@@ -64,6 +62,8 @@ module XYZ
       r8meta_hash.write_yaml(STDOUT)
       File.open(r8meta_path,"w"){|f|r8meta_hash.write_yaml(f)}
       Model.add_library_components_from_r8meta(config_agent_type,top_container_idh,library_idh,impl_idh,r8meta_hash)
+
+      impl_idh.create_object().add_contained_files_and_push_to_repo()
       {:content => {}}
     end
 

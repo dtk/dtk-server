@@ -66,6 +66,7 @@ module XYZ
       klass.create_empty_repo(repo_obj,repo_user_acls,:error_if_exists => false)
     end
 
+    ##########
     def self.get_repo(context)
       #TODO: do we still need __top
       repo = (context[:implementation]||{})[:repo]||"__top"
@@ -74,6 +75,7 @@ module XYZ
       CachedRepoObjects[repo] ||= Hash.new
       CachedRepoObjects[repo][branch] ||= load_and_create(repo,branch)
     end
+
    private
     CachedRepoObjects = Hash.new
 

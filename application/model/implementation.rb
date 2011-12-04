@@ -1,5 +1,9 @@
 module XYZ
   class Implementation < Model
+    def add_contained_files_and_push_to_repo()
+      pp "TODO: stub to add files into git repo and push"
+    end
+
     def get_tree(opts={})
       sp_hash = {:cols => [:id,:display_name,:component_template]}
       rows = get_objs(sp_hash)

@@ -1,9 +1,13 @@
 module XYZ
   class Library < Model
-#    set_relation_name(:library,:library)
+    def self.create_users_private_library?(model_handle)
+      user_obj = CurrentSession.new.get_user_object()
+      private_group_obj = user_obj.get_private_group()
+      library_mh = model_handle.createMH(:model_name => :library, :group_id => private_group_obj[:id])
+      lib_name = "private-#{user_obj[:username]}"
+      Model.create_from_row?(model_handle,lib_name,{:display_name => lib_name})
+    end
 
-    ##### Actions
-    #TODO: this jsut for assemblies shoudl shoudl probably be reanmed
     def clone_post_copy_hook(clone_copy_output,opts={})
       new_id_handle = clone_copy_output.id_handles.first
       #TODO: hack; this should be optained from clone_copy_output

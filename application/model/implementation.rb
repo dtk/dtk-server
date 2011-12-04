@@ -1,5 +1,8 @@
 module XYZ
   class Implementation < Model
+    def self.create_library_repo_and_implementation()
+    end
+
     def add_contained_files_and_push_to_repo()
       pp "TODO: stub to add files into git repo and push"
     end

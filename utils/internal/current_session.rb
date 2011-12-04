@@ -6,6 +6,15 @@ module XYZ
       user_object
     end
 
+
+    def get_username()
+      get_user_object()[:username]
+    end
+
+    def self.get_username()
+       CurrentSession.new.get_username()
+    end
+
     def set_user_object(user_object)
       self.user_object = user_object
     end

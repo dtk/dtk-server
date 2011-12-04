@@ -2,8 +2,9 @@ module XYZ
   class ImplementationController < Controller
 ###TODO: for testing
     def test_extract(module_name)
-      #create repo if it does not exist
 
+      #a library should be passed as input; here we are just using teh users' private library
+      #create repo if it does not exist
       user_obj = CurrentSession.new.get_user_object()
       user_group = user_obj.get_private_group()
       user_group_id = user_group && user_group[:id]

@@ -23,7 +23,7 @@ module XYZ
     #returns [library_idh,implementation_idh]
     def add_library_files_from_directory(top_container_idh,module_dir,module_name,config_agent_type)
       library_impl_hash = Implementation::ret_library_implementation_hash(module_dir,module_name,config_agent_type)
-      username = CurrentSession.new.get_user_object()[:username]
+      username = CurrentSession.get_user_username()
       users_private_lib_name = "private-#{username}"
       hash_content = {
         "library" => {

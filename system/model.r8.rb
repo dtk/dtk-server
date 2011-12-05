@@ -203,7 +203,7 @@ module XYZ
 
     #creates if does not exist using match_assigns; in eitehr case returns id_handle 
     def self.create_from_row?(model_handle,ref,match_assigns,other_assigns={},opts={})
-      sp_hash = {:cols => [:id]}
+      sp_hash = {:cols => [:id,:group_id]}
       filter_els = match_assigns.map{|k,v|[:eq,k,v]}
       if filter_els.size > 0
         sp_hash.merge!(:filter => filter_els.size == 1 ? filter_els.first : [:and] + filter_els)

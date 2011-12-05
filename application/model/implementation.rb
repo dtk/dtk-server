@@ -1,9 +1,9 @@
 module XYZ
   class Implementation < Model
-    #return [repo_obj,impl_idh]
+    #return [repo_obj,impl_obj]
     def self.create_library_repo_and_implementation?(library_idh,module_name,config_agent_type)
       repo_obj = nil
-      impl_idh = nil
+      impl_obj = nil
       ret = [nil,nil]
       #create repo if it does not exist
       repo_mh = library_idh.createMH(:repo)
@@ -26,12 +26,35 @@ module XYZ
       impl_ref = "#{config_agent_type}-#{module_name}"
       impl_mh = library_idh.create_childMH(:implementation)
       impl_idh = create_from_row?(impl_mh,impl_ref,{:ref => impl_ref},impl_hash)
-      [repo_obj, impl_idh]
+      impl_obj = impl_idh.create_object().merge(impl_hash)
+      [repo_obj, impl_obj]
     end
-    ImplementationType = {
-      :puppet => "puppet_module",
-      :chef => "chef_cookbook"
-    }
+
+    def add_library_files_from_directory(repo_obj)
+      module_dir = repo_obj[:local_dir]
+      file_paths = Array.new
+      Dir.chdir(module_dir) do
+        pattern = "**/*"
+        file_paths = Dir[pattern].select{|item|File.file?(item)}
+      end
+
+      file_type = ImplTypeToFileType[self[:type]]
+      impl_id = id()
+      file_asset_rows = file_paths.map do |file_path|
+        file_name = file_path =~ Regexp.new("/([^/]+$)") ? $1 : file_path
+        file_asset_ref = file_path.gsub(Regexp.new("/"),"_") #removing "/" since they confuse processing
+        {
+          :ref => file_asset_ref,
+          :implementation_implementation_id => impl_id,
+          :type => file_type,
+          :display_name => file_name,
+          :file_name => file_name,
+          :path => file_path
+        }
+      end
+      #TODO: need to make create? from rows
+      Model.create_from_rows(model_handle(:file_asset),file_asset_rows)
+    end
 
     def add_contained_files_and_push_to_repo()
       pp "TODO: stub to add files into git repo and push"
@@ -186,6 +209,14 @@ module XYZ
     end
 
    private
+    ImplementationType = {
+      :puppet => "puppet_module",
+      :chef => "chef_cookbook"
+    }
+    ImplTypeToFileType = {
+      "puppet_module" => "puppet_file",
+      "chef_cookbook" => "chef_file"
+    }
 
     def get_new_version_num(library_idh)
       #TODO: potential race condition in getting new version

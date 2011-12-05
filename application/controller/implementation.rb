@@ -6,15 +6,15 @@ module XYZ
       library_idh = Library.get_users_private_library(model_handle(:library)).id_handle()
       config_agent_type = :puppet
 
-      repo_obj,impl_idh = Implementation.create_library_repo_and_implementation?(library_idh,module_name,config_agent_type)
+
+      repo_obj,impl_obj = Implementation.create_library_repo_and_implementation?(library_idh,module_name,config_agent_type)
       repo_name = repo_obj[:repo_name]
       module_dir = repo_obj[:local_dir]
       base_dir = repo_obj[:base_dir]
 
+      
       compressed_file = "#{R8::EnvironmentConfig::CompressedFileStore}/#{module_name}.tar.gz"
-
       opts = {:strip_prefix_count => 1} 
-
       #begin capture here so can rerun even after loading in dir already
       begin
         #extract tar.gz file into directory
@@ -23,8 +23,7 @@ module XYZ
         #raise e
       end
 
-      #TODO: update so that takes repo_obj (and then can remove somne params; so can link from implementation to repo it uses 
-      library_idh,impl_idh = Model.add_library_files_from_directory(top_container_idh,module_dir,module_name,config_agent_type)
+      impl_obj.add_library_files_from_directory(repo_obj)
 
       #parsing
       begin

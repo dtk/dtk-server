@@ -58,20 +58,10 @@ module XYZ
         info = cmp_info.inject({}) do |r,(k,v)|
           ["link_defs", "external_link_defs"].include?(k) ? r : r.merge(k => v)
         end
-        info.merge!(:implementation_id => impl_id)
+        info.merge!("implementation_id" => impl_id)
         #TODO: may be better to have these prefixes already in r8 meta file
         h.merge("#{config_agent_type}-#{cmp_ref}" => info)
       end
-      library_ref = library_idh.create_object().update_object!(:ref)[:ref]
-      hash_content = {
-        "library" => {
-          library_ref => {
-            "component" => cmps_hash
-          }
-        }
-      }
-      #TODO: reason  not just using library_idh as index is that factories may not yet be created
-#      input_hash_content_into_model(library_idh.create_top(),hash_content)
       input_hash_content_into_model(library_idh,{"component" => cmps_hash})
     end
 

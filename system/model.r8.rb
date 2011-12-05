@@ -205,7 +205,7 @@ module XYZ
     #adds or deletes children based on match_cols
     def self.modify_children_from_rows(model_handle,parent_idh,rows,match_cols=[:ref])
       parent_id_col = DB.parent_field(parent_idh[:model_name],model_handle[:model_name])
-      basic_cols = (has_group_id_col?() ? [:id,:group_id] : [:id])
+      basic_cols = (has_group_id_col?(model_handle) ? [:id,:group_id] : [:id])
       sp_hash = {
         :cols => basic_cols + (match_cols - basic_cols),
         :filter => [:eq, parent_id_col, parent_idh.get_id()]
@@ -238,7 +238,7 @@ module XYZ
     #creates if does not exist using match_assigns; in eitehr case returns id_handle 
     def self.create_from_row?(model_handle,ref,match_assigns,other_assigns={},opts={})
       sp_hash = {
-        :cols => (has_group_id_col?() ? [:id,:group_id] : [:id])
+        :cols => (has_group_id_col?(model_handle) ? [:id,:group_id] : [:id])
       }
       filter_els = match_assigns.map{|k,v|[:eq,k,v]}
       if filter_els.size > 0
@@ -258,8 +258,8 @@ module XYZ
           not cols.find{|col| not (el[col] == el_in_list[col])}
         end
       end
-      def has_group_id_col?
-        not [:user,:user_group,:user_group_relation].include?(model_name)
+      def has_group_id_col?(model_handle)
+        not [:user,:user_group,:user_group_relation].include?(model_handle[:model_name])
       end
     end
 

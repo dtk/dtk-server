@@ -229,8 +229,8 @@ module XYZ
         create_from_rows(model_handle,pruned_rows,:duplicate_refs => :no_check) 
       end
       #delete ones that not in rows
-      delete_idhs = existing.reject{|r|not match_found(r,pruned_rows,match_cols)}.map{|r|model_handle.createIDH(r[:id])}
-      delete_instance(delete_idhs) unless delete_idhs.empty?
+      delete_idhs = existing.reject{|r|match_found(r,rows,match_cols)}.map{|r|model_handle.createIDH(:id => r[:id])}
+      delete_instances(delete_idhs) unless delete_idhs.empty?
       ret
     end
 

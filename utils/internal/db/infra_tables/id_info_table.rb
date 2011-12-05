@@ -399,12 +399,10 @@ module XYZ
         def update_top_instances(model_handle,returning_cols)
           update_ds = ds().where(:relation_id => returning_cols.map{|r|r[:id]})
           uri = SQL::ColRef.concat{|o|["/#{model_handle[:model_name]}/",:ref,o.case{[[{:ref_num=> nil},""],o.concat("-",:ref_num)]}]}
-          update_ds.update({
-             :uri => uri,
-             :relation_type => model_handle[:model_name].to_s,
-             :parent_relation_type => TOP_RELATION_TYPE.to_s})
+          update_ds.update({:uri => uri,:relation_type => model_handle[:model_name].to_s})
+
         end
-       
+       #TODO: see if bug below to set :parent_relation_type when parent_relation_type.nil?, but not above
         def update_instance(db_rel,id,uri,relation_type,parent_id_x,parent_relation_type)
 	  #  to fill in uri ##TBD: this is split between trigger, which creates it and this code which updates it; may better encapsulate 
 	  parent_id = parent_id_x ? parent_id_x : 0

@@ -1,11 +1,30 @@
 module XYZ
   class Library < Model
-    def self.create_users_private_library?(model_handle)
-      user_obj = CurrentSession.new.get_user_object()
-      private_group_obj = user_obj.get_private_group()
-      library_mh = model_handle.createMH(:model_name => :library, :group_id => private_group_obj[:id])
-      lib_name = "private-#{user_obj[:username]}"
-      Model.create_from_row?(model_handle,lib_name,{:display_name => lib_name})
+    class << self
+      def create_users_private_library?(model_handle)
+        user_obj = CurrentSession.new.get_user_object()
+        private_group_obj = user_obj.get_private_group()
+        library_mh = model_handle.createMH(:model_name => :library, :group_id => private_group_obj[:id])
+        lib_name = users_private_library_name(user_obj[:username])
+        Model.create_from_row?(model_handle,lib_name,{:display_name => lib_name})
+      end
+
+      def get_users_private_library?(model_handle,username=nil)
+        username ||=  CurrentSession.get_username()
+        sp_hash = {
+          :cols => common_columns(),
+          :filter => [:eq,:display_name,users_private_library_name(username)] 
+        }
+        get_obj(model_handle,sp_hash)
+      end
+     private
+      def users_private_library_name(username)
+        "private-#{username}"
+      end
+    end
+
+    def self.common_columns()
+      [:id,:display_name]
     end
 
     def clone_post_copy_hook(clone_copy_output,opts={})

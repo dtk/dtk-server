@@ -114,10 +114,9 @@ module XYZ
 	#each assigns key should be qualified ref wrt factory_id
         assigns.each_pair do |qualified_ref,child_assigns|
 	  child_uri = RestURI.ret_child_uri_from_qualified_ref(factory_id_info[:uri],qualified_ref)
-          child_idh = IDHandle[:c => c, :uri => child_uri]
-	  child_id_info = IDInfoTable.get_row_from_id_handle child_idh
+	  child_id_info = IDInfoTable.get_row_from_id_handle IDHandle[:c => c, :uri => child_uri]
           if child_id_info
-	    update_from_hash_from_instance_id(child_id_info,child_idh,child_assigns,opts)
+	    update_from_hash_from_instance_id(child_id_info,id_handle,child_assigns,opts)
             child_id_list << child_id_info[:id] if delete_not_matching
           else
             unless assigns.kind_of?(HashObject) and assigns.do_not_extend

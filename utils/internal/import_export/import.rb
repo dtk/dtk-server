@@ -86,7 +86,16 @@ module XYZ
         #TODO: may be better to have these prefixes already in r8 meta file
         h.merge("#{config_agent_type}-#{cmp_ref}" => info)
       end
-      input_hash_content_into_model(library_idh,"component" => cmps_hash)
+      library_ref = library_idh.create_object().update_object!(:ref)[:ref]
+      hash_content = {
+        "library" => {
+          library_ref => {
+            "component" => cmps_hash
+          }
+        }
+      }
+      #TODO: reason  not just using library_idh as index is that factories may not yet be created
+      input_hash_content_into_model(library_idh.create_top(),hash_content)
     end
 
     #assumption is that target_id_handle is in uri form

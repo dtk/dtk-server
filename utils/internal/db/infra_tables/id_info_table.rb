@@ -19,7 +19,7 @@ module XYZ
     end
 
     def create_top()
-      IDHandle.new(:c => self[:c], :uri => "/")
+      IDHandle.new(reject{|k,v|[:uri,:guid].include?(k)}.merge(:uri => "/"))
     end
 
     #has form hash or if just symbol then its the attribute :model_name

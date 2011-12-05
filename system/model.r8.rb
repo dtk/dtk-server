@@ -192,7 +192,7 @@ module XYZ
     def self.create_from_rows(model_handle,rows,opts={})
       select_ds = SQL::ArrayDataset.create(db,rows,model_handle,opts[:convert] ? {:convert_for_create => true} : {})
       override_attrs = {}
-      create_opts = Aux::hash_subset(opts,[:returning_sql_cols])
+      create_opts = Aux::hash_subset(opts,[:returning_sql_cols,:duplicate_refs])
       field_set = FieldSet.new(model_handle[:model_name],rows.first.keys)
       create_from_select(model_handle,field_set,select_ds,override_attrs,create_opts)
     end
@@ -201,6 +201,49 @@ module XYZ
       create_from_rows(model_handle,[row],opts).first
     end
 
+
+    #adds or deletes children based on match_cols
+    def self.modify_children_from_rows(model_handle,parent_idh,rows,match_cols=[:ref])
+      parent_id_col = DB.parent_field(parent_idh[:model_name],model_handle[:model_name])
+      
+      sp_hash = {
+        :cols => [:id,:group_id] + (match_cols - [:id,:group_id]),
+        :filter => [:eq, parent_id_col, parent_idh.get_id()]
+      }
+      existing = get_objs(model_handle,sp_hash,:keep_ref_cols => true)
+      if existing.empty? #shortcut
+        return create_from_rows(model_handle,rows,:duplicate_refs => :no_check)
+      end
+
+      ret = Array.new
+      pruned_rows = Array.new
+      rows.each do |r|
+        if match = match_found(r,existing,match_cols)
+          ret << model_handle.createIDH(:id => match[:id])
+        else
+          pruned_rows << r
+        end
+      end
+      #add only ones not existing
+      unless pruned_rows.empty?
+        create_from_rows(model_handle,pruned_rows,:duplicate_refs => :no_check) 
+      end
+      #delete ones that not in rows
+      delete_idhs = existing.reject{|r|not match_found(r,pruned_rows,match_cols)}.map{|r|model_handle.createIDH(r[:id])}
+      delete_instance(delete_idhs) unless delete_idhs.empty?
+      ret
+    end
+
+    class << self
+      def match_found(el,el_list,cols)
+        el_list.find do |el_in_list|
+          not cols.find{|col| not (el[col] == el_in_list[col])}
+        end
+      end
+      private :match_found
+    end
+
+    #TODO: can below be subsumbed by above
     #creates if does not exist using match_assigns; in eitehr case returns id_handle 
     def self.create_from_row?(model_handle,ref,match_assigns,other_assigns={},opts={})
       sp_hash = {:cols => [:id,:group_id]}

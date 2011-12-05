@@ -50,6 +50,7 @@ module XYZ
 
           case duplicate_refs
            when :prune_duplicates
+            #TODO: bug here
             select_info[:ds] = select_info[:ds].join_table(:left_outer,ds,match_cols,{:table_alias => :existing}).where({:existing__c => nil})
            when :error_on_duplicate
             #TODO: not right yet

@@ -53,7 +53,7 @@ module XYZ
         }
       end
       #TODO: need to make create? from rows
-      Model.create_from_rows(model_handle(:file_asset),file_asset_rows)
+      Model.modify_children_from_rows(model_handle(:file_asset),id_handle,file_asset_rows)
     end
 
     def add_contained_files_and_push_to_repo()

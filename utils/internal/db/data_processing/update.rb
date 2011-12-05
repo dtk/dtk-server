@@ -158,8 +158,10 @@ module XYZ
 	obj_assigns = ret_object_assignments(assigns,db_rel)
 	obj_assigns.each_pair do |relation_type,child_assigns|
 	  factory_uri = RestURI.ret_factory_uri(id_info[:uri],relation_type)
-	  factory_id_info = IDInfoTable.get_row_from_id_handle IDHandle[:c => c, :uri => factory_uri, :is_factory => true], :create_factory_if_needed => true	 
-          new_uris = new_uris + update_from_hash_from_factory_id(factory_id_info,id_handle,child_assigns,opts)
+#          factory_idh = IDHandle[:c => c, :uri => factory_uri, :is_factory => true]
+          factory_idh = id_handle.createIDH(:uri => factory_uri, :is_factory => true)
+	  factory_id_info = IDInfoTable.get_row_from_id_handle factory_idh, :create_factory_if_needed => true	 
+          new_uris = new_uris + update_from_hash_from_factory_id(factory_id_info,factory_idh,child_assigns,opts)
         end
         new_uris
       end

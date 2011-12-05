@@ -15,7 +15,15 @@ module XYZ
     end
 
     def createIDH(x)
-      IDHandle.new(self.merge(x))
+      args = x
+      if x[:uri]
+        each{|k,v|args[k] ||= v unless k == :guid}
+      elsif x[:id] or x[:guid]
+        each{|k,v|args[k] ||= v unless k == :uri}
+      else
+        args = self.merge(x)
+      end
+      IDHandle.new(args)
     end
 
     def create_top()

@@ -353,12 +353,28 @@ module XYZ
         def get_row_from_uri(uri,c,opts={})
           ds = ds().where(:uri => uri, CONTEXT_ID => c)
 	  if ds.empty? 
+            if opts[:create_factory_if_needed] # should only be applied for factory uri
+              return create_factory(uri,c,:raise_error => true) #not doing recursive create
+            end
 	    raise ErrorNotFound.new(:uri,uri) if opts[:raise_error]
 	    return nil
 	  end
 	  unformated_row = ds.first
 	  format_row(unformated_row)
         end
+
+        def create_factory(factory_uri,c,opts={})
+          relation_type,parent_uri = RestURI.parse_factory_uri(factory_uri)
+          par_id_info = get_row_from_uri(parent_uri,c,opts)
+          if par_id_info
+            insert_factory(relation_type,factory_uri,par_id_info[:relation_type],par_id_info[:id],c)
+            #TODO: more effiienct would be if insert_factory returns new row
+            get_row_from_uri(factory_uri,c,:raise_error => true)
+          end
+        end
+        private :create_factory
+
+
 
         def get_row_from_guid(guid,opts={})
           #NOTE: contingent on id scheme where guid uniquely picks out row

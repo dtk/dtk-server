@@ -8,13 +8,13 @@
     :parse_state => {:type=>:varchar, :size => 25},
     :branch => {:type=>:varchar, :size => 50, :default => "master"}, 
     :version_num => {:type=>:integer, :default => 1},
-    :updated => {:type=>:boolean, :default => false}
-  },
-  :repo_id=>{
-    :type=>:bigint,
-    :foreign_key_rel_type=>:attribute,
-    :on_delete=>:set_null,
-    :on_update=>:set_null
+    :updated => {:type=>:boolean, :default => false},
+    :repo_id=>{
+      :type=>:bigint,
+      :foreign_key_rel_type=>:repo,
+      :on_delete=>:set_null,
+      :on_update=>:set_null
+    }
   },
   :virtual_columns=>{
     :component_summary_info=>{

@@ -2,23 +2,11 @@ module XYZ
   class ImplementationController < Controller
 ###TODO: for testing
     def test_extract(module_name)
-
       #a library should be passed as input; here we are just using teh users' private library
-      #create repo if it does not exist
-      user_obj = CurrentSession.new.get_user_object()
-      user_group = user_obj.get_private_group()
-      user_group_id = user_group && user_group[:id]
-      top_container_idh = top_id_handle(:group_id => user_group_id)
-
-      repo_mh = top_container_idh.createMH(:repo)
-      repo_user_acls = %w{r8server}.map do |repo_username|
-        {
-          :repo_username => repo_username,
-          :access_rights => "RW+"
-        }
-      end
+      library_idh = Library.get_users_private_library(model_handle(:library)).id_handle()
       config_agent_type = :puppet
-      repo_obj = Repo.create?(repo_mh,module_name,config_agent_type,repo_user_acls)
+
+      repo_obj,impl_idh = Implementation.create_library_repo_and_implementation?(library_idh,module_name,config_agent_type)
       repo_name = repo_obj[:repo_name]
       module_dir = repo_obj[:local_dir]
       base_dir = repo_obj[:base_dir]

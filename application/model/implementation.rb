@@ -1,7 +1,37 @@
 module XYZ
   class Implementation < Model
-    def self.create_library_repo_and_implementation()
+    #return [repo_obj,impl_idh]
+    def self.create_library_repo_and_implementation?(library_idh,module_name,config_agent_type)
+      repo_obj = nil
+      impl_idh = nil
+      ret = [nil,nil]
+      #create repo if it does not exist
+      repo_mh = library_idh.createMH(:repo)
+      repo_user_acls = %w{r8server}.map do |repo_username|
+        {
+          :repo_username => repo_username,
+          :access_rights => "RW+"
+        }
+      end
+      repo_obj = Repo.create?(repo_mh,module_name,config_agent_type,repo_user_acls)
+
+      impl_hash = {
+        :display_name => module_name,
+        :type => ImplementationType[config_agent_type],
+        :repo => repo_obj[:repo_name],
+        :repo_id => repo_obj[:id],
+        :module_name => module_name,
+        :library_library_id => library_idh.get_id()
+      }
+      impl_ref = "#{config_agent_type}-#{module_name}"
+      impl_mh = library_idh.create_childMH(:implementation)
+      impl_idh = create_from_row?(impl_mh,impl_ref,{:ref => impl_ref},impl_hash)
+      [repo_obj, impl_idh]
     end
+    ImplementationType = {
+      :puppet => "puppet_module",
+      :chef => "chef_cookbook"
+    }
 
     def add_contained_files_and_push_to_repo()
       pp "TODO: stub to add files into git repo and push"

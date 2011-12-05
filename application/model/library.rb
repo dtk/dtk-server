@@ -9,10 +9,10 @@ module XYZ
         Model.create_from_row?(model_handle,lib_name,{:display_name => lib_name})
       end
 
-      def get_users_private_library?(model_handle,username=nil)
+      def get_users_private_library(model_handle,username=nil)
         username ||=  CurrentSession.get_username()
         sp_hash = {
-          :cols => common_columns(),
+          :cols => [:id,:display_name,:group_id],
           :filter => [:eq,:display_name,users_private_library_name(username)] 
         }
         get_obj(model_handle,sp_hash)
@@ -21,10 +21,6 @@ module XYZ
       def users_private_library_name(username)
         "private-#{username}"
       end
-    end
-
-    def self.common_columns()
-      [:id,:display_name]
     end
 
     def clone_post_copy_hook(clone_copy_output,opts={})

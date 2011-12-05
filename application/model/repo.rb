@@ -42,7 +42,7 @@ module XYZ
       [:id,:display_name,:repo_name,:local_dir]
     end
     def self.repo_name(config_agent_type,module_name)
-      username = CurrentSession.get_user_username()
+      username = CurrentSession.get_username()
       RepoManager.repo_name(username,config_agent_type,module_name)
     end
   end

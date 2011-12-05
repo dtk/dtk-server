@@ -1,3 +1,5 @@
+#TODO: refactor so this and env reflect defaults and specfically set and have specfically set be in 
+#simpler syntactic form
 require File.expand_path('../require_first',File.dirname(__FILE__))
 r8_require('../../utils/internal/log')
 r8_require('../../utils/internal/hash_object')

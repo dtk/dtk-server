@@ -51,6 +51,7 @@ module XYZ
       end
     end
     #TODO: fix so has less arguments
+=begin
     def add_library_components_from_r8meta(config_agent_type,top_container_idh,library_uri_idh,implementation_idh,r8meta_hash)
       raise Error.new("library_uri_idh is expected to have a uri") unless library_uri = library_uri_idh[:uri]
       library_ref = library_uri.split("/").last
@@ -72,6 +73,20 @@ module XYZ
         } 
       }
       input_hash_content_into_model(top_container_idh,hash_content)
+    end
+=end
+    def add_library_components_from_r8meta(config_agent_type,library_idh,impl_idh,r8meta_hash)
+      impl_id = impl_idh.get_id()
+      cmps_hash = r8meta_hash.inject({}) do |h, (cmp_ref,cmp_info)|
+        #TODO: for now just removing the link defs
+        info = cmp_info.inject({}) do |r,(k,v)|
+          ["link_defs", "external_link_defs"].include?(k) ? r : r.merge(k => v)
+        end
+        info.merge!(:implementation_id => impl_id)
+        #TODO: may be better to have these prefixes already in r8 meta file
+        h.merge("#{config_agent_type}-#{cmp_ref}" => info)
+      end
+      input_hash_content_into_model(library_idh,"component" => cmps_hash)
     end
 
     #assumption is that target_id_handle is in uri form

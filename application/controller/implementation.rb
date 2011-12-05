@@ -11,7 +11,6 @@ module XYZ
       repo_name = repo_obj[:repo_name]
       module_dir = repo_obj[:local_dir]
       base_dir = repo_obj[:base_dir]
-
       
       compressed_file = "#{R8::EnvironmentConfig::CompressedFileStore}/#{module_name}.tar.gz"
       opts = {:strip_prefix_count => 1} 
@@ -49,9 +48,10 @@ module XYZ
       r8meta_path = "#{module_dir}/r8meta.#{config_agent_type}.yml"
       r8meta_hash.write_yaml(STDOUT)
       File.open(r8meta_path,"w"){|f|r8meta_hash.write_yaml(f)}
-      Model.add_library_components_from_r8meta(config_agent_type,top_container_idh,library_idh,impl_idh,r8meta_hash)
 
-      impl_idh.create_object().add_contained_files_and_push_to_repo()
+      Model.add_library_components_from_r8meta(config_agent_type,library_idh,impl_obj.id_handle,r8meta_hash)
+
+      impl_obj.add_contained_files_and_push_to_repo()
       {:content => {}}
     end
 

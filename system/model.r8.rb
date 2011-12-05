@@ -247,7 +247,7 @@ module XYZ
       if matching_obj = get_obj(model_handle,sp_hash)
         matching_obj.id_handle()
       else
-        create_from_row(model_handle,{:ref => ref}.merge(match_assigns).merge(other_assigns),opts)
+        create_from_row(model_handle,{:ref => ref}.merge(match_assigns).merge(other_assigns),opts.merge(:duplicate_refs => :no_check))
       end
     end
 

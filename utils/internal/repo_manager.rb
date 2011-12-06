@@ -57,13 +57,14 @@ module XYZ
       klass.repo_name(username,config_agent_type,module_name)
     end
 
-    def self.create_repo(repo_obj,repo_user_acls)
+    def self.create_repo(repo_obj,repo_user_acls,opts={})
       klass = load_and_return_adapter_class()
-      klass.create_empty_repo(repo_obj,repo_user_acls,:error_if_exists => true)
+      klass.create_empty_repo(repo_obj,repo_user_acls,opts)
     end
-    def self.create_repo?(repo_obj,repo_user_acls)
+
+    def self.delete_all_repos()
       klass = load_and_return_adapter_class()
-      klass.create_empty_repo(repo_obj,repo_user_acls,:error_if_exists => false)
+      klass.delete_all_repos()
     end
 
     ##########

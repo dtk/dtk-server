@@ -1,7 +1,7 @@
 module XYZ
   class Implementation < Model
     #return [repo_obj,impl_obj]
-    def self.create_library_repo_and_implementation?(library_idh,module_name,config_agent_type)
+    def self.create_library_repo_and_implementation(library_idh,module_name,config_agent_type,opts={})
       repo_obj = nil
       impl_obj = nil
       ret = [nil,nil]
@@ -13,7 +13,7 @@ module XYZ
           :access_rights => "RW+"
         }
       end
-      repo_obj = Repo.create?(repo_mh,module_name,config_agent_type,repo_user_acls)
+      repo_obj = Repo.create(repo_mh,module_name,config_agent_type,repo_user_acls,opts)
 
       impl_hash = {
         :display_name => module_name,

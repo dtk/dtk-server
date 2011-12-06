@@ -6,6 +6,11 @@ module XYZ
     def create_empty_repo(repo_obj,repo_user_acls,opts={})
       git_server_class().create_empty_repo(repo_obj,repo_user_acls,opts)
     end
+
+    def delete_all_repos()
+      git_server_class().delete_all_repos()
+    end
+
    private
     def git_server_class()
       return @git_server_class if @git_server_class

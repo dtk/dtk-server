@@ -8,17 +8,31 @@ module XYZ
       def create_empty_repo(repo_obj,repo_user_acls,opts={})
         ret = repo_name = repo_obj[:repo_name]
         if repos_having_config_files().include?(repo_name)
-          if opts[:error_if_exists]
-            raise Error.new("trying to create repo (#{actual_repo_name} that exists already") 
+          if opts[:delete_if_exists]
+            admin_repo.pull_changes()
+            delete_existing_repo(repo_name)
           else
-            return ret
+            raise Error.new("trying to create a repo (#{repo_name}) that exists already") 
           end
         end
-        file_asset_hash = {:path => repo_config_file_relative_path(repo_name)}
+
+        config_dir = repo_config_directory()
+        Dir.mkdir(config_dir) unless File.directory?(config_dir)
+        path = repo_config_file_relative_path(repo_name)
+        file_asset_hash = {:path => path}
         content = config_file_content(repo_name,repo_user_acls)
         admin_repo.add_file(file_asset_hash,content)
         admin_repo.push_changes()
         ret
+      end
+
+      def delete_all_repos()
+        admin_repo.pull_changes()
+        repo_config_files().each do |repo_conf|
+          repo_name = repo_conf.gsub(/\.conf/,"")
+          delete_existing_repo(repo_name,:do_not_push_changes => true)
+        end
+        admin_repo.push_changes()
       end
 
       def set_git_class(git_class)
@@ -26,6 +40,14 @@ module XYZ
       end
       
      private
+
+      #assumes that a pull has been done
+      def delete_existing_repo(repo_name,opts={})
+        file_path = repo_config_file_relative_path(repo_name)
+        admin_repo.delete_file(file_path)
+        admin_repo.push_changes() unless opts[:do_not_push_changes]
+      end
+
       def admin_directory()
         @admin_directory ||= R8::Config[:repo][:git][:gitolite][:admin_directory] 
       end
@@ -40,6 +62,7 @@ module XYZ
         "#{admin_directory}/#{repo_config_relative_path}"
       end
       def repo_config_files()
+        return Array.new unless File.directory?(repo_config_directory)
         Dir.chdir(repo_config_directory){Dir["*.conf"]}
       end
       def repos_having_config_files()

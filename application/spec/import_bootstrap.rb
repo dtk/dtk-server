@@ -27,3 +27,6 @@ CurrentSession.new.set_user_object(user_obj)
 library_mh = repo_user_mh.createMH(:library)
 Library.create_users_private_library?(library_mh)
 
+#TODO: not sure if btter to go in bootstrap or clear
+RepoManager.delete_all_repos()
+

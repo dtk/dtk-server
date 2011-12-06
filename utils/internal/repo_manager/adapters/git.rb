@@ -38,6 +38,14 @@ module XYZ
       end
     end
 
+    def delete_file(file_path)
+      checkout(@branch) do
+        message = "Deleting #{file_path} in #{@branch}"
+        git_command__rm(file_path)
+        git_command__commit(message)
+      end
+    end
+
     def update_file_content(file_asset,content)
       checkout(@branch) do
         File.open(file_asset[:path],"w"){|f|f << content}
@@ -51,6 +59,10 @@ module XYZ
 
     def push_changes()
       git_command__push(@branch)
+    end
+
+    def pull_changes()
+      git_command__pull(@branch)
     end
 
     def push_implementation()
@@ -125,11 +137,17 @@ module XYZ
     def git_command__add(file_path)
       @grit_repo.add(file_path)
     end
+    def git_command__rm(file_path)
+      @grit_repo.remove(file_path)
+    end
     def git_command__commit(message)
       @grit_repo.commit_index(message)
     end
     def git_command__push(branch_name)
       git_command.push(CmdOpts,"origin", "#{branch_name}:refs/heads/#{branch_name}")
+    end
+    def git_command__pull(branch_name)
+      git_command.pull(CmdOpts,"origin",branch_name)
     end
 
     def git_command__merge(branch_to_merge_from)

@@ -38,7 +38,8 @@ module XYZ
 
 
     def clone_from_git_server(repo_name)
-      
+      remote_repo = "#{R8::Config[:repo][:git][:gitolite][:url]}:#{repo_name}"
+      git_command__clone(remote_repo,@path)      
       @grit_repo = Grit::Repo.new(@path) 
       @index = @grit_repo.index #creates new object so use @index, not grit_repo
     end
@@ -121,7 +122,6 @@ module XYZ
     end
 
    private
-
     attr_reader :grit_repo
     def initialize(path,branch,opts={})
       @branch = branch 
@@ -150,11 +150,14 @@ module XYZ
       @grit_repo.heads.find{|h|h.name == branch_name} ? true : nil
     end
     def git_command()
-      @grit_repo.git
+      @grit_repo ? @grit_repo.git : Grit::Git.new("")
     end
   end
   class RepomanagerGitLinux < RepoManagerGit
    private
+    def git_command__clone(remote_repo,local_dir)
+      git_command.clone(CmdOpts,remote_repo,local_dir)
+    end
     def git_command__checkout(branch_name)
       git_command.checkout(CmdOpts,branch_name)
     end

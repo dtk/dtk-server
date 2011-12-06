@@ -1,3 +1,4 @@
+require 'fileutils'
 module XYZ
   class RepoManager 
     #### for interacting with existing repos
@@ -11,6 +12,10 @@ module XYZ
 
     def self.add_file(file_asset,content,context)
       get_repo(context).add_file(file_asset,content)
+    end
+
+    def self.add_all_files(context)
+      get_repo(context).add_all_files()
     end
 
     def self.push_implementation(context)
@@ -67,9 +72,19 @@ module XYZ
 
     def self.delete_all_repos()
       klass = load_and_return_adapter_class()
-      klass.delete_all_repos()
+      #delete all repos on repo server
+      klass.delete_all_server_repos()
+      delete_all_local_repos()
     end
 
+    def self.delete_all_local_repos()
+      repo_base_dir = R8::Config[:repo][:base_directory]
+      if File.directory?(repo_base_dir)
+        Dir.chdir(R8::Config[:repo][:base_directory]) do
+          Dir["*"].each{|local_repo_dir|FileUtils.rm_rf local_repo_dir} 
+        end
+      end
+    end
     ##########
     def self.get_repo(context)
       #TODO: do we still need __top

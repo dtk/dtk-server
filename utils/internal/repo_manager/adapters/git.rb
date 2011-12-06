@@ -52,6 +52,14 @@ module XYZ
       ret
     end
 
+    def add_all_files()
+      checkout(@branch) do
+        git_command__add(".")
+        message = "Adding . in #{@branch}"
+        git_command__commit(message)
+      end
+    end
+
     def add_file(file_asset,content)
       content ||= String.new
       checkout(@branch) do

@@ -57,8 +57,21 @@ module XYZ
     end
 
     def add_contained_files_and_push_to_repo()
-      pp "TODO: stub to add files into git repo and push"
+      context = repo_manager_context()
+      RepoManager.add_all_files(context)
+      RepoManager.push_implementation(context)
     end
+
+    def repo_manager_context()
+      update_object!(:repo,:branch)
+      {
+        :implementation => {
+          :repo => self[:repo],
+          :branch => self[:branch]
+        }
+      }
+    end
+    private :repo_manager_context
 
     def get_tree(opts={})
       sp_hash = {:cols => [:id,:display_name,:component_template]}

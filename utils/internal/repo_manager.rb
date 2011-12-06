@@ -59,7 +59,10 @@ module XYZ
 
     def self.create_repo(repo_obj,repo_user_acls,opts={})
       klass = load_and_return_adapter_class()
-      klass.create_empty_repo(repo_obj,repo_user_acls,opts)
+      #create repo on repo server
+      klass.create_server_repo(repo_obj,repo_user_acls,opts)
+      #create on r8 a local repo (pointing to git server)
+      klass.create_local_repo(repo_obj,opts)
     end
 
     def self.delete_all_repos()

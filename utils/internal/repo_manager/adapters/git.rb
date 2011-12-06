@@ -1,8 +1,26 @@
 require 'grit'
+require 'fileutils'
 r8_nested_require('git','manage_git_server')
 module XYZ
   class RepoManagerGit < RepoManager
     extend RepoGitManageClassMixin
+
+    def self.create_local_repo(repo_obj,opts)
+      local_repo_dir = repo_obj[:local_dir]
+      repo_name = repo_obj[:repo_name]
+      if File.exists?(local_repo_dir)
+        if opts[:delete_if_exists]
+          FileUtils.rm_rf local_repo_dir
+        else
+          raise Error.new("trying to create a repo (#{repo_name}) that exists already on r8 server")
+        end
+      end
+
+      local_repo = create(local_repo_dir,"master",:absolute_path => true, :repo_does_not_exist => true)
+      local_repo.clone_from_git_server(repo_name)
+    end
+
+    #for binding to existing local repo
     def self.create(path,branch,opts={})
       root = R8::Config[:repo][:base_directory]
       full_path = 
@@ -10,12 +28,19 @@ module XYZ
         else (path == "__top" ? root : "#{root}/#{path}")
         end
       if Aux::platform_is_linux?()
-        RepomanagerGitLinux.new(full_path,branch)
+        RepomanagerGitLinux.new(full_path,branch,opts)
       elsif  Aux::platform_is_windows?()
-        RepoManagerGitWindows.new(full_path,branch)
+        RepoManagerGitWindows.new(full_path,branch,opts)
       else
         raise Error.new("platform #{Aux::platform} not treated")
       end
+    end
+
+
+    def clone_from_git_server(repo_name)
+      
+      @grit_repo = Grit::Repo.new(@path) 
+      @index = @grit_repo.index #creates new object so use @index, not grit_repo
     end
 
     def get_file_content(file_asset)
@@ -98,11 +123,13 @@ module XYZ
    private
 
     attr_reader :grit_repo
-    def initialize(path,branch)
+    def initialize(path,branch,opts={})
       @branch = branch 
       @path = path
-      @grit_repo = Grit::Repo.new(path)
-      @index = @grit_repo.index #creates new object so use @index, not grit_repo
+      unless opts[:repo_does_not_exist]
+        @grit_repo = Grit::Repo.new(path) 
+        @index = @grit_repo.index #creates new object so use @index, not grit_repo
+      end
     end
 
     def checkout(branch_name,&block)
@@ -165,10 +192,10 @@ module XYZ
   end
   class RepoManagerGitWindows  < RepoManagerGit
    private
-    def initialize(full_path,branch)
+    def initialize(full_path,branch,opts={})
       raise Error.new("R8::EnvironmentConfig::GitExecutable not defined") unless defined? R8::EnvironmentConfig::GitExecutable
       @git = R8::EnvironmentConfig::GitExecutable
-      super(full_path,branch)
+      super(full_path,branch,opts)
     end
     attr_reader :git
     def git_command__checkout(branch_name)

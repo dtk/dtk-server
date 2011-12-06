@@ -5,8 +5,7 @@ module XYZ
       #a library should be passed as input; here we are just using teh users' private library
       library_idh = Library.get_users_private_library(model_handle(:library)).id_handle()
       config_agent_type = :puppet
-
-      repo_obj,impl_obj = Implementation.create_library_repo_and_implementation(library_idh,module_name,config_agent_type)
+      repo_obj,impl_obj = Implementation.create_library_repo_and_implementation(library_idh,module_name,config_agent_type, :delete_if_exists => true)
       repo_name = repo_obj[:repo_name]
       module_dir = repo_obj[:local_dir]
       base_dir = repo_obj[:base_dir]

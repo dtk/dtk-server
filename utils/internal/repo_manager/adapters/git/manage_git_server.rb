@@ -3,8 +3,8 @@ module XYZ
     def repo_name(username,config_agent_type,module_name)
       git_server_class().repo_name(username,config_agent_type,module_name)
     end
-    def create_empty_repo(repo_obj,repo_user_acls,opts={})
-      git_server_class().create_empty_repo(repo_obj,repo_user_acls,opts)
+    def create_server_repo(repo_obj,repo_user_acls,opts={})
+      git_server_class().create_server_repo(repo_obj,repo_user_acls,opts)
     end
 
     def delete_all_repos()

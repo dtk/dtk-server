@@ -36,7 +36,6 @@ module XYZ
       end
     end
 
-
     def clone_from_git_server(repo_name)
       remote_repo = "#{R8::Config[:repo][:git][:gitolite][:url]}:#{repo_name}"
       git_command__clone(remote_repo,@path)      

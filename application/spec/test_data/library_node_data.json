@@ -1,5 +1,6 @@
 {
   "library": {
+    "public" : {
       "display_name": "public",
       "node": {
         "ami-c7f830ae-micro": {
@@ -555,5 +556,6 @@
           "ds_key": "[:user_data, \"/library/test/ami-1738c102\"]"
         }
       }
-    }
+    }    
+  }
 }

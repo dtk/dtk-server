@@ -53,6 +53,29 @@ module XYZ
       {:content => {}}
     end
 
+    def test_copy(module_name)
+      #a library should be passed as input; here we are just using the public library
+      library_idh = Library.get_public_library(model_handle(:library)).id_handle()
+      config_agent_type = :puppet
+      repo_obj,impl_obj = Implementation.create_library_repo_and_implementation(library_idh,module_name,config_agent_type, :delete_if_exists => true)
+      module_dir = repo_obj[:local_dir]
+
+      #TODO: hard codeed for testing
+      source_dir = "/root/core-cookbooks/puppet/#{module_name}"
+      require 'fileutils'
+      FileUtils.cp_r "#{source_dir}/.", module_dir
+      source_git = "#{source_dir}/.git"
+      FileUtils.rm_rf source_git if File.directory?(source_git)
+
+      r8meta_path = "#{source_dir}/r8meta.#{config_agent_type}.yml"
+      require 'yaml'
+      r8meta_hash = YAML.load_file(r8meta_path)
+
+      Model.add_library_components_from_r8meta(config_agent_type,library_idh,impl_obj.id_handle,r8meta_hash)
+
+      impl_obj.add_contained_files_and_push_to_repo()
+      {:content => {}}
+    end
 
 ###################
     def replace_library_implementation(proj_impl_id)

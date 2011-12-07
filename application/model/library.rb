@@ -6,6 +6,11 @@ module XYZ
         private_group_obj = user_obj.get_private_group()
         library_mh = model_handle.createMH(:model_name => :library, :group_id => private_group_obj[:id])
         lib_name = users_private_library_name(user_obj[:username])
+        Model.create_from_row?(library_mh,lib_name,{:display_name => lib_name})
+      end
+
+      def create_public_library?(model_handle)
+        lib_name = public_library_name()
         Model.create_from_row?(model_handle,lib_name,{:display_name => lib_name})
       end
 
@@ -17,9 +22,20 @@ module XYZ
         }
         get_obj(model_handle,sp_hash)
       end
+      def get_public_library(model_handle)
+        sp_hash = {
+          :cols => [:id,:display_name,:group_id],
+          :filter => [:eq,:display_name,public_library_name()]
+        }
+        get_obj(model_handle,sp_hash)
+      end
      private
       def users_private_library_name(username)
         "private-#{username}"
+      end
+
+      def public_library_name()
+        "public"
       end
     end
 

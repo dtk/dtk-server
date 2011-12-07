@@ -5,7 +5,7 @@ import_file = File.expand_path('test_data/library_node_data.json', File.dirname(
 
 Root = File.expand_path('../', File.dirname(__FILE__))
 require Root + '/app'
-inclde XYZ
+include XYZ
 
 
 def model_handle(model_name)
@@ -21,6 +21,6 @@ all_group_obj = UserGroup.get_by_groupname(user_mh.createMH(:user_group),"all")
 container_idh = IDHandle[:c => 2, :uri => "/", :group_id => all_group_obj[:id]]
 opts = {:username => username}
 
-Object.import_objects_from_file(container_idh,import_file,opts)
+Model.import_objects_from_file(container_idh,import_file,opts)
 
 

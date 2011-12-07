@@ -12,5 +12,8 @@ module XYZ
     def get_file_content(file_asset)
       Dir.chdir(@path){File.open(file_asset[:path]){|f|f.read}}
     end
+
+    def self.delete_all_server_repos()
+    end
   end
 end

@@ -58,88 +58,80 @@ module XYZ
 
     def step_one()
       module_upload = request.params["module_package"]
+#pp module_upload
       pkg_filename = module_upload[:filename]
       tmp_file_handle = module_upload[:tempfile]
-      module_name = pkg_filename.gsub(/\.tar\.gz$/,"")
-
-      #mv the tmp file to under CompressedFileStore
       tmp_path = tmp_file_handle.path
       tmp_file_handle.close
-      compressed_file = "#{R8::EnvironmentConfig::CompressedFileStore}/#{pkg_filename}"
-      FileUtils.mv tmp_path, compressed_file
 
-      config_agent_type = :puppet
-      library_idh = Library.get_users_private_library(model_handle(:library)).id_handle()
-      repo_obj,impl_obj = Implementation.create_library_repo_and_implementation(library_idh,module_name,config_agent_type, :delete_if_exists => true)
+      pkg_upload_path = R8::EnvironmentConfig::CompressedFileStore+'/'+pkg_filename
+=begin
+#      file_contents=IO.read(tmp_file_handle.path)
+      begin
+        File.open(pkg_upload_path, 'w') do |f|  
+          f << tmp_file_handle.read
+        end
+      ensure
+        tmp_file_handle.close
+      end
+=end
+      FileUtils.mv tmp_path, pkg_upload_path
 
-      repo_name = repo_obj[:repo_name]
-      module_dir = repo_obj[:local_dir]
-      base_dir = repo_obj[:base_dir]
-    
+      pkg_root = module_upload[:filename]
+      pkg_root[".tar.gz"] = ""
 #EXTRACT AND PARSE CODE-----------------------------
+      config_agent_type = :puppet
       user_obj = CurrentSession.new.get_user_object()
       username = user_obj[:username]
-      repo_name =  "#{username}-#{config_agent_type}-#{module_name}"
-
+      repo_name =  "#{username}-#{config_agent_type}-#{pkg_root}"
       opts = {:strip_prefix_count => 1} 
       base_dir = R8::EnvironmentConfig::ImportTestBaseDir
 
       #begin capture here so can rerun even after loading in dir already
       begin
+pp "INSIDE OF CTRL'R, SHOULD CALL EXTRACT NOW:"+base_dir+'/'+repo_name
         #extract tar.gz file into directory
+        compressed_file = "#{R8::EnvironmentConfig::CompressedFileStore}/#{pkg_root}.tar.gz"
         Extract.single_module_into_directory(compressed_file,repo_name,base_dir,opts)
       rescue Exception => e
         #raise e
       end
       
-      opts = {:strip_prefix_count => 1} 
-      #begin capture here so can rerun even after loading in dir already
-      begin
-        #extract tar.gz file into directory
-        Extract.single_module_into_directory(compressed_file,repo_name,base_dir,opts)
-      rescue Exception => e
-        #raise e
-      end
-
-      impl_obj.add_library_files_from_directory(repo_obj)
-
+      module_dir = "#{base_dir}/#{repo_name}"
+      user_group = user_obj.get_private_group()
+      user_group_id = user_group && user_group[:id]
+      top_container_idh = top_id_handle(:group_id => user_group_id)
+      library_idh,impl_idh = Model.add_library_files_from_directory(top_container_idh,module_dir,pkg_root,config_agent_type)
       #parsing
       begin
         r8_parse = ConfigAgent.parse_given_module_directory(config_agent_type,module_dir)
        rescue ConfigAgent::ParseErrors => errors
-        errors.set_file_asset_ids!(model_handle)
         pp [:puppet_error,errors.error_list.map{|e|e.to_s}]
+        return {:data => {:errors=>errors.error_list}}
        rescue R8ParseError => e
         pp [:r8_parse_error, e.to_s]
+        return {:data => {:errors=>errors.error_list}}
       end
 
       meta_generator = GenerateMeta.create("1.0")
-      refinement_hash = meta_generator.generate_refinement_hash(r8_parse,module_name)
+      refinement_hash = meta_generator.generate_refinement_hash(r8_parse,pkg_root)
       #pp refinement_hash
-
+        
         #in between here refinement has would have through user interaction the user set the needed unknowns
         #mock_user_updates_hash!(refinement_hash)
       r8meta_hash = refinement_hash.render_hash_form()
-      #TODO: currently version not handled
-      r8meta_hash.delete("version")
-      r8meta_path = "#{module_dir}/r8meta.#{config_agent_type}.yml"
-      r8meta_hash.write_yaml(STDOUT)
-      File.open(r8meta_path,"w"){|f|r8meta_hash.write_yaml(f)}
-      
-      pp r8meta_hash
+
       return {
         :data=> {
           :import_def=>r8meta_hash
         }
       }
-=begin
-Not reached
+
       return {
         :data=> {
           :import_id=>pkg_root
         }
       }
-=end
     end
 
     def step_two(id)

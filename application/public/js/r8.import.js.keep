@@ -2,7 +2,7 @@
 if(!R8.Import) {
 
 	R8.Import = function() {
-		var _importDef={},
+		var _importDef=null,
 
 			_pageContainerNode = null,
 			_topbarNode = null,
@@ -18,7 +18,7 @@ if(!R8.Import) {
 		return {
 			init: function(import_def,step) {
 				R8.UI.init();
-//				_importDef = import_def;
+				_importDef = import_def;
 
 				this.setupImportDef();
 
@@ -270,12 +270,11 @@ if(!R8.Import) {
 //TODO: change to take import object as input
 //					var import_id = response.application_import_step_one.content[0].data.import_id;
 					var result = response.application_import_step_one.content[0].data;
-console.log(result);
 if(typeof(result.error) == 'undefined') {
-	_importDef['components'] = result;
-	_this.setupImportDef();
+	_importDef = result;
 	_this.advanceWizard();
 }
+console.log(result);
 return;
 /*
 					var tpl = R8.Rtpl.component_cfg_file_list({
@@ -313,13 +312,19 @@ return;
 
 				var wizardContentNode = R8.Utils.Y.one('#wizard-content');
 				//render the contents for Step Two
-				wizardContentNode.append(R8.Rtpl['import_step_three']({'component_list': _importDef.components}));
+				wizardContentNode.append(R8.Rtpl['import_step_three']({'component_list': _importDef}));
 
-				for(var c in _importDef.components) {
-					if(_importDef.components[c].selected == true) {
-						document.getElementById(_importDef.components[c].id+'_selected').checked = true;
+				for(var c in _importDef) {
+					if(_importDef[c].selected == true) {
+						document.getElementById(_importDef[c].def.id+'_selected').checked = true;
 					}
 				}
+/*				for(var c in _importDef.components) {
+					if(_importDef.components[c].selected == true) {
+						document.getElementById(_importDef.components[c].def.id+'_selected').checked = true;
+					}
+				}
+*/
 				_currentWizardStep = 3;
 			},
 			loadStepFour: function(compIndex) {

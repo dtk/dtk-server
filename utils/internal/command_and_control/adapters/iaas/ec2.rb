@@ -61,6 +61,7 @@ module XYZ
         end
       end
 UserDataTemplate = Erubis::Eruby.new <<eos
+#!/bin/sh 
 cat << EOF > /etc/mcollective/facts.yaml
 ---
 mcollective: "<%=git_server_url %>"

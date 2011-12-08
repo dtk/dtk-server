@@ -64,7 +64,7 @@ UserDataTemplate = Erubis::Eruby.new <<eos
 #!/bin/sh 
 cat << EOF > /etc/mcollective/facts.yaml
 ---
-mcollective: "<%=git_server_url %>"
+git-server: "<%=git_server_url %>"
 EOF
 eos
 

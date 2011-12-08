@@ -68,8 +68,13 @@ module XYZ
     #assumption is that target_id_handle is in uri form
     def import_objects_from_file(target_id_handle,json_file,opts={})
       raise Error.new("file given #{json_file} does not exist") unless File.exists?(json_file)
-      create_prefix_object_if_needed(target_id_handle,opts)
       hash_content = Aux::hash_from_file_with_json(json_file) 
+      import_objects_from_hash(target_id_handle,hash_content,opts)
+    end
+
+    #assumption is that target_id_handle is in uri form
+    def import_objects_from_hash(target_id_handle,hash_content,opts={})
+      create_prefix_object_if_needed(target_id_handle,opts)
       return nil unless hash_content
       type_info = Hash.new
       add_r8meta!(hash_content,opts[:r8meta]) if opts[:r8meta]

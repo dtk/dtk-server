@@ -9,6 +9,9 @@ module XYZ
       root = R8::Config[:repo][:base_directory]
       @path = "#{root}/#{path}"
     end
+    def self.repo_url()
+      nil
+    end
 
     def add_all_files()
     end

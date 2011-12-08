@@ -57,6 +57,11 @@ module XYZ
     end
 
     ###### for creating and deleting repositories
+    #TODO: need to change or prtect since with this design pattern get stack error if adapter does not have this defined
+    def self.repo_url()
+      klass = load_and_return_adapter_class()
+      klass.repo_url()
+    end
     def self.repo_name(username,config_agent_type,module_name)
       klass = load_and_return_adapter_class()
       klass.repo_name(username,config_agent_type,module_name)

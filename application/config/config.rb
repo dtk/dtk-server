@@ -51,9 +51,9 @@ else
 end
 R8::Config[:repo].set?(:type,"git")
 R8::Config[:repo][:git][:server_type] = "gitolite"
+R8::Config[:repo][:git][:url] = "git@ec2-107-22-254-226.compute-1.amazonaws.com"
 
 #TODO: temp for testing
-R8::Config[:repo][:git][:gitolite][:url] = "git@ec2-107-22-254-226.compute-1.amazonaws.com"
 R8::Config[:repo][:base_directory_test] = "/root/r8server-repo-test"
 ########end test
 

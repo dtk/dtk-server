@@ -36,8 +36,16 @@ module XYZ
       end
     end
 
+    def self.repo_url()
+      @git_url ||= R8::Config[:repo][:git][:url]
+    end
+
+    def repo_url()
+      @git_url ||= self.class.repo_url()
+    end
+
     def clone_from_git_server(repo_name)
-      remote_repo = "#{R8::Config[:repo][:git][:gitolite][:url]}:#{repo_name}"
+      remote_repo = "#{repo_url()}:#{repo_name}"
       git_command__clone(remote_repo,@path)      
       @grit_repo = Grit::Repo.new(@path) 
       @index = @grit_repo.index #creates new object so use @index, not grit_repo

@@ -70,7 +70,7 @@ module XYZ
       
       impl_idhs = ret.map{|impl|impl.id_handle}
       indexed_asset_files = Implementation.get_indexed_asset_files(impl_idhs)
-      ret.each{|impl|impl.merge!(:file_assets => indexed_asset_files[impl[:id]])}
+      ret.each{|impl|impl.merge!(:file_assets => indexed_asset_files[impl[:id]]||[])}
       ret
     end
 

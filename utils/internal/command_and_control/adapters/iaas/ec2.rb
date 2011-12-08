@@ -22,6 +22,10 @@ module XYZ
           unless avail_zone.nil? or avail_zone == "automatic"
             create_options.merge!(:availability_zone => avail_zone)
           end
+          unless create_options.has_key?(:user_data)
+            user_data = default_user_data()
+            create_options[:user_data] = user_data if user_data
+          end
           response = conn().server_create(create_options)
           instance_id = response[:id]
           state = response[:state]
@@ -47,6 +51,22 @@ module XYZ
           }
         }
       end
+      class << self
+       private 
+        #TODO: stub
+        def default_user_data()
+          if git_server_url = RepoManager.repo_url()
+            UserDataTemplate.result(:git_server_url => git_server_url)
+          end
+        end
+      end
+UserDataTemplate = Erubis::Eruby.new <<eos
+cat << EOF > /etc/mcollective/facts.yaml
+---
+mcollective: "<%=git_server_url %>"
+EOF
+eos
+
       DefaultSecurityGroupSet = ["default"] 
       #destroys the node if it exists
       def self.destroy_node?(node)

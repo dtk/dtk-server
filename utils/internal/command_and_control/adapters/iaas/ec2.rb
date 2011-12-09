@@ -59,7 +59,7 @@ module XYZ
           if git_server_url = RepoManager.repo_url()
             git_server_dns = RepoManager.repo_server_dns()
             #TODO: to make more secure when gitserver different from this server will assume footprint put on server at installtime
-            footprint = `ssh-keyscan -t rsa #{git_server_dns}`
+            footprint = `ssh-keyscan -H -t rsa #{git_server_dns}`
             UserDataTemplate.result(:git_server_url => git_server_url, :git_server_dns => git_server_dns,:footprint => footprint)
           end
         end

@@ -36,10 +36,14 @@ module XYZ
       end
     end
 
-    def self.repo_url()
-      @git_url ||= R8::Config[:repo][:git][:url]
+
+    def self.repo_server_dns()
+      @git_dns ||= R8::Config[:repo][:git][:dns]
     end
 
+    def self.repo_url()
+      @git_url ||= "#{R8::Config[:repo][:git][:server_username]}@#{repo_server_dns()}"
+    end
     def repo_url()
       @git_url ||= self.class.repo_url()
     end

@@ -54,18 +54,24 @@ module XYZ
       class << self
        private 
         #TODO: stub
+        #TODO: need sto be cased on os type; below assumes that ubuntu cloud-init being used
         def default_user_data()
           if git_server_url = RepoManager.repo_url()
-            UserDataTemplate.result(:git_server_url => git_server_url)
+            git_server_dns = RepoManager.repo_server_dns()
+            UserDataTemplate.result(:git_server_url => git_server_url, :git_server_dns => git_server_dns)
           end
         end
       end
 UserDataTemplate = Erubis::Eruby.new <<eos
 #!/bin/sh 
+
 cat << EOF > /etc/mcollective/facts.yaml
 ---
 git-server: "<%=git_server_url %>"
 EOF
+
+ssh-keygen -f "/root/.ssh/known_hosts" -R <%=git_server_dns %>
+ssh-keyscan -t rsa <%=git_server_dns %> >> /root/.ssh/known_hosts
 eos
 
       DefaultSecurityGroupSet = ["default"] 

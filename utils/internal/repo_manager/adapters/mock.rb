@@ -12,6 +12,9 @@ module XYZ
     def self.repo_url()
       nil
     end
+    def self.repo_server_dns()
+      nil
+    end
 
     def add_all_files()
     end

@@ -62,6 +62,10 @@ module XYZ
       klass = load_and_return_adapter_class()
       klass.repo_url()
     end
+    def self.repo_server_dns()
+      klass = load_and_return_adapter_class()
+      klass.repo_server_dns()
+    end
     def self.repo_name(username,config_agent_type,module_name)
       klass = load_and_return_adapter_class()
       klass.repo_name(username,config_agent_type,module_name)

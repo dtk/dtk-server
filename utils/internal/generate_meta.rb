@@ -56,13 +56,28 @@ module XYZ
       super([{:type => type.to_s},{:required => nil},{:def => content}])
       self[:required] = content.delete(:include)
     end
-    
+=begin
+def initialize(mode,blob)
+      case mode
+       when :initial
+        super(blob)
+        self[:required] = content.delete(:include)
+       when :reify
+        initialize_reify(blob)
+       else
+        raise Error.new("Unexpected mode (#{mode})")
+      end
+    end
+=end    
     def hash_key()
       self[:def].hash_key()
     end
 
     def render_hash_form(opts={})
       self[:def].render_hash_form(opts)
+    end
+   private
+    def self.initialize_reify(blob)
     end
   end
 
@@ -100,9 +115,18 @@ module XYZ
       super()
       @context = context
     end
+
     def create(type,parse_struct,opts={})
       MetaStructObject.new(type,klass(type).new(parse_struct,@context.merge(opts)))
     end
+
+=begin
+    def create(type,parse_struct,opts={})
+      content = klass(type).new(parse_struct,@context.merge(opts))
+      blob = [{:type => type.to_s},{:required => nil},{:def => content}]
+      MetaStructObject.new(:initial,blob)
+    end
+=end
 
     #dup used because yaml generation is upstream and dont want string refs
     def required_value(key)

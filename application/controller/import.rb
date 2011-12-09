@@ -121,6 +121,11 @@ module XYZ
 
       meta_generator = GenerateMeta.create("1.0")
       refinement_hash = meta_generator.generate_refinement_hash(r8_parse,module_name)
+      object_form = meta_generator.reify(refinement_hash,module_name,config_agent_type)
+      return {
+        :data=> object_form
+      }
+
       #pp refinement_hash
 
         #in between here refinement has would have through user interaction the user set the needed unknowns

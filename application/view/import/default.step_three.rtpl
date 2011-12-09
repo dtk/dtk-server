@@ -3,8 +3,8 @@
 <table id="component-list">
 	{%for component in component_list%}
 	<tr>
-		<td class="component-checkbox"><input type="checkbox" value="1" name="{%=component[:display_name]%}_selected" id="{%=component[:display_name]%}_selected" onchange="R8.Import.toggleComponent('{%=component[:id]%}');"/></td>
-		<td class="component-label"><span>{%=component[:display_name]%}</span></td>
+		<td class="component-checkbox"><input type="checkbox" value="1" name="{%=component[:def][:display_name]%}_selected" id="{%=component[:def][:display_name]%}_selected" onchange="R8.Import.toggleComponent('{%=component[:def][:id]%}');"/></td>
+		<td class="component-label"><span>{%=component[:def][:display_name]%}</span></td>
 	</tr>
 	{%end%}
 </table>

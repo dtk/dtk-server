@@ -52,8 +52,8 @@ module XYZ
   end
 
   class MetaStructObject < SimpleOrderedHash
-    def initialize(content)
-      super([{:required => nil},{:def => content}])
+    def initialize(type,content)
+      super([{:type => type.to_s},{:required => nil},{:def => content}])
       self[:required] = content.delete(:include)
     end
     
@@ -101,7 +101,7 @@ module XYZ
       @context = context
     end
     def create(type,parse_struct,opts={})
-      MetaStructObject.new(klass(type).new(parse_struct,@context.merge(opts)))
+      MetaStructObject.new(type,klass(type).new(parse_struct,@context.merge(opts)))
     end
 
     #dup used because yaml generation is upstream and dont want string refs

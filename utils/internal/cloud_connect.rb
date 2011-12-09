@@ -18,7 +18,7 @@ module XYZ
     end
     class EC2 < Top
       def initialize()             
-        @conn = Fog::AWS::Compute.new(Fog.credentials())
+        @conn = Fog::Compute::AWS.new(Fog.credentials())
       end
 
       def servers_all()

@@ -38,11 +38,14 @@ module XYZ
       refinement_hash = meta_generator.generate_refinement_hash(r8_parse,module_name)
 
       #pp refinement_hash
+      #simulating egtting resu
+      #in between here refinement has would have through user interaction the user set the needed unknowns
+      #refinement_hash is suppose to represent aplain hash
+      
       object_form = meta_generator.reify(refinement_hash,module_name,config_agent_type)
 
-        #in between here refinement has would have through user interaction the user set the needed unknowns
-        #mock_user_updates_hash!(refinement_hash)
-      r8meta_hash = refinement_hash.render_hash_form()
+
+      r8meta_hash = object_form.render_hash_form()
       #TODO: currently version not handled
       r8meta_hash.delete("version")
       r8meta_path = "#{module_dir}/r8meta.#{config_agent_type}.yml"

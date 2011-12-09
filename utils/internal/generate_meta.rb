@@ -155,6 +155,10 @@ module XYZ
 
   private
     #functions to treat object functions
+    #can be overwritten
+    def object_attributes()
+      []
+    end
     def index(hash,key)
       if hash.has_key?(key.to_s)
         hash[key.to_s]
@@ -163,8 +167,15 @@ module XYZ
       end
     end
     def create_in_object_form(hash)
-      hash.each do |k,v|
-        self[k.to_sym] = v
+      hash.each{|k,v|self[k.to_sym] = convert_value_if_needed(k,v)}
+    end
+
+    def convert_value_if_needed(key,val)
+      return val unless object_attributes().include?(key.to_sym)
+      if val.kind_of?(Array)
+        val.inject(MetaArray.new){|ret,el_val|ret + [reify(el_val)]}
+      else
+        reify(val)
       end
     end
 
@@ -218,6 +229,10 @@ module XYZ
     def render_to_file(file,format)
     end
    private
+    def object_attributes()
+      [:components,:link_defs]
+    end
+
     def process_imported_resources()
       #first get all the exported resources and imported resources
       #TODO: more efficient to store these in first phase
@@ -285,8 +300,9 @@ module XYZ
   end
 
   class ComponentMeta < MetaObject
-    def initialize(component_ps,context)
-      super(context)
+    def initialize(component_ps,context,opts={})
+      super(context,opts)
+      return if opts[:reify]
       processed_name = component_ps[:name]
       #if qualified name make sure matches module name
       if processed_name =~ /(^.+)::(.+$)/
@@ -315,6 +331,9 @@ module XYZ
       set_attributes(component_ps)
     end
    private
+    def object_attributes()
+      [:attributes,:dependencies]
+    end
     def dependencies(component_ps)
       ret = MetaArray.new
       ret += find_foreign_resource_names(component_ps).map do |name|
@@ -356,8 +375,9 @@ module XYZ
   end
 
   class DependencyMeta < MetaObject
-    def initialize(data,context)
-      super(context)
+    def initialize(data,context,opts={})
+      super(context,opts)
+      return if opts[:reify]
       self[:type] = nailed(data[:type].to_s)
       case data[:type]
         when :foreign_dependency
@@ -369,8 +389,9 @@ module XYZ
 
   #TODO: see if makes sense to handle the exported resource link defs heere while using store confif helper file to deal with attributes
   module LinkDefMetaMixin
-    def initialize(data,context)
-      super(context)
+    def initialize(data,context,opts={})
+      super(context,opts)
+      return if opts[:reify]
       case data[:type]
         when :imported_collection then initialize__imported_collection(data)
         else raise Error.new("unexpeced link def type (#{data[:type]})")
@@ -381,6 +402,10 @@ module XYZ
   class LinkDefMeta < MetaObject
     include LinkDefMetaMixin
    private
+    def object_attributes()
+      [:possible_links]
+    end
+
     def initialize__imported_collection(data)
       self[:include] = true
       self[:required] = nailed(true)
@@ -405,8 +430,9 @@ module XYZ
   end
 
   class LinkDefAttributeMappingMeta  < MetaObject
-    def initialize(data,context)
-      super(context)
+    def initialize(data,context,opts={})
+      super(context,opts)
+      return if opts[:reify]
       self[:include] = true if data[:include]
       self[:output] = data[:output]
       self[:input] = data[:input]
@@ -415,8 +441,9 @@ module XYZ
 
 
   class AttributeMeta < MetaObject
-    def initialize(parse_struct,context)
-      super(context)
+    def initialize(parse_struct,context,opts={})
+      super(context,opts)
+      return if opts[:reify]
       set_source_ref(parse_struct)
       if parse_struct.is_attribute?()
         initialize__from_attribute(parse_struct)

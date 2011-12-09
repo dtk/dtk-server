@@ -45,6 +45,15 @@ module XYZ
       MetaObject.new(context).create(:module,parse_struct)
     end
 
+    def reify(hash,module_name,config_agent_type)
+      context = {
+        :version => @version,
+        :module_name => module_name,
+        :config_agent_type => config_agent_type
+      }
+      MetaObject.new(context).reify(hash)
+    end
+
    private
     def initialize(version)
       @version = version
@@ -52,32 +61,21 @@ module XYZ
   end
 
   class MetaStructObject < SimpleOrderedHash
-    def initialize(type,content)
-      super([{:type => type.to_s},{:required => nil},{:def => content}])
-      self[:required] = content.delete(:include)
-    end
-=begin
-def initialize(mode,blob)
-      case mode
-       when :initial
-        super(blob)
+    def initialize(type,content,opts={})
+      if opts[:reify]
+        super([{:type => type.to_s},{:required => opts[:required]},{:def => content}])
+      else
+        super([{:type => type.to_s},{:required => nil},{:def => content}])
         self[:required] = content.delete(:include)
-       when :reify
-        initialize_reify(blob)
-       else
-        raise Error.new("Unexpected mode (#{mode})")
       end
     end
-=end    
+
     def hash_key()
       self[:def].hash_key()
     end
 
     def render_hash_form(opts={})
       self[:def].render_hash_form(opts)
-    end
-   private
-    def self.initialize_reify(blob)
     end
   end
 
@@ -111,22 +109,15 @@ def initialize(mode,blob)
   class MetaObject < SimpleOrderedHash
     include CommonGenerateMetaMixin
     include StoreConfigHandlerMixin
-    def initialize(context)
+    def initialize(context,opts={})
       super()
       @context = context
+      create_in_object_form(opts[:def]) if opts[:reify]
     end
 
     def create(type,parse_struct,opts={})
       MetaStructObject.new(type,klass(type).new(parse_struct,@context.merge(opts)))
     end
-
-=begin
-    def create(type,parse_struct,opts={})
-      content = klass(type).new(parse_struct,@context.merge(opts))
-      blob = [{:type => type.to_s},{:required => nil},{:def => content}]
-      MetaStructObject.new(:initial,blob)
-    end
-=end
 
     #dup used because yaml generation is upstream and dont want string refs
     def required_value(key)
@@ -155,7 +146,28 @@ def initialize(mode,blob)
       @context[:source_ref] = parse_struct
     end
 
-   private
+    #functions to convert to object form
+    def reify(hash)
+      type = index(hash,:type)
+      content = klass(type).new(nil,@context,{:reify => true, :def => index(hash,:def)})
+      MetaStructObject.new(type,content,{:reify => true, :required => index(hash,:required)})
+    end
+
+  private
+    #functions to treat object functions
+    def index(hash,key)
+      if hash.has_key?(key.to_s)
+        hash[key.to_s]
+      elsif hash.has_key?(key.to_sym)
+        hash[key.to_sym]
+      end
+    end
+    def create_in_object_form(hash)
+      hash.each do |k,v|
+        self[k.to_sym] = v
+      end
+    end
+
     ###utilities
     def is_foreign_component_name?(name)
       if name =~ /(^.+)::.+$/
@@ -193,8 +205,9 @@ def initialize(mode,blob)
   end
   
   class ModuleMeta < MetaObject
-    def initialize(top_parse_struct,context)
-      super(context)
+    def initialize(top_parse_struct,context,opts={})
+      super(context,opts)
+      return if opts[:reify]
       self[:components] = MetaArray.new
       top_parse_struct.each_component do |component_ps|
         self[:components] << create(:component,component_ps)

@@ -74,6 +74,18 @@
          :join_cond=>{:implementation_implementation_id => :implementation__id},
          :cols=>[:id,:file_name,:type,:path]
        }]
+    },
+    :repo_object=>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [{
+         :model_name=>:repo,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:id => :implementation__repo_id},
+         :cols=>[:id,:display_name,:local_dir,:repo_name]
+       }]
     }
   },
   :many_to_one=>[:library,:project],

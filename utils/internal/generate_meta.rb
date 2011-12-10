@@ -36,33 +36,37 @@ module XYZ
         else raise Error.new("Unexpected version (#{version})")
       end
     end
-    def generate_refinement_hash(parse_struct,module_name,library_idh,impl_idh)
+    def generate_refinement_hash(parse_struct,module_name,impl_idh)
       context = {
         :version => @version,
         :module_name => module_name,
         :config_agent_type => parse_struct.config_agent_type,
-        :library_id => library_idh.get_id(),
         :implementation_id => impl_idh.get_id()
       }
       MetaObject.new(context).create(:module,parse_struct)
     end
 
-    def self.save_meta_info(meta_info_hash,library_mh)
+    def self.save_meta_info(meta_info_hash,impl_mh)
       version = meta_info_hash["version"]
       config_agent_type = meta_info_hash["config_agent_type"]
       module_name = meta_info_hash["module_name"]
       components = meta_info_hash["components"]
+      impl_id = meta_info_hash["implementation_id"]
       module_hash = {
         :required => true,
         :type => "module",
         :def => {"components" => components}
       }
+=begin
+      impl_idh = library_mh.createIDH_with_auth_info(:id => meta_info_hash["library_id"]
+      repo = Model.get_obj(library_mh.createMH(:iml
 return
       meta_generator = GenerateMeta.create(version)
       object_form = meta_generator.reify(module_hash,module_name,config_agent_type)
       r8meta_hash = object_form.render_hash_form()
 
-=begin
+
+
       #TODO: currently version not handled
       r8meta_hash.delete("version")
 

@@ -124,7 +124,7 @@ module XYZ
       end
 
       meta_generator = GenerateMeta.create("1.0")
-      refinement_hash = meta_generator.generate_refinement_hash(r8_parse,module_name,library_idh,impl_obj.id_handle)
+      refinement_hash = meta_generator.generate_refinement_hash(r8_parse,module_name,impl_obj.id_handle)
       return {
         :data=> refinement_hash
       }
@@ -207,7 +207,7 @@ Not reached
     def finish()
       meta_info_hash = JSON.parse(request.params["import_def"])
       pp meta_info_hash
-      GenerateMeta.save_meta_info(meta_info_hash,model_handle(:library))
+      GenerateMeta.save_meta_info(meta_info_hash,model_handle(:implementation))
       {:data => ''}
     end
   end

@@ -36,17 +36,44 @@ module XYZ
         else raise Error.new("Unexpected version (#{version})")
       end
     end
-    def generate_refinement_hash(parse_struct,module_name)
+    def generate_refinement_hash(parse_struct,module_name,library_idh,impl_idh)
       context = {
         :version => @version,
         :module_name => module_name,
-        :config_agent_type => parse_struct.config_agent_type
+        :config_agent_type => parse_struct.config_agent_type,
+        :library_id => library_idh.get_id(),
+        :implementation_id => impl_idh.get_id()
       }
       MetaObject.new(context).create(:module,parse_struct)
     end
 
-    def self.save_meta_info(meta_info_hash)
-      #TODO: stub
+    def self.save_meta_info(meta_info_hash,library_mh)
+      version = meta_info_hash["version"]
+      config_agent_type = meta_info_hash["config_agent_type"]
+      module_name = meta_info_hash["module_name"]
+      components = meta_info_hash["components"]
+      module_hash = {
+        :required => true,
+        :type => "module",
+        :def => {"components" => components}
+      }
+return
+      meta_generator = GenerateMeta.create(version)
+      object_form = meta_generator.reify(module_hash,module_name,config_agent_type)
+      r8meta_hash = object_form.render_hash_form()
+
+=begin
+      #TODO: currently version not handled
+      r8meta_hash.delete("version")
+
+      r8meta_path = "#{module_dir}/r8meta.#{config_agent_type}.yml"
+      r8meta_hash.write_yaml(STDOUT)
+      File.open(r8meta_path,"w"){|f|r8meta_hash.write_yaml(f)}
+
+      Model.add_library_components_from_r8meta(config_agent_type,library_idh,impl_obj.id_handle,r8meta_hash)
+
+      impl_obj.add_contained_files_and_push_to_repo()
+=end
     end
 
     def reify(hash,module_name,config_agent_type)
@@ -223,9 +250,7 @@ module XYZ
     def initialize(top_parse_struct,context,opts={})
       super(context,opts)
       return if opts[:reify]
-      self[:version] = context[:version]
-      self[:module_name] = context[:module_name]
-      self[:config_agent_type] = context[:config_agent_type]
+      context.each{|k,v|self[k] = v}
       self[:components] = MetaArray.new
       top_parse_struct.each_component do |component_ps|
         self[:components] << create(:component,component_ps)

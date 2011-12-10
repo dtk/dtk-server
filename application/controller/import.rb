@@ -60,7 +60,11 @@ module XYZ
       module_upload = request.params["module_package"]
       pkg_filename = module_upload[:filename]
       tmp_file_handle = module_upload[:tempfile]
+
+      #TODO: module_name; this is hack to get it from tar.gz file name
       module_name = pkg_filename.gsub(/\.tar\.gz$/,"")
+      module_name.gsub!(/^puppetlabs-/,"")
+      module_name.gsub!(/-[0-9]+\.[0-9]+\.[0-9]+$/,"")
 
       #mv the tmp file to under CompressedFileStore
       tmp_path = tmp_file_handle.path
@@ -82,7 +86,7 @@ module XYZ
       repo_name =  "#{username}-#{config_agent_type}-#{module_name}"
 
       opts = {:strip_prefix_count => 1} 
-      base_dir = R8::EnvironmentConfig::ImportTestBaseDir
+      base_dir = R8::Config[:repo][:base_directory]
 
       #begin capture here so can rerun even after loading in dir already
       begin

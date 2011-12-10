@@ -45,6 +45,10 @@ module XYZ
       MetaObject.new(context).create(:module,parse_struct)
     end
 
+    def self.save_meta_info(meta_info_hash)
+      #TODO: stub
+    end
+
     def reify(hash,module_name,config_agent_type)
       context = {
         :version => @version,
@@ -219,6 +223,9 @@ module XYZ
     def initialize(top_parse_struct,context,opts={})
       super(context,opts)
       return if opts[:reify]
+      self[:version] = context[:version]
+      self[:module_name] = context[:module_name]
+      self[:config_agent_type] = context[:config_agent_type]
       self[:components] = MetaArray.new
       top_parse_struct.each_component do |component_ps|
         self[:components] << create(:component,component_ps)

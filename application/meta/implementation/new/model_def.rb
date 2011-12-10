@@ -3,7 +3,7 @@
   :table=>:implementation,
   :columns=>{
     :type => {:type=>:varchar, :size => 25},
-    :repo => {:type=>:varchar, :size => 50}, #not normalized 
+    :repo => {:type=>:varchar, :size => 50}, #not normalized TODO: creating problems because it has same name as model :repo
     :module_name => {:type=>:varchar, :size => 50}, 
     :parse_state => {:type=>:varchar, :size => 25},
     :branch => {:type=>:varchar, :size => 50, :default => "master"}, 
@@ -73,18 +73,6 @@
          :join_type=>:inner,
          :join_cond=>{:implementation_implementation_id => :implementation__id},
          :cols=>[:id,:file_name,:type,:path]
-       }]
-    },
-    :repo_object=>{
-      :type=>:json,
-      :hidden=>true,
-      :remote_dependencies=>
-      [{
-         :model_name=>:repo,
-         :convert => true,
-         :join_type=>:inner,
-         :join_cond=>{:id => :implementation__repo_id},
-         :cols=>[:id,:display_name,:local_dir,:repo_name]
        }]
     }
   },

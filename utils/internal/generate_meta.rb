@@ -57,6 +57,8 @@ module XYZ
         :type => "module",
         :def => {"components" => components}
       }
+      impl_obj = impl_mh.createIDH(:id => impl_id).create_object().update_object!(:id,:display_name,:group_id,:type,:repo_id,:repo,:library_library_id)
+      impl_obj
 =begin
       impl_idh = library_mh.createIDH_with_auth_info(:id => meta_info_hash["library_id"]
       repo = Model.get_obj(library_mh.createMH(:iml

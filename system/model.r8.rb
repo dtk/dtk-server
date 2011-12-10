@@ -306,6 +306,7 @@ module XYZ
       opts = (cols_to_get & [:ref,:ref_num]).empty? ? {} : {:keep_ref_cols => true}
       vals = get_objs({:cols => cols_to_get},opts).first
       vals.each{|k,v|self[k]=v} if vals
+      @id_handle[:group_id] ||= group_id()
       self
     end
 

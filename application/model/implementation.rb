@@ -5,9 +5,11 @@ module XYZ
       repo_obj = nil
       impl_obj = nil
       ret = [nil,nil]
+
       #create repo if it does not exist
       repo_mh = library_idh.createMH(:repo)
-      repo_user_acls = %w{r8server}.map do |repo_username|
+      auth_repo_users = RepoUser.authorized_users(library_idh.createMH(:repo_user))
+      repo_user_acls = auth_repo_users.map do |repo_username|
         {
           :repo_username => repo_username,
           :access_rights => "RW+"

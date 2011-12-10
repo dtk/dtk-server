@@ -57,34 +57,31 @@ module XYZ
         :type => "module",
         :def => {"components" => components}
       }
-      impl_obj = impl_mh.createIDH(:id => impl_id).create_object().update_object!(:id,:display_name,:group_id,:type,:repo_id,:repo,:library_library_id)
-      impl_obj
-=begin
-      impl_idh = library_mh.createIDH_with_auth_info(:id => meta_info_hash["library_id"]
-      repo = Model.get_obj(library_mh.createMH(:iml
-return
+      impl_obj = impl_mh.createIDH(:id => impl_id).create_object().update_object!(:id,:display_name,:type,:repo_id,:repo,:library_library_id)
+      impl_idh = impl_obj.id_handle
+      library_idh = impl_idh.createIDH(:model_name => :library,:id => impl_obj[:library_library_id])
+      repo_obj = Model.get_obj(impl_idh.createMH(:repo),{:cols => [:id,:local_dir], :filter => [:eq, :id, impl_obj[:repo_id]]})
+                                       
       meta_generator = GenerateMeta.create(version)
       object_form = meta_generator.reify(module_hash,module_name,config_agent_type)
       r8meta_hash = object_form.render_hash_form()
 
+      r8meta_hash.delete("version") #TODO: currently version not handled in add_library_components_from_r8meta
 
-
-      #TODO: currently version not handled
-      r8meta_hash.delete("version")
-
-      r8meta_path = "#{module_dir}/r8meta.#{config_agent_type}.yml"
+      r8meta_path = "#{repo_obj[:local_dir]}/r8meta.#{config_agent_type}.yml"
       r8meta_hash.write_yaml(STDOUT)
       File.open(r8meta_path,"w"){|f|r8meta_hash.write_yaml(f)}
 
-      Model.add_library_components_from_r8meta(config_agent_type,library_idh,impl_obj.id_handle,r8meta_hash)
+      Model.add_library_components_from_r8meta(config_agent_type,library_idh,impl_idh,r8meta_hash)
 
       impl_obj.add_contained_files_and_push_to_repo()
-=end
     end
 
+    
     def reify(hash,module_name,config_agent_type)
       context = {
         :version => @version,
+        #TODO: do we neeed module_name and :config_agent_type for reify?
         :module_name => module_name,
         :config_agent_type => config_agent_type
       }
@@ -203,17 +200,30 @@ return
         hash[key.to_sym]
       end
     end
+
+    def has_index?(hash,key)
+      hash.has_key?(key.to_s) or hash.has_key?(key.to_sym)
+    end
+
     def create_in_object_form(hash)
       hash.each{|k,v|self[k.to_sym] = convert_value_if_needed(k,v)}
     end
 
     def convert_value_if_needed(key,val)
       return val unless object_attributes().include?(key.to_sym)
+      
       if val.kind_of?(Array)
-        val.inject(MetaArray.new){|ret,el_val|ret + [reify(el_val)]}
+        ret = MetaArray.new
+        val.each{|el_val| ret << reify(el_val) if selected?(el_val)}
+        ret
       else
+        #TODO: no check for selcted here?
         reify(val)
       end
+    end
+
+    def selected?(hash)
+      index(hash,:selected) or not has_index?(hash,:selected) #default is 'selected'
     end
 
     ###utilities

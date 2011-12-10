@@ -206,8 +206,10 @@ Not reached
     end
 
     def finish()
-      import_def = JSON.parse(request.params["import_def"])
-pp import_def
+      meta_info_hash = JSON.parse(request.params["import_def"])
+      pp meta_info_hash
+      GenerateMeta.save_meta_info(meta_info_hash)
+      {:data => ''}
     end
   end
 end

@@ -59,7 +59,7 @@ module XYZ
       #TDOD may remove below two public methods and subsume by above
       def update_instance(id_handle,scalar_assigns,opts={}) 
 	id_info = IDInfoTable.get_row_from_id_handle id_handle, :raise_error => true
-	update_instance_from_id_info(id_info,scalar_assigns,opts)
+	update_instance_from_id_info(id_handle,id_info,scalar_assigns,opts)
       end
     
       def update(relation_type,c,scalar_assigns,where_clause={})
@@ -93,16 +93,16 @@ module XYZ
         ret
       end
 
-      def update_instance_from_id_info(id_info,scalar_assigns,opts={})
+      def update_instance_from_id_info(id_handle_x,id_info,scalar_assigns,opts={})
 	return nil if scalar_assigns.empty?
 	db_rel = DB_REL_DEF[id_info[:relation_type]]
 	ds = dataset(db_rel).where(:id => id_info[:id])
 	#TODO: check that valid assigns
         id_handle = IDHandle[:id_info => id_info]
+        id_handle[:group_id] ||= id_handle_x[:group_id] if id_handle_x[:group_id]
 	modify_to_reflect_special_processing!(scalar_assigns,db_rel,:update,opts.merge({:id_handle => id_handle}))
 	ds.update(scalar_assigns)
       end
-
 
       #id_handle used to pass context such as user_id and group_id
       #TODO: may collapse factory_id_info and id_handle
@@ -115,6 +115,7 @@ module XYZ
         assigns.each_pair do |qualified_ref,child_assigns|
 	  child_uri = RestURI.ret_child_uri_from_qualified_ref(factory_id_info[:uri],qualified_ref)
           child_idh = IDHandle[:c => c, :uri => child_uri]
+          child_idh[:group_id] = id_handle[:group_id] if id_handle[:group_id]
 	  child_id_info = IDInfoTable.get_row_from_id_handle child_idh
           if child_id_info
 	    update_from_hash_from_instance_id(child_id_info,child_idh,child_assigns,opts)
@@ -153,7 +154,7 @@ module XYZ
 	new_uris = Array.new
         db_rel = DB_REL_DEF[id_info[:relation_type]]
 	scalar_assigns = ret_settable_scalar_assignments(assigns,db_rel)
-	update_instance_from_id_info(id_info,scalar_assigns,opts)
+	update_instance_from_id_info(id_handle,id_info,scalar_assigns,opts)
 
 	obj_assigns = ret_object_assignments(assigns,db_rel)
 	obj_assigns.each_pair do |relation_type,child_assigns|

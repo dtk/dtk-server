@@ -69,7 +69,7 @@ module XYZ
       module_dir = repo_obj[:local_dir]
 
       #copy files
-      source_dir = "/root/core-cookbooks/puppet/#{module_name}" #TODO: hard coded for testing
+      source_dir = "#{R8::EnvironmentConfig::SourceExternalRepoDir}/puppet/#{module_name}" 
       require 'fileutils'
       #TODO: more efficient to use copy pattern that does not include .git in first place
       FileUtils.cp_r "#{source_dir}/.", module_dir

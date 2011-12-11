@@ -16,6 +16,9 @@ module XYZ
       nil
     end
 
+    def clone_branch(new_branch)
+    end
+
     def add_all_files()
     end
     def push_implementation()

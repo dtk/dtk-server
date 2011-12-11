@@ -9,34 +9,15 @@ module XYZ
       root = R8::Config[:repo][:base_directory]
       @path = "#{root}/#{path}"
     end
-    def self.repo_url()
-      nil
-    end
-    def self.repo_server_dns()
-      nil
-    end
-
-    def clone_branch(new_branch)
-    end
-
-    def add_all_files()
-    end
-    def push_implementation()
-    end
-
+    
     def get_file_content(file_asset)
       Dir.chdir(@path){File.open(file_asset[:path]){|f|f.read}}
-    end
-
-    def self.delete_all_server_repos()
     end
 
     def self.repo_name(username,config_agent_type,module_name)
       "#{username}-#{config_agent_type}-#{module_name}"
     end
 
-    def self.create_server_repo(repo_obj,repo_user_acls,opts={})
-    end
     def self.create_local_repo(repo_obj,opts)
       local_repo_dir = repo_obj[:local_dir]
       repo_name = repo_obj[:repo_name]
@@ -47,6 +28,16 @@ module XYZ
           raise Error.new("trying to create a repo (#{repo_name}) that exists already on r8 server")
         end
       end
+    end
+
+    #no ops if dont explicitly have method
+    class << self
+      def method_missing(meth, *args, &block)
+        nil
+      end
+    end
+    def method_missing(meth, *args, &block)
+      nil
     end
   end
 end

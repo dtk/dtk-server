@@ -175,13 +175,13 @@ module XYZ
   class RepomanagerGitLinux < RepoManagerGit
    private
     def git_command__clone(remote_repo,local_dir)
-      git_command.clone(CmdOpts,remote_repo,local_dir)
+      git_command.clone(cmd_opts(),remote_repo,local_dir)
     end
     def git_command__checkout(branch_name)
-      git_command.checkout(CmdOpts,branch_name)
+      git_command.checkout(cmd_opts(),branch_name)
     end
     def git_command__add_branch(branch_name)
-      git_command.branch(CmdOpts,branch_name)
+      git_command.branch(cmd_opts(),branch_name)
     end
     def git_command__add(file_path)
       @grit_repo.add(file_path)
@@ -193,24 +193,25 @@ module XYZ
       @grit_repo.commit_index(message)
     end
     def git_command__push(branch_name)
-      git_command.push(CmdOpts,"origin", "#{branch_name}:refs/heads/#{branch_name}")
+      git_command.push(cmd_opts(),"origin", "#{branch_name}:refs/heads/#{branch_name}")
     end
     def git_command__pull(branch_name)
-      git_command.pull(CmdOpts,"origin",branch_name)
+      git_command.pull(cmd_opts(),"origin",branch_name)
     end
 
     def git_command__merge(branch_to_merge_from)
-      git_command.merge(CmdOpts,branch_to_merge_from)
+      git_command.merge(cmd_opts(),branch_to_merge_from)
     end
 
     def git_command__delete_local_branch(branch_name)
-      git_command.branch(CmdOpts,"-D",branch_name)
+      git_command.branch(cmd_opts(),"-D",branch_name)
     end
     def git_command__delete_remote_branch(branch_name)
-      git_command.push(CmdOpts,"origin",":refs/heads/#{branch_name}")
+      git_command.push(cmd_opts(),"origin",":refs/heads/#{branch_name}")
     end
-    CmdOpts = {}
-
+    def cmd_opts()
+      {:raise => true, :timeout => 60}
+    end
   end
   class RepoManagerGitWindows  < RepoManagerGit
    private

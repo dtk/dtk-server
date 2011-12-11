@@ -64,7 +64,10 @@ module XYZ
           end
         end
       end
+#TODO: put this as boothook because if not get race condition with start of mcollective
+#need to check if this now runs on every boot; if so might want to put provision in so only runs on first boot
 UserDataTemplate = Erubis::Eruby.new <<eos
+#cloud-boothook
 #!/bin/sh 
 
 cat << EOF > /etc/mcollective/facts.yaml

@@ -106,11 +106,20 @@ module XYZ
         :filter => [:oneof,:component_type,remote_link_defs.keys]
       }
       stored_remote_cmps = library_idh.create_object().get_children_objs(:component,sp_hash,:keep_ref_cols=>true)
-=begin
-          Log.error("link def references a remote component (#{remote_cmp_ref}) that does not exist")
+      ndx_stored_remote_cmps = stored_remote_cmps.inject({}){|h,cmp|h.merge(cmp[:component_type] => cmp)}
+      remote_link_defs.each do |remote_cmp_type,remote_link_def|
+        if remote_cmp = ndx_stored_remote_cmps[remote_cmp_type]
+          remote_cmp_ref = remote_cmp[:ref]
+          cmp_pointer = cmps_hash[remote_cmp_ref] ||= {"link_def" => Hash.new}
+          cmp_pointer["link_def"].merge!(remote_link_def)
+          remote_link_defs.delete(remote_cmp_type)
+        end
+      end
 
-=end 
-      stored_remote_cmps
+      #if any remote_link_defs left they are dangling refs
+      remote_link_defs.keys.each do |remote_cmp_type|
+        Log.error("link def references a remote component (#{remote_cmp_type}) that does not exist")
+      end
     end
     private :component_ref, :component_ref_from_cmp_type, :process_remote_link_defs!
     #### end: privaate helpers

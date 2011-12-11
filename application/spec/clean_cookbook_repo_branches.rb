@@ -1,11 +1,14 @@
 #!/usr/bin/env ruby
 require 'rubygems'
-root = File.expand_path('../', File.dirname(__FILE__))
-require 'pp'
-#require root + '/app'
 Root = File.expand_path('../', File.dirname(__FILE__))
-require "#{Root}/config/environment_config.rb"
-require "#{Root}/../utils/internal/auxiliary.rb"
-require "#{Root}/../utils/internal/repo.rb"
+require 'pp'
+require Root + '/app'
+include XYZ
 
-XYZ::RepoManager.delete_all_branches()
+def model_handle(model_name)
+  c = 2
+  ModelHandle.new(c,model_name)
+end
+
+RepoManager.delete_all_branches(model_handle(:repo))
+

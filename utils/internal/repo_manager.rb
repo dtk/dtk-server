@@ -34,11 +34,11 @@ module XYZ
       get_repo(context).delete_branch()
     end
 
-    def self.delete_all_branches(model_handle)
-      repo_names = get_all_repo_names()
-      delete_branches(model_handle,*repo_names)
+    def self.delete_all_branches(repo_mh)
+      repo_names = get_all_repo_names(repo_mh)
+      delete_branches(*repo_names)
     end
-    def self.delete_branches(model_handle,*repo_names)
+    def self.delete_branches(*repo_names)
       klass = load_and_return_adapter_class()
       repo_names.each do |repo_name|
         #TODO: change so this from Repo if want to put in hooks for per branch auth

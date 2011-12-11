@@ -19,6 +19,11 @@ module XYZ
     end
 
    private    
+    def self.repo_name(config_agent_type,module_name)
+      username = CurrentSession.get_username()
+      RepoManager.repo_name(username,config_agent_type,module_name)
+    end
+
     def self.create_repo_obj?(model_handle,repo_name)
       sp_hash = {
         :cols => common_columns(),
@@ -37,13 +42,8 @@ module XYZ
       repo_idh.create_object().merge(repo_hash)
     end
 
-
     def self.common_columns()
       [:id,:display_name,:repo_name,:local_dir]
-    end
-    def self.repo_name(config_agent_type,module_name)
-      username = CurrentSession.get_username()
-      RepoManager.repo_name(username,config_agent_type,module_name)
     end
   end
 end

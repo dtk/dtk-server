@@ -1,6 +1,8 @@
 module XYZ
   class ImplementationController < Controller
 ###TODO: for testing
+    #remove when finish testing
+    #currently broken
     def test_extract(module_name)
       #a library should be passed as input; here we are just using teh users' private library
       library_idh = Library.get_users_private_library(model_handle(:library)).id_handle()
@@ -58,6 +60,7 @@ module XYZ
       {:content => {}}
     end
 
+    #TODO: may convert to get from git repo or process when git receive hooks
     def test_copy(module_name)
       #a library should be passed as input; here we are just using the public library
       library_idh = Library.get_public_library(model_handle(:library)).id_handle()
@@ -65,14 +68,18 @@ module XYZ
       repo_obj,impl_obj = Implementation.create_library_repo_and_implementation(library_idh,module_name,config_agent_type, :delete_if_exists => true)
       module_dir = repo_obj[:local_dir]
 
-      #TODO: hard codeed for testing
-      source_dir = "/root/core-cookbooks/puppet/#{module_name}"
+      #copy files
+      source_dir = "/root/core-cookbooks/puppet/#{module_name}" #TODO: hard coded for testing
       require 'fileutils'
+      #TODO: more efficient to use copy pattern that does not include .git in first place
       FileUtils.cp_r "#{source_dir}/.", module_dir
       source_git = "#{source_dir}/.git"
       FileUtils.rm_rf source_git if File.directory?(source_git)
 
-      r8meta_path = "#{source_dir}/r8meta.#{config_agent_type}.yml"
+      #add file_assets
+      impl_obj.add_library_files_from_directory(repo_obj)
+
+      r8meta_path = "#{module_dir}/r8meta.#{config_agent_type}.yml"
       require 'yaml'
       r8meta_hash = YAML.load_file(r8meta_path)
 

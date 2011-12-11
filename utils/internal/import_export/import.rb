@@ -21,7 +21,6 @@ module XYZ
     include CommonInputImport
     #assumption is that top_container_idh is in uri form
     #returns [library_idh,implementation_idh]
-    #TODO: deprecate
     def add_library_files_from_directory(top_container_idh,module_dir,module_name,config_agent_type)
       library_impl_hash = Implementation::ret_library_implementation_hash(module_dir,module_name,config_agent_type)
       username = CurrentSession.get_user_username()
@@ -41,8 +40,7 @@ module XYZ
       ret_library_and_impl_id_handles(top_container_idh,library_ref,impl_ref)
     end
 
-    #TODO: deprecate
-    #TODO: this is somewhatr of a hack; better is if input_hash_content_into_model gave this info
+    #TODO: this is somewhat of a hack; better is if input_hash_content_into_model gave this info
     def ret_library_and_impl_id_handles(top_container_idh,library_ref,impl_ref)
       library_uri = "/library/#{library_ref}"
       impl_uri = "#{library_uri}/implementation/#{impl_ref}"
@@ -53,10 +51,19 @@ module XYZ
 
     def add_library_components_from_r8meta(config_agent_type,library_idh,impl_idh,r8meta_hash)
       impl_id = impl_idh.get_id()
+      remote_link_defs = Hash.new
       cmps_hash = r8meta_hash.inject({}) do |h, (cmp_ref,cmp_info)|
-        #TODO: for now just removing the link defs
-        info = cmp_info.inject({}) do |r,(k,v)|
-          ["link_defs", "external_link_defs"].include?(k) ? r : r.merge(k => v)
+        info = Hash.new
+        cmp_info.each do |k,v|
+          case k
+           when "external_link_defs"
+            #TODO: for now just removing the remote link defs; must process them
+           when "link_defs" 
+            parsed_link_def = LinkDef.parse_serialized_form_local(v,config_agent_type,remote_link_defs)
+            (info["link_def"] ||= Hash.new).merge!(parsed_link_def)
+          else
+            info[k] = v
+          end
         end
         info.merge!("implementation_id" => impl_id)
         #TODO: may be better to have these prefixes already in r8 meta file

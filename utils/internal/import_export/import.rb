@@ -49,15 +49,18 @@ module XYZ
       end
     end
 
+    #TODO: make this version dependent
     def add_library_components_from_r8meta(config_agent_type,library_idh,impl_idh,r8meta_hash)
       impl_id = impl_idh.get_id()
       remote_link_defs = Hash.new
-      cmps_hash = r8meta_hash.inject({}) do |h, (cmp_ref,cmp_info)|
+      cmps_hash = r8meta_hash.inject({}) do |h, (r8_hash_cmp_ref,cmp_info)|
         info = Hash.new
         cmp_info.each do |k,v|
           case k
            when "external_link_defs"
-            #TODO: for now just removing the remote link defs; must process them
+            v.each{|ld|(ld["possible_links"]||[]).each{|pl|pl.values.first["type"] = "external"}} #TODO: temp hack to put in type = "external"
+            parsed_link_def = LinkDef.parse_serialized_form_local(v,config_agent_type,remote_link_defs)
+            (info["link_def"] ||= Hash.new).merge!(parsed_link_def)
            when "link_defs" 
             parsed_link_def = LinkDef.parse_serialized_form_local(v,config_agent_type,remote_link_defs)
             (info["link_def"] ||= Hash.new).merge!(parsed_link_def)
@@ -66,11 +69,51 @@ module XYZ
           end
         end
         info.merge!("implementation_id" => impl_id)
-        #TODO: may be better to have these prefixes already in r8 meta file
-        h.merge("#{config_agent_type}-#{cmp_ref}" => info)
+        cmp_ref = component_ref(config_agent_type,r8_hash_cmp_ref)
+        h.merge(cmp_ref => info)
       end
+      #process the link defs for remote components
+      process_remote_link_defs!(cmps_hash,remote_link_defs,library_idh)
       input_hash_content_into_model(library_idh,{"component" => cmps_hash})
     end
+
+    #### private helpers
+    def component_ref(config_agent_type,r8_hash_cmp_ref)
+      #TODO: may be better to have these prefixes already in r8 meta file
+      "#{config_agent_type}-#{r8_hash_cmp_ref}"
+    end
+    def component_ref_from_cmp_type(config_agent_type,component_type)
+      "#{config_agent_type}-#{component_type}"
+    end
+
+    #updates both cmps_hash and remote_link_defs
+    def process_remote_link_defs!(cmps_hash,remote_link_defs,library_idh)
+      return if remote_link_defs.empty?
+      #process all remote_link_defs in this module
+      remote_link_defs.each do |remote_cmp_type,remote_link_def|
+        config_agent_type = remote_link_def.values.first[:config_agent_type]
+        remote_cmp_ref = component_ref_from_cmp_type(config_agent_type,remote_cmp_type)
+        if cmp_pointer = cmps_hash[remote_cmp_ref]
+          (cmp_pointer["link_def"] ||= Hash.new).merge!(remote_link_def)
+          remote_link_defs.delete(remote_cmp_type)
+        end
+      end
+
+      #process remaining remote_link_defs to see if in stored modules
+      return if remote_link_defs.empty?
+      sp_hash = {
+        :cols => [:id,:ref,:component_type],
+        :filter => [:oneof,:component_type,remote_link_defs.keys]
+      }
+      stored_remote_cmps = library_idh.create_object().get_children_objs(:component,sp_hash,:keep_ref_cols=>true)
+=begin
+          Log.error("link def references a remote component (#{remote_cmp_ref}) that does not exist")
+
+=end 
+      stored_remote_cmps
+    end
+    private :component_ref, :component_ref_from_cmp_type, :process_remote_link_defs!
+    #### end: privaate helpers
 
     #assumption is that target_id_handle is in uri form
     def import_objects_from_file(target_id_handle,json_file,opts={})

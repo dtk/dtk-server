@@ -1,8 +1,8 @@
 <div style="height: 200px; width: 400px; margin: 0 auto;">
-	<div style="margin-left: 50px;"><img src="{%=_app[:base_images_uri]%}/R8-Logo-Black.png" border="0"/></div>
 	<br/>
+	<div style="margin: 20px 0 20px 30px;"><img src="{%=_app[:base_images_uri]%}/reactor8-logo-350x55.png" border="0"/></div>
 	<form action="process_login" method="POST">
-	<div style="width: 400px; height: 125px; border: 3px solid #CCCCCC; background-color: #EDEDED;">
+	<div style="width: 400px; height: 125px; border: 3px solid #CCCCCC; background-color: #EDEDED; 	-moz-border-radius-topleft: 5px; -moz-border-radius-topright: 5px;-moz-border-radius-bottomleft: 5px;-moz-border-radius-bottomright: 5px;">
 		<div style="margin: 10px;">
 			<table class="edit" style="border: 0;">
 			    <tr>
@@ -20,3 +20,4 @@
 	</div>
 	</form>
 </div>
+<br/><br/><br/><br/><br/><br/>

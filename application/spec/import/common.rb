@@ -28,7 +28,7 @@ class R8Server
   end
 
   def create_public_library?()
-    library_mh = pre_execute(:repo_user)
+    library_mh = pre_execute(:library)
     Library.create_public_library?(library_mh)
   end
 

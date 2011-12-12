@@ -944,7 +944,7 @@ POSSIBLE CHANGES TO HASH
       library_list = get_objects(:library,where_clause)
       lib_num = 1
       library_list.each do |library|
-        library[:name] = "Library "+lib_num.to_s if library[:name].nil?
+        library[:name] = "Library #{(library[:display_name]||"").capitalize}"
         lib_num = lib_num+1
       end
       tpl.assign(:library_list,library_list)

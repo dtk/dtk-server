@@ -13,7 +13,7 @@ end.parse!
 
 server = R8Server.new("superuser","all")
 server.create_repo_user_r8server?()
-server.create_public_library?()
+server.create_public_library?(:include_default_nodes => true)
 
 #TODO: not sure if btter to go in bootstrap or clear
 XYZ::RepoManager.delete_all_repos() if options[:delete]

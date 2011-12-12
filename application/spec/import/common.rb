@@ -27,16 +27,44 @@ class R8Server
     RepoUser.create_r8server?(repo_user_mh)
   end
 
-  def create_public_library?()
+  def create_repo_user_client?()
+    repo_user_mh = pre_execute(:repo_user)
+    RepoUser.create_r8client?(repo_user_mh,username)
+  end
+
+  def create_public_library?(opts={})
+    #TODO: hack; must unify; right now based on assumption on name that appears in import file
+    if opts[:include_default_nodes]
+      container_idh = pre_execute(:top)
+      import_file = "#{Root}/spec/test_data/library_node_data.json" #TODO: hack
+      Model.import_objects_from_file(container_idh,import_file)
+    else
+      library_mh = pre_execute(:library)
+      Library.create_public_library?(library_mh)
+    end
+  end
+
+  def create_users_private_library?()
     library_mh = pre_execute(:library)
-    Library.create_public_library?(library_mh)
+    Library.create_users_private_library?(library_mh)
+  end
+
+  def create_users_private_target?(import_file=nil)
+    container_idh = pre_execute(:top)
+    import_file ||= "#{Root}/spec/test_data/target_data.json" #TODO: hack
+    Model.import_objects_from_file(container_idh,import_file)
   end
 
   private
   attr_reader :user_mh, :user_obj
+  def username()
+    user_obj[:username]
+  end
   def pre_execute(model_name=nil)
     CurrentSession.new.set_user_object(user_obj)
-    model_name && user_mh.createMH(model_name)
+    if model_name 
+      model_name == :top ? user_mh.create_top() : user_mh.createMH(model_name)
+    end
   end
   def model_handle(model_name)
     c = 2

@@ -74,6 +74,7 @@
 					<div class="sub-item"><a href="javascript:R8.IDE.refreshChefDebug('info');">Refresh Chef Info</a></div>
 					<div class="sub-item"><a href="javascript:R8.IDE.refreshChefDebug('summary');">Refresh Chef Summary</a></div>
 -->
+					<div style="float: right; margin:5px; 10px;"><a href="{%=_app[:base_uri]%}/xyz/user/logout">Logout</a></div>
 				</div>
 				<div class="yui3-u right-cap"></div>
 			</div>

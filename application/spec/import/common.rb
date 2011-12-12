@@ -52,23 +52,14 @@ class R8Server
   def create_users_private_target?(import_file=nil)
     #TODO: this is hack that should be fixed up
     container_idh = pre_execute(:top)
-    import_file ||= "#{Root}/spec/test_data/target_data_set.json" #TODO: hack
-    hash_content_with_generic_refs = Aux::hash_from_file_with_json(import_file) 
+    template_path ||= "#{Root}/spec/test_data/target_data_template.erb" 
+    template = File.open(template_path){|f|f.read}
+    erubis = Erubis::Eruby.new(template)
     users_ref = "private-#{username}"
-    hash_content = transform_refs(users_ref,hash_content_with_generic_refs)
+    json_content = erubis.result(:project_ref => users_ref,:target_ref => users_ref)
+    hash_content = JSON.parse(json_content)
     Model.import_objects_from_hash(container_idh,hash_content)
   end
-  def transform_refs(users_ref,hash_content_with_generic_refs)
-    hash_content_with_generic_refs.inject({}) do |h,(top_model_name,rest)|
-      to_add = {
-        top_model_name => {
-          users_ref => rest.values.first
-        }
-      }
-      h.merge(to_add)
-    end
-  end
-  private :transform_refs
 
   private
   attr_reader :user_mh, :user_obj

@@ -1,21 +1,17 @@
 #!/usr/bin/env ruby
 #general initial
-require  File.expand_path('common', File.dirname(__FILE__))
+require 'rubygems'
+require 'optparse'
 options = Hash.new
 OptionParser.new do|opts|
-   opts.banner = "Usage: initialize.rb [--delete]"
+   opts.banner = "Usage: add_user.rb USERNAME [--add-nodes]"
 
    # Define the options, and what they do
-   opts.on( '-d', '--delete', 'Delete module repos' ) do
-     options[:delete] = true
+   opts.on( '-a', '--add-nodes', 'Add library nodes in private library ' ) do
+     options[:add-nodes] = true
    end
 end.parse!
-
-server = R8Server.new("superuser","all")
-server.create_repo_user_r8server?()
-server.create_public_library?()
-
-=begin
+username = ARGV[0]
 
 Root = File.expand_path('../../', File.dirname(__FILE__))
 require Root + '/app'
@@ -37,8 +33,8 @@ repo_user_mh = user_mh.createMH(:model_name => :repo_user, :group_id => group_ob
 RepoUser.create_r8server?(repo_user_mh)
 public_library_mh = repo_user_mh.createMH(:library)
 Library.create_public_library?(public_library_mh)
-=end
+
 #TODO: not sure if btter to go in bootstrap or clear
-XYZ::RepoManager.delete_all_repos() if options[:delete]
+RepoManager.delete_all_repos() if options[:delete]
 
 

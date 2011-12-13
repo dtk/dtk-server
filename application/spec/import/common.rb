@@ -61,6 +61,32 @@ class R8Server
     Model.import_objects_from_hash(container_idh,hash_content)
   end
 
+  def add_modules_from_external_repo_dir(*module_names)
+    library_mh = pre_execute(:library)
+    library_idh = Library.get_users_private_library(library_mh).id_handle()
+    config_agent_type = :puppet
+    module_names.each do |module_name|
+      repo_obj,impl_obj = Implementation.create_library_repo_and_implementation(library_idh,module_name,config_agent_type, :delete_if_exists => true)
+      module_dir = repo_obj[:local_dir]
+
+      #copy files
+      source_dir = "#{R8::EnvironmentConfig::SourceExternalRepoDir}/puppet/#{module_name}" 
+      #TODO: more efficient to use copy pattern that does not include .git in first place
+      FileUtils.cp_r "#{source_dir}/.", module_dir
+      source_git = "#{source_dir}/.git"
+      FileUtils.rm_rf source_git if File.directory?(source_git)
+      
+      #add file_assets
+      impl_obj.add_library_files_from_directory(repo_obj)
+    
+      r8meta_path = "#{module_dir}/r8meta.#{config_agent_type}.yml"
+      r8meta_hash = YAML.load_file(r8meta_path)
+
+      Model.add_library_components_from_r8meta(config_agent_type,library_idh,impl_obj.id_handle,r8meta_hash)
+      
+      impl_obj.add_contained_files_and_push_to_repo()
+    end
+  end
   private
   attr_reader :user_mh, :user_obj
   def username()

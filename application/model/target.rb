@@ -28,18 +28,24 @@ module XYZ
       port_list.map{|port|port.filter_and_process!(i18n,*types)}.compact
     end
 
+    def get_node_config_changes()
+      nodes = get_objs(:cols => [:nodes]).map{|r|r[:node]}
+      ndx_changes = StateChange.get_ndx_node_config_changes(id_handle)
+      nodes.inject({}){|h,n|h.merge(n.id => ndx_changes[n.id]||StateChange.node_config_change__no_changes())}
+    end
+
     def get_and_update_nodes_status()
-      nodes = get_objects_from_sp_hash(:cols => [:nodes]).map{|r|r[:node]}
+      nodes = get_objs(:cols => [:nodes]).map{|r|r[:node]}
       nodes.inject({}){|h,n|h.merge(n.id => n.get_and_update_status!())}
     end
 
     def destroy_and_delete_nodes()
-      nodes = get_objects_from_sp_hash(:cols => [:nodes]).map{|r|r[:node]}
+      nodes = get_objs(:cols => [:nodes]).map{|r|r[:node]}
       nodes.each{|n|n.destroy_and_delete()}
     end
 
     def get_violation_info(severity=nil)
-      get_objects_from_sp_hash(:columns => [:violation_info]).map do |r|
+      get_objs(:columns => [:violation_info]).map do |r|
         v = r[:violation]
         if severity.nil? or v[:severity] == severity
           v.merge(:target_node_display_name => (r[:node]||{})[:display_name])

@@ -38,7 +38,7 @@ module XYZ
       session = CurrentSession.new
       auth_filters = NoAuth.include?(model_handle[:model_name]) ? nil : session.get_auth_filters()
       if auth_filters 
-#=begin
+=begin
 controller_line = caller.find{|x|x =~ /application\/controller/}
 controller = controller_line
 if controller_line =~ /controller\/(.+)\.rb:.+`(.+)'/
@@ -51,7 +51,7 @@ unless [:task_log].include?(mn) or ["target#get_nodes_status", "task#get_logs"].
   username = CurrentSession.new.get_username()
   pp [:auth,username,mn,controller_action]
 end
-#=end
+=end
         conjoin_set += process_session_auth(session,auth_filters)
       else
         conjoin_set << {CONTEXT_ID => model_handle[:c]} if model_handle[:c]

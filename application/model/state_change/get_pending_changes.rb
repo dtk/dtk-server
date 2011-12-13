@@ -1,5 +1,19 @@
 module XYZ
   module GetPendingChangesClassMixin
+    def get_ndx_node_config_changes(target_idh)
+      #TODO: there is probably more efficient info to get; this provides too much
+      changes = flat_list_pending_changes(target_idh)
+      #TODO: stub
+      changes.inject({}) do |h,r|
+        node_id = r[:node][:id]
+        h.merge(node_id => {:state => :changes, :detail => {}})
+      end
+    end
+
+    def node_config_change__no_changes()
+      {:state => :no_changes}
+    end
+
     def flat_list_pending_changes(target_idh)
       target_mh = target_idh.createMH()
       last_level = pending_changes_one_level_raw(target_mh,[target_idh])

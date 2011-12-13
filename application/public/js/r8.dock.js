@@ -867,9 +867,9 @@ var _footer ='<div class="corner bl"></div>\
 //						'io:success':this.getPanelCfg
 //					}
 				};
-//DEBUG
 //console.log('going to call dock get users.....');
-				R8.Ctrl.call(item.model+'dock_get_users/'+item.id, params);
+//				R8.Ctrl.call(item.model+'/dock_get_users/'+item.id, params);
+				R8.Ctrl.call('node/dock_get_users/'+item.id, params);
 			}
 		}
 	}
@@ -891,9 +891,10 @@ var _footer ='<div class="corner bl"></div>\
 						'method': 'GET'
 					},
 				};
+//DEBUG
 //console.log('going to call dock get service checks.....');
-				R8.Ctrl.call(item.model+'dock_get_service_checks/'+item.id, params);
-
+				//R8.Ctrl.call(item.model+'/dock_get_service_checks/'+item.id, params);
+				R8.Ctrl.call('node/dock_get_service_checks/'+item.id, params);
 			}
 		}
 	}
@@ -925,8 +926,10 @@ var _footer ='<div class="corner bl"></div>\
 						}
 					}
 				};
-console.log('going to call dock get applications.....');
-				R8.Ctrl.call(item.model+'dock_get_applications/'+item.id, params);
+//DEBUG
+//console.log('going to call dock get applications.....');
+//				R8.Ctrl.call(item.model+'/dock_get_applications/'+item.id, params);
+				R8.Ctrl.call('node/dock_get_applications/'+item.id, params);
 			},
 			init: function() {
 //TODO: revisit to make more generic, shouldnt have to reference node explicitly, should be based on focus

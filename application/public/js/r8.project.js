@@ -22,10 +22,13 @@ if (!R8.Project) {
 					_targets[target.id] = new R8.Target(target,this);
 					_targets[target.id].init();
 				}
+//DEBUG
+//console.log('going to instantiation implementations inside fo project.init....');
 				for(var i in _def.tree.implementations) {
-					var implementations = _def.tree.implementations[i];
-					_implementations[implementations.id] = new R8.Implementation(implementations,this);
-					_implementations[implementations.id].init();
+					var implementation = _def.tree.implementations[i];
+//console.log(implementation);
+					_implementations[implementation.id] = new R8.Implementation(implementation,this);
+					_implementations[implementation.id].init();
 				}
 
 				this.setupEvents();
@@ -99,6 +102,15 @@ if (!R8.Project) {
 //DEBUG
 console.log('going to add new implementation tree...');
 console.log(impTree);
+return;
+						_implementations[impTree.id] = new R8.Implementation(impTree,_this);
+						_implementations[impTree.id].init();
+						for(var v in _views) {
+							_views[v].addImplementation(_implementations[impTree.id],_this);
+						}
+
+//						this.addImplementation(implementations[i]);
+
 //						_this.addImplementation(impTree);
 				}
 				var callbacks = {

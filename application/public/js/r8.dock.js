@@ -146,14 +146,18 @@ if(!R8.Dock2) {
 					});
 //DEBUG
 //hiding the dock by default for demo, change after implementing user settings/memory
-					that.hide();
+//					that.hide();
 				});
+//DEBUG
+//temp removing add view item
+/*
 				R8.Topbar2.addViewItem({
 					id: 'dock',
 					i18n: 'Dock',
 					visible: false,
 					clickCallback: this.toggleDock
 				});
+*/
 			},
 			realign: function() {
 //				_overlay.set('align',{node: "#"+_dockAlignNodeId,points: ["tr", "tr"]});
@@ -863,8 +867,9 @@ var _footer ='<div class="corner bl"></div>\
 //						'io:success':this.getPanelCfg
 //					}
 				};
-console.log('going to call dock get users.....');
-				R8.Ctrl.call(item.model+'/dock_get_users/'+item.id, params);
+//DEBUG
+//console.log('going to call dock get users.....');
+				R8.Ctrl.call(item.model+'dock_get_users/'+item.id, params);
 			}
 		}
 	}
@@ -886,8 +891,8 @@ console.log('going to call dock get users.....');
 						'method': 'GET'
 					},
 				};
-console.log('going to call dock get service checks.....');
-				R8.Ctrl.call(item.model+'/dock_get_service_checks/'+item.id, params);
+//console.log('going to call dock get service checks.....');
+				R8.Ctrl.call(item.model+'dock_get_service_checks/'+item.id, params);
 
 			}
 		}
@@ -921,7 +926,7 @@ console.log('going to call dock get service checks.....');
 					}
 				};
 console.log('going to call dock get applications.....');
-				R8.Ctrl.call(item.model+'/dock_get_applications/'+item.id, params);
+				R8.Ctrl.call(item.model+'dock_get_applications/'+item.id, params);
 			},
 			init: function() {
 //TODO: revisit to make more generic, shouldnt have to reference node explicitly, should be based on focus

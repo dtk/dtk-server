@@ -107,6 +107,10 @@ if (!R8.IDE.View.node.editor_target) {
 						_nameNode.set('innerHTML',_node.get('name'));
 					},this);
 				},this);
+
+//DEBUG
+//				_events['node_action_click'] = R8.Utils.Y.delegate('click',function(e){console.log('clicked action btn for node...');},_contentNode,'.action-btn',this);
+
 			},
 			render: function() {
 //				var tpl_callback = _node['tpl_callback'];

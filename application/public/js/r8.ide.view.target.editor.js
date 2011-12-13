@@ -246,12 +246,14 @@ if (!R8.IDE.View.target.editor) {
 */
 
 				this.startStatusPoller();
-return;
+//return;
+
+/*
 				document.getElementById('cmdbar_input_form').onsubmit = function() {
 					_cmdBar.submit();
 					return false;
 				};
-
+*/
 //				_contentNode.append(R8.Dock.render({'display':'block','top':_topbarNode.get('region').bottom}));
 //				_contentNode.append(R8.Dock2.render({'display':'block','top':_contentNode.get('region').top}));
 				_contentNode.append(R8.Dock2.render({'display':'block','top':40}));
@@ -590,6 +592,7 @@ return;
 					e.halt();
 					return false;
 				},this);
+
 //DEBUG
 //TODO: mouse over popup screwed b/c of layout, disabling for now
 /*
@@ -716,7 +719,7 @@ return;
 
 //DEBUG
 //TODO: revisit once puting dock into place
-//				R8.Dock2.focusChange(_selectedItems);
+				R8.Dock2.focusChange(_selectedItems);
 
 				e.stopImmediatePropagation();
 			},

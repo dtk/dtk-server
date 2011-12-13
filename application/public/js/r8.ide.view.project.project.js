@@ -189,7 +189,7 @@ break;
 				_leafBodyNode = _leafNode.get('children').item(0);
 				_leafBodyNodeId = _leafBodyNode.get('id');
 
-				_childrenListNode = R8.Utils.Y.Node.create('<ul ="project-'+_project.get('id')+'-children-list"></ul>');
+				_childrenListNode = R8.Utils.Y.Node.create('<ul id="project-'+_project.get('id')+'-children-list"></ul>');
 				_childrenListNodeId = _childrenListNode.get('id');
 
 				//------------------------------------
@@ -211,7 +211,7 @@ break;
 				};
 				_implementationsLeafNode = R8.Utils.Y.Node.create(R8.Rtpl['project_tree_leaf']({'leaf_item': projectImplementationsLeaf}));
 				_implementationsLeafNodeId = _implementationsLeafNode.get('id');
-				_implementationsListNode = R8.Utils.Y.Node.create('<ul ="project-'+_project.get('id')+'-implementation-list"></ul>');
+				_implementationsListNode = R8.Utils.Y.Node.create('<ul id="project-'+_project.get('id')+'-implementation-list"></ul>');
 				_implementationsListNodeId = _implementationsListNode.get('id');
 
 				var implementations = _project.get('implementations');
@@ -249,6 +249,8 @@ break;
 					_childrenListNode.append(target.getView('project').render());
 			},
 			addImplementation: function(implementation) {
+//DEBUG
+//console.log(implementation);
 					_implementationsListNode.append(implementation.getView('project').render());
 			},
 			renderFileTree: function(file_assets,ulNode) {

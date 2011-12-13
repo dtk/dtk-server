@@ -43,7 +43,7 @@ module XYZ
       def get_and_propagate_dynamic_attributes(result)
         dyn_attr_val_info = get_dynamic_attributes(result)
         return if dyn_attr_val_info.empty?
-        attr_mh = self[:node].model_handle(:attribute)
+        attr_mh = self[:node].model_handle_with_auth_info(:attribute)
         Attribute.update_and_propagate_dynamic_attributes(attr_mh,dyn_attr_val_info)
       end
 

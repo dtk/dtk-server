@@ -109,6 +109,8 @@ module XYZ
       opts = {:include_file_assets => true}
       impl_tree = impl.get_module_tree(opts)
 
+      impl_tree.first[:id] = implementation_id.to_i #TODO: part of hack
+
       {:data => impl_tree}
     end
   end

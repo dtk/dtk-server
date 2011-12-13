@@ -110,7 +110,7 @@ module XYZ
            :join_type => :inner,
            :filter => [:eq,:dynamic, true],
            :join_cond=>{:component_component_id => q(:component,:id)} ,
-           :cols => [:id,:display_name]
+           :cols => [:id,:group_id,:display_name]
          }]
 
       ###### end of virtual columns related to attributes, ports, and link_defs

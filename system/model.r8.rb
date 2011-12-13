@@ -315,7 +315,11 @@ module XYZ
     end
 
     def get_obj(sp_hash_x,opts={})
-      get_objs(sp_hash_x,opts).first
+      rows = get_objs(sp_hash_x,opts)
+      if rows.size > 1
+        Log.error("call to get_obj (sp_hash=#{sp_hash_x.inspect} returned more than one row")
+      end
+      rows.first
     end
     def get_objs(sp_hash_x,opts={})
       sp_hash = HashSearchPattern.add_to_filter(sp_hash_x,[:eq, :id, id()])

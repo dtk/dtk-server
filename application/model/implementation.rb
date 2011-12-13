@@ -75,6 +75,29 @@ module XYZ
     end
     private :repo_manager_context
 
+    #TODO: unify with project#get_module_tree()
+    def get_module_tree(opts={})
+      sp_hash = {:cols => [:id,:display_name,:type,:project_project_id,:component_template]}
+      rows_with_cmps = get_objs(sp_hash)
+
+      i18n = get_i18n_mappings_for_models(:component)
+      cmps = rows_with_cmps.map do |r|
+        cmp = r[:component].materialize!(Component.common_columns())
+        #TODO: see if cleaner way to put in i18n names
+        cmp[:name] = i18n_string(i18n,:component, cmp[:name])
+        cmp
+      end
+      #all rows common on all columns expect for :component
+      ret_row = rows_with_cmps.first.reject{|k,v|k == :component}
+      ret_row.merge!(:components => cmps)
+      return [ret_row] unless opts[:include_file_assets]
+      
+      indexed_asset_files = Implementation.get_indexed_asset_files([id_handle])
+      ret_row.merge!(:file_assets => indexed_asset_files.values.first)
+      [ret_row]
+    end
+
+    #TODO deprecate
     def get_tree(opts={})
       sp_hash = {:cols => [:id,:display_name,:component_template]}
       rows = get_objs(sp_hash)
@@ -94,7 +117,7 @@ module XYZ
 
     #indexed by implementation_id
     def self.get_indexed_asset_files(id_handles)
-      flat_file_assets = get_objects_in_set_from_sp_hash(id_handles,{:cols => [:id,:file_assets]})
+      flat_file_assets = get_objs_in_set(id_handles,{:cols => [:id,:file_assets]})
       ret = Hash.new
       flat_file_assets.each do |r|
         pointer = ret[r[:id]] ||= Array.new

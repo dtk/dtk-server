@@ -96,9 +96,18 @@ module XYZ
     end
 
     def get_tree(implementation_id)
-      impl = create_object_from_id(implementation_id)
+      #TODO: should be passed proj_impl_id; below is hack to set if it is given libary ancesor
+      impl_hack = create_object_from_id(implementation_id)
+      if impl_hack.update_object!(:project_project_id)[:project_project_id]
+        proj_impl_id = implementation_id
+      else
+        proj_impl = Model.get_obj(idh.createMH,{:cols => [:id],:filer => [:eq, :ancestor_id,impl_hack[:id]]})
+        proj_impl_id = proj_impl[:id]
+      end
+
+      impl = create_object_from_id(proj_impl_id)
       opts = {:include_file_assets => true}
-      impl_tree = impl.get_tree(opts)
+      impl_tree = impl.get_module_tree(opts)
 
       {:data => impl_tree}
     end

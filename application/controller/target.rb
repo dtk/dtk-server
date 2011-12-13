@@ -9,7 +9,7 @@ module XYZ
     def get_nodes_status(id)
       target = create_object_from_id(id)
       nodes_status = target.get_and_update_nodes_status()
-      pp [:node_config_changes,target.get_node_config_changes()]
+     # pp [:node_config_changes,target.get_node_config_changes()]
 
       return {:data=>nodes_status}
     end

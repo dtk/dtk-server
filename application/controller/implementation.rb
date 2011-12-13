@@ -101,7 +101,7 @@ module XYZ
       if impl_hack.update_object!(:project_project_id)[:project_project_id]
         proj_impl_id = implementation_id
       else
-        proj_impl = Model.get_obj(idh.createMH,{:cols => [:id],:filer => [:eq, :ancestor_id,impl_hack[:id]]})
+        proj_impl = Model.get_obj(impl_hack.model_handle,{:cols => [:id],:filter => [:eq, :ancestor_id,impl_hack[:id]]})
         proj_impl_id = proj_impl[:id]
       end
 

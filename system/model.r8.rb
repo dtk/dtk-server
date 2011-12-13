@@ -367,8 +367,13 @@ module XYZ
     end
 
     def self.get_obj(model_handle,sp_hash,opts={})
-      get_objs(model_handle,sp_hash,opts).first
+      rows = get_objs(model_handle,sp_hash,opts)
+      if rows.size > 1
+        Log.error("call to get_obj (sp_hash=#{sp_hash.inspect} returned more than one row")
+      end
+      rows.first
     end
+
     def self.get_objs(model_handle,sp_hash,opts={})
       model_name = model_handle[:model_name]
       hash = sp_hash.merge(:relation => model_name)

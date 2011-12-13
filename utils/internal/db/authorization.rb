@@ -38,11 +38,6 @@ module XYZ
       session = CurrentSession.new
       auth_filters = NoAuth.include?(model_handle[:model_name]) ? nil : session.get_auth_filters()
       if auth_filters 
-=begin
-create_dataset_found = caller.select{|x|x =~ /create_dataset'/}
-caller_info = (create_dataset_found ? "CREATE_DATASET_FOUND" : caller[0..15])
-pp [:auth,model_handle[:model_name],auth_filters,caller_info]
-=end
 #=begin
 controller_line = caller.find{|x|x =~ /application\/controller/}
 controller = controller_line
@@ -53,7 +48,8 @@ if controller_line =~ /controller\/(.+)\.rb:.+`(.+)'/
 end
 mn = model_handle[:model_name]
 unless [:task_log].include?(mn) or ["target#get_nodes_status", "task#get_logs"].include?(controller_action) #ignore list
-  pp [:auth,mn,controller_action]
+  username = CurrentSession.new.get_username()
+  pp [:auth,username,mn,controller_action]
 end
 #=end
         conjoin_set += process_session_auth(session,auth_filters)

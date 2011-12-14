@@ -2,7 +2,7 @@
 <span style="font-size: 13px; font-weight: bold;">(Component {%=num%} of {%=total%}){%=component[:def][:display_name]%} Attributes</span>
 <br/><br/>
 
-<div style="width: 200px; float: left;">
+<div style="width: 265px; float: left;">
 {%if num_attributes == 0%}
 	<b>No attributes detected</b>
 {%end%}

@@ -59,7 +59,7 @@ table #component-list {
 }
 
 ul.attr_list {
-	width: 200px;
+	width: 250px;
 	float: left;
 }
 
@@ -68,7 +68,7 @@ ul.attr_list li {
 	border: 1px solid #999999;
 	margin: 3px;
 	padding: 3px;
-	width: 140px;
+	width: 240px;
 	height: 20px;
 	cursor: pointer;
 }

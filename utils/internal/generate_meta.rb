@@ -72,6 +72,9 @@ module XYZ
       r8meta_hash.write_yaml(STDOUT)
       File.open(r8meta_path,"w"){|f|r8meta_hash.write_yaml(f)}
 
+      #this wil add any file_assets that have not been yet added (this will include the r8meta file
+      impl_obj.add_library_files_from_directory(repo_obj)
+
       Model.add_library_components_from_r8meta(config_agent_type,library_idh,impl_idh,r8meta_hash)
 
       impl_obj.add_contained_files_and_push_to_repo()
@@ -372,7 +375,7 @@ module XYZ
       type = "#{component_ps.config_agent_type}_#{component_ps[:type]}"
       external_ref = create_external_ref(component_ps[:name],type)
       self[:external_ref] = nailed(external_ref) 
-      self[:basic_type] = unknown
+      self[:basic_type] = t("service") #TODO: stub
       self[:component_type] = t(processed_name)
       dependencies = dependencies(component_ps)
       self[:dependencies] = dependencies unless dependencies.empty?

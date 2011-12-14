@@ -98,10 +98,12 @@ module XYZ
 
     class LinkDefAttributeMappingMeta  < ::XYZ::LinkDefAttributeMappingMeta
       def render_hash_form(opts={})
-        in_cmp = self[:input][:component]
-        in_attr = self[:input][:attribute]
-        out_cmp = self[:output][:component]
-        out_attr = self[:output][:attribute]
+        input = self[:input]
+        output = self[:output]
+        in_cmp = index(input,:component)
+        in_attr = index(input,:attribute)
+        out_cmp = index(output,:component)
+        out_attr = index(output,:attribute)
         RenderHash.new(attr_ref(out_cmp,out_attr) => attr_ref(in_cmp,in_attr))
       end
       private

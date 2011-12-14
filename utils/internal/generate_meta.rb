@@ -278,7 +278,7 @@ module XYZ
     end
    private
     def object_attributes()
-      [:components,:link_defs]
+      [:components]
     end
 
     def process_imported_resources()
@@ -380,7 +380,7 @@ module XYZ
     end
    private
     def object_attributes()
-      [:attributes,:dependencies]
+      [:attributes,:dependencies,:link_defs]
     end
     def dependencies(component_ps)
       ret = MetaArray.new
@@ -474,6 +474,10 @@ module XYZ
       data = {:input => input, :output => output}
       data.merge!(:include => true) if opts[:include]
       create(:link_def_attribute_mapping,data)
+    end
+    private
+    def object_attributes()
+      [:attribute_mappings]
     end
   end
 

@@ -720,12 +720,12 @@ pp request.params
       attr_val_hash.each{|k,v|attr_val_hash[k] = nil if v.kind_of?(String) and v.empty?}
       component_id = attr_val_hash.delete("component_id").to_i
       attribute_rows = AttributeComplexType.ravel_raw_post_hash(attr_val_hash,:attribute,component_id)
-      attr_mh = ModelHandle.new(ret_session_context_id(),:attribute)
+      #setting attr_mh this way so get a group id
+      attr_mh = id_handle(component_id).createMH(:attribute)
       #TODO: need way to mark which ones are instance vars vs which ones are defaults
       Attribute.update_and_propagate_attributes(attr_mh,attribute_rows)
       redirect "/xyz/component/dock_edit/#{component_id.to_s}"
     end
-
 
     def testjsonlayout
       tpl = R8Tpl::TemplateR8.new('component/testjson',user_context())

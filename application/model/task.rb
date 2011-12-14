@@ -115,6 +115,10 @@ module XYZ
       get_objs(model_handle,sp_hash).reject{|k,v|k == :subtasks}
     end
 
+    def self.get_most_recent_top_level_task(model_handle)
+      get_top_level_tasks(model_handle).sort{|a,b| b[:updated_at] <=> a[:updated_at]}.first
+    end
+
     def get_per_node_info_for_reporting()
       exec_actions = Array.new
       #if executable level then get its executable_action

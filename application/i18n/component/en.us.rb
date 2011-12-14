@@ -33,6 +33,7 @@
   :hadoop => 'Hadoop',
   :hadoop_hive => 'Hadoop Hive',
   :hadoop_doc => 'Hadoop Docs',
+  :hadoop__ssh_auth_key => "SSH Auth Key",
   :hadoop_cloudera_c3 => 'Cloudera C3',
   :hadoop_cloudera_c3__conf_pseudo => 'Pseudo Conf',
   :rabbitmq_edge_stomp => 'Rabbit - Stomp',

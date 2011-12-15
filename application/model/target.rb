@@ -130,7 +130,7 @@ module XYZ
 
       level = 2
       component_new_items = clone_copy_output.children_hash_form(level,:component).map do |child_hash| 
-        {:new_item => child_hash[:id_handle], :parent => indexed_node_info[child_hash[:clone_parent_id]]}
+        {:new_item => child_hash[:id_handle], :parent => id_handle()}
       end
       return if component_new_items.empty?
       StateChange.create_pending_change_items(component_new_items)

@@ -807,7 +807,6 @@ module XYZ
       component.clone_post_copy_hook_into_node(self)
 
       component_idh = clone_copy_output.id_handles.first
-     #TODO: deprecated create_needed_l4_sap_attributes(component_idh)
 
       #get the link defs/component_ports associated with components on the node; this is used
       #to determine if need to add internal links and for port processing
@@ -853,9 +852,6 @@ module XYZ
                                                              
       LinkDef.create_needed_internal_links(self,component,node_link_defs_info)
 
-      #TODO: pass node_link_defs into create_component_external_ports?
-      #TODO: deprecate beloww for above
-      #Port.create_ports_for_external_attributes(id_handle,component_idh)
       parent_action_id_handle = get_parent_id_handle()
       StateChange.create_pending_change_item(:new_item => component_idh, :parent => parent_action_id_handle)
     end

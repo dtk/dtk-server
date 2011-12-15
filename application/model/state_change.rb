@@ -1,3 +1,5 @@
+#TODO: may get rid of nested state change structure because of problem such as a "parent is completed, but children arent and effeiciency
+#alternatively have state chanegs associated with a "container
 require  File.expand_path('state_change/get_pending_changes', File.dirname(__FILE__))
 module XYZ
   class StateChange < Model
@@ -54,6 +56,15 @@ module XYZ
       ret = Array.new
       return ret if new_item_hashes.empty? 
       parent_model_name = new_item_hashes.first[:parent][:model_name]
+
+      #workaround referenced in PBUILDER-161
+      unless [:target,:datacenter].include?(parent_model_name)
+        Log.info("workaround for PBUILDER-161: changing parent_model_name (#{parent_model_name}) to be target (datacenter)")
+        parent_idh = new_item_hashes.first[:parent].get_top_container_id_handle(:datacenter)
+        parent_model_name = parent_idh[:model_name]
+        new_item_hashes.each{|r|r[:parent] = parent_idh}
+      end
+
       model_handle = new_item_hashes.first[:new_item].createMH({:model_name => :state_change, :parent_model_name => parent_model_name})
       object_model_name = new_item_hashes.first[:new_item][:model_name]
       object_id_col = "#{object_model_name}_id".to_sym

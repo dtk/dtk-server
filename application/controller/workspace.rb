@@ -654,7 +654,7 @@ pp datacenter
         h.merge(k.gsub(/^c__[0-9]+__/,"") => v)
       end
       attribute_rows = AttributeComplexType.ravel_raw_post_hash(attr_val_hash,:attribute)
-      Attribute.update_and_propagate_attributes(model_handle(:attribute),attribute_rows)
+      Attribute.update_and_propagate_attributes(target_idh.createMH(:attribute),attribute_rows)
       ######
       pending_changes = StateChange.flat_list_pending_changes(target_idh)
       if pending_changes.empty?

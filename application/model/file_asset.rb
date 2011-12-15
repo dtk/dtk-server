@@ -19,7 +19,7 @@ module XYZ
       #TODO: trap parse errors and then do consitemncy check with meta
       config_agent_type = config_agent_type()
       file_path = self[:path]
-      file_config_type, r8_parse = ConfigAgent.parse_given_file_content(config_agent_type,file_path,content)
+#      file_config_type, r8_parse = ConfigAgent.parse_given_file_content(config_agent_type,file_path,content)
 
       impl_obj = self[:implementation]
       RepoManager.update_file_content(self,content,{:implementation => impl_obj})

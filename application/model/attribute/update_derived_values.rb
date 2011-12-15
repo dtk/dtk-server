@@ -180,13 +180,14 @@ module XYZ
     end
 
     def self.update_attr_for_delete_link__splice_out(attr_mh,link_info,input_index)
-      #if this is last link in output then null out
-      if link_info[:other_links].empty?
+      pos_to_delete = input_index.first 
+
+      #if this is not an array or last link in output then null out
+      if pos_to_delete.kind_of?(String) or link_info[:other_links].empty?
         return update_attr_for_delete_link__set_to_null(attr_mh,link_info)
       end
 
-      #splice out the value from teh deleted link
-      pos_to_delete = input_index.first 
+      #splice out the value from the deleted link
       ret = nil
       Model.select_process_and_update(attr_mh,[:id,:value_derived],[link_info[:input_attribute][:id]]) do |rows|
         #will only be one row; 

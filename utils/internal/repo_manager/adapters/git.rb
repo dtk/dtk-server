@@ -184,7 +184,8 @@ module XYZ
       git_command.branch(cmd_opts(),branch_name)
     end
     def git_command__add(file_path)
-      @grit_repo.add(file_path)
+      git_command.add(cmd_opts(),file_path)
+      #took out because could not pass in time out @grit_repo.add(file_path)
     end
     def git_command__rm(file_path)
       @grit_repo.remove(file_path)

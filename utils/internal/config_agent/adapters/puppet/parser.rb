@@ -11,6 +11,7 @@ module XYZ
       opts = {:just_krt_code => true}
       all_errors = nil
       manifest_file_names.each do |filename|
+        Log.info("calling puppet and r8 processor on file #{filename}")
         begin
           krt_code = parse_given_file_path__manifest(filename,opts)
           ret.add_children(krt_code) unless all_errors #short-circuiot once first error found
@@ -190,8 +191,10 @@ module XYZ
         :concat => ::Puppet::Parser::AST::Concat,
         :function => ::Puppet::Parser::AST::Function,
         :var_def => ::Puppet::Parser::AST::VarDef,
+        :resource_defaults => ::Puppet::Parser::AST::ResourceDefaults,
+        :ast_array => ::Puppet::Parser::AST::ASTArray,
       }
-      AstTerm = [:string,:name,:variable,:concat,:function,:boolean]
+      AstTerm = [:string,:name,:variable,:concat,:function,:boolean,:ast_array]
     end
 
     #can be module or file
@@ -278,8 +281,14 @@ module XYZ
         return nil if puppet_type?(ast_item,types_to_ignore)
         if type = puppet_type?(ast_item,types_to_process)
           "parse__#{type}".to_sym
+        elsif puppet_type?(ast_item,:definition)
+          Log.error("need to implement nested class definitions")
+          nil
+        elsif puppet_type?(ast_item,:resource_defaults)
+          Log.error("check whether should ignore resource_defaults in class def")
+          nil
         else
-          raise R8ParseError.new("unexpected ast type (#{ast_item.class.to_s})")
+          raise R8ParseError.new("unexpected ast type (#{ast_item.class.to_s})",self)
         end
       end
 
@@ -679,6 +688,7 @@ module XYZ
          when :string then StringPS.new(ast_term,opts)
          when :boolean then BooleanPS.new(ast_term,opts)
          when :function then FunctionPS.new(ast_term,opts)
+         when :ast_array then ArrayPS.new(ast_term,opts)
          else raise R8ParseError.new("type not treated as a term (#{ast_term.class.to_s})")
         end
       end
@@ -762,6 +772,32 @@ module XYZ
       def initialize(boolean_ast,opts={})
         self[:value] = boolean_ast.value
         super
+      end
+    end
+
+    class ArrayPS < TermPS
+      def initialize(array_ast,opts={})
+        self[:terms] = array_ast.children.map{|term_ast|TermPS.create(term_ast,opts)}
+        super
+      end
+      def to_s(opts={})
+        elements = self[:terms].map do |t|
+          t.kind_of?(TermPS) ? t.to_s(opts.merge(:in_string => true)) : t.to_s
+        end
+        "[#{elements.join(",")}]"
+      end
+      def can_match?(ast_term)
+        if ast_term.kind_of?(VariablePS) 
+          VarMatches.new.add(self,ast_term)
+        elsif ast_term.kind_of?(ArrayPS)
+          return nil unless self[:terms].size == ast_term[:terms].size
+          ret = nil
+          self[:terms].each_with_index do |t,i|
+            return nil unless match = t.can_match?(ast_term[:terms][i])
+            ret = (ret ? ret + match : match)
+          end
+          ret
+        end
       end
     end
 

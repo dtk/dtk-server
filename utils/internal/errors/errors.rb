@@ -19,6 +19,10 @@ module XYZ
   end
 
   class R8ParseError < Error
+    def initialize(msg,calling_obj=nil)
+      msg = (calling_obj ? "#{msg} in class #{calling_obj.class.to_s}" : msg)
+      super(msg)
+    end
   end
   class ErrorForUser < Error
   end

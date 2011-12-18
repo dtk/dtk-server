@@ -53,8 +53,11 @@ module XYZ
       }
       cmps = get_objs(model_handle.createMH(:component),sp_hash)
 
-      pp [:impls,impls,repos,cmps]
       repos.each{|repo|RepoManager.delete_repo(repo)}
+
+      Model.delete_instances(cmps.map{|cmp|cmp.id_handle()})
+      Model.delete_instances(repos.map{|repo|repo.id_handle()})
+      Model.delete_instances(impls.map{|impl|impl.id_handle()})
     end
 
     def add_library_files_from_directory(repo_obj)

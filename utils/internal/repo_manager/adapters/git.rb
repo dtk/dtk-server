@@ -83,6 +83,10 @@ module XYZ
       end
     end
 
+    def delete_file?(file_path)
+      delete_file(file_path) if File.exists?("#{@path}/#{file_path}")
+    end
+
     def delete_file(file_path)
       checkout(@branch) do
         message = "Deleting #{file_path} in #{@branch}"
@@ -188,7 +192,8 @@ module XYZ
       #took out because could not pass in time out @grit_repo.add(file_path)
     end
     def git_command__rm(file_path)
-      @grit_repo.remove(file_path)
+      git_command.rm(cmd_opts(),file_path)
+      #took out because could not pass in command opts @grit_repo.remove(file_path)
     end
     def git_command__commit(message)
       @grit_repo.commit_index(message)

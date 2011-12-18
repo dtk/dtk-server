@@ -94,11 +94,7 @@ module XYZ
 
     class << self
       def delete_local_repo(repo_local_dir)
-        repo_base_dir = R8::Config[:repo][:base_directory]
-        full_path_dir = "#{repo_base_dir}/#{repo_local_dir}"
-        if File.directory?(full_path_dir)
-          FileUtils.rm_rf full_path_dir
-        end
+        FileUtils.rm_rf repo_local_dir if File.directory?(repo_local_dir)
       end
       def delete_all_local_repos()
         repo_base_dir = R8::Config[:repo][:base_directory]

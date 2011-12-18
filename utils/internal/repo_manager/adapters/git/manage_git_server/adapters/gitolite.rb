@@ -42,7 +42,7 @@ module XYZ
       def delete_server_repo(repo_name,opts={})
         admin_repo.pull_changes() unless opts[:do_not_pull_changes]
         file_path = repo_config_file_relative_path(repo_name)
-        admin_repo.delete_file(file_path)
+        admin_repo.delete_file?(file_path)
         admin_repo.push_changes() unless opts[:do_not_push_changes]
       end
 

@@ -86,6 +86,13 @@ module XYZ
       delete_all_local_repos()
     end
 
+    def self.delete_repo(repo_name)
+      klass = load_and_return_adapter_class()
+      #delete all repos on repo server
+      klass.delete_server_repo(repo_name)
+      Log.error("Need to write delete_local_repo(repo_name)")
+    end
+
     def self.delete_all_local_repos()
       repo_base_dir = R8::Config[:repo][:base_directory]
       if File.directory?(repo_base_dir)

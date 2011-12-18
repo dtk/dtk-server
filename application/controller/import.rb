@@ -63,7 +63,8 @@ module XYZ
 
       #TODO: module_name; this is hack to get it from tar.gz file name
       module_name = pkg_filename.gsub(/\.tar\.gz$/,"")
-      module_name.gsub!(/^puppetlabs-/,"")
+      prefixes_to_strip = %w{puppetlabs ghoneycutt} #TODO: complate hack
+      prefixes_to_strip.each{|pre|module_name.gsub!(Regexp.new("^#{pre}-"),"")}
       module_name.gsub!(/-[0-9]+\.[0-9]+\.[0-9]+$/,"")
 
       #mv the tmp file to under CompressedFileStore

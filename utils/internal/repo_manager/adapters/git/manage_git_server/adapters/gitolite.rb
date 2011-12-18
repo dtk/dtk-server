@@ -10,7 +10,6 @@ module XYZ
         ret = repo_name = repo_obj[:repo_name]
         if repos_having_config_files().include?(repo_name)
           if opts[:delete_if_exists]
-            admin_repo.pull_changes()
             delete_server_repo(repo_name)
           else
             raise Error.new("trying to create a repo (#{repo_name}) that exists already on gitolite server") 
@@ -31,7 +30,7 @@ module XYZ
         admin_repo.pull_changes()
         repo_config_files().each do |repo_conf|
           repo_name = repo_conf.gsub(/\.conf/,"")
-          delete_server_repo(repo_name,:do_not_push_changes => true)
+          delete_server_repo(repo_name,:do_not_pull_changes => true,:do_not_push_changes => true)
         end
         admin_repo.push_changes()
       end
@@ -40,14 +39,14 @@ module XYZ
         @git_class = git_class
       end
       
-     private
-
-      #assumes that a pull does not need to be done
       def delete_server_repo(repo_name,opts={})
+        admin_repo.pull_changes() unless opts[:do_not_pull_changes]
         file_path = repo_config_file_relative_path(repo_name)
         admin_repo.delete_file(file_path)
         admin_repo.push_changes() unless opts[:do_not_push_changes]
       end
+
+     private
 
       def admin_directory()
         @admin_directory ||= R8::Config[:repo][:git][:gitolite][:admin_directory] 

@@ -86,21 +86,31 @@ module XYZ
       delete_all_local_repos()
     end
 
-    def self.delete_repo(repo_name)
+    def self.delete_repo(repo)
       klass = load_and_return_adapter_class()
-      #delete all repos on repo server
-      klass.delete_server_repo(repo_name)
-      Log.error("Need to write delete_local_repo(repo_name)")
+      klass.delete_server_repo(repo[:repo_name])
+      delete_local_repo(repo[:local_dir])
     end
 
-    def self.delete_all_local_repos()
-      repo_base_dir = R8::Config[:repo][:base_directory]
-      if File.directory?(repo_base_dir)
-        Dir.chdir(R8::Config[:repo][:base_directory]) do
-          Dir["*"].each{|local_repo_dir|FileUtils.rm_rf local_repo_dir} 
+    class << self
+      def delete_local_repo(repo_local_dir)
+        repo_base_dir = R8::Config[:repo][:base_directory]
+        full_path_dir = "#{repo_base_dir}/#{repo_local_dir}"
+        if File.directory?(full_path_dir)
+          FileUtils.rm_rf full_path_dir
         end
       end
+      def delete_all_local_repos()
+        repo_base_dir = R8::Config[:repo][:base_directory]
+        if File.directory?(repo_base_dir)
+          Dir.chdir(R8::Config[:repo][:base_directory]) do
+            Dir["*"].each{|local_repo_dir|FileUtils.rm_rf local_repo_dir} 
+          end
+        end
+      end
+      private :delete_local_repo,:delete_all_local_repos
     end
+    
     ##########
     def self.get_repo(context)
       #TODO: do we still need __top

@@ -12,6 +12,10 @@ module XYZ
       git_server_class().delete_all_server_repos()
     end
 
+    def delete_server_repo(repo)
+      git_server_class().delete_server_repo(repo)
+    end
+
    private
     def git_server_class()
       return @git_server_class if @git_server_class

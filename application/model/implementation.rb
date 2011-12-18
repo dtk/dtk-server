@@ -32,6 +32,31 @@ module XYZ
       [repo_obj, impl_obj]
     end
 
+
+    def self.delete_repos_and_implementations(model_handle,module_name)
+      sp_hash = {
+        :cols => [:id,:module_name,:repo_id],
+        :filter => [:eq, :module_name, module_name]
+      }
+      impls = get_objs(model_handle,sp_hash)
+      return if impls.empty?
+
+      sp_hash = {
+        :cols => [:id,:repo_name,:local_dir],
+        :filter => [:oneof,:id,impls.map{|r|r[:repo_id]}.uniq]
+      }
+      repos = get_objs(model_handle.createMH(:repo),sp_hash)
+
+      sp_hash = {
+        :cols => [:id,:display_name],
+        :filter => [:oneof,:implementation_id,impls.map{|r|r[:id]}.uniq]
+      }
+      cmps = get_objs(model_handle.createMH(:component),sp_hash)
+
+      pp [:impls,impls,repos,cmps]
+      repos.each{|repo|RepoManager.delete_repo(repo)}
+    end
+
     def add_library_files_from_directory(repo_obj)
       module_dir = repo_obj[:local_dir]
       file_paths = Array.new

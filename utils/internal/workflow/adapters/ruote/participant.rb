@@ -78,7 +78,7 @@ module XYZ
               pp [:found,msg[:senderid]]
               task[:executable_action][:node].update_operational_status!(:running)
               set_result_succeeded(workitem,result,task,action)
-              action.get_and_propagate_dynamic_attributes(result)
+              action.get_and_propagate_dynamic_attributes(result,:non_null_attributes => "host_addresses_ipv4")
               self.reply_to_engine(workitem)
             end,
             :on_timeout => proc do 

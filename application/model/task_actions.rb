@@ -40,12 +40,43 @@ module XYZ
         Array.new
       end
 
-      def get_and_propagate_dynamic_attributes(result)
+      def get_and_propagate_dynamic_attributes(result,opts={})
         dyn_attr_val_info = get_dynamic_attributes(result)
+        if non_null_attrs = opts[:non_null_attributes]
+          dyn_attr_val_info = retry_get_dynamic_attributes(dyn_attr_val_info,non_null_attrs) do
+            get_dynamic_attributes(result)
+          end
+        end
         return if dyn_attr_val_info.empty?
         attr_mh = self[:node].model_handle_with_auth_info(:attribute)
         Attribute.update_and_propagate_dynamic_attributes(attr_mh,dyn_attr_val_info)
       end
+
+      def retry_get_dynamic_attributes(dyn_attr_val_info,non_null_attrs,count=1,&block)
+        if values_non_null?(dyn_attr_val_info,non_null_attrs)
+          dyn_attr_val_info
+        elsif count > RetryMaxCount
+          raise Error.new("cannot get all attributes with keys (#{non_null_attrs.join(",")})")
+        else
+          sleep(RetrySleep)
+          retry_get_dynamic_attributes(block.call(),non_null_attrs,count+1)
+        end
+      end
+      RetryMaxCount = 10
+      RetrySleep = 0.5
+      def values_non_null?(dyn_attr_val_info,keys)
+        keys.each do |k| 
+          is_non_null = nil
+          if match = dyn_attr_val_info.find{|a|a[:display_name] == k}
+            if val = match[:attribute_value]
+              is_non_null = (val.kind_of?(Array) ? val.find{|el|el} : true) 
+            end
+          end
+          return nil unless is_non_null
+        end
+        true
+      end
+      private :retry_get_dynamic_attributes, :values_non_null?
 
       #virtual gets overwritten
       #updates object and the tasks in the model

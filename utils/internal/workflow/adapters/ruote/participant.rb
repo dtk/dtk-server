@@ -83,9 +83,10 @@ module XYZ
             end,
             :on_timeout => proc do 
               self.reply_to_engine(workitem)
+              Log.error("timeout detecting node is ready")
             end
           }
-          num_poll_cycles = 10
+          num_poll_cycles = 20
           poll_cycle = 6
           context = {:callbacks => callbacks, :expected_count => 1,:count => num_poll_cycles,:poll_cycle => poll_cycle} 
           workflow.poll_to_detect_node_ready(action[:node],context)

@@ -79,9 +79,9 @@ ssh-keygen -f "/root/.ssh/known_hosts" -R <%=git_server_dns %>
 cat << EOF >>/root/.ssh/known_hosts
 <%=footprint %>
 EOF
-/usr/bin/apt-get update
-eos
 
+eos
+#TODO: when put apt-get update in thing delying time it taks for the os to say it is ready /usr/bin/apt-get update
       DefaultSecurityGroupSet = ["default"] 
       #destroys the node if it exists
       def self.destroy_node?(node)

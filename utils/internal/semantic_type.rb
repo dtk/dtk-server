@@ -199,20 +199,22 @@ module XYZ
       self.new(convert_hash(semantic_type))
     end
 
+    #TODO: this needs to be fixed; this includes fixing up to handle inputs that are arrays of hashes
     def self.find_link_function(input_attr,output_attr)
-      input_type = attribute_index_type(input_attr)
-      output_type = attribute_index_type(output_attr)
-      LinkFunctionMatrix[input_type][output_type]
+      input_type = attribute_index_type__input(input_attr)
+      output_type = attribute_index_type__output(output_attr)
+      LinkFunctionMatrix[output_type][input_type]
     end
+    #first index is output type, second one is input type
     LinkFunctionMatrix = {
       :scalar => {
-        :scalar => "eq", :indexed => "eq_indexed", :array => "select_one"
+        :scalar => "eq", :indexed => "eq_indexed", :array => "array_append"
       },
       :indexed => {
-        :scalar => "eq_indexed", :indexed => "eq_indexed", :array => "select_one"
+        :scalar => "eq_indexed", :indexed => "eq_indexed", :array => "array_append"
       },
       :array => {
-        :scalar => "array_append", :indexed => "array_append", :array => "array_append"
+        :scalar => "select_one", :indexed => "select_one", :array => "array_append"
       }
     }
 
@@ -221,8 +223,16 @@ module XYZ
     end
 
    private
-    def self.attribute_index_type(attr)
+    def self.attribute_index_type__input(attr)
+      #TODO: think may need to look at data type inside array
       if attr[:input_path] then :indexed
+      else attr[:semantic_type_object].is_array?() ? :array : :scalar
+      end
+    end
+
+    def self.attribute_index_type__output(attr)
+      #TODO: may need to look at data type inside array
+      if attr[:output_path] then :indexed
       else attr[:semantic_type_object].is_array?() ? :array : :scalar
       end
     end

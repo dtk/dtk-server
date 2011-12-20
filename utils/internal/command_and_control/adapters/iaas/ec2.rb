@@ -79,6 +79,7 @@ ssh-keygen -f "/root/.ssh/known_hosts" -R <%=git_server_dns %>
 cat << EOF >>/root/.ssh/known_hosts
 <%=footprint %>
 EOF
+/usr/bin/apt-get update
 eos
 
       DefaultSecurityGroupSet = ["default"] 

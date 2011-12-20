@@ -62,8 +62,8 @@ module XYZ
           retry_get_dynamic_attributes(block.call(),non_null_attrs,count+1)
         end
       end
-      RetryMaxCount = 10
-      RetrySleep = 0.5
+      RetryMaxCount = 60
+      RetrySleep = 1
       def values_non_null?(dyn_attr_val_info,keys)
         keys.each do |k| 
           is_non_null = nil

@@ -158,7 +158,11 @@ pp poss_remote_cmps
         }
         component_obj = target_object.clone_into(id_handle.create_object(),override_attrs,clone_opts)
         component_obj.materialize!(Component.common_columns())
-
+        if component_obj[:display_name] == "ganglia__server"
+          (clone_opts[:outermost_ports]||[]).each{|x|x[:location] = "east"}
+        elsif component_obj[:display_name] == "ganglia__monitor"
+          (clone_opts[:outermost_ports]||[]).each{|x|x[:location] = "west"}
+        end
         data = {
           :component => component_obj,
           :ports => clone_opts[:outermost_ports]

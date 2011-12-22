@@ -21,8 +21,9 @@ module XYZ
       return "east" if self[:display_name] =~ /nagios__server/
       return "east" if self[:display_name] =~ /mysql__master/
       return "west" if self[:display_name] =~ /nagios__client/
-      return "east" if self[:display_name] =~ / ganglia__server/
-      return "west" if self[:display_name] =~ / ganglia__monitor/
+      return "east" if self[:display_name] =~ /ganglia server/
+      return "west" if self[:display_name] =~ /ganglia monitor/
+
       case self[:direction]
         when "output" then "north"
         when "input" then "south"

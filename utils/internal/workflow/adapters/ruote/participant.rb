@@ -82,14 +82,17 @@ module XYZ
               self.reply_to_engine(workitem)
             end,
             :on_timeout => proc do 
-              self.reply_to_engine(workitem)
               Log.error("timeout detecting node is ready")
+              result = {:type => :timeout_create_node, :task_id => task_id}
+              set_result_failed(workitem,result,task,action)
+              self.reply_to_engine(workitem)
             end
           }
-          num_poll_cycles = 20
-          poll_cycle = 6
-          context = {:callbacks => callbacks, :expected_count => 1,:count => num_poll_cycles,:poll_cycle => poll_cycle} 
-          workflow.poll_to_detect_node_ready(action[:node],context)
+          num_poll_cycles = 25
+          poll_cycle = 6 #in seconds
+          receiver_context = {:callbacks => callbacks, :expected_count => 1}
+          opts = {:count => num_poll_cycles,:poll_cycle => poll_cycle}
+          workflow.poll_to_detect_node_ready(action[:node],receiver_context,opts)
         end
       end
 

@@ -90,7 +90,10 @@ module XYZ
    private
     def get_component(component_type,link_defs_info)
       match = link_defs_info.find{|r|component_type == r[:component][:component_type]}
-      match && match[:component]
+      unless ret = match && match[:component]
+        Log.error("component of type #{component_type} not found in  link_defs_info")
+      end
+      ret
     end
 
     def create_node_object(component)

@@ -77,7 +77,7 @@ module XYZ
                           [:oneof, :link_def_id, relevant_link_def_ids],
                           [:or, [:eq,:remote_component_type,component_type],
                                 [:oneof, :link_def_id,cmp_link_def_ids]]],
-        :order_by => [{:field => :position, :order => "ASC"}]
+        :order_by => [{:field => :position, :ordet => "ASC"}]
       }
       poss_links = Model.get_objs(component.model_handle(:link_def_link),sp_hash)
       return ret if poss_links.empty?

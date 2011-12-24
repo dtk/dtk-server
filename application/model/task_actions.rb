@@ -204,6 +204,9 @@ module XYZ
       def self.state_info(object)
         ret = PrettyPrintHash.new
         ret[:node] = node_state_info(object)
+        ret[:component_actions] = (object[:component_actions]||[]).map do |component_action|
+          ComponentAction.state_info(component_action)
+        end
         ret
       end
 
@@ -341,6 +344,13 @@ module XYZ
     end
 
     class ComponentAction < HashObject
+      def self.state_info(object)
+        ret = PrettyPrintHash.new
+        ret[:component] = component_state_info(object)
+        ret[:attributes] = attributes_state_info(object)
+        ret
+      end
+
       #for debugging
       def self.pretty_print_hash(object)
         ret = PrettyPrintHash.new
@@ -372,6 +382,28 @@ module XYZ
       end
 
       private
+      def self.component_state_info(object)
+        ret = PrettyPrintHash.new
+        component = object[:component]||{}
+        if name = component[:display_name]
+          ret[:name] = name
+        end
+        if id = component[:id]  
+          ret[:id] = id
+        end
+        ret
+      end
+      def self.attributes_state_info(object)
+        #need to query db to get up to date values
+        (object[:attributes]||[]).map do |attr|
+          ret_attr = PrettyPrintHash.new
+          ret_attr[:name] = attr[:display_name]
+          ret_attr[:id] = attr[:id]
+          ret_attr[:value] = attr[:value_asserted]||attr[:value_derived]
+          ret_attr
+        end
+      end
+
       #returns array of form [component_id,deps]
       def self.generate_component_order(cmp_deps)
         #TODO: assumption that only a singleton component can be a dependency -> match on component_type sufficient

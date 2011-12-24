@@ -44,10 +44,13 @@ module XYZ
       action_type = self[:executable_action_type]
       case action_type
        when "ConfigNode" 
-#        ret.add(self,:executable_action?){|ea|TaskAction::ConfigNode.state_info(ea)}
+        if ea = self[:executable_action]
+          ret.merge!(TaskAction::ConfigNode.state_info(ea))
+        end
        when "CreateNode" 
-#        ret.add(self,:executable_action?){|ea|TaskAction::CreateNode.satte_info(ea)}
-       else
+        if ea = self[:executable_action]
+          ret.merge!(TaskAction::CreateNode.state_info(ea))
+        end
       end
       ret
     end
@@ -89,7 +92,7 @@ module XYZ
       status = 
         if subtask_status_array.include?("failed") then "failed"
         elsif subtask_status_array.include?("executing") then "executing"
-        elsif not subtask_status_array.find{|s|s != "completed"} then "completed" #all completed
+        elsif not subtask_status_array.find{|s|s != "succeeded"} then "succeeded" #all succeeded
         else "created" #if reach here must be all created
         end
       self[:status] = status

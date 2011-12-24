@@ -2,7 +2,7 @@
   :schema=>:task,
   :table=>:task,
   :columns=>{
-    :status => {:type=>:varchar, :size=>20, :default => "created"}, # = "created" | "executing" | "completed" | "failed" | "not_reached"
+    :status => {:type=>:varchar, :size=>20, :default => "created"}, # = "created" | "executing" | "succeeded" | "failed" #TODO possibly more such as "not_reached"
     :result => {:type => :json}, # gets serialized version of TaskAction::Result
     :action_on_failure => {:type => :varchar, :default => "abort"},
     :temporal_order => {:type => :varchar, :size => 20}, # = "sequential" | "concurrent"

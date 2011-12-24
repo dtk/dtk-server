@@ -92,6 +92,19 @@ module XYZ
         state_change_mh = task_mh.createMH(:model_name => :state_change)
         Model.update_from_rows(state_change_mh,rows)
       end
+
+      private
+      def self.node_state_info(object)
+        ret = PrettyPrintHash.new
+        node = object[:node]||{}
+        if name = node[:display_name]
+          ret[:name] = name
+        end
+        if id = node[:id]  
+          ret[:id] = id
+        end
+        ret
+      end
     end
 
     class CreateNode < TaskActionNode
@@ -105,6 +118,11 @@ module XYZ
         super(hash)
       end
 
+      def self.state_info(object)
+        ret = PrettyPrintHash.new
+        ret[:node] = node_state_info(object)
+        ret
+      end
 
       #for debugging
       def self.pretty_print_hash(object)
@@ -183,6 +201,11 @@ module XYZ
     end
 
     class ConfigNode < TaskActionNode
+      def self.state_info(object)
+        ret = PrettyPrintHash.new
+        ret[:node] = node_state_info(object)
+        ret
+      end
 
       #for debugging
       def self.pretty_print_hash(object)

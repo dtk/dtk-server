@@ -6,7 +6,7 @@ module XYZ
     def pretty_print_hash()
       ret = PrettyPrintHash.new
       ret.add(self,:id,:status)
-      num_subtasks = (self[:subtasks]||[]).size
+      num_subtasks = subtasks.size
       #only include :temporal_order if more than 1 subtask
       ret.add(self,:temporal_order) if num_subtasks > 1
       if num_subtasks > 0
@@ -27,6 +27,74 @@ module XYZ
       end
       ret
     end
+
+    #TODO: cleanup; quick hack
+    def state_info()
+      set_and_return_status_from_children!()
+      set_and_return_names!()
+      ret = PrettyPrintHash.new
+      ret.add(self,:name,:id,:status)
+      num_subtasks = subtasks.size
+      ret.add(self,:temporal_order) if num_subtasks > 1
+      if num_subtasks > 0
+        ret.add(self,:subtasks) do |subtasks|
+          subtasks.sort{|a,b| (a[:position]||0) <=> (b[:position]||0)}.map{|st|st.state_info()}
+        end
+      end
+      action_type = self[:executable_action_type]
+      case action_type
+       when "ConfigNode" 
+#        ret.add(self,:executable_action?){|ea|TaskAction::ConfigNode.state_info(ea)}
+       when "CreateNode" 
+#        ret.add(self,:executable_action?){|ea|TaskAction::CreateNode.satte_info(ea)}
+       else
+      end
+      ret
+    end
+
+    #TODO: a hack
+    #TODO: probably better to get this from display_name and set when creating
+    def set_and_return_names!()
+      name = nil
+      if self[:task_id].nil?
+        name = "top"
+      else
+        if action_type = self[:executable_action_type]
+          name = ActionTypeNames[action_type.to_s]
+        else
+          #assumption that all subtypes some type
+          if sample_st = subtasks.first
+            if sample_st[:executable_action_type]
+              sample_type = ActionTypeNames[sample_st[:executable_action_type]]
+              name = (sample_type && "#{sample_type}s") #make plural
+            end
+          end 
+        end
+      end
+      subtasks.each{|st|st.set_and_return_names!()}
+      self[:name] = name
+    end
+    protected :set_and_return_names!
+
+    ActionTypeNames = {
+      "ConfigNode" => "Configure Node",
+      "CreateNode" => "Create Node"
+    }
+    
+    #alternative is to update task parent states as children are updated
+    def set_and_return_status_from_children!()
+      return self[:status] if subtasks.empty?
+      #TODO: would incorporate sucess definition here
+      subtask_status_array = subtasks.map{|st|st.set_and_return_status_from_children!()}
+      status = 
+        if subtask_status_array.include?("failed") then "failed"
+        elsif subtask_status_array.include?("executing") then "executing"
+        elsif not subtask_status_array.find{|s|s != "completed"} then "completed" #all completed
+        else "created" #if reach here must be all created
+        end
+      self[:status] = status
+    end
+    protected :set_and_return_status_from_children!
 
     def get_events()
       sp_hash = {:cols => [:created_at, :type, :content]}
@@ -318,7 +386,7 @@ module XYZ
     end
 
     def subtasks()
-      self[:subtasks]
+      self[:subtasks]||[]
     end
 
     #for special tasks that have component actions

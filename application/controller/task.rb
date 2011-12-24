@@ -1,6 +1,19 @@
 module XYZ
   class TaskController < Controller
     helper :task_helper
+
+    def state_info(task_id=nil)
+      unless task_id
+        tasks = Task.get_top_level_tasks(model_handle).sort{|a,b| b[:updated_at] <=> a[:updated_at]}
+        task_id = tasks.first[:id]
+      end
+      top_task_idh = id_handle(task_id)
+      task_structure = Task.get_hierarchical_structure(top_task_idh)
+      state_info = task_structure.state_info()
+      pp state_info
+      {:content => JSON.generate(state_info)}
+    end
+
     #TODO: test stub
     def rerun_components(node_id)
       node_idh = id_handle(node_id,:node)
@@ -28,6 +41,7 @@ module XYZ
       pp pp_hash
       {:content => JSON.generate(pp_hash)}
     end
+
 
     def get_events(task_id=nil)
       unless task_id

@@ -7,7 +7,7 @@ module XYZ
         session.set_user_object(user_object())
         session.set_auth_filters(:c,:group_ids)
       end
-      @json_response = true if ajax_request?
+      @json_response = true if ajax_request? 
 
       #seperate route in 'route_key' (e.g., object/action, object) and its params 'action_set_params'
       #first two (or single items make up route_key; the rest are params
@@ -176,6 +176,8 @@ pp ')))))))))))))))))))))))))))))))))))))))))))))'
     Ramaze::Route["route_to_actionset"] = lambda{ |path, request|
       if path =~ Regexp.new("^/xyz") and not path =~ Regexp.new("^/xyz/devtest") 
         path.gsub(Regexp.new("^/xyz"),"/xyz/actionset/process")
+      elsif path =~ Regexp.new("^/rest")
+        path.gsub(Regexp.new("^/rest"),"/xyz/actionset/process")
       end
     }
   end

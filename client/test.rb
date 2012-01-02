@@ -30,28 +30,57 @@ module R8
     class Config < Hash
       include Singleton
       include ParseFile
-      def initialize()
-        load_config_file()
+      def self.[](k)
+        Config.instance[k]
       end
      private
+      def initialize()
+        set_defaults()
+        load_config_file()
+        validate()
+      end
+      def set_defaults()
+        self[:server_port] = 7000
+      end
       ConfigFile = "/etc/r8client/client.conf"
-      RequiredKeys = [:server_host]
       def load_config_file()
-        #TODO: need to check for legal values
         parse_key_value_file(ConfigFile).each{|k,v|self[k]=v}
+      end
+      RequiredKeys = [:server_host]
+      def validate
+        #TODO: need to check for legal values
         missing_keys = RequiredKeys - keys
-        raise Error.new("Missinng config keys (#{missing_keys.join(",")})") unless missing_keys.empty?
+        raise Error.new("Missing config keys (#{missing_keys.join(",")})") unless missing_keys.empty?
       end
     end
+
     def initialize()
-      login()
       @cookies = Hash.new
+      login()
     end
+
+    def get_task_state_info()
+      get url("task/state_info")
+    end
+
     private
     include ParseFile
     def login()
       creds = get_credentials()
-      pp creds
+      response = post url("/user/process_login"),creds
+      @cookies = response.cookies
+    end
+
+    def url(route)
+      "http://#{Config[:server_host]}:#{Config[:server_port].to_s}/rest/#{route}"
+    end
+
+    def post(url,body)
+      RestClient.post(url,body,:cookies => @cookies)
+    end
+
+    def get(url)
+      RestClient.get(url,:cookies => @cookies)
     end
 
     def get_credentials()
@@ -64,8 +93,8 @@ module R8
   end
 end
 
-R8::Client.new
-
+client = R8::Client.new
+pp client.get_task_state_info()
 =begin
 r = RestClient.post 'http://localhost:7000/xyz/user/process_login',{"username"=> "joe","password" => "r8server"}
 pp r.cookies

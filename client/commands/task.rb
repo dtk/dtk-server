@@ -8,8 +8,3 @@ class R8::Client
   end
 end
 
-conn = R8::Client::Conn.new()
-
-pp conn.task.get_state_info()
-
-    

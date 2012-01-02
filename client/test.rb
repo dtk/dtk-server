@@ -1,47 +1,70 @@
 require 'rubygems'
+require 'singleton'
 require 'restclient'
 require 'pp'
 
-class R8
+module R8
   class Client
-    def initialize()
-      @cookies = Hash.new
-    end
-    def login()
-      username,password = get_credentials()
-      raise Error.new("cannot find username") unless username
-      raise Error.new("cannot find password") unless password
-      pp [username,password]
-    end
-
     class Error < NameError
     end
-   private
+
+    module ParseFile
+      def parse_key_value_file(file)
+        #adapted from mcollective config
+        ret = Hash.new
+        raise Error.new("Config file (#{file}) does not exists") unless File.exists?(file)
+        File.open(file).each do |line|
+          # strip blank spaces, tabs etc off the end of all lines
+          line.gsub!(/\s*$/, "")
+          unless line =~ /^#|^$/
+            if (line =~ /(.+?)\s*=\s*(.+)/)
+              key = $1
+              val = $2
+              ret[key.to_sym] = val
+            end
+          end
+        end
+        ret
+      end
+    end
+    class Config < Hash
+      include Singleton
+      include ParseFile
+      def initialize()
+        load_config_file()
+      end
+     private
+      ConfigFile = "/etc/r8client/client.conf"
+      RequiredKeys = [:server_host]
+      def load_config_file()
+        #TODO: need to check for legal values
+        parse_key_value_file(ConfigFile).each{|k,v|self[k]=v}
+        missing_keys = RequiredKeys - keys
+        raise Error.new("Missinng config keys (#{missing_keys.join(",")})") unless missing_keys.empty?
+      end
+    end
+    def initialize()
+      login()
+      @cookies = Hash.new
+    end
+    private
+    include ParseFile
+    def login()
+      creds = get_credentials()
+      pp creds
+    end
+
     def get_credentials()
       cred_file = File.expand_path("~/.r8client")
       raise Error.new("Credential file (#{cred_file}) does not exist") unless File.exists?(cred_file)
-      username = password = nil
-      File.open(cred_file) do |io|
-        io.each_line do |line|
-          line.chomp!
-          if m = matches_var(:username,line)
-            username = m
-          elsif m = matches_var(:password,line)
-            password = m
-          end
-        end
-      end
-      [username,password]
-    end
-    def matches_var(var,line)  
-      if line =~ Regexp.new(":#{var}:[ ]+([^ ]+)")
-        $1
-      end
+      ret = parse_key_value_file(cred_file)
+      [:username,:password].each{|k|raise Error.new("cannot find #{k}") unless ret[k]}
+      ret
     end
   end
 end
 
-R8::Client.new.login()
+R8::Client.new
 
 =begin
 r = RestClient.post 'http://localhost:7000/xyz/user/process_login',{"username"=> "joe","password" => "r8server"}

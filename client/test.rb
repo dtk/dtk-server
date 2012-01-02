@@ -9,6 +9,8 @@ class R8
     end
     def login()
       username,password = get_credentials()
+      raise Error.new("cannot find username") unless username
+      raise Error.new("cannot find password") unless password
       pp [username,password]
     end
 

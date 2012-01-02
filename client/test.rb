@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'singleton'
 require 'restclient'
+require 'json'
 require 'pp'
 
 module R8
@@ -60,7 +61,8 @@ module R8
     end
 
     def get_task_state_info()
-      get url("task/state_info")
+      json = get url("task/state_info")
+      JSON.parse(json)
     end
 
     private

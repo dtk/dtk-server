@@ -55,54 +55,65 @@ module R8
       end
     end
 
-    def initialize()
-      @cookies = Hash.new
-      login()
+    class CommandBase
+      def initialize(conn)
+        @conn = conn
+      end
+
+      def get(url)
+        @conn.get(url)
+      end
+
+      def rest_url(route)
+        @conn.rest_url(route)
+      end
     end
 
-    def get_task_state_info()
-      json = get url("task/state_info")
-      JSON.parse(json)
-    end
+    class Conn
+      def initialize()
+        @cookies = Hash.new
+        login()
+      end
 
-    private
-    include ParseFile
-    def login()
-      creds = get_credentials()
-      response = post url("/user/process_login"),creds
-      @cookies = response.cookies
-    end
+      ####
+      def task()
+        TaskCommand.new(self)
+      end
 
-    def url(route)
-      "http://#{Config[:server_host]}:#{Config[:server_port].to_s}/rest/#{route}"
-    end
+      #######
 
-    def post(url,body)
-      RestClient.post(url,body,:cookies => @cookies)
-    end
+      def rest_url(route)
+        "http://#{Config[:server_host]}:#{Config[:server_port].to_s}/rest/#{route}"
+      end
 
-    def get(url)
-      RestClient.get(url,:cookies => @cookies)
-    end
+      def get(url)
+        JSON.parse(get_raw(url))
+      end
 
-    def get_credentials()
-      cred_file = File.expand_path("~/.r8client")
-      raise Error.new("Credential file (#{cred_file}) does not exist") unless File.exists?(cred_file)
-      ret = parse_key_value_file(cred_file)
-      [:username,:password].each{|k|raise Error.new("cannot find #{k}") unless ret[k]}
-      ret
+
+      private
+      include ParseFile
+      def login()
+        creds = get_credentials()
+        response = post rest_url("/user/process_login"),creds
+        @cookies = response.cookies
+      end
+
+      def post(url,body)
+        RestClient.post(url,body,:cookies => @cookies)
+      end
+
+      def get_raw(url)
+        RestClient.get(url,:cookies => @cookies)
+      end
+
+      def get_credentials()
+        cred_file = File.expand_path("~/.r8client")
+        raise Error.new("Credential file (#{cred_file}) does not exist") unless File.exists?(cred_file)
+        ret = parse_key_value_file(cred_file)
+        [:username,:password].each{|k|raise Error.new("cannot find #{k}") unless ret[k]}
+        ret
+      end
     end
   end
 end
-
-client = R8::Client.new
-pp client.get_task_state_info()
-=begin
-r = RestClient.post 'http://localhost:7000/xyz/user/process_login',{"username"=> "joe","password" => "r8server"}
-pp r.cookies
-
-pp RestClient.get 'http://localhost:7000/xyz/task/state_info.json', {:cookies =>
-{"innate.sid"=>
-  "aeba7aa8e632d0c878745638a3506351f9465b025bd1b5429bf6fa341d0d15c2a0c442f26fd092086d53e4b2ca570b041e91a43c900324fa007a8ee9d269f190"}
-}
-=end

@@ -24,36 +24,28 @@ module XYZ
       if action_set_def[:action_set]
         run_action_set(action_set_def[:action_set],model_name)
       else #create an action set of length one and run it
-        action_set = compute_singleton_action_set(action_set_def,route_key,action_set_params)
+        action_params = action_set_params 
+        query_string = ret_parsed_query_string_from_uri()
+        action_params << query_string unless query_string.empty?
+        action_set = 
+          [{
+              :route => action_set_def[:route] || route_key,
+              :panel => action_set_def[:panel] || :main_body,
+              :assign_type => action_set_def[:assign_type] || :replace,
+              :action_params => action_params,
+           }]
         run_action_set(action_set)
       end
     end
    private
-    def compute_singleton_action_set(action_set_def,route_key,action_set_params)
-      action_params = action_set_params 
-      query_string = ret_parsed_query_string_from_uri()
-      action_params << query_string unless query_string.empty?
-      action = {
-        :route => action_set_def[:route] || route_key,
-        :action_params => action_params
-      }
-      unless rest_request?
-        action.merge!(
-          :panel => action_set_def[:panel] || :main_body,
-          :assign_type => action_set_def[:assign_type] || :replace
-        )
-      end
-      [action]
-    end
-
-    #parent_model_name only set when top level action decomposed as opposed to when an action set of length one is created
+    #parent_model_name only set when top leevl action decomposed as opposed to when an action set of length one is created
     def run_action_set(action_set,parent_model_name=nil)
       #Execute each of the actions in the action_set and set the returned content
-      (action_set||[]).each do |action|
+      (action_set || []).each do |action|
         ctrl_result = Hash.new
         result = call_action(action,parent_model_name)
 
-        if result and result.length > 0
+        if !result.nil? && result.length > 0
           #if a hash is returned, turn make result an array list of one
           (result.class == Hash) ? ctrl_result[:content] = [result] : ctrl_result = result
 
@@ -81,6 +73,11 @@ module XYZ
         model,method = action[:route].split("/")
         method ||= :index
         action_namespace = "#{R8::Config[:application_name]}_#{model}_#{method}".to_sym
+=begin
+#DEBUG
+pp ctrl_result
+pp ')))))))))))))))))))))))))))))))))))))))))))))'
+=end
         @ctrl_results[action_namespace] = ctrl_result
         @ctrl_results[:as_run_list] << action_namespace
       end
@@ -88,32 +85,27 @@ module XYZ
 
     def call_action(action,parent_model_name=nil)
       model,method = action[:route].split("/")
-      controller_class = XYZ.const_get("#{model.capitalize}Controller")
       method ||= :index
-      if rest_request?()
-        rest_variant = "rest_#{method}"
-        if controller_class.method_defined?(rest_variant)
-          method = rest_variant
-        end
-      end
       model_name = model.to_sym
       processed_params = process_action_params(action[:action_params]) 
       action_set_params = ret_search_object(processed_params,model_name,parent_model_name)
       uri_params = ret_uri_params(processed_params)
-      variables = {:action_set_params => action_set_params}
-      unless rest_request?()
-        variables.merge!(
-          :js_includes => @js_includes,
-          :css_includes => @css_includes,
-          :js_exe_list => @js_exe_list
-        )
-      end
+#DEBUG
+#p '++++++++++++++++++++++++'
+#pp uri_params
+#p '++++++++++++++++++++++++'
+
       a = Ramaze::Action.create(
-        :node => controller_class,
+        :node => XYZ.const_get("#{model.capitalize}Controller"),
         :method => method.to_sym,
         :params => uri_params,
         :engine => lambda{|action, value| value },
-        :variables => variables
+        :variables => {
+          :js_includes => @js_includes,
+          :css_includes => @css_includes,
+          :js_exe_list => @js_exe_list,
+          :action_set_params => action_set_params
+        }
        )
       return a.call
     end

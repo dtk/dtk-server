@@ -10,7 +10,6 @@ module XYZ
       top_task_idh = id_handle(task_id)
       task_structure = Task.get_hierarchical_structure(top_task_idh)
       state_info = task_structure.state_info()
-      pp state_info
       {:content => JSON.generate(state_info)}
     end
 

@@ -156,15 +156,16 @@ module XYZ
     def update(update_hash,opts={})
       super(update_hash)
       unless opts[:no_hierarchical_update_status]
-#        hierarchical_update_status(update_hash[:status]) if update_hash[:status]
+        hierarchical_update_status(update_hash[:status]) if update_hash[:status]
       end
     end
 
     def hierarchical_update_status(status)
-      update_objects!(:task_id)
+      update_object!(:task_id)
       if self[:task_id]
         parent = id_handle.createIDH(:id => self[:task_id]).create_object().update_object!(:status,:children_status)
-        parent[:children_status][id()] = status
+        key = id().to_s.to_sym #TODO: look at avoiding this by having translation of json not make num keys into symbols
+        parent[:children_status][key] = status
         parent.update_from_children_status()
       end
     end
@@ -177,11 +178,12 @@ module XYZ
         elsif not subtask_status_array.find{|s|s != "succeeded"} then "succeeded" #all succeeded
         else "created" #if reach here must be all created
         end
-      if new_status and new_status != parent[:status]
+      if new_status and new_status != self[:status]
         update({:status => new_status, :children_status => children_status},:no_hierarchical_update_status => true)
       end
     end
-    private :hierarchical_update_status,:update_from_children_status
+    private :hierarchical_update_status
+    protected :update_from_children_status
 
     def update_input_attributes!()
       task_action = self[:executable_action]
@@ -460,7 +462,7 @@ module XYZ
         [:parent_id => parent_id, :id => id, :children_status => nil]
       else
         recursive_subtasks = subtasks.map{|st|st.set_and_ret_parents_and_children_status!(id)}.flatten
-        children_status = subtasks.map{|st|{id() => "created"}}
+        children_status = subtasks.inject({}){|h,st|h.merge(st.id() => "created")}
         [:parent_id => parent_id, :id => id, :children_status => children_status] + recursive_subtasks 
       end
     end

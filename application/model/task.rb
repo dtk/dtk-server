@@ -29,7 +29,7 @@ module XYZ
     end
 
     #TODO: cleanup; quick hack
-    def stte_ainfo()
+    def state_info()
       set_and_return_status_from_children!()
       set_and_return_names!()
       ret = PrettyPrintHash.new
@@ -155,12 +155,12 @@ module XYZ
     #this updates self, which is leaf node, plus all parents
     def update(update_hash,opts={})
       super(update_hash)
-      unless opts[:no_recursive_update_status]
-#        recursive_update_status(update_hash[:status]) if update_hash[:status]
+      unless opts[:no_hierarchical_update_status]
+#        hierarchical_update_status(update_hash[:status]) if update_hash[:status]
       end
     end
 
-    def recursive_update_status(status)
+    def hierarchical_update_status(status)
       update_objects!(:task_id)
       if self[:task_id]
         parent = id_handle.createIDH(:id => self[:task_id]).create_object().update_object!(:status,:children_status)
@@ -178,10 +178,10 @@ module XYZ
         else "created" #if reach here must be all created
         end
       if new_status and new_status != parent[:status]
-        update({:status => new_status, :children_status => children_status},:no_recursive_update_status => true)
+        update({:status => new_status, :children_status => children_status},:no_hierarchical_update_status => true)
       end
     end
-    private :recursive_update_status,:update_from_children_status
+    private :hierarchical_update_status,:update_from_children_status
 
     def update_input_attributes!()
       task_action = self[:executable_action]
@@ -396,6 +396,7 @@ module XYZ
       rows = unrolled_tasks.map do |hash_row|
         executable_action = hash_row[:executable_action]
         row = {
+          #TODO: put in the user friendly name
           :display_name => "task#{hash_row[:position].to_s}",
           :ref => "task#{hash_row[:position].to_s}",
           :executable_action_type => executable_action ? Aux.demodulize(executable_action.class.to_s) : nil,
@@ -409,12 +410,10 @@ module XYZ
       #set ids
       unrolled_tasks.each_with_index{|task,i|task.set_id_handle(new_idhs[i])}
 
-      #set parent relationship
-      par_rel_rows_for_id_info = set_and_ret_parents!()
-      par_rel_rows_for_task = par_rel_rows_for_id_info.map{|r|{:id => r[:id], :task_id => r[:parent_id]}}
-
-      #prune top level tasks
-      par_rel_rows_for_task.reject!{|r|r[:task_id].nil?}
+      #set parent relationship and use to set task_id (subtask parent) and children_status
+      par_rel_rows_for_id_info = set_and_ret_parents_and_children_status!()
+      par_rel_rows_for_task = par_rel_rows_for_id_info.map{|r|{:id => r[:id], :task_id => r[:parent_id], :children_status => r[:children_status]}}
+      
       Model.update_from_rows(model_handle,par_rel_rows_for_task) unless par_rel_rows_for_task.empty?
       IDInfoTable.update_instances(model_handle,par_rel_rows_for_id_info)
     end
@@ -454,10 +453,16 @@ module XYZ
       end
     end
 
-    def set_and_ret_parents!(parent_id=nil)
+    def set_and_ret_parents_and_children_status!(parent_id=nil)
       self[:task_id] = parent_id
       id = id()
-      [:parent_id => parent_id, :id => id] + subtasks.map{|e|e.set_and_ret_parents!(id)}.flatten
+      if subtasks.empty?
+        [:parent_id => parent_id, :id => id, :children_status => nil]
+      else
+        recursive_subtasks = subtasks.map{|st|st.set_and_ret_parents_and_children_status!(id)}.flatten
+        children_status = subtasks.map{|st|{id() => "created"}}
+        [:parent_id => parent_id, :id => id, :children_status => children_status] + recursive_subtasks 
+      end
     end
 
     def unroll_tasks()

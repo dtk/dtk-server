@@ -50,13 +50,25 @@ module XYZ
     def run_action_set(action_set,parent_model_name=nil)
       #Execute each of the actions in the action_set and set the returned content
       (action_set||[]).each do |action|
-        ctrl_result = Hash.new
+        model,method = action[:route].split("/")
+        method ||= :index
+        action_namespace = "#{R8::Config[:application_name]}_#{model}_#{method}".to_sym
         result = call_action(action,parent_model_name)
+
+        if rest_request?
+          @ctrl_results[action_namespace] = result
+          next
+        end
+
+        ctrl_result = Hash.new
 
         if result and result.length > 0
           #if a hash is returned, turn make result an array list of one
-          (result.class == Hash) ? ctrl_result[:content] = [result] : ctrl_result = result
-
+          if result.kind_of?(Hash) 
+            ctrl_result[:content] = [result] 
+          else 
+            ctrl_result = result
+          end
           panel_content_track = {}
           #for each piece of content set by controller result,make sure panel and assign type is set
           ctrl_result[:content].each_with_index do |item,index|
@@ -78,9 +90,6 @@ module XYZ
         ctrl_result[:css_includes] = ret_css_includes()
         ctrl_result[:js_exe_list] = ret_js_exe_list()
 
-        model,method = action[:route].split("/")
-        method ||= :index
-        action_namespace = "#{R8::Config[:application_name]}_#{model}_#{method}".to_sym
         @ctrl_results[action_namespace] = ctrl_result
         @ctrl_results[:as_run_list] << action_namespace
       end

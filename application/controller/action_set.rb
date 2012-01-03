@@ -100,7 +100,7 @@ module XYZ
       controller_class = XYZ.const_get("#{model.capitalize}Controller")
       method ||= :index
       if rest_request?()
-        rest_variant = "rest_#{method}"
+        rest_variant = "rest__#{method}"
         if controller_class.method_defined?(rest_variant)
           method = rest_variant
         end

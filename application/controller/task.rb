@@ -10,7 +10,12 @@ module XYZ
       top_task_idh = id_handle(task_id)
       task_structure = Task.get_hierarchical_structure(top_task_idh)
       state_info = task_structure.state_info()
-      {:content => JSON.generate(state_info)}
+      return_rest_response state_info
+    end
+
+    def rest__list()
+      tasks = Task.list(model_handle)
+      return_rest_response tasks
     end
 
     #TODO: test stub
@@ -20,13 +25,7 @@ module XYZ
       {:content => nil}
     end
 
-    #TODO: test stub
-    def commit()
-      model_handle = ModelHandle.new(ret_session_context_id(),:datacenter)
-      datacenters = Model.get_objects_from_sp_hash(model_handle,{:cols =>[:id]})
-      raise Error.new("only can be called when there is one datacenter") unless datacenters.size == 1
-      redirect "/xyz/workspace/commit_changes/#{datacenters.first[:id].to_s}"
-    end
+
 
     #TODO: test stub
     def pretty_print(task_id=nil)

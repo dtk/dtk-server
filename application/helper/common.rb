@@ -1,6 +1,6 @@
 module Ramaze::Helper
   module Common
-    include XYZ #TODO: included because of ModelHandle amd Model; make sure not expensive to laod these defs in this module
+    include XYZ #TODO: included because of ModelHandle and Model; make sure not expensive to laod these defs in this module
 
     def create_object_from_id(id,model_name_x=model_name(),opts={})
       id_handle(id,model_name_x).create_object(opts)

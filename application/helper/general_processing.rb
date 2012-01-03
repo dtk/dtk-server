@@ -1,0 +1,77 @@
+module Ramaze::Helper
+  module GeneralProcessing
+    def ret_session_context_id()
+      #stub
+      2
+    end
+
+    ### user processing
+    def login_first
+      auth_violation_response() unless logged_in? 
+    end
+
+    def auth_violation_response()
+      rest_request? ? respond('Not Authorized',403) : redirect(R8::Config[:login][:path])
+    end
+
+    def get_user()
+      return nil unless user.kind_of?(Hash)
+      @cached_user_obj ||= User.new(user,ret_session_context_id(),:user)
+    end
+    #########
+
+
+    def initialize
+      super
+      @cached_user_obj = nil
+      #TODO: see where these are used; remove if not used
+      @public_js_root = R8::Config[:public_js_root]
+      @public_css_root = R8::Config[:public_css_root]
+      @public_images_root = R8::Config[:public_images_root]
+
+      #TBD: may make a calls fn that declares a cached var to be 'self documenting'
+      @model_name = nil #cached ; called on demand
+
+      #used when action set calls actions
+      @parsed_query_string = nil
+
+      @css_includes = Array.new
+      @js_includes = Array.new
+      @js_exe_list = Array.new
+
+      @user_context = nil
+
+      @layout = nil
+
+      #if there is an action set then call by value is used to substitue in child actions; this var
+      #will be set to have av pairs set from global params given in action set call
+      @action_set_param_map = Hash.new
+
+      @ctrl_results = Hash.new
+      @ctrl_results[:as_run_list] = Array.new
+    end
+
+    def return_rest_response(item)
+      {:content => item ? JSON.generate(item) : nil}
+    end
+
+    def json_response?()
+      @json_response ||= rest_request?() or ajax_request?() 
+    end
+    def rest_request?()
+      @rest_request ||= request.env["REQUEST_PATH"] =~ Regexp.new("^/rest")
+    end
+    def ajax_request?
+      @ajax_request ||=  ajax_request_aux?()
+    end
+    def ajax_request_aux?()
+      route_pieces = request.env["PATH_INFO"].split("/")
+      last_piece = route_pieces[route_pieces.size-1]
+      return true if /\.json/.match(last_piece)
+
+      return true if request.params["iframe_upload"] == "1"
+
+      return (request.env["HTTP_X_REQUESTED_WITH"] && request.env["HTTP_X_REQUESTED_WITH"]=="XMLHttpRequest" )
+    end
+  end
+end

@@ -29,7 +29,7 @@ module XYZ
     end
 
     #TODO: cleanup; quick hack
-    def state_info()
+    def stte_ainfo()
       set_and_return_status_from_children!()
       set_and_return_names!()
       ret = PrettyPrintHash.new
@@ -151,6 +151,37 @@ module XYZ
       Model.create_from_rows(model_handle(:task_error),rows,{:convert => true})
       normalized_errors 
     end
+
+    #this updates self, which is leaf node, plus all parents
+    def update(update_hash,opts={})
+      super(update_hash)
+      unless opts[:no_recursive_update_status]
+#        recursive_update_status(update_hash[:status]) if update_hash[:status]
+      end
+    end
+
+    def recursive_update_status(status)
+      update_objects!(:task_id)
+      if self[:task_id]
+        parent = id_handle.createIDH(:id => self[:task_id]).create_object().update_object!(:status,:children_status)
+        parent[:children_status][id()] = status
+        parent.update_from_children_status()
+      end
+    end
+    def update_from_children_status()
+      children_status = self[:children_status]
+      subtask_status_array = children_status.values
+      new_status = 
+        if subtask_status_array.include?("failed") then "failed"
+        elsif subtask_status_array.include?("executing") then "executing"
+        elsif not subtask_status_array.find{|s|s != "succeeded"} then "succeeded" #all succeeded
+        else "created" #if reach here must be all created
+        end
+      if new_status and new_status != parent[:status]
+        update({:status => new_status, :children_status => children_status},:no_recursive_update_status => true)
+      end
+    end
+    private :recursive_update_status,:update_from_children_status
 
     def update_input_attributes!()
       task_action = self[:executable_action]

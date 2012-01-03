@@ -89,7 +89,7 @@ module XYZ
 
       def update_state_change_status_aux(task_mh,status,state_change_ids)
         rows = state_change_ids.map{|id|{:id => id, :status => status.to_s}}
-        state_change_mh = task_mh.createMH(:model_name => :state_change)
+        state_change_mh = task_mh.createMH(:state_change)
         Model.update_from_rows(state_change_mh,rows)
       end
 

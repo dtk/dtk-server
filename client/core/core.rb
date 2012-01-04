@@ -55,18 +55,71 @@ module R8
       end
     end
 
+    module ResponseTokens
+      StatusOK = "ok"
+      StatusNotok = "notok"
+      DataField = "data"
+      StatusField = "status"
+      ErrorsField = "errors"
+      ErrorsSubFieldCode = "code"
+
+      def error_response(error_or_errors)
+        errors = error_or_errors.kind_of?(Hash) ? [error_or_errors] : error_or_errors
+        {StatusField => StatusNotok, ErrorsField => errors}
+      end
+    end
+
+    class RestClientWrapper 
+      include ResponseTokens
+      extend ResponseTokens
+      def self.get(url,opts={})
+        error_handling do
+          ::RestClient.get(url,opts)
+        end
+      end
+      def self.post(url,body={},opts={})
+        error_handling do
+          ::RestClient.post(url,body,opts)
+        end
+      end
+
+      private
+      def self.error_handling(&block)
+        begin
+          block.call 
+         rescue ::RestClient::InternalServerError => e
+          error_response(ErrorsSubFieldCode => "internal_server_error")
+         rescue Exception => e
+          error_response(ErrorsSubFieldCode => "error")
+        end 
+      end
+    end
+
+    class Response < Hash
+      include ResponseTokens
+      def initialize(hash)
+        super()
+        replace(hash)
+      end
+      def ok?()
+        self[StatusField] == StatusOK
+      end
+
+      def data()
+        self[DataField]
+      end
+    end
+
     class CommandBase
       def initialize(conn)
         @conn = conn
       end
 
-      def response_ok?(response)
-        response.kind_of?(Hash) and response["status"] == "ok"  
-      end
-
       def method_missing(method,*args)
+        raise Error.new("Illegal method (#{method})") unless ConnMethods.include?(method)
         @conn.send(method,*args)
       end
+      ConnMethods = [:rest_url,:get,:post]
     end
 
     class Conn
@@ -81,17 +134,16 @@ module R8
       end
 
       #######
-
       def rest_url(route)
         "http://#{Config[:server_host]}:#{Config[:server_port].to_s}/rest/#{route}"
       end
 
       def get(url)
-        JSON.parse(get_raw(url))
+        Response.new(json_parse_if_needed(get_raw(url)))
       end
 
       def post(url,body=nil)
-        JSON.parse(post_raw(url,body))
+        Response.new(json_parse_if_needed(post_raw(url,body)))
       end
 
       private
@@ -101,20 +153,24 @@ module R8
         response = post_raw rest_url("/user/process_login"),creds
         @cookies = response.cookies
       end
-
-      def get_raw(url)
-        RestClient.get(url,:cookies => @cookies)
-      end
-      def post_raw(url,body)
-        RestClient.post(url,body,:cookies => @cookies)
-      end
-
       def get_credentials()
         cred_file = File.expand_path("~/.r8client")
         raise Error.new("Credential file (#{cred_file}) does not exist") unless File.exists?(cred_file)
         ret = parse_key_value_file(cred_file)
         [:username,:password].each{|k|raise Error.new("cannot find #{k}") unless ret[k]}
         ret
+      end
+
+      ####
+      def get_raw(url)
+        RestClientWrapper.get(url,:cookies => @cookies)
+      end
+      def post_raw(url,body)
+        RestClientWrapper.post(url,body,:cookies => @cookies)
+      end
+
+      def json_parse_if_needed(item)
+        item.kind_of?(String) ? JSON.parse(item) : item
       end
     end
   end

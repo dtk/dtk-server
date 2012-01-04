@@ -10,12 +10,12 @@ module XYZ
       top_task_idh = id_handle(task_id)
       task_structure = Task.get_hierarchical_structure(top_task_idh)
       state_info = task_structure.state_info()
-      return_rest_response state_info
+      rest_ok_response state_info
     end
 
     def rest__list()
       tasks = Task.list(model_handle)
-      return_rest_response tasks
+      rest_ok_response tasks
     end
 
 
@@ -43,21 +43,19 @@ module XYZ
 
       target_idh = id_handle(target_scope.first,:target)
       pending_changes = StateChange.flat_list_pending_changes(target_idh)
-      ret = Hash.new
+
       if pending_changes.empty?
-        ret = {:status => :notok, :errors => [{:code => :no_pending_changes}]}
+        rest_notok_response :code => :no_pending_changes
       else
         task = Task.create_from_pending_changes(target_idh,pending_changes)
         task.save!()
-        ret = {:status => :ok, :task_id => task.id}
+        rest_ok_response :task_id => task.id
       end
-       return_rest_response ret
     end
 
     def rest_execute(task_id)
       task = Task.get_hierarchical_structure(id_handle(task_id))
 
-      ret = Hash.new
       #TODO: need to sync ValidationError with analysis done in group by
       #TODO: just need to check if anything returned missing values
       if errors = ValidationError.find_missing_required_attributes(task)

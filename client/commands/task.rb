@@ -16,8 +16,8 @@ module R8::Client
 
     def commit_changes_and_execute()
       response = create_task_from_commit_changes()
-      if response_ok?(response)
-        execute(response[:task_id])
+      if response.ok?
+        execute(response.data[:task_id])
       else
         response
       end

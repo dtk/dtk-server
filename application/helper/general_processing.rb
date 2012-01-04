@@ -51,10 +51,6 @@ module Ramaze::Helper
       @ctrl_results[:as_run_list] = Array.new
     end
 
-    def return_rest_response(item)
-      {:content => item ? JSON.generate(item) : nil}
-    end
-
     def json_response?()
       @json_response ||= rest_request?() or ajax_request?() 
     end

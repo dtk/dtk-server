@@ -70,27 +70,28 @@ module R8
     end
 
     class RestClientWrapper 
-      include ResponseTokens
-      extend ResponseTokens
-      def self.get(url,opts={})
-        error_handling do
-          ::RestClient.get(url,opts)
+      class << self
+        include ResponseTokens
+        def get(url,opts={})
+          error_handling do
+            ::RestClient.get(url,opts)
+          end
         end
-      end
-      def self.post(url,body={},opts={})
-        error_handling do
-          ::RestClient.post(url,body,opts)
+        def post(url,body={},opts={})
+          error_handling do
+            ::RestClient.post(url,body,opts)
+          end
         end
-      end
 
-      private
-      def self.error_handling(&block)
-        begin
-          block.call 
-         rescue ::RestClient::InternalServerError => e
-          error_response(ErrorsSubFieldCode => "internal_server_error")
-         rescue Exception => e
-          error_response(ErrorsSubFieldCode => "error")
+        private
+        def error_handling(&block)
+          begin
+            block.call 
+          rescue ::RestClient::InternalServerError => e
+            error_response(ErrorsSubFieldCode => "internal_server_error")
+          rescue Exception => e
+            error_response(ErrorsSubFieldCode => "error")
+          end
         end 
       end
     end

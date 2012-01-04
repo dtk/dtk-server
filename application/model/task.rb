@@ -30,7 +30,6 @@ module XYZ
 
     #TODO: cleanup; quick hack
     def state_info()
-      set_and_return_status_from_children!()
       set_and_return_names!()
       ret = PrettyPrintHash.new
       ret.add(self,:name,:id,:status)
@@ -84,27 +83,12 @@ module XYZ
       "CreateNode" => "Create Node"
     }
     
-    #alternative is to update task parent states as children are updated
-    def set_and_return_status_from_children!()
-      return self[:status] if subtasks.empty?
-      #TODO: would incorporate sucess definition here
-      subtask_status_array = subtasks.map{|st|st.set_and_return_status_from_children!()}
-      status = 
-        if subtask_status_array.include?("failed") then "failed"
-        elsif subtask_status_array.include?("executing") then "executing"
-        elsif not subtask_status_array.find{|s|s != "succeeded"} then "succeeded" #all succeeded
-        else "created" #if reach here must be all created
-        end
-      self[:status] = status
-    end
-    protected :set_and_return_status_from_children!
-
     def get_events()
       sp_hash = {:cols => [:created_at, :type, :content]}
       get_children_objs(:task_event,sp_hash).sort{|a,b| a[:created_at] <=> b[:created_at]}
     end
 
-    def add_event(event_type,top_task,result=nil)
+    def add_event(event_type,result=nil)
       event = TaskEvent.create_event?(event_type,self,result)
       return nil unless event
       type = event.delete(:type)||event_type
@@ -119,7 +103,7 @@ module XYZ
     end
     
     #returns [event,error-array]
-    def add_event_and_errors(event_type,top_task,result=nil)
+    def add_event_and_errors(event_type,result=nil)
       ret = [nil,nil]
       #process errors and strip out from what is passed to add event
       #TODO: change client so just returns :errors not sither :error or :errors
@@ -134,7 +118,7 @@ module XYZ
       else
         result_wo_errors = result
       end
-      ret[0] = add_event(event_type,top_task,result_wo_errors)
+      ret[0] = add_event(event_type,result_wo_errors)
       ret
     end
 

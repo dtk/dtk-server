@@ -19,6 +19,11 @@ module XYZ
           params
         end
 
+        def set_task_to_executing_and_ret_event(task)
+          task.update(:status => "executing")
+          task.add_event(:start)
+        end
+
         def set_result_succeeded(workitem,new_result,task,action)
           update_hash = {
             :status => "succeeded",
@@ -70,14 +75,14 @@ module XYZ
       class DetectCreatedNodeIsReady < Top
         def consume(workitem)
           params = get_params(workitem) 
-          task_id,action,workflow,task,task_end,top_task = %w{task_id action workflow task task_end top_task}.map{|k|params[k]}
+          task_id,action,workflow,task = %w{task_id action workflow task}.map{|k|params[k]}
           callbacks = {
             :on_msg_received => proc do |msg|
               result = {:type => :completed_create_node, :task_id => task_id} 
-              event = task.add_event(:complete_succeeded, top_task,result)
+              event = task.add_event(:complete_succeeded,result)
               pp [:found,msg[:senderid]]
               task[:executable_action][:node].update_operational_status!(:running)
-              set_result_succeeded(workitem,result,task,action)
+              set_result_succeeded(workitem,result,task,action) 
               action.get_and_propagate_dynamic_attributes(result,:non_null_attributes => "host_addresses_ipv4")
               self.reply_to_engine(workitem)
             end,
@@ -96,36 +101,17 @@ module XYZ
         end
       end
 
-      #TODO: currently; just using above; either use this or get rid of it
-      class DetectIfNodeIsResponding < Top
-        def consume(workitem)
-          params = get_params(workitem) 
-          action,task,workflow = %w{action task workflow}.map{|k|params[k]}
-          callbacks = {
-            :on_msg_received => proc do |msg|
-              pp [:found,msg[:senderid]]
-              task[:executable_action][:node].update_operational_status!(:running)
-              self.reply_to_engine(workitem)
-            end,
-            :on_timeout => proc do 
-              self.reply_to_engine(workitem)
-            end
-          }
-          poll_cycle = 2
-          context = {:callbacks => callbacks, :expected_count => 1,:count => 1,:poll_cycle => poll_cycle} 
-          workflow.poll_to_detect_node_ready(action[:node],context)
-        end
-      end
       class ExecuteOnNode < Top
         #LockforDebug = Mutex.new
         def consume(workitem)
           #LockforDebug.synchronize{pp [:in_consume, Thread.current, Thread.list];STDOUT.flush}
           params = get_params(workitem) 
-          task_id,action,workflow,task,top_task = %w{task_id action workflow task top_task}.map{|k|params[k]}
+          task_id,action,workflow,task,task_end = %w{task_id action workflow task task_end}.map{|k|params[k]}
           task.update_input_attributes!()
           task.add_internal_guards!(workflow.guards[:internal])
-          event = task.add_event(:start,top_task)
-          pp ["executing #{action.class.to_s}", task_id,event] if event
+          event = set_task_to_executing_and_ret_event(task)
+
+          pp ["executing #{action.class.to_s}", "task_end = #{task_end||"false"}",task_id,event] if event
           workitem.fields["guard_id"] = task_id # ${guard_id} is referenced if guard for execution of this
           execution_context(task) do
             if action.long_running?
@@ -135,12 +121,12 @@ module XYZ
                   #result[:statuscode] is for transport errors and data is for errors for agent
                   succeeded = (result[:statuscode] == 0 and [:succeeded,:ok].include?((result[:data]||{})[:status]))
                   if succeeded
-                    event = task.add_event(:complete_succeeded,top_task,result)
+                    event = task.add_event(:complete_succeeded,result)
                     pp ["task_complete_succeeded #{action.class.to_s}", task_id,event] if event
-                    set_result_succeeded(workitem,result,task,action) 
+                    set_result_succeeded(workitem,result,task,action) if task_end 
                     action.get_and_propagate_dynamic_attributes(result)
                   else
-                    event,errors = task.add_event_and_errors(:complete_failed,top_task,result)
+                    event,errors = task.add_event_and_errors(:complete_failed,result)
                     pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event
                     set_result_failed(workitem,result,task,action)
                   end
@@ -150,7 +136,7 @@ module XYZ
                   result = {
                     "status" => "timeout" 
                   }
-                  event,errors = task.add_event_and_errors(:complete_timeout,top_task,result)
+                  event,errors = task.add_event_and_errors(:complete_timeout,result)
                   pp ["task_complete_timeout #{action.class.to_s}", task_id,event,{:errors => errors}] if event
                   set_result_timeout(workitem,result,task)
                   self.reply_to_engine(workitem)
@@ -160,8 +146,7 @@ module XYZ
               workflow.initiate_executable_action(task,receiver_context)
             else
               result = workflow.process_executable_action(task)
-              #TODO: determien how or whether to set set on succeeded or failed
-              set_result_succeeded(workitem,result,task,action) 
+              set_result_succeeded(workitem,result,task,action) if task_end 
               reply_to_engine(workitem)
             end
           end

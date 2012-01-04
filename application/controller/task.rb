@@ -55,7 +55,7 @@ module XYZ
     end
 
     def rest_execute(task_id)
-      task = Task.get_for_execution(id_handle(task_id))
+      task = Task.get_hierarchical_structure(id_handle(task_id))
 
       ret = Hash.new
       #TODO: need to sync ValidationError with analysis done in group by

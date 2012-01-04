@@ -86,8 +86,7 @@ module R8
         JSON.parse(get_raw(url))
       end
 
-      def post(url,body={})
-#        post_raw(url,body)
+      def post(url,body=nil)
         JSON.parse(post_raw(url,body))
       end
 
@@ -95,7 +94,7 @@ module R8
       include ParseFile
       def login()
         creds = get_credentials()
-        response = post rest_url("/user/process_login"),creds
+        response = post_raw rest_url("/user/process_login"),creds
         @cookies = response.cookies
       end
 

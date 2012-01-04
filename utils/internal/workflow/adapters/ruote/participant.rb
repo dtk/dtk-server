@@ -110,7 +110,7 @@ module XYZ
           task.add_internal_guards!(workflow.guards[:internal])
           event = set_task_to_executing_and_ret_event(task)
 
-          pp ["executing #{action.class.to_s}", "task_end = #{task_end||"false"}",task_id,event] if event
+          pp ["executing #{action.class.to_s}",task_id,event] if event
           workitem.fields["guard_id"] = task_id # ${guard_id} is referenced if guard for execution of this
           execution_context(task) do
             if action.long_running?

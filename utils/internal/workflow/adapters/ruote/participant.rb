@@ -14,8 +14,7 @@ module XYZ
           params.merge!("workflow" => workflow)
           params.merge!("task" => task_info["task"])
           params.merge!("action" => task_info["action"])
-          params.merge!("top_task_idh" => task_info["top_task_idh"])
-          params.merge!("top_task" => workflow.top_task)
+          params.merge!("task_end" => workitem.params["task_end"])
           params
         end
 

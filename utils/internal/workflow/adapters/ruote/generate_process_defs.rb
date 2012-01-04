@@ -28,7 +28,7 @@ module XYZ
         elsif action.kind_of?(TaskAction::ConfigNode)
           if guard_tasks = context.get_guard_tasks(action)
             guards = ret_guards(guard_tasks)
-            main = participant_executable_action(:execute_on_node,task,context)
+            main = participant_executable_action(:execute_on_node,task,context,:task_end => true)
             sequence(guards,main)
           end
         end

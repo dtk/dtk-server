@@ -176,11 +176,10 @@ module XYZ
         if subtask_status_array.include?("failed") then "failed"
         elsif subtask_status_array.include?("executing") then "executing"
         elsif not subtask_status_array.find{|s|s != "succeeded"} then "succeeded" #all succeeded
-        else "created" #if reach here must be all created
+        else "executing" #if reach here must be some created and some finished
         end
-      if new_status and new_status != self[:status]
-        update({:status => new_status, :children_status => children_status},:no_hierarchical_update_status => true)
-      end
+      hier_update = (new_status != self[:status])
+      update({:status => new_status, :children_status => children_status},{:no_hierarchical_update_status => (not hier_update)})
     end
     private :hierarchical_update_status
     protected :update_from_children_status

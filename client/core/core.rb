@@ -5,7 +5,7 @@ require 'json'
 require 'pp'
 
 module R8
-  class Client
+  module Client
     class Error < NameError
     end
 
@@ -58,6 +58,10 @@ module R8
     class CommandBase
       def initialize(conn)
         @conn = conn
+      end
+
+      def response_ok?(response)
+        response.kind_of?(Hash) and response["status"] == "ok"  
       end
 
       def method_missing(method,*args)

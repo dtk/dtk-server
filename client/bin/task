@@ -1,6 +1,18 @@
 #!/usr/bin/env ruby
 require File.expand_path('../commands/task', File.dirname(__FILE__))
+include R8::Client
 
-conn = R8::Client::Conn.new()
+subcommand = ARGV[0]
+SubcommandToMethod = {
+  "list" => :get_state_info,
+  "commit_changes" => :create_task_from_commit_changes,
+  "execute" => :execute,
+  "commit_changes_and_execute" => :commit_changes_and_execute
+}
+method = SubcommandToMethod[subcommand]
+raise Error.new("Illegal subcommand #{subcommand||""}") unless method
+args = Array.new
 
-pp conn.task.get_state_info()
+conn = Conn.new()
+
+pp conn.task.send(method,*args)

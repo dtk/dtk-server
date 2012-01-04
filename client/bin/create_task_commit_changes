@@ -1,0 +1,7 @@
+#!/usr/bin/env ruby
+require File.expand_path('../commands/task', File.dirname(__FILE__))
+
+conn = R8::Client::Conn.new()
+
+pp conn.task.create_task_commit_changes()
+

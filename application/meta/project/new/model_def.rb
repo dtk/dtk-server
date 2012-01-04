@@ -3,8 +3,8 @@
   :table=>:project,
   :columns=>{
     :type => {:type=>:varchar, :size => 25}
-  },
-  :one_to_many=> [:implementation,:component],
+  },                   #TODO: should :implementation,:component be here?  
+  :one_to_many=> [:task,:implementation,:component],
   :virtual_columns=>{
     :targets=>{
       :type=>:json,

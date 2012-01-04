@@ -637,7 +637,7 @@ pp datacenter
       }
     end
 
-    #TDOO: doing redundant work to what is done in commit_ide
+    #TODO: doing redundant work to what is done in commit_ide
     def commit_changes_ide(target_id)
       target_id = target_id.gsub(/editor-target-/,"") #TODO: temp to compensate front end error
 

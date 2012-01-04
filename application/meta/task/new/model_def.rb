@@ -15,7 +15,7 @@
     :bound_input_attrs => {:type => :json},
     :bound_output_attrs => {:type => :json} #these are the dynamic attributes with values at time of task completion
   },
-  :many_to_one=>[:task],
+  :many_to_one=>[:project,:task],
   :one_to_many => [:task, :task_log, :task_event, :task_error]
 }
 

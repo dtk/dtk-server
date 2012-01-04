@@ -1,7 +1,7 @@
 #TODO: unify relation_type and model_name
 module XYZ
 
-  #TBD: should this class  be in this file or instead somewhere else
+  #TODO: should this class  be in this file or instead somewhere else
   module CommonMixin
     def [](x)
       super(x.to_sym)
@@ -298,7 +298,7 @@ module XYZ
 
   class IDInfoTable
     class << self
-      #TBD: may have parent class for infra tables
+      #TODO: may have parent class for infra tables
       def set_db(db)
         @db = db
       end
@@ -323,13 +323,13 @@ module XYZ
       ###### end: SchemaProcessing
 
       ###### Initial data
-	# TBD: must make so that does not add if there already
+	# TODO: must make so that does not add if there already
 	def add_top_factories?()
 	  DB_REL_DEF.each{|key,db_info|
 	    if db_info[:many_to_one].nil? or db_info[:many_to_one].empty? or 
                (db_info[:many_to_one] ? db_info[:many_to_one] == [db_info[:relation_type]] : nil)
 	      uri = "/" + key.to_s
-	      context = 2 #TBD : hard wired
+	      context = 2 #TODO : hard wired
 	      if get_row_from_uri(uri,context).nil?
 	        Log.info("adding to top level factory for: #{key}")
 	        insert_factory(key,uri,TOP_RELATION_TYPE.to_s,0,context) 
@@ -428,7 +428,7 @@ module XYZ
         end
        #TODO: see if bug below to set :parent_relation_type when parent_relation_type.nil?, but not above
         def update_instance(db_rel,id,uri,relation_type,parent_id_x,parent_relation_type)
-	  #  to fill in uri ##TBD: this is split between trigger, which creates it and this code which updates it; may better encapsulate 
+	  #  to fill in uri ##TODO: this is split between trigger, which creates it and this code which updates it; may better encapsulate 
 	  parent_id = parent_id_x ? parent_id_x : 0
 	  rel_qn = @db.fully_qualified_rel_name(db_rel)
 	  prt = parent_relation_type.nil? ? TOP_RELATION_TYPE.to_s : parent_relation_type.to_s

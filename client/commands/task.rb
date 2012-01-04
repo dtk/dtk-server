@@ -5,6 +5,11 @@ class R8::Client
       path = "task/state_info#{task_id ? "/#{task_id.to_s}" : ""}"
       get rest_url(path)
     end
+
+    def create_task_commit_changes()
+      path = "task/create_task_commit_changes"
+      get rest_url(path)
+    end
   end
 end
 

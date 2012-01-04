@@ -2,7 +2,7 @@ module XYZ
   class TaskController < Controller
     helper :task_helper
 
-    def state_info(task_id=nil)
+    def rest__state_info(task_id=nil)
       unless task_id
         tasks = Task.get_top_level_tasks(model_handle).sort{|a,b| b[:updated_at] <=> a[:updated_at]}
         task_id = tasks.first[:id]
@@ -18,13 +18,49 @@ module XYZ
       return_rest_response tasks
     end
 
+
+    def rest__create_task_commit_changes()
+      hash = request.params
+      #TODO: stub version that does not deal with parameters
+      #TODO: make sure that there is no task created but not executed that handles same changes
+      #compute scope
+      scope = 
+        if hash["target_ids"]
+          #TODO: stub
+        elsif hash["project_id"]
+          sp_hash = {
+            :cols => [:id],
+            :filter => [:and, :project_project_id, hash["project_id"].to_i]
+           }
+          target_ids = Model.get_objs(model_handle(:target),sp_hash).map{|r|r[:id]}
+          {:target_ids => target_ids}
+        else
+          target_ids = Model.get_objs(model_handle(:target),{:cols => [:id]}).map{|r|r[:id]}
+          {:target_ids => target_ids}
+        end
+      return Error.new("Only treating scope by target ids") unless target_scope = scope[:target_ids]
+      return Error.new("Only treating scope gievn by single target") unless target_scope.size == 1
+
+      target_idh = id_handle(target_scope.first,:target)
+      pending_changes = StateChange.flat_list_pending_changes(target_idh)
+      ret = Hash.new
+      if pending_changes.empty?
+        ret = {:status => :notok, :error_code => :no_pending_changes}
+               
+      else
+        top_level_task = Task.create_from_pending_changes(target_idh,pending_changes)
+        top_level_task.save!()
+        ret = {:status => :ok, :task_id => top_level_task.id}
+      end
+       return_rest_response ret
+    end
+
     #TODO: test stub
     def rerun_components(node_id)
       node_idh = id_handle(node_id,:node)
       StateChange.create_rerun_state_changes([node_idh])
       {:content => nil}
     end
-
 
 
     #TODO: test stub

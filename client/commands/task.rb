@@ -8,7 +8,7 @@ class R8::Client
 
     def create_task_commit_changes()
       path = "task/create_task_commit_changes"
-      get rest_url(path)
+      post rest_url(path)
     end
   end
 end

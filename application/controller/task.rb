@@ -55,6 +55,9 @@ module XYZ
        return_rest_response ret
     end
 
+    def rest_execute(task_id)
+    end
+
     #TODO: test stub
     def rerun_components(node_id)
       node_idh = id_handle(node_id,:node)

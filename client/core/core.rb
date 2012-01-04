@@ -60,12 +60,8 @@ module R8
         @conn = conn
       end
 
-      def get(url)
-        @conn.get(url)
-      end
-
-      def rest_url(route)
-        @conn.rest_url(route)
+      def method_missing(method,*args)
+        @conn.send(method,*args)
       end
     end
 
@@ -90,6 +86,10 @@ module R8
         JSON.parse(get_raw(url))
       end
 
+      def post(url,body={})
+        
+        JSON.parse(post_raw(url,body))
+      end
 
       private
       include ParseFile
@@ -99,12 +99,11 @@ module R8
         @cookies = response.cookies
       end
 
-      def post(url,body)
-        RestClient.post(url,body,:cookies => @cookies)
-      end
-
       def get_raw(url)
         RestClient.get(url,:cookies => @cookies)
+      end
+      def post_raw(url,body)
+        RestClient.post(url,body,:cookies => @cookies)
       end
 
       def get_credentials()

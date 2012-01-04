@@ -45,19 +45,50 @@ module XYZ
       pending_changes = StateChange.flat_list_pending_changes(target_idh)
       ret = Hash.new
       if pending_changes.empty?
-        ret = {:status => :notok, :error_code => :no_pending_changes}
-               
+        ret = {:status => :notok, :errors => [{:code => :no_pending_changes}]}
       else
-        top_level_task = Task.create_from_pending_changes(target_idh,pending_changes)
-        top_level_task.save!()
-        ret = {:status => :ok, :task_id => top_level_task.id}
+        task = Task.create_from_pending_changes(target_idh,pending_changes)
+        task.save!()
+        ret = {:status => :ok, :task_id => task.id}
       end
        return_rest_response ret
     end
 
     def rest_execute(task_id)
-    end
+      task = Task.get_for_execution(id_handle(task_id))
 
+      ret = Hash.new
+      #TODO: need to sync ValidationError with analysis done in group by
+      #TODO: just need to check if anything returned missing values
+      if errors = ValidationError.find_missing_required_attributes(task)
+        pp [:errors,errors]
+        error_list = []
+        #TODO: stub
+        error_codes = {
+          "MissingRequiredAttribute"=>:missing_required_attribute
+        }
+        error_list = errors.map do |e|
+          error_name = Aux::demodulize(e.class.to_s)
+          error_description = error_name
+          case error_name
+            when "MissingRequiredAttribute"
+            error_description = "Component(#{e[:component_name]}) on node (#{e[:node_name]}) is missing required attribute #{e[:attribute_name]}"
+          end
+          {
+            :code => error_codes[error_name] || :error,
+            :name => error_name,
+            :node_id => e[:node_id],
+            :description => error_description
+          }
+        end
+        rest_notok_response error_list
+      else
+        guards = Attribute.ret_attribute_guards(task)
+        workflow = Workflow.create(task,guards)
+        workflow.defer_execution()
+        rest_ok_response 
+      end
+    end
     #TODO: test stub
     def rerun_components(node_id)
       node_idh = id_handle(node_id,:node)

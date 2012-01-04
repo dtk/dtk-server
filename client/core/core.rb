@@ -87,7 +87,7 @@ module R8
       end
 
       def post(url,body={})
-        
+#        post_raw(url,body)
         JSON.parse(post_raw(url,body))
       end
 

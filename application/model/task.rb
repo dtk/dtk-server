@@ -322,7 +322,7 @@ module XYZ
         }
         next_level_objs = Model.get_objs(model_handle,sp_hash).reject{|k,v|k == :subtasks}
         next_level_objs.each do |st|
-          st[:executable_action] &&= TaskAction::TaskActionNode.create_from_hash(st[:executable_action_type],st[:executable_action])
+          st[:executable_action] &&= TaskAction::TaskActionNode.create_from_hash(st[:executable_action_type],st[:executable_action],id_handle)
         end
         id_handles = next_level_objs.map{|obj|obj.id_handle}
         ret += next_level_objs

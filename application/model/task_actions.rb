@@ -39,17 +39,19 @@ module XYZ
       def self.create_from_state_change(state_change)
         new(:state_change,state_change)
       end
-      def self.create_from_hash(task_action_type,hash)
+      def self.create_from_hash(task_action_type,hash,task_idh)
         case task_action_type
-          when "CreateNode" then CreateNode.new(:hash,hash)
-          when "ConfigNode" then ConfigNode.new(:hash,hash)
+          when "CreateNode" then CreateNode.new(:hash,hash,task_idh)
+          when "ConfigNode" then ConfigNode.new(:hash,hash,task_idh)
           else raise Error.new("Unexpected task_action_type (#{task_action_type})")
         end
       end
-      def initialize(hash)
+      def initialize(hash,task_idh=nil)
+        unless hash[:node].kind_of?(Node)
+          hash[:node] &&= Node.create_from_model_handle(hash[:node],task_idh.createMH(:node))
+        end
         super(hash)
       end
-      private :initialize
 
       def attributes_to_set()
         Array.new
@@ -123,7 +125,7 @@ module XYZ
     end
 
     class CreateNode < TaskActionNode
-      def initialize(type,item)
+      def initialize(type,item,task_idh=nil)
         hash = 
           case type 
            when :state_change
@@ -138,7 +140,7 @@ module XYZ
            else
             raise Error.new("Unexpected CreateNode.initialize type")
           end
-        super(hash)
+        super(hash,task_idh)
       end
       private :initialize
 
@@ -354,7 +356,7 @@ module XYZ
       end
 
      private
-      def initialize(type,item)
+      def initialize(type,item,task_idh=nil)
          hash =
           case type
            when :state_change
@@ -367,11 +369,14 @@ module XYZ
               :component_actions => ComponentAction.order_and_group_by_component(item)
             }
            when :hash
+            if component_actions = item[:component_actions]
+              component_actions.each_with_index{|ca,i|component_actions[i] = ComponentAction.create_from_hash(ca,task_idh)}
+            end
             item
            else
             raise Error.new("Unexpected ConfigNode.initialize type")
           end
-        super(hash)
+        super(hash,task_idh)
       end
     end
 
@@ -396,6 +401,14 @@ module XYZ
         end
         ret
       end
+      def self.create_from_hash(hash,task_idh)
+        hash[:component] &&= Component.create_from_model_handle(hash[:component],task_idh.createMH(:component))
+        if attrs = hash[:attributes]
+          attr_mh = task_idh.createMH(:attribute)
+          attrs.each_with_index{|attr,i|attrs[i] = Attribute.create_from_model_handle(attr,attr_mh)}
+        end
+        new(hash)
+      end
 
       def self.order_and_group_by_component(state_change_list)
         ndx_cmp_idhs = Hash.new
@@ -405,7 +418,7 @@ module XYZ
         end
         cmp_deps = Component.get_component_type_and_dependencies(ndx_cmp_idhs.values)
         generate_component_order(cmp_deps).map do |(component_id,deps)|
-          create(state_change_list.select{|a|a[:component][:id] == component_id},deps) 
+          create_from_state_change(state_change_list.select{|a|a[:component][:id] == component_id},deps) 
         end
       end
 
@@ -462,7 +475,7 @@ module XYZ
         end
       end
 
-      def self.create(scs_same_cmp,deps)
+      def self.create_from_state_change(scs_same_cmp,deps)
         state_change = scs_same_cmp.first
         #TODO: may deprecate need for ||[sc[:id]
         pointer_ids = scs_same_cmp.map{|sc|sc[:linked_ids]||[sc[:id]]}.flatten

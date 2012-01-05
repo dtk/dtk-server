@@ -31,13 +31,13 @@ module XYZ
       ret = nil
       all_actions = Array.new
       if state_change_list.size == 1
-        executable_action = TaskAction::CreateNode.new(state_change_list.first.first)
+        executable_action = TaskAction::CreateNode.create_from_state_change(state_change_list.first.first)
         all_actions << executable_action
         ret = create_new_task(task_mh,:executable_action => executable_action) 
       else
         ret = create_new_task(task_mh,:display_name => "create_node_stage", :temporal_order => "concurrent")
         state_change_list.each do |sc|
-          executable_action = TaskAction::CreateNode.new(sc.first)
+          executable_action = TaskAction::CreateNode.create_from_state_change(sc.first)
           all_actions << executable_action
           ret.add_subtask_from_hash(:executable_action => executable_action)
           end
@@ -52,13 +52,13 @@ module XYZ
       ret = nil
       all_actions = Array.new
       if state_change_list.size == 1
-        executable_action = TaskAction::ConfigNode.new(state_change_list.first)
+        executable_action = TaskAction::ConfigNode.create_from_state_change(state_change_list.first)
         all_actions << executable_action
         ret = create_new_task(task_mh,:executable_action => executable_action) 
       else
         ret = create_new_task(task_mh,:display_name => "config_node_stage", :temporal_order => "concurrent")
         state_change_list.each do |sc|
-          executable_action = TaskAction::ConfigNode.new(sc)
+          executable_action = TaskAction::ConfigNode.create_from_state_change(sc)
           all_actions << executable_action
           ret.add_subtask_from_hash(:executable_action => executable_action)
           end

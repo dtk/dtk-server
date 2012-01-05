@@ -11,13 +11,13 @@ module R8::Client
     end
 
     def execute(task_id)
-      post rest_url("task/execute/#{task_id.to_s}")
+      post rest_url("task/execute"), "task_id" => task_id
     end
 
     def commit_changes_and_execute()
       response = create_task_from_commit_changes()
       if response.ok?
-        execute(response.data[:task_id])
+        execute(response.data["task_id"])
       else
         response
       end

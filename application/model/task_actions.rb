@@ -36,6 +36,21 @@ module XYZ
     end
 
     class TaskActionNode < TaskActionBase
+      def self.create_from_state_change(state_change)
+        new(:state_change,state_change)
+      end
+      def self.create_from_hash(task_action_type,hash)
+        case task_action_type
+          when "CreateNode" then CreateNode.new(:hash,hash)
+          when "ConfigNode" then ConfigNode.new(:hash,hash)
+          else raise Error.new("Unexpected task_action_type (#{task_action_type})")
+        end
+      end
+      def initialize(hash)
+        super(hash)
+      end
+      private :initialize
+
       def attributes_to_set()
         Array.new
       end
@@ -108,15 +123,24 @@ module XYZ
     end
 
     class CreateNode < TaskActionNode
-      def initialize(state_change)
-        hash = {
-          :state_change_id => state_change[:id],
-          :state_change_types => [state_change[:type]],
-          :attributes => Array.new,
-          :node => state_change[:node]
-        }
+      def initialize(type,item)
+        hash = 
+          case type 
+           when :state_change
+            {
+              :state_change_id => item[:id],
+              :state_change_types => [item[:type]],
+              :attributes => Array.new,
+              :node => item[:node]
+            }
+           when :hash
+            item
+           else
+            raise Error.new("Unexpected CreateNode.initialize type")
+          end
         super(hash)
       end
+      private :initialize
 
       def self.state_info(object)
         ret = PrettyPrintHash.new
@@ -330,15 +354,23 @@ module XYZ
       end
 
      private
-      def initialize(on_node_state_changes)
-        sample_state_change = on_node_state_changes.first
-        node = sample_state_change[:node]
-        hash = {
-          :node => node,
-          :state_change_types => on_node_state_changes.map{|sc|sc[:type]}.uniq,
-          :config_agent_type => on_node_state_changes.first.on_node_config_agent_type,
-          :component_actions => ComponentAction.order_and_group_by_component(on_node_state_changes)
-        }
+      def initialize(type,item)
+         hash =
+          case type
+           when :state_change
+            sample_state_change = item.first
+            node = sample_state_change[:node]
+            {
+              :node => node,
+              :state_change_types => item.map{|sc|sc[:type]}.uniq,
+              :config_agent_type => item.first.on_node_config_agent_type,
+              :component_actions => ComponentAction.order_and_group_by_component(item)
+            }
+           when :hash
+            item
+           else
+            raise Error.new("Unexpected ConfigNode.initialize type")
+          end
         super(hash)
       end
     end

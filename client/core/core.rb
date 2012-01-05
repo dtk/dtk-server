@@ -9,6 +9,16 @@ module R8
     class Error < NameError
     end
 
+    class Log
+      #TODO Stubs
+      def self.info(msg)
+        pp "info: #{msg}"
+      end
+      def self.error(msg)
+        pp "error: #{msg}"
+      end
+    end
+
     module ParseFile
       def parse_key_value_file(file)
         #adapted from mcollective config
@@ -62,7 +72,7 @@ module R8
       StatusField = "status"
       ErrorsField = "errors"
       ErrorsSubFieldCode = "code"
-
+      GenericError = "error"
       def error_response(error_or_errors)
         errors = error_or_errors.kind_of?(Hash) ? [error_or_errors] : error_or_errors
         {StatusField => StatusNotok, ErrorsField => errors}
@@ -87,12 +97,17 @@ module R8
         def error_handling(&block)
           begin
             block.call 
-          rescue ::RestClient::InternalServerError => e
-            error_response(ErrorsSubFieldCode => "internal_server_error")
+          rescue ::RestClient::InternalServerError,::RestClient::RequestTimeout => e
+            error_response(ErrorsSubFieldCode => RestClientErrors[e.class.to_s]||GenericError)
           rescue Exception => e
-            error_response(ErrorsSubFieldCode => "error")
+            Log.info("Uninterpred error object (#{e.class.to_s})")
+            error_response(ErrorsSubFieldCode => GenericError)
           end
         end 
+        RestClientErrors = {
+          "RestClient::InternalServerError" => "internal_server_error",
+          "RestClient::RequestTimeout" => "timeout"
+        }
       end
     end
 

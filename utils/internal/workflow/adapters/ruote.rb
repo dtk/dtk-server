@@ -81,6 +81,35 @@ module XYZ
         @process_def #TODO: just for testing so can checkpoint and see what it looks like
       end
 
+      #This works under the assumption that task_ids are never reused
+      class TaskInfo 
+        Store = Hash.new
+        Lock = Mutex.new
+        def self.initialize_task_info()
+          #deprecate
+        end
+        def self.set(task_id,task_info,task_type=nil)
+          key = task_key(task_id,task_type)
+          Lock.synchronize{Store[key] = task_info}
+        end
+        def self.get_and_delete(task_id,task_type=nil)
+          key = task_key(task_id,task_type)
+          ret = nil
+          Lock.synchronize{ret = Store.delete(key)}
+          ret 
+        end
+        def self.clean()
+          pp [:write_cleanup,Store.keys]
+          #TODO: this needs to clean all keys associated with the task; some handle must be passed in
+          #TODO: if run through all the tasks this does not need to be called; so call to cleanup aborted tasks
+        end
+       private
+        def self.task_key(task_id,task_type)
+          task_type ? "#{task_id.to_s}-#{task_type}" : task_id.to_s
+        end
+      end
+=begin
+      #TODO: this does not work for concurrent tasks because @count is not updated at right time
       class TaskInfo 
         @@count = 0
         Store = Hash.new
@@ -107,6 +136,7 @@ module XYZ
           task_type ? "#{task_id.to_s}-#{task_type}" : task_id.to_s
         end
       end
+=end
     end
   end
 end

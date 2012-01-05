@@ -58,9 +58,12 @@ module XYZ
       task_id = hash["task_id"]
       task = Task.get_hierarchical_structure(id_handle(task_id))
 
-      #TODO: need to sync ValidationError with analysis done in group by
+      guards = Attribute.ret_attribute_guards(task)
+
+      #TODO: need to sync ValidationError with analysis done in ret_attribute_guards 
       #TODO: just need to check if anything returned missing values
-      if errors = ValidationError.find_missing_required_attributes(task)
+      if false
+      #if errors = ValidationError.find_missing_required_attributes(task)
         pp [:errors,errors]
         error_list = []
         #TODO: stub
@@ -83,7 +86,6 @@ module XYZ
         end
         rest_notok_response error_list
       else
-        guards = Attribute.ret_attribute_guards(task)
         workflow = Workflow.create(task,guards)
         workflow.defer_execution()
         rest_ok_response :task_id => task_id 

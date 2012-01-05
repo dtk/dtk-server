@@ -86,7 +86,7 @@ module XYZ
         guards = Attribute.ret_attribute_guards(task)
         workflow = Workflow.create(task,guards)
         workflow.defer_execution()
-        rest_ok_response 
+        rest_ok_response :task_id => task_id 
       end
     end
     #TODO: test stub

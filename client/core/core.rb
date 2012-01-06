@@ -131,6 +131,12 @@ module R8
         @conn = conn
       end
 
+      def apply(subcommand,*args)
+        method = subcommand.to_sym
+        raise Error.new("Illegal subcommand #{subcommand||""}") unless respond_to?(method)
+        send(method,*args)
+      end
+
       def method_missing(method,*args)
         raise Error.new("Illegal method (#{method})") unless ConnMethods.include?(method)
         @conn.send(method,*args)

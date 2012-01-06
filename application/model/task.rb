@@ -1,4 +1,5 @@
-require  File.expand_path('task/create', File.dirname(__FILE__))
+r8_nested_require('task','create')
+r8_nested_require('task','action')
 module XYZ
   class Task < Model
     extend TaskCreateClassMixin
@@ -324,7 +325,7 @@ module XYZ
         next_level_objs = Model.get_objs(model_handle,sp_hash).reject{|k,v|k == :subtasks}
 
         #process depending on detail level
-        unless detail_level == :detailed
+        if detail_level == :detailed
           next_level_objs.each{|st|st.reify!()}
         else
           next_level_objs.each{|st|st.prune_for_summary!()}
@@ -336,6 +337,7 @@ module XYZ
       ret
     end
     def prune_for_summary!()
+      TaskAction::TaskActionNode.prune_for_summary!(self[:executable_action_type],self[:executable_action])
     end
     def reify!()
       self[:executable_action] &&= TaskAction::TaskActionNode.create_from_hash(self[:executable_action_type],self[:executable_action],id_handle)
@@ -364,6 +366,9 @@ module XYZ
        :status,
        :result,
        :updated_at,
+       :created_at,
+       :start_datetime,
+       :end_datetime,
        :task_id,
        :temporal_order,
        :position,

@@ -3,6 +3,8 @@
   :table=>:task,
   :columns=>{
     :status => {:type=>:varchar, :size=>20, :default => "created"}, # = "created" | "executing" | "succeeded" | "failed" 
+    :start_datetime => {:type => :timestamp},
+    :end_datetime => {:type => :timestamp},
     :result => {:type => :json}, # gets serialized version of TaskAction::Result
     :action_on_failure => {:type => :varchar, :default => "abort"},
     :commit_message => {:type => :varchar}, #only on top level task

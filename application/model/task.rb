@@ -311,7 +311,8 @@ module XYZ
     private :get_config_agent_type, :get_config_agent
 
     #recursively walks structure, but returns them in flat list
-    def get_all_subtasks()
+    def get_all_subtasks(opts={})
+      detail_level = opts[:detail_level] || :detailed
       ret = Array.new
       id_handles = [id_handle]
 
@@ -321,22 +322,33 @@ module XYZ
           :filter => [:oneof,:task_id,id_handles.map{|idh|idh.get_id}] 
         }
         next_level_objs = Model.get_objs(model_handle,sp_hash).reject{|k,v|k == :subtasks}
-        next_level_objs.each do |st|
-          st[:executable_action] &&= TaskAction::TaskActionNode.create_from_hash(st[:executable_action_type],st[:executable_action],id_handle)
+
+        #process depending on detail level
+        unless detail_level == :detailed
+          next_level_objs.each{|st|st.reify!()}
+        else
+          next_level_objs.each{|st|st.prune_for_summary!()}
         end
         id_handles = next_level_objs.map{|obj|obj.id_handle}
+
         ret += next_level_objs
       end
       ret
     end
-    
-    def self.get_hierarchical_structure(top_task_idh)
+    def prune_for_summary!()
+    end
+    def reify!()
+      self[:executable_action] &&= TaskAction::TaskActionNode.create_from_hash(self[:executable_action_type],self[:executable_action],id_handle)
+    end
+    protected :prune_for_summary!,:reify!
+
+    def self.get_hierarchical_structure(top_task_idh,opts={})
       sp_hash = {
         :cols => Task.common_columns(),
         :filter => [:eq,:id,top_task_idh.get_id()]
       }
       top_task = get_objs(top_task_idh.createMH(),sp_hash).first
-      flat_subtask_list = top_task.get_all_subtasks()
+      flat_subtask_list = top_task.get_all_subtasks(opts)
       ndx_task_list = flat_subtask_list.inject({top_task.id => top_task}){|h,t|h.merge(t.id => t)}
       flat_subtask_list.each do |subtask|
         parent_id = subtask[:task_id]

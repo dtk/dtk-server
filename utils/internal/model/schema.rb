@@ -314,8 +314,8 @@ module XYZ
           Integer :ref_num
           String :description
           String :display_name
-          Timestamp :created_at, :default => SQL.now
-          Timestamp :updated_at, :default => SQL.now
+          Timestamp :created_at
+          Timestamp :updated_at
           unless opts[:user_model]
             foreign_key :owner_id, USER_TABLE.schema_table_symbol, FK_CASCADE_OPT.merge({:type =>  ID_TYPES[:id]})
             foreign_key :group_id, USER_GROUP_TABLE.schema_table_symbol, FK_CASCADE_OPT.merge({:type =>  ID_TYPES[:id]})

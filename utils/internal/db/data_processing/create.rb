@@ -28,6 +28,9 @@ module XYZ
       def create_from_select(model_handle,field_set,select_ds,override_attrs={},opts={})
         duplicate_refs = opts[:duplicate_refs] || :allow #other alternatives: #:no_check | :error_on_duplicate | :prune_duplicates
         overrides = override_attrs.dup #because can remove elements
+        set_updated_at!(overrides)
+        set_created_at!(overrides)
+
         user_info_assigns = DB.user_info_for_create_seleect(overrides,model_handle)
         
         #modify ds and its columns in concert
@@ -205,7 +208,7 @@ module XYZ
           ref_num = compute_ref_num db_rel,ref,c,parent_id_field => parent_id
 
           merge_attrs = {:ref_num => ref_num,parent_id_field => parent_id_info[:id]}
-          #TODO: may fold into  modify_to_reflect_special_processing!, but that require sref_num be computed before this call
+          #TODO: may fold into  modify_to_reflect_special_processing!, but that requires ref_num be computed before this call
           if opts[:sync_display_name_with_ref] and ref_num and ref_num > 1
             merge_attrs.merge!(:display_name => "#{ref}-#{ref_num.to_s}")
           end

@@ -75,9 +75,17 @@ module XYZ
         end
 
         set_updated_at!(scalar_assigns) if sql_operation == :update
+        set_created_at!(scalar_assigns) if sql_operation == :create
 
 	scalar_assigns
       end
+      def set_updated_at!(update_set_clause)
+        update_set_clause[:updated_at] ||= Aux::now_time_stamp()
+      end
+      def set_created_at!(update_set_clause)
+        update_set_clause[:created_at] ||= Aux::now_time_stamp()
+      end
+
 
 
       #if any virtual columns need to remove and populate the actual table 

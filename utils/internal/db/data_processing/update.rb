@@ -72,10 +72,6 @@ module XYZ
 
      private
 
-      def set_updated_at!(update_set_clause)
-        update_set_clause[:updated_at] = SQL.now unless update_set_clause[:updated_at]
-      end
-
       def update_given_sequel_dataset(id_info,update_ds,update_set_clause,opts={})
         unless opts[:returning_cols] 
           update_ds.update(update_set_clause)

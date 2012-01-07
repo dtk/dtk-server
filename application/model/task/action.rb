@@ -52,6 +52,13 @@ module XYZ
         end
         super(hash)
       end
+      def self.prune_for_summary!(task_action_type,hash)
+        case task_action_type
+          when "CreateNode" then CreateNode.prune_for_summary_aux!(hash)
+          when "ConfigNode" then ConfigNode.prune_for_summary_aux!(hash)
+          else raise Error.new("Unexpected task_action_type (#{task_action_type})")
+        end
+      end
 
       def attributes_to_set()
         Array.new
@@ -144,6 +151,12 @@ module XYZ
       end
       private :initialize
 
+      def self.prune_for_summary_aux!(hash)
+        hash[:node] = node_state_info(hash)
+        hash.each_key{|k|hash.delete(k) unless [:node].include?(k)}
+        hash
+      end
+      #TODO: should state_info be deprecated for prune_for_summary_aux!
       def self.state_info(object)
         ret = PrettyPrintHash.new
         ret[:node] = node_state_info(object)
@@ -227,6 +240,13 @@ module XYZ
     end
 
     class ConfigNode < TaskActionNode
+      def self.prune_for_summary_aux!(hash)
+        hash[:node] = node_state_info(hash)
+        hash[:component_actions] &&= hash[:component_actions].map{|ca|ComponentAction.summary(ca)}
+        hash.each_key{|k|hash.delete(k) unless [:node,:component_actions].include?(k)}
+        hash
+      end
+      #TODO: should state_info be deprecated for prune_for_summary_aux!
       def self.state_info(object)
         ret = PrettyPrintHash.new
         ret[:node] = node_state_info(object)
@@ -381,6 +401,10 @@ module XYZ
     end
 
     class ComponentAction < HashObject
+      def self.summary(hash)
+        component_state_info(hash)
+      end
+      #TODO: should state_info be deprecated for summary
       def self.state_info(object)
         ret = PrettyPrintHash.new
         ret[:component] = component_state_info(object)

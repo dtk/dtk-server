@@ -5,7 +5,7 @@ module XYZ
     def rest__state_info(task_id=nil)
       hash = request.params
       detail_level = nil
-#      detail_level = (hash[:detail_level]||:summary).to_sym
+      detail_level = (hash[:detail_level]||:summary).to_sym
       unless task_id
         tasks = Task.get_top_level_tasks(model_handle).sort{|a,b| b[:updated_at] <=> a[:updated_at]}
         task_id = tasks.first[:id]

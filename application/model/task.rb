@@ -337,7 +337,7 @@ module XYZ
       ret
     end
     def prune_for_summary!()
-      TaskAction::TaskActionNode.prune_for_summary!(self[:executable_action_type],self[:executable_action])
+      TaskAction::TaskActionNode.prune_for_summary!(self[:executable_action_type],self[:executable_action]) if self[:executable_action]
     end
     def reify!()
       self[:executable_action] &&= TaskAction::TaskActionNode.create_from_hash(self[:executable_action_type],self[:executable_action],id_handle)

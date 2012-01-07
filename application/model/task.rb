@@ -145,34 +145,45 @@ module XYZ
     #this updates self, which is leaf node, plus all parents
     def update(update_hash,opts={})
       super(update_hash)
-      unless opts[:no_hierarchical_update_status]
-        hierarchical_update_status(update_hash[:status]) if update_hash[:status]
+      unless opts[:dont_update_parents] or (update_hash & [:status,:started_at,:ended_at]).nil?
+        update_parents()
       end
     end
 
-    def hierarchical_update_status(status)
+    #updates parent fields that are fn of children (:status,:started_at,:ended_at)
+    def update_parents()
       update_object!(:task_id)
-      if self[:task_id]
-        parent = id_handle.createIDH(:id => self[:task_id]).create_object().update_object!(:status,:children_status)
-        key = id().to_s.to_sym #TODO: look at avoiding this by having translation of json not make num keys into symbols
-        parent[:children_status][key] = status
-        parent.update_from_children_status()
+      return unless self[:task_id]
+      parent = id_handle.createIDH(:id => self[:task_id]).create_object().update_object!(:status,:started_at,:ended_at,:children_status)
+      key = id().to_s.to_sym #TODO: look at avoiding this by having translation of json not make num keys into symbols
+      children_status = parent[:children_status].merge!(key => self[:status])
+
+      parent_updates = {:children_status => children_status}
+      #compute parent start time
+      unless parent[:started_at] or self[:started_at].nil?
+        parent_updates.merge!(:started_at => self[:started_at])
       end
-    end
-    def update_from_children_status()
-      children_status = self[:children_status]
+
+      #compute new parent status
       subtask_status_array = children_status.values
-      new_status = 
+      parent_status = 
         if subtask_status_array.include?("failed") then "failed"
         elsif subtask_status_array.include?("executing") then "executing"
         elsif not subtask_status_array.find{|s|s != "succeeded"} then "succeeded" #all succeeded
         else "executing" #if reach here must be some created and some finished
+       end
+      unless parent_status == parent[:status]
+        parent_updates.merge!(:status => parent_status)
+        #compute parent end time which can only change if parent changed to "failed" or "succeeded"
+        if ["failed","succeeded"].include?(parent_status) and self[:ended_at]
+          parent_updates.merge!(:ended_at => self[:ended_at])
         end
-      hier_update = (new_status != self[:status])
-      update({:status => new_status, :children_status => children_status},{:no_hierarchical_update_status => (not hier_update)})
+      end
+
+      dont_update_parents = (parent_updates.keys - [:children_status]).empty?
+      parent.update(parent_updates, :dont_update_parents => dont_update_parents)
     end
-    private :hierarchical_update_status
-    protected :update_from_children_status
+    private :update_parents
 
     def update_input_attributes!()
       task_action = self[:executable_action]

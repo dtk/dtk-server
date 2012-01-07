@@ -142,26 +142,27 @@ module XYZ
       add_event(:start)
     end
 
+    #TODO: update and update_parents can be cleaned up because halfway between update and update_object!
     #this updates self, which is leaf node, plus all parents
     def update(update_hash,opts={})
       super(update_hash)
       unless opts[:dont_update_parents] or (update_hash.keys & [:status,:started_at,:ended_at]).empty?
-        update_parents(update_hash)
+        if task_id = update_object!(:task_id)[:task_id]
+          update_parents(update_hash.merge(:task_id => task_id))
+        end
       end
     end
 
     #updates parent fields that are fn of children (:status,:started_at,:ended_at)
     def update_parents(child_hash)
-      update_object!(:task_id)
-      return unless self[:task_id]
-      parent = id_handle.createIDH(:id => self[:task_id]).create_object().update_object!(:status,:started_at,:ended_at,:children_status)
+      parent = id_handle.createIDH(:id => child_hash[:task_id]).create_object().update_object!(:status,:started_at,:ended_at,:children_status)
       key = id().to_s.to_sym #TODO: look at avoiding this by having translation of json not make num keys into symbols
-      children_status = parent[:children_status].merge!(key => self[:status])
+      children_status = parent[:children_status].merge!(key => child_hash[:status])
 
       parent_updates = {:children_status => children_status}
       #compute parent start time
-      unless parent[:started_at] or self[:started_at].nil?
-        parent_updates.merge!(:started_at => self[:started_at])
+      unless parent[:started_at] or child_hash[:started_at].nil?
+        parent_updates.merge!(:started_at => child_hash[:started_at])
       end
 
       #compute new parent status
@@ -175,8 +176,8 @@ module XYZ
       unless parent_status == parent[:status]
         parent_updates.merge!(:status => parent_status)
         #compute parent end time which can only change if parent changed to "failed" or "succeeded"
-        if ["failed","succeeded"].include?(parent_status) and self[:ended_at]
-          parent_updates.merge!(:ended_at => self[:ended_at])
+        if ["failed","succeeded"].include?(parent_status) and child_hash[:ended_at]
+          parent_updates.merge!(:ended_at => child_hash[:ended_at])
         end
       end
 

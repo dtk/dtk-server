@@ -33,6 +33,7 @@ module XYZ
       set_and_return_names!()
       ret = PrettyPrintHash.new
       ret.add(self,:name,:id,:status)
+      ret.add(self,:started_at?)
       num_subtasks = subtasks.size
       ret.add(self,:temporal_order) if num_subtasks > 1
       if num_subtasks > 0
@@ -134,6 +135,11 @@ module XYZ
       end
       Model.create_from_rows(model_handle(:task_error),rows,{:convert => true})
       normalized_errors 
+    end
+
+    def update_to_starting()
+      update(:status => "executing", :started_at => Aux::now_time_stamp())
+      add_event(:start)
     end
 
     #this updates self, which is leaf node, plus all parents
@@ -356,8 +362,8 @@ module XYZ
        :result,
        :updated_at,
        :created_at,
-       :start_datetime,
-       :end_datetime,
+       :started_at,
+       :ended_at,
        :task_id,
        :temporal_order,
        :position,

@@ -19,8 +19,7 @@ module XYZ
         end
 
         def set_task_to_executing_and_ret_event(task)
-          task.update(:status => "executing")
-          task.add_event(:start)
+          task.update_to_starting()
         end
 
         def set_result_succeeded(workitem,new_result,task,action)

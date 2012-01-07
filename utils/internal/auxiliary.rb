@@ -35,6 +35,12 @@ module XYZ
         RUBY_PLATFORM
       end
 
+
+      def now_time_stamp()
+        SQL.now
+        #TODO: change to use app server clock
+      end
+
       def ordered_hash(array_with_hashes)
         array_with_hashes.inject(ActiveSupport::OrderedHash.new) do |h,x|
           h.merge(x.keys.first => x.values.first)

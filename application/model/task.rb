@@ -145,13 +145,13 @@ module XYZ
     #this updates self, which is leaf node, plus all parents
     def update(update_hash,opts={})
       super(update_hash)
-      unless opts[:dont_update_parents] or (update_hash & [:status,:started_at,:ended_at]).nil?
-        update_parents()
+      unless opts[:dont_update_parents] or (update_hash.keys & [:status,:started_at,:ended_at]).empty?
+        update_parents(update_hash)
       end
     end
 
     #updates parent fields that are fn of children (:status,:started_at,:ended_at)
-    def update_parents()
+    def update_parents(child_hash)
       update_object!(:task_id)
       return unless self[:task_id]
       parent = id_handle.createIDH(:id => self[:task_id]).create_object().update_object!(:status,:started_at,:ended_at,:children_status)

@@ -29,8 +29,7 @@ module XYZ
       ret
     end
 
-    #TODO: cleanup; quick hack
-    def state_info()
+    def state_info(opts)
       set_and_return_names!()
       ret = PrettyPrintHash.new
       ret.add(self,:name,:id,:status)
@@ -38,18 +37,18 @@ module XYZ
       ret.add(self,:temporal_order) if num_subtasks > 1
       if num_subtasks > 0
         ret.add(self,:subtasks) do |subtasks|
-          subtasks.sort{|a,b| (a[:position]||0) <=> (b[:position]||0)}.map{|st|st.state_info()}
+          subtasks.sort{|a,b| (a[:position]||0) <=> (b[:position]||0)}.map{|st|st.state_info(opts)}
         end
       end
       action_type = self[:executable_action_type]
       case action_type
        when "ConfigNode" 
         if ea = self[:executable_action]
-          ret.merge!(TaskAction::ConfigNode.state_info(ea))
+          ret.merge!(TaskAction::ConfigNode.state_info(ea,opts))
         end
        when "CreateNode" 
         if ea = self[:executable_action]
-          ret.merge!(TaskAction::CreateNode.state_info(ea))
+          ret.merge!(TaskAction::CreateNode.state_info(ea,opts))
         end
       end
       ret
@@ -312,8 +311,7 @@ module XYZ
     private :get_config_agent_type, :get_config_agent
 
     #recursively walks structure, but returns them in flat list
-    def get_all_subtasks(opts={})
-      detail_level = opts[:detail_level] || :detailed
+    def get_all_subtasks()
       ret = Array.new
       id_handles = [id_handle]
 
@@ -323,34 +321,25 @@ module XYZ
           :filter => [:oneof,:task_id,id_handles.map{|idh|idh.get_id}] 
         }
         next_level_objs = Model.get_objs(model_handle,sp_hash).reject{|k,v|k == :subtasks}
-
-        #process depending on detail level
-        if detail_level == :detailed
-          next_level_objs.each{|st|st.reify!()}
-        else
-          next_level_objs.each{|st|st.prune_for_summary!()}
-        end
+        next_level_objs.each{|st|st.reify!()}
         id_handles = next_level_objs.map{|obj|obj.id_handle}
 
         ret += next_level_objs
       end
       ret
     end
-    def prune_for_summary!()
-      TaskAction::TaskActionNode.prune_for_summary!(self[:executable_action_type],self[:executable_action]) if self[:executable_action]
-    end
     def reify!()
       self[:executable_action] &&= TaskAction::TaskActionNode.create_from_hash(self[:executable_action_type],self[:executable_action],id_handle)
     end
-    protected :prune_for_summary!,:reify!
+    protected :reify!
 
-    def self.get_hierarchical_structure(top_task_idh,opts={})
+    def self.get_hierarchical_structure(top_task_idh)
       sp_hash = {
         :cols => Task.common_columns(),
         :filter => [:eq,:id,top_task_idh.get_id()]
       }
       top_task = get_objs(top_task_idh.createMH(),sp_hash).first
-      flat_subtask_list = top_task.get_all_subtasks(opts)
+      flat_subtask_list = top_task.get_all_subtasks()
       ndx_task_list = flat_subtask_list.inject({top_task.id => top_task}){|h,t|h.merge(t.id => t)}
       flat_subtask_list.each do |subtask|
         parent_id = subtask[:task_id]
@@ -639,6 +628,12 @@ module XYZ
         task[:children] << attr_task
       end
       task
+    end
+    class StateInfoOpts < Hash
+      def initialize(hash_opts={})
+        super()
+        replace(hash_opts) unless hash_opts.empty?
+      end
     end
   end
 end

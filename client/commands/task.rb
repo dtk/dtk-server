@@ -1,10 +1,11 @@
 require File.expand_path('../core/core', File.dirname(__FILE__))
 module R8::Client
   class TaskCommand < CommandBase
-    def status(task_id=nil)
+    def status(detail_level="summary",task_id=nil)
       body = Hash.new
-      path = "task/state_info#{task_id ? "/#{task_id.to_s}" : ""}"
-      post rest_url(path),body
+      body["detail_level"] = detail_level
+      body["task_id"] = task_id if task_id
+      post rest_url("task/state_info"),body
     end
 
     def commit_changes()

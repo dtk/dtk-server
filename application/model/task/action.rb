@@ -52,13 +52,6 @@ module XYZ
         end
         super(hash)
       end
-      def self.prune_for_summary!(task_action_type,hash)
-        case task_action_type
-          when "CreateNode" then CreateNode.prune_for_summary_aux!(hash)
-          when "ConfigNode" then ConfigNode.prune_for_summary_aux!(hash)
-          else raise Error.new("Unexpected task_action_type (#{task_action_type})")
-        end
-      end
 
       def attributes_to_set()
         Array.new
@@ -118,7 +111,7 @@ module XYZ
       end
 
       private
-      def self.node_state_info(object)
+      def self.node_state_info(object,opts)
         ret = PrettyPrintHash.new
         node = object[:node]||{}
         if name = node[:display_name]
@@ -151,15 +144,9 @@ module XYZ
       end
       private :initialize
 
-      def self.prune_for_summary_aux!(hash)
-        hash[:node] = node_state_info(hash)
-        hash.each_key{|k|hash.delete(k) unless [:node].include?(k)}
-        hash
-      end
-      #TODO: should state_info be deprecated for prune_for_summary_aux!
-      def self.state_info(object)
+      def self.state_info(object,opts)
         ret = PrettyPrintHash.new
-        ret[:node] = node_state_info(object)
+        ret[:node] = node_state_info(object,opts)
         ret
       end
 
@@ -240,18 +227,13 @@ module XYZ
     end
 
     class ConfigNode < TaskActionNode
-      def self.prune_for_summary_aux!(hash)
-        hash[:node] = node_state_info(hash)
-        hash[:component_actions] &&= hash[:component_actions].map{|ca|ComponentAction.summary(ca)}
-        hash.each_key{|k|hash.delete(k) unless [:node,:component_actions].include?(k)}
-        hash
-      end
-      #TODO: should state_info be deprecated for prune_for_summary_aux!
-      def self.state_info(object)
+      def self.state_info(object,opts)
         ret = PrettyPrintHash.new
-        ret[:node] = node_state_info(object)
-        ret[:component_actions] = (object[:component_actions]||[]).map do |component_action|
-          ComponentAction.state_info(component_action)
+        ret[:node] = node_state_info(object,opts)
+        unless opts[:no_components]
+          ret[:component_actions] = (object[:component_actions]||[]).map do |component_action|
+            ComponentAction.state_info(component_action,opts)
+          end
         end
         ret
       end
@@ -401,14 +383,10 @@ module XYZ
     end
 
     class ComponentAction < HashObject
-      def self.summary(hash)
-        component_state_info(hash)
-      end
-      #TODO: should state_info be deprecated for summary
-      def self.state_info(object)
+      def self.state_info(object,opts)
         ret = PrettyPrintHash.new
-        ret[:component] = component_state_info(object)
-        ret[:attributes] = attributes_state_info(object)
+        ret[:component] = component_state_info(object,opts) 
+        ret[:attributes] = attributes_state_info(object,opts) unless opts[:no_attributes]
         ret
       end
 
@@ -451,7 +429,7 @@ module XYZ
       end
 
       private
-      def self.component_state_info(object)
+      def self.component_state_info(object,opts)
         ret = PrettyPrintHash.new
         component = object[:component]||{}
         if name = component[:display_name]
@@ -462,7 +440,7 @@ module XYZ
         end
         ret
       end
-      def self.attributes_state_info(object)
+      def self.attributes_state_info(object,opts)
         #need to query db to get up to date values
         (object[:attributes]||[]).map do |attr|
           ret_attr = PrettyPrintHash.new

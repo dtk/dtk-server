@@ -2,18 +2,22 @@ module XYZ
   class TaskController < Controller
     helper :task_helper
 
-    def rest__state_info(task_id=nil)
+    def rest__state_info()
       hash = request.params
-      detail_level = nil
-      detail_level = (hash[:detail_level]||:summary).to_sym
+      task_id = hash["task_id"] && hash["task_id"].to_i
       unless task_id
         tasks = Task.get_top_level_tasks(model_handle).sort{|a,b| b[:updated_at] <=> a[:updated_at]}
         task_id = tasks.first[:id]
       end
-      top_task_idh = id_handle(task_id)
-      opts = {:detail_level => detail_level}
-      task_structure = Task.get_hierarchical_structure(top_task_idh,opts)
-      state_info = task_structure.state_info()
+      opts = Task::StateInfoOpts.new
+      if :summary == (hash["detail_level"]||:summary).to_sym
+        opts[:no_components] = true
+        opts[:no_attributes] = true
+      end
+
+      task_structure = Task.get_hierarchical_structure(id_handle(task_id))
+
+      state_info = task_structure.state_info(opts)
       rest_ok_response state_info
     end
 

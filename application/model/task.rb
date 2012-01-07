@@ -34,6 +34,7 @@ module XYZ
       ret = PrettyPrintHash.new
       ret.add(self,:name,:id,:status)
       ret.add(self,:started_at?)
+      ret.add(self,:ended_at?)
       num_subtasks = subtasks.size
       ret.add(self,:temporal_order) if num_subtasks > 1
       if num_subtasks > 0
@@ -137,7 +138,15 @@ module XYZ
       normalized_errors 
     end
 
-    def update_to_starting()
+    def update_at_task_completion(status,result)
+      update_hash = {
+        :status => status,
+        :result => result,
+        :ended_at => Aux::now_time_stamp()
+      } 
+      update(update_hash)
+    end
+    def update_at_task_start()
       update(:status => "executing", :started_at => Aux::now_time_stamp())
       add_event(:start)
     end

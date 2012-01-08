@@ -5,8 +5,14 @@ module R8::Client::ViewMeta
       :task_def =>
       [
        :type,
+       :id,
        :status,
-       {:subtasks => {:type => :task, :is_array => true}}
+       :node,
+       :started_at,
+       :ended_at,
+       :temporal_order,
+       {:subtasks => {:type => :task, :is_array => true}},
+       :errors
       ]
     }
   }

@@ -16,7 +16,7 @@ module R8
       end
 
       def get_object_def(object_type)
-        if defs = meta[:defs]
+        if defs = meta[:defs] and object_type
           defs["#{object_type}_def".to_sym]
         end
       end
@@ -30,6 +30,7 @@ module R8
 
         object_def.each do |item|
           if item.kind_of?(Hash)
+            render_object_def__hash_def!(ret,hash,item)
           else
             key = item.to_s
             ret[key] = hash[key] if hash[key]
@@ -40,6 +41,20 @@ module R8
           ret[key] = hash[key]
         end
         ret
+      end
+      def render_object_def__hash_def!(ret,hash,hash_def_item)
+        key = hash_def_item.keys.first.to_s
+        return unless input = hash[key]
+        hash_def_info = hash_def_item.values.first
+        nested_object_def = get_object_def(hash_def_info[:type])
+        raise_error("object def of type (#{hash_def_info[:type]||""}) does not exist") unless nested_object_def
+                                           
+        if hash_def_info[:is_array]
+          raise_error("hash subpart should be an array") unless input.kind_of?(Array)
+          ret[key] = input.map{|el|render_object_def(el,nested_object_def)}
+        else
+          ret[key] = render_object_def(input,nested_object_def)
+        end
       end
     end
   end

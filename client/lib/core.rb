@@ -125,6 +125,10 @@ module R8
       def data()
         self[DataField]
       end
+
+      def render_data(view_type)
+        ViewProcessor.render(data,view_type)
+      end
     end
 
     class Conn

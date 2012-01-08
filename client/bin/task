@@ -10,4 +10,5 @@ args = Array.new
 
 conn = Conn.new()
 
-pp conn.task.apply(subcommand,*args)
+hash_response = conn.task.apply(subcommand,*args)
+pp hash_response.render_data("hash_pretty_print")

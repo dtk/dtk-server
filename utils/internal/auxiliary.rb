@@ -297,27 +297,7 @@ private
    end
 end
 
-require 'active_support/ordered_hash'
 #monkey patch
-module ActiveSupport
-  class OrderedHash < ::Hash
-    def pretty_print(q)
-#      q.group(0, "#<OrderedHash", "}>") {
-      q.group(0,"","}") {
-#        q.breakable " "
-        q.text "{"
-        q.group(1) {
-          q.seplist(self) {|pair|
-            q.pp pair.first
-            q.text "=>"
-            q.pp pair.last
-          }
-        }
-      }
-    end
-  end
-end
-
 class Object
   #dups only if object responds to dup
   def dup?()

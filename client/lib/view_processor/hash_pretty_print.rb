@@ -1,4 +1,6 @@
 r8_require_util_library("hash_object")
+r8_require_util_library("auxiliary") #TODO: just using now for active support ordered hash pp patch; this should be moved to hash object
+
 module R8
   module Client
     class ViewProcHashPrettyPrint < ViewProcessor

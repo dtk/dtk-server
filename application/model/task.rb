@@ -30,9 +30,9 @@ module XYZ
     end
 
     def state_info(opts)
-      set_and_return_names!()
+      set_and_return_types!()
       ret = PrettyPrintHash.new
-      ret.add(self,:name,:id,:status)
+      ret.add(self,:type,:id,:status)
       ret.add(self,:started_at?)
       ret.add(self,:ended_at?)
       num_subtasks = subtasks.size
@@ -53,36 +53,46 @@ module XYZ
           ret.merge!(TaskAction::CreateNode.state_info(ea,opts))
         end
       end
+      add_task_errors!(ret,opts)
       ret
     end
 
-    #TODO: a hack
-    #TODO: probably better to get this from display_name and set when creating
-    def set_and_return_names!()
-      name = nil
+    def add_task_errors!(ret,opts)
+      sp_hash = {
+        :cols => [:content],
+        :filter => [:eq,:task_id,id()]
+      }
+      errors = Model.get_objs(model_handle(:task_error),sp_hash).map{|r|r[:content]}
+      ret[:errors] = errors unless errors.empty?
+    end
+
+    #TODO: probably better to set when creating
+    def set_and_return_types!()
+      type = nil
       if self[:task_id].nil?
-        name = "top"
+        #TODO: stub that gets changed when different ways to generate tasks
+        type = "commit_cfg_changes"
       else
         if action_type = self[:executable_action_type]
-          name = ActionTypeNames[action_type.to_s]
+          type = ActionTypeCodes[action_type.to_s]
         else
           #assumption that all subtypes some type
           if sample_st = subtasks.first
             if sample_st[:executable_action_type]
-              sample_type = ActionTypeNames[sample_st[:executable_action_type]]
-              name = (sample_type && "#{sample_type}s") #make plural
+              sample_type = ActionTypeCodes[sample_st[:executable_action_type]]
+              type = (sample_type && "#{sample_type}s") #make plural
             end
           end 
         end
       end
-      subtasks.each{|st|st.set_and_return_names!()}
-      self[:name] = name
+      subtasks.each{|st|st.set_and_return_types!()}
+      self[:type] = type
     end
-    protected :set_and_return_names!
+    protected :set_and_return_types!
 
-    ActionTypeNames = {
-      "ConfigNode" => "Configure Node",
-      "CreateNode" => "Create Node"
+    ActionTypeCodes = {
+      "ConfigNode" => "configure_node",
+      "CreateNode" => "create_node"
     }
     
     def get_events()

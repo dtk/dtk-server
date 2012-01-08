@@ -97,7 +97,7 @@ module R8
         def error_handling(&block)
           begin
             block.call 
-          rescue ::RestClient::InternalServerError,::RestClient::RequestTimeout => e
+          rescue ::RestClient::InternalServerError,::RestClient::RequestTimeout,Errno::ECONNREFUSED => e
             error_response(ErrorsSubFieldCode => RestClientErrors[e.class.to_s]||GenericError)
           rescue Exception => e
             Log.info("Uninterpred error object (#{e.class.to_s})")
@@ -106,7 +106,8 @@ module R8
         end 
         RestClientErrors = {
           "RestClient::InternalServerError" => "internal_server_error",
-          "RestClient::RequestTimeout" => "timeout"
+          "RestClient::RequestTimeout" => "timeout",
+          "Errno::ECONNREFUSED" => "connection_refused"
         }
       end
     end

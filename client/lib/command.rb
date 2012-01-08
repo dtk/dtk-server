@@ -1,8 +1,7 @@
 module R8
   module Client
     def load_command(command_name)
-      #require File.expand_path("commands/#{command_name}", File.dirname(__FILE__))
-      r8_nested_require("commands",command_name)
+      r8_nested_require("command",command_name)
     end
     class CommandBase
       def initialize(conn)

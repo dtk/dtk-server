@@ -12,3 +12,7 @@ module R8
     end
   end
 end
+#TODO: these utils shoudl be common gems
+def r8_require_util_library(util_library)
+  r8_require("../../utils/internal/#{util_library}")
+end

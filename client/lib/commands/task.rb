@@ -1,4 +1,3 @@
-require File.expand_path('../core/core', File.dirname(__FILE__))
 module R8::Client
   class TaskCommand < CommandBase
     def status(detail_level="summary",task_id=nil)

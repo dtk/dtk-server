@@ -1,6 +1,8 @@
 #!/usr/bin/env ruby
-require File.expand_path('../commands/task', File.dirname(__FILE__))
+require File.expand_path('../r8_client', File.dirname(__FILE__))
 include R8::Client
+load_command("task")
+
 
 subcommand = ARGV[0]
 

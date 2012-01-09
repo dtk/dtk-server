@@ -291,7 +291,7 @@ module XYZ
         Log.error("unexpected token #{el}") unless el =~ AnyTokenRE
         if el =~ IndexedPatRE
           first_part = $1; index = $2
-          if index = ":component_index"
+          if index == ":component_index"
             [first_part,"__create_component_index"]
           else
             Log.error("index not treated #{index}")

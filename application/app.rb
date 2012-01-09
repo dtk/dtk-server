@@ -8,7 +8,7 @@ require 'rubygems'
 require 'ramaze'
 require 'json'
 require 'yaml'
-$: << "."
+$: << "." #TODO: put in to get aroudn path problem in rvm 1.9.2 environment
 require 'require_first'
 r8_require('config/config.rb')
 

@@ -34,7 +34,6 @@ R8::Config[:login][:redirect] = "/xyz/ide/index"
 
 #Database related config params
 R8::Config[:database][:hostname] = "127.0.0.1"
-#R8::Config[:database][:hostname] = "ec2-174-129-28-204.compute-1.amazonaws.com"
 R8::Config[:database][:user] = "postgres"
 R8::Config[:database][:pass] = "bosco"
 R8::Config[:database][:name] = "db_main"
@@ -51,8 +50,6 @@ else
 end
 R8::Config[:repo].set?(:type,"git")
 R8::Config[:repo][:git][:server_type] = "gitolite"
-#R8::Config[:repo][:git][:dns] = "ec2-107-22-254-226.compute-1.amazonaws.com"
-R8::Config[:repo][:git][:dns] = "ec2-184-73-175-145.compute-1.amazonaws.com"
 R8::Config[:repo][:git][:server_username] = "git"
 
 #TODO: temp for testing

@@ -101,7 +101,7 @@ module XYZ
           real_cols = virtual_col_defs.values.map{|vc|vc[:path].first if vc[:path]}.compact.uniq
           unless id_handle
             Log.info("id handle should not be nil")
-            next
+            return nil
           end
           object = get_object_scalar_columns(id_handle,Model::FieldSet.opt(real_cols,id_handle[:model_name]))
           object.each{|k,v| scalar_assigns[k] = v}

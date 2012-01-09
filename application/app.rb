@@ -8,7 +8,7 @@ require 'rubygems'
 require 'ramaze'
 require 'json'
 require 'yaml'
-
+$: << "."
 require 'require_first'
 r8_require('config/config.rb')
 

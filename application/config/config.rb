@@ -5,7 +5,7 @@ r8_require('../../utils/internal/log')
 r8_require('../../utils/internal/hash_object')
 
 module R8
-  Config = XYZ::HashObject.create_with_auto_vivification()
+  Config = XYZ::ConfigHash.create_with_auto_vivification()
 end
 
 r8_require('environment_config')

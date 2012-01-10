@@ -155,6 +155,10 @@ module XYZ
     end
   end
 
+  class ConfigHash < HashObject
+    #TODO: for putting in hooks to better report on config var access errors
+  end
+
   require 'tsort'
   class TSortHash < Hash
     #defining tsort on this

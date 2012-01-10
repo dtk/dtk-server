@@ -159,7 +159,7 @@ module R8
       include ParseFile
       def login()
         creds = get_credentials()
-        response = post_raw rest_url("/user/process_login"),creds
+        response = post_raw rest_url("user/process_login"),creds
         @cookies = response.cookies
       end
       def get_credentials()

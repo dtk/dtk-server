@@ -54,6 +54,11 @@ module XYZ
       frozen? ? (super if has_key?(x)) : super
     end
 
+    def recursive_freeze()
+      each_value{|el| el.recursive_freeze if el.respond_to?(:recursive_freeze)}
+      freeze
+    end
+
     def slice(*slice_keys)
       slice_keys.inject(HashObject.new()) do |h,k|
         if k.kind_of?(Hash)

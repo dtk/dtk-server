@@ -109,4 +109,4 @@ R8::Config[:config_file_path] = "#{R8::Config[:app_root_path]}/config_upload"
 R8::Config[:page_limit] = 20
 
 #freeze
-R8::Config.freeze
+R8::Config.recursive_freeze

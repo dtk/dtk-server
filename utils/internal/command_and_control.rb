@@ -14,6 +14,10 @@ module XYZ
       end
     end
 
+    def self.node_config_server_host()
+      klass = load_config_node_adapter()
+      klass.server_host()
+    end
     def self.destroy_node?(node)
       klass = load_iaas_for(:node => node)
       klass.destroy_node?(node)
@@ -62,6 +66,12 @@ module XYZ
       else
         raise Error.new("not treated")
       end
+    end
+    
+    def self.load_config_node_adapter()
+      adapter_type = :node_config
+      adapter_name = R8::Config[:command_and_control][adapter_type][:type]
+      load_for_aux(adapter_type,adapter_name)
     end
 
     def self.load_for(task_or_task_action)

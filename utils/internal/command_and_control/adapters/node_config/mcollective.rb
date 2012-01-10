@@ -5,6 +5,9 @@ require File.expand_path('mcollective/monkey_patches', File.dirname(__FILE__))
 module XYZ
   module CommandAndControlAdapter
     class Mcollective < CommandAndControlNodeConfig
+      def self.server_host()
+        R8::Config[:command_and_control][:node_config][:mcollective][:host]
+      end
       #TODO: change signature to def self.async_execution(task_idh,top_task_idh,config_node,callbacks,context)
       def self.initiate_execution(task_idh,top_task_idh,config_node,opts)
         

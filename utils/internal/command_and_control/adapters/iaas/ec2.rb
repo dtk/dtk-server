@@ -56,19 +56,33 @@ module XYZ
         #TODO: stub
         #TODO: need sto be cased on os type; below assumes that ubuntu cloud-init being used
         def default_user_data()
-          if git_server_url = RepoManager.repo_url()
-            git_server_dns = RepoManager.repo_server_dns()
-            #TODO: to make more secure when gitserver different from this server will assume footprint put on server at installtime
-            footprint = `ssh-keyscan -H -t rsa #{git_server_dns}`
-            UserDataTemplate.result(:git_server_url => git_server_url, :git_server_dns => git_server_dns,:footprint => footprint)
-          end
+          git_server_url = RepoManager.repo_url()
+          git_server_dns = RepoManager.repo_server_dns()
+          node_config_server_host = CommandAndControl.node_config_server_host()
+          #TODO: to make more secure when gitserver different from this server will assume footprint put on server at installtime
+          footprint = `ssh-keyscan -H -t rsa #{git_server_dns}`
+          template_bindings = {
+            :node_config_server_host => node_config_server_host,
+            :git_server_url => git_server_url, 
+            :git_server_dns => git_server_dns,
+            :footprint => footprint
+          }
+          unbound_bindings = template_bindings.reject{|k,v|v}
+          raise Error.new("Unbound cloudint var(s) (#{unbound_bindings.values.join(",")}") unless unbound_bindings.empty?
+          UserDataTemplate.result(template_bindings)
         end
       end
+
 #TODO: put this as boothook because if not get race condition with start of mcollective
 #need to check if this now runs on every boot; if so might want to put provision in so only runs on first boot
 UserDataTemplate = Erubis::Eruby.new <<eos
 #cloud-boothook
 #!/bin/sh 
+
+cat << EOF >> /etc/mcollective/server.cfg
+---
+plugin.stomp.host = <%=node_config_server_host %>
+EOF
 
 cat << EOF > /etc/mcollective/facts.yaml
 ---

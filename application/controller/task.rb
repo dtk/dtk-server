@@ -70,8 +70,9 @@ module XYZ
 
       #TODO: need to sync ValidationError with analysis done in ret_attribute_guards 
       #TODO: just need to check if anything returned missing values
+      errors = ValidationError.find_missing_required_attributes(task)
       if false
-      #if errors = ValidationError.find_missing_required_attributes(task)
+      #if errors
         pp [:errors,errors]
         error_list = []
         #TODO: stub

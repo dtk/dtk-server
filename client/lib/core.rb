@@ -75,7 +75,7 @@ module R8
       GenericError = "error"
       def error_response(error_or_errors)
         errors = error_or_errors.kind_of?(Hash) ? [error_or_errors] : error_or_errors
-        {StatusField => StatusNotok, ErrorsField => errors}
+        Response.new(StatusField => StatusNotok, ErrorsField => errors)
       end
     end
 
@@ -127,7 +127,11 @@ module R8
       end
 
       def render_data(view_type)
-        ViewProcessor.render(data,view_type)
+        if ok?()
+          ViewProcessor.render(data,view_type)
+        else
+          self
+        end
       end
     end
 
@@ -158,9 +162,14 @@ module R8
       private
       include ParseFile
       def login()
+        @cookies = nil
         creds = get_credentials()
         response = post_raw rest_url("user/process_login"),creds
-        @cookies = response.cookies
+        if response.kind_of?(Response) and not response.ok?
+          self
+        else
+          @cookies = response.cookies
+        end
       end
       def get_credentials()
         cred_file = File.expand_path("~/.r8client")

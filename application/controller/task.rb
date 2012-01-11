@@ -66,21 +66,16 @@ module XYZ
       task_id = hash["task_id"]
       task = Task.get_hierarchical_structure(id_handle(task_id))
 
-      guards,missing_required_attrs = Attribute.ret_attr_guards_and_attrs_mising_vals(task)
-
-      #TODO: need to sync ValidationError with analysis done in ret_attribute_guards 
-      #TODO: just need to check if anything returned missing values
-
-      errors = ValidationError.find_missing_required_attributes(task)
-      if false
-      #if errors
-        pp [:errors,errors]
+      guards,violations = Attribute.ret_attr_guards_and_violations(task)
+      #if false
+      unless violations.empty? 
+        pp [:violations,violations]
         error_list = []
         #TODO: stub
         error_codes = {
           "MissingRequiredAttribute"=>:missing_required_attribute
         }
-        error_list = errors.map do |e|
+        error_list = violations.map do |e|
           error_name = Aux::demodulize(e.class.to_s)
           error_description = error_name
           case error_name
@@ -89,7 +84,6 @@ module XYZ
           end
           {
             :code => error_codes[error_name] || :error,
-            :name => error_name,
             :node_id => e[:node_id],
             :description => error_description
           }

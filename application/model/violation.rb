@@ -182,6 +182,8 @@ module XYZ
 
   #TODO: unify with Violation class
   class ValidationError < HashObject 
+    #TODO: deprecate
+=begin
     extend R8Tpl::Utility::I18n
     def self.find_missing_required_attributes(commit_task)
       component_actions = commit_task.component_actions
@@ -205,7 +207,7 @@ module XYZ
       end
       ret.empty? ? nil : ret
     end
-
+=end
     def self.debug_inspect(error_list)
       ret = ""
       error_list.each{|e| ret << "#{e.class.to_s}: #{e.inspect}\n"}
@@ -220,8 +222,19 @@ module XYZ
     end
    public
     class MissingRequiredAttribute < ValidationError
+      def self.create_from_augmented_attr(attr)
+        error_hash = {
+          :attribute_id => attr[:id],
+          :attribute_name => attr[:display_name],
+          :component_name => attr[:component][:display_name],
+          :component_id => attr[:component][:id],
+          :node_name =>  attr[:node][:display_name],
+          :node_id => attr[:node][:id]
+        }
+        new(error_hash)
+      end
       def error_fields()
-        [:node_id,:node_name,:component_name,:attribute_name]
+        [:node_id,:node_name,:component_name,:component_id,:attribute_name,:attribute_id]
       end
     end
   end

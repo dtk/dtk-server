@@ -53,6 +53,10 @@ module XYZ
         super(hash)
       end
 
+      def node_id()
+        self[:node][:id]
+      end
+
       def attributes_to_set()
         Array.new
       end

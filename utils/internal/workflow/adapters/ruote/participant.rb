@@ -21,7 +21,9 @@ module XYZ
         def set_task_to_executing_and_ret_event(task)
           task.update_at_task_start()
         end
-
+        def set_task_to_failed_preconditions(task,failed_antecedent_tasks)
+          task.update_when_failed_preconditions(failed_antecedent_tasks)
+        end
         def set_result_succeeded(workitem,new_result,task,action)
           task.update_at_task_completion("succeeded",TaskAction::Result::Succeeded.new())
           action.update_state_change_status(task.model_handle,:completed)  #this updates pending state
@@ -94,6 +96,12 @@ module XYZ
           params = get_params(workitem) 
           task_id,action,workflow,task,task_end = %w{task_id action workflow task task_end}.map{|k|params[k]}
           task.update_input_attributes!()
+          failed_tasks = ret_failed_precondition_tasks(task,workflow.guards[:external])
+          unless failed_tasks.empty?
+            set_task_to_failed_preconditions(task,failed_tasks)
+            return reply_to_engine(workitem)
+          end
+
           task.add_internal_guards!(workflow.guards[:internal])
           event = set_task_to_executing_and_ret_event(task)
 
@@ -116,7 +124,7 @@ module XYZ
                     pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event
                     set_result_failed(workitem,result,task,action)
                   end
-                  self.reply_to_engine(workitem)
+                  reply_to_engine(workitem)
                 end,
                 :on_timeout => proc do 
                   result = {
@@ -125,7 +133,7 @@ module XYZ
                   event,errors = task.add_event_and_errors(:complete_timeout,result)
                   pp ["task_complete_timeout #{action.class.to_s}", task_id,event,{:errors => errors}] if event
                   set_result_timeout(workitem,result,task)
-                  self.reply_to_engine(workitem)
+                  reply_to_engine(workitem)
                 end
               }
               receiver_context = {:callbacks => callbacks, :expected_count => 1}
@@ -136,6 +144,17 @@ module XYZ
               reply_to_engine(workitem)
             end
           end
+        end
+       private
+        def ret_failed_precondition_tasks(task,external_guards)
+          ret = Array.new
+          guard_task_idhs = task.guarded_by(external_guards)
+          return ret if guard_task_idhs.empty?
+          sp_hash = {
+            :cols => [:id,:status,:display_name],
+            :filter => [:and, [:eq,:status,"failed"],[:oneof,:id,guard_task_idhs.map{|idh|idh.id}]]
+          }
+          Model.get_objs(task.model_handle,sp_hash)
         end
 
         def execution_context(task,&body)

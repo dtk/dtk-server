@@ -3,6 +3,14 @@ r8_nested_require('task','action')
 module XYZ
   class Task < Model
     extend TaskCreateClassMixin
+    #returns list (possibly empty) of subtasks that guard this
+    def guarded_by(external_guards)
+      ret = Array.new
+      ea = self[:executable_action]
+      return ret unless node_id = ea.respond_to?(:node_id) && ea.node_id
+      external_guards.select{|g|g[:guarded][:node][:id]}.map{|g|id_handle(g[:guard][:task_id])}
+    end
+
     #for debugging
     def pretty_print_hash()
       ret = PrettyPrintHash.new
@@ -159,6 +167,12 @@ module XYZ
     def update_at_task_start()
       update(:status => "executing", :started_at => Aux::now_time_stamp())
       add_event(:start)
+    end
+
+    def update_when_failed_preconditions(failed_antecedent_tasks)
+      ts = Aux::now_time_stamp()
+      update(:status => "preconditions_failed", :started_at => ts, :ended_at => ts)
+      #TODO: put in context about failure in errors
     end
 
     #TODO: update and update_parents can be cleaned up because halfway between update and update_object!

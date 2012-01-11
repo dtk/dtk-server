@@ -17,7 +17,7 @@ module XYZ
       ret = Array.new 
       component_actions.each do |action|
         AttributeComplexType.flatten_attribute_list(action[:attributes],:flatten_nil_value=>true).each do |attr|
-          ret << attr.merge(:component => action[:component], :node => action[:node])
+          ret << attr.merge(:component => action[:component], :node => action[:node],:task_id => task[:id])
         end
       end
       ret

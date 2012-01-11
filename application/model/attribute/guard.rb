@@ -77,7 +77,8 @@ module XYZ
         :attribute => {
           :id => attr[:id],
           :display_name =>  attr[:display_name]
-        }
+        },
+        :task_id => attr[:task_id]
       }
       return ret unless keys
       keys.inject({}){|h,(k,v)| keys.include?(k) ? h.merge(k => v) : h}

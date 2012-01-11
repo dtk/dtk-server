@@ -67,9 +67,10 @@ module XYZ
       task = Task.get_hierarchical_structure(id_handle(task_id))
 
       guards,violations = Attribute.ret_attr_guards_and_violations(task)
-      #if false
-      unless violations.empty? 
-        pp [:violations,violations]
+      #TODO: also need to look for missing required components
+      if false
+      #unless violations.empty? 
+        pp [:violations,violations.map{|v|v.merge(:violation => Aux::demodulize(v.class.to_s))}]
         error_list = []
         #TODO: stub
         error_codes = {

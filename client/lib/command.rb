@@ -9,6 +9,9 @@ module R8
       end
 
       def apply(subcommand,*args)
+        if @conn.connection_error
+          return @conn.connection_error
+        end
         method = subcommand.to_sym
         raise Error.new("Illegal subcommand #{subcommand||""}") unless respond_to?(method)
         send(method,*args)

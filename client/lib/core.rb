@@ -138,10 +138,12 @@ module R8
     class Conn
       def initialize()
         @cookies = Hash.new
+        @connection_error = nil
         login()
       end
+      attr_reader :connection_error
 
-      ####
+      #### command (types)
       def task()
         TaskCommand.new(self)
       end
@@ -162,11 +164,10 @@ module R8
       private
       include ParseFile
       def login()
-        @cookies = nil
         creds = get_credentials()
         response = post_raw rest_url("user/process_login"),creds
         if response.kind_of?(Response) and not response.ok?
-          self
+          @connection_error = response
         else
           @cookies = response.cookies
         end

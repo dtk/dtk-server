@@ -66,10 +66,11 @@ module XYZ
       task_id = hash["task_id"]
       task = Task.get_hierarchical_structure(id_handle(task_id))
 
-      guards = Attribute.ret_attribute_guards(task)
+      guards,missing_required_attrs = Attribute.ret_attr_guards_and_attrs_mising_vals(task)
 
       #TODO: need to sync ValidationError with analysis done in ret_attribute_guards 
       #TODO: just need to check if anything returned missing values
+
       errors = ValidationError.find_missing_required_attributes(task)
       if false
       #if errors

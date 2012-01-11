@@ -10,7 +10,30 @@ module XYZ
       end
       ret
     end
+
+    def ret_attr_guards_and_attrs_mising_vals(top_level_task)
+      guards = Array.new
+      augmented_attr_list = augmented_attribute_list_from_task(top_level_task)
+      dependency_analysis(augmented_attr_list) do |attr_in,link,attr_out|
+        if guard = GuardedAttribute.create(attr_in,link,attr_out)
+          guards << guard
+        end
+      end
+      missing_attrs = ret_required_attrs_without_values(augmented_attr_list,guards)
+      [guards,missing_attrs]
+    end
+   private
+    def ret_required_attrs_without_values(augmented_attr_list,guards)
+      guarded_ids = nil
+      augmented_attr_list.select do |attr|
+        if attr[:required] and attr[:attribute_value].nil? 
+          guarded_ids ||= guards.map{|g|g[:guarded][:attribute][:id]}.uniq
+          not guarded_ids.include?(attr[:id])
+        end
+      end
+    end
   end
+
   class GuardedAttribute < HashObject
     def self.create(guarded_attr,link,guard_attr)
       #TODO: shouldnt this be error? or instaed if ran already than this attribute should be set

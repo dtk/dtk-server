@@ -96,9 +96,14 @@ module XYZ
           params = get_params(workitem) 
           task_id,action,workflow,task,task_end = %w{task_id action workflow task task_end}.map{|k|params[k]}
           task.update_input_attributes!()
+
+          workitem.fields["guard_id"] = task_id # ${guard_id} is referenced if guard for execution of this
+
           failed_tasks = ret_failed_precondition_tasks(task,workflow.guards[:external])
           unless failed_tasks.empty?
             set_task_to_failed_preconditions(task,failed_tasks)
+            #TODO: stub until
+            pp ["precondition_failure", task_id] #TODO: stub
             return reply_to_engine(workitem)
           end
 
@@ -106,7 +111,6 @@ module XYZ
           event = set_task_to_executing_and_ret_event(task)
 
           pp ["executing #{action.class.to_s}",task_id,event] if event
-          workitem.fields["guard_id"] = task_id # ${guard_id} is referenced if guard for execution of this
           execution_context(task) do
             if action.long_running?
               callbacks = {
@@ -152,7 +156,7 @@ module XYZ
           return ret if guard_task_idhs.empty?
           sp_hash = {
             :cols => [:id,:status,:display_name],
-            :filter => [:and, [:eq,:status,"failed"],[:oneof,:id,guard_task_idhs.map{|idh|idh.id}]]
+            :filter => [:and, [:eq,:status,"failed"],[:oneof,:id,guard_task_idhs.map{|idh|idh.get_id}]]
           }
           Model.get_objs(task.model_handle,sp_hash)
         end

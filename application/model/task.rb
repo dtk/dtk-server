@@ -3,12 +3,14 @@ r8_nested_require('task','action')
 module XYZ
   class Task < Model
     extend TaskCreateClassMixin
-    #returns list (possibly empty) of subtasks that guard this
+
+    #returns list (possibly empty) of subtask idhs that guard this
     def guarded_by(external_guards)
       ret = Array.new
       ea = self[:executable_action]
       return ret unless node_id = ea.respond_to?(:node_id) && ea.node_id
-      external_guards.select{|g|g[:guarded][:node][:id]}.map{|g|id_handle(g[:guard][:task_id])}
+      task_ids = external_guards.select{|g|g[:guarded][:node][:id]}.map{|g|g[:guard][:task_id]}.uniq
+      task_ids.map{|task_id|id_handle(:id => task_id)}
     end
 
     #for debugging

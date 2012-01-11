@@ -41,7 +41,6 @@ module MCollective
 
         def receive_msg msg
           if msg.command == "CONNECTED"
-pp [:is_connected]
             @connected = true
           else
             Stomp_em.process(msg) 

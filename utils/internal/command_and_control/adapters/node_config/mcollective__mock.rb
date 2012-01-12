@@ -8,12 +8,22 @@ module XYZ
           :node_name=>node_name
         }
         updated_attributes = Array.new
-        sleep(5)
+        sleep MockTimes[:execution]
         [result,updated_attributes]
       end
+      MockTimes = {
+        :execution => 5,
+        :node_ready => 3
+      }
 
       def self.wait_for_node_to_be_ready(node)
-        sleep(5)
+        sleep MockTimes[:node_ready]
+      end
+      def self.poll_to_detect_node_ready(node,opts)
+        wait_for_node_to_be_ready(node)
+        rc = opts[:receiver_context]
+        msg = Hash.new #TODO: stub
+        rc[:callbacks][:on_msg_received].call(msg)
       end
     end
   end

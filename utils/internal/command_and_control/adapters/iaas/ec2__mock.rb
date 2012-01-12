@@ -3,8 +3,10 @@ require 'ipaddr'
 module XYZ
   module CommandAndControlAdapter
     class Ec2__mock < Ec2
+
+      def self.default_user_data()
+      end
       def self.get_node_operational_status(node)
-        nil
       end
 
      private

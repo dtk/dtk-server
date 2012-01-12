@@ -17,6 +17,11 @@ module XYZ
     def self.repo_name(username,config_agent_type,module_name)
       "#{username}-#{config_agent_type}-#{module_name}"
     end
+    
+    def self.repo_url()
+    end
+    def self.repo_server_dns()
+    end
 
     def self.create_local_repo(repo_obj,opts)
       local_repo_dir = repo_obj[:local_dir]

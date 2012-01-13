@@ -13,7 +13,7 @@ module XYZ
     class Top
      private
       def hash_form(x)
-        x ? x.attributes : nil        
+        x && x.attributes 
       end
     end
     class EC2 < Top
@@ -38,12 +38,11 @@ module XYZ
       end
 
       def server_get(id)
-        hash_form(@conn.servers.get(id))
+        hash_form(wrap_servers_get(id))
       end
 
       def server_destroy(id)
-        server = @conn.servers.get(id)
-        if server
+        if server = wrap_servers_get(id)
           server.destroy
         else
           :server_does_not_exist
@@ -52,6 +51,15 @@ module XYZ
 
       def server_create(options)
         hash_form(@conn.servers.create(options))
+      end
+     private
+      def wrap_servers_get(id)
+        begin
+          @conn.servers.get(id)
+         rescue Fog::Compute::AWS::Error => e
+          Log.info("fog error: #{e.message}")
+          nil
+        end 
       end
     end
   end

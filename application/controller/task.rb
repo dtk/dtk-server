@@ -1,7 +1,13 @@
 module XYZ
   class TaskController < Controller
     helper :task_helper
-
+###TODO temp for mocking
+    @@count = 0
+    def debug_save(state_info)
+      @@count += 1
+      File.open("/tmp/save#{@@count.to_s}","w"){|f|f << JSON.pretty_generate(state_info)}
+    end
+### end temp for mocking
     def rest__state_info()
       hash = request.params
       task_id = hash["task_id"] && hash["task_id"].to_i
@@ -18,6 +24,7 @@ module XYZ
       task_structure = Task.get_hierarchical_structure(id_handle(task_id))
 
       state_info = task_structure.state_info(opts)
+debug_save(state_info)
       rest_ok_response state_info
     end
 

@@ -3,9 +3,19 @@ module XYZ
     helper :task_helper
 ###TODO temp for mocking
     @@count = 0
-    def debug_save(state_info)
+    def debug_mock_record(state_info)
       @@count += 1
       File.open("/tmp/save#{@@count.to_s}","w"){|f|f << JSON.pretty_generate(state_info)}
+    end
+    def debug_mock_replay()
+      dir = File.expand_path('../spec/task_mock_data', File.dirname(__FILE__))
+      Dir.chdir(dir) do
+        save_files = Dir["*"]
+        file = "save#{@@count.to_s}"
+        file = save_files.sort.last unless save_files.include?(file)
+        @@count += 1
+        JSON.parse(File.open(file){|f|f.read})
+      end
     end
 ### end temp for mocking
     def rest__state_info()
@@ -22,9 +32,11 @@ module XYZ
       end
 
       task_structure = Task.get_hierarchical_structure(id_handle(task_id))
-
+      if defined? R8::EnvironmentConfig::TaskMockMode and  R8::EnvironmentConfig::TaskMockMode == "replay"
+        return rest_ok_response(debug_mock_replay())
+      end
       state_info = task_structure.state_info(opts)
-debug_save(state_info)
+      debug_mock_record(state_info) if defined? R8::EnvironmentConfig::TaskMockMode and  R8::EnvironmentConfig::TaskMockMode == "record"
       rest_ok_response state_info
     end
 

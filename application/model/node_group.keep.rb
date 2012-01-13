@@ -1,5 +1,23 @@
 module XYZ
   class NodeGroup < Model
+    set_relation_name(:node,:node_group)
+    def self.up()
+      #TODO: should it instaed be pointer to by pointer search_object
+      column :dynamic_search_pattern, :json #sql where clause that picks out node members and means to ignore memebrship assocs
+      virtual_column :member_id_list
+      virtual_column :member_list
+      column :ui, :json
+      many_to_one :library, :datacenter
+      one_to_many :component
+    end
+
+    ### virtual column defs
+    def member_list()
+      self[:node]||[]
+    end
+    def member_id_list()
+      member_list.map{|n|n[:id]}
+    end
     #######################
     ### object procssing and access functions
 
@@ -115,5 +133,34 @@ module XYZ
         group.merge :node => get_objects_from_search_object(search_object)
       end
     end
+  end
+
+  class NodeGroupMember < Model
+    set_relation_name(:node,:node_group_member)
+    def self.up()
+      column :is_elastic_node, :boolean, :default => false
+      foreign_key :node_id, :node, FK_CASCADE_OPT
+      foreign_key :node_group_id, :node_group, FK_CASCADE_OPT
+      many_to_one :library, :datacenter
+    end
+
+    ### virtual column defs
+    #######################
+    ### object access functions
+    #######################
+  end
+
+  class GroupGroupMember < Model
+    set_relation_name(:node,:group_group_member)
+    def self.up()
+      foreign_key :parent_group_id, :node_group, FK_CASCADE_OPT
+      foreign_key :child_group_id, :node_group, FK_CASCADE_OPT
+      many_to_one :library, :datacenter
+    end
+
+    ### virtual column defs
+    #######################
+    ### object access functions
+    #######################
   end
 end

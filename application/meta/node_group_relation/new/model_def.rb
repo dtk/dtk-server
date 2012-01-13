@@ -1,0 +1,19 @@
+{
+  :schema=>:node_group,
+  :table=>:group_relation,
+  :columns=>{
+    :node_id=>{
+      :type=>:bigint,
+      :foreign_key_rel_type=>:node,
+      :on_delete=>:cascade,
+      :on_update=>:cascade
+    },
+    :node_group_id=>{
+      :type=>:bigint,
+      :foreign_key_rel_type=>:node_group,
+      :on_delete=>:cascade,
+      :on_update=>:cascade
+    }
+  },
+  :many_to_one => [:datacenter,:library]
+}

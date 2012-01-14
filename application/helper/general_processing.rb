@@ -55,6 +55,7 @@ module Ramaze::Helper
       @json_response ||= rest_request?() or ajax_request?() 
     end
     def rest_request?()
+      pp [:foooooo2,request.env["REQUEST_PATH"]]
       @rest_request ||= request.env["REQUEST_PATH"] =~ Regexp.new("^/rest")
     end
     def ajax_request?

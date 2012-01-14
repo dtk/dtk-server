@@ -29,8 +29,9 @@ module XYZ
         end
 
         def add_foreign_key?(db_rel,foreign_key_field,db_rel_pointed_to,opts={})
-          return add_foreign_key(db_rel,foreign_key_field,db_rel_pointed_to,opts) if foreign_key_exists?(db_rel,foreign_key_field,db_rel_pointed_to).nil?
-	  nil
+          unless foreign_key_exists?(db_rel,foreign_key_field,db_rel_pointed_to)
+            add_foreign_key(db_rel,foreign_key_field,db_rel_pointed_to,opts) 
+	  end
         end
       ########### end: SchemaProcessing
     end

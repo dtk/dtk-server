@@ -1,5 +1,5 @@
 {
-  :schema=>:node_group,
+  :schema=>:node,
   :table=>:group_relation,
   :columns=>{
     :node_id=>{
@@ -10,7 +10,7 @@
     },
     :node_group_id=>{
       :type=>:bigint,
-      :foreign_key_rel_type=>:node_group,
+      :foreign_key_rel_type=>:node,
       :on_delete=>:cascade,
       :on_update=>:cascade
     }

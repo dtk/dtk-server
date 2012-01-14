@@ -34,8 +34,7 @@
    :data_source,
    :node,
    :state_change,
-   :node_group,
-   :node_group_member,
+   :node_group_relation,
    :attribute_link,
    :port_link,
    :network_partition,
@@ -59,18 +58,6 @@
          :join_type=>:inner,
          :join_cond=>{:datacenter_datacenter_id=>:datacenter__id},
          :cols=>Node.common_columns
-       }]
-    },
-    :node_groups=>{
-      :type=>:json,
-      :hidden=>true,
-      :remote_dependencies=>
-      [{
-         :model_name=>:node_group,
-         :convert => true,
-         :join_type=>:inner,
-         :join_cond=>{:datacenter_datacenter_id=>:datacenter__id},
-         :cols=>[:id,:display_name,:ui,:type]
        }]
     },
     :node_ports=>{

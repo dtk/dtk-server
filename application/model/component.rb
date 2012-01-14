@@ -62,14 +62,14 @@ module XYZ
         virtual_column :connectivity_profile_internal, :type => :json, :local_dependencies => [:link_defs,:component_type,:specific_type,:basic_type]
         virtual_column :most_specific_type, :type => :varchar, :local_dependencies => [:specific_type,:basic_type]
 
-        many_to_one :component, :library, :node, :node_group, :datacenter, :project
+        many_to_one :component, :library, :node, :datacenter, :project
         one_to_many :component, :attribute_link, :attribute, :port_link, :monitoring_item, :dependency, :layout, :file_asset, :link_def
         one_to_many_clone_omit :layout
 
         virtual_column :project_id, :type => ID_TYPES[:id], :local_dependencies => [:project_project_id]
         virtual_column :node_id, :type => ID_TYPES[:id], :local_dependencies => [:node_node_id]
         virtual_column :library_id, :type => ID_TYPES[:id], :local_dependencies => [:library_library_id]
-        virtual_column :parent_name, :possible_parents => [:component,:library,:node,:node_group,:project]
+        virtual_column :parent_name, :possible_parents => [:component,:library,:node,:project]
 
         virtual_column :view_def_key, :type => :varchar, :hidden => true, :local_dependencies => [:id,:view_def_ref,:component_type] 
 
@@ -238,6 +238,7 @@ module XYZ
             }
          ]
 
+      #TODO: needs to be refined since now no node_group_id
         virtual_column :containing_datacenter, :type => :varchar, :hidden => true,
           :remote_dependencies =>
          [

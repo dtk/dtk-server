@@ -133,106 +133,6 @@ module XYZ
       virtual_column :qualified_attribute_id_under_node, :type => :varchar, :hidden => true #TODO put in depenedncies
       virtual_column :qualified_attribute_name, :type => :varchar, :hidden => true #not giving dependences because assuming right base_object included in col list
 
-      #base_objects
-      virtual_column :base_object_node, :type => :json, :hidden => true, 
-        :remote_dependencies => 
-        [
-         {
-           :model_name => :component,
-           :join_type => :inner,
-           :join_cond=>{:id=> :attribute__component_component_id},
-           :cols=>[:id, :display_name,:node_node_id]
-         },
-         {
-           :model_name => :node,
-           :join_type => :inner,
-           :join_cond=>{:id=> :component__node_node_id},
-           :cols=>[:id, :display_name, {:id => :param_node_id}]
-         }
-        ]
-      virtual_column :base_object_node_datacenter, :type => :json, :hidden => true, 
-        :remote_dependencies => 
-        [
-         {
-           :model_name => :component,
-           :join_type => :inner,
-           :join_cond=>{:id=> :attribute__component_component_id},
-           :cols=>[:id, :display_name,:node_node_id]
-         },
-         {
-           :model_name => :node,
-           :join_type => :inner,
-           :join_cond=>{:id=> :component__node_node_id},
-           :cols=>[:id, :display_name, :datacenter_datacenter_id]
-         },
-         {
-           :model_name => :datacenter,
-           :join_type => :inner,
-           :join_cond=>{:id=> :node__datacenter_datacenter_id},
-           :cols=>[:id, :display_name, {:id => :param_datacenter_id}]
-         }
-        ]
-      virtual_column :base_object_node_feature, :type => :json, :hidden => true, 
-        :remote_dependencies => 
-        [
-         {
-           :model_name => :component,
-           :join_type => :inner,
-           :join_cond=>{:id=> :attribute__component_component_id},
-           :cols=>[:id, :display_name,:component_id]
-         },
-         {
-           :model_name => :component,
-           :join_type => :inner,
-           :join_cond=>{:id=> :component__component_id},
-           :cols=>[:id, :display_name,:node_node_id]
-         },
-         {
-           :model_name => :node,
-           :join_type => :inner,
-           :join_cond=>{:id=> :component2__node_node_id},
-           :cols=>[:id, :display_name, {:id => :param_node_id}]
-         }
-        ]
-      virtual_column :base_object_node_group, :type => :json, :hidden => true, 
-        :remote_dependencies => 
-        [
-         {
-           :model_name => :component,
-           :join_type => :inner,
-           :join_cond=>{:id=> :attribute__component_component_id},
-           :cols=>[:id, :display_name,:node_node_group_id]
-         },
-         {
-           :model_name => :node_group,
-           :join_type => :inner,
-           :join_cond=>{:id=> :component__node_node_group_id},
-           :cols=>[:id, :display_name, {:id => :param_node_group_id}]
-         }
-        ]
-
-      virtual_column :base_object_datacenter, :type => :json, :hidden => true, 
-        :remote_dependencies => 
-        [
-         {
-           :model_name => :component,
-           :join_type => :inner,
-           :join_cond=>{:id=> :attribute__component_component_id},
-           :cols=>[:id, :display_name,:node_node_id,:node_node_group_id]
-         },
-         {
-           :model_name => :node,
-           :join_cond=>{:id=> :component__node_node_id},
-           :cols=>[:id, :display_name, {:datacenter_datacenter_id => :param_node_datacenter_id}]
-         },
-         {
-           :model_name => :node_group,
-           :join_cond=>{:id=> :component__node_node_group_id},
-           :cols=>[:id, :display_name, {:datacenter_datacenter_id => :param_node_group_datacenter_id}]
-         }
-        ]
-
-
       virtual_column :linked_attributes, :type => :json, :hidden => true, 
         :remote_dependencies => 
         [
@@ -320,15 +220,8 @@ module XYZ
     def qualified_attribute_name()
       node_or_group_name =
         if self.has_key?(:node) then self[:node][:display_name]
-        elsif self.has_key?(:node_group) then self[:node_group][:display_name]
       end
       qualified_attribute_name_aux(node_or_group_name)
-    end
-
-    def base_object()
-      ret = Hash.new
-      [:node_group,:node,:component].each{|col|ret[col] = self[col] if self[col]}
-      ret
     end
 
     def id_info_uri()

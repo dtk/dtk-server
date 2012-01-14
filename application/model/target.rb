@@ -96,7 +96,7 @@ module XYZ
 
    private
     def sub_item_model_names()
-      [:node,:node_group]
+      [:node]
     end
 
     def clone_post_copy_hook__node(clone_copy_output,opts)

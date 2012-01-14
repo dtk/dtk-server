@@ -19,16 +19,6 @@ module XYZ
       create_pending_change_items(new_item_hashes)
     end
 
-    #TODO: deprecate
-    def qualified_parent_name()
-      base =  self[:base_object]
-      return nil unless base
-      node_or_ng = (base[:node]||{})[:display_name]||(base[:node_group]||{})[:display_name]
-      component = (base[:component]||{})[:display_name]
-      return nil if node_or_ng.nil? and component.nil?
-      [node_or_ng,component].compact.join("/")
-    end
-
     #object processing and access functions
     #######################
     def on_node_config_agent_type()

@@ -55,7 +55,7 @@ module Ramaze::Helper
       @json_response ||= rest_request?() or ajax_request?() 
     end
     def rest_request?()
-      #TODO: needs to be fixed up 
+      #TODO: needs to be fixed up; issue is different envs (linux versus windows) give different values for request.env["REQUEST_URI"] 
       @rest_request ||= (request.env["REQUEST_URI"] =~ Regexp.new("/rest/") ? true : nil)
     end
     def ajax_request?

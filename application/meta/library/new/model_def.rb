@@ -15,8 +15,7 @@
   [
    :component,
    :node,
-   :node_group,
-   :node_group_member,
+   :node_group_relation,
    :attribute_link,
    :port_link,
    :network_partition,

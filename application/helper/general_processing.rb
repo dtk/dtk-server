@@ -55,7 +55,6 @@ module Ramaze::Helper
       @json_response ||= rest_request?() or ajax_request?() 
     end
     def rest_request?()
-      pp [:fooooo2,request.env]
       #TODO: needs to be fixed up 
       @rest_request ||= (request.env["REQUEST_URI"] =~ Regexp.new("/rest/") ? true : nil)
     end

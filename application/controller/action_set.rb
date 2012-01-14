@@ -105,6 +105,7 @@ module XYZ
           method = rest_variant
         end
       end
+pp [:foooooo,rest_request?(),method]
       model_name = model.to_sym
       processed_params = process_action_params(action[:action_params]) 
       action_set_params = ret_search_object(processed_params,model_name,parent_model_name)

@@ -19,6 +19,9 @@ module XYZ
     end
 ### end temp for mocking
     def rest__state_info()
+      if defined? R8::EnvironmentConfig::TaskMockMode and  R8::EnvironmentConfig::TaskMockMode == "replay"
+        return rest_ok_response(debug_mock_replay())
+      end
       hash = request.params
       task_id = hash["task_id"] && hash["task_id"].to_i
       unless task_id
@@ -32,9 +35,6 @@ module XYZ
       end
 
       task_structure = Task.get_hierarchical_structure(id_handle(task_id))
-      if defined? R8::EnvironmentConfig::TaskMockMode and  R8::EnvironmentConfig::TaskMockMode == "replay"
-        return rest_ok_response(debug_mock_replay())
-      end
       state_info = task_structure.state_info(opts)
       debug_mock_record(state_info) if defined? R8::EnvironmentConfig::TaskMockMode and  R8::EnvironmentConfig::TaskMockMode == "record"
       rest_ok_response state_info

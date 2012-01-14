@@ -431,6 +431,8 @@ module XYZ
       foreign_key :data_source_id, :data_source, FK_SET_NULL_OPT
       many_to_one :library, :datacenter
       one_to_many :attribute, :port, :attribute_link, :component, :node_interface, :address_access_point, :monitoring_item
+
+      set_submodel(:node_group)
     end
 
     def self.common_columns()
@@ -487,6 +489,10 @@ module XYZ
         end
       end
       op_status || self[:operational_status]
+    end
+
+    def is_node_group?()
+      ["node_group_instance"].include?(self[:type])
     end
 
     #attribute on node

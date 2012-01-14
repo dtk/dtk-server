@@ -36,10 +36,11 @@ module XYZ
     end
 
     def set_submodel(submodel_name)
-      model_def = load_model_def(submodel_name)
-      model_def.each do |top_key,top_val|
-        next unless [:virtual_columns].include?(top_key)
-        top_val.each{|k,v|@db_rel[top_key][k] = v}
+      if model_def = load_model_def(submodel_name)
+        model_def.each do |top_key,top_val|
+          next unless [:virtual_columns].include?(top_key)
+          top_val.each{|k,v|@db_rel[top_key][k] = v}
+        end
       end
     end
 

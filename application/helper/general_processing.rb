@@ -56,7 +56,8 @@ module Ramaze::Helper
     end
     def rest_request?()
       pp [:fooooo2,request.env]
-      @rest_request ||= (request.env["REQUEST_URI"] =~ Regexp.new("^/rest") ? true : nil)
+      #TODO: needs to be fixed up 
+      @rest_request ||= (request.env["REQUEST_URI"] =~ Regexp.new("/rest/") ? true : nil)
     end
     def ajax_request?
       @ajax_request ||=  ajax_request_aux?()

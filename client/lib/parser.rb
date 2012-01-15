@@ -5,7 +5,7 @@ module R8
         raise Error.new("No cli parser specified in config file")
       end
       r8_nested_require("parser/adapters",parser_adapter)
-      r8_nested_require("parser/adapters/parser_adapter",command_name)
+      r8_nested_require("parser/adapters/#{parser_adapter}",command_name)
     end
     module CommandBase
       def self.execute_from_cli(conn,argv)

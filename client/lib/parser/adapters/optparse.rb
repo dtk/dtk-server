@@ -1,9 +1,7 @@
 module R8
   module Client
-    def load_command(command_name)
-      r8_nested_require("command",command_name)
-    end
-    class CommandBase
+    class CommandBaseOptParse
+      include CommandBase
       def initialize(conn)
         @conn = conn
       end
@@ -20,12 +18,6 @@ module R8
       def self.command_name()
         to_s.gsub(/^.*::/, '').gsub(/Command$/,'').scan(/[A-Z][a-z]+/).map{|w|w.downcase}.join("-")
       end
-
-      def method_missing(method,*args)
-        raise Error.new("Illegal method (#{method})") unless ConnMethods.include?(method)
-        @conn.send(method,*args)
-      end
-      ConnMethods = [:rest_url,:get,:post]
     end
   end
 end

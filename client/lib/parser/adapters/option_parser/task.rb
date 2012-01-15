@@ -1,5 +1,5 @@
 module R8::Client
-  class TaskCommand < CommandBaseOptParse
+  class TaskCommand < CommandBaseOptionParser
     CLIParseOptions = Hash.new
     def status(args)
       detail_level=args["detail_level"]||"summary"

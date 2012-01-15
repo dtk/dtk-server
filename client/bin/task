@@ -6,5 +6,7 @@ load_command("task")
 
 conn = Conn.new()
 
-hash_response = conn.task.execute_from_cli(ARGV)
-pp hash_response.render_data("hash_pretty_print")
+hash_response = TaskCommand.execute_from_cli(conn,ARGV)
+if print = hash_response.render_data("hash_pretty_print")
+  pp print
+end

@@ -9,6 +9,7 @@ module R8
       end
 
       def self.execute_from_cli(conn,argv)
+        return conn.connection_error if conn.connection_error
         ret = start(argv,:conn => conn)
         ret.kind_of?(Response) ? ret : ResponseNoOp.new
       end

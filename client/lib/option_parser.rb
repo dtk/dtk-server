@@ -4,15 +4,17 @@ module R8
     class OptionParser
       def self.parse_options(command_class)
         ret = Hash.new
-        cmd_parse_class = command_class.const_get "Parse"
+        parse_info = command_class.const_get "CLIParseOptions"
         ::OptionParser.new do|opts|
-          opts.banner = cmd_parse_class.banner
-          cmd_parse_class.options.each do |option_spec|
-            opts.on(*option_spec[:command_line]) do
-              #option_spec[:proc]
+          opts.banner = parse_info[:banner] if parse_info[:banner]
+          (parse_info[:options]||[]).each do |param_name,parse_info_option|
+            raise Error.new("missing optparse spec") unless parse_info_option[:optparse_spec]
+            opts.on(*parse_info_option[:optparse_spec]) do |val|
+              ret[param_name] = val ? val : true
             end
           end
         end.parse!
+        ret
       end
     end
   end

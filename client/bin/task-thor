@@ -1,10 +1,12 @@
 #!/usr/bin/env ruby
 $: << "/usr/lib/ruby/1.8/" #TODO: put in to get around path problem in rvm 1.9.2 environment
-require File.expand_path('../r8_client_thor', File.dirname(__FILE__))
+require File.expand_path('../r8_client', File.dirname(__FILE__))
 include R8::Client
 load_command("task")
 
 conn = Conn.new()
 
 hash_response = TaskCommand.execute_from_cli(conn,ARGV)
-pp hash_response.render_data("hash_pretty_print")
+if print = hash_response.render_data("hash_pretty_print")
+  pp print
+end

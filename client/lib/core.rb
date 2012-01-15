@@ -114,7 +114,7 @@ module R8
 
     class Response < Hash
       include ResponseTokens
-      def initialize(hash)
+      def initialize(hash={})
         super()
         replace(hash)
       end
@@ -132,6 +132,11 @@ module R8
         else
           self
         end
+      end
+    end
+
+    class ResponseNoOp < Response
+      def render_data(view_type)
       end
     end
 

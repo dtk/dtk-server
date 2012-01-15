@@ -4,12 +4,7 @@ require File.expand_path('../r8_client', File.dirname(__FILE__))
 include R8::Client
 load_command("task")
 
-
-subcommand = ARGV[0]
-
-args = Array.new
-
 conn = Conn.new()
 
-hash_response = conn.task.apply(subcommand,*args)
+hash_response = conn.task.execute_from_cli
 pp hash_response.render_data("hash_pretty_print")

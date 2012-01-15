@@ -8,13 +8,13 @@ module R8
         @conn = conn
       end
 
-      def apply(subcommand,*args)
+      def execute_from_cli()
+        method, args_hash = OptionParser.parse_options(self.class)
+        raise Error.new("Illegal subcommand #{subcommand||""}") unless respond_to?(method)
         if @conn.connection_error
           return @conn.connection_error
         end
-        method = subcommand.to_sym
-        raise Error.new("Illegal subcommand #{subcommand||""}") unless respond_to?(method)
-        send(method,*args)
+        send(method,args_hash)
       end
 
       def method_missing(method,*args)

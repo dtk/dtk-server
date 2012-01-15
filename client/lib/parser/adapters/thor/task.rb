@@ -25,7 +25,7 @@ module R8::Client
     def commit_changes_and_execute()
       response = commit_changes()
       if response.ok?
-        execute("task_id" => response.data["task_id"])
+        execute(response.data["task_id"])
       else
         response
       end

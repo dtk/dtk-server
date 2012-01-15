@@ -1,9 +1,7 @@
 module R8
   module Client
     def load_command(command_name)
-      unless parser_adapter = Config[:cli_parser]
-        raise Error.new("No cli parser specified in config file")
-      end
+      parser_adapter = Config[:cli_parser]|| "thor"
       r8_nested_require("parser/adapters",parser_adapter)
       r8_nested_require("parser/adapters/#{parser_adapter}",command_name)
     end

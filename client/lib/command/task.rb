@@ -20,7 +20,7 @@ module R8::Client
       ]
     }
 
-    def commit_changes()
+    def commit_changes(args={})
       post rest_url("task/create_task_commit_changes")
     end
     CLIParseOptions[:commit_changes] = {

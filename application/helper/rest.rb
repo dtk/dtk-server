@@ -1,10 +1,7 @@
 module Ramaze::Helper
   module Rest
     def rest_response()
-      #TODO: only handles case when there is one result
-      res =  @ctrl_results.reject{|k,v|not(k.to_s =~ /^application/)}
-      raise rest_response_error unless res.size == 1
-      res.values.first[:content]
+      JSON.generate(@ctrl_results)
     end
 
     def rest_ok_response(data={})
@@ -20,7 +17,7 @@ module Ramaze::Helper
 
     private
     def wrap_rest_response(item)
-      {:content => item ? JSON.generate(item) : nil}
+      item
     end
   end
 end

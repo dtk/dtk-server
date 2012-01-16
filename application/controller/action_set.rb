@@ -48,17 +48,22 @@ module XYZ
 
     #parent_model_name only set when top level action decomposed as opposed to when an action set of length one is created
     def run_action_set(action_set,parent_model_name=nil)
+      if rest_request?
+        unless (action_set||[]).size == 1
+          raise Error.new("If rest response action set must just have one element")
+        end
+        run_rest_action(action_set.first,parent_model_name)
+        return
+      end
+
+      @ctrl_results = ControllerResultsWeb.new
+
       #Execute each of the actions in the action_set and set the returned content
       (action_set||[]).each do |action|
         model,method = action[:route].split("/")
         method ||= :index
         action_namespace = "#{R8::Config[:application_name]}_#{model}_#{method}".to_sym
         result = call_action(action,parent_model_name)
-
-        if rest_request?
-          @ctrl_results[action_namespace] = result
-          next
-        end
 
         ctrl_result = Hash.new
 
@@ -90,9 +95,15 @@ module XYZ
         ctrl_result[:css_includes] = ret_css_includes()
         ctrl_result[:js_exe_list] = ret_js_exe_list()
 
-        @ctrl_results[action_namespace] = ctrl_result
-        @ctrl_results[:as_run_list] << action_namespace
+        @ctrl_results.add(action_namespace,ctrl_result)
       end
+    end
+
+    def run_rest_action(action,parent_model_name=nil)
+      model,method = action[:route].split("/")
+      method ||= :index
+      result = call_action(action,parent_model_name)
+      @ctrl_results = ControllerResultsRest.new(result)
     end
 
     def call_action(action,parent_model_name=nil)

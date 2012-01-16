@@ -1,5 +1,25 @@
 module Ramaze::Helper
   module BundleAndReturnHelper
+    class ControllerResults < Hash
+    end
+
+    class ControllerResultsRest < ControllerResults
+      def initialize(result)
+        replace(result)
+      end
+    end
+
+    class ControllerResultsWeb < ControllerResults
+      def initialize()
+        super
+        replace(:as_run_list => Array.new)
+      end
+      def add(action_namespace,ctrl_result)
+        self[action_namespace] = ctrl_result
+        self[:as_run_list] << action_namespace
+      end
+    end
+
     def include_css(css_name)
       @css_includes << R8::Config[:base_css_uri] + '/' + css_name + '.css'
     end

@@ -18,8 +18,22 @@ module Ramaze::Helper
       return nil unless user.kind_of?(Hash)
       @cached_user_obj ||= User.new(user,ret_session_context_id(),:user)
     end
-    #########
 
+    class UserContext
+      attr_reader :current_profile,:request,:json_response
+
+      def initialize(controller)
+        @current_profile = :default
+        @request = controller.request
+      @json_response = controller.json_response?
+        @controller = controller
+      end
+      
+      def create_object_from_id(id)
+        @controller.create_object_from_id(id)
+      end
+    end
+    ##############
 
     def initialize
       super
@@ -47,8 +61,7 @@ module Ramaze::Helper
       #will be set to have av pairs set from global params given in action set call
       @action_set_param_map = Hash.new
 
-      @ctrl_results = Hash.new
-      @ctrl_results[:as_run_list] = Array.new
+      @ctrl_results = nil
     end
 
     def json_response?()

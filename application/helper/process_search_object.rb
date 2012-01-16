@@ -42,14 +42,13 @@ module Ramaze::Helper
     end
 
     def ret_hash_search_object_in_post()
-      params = (ret_request_params()||{})["search"]
-      unless params.empty?
+      json_params = (ret_request_params()||{})["search"]
+      if json_params and not json_params.empty?
+        search_pattern = JSON.parse(json_params)
         if rest_request?()
-          params["relation"] ||=  model_name()
-          {"search_pattern" => params}
-        else
-          {"search_pattern" => JSON.parse(params)}
+          search_pattern["relation"] ||=  model_name()
         end
+        {"search_pattern" => search_pattern}
       end
     end
   end

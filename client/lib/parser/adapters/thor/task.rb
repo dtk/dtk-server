@@ -34,10 +34,10 @@ module R8::Client
     desc "list","List tasks"
     def list()
       search_hash = {
-        :columns => [:id,:display_name,:updated_at,:task_id],
-        :filter=>[:eq, ":task_id", 2147525173]
+        :columns => [:id,:display_name,:updated_at],
+        :filter=>[:eq, ":task_id", nil] #just top level tasks
       }
-      post rest_url("task/list"), {:search => search_hash}
+      post rest_url("task/list"), {:search => JSON.generate(search_hash)}
     end
   end
 end

@@ -6,8 +6,8 @@ module R8::Client
     def status(task_id=nil)
       detail_level = options["detail-level"]
       body = Hash.new
-      body["detail_level"] = detail_level
-      body["task_id"] = task_id if task_id
+      body[:detail_level] = detail_level
+      body[:task_id] = task_id if task_id
       post rest_url("task/state_info"),body
     end
 
@@ -33,7 +33,11 @@ module R8::Client
 
     desc "list","List tasks"
     def list()
-      post rest_url("task/list")
+      search_hash = {
+        :columns => [:id,:display_name,:updated_at,:task_id],
+        :filter=>[:eq, ":task_id", 2147525173]
+      }
+      post rest_url("task/list"), {:search => search_hash}
     end
   end
 end

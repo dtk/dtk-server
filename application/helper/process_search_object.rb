@@ -4,19 +4,20 @@ module Ramaze::Helper
    private
     #fns that get _search_object
     def ret_search_object_in_request()
-  pp ret_request_params()
       source = hash = nil
-      if @action_set_params and not @action_set_params.empty?
+      if request_method_is_post?()
+        hash = ret_hash_search_object_in_post()
+      end
+      if hash #request_method_is_post and it has search pattern
+        source = :post_request
+      elsif @action_set_params and not @action_set_params.empty?
         source = :action_set
         hash = ret_hash_search_object_in_action_set_params(@action_set_params)
-      elsif request_method_is_post?() 
-        source = :post_request
-        hash = ret_hash_search_object_in_post() 
       else 
         source = :get_request
         hash = ret_hash_search_object_in_get()
       end
-      hash ? SearchObject.create_from_input_hash(hash,source,ret_session_context_id()) : nil
+      SearchObject.create_from_input_hash(hash,source,ret_session_context_id()) if hash
    end
 
  
@@ -41,10 +42,15 @@ module Ramaze::Helper
     end
 
     def ret_hash_search_object_in_post()
-      json = (ret_request_params()||{})["search"]
-      json ? JSON.parse(json) : nil
+      params = (ret_request_params()||{})["search"]
+      unless params.empty?
+        if rest_request?()
+          params["relation"] ||=  model_name()
+          {"search_pattern" => params}
+        else
+          {"search_pattern" => JSON.parse(params)}
+        end
+      end
     end
-
-    ###
   end
 end

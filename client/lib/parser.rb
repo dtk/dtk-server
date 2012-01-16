@@ -11,11 +11,15 @@ module R8
         ret.kind_of?(Response) ? ret : ResponseNoOp.new
       end
 
-      def method_missing(method,*args)
-        raise Error.new("Illegal method (#{method})") unless ConnMethods.include?(method)
-        @conn.send(method,*args)
+      def get(url)
+        @conn.get(self.class,url)
       end
-      ConnMethods = [:rest_url,:get,:post]
+      def post(url,body=nil)
+        @conn.post(self.class,url,body)
+      end
+      def rest_url(route)
+        @conn.rest_url(route)
+      end
     end
   end
 end

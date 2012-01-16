@@ -18,6 +18,8 @@ module R8
       def get_object_def(object_type)
         if defs = meta[:defs] and object_type
           defs["#{object_type}_def".to_sym]
+        else
+          #          R8::Client.const_get "ViewProc#{cap_form(type)}"          
         end
       end
       def raise_error(msg=nil)

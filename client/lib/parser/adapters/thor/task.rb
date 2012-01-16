@@ -33,6 +33,7 @@ module R8::Client
 
     desc "list","List tasks"
     def list()
+      #TODO: just hard coded params now
       search_hash = SearchHash.new()
       search_hash.cols = [:id,:display_name,:updated_at]
       search_hash.filters = [:eq, ":task_id", nil] #just top level tasks

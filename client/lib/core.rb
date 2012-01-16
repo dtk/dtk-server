@@ -75,7 +75,7 @@ module R8
       GenericError = "error"
       def error_response(error_or_errors)
         errors = error_or_errors.kind_of?(Hash) ? [error_or_errors] : error_or_errors
-        Response.new(StatusField => StatusNotok, ErrorsField => errors)
+        ResponseError.new(StatusField => StatusNotok, ErrorsField => errors)
       end
     end
 
@@ -114,7 +114,8 @@ module R8
 
     class Response < Hash
       include ResponseTokens
-      def initialize(hash={})
+      def initialize(command_class=nil,hash={})
+        @command_class = command_class
         super()
         replace(hash)
       end
@@ -128,10 +129,20 @@ module R8
 
       def render_data(view_type)
         if ok?()
-          ViewProcessor.render(data,view_type)
+          ViewProcessor.render(@command_class,data,view_type)
         else
-          self
+          hash_part()
         end
+      end
+     private
+      def hash_part()
+        keys.inject(Hash.new){|h,k|h.merge(k => self[k])}
+      end
+    end
+
+    class ResponseError < Response
+      def initialize(hash={})
+        super(nil,hash)
       end
     end
 
@@ -148,22 +159,17 @@ module R8
       end
       attr_reader :connection_error
 
-      #### command (types)
-      def task()
-        TaskCommand.new(self)
-      end
-
       #######
       def rest_url(route)
         "http://#{Config[:server_host]}:#{Config[:server_port].to_s}/rest/#{route}"
       end
 
-      def get(url)
-        Response.new(json_parse_if_needed(get_raw(url)))
+      def get(command_class,url)
+        Response.new(command_class,json_parse_if_needed(get_raw(url)))
       end
 
-      def post(url,body=nil)
-        Response.new(json_parse_if_needed(post_raw(url,body)))
+      def post(command_class,url,body=nil)
+        Response.new(command_class,json_parse_if_needed(post_raw(url,body)))
       end
 
       private

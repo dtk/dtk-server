@@ -14,12 +14,14 @@ module R8
         raise Error.new("Illegal subcommand #{method}") unless instance.respond_to?(method)
         instance.send(method,args_hash)
       end
-
-      def self.command_name()
-        to_s.gsub(/^.*::/, '').gsub(/Command$/,'').scan(/[A-Z][a-z]+/).map{|w|w.downcase}.join("-")
+      class << self
+        include Aux
+        def command_name()
+          snake_form(self,"-")
+        end
       end
     end
-        class OptionParser
+    class OptionParser
       def self.parse_options(command_class,argv)
         args_hash = Hash.new
         unless subcommand = argv[0]

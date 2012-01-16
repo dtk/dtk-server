@@ -2,9 +2,9 @@ module R8
   module Client
     class ViewProcessor
       class << self
-        def render(ruby_obj,type)
-          #TODO: hard wired command; can get it from looking at called
-          command = "task"
+        include Aux
+        def render(command_class,ruby_obj,type)
+          command = snake_form(command_class)
           adapter = get_adapter(type,command)
           if ruby_obj.kind_of?(Hash)
             adapter.render(ruby_obj)
@@ -27,10 +27,6 @@ module R8
         def get_meta(type,command)
           r8_require("../views/#{command}/#{type}")
           R8::Client::ViewMeta.const_get cap_form(type)
-        end
-
-        def cap_form(x)
-          x.to_s.split("_").map{|t|t.capitalize}.join("")
         end
       end
      protected

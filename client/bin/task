@@ -6,7 +6,7 @@ load_command("task")
 
 conn = Conn.new()
 
-hash_response = TaskCommand.execute_from_cli(conn,ARGV)
-if print = hash_response.render_data("hash_pretty_print")
+response_ruby_obj = TaskCommand.execute_from_cli(conn,ARGV)
+if print = response_ruby_obj.render_data("hash_pretty_print")
   pp print
 end

@@ -2,11 +2,17 @@ module R8
   module Client
     class ViewProcessor
       class << self
-        def render(hash,type)
+        def render(ruby_obj,type)
           #TODO: hard wired command; can get it from looking at called
           command = "task"
           adapter = get_adapter(type,command)
-          adapter.render(hash)
+          if ruby_obj.kind_of?(Hash)
+            adapter.render(ruby_obj)
+          elsif ruby_obj.kind_of?(Array)
+            ruby_obj.map{|el|render(el,type)}
+          else
+            raise Error.new("ruby_obj has unexepected type")
+          end
         end
        private
         def get_adapter(type,command)

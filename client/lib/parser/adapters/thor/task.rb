@@ -30,6 +30,11 @@ module R8::Client
         response
       end
     end
+
+    desc "list","List tasks"
+    def list()
+      post rest_url("task/list")
+    end
   end
 end
 

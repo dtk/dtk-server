@@ -40,11 +40,12 @@ module XYZ
       rest_ok_response state_info
     end
 
+=begin
     def rest__list()
       tasks = Task.list(model_handle)
       rest_ok_response tasks
     end
-
+=end
 
     def rest__create_task_commit_changes()
       hash = request.params

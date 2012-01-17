@@ -424,15 +424,6 @@ module XYZ
       [:node_config,nil]
     end
 
-    def initialize(hash_scalar_values,c,model=:task,id_handle=nil)
-      defaults = { 
-        :status => "created",
-        :action_on_failure => "abort"
-      }
-      super(defaults.merge(hash_scalar_values),c,model,id_handle)
-      self[:subtasks] = Array.new
-    end
-
     #persists to db this and its sub tasks
     def save!()
       #no op if saved already as detected by whether has an id
@@ -487,7 +478,7 @@ module XYZ
     end
 
     def add_subtask(new_subtask)
-      self[:subtasks] << new_subtask
+      (self[:subtasks] ||= Array.new) << new_subtask
       new_subtask
     end
 

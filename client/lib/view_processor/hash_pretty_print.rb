@@ -4,13 +4,34 @@ module R8
   module Client
     class ViewProcHashPrettyPrint < ViewProcessor
       include XYZ
+      include Aux
       def render(hash)
         object_def = get_top_def()
         raise_error() unless object_def
         render_object_def(hash,object_def)
       end
      private
-      def  get_top_def()
+      attr_reader :meta
+      def initialize(type,command)
+        @meta = get_meta(type,command)
+      end
+
+      def get_meta(type,command)
+        begin
+          r8_require("../../views/#{command}/#{type}")
+        rescue Exception => e
+          #          R8::Client.const_get "ViewProc#{cap_form(type)}"          
+          return EmptyView
+        end
+        R8::Client::ViewMeta.const_get cap_form(type)
+      end
+
+      EmptyView = {
+        :top_type => :top,
+        :defs => {:top_def => []}
+      }
+
+      def get_top_def()
         raise_error("No Top def") unless top_object_type = meta[:top_type]
         get_object_def(top_object_type)
       end
@@ -18,8 +39,6 @@ module R8
       def get_object_def(object_type)
         if defs = meta[:defs] and object_type
           defs["#{object_type}_def".to_sym]
-        else
-          #          R8::Client.const_get "ViewProc#{cap_form(type)}"          
         end
       end
       def raise_error(msg=nil)

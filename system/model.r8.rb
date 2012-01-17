@@ -92,23 +92,28 @@ module XYZ
 
     SubClassRelations = {
       :assembly => :component,
-#TODO: fix an dput back in      :node_group => :node
+      :node_group => :node
     }
-
-    def self.find_subtype_model_name(id_handle)
+    SubClassTargets = SubClassRelations.values
+    #so can use calling cobntroller to shortcut needing datbase lookup
+    def self.subclass_controllers(opts)
+      case opts[:controller_class] 
+       when Node_groupController then :node_group
+       when AsemblyGroup then :assembly
+      end
+    end
+    
+    def self.find_subtype_model_name(id_handle,opts={})
       model_name = id_handle[:model_name]
-      return model_name unless SubClassRelations.values.include?(model_name)
-      #TODO: make this data driven too off SubClassRelations
-      if model_name == :component
+      return model_name unless SubClassTargets.include?(model_name)
+      case model_name
+       when :component
         type = get_object_scalar_column(id_handle,:type)
         type == "composite" ? :assembly : model_name
-=begin
-TODO: fix an dput back in
-      elsif model_name == :node
+       when :node
         type = get_object_scalar_column(id_handle,:type)
         %w{node_group_instance}.include?(type) ? :node_group : model_name
-=end
-      else
+       else
         Log.error("not implemented: finding subclass of relation #{model_name}")
         model_name
       end

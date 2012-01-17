@@ -78,7 +78,7 @@ module XYZ
       @db_rel[:virtual_columns][col_name] = opts
     end
 
-    #TBD: hardwired to ref column id on target table
+    #TODO: hardwired to ref column id on target table
     def foreign_key(col_name,target_rel_type,opts={})
       @db_rel[:columns][col_name] = {:type => ID_TYPES[:id], :foreign_key_rel_type => target_rel_type}.merge(opts)
       CloneHelper.add_foreign_key_info(@relation_type,col_name,target_rel_type)
@@ -205,7 +205,7 @@ module XYZ
           when :up
             create_table_specific_fields?(@db_rel)
           when :down
-            #TBD: not implemented yet
+            #TODO: not implemented yet
         end
       end
 
@@ -214,7 +214,7 @@ module XYZ
           when :up
             @db.create_table_associations?(@db_rel)
           when :down
-            #TBD: not implemented yet
+            #TODO: not implemented yet
         end
       end
 

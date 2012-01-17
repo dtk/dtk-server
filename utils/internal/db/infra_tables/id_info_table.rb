@@ -96,7 +96,7 @@ module XYZ
         if opts[:model_name]
           opts[:model_name]
         elsif not opts[:donot_find_subtype]
-          Model.find_subtype_model_name(self)
+          Model.find_subtype_model_name(self,opts)
         else
           self[:model_name]
         end

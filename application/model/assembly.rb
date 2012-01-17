@@ -48,6 +48,7 @@ module XYZ
       nil
     end
 
+    #TODO: can we avoid explicitly pacing this here
     def self.db_rel()
       Component.db_rel()
     end

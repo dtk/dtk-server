@@ -249,7 +249,8 @@ limit = TestOveride if TestOveride
 
    #TODO: unify with  SubClassRelations in system/model
    ConvertFromSubtypeModelName = {
-     :assembly => :component
+     :assembly => :component,
+     :node_group => :node
    }
   end
 end

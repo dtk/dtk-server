@@ -10,7 +10,9 @@ pp node.get_obj_with_common_cols()
     end
 
     ###TODO test
-    def destroy_and_delete(id)
+    #TODO: this should be a post; so transitioning over
+    def destroy_and_delete(id=nil)
+      id ||= request.params["id"]
       create_object_from_id(id).destroy_and_delete()
       return {:data => {:id=>id,:result=>true}}
     end

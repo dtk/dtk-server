@@ -19,7 +19,7 @@ module R8::Client
       :desc => "Target (id) to create node group in"
     def create(name)
       target_id = options["in-target"]
-     save_hash = {
+      save_hash = {
         :parent_id => target_id,
         :parent_model_name => "target",
         :display_name => name,

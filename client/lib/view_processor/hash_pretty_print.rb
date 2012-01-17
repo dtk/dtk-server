@@ -58,12 +58,13 @@ module R8
             render_object_def__hash_def!(ret,hash,item)
           else
             key = item.to_s
+            #TODO: may want to conditionally include nil values
             ret[key] = hash[key] if hash[key]
           end
         end
         #catch all for keys not defined
         (hash.keys - ret.keys).each do |key|
-          ret[key] = hash[key]
+          ret[key] = hash[key] if hash[key]
         end
         ret
       end

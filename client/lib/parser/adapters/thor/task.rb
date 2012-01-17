@@ -35,8 +35,8 @@ module R8::Client
     def list()
       #TODO: just hard coded params now
       search_hash = SearchHash.new()
-      search_hash.cols = [:id,:display_name,:updated_at]
-      search_hash.filters = [:eq, ":task_id", nil] #just top level tasks
+      search_hash.cols = [:commit_message,:status,:id,:started_at,:ended_at]
+      search_hash.filter = [:eq, ":task_id", nil] #just top level tasks
       post rest_url("task/list"), search_hash.post_body_hash()
     end
   end

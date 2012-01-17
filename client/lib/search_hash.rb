@@ -4,8 +4,8 @@ module R8
       def cols=(cols)
         self[:columns] = cols
       end
-      def filters=(filters)
-        self[:filters] = filters
+      def filter=(filter)
+        self[:filter] = filter
       end
       def post_body_hash()
         {:search => JSON.generate(self)}

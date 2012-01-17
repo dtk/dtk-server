@@ -4,6 +4,7 @@ module R8::Client::ViewMeta
     :defs => {
       :task_def =>
       [
+       :commit_message,
        :type,
        :id,
        :status,

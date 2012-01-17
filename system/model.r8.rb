@@ -96,16 +96,21 @@ module XYZ
     }
     SubClassTargets = SubClassRelations.values
     #so can use calling cobntroller to shortcut needing datbase lookup
-    def self.subclass_controllers(opts)
-      case opts[:controller_class] 
-       when Node_groupController then :node_group
-       when AsemblyGroup then :assembly
+    def self.subclass_controllers(model_name,opts)
+      if model_name == :node and opts[:controller_class] == Node_groupController 
+        :node_group 
+      elsif model_name == :component and opts[:controller_class] == AssemblyController
+        :assembly
       end
     end
     
     def self.find_subtype_model_name(id_handle,opts={})
       model_name = id_handle[:model_name]
       return model_name unless SubClassTargets.include?(model_name)
+      if shortcut = subclass_controllers(model_name,opts)
+        pp [:fooooooooooooo_shortcut,shortcut]
+        return shortcut
+      end
       case model_name
        when :component
         type = get_object_scalar_column(id_handle,:type)

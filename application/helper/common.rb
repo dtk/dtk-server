@@ -3,7 +3,7 @@ module Ramaze::Helper
     include XYZ #TODO: included because of ModelHandle and Model; make sure not expensive to laod these defs in this module
 
     def create_object_from_id(id,model_name_x=model_name(),opts={})
-      id_handle(id,model_name_x).create_object(opts)
+      id_handle(id,model_name_x).create_object(opts.merge(:controller_class => self.class))
     end      
 
     def user_object()

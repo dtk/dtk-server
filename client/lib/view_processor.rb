@@ -4,8 +4,7 @@ module R8
       class << self
         include Aux
         def render(command_class,ruby_obj,type)
-          command = snake_form(command_class)
-          adapter = get_adapter(type,command)
+          adapter = get_adapter(type,command_class)
           if ruby_obj.kind_of?(Hash)
             adapter.render(ruby_obj)
           elsif ruby_obj.kind_of?(Array)
@@ -15,13 +14,13 @@ module R8
           end
         end
        private
-        def get_adapter(type,command)
-          cached = (AdapterCache[type]||{})[command]
+        def get_adapter(type,command_class)
+          cached = (AdapterCache[type]||{})[command_class]
           return cached if cached
           r8_nested_require("view_processor",type)
           klass = R8::Client.const_get "ViewProc#{cap_form(type)}" 
           AdapterCache[type] ||= Hash.new
-          AdapterCache[type][command] = klass.new(type,command)
+          AdapterCache[type][command_class] = klass.new(type,command_class)
         end
         AdapterCache = Hash.new
       end

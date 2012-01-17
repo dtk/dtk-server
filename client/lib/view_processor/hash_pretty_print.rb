@@ -12,24 +12,28 @@ module R8
       end
      private
       attr_reader :meta
-      def initialize(type,command)
-        @meta = get_meta(type,command)
+      def initialize(type,command_class)
+        @meta = get_meta(type,command_class)
       end
 
-      def get_meta(type,command)
+      def get_meta(type,command_class)
+        ret = nil
+        command = snake_form(command_class)
         begin
           r8_require("../../views/#{command}/#{type}")
-        rescue Exception => e
-          #          R8::Client.const_get "ViewProc#{cap_form(type)}"          
-          return EmptyView
+          ret = R8::Client::ViewMeta.const_get cap_form(type)
+         rescue Exception => e
+          ret = failback_meta(command_class.respond_to?(:pretty_print_cols) ? command_class.pretty_print_cols() : [])
         end
-        R8::Client::ViewMeta.const_get cap_form(type)
+        ret
       end
 
-      EmptyView = {
-        :top_type => :top,
-        :defs => {:top_def => []}
-      }
+      def failback_meta(ordered_cols)
+        {
+          :top_type => :top,
+          :defs => {:top_def => ordered_cols}
+        }
+      end
 
       def get_top_def()
         raise_error("No Top def") unless top_object_type = meta[:top_type]

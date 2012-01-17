@@ -90,11 +90,10 @@ module XYZ
       @id_handle ? @id_handle.i18n_language() : R8::Config[:default_language]
     end
 
-   private
     SubClassRelations = {
-     :assembly => :component
+      :assembly => :component,
+#TODO: fix an dput back in      :node_group => :node
     }
-   public
 
     def self.find_subtype_model_name(id_handle)
       model_name = id_handle[:model_name]
@@ -103,6 +102,12 @@ module XYZ
       if model_name == :component
         type = get_object_scalar_column(id_handle,:type)
         type == "composite" ? :assembly : model_name
+=begin
+TODO: fix an dput back in
+      elsif model_name == :node
+        type = get_object_scalar_column(id_handle,:type)
+        %w{node_group_instance}.include?(type) ? :node_group : model_name
+=end
       else
         Log.error("not implemented: finding subclass of relation #{model_name}")
         model_name

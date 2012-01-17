@@ -2,7 +2,8 @@ module XYZ
   class Node_groupController < Controller
     def delete()
       id = request.params["id"]
-      create_object_from_id(id).delete()
+      node_group = id_handle(id).create_object()
+      node_group.delete()
       if rest_request?()
         rest_ok_response(:id => id)
       else

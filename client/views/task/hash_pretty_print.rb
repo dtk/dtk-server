@@ -9,6 +9,7 @@ module R8::Client::ViewMeta
        :id,
        :status,
        :node,
+       :created_at,
        :started_at,
        :ended_at,
        :temporal_order,

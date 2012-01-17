@@ -21,7 +21,7 @@ module R8::Client
       post rest_url("task/state_info"),body
     end
 
-    desc "commit_changes", "Commit changes"
+    desc "commit-changes", "Commit changes"
     def commit_changes()
       post rest_url("task/create_task_commit_changes")
     end
@@ -31,7 +31,7 @@ module R8::Client
       post rest_url("task/execute"), "task_id" => task_id
     end
 
-    desc "commit_changes_and_execute", "Commit changes and execute task"
+    desc "commit-changes-and-execute", "Commit changes and execute task"
     def commit_changes_and_execute()
       response = commit_changes()
       if response.ok?

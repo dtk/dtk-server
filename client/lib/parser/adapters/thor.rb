@@ -13,6 +13,11 @@ module R8
         ret = start(argv,:conn => conn)
         ret.kind_of?(Response) ? ret : ResponseNoOp.new
       end
+
+      desc "help [SUBCOMMAND]", "Describes available subcommands or one specific subcommand"
+      def help(*args)
+        super
+      end
     end
   end
 end

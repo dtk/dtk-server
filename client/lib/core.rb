@@ -7,7 +7,7 @@ require 'pp'
 def top_level_execute()
   $: << "/usr/lib/ruby/1.8/" #TODO: put in to get around path problem in rvm 1.9.2 environment
   include R8::Client
-  include R8::Client::Aux
+  include Aux
   command = $0.gsub(Regexp.new("^.+/"),"").gsub("-","_")
   require File.expand_path('../r8_client', File.dirname(__FILE__))
   load_command(command)

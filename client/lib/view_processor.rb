@@ -3,12 +3,12 @@ module R8
     class ViewProcessor
       class << self
         include Aux
-        def render(command_class,ruby_obj,type)
-          adapter = get_adapter(type,command_class)
+        def render(command_class,ruby_obj,type,adapter=nil)
+          adapter ||= get_adapter(type,command_class)
           if ruby_obj.kind_of?(Hash)
             adapter.render(ruby_obj)
           elsif ruby_obj.kind_of?(Array)
-            ruby_obj.map{|el|render(command_class,el,type)}
+            ruby_obj.map{|el|render(command_class,el,type,adapter)}
           else
             raise Error.new("ruby_obj has unexepected type")
           end

@@ -108,7 +108,6 @@ module XYZ
       model_name = id_handle[:model_name]
       return model_name unless SubClassTargets.include?(model_name)
       if shortcut = subclass_controllers(model_name,opts)
-        pp [:fooooooooooooo_shortcut,shortcut]
         return shortcut
       end
       case model_name

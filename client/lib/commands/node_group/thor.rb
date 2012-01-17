@@ -11,7 +11,7 @@ module R8::Client
       post rest_url("node_group/list"), search_hash.post_body_hash()
     end
 
-    desc "create_in_target NODE-GROUP-NAME TARGET-ID", "Create node group in target"
+    desc "create-in-target NODE-GROUP-NAME TARGET-ID", "Create node group in target"
     def create_in_target(name,target_id)
       save_hash = {
         :parent_id => target_id,

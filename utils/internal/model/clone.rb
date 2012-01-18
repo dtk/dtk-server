@@ -14,7 +14,8 @@ module XYZ
     def clone_into(clone_source_object,override_attrs={},opts={})
       target_id_handle = id_handle_with_auth_info()
        ##constraints
-      if clone_source_object.class == Component and target_id_handle[:model_name] == :node
+      if clone_source_object.class == Component and self.class == Node
+        pp [:fooooo]
         constraints = clone_source_object.get_constraints!(:update_object => true)
         if constraints
           target = {"target_node_id_handle" => target_id_handle}

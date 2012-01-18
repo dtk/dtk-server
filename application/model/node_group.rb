@@ -8,7 +8,9 @@ module XYZ
     end
 
     def clone_post_copy_hook(clone_copy_output,opts={})
-      super
+      #TODO: for simplicity not creating pending changes for node groups; future enhancement may be to keep this
+      #for accounting reasons
+      super(clone_copy_output,opts.merge(:donot_create_pending_changes => true))
       clone_source_obj = clone_copy_output.source_object
       
       #clone the component in all the nodes taht are a member of this node group
@@ -31,7 +33,7 @@ module XYZ
       delete()
     end
     private
-    #TODO: can we avoid explicitly placing this here
+    #TODO: can we avoid explicitly placing this here?
      def self.db_rel()
       Node.db_rel()
     end

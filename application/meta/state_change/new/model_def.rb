@@ -102,7 +102,6 @@
       :possible_parents=>[:datacenter, :state_change]
     },
     :old_value=>{:path=>[:change, :old]},
-    :qualified_parent_name=>{:type=>:varchar, :local_dependencies=>[:base_object]},
     :new_value=>{:path=>[:change, :new]}
   }
 }

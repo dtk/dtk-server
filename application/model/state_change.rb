@@ -1,6 +1,5 @@
-#TODO: may get rid of nested state change structure because of problem such as a "parent is completed, but children arent and effeiciency
-#alternatively have state chanegs associated with a "container
-require  File.expand_path('state_change/get_pending_changes', File.dirname(__FILE__))
+#TODO: may get rid of nested state change structure because of problem such as a "parent is completed, but children arent and effeiciency; alternatively have state chanegs associated with a "container
+r8_nested_require('state_change','get_pending_changes')
 module XYZ
   class StateChange < Model
     extend GetPendingChangesClassMixin

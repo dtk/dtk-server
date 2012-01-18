@@ -14,25 +14,25 @@ module XYZ
       {:state => :no_changes}
     end
 
-    def flat_list_pending_changes(target_idh)
+    def flat_list_pending_changes(target_idh,opts={})
       target_mh = target_idh.createMH()
-      last_level = pending_changes_one_level_raw(target_mh,[target_idh])
+      last_level = pending_changes_one_level_raw(target_mh,[target_idh],opts)
       ret = Array.new
       state_change_mh = target_mh.create_childMH(:state_change)
       while not last_level.empty?
         ret += last_level
-        last_level = pending_changes_one_level_raw(state_change_mh,last_level.map{|obj|obj.id_handle()})
+        last_level = pending_changes_one_level_raw(state_change_mh,last_level.map{|obj|obj.id_handle()},opts)
       end
       remove_dups_and_proc_related_components(ret)
     end
 
-    def pending_changes_one_level_raw(parent_mh,idh_list)
-      pending_create_node(parent_mh,idh_list) + 
-        pending_changed_component(parent_mh,idh_list) +
-        pending_changed_attribute(parent_mh,idh_list)
+    def pending_changes_one_level_raw(parent_mh,idh_list,opts={})
+      pending_create_node(parent_mh,idh_list,opts) + 
+        pending_changed_component(parent_mh,idh_list,opts) +
+        pending_changed_attribute(parent_mh,idh_list,opts)
     end
 
-    def pending_create_node(parent_mh,idh_list)
+    def pending_create_node(parent_mh,idh_list,opts={})
       parent_field_name = DB.parent_field(parent_mh[:model_name],:state_change)
       sp_hash = {
         :filter => [:and,
@@ -45,7 +45,7 @@ module XYZ
       get_objs(state_change_mh,sp_hash)
     end
 
-    def pending_changed_component(parent_mh,idh_list)
+    def pending_changed_component(parent_mh,idh_list,opts={})
       parent_field_name = DB.parent_field(parent_mh[:model_name],:state_change)
       sp_hash = {
         :filter => [:and,
@@ -59,7 +59,7 @@ module XYZ
       add_related_components(sc_with_direct_cmps)
     end
 
-    def pending_changed_attribute(parent_mh,idh_list)
+    def pending_changed_attribute(parent_mh,idh_list,opts={})
       parent_field_name = DB.parent_field(parent_mh[:model_name],:state_change)
       sp_hash = {
         :filter => [:and,

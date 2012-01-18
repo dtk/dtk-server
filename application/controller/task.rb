@@ -40,17 +40,10 @@ module XYZ
       rest_ok_response state_info
     end
 
-=begin
-    def rest__list()
-      tasks = Task.list(model_handle)
-      rest_ok_response tasks
-    end
-=end
-
     def rest__create_task_commit_changes()
       hash = request.params
-      #TODO: stub version that does not deal with parameters
-      #TODO: make sure that there is no task created but not executed that handles same changes
+      #TODO: put in check/error that there is no task created already, but not executed, that handles same changes
+
       #compute scope
       scope = 
         if hash["target_ids"]
@@ -67,7 +60,7 @@ module XYZ
           {:target_ids => target_ids}
         end
       return Error.new("Only treating scope by target ids") unless target_scope = scope[:target_ids]
-      return Error.new("Only treating scope gievn by single target") unless target_scope.size == 1
+      return Error.new("Only treating scope given by single target") unless target_scope.size == 1
 
       target_idh = id_handle(target_scope.first,:target)
       pending_changes = StateChange.flat_list_pending_changes(target_idh)

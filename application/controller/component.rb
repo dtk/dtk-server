@@ -64,7 +64,7 @@ pp poss_remote_cmps
       sp_hash = {
         :cols => cols,
         :filter => [:and] + filter_conjuncts
-      }
+     }
       component_list = Model.get_objs(model_handle(:component),sp_hash).each{|r|r.materialize!(cols)}
 
       i18n = get_i18n_mappings_for_models(model_name)
@@ -105,33 +105,7 @@ pp poss_remote_cmps
         model_list[index][:body_value] = body_value
 =end
       end
-#pp "^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
-#pp component_list
-#pp "^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
-
-=begin
-      tpl = R8Tpl::TemplateR8.new("workspace/wspace_search_#{model_name}",user_context())
-      tpl.set_js_tpl_name("wspace_search_#{model_name}")
-      tpl.assign('model_list',model_list)
-
-      slide_width = 130*model_list.size
-      tpl.assign('slide_width',slide_width)
-      #TODO: needed to below back in so template did not barf
- # }
-      _model_var = {}
-      _model_var[:i18n] = get_model_i18n(model_name,user_context())
-      tpl.assign("_workspace",_model_var)
-      tpl.assign("model_name",model_name.to_s)
-
-      tpl_result = tpl.render()
-      tpl_result[:panel] = "#{model_name}-search-list-container"
-      return tpl_result
-=end
-#RICHTEMP
-#      keep = %w{java_webapp mysql__server}
-#component_list.reject!{|x| not (x[:config_agent_type] == "puppet" and keep.include?(x[:display_name]))}
-
-      return {:data=>component_list}
+      {:data=>component_list}
     end
 
     def clone(id)
@@ -151,47 +125,27 @@ pp poss_remote_cmps
         override_attrs = hash["ui"] ? {:ui=>hash["ui"]} : {}
         target_object = target_id_handle.create_object()
 
-        #TODO: push in logic that forces us heer to pass in real cols and tehn materialize
+        #TODO: push in logic that forces us here to pass in real cols and then materialize
         clone_opts = {
           :ret_new_obj_with_cols => Component.common_real_columns(),
           :outermost_ports => Array.new
         }
         component_obj = target_object.clone_into(id_handle.create_object(),override_attrs,clone_opts)
         component_obj.materialize!(Component.common_columns())
+        
+        #TODO: remove after putting this info in teh r8 meta files
         if component_obj[:display_name] == "ganglia__server"
           (clone_opts[:outermost_ports]||[]).each{|x|x[:location] = "east"}
         elsif component_obj[:display_name] == "ganglia__monitor"
           (clone_opts[:outermost_ports]||[]).each{|x|x[:location] = "west"}
         end
+
         data = {
           :component => component_obj,
           :ports => clone_opts[:outermost_ports]
         }
         {:data => data}
       end
-    end
-
-    #TODO: remove when finshed testing
-    def test(action,*rest)
-      hash = request.params
-      if action == "new_version"
-        cmp_type = rest[0]
-        version = rest[1] || "0.0.1"
-        new_version = rest[2] ||"0.0.2"
-        proj_cmp_tmpl = ret_project_component_template(cmp_type,version)
-        library_obj = Model.get_objects_from_sp_hash(model_handle(:library),{:cols => [:id]}).first
-        proj_cmp_tmpl.promote_template__new_version(new_version,library_obj.id_handle)
-      elsif action == "update_default"
-        cmp_type = rest[0]
-        version = rest[1]
-        attr = rest[2] 
-        val = hash["val"]
-        val = true if val == "true"
-        val = false if val == "false"
-        proj_cmp_tmpl = ret_project_component_template(cmp_type,version)
-        proj_cmp_tmpl.update_default(attr,val)
-      end
-      return {:content => {}}
     end
 
     def ret_project_component_template(cmp_type,version)
@@ -214,35 +168,6 @@ pp poss_remote_cmps
       return {:content => {}}
     end
     
-    def details_old(id)
-      component = get_object_by_id(id)
-      tpl = R8Tpl::TemplateR8.new("component/details",user_context())
-
-#      img_str = '<img title="' << component[:display_name] << '"' << 'src="' << R8::Config[:base_images_uri] << '/component/Icons/'<< component[:ui][:images][:tnail] << '"/>'
-
-      _model_var = {}
-      _model_var[:i18n] = get_model_i18n(:component,user_context())
-      component[:name] = _model_var[:i18n][component[:display_name].to_sym]
-
-#TEMP UNTIL FULLY IMPLEMENTING DEPENDENCIES
-      supported_os_list = [
-        {:id=>12345,:name=>'Ubuntu',:version=>'10.4',:ui=>{:images=>{:icon=>'ubuntu-favicon.png'}}},
-        {:id=>12345,:name=>'Debian',:version=>'6',:ui=>{:images=>{:icon=>'debian-favicon.png'}}},
-        {:id=>12345,:name=>'Fedora',:version=>'14',:ui=>{:images=>{:icon=>'fedora-favicon.png'}}},
-        {:id=>12345,:name=>'CentOS',:version=>'5.5',:ui=>{:images=>{:icon=>'centos-favicon.png'}}},
-        {:id=>12345,:name=>'RedHat',:version=>'6',:ui=>{:images=>{:icon=>'redhat-favicon.png'}}}
-      ]
-      component[:supported_os_list] = supported_os_list
-
-      tpl.assign("_#{model_name().to_s}",_model_var)
-      tpl.assign("component",component)
-      tpl.assign("component_images_uri",R8::Config[:component_images_uri])
-
-      run_javascript("R8.Displayview.init('#{id}');")
-
-      return {:content => tpl.render()}
-    end
-
     def details(id)
       component = get_object_by_id(id)
 

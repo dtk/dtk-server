@@ -61,8 +61,10 @@ module XYZ
                                                              
       LinkDef.create_needed_internal_links(self,component,node_link_defs_info)
 
-      parent_action_id_handle = get_parent_id_handle()
-      StateChange.create_pending_change_item(:new_item => component_idh, :parent => parent_action_id_handle)
+      unless opts[:donot_create_pending_changes]
+        parent_action_id_handle = get_parent_id_handle()
+        StateChange.create_pending_change_item(:new_item => component_idh, :parent => parent_action_id_handle)
+      end
     end
   end
 end

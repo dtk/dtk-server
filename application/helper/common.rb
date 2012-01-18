@@ -172,8 +172,27 @@ limit = TestOveride if TestOveride
 
     def ret_request_params()
       return nil unless request_method_is_post?()
-      return request.params
+      request.params
     end
+
+    def ret_non_null_request_params(*params)
+      null_params = Array.new
+      ret = params.map do |p|
+        unless val = request.params[p.to_s]
+          null_params << p
+        else val
+        end
+      end
+      raise_error_null_params?(*null_params)
+      ret
+    end
+
+    def raise_error_null_params?(*null_params)
+      unless null_params.empty?
+        raise Error.new("There parametrs should not be null (#{null_params.join(",")})")
+      end
+    end
+
 
     def request_method_is_get?()
       request.env["REQUEST_METHOD"] == "GET"

@@ -98,7 +98,8 @@ module XYZ
     private
     #TODO: slight refactor of CloneCopyOutput so each child is of form {:parent => <parent>,:child => <CloneCopyOutput>}
     class CloneCopyOutput
-      def initialize(opts={})
+      def initialize(source_obj,opts={})
+        @source_object = source_obj
         @id_handles = Array.new
         @objects = nil
         @children = Hash.new
@@ -107,7 +108,7 @@ module XYZ
         @ret_new_obj_with_cols = opts[:ret_new_obj_with_cols]
         end
 
-      attr_reader :id_handles, :ret_new_obj_with_cols, :objects
+      attr_reader :source_object, :id_handles, :ret_new_obj_with_cols, :objects
       def model_name()
         #all id handles wil be of same type
         @id_handles.first && @id_handles.first[:model_name]
@@ -165,7 +166,7 @@ module XYZ
         @db = source_obj.class.db
         @fk_info = ForeignKeyInfo.new(@db)
         @model_name = source_obj.model_name()
-        @ret = CloneCopyOutput.new(opts)
+        @ret = CloneCopyOutput.new(source_obj,opts)
       end
 
       def output()

@@ -7,16 +7,25 @@ module XYZ
       get_objs(sp_hash).map{|r|r[:node_member]}
     end
 
+    def clone_post_copy_hook(clone_copy_output,opts={})
+      super
+      clone_source_obj = clone_copy_output.source_object
+      override_attrs = {}
+      node_clone_opts = [:ret_new_obj_with_cols].inject({}) do |h,k|
+        opts.has_key?(k) ? h.merge(k => opts[k]) : h
+      end
+      node_members().each{|node|node.clone_into(clone_source_obj,override_attrs,node_clone_opts)}
+    end
+
     def delete()
       #TODO: stub
       Model.delete_instance(id_handle())
     end
-
     def destroy_and_delete
       delete()
     end
     private
-    #TODO: can we avoid explicitly pacing this here
+    #TODO: can we avoid explicitly placing this here
      def self.db_rel()
       Node.db_rel()
     end

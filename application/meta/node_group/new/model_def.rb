@@ -13,6 +13,7 @@
        {
          :model_name=>:node,
          :alias => :node_member,
+         :convert => true,
          :join_type=>:inner,
          :join_cond=>{:id=>:node_group_relation__node_id},
          :cols=>[:id,:display_name,:type]

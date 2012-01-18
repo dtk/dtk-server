@@ -11,6 +11,12 @@ module R8::Client
       post rest_url("node_group/list"), search_hash.post_body_hash()
     end
 
+
+    desc "members NODE-GROUP-ID", "Node group members"
+    def members(node_group_id)
+      get rest_url("node_group/members/#{node_group_id.to_s}")
+    end
+
     desc "create NODE-GROUP-NAME", "Create node group"
     method_option "in-target",:aliases => "-t", 
       :required => true, 

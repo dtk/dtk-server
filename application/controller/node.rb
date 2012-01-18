@@ -8,6 +8,7 @@ module XYZ
       unless parent_id = node_group.update_object!(:datacenter_datacenter_id)[:datacenter_datacenter_id]
         raise Error.new("node group with id (#{node_group_id.to_s}) given is not in a target")
       end
+      #TODO: can check if node already belongs to group; in which case this becomes a no op
       save_hash = {
         "model" => "node_group_relation",
         "display_name" => "n#{node_id.to_s}-ng#{node_group_id.to_s}",

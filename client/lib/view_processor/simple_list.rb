@@ -2,14 +2,19 @@ require 'erubis'
 module R8
   module Client
     class ViewProcSimpleList < ViewProcessor
-      def render(hash,ident_info={})
+      def render(hash)
         pp_adapter = ViewProcessor.get_adapter("hash_pretty_print",@command_class)
         ordered_hash = pp_adapter.render(hash)
+        render_ordered_hash(ordered_hash)
+      end
+     private
+      def render_ordered_hash(ordered_hash,ident_info={})
         #find next value that is type pretty print hash or array
-        first,nested,rest = find_first_non_scalar(ordered_hash)
+        beg,nested,rest = find_first_non_scalar(ordered_hash)
+        pp [ beg,nested,rest].map{|x|x.keys}
         ret = String.new
-        unless first.empty?
-          ret = scalar_value_render(first,ident_info)
+        unless beg.empty?
+          ret = scalar_value_render(beg,ident_info)
         end
         unless nested.empty?
           ident_info_nested = {
@@ -18,14 +23,13 @@ module R8
           }
           vals = nested.values.first
           vals = [vals] unless vals.kind_of?(Array)
-          vals.each{|val|ret << render(val,ident_info_nested)}
+          vals.each{|val|ret << render_ordered_hash(val,ident_info_nested)}
         end
         unless rest.empty?
-          ret << render(rest,ident_info)
+          ret << render_ordered_hash(rest,ident_info)
         end
         ret
       end
-     private
 
       IdentAdd = 2
       def find_first_non_scalar(ordered_hash)

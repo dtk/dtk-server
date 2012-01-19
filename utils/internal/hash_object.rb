@@ -39,6 +39,10 @@ module XYZ
       end
       self
     end
+
+    def slice(*keys)
+      keys.inject(self.class.new){|h,k|h.merge(k => self[k])}
+    end
   end
 
   class HashObject < Hash

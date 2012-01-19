@@ -5,9 +5,16 @@ module R8
       def render(hash)
         pp_adapter = ViewProcessor.get_adapter("hash_pretty_print",@command_class)
         ordered_hash = pp_adapter.render(hash)
-        render_ordered_hash(ordered_hash)
+        if ordered_hash.size == 1
+          render_simple_assignment(ordered_hash.keys.first,ordered_hash.values.first)
+        else
+          render_ordered_hash(ordered_hash)
+        end
       end
      private
+      def render_simple_assignment(key,val)
+        key + KeyValSeperator + val.to_s + "\n" 
+      end
       def render_ordered_hash(ordered_hash,ident_info={})
         #find next value that is type pretty print hash or array
         beg,nested,rest = find_first_non_scalar(ordered_hash)

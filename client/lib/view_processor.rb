@@ -13,7 +13,7 @@ module R8
             raise Error.new("ruby_obj has unexepected type")
           end
         end
-       private
+
         def get_adapter(type,command_class)
           cached = (AdapterCache[type]||{})[command_class]
           return cached if cached
@@ -23,6 +23,10 @@ module R8
           AdapterCache[type][command_class] = klass.new(type,command_class)
         end
         AdapterCache = Hash.new
+      end
+     private
+      def initialize(type,command_class)
+        @command_class = command_class
       end
     end
     module ViewMeta

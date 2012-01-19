@@ -13,6 +13,7 @@ module R8
      private
       attr_reader :meta
       def initialize(type,command_class)
+        super(type,command_class)
         @meta = get_meta(type,command_class)
       end
 

@@ -1,10 +1,10 @@
-r8_require('hash_pretty_print')
 require 'erubis'
 module R8
   module Client
-    class ViewProcSimpleList < ViewProcHashPrettyPrint
+    class ViewProcSimpleList < ViewProcessor
       def render(hash)
-        pp_hash = super
+        pp_adapter = ViewProcessor.get_adapter("hash_pretty_print",@command_class)
+        pp_hash = pp_adapter.render(hash)
         template_bindings = {
           :pretty_print_hash => pp_hash
         }

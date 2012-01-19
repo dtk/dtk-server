@@ -108,7 +108,7 @@ module XYZ
       state_changes.each do |sc|
         if sc[:type] == "create_node"
           indexed_ret[sc[:node][:id]] = augment_with_linked_id(sc,sc[:id])
-          #TODO: ordering may do thsi anyway, but do we explicitly want to make sure if both setting adn isnatll use install as type
+          #TODO: ordering may do thsis anyway, but do we explicitly want to make sure if both setting adn isnatll use install as type
         elsif ["setting","install_component","update_implementation","rerun_component"].include?(sc[:type])
           indexed_ret[sc[:component][:id]] = augment_with_linked_id(indexed_ret[sc[:component][:id]] || sc.reject{|k,v|[:attribute].include?(k)},sc[:id])
         else

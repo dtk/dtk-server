@@ -3,6 +3,47 @@ r8_nested_require('state_change','get_pending_changes')
 module XYZ
   class StateChange < Model
     extend GetPendingChangesClassMixin
+
+    def self.update_with_current_names!(state_changes)
+      #looking just for node names
+      return if state_changes.empty?
+      sample_sc = state_changes.first
+      cols = sample_sc.keys
+      return unless cols.include?(:display_name)
+
+      need_more_info_ids = node_ids_need_more_info_for(state_changes,cols)
+      return if need_more_info_ids.empty?
+
+      sp_hash = {
+        :cols => [:id,:display_name],
+        :filter => [:oneof,:id,need_more_info_ids]
+      }
+      node_mh = sample_sc.model_handle(:node)
+      ndx_node_name_info = get_objs(node_mh,sp_hash).inject({}) do |h,r|
+        h.merge(r[:id] => ret_display_name(:node,r[:display_name]))
+      end
+      state_changes.each do |r|
+        if updated_name = ndx_node_name_info[r[:id]]
+          r[:display_name] = updated_name
+        end
+      end
+    end
+    class << self
+      def node_ids_need_more_info_for(state_changes,cols)
+        ret = Array.new
+        if cols.include?(:type) and cols.include?(:node_id)
+          return state_changes.select{|r|r[:type] == "create_node"}.map{|r|r[:node_id]}.compact
+        end
+        sp_hash = {
+          :cols => [:type,:node_id],
+          :filter => [:oneof,:id,state_changes.map{|r|r[:id]}]
+        }
+        sc_mh = state_changes.first.model_handle
+        get_objs(sc_mh,sp_hash).select{|r|r[:type] == "create_node"}.map{|r|r[:node_id]}.compact
+      end
+      private :node_ids_need_more_info_for
+    end
+
     def self.create_rerun_state_changes(node_idhs)
       sample_idh = node_idhs.first()
       sp_hash = {
@@ -65,12 +106,6 @@ module XYZ
           when :node then "create_node"
           else raise ErrorNotImplemented.new("when object type is #{object_model_name}")
       end 
-      display_name_prefix = 
-        case object_model_name
-          when :attribute then "setting-attribute"
-          when :component then "install-component"
-          when :node then "create_node"
-      end 
       
       ref_prefix = "state_change"
       i=0
@@ -79,7 +114,7 @@ module XYZ
         id = item[:new_item].get_id()
         parent_id = item[:parent].get_id()
         #TODO: think wil change to have display name derived on spot; problem is for example name of node changes after state change saved
-        display_name = display_name_prefix + (item[:new_item][:display_name] ? "(#{item[:new_item][:display_name]})" : "")
+        display_name = ret_display_name(object_model_name,item[:new_item][:display_name])
         hash = {
           :ref => ref,
           :display_name => display_name,
@@ -95,6 +130,16 @@ module XYZ
         hash
       end
       create_from_rows(model_handle,rows,{:convert => true})
+    end
+
+    def self.ret_display_name(object_model_name,item_display_name)
+      display_name_prefix = 
+        case object_model_name
+         when :attribute then "setting-attribute"
+         when :component then "install-component"
+         when :node then "create-node"
+      end
+      display_name_prefix + (item_display_name ? "(#{item_display_name})" : "")
     end
   end
 end

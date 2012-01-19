@@ -8,19 +8,27 @@ module Ramaze::Helper
     end
 
     def rest_ok_response(data={})
-      wrap_rest_response(:status => :ok,:data => data)
+      RestResponse.new(:status => :ok,:data => data)
     end
 
     def rest_notok_response(errors=[{:code => :error}])
       if errors.kind_of?(Hash)
         errors = [errors]
       end
-      wrap_rest_response(:status => :notok, :errors => errors)
+      RestResponse.new(:status => :notok, :errors => errors)
     end
 
     private
-    def wrap_rest_response(item)
-      item
+    class RestResponse < Hash
+      def initialize(hash)
+        replace(hash)
+      end
+      def is_ok?
+        self[:status] == :ok
+      end
+      def data()
+        self[:data]
+      end
     end
   end
 end

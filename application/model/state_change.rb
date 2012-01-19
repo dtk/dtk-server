@@ -34,7 +34,6 @@ module XYZ
       end
     end
 
-
     def self.create_rerun_state_changes(node_idhs)
       sample_idh = node_idhs.first()
       sp_hash = {

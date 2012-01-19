@@ -11,7 +11,6 @@ module R8
       def render_ordered_hash(ordered_hash,ident_info={})
         #find next value that is type pretty print hash or array
         beg,nested,rest = find_first_non_scalar(ordered_hash)
-        pp [ beg,nested,rest].map{|x|x.keys}
         ret = String.new
         unless beg.empty?
           ret = scalar_value_render(beg,ident_info)
@@ -26,7 +25,7 @@ module R8
           vals.each{|val|ret << render_ordered_hash(val,ident_info_nested)}
         end
         unless rest.empty?
-          ret << render_ordered_hash(rest,ident_info)
+          ret << render_ordered_hash(rest,ident_info.merge(:include_first_key => true))
         end
         ret
       end
@@ -50,7 +49,12 @@ module R8
       end
 
       def scalar_value_render(ordered_hash,ident_info)
-        prefix = (ident_info[:prefix] ? (ident_info[:prefix] + KeyValSeperator) : "")
+        prefix = 
+          if ident_info[:include_first_key]
+            ident_str(IdentAdd) + ordered_hash.keys.first + KeyValSeperator
+          else
+            (ident_info[:prefix] ? (ident_info[:prefix] + KeyValSeperator) : "")
+          end
         ident = ident_info[:ident]||0
         first_prefix = ident_str(ident) + prefix
         rest_prefix = ident_str(ident+IdentAdd)

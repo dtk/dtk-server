@@ -9,7 +9,7 @@ module R8
         first,nested,rest = find_first_non_scalar(ordered_hash)
         ret = String.new
         unless first.empty?
-          ret = scalar_value_render(ordered_hash,ident_info)
+          ret = scalar_value_render(first,ident_info)
         end
         unless nested.empty?
           ident_info_nested = {

@@ -11,16 +11,21 @@ module XYZ
       cols = sample_sc.keys
       return unless cols.include?(:display_name)
 
-      need_more_info_ids = node_ids_need_more_info_for(state_changes,cols)
-      return if need_more_info_ids.empty?
-
+      filter_ids = nil 
+      if cols.include?(:type) 
+        filter_ids = state_changes.select{|r|r[:type] == "create_node"}.map{|r|r[:id]}
+        #shortcut if cols include type and no "create_node" columns
+        return if filter_ids.empty?
+      end
       sp_hash = {
-        :cols => [:id,:display_name],
-        :filter => [:oneof,:id,need_more_info_ids]
+        :cols => [:id,:type,:created_node]
       }
-      node_mh = sample_sc.model_handle(:node)
-      ndx_node_name_info = get_objs(node_mh,sp_hash).inject({}) do |h,r|
-        h.merge(r[:id] => ret_display_name(:node,r[:display_name]))
+      sp_hash[:filter] = [:oneof,:id,filter_ids] if filter_ids
+
+      state_change_mh = sample_sc.model_handle
+      ndx_node_name_info = get_objs(state_change_mh,sp_hash).inject({}) do |h,r|
+        node_name = r[:node][:display_name]
+        h.merge(r[:id] => ret_display_name(:node,node_name))
       end
       state_changes.each do |r|
         if updated_name = ndx_node_name_info[r[:id]]
@@ -28,21 +33,7 @@ module XYZ
         end
       end
     end
-    class << self
-      def node_ids_need_more_info_for(state_changes,cols)
-        ret = Array.new
-        if cols.include?(:type) and cols.include?(:node_id)
-          return state_changes.select{|r|r[:type] == "create_node"}.map{|r|r[:node_id]}.compact
-        end
-        sp_hash = {
-          :cols => [:type,:node_id],
-          :filter => [:oneof,:id,state_changes.map{|r|r[:id]}]
-        }
-        sc_mh = state_changes.first.model_handle
-        get_objs(sc_mh,sp_hash).select{|r|r[:type] == "create_node"}.map{|r|r[:node_id]}.compact
-      end
-      private :node_ids_need_more_info_for
-    end
+
 
     def self.create_rerun_state_changes(node_idhs)
       sample_idh = node_idhs.first()

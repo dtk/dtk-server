@@ -55,8 +55,18 @@ module XYZ
        #partition into attributes on node group and ones on nodes
        #index by AttributeFieldToMatchOn
        ng_ndx = attrs.select{|r|r[:component_component_id] == ng_cmp_id}.inject({}) do |h,r|
-         h.merge(r[AttributeFieldToMatchOn] => r)
+         h.merge(r[AttributeFieldToMatchOn] => r[:id])
        end
+       #build up link rows to create
+       attr_link_rows = attrs.select{|r|r[:component_component_id] != ng_cmp_id}.map do |r|
+         index = r[AttributeFieldToMatchOn]
+         {
+           :output_id => ng_ndx[index],
+           :input_id => r[:id]
+         }
+       end
+       pp attr_link_rows
+       #AttributeLink.create_attribute_links(parent_idh,attr_link_rows)
      end
 
      AttributeFieldToMatchOn = :display_name

@@ -26,7 +26,6 @@ module XYZ
       AttributeLink.create_attribute_links(parent_idh,links)
     end
 
-
     def attribute_mappings()
       self[:attribute_mappings] ||= (self[:content][:attribute_mappings]||[]).map{|am|AttributeMapping.new(am)}
     end
@@ -36,7 +35,7 @@ module XYZ
     end
 
     #TODO: this is making too many assumptions about form of link_defs_info
-    #and that self has stra field local_component_type
+    #and that self has field local_component_type
     def get_context(link_defs_info)
       ret = LinkDefContext.new()
       #TODO: add back in commented out parts

@@ -52,12 +52,7 @@ module XYZ
           :input_port => input_port,
           :output_port => output_port,
         }
-
-puts "-------------------------"
-pp ["new create link response:", ret]
-puts "-------------------------"
-
-        return {:data=>ret}
+        {:data=>ret}
       end
     end
 

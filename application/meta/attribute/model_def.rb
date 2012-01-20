@@ -9,9 +9,6 @@
     :attribute_value=>{
         :type=>:text,
     },
-    :needs_to_be_set=>{
-        :type=>:boolean,
-    },
     :is_unset=>{
         :type=>:boolean,
     },

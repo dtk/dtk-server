@@ -10,7 +10,6 @@
   :semantic_type => 'Semantic Type',
   :is_port => 'Is Port',
   :description => 'Description',
-  :needs_to_be_set => "Needs to be set",
   :is_unset => "Is Unset",
   :external_ref => 'Ext Attr Ref',
   :required_list => 'Req',

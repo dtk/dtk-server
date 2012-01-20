@@ -44,11 +44,6 @@ module XYZ
       SemanticType.create_from_attribute(self)
     end
 
-    #TODO: deprecate
-    def needs_to_be_set()
-      attribute_value().nil? and self[:required] and not self[:read_only]
-    end
-
     #TODO: modify these so dont look up AttributeSemantic
     def port_is_external()
       return self[:is_external] unless self[:is_external].nil?

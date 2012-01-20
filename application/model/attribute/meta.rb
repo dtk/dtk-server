@@ -89,12 +89,6 @@ module XYZ
            :cols => [:id,:type,id(:node),:containing_port_id,:external_attribute_id,:ref]
          }]
 
-      virtual_column :needs_to_be_set, :type => :boolean, :hidden => true, 
-        :local_dependencies => [:value_asserted,:value_derived,:read_only,:required],
-        :sql_fn => SQL.and({:attribute__value_asserted => nil},{:attribute__value_derived => nil},
-                           SQL.not(:attribute__read_only),
-                           :attribute__required)
-
       uri_remote_dependencies = 
         {:uri =>
         [

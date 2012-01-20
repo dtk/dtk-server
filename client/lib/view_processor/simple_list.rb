@@ -20,7 +20,7 @@ module R8
         beg,nested,rest = find_first_non_scalar(ordered_hash)
         ret = String.new
         unless beg.empty?
-          ret = scalar_value_render(beg,ident_info)
+          ret = simple_value_render(beg,ident_info)
         end
         unless nested.empty?
           ident_info_nested = {
@@ -57,7 +57,16 @@ module R8
         end
       end
 
-      def scalar_value_render(ordered_hash,ident_info)
+      def simple_value_render(ordered_hash,ident_info)
+        #process elements that are not scalars
+        updated_els = Hash.new
+        ordered_hash.each do |k,v|
+          unless is_scalar_type?(v)
+            updated_els[k] = convert_to_string_form(v)
+          end
+        end
+        proc_ordered_hash = ordered_hash.merge(updated_els)
+
         prefix = 
           if ident_info[:include_first_key]
             ident_str(IdentAdd) + ordered_hash.keys.first + KeyValSeperator
@@ -68,14 +77,33 @@ module R8
         first_prefix = ident_str(ident) + prefix
         rest_prefix = ident_str(ident+IdentAdd)
         template_bindings = {
-          :ordered_hash => ordered_hash,
+          :ordered_hash => proc_ordered_hash,
           :first_prefix => first_prefix,
           :rest_prefix => rest_prefix,
           :sep => KeyValSeperator
         }
         SimpleListTemplate.result(template_bindings)
-
       end
+      def is_scalar_type?(x)
+        [String,Fixnum,Bignum].find{|t|x.kind_of?(t)}
+      end
+
+      def convert_to_string_form(val)
+        if val.kind_of?(Array)
+          "[#{val.map{|el|convert_to_string_form(el)}.join(",")}]"
+        elsif is_scalar_type?(val)
+          val.to_s
+        else #catchall
+          pp_form val
+        end
+      end
+      def pp_form(obj)
+        pp [:foo,obj.class]
+        ret = String.new
+        PP.pp obj, ret
+        ret.chomp!
+      end
+
       def ident_str(n)
         Array.new(n, " ").join
       end

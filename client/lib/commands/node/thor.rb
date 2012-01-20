@@ -13,7 +13,6 @@ module R8::Client
       if options["only-in-targets"]
         types = TargetTypes
         add_cols = [:operational_status,:datacenter_datacenter_id]
-        minus_cols = [:type]
       elsif options["only-in-libraries"]
         types = LibraryTypes
         add_cols = [:library_library_id]

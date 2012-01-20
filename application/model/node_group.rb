@@ -44,11 +44,12 @@ module XYZ
 
        cols = AttributeLink.attribute_info_cols()
        cols << AttrFieldToMatchOn unless cols.include?(AttrFieldToMatchOn)
+       cols << :component_component_id unless cols.include?(:component_component_id)
        sp_hash = {
-         :columns => cols,
+         :cols => cols,
          :filter => [:oneof, :component_component_id, ng_plus_node_cmp_ids]
        }
-       attrs = get_objs(attr_mh,sp_hash)
+       attrs = Model.get_objs(attr_mh,sp_hash)
        return if attrs.empty?
 
        #partition into attributes on node group and ones on nodes

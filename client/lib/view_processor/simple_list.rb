@@ -42,7 +42,9 @@ module R8
         found = nil
         keys = ordered_hash.keys
         keys.each_with_index do |k,i|
-          if ordered_hash[k].kind_of?(Hash) or ordered_hash[k].kind_of?(Array)
+          val = ordered_hash[k]
+          if val.kind_of?(XYZ::PrettyPrintHash) or 
+              (val.kind_of?(Array) and val.size > 0 and val.first.kind_of?(XYZ::PrettyPrintHash))
             found = i
             break
           end

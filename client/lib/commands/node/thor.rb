@@ -1,7 +1,7 @@
 module R8::Client
   class NodeCommand < CommandBaseThor
     def self.pretty_print_cols()
-      [:display_name, :type,:id, :description]
+      [:display_name, :type,:id, :description, :external_ref]
     end
     desc "list","List Node groups"
     method_option "only-in-targets", :aliases => "-t", :type => :boolean
@@ -11,7 +11,7 @@ module R8::Client
       add_cols = []
       if options["only-in-targets"]
         types = TargetTypes
-        add_cols = ["datacenter_datacenter_id"]
+        add_cols = ["operational_status","datacenter_datacenter_id"]
       elsif options["only-in-libraries"]
         types = LibraryTypes
         add_cols = ["library_library_id"]
@@ -19,7 +19,7 @@ module R8::Client
         types = TargetTypes + LibraryTypes
       end
       search_hash = SearchHash.new()
-      search_hash.cols = self.class.pretty_print_cols() + add_cols
+      search_hash.cols = pretty_print_cols() + add_cols
       search_hash.filter = [:oneof, ":type", types]
       post rest_url("node/list"), search_hash.post_body_hash()
     end

@@ -7,7 +7,7 @@ module R8::Client
     def list()
       search_hash = SearchHash.new()
       add_cols = [:object_type,:status,:node_node_id]
-      search_hash.cols = self.class.pretty_print_cols() + add_cols
+      search_hash.cols = pretty_print_cols() + add_cols
       search_hash.filter = [:eq, ":status", "pending"]
       post rest_url("state_change/list"), search_hash.post_body_hash()
     end

@@ -20,6 +20,10 @@ module R8
       def rest_url(route)
         @conn.rest_url(route)
       end
+     private
+      def pretty_print_cols()
+        self.class.pretty_print_cols()
+      end
     end
   end
 end

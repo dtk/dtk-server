@@ -6,7 +6,7 @@ module R8::Client
     desc "list","List Node groups"
     def list()
       search_hash = SearchHash.new()
-      search_hash.cols = self.class.pretty_print_cols()
+      search_hash.cols = pretty_print_cols()
       search_hash.filter = [:oneof, ":type", ["node_group_instance"]]
       post rest_url("node_group/list"), search_hash.post_body_hash()
     end

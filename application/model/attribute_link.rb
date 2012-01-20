@@ -71,7 +71,7 @@ module XYZ
     def self.get_attribute_info(attr_mh,rows_to_create)
       endpoint_ids = rows_to_create.map{|r|[r[:input_id],r[:output_id]]}.flatten.uniq
       sp_hash = {
-        :columns => cols,
+        :cols => attribute_info_cols(),
         :filter => [:oneof, :id, endpoint_ids]
       }
       get_objs(attr_mh,sp_hash)
@@ -329,7 +329,7 @@ module XYZ
         end
         return if ndx_cmp_idhs.empty?
         cmp_idhs =  ndx_cmp_idhs.values.map{|x|x[:idh]}
-        sp_hash = {:columns => [:id,:multiple_instance_ref]}
+        sp_hash = {:cols => [:id,:multiple_instance_ref]}
         opts = {:keep_ref_cols => true}
         cmp_info = Model.get_objects_in_set_from_sp_hash(cmp_idhs,sp_hash,opts)
         cmp_info.each do |r|

@@ -9,8 +9,10 @@ module XYZ
       attr_mh = parent_idh.create_childMH(:attribute)
       attr_link_mh = parent_idh.create_childMH(:attribute_link)
 
-      attr_info = get_attribute_info(attr_mh,rows_to_create)
-      add_link_fns!(rows_to_create,attr_info)
+      attr_rows = opts[:attr_rows]||get_attribute_info(attr_mh,rows_to_create)
+      attr_info = attr_rows.inject({}){|h,attr|h.merge(attr[:id] => attr)}
+      
+      add_link_fns!(rows_to_create,attr_info) unless opts[:link_fns_are_set]
 
       #add parent_col and ref
       parent_col = attr_link_mh.parent_id_field_name()
@@ -38,6 +40,9 @@ module XYZ
       StateChange.create_pending_change_items(ndx_nested_change_hashes.values)
     end
 
+    def self.attribute_info_cols()
+      [:id,:attribute_value,:semantic_type_object,:component_parent]
+    end
    private
     def  self.propagate_from_create(attr_mh,attr_info,attr_links,change_parent_idh)
       attrs_links_to_update = attr_links.map do |attr_link|
@@ -66,11 +71,10 @@ module XYZ
     def self.get_attribute_info(attr_mh,rows_to_create)
       endpoint_ids = rows_to_create.map{|r|[r[:input_id],r[:output_id]]}.flatten.uniq
       sp_hash = {
-        :columns => [:id,:attribute_value,:semantic_type_object,:component_parent],
+        :columns => cols,
         :filter => [:oneof, :id, endpoint_ids]
       }
-      attr_rows = get_objs(attr_mh,sp_hash)
-      attr_rows.inject({}){|h,attr|h.merge(attr[:id] => attr)}
+      get_objs(attr_mh,sp_hash)
     end
 
     def self.check_constraints(attr_mh,rows_to_create)

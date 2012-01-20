@@ -12,12 +12,6 @@ module XYZ
       #future enhancement may be to create these, for example, for accounting reasons
       super(clone_copy_output,opts.merge(:donot_create_pending_changes => true))
       clone_source_obj = clone_copy_output.source_object
-      
-      #clone the component in all the nodes taht are a member of this node group
-      #TODO: started with brute force way to do this. There is many different ways that teh computation can be optimized, such s
-      #bulk cloning, flags that idniacet ops to skip when node is being cloned to mirror what is in node group
-      # shortcutting implementation pointers by having it be an overriding attribute
-      #copy to nodes the output object after post processing not source object
       override_attrs = {}
       node_clone_opts = [:ret_new_obj_with_cols].inject({}) do |h,k|
         opts.has_key?(k) ? h.merge(k => opts[k]) : h
@@ -45,31 +39,38 @@ module XYZ
      def add_links_between_ng_and_node_components(ng_cmp,node_cmps)
        #get all the relevant attributes
        ng_cmp_id = ng_cmp[:id]
-       sp_hash = {
-         :cols => [:id,AttributeFieldToMatchOn,:component_component_id],
-         :filter => [:oneof, :component_component_id,node_cmps.map{|r|r[:id]} + [ng_cmp_id]]
-       }
+       ng_plus_node_cmp_ids = node_cmps.map{|r|r[:id]} + [ng_cmp_id]
        attr_mh = ng_cmp.model_handle(:attribute)
-       attrs = Model.get_objs(attr_mh,sp_hash)
+
+       cols = AttributeLink.attribute_info_cols()
+       cols << AttrFieldToMatchOn unless cols.include?(AttrFieldToMatchOn)
+       sp_hash = {
+         :columns => cols,
+         :filter => [:oneof, :component_component_id, ng_plus_node_cmp_ids]
+       }
+       attrs = get_objs(attr_mh,sp_hash)
        return if attrs.empty?
+
        #partition into attributes on node group and ones on nodes
-       #index by AttributeFieldToMatchOn
+       #index by AttrFieldToMatchOn
        ng_ndx = attrs.select{|r|r[:component_component_id] == ng_cmp_id}.inject({}) do |h,r|
-         h.merge(r[AttributeFieldToMatchOn] => r[:id])
+         h.merge(r[AttrFieldToMatchOn] => r[:id])
        end
        #build up link rows to create
        attr_link_rows = attrs.select{|r|r[:component_component_id] != ng_cmp_id}.map do |r|
-         index = r[AttributeFieldToMatchOn]
+         index = r[AttrFieldToMatchOn]
          {
            :output_id => ng_ndx[index],
-           :input_id => r[:id]
+           :input_id => r[:id],
+           :function => "eq"
          }
        end
-       pp attr_link_rows
-       #AttributeLink.create_attribute_links(parent_idh,attr_link_rows)
+       opts = {:link_fns_are_set => true, :attr_rows => attrs} 
+       parent_idh =  id_handle().get_top_container_id_handle(:target,:auth_info_from_self => true)
+       AttributeLink.create_attribute_links(parent_idh,attr_link_rows,opts)
      end
 
-     AttributeFieldToMatchOn = :display_name
+     AttrFieldToMatchOn = :display_name
   end
 end
 

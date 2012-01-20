@@ -56,12 +56,7 @@ module XYZ
         ret.add_ref!(self[:input])
         ret.add_ref!(self[:output])
       end
-
       def ret_link(context)
-        ret_link__node_endpoints(context)
-      end
-     private
-      def ret_link__node_endpoints(context)
         input_attr,input_path = get_attribute_with_unravel_path(:input,context)
         output_attr,output_path = get_attribute_with_unravel_path(:output,context)
         unless input_attr
@@ -77,6 +72,8 @@ module XYZ
         ret.merge!(:output_path => output_path) if output_path
         ret
       end
+
+     private
       
       #returns [attribute,unravel_path]
       def get_attribute_with_unravel_path(dir,context)

@@ -37,7 +37,7 @@ module XYZ
       change_parent_idh = parent_idh.get_top_container_id_handle(:datacenter,:auth_info_from_self => true)
       #propagate attribute values
       ndx_nested_change_hashes = propagate_from_create(attr_mh,attr_info,rows_to_create,change_parent_idh)
-      StateChange.create_pending_change_items(ndx_nested_change_hashes.values)
+      StateChange.create_pending_change_items(ndx_nested_change_hashes.values) unless opts[:donot_create_pending_changes]
     end
 
     def self.attribute_info_cols()

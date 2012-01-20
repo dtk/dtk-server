@@ -57,7 +57,7 @@ module XYZ
 
     def list_under_node(node_id=nil)
       filter = nil
-      cols = [:id,:display_name,:base_object_node,:value_actual,:value_derived,:data_type,:semantic_type]
+      cols = [:id,:display_name,:value_actual,:value_derived,:data_type,:semantic_type]
       field_set = Model::FieldSet.new(model_name,cols)
       ds = SearchObject.create_from_field_set(field_set,ret_session_context_id(),filter).create_dataset()
       ds = ds.where(:param_node_id => node_id.to_i) if node_id
@@ -65,7 +65,7 @@ module XYZ
       raw_attribute_list = ds.all
       attribute_list = AttributeComplexType.flatten_attribute_list(raw_attribute_list)
 
-      cols = [:id,:display_name,:base_object_node_feature,:value_actual,:value_derived,:data_type,:semantic_type]
+      cols = [:id,:display_name,:value_actual,:value_derived,:data_type,:semantic_type]
       field_set = Model::FieldSet.new(model_name,cols)
       ds = SearchObject.create_from_field_set(field_set,ret_session_context_id(),filter).create_dataset()
       ds = ds.where(:param_node_id => node_id.to_i) if node_id
@@ -81,7 +81,7 @@ module XYZ
 
     def ports_under_node(node_id=nil)
       filter = [:and,[:eq,:is_port,true],[:eq,:port_is_external,true]]
-      cols = [:id,:display_name,:base_object_node,:value_derived,:value_asserted]
+      cols = [:id,:display_name,:value_derived,:value_asserted]
       field_set = Model::FieldSet.new(model_name,cols)
       ds = SearchObject.create_from_field_set(field_set,ret_session_context_id(),filter).create_dataset()
       ds = ds.where(:param_node_id => node_id.to_i) if node_id
@@ -98,7 +98,7 @@ module XYZ
 
     def edit_under_node(node_id=nil)
       filter = nil
-      cols = [:id,:display_name,:base_object_node,:value_actual,:value_derived,:data_type,:semantic_type]
+      cols = [:id,:display_name,:value_actual,:value_derived,:data_type,:semantic_type]
       field_set = Model::FieldSet.new(model_name,cols)
       ds = SearchObject.create_from_field_set(field_set,ret_session_context_id(),filter).create_dataset()
       ds = ds.where(:param_node_id => node_id.to_i) if node_id
@@ -124,7 +124,7 @@ module XYZ
     def list_under_datacenter(datacenter_id=nil)
       datacenter_id = IDHandle[:c => ret_session_context_id(), :model_name => :datacenter, :uri => "/datacenter/dc1"].get_id() unless datacenter_id
       filter = nil
-      cols = [:id,:display_name,:base_object_datacenter,:value_actual,:value_derived,:data_type,:semantic_type]
+      cols = [:id,:display_name,:value_actual,:value_derived,:data_type,:semantic_type]
       field_set = Model::FieldSet.new(model_name,cols)
       ds = SearchObject.create_from_field_set(field_set,ret_session_context_id(),filter).create_dataset()
       ds = ds.where(SQL::ColRef.coalesce(:param_node_group_datacenter_id,:param_node_datacenter_id) => datacenter_id)
@@ -165,7 +165,7 @@ pp request
 pp ')))))))))))))))))))))))))))))'
 =end
       filter = nil
-      cols = [:id,:display_name,:base_object_node,:value_actual,:value_derived,:data_type,:semantic_type]
+      cols = [:id,:display_name,:value_actual,:value_derived,:data_type,:semantic_type]
       field_set = Model::FieldSet.new(model_name,cols)
       ds = SearchObject.create_from_field_set(field_set,ret_session_context_id(),filter).create_dataset()
       ds = ds.where(:param_node_id => node_id.to_i) if node_id
@@ -198,7 +198,7 @@ pp ')))))))))))))))))))))))))))))'
 
     def wspace_node_edit(node_id=nil)
       filter = nil
-      cols = [:id,:display_name,:base_object_node,:value_actual,:value_derived,:data_type,:semantic_type]
+      cols = [:id,:display_name,:value_actual,:value_derived,:data_type,:semantic_type]
       field_set = Model::FieldSet.new(model_name,cols)
       ds = SearchObject.create_from_field_set(field_set,ret_session_context_id(),filter).create_dataset()
       ds = ds.where(:param_node_id => node_id.to_i) if node_id

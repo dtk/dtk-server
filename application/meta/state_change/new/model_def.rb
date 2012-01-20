@@ -5,7 +5,6 @@
     :status=>{:type=>:varchar, :default=>"pending", :size=>15},
     :type=>{:type=>:varchar, :size=>25},
     :object_type=>{:type=>:varchar, :size=>15},
-    :base_object=>{:type=>:json},
     :change=>{:type=>:json},
     :change_paths=>{:type=>:json},
     :attribute_id=>{

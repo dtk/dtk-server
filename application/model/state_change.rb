@@ -112,8 +112,7 @@ module XYZ
           :type => type,
           :object_type => object_model_name.to_s,
           object_id_col => id,
-          parent_id_col => parent_id,
-          :base_object => item[:base_object] #TODO: should deprecate
+          parent_id_col => parent_id
         }
         hash.merge!(:change => item[:change]) if item[:change]
         hash.merge!(:change_paths => item[:change_paths]) if item[:change_paths]

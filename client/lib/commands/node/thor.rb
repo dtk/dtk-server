@@ -9,17 +9,20 @@ module R8::Client
     def list()
       types = nil
       add_cols = []
+      minus_cols = []
       if options["only-in-targets"]
         types = TargetTypes
-        add_cols = ["operational_status","datacenter_datacenter_id"]
+        add_cols = [:operational_status,:datacenter_datacenter_id]
+        minus_cols = [:type]
       elsif options["only-in-libraries"]
         types = LibraryTypes
-        add_cols = ["library_library_id"]
+        add_cols = [:library_library_id]
+        minus_cols = [:type]
       else
-        types = TargetTypes + LibraryTypes
+        types = (TargetTypes + LibraryTypes) 
       end
       search_hash = SearchHash.new()
-      search_hash.cols = pretty_print_cols() + add_cols
+      search_hash.cols = (pretty_print_cols() + add_cols) - minus_cols
       search_hash.filter = [:oneof, ":type", types]
       post rest_url("node/list"), search_hash.post_body_hash()
     end

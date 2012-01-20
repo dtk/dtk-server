@@ -9,13 +9,22 @@ module XYZ
       node_clone_opts = [:ret_new_obj_with_cols].inject({}) do |h,k|
         opts.has_key?(k) ? h.merge(k => opts[k]) : h
       end
+      node_members().each{|node|node.clone_into(clone_source_obj,override_attrs,node_clone_opts)}
+=begin
+DEPRECATED
       node_components = node_members().map{|node|node.clone_into(clone_source_obj,override_attrs,node_clone_opts)}
+
       unless node_components.empty?
         ng_component = clone_copy_output.objects.first
         add_links_between_ng_and_node_components(ng_component,node_components)
       end
+=end
     end
    private
+=begin
+TODO: deprecated
+this is use technicaue that links between ng and component attributes and indirect propagation; problematic when the node groupo side has output attribute
+alternative is adding links at time that node to ng link is added and special processing when attribute changed at ng level
      def add_links_between_ng_and_node_components(ng_cmp,node_cmps)
        #get all the relevant attributes
        ng_cmp_id = ng_cmp[:id]
@@ -52,5 +61,6 @@ module XYZ
      end
 
      AttrFieldToMatchOn = :display_name
+=end
   end
 end

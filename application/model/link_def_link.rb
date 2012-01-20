@@ -15,9 +15,10 @@ module XYZ
     def process(parent_idh,components,port_link_idh=nil)
       link_defs_info = components.map{|cmp| {:component => cmp}}
       context = get_context(link_defs_info)
+
       on_create_events.each{|ev|ev.process!(context)}
       #ret_links returns nil only if error such as not being able to find input_id or output_id
-      links = attribute_mappings.map{|am|am.ret_link(context)}.compact
+      links = AttributeMapping.ret_links(attribute_mappings,context)
       return if links.empty?
       if port_link_idh
         port_link_id = port_link_idh.get_id()
@@ -47,11 +48,20 @@ module XYZ
     end
 
     class AttributeMapping < HashObject
+      def self.ret_links(attribute_mappings,context)
+        attribute_mappings.map{|am|am.ret_link(context)}.compact
+      end
+
       def get_context_refs!(ret)
         ret.add_ref!(self[:input])
         ret.add_ref!(self[:output])
       end
+
       def ret_link(context)
+        ret_link__node_endpoints(context)
+      end
+     private
+      def ret_link__node_endpoints(context)
         input_attr,input_path = get_attribute_with_unravel_path(:input,context)
         output_attr,output_path = get_attribute_with_unravel_path(:output,context)
         unless input_attr
@@ -67,7 +77,7 @@ module XYZ
         ret.merge!(:output_path => output_path) if output_path
         ret
       end
-     private
+      
       #returns [attribute,unravel_path]
       def get_attribute_with_unravel_path(dir,context)
         index_map_path = nil

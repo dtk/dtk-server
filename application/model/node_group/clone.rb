@@ -3,7 +3,11 @@ module XYZ
     def clone_post_copy_hook(clone_copy_output,opts={})
       #TODO: for simplicity not creating pending changes for node groups; 
       #future enhancement may be to create these, for example, for accounting reasons
-      super(clone_copy_output,opts.merge(:donot_create_pending_changes => true))
+
+      super_opts = opts.merge(:donot_create_pending_changes => true)
+      super(clone_copy_output,super_opts)
+      opts[:outermost_ports] = super_opts[:outermost_ports] if super_opts[:outermost_ports]
+
       clone_source_obj = clone_copy_output.source_object
       override_attrs = {}
       node_clone_opts = [:ret_new_obj_with_cols].inject({}) do |h,k|

@@ -80,12 +80,14 @@ module XYZ
     end
 
     def set_values__node_to_node_group!(link,local_cmp,remote_cmp)
+      @type =  :node_to_node_group
       #TODO: stub
       pp [:node_to_node_group_link, @node_mappings]
       set_values__node_to_node!(link,local_cmp,remote_cmp)
     end
 
     def set_values__node_to_node!(link,local_cmp,remote_cmp)
+      @type ||= :node_to_node
       @term_mappings.values.each do |v| 
         v.set_component_remote_and_local_value!(link,local_cmp,remote_cmp)
       end
@@ -161,6 +163,8 @@ module XYZ
           a[:value_object].set_attribute_value!(node_info[attr_name]) if node_info.has_key?(attr_name)
         end
       end
+    end
+    class NodeGroupMember < LinkDefContext 
     end
 
     class Value 

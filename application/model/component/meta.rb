@@ -104,7 +104,6 @@ module XYZ
          }]
 
       ###### end of virtual columns related to attributes, ports, and link_defs
-      #TODO: see if coudl be virtual column on assembly object
       virtual_column :node_assembly_nested_nodes_and_cmps, :type => :json, :hidden => true,
        :remote_dependencies =>
         [

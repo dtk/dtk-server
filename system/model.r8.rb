@@ -61,6 +61,13 @@ module XYZ
     def self.create(hash_scalar_values,c,relation_type_x=model_name(),id_handle=nil)
       self.new(hash_scalar_values,c,relation_type_x,id_handle)
     end
+
+    #for, e.g., creating NodeGroup from Node object
+    def self.create_as(superclass_obj)
+      idh = superclass_obj.id_handle
+      create(superclass_obj,idh[:c],model_name,idh)
+    end
+
     #TODO: make initialize and use create
     def initialize(hash_scalar_values,c,relation_type_x=nil,id_handle=nil)
       return nil if hash_scalar_values.nil?

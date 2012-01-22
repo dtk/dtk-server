@@ -51,6 +51,23 @@ module XYZ
            :cols => [:id,:display_name]
          }]
 
+      virtual_column :node_or_ng_summary, :type=>:json, :hidden=>true,
+      :remote_dependencies=>
+        [{
+           :model_name=>:node_group_relation,
+           :join_type=>:left_outer,
+           :join_cond=>{:node_group_id => q(:node,:id)},
+           :cols=>[:id,:display_name,:node_id]
+       },
+       {
+           :model_name=>:node,
+           :alias => :node_member,
+           :convert => true,
+           :join_type=>:left_outer,
+           :join_cond=>{:id => q(:node_group_relation,:node_id)},
+           :cols=>[:id,:display_name,:type]
+       }]
+
       ##### for connection to ports and port links
       virtual_column :node_link_defs_info, :type => :json, :hidden => true, 
         :remote_dependencies => 

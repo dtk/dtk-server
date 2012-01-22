@@ -18,11 +18,6 @@ module XYZ
 
       on_create_events.each{|ev|ev.process!(context)}
 
-      #TODO: see if info from get_node_group_info can be gotten from get_context
-      node_group_info = get_node_group_info(components)
-      #TODO: now case on whether both or either is a node group 
-
-
       #ret_links returns nil only if error such as not being able to find input_id or output_id
       links = AttributeMapping.ret_links(attribute_mappings,context)
       return if links.empty?
@@ -33,32 +28,6 @@ module XYZ
       AttributeLink.create_attribute_links(parent_idh,links)
     end
     
-    def get_node_group_info(components)
-      sp_hash = {
-        :cols => [:id,:node_member_include_null,:type],
-        :filter => [:oneof, :id, components.map{|cmp|cmp[:node_node_id]}]
-      }
-      node_mh = components.first.model_handle(:node)
-      node_ng_info = Model.get_objs(node_mh,sp_hash)
-      ndx_ng_members = Hash.new
-      node_ng_info.each do |r|
-        if r[:type] == "node_group_instance"
-          pntr = ndx_ng_members[r[:id]] ||= Array.new
-          pntr << r[:node_member] if r[:node_member]
-        end
-      end
-      components.inject({}) do |h,cmp|
-        val = 
-          if ng_members =  ndx_ng_members[cmp[:node_node_id]]
-            {:type => :node_group,:members => ng_members}
-          else
-            {:type => :node}
-          end
-        h.merge(cmp[:id] => val)
-      end
-    end
-    private :get_node_group_info
-
 
     def attribute_mappings()
       self[:attribute_mappings] ||= (self[:content][:attribute_mappings]||[]).map{|am|AttributeMapping.new(am)}

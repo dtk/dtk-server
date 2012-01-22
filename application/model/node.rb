@@ -114,6 +114,45 @@ module XYZ
       ret
     end
 
+    #### related to distinguishing bewteen nodes and node groups
+
+    def self.get_node_or_ng_summary(node_mh,node_ids)
+      ret = Hash.new
+      return ret if node_ids.empty?
+      sp_hash = {
+        :cols => [:id,:type,:node_or_ng_summary],
+        :filter => [:oneof, :id, node_ids]
+      }
+      get_objs(node_mh,sp_hash).inject({}) do |ret,n|
+        n.delete(:node_group_relation)
+        node_member = n.delete(:node_member)
+        node_id = n[:id]
+        if n.is_node_group?()
+          pntr = ret[node_id] ||= NodeGroup.create_as(n).merge(:node_members => Array.new)
+          pntr[:node_members] << node_member if node_member
+          ret
+        else
+          ret.merge(node_id => n)
+        end
+      end
+    end
+
+    def is_node?()
+      update_object!(:type)
+       NodeTypes.include?(self[:type])
+    end
+    def is_node_group?()
+      #short circuit
+      return true if kind_of?(NodeGroup)
+      update_object!(:type)
+      NodeGroupTypes.include?(self[:type])
+    end
+    NodeTypes = %w{instance image staged}
+    NodeGroupTypes = %w{node_group_instance}
+
+    #### end: related to distinguishing bewteen nodes and node groups
+
+
     #attribute on component on node
     #assumption is that component cannot appear more than once on node
     def get_virtual_component_attribute(cmp_assign,attr_assign,cols)

@@ -51,10 +51,8 @@ module XYZ
 
       [local_cmp_type,remote_cmp_type].each{|t|add_ref_component!(t)}
 
-      @node_mappings = {
-        :local => create_node_object(local_cmp),
-        :remote => create_node_object(remote_cmp)
-      }
+      @node_mappings = get_node_mappings(local_cmp,remote_cmp)
+
       @term_mappings.values.each do |v| 
         v.set_component_remote_and_local_value!(link,local_cmp,remote_cmp)
       end
@@ -96,8 +94,15 @@ module XYZ
       ret
     end
 
-    def create_node_object(component)
-      component.id_handle.createIDH(:model_name => :node, :id => component[:node_node_id]).create_object()
+    def get_node_mappings(local_cmp,remote_cmp)
+      node_mh = local_cmp.model_handle(:node)
+      local_n_id = local_cmp[:node_node_id]
+      remote_n_id = remote_cmp[:node_node_id]
+      node_ng_info = Node.get_node_or_ng_summary(node_mh,[local_n_id,remote_n_id])
+      {
+        :local => node_ng_info[local_n_id],
+        :remote => node_ng_info[remote_n_id]
+      }
     end
 
     def get_and_update_component_virtual_attributes!(attrs_to_get)

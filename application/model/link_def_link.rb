@@ -13,13 +13,16 @@ module XYZ
     end
 
     def process(parent_idh,components,port_link_idh=nil)
-      node_group_info = get_node_group_info(components)
-
-      #TODO: now case on whether both or either is a node group 
       link_defs_info = components.map{|cmp| {:component => cmp}}
       context = get_context(link_defs_info)
 
       on_create_events.each{|ev|ev.process!(context)}
+
+      #TODO: see if info from get_node_group_info can be gotten from get_context
+      node_group_info = get_node_group_info(components)
+      #TODO: now case on whether both or either is a node group 
+
+
       #ret_links returns nil only if error such as not being able to find input_id or output_id
       links = AttributeMapping.ret_links(attribute_mappings,context)
       return if links.empty?

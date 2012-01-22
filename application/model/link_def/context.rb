@@ -1,11 +1,29 @@
 module XYZ
   class LinkDefContext
-    def initialize()
+    def self.create(link,link_defs_info)
+      new(link,link_defs_info)
+    end
+
+    def initialize(link,link_defs_info)
       #TODO: if needed put in machanism where terms map to same values so only need to set values once
+      @type = nil # can by :node_to_node | :node_to_node_group
+      @node_members_context = Hash.new
       @term_mappings = Hash.new
       @node_mappings = Hash.new
       @component_attr_index = Hash.new
+      #TODO: add back in commented out parts
+      # constraints.each{|cnstr|cnstr.get_context_refs!(ret)}
+      #TODO: this is making too many assumptions about form of link_defs_info
+      #and that self has field local_component_type
+      link.attribute_mappings.each do |am|
+        add_ref!(am[:input])
+        add_ref!(am[:output])
+      end
+
+      set_values!(link,link_defs_info)
     end
+    private :initialize
+
     def find_attribute(term_index)
       match = @term_mappings[term_index]
       match && match.value
@@ -43,6 +61,7 @@ module XYZ
 
     attr_reader :component_attr_index
 
+   private
     def set_values!(link,link_defs_info)
       local_cmp_type = link[:local_component_type]
       local_cmp = get_component(local_cmp_type,link_defs_info)
@@ -52,7 +71,21 @@ module XYZ
       [local_cmp_type,remote_cmp_type].each{|t|add_ref_component!(t)}
 
       @node_mappings = get_node_mappings(local_cmp,remote_cmp)
+      num_ngs = @node_mappings.values.inject(0){|s,n|n.is_node_group? ? s+1 : s}
+      case num_ngs
+        when 0 then set_values__node_to_node!(link,local_cmp,remote_cmp)
+        when 1 then set_values__node_to_node_group!(link,local_cmp,remote_cmp)
+        when 2 then raise Error.new("Not treating port link between two node groups")
+      end
+    end
 
+    def set_values__node_to_node_group!(link,local_cmp,remote_cmp)
+      #TODO: stub
+      pp [:node_to_node_group_link, @node_mappings]
+      set_values__node_to_node!(link,local_cmp,remote_cmp)
+    end
+
+    def set_values__node_to_node!(link,local_cmp,remote_cmp)
       @term_mappings.values.each do |v| 
         v.set_component_remote_and_local_value!(link,local_cmp,remote_cmp)
       end
@@ -85,7 +118,6 @@ module XYZ
       self
     end
 
-   private
     def get_component(component_type,link_defs_info)
       match = link_defs_info.find{|r|component_type == r[:component][:component_type]}
       unless ret = match && match[:component]

@@ -14,7 +14,7 @@ module XYZ
 
     def process(parent_idh,components,port_link_idh=nil)
       link_defs_info = components.map{|cmp| {:component => cmp}}
-      context = get_context(link_defs_info)
+      context = LinkDefContext.create(self,link_defs_info)
 
       on_create_events.each{|ev|ev.process!(context)}
 
@@ -37,27 +37,11 @@ module XYZ
       self[:on_create_events]||= ((self[:content][:events]||{})[:on_create]||[]).map{|ev|Event.create(ev,self)}
     end
 
-    #TODO: this is making too many assumptions about form of link_defs_info
-    #and that self has field local_component_type
-    def get_context(link_defs_info)
-      ret = LinkDefContext.new()
-      #TODO: add back in commented out parts
-      # constraints.each{|cnstr|cnstr.get_context_refs!(ret)} 
-      attribute_mappings.each{|am|am.get_context_refs!(ret)}
-      
-      ret.set_values!(self,link_defs_info)
-      ret
-    end
-
     class AttributeMapping < HashObject
       def self.ret_links(attribute_mappings,context)
         attribute_mappings.map{|am|am.ret_link(context)}.compact
       end
 
-      def get_context_refs!(ret)
-        ret.add_ref!(self[:input])
-        ret.add_ref!(self[:output])
-      end
       def ret_link(context)
         input_attr,input_path = get_attribute_with_unravel_path(:input,context)
         output_attr,output_path = get_attribute_with_unravel_path(:output,context)

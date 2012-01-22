@@ -15,7 +15,7 @@ module XYZ
       attr_links = Array.new
       relevant_link_defs.each do |link_def|
         if link_def_link = link_def.choose_internal_link(link_def[:possible_links],link_def[:component],strategy)
-          context = link_def_link.get_context(node_link_defs_info)
+          context = LinkDefContext.create(link_def_link,node_link_defs_info)
           link_def_link.attribute_mappings.each do |attr_mapping|
             attr_links << attr_mapping.ret_link(context).merge(:type => "internal")
           end

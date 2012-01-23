@@ -128,8 +128,8 @@ module XYZ
         node_member = n.delete(:node_member)
         node_id = n[:id]
         if n.is_node_group?()
-          pntr = ret[node_id] ||= NodeGroup.create_as(n).merge(:node_members => Array.new)
-          pntr[:node_members] << node_member if node_member
+          pntr = ret[node_id] ||= NodeGroup.create_as(n).merge(:node_group_members => Array.new)
+          pntr[:node_group_members] << node_member if node_member
           ret
         else
           ret.merge(node_id => n)

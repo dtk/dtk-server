@@ -7,7 +7,7 @@ module XYZ
     def initialize(link,link_defs_info)
       #TODO: if needed put in machanism where terms map to same values so only need to set values once
       @type = nil # can by :internal | :node_to_node | :node_to_node_group
-      @node_members_context = Hash.new
+      @node_member_contexts = Hash.new
       @term_mappings = Hash.new
       @node_mappings = Hash.new
       @component_attr_index = Hash.new
@@ -70,32 +70,32 @@ module XYZ
 
       [local_cmp_type,remote_cmp_type].each{|t|add_ref_component!(t)}
 
-      @node_mappings = NodeMappings.create_from_components(local_cmp,remote_cmp)
+      cmp_mappings = {:local => local_cmp, :remote => remote_cmp}
+      @node_mappings = NodeMappings.create_from_cmp_mappings(cmp_mappings)
       case @node_mappings.num_node_groups()
-       when 0 then set_values__node_to_node!(link,local_cmp,remote_cmp)
-       when 1 then set_values__node_to_node_group!(link,local_cmp,remote_cmp)
+       when 0 then set_values__node_to_node!(link,cmp_mappings)
+       when 1 then set_values__node_to_node_group!(link,cmp_mappings)
        when 2 
         if @node_mappings.is_internal?
-          set_values__internal!(link,local_cmp,remote_cmp) 
+          set_values__internal!(link,cmp_mappings) 
         else raise Error.new("Not treating port link between two node groups")
         end
       end
     end
-    def set_values__internal!(link,local_cmp,remote_cmp)
+    def set_values__internal!(link,cmp_mappings)
       @type = :internal
-      set_values__node_to_node!(link,local_cmp,remote_cmp)
+      set_values__node_to_node!(link,cmp_mappings)
     end
-    def set_values__node_to_node_group!(link,local_cmp,remote_cmp)
+    def set_values__node_to_node_group!(link,cmp_mappings)
       @type =  :node_to_node_group
-      #TODO: stub
-      pp [:node_to_node_group_link, @node_mappings]
-      set_values__node_to_node!(link,local_cmp,remote_cmp)
+      @node_member_contexts = NodeGroupMember.create_node_member_contexts(link,@node_mappings,cmp_mappings)
+      set_values__node_to_node!(link,cmp_mappings)
     end
 
-    def set_values__node_to_node!(link,local_cmp,remote_cmp)
+    def set_values__node_to_node!(link,cmp_mappings)
       @type ||= :node_to_node
       @term_mappings.values.each do |v| 
-        v.set_component_remote_and_local_value!(link,local_cmp,remote_cmp)
+        v.set_component_remote_and_local_value!(link,cmp_mappings)
       end
       #set component attributes
       attrs_to_get = Hash.new
@@ -161,35 +161,42 @@ module XYZ
     end
 
     class NodeMappings < Hash
-      def self.create_from_components(local_cmp,remote_cmp)
-        local_n_id = local_cmp[:node_node_id]
-        remote_n_id = remote_cmp[:node_node_id]
-        if local_n_id == remote_n_id #shortcut if internal
-          node = local_cmp.model_handle(:node).createIDH(:id => local_n_id).create_object()
+      def self.create_from_cmp_mappings(cmp_mappings)
+        ndx_node_ids = cmp_mappings.inject({}){|h,(k,v)|h.merge(k => v[:node_node_id])}
+        sample_cmp = cmp_mappings[:local]
+        node_mh = sample_cmp.model_handle(:node)
+        if ndx_node_ids[:local] == ndx_node_ids[:remote] #shortcut if internal
+          #since same node on both sides; just create from one of them
+          node = node_mh.createIDH(:id => ndx_node_ids[:local]).create_object()
           new(node)
         else
-          node_mh = local_cmp.model_handle(:node)
-          node_ng_info = Node.get_node_or_ng_summary(node_mh,[local_n_id,remote_n_id])
-          new(node_ng_info[local_n_id],node_ng_info[remote_n_id])
+          node_ng_info = Node.get_node_or_ng_summary(node_mh,ndx_node_ids.values)
+          new(node_ng_info[ndx_node_ids[:local]],node_ng_info[ndx_node_ids[:remote]])
         end
       end
       
       def num_node_groups()
         values.inject(0){|s,n|n.is_node_group? ? s+1 : s}
       end
-
       def is_internal?()
-        self[:local][:id] == self[:remote][:id]
+        local[:id] == remote[:id]
       end
-
+      def node_group_members()
+        ret = Array.new
+        if local.is_node_group?()
+          ret << {:endpoint => :local, :nodes => local[:node_group_members]}
+        end
+        if remote.is_node_group?()
+          ret << {:endpoint => :remote, :nodes => remote[:node_group_members]}
+        end
+        ret
+      end
       def local()
         self[:local]
       end
-
       def remote()
         self[:remote]
       end
-
      private
       def initialize(local,remote=nil)
         super()
@@ -198,6 +205,29 @@ module XYZ
     end
 
     class NodeGroupMember < LinkDefContext 
+      def self.create_node_member_contexts(link,node_mappings,cmp_mappings)
+        ret = Hash.new
+        ng_members_x = node_mappings.node_group_members()
+        unless ng_members_x.size == 1
+          raise Error.new("Only one of local or remote should be node group")
+        end
+        ng_members = ng_members_x.first
+        #no op if there is side with cardinality == 0
+        if ng_members[:nodes].size == 0
+          return ret
+        end
+        node_cmps = get_node_member_components(ng_members[:nodes],cmp_mappings[ng_members[:endpoint]])
+        ret
+      end
+      private
+      def self.get_node_member_components(nodes,ng_component)
+        sp_hash = {
+          :cols => ng_component.keys,
+          :filter => [:and, [:oneof, :node_node_id, nodes.map{|n|n[:id]}], [:eq, :ng_component_id, ng_component[:id]]]
+        }
+        cmp_mh = ng_component.model_handle
+        Model.get_objs(cmp_mh,sp_hash)
+      end
     end
 
     class Value 
@@ -223,12 +253,12 @@ module XYZ
         end
       end
 
-      def set_component_remote_and_local_value!(link,local_cmp,remote_cmp)
+      def set_component_remote_and_local_value!(link,cmp_mappings)
         return if @component_ref.nil? #would fire if this is a NodeAttribute
         if @component_ref == link[:local_component_type]
-          @component = local_cmp
+          @component = cmp_mappings[:local]
         elsif @component_ref == link[:remote_component_type]
-          @component = remote_cmp
+          @component = cmp_mappings[:remote]
         end
       end
 

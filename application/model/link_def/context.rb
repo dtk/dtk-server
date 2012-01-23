@@ -47,26 +47,6 @@ module XYZ
       @node_mappings.local
     end
 
-    def add_component_ref_and_value!(component_type,component)
-      if has_node_group_form?()
-        add_ref_component!(component_type).set_component_value!(component) #TODO: is this needed
-        #TODO: may be more efficient to do this in bulk
-        node_group_contexts_array().each do |member_context|
-          member_context.add_component_ref_and_value__node!(component_type,component)
-        end
-      else
-        add_component_ref_and_value__node!(component_type,component)
-      end
-    end
-    def add_component_ref_and_value__node!(component_type,component)
-      add_ref_component!(component_type).set_component_value!(component)
-      #update all attributes that ref this component
-      cmp_id = component[:id]
-      attrs_to_get = {cmp_id => {:component => component, :attribute_info => @component_attr_index[component_type]}}
-      get_and_update_component_virtual_attributes!(attrs_to_get)
-    end
-    protected :add_component_ref_and_value__node!
-
     def add_ref!(term)
       #TODO: see if there can be name conflicts between different types in which nmay want to prefix with type (type's initials, like CA for componanet attribute)
       term_index = term[:term_index]
@@ -80,7 +60,39 @@ module XYZ
 
     attr_reader :component_attr_index
 
+    def add_component_ref_and_value!(component_type,component)
+      if has_node_group_form?()
+        add_component_ref_and_value__node_group!(component_type,component)
+      else
+        add_component_ref_and_value__node!(component_type,component)
+      end
+    end
+
+
+   protected
+    def add_component_ref_and_value__node!(component_type,component)
+      add_ref_component!(component_type).set_component_value!(component)
+      #update all attributes that ref this component
+      cmp_id = component[:id]
+      attrs_to_get = {cmp_id => {:component => component, :attribute_info => @component_attr_index[component_type]}}
+      get_and_update_component_virtual_attributes!(attrs_to_get)
+    end
+
    private
+    def add_component_ref_and_value__node_group!(component_type,ng_component)
+      #TODO: dont think needed add_ref_component!(component_type).set_component_value!(component) 
+      #TODO: may be more efficient to do this in bulk
+      #get corresponding components on node group members
+      node_ids = @node_member_contexts.keys
+      ndx_node_cmps = NodeGroupMember.get_node_member_components(node_ids,ng_component).inject({}) do |h,r|
+        h.merge(r[:node_node_id] => r)
+      end
+      @node_member_contexts.each do |node_id,member_context|
+        node_cmp = ndx_node_cmps[node_id]
+        member_context.add_component_ref_and_value__node!(component_type,node_cmp)
+      end
+    end
+
     def set_values!(link,link_defs_info)
       local_cmp_type = link[:local_component_type]
       local_cmp = get_component(local_cmp_type,link_defs_info)
@@ -242,24 +254,27 @@ module XYZ
         end
         create_node_member_contexts_aux(link,ng_members,cmp_mappings)
       end
+
+      def self.get_node_member_components(node_ids,ng_component)
+        sp_hash = {
+          :cols => ng_component.keys,
+          :filter => [:and, [:oneof, :node_node_id, node_ids], [:eq, :ng_component_id, ng_component[:id]]]
+        }
+        cmp_mh = ng_component.model_handle
+        Model.get_objs(cmp_mh,sp_hash)
+      end
+
       private
       #returns hash where each key is a node member node id and each eleemnt is LinkDefContext relevant to linking node member to other end node
       def self.create_node_member_contexts_aux(link,ng_members,cmp_mappings)
         node_cmp_part = {:component=> cmp_mappings[ng_members[:endpoint] == :local ? :remote : :local] }
-        ng_member_cmps = get_node_member_components(ng_members[:nodes],cmp_mappings[ng_members[:endpoint]])
+        node_ids = ng_members[:nodes].map{|n|n[:id]}
+        ng_member_cmps = get_node_member_components(node_ids,cmp_mappings[ng_members[:endpoint]])
         ng_member_cmps.inject({}) do |ret,ng_member_cmp|
           link_defs_info = [node_cmp_part, {:component=>ng_member_cmp}]
           link_def_context = new(link,link_defs_info)
           ret.merge(ng_member_cmp[:node_node_id] => link_def_context)
         end
-      end
-      def self.get_node_member_components(nodes,ng_component)
-        sp_hash = {
-          :cols => ng_component.keys,
-          :filter => [:and, [:oneof, :node_node_id, nodes.map{|n|n[:id]}], [:eq, :ng_component_id, ng_component[:id]]]
-        }
-        cmp_mh = ng_component.model_handle
-        Model.get_objs(cmp_mh,sp_hash)
       end
     end
 

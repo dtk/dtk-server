@@ -29,6 +29,7 @@ module XYZ
       #refernce used when multiple isnatnces of same component type 
       #TODO: make sure that this is preserved under clone; case to watch out fro is when cloning for example more dbs in something with dbs
       virtual_column :multiple_instance_ref, :type => :integer ,:local_dependencies => [:ref_num]
+      foreign_key :ng_component_id, :component, FK_SET_NULL_OPT #set when created by cloning from component node group
 
       #used when this component is an extension
       column :extended_base, :varchar, :size => 30

@@ -9,7 +9,8 @@ module XYZ
       opts[:outermost_ports] = super_opts[:outermost_ports] if super_opts[:outermost_ports]
 
       clone_source_obj = clone_copy_output.source_object
-      override_attrs = {}
+      component = clone_copy_output.objects.first
+      override_attrs = {:ng_component_id => component[:id]}
       node_clone_opts = [:ret_new_obj_with_cols].inject({}) do |h,k|
         opts.has_key?(k) ? h.merge(k => opts[k]) : h
       end

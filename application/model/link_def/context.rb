@@ -6,7 +6,7 @@ module XYZ
 
     def initialize(link,link_defs_info)
       #TODO: if needed put in machanism where terms map to same values so only need to set values once
-      @type = nil # can by :node_to_node | :node_to_node_group
+      @type = nil # can by :internal | :node_to_node | :node_to_node_group
       @node_members_context = Hash.new
       @term_mappings = Hash.new
       @node_mappings = Hash.new
@@ -33,10 +33,10 @@ module XYZ
       match && match.value
     end
     def remote_node()
-      @node_mappings[:remote]
+      @node_mappings.remote
     end
     def local_node()
-      @node_mappings[:local]
+      @node_mappings.local
     end
 
     def add_component_ref_and_value!(component_type,component)
@@ -70,15 +70,21 @@ module XYZ
 
       [local_cmp_type,remote_cmp_type].each{|t|add_ref_component!(t)}
 
-      @node_mappings = get_node_mappings(local_cmp,remote_cmp)
-      num_ngs = @node_mappings.values.inject(0){|s,n|n.is_node_group? ? s+1 : s}
-      case num_ngs
-        when 0 then set_values__node_to_node!(link,local_cmp,remote_cmp)
-        when 1 then set_values__node_to_node_group!(link,local_cmp,remote_cmp)
-        when 2 then raise Error.new("Not treating port link between two node groups")
+      @node_mappings = NodeMappings.create_from_components(local_cmp,remote_cmp)
+      case @node_mappings.num_node_groups()
+       when 0 then set_values__node_to_node!(link,local_cmp,remote_cmp)
+       when 1 then set_values__node_to_node_group!(link,local_cmp,remote_cmp)
+       when 2 
+        if @node_mappings.is_internal?
+          set_values__internal!(link,local_cmp,remote_cmp) 
+        else raise Error.new("Not treating port link between two node groups")
+        end
       end
     end
-
+    def set_values__internal!(link,local_cmp,remote_cmp)
+      @type = :internal
+      set_values__node_to_node!(link,local_cmp,remote_cmp)
+    end
     def set_values__node_to_node_group!(link,local_cmp,remote_cmp)
       @type =  :node_to_node_group
       #TODO: stub
@@ -128,17 +134,6 @@ module XYZ
       ret
     end
 
-    def get_node_mappings(local_cmp,remote_cmp)
-      node_mh = local_cmp.model_handle(:node)
-      local_n_id = local_cmp[:node_node_id]
-      remote_n_id = remote_cmp[:node_node_id]
-      node_ng_info = Node.get_node_or_ng_summary(node_mh,[local_n_id,remote_n_id])
-      {
-        :local => node_ng_info[local_n_id],
-        :remote => node_ng_info[remote_n_id]
-      }
-    end
-
     def get_and_update_component_virtual_attributes!(attrs_to_get)
       return if attrs_to_get.empty?
       cols = [:id,:value_derived,:value_asserted]
@@ -164,6 +159,44 @@ module XYZ
         end
       end
     end
+
+    class NodeMappings < Hash
+      def self.create_from_components(local_cmp,remote_cmp)
+        local_n_id = local_cmp[:node_node_id]
+        remote_n_id = remote_cmp[:node_node_id]
+        if local_n_id == remote_n_id #shortcut if internal
+          node = local_cmp.model_handle(:node).createIDH(:id => local_n_id).create_object()
+          new(node)
+        else
+          node_mh = local_cmp.model_handle(:node)
+          node_ng_info = Node.get_node_or_ng_summary(node_mh,[local_n_id,remote_n_id])
+          new(node_ng_info[local_n_id],node_ng_info[remote_n_id])
+        end
+      end
+      
+      def num_node_groups()
+        values.inject(0){|s,n|n.is_node_group? ? s+1 : s}
+      end
+
+      def is_internal?()
+        self[:local][:id] == self[:remote][:id]
+      end
+
+      def local()
+        self[:local]
+      end
+
+      def remote()
+        self[:remote]
+      end
+
+     private
+      def initialize(local,remote=nil)
+        super()
+        replace(:local => local, :remote => remote||local)
+      end
+    end
+
     class NodeGroupMember < LinkDefContext 
     end
 

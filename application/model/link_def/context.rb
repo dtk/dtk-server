@@ -88,8 +88,8 @@ module XYZ
     end
     def set_values__node_to_node_group!(link,cmp_mappings)
       @type =  :node_to_node_group
+      #creates a link def context for each node to node member pair
       @node_member_contexts = NodeGroupMember.create_node_member_contexts(link,@node_mappings,cmp_mappings)
-      set_values__node_to_node!(link,cmp_mappings)
     end
 
     def set_values__node_to_node!(link,cmp_mappings)
@@ -216,10 +216,19 @@ module XYZ
         if ng_members[:nodes].size == 0
           return ret
         end
-        node_cmps = get_node_member_components(ng_members[:nodes],cmp_mappings[ng_members[:endpoint]])
-        ret
+        create_node_member_contexts_aux(link,ng_members,cmp_mappings)
       end
       private
+      #returns hash where each key is a node member node id and each eleemnt is LinkDefContext relevant to linking node member to other end node
+      def self.create_node_member_contexts_aux(link,ng_members,cmp_mappings)
+        node_cmp_part = {:component=> cmp_mappings[ng_members[:endpoint] == :local ? :remote : :local] }
+        ng_member_cmps = get_node_member_components(ng_members[:nodes],cmp_mappings[ng_members[:endpoint]])
+        ng_member_cmps.inject({}) do |ret,ng_member_cmp|
+          link_defs_info = [node_cmp_part, {:component=>ng_member_cmp}]
+          link_def_context = new(link,link_defs_info)
+          ret.merge(ng_member_cmp[:node_node_id] => link_def_context)
+        end
+      end
       def self.get_node_member_components(nodes,ng_component)
         sp_hash = {
           :cols => ng_component.keys,

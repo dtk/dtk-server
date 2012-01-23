@@ -48,13 +48,24 @@ module XYZ
     end
 
     def add_component_ref_and_value!(component_type,component)
+      if has_node_group_form?()
+        add_ref_component!(component_type).set_component_value!(component) #TODO: is this needed
+        #TODO: may be more efficient to do this in bulk
+        node_group_contexts_array().each do |member_context|
+          member_context.add_component_ref_and_value__node!(component_type,component)
+        end
+      else
+        add_component_ref_and_value__node!(component_type,component)
+      end
+    end
+    def add_component_ref_and_value__node!(component_type,component)
       add_ref_component!(component_type).set_component_value!(component)
-
       #update all attributes that ref this component
       cmp_id = component[:id]
       attrs_to_get = {cmp_id => {:component => component, :attribute_info => @component_attr_index[component_type]}}
       get_and_update_component_virtual_attributes!(attrs_to_get)
     end
+    protected :add_component_ref_and_value__node!
 
     def add_ref!(term)
       #TODO: see if there can be name conflicts between different types in which nmay want to prefix with type (type's initials, like CA for componanet attribute)

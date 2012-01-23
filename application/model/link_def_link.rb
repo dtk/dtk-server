@@ -52,11 +52,11 @@ module XYZ
         input_attr,input_path = get_attribute_with_unravel_path(:input,context)
         output_attr,output_path = get_attribute_with_unravel_path(:output,context)
         unless input_attr
-          Log.error("cannot find input_id") 
+          Log.error("cannot find input_id for #{(self[:input]||Hash.new)[:term_index]||''}")
           return nil
         end
         unless output_attr
-          Log.error("cannot find output_id")
+          Log.error("cannot find output_id for #{(self[:output]||Hash.new)[:term_index]||''}")
           return nil
         end
         ret = {:input_id => input_attr[:id],:output_id => output_attr[:id]}

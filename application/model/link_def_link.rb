@@ -39,7 +39,13 @@ module XYZ
 
     class AttributeMapping < HashObject
       def self.ret_links(attribute_mappings,context)
-        attribute_mappings.map{|am|am.ret_link(context)}.compact
+        if context.has_node_group_form?()
+          context.node_group_contexts_array().inject([]) do |ret,member_context|
+            ret += ret_links(attribute_mappings,member_context)
+          end
+        else
+          attribute_mappings.map{|am|am.ret_link(context)}.compact
+        end
       end
 
       def ret_link(context)

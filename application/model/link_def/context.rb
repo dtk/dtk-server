@@ -24,6 +24,14 @@ module XYZ
     end
     private :initialize
 
+    def has_node_group_form?()
+      @type == :node_to_node_group
+    end
+
+    def node_group_contexts_array()
+      @node_member_contexts.values
+    end
+
     def find_attribute(term_index)
       match = @term_mappings[term_index]
       match && match.value
@@ -90,6 +98,11 @@ module XYZ
       @type =  :node_to_node_group
       #creates a link def context for each node to node member pair
       @node_member_contexts = NodeGroupMember.create_node_member_contexts(link,@node_mappings,cmp_mappings)
+
+      #below is needed so that create can have ref to component
+      @term_mappings.values.each do |v| 
+        v.set_component_remote_and_local_value!(link,cmp_mappings)
+      end
     end
 
     def set_values__node_to_node!(link,cmp_mappings)

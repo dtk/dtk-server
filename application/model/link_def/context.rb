@@ -256,8 +256,10 @@ module XYZ
       end
 
       def self.get_node_member_components(node_ids,ng_component)
+        cols = ng_component.keys
+        cols << :node_node_id unless cols.include?(:node_node_id)
         sp_hash = {
-          :cols => ng_component.keys,
+          :cols => cols,
           :filter => [:and, [:oneof, :node_node_id, node_ids], [:eq, :ng_component_id, ng_component[:id]]]
         }
         cmp_mh = ng_component.model_handle

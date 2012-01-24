@@ -37,6 +37,8 @@ module XYZ
       #self will have implementation_id set to library implementation and ancestor_id set to library template
       #need to search project to see if has implementation that matches (same repo)
       #if match then set new_cmps impelemntation_id to this otehrwise need to clone implementaion in library to project
+      update_object!(:implementation_id,:ancestor_id) #just to be safe
+
       proj = node.get_project()
       proj_idh = proj.id_handle()
 

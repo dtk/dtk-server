@@ -8,13 +8,11 @@ module XYZ
       clone_opts = {
         :ret_new_obj_with_cols => [:id,:display_name],
         :outermost_ports => Array.new,
-        :use_sources_implemntation_id => true
+        :use_source_impl_and_template => true
       }
 
       #TODO: fix bug below
       #also need way to make sure that components added through link def add events are not added twice
-
-      return
       ng_cmps.each do |cmp|
         #TODO: need to update clone_into to process case where  :use_sources_implemntation_id == true
         component_obj = node.clone_into(cmp,override_attrs,clone_opts)

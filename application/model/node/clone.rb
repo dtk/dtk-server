@@ -13,9 +13,11 @@ module XYZ
     def clone_post_copy_hook(clone_copy_output,opts={})
       component = clone_copy_output.objects.first
       #handles copying over if needed component template and implementation into project
-      component.clone_post_copy_hook_into_node(self)
+      unless opts[ :use_source_impl_and_template]
+        component.update_implementation_and_template?(get_project())
+      end
 
-      component_idh = clone_copy_output.id_handles.first
+      component_idh = component.id_handle
 
       #get the link defs/component_ports associated with components on the node; this is used
       #to determine if need to add internal links and for port processing

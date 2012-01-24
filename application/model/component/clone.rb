@@ -32,14 +32,13 @@ module XYZ
     end
 
     #handles copying over if needed component template and implementation into project
-    def clone_post_copy_hook_into_node(node)
+    def update_implementation_and_template?(proj)
       #processing so that component's implementation and template are cloned to project
       #self will have implementation_id set to library implementation and ancestor_id set to library template
       #need to search project to see if has implementation that matches (same repo)
       #if match then set new_cmps impelemntation_id to this otehrwise need to clone implementaion in library to project
       update_object!(:implementation_id,:ancestor_id) #just to be safe
 
-      proj = node.get_project()
       proj_idh = proj.id_handle()
 
       #create new project implementation if needed

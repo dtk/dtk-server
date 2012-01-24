@@ -4,7 +4,6 @@ module XYZ
       #get the components on the node group
       ng_cmps = get_objs(:cols => [:components]).map{|r|r[:component]}
       return if ng_cmps.empty?
-      override_attrs = {}
       clone_opts = {
         :ret_new_obj_with_cols => [:id,:display_name],
         :outermost_ports => Array.new,
@@ -13,9 +12,9 @@ module XYZ
 
       #TODO: fix bug below
       #also need way to make sure that components added through link def add events are not added twice
-      ng_cmps.each do |cmp|
-        #TODO: need to update clone_into to process case where  :use_sources_implemntation_id == true
-        component_obj = node.clone_into(cmp,override_attrs,clone_opts)
+      ng_cmps.each do |ng_cmp|
+        override_attrs = {:ng_component_id => ng_cmp[:id]}
+        component_obj = node.clone_into(ng_cmp,override_attrs,clone_opts)
         #TODO: see what here is useful to save
 
         component_obj

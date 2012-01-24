@@ -75,17 +75,29 @@ module XYZ
     end
 
     def get_target_tree()
-      sp_hash = {:cols => [:id,:display_name,:type,:target_tree]}
-      unravelled_ret = get_objs(sp_hash)
+      #get and index node group members (index is [target_id][node_group_id]
+      ndx_ng_members = Hash.new
+      get_objs(:cols => [:id,:node_group_relations]).each do |r|
+        pntr = ndx_ng_members[r[:target][:id]] ||= Hash.new
+        ng_id = r[:node_group_relation][:node_group_id]
+        (pntr[ng_id] ||= Array.new) << r[:node_group_relation][:node_id]
+      end
+
+      unravelled_ret = get_objs(:cols => [:id,:display_name,:type,:target_tree])
       ret_hash = Hash.new
       unravelled_ret.each do |r|
-        unless target = ret_hash[r[:target][:id]]
-          target = ret_hash[r[:target][:id]] ||= r[:target].materialize!(Target.common_columns()).merge(:model_name => "target")
+        target_id = r[:target][:id]
+        unless target = ret_hash[target_id]
+          target = ret_hash[target_id] ||= r[:target].materialize!(Target.common_columns()).merge(:model_name => "target")
         end
         nodes = target[:nodes] ||= Hash.new
         next unless r[:node]
         unless node = nodes[r[:node][:id]] 
           node = nodes[r[:node][:id]] = r[:node].materialize!(Node.common_columns())
+          if node.is_node_group? 
+            node_group_members = ndx_ng_members[target_id][node[:id]]|| Array.new
+            node.merge!(:node_group_members => node_group_members)
+          end
         end
         components = node[:components] ||= Hash.new
         components[r[:component][:id]] = r[:component].materialize!(Component.common_columns()) if r[:component]

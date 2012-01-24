@@ -9,6 +9,7 @@ module XYZ
     def self.common_columns()
       [
        :id,
+       :group_id,
        :display_name,
        :name,
        :os_type,

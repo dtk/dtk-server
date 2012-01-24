@@ -8,15 +8,9 @@ module XYZ
       projects.each_with_index { |p,i|
         projects[i][:tree] = {}
         projects[i][:tree][:targets] = p.get_target_tree()
-        #TODO: think should be removed:
-        #projects[i][:tree][:component_templates] = p.get_implementaton_tree(:include_file_assets => true)
-
         projects[i][:tree][:implementations] = p.get_module_tree(:include_file_assets => true)
-
-#pp p.get_module_tree(:include_file_assets => true)
         projects[i][:name] = projects[i][:display_name]
       }
-#pp projects
       tpl = R8Tpl::TemplateR8.new("ide/project_tree_leaf",user_context())
       tpl.set_js_tpl_name("project_tree_leaf")
       tpl_info = tpl.render()

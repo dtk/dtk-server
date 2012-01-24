@@ -46,6 +46,26 @@
          :cols=>Component.common_columns
        }]
     },
+    :node_group_relations=>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [{
+         :model_name=>:datacenter,
+         :alias => :target,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:project_id=>:project__id},
+         :cols=>[:project_id,:id]
+       },
+       {
+         :model_name=>:node_group_relation,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:datacenter_datacenter_id=>:target__id},
+         :cols=> [:node_id,:node_group_id]
+       }]
+    },
     :module_tree=>{
       :type=>:json,
       :hidden=>true,

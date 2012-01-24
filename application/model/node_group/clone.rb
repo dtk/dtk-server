@@ -4,26 +4,45 @@ module XYZ
       #get the components on the node group
       ng_cmps = get_objs(:cols => [:components]).map{|r|r[:component]}
       return if ng_cmps.empty?
-      clone_opts = {
-        :ret_new_obj_with_cols => [:id,:display_name],
-        :outermost_ports => Array.new,
-        :use_source_impl_and_template => true
-      }
-
-      #TODO: fix bug below
-      #also need way to make sure that components added through link def add events are not added twice
-      ng_cmps.each do |ng_cmp|
-        override_attrs = {:ng_component_id => ng_cmp[:id]}
-        component_obj = node.clone_into(ng_cmp,override_attrs,clone_opts)
-        #TODO: see what here is useful to save
-
-        component_obj
-      end
-
-      #TODO:
-      #find all the ports on node group that are connecetd and create associated attribute links for each
+      node_external_ports = clone_components(ng_cmps,node)
+      clone_external_attribute_links(node_external_ports,node)
     end
 
+    def clone_components(node_group_cmps,node)
+      external_ports = Array.new
+      node_group_cmps.each do |ng_cmp|
+        clone_opts = {
+          :ret_new_obj_with_cols => [:id,:display_name],
+          :outermost_ports => Array.new,
+          :use_source_impl_and_template => true
+        }
+        override_attrs = {:ng_component_id => ng_cmp[:id]}
+        node.clone_into(ng_cmp,override_attrs,clone_opts)
+        external_ports += clone_opts[:outermost_ports]
+      end
+      external_ports
+    end
+    private :clone_components
+
+    def clone_external_attribute_links(node_external_ports,node)
+      return if node_external_ports.empty?
+      #find and clone the external port links by first finding the corresponding ng ports and then finding port links that hook to them
+      #TODO this makes asseumption that can find cooresponding port on node group by matching on port display_name
+      sp_hash = {
+        :cols => [:id],
+        :filter => [:and, [:eq, :node_node_id, id()], [:oneof, :display_name, node_external_ports.map{|r|r[:display_name]}]]
+      }
+      ng_port_ids = Model.get_objs(model_handle(:port),sp_hash).map{|r|r[:id]}
+      
+      sp_hash = {
+        :cols => [:id, :group_id,:input_id, :output_id],
+        :filter => [:or, [:oneof, :input_id, ng_port_ids], [:oneof, :output_id, ng_port_ids]]
+      }
+      port_links = Model.get_objs(model_handle(:port_link),sp_hash)
+      port_links
+      #use port links to generate attributes between the node and nodes that node group is connected to
+    end
+    private :clone_external_attribute_links
 
     def clone_post_copy_hook(clone_copy_output,opts={})
       #TODO: for simplicity not creating pending changes for node groups; 

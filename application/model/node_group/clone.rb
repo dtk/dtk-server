@@ -17,11 +17,9 @@ module XYZ
     end
   end
 end
-
-
-
-
 =begin
+TODO: ***; may want to put in version of this for varaibles taht are not input ports; so change to var at node group level propagates to teh node members; for matching would not leverage the component ng_component_id
+
 TODO: currently not used because instead treating node group more like proxy for node members; keeping in 
 for now in case turns out taking this approach will be more efficient 
       node_components = node_members().map{|node|node.clone_into(clone_source_obj,override_attrs,node_clone_opts)}

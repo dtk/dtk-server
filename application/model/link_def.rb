@@ -1,4 +1,4 @@
-require  File.expand_path('link_def/parse_serialized_form.rb', File.dirname(__FILE__))
+r8_nested_require('link_def','parse_serialized_form')
 module XYZ
   class LinkDef < Model
     extend LinkDefParseSerializedForm

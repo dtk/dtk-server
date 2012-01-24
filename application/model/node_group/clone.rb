@@ -3,8 +3,7 @@ module XYZ
     def clone_post_copy_hook(clone_copy_output,opts={})
       #TODO: for simplicity not creating pending changes for node groups; 
       #future enhancement may be to create these, for example, for accounting reasons
-
-      super_opts = opts.merge(:donot_create_pending_changes => true)
+      super_opts = opts.merge(:donot_create_pending_changes => true, :donot_create_internal_links => true)
       super(clone_copy_output,super_opts)
       opts[:outermost_ports] = super_opts[:outermost_ports] if super_opts[:outermost_ports]
 
@@ -15,20 +14,27 @@ module XYZ
         opts.has_key?(k) ? h.merge(k => opts[k]) : h
       end
       node_members().each{|node|node.clone_into(clone_source_obj,override_attrs,node_clone_opts)}
+    end
+  end
+end
+
+
+
+
 =begin
-DEPRECATED
+TODO: currently not used because instead treating node group more like proxy for node members; keeping in 
+for now in case turns out taking this approach will be more efficient 
       node_components = node_members().map{|node|node.clone_into(clone_source_obj,override_attrs,node_clone_opts)}
 
       unless node_components.empty?
         ng_component = clone_copy_output.objects.first
         add_links_between_ng_and_node_components(ng_component,node_components)
       end
-=end
+
     end
    private
-=begin
-TODO: deprecated
-this is use technicaue that links between ng and component attributes and indirect propagation; problematic when the node groupo side has output attribute
+
+#this is use technique that links between ng and component attributes and indirect propagation; problematic when the node groupo side has output attribute
 alternative is adding links at time that node to ng link is added and special processing when attribute changed at ng level
      def add_links_between_ng_and_node_components(ng_cmp,node_cmps)
        #get all the relevant attributes
@@ -67,5 +73,3 @@ alternative is adding links at time that node to ng link is added and special pr
 
      AttrFieldToMatchOn = :display_name
 =end
-  end
-end

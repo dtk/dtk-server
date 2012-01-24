@@ -58,8 +58,10 @@ module XYZ
       end
 
       #### end create needed component ports ####
-                                                             
-      LinkDef.create_needed_internal_links(self,component,node_link_defs_info)
+
+      unless opts[:donot_create_internal_links]
+        LinkDef.create_needed_internal_links(self,component,node_link_defs_info)
+      end
 
       unless opts[:donot_create_pending_changes]
         parent_action_id_handle = get_parent_id_handle()

@@ -98,7 +98,6 @@ module R8
         end
       end
       def pp_form(obj)
-        pp [:foo,obj.class]
         ret = String.new
         PP.pp obj, ret
         ret.chomp!

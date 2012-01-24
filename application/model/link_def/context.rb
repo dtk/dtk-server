@@ -109,7 +109,8 @@ module XYZ
        when 2 
         if @node_mappings.is_internal?
           set_values__internal!(link,cmp_mappings) 
-        else raise Error.new("Not treating port link between two node groups")
+        else 
+          raise Error.new("Not treating port link between two node groups")
         end
       end
     end

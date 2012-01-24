@@ -18,14 +18,18 @@ module XYZ
 
       on_create_events.each{|ev|ev.process!(context)}
 
-      #ret_links returns nil only if error such as not being able to find input_id or output_id
-      links = AttributeMapping.ret_links(attribute_mappings,context)
-      return if links.empty?
-      if port_link_idh
-        port_link_id = port_link_idh.get_id()
-        links.each{|link|link[:port_link_id] = port_link_id}
+      #TODO: not bulking up procssing multiple node group members because dont yet handle case when
+      #theer are multiple members taht are output that feed into a node attribute
+      links_array = AttributeMapping.ret_links_array(attribute_mappings,context)
+      links_array.each do |links|
+        #ret_links returns nil only if error such as not being able to find input_id or output_id
+        next if links.empty?
+        if port_link_idh
+          port_link_id = port_link_idh.get_id()
+          links.each{|link|link[:port_link_id] = port_link_id}
+        end
+        AttributeLink.create_attribute_links(parent_idh,links)
       end
-      AttributeLink.create_attribute_links(parent_idh,links)
     end
     
 
@@ -38,14 +42,9 @@ module XYZ
     end
 
     class AttributeMapping < HashObject
-      def self.ret_links(attribute_mappings,context)
-        if context.has_node_group_form?()
-          context.node_group_contexts_array().inject([]) do |ret,member_context|
-            ret += ret_links(attribute_mappings,member_context)
-          end
-        else
-          attribute_mappings.map{|am|am.ret_link(context)}.compact
-        end
+      def self.ret_links_array(attribute_mappings,context)
+        contexts = (context.has_node_group_form?() ? context.node_group_contexts_array() : [context])
+        contexts.map{|context|attribute_mappings.map{|am|am.ret_link(context)}.compact}
       end
 
       def ret_link(context)

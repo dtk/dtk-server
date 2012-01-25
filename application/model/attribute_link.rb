@@ -40,15 +40,6 @@ module XYZ
       StateChange.create_pending_change_items(ndx_nested_change_hashes.values) unless opts[:donot_create_pending_changes]
     end
 
-    #called when adding a node under a node group
-    def self.create_from_port_links(node_idh,node_group_port_links)
-      opts = {:port_link_created_already => true}
-      #TODO: can optimize by bulking up below
-      node_group_port_links.each do |port_link|
-        PortLink.create_port_and_attr_links(node_idh,port_link,opts)
-      end
-    end
-
     def self.attribute_info_cols()
       [:id,:attribute_value,:semantic_type_object,:component_parent]
     end

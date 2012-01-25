@@ -95,7 +95,7 @@ module XYZ
         unless node = nodes[r[:node][:id]] 
           node = nodes[r[:node][:id]] = r[:node].materialize!(Node.common_columns())
           if node.is_node_group? 
-            node_group_members = ndx_ng_members[target_id][node[:id]]|| Array.new
+            node_group_members = (ndx_ng_members[target_id]||{})[node[:id]]|| Array.new
             node.merge!(:node_group_members => node_group_members)
           end
         end

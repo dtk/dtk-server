@@ -318,6 +318,18 @@ module XYZ
            :cols => [:id,:display_name]
          }]
 
+      virtual_column :cmps_not_on_create_events, :type => :json, :hidden => true,
+      :remote_dependencies =>
+        [
+         {
+           :model_name => :component,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond=>{:node_node_id =>:node__id},
+           :filter => [:eq, :from_on_create_event, false],
+           :cols => [:id,:display_name]
+         }]
+
         virtual_column :has_pending_change, :type => :boolean, :hidden => true,
          :remote_dependencies =>
          [

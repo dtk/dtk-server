@@ -1,8 +1,8 @@
 module XYZ
   module NodeGroupClone
     def clone_into_node(node)
-      #get the components on the node group
-      ng_cmps = get_objs(:cols => [:components]).map{|r|r[:component]}
+      #get the components on the node group (except those created through link def on creeate event since these wil be created in clone_external_attribute_links call
+      ng_cmps = get_objs(:cols => [:cmps_not_on_create_events]).map{|r|r[:component]}
       return if ng_cmps.empty?
       node_external_ports = clone_components(ng_cmps,node)
       clone_external_attribute_links(node_external_ports,node)
@@ -43,10 +43,7 @@ module XYZ
       #use port links to generate attributes between the node and nodes that node group is connected to
       target_id = port_links.first[:datacenter_datacenter_id]
       target_idh = model_handle(:target).createIDH(:id => target_id)
-      #TODO: can optimize speed by bulking up below
-      port_links.each do |port_link|
-        PortLink.create_attr_links_from_port_link(target_idh,port_link)
-      end
+      AttributeLink.create_from_port_links(target_idh,port_links)
     end
     private :clone_external_attribute_links
 

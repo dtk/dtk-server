@@ -35,7 +35,10 @@ module XYZ
       column :extended_base, :varchar, :size => 30
       virtual_column :extended_base_id, :type => ID_TYPES[:id] ,:local_dependencies => [:extended_base,:implementation_id]
       virtual_column :instance_extended_base_id, :type => ID_TYPES[:id] ,:local_dependencies => [:extended_base,:implementation_id,:node_node_id]
-        column :extension_type, :varchar, :size => 30
+      column :extension_type, :varchar, :size => 30
+
+
+      column :from_on_create_event, :boolean, :default => false
 
       column :uri, :varchar
       column :ui, :json

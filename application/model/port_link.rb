@@ -21,18 +21,12 @@ module XYZ
       create_from_rows(port_link_mh,rows,create_opts).map{|hash|new(hash,port_link_mh[:c])}
     end
 
-    #called when adding a node under a node group
-    def self.create_attr_links_from_port_link(parent_idh,port_link)
-      opts = {:port_link_created_already => true, :no_create_events => true}
-      create_port_and_attr_links(parent_idh,port_link,opts)
-    end
-
     def self.create_port_and_attr_links(parent_idh,port_link_hash,opts={})
       #get the associated link_def_link TODO: if it does not exist means constraint violation
       link_def_link, components = get_link_def_and_components(parent_idh,port_link_hash)
       raise PortLinkError.new("Illegal link") unless link_def_link
       port_link = (opts[:port_link_created_already] ? port_link_hash : create_from_links_hash(parent_idh,[port_link_hash]).first)
-      link_def_link.process(parent_idh,components,opts.merge(:port_link_id => port_link.id_handle))
+      link_def_link.process(parent_idh,components,opts.merge(:port_link_idh => port_link.id_handle))
       port_link
     end
 

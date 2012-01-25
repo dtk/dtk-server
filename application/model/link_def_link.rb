@@ -16,9 +16,8 @@ module XYZ
       link_defs_info = components.map{|cmp| {:component => cmp}}
       context = LinkDefContext.create(self,link_defs_info)
 
-      unless opts[:no_create_events]
-        on_create_events.each{|ev|ev.process!(context)} 
-      end
+      on_create_events.each{|ev|ev.process!(context)} 
+
       #TODO: not bulking up procssing multiple node group members because dont yet handle case when
       #theer are multiple members taht are output that feed into a node attribute
       links_array = AttributeMapping.ret_links_array(attribute_mappings,context)
@@ -109,7 +108,7 @@ module XYZ
         raise Error.new("cannot find node of type #{self[:node]} in context") unless node
 
         #clone component into node
-        override_attrs = {}
+        override_attrs = {:from_on_create_event => true}
         #TODO: may put in flags to tell clone operation not to do any constraint checking
         clone_opts = {:ret_new_obj_with_cols => [:id,:display_name,:extended_base,:implementation_id]}
         new_cmp = node.clone_into(component_extension,override_attrs,clone_opts)

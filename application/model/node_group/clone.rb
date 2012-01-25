@@ -35,15 +35,13 @@ module XYZ
       ng_port_ids = Model.get_objs(model_handle(:port),sp_hash).map{|r|r[:id]}
       
       sp_hash = {
-        :cols => [:id, :datacenter_datacenter_id, :group_id,:input_id, :output_id],
+        :cols => [:id, :group_id,:input_id, :output_id],
         :filter => [:or, [:oneof, :input_id, ng_port_ids], [:oneof, :output_id, ng_port_ids]]
       }
-      port_links = Model.get_objs(model_handle(:port_link),sp_hash)
-      return if port_links.empty?
+      ng_port_links = Model.get_objs(model_handle(:port_link),sp_hash)
+      return if ng_port_links.empty?
       #use port links to generate attributes between the node and nodes that node group is connected to
-      target_id = port_links.first[:datacenter_datacenter_id]
-      target_idh = model_handle(:datacenter).createIDH(:id => target_id)
-      AttributeLink.create_from_port_links(target_idh,port_links)
+      AttributeLink.create_from_port_links(node.id_handle,ng_port_links)
     end
     private :clone_external_attribute_links
 

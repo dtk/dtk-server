@@ -41,11 +41,11 @@ module XYZ
     end
 
     #called when adding a node under a node group
-    def self.create_from_port_links(parent_idh,port_links)
+    def self.create_from_port_links(node_idh,node_group_port_links)
       opts = {:port_link_created_already => true}
       #TODO: can optimize by bulking up below
-      port_links.each do |port_link|
-        PortLink.create_port_and_attr_links(parent_idh,port_link,opts)
+      node_group_port_links.each do |port_link|
+        PortLink.create_port_and_attr_links(node_idh,port_link,opts)
       end
     end
 

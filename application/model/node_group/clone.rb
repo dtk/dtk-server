@@ -35,18 +35,22 @@ module XYZ
       ng_port_ids = Model.get_objs(model_handle(:port),sp_hash).map{|r|r[:id]}
       
       sp_hash = {
-        :cols => [:id, :group_id,:input_id, :output_id],
+        :cols => [:id, :datacenter_datacenter_id, :group_id,:input_id, :output_id],
         :filter => [:or, [:oneof, :input_id, ng_port_ids], [:oneof, :output_id, ng_port_ids]]
       }
       port_links = Model.get_objs(model_handle(:port_link),sp_hash)
-      port_links
+      return if port_links.empty?
       #use port links to generate attributes between the node and nodes that node group is connected to
+      target_id = port_links.first[:datacenter_datacenter_id]
+      target_idh = model_handle(:target).createIDH(:id => target_id)
+      #TODO: can optimize speed by bulking up below
+      port_links.each do |port_link|
+        PortLink.create_attr_links_from_port_link(target_idh,port_link)
+      end
     end
     private :clone_external_attribute_links
 
     def clone_post_copy_hook(clone_copy_output,opts={})
-      #TODO: for simplicity not creating pending changes for node groups; 
-      #future enhancement may be to create these, for example, for accounting reasons
       super_opts = opts.merge(:donot_create_pending_changes => true, :donot_create_internal_links => true)
       super(clone_copy_output,super_opts)
       opts[:outermost_ports] = super_opts[:outermost_ports] if super_opts[:outermost_ports]

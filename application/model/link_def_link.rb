@@ -12,19 +12,20 @@ module XYZ
       create_from_rows(model_handle,rows)
     end
 
-    def process(parent_idh,components,port_link_idh=nil)
+    def process(parent_idh,components,opts={})
       link_defs_info = components.map{|cmp| {:component => cmp}}
       context = LinkDefContext.create(self,link_defs_info)
 
-      on_create_events.each{|ev|ev.process!(context)}
-
+      unless opts[:no_create_events]
+        on_create_events.each{|ev|ev.process!(context)} 
+      end
       #TODO: not bulking up procssing multiple node group members because dont yet handle case when
       #theer are multiple members taht are output that feed into a node attribute
       links_array = AttributeMapping.ret_links_array(attribute_mappings,context)
       links_array.each do |links|
         #ret_links returns nil only if error such as not being able to find input_id or output_id
         next if links.empty?
-        if port_link_idh
+        if port_link_idh = opts[:port_link_idh]
           port_link_id = port_link_idh.get_id()
           links.each{|link|link[:port_link_id] = port_link_id}
         end

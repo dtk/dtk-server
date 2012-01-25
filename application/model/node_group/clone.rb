@@ -42,7 +42,7 @@ module XYZ
       return if port_links.empty?
       #use port links to generate attributes between the node and nodes that node group is connected to
       target_id = port_links.first[:datacenter_datacenter_id]
-      target_idh = model_handle(:target).createIDH(:id => target_id)
+      target_idh = model_handle(:datacenter).createIDH(:id => target_id)
       AttributeLink.create_from_port_links(target_idh,port_links)
     end
     private :clone_external_attribute_links

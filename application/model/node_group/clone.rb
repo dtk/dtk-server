@@ -20,7 +20,7 @@ module XYZ
       ng_cmps = get_objs(:cols => [:cmps_not_on_create_events]).map{|r|r[:component]}
       return if ng_cmps.empty?
       node_external_ports = clone_components(ng_cmps,node)
-      clone_external_attribute_links(node_external_ports)
+      clone_external_attribute_links(node_external_ports,node)
     end
    private
     def clone_components(node_group_cmps,node)
@@ -38,19 +38,20 @@ module XYZ
       external_ports
     end
 
-    def clone_external_attribute_links(node_external_ports)
+    def clone_external_attribute_links(node_external_ports,node)
       #first create a port_link_hash array that mirrors ng links to new node, 
       #then  use PortLink.create_port_and_attr_links to create the attribute links
-      node_port_link_hashes = ret_node_port_link_hashes(node_external_ports)
-      return if node_port_link_hashes.empty?
+      port_link_info = ret_port_link_info(node_external_ports)
+      return if port_link_info.empty?
       #TODO: can also look at approach were if one node member exists already can do simpler copy
-      opts = {:donot_create_port_link => true, :port_link_idh => port_link_idh}
-      node_port_link_hashes.each do |port_link|
-        PortLink.create_port_and_attr_links(node_idh,port_link,opts)
+      port_link_info.each do |pl|
+        port_link_idh = pl[:node_group_port_link].id_handle
+        opts = {:donot_create_port_link => true, :port_link_idh => port_link_idh}
+        PortLink.create_port_and_attr_links(node.id_handle,pl[:node_port_link_hash],opts)
       end
     end
 
-    def ret_node_port_link_hashes(node_external_ports)
+    def ret_port_link_info(node_external_ports)
       ret = Array.new
       return ret if node_external_ports.empty?
       #TODO this makes asseumption that can find cooresponding port on node group by matching on port display_name
@@ -84,7 +85,8 @@ module XYZ
         end
         port_display_name = ndx_ng_ports[ng_port_id][:display_name]
         node_port_id = ndx_node_port_ids[port_display_name]
-        ng_pl.merge(index => node_port_id)
+        other_index = (index == :input_id ? :output_id : :input_id)
+        {:node_group_port_link => ng_pl, :node_port_link_hash => {index => node_port_id, other_index => ng_pl[other_index]}}
       end
     end
   end

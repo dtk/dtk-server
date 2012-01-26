@@ -1,3 +1,4 @@
+#TODO: determine what in this file is deprecated
 module XYZ
   module ComponentClone
     def determine_cloned_components_parent(specified_target_idh)

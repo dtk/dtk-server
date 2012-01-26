@@ -23,10 +23,10 @@ module XYZ
       klass.destroy_node?(node)
     end
 
-    def self.get_node_state(node)
+    def self.get_and_update_node_state!(node,attribute_names)
       adapter_name = R8::Config[:command_and_control][:iaas][:type]
       klass = load_for_aux(:iaas,adapter_name)      
-      klass.get_node_state(node)
+      klass.get_and_update_node_state!(node,attribute_names)
     end
 
     def self.get_node_operational_status(node)

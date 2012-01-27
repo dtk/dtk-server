@@ -29,19 +29,18 @@ module R8::Client
     end
 
     desc "create NODE-GROUP-NAME", "Create node group"
-    method_option "in-target",:aliases => "-t", 
-      :required => true, 
+    method_option "in-target",:aliases => "-t" ,
       :type => :numeric, 
       :banner => "TARGET-ID",
       :desc => "Target (id) to create node group in"
     def create(name)
       target_id = options["in-target"]
       save_hash = {
-        :parent_id => target_id,
         :parent_model_name => "target",
         :display_name => name,
         :type => "node_group_instance"
       }
+      save_hash[:parent_id] = target_id if target_id
       post rest_url("node_group/save"), save_hash
     end
 

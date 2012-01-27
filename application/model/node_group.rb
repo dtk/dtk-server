@@ -22,11 +22,11 @@ module XYZ
 
       #add node group relationship
       cloned_node = model_handle(:node).createIDH(:id => cloned_node_id).create_object()
-      add_instance_node(cloned_node,target_idh,:dont_check_redundancy => true)
+      add_member(cloned_node,target_idh,:dont_check_redundancy => true)
       cloned_node.id_handle
     end
 
-    def add_instance_node(instance_node,target_idh,opts={})
+    def add_member(instance_node,target_idh,opts={})
       node_id = instance_node[:id]
       ng_id = self[:id]
       #check for redundancy

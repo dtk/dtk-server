@@ -1,16 +1,20 @@
 module XYZ
   class Node_groupController < Controller
     def save()
-      ret = super
-      if request.params["parent_model_name"] == "target"
-        target_id = request.params["parent_id"]
+      params = request.params
+      unless params["parent_model_name"] == "target"
+        super 
+      else
+        target_idh = target_idh_with_default(params["parent_id"])
+        target_id = target_idh.get_id()
+        modified_params = {"parent_id" => target_id}.merge(params)
+        ret = super(modified_params)
         if ret.is_ok?
           ng_id = ret.data[:id]
-          target = get_object_by_id(target_id,:target)
-          target.update_ui_for_new_item(ng_id)
+          target_idh.create_object().update_ui_for_new_item(ng_id)
         end
+        ret
       end
-      ret
     end
 
     def rest__members(node_group_id)

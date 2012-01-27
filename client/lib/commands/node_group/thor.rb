@@ -12,8 +12,8 @@ module R8::Client
     end
 
     desc "set-profile NODE-GROUP-ID TEMPLATE-NODE-ID", "Set node group's default node template"
-    def set_profile(node_group_id,profile_node_id)
-      post_body_hash = {:node_group_id => node_group_id, :profile_node_id => profile_node_id}
+    def set_profile(node_group_id,template_node_id)
+      post_body_hash = {:node_group_id => node_group_id, :template_node_id => template_node_id}
       post rest_url("node_group/set_default_template_node"),post_body_hash
     end
 

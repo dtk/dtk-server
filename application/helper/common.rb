@@ -200,7 +200,7 @@ limit = TestOveride if TestOveride
 
     def raise_error_null_params?(*null_params)
       unless null_params.empty?
-        raise Error.new("There parametrs should not be null (#{null_params.join(",")})")
+        raise Error.new("These parameters should not be null (#{null_params.join(",")})")
       end
     end
 

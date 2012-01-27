@@ -11,6 +11,17 @@ module R8::Client
       post rest_url("node_group/list"), search_hash.post_body_hash()
     end
 
+    desc "set-profile NODE-GROUP-ID TEMPLATE-NODE-ID", "Set node group's default node template"
+    def set_profile(node_group_id,profile_node_id)
+      post_body_hash = {:node_group_id => node_group_id, :profile_node_id => profile_node_id}
+      post rest_url("node_group/set_default_template_node"),post_body_hash
+    end
+
+    desc "add-template NODE-GROUP-ID", "Copy templaet from library and add to node group"
+    def add_template(node_group_id)
+      post_body_hash = {:node_group_id => node_group_id}
+      post rest_url("node_group/clone_and_add_template_node"),post_body_hash
+    end
 
     desc "members NODE-GROUP-ID", "Node group members"
     def members(node_group_id)

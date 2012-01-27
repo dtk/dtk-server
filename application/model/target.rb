@@ -22,6 +22,14 @@ module XYZ
     end
 
     ######### Model apis
+    def update_ui_for_new_item(new_item_id)
+      update_object!(:ui)
+      target_ui = self[:ui]||{:items=>{}}
+      target_ui[:items][new_item_id.to_s.to_sym] = {}
+      update(:ui=>target_ui)
+    end
+
+
     def get_ports(*types)
       port_list = get_objs(:cols => [:node_ports]).map{|r|r[:port]}
       i18n = get_i18n_mappings_for_models(:component,:attribute)

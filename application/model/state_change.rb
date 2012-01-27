@@ -123,11 +123,11 @@ module XYZ
         case type
          when "create_node"
           node_name
-         when "install_component"
+         when "install_component", "update_implementation"
           cmp_name = flat_pending_ch[:component][:display_name]
-          "#{node_name},#{cmp_name}"
+          "#{node_name}:#{cmp_name}"
          else
-          Log.error("need rules to treat type {#{type})")
+          Log.error("need rules to treat type (#{type})")
           nil
         end
       suffix ? "#{type}(#{suffix})" : type

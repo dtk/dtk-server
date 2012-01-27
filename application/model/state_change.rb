@@ -4,6 +4,32 @@ module XYZ
   class StateChange < Model
     extend GetPendingChangesClassMixin
 
+    def self.list_pending_changes(target_idh)
+      #TODO: may pass in options so dont get all fields that are returned in flat_list_pending_changes
+      pending_changes = flat_list_pending_changes(target_idh)
+      ndx_ret = Hash.new
+      pending_changes.each do |ch|
+        node_id = ch[:node][:id]
+        node = ndx_ret[node_id] ||= {:node_id => node_id, :node_name => ch[:node][:display_name], :node_changes => Array.new, :ndx_cmp_changes => Hash.new} 
+        if ch[:type] == "create_node"
+          node[:node_changes] << {:name => "create_node"}
+        else
+          cmp_id = ch[:component][:id]
+          cmp = node[:ndx_cmp_changes][cmp_id] ||= {:component_id => cmp_id, :component_name => ch[:component][:display_name], :changes => Array.new}
+          #TODO stub
+          cmp[:changes] << ch[:type]
+        end
+      end
+      ndx_ret.values.map do |n|
+        changes = n[:node_changes] + n[:ndx_cmp_changes].values
+        el = {:node_id => n[:node_id], :node_name => n[:node_name]}
+        el.merge!(:node_changes => n[:node_changes]) unless n[:node_changes].empty?
+        el.merge!(:component_changes => n[:ndx_cmp_changes].values) unless n[:ndx_cmp_changes].empty?
+        el
+      end
+    end
+=begin
+    #TODO: deprecate
     def self.update_with_current_names!(state_changes)
       #looking just for node names
       return if state_changes.empty?
@@ -33,7 +59,7 @@ module XYZ
         end
       end
     end
-
+=end
     def self.create_rerun_state_changes(node_idhs)
       sample_idh = node_idhs.first()
       sp_hash = {

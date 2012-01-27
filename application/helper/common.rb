@@ -20,6 +20,17 @@ module Ramaze::Helper
       user_obj = user_object()
       ModelHandle.create_from_user(user_obj,model_name_x)
     end
+
+    #looks for default if no target is given
+    def target_idh_with_default(target_id=nil)
+      if target_id
+        id_handle(target_id,:target)
+      else
+        targets = Model.get_objs(model_handle(:target),:cols => [:id])
+        raise Error.new("Cannot find a unique default target") unless targets.size == 1
+        targets.first.id_handle()
+      end
+    end
    private
 
     #helpers that interact with model

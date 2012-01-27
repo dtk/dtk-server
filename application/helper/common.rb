@@ -195,7 +195,7 @@ limit = TestOveride if TestOveride
         end
       end
       raise_error_null_params?(*null_params)
-      ret
+      ret.size == 1 ? ret.first : ret
     end
 
     def raise_error_null_params?(*null_params)
@@ -203,7 +203,6 @@ limit = TestOveride if TestOveride
         raise Error.new("These parameters should not be null (#{null_params.join(",")})")
       end
     end
-
 
     def request_method_is_get?()
       request.env["REQUEST_METHOD"] == "GET"

@@ -21,7 +21,7 @@ module XYZ
     def rest__set_default_template_node()
       node_group_id, template_node_id = ret_non_null_request_params(:node_group_id,:template_node_id)
       node_group = create_object_from_id(node_group_id)
-      node_group.update(:canonical_template_node_id => template_node_id)
+      node_group.update(:canonical_template_node_id => template_node_id.to_i)
       rest_ok_response
     end
 
@@ -30,7 +30,7 @@ module XYZ
       node_group_id = ret_non_null_request_params(:node_group_id)
       node_group = create_object_from_id(node_group_id)
       unless template_node = node_group.get_canonical_template_node()
-        raise Error.new("Node group does not have a default templae node set")
+        raise Error.new("Node group does not have a default template node set")
       end
       cloned_node_idh = node_group.clone_and_add_template_node(template_node)
       rest_ok_response(:id => cloned_node_idh.get_id)

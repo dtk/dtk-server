@@ -32,6 +32,7 @@ module XYZ
         :remote_dependencies =>
         [{
            :model_name => :node,
+           :alias => :template_node,
            :convert => true,
            :join_type => :inner,
            :join_cond => {:id => q(:node,:canonical_template_node_id)},

@@ -1,6 +1,6 @@
 require 'ruote'
-require File.expand_path('ruote/participant', File.dirname(__FILE__))
-require File.expand_path('ruote/generate_process_defs', File.dirname(__FILE__))
+r8_nested_require('ruote','participant')
+r8_nested_require('ruote','generate_process_defs')
 
 module XYZ 
   module WorkflowAdapter

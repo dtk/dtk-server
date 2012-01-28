@@ -31,7 +31,8 @@ module XYZ
         clone_opts = {
           :ret_new_obj_with_cols => [:id,:display_name],
           :outermost_ports => Array.new,
-          :use_source_impl_and_template => true
+          :use_source_impl_and_template => true,
+          :no_constraint_checking => true
         }
         override_attrs = {:ng_component_id => ng_cmp[:id]}
         node.clone_into(ng_cmp,override_attrs,clone_opts)

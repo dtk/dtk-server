@@ -467,22 +467,23 @@ module XYZ
 
     #this provides for each component, what other components it depends on
     def self.get_component_type_and_dependencies(id_handles)
-      ret = id_handles.inject({}) do |h,idh|
-        h.merge(idh.get_id() => {:component_dependencies => Array.new})
-      end
-
       sample_idh = id_handles.first
       sp_hash = {
         :cols => [:id,:dependencies, :extended_base, :component_type],
-        :filter => [:oneof, :id, ret.keys]
+        :filter => [:oneof, :id, id_handles.map{|idh|idh.get_id()}]
       }
-      rows = get_objs(sample_idh.createMH,sp_hash)
-      rows.each do |r|
-        id = r[:id]
-        ret[id][:component_type] = r[:component_type]
-        if r[:extended_base]
-          ret[id][:component_dependencies] << r[:extended_base]
-        elsif deps = r[:dependencies]
+      components = get_objs(sample_idh.createMH,sp_hash)
+      find_component_dependencies(components)
+    end
+
+    #assumption that this is called with components having keys :id,:dependencies, :extended_base, :component_type 
+    def self.find_component_dependencies(components)
+      ret = Hash.new
+      components.each do |cmp|
+        pntr = ret[cmp[:id]] ||= {:component_type => cmp[:component_type], :component_dependencies => Array.new}
+        if cmp[:extended_base]
+          pntr[:component_dependencies] << cmp[:extended_base]
+        elsif deps = cmp[:dependencies]
           #process dependencies
           #TODO: hack until we haev macros which will stamp the dependency to make this easier to detect
           #looking for signature where dependency has
@@ -490,7 +491,7 @@ module XYZ
           filter = (deps[:search_pattern]||{})[":filter".to_sym]
           if filter and deps[:type] == "component"
             if filter[0] == ":eq" and filter[1] == ":component_type"
-              ret[id][:component_dependencies] << filter[2]
+              pntr[:component_dependencies] << filter[2]
             end
           end
         end

@@ -331,7 +331,7 @@ module XYZ
            :cols => [:id,:display_name]
          }]
 
-      virtual_column :cmps_not_on_create_events, :type => :json, :hidden => true,
+      virtual_column :cmps_for_clone_into_node, :type => :json, :hidden => true,
       :remote_dependencies =>
         [
          {
@@ -340,7 +340,7 @@ module XYZ
            :join_type => :inner,
            :join_cond=>{:node_node_id =>:node__id},
            :filter => [:eq, :from_on_create_event, false],
-           :cols => [:id,:display_name]
+           :cols => [:id,:display_name,:dependencies, :extended_base, :component_type] #columns needed by Component.find_component_dependencies
          }]
 
         virtual_column :has_pending_change, :type => :boolean, :hidden => true,

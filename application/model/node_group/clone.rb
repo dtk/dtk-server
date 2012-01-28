@@ -17,7 +17,7 @@ module XYZ
     #clone components and links on this node group to node
     def clone_into_node(node)
       #get the components on the node group (except those created through link def on create event since these wil be created in clone_external_attribute_links call
-      ng_cmps = get_objs(:cols => [:cmps_not_on_create_events]).map{|r|r[:component]}
+      ng_cmps = get_objs(:cols => [:cmps_for_clone_into_node]).map{|r|r[:component]}
       return if ng_cmps.empty?
       node_external_ports = clone_components(ng_cmps,node)
       clone_external_attribute_links(node_external_ports,node)
@@ -25,6 +25,8 @@ module XYZ
    private
     def clone_components(node_group_cmps,node)
       external_ports = Array.new
+      #order components to respect dependencies
+      cmp_deps = Component.find_component_dependencies(node_group_cmps)
       #TODO: need to make sure that an order of components is picked that respects base before extension
       #TODO: use below to get order cmp_deps = Component.get_component_type_and_dependencies(ndx_cmp_idhs.values)
       #generate_component_order(cmp_deps).map do |(component_id,deps)|

@@ -26,7 +26,9 @@ module XYZ
     def clone_components(node_group_cmps,node)
       external_ports = Array.new
       #TODO: need to make sure that an order of components is picked that respects base before extension
-      #TODO: turn of contraint checking
+      #TODO: use below to get order cmp_deps = Component.get_component_type_and_dependencies(ndx_cmp_idhs.values)
+      #generate_component_order(cmp_deps).map do |(component_id,deps)|
+
       node_group_cmps.each do |ng_cmp|
         clone_opts = {
           :ret_new_obj_with_cols => [:id,:display_name],

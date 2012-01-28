@@ -476,27 +476,38 @@ module XYZ
       find_component_dependencies(components)
     end
 
-    #assumption that this is called with components having keys :id,:dependencies, :extended_base, :component_type 
-    def self.find_component_dependencies(components)
-      ret = Hash.new
-      components.each do |cmp|
-        pntr = ret[cmp[:id]] ||= {:component_type => cmp[:component_type], :component_dependencies => Array.new}
-        if cmp[:extended_base]
-          pntr[:component_dependencies] << cmp[:extended_base]
-        elsif deps = cmp[:dependencies]
-          #process dependencies
-          #TODO: hack until we haev macros which will stamp the dependency to make this easier to detect
-          #looking for signature where dependency has
-          #:search_pattern=>{:filter=>[:and, [:eq, :component_type, <component_type>]
-          filter = (deps[:search_pattern]||{})[":filter".to_sym]
-          if filter and deps[:type] == "component"
-            if filter[0] == ":eq" and filter[1] == ":component_type"
-              pntr[:component_dependencies] << filter[2]
+    def self.ordered_components(components,&block)
+      ndx_cmps = components.inject({}){|h,cmp|h.merge(cmp[:id] => cmp)}
+      cmp_deps = find_component_dependencies(components)
+      TaskAction::ComponentAction.generate_component_order(cmp_deps).each do |(component_id,deps)|
+        block.call(ndx_cmps[component_id])
+      end
+    end
+
+    class << self
+      private
+      #assumption that this is called with components having keys :id,:dependencies, :extended_base, :component_type 
+      def find_component_dependencies(components)
+        ret = Hash.new
+        components.each do |cmp|
+          pntr = ret[cmp[:id]] ||= {:component_type => cmp[:component_type], :component_dependencies => Array.new}
+          if cmp[:extended_base]
+            pntr[:component_dependencies] << cmp[:extended_base]
+          elsif deps = cmp[:dependencies]
+            #process dependencies
+            #TODO: hack until we haev macros which will stamp the dependency to make this easier to detect
+            #looking for signature where dependency has
+            #:search_pattern=>{:filter=>[:and, [:eq, :component_type, <component_type>]
+            filter = (deps[:search_pattern]||{})[":filter".to_sym]
+            if filter and deps[:type] == "component"
+              if filter[0] == ":eq" and filter[1] == ":component_type"
+                pntr[:component_dependencies] << filter[2]
+              end
             end
           end
         end
+        ret
       end
-      ret
     end
 
     def get_containing_node_id()

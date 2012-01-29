@@ -443,7 +443,7 @@
           },
           "ds_key": "[:user_data, \"/library/test/ami-aa37c984\"]"
         },
-        "ami-1738c102": {
+        "ami-5fc51436": {
           "type": "image",
           "ds_source_obj_type": "image",
 	  "os_type": "centos",
@@ -454,11 +454,11 @@
               "tiny": ""
             }
           },
-          "display_name": "CentOS 5.3",
+          "display_name": "CentOS 5.6",
           "data_source": "user_data",
           "external_ref": {
             "type": "ec2_image",
-            "image_id": "ami-1738c102"
+            "image_id": "ami-5fc51436"
           },
           "node_interface": {
             "eth0": {
@@ -492,7 +492,7 @@
             "flavor": {
               "disk": null
             },
-            "id": "ami-1738c102",
+            "id": "ami-5fc51436",
             "product_codes": [
 
             ]
@@ -553,7 +553,7 @@
               "enabled": true
             }
           },
-          "ds_key": "[:user_data, \"/library/test/ami-1738c102\"]"
+          "ds_key": "[:user_data, \"/library/test/ami-5fc51436\"]"
         }
       }
     }    

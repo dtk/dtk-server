@@ -443,7 +443,7 @@
           },
           "ds_key": "[:user_data, \"/library/test/ami-aa37c984\"]"
         },
-        "ami-5fc51436": {
+        "ami-b1c514d8": {
           "type": "image",
           "ds_source_obj_type": "image",
 	  "os_type": "centos",
@@ -458,7 +458,7 @@
           "data_source": "user_data",
           "external_ref": {
             "type": "ec2_image",
-            "image_id": "ami-5fc51436"
+            "image_id": "ami-b1c514d8"
           },
           "node_interface": {
             "eth0": {
@@ -492,7 +492,7 @@
             "flavor": {
               "disk": null
             },
-            "id": "ami-5fc51436",
+            "id": "ami-b1c514d8",
             "product_codes": [
 
             ]
@@ -553,7 +553,7 @@
               "enabled": true
             }
           },
-          "ds_key": "[:user_data, \"/library/test/ami-5fc51436\"]"
+          "ds_key": "[:user_data, \"/library/test/ami-b1c514d8\"]"
         }
       }
     }    

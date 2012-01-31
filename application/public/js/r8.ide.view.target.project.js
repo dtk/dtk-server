@@ -92,7 +92,7 @@ if (!R8.IDE.View.target.project) {
 console.log('should load target view....');
 				});
 */
-				_childrenListNode = R8.Utils.Y.Node.create('<ul id="target-'+_target.get('id')+'-children');
+				_childrenListNode = R8.Utils.Y.Node.create('<ul id="target-'+_target.get('id')+'-children">');
 				_childrenListNodeId = _childrenListNode.get('id');
 
 				var nodesLeaf = {

@@ -18,7 +18,6 @@ module XYZ
       repo_obj
     end
 
-    
    private    
     def self.repo_name(config_agent_type,module_name)
       username = CurrentSession.get_username()

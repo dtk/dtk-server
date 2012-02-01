@@ -88,6 +88,7 @@ module XYZ
 
     def self.delete_repo(repo)
       klass = load_and_return_adapter_class()
+      repo.update_object!(:repo_name,:local_dir)
       klass.delete_server_repo(repo[:repo_name])
       delete_local_repo(repo[:local_dir])
     end

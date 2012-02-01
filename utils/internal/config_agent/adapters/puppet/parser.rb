@@ -188,13 +188,14 @@ module XYZ
         :name => ::Puppet::Parser::AST::Name,
         :boolean => ::Puppet::Parser::AST::Boolean,
         :variable => ::Puppet::Parser::AST::Variable,
+        :undef => ::Puppet::Parser::AST::Undef,
         :concat => ::Puppet::Parser::AST::Concat,
         :function => ::Puppet::Parser::AST::Function,
         :var_def => ::Puppet::Parser::AST::VarDef,
         :resource_defaults => ::Puppet::Parser::AST::ResourceDefaults,
         :ast_array => ::Puppet::Parser::AST::ASTArray,
       }
-      AstTerm = [:string,:name,:variable,:concat,:function,:boolean,:ast_array]
+      AstTerm = [:string,:name,:variable,:concat,:function,:boolean,:undef,:ast_array]
     end
 
     #can be module or file
@@ -512,10 +513,10 @@ module XYZ
       end
      private
       def default_value(default_ast_obj)
-        if puppet_type?(default_ast_obj,[:string,:name,:variable,:boolean])
+        if puppet_type?(default_ast_obj,[:string,:name,:variable,:boolean,:undef])
           TermPS.create(default_ast_obj)
         else
-          raise R8ParseError.new("unexpected type for an attribute default")
+          raise R8ParseError.new("unexpected type for an attribute default (#{default_ast_obj.class.to_s})")
         end
       end
     end
@@ -687,6 +688,7 @@ module XYZ
          when :concat then ConcatPS.new(ast_term,opts)
          when :string then StringPS.new(ast_term,opts)
          when :boolean then BooleanPS.new(ast_term,opts)
+         when :undef then UndefPS.new(ast_term,opts)
          when :function then FunctionPS.new(ast_term,opts)
          when :ast_array then ArrayPS.new(ast_term,opts)
          else raise R8ParseError.new("type not treated as a term (#{ast_term.class.to_s})")
@@ -771,6 +773,13 @@ module XYZ
     class BooleanPS < TermPS
       def initialize(boolean_ast,opts={})
         self[:value] = boolean_ast.value
+        super
+      end
+    end
+
+    class UndefPS < TermPS
+      def initialize(undef_ast,opts={})
+        self[:value] = undef_ast.value
         super
       end
     end

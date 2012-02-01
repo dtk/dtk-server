@@ -18,6 +18,12 @@ module XYZ
       repo_obj
     end
 
+    def self.delete(repo_idh)
+      repo = repo_idh.create_object()
+      RepoManager.delete_repo(repo)
+      Model.delete_instance(repo_idh)
+    end
+
    private    
     def self.repo_name(config_agent_type,module_name)
       username = CurrentSession.get_username()

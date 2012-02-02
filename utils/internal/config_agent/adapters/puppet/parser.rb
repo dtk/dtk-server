@@ -775,12 +775,17 @@ module XYZ
         self[:value] = boolean_ast.value
         super
       end
+      def to_s(opts={})
+        self[:value] && self[:value].to_s
+      end
     end
 
     class UndefPS < TermPS
       def initialize(undef_ast,opts={})
-        self[:value] = undef_ast.value
         super
+      end
+      def to_s(opts={})
+        "undef"
       end
     end
 

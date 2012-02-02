@@ -78,7 +78,8 @@ module XYZ
           ext_ref = attr[:external_ref]||{}
           if var_name_path = ext_ref[:path]
             array_form_path = to_array_form(var_name_path)
-            val = attr[:attribute_value]
+            val = ret_value(attr)
+
             #second clause is to handle case where theer is a default just in puppet and header and since not overwritten acts as dynamic attr
             if attr[:dynamic] or (ext_ref[:default_variable] and val.nil?) 
               #TODO: ignoring ones set already; this implicitly captures assumption that dynamic attribute
@@ -115,6 +116,18 @@ module XYZ
         ret.merge!("dynamic_attributes" => dynamic_attrs) unless dynamic_attrs.empty?
         ret
       end
+
+      def ret_value(attr)
+        ret = attr[:attribute_value]
+        case attr[:data_type]
+         when "boolean" 
+          if ret == "true" then ret = true 
+          elsif ret == "false" then ret = false 
+          end
+        end
+        ret
+      end
+
 
       def find_reference_to_guard(guard,attributes)
         ret = nil

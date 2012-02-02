@@ -694,6 +694,12 @@ module XYZ
          else raise R8ParseError.new("type not treated as a term (#{ast_term.class.to_s})")
         end
       end
+      def data_type()
+        "string" 
+      end
+      def set_default_value?()
+        true
+      end
       def contains_variable?()
         nil
       end
@@ -775,6 +781,9 @@ module XYZ
         self[:value] = boolean_ast.value
         super
       end
+      def data_type()
+        "boolean" 
+      end
       def to_s(opts={})
         self[:value] && self[:value].to_s
       end
@@ -785,7 +794,10 @@ module XYZ
         super
       end
       def to_s(opts={})
-        "undef"
+        nil
+      end
+      def set_default_value?()
+        nil
       end
     end
 

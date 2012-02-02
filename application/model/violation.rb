@@ -183,7 +183,7 @@ module XYZ
   #TODO: unify with Violation class
   class ValidationError < HashObject 
     #TODO: deprecate
-=begin
+
     extend R8Tpl::Utility::I18n
     def self.find_missing_required_attributes(commit_task)
       component_actions = commit_task.component_actions
@@ -207,7 +207,7 @@ module XYZ
       end
       ret.empty? ? nil : ret
     end
-=end
+
     def self.debug_inspect(error_list)
       ret = ""
       error_list.each{|e| ret << "#{e.class.to_s}: #{e.inspect}\n"}

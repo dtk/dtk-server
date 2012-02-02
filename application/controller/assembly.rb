@@ -77,6 +77,17 @@ module XYZ
         #just want external ports
         (nested_objs[:nodes]||[]).each{|n|(n[:ports]||[]).reject!{|p|p[:type] == "component_internal"}}
 
+        #TODO: ganglia hack: remove after putting this info in teh r8 meta files
+        (nested_objs[:nodes]||[]).each do |n|
+          (n[:ports]||[]).each do |port|
+            if port[:display_name] =~ /ganglia__server/
+              port[:location] = "east"
+            elsif  port[:display_name] =~ /ganglia__monitor/
+              port[:location] = "west"
+            end
+          end
+        end
+
 #TODO: get node positions going for assemblies
         #compute uui positions
         parent_id = request.params["parent_id"]

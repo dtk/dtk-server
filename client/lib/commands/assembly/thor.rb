@@ -8,6 +8,21 @@ module R8::Client
       post rest_url("assembly/list_from_library")
     end
 
+    desc "clone ASSEMBLY-ID", "Clone assembly from library to target"
+    method_option "in-target",:aliases => "-t" ,
+      :type => :numeric, 
+      :banner => "TARGET-ID",
+      :desc => "Target (id) to create assembly in" 
+    def clone(assembly_id)
+      post_body = {
+        :assembly_id => assembly_id
+      }
+      if target_id = options["in-target"]
+        post_body.merge!(:target_id => target_id)
+      end
+      post rest_url("assembly/clone"), post_body
+    end
+
     desc "execute ASSEMBLY-ID", "Excute assembly from library"
     method_option "in-target",:aliases => "-t" ,
       :type => :numeric, 

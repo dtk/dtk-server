@@ -68,40 +68,12 @@ module XYZ
       clone_opts = {:ret_new_obj_with_cols => [:id]}
       new_assembly_obj = target_object.clone_into(id_handle.create_object(),override_attrs,clone_opts)
       id = new_assembly_obj && new_assembly_obj.id()
-      nested_objs = new_assembly_obj.get_node_assembly_nested_objects()
-      #TODO: get node positions going for assemblies
-      #compute ui positions
-      assembly_left_pos = 0
-  
-      dc_hash = target_object
 
-      #get the top most item in the list to set new positions
-      top_node = {}
-      top_most = 2000
-      
-      #        node_list.each do |node|
+      #compute ui positions
+      nested_objs = new_assembly_obj.get_node_assembly_nested_objects()
+      #TODO: this does not leverage assembly node relative positions
       nested_objs[:nodes].each do |node|
-        #          node = create_object_from_id(node_hash[:id],:node)
-        ui = node.get_ui_info(dc_hash)
-        if ui and (ui[:top].to_i < top_most.to_i)
-          left_diff = assembly_left_pos.to_i - ui[:left].to_i
-          top_node = {:id=>node[:id],:ui=>ui,:left_diff=>left_diff}
-          top_most = ui[:top]
-        end
-      end
-  
-      nested_objs[:nodes].each_with_index do |node,i|
-        ui = node.get_ui_info(dc_hash)
-        Log.error("no coordinates for node with id #{node[:id].to_s} in #{parent_id.to_s}") unless ui
-        if ui
-          if node[:id] == top_node[:id]
-            ui[:left] = assembly_left_pos.to_i
-          else
-            ui[:left] = ui[:left].to_i + top_node[:left_diff].to_i
-          end
-        end
-        node.update_ui_info!(ui,dc_hash)
-          nested_objs[:nodes][i][:assembly_ui] = ui
+        target_object.update_ui_for_new_item(node[:id])
       end
       rest_ok_response(:id => id)
     end

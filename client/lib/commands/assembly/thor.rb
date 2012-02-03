@@ -13,7 +13,7 @@ module R8::Client
       post_body = {
         :assembly_id => assembly_id
       }
-      post rest_url("assembly/execute_from_library"), post_body
+      post rest_url("assembly/clone"), post_body
     end
   end
 end

@@ -40,7 +40,6 @@ module R8::Client
         response
       end
     end
-
   end
 end
 

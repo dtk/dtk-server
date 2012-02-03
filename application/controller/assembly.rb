@@ -1,5 +1,8 @@
 module XYZ
   class AssemblyController < Controller
+    def rest__list_from_library()
+      rest_ok_response Assembly.list_from_library(model_handle())
+    end
 
     def test_get_items(id)
       assembly = id_handle(id,:component).create_object()

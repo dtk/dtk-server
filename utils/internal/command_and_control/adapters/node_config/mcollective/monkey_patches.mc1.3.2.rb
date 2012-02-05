@@ -1,5 +1,5 @@
 require 'mcollective'
-######## Monkey patches for version 1.2 
+######## Monkey patches for version 1.3.2 
 module MCollective
   class Client
     def r8_set_context(multiplexer)
@@ -27,49 +27,36 @@ module MCollective
     end
 
     def r8_generate_request_id(msg, agent, filter = {})
-      target = make_target(agent, :request, collective)
-      reqid = Digest::MD5.hexdigest("#{@config.identity}-#{Time.now.to_f.to_s}-#{target}")
+      create_request_message(msg,agent,filter).create_reqid
     end
 
-    def r8_sendreq_give_reqid(reqid,msg,agent,filter = {})
-      target = make_target(agent, :request, collective)
-#1.3.2 CHANGE        req = @security.encoderequest(@config.identity, target, msg, reqid, filter, agent, collective)
-      req = @security.encoderequest(@config.identity, msg, reqid, filter, agent, collective)
+    def r8_sendreq_give_reqid(reqid,msg,agent,filter = {},&block)
+      #TODO: see if can put in block form that first generates request id then calss functions that need it
+      #then does subscribe and send
 
+      #TODO: rather than below see if can use
+      #following
+      #msg = create_request_message(msg,agent,filter)
+      #msg.encode!
+      #block.call(msg.create_reqid) if block
+      #req = msg.payload
+
+      target = make_target(agent, :request, collective)
+      req = @security.encoderequest(@config.identity, msg, reqid, filter, agent, collective)
       topic = make_target(agent, :reply, collective)
+
       Log.debug("Sending request #{reqid} to #{target}")
       @connection.subscribe_and_send(topic,target,req)
       reqid
     end
 
-#1.3.2 CHANGE [added new ffn taht copied from stomp conector plugin
-    #TODO: this shoudl instead be call to pluggin
+    private
     def make_target(agent, type, collective, target_node=nil)
-      raise("Unknown target type #{type}") unless [:directed, :broadcast, :reply, :request, :direct_request].include?(type)
-      raise("Unknown collective '#{collective}' known collectives are '#{@config.collectives.join ', '}'") unless @config.collectives.include?(collective)
-
-      prefix = @config.topicprefix
-
-      case type
-      when :reply
-        suffix = :reply
-      when :broadcast
-        suffix = :request
-      when :request
-        suffix = :command
-      when :direct_request
-        agent = nil
-        prefix = @config.queueprefix
-        suffix = Digest::MD5.hexdigest(target_node)
-      when :directed
-        agent = nil
-        prefix = @config.queueprefix
-        # use a md5 since hostnames might have illegal characters that
-        # the middleware dont understand
-        suffix = Digest::MD5.hexdigest(@config.identity)
-      end
-
-      ["#{prefix}#{collective}", agent, suffix].compact.join(@config.topicsep)
+      @connection.make_target(agent, type, collective, target_node)
+    end
+    def create_request_message(msg,agent,filter)
+      type = :request #TODO: stub so can use direct types
+      Message.new(msg,nil,:agent => agent, :filter => filter, :collective => collective, :type => type)
     end
   end
 end

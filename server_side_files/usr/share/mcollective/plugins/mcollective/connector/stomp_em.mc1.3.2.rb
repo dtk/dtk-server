@@ -1,30 +1,17 @@
-#TODO: need to see if need to sync fns other than procss useed in receive with updated 1.3.2 stomp of activemq connector; see what calss are used
 require 'eventmachine'
 module MCollective
   module Connector
-        # Handles sending and receiving messages over the Stomp protocol
-        #
-        # This plugin supports version 1.1 or 1.1.6 and newer of the Stomp rubygem
-        # the versions between those had multi threading issues.
-        #
-        # For all versions you can configure it as follows:
-        #
-        #    connector = stomp
-        #    plugin.stomp.host = stomp.your.net
-        #    plugin.stomp.port = 6163
-        #    plugin.stomp.user = you
-        #    plugin.stomp.password = secret
-        #
-        # For versions of ActiveMQ that supports message priorities
-        # you can set a priority, this will cause a "priority" header
-        # to be emitted if present:
-        #
-        #     plugin.stomp.priority = 4
-        #
-    class Stomp_em<Base
+    #monkey patch so that dont first load stomp
+    class Base
+      def self.inherited(klass)
+        PluginManager << {:type => "connector_plugin", :class => klass.to_s} unless klass == Stomp
+      end
+    end
+    require File.expand_path('stomp', File.dirname(__FILE__))
+
+    class Stomp_em<Stomp
       #this is effectively a singleton, but not mixin in Singleton beacuse mcollective isstantiates with new
       #TODO: may look at making singleton and patching with making :new public, recognizing that will only be called once
-
       module StompClient
         include EM::Protocols::Stomp
         def initialize(*args)
@@ -40,9 +27,17 @@ module MCollective
           connect :login => @login, :passcode => @passcode
         end
 
+        def receive
+          Log.error("Should not be called")
+          nil
+        end
+        def publish(msg)
+          Log.error("Should not be called")
+          nil
+        end
+
         def receive_msg msg
           if msg.command == "CONNECTED"
-pp [:is_connected]
             @connected = true
           else
             Stomp_em.process(msg) 
@@ -55,8 +50,7 @@ pp [:is_connected]
       end
 
       def initialize
-        @config = Config.instance
-        @subscriptions = []
+        super
         @connected = nil
         @connection = nil
       end
@@ -71,7 +65,8 @@ pp [:is_connected]
       end
 
       # Connects to the Stomp middleware
-      def connect
+      #TODO: write to use logic from super class
+      def connect(connector = ::Stomp::Connection)
         if @connection
           Log.debug("Already connection, not re-initializing connection")
           return

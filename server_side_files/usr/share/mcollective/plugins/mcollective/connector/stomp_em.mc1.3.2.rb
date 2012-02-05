@@ -1,3 +1,4 @@
+#TODO: need to see if need to sync fns other than procss useed in receive with updated 1.3.2 stomp of activemq connector; see what calss are used
 require 'eventmachine'
 module MCollective
   module Connector

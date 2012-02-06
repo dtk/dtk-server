@@ -40,22 +40,24 @@ module XYZ
       rest_ok_response state_info
     end
 
-    def rest__create_task_commit_changes()
-      hash = request.params
+    def rest__create_task_from_pending_changes()
+      scope_x = ret_request_params(:scope)||{}
       #TODO: put in check/error that there is no task created already, but not executed, that handles same changes
 
-      #compute scope
+      #process raw scope
       scope = 
-        if hash["target_ids"]
+        if scope_x["target_ids"]
           #TODO: stub
-        elsif hash["project_id"]
+        elsif scope_x["project_id"]
           sp_hash = {
             :cols => [:id],
-            :filter => [:and, :project_project_id, hash["project_id"].to_i]
+            :filter => [:and, :project_project_id, scope_x["project_id"].to_i]
            }
           target_ids = Model.get_objs(model_handle(:target),sp_hash).map{|r|r[:id]}
           {:target_ids => target_ids}
         else
+          #TODO: stub if scope by node_id
+          Log.info("node_id scope given (#{scope_x["node_id"]})") if scope_x["node_id"]
           target_ids = Model.get_objs(model_handle(:target),{:cols => [:id]}).map{|r|r[:id]}
           {:target_ids => target_ids}
         end
@@ -76,8 +78,6 @@ module XYZ
 
     def rest__execute()
       task_id =  ret_non_null_request_params(:task_id)
-      scope = ret_request_params(:scope)
-      pp [:stub, :scope, scope]
       task = Task.get_hierarchical_structure(id_handle(task_id))
 
       guards,violations = Attribute.ret_attr_guards_and_violations(task)

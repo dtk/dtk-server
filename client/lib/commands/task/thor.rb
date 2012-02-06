@@ -27,8 +27,10 @@ module R8::Client
     end
 
     desc "execute TASK-ID", "Execute task"
-    def execute(task_id)
-      post rest_url("task/execute"), "task_id" => task_id
+    def execute(task_id,scope=nil)
+      post_hash_body = {:task_id => task_id}
+      post_hash_body.merge!(:scope => scope) if scope
+      post rest_url("task/execute"), post_hash_body
     end
 
     desc "commit-changes-and-execute", "Commit changes and execute task"
@@ -36,6 +38,20 @@ module R8::Client
       response = commit_changes()
       if response.ok?
         execute(response.data["task_id"])
+      else
+        response
+      end
+    end
+
+    desc "converge-node NODE-ID", "(Re)Converge node"
+    def converge_node(node_id)
+      response = post(rest_url("task/create_rerun_state_changes"),:node_id => node_id)
+      if response.ok?
+        task_id = response.data["task_id"]
+        scope = {
+          :node_id => node_id
+        }
+        execute(task_id,scope)
       else
         response
       end

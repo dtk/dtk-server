@@ -181,12 +181,15 @@ limit = TestOveride if TestOveride
       request.env["QUERY_STRING"]
     end
 
-    def ret_request_params()
+    def ret_request_params(*params)
       return nil unless request_method_is_post?()
-      request.params
+      return request.params if params.size == 0
+      ret = params.map{|p|request.params[p.to_s]}
+      ret.size == 1 ? ret.first : ret
     end
 
     def ret_non_null_request_params(*params)
+      return nil unless request_method_is_post?()
       null_params = Array.new
       ret = params.map do |p|
         unless val = request.params[p.to_s]

@@ -328,7 +328,7 @@ module XYZ
            :convert => true,
            :join_type => :inner,
            :join_cond=>{:node_node_id =>:node__id},
-           :cols => [:id,:display_name]
+           :cols => [:id,:display_name,:group_id]
          }]
 
       virtual_column :cmps_for_clone_into_node, :type => :json, :hidden => true,

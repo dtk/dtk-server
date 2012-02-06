@@ -75,8 +75,9 @@ module XYZ
     end
 
     def rest__execute()
-      hash = request.params
-      task_id = hash["task_id"]
+      task_id =  ret_non_null_request_params(:task_id)
+      scope = ret_request_params(:scope)
+      pp [:stub, :scope, scope]
       task = Task.get_hierarchical_structure(id_handle(task_id))
 
       guards,violations = Attribute.ret_attr_guards_and_violations(task)
@@ -109,11 +110,12 @@ module XYZ
         rest_ok_response :task_id => task_id 
       end
     end
-    #TODO: test stub
-    def rerun_components(node_id)
+
+    def rest__create_rerun_state_changes()
+      node_id = ret_non_null_request_params(:node_id)
       node_idh = id_handle(node_id,:node)
       StateChange.create_rerun_state_changes([node_idh])
-      {:content => nil}
+      rest_ok_response
     end
 
 

@@ -34,10 +34,10 @@ module R8::Client
     end
 
     desc "commit-changes-and-execute", "Commit changes and execute task"
-    def commit_changes_and_execute()
+    def commit_changes_and_execute(scope=nil)
       response = commit_changes()
       if response.ok?
-        execute(response.data["task_id"])
+        execute(response.data["task_id"],scope)
       else
         response
       end
@@ -47,11 +47,10 @@ module R8::Client
     def converge_node(node_id)
       response = post(rest_url("task/create_rerun_state_changes"),:node_id => node_id)
       if response.ok?
-        task_id = response.data["task_id"]
         scope = {
           :node_id => node_id
         }
-        execute(task_id,scope)
+        commit_changes_and_execute(scope)
       else
         response
       end

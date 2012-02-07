@@ -39,7 +39,7 @@ module R8::Client
       return response unless response.ok?
       
       #TODO: if options["in-target"] then below must take this value
-      response = post(rest_url("task/create_task_commit_changes"))
+      response = post(rest_url("task/create_task_from_pending_changes"))
       return response unless response.ok?
 
       task_id = response.data["task_id"]

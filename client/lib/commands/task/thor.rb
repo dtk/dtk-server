@@ -42,6 +42,11 @@ module R8::Client
         response
       end
     end
+    #alias for commit-changes-and-execute
+    desc "start", "Commit changes and execute task"
+    def start(scope=nil)
+      commit_changes_and_execute(scope)
+    end
 
     desc "converge-node NODE-ID", "(Re)Converge node"
     def converge_node(node_id)

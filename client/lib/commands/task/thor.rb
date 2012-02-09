@@ -15,10 +15,10 @@ module R8::Client
     method_option "detail-level",:default => "summary", :aliases => "-d", :desc => "detail level to report task status"
     def status(task_id=nil)
       detail_level = options["detail-level"]
-      body = Hash.new
-      body[:detail_level] = detail_level
-      body[:task_id] = task_id if task_id
-      post rest_url("task/state_info"),body
+      post_hash_body = Hash.new
+      post_hash_body[:detail_level] = detail_level if detail_level
+      post_hash_body[:task_id] = task_id if task_id
+      post rest_url("task/state_info"),post_hash_body
     end
 
     desc "commit-changes", "Commit changes"
@@ -43,21 +43,34 @@ module R8::Client
       end
     end
     #alias for commit-changes-and-execute
-    desc "start", "Commit changes and execute task"
-    def start(scope=nil)
+    desc "simple-run", "Commit changes and execute task"
+    def simple_run(scope=nil)
       commit_changes_and_execute(scope)
     end
 
     desc "converge-node NODE-ID", "(Re)Converge node"
     def converge_node(node_id)
       response = post(rest_url("task/create_rerun_state_changes"),:node_id => node_id)
-      if response.ok?
-        scope = {:node_id => node_id}
-        commit_changes_and_execute(scope)
-      else
-        response
+      return response unless response.ok?
+
+      scope = {:node_id => node_id}
+      response = commit_changes_and_execute(scope)
+      while not task_complete(response) do
+        response = status()
+        sleep(TASK_STATUS_POLLING_INTERVAL)
       end
+      response
     end
+  private
+    @@count = 0
+   def task_complete(response)
+     return true unless response.ok?
+     @@count += 1
+     return true if (@@count * TASK_STATUS_POLLING_INTERVAL) > TASK_STATUS_MAX_TIME
+     %w{succeeded failed}.include?(response.data["status"])
+   end
+   TASK_STATUS_POLLING_INTERVAL = 3
+   TASK_STATUS_MAX_TIME = 60
   end
 end
 

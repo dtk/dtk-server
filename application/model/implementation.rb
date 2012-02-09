@@ -60,7 +60,11 @@ module XYZ
       Model.delete_instances(impls.map{|impl|impl.id_handle()})
     end
 
+    #TODO: this need s to be updated to rflect that can be on different branches
     def add_library_files_from_directory(repo_obj)
+      update_object!(:type)
+      repo_obj.update_object!(:local_dir)
+
       module_dir = repo_obj[:local_dir]
       file_paths = Array.new
       Dir.chdir(module_dir) do

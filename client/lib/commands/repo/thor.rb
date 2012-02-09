@@ -15,6 +15,13 @@ module R8::Client
       post_body_hash = {:repo_id => repo_id}
       post rest_url("repo/delete"),post_body_hash
     end
+
+    desc "sync REPO-ID", "Synchronize target repo from actual files"
+    def sync(repo_id)
+      post_body_hash = {:repo_id => repo_id}
+      post rest_url("repo/synchronize_target_repo"),post_body_hash
+    end
+
   end
 end
 

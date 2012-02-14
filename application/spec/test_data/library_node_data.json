@@ -167,23 +167,105 @@
           },
           "ds_key": "[:user_data, \"/library/test/ami-e7b1618e\"]"
         },
-        "ami-19a76670-micro": {
+        "ami-9bd102f2-large": {
           "type": "image",
           "ds_source_obj_type": "image",
-	  "os_type": "ubuntu",
+	  "os_type": "redhat",
           "ui": {
             "images": {
-              "tnail": "ubuntu.png",
-              "display": "ubuntu.png",
+              "tnail": "redhat.png",
+              "display": "redhat.png",
               "tiny": ""
             }
           },
-          "display_name": "Lucid micro",
+          "display_name": "RH5.7 64 large",
+          "data_source": "user_data",
+          "external_ref": {
+	    "size": "m1.large",
+            "type": "ec2_image",
+            "image_id": "ami-9bd102f2"
+          },
+          "node_interface": {
+            "eth0": {
+              "type": "ethernet",
+              "display_name": "eth0"
+            }
+          },
+          "attribute": {
+            "host_addresses_ipv4": {
+              "required": false,
+              "dynamic": true,
+              "semantic_type": {
+                ":array": "host_address_ipv4"
+              },
+              "display_name": "host_addresses_ipv4",
+              "value_derived": [
+                null
+              ],
+              "cannot_change": false,
+              "is_port": true,
+              "read_only": true,
+              "data_type": "json",
+              "semantic_type_summary": "host_address_ipv4",
+              "hidden": false
+            }
+          },
+          "monitoring_item": {
+            "check_ping": {
+              "display_name": "check_ping",
+              "description": "ping",
+              "enabled": true
+            },
+            "check_mem": {
+              "display_name": "check_mem",
+              "description": "Free Memory",
+              "enabled": true
+            },
+            "check_local_procs": {
+              "display_name": "check_local_procs",
+              "description": "Processes",
+              "enabled": true
+            },
+            "check_all_disks": {
+              "display_name": "check_all_disks",
+              "description": "Free Space All Disks",
+              "enabled": true
+            },
+            "check_memory_profiler": {
+              "display_name": "check_memory_profiler",
+              "description": "Memory Profiler",
+              "enabled": true
+            },
+            "check_iostat": {
+              "display_name": "check_iostat",
+              "description": "Iostat",
+              "enabled": true
+            },
+            "check_ssh": {
+              "display_name": "check_ssh",
+              "description": "SSH",
+              "enabled": true
+            }
+          },
+          "ds_key": "[:user_data, \"/library/test/ami-9bd102f2\"]"
+        },
+        "ami-9bd102f2-micro": {
+          "type": "image",
+          "ds_source_obj_type": "image",
+	  "os_type": "redhat",
+          "ui": {
+            "images": {
+              "tnail": "redhat.png",
+              "display": "redhat.png",
+              "tiny": ""
+            }
+          },
+          "display_name": "RH5.7 64 micro",
           "data_source": "user_data",
           "external_ref": {
 	    "size": "t1.micro",
             "type": "ec2_image",
-            "image_id": "ami-19a76670"
+            "image_id": "ami-9bd102f2"
           },
           "node_interface": {
             "eth0": {
@@ -247,89 +329,7 @@
               "enabled": true
             }
           },
-          "ds_key": "[:user_data, \"/library/test/ami-19a76670\"]"
-        },
-        "ami-19a76670-small": {
-          "type": "image",
-          "ds_source_obj_type": "image",
-	  "os_type": "ubuntu",
-          "ui": {
-            "images": {
-              "tnail": "ubuntu.png",
-              "display": "ubuntu.png",
-              "tiny": ""
-            }
-          },
-          "display_name": "Lucid small",
-          "data_source": "user_data",
-          "external_ref": {
-	    "size": "m1.small",
-            "type": "ec2_image",
-            "image_id": "ami-19a76670"
-          },
-          "node_interface": {
-            "eth0": {
-              "type": "ethernet",
-              "display_name": "eth0"
-            }
-          },
-          "attribute": {
-            "host_addresses_ipv4": {
-              "required": false,
-              "dynamic": true,
-              "semantic_type": {
-                ":array": "host_address_ipv4"
-              },
-              "display_name": "host_addresses_ipv4",
-              "value_derived": [
-                null
-              ],
-              "cannot_change": false,
-              "is_port": true,
-              "read_only": true,
-              "data_type": "json",
-              "semantic_type_summary": "host_address_ipv4",
-              "hidden": false
-            }
-          },
-          "monitoring_item": {
-            "check_ping": {
-              "display_name": "check_ping",
-              "description": "ping",
-              "enabled": true
-            },
-            "check_mem": {
-              "display_name": "check_mem",
-              "description": "Free Memory",
-              "enabled": true
-            },
-            "check_local_procs": {
-              "display_name": "check_local_procs",
-              "description": "Processes",
-              "enabled": true
-            },
-            "check_all_disks": {
-              "display_name": "check_all_disks",
-              "description": "Free Space All Disks",
-              "enabled": true
-            },
-            "check_memory_profiler": {
-              "display_name": "check_memory_profiler",
-              "description": "Memory Profiler",
-              "enabled": true
-            },
-            "check_iostat": {
-              "display_name": "check_iostat",
-              "description": "Iostat",
-              "enabled": true
-            },
-            "check_ssh": {
-              "display_name": "check_ssh",
-              "description": "SSH",
-              "enabled": true
-            }
-          },
-          "ds_key": "[:user_data, \"/library/test/ami-19a76670\"]"
+          "ds_key": "[:user_data, \"/library/test/ami-9bd102f2\"]"
         },
         "ami-aa37c984": {
           "type": "image",

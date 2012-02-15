@@ -69,7 +69,11 @@ module XYZ
       include_js_tpl(tpl_info[:src])
 #==========================
 
-      include_js('plugins/search.cmdhandler2')
+#      include_js('plugins/search.cmdhandler2')
+      include_js('plugins/r8.cmdbar.assemblies')
+      include_js('plugins/r8.cmdbar.components')
+      include_js('plugins/r8.cmdbar.nodes')
+      include_js('plugins/r8.cmdbar.tasks')
 
       projects_json = JSON.generate(projects)
 #TODO: figure out why this user init isnt firing inside of bundle and return

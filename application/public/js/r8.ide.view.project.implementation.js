@@ -52,14 +52,20 @@ if (!R8.IDE.View.project.implementation) {
 
 //					R8.IDE.openEditorView(_implementation);
 //DEBUG
-console.log('double clicked on implementation leaf:'+leafObjectId);
+//console.log('double clicked on implementation leaf:'+leafObjectId);
 					e.halt();
 					e.stopImmediatePropagation();
 				},this);
 			},
-			render: function() {
+			render: function(newImplementation) {
 				_leafNode = R8.Utils.Y.Node.create(R8.Rtpl['project_tree_leaf']({'leaf_item': _leafDef}));
 				_leafNodeId = _leafNode.get('id');
+
+				if(newImplementation==true) {
+//					_leafNode.addClass('jstree-leaf');
+					_leafNode.get('children').item(0).prepend('<ins class="jstree-icon">&nbsp;</ins>');
+					_leafNode.prepend('<ins class="jstree-icon">&nbsp;</ins>');
+				}
 
 				_leafBodyNode = _leafNode.get('children').item(0);
 				_leafBodyNodeId = _leafBodyNode.get('id');
@@ -81,14 +87,18 @@ console.log('double clicked on implementation leaf:'+leafObjectId);
 
 				var components = _implementation.get('components');
 				for(var c in components) {
-					this.addComponent(components[c]);
+					this.addComponent(components[c],newImplementation);
 				}
 
 				_componentsLeafNode.append(_componentsListNode);
+				if (newImplementation == true) {
+					_componentsLeafNode.get('children').item(0).prepend('<ins class="jstree-icon">&nbsp;</ins>');
+					_componentsLeafNode.prepend('<ins class="jstree-icon">&nbsp;</ins>');
+				}
 				_childrenListNode.append(_componentsLeafNode);
 
 				//Need to pass _childrenListNode to renderFileTree b/c of recursive behavior to render files and folders
-				this.renderFileTree(_implementation.get('file_assets'),_childrenListNode);
+				this.renderFileTree(_implementation.get('file_assets'),_childrenListNode,newImplementation);
 
 				_leafNode.append(_childrenListNode);
 				return _leafNode;
@@ -115,14 +125,22 @@ console.log('double clicked on implementation leaf:'+leafObjectId);
 //--------------------------------------
 //IMPLEMENTATION VIEW FUNCTIONS
 //--------------------------------------
-			addComponent: function(component) {
+			addComponent: function(component,newImplementation) {
 				var componentLeafNode = component.getView('project').render();
+				if(newImplementation==true) {
+					componentLeafNode.addClass('jstree-leaf');
+					componentLeafNode.get('children').item(0).prepend('<ins class="jstree-icon">&nbsp;</ins>');
+					componentLeafNode.prepend('<ins class="jstree-icon">&nbsp;</ins>');
+				}
 				_componentsListNode.append(componentLeafNode);
 			},
-			renderFileTree: function(file_assets,listNode) {
+			renderFileTree: function(file_assets,listNode,newImplementation) {
+//DEBUG
+console.log('Inside renderFileTree, listNode is:'+listNode);
+//console.log(arguments);
 				file_assets.sort(this.sortAssetTree);
 
-				if (typeof(listNode) == 'undefined') {
+				if (typeof(listNode) == 'undefined' || listNode == false) {
 					var listNode = R8.Utils.Y.Node.create('<ul></ul>');
 				}
 				for(var f in file_assets) {
@@ -136,7 +154,13 @@ console.log('double clicked on implementation leaf:'+leafObjectId);
 								'name': file_assets[f].display_name
 							};
 							var fileNode = R8.Utils.Y.Node.create(R8.Rtpl['project_tree_leaf']({'leaf_item': dirLeaf}));
-							fileNode.append(this.renderFileTree(file_assets[f].children));
+							if(newImplementation==true) {
+//								fileNode.addClass('jstree-leaf');
+								fileNode.get('children').item(0).prepend('<ins class="jstree-icon">&nbsp;</ins>');
+								fileNode.prepend('<ins class="jstree-icon">&nbsp;</ins>');
+							}
+							fileNode.append(this.renderFileTree(file_assets[f].children),false,newImplementation);
+
 							ulDNode.append(fileNode);
 							listNode.append(ulDNode);
 							break;
@@ -150,6 +174,13 @@ console.log('double clicked on implementation leaf:'+leafObjectId);
 								'name': file_assets[f].file_name
 							};
 							var fileNode = R8.Utils.Y.Node.create(R8.Rtpl['project_tree_leaf']({'leaf_item': fileLeaf}));
+//DEBUG
+//console.log('rendering file, newImplementation is:'+newImplementation+ '   for file:'+file_assets[f].file_name);
+							if(newImplementation==true) {
+								fileNode.addClass('jstree-leaf');
+								fileNode.get('children').item(0).prepend('<ins class="jstree-icon">&nbsp;</ins>');
+								fileNode.prepend('<ins class="jstree-icon">&nbsp;</ins>');
+							}
 							listNode.append(fileNode);
 							break;
 					}

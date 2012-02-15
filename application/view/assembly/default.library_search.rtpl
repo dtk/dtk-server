@@ -1,9 +1,9 @@
 
 
-<div id="search-assembly-{%=assembly[:id]%}" class="component-result" data-id="{%=assembly[:id]%}">
+<div id="search-assembly-{%=assembly[:id]%}" class="assembly-result" data-id="{%=assembly[:id]%}">
 	<div class="body" data-id="{%=assembly[:id]%}">
 		<div class="main-content">
-			<div class="component-icon">
+			<div class="assembly-icon">
 				<img title="{%=assembly[:i18n]%}" src="{%=assembly[:image_path]%}"/>
 			</div>
 			<div class="icon-divider"></div>

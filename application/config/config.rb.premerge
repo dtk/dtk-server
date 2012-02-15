@@ -18,6 +18,7 @@ R8::Config[:default_layout] = "default"
 #Application paths.., these should be set/written by templating engine on every call
 #R8::Config[:base_uri] = "http://172.22.101.112:7000"
 R8::Config[:base_uri] = R8::EnvironmentConfig::Base_Uri
+R8::Config[:base_rest_uri] = R8::EnvironmentConfig::Base_REST_Uri
 R8::Config[:base_js_uri] = R8::Config[:base_uri] + "/js"
 R8::Config[:base_js_cache_uri] = R8::Config[:base_uri] + "/js/cache"
 R8::Config[:base_css_uri] = R8::Config[:base_uri] + "/css"

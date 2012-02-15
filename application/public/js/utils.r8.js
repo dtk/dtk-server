@@ -5,8 +5,8 @@ if (!R8.Utils) {
 	 */
 	R8.Utils = function(){
 //DEBUG
-console.log(YUI_config);
-console.log(YUI);
+//console.log(YUI_config);
+//console.log(YUI);
 		return {
 
 			/*
@@ -185,7 +185,7 @@ String.prototype.startsWith = function (str){
 		}
 	}();
 //DEBUG
-console.log('inside of R8.Utils at the bottom....');
-console.log(R8.Utils.Y);
+//console.log('inside of R8.Utils at the bottom....');
+//console.log(R8.Utils.Y);
 
 }

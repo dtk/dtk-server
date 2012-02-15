@@ -76,6 +76,8 @@ if (!R8.IDE.View.target.editor) {
 			_closedPluginContentHeight = 2,
 			_pluginDefs = {
 				'node-search': {
+					'id': 'node-search',
+					'type':'nodes',
 					'default_height': 80,
 					'resizeable': false,
 					'i18n': 'Nodes',
@@ -96,6 +98,8 @@ if (!R8.IDE.View.target.editor) {
 					}
 				},
 				'component-search': {
+					'id': 'component-search',
+					'type':'components',
 					'default_height': 80,
 					'resizeable': false,
 					'i18n': 'Components',
@@ -116,6 +120,8 @@ if (!R8.IDE.View.target.editor) {
 					}
 				},
 				'assembly-search': {
+					'id': 'assembly-search',
+					'type':'assemblies',
 					'default_height': 80,
 					'resizeable': false,
 					'i18n': 'Assemblies',
@@ -135,7 +141,14 @@ if (!R8.IDE.View.target.editor) {
 							delete(this.data[key]);
 					}
 				},
-				'logging': {
+				'task-viewer': {
+					'id': 'task-viewer',
+					'type':'tasks',
+					'default_height': 200,
+					'resizeable': false,
+					'i18n': 'Tasks',
+				}
+/*				'logging': {
 					'default_height': 200,
 					'resizeable': false,
 					'i18n': 'Logging',
@@ -173,6 +186,7 @@ if (!R8.IDE.View.target.editor) {
 							delete(this.data[key]);
 					}
 				}
+*/
 			},
 			_plugins = {},
 
@@ -192,8 +206,14 @@ if (!R8.IDE.View.target.editor) {
 				_pluginInputNode = R8.Utils.Y.one('#'+this.get('id')+'-plugin-input');
 
 				for(var p in _pluginDefs) {
-					_plugins[p] = _pluginDefs[p];
-					_plugins[p].node = R8.Utils.Y.one('#'+this.get('id')+'-plugin-'+p);
+//DEBUG
+//					_plugins[p] = _pluginDefs[p];
+//					_plugins[p].node = R8.Utils.Y.one('#'+this.get('id')+'-plugin-'+p);
+					var pluginObj = _pluginDefs[p].type;
+					_plugins[p] = new R8.Cmdbar[pluginObj](_pluginDefs[p],this);
+					_pluginBarNode.append(_plugins[p].render());
+					_plugins[p].init();
+//					_plugins[p].node = R8.Utils.Y.one('#'+this.get('id')+'-plugin-'+p);
 				}
 
 				if(_ui == null) _ui = {"items":{}};
@@ -398,6 +418,23 @@ if (!R8.IDE.View.target.editor) {
 									</div>\
 							</div>';
 
+				_contentTpl = '<div id="'+id+'-wrapper" style="">\
+									<div id="'+id+'" class="target-viewspace editor-target" data-id="'+_target.get('id')+'">\
+									</div>\
+									<div id="'+id+'-plugin-content-wrapper" class="plugin-content-wrapper">\
+									</div>\
+									<div id="'+id+'-plugin-bar" class="plugin-bar">\
+										<div id="'+id+'-plugin-input-content" class="input-content">\
+											<div id="'+id+'-plugin-input-wrapper" class="plugin-input-wrapper">\
+												<form id="'+id+'-plugin-input-form">\
+												<input id="'+id+'-plugin-input" name="plugin-input" type="text" class="plugin-input"/>\
+												</form>\
+											</div>\
+										</div>\
+										<div id="" class="divider"></div>\
+									</div>\
+							</div>';
+
 				return _contentTpl;
 
 //				_contentWrapperNode = R8.Utils.Y.Node.create(_contentTpl);
@@ -430,6 +467,9 @@ if (!R8.IDE.View.target.editor) {
 						return _idPrefix+_target.get('id');
 //						return _target.get('id');
 						break;
+					case "model":
+						return _target;
+						break;
 					case "name":
 						return _target.get('name');
 						break;
@@ -442,6 +482,9 @@ if (!R8.IDE.View.target.editor) {
 						break;
 					case "items":
 						return _viewSpaces[_currentViewSpace].get('items');
+						break;
+					case "pluginContentNode":
+						return _pluginContentNode;
 						break;
 				}
 			},
@@ -488,6 +531,11 @@ if (!R8.IDE.View.target.editor) {
 			},
 //TODO: make remove evented like add using IDE event framework
 			removeNode: function(nodeRemoveId) {
+				var links = _items[nodeRemoveId].get('_node').get('links');
+				for (var l in links) {
+					_target.removeLink(l);
+				}
+
 				this.removeItem(nodeRemoveId);
 			},
 			removeItem: function(itemRemoveId) {
@@ -1059,33 +1107,41 @@ if (!R8.IDE.View.target.editor) {
 //---------------------------------------------
 			pluginClick: function(e) {
 				var nodeId = e.currentTarget.get('id'),
-					pluginId = nodeId.replace(this.get('id')+'-plugin-','');
+					pluginId = nodeId.replace(this.get('id')+'-cmdbar-plugin-','');
+//					pluginId = nodeId.replace(this.get('id')+'-plugin-','');
 
 				if(_pluginContentOpen && _activePlugin==pluginId) {
 					_pluginContentNode.setStyles({'height':_closedPluginContentHeight+'px'});
 					_pluginContentOpen = false;
-					_plugins[pluginId].node.removeClass('active');
+					_plugins[pluginId].get('node').removeClass('active');
+					_plugins[_activePlugin].blur();
+//DEBUG
+//console.log('same open plugin was clicked....');
 					return;
 				} else {
 					for(var p in _plugins) {
-						_plugins[p].node.removeClass('active');
+						_plugins[p].get('node').removeClass('active');
 					}
 				}
 
 				if(_activePlugin != '') {
-					var blurFunc = _plugins[_activePlugin].blurCallback;
-					this[blurFunc]();
+//					var blurFunc = _plugins[_activePlugin].blurCallback;
+//					this[blurFunc]();
+					_plugins[_activePlugin].blur();
 				}
+
 //TODO: revisit, should be a plugin object with ref to target editor object
-				var loadCallback = _plugins[pluginId].loadCallback;
-				this[loadCallback]();
+//				var loadCallback = _plugins[pluginId].loadCallback;
+//				this[loadCallback]();
+
+				_plugins[pluginId].focus();
 
 				_activePlugin = pluginId;
-				var contentHeight = _plugins[pluginId].default_height;
+				var contentHeight = _plugins[pluginId].get('default_height');
 				_pluginContentNode.setStyles({'height':contentHeight+'px'});
 				_pluginContentOpen = true;
 
-				_plugins[pluginId].node.addClass('active');
+				_plugins[pluginId].get('node').addClass('active');
 			},
 			searchNodes: function() {
 				this.searchNodesFocus();

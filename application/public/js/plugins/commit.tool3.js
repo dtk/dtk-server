@@ -11,7 +11,8 @@ if(!R8.CommitTool3) {
 			_submitBtnNode = null,
 			_taskDef = null;
 
-		var _tabs = ['change-list','required-attrs','details'];
+//		var _tabs = ['change-list','required-attrs','details'];
+		var _tabs = ['details','required-attrs'];
 
 		return {
 			init: function() {

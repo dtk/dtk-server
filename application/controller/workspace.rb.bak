@@ -834,9 +834,6 @@ POSSIBLE CHANGES TO HASH
       tpl = R8Tpl::TemplateR8.new("workspace/commit_ide",user_context())
       tpl.assign(:_app,app_common())
 
-      if required_attr_list.length == 0
-        tpl.assign(:no_required_attrs,'<tr><td class="label"><i>No Required Attributes Missing</i></td></tr>')
-      end
       tpl.assign(:required_attr_list,required_attr_list)
 
 #TODO: using datacenters as environments right now, redo later on
@@ -867,7 +864,7 @@ POSSIBLE CHANGES TO HASH
       commit_tree_json = JSON.generate(commit_tree)
 
       run_javascript("R8.CommitTool3.init();")
-#      run_javascript("R8.CommitTool3.renderTree(#{commit_tree_json},'edit','change-list-tab-content');")
+      run_javascript("R8.CommitTool3.renderTree(#{commit_tree_json},'edit','change-list-tab-content');")
 
       return {
         :content=> tpl.render(),

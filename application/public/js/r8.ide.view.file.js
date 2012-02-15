@@ -9,6 +9,9 @@ if (!R8.IDE.View.file) {
 			_initialized = false,
 
 			_file = null,
+			_lineNo = 1,
+			_cursorPos = null,
+			_fileChanged = false,
 
 			_events = {};
 
@@ -44,11 +47,19 @@ if (!R8.IDE.View.file) {
 				}
 			},
 			focus: function() {
+				R8.Editor.setViewContext(this);
 				this.resize();
 				R8.Utils.Y.one('#'+_panel.get('id')+'-editor-wrapper').setStyle('display','block');
 				this.setEditorContent();
+//DEBUG
+//console.log('should be navigating to cursor pos...');
+//console.log(_cursorPos);
+				R8.Editor.goToPos(_cursorPos);
+				R8.Editor.focus();
 			},
 			blur: function() {
+				_cursorPos = R8.Editor.get('cursorPos');
+				_file.content = R8.Editor.getEditorContent();
 				R8.Utils.Y.one('#'+_panel.get('id')+'-editor-wrapper').setStyle('display','none');
 
 			},
@@ -72,7 +83,13 @@ if (!R8.IDE.View.file) {
 					setTimeout(callback,100);
 					return;
 				}
+
 				R8.Editor.setEditorContent(_file.content);
+
+				var callback = function() {
+					R8.Editor.goToLine(_lineNo);
+				}
+				setTimeout(callback,150);
 			}
 		}
 	};

@@ -22,9 +22,6 @@ if(!R8.UI) {
 
 			return {
 				init: function() {
-//DEBUG
-console.log('inside of ui.r8....');
-console.log(R8.Utils.Y);
 					_pageContainerNode = R8.Utils.Y.one('#'+_pageContainerNodeId);
 					_topBarNode = R8.Utils.Y.one('#page-topbar');
 					if(_topBarNode != null) {

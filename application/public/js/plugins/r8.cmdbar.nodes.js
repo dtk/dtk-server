@@ -1,7 +1,6 @@
 
 if (!R8.Cmdbar) R8.Cmdbar = {};
 if (!R8.Cmdbar.nodes) {
-
 	R8.Cmdbar.nodes = function(def, target) {
 		var _def = def,
 			_id = _def['id'],

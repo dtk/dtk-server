@@ -4,33 +4,28 @@ module XYZ
   class StateChange < Model
     extend GetPendingChangesClassMixin
 
-    def self.update_with_current_names!(state_changes)
-      #looking just for node names
-      return if state_changes.empty?
-      sample_sc = state_changes.first
-      cols = sample_sc.keys
-      return unless cols.include?(:display_name)
-
-      filter_ids = nil 
-      if cols.include?(:type) 
-        filter_ids = state_changes.select{|r|r[:type] == "create_node"}.map{|r|r[:id]}
-        #shortcut if cols include type and no "create_node" columns
-        return if filter_ids.empty?
-      end
-      sp_hash = {
-        :cols => [:id,:type,:created_node]
-      }
-      sp_hash[:filter] = [:oneof,:id,filter_ids] if filter_ids
-
-      state_change_mh = sample_sc.model_handle
-      ndx_node_name_info = get_objs(state_change_mh,sp_hash).inject({}) do |h,r|
-        node_name = r[:node][:display_name]
-        h.merge(r[:id] => ret_display_name(:node,node_name))
-      end
-      state_changes.each do |r|
-        if updated_name = ndx_node_name_info[r[:id]]
-          r[:display_name] = updated_name
+    def self.list_pending_changes(target_idh)
+      #TODO: may pass in options so dont get all fields that are returned in flat_list_pending_changes
+      pending_changes = flat_list_pending_changes(target_idh)
+      ndx_ret = Hash.new
+      pending_changes.each do |ch|
+        node_id = ch[:node][:id]
+        node = ndx_ret[node_id] ||= {:node_id => node_id, :node_name => ch[:node][:display_name], :node_changes => Array.new, :ndx_cmp_changes => Hash.new} 
+        if ch[:type] == "create_node"
+          node[:node_changes] << {:name => ret_display_name(ch)}
+        else
+          cmp_id = ch[:component][:id]
+          cmp = node[:ndx_cmp_changes][cmp_id] ||= {:component_id => cmp_id, :component_name => ch[:component][:display_name], :changes => Array.new}
+          #TODO stub
+          cmp[:changes] << ret_display_name(ch)
         end
+      end
+      ndx_ret.values.map do |n|
+        changes = n[:node_changes] + n[:ndx_cmp_changes].values
+        el = {:node_id => n[:node_id], :node_name => n[:node_name]}
+        el.merge!(:node_changes => n[:node_changes]) unless n[:node_changes].empty?
+        el.merge!(:component_changes => n[:ndx_cmp_changes].values) unless n[:ndx_cmp_changes].empty?
+        el
       end
     end
 
@@ -103,8 +98,7 @@ module XYZ
         ref = "#{ref_prefix}#{(i+=1).to_s}"
         id = item[:new_item].get_id()
         parent_id = item[:parent].get_id()
-        #TODO: think wil change to have display name derived on spot; problem is for example name of node changes after state change saved
-        display_name = ret_display_name(object_model_name,item[:new_item][:display_name])
+        display_name = ret_stub_display_name(object_model_name,item[:new_item][:display_name])
         hash = {
           :ref => ref,
           :display_name => display_name,
@@ -121,7 +115,26 @@ module XYZ
       create_from_rows(model_handle,rows,{:convert => true})
     end
 
-    def self.ret_display_name(object_model_name,item_display_name)
+    def self.ret_display_name(flat_pending_ch)
+
+      type = flat_pending_ch[:type]
+      node_name = flat_pending_ch[:node][:display_name]
+      suffix = 
+        case type
+         when "create_node"
+          node_name
+         when "install_component", "update_implementation"
+          cmp_name = flat_pending_ch[:component][:display_name]
+          "#{node_name}:#{cmp_name}"
+         else
+          Log.error("need rules to treat type (#{type})")
+          nil
+        end
+      suffix ? "#{type}(#{suffix})" : type
+    end
+
+    #called 'stub'  because objects refernced can change
+    def self.ret_stub_display_name(object_model_name,item_display_name)
       display_name_prefix = 
         case object_model_name
          when :attribute then "setting-attribute"

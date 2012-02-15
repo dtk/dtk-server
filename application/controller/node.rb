@@ -8,29 +8,13 @@ module XYZ
       unless parent_id = node_group.update_object!(:datacenter_datacenter_id)[:datacenter_datacenter_id]
         raise Error.new("node group with id (#{node_group_id.to_s}) given is not in a target")
       end
-      #TODO: can check if node already belongs to group; in which case this becomes a no op
-
-      #create teh node_group_relation item to indicate node group membership
-      save_hash = {
-        "model" => "node_group_relation",
-        "display_name" => "n#{node_id.to_s}-ng#{node_group_id.to_s}",
-        "node_id" => node_id,
-        "node_group_id" => node_group_id,
-        "parent_id" => parent_id,
-        "parent_model_name" => "target"
-      }
-      save(save_hash)
-
-      #clone the components and links associated with node group to teh node
-      node = create_object_from_id(node_id,:node)
-      node_group.clone_into_node(node)
+      node = create_object_from_id(node_id)
+      node_group.add_member(node,id_handle(parent_id,:target))
       rest_ok_response
     end
 
     def get(id)
-#      node = get_object_by_id(id,:node)
       node = create_object_from_id(id)
-pp node.get_obj_with_common_cols()      
       return {:data=>node.get_obj_with_common_cols()}
     end
 

@@ -21,15 +21,25 @@ module XYZ
       create_from_rows(port_link_mh,rows,create_opts).map{|hash|new(hash,port_link_mh[:c])}
     end
 
+    #somewhat of misnomer since with :donot_create_port_link, port links not created
     def self.create_port_and_attr_links(parent_idh,port_link_hash,opts={})
       #get the associated link_def_link TODO: if it does not exist means constraint violation
       link_def_link, components = get_link_def_and_components(parent_idh,port_link_hash)
       raise PortLinkError.new("Illegal link") unless link_def_link
-      port_link = (opts[:port_link_created_already] ? port_link_hash : create_from_links_hash(parent_idh,[port_link_hash]).first)
-      link_def_link.process(parent_idh,components,opts.merge(:port_link_idh => port_link.id_handle))
+      if opts[:donot_create_port_link]
+        port_link = port_link_hash 
+        unless port_link_idh = opts[:port_link_idh]
+          raise Error.new("if option :donot_create_port_link, so must :port_link_idh")
+        end
+      else
+        port_link = create_from_links_hash(parent_idh,[port_link_hash]).first
+        port_link_idh = port_link.id_handle
+      end
+      link_def_link.process(parent_idh,components,opts.merge(:port_link_idh => port_link_idh))
       port_link
     end
 
+   private
     def self.get_link_def_and_components(parent_idh,port_link_hash)
       #returns [link_def_link,relevant_components]
       ret = [nil,nil]

@@ -1,5 +1,8 @@
 module XYZ
   class AssemblyController < Controller
+    def rest__list_from_library()
+      rest_ok_response Assembly.list_from_library(model_handle())
+    end
 
     def test_get_items(id)
       assembly = id_handle(id,:component).create_object()
@@ -53,6 +56,28 @@ module XYZ
       return {:data=>'some tree data goes here'}
     end
 
+    #TODO: unify with clone(id)
+    def rest__clone()
+      target_idh = target_idh_with_default(request.params["target_id"])
+      assembly_id = ret_non_null_request_params(:assembly_id)
+      id_handle = id_handle(assembly_id)
+
+      #TODO: need to copy in avatar when hash["ui"] is non null
+      override_attrs = Hash.new
+      target_object = target_idh.create_object()
+      clone_opts = {:ret_new_obj_with_cols => [:id]}
+      new_assembly_obj = target_object.clone_into(id_handle.create_object(),override_attrs,clone_opts)
+      id = new_assembly_obj && new_assembly_obj.id()
+
+      #compute ui positions
+      nested_objs = new_assembly_obj.get_node_assembly_nested_objects()
+      #TODO: this does not leverage assembly node relative positions
+      nested_objs[:nodes].each do |node|
+        target_object.update_ui_for_new_item(node[:id])
+      end
+      rest_ok_response(:id => id)
+    end
+
     def clone(id)
       handle_errors do
         id_handle = id_handle(id)
@@ -76,6 +101,17 @@ module XYZ
 
         #just want external ports
         (nested_objs[:nodes]||[]).each{|n|(n[:ports]||[]).reject!{|p|p[:type] == "component_internal"}}
+
+        #TODO: ganglia hack: remove after putting this info in teh r8 meta files
+        (nested_objs[:nodes]||[]).each do |n|
+          (n[:ports]||[]).each do |port|
+            if port[:display_name] =~ /ganglia__server/
+              port[:location] = "east"
+            elsif  port[:display_name] =~ /ganglia__monitor/
+              port[:location] = "west"
+            end
+          end
+        end
 
 #TODO: get node positions going for assemblies
         #compute uui positions

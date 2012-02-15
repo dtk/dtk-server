@@ -1,4 +1,12 @@
 {
+  :columns=>{
+    :profile_template_id=>{
+      :type=>:bigint,
+      :foreign_key_rel_type=>:node,
+      :on_delete=>:set_null,
+      :on_update=>:set_null
+    }
+  },
   :virtual_columns=>{
     :node_member=> {
       :type=>:json,

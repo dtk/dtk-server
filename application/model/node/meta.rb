@@ -26,6 +26,19 @@ module XYZ
       #TODO how to have this conditionally "show up"
       virtual_column :ec2_security_groups, :path => [:ds_attributes,:groups] 
 
+      #can be null; points to the canonical member (a node template in the library) which is used by default when do node_group add_node 
+      foreign_key :canonical_template_node_id, :node, FK_SET_NULL_OPT
+      virtual_column :canonical_template_node, :type => :json, :hidden => true,
+        :remote_dependencies =>
+        [{
+           :model_name => :node,
+           :alias => :template_node,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond => {:id => q(:node,:canonical_template_node_id)},
+           :cols => [:id,:group_id, :display_name]
+         }]
+
       virtual_column :project, :type => :json, :hidden => true,
         :remote_dependencies =>
         [{
@@ -315,10 +328,10 @@ module XYZ
            :convert => true,
            :join_type => :inner,
            :join_cond=>{:node_node_id =>:node__id},
-           :cols => [:id,:display_name]
+           :cols => [:id,:display_name,:group_id]
          }]
 
-      virtual_column :cmps_not_on_create_events, :type => :json, :hidden => true,
+      virtual_column :cmps_for_clone_into_node, :type => :json, :hidden => true,
       :remote_dependencies =>
         [
          {
@@ -327,7 +340,7 @@ module XYZ
            :join_type => :inner,
            :join_cond=>{:node_node_id =>:node__id},
            :filter => [:eq, :from_on_create_event, false],
-           :cols => [:id,:display_name]
+           :cols => [:id,:display_name,:dependencies, :extended_base, :component_type] #columns needed by Component.find_component_dependencies
          }]
 
         virtual_column :has_pending_change, :type => :boolean, :hidden => true,

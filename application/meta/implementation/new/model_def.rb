@@ -30,10 +30,11 @@
        },
        {
          :model_name=>:node,
+         :convert => true,
          :join_type=>:inner,
          :join_cond=>{:id=>:component__node_node_id},
          :filter => [:neq,:datacenter_datacenter_id,nil],
-         :cols=>[:id,:group_id,:display_name,:datacenter_datacenter_id]
+         :cols=>[:id,:type,:group_id,:display_name,:datacenter_datacenter_id]
        }]
     },
     #getting just templates with this implementation

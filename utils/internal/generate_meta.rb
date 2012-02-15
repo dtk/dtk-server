@@ -540,11 +540,14 @@ module XYZ
       set_label(name)
       self[:label] = t(name) 
       self[:description] = unknown
-      self[:type] = t("string") #TODO: stub
+      self[:type] = t("string") #default taht can be overriten
       var_default = nil
       if default = attr_ps[:default]
-        var_default = default.contains_variable?()
-        self[:default_info] = var_default ? unknown : t(default.to_s) 
+        if default.set_default_value?()
+          self[:type] = t(default.data_type)
+          var_default = default.contains_variable?()
+          self[:default_info] = var_default ? unknown : t(default.to_s) 
+        end
       end
       if var_default
         self[:required] = t(false)

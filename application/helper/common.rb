@@ -20,6 +20,17 @@ module Ramaze::Helper
       user_obj = user_object()
       ModelHandle.create_from_user(user_obj,model_name_x)
     end
+
+    #looks for default if no target is given
+    def target_idh_with_default(target_id=nil)
+      if target_id
+        id_handle(target_id,:target)
+      else
+        targets = Model.get_objs(model_handle(:target),:cols => [:id])
+        raise Error.new("Cannot find a unique default target") unless targets.size == 1
+        targets.first.id_handle()
+      end
+    end
    private
 
     #helpers that interact with model
@@ -170,12 +181,15 @@ limit = TestOveride if TestOveride
       request.env["QUERY_STRING"]
     end
 
-    def ret_request_params()
+    def ret_request_params(*params)
       return nil unless request_method_is_post?()
-      request.params
+      return request.params if params.size == 0
+      ret = params.map{|p|request.params[p.to_s]}
+      ret.size == 1 ? ret.first : ret
     end
 
     def ret_non_null_request_params(*params)
+      return nil unless request_method_is_post?()
       null_params = Array.new
       ret = params.map do |p|
         unless val = request.params[p.to_s]
@@ -184,15 +198,14 @@ limit = TestOveride if TestOveride
         end
       end
       raise_error_null_params?(*null_params)
-      ret
+      ret.size == 1 ? ret.first : ret
     end
 
     def raise_error_null_params?(*null_params)
       unless null_params.empty?
-        raise Error.new("There parametrs should not be null (#{null_params.join(",")})")
+        raise Error.new("These parameters should not be null (#{null_params.join(",")})")
       end
     end
-
 
     def request_method_is_get?()
       request.env["REQUEST_METHOD"] == "GET"

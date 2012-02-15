@@ -13,6 +13,7 @@ module R8::Client::ViewMeta
       :external_ref_def => 
       [
        :instance_id,
+       :dns_name,
        :image_id
       ]
     }

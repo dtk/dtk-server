@@ -72,4 +72,9 @@
   :user_account_tom => "Tom",
   :user_account_rich => "Rich",
   :user_account_nate => "Nate",
+
+###### hdp
+  "hdp-hadoop__namenode-conn".to_sym => "HDP Namenode conn",
+  "hdp-hadoop__namenode".to_sym => "HDP Namenode",
+  "hdp-hadoop__datanode".to_sym => "HDP Datanode",
 }

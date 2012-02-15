@@ -14,12 +14,13 @@ module XYZ
     def clone_into(clone_source_object,override_attrs={},opts={})
       target_id_handle = id_handle_with_auth_info()
        ##constraints
-      if clone_source_object.class == Component and self.class == Node
-        constraints = clone_source_object.get_constraints!(:update_object => true)
-        if constraints
-          target = {"target_node_id_handle" => target_id_handle}
-          constraint_opts = {:raise_error_when_error_violation => true, :update_object => clone_source_object}
-          constraints.evaluate_given_target(target,constraint_opts)
+      unless opts[:no_constraint_checking]
+        if clone_source_object.class == Component and self.class == Node
+          if constraints = clone_source_object.get_constraints!(:update_object => true)
+            target = {"target_node_id_handle" => target_id_handle}
+            constraint_opts = {:raise_error_when_error_violation => true, :update_object => clone_source_object}
+            constraints.evaluate_given_target(target,constraint_opts)
+          end
         end
       end
 

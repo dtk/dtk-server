@@ -106,14 +106,38 @@ eos
         response
       end
 
-      def self.get_node_state(node)
+      def self.get_and_update_node_state!(node,attribute_names)
+        ret = Hash.new
         instance_id = (node[:external_ref]||{})[:instance_id]
         unless instance_id
           Log.error("get_node_state called when #{node_print_form(node)} does not have instance id")
-          return nil
+          return ret
         end
-        conn().server_get(instance_id)
+        raw_state_info = conn().server_get(instance_id)
+        return ret unless raw_state_info
+        #attribute_names in normalized form so need to convert
+        change = nil
+        attribute_names.each do |normalized_attr_name|
+          if raw_info = AttributeToSetMapping[normalized_attr_name]
+            raw_name = raw_info[:raw_name]
+            raw_val = raw_state_info[raw_name]
+            if normalized_val = (raw_info[:fn] ? raw_info[:fn].call(raw_state_info) : raw_val) 
+              change = true
+              ret[normalized_attr_name] = normalized_val
+              node[:external_ref][raw_name] = raw_val
+            end
+          end
+        end
+        node.update(:external_ref => node[:external_ref]) if change
+        ret
       end
+      #TODO: if can legitimately have nil value then need to change update
+      AttributeToSetMapping = {
+        :host_addresses_ipv4 => {
+          :raw_name => :dns_name,
+          :fn => lambda{|raw|raw[:dns_name] && [raw[:dns_name]]} #null if no value
+        }
+      }
 
       def self.get_node_operational_status(node)
         instance_id = (node[:external_ref]||{})[:instance_id]

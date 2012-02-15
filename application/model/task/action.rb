@@ -162,35 +162,27 @@ module XYZ
       end
 
       def get_dynamic_attributes(result)
-        node = self[:node]
-        updated_node_state = CommandAndControl.get_node_state(node)
         ret = Array.new
-        attributes_to_set().each do |attr|
-          unless fn = AttributeToSetMapping[attr[:display_name]]
-            Log.error("no rules to process attribute to set #{attr[:display_name]}")
-          else
-            new_value = fn.call(updated_node_state)
-            unless false #TODO: temp for testing attr[:value_asserted] == new_value
-              unless new_value.nil?
-                attr[:attribute_value] = new_value
-                ret << attr
-              end
-            end
-          end
+        node = self[:node]
+        attrs_to_set = attributes_to_set()
+        attr_names = attrs_to_set.map{|a|a[:display_name].to_sym}
+        av_pairs = CommandAndControl.get_and_update_node_state!(node,attr_names)
+        return ret if av_pairs.empty?
+        attrs_to_set.each do |attr|
+          attr_name = attr[:display_name].to_sym
+          #TODO: can test and case here whether value changes such as wehetehr new ip address
+          attr[:attribute_value] = av_pairs[attr_name] if av_pairs.has_key?(attr_name)
+          ret << attr
         end
         ret
       end
-      #TODO: if can legitimately have nil value then need to change update
-      AttributeToSetMapping = {
-        "host_addresses_ipv4" =>  lambda{|server|(server||{})[:dns_name] && [server[:dns_name]]} #null if no value
-      }
 
       def add_attribute!(attr)
         self[:attributes] << attr
       end
 
       def attributes_to_set()
-        self[:attributes].reject{|a| not a[:dynamic]} 
+        self[:attributes].reject{|a| not a[:dynamic]}
       end
 
       def ret_command_and_control_adapter_info()

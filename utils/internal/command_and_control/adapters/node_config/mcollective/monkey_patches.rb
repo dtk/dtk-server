@@ -1,5 +1,5 @@
 require 'mcollective'
-######## Monkey patches for version 1.2 
+######## Monkey patches for version 1.3.2 
 module MCollective
   class Client
     def r8_set_context(multiplexer)
@@ -27,25 +27,36 @@ module MCollective
     end
 
     def r8_generate_request_id(msg, agent, filter = {})
-      target = Util.make_target(agent, :command, collective)
-      reqid = Digest::MD5.hexdigest("#{@config.identity}-#{Time.now.to_f.to_s}-#{target}")
+      create_request_message(msg,agent,filter).create_reqid
     end
 
-    def r8_sendreq_give_reqid(reqid,msg,agent,filter = {})
-      target = Util.make_target(agent, :command, collective)
-      # Security plugins now accept an agent and collective, ones written for <= 1.1.4 dont
-      # but we still want to support them, try to call them in a compatible way if they
-      # dont support the new arguments
-      begin
-        req = @security.encoderequest(@config.identity, target, msg, reqid, filter, agent, collective)
-      rescue ArgumentError
-        req = @security.encoderequest(@config.identity, target, msg, reqid, filter)
-      end
+    def r8_sendreq_give_reqid(reqid,msg,agent,filter = {},&block)
+      #TODO: see if can put in block form that first generates request id then calss functions that need it
+      #then does subscribe and send
 
-      topic = Util.make_target(agent, :reply, collective)
+      #TODO: rather than below see if can use
+      #following
+      #msg = create_request_message(msg,agent,filter)
+      #msg.encode!
+      #block.call(msg.create_reqid) if block
+      #req = msg.payload
+
+      target = make_target(agent, :request, collective)
+      req = @security.encoderequest(@config.identity, msg, reqid, filter, agent, collective)
+      topic = make_target(agent, :reply, collective)
+
       Log.debug("Sending request #{reqid} to #{target}")
       @connection.subscribe_and_send(topic,target,req)
       reqid
+    end
+
+    private
+    def make_target(agent, type, collective, target_node=nil)
+      @connection.make_target(agent, type, collective, target_node)
+    end
+    def create_request_message(msg,agent,filter)
+      type = :request #TODO: stub so can use direct types
+      Message.new(msg,nil,:agent => agent, :filter => filter, :collective => collective, :type => type)
     end
   end
 end

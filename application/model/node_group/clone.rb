@@ -1,50 +1,5 @@
 module XYZ
   module NodeGroupClone
-    def clone_into_node(node)
-      #get the components on the node group (except those created through link def on creeate event since these wil be created in clone_external_attribute_links call
-      ng_cmps = get_objs(:cols => [:cmps_not_on_create_events]).map{|r|r[:component]}
-      return if ng_cmps.empty?
-      node_external_ports = clone_components(ng_cmps,node)
-      clone_external_attribute_links(node_external_ports,node)
-    end
-
-    def clone_components(node_group_cmps,node)
-      external_ports = Array.new
-      node_group_cmps.each do |ng_cmp|
-        clone_opts = {
-          :ret_new_obj_with_cols => [:id,:display_name],
-          :outermost_ports => Array.new,
-          :use_source_impl_and_template => true
-        }
-        override_attrs = {:ng_component_id => ng_cmp[:id]}
-        node.clone_into(ng_cmp,override_attrs,clone_opts)
-        external_ports += clone_opts[:outermost_ports]
-      end
-      external_ports
-    end
-    private :clone_components
-
-    def clone_external_attribute_links(node_external_ports,node)
-      return if node_external_ports.empty?
-      #find and clone the external port links by first finding the corresponding ng ports and then finding port links that hook to them
-      #TODO this makes asseumption that can find cooresponding port on node group by matching on port display_name
-      sp_hash = {
-        :cols => [:id],
-        :filter => [:and, [:eq, :node_node_id, id()], [:oneof, :display_name, node_external_ports.map{|r|r[:display_name]}]]
-      }
-      ng_port_ids = Model.get_objs(model_handle(:port),sp_hash).map{|r|r[:id]}
-      
-      sp_hash = {
-        :cols => [:id, :group_id,:input_id, :output_id],
-        :filter => [:or, [:oneof, :input_id, ng_port_ids], [:oneof, :output_id, ng_port_ids]]
-      }
-      ng_port_links = Model.get_objs(model_handle(:port_link),sp_hash)
-      return if ng_port_links.empty?
-      #use port links to generate attributes between the node and nodes that node group is connected to
-      AttributeLink.create_from_port_links(node.id_handle,ng_port_links)
-    end
-    private :clone_external_attribute_links
-
     def clone_post_copy_hook(clone_copy_output,opts={})
       super_opts = opts.merge(:donot_create_pending_changes => true, :donot_create_internal_links => true)
       super(clone_copy_output,super_opts)
@@ -58,8 +13,87 @@ module XYZ
       end
       node_members().each{|node|node.clone_into(clone_source_obj,override_attrs,node_clone_opts)}
     end
+
+    #clone components and links on this node group to node
+    def clone_into_node(node)
+      #get the components on the node group (except those created through link def on create event since these wil be created in clone_external_attribute_links call
+      ng_cmps = get_objs(:cols => [:cmps_for_clone_into_node]).map{|r|r[:component]}
+      return if ng_cmps.empty?
+      node_external_ports = clone_components(ng_cmps,node)
+      clone_external_attribute_links(node_external_ports,node)
+    end
+   private
+    def clone_components(node_group_cmps,node)
+      external_ports = Array.new
+      #order components to respect dependencies
+      Component.ordered_components(node_group_cmps) do |ng_cmp| 
+        clone_opts = {
+          :ret_new_obj_with_cols => [:id,:display_name],
+          :outermost_ports => Array.new,
+          :use_source_impl_and_template => true,
+          :no_constraint_checking => true
+        }
+        override_attrs = {:ng_component_id => ng_cmp[:id]}
+        node.clone_into(ng_cmp,override_attrs,clone_opts)
+        external_ports += clone_opts[:outermost_ports]
+      end
+      external_ports
+    end
+
+    def clone_external_attribute_links(node_external_ports,node)
+      #first create a port_link_hash array that mirrors ng links to new node, 
+      #then  use PortLink.create_port_and_attr_links to create the attribute links
+      port_link_info = ret_port_link_info(node_external_ports)
+      return if port_link_info.empty?
+      #TODO: can also look at approach were if one node member exists already can do simpler copy
+      port_link_info.each do |pl|
+        port_link_idh = pl[:node_group_port_link].id_handle
+        opts = {:donot_create_port_link => true, :port_link_idh => port_link_idh}
+        PortLink.create_port_and_attr_links(node.id_handle,pl[:node_port_link_hash],opts)
+      end
+    end
+
+    def ret_port_link_info(node_external_ports)
+      ret = Array.new
+      return ret if node_external_ports.empty?
+      #TODO this makes asseumption that can find cooresponding port on node group by matching on port display_name
+      #get the node group ports that correspond to node_external_ports 
+      #TODO: this can be more efficient if made into ajoin
+      ng_id = id()
+      sp_hash = {
+        :cols => [:id,:link_def_info,:display_name],
+        :filter => [:and, [:eq, :node_node_id, ng_id], [:oneof, :display_name, node_external_ports.map{|r|r[:display_name]}]]
+      }
+      ng_ports = Model.get_objs(model_handle(:port),sp_hash)
+      ng_port_ids = ng_ports.map{|r|r[:id]}
+      
+      #get the ng_ports
+      sp_hash = {
+        :cols => [:id, :group_id,:input_id, :output_id],
+        :filter => [:or, [:oneof, :input_id, ng_port_ids], [:oneof, :output_id, ng_port_ids]]
+      }
+      ng_port_links = Model.get_objs(model_handle(:port_link),sp_hash)
+
+      #form the node_port_link_hashes by subsitituting corresponding node port sfor ng ports 
+      ndx_node_port_ids = node_external_ports.inject({}){|h,r|h.merge(r[:display_name] => r[:id])}
+      ndx_ng_ports = ng_ports.inject({}){|h,r|h.merge(r[:id] => r)}
+      ng_port_links.map do |ng_pl|
+        if ng_port_ids.include?(ng_pl[:input_id]) 
+          index = :input_id
+          ng_port_id = ng_pl[:input_id]
+        else
+          index = :output_id
+          ng_port_id = ng_pl[:output_id]
+        end
+        port_display_name = ndx_ng_ports[ng_port_id][:display_name]
+        node_port_id = ndx_node_port_ids[port_display_name]
+        other_index = (index == :input_id ? :output_id : :input_id)
+        {:node_group_port_link => ng_pl, :node_port_link_hash => {index => node_port_id, other_index => ng_pl[other_index]}}
+      end
+    end
   end
 end
+
 =begin
 TODO: ***; may want to put in version of this for varaibles taht are not input ports; so change to var at node group level propagates to teh node members; for matching would not leverage the component ng_component_id
 

@@ -60,7 +60,11 @@ module XYZ
       Model.delete_instances(impls.map{|impl|impl.id_handle()})
     end
 
+    #TODO: this need s to be updated to rflect that can be on different branches
     def add_library_files_from_directory(repo_obj)
+      update_object!(:type)
+      repo_obj.update_object!(:local_dir)
+
       module_dir = repo_obj[:local_dir]
       file_paths = Array.new
       Dir.chdir(module_dir) do
@@ -254,6 +258,8 @@ module XYZ
 
     def create_pending_changes_and_clear_dynamic_attrs(file_asset)
       cmp_rows = get_objs({:cols => [:component_summary_info]})
+      #remove any node groups
+      cmp_rows.reject!{|r|r[:node].is_node_group?}
 
       Component.clear_dynamic_attributes_and_their_dependents(cmp_rows.map{|r|r[:component].id_handle()})
 
@@ -261,15 +267,6 @@ module XYZ
       cmp_rows.each do |r|
         cmp_idh = r[:component].id_handle()
         parent_idh = cmp_idh.createIDH(:model_name => :datacenter, :id => r[:node][:datacenter_datacenter_id])
-        StateChange.create_pending_change_item(:new_item => cmp_idh, :parent => parent_idh, :type => "update_implementation")
-      end
-    end
-    #TODO: deprecate below and replace by above
-    def create_pending_change_item(file_asset)
-      #TODO: make more efficient by using StateChange.create_pending_change_items
-      get_objs({:cols => [:component_summary_info]}).each do |r|
-        cmp_idh = r[:component].id_handle()
-        parent_idh = id_handle(:model_name => :datacenter, :id => r[:node][:datacenter_datacenter_id])
         StateChange.create_pending_change_item(:new_item => cmp_idh, :parent => parent_idh, :type => "update_implementation")
       end
     end

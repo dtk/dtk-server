@@ -30,7 +30,7 @@ module XYZ
         overrides = override_attrs.dup #because can remove elements
         set_updated_at!(overrides)
         set_created_at!(overrides)
-
+#TODO: benchmark point pp [:create_from_select,duplicate_refs]
         user_info_assigns = DB.user_info_for_create_seleect(overrides,model_handle)
         
         #modify ds and its columns in concert
@@ -93,6 +93,7 @@ module XYZ
           end
 
           sql = ds.insert_returning_sql(returning_sql_cols,columns,sequel_select_with_cols)
+#TODO: benchmark point pp [:create_from_select,sql]
           fetch_raw_sql(sql){|row| returning_ids << row}
           IDInfoTable.update_instances(model_handle,returning_ids) unless opts[:do_not_update_info_table]
           ret = opts[:returning_sql_cols] ? 

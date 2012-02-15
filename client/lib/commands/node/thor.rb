@@ -3,7 +3,7 @@ module R8::Client
     def self.pretty_print_cols()
       [:display_name, :type,:id, :description, :external_ref]
     end
-    desc "list","List Node groups"
+    desc "list","List nodes"
     method_option "only-in-targets", :aliases => "-t", :type => :boolean
     method_option "only-in-libraries", :aliases => "-l", :type => :boolean
     def list()

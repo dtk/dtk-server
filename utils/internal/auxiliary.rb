@@ -247,7 +247,9 @@ class Class
   #TODO: consider variant where third argument passed which is lambda indicating how to 
   #transform inputs before applying to interval method var
   def expose_methods_from_internal_object(innervar,methods_to_expose,opts={})
-    return expose_methods_with_benchmark(innervar,methods_to_expose,opts) if opts[:benchmark]
+    if R8::Config[:benchmark]
+      return expose_methods_with_benchmark(innervar,methods_to_expose,opts.merge(:benchmark => R8::Config[:benchmark]))
+    end 
     methods_to_expose.each do |m| 
       method_def = 
         if opts[:post_hook]
@@ -263,16 +265,11 @@ class Class
 
   def expose_methods_with_benchmark(innervar,methods_to_expose,opts={})
     b = opts[:benchmark]
+    post_hook = opts[:post_hook]
     methods_to_expose.each do |m| 
       exec = "@#{innervar}.#{m}(*args)"
       exec = "XYZ::Aux.benchmark('#{m}'){#{exec}}" if b == :all or (b.respond_to?(:include?) and b.include?(m))
-      method_def = 
-        if opts[:post_hook]
-          #TODO: whethether benchmark shoudl include post_hook
-          "def #{m}(*args);#{opts[:post_hook]}.call(#{exec});end"
-        else
-          "def #{m}(*args);#{exec};end"
-        end
+      method_def = (post_hook ? "def #{m}(*args);#{post_hook}.call(#{exec});end" : "def #{m}(*args);#{exec};end")
       class_eval(method_def)
     end
   end

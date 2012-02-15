@@ -79,5 +79,5 @@
   "hdp-hadoop__datanode".to_sym => "HDP Datanode",
 #### zoookeeper
   "hdp-zookeeper".to_sym => "HDP ZK",
-  "hdp-zookeeper__zookeeper-conn".to_sym => "HDP ZK conn",
+  "hdp-zookeeper__quorom-member".to_sym => "HDP ZK quorum member",
 }

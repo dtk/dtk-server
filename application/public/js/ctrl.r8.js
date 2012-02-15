@@ -1,5 +1,9 @@
+if(typeof(console) == 'undefined') {
+	var console = {};
+	console.log = function() {};
+}
 
-if(typeof(R8) === 'undefined') R8 = {}
+if(typeof(R8) === 'undefined') R8 = {};
 
 //TODO: figure out how best to implement the template handling class
 R8.Rtpl = {}
@@ -17,7 +21,7 @@ if (!R8.Ctrl) {
 
 			//TODO: should the request handling and page updating be handled by core or R8.Ctrl?
 //			call: function(route, args, callBacks, cfg) {
-			call: function(route, params) {
+			call: function(route, params,isREST) {
 //				if(typeof(params['args']) === 'object') var req_params = R8.Utils.json2Str(params['args']);
 //				else if(typeof(params['args']) === 'undefined') var req_params = '';
 //				else var req_params = params['args'];
@@ -80,7 +84,14 @@ if (!R8.Ctrl) {
 
 //TODO: revisit when config is implemented
 //					var request_url = 'http://localhost:7000/xyz/'+route;
-					var request_url = R8.config['base_uri']+'/'+route;
+					if(typeof(isREST) != 'undefined' && isREST == true) {
+//DEBUG
+//console.log(R8.config);
+						var request_url = R8.config['base_rest_uri']+'/'+route;
+					} else {
+						var request_url = R8.config['base_uri']+'/'+route;
+					}
+//console.log('REQ URL:'+request_url);
 
 					var request = Y.io(request_url, cfg);
 					var ioId = request['id'];

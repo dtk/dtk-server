@@ -58,13 +58,14 @@ if(splitter.length === 3) {
 }
 switch(model) {
 	case "node":
-console.log('should be deleting node.....');
+//DEBUG
+//console.log('should be deleting node.....');
 		var targets = _project.get('targets');
 		for(var t in targets) {
 			if(targets[t].hasNode(modelId)) {
 				targets[t].deleteNode(modelId);
 			}
-console.log('have target:'+t);
+//console.log('have target:'+t);
 		}
 		break;
 }
@@ -77,8 +78,8 @@ console.log('have target:'+t);
 								"icon": "file",
 								"action": function(obj) {
 this.create(obj);
-console.log(arguments);
-console.log('should be creating tree node now.....');
+//console.log(arguments);
+//console.log('should be creating tree node now.....');
 								}
 							}
 						}
@@ -120,7 +121,7 @@ console.log('should be creating tree node now.....');
 						leafLabel = e.currentTarget.get('children').item(1).get('innerHTML');
 
 //					R8.IDE.openEditorView(_implementation);
-console.log('double clicked on project leaf:'+leafNodeId);
+//console.log('double clicked on project leaf:'+leafNodeId);
 
 					e.halt();
 					e.stopImmediatePropagation();
@@ -204,7 +205,7 @@ break;
 				//ADD IMPLEMENTATIONS
 				//------------------------------------
 				var projectImplementationsLeaf = {
-					'node_id': 'project-'+_project.get('id')+'-implementation-list',
+					'node_id': 'project-'+_project.get('id')+'-implementation',
 					'type': 'implementations',
 					'basic_type': 'implementations',
 					'name': 'Implementations'
@@ -248,10 +249,13 @@ break;
 			addTarget: function(target) {
 					_childrenListNode.append(target.getView('project').render());
 			},
-			addImplementation: function(implementation) {
+			addImplementation: function(implementation,newImplementation) {
 //DEBUG
 //console.log(implementation);
-					_implementationsListNode.append(implementation.getView('project').render());
+//console.log('rendering the implementation:'+implementation.get('id'));
+				var impLeafNode = implementation.getView('project').render(newImplementation);
+				_implementationsListNode.append(impLeafNode);
+
 			},
 			renderFileTree: function(file_assets,ulNode) {
 				file_assets.sort(this.sortAssetTree);

@@ -157,6 +157,8 @@ if (!R8.Target) {
 				if(!this.hasNode(nodeId)) return false;
 
 				var _this=this;
+_this.purgeNode(nodeId);
+return;
 				var removeNodeFromViews = function(ioId,responseObj) {
 					eval("var response =" + responseObj.responseText);
 					var delete_result = response.application_node_destroy_and_delete.content[0].data;
@@ -180,6 +182,7 @@ if (!R8.Target) {
 				for(var v in _views) {
 					_views[v].removeNode(nodeId);
 				}
+				_nodes[nodeId].purge();
 				delete(_nodes[nodeId]);
 /*
 				for(var l in _links) {

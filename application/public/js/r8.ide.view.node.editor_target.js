@@ -144,9 +144,6 @@ if (!R8.IDE.View.node.editor_target) {
 					case "id":
 						return _contentNodePrefix+_node.get('id');
 						break;
-					case "object":
-						return _object;
-						break;
 					case "type":
 						return "node";
 						break;
@@ -160,7 +157,10 @@ if (!R8.IDE.View.node.editor_target) {
 						return _type;
 						break;
 					case "object":
-						return _object;
+						return _node;
+						break;
+					case "_node":
+						return _node;
 						break;
 					case "portDefs":
 						return _ports;
@@ -314,7 +314,8 @@ if(ports == null) return;
 					} else
 						var left = (prevLeft + prevPortWidth + _portSpacer);
 
-					portNode.setStyles({'top':(-1*portObjs[portId].hOffset)+'px','left':left+'px','display':'block'});
+					//the +3 is needed for proper aligning when moving to img background styling
+					portNode.setStyles({'top':(-1*portObjs[portId].hOffset + 3)+'px','left':left+'px','display':'block'});
 
 					totalPortWidth -= (portObjs[portId].width+_portSpacer);
 					prevPortWidth = portObjs[portId].width;
@@ -365,7 +366,8 @@ if(ports == null) return;
 					} else
 						var left = (prevLeft + prevPortWidth + _portSpacer);
 
-					portNode.setStyles({'top':top+'px','left':left+'px','display':'block'});
+					//the +3 is needed for proper aligning when moving to img background styling
+					portNode.setStyles({'top':(top+3)+'px','left':left+'px','display':'block'});
 
 					totalPortWidth -= (portObjs[portId].width+_portSpacer);
 					prevPortWidth = portObjs[portId].width;
@@ -401,7 +403,7 @@ if(ports == null) return;
 					portObjs[portId].wOffset = Math.floor(portObjs[portId].width/2);
 					portObjs[portId].hOffset = Math.floor(portObjs[portId].height/2);
 
-					totalPortWidth += portObjs[portId].width;
+					totalPortHeight += portObjs[portId].height;
 					count++;
 				}
 				var numSpacers = count-1;
@@ -409,7 +411,8 @@ if(ports == null) return;
 				var prevTop = 0;
 				for(var portId in portObjs) {
 					var portNode = _ports[portId].get('node');
-					var left = -1*(portObjs[portId].wOffset);
+					//the +3 is needed for new img background setup
+					var left = -1*(portObjs[portId].wOffset) + 3;
 					if (count == 0) {
 						var top = (nodeHeight - (totalPortHeight + (numSpacers * _portSpacer))) / 2;
 					} else
@@ -451,7 +454,7 @@ if(ports == null) return;
 					portObjs[portId].wOffset = Math.floor(portObjs[portId].width/2);
 					portObjs[portId].hOffset = Math.floor(portObjs[portId].height/2);
 
-					totalPortWidth += portObjs[portId].width;
+					totalPortHeight += portObjs[portId].height;
 					count++;
 				}
 				var numSpacers = count-1;
@@ -459,8 +462,10 @@ if(ports == null) return;
 				var prevTop = 0;
 				for(var portId in portObjs) {
 					var portNode = _ports[portId].get('node');
-					var left = nodeWidth - portObjs[portId].wOffset;
+					//the -2 is needed for new img background styling of nodes
+					var left = nodeWidth - portObjs[portId].wOffset - 2;
 					if (count == 0) {
+console.log('count=0, nodeHeight:'+nodeHeight+'  totalPortheight:'+totalPortHeight);
 						var top = (nodeHeight - (totalPortHeight + (numSpacers * _portSpacer))) / 2;
 					} else
 						var top = (prevTop + prevPortHeight + _portSpacer);
@@ -905,6 +910,12 @@ return;
 				var links = _node.get('links');
 				for(var l in links) {
 					links[l].render();
+				}
+			},
+			destroyLinks: function() {
+				var links = _node.get('links');
+				for(var l in links) {
+					links[l].destroy();
 				}
 			},
 /*

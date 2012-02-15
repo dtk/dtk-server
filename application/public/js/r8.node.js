@@ -272,6 +272,14 @@ if (!R8.Node) {
 			},
 			removeLink: function(linkId) {
 				delete(_links[linkId]);
+			},
+			purge: function() {
+				for(var l in _links) {
+					delete(_links[l]);
+				}
+				for(var p in _ports) {
+					delete(_ports[p]);
+				}
 			}
 		}
 	};

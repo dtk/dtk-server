@@ -1,9 +1,9 @@
 
 
-<div id="search-node-{%=node[:id]%}" class="component-result {%=node[:os_type]%}">
+<div id="search-node-{%=node[:id]%}" class="node-result {%=node[:os_type]%}">
 	<div class="body" data-id="{%=node[:id]%}" data-os-type="{%=node[:os_type]%}" data-name="{%=node[:i18n]%}">
 		<div class="main-content">
-			<div class="component-icon">
+			<div class="node-icon">
 				<img title="{%=node[:i18n]%}" src="{%=node[:image_path]%}"/>
 			</div>
 			<div class="icon-divider"></div>

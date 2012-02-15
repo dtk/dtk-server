@@ -4,13 +4,16 @@ if (!R8.Utils) {
 	 * This is the utility r8 js class, more to be added
 	 */
 	R8.Utils = function(){
-
+//DEBUG
+//console.log(YUI_config);
+//console.log(YUI);
 		return {
 
 			/*
 			 * This is the global YUI variable to be used
 			 */
 			Y : new YUI(YUI_config).use('event', 'node','json'),
+//			Y : new YUI().use('event', 'node','json'),
 //			Y : new YUI(YUI_config).use('dd', 'node'),
 //			Y : new YUI({base:'js/yui3x/build/'}).use('dd', 'node'),
 //			Y: new YUI().use('dd', 'node'),
@@ -181,4 +184,8 @@ String.prototype.startsWith = function (str){
 
 		}
 	}();
+//DEBUG
+//console.log('inside of R8.Utils at the bottom....');
+//console.log(R8.Utils.Y);
+
 }

@@ -4,6 +4,7 @@ if (!R8.Editor) {
 	R8.Editor = function() {
 		var _cfg = null,
 			_initialized = false,
+			_viewContext = null,
 
 			_currentFileFocus = '',
 			_itemId = null,
@@ -73,7 +74,7 @@ if (!R8.Editor) {
 			_editorFormTpl = '<form id="hidden_editor_form" name="hidden_editor_form">\
 								<input type="hidden" id="editor_file_id" name="editor_file_id"/>\
 								<input type="hidden" id="editor_file_content" name="editor_file_content"/>\
-							</form>';
+							</form>',
 			_events = {};
 
 		return {
@@ -92,6 +93,9 @@ if (!R8.Editor) {
 				_pageContainerNode = R8.Utils.Y.one('#page-container');
 
 				this.initEditor();
+			},
+			setViewContext: function(viewContext) {
+				_viewContext = viewContext;
 			},
 			toggleEditor: function() {
 				if(_editorOpen) {
@@ -143,7 +147,10 @@ if (!R8.Editor) {
 				var that=this;
 
 				_selectRange = _editor.getSelectionRange();
+//DEBUG
+//console.log(_editor.gotoLine);
 				//setup events-----------------------------
+/*
 				_editor.getSession().selection.on('changeSelection', function(e){
 			//		console.log(arguments);
 //					console.log(_editor.getSelectionRange());
@@ -169,6 +176,7 @@ if (!R8.Editor) {
 					this.closeSelectionPopup();
 					_mousePos = { 'pageX': e.pageX, 'pageY': e.PageY};
 				},this);
+*/
 
 /*
 				_events['ftabMouseEnter'] = R8.Utils.Y.delegate('mouseenter',function(e){
@@ -226,7 +234,18 @@ if (!R8.Editor) {
 					case "selectionSize":
 						return _selectRange.start.column < _selectRange.end.column;
 						break;
+					case "cursorPos":
+						return _editor.getCursorPosition();
+						break;
 				}
+			},
+			goToPos: function(cursorPos) {
+				if(cursorPos == null) return false;
+
+				_editor.moveCursorTo(cursorPos.row,cursorPos.column);
+			},
+			focus: function() {
+				_editor.focus();
 			},
 			renderSelectionPopup: function() {
 				var gutterWidth = _gutterNode.getStyle('width');
@@ -378,8 +397,11 @@ if(_editorContainerNode == null) return;
 				setTimeout(callback,150);
 */
 			},
+			getEditorContent: function() {
+				return _editor.getSession().getValue();
+			},
 			goToLine: function(lineNum) {
-				_editor.goToLine(lineNum);
+				_editor.gotoLine(lineNum);
 			},
 			fileFocus: function(fileId) {
 				if(_currentFileFocus == fileId) return;
@@ -470,7 +492,6 @@ if(_editorContainerNode == null) return;
 				setTimeout(callback,100);
 //console.log(file_contents);
 			}
-
 		}
 	}();
 }

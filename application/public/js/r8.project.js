@@ -100,13 +100,13 @@ if (!R8.Project) {
 						eval("var response =" + responseObj.responseText);
 						var impTree = response.application_implementation_get_tree.content[0]['data'];
 //DEBUG
-console.log('going to add new implementation tree...');
-console.log(impTree);
-return;
+//console.log('going to add new implementation tree...');
+//console.log(impTree);
+//return;
 						_implementations[impTree.id] = new R8.Implementation(impTree,_this);
 						_implementations[impTree.id].init();
 						for(var v in _views) {
-							_views[v].addImplementation(_implementations[impTree.id],_this);
+							_views[v].addImplementation(_implementations[impTree.id],true);
 						}
 
 //						this.addImplementation(implementations[i]);
@@ -120,7 +120,7 @@ return;
 				R8.Ctrl.call('implementation/get_tree/'+implementationId,{
 					'callbacks': callbacks,
 					'cfg': {
-						'data': ''
+						'data': 'project_id='+this.get('id')
 					}
 				});
 			}

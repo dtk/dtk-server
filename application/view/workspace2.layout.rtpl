@@ -230,12 +230,27 @@ YUI_config = {
 
 <!-- JS -->
 
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/external/yui/build/yui/yui.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/external/yui/build/loader/loader.js"></script>
+
 <script src="{%=_app[:base_js_uri]%}/external/jquery-1.6.2.js"></script>
 <script src="{%=_app[:base_js_uri]%}/external/jquery.cookie.js"></script>
 <script src="{%=_app[:base_js_uri]%}/external/jstree/jquery.jstree.js"></script>
 <script src="{%=_app[:base_js_uri]%}/external/jstree/_lib/jquery.hotkeys.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/external/yui/build/yui/yui.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/external/yui/build/loader/loader.js"></script>
+
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/ctrl.r8.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/model.r8.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.user.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/ui.r8.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/templating.r8.js"></script>
+
+<div id="js_include_container">
+	{%for js_include in _app[:js_includes]%}
+	<script type="text/javascript" src="{%=js_include%}"></script>
+	{%end%}
+</div>
+
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/utils.r8.js"></script>
 
 <script src="{%=_app[:base_js_uri]%}/external/ace/src/ace.js" type="text/javascript" charset="utf-8"></script>
 <script src="{%=_app[:base_js_uri]%}/external/ace/src/mode-ruby.js" type="text/javascript" charset="utf-8"></script>
@@ -245,12 +260,33 @@ YUI_config = {
 -->
 <script src="{%=_app[:base_js_uri]%}/external/ace/src/theme-eclipse.js" type="text/javascript" charset="utf-8"></script>
 
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/ctrl.r8.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.user.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/ui.r8.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/templating.r8.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/utils.r8.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.viewspace.js"></script>
 
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.project.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.target.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.node.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.component.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.implementation.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.port.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.link.js"></script>
+
+
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/canvas2.r8.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/canvas.r8.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/cmdbar2.r8.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/maintoolbar.r8.js"></script>
+
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/search.r8.js"></script>
+
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.toolbargroup.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.topbar.js"></script>
+
+
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.dock.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.editor.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/file.r8.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/toolbar.r8.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/page.r8.js"></script>
 
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.leftPanel.js"></script>
@@ -269,34 +305,6 @@ YUI_config = {
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.view.port.editor_target.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.view.chefdebugger.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.view.jitter.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.viewspace.js"></script>
-
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.project.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.target.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.node.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.component.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.implementation.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.port.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.link.js"></script>
-
-
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/model.r8.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/canvas2.r8.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/canvas.r8.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/cmdbar2.r8.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/maintoolbar.r8.js"></script>
-
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/search.r8.js"></script>
-
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.toolbargroup.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.topbar.js"></script>
-
-
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.dock.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.editor.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/file.r8.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/toolbar.r8.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/page.r8.js"></script>
 
 
 <script type="text/javascript">
@@ -304,14 +312,20 @@ R8.config = {};
 R8.config['base_uri'] = '{%=_app[:base_uri]%}/xyz';
 </script>
 
-	<div id="js_include_container">
-		{%for js_include in _app[:js_includes]%}
-			<script type="text/javascript" src="{%=js_include%}"></script>
-		{%end%}
+	<div id="js_exe_container">
 		<script type="text/javascript">
-		{%for js_exe in _app[:js_exe_list]%}
-			{%=js_exe%}
-		{%end%}
+		window.onload = function() {
+//DEBUG
+console.log('window.onload is complete....');
+			setTimeout(bootStrap,3000);
+		}
+		function bootStrap() {
+//DEBUG
+console.log('Going to exe all the needed JS....');
+			{%for js_exe in _app[:js_exe_list]%}
+				{%=js_exe%}
+			{%end%}
+		}
 		</script>
 	</div>
 

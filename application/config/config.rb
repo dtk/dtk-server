@@ -35,7 +35,7 @@ R8::Config[:login][:redirect] = "/xyz/ide/index"
 #Database related config params
 R8::Config[:database][:hostname] = "127.0.0.1"
 R8::Config[:database][:user] = "postgres"
-R8::Config[:database][:pass] = "bosco"
+R8::Config[:database][:pass] = "swoopmatic"
 R8::Config[:database][:name] = "db_main"
 R8::Config[:database][:type] = "postgres"
 

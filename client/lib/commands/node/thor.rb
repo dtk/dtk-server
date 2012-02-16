@@ -43,6 +43,12 @@ module R8::Client
       }
       post rest_url("node/add_to_group"), post_body
     end
+
+    #TODO: temp for testing; should be on target
+    desc "destroy-all", "Delete and destory all target nodes"
+    def destroy_all()
+      post rest_url("project/destroy_and_delete_nodes")
+    end
   end
 end
 

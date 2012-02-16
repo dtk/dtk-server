@@ -314,7 +314,7 @@ R8.config['base_uri'] = '{%=_app[:base_uri]%}/xyz';
 
 	<div id="js_exe_container">
 		<script type="text/javascript">
-//		window.onload = function() {
+		window.onload = function() {
 //DEBUG
 //console.log('window.onload is complete....');
 //			setTimeout(bootStrap,3000);
@@ -325,7 +325,7 @@ R8.config['base_uri'] = '{%=_app[:base_uri]%}/xyz';
 			{%for js_exe in _app[:js_exe_list]%}
 				{%=js_exe%}
 			{%end%}
-//		}
+		}
 		</script>
 	</div>
 

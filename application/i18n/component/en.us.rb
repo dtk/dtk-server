@@ -77,4 +77,7 @@
   "hdp-hadoop__namenode-conn".to_sym => "HDP Namenode conn",
   "hdp-hadoop__namenode".to_sym => "HDP Namenode",
   "hdp-hadoop__datanode".to_sym => "HDP Datanode",
+#### zoookeeper
+  "hdp-zookeeper".to_sym => "HDP ZK",
+  "hdp-zookeeper__quorom-member".to_sym => "HDP ZK quorum member",
 }

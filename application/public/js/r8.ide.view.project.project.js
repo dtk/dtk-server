@@ -50,7 +50,7 @@ console.log('should be renaming this tree node now.....');
 							"remove":{
 								"label": "Delete",
 								"action": function(obj) {
-console.log(obj.attr('id'));
+//console.log(obj.attr('id'));
 var splitter = obj.attr('id').split('-');
 if(splitter.length === 3) {
 	var model = splitter[0];

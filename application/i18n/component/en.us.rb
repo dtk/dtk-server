@@ -73,10 +73,11 @@
   :user_account_rich => "Rich",
   :user_account_nate => "Nate",
 
-###### hdp
-  "hdp-hadoop__namenode-conn".to_sym => "HDP Namenode conn",
+###### hadoop
+  "hdp-hadoop__namenode-conn".to_sym => "HDP NN conn",
   "hdp-hadoop__namenode".to_sym => "HDP Namenode",
-  "hdp-hadoop__datanode".to_sym => "HDP Datanode",
+  "hdp-hadoop__jobtracker".to_sym => "HDP Jobtracker",
+  "hdp-hadoop__tasktracker".to_sym => "HDP Tasktracker",
 #### zoookeeper
   "hdp-zookeeper".to_sym => "HDP ZK",
   "hdp-zookeeper__quorom-member".to_sym => "HDP ZK quorum member",

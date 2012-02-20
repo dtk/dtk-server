@@ -1,13 +1,22 @@
-require File.expand_path('puppet/error_processing', File.dirname(__FILE__))
-require File.expand_path('puppet/parser', File.dirname(__FILE__))
+r8_nested_require('puppet','error_processing')
+r8_nested_require('puppet','parser')
+r8_nested_require('puppet','generate_node_manifest')
 module XYZ
-  #TODO!!!!: probably need to rewrite, like for chef to include all attributes; not just ones that changes
   module ConfigAgentAdapter
     class Puppet < ConfigAgent
       include PuppetParser
       include PuppetErrorProcessing
+      include PuppetGenerateNodeManifest
       def ret_msg_content(config_node,impl_info)
-        {:components_with_attributes => components_with_attributes(config_node,impl_info)}
+        cmps_with_attrs = components_with_attributes(config_node,impl_info)
+=begin
+#TODO: test
+ manifest = NodeManifest.new.generate(cmps_with_attrs)
+pp manifest
+     {:components_with_attributes => cmps_with_attrs,
+          :node_manifest => manifest}
+=end
+        {:components_with_attributes => cmps_with_attrs}
       end
       def type()
         :puppet

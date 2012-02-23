@@ -83,7 +83,8 @@ module XYZ
           :type => file_type,
           :display_name => file_name,
           :file_name => file_name,
-          :path => file_path
+          :path => file_path,
+          :content => nil #TODO to clear model cache of content
         }
       end
       #TODO: need to make create? from rows

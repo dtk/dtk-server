@@ -23,6 +23,16 @@ module XYZ
       end
     end
 
+    def self.delete_from_library(assembly_idh)
+      #need to explicitly delete nodes, but not components since node's parents are not the assembly, while compoennt's parents are teh nodes
+      sp_hash = {
+        :cols => [:id, :nodes],
+        :filter => [:eq, :id, assembly_idh.get_id]
+      }
+      node_idhs = get_objs(assembly_idh.createMH(),sp_hash).map{|r|r[:node].id_handle()}
+      Model.delete_instances(node_idhs + [assembly_idh])
+    end
+
     #### for cloning
     def add_model_specific_override_attrs!(override_attrs,target_obj)
       override_attrs[:display_name] ||= SQL::ColRef.qualified_ref 

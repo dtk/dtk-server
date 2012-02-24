@@ -23,6 +23,15 @@ module R8::Client
       post rest_url("assembly/clone"), post_body
     end
 
+    desc "delete ASSEMBLY-ID", "Delete library assembly"
+    def delete(assembly_id)
+      post_body = {
+        :assembly_id => assembly_id
+      }
+      post rest_url("assembly/delete_from_library"), post_body
+    end
+
+
     desc "execute ASSEMBLY-ID", "Excute assembly from library"
     method_option "in-target",:aliases => "-t" ,
       :type => :numeric, 

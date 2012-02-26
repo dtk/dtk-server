@@ -1,0 +1,51 @@
+--- !omap 
+- hdp: !omap 
+    - display_name: hdp
+    - description: Core utilities for HDP
+    - external_ref: 
+        class_name: hdp
+        type: puppet_class
+    - basic_type: service
+    - component_type: hdp
+    - ui: 
+        images: 
+          tiny: ""
+          tnail: hadoop.png
+          display: hadoop.png
+- hdp__wait: !omap 
+    - display_name: hdp__wait
+    - description: Wait function for HDP
+    - external_ref: 
+        class_name: hdp::wait
+        type: puppet_definition
+    - basic_type: service
+    - component_type: hdp__wait
+    - only_one_per_node: false
+    - ui: 
+        images: 
+          tiny: ""
+          tnail: hadoop.png
+          display: hadoop.png
+    - attribute: !omap 
+        - name: !omap 
+            - display_name: name
+            - description: Tag for wait
+            - data_type: json
+            - external_ref: 
+                type: puppet_attribute
+                path: node[htp-hadoop][name]
+        - name: !omap 
+            - display_name: name
+            - description: Tag for wait
+            - data_type: string
+            - external_ref: 
+                type: puppet_attribute
+                path: node[htp-hadoop][name]
+        - wait_time: !omap 
+            - display_name: wait_time
+            - description: Tag for wait
+            - data_type: string
+            - external_ref: 
+                type: puppet_attribute
+                path: node[htp-hadoop][wait_time]
+

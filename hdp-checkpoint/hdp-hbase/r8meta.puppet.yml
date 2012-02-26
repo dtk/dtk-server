@@ -1,0 +1,160 @@
+--- !omap 
+- hdp-hbase__master: !omap 
+    - display_name: hdp-hbase__master
+    - description: Hbase master node
+    - external_ref: 
+        class_name: hdp-hbase::master
+        type: puppet_class
+    - basic_type: service
+    - component_type: hdp-hbase__master
+    - ui: 
+        images: 
+          tiny: ""
+          tnail: hadoop.png
+          display: hadoop.png
+    - dependency: 
+        hdp: 
+          type: component
+          search_pattern: 
+            ":filter": 
+            - ":eq"
+            - ":component_type"
+            - hdp
+          display_name: hdp
+          description: hdp is required for hdp-hbase__master
+          severity: warning
+        hdp-hadoop__namenode: 
+          type: component
+          search_pattern: 
+            ":filter": 
+            - ":eq"
+            - ":component_type"
+            - hdp-hadoop__namenode
+          display_name: hdp-hadoop__namenode
+          description: hdp-hadoop__namenode should be before hdp-hbase__master
+          severity: warning
+        hdp-zookeeper: 
+          type: component
+          search_pattern: 
+            ":filter": 
+            - ":eq"
+            - ":component_type"
+            - hdp-zookeeper
+          display_name: hdp-zookeeper
+          description: hdp-zookeeper should be before hdp-hbase__master
+          severity: warning
+- hdp-hbase__regionserver: !omap 
+    - display_name: hdp-hbase__regionserver
+    - description: Hbase regionserver node
+    - external_ref: 
+        class_name: hdp-hbase::regionserver
+        type: puppet_class
+    - basic_type: service
+    - component_type: hdp-hbase__regionserver
+    - ui: 
+        images: 
+          tiny: ""
+          tnail: hadoop.png
+          display: hadoop.png
+    - dependency: 
+        hdp: 
+          type: component
+          search_pattern: 
+            ":filter": 
+            - ":eq"
+            - ":component_type"
+            - hdp
+          display_name: hdp
+          description: hdp is required for hdp-hbase__regionserver
+          severity: warning
+        hdp_hbase__master: 
+          type: component
+          search_pattern: 
+            ":filter": 
+            - ":eq"
+            - ":component_type"
+            - hdp_hbase__master
+          display_name: hdp_hbase__master
+          description: hdp_hbase__master should be before hdp-hbase__regionserver
+          severity: warning
+        hdp-hadoop__datanode: 
+          type: component
+          search_pattern: 
+            ":filter": 
+            - ":eq"
+            - ":component_type"
+            - hdp-hadoop__datanode
+          display_name: hdp-hadoop__datanode
+          description: hdp-hadoop__datanode should be before hdp-hbase__regionserver
+          severity: warning
+        hdp-zookeeper: 
+          type: component
+          search_pattern: 
+            ":filter": 
+            - ":eq"
+            - ":component_type"
+            - hdp-zookeeper
+          display_name: hdp-zookeeper
+          description: hdp-zookeeper should be before hdp-hbase__master
+          severity: warning
+- hdp-hbase__zk-conn: !omap 
+    - display_name: hdp-hbase__zk-conn
+    - description: Hbase connection to Zookeeper
+    - external_ref: 
+        class_name: hdp-hbase::zk-conn
+        type: puppet_class
+    - basic_type: service
+    - component_type: hdp-hbase__zk-conn
+    - ui: 
+        images: 
+          tiny: ""
+          tnail: hadoop.png
+          display: hadoop.png
+    - attribute: !omap 
+        - zookeeper_hosts: !omap 
+            - display_name: zookeeper_hosts
+            - description: Hbase Zookeeper hosts
+            - data_type: json
+            - external_ref: 
+                type: puppet_attribute
+                path: node[htp-hadoop][zookeeper_hosts]
+            - semantic_type_summary: "array(string)"
+            - semantic_type: 
+                ":array": string
+    - external_link_defs: 
+      - required: true
+        type: zk-conn
+        possible_links: 
+        - hdp-zookeeper:
+            attribute_mappings: 
+            - ":remote_node.host_addresses_ipv4.0": ":hdp-hbase__zk-conn.zookeeper_hosts"
+- hdp-hbase__master-conn: !omap 
+    - display_name: hdp-hbase__master-conn
+    - description: Connection to Hbase master
+    - external_ref: 
+        class_name: hdp-hbase::master-conn
+        type: puppet_class
+    - basic_type: extension
+    - extension_type: master-conn
+    - extended_base: hdp-hbase__regionserver
+    - component_type: hdp-hbase__master-conn
+    - ui: 
+        images: 
+          tiny: ""
+          tnail: hadoop.png
+          display: hadoop.png
+    - attribute: !omap 
+        - hbase_master_host: !omap 
+            - display_name: hbase_master_host
+            - description: Hbase master host
+            - data_type: json
+            - external_ref: 
+                type: puppet_attribute
+                path: node[htp-hadoop][hbase_master_host]
+    - external_link_defs: 
+      - required: true
+        type: master-conn
+        possible_links: 
+        - hdp-hbase__master:
+            attribute_mappings: 
+            - ":remote_node.host_addresses_ipv4.0": ":hdp-hbase__master-conn.hbase_master_host"

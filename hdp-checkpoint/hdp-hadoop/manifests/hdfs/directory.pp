@@ -22,7 +22,7 @@ define hdp-hadoop::hdfs::directory(
     #TODO: see if there is a good 'unless test'
     if ($recursive_chown == true) {
       $chown_cmd = "fs -chown -R ${chown} ${name}"
-    else {
+    } else {
       $chown_cmd = "fs -chown ${chown} ${name}"
     }
     hdp-hadoop::exec-hadoop {$chown_cmd :

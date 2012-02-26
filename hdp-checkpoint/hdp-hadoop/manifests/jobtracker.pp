@@ -1,4 +1,5 @@
 class hdp-hadoop::jobtracker(
+  $service_state = 'running',
   $ganglia_host = undef,
   $nagios_host = undef,
   $opts = {}
@@ -14,6 +15,7 @@ class hdp-hadoop::jobtracker(
   class { 'hdp-hadoop::jobtracker::directory' : }
   
   hdp-hadoop::service{ 'jobtracker':
+    enable       => $service_state,
     user         => $hdp-hadoop::params::mapred_user,
     initial_wait => $opts[wait]
   }

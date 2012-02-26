@@ -36,7 +36,7 @@ class hdp::params()
     },
     hbase => {
       64 => 'hbase-0.92.0-1.x86_64.rpm'
-    }
+    },
     hcat-server => {
       64 => 'hcatalog-server-0.3.0-1.amd64.rpm'
     },

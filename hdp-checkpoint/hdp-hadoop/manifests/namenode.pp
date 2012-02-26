@@ -1,4 +1,5 @@
 class hdp-hadoop::namenode(
+  $service_state = 'running',
   $slave_hosts = [],
   $snamenode_hosts = [$hdp::params::host_address], #TODO: fix; to be single host
   $ganglia_host = undef,
@@ -20,6 +21,7 @@ class hdp-hadoop::namenode(
   class {'hdp-hadoop::namenode::format' : }
 
   hdp-hadoop::service{ 'namenode':
+    enable       => $service_state,
     user         => $hdp-hadoop::params::hdfs_user,
     initial_wait => $opts[wait]
   }

@@ -1,6 +1,6 @@
 
 define hdp-hadoop::service(
-  $enable = undef,
+  $enable = 'running',
   $ensure = undef,
   $user,
   $initial_wait = undef
@@ -12,7 +12,7 @@ define hdp-hadoop::service(
   $pid_file = "${pid_dir}/hadoop-${user}-${name}.pid"
   $log_dir = "${hdp-hadoop::params::hadoop_logdirprefix}/${user}"
   
-  $cmd = "/usr/sbin/hadoop-daemon.sh --config ${hdp-hadoop::params::config_dir}"
+  $cmd = "/usr/sbin/hadoop-daemon.sh --config ${hdp-hadoop::params::conf_dir}"
   if ($enable == 'running') {
     $daemon_cmd = "su - ${user} -c  '${cmd} start ${name}'"
     $service_is_up = "ls ${pid_file} >/dev/null 2>&1 && ps `cat ${pid_file}` >/dev/null 2>&1"
@@ -46,7 +46,7 @@ define hdp-hadoop::service(
     $post_check = "sleep ${sleep}; ${service_is_up}"
     hdp::exec { $post_check:
       command => $post_check,
-      unless  => ${service_is_up}
+      unless  => $service_is_up
     }
     Hdp::Exec[$daemon_cmd] -> Hdp::Exec[$post_check] -> Anchor["hdp-hadoop::service::${name}::end"]
   }  

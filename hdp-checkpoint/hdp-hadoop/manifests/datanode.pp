@@ -1,4 +1,5 @@
 class hdp-hadoop::datanode(
+  $service_state = running,
   $ganglia_host = undef,
   $nagios_host = undef,
   $opts = {}
@@ -10,6 +11,7 @@ class hdp-hadoop::datanode(
   hdp-hadoop::datanode::configfile { 'hdfs-site.xml':}
   
   hdp-hadoop::service{ 'datanode':
+    enable       => $service_state,
     user         => $hdp-hadoop::params::hdfs_user,
     initial_wait => $opts[wait]
   }

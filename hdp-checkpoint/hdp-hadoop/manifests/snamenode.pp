@@ -1,4 +1,5 @@
 class hdp-hadoop::snamenode(
+  $service_state = 'running',
   $ganglia_host = undef,
   $nagios_host = undef,
   $opts = {}
@@ -10,6 +11,7 @@ class hdp-hadoop::snamenode(
   Hdp-Hadoop::Configfile<||>{snamenode_host => '0.0.0.0'}
   
   hdp-hadoop::service{ 'secondarynamenode':
+    enable       => $service_state,
     user         => $hdp-hadoop::params::hdfs_user,
     initial_wait => $opts[wait]
   }

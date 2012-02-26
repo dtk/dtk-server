@@ -1,4 +1,5 @@
 class hdp-hadoop::tasktracker(
+  $service_state = 'running',
   $ganglia_host = undef,
   $nagios_host = undef,
   $opts = {}
@@ -9,6 +10,7 @@ class hdp-hadoop::tasktracker(
   hdp-hadoop::tasktracker::configfile { 'mapred-site.xml':}
 
   hdp-hadoop::service{ 'tasktracker':
+    enable       => $service_state,
     user         => $hdp-hadoop::params::mapred_user,
     initial_wait => $opts[wait]
   }

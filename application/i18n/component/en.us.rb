@@ -73,12 +73,20 @@
   :user_account_rich => "Rich",
   :user_account_nate => "Nate",
 
+## HDP
 ###### hadoop
-  "hdp-hadoop__namenode-conn".to_sym => "HDP NN conn",
-  "hdp-hadoop__namenode".to_sym => "HDP Namenode",
-  "hdp-hadoop__jobtracker".to_sym => "HDP Jobtracker",
-  "hdp-hadoop__tasktracker".to_sym => "HDP Tasktracker",
+  "hdp-hadoop__namenode-conn".to_sym => "NN conn",
+  "hdp-hadoop__namenode".to_sym => "Namenode",
+  "hdp-hadoop__jobtracker".to_sym => "Jobtracker",
+  "hdp-hadoop__tasktracker".to_sym => "Tasktracker",
+  "hdp-hadoop__datanode".to_sym => "Datanode",
 #### zoookeeper
-  "hdp-zookeeper".to_sym => "HDP ZK",
-  "hdp-zookeeper__quorom-member".to_sym => "HDP ZK quorum member",
+  "hdp-zookeeper".to_sym => "ZK",
+  "hdp-zookeeper__quorom-member".to_sym => "ZK member",
+### hbase
+  "hdp-hbase__zk-conn".to_sym => "Hbase ZK conn",
+  "hdp-hbase__master".to_sym => "Hbase Master",
+  "hdp-hbase__master-conn".to_sym => "Hbase Master conn",
+  "hdp-hbase__regionserver".to_sym => "Hbase Region Server",
 }
+

@@ -27,7 +27,8 @@ class hdp-hcat::service(
     owner        => $user,
     context_tag => 'hcat_service'
   }
-  
+
+if (true == false) {
   hdp::exec { $daemon_cmd:
     command => $daemon_cmd,
     unless  => $no_op_test,
@@ -35,6 +36,9 @@ class hdp-hcat::service(
   }
  
   anchor{'hdp-hcat::service::begin':} -> Hdp::Directory_recursive_create<|context_tag == 'hcat_service'|> -> Hdp::Exec[$daemon_cmd] -> anchor{'hdp-hcat::service::end':}
+} else {
+  anchor{'hdp-hcat::service::begin':} -> Hdp::Directory_recursive_create<|context_tag == 'hcat_service'|> -> anchor{'hdp-hcat::service::end':}
+}
 }
 
 

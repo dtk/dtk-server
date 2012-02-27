@@ -8,9 +8,8 @@ class hdp-hcat::service(
   
   $user = $hdp-hcat::params::hcat_user
   $hadoop_home = $hdp::hadoop_home
-  #TODO: looks like hcat-env not getting conf dir, pid or log
-  $cmd = "env HADOOP_HOME=${hadoop_home} $/usr/sbin/hcat_server.sh"
-  $pid_file = $hdp-hcat::params::hcat_pid_file  
+  $cmd = "env HADOOP_HOME=${hadoop_home} /usr/sbin/hcat_server.sh"
+  $pid_file = "${hdp-hcat::params::hcat_pid_dir}/hcat.pid" 
 
   if ($enable == 'running') {
     $daemon_cmd = "su - ${user} -c  '${cmd} start'"
@@ -23,7 +22,6 @@ class hdp-hcat::service(
   hdp-hcat::service::directory { $hdp-hcat::params::hcat_pid_dir : }
   hdp-hcat::service::directory { $hdp-hcat::params::hcat_log_dir : }
   
-if (true == false) {
   hdp::exec { $daemon_cmd:
     command => $daemon_cmd,
     unless  => $no_op_test,
@@ -31,9 +29,6 @@ if (true == false) {
   }
  
   anchor{'hdp-hcat::service::begin':} -> Hdp-hcat::Service::Directory<||> -> Hdp::Exec[$daemon_cmd] -> anchor{'hdp-hcat::service::end':}
-} else {
-  anchor{'hdp-hcat::service::begin':} -> Hdp-hcat::Service::Directory<||> -> anchor{'hdp-hcat::service::end':}
-}
 }
 
 define hdp-hcat::service::directory()

@@ -5,7 +5,7 @@ class hdp-hcat(
  include hdp-hcat::params
 
   $hcat_user = $hdp-hcat::params::hcat_user
-  $hcat_config_dir = $hdp-hcat::params::conf_dir
+  $hcat_config_dir = $hdp-hcat::params::hcat_conf_dir
  
   hdp::package { 'hcat-base' : }
   if ($server == true ) {
@@ -39,7 +39,7 @@ define hdp-hcat::configfile(
   hdp::configfile { $name:
     component        => 'hcat',
     owner            => $hdp-hcat::params::hcat_user,
-    conf_dir         => $hdp-hcat::params::conf_dir,
+    conf_dir         => $hdp-hcat::params::hcat_conf_dir,
     mode             => $mode,
     hcat_server_host => $hcat_server_host 
   }

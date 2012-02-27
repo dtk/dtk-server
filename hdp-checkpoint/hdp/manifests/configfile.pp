@@ -8,7 +8,8 @@ define hdp::configfile(
   $snamenode_host = $hdp::params::snamenode_host,
   $zookeeper_hosts = $hdp::params::zookeeper_hosts,
   $hbase_master_host = $hdp::params::hbase_master_host,
-  $hcat_server_host = $hdp::params::hcat_server_host
+  $hcat_server_host = $hdp::params::hcat_server_host,
+  $hcat_mysql_host = $hdp::params::hcat_mysql_host
 ) 
 {
    $file_name = "${conf_dir}/${name}"

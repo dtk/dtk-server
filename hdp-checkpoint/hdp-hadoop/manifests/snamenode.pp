@@ -7,7 +7,6 @@ class hdp-hadoop::snamenode(
 {
   include hdp-hadoop  #adds package, users, directories, and common configs
 
-  hdp-hadoop::snamenode::configfile { 'hdfs-site.xml':}
   Hdp-Hadoop::Configfile<||>{snamenode_host => '0.0.0.0'}
   
   hdp-hadoop::service{ 'secondarynamenode':
@@ -16,13 +15,6 @@ class hdp-hadoop::snamenode(
     initial_wait => $opts[wait]
   }
   #top level does not need anchors
-  Class['hdp-hadoop'] -> Hdp-hadoop::Snamenode::Configfile<||> -> Hdp-hadoop::Service['secondarynamenode']
+  Class['hdp-hadoop'] -> Hdp-hadoop::Service['secondarynamenode']
 }
 
-define hdp-hadoop::snamenode::configfile()
-{
-  hdp-hadoop::configfile { $name: 
-    owner => $hdp-hadoop::params::hdfs_user
-  }
-}
-  

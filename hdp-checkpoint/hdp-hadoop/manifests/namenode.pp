@@ -12,9 +12,6 @@ class hdp-hadoop::namenode(
     namenode => true
   }
    
-  #hdfs specific config files
-  hdp-hadoop::namenode::configfile { 'hdfs-site.xml': }
-  
   Hdp-Hadoop::Configfile<||>{namenode_host => $hdp::params::host_address}
   Hdp::Configfile<||>{namenode_host => $hdp::params::host_address} #for components other than hadoop (e.g., hbase) 
   
@@ -26,12 +23,6 @@ class hdp-hadoop::namenode(
     initial_wait => $opts[wait]
   }
   #top level does not need anchors
-  Hdp-hadoop::Common['hadoop'] -> Hdp-hadoop::Namenode::Configfile<||> -> Class['hdp-hadoop::namenode::format'] -> Hdp-hadoop::Service['namenode']
+  Hdp-hadoop::Common['hadoop'] -> Class['hdp-hadoop::namenode::format'] -> Hdp-hadoop::Service['namenode']
 }
 
-define hdp-hadoop::namenode::configfile()
-{
-  hdp-hadoop::configfile { $name: 
-    owner => $hdp-hadoop::params::hdfs_user
-  }
-}

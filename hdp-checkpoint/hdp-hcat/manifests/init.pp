@@ -32,7 +32,7 @@ class hdp-hcat(
 ### config files
 define hdp-hcat::configfile(
   $mode = undef,
-  $hcat_server_host = under
+  $hcat_server_host = undef
 ) 
 {
   hdp::configfile { $name:

@@ -27,7 +27,7 @@ limitations under the License.
 
   <property>
     <name>javax.jdo.option.ConnectionURL</name>
-    <value>jdbc:mysql://<%=scope.function_hdp_template_var("hcat_mysql_server")%>/<%=scope.function_hdp_template_var("hcat_database_name")%>?createDatabaseIfNotExist=true</value>
+    <value>jdbc:mysql://<%=scope.function_hdp_host("hcat_mysql_host")%>/<%=scope.function_hdp_template_var("hcat_database_name")%>?createDatabaseIfNotExist=true</value>
     <description>JDBC connect string for a JDBC metastore</description>
   </property>
 
@@ -84,7 +84,7 @@ limitations under the License.
 
   <property>
     <name>hive.metastore.uris</name>
-    <value>thrift://<%=scope.function_hdp_template_var("hcat_metastore_server_host")%>:<%=scope.function_hdp_template_var("hcat_metastore_port")%></value>
+    <value>thrift://<%=scope.function_hdp_host("hcat_server_host")%>:<%=scope.function_hdp_template_var("hcat_metastore_port")%></value>
     <description>URI for client to contact metastore server</description>
   </property>
 

@@ -3,10 +3,7 @@ class hdp-hcat::params() inherits hdp::params
 
   #TODO: will move to globals
   $hcat_metastore_user_name = hdp_default("hadoop/hive-site/hcat_metastore_user_name","dbusername")
-
   $hcat_metastore_user_passwd = hdp_default("hadoop/hive-site/hcat_metastore_user_passwd","dbpassword")
-
-  $hcat_mysql_server = hdp_default("hadoop/hive-site/hcat_mysql_server","ec2-50-19-230-130.compute-1.amazonaws.com")
  
  ####### users
   $hcat_user = hdp_default("hcat_user","hcat")
@@ -33,7 +30,7 @@ class hdp-hcat::params() inherits hdp::params
 
   $hcat_metastore_sasl_enabled = hdp_default("hadoop/hive-site/hcat_metastore_sasl_enabled")
 
-  $hcat_metastore_server_host = hdp_default("hadoop/hive-site/hcat_metastore_server_host","0.0.0.0") #TODO: just works for server
+  #TODO: using instead hcat_server_host in hdp::params $hcat_metastore_server_host = hdp_default("hadoop/hive-site/hcat_metastore_server_host")
 
   $keytab_path = hdp_default("hadoop/hive-site/keytab_path")
   

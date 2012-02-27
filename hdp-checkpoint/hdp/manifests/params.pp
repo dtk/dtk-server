@@ -6,7 +6,8 @@ class hdp::params()
   $snamenode_host = hdp_default("namenode_host")
   $zookeeper_hosts = hdp_default("zookeeper_hosts")
   $hbase_master_host = hdp_default("hbase_master_host")
-
+  $hcat_server_host = hdp_default("hcat_server_host")
+  $hcat_mysql_host = hdp_default("hcat_mysql_host","ec2-50-19-230-130.compute-1.amazonaws.com")
   
   #TODO: either remove or make conditional on ec2
   #TODO: may want to use private address to sync with rDNS

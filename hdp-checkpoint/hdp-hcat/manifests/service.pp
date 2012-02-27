@@ -8,6 +8,7 @@ class hdp-hcat::service(
   
   $user = $hdp-hcat::params::hcat_user
   $hadoop_home = $hdp::hadoop_home
+  #TODO: looks like hcat-env not getting conf dir, pid or log
   $cmd = "env HADOOP_HOME=${hadoop_home} $/usr/sbin/hcat_server.sh"
   $pid_file = $hdp-hcat::params::hcat_pid_file  
 

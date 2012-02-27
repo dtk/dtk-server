@@ -41,7 +41,6 @@ define hdp::package(
   exec{ "wget ${package_fn}":
     command => "wget --tries=10 ${package_url} -O ${package_target}",
     creates => $package_target,
-    
     path    => ["/usr/bin/"]
   }
 

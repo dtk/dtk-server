@@ -1,11 +1,19 @@
 class hdp-hcat::params() inherits hdp::params
 {
 
-  ####### users
+  #TODO: will move to globals
+  $hcat_metastore_user_name = hdp_default("hadoop/hive-site/hcat_metastore_user_name","dbusername")
+
+  $hcat_metastore_user_passwd = hdp_default("hadoop/hive-site/hcat_metastore_user_passwd","dbpassword")
+
+  $hcat_mysql_server = hdp_default("hadoop/hive-site/hcat_mysql_server","ec2-50-19-230-130.compute-1.amazonaws.com")
+ 
+ ####### users
   $hcat_user = hdp_default("hcat_user","hcat")
   
   ### common
   $hcat_metastore_port = hdp_default("hcat_metastore_port",9933)
+  $hcat_lib = hdp_default("hcat_lib","/usr/share/hcatalog/lib")
 
   ### hcat-env
   $conf_dir = hdp_default("hadoop/hcat-env/hcat_conf_dir","/etc/hcatalog")
@@ -25,14 +33,13 @@ class hdp-hcat::params() inherits hdp::params
 
   $hcat_metastore_sasl_enabled = hdp_default("hadoop/hive-site/hcat_metastore_sasl_enabled")
 
-  $hcat_metastore_server_host = hdp_default("hadoop/hive-site/hcat_metastore_server_host")
+  $hcat_metastore_server_host = hdp_default("hadoop/hive-site/hcat_metastore_server_host","0.0.0.0") #TODO: just works for server
 
-  $hcat_metastore_user_name = hdp_default("hadoop/hive-site/hcat_metastore_user_name")
-
-  $hcat_metastore_user_passwd = hdp_default("hadoop/hive-site/hcat_metastore_user_passwd")
-
-  $hcat_mysql_server = hdp_default("hadoop/hive-site/hcat_mysql_server")
+  
 
   $keytab_path = hdp_default("hadoop/hive-site/keytab_path")
-
+  
+  ###mysql connector
+  $mysql_zip_name = hdp_default("hcat_mysql_zip_name","mysql-connector-java-5.1.18.zip")
+  $mysql_connector_url = hdp_default("hcat_mysql_connector","http://mysql.he.net/Downloads/Connector-J/${mysql_zip_name}")
 }

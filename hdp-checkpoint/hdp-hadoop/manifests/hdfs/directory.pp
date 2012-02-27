@@ -1,7 +1,9 @@
 define hdp-hadoop::hdfs::directory(
   $owner = unset,
   $group = unset,
-  $recursive_chown = false
+  $recursive_chown = false,
+  $mode = undef,
+  $recursive_chmod = false
 ) 
 {
   $mkdir_cmd = "fs -mkdir ${name}"
@@ -18,6 +20,7 @@ define hdp-hadoop::hdfs::directory(
       $chown = "${owner}:${group}"
     } 
   }  
+ 
   if (chown != "") {
     #TODO: see if there is a good 'unless test'
     if ($recursive_chown == true) {
@@ -30,4 +33,17 @@ define hdp-hadoop::hdfs::directory(
     }
     Hdp-hadoop::Exec-hadoop[$mkdir_cmd] -> Hdp-hadoop::Exec-hadoop[$chown_cmd]
   }
+  
+  if ($mode != undef) {
+    #TODO: see if there is a good 'unless test'
+    if ($recursive_mode == true) {
+      $chmod_cmd = "fs -chmod -R ${mode} ${name}"
+    } else {
+      $chmod_cmd = "fs -chmod ${mode} ${name}"
+    }
+    hdp-hadoop::exec-hadoop {$chmod_cmd :
+      command => $chmod_cmd
+    }
+    Hdp-hadoop::Exec-hadoop[$mkdir_cmd] -> Hdp-hadoop::Exec-hadoop[$chmod_cmd]
+  }       
 }

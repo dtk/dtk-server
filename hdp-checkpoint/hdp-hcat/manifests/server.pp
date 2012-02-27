@@ -4,8 +4,7 @@ class hdp-hcat::server(
   $nagios_host = undef,
   $opts = {}
 )
-{
-    
+{   
   class{ 'hdp-hcat' : server => true} #installs package, creates user, sets configuration
   
   Hdp-Hcat::Configfile<||>{hcat_server_host => $hdp::params::host_address}
@@ -16,14 +15,21 @@ class hdp-hcat::server(
     enable       => $server_state,
     initial_wait => $opts[wait]
   }
+  
   #top level does not need anchors
-
   Class['hdp-hcat'] -> Class['hdp-hcat::hdfs-directories'] -> Class['hdp-hcat::service']
 }
 
 class hdp-hcat::hdfs-directories()
 {
-  #TODO: need to make sure that hdfs service is running
-  #TODO: change
-  #Hdp-hcat::Hdfs::Directory['/mapred'] -> Hdp-hcat::Hdfs::Directory['/mapred/system'] 
+ $hcat_user = $hdp-hcat::params::hcat_user
+ #TODO: need to make sure that hdfs service is running
+  hdp-hadoop::hdfs::directory{ '/apps/hive/warehouse':
+    owner => $hcat_user,
+    mode  => '770',
+    recursive_chmod => true
+  }  
+  hdp-hadoop::hdfs::directory{ "/usr/${hcat_user}":
+    owner => $hcat_user
+  }
 }

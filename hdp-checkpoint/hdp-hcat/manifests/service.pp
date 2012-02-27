@@ -5,9 +5,10 @@ class hdp-hcat::service(
 )
 {
   include $hdp-hcat::params
+  
   $user = $hdp-hcat::params::hcat_user
-  $conf_dir = $hdp-hcat::params::conf_dir
-  $cmd = "/bin/env ZOOCFGDIR=${conf_dir} ZOOCFG=zoo.cfg /usr/sbin/hcatServer.sh"
+  $hadoop_home = $hdp::hadoop_home
+  $cmd = "env HADOOP_HOME=${hadoop_home} $/usr/sbin/hcat_server.sh"
   $pid_file = $hdp-hcat::params::hcat_pid_file  
 
   if ($enable == 'running') {

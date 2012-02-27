@@ -117,7 +117,7 @@
             - ":component_type"
             - hdp-hadoop__namenode-conn
           display_name: hdp-hadoop__namenode-conn
-          description: hdp-hadoop__namenode-conn is required for hdp-hadoop__datanode-conn
+          description: hdp-hadoop__namenode-conn is required for hdp-hadoop__datanode
           severity: warning
 - hdp-hadoop__snamenode: !omap 
     - display_name: hdp-hadoop__snamenode
@@ -287,3 +287,37 @@
             - external_ref: 
                 type: puppet_attribute
                 path: node[htp-hadoop][opts]     
+- hdp-hadoop__client: !omap 
+    - display_name: hdp-hadoop__client
+    - description: Configures a Hadoop name node 
+    - external_ref: 
+        class_name: hdp-hadoop::client
+        type: puppet_class
+    - basic_type: service
+    - component_type: hdp-hadoop__client
+    - ui: 
+        images: 
+          tiny: ""
+          tnail: hadoop.png
+          display: hadoop.png
+    - dependency: 
+        hdp: 
+          type: component
+          search_pattern: 
+            ":filter": 
+            - ":eq"
+            - ":component_type"
+            - hdp
+          display_name: hdp
+          description: hdp is required for hdp-hadoop__client
+          severity: warning
+        hdp-hadoop__namenode-conn: 
+          type: component
+          search_pattern: 
+            ":filter": 
+            - ":eq"
+            - ":component_type"
+            - hdp-hadoop__namenode-conn
+          display_name: hdp-hadoop__namenode-conn
+          description: hdp-hadoop__namenode-conn is required for hdp-hadoop__client
+          severity: warning

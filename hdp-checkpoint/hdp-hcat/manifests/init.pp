@@ -7,10 +7,9 @@ class hdp-hcat(
   $hcat_user = $hdp-hcat::params::hcat_user
   $hcat_config_dir = $hdp-hcat::params::conf_dir
  
+  hdp::package { 'hcat-base' : }
   if ($server == true ) {
     hdp::package { 'hcat-server':} 
-  } else {
-    hdp::package { 'hcat-client':} 
   }
   hdp::user{ $hcat_user:}
 
@@ -19,8 +18,12 @@ class hdp-hcat(
 # hdp-hcat::configfile { 'hcat-env.sh':}
 # ... 
  
-  anchor { "hdp-hcat::begin": } -> Hdp::Package<| title == 'hcat-server' or title == 'hcat-client'|> -> Hdp::User[$hcat_user] -> 
-   Hdp::Directory[$hcat_config_dir] -> Hdp-hcat::Configfile<||> -> anchor { "hdp-hcat::end": }
+  anchor { 'hdp-hcat::begin': } -> Hdp::Package['hcat-base'] -> Hdp::User[$hcat_user] -> 
+   Hdp::Directory[$hcat_config_dir] -> Hdp-hcat::Configfile<||> -> anchor { 'hdp-hcat::end': }
+
+   if ($server == true ) {
+     Hdp::Package['hcat-base'] -> Hdp::Package['hcat-server'] ->  Hdp::User[$hcat_user]
+   }
 }
 
 ### config files

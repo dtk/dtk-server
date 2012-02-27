@@ -8,7 +8,6 @@ class hdp-hcat::service(
   $user = $hdp-hcat::params::hcat_user
   $conf_dir = $hdp-hcat::params::conf_dir
   $cmd = "/bin/env ZOOCFGDIR=${conf_dir} ZOOCFG=zoo.cfg /usr/sbin/hcatServer.sh"
-
   $pid_file = $hdp-hcat::params::hcat_pid_file  
 
   if ($enable == 'running') {
@@ -19,15 +18,9 @@ class hdp-hcat::service(
     $no_op_test = undef
   }
 
-  hdp::directory_recursive_create { $hdp-hcat::params::hcat_pid_dir: 
-    owner        => $user,
-    context_tag => 'hcat_service'
-  }
-  hdp::directory_recursive_create { $hdp-hcat::params::hcat_log_dir: 
-    owner        => $user,
-    context_tag => 'hcat_service'
-  }
-
+  hdp-hcat::service::directory { $hdp-hcat::params::hcat_pid_dir : }
+  hdp-hcat::service::directory { $hdp-hcat::params::hcat_log_dir : }
+  
 if (true == false) {
   hdp::exec { $daemon_cmd:
     command => $daemon_cmd,
@@ -35,10 +28,17 @@ if (true == false) {
     initial_wait => $initial_wait
   }
  
-  anchor{'hdp-hcat::service::begin':} -> Hdp::Directory_recursive_create<|context_tag == 'hcat_service'|> -> Hdp::Exec[$daemon_cmd] -> anchor{'hdp-hcat::service::end':}
+  anchor{'hdp-hcat::service::begin':} -> Hdp-hcat::Service::Directory<||> -> Hdp::Exec[$daemon_cmd] -> anchor{'hdp-hcat::service::end':}
 } else {
-  anchor{'hdp-hcat::service::begin':} -> Hdp::Directory_recursive_create<|context_tag == 'hcat_service'|> -> anchor{'hdp-hcat::service::end':}
+  anchor{'hdp-hcat::service::begin':} -> Hdp-hcat::Service::Directory<||> -> anchor{'hdp-hcat::service::end':}
 }
 }
 
+define hdp-hcat::service::directory()
+{
+  hdp::directory_recursive_create { $name: 
+    owner => $hdp-hcat::params::hcat_user,
+    mode => '0755'
+  }
+}
 

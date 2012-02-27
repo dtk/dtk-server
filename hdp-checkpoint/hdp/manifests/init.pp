@@ -44,19 +44,22 @@ define hdp::file(
      
 define hdp::directory(
   $owner = $hdp::params::hadoop_user,
-  $group = $hdp::params::hadoop_user_group
+  $group = $hdp::params::hadoop_user_group,
+  $mode  = undef
   )
 {
   file { $name :
-    ensure    => directory,
-    owner     => $owner,
-    group     => $group,
-    recurse   => $recurse
+    ensure => directory,
+    owner  => $owner,
+    group  => $group,
+    mode=> $mode
   }
 }
+#TODO: check on -R flag and use of recurse
 define hdp::directory_recursive_create(
   $owner = $hdp::params::hadoop_user,
   $group = $hdp::params::hadoop_user_group,
+  $mode = undef,
   $context_tag = undef
   )
 {
@@ -64,10 +67,11 @@ define hdp::directory_recursive_create(
     command => "mkdir -p ${name}",
     creates => $name
   }
-  #to take care of setting ownership
+  #to take care of setting ownership and mode
   hdp::directory { $name :
     owner => $owner,
-    group => $group
+    group => $group,
+    mode  => $mode
   }
   Hdp::Exec["mkdir -p ${name}"] -> Hdp::Directory[$name]
 }

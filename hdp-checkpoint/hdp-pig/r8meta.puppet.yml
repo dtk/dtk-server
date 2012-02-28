@@ -1,0 +1,25 @@
+--- !omap 
+- hdp-pig: !omap 
+    - display_name: hdp-pig
+    - description: Pig
+    - external_ref: 
+        class_name: hdp-pig::client
+        type: puppet_class
+    - basic_type: service
+    - component_type: hdp-pig
+    - ui: 
+        images: 
+          tiny: ""
+          tnail: hadoop.png
+          display: hadoop.png
+    - dependency: 
+        hdp: 
+          type: component
+          search_pattern: 
+            ":filter": 
+            - ":eq"
+            - ":component_type"
+            - hdp
+          display_name: hdp
+          description: hdp is required for hdp-pig
+          severity: warning

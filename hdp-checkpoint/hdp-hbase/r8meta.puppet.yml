@@ -158,3 +158,36 @@
         - hdp-hbase__master:
             attribute_mappings: 
             - ":remote_node.host_addresses_ipv4.0": ":hdp-hbase__master-conn.hbase_master_host"
+- hdp-hbase__client: !omap 
+    - display_name: hdp-hbase__client
+    - description: Hbase client
+    - external_ref: 
+        class_name: hdp-hbase::client
+        type: puppet_class
+    - basic_type: client
+    - ui: 
+        images: 
+          tiny: ""
+          tnail: hadoop.png
+          display: hadoop.png
+    - dependency: 
+        hdp: 
+          type: component
+          search_pattern: 
+            ":filter": 
+            - ":eq"
+            - ":component_type"
+            - hdp
+          display_name: hdp
+          description: hdp is required for hdp-hbase__client
+          severity: warning
+        hdp_hbase__master: 
+          type: component
+          search_pattern: 
+            ":filter": 
+            - ":eq"
+            - ":component_type"
+            - hdp_hbase__master
+          display_name: hdp_hbase__master
+          description: hdp_hbase__master should be before hdp-hbase__client
+          severity: warning

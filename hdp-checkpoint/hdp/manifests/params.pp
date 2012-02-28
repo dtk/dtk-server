@@ -19,6 +19,7 @@ class hdp::params()
 
   #TODO: need to allow multiple paths if 32 + 64
   $java_home = hdp_default("java_home","/usr/java/default")
+
   $hadoop_home = hdp_default("hadoop_home","/usr")
 
   $hadoop_user = hdp_default("hadoop_user", "hadoop")
@@ -43,9 +44,12 @@ class hdp::params()
     },
     hcat-base => {
       64 => 'hcatalog-0.3.0-1.amd64.rpm'
+    },
+    pig => {
+      32 => 'pig-0.9.2-1.i386.rpm'
     }
   })
-  $artifact_dir = hdp_default("artifact_dir","/tmp/HDP-artifacts/") #bashvar: artifactdownloaddir
+  $artifact_dir = hdp_default("artifact_dir","/tmp/HDP-artifacts/") 
   
 
  ####kerberos

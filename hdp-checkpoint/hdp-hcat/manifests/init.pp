@@ -2,7 +2,7 @@ class hdp-hcat(
   $server = false
 ) 
 {
- include hdp-hcat::params
+  include hdp-hcat::params
 
   $hcat_user = $hdp-hcat::params::hcat_user
   $hcat_config_dir = $hdp-hcat::params::hcat_conf_dir

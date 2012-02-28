@@ -3,7 +3,7 @@
     - display_name: hdp-pig
     - description: Pig
     - external_ref: 
-        class_name: hdp-pig::client
+        class_name: hdp-pig
         type: puppet_class
     - basic_type: service
     - component_type: hdp-pig

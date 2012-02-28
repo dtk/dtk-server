@@ -34,10 +34,9 @@ define hdp::package(
   $package_name = regsubst($package_fn,'^(.+)\.rpm$','\1')
   $package_url = "${repo_url}/${package_fn}"  
   $package_target = "${artifact_dir}/${package_fn}"
-  
-  include hdp::service::artifact_dir
  
-  #TODO: hardcoded provider type; changing to allowing choice; default being yum or apt-get
+  include hdp::package::artifact_dir
+  
   exec{ "wget ${package_fn}":
     command => "wget --tries=10 ${package_url} -O ${package_target}",
     creates => $package_target,
@@ -49,10 +48,10 @@ define hdp::package(
     provider => rpm,
     source   =>  $package_target
   }
-  Class['hdp::service::artifact_dir'] -> Exec["wget ${package_fn}"] -> Package[$package_name] 
+  anchor{ "hdp::package::${name}::begin": } -> Class['hdp::package::artifact_dir'] -> Exec["wget ${package_fn}"] -> Package[$package_name] -> anchor{ "hdp::package::${name}::end": }
 }
 
-class hdp::service::artifact_dir()
+class hdp::package::artifact_dir()
 {
   file{ $hdp::params::artifact_dir:
     ensure  => directory

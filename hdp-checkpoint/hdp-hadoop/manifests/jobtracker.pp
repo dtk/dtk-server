@@ -6,7 +6,7 @@ class hdp-hadoop::jobtracker(
 )
 {
     
-  include hdp::params
+  include hdp-hadoop::params
   
   Hdp-Hadoop::Configfile<||>{jtnode_host => $hdp::params::host_address}
 

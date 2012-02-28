@@ -7,7 +7,7 @@ class hdp-hadoop::namenode(
   $opts = {}
 ) inherits hdp-hadoop::params
 {
-  #include hdp-hadoop #adds package, users and directories, and common hadoop configs
+  #adds package, users and directories, and common hadoop configs
   hdp-hadoop::common { 'hadoop': 
     namenode => true
   }

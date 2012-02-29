@@ -23,3 +23,23 @@
           display_name: hdp
           description: hdp is required for hdp-pig
           severity: warning
+        hdp-hadoop__client: 
+          type: component
+          search_pattern: 
+            ":filter": 
+            - ":eq"
+            - ":component_type"
+            - hdp-hadoop__client
+          display_name: hdp-hadoop__client
+          description: hdp-hadoop__client is required for hdp-hcat__server
+          severity: warning
+        hdp-hadoop__namenode: 
+          type: component
+          search_pattern: 
+            ":filter": 
+            - ":eq"
+            - ":component_type"
+            - hdp-hadoop__namenode
+          display_name: hdp-hadoop__namenode
+          description: hdp-hadoop__namenode is required for hdp-hcat__server
+          severity: warning

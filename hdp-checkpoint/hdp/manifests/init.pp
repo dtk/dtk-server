@@ -9,8 +9,9 @@ class hdp()
   hdp::user { $hdp::params::hadoop_user:}
   
   Group[$hdp::params::hadoop_user_group] -> Hdp::User[$hdp::params::hadoop_user]
-  
-  #TODO: stub for testing; can be replaced by logic that opens up just needed ports
+  Hdp::Package<|title == 'hadoop'|> ->   Hdp::Package<|title == 'hbase'|>
+
+  #TODO: !!!!must remove stub for testing; 
   class{ 'hdp::iptables': ensure => stopped}
 }
 

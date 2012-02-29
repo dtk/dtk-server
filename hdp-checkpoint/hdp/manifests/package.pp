@@ -4,14 +4,18 @@ define hdp::package(
   $included = false
   )
 {
-  #does not support changing size once this has been run
-  
+    
   $package_type = $name
 
   include hdp::params
   $repo_url = $hdp::params::repo_url
   $artifact_dir = $hdp::params::artifact_dir
 
+
+  
+  #does not support changing size once this has been run
+  
+  
   #compute size to use (calc_size)
   #1) if size given, use that
   #2) if 64 bit and 64 bit package is availble, use 64; 
@@ -34,26 +38,51 @@ define hdp::package(
   $package_name = regsubst($package_fn,'^(.+)\.rpm$','\1')
   $package_url = "${repo_url}/${package_fn}"  
   $package_target = "${artifact_dir}/${package_fn}"
- 
-  include hdp::package::artifact_dir
   
-  exec{ "wget ${package_fn}":
-    command => "wget --tries=10 ${package_url} -O ${package_target}",
-    creates => $package_target,
-    path    => ["/usr/bin/"]
+  hdp::package::wget{ $package_fn:
+    package_url    => $package_url,
+    package_target => $package_target
   }
-
+  
   package{ $package_name:
     ensure   => $ensure,
     provider => rpm,
     source   =>  $package_target
   }
-  anchor{ "hdp::package::${name}::begin": } -> Class['hdp::package::artifact_dir'] -> Exec["wget ${package_fn}"] -> Package[$package_name] -> anchor{ "hdp::package::${name}::end": }
+ 
+  anchor{ "hdp::package::${name}::begin": } ->  hdp::artifact_dir{$name :} -> Hdp::Package::Wget[$package_fn] -> Package[$package_name] -> anchor{ "hdp::package::${name}::end": } 
+  
 }
 
-class hdp::package::artifact_dir()
+define hdp::artifact_dir()
+{
+  include artifact_dir_shared
+}
+
+define hdp::save-artifact_dir()
+{
+  $artifact_dir = $hdp::params::artifact_dir
+  exec { "mkdir ${artifact_dir} ${name}" :
+    command => "mkdir ${artifact_dir}",
+    creates => $artifact_dir,
+    path    => ["/bin/"]
+  }
+}
+class artifact_dir_shared()
 {
   file{ $hdp::params::artifact_dir:
     ensure  => directory
+  }
+}
+   
+
+define hdp::package::wget(
+  $package_url,
+  $package_target
+) {
+ exec{ "wget ${name}":
+    command => "wget --tries=10 ${package_url} -O ${package_target}",
+    creates => $package_target,
+    path    => ["/usr/bin/"]
   }
 }

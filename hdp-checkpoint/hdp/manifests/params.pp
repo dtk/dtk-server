@@ -50,7 +50,7 @@ class hdp::params()
     }
   })
   $artifact_dir = hdp_default("artifact_dir","/tmp/HDP-artifacts/") 
-  
+ # $artifact_dir = hdp_default("artifact_dir","/tmp") 
 
  ####kerberos
    #$kerberos_domain = hdp_default("hadoop/hdfs-site/kerberos_domain","EXAMPLE.COM")

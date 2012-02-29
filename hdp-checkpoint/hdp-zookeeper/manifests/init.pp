@@ -1,4 +1,5 @@
 class hdp-zookeeper(
+  $type = server,
   $service_state = running,
   $myid = 1
 ) 
@@ -17,12 +18,16 @@ class hdp-zookeeper(
  hdp-zookeeper::configfile { 'zoo.cfg':}
  hdp-zookeeper::configfile { 'zookeeper-env.sh':}
  
- class { 'hdp-zookeeper::set_myid' : myid => $myid}
+ if ($type == 'server') {
+   class { 'hdp-zookeeper::set_myid' : myid => $myid}
  
- class { 'hdp-zookeeper::service' : enable => $service_state}
+   class { 'hdp-zookeeper::service' : enable => $service_state}
+}
 
- #top level does not need anchors
- Hdp::Package['zookeeper'] -> Hdp::User[$zk_user] -> Hdp::Directory[$zk_config_dir] -> Hdp-zookeeper::Configfile<||> -> Class['hdp-zookeeper::set_myid'] -> Class['hdp-zookeeper::service']
+  anchor{'hdp-zookeeper::begin':} -> Hdp::Package['zookeeper'] -> Hdp::User[$zk_user] -> Hdp::Directory[$zk_config_dir] -> Hdp-zookeeper::Configfile<||> -> anchor{'hdp-zookeeper::end':}
+  if ($type == 'server') {
+   Hdp::Directory[$zk_config_dir] -> Hdp-zookeeper::Configfile<||> -> Class['hdp-zookeeper::set_myid'] -> Class['hdp-zookeeper::service'] -> Anchor['hdp-zookeeper::end']
+  }
 }
 
 ### config files

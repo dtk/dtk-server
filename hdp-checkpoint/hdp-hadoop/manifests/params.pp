@@ -37,26 +37,26 @@ class hdp-hadoop::params(
   ### core-site
   $compression_codecs = hdp_default("hadoop/core-site/compression_codecs")
 
-  $enable_security_authorization = hdp_default("hadoop/core-site/enable_security_authorization")
+  $enable_security_authorization = hdp_default("hadoop/core-site/enable_security_authorization","false")
 
-  $fs_inmemory_size = hdp_default("hadoop/core-site/fs_inmemory_size")
+  $fs_inmemory_size = hdp_default("hadoop/core-site/fs_inmemory_size",256)
 
   $proxyuser_group = hdp_default("hadoop/core-site/proxyuser_group")
 
   $proxyuser_host = hdp_default("hadoop/core-site/proxyuser_host")
 
-  $security_type = hdp_default("hadoop/core-site/security_type")
+  $security_type = hdp_default("hadoop/core-site/security_type","simple")
   
   ### hdfs-site
   $datanode_du_reserved = hdp_default("hadoop/hdfs-site/datanode_du_reserved",1073741824)
 
   $dfs_block_local_path_access_user = hdp_default("hadoop/hdfs-site/dfs_block_local_path_access_user","hbase")
 
-  $dfs_data_dir = hdp_default("hadoop/hdfs-site/dfs_data_dir")
+  $dfs_data_dir = hdp_default("hadoop/hdfs-site/dfs_data_dir","/tmp/hadoop-hdfs/dfs/data")
 
   $dfs_datanode_address = hdp_default("hadoop/hdfs-site/dfs_datanode_address",50010)
 
-  $dfs_datanode_data_dir_perm = hdp_default("hadoop/hdfs-site/dfs_datanode_data_dir_perm")
+  $dfs_datanode_data_dir_perm = hdp_default("hadoop/hdfs-site/dfs_datanode_data_dir_perm",750)
 
   $dfs_datanode_failed_volume_tolerated = hdp_default("hadoop/hdfs-site/dfs_datanode_failed_volume_tolerated",0)
 
@@ -66,13 +66,13 @@ class hdp-hadoop::params(
 
   $dfs_include = hdp_default("hadoop/hdfs-site/dfs_include","dfs.include")
   
-  $dfs_name_dir = hdp_default("hadoop/hdfs-site/dfs_name_dir")
+  $dfs_name_dir = hdp_default("hadoop/hdfs-site/dfs_name_dir","/tmp/hadoop-hdfs/dfs/name")
   
   $dfs_replication = hdp_default("hadoop/hdfs-site/dfs_replication",1) #TODO: for testing
   
   $dfs_support_append = hdp_default("hadoop/hdfs-site/dfs_support_append",true)
 
-  $dfs_webhdfs_enabled = hdp_default("hadoop/hdfs-site/dfs_webhdfs_enabled",false)
+  $dfs_webhdfs_enabled = hdp_default("hadoop/hdfs-site/dfs_webhdfs_enabled","false")
 
 
  ######### mapred #######
@@ -94,7 +94,7 @@ class hdp-hadoop::params(
 
   $mapred_cluster_red_mem_mb = hdp_default("hadoop/mapred-site/mapred_cluster_red_mem_mb","-1")
 
-  $mapred_compress_map_output = hdp_default("hadoop/mapred-site/mapred_compress_map_output",false)
+  $mapred_compress_map_output = hdp_default("hadoop/mapred-site/mapred_compress_map_output","false")
 
   $mapred_hosts_exclude = hdp_default("hadoop/mapred-site/mapred_hosts_exclude","/etc/hadoop/mapred.exclude")
 
@@ -106,7 +106,7 @@ class hdp-hadoop::params(
 
   $mapred_jobstatus_dir = hdp_default("hadoop/mapred-site/mapred_jobstatus_dir","file:////mapred/jobstatus")
 
-  $mapred_local_dir = hdp_default("hadoop/mapred-site/mapred_local_dir")
+  $mapred_local_dir = hdp_default("hadoop/mapred-site/mapred_local_dir","/tmp/hadoop-mapred/mapred/local")
 
   $mapred_map_output_compression_codec = hdp_default("hadoop/mapred-site/mapred_map_output_compression_codec","org.apache.hadoop.io.compress.DefaultCodec")
 

@@ -15,7 +15,9 @@ module XYZ
         pntr = ndx_ret[r[:id]] ||= r.id_handle.create_object().merge(:display_name => r[:display_name], :ndx_nodes => Hash.new)
         node_id = r[:node][:id]
         node = pntr[:ndx_nodes][node_id] ||= {:node_name => r[:node][:display_name], :node_id => node_id, :components => Array.new}
-        node[:components] << r[:nested_component][:component_type].gsub(/__/,"::")
+        if r[:nested_component][:component_type]
+          node[:components] << r[:nested_component][:component_type].gsub(/__/,"::")
+        end
       end
 
       ndx_ret.values.map do |r|

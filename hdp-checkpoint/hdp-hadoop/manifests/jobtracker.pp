@@ -7,6 +7,7 @@ class hdp-hadoop::jobtracker(
 {
     
   include hdp-hadoop::params
+  $mapred_user = $hdp-hadoop::params::mapred_user
   
   Hdp-Hadoop::Configfile<||>{jtnode_host => $hdp::params::host_address}
 
@@ -14,13 +15,21 @@ class hdp-hadoop::jobtracker(
   
   hdp-hadoop::service{ 'jobtracker':
     enable       => $service_state,
-    user         => $hdp-hadoop::params::mapred_user,
+    user         => $mapred_user,
     initial_wait => $opts[wait]
+  }
+  
+  hdp-hadoop::service{ 'historyserver':
+    enable         => $service_state,
+    user           => $mapred_user,
+    initial_wait   => $opts[wait],
+    create_pid_dir => false,
+    create_log_dir => false
   }
 
   #TODO: to support jt on different node than namenode may need to use virtual resource for Hdp-hadoop::Common
   #top level does not need anchors
-  Hdp-hadoop::Common<|namenode == false|> -> Hdp-hadoop::Service['jobtracker']
+  Hdp-hadoop::Common<|namenode == false|> -> Hdp-hadoop::Service['jobtracker'] -> Hdp-hadoop::Service['historyserver']
   Class['hdp-hadoop::jobtracker::hdfs-directory'] -> Hdp-hadoop::Service['jobtracker']
 }
 

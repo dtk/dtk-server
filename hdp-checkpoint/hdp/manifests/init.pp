@@ -9,6 +9,8 @@ class hdp()
   hdp::user { $hdp::params::hadoop_user:}
   
   Group[$hdp::params::hadoop_user_group] -> Hdp::User[$hdp::params::hadoop_user]
+  
+  #TODO: add other package dependencies (see if apply also to yum) and move to params or package file
   Hdp::Package<|title == 'hadoop'|> ->   Hdp::Package<|title == 'hbase'|>
 
   #TODO: !!!!must remove stub for testing; 

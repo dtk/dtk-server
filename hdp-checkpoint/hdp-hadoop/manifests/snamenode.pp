@@ -7,7 +7,7 @@ class hdp-hadoop::snamenode(
 {
   include hdp-hadoop  #adds package, users, directories, and common configs
 
-  Hdp-Hadoop::Configfile<||>{snamenode_host => '0.0.0.0'}
+  Hdp-Hadoop::Configfile<||>{snamenode_host => $hdp::params::host_address}
   
   hdp-hadoop::service{ 'secondarynamenode':
     enable       => $service_state,

@@ -3,7 +3,9 @@ define hdp-hadoop::service(
   $enable = 'running',
   $ensure = undef,
   $user,
-  $initial_wait = undef
+  $initial_wait = undef,
+  $create_pid_dir = true,
+  $create_log_dir = true
 )
 {
 
@@ -21,14 +23,18 @@ define hdp-hadoop::service(
     $service_is_up = undef
   }
  
-  hdp::directory_recursive_create { $pid_dir: 
-    owner       => $user,
-    context_tag => 'hadoop_service',
+  if ($create_pid_dir == true) {
+    hdp::directory_recursive_create { $pid_dir: 
+      owner       => $user,
+      context_tag => 'hadoop_service',
+    }
   }
-
-  hdp::directory_recursive_create { $log_dir: 
-    owner       => $user,
-    context_tag => 'hadoop_service',
+  
+  if ($create_log_dir == true) {
+    hdp::directory_recursive_create { $log_dir: 
+      owner       => $user,
+      context_tag => 'hadoop_service',
+    }
   }
   
   hdp::exec { $daemon_cmd:
@@ -37,8 +43,14 @@ define hdp-hadoop::service(
     initial_wait => $initial_wait
   }
 
-  anchor{"hdp-hadoop::service::${name}::begin":} -> Hdp::Directory_recursive_create<|title == $pid_dir or title == $log_dir|> -> Hdp::Exec[$daemon_cmd] -> anchor{"hdp-hadoop::service::${name}::end":}
-
+  anchor{"hdp-hadoop::service::${name}::begin":} ->  Hdp::Exec[$daemon_cmd] -> anchor{"hdp-hadoop::service::${name}::end":}
+  if ($create_pid_dir == true) {
+    Anchor["hdp-hadoop::service::${name}::begin"] -> Hdp::Directory_recursive_create[$pid_dir] -> Hdp::Exec[$daemon_cmd] 
+  }
+   if ($create_log_dir == true) {
+    Anchor["hdp-hadoop::service::${name}::begin"] -> Hdp::Directory_recursive_create[$log_dir] -> Hdp::Exec[$daemon_cmd] 
+  }
+ 
   if ($enable == 'running') {
     #TODO: look at Puppet resource retry and retry_sleep
     #TODO: can make sleep contingent on $name

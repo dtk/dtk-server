@@ -4,17 +4,36 @@ define hdp::package(
   $included = false
   )
 {
+ hdp::package::yum::set_repo{$name :}
+ 
+ # hdp::package::wget-rpm { $name:
+  #  ensure   => $ensure,
+  #  size     =>   $size,
+  #  included => $included
+  #}
+  
+ # hdp::package::yum { $name:
+ #   ensure   => $ensure,
+ #   size     =>   $size
+ # }
+}
+
+######
+# DEPRECATE
+define hdp::package::wget-rpm(
+  $ensure = present,
+  $size = undef,
+  $included = false
+  )
+{
     
   $package_type = $name
 
   include hdp::params
   $repo_url = $hdp::params::repo_url
   $artifact_dir = $hdp::params::artifact_dir
-
-
   
   #does not support changing size once this has been run
-  
   
   #compute size to use (calc_size)
   #1) if size given, use that
@@ -83,6 +102,56 @@ define hdp::package::wget(
  exec{ "wget ${name}":
     command => "wget --tries=10 ${package_url} -O ${package_target}",
     creates => $package_target,
+    path    => ["/usr/bin/"]
+  }
+}
+
+##TO: remove above after yum tested
+##################### new yum based #################
+define hdp::package::yum(
+  $ensure = present,
+  $size = undef
+  )
+{
+    
+  $package_type = $name
+
+  include hdp::params
+ 
+  #compute size to use (calc_size)
+  #1) if size given, use that
+  #2) if 64 bit and 64 bit package is availble, use 64; 
+  #3) otherwise use 32
+  if ($size == undef) {
+    #TODO: make sure have full set of possible model numbers
+    if (undef != $hdp::params::package_file_names[$package_type][64]) and ($::hardwaremodel in [x86_64]) {
+      $calc_size = 64
+    } else {
+      $calc_size = 32
+    }
+  } else {
+    $calc_size = 32
+  }
+  $package_name = $hdp::params::package_names[$package_type][$calc_size]
+  if ($package_name == undef) {
+    hdp_fail("Cannot find package ${package_type} of size ${calc_size}")
+  }
+  
+  package{ $package_name:
+    ensure   => $ensure,
+    provider => yum,
+  }
+   #TODO: double check dp::package::yum::set_repo{$name :} -> Package[$package_name] to make sure can be many to one
+  anchor{ "hdp::package::${name}::begin": } ->  hdp::package::yum::set_repo{$name :} -> Package[$package_name] -> anchor{ "hdp::package::${name}::end": } 
+  
+}
+
+define hdp::package::yum::set_repo()
+{
+  $repo_info = '/etc/yum.repos.d/hdp.repo'
+  exec{ "set yum repo for ${name}":
+    command => "wget --tries=10 ${hdp::params::yum_repo} -O ${repo_info}",
+    creates => $repo_info,
     path    => ["/usr/bin/"]
   }
 }

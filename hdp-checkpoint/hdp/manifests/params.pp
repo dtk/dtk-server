@@ -50,6 +50,31 @@ class hdp::params()
     }
   })
   $artifact_dir = hdp_default("artifact_dir","/tmp/HDP-artifacts/") 
+  
+  #### TODO: yum base; wil replace above
+  $yum_repo = hdp_default("hdp_yum_repo", "http://linuxrepo.s3-website-us-west-1.amazonaws.com/yumrepo/HDP-1.0.1-PREVIEW-3/hdp.repo")
+  
+  $package_names = hdp_default("package_names",{
+    hadoop => {
+      32 => 'hadoop-1.0.0-1.i386.rpm', 
+      64 => 'hadoop-1.0.0-1.amd64.rpm' 
+    },
+    zookeeper => {
+      64 => 'zookeeper-3.3.4-1.x86_64.rpm'
+    },
+    hbase => {
+      64 => 'hbase-0.92.0-1.x86_64.rpm'
+    },
+    hcat-server => {
+      64 => 'hcatalog-server-0.3.0-1.amd64.rpm'
+    },
+    hcat-base => {
+      64 => 'hcatalog-0.3.0-1.amd64.rpm'
+    },
+    pig => {
+      32 => 'pig-0.9.2-1.i386.rpm'
+    }
+  })
  # $artifact_dir = hdp_default("artifact_dir","/tmp") 
 
  ####kerberos

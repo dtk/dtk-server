@@ -18,7 +18,9 @@ class hdp::params()
 
   #####
 
-  #TODO: need to allow multiple paths if 32 + 64
+  $java32_home = hdp_default("java32_home")
+  $java64_home = hdp_default("java64_home","/usr/java/default") #TODO: temp defualt
+  #TODO: deprecate below once incorporate above
   $java_home = hdp_default("java_home","/usr/java/default")
 
   $hadoop_home = hdp_default("hadoop_home","/usr")

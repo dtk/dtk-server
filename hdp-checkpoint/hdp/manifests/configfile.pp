@@ -3,6 +3,7 @@ define hdp::configfile(
   $conf_dir,
   $owner = undef,
   $mode = undef,
+  $size = 64, #32 or 64 bit (used to pick appropriate java_home)
   $namenode_host = $hdp::params::namenode_host,
   $jtnode_host = $hdp::params::jtnode_host,
   $snamenode_host = $hdp::params::snamenode_host,

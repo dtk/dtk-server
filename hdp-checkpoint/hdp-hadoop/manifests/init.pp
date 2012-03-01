@@ -22,16 +22,6 @@ class hdp-hadoop()
   -> Hdp::Directory[$conf_dir] -> Hdp-hadoop::Configfile<|context_tag == 'common'|> -> anchor{ 'hdp-hadoop::end':}
 }
 
-#TODO: remove below when finished testing
-#using define vs class because cannot uses class in collect statement
-#$namenode is used for conditional ordering in componet role classes
-#only realized under 1 name
-define hdp-hadoop::common($namenode = false)
-{
- include hdp-hadoop
- anchor{'hdp-hadoop::common::begin' :} -> Class['hdp-hadoop'] -> anchor{'hdp-hadoop::common::end' :}
-}
-
 ###config file helper
 define hdp-hadoop::configfile(
   $owner = undef,

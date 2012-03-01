@@ -8,9 +8,6 @@ class hdp-hadoop::namenode(
 ) inherits hdp-hadoop::params
 {
   #adds package, users and directories, and common hadoop configs
-  #hdp-hadoop::common { 'hadoop': 
-  #  namenode => true
-  #}
   class { 'hdp-hadoop' : }
    
   Hdp-Hadoop::Configfile<||>{namenode_host => $hdp::params::host_address}
@@ -24,7 +21,6 @@ class hdp-hadoop::namenode(
     initial_wait => $opts[wait]
   }
   #top level does not need anchors
-  #Hdp-hadoop::Common['hadoop'] -> Class['hdp-hadoop::namenode::format'] -> Hdp-hadoop::Service['namenode']
   Class['hdp-hadoop'] -> Class['hdp-hadoop::namenode::format'] -> Hdp-hadoop::Service['namenode']
 }
 

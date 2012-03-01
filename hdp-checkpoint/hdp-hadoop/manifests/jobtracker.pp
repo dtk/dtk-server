@@ -30,11 +30,8 @@ class hdp-hadoop::jobtracker(
     create_log_dir => false
   }
 
-  #TODO: to support jt on different node than namenode may need to use virtual resource for Hdp-hadoop::Common
   #top level does not need anchors
- # Hdp-hadoop::Common<|namenode == false|> -> Hdp-hadoop::Service['jobtracker'] -> Hdp-hadoop::Service['historyserver']
   Class['hdp-hadoop'] -> Hdp-hadoop::Service['jobtracker'] -> Hdp-hadoop::Service['historyserver']
- 
   Class['hdp-hadoop::jobtracker::hdfs-directory'] -> Hdp-hadoop::Service['jobtracker']
 }
 

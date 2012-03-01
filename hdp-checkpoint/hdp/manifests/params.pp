@@ -16,12 +16,20 @@ class hdp::params()
   $host_address = $::ec2_public_hostname #TODO: works with facter 1.6.4, but not facter 1.6.5
   #$host_address = $::fqdn
 
+  ##### java 
+  #TODO: should we check what is in java32/64 to see if should install java or have explicit flag?
+  #btter normaize inputs for java
+  $java32_home = hdp_default("java32_home","/usr/jdk32/jdk1.6.0_26")
+  $java64_home = hdp_default("java64_home","/usr/java/default") #TODO: change to  "/usr/jdk64/jdk1.6.0_26"
+  $java_home = hdp_default("java_home","/usr/java/default") #TODO: deprecate once incorporate above
+  
+  $jdk_location = hdp_default("jdk_location","http://download.oracle.com/otn-pub/java/jdk/6u26-b03")
+  $jdk_bins = hdp_default("jdk_bins",{
+    32 => "jdk-6u26-linux-i586.bin",
+    64 => "jdk-6u26-linux-x64.bin"
+  })
+  
   #####
-
-  $java32_home = hdp_default("java32_home")
-  $java64_home = hdp_default("java64_home","/usr/java/default") #TODO: temp defualt
-  #TODO: deprecate below once incorporate above
-  $java_home = hdp_default("java_home","/usr/java/default")
 
   $hadoop_home = hdp_default("hadoop_home","/usr")
 
@@ -29,6 +37,8 @@ class hdp::params()
   $hadoop_user_group = hdp_default("hadoop_user_group","hadoop")
 
   $exec_path = ["/bin","/usr/bin", "/usr/sbin"]
+  
+  ##### packages/repos
  
   $repo_url = hdp_default("repo_url","http://public-repo-1.hortonworks.com/HDP-1.0.1-PREVIEW-2")
   $package_file_names = hdp_default("package_file_names",{

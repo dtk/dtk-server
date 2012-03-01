@@ -71,27 +71,6 @@ define hdp::package::wget-rpm(
   anchor{ "hdp::package::${name}::begin": } ->  hdp::artifact_dir{$name :} -> Hdp::Package::Wget[$package_fn] -> Package[$package_name] -> anchor{ "hdp::package::${name}::end": } 
   
 }
-
-define hdp::artifact_dir()
-{
-  include artifact_dir_shared
-}
-
-define hdp::save-artifact_dir()
-{
-  $artifact_dir = $hdp::params::artifact_dir
-  exec { "mkdir ${artifact_dir} ${name}" :
-    command => "mkdir ${artifact_dir}",
-    creates => $artifact_dir,
-    path    => ["/bin/"]
-  }
-}
-class artifact_dir_shared()
-{
-  file{ $hdp::params::artifact_dir:
-    ensure  => directory
-  }
-}
    
 
 define hdp::package::wget(

@@ -4,18 +4,17 @@ define hdp::package(
   $included = false
   )
 {
- hdp::package::yum::set_repo{$name :}
- 
- # hdp::package::wget-rpm { $name:
-  #  ensure   => $ensure,
-  #  size     =>   $size,
-  #  included => $included
-  #}
+
+  hdp::package::wget-rpm { $name:
+    ensure   => $ensure,
+    size     =>   $size,
+    included => $included
+  }
   
- # hdp::package::yum { $name:
- #   ensure   => $ensure,
- #   size     =>   $size
- # }
+# hdp::package::yum { $name:
+#    ensure   => $ensure,
+#    size     =>   $size
+# }
 }
 
 ######

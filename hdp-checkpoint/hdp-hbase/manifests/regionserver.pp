@@ -6,7 +6,7 @@ class hdp-hbase::regionserver(
 ) 
 {
   if ($opts[wait] == undef) {
-    $wait = 15
+    $wait = 25
   } else {
     $wait = $opts[wait]
   }      

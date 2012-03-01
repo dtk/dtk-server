@@ -1,7 +1,8 @@
 class hdp-zookeeper(
   $type = server,
   $service_state = running,
-  $myid = 1
+  $myid = 1,
+  $opts = {}
 ) 
 {
  include hdp-zookeeper::params
@@ -21,7 +22,10 @@ class hdp-zookeeper(
  if ($type == 'server') {
    class { 'hdp-zookeeper::set_myid' : myid => $myid}
  
-   class { 'hdp-zookeeper::service' : enable => $service_state}
+   class { 'hdp-zookeeper::service' : 
+     enable  => $service_state,
+     initial_wait => $opts[wait]
+   }
 }
 
   anchor{'hdp-zookeeper::begin':} -> Hdp::Package['zookeeper'] -> Hdp::User[$zk_user] -> Hdp::Directory[$zk_config_dir] -> Hdp-zookeeper::Configfile<||> -> anchor{'hdp-zookeeper::end':}

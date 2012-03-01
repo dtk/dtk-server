@@ -12,6 +12,7 @@ class hdp::params()
   #TODO: either remove or make conditional on ec2
   #TODO: may want to use private address to sync with rDNS
   #for self
+  #TODO: may be safe to keep in becasue if not ec2 will be undefined; alternatively set to $host_address = undef
   $host_address = $::ec2_public_hostname #TODO: works with facter 1.6.4, but not facter 1.6.5
   #$host_address = $::fqdn
 
@@ -56,23 +57,23 @@ class hdp::params()
   
   $package_names = hdp_default("package_names",{
     hadoop => {
-      32 => 'hadoop-1.0.0-1.i386.rpm', 
-      64 => 'hadoop-1.0.0-1.amd64.rpm' 
+      32 => 'hadoop.i386', 
+      64 => 'hadoop.x86_64' 
     },
     zookeeper => {
-      64 => 'zookeeper-3.3.4-1.x86_64.rpm'
+      64 => 'zookeeper.x86_64'
     },
     hbase => {
-      64 => 'hbase-0.92.0-1.x86_64.rpm'
+      64 => 'hbase.x86_64'
     },
     hcat-server => {
-      64 => 'hcatalog-server-0.3.0-1.amd64.rpm'
+    #  64 => ''
     },
     hcat-base => {
-      64 => 'hcatalog-0.3.0-1.amd64.rpm'
+     # 64 => ''
     },
     pig => {
-      32 => 'pig-0.9.2-1.i386.rpm'
+      32 => 'pig.i386'
     }
   })
  # $artifact_dir = hdp_default("artifact_dir","/tmp") 

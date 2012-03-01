@@ -1,6 +1,7 @@
 class hdp-zookeeper::service(
   $enable = undef,
-  $ensure = undef
+  $ensure = undef,
+  $initial_wait = undef
 )
 {
   include $hdp-zookeeper::params
@@ -36,7 +37,8 @@ class hdp-zookeeper::service(
   
   hdp::exec { $daemon_cmd:
     command => $daemon_cmd,
-    unless  => $no_op_test
+    unless  => $no_op_test,
+    initial_wait => $initial_wait
   }
  
   anchor{'hdp-zookeeper::service::begin':} -> Hdp::Directory_recursive_create<|context_tag == 'zk_service'|> -> Hdp::Exec[$daemon_cmd] -> anchor{'hdp-zookeeper::service::end':}

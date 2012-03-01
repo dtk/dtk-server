@@ -16,4 +16,3 @@ class hdp-hadoop::tasktracker(
   #top level does not need anchors
   Class['hdp-hadoop'] -> Hdp-hadoop::Service['tasktracker']
 }
-

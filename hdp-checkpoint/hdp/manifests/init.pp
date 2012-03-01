@@ -92,7 +92,13 @@ define hdp::exec(
 {
      
   if ($initial_wait != undef) {
-    hdp::wait { "service ${name}" : wait_time => $initial_wait}
+    #passing in creates and unless so dont have to wait if condition has been acheived already
+    hdp::wait { "service ${name}" : 
+      wait_time => $initial_wait,
+      creates   => $creates,
+      unless    => $unless,
+      path      => $path
+    }
   }
   
   exec { $name :
@@ -111,10 +117,18 @@ define hdp::exec(
 }
 
 #### utilities for waits
-define hdp::wait($wait_time)
+define hdp::wait(
+  $wait_time,
+  $creates = undef,
+  $unless = undef,
+  $path = undef #used for unless
+)   
 {
   exec { "wait ${name} ${wait_time}" :
-    command => "/bin/sleep ${wait_time}"
+    command => "/bin/sleep ${wait_time}",
+    creates => $creates,
+    unless  => $unless,
+    path    => $path
   } 
 }
 

@@ -198,8 +198,13 @@ module XYZ
     def git_command__commit(message)
       @grit_repo.commit_index(message)
     end
+
+    #TODO: see what other commands needs mutex and whetehr mutex across what boundaries
+    Git_command__push_mutex = Mutex.new
     def git_command__push(branch_name)
-      git_command.push(cmd_opts(),"origin", "#{branch_name}:refs/heads/#{branch_name}")
+      Git_command__push_mutex.synchronize do 
+        git_command.push(cmd_opts(),"origin", "#{branch_name}:refs/heads/#{branch_name}")
+      end
     end
     def git_command__pull(branch_name)
       git_command.pull(cmd_opts(),"origin",branch_name)

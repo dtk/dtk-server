@@ -126,6 +126,7 @@ module XYZ
         Model.get_objs_in_set(impl_idhs,{:col => [:id, :repo, :branch]})
       end
       def self.push_implementation(impl_info)
+        #TODO: put in logic to reduce unnecesarry pushes
         ret = Array.new
         impl_info.each do |impl|
           ret << {:repo => impl[:repo],:branch => impl[:branch], :implementation => impl[:display_name]}

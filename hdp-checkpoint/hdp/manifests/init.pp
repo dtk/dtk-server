@@ -55,7 +55,7 @@ define hdp::directory(
     ensure => directory,
     owner  => $owner,
     group  => $group,
-    mode=> $mode
+    mode   => $mode
   }
 }
 #TODO: check on -R flag and use of recurse

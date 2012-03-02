@@ -1,0 +1,45 @@
+--- !omap 
+- hdp-nagios__server: !omap 
+    - display_name: hdp-nagios__server
+    - description: Nagios server
+    - external_ref: 
+        class_name: hdp-nagios::server
+        type: puppet_class
+    - basic_type: service
+    - component_type: hdp-nagios__server
+    - ui: 
+        images: 
+          tiny: ""
+          tnail: nagios.png
+          display: nagios.png
+    - attribute: !omap 
+        - monitored_hosts: !omap 
+            - display_name: monitored_hosts
+            - description: Nagios hosts being monitored
+            - data_type: json
+            - external_ref: 
+                type: puppet_attribute
+                path: node[htp-hadoop][monitored_hosts]
+            - semantic_type_summary: "array(string)"
+            - semantic_type: 
+                ":array": string
+- hdp-nagios__target: !omap 
+    - display_name: hdp-nagios__target
+    - description: Nagios target
+    - external_ref: 
+        class_name: hdp-nagios::target
+        type: puppet_class
+    - basic_type: service
+    - component_type: hdp-nagios__target
+    - ui: 
+        images: 
+          tiny: ""
+          tnail: nagios.png
+          display: nagios.png                    
+    - external_link_defs: 
+      - required: true
+        type: server
+        possible_links: 
+        - hdp-nagios__server:
+            attribute_mappings: 
+            - ":remote_node.host_addresses_ipv4.0": ":hdp-nagios__server.monitored_hosts"

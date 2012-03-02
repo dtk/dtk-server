@@ -6,7 +6,7 @@ class hdp-hcat::params() inherits hdp::params
   $hcat_metastore_user_passwd = hdp_default("hadoop/hive-site/hcat_metastore_user_passwd","dbpassword")
  
  ####### users
-  $hcat_user = hdp_default("hcat_user","hcat")
+ 
   
   ### common
   $hcat_metastore_port = hdp_default("hcat_metastore_port",9933)
@@ -18,10 +18,10 @@ class hdp-hcat::params() inherits hdp::params
   $hcat_dbroot = hdp_default("hadoop/hcat-env/hcat_dbroot",$hcat_lib)
 
   $hcat_logdirprefix = hdp_default("hadoop/hcat-env/hcat_logdirprefix","/var/log")
-  $hcat_log_dir = "${hcat_logdirprefix}/${hcat_user}"
+  $hcat_log_dir = "${hcat_logdirprefix}/${hdp::params::hcat_user}"
 
   $hcat_piddirprefix = hdp_default("hadoop/hcat-env/hcat_piddirprefix","/usr/pids")
-  $hcat_pid_dir = "${hcat_piddirprefix}/${hcat_user}"
+  $hcat_pid_dir = "${hcat_piddirprefix}/${hdp::params::hcat_user}"
   
   ### hive-site
   $hcat_database_name = hdp_default("hadoop/hive-site/hcat_database_name","hive")

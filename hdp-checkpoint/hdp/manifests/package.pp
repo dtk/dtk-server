@@ -40,7 +40,8 @@ define hdp::package::wget-rpm(
   #3) otherwise use 32
   if ($size == undef) {
     #TODO: make sure have full set of possible model numbers
-    if (undef != $hdp::params::package_file_names[$package_type][64]) and ($::hardwaremodel in [x86_64]) {
+    $pn = $hdp::params::package_file_names[$package_type][64]
+    if (("||" != "|${pn}|") and ($::hardwaremodel in [x86_64])) {
       $calc_size = 64
     } else {
       $calc_size = 32
@@ -53,7 +54,7 @@ define hdp::package::wget-rpm(
     hdp_fail("Cannot find package ${package_type} of size ${calc_size}")
   }
   
-  $package_name = regsubst($package_fn,'^(.+)\.rpm$','\1')
+  $package_name = regsubst($package_fn,'^(.+)\.rpm','\1')
   $package_url = "${repo_url}/${package_fn}"  
   $package_target = "${artifact_dir}/${package_fn}"
   

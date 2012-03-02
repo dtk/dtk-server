@@ -2,12 +2,24 @@ class hdp::params()
 {
   ### hostnames
   $namenode_host = hdp_default("namenode_host")
-  $jtnode_host = hdp_default("jtnode_host")
   $snamenode_host = hdp_default("snamenode_host")
+  $datanode_hosts = hdp_default("datanode_hosts")
+  $jtnode_host = hdp_default("jtnode_host")
+  $ttnode_hosts = hdp_default("ttnode_hosts")
+
   $zookeeper_hosts = hdp_default("zookeeper_hosts")
+
   $hbase_master_host = hdp_default("hbase_master_host")
+  $hbase_rs_hosts = hdp_default("hbase_rs_hosts")
+
   $hcat_server_host = hdp_default("hcat_server_host")
   $hcat_mysql_host = hdp_default("hcat_mysql_host")
+
+  $nagios_server_host = hdp_default("nagios_server_host")
+  
+  #### users
+  #TODO: move rest of users here so can be used globally
+  $hcat_user = hdp_default("hcat_user","hcat")
   
   #TODO: either remove or make conditional on ec2
   #TODO: may want to use private address to sync with rDNS

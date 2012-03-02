@@ -6,7 +6,7 @@ class hdp-hcat::service(
 {
   include $hdp-hcat::params
   
-  $user = $hdp-hcat::params::hcat_user
+  $user = $hdp::params::hcat_user
   $hadoop_home = $hdp::hadoop_home
   $cmd = "env HADOOP_HOME=${hadoop_home} /usr/sbin/hcat_server.sh"
   $pid_file = "${hdp-hcat::params::hcat_pid_dir}/hcat.pid" 
@@ -34,7 +34,7 @@ class hdp-hcat::service(
 define hdp-hcat::service::directory()
 {
   hdp::directory_recursive_create { $name: 
-    owner => $hdp-hcat::params::hcat_user,
+    owner => $hdp::params::hcat_user,
     mode => '0755'
   }
 }

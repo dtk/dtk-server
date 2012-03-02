@@ -172,7 +172,7 @@ DEFAULT
   </property>
 
 <property>
-  <name>hadoop.proxyuser.<%=scope.function_hdp_template_var("hcat_user")%>.groups</name>
+  <name>hadoop.proxyuser.<%=scope.function_hdp_user("hcat_user")%>.groups</name>
   <value><%=scope.function_hdp_template_var("proxyuser_group")%></value>
   <description>
      Proxy group for Hadoop.
@@ -180,7 +180,7 @@ DEFAULT
 </property>
 
 <property>
-  <name>hadoop.proxyuser.<%=scope.function_hdp_template_var("hcat_user")%>.hosts</name>
+  <name>hadoop.proxyuser.<%=scope.function_hdp_user("hcat_user")%>.hosts</name>
   <value><%=scope.function_hdp_template_var("proxyuser_host")%></value>
   <description>
      Proxy host for Hadoop.

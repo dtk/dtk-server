@@ -19,7 +19,7 @@ class hdp-hcat::mysql-connector()
   exec{ "unzip ${target}":
     command => "unzip -o -j ${target} '*.jar' -x */lib/*",
     cwd     => $hcat_lib,
-    user    => $hdp-hcat::hcat_user,
+    user    => $hdp::params::hcat_user,
     group   => $hdp::params::hadoop_user_group,
     creates => "${hcat_lib}/${$jar_name}",
     path    => ["/usr/bin/"]

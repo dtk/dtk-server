@@ -22,7 +22,7 @@ class hdp-hcat::server(
 
 class hdp-hcat::hdfs-directories()
 {
- $hcat_user = $hdp-hcat::params::hcat_user
+ $hcat_user = $hdp::params::hcat_user
  #TODO: need to make sure that hdfs service is running
   hdp-hadoop::hdfs::directory{ '/apps/hive/warehouse':
     owner => $hcat_user,

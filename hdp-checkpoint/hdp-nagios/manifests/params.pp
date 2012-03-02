@@ -1,5 +1,15 @@
 class hdp-nagios::params() inherits hdp::params
 {   
+ 
+ 
+  $conf_dir = hdp_default("nagios_conf_dir","/etc/nagios")
+  $nagios_web_login = hdp_default("nagios_web_login","nagiosadmin")
+  $nagios_web_password = hdp_default("nagios_web_password","admin")
+  
+  $datanode_dir =  hdp_default("nagios/nagios-hadoop-services/datanode_dir") #TODO: must be same as what is set/used in hadoop
+   
+  $nagios_contact = hdp_default("nagios/nagios-contacts/nagios_contact","monitor\@monitor.com")
+ 
   $nagios_download_info = hdp_default("nagios_download_info",{
       server => {
         url => "http://pkgs.repoforge.org/nagios/nagios-3.2.3-3.el5.rf.x86_64.rpm",

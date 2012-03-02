@@ -3,10 +3,9 @@ class hdp::params()
   ### hostnames
   $namenode_host = hdp_default("namenode_host")
   $snamenode_host = hdp_default("snamenode_host")
-  $datanode_hosts = hdp_default("datanode_hosts")
   $jtnode_host = hdp_default("jtnode_host")
-  $ttnode_hosts = hdp_default("ttnode_hosts")
-
+  $slave_hosts = hdp_default("slave_hosts")
+  
   $zookeeper_hosts = hdp_default("zookeeper_hosts")
 
   $hbase_master_host = hdp_default("hbase_master_host")
@@ -15,6 +14,8 @@ class hdp::params()
   $hcat_server_host = hdp_default("hcat_server_host")
   $hcat_mysql_host = hdp_default("hcat_mysql_host")
 
+  $gateway_host = hdp_default("gateway_host")
+  
   $nagios_server_host = hdp_default("nagios_server_host")
   
   #### users

@@ -1,9 +1,10 @@
- class hdp-nagios::server($monitored_hosts = undef)
+ class hdp-nagios::server($monitored_hosts = undef) 
 {
   include hdp-nagios::params
 
   if ($monitored_hosts == undef) {
-    $types = "namenode_host,datanode_hosts,jtnode_host,ttnode_hosts,snamenode_host,zookeeper_hosts,hbase_master_host,hbase_rs_hosts,hcat_server_host"
+    #TODO: make sure list is in sync (with hdp::params host def and includes everything monitored
+    $types = [namenode_host,datanode_hosts,jtnode_host,slave_hosts,snamenode_host,zookeeper_hosts,hbase_master_host,gateway_host,hcat_server_host]
     $targets = hdp_nagios_target_hosts($types)
   } else {	     
     $targets = $monitored_hosts

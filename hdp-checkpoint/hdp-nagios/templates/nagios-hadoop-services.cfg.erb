@@ -209,7 +209,7 @@ define service {
         hostgroup_name          slaves
         use                     generic-service
         service_description     DATANODE::Storage full alert
-        check_command           check_snmp_storage!DFSDATADIRS!89%!90%
+        check_command           check_snmp_storage!<%=scope.function_hdp_template_var("datanode_dir") %>!89%!90%
         normal_check_interval   10
         retry_check_interval    5
         max_check_attempts      1

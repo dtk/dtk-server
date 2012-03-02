@@ -17,10 +17,10 @@ class hdp-hcat::params() inherits hdp::params
 
   $hcat_dbroot = hdp_default("hadoop/hcat-env/hcat_dbroot",$hcat_lib)
 
-  $hcat_logdirprefix = hdp_default("hadoop/hcat-env/hcat_logdirprefix","/var/log")
+  $hcat_logdirprefix = hdp_default("hadoop/hcat-env/hcat_logdirprefix","/var/log/hcatalog")
   $hcat_log_dir = "${hcat_logdirprefix}/${hdp::params::hcat_user}"
 
-  $hcat_piddirprefix = hdp_default("hadoop/hcat-env/hcat_piddirprefix","/usr/pids")
+  $hcat_piddirprefix = hdp_default("hadoop/hcat-env/hcat_piddirprefix","/var/run/hcatalog")
   $hcat_pid_dir = "${hcat_piddirprefix}/${hdp::params::hcat_user}"
   
   ### hive-site

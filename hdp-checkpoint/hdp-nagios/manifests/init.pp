@@ -1,1 +1,1 @@
-class hdp-nagios:(){}
+class hdp-nagios(){}

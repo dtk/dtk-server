@@ -16,10 +16,9 @@ class hdp-hadoop::params(
 
   $hadoop_heapsize = hdp_default("hadoop/hadoop-env/hadoop_heapsize","1024m")
 
-  $hadoop_logdirprefix = hdp_default("hadoop/hadoop-env/hadoop_logdirprefix","/var/log")
-  #TODO: alternative is $hadoop_logdirprefix = hdp_default("hadoop/hadoop-env/hadoop_logdirprefix","${hdp::params::hadoop_home}/logs")
+  $hadoop_logdirprefix = hdp_default("hadoop/hadoop-env/hadoop_logdirprefix","/var/log/hadoop")
 
-  $hadoop_piddirprefix = hdp_default("hadoop/hadoop-env/hadoop_piddirprefix","${hdp::params::hadoop_home}/pids")
+  $hadoop_piddirprefix = hdp_default("hadoop/hadoop-env/hadoop_piddirprefix","/var/run/hadoop")
 
   $jtnode_heapsize = hdp_default("hadoop/hadoop-env/jtnode_heapsize","1024m")
 

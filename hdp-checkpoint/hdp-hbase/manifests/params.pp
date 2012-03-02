@@ -13,7 +13,7 @@ class hdp-hbase::params() inherits hdp::params
 
   $hbase_master_heapsize = hdp_default("hadoop/hbase-env/hbase_master_heapsize","1000m")
 
-  $hbase_pid_dir = hdp_default("hadoop/hbase-env/hbase_pid_dir","/usr/pids/hbase")
+  $hbase_pid_dir = hdp_default("hadoop/hbase-env/hbase_pid_dir","/var/run/hbase")
 
   $hbase_regionserver_heapsize = hdp_default("hadoop/hbase-env/hbase_regionserver_heapsize","1000m")
 

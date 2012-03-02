@@ -9,12 +9,15 @@
     $targets = $monitored_hosts
   }
 
-  class { 'hdp-nagios::server::package': }
-
+  package { ['php'] : }
+  hdp-nagios::server::package { ['perl_net_snmp','server','fping','plugins']: } 
+  
   hdp-nagios::server::host{$targets : }
 
-  Class['hdp-nagios::server::package'] -> Hdp-nagios::Server::Host<||>
-
+  Hdp-nagios::Server::Package<||> -> Hdp-nagios::Server::Host<||>
+  Package['php'] -> Hdp-nagios::Server::Package['server']
+  Hdp-nagios::Server::Package['perl_net_snmp'] -> Hdp-nagios::Server::Package['plugins']
+  Hdp-nagios::Server::Package['fping'] -> Hdp-nagios::Server::Package['plugins']
 }
 
 define hdp-nagios::server::host()
@@ -25,25 +28,30 @@ define hdp-nagios::server::host()
     use     => 'linux-server'
   }
 }
-class hdp-nagios::server::package()
-{
-  $target = "/tmp/nagiosserver.rpm"
-  $nagios_exec = "/usr/bin/nagios"  
 
-  $wget_cmd = "wget ${hdp-nagios::params::nagios_rpm_url} -O ${target}"
+define hdp-nagios::server::package()
+{
+  $info = $hdp-nagios::params::nagios_download_info[$name]  
+  $target = "/tmp/${info[rpm]}"
+  
+  $wget_cmd = "wget ${info[url]} -O ${target}"
   exec { $wget_cmd:
     command => $wget_cmd,
     path    => ["/usr/bin/"],
-    creates => $target,
-    unless  => "test -e ${nagios_exec}"
+    creates => $target
+  }
+   
+  $install_cmd = $info[provider] ? {
+    'yum'  => "yum -y ${info[options]} install ${target}",
+    'rpm' => "rpm ${info[options]} -i ${target}",
+     default  => undef,
   }
 
-  $install_cmd = "yum -y --nogpgcheck install ${target}"
   exec { $install_cmd:
     command => $install_cmd,
     path    => ["/bin","/usr/bin/"],
-    creates => $nagios__exec
+    creates => $info[creates]
   }
  
-  anchor{'hdp-nagios::server::package::begin':} -> Exec[$wget_cmd] -> Exec[$install_cmd] -> anchor{'hdp-nagios::server::package::end':}
+  anchor{"hdp-nagios::server::package::${name}::begin":} -> Exec[$wget_cmd] -> Exec[$install_cmd] -> anchor{"hdp-nagios::server::${name}::package::end":}
 }

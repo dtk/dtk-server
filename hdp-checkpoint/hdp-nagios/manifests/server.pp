@@ -9,7 +9,7 @@
     $targets = $monitored_hosts
   }
 
-  package { ['php'] : }
+  package { ['httpd','php','net-snmp-perl','perl-Net-SNMP'] : }
   hdp-nagios::server::package { ['perl_net_snmp','server','fping','plugins']: } 
   
   hdp-nagios::server::host{$targets : }

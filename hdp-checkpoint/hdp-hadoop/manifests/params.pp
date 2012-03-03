@@ -51,7 +51,8 @@ class hdp-hadoop::params(
 
   $dfs_block_local_path_access_user = hdp_default("hadoop/hdfs-site/dfs_block_local_path_access_user","hbase")
 
-  $dfs_data_dir = hdp_default("hadoop/hdfs-site/dfs_data_dir","/tmp/hadoop-hdfs/dfs/data")
+  #$dfs_data_dir = hdp_default("hadoop/hdfs-site/dfs_data_dir","/tmp/hadoop-hdfs/dfs/data")
+  $dfs_data_dir = hdp_default("hadoop/hdfs-site/dfs_data_dir","/grid/0/hdp/hdfs/data,/grid/1/hdp/hdfs/data,/grid/2/hdp/hdfs/data,/grid/3/hdp/hdfs/data")
 
   $dfs_datanode_address = hdp_default("hadoop/hdfs-site/dfs_datanode_address",50010)
 
@@ -65,7 +66,8 @@ class hdp-hadoop::params(
 
   $dfs_include = hdp_default("hadoop/hdfs-site/dfs_include","dfs.include")
   
-  $dfs_name_dir = hdp_default("hadoop/hdfs-site/dfs_name_dir","/tmp/hadoop-hdfs/dfs/name")
+#  $dfs_name_dir = hdp_default("hadoop/hdfs-site/dfs_name_dir","/tmp/hadoop-hdfs/dfs/name")
+  $dfs_name_dir = hdp_default("hadoop/hdfs-site/dfs_name_dir","/grid/0/hdp/hdfs/name")
   
   $dfs_replication = hdp_default("hadoop/hdfs-site/dfs_replication",1) #TODO: for testing
   
@@ -105,8 +107,9 @@ class hdp-hadoop::params(
 
   $mapred_jobstatus_dir = hdp_default("hadoop/mapred-site/mapred_jobstatus_dir","file:////mapred/jobstatus")
 
-  $mapred_local_dir = hdp_default("hadoop/mapred-site/mapred_local_dir","/tmp/hadoop-mapred/mapred/local")
-
+  #$mapred_local_dir = hdp_default("hadoop/mapred-site/mapred_local_dir","/tmp/hadoop-mapred/mapred/local")
+  $mapred_local_dir = hdp_default("hadoop/mapred-site/mapred_local_dir","/grid/0/hdp/mapred/local,/grid/1/hdp/mapred/local,/grid/2/hdp/mapred/local,/grid/3/hdp/mapred/local")
+   
   $mapred_map_output_compression_codec = hdp_default("hadoop/mapred-site/mapred_map_output_compression_codec","org.apache.hadoop.io.compress.DefaultCodec")
 
   $mapred_map_tasks_max = hdp_default("hadoop/mapred-site/mapred_map_tasks_max",4)

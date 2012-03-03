@@ -11,9 +11,10 @@ class hdp-hadoop::namenode::format(
   } else {
    #TODO: need to put in some other directory contents test
     hdp-hadoop::exec-hadoop { 'namenode -format' :
-      command => 'namenode -format',
-      unless  => "test -f ${mark_file}",
-      notify  => Hdp::Exec['set namenode mark']
+      command  => 'namenode -format',
+      echo_yes => true,
+      unless   => "test -f ${mark_file}",
+      notify   => Hdp::Exec['set namenode mark']
     }
   }
 

@@ -54,12 +54,18 @@ define hdp-hadoop::configfile(
 #####
 define hdp-hadoop::exec-hadoop(
   $command,
-  $unless = undef
+  $unless = undef,
+  $echo_yes = false
 )
 {
   include hdp-hadoop::params
-  hdp::exec { "hadoop ${command}":
-    command => "hadoop ${command}",
+  if ($echo_yes == true) {
+    $cmd = "echo Y | hadoop ${command}"
+  } else {
+    $cmd = "hadoop ${command}"       
+  }
+  hdp::exec { $cmd:
+    command => $cmd,
     user    => $hdp-hadoop::params::hdfs_user,
     unless  => $unless
   }

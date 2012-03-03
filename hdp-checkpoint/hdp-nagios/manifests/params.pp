@@ -5,12 +5,16 @@ class hdp-nagios::params() inherits hdp::params
   $nagios_user = "nagios"
   $nagios_group = "nagios"
   
-  $nagios_host_cfg = hdp_default("nagios_host_cfg","/etc/nagios/objects/hadoop-hosts.cfg")
-  $nagios_hostgroup_cfg = hdp_default("nagios_hostgroup_cfg","/etc/nagios/objects/hadoop-hostgroups.cfg")
-  $nagios_service_cfg = hdp_default("nagios_service_cfg","/etc/nagios/objects/hadoop-services.cfg")
-  $nagios_command_cfg = hdp_default("nagios_command_cfg","/etc/nagios/objects/hadoop-commands.cfg")
-  
   $conf_dir = hdp_default("nagios_conf_dir","/etc/nagios")
+  #TODO: note if $nagios_obj_dir different than "/etc/nagios/", Puppet nagios resources only provide partial support
+  $nagios_obj_dir = hdp_default("nagios_obj_dir","/etc/nagios/objects")
+  
+  $nagios_host_cfg = hdp_default("nagios_host_cfg","${nagios_obj_dir}/nagios-hadoop-hosts.cfg")
+  $nagios_hostgroup_cfg = hdp_default("nagios_hostgroup_cfg","${nagios_obj_dir}/nagios-hadoop-hostgroups.cfg")
+  $nagios_service_cfg = hdp_default("nagios_service_cfg","${nagios_obj_dir}/nagios-hadoop-services.cfg")
+  $nagios_command_cfg = hdp_default("nagios_command_cfg","${nagios_obj_dir}/nagios-hadoop-commands.cfg")
+  
+  
   $nagios_web_login = hdp_default("nagios_web_login","nagiosadmin")
   $nagios_web_password = hdp_default("nagios_web_password","admin")
   

@@ -15,6 +15,15 @@ class hdp-hadoop($size = undef)
   hdp::user { $mapred_user:}
 
   hdp::directory { $conf_dir:}
+  
+  $logdirprefix = $hdp-hadoop::params::hadoop_logdirprefix
+  hdp::directory_recursive_create { $logdirprefix: 
+      owner => 'root'
+  }
+  $piddirprefix = $hdp-hadoop::params::hadoop_piddirprefix
+  hdp::directory_recursive_create { $piddirprefix: 
+      owner => 'root'
+  }
  
   hdp-hadoop::configfile { 'hadoop-env.sh': context_tag => common, owner => $hdfs_user}
   hdp-hadoop::configfile { 'core-site.xml': context_tag => common, owner => $hdfs_user}
@@ -23,7 +32,10 @@ class hdp-hadoop($size = undef)
 
   anchor{'hdp-hadoop::begin':} -> Hdp::Package['hadoop'] ->  Hdp::User<|title == $hdfs_user or title == $mapred_user|> 
   -> Hdp::Directory[$conf_dir] -> Hdp-hadoop::Configfile<|context_tag == 'common'|> -> anchor{ 'hdp-hadoop::end':}
+  Anchor['hdp-hadoop::begin'] -> Hdp::Directory_recursive_create[$logdirprefix] -> Anchor['hdp-hadoop::end']
+  Anchor['hdp-hadoop::begin'] -> Hdp::Directory_recursive_create[$piddirprefix] -> Anchor['hdp-hadoop::end']
 }
+
 
 ###config file helper
 define hdp-hadoop::configfile(

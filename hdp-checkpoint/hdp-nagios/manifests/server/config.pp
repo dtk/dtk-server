@@ -4,15 +4,24 @@ class hdp-nagios::server::config($targets)
   $host_cfg = $hdp-nagios::params::nagios_host_cfg
   $hostgroup_cfg = $hdp-nagios::params::nagios_hostgroup_cfg
   
-  hdp-nagios::server::configfile { 'nagios.cfg' : }
+  #TODO: may make nagios-hadoop-services.cfg .. paarms also
+  hdp-nagios::server::configfile { 'nagios.cfg': conf_dir => $hdp-nagios::params::conf_dir }
+  hdp-nagios::server::configfile { 'nagios-hadoop-services.cfg': }
+  hdp-nagios::server::configfile { 'nagios-hadoop-commands.cfg': }
   #TODO: .. put in rest
   
+  #TODO: !!!all-servers does not work with targets == undef
   hdp-nagios::server::config::hostgroup { 'all-servers': targets => $targets, alias_name => "All Servers"}
-  hdp-nagios::server::config::hostgroup { 'namnode': host_type => 'namnode_host'}
+  hdp-nagios::server::config::hostgroup { 'namenode': host_type => 'namenode_host'}
+  hdp-nagios::server::config::hostgroup { 'slaves': host_type => 'slave_hosts'}
+  hdp-nagios::server::config::hostgroup { 'nagios-server': host_type => 'nagios_server_host'}
+  hdp-nagios::server::config::hostgroup { 'jobtracker': host_type => 'jtnode_host'}
+  hdp-nagios::server::config::hostgroup { 'ganglia-server': host_type => 'ganglia_server_host'}
   #TODO: .. put in rest
   
   
   hdp-nagios::server::config::host{$targets : }
+  hdp-nagios::server::config::host{'dev-null' : } #TODO: hack to get aroudn empty host groups
   #TODO: .. put in rest
   
   anchor{'hdp-nagios::server::config::begin':} -> Hdp-nagios::Server::Configfile<||> -> anchor{'hdp-nagios::server::config::end':}
@@ -53,7 +62,8 @@ define hdp-nagios::server::config::hostgroup(
   }
     
   if ($targets == undef) {
-    $members = inline_template("<%= h=scope.function_hdp_host('${host_type}'); h.empty? ? '' : [h].flatten(1).split(',')%>") 
+      #TODO: fix: empty hostgroups
+    $members = inline_template("<%= h=scope.function_hdp_host('${host_type}'); h.empty? ? 'dev-null' : [h].flatten(1).join(',')%>") 
   } else {
     $members = $targets
   }
@@ -69,6 +79,7 @@ define hdp-nagios::server::config::hostgroup(
 ###config file helper
 define hdp-nagios::server::configfile(
   $owner = $hdp-nagios::params::nagios_user,
+  $conf_dir = $hdp-nagios::params::nagios_obj_dir,
   $mode = undef 
 ) 
 {
@@ -76,7 +87,7 @@ define hdp-nagios::server::configfile(
   hdp::configfile { $name:
     component      => 'nagios',
     owner          => $owner,
-    conf_dir       => $hdp-nagios::params::conf_dir,
+    conf_dir       => $conf_dir,
     mode           => $mode
   }
 }

@@ -28,22 +28,6 @@ define hdp::user(
     gid        => $gid
   }
 }
-
-define hdp::file(
-    $owner = $hdp::params::hadoop_user,
-    $mode = undef,
-    $content,
-    $ensure = present,
-    $group = $hdp::params::hadoop_user_group
-) 
-{
-  file { $name :
-    ensure  => $ensure,
-    owner   => $owner,
-    group   => $group,
-    content => $content
-  }
-}
      
 define hdp::directory(
   $owner = $hdp::params::hadoop_user,

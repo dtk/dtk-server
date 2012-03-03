@@ -2,6 +2,14 @@ class hdp-nagios::params() inherits hdp::params
 {   
  
  
+  $nagios_user = "nagios"
+  $nagios_group = "nagios"
+  
+  $nagios_host_cfg = hdp_default("nagios_host_cfg","/etc/nagios/objects/hadoop-hosts.cfg")
+  $nagios_hostgroup_cfg = hdp_default("nagios_hostgroup_cfg","/etc/nagios/objects/hadoop-hostgroups.cfg")
+  $nagios_service_cfg = hdp_default("nagios_service_cfg","/etc/nagios/objects/hadoop-services.cfg")
+  $nagios_command_cfg = hdp_default("nagios_command_cfg","/etc/nagios/objects/hadoop-commands.cfg")
+  
   $conf_dir = hdp_default("nagios_conf_dir","/etc/nagios")
   $nagios_web_login = hdp_default("nagios_web_login","nagiosadmin")
   $nagios_web_password = hdp_default("nagios_web_password","admin")

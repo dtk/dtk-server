@@ -1,7 +1,8 @@
 define hdp::configfile(
   $component,
   $conf_dir,
-  $owner = undef,
+  $owner = undef, #TODO : do we want instaead $hdp::params::hadoop_user?,
+  $group = $hdp::params::hadoop_user_group,
   $mode = undef,
   $size = 64, #32 or 64 bit (used to pick appropriate java_home)
   $namenode_host = $hdp::params::namenode_host,
@@ -16,9 +17,10 @@ define hdp::configfile(
    $file_name = "${conf_dir}/${name}"
   
    $template_name = "hdp-${component}/${name}.erb"
-   hdp::file{ $file_name:
+   file{ $file_name:
      ensure  => present,
      owner   => $owner,
+     group   => $group,
      mode    => $mode,
      content => template($template_name)
   }

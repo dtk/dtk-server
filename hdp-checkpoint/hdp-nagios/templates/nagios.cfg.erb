@@ -45,10 +45,10 @@ cfg_file=/etc/nagios/objects/templates.cfg
 #cfg_file=/etc/nagios/objects/printer.cfg
 
 # Definitions for hadoop servers
-cfg_file=/etc/nagios/objects/hadoop-hosts.cfg
-cfg_file=/etc/nagios/objects/hadoop-hostgroups.cfg
-cfg_file=/etc/nagios/objects/hadoop-services.cfg
-cfg_file=/etc/nagios/objects/hadoop-commands.cfg
+cfg_file=<%=scope.function_hdp_template_var("nagios_host_cfg")%>
+cfg_file=<%=scope.function_hdp_template_var("nagios_hostgroup_cfg")%>
+cfg_file=<%=scope.function_hdp_template_var("nagios_service_cfg")%>
+cfg_file=<%=scope.function_hdp_template_var("nagios_command_cfg")%>
 
 
 # You can also tell Nagios to process all config files (with a .cfg

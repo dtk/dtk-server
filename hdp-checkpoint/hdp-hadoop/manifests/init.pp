@@ -1,4 +1,4 @@
-class hdp-hadoop()
+class hdp-hadoop($size = undef)
 {
   include hdp-hadoop::params
 
@@ -6,7 +6,10 @@ class hdp-hadoop()
   $mapred_user = $hdp-hadoop::params::mapred_user  
   $hdfs_user = $hdp-hadoop::params::hdfs_user  
 
-  hdp::package{ 'hadoop' : included => true}
+  hdp::package{ 'hadoop' :
+    size     => $size,
+    included => true #TODO: see if we can get rid of included
+  }
 
   hdp::user{ $hdfs_user:}
   hdp::user { $mapred_user:}

@@ -1,6 +1,6 @@
 class hdp::params()
 {
-  ### hostnames
+  ###### hostnames
   $namenode_host = hdp_default("namenode_host")
   $snamenode_host = hdp_default("snamenode_host")
   $jtnode_host = hdp_default("jtnode_host")
@@ -17,9 +17,12 @@ class hdp::params()
   $gateway_host = hdp_default("gateway_host")
   
   $nagios_server_host = hdp_default("nagios_server_host")
+  $ganglia_server_host = hdp_default("ganglia_server_host")
   
-  #### users
-  #TODO: move rest of users here so can be used globally
+  ###### users
+  $user_info = hdp_default("user_info",{})
+  #TODO: move rest of users here so can be used globally and also put all in user info
+  
   $hcat_user = hdp_default("hcat_user","hcat")
   
   #TODO: either remove or make conditional on ec2
@@ -78,7 +81,7 @@ class hdp::params()
   $artifact_dir = hdp_default("artifact_dir","/tmp/HDP-artifacts/") 
   
   #### TODO: yum base; wil replace above
-  $yum_repo = hdp_default("hdp_yum_repo", "http://linuxrepo.s3-website-us-west-1.amazonaws.com/yumrepo/HDP-1.0.1-PREVIEW-3/hdp.repo")
+  $yum_repo = hdp_default("hdp_yum_repo", "http://linuxrepo.s3-website-us-west-1.amazonaws.com/yumrepo/HDP-1.0.2-PREVIEW-4/hdp.repo")
   
   $package_names = hdp_default("package_names",{
     hadoop => {
@@ -99,20 +102,9 @@ class hdp::params()
     },
     pig => {
       32 => 'pig.i386'
+    },
+    ganglia-monitor => {
+      64 => 'ganglia-gmond.x86_64'
     }
   })
- # $artifact_dir = hdp_default("artifact_dir","/tmp") 
-
- ####kerberos
-   #$kerberos_domain = hdp_default("hadoop/hdfs-site/kerberos_domain","EXAMPLE.COM")
-   #$kerberos_domain = hdp_default("hadoop/mapred-site/kerberos_domain","EXAMPLE.COM")
-   ##$kerberos_domain = hdp_default("hadoop/core-site/kerberos_domain")
-   ##$kerberos_domain = hdp_default("hadoop/mapred-site/kerberos_domain")
-   ## $kerberos_domain = hdp_default("hadoop/hbase-site/kerberos_domain")
-
-   ##$keytab_path = hdp_default("hadoop/hdfs-site/keytab_path")
-   ##$keytab_path = hdp_default("hadoop/mapred-site/keytab_path")
-   ##$keytab_path = hdp_default("hadoop/mapred-site/keytab_path")
-   ##$keytab_path = hdp_default("hadoop/hbase-site/keytab_path")
-
 }

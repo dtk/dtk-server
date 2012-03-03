@@ -1,28 +1,30 @@
 define hdp::package(
   $ensure = present,
   $size = undef,
-  $included = false
+  $included = false,
+  $provider = rpm
   )
 {
-
-  hdp::package::wget-rpm { $name:
-    ensure   => $ensure,
-    size     =>   $size,
-    included => $included
+  case $provider {
+    'rpm':  { 
+      hdp::package::wget-rpm { $name:
+        ensure => $ensure,
+        size   =>   $size
+      }
+    }
+    'yum': { 
+      hdp::package::yum { $name:
+        ensure => $ensure,
+        size   =>   $size
+      }
+    }
   }
-  
-# hdp::package::yum { $name:
-#    ensure   => $ensure,
-#    size     =>   $size
-# }
 }
 
 ######
-# DEPRECATE
 define hdp::package::wget-rpm(
   $ensure = present,
-  $size = undef,
-  $included = false
+  $size = undef
   )
 {
     
@@ -103,7 +105,7 @@ define hdp::package::yum(
   #3) otherwise use 32
   if ($size == undef) {
     #TODO: make sure have full set of possible model numbers
-    if (undef != $hdp::params::package_file_names[$package_type][64]) and ($::hardwaremodel in [x86_64]) {
+    if (undef != $hdp::params::package_names[$package_type][64]) and ($::hardwaremodel in [x86_64]) {
       $calc_size = 64
     } else {
       $calc_size = 32

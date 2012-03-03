@@ -19,13 +19,29 @@ class hdp()
 
 define hdp::user(
   $gid = $hdp::params::hadoop_user_group,
-  $just_validate = false #if set to true wil not add user and wil fail if user is not there #TODO: implement
+  $just_validate = undef
 )
 {
-  user { $name:
-    ensure     => present,
-    managehome => true,
-    gid        => $gid
+  $user_info = $hdp::params::user_info[$name]
+  if ($just_validate != undef) {
+    $just_val  = $just_validate
+  } elsif ($user_info == undef) { 
+    $just_val = false
+  } else {
+    $just_val = $user_info[just_validate]
+  }
+  
+  if ($just_val == true) {
+    exec { "user ${name} exists":
+      command => "su - ${name} -c 'ls /dev/null' >/dev/null 2>&1",
+      path    => ['/bin']
+    }
+  } else {
+    user { $name:
+      ensure     => present,
+      managehome => true,
+      gid        => $gid
+    }
   }
 }
      

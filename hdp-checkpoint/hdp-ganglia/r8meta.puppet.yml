@@ -1,0 +1,67 @@
+--- !omap 
+- hdp-ganglia__monitor: !omap 
+    - display_name: hdp-ganglia__monitor
+    - description: Installs a ganglia monitor
+    - external_ref: 
+        class_name: hdp-ganglia::monitor
+        type: puppet_class
+    - basic_type: service
+    - component_type: hdp-ganglia__monitor
+    - attribute: !omap 
+        - ganglia_server_host: !omap 
+            - display_name: ganglia_server_host
+            - description: ganglia server host address
+            - data_type: string
+            - external_ref: 
+                type: puppet_attribute
+                path: node[hdp-ganglia][ganglia_server_host]
+    - dependency: 
+        hdp: 
+          type: component
+          search_pattern: 
+            ":filter": 
+            - ":eq"
+            - ":component_type"
+            - hdp
+          display_name: hdp
+          description: hdp is required for hdp-ganglia__monitor
+          severity: warning
+    - external_link_defs: 
+      - required: true
+        type: server_connection
+        possible_links: 
+        - hdp-ganglia__server: 
+            attribute_mappings: 
+            - ":remote_node.host_addresses_ipv4.0": ":hdp-ganglia__monitor.ganglia_server_host"
+            - ":local_node.host_addresses_ipv4.0": ":hdp-ganglia__server.monitored_hosts"
+- hdp-ganglia__server: !omap 
+    - display_name: hdp-ganglia__server
+    - description: Installs a ganglia server
+    - external_ref: 
+        class_name: hdp-ganglia::server
+        type: puppet_class
+    - basic_type: service
+    - component_type: hdp-ganglia__server
+    - attribute: 
+        - monitored_hosts: !omap 
+            - display_name: monitored_hosts
+            - description: Hdp-Ganglia monitor host addresses
+            - data_type: json
+            - external_ref: 
+                type: puppet_attribute
+                path: node[hdp-ganglia][monitored_hosts]
+            - semantic_type_summary: "array(string)"
+            - semantic_type: 
+                ":array": string
+    - dependency: 
+        hdp: 
+          type: component
+          search_pattern: 
+            ":filter": 
+            - ":eq"
+            - ":component_type"
+            - hdp
+          display_name: hdp
+          description: hdp is required for hdp-ganglia__server
+          severity: warning
+

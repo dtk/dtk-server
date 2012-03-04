@@ -1,0 +1,3 @@
+class hdp-ganglia::params()
+{
+}

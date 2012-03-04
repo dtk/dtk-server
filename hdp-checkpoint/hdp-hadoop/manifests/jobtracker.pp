@@ -9,8 +9,11 @@ class hdp-hadoop::jobtracker(
   include hdp-hadoop::params
   
   $mapred_user = $hdp-hadoop::params::mapred_user
- 
+  $mapred_local_dir = $hdp-hadoop::params::mapred_local_dir 
+
   include hdp-hadoop
+
+  hdp-hadoop::jobtracker::create_local_dirs { $mapred_local_dir: }
  
   Hdp-Hadoop::Configfile<||>{jtnode_host => $hdp::params::host_address}
 
@@ -33,6 +36,16 @@ class hdp-hadoop::jobtracker(
   #top level does not need anchors
   Class['hdp-hadoop'] -> Hdp-hadoop::Service['jobtracker'] -> Hdp-hadoop::Service['historyserver']
   Class['hdp-hadoop::jobtracker::hdfs-directory'] -> Hdp-hadoop::Service['jobtracker']
+  Hdp-hadoop::Jobtracker::Create_local_dirs<||> -> Hdp-hadoop::Service['jobtracker']
+}
+
+define hdp-hadoop::jobtracker::create_local_dirs()
+{
+  $dirs = hdp_array_from_comma_list($name)    
+  hdp::directory_recursive_create { $dirs :
+    owner => $hdp-hadoop::params::mapred_user,
+    mode => '0755'
+  }
 }
 
 class hdp-hadoop::jobtracker::hdfs-directory()

@@ -80,9 +80,9 @@ class hdp::params()
   })
   $artifact_dir = hdp_default("artifact_dir","/tmp/HDP-artifacts/") 
   
-  #### TODO: yum base; wil replace above
+  #### TODO: yum base; will replace above
+  #$yum_repo = hdp_default("hdp_yum_repo", "http://linuxrepo.s3-website-us-west-1.amazonaws.com/yumrepo/HDP-1.0.1-PREVIEW-3/hdp.repo")
   $yum_repo = hdp_default("hdp_yum_repo", "http://linuxrepo.s3-website-us-west-1.amazonaws.com/yumrepo/HDP-1.0.2-PREVIEW-4/hdp.repo")
-  
   $package_names = hdp_default("package_names",{
     hadoop => {
       32 => 'hadoop.i386', 
@@ -105,6 +105,15 @@ class hdp::params()
     },
     ganglia-monitor => {
       64 => 'ganglia-gmond.x86_64'
+    },
+    ganglia-server => {
+      64 => 'ganglia-gmetad.x86_64'
+    },
+    ganglia-gweb => {
+      64 => 'gweb'
+    },
+    ganglia-hdp-gweb-addons => {
+      64 => 'hdp_mon_ganglia_addons'
     }
   })
 }

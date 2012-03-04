@@ -1,3 +1,11 @@
-class hdp-ganglia::params()
+class hdp-ganglia::params() inherits hdp::params
 {
+ 
+  $ganglia_shell_cmds_dir = hdp_default("ganglia_shell_cmd_dir","/usr/libexec/hdp/ganglia")
+  
+  $gmetad_user = hdp_default("gmetad_user","nobody")
+
+  $gmond_user = hdp_default("gmond_user","nobody")
+
+  $webserver_group = hdp_default("hadoop/gangliaEnv/webserver_group","apache")
 }

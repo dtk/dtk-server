@@ -11,7 +11,9 @@ define hdp::configfile(
   $zookeeper_hosts = $hdp::params::zookeeper_hosts,
   $hbase_master_host = $hdp::params::hbase_master_host,
   $hcat_server_host = $hdp::params::hcat_server_host,
-  $hcat_mysql_host = $hdp::params::hcat_mysql_host
+  $hcat_mysql_host = $hdp::params::hcat_mysql_host,
+  $nagios_server_host = $hdp::params::nagios_server_host,
+  $ganglia_server_host = $hdp::params::ganglia_server_host
 ) 
 {
    $file_name = "${conf_dir}/${name}"

@@ -5,6 +5,7 @@ define hdp::configfile(
   $group = $hdp::params::hadoop_user_group,
   $mode = undef,
   $size = 64, #32 or 64 bit (used to pick appropriate java_home)
+  $template_tag = undef,
   $namenode_host = $hdp::params::namenode_host,
   $jtnode_host = $hdp::params::jtnode_host,
   $snamenode_host = $hdp::params::snamenode_host,
@@ -16,9 +17,14 @@ define hdp::configfile(
   $ganglia_server_host = $hdp::params::ganglia_server_host
 ) 
 {
+
    $file_name = "${conf_dir}/${name}"
-  
-   $template_name = "hdp-${component}/${name}.erb"
+   if ($template_tag == undef) {  
+     $template_name = "hdp-${component}/${name}.erb"
+   } else {
+     $template_name = "hdp-${component}/${name}-${template_tag}.erb"
+   }
+
    file{ $file_name:
      ensure  => present,
      owner   => $owner,

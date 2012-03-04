@@ -33,8 +33,6 @@ class hdp::params()
   #$host_address = $::fqdn
 
   ##### java 
-  #TODO: should we check what is in java32/64 to see if should install java or have explicit flag?
-  #btter normaize inputs for java
   $java32_home = hdp_default("java32_home","/usr/jdk32/jdk1.6.0_26")
   $java64_home = hdp_default("java64_home","/usr/java/default") #TODO: change to  "/usr/jdk64/jdk1.6.0_26"
   $java_home = hdp_default("java_home","/usr/java/default") #TODO: deprecate once incorporate above
@@ -49,7 +47,8 @@ class hdp::params()
 
   $hadoop_home = hdp_default("hadoop_home","/usr")
 
-  $hadoop_user = hdp_default("hadoop_user", "hadoop")
+  #because of Puppet user resource issue make sure that $hadoop_user is different from hadoop_user_group
+  $hadoop_user = hdp_default("hadoop_user", "hadoop_deploy")
   $hadoop_user_group = hdp_default("hadoop_user_group","hadoop")
 
   $exec_path = ["/bin","/usr/bin", "/usr/sbin"]

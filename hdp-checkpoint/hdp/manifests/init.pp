@@ -6,8 +6,10 @@ class hdp()
     ensure => present
   }
   
-  hdp::user { $hdp::params::hadoop_user:}
-  
+  #TODO: think not needed and also there seems to be a puppet bug around this and ldap
+  hdp::user { $hdp::params::hadoop_user:
+    gid => $hdp::params::hadoop_user_group
+  }
   Group[$hdp::params::hadoop_user_group] -> Hdp::User[$hdp::params::hadoop_user]
   
   #TODO: add other package dependencies (see if apply also to yum) and move to params or package file

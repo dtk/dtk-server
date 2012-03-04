@@ -1,7 +1,5 @@
 class hdp-hadoop::datanode(
   $service_state = running,
-  $ganglia_host = undef,
-  $nagios_host = undef,
   $opts = {}
 ) 
 {
@@ -9,6 +7,8 @@ class hdp-hadoop::datanode(
   $dfs_data_dir = $hdp-hadoop::params::dfs_data_dir
  
   include hdp-hadoop #adds package, users, directories, and common configs
+  Hdp-hadoop::Package<||>{include_32_bit => true}
+  Hdp-hadoop::Configfile<||>{size => 32}
 
   hdp-hadoop::datanode::create_data_dirs { $dfs_data_dir: }
   
@@ -20,13 +20,6 @@ class hdp-hadoop::datanode(
   #top level does not need anchors
   Class['hdp-hadoop'] -> Hdp-hadoop::Service['datanode']
   Hdp-hadoop::Datanode::Create_data_dirs<||> -> Hdp-hadoop::Service['datanode']
-}
-
-define hdp-hadoop::datanode::configfile()
-{
-  hdp-hadoop::configfile { $name: 
-    owner => $hdp-hadoop::params::hdfs_user
-  }
 }
 
 define hdp-hadoop::datanode::create_data_dirs()

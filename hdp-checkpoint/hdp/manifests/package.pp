@@ -1,21 +1,30 @@
 define hdp::package(
   $ensure = present,
+  $package_type = undef,
   $size = undef,
   $included = false,
   $provider = rpm
   )
 {
+ 
+  $pt = $package_type ? {
+    undef  => $name,
+    default  => $package_type
+  }
+
   case $provider {
     'rpm':  { 
       hdp::package::wget-rpm { $name:
-        ensure => $ensure,
-        size   =>   $size
+        ensure       => $ensure,
+        package_type => $pt,
+        size         => $size
       }
     }
     'yum': { 
       hdp::package::yum { $name:
-        ensure => $ensure,
-        size   =>   $size
+        ensure       => $ensure,
+        package_type => $pt,
+        size         => $size
       }
     }
   }
@@ -23,13 +32,12 @@ define hdp::package(
 
 ######
 define hdp::package::wget-rpm(
+  $package_type,
   $ensure = present,
   $size = undef
   )
 {
     
-  $package_type = $name
-
   include hdp::params
   $repo_url = $hdp::params::repo_url
   $artifact_dir = $hdp::params::artifact_dir
@@ -49,7 +57,7 @@ define hdp::package::wget-rpm(
       $calc_size = 32
     }
   } else {
-    $calc_size = 32
+    $calc_size = $size
   }
   $package_fn = $hdp::params::package_file_names[$package_type][$calc_size]
   if ($package_fn == undef) {
@@ -60,9 +68,17 @@ define hdp::package::wget-rpm(
   $package_url = "${repo_url}/${package_fn}"  
   $package_target = "${artifact_dir}/${package_fn}"
   
-  hdp::package::wget{ $package_fn:
-    package_url    => $package_url,
-    package_target => $package_target
+  hdp::artifact_dir{$name :}
+  
+  hdp::java::package{ $name:
+    size                 => $calc_size,
+    include_artifact_dir => false
+  }
+  
+  exec{ "wget ${name}":
+    command => "wget --tries=10 ${package_url} -O ${package_target}",
+    creates => $package_target,
+    path    => ["/usr/bin/"]
   }
   
   package{ $package_name:
@@ -71,32 +87,20 @@ define hdp::package::wget-rpm(
     source   =>  $package_target
   }
  
-  anchor{ "hdp::package::${name}::begin": } ->  hdp::artifact_dir{$name :} -> Hdp::Package::Wget[$package_fn] -> Package[$package_name] -> anchor{ "hdp::package::${name}::end": } 
+  anchor{ "hdp::package::${name}::begin": } -> Hdp::Artifact_dir[$name] -> Hdp::Java::Package[$name] -> anchor{ "hdp::package::${name}::end": } 
+  Hdp::Artifact_dir[$name] -> Exec["wget ${name}"] -> Package[$package_name] -> Anchor["hdp::package::${name}::end"] 
   
 }
    
-
-define hdp::package::wget(
-  $package_url,
-  $package_target
-) {
- exec{ "wget ${name}":
-    command => "wget --tries=10 ${package_url} -O ${package_target}",
-    creates => $package_target,
-    path    => ["/usr/bin/"]
-  }
-}
-
 ##TO: remove above after yum tested
 ##################### new yum based #################
 define hdp::package::yum(
   $ensure = present,
+  $package_type,
   $size = undef
   )
 {
     
-  $package_type = $name
-
   include hdp::params
  
   #compute size to use (calc_size)

@@ -1,7 +1,5 @@
 class hdp-hadoop::jobtracker(
   $service_state = 'running',
-  $ganglia_host = undef,
-  $nagios_host = undef,
   $opts = {}
 )
 {
@@ -12,6 +10,7 @@ class hdp-hadoop::jobtracker(
   $mapred_local_dir = $hdp-hadoop::params::mapred_local_dir 
 
   include hdp-hadoop
+  Hdp-hadoop::Package<||>{include_64_bit => true}
 
   hdp-hadoop::jobtracker::create_local_dirs { $mapred_local_dir: }
  

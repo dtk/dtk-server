@@ -124,4 +124,9 @@ class hdp-hadoop::params(
 
   $task_controller = hdp_default("hadoop/mapred-site/task_controller","org.apache.hadoop.mapred.DefaultTaskController")
 
+  #### health_check
+
+  $security_enabled = hdp_default("hadoop/health_check/security_enabled","false")
+
+  $task_bin_exe = hdp_default("hadoop/health_check/task_bin_exe")
 }

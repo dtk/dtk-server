@@ -1,16 +1,15 @@
 class hdp-hadoop::namenode(
   $service_state = 'running',
   $slave_hosts = [],
-  $snamenode_hosts = [$hdp::params::host_address], #TODO: fix; to be single host
-  $ganglia_host = undef,
-  $nagios_host = undef,
   $opts = {}
-) inherits hdp-hadoop::params
+) 
 {
+  include  hdp-hadoop::params
   $dfs_name_dir = $hdp-hadoop::params::dfs_name_dir
 
   #adds package, users and directories, and common hadoop configs
   class { 'hdp-hadoop' : }
+  Hdp-hadoop::Package<||>{include_64_bit => true}
 
   hdp-hadoop::namenode::create_name_dirs { $dfs_name_dir: }
    

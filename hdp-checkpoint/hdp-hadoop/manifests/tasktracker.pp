@@ -1,7 +1,5 @@
 class hdp-hadoop::tasktracker(
   $service_state = 'running',
-  $ganglia_host = undef,
-  $nagios_host = undef,
   $opts = {}
 ) 
 {
@@ -9,6 +7,8 @@ class hdp-hadoop::tasktracker(
   $mapred_local_dir = $hdp-hadoop::params::mapred_local_dir
   
   include hdp-hadoop #adds package, users, directories, and common configs
+  Hdp-hadoop::Package<||>{include_32_bit => true}
+  Hdp-hadoop::Configfile<||>{size => 32}
   
   hdp-hadoop::tasktracker::create_local_dirs { $mapred_local_dir: }
 

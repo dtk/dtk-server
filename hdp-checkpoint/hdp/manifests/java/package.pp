@@ -1,4 +1,7 @@
-define hdp::java::package($size)
+define hdp::java::package(
+  $size,
+  $include_artifact_dir = true
+)
 {
     
   include hdp::params
@@ -17,8 +20,10 @@ define hdp::java::package($size)
   $java_exec = "${java_home}/bin/java"
   $java_dir = regsubst($java_home,'/[^/]+$','')
    
-  hdp::artifact_dir{ "java::package::${name}": }
- 
+  if ($include_artifact_dir == true) {
+    hdp::artifact_dir{ "java::package::${name}": }
+  }
+  
   $wget_cmd = "wget --tries=10 ${jdk_location}/${jdk_bin} -O ${jdk_wget_target}"
   exec{ "${wget_cmd} ${name}":
     command => $wget_cmd,
@@ -34,6 +39,8 @@ define hdp::java::package($size)
     path    => ["/bin","/usr/bin/"]
   }
   
-  anchor{"hdp::java::package::${name}::begin":} -> Hdp::Artifact_dir["java::package::${name}"] -> Exec["${wget_cmd} ${name}"] ->
-   Exec["${install_cmd} ${name}"] -> anchor{"hdp::java::package::${name}::end":}
+  anchor{"hdp::java::package::${name}::begin":} -> Exec["${wget_cmd} ${name}"] ->  Exec["${install_cmd} ${name}"] -> anchor{"hdp::java::package::${name}::end":}
+  if ($include_artifact_dir == true) {
+    Anchor["hdp::java::package::${name}::begin"] -> Hdp::Artifact_dir["java::package::${name}"] -> Exec["${wget_cmd} ${name}"]
+  }
 }

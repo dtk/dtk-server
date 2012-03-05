@@ -16,9 +16,12 @@ class hdp-ganglia::monitor(
   }
 
   class { 'hdp-ganglia::monitor::config-gen': }
+  
+  class { 'hdp-ganglia::service::gmond': ensure => $service_state}
 
    #top level does not need anchors
-  Hdp::Package['ganglia-monitor'] -> Class['hdp-ganglia::config'] -> Class['hdp-ganglia::monitor::config-gen']
+  Hdp::Package['ganglia-monitor'] -> Class['hdp-ganglia::config'] -> Class['hdp-ganglia::monitor::config-gen'] ->
+   Class['hdp-ganglia::service::gmond']
 }
 
 

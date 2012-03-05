@@ -17,6 +17,7 @@ class hdp()
 
   #TODO: !!!!must remove stub for testing; 
   class{ 'hdp::iptables': ensure => stopped}
+  exec { 'echo 0 > /selinux/enforce':}
 }
 
 define hdp::user(

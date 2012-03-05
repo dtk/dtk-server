@@ -1,5 +1,5 @@
 class hdp-hcat::service(
-  $enable = undef,
+  $ensure = undef,
   $ensure = undef,
   $initial_wait = undef
 )
@@ -11,7 +11,7 @@ class hdp-hcat::service(
   $cmd = "env HADOOP_HOME=${hadoop_home} /usr/sbin/hcat_server.sh"
   $pid_file = "${hdp-hcat::params::hcat_pid_dir}/hcat.pid" 
 
-  if ($enable == 'running') {
+  if ($ensure == 'running') {
     $daemon_cmd = "su - ${user} -c  '${cmd} start'"
     $no_op_test = "ls ${pid_file} >/dev/null 2>&1 && ps `cat ${pid_file}` >/dev/null 2>&1"
   } else {

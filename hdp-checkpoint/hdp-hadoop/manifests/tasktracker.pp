@@ -13,7 +13,7 @@ class hdp-hadoop::tasktracker(
   hdp-hadoop::tasktracker::create_local_dirs { $mapred_local_dir: }
 
   hdp-hadoop::service{ 'tasktracker':
-    enable       => $service_state,
+    ensure       => $service_state,
     user         => $hdp-hadoop::params::mapred_user,
     initial_wait => $opts[wait]
   }

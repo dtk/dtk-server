@@ -1,5 +1,5 @@
 define hdp-hbase::service(
-  $enable = undef,
+  $ensure = undef,
   $ensure = undef,
   $initial_wait = undef
 )
@@ -13,7 +13,7 @@ define hdp-hbase::service(
   $pid_dir = $hdp-hbase::params::hbase_pid_dir
   $pid_file = "${pid_dir}/hbase-hbase-${role}.pid"
 
-  if ($enable == 'running') {
+  if ($ensure == 'running') {
     #TODO: need to make sure that hdfs service is running
 
     $daemon_cmd = "su - ${user} -c  '${cmd} start ${role}'"

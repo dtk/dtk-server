@@ -19,13 +19,13 @@ class hdp-hadoop::jobtracker(
   class { 'hdp-hadoop::jobtracker::hdfs-directory' : }
   
   hdp-hadoop::service{ 'jobtracker':
-    enable       => $service_state,
+    ensure       => $service_state,
     user         => $mapred_user,
     initial_wait => $opts[wait]
   }
   
   hdp-hadoop::service{ 'historyserver':
-    enable         => $service_state,
+    ensure         => $service_state,
     user           => $mapred_user,
     initial_wait   => $opts[wait],
     create_pid_dir => false,

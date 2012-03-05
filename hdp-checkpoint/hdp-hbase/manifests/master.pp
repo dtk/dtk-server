@@ -16,7 +16,7 @@ class hdp-hbase::master(
   }  
   
   hdp-hbase::service{ 'master':
-    enable       => $service_state,
+    ensure       => $service_state,
     initial_wait => $opts[wait]
   }
 

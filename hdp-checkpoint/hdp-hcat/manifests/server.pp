@@ -12,7 +12,7 @@ class hdp-hcat::server(
   class { 'hdp-hcat::hdfs-directories' : }
 
   class { 'hdp-hcat::service' :
-    enable       => $server_state,
+    ensure       => $server_state,
     initial_wait => $opts[wait]
   }
   

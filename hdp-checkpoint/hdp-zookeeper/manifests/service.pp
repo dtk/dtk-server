@@ -1,5 +1,5 @@
 class hdp-zookeeper::service(
-  $enable = undef,
+  $ensure = undef,
   $ensure = undef,
   $initial_wait = undef
 )
@@ -11,7 +11,7 @@ class hdp-zookeeper::service(
 
   $pid_file = $hdp-zookeeper::params::zk_pid_file  
 
-  if ($enable == 'running') {
+  if ($ensure == 'running') {
     $daemon_cmd = "su - ${user} -c  '${cmd} start'"
     $no_op_test = "ls ${pid_file} >/dev/null 2>&1 && ps `cat ${pid_file}` >/dev/null 2>&1"
     #TODO: not using below because checks more than whether there is a service started up

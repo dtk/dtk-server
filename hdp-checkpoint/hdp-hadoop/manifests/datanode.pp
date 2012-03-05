@@ -13,7 +13,7 @@ class hdp-hadoop::datanode(
   hdp-hadoop::datanode::create_data_dirs { $dfs_data_dir: }
   
   hdp-hadoop::service{ 'datanode':
-    enable       => $service_state,
+    ensure       => $service_state,
     user         => $hdp-hadoop::params::hdfs_user,
     initial_wait => $opts[wait]
   }

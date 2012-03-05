@@ -19,7 +19,7 @@ class hdp-hadoop::namenode(
   class {'hdp-hadoop::namenode::format' : }
 
   hdp-hadoop::service{ 'namenode':
-    enable       => $service_state,
+    ensure       => $service_state,
     user         => $hdp-hadoop::params::hdfs_user,
     initial_wait => $opts[wait]
   }

@@ -12,7 +12,7 @@ class hdp-hbase::regionserver(
   }      
   @hdp-hbase::common { 'hbase': }
   hdp-hbase::service{ 'regionserver':
-    enable       => $service_state,
+    ensure       => $service_state,
     initial_wait => $wait
   }
 

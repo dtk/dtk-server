@@ -14,7 +14,7 @@ class hdp-hadoop::snamenode(
   hdp-hadoop::snamenode::create_name_dirs { $dfs_name_dir: }
   
   hdp-hadoop::service{ 'secondarynamenode':
-    enable       => $service_state,
+    ensure       => $service_state,
     user         => $hdp-hadoop::params::hdfs_user,
     initial_wait => $opts[wait]
   }

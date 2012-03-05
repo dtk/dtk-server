@@ -1,7 +1,7 @@
 class hdp-ganglia(){}
 
 class hdp-ganglia::service::gmond(
-  ensure = undef,
+  $ensure = undef,
   )
 {
   service { 'hdp-gmond':
@@ -12,7 +12,7 @@ class hdp-ganglia::service::gmond(
 }
 
 class hdp-ganglia::service::gmetad(
-  ensure = undef)
+  $ensure = undef)
 {
   service { 'hdp-gmetad':
     ensure     => $ensure,

@@ -1,6 +1,6 @@
 
 define hdp-hadoop::service(
-  $enable = 'running',
+  $ensure = 'running',
   $ensure = undef,
   $user,
   $initial_wait = undef,
@@ -15,7 +15,7 @@ define hdp-hadoop::service(
   $log_dir = "${hdp-hadoop::params::hadoop_logdirprefix}/${user}"
   
   $cmd = "/usr/sbin/hadoop-daemon.sh --config ${hdp-hadoop::params::conf_dir}"
-  if ($enable == 'running') {
+  if ($ensure == 'running') {
     $daemon_cmd = "su - ${user} -c  '${cmd} start ${name}'"
     $service_is_up = "ls ${pid_file} >/dev/null 2>&1 && ps `cat ${pid_file}` >/dev/null 2>&1"
   } else {
@@ -51,7 +51,7 @@ define hdp-hadoop::service(
     Anchor["hdp-hadoop::service::${name}::begin"] -> Hdp::Directory_recursive_create[$log_dir] -> Hdp::Exec[$daemon_cmd] 
   }
  
-  if ($enable == 'running') {
+  if ($ensure == 'running') {
     #TODO: look at Puppet resource retry and retry_sleep
     #TODO: can make sleep contingent on $name
     $sleep = 5

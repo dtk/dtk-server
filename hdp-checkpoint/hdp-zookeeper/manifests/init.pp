@@ -23,7 +23,7 @@ class hdp-zookeeper(
    class { 'hdp-zookeeper::set_myid' : myid => $myid}
  
    class { 'hdp-zookeeper::service' : 
-     enable  => $service_state,
+     ensure  => $service_state,
      initial_wait => $opts[wait]
    }
 }

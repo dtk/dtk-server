@@ -7,6 +7,8 @@ class hdp-ganglia::monitor(
 {
   include hdp-ganglia::params
   
+  class { 'hdp-ganglia': }
+  
   hdp::package { 'ganglia-monitor' : provider => 'yum'}
 
   class { 'hdp-ganglia::config': ganglia_server_host => $ganglia_server_host}
@@ -20,8 +22,8 @@ class hdp-ganglia::monitor(
   class { 'hdp-ganglia::service::gmond': ensure => $service_state}
 
    #top level does not need anchors
-  Hdp::Package['ganglia-monitor'] -> Class['hdp-ganglia::config'] -> Class['hdp-ganglia::monitor::config-gen'] ->
-   Class['hdp-ganglia::service::gmond']
+   Class['hdp-ganglia'] -> Hdp::Package['ganglia-monitor'] -> Class['hdp-ganglia::config'] -> 
+    Class['hdp-ganglia::monitor::config-gen'] -> Class['hdp-ganglia::service::gmond']
 }
 
 

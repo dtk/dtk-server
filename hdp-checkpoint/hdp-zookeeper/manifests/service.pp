@@ -1,6 +1,6 @@
 class hdp-zookeeper::service(
   $ensure = undef,
-  $ensure = undef,
+  $myid,
   $initial_wait = undef
 )
 {
@@ -35,13 +35,17 @@ class hdp-zookeeper::service(
     context_tag => 'zk_service'
   }
   
+  class { 'hdp-zookeeper::set_myid': myid => $myid}
+ 
+ 
   hdp::exec { $daemon_cmd:
     command => $daemon_cmd,
     unless  => $no_op_test,
     initial_wait => $initial_wait
   }
  
-  anchor{'hdp-zookeeper::service::begin':} -> Hdp::Directory_recursive_create<|context_tag == 'zk_service'|> -> Hdp::Exec[$daemon_cmd] -> anchor{'hdp-zookeeper::service::end':}
+  anchor{'hdp-zookeeper::service::begin':} -> Hdp::Directory_recursive_create<|context_tag == 'zk_service'|> -> 
+    Class['hdp-zookeeper::set_myid'] -> Hdp::Exec[$daemon_cmd] -> anchor{'hdp-zookeeper::service::end':}
 
   #TODO: probably move to smoketest file
   Anchor['hdp-zookeeper::service::begin'] -> class{'hdp-zookeeper::smoketest_setup':} ->  Anchor['hdp-zookeeper::service::end']
@@ -56,5 +60,16 @@ class hdp-zookeeper::smoketest_setup()
      unless  => $test
   }
 }
+
+class hdp-zookeeper::set_myid($myid)
+{
+  $create_file = "${hdp-zookeeper::params::zk_data_dir}/myid"
+  $cmd = "echo '${myid}' > ${create_file}"
+  hdp::exec{ $cmd:
+    command => $cmd,
+    creates  => $create_file
+  }
+}
+
 
 

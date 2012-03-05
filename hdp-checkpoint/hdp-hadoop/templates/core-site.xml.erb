@@ -181,7 +181,7 @@ DEFAULT
 
 <property>
   <name>hadoop.proxyuser.<%=scope.function_hdp_user("hcat_user")%>.hosts</name>
-  <value><%=scope.function_hdp_template_var("proxyuser_host")%></value>
+  <value><%=scope.function_hdp_host("gateway_host")%></value>
   <description>
      Proxy host for Hadoop.
   </description>

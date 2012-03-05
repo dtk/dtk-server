@@ -42,8 +42,6 @@ class hdp-hadoop::params(
 
   $proxyuser_group = hdp_default("hadoop/core-site/proxyuser_group")
 
-  $proxyuser_host = hdp_default("hadoop/core-site/proxyuser_host")
-
   $security_type = hdp_default("hadoop/core-site/security_type","simple")
   
   ### hdfs-site

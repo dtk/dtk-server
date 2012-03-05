@@ -20,17 +20,16 @@ class hdp-zookeeper(
  hdp-zookeeper::configfile { 'zookeeper-env.sh':}
  
  if ($type == 'server') {
-   class { 'hdp-zookeeper::set_myid' : myid => $myid}
- 
    class { 'hdp-zookeeper::service' : 
-     ensure  => $service_state,
+     ensure       => $service_state,
+     myid         => $myid,
      initial_wait => $opts[wait]
    }
 }
 
   anchor{'hdp-zookeeper::begin':} -> Hdp::Package['zookeeper'] -> Hdp::User[$zk_user] -> Hdp::Directory[$zk_config_dir] -> Hdp-zookeeper::Configfile<||> -> anchor{'hdp-zookeeper::end':}
   if ($type == 'server') {
-   Hdp::Directory[$zk_config_dir] -> Hdp-zookeeper::Configfile<||> -> Class['hdp-zookeeper::set_myid'] -> Class['hdp-zookeeper::service'] -> Anchor['hdp-zookeeper::end']
+   Hdp::Directory[$zk_config_dir] -> Hdp-zookeeper::Configfile<||> -> Class['hdp-zookeeper::service'] -> Anchor['hdp-zookeeper::end']
   }
 }
 
@@ -46,14 +45,3 @@ define hdp-zookeeper::configfile(
     mode            => $mode
   }
 }
-
-class hdp-zookeeper::set_myid($myid)
-{
-  $create_file = "${hdp-zookeeper::params::zk_data_dir}/myid"
-  $cmd = "echo '${myid}' > ${create_file}"
-  hdp::exec{ $cmd:
-    command => $cmd,
-    creates  => $create_file
-  }
-}
-

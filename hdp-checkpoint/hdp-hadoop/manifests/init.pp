@@ -7,12 +7,7 @@ class hdp-hadoop(
   $conf_dir = $hdp-hadoop::params::conf_dir
   $mapred_user = $hdp-hadoop::params::mapred_user  
   $hdfs_user = $hdp-hadoop::params::hdfs_user  
-  if ($ganglia_enabled == false) {
-    $hadoop-metrics2_tag = undef
-  } else {
-    $hadoop-metrics2_tag = 'GANGLIA'
-  }
-
+ 
   hdp-hadoop::package { 'hadoop':}
  
   hdp::user{ $hdfs_user:}
@@ -37,7 +32,6 @@ class hdp-hadoop(
   hdp-hadoop::configfile { 'hadoop-metrics2.properties' : 
     context_tag  => common, 
     owner        => $hdfs_user,
-    template_tag => $hadoop-metrics2_tag
   }
 
   hdp-hadoop::configfile { 'mapred-site.xml': 
@@ -51,8 +45,9 @@ class hdp-hadoop(
   Anchor['hdp-hadoop::begin'] -> Hdp::Directory_recursive_create[$piddirprefix] -> Anchor['hdp-hadoop::end']
 }
 
-define hdp-hadoop::common()
+class hdp-hadoop::enable-ganglia()
 {
+  Hdp-hadoop::Configfile<|title  == 'hadoop-metrics2.properties'|>{template_tag => 'GANGLIA'}
 }
 
 ###config file helper

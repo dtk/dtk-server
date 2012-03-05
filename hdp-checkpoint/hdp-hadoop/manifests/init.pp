@@ -65,7 +65,7 @@ define hdp-hadoop::configfile(
   $snamenode_host = undef,
   $context_tag = undef,
   $template_tag = undef,
-  size = undef
+  $size = undef
 ) 
 {
   #TODO: may need to be fixed 

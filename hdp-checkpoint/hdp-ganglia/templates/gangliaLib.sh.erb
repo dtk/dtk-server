@@ -16,8 +16,8 @@
 
 cd `dirname ${0}`;
 
-GANGLIA_CONF_DIR=/etc/ganglia/hdp;
-GANGLIA_RUNTIME_DIR=/var/run/ganglia/hdp;
+GANGLIA_CONF_DIR=<%=scope.function_hdp_template_var("ganglia_conf_dir")%>;
+GANGLIA_RUNTIME_DIR=<%=scope.function_hdp_template_var("ganglia_runtime_dir")%>;
 
 # This file contains all the info about each Ganglia Cluster in our Grid.
 GANGLIA_CLUSTERS_CONF_FILE=./gangliaClusters.conf;

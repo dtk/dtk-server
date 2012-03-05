@@ -2,7 +2,7 @@ class hdp-ganglia::config($ganglia_server_host = undef)
 {
   #TODO: divide into what is needed on server vs what is needed on monitored nodes
   $shell_cmds_dir = $hdp-ganglia::params::ganglia_shell_cmds_dir
-  $shell_files = ['checkGmond.sh','checkRrdcached.sh','gangliaLib.sh','gmetadLib.sh','gmondLib.sh','rrdcachedLib.sh' ,'setupGanglia.sh','startGmetad.sh','startGmond.sh','startRrdcached.sh','stopGmetad.sh','stopGmond.sh','stopRrdcached.sh','teardownGanglia.sh']
+  $shell_files = ['checkGmond.sh','checkRrdcached.sh','gmetadLib.sh','gmondLib.sh','rrdcachedLib.sh' ,'setupGanglia.sh','startGmetad.sh','startGmond.sh','startRrdcached.sh','stopGmetad.sh','stopGmond.sh','stopRrdcached.sh','teardownGanglia.sh']
 
   hdp::directory_recursive_create { $shell_cmds_dir :
     owner => root,
@@ -13,13 +13,12 @@ class hdp-ganglia::config($ganglia_server_host = undef)
 
    hdp-ganglia::config::shell_file { $shell_files: }                       
 
-   hdp-ganglia::config::file { ['gangliaClusters.conf','gangliaEnv.sh']: 
+   hdp-ganglia::config::file { ['gangliaClusters.conf','gangliaEnv.sh','gangliaLib.sh']: 
      ganglia_server_host => $ganglia_server_host
    }
  
    anchor{'hdp-ganglia::config::begin':} -> Hdp::Directory_recursive_create[$shell_cmds_dir] -> Hdp-ganglia::Config::Shell_file<||> -> anchor{'hdp-ganglia::config::end':}
    Anchor['hdp-ganglia::config::begin'] -> Hdp-ganglia::Config::Init_file<||> -> Anchor['hdp-ganglia::config::end']
-
    Anchor['hdp-ganglia::config::begin'] -> Hdp-ganglia::Config::File<||> -> Anchor['hdp-ganglia::config::end']
 }
 
@@ -40,13 +39,15 @@ define hdp-ganglia::config::init_file()
 }
 
 ### config files
-define hdp-ganglia::config::file($ganglia_server_host = undef) 
+define hdp-ganglia::config::file(
+  $ganglia_server_host = undef
+) 
 {
   hdp::configfile { $name:
     component           => 'ganglia',
     owner               => root,
     group               => root,
-    conf_dir            => '/etc/ganglia/',
+    conf_dir            => $hdp-ganglia::params::ganglia_shell_cmds_dir,
     ganglia_server_host => $ganglia_server_host
   }
 }

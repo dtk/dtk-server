@@ -19,7 +19,9 @@ class hdp::params()
   $nagios_server_host = hdp_default("nagios_server_host")
   $ganglia_server_host = hdp_default("ganglia_server_host")
   
-  ###### users
+  $dashboard_host = hdp_default("dashboard_host")
+  
+  ############ users
   $user_info = hdp_default("user_info",{})
   #TODO: move rest of users here so can be used globally and also put all in user info
   
@@ -35,7 +37,6 @@ class hdp::params()
   ##### java 
   $java32_home = hdp_default("java32_home","/usr/jdk32/jdk1.6.0_26")
   $java64_home = hdp_default("java64_home","/usr/java/default") #TODO: change to  "/usr/jdk64/jdk1.6.0_26"
-  $java_home = hdp_default("java_home","/usr/java/default") #TODO: deprecate once incorporate above
   
   $jdk_location = hdp_default("jdk_location","http://download.oracle.com/otn-pub/java/jdk/6u26-b03")
   $jdk_bins = hdp_default("jdk_bins",{
@@ -113,6 +114,9 @@ class hdp::params()
     },
     ganglia-hdp-gweb-addons => {
       64 => 'hdp_mon_ganglia_addons'
+    },
+    dashboard => {
+      64 => 'hdp_mon_dashboard'
     }
   })
 }

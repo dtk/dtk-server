@@ -40,7 +40,7 @@ class hdp-hadoop::params(
 
   $fs_inmemory_size = hdp_default("hadoop/core-site/fs_inmemory_size",256)
 
-  $proxyuser_group = hdp_default("hadoop/core-site/proxyuser_group")
+  $proxyuser_group = hdp_default("hadoop/core-site/proxyuser_group","users")
 
   $security_type = hdp_default("hadoop/core-site/security_type","simple")
   

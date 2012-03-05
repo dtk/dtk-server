@@ -14,7 +14,8 @@ define hdp::configfile(
   $hcat_server_host = $hdp::params::hcat_server_host,
   $hcat_mysql_host = $hdp::params::hcat_mysql_host,
   $nagios_server_host = $hdp::params::nagios_server_host,
-  $ganglia_server_host = $hdp::params::ganglia_server_host
+  $ganglia_server_host = $hdp::params::ganglia_server_host,
+  $dashboard_host = $hdp::params::dashboard_host
 ) 
 {
 

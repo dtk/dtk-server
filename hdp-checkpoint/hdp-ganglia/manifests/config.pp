@@ -41,13 +41,15 @@ define hdp-ganglia::config::init_file()
 ### config files
 define hdp-ganglia::config::file(
   $ganglia_server_host = undef
-) 
+)
 {
   hdp::configfile { $name:
     component           => 'ganglia',
     owner               => root,
     group               => root,
-    conf_dir            => $hdp-ganglia::params::ganglia_shell_cmds_dir,
-    ganglia_server_host => $ganglia_server_host
+    conf_dir            => $hdp-ganglia::params::ganglia_shell_cmds_dir
+  }
+  if ($ganglia_server_host != undef) {
+    Hdp::Configfile<||>{ganglia_server_host => $ganglia_server_host}
   }
 }

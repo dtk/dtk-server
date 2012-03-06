@@ -5,6 +5,8 @@ class hdp-hbase::regionserver(
   $opts = {}
 ) 
 {
+  $hdp::params::service_exists['hdp-hbase::regionserver'] = true
+  
   if ($opts[wait] == undef) {
     $wait = 25
   } else {
@@ -19,4 +21,3 @@ class hdp-hbase::regionserver(
   #top level does not need anchors
   Hdp-hbase::Common<|master != true|> -> Hdp-hbase::Service['regionserver']
 }
-

@@ -1,7 +1,11 @@
 class hdp-nagios::server::packages()
 {
-  package { ['httpd','php','net-snmp-perl','perl-Net-SNMP'] : }
-  hdp-nagios::server::package { ['perl_net_snmp','server','fping','plugins']: } 
+#  package { ['httpd','php','net-snmp-perl','perl-Net-SNMP'] : }
+   Hdp::Package::Common<||>{
+     httpd => true, php => true, net-snmp-perl => true, perl-net-snmp => true
+   }
+
+   hdp-nagios::server::package { ['perl_net_snmp','server','fping','plugins']: } 
 
   #TODO: ccnflict if other modules load in packages httpd','php','net-snmp-perl','perl-Net-SNMP in stage after this
   anchor{'hdp-nagios::server::packages::begin':}  -> Hdp-nagios::Server::Package<||> -> anchor{'hdp-nagios::server::packages::end':}
@@ -34,6 +38,6 @@ define hdp-nagios::server::package()
     path    => ["/bin","/usr/bin/"],
     creates => $info[creates]
   }
- 
+  
   anchor{"hdp-nagios::server::package::${name}::begin":} -> Exec[$wget_cmd] -> Exec[$install_cmd] -> anchor{"hdp-nagios::server::${name}::package::end":}
 }

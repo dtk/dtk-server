@@ -24,6 +24,7 @@ class hdp-hbase()
 #only realized under 1 name
 define hdp-hbase::common($master = false)
 {
+  $hdp::params::component_exists['hdp-hbase'] = true
   include hdp-hbase
   anchor{'hdp-hbase::common::begin' :} -> Class['hdp-hbase'] -> anchor{'hdp-hbase::common::end' :}
 }

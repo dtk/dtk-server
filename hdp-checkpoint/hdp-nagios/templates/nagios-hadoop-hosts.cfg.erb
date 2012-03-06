@@ -1,0 +1,9 @@
+<%scope.function_hdp_template_var("hostgroup_defs").values.map{|info|h=scope.function_hdp_host(info['host_member_info']); h.empty? ? [] : [h].flatten(1)}.flatten.uniq.each do |host|-%>
+define host {
+        alias        <%=host%>
+        host_name    <%=host%>
+        use          linux-server
+        address      <%=host%>
+}
+
+<%end%>

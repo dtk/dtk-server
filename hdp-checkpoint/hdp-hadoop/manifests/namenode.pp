@@ -6,6 +6,8 @@ class hdp-hadoop::namenode(
 {
   include  hdp-hadoop::params
   $dfs_name_dir = $hdp-hadoop::params::dfs_name_dir
+  
+  $hdp::params::service_exists['hdp-hadoop::namenode'] = true
 
   #adds package, users and directories, and common hadoop configs
   class { 'hdp-hadoop' : }

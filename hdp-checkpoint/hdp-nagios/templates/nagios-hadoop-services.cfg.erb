@@ -1,5 +1,6 @@
-
+<%hg_defs = scope.function_hdp_template_var("hostgroup_defs")-%>
 # NAGIOS SERVER Check (status log update)
+<%if hg_defs['nagios-server']['host_member_info'] and not scope.function_hdp_host(hg_defs['nagios-server']['host_member_info']).empty?-%>
 define service {        
         hostgroup_name          nagios-server        
         use                     generic-service
@@ -10,7 +11,42 @@ define service {
         max_check_attempts      2
 }
 
+# NAGIOS SERVER HDFS Checks
+define service {
+        hostgroup_name          nagios-server
+        use                     generic-service
+        service_description     HDFS::Percent DataNodes storage full alert
+        check_command           check_aggregate!"DATANODE::Storage full alert"!10%!30%
+        normal_check_interval   2
+        retry_check_interval    1 
+        max_check_attempts      5
+}
+
+define service {
+        hostgroup_name          nagios-server
+        use                     generic-service
+        service_description     HDFS::Percent DataNodes down alert
+        check_command           check_aggregate!"DATANODE::Process down alert"!10%!30%
+        normal_check_interval   1
+        retry_check_interval    1 
+        max_check_attempts      5
+}
+
+# NAGIOS SERVER MAPREDUCE Checks
+
+define service {
+        hostgroup_name          nagios-server
+        use                     generic-service
+        service_description     MAPREDUCE::Percent TaskTrackers down alert
+        check_command           check_aggregate!"TASKTRACKER::Process down alert"!10%!30%
+        normal_check_interval   1
+        retry_check_interval    1 
+        max_check_attempts      5
+}
+<%end-%>
+
 # GANGLIA SERVER Checks
+<%if hg_defs['ganglia-server']['host_member_info'] and not scope.function_hdp_host(hg_defs['ganglia-server']['host_member_info']).empty?-%>
 define service {
         hostgroup_name          ganglia-server
         use                     generic-service
@@ -60,8 +96,10 @@ define service {
         retry_check_interval    1 
         max_check_attempts      5
 }
+<%end-%>
 
 # HDFS Checks
+<%if hg_defs['namenode']['host_member_info'] and not scope.function_hdp_host(hg_defs['namenode']['host_member_info']).empty?-%>
 define service {        
         hostgroup_name          namenode        
         use                     generic-service
@@ -121,28 +159,10 @@ define service {
         retry_check_interval    1 
         max_check_attempts      5
 }
-
-define service {
-        hostgroup_name          nagios-server
-        use                     generic-service
-        service_description     HDFS::Percent DataNodes storage full alert
-        check_command           check_aggregate!"DATANODE::Storage full alert"!10%!30%
-        normal_check_interval   2
-        retry_check_interval    1 
-        max_check_attempts      5
-}
-
-define service {
-        hostgroup_name          nagios-server
-        use                     generic-service
-        service_description     HDFS::Percent DataNodes down alert
-        check_command           check_aggregate!"DATANODE::Process down alert"!10%!30%
-        normal_check_interval   1
-        retry_check_interval    1 
-        max_check_attempts      5
-}
+<%end-%>
 
 # MAPREDUCE Checks
+<%if hg_defs['jobtracker']['host_member_info'] and not scope.function_hdp_host(hg_defs['jobtracker']['host_member_info']).empty?-%>
 define service {
         hostgroup_name          jobtracker
         use                     generic-service
@@ -182,19 +202,10 @@ define service {
         retry_check_interval    1 
         max_check_attempts      5
 }
-
-define service {
-        hostgroup_name          nagios-server
-        use                     generic-service
-        service_description     MAPREDUCE::Percent TaskTrackers down alert
-        check_command           check_aggregate!"TASKTRACKER::Process down alert"!10%!30%
-        normal_check_interval   1
-        retry_check_interval    1 
-        max_check_attempts      5
-}
-
+<%end-%>
 
 # HDFS::DATANODE Checks
+<%if hg_defs['slaves']['host_member_info'] and not scope.function_hdp_host(hg_defs['slaves']['host_member_info']).empty?-%>
 define service {
         hostgroup_name          slaves
         use                     generic-service
@@ -225,4 +236,4 @@ define service {
         retry_check_interval    1 
         max_check_attempts      5
 }
-
+<%end-%>

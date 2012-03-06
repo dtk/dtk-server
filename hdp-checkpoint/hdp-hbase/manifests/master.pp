@@ -8,6 +8,8 @@ class hdp-hbase::master(
   include hdp-hbase::params
   $hdfs_root_dir = $hdp-hbase::params::hbase_hdfs_root_dir
   
+  $hdp::params::service_exists['hdp-hbase::master'] = true
+  
   hdp-hbase::common { 'hbase': master => true} #adds package, users, directories, and common configs
   Hdp-hbase::Configfile<||>{hbase_master_host => $hdp::params::host_address}
   

@@ -1,7 +1,6 @@
 class hdp-nagios::params() inherits hdp::params
 {   
  
- 
   $nagios_user = "nagios"
   $nagios_group = "nagios"
   
@@ -14,13 +13,20 @@ class hdp-nagios::params() inherits hdp::params
   $nagios_service_cfg = hdp_default("nagios_service_cfg","${nagios_obj_dir}/nagios-hadoop-services.cfg")
   $nagios_command_cfg = hdp_default("nagios_command_cfg","${nagios_obj_dir}/nagios-hadoop-commands.cfg")
   
-  
   $nagios_web_login = hdp_default("nagios_web_login","nagiosadmin")
   $nagios_web_password = hdp_default("nagios_web_password","admin")
   
   $datanode_dir =  hdp_default("nagios/nagios-hadoop-services/datanode_dir") #TODO: must be same as what is set/used in hadoop
    
   $nagios_contact = hdp_default("nagios/nagios-contacts/nagios_contact","monitor\@monitor.com")
+
+  $hostgroup_defs = {
+    namenode => {host_member_info => 'namenode_host'},
+    slaves => {host_member_info => 'slave_hosts'},
+    nagios-server => {host_member_info => 'nagios_server_host'},
+    jobtracker  => {host_member_info => 'jtnode_host'},
+    ganglia-server => {host_member_info => 'ganglia_server_host'}
+  }
  
   $nagios_download_info = hdp_default("nagios_download_info",{
       server => {

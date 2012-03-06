@@ -5,6 +5,8 @@ class hdp-hadoop::datanode(
 {
   include hdp-hadoop::params
   $dfs_data_dir = $hdp-hadoop::params::dfs_data_dir
+  
+  $hdp::params::service_exists['hdp-hadoop::datanode'] = true
  
   include hdp-hadoop #adds package, users, directories, and common configs
   Hdp-hadoop::Package<||>{include_32_bit => true}

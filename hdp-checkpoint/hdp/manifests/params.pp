@@ -119,4 +119,8 @@ class hdp::params()
       64 => 'hdp_mon_dashboard'
     }
   })
+  
+  #used by ganglia monitor to tell what components and services are present
+  $component_exists = {} 
+  $service_exists = {} 
 }

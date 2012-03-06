@@ -8,6 +8,8 @@ class hdp-hadoop::jobtracker(
   
   $mapred_user = $hdp-hadoop::params::mapred_user
   $mapred_local_dir = $hdp-hadoop::params::mapred_local_dir 
+  
+  $hdp::params::service_exists['hdp-hadoop::jobtracker'] = true
 
   include hdp-hadoop
   Hdp-hadoop::Package<||>{include_64_bit => true}

@@ -6,6 +6,8 @@ class hdp-hadoop::tasktracker(
   include hdp-hadoop::params
   $mapred_local_dir = $hdp-hadoop::params::mapred_local_dir
   
+  $hdp::params::service_exists['hdp-hadoop::tasktracker'] = true
+  
   include hdp-hadoop #adds package, users, directories, and common configs
   Hdp-hadoop::Package<||>{include_32_bit => true}
   Hdp-hadoop::Configfile<||>{size => 32}

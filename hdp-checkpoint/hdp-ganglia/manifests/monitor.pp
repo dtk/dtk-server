@@ -1,4 +1,4 @@
-#TODO: see if can get away from using defined?; this must be put after any of these components
+#must be put after monitored components because of use of params::service_exist and component_exists
 class hdp-ganglia::monitor(
   $service_state = running,
   $ganglia_server_host = undef,
@@ -13,7 +13,7 @@ class hdp-ganglia::monitor(
 
   class { 'hdp-ganglia::config': ganglia_server_host => $ganglia_server_host}
 
-  if defined('hdp-hadoop') {
+  if ($hdp::params::component_exists['hdp-hadoop'] == true) {
     class { 'hdp-hadoop::enable-ganglia': }
   }
 
@@ -26,20 +26,21 @@ class hdp-ganglia::monitor(
     Class['hdp-ganglia::monitor::config-gen'] -> Class['hdp-ganglia::service::gmond']
 }
 
-
 class hdp-ganglia::monitor::config-gen()
 {
 
-  if defined('hdp-hadoop::namenode') or defined('hdp-hadoop::snamenode') {
+  $service_exists = $hdp::params::service_exists
+
+  if ($service_exists['hdp-hadoop::namenode'] == true) {
     hdp-ganglia::config::generate { 'HDPNameNode':}
   }
-  if defined('hdp-hadoop::jobtracker') {
+  if ($service_exists['hdp-hadoop::jobtracker'] == true){
     hdp-ganglia::config::generate { 'HDPJobTracker':}
   }
-  if defined('hdp-hbase::master') {
+  if ($service_exists['hdp-hbase::master'] == true) {
     hdp-ganglia::config::generate { 'HDPHBaseMaster':}
   }
-  if defined('hdp-hadoop::datanode') or defined('hdp-hadoop::tasktracker') {
+  if ($service_exists['hdp-hadoop::datanode'] == true) {
     hdp-ganglia::config::generate { 'HDPSlaves':}
   }
   Hdp-ganglia::Config::Generate<||>{

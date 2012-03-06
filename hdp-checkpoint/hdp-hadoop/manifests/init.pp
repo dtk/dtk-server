@@ -7,6 +7,8 @@ class hdp-hadoop(
   $conf_dir = $hdp-hadoop::params::conf_dir
   $mapred_user = $hdp-hadoop::params::mapred_user  
   $hdfs_user = $hdp-hadoop::params::hdfs_user  
+
+  $hdp::params::component_exists['hdp-hadoop'] = true
  
   hdp-hadoop::package { 'hadoop':}
  
@@ -78,6 +80,7 @@ define hdp-hadoop::configfile(
     namenode_host  => $namenode_host,
     snamenode_host => $snamenode_host,
     jtnode_host    => $calc_jtnode_host,
+    template_tag  => $template_tag,
     size           => $size
   }
 }

@@ -4,11 +4,11 @@ require 'restclient'
 require 'json'
 require 'pp'
 
-def top_level_execute()
+def top_level_execute(command=nil)
   $: << "/usr/lib/ruby/1.8/" #TODO: put in to get around path problem in rvm 1.9.2 environment
   include R8::Client
   include Aux
-  command = $0.gsub(Regexp.new("^.+/"),"").gsub("-","_")
+  command = command || $0.gsub(Regexp.new("^.+/"),"").gsub("-","_")
   require File.expand_path('../r8_client', File.dirname(__FILE__))
   load_command(command)
   

@@ -49,17 +49,20 @@ module R8::Client
     end
 
     desc "converge-node NODE-ID", "(Re)Converge node"
-    def converge_node(node_id)
-      response = post(rest_url("task/create_rerun_state_changes"),:node_id => node_id)
+    def converge_node(node_id=nil)
+      scope = node_id && {:node_id => node_id} 
+      response = post(rest_url("task/create_rerun_state_changes"),scope)
       return response unless response.ok?
-
-      scope = {:node_id => node_id}
       response = commit_changes_and_execute(scope)
       while not task_complete(response) do
         response = status()
         sleep(TASK_STATUS_POLLING_INTERVAL)
       end
       response
+    end
+    desc "converge-nodes", "(Re)Converge nodes"
+    def converge_nodes()
+      converge_node(nil)
     end
   private
     @@count = 0

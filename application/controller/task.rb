@@ -112,9 +112,19 @@ module XYZ
     end
 
     def rest__create_rerun_state_changes()
-      node_id = ret_non_null_request_params(:node_id)
-      node_idh = id_handle(node_id,:node)
-      StateChange.create_rerun_state_changes([node_idh])
+      node_id = ret_request_params(:node_id)
+      if node_id
+        node_idhs = [id_handle(node_id,:node)]
+      else
+        #means get set of nodes
+        #TODO: stub is to get all in target
+        sp_hash = {
+          :cols => [:id, :display_name],
+          :filter => [:neq, :datacenter_datacenter_id, nil]
+        }
+        node_idhs = Model.get_objs(model_handle(:node),sp_hash).map{|r|r.id_handle}
+      end
+      StateChange.create_rerun_state_changes(node_idhs)
       rest_ok_response
     end
 

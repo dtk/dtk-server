@@ -32,12 +32,12 @@ module R8::Client
     end
 
 
-    desc "execute ASSEMBLY-ID", "Excute assembly from library"
+    desc "deploy ASSEMBLY-ID", "Deploy assembly from library"
     method_option "in-target",:aliases => "-t" ,
       :type => :numeric, 
       :banner => "TARGET-ID",
       :desc => "Target (id) to create assembly in" 
-    def execute(assembly_id)
+    def deploy(assembly_id)
       post_body = {
         :assembly_id => assembly_id
       }

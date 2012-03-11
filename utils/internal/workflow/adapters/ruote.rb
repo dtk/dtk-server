@@ -94,6 +94,9 @@ module XYZ
         end
         def self.get_and_delete(task_id,task_type=nil)
           key = task_key(task_id,task_type)
+          if (not key =~ /post/) and Store.keys.find{|x| x =~ /post/} and (not Store.keys.find{|x| x =~ Regexp.new("#{key}-post")})
+raise "TODO: workflow bug"
+end
           ret = nil
           Lock.synchronize{ret = Store.delete(key)}
           ret 
@@ -141,6 +144,7 @@ module XYZ
   end
 end
 
+#TODO: see if stil needed
 ###Monkey patches
 module Ruote
   class DispatchPool

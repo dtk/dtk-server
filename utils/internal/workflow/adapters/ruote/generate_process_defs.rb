@@ -4,7 +4,6 @@ module XYZ
       @@count = 0
       def compute_process_def(task,guards)
         count = @@count += 1 #TODO: see if we need to keep generating new ones or whether we can (delete) and reuse
-        task = task
         top_task_idh = task.id_handle()
         name = "process-#{count.to_s}"
         context = RuoteGenerateProcessDefsContext.create_top(guards,top_task_idh)
@@ -12,7 +11,6 @@ module XYZ
                           participant(:end_of_task))
         #for testing
         #tasks = concurrence(tasks,participant(:debug_task))
-
         ["define", {"name" => name}, [tasks]]
       end
       private

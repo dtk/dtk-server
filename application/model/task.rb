@@ -393,10 +393,16 @@ module XYZ
       }
       top_task = get_objs(top_task_idh.createMH(),sp_hash).first
       flat_subtask_list = top_task.get_all_subtasks()
-      ndx_task_list = flat_subtask_list.inject({top_task.id => top_task}){|h,t|h.merge(t.id => t)}
+      ndx_task_list = {top_task.id => top_task}
+      subtask_count = Hash.new 
+      flat_subtask_list.each do |t|
+        ndx_task_list[t.id] = t
+        parent_id = t[:task_id]
+        subtask_count[parent_id] = (subtask_count[parent_id]||0) +1
+      end
       flat_subtask_list.each do |subtask|
         parent_id = subtask[:task_id]
-        (ndx_task_list[parent_id][:subtasks] ||= Array.new) << subtask
+        (ndx_task_list[parent_id][:subtasks] ||= Array.new(subtask_count[parent_id]))[subtask[:position]-1] = subtask
       end
       top_task
     end

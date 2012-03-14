@@ -119,9 +119,10 @@ if (!R8.IDE.editorPanel) {
 
 				if(_fileList.length > 0) R8.Editor.resize();
 
-//				if(_currentView != null) _views[_currentView].resize();
+				R8.Dock2.realign();
+				if(_currentView != null) _views[_currentView].resize();
 
-
+/*
 				var numViews = _def.views.length;
 				for(var i=0; i < numViews; i++) {
 					if(_def.views[i].id == _currentView && typeof(_def.views[i].resizeMethod) != 'undefined') {
@@ -130,7 +131,7 @@ if (!R8.IDE.editorPanel) {
 						i = numViews + 1;
 					}
 				}
-
+*/
 			},
 			render: function() {
 //				this.setViewFocus();

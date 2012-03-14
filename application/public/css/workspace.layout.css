@@ -90,6 +90,8 @@ body {
 	float: left;
 	width: 100%;
 	height: 100%;
+	-moz-border-radius-bottomleft: 5px;
+	-moz-border-radius-bottomright: 5px;
 }
 
 #editor-panel .header {
@@ -118,6 +120,7 @@ body {
 	-moz-border-radius-bottomleft: 5px;
 	-moz-border-radius-bottomright: 5px;
 
+	overflow: hidden;
 /*
 	background-image: url(../images/v1/target-editor-bg-01.jpg);
 	background-repeat: repeat;

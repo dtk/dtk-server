@@ -347,8 +347,9 @@ if (!R8.IDE) {
 						var newWidth = x1-x2-10;
 						var newEditorWidth = viewportRegion.width-(30+lPanelNode.get('region').width+_lResizerNode.get('region').width);
 
-console.log('editorNodeId:'+lPanelNode.get('id'));
-console.log('new editor width:'+newEditorWidth);
+//DEBUG
+//console.log('editorNodeId:'+lPanelNode.get('id'));
+//console.log('new editor width:'+newEditorWidth);
 						lPanelNode.setStyle('width',newWidth+'px');
 						ePanelNode.setStyle('width',newEditorWidth+'px');
 
@@ -383,7 +384,9 @@ console.log('new editor width:'+newEditorWidth);
 							}
 						}
 						return null;
-
+						break;
+					case "editorRegionNode":
+						return _editorRegionNode;
 						break;
 					case "currentEditorView":
 /*						if(!_editorPanelActive) return null;

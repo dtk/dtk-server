@@ -23,6 +23,7 @@ if(!R8.Dock2) {
 			_toggleCache = {},
 
 			_itemFocusList = {},
+			_initialized = false,
 
 			testMeta = {
 				panels:[{
@@ -79,6 +80,7 @@ if(!R8.Dock2) {
 		return {
 			init: function(alignNodeId) {
 				_dockAlignNodeId = alignNodeId;
+				_height = 25;
 
 				_node = R8.Utils.Y.one('#'+_nodeId);
 				_headerNode = R8.Utils.Y.one('#'+_nodeId+'-header');
@@ -148,6 +150,9 @@ if(!R8.Dock2) {
 //hiding the dock by default for demo, change after implementing user settings/memory
 //					that.hide();
 				});
+
+				_initialized = true;
+
 //DEBUG
 //temp removing add view item
 /*
@@ -160,7 +165,10 @@ if(!R8.Dock2) {
 */
 			},
 			realign: function() {
+				if(_initialized == false || _overlay == null) return;
+
 //				_overlay.set('align',{node: "#"+_dockAlignNodeId,points: ["tr", "tr"]});
+				_overlay.set('align',{node: "#editor-panel-content",points: ["tr", "tr"]});
 			},
 			get: function(item) {
 				switch(item) {

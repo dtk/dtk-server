@@ -29,6 +29,29 @@ if (!R8.Cmdbar.nodes) {
 
 				return _itemTpl;
 			},
+			resize: function() {
+/*
+				var listTpl = '<div id="node-list-container" style="width:'+targetWidth+'px;">\
+								 <div id="list-l-arrow-wrapper">\
+									<div id="list-l-arrow"></div>\
+								 </div>\
+								<div id="list-body-wrapper" style="width:'+(targetWidth-80)+'px;">\
+									<div id="'+id+'-list-body" style="width:'+(targetWidth-80)+'px;">\
+									</div>\
+								</div>\
+								<div id="list-r-arrow-wrapper">\
+									<div id="list-r-arrow"></div>\
+								</div>\
+							</div>';
+*/
+				var targetRegion = _target.get('node').get('region');
+				var targetWidth = targetRegion.width;
+//DEBUG
+console.log('inside of resize for node cmdbar...');
+				R8.Utils.Y.one('#node-list-container').setStyle('width',targetWidth);
+				R8.Utils.Y.one('#list-body-wrapper').setStyle('width',targetWidth-80);
+				R8.Utils.Y.one('#'+this.get('id')+'-list-body').setStyle('width',targetWidth-80);
+			},
 			get: function(key) {
 				switch(key) {
 					case "id":

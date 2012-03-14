@@ -277,8 +277,12 @@ if (!R8.IDE.View.target.editor) {
 */
 //				_contentNode.append(R8.Dock.render({'display':'block','top':_topbarNode.get('region').bottom}));
 //				_contentNode.append(R8.Dock2.render({'display':'block','top':_contentNode.get('region').top}));
+
 				_contentNode.append(R8.Dock2.render({'display':'block','top':40}));
 				R8.Dock2.init(_contentNode.get('id'));
+
+//				R8.Utils.Y.one('#editor-panel-content').append(R8.Dock2.render({'display':'block','top':40}));
+//				R8.Dock2.init('editor-panel-content');
 
 				_initialized = true;
 
@@ -458,6 +462,22 @@ if (!R8.IDE.View.target.editor) {
 
 				R8.Dock2.realign();
 /*
+//console.log('activePlugin:'+_activePlugin);
+				if(_activePlugin != '') {
+//DEBUG
+//console.log('activePlugin isnt blank.., calling resize');
+					_plugins[_activePlugin].resize();
+				}
+*/
+				var editorPanelContentNode = R8.Utils.Y.one('#editor-panel-content');
+				var editorRegionNode = R8.IDE.get('editorRegionNode');
+				var e = {
+					'editorRegion': editorRegionNode.get('region'),
+					'contentRegion': editorPanelContentNode.get('region')
+				};
+
+				this.editorResize(e);
+/*
 				var contentHeight = _node.get('region').height - _headerNode.get('region').height;
 				_contentNode.setStyles({'height':contentHeight,'width':_node.get('region').width,'backgroundColor':'#FFFFFF'});
 */
@@ -536,23 +556,25 @@ if (!R8.IDE.View.target.editor) {
 				_items[itemId].init();
 			},
 //TODO: make remove evented like add using IDE event framework
-			removeNode: function(nodeRemoveId) {
-				var links = _items[nodeRemoveId].get('_node').get('links');
+			removeNode: function(nodeId) {
+//DEBUG
+//console.log('should be removing node from target:'+nodeId);
+				var links = _items[nodeId].get('_node').get('links');
 				for (var l in links) {
 					_target.removeLink(l);
 				}
 
-				this.removeItem(nodeRemoveId);
+				this.removeItem(nodeId);
 			},
-			removeItem: function(itemRemoveId) {
+			removeItem: function(itemId) {
 				_contentNode.get('children').each(function() {
 					var itemNodeId = this.get('id');
 					var itemNodeId = itemNodeId.replace('node-','');
 //TODO: keep an eye out for leaks from this action.., lots going on with ports and links inside of nodes
-					if(itemNodeId == itemRemoveId) {
-						this.purge(true);						
+					if(itemNodeId == itemId) {
+						this.purge(true);
 						this.remove();
-						delete(_items[itemRemoveId]);
+						delete(_items[itemId]);
 					}
 				});
 			},
@@ -696,9 +718,11 @@ if (!R8.IDE.View.target.editor) {
 
 				var id=this.get('id');
 				var resultListNode = R8.Utils.Y.one('#'+id+'-list-body');
-				var resultListWidth = resultListNode.get('region').width;
-				var limit = Math.floor(resultListWidth/138)+1;
-				resultListNode.setStyle('width',((limit+1)*138));
+				if(resultListNode != null) {
+					var resultListWidth = resultListNode.get('region').width;
+					var limit = Math.floor(resultListWidth/138)+1;
+					resultListNode.setStyle('width',((limit+1)*138));
+				}
 			},
 			portMout: function(e) {
 				R8.Utils.Y.one('#port-modal').remove();

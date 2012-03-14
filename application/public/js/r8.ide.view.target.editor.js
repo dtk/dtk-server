@@ -631,15 +631,18 @@ if (!R8.IDE.View.target.editor) {
 				_events['pluginInputFormSubmit'] = R8.Utils.Y.one('#'+this.get('id')+'-plugin-input-form').on('submit',function(e){
 					var inputValue = _pluginInputNode.get('value');
 					if (_activePlugin != '') {
-						var item_list = _plugins[_activePlugin].getData('itemList');
+						var item_list = _plugins[_activePlugin].get('itemList');
+
 						var match_list = [];
 						for(var i in item_list) {
-							if(R8.Utils.stringStartsWith(item_list[i].i18n,inputValue)) {
+							if(R8.Utils.stringStartsWith(item_list[i].display_name,inputValue) || R8.Utils.stringStartsWith(item_list[i].i18n,inputValue)) {
 								match_list.push(item_list[i]);
 							}
 						}
-						_plugins[_activePlugin].setData('renderList',match_list);
-						this[_plugins[_activePlugin].renderCallback]();
+//						_plugins[_activePlugin].setData('renderList',match_list);
+						_plugins[_activePlugin].set('renderList',match_list);
+						_plugins[_activePlugin].renderResults();
+//						this[_plugins[_activePlugin].renderCallback]();
 					}
 
 					_pluginInputNode.set('value','');

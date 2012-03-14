@@ -35,6 +35,9 @@ if (!R8.Cmdbar.components) {
 					case "id":
 						return _id;
 						break;
+					case "itemList":
+						return _itemList;
+						break;
 					case "node":
 						return _node;
 						break;
@@ -43,6 +46,15 @@ if (!R8.Cmdbar.components) {
 						return _def['default_height'];
 						break;
 				}
+			},
+			set: function(key,value) {
+				switch(key) {
+					case "renderList":
+						_renderList = value;
+						return true;
+						break;
+				}
+				return false;
 			},
 			focus: function() {
 //				_pluginInputNode.focus();
@@ -153,8 +165,14 @@ if (!R8.Cmdbar.components) {
 				var id = this.get('id');
 				var resultListNode = R8.Utils.Y.one('#'+id+'-list-body');
 
-				_itemList = _renderList;
+/*				_itemList = _renderList;
 				if (_itemList.length == 0) {
+					resultListNode.set('innerHTML','');
+					return;
+				}
+*/
+//				_itemList = _renderList;
+				if (_renderList.length == 0) {
 					resultListNode.set('innerHTML','');
 					return;
 				}
@@ -172,8 +190,9 @@ if (!R8.Cmdbar.components) {
 */
 				resultListNode.set('innerHTML','');
 				for(var i=renderStartIndex; i < renderEndIndex; i++) {
-					if(typeof(_itemList[i]) == 'undefined') continue;
-					resultListNode.append(R8.Rtpl['component_library_search']({'component':_itemList[i]}));
+//					if(typeof(_itemList[i]) == 'undefined') continue;
+					if(typeof(_renderList[i]) == 'undefined') continue;
+					resultListNode.append(R8.Rtpl['component_library_search']({'component':_renderList[i]}));
 				}
 				resultListNode.get('children').item((_selectedIndex - renderStartIndex)).addClass('selected');
 			},

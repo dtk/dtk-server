@@ -45,7 +45,8 @@ body {
 }
 
 #l-panel-header {
-	width: 99%;
+	width: 100%;
+/*	width: 99%;*/
 	padding-left: -1px;
 	padding-right: -1px;
 	height: 35px;

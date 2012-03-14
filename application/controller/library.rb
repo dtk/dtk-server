@@ -5,5 +5,15 @@ module XYZ
       ImportImplementationPackage.add(library_idh,implementation_name)
       {:content => {}}
     end 
+
+    def index
+      tpl = R8Tpl::TemplateR8.new("ui/panel",user_context())
+      tpl.set_js_tpl_name("ui_panel")
+      tpl_info = tpl.render()
+      include_js_tpl(tpl_info[:src])
+
+      run_javascript("R8.LibraryView.init('#{model_name}');")
+      return {:content => ''}      
+    end
   end
 end

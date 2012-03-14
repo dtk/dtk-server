@@ -14,6 +14,8 @@ if (!R8.Cmdbar.components) {
 			_compDDel = null,
 			_target = target,
 
+			_dropList = {},
+
 			_events = {};
 
 		return {
@@ -103,6 +105,7 @@ if (!R8.Cmdbar.components) {
 				_target.get('pluginContentNode').set('innerHTML','');
 				_compDDel.destroy();
 				delete(_compDDel);
+				_dropList = {};
 			},
 			runSearch: function() {
 				var _this=this;
@@ -194,9 +197,10 @@ if (!R8.Cmdbar.components) {
 
 						if(componentType == 'composite') {
 							var dropGroup = 'dg-node-assembly';
-							if(!vspaceNode.hasClass('yui3-dd-drop')) {
+							if(typeof(_dropList[vspaceNode.get('id')]) == 'undefined') {
 								var drop = new Y.DD.Drop({node:vspaceNode});
 								drop.addToGroup([dropGroup]);
+								_dropList[vspaceNode.get('id')] = true;
 								drop.on('drop:enter',function(e){
 								});
 								drop.on('drop:hit',function(e){
@@ -216,9 +220,10 @@ if (!R8.Cmdbar.components) {
 							var dropList = Y.all('#'+_target.get('node').get('id')+' div.'+dropGroup);
 
 							dropList.each(function(){
-								if(!this.hasClass('yui3-dd-drop')) {
+								if(typeof(_dropList[this.get('id')]) == 'undefined') {
 									var drop = new Y.DD.Drop({node:this});
 									drop.addToGroup([dropGroup]);
+									_dropList[this.get('id')] = true;
 									drop.on('drop:enter',function(e){
 									});
 									drop.on('drop:hit',function(e){

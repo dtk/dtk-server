@@ -65,8 +65,9 @@ if (!R8.IDE.leftPanel) {
 			resize: function() {
 				if(!_initialized) return;
 
-				var contentHeight = _node.get('region').height - _headerNode.get('region').height;
-				_contentNode.setStyles({'height':contentHeight-6,'width':_node.get('region').width-6,'backgroundColor':'#FFFFFF'});
+				var contentHeight = _node.get('region').height - _headerNode.get('region').height -2;
+//				_contentNode.setStyles({'height':contentHeight-6,'width':_node.get('region').width-6,'backgroundColor':'#FFFFFF'});
+				_contentNode.setStyles({'height':contentHeight,'width':_node.get('region').width});
 
 				var numViews = _def.views.length;
 				for(var i=0; i < numViews; i++) {
@@ -86,8 +87,8 @@ if (!R8.IDE.leftPanel) {
 			},
 			get: function(key) {
 				switch(key) {
-					case "foo":
-						return "foo";
+					case "panelNode":
+						return _node.get('parentNode');
 						break;
 				}
 			},

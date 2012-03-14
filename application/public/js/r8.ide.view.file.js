@@ -4,6 +4,7 @@ if (!R8.IDE.View.file) {
 	R8.IDE.View.file = function(view) {
 		var _view = view,
 			_id = _view.id,
+			_infocus = false,
 			_panel = _view.panel,
 			_fileContent = '',
 			_initialized = false,
@@ -46,22 +47,23 @@ if (!R8.IDE.View.file) {
 						break;
 				}
 			},
+			inFocus: function() {
+				return _infocus;
+			},
 			focus: function() {
 				R8.Editor.setViewContext(this);
 				this.resize();
 				R8.Utils.Y.one('#'+_panel.get('id')+'-editor-wrapper').setStyle('display','block');
 				this.setEditorContent();
-//DEBUG
-//console.log('should be navigating to cursor pos...');
-//console.log(_cursorPos);
 				R8.Editor.goToPos(_cursorPos);
 				R8.Editor.focus();
+				_infocus = true;
 			},
 			blur: function() {
 				_cursorPos = R8.Editor.get('cursorPos');
 				_file.content = R8.Editor.getEditorContent();
 				R8.Utils.Y.one('#'+_panel.get('id')+'-editor-wrapper').setStyle('display','none');
-
+				_infocus = false;
 			},
 			close: function() {
 

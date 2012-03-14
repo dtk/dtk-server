@@ -5,6 +5,7 @@ if (!R8.IDE.View.target.editor) {
 
 	R8.IDE.View.target.editor = function(target) {
 		var _target = target,
+			_infocus = false,
 			_idPrefix = 'editor-target-',
 			_panel = null,
 			_contentWrapperNode = null,
@@ -495,12 +496,17 @@ if (!R8.IDE.View.target.editor) {
 						break;
 				}
 			},
+			inFocus: function() {
+				return _infocus;
+			},
 			focus: function() {
 				this.resize();
 				_contentWrapperNode.setStyle('display','block');
+				_infocus = true;
 			},
 			blur: function() {
 				_contentWrapperNode.setStyle('display','none');
+				_infocus = false;
 			},
 			close: function() {
 				_contentWrapperNode.purge(true);

@@ -430,7 +430,6 @@ continue;
 							break;
 						case "replace":
 //							panelsContent[panel] = content;
-
 							R8.Utils.Y.one('#'+panel).set('innerHTML',content);
 							break;
 						case "prepend":

@@ -5,19 +5,29 @@
 -->
 
 <link rel="SHORTCUT ICON" href="{%=_app[:base_images_uri]%}/icon-black.ico" />
-<!--
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_js_uri]%}/external/yui/build/cssreset/reset.css">
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_js_uri]%}/external/yui/build/cssfonts/fonts.css">
--->
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_js_uri]%}/external/yui/build/cssgrids/grids.css">
+
+<link href="{%=_app[:base_js_uri]%}/external/bootstrap/css/bootstrap.css" rel="stylesheet">
+<link href="{%=_app[:base_js_uri]%}/external/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_js_uri]%}/external/jstree/themes/r8/style.css">
 
 <!--//TODO: revisit to variablize the path of the founcation css-->
-<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/topbar.css" />
-<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/cmdbar.css" />
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/ui.css" />
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/ui.components.css" />
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/ui.list.css" />
+
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/form.css" />
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/topbar.v1.css" />
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/toolbar.css" />
 
-<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/library.layout.css" />
 
-<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/temp-dev.css" />
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/search.css" />
+
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/workspace.layout.css" />
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/library.css" />
 
 {%for css_include in _app[:css_includes]%}
 	<link rel="stylesheet" type="text/css" href="{%=css_include%}" />
@@ -27,26 +37,35 @@
 
 	<body class="yui3-skin-sam  yui-skin-sam" style="overflow: hidden;">
 	<div id="page-container" class="page-container">
-		<div id="page-topbar">
-			<div id="menu-bar" class="menu-bar">
-				<div class="logo black"></div>
-				<div class="menu-item"><a href="{%=_app[:base_uri]%}/xyz/component/list" style="color: #EEF48C">Library</a></div>
-				<div class="menu-item"><a href="{%=_app[:base_uri]%}/xyz/workspace">Workspace</a></div>
-				<div class="menu-item"><a href="{%=_app[:base_uri]%}/xyz/datacenter/list">Dashboard</a></div>
+		<div id="page-topbar" class="top-bar">
+			<div id="menu-bar" class="yui3-g menu-bar grey">
+				<div class="yui3-u left-cap"></div>
+				<div id="menu-bar-body" class="toolbar yui3-u body">
+					<div class="logo black"></div>
+					<div class="nav-divider"></div>
+					<div id="main-menu-items" class="main-menu-items">
+						<div class="item">
+							<a href="{%=_app[:base_uri]%}/xyz/ide">Workspace</a>
+						</div>
+						<div class="item-divider"></div>
+						<div class="item actove">
+							<a href="{%=_app[:base_uri]%}/xyz/component/list">Library</a>
+							<div class="overlay">
+								<div class="l-cap"></div>
+								<div class="bg"></div>
+								<div class="r-cap"></div>
+							</div>
+						</div>
+						<div class="item-divider"></div>
+						<div class="item disabled"><a href="{%=_app[:base_uri]%}/xyz/datacenter/list">Dashboard</a></div>
+					</div>
+					<div class="nav-divider"></div>
+					<div style="float: right; margin:5px; 10px; text-decoration: none;"><a href="{%=_app[:base_uri]%}/xyz/user/logout">Logout</a></div>
+				</div>
+				<div class="yui3-u right-cap"></div>
 			</div>
 		</div>
-		<div id="menu_container">
-			<ul>
-				<li class=""><a href="{%=_app[:base_uri]%}/xyz/home">Home</a></li>
-				<li class=""><a href="{%=_app[:base_uri]%}/xyz/datacenter/list">Datacenters</a></li>
-				<li class=""><a href="{%=_app[:base_uri]%}/xyz/node/list">Nodes</a></li>
-				<li class="selected"><a href="{%=_app[:base_uri]%}/xyz/component/list">Components</a></li>
-				<li class=""><a href="{%=_app[:base_uri]%}/xyz/state_change/list_pending">Pending Changes</a></li>
-				<li class=""><a href="{%=_app[:base_uri]%}/xyz/task/list">Tasks</a></li>
-			</ul>
-		</div>
-		<div id="main-body" class="main-body" style="height: 700px; overflow-y: auto;">
-			{%=main_body%}
+		<div id="main-body-wrapper" class="main-body-wrapper">
 		</div>
 		</div>
 	</div>
@@ -66,52 +85,65 @@ YUI_config = {
 
 <!-- JS -->
 
-<script src="{%=_app[:base_js_uri]%}/external/jquery.js"></script>
-<script src="{%=_app[:base_js_uri]%}/external/jquery.cookie.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/external/yui/build/yui/yui.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/external/yui/build/loader/loader.js"></script>
 
+<script src="{%=_app[:base_js_uri]%}/external/bootstrap/js/jquery.js"></script>
+<script src="{%=_app[:base_js_uri]%}/external/bootstrap/js/bootstrap-transition.js"></script>
+<script src="{%=_app[:base_js_uri]%}/external/bootstrap/js/bootstrap-alert.js"></script>
+<script src="{%=_app[:base_js_uri]%}/external/bootstrap/js/bootstrap-modal.js"></script>
+<script src="{%=_app[:base_js_uri]%}/external/bootstrap/js/bootstrap-dropdown.js"></script>
+<script src="{%=_app[:base_js_uri]%}/external/bootstrap/js/bootstrap-scrollspy.js"></script>
+<script src="{%=_app[:base_js_uri]%}/external/bootstrap/js/bootstrap-tab.js"></script>
+<script src="{%=_app[:base_js_uri]%}/external/bootstrap/js/bootstrap-tooltip.js"></script>
+<script src="{%=_app[:base_js_uri]%}/external/bootstrap/js/bootstrap-popover.js"></script>
+<script src="{%=_app[:base_js_uri]%}/external/bootstrap/js/bootstrap-button.js"></script>
+<script src="{%=_app[:base_js_uri]%}/external/bootstrap/js/bootstrap-collapse.js"></script>
+<script src="{%=_app[:base_js_uri]%}/external/bootstrap/js/bootstrap-carousel.js"></script>
+<script src="{%=_app[:base_js_uri]%}/external/bootstrap/js/bootstrap-typeahead.js"></script>
+
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/ctrl.r8.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/utils.r8.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.mixin.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/model.r8.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/canvas.r8.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.user.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/ui.r8.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ui.panel.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/templating.r8.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/render_basic_component.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/render_tbar_component.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/workspace.r8.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/cmdbar.r8.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/maintoolbar.r8.js"></script>
 
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/detailview.r8.js"></script>
+<div id="js_include_container">
+	{%for js_include in _app[:js_includes]%}
+	<script type="text/javascript" src="{%=js_include%}"></script>
+	{%end%}
+</div>
 
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/toolbargroup.r8.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/topbar.r8.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/utils.r8.js"></script>
 
+<!--
+<script src="{%=_app[:base_js_uri]%}/external/ace/src/ace.js" type="text/javascript" charset="utf-8"></script>
+<script src="{%=_app[:base_js_uri]%}/external/ace/src/mode-ruby.js" type="text/javascript" charset="utf-8"></script>
+<script src="{%=_app[:base_js_uri]%}/external/ace/src/theme-twilight.js" type="text/javascript" charset="utf-8"></script>
+<script src="{%=_app[:base_js_uri]%}/external/ace/src/theme-cobalt.js" type="text/javascript" charset="utf-8"></script>
+<script src="{%=_app[:base_js_uri]%}/external/ace/src/theme-eclipse.js" type="text/javascript" charset="utf-8"></script>
+-->
 
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/viewspace.r8.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/group.r8.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/datacenter.r8.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/node.r8.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/port.r8.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/toolbar.r8.js"></script>
-<script type="text/javascript" src="{%=_app[:base_js_uri]%}/dock.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/page.r8.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.topbar.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/search.r8.js"></script>
 
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.libraryView.js"></script>
 
 <script type="text/javascript">
 R8.config = {};
 R8.config['base_uri'] = '{%=_app[:base_uri]%}/xyz';
 </script>
 
-	<div id="js_include_container">
-		{%for js_include in _app[:js_includes]%}
-			<script type="text/javascript" src="{%=js_include%}"></script>
-		{%end%}
+	<div id="js_exe_container">
 		<script type="text/javascript">
-		{%for js_exe in _app[:js_exe_list]%}
-			{%=js_exe%}
-		{%end%}
+		window.onload = function() {
+			{%for js_exe in _app[:js_exe_list]%}
+				{%=js_exe%}
+			{%end%}
+		}
 		</script>
 	</div>
 

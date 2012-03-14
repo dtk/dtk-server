@@ -9,11 +9,6 @@
   ],
   :field_list => 
   [
-   {:parent_name => {
-       :type => 'text',
-       :width => '20%',
-       :help => '',
-     }},
    {:display_name => {
        :type => 'text',
        :width => '20%',
@@ -21,9 +16,14 @@
        :objLink => true,
        :objLinkView => 'display',
      }},
+   {:parent_name => {
+       :type => 'text',
+       :width => '20%',
+       :help => '',
+     }},
    {:type => {
        :type => 'select',
-       :width => '20%',
+       :width => '7%',
        :help => '',
      }},
    {:description => {

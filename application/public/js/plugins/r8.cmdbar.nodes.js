@@ -13,6 +13,8 @@ if (!R8.Cmdbar.nodes) {
 			_nodeDDel = null,
 			_target = target,
 
+			_dropList = {},
+
 			_events = {};
 
 		return {
@@ -102,6 +104,7 @@ if (!R8.Cmdbar.nodes) {
 				_target.get('pluginContentNode').set('innerHTML','');
 				_nodeDDel.destroy();
 				delete(_nodeDDel);
+				_dropList = {};
 			},
 			runSearch: function() {
 				var _this=this;
@@ -177,7 +180,7 @@ if (!R8.Cmdbar.nodes) {
 
 					_nodeDDel.dd.plug(Y.Plugin.DDProxy, {
 						moveOnEnd: false,
-						borderStyle: false,
+						borderStyle: false
 					});
 
 					_nodeDDel.on('drag:start', function(e){
@@ -195,10 +198,11 @@ if (!R8.Cmdbar.nodes) {
 						var dropGroup = 'dg-node';
 
 						var targetViewNode = Y.one('#'+id);
-						if (!targetViewNode.hasClass('yui3-dd-drop')) {
+						if (typeof(_dropList[id]) == 'undefined') {
 							var targetNodeDrop = new Y.DD.Drop({
 								node: targetViewNode
 							});
+							_dropList[id] = true;
 							targetNodeDrop.addToGroup([dropGroup]);
 
 							targetNodeDrop.on('drop:enter', function(e){

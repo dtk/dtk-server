@@ -181,7 +181,11 @@ R8::Routes["datacenter/list"] = {
   :layout => 'dashboard'
 }
 R8::Routes["component/list"] = {
-  :layout => 'inventory'
+#  :layout => 'inventory'
+  :layout => 'library'
+}
+R8::Routes["library/index"] = {
+  :layout => 'library'
 }
 
 R8::Routes["node/list"] = {

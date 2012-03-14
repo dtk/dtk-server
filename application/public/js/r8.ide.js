@@ -23,6 +23,7 @@ if (!R8.IDE) {
 			_lRegionPanels = {},
 
 			_lResizerNode = null,
+			_panelsResizerDD = null,
 
 			_mainRegionMinWidth = 300,
 			_mainRegionMinHeight = 100,
@@ -289,6 +290,7 @@ if (!R8.IDE) {
 				_lRegionNode = R8.Utils.Y.one('#l-panel-wrapper');
 				_editorRegionNode = R8.Utils.Y.one('#editor-panel-wrapper');
 
+				this.setupEvents();
 				this.resizePage();
 
 				R8.Utils.Y.one(window).on('resize',function(e){
@@ -317,6 +319,53 @@ if (!R8.IDE) {
 				this.panelResizeInit();
 */
 //				R8.Editor.init();
+			},
+			setupEvents: function() {
+				var _this = this;
+				YUI(YUI_config).use('dd',function(Y){
+					_panelsResizerDD = new Y.DD.Drag({
+						node: '#l-resizer'
+					});
+					_panelsResizerDD.plug(Y.Plugin.DDProxy, {
+						moveOnEnd: false,
+						borderStyle: false,
+						cloneNode: true
+					});
+					_panelsResizerDD.on('drag:start',function(e){
+						var drag = this.get('dragNode');
+						drag.setStyle('border',0);
+						drag.set('innerHTML','');
+					});
+
+					_panelsResizerDD.on('drag:drag',function(e){
+						var lPanelNode = _panels['left'].get('panelNode'),
+							ePanelNode = _panels['editor'].get('panelNode'),
+							viewportRegion = _pageContainerNode.get('viewportRegion');
+
+						var x1 = e.pageX;
+						var x2 = lPanelNode.get('region').left;
+						var newWidth = x1-x2-10;
+						var newEditorWidth = viewportRegion.width-(30+lPanelNode.get('region').width+_lResizerNode.get('region').width);
+
+console.log('editorNodeId:'+lPanelNode.get('id'));
+console.log('new editor width:'+newEditorWidth);
+						lPanelNode.setStyle('width',newWidth+'px');
+						ePanelNode.setStyle('width',newEditorWidth+'px');
+
+						_panels['left'].resize();
+						_panels['editor'].resize();
+
+//						_this.resizePage();
+/*
+						Y.all('#'+_panelNodeId+' .width-resizer').each(function(){
+							var widthOffset = this.getAttribute('data-resize-offset-width');
+							widthOffset = (widthOffset == '') ? 8 : widthOffset;
+							var innerWidth = newWidth - widthOffset;
+							this.setStyle('width',innerWidth+'px');
+						});
+*/
+					});
+				});
 			},
 			get: function(key) {
 				switch(key) {
@@ -638,15 +687,15 @@ if (!R8.IDE) {
 
 				var _lRegionHeightMargin = 20;
 				var _lRegionWidthMargin = 15;
-				var lPanelHeight = mainBodyWrapperHeight-_lRegionHeightMargin
+				var lPanelHeight = mainBodyWrapperHeight-_lRegionHeightMargin;
 				_lRegionNode.setStyle('height',lPanelHeight);
 
 				var lPanelHeaderNode = R8.Utils.Y.one('#l-panel-header');
 				var lPanelHeaderRegion = lPanelHeaderNode.get('region');
 				var lPanelContentNode = R8.Utils.Y.one('#l-panel-content');
-				var lPanelContentRegion = lPanelContentNode.get('region')
+				var lPanelContentRegion = lPanelContentNode.get('region');
 
-				lPanelContentNode.setStyle('height',(lPanelHeight-lPanelHeaderRegion.height+2))
+				lPanelContentNode.setStyle('height',(lPanelHeight-lPanelHeaderRegion.height+2));
 
 				var _editorRegionHeightMargin = 15;
 				var _editorRegionWidthMargin = 15;
@@ -663,9 +712,9 @@ if (!R8.IDE) {
 				var editorPanelContentNode = R8.Utils.Y.one('#editor-panel-content');
 				var editorPanelContentRegion = editorPanelContentNode.get('region')
 
-				editorPanelHeaderNode.setStyle('width',editorPanelWidth-2);
+//				editorPanelHeaderNode.setStyle('width',editorPanelWidth-2);
 				editorPanelContentNode.setStyles({
-					'width': editorPanelWidth,
+//					'width': editorPanelWidth,
 					'height': (editorPanelHeight - (editorPanelHeaderRegion.height + 2))
 				});
 

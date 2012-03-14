@@ -14,6 +14,8 @@ if (!R8.Cmdbar.assemblies) {
 			_assemblyDDel = null,
 			_target = target,
 
+			_dropList = {},
+
 			_events = {};
 
 		return {
@@ -101,6 +103,7 @@ if (!R8.Cmdbar.assemblies) {
 				_target.get('pluginContentNode').set('innerHTML','');
 				_assemblyDDel.destroy();
 				delete(_assemblyDDel);
+				_dropList = {};
 			},
 			runSearch: function() {
 				var _this=this;
@@ -188,9 +191,10 @@ if (!R8.Cmdbar.assemblies) {
 //console.log(componentType);
 						if(componentType == 'composite') {
 							var dropGroup = 'dg-node-assembly';
-							if(!targetNode.hasClass('yui3-dd-drop')) {
+							if(typeof(_dropList[targetNode.get('id')]) == 'undefined') {
 								var drop = new Y.DD.Drop({node:targetNode});
 								drop.addToGroup([dropGroup]);
+								_dropList[targetNode.get('id')] = true;
 								drop.on('drop:enter',function(e){
 //console.log('entered drop zone for assembly....');
 								});
@@ -220,9 +224,10 @@ if (!R8.Cmdbar.assemblies) {
 							var dropList = Y.all('#'+targetNode.get('id')+' div.'+dropGroup);
 
 							dropList.each(function(){
-								if(!this.hasClass('yui3-dd-drop')) {
+								if(typeof(_dropList[this.get('id')]) == 'undefined') {
 									var drop = new Y.DD.Drop({node:this});
 									drop.addToGroup([dropGroup]);
+									_dropList[this.get('id')] = true;
 									drop.on('drop:enter',function(e){
 									});
 									drop.on('drop:hit',function(e){

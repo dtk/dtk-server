@@ -105,20 +105,23 @@ if (!R8.IDE.editorPanel) {
 			resize: function(resizeType) {
 				if(!_initialized) return;
 
-				var contentHeight = _node.get('region').height - _headerNode.get('region').height;
+				var contentHeight = this.get('panelNode').get('region').height - _headerNode.get('region').height - 4;
 				if (typeof(resizeType) == 'undefined') {
-					_contentNode.setStyles({'height': contentHeight - 6,'width': _node.get('region').width - 6,'backgroundColor': '#FFFFFF'});
+//					_contentNode.setStyles({'height': contentHeight - 6,'width': _node.get('region').width - 6,'backgroundColor': '#FFFFFF'});
+					_contentNode.setStyles({'height': contentHeight,'width': this.get('panelNode').get('region').width});
 				} else if(resizeType == 'width') {
-					_contentNode.setStyles({'width': _node.get('region').width - 6,'backgroundColor': '#FFFFFF'});
+//					_contentNode.setStyles({'width': _node.get('region').width - 6,'backgroundColor': '#FFFFFF'});
+					_contentNode.setStyles({'width': this.get('panelNode').get('region').width});
 				} else if(resizeType == 'height') {
-					_contentNode.setStyles({'height': contentHeight - 6,'backgroundColor': '#FFFFFF'});
+//					_contentNode.setStyles({'height': contentHeight - 6,'backgroundColor': '#FFFFFF'});
+					_contentNode.setStyles({'height': contentHeight});
 				}
 
 				if(_fileList.length > 0) R8.Editor.resize();
 
-				if(_currentView != null) _views[_currentView].resize();
+//				if(_currentView != null) _views[_currentView].resize();
 
-/*
+
 				var numViews = _def.views.length;
 				for(var i=0; i < numViews; i++) {
 					if(_def.views[i].id == _currentView && typeof(_def.views[i].resizeMethod) != 'undefined') {
@@ -127,7 +130,7 @@ if (!R8.IDE.editorPanel) {
 						i = numViews + 1;
 					}
 				}
-*/
+
 			},
 			render: function() {
 //				this.setViewFocus();
@@ -139,6 +142,9 @@ if (!R8.IDE.editorPanel) {
 				switch(key) {
 					case "id":
 						return _id;
+						break;
+					case "panelNode":
+						return _node.get('parentNode');
 						break;
 					case "node":
 						return _contentNode;
@@ -152,6 +158,11 @@ if (!R8.IDE.editorPanel) {
 						if(typeof(_views[_currentView]) == 'undefined') return null;
 						else return _views[_currentView];
 						break;
+					case "firstView":
+						for(var v in _views) {
+							return v;
+						}
+						break;
 				}
 			},
 			setViewFocus: function(viewId) {
@@ -159,6 +170,8 @@ if (!R8.IDE.editorPanel) {
 
 				if (this.numViews() > 1) {
 					for (var v in _views) {
+						if(_views[v].get('id') == viewId || !_views[v].inFocus()) continue;
+
 						var tabNode = R8.Utils.Y.one('#'+_id+'-tab-' + v);
 						tabNode.removeClass('active');
 						
@@ -171,7 +184,9 @@ if (!R8.IDE.editorPanel) {
 					}
 				}
 				var tabNode = R8.Utils.Y.one('#'+_id+'-tab-'+viewId);
-				tabNode.addClass('active');
+
+				if(tabNode != null) tabNode.addClass('active');
+
 				_views[viewId].focus();
 /*
 				if(_views[viewId].get('type') == 'file' && _fileList.length == 1) {
@@ -297,14 +312,27 @@ if (!R8.IDE.editorPanel) {
 				tabNode.purge(true);
 				tabNode.remove();
 				_views[viewId].close();
+//TODO: revisit to implement purge functionality
 				delete(_views[viewId]);
 
-				if(viewId == _currentView) _currentView = null;
+/*				if(viewId == _currentView) _currentView = null;
 				if(this.numViews() == 0) {
 					_contentNode.append(_emptyContentTpl);
 					_lastView = null;
 				} else {
 					this.setViewFocus(_lastView);
+				}
+*/
+				if(viewId == _currentView) {
+					_currentView = null;
+					if(this.numViews() == 0) {
+						_contentNode.append(_emptyContentTpl);
+						_lastView = null;
+					} else if(typeof(_views[_lastView]) == 'undefined') {
+						this.setViewFocus(this.get('firstView'));
+					} else {
+						this.setViewFocus(_lastView);
+					}
 				}
 			},
 /*

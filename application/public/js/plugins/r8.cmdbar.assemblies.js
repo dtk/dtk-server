@@ -35,6 +35,9 @@ if (!R8.Cmdbar.assemblies) {
 					case "id":
 						return _id;
 						break;
+					case "itemList":
+						return _itemList;
+						break;
 					case "node":
 						return _node;
 						break;
@@ -43,6 +46,15 @@ if (!R8.Cmdbar.assemblies) {
 						return _def['default_height'];
 						break;
 				}
+			},
+			set: function(key,value) {
+				switch(key) {
+					case "renderList":
+						_renderList = value;
+						return true;
+						break;
+				}
+				return false;
 			},
 			focus: function() {
 				var id = this.get('id');
@@ -151,8 +163,13 @@ if (!R8.Cmdbar.assemblies) {
 				var id = this.get('id');
 				var resultListNode = R8.Utils.Y.one('#'+id+'-list-body');
 
-				var itemList = _renderList;
+/*				var itemList = _renderList;
 				if (itemList.length == 0) {
+					resultListNode.set('innerHTML','');
+					return;
+				}
+*/
+				if (_renderList.length == 0) {
 					resultListNode.set('innerHTML','');
 					return;
 				}

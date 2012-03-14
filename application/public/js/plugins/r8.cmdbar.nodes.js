@@ -46,8 +46,6 @@ if (!R8.Cmdbar.nodes) {
 */
 				var targetRegion = _target.get('node').get('region');
 				var targetWidth = targetRegion.width;
-//DEBUG
-console.log('inside of resize for node cmdbar...');
 				R8.Utils.Y.one('#node-list-container').setStyle('width',targetWidth);
 				R8.Utils.Y.one('#list-body-wrapper').setStyle('width',targetWidth-80);
 				R8.Utils.Y.one('#'+this.get('id')+'-list-body').setStyle('width',targetWidth-80);
@@ -57,6 +55,9 @@ console.log('inside of resize for node cmdbar...');
 					case "id":
 						return _id;
 						break;
+					case "itemList":
+						return _itemList;
+						break;
 					case "node":
 						return _node;
 						break;
@@ -65,6 +66,15 @@ console.log('inside of resize for node cmdbar...');
 						return _def['default_height'];
 						break;
 				}
+			},
+			set: function(key,value) {
+				switch(key) {
+					case "renderList":
+						_renderList = value;
+						return true;
+						break;
+				}
+				return false;
 			},
 			focus: function() {
 //				_pluginInputNode.focus();
@@ -175,8 +185,13 @@ console.log('inside of resize for node cmdbar...');
 				var id = this.get('id');
 				var resultListNode = R8.Utils.Y.one('#'+id+'-list-body');
 
-				var itemList = _renderList;
+/*				var itemList = _renderList;
 				if (itemList.length == 0) {
+					resultListNode.set('innerHTML','');
+					return;
+				}
+*/
+				if (_renderList.length == 0) {
 					resultListNode.set('innerHTML','');
 					return;
 				}
@@ -187,8 +202,9 @@ console.log('inside of resize for node cmdbar...');
 
 				resultListNode.set('innerHTML','');
 				for(var i=renderStartIndex; i < renderEndIndex; i++) {
-					if(typeof(itemList[i]) == 'undefined') continue;
-					resultListNode.append(R8.Rtpl['node_library_search']({'node':itemList[i]}));
+//					if(typeof(_itemList[i]) == 'undefined') continue;
+					if(typeof(_renderList[i]) == 'undefined') continue;
+					resultListNode.append(R8.Rtpl['node_library_search']({'node':_renderList[i]}));
 				}
 				resultListNode.get('children').item((_selectedIndex - renderStartIndex)).addClass('selected');
 			},

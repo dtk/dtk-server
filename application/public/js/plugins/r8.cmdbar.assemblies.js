@@ -113,8 +113,10 @@ if (!R8.Cmdbar.assemblies) {
 				}
 
 				_target.get('pluginContentNode').set('innerHTML','');
-				_assemblyDDel.destroy();
-				delete(_assemblyDDel);
+				if(_assemblyDDel != null) {
+					_assemblyDDel.destroy();
+					delete(_assemblyDDel);
+				}
 				_dropList = {};
 			},
 			runSearch: function() {

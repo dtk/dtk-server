@@ -167,7 +167,7 @@
           },
           "ds_key": "[:user_data, \"/library/test/ami-e7b1618e\"]"
         },
-        "ami-e829f481-large": {
+        "ami-3cd10e55-large": {
           "type": "image",
           "ds_source_obj_type": "image",
 	  "os_type": "redhat",
@@ -183,7 +183,7 @@
           "external_ref": {
 	    "size": "m1.large",
             "type": "ec2_image",
-            "image_id": "ami-e829f481"
+            "image_id": "ami-3cd10e55"
           },
           "node_interface": {
             "eth0": {
@@ -247,9 +247,9 @@
               "enabled": true
             }
           },
-          "ds_key": "[:user_data, \"/library/test/ami-e829f481\"]"
+          "ds_key": "[:user_data, \"/library/test/ami-3cd10e55\"]"
         },
-        "ami-e829f481-micro": {
+        "ami-3cd10e55-micro": {
           "type": "image",
           "ds_source_obj_type": "image",
 	  "os_type": "redhat",
@@ -265,7 +265,7 @@
           "external_ref": {
 	    "size": "t1.micro",
             "type": "ec2_image",
-            "image_id": "ami-e829f481"
+            "image_id": "ami-3cd10e55"
           },
           "node_interface": {
             "eth0": {
@@ -329,7 +329,7 @@
               "enabled": true
             }
           },
-          "ds_key": "[:user_data, \"/library/test/ami-e829f481\"]"
+          "ds_key": "[:user_data, \"/library/test/ami-3cd10e55\"]"
         },
         "ami-aa37c984": {
           "type": "image",

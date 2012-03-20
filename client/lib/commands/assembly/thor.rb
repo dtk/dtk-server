@@ -8,12 +8,12 @@ module R8::Client
       post rest_url("assembly/list_from_library")
     end
 
-    desc "clone ASSEMBLY-ID", "Clone assembly from library to target"
+    desc "stage ASSEMBLY-ID", "Stage library assembly in target"
     method_option "in-target",:aliases => "-t" ,
       :type => :numeric, 
       :banner => "TARGET-ID",
       :desc => "Target (id) to create assembly in" 
-    def clone(assembly_id)
+    def stage(assembly_id)
       post_body = {
         :assembly_id => assembly_id
       }

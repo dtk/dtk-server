@@ -63,9 +63,10 @@ module XYZ
     end
 
     #TODO: unify with clone(id)
+    #clone assembly from library to target
     def rest__clone()
       target_idh = target_idh_with_default(request.params["target_id"])
-      assembly_id = ret_non_null_request_params(:assembly_id)
+      assembly_id = ret_non_null_request_params(:assembly_id).to_i
       id_handle = id_handle(assembly_id)
 
       #TODO: need to copy in avatar when hash["ui"] is non null
@@ -84,6 +85,7 @@ module XYZ
       rest_ok_response(:id => id)
     end
 
+    #clone assembly from library to target
     def clone(id)
       handle_errors do
         id_handle = id_handle(id)

@@ -993,7 +993,7 @@ POSSIBLE CHANGES TO HASH
       id_handles = node_idhs + link_idhs
       library_object = library_idh.create_object()
       #TODO: encapsulate some of above so ca just call library_object.clone_into(...
-      library_object.clone_into__top_object_exists(assembly_idh,id_handles)
+      library_object.clone_into_library_assembly(assembly_idh,id_handles)
       return {:content => nil}
     end
 
@@ -1031,7 +1031,7 @@ POSSIBLE CHANGES TO HASH
       id_handles = node_idhs + link_idhs
       library_object = library_idh.create_object()
       #TODO: encapsulate some of above so ca just call library_object.clone_into(...
-      library_object.clone_into__top_object_exists(assembly_idh,id_handles)
+      library_object.clone_into_library_assembly(assembly_idh,id_handles)
 
       return {:content => nil}
     end

@@ -72,7 +72,7 @@ module XYZ
       #TODO: need to copy in avatar when hash["ui"] is non null
       override_attrs = Hash.new
       target_object = target_idh.create_object()
-      clone_opts = {:ret_new_obj_with_cols => [:id]}
+      clone_opts = {:ret_new_obj_with_cols => [:id,:type]}
       new_assembly_obj = target_object.clone_into(id_handle.create_object(),override_attrs,clone_opts)
       id = new_assembly_obj && new_assembly_obj.id()
 
@@ -102,7 +102,7 @@ module XYZ
         #TODO: need to copy in avatar when hash["ui"] is non null
         override_attrs = hash["ui"] ? {:ui=>hash["ui"]} : {}
         target_object = target_id_handle.create_object()
-        clone_opts = {:ret_new_obj_with_cols => [:id]}
+        clone_opts = {:ret_new_obj_with_cols => [:id,:type]}
         new_assembly_obj = target_object.clone_into(id_handle.create_object(),override_attrs,clone_opts)
         id = new_assembly_obj && new_assembly_obj.id()
         nested_objs = new_assembly_obj.get_node_assembly_nested_objects()

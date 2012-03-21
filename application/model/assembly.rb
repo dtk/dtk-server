@@ -1,27 +1,44 @@
 module XYZ
   class Assembly < Component
-
-    def self.list_from_library(assembly_mh)
+    def self.list_from_library(assembly_mh,library_idh=nil)
+      lib_filter = (library_idh ? [:eq, :library_library_id, library_idh.get_id()] : [:neq, :library_library_id, nil])
       sp_hash = {
         #TODO: make variant of node_assembly_nested_nodes_and_cmps that returns less cols
         :cols => [:id, :display_name,:node_assembly_nested_nodes_and_cmps],
-        :filter => [:and, [:eq, :type, "composite"], [:neq, :library_library_id, nil]]
+        :filter => [:and, [:eq, :type, "composite"], lib_filter]
       }
       assemblies = get_objs(assembly_mh,sp_hash)
-      ndx_ret = Hash.new
-      assemblies.each do |r|
-        #TODO: hack to create a Assembly object (as opposed to row which is component); should be replaced by having 
-        #get_objs do this (using possibly option flag for subtype processing)
-        pntr = ndx_ret[r[:id]] ||= r.id_handle.create_object().merge(:display_name => r[:display_name], :ndx_nodes => Hash.new)
-        node_id = r[:node][:id]
-        node = pntr[:ndx_nodes][node_id] ||= {:node_name => r[:node][:display_name], :node_id => node_id, :components => Array.new}
-        if r[:nested_component][:component_type]
-          node[:components] << r[:nested_component][:component_type].gsub(/__/,"::")
-        end
-      end
+      list_aux(assemblies)
+    end
 
-      ndx_ret.values.map do |r|
-        {:id => r[:id], :display_name => r[:display_name], :nodes => r[:ndx_nodes].values}
+    def self.list_from_target(assembly_mh,target_idh=nil)
+      target_filter = (target_idh ? [:eq, :datacenter_datacenter_id, target_idh.get_id()] : [:neq, :datacenter_datacenter_id, nil])
+      sp_hash = {
+        :cols => [:id, :display_name,:target_assembly_nested_nodes_and_cmps],
+        :filter => [:and, [:eq, :type, "composite"], target_filter]
+      }
+      assemblies = get_objs(assembly_mh,sp_hash)
+      list_aux(assemblies)
+    end
+
+    class << self
+      private
+      def list_aux(assemblies)
+        ndx_ret = Hash.new
+        assemblies.each do |r|
+          #TODO: hack to create a Assembly object (as opposed to row which is component); should be replaced by having 
+          #get_objs do this (using possibly option flag for subtype processing)
+          pntr = ndx_ret[r[:id]] ||= r.id_handle.create_object().merge(:display_name => r[:display_name], :ndx_nodes => Hash.new)
+          node_id = r[:node][:id]
+          node = pntr[:ndx_nodes][node_id] ||= {:node_name => r[:node][:display_name], :node_id => node_id, :components => Array.new}
+          if r[:nested_component][:component_type]
+            node[:components] << r[:nested_component][:component_type].gsub(/__/,"::")
+          end
+        end
+        
+        ndx_ret.values.map do |r|
+          {:id => r[:id], :display_name => r[:display_name], :nodes => r[:ndx_nodes].values}
+        end
       end
     end
 

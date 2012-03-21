@@ -108,25 +108,6 @@ module XYZ
          }]
 
       ###### end of virtual columns related to attributes, ports, and link_defs
-      virtual_column :node_assembly_nested_nodes_and_cmps, :type => :json, :hidden => true,
-       :remote_dependencies =>
-        [
-         {
-           :model_name => :node,
-           :convert => true,
-           :join_type => :inner,
-           :join_cond=>{:assembly_id => q(:component,:id)},
-           :cols => Node.common_columns
-         },
-         {
-           :model_name => :component,
-           :convert => true,
-           :alias => :nested_component,
-           :join_type => :inner,
-           :join_cond=>{:node_node_id => q(:node,:id)},
-           :cols => Component.common_columns
-         }]
-
 
       virtual_column :implementation_file_paths, :type => :json, :hidden => true,
       :remote_dependencies =>

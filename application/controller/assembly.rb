@@ -3,6 +3,9 @@ module XYZ
     def rest__list_from_library()
       rest_ok_response Assembly.list_from_library(model_handle())
     end
+    def rest__list_from_target()
+      rest_ok_response Assembly.list_from_target(model_handle())
+    end
 
     def rest__delete_from_library()
       assembly_id = ret_non_null_request_params(:assembly_id)

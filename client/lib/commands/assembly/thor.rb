@@ -3,9 +3,14 @@ module R8::Client
     def self.pretty_print_cols()
       [:display_name, :type,:id, :description, :external_ref]
     end
-    desc "list","List asssemblies in library"
-    def list()
-      post rest_url("assembly/list_from_library")
+    desc "list [library|target]","List asssemblies in library or target"
+    def list(parent)
+      case parent
+        when "library":
+          post rest_url("assembly/list_from_library")
+        when "target":
+          post rest_url("assembly/list_from_target")
+      end
     end
 
     desc "stage ASSEMBLY-ID", "Stage library assembly in target"

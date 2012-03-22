@@ -129,8 +129,8 @@ module XYZ
       end
 
       def is_assembly?()
-        raise Error.new("should not be called") unless objects.first
-        objects.first.is_assembly?
+        #TODO: cleanup; this assumes that assembly call wil creat an object
+        objects and objects.first and objects.first.is_assembly?
       end
 
       def set_new_objects!(objs_info,target_mh)

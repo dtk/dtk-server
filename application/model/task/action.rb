@@ -61,6 +61,8 @@ module XYZ
         Array.new
       end
 
+#TODO: remove when get right
+=begin      
       def get_and_propagate_dynamic_attributes(result,opts={})
         dyn_attr_val_info = get_dynamic_attributes(result)
         if non_null_attrs = opts[:non_null_attributes]
@@ -72,6 +74,24 @@ module XYZ
         attr_mh = self[:node].model_handle_with_auth_info(:attribute)
         Attribute.update_and_propagate_dynamic_attributes(attr_mh,dyn_attr_val_info)
       end
+=end
+      def get_and_propagate_dynamic_attributes(result,opts={})
+        dyn_attr_val_info = get_dynamic_attributes_with_retry(result,opts)
+        return if dyn_attr_val_info.empty?
+        attr_mh = self[:node].model_handle_with_auth_info(:attribute)
+        Attribute.update_and_propagate_dynamic_attributes(attr_mh,dyn_attr_val_info)
+      end
+
+      def get_dynamic_attributes_with_retry(result,opts={})
+        ret = get_dynamic_attributes(result)
+        if non_null_attrs = opts[:non_null_attributes]
+          ret = retry_get_dynamic_attributes(ret,non_null_attrs) do
+            get_dynamic_attributes(result)
+          end
+        end
+        ret
+      end
+      private :get_dynamic_attributes_with_retry
 
       def retry_get_dynamic_attributes(dyn_attr_val_info,non_null_attrs,count=1,&block)
         if values_non_null?(dyn_attr_val_info,non_null_attrs)
@@ -175,6 +195,13 @@ module XYZ
           ret << attr
         end
         ret
+      end
+
+      ###special processing for node_components
+      def get_dynamic_attributes__node_components!(attr_names,results)
+        ret = Hash.new
+        return ret unless attr_names.delete(:node_components)
+        
       end
 
       def add_attribute!(attr)

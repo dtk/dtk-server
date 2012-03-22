@@ -25,29 +25,7 @@
          :cols => [:id,:display_name,:hidden,:description,:component_component_id,:attribute_value,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
        }]
     },
-    :node_assembly_nested_nodes_and_cmps=> {
-      :type => :json, 
-      :hidden => true,
-      :remote_dependencies =>
-        [
-         {
-           :model_name => :node,
-           :convert => true,
-           :join_type => :inner,
-           :join_cond=>{:assembly_id => q(:component,:id)},
-           :cols => Node.common_columns
-         },
-         {
-           :model_name => :component,
-           :convert => true,
-           :alias => :nested_component,
-           :join_type => :inner,
-           :join_cond=>{:node_node_id => q(:node,:id)},
-           :cols => Component.common_columns
-         }]
-    },
-    #TODO: replace above by below after making sure library components in assembly point to the assembly
-    :target_assembly_nested_nodes_and_cmps=> {
+    :nested_nodes_and_cmps=> {
       :type => :json, 
       :hidden => true,
       :remote_dependencies =>
@@ -66,6 +44,27 @@
            :join_type => :inner,
            :join_cond=>{:node_node_id => q(:node,:id), :assembly_id => q(:component,:id)},
            :cols => Component.common_columns
+         }]
+    },
+    :nested_nodes_and_cmps_summary=> {
+      :type => :json, 
+      :hidden => true,
+      :remote_dependencies =>
+        [
+         {
+           :model_name => :node,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond=>{:assembly_id => q(:component,:id)},
+           :cols => [:id,:display_name]
+         },
+         {
+           :model_name => :component,
+           :convert => true,
+           :alias => :nested_component,
+           :join_type => :inner,
+           :join_cond=>{:node_node_id => q(:node,:id), :assembly_id => q(:component,:id)},
+           :cols => [:id,:display_name,:component_type]
          }]
     },
     :nodes=> {

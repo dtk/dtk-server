@@ -71,8 +71,8 @@ module XYZ
         "ui"=>
           {"images"=>
             {"tiny"=>"", "tnail"=>info[:png], "display"=>info[:png]}},
-         "attribute"=>
-          {"host_addresses_ipv4"=>
+         "attribute"=> {
+          "host_addresses_ipv4"=>
             {"required"=>false,
              "read_only"=>true,
              "is_port"=>true,
@@ -83,7 +83,19 @@ module XYZ
              "display_name"=>"host_addresses_ipv4",
              "dynamic"=>true,
              "hidden"=>false,
-             "semantic_type"=>{":array"=>"host_address_ipv4"}}},
+             "semantic_type"=>{":array"=>"host_address_ipv4"}
+          },
+          "node_components"=>
+            {"required"=>false,
+             "read_only"=>true,
+             "is_port"=>true,
+             "cannot_change"=>false,
+             "data_type"=>"json",
+             "display_name"=>"node_components",
+             "dynamic"=>true,
+             "hidden"=>false,
+          }
+         },
          "node_interface"=>
           {"eth0"=>{"type"=>"ethernet", "display_name"=>"eth0"}},
          "monitoring_item"=>

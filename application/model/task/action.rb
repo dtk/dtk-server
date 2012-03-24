@@ -186,7 +186,9 @@ module XYZ
         node = self[:node]
         attrs_to_set = attributes_to_set()
         attr_names = attrs_to_set.map{|a|a[:display_name].to_sym}
-        av_pairs = CommandAndControl.get_and_update_node_state!(node,attr_names)
+        av_pairs__node_components = get_dynamic_attributes__node_components!(attr_names)
+        rest_av_pairs = (attr_names.empty? ? {} : CommandAndControl.get_and_update_node_state!(node,attr_names))
+        av_pairs = av_pairs__node_components.merge(rest_av_pairs)
         return ret if av_pairs.empty?
         attrs_to_set.each do |attr|
           attr_name = attr[:display_name].to_sym
@@ -198,10 +200,18 @@ module XYZ
       end
 
       ###special processing for node_components
-      def get_dynamic_attributes__node_components!(attr_names,results)
+      def get_dynamic_attributes__node_components!(attr_names)
         ret = Hash.new
         return ret unless attr_names.delete(:node_components)
-        
+        #TODO: hack
+        ipv4_val = CommandAndControl.get_and_update_node_state!(self[:node],[:host_addresses_ipv4])
+        return ret if ipv4_val.empty?
+        cmps = self[:node].get_objs(:cols => [:components]).map{|r|r[:component][:display_name].gsub("__","::")}
+        ret = {:node_components => {ipv4_val.values.first[0] => cmps}}
+        if attr_names.delete(:host_addresses_ipv4)
+          ret.merge!(ipv4_val)
+        end
+        ret
       end
 
       def add_attribute!(attr)

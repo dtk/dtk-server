@@ -2,44 +2,66 @@ module XYZ
   class ComponentOrder < Model
     def self.get_applicable_dependencies(component_idhs)
       sample_idh = component_idhs.first
+      cols_for_get_virtual_attrs_call = [:component_type,:implementation_id,:extended_base]
       sp_hash = {
-        :cols => [:id,:component_order_objs],
+        :cols => [:id,:component_order_objs]+cols_for_get_virtual_attrs_call,
         :filter => [:oneof, :id, component_idhs.map{|idh|idh.get_id()}]
       }
-      cmp_order_objs = get_objs(sample_idh.createMH,sp_hash).map{|r|r[:component_order]}
-      prune_if_not_applicable(cmp_order_objs)
+      cmps_with_order_info = prune_if_not_applicable(get_objs(sample_idh.createMH,sp_hash))
+      #cmps_with_order_info can have a component appear multiple fo each order relation
+      dependency_form(cmps_with_order_info)
     end
    private
-    def self.prune_if_not_applicable(cmp_order_objs)
+    def self.prune_if_not_applicable(cmps_with_order_info)
       ret = Array.new
-      return ret if cmp_order_objs.empty?
+      return ret if cmps_with_order_info.empty?
       with_conditionals = Array.new
-      cmp_order_objs.each do |obj|
-        if obj[:conditional]
-          with_conditionals << obj
+      cmps_with_order_info.each do |cmp|
+        order_info = cmp[:component_order]
+        if order_info[:conditional]
+          with_conditionals << cmp
         else
-          ret << obj
+          ret << cmp
         end
       end
-      return ret if with_conditionals.empty?
+      with_conditionals.empty? ? ret : (prune(with_conditionals) + ret)
+    end
 
+    def self.prune(cmps_with_order_info)
       #TODO: stub that just treats very specific form
       #assuming conditional of form :":attribute_value"=>[":eq", ":attribute.<var>", <val>]
-      assigns = Array.new
-      with_conditionals.each do |obj|
+      attrs_to_get = Hash.new 
+      cmps_with_order_info.each do |cmp|
         unexepected_form = true
-        cnd = obj[:conditional]
+        cnd = cmp[:component_order][:conditional]
         if cnd.kind_of?(Hash) and cnd.keys.first.to_s == ":attribute_value"
           eq_stmt =  cnd.values.first
           if eq_stmt.kind_of?(Array) and eq_stmt[0] == ":eq"
             if cnd.values.first[1] =~ /:attribute\.(.+$)/ and eq_stmt[2]
-              var = $1
+              attr_name = $1
+              val = eq_stmt[2]
               unexepected_form = false
-              assigns << {:component_id => obj[:component_component_id], :var => var, :val => eq_stmt[2]}
+              match_cond = [:eq,:attribute_value,val]
+              pntr = attrs_to_get[cmp[:id]] ||= {:component => cmp, :attr_info => Array.new} 
+              pntr[:attr_info] << {:attr_name => attr_name, :match_cond => match_cond, :component_order => cmp[:component_order]}
             end
           end
         end
-        Error.new("Unexpected form") if unexepected_form
+        raise Error.new("Unexpected form") if unexepected_form
+      end
+      ret = Array.new
+      #TODO: more efficienct is getting this in bulk
+      attrs_to_get.each do |cmp_id,info|
+        info[:attr_info].each do |attr_info|
+          #if component order appears twice then taht means disjunction
+          next unless  attr_val_info = info[:component].get_virtual_attribute(attr_info[:attr_name],[:attribute_value])
+          #TODO: stubbed form treating
+          match_cond = attr_info[:match_cond]
+          raise Error.new("Unexpected form") unless match_cond.size == 3 and match_cond[0] == :eq and match_cond[1] == :attribute_value
+          if attr_val_info[:attribute_value] == match_cond[2]
+            ret << info[:component].merge(:component_order => attr_info[:component_order]) 
+          end
+        end
       end
       ret
     end

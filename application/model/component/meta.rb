@@ -57,7 +57,7 @@ module XYZ
       virtual_column :most_specific_type, :type => :varchar, :local_dependencies => [:specific_type,:basic_type]
 
       many_to_one :component, :library, :node, :datacenter, :project
-      one_to_many :component, :attribute_link, :attribute, :port_link, :monitoring_item, :dependency, :layout, :file_asset, :link_def
+      one_to_many :component, :attribute_link, :attribute, :port_link, :monitoring_item, :dependency, :component_order, :layout, :file_asset, :link_def
       one_to_many_clone_omit :layout
 
       virtual_column :project_id, :type => ID_TYPES[:id], :local_dependencies => [:project_project_id]
@@ -136,6 +136,18 @@ module XYZ
            :join_type => :left_outer,
            :join_cond=>{:component_component_id => q(:component,:id)}, 
            :cols => [:id,:search_pattern,:type,:description,:severity]
+         }
+        ]
+
+        virtual_column :component_order_objs, :type => :json, :hidden => true, 
+        :remote_dependencies => 
+        [
+         {
+           :model_name => :component_order,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond=>{:component_component_id => q(:component,:id)}, 
+           :cols => [:id,:after,:conditional,:component_component_id]
          }
         ]
 

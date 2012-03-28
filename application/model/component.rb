@@ -510,9 +510,7 @@ module XYZ
             end
           end
         end
-#TODO: stub
-foo = ComponentOrder.get_applicable_dependencies(cmp_idhs)
-        ret
+        ComponentOrder.update_with_applicable_dependencies!(ret,cmp_idhs)
       end
     end
 

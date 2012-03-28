@@ -1,6 +1,6 @@
 module XYZ
   class ComponentOrder < Model
-    def self.get_applicable_dependencies(component_idhs)
+    def self.update_with_applicable_dependencies!(component_deps,component_idhs)
       sample_idh = component_idhs.first
       cols_for_get_virtual_attrs_call = [:component_type,:implementation_id,:extended_base]
       sp_hash = {
@@ -9,7 +9,7 @@ module XYZ
       }
       cmps_with_order_info = prune_if_not_applicable(get_objs(sample_idh.createMH,sp_hash))
       #cmps_with_order_info can have a component appear multiple fo each order relation
-      dependency_form(cmps_with_order_info)
+      update_with_order_info!(component_deps,cmps_with_order_info)
     end
    private
     def self.prune_if_not_applicable(cmps_with_order_info)
@@ -64,6 +64,14 @@ module XYZ
         end
       end
       ret
+    end
+    def self.update_with_order_info!(component_deps,cmps_with_order_info)
+      cmps_with_order_info.each do |info|
+        pntr = component_deps[info[:id]] ||= {:component_type=> order_info[:component_type], :component_dependencies=>Array.new}
+        dep = info[:component_order][:after]
+        pntr[:component_dependencies] << dep unless pntr[:component_dependencies].include?(dep)
+      end
+      component_deps
     end
   end
 end

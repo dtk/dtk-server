@@ -20,6 +20,10 @@ module XYZ
     
     class ComponentLevel < AssemblyAttributePattern
       def ret_attribute_idhs(assembly_idh)
+        ret = Array.new
+        nodes = ret_matching_nodes(assembly_idh)
+        return ret if nodes.empty?
+pp nodes
       end
     end
 
@@ -29,14 +33,24 @@ module XYZ
     end
     attr_reader :pattern
 
-    def ret_node_filter()
-      if pattern  =~ /^node([^\/])*\//
-        node_filter = $1
-        if node_filter == "[*]"
-          :all
-        else
-          raise ErrorNotImplementedYet.new()
-        end
+    def ret_matching_nodes(assembly_idh)
+      node_filter = ret_filter(pattern)
+      if node_filter == "*"
+        sp_hash = {
+          :cols => [:display_name,:id],
+          :filter => [:eq, :assembly_id, assembly_idh.get_id()]
+        }
+        Model.get_objs(assembly_idh.createMH(:node),sp_hash)
+      else
+        raise ErrorNotImplementedYet.new()
+      end
+    end
+
+    def ret_filter(fragment)
+      if fragment =~ /[a-z]\[([^\]]+)\]/
+        $1
+      else
+        "*" #without qaulification means all
       end
     end
 
@@ -52,3 +66,4 @@ module XYZ
     end
   end
 end
+

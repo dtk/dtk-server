@@ -36,6 +36,16 @@ module R8::Client
       post rest_url("assembly/delete_from_library"), post_body
     end
 
+    desc "set ASSEMBLY-ID ATTRIBUTE-PATTERN VALUE", "set target assembly attributes"
+    def set(assembly_id,pattern,value)
+      post_body = {
+        :assembly_id => assembly_id,
+        :pattern => pattern,
+        :value => value
+      }
+      post rest_url("assembly/set_attributes"), post_body
+    end
+
 
     desc "deploy ASSEMBLY-ID", "Deploy assembly from library"
     method_option "in-target",:aliases => "-t" ,

@@ -1,3 +1,4 @@
+r8_nested_require('assembly','attribute_pattern')
 module XYZ
   class Assembly < Component
     def self.list_from_library(assembly_mh,library_idh=nil)

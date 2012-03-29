@@ -13,6 +13,13 @@ module XYZ
       rest_ok_response 
     end
 
+    def rest__set_attributes()
+      assembly_id,pattern = ret_non_null_request_params(:assembly_id,:pattern)
+      #TODO:stub
+      pat = AssemblyAttributePattern.create(pattern)
+      pat.ret_attribute_idhs(id_handle(assembly_id))
+      rest_ok_response
+    end
     def test_get_items(id)
       assembly = id_handle(id,:component).create_object()
       item_list = assembly.get_items()

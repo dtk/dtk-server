@@ -14,10 +14,9 @@ module XYZ
     end
 
     def rest__set_attributes()
-      assembly_id,pattern = ret_non_null_request_params(:assembly_id,:pattern)
-      #TODO:stub
-      pat = AssemblyAttributePattern.create(pattern)
-      pat.ret_attribute_idhs(id_handle(assembly_id))
+      assembly_id,pattern,value = ret_non_null_request_params(:assembly_id,:pattern,:value)
+      assembly = id_handle(assembly_id,:component).create_object()
+      assembly.set_attributes(pattern,value)
       rest_ok_response
     end
     def test_get_items(id)

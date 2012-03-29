@@ -21,6 +21,18 @@ module XYZ
       list_aux(assemblies)
     end
 
+    def set_attributes(pattern,value)
+      ret = Array.new
+      pattern = AssemblyAttributePattern.create(pattern)
+      attr_idhs = pattern.ret_attribute_idhs(id_handle())
+      return ret if attr_idhs.empty?
+
+      attr_mh = model_handle(:attribute)
+      attribute_rows = attr_idhs.map{|idh|{:id => idh.get_id(),:value_asserted => value}}
+      Attribute.update_and_propagate_attributes(attr_mh,attribute_rows)
+      attr_idhs
+    end
+
     class << self
       private
       def list_aux(assemblies)

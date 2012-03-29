@@ -21,9 +21,17 @@ module XYZ
     class ComponentLevel < AssemblyAttributePattern
       def ret_attribute_idhs(assembly_idh)
         ret = Array.new
-        nodes = ret_matching_nodes(assembly_idh)
-        return ret if nodes.empty?
-pp nodes
+        node_idhs = ret_matching_node_idhs(assembly_idh)
+        return ret if node_idhs.empty?
+
+        pattern  =~ /^node[^\/]*\/(component.+$)/
+        cmp_fragment = $1
+        cmp_idhs = ret_matching_component_idhs(node_idhs,cmp_fragment)
+        return ret if cmp_idhs.empty?
+
+        cmp_fragment =~ /^component[^\/]*\/(attribute.+$)/  
+        attr_fragment = $1
+        ret_matching_attribute_idhs(cmp_idhs,attr_fragment)
       end
     end
 
@@ -33,24 +41,64 @@ pp nodes
     end
     attr_reader :pattern
 
-    def ret_matching_nodes(assembly_idh)
-      node_filter = ret_filter(pattern)
-      if node_filter == "*"
-        sp_hash = {
-          :cols => [:display_name,:id],
-          :filter => [:eq, :assembly_id, assembly_idh.get_id()]
-        }
-        Model.get_objs(assembly_idh.createMH(:node),sp_hash)
-      else
-        raise ErrorNotImplementedYet.new()
+    #TODO: more efficient to use joins of below
+    def ret_matching_node_idhs(assembly_idh)
+      filter = [:eq, :assembly_id, assembly_idh.get_id()]
+      if node_filter = ret_filter(pattern,:node)
+        filter = [:and, filter, node_filter]
       end
+      sp_hash = {
+        :cols => [:display_name,:id],
+        :filter => filter
+      }
+      Model.get_objs(assembly_idh.createMH(:node),sp_hash).map{|r|r.id_handle()}
     end
 
-    def ret_filter(fragment)
+    def ret_matching_component_idhs(node_idhs,cmp_fragment)
+      filter = [:oneof, :node_node_id, node_idhs.map{|idh|idh.get_id()}]
+      if cmp_filter = ret_filter(cmp_fragment,:component)
+        filter = [:and, filter, cmp_filter]
+      end
+      sp_hash = {
+        :cols => [:display_name,:id],
+        :filter => filter
+      }
+      sample_idh = node_idhs.first
+      Model.get_objs(sample_idh.createMH(:component),sp_hash).map{|r|r.id_handle()}
+    end
+
+    def ret_matching_attribute_idhs(cmp_idhs,attr_fragment)
+      filter = [:oneof, :component_component_id, cmp_idhs.map{|idh|idh.get_id()}]
+      if attr_filter = ret_filter(attr_fragment,:attribute)
+        filter = [:and, filter, attr_filter]
+      end
+      sp_hash = {
+        :cols => [:display_name,:id],
+        :filter => filter
+      }
+      sample_idh = cmp_idhs.first
+      Model.get_objs(sample_idh.createMH(:attribute),sp_hash).map{|r|r.id_handle()}
+    end
+
+    def ret_filter(fragment,type)
       if fragment =~ /[a-z]\[([^\]]+)\]/
-        $1
+        filter = $1
+        if filter == "*"
+          nil
+        elsif filter =~ /^[a-z_-]+$/
+          case type
+           when :attribute
+            [:eq,:display_name,filter]
+            when :component
+            [:eq,:component_type,filter]
+           else
+            raise ErrorNotImplementedYet.new()
+          end
+        else
+          raise ErrorNotImplementedYet.new()
+        end
       else
-        "*" #without qaulification means all
+        nil #without qualification means all (no filter)
       end
     end
 

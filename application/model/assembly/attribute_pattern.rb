@@ -89,8 +89,10 @@ module XYZ
           case type
            when :attribute
             [:eq,:display_name,filter]
-            when :component
+           when :component
             [:eq,:component_type,filter]
+           when :node
+            [:eq,:display_name,filter]
            else
             raise ErrorNotImplementedYet.new()
           end

@@ -5,7 +5,7 @@ require 'json'
 require 'pp'
 
 #TODO: for testing; fix by pass in commadn line argument
-RestClient.log = STDOUT
+#RestClient.log = STDOUT
 
 def top_level_execute(command=nil)
   $: << "/usr/lib/ruby/1.8/" #TODO: put in to get around path problem in rvm 1.9.2 environment

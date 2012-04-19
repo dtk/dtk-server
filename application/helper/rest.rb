@@ -4,6 +4,15 @@ module Ramaze::Helper
       unless @ctrl_results.kind_of?(BundleAndReturnHelper::ControllerResultsRest)
         raise Error.new("controller results is in wrong form; it should have 'rest' form")
       end
+#TODO: debug
+if true
+req_body = ret_request_params()
+if req_body and req_body["search"]
+  req_body = req_body.merge("search" => JSON.parse(req_body["search"]))
+end
+pp({:request => request.env["REQUEST_PATH"], :request_body => req_body, :result => @ctrl_results})
+end
+#######
       JSON.generate(@ctrl_results)
     end
 

@@ -33,17 +33,18 @@ module XYZ
          :size => "t1.micro",
          :png => "redhat.png"
        },
+       "ami-3cd10e55-medium"=> {
+         :ami => "ami-3cd10e55",
+         :display_name => "RH5.7 64 medium",
+         :os_type =>"redhat",
+         :size => "m1.medium",
+         :png => "redhat.png"
+       },
        "ami-3cd10e55-large"=> {
          :ami => "ami-3cd10e55",
          :display_name => "RH5.7 64 large",
          :os_type =>"redhat",
          :size => "m1.large",
-         :png => "redhat.png"
-       },
-       "ami-aa37c984"=> {
-         :ami => "ami-aa37c984",
-         :display_name =>"RHEL 5.5",
-         :os_type =>"redhat",
          :png => "redhat.png"
        },
        "ami-e7b1618e-small"=> {

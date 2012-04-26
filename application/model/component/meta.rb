@@ -12,7 +12,9 @@ module XYZ
       column :keys, :json #only used if only_one_per_node is false; array of keys for displaying component name
       column :i18n_labels, :json, :ret_keys_as_symbols => false
       
+      column :enabled, :boolean, :default => true
       #columns related to version
+      #TODO: think we want to deprecate these; versioning is at module level
       column :version, :varchar, :size => 25, :default => "0.0.1" # version of underlying component (not chef recipe .... version)
       column :updated, :boolean, :default => false
 

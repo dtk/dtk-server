@@ -1,0 +1,19 @@
+{
+  :schema=>:service_check,
+  :table=>:relation,
+  :columns=>{
+    :component_id=>{
+      :type=>:bigint,
+      :foreign_key_rel_type=>:component,
+      :on_delete=>:cascade,
+      :on_update=>:cascade
+    },
+    :service_check_id=>{
+      :type=>:bigint,
+      :foreign_key_rel_type=>:component,
+      :on_delete=>:cascade,
+      :on_update=>:cascade
+    }
+  }, 
+  :many_to_one=>[:library]
+}

@@ -5,7 +5,7 @@ module Ramaze::Helper
         raise Error.new("controller results is in wrong form; it should have 'rest' form")
       end
 #TODO: debug
-if true
+if false
 req_body = ret_request_params()
 if req_body and req_body["search"]
   req_body = req_body.merge("search" => JSON.parse(req_body["search"]))

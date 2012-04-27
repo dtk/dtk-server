@@ -111,7 +111,7 @@ module XYZ
       end
     end
 
-    def rest__create_rerun_state_changes()
+    def rest__create_converge_state_changes()
       node_id = ret_request_params(:node_id)
       if node_id
         node_idhs = [id_handle(node_id,:node)]
@@ -124,7 +124,7 @@ module XYZ
         }
         node_idhs = Model.get_objs(model_handle(:node),sp_hash).map{|r|r.id_handle}
       end
-      StateChange.create_rerun_state_changes(node_idhs)
+      StateChange.create_converge_state_changes(node_idhs)
       rest_ok_response
     end
 

@@ -118,7 +118,7 @@ module XYZ
       #returns version context, (repo branch pairs)
       def self.get_relevant_impl_info(config_node)
         ret = Array.new
-        return ret unless (config_node[:state_change_types] & ["install_component","update_implementation","rerun_component","setting"]).size > 0
+        return ret unless (config_node[:state_change_types] & ["install_component","update_implementation","converge_component","setting"]).size > 0
         sample_idh = config_node[:component_actions].first[:component].id_handle
         impl_idhs = config_node[:component_actions].map{|x|x[:component][:implementation_id]}.uniq.map do |impl_id|
           sample_idh.createIDH(:model_name => :implementation, :id => impl_id)

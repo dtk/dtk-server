@@ -112,7 +112,7 @@ module XYZ
         "create_node" => TaskAction::CreateNode,
         "install_component" => TaskAction::ConfigNode,
         "update_implementation" => TaskAction::ConfigNode,
-        "rerun_component" => TaskAction::ConfigNode,
+        "converge_component" => TaskAction::ConfigNode,
         "setting" => TaskAction::ConfigNode
       }
       @mapping_sc_to_task_action[state_change]

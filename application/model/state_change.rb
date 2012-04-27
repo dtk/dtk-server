@@ -29,8 +29,7 @@ module XYZ
       end
     end
 
-    #TODO: may change rerun to converge
-    def self.create_rerun_state_changes(node_idhs)
+    def self.create_converge_state_changes(node_idhs)
       sample_idh = node_idhs.first()
       sp_hash = {
         :cols => [:id,:datacenter_datacenter_id,:components]
@@ -39,7 +38,7 @@ module XYZ
         {
           :new_item => r[:component].id_handle(), 
           :parent => sample_idh.createIDH(:model_name => :datacenter, :id=> r[:datacenter_datacenter_id]),
-          :type => "rerun_component"
+          :type => "converge_component"
         }
       end
       create_pending_change_items(new_item_hashes)

@@ -233,7 +233,7 @@ module XYZ
       task_action.add_internal_guards!(guards)
     end
 
-    def self.create_from_nodes_to_rerun(node_idhs)
+    def self.create_from_nodes_to_converge(node_idhs)
       config_nodes_task = config_nodes_task(grouped_state_changes[TaskAction::ConfigNode])
       if create_nodes_task and config_nodes_task
         ret = create_new_task(:temporal_order => "sequential")
@@ -581,7 +581,7 @@ module XYZ
       elsif sc.include?("install_component") then Task.render_tasks_component_op("install_component",executable_action,common_vals)
       elsif sc.include?("setting") then Task.render_tasks_setting(executable_action,common_vals)
       elsif sc.include?("update_implementation") then Task.render_tasks_component_op("update_implementation",executable_action,common_vals)
-      elsif sc.include?("rerun_component") then Task.render_tasks_component_op("rerun_component",executable_action,common_vals)
+      elsif sc.include?("converge_component") then Task.render_tasks_component_op("converge_component",executable_action,common_vals)
       else 
         Log.error("do not treat executable tasks of type(s) #{sc.join(',')}")
         nil

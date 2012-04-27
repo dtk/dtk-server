@@ -1,8 +1,10 @@
 #TODO: may get rid of nested state change structure because of problem such as a "parent is completed, but children arent and effeiciency; alternatively have state chanegs associated with a "container
 r8_nested_require('state_change','get_pending_changes')
+r8_nested_require('state_change','ret_pending_changes')
 module XYZ
   class StateChange < Model
     extend GetPendingChangesClassMixin
+    extend RetPendingChangesClassMixin
 
     def self.list_pending_changes(target_idh)
       #TODO: may pass in options so dont get all fields that are returned in flat_list_pending_changes
@@ -42,21 +44,6 @@ module XYZ
         }
       end
       create_pending_change_items(new_item_hashes)
-    end
-
-
-    def self.ret_assembly_component_state_changes(assembly_idh,target_idh)
-      sp_hash = {
-        :cols => [:id,:display_name,:group_id]
-      }
-      new_item_hashes = get_objs(assembly_idh.createMH(:component),sp_hash).map do |r|
-        {
-          :new_item => r.id_handle(), 
-          :parent => target_idh,
-          :type => "converge_component" 
-        }
-      end
-      create_pending_change_items(new_item_hashes,:donot_persist=>true)
     end
 
 
@@ -128,11 +115,7 @@ module XYZ
         hash.merge!(:change_paths => item[:change_paths]) if item[:change_paths]
         hash
       end
-      if opts[:donot_persist]
-        rows.map{|r|create_stub(model_handle,r)}
-      else
-        create_from_rows(model_handle,rows,{:convert => true})
-      end
+      create_from_rows(model_handle,rows,{:convert => true})
     end
 
     def self.ret_display_name(flat_pending_ch)

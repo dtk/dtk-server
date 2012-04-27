@@ -109,6 +109,16 @@ module XYZ
          }]
 
       ###### end of virtual columns related to attributes, ports, and link_defs
+    virtual_column :node_for_state_change_info, :type => :json, :hidden => true,
+      :remote_dependencies =>
+      [
+       {
+         :model_name => :node,
+         :convert=>true,
+         :join_type => :inner,
+         :join_cond=>{:id => :component__node_node_id},
+         :cols => [:id,:display_name, :external_ref]
+       }]
 
       virtual_column :implementation_file_paths, :type => :json, :hidden => true,
       :remote_dependencies =>

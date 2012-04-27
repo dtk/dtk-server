@@ -3,6 +3,16 @@ module R8::Client
     def self.pretty_print_cols()
       [:display_name, :type,:id, :description, :external_ref]
     end
+
+#TODO: for testing
+    desc "create-task ASSEMBLY-ID", "Create task to execute assembly instance"
+    def create_task(assembly_id)
+      post_body = {
+        :assembly_id => assembly_id
+      }
+      post rest_url("assembly/create_task"), post_body
+    end
+
     desc "list [library|target]","List asssemblies in library or target"
     def list(parent)
       case parent

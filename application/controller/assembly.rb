@@ -3,14 +3,25 @@ module XYZ
     def rest__list_from_library()
       rest_ok_response Assembly.list_from_library(model_handle())
     end
-    def rest__list_from_target()
-      rest_ok_response Assembly.list_from_target(model_handle())
-    end
 
     def rest__delete_from_library()
       assembly_id = ret_non_null_request_params(:assembly_id)
       Assembly.delete_from_library(id_handle(assembly_id))
       rest_ok_response 
+    end
+
+    def rest__list_from_target()
+      rest_ok_response Assembly.list_from_target(model_handle())
+    end
+
+    #creates task to execute/converge assembly
+    def rest__create_task()
+      #assembly_id should be a target assembly instance
+      #TODO: put in additional options to inidcate whether to excute just smoke tests for example
+      assembly_id = ret_non_null_request_params(:assembly_id)
+      task = Task.create_from_assembly_instance(id_handle(assembly_id))
+      task.save!()
+      rest_ok_response :task_id => task.id
     end
 
     def rest__set_attributes()

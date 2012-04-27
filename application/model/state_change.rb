@@ -29,6 +29,7 @@ module XYZ
       end
     end
 
+    #TODO: may change rerun to converge
     def self.create_rerun_state_changes(node_idhs)
       sample_idh = node_idhs.first()
       sp_hash = {
@@ -43,6 +44,22 @@ module XYZ
       end
       create_pending_change_items(new_item_hashes)
     end
+
+
+    def self.ret_assembly_component_state_changes(assembly_idh,target_idh)
+      sp_hash = {
+        :cols => [:id,:display_name,:group_id]
+      }
+      new_item_hashes = get_objs(assembly_idh.createMH(:component),sp_hash).map do |r|
+        {
+          :new_item => r.id_handle(), 
+          :parent => target_idh,
+          :type => "converge_component" 
+        }
+      end
+      create_pending_change_items(new_item_hashes,:donot_persist=>true)
+    end
+
 
     #object processing and access functions
     #######################
@@ -63,11 +80,11 @@ module XYZ
       true
     end
 
-    def self.create_pending_change_item(new_item_hash)
-      create_pending_change_items([new_item_hash]).first
+    def self.create_pending_change_item(new_item_hash,opts={})
+      create_pending_change_items([new_item_hash],opts).first
     end
     #assumption is that all parents are of same type and all changed items of same type
-    def self.create_pending_change_items(new_item_hashes)
+    def self.create_pending_change_items(new_item_hashes,opts={})
       ret = Array.new
       return ret if new_item_hashes.empty? 
       parent_model_name = new_item_hashes.first[:parent][:model_name]
@@ -112,7 +129,11 @@ module XYZ
         hash.merge!(:change_paths => item[:change_paths]) if item[:change_paths]
         hash
       end
-      create_from_rows(model_handle,rows,{:convert => true})
+      if opts[:donot_persist]
+        rows.map{|r|create_stub(model_handle,r)}
+      else
+        create_from_rows(model_handle,rows,{:convert => true})
+      end
     end
 
     def self.ret_display_name(flat_pending_ch)

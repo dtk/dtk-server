@@ -25,6 +25,28 @@ module XYZ
       end
     end
 
+    def create_from_assembly_instance(assembly_idh)
+      target_idh = assembly_idh.get_parent_id_handle_with_auth_info()
+      task_mh = target_idh.create_childMH(:task)
+      config_nodes_changes = StateChange.ret_assembly_component_state_changes(assembly_idh,target_idh)
+      config_nodes_task = config_nodes_task(task_mh,config_nodes_changes)
+ create_new_task(task_mh,:temporal_order => "sequential")
+=begin
+      create_nodes_task = create_nodes_task(task_mh,grouped_state_changes[TaskAction::CreateNode])
+      config_nodes_task = config_nodes_task(task_mh,grouped_state_changes[TaskAction::ConfigNode])
+      if create_nodes_task and config_nodes_task
+        ret = create_new_task(task_mh,:temporal_order => "sequential")
+        ret.add_subtask(create_nodes_task)
+        ret.add_subtask(config_nodes_task)
+        ret
+      else
+        ret = create_new_task(task_mh,:temporal_order => "sequential")
+        ret.add_subtask(create_nodes_task||config_nodes_task) #only one wil be non null
+        ret
+      end
+=end
+    end
+
    private
     def create_nodes_task(task_mh,state_change_list)
       return nil unless state_change_list and not state_change_list.empty?

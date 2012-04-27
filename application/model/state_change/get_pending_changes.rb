@@ -119,6 +119,7 @@ module XYZ
     end
 
    private
+    #linked ids is link to relevant stage_change objects
     def augment_with_linked_id(state_change,id)
       if linked = state_change[:linked_ids]
         linked.include?(id) ? state_change : state_change.merge(:linked_ids => linked + [id])

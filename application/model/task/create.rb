@@ -25,6 +25,7 @@ module XYZ
       end
     end
 
+   private
     def create_nodes_task(task_mh,state_change_list)
       return nil unless state_change_list and not state_change_list.empty?
       #each element will be list with single element

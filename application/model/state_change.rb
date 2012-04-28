@@ -1,10 +1,8 @@
 #TODO: may get rid of nested state change structure because of problem such as a "parent is completed, but children arent and effeiciency; alternatively have state chanegs associated with a "container
 r8_nested_require('state_change','get_pending_changes')
-r8_nested_require('state_change','ret_pending_changes')
 module XYZ
   class StateChange < Model
     extend GetPendingChangesClassMixin
-    extend RetPendingChangesClassMixin
 
     def self.list_pending_changes(target_idh)
       #TODO: may pass in options so dont get all fields that are returned in flat_list_pending_changes

@@ -38,7 +38,7 @@ module XYZ
         changes += last_level
         last_level = pending_create_node(state_change_mh,last_level.map{|obj|obj.id_handle()},:added_filters => added_state_change_filters)
       end
-      [changes]
+      changes.empty? ? changes : [changes]
     end
 
     def get_ndx_node_config_changes(target_idh)

@@ -17,9 +17,17 @@ module XYZ
     #creates task to execute/converge assembly
     def rest__create_task()
       #assembly_id should be a target assembly instance
-      #TODO: put in additional options to inidcate whether to excute just smoke tests for example
       assembly_id = ret_non_null_request_params(:assembly_id)
       task = Task.create_from_assembly_instance(id_handle(assembly_id))
+      task.save!()
+      rest_ok_response :task_id => task.id
+    end
+
+    #TODO: replace or given options to specify specific smoktests to run
+    def rest__create_smoketests_task()
+      #assembly_id should be a target assembly instance
+      assembly_id = ret_non_null_request_params(:assembly_id)
+      task = Task.create_from_assembly_instance(id_handle(assembly_id),:smoketest)
       task.save!()
       rest_ok_response :task_id => task.id
     end

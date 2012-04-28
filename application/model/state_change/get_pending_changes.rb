@@ -5,9 +5,9 @@ module XYZ
     def assembly_component_state_changes(assembly_idh,component_type=nil)
       filter = [:and, [:eq, :assembly_id, assembly_idh.get_id()]]
       if (component_type == :smoketest)
-        filter += [:eq, :basic_type, "smoketest"]
+        filter << [:eq, :basic_type, "smoketest"]
       else
-        filter += [:neq, :basic_type, "smoketest"]
+        filter << [:neq, :basic_type, "smoketest"]
       end
       sp_hash = {
         :cols => [:id,:node_for_state_change_info,:display_name,:basic_type,:external_ref,:node_node_id,:only_one_per_node,:extended_base_id,:implementation_id,:group_id],

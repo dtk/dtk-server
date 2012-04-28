@@ -499,7 +499,7 @@ module XYZ
       def self.create_from_state_change(scs_same_cmp,deps)
         state_change = scs_same_cmp.first
         #TODO: may deprecate need for ||[sc[:id]
-        pointer_ids = scs_same_cmp.map{|sc|sc[:linked_ids]||[sc[:id]]}.flatten
+        pointer_ids = scs_same_cmp.map{|sc|sc[:linked_ids]||[sc[:id]]}.flatten.compact
         hash = {
           :state_change_pointer_ids => pointer_ids, #this field used to update teh coorepdonsing state change after thsi action is run
           :attributes => Array.new,

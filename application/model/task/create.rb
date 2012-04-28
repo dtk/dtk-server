@@ -32,7 +32,7 @@ module XYZ
       create_nodes_changes = StateChange.assembly_node_state_changes(assembly_idh,target_idh)
       create_nodes_task = create_nodes_task(task_mh,create_nodes_changes)
 
-      config_nodes_changes = StateChange.assembly_node_state_changes(assembly_idh,target_idh)
+      config_nodes_changes = StateChange.assembly_component_state_changes(assembly_idh)
       config_nodes_task = config_nodes_task(task_mh,config_nodes_changes)
 
       if create_nodes_task and config_nodes_task

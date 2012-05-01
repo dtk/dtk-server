@@ -57,7 +57,7 @@ R8::Config[:repo][:base_directory_test] = "/root/r8server-repo-test"
 ########end test
 
 #R8::Config[:repo][:git][:gitolite][:hostname] = "127.0.0.1"
-R8::Config[:repo][:git][:gitolite][:admin_directory] = "/root/r8_gitolite_admin"
+R8::Config[:repo][:git][:gitolite].set?(:admin_directory,"/root/r8_gitolite_admin")
 
 
 #Command and control related parameters

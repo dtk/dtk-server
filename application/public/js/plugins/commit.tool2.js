@@ -110,9 +110,9 @@ taskDef.children[0].children[0].children = [];
 					    taskClass = 'update-implementation';
 					    editContent = '<input type="checkbox" id="'+taskId+'" name="'+taskId+'" value="true"/>';
 					    break;
-					case "rerun_component":
-					    taskI18n = '<b>Rerun ('+taskDef.component_i18n+')</b>';
-					    taskClass = 'rerun-component';
+					case "converge_component":
+					    taskI18n = '<b>Converge ('+taskDef.component_i18n+')</b>';
+					    taskClass = 'converge-component';
 					    editContent = '<input type="checkbox" id="'+taskId+'" name="'+taskId+'" value="true"/>';
 					    break;
 					case "install_component":

@@ -62,16 +62,22 @@ module XYZ
       end
 
       def get_and_propagate_dynamic_attributes(result,opts={})
-        dyn_attr_val_info = get_dynamic_attributes(result)
-        if non_null_attrs = opts[:non_null_attributes]
-          dyn_attr_val_info = retry_get_dynamic_attributes(dyn_attr_val_info,non_null_attrs) do
-            get_dynamic_attributes(result)
-          end
-        end
+        dyn_attr_val_info = get_dynamic_attributes_with_retry(result,opts)
         return if dyn_attr_val_info.empty?
         attr_mh = self[:node].model_handle_with_auth_info(:attribute)
         Attribute.update_and_propagate_dynamic_attributes(attr_mh,dyn_attr_val_info)
       end
+
+      def get_dynamic_attributes_with_retry(result,opts={})
+        ret = get_dynamic_attributes(result)
+        if non_null_attrs = opts[:non_null_attributes]
+          ret = retry_get_dynamic_attributes(ret,non_null_attrs) do
+            get_dynamic_attributes(result)
+          end
+        end
+        ret
+      end
+      private :get_dynamic_attributes_with_retry
 
       def retry_get_dynamic_attributes(dyn_attr_val_info,non_null_attrs,count=1,&block)
         if values_non_null?(dyn_attr_val_info,non_null_attrs)
@@ -166,13 +172,30 @@ module XYZ
         node = self[:node]
         attrs_to_set = attributes_to_set()
         attr_names = attrs_to_set.map{|a|a[:display_name].to_sym}
-        av_pairs = CommandAndControl.get_and_update_node_state!(node,attr_names)
+        av_pairs__node_components = get_dynamic_attributes__node_components!(attr_names)
+        rest_av_pairs = (attr_names.empty? ? {} : CommandAndControl.get_and_update_node_state!(node,attr_names))
+        av_pairs = av_pairs__node_components.merge(rest_av_pairs)
         return ret if av_pairs.empty?
         attrs_to_set.each do |attr|
           attr_name = attr[:display_name].to_sym
           #TODO: can test and case here whether value changes such as wehetehr new ip address
           attr[:attribute_value] = av_pairs[attr_name] if av_pairs.has_key?(attr_name)
           ret << attr
+        end
+        ret
+      end
+
+      ###special processing for node_components
+      def get_dynamic_attributes__node_components!(attr_names)
+        ret = Hash.new
+        return ret unless attr_names.delete(:node_components)
+        #TODO: hack
+        ipv4_val = CommandAndControl.get_and_update_node_state!(self[:node],[:host_addresses_ipv4])
+        return ret if ipv4_val.empty?
+        cmps = self[:node].get_objs(:cols => [:components]).map{|r|r[:component][:display_name].gsub("__","::")}
+        ret = {:node_components => {ipv4_val.values.first[0] => cmps}}
+        if attr_names.delete(:host_addresses_ipv4)
+          ret.merge!(ipv4_val)
         end
         ret
       end
@@ -476,9 +499,9 @@ module XYZ
       def self.create_from_state_change(scs_same_cmp,deps)
         state_change = scs_same_cmp.first
         #TODO: may deprecate need for ||[sc[:id]
-        pointer_ids = scs_same_cmp.map{|sc|sc[:linked_ids]||[sc[:id]]}.flatten
+        pointer_ids = scs_same_cmp.map{|sc|sc[:linked_ids]||[sc[:id]]}.flatten.compact
         hash = {
-          :state_change_pointer_ids => pointer_ids,
+          :state_change_pointer_ids => pointer_ids, #this field used to update teh coorepdonsing state change after thsi action is run
           :attributes => Array.new,
           :component => state_change[:component],
           :on_node_config_agent_type => state_change.on_node_config_agent_type(),

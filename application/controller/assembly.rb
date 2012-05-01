@@ -10,6 +10,34 @@ module XYZ
       rest_ok_response 
     end
 
+    def rest__list_from_target()
+      rest_ok_response Assembly.list_from_target(model_handle())
+    end
+
+    #creates task to execute/converge assembly
+    def rest__create_task()
+      #assembly_id should be a target assembly instance
+      assembly_id = ret_non_null_request_params(:assembly_id)
+      task = Task.create_from_assembly_instance(id_handle(assembly_id))
+      task.save!()
+      rest_ok_response :task_id => task.id
+    end
+
+    #TODO: replace or given options to specify specific smoktests to run
+    def rest__create_smoketests_task()
+      #assembly_id should be a target assembly instance
+      assembly_id = ret_non_null_request_params(:assembly_id)
+      task = Task.create_from_assembly_instance(id_handle(assembly_id),:smoketest)
+      task.save!()
+      rest_ok_response :task_id => task.id
+    end
+
+    def rest__set_attributes()
+      assembly_id,pattern,value = ret_non_null_request_params(:assembly_id,:pattern,:value)
+      assembly = id_handle(assembly_id,:component).create_object()
+      assembly.set_attributes(pattern,value)
+      rest_ok_response
+    end
     def test_get_items(id)
       assembly = id_handle(id,:component).create_object()
       item_list = assembly.get_items()
@@ -63,15 +91,16 @@ module XYZ
     end
 
     #TODO: unify with clone(id)
+    #clone assembly from library to target
     def rest__clone()
       target_idh = target_idh_with_default(request.params["target_id"])
-      assembly_id = ret_non_null_request_params(:assembly_id)
+      assembly_id = ret_non_null_request_params(:assembly_id).to_i
       id_handle = id_handle(assembly_id)
 
       #TODO: need to copy in avatar when hash["ui"] is non null
       override_attrs = Hash.new
       target_object = target_idh.create_object()
-      clone_opts = {:ret_new_obj_with_cols => [:id]}
+      clone_opts = {:ret_new_obj_with_cols => [:id,:type]}
       new_assembly_obj = target_object.clone_into(id_handle.create_object(),override_attrs,clone_opts)
       id = new_assembly_obj && new_assembly_obj.id()
 
@@ -84,6 +113,7 @@ module XYZ
       rest_ok_response(:id => id)
     end
 
+    #clone assembly from library to target
     def clone(id)
       handle_errors do
         id_handle = id_handle(id)
@@ -100,7 +130,7 @@ module XYZ
         #TODO: need to copy in avatar when hash["ui"] is non null
         override_attrs = hash["ui"] ? {:ui=>hash["ui"]} : {}
         target_object = target_id_handle.create_object()
-        clone_opts = {:ret_new_obj_with_cols => [:id]}
+        clone_opts = {:ret_new_obj_with_cols => [:id,:type]}
         new_assembly_obj = target_object.clone_into(id_handle.create_object(),override_attrs,clone_opts)
         id = new_assembly_obj && new_assembly_obj.id()
         nested_objs = new_assembly_obj.get_node_assembly_nested_objects()

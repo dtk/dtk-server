@@ -13,6 +13,7 @@ module XYZ
       column :i18n_labels, :json, :ret_keys_as_symbols => false
       
       #columns related to version
+      #TODO: think we want to deprecate these; versioning is at module level
       column :version, :varchar, :size => 25, :default => "0.0.1" # version of underlying component (not chef recipe .... version)
       column :updated, :boolean, :default => false
 
@@ -57,7 +58,7 @@ module XYZ
       virtual_column :most_specific_type, :type => :varchar, :local_dependencies => [:specific_type,:basic_type]
 
       many_to_one :component, :library, :node, :datacenter, :project
-      one_to_many :component, :attribute_link, :attribute, :port_link, :monitoring_item, :dependency, :layout, :file_asset, :link_def
+      one_to_many :component, :attribute_link, :attribute, :port_link, :monitoring_item, :dependency, :component_order, :layout, :file_asset, :link_def
       one_to_many_clone_omit :layout
 
       virtual_column :project_id, :type => ID_TYPES[:id], :local_dependencies => [:project_project_id]
@@ -108,25 +109,16 @@ module XYZ
          }]
 
       ###### end of virtual columns related to attributes, ports, and link_defs
-      virtual_column :node_assembly_nested_nodes_and_cmps, :type => :json, :hidden => true,
-       :remote_dependencies =>
-        [
-         {
-           :model_name => :node,
-           :convert => true,
-           :join_type => :inner,
-           :join_cond=>{:assembly_id => q(:component,:id)},
-           :cols => Node.common_columns
-         },
-         {
-           :model_name => :component,
-           :convert => true,
-           :alias => :nested_component,
-           :join_type => :inner,
-           :join_cond=>{:node_node_id => q(:node,:id)},
-           :cols => Component.common_columns
-         }]
-
+    virtual_column :node_for_state_change_info, :type => :json, :hidden => true,
+      :remote_dependencies =>
+      [
+       {
+         :model_name => :node,
+         :convert=>true,
+         :join_type => :inner,
+         :join_cond=>{:id => :component__node_node_id},
+         :cols => [:id,:display_name, :external_ref]
+       }]
 
       virtual_column :implementation_file_paths, :type => :json, :hidden => true,
       :remote_dependencies =>
@@ -155,6 +147,18 @@ module XYZ
            :join_type => :left_outer,
            :join_cond=>{:component_component_id => q(:component,:id)}, 
            :cols => [:id,:search_pattern,:type,:description,:severity]
+         }
+        ]
+
+        virtual_column :component_order_objs, :type => :json, :hidden => true, 
+        :remote_dependencies => 
+        [
+         {
+           :model_name => :component_order,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond=>{:component_component_id => q(:component,:id)}, 
+           :cols => [:id,:after,:conditional,:component_component_id]
          }
         ]
 

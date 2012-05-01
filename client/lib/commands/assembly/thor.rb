@@ -3,17 +3,40 @@ module R8::Client
     def self.pretty_print_cols()
       [:display_name, :type,:id, :description, :external_ref]
     end
-    desc "list","List asssemblies in library"
-    def list()
-      post rest_url("assembly/list_from_library")
+
+#TODO: for testing; may compine with execute
+    desc "create-task ASSEMBLY-ID", "Create task to execute assembly instance"
+    def create_task(assembly_id)
+      post_body = {
+        :assembly_id => assembly_id
+      }
+      post rest_url("assembly/create_task"), post_body
     end
 
-    desc "clone ASSEMBLY-ID", "Clone assembly from library to target"
+    desc "create-smoketests-task ASSEMBLY-ID", "Create task to execute assembly instance"
+    def create_smoketests_task(assembly_id)
+      post_body = {
+        :assembly_id => assembly_id
+      }
+      post rest_url("assembly/create_smoketests_task"), post_body
+    end
+
+    desc "list [library|target]","List asssemblies in library or target"
+    def list(parent)
+      case parent
+        when "library":
+          post rest_url("assembly/list_from_library")
+        when "target":
+          post rest_url("assembly/list_from_target")
+      end
+    end
+
+    desc "stage ASSEMBLY-ID", "Stage library assembly in target"
     method_option "in-target",:aliases => "-t" ,
       :type => :numeric, 
       :banner => "TARGET-ID",
       :desc => "Target (id) to create assembly in" 
-    def clone(assembly_id)
+    def stage(assembly_id)
       post_body = {
         :assembly_id => assembly_id
       }
@@ -29,6 +52,16 @@ module R8::Client
         :assembly_id => assembly_id
       }
       post rest_url("assembly/delete_from_library"), post_body
+    end
+
+    desc "set ASSEMBLY-ID ATTRIBUTE-PATTERN VALUE", "set target assembly attributes"
+    def set(assembly_id,pattern,value)
+      post_body = {
+        :assembly_id => assembly_id,
+        :pattern => pattern,
+        :value => value
+      }
+      post rest_url("assembly/set_attributes"), post_body
     end
 
 

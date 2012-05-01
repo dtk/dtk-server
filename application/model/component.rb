@@ -489,13 +489,17 @@ module XYZ
       #assumption that this is called with components having keys :id,:dependencies, :extended_base, :component_type 
       def find_component_dependencies(components)
         ret = Hash.new
+        cmp_idhs = Array.new
         components.each do |cmp|
-          pntr = ret[cmp[:id]] ||= {:component_type => cmp[:component_type], :component_dependencies => Array.new}
+          unless pntr = ret[cmp[:id]]
+            pntr = ret[cmp[:id]] = {:component_type => cmp[:component_type], :component_dependencies => Array.new}
+            cmp_idhs << cmp.id_handle()
+          end
           if cmp[:extended_base]
             pntr[:component_dependencies] << cmp[:extended_base]
           elsif deps = cmp[:dependencies]
             #process dependencies
-            #TODO: hack until we haev macros which will stamp the dependency to make this easier to detect
+            #TODO: hack until we have macros which will stamp the dependency to make this easier to detect
             #looking for signature where dependency has
             #:search_pattern=>{:filter=>[:and, [:eq, :component_type, <component_type>]
             filter = (deps[:search_pattern]||{})[":filter".to_sym]
@@ -506,7 +510,7 @@ module XYZ
             end
           end
         end
-        ret
+        ComponentOrder.update_with_applicable_dependencies!(ret,cmp_idhs)
       end
     end
 

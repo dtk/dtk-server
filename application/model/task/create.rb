@@ -25,6 +25,34 @@ module XYZ
       end
     end
 
+    def create_from_assembly_instance(assembly_idh,component_type=nil)
+      target_idh = assembly_idh.get_parent_id_handle_with_auth_info()
+      task_mh = target_idh.create_childMH(:task)
+
+      #smokettest should not create a node
+      if component_type == :smoketest
+        create_nodes_task = nil
+      else
+        create_nodes_changes = StateChange.assembly_node_state_changes(assembly_idh,target_idh)
+        create_nodes_task = create_nodes_task(task_mh,create_nodes_changes)
+      end
+
+      config_nodes_changes = StateChange.assembly_component_state_changes(assembly_idh,component_type)
+      config_nodes_task = config_nodes_task(task_mh,config_nodes_changes)
+
+      if create_nodes_task and config_nodes_task
+        ret = create_new_task(task_mh,:temporal_order => "sequential")
+        ret.add_subtask(create_nodes_task)
+        ret.add_subtask(config_nodes_task)
+        ret
+      else
+        ret = create_new_task(task_mh,:temporal_order => "sequential")
+        ret.add_subtask(create_nodes_task||config_nodes_task) #only one wil be non null
+        ret
+      end
+    end
+
+   private
     def create_nodes_task(task_mh,state_change_list)
       return nil unless state_change_list and not state_change_list.empty?
       #each element will be list with single element
@@ -89,7 +117,7 @@ module XYZ
         "create_node" => TaskAction::CreateNode,
         "install_component" => TaskAction::ConfigNode,
         "update_implementation" => TaskAction::ConfigNode,
-        "rerun_component" => TaskAction::ConfigNode,
+        "converge_component" => TaskAction::ConfigNode,
         "setting" => TaskAction::ConfigNode
       }
       @mapping_sc_to_task_action[state_change]

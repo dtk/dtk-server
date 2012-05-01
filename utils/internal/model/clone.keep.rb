@@ -26,7 +26,7 @@ module XYZ
 
       clone_source_object.add_model_specific_override_attrs!(override_attrs,self)
       proc = CloneCopyProcessor.new(clone_source_object,opts.merge(:include_children => true))
-      clone_copy_output = proc.clone_copy_top_level(clone_source_object.id_handle,[target_id_handle],override_attrs)
+      clone_copy_output = proc.clone_copy(clone_source_object.id_handle,[target_id_handle],override_attrs)
       new_id_handle = clone_copy_output.id_handles.first
       return nil unless new_id_handle
       #calling with respect to target
@@ -42,20 +42,28 @@ module XYZ
       end
     end
 
-    def clone_into_library_assembly(assembly_idh,id_handles)
+    #this gets optionally overwritten
+    def source_clone_info_opts()
+      {:ret_new_obj_with_cols => [:id]}
+    end
+
+    #TODO: if just used for cloning into assemblies in libraries may rename
+    def clone_into__top_object_exists(top_object_id_handle,id_handles)
+      #TODO: may add override attributes and opts
       opts = {:include_children => true}
-      proc = CloneCopyProcessor.new(assembly_idh.create_object(),opts)
-      proc.add_id_handle(assembly_idh)
+      proc = CloneCopyProcessor.new(top_object_id_handle.create_object(),opts)
+      proc.add_id_handle(top_object_id_handle)
 
       #group id handles by model type
       ndx_id_handle_groups = Hash.new
       id_handles.each do |idh|
         model_name = idh[:model_name]
-        (ndx_id_handle_groups[model_name] ||= Array.new) << idh
+        ndx_id_handle_groups[model_name] ||= Array.new
+        ndx_id_handle_groups[model_name] << idh
       end
 
-      assembly_id_assign = {:assembly_id => assembly_idh.get_id()}
-      overrides = assembly_id_assign.merge(:component => assembly_id_assign)
+      #TODO: assembly_id should not be hard  coded
+      overrides = {:assembly_id => top_object_id_handle.get_id()}
       ndx_id_handle_groups.each_value do |child_id_handles|
         child_context = proc.ret_child_context(child_id_handles,id_handle(),overrides)
         proc.clone_copy_child_objects(child_context)
@@ -66,16 +74,11 @@ module XYZ
       clone_copy_output = proc.output
       clone_post_copy_hook(clone_copy_output)
 
-      assembly_idh.get_id()
+      top_object_id_handle.get_id()
     end
 
     def get_constraints()
       get_constraints!()
-    end
-
-    #this gets optionally overwritten
-    def source_clone_info_opts()
-      {:ret_new_obj_with_cols => [:id]}
     end
 
    protected
@@ -128,11 +131,6 @@ module XYZ
         children_hash_form(level,model_name).map{|child_hash|child_hash[:id_handle]}
       end
 
-      def is_assembly?()
-        #TODO: cleanup; this assumes that assembly call wil creat an object
-        objects and objects.first and objects.first.is_assembly?
-      end
-
       def set_new_objects!(objs_info,target_mh)
         @id_handles = Model.ret_id_handles_from_create_returning_ids(target_mh,objs_info)
         if @ret_new_obj_with_cols
@@ -182,7 +180,7 @@ module XYZ
 
       #copy part of clone
       #targets is a list of id_handles, each with same model_name 
-      def clone_copy_top_level(source_id_handle,targets,recursive_override_attrs={})
+      def clone_copy(source_id_handle,targets,recursive_override_attrs={})
         return @ret if targets.empty?
 
         source_model_name = source_id_handle[:model_name]
@@ -221,7 +219,8 @@ module XYZ
         fk_info.add_id_handles(new_id_handles) #TODO: may be more efficient adding only id handles assciated with foreign keys
 
         #iterate over all nested objects which includes children object plus, for example, components for composite components
-        get_nested_objects_top_level(source_model_handle,target_parent_mh,new_objs_info,recursive_override_attrs).each do |child_context|
+#***TODO: double check this change        get_nested_objects__all(source_model_handle,target_parent_mh,new_objs_info,recursive_override_attrs).each do |child_context|
+        get_nested_objects__all(target_mh,target_parent_mh,new_objs_info,recursive_override_attrs).each do |child_context|
           clone_copy_child_objects(child_context)
         end
         fk_info.shift_foregn_keys()
@@ -299,59 +298,54 @@ module XYZ
       end
      private
       attr_reader :db,:fk_info, :model_name
-      def get_nested_objects__parents(model_handle,objs_info,recursive_override_attrs,omit_list=[])
-        ret = Array.new
-        model_handle.get_children_model_handles(:clone_context => true).each do |mh|
-          next if omit_list.include?(mh[:model_name])
+      def get_nested_objects__parents(model_handle,objs_info,recursive_override_attrs)
+        model_handle.get_children_model_handles(:clone_context => true).map do |mh|
           override_attrs = ret_child_override_attrs(mh,recursive_override_attrs)
           parent_id_col = mh.parent_id_field_name()
           parent_rels = objs_info.map{|row|{parent_id_col => row[:id],:old_par_id => row[:ancestor_id]}}
           create_opts = {:duplicate_refs => :no_check, :returning_sql_cols => [:ancestor_id,parent_id_col]}
-          ret << {:model_handle => mh, :clone_par_col => parent_id_col, :parent_rels => parent_rels, :override_attrs => override_attrs, :create_opts => create_opts}
+          {:model_handle => mh, :clone_par_col => parent_id_col, :parent_rels => parent_rels, :override_attrs => override_attrs, :create_opts => create_opts}
+        end
+      end
+
+      def get_nested_objects__all(model_handle,target_parent_mh,objs_info,recursive_override_attrs,opts={})
+        ret = get_nested_objects__parents(model_handle,objs_info,recursive_override_attrs)
+        target_parent_mn = target_parent_mh[:model_name]
+        model_name = model_handle[:model_name]
+        parent_id_col = DB.parent_field(target_parent_mn,model_name)
+        return ret unless nested_in_addition_to_parent?(model_handle,objs_info)
+        (InvertedNonParentNestedKeys[model_handle[:model_name]]||{}).each do |nested_model_name, clone_par_col|
+          nested_mh = model_handle.createMH(:model_name => nested_model_name, :parent_model_name => target_parent_mn)
+          override_attrs = ret_child_override_attrs(nested_mh,recursive_override_attrs)
+          create_opts = {:duplicate_refs => :allow, :returning_sql_cols => [:ancestor_id,clone_par_col]}
+          #putting in nulls to null-out; more efficient to omit this columns in create
+          common_settings = (DB_REL_DEF[nested_model_name][:many_to_one]||[]).inject({}) do |hash,pos_par|
+            hash.merge(pos_par == target_parent_mn ? {} : {DB.parent_field(pos_par,model_name) => SQL::ColRef.null_id})
+          end
+          parent_rels = objs_info.map do |row|
+            common_settings.merge(clone_par_col => row[:id],:old_par_id => row[:ancestor_id], parent_id_col => row[:parent_id])
+          end
+          ret << {:model_handle => nested_mh, :clone_par_col => clone_par_col, :parent_rels => parent_rels, :override_attrs => override_attrs, :create_opts => create_opts}
+        end
+        ret
+      end
+      NonParentNestedKeys = {
+        :component => {:assembly_id => :component},
+        :node => {:assembly_id => :component},
+        :attribute_link => {:assembly_id => :component},
+        :port_link => {:assembly_id => :component}
+      }
+
+      InvertedNonParentNestedKeys = NonParentNestedKeys.inject({}) do |ret,kv|
+        kv[1].each do |col,m|
+          ret[m] ||= Hash.new
+          ret[m][kv[0]] = col
         end
         ret
       end
 
-      def get_nested_objects_top_level(model_handle,target_parent_mh,objs_info,recursive_override_attrs,opts={})
-        if @ret.is_assembly?()
-          get_nested_objects__assembly(model_handle,target_parent_mh,objs_info,recursive_override_attrs,opts)
-        else
-          get_nested_objects__parents(model_handle,objs_info,recursive_override_attrs)
-        end
-      end
-
-      def get_nested_objects__assembly(model_handle,target_parent_mh,assembly_objs_info,recursive_override_attrs,opts)
-        raise Error.new("Not treating assembly_objs_info with more than 1 element") unless assembly_objs_info.size == 1
-        assembly_obj_info = assembly_objs_info.first
-        ancestor_id = assembly_obj_info[:ancestor_id]
-        target_parent_mn = target_parent_mh[:model_name]
-        model_name = model_handle[:model_name]
-        new_assembly_assign = {:assembly_id => assembly_obj_info[:id]}
-        new_par_assign = {DB.parent_field(target_parent_mn,model_name) => assembly_obj_info[:parent_id]}
-        AssemblyChildren.map do |nested_model_name|
-          nested_mh = model_handle.createMH(:model_name => nested_model_name, :parent_model_name => target_parent_mn)
-          override_attrs = new_assembly_assign.merge(ret_child_override_attrs(nested_mh,recursive_override_attrs))
-          #TODO: make daat-driven
-          if matching_models?(nested_model_name,:node)
-            unless (override_attrs[:component]||{})[:assembly_id]
-              override_attrs.merge!(:component => new_assembly_assign)
-            end
-          end
-          create_opts = {:duplicate_refs => :allow, :returning_sql_cols => [:ancestor_id,:assembly_id]}
-          #putting in nulls to null-out; more efficient to omit this columns in create
-          parent_rel = (DB_REL_DEF[nested_model_name][:many_to_one]||[]).inject({:old_par_id => ancestor_id}) do |hash,pos_par|
-            hash.merge(matching_models?(pos_par,target_parent_mn) ? new_par_assign : {DB.parent_field(pos_par,model_name) => SQL::ColRef.null_id})
-          end
-          {:model_handle => nested_mh, :clone_par_col => :assembly_id, :parent_rels => [parent_rel], :override_attrs => override_attrs, :create_opts => create_opts}
-        end
-      end
-      AssemblyChildren = [:node,:attribute_link,:port_link]
-      NonParentNestedKeys = AssemblyChildren.inject({}) do |h,m|
-        h.merge(m => {:assembly_id => :component})
-      end
-
-      def matching_models?(mn1,mn2)
-        (mn1 == :datacenter ? :target : mn1) == (mn2 == :datacenter ? :target : mn2)
+      def nested_in_addition_to_parent?(model_handle,objs_info)
+        model_handle[:model_name] == :component and (objs_info.first||{})[:type] == "composite"
       end
 
       def create_opts_for_top()

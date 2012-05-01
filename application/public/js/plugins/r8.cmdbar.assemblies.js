@@ -182,8 +182,8 @@ if (!R8.Cmdbar.assemblies) {
 
 				resultListNode.set('innerHTML','');
 				for(var i=renderStartIndex; i < renderEndIndex; i++) {
-					if(typeof(itemList[i]) == 'undefined') continue;
-					resultListNode.append(R8.Rtpl['assembly_library_search']({'assembly':itemList[i]}));
+					if(typeof(_renderList[i]) == 'undefined') continue;
+					resultListNode.append(R8.Rtpl['assembly_library_search']({'assembly':_renderList[i]}));
 				}
 				resultListNode.get('children').item((_selectedIndex - renderStartIndex)).addClass('selected');
 			},

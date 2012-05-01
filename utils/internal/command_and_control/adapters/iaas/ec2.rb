@@ -136,6 +136,9 @@ eos
         :host_addresses_ipv4 => {
           :raw_name => :dns_name,
           :fn => lambda{|raw|raw[:dns_name] && [raw[:dns_name]]} #null if no value
+        },
+        :fqdn => {
+          :raw_name => :private_dns_name
         }
       }
 

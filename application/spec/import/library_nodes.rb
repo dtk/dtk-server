@@ -86,6 +86,16 @@ module XYZ
              "hidden"=>false,
              "semantic_type"=>{":array"=>"host_address_ipv4"}
           },
+          "fqdn"=>
+            {"required"=>false,
+             "read_only"=>true,
+             "is_port"=>true,
+             "cannot_change"=>false,
+             "data_type"=>"string",
+             "display_name"=>"fqdn",
+             "dynamic"=>true,
+             "hidden"=>false,
+          },
           "node_components"=>
             {"required"=>false,
              "read_only"=>true,

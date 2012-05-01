@@ -306,6 +306,9 @@ YUI_config = {
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.view.chefdebugger.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/r8.ide.view.jitter.js"></script>
 
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/plugins/assembly.tool2.js"></script>
+<script type="text/javascript" src="{%=_app[:base_js_uri]%}/plugins/commit.tool3.js"></script>
+
 
 <script type="text/javascript">
 R8.config = {};

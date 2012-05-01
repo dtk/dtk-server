@@ -135,8 +135,11 @@ if (!R8.Cmdbar.nodes) {
 				}
 
 				_target.get('pluginContentNode').set('innerHTML','');
-				_nodeDDel.destroy();
-				delete(_nodeDDel);
+
+				if(typeof(_nodeDDel) != 'undefined') {
+					_nodeDDel.destroy();
+					delete(_nodeDDel);
+				}
 				_dropList = {};
 			},
 			runSearch: function() {

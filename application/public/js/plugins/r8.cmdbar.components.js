@@ -115,8 +115,12 @@ if (!R8.Cmdbar.components) {
 				}
 
 				_target.get('pluginContentNode').set('innerHTML','');
-				_compDDel.destroy();
-				delete(_compDDel);
+
+				if(typeof(_compDDel) != 'undefined') {
+					_compDDel.destroy();
+					delete(_compDDel);
+				}
+
 				_dropList = {};
 			},
 			runSearch: function() {

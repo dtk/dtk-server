@@ -138,7 +138,8 @@ eos
           :fn => lambda{|raw|raw[:dns_name] && [raw[:dns_name]]} #null if no value
         },
         :fqdn => {
-          :raw_name => :private_dns_name
+          :raw_name => :private_dns_name,
+          :fn => lambda{|raw|raw[:dns_name] && raw[:private_dns_name] && {raw[:dns_name] => raw[:private_dns_name]}}
         }
       }
 

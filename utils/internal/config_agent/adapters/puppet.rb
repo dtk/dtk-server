@@ -42,6 +42,7 @@ pp manifest
       def components_with_attributes(config_node,impl_info)
         cmp_actions = config_node[:component_actions]
         ndx_impl_info = impl_info.inject({}){|h,impl|h.merge(impl[:id] => impl)}
+        node_components = cmp_actions.map{|ca|(component_external_ref(ca[:component])||{})["name"]}.compact
         ndx_cmps = cmp_actions.inject({}) do |h,cmp_action|
           cmp = cmp_action[:component]
           h.merge(cmp[:id] => cmp)
@@ -53,7 +54,7 @@ pp manifest
           attrs_for_guards = cmp_actions.map{|cmp_action| cmp_action[:attributes]}.flatten(1)
         end
         cmp_actions.map do |cmp_action|
-          component_with_deps(cmp_action,ndx_cmps,ndx_impl_info).merge(ret_attributes(cmp_action,internal_guards,attrs_for_guards))
+          component_with_deps(cmp_action,ndx_cmps,ndx_impl_info).merge(ret_attributes(cmp_action,internal_guards,attrs_for_guards,node_components))
         end
       end
 
@@ -80,14 +81,14 @@ pp manifest
       end
 
       #returns both attributes to set on node and dynmic attributes that get set by the node
-      def ret_attributes(action,internal_guards,attrs_for_guards)
+      def ret_attributes(action,internal_guards,attrs_for_guards,node_components=nil)
         ndx_attributes = Hash.new
         dynamic_attrs = Array.new
         (action[:attributes]||[]).each do |attr|
           ext_ref = attr[:external_ref]||{}
           if var_name_path = ext_ref[:path]
             array_form_path = to_array_form(var_name_path)
-            val = ret_value(attr)
+            val = ret_value(attr,node_components)
 
             #second clause is to handle case where theer is a default just in puppet and header and since not overwritten acts as dynamic attr
             if attr[:dynamic] or (ext_ref[:default_variable] and val.nil?) 
@@ -126,7 +127,8 @@ pp manifest
         ret
       end
 
-      def ret_value(attr)
+      def ret_value(attr,node_components=nil)
+        return node_components if attr[:display_name] == "__node_components" and node_components #TODO: clean-up
         ret = attr[:attribute_value]
         case attr[:data_type]
          when "boolean" 
@@ -136,7 +138,6 @@ pp manifest
         end
         ret
       end
-
 
       def find_reference_to_guard(guard,attributes)
         ret = nil

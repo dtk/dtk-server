@@ -33,6 +33,15 @@ module XYZ
       attr_idhs
     end
 
+    def list_smoketests(assembly_idh)
+      sp_hash = {
+        :cols => [:id, :display_name,:nested_nodes_and_cmps_summary],
+        :filter => [:and, [:eq, :type, "composite"], lib_filter]
+      }
+      nodes_and_cmps = get_obj(sp_hash)
+      nodes_and_cmps.map{|r|r[:component]}.select{|cmp|cmp[:component_type] == :smoketest}
+    end
+
     class << self
       private
       def list_aux(assemblies)

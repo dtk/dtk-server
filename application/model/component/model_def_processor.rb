@@ -21,7 +21,7 @@ module XYZ
    extend R8Tpl::Utility::I18n
 
     def self.create_or_modify_field_def(component,field_def)
-      attr_mh = component.model_handle.createMH(:attribute)
+      attr_mh = component.model_handle.create_childMH(:attribute)
       attr_hash = Aux::hash_subset(field_def,CreateFields)
       unless attr_hash[:display_name]
         raise Error.new("display_name required in field_def")

@@ -12,9 +12,25 @@ module XYZ
     def update_field_def(field_def_update)
       ModelDefProcessorInternals.update_field_def(self,field_def_update)
     end
+   #TODO: cleanup uniform way of giving field def; for below just assuming hash display name
+    def create_or_modify_field_def(field_def)
+      ModelDefProcessorInternals.create_field_def(self,field_def)
+    end
 
   module ModelDefProcessorInternals
    extend R8Tpl::Utility::I18n
+
+    def self.create_or_modify_field_def(component,field_def)
+      attr_mh = component.model_handle.createMH(:attribute)
+      attr_hash = Aux::hash_subset(field_def,CreateFields)
+      unless attr_hash[:display_name]
+        raise Error.new("display_name required in field_def")
+      end
+      attr_hash[:ref] = attr_hash[:display_name]
+      attr_hash[:data_type] != "string"
+      Model.modify_children_from_rows(attr_mh,component.id_handle,[attr_hash],[:ref],:update_matching => true,:no_delete => true)
+    end
+    CreateFields = [{"display_name" => :display_name}, {"default" => :value_asserted}, {"data_type" => :data_type}]
 
     def self.update_field_def(component,field_def_update)
       #compute default 
@@ -30,9 +46,8 @@ module XYZ
       component.update_attribute_i18n_label(field_def["name"],label) if label
       field_def.merge(Aux::hash_subset(field_def_update,UpdateFields))
     end
-   private
     UpdateFields = %w{default description required, i18n}
-   public
+
     def self.convert_to_model_def_form(cmp_attrs_obj)
       component_i18n = cmp_attrs_obj.get_component_i18n_label()
       ret = Aux::ordered_hash_subset(cmp_attrs_obj,ComponentMappings){|v|v.kind_of?(String) ? v.to_sym : v}

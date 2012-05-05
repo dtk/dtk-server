@@ -223,7 +223,7 @@ module XYZ
 
 
     #adds or deletes children based on match_cols
-    def self.modify_children_from_rows(model_handle,parent_idh,rows,match_cols=[:ref])
+    def self.modify_children_from_rows(model_handle,parent_idh,rows,match_cols=[:ref],opts={})
       parent_id_col = DB.parent_field(parent_idh[:model_name],model_handle[:model_name])
       basic_cols = (has_group_id_col?(model_handle) ? [:id,:group_id] : [:id])
       sp_hash = {
@@ -237,24 +237,33 @@ module XYZ
 
       ret = Array.new
       pruned_rows = Array.new
+      updated_rows = Array.new
       rows.each do |r|
         if match = match_found(r,existing,match_cols)
           ret << model_handle.createIDH(:id => match[:id])
+          updated_rows << r if opts[:update_matching]
         else
           pruned_rows << r
         end
       end
+    
+      unless updated_rows.empty?
+        update_from_rows(model_handle,updated_rows)
+      end
+
       #add only ones not existing
       unless pruned_rows.empty?
         create_from_rows(model_handle,pruned_rows,:duplicate_refs => :no_check) 
       end
+      
       #delete ones that not in rows
-      delete_idhs = existing.reject{|r|match_found(r,rows,match_cols)}.map{|r|model_handle.createIDH(:id => r[:id])}
-      delete_instances(delete_idhs) unless delete_idhs.empty?
+      unless opts[:no_delete]
+        delete_idhs = existing.reject{|r|match_found(r,rows,match_cols)}.map{|r|model_handle.createIDH(:id => r[:id])}
+        delete_instances(delete_idhs) unless delete_idhs.empty?
+      end
       ret
     end
-
-    #TODO: can below be subsumbed by above
+    #TODO: think may subsume below by above
     #creates if does not exist using match_assigns; in eitehr case returns id_handle 
     def self.create_from_row?(model_handle,ref,match_assigns,other_assigns={},opts={})
       sp_hash = {

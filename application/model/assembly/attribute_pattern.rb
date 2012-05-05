@@ -18,6 +18,22 @@ module XYZ
       raise Error.new("Should be overwritten")
     end
     
+    class AssemblyLevel < AssemblyAttributePattern
+      def ret_attribute_idhs(assembly_idh)
+        ret = ret_matching_attribute_idhs([assembly_idh],pattern)
+        #if does not exist then create the attribute
+        if ret.empty?
+          af = ret_filter(pattern,:attribute)
+          #attribute must have simple form 
+          unless af.kind_of?(Array) and af.size == 3 and af[0..1] == [:eq,:display_name]
+            raise Error.new("cannot create new attribute from attribute pattern #{pattern}")
+          end
+          field_def = {"display_name" => af[2]}
+          assembly_idh.create_object().create_or_modify_field_def(field_def)
+        end
+      end
+    end
+
     class ComponentLevel < AssemblyAttributePattern
       def ret_attribute_idhs(assembly_idh)
         ret = Array.new

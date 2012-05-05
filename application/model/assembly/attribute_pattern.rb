@@ -29,8 +29,9 @@ module XYZ
             raise Error.new("cannot create new attribute from attribute pattern #{pattern}")
           end
           field_def = {"display_name" => af[2]}
-          assembly_idh.create_object().create_or_modify_field_def(field_def)
+          ret = assembly_idh.create_object().create_or_modify_field_def(field_def)
         end
+        ret
       end
     end
 
@@ -101,7 +102,7 @@ module XYZ
         filter = $1
         if filter == "*"
           nil
-        elsif filter =~ /^[a-z_-]+$/
+        elsif filter =~ /^[a-z0-9_-]+$/
           case type
            when :attribute
             [:eq,:display_name,filter]

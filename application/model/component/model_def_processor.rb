@@ -28,6 +28,7 @@ module XYZ
       end
       attr_hash[:ref] = attr_hash[:display_name]
       attr_hash[:data_type] != "string"
+      #TODO: may use a method rather than below that is more efficient; below returns alll children rather than filtered search
       Model.modify_children_from_rows(attr_mh,component.id_handle,[attr_hash],[:ref],:update_matching => true,:no_delete => true)
     end
     CreateFields = [{"display_name" => :display_name}, {"default" => :value_asserted}, {"data_type" => :data_type}]

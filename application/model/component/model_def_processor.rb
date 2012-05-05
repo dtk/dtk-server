@@ -14,7 +14,7 @@ module XYZ
     end
    #TODO: cleanup uniform way of giving field def; for below just assuming hash display name
     def create_or_modify_field_def(field_def)
-      ModelDefProcessorInternals.create_field_def(self,field_def)
+      ModelDefProcessorInternals.create_or_modify_field_def(self,field_def)
     end
 
   module ModelDefProcessorInternals

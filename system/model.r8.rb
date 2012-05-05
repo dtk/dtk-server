@@ -225,6 +225,7 @@ module XYZ
     #adds or deletes children based on match_cols
     def self.modify_children_from_rows(model_handle,parent_idh,rows,match_cols=[:ref],opts={})
       parent_id_col = DB.parent_field(parent_idh[:model_name],model_handle[:model_name])
+      parent_fields = {parent_id_col => parent_idh.get_id(), :group_id => parent_idh[:group_id]}
       basic_cols = (has_group_id_col?(model_handle) ? [:id,:group_id] : [:id])
       sp_hash = {
         :cols => basic_cols + (match_cols - basic_cols),
@@ -232,7 +233,8 @@ module XYZ
       }
       existing = get_objs(model_handle,sp_hash,:keep_ref_cols => true)
       if existing.empty? #shortcut
-        return create_from_rows(model_handle,rows,:duplicate_refs => :no_check)
+        create_rows = rows.map{|r|parent_fields.merge(r)}
+        return create_from_rows(model_handle,create_rows,:duplicate_refs => :no_check)
       end
 
       ret = Array.new
@@ -253,7 +255,8 @@ module XYZ
 
       #add only ones not existing
       unless pruned_rows.empty?
-        create_from_rows(model_handle,pruned_rows,:duplicate_refs => :no_check) 
+        create_rows = pruned_rows.map{|r|parent_fields.merge(r)}
+        create_from_rows(model_handle,create_rows,:duplicate_refs => :no_check) 
       end
       
       #delete ones that not in rows
@@ -263,6 +266,8 @@ module XYZ
       end
       ret
     end
+
+
     #TODO: think may subsume below by above
     #creates if does not exist using match_assigns; in eitehr case returns id_handle 
     def self.create_from_row?(model_handle,ref,match_assigns,other_assigns={},opts={})

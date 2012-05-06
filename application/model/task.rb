@@ -446,8 +446,9 @@ module XYZ
           :executable_action_type => executable_action ? Aux.demodulize(executable_action.class.to_s) : nil,
           :executable_action => executable_action
         }
-        cols = [:status, :result, :action_on_failure, :position, :temporal_order,:assembly_id] 
+        cols = [:status, :result, :action_on_failure, :position, :temporal_order] 
         cols.each{|col|row.merge!(col => hash_row[col])}
+        row[:assembly_id] = hash_row[:assembly_id]||SQL::ColRef.null_id
         row
       end
       new_idhs = Model.create_from_rows(model_handle,rows,{:convert => true,:do_not_update_info_table => true})

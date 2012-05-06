@@ -38,7 +38,7 @@ module XYZ
       end
 
       config_nodes_changes = StateChange.assembly_component_state_changes(assembly_idh,component_type)
-      config_nodes_task = config_nodes_task(task_mh,config_nodes_changes)
+      config_nodes_task = config_nodes_task(task_mh,config_nodes_changes,assembly_idh)
 
       ret = create_new_task(task_mh,:assembly_id => assembly_idh.get_id(),:temporal_order => "sequential")
       if create_nodes_task and config_nodes_task
@@ -74,18 +74,18 @@ module XYZ
       ret
     end
 
-    def config_nodes_task(task_mh,state_change_list)
+    def config_nodes_task(task_mh,state_change_list,assembly_idh=nil)
       return nil unless state_change_list and not state_change_list.empty?
       ret = nil
       all_actions = Array.new
       if state_change_list.size == 1
-        executable_action = TaskAction::ConfigNode.create_from_state_change(state_change_list.first)
+        executable_action = TaskAction::ConfigNode.create_from_state_change(state_change_list.first,assembly_idh)
         all_actions << executable_action
         ret = create_new_task(task_mh,:executable_action => executable_action) 
       else
         ret = create_new_task(task_mh,:display_name => "config_node_stage", :temporal_order => "concurrent")
         state_change_list.each do |sc|
-          executable_action = TaskAction::ConfigNode.create_from_state_change(sc)
+          executable_action = TaskAction::ConfigNode.create_from_state_change(sc,assembly_idh)
           all_actions << executable_action
           ret.add_subtask_from_hash(:executable_action => executable_action)
           end

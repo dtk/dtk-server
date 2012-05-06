@@ -36,8 +36,8 @@ module XYZ
     end
 
     class TaskActionNode < TaskActionBase
-      def self.create_from_state_change(state_change)
-        new(:state_change,state_change)
+      def self.create_from_state_change(state_change,assembly_idh=nil)
+        new(:state_change,state_change,nil,assembly_idh)
       end
       def self.create_from_hash(task_action_type,hash,task_idh)
         case task_action_type
@@ -135,7 +135,7 @@ module XYZ
     end
 
     class CreateNode < TaskActionNode
-      def initialize(type,item,task_idh=nil)
+      def initialize(type,item,task_idh=nil,assembly_idh=nil)
         hash = 
           case type 
            when :state_change
@@ -377,18 +377,19 @@ module XYZ
       end
 
      private
-      def initialize(type,item,task_idh=nil)
+      def initialize(type,item,task_idh=nil,assembly_idh=nil)
          hash =
           case type
            when :state_change
             sample_state_change = item.first
             node = sample_state_change[:node]
-            {
+            h = {
               :node => node,
               :state_change_types => item.map{|sc|sc[:type]}.uniq,
               :config_agent_type => item.first.on_node_config_agent_type,
               :component_actions => ComponentAction.order_and_group_by_component(item)
             }
+            assembly_idh ? h.merge(:assembly_idh => assembly_idh) : h
            when :hash
             if component_actions = item[:component_actions]
               component_actions.each_with_index{|ca,i|component_actions[i] = ComponentAction.create_from_hash(ca,task_idh)}

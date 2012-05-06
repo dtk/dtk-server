@@ -446,7 +446,7 @@ module XYZ
           :executable_action_type => executable_action ? Aux.demodulize(executable_action.class.to_s) : nil,
           :executable_action => executable_action
         }
-        cols = [:status, :result, :action_on_failure, :position, :temporal_order] 
+        cols = [:status, :result, :action_on_failure, :position, :temporal_order,:assembly_id] 
         cols.each{|col|row.merge!(col => hash_row[col])}
         row
       end

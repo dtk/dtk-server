@@ -40,16 +40,15 @@ module XYZ
       config_nodes_changes = StateChange.assembly_component_state_changes(assembly_idh,component_type)
       config_nodes_task = config_nodes_task(task_mh,config_nodes_changes)
 
+      ret = create_new_task(task_mh,:assembly_id => assembly_idh.get_id(),:temporal_order => "sequential")
       if create_nodes_task and config_nodes_task
-        ret = create_new_task(task_mh,:temporal_order => "sequential")
         ret.add_subtask(create_nodes_task)
         ret.add_subtask(config_nodes_task)
-        ret
       else
         ret = create_new_task(task_mh,:temporal_order => "sequential")
         ret.add_subtask(create_nodes_task||config_nodes_task) #only one wil be non null
-        ret
       end
+      ret
     end
 
    private

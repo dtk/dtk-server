@@ -26,22 +26,22 @@ module XYZ
          :size => "t1.micro",
          :png => "centos.png"
        },
-       "ami-045aff6d-micro"=> {
-         :ami => "ami-045aff6d",
+       "ami-6425800d-micro"=> {
+         :ami => "ami-6425800d",
          :display_name => "RH5.7 64 micro",
          :os_type =>"redhat",
          :size => "t1.micro",
          :png => "redhat.png"
        },
-       "ami-045aff6d-medium"=> {
-         :ami => "ami-045aff6d",
+       "ami-6425800d-medium"=> {
+         :ami => "ami-6425800d",
          :display_name => "RH5.7 64 medium",
          :os_type =>"redhat",
          :size => "m1.medium",
          :png => "redhat.png"
        },
-       "ami-045aff6d-large"=> {
-         :ami => "ami-045aff6d",
+       "ami-6425800d-large"=> {
+         :ami => "ami-6425800d",
          :display_name => "RH5.7 64 large",
          :os_type =>"redhat",
          :size => "m1.large",

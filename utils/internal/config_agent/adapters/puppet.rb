@@ -38,7 +38,13 @@ module XYZ
         ret = nil
         assembly_attrs = config_node[:assembly_attributes]
         return ret unless assembly_attrs
-        assembly_attrs.map{|attr|{"name" => attr[:display_name], "value" => ret_value(attr)}}
+        assembly_attrs.map do |attr|
+          val = ret_value(attr)
+          #TODO: hack until can add data types
+          val = true if val == "true"
+          val = false if val == "false"
+          {"name" => attr[:display_name], "value" => val}
+        end
       end
 
       def components_with_attributes(config_node,impl_info)

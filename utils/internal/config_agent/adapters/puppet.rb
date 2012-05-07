@@ -9,14 +9,9 @@ module XYZ
       include PuppetGenerateNodeManifest
       def ret_msg_content(config_node,impl_info)
         cmps_with_attrs = components_with_attributes(config_node,impl_info)
-=begin
-#TODO: test
- manifest = NodeManifest.new.generate(cmps_with_attrs)
-pp manifest
-     {:components_with_attributes => cmps_with_attrs,
-          :node_manifest => manifest}
-=end
-        {:components_with_attributes => cmps_with_attrs}
+        assembly_attrs = assembly_attributes(config_node)
+        manifest = NodeManifest.new.generate(cmps_with_attrs,assembly_attrs)
+        {:node_manifest => manifest}
       end
       def type()
         :puppet
@@ -39,6 +34,13 @@ pp manifest
       end
 
      private
+      def assembly_attributes(config_node)
+        ret = nil
+        assembly_attrs = config_node[:assembly_attributes]
+        return ret unless assembly_attrs
+        assembly_attrs.map{|attr|{"name" => attr[:display_name], "value" => ret_value(attr)}}
+      end
+
       def components_with_attributes(config_node,impl_info)
         cmp_actions = config_node[:component_actions]
         ndx_impl_info = impl_info.inject({}){|h,impl|h.merge(impl[:id] => impl)}

@@ -45,7 +45,6 @@ module XYZ
         ret.add_subtask(create_nodes_task)
         ret.add_subtask(config_nodes_task)
       else
-        ret = create_new_task(task_mh,:temporal_order => "sequential")
         ret.add_subtask(create_nodes_task||config_nodes_task) #only one wil be non null
       end
       ret

@@ -309,6 +309,7 @@ module XYZ
         #these two below update the ruby obj
         get_and_update_attributes__node_ext_ref!(task_mh)
         get_and_update_attributes__cmp_attrs!(task_mh)
+        get_and_update_attributes__assembly_attrs!(task_mh)
         #this updates the task model
         update_bound_input_attrs!(task)
       end
@@ -324,6 +325,19 @@ module XYZ
           else
             Log.error("cannot update task action's node id because do not have its id")
           end
+        end
+      end
+
+      def get_and_update_attributes__assembly_attrs!(task_mh)
+        assembly_idh = self[:assembly_idh] && IDHandle.new(self[:assembly_idh])
+        return unless assembly_idh
+        sp_hash = {
+          :cols => [:id,:display_name,:attribute_value,:data_type],
+          :filter => [:eq,:component_component_id, assembly_idh.get_id()]
+        }
+        assembly_attr_vals = Model.get_objs(assembly_idh.createMH(:attribute),sp_hash)
+        unless assembly_attr_vals.empty?
+          self[:assembly_attributes] = assembly_attr_vals
         end
       end
 

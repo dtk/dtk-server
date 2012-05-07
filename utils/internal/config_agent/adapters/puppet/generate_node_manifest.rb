@@ -5,8 +5,9 @@ module XYZ
         @import_statement_modules = Array.new
       end
 
-      def generate(cmps_with_attrs)
+      def generate(cmps_with_attrs,assembly_attrs=nil)
         ret = Array.new
+        add_assembly_attributes!(ret,assembly_attrs||[])
         cmps_with_attrs.each_with_index do |cmp_with_attrs,i|
           stage = i+1
           module_name = cmp_with_attrs["module_name"]
@@ -62,7 +63,14 @@ module XYZ
         ret
       end
      private
+      def add_assembly_attributes!(ret,assembly_attrs)
+        assembly_attrs.each do |attr|
+          ret << "$#{attr['name']} = #{process_val(attr['value'])}"
+        end
+      end
+
       def needs_import_statement?(cmp_or_def,module_name)
+        #TODO: this needs to be refined
         return nil if cmp_or_def =~ /::/
         return nil if @import_statement_modules.include?(module_name)
         @import_statement_modules << module_name

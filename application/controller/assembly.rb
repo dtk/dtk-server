@@ -110,7 +110,7 @@ module XYZ
       nested_objs[:nodes].each do |node|
         target_object.update_ui_for_new_item(node[:id])
       end
-      rest_ok_response(:id => id)
+      rest_ok_response(:assembly_id => id)
     end
 
     #clone assembly from library to target

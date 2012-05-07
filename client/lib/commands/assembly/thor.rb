@@ -4,21 +4,26 @@ module R8::Client
       [:display_name, :type,:id, :description, :external_ref]
     end
 
-#TODO: for testing; may compine with execute
-    desc "create-task ASSEMBLY-ID", "Create task to execute assembly instance"
-    def create_task(assembly_id)
+    desc "converge ASSEMBLY-ID", "Converges assembly instance"
+    def converge(assembly_id)
       post_body = {
         :assembly_id => assembly_id
       }
-      post rest_url("assembly/create_task"), post_body
+      response = post rest_url("assembly/create_task"), post_body
+      return response unless response.ok?
+      task_id = response.data["task_id"]
+      post rest_url("task/execute"), "task_id" => task_id
     end
 
-    desc "create-smoketests-task ASSEMBLY-ID", "Create task to execute assembly instance"
-    def create_smoketests_task(assembly_id)
+    desc "run-smoketests ASSEMBLY-ID", "Run smoketests associated with assembly instance"
+    def run_smoketests(assembly_id)
       post_body = {
         :assembly_id => assembly_id
       }
-      post rest_url("assembly/create_smoketests_task"), post_body
+      response = post rest_url("assembly/create_smoketests_task"), post_body
+      return response unless response.ok?
+      task_id = response.data["task_id"]
+      post rest_url("task/execute"), "task_id" => task_id
     end
 
     desc "list [library|target]","List asssemblies in library or target"
@@ -79,13 +84,8 @@ module R8::Client
       end
       response = post(rest_url("assembly/clone"),post_body)
       return response unless response.ok?
-      
-      #TODO: if options["in-target"] then below must take this value
-      response = post(rest_url("task/create_task_from_pending_changes"))
-      return response unless response.ok?
-
-      task_id = response.data["task_id"]
-      post rest_url("task/execute"), "task_id" => task_id
+      assembly_id = response.data["assembly_id"]
+      converge(assembly_id)
     end
   end
 end

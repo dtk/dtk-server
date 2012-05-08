@@ -11,6 +11,7 @@ module R8::Client
       }
       response = post rest_url("assembly/create_task"), post_body
       return response unless response.ok?
+return response
       task_id = response.data["task_id"]
       post rest_url("task/execute"), "task_id" => task_id
     end

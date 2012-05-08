@@ -23,10 +23,11 @@ module XYZ
         }
         create_stub(state_change_mh,hash)
       end
+      ##group by node id
       ndx_ret = Hash.new
       changes.each do |sc|
         node_id = sc[:node][:id]
-        (ndx_ret[node_id] ||= Array.new)  << sc
+        (ndx_ret[node_id] ||= Array.new) << sc
       end
       ndx_ret.values
     end
@@ -49,15 +50,9 @@ module XYZ
         changes += last_level
         last_level = pending_create_node(state_change_mh,last_level.map{|obj|obj.id_handle()},:added_filters => added_state_change_filters)
       end
-      ndx_ret = Hash.new
-      changes.each do |sc|
-        node_id = sc[:node][:id]
-        (ndx_ret[node_id] ||= Array.new)  << sc
-      end
-      ndx_ret.values
+      ##group by node id (and using fact that each wil be unique id)
+      changes.map{|ch|[ch]}
     end
-
-
 
     def get_ndx_node_config_changes(target_idh)
       #TODO: there is probably more efficient info to get; this provides too much

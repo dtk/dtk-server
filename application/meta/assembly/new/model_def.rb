@@ -64,7 +64,7 @@
            :alias => :nested_component,
            :join_type => :inner,
            :join_cond=>{:node_node_id => q(:node,:id), :assembly_id => q(:component,:id)},
-           :cols => [:id,:display_name,:component_type]
+           :cols => [:id,:display_name,:component_type,:basic_type,:description]
          }]
     },
     :nodes=> {

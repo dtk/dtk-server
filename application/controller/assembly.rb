@@ -23,7 +23,7 @@ module XYZ
       rest_ok_response :task_id => task.id
     end
 
-    #TODO: replace or given options to specify specific smoktests to run
+    #TODO: replace or given options to specify specific smoketests to run
     def rest__create_smoketests_task()
       #assembly_id should be a target assembly instance
       assembly_id = ret_non_null_request_params(:assembly_id)
@@ -32,12 +32,20 @@ module XYZ
       rest_ok_response :task_id => task.id
     end
 
+    def rest__list_smoketests()
+      assembly_id = ret_non_null_request_params(:assembly_id)
+      assembly = id_handle(assembly_id,:component).create_object()
+      smoketests = assembly.list_smoketests()
+      rest_ok_response smoketests
+    end
+
     def rest__set_attributes()
       assembly_id,pattern,value = ret_non_null_request_params(:assembly_id,:pattern,:value)
       assembly = id_handle(assembly_id,:component).create_object()
       assembly.set_attributes(pattern,value)
       rest_ok_response
     end
+
     def test_get_items(id)
       assembly = id_handle(id,:component).create_object()
       item_list = assembly.get_items()

@@ -36,6 +36,14 @@ module R8::Client
       end
     end
 
+    desc "list-smoketests ASSEMBLY-ID","List smoketests on asssembly"
+    def list_smoketests(assembly_id)
+      post_body = {
+        :assembly_id => assembly_id
+      }
+      post rest_url("assembly/list_smoketests"), post_body
+    end
+
     desc "stage ASSEMBLY-ID", "Stage library assembly in target"
     method_option "in-target",:aliases => "-t" ,
       :type => :numeric, 

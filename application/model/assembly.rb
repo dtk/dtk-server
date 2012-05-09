@@ -62,7 +62,22 @@ module XYZ
       end
     end
 
-    def self.delete_from_library(assembly_idh)
+    def self.delete(assembly_idh)
+      if is_template?(assembly_idh)
+        delete_template(assembly_idh)
+      else
+        delete_instance_and_destroy_its_nodes(assembly_idh)
+      end
+    end
+
+    def self.is_template?(assembly_idh)
+      assembly_idh.create_object().is_template?()
+    end
+    def is_template?()
+      not update_object!(:library_library_id)[:library_library_id].nil?
+    end
+   private
+    def self.delete_template(assembly_idh)
       #need to explicitly delete nodes, but not components since node's parents are not the assembly, while compoennt's parents are teh nodes
       sp_hash = {
         :cols => [:id, :nodes],
@@ -71,6 +86,19 @@ module XYZ
       node_idhs = get_objs(assembly_idh.createMH(),sp_hash).map{|r|r[:node].id_handle()}
       Model.delete_instances(node_idhs + [assembly_idh])
     end
+   
+    def self.delete_instance_and_destroy_its_nodes(assembly_idh)
+      #TODO: need to refine to handle case where node hosts multiple assemblies or native components; before that need to modify node isnatnce
+      #repo so can point to multiple assembly instances
+      sp_hash = {
+        :cols => [:id,:display_name],
+        :filter => [:eq, :assembly_id, assembly_idh.get_id]
+      }
+      assembly_nodes = get_objs(assembly_idh.createMH(:node),sp_hash)
+      assembly_nodes.map{|r|r.destroy_and_delete()}
+      Model.delete_instance(assembly_idh)
+    end
+   public
 
     #### for cloning
     def add_model_specific_override_attrs!(override_attrs,target_obj)

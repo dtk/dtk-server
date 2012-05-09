@@ -59,12 +59,12 @@ module R8::Client
       post rest_url("assembly/clone"), post_body
     end
 
-    desc "delete ASSEMBLY-ID", "Delete library assembly"
+    desc "delete ASSEMBLY-ID", "Delete assembly"
     def delete(assembly_id)
       post_body = {
         :assembly_id => assembly_id
       }
-      post rest_url("assembly/delete_from_library"), post_body
+      post rest_url("assembly/delete"), post_body
     end
 
     desc "set ASSEMBLY-ID ATTRIBUTE-PATTERN VALUE", "set target assembly attributes"

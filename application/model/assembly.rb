@@ -84,7 +84,8 @@ module XYZ
         :filter => [:eq, :id, assembly_idh.get_id]
       }
       node_idhs = get_objs(assembly_idh.createMH(),sp_hash).map{|r|r[:node].id_handle()}
-      Model.delete_instances(node_idhs + [assembly_idh])
+      Model.delete_instances(node_idhs)
+      Model.delete_instance(assembly_idh)
     end
    
     def self.delete_instance_and_destroy_its_nodes(assembly_idh)

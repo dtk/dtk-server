@@ -77,7 +77,7 @@
            :convert => true,
            :join_type => :inner,
            :join_cond=>{:assembly_id => q(:component,:id)},
-           :cols => [:id,:display_name,:description]
+           :cols => [:id,:display_name]
          },
          {
            :model_name => :component,
@@ -85,7 +85,7 @@
            :alias => :nested_component,
            :join_type => :inner,
            :join_cond=>{:node_node_id => q(:node,:id), :assembly_id => q(:component,:id)},
-           :cols => [:id,:display_name,:component_type,:basic_type,:description,:implementation_id]
+           :cols => [:id,:display_name,:component_type,:implementation_id]
          },
          {
            :model_name => :implementation,

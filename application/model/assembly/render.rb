@@ -3,8 +3,10 @@ module XYZ
   module AssemblyRender
     def render(opts={})
       nested_objs = get_nested_objects_for_render()
+pp nested_objs[:nodes]
       output_hash = output_hash_form(nested_objs)
       pp output_hash
+      File.open("/tmp/t","w"){|f| f << JSON.pretty_generate(output_hash)}
     end
    private
     def get_nested_objects_for_render()
@@ -79,7 +81,8 @@ module XYZ
     def node_output_hash(node)
       external_ref = node[:external_ref]
       if external_ref[:type] == "ec2_image"
-        node_ref = SimpleOrderedHash.new([{:type => external_ref[:type]},{:image_id => external_ref[:image_id]}])
+        fields = [:type,:region,:image_id]
+        node_ref = SimpleOrderedHash.new(fields.map{|f|{f => external_ref[f]}})
       else
         raise Error.new("Have not implemented support for node type #{external_ref[:type]}")
       end

@@ -139,15 +139,7 @@ module XYZ
       port_links = Model.get_objs(model_handle(:port_link),sp_hash)
       port_links.each{|pl|pl.materialize!(PortLink.common_columns())}
 
-      attr_cols = [:id,:display_name,:data_type,:attribute_value]
-      sp_hash = {
-        :cols => attr_cols,
-        :filter => [:eq, :component_component_id, id()]
-      }
-      assembly_attrs = Model.get_objs(model_handle(:attribute),sp_hash)
-      assembly_attrs.each{|attr|attr.materialize!(attr_cols)}
-
-      {:nodes => ndx_nodes.values, :port_links => port_links, :attributes => assembly_attrs}
+      {:nodes => ndx_nodes.values, :port_links => port_links}
     end
 
     def is_assembly?()

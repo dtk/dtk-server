@@ -67,6 +67,35 @@
            :cols => [:id,:display_name,:component_type,:basic_type,:description]
          }]
     },
+    :nested_nodes_and_cmps_for_render=> {
+      :type => :json, 
+      :hidden => true,
+      :remote_dependencies =>
+        [
+         {
+           :model_name => :node,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond=>{:assembly_id => q(:component,:id)},
+           :cols => [:id,:display_name,:description]
+         },
+         {
+           :model_name => :component,
+           :convert => true,
+           :alias => :nested_component,
+           :join_type => :inner,
+           :join_cond=>{:node_node_id => q(:node,:id), :assembly_id => q(:component,:id)},
+           :cols => [:id,:display_name,:component_type,:basic_type,:description,:implementation_id]
+         },
+         {
+           :model_name => :implementation,
+           :convert => true,
+           :alias => :implementation,
+           :join_type => :inner,
+           :join_cond=>{:id => q(:nested_component,:implementation_id)},
+           :cols => [:id,:display_name,:module_name,:version_num]
+         }]
+    },
     :nodes=> {
       :type=>:json,
       :hidden=>true,

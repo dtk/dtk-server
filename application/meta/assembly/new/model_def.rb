@@ -77,7 +77,7 @@
            :convert => true,
            :join_type => :inner,
            :join_cond=>{:assembly_id => q(:component,:id)},
-           :cols => [:id,:display_name]
+           :cols => [:id,:display_name,:external_ref]
          },
          {
            :model_name => :component,

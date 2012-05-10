@@ -3,7 +3,6 @@ module XYZ
   module AssemblyRender
     def render(opts={})
       nested_objs = get_nested_objects_for_render()
-      pp nested_objs
       output_hash = output_hash_form(nested_objs)
       pp output_hash
     end
@@ -48,9 +47,10 @@ module XYZ
 
     def output_hash_form(nested_objs)
       ret = SimpleOrderedHash.new()
+      ret[:name] = update_object!(:display_name)[:display_name]
       #add modules
       ret[:modules] = nested_objs[:implementations].map do |impl|
-        #TODO: stub that ignores verion = 1
+        #TODO: stub that ignores version = 1
         version = impl[:version_num]
         ((version.nil? or version == 1) ? impl[:module_name] : "#{impl[:module_name]}-#{version}") 
       end
@@ -62,7 +62,8 @@ module XYZ
       ret[:nodes] = nested_objs[:nodes].inject(SimpleOrderedHash.new()) do |h,node|
         node_name = node[:display_name]
         cmp_info = node[:components].map{|cmp|component_name_output_form(cmp[:component_type])}
-        h.merge(node_name => cmp_info)
+        node_info = node_output_hash(node).merge(:components => cmp_info)
+        h.merge(node_name => node_info)
       end
 
       #add port links
@@ -70,9 +71,19 @@ module XYZ
       ret[:port_links] = nested_objs[:port_links].map do |pl|
         input_port = ndx_ports[pl[:input_id]]
         output_port = ndx_ports[pl[:output_id]]
-       {port_output_form(input_port,:input) => port_output_form(input_port,:output)}
+       {port_output_form(input_port,:input) => port_output_form(output_port,:output)}
       end
       ret
+    end
+
+    def node_output_hash(node)
+      external_ref = node[:external_ref]
+      if external_ref[:type] == "ec2_image"
+        node_ref = SimpleOrderedHash.new([{:type => external_ref[:type]},{:image_id => external_ref[:image_id]}])
+      else
+        raise Error.new("Have not implemented support for node type #{external_ref[:type]}")
+      end
+      SimpleOrderedHash.new(:node_ref => node_ref)
     end
 
     def port_output_form(port,dir)

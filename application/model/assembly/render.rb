@@ -3,10 +3,9 @@ module XYZ
   module AssemblyRender
     def render(opts={})
       nested_objs = get_nested_objects_for_render()
-pp nested_objs[:nodes]
       output_hash = output_hash_form(nested_objs)
-      pp output_hash
-      File.open("/tmp/t","w"){|f| f << JSON.pretty_generate(output_hash)}
+File.open("/tmp/t2","w"){|f| f << JSON.pretty_generate(nested_objs)}
+File.open("/tmp/t3","w"){|f| f << JSON.pretty_generate(output_hash)}
     end
    private
     def get_nested_objects_for_render()

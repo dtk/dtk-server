@@ -1,6 +1,8 @@
 r8_nested_require('assembly','attribute_pattern')
+r8_nested_require('assembly','render')
 module XYZ
   class Assembly < Component
+    include AssemblyRender
     def self.list_from_library(assembly_mh,library_idh=nil)
       lib_filter = (library_idh ? [:eq, :library_library_id, library_idh.get_id()] : [:neq, :library_library_id, nil])
       sp_hash = {
@@ -108,6 +110,8 @@ module XYZ
     end
 
     ##############
+    #TODO: looks like callers dont need all teh detail; might just provide summarized info or instead pass arg that specifies sumamry level
+    #also make optional whether materialize
     def get_node_assembly_nested_objects()
       ndx_nodes = Hash.new
       sp_hash = {:cols => [:nested_nodes_and_cmps]}
@@ -134,7 +138,16 @@ module XYZ
       }
       port_links = Model.get_objs(model_handle(:port_link),sp_hash)
       port_links.each{|pl|pl.materialize!(PortLink.common_columns())}
-      {:nodes => ndx_nodes.values, :port_links => port_links}
+
+      attr_cols = [:id,:display_name,:data_type,:attribute_value]
+      sp_hash = {
+        :cols => attr_cols,
+        :filter => [:eq, :component_component_id, id()]
+      }
+      assembly_attrs = Model.get_objs(model_handle(:attribute),sp_hash)
+      assembly_attrs.each{|attr|attr.materialize!(attr_cols)}
+
+      {:nodes => ndx_nodes.values, :port_links => port_links, :attributes => assembly_attrs}
     end
 
     def is_assembly?()

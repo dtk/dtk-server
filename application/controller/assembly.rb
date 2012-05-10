@@ -1,8 +1,10 @@
 module XYZ
   class AssemblyController < Controller
-    #TODO: change so is just list; and bahvior varies whether object template or insatnce
-    def rest__list_from_library()
-      rest_ok_response Assembly.list_from_library(model_handle())
+    def rest__render()
+      assembly_id = ret_non_null_request_params(:assembly_id)
+      assembly = id_handle(assembly_id,:component).create_object()
+      assembly.render()
+      rest_ok_response 
     end
 
     def rest__delete()
@@ -11,6 +13,10 @@ module XYZ
       rest_ok_response 
     end
 
+    #TODO: might change so is just 'list'; and bahvior varies whether object template or insatnce
+    def rest__list_from_library()
+      rest_ok_response Assembly.list_from_library(model_handle())
+    end
     def rest__list_from_target()
       rest_ok_response Assembly.list_from_target(model_handle())
     end

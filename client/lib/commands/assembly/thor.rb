@@ -4,6 +4,14 @@ module R8::Client
       [:display_name, :type,:id, :description, :external_ref]
     end
 
+    desc "render ASSEMBLY-ID", "Renders assembly instance or template"
+    def render(assembly_id)
+      post_body = {
+        :assembly_id => assembly_id
+      }
+      post rest_url("assembly/render"), post_body
+    end
+
     desc "converge ASSEMBLY-ID", "Converges assembly instance"
     def converge(assembly_id)
       post_body = {

@@ -80,8 +80,8 @@ File.open("/tmp/t3","w"){|f| f << JSON.pretty_generate(output_hash)}
     def node_output_hash(node)
       external_ref = node[:external_ref]
       if external_ref[:type] == "ec2_image"
-        fields = [:type,:region,:image_id]
-        node_ref = SimpleOrderedHash.new(fields.map{|f|{f => external_ref[f]}})
+        ec2_fields = [:image_id,:size,:region,:availability_zone,:security_group_set]
+        node_ref = SimpleOrderedHash.new(([:type]+ec2_fields).map{|f|{f => external_ref[f]} if external_ref[f]}.compact)
       else
         raise Error.new("Have not implemented support for node type #{external_ref[:type]}")
       end

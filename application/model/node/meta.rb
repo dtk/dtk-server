@@ -20,6 +20,7 @@ module XYZ
       virtual_column :status, :type => :varchar, :local_dependencies => [:is_deployed,:operational_status]
       column :ui, :json
       foreign_key :assembly_id, :component, FK_SET_NULL_OPT
+      foreign_key :node_binding_id, :node_binding, FK_SET_NULL_OPT
       virtual_column :target_id, :type => ID_TYPES[:id], :local_dependencies => [:datacenter_datacenter_id]
       virtual_column :parent_name, :possible_parents => [:library,:datacenter]
       virtual_column :disk_size, :path => [:ds_attributes,:flavor,:disk] #in megs

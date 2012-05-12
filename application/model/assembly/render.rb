@@ -5,7 +5,8 @@ module XYZ
       nested_objs = get_nested_objects_for_render()
       output_hash = output_hash_form(nested_objs)
 File.open("/tmp/t2","w"){|f| f << JSON.pretty_generate(nested_objs)}
-File.open("/tmp/t3","w"){|f| f << JSON.pretty_generate(output_hash)}
+out = SimpleOrderedHash.new([{:node_templates =>{}}, {:node_bindings => {}}, {:assemblies => {output_hash[:name] => output_hash}}])
+File.open("/tmp/t3","w"){|f| f << JSON.pretty_generate(out)}
     end
    private
     def get_nested_objects_for_render()

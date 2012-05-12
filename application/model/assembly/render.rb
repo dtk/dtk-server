@@ -5,9 +5,41 @@ module XYZ
       nested_objs = get_nested_objects_for_render()
       output_hash = output_hash_form(nested_objs)
 File.open("/tmp/t2","w"){|f| f << JSON.pretty_generate(nested_objs)}
-out = SimpleOrderedHash.new([{:node_templates =>{}}, {:node_bindings => {}}, {:assemblies => {output_hash[:name] => output_hash}}])
+node_binding_rs = debug_node_binding_rs()
+out = SimpleOrderedHash.new([{:node_binding_rulesets => node_binding_rs}, {:assemblies => {output_hash[:name] => output_hash}}])
 File.open("/tmp/t3","w"){|f| f << JSON.pretty_generate(out)}
     end
+
+def debug_node_binding_rs()
+  sp_hash = {
+    :cols => [:id,:display_name,:external_ref],
+    :filter => [:and, [:eq, :assembly_id, nil],[:neq, :library_library_id, nil]]
+  }
+  node_templates = Model.get_objs(model_handle(:node),sp_hash)
+  node_templates.inject(SimpleOrderedHash.new) do |h,node|
+    external_ref = debug_node_external_ref(node)
+    rule = SimpleOrderedHash.new([{:conditions => Aux::hash_subset(external_ref,[:type,:region])},{:node_template => external_ref}])
+    node_ref = node[:display_name].downcase.gsub(/ /,"-")
+
+    h.merge(node_ref => SimpleOrderedHash.new([{:type => "clone"},{:rules => [rule]}]))
+  end
+end
+def debug_node_external_ref(node)
+  node_info =  SimpleOrderedHash.new
+  external_ref = node[:external_ref]
+  if external_ref[:type] == "ec2_image"
+    ec2_fields = [:image_id,:size,:region,:availability_zone,:security_group_set]
+    
+    output = ([:type]+ec2_fields).map do |f|
+      val = external_ref[f]||(f == :region ? "us-east-1" : nil) 
+      {f => val} if val
+    end.compact
+    SimpleOrderedHash.new(output)
+  else
+    raise Error.new("Have not implemented support for node type #{external_ref[:type]}")
+  end
+end
+
    private
     def get_nested_objects_for_render()
       #get assembly level attributes
@@ -64,8 +96,7 @@ File.open("/tmp/t3","w"){|f| f << JSON.pretty_generate(out)}
       ret[:nodes] = nested_objs[:nodes].inject(SimpleOrderedHash.new()) do |h,node|
         node_name = node[:display_name]
         cmp_info = node[:components].map{|cmp|component_name_output_form(cmp[:component_type])}
-        node_info = node_output_hash(node).merge(:components => cmp_info)
-        h.merge(node_name => node_info)
+        h.merge(node_name => {:components => cmp_info})
       end
 
       #add port links
@@ -76,17 +107,6 @@ File.open("/tmp/t3","w"){|f| f << JSON.pretty_generate(out)}
        {port_output_form(input_port,:input) => port_output_form(output_port,:output)}
       end
       ret
-    end
-
-    def node_output_hash(node)
-      external_ref = node[:external_ref]
-      if external_ref[:type] == "ec2_image"
-        ec2_fields = [:image_id,:size,:region,:availability_zone,:security_group_set]
-        node_ref = SimpleOrderedHash.new(([:type]+ec2_fields).map{|f|{f => external_ref[f]} if external_ref[f]}.compact)
-      else
-        raise Error.new("Have not implemented support for node type #{external_ref[:type]}")
-      end
-      SimpleOrderedHash.new(:node_ref => node_ref)
     end
 
     def port_output_form(port,dir)

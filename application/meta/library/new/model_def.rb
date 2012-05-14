@@ -15,6 +15,7 @@
   [
    :component,
    :node,
+   :node_binding_ruleset,
    :node_group_relation,
    :attribute_link,
    :port_link,

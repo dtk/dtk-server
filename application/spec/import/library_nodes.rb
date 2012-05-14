@@ -1,7 +1,8 @@
 module XYZ
   class LibraryNodes
     def self.get()
-      {"library"=> {"public"=> {"node"=> nodes}}}
+      #TOIDO: deprecate the nodes and just have node being rules
+      {"library"=> {"public"=> {"node"=> nodes, "node_binding_ruleset" => node_binding_rulesets}}}
     end
    private
      def self.nodes()
@@ -140,7 +141,45 @@ module XYZ
              "display_name"=>"check_ssh"}
          }
        }
-    end
+   end
+   def self.node_binding_rulesets()
+{"centos-5.6-small"=>{:type=>"clone",
+  :rules=>[{:conditions=>{:type=>"ec2_image", :region=>"us-east-1"},
+    :node_template=>{:type=>"ec2_image",
+     :image_id=>"ami-9bce1ef2",
+     :size=>"m1.small",
+     :region=>"us-east-1"}}]},
+ "rh5.7-64-large"=>{:type=>"clone",
+  :rules=>[{:conditions=>{:type=>"ec2_image", :region=>"us-east-1"},
+    :node_template=>{:type=>"ec2_image",
+     :image_id=>"ami-6425800d",
+     :size=>"m1.large",
+     :region=>"us-east-1"}}]},
+ "natty-small"=>{:type=>"clone",
+  :rules=>[{:conditions=>{:type=>"ec2_image", :region=>"us-east-1"},
+    :node_template=>{:type=>"ec2_image",
+     :image_id=>"ami-e7b1618e",
+     :size=>"t1.micro",
+     :region=>"us-east-1"}}]},
+ "centos-5.6-micro"=>{:type=>"clone",
+  :rules=>[{:conditions=>{:type=>"ec2_image", :region=>"us-east-1"},
+    :node_template=>{:type=>"ec2_image",
+     :image_id=>"ami-9bce1ef2",
+     :size=>"t1.micro",
+     :region=>"us-east-1"}}]},
+ "rh5.7-64-micro"=>{:type=>"clone",
+  :rules=>[{:conditions=>{:type=>"ec2_image", :region=>"us-east-1"},
+    :node_template=>{:type=>"ec2_image",
+     :image_id=>"ami-6425800d",
+     :size=>"t1.micro",
+     :region=>"us-east-1"}}]},
+ "rh5.7-64-medium"=>{:type=>"clone",
+  :rules=>[{:conditions=>{:type=>"ec2_image", :region=>"us-east-1"},
+    :node_template=>{:type=>"ec2_image",
+     :image_id=>"ami-6425800d",
+     :size=>"m1.medium",
+     :region=>"us-east-1"}}]}}
+   end
   end
 end
 

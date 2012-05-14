@@ -8,6 +8,7 @@ File.open("/tmp/t2","w"){|f| f << JSON.pretty_generate(nested_objs)}
 node_binding_rs = debug_node_binding_rs()
 out = SimpleOrderedHash.new([{:node_binding_rulesets => node_binding_rs}, {:assemblies => {output_hash[:name] => output_hash}}])
 File.open("/tmp/t3","w"){|f| f << JSON.pretty_generate(out)}
+File.open("/tmp/t4","w"){|f| f << PP.pp(node_binding_rs,f)}
     end
 
 def debug_node_binding_rs()

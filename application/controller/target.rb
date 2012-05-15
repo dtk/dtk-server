@@ -166,10 +166,12 @@ pp request.params
       override_attrs = request.params["ui"] ? {:ui=>request.params["ui"]} : {}
 
       model_id_handle = id_handle(request.params["model_id"].to_i,request.params["model"].to_sym)
-#      model_id_handle = id_handle(request.params["id"].to_i,request.params["model"].to_sym)
-      new_item_id = target.add_item(model_id_handle,override_attrs)
-#      id = new_id if new_id
-
+      if R8::Config[:use_node_bindings] and request.params["model"] == "node"
+        node_binding_rs =  create_object_from_id(request.params["model_id"],:node_binding_ruleset)
+        new_item_id = node_binding_rs.clone_or_match(target).get_id()
+      else
+        new_item_id = target.add_item(model_id_handle,override_attrs)
+      end
 #TODO: how do we get field info from model instance?
       dc_hash = get_object_by_id(id,:datacenter)
       dc_ui = dc_hash[:ui].nil? ? {:items=>{}} : dc_hash[:ui]

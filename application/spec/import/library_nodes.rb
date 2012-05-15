@@ -1,11 +1,10 @@
 module XYZ
   class LibraryNodes
     def self.get()
-      #TOIDO: deprecate the nodes and just have node being rules
-      {"library"=> {"public"=> {"node"=> nodes, "node_binding_ruleset" => node_binding_rulesets}}}
+      {"library"=> {"public"=> {"node"=> node_templates(), "node_binding_ruleset" => node_binding_rulesets()}}}
     end
    private
-     def self.nodes()
+     def self.node_templates()
        ret = Hash.new
        NodesInfo.each do |k,info|
          ret[k] = node_info(info)
@@ -57,14 +56,15 @@ module XYZ
        },
        "ami-e7b1618e-micro"=> {
          :ami => "ami-e7b1618e",
-         :display_name => "Natty small",
+         :display_name => "Natty micro",
          :os_type =>"ubuntu",
          :size => "t1.micro",
          :png => "ubuntu.png"
        }
      }
    def self.node_info(info)
-     {"os_type"=>info[:os_type],
+     ret = {
+       "os_type"=>info[:os_type],
        "type"=>"image",
        "display_name"=> info[:display_name],
        "external_ref"=>{
@@ -141,50 +141,67 @@ module XYZ
              "display_name"=>"check_ssh"}
          }
        }
+     if node_binding_rs_id = node_info_binding_ruleset_id(info)
+       ret["*node_binding_rs_id"] =  node_binding_rs_id
+     end
+     ret
    end
+   def self.node_info_binding_ruleset_id(info)
+     Bindings.each do |k,v|
+       v[:rules].each_with_index do |r,i|
+         nt = r[:node_template]
+         if info[:ami] == nt[:ami] and info[:size] == nt[:size]
+           return "/library/public/node_binding_ruleset/#{k}"
+         end
+       end
+     end
+     nil
+   end
+
 Bindings = {"centos-5.6-small"=>{:type=>"clone",
   :os_type=>"centos",
   :rules=>[{:conditions=>{:type=>"ec2_image", :region=>"us-east-1"},
     :node_template=>{:type=>"ec2_image",
-     :image_id=>"ami-9bce1ef2",
+     :ami=>"ami-9bce1ef2",
      :size=>"m1.small",
      :region=>"us-east-1"}}]},
  "rh5.7-64-large"=>{:type=>"clone",
   :os_type=>"redhat",    
   :rules=>[{:conditions=>{:type=>"ec2_image", :region=>"us-east-1"},
     :node_template=>{:type=>"ec2_image",
-     :image_id=>"ami-6425800d",
+     :ami=>"ami-6425800d",
      :size=>"m1.large",
      :region=>"us-east-1"}}]},
  "natty-small"=>{:type=>"clone",
   :os_type=>"ubuntu",
   :rules=>[{:conditions=>{:type=>"ec2_image", :region=>"us-east-1"},
     :node_template=>{:type=>"ec2_image",
-     :image_id=>"ami-e7b1618e",
+     :ami=>"ami-e7b1618e",
      :size=>"t1.micro",
      :region=>"us-east-1"}}]},
  "centos-5.6-micro"=>{:type=>"clone",
   :os_type=>"centos",
   :rules=>[{:conditions=>{:type=>"ec2_image", :region=>"us-east-1"},
     :node_template=>{:type=>"ec2_image",
-     :image_id=>"ami-9bce1ef2",
+     :ami=>"ami-9bce1ef2",
      :size=>"t1.micro",
      :region=>"us-east-1"}}]},
  "rh5.7-64-micro"=>{:type=>"clone",
   :os_type=>"redhat",    
   :rules=>[{:conditions=>{:type=>"ec2_image", :region=>"us-east-1"},
     :node_template=>{:type=>"ec2_image",
-     :image_id=>"ami-6425800d",
+     :ami=>"ami-6425800d",
      :size=>"t1.micro",
      :region=>"us-east-1"}}]},
  "rh5.7-64-medium"=>{:type=>"clone",
   :os_type=>"redhat",    
   :rules=>[{:conditions=>{:type=>"ec2_image", :region=>"us-east-1"},
     :node_template=>{:type=>"ec2_image",
-     :image_id=>"ami-6425800d",
+     :ami=>"ami-6425800d",
      :size=>"m1.medium",
      :region=>"us-east-1"}}]}}
    Bindings.each{|k,v|v[:display_name] = k.gsub(/-/,' ')}
+
    def self.node_binding_rulesets()
      Bindings
    end

@@ -142,43 +142,51 @@ module XYZ
          }
        }
    end
-   def self.node_binding_rulesets()
-{"centos-5.6-small"=>{:type=>"clone",
+Bindings = {"centos-5.6-small"=>{:type=>"clone",
+  :os_type=>"centos",
   :rules=>[{:conditions=>{:type=>"ec2_image", :region=>"us-east-1"},
     :node_template=>{:type=>"ec2_image",
      :image_id=>"ami-9bce1ef2",
      :size=>"m1.small",
      :region=>"us-east-1"}}]},
  "rh5.7-64-large"=>{:type=>"clone",
+  :os_type=>"redhat",    
   :rules=>[{:conditions=>{:type=>"ec2_image", :region=>"us-east-1"},
     :node_template=>{:type=>"ec2_image",
      :image_id=>"ami-6425800d",
      :size=>"m1.large",
      :region=>"us-east-1"}}]},
  "natty-small"=>{:type=>"clone",
+  :os_type=>"ubuntu",
   :rules=>[{:conditions=>{:type=>"ec2_image", :region=>"us-east-1"},
     :node_template=>{:type=>"ec2_image",
      :image_id=>"ami-e7b1618e",
      :size=>"t1.micro",
      :region=>"us-east-1"}}]},
  "centos-5.6-micro"=>{:type=>"clone",
+  :os_type=>"centos",
   :rules=>[{:conditions=>{:type=>"ec2_image", :region=>"us-east-1"},
     :node_template=>{:type=>"ec2_image",
      :image_id=>"ami-9bce1ef2",
      :size=>"t1.micro",
      :region=>"us-east-1"}}]},
  "rh5.7-64-micro"=>{:type=>"clone",
+  :os_type=>"redhat",    
   :rules=>[{:conditions=>{:type=>"ec2_image", :region=>"us-east-1"},
     :node_template=>{:type=>"ec2_image",
      :image_id=>"ami-6425800d",
      :size=>"t1.micro",
      :region=>"us-east-1"}}]},
  "rh5.7-64-medium"=>{:type=>"clone",
+  :os_type=>"redhat",    
   :rules=>[{:conditions=>{:type=>"ec2_image", :region=>"us-east-1"},
     :node_template=>{:type=>"ec2_image",
      :image_id=>"ami-6425800d",
      :size=>"m1.medium",
      :region=>"us-east-1"}}]}}
+   Bindings.each{|k,v|v[:display_name] = k.gsub(/-/,' ')}
+   def self.node_binding_rulesets()
+     Bindings
    end
   end
 end

@@ -378,6 +378,39 @@ ie: get_components(['language'])
     end
 
     def search
+      if R8::Config[:use_node_bindings]
+        search_new
+      else
+        search_old
+      end
+    end
+
+    def search_new
+      search_cols = [:display_name]
+
+      filter_conjuncts = request.params.map do |name,value|
+        [:regex,name.to_sym,"^#{value}"] if search_cols.include?(name.to_sym)
+      end.compact
+      cols = NodeBindingRuleset.common_columns()
+      sp_hash = {
+        :cols => cols
+      }
+      unless filter_conjuncts.empty?
+        sp_hash[:filter] = [:and] + filter_conjuncts
+      end
+      node_list = Model.get_objs(model_handle(:node_binding_ruleset),sp_hash).each{|r|r.materialize!(cols)}
+      icon_dir = "#{R8::Config[:base_images_uri]}/v1/nodeIcons"
+      node_list.each do |node|
+        png = (node[:os_type] ? "#{node[:os_type]}.png" : "unknown-node.png")
+        node[:image_path] = "#{icon_dir}/#{png}"
+        node[:i18n] = node[:display_name]
+      end
+pp node_list
+      {:data=>node_list}
+    end
+
+    #TODO: old; new in terms of node_binding_ruleset
+    def search_old
       params = request.params.dup
       cols = model_class(:node).common_columns()
 

@@ -42,9 +42,9 @@ module XYZ
     def get_node_template(node_template_ref)
       sp_hash = {
         :cols => [:id, :display_name, :group_id],
-        :filter => [:eq,:node_binding_rs_id,id()]
+        :filter => [:and, [:eq,:node_binding_rs_id,id()], [:eq,:type,"image"]]
       }
-      Model.get_objs(id_handle.createMH(:node),sp_hash).first
+      Model.get_obj(id_handle.createMH(:node),sp_hash)
     end
   end
 end

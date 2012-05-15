@@ -77,7 +77,14 @@
            :convert => true,
            :join_type => :inner,
            :join_cond=>{:assembly_id => q(:component,:id)},
-           :cols => [:id,:display_name,:external_ref]
+           :cols => [:id,:display_name,:external_ref,:node_binding_rs_id]
+         },
+         {
+           :model_name => :node_binding_ruleset,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond=>{:id => q(:node,:node_binding_rs_id)},
+           :cols => [:id,:display_name,:ref]
          },
          {
            :model_name => :component,

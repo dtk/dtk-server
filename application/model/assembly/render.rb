@@ -54,7 +54,7 @@ end
       ndx_nodes = Hash.new
       ndx_impls = Hash.new
       sp_hash = {:cols => [:nested_nodes_and_cmps_for_render]}
-      get_objs(sp_hash).each do |r|
+      get_objs(sp_hash,:keep_ref_cols => true).each do |r|
         node = r[:node]
         node = ndx_nodes[node[:id]] ||= node.merge(:components => Array.new)
         cmp = r[:nested_component]

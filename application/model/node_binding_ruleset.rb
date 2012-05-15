@@ -22,16 +22,29 @@ module XYZ
     
     def clone(target)
       #match conditions in ruleset with properties on target
-      unless match = clone_match(,target)
+      unless match = clone_match(target)
         raise Error.new("No rules in teh node being match the target")
       end
-      node_template = match[:node_template]
+      node_template = get_node_template(match[:node_template])
+      override_attrs = {:node_binding_rs_id => id()}
+      clone_opts = node_template.source_clone_info_opts()
+      new_obj = target.clone_into(node_template,override_attrs,clone_opts)
+      new_obj && new_obj.id_handle()
     end
     def clone_match(target)
       rules = self[:rules]
       #TODO: stub
       rules.first
       #TODO: add any target defaults like security groups
+    end
+    def get_node_template(node_template_ref)
+      #TODO: stub
+      sp_hash = {
+        :cols => [:id,:display_name,:group_id,:external_ref],
+        :filter => [:neq,:library_library_id,nil]
+      }
+      node_templates = Model.get_objs(id_handle.createMH(:node),sp_hash)
+      node_templates.select{|r|r[:external_ref][:image_id] == node_template_ref[:image_id]}.first
     end
   end
 end

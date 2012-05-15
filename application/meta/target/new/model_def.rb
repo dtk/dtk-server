@@ -19,7 +19,7 @@
       :type=>:varchar,
       :length=>20
     },
-    :iaas_parameters=>{
+    :iaas_properties=>{
       :type=>:json
     },
     :project_id=> { #TODO: should project be a parent?

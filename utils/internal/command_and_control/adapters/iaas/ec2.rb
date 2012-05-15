@@ -1,7 +1,14 @@
 module XYZ
   module CommandAndControlAdapter
     class Ec2 < CommandAndControlIAAS
-      def self.execute(task_idh,top_task_idh,task_action)
+    def self.clone_match(node_binding_rules,target)
+      node_binding_rules.find do |r|
+        conditions = r[:conditions]
+        conditions[:region] == target[:iaas_properties][:region]
+      end
+    end
+
+    def self.execute(task_idh,top_task_idh,task_action)
         node = task_action[:node]
         external_ref = node[:external_ref]||{}
         instance_id = external_ref[:instance_id]

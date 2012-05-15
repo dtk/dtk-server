@@ -11,7 +11,7 @@
       "display_name": "Staging East1",
       "description": "Staging East1",
       "iaas_type" : "ec2",
-      "iaas_parameters" : {
+      "iaas_properties" : {
         "region" : "us-east-1",
         "availability_zone" : "us-east-1a",
 	"security_group_set" : ["default"] 

@@ -22,6 +22,7 @@ module XYZ
     
     def clone(target)
       #match conditions in ruleset with properties on target
+      target.update_object!(:iaas_type,:iaas_properties)
       match = clone_match(target)
       raise Error.new("No rules in the node being match the target") unless match
 
@@ -33,12 +34,11 @@ module XYZ
       new_obj = target.clone_into(node_template,override_attrs,clone_opts)
       new_obj && new_obj.id_handle()
     end
+
     def clone_match(target)
-      rules = self[:rules]
-      #TODO: stub
-      rules.first
-      #TODO: add any target defaults like security groups
+      CommandAndControl.clone_match(self[:rules],target)
     end
+
     def get_node_template(node_template_ref)
       sp_hash = {
         :cols => [:id, :display_name, :group_id],

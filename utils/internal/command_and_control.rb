@@ -14,6 +14,12 @@ module XYZ
       end
     end
 
+
+    def self.clone_match(node_binding_rules,target)
+      klass = load_iaas_for(:target => target)
+      klass.clone_match(node_binding_rules,target)
+    end
+
     def self.node_config_server_host()
       klass = load_config_node_adapter()
       klass.server_host()
@@ -61,11 +67,18 @@ module XYZ
             when "ec2_image" then :ec2 #TODO: kept in because staged node has this type, which should be changed
            else raise Error.new("not treated")
         end
-        adapter_type = :iaas
-        load_for_aux(adapter_type,adapter_name)
+      elsif key_val[:target]
+        target =  key_val[:target]
+        adapter_name =
+          case target[:iaas_type]
+            when "ec2" then :ec2
+            else raise Error.new("not treated")
+          end
       else
         raise Error.new("not treated")
       end
+      adapter_type = :iaas
+      load_for_aux(adapter_type,adapter_name)
     end
     
     def self.load_config_node_adapter()

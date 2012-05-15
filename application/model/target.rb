@@ -12,6 +12,7 @@ module XYZ
        :description,
        :type,
        :iaas_type,
+       :iaas_properties,
        :project_id,
        :ui
       ]
@@ -108,14 +109,14 @@ module XYZ
     end
 
     def clone_post_copy_hook__node(clone_copy_output,opts)
-      update_object!(:iaas_type,:iaas_parameters)
+      update_object!(:iaas_type,:iaas_properties)
       new_id_handle = clone_copy_output.id_handles.first
       #add external ref values from target to node if node does not have them
       #assuming passed already check whether node consistent requirements with target
       #TODO: not handling yet constraint form where set of possibilities given
       node = clone_copy_output.objects.first
       node_ext_ref = node[:external_ref]
-      self[:iaas_parameters].each do |k,v|
+      self[:iaas_properties].each do |k,v|
         unless node_ext_ref.has_key?(k)
           node_ext_ref[k] = v
         end

@@ -19,7 +19,10 @@
       :type=>:varchar,
       :length=>20
     },
-    :project_id=> { #TODO: when port datacenters to be target objects; project should be a parent
+    :iaas_properties=> {
+      :type=>:json
+    },
+    :project_id=> { #TODO: remove and make seperate relation so that targets can belong to multiple projects
       :type=>:bigint,
       :foreign_key_rel_type=>:project,
       :on_delete=>:set_null,

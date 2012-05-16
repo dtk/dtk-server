@@ -1,8 +1,8 @@
-#renders an asembly isnatnce or templaet in serialized form
+#exports an assembly isnatnce or templaet in serialized form
 module XYZ
-  module AssemblyRender
-    def render(opts={})
-      nested_objs = get_nested_objects_for_render()
+  module AssemblyExport
+    def export(opts={})
+      nested_objs = get_nested_objects_for_export()
       assembly_hash = assembly_output_hash(nested_objs)
       node_bindings_hash = node_bindings_output_hash(nested_objs)
 File.open("/tmp/t2","w"){|f| f << JSON.pretty_generate(nested_objs)}
@@ -10,7 +10,7 @@ out = SimpleOrderedHash.new([{:node_bindings => node_bindings_hash}, {:assemblie
 File.open("/tmp/t3","w"){|f| f << JSON.pretty_generate(out)}
     end
    private
-    def get_nested_objects_for_render()
+    def get_nested_objects_for_export()
       #get assembly level attributes
       sp_hash = {
         :cols => [:id,:display_name,:data_type,:value_asserted],
@@ -23,7 +23,7 @@ File.open("/tmp/t3","w"){|f| f << JSON.pretty_generate(out)}
       ndx_impls = Hash.new
       ndx_node_bindings = Hash.new
       assembly_ref = update_object!(:ref)[:ref]
-      sp_hash = {:cols => [:nested_nodes_and_cmps_for_render]}
+      sp_hash = {:cols => [:nested_nodes_and_cmps_for_export]}
       get_objs(sp_hash,:keep_ref_cols => true).each do |r|
         node = r[:node]
         node = ndx_nodes[node[:id]] ||= node.merge(:components => Array.new)

@@ -49,7 +49,7 @@ class R8Server
   def create_public_library_assemblies(assemblies_hash,node_bindings_hash)
     library_mh = pre_execute(:library)
     library_idh = Library.create_public_library?(library_mh)
-    Assembly.reify(library_idh,assemblies_hash,node_bindings_hash)
+    Assembly.import(library_idh,assemblies_hash,node_bindings_hash)
   end
 
 

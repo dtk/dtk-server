@@ -67,7 +67,7 @@
            :cols => [:id,:display_name,:component_type,:basic_type,:description]
          }]
     },
-    :nested_nodes_and_cmps_for_render=> {
+    :nested_nodes_and_cmps_for_export=> {
       :type => :json, 
       :hidden => true,
       :remote_dependencies =>

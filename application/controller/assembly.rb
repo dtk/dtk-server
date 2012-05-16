@@ -1,9 +1,9 @@
 module XYZ
   class AssemblyController < Controller
-    def rest__render()
+    def rest__export()
       assembly_id = ret_non_null_request_params(:assembly_id)
       assembly = id_handle(assembly_id,:component).create_object()
-      assembly.render()
+      assembly.export()
       rest_ok_response 
     end
 

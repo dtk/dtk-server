@@ -1,8 +1,10 @@
 r8_nested_require('assembly','attribute_pattern')
 r8_nested_require('assembly','render')
+r8_nested_require('assembly','reify')
 module XYZ
   class Assembly < Component
     include AssemblyRender
+    extend AssemblyReifyClassMixin
     def self.list_from_library(assembly_mh,library_idh=nil)
       lib_filter = (library_idh ? [:eq, :library_library_id, library_idh.get_id()] : [:neq, :library_library_id, nil])
       sp_hash = {

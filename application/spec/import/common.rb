@@ -46,6 +46,13 @@ class R8Server
     end
   end
 
+  def create_public_library_assemblies(assemblies_hash,node_bindings_hash)
+    library_mh = pre_execute(:library)
+    library_idh = Library.create_public_library?(library_mh)
+    Assembly.reify(library_idh,assemblies_hash,node_bindings_hash)
+  end
+
+
   def create_users_private_library?()
     library_mh = pre_execute(:library)
     Library.create_users_private_library?(library_mh)

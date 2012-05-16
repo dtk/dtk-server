@@ -3,44 +3,12 @@ module XYZ
   module AssemblyRender
     def render(opts={})
       nested_objs = get_nested_objects_for_render()
-      output_hash = output_hash_form(nested_objs)
+      assembly_hash = assembly_output_hash(nested_objs)
+      node_bindings_hash = node_bindings_output_hash(nested_objs)
 File.open("/tmp/t2","w"){|f| f << JSON.pretty_generate(nested_objs)}
-node_binding_rs = debug_node_binding_rs()
-out = SimpleOrderedHash.new([{:node_binding_rulesets => node_binding_rs}, {:assemblies => {output_hash[:name] => output_hash}}])
+out = SimpleOrderedHash.new([{:node_bindings => node_bindings_hash}, {:assemblies => {assembly_hash[:name] => assembly_hash}}])
 File.open("/tmp/t3","w"){|f| f << JSON.pretty_generate(out)}
-File.open("/tmp/t4","w"){|f| f << PP.pp(node_binding_rs,f)}
     end
-
-def debug_node_binding_rs()
-  sp_hash = {
-    :cols => [:id,:display_name,:external_ref],
-    :filter => [:and, [:eq, :assembly_id, nil],[:neq, :library_library_id, nil]]
-  }
-  node_templates = Model.get_objs(model_handle(:node),sp_hash)
-  node_templates.inject(SimpleOrderedHash.new) do |h,node|
-    external_ref = debug_node_external_ref(node)
-    rule = SimpleOrderedHash.new([{:conditions => Aux::hash_subset(external_ref,[:type,:region])},{:node_template => external_ref}])
-    node_ref = node[:display_name].downcase.gsub(/ /,"-")
-
-    h.merge(node_ref => SimpleOrderedHash.new([{:type => "clone"},{:rules => [rule]}]))
-  end
-end
-def debug_node_external_ref(node)
-  node_info =  SimpleOrderedHash.new
-  external_ref = node[:external_ref]
-  if external_ref[:type] == "ec2_image"
-    ec2_fields = [:image_id,:size,:region,:availability_zone,:security_group_set]
-    
-    output = ([:type]+ec2_fields).map do |f|
-      val = external_ref[f]||(f == :region ? "us-east-1" : nil) 
-      {f => val} if val
-    end.compact
-    SimpleOrderedHash.new(output)
-  else
-    raise Error.new("Have not implemented support for node type #{external_ref[:type]}")
-  end
-end
-
    private
     def get_nested_objects_for_render()
       #get assembly level attributes
@@ -53,10 +21,13 @@ end
       #get nodes, components and implementations
       ndx_nodes = Hash.new
       ndx_impls = Hash.new
+      ndx_node_bindings = Hash.new
+      assembly_ref = update_object!(:ref)[:ref]
       sp_hash = {:cols => [:nested_nodes_and_cmps_for_render]}
       get_objs(sp_hash,:keep_ref_cols => true).each do |r|
         node = r[:node]
         node = ndx_nodes[node[:id]] ||= node.merge(:components => Array.new)
+        ndx_node_bindings[node[:id]] ||= {:assembly_ref => assembly_ref,:node_display_name => node[:display_name], :node_binding_rs_ref => r[:node_binding_ruleset][:ref]}
         cmp = r[:nested_component]
         node[:components] << cmp
         ndx_impls[cmp[:implementation_id]] ||= r[:implementation]
@@ -77,10 +48,10 @@ end
       }
       port_links = Model.get_objs(model_handle(:port_link),sp_hash)
 
-      {:nodes => ndx_nodes.values, :ports => ports, :port_links => port_links, :attributes => assembly_attrs, :implementations => ndx_impls.values}
+      {:nodes => ndx_nodes.values, :ports => ports, :port_links => port_links, :attributes => assembly_attrs, :implementations => ndx_impls.values, :node_bindings => ndx_node_bindings.values}
     end
 
-    def output_hash_form(nested_objs)
+    def assembly_output_hash(nested_objs)
       ret = SimpleOrderedHash.new()
       ret[:name] = update_object!(:display_name)[:display_name]
       #add modules
@@ -108,6 +79,12 @@ end
        {port_output_form(input_port,:input) => port_output_form(output_port,:output)}
       end
       ret
+    end
+
+    def node_bindings_output_hash(nested_objs)
+      nested_objs[:node_bindings].inject(Hash.new) do |h,nb|
+        h.merge("#{nb[:assembly_ref]}/#{nb[:node_display_name]}" => nb[:node_binding_rs_ref])
+      end
     end
 
     def port_output_form(port,dir)

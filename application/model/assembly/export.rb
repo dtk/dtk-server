@@ -1,6 +1,12 @@
 #exports an assembly isnatnce or templaet in serialized form
 module XYZ
   module AssemblyExport
+    Seperators = {
+      :module_component => "::",
+      :component_port => "/",
+      :assembly_node => "/"
+    }
+    Attribute
     def export(opts={})
       nested_objs = get_nested_objects_for_export()
       assembly_hash = assembly_output_hash(nested_objs)
@@ -85,7 +91,7 @@ File.open("/tmp/t3","w"){|f| f << JSON.pretty_generate(out)}
       #add nodes and components
       ret[:nodes] = nested_objs[:nodes].inject(SimpleOrderedHash.new()) do |h,node|
         node_name = node[:display_name]
-        cmp_info = node[:components].map{|cmp|component_name_output_form(cmp[:component_type])}
+        cmp_info = node[:components].map{|cmp|component_output_form(cmp)}
         h.merge(node_name => {:components => cmp_info})
       end
 
@@ -99,9 +105,18 @@ File.open("/tmp/t3","w"){|f| f << JSON.pretty_generate(out)}
       ret
     end
 
+    def component_output_form(component)
+      name = component_name_output_form(component[:component_type])
+      if component[:attributes]
+        {name => component[:attributes].inject(Hash.new){|h,a|h.merge(a[:display_name] => a[:attribute_value])}}
+      else
+        name 
+      end
+    end
+
     def node_bindings_output_hash(nested_objs)
       nested_objs[:node_bindings].inject(Hash.new) do |h,nb|
-        h.merge("#{nb[:assembly_ref]}/#{nb[:node_display_name]}" => nb[:node_binding_rs_ref])
+        h.merge("#{nb[:assembly_ref]}#{Seperators[:assembly_node]}#{nb[:node_display_name]}" => nb[:node_binding_rs_ref])
       end
     end
 
@@ -109,17 +124,14 @@ File.open("/tmp/t3","w"){|f| f << JSON.pretty_generate(out)}
       #example internal form component_external___hdp-hadoop__namenode___namenode_conn
       if port[:display_name] =~ /component_external___(.+)__(.+)___(.+$)/
         mod = $1;cmp = $2;port_name = $3
-       ret = "#{mod}#{Module_seperator}#{cmp}#{Module_seperator}#{port_name}"
-       ((dir == :input) ? "#{ret}_ref" : ret)
+        "#{mod}#{Seperators[:module_component]}#{cmp}#{Seperators[:component_port]}#{port_name}"
       else
         ralse Error.new("unexpected display name #{port[:display_name]}")
       end
     end
    
     def component_name_output_form(internal_format)
-      internal_format.gsub(/__/,Module_seperator)
+      internal_format.gsub(/__/,Seperators[:module_component])
     end
-    
-    Module_seperator = "::"
   end
 end

@@ -38,7 +38,11 @@ module XYZ
       return ret if ndx_ch_attr_info.empty?
       changed_attrs_info = ndx_ch_attr_info.values
 
-      update_rows = changed_attrs_info.map{|r|Aux::hash_subset(r,[:id,val_field]).merge(:is_instance_value => true)}
+      update_rows = changed_attrs_info.map do |r|
+        row = Aux::hash_subset(r,[:id,val_field])
+        row.merge!(:is_instance_value => true) if (val_field == :value_asserted)
+        row
+      end
 
       #make actual changes in database
       update_from_rows(attr_mh,update_rows,:partial_value => true)

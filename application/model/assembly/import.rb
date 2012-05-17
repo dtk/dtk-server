@@ -14,7 +14,7 @@ pp import_hash
     module AssemblyImportInternal
       include AssemblyImportExportCommon
       def self.import_assembly_top(assembly_ref,assembly_hash)
-        {assembly_ref => {"display_name" => assembly_hash["name"]}}
+        {assembly_ref => {"display_name" => assembly_hash["name"], "type" => "composite"}}
       end
       def self.import_nodes(library_idh,assembly_ref,assembly_hash,node_bindings_hash)
         module_refs = assembly_hash["modules"]
@@ -48,7 +48,8 @@ pp import_hash
         augment_cmps = components_hash.inject(Hash.new) do |h,cmp_hash|
           if match = matching_cmps.find{|match_cmp|match_cmp[:component_type] == component_type(cmp_hash)}
             [:id,:implementation,:assembly_id,:node_node_id].each{|k|match.delete(k)}
-            match.merge!("*assembly_id" => "/component/#{assembly_ref}",:library_library_id => library_idh.get_id())
+            match.merge!("*assembly_id" => "/component/#{assembly_ref}")
+            #match.merge!(:library_library_id => library_idh.get_id()) looks like this gets nulled out; see if even need
             h.merge(match[:component_type] => match)
           else 
             non_matches << component_type(cmp_hash)

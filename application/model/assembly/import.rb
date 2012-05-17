@@ -7,7 +7,7 @@ module XYZ
         import_hash["component"].merge!(AssemblyImportInternal.import_assembly_top(ref,assem))
         import_hash["node"].merge!(AssemblyImportInternal.import_nodes(library_idh,ref,assem,node_bindings_hash))
       end
-##      import_objects_from_hash(library_idh,import_hash)
+      import_objects_from_hash(library_idh,import_hash)
 pp import_hash
     end
     private
@@ -25,14 +25,14 @@ pp import_hash
             "type" => "stub",
             "*assembly_id" => "/component/#{assembly_ref}"
           }
-          cmps_output = import_components(library_idh,module_refs,node_hash["components"])
+          cmps_output = import_components(library_idh,assembly_ref,module_refs,node_hash["components"])
           unless cmps_output.empty?
             node_output["component"] = cmps_output
           end
           h.merge(node_ref => node_output)
         end
       end
-      def self.import_components(library_idh,module_refs,components_hash)
+      def self.import_components(library_idh,assembly_ref,module_refs,components_hash)
         #find the reference components and clone
         #TODO: not clear we need the modules if component names are unique w/o modules
         #TODO: may eventually move to ref model for components in an assembly
@@ -54,7 +54,7 @@ pp import_hash
             non_matches << component_type(cmp_hash)
             h
           end
-        end.compact
+        end
         #error if one or more matches
         unless non_matches.empty?
           raise Error.new("No component matches for (#{non_matches.join(",")})")

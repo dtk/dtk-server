@@ -22,6 +22,7 @@ File.open("/tmp/t3","w"){|f| f << JSON.pretty_generate(out)}
       ndx_nodes = Hash.new
       ndx_impls = Hash.new
       ndx_node_bindings = Hash.new
+      cmp_ids = Array.new
       assembly_ref = update_object!(:ref)[:ref]
       sp_hash = {:cols => [:nested_nodes_and_cmps_for_export]}
       get_objs(sp_hash,:keep_ref_cols => true).each do |r|
@@ -29,9 +30,17 @@ File.open("/tmp/t3","w"){|f| f << JSON.pretty_generate(out)}
         node = ndx_nodes[node[:id]] ||= node.merge(:components => Array.new)
         ndx_node_bindings[node[:id]] ||= {:assembly_ref => assembly_ref,:node_display_name => node[:display_name], :node_binding_rs_ref => r[:node_binding_ruleset][:ref]}
         cmp = r[:nested_component]
+        cmp_ids << cmp[:id]
         node[:components] << cmp
         ndx_impls[cmp[:implementation_id]] ||= r[:implementation]
       end
+
+      #get non-default attributes on components
+      sp_hash = {
+        :cols => [:id,:attribute_value],
+        :filter => [:and,[:eq,:is_instance_value,true],[:oneof,:component_component_id,cmp_ids]]
+      }
+      non_default_attrs = Model.get_objs(model_handle(:attribute),sp_hash) 
 
       #get ports
       nested_node_ids = ndx_nodes.keys

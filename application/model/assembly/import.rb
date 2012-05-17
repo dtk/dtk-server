@@ -30,6 +30,15 @@ pp import_hash
         end
       end
       def self.import_components(module_refs,components_hash)
+        #find the reference components and clone
+        #TODO: may eventually move to ref model for components in an assembly
+        cmp_types = components_hash.map do |cmp|
+          (cmp.kind_of?(Hash) ? : cmp.keys.first : cmp).gsub(Regexp.new(Seperators[:module_component],"__"))
+        end
+        sp_hash => {
+          :cols => Component.common_columns() + [:module_name],
+          :filter => [:and, [:neq, :library_library_id,nil],[:oneof, :component_type,cmp_types]]
+        }
         nil #TODO: stub
       end
     end

@@ -137,6 +137,17 @@ module XYZ
            :cols => [:id,:file_name,:type,:path]
          }]
 
+      virtual_column :module_name, :type => :json, :hidden => true,
+      :remote_dependencies =>
+        [
+         {
+           :model_name => :implementation,
+           :join_type => :inner,
+           :join_cond=>{:id => q(:component,:implementation_id)},
+           :cols => [:id,:module_name]
+         }
+        ]
+
         virtual_column :dependencies, :type => :json, :hidden => true, 
         :remote_dependencies => 
         [

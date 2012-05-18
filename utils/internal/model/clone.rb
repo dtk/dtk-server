@@ -228,6 +228,7 @@ module XYZ
         @ret
       end
 
+#TODO: think in this fn need to recognize when child_context designates a node stub in an assembly and then need to process by getting teh library stub nodes and mapping to appropriaet target specfic node templates
       def clone_copy_child_objects(child_context,level=1)
         child_model_handle = child_context[:model_handle]
         parent_rels = child_context[:parent_rels]

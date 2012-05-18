@@ -332,6 +332,17 @@ module XYZ
            :cols => [:id,:display_name,:group_id]
          }]
 
+      virtual_column :node_binding_ruleset, :type => :json, :hidden => true,
+      :remote_dependencies =>
+        [
+         {
+           :model_name => :node_binding_ruleset,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond=>{:id =>:node__node_binding_rs_id},
+           :cols => NodeBindingRuleset.common_columns()
+         }]
+
       virtual_column :cmps_for_clone_into_node, :type => :json, :hidden => true,
       :remote_dependencies =>
         [

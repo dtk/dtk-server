@@ -332,20 +332,42 @@ module XYZ
         AssemblyChildren.map do |nested_model_name|
           nested_mh = model_handle.createMH(:model_name => nested_model_name, :parent_model_name => target_parent_mn)
           override_attrs = new_assembly_assign.merge(ret_child_override_attrs(nested_mh,recursive_override_attrs))
-          #TODO: make daat-driven
-          if matching_models?(nested_model_name,:node)
-            unless (override_attrs[:component]||{})[:assembly_id]
-              override_attrs.merge!(:component => new_assembly_assign)
-            end
-          end
           create_opts = {:duplicate_refs => :allow, :returning_sql_cols => [:ancestor_id,:assembly_id]}
-          #putting in nulls to null-out; more efficient to omit this columns in create
-          parent_rel = (DB_REL_DEF[nested_model_name][:many_to_one]||[]).inject({:old_par_id => ancestor_id}) do |hash,pos_par|
-            hash.merge(matching_models?(pos_par,target_parent_mn) ? new_par_assign : {DB.parent_field(pos_par,model_name) => SQL::ColRef.null_id})
+          if matching_models?(nested_model_name,:node) and  R8::Config[:use_node_bindings]
+            assembly_template_idh = model_handle.createIDH(:model_name => :component, :id => ancestor_id)
+            target_idh = target_parent_mh.createIDH(:id => assembly_obj_info[:parent_id])
+            get_nested_objects__nodes_in_assembly(target_idh,assembly_template_idh,nested_mh,override_attrs,create_opts)
+          else
+            #TODO: remove after get rid of R8::Config[:use_node_bindings] switch
+            if matching_models?(nested_model_name,:node)
+              unless (override_attrs[:component]||{})[:assembly_id]
+                override_attrs.merge!(:component => new_assembly_assign)
+              end
+            end
+            #putting in nulls to null-out; more efficient to omit this columns in create
+            parent_rel = (DB_REL_DEF[nested_model_name][:many_to_one]||[]).inject({:old_par_id => ancestor_id}) do |hash,pos_par|
+              hash.merge(matching_models?(pos_par,target_parent_mn) ? new_par_assign : {DB.parent_field(pos_par,model_name) => SQL::ColRef.null_id})
+            end
+            {:model_handle => nested_mh, :clone_par_col => :assembly_id, :parent_rels => [parent_rel], :override_attrs => override_attrs, :create_opts => create_opts}
           end
-          {:model_handle => nested_mh, :clone_par_col => :assembly_id, :parent_rels => [parent_rel], :override_attrs => override_attrs, :create_opts => create_opts}
         end
       end
+      def get_nested_objects__nodes_in_assembly(target_idh,assembly_template_idh,node_mh,override_attrs,create_opts)
+        #find the assembly's stub nodes and then use the node biding to find the node templates
+        sp_hash = {
+          :cols => [:id,:display_name,:node_binding_ruleset],
+          :filter => [:eq, :assembly_id, assembly_template_idh.get_id()]
+        }
+        node_info = Model.get_objs(node_mh,sp_hash)
+        #TODO: may be more efficient to get these all at once
+        node_info.each do |r|
+          #TODO: below is wrong fn; need to find matching template in the library
+          node_template_idh = r[:node_binding_ruleset].clone_or_match(target_idh.create_object())
+          r.merge(:node_template_idh => node_template_idh)
+        end
+        raise Error.new("in process of writing")
+      end
+
       AssemblyChildren = [:node,:attribute_link,:port_link]
       NonParentNestedKeys = AssemblyChildren.inject({}) do |h,m|
         h.merge(m => {:assembly_id => :component})

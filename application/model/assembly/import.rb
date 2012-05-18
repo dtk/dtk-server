@@ -7,8 +7,8 @@ module XYZ
         import_hash["component"].merge!(AssemblyImportInternal.import_assembly_top(ref,assem))
         import_hash["node"].merge!(AssemblyImportInternal.import_nodes(library_idh,ref,assem,node_bindings_hash))
       end
-      import_objects_from_hash(library_idh,import_hash)
 pp import_hash
+      import_objects_from_hash(library_idh,import_hash)
     end
     private
     module AssemblyImportInternal
@@ -18,6 +18,14 @@ pp import_hash
       end
       def self.import_nodes(library_idh,assembly_ref,assembly_hash,node_bindings_hash)
         module_refs = assembly_hash["modules"]
+        node_to_nb_rs = node_bindings_hash.inject(Hash.new) do |h,(k,v)|
+          if k =~ Regexp.new("#{assembly_ref}#{Seperators[:assembly_node]}(.+$)")
+            node = $1
+            h.merge(node => v)
+          else
+            h
+          end
+        end
         assembly_hash["nodes"].inject(Hash.new) do |h,(node_hash_ref,node_hash)|
           node_ref = "#{assembly_ref}--#{node_hash_ref}"
           node_output = {
@@ -25,6 +33,11 @@ pp import_hash
             "type" => "stub",
             "*assembly_id" => "/component/#{assembly_ref}"
           }
+          if nb_rs = node_to_nb_rs[node_hash_ref]
+            node_output["*node_binding_rs_id"] = "/node_binding_ruleset/#{nb_rs}"
+          else
+            Log.info("assembly node(#{node_hash_ref}) without a matching node bidning")
+          end
           cmps_output = import_components(library_idh,assembly_ref,module_refs,node_hash["components"])
           unless cmps_output.empty?
             node_output["component"] = cmps_output

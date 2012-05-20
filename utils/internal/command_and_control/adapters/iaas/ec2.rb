@@ -1,7 +1,7 @@
 module XYZ
   module CommandAndControlAdapter
     class Ec2 < CommandAndControlIAAS
-    def self.clone_match(node_binding_rules,target)
+    def self.find_matching_node_binding_rule(node_binding_rules,target)
       node_binding_rules.find do |r|
         conditions = r[:conditions]
         conditions[:region] == target[:iaas_properties][:region]

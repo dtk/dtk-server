@@ -353,7 +353,7 @@ module XYZ
         end
       end
       def get_nested_objects__nodes_in_assembly(target_idh,assembly_template_idh,node_mh,override_attrs,create_opts)
-        #find the assembly's stub nodes and then use the node biding to find the node templates
+        #find the assembly's stub nodes and then use the node binding to find the node templates
         sp_hash = {
           :cols => [:id,:display_name,:node_binding_ruleset],
           :filter => [:eq, :assembly_id, assembly_template_idh.get_id()]
@@ -361,8 +361,7 @@ module XYZ
         node_info = Model.get_objs(node_mh,sp_hash)
         #TODO: may be more efficient to get these all at once
         node_info.each do |r|
-          #TODO: below is wrong fn; need to find matching template in the library
-          node_template_idh = r[:node_binding_ruleset].clone_or_match(target_idh.create_object())
+          node_template_idh = r[:node_binding_ruleset].find_matching_node_template(target_idh.create_object()).id_handle()
           r.merge(:node_template_idh => node_template_idh)
         end
         raise Error.new("in process of writing")

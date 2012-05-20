@@ -15,9 +15,10 @@ module XYZ
     end
 
 
-    def self.clone_match(node_binding_rules,target)
+    def self.find_matching_node_binding_rule(node_binding_rules,target)
+      target.update_object!(:iaas_type,:iaas_properties)
       klass = load_iaas_for(:target => target)
-      klass.clone_match(node_binding_rules,target)
+      klass.find_matching_node_binding_rule(node_binding_rules,target)
     end
 
     def self.node_config_server_host()

@@ -228,7 +228,7 @@ module XYZ
         @ret
       end
 
-      def clone_copy_child_objects(child_context,level=1)
+      def clone_copy_child_objects_deprecate(child_context,level=1)
         child_model_handle = child_context[:model_handle]
         parent_rels = child_context[:parent_rels]
         recursive_override_attrs= child_context[:override_attrs]
@@ -251,6 +251,31 @@ module XYZ
         create_override_attrs = ret_real_columns(child_model_handle,recursive_override_attrs)
         new_objs_info = Model.create_from_select(child_model_handle,field_set_to_copy,select_ds,create_override_attrs,child_context[:create_opts])
         return if new_objs_info.empty?
+        new_id_handles = @ret.add_new_children_objects(new_objs_info,child_model_handle,clone_par_col,level)
+        fk_info.add_id_mappings(child_model_handle,new_objs_info)
+
+        fk_info.add_id_handles(new_id_handles) #TODO: may be more efficient adding only id handles assciated with foreign keys
+
+        #iterate all nested children
+        get_nested_objects__parents(child_model_handle,new_objs_info,recursive_override_attrs).each do |child_context|
+          clone_copy_child_objects(child_context,level+1)
+        end
+        @ret
+      end
+
+      def clone_copy_child_objects(child_context,level=1)
+        child_model_handle = child_context[:model_handle]
+        recursive_override_attrs = child_context[:override_attrs]
+        child_model_name = child_model_handle[:model_name]
+        clone_par_col = child_context[:clone_par_col]
+
+        field_set_to_copy = Model::FieldSet.all_real(child_model_name).with_removed_cols(:id,:local_id)
+        fk_info.add_foreign_keys(child_model_handle,field_set_to_copy)
+
+        create_override_attrs = ret_real_columns(child_model_handle,recursive_override_attrs)
+        new_objs_info = child_context.ret_new_objs_info(db,field_set_to_copy,create_override_attrs)
+        return if new_objs_info.empty?
+
         new_id_handles = @ret.add_new_children_objects(new_objs_info,child_model_handle,clone_par_col,level)
         fk_info.add_id_mappings(child_model_handle,new_objs_info)
 
@@ -304,7 +329,41 @@ module XYZ
         def self.create(hash)
           self.new(hash)
         end
+
+        def ret_new_objs_info(db,field_set_to_copy,create_override_attrs)
+          ancestor_rel_ds = SQL::ArrayDataset.create(db,parent_rels,model_handle.createMH(:model_name => :target))
+
+          #all parent_rels will have same cols so taking a sample
+          remove_cols = [:ancestor_id] + parent_rels.first.keys.reject{|col|col == :old_par_id}
+          field_set_from_ancestor = field_set_to_copy.with_removed_cols(*remove_cols).with_added_cols({:id => :ancestor_id},{clone_par_col => :old_par_id})
+
+          ds = Model.get_objects_just_dataset(model_handle,where_clause(),Model::FieldSet.opt(field_set_from_ancestor))
+        
+          select_ds = ancestor_rel_ds.join_table(:inner,ds,[:old_par_id])
+          Model.create_from_select(model_handle,field_set_to_copy,select_ds,create_override_attrs,create_opts)
+        end
+        private
+         def parent_rels()
+           self[:parent_rels]
+         end
+         def model_handle()
+           self[:model_handle]
+         end
+         def clone_par_col()
+           self[:clone_par_col]
+         end
+         def override_attrs()
+           self[:override_attrs]
+         end
+         def create_opts()
+           self[:create_opts]
+         end
+         
+         def where_clause()
+           nil
+         end
       end
+
       class ChildContextAssemblyNode < ChildContext
         def find_node_templates_in_assembly!(target_idh,assembly_template_idh)
           #find the assembly's stub nodes and then use the node binding to find the node templates
@@ -320,6 +379,13 @@ module XYZ
             {:source_idh => r.id_handle, :match_idh =>  node_template_idh}
           end
           merge!(:matches => matches)
+        end
+       private
+        def where_clause()
+          !matches.empty? && {:id => matches.map{|m|m[:match_idh].get_id()}}
+        end
+        def matches()
+          self[:matches]
         end
       end
 
@@ -365,7 +431,7 @@ module XYZ
           child_context_class = (matching_models?(nested_model_name,:node) and R8::Config[:use_node_bindings]) ? ChildContextAssemblyNode : ChildContext
           child = child_context_class.create(:model_handle => nested_mh, :clone_par_col => :assembly_id, :parent_rels => [parent_rel], :override_attrs => override_attrs, :create_opts => create_opts)
           if matching_models?(nested_model_name,:node) 
-            unless (child_hash[:override_attrs][:component]||{})[:assembly_id]
+            unless (child[:override_attrs][:component]||{})[:assembly_id]
               child[:override_attrs].merge!(:component => new_assembly_assign)
             end
 

@@ -4,7 +4,7 @@ module XYZ
     def initialize(initial_val=nil,&block)
       block ? super(&block) : super()
       if initial_val
-        replace(convert_initial)
+        replace(initial_val)
       end
     end
   end

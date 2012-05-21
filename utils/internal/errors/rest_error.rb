@@ -1,13 +1,14 @@
+#When creating these objects, an internal errro class is passed to the creation functions
 module XYZ
   class RestError  
-    def self.create(internal_error)
-      if internal_error.kind_of?(::NoMethodError)
-        NotFound.new(internal_error)
+    def self.create(err)
+      if NotFound.match?(err)
+        NotFound.new(err)
       else
-        new(internal_error)
+        Internal.new(err)
       end
     end
-    def initialize(internal_error)
+    def initialize(err)
       @code = nil
       @message = nil
     end
@@ -26,9 +27,17 @@ module XYZ
     class Usage < RestError
     end
     class NotFound < Usage
-      def initilize(internal_error)
+      def self.match?(err)
+        err.kind_of?(::NoMethodError) and is_controller_method(err)
+      end
+      def initialize(err)
         super
         @code = :not_found
+        @message = "'#{err.name}' was not found"
+      end
+     private
+      def self.is_controller_method(err)
+        err.to_s =~ /#<XYZ::.+Controller:/
       end
     end
   end

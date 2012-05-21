@@ -363,7 +363,7 @@ module XYZ
         node_info = Model.get_objs(assembly_template_idh.createMH(:node),sp_hash)
         target = target_idh.create_object()
         #TODO: may be more efficient to get these all at once
-        matches = node_info.each do |r|
+        matches = node_info.map do |r|
           node_template_idh = r[:node_binding_ruleset].find_matching_node_template(target).id_handle()
           {:source_idh => r.id_handle, :match_idh =>  node_template_idh}
         end

@@ -228,7 +228,6 @@ module XYZ
         @ret
       end
 
-#TODO: think in this fn need to recognize when child_context designates a node stub in an assembly and then need to process by getting teh library stub nodes and mapping to appropriaet target specfic node templates
       def clone_copy_child_objects(child_context,level=1)
         child_model_handle = child_context[:model_handle]
         parent_rels = child_context[:parent_rels]
@@ -243,7 +242,9 @@ module XYZ
         #all parent_rels will have same cols so taking a sample
         remove_cols = [:ancestor_id] + parent_rels.first.keys.reject{|col|col == :old_par_id}
         field_set_from_ancestor = field_set_to_copy.with_removed_cols(*remove_cols).with_added_cols({:id => :ancestor_id},{clone_par_col => :old_par_id})
-        child_wc = nil
+
+        #if direct matches foudn tehn use the ids contained in child_context[:matches]
+        child_wc = child_context[:matches] && !child_context[:matches].empty? && {:id => child_context[:matches].map{|m|m[:match_idh].get_id()}}
         child_ds = Model.get_objects_just_dataset(child_model_handle,child_wc,Model::FieldSet.opt(field_set_from_ancestor))
         
         select_ds = ancestor_rel_ds.join_table(:inner,child_ds,[:old_par_id])
@@ -292,13 +293,36 @@ module XYZ
         create_opts = {:duplicate_refs => :allow, :returning_sql_cols => ret_sql_cols}
         parent_rels = id_handles.map{|idh|{:old_par_id => idh.get_id()}}
         
-        {:model_handle => model_handle, :clone_par_col => :id, :parent_rels => parent_rels, :override_attrs => override_attrs, :create_opts => create_opts}
+        ChildContext.create(:model_handle => model_handle, :clone_par_col => :id, :parent_rels => parent_rels, :override_attrs => override_attrs, :create_opts => create_opts)
       end
 
       def add_id_handle(id_handle)
         @ret.add_id_handle(id_handle)
       end
      private
+      class ChildContext < SimpleHashObject
+        def self.create(hash)
+          self.new(hash)
+        end
+      end
+      class ChildContextAssemblyNode < ChildContext
+        def find_node_templates_in_assembly!(target_idh,assembly_template_idh)
+          #find the assembly's stub nodes and then use the node binding to find the node templates
+          sp_hash = {
+            :cols => [:id,:display_name,:node_binding_ruleset],
+            :filter => [:eq, :assembly_id, assembly_template_idh.get_id()]
+          }
+          node_info = Model.get_objs(assembly_template_idh.createMH(:node),sp_hash)
+          target = target_idh.create_object()
+          #TODO: may be more efficient to get these all at once
+          matches = node_info.map do |r|
+            node_template_idh = r[:node_binding_ruleset].find_matching_node_template(target).id_handle()
+            {:source_idh => r.id_handle, :match_idh =>  node_template_idh}
+          end
+          merge!(:matches => matches)
+        end
+      end
+
       attr_reader :db,:fk_info, :model_name
       def get_nested_objects__parents(model_handle,objs_info,recursive_override_attrs,omit_list=[])
         ret = Array.new
@@ -308,7 +332,7 @@ module XYZ
           parent_id_col = mh.parent_id_field_name()
           parent_rels = objs_info.map{|row|{parent_id_col => row[:id],:old_par_id => row[:ancestor_id]}}
           create_opts = {:duplicate_refs => :no_check, :returning_sql_cols => [:ancestor_id,parent_id_col]}
-          ret << {:model_handle => mh, :clone_par_col => parent_id_col, :parent_rels => parent_rels, :override_attrs => override_attrs, :create_opts => create_opts}
+          ret << ChildContext.create(:model_handle => mh, :clone_par_col => parent_id_col, :parent_rels => parent_rels, :override_attrs => override_attrs, :create_opts => create_opts)
         end
         ret
       end
@@ -338,36 +362,21 @@ module XYZ
           parent_rel = (DB_REL_DEF[nested_model_name][:many_to_one]||[]).inject({:old_par_id => ancestor_id}) do |hash,pos_par|
             hash.merge(matching_models?(pos_par,target_parent_mn) ? new_par_assign : {DB.parent_field(pos_par,model_name) => SQL::ColRef.null_id})
           end
-          child = {:model_handle => nested_mh, :clone_par_col => :assembly_id, :parent_rels => [parent_rel], :override_attrs => override_attrs, :create_opts => create_opts}
+          child_context_class = (matching_models?(nested_model_name,:node) and R8::Config[:use_node_bindings]) ? ChildContextAssemblyNode : ChildContext
+          child = child_context_class.create(:model_handle => nested_mh, :clone_par_col => :assembly_id, :parent_rels => [parent_rel], :override_attrs => override_attrs, :create_opts => create_opts)
           if matching_models?(nested_model_name,:node) 
-            unless (child[:override_attrs][:component]||{})[:assembly_id]
+            unless (child_hash[:override_attrs][:component]||{})[:assembly_id]
               child[:override_attrs].merge!(:component => new_assembly_assign)
             end
 
-            if R8::Config[:use_node_bindings]
+            if child.kind_of?(ChildContextAssemblyNode)
               assembly_template_idh = model_handle.createIDH(:model_name => :component, :id => ancestor_id)
               target_idh = target_parent_mh.createIDH(:id => assembly_obj_info[:parent_id])
-              find_node_templates_in_assembly!(child,target_idh,assembly_template_idh)
+              child.find_node_templates_in_assembly!(target_idh,assembly_template_idh)
             end
           end
           child 
         end
-      end
-
-      def find_node_templates_in_assembly!(child,target_idh,assembly_template_idh)
-        #find the assembly's stub nodes and then use the node binding to find the node templates
-        sp_hash = {
-          :cols => [:id,:display_name,:node_binding_ruleset],
-          :filter => [:eq, :assembly_id, assembly_template_idh.get_id()]
-        }
-        node_info = Model.get_objs(assembly_template_idh.createMH(:node),sp_hash)
-        target = target_idh.create_object()
-        #TODO: may be more efficient to get these all at once
-        matches = node_info.map do |r|
-          node_template_idh = r[:node_binding_ruleset].find_matching_node_template(target).id_handle()
-          {:source_idh => r.id_handle, :match_idh =>  node_template_idh}
-        end
-        child.merge!(:matches => matches)
       end
 
       AssemblyChildren = [:node,:attribute_link,:port_link]

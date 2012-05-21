@@ -102,7 +102,12 @@ module XYZ
     def run_rest_action(action,parent_model_name=nil)
       model,method = action[:route].split("/")
       method ||= :index
-      result = call_action(action,parent_model_name)
+      result = nil
+      begin 
+       result = call_action(action,parent_model_name)
+       rescue Exception => e
+        result = rest_notok_response(RestError.create(e).hash_form())
+      end
       @ctrl_results = ControllerResultsRest.new(result)
     end
 

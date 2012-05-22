@@ -7,7 +7,7 @@ module XYZ
       virtual_column :name, :type => :varchar, :local_dependencies => [:display_name]
       column :tag, :varchar
       #TODO: may change types; by virtue of being in alibrary we know about item; may need to distingusih between backed images versus barbones one; also may only treat node constraints with search objects
-      column :type, :varchar, :size => 25, :default => "instance" # | "image" #TODO: any more states possible
+      column :type, :varchar, :size => 25, :default => "instance" # | "image" || "staged" || "stub"
       column :os_type, :varchar, :size => 25
       column :architecture, :varchar, :size => 10 #e.g., 'i386'
       #TBD: in data source specfic now column :manifest, :varchar #e.g.,rnp-chef-server-0816-ubuntu-910-x86_32

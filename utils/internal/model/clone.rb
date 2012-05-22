@@ -331,13 +331,14 @@ module XYZ
         end
 
         def ret_new_objs_info(db,field_set_to_copy,create_override_attrs)
-          ancestor_rel_ds = SQL::ArrayDataset.create(db,parent_rels,model_handle.createMH(:model_name => :target))
+          ancestor_rel_ds = SQL::ArrayDataset.create(db,parent_rels,model_handle.createMH(:target))
 
           #all parent_rels will have same cols so taking a sample
           remove_cols = [:ancestor_id] + parent_rels.first.keys.reject{|col|col == :old_par_id}
           field_set_from_ancestor = field_set_to_copy.with_removed_cols(*remove_cols).with_added_cols({:id => :ancestor_id},{clone_par_col => :old_par_id})
 
-          ds = Model.get_objects_just_dataset(model_handle,where_clause(),Model::FieldSet.opt(field_set_from_ancestor))
+          wc = nil
+          ds = Model.get_objects_just_dataset(model_handle,wc,Model::FieldSet.opt(field_set_from_ancestor))
         
           select_ds = ancestor_rel_ds.join_table(:inner,ds,[:old_par_id])
           Model.create_from_select(model_handle,field_set_to_copy,select_ds,create_override_attrs,create_opts)
@@ -358,10 +359,6 @@ module XYZ
          def create_opts()
            self[:create_opts]
          end
-         
-         def where_clause()
-           nil
-         end
       end
 
       class ChildContextAssemblyNode < ChildContext
@@ -376,14 +373,30 @@ module XYZ
           #TODO: may be more efficient to get these all at once
           matches = node_info.map do |r|
             node_template_idh = r[:node_binding_ruleset].find_matching_node_template(target).id_handle()
-            {:source_idh => r.id_handle, :match_idh =>  node_template_idh}
+            {:node_stub_idh => r.id_handle, :node_stub_display_name => r[:display_name], :node_template_idh => node_template_idh}
           end
           merge!(:matches => matches)
         end
-       private
-        def where_clause()
-          !matches.empty? && {:id => matches.map{|m|m[:match_idh].get_id()}}
+
+        def ret_new_objs_info(db,field_set_to_copy,create_override_attrs)
+          ancestor_rel_ds = SQL::ArrayDataset.create(db,parent_rels,model_handle.createMH(:target))
+
+          #all parent_rels will have same cols so taking a sample
+#          remove_cols = [:ancestor_id,:display_name] + parent_rels.first.keys.reject{|col|col == :old_par_id}
+          remove_cols = [:ancestor_id,:display_name] + parent_rels.first.keys
+          node_template_fs = field_set_to_copy.with_removed_cols(*remove_cols).with_added_cols(:id => :ancestor_id)
+          node_template_wc = nil
+          node_template_ds = Model.get_objects_just_dataset(model_handle,node_template_wc,Model::FieldSet.opt(node_template_fs))
+
+          #mapping from node stub to node template
+          mapping_rows = matches.map{|m|{:ancestor_id => m[:node_template_idh].get_id(), :display_name => m[:node_stub_display_name]}}
+          mapping_ds = SQL::ArrayDataset.create(db,mapping_rows,model_handle.createMH(:mapping))
+        
+          select_ds = ancestor_rel_ds.join_table(:inner,node_template_ds).join_table(:inner,mapping_ds,[:ancestor_id])
+          Model.create_from_select(model_handle,field_set_to_copy,select_ds,create_override_attrs,create_opts)
         end
+
+       private
         def matches()
           self[:matches]
         end

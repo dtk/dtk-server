@@ -383,15 +383,15 @@ module XYZ
 
           #all parent_rels will have same cols so taking a sample
           remove_cols = [:ancestor_id,:display_name,:type] + parent_rels.first.keys
-          node_template_fs = field_set_to_copy.with_removed_cols(*remove_cols).with_added_cols(:id => :ancestor_id)
+          node_template_fs = field_set_to_copy.with_removed_cols(*remove_cols).with_added_cols(:id => :node_template_id)
           node_template_wc = nil
           node_template_ds = Model.get_objects_just_dataset(model_handle,node_template_wc,Model::FieldSet.opt(node_template_fs))
 
           #mapping from node stub to node template and overriding appropriate node template columns
-          mapping_rows = matches.map{|m|{:type => "staged",:ancestor_id => m[:node_template_idh].get_id(), :display_name => m[:node_stub_display_name]}}
+          mapping_rows = matches.map{|m|{:type => "staged",:ancestor_id => m[:node_stub_idh].get_id(),:node_template_id => m[:node_template_idh].get_id(), :display_name => m[:node_stub_display_name]}}
           mapping_ds = SQL::ArrayDataset.create(db,mapping_rows,model_handle.createMH(:mapping))
         
-          select_ds = ancestor_rel_ds.join_table(:inner,node_template_ds).join_table(:inner,mapping_ds,[:ancestor_id])
+          select_ds = ancestor_rel_ds.join_table(:inner,node_template_ds).join_table(:inner,mapping_ds,[:node_template_id])
           Model.create_from_select(model_handle,field_set_to_copy,select_ds,create_override_attrs,create_opts)
         end
 

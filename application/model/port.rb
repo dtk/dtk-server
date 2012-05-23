@@ -40,7 +40,7 @@ module XYZ
     
     ###########
    public
-    #TODO: assumption that ref and display_name are teh same
+    #TODO: assumption that ref and display_name are the same
     def component_name()
       self[:display_name].split("___")[1]
     end

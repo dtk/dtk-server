@@ -1,4 +1,4 @@
-#TODO: may just make an isnatnce mixin
+#TODO: this needs much cleanup: may spearete into parts fro assemblies and then teh rest which is containment based copying
 module XYZ
   module CloneClassMixins
 

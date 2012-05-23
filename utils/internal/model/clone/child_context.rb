@@ -44,6 +44,10 @@ module XYZ
     def create_opts()
       self[:create_opts]
     end
+      
+    def matches()
+      self[:matches]
+    end
 
     class AssemblyNode < ChildContext
       #for processing node stubs in an assembly
@@ -89,13 +93,24 @@ module XYZ
         end
         merge!(:matches => matches)
       end
-      
-      def matches()
-        self[:matches]
-      end
     end
     class AssemblyComponentRef < ChildContext
+      private
       def initialize(hash)
+        super
+        find_component_templates_in_assembly!()
+      end
+      def find_component_templates_in_assembly!()
+        #find the component templates that each component ref is pointing to
+        node_stub_ids = parent_rels.map{|pr|pr[:old_par_id]}
+        sp_hash = {
+          :cols => [:id,:display_name,:node_node_id,:component_template_id],
+          :filter => [:oneof, :node_node_id, node_stub_ids]
+        }
+        matches = Model.get_objs(model_handle.createMH(:component_ref),sp_hash)
+        merge!(:matches => matches)
+      end
+      def ret_new_objs_info(db,field_set_to_copy,create_override_attrs)
         super
       end
     end

@@ -187,6 +187,7 @@ module XYZ
         new_assembly_assign = {:assembly_id => assembly_obj_info[:id]}
         new_par_assign = {DB.parent_field(target_parent_mn,model_name) => assembly_obj_info[:parent_id]}
         AssemblyChildren.map do |nested_model_name|
+          #TODO: push this into ChildContext.create
           nested_mh = model_handle.createMH(:model_name => nested_model_name, :parent_model_name => target_parent_mn)
           override_attrs = new_assembly_assign.merge(ret_child_override_attrs(nested_mh,recursive_override_attrs))
           create_opts = {:duplicate_refs => :allow, :returning_sql_cols => [:ancestor_id,:assembly_id]}
@@ -316,6 +317,7 @@ module XYZ
       end
 
       def ret_child_context(id_handles,target_idh,existing_override_attrs={})
+        #TODO: push this into ChildContext.create
         #assuming all id_handles have same model_handle
         sample_idh = id_handles.first
         model_name = sample_idh[:model_name]
@@ -345,6 +347,7 @@ module XYZ
       def get_nested_objects__parents(model_handle,objs_info,recursive_override_attrs,omit_list=[])
         ret = Array.new
         model_handle.get_children_model_handles(:clone_context => true).each do |mh|
+          #TODO: push this into ChildContext.create
           next if omit_list.include?(mh[:model_name])
           override_attrs = ret_child_override_attrs(mh,recursive_override_attrs)
           parent_id_col = mh.parent_id_field_name()

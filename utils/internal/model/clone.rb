@@ -25,7 +25,7 @@ module XYZ
       end
 
       clone_source_object.add_model_specific_override_attrs!(override_attrs,self)
-      proc = CloneCopyProcessor.new(clone_source_object,opts.merge(:include_children => true))
+      proc = CloneCopyProcessor.create(clone_source_object,opts.merge(:include_children => true))
       clone_copy_output = proc.clone_copy_top_level(clone_source_object.id_handle,[target_id_handle],override_attrs)
       new_id_handle = clone_copy_output.id_handles.first
       return nil unless new_id_handle
@@ -44,7 +44,7 @@ module XYZ
 
     def clone_into_library_assembly(assembly_idh,id_handles)
       opts = {:include_children => true}
-      proc = CloneCopyProcessor.new(assembly_idh.create_object(),opts)
+      proc = CloneCopyProcessor.create(assembly_idh.create_object(),opts)
       proc.add_id_handle(assembly_idh)
 
       #group id handles by model type
@@ -165,13 +165,69 @@ module XYZ
     end
 
     class CloneCopyProcessor
+      private
+      AssemblyChildren = [:node,:attribute_link,:port_link]
+      NonParentNestedKeys = AssemblyChildren.inject({}) do |h,m|
+        h.merge(m => {:assembly_id => :component})
+      end
+      def get_nested_objects_top_level(model_handle,target_parent_mh,objs_info,recursive_override_attrs,opts={})
+        get_nested_objects__parents(model_handle,objs_info,recursive_override_attrs)
+      end
+    end
+
+    class CloneCopyProcessorAssembly < CloneCopyProcessor
+      private
+      def get_nested_objects_top_level(model_handle,target_parent_mh,assembly_objs_info,recursive_override_attrs,opts={})
+        raise Error.new("Not treating assembly_objs_info with more than 1 element") unless assembly_objs_info.size == 1
+        assembly_obj_info = assembly_objs_info.first
+        ancestor_id = assembly_obj_info[:ancestor_id]
+        target_parent_mn = target_parent_mh[:model_name]
+        model_name = model_handle[:model_name]
+        new_assembly_assign = {:assembly_id => assembly_obj_info[:id]}
+        new_par_assign = {DB.parent_field(target_parent_mn,model_name) => assembly_obj_info[:parent_id]}
+        AssemblyChildren.map do |nested_model_name|
+          nested_mh = model_handle.createMH(:model_name => nested_model_name, :parent_model_name => target_parent_mn)
+          override_attrs = new_assembly_assign.merge(ret_child_override_attrs(nested_mh,recursive_override_attrs))
+          create_opts = {:duplicate_refs => :allow, :returning_sql_cols => [:ancestor_id,:assembly_id]}
+
+          #putting in nulls to null-out; more efficient to omit this columns in create
+          parent_rel = (DB_REL_DEF[nested_model_name][:many_to_one]||[]).inject({:old_par_id => ancestor_id}) do |hash,pos_par|
+            hash.merge(matching_models?(pos_par,target_parent_mn) ? new_par_assign : {DB.parent_field(pos_par,model_name) => SQL::ColRef.null_id})
+          end
+          child_context_class = (matching_models?(nested_model_name,:node) and R8::Config[:use_node_bindings]) ? ChildContextAssemblyNode : ChildContext
+          child = child_context_class.create(:model_handle => nested_mh, :clone_par_col => :assembly_id, :parent_rels => [parent_rel], :override_attrs => override_attrs, :create_opts => create_opts)
+          if matching_models?(nested_model_name,:node) 
+            unless (child[:override_attrs][:component]||{})[:assembly_id]
+              child[:override_attrs].merge!(:component => new_assembly_assign)
+            end
+
+            if child.kind_of?(ChildContextAssemblyNode)
+              assembly_template_idh = model_handle.createIDH(:model_name => :component, :id => ancestor_id)
+              target_idh = target_parent_mh.createIDH(:id => assembly_obj_info[:parent_id])
+              child.find_node_templates_in_assembly!(target_idh,assembly_template_idh)
+            end
+          end
+          child 
+        end
+      end
+    end
+
+    class CloneCopyProcessor
+      def self.create(source_obj,opts={})
+        if source_obj.is_assembly?
+          CloneCopyProcessorAssembly.new(source_obj,opts)
+        else
+          new(source_obj,opts)
+        end
+      end
+
       def initialize(source_obj,opts={})
         @db = source_obj.class.db
         @fk_info = ForeignKeyInfo.new(@db)
         @model_name = source_obj.model_name()
         @ret = CloneCopyOutput.new(source_obj,opts)
       end
-
+      private :initialize
       def output()
         @ret
       end
@@ -225,41 +281,6 @@ module XYZ
           clone_copy_child_objects(child_context)
         end
         fk_info.shift_foregn_keys()
-        @ret
-      end
-
-      def clone_copy_child_objects_deprecate(child_context,level=1)
-        child_model_handle = child_context[:model_handle]
-        parent_rels = child_context[:parent_rels]
-        recursive_override_attrs= child_context[:override_attrs]
-        child_model_name = child_model_handle[:model_name]
-        clone_par_col = child_context[:clone_par_col]
-
-        ancestor_rel_ds = SQL::ArrayDataset.create(db,parent_rels,child_model_handle.createMH(:model_name => :target))
-
-        field_set_to_copy = Model::FieldSet.all_real(child_model_name).with_removed_cols(:id,:local_id)
-        fk_info.add_foreign_keys(child_model_handle,field_set_to_copy)
-        #all parent_rels will have same cols so taking a sample
-        remove_cols = [:ancestor_id] + parent_rels.first.keys.reject{|col|col == :old_par_id}
-        field_set_from_ancestor = field_set_to_copy.with_removed_cols(*remove_cols).with_added_cols({:id => :ancestor_id},{clone_par_col => :old_par_id})
-
-        #if direct matches foudn tehn use the ids contained in child_context[:matches]
-        child_wc = child_context[:matches] && !child_context[:matches].empty? && {:id => child_context[:matches].map{|m|m[:match_idh].get_id()}}
-        child_ds = Model.get_objects_just_dataset(child_model_handle,child_wc,Model::FieldSet.opt(field_set_from_ancestor))
-        
-        select_ds = ancestor_rel_ds.join_table(:inner,child_ds,[:old_par_id])
-        create_override_attrs = ret_real_columns(child_model_handle,recursive_override_attrs)
-        new_objs_info = Model.create_from_select(child_model_handle,field_set_to_copy,select_ds,create_override_attrs,child_context[:create_opts])
-        return if new_objs_info.empty?
-        new_id_handles = @ret.add_new_children_objects(new_objs_info,child_model_handle,clone_par_col,level)
-        fk_info.add_id_mappings(child_model_handle,new_objs_info)
-
-        fk_info.add_id_handles(new_id_handles) #TODO: may be more efficient adding only id handles assciated with foreign keys
-
-        #iterate all nested children
-        get_nested_objects__parents(child_model_handle,new_objs_info,recursive_override_attrs).each do |child_context|
-          clone_copy_child_objects(child_context,level+1)
-        end
         @ret
       end
 
@@ -378,6 +399,7 @@ module XYZ
           merge!(:matches => matches)
         end
 
+        #for processing node stubs in an assembly
         def ret_new_objs_info(db,field_set_to_copy,create_override_attrs)
           ancestor_rel_ds = SQL::ArrayDataset.create(db,parent_rels,model_handle.createMH(:target))
 
@@ -392,7 +414,11 @@ module XYZ
           mapping_ds = SQL::ArrayDataset.create(db,mapping_rows,model_handle.createMH(:mapping))
         
           select_ds = ancestor_rel_ds.join_table(:inner,node_template_ds).join_table(:inner,mapping_ds,[:node_template_id])
-          Model.create_from_select(model_handle,field_set_to_copy,select_ds,create_override_attrs,create_opts)
+          ret = Model.create_from_select(model_handle,field_set_to_copy,select_ds,create_override_attrs,create_opts)
+          ret.each do |r|
+            r.merge!(:node_template_id => (mapping_rows.find{|mr|mr[:assembly_id] = r[:assembly_id]}||{})[:node_template_id])
+          end
+          ret
         end
 
        private
@@ -413,53 +439,6 @@ module XYZ
           ret << ChildContext.create(:model_handle => mh, :clone_par_col => parent_id_col, :parent_rels => parent_rels, :override_attrs => override_attrs, :create_opts => create_opts)
         end
         ret
-      end
-
-      def get_nested_objects_top_level(model_handle,target_parent_mh,objs_info,recursive_override_attrs,opts={})
-        if @ret.is_assembly?()
-          get_nested_objects__assembly(model_handle,target_parent_mh,objs_info,recursive_override_attrs,opts)
-        else
-          get_nested_objects__parents(model_handle,objs_info,recursive_override_attrs)
-        end
-      end
-
-      def get_nested_objects__assembly(model_handle,target_parent_mh,assembly_objs_info,recursive_override_attrs,opts)
-        raise Error.new("Not treating assembly_objs_info with more than 1 element") unless assembly_objs_info.size == 1
-        assembly_obj_info = assembly_objs_info.first
-        ancestor_id = assembly_obj_info[:ancestor_id]
-        target_parent_mn = target_parent_mh[:model_name]
-        model_name = model_handle[:model_name]
-        new_assembly_assign = {:assembly_id => assembly_obj_info[:id]}
-        new_par_assign = {DB.parent_field(target_parent_mn,model_name) => assembly_obj_info[:parent_id]}
-        AssemblyChildren.map do |nested_model_name|
-          nested_mh = model_handle.createMH(:model_name => nested_model_name, :parent_model_name => target_parent_mn)
-          override_attrs = new_assembly_assign.merge(ret_child_override_attrs(nested_mh,recursive_override_attrs))
-          create_opts = {:duplicate_refs => :allow, :returning_sql_cols => [:ancestor_id,:assembly_id]}
-
-          #putting in nulls to null-out; more efficient to omit this columns in create
-          parent_rel = (DB_REL_DEF[nested_model_name][:many_to_one]||[]).inject({:old_par_id => ancestor_id}) do |hash,pos_par|
-            hash.merge(matching_models?(pos_par,target_parent_mn) ? new_par_assign : {DB.parent_field(pos_par,model_name) => SQL::ColRef.null_id})
-          end
-          child_context_class = (matching_models?(nested_model_name,:node) and R8::Config[:use_node_bindings]) ? ChildContextAssemblyNode : ChildContext
-          child = child_context_class.create(:model_handle => nested_mh, :clone_par_col => :assembly_id, :parent_rels => [parent_rel], :override_attrs => override_attrs, :create_opts => create_opts)
-          if matching_models?(nested_model_name,:node) 
-            unless (child[:override_attrs][:component]||{})[:assembly_id]
-              child[:override_attrs].merge!(:component => new_assembly_assign)
-            end
-
-            if child.kind_of?(ChildContextAssemblyNode)
-              assembly_template_idh = model_handle.createIDH(:model_name => :component, :id => ancestor_id)
-              target_idh = target_parent_mh.createIDH(:id => assembly_obj_info[:parent_id])
-              child.find_node_templates_in_assembly!(target_idh,assembly_template_idh)
-            end
-          end
-          child 
-        end
-      end
-
-      AssemblyChildren = [:node,:attribute_link,:port_link]
-      NonParentNestedKeys = AssemblyChildren.inject({}) do |h,m|
-        h.merge(m => {:assembly_id => :component})
       end
 
       def matching_models?(mn1,mn2)

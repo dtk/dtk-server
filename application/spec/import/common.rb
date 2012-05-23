@@ -38,7 +38,7 @@ class R8Server
       container_idh = pre_execute(:top)
 #      import_file = "#{Root}/spec/test_data/library_node_data.json" #TODO: hack
 #      Model.import_objects_from_file(container_idh,import_file)
-       hash_content = LibraryNodes.get()
+       hash_content = LibraryNodes.get_hash(:in_library => "public")
        Model.import_objects_from_hash(container_idh,hash_content)
     else
       library_mh = pre_execute(:library)
@@ -46,9 +46,10 @@ class R8Server
     end
   end
 
-  def create_public_library_assemblies(assemblies_hash,node_bindings_hash)
+  def create_private_library_assemblies(assemblies_hash,node_bindings_hash)
     library_mh = pre_execute(:library)
-    library_idh = Library.create_public_library?(library_mh)
+    library_idh = Library.create_users_private_library?(library_mh)
+    Model.import_objects_from_hash(library_idh,LibraryNodes.get_hash())
     Assembly.import(library_idh,assemblies_hash,node_bindings_hash)
   end
 

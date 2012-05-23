@@ -31,20 +31,53 @@ pp import_hash
           node_output = {
             "display_name" => node_hash_ref, 
             "type" => "stub",
-            "*assembly_id" => "/component/#{assembly_ref}"
+            "*assembly_id" => "/component/#{assembly_ref}" 
           }
           if nb_rs = node_to_nb_rs[node_hash_ref]
             node_output["*node_binding_rs_id"] = "/node_binding_ruleset/#{nb_rs}"
           else
             Log.info("assembly node(#{node_hash_ref}) without a matching node bidning")
           end
-          cmps_output = import_components(library_idh,assembly_ref,module_refs,node_hash["components"])
+#          cmps_output = import_components(library_idh,assembly_ref,module_refs,node_hash["components"])
+          cmps_output = import_component_refs(library_idh,module_refs,node_hash["components"])
           unless cmps_output.empty?
-            node_output["component"] = cmps_output
+#            node_output["component"] = cmps_output
+            node_output["component_ref"] = cmps_output
           end
           h.merge(node_ref => node_output)
         end
       end
+      def self.import_component_refs(library_idh,module_refs,components_hash)
+        #find the reference components and clone
+        #TODO: not clear we need the modules if component names are unique w/o modules
+        cmp_types = components_hash.map{|cmp|component_type(cmp)}
+        sp_hash = {
+          :cols => [:id, :display_name, :component_type, :ref, :module_name],
+          :filter => [:and, [:oneof, :component_type,cmp_types],
+                      [:neq, :library_library_id,nil]] #TODO: think this should pick out specific library
+        }
+        matching_cmps = Model.get_objs(library_idh.createMH(:component),sp_hash,:keep_ref_cols => true)
+        #make sure a match is found for each component
+        non_matches = Array.new
+        augment_cmps = components_hash.inject(Hash.new) do |h,cmp_hash|
+          if match = matching_cmps.find{|match_cmp|match_cmp[:component_type] == component_type(cmp_hash)}
+            cmp_ref = {
+              "*component_template_id" => "/component/#{match[:ref]}",
+              "display_name" => match[:component_type]
+            }
+            h.merge(match[:component_type] => cmp_ref)
+          else 
+            non_matches << component_type(cmp_hash)
+            h
+          end
+        end
+        #error if one or more matches
+        unless non_matches.empty?
+          raise Error.new("No component matches for (#{non_matches.join(",")})")
+        end
+        augment_cmps
+      end
+      #TODO: deprecate below
       def self.import_components(library_idh,assembly_ref,module_refs,components_hash)
         #find the reference components and clone
         #TODO: not clear we need the modules if component names are unique w/o modules

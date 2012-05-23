@@ -1,15 +1,24 @@
 module XYZ
   class LibraryNodes
-    def self.get()
-      {"library"=> {"public"=> {"node"=> node_templates(), "node_binding_ruleset" => node_binding_rulesets()}}}
+    def self.get_hash(opts={})
+      ret = {"node"=> node_templates(opts), "node_binding_ruleset" => node_binding_rulesets()}
+      if opts[:in_library]
+        {"library"=> {opts[:in_library] => ret}}
+      else
+        ret
+      end
     end
    private
-     def self.node_templates()
+    def self.node_templates(opts={})
        ret = Hash.new
        NodesInfo.each do |k,info|
-         ret[k] = node_info(info)
+         ret[k] = node_info(info,opts)
        end
        ret
+     end
+
+     def self.node_binding_rulesets()
+       Bindings
      end
      NodesInfo = {
        "ami-9bce1ef2-small"=> {
@@ -62,7 +71,7 @@ module XYZ
          :png => "ubuntu.png"
        }
      }
-   def self.node_info(info)
+   def self.node_info(info,opts={})
      ret = {
        "os_type"=>info[:os_type],
        "type"=>"image",
@@ -141,17 +150,22 @@ module XYZ
              "display_name"=>"check_ssh"}
          }
        }
-     if node_binding_rs_id = node_info_binding_ruleset_id(info)
+     if node_binding_rs_id = node_info_binding_ruleset_id(info,opts)
        ret["*node_binding_rs_id"] =  node_binding_rs_id
      end
      ret
    end
-   def self.node_info_binding_ruleset_id(info)
+   def self.node_info_binding_ruleset_id(info,opts={})
      Bindings.each do |k,v|
        v[:rules].each_with_index do |r,i|
          nt = r[:node_template]
          if info[:ami] == nt[:image_id] and info[:size] == nt[:size]
-           return "/library/public/node_binding_ruleset/#{k}"
+           ret = "/node_binding_ruleset/#{k}"
+           if opts[:in_library]
+             return {"library"=> {opts[:in_library] => ret}}
+           else
+             return ret
+           end
          end
        end
      end
@@ -201,10 +215,6 @@ Bindings = {"centos-5.6-small"=>{:type=>"clone",
      :size=>"m1.medium",
      :region=>"us-east-1"}}]}}
    Bindings.each{|k,v|v[:display_name] = k.gsub(/-/,' ')}
-
-   def self.node_binding_rulesets()
-     Bindings
-   end
   end
 end
 

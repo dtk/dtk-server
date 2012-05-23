@@ -201,7 +201,7 @@ module XYZ
             end
           end
           target_idh = target_parent_mh.createIDH(:id => assembly_obj_info[:parent_id])
-          ChildContext.create(:model_handle => nested_mh, :clone_par_col => :assembly_id, :parent_rels => [parent_rel], :override_attrs => override_attrs, :create_opts => create_opts, :ancestor_id => ancestor_id, :target_idh => target_idh)
+          ChildContext.create(self,{:model_handle => nested_mh, :clone_par_col => :assembly_id, :parent_rels => [parent_rel], :override_attrs => override_attrs, :create_opts => create_opts, :ancestor_id => ancestor_id, :target_idh => target_idh})
         end
       end
     end
@@ -333,7 +333,7 @@ module XYZ
         create_opts = {:duplicate_refs => :allow, :returning_sql_cols => ret_sql_cols}
         parent_rels = id_handles.map{|idh|{:old_par_id => idh.get_id()}}
         
-        ChildContext.create(:model_handle => model_handle, :clone_par_col => :id, :parent_rels => parent_rels, :override_attrs => override_attrs, :create_opts => create_opts)
+        ChildContext.create(self,{:model_handle => model_handle, :clone_par_col => :id, :parent_rels => parent_rels, :override_attrs => override_attrs, :create_opts => create_opts})
       end
 
       def add_id_handle(id_handle)
@@ -350,7 +350,7 @@ module XYZ
           parent_id_col = mh.parent_id_field_name()
           parent_rels = objs_info.map{|row|{parent_id_col => row[:id],:old_par_id => row[:ancestor_id]}}
           create_opts = {:duplicate_refs => :no_check, :returning_sql_cols => [:ancestor_id,parent_id_col]}
-          ret << ChildContext.create(:model_handle => mh, :clone_par_col => parent_id_col, :parent_rels => parent_rels, :override_attrs => override_attrs, :create_opts => create_opts)
+          ret << ChildContext.create(self,{:model_handle => mh, :clone_par_col => parent_id_col, :parent_rels => parent_rels, :override_attrs => override_attrs, :create_opts => create_opts})
         end
         ret
       end

@@ -31,6 +31,12 @@ module XYZ
       XYZ.const_get Aux.camelize model_name
     end
 
+    def self.matching_models?(mn1,mn2)
+      (mn1 == :datacenter ? :target : mn1) == (mn2 == :datacenter ? :target : mn2)
+    end
+
+
+
     module Delim
       Char = "_"
       Common = "#{Char}#{Char}"

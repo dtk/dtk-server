@@ -282,14 +282,9 @@ module XYZ
       def clone_copy_child_objects(child_context,level=1)
         child_model_handle = child_context[:model_handle]
         recursive_override_attrs = child_context[:override_attrs]
-        child_model_name = child_model_handle[:model_name]
         clone_par_col = child_context[:clone_par_col]
 
-        field_set_to_copy = Model::FieldSet.all_real(child_model_name).with_removed_cols(:id,:local_id)
-        fk_info.add_foreign_keys(child_model_handle,field_set_to_copy)
-
-        create_override_attrs = ret_real_columns(child_model_handle,recursive_override_attrs)
-        new_objs_info = child_context.ret_new_objs_info(db,field_set_to_copy,create_override_attrs)
+        new_objs_info = child_context.create_new_objects(self)
         return if new_objs_info.empty?
 
         new_id_handles = @ret.add_new_children_objects(new_objs_info,child_model_handle,clone_par_col,level)
@@ -345,10 +340,15 @@ module XYZ
       def ret_child_override_attrs(child_model_handle,recursive_override_attrs)
         recursive_override_attrs[(child_model_handle[:model_name])]||{}
       end
-     private
 
       attr_reader :db,:fk_info, :model_name
 
+      def ret_real_columns(model_handle,recursive_override_attrs)
+        fs = Model::FieldSet.all_real(model_handle[:model_name])
+        recursive_override_attrs.reject{|k,v| not fs.include_col?(k)}
+      end
+
+     private
       def create_opts_for_top()
         dups_allowed_for_cmp = true #TODO stub
 
@@ -362,11 +362,6 @@ module XYZ
         {:duplicate_refs => dups_allowed_for_cmp ? :allow : :prune_duplicates,:returning_sql_cols => returning_sql_cols}
       end
 
-      def ret_real_columns(model_handle,recursive_override_attrs)
-        fs = Model::FieldSet.all_real(model_handle[:model_name])
-        recursive_override_attrs.reject{|k,v| not fs.include_col?(k)}
-      end
-      
       class ForeignKeyInfo
         def initialize(db)
           @info = Hash.new

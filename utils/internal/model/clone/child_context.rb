@@ -35,6 +35,18 @@ module XYZ
       klass.new(hash)
     end
 
+    def create_new_objects(clone_proc)
+      field_set_to_copy = Model::FieldSet.all_real(model_handle[:model_name]).with_removed_cols(:id,:local_id)
+      clone_proc.fk_info.add_foreign_keys(model_handle,field_set_to_copy)
+      create_override_attrs = clone_proc.ret_real_columns(model_handle,override_attrs)
+      ret_new_objs_info(clone_proc.db,field_set_to_copy,create_override_attrs)
+    end
+
+   private
+    def ret_field_set_to_copy()
+      Model::FieldSet.all_real(model_handle[:model_name]).with_removed_cols(:id,:local_id)
+    end
+
     def ret_new_objs_info(db,field_set_to_copy,create_override_attrs)
       ancestor_rel_ds = SQL::ArrayDataset.create(db,parent_rels,model_handle.createMH(:target))
 
@@ -48,7 +60,7 @@ module XYZ
       select_ds = ancestor_rel_ds.join_table(:inner,ds,[:old_par_id])
       Model.create_from_select(model_handle,field_set_to_copy,select_ds,create_override_attrs,create_opts)
     end
-   private
+
     def self.ret_old_parent_rel_col(clone_proc,model_handle)
       ret = :ancestor_id
       unless clone_proc.kind_of?(Model::CloneCopyProcessorAssembly)
@@ -88,6 +100,13 @@ module XYZ
     end
 
     class AssemblyNode < ChildContext
+     private
+      def initialize(hash)
+        super
+        assembly_template_idh = model_handle.createIDH(:model_name => :component, :id => hash[:ancestor_id])
+        find_node_templates_in_assembly!(hash[:target_idh],assembly_template_idh)
+      end
+
       #for processing node stubs in an assembly
       def ret_new_objs_info(db,field_set_to_copy,create_override_attrs)
         ancestor_rel_ds = SQL::ArrayDataset.create(db,parent_rels,model_handle.createMH(:target))
@@ -117,12 +136,6 @@ module XYZ
         ret
       end
     
-      private
-      def initialize(hash)
-        super
-        assembly_template_idh = model_handle.createIDH(:model_name => :component, :id => hash[:ancestor_id])
-        find_node_templates_in_assembly!(hash[:target_idh],assembly_template_idh)
-      end
       def find_node_templates_in_assembly!(target_idh,assembly_template_idh)
         #find the assembly's stub nodes and then use the node binding to find the node templates
         sp_hash = {
@@ -140,14 +153,43 @@ module XYZ
       end
     end
     class AssemblyComponentRef < ChildContext
-      def ret_new_objs_info(db,field_set_to_copy,create_override_attrs)
-        super
-      end
-      private
+     private
       def initialize(hash)
         super
         find_component_templates_in_assembly!()
       end
+
+      def ret_field_set_to_copy()
+        Model::FieldSet.all_real(:component).with_removed_cols(:id,:local_id)
+      end
+
+      #for processing component refs in an assembly
+      def ret_new_objs_info(db,field_set_to_copy,create_override_attrs)
+        ancestor_rel_ds = SQL::ArrayDataset.create(db,parent_rels,model_handle.createMH(:target))
+
+        #mapping from component ref to component template 
+        mapping_rows = matches.map do |m|
+          old_par_id = m[:node_node_id]
+          unless node_node_id = parent_rels.find{|r|r[:old_par_id] == old_par_id}
+            raise Error.new("Cannot find old_par_id #{old_par_id.to_s} in parent_rels") 
+          end
+          {:ancestor_id => m[:id],
+            :component_template_id => m[:component_template_id],
+            :node_node_id =>  node_node_id
+          }
+        end
+        mapping_ds = SQL::ArrayDataset.create(db,mapping_rows,model_handle.createMH(:mapping))
+      
+        #all parent_rels will have same cols so taking a sample
+        remove_cols = [:ancestor_id] + parent_rels.first.keys
+        cmp_template_fs = field_set_to_copy.with_removed_cols(*remove_cols).with_added_cols({:id => :component_template_id})
+        cmp_template_wc = nil
+        cmp_template_ds = Model.get_objects_just_dataset(model_handle,cmp_template_wc,Model::FieldSet.opt(cmp_template_fs))
+
+        select_ds = cmp_template_ds.join_table(:inner,mapping_ds,[:component_template_id])
+        Model.create_from_select(model_handle.createMH(:component),field_set_to_copy,select_ds,create_override_attrs,create_opts)
+      end
+
       def find_component_templates_in_assembly!()
         #find the component templates that each component ref is pointing to
         node_stub_ids = parent_rels.map{|pr|pr[:old_par_id]}

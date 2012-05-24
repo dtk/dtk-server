@@ -60,7 +60,7 @@ module XYZ
       end
       model_name = Model.normalize_model(model_handle[:model_name])
       parent_model_name = Model.normalize_model(model_handle[:parent_model_name])
-      if model_name == :node and parent_model_name != :component_ref
+      if parent_model_name == :node and model_name != :component_ref
         :node_template_id
       else
         ret

@@ -1,18 +1,21 @@
 module XYZ
   class ChildContext < SimpleHashObject
-    def create_new_objects(clone_proc,level)
+    def clone_copy_child_objects(clone_proc,level)
       clone_model_handle = clone_model_handle()
       field_set_to_copy = Model::FieldSet.all_real(clone_model_handle[:model_name]).with_removed_cols(:id,:local_id)
       fk_info = clone_proc.fk_info
       fk_info.add_foreign_keys(clone_model_handle,field_set_to_copy)
       create_override_attrs = clone_proc.ret_real_columns(clone_model_handle,override_attrs)
-      ret = ret_new_objs_info(clone_proc.db,field_set_to_copy,create_override_attrs)
-      return ret if ret.empty?
+      new_objs_info = ret_new_objs_info(clone_proc.db,field_set_to_copy,create_override_attrs)
+      return if new_objs_info.empty?
 
-      new_id_handles = clone_proc.add_new_children_objects(ret,clone_model_handle,clone_par_col,level)
-      fk_info.add_id_mappings(clone_model_handle,ret)
+      new_id_handles = clone_proc.add_new_children_objects(new_objs_info,clone_model_handle,clone_par_col,level)
+      fk_info.add_id_mappings(clone_model_handle,new_objs_info)
       fk_info.add_id_handles(new_id_handles) #TODO: may be more efficient adding only id handles assciated with foreign keys
-      ret
+      #iterate all nested children
+      ChildContext.get_from_parent_relation(clone_proc,clone_model_handle,new_objs_info,override_attrs).each do |child_context|
+        child_context.clone_copy_child_objects(clone_proc,level+1)
+      end
     end
 
     def self.get_from_parent_relation(clone_proc,model_handle,objs_info,recursive_override_attrs,omit_list=[])

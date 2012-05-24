@@ -280,16 +280,7 @@ module XYZ
       end
 
       def clone_copy_child_objects(child_context,level=1)
-        child_model_handle = child_context[:model_handle]
-        recursive_override_attrs = child_context[:override_attrs]
-
-        new_objs_info = child_context.create_new_objects(self,level)
-        return if new_objs_info.empty?
-
-        #iterate all nested children
-        ChildContext.get_from_parent_relation(self,child_model_handle,new_objs_info,recursive_override_attrs).each do |child_context|
-          clone_copy_child_objects(child_context,level+1)
-        end
+        child_context.clone_copy_child_objects(self,level)
         @ret
       end
 

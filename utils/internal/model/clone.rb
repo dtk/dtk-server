@@ -1,6 +1,8 @@
 #TODO: this needs much cleanup: may spearete into parts fro assemblies and then teh rest which is containment based copying
 #TODO: try to move more to chidl context geenraizing to be object context and possibly using it to subsume cloneprocesseor
+r8_nested_require('clone','global')
 r8_nested_require('clone','child_context')
+r8_nested_require('clone','foreign_key_info')
 module XYZ
   module CloneClassMixins
     #TODO: may just be temporary; this function takes into account that front end may not send teh actual target handle for componenst who parents
@@ -166,11 +168,9 @@ module XYZ
     end
 
     class CloneCopyProcessor
-      private
-      AssemblyChildren = [:node,:attribute_link,:port_link]
-      NonParentNestedKeys = AssemblyChildren.inject({}) do |h,m|
-        h.merge(m => {:assembly_id => :component})
-      end
+     private
+      include ForeignKeyInfoMixin
+
       def get_nested_objects_top_level(model_handle,target_parent_mh,objs_info,recursive_override_attrs,opts={})
         ChildContext.get_from_parent_relation(self,model_handle,objs_info,recursive_override_attrs)
       end
@@ -186,7 +186,7 @@ module XYZ
         model_name = model_handle[:model_name]
         new_assembly_assign = {:assembly_id => assembly_obj_info[:id]}
         new_par_assign = {DB.parent_field(target_parent_mn,model_name) => assembly_obj_info[:parent_id]}
-        AssemblyChildren.map do |nested_model_name|
+        CloneGlobal::AssemblyChildren.map do |nested_model_name|
           #TODO: push this into ChildContext.create
           nested_mh = model_handle.createMH(:model_name => nested_model_name, :parent_model_name => target_parent_mn)
           override_attrs = new_assembly_assign.merge(ret_child_override_attrs(nested_mh,recursive_override_attrs))
@@ -282,21 +282,19 @@ module XYZ
       def clone_copy_child_objects(child_context,level=1)
         child_model_handle = child_context[:model_handle]
         recursive_override_attrs = child_context[:override_attrs]
-        clone_par_col = child_context[:clone_par_col]
 
-        new_objs_info = child_context.create_new_objects(self)
+        new_objs_info = child_context.create_new_objects(self,level)
         return if new_objs_info.empty?
-
-        new_id_handles = @ret.add_new_children_objects(new_objs_info,child_model_handle,clone_par_col,level)
-        fk_info.add_id_mappings(child_model_handle,new_objs_info)
-
-        fk_info.add_id_handles(new_id_handles) #TODO: may be more efficient adding only id handles assciated with foreign keys
 
         #iterate all nested children
         ChildContext.get_from_parent_relation(self,child_model_handle,new_objs_info,recursive_override_attrs).each do |child_context|
           clone_copy_child_objects(child_context,level+1)
         end
         @ret
+      end
+
+      def add_new_children_objects(new_objs_info,child_model_handle,clone_par_col,level)
+        @ret.add_new_children_objects(new_objs_info,child_model_handle,clone_par_col,level)
       end
 
       def add_to_overrides_null_other_parents(overrides,model_name,selected_par_id_col)
@@ -362,93 +360,6 @@ module XYZ
         {:duplicate_refs => dups_allowed_for_cmp ? :allow : :prune_duplicates,:returning_sql_cols => returning_sql_cols}
       end
 
-      class ForeignKeyInfo
-        def initialize(db)
-          @info = Hash.new
-          @db = db
-          @no_fk_processing = false
-        end
-
-        def add_id_handles(new_id_handles)
-          return if @no_fk_processing
-          new_id_handles.each do |idh|
-            model_handle_info(idh)[:new_ids] << idh.get_id() 
-          end
-        end
-
-        def shift_foregn_keys()
-          return if @no_fk_processing
-          each_fk do |model_handle, fk_model_name, fk_cols|
-            #get (if the set of id mappings for fk_model_name
-            id_mappings = get_id_mappings(model_handle,fk_model_name)
-            next if id_mappings.empty?
-            #TODO: may be more efficient to shift multiple fk cols at same time
-            fk_cols.each{|fk_col|shift_foregn_keys_aux(model_handle,fk_col,id_mappings)}
-          end
-        end
-        
-        def add_id_mappings(model_handle,objs_info,opts={})
-          return if @no_fk_processing
-          @no_fk_processing = avoid_fk_processing?(model_handle,objs_info,opts)
-          model_index = model_handle_info(model_handle)
-          model_index[:id_mappings] = model_index[:id_mappings]+objs_info.map{|x|Aux::hash_subset(x,[:id,:ancestor_id])}
-        end
-
-        def add_foreign_keys(model_handle,field_set)
-          return if @no_fk_processing
-          #TODO: only putting in once per model; not sure if need to treat instances differently; if not can do this alot more efficiently computing just once
-          fks = model_handle_info(model_handle)[:fks]
-          #put in foreign keys that are not special keys like ancestor or assembly_id
-          omit = ForeignKeyOmissions[model_handle[:model_name]]||[]
-          field_set.foreign_key_info().each do |fk,fk_info|
-            next if fk == :ancestor_id or omit.include?(fk)
-            pointer = fks[fk_info[:foreign_key_rel_type]] ||= Array.new
-            pointer << fk unless pointer.include?(fk)
-          end
-        end
-       private
-        ForeignKeyOmissions = NonParentNestedKeys.inject({}) do |ret,kv|
-          ret.merge(kv[0] => kv[1].keys)
-        end
-
-        def avoid_fk_processing?(model_handle,objs_info,opts)
-          return false unless opts[:top]
-          model_handle[:model_name] != :component or (objs_info.first||{})[:type] != "composite"
-        end
-
-        def shift_foregn_keys_aux(model_handle,fk_col,id_mappings)
-          model_name = model_handle[:model_name]
-          base_fs = Model::FieldSet.opt([:id,{fk_col => :old_key}],model_name)
-          base_wc = SQL.in(:id,model_handle_info(model_handle)[:new_ids])
-          base_ds = Model.get_objects_just_dataset(model_handle,base_wc,base_fs)
-
-          mappping_rows = id_mappings.map{|r| {fk_col => r[:id], :old_key => r[:ancestor_id]}}
-          mapping_ds = SQL::ArrayDataset.create(@db,mappping_rows,model_handle.createMH(:model_name => :mappings))
-          select_ds = base_ds.join_table(:inner,mapping_ds,[:old_key])
-
-          field_set = Model::FieldSet.new(model_name,[fk_col])
-          Model.update_from_select(model_handle,field_set,select_ds)
-        end
-        
-        def model_handle_info(mh)
-          @info[mh[:c]] ||= Hash.new
-          @info[mh[:c]][mh[:model_name]] ||= {:id_mappings => Array.new, :fks => Hash.new, :new_ids => Array.new}
-        end
-        
-        def each_fk(&block)
-          @info.each do |c,rest|
-            rest.each do |model_name, hash|
-              hash[:fks].each do |fk_model_name, fk_cols|
-                block.call(ModelHandle.new(c,model_name),fk_model_name, fk_cols)
-              end
-            end
-          end
-        end
-      
-        def get_id_mappings(mh,fk_model_name)
-          ((@info[mh[:c]]||{})[fk_model_name]||{})[:id_mappings] || Array.new
-        end
-      end
     end
   end
 end

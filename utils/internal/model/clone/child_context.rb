@@ -1,5 +1,20 @@
 module XYZ
   class ChildContext < SimpleHashObject
+    def create_new_objects(clone_proc,level)
+      clone_model_handle = clone_model_handle()
+      field_set_to_copy = Model::FieldSet.all_real(clone_model_handle[:model_name]).with_removed_cols(:id,:local_id)
+      fk_info = clone_proc.fk_info
+      fk_info.add_foreign_keys(clone_model_handle,field_set_to_copy)
+      create_override_attrs = clone_proc.ret_real_columns(clone_model_handle,override_attrs)
+      ret = ret_new_objs_info(clone_proc.db,field_set_to_copy,create_override_attrs)
+      return ret if ret.empty?
+
+      new_id_handles = clone_proc.add_new_children_objects(ret,clone_model_handle,clone_par_col,level)
+      fk_info.add_id_mappings(clone_model_handle,ret)
+      fk_info.add_id_handles(new_id_handles) #TODO: may be more efficient adding only id handles assciated with foreign keys
+      ret
+    end
+
     def self.get_from_parent_relation(clone_proc,model_handle,objs_info,recursive_override_attrs,omit_list=[])
       ret = Array.new
       model_handle.get_children_model_handles(:clone_context => true).each do |child_mh|
@@ -35,18 +50,7 @@ module XYZ
       klass.new(hash)
     end
 
-    def create_new_objects(clone_proc)
-      field_set_to_copy = ret_field_set_to_copy()
-      clone_proc.fk_info.add_foreign_keys(model_handle,field_set_to_copy)
-      create_override_attrs = clone_proc.ret_real_columns(model_handle,override_attrs)
-      ret_new_objs_info(clone_proc.db,field_set_to_copy,create_override_attrs)
-    end
-
    private
-    def ret_field_set_to_copy()
-      Model::FieldSet.all_real(model_handle[:model_name]).with_removed_cols(:id,:local_id)
-    end
-
     def ret_new_objs_info(db,field_set_to_copy,create_override_attrs)
       ancestor_rel_ds = SQL::ArrayDataset.create(db,parent_rels,model_handle.createMH(:target))
 
@@ -85,6 +89,13 @@ module XYZ
     def model_handle()
       self[:model_handle]
     end
+
+    #can diffeer such as for component_ref
+    #can be over written
+    def clone_model_handle()
+      model_handle()
+    end
+    
     def clone_par_col()
       self[:clone_par_col]
     end
@@ -158,9 +169,8 @@ module XYZ
         super
         find_component_templates_in_assembly!()
       end
-
-      def ret_field_set_to_copy()
-        Model::FieldSet.all_real(:component).with_removed_cols(:id,:local_id)
+      def clone_model_handle()
+        model_handle().createMH(:component)
       end
 
       #for processing component refs in an assembly

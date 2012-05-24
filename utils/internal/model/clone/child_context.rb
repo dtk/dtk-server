@@ -36,7 +36,7 @@ module XYZ
     end
 
     def create_new_objects(clone_proc)
-      field_set_to_copy = Model::FieldSet.all_real(model_handle[:model_name]).with_removed_cols(:id,:local_id)
+      field_set_to_copy = ret_field_set_to_copy()
       clone_proc.fk_info.add_foreign_keys(model_handle,field_set_to_copy)
       create_override_attrs = clone_proc.ret_real_columns(model_handle,override_attrs)
       ret_new_objs_info(clone_proc.db,field_set_to_copy,create_override_attrs)
@@ -165,15 +165,14 @@ module XYZ
 
       #for processing component refs in an assembly
       def ret_new_objs_info(db,field_set_to_copy,create_override_attrs)
-        ancestor_rel_ds = SQL::ArrayDataset.create(db,parent_rels,model_handle.createMH(:target))
-
         #mapping from component ref to component template 
+        component_mh = model_handle.createMH(:component)
         mapping_rows = matches.map do |m|
           old_par_id = m[:node_node_id]
-          unless node_node_id = parent_rels.find{|r|r[:old_par_id] == old_par_id}
+          unless node_node_id = (parent_rels.find{|r|r[:old_par_id] == old_par_id}||{})[:node_node_id]
             raise Error.new("Cannot find old_par_id #{old_par_id.to_s} in parent_rels") 
           end
-          {:ancestor_id => m[:id],
+          {:ancestor_id => m[:component_template_id],
             :component_template_id => m[:component_template_id],
             :node_node_id =>  node_node_id
           }
@@ -184,10 +183,10 @@ module XYZ
         remove_cols = [:ancestor_id] + parent_rels.first.keys
         cmp_template_fs = field_set_to_copy.with_removed_cols(*remove_cols).with_added_cols({:id => :component_template_id})
         cmp_template_wc = nil
-        cmp_template_ds = Model.get_objects_just_dataset(model_handle,cmp_template_wc,Model::FieldSet.opt(cmp_template_fs))
+        cmp_template_ds = Model.get_objects_just_dataset(component_mh,cmp_template_wc,Model::FieldSet.opt(cmp_template_fs))
 
         select_ds = cmp_template_ds.join_table(:inner,mapping_ds,[:component_template_id])
-        Model.create_from_select(model_handle.createMH(:component),field_set_to_copy,select_ds,create_override_attrs,create_opts)
+        Model.create_from_select(component_mh,field_set_to_copy,select_ds,create_override_attrs,create_opts)
       end
 
       def find_component_templates_in_assembly!()

@@ -1,5 +1,25 @@
 module XYZ
   class ChildContext < SimpleHashObject
+    def self.get_from_parent_relation(clone_proc,model_handle,objs_info,recursive_override_attrs,omit_list=[])
+      ret = Array.new
+      model_handle.get_children_model_handles(:clone_context => true).each do |mh|
+        next if omit_list.include?(mh[:model_name])
+        override_attrs = clone_proc.ret_child_override_attrs(mh,recursive_override_attrs)
+        parent_id_col = mh.parent_id_field_name()
+        parent_rel_col = ret_parent_rel_col(clone_proc,model_handle)
+        parent_rels = objs_info.map do |row|
+          if old_par_id = row[parent_rel_col]
+            {parent_id_col => row[:id],:old_par_id => old_par_id}
+          else
+            raise Error.new("Column (#{parent_rel_col}) not found in objs_info")
+          end
+        end
+        create_opts = {:duplicate_refs => :no_check, :returning_sql_cols => [:ancestor_id,parent_id_col]}
+        ret << create(clone_proc,{:model_handle => mh, :clone_par_col => parent_id_col, :parent_rels => parent_rels, :override_attrs => override_attrs, :create_opts => create_opts})
+      end
+      ret
+    end
+
     def self.create(clone_proc,hash)
       unless clone_proc.kind_of?(Model::CloneCopyProcessorAssembly)
         return new(hash)
@@ -28,7 +48,25 @@ module XYZ
       select_ds = ancestor_rel_ds.join_table(:inner,ds,[:old_par_id])
       Model.create_from_select(model_handle,field_set_to_copy,select_ds,create_override_attrs,create_opts)
     end
-    private
+   private
+    def self.ret_parent_rel_col(clone_proc,model_handle)
+      ret = :ancestor_id
+      unless clone_proc.kind_of?(Model::CloneCopyProcessorAssembly)
+        return ret
+      end
+
+      unless R8::Config[:use_node_bindings]
+        return ret
+      end
+      model_name = Model.normalize_model(model_handle[:model_name])
+      parent_model_name = Model.normalize_model(model_handle[:parent_model_name])
+      if model_name == :node and parent_model_name != :component_ref
+        :node_template_id
+      else
+        ret
+      end
+    end
+
     def parent_rels()
       self[:parent_rels]
     end
@@ -95,6 +133,9 @@ module XYZ
       end
     end
     class AssemblyComponentRef < ChildContext
+      def ret_new_objs_info(db,field_set_to_copy,create_override_attrs)
+        super
+      end
       private
       def initialize(hash)
         super
@@ -109,9 +150,6 @@ module XYZ
         }
         matches = Model.get_objs(model_handle.createMH(:component_ref),sp_hash)
         merge!(:matches => matches)
-      end
-      def ret_new_objs_info(db,field_set_to_copy,create_override_attrs)
-        super
       end
     end
 

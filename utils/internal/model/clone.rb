@@ -172,7 +172,7 @@ module XYZ
         h.merge(m => {:assembly_id => :component})
       end
       def get_nested_objects_top_level(model_handle,target_parent_mh,objs_info,recursive_override_attrs,opts={})
-        get_nested_objects__parents(model_handle,objs_info,recursive_override_attrs)
+        ChildContext.get_from_parent_relation(self,model_handle,objs_info,recursive_override_attrs)
       end
     end
 
@@ -298,7 +298,7 @@ module XYZ
         fk_info.add_id_handles(new_id_handles) #TODO: may be more efficient adding only id handles assciated with foreign keys
 
         #iterate all nested children
-        get_nested_objects__parents(child_model_handle,new_objs_info,recursive_override_attrs).each do |child_context|
+        ChildContext.get_from_parent_relation(self,child_model_handle,new_objs_info,recursive_override_attrs).each do |child_context|
           clone_copy_child_objects(child_context,level+1)
         end
         @ret
@@ -341,22 +341,13 @@ module XYZ
       def add_id_handle(id_handle)
         @ret.add_id_handle(id_handle)
       end
+
+      def ret_child_override_attrs(child_model_handle,recursive_override_attrs)
+        recursive_override_attrs[(child_model_handle[:model_name])]||{}
+      end
      private
 
       attr_reader :db,:fk_info, :model_name
-      def get_nested_objects__parents(model_handle,objs_info,recursive_override_attrs,omit_list=[])
-        ret = Array.new
-        model_handle.get_children_model_handles(:clone_context => true).each do |mh|
-          #TODO: push this into ChildContext.create
-          next if omit_list.include?(mh[:model_name])
-          override_attrs = ret_child_override_attrs(mh,recursive_override_attrs)
-          parent_id_col = mh.parent_id_field_name()
-          parent_rels = objs_info.map{|row|{parent_id_col => row[:id],:old_par_id => row[:ancestor_id]}}
-          create_opts = {:duplicate_refs => :no_check, :returning_sql_cols => [:ancestor_id,parent_id_col]}
-          ret << ChildContext.create(self,{:model_handle => mh, :clone_par_col => parent_id_col, :parent_rels => parent_rels, :override_attrs => override_attrs, :create_opts => create_opts})
-        end
-        ret
-      end
 
       def create_opts_for_top()
         dups_allowed_for_cmp = true #TODO stub
@@ -371,9 +362,6 @@ module XYZ
         {:duplicate_refs => dups_allowed_for_cmp ? :allow : :prune_duplicates,:returning_sql_cols => returning_sql_cols}
       end
 
-      def ret_child_override_attrs(child_model_handle,recursive_override_attrs)
-        recursive_override_attrs[(child_model_handle[:model_name])]||{}
-      end
       def ret_real_columns(model_handle,recursive_override_attrs)
         fs = Model::FieldSet.all_real(model_handle[:model_name])
         recursive_override_attrs.reject{|k,v| not fs.include_col?(k)}

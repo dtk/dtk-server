@@ -2,20 +2,20 @@ module XYZ
   class ChildContext < SimpleHashObject
     def self.get_from_parent_relation(clone_proc,model_handle,objs_info,recursive_override_attrs,omit_list=[])
       ret = Array.new
-      model_handle.get_children_model_handles(:clone_context => true).each do |mh|
-        next if omit_list.include?(mh[:model_name])
-        override_attrs = clone_proc.ret_child_override_attrs(mh,recursive_override_attrs)
-        parent_id_col = mh.parent_id_field_name()
-        parent_rel_col = ret_parent_rel_col(clone_proc,model_handle)
+      model_handle.get_children_model_handles(:clone_context => true).each do |child_mh|
+        next if omit_list.include?(child_mh[:model_name])
+        override_attrs = clone_proc.ret_child_override_attrs(child_mh,recursive_override_attrs)
+        parent_id_col = child_mh.parent_id_field_name()
+        old_parent_rel_col = ret_old_parent_rel_col(clone_proc,child_mh)
         parent_rels = objs_info.map do |row|
-          if old_par_id = row[parent_rel_col]
+          if old_par_id = row[old_parent_rel_col]
             {parent_id_col => row[:id],:old_par_id => old_par_id}
           else
             raise Error.new("Column (#{parent_rel_col}) not found in objs_info")
           end
         end
         create_opts = {:duplicate_refs => :no_check, :returning_sql_cols => [:ancestor_id,parent_id_col]}
-        ret << create(clone_proc,{:model_handle => mh, :clone_par_col => parent_id_col, :parent_rels => parent_rels, :override_attrs => override_attrs, :create_opts => create_opts})
+        ret << create(clone_proc,{:model_handle => child_mh, :clone_par_col => parent_id_col, :parent_rels => parent_rels, :override_attrs => override_attrs, :create_opts => create_opts})
       end
       ret
     end
@@ -49,7 +49,7 @@ module XYZ
       Model.create_from_select(model_handle,field_set_to_copy,select_ds,create_override_attrs,create_opts)
     end
    private
-    def self.ret_parent_rel_col(clone_proc,model_handle)
+    def self.ret_old_parent_rel_col(clone_proc,model_handle)
       ret = :ancestor_id
       unless clone_proc.kind_of?(Model::CloneCopyProcessorAssembly)
         return ret
@@ -93,13 +93,20 @@ module XYZ
         ancestor_rel_ds = SQL::ArrayDataset.create(db,parent_rels,model_handle.createMH(:target))
       
         #all parent_rels will have same cols so taking a sample
-        remove_cols = [:ancestor_id,:display_name,:type] + parent_rels.first.keys
+        remove_cols = [:ancestor_id,:display_name,:type,:ref] + parent_rels.first.keys
         node_template_fs = field_set_to_copy.with_removed_cols(*remove_cols).with_added_cols(:id => :node_template_id)
         node_template_wc = nil
         node_template_ds = Model.get_objects_just_dataset(model_handle,node_template_wc,Model::FieldSet.opt(node_template_fs))
 
         #mapping from node stub to node template and overriding appropriate node template columns
-        mapping_rows = matches.map{|m|{:type => "staged",:ancestor_id => m[:node_stub_idh].get_id(),:node_template_id => m[:node_template_idh].get_id(), :display_name => m[:node_stub_display_name]}}
+        mapping_rows = matches.map do |m|
+          {:type => "staged",
+            :ancestor_id => m[:node_stub_idh].get_id(),
+            :node_template_id => m[:node_template_idh].get_id(), 
+            :display_name => m[:node_stub_display_name],
+            :ref => m[:node_stub_display_name]
+          }
+        end
         mapping_ds = SQL::ArrayDataset.create(db,mapping_rows,model_handle.createMH(:mapping))
         
         select_ds = ancestor_rel_ds.join_table(:inner,node_template_ds).join_table(:inner,mapping_ds,[:node_template_id])

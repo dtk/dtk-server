@@ -8,8 +8,9 @@ module XYZ
     extend AssemblyImportClassMixin
     def self.list_from_library(assembly_mh,library_idh=nil)
       lib_filter = (library_idh ? [:eq, :library_library_id, library_idh.get_id()] : [:neq, :library_library_id, nil])
+      nested_virtual_attr = (R8::Config[:use_node_bindings] ? :template_nodes_and_cmps_summary : :nested_nodes_and_cmps_summary)
       sp_hash = {
-        :cols => [:id, :display_name,:nested_nodes_and_cmps_summary],
+        :cols => [:id, :display_name,nested_virtual_attr],
         :filter => [:and, [:eq, :type, "composite"], lib_filter]
       }
       assemblies = get_objs(assembly_mh,sp_hash)

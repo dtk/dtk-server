@@ -67,6 +67,33 @@
            :cols => [:id,:display_name,:component_type,:basic_type,:description]
          }]
     },
+    :template_nodes_and_cmps_summary=> {
+      :type => :json, 
+      :hidden => true,
+      :remote_dependencies =>
+        [
+         {
+           :model_name => :node,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond=>{:assembly_id => q(:component,:id)},
+           :cols => [:id,:display_name]
+         },
+         {
+           :model_name => :component_ref,
+           :join_type => :inner,
+           :join_cond=>{:node_node_id => q(:node,:id)},
+           :cols => [:id,:display_name,:component_template_id]
+         },
+         {
+           :model_name => :component,
+           :convert => true,
+           :alias => :nested_component,
+           :join_type => :inner,
+           :join_cond=>{:id => q(:component_ref,:component_template_id)},
+           :cols => [:id,:display_name,:component_type,:basic_type,:description]
+         }]
+    },
     :nested_nodes_and_cmps_for_export=> {
       :type => :json, 
       :hidden => true,

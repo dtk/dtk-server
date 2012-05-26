@@ -16,6 +16,7 @@ module XYZ
       ChildContext.get_from_parent_relation(clone_proc,clone_model_handle,new_objs_info,override_attrs).each do |child_context|
         child_context.clone_copy_child_objects(clone_proc,level+1)
       end
+      clone_post_copy_hook(new_objs_info)
     end
 
     def self.get_from_parent_relation(clone_proc,model_handle,objs_info,recursive_override_attrs,omit_list=[])
@@ -66,6 +67,10 @@ module XYZ
         
       select_ds = ancestor_rel_ds.join_table(:inner,ds,[:old_par_id])
       Model.create_from_select(model_handle,field_set_to_copy,select_ds,create_override_attrs,create_opts)
+    end
+
+    #can be overwritten
+    def clone_post_copy_hook(new_objs_info)
     end
 
     def self.ret_old_parent_rel_col(clone_proc,model_handle)
@@ -212,23 +217,23 @@ module XYZ
         cmp_template_ds = Model.get_objects_just_dataset(component_mh,cmp_template_wc,Model::FieldSet.opt(cmp_template_fs))
 
         select_ds = cmp_template_ds.join_table(:inner,mapping_ds,[:component_template_id])
-        ret = Model.create_from_select(component_mh,field_set_to_copy,select_ds,create_override_attrs,create_opts)
-        clone_post_copy_hook(ret)
-        ret
+        Model.create_from_select(component_mh,field_set_to_copy,select_ds,create_override_attrs,create_opts)
       end
 
-      def clone_post_copy_hook(cmps_hash)
+      def clone_post_copy_hook(new_objs_info)
+        cmps_hash = new_objs_info
         node_mh = model_handle.createMH(:node)
         component_mh = model_handle.createMH(:component)
         parent_nodes_ndx = parent_rels.inject(Hash.new) do |h,r|
           node_id = r[:node_node_id]
           h.merge(node_id => node_mh.create_object_from_hash(:id => r[:node_node_id]))
         end
+        #TODO: below is very slow; may just put in ports when importing assemblies into library
         #TODO: consider bulking up to make more efficient
         cmps_hash.each do |cmp_hash|
           cmp = component_mh.create_object_from_hash(cmp_hash)
-          node =  parent_nodes_ndx[cmp_hash[:node_node_id]]
-          node.clone_post_copy_hook__component(cmp)
+          node = parent_nodes_ndx[cmp_hash[:node_node_id]]
+          node.clone_post_copy_hook__component(cmp,:donot_create_pending_changes => true)
         end
       end
     end

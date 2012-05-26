@@ -176,41 +176,43 @@ module XYZ
         model_handle().createMH(:component)
       end
 
+      def find_component_templates_in_assembly!()
+        #find the component templates that each component ref is pointing to
+        node_stub_ids = parent_rels.map{|pr|pr[:old_par_id]}
+        sp_hash = {
+          :cols => [:id,:display_name,:node_with_assembly_id,:component_template_id],
+          :filter => [:oneof, :node_node_id, node_stub_ids]
+        }
+        matches = Model.get_objs(model_handle.createMH(:component_ref),sp_hash)
+        merge!(:matches => matches)
+      end
+
       #for processing component refs in an assembly
       def ret_new_objs_info(db,field_set_to_copy,create_override_attrs)
         #mapping from component ref to component template 
         component_mh = model_handle.createMH(:component)
         mapping_rows = matches.map do |m|
-          old_par_id = m[:node_node_id]
+          node = m[:node]
+          old_par_id = node[:id]
           unless node_node_id = (parent_rels.find{|r|r[:old_par_id] == old_par_id}||{})[:node_node_id]
             raise Error.new("Cannot find old_par_id #{old_par_id.to_s} in parent_rels") 
           end
           {:ancestor_id => m[:component_template_id],
             :component_template_id => m[:component_template_id],
-            :node_node_id =>  node_node_id
+            :node_node_id =>  node_node_id,
+            :assembly_id => node[:assembly_id]
           }
         end
         mapping_ds = SQL::ArrayDataset.create(db,mapping_rows,model_handle.createMH(:mapping))
       
         #all parent_rels will have same cols so taking a sample
-        remove_cols = [:ancestor_id] + parent_rels.first.keys
+        remove_cols = [:ancestor_id,:assembly_id] + parent_rels.first.keys
         cmp_template_fs = field_set_to_copy.with_removed_cols(*remove_cols).with_added_cols({:id => :component_template_id})
         cmp_template_wc = nil
         cmp_template_ds = Model.get_objects_just_dataset(component_mh,cmp_template_wc,Model::FieldSet.opt(cmp_template_fs))
 
         select_ds = cmp_template_ds.join_table(:inner,mapping_ds,[:component_template_id])
         Model.create_from_select(component_mh,field_set_to_copy,select_ds,create_override_attrs,create_opts)
-      end
-
-      def find_component_templates_in_assembly!()
-        #find the component templates that each component ref is pointing to
-        node_stub_ids = parent_rels.map{|pr|pr[:old_par_id]}
-        sp_hash = {
-          :cols => [:id,:display_name,:node_node_id,:component_template_id],
-          :filter => [:oneof, :node_node_id, node_stub_ids]
-        }
-        matches = Model.get_objs(model_handle.createMH(:component_ref),sp_hash)
-        merge!(:matches => matches)
       end
     end
 

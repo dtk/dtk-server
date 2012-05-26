@@ -12,8 +12,12 @@ module XYZ
 
     def clone_post_copy_hook(clone_copy_output,opts={})
       component = clone_copy_output.objects.first
+      clone_post_copy_hook__component(component,opts)
+    end
+
+    def clone_post_copy_hook__component(component,opts={})
       #handles copying over if needed component template and implementation into project
-      unless opts[ :use_source_impl_and_template]
+      unless opts[:use_source_impl_and_template]
         component.update_implementation_and_template?(get_project())
       end
 

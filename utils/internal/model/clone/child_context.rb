@@ -212,10 +212,26 @@ module XYZ
         cmp_template_ds = Model.get_objects_just_dataset(component_mh,cmp_template_wc,Model::FieldSet.opt(cmp_template_fs))
 
         select_ds = cmp_template_ds.join_table(:inner,mapping_ds,[:component_template_id])
-        Model.create_from_select(component_mh,field_set_to_copy,select_ds,create_override_attrs,create_opts)
+        ret = Model.create_from_select(component_mh,field_set_to_copy,select_ds,create_override_attrs,create_opts)
+        clone_post_copy_hook(ret)
+        ret
+      end
+
+      def clone_post_copy_hook(cmps_hash)
+        node_mh = model_handle.createMH(:node)
+        component_mh = model_handle.createMH(:component)
+        parent_nodes_ndx = parent_rels.inject(Hash.new) do |h,r|
+          node_id = r[:node_node_id]
+          h.merge(node_id => node_mh.create_object_from_hash(:id => r[:node_node_id]))
+        end
+        #TODO: consider bulking up to make more efficient
+        cmps_hash.each do |cmp_hash|
+          cmp = component_mh.create_object_from_hash(cmp_hash)
+          node =  parent_nodes_ndx[cmp_hash[:node_node_id]]
+          node.clone_post_copy_hook__component(cmp)
+        end
       end
     end
-
     #index is parent and child
     SpecialContext = {
       :target => {:node => AssemblyNode},

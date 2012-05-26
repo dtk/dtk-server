@@ -252,6 +252,20 @@ module XYZ
       self.new(user[:c],model_name,parent_model_name,user)
     end
 
+    def create_object_from_hash(hash,opts={})
+      unless hash[:id]
+        raise Error.new("hash must contain:id key")
+      end
+      idh = createIDH(:id => hash[:id])
+      model_name =
+       if not opts[:donot_find_subtype]
+         Model.find_subtype_model_name(idh,opts)
+       else
+         self[:model_name]
+       end
+      Model.model_class(model_name).new(hash,self[:c],nil,idh)
+    end
+
     def get_virtual_columns()
       DB_REL_DEF[self[:model_name]][:virtual_columns]
     end

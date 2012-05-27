@@ -120,6 +120,12 @@ module XYZ
       self[:uri] || IDInfoTable.get_row_from_id_handle(self)[:uri]
     end
 
+    def get_child_id_handle(child_relation_type,qualified_child_ref)
+      factory_uri = RestURI.ret_factory_uri(get_uri(),child_relation_type)
+      child_uri = RestURI.ret_child_uri_from_qualified_ref(factory_uri,qualified_child_ref)
+      createIDH(:model_name => child_relation_type,:uri => child_uri)
+    end
+
     def get_parent_id_handle()
       #TODO: short circuit if parent_guid and parent_model_name are set
       c = self[:c]

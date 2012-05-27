@@ -4,7 +4,8 @@ r8_nested_require('assembly','export')
 r8_nested_require('assembly','import')
 module XYZ
   class Assembly < Component
-    include AssemblyExport
+    include AssemblyExportMixin
+    include AssemblyImportMixin
     extend AssemblyImportClassMixin
     def self.list_from_library(assembly_mh,library_idh=nil)
       lib_filter = (library_idh ? [:eq, :library_library_id, library_idh.get_id()] : [:neq, :library_library_id, nil])

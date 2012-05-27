@@ -1,5 +1,35 @@
 #converts serialized form into object form
 module XYZ
+  module AssemblyImportMixin
+    def add_ports_and_links_during_import(port_links_hash)
+      #TODO: midifying from node#clone_post_copy_hook__component(
+      #get the link defs/component_ports associated with components in assembly;
+      #to determine if need to add internal links and for port processing
+return nil
+      node_link_defs_info = get_objs(:cols => [:node_link_defs_info])
+      component_id = component.id()
+      
+      ###create needed component ports
+      ndx_for_port_update = Hash.new
+      component_link_defs = node_link_defs_info.map  do |r|
+        link_def = r[:link_def]
+        if link_def[:component_component_id] == component_id
+          ndx_for_port_update[link_def[:id]] = r
+          link_def 
+        end
+      end.compact
+
+      create_opts = {:returning_sql_cols => [:link_def_id,:id,:display_name,:type,:connected]}
+      new_cmp_ports = Port.create_needed_component_ports(component_link_defs,self,component,create_opts)
+
+      #update node_link_defs_info with new ports
+      new_cmp_ports.each do |port|
+        ndx_for_port_update[port[:link_def_id]].merge!(:port => port)
+      end
+      LinkDef.create_needed_internal_links(self,component,node_link_defs_info)
+    end
+  end
+
   module AssemblyImportClassMixin
     def import(library_idh,assemblies_hash,node_bindings_hash)
       import_hash = {"component" => Hash.new,"node" => Hash.new}
@@ -7,8 +37,12 @@ module XYZ
         import_hash["component"].merge!(AssemblyImportInternal.import_assembly_top(ref,assem))
         import_hash["node"].merge!(AssemblyImportInternal.import_nodes(library_idh,ref,assem,node_bindings_hash))
       end
-pp import_hash
       import_objects_from_hash(library_idh,import_hash)
+      assembly_ref = import_hash["component"].keys.first
+      assembly_idh = library_idh.get_child_id_handle(:component,assembly_ref)
+      port_links_hash = Hash.new() #TODO: stub
+      assembly_idh.create_object().add_ports_and_links_during_import(port_links_hash)
+      assembly_idh
     end
     private
     module AssemblyImportInternal

@@ -1,6 +1,6 @@
 #exports an assembly isnatnce or templaet in serialized form
 module XYZ
-  module AssemblyExport
+  module AssemblyExportMixin
     def export(opts={})
       nested_objs = AssemblyExportInternal.get_nested_objects_for_export(self)
       assembly_hash = AssemblyExportInternal.assembly_output_hash(self,nested_objs)

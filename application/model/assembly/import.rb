@@ -5,6 +5,8 @@ module XYZ
       #get the link defs/component_ports associated with components in assembly;
       #to determine if need to add internal links and for port processing
       link_defs_info = get_objs(:cols => [:template_link_defs_info])
+      create_opts = {:returning_sql_cols => [:link_def_id,:id,:display_name,:type,:connected]}
+      new_cmp_ports = Port.create_needed_assembly_template_ports(self,link_defs_info,create_opts)
 return nil
       #TODO: midifying from node#clone_post_copy_hook__component(
 

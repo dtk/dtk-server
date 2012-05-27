@@ -39,29 +39,30 @@ module XYZ
     end
     
     ###########
+    RefDelim = "___"
    public
     #TODO: assumption that ref and display_name are the same
     def component_name()
-      self[:display_name].split("___")[1]
+      self[:display_name].split(RefDelim)[1]
     end
     def attribute_name()
-      self[:display_name].split("___")[2]
+      self[:display_name].split(RefDelim)[2]
     end
     def ref_num()
-      self[:display_name].split("___")[3].to_i
+      self[:display_name].split(RefDelim)[3].to_i
     end
    private
     def self.port_ref(type,attr)
       ref_num = (attr[:component_ref_num]||1).to_s
-      "#{type}___#{attr[:component_ref]}___#{attr[:display_name]}___#{ref_num}"
+      "#{type}#{RefDelim}#{attr[:component_ref]}#{RefDelim}#{attr[:display_name]}#{RefDelim}#{ref_num}"
     end
     
     def self.strip_type(ref)
-      ref.gsub(/^[^_]+___/,"")
+      ref.gsub(Regexp.new("^[^_]+#{RefDelim}"),"")
     end
 
     def self.add_type(type,stripped_ref)
-      "#{type}___#{stripped_ref}"
+      "#{type}#{RefDelim}#{stripped_ref}"
     end
    public
     #returns nil if filtered
@@ -103,7 +104,7 @@ module XYZ
             "component_internal"
           end
 
-        ref = "#{type}___#{component_type}___#{link_def[:link_type]}"
+        ref = ref_from_component_and_link_def(type,component_type,link_def)
         display_name = ref #TODO: rather than encoded name to component i18n name, make add a structured column likne name_context
         #TODO: just hueristc for computing dir; also need to upport "<>" (bidirectional)
         dir = link_def[:local_or_remote] == "local" ?  "input" : "output"
@@ -121,7 +122,56 @@ module XYZ
       end
       create_from_rows(port_mh,rows,opts)
     end
+
+    def self.create_needed_assembly_template_ports(assembly,link_defs_info,opts={})
+      ret = Array.new
+      return ret if link_defs_info.empty?
+
+      #TODO: need to index by node because create_from_rows can only insert under one parent; if this is changed can do one insert for all
+      ndx_rows = Hash.new
+      link_defs_info.each do |ld_info|
+        link_def = ld_info[:link_def]
+        cmp = ld_info[:nested_component]
+        node = ld_info[:node]
+        component_type = cmp[:component_type]
+        type = 
+          if link_def[:has_external_link]
+            link_def[:has_internal_link] ? "component_internal_external" : "component_external"
+          else #will be just ld_info[:has_internal_link]
+            "component_internal"
+          end
+
+        ref = ref_from_component_and_link_def(type,component_type,link_def)
+        display_name = ref #TODO: rather than encoded name to component i18n name, make add a structured column likne name_context
+        #TODO: just hueristc for computing dir; also need to upport "<>" (bidirectional)
+        dir = link_def[:local_or_remote] == "local" ?  "input" : "output"
+        location_asserted = ret_location_asserted(component_type,link_def[:link_type])
+        row = {
+          :ref => ref,
+          :display_name => display_name,
+          :direction => dir,
+          :link_def_id => link_def[:id],
+          :node_node_id => node[:id],
+          :type => type
+        }
+        row[:location_asserted] = location_asserted if location_asserted
+
+        pntr = ndx_rows[node[:id]] ||= {:node => node, :create_rows => Array.new}
+        pntr[:create_rows] << row
+      end
+
+      ndx_rows.values.each do |r|
+        port_mh = r[:node].model_handle_with_auth_info.create_childMH(:port)
+        ret += create_from_rows(port_mh,r[:create_rows],opts)
+      end
+      ret
+    end
+
    private
+    def self.ref_from_component_and_link_def(type,component_type,link_def)
+      "#{type}#{RefDelim}#{component_type}#{RefDelim}#{link_def[:link_type]}"
+    end
+
     #TODO: this should be in link defs
     def self.ret_location_asserted(component_type,link_type)
       (LocationMapping[component_type.to_sym]||{})[link_type.to_sym]

@@ -94,6 +94,94 @@
            :cols => [:id,:display_name,:component_type,:basic_type,:description]
          }]
     },
+    :template_nodes_and_cmps_summary=> {
+      :type => :json, 
+      :hidden => true,
+      :remote_dependencies =>
+        [
+         {
+           :model_name => :node,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond=>{:assembly_id => q(:component,:id)},
+           :cols => [:id,:display_name]
+         },
+         {
+           :model_name => :component_ref,
+           :join_type => :inner,
+           :join_cond=>{:node_node_id => q(:node,:id)},
+           :cols => [:id,:display_name,:component_template_id]
+         },
+         {
+           :model_name => :component,
+           :convert => true,
+           :alias => :nested_component,
+           :join_type => :inner,
+           :join_cond=>{:id => q(:component_ref,:component_template_id)},
+           :cols => [:id,:display_name,:component_type,:basic_type,:description]
+         }]
+    },
+    :template_nodes_and_cmps_summary=> {
+      :type => :json, 
+      :hidden => true,
+      :remote_dependencies =>
+        [
+         {
+           :model_name => :node,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond=>{:assembly_id => q(:component,:id)},
+           :cols => [:id,:display_name]
+         },
+         {
+           :model_name => :component_ref,
+           :join_type => :inner,
+           :join_cond=>{:node_node_id => q(:node,:id)},
+           :cols => [:id,:display_name,:component_template_id]
+         },
+         {
+           :model_name => :component,
+           :convert => true,
+           :alias => :nested_component,
+           :join_type => :inner,
+           :join_cond=>{:id => q(:component_ref,:component_template_id)},
+           :cols => [:id,:display_name,:component_type,:basic_type,:description]
+         }]
+    },
+    :template_link_defs_info=> {
+      :type => :json, 
+      :hidden => true,
+      :remote_dependencies =>
+        [
+         {
+           :model_name => :node,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond=>{:assembly_id => q(:component,:id)},
+           :cols => [:id,:display_name]
+         },
+         {
+           :model_name => :component_ref,
+           :join_type => :inner,
+           :join_cond=>{:node_node_id => q(:node,:id)},
+           :cols => [:id,:display_name,:component_template_id]
+         },
+         {
+           :model_name => :component,
+           :convert => true,
+           :alias => :nested_component,
+           :join_type => :inner,
+           :join_cond=>{:id => q(:component_ref,:component_template_id)},
+           :cols => [:id,:display_name,:component_type, :extended_base, :implementation_id, :node_node_id]
+         },
+         {
+           :model_name => :link_def,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond=>{:component_component_id => q(:nested_component,:id)},
+           :cols => [:id,:component_component_id,:local_or_remote,:link_type,:has_external_link,:has_internal_link]
+         }]
+    },
     :nested_nodes_and_cmps_for_export=> {
       :type => :json, 
       :hidden => true,

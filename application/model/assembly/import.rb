@@ -2,13 +2,12 @@
 module XYZ
   module AssemblyImportMixin
     def add_ports_and_links_during_import(port_links_hash)
-      #TODO: midifying from node#clone_post_copy_hook__component(
       #get the link defs/component_ports associated with components in assembly;
       #to determine if need to add internal links and for port processing
+      link_defs_info = get_objs(:cols => [:template_link_defs_info])
 return nil
-      node_link_defs_info = get_objs(:cols => [:node_link_defs_info])
-      component_id = component.id()
-      
+      #TODO: midifying from node#clone_post_copy_hook__component(
+
       ###create needed component ports
       ndx_for_port_update = Hash.new
       component_link_defs = node_link_defs_info.map  do |r|

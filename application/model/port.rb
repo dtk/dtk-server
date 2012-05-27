@@ -127,6 +127,18 @@ module XYZ
       ret = Array.new
       return ret if link_defs_info.empty?
 
+      #make sure duplicate ports are pruned; tried to use :duplicate_refs => :prune_duplicates but bug; so explicitly looking fro existing ports
+      sp_hash = {
+        :cols => [:node_node_id,:ref],
+        :filter => [:oneof, :node_node_id, link_defs_info.map{|ld|ld[:node][:id]}]
+      }
+
+      port_mh = assembly.id_handle.create_childMH(:port)
+      ndx_existing_ports = Hash.new
+      Model.get_objs(port_mh,sp_hash,:keep_ref_cols => true).each do |r|
+        (ndx_existing_ports[r[:node_node_id]] ||= Hash.new)[r[:ref]] = true
+      end 
+
       #TODO: need to index by node because create_from_rows can only insert under one parent; if this is changed can do one insert for all
       ndx_rows = Hash.new
       link_defs_info.each do |ld_info|
@@ -142,6 +154,8 @@ module XYZ
           end
 
         ref = ref_from_component_and_link_def(type,component_type,link_def)
+        next if (ndx_existing_ports[node[:id]]||{})[ref]
+
         display_name = ref #TODO: rather than encoded name to component i18n name, make add a structured column likne name_context
         #TODO: just hueristc for computing dir; also need to upport "<>" (bidirectional)
         dir = link_def[:local_or_remote] == "local" ?  "input" : "output"

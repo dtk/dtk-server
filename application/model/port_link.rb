@@ -25,7 +25,7 @@ module XYZ
       "port_link:#{input_id}-#{output_id}"
     end
 
-    #somewhat of misnomer since with :donot_create_port_link, port links not created
+    #method name is somewhat of misnomer since with :donot_create_port_link, port links are not created
     def self.create_port_and_attr_links(parent_idh,port_link_hash,opts={})
       #get the associated link_def_link TODO: if it does not exist means constraint violation
       link_def_link, components = get_link_def_and_components(parent_idh,port_link_hash)
@@ -33,7 +33,7 @@ module XYZ
       if opts[:donot_create_port_link]
         port_link = port_link_hash 
         unless port_link_idh = opts[:port_link_idh]
-          raise Error.new("if option :donot_create_port_link, so must :port_link_idh")
+          raise Error.new("if option :donot_create_port_link give, option :port_link_idh must be set")
         end
       else
         port_link = create_from_links_hash(parent_idh,[port_link_hash]).first
@@ -42,7 +42,11 @@ module XYZ
       link_def_link.process(parent_idh,components,opts.merge(:port_link_idh => port_link_idh))
       port_link
     end
-
+    def create_attr_links(parent_idh,opts={})
+      update_object!(:input_id,:output_id)
+      augmented_opts = opts.merge(:port_link_idh => id_handle,:donot_create_port_link => true)
+      PortLink.create_port_and_attr_links(parent_idh,self,augmented_opts)
+    end
    private
     def self.get_link_def_and_components(parent_idh,port_link_hash)
       #returns [link_def_link,relevant_components]

@@ -1,5 +1,7 @@
+r8_nested_require('target','clone')
 module XYZ
   class Target < Model
+    include TargetCloneMixin
     def model_name() #TODO: remove temp datacenter->target
       :datacenter
     end
@@ -89,62 +91,9 @@ module XYZ
       ndx_ret.values
     end
 
-    #### clone helping functions
-    def clone_post_copy_hook(clone_copy_output,opts={})
-      case clone_copy_output.model_name()
-       when :component 
-        clone_post_copy_hook__component(clone_copy_output,opts)
-       when :node
-        clone_post_copy_hook__node(clone_copy_output,opts)        
-       else #TODO: catchall taht will be expanded
-        new_id_handle = clone_copy_output.id_handles.first
-        StateChange.create_pending_change_item(:new_item => new_id_handle, :parent => id_handle())
-      end
-    end
-
    private
     def sub_item_model_names()
       [:node]
-    end
-
-    def clone_post_copy_hook__node(clone_copy_output,opts)
-      update_object!(:iaas_type,:iaas_properties)
-      new_id_handle = clone_copy_output.id_handles.first
-      #add external ref values from target to node if node does not have them
-      #assuming passed already check whether node consistent requirements with target
-      #TODO: not handling yet constraint form where set of possibilities given
-      node = clone_copy_output.objects.first
-      node_ext_ref = node[:external_ref]
-      self[:iaas_properties].each do |k,v|
-        unless node_ext_ref.has_key?(k)
-          node_ext_ref[k] = v
-        end
-      end
-      node.update(:external_ref => node_ext_ref)
-      StateChange.create_pending_change_item(:new_item => new_id_handle, :parent => id_handle())
-    end
-
-    def clone_post_copy_hook__component(clone_copy_output,opts)
-      #TODO: right now this wil be just a composite component and clone_copy_output will be of form: assembly - node - component
-      #TODO: put in logic for  R8::Config[:use_node_bindings]:
-      #  find the port_links under the assembly and then add attribute_links associated with it
-      #  TODO: this may be considered bug; but at this point assembly_id on port_links point to assembly library instance
-      #TODO: may put node state changes under "install of assembly"
-      level = 1
-      node_idhs = clone_copy_output.children_id_handles(level,:node)
-      node_new_items = node_idhs.map{|idh|{:new_item => idh, :parent => id_handle()}}
-      return if node_new_items.empty?
-      node_sc_idhs = StateChange.create_pending_change_items(node_new_items)
-
-      indexed_node_info = Hash.new #TODO: may have state create this as output
-      node_sc_idhs.each_with_index{|sc_idh,i|indexed_node_info[node_idhs[i].get_id()] = sc_idh}
-
-      level = 2
-      component_new_items = clone_copy_output.children_hash_form(level,:component).map do |child_hash| 
-        {:new_item => child_hash[:id_handle], :parent => id_handle()}
-      end
-      return if component_new_items.empty?
-      StateChange.create_pending_change_items(component_new_items)
     end
   end
   Datacenter = Target #TODO: remove temp datacenter->target

@@ -132,7 +132,7 @@ module XYZ
       end
 
       def is_assembly?()
-        #TODO: cleanup; this assumes that assembly call wil creat an object
+        #TODO: cleanup; this assumes that assembly call wil create an object
         objects and objects.first and objects.first.is_assembly?
       end
 

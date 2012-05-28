@@ -30,7 +30,6 @@ module XYZ
       update(:ui=>target_ui)
     end
 
-
     def get_ports(*types)
       port_list = get_objs(:cols => [:node_ports]).map{|r|r[:port]}
       i18n = get_i18n_mappings_for_models(:component,:attribute)
@@ -126,8 +125,11 @@ module XYZ
     end
 
     def clone_post_copy_hook__component(clone_copy_output,opts)
-      #TODO: right now this wil be just a composite component and clone_copy_output will be off form assembly - nodee - component
-      #TODO: may put nodes under "install of assembly"
+      #TODO: right now this wil be just a composite component and clone_copy_output will be of form: assembly - node - component
+      #TODO: put in logic for  R8::Config[:use_node_bindings]:
+      #  find the port_links under the assembly and then add attribute_links associated with it
+      #  TODO: this may be considered bug; but at this point assembly_id on port_links point to assembly library instance
+      #TODO: may put node state changes under "install of assembly"
       level = 1
       node_idhs = clone_copy_output.children_id_handles(level,:node)
       node_new_items = node_idhs.map{|idh|{:new_item => idh, :parent => id_handle()}}

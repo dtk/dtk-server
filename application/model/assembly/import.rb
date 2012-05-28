@@ -3,19 +3,20 @@ module XYZ
   module AssemblyImportClassMixin
     def import(library_idh,assemblies_hash,node_bindings_hash)
       import_hash = {"component" => Hash.new,"node" => Hash.new}
-      pl_import_hash = {"port_links" => Hash.new}
       assemblies_hash.each do |ref,assem|
         import_hash["component"].merge!(AssemblyImportInternal.import_assembly_top(ref,assem))
         import_hash["node"].merge!(AssemblyImportInternal.import_nodes(library_idh,ref,assem,node_bindings_hash))
-        pl_import_hash["port_links"].merge!(AssemblyImportInternal.import_port_links(ref,assem))
       end
       import_objects_from_hash(library_idh,import_hash)
       #port links can only be imported in after ports created
       #add ports to assembly nodes
+      pl_import_hash = Hash.new
       assemblies_hash.each do |ref,assem|
         assembly_idh = library_idh.get_child_id_handle(:component,ref)
-        assembly_idh.create_object().add_ports_during_import()
+        ports = assembly_idh.create_object().add_ports_during_import()
+        pl_import_hash.merge!(AssemblyImportInternal.import_port_links(ref,assem,ports))
       end
+
       import_objects_from_hash(library_idh,pl_import_hash)
 
       ret = Array.new
@@ -27,13 +28,15 @@ module XYZ
       def self.import_assembly_top(assembly_ref,assembly_hash)
         {assembly_ref => {"display_name" => assembly_hash["name"], "type" => "composite"}}
       end
-      def self.import_port_links(assembly_ref,assembly_hash)
+      def self.import_port_links(assembly_ref,assembly_hash,ports)
         (assembly_hash["port_links"]||[]).inject(Hash.new) do |h,pl|
           input = AssemblyImportPortRef.parse(pl.values.first)
           output = AssemblyImportPortRef.parse(pl.keys.first)
-          pl_ref = AssemblyImportPortRef.port_link_ref(input,output)
-          pl_hash = {"*input_id" => input.ret_uri_form(assembly_ref),"*output_id" => output.ret_uri_form(assembly_ref)}
-          h.merge(assembly_ref => {pl_ref => pl_hash}) 
+          input_id = input.matching_id(ports)
+          output_id = output.matching_id(ports)
+          pl_ref = PortLink.ref_from_ids(input_id,output_id)
+          pl_hash = {"input_id" => input_id,"output_id" => output_id}
+          h.merge(assembly_ref => {"port_link" => {pl_ref => pl_hash}})
         end
       end
 
@@ -140,28 +143,7 @@ module XYZ
       #to determine if need to add internal links and for port processing
       link_defs_info = get_objs(:cols => [:template_link_defs_info])
       create_opts = {:returning_sql_cols => [:link_def_id,:id,:display_name,:type,:connected]}
-      new_cmp_ports = Port.create_needed_assembly_template_ports(self,link_defs_info,create_opts)
-return nil
-      #TODO: midifying from node#clone_post_copy_hook__component(
-
-      ###create needed component ports
-      ndx_for_port_update = Hash.new
-      component_link_defs = node_link_defs_info.map  do |r|
-        link_def = r[:link_def]
-        if link_def[:component_component_id] == component_id
-          ndx_for_port_update[link_def[:id]] = r
-          link_def 
-        end
-      end.compact
-
-      create_opts = {:returning_sql_cols => [:link_def_id,:id,:display_name,:type,:connected]}
-      new_cmp_ports = Port.create_needed_component_ports(component_link_defs,self,component,create_opts)
-
-      #update node_link_defs_info with new ports
-      new_cmp_ports.each do |port|
-        ndx_for_port_update[port[:link_def_id]].merge!(:port => port)
-      end
-      LinkDef.create_needed_internal_links(self,component,node_link_defs_info)
+      Port.create_needed_assembly_template_ports(self,link_defs_info,create_opts)
     end
   end
 end

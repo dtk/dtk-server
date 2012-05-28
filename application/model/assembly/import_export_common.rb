@@ -20,15 +20,9 @@ module XYZ
       end
       PortRefRegex = Regexp.new("(^.+)#{Seperators[:node_component]}(.+)#{Seperators[:component_link_def_ref]}(.+$)")
       ModCompRegex = Regexp.new(Seperators[:module_component])
-
-      def self.port_link_ref(in_aipr,out_aipr)
-        "#{in_aipr[:node]}-#{out_aipr[:node]}-#{in_aipr[:link_def_ref]}"
-      end
-
-      def ret_uri_form(assembly_ref)
-        p = Port.ref_from_component_and_link_def_ref("component_external",self[:component_type],self[:link_def_ref])
-        #TODO: global for "--"
-        "/node/#{assembly_ref}--#{self[:node]}/port/#{p}"
+      
+      def matching_id(ports)
+        nil
       end
     end
   end

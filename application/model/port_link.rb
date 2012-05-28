@@ -13,12 +13,16 @@ module XYZ
         {:input_id => link[:input_id],
          :output_id => link[:output_id],
           parent_col => parent_id,
-          :ref => "port_link:#{link[:input_id]}-#{link[:output_id]}"
+          :ref => ref_from_ids(link[:input_id],link[:output_id])
         }
       end
       create_opts = {:returning_sql_cols => [:id,:input_id,:output_id]}
       #TODO: push in use of :c into create_from_rows
       create_from_rows(port_link_mh,rows,create_opts).map{|hash|new(hash,port_link_mh[:c])}
+    end
+
+    def self.ref_from_ids(input_id,output_id)
+      "port_link:#{input_id}-#{output_id}"
     end
 
     #somewhat of misnomer since with :donot_create_port_link, port links not created

@@ -129,14 +129,14 @@ module XYZ
 
       #make sure duplicate ports are pruned; tried to use :duplicate_refs => :prune_duplicates but bug; so explicitly looking fro existing ports
       sp_hash = {
-        :cols => [:node_node_id,:ref],
+        :cols => ([:node_node_id,:ref] + (opts[:returning_sql_cols]||[])).uniq,
         :filter => [:oneof, :node_node_id, link_defs_info.map{|ld|ld[:node][:id]}]
       }
 
       port_mh = assembly.id_handle.create_childMH(:port)
       ndx_existing_ports = Hash.new
       Model.get_objs(port_mh,sp_hash,:keep_ref_cols => true).each do |r|
-        (ndx_existing_ports[r[:node_node_id]] ||= Hash.new)[r[:ref]] = true
+        (ndx_existing_ports[r[:node_node_id]] ||= Hash.new)[r[:ref]] = r
       end 
 
       #TODO: need to index by node because create_from_rows can only insert under one parent; if this is changed can do one insert for all
@@ -154,24 +154,26 @@ module XYZ
           end
 
         ref = ref_from_component_and_link_def(type,component_type,link_def)
-        next if (ndx_existing_ports[node[:id]]||{})[ref]
+        if existing = (ndx_existing_ports[node[:id]]||{})[ref]
+          ret << existing
+        else
+          display_name = ref #TODO: rather than encoded name to component i18n name, make add a structured column likne name_context
+          #TODO: just heuristc for computing dir; also need to upport "<>" (bidirectional)
+          dir = link_def[:local_or_remote] == "local" ?  "input" : "output"
+          location_asserted = ret_location_asserted(component_type,link_def[:link_type])
+          row = {
+            :ref => ref,
+            :display_name => display_name,
+            :direction => dir,
+            :link_def_id => link_def[:id],
+            :node_node_id => node[:id],
+            :type => type
+          }
+          row[:location_asserted] = location_asserted if location_asserted
 
-        display_name = ref #TODO: rather than encoded name to component i18n name, make add a structured column likne name_context
-        #TODO: just hueristc for computing dir; also need to upport "<>" (bidirectional)
-        dir = link_def[:local_or_remote] == "local" ?  "input" : "output"
-        location_asserted = ret_location_asserted(component_type,link_def[:link_type])
-        row = {
-          :ref => ref,
-          :display_name => display_name,
-          :direction => dir,
-          :link_def_id => link_def[:id],
-          :node_node_id => node[:id],
-          :type => type
-        }
-        row[:location_asserted] = location_asserted if location_asserted
-
-        pntr = ndx_rows[node[:id]] ||= {:node => node, :create_rows => Array.new}
-        pntr[:create_rows] << row
+          pntr = ndx_rows[node[:id]] ||= {:node => node, :create_rows => Array.new}
+          pntr[:create_rows] << row
+        end
       end
 
       ndx_rows.values.each do |r|
@@ -180,6 +182,7 @@ module XYZ
       end
       ret
     end
+
     def self.ref_from_component_and_link_def_ref(type,component_type,link_def_ref)
       "#{type}#{RefDelim}#{component_type}#{RefDelim}#{link_def_ref}"
     end

@@ -117,13 +117,8 @@ File.open("/tmp/t3","w"){|f| f << JSON.pretty_generate(out)}
       end
 
       def self.port_output_form(port,dir)
-        #example internal form component_external___hdp-hadoop__namenode___namenode_conn
-        if port[:display_name] =~ /component_external___(.+)__(.+)___(.+$)/
-          mod = $1;cmp = $2;port_name = $3
-          "#{mod}#{Seperators[:module_component]}#{cmp}#{Seperators[:component_port]}#{port_name}"
-        else
-          ralse Error.new("unexpected display name #{port[:display_name]}")
-        end
+        p = Port.parse_external_port_display_name(port[:display_name])
+        "#{p[:module]}#{Seperators[:module_component]}#{p[:component]}#{Seperators[:component_port]}#{p[:link_def_ref]}"
       end
    
       def self.component_name_output_form(internal_format)

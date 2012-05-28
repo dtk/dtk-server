@@ -51,6 +51,17 @@ module XYZ
     def ref_num()
       self[:display_name].split(RefDelim)[3].to_i
     end
+
+    #example internal form component_external___hdp-hadoop__namenode___namenode_conn
+    ExternalPortRegexp = Regexp.new("component_external#{RefDelim}(.+)__(.+)#{RefDelim}(.+$)")
+    def self.parse_external_port_display_name(port_display_name)
+      if port_display_name =~ ExternalPortRegexp
+        {:module => $1,:component => $2,:link_def_ref => $3,:component_type => "#{$1}__#{$2}"}
+      else
+        ralse Error.new("unexpected display name #{port[:display_name]}")
+      end
+    end
+
    private
     def self.port_ref(type,attr)
       ref_num = (attr[:component_ref_num]||1).to_s
@@ -129,7 +140,7 @@ module XYZ
 
       #make sure duplicate ports are pruned; tried to use :duplicate_refs => :prune_duplicates but bug; so explicitly looking fro existing ports
       sp_hash = {
-        :cols => ([:node_node_id,:ref] + (opts[:returning_sql_cols]||[])).uniq,
+        :cols => ([:node_node_id,:ref,:node] + (opts[:returning_sql_cols]||[])).uniq,
         :filter => [:oneof, :node_node_id, link_defs_info.map{|ld|ld[:node][:id]}]
       }
 
@@ -176,11 +187,23 @@ module XYZ
         end
       end
 
+      new_rows = Array.new
       ndx_rows.values.each do |r|
         port_mh = r[:node].model_handle_with_auth_info.create_childMH(:port)
-        ret += create_from_rows(port_mh,r[:create_rows],opts)
+        new_rows += create_from_rows(port_mh,r[:create_rows],opts)
       end
-      ret
+      #for new rows need to splice in node info
+      unless new_rows.empty?
+        sp_hash = {
+          :cols => [:id,:node],
+          :filter => [:oneof, :node_node_id, new_rows.map{|p|p[:node_node_id]}]
+        }
+        ndx_port_node = get_objs(port_mh,sp_hash).inject(Hash.new) do |h,r|
+          h.merge(r[:id] => r[:node])
+        end
+        new_rows.each{|r|r.merge(:node => ndx_port_node[r[:id]])}
+      end
+      ret + new_rows
     end
 
     def self.ref_from_component_and_link_def_ref(type,component_type,link_def_ref)

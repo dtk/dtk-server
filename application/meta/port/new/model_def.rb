@@ -51,6 +51,18 @@
       :hidden=>true,
       :local_dependencies => [:node_node_id]
     },
+    :node=>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [{
+         :model_name=>:node,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:id =>:port__node_node_id},
+         :cols=>[:id,:display_name]
+       }]
+    },
     :link_def_info=>{
       :type=>:json,
       :hidden=>true,

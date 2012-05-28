@@ -17,7 +17,7 @@ module XYZ
         pl_import_hash.merge!(AssemblyImportInternal.import_port_links(ref,assem,ports))
       end
 
-      import_objects_from_hash(library_idh,pl_import_hash)
+      import_objects_from_hash(library_idh,{"component" => pl_import_hash})
 
       ret = Array.new
       ret
@@ -29,6 +29,9 @@ module XYZ
         {assembly_ref => {"display_name" => assembly_hash["name"], "type" => "composite"}}
       end
       def self.import_port_links(assembly_ref,assembly_hash,ports)
+        #augment ports with parsed display_name
+        ports.each{|p|p.merge!(:parsed_port_name => Port.parse_external_port_display_name(p[:display_name]))}
+
         (assembly_hash["port_links"]||[]).inject(Hash.new) do |h,pl|
           input = AssemblyImportPortRef.parse(pl.values.first)
           output = AssemblyImportPortRef.parse(pl.keys.first)
@@ -62,10 +65,8 @@ module XYZ
           else
             Log.info("assembly node(#{node_hash_ref}) without a matching node bidning")
           end
-#          cmps_output = import_components(library_idh,assembly_ref,module_refs,node_hash["components"])
           cmps_output = import_component_refs(library_idh,module_refs,node_hash["components"])
           unless cmps_output.empty?
-#            node_output["component"] = cmps_output
             node_output["component_ref"] = cmps_output
           end
           h.merge(node_ref => node_output)
@@ -101,40 +102,9 @@ module XYZ
         end
         augment_cmps
       end
-      #TODO: deprecate below
-      def self.import_components(library_idh,assembly_ref,module_refs,components_hash)
-        #find the reference components and clone
-        #TODO: not clear we need the modules if component names are unique w/o modules
-        #TODO: may eventually move to ref model for components in an assembly
-        cmp_types = components_hash.map{|cmp|component_type(cmp)}
-        sp_hash = {
-          :cols => Component.common_columns() + [:module_name],
-          :filter => [:and, [:oneof, :component_type,cmp_types],
-                      [:neq, :library_library_id,nil]] #TODO: think this should pick out specific library
-        }
-        matching_cmps = Model.get_objs(library_idh.createMH(:component),sp_hash)
-        #make sure a match is found for each component
-        non_matches = Array.new
-        augment_cmps = components_hash.inject(Hash.new) do |h,cmp_hash|
-          if match = matching_cmps.find{|match_cmp|match_cmp[:component_type] == component_type(cmp_hash)}
-            [:id,:implementation,:assembly_id,:node_node_id].each{|k|match.delete(k)}
-            match.merge!("*assembly_id" => "/component/#{assembly_ref}")
-            #match.merge!(:library_library_id => library_idh.get_id()) looks like this gets nulled out; see if even need
-            h.merge(match[:component_type] => match)
-          else 
-            non_matches << component_type(cmp_hash)
-            h
-          end
-        end
-        #error if one or more matches
-        unless non_matches.empty?
-          raise Error.new("No component matches for (#{non_matches.join(",")})")
-        end
-        augment_cmps
+      def self.component_type(cmp)
+        (cmp.kind_of?(Hash) ?  cmp.keys.first : cmp).gsub(Regexp.new(Seperators[:module_component]),"__")
       end
-        def self.component_type(cmp)
-          (cmp.kind_of?(Hash) ?  cmp.keys.first : cmp).gsub(Regexp.new(Seperators[:module_component]),"__")
-        end
     end
   end
   module AssemblyImportMixin

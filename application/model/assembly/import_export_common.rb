@@ -7,6 +7,7 @@ module XYZ
       :node_component => "/",
       :component_link_def_ref => "/"
     }
+
     class AssemblyImportPortRef < SimpleHashObject
       def self.parse(port_ref)
         if port_ref =~ PortRefRegex
@@ -21,8 +22,18 @@ module XYZ
       PortRefRegex = Regexp.new("(^.+)#{Seperators[:node_component]}(.+)#{Seperators[:component_link_def_ref]}(.+$)")
       ModCompRegex = Regexp.new(Seperators[:module_component])
       
-      def matching_id(ports)
-        nil
+      #ports are augmented with field :parsed_port_name
+      def matching_id(aug_ports)
+        match = aug_ports.find do |port|
+          p = port[:parsed_port_name]
+          node = port[:node][:display_name]
+          self[:component_type] == p[:component_type] and self[:link_def_ref] == p[:link_def_ref] and node == self[:node] 
+        end
+        if match
+          match[:id]
+        else
+          raise Error.new("Connot find match to (#{self.inspect})")
+        end
       end
     end
   end

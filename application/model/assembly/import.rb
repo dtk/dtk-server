@@ -14,7 +14,7 @@ module XYZ
       assemblies_hash.each do |ref,assem|
         assembly_idh = library_idh.get_child_id_handle(:component,ref)
         ports = assembly_idh.create_object().add_ports_during_import()
-        pl_import_hash.merge!(AssemblyImportInternal.import_port_links(ref,assem,ports))
+        pl_import_hash.merge!(AssemblyImportInternal.import_port_links(assembly_idh,ref,assem,ports))
       end
 
       import_objects_from_hash(library_idh,{"component" => pl_import_hash})
@@ -28,7 +28,7 @@ module XYZ
       def self.import_assembly_top(assembly_ref,assembly_hash)
         {assembly_ref => {"display_name" => assembly_hash["name"], "type" => "composite"}}
       end
-      def self.import_port_links(assembly_ref,assembly_hash,ports)
+      def self.import_port_links(assembly_idh,assembly_ref,assembly_hash,ports)
         #augment ports with parsed display_name
         ports.each{|p|p.merge!(:parsed_port_name => Port.parse_external_port_display_name(p[:display_name]))}
 
@@ -38,7 +38,7 @@ module XYZ
           input_id = input.matching_id(ports)
           output_id = output.matching_id(ports)
           pl_ref = PortLink.ref_from_ids(input_id,output_id)
-          pl_hash = {"input_id" => input_id,"output_id" => output_id}
+          pl_hash = {"input_id" => input_id,"output_id" => output_id, "assembly_id" => assembly_idh.get_id()}
           h.merge(assembly_ref => {"port_link" => {pl_ref => pl_hash}})
         end
       end

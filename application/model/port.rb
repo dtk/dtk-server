@@ -180,10 +180,12 @@ module XYZ
       end
       ret
     end
-
+    def self.ref_from_component_and_link_def_ref(type,component_type,link_def_ref)
+      "#{type}#{RefDelim}#{component_type}#{RefDelim}#{link_def_ref}"
+    end
    private
     def self.ref_from_component_and_link_def(type,component_type,link_def)
-      "#{type}#{RefDelim}#{component_type}#{RefDelim}#{link_def[:link_type]}"
+      ref_from_component_and_link_def_ref(type,component_type,link_def[:link_type])
     end
 
     #TODO: this should be in link defs

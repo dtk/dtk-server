@@ -28,9 +28,13 @@ module XYZ
       def self.import_assembly_top(assembly_ref,assembly_hash)
         {assembly_ref => {"display_name" => assembly_hash["name"], "type" => "composite"}}
       end
-      def self.import_port_links(assembly_hash)
-        (assembly_hash["port_links"]||[]).map do |pl|
-          {"output" => parse_port_ref(pl.keys.first), "input" => parse_port_ref(pl.values.first)}
+      def self.import_port_links(assembly_ref,assembly_hash)
+        (assembly_hash["port_links"]||[]).inject(Hash.new) do |pl|
+          input = AssemblyImportPortRef.parse(pl.values.first)
+          output = AssemblyImportPortRef.parse(pl.keys.first)
+          pl_ref = AssemblyImportPortRef.port_link_ref(input,output)
+          pl_hash = {"*input_id" => input.ret_uri_form(assembly_ref),"*output_id" => output.ret_uri_form(assembly_ref)}
+          h.merge(assembly_ref => {pl_ref => pl_hash}) 
         end
       end
 

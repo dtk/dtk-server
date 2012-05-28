@@ -13,7 +13,7 @@ module XYZ
           node = $1; cmp_type_x = $2; link_def_ref = $3
           #TODO: global for "__"
           cmp_type = cmp_type_x.gsub(ModCompRegex,"__")
-          new(:node => node,:compoment_type => cmp_type, :link_def_ref => link_def_ref)
+          new(:node => node,:component_type => cmp_type, :link_def_ref => link_def_ref)
         else
           raise Error.new("ill-formed port ref (#{port_ref})")
         end     

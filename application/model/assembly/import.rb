@@ -3,7 +3,7 @@ module XYZ
   module AssemblyImportClassMixin
     def import(library_idh,assemblies_hash,node_bindings_hash)
       import_hash = {"component" => Hash.new,"node" => Hash.new}
-      pl_import_hash = {"port_links" > Hash.new}
+      pl_import_hash = {"port_links" => Hash.new}
       assemblies_hash.each do |ref,assem|
         import_hash["component"].merge!(AssemblyImportInternal.import_assembly_top(ref,assem))
         import_hash["node"].merge!(AssemblyImportInternal.import_nodes(library_idh,ref,assem,node_bindings_hash))
@@ -15,7 +15,6 @@ module XYZ
       assemblies_hash.each do |ref,assem|
         assembly_idh = library_idh.get_child_id_handle(:component,ref)
         assembly_idh.create_object().add_ports_during_import()
-        assembly.add_ports_during_import()
       end
       import_objects_from_hash(library_idh,pl_import_hash)
 
@@ -29,7 +28,7 @@ module XYZ
         {assembly_ref => {"display_name" => assembly_hash["name"], "type" => "composite"}}
       end
       def self.import_port_links(assembly_ref,assembly_hash)
-        (assembly_hash["port_links"]||[]).inject(Hash.new) do |pl|
+        (assembly_hash["port_links"]||[]).inject(Hash.new) do |h,pl|
           input = AssemblyImportPortRef.parse(pl.values.first)
           output = AssemblyImportPortRef.parse(pl.keys.first)
           pl_ref = AssemblyImportPortRef.port_link_ref(input,output)
@@ -136,7 +135,7 @@ module XYZ
     end
   end
   module AssemblyImportMixin
-    def add_ports_and_links_during_import(port_links)
+    def add_ports_during_import()
       #get the link defs/component_ports associated with components in assembly;
       #to determine if need to add internal links and for port processing
       link_defs_info = get_objs(:cols => [:template_link_defs_info])

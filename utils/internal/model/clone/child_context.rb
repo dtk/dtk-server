@@ -29,7 +29,7 @@ module XYZ
           if old_par_id = row[old_parent_rel_col]
             {parent_id_col => row[:id],:old_par_id => old_par_id}
           else
-            raise Error.new("Column (#{parent_rel_col}) not found in objs_info")
+            raise Error.new("Column (#{old_parent_rel_col}) not found in objs_info")
           end
         end
         create_opts = {:duplicate_refs => :no_check, :returning_sql_cols => [:ancestor_id,parent_id_col]}
@@ -145,7 +145,7 @@ module XYZ
         select_ds = ancestor_rel_ds.join_table(:inner,node_template_ds).join_table(:inner,mapping_ds,[:node_template_id])
         ret = Model.create_from_select(model_handle,field_set_to_copy,select_ds,create_override_attrs,create_opts)
         ret.each do |r|
-          r.merge!(:node_template_id => (mapping_rows.find{|mr|mr[:assembly_id] = r[:assembly_id]}||{})[:node_template_id])
+          r.merge!(:node_template_id => (mapping_rows.find{|mr|mr[:display_name] == r[:display_name]}||{})[:node_template_id])
         end
         ret
       end
@@ -212,13 +212,28 @@ module XYZ
         cmp_template_ds = Model.get_objects_just_dataset(component_mh,cmp_template_wc,Model::FieldSet.opt(cmp_template_fs))
 
         select_ds = cmp_template_ds.join_table(:inner,mapping_ds,[:component_template_id])
-        Model.create_from_select(component_mh,field_set_to_copy,select_ds,create_override_attrs,create_opts)
+        ret = Model.create_from_select(component_mh,field_set_to_copy,select_ds,create_override_attrs,create_opts)
+        ret.each{|r|r.merge!(:component_ref_id => r[:ancestor_id])}
+        ret
       end
     end
+    class AssemblyComponentAttribute < ChildContext
+      private
+      def ret_new_objs_info(db,field_set_to_copy,create_override_attrs)
+        ret = super
+        process_attribute_overrides(ret)
+        ret
+      end
+      def process_attribute_overrides(new_objs_info)
+        nil #TODO: stub
+      end
+    end
+
     #index is parent and child
     SpecialContext = {
       :target => {:node => AssemblyNode},
-      :node => {:component_ref => AssemblyComponentRef}
+      :node => {:component_ref => AssemblyComponentRef},
+      :component => {:attribute => AssemblyComponentAttribute}
     }
   end
 end

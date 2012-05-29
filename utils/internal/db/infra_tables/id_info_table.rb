@@ -145,11 +145,11 @@ module XYZ
 
     #returns nil if model_name given and top does not mactch it
     def get_top_container_id_handle(model_name=nil,opts={})
-      model_name = :datacenter if model_name==:target
-      return self if model_name and model_name == self[:model_name]
+      model_name = :datacenter if model_name==:target #TODO: with change to Model.matching_models? in place of == may not need this
+      return self if model_name and Model.matching_models?(model_name,self[:model_name])
       uri = get_uri()
       top_model_name = RestURI.ret_top_container_relation_type(uri)
-      return nil if model_name and not model_name == top_model_name
+      return nil if model_name and not Model.matching_models?(model_name,top_model_name)
       c = self[:c]
       top_container_uri = RestURI.ret_top_container_uri(uri)
       hash_info = {:c => c, :model_name => top_model_name, :uri => top_container_uri}

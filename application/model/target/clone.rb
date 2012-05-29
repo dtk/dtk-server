@@ -43,7 +43,7 @@ module XYZ
         level = 1
         if R8::Config[:use_node_bindings]
           port_link_idhs = clone_copy_output.children_id_handles(level,:port_link)
-          assembly__port_links(clone_copy_output,port_link_idhs,opts)
+          assembly__port_links(target,clone_copy_output,port_link_idhs,opts)
         end
         node_idhs = clone_copy_output.children_id_handles(level,:node)
         node_new_items = node_idhs.map{|idh|{:new_item => idh, :parent => target.id_handle()}}
@@ -61,7 +61,7 @@ module XYZ
         StateChange.create_pending_change_items(component_new_items)
       end
 
-      def self.assembly__port_links(clone_copy_output,port_link_idhs,opts)
+      def self.assembly__port_links(target,clone_copy_output,port_link_idhs,opts)
         #find the port_links under the assembly and then add attribute_links associated with it
         #  TODO: this may be considered bug; but at this point assembly_id on port_links point to assembly library instance
         return if port_link_idhs.empty?
@@ -71,8 +71,8 @@ module XYZ
           :cols => [:id,:input_id,:output_id],
           :filter => [:oneof, :id, port_link_idhs.map{|pl_idh|pl_idh.get_id()}]
         }
-        Model.get_objs(port_link_mh,sp_hash) do |port_link|
-          port_link.create_attr_links(id_handle)
+        Model.get_objs(port_link_mh,sp_hash).each do |port_link|
+          port_link.create_attr_links(target.id_handle)
         end
       end
     end

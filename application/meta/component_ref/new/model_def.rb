@@ -22,5 +22,6 @@
        }]
     }
   },
-  :many_to_one => [:node]
+  :many_to_one => [:node],
+  :one_to_many => [:attribute_override]
 }

@@ -90,6 +90,10 @@ module XYZ
               "*component_template_id" => "/component/#{match[:ref]}",
               "display_name" => match[:component_type]
             }
+            attr_overrides = attribute_overrides(cmp_hash)
+            unless attr_overrides.empty?
+              cmp_ref.merge!("attribute_override" => attr_overrides)
+            end
             h.merge(match[:component_type] => cmp_ref)
           else 
             non_matches << component_type(cmp_hash)
@@ -104,6 +108,14 @@ module XYZ
       end
       def self.component_type(cmp)
         (cmp.kind_of?(Hash) ?  cmp.keys.first : cmp).gsub(Regexp.new(Seperators[:module_component]),"__")
+      end
+
+      def self.attribute_overrides(cmp)
+        ret = Hash.new
+        return ret unless cmp.kind_of?(Hash)
+        cmp.inject(Hash.new) do |h,(attribute,value)|
+          h.merge(attribute => {"display_name" => attribute, "attribute_value" => value}) 
+        end       
       end
     end
   end

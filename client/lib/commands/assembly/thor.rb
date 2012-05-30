@@ -34,11 +34,12 @@ module R8::Client
       post rest_url("task/execute"), "task_id" => task_id
     end
 
+    #TODO: put in flag to control detail level
     desc "list [library|target]","List asssemblies in library or target"
     def list(parent)
       case parent
         when "library":
-          post rest_url("assembly/list_from_library")
+          post rest_url("assembly/list_from_library"), "detail_level" => ["attributes"]
         when "target":
           post rest_url("assembly/list_from_target")
       end

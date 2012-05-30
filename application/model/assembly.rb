@@ -16,7 +16,7 @@ module XYZ
         :filter => [:and, [:eq, :type, "composite"], lib_filter]
       }
       assem_rows = get_objs(assembly_mh,sp_hash)
-      attr_rows = (opts[:detail_level] and [opts[:detail_level]].flatten.include?("attributes")) ? get_template_component_attributes(assem_rows) : []
+      attr_rows = (opts[:detail_level] and [opts[:detail_level]].flatten.include?("attributes")) ? get_template_component_attributes(assembly_mh,assem_rows) : []
       list_aux(assem_rows,attr_rows)
     end
 
@@ -53,14 +53,37 @@ module XYZ
 
     class << self
       private
-      def get_template_component_attributes(template_assembly_rows)
-        ret = Array.new
+      def get_template_component_attributes(assembly_mh,template_assembly_rows)
+        #get attributes on templates (these are defaults)
+        ret = get_default_component_attributes(assembly_mh,template_assembly_rows)
+        return ret unless R8::Config[:use_node_bindings]
+        #get attribute overrides
         sp_hash = {
-          :cols => [:id,:display_name,:attribute_value],
-          :filter => [:one_of, :component_component_id,template_assembly_rows.map{|r|r[:nested_component]}]
+          :cols => [:id,:display_name,:attribute_value,:attribute_template_id],
+          :filter => [:oneof, :component_ref_id,template_assembly_rows.map{|r|r[:component_ref][:id]}]
         }
-        ret #TODO: stub
+        attr_override_rows = Model.get_objs(assembly_mh.createMH(:attribute_override),sp_hash)
+        unless attr_override_rows.empty?
+          ndx_attr_override_rows = attr_override_rows.inject(Hash.new) do |h,r|
+            h.merge(r[:attribute_template_id] => r)
+          end
+          ret.each do |r|
+            if override = ndx_attr_override_rows[r[:id]]
+              r.merge!(:attribute_value => override[:attribute_value], :override => true)
+            end
+          end
+        end
+        ret
       end
+
+      def get_default_component_attributes(assembly_mh,assembly_rows)
+        sp_hash = {
+          :cols => [:id,:display_name,:attribute_value,:component_component_id],
+          :filter => [:oneof, :component_component_id,assembly_rows.map{|r|r[:nested_component][:id]}]
+        }
+        Model.get_objs(assembly_mh.createMH(:attribute),sp_hash)
+      end
+
       def list_aux(assembly_rows,attr_rows=[])
         ndx_ret = Hash.new
         rows_from_get_assembly.each do |r|

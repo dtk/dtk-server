@@ -171,14 +171,15 @@ module XYZ
      private
       include ForeignKeyInfoMixin
 
-      def get_nested_objects_top_level(model_handle,target_parent_mh,objs_info,recursive_override_attrs,opts={})
-        ChildContext.generate(self,model_handle,objs_info,recursive_override_attrs)
+      def get_nested_objects_top_level(model_handle,target_parent_mh,objs_info,recursive_override_attrs,opts={},&block)
+        ChildContext.generate(self,model_handle,objs_info,recursive_override_attrs,&block)
       end
     end
 
     class CloneCopyProcessorAssembly < CloneCopyProcessor
       private
-      def get_nested_objects_top_level(model_handle,target_parent_mh,assembly_objs_info,recursive_override_attrs,opts={})
+      def get_nested_objects_top_level(model_handle,target_parent_mh,assembly_objs_info,recursive_override_attrs,opts={},&block)
+        ret = Array.new
         raise Error.new("Not treating assembly_objs_info with more than 1 element") unless assembly_objs_info.size == 1
         assembly_obj_info = assembly_objs_info.first
         ancestor_id = assembly_obj_info[:ancestor_id]
@@ -186,7 +187,7 @@ module XYZ
         model_name = model_handle[:model_name]
         new_assembly_assign = {:assembly_id => assembly_obj_info[:id]}
         new_par_assign = {DB.parent_field(target_parent_mn,model_name) => assembly_obj_info[:parent_id]}
-        CloneGlobal::AssemblyChildren.map do |nested_model_name|
+        CloneGlobal::AssemblyChildren.each do |nested_model_name|
           #TODO: push this into ChildContext.create_from_hash
           nested_mh = model_handle.createMH(:model_name => nested_model_name, :parent_model_name => target_parent_mn)
           override_attrs = new_assembly_assign.merge(ret_child_override_attrs(nested_mh,recursive_override_attrs))
@@ -202,8 +203,14 @@ module XYZ
             end
           end
           target_idh = target_parent_mh.createIDH(:id => assembly_obj_info[:parent_id])
-          ChildContext.create_from_hash(self,{:model_handle => nested_mh, :clone_par_col => :assembly_id, :parent_rels => [parent_rel], :override_attrs => override_attrs, :create_opts => create_opts, :ancestor_id => ancestor_id, :target_idh => target_idh})
+          child_context = ChildContext.create_from_hash(self,{:model_handle => nested_mh, :clone_par_col => :assembly_id, :parent_rels => [parent_rel], :override_attrs => override_attrs, :create_opts => create_opts, :ancestor_id => ancestor_id, :target_idh => target_idh})
+          if block
+            block.call(child_context)
+          else
+            ret << child_context
+          end
         end
+        ret unless block
       end
     end
 
@@ -272,7 +279,7 @@ module XYZ
         fk_info.add_id_handles(new_id_handles) #TODO: may be more efficient adding only id handles assciated with foreign keys
 
         #iterate over all nested objects which includes children object plus, for example, components for composite components
-        get_nested_objects_top_level(source_model_handle,target_parent_mh,new_objs_info,recursive_override_attrs).each do |child_context|
+        get_nested_objects_top_level(source_model_handle,target_parent_mh,new_objs_info,recursive_override_attrs) do |child_context|
           clone_copy_child_objects(child_context)
         end
         fk_info.shift_foregn_keys()

@@ -217,20 +217,31 @@ module XYZ
         cmp_template_ds = Model.get_objects_just_dataset(component_mh,cmp_template_wc,Model::FieldSet.opt(cmp_template_fs))
 
         select_ds = cmp_template_ds.join_table(:inner,mapping_ds,[:component_template_id])
-        ret = Model.create_from_select(component_mh,field_set_to_copy,select_ds,create_override_attrs,create_opts)
-        ret.each{|r|r.merge!(:component_ref_id => r[:ancestor_id])}
-        ret
+        Model.create_from_select(component_mh,field_set_to_copy,select_ds,create_override_attrs,create_opts)
       end
     end
     class AssemblyComponentAttribute < ChildContext
       private
       def ret_new_objs_info(db,field_set_to_copy,create_override_attrs)
-        ret = super
-        process_attribute_overrides(ret)
-        ret
+        new_objs_info = super
+        process_attribute_overrides(db,new_objs_info)
+        new_objs_info
       end
-      def process_attribute_overrides(new_objs_info)
-        nil #TODO: stub
+      def process_attribute_overrides(db,new_objs_info)
+        #self[::parent_rels] is an array with hash that has keys :old_par_id,  :component_component_id
+        #:old_par_id points to component_template_id in library and :component_component_id points to new component
+
+        attr_override_fs = Model::FieldSet.new(:attribute_override,[:display_name,{:component_ref_id => :old_par_id}])
+        attr_override_wc = nil
+        attr_override_ds = Model.get_objects_just_dataset(model_handle.createMH(:attribute_override),attr_override_wc,Model::FieldSet.opt(attr_override_fs))
+
+        cmp_mapping_ds = SQL::ArrayDataset.create(db,parent_rels,model_handle.createMH(:cmp_mapping))
+
+        attr_mapping_rows = new_objs_info.map{|r|Aux::hash_subset(r,[:component_component_id,:display_name])}
+        attr_mapping_ds = SQL::ArrayDataset.create(db,attr_mapping_rows,model_handle.createMH(:attr_mapping))
+
+        select_ds = attr_override_ds.join_table(:inner,cmp_mapping_ds,[:old_par_id]).join_table(:inner,attr_mapping_ds,[:component_component_id,:display_name])
+        nil
       end
     end
 

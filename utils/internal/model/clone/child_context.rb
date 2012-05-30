@@ -238,6 +238,33 @@ module XYZ
       end
       def process_attribute_overrides(db,new_objs_info)
         #parent_objs_info has component info keys: :component_template_id, :component_ref_id and (which is the new component instance)
+        ndx_cmp_info = parent_objs_info.inject(Hash.new){|h,r|h.merge(r[:component_ref_id] => r[:id])}
+        sp_hash = {
+          :cols => [:display_name,:component_ref_id,:attribute_value],
+          :filter => [:oneof, :component_ref_id, ndx_cmp_info.keys]
+        }
+        override_rows = Model.get_objs(model_handle.createMH(:attribute_override),sp_hash)
+        return if override_rows.empty?
+
+        ndx_attr_info = Hash.new
+        new_objs_info.each do |r|
+          (ndx_attr_info[r[:component_component_id]] ||= Hash.new)[r[:display_name]] = r[:id]
+        end
+
+        update_rows = override_rows.map do |r|
+          cmp_id = ndx_cmp_info[r[:component_ref_id]]
+          {
+            :id => ndx_attr_info[cmp_id][r[:display_name]],
+            :value_asserted => r[:attribute_value],
+            :is_instance_value => true
+          }
+        end
+        Model.update_from_rows(model_handle.createMH(:attribute),update_rows)
+      end
+    end
+=begin
+TODO: if use update from select
+
         attr_override_fs = Model::FieldSet.new(:attribute_override,[:display_name,:component_ref_id])
         attr_override_wc = nil
         attr_override_ds = Model.get_objects_just_dataset(model_handle.createMH(:attribute_override),attr_override_wc,Model::FieldSet.opt(attr_override_fs))
@@ -249,9 +276,10 @@ module XYZ
         attr_mapping_ds = SQL::ArrayDataset.create(db,attr_mapping_rows,model_handle.createMH(:attr_mapping))
 
         select_ds = attr_override_ds.join_table(:inner,cmp_mapping_ds,[:component_ref_id]).join_table(:inner,attr_mapping_ds,[:component_component_id,:display_name])
+        override_rows = select_ds.all
         nil
       end
-    end
+=end
 
     #index is parent and child
     SpecialContext = {

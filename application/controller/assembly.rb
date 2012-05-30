@@ -13,12 +13,18 @@ module XYZ
       rest_ok_response 
     end
 
-    #TODO: might change so is just 'list'; and bahvior varies whether object template or insatnce
+    #TODO: might change so is just 'list'; and bahvior varies whether object template or instance
     def rest__list_from_library()
-      rest_ok_response Assembly.list_from_library(model_handle())
+      detail_level = ret_request_params(:detail_level)
+      opts = Hash.new
+      opts[:detail_level] = detail_level if detail_level
+      rest_ok_response Assembly.list_from_library(model_handle(),opts)
     end
     def rest__list_from_target()
-      rest_ok_response Assembly.list_from_target(model_handle())
+      detail_level = ret_request_params(:detail_level)
+      opts = Hash.new
+      opts[:detail_level] = detail_level if detail_level
+      rest_ok_response Assembly.list_from_target(model_handle(),opts)
     end
 
     #creates task to execute/converge assembly

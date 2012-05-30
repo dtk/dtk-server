@@ -7,25 +7,28 @@ module XYZ
     include AssemblyExportMixin
     include AssemblyImportMixin
     extend AssemblyImportClassMixin
-    def self.list_from_library(assembly_mh,library_idh=nil)
+    def self.list_from_library(assembly_mh,opts={})
+      library_idh = opts[:library_idh]
       lib_filter = (library_idh ? [:eq, :library_library_id, library_idh.get_id()] : [:neq, :library_library_id, nil])
       nested_virtual_attr = (R8::Config[:use_node_bindings] ? :template_nodes_and_cmps_summary : :nested_nodes_and_cmps_summary)
       sp_hash = {
         :cols => [:id, :display_name,nested_virtual_attr],
         :filter => [:and, [:eq, :type, "composite"], lib_filter]
       }
-      assemblies = get_objs(assembly_mh,sp_hash)
-      list_aux(assemblies)
+      assem_rows = get_objs(assembly_mh,sp_hash)
+      attr_rows = (opts[:detail_level] and [opts[:detail_level]].flatten.include?("attributes")) ? get_template_component_attributes(assem_rows) : []
+      list_aux(assem_rows,attr_rows)
     end
 
-    def self.list_from_target(assembly_mh,target_idh=nil)
+    def self.list_from_target(assembly_mh,opts={})
+      target_idh = opts[:target_idh]
       target_filter = (target_idh ? [:eq, :datacenter_datacenter_id, target_idh.get_id()] : [:neq, :datacenter_datacenter_id, nil])
       sp_hash = {
         :cols => [:id, :display_name,:nested_nodes_and_cmps_summary],
         :filter => [:and, [:eq, :type, "composite"], target_filter]
       }
-      assemblies = get_objs(assembly_mh,sp_hash)
-      list_aux(assemblies)
+      assembly_rows = get_objs(assembly_mh,sp_hash)
+      list_aux(assembly_rows,opts)
     end
 
     def set_attributes(pattern,value)
@@ -50,9 +53,17 @@ module XYZ
 
     class << self
       private
-      def list_aux(assemblies)
+      def get_template_component_attributes(template_assembly_rows)
+        ret = Array.new
+        sp_hash = {
+          :cols => [:id,:display_name,:attribute_value],
+          :filter => [:one_of, :component_component_id,template_assembly_rows.map{|r|r[:nested_component]}]
+        }
+        ret #TODO: stub
+      end
+      def list_aux(assembly_rows,attr_rows=[])
         ndx_ret = Hash.new
-        assemblies.each do |r|
+        rows_from_get_assembly.each do |r|
           #TODO: hack to create a Assembly object (as opposed to row which is component); should be replaced by having 
           #get_objs do this (using possibly option flag for subtype processing)
           pntr = ndx_ret[r[:id]] ||= r.id_handle.create_object().merge(:display_name => r[:display_name], :ndx_nodes => Hash.new)

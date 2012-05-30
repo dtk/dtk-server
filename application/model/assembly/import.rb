@@ -86,11 +86,12 @@ module XYZ
         non_matches = Array.new
         augment_cmps = components_hash.inject(Hash.new) do |h,cmp_hash|
           if match = matching_cmps.find{|match_cmp|match_cmp[:component_type] == component_type(cmp_hash)}
+            cmp_template_relative_uri = "/component/#{match[:ref]}" 
             cmp_ref = {
-              "*component_template_id" => "/component/#{match[:ref]}",
+              "*component_template_id" => cmp_template_relative_uri,
               "display_name" => match[:component_type]
             }
-            attr_overrides = attribute_overrides(cmp_hash)
+            attr_overrides = attribute_overrides(cmp_hash,cmp_template_relative_uri)
             unless attr_overrides.empty?
               cmp_ref.merge!("attribute_override" => attr_overrides)
             end
@@ -110,11 +111,12 @@ module XYZ
         (cmp.kind_of?(Hash) ?  cmp.keys.first : cmp).gsub(Regexp.new(Seperators[:module_component]),"__")
       end
 
-      def self.attribute_overrides(cmp)
+      def self.attribute_overrides(cmp,cmp_template_relative_uri)
         ret = Hash.new
         return ret unless cmp.kind_of?(Hash)
-        cmp.values.first.inject(Hash.new) do |h,(attribute,value)|
-          h.merge(attribute => {"display_name" => attribute, "attribute_value" => value}) 
+        cmp.values.first.inject(Hash.new) do |h,(name,value)|
+          attr_template_id = "#{cmp_template_relative_uri}/attribute/#{name}"
+          h.merge(name => {"display_name" => name, "attribute_value" => value, "*attribute_template_id" => attr_template_id}) 
         end       
       end
     end

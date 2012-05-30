@@ -33,7 +33,7 @@ module XYZ
           end
         end
         create_opts = {:duplicate_refs => :no_check, :returning_sql_cols => [:ancestor_id,parent_id_col]}
-        child_context = create_from_hash(clone_proc,{:model_handle => child_mh, :clone_par_col => parent_id_col, :parent_rels => parent_rels, :override_attrs => override_attrs, :create_opts => create_opts})
+        child_context = create_from_hash(clone_proc,{:model_handle => child_mh, :clone_par_col => parent_id_col, :parent_rels => parent_rels, :override_attrs => override_attrs, :create_opts => create_opts, :parent_objs_info => objs_info})
         if block
           block.call(child_context)
         else
@@ -103,7 +103,6 @@ module XYZ
     def clone_model_handle()
       model_handle()
     end
-    
     def clone_par_col()
       self[:clone_par_col]
     end
@@ -113,10 +112,13 @@ module XYZ
     def create_opts()
       self[:create_opts]
     end
-      
     def matches()
       self[:matches]
     end
+    def parent_objs_info()
+      self[:parent_objs_info]
+    end
+
 
     class AssemblyNode < ChildContext
      private
@@ -149,9 +151,7 @@ module XYZ
         
         select_ds = ancestor_rel_ds.join_table(:inner,node_template_ds).join_table(:inner,mapping_ds,[:node_template_id])
         ret = Model.create_from_select(model_handle,field_set_to_copy,select_ds,create_override_attrs,create_opts)
-        ret.each do |r|
-          r.merge!(:node_template_id => (mapping_rows.find{|mr|mr[:display_name] == r[:display_name]}||{})[:node_template_id])
-        end
+        ret.each{|r|r[:node_template_id] = (mapping_rows.find{|mr|mr[:display_name] == r[:display_name]}||{})[:node_template_id]}
         ret
       end
     
@@ -196,12 +196,14 @@ module XYZ
       def ret_new_objs_info(db,field_set_to_copy,create_override_attrs)
         #mapping from component ref to component template 
         component_mh = model_handle.createMH(:component)
+        ndx_template_to_ref = Hash.new
         mapping_rows = matches.map do |m|
           node = m[:node]
           old_par_id = node[:id]
           unless node_node_id = (parent_rels.find{|r|r[:old_par_id] == old_par_id}||{})[:node_node_id]
             raise Error.new("Cannot find old_par_id #{old_par_id.to_s} in parent_rels") 
           end
+          ndx_template_to_ref[m[:component_template_id]] = m[:id]
           {:ancestor_id => m[:component_template_id],
             :component_template_id => m[:component_template_id],
             :node_node_id =>  node_node_id,
@@ -217,11 +219,16 @@ module XYZ
         cmp_template_ds = Model.get_objects_just_dataset(component_mh,cmp_template_wc,Model::FieldSet.opt(cmp_template_fs))
 
         select_ds = cmp_template_ds.join_table(:inner,mapping_ds,[:component_template_id])
-        Model.create_from_select(component_mh,field_set_to_copy,select_ds,create_override_attrs,create_opts)
+        ret = Model.create_from_select(component_mh,field_set_to_copy,select_ds,create_override_attrs,create_opts)
+        ret.each{|r|r[:component_ref_id] = ndx_template_to_ref[r[:ancestor_id]]}
+        ret
       end
     end
     class AssemblyComponentAttribute < ChildContext
       private
+      def initialize(hash)
+        super
+      end
       def ret_new_objs_info(db,field_set_to_copy,create_override_attrs)
         new_objs_info = super
         process_attribute_overrides(db,new_objs_info)

@@ -19,7 +19,9 @@ module XYZ
 
         update_ds = dataset(db_rel,update_table_prefix,sequel_select).where(wc)
         update_set_clause = columns.inject({}){|hash,col| hash.merge(col => "#{select_prefix}__#{col}".to_sym)}
-
+        if opts[:constant_set_values]
+          opts[:constant_set_values].each{|col,val|update_set_clause[col]=val}
+        end
         set_updated_at!(update_set_clause)
 
         unless opts[:returning_cols] 

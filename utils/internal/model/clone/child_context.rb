@@ -13,12 +13,12 @@ module XYZ
       fk_info.add_id_mappings(clone_model_handle,new_objs_info)
       fk_info.add_id_handles(new_id_handles) #TODO: may be more efficient adding only id handles assciated with foreign keys
       #iterate all nested children
-      ChildContext.get_from_parent_relation(clone_proc,clone_model_handle,new_objs_info,override_attrs).each do |child_context|
+      ChildContext.generate(clone_proc,clone_model_handle,new_objs_info,override_attrs) do |child_context|
         child_context.clone_copy_child_objects(clone_proc,level+1)
       end
     end
 
-    def self.get_from_parent_relation(clone_proc,model_handle,objs_info,recursive_override_attrs,omit_list=[])
+    def self.generate(clone_proc,model_handle,objs_info,recursive_override_attrs,omit_list=[],&block)
       ret = Array.new
       model_handle.get_children_model_handles(:clone_context => true).each do |child_mh|
         next if omit_list.include?(child_mh[:model_name])
@@ -33,12 +33,17 @@ module XYZ
           end
         end
         create_opts = {:duplicate_refs => :no_check, :returning_sql_cols => [:ancestor_id,parent_id_col]}
-        ret << create(clone_proc,{:model_handle => child_mh, :clone_par_col => parent_id_col, :parent_rels => parent_rels, :override_attrs => override_attrs, :create_opts => create_opts})
+        child_context = create_from_hash(clone_proc,{:model_handle => child_mh, :clone_par_col => parent_id_col, :parent_rels => parent_rels, :override_attrs => override_attrs, :create_opts => create_opts})
+        if block
+          block.call(child_context)
+        else
+          ret << child_context
+        end
       end
-      ret
+      ret unless block
     end
 
-    def self.create(clone_proc,hash)
+    def self.create_from_hash(clone_proc,hash)
       unless clone_proc.kind_of?(Model::CloneCopyProcessorAssembly)
         return new(hash)
       end

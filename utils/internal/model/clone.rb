@@ -172,7 +172,7 @@ module XYZ
       include ForeignKeyInfoMixin
 
       def get_nested_objects_top_level(model_handle,target_parent_mh,objs_info,recursive_override_attrs,opts={})
-        ChildContext.get_from_parent_relation(self,model_handle,objs_info,recursive_override_attrs)
+        ChildContext.generate(self,model_handle,objs_info,recursive_override_attrs)
       end
     end
 
@@ -187,7 +187,7 @@ module XYZ
         new_assembly_assign = {:assembly_id => assembly_obj_info[:id]}
         new_par_assign = {DB.parent_field(target_parent_mn,model_name) => assembly_obj_info[:parent_id]}
         CloneGlobal::AssemblyChildren.map do |nested_model_name|
-          #TODO: push this into ChildContext.create
+          #TODO: push this into ChildContext.create_from_hash
           nested_mh = model_handle.createMH(:model_name => nested_model_name, :parent_model_name => target_parent_mn)
           override_attrs = new_assembly_assign.merge(ret_child_override_attrs(nested_mh,recursive_override_attrs))
           create_opts = {:duplicate_refs => :allow, :returning_sql_cols => [:ancestor_id,:assembly_id]}
@@ -202,7 +202,7 @@ module XYZ
             end
           end
           target_idh = target_parent_mh.createIDH(:id => assembly_obj_info[:parent_id])
-          ChildContext.create(self,{:model_handle => nested_mh, :clone_par_col => :assembly_id, :parent_rels => [parent_rel], :override_attrs => override_attrs, :create_opts => create_opts, :ancestor_id => ancestor_id, :target_idh => target_idh})
+          ChildContext.create_from_hash(self,{:model_handle => nested_mh, :clone_par_col => :assembly_id, :parent_rels => [parent_rel], :override_attrs => override_attrs, :create_opts => create_opts, :ancestor_id => ancestor_id, :target_idh => target_idh})
         end
       end
     end
@@ -301,7 +301,7 @@ module XYZ
       end
 
       def ret_child_context(id_handles,target_idh,existing_override_attrs={})
-        #TODO: push this into ChildContext.create
+        #TODO: push this into ChildContext.create_from_hash
         #assuming all id_handles have same model_handle
         sample_idh = id_handles.first
         model_name = sample_idh[:model_name]
@@ -319,7 +319,7 @@ module XYZ
         create_opts = {:duplicate_refs => :allow, :returning_sql_cols => ret_sql_cols}
         parent_rels = id_handles.map{|idh|{:old_par_id => idh.get_id()}}
         
-        ChildContext.create(self,{:model_handle => model_handle, :clone_par_col => :id, :parent_rels => parent_rels, :override_attrs => override_attrs, :create_opts => create_opts})
+        ChildContext.create_from_hash(self,{:model_handle => model_handle, :clone_par_col => :id, :parent_rels => parent_rels, :override_attrs => override_attrs, :create_opts => create_opts})
       end
 
       def add_id_handle(id_handle)

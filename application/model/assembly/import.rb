@@ -113,7 +113,7 @@ module XYZ
       def self.attribute_overrides(cmp)
         ret = Hash.new
         return ret unless cmp.kind_of?(Hash)
-        cmp.inject(Hash.new) do |h,(attribute,value)|
+        cmp.values.first.inject(Hash.new) do |h,(attribute,value)|
           h.merge(attribute => {"display_name" => attribute, "attribute_value" => value}) 
         end       
       end

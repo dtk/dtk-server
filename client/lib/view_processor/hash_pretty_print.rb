@@ -50,7 +50,9 @@ module R8
         msg ||= "No hash pretty print view defined"
         raise Error.new(msg)
       end
-      def render_object_def(hash,object_def)
+      def render_object_def(object,object_def)
+        return object unless object.kind_of?(Hash)
+        hash = object
         #TODO: stub making it only first level
         ret = PrettyPrintHash.new
 

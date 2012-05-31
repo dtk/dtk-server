@@ -8,7 +8,18 @@ module R8::Client::ViewMeta
        :id,
        {:nodes  => {:type => :node, :is_array => true}}
       ],
-      :node_def => [:node_name, :node_id, :components]
+      :node_def => 
+      [
+       :node_name, 
+       :node_id, 
+       {:components => {:type => :component, :is_array => true}}
+      ],
+      :component_def => 
+      [
+       :component_name,
+       {:attributes => {:type => :attribute, :is_array => true}}
+      ],
+      :attribute_def => [:display_name,:attribute_value]
     }
   }
 end

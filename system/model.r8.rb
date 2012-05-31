@@ -38,6 +38,9 @@ module XYZ
       normalize_model(mn1) == normalize_model(mn2)
     end
 
+    def hash_subset(*cols)
+      Aux::hash_subset(self,cols)
+    end
 
     module Delim
       Char = "_"

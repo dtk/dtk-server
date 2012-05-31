@@ -85,15 +85,29 @@ module XYZ
       end
 
       def list_aux(assembly_rows,attr_rows=[])
+        ndx_attrs = Hash.new
+        attr_rows.each do |attr|
+          if val = attr[:attribute_value]
+            attr_hash = attr.hash_subset(:display_name).merge(:attribute_value => val)
+            attr_hash[:override] = attr[:override] unless attr[:override].nil?
+            (ndx_attrs[attr[:component_component_id]] ||= Array.new) << attr_hash
+          end
+        end
         ndx_ret = Hash.new
-        rows_from_get_assembly.each do |r|
+        assembly_rows.each do |r|
           #TODO: hack to create a Assembly object (as opposed to row which is component); should be replaced by having 
           #get_objs do this (using possibly option flag for subtype processing)
           pntr = ndx_ret[r[:id]] ||= r.id_handle.create_object().merge(:display_name => r[:display_name], :ndx_nodes => Hash.new)
           node_id = r[:node][:id]
           node = pntr[:ndx_nodes][node_id] ||= {:node_name => r[:node][:display_name], :node_id => node_id, :components => Array.new}
-          if r[:nested_component][:component_type]
-            node[:components] << r[:nested_component][:component_type].gsub(/__/,"::")
+          cmp_hash = r[:nested_component]
+          if cmp_type =  cmp_hash[:component_type] && cmp_hash[:component_type].gsub(/__/,"::")
+            if attrs = ndx_attrs[r[:nested_component][:id]]
+              cmp = {cmp_type => {:attributes => attrs}}
+            else
+              cmp = cmp_type
+            end
+            node[:components] << cmp
           end
         end
         

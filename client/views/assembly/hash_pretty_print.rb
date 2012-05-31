@@ -19,7 +19,7 @@ module R8::Client::ViewMeta
        :component_name,
        {:attributes => {:type => :attribute, :is_array => true}}
       ],
-      :attribute_def => [:display_name,:attribute_value]
+      :attribute_def => [:attribute_name,:value,:override]
     }
   }
 end

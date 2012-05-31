@@ -23,6 +23,11 @@ module XYZ
       def hash_form()
         super.merge(:internal => true)
       end 
+     private
+      def initialize(err)
+        super
+        @message = "#{err.to_s} (#{err.backtrace.first})"
+      end
     end
     class Usage < RestError
     end

@@ -39,9 +39,9 @@ module R8::Client
     def list(parent)
       case parent
         when "library":
-          post rest_url("assembly/list_from_library"), "detail_level" => ["attributes"]
+          post rest_url("assembly/list_from_library")
         when "target":
-          post rest_url("assembly/list_from_target")
+          post rest_url("assembly/list_from_target"), "detail_level" => ["attributes"]
       end
     end
 

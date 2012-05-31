@@ -15,9 +15,10 @@ module XYZ
         :cols => [:id, :display_name,nested_virtual_attr],
         :filter => [:and, [:eq, :type, "composite"], lib_filter]
       }
-      assem_rows = get_objs(assembly_mh,sp_hash)
-      attr_rows = (opts[:detail_level] and [opts[:detail_level]].flatten.include?("attributes")) ? get_template_component_attributes(assembly_mh,assem_rows) : []
-      list_aux(assem_rows,attr_rows)
+      assembly_rows = get_objs(assembly_mh,sp_hash)
+      get_attrs = (opts[:detail_level] and [opts[:detail_level]].flatten.include?("attributes")) 
+      attr_rows = get_attrs ? get_template_component_attributes(assembly_mh,assembly_rows) : []
+      list_aux(assembly_rows,attr_rows)
     end
 
     def self.list_from_target(assembly_mh,opts={})
@@ -28,7 +29,9 @@ module XYZ
         :filter => [:and, [:eq, :type, "composite"], target_filter]
       }
       assembly_rows = get_objs(assembly_mh,sp_hash)
-      list_aux(assembly_rows,opts)
+      get_attrs = (opts[:detail_level] and [opts[:detail_level]].flatten.include?("attributes")) 
+      attr_rows = get_attrs ? get_default_component_attributes(assembly_mh,assembly_rows) : []
+      list_aux(assembly_rows,attr_rows)
     end
 
     def set_attributes(pattern,value)
@@ -53,9 +56,9 @@ module XYZ
 
     class << self
       private
-      def get_template_component_attributes(assembly_mh,template_assembly_rows)
+      def get_template_component_attributes(assembly_mh,template_assembly_rows,opts={})
         #get attributes on templates (these are defaults)
-        ret = get_default_component_attributes(assembly_mh,template_assembly_rows)
+        ret = get_default_component_attributes(assembly_mh,template_assembly_rows,opts)
         return ret unless R8::Config[:use_node_bindings]
         #get attribute overrides
         sp_hash = {
@@ -69,16 +72,18 @@ module XYZ
           end
           ret.each do |r|
             if override = ndx_attr_override_rows[r[:id]]
-              r.merge!(:attribute_value => override[:attribute_value], :override => true)
+              r.merge!(:attribute_value => override[:attribute_value], :is_instance_value => true)
             end
           end
         end
         ret
       end
 
-      def get_default_component_attributes(assembly_mh,assembly_rows)
+      def get_default_component_attributes(assembly_mh,assembly_rows,opts={})
+        #by defualt do not include derived values
+        cols = [:id,:display_name,:value_asserted,:component_component_id,:is_instance_value] + (opts[:include_derived] ? [:value_derived] : [])
         sp_hash = {
-          :cols => [:id,:display_name,:attribute_value,:component_component_id],
+          :cols => cols,
           :filter => [:oneof, :component_component_id,assembly_rows.map{|r|r[:nested_component][:id]}]
         }
         Model.get_objs(assembly_mh.createMH(:attribute),sp_hash)
@@ -103,7 +108,12 @@ module XYZ
           cmp_hash = r[:nested_component]
           if cmp_type =  cmp_hash[:component_type] && cmp_hash[:component_type].gsub(/__/,"::")
             if attrs = ndx_attrs[r[:nested_component][:id]]
-              cmp = {:component_name => cmp_type, :attributes => attrs}
+              processed_attrs = attrs.map do |attr|
+                proc_attr = Aux::hash_subset(attr,[{:display_name => :attribute_name},{:attribute_value => :value}])
+                proc_attr[:override] = true if attr[:is_instance_value]
+                proc_attr
+              end
+              cmp = {:component_name => cmp_type, :attributes => processed_attrs}
             elsif not attr_rows.empty?
               cmp = {:component_name => cmp_type}
             else

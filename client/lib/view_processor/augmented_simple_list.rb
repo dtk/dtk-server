@@ -4,7 +4,6 @@ module R8
   module Client
     class ViewProcAugmentedSimpleList < ViewProcSimpleList
      private
-      attr_reader :meta
       def initialize(type,command_class)
         super
         @meta = get_meta(type,command_class)
@@ -13,7 +12,16 @@ module R8
         nil
       end
       def simple_value_render(ordered_hash,ident_info)
-        super
+#pp [ordered_hash,ident_info]
+        augmented_def?(ordered_hash,ident_info) || super
+      end
+      def augmented_def?(ordered_hash,ident_info)
+        return nil unless @meta
+        if aug_def =  @meta["#{ordered_hash.object_type}_def".to_sym]
+          ident_str = ident_str(ident_info[:ident]||0)
+          vals = aug_def[:keys].map{|k|ordered_hash[k.to_s]}
+          "#{ident_str}#{aug_def[:fn].call(*vals)}\n"
+        end
       end
     end
   end

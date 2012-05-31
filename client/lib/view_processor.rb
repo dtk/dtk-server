@@ -28,6 +28,18 @@ module R8
       def initialize(type,command_class)
         @command_class = command_class
       end
+
+      def get_meta(type,command_class)
+        ret = nil
+        command = snake_form(command_class)
+        begin
+          r8_require("../views/#{command}/#{type}")
+          ret = R8::Client::ViewMeta.const_get cap_form(type)
+         rescue Exception => e
+          ret = failback_meta(command_class.respond_to?(:pretty_print_cols) ? command_class.pretty_print_cols() : [])
+        end
+        ret
+      end
     end
     module ViewMeta
     end

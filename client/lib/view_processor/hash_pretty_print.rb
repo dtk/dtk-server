@@ -17,18 +17,6 @@ module R8
         @meta = get_meta(type,command_class)
       end
 
-      def get_meta(type,command_class)
-        ret = nil
-        command = snake_form(command_class)
-        begin
-          r8_require("../../views/#{command}/#{type}")
-          ret = R8::Client::ViewMeta.const_get cap_form(type)
-         rescue Exception => e
-          ret = failback_meta(command_class.respond_to?(:pretty_print_cols) ? command_class.pretty_print_cols() : [])
-        end
-        ret
-      end
-
       def failback_meta(ordered_cols)
         {
           :top_type => :top,
@@ -105,7 +93,12 @@ module R8
         super()
         @object_type = object_type
       end
-      attr_reader :object_type
+      attr_accessor :object_type
+      def slice(*keys)
+        ret = super
+        ret.object_type = object_type
+        ret
+      end
     end
   end
 end

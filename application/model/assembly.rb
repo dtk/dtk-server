@@ -92,10 +92,8 @@ module XYZ
       def list_aux(assembly_rows,attr_rows=[])
         ndx_attrs = Hash.new
         attr_rows.each do |attr|
-          if val = attr[:attribute_value]
-            attr_hash = attr.hash_subset(:display_name).merge(:attribute_value => val)
-            attr_hash[:override] = attr[:override] unless attr[:override].nil?
-            (ndx_attrs[attr[:component_component_id]] ||= Array.new) << attr_hash
+          if attr[:attribute_value]
+            (ndx_attrs[attr[:component_component_id]] ||= Array.new) << attr
           end
         end
         ndx_ret = Hash.new
@@ -109,7 +107,7 @@ module XYZ
           if cmp_type =  cmp_hash[:component_type] && cmp_hash[:component_type].gsub(/__/,"::")
             if attrs = ndx_attrs[r[:nested_component][:id]]
               processed_attrs = attrs.map do |attr|
-                proc_attr = Aux::hash_subset(attr,[{:display_name => :attribute_name},{:attribute_value => :value}])
+                proc_attr = {:attribute_name => attr[:display_name], :value => attr[:attribute_value]}
                 proc_attr[:override] = true if attr[:is_instance_value]
                 proc_attr
               end

@@ -103,7 +103,9 @@ module XYZ
           cmp_hash = r[:nested_component]
           if cmp_type =  cmp_hash[:component_type] && cmp_hash[:component_type].gsub(/__/,"::")
             if attrs = ndx_attrs[r[:nested_component][:id]]
-              cmp = {cmp_type => {:attributes => attrs}}
+              cmp = {:component_name => cmp_type, :attributes => attrs}
+            elsif not attr_rows.empty?
+              cmp = {:component_name => cmp_type}
             else
               cmp = cmp_type
             end

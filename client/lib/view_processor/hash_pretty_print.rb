@@ -1,4 +1,4 @@
-r8_require_util_library("hash_object")
+r8_require_util_library("hash_object") 
 
 module R8
   module Client
@@ -43,7 +43,7 @@ module R8
 
       def get_object_def(object_type)
         if defs = meta[:defs] and object_type
-          defs["#{object_type}_def".to_sym]
+          {object_type => defs["#{object_type}_def".to_sym]}
         end
       end
       def raise_error(msg=nil)
@@ -51,12 +51,13 @@ module R8
         raise Error.new(msg)
       end
       def render_object_def(object,object_def)
+        #TODO: stub making it only first level
         return object unless object.kind_of?(Hash)
         hash = object
-        #TODO: stub making it only first level
-        ret = PrettyPrintHash.new
 
-        object_def.each do |item|
+        ret = ViewPrettyPrintHash.new(object_def.keys.first)
+
+        object_def.values.first.each do |item|
           if item.kind_of?(Hash)
             render_object_def__hash_def!(ret,hash,item)
           else
@@ -99,6 +100,13 @@ module R8
           ret[key] = render_object_def(input,nested_object_def)
         end
       end
+    end
+    class ViewPrettyPrintHash < ::XYZ::PrettyPrintHash
+      def initialize(object_type=nil)
+        super()
+        @object_type = object_type
+      end
+      attr_reader :object_type
     end
   end
 end

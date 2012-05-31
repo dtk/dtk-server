@@ -20,7 +20,7 @@ def top_level_execute(command=nil)
   command_class = R8::Client.const_get "#{cap_form(command)}Command"
   response_ruby_obj = command_class.execute_from_cli(conn,ARGV)
   #default_render_type = "hash_pretty_print"
-  default_render_type = "simple_list" #TODO: doe not work for nested hashes
+  default_render_type = "simple_list2" #TODO: doe not work for nested hashes
   if print = response_ruby_obj.render_data(default_render_type)
     print = [print] unless print.kind_of?(Array)
     print.each do |el|
@@ -32,7 +32,6 @@ def top_level_execute(command=nil)
     end
   end
 end
-
 
 module R8
   module Client

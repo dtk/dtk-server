@@ -24,6 +24,7 @@ module R8
         first_prefix = ident_str(ident)
         rest_prefix = ident_str(ident+IdentAdd)
         type = ident_info[:prefix] && ident_info[:prefix].gsub(/s$/,"").to_sym #TODO: hack
+    pp [type, ordered_hash.object_type,"#{proc_ordered_hash.values.first}"]
         unless (type == :attribute) 
           first_value = "#{proc_ordered_hash.values.first}"
           template_bindings = {

@@ -54,7 +54,6 @@ module R8
         #TODO: stub making it only first level
         return object unless object.kind_of?(Hash)
         hash = object
-
         ret = ViewPrettyPrintHash.new(object_def.keys.first)
 
         object_def.values.first.each do |item|

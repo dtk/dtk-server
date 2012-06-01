@@ -93,37 +93,12 @@ module R8
       def simple_value_render(ordered_hash,ident_info)
         proc_ordered_hash = proc_ordered_hash(ordered_hash)
 
-        prefix = 
-          if ident_info[:include_first_key]
-            ident_str(IdentAdd) + ordered_hash.keys.first + KeyValSeperator
-          else
-            (ident_info[:nested_key] ? (ident_info[:nested_key] + KeyValSeperator) : "")
-          end
         ident = ident_info[:ident]||0
-        first_prefix = ident_str(ident) + prefix
+        first_prefix = (ident_info[:include_first_key] ?
+          (ident_str(ident+IdentAdd) + ordered_hash.keys.first + KeyValSeperator) : ident_str(ident))
+        first_suffix = ((ident_info[:include_first_key] or not ordered_hash.object_type) ? "" : " (#{ordered_hash.object_type})")
         rest_prefix = ident_str(ident+IdentAdd)
-        template_bindings = {
-          :optional_first_line => nil,
-          :ordered_hash => proc_ordered_hash,
-          :first_prefix => first_prefix,
-          :first_suffix => '',
-          :rest_prefix => rest_prefix,
-          :sep => KeyValSeperator
-        }
-        SimpleListTemplate.result(template_bindings)
-      end
-#TODO: below mis formats for task status and list node
-      def simple_value_renderx(ordered_hash,ident_info)
-        proc_ordered_hash = proc_ordered_hash(ordered_hash)
 
-        ident = ident_info[:ident]||0
-        first_prefix = ident_str(ident)
-        rest_prefix = ident_str(ident+IdentAdd)
-        if ident_info[:include_first_key] or not ordered_hash.object_type
-          first_suffix = ""
-        else
-          first_suffix = " (#{ordered_hash.object_type})" 
-        end
         template_bindings = {
           :ordered_hash => proc_ordered_hash,
           :first_prefix => first_prefix,

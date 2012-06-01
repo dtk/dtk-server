@@ -12,7 +12,6 @@ module R8
         nil
       end
       def simple_value_render(ordered_hash,ident_info)
-#pp [ordered_hash,ident_info]
         augmented_def?(ordered_hash,ident_info) || super
       end
       def augmented_def?(ordered_hash,ident_info)

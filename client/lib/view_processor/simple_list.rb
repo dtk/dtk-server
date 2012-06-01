@@ -15,21 +15,21 @@ module R8
       def render_simple_assignment(key,val)
         key + KeyValSeperator + val.to_s + "\n" 
       end
-      def render_ordered_hash(ordered_hash,ident_info={})
+      def render_ordered_hash(ordered_hash,ident_info={},index=1)
         #find next value that is type pretty print hash or array
         beg,nested,rest = find_first_non_scalar(ordered_hash)
         ret = String.new
         unless beg.empty?
-          ret = simple_value_render(beg,ident_info)
+          ret = simple_value_render(beg,ident_info.merge(:index => index))
         end
         unless nested.empty?
           ident_info_nested = {
             :ident => (ident_info[:ident]||0) +IdentAdd,
-            :prefix => nested.keys.first
+            :nested_key => nested.keys.first
           }
           vals = nested.values.first
           vals = [vals] unless vals.kind_of?(Array)
-          vals.each{|val|ret << render_ordered_hash(val,ident_info_nested)}
+          vals.each_with_index{|val,i|ret << render_ordered_hash(val,ident_info_nested,i+1)}
         end
         unless rest.empty?
           ret << render_ordered_hash(rest,ident_info.merge(:include_first_key => true))
@@ -56,34 +56,6 @@ module R8
           [keys[0,found],keys[found,1],keys[found+1,keys.size-1]].map{|key_array|ordered_hash.slice(*key_array)}
         end
       end
-
-      def simple_value_render(ordered_hash,ident_info)
-        #process elements that are not scalars
-        updated_els = Hash.new
-        ordered_hash.each do |k,v|
-          unless is_scalar_type?(v)
-            updated_els[k] = convert_to_string_form(v)
-          end
-        end
-        proc_ordered_hash = ordered_hash.merge(updated_els)
-
-        prefix = 
-          if ident_info[:include_first_key]
-            ident_str(IdentAdd) + ordered_hash.keys.first + KeyValSeperator
-          else
-            (ident_info[:prefix] ? (ident_info[:prefix] + KeyValSeperator) : "")
-          end
-        ident = ident_info[:ident]||0
-        first_prefix = ident_str(ident) + prefix
-        rest_prefix = ident_str(ident+IdentAdd)
-        template_bindings = {
-          :ordered_hash => proc_ordered_hash,
-          :first_prefix => first_prefix,
-          :rest_prefix => rest_prefix,
-          :sep => KeyValSeperator
-        }
-        SimpleListTemplate.result(template_bindings)
-      end
       def is_scalar_type?(x)
         [String,Fixnum,Bignum].find{|t|x.kind_of?(t)}
       end
@@ -106,11 +78,66 @@ module R8
       def ident_str(n)
         Array.new(n, " ").join
       end
+
+      #process elements that are not scalars
+      def proc_ordered_hash(ordered_hash)
+        updated_els = Hash.new
+        ordered_hash.each do |k,v|
+          unless is_scalar_type?(v)
+            updated_els[k] = convert_to_string_form(v)
+          end
+        end
+        ordered_hash.merge(updated_els)
+      end
+
+      def simple_value_render(ordered_hash,ident_info)
+        proc_ordered_hash = proc_ordered_hash(ordered_hash)
+
+        prefix = 
+          if ident_info[:include_first_key]
+            ident_str(IdentAdd) + ordered_hash.keys.first + KeyValSeperator
+          else
+            (ident_info[:nested_key] ? (ident_info[:nested_key] + KeyValSeperator) : "")
+          end
+        ident = ident_info[:ident]||0
+        first_prefix = ident_str(ident) + prefix
+        rest_prefix = ident_str(ident+IdentAdd)
+        template_bindings = {
+          :optional_first_line => nil,
+          :ordered_hash => proc_ordered_hash,
+          :first_prefix => first_prefix,
+          :first_suffix => '',
+          :rest_prefix => rest_prefix,
+          :sep => KeyValSeperator
+        }
+        SimpleListTemplate.result(template_bindings)
+      end
+#TODO: below mis formats for task status and list node
+      def simple_value_renderx(ordered_hash,ident_info)
+        proc_ordered_hash = proc_ordered_hash(ordered_hash)
+
+        ident = ident_info[:ident]||0
+        first_prefix = ident_str(ident)
+        rest_prefix = ident_str(ident+IdentAdd)
+        if ident_info[:include_first_key] or not ordered_hash.object_type
+          first_suffix = ""
+        else
+          first_suffix = " (#{ordered_hash.object_type})" 
+        end
+        template_bindings = {
+          :ordered_hash => proc_ordered_hash,
+          :first_prefix => first_prefix,
+          :first_suffix => first_suffix,
+          :rest_prefix => rest_prefix,
+          :sep => KeyValSeperator
+        }
+        SimpleListTemplate.result(template_bindings)
+      end
       KeyValSeperator = ": "
 SimpleListTemplate = Erubis::Eruby.new <<eos
 <% keys = ordered_hash.keys %>
 <% first = keys.shift  %>
-<%= first_prefix %><%= ordered_hash[first] %>
+<%= first_prefix %><%= ordered_hash[first] %><%= first_suffix %>
 <% keys.each do |k| %>
 <%= rest_prefix %><%= k %><%= sep  %><%= ordered_hash[k] %>
 <% end %>

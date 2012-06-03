@@ -12,7 +12,7 @@ module R8RepoManager
       validate()
     end
     def set_defaults()
-      self[:admin_repo_dir] = '/home/gitolite-admin/gitolite-admin'
+      self[:admin_repo_dir] = '/home/gitolite-admin/gitolite-admin.git'
     end
     #ConfigFile = "/etc/r8client/client.conf"
     def load_config_file()

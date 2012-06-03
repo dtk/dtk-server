@@ -405,7 +405,6 @@ ie: get_components(['language'])
         node[:image_path] = "#{icon_dir}/#{png}"
         node[:i18n] = node[:display_name]
       end
-pp node_list
       {:data=>node_list}
     end
 
@@ -417,7 +416,6 @@ pp node_list
       filter_conjuncts = params.map do |name,value|
         [:regex,name.to_sym,"^#{value}"] if cols.include?(name.to_sym)
       end.compact
-
       #restrict results do not nested in assembly
       filter_conjuncts << [:eq,:assembly_id,nil]
       #including library forces join and filter on library; so makes sure only nodes from library returned and ones

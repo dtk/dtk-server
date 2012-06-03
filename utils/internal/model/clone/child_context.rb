@@ -233,6 +233,7 @@ module XYZ
       end
       def ret_new_objs_info(db,field_set_to_copy,create_override_attrs)
         new_objs_info = super
+        return new_objs_info if new_objs_info.empty?
         process_attribute_overrides(db,new_objs_info)
         new_objs_info
       end

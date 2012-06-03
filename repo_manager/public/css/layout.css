@@ -1,0 +1,81 @@
+/**
+ * Stylesheet used for the layout of most elements.
+ *
+ * @author Yorick Peterse
+ * @link   http://yorickpeterse.com/
+ */
+#container
+{
+    margin:  20px auto;
+    width:   940px;
+}
+
+#content
+{
+    background:    #fff;
+    border:        1px solid #ddd;
+    padding:       20px;
+    width:         898px;
+}
+
+/* Top part of the website, contains the title and the navigation menu */
+#top
+{
+    background:    #E33F1E;
+    height:        70px;
+    margin-bottom: 20px;
+    padding:       0px 10px;
+}
+
+    #top header h1
+    {
+        color:       #fff;
+        font-size:   38px;
+        margin:      10px 0px 0px 0px;
+        padding:     0px;
+    }
+
+    #top nav ul
+    {
+        float:        right;
+        margin-right: 15px;
+    }
+
+        #top nav ul li
+        {
+            float:           left;
+            font-size:       16px;
+            list-style-type: none;
+            margin-right:    10px;
+        }
+
+        #top nav ul li:last-child
+        {
+            margin-right: 0px;
+        }
+
+            #top nav ul li a
+            {
+                color:           #fff;
+                display:         block;
+                height:          45px;
+                padding:         25px 10px 0px 10px;
+                text-decoration: none;
+            }
+
+            #top nav ul li a:hover
+            {
+                background: #D43919;
+            }
+
+/* Footer at the bottom of the page */
+#footer
+{
+    text-align: center;
+}
+
+    #footer p
+    {
+        font-size:     13px;
+        margin-bottom: 10px;
+    }

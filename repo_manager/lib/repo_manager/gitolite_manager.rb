@@ -31,7 +31,7 @@ module R8RepoManager
         Config[:admin_repo_dir]
       end
       def admin_repo()
-        @admin_repo ||= GitRepo.new(admin_directory())
+        @admin_repo ||= GitBareRepo.new(admin_directory())
       end
 
       def repo_config_relative_path()

@@ -1,13 +1,6 @@
-require 'grit'
+r8_require('git_repo')
 module R8::RepoManager
-  #TODO: some of these methods wil be mobved to teh non bare repo if determined applicable
-  class GitBareRepo 
-    def initialize(repo_dir,branch='master')
-      @repo_dir = repo_dir
-      @branch = branch
-      @grit_index = nil
-      @grit_repo = Grit::Repo.new(repo_dir)
-    end
+  class GitBareRepo  < GitRepo
     def read_tree()
       @grit_index = @grit_repo.read_tree(@branch)
     end

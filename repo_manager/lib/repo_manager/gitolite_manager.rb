@@ -38,12 +38,10 @@ module R8::RepoManager
       def repo_config_relative_path()
         "conf/repo-configs"
       end
-      def repo_config_directory()
-        "#{admin_directory}/#{repo_config_relative_path}"
-      end
       def repo_config_files()
-        return Array.new unless File.directory?(repo_config_directory)
-        Dir.chdir(repo_config_directory){Dir["*.conf"]}
+        base_path = repo_config_relative_path
+        files = admin_repo.ls_r(base_path.split("/").size+1)
+        match_regexp = Regexp.new("^#{base_path}")
       end
       def repos_having_config_files()
         repo_config_files().map{|fn|fn.gsub(/\.conf/,"")}

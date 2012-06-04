@@ -38,11 +38,11 @@ module R8::RepoManager
         "conf/repo-configs"
       end
 
+      #TODO: may move this into initial install
       def update_base_config?()
        #repo_config_relative_path exsits is test if the base config hash been updated
-      #  return if admin_repo.path_exists?(repo_config_relative_path())
+        return if admin_repo.path_exists?(repo_config_relative_path())
         content = admin_repo.file_content(BaseConfPath)
-pp content
         content << 'include "repo-configs/*.conf"'
         update_file_and_push(BaseConfPath,content,"updating base config")
       end

@@ -12,7 +12,8 @@ module R8::RepoManager
     end
 
     def path_exists?(path)
-      not tree/path.nil?
+pp [path,tree/path]
+      not (tree/path).nil?
     end
 
     def file_content(path)

@@ -4,7 +4,9 @@ module R8::RepoManager
     class << self
       def create_repo(repo_name,repo_user_acls,opts={})
         ret = repo_name
-        if repos_having_config_files().include?(repo_name)
+        update_base_config?()
+        repo_config_file = repo_config_file_relative_path(repo_name)
+        if repo_config_files().include?(repo_config_file)
           if opts[:delete_if_exists]
             delete_server_repo(repo_name)
           else
@@ -13,9 +15,7 @@ module R8::RepoManager
         end
 
         content = config_file_content(repo_name,repo_user_acls)
-        admin_repo.add_file(file_asset_hash,content)
-        admin_repo.commit("adding repo #{repo_name}")
-        admin_repo.push_changes()
+        update_file_and_push(repo_config_file,"adding repo #{repo_name}")
         ret
       end
 
@@ -27,7 +27,6 @@ module R8::RepoManager
       end
 
      private
-
       def admin_directory()
         Config[:admin_repo_dir]
       end
@@ -38,13 +37,29 @@ module R8::RepoManager
       def repo_config_relative_path()
         "conf/repo-configs"
       end
+
+      def update_base_config?()
+       #repo_config_relative_path exsits is test if the base config hash been updated
+        return if admin_repo.path_exists?(repo_config_relative_path())
+        content = file_content(BaseConfPath)
+        content << 'include "repo-configs/*.conf"\n'
+        update_file_and_push(BaseConfPath,content,"updating base config")
+      end
+      BaseConfPath = "conf/gitolite.conf"
+
+      def update_file_and_push(file,content,commit_msg=nil)
+raise Error.new("Not woring yet")
+        admin_repo.read_tree()
+        admin_repo.add_or_replace_file(file,content)
+        admin_repo.commit(commit_msg||"updating #{file}")
+        admin_repo.push()
+      end
+
       def repo_config_files()
         base_path = repo_config_relative_path
-        files = admin_repo.ls_r(base_path.split("/").size+1)
+        paths = admin_repo.ls_r(base_path.split("/").size+1)
         match_regexp = Regexp.new("^#{base_path}")
-      end
-      def repos_having_config_files()
-        repo_config_files().map{|fn|fn.gsub(/\.conf/,"")}
+        paths.select{|p| p =~ match_regexp}
       end
       def repo_config_file_relative_path(repo_name)
         "#{repo_config_relative_path}/#{repo_name}.conf"

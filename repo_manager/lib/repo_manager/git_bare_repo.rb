@@ -1,17 +1,18 @@
 r8_require('git_repo')
 module R8::RepoManager
   class GitBareRepo  < GitRepo
-    def read_tree()
-      @grit_index = @grit_repo.read_tree(@branch)
+    def initialize(repo_dir,branch='master')
+      super
+      @grit_index = @grit_repo.index
     end
-    def add_or_replace_file_content(file_path,content)
-      (@grit_index||read_tree).add(file_path,content)
+    def read_tree()
+      @grit_index.read_tree(@branch)
+    end
+    def add_or_replace_file(file_path,content)
+      @grit_index.add(file_path,content)
     end
     def commit(commit_msg)
-      @grit_index.commit(commit_msg,repo.commits,nil,nil,@branch)
-    end
-
-    def write_tree()
+      @grit_index.commit(commit_msg,@grit_repo.commits,nil,nil,@branch)
       git_command("write-tree".to_sym)
     end
 

@@ -63,7 +63,7 @@ module XYZ
           if nb_rs = node_to_nb_rs[node_hash_ref]
             node_output["*node_binding_rs_id"] = "/node_binding_ruleset/#{nb_rs}"
           else
-            Log.info("assembly node(#{node_hash_ref}) without a matching node bidning")
+            Log.info("assembly node(#{node_hash_ref}) without a matching node binding")
           end
           cmps_output = import_component_refs(library_idh,module_refs,node_hash["components"])
           unless cmps_output.empty?

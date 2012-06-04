@@ -18,7 +18,7 @@ module XYZ
        when "match"
         match(target)
       else
-        raise Error.new("Unexpected type (#{self[:type]}) in node bidning ruleset")
+        raise Error.new("Unexpected type (#{self[:type]}) in node binding ruleset")
       end
     end
    private

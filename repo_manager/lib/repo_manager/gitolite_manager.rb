@@ -1,4 +1,5 @@
-module R8RepoManager
+require 'erubis'
+module R8::RepoManager
   class GitoliteManager
     class << self
       def create_repo(repo_name,repo_user_acls,opts={})

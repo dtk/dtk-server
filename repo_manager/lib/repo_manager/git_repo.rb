@@ -17,7 +17,7 @@ module R8::RepoManager
 
     def file_content(path)
       tree_or_blob = tree/path
-      tree_or_blob && tree_or_blob(::Grit::Blob) && tree_or_blob.data
+      tree_or_blob && tree_or_blob.kind_of?(::Grit::Blob) && tree_or_blob.data
     end
 
    private

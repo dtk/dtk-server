@@ -15,7 +15,7 @@ module R8::RepoManager
         end
 
         content = config_file_content(repo_name,repo_user_acls)
-        update_file_and_push(repo_config_file,"adding repo #{repo_name}")
+        update_file_and_push(repo_config_file,content,"adding repo #{repo_name}")
         ret
       end
 
@@ -40,15 +40,15 @@ module R8::RepoManager
 
       def update_base_config?()
        #repo_config_relative_path exsits is test if the base config hash been updated
-        return if admin_repo.path_exists?(repo_config_relative_path())
-        content = file_content(BaseConfPath)
-        content << 'include "repo-configs/*.conf"\n'
+      #  return if admin_repo.path_exists?(repo_config_relative_path())
+        content = admin_repo.file_content(BaseConfPath)
+pp content
+        content << 'include "repo-configs/*.conf"'
         update_file_and_push(BaseConfPath,content,"updating base config")
       end
       BaseConfPath = "conf/gitolite.conf"
 
       def update_file_and_push(file,content,commit_msg=nil)
-raise Error.new("Not woring yet")
         admin_repo.read_tree()
         admin_repo.add_or_replace_file(file,content)
         admin_repo.commit(commit_msg||"updating #{file}")

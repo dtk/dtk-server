@@ -14,12 +14,13 @@ module R8::RepoManager
     end
     def set_defaults()
       self[:admin_repo_dir] = '/home/repo_manager/gitolite-admin.git'
+      self[:git_user] = 'git'
+      self[:git_user_home] = "/home/#{self[:git_user]}"
     end
-    #ConfigFile = "/etc/r8client/client.conf"
     def load_config_file()
       parse_key_value_file(ConfigFile).each{|k,v|self[k]=v}
     end
-    RequiredKeys = [:admin_repo_dir]
+    RequiredKeys = [:admin_repo_dir,:git_user,:git_user_home]
     def validate
       #TODO: need to check for legal values
       missing_keys = RequiredKeys - keys

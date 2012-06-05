@@ -18,11 +18,14 @@ module R8::RepoManager
         ret
       end
 
-      def delete_server_repo(repo_name,opts={})
-        admin_repo.pull_changes() unless opts[:do_not_pull_changes]
-        file_path = repo_config_file_relative_path(repo_name)
-        admin_repo.delete_file?(file_path)
-        admin_repo.push_changes() unless opts[:do_not_push_changes]
+      def delete_repo(repo_name)
+        ret = repo_name
+        #delete the reference to the repo 
+        repo_config_file = repo_config_file_relative_path(repo_name)
+        delete_file_and_push(repo_config_file)
+        #delete the actual repo
+        `sudo rm -r #{Config[:git_user_home]}/repositories/#{repo_name}.git`
+        ret
       end
 
      private
@@ -40,6 +43,12 @@ module R8::RepoManager
       def update_file_and_push(file,content,commit_msg=nil)
         admin_repo.read_tree()
         admin_repo.add_or_replace_file(file,content)
+        admin_repo.commit(commit_msg||"updating #{file}")
+        admin_repo.push()
+      end
+      def delete_file_and_push(file,commit_msg=nil)
+        admin_repo.read_tree()
+        admin_repo.delete_file(file)
         admin_repo.commit(commit_msg||"updating #{file}")
         admin_repo.push()
       end

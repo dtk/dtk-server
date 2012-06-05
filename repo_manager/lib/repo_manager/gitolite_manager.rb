@@ -4,7 +4,6 @@ module R8::RepoManager
     class << self
       def create_repo(repo_name,repo_user_acls,opts={})
         ret = repo_name
-        update_base_config?()
         repo_config_file = repo_config_file_relative_path(repo_name)
         if repo_config_files().include?(repo_config_file)
           if opts[:delete_if_exists]
@@ -37,16 +36,6 @@ module R8::RepoManager
       def repo_config_relative_path()
         "conf/repo-configs"
       end
-
-      #TODO: may move this into initial install
-      def update_base_config?()
-       #repo_config_relative_path exsits is test if the base config hash been updated
-        return if admin_repo.path_exists?(repo_config_relative_path())
-        content = admin_repo.file_content(BaseConfPath)
-        content << 'include "repo-configs/*.conf"'
-        update_file_and_push(BaseConfPath,content,"updating base config")
-      end
-      BaseConfPath = "conf/gitolite.conf"
 
       def update_file_and_push(file,content,commit_msg=nil)
         admin_repo.read_tree()

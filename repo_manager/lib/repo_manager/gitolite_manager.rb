@@ -28,6 +28,24 @@ module R8::RepoManager
         ret
       end
 
+      #delete if exists
+      def delete_repo?(repo_name)
+        #TODO: cleaner way to do this
+        ret = repo_name
+        begin
+          #delete the reference to the repo 
+          repo_config_file = repo_config_file_relative_path(repo_name)
+          delete_file_and_push(repo_config_file)
+         rescue
+        end
+        begin
+          #delete the actual repo
+          `sudo rm -r #{Config[:git_user_home]}/repositories/#{repo_name}.git`
+         rescue
+        end
+        ret
+      end
+
      private
       def admin_directory()
         Config[:admin_repo_dir]

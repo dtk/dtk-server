@@ -13,17 +13,20 @@ module R8::RepoManager
       validate()
     end
     def set_defaults()
-      self[:admin_repo_dir] = '/home/repo_manager/gitolite-admin'
       self[:git_user] = 'git'
       self[:git_user_home] = "/home/#{self[:git_user]}"
+      self[:bare_repo_dir] = "#{self[:git_user_home]}/repositories"
+
+      self[:admin_user] = self[:git_user]
+      self[:admin_repo_dir] = "/home/#{self[:admin_user]}/gitolite-admin"
     end
     def load_config_file()
       parse_key_value_file(ConfigFile).each{|k,v|self[k]=v}
     end
-    RequiredKeys = [:admin_repo_dir,:git_user,:git_user_home]
+    RequiredNonDefaultKeys = []
     def validate
       #TODO: need to check for legal values
-      missing_keys = RequiredKeys - keys
+      missing_keys = RequiredNonDefaultKeys - keys
       raise Error.new("Missing config keys (#{missing_keys.join(",")})") unless missing_keys.empty?
     end
   end

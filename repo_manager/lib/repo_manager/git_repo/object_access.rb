@@ -21,5 +21,11 @@ class R8::RepoManager::GitRepo
       @grit_index.commit(commit_msg,@grit_repo.commits,nil,nil,@branch)
       git_command("write-tree".to_sym)
     end
+
+    def commit_context(commit_msg,&block)
+      read_tree()
+      yield
+      commit(commit_msg)
+    end
   end
 end

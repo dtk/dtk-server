@@ -1,5 +1,5 @@
 class R8::RepoManager::GitRepo
-  class ObjectAcess  < self 
+  class ObjectAccess  < self 
     def initialize(repo_dir,branch='master')
       super
       @grit_index = @grit_repo.index

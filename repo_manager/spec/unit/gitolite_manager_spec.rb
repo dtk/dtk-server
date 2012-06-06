@@ -30,6 +30,9 @@ describe GitoliteManager do
     it "should cause a repo directory to be created in the bare repo" do
       File.directory?("/home/#{@git_user}/repositories/#{@test_repo_name}.git").should == true
     end
+    it "should enable successful creation of a repo instance object" do
+      GitoliteManager::Repo.new(@test_repo_name).kind_of?(GitoliteManager::Repo).should be_true
+    end
   end
 
 end

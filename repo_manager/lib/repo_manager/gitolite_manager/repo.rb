@@ -1,11 +1,12 @@
-module R8::RepoManager::GitoliteManager
-  class Repo
-    def initialize(repo_name,branch)
+class R8::RepoManager::GitoliteManager
+  class Repo < self
+    def initialize(repo_name,branch='master')
       @repo = GitRepo::ObjectAccess.new(repo_dir(repo_name),branch)
     end
    private
-    #updating directy the bare repo
+    #updating directly the bare repo   
     def repo_dir(repo_name)
+      bare_repo_dir(repo_name)
     end
   end
 end

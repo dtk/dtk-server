@@ -1,4 +1,5 @@
 require 'erubis'
+require 'fileutils'
 module R8::RepoManager::GitoliteManager
   class Admin
     class << self
@@ -24,7 +25,7 @@ module R8::RepoManager::GitoliteManager
         repo_config_file = repo_config_file_relative_path(repo_name)
         delete_file_and_push(repo_config_file)
         #delete the actual repo
-        `sudo rm -r #{Config[:git_user_home]}/repositories/#{repo_name}.git`
+        FileUtils.rm_rf "#{Config[:git_user_home]}/repositories/#{repo_name}.git"
         ret
       end
 

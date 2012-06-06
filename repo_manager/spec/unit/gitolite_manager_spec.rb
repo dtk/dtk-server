@@ -14,11 +14,6 @@ describe GitoliteManager do
   end
 =end  
   describe "when creating a repo" do
-=begin
-    before(:all) do
-      GitoliteManager.delete_repo?(repo_name)
-    end
-=end
     it "should create a new repo first time" do
       GitoliteManager.create_repo(repo_name,repo_user_acls).should == repo_name
     end

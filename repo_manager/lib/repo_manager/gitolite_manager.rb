@@ -14,7 +14,7 @@ module R8::RepoManager
         end
 
         content = config_file_content(repo_name,repo_user_acls)
-        update_file_and_push(repo_config_file,content,"adding repo #{repo_name}")
+        add_file_and_push(repo_config_file,content,"adding repo #{repo_name}")
         ret
       end
 
@@ -28,46 +28,26 @@ module R8::RepoManager
         ret
       end
 
-      #delete if exists
-      def delete_repo?(repo_name)
-        #TODO: cleaner way to do this
-        ret = repo_name
-        begin
-          #delete the reference to the repo 
-          repo_config_file = repo_config_file_relative_path(repo_name)
-          delete_file_and_push(repo_config_file)
-         rescue
-        end
-        begin
-          #delete the actual repo
-          `sudo rm -r #{Config[:git_user_home]}/repositories/#{repo_name}.git`
-         rescue
-        end
-        ret
-      end
-
      private
       def admin_directory()
         Config[:admin_repo_dir]
       end
       def admin_repo()
-        @admin_repo ||= GitBareRepo.new(admin_directory())
+        @admin_repo ||= GitRepo::FileAccess.new(admin_directory())
       end
 
       def repo_config_relative_path()
         "conf/repo-configs"
       end
 
-      def update_file_and_push(file,content,commit_msg=nil)
-        admin_repo.read_tree()
-        admin_repo.add_or_replace_file(file,content)
-        admin_repo.commit(commit_msg||"updating #{file}")
+      def add_file_and_push(file,content,commit_msg=nil)
+        admin_repo.add_file(file,content)
+        admin_repo.commit(commit_msg||"adding #{file}")
         admin_repo.push()
       end
       def delete_file_and_push(file,commit_msg=nil)
-        admin_repo.read_tree()
-        admin_repo.delete_file(file)
-        admin_repo.commit(commit_msg||"updating #{file}")
+        admin_repo.remove_file(file)
+        admin_repo.commit(commit_msg||"deleting #{file}")
         admin_repo.push()
       end
 

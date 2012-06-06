@@ -13,7 +13,7 @@ module R8::RepoManager
       validate()
     end
     def set_defaults()
-      self[:admin_repo_dir] = '/home/repo_manager/gitolite-admin.git'
+      self[:admin_repo_dir] = '/home/repo_manager/gitolite-admin'
       self[:git_user] = 'git'
       self[:git_user_home] = "/home/#{self[:git_user]}"
     end

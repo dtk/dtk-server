@@ -1,6 +1,5 @@
-r8_require('git_repo')
-module R8::RepoManager
-  class GitBareRepo  < GitRepo
+class R8::RepoManager::GitRepo
+  class ObjectAcess  < self 
     def initialize(repo_dir,branch='master')
       super
       @grit_index = @grit_repo.index
@@ -21,21 +20,6 @@ module R8::RepoManager
     def commit(commit_msg)
       @grit_index.commit(commit_msg,@grit_repo.commits,nil,nil,@branch)
       git_command("write-tree".to_sym)
-    end
-
-    def push()
-      Git_command__push_mutex.synchronize do 
-        git_command(:push,"origin", "#{@branch}:refs/heads/#{@branch}")
-      end
-    end
-    Git_command__push_mutex = Mutex.new
-
-   private
-    def git_command(cmd,*args)
-      @grit_repo.git.send(cmd, cmd_opts(),*args)
-    end
-    def cmd_opts()
-      {:raise => true, :timeout => 60}
     end
   end
 end

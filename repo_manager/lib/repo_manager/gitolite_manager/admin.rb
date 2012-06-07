@@ -29,6 +29,28 @@ module R8::RepoManager; class GitoliteManager
         ret
       end
 
+      def add_user(username,rsa_pub_key,opts={})
+        ret = username
+        key_path = repo_user_public_key_relative_path(username)
+        if repo_users_public_keys().include?(key_path)
+          if opts[:delete_if_exists]
+            delete_user(username)
+          else
+            raise Error.new("trying to create a user (#{username}) that exists already on gitolite server") 
+          end
+        end
+
+        add_file_and_push(key_path,rsa_pub_key,"adding rs pub key for #{username}")
+        ret
+      end
+
+      def delete_user(username)
+        ret = username
+        key_path = repo_user_public_key_relative_path(username)
+        delete_file_and_push(key_path)
+        ret
+      end
+
      private
       def admin_directory()
         Config[:admin_repo_dir]
@@ -41,26 +63,48 @@ module R8::RepoManager; class GitoliteManager
         "conf/repo-configs"
       end
 
+      def repo_user_public_key_dir_relative_path()
+        "keydir"
+      end
+
       def add_file_and_push(file,content,commit_msg=nil)
         admin_repo.add_file(file,content)
         admin_repo.commit(commit_msg||"adding #{file}")
         admin_repo.push()
       end
+
       def delete_file_and_push(file,commit_msg=nil)
         admin_repo.remove_file(file)
         admin_repo.commit(commit_msg||"deleting #{file}")
         admin_repo.push()
       end
 
+
+      def repo_users_public_keys()
+        base_path = repo_user_public_key_dir_relative_path()
+        ret_files_under_path(base_path)
+      end
+
       def repo_config_files()
         base_path = repo_config_relative_path
-        paths = admin_repo.ls_r(base_path.split("/").size+1)
+        ret_files_under_path(base_path)
+      end
+
+      def ret_files_under_path(base_path)
+        paths = admin_repo.ls_r(base_path.split("/").size+1, :files_only => true)
         match_regexp = Regexp.new("^#{base_path}")
         paths.select{|p| p =~ match_regexp}
       end
+
+      def repo_user_public_key_relative_path(username)
+        "#{repo_user_public_key_dir_relative_path}/#{username}.conf"
+      end
+
       def repo_config_file_relative_path(repo_name)
         "#{repo_config_relative_path}/#{repo_name}.conf"
       end
+
+
 
       def config_file_content(repo_name,repo_user_acls)
         #group users by user rights

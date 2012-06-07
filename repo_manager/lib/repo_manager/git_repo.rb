@@ -12,9 +12,9 @@ module R8::RepoManager
       @branch = branch
       @grit_repo = ::Grit::Repo.new(repo_dir)
     end
-    def ls_r(depth=nil)
+    def ls_r(depth=nil,opts={})
       tree_contents = tree.contents
-      ls_r_aux(depth,tree_contents)
+      ls_r_aux(depth,tree_contents,opts)
     end
 
     def path_exists?(path)
@@ -42,14 +42,27 @@ module R8::RepoManager
       @grit_repo.tree(@branch)
     end
 
-    def ls_r_aux(depth,tree_contents)
+    def ls_r_aux(depth,tree_contents,opts={})
       ret = Array.new
       return ret if tree_contents.empty?
-      return tree_contents.map{|tc|tc.name} if depth == 1
+      if depth == 1
+        ret = tree_contents.map do |tc|
+          if opts[:file_only]
+            tc.kind_of?(::Grit::Blob) && tc.name 
+          elsif opts[:directory_only]
+            tc.kind_of?(::Grit::Tree) && tc.name
+          else
+            tc.name
+          end
+        end.compact
+        return ret
+      end
 
       tree_contents.each do |tc|
         if tc.kind_of?(::Grit::Blob)
-          ret << tc.name
+          unless opts[:directory_only]
+            ret << tc.name
+          end
         else
           dir_name = tc.name
           ret += ls_r_aux(depth && depth-1,tc.contents).map{|r|"#{dir_name}/#{r}"}

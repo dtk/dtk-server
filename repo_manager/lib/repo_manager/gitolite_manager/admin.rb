@@ -15,7 +15,25 @@ module R8::RepoManager; class GitoliteManager
         end
 
         content = config_file_content(repo_name,repo_user_acls)
-        add_file_and_push(repo_config_file,content,"adding repo #{repo_name}")
+        add_file(repo_config_file,content)
+        unless opts[:add_file_only]
+          commit("adding repo #{repo_name}")
+          push()
+        end
+        ret
+      end
+
+      #creates new user and new repo; error if either exists already
+      def create_repo_and_user(repo_name,username,rsa_pub_key,access_rights)
+        ret = repo_name
+
+        repo_user_acls = [{:access_rights => access_rights,:repo_username => username}]
+        add_user(username,rsa_pub_key, :add_file_only => true)
+        create_repo(repo_name,repo_user_acls,:add_file_only => true)
+
+        commit_msg = "creating user (#{username}) and repo (#{repo_name})" 
+        commit(commit_msg)
+        push()
         ret
       end
 
@@ -33,14 +51,20 @@ module R8::RepoManager; class GitoliteManager
         ret = username
         key_path = repo_user_public_key_relative_path(username)
         if repo_users_public_keys().include?(key_path)
-          if opts[:delete_if_exists]
+          if opts[:noop_if_exists]
+            return nil
+          elsif opts[:delete_if_exists]
             delete_user(username)
           else
             raise Error.new("trying to create a user (#{username}) that exists already on gitolite server") 
           end
         end
 
-        add_file_and_push(key_path,rsa_pub_key,"adding rs pub key for #{username}")
+        add_file(key_path,rsa_pub_key)
+        unless opts[:add_file_only]
+          commit("adding rsa pub key for #{username}")
+          push()
+        end
         ret
       end
 
@@ -67,6 +91,19 @@ module R8::RepoManager; class GitoliteManager
         "keydir"
       end
 
+
+      def add_file(file,content)
+        admin_repo.add_file(file,content)
+      end
+
+      def commit(commit_msg)
+        admin_repo.commit(commit_msg)
+      end
+
+      def push()
+        admin_repo.push()
+      end
+
       def add_file_and_push(file,content,commit_msg=nil)
         admin_repo.add_file(file,content)
         admin_repo.commit(commit_msg||"adding #{file}")
@@ -75,8 +112,8 @@ module R8::RepoManager; class GitoliteManager
 
       def delete_file_and_push(file,commit_msg=nil)
         admin_repo.remove_file(file)
-        admin_repo.commit(commit_msg||"deleting #{file}")
-        admin_repo.push()
+        commit(commit_msg||"deleting #{file}")
+        push()
       end
 
 

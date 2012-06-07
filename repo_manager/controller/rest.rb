@@ -5,6 +5,6 @@ class RestController < Controller
   provide(:json, :type => 'application/json'){|a,s|s.to_json}
 
   def index
-    rest_ok_response
+    rest_ok_response :version => "0.1"
   end
 end

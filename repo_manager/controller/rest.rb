@@ -19,4 +19,10 @@ class RestController < Controller
     GitoliteManager::Repo::Admin.add_user(username,rsa_pub_key)
     rest_ok_response :usename => username
   end
+
+  def delete_user()
+    username = ret_non_null_request_params(:username)
+    GitoliteManager::Repo::Admin.delete_user(username)
+    rest_ok_response :usename => username
+  end
 end

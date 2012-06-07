@@ -8,6 +8,8 @@ require 'ramaze'
 # Make sure that Ramaze knows where you are
 Ramaze.options.roots = [__DIR__]
 
+require __DIR__('lib/repo_manager')
 # Initialize controllers and models
 require __DIR__('model/init')
 require __DIR__('controller/init')
+

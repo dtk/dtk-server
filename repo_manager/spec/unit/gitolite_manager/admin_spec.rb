@@ -8,7 +8,7 @@ describe GitoliteManager::Admin do
       [
        {:access_rights => "RW+", :repo_username => "@all"}
       ]
-    #TODO: these might be pulled from Config
+    #TODO: this might be pulled from Config
     @git_user = "git"
   end
 

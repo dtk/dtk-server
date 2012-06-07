@@ -19,7 +19,7 @@ describe GitoliteManager::Repo do
       @test_repo = GitoliteManager::Repo.new(@test_repo_name)
     end
     after(:all) do 
-#      GitoliteManager::Admin.delete_repo(@test_repo_name)
+      GitoliteManager::Admin.delete_repo(@test_repo_name)
     end
     it "should enable successful creation of a repo instance object" do
       @test_repo.kind_of?(GitoliteManager::Repo).should be_true

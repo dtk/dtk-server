@@ -1,4 +1,4 @@
-class R8::RepoManager::GitoliteManager
+module R8::RepoManager; class GitoliteManager
   class Repo < self
     def initialize(repo_name,branch='master')
       #updating and querying from the bare repo   
@@ -32,4 +32,4 @@ class R8::RepoManager::GitoliteManager
       @repo.commit_context(commit_msg,&block)
     end
   end
-end
+end;end

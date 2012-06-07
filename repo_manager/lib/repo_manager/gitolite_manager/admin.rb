@@ -1,6 +1,6 @@
 require 'erubis'
 require 'fileutils'
-class R8::RepoManager::GitoliteManager
+module R8::RepoManager; class GitoliteManager
   class Admin < self
     class << self
       def create_repo(repo_name,repo_user_acls,opts={})
@@ -79,4 +79,5 @@ repo    <%=repo_name %>
 eos
     end
   end
-end
+end;end
+

@@ -1,4 +1,4 @@
-class R8::RepoManager::GitRepo
+module R8::RepoManager; class GitRepo
   class FileAccess < self
     def add_file(file_rel_path,content)
       content ||= String.new
@@ -41,4 +41,5 @@ class R8::RepoManager::GitRepo
        end
      end
    end
-end
+end;end
+

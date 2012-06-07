@@ -1,4 +1,4 @@
-class R8::RepoManager::GitRepo
+module R8::RepoManager; class GitRepo
   class ObjectAccess  < self 
     def initialize(repo_dir,branch='master')
       super
@@ -28,4 +28,4 @@ class R8::RepoManager::GitRepo
       commit(commit_msg)
     end
   end
-end
+end;end

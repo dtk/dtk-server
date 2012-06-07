@@ -28,6 +28,6 @@ class RestController < Controller
 
   def error
     exception = request.env["rack.route_exceptions.exception"]
-    rest_notok_response XYZ::RestError.create(exception)
+    rest_notok_response XYZ::RestError.create(exception).hash_form()
   end
 end

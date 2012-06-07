@@ -25,4 +25,9 @@ class RestController < Controller
     GitoliteManager::Repo::Admin.delete_user(username)
     rest_ok_response :usename => username
   end
+
+  def error
+    exception = request.env["rack.route_exceptions.exception"]
+    rest_notok_response XYZ::RestError.create(exception)
+  end
 end

@@ -1,5 +1,7 @@
-#TODO: refering to common r8server apps, which wil be made to a common gem
+#TODO: refering to common r8server apps, which will be made to a common gem
 require File.expand_path('../../application/require_first', File.dirname(__FILE__))
+require File.expand_path('../../utils/internal/errors/rest_error', File.dirname(__FILE__))
+
 module R8
   module RepoManager
     class Error < NameError

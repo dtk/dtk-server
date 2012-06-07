@@ -13,4 +13,10 @@ class RestController < Controller
     content = GitoliteManager::Repo.new(repo_name).file_content(path)
     rest_ok_response :content => content
   end
+
+  def add_user()
+    username,rsa_pub_key = ret_non_null_request_params(:username,:rsa_pub_key)
+    GitoliteManager::Repo::Admin.add_user(username,rsa_pub_key)
+    rest_ok_response :usename => username
+  end
 end

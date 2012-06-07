@@ -97,7 +97,7 @@ module R8::RepoManager; class GitoliteManager
       end
 
       def repo_user_public_key_relative_path(username)
-        "#{repo_user_public_key_dir_relative_path}/#{username}.conf"
+        "#{repo_user_public_key_dir_relative_path}/#{username}.pub"
       end
 
       def repo_config_file_relative_path(repo_name)

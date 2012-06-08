@@ -7,7 +7,9 @@ module R8::RepoManager; class GitoliteManager
         ret = repo_name
         repo_config_file = repo_config_file_relative_path(repo_name)
         if repo_config_files().include?(repo_config_file)
-          if opts[:delete_if_exists]
+          if opts[:noop_if_exists]
+            return nil
+          elsif opts[:delete_if_exists]
             delete_server_repo(repo_name)
           else
             raise Error.new("trying to create a repo (#{repo_name}) that exists already on gitolite server") 

@@ -16,6 +16,10 @@ module R8::RepoManager; class GitoliteManager
       end
     end
 
+    def add_or_replace_file(file_path,content)
+      @repo.add_or_replace_file(file_path,content)
+    end
+
     def delete_file_and_commit(file_path,commit_msg=nil)
       commit_msg = "updating file #{file_path}"
       commit_context(commit_msg||"deleting file #{file_path}") do
@@ -27,7 +31,6 @@ module R8::RepoManager; class GitoliteManager
       @repo.file_content(file_path)
     end
 
-   private
     def commit_context(commit_msg,&block)
       @repo.commit_context(commit_msg,&block)
     end

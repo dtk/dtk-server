@@ -10,7 +10,16 @@ module R8::RepoManager
     def initialize(repo_dir,branch='master')
       @repo_dir = repo_dir
       @branch = branch
-      @grit_repo = ::Grit::Repo.new(repo_dir)
+      @grit_repo = nil
+      begin
+        @grit_repo = ::Grit::Repo.new(repo_dir)
+       rescue ::Grit::NoSuchPathError
+        repo_name = repo_dir.split("/").last.gsub("\.git","")
+        #TODO: change to usage error
+        raise Error.new("repo (#{repo_name}) does not exist")
+       rescue => e
+        raise e
+      end
     end
     def ls_r(depth=nil,opts={})
       tree_contents = tree.contents

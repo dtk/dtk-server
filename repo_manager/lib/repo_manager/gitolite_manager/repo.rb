@@ -31,6 +31,10 @@ module R8::RepoManager; class GitoliteManager
       @repo.file_content(file_path)
     end
 
+    def ls_r(depth=nil,opts={})
+      @repo.ls_r(depth,opts)
+    end
+
     def commit_context(commit_msg,&block)
       @repo.commit_context(commit_msg,&block)
     end

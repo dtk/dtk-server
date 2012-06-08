@@ -37,6 +37,11 @@ class RestController < Controller
       content = GitoliteManager::Repo.new(repo_name).file_content(path)
       rest_ok_response :content => content
     end
+
+    def list_recursive(repo_name)
+      paths = GitoliteManager::Repo.new(repo_name).ls_r()
+      rest_ok_response :paths => paths
+    end
   end
 
   def error

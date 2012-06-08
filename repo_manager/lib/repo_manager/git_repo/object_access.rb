@@ -17,6 +17,14 @@ module R8::RepoManager; class GitRepo
       @grit_index.delete(file_path)
     end
 
+    def create_branch(new_branch)
+      if branches().include?(new_branch)
+        raise Error.new("Branch (#{new_branch}) already exists")
+      end
+      commit_msg = "adding new branch (#{new_branch})"
+      @grit_index.commit(commit_msg,@grit_repo.commits,nil,nil,new_branch)
+    end
+
     def commit(commit_msg)
       @grit_index.commit(commit_msg,@grit_repo.commits,nil,nil,@branch)
       git_command("write-tree".to_sym)

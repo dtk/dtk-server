@@ -1,4 +1,3 @@
-require 'erubis'
 module R8::RepoManager
   class GitoliteManager
   end

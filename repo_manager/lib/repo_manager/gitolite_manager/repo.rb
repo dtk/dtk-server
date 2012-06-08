@@ -1,5 +1,7 @@
 module R8::RepoManager; class GitoliteManager
   class Repo < self
+    #TODO: instaed may make child of GitRepo::ObjectAccess; or use missing method and send to @repo
+    #but check in explicit list
     def initialize(repo_name,branch='master')
       #updating and querying from the bare repo   
       @repo = GitRepo::ObjectAccess.new(bare_repo_dir(repo_name),branch)
@@ -25,6 +27,14 @@ module R8::RepoManager; class GitoliteManager
       commit_context(commit_msg||"deleting file #{file_path}") do
         @repo.delete_file(content)
       end
+    end
+
+    def branches()
+      @repo.branches()
+    end
+    
+    def create_branch(new_branch)
+      @repo.create_branch(new_branch)
     end
 
     def file_content(file_path)

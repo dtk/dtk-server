@@ -21,6 +21,11 @@ module R8::RepoManager
         raise e
       end
     end
+
+    def branches()
+      @grit_repo.branches.map{|h|h.name}
+    end
+
     def ls_r(depth=nil,opts={})
       tree_contents = tree.contents
       ls_r_aux(depth,tree_contents,opts)

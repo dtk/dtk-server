@@ -42,6 +42,17 @@ class RestController < Controller
       paths = GitoliteManager::Repo.new(repo_name).ls_r()
       rest_ok_response :paths => paths
     end
+
+    def branches(repo_name)
+      branches = GitoliteManager::Repo.new(repo_name).branches()
+      rest_ok_response :branches => branches
+    end
+
+    def create_branch()
+      repo_name,new_branch = ret_non_null_request_params(:repo_name,:new_branch)
+      GitoliteManager::Repo.new(repo_name).create_branch(new_branch)
+      rest_ok_response :branch => new_branch
+    end
   end
 
   def error

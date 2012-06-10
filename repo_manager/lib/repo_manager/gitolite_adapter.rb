@@ -152,7 +152,7 @@ module R8::RepoManager; class GitoliteAdapter
 
       def get_existing_repo_user_acls(repo_name)
         ret = Array.new
-        raw_content = admin_repo.get_file_content(repo_config_file_relative_path(repo_name))
+        raw_content = admin_repo.file_content(repo_config_file_relative_path(repo_name))
         unless raw_content
           raise Error.new("Repo (#{repo_name} does not exist")
         end

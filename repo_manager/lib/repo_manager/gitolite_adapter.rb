@@ -28,8 +28,8 @@ module R8::RepoManager; class GitoliteAdapter
       def add_user_to_repo(username,repo_name,access_rights)
         ret = repo_name
         repo_user_acls = get_existing_repo_user_acls(repo_name)
-        if match = repo_user_acls.find{|r|r[:repo_username]}
-          raise Error.new("User (#{username}) already has access right to repo (#{repo_name}): #{match[:access_rights]}")
+        if match = repo_user_acls.find{|r|r[:repo_username] == username}
+          raise Error.new("User (#{username}) already has access rights to repo (#{repo_name}): #{match[:access_rights]}")
         end
         
         augmented_repo_user_acls = repo_user_acls + [{:repo_username => username, :access_rights => access_rights}]
@@ -154,12 +154,12 @@ module R8::RepoManager; class GitoliteAdapter
         ret = Array.new
         raw_content = admin_repo.file_content(repo_config_file_relative_path(repo_name))
         unless raw_content
-          raise Error.new("Repo (#{repo_name} does not exist")
+          raise Error.new("Repo (#{repo_name}) does not exist")
         end
         #expections is that has form given by ConfigFileTemplate)
         raw_content.each do |l|
           l.chomp!()
-          if l = ~ /^[ ]*repo[ ]+([^ ]+)/
+          if l =~ /^[ ]*repo[ ]+([^ ]+)/
             unless $1 == repo_name
               raise Error.new("Parsing error: expected repo to be (${repo_name} in (#{l})")
             end

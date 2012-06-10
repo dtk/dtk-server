@@ -4,10 +4,13 @@ require File.expand_path('../../utils/internal/errors/rest_error', File.dirname(
 require File.expand_path('../../utils/internal/log', File.dirname(__FILE__))
 module R8
   module RepoManager
+    def self.bare_repo_dir(repo_name)
+      "#{Config[:git_user_home]}/repositories/#{repo_name}.git"
+    end
   end
 end
 
-%w{config git_repo gitolite_manager}.each do |f|
+%w{config repo admin}.each do |f|
   r8_nested_require('repo_manager',f)
 end
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env rspec
-require File.expand_path('../../spec_helper', File.dirname(__FILE__))
+require File.expand_path('../spec_helper', File.dirname(__FILE__))
 
-describe GitoliteManager::Repo do
+describe Repo do
   before(:all) do
     @test_repo_name = "test_spec_repo"
     @repo_user_acls = 
@@ -13,16 +13,16 @@ describe GitoliteManager::Repo do
   end
   describe "while a repo is created" do
     before(:all) do 
-      GitoliteManager::Admin.create_repo(@test_repo_name,@repo_user_acls)
+      Admin.create_repo(@test_repo_name,@repo_user_acls)
       @test_file_content = "test content\n"
       @test_file_name = "test_file"
-      @test_repo = GitoliteManager::Repo.new(@test_repo_name)
+      @test_repo = Repo.new(@test_repo_name)
     end
     after(:all) do 
-      GitoliteManager::Admin.delete_repo(@test_repo_name)
+      Admin.delete_repo(@test_repo_name)
     end
     it "should enable successful creation of a repo instance object" do
-      @test_repo.kind_of?(GitoliteManager::Repo).should be_true
+      @test_repo.kind_of?(Repo).should be_true
     end
 
     it "should support adding a file and retrieving back the file contents" do

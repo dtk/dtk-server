@@ -1,4 +1,4 @@
-module R8::RepoManager; class GitRepo
+module R8::RepoManager; class GritAdapter
   class FileAccess < self
     def add_file(file_rel_path,content)
       content ||= String.new

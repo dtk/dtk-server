@@ -1,7 +1,7 @@
 require 'erubis'
 require 'fileutils'
-module R8::RepoManager; class GitoliteManager
-  class Admin < self
+module R8::RepoManager; class GitoliteAdapter
+  class Admin 
     class << self
       def create_repo(repo_name,repo_user_acls,opts={})
         ret = repo_name
@@ -78,11 +78,16 @@ module R8::RepoManager; class GitoliteManager
       end
 
      private
+      Config = ::R8::RepoManager::Config
+      def bare_repo_dir(repo_name)
+        ::R8::RepoManager::bare_repo_dir(repo_name)
+      end
+
       def admin_directory()
         Config[:admin_repo_dir]
       end
       def admin_repo()
-        @admin_repo ||= GitRepo::FileAccess.new(admin_directory())
+        @admin_repo ||= GritAdapter::FileAccess.new(admin_directory())
       end
 
       def repo_config_relative_path()
@@ -163,4 +168,3 @@ eos
     end
   end
 end;end
-

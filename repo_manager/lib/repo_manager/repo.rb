@@ -1,8 +1,12 @@
-module R8::RepoManager; class GitoliteManager
-  class Repo < self
+r8_require('grit_adapter')
+module R8::RepoManager
+  class Repo 
+    def adapter_class()
+      GritAdapter::ObjectAccess
+    end
     def initialize(repo_name,branch='master')
       #updating and querying from the bare repo   
-      @repo = GitRepo::ObjectAccess.new(bare_repo_dir(repo_name),branch)
+      @repo = adapter_class.new(bare_repo_dir(repo_name),branch)
     end
     
     def add_file_and_commit(file_path,content,commit_msg=nil)
@@ -35,5 +39,9 @@ module R8::RepoManager; class GitoliteManager
     def respond_to?(name)
       !!(RepoMethods.include?(name) || super)
     end
+   private
+    def bare_repo_dir(repo_name)
+      ::R8::RepoManager::bare_repo_dir(repo_name)
+    end
   end
-end;end
+end

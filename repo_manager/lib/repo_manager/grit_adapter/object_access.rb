@@ -1,4 +1,4 @@
-module R8::RepoManager; class GitRepo
+module R8::RepoManager; class GritAdapter
   class ObjectAccess  < self 
     def initialize(repo_dir,branch='master')
       super

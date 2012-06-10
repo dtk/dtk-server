@@ -12,7 +12,15 @@ module R8::Client::ViewMeta
       [
        :node_name, 
        :node_id, 
+       {:external_ref => {:type => :external_ref, :only_explicit_cols => true}},
        {:components => {:type => :component, :is_array => true}}
+      ],
+      :external_ref_def =>
+      [
+       :image_id,
+       :size,
+       :dns_name,
+       :private_dns_name
       ],
       :component_def => 
       [

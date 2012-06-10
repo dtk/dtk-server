@@ -38,7 +38,7 @@ module R8
         msg ||= "No hash pretty print view defined"
         raise Error.new(msg)
       end
-      def render_object_def(object,object_def)
+      def render_object_def(object,object_def,opts={})
         #TODO: stub making it only first level
         return object unless object.kind_of?(Hash)
         hash = object
@@ -55,8 +55,10 @@ module R8
           end
         end
         #catch all for keys not defined
-        (hash.keys.map{|k|replace_with_key_alias?(k)} - ret.keys).each do |key|
-          ret[key] = hash[key] if hash[key]
+        unless opts[:only_explicit_cols]
+          (hash.keys.map{|k|replace_with_key_alias?(k)} - ret.keys).each do |key|
+            ret[key] = hash[key] if hash[key]
+          end
         end
         ret
       end
@@ -79,12 +81,16 @@ module R8
         hash_def_info = hash_def_item.values.first
         nested_object_def = get_object_def(hash_def_info[:type])
         raise_error("object def of type (#{hash_def_info[:type]||""}) does not exist") unless nested_object_def
-                                           
+
+        opts = Hash.new
+        if hash_def_info[:only_explicit_cols]
+          opts.merge!(:only_explicit_cols => true)
+        end
         if hash_def_info[:is_array]
           raise_error("hash subpart should be an array") unless input.kind_of?(Array)
-          ret[key] = input.map{|el|render_object_def(el,nested_object_def)}
+          ret[key] = input.map{|el|render_object_def(el,nested_object_def,opts)}
         else
-          ret[key] = render_object_def(input,nested_object_def)
+          ret[key] = render_object_def(input,nested_object_def,opts)
         end
       end
     end

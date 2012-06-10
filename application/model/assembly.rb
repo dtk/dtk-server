@@ -102,7 +102,7 @@ module XYZ
           #get_objs do this (using possibly option flag for subtype processing)
           pntr = ndx_ret[r[:id]] ||= r.id_handle.create_object().merge(:display_name => r[:display_name], :ndx_nodes => Hash.new)
           node_id = r[:node][:id]
-          node = pntr[:ndx_nodes][node_id] ||= {:node_name => r[:node][:display_name], :node_id => node_id, :components => Array.new}
+          node = pntr[:ndx_nodes][node_id] ||= {:node_name => r[:node][:display_name], :node_id => node_id, :components => Array.new}.merge(r[:node][:external_ref] ? {:external_ref => r[:node][:external_ref]} : {})
           cmp_hash = r[:nested_component]
           if cmp_type =  cmp_hash[:component_type] && cmp_hash[:component_type].gsub(/__/,"::")
             if attrs = ndx_attrs[r[:nested_component][:id]]

@@ -14,19 +14,19 @@ class RestController < Controller
 
     def add_user()
       username,rsa_pub_key = ret_non_null_request_params(:username,:rsa_pub_key)
-      GitoliteManager::Repo::Admin.add_user(username,rsa_pub_key)
+      Admin.add_user(username,rsa_pub_key)
       rest_ok_response :usename => username
     end
 
     def delete_user()
       username = ret_non_null_request_params(:username)
-      GitoliteManager::Repo::Admin.delete_user(username)
+      Admin.delete_user(username)
       rest_ok_response :usename => username
     end
 
     def create_repo_and_user()
       repo_name,username,rsa_pub_key = ret_non_null_request_params(:repo_name,:username,:rsa_pub_key)
-      GitoliteManager::Repo::Admin.create_repo_and_user(repo_name,username,rsa_pub_key,"RW+")
+      Admin.create_repo_and_user(repo_name,username,rsa_pub_key,"RW+")
       rest_ok_response :repo_name => repo_name
     end
   end
@@ -34,23 +34,23 @@ class RestController < Controller
   class RepoController < self
     map "/rest/repo"
     def get_file_content(repo_name,path)
-      content = GitoliteManager::Repo.new(repo_name).file_content(path)
+      content = Repo.new(repo_name).file_content(path)
       rest_ok_response :content => content
     end
 
     def list_recursive(repo_name)
-      paths = GitoliteManager::Repo.new(repo_name).ls_r()
+      paths = Repo.new(repo_name).ls_r()
       rest_ok_response :paths => paths
     end
 
     def branches(repo_name)
-      branches = GitoliteManager::Repo.new(repo_name).branches()
+      branches = Repo.new(repo_name).branches()
       rest_ok_response :branches => branches
     end
 
     def create_branch()
       repo_name,new_branch = ret_non_null_request_params(:repo_name,:new_branch)
-      GitoliteManager::Repo.new(repo_name).create_branch(new_branch)
+      Repo.new(repo_name).create_branch(new_branch)
       rest_ok_response :branch => new_branch
     end
   end

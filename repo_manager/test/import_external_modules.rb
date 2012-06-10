@@ -21,12 +21,12 @@ module R8::RepoManager
 
    private
     def self.add_repo_from_external_dir(repo_name,repo_user_acls,external_dir)
-      repo_created = GitoliteManager::Admin.create_repo(repo_name,repo_user_acls,:noop_if_exists => true)
+      repo_created = Admin.create_repo(repo_name,repo_user_acls,:noop_if_exists => true)
       unless repo_created
         Log.info("repo (#{repo_name}) created already")
       end
       
-      repo = GitoliteManager::Repo.new(repo_name)
+      repo = Repo.new(repo_name)
       Dir.chdir(external_dir) do
         file_paths = Dir["**/*"].reject{|path|File.directory?(path)}
         repo.commit_context("adding files for #{repo_name}") do

@@ -1,4 +1,4 @@
-r8_require('grit_adapter')
+r8_require('grit_adapter') #TODO: since just one adapter now not dynamically loading in
 module R8::RepoManager
   class Repo 
     def adapter_class()

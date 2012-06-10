@@ -1,4 +1,4 @@
-r8_require('gitolite_adapter')
+r8_require('gitolite_adapter') #TODO: since just one adapter now not dynamically loading in
 module R8::RepoManager
   class Admin
     class << self
@@ -6,7 +6,7 @@ module R8::RepoManager
         GitoliteAdapter::Admin
       end
       #'pass' all these methods to @repo
-      AdminMethods = [:create_repo,:create_repo_and_user,:delete_repo,:add_user,:delete_user]
+      AdminMethods = [:create_repo,:add_user_to_repo,:delete_repo,:add_user,:delete_user]
       def method_missing(name,*args,&block)
         if AdminMethods.include?(name)
           adapter_class().send(name,*args,&block)

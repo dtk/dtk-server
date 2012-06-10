@@ -24,9 +24,10 @@ class RestController < Controller
       rest_ok_response :usename => username
     end
 
-    def create_repo_and_user()
-      repo_name,username,rsa_pub_key = ret_non_null_request_params(:repo_name,:username,:rsa_pub_key)
-      Admin.create_repo_and_user(repo_name,username,rsa_pub_key,"RW+")
+    def add_user_to_repo()
+      repo_name,username = ret_non_null_request_params(:repo_name,:username)
+      access_rights = "RW+" #TODO: make this a settable param
+      Admin.add_user_to_repo(repo_name,username,rsa_pub_key,access_rights)
       rest_ok_response :repo_name => repo_name
     end
   end

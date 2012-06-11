@@ -1,9 +1,9 @@
+#TODO: user common utils in R8::Common::Rest
 require 'rubygems'
 require 'singleton'
 require 'restclient'
 require 'json'
 require 'pp'
-
 #TODO: for testing; fix by pass in commadn line argument
 #RestClient.log = STDOUT
 

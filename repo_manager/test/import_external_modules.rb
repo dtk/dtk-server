@@ -10,12 +10,15 @@ module_names = ARGV[0].split(",")
 
 module R8::RepoManager
   SourceBaseDir = "#{Config[:git_user_home]}/core-cookbooks/puppet"
+  RepoPrefix = "joe-puppet-"
+  WorkspaceBranch = "project-private-joe-v1"
   class ImportModules
     def self.add_modules_from_external_repo_dir(*module_names)
       repo_user_acls = [{:access_rights => "RW+", :repo_username => Config[:admin_user]}]
       module_names.each do |module_name|
         external_dir = "#{SourceBaseDir}/#{module_name}"
-        add_repo_from_external_dir(module_name,repo_user_acls,external_dir)
+        repo_name = "#{RepoPrefix}#{module_name}"
+        add_repo_from_external_dir(repo_name,repo_user_acls,external_dir)
       end
     end
 
@@ -36,6 +39,7 @@ module R8::RepoManager
           end
         end
       end
+      repo.create_branch(WorkspaceBranch)
     end
   end
 end

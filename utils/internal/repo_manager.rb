@@ -128,9 +128,9 @@ module XYZ
       @cached_adpater_class = DynamicLoader.load_and_return_adapter_class("repo_manager",adapter_name)
     end
 
-    def self.load_and_create(path,branch)
+    def self.load_and_create(repo,branch)
       klass = load_and_return_adapter_class() 
-      klass.create(path,branch)
+      klass.create(repo,branch)
     end
 
     def self.get_all_repo_names(model_handle)

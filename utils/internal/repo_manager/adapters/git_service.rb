@@ -1,19 +1,14 @@
+#TODO: writing now just rest acess; may want direct ruby api access if repo manager on same node
 module XYZ
   class RepoManagerGitService < RepoManager
-#    extend RepoGitManageClassMixin
-#TODO: need to repace below
-    def get_file_content(file_asset)
-      ret = nil
-      checkout(@branch) do
-        ret = File.open(file_asset[:path]){|f|f.read}
-      end
-      ret
+    r8_nested_require('git_service','rest')
+    def create(repo,branch,opts={})
+      Rest.new(repo,branch,opts)
     end
-
     private
-     def initialize(path,branch,opts={})
+     def initialize(repo,branch,opts={})
       @branch = branch 
-      @path = path
+      @repo = repo
      end
   end
 end

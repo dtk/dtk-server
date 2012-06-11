@@ -1,4 +1,5 @@
 require 'restclient'
+require 'json'
 module R8
   module Common
     module Rest
@@ -21,16 +22,21 @@ module R8
           include ResponseTokens
           def get(url,opts={})
             error_handling do
-              ::RestClient.get(url,opts)
+              raw_response = ::RestClient.get(url,opts)
+              json_parse_if_needed(raw_response)
             end
           end
           def post(url,body={},opts={})
             error_handling do
-              ::RestClient.post(url,body,opts)
+              raw_response = ::RestClient.post(url,body,opts)
+              json_parse_if_needed(raw_response)
             end
           end
 
           private
+          def json_parse_if_needed(item)
+            item.kind_of?(String) ? JSON.parse(item) : item
+          end
           def error_handling(&block)
             begin
               block.call 

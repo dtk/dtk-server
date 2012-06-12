@@ -1,6 +1,6 @@
 require 'restclient'
 require 'json'
-module R8
+module DTK
   module Common
     module Rest
       module ResponseTokens

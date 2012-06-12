@@ -25,10 +25,10 @@ module XYZ
       end
      private
       def get_rest_request(route,opts={})
-        ::R8::Common::Rest::ClientWrapper.get("#{rest_base_url()}#{route}",opts)
+        ::DTK::Common::Rest::ClientWrapper.get("#{rest_base_url()}#{route}",opts)
       end
       def post_rest_request(route,body,opts={})
-        ::R8::Common::Rest::ClientWrapper.post("#{rest_base_url()}#{route}",body,opts)
+        ::DTK::Common::Rest::ClientWrapper.post("#{rest_base_url()}#{route}",body,opts)
       end
       def rest_base_url()
         ::R8::Config[:repo][:git_service][:rest_base_url]

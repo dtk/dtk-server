@@ -41,6 +41,13 @@ class RestController < Controller
       rest_ok_response :content => content
     end
 
+    def update_file_content()
+      repo_name,path,content = ret_non_null_request_params(:repo_name,:path,:content)
+      branch = ret_request_params(:branch)||'master'
+      Repo.new(repo_name,branch).update_file_and_commit(path,content)
+      rest_ok_response
+    end
+
     def list_recursive(repo_name)
       paths = Repo.new(repo_name).ls_r()
       rest_ok_response :paths => paths

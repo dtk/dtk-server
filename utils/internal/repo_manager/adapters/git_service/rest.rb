@@ -14,6 +14,15 @@ module XYZ
         end
       end
 
+      def update_file_content(file_asset,content)
+        route = "/rest/repo/update_file_content"
+        body = {:repo_name => @repo,:path => file_asset[:path], :branch => @branch, :content => content}
+        response = post_rest_request(route,body)
+        unless response.ok?
+          raise Error.new(response.inspect)
+        end
+        nil
+      end
      private
       def get_rest_request(route,opts={})
         ::R8::Common::Rest::ClientWrapper.get("#{rest_base_url()}#{route}",opts)

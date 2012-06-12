@@ -1,5 +1,5 @@
 r8_require('grit_adapter') #TODO: since just one adapter now not dynamically loading in
-module R8::RepoManager
+module DTK::RepoManager
   class Repo 
     def adapter_class()
       GritAdapter::ObjectAccess
@@ -41,7 +41,7 @@ module R8::RepoManager
     end
    private
     def bare_repo_dir(repo_name)
-      ::R8::RepoManager::bare_repo_dir(repo_name)
+      ::DTK::RepoManager::bare_repo_dir(repo_name)
     end
   end
 end

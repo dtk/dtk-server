@@ -1,5 +1,5 @@
 r8_require('gitolite_adapter') #TODO: since just one adapter now not dynamically loading in
-module R8::RepoManager
+module DTK::RepoManager
   class Admin
     class << self
       def adapter_class()

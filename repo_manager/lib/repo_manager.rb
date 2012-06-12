@@ -2,7 +2,7 @@
 require File.expand_path('../../application/require_first', File.dirname(__FILE__))
 require File.expand_path('../../utils/internal/errors/rest_error', File.dirname(__FILE__))
 require File.expand_path('../../utils/internal/log', File.dirname(__FILE__))
-module R8
+module DTK
   module RepoManager
     def self.bare_repo_dir(repo_name)
       "#{Config[:git_user_home]}/repositories/#{repo_name}.git"
@@ -14,7 +14,7 @@ end
   r8_nested_require('repo_manager',f)
 end
 
-module R8::RepoManager
+module DTK::RepoManager
   class Error < NameError
   end
   module Log

@@ -1,5 +1,5 @@
 require 'singleton'
-module R8::RepoManager
+module DTK::RepoManager
   class Config < Hash
     include Singleton
     #include ParseFile

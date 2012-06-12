@@ -1,11 +1,11 @@
 require 'grit'
-module R8::RepoManager
+module DTK::RepoManager
   class GritAdapter
   end
 end
 r8_nested_require('grit_adapter','file_access')
 r8_nested_require('grit_adapter','object_access')
-module R8::RepoManager
+module DTK::RepoManager
   class GritAdapter 
     def initialize(repo_dir,branch='master')
       @repo_dir = repo_dir

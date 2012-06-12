@@ -8,7 +8,7 @@ end.parse!
 
 module_names = ARGV[0].split(",")
 
-module R8::RepoManager
+module DTK::RepoManager
   SourceBaseDir = "#{Config[:git_user_home]}/core-cookbooks/puppet"
   RepoPrefix = "joe-puppet-"
   WorkspaceBranch = "project-private-joe-v1"
@@ -44,4 +44,4 @@ module R8::RepoManager
   end
 end
 
-R8::RepoManager::ImportModules.add_modules_from_external_repo_dir(*module_names)
+DTK::RepoManager::ImportModules.add_modules_from_external_repo_dir(*module_names)

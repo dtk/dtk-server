@@ -1,6 +1,6 @@
 require 'erubis'
 require 'fileutils'
-module R8::RepoManager; class GitoliteAdapter
+module DTK::RepoManager; class GitoliteAdapter
   class Admin 
     class << self
       def create_repo(repo_name,repo_user_acls,opts={})
@@ -82,9 +82,9 @@ module R8::RepoManager; class GitoliteAdapter
       end
 
      private
-      Config = ::R8::RepoManager::Config
+      Config = ::DTK::RepoManager::Config
       def bare_repo_dir(repo_name)
-        ::R8::RepoManager::bare_repo_dir(repo_name)
+        ::DTK::RepoManager::bare_repo_dir(repo_name)
       end
 
       def admin_directory()

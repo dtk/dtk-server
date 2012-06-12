@@ -22,7 +22,7 @@ module Ramaze::Helper
 
     def raise_error_null_params?(*null_params)
       unless null_params.empty?
-        raise ::R8::RepoManager::Error.new("These parameters should not be null (#{null_params.join(",")})")
+        raise ::DTK::RepoManager::Error.new("These parameters should not be null (#{null_params.join(",")})")
       end
     end
 

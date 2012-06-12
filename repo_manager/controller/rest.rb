@@ -34,7 +34,7 @@ class RestController < Controller
 
   class RepoController < self
     map "/rest/repo"
-    def get_file_content(repo_name,path)
+    def get_file_content()
       repo_name,path = ret_non_null_request_params(:repo_name,:path)
       branch = ret_request_params(:branch)||'master'
       content = Repo.new(repo_name,branch).file_content(path)

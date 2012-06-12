@@ -7,8 +7,7 @@ module XYZ
       file_asset[:name] = file_asset[:file_name]
 
       file_asset[:content] = file_asset.get_content()
-
-      file_asset[:content] ||= 'this is some stubbed file content to return something---'+id.to_s
+      file_asset[:content] ||= 'ERROR RETRIEVING CONTENT'
 =begin TODO FOR debugging
       file_asset = {}
       file_asset[:content] = 'this is some stubbed file content to return something---'+id.to_s

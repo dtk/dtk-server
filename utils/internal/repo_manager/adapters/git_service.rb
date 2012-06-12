@@ -2,7 +2,7 @@
 module XYZ
   class RepoManagerGitService < RepoManager
     r8_nested_require('git_service','rest')
-    def create(repo,branch,opts={})
+    def self.create(repo,branch,opts={})
       Rest.new(repo,branch,opts)
     end
     private

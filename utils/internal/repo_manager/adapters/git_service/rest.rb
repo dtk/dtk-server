@@ -6,18 +6,23 @@ module XYZ
         route = "/rest/repo/get_file_content"
         body = {:repo_name => @repo,:path => file_asset[:path], :branch => @branch}
         response = post_rest_request(route,body)
-        ret = nil
-        ret
+        if response.ok?
+          response.data["content"]
+        else
+          Log.error(response.inspect)
+          nil
+        end
       end
-      private
+
+     private
       def get_rest_request(route,opts={})
-        ::R8::Common::Rest::ClientWrapper.get("#{rest_base_url()}/#{route}",opts)
+        ::R8::Common::Rest::ClientWrapper.get("#{rest_base_url()}#{route}",opts)
       end
       def post_rest_request(route,body,opts={})
-        ::R8::Common::Rest::ClientWrapper.post("#{rest_base_url()}/#{route}",body,opts)
+        ::R8::Common::Rest::ClientWrapper.post("#{rest_base_url()}#{route}",body,opts)
       end
       def rest_base_url()
-        #{R8::Config[:git][:git_service][:rest_base_url]}
+        ::R8::Config[:repo][:git_service][:rest_base_url]
       end
     end
   end

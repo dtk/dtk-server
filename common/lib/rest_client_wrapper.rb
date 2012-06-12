@@ -23,13 +23,13 @@ module R8
           def get(url,opts={})
             error_handling do
               raw_response = ::RestClient.get(url,opts)
-              json_parse_if_needed(raw_response)
+              Response.new(json_parse_if_needed(raw_response))
             end
           end
           def post(url,body={},opts={})
             error_handling do
               raw_response = ::RestClient.post(url,body,opts)
-              json_parse_if_needed(raw_response)
+              Response.new(json_parse_if_needed(raw_response))
             end
           end
 
@@ -43,7 +43,6 @@ module R8
             rescue ::RestClient::InternalServerError,::RestClient::RequestTimeout,Errno::ECONNREFUSED => e
               error_response(ErrorsSubFieldCode => RestClientErrors[e.class.to_s]||GenericError)
             rescue Exception => e
-              ::XYZ::Log.info("Uninterpred error object (#{e.class.to_s})")
               error_response(ErrorsSubFieldCode => GenericError)
             end
           end 
@@ -73,6 +72,9 @@ module R8
       class ResponseError < Response
         def initialize(hash={})
           super(hash)
+        end
+        def ok?()
+          false
         end
       end
     end

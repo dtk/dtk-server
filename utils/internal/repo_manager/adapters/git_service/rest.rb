@@ -17,7 +17,8 @@ module DTK
 
       def self.get_repos()
         route = "/rest/admin/get_repos"
-        get_rest_request_data(route,:raise_error => true)
+        response_data = get_rest_request_data(route,:raise_error => true)
+        response_data["repos"]
       end
 
      private

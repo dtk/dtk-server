@@ -3,6 +3,10 @@ require 'fileutils'
 module DTK::RepoManager; class GitoliteAdapter
   class Admin 
     class << self
+      def get_repos()
+        repo_config_file_paths().map{|fn|repo_name_from_repo_config_file(fn)} - ['testing']
+      end
+
       def create_repo(repo_name,repo_user_acls,opts={})
         ret = repo_name
         repo_config_file_path = repo_config_file_relative_path(repo_name)
@@ -144,6 +148,15 @@ module DTK::RepoManager; class GitoliteAdapter
 
       def repo_user_public_key_relative_path(username)
         "#{repo_user_public_key_dir_relative_path}/#{username}.pub"
+      end
+
+     
+      def repo_name_from_repo_config_file(filename)
+        if filename =~ Regexp.new("^#{repo_config_relative_path()}/(.+)\.conf")
+          $1
+        else
+          raise Error.new("Unexpected form for repo config file name (#{filename})")
+        end
       end
 
       def repo_config_file_relative_path(repo_name)

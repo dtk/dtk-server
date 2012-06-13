@@ -12,6 +12,11 @@ class RestController < Controller
   class AdminController < self
     map "/rest/admin"
 
+    def get_repos()
+      repos = Admin.get_repos()
+      rest_ok_response :repos => repos
+    end
+
     def add_user()
       username,rsa_pub_key = ret_non_null_request_params(:username,:rsa_pub_key)
       Admin.add_user(username,rsa_pub_key)

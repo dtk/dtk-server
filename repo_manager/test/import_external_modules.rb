@@ -10,8 +10,8 @@ module_names = ARGV[0].split(",")
 
 module DTK::RepoManager
   SourceBaseDir = "#{Config[:git_user_home]}/core-cookbooks/puppet"
-  RepoPrefix = "joe-puppet-"
-  WorkspaceBranch = "project-private-joe-v1"
+  RepoPrefix = "" #"joe-puppet-"
+  WorkspaceBranch = "" #"project-private-joe-v1"
   class ImportModules
     def self.add_modules_from_external_repo_dir(*module_names)
       repo_user_acls = [{:access_rights => "RW+", :repo_username => Config[:admin_user]}]
@@ -39,7 +39,7 @@ module DTK::RepoManager
           end
         end
       end
-      repo.create_branch(WorkspaceBranch)
+      repo.create_branch(WorkspaceBranch) unless WorkspaceBranch.empty?
     end
   end
 end

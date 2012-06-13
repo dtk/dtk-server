@@ -93,39 +93,6 @@ module DTK
       end
     end
 
-    class RestClientWrapper 
-      class << self
-        include ::DTK::Common::Rest::ResponseTokens
-        def get(url,opts={})
-          error_handling do
-            ::RestClient.get(url,opts)
-          end
-        end
-        def post(url,body={},opts={})
-          error_handling do
-            ::RestClient.post(url,body,opts)
-          end
-        end
-
-        private
-        def error_handling(&block)
-          begin
-            block.call 
-          rescue ::RestClient::InternalServerError,::RestClient::RequestTimeout,Errno::ECONNREFUSED => e
-            error_response(ErrorsSubFieldCode => RestClientErrors[e.class.to_s]||GenericError)
-          rescue Exception => e
-            Log.info("Uninterpred error object (#{e.class.to_s})")
-            error_response(ErrorsSubFieldCode => GenericError)
-          end
-        end 
-        RestClientErrors = {
-          "RestClient::InternalServerError" => "internal_server_error",
-          "RestClient::RequestTimeout" => "timeout",
-          "Errno::ECONNREFUSED" => "connection_refused"
-        }
-      end
-    end
-
     class Response < Hash
       include ::DTK::Common::Rest::ResponseTokens
       def initialize(command_class=nil,hash={})
@@ -206,15 +173,16 @@ module DTK
       end
 
       ####
+      DefaultRestOpts = {:open_timeout => 0.5}
       def get_raw(url)
-        RestClientWrapper.get(url,:cookies => @cookies)
+        Common::Rest::ClientWrapper.get_raw(url,DefaultRestOpts.merge(:cookies => @cookies))
       end
       def post_raw(url,body)
-        RestClientWrapper.post(url,body,:cookies => @cookies)
+        Common::Rest::ClientWrapper.post_raw(url,body,DefaultRestOpts.merge(:cookies => @cookies))
       end
 
       def json_parse_if_needed(item)
-        item.kind_of?(String) ? JSON.parse(item) : item
+        Common::Rest::ClientWrapper.json_parse_if_needed(item)
       end
     end
   end

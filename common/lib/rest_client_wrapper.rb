@@ -42,10 +42,10 @@ module DTK
             post_raw(url,body,opts){|raw_response|Response.new(json_parse_if_needed(raw_response))}
           end
 
-          private
           def json_parse_if_needed(item)
             item.kind_of?(String) ? JSON.parse(item) : item
           end
+          private
           def error_handling(&block)
             begin
               block.call 

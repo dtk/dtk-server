@@ -93,23 +93,9 @@ module DTK
       end
     end
 
-    module ResponseTokens
-      StatusOK = "ok"
-      StatusNotok = "notok"
-      DataField = "data"
-      StatusField = "status"
-      ErrorsField = "errors"
-      ErrorsSubFieldCode = "code"
-      GenericError = "error"
-      def error_response(error_or_errors)
-        errors = error_or_errors.kind_of?(Hash) ? [error_or_errors] : error_or_errors
-        ResponseError.new(StatusField => StatusNotok, ErrorsField => errors)
-      end
-    end
-
     class RestClientWrapper 
       class << self
-        include ResponseTokens
+        include ::DTK::Common::Rest::ResponseTokens
         def get(url,opts={})
           error_handling do
             ::RestClient.get(url,opts)
@@ -141,7 +127,7 @@ module DTK
     end
 
     class Response < Hash
-      include ResponseTokens
+      include ::DTK::Common::Rest::ResponseTokens
       def initialize(command_class=nil,hash={})
         @command_class = command_class
         super()

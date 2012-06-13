@@ -20,17 +20,26 @@ module DTK
       class ClientWrapper 
         class << self
           include ResponseTokens
-          def get(url,opts={})
+          def get_raw(url,opts={},&block)
             error_handling do
               raw_response = ::RestClient::Resource.new(url,opts).get()
-              Response.new(json_parse_if_needed(raw_response))
+              block ? block.call(raw_response) : raw_response
             end
           end
-          def post(url,body={},opts={})
+
+          def get(url,opts={})
+            get_raw(url,opts){|raw_response|Response.new(json_parse_if_needed(raw_response))}
+          end
+
+          def post_raw(url,body={},opts={},&block)
             error_handling do
               raw_response = ::RestClient::Resource.new(url,opts).post(body)
-              Response.new(json_parse_if_needed(raw_response))
+              block ? block.call(raw_response) : raw_response
             end
+          end
+
+          def post(url,body={},opts={})
+            post_raw(url,body,opts){|raw_response|Response.new(json_parse_if_needed(raw_response))}
           end
 
           private

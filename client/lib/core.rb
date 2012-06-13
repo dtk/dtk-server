@@ -93,19 +93,10 @@ module DTK
       end
     end
 
-    class Response < Hash
-      include ::DTK::Common::Rest::ResponseTokens
+    class Response < Common::Rest::Response
       def initialize(command_class=nil,hash={})
+        super(hash)
         @command_class = command_class
-        super()
-        replace(hash)
-      end
-      def ok?()
-        self[StatusField] == StatusOK
-      end
-
-      def data()
-        self[DataField]
       end
 
       def render_data(view_type)
@@ -122,6 +113,7 @@ module DTK
     end
 
     class ResponseError < Response
+      include Common::Rest::ResponseErrorMixin
       def initialize(hash={})
         super(nil,hash)
       end
@@ -158,7 +150,7 @@ module DTK
       def login()
         creds = get_credentials()
         response = post_raw rest_url("user/process_login"),creds
-        if response.kind_of?(Response) and not response.ok?
+        if response.kind_of?(Common::Rest::Response) and not response.ok?
           @connection_error = response
         else
           @cookies = response.cookies
@@ -173,7 +165,7 @@ module DTK
       end
 
       ####
-      DefaultRestOpts = {:open_timeout => 0.5}
+      DefaultRestOpts = {:timeout => 20, :open_timeout => 0.5, :error_response_class => Client::ResponseError}
       def get_raw(url)
         Common::Rest::ClientWrapper.get_raw(url,DefaultRestOpts.merge(:cookies => @cookies))
       end

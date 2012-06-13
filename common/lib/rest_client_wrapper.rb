@@ -11,17 +11,13 @@ module DTK
         ErrorsField = "errors"
         ErrorsSubFieldCode = "code"
         GenericError = "error"
-        def error_response(error_or_errors)
-          errors = error_or_errors.kind_of?(Hash) ? [error_or_errors] : error_or_errors
-          ResponseError.new(StatusField => StatusNotok, ErrorsField => errors)
-        end
       end
 
       class ClientWrapper 
         class << self
           include ResponseTokens
           def get_raw(url,opts={},&block)
-            error_handling do
+            error_handling(opts) do
               raw_response = ::RestClient::Resource.new(url,opts).get()
               block ? block.call(raw_response) : raw_response
             end
@@ -32,7 +28,7 @@ module DTK
           end
 
           def post_raw(url,body={},opts={},&block)
-            error_handling do
+            error_handling(opts) do
               raw_response = ::RestClient::Resource.new(url,opts).post(body)
               block ? block.call(raw_response) : raw_response
             end
@@ -46,15 +42,20 @@ module DTK
             item.kind_of?(String) ? JSON.parse(item) : item
           end
           private
-          def error_handling(&block)
+          def error_handling(opts={},&block)
             begin
               block.call 
             rescue ::RestClient::InternalServerError,::RestClient::RequestTimeout,Errno::ECONNREFUSED => e
-              error_response(ErrorsSubFieldCode => RestClientErrors[e.class.to_s]||GenericError)
+              error_response({ErrorsSubFieldCode => RestClientErrors[e.class.to_s]||GenericError},opts)
             rescue Exception => e
-              error_response(ErrorsSubFieldCode => GenericError)
+              error_response({ErrorsSubFieldCode => GenericError},opts)
             end
           end 
+          def error_response(error_or_errors,opts={})
+            errors = error_or_errors.kind_of?(Hash) ? [error_or_errors] : error_or_errors
+            (opts[:error_response_class]||ResponseError).new(StatusField => StatusNotok, ErrorsField => errors)
+          end
+
           RestClientErrors = {
             "RestClient::InternalServerError" => "internal_server_error",
             "RestClient::RequestTimeout" => "timeout",
@@ -78,12 +79,15 @@ module DTK
         end
       end
 
-      class ResponseError < Response
-        def initialize(hash={})
-          super(hash)
-        end
+      module ResponseErrorMixin
         def ok?()
           false
+        end
+      end
+      class ResponseError < Response
+        include ResponseErrorMixin
+        def initialize(hash={})
+          super(hash)
         end
       end
     end

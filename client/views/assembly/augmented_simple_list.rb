@@ -1,4 +1,4 @@
-module R8::Client::ViewMeta
+module DTK::Client::ViewMeta
   AugmentedSimpleList = {
     :attribute_def => {
       :keys => [:attribute_name,:value,:override],

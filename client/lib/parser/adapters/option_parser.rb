@@ -1,5 +1,5 @@
 require 'optparse'
-module R8
+module DTK
   module Client
     class CommandBaseOptionParser
       include CommandBase

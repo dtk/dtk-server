@@ -1,4 +1,4 @@
-module R8::Client::ViewMeta
+module DTK::Client::ViewMeta
   HashPrettyPrint = {
     :top_type => :state_change,
     :defs => {

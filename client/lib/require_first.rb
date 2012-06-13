@@ -1,4 +1,4 @@
-module R8
+module DTK
   module Client
     def r8_require(*files_x)
       files = (files_x.first.kind_of?(Array) ? files_x.first : files_x) 

@@ -1,4 +1,4 @@
-#TODO: user common utils in R8::Common::Rest
+#TODO: user common utils in DTK::Common::Rest
 require 'rubygems'
 require 'singleton'
 require 'restclient'
@@ -9,7 +9,7 @@ require 'pp'
 
 def top_level_execute(command=nil)
   $: << "/usr/lib/ruby/1.8/" #TODO: put in to get around path problem in rvm 1.9.2 environment
-  include R8::Client
+  include DTK::Client
   include Aux
   command = command || $0.gsub(Regexp.new("^.+/"),"").gsub("-","_")
   require File.expand_path('../r8_client', File.dirname(__FILE__))
@@ -17,7 +17,7 @@ def top_level_execute(command=nil)
   
   conn = Conn.new()
 
-  command_class = R8::Client.const_get "#{cap_form(command)}Command"
+  command_class = DTK::Client.const_get "#{cap_form(command)}Command"
   response_ruby_obj = command_class.execute_from_cli(conn,ARGV)
   #default_render_type = "hash_pretty_print"
   default_render_type = "augmented_simple_list" #TODO: doe not work for nested hashes
@@ -33,7 +33,7 @@ def top_level_execute(command=nil)
   end
 end
 
-module R8
+module DTK
   module Client
     class Error < NameError
     end

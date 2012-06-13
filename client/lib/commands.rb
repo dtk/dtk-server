@@ -1,4 +1,4 @@
-module R8
+module DTK
   module Client
     def load_command(command_name)
       parser_adapter = Config[:cli_parser]|| "thor"

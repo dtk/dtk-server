@@ -1,5 +1,5 @@
 require 'erubis'
-module R8
+module DTK
   module Client
     class ViewProcSimpleList < ViewProcessor
       def render(hash)

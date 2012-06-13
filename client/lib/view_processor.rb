@@ -1,4 +1,4 @@
-module R8
+module DTK
   module Client
     class ViewProcessor
       class << self
@@ -18,7 +18,7 @@ module R8
           cached = (AdapterCache[type]||{})[command_class]
           return cached if cached
           r8_nested_require("view_processor",type)
-          klass = R8::Client.const_get "ViewProc#{cap_form(type)}" 
+          klass = DTK::Client.const_get "ViewProc#{cap_form(type)}" 
           AdapterCache[type] ||= Hash.new
           AdapterCache[type][command_class] = klass.new(type,command_class)
         end
@@ -34,7 +34,7 @@ module R8
         command = snake_form(command_class)
         begin
           r8_require("../views/#{command}/#{type}")
-          ret = R8::Client::ViewMeta.const_get cap_form(type)
+          ret = DTK::Client::ViewMeta.const_get cap_form(type)
          rescue Exception => e
           ret = failback_meta(command_class.respond_to?(:pretty_print_cols) ? command_class.pretty_print_cols() : [])
         end

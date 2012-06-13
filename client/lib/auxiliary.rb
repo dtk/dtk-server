@@ -1,4 +1,4 @@
-module R8
+module DTK
   module Client
     module Aux
       def cap_form(x)

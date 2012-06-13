@@ -1,5 +1,5 @@
 require 'thor'
-module R8
+module DTK
   module Client
     class CommandBaseThor < ::Thor
       include CommandBase

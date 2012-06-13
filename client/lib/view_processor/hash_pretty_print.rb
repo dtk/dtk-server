@@ -1,6 +1,6 @@
 r8_require_util_library("hash_object") 
 
-module R8
+module DTK
   module Client
     class ViewProcHashPrettyPrint < ViewProcessor
       include XYZ

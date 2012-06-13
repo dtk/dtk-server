@@ -1,4 +1,4 @@
-module R8
+module DTK
   module Client
     class SearchHash < Hash
       def cols=(cols)

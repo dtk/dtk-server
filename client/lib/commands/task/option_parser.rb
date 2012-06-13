@@ -1,4 +1,4 @@
-module R8::Client
+module DTK::Client
   class TaskCommand < CommandBaseOptionParser
     CLIParseOptions = Hash.new
     def status(args)

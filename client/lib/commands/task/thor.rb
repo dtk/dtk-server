@@ -1,4 +1,4 @@
-module R8::Client
+module DTK::Client
   class TaskCommand < CommandBaseThor
 
     desc "list","List tasks"

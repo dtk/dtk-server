@@ -1,4 +1,4 @@
-module R8::Client
+module DTK::Client
   class AssemblyCommand < CommandBaseThor
     def self.pretty_print_cols()
       [:display_name, :type,:id, :description, :external_ref]

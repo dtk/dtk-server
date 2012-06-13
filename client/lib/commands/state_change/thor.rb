@@ -1,4 +1,4 @@
-module R8::Client
+module DTK::Client
   class StateChangeCommand < CommandBaseThor
     desc "list","List pending state changes"
     def list()

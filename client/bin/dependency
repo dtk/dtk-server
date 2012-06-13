@@ -1,4 +1,4 @@
 #!/usr/bin/env ruby
-require File.expand_path('../r8_client', File.dirname(__FILE__))
+require File.expand_path('../lib/client', File.dirname(__FILE__))
 top_level_execute()
 

@@ -12,7 +12,6 @@ def top_level_execute(command=nil)
   include DTK::Client
   include Aux
   command = command || $0.gsub(Regexp.new("^.+/"),"").gsub("-","_")
-  require File.expand_path('../r8_client', File.dirname(__FILE__))
   load_command(command)
   
   conn = Conn.new()

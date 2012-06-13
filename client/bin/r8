@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 command = ARGV.shift
-require File.expand_path('../r8_client', File.dirname(__FILE__))
+require File.expand_path('../lib/client', File.dirname(__FILE__))
 top_level_execute(command)
 
 

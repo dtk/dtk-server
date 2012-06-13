@@ -187,7 +187,7 @@ module XYZ
 
       #if reach here; no match and need to clone
       new_branch = augmented_impl.project_branch_name(project)
-      RepoManager.clone_branch({:implementation => augmented_impl},new_branch)
+      RepoManager.clone_branch(new_branch,{:implementation => augmented_impl})
       override_attrs={:branch => new_branch}
       new_impl_id = project.clone_into(self,override_attrs)
       id_handle(:id => new_impl_id, :model => :implementation)
@@ -202,7 +202,7 @@ module XYZ
         new_version_num = get_new_version_num(library_idh)
         new_branch = library_branch_name(new_version_num,library_idh)
         #TODO: assuming that implementaion files do not hvae any content that is not written to repo
-        RepoManager.clone_branch({:implementation => self},new_branch)
+        RepoManager.clone_branch(new_branch,{:implementation => self})
         override_attrs={:version_num => new_version_num,:branch => new_branch}
         new_impl_id = library_idh.create_object.clone_into(self,override_attrs)
         ret = id_handle(:model_name => :implemntation, :id => new_impl_id)
@@ -220,7 +220,7 @@ module XYZ
       raise Error.new("Cannot find associated library implementation") unless impl_objs_info
       library_impl = impl_objs_info[:library_implementation]
       project_impl = impl_objs_info
-      RepoManager.merge_from_branch({:implementation => library_impl},project_impl[:branch])
+      RepoManager.merge_from_branch(project_impl[:branch],{:implementation => library_impl})
       RepoManager.push_implementation(:implementation => library_impl)
     end
 

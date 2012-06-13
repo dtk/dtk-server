@@ -2,6 +2,7 @@ module XYZ
   class LibraryController < Controller
     #TODO: stub; this might be part of installation
     def rest__bind_to_repo_manager()
+      sp_hash = {:cols => [:id,:display_name]}
       library_id = ret_request_params(:library_id) || Library.create_public_library?(model_handle()).get_id()
       create_object_from_id(library_id).bind_to_repo_manager()
       rest_ok_response

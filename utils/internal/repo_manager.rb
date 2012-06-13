@@ -1,37 +1,20 @@
 require 'fileutils'
 module XYZ
   class RepoManager 
-    #### for interacting with existing repos
-    def self.get_file_content(file_asset,context)
-      get_repo(context).get_file_content(file_asset)
-    end
-
-    def self.update_file_content(file_asset,content,context)
-      get_repo(context).update_file_content(file_asset,content)
-    end
-
-    def self.add_file(file_asset,content,context)
-      get_repo(context).add_file(file_asset,content)
-    end
-
-    def self.add_all_files(context)
-      get_repo(context).add_all_files()
-    end
-
-    def self.push_implementation(context)
-      get_repo(context).push_implementation()
-    end
-
-    def self.clone_branch(context,new_branch)
-      get_repo(context).clone_branch(new_branch)
-    end
-
-    def self.merge_from_branch(context,branch_to_merge_from)
-      get_repo(context).merge_from_branch(branch_to_merge_from)
-    end
-
-    def self.delete_branch(context)
-      get_repo(context).delete_branch()
+    #### for interacting with particular repo
+    class << self
+      PassToRepoMethods = [:get_file_content,:update_file_content,:add_file,:add_all_files,:push_implementation,:clone_branch,:merge_from_branch,:delete_branch]
+      def method_missing(name,*args,&block)
+        if PassToRepoMethods.include?(name)
+          context = args.pop
+          get_repo(context).send(name,*args,&block)
+        else
+          super
+        end
+      end
+      def respond_to?(name)
+        !!(PassToRepoMethods.include?(name) || super)
+      end
     end
 
     def self.delete_all_branches(repo_mh)
@@ -56,8 +39,13 @@ module XYZ
       end
     end
 
-    ###### for creating and deleting repositories
+    ###### for repo admin functions, such as creating and deleting repositories
     #TODO: need to change or prtect since with this design pattern get stack error if adapter does not have this defined
+    def self.get_repos()
+      klass = load_and_return_adapter_class()
+      klass.get_repos()
+    end
+
     def self.repo_url()
       klass = load_and_return_adapter_class()
       klass.repo_url()

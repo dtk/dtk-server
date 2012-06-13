@@ -2,8 +2,10 @@ require 'fileutils'
 module XYZ
   class RepoManager 
     class << self
+      #admin and repo methods that just pass to lower level object or class
       RepoMethods = [:get_file_content,:update_file_content,:add_file,:add_all_files,:push_implementation,:clone_branch,:merge_from_branch,:delete_branch]
-      AdminMethods = [:get_repos]
+      AdminMethods = [:get_repos,:repo_url,:repo_server_dns,:repo_name]
+
       def method_missing(name,*args,&block)
         if RepoMethods.include?(name)
           context = args.pop
@@ -31,8 +33,8 @@ module XYZ
         end
       end
     end
-    #### for interacting with particular repo
 
+    #### for interacting with particular repo
     def self.delete_all_branches(repo_mh)
       repo_names = get_all_repo_names(repo_mh)
       delete_branches(*repo_names)
@@ -56,20 +58,6 @@ module XYZ
     end
 
     ###### for repo admin functions, such as creating and deleting repositories
-    #TODO: need to change or prtect since with this design pattern get stack error if adapter does not have this defined
-
-    def self.repo_url()
-      klass = load_and_return_adapter_class()
-      klass.repo_url()
-    end
-    def self.repo_server_dns()
-      klass = load_and_return_adapter_class()
-      klass.repo_server_dns()
-    end
-    def self.repo_name(username,config_agent_type,module_name)
-      klass = load_and_return_adapter_class()
-      klass.repo_name(username,config_agent_type,module_name)
-    end
 
     def self.create_repo(repo_obj,repo_user_acls,opts={})
       klass = load_and_return_adapter_class()

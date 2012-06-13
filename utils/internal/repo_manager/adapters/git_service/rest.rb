@@ -43,9 +43,10 @@ module DTK
       def get_rest_request_data(route,opts={})
         self.class.get_rest_request_data(route,opts)
       end
+      DefaultTimeoutOpts = {:timeout => 1, :open_timeout => 0.1}
       def self.get_rest_request_data(route,opts={})
         handle_error(opts) do 
-          Common::Rest::ClientWrapper.get("#{rest_base_url()}#{route}",opts)
+          Common::Rest::ClientWrapper.get("#{rest_base_url()}#{route}",DefaultTimeoutOpts)
         end
       end
 
@@ -54,7 +55,7 @@ module DTK
       end
       def self.post_rest_request_data(route,body,opts={})
         handle_error(opts) do
-          Common::Rest::ClientWrapper.post("#{rest_base_url()}#{route}",body,opts)
+          Common::Rest::ClientWrapper.post("#{rest_base_url()}#{route}",body,DefaultTimeoutOpts)
         end
       end
 

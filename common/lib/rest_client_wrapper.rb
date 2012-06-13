@@ -22,13 +22,13 @@ module DTK
           include ResponseTokens
           def get(url,opts={})
             error_handling do
-              raw_response = ::RestClient.get(url,opts)
+              raw_response = ::RestClient::Resource.new(url,opts).get()
               Response.new(json_parse_if_needed(raw_response))
             end
           end
           def post(url,body={},opts={})
             error_handling do
-              raw_response = ::RestClient.post(url,body,opts)
+              raw_response = ::RestClient::Resource.new(url,opts).post(body)
               Response.new(json_parse_if_needed(raw_response))
             end
           end

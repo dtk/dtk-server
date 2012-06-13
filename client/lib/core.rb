@@ -81,7 +81,7 @@ module DTK
       def set_defaults()
         self[:server_port] = 7000
       end
-      ConfigFile = "/etc/r8client/client.conf"
+      ConfigFile = "/etc/dtk/client.conf"
       def load_config_file()
         parse_key_value_file(ConfigFile).each{|k,v|self[k]=v}
       end
@@ -212,7 +212,7 @@ module DTK
         end
       end
       def get_credentials()
-        cred_file = File.expand_path("~/.r8client")
+        cred_file = File.expand_path("~/.dtkclient")
         raise Error.new("Credential file (#{cred_file}) does not exist") unless File.exists?(cred_file)
         ret = parse_key_value_file(cred_file)
         [:username,:password].each{|k|raise Error.new("cannot find #{k}") unless ret[k]}

@@ -1,5 +1,5 @@
 #TODO: test for assembly list/display; want to make assembly specfic stuff datadriven
-r8_require 'simple_list'
+dtk_require 'simple_list'
 module DTK
   module Client
     class ViewProcAugmentedSimpleList < ViewProcSimpleList

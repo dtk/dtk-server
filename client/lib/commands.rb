@@ -2,8 +2,8 @@ module DTK
   module Client
     def load_command(command_name)
       parser_adapter = Config[:cli_parser]|| "thor"
-      r8_nested_require("parser/adapters",parser_adapter)
-      r8_nested_require("commands/#{command_name}",parser_adapter)
+      dtk_nested_require("parser/adapters",parser_adapter)
+      dtk_nested_require("commands/#{command_name}",parser_adapter)
     end
     module CommandBase
       def self.execute_from_cli(conn,argv)

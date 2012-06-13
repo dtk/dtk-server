@@ -1,4 +1,4 @@
-r8_require_util_library("hash_object") 
+dtk_require_util_library("hash_object") 
 
 module DTK
   module Client

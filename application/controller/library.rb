@@ -1,11 +1,16 @@
 module XYZ
   class LibraryController < Controller
-    def bind_to_repo_manager()
-      
-      #TODO: stub; this might be part of installation
+    #TODO: stub; this might be part of installation
+    def rest__bind_to_repo_manager()
+      library_id = ret_non_null_request_params(:library_id)
+      create_object_from_id(library_id).bind_to_repo_manager()
+      rest_ok_response
     end
 
-    def import_from_repo_manager()
+    def rest__import_from_repo_manager()
+      library_id,repo_manager_hostname = ret_non_null_request_params(:library_id,:repo_manager_hostname)
+      create_object_from_id(library_id).import_from_repo_manager(repo_manager_hostname)
+      rest_ok_response
     end
 
 #TODO: see which of below shoudl be deprecated

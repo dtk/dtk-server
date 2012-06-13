@@ -1,6 +1,9 @@
+r8_nested_require('library','import')
 module XYZ
   class Library < Model
-    class << self
+    include LibraryImportMixin
+
+    class << self 
       def create_users_private_library?(model_handle)
         user_obj = CurrentSession.new.get_user_object()
         private_group_obj = user_obj.get_private_group()

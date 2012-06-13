@@ -1,5 +1,5 @@
 r8_require_common_lib('rest_client_wrapper')
-module XYZ
+module DTK
   class RepoManagerGitService < RepoManager
     class Rest < self
       def get_file_content(file_asset)
@@ -25,10 +25,10 @@ module XYZ
       end
      private
       def get_rest_request(route,opts={})
-        ::DTK::Common::Rest::ClientWrapper.get("#{rest_base_url()}#{route}",opts)
+        Common::Rest::ClientWrapper.get("#{rest_base_url()}#{route}",opts)
       end
       def post_rest_request(route,body,opts={})
-        ::DTK::Common::Rest::ClientWrapper.post("#{rest_base_url()}#{route}",body,opts)
+        Common::Rest::ClientWrapper.post("#{rest_base_url()}#{route}",body,opts)
       end
       def rest_base_url()
         ::R8::Config[:repo][:git_service][:rest_base_url]

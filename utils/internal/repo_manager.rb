@@ -1,21 +1,37 @@
 require 'fileutils'
 module XYZ
   class RepoManager 
-    #### for interacting with particular repo
     class << self
-      PassToRepoMethods = [:get_file_content,:update_file_content,:add_file,:add_all_files,:push_implementation,:clone_branch,:merge_from_branch,:delete_branch]
+      RepoMethods = [:get_file_content,:update_file_content,:add_file,:add_all_files,:push_implementation,:clone_branch,:merge_from_branch,:delete_branch]
+      AdminMethods = [:get_repos]
       def method_missing(name,*args,&block)
-        if PassToRepoMethods.include?(name)
+        if RepoMethods.include?(name)
           context = args.pop
-          get_repo(context).send(name,*args,&block)
-        else
-          super
+          return get_repo(context).send(name,*args,&block)
         end
+        if klass = class_if_admin_method?(name) 
+          return klass.send(name,*args,&block)
+        end
+        super
       end
       def respond_to?(name)
-        !!(PassToRepoMethods.include?(name) || super)
+        !!(defined_method?(name) || super)
+      end
+
+     private
+      def defined_method?(name)
+        RepoMethods.include?(name) or !!class_if_admin_method?(name)
+      end
+      def class_if_admin_method?(name)
+        if AdminMethods.include?(name) 
+          klass = load_and_return_adapter_class()
+          if klass.public_methods(false).include?(name.to_s)
+            klass
+          end
+        end
       end
     end
+    #### for interacting with particular repo
 
     def self.delete_all_branches(repo_mh)
       repo_names = get_all_repo_names(repo_mh)
@@ -41,10 +57,6 @@ module XYZ
 
     ###### for repo admin functions, such as creating and deleting repositories
     #TODO: need to change or prtect since with this design pattern get stack error if adapter does not have this defined
-    def self.get_repos()
-      klass = load_and_return_adapter_class()
-      klass.get_repos()
-    end
 
     def self.repo_url()
       klass = load_and_return_adapter_class()

@@ -35,22 +35,22 @@ module XYZ
          :size => "t1.micro",
          :png => "centos.png"
        },
-       "ami-6425800d-micro"=> {
-         :ami => "ami-6425800d",
+       "ami-cc4eeda5-micro"=> {
+         :ami => "ami-cc4eeda5",
          :display_name => "RH5.7 64 micro",
          :os_type =>"redhat",
          :size => "t1.micro",
          :png => "redhat.png"
        },
-       "ami-6425800d-medium"=> {
-         :ami => "ami-6425800d",
+       "ami-cc4eeda5-medium"=> {
+         :ami => "ami-cc4eeda5",
          :display_name => "RH5.7 64 medium",
          :os_type =>"redhat",
          :size => "m1.medium",
          :png => "redhat.png"
        },
-       "ami-6425800d-large"=> {
-         :ami => "ami-6425800d",
+       "ami-cc4eeda5-large"=> {
+         :ami => "ami-cc4eeda5",
          :display_name => "RH5.7 64 large",
          :os_type =>"redhat",
          :size => "m1.large",
@@ -183,7 +183,7 @@ Bindings = {"centos-5.6-small"=>{:type=>"clone",
   :os_type=>"redhat",    
   :rules=>[{:conditions=>{:type=>"ec2_image", :region=>"us-east-1"},
     :node_template=>{:type=>"ec2_image",
-     :image_id=>"ami-6425800d",
+     :image_id=>"ami-cc4eeda5",
      :size=>"m1.large",
      :region=>"us-east-1"}}]},
  "natty-small"=>{:type=>"clone",
@@ -204,14 +204,14 @@ Bindings = {"centos-5.6-small"=>{:type=>"clone",
   :os_type=>"redhat",    
   :rules=>[{:conditions=>{:type=>"ec2_image", :region=>"us-east-1"},
     :node_template=>{:type=>"ec2_image",
-     :image_id=>"ami-6425800d",
+     :image_id=>"ami-cc4eeda5",
      :size=>"t1.micro",
      :region=>"us-east-1"}}]},
  "rh5.7-64-medium"=>{:type=>"clone",
   :os_type=>"redhat",    
   :rules=>[{:conditions=>{:type=>"ec2_image", :region=>"us-east-1"},
     :node_template=>{:type=>"ec2_image",
-     :image_id=>"ami-6425800d",
+     :image_id=>"ami-cc4eeda5",
      :size=>"m1.medium",
      :region=>"us-east-1"}}]}}
    Bindings.each{|k,v|v[:display_name] = k.gsub(/-/,' ')}

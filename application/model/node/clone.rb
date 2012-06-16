@@ -16,6 +16,11 @@ module XYZ
     end
 
     def clone_post_copy_hook__component(component,opts={})
+      #if node is in assembly put component in teh assembly
+      if assembly_id = update_object!(:assembly_id)[:assembly_id]
+        component.update(:assembly_id => assembly_id)
+      end
+
       #handles copying over if needed component template and implementation into project
       unless opts[:use_source_impl_and_template]
         component.update_implementation_and_template?(get_project())

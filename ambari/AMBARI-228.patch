@@ -1,0 +1,98 @@
+diff --git hmc/puppet/modules/hdp-ganglia/manifests/monitor.pp hmc/puppet/modules/hdp-ganglia/manifests/monitor.pp
+index f884954..e20533d 100644
+--- hmc/puppet/modules/hdp-ganglia/manifests/monitor.pp
++++ hmc/puppet/modules/hdp-ganglia/manifests/monitor.pp
+@@ -1,4 +1,3 @@
+-#must be put after monitored components because of use of params::service_exist and component_exists
+ class hdp-ganglia::monitor(
+   $service_state = $hdp::params::cluster_service_state,
+   $ganglia_server_host = undef,
+@@ -16,16 +15,6 @@ class hdp-ganglia::monitor(
+         before              => Class['hdp-ganglia::monitor::config-gen']
+       }
+     }
+-    #if ($hdp::params::component_exists['hdp-hadoop'] == true) {
+-    #  class { 'hdp-hadoop::enable-ganglia':}
+-    #}
+-    
+-    #if ($service_exists['hdp-hbase::master'] == true) {
+-    #  class { 'hdp-hbase::master::enable-ganglia': }
+-    #}
+-    #if ($service_exists['hdp-hbase::regionserver'] == true) {
+-    #  class { 'hdp-hbase::regionserver::enable-ganglia': }
+-    #}
+ 
+     class { 'hdp-ganglia::monitor::config-gen': }
+ 
+@@ -49,16 +38,16 @@ class hdp-ganglia::monitor::config-gen()
+ 
+   $service_exists = $hdp::params::service_exists
+ 
+-  if ($service_exists['hdp-hadoop::namenode'] == true) {
++  if ($hdp-ganglia::params::omit_namenode != true) {
+     hdp-ganglia::config::generate_monitor { 'HDPNameNode':}
+   }
+-  if ($service_exists['hdp-hadoop::jobtracker'] == true){
++  if ($hdp-ganglia::params::omit_job_tracker != true) {
+     hdp-ganglia::config::generate_monitor { 'HDPJobTracker':}
+   }
+-  if ($service_exists['hdp-hbase::master'] == true) {
++  if ($hdp-ganglia::params::omit_hbase_master != true) {
+     hdp-ganglia::config::generate_monitor { 'HDPHBaseMaster':}
+   }
+-  if ($service_exists['hdp-hadoop::datanode'] == true) {
++  if ($hdp-ganglia::params::omit_slaves != true) {
+     hdp-ganglia::config::generate_monitor { 'HDPSlaves':}
+   }
+   Hdp-ganglia::Config::Generate_monitor<||>{
+diff --git hmc/puppet/modules/hdp-ganglia/manifests/params.pp hmc/puppet/modules/hdp-ganglia/manifests/params.pp
+index e55a4c8..aeb3e40 100644
+--- hmc/puppet/modules/hdp-ganglia/manifests/params.pp
++++ hmc/puppet/modules/hdp-ganglia/manifests/params.pp
+@@ -10,4 +10,10 @@ class hdp-ganglia::params() inherits hdp::params
+   $gmond_user = hdp_default("gmond_user","nobody")
+ 
+   $webserver_group = hdp_default("hadoop/gangliaEnv/webserver_group","apache")
++
++
++  $omit_hbase_master = hdp_default("omit_hbase_master",hdp_is_empty($hdp::params::hbase_master_host))
++  $omit_job_tracker = hdp_default("omit_job_tracker",hdp_is_empty($hdp::params::jtnode_host))
++  $omit_namenode = hdp_default("omit_namenode",hdp_is_empty($hdp::params::namenode_host))
++  $omit_slaves = hdp_default("omit_slaves",hdp_is_empty($hdp::params::slave_hosts))
+ }
+\ No newline at end of file
+diff --git hmc/puppet/modules/hdp-ganglia/manifests/server.pp hmc/puppet/modules/hdp-ganglia/manifests/server.pp
+index b3c113f..91d1e6d 100644
+--- hmc/puppet/modules/hdp-ganglia/manifests/server.pp
++++ hmc/puppet/modules/hdp-ganglia/manifests/server.pp
+@@ -18,9 +18,28 @@ class hdp-ganglia::server(
+ 
+     class { 'hdp-ganglia::config': ganglia_server_host => $hdp::params::host_address }
+ 
+-    hdp-ganglia::config::generate_server { ['HDPHBaseMaster','HDPJobTracker','HDPNameNode','HDPSlaves']:
+-      ganglia_service => 'gmond'
++   
++    if ($hdp-ganglia::params::omit_hbase_master != true) {
++      hdp-ganglia::config::generate_server { 'HDPHBaseMaster':
++        ganglia_service => 'gmond'
++      }
++    }
++    if ($hdp-ganglia::params::omit_job_tracker != true) {
++      hdp-ganglia::config::generate_server { 'HDPJobTracker':
++        ganglia_service => 'gmond'
++      }
++    }
++    if ($hdp-ganglia::params::omit_namenode != true) {
++      hdp-ganglia::config::generate_server { 'HDPNameNode':
++        ganglia_service => 'gmond'
++      }
++    }
++    if ($hdp-ganglia::params::omit_slaves != true) {
++      hdp-ganglia::config::generate_server { 'HDPSlaves':
++        ganglia_service => 'gmond'
++      }
+     }
++    
+     hdp-ganglia::config::generate_server { 'gmetad':
+       ganglia_service => 'gmetad'
+     }

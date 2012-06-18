@@ -1,4 +1,4 @@
-#exports an assembly isnatnce or templaet in serialized form
+#exports an assembly isnatnce or template in serialized form
 module XYZ
   module AssemblyExportMixin
     def export(opts={})
@@ -76,9 +76,8 @@ File.open("/tmp/t3","w"){|f| f << JSON.pretty_generate(out)}
         ret[:name] = assembly.update_object!(:display_name)[:display_name]
         #add modules
         ret[:modules] = nested_objs[:implementations].map do |impl|
-        #TODO: stub that ignores version = 1
-          version = impl[:version_num]
-          ((version.nil? or version == 1) ? impl[:module_name] : "#{impl[:module_name]}-#{version}") 
+          version = impl[:version]
+          "#{impl[:module_name]}-#{version}"
         end
 
         #add assembly level attributes

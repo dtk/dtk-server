@@ -215,7 +215,7 @@
            :alias => :implementation,
            :join_type => :inner,
            :join_cond=>{:id => q(:nested_component,:implementation_id)},
-           :cols => [:id,:display_name,:module_name,:version_num]
+           :cols => [:id,:display_name,:module_name,:version]
          }]
     },
     :nodes=> {

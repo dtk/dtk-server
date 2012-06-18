@@ -1,5 +1,7 @@
+r8_require_nested('implementation','promote_module')
 module XYZ
   class Implementation < Model
+    include ImplementationPromoteModuleMixin
     #return [repo_obj,impl_obj]
     def self.create_library_repo_and_implementation(library_idh,module_name,config_agent_type,opts={})
       repo_obj = nil
@@ -167,7 +169,7 @@ module XYZ
       base_sp_hash = {
         :model_name => :implementation,
         :filter => [:eq, :id, id()],
-        :cols => [:repo, :version_num, :branch]
+        :cols => [:repo, :version, :branch]
       }
       join_array = 
         [{
@@ -176,8 +178,8 @@ module XYZ
            :convert => true,
            :join_type => :left_outer,
            :filter => [:eq, :project_project_id, proj_idh.get_id()],
-           :join_cond => {:repo => :implementation__repo, :version_num => :implementation__version_num},
-           :cols => [:id,:repo,:version_num]
+           :join_cond => {:repo => :implementation__repo, :version => :implementation__version},
+           :cols => [:id,:repo,:version]
          }]
 
       augmented_impl = Model.get_objects_from_join_array(model_handle(),base_sp_hash,join_array).first
@@ -193,37 +195,6 @@ module XYZ
       id_handle(:id => new_impl_id, :model => :implementation)
     end
 
-    #self is a project implementation; returns library implementation idh
-    def clone_into_library_if_needed(library_idh)
-      ret = nil
-      #if implementation is updated, need to create a new implemntation in library; otherwise use
-      update_object!(:updated,:repo,:branch)
-      if self[:updated]
-        new_version_num = get_new_version_num(library_idh)
-        new_branch = library_branch_name(new_version_num,library_idh)
-        #TODO: assuming that implementaion files do not hvae any content that is not written to repo
-        RepoManager.clone_branch(new_branch,{:implementation => self})
-        override_attrs={:version_num => new_version_num,:branch => new_branch}
-        new_impl_id = library_idh.create_object.clone_into(self,override_attrs)
-        ret = id_handle(:model_name => :implemntation, :id => new_impl_id)
-      else
-        impl_obj = matching_library_template_exists?(self[:version_num],library_idh)
-        raise Error.new("expected to find a matching library implemntation") unless impl_obj
-        ret = impl_obj.id_handle
-      end
-      ret
-    end
-
-    #self is a project implementation
-    def replace_library_impl_with_proj_impl()
-      impl_objs_info = get_objs(:cols=>[:linked_library_implementation,:repo,:branch]).first
-      raise Error.new("Cannot find associated library implementation") unless impl_objs_info
-      library_impl = impl_objs_info[:library_implementation]
-      project_impl = impl_objs_info
-      RepoManager.merge_from_branch(project_impl[:branch],{:implementation => library_impl})
-      RepoManager.push_implementation(:implementation => library_impl)
-    end
-
     def add_asset_file(path,content=nil)
       update_object!(:type,:repo,:branch)
       file_asset_type = FileAssetType[self[:type].to_sym]
@@ -235,13 +206,13 @@ module XYZ
 
     def project_branch_name(project)
       project.update_object!(:ref)
-      update_object!(:version_num,:repo)
-      "project-#{project[:ref]}-v#{self[:version_num].to_s}"
+      update_object!(:version,:repo)
+      "project-#{project[:ref]}-v#{self[:version].to_s}"
     end
 
-    def library_branch_name(new_version_num,library_idh)
+    def library_branch_name(new_version,library_idh)
       library = library_idh.create_object().update_object!(:ref)
-      "library-#{library[:ref]}-v#{new_version_num.to_s}"
+      "library-#{library[:ref]}-v#{new_version.to_s}"
     end
 
     def add_model_specific_override_attrs!(override_attrs,target_obj)
@@ -282,25 +253,12 @@ module XYZ
       "chef_cookbook" => "chef_file"
     }
 
-    def get_new_version_num(library_idh)
-      #TODO: potential race condition in getting new version
-      sp_hash = {
-        :cols => [:version_num],
-        :filter => [:and,
-                    [:eq, :library_library_id, library_idh.get_id()],
-                    [:eq, :repo, self[:repo]]]
-      }
-      impl_mh = model_handle(:implementatation)
-      existing_ver_nums = get_objs(impl_mh,sp_hash).map{|r|r[:version_num]}
-      1 + (existing_ver_nums.max||0)
-    end
-
-    def matching_library_template_exists?(version_num,library_idh)
+    def matching_library_template_exists?(version,library_idh)
       sp_hash = {
         :cols => [:id],
         :filter => [:and, 
                      [:eq, :library_library_id, library_idh.get_id()],
-                     [:eq, :version_num, version_num],
+                     [:eq, :version, version],
                      [:eq, :repo, self[:repo]]]
       }
       Model.get_objs(model_handle,sp_hash).first

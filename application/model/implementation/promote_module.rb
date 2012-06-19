@@ -1,5 +1,5 @@
 module DTK
-  module ImplementationPromoteModuleMixin
+  module ImplPromoteModuleMixin
 =begin
     def promote_workspace_to_library(new_version,library_idh)
       #iterate over components to see which ones changed; think need component to point to implenntation

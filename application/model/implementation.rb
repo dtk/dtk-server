@@ -1,9 +1,11 @@
 r8_nested_require('implementation','version')
+r8_nested_require('implementation','create_workspace')
 r8_nested_require('implementation','promote_module')
 module XYZ
   class Implementation < Model
-    include ImplementationVersionMixin
-    include ImplementationPromoteModuleMixin
+    include ImplVersionMixin
+    include ImplCreateWorkspaceMixin
+    include ImplPromoteModuleMixin
     #return [repo_obj,impl_obj]
     def self.create_library_repo_and_implementation(library_idh,module_name,config_agent_type,opts={})
       repo_obj = nil
@@ -164,39 +166,6 @@ module XYZ
       ret
     end
 
-    def clone_into_project_if_needed(project)
-      proj_idh = project.id_handle()
-      #check if there is a matching implementation aready in the project
-      # mtach looks for match on rep and version
-      base_sp_hash = {
-        :model_name => :implementation,
-        :filter => [:eq, :id, id()],
-        :cols => [:repo, :version, :branch]
-      }
-      join_array = 
-        [{
-           :model_name => :implementation,
-           :alias => :proj_impl,
-           :convert => true,
-           :join_type => :left_outer,
-           :filter => [:eq, :project_project_id, proj_idh.get_id()],
-           :join_cond => {:repo => :implementation__repo, :version => :implementation__version},
-           :cols => [:id,:repo,:version]
-         }]
-
-      augmented_impl = Model.get_objects_from_join_array(model_handle(),base_sp_hash,join_array).first
-      raise Error.new("No implementation for component") unless augmented_impl
-      #return matching implementation idh if there is a match
-      return augmented_impl[:proj_impl].id_handle() if augmented_impl[:proj_impl]
-
-      #if reach here; no match and need to clone
-      new_branch = augmented_impl.project_branch_name(project)
-      RepoManager.clone_branch(new_branch,{:implementation => augmented_impl})
-      override_attrs={:branch => new_branch}
-      new_impl_id = project.clone_into(self,override_attrs)
-      id_handle(:id => new_impl_id, :model => :implementation)
-    end
-
     def add_asset_file(path,content=nil)
       update_object!(:type,:repo,:branch)
       file_asset_type = FileAssetType[self[:type].to_sym]
@@ -205,12 +174,6 @@ module XYZ
     FileAssetType = { 
       :chef_cookbook => "chef_file"
     }
-
-    def project_branch_name(project)
-      project.update_object!(:ref)
-      update_object!(:version,:repo)
-      "project-#{project[:ref]}-v#{self[:version].to_s}"
-    end
 
     def library_branch_name(new_version,library_idh)
       library = library_idh.create_object().update_object!(:ref)

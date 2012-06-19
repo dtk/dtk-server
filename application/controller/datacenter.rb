@@ -1,36 +1,5 @@
 module XYZ
   class DatacenterController < Controller
-    #TODO: just to show values
-    def list()
-      c = ret_session_context_id()
-      model_handle = ModelHandle.new(c,:project)
-      projects = Project.get_all(model_handle)
-      pp [:projects,projects]
-      projects.each do |p|
-=begin
-        implementation_tree = p.get_implementaton_tree(:include_file_assets => true)
-        pp implementation_tree
-
-        if implementation_tree.find{|x|x[:display_name] == "apache2"}
-          sample_impl = implementation_tree.find{|x|x[:display_name] == "apache2"}[:implementations].first
-          pp sample_impl.get_asset_files()
-        end
-
-
-        tree = p.get_target_tree()
-      #  pp tree
-        sample_cmp = ((((tree.first||{})[:nodes]||[]).first||{})[:components]||[]).find{|x|x[:display_name] == "apache2"}
-        if sample_cmp
-          file_paths = sample_cmp.get_implementation_file_paths()
-          pp file_paths
-        end
-=end
-
-      end
-      super
-    end
-    ################
-
     def create(name)
       c = ret_session_context_id()
       Target.create(name,c)

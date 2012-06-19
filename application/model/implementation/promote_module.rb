@@ -1,5 +1,6 @@
 module DTK
   module ImplementationPromoteModuleMixin
+=begin
     def promote_workspace_to_library(new_version,library_idh)
       #iterate over components to see which ones changed; think need component to point to implenntation
       #TODO: can make more efficient by reducing number of seprate calss to db
@@ -59,5 +60,6 @@ module DTK
       RepoManager.merge_from_branch(project_impl[:branch],{:implementation => library_impl})
       RepoManager.push_implementation(:implementation => library_impl)
     end
+=end
   end
 end

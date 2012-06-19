@@ -157,20 +157,6 @@ module XYZ
 
     #######################
     ######### Model apis
-    def get_implementation_file_paths()
-      sp_hash = {:cols => [:id,:display_name,:implementation_file_paths]}
-      unravelled_ret = get_objects_from_sp_hash(sp_hash)
-      indexed_ret = Hash.new
-      unravelled_ret.each do |r|
-        unless implementation = indexed_ret[r[:implementation][:id]] 
-          implementation = indexed_ret[r[:implementation][:id]] = r[:implementation].reject{|k,v|k == :project_id}.merge(:model_name => "implementation")
-        end
-        file_assets = implementation[:file_assets] ||= Array.new
-        FileAsset.set_hierrachical_file_struct!(file_assets,r[:file_asset].reject{|k,v|k == :implementation_implementation_id}) if r[:file_asset]
-      end
-      indexed_ret.values
-    end
-
 
     def add_config_file(file_name,file_content)
       #TODO: may check first that object does not have already a config file with same name

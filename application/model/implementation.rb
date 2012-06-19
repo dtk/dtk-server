@@ -1,4 +1,4 @@
-r8_require_nested('implementation','promote_module')
+r8_nested_require('implementation','promote_module')
 module XYZ
   class Implementation < Model
     include ImplementationPromoteModuleMixin

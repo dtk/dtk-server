@@ -19,7 +19,12 @@ server.create_repo_user_client?()
 
 server.create_users_private_library?() if options[:create_private]
 
-server.create_users_private_target?()
-
-server.add_modules_from_external_repo_dir(*options[:module_names]) if options[:module_names]
+idhs = server.create_users_private_target?()
+if options[:module_names]
+  library_impls = server.add_modules_from_external_repo_dir(options[:module_names])
+  (idhs[:project_idhs]||[]).each do |project_idh|
+    project = project_idh.create_object()
+    server.add_modules_workspaces(project,library_impls)
+  end
+end
 

@@ -69,12 +69,27 @@ class R8Server
     json_content = erubis.result(:project_ref => users_ref,:target_ref => users_ref)
     hash_content = JSON.parse(json_content)
     Model.import_objects_from_hash(container_idh,hash_content)
+
+    # return idhs of new targets and new projects
+    {
+      :target_idhs => ret_idhs("datacenter",hash_content,container_idh), 
+      :project_idhs => ret_idhs("project",hash_content,container_idh)
+    }
   end
 
-  def add_modules_from_external_repo_dir(*module_names)
+  def ret_idhs(mn,hash_content,container_idh)
+    (hash_content[mn]||{}).keys.map do |key|
+      ref = "/#{mn}/#{key}"
+      container_idh.createIDH(:uri => ref, :model_name => mn.to_sym)
+    end
+  end
+  private :ret_idhs
+
+  def add_modules_from_external_repo_dir(module_names)
     library_mh = pre_execute(:library)
     library_idh = Library.get_users_private_library(library_mh).id_handle()
     config_agent_type = :puppet
+    ret = Array.new
     module_names.each do |module_name|
       repo_obj,impl_obj = Implementation.create_library_repo_and_implementation(library_idh,module_name,config_agent_type, :delete_if_exists => true)
       module_dir = repo_obj[:local_dir]
@@ -95,8 +110,15 @@ class R8Server
       Model.add_library_components_from_r8meta(config_agent_type,library_idh,impl_obj.id_handle,r8meta_hash)
       
       impl_obj.add_contained_files_and_push_to_repo()
+      ret << impl_obj
     end
+    ret
   end
+
+  def add_modules_workspaces(project,library_impls)
+    library_impls.map{|library_impl|library_impl.clone_into_project_if_needed(project)}
+  end
+
   private
   attr_reader :user_mh, :user_obj
   def username()

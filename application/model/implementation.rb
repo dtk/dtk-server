@@ -6,6 +6,25 @@ module XYZ
     include ImplVersionMixin
     include ImplCreateWorkspaceMixin
     include ImplPromoteModuleMixin
+
+    def self.list_from_library(impl_mh,opts={})
+      library_idh = opts[:library_idh]
+      lib_filter = (library_idh ? [:eq, :library_library_id, library_idh.get_id()] : [:neq, :library_library_id, nil])
+      sp_hash = {
+        :cols => [:id, :display_name,:version],
+        :filter => lib_filter
+      }
+      get_objs(impl_mh,sp_hash)
+    end
+
+    def self.list_from_workspace(impl_mh,opts={})
+      sp_hash = {
+        :cols => [:id, :display_name,:version],
+        :filter => [:neq, :project_project_id,nil]
+      }
+      get_objs(impl_mh,sp_hash)
+    end
+
     #return [repo_obj,impl_obj]
     def self.create_library_repo_and_implementation(library_idh,module_name,config_agent_type,opts={})
       repo_obj = nil

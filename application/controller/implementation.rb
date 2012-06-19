@@ -1,5 +1,13 @@
 module XYZ
   class ImplementationController < Controller
+    def rest__list_from_library()
+      rest_ok_response Implementation.list_from_library(model_handle())
+    end
+
+    def rest__list_from_workspace()
+      rest_ok_response Implementation.list_from_workspace(model_handle())
+    end
+
 ###TODO: for testing
 
     def delete_module(module_name)

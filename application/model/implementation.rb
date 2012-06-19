@@ -1,6 +1,8 @@
+r8_nested_require('implementation','version')
 r8_nested_require('implementation','promote_module')
 module XYZ
   class Implementation < Model
+    include ImplementationVersionMixin
     include ImplementationPromoteModuleMixin
     #return [repo_obj,impl_obj]
     def self.create_library_repo_and_implementation(library_idh,module_name,config_agent_type,opts={})

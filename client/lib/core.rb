@@ -119,6 +119,16 @@ module DTK
       end
     end
 
+    class ResponseBadParams < ResponseError
+      def initialize(bad_params_hash)
+        errors = bad_params_hash.map do |k,v|
+          {"code"=>"bad_parameter","message"=>"Parameter (#{k}) has a bad value: #{v}"}
+        end
+        hash = {"errors"=>errors, "status"=>"notok"}
+        super(hash)
+      end
+    end
+
     class ResponseNoOp < Response
       def render_data(view_type)
       end

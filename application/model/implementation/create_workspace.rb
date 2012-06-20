@@ -32,12 +32,5 @@ module DTK
       new_impl_id = project.clone_into(self,override_attrs)
       id_handle(:id => new_impl_id, :model => :implementation)
     end
-   protected
-    def workspace_branch_name(project)
-      project.update_object!(:ref)
-      update_object!(:version,:repo) #TODO: do we need :repo?
-      version_info = (has_default_version?() ? "" : "-v#{self[:version]}")
-      "workspace-#{project[:ref]}#{version_info}"
-    end
   end
 end

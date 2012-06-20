@@ -1,9 +1,11 @@
 r8_nested_require('implementation','version')
+r8_nested_require('implementation','branch_names')
 r8_nested_require('implementation','create_workspace')
 r8_nested_require('implementation','promote_module')
 module XYZ
   class Implementation < Model
     include ImplVersionMixin
+    include ImplBranchNamesMixin
     include ImplCreateWorkspaceMixin
     include ImplPromoteModuleMixin
 
@@ -194,11 +196,6 @@ module XYZ
       :chef_cookbook => "chef_file"
     }
 
-    def library_branch_name(new_version,library_idh)
-      library = library_idh.create_object().update_object!(:ref)
-      "library-#{library[:ref]}-v#{new_version.to_s}"
-    end
-
     def add_model_specific_override_attrs!(override_attrs,target_obj)
       override_attrs[:updated] ||= false
     end
@@ -227,7 +224,6 @@ module XYZ
       end
     end
 
-   private
     ImplementationType = {
       :puppet => "puppet_module",
       :chef => "chef_cookbook"
@@ -236,17 +232,6 @@ module XYZ
       "puppet_module" => "puppet_file",
       "chef_cookbook" => "chef_file"
     }
-
-    def matching_library_template_exists?(version,library_idh)
-      sp_hash = {
-        :cols => [:id],
-        :filter => [:and, 
-                     [:eq, :library_library_id, library_idh.get_id()],
-                     [:eq, :version, version],
-                     [:eq, :repo, self[:repo]]]
-      }
-      Model.get_objs(model_handle,sp_hash).first
-    end
   end
 end
 

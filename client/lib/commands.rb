@@ -20,6 +20,11 @@ module DTK
       def rest_url(route)
         @conn.rest_url(route)
       end
+
+      def self.handle_argument_error(task, error) 
+        super
+      end
+
      private
       def pretty_print_cols()
         self.class.pretty_print_cols()

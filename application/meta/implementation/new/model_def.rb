@@ -51,6 +51,19 @@
          :cols=>Component.common_columns
        }]
     },
+    :component_template_summary =>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [{
+         :model_name=>:component,
+         :convert => true,
+         :join_type=>:inner,
+         :filter => [:eq, :node_node_id, nil],
+         :join_cond=>{:implementation_id=>:implementation__id},
+         :cols=>[:id,:display_name]
+       }]
+    },
     :linked_library_implementation=>{
       :type=>:json,
       :hidden=>true,

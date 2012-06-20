@@ -7,11 +7,19 @@ module DTK::Client
     def list(parent)
       case parent
        when "library":
-        post rest_url("implementation/list_from_library")
+         post rest_url("implementation/list_from_library")
        when "workspace":
-          post rest_url("implementation/list_from_workspace")
-       else ResponseBadParams.new("module type" => parent)
+         post rest_url("implementation/list_from_workspace")
+       else 
+         ResponseBadParams.new("module type" => parent)
       end
+    end
+    desc "update-library WORKSPACE-MODULE-ID", "Updates library module with workspace module"
+    def update_library(module_id)
+      post_body = {
+       :implementation_id => module_id
+      }
+      post rest_url("implementation/update_library"), post_body
     end
   end
 end

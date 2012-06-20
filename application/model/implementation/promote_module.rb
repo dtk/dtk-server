@@ -1,41 +1,52 @@
 module DTK
   module ImplPromoteModuleMixin
-=begin
-    def promote_workspace_to_library(new_version,library_idh)
-      #iterate over components to see which ones changed; think need component to point to implenntation
-      #TODO: can make more efficient by reducing number of seprate calss to db
-      update_object!(:component_type,:extended_base,:implementation_id)
-      #check if version exists already
-      raise Error.new("component template #{self[:component_type]} (#{new_version}) already exists") if  matching_library_template_exists?(new_version,library_idh)
+    #self is a project implementation; returns library implementation idh
+    def promote_module_to_new_version(new_version,library_idh)
+      ret = nil
+      library_impl_idh = proj_impl.clone_impl_into_library_if_needed(new_version,library_idh)
+      if library_impl_idh
+        override_attrs = {:version => new_version, :implementation_id => library_impl_idh.get_id()}
+        cmps = get_objs({:cols => [:component_summary_info]}).map{|r|r[:component]}
+        library =  library_idh.create_object()
+        cmps.each{|cmp|library.clone_into(cmp,override_attrs)}
 
-      #if project template has  been updated then need to generate
-      proj_impl = id_handle(:model_name => :implementation, :id => self[:implementation_id]).create_object
+        ret = library_impl_idh
+      end
+      ret
+    end
 
-      library_impl_idh = proj_impl.clone_into_library_if_needed(library_idh,new_version)
-
-      override_attrs = {:version => new_version, :implementation_id => library_impl_idh.get_id()}
-      library_idh.create_object().clone_into(self,override_attrs)
+    #self is a project implementation; returns library implementation idh
+    def update_library_module_with_workspace()
+      ret = nil
+      impl_objs_info = get_obj(:cols=>[:linked_library_implementation,:repo,:branch])
+      raise Error.new("Cannot find associated library implementation") unless impl_objs_info
+      library_impl = impl_objs_info[:library_implementation]
+      project_impl = impl_objs_info
+      RepoManager.merge_from_branch(project_impl[:branch],{:implementation => library_impl})
+      RepoManager.push_implementation(:implementation => library_impl)
+      Log.info("TODO: need to see if anything in component types changed")
+      library_impl
     end
 
    private
-
     def matching_library_template_exists?(version,library_idh)
+      update_object!(:repo)
       sp_hash = {
         :cols => [:id],
         :filter => [:and, 
                      [:eq, :library_library_id, library_idh.get_id()],
                      [:eq, :version, version],
-                     [:eq, :component_type, self[:component_type]]]
+                     [:eq, :repo, self[:repo]]]
       }
-      Model.get_objects_from_sp_hash(model_handle,sp_hash).first
+      Model.get_obj(model_handle,sp_hash)
     end
 
-
-    #self is a project implementation; returns library implementation idh
-    def clone_into_library_if_needed(library_idh,new_version)
+    def clone_impl_into_library(new_version,library_idh)
       ret = nil
-      #if implementation is updated, need to create a new implemntation in library; otherwise use
       update_object!(:updated,:repo,:branch)
+      if matching_library_template_exists?(self[:version],library_idh)
+        raise Error.new("Version (#{self[:version]}) exists in library already")
+      end
       if self[:updated]
         new_branch = library_branch_name(new_version,library_idh)
         #TODO: assuming that implementaion files do not hvae any content that is not written to repo
@@ -44,22 +55,9 @@ module DTK
         new_impl_id = library_idh.create_object.clone_into(self,override_attrs)
         ret = id_handle(:model_name => :implemntation, :id => new_impl_id)
       else
-        impl_obj = matching_library_template_exists?(self[:version],library_idh)
-        raise Error.new("expected to find a matching library implemntation") unless impl_obj
-        ret = impl_obj.id_handle
+        Log.info("nothing updated so no op")
       end
       ret
     end
-
-    #self is a project implementation
-    def replace_library_impl_with_proj_impl()
-      impl_objs_info = get_objs(:cols=>[:linked_library_implementation,:repo,:branch]).first
-      raise Error.new("Cannot find associated library implementation") unless impl_objs_info
-      library_impl = impl_objs_info[:library_implementation]
-      project_impl = impl_objs_info
-      RepoManager.merge_from_branch(project_impl[:branch],{:implementation => library_impl})
-      RepoManager.push_implementation(:implementation => library_impl)
-    end
-=end
   end
 end

@@ -19,10 +19,16 @@ module DTK
       post_rest_request_data(route,body,:raise_error => true)
     end
 
-    def get_repos()
-      route = "/rest/admin/get_repos"
+    def list_repos()
+      route = "/rest/admin/list_repos"
       response_data = get_rest_request_data(route,:raise_error => true)
       response_data["repos"]
+    end
+
+    def add_user_to_repo(repo_name,username,access_rights="R")
+      route = "/rest/admin/add_user_to_repo"
+      body = {:repo_name => repo_name, :username => username, :access_rights => access_rights}
+      post_rest_request_data(route,body,:raise_error => true)
     end
 
    private

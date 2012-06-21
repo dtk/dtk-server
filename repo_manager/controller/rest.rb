@@ -12,8 +12,8 @@ class RestController < Controller
   class AdminController < self
     map "/rest/admin"
 
-    def get_repos()
-      repos = Admin.get_repos()
+    def list_repos()
+      repos = Admin.list_repos()
       rest_ok_response :repos => repos
     end
 

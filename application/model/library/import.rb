@@ -1,7 +1,7 @@
 module DTK
   module LibraryImportMixin
     def bind_to_repo_manager()
-      repos = RepoManager.get_repos()
+      repos = RepoManager.list_repos()
       pp repos
       nil
       #TODO: stub

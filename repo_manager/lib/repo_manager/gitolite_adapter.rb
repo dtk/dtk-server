@@ -3,7 +3,7 @@ require 'fileutils'
 module DTK::RepoManager; class GitoliteAdapter
   class Admin 
     class << self
-      def get_repos()
+      def list_repos()
         repo_config_file_paths().map{|fn|repo_name_from_repo_config_file(fn)} - ['testing']
       end
 

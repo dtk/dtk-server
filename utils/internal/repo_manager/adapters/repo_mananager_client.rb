@@ -4,8 +4,8 @@ module DTK
     def self.create(repo,branch,opts={})
       adapter_class.new(repo,branch,opts)
     end
-    def self.get_repos()
-      adapter_class.get_repos()
+    def self.list_repos()
+      adapter_class.list_repos()
     end
    private
     def self.adapter_class()

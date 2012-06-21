@@ -6,7 +6,7 @@ module DTK::RepoManager
         GitoliteAdapter::Admin
       end
       #'pass' all these methods to @repo
-      AdminMethods = [:get_repos,:create_repo,:add_user_to_repo,:delete_repo,:add_user,:delete_user]
+      AdminMethods = [:list_repos,:create_repo,:add_user_to_repo,:delete_repo,:add_user,:delete_user]
       def method_missing(name,*args,&block)
         if AdminMethods.include?(name)
           adapter_class().send(name,*args,&block)

@@ -9,7 +9,7 @@ module DTK
     end
    private
     r8_nested_require('git_service','rest')
-    def adapter_class()
+    def self.adapter_class()
       Rest
     end
     def initialize(repo,branch,opts={})

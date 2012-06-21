@@ -3,13 +3,15 @@ module DTK::Client
     def self.pretty_print_cols()
       [:display_name, :id, :version]
     end
-    desc "list [library|workspace]","List library or workspace modules"
+    desc "list [library|workspace|remote]","List library, workspace, or remote modules"
     def list(parent)
       case parent
        when "library":
          post rest_url("implementation/list_from_library")
        when "workspace":
          post rest_url("implementation/list_from_workspace")
+       when "remote":
+         post rest_url("implementation/list_remote")
        else 
          ResponseBadParams.new("module type" => parent)
       end

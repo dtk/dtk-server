@@ -6,8 +6,9 @@ module DTK
       def self.rest_base_url()
         ::R8::Config[:repo][:remote][:rest_base_url]
       end
+    end
    private
-    def adapter_class()
+    def self.adapter_class()
       RemoteRepo
     end
   end

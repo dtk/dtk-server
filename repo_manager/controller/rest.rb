@@ -35,6 +35,12 @@ class RestController < Controller
       Admin.add_user_to_repo(username,repo_name,access_rights)
       rest_ok_response :repo_name => repo_name
     end
+
+    def delete_repo()
+      repo_name = ret_non_null_request_params(:repo_name)
+      Admin.delete_repo(repo_name)
+      rest_ok_response :repo_name => repo_name
+    end
   end
 
   class RepoController < self
@@ -72,6 +78,7 @@ class RestController < Controller
 
   def error
     exception = request.env["rack.route_exceptions.exception"]
+pp [:error, exception,exception.backtrace[0..15]]
     rest_notok_response XYZ::RestError.create(exception).hash_form()
   end
 end

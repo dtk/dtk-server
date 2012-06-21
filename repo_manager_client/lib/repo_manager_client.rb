@@ -6,19 +6,11 @@ module DTK
       @rest_base_url = rest_base_url
     end
 
-    def get_file_content(file_asset)
-      route = "/rest/repo/get_file_content"
-      body = {:repo_name => @repo,:path => file_asset[:path], :branch => @branch}
-      response_data = post_rest_request_data(route,body,:log_error => true)
-      response_data["content"]
+    def self.create_branch_instance(repo,branch,opts={})
+      BranchInstance.new(@rest_base_url,repo,branch,opts)
     end
 
-    def update_file_content(file_asset,content)
-      route = "/rest/repo/update_file_content"
-      body = {:repo_name => @repo,:path => file_asset[:path], :branch => @branch, :content => content}
-      post_rest_request_data(route,body,:raise_error => true)
-    end
-
+    #admin access
     def list_repos()
       route = "/rest/admin/list_repos"
       response_data = get_rest_request_data(route,:raise_error => true)
@@ -61,6 +53,28 @@ module DTK
     def post_rest_request_data(route,body,opts={})
       handle_error(opts) do
         Common::Rest::ClientWrapper.post("#{@rest_base_url}#{route}",body,DefaultTimeoutOpts)
+      end
+    end
+
+    #repo access
+    class BranchInstance < self
+      def initialize(rest_base_url,repo,branch,opts={})
+        super(rest_base_url)
+        @repo = repo
+        @branch = branch
+      end
+
+      def get_file_content(file_asset)
+        route = "/rest/repo/get_file_content"
+        body = {:repo_name => @repo,:path => file_asset[:path], :branch => @branch}
+        response_data = post_rest_request_data(route,body,:log_error => true)
+        response_data["content"]
+      end
+
+      def update_file_content(file_asset,content)
+        route = "/rest/repo/update_file_content"
+        body = {:repo_name => @repo,:path => file_asset[:path], :branch => @branch, :content => content}
+        post_rest_request_data(route,body,:raise_error => true)
       end
     end
   end

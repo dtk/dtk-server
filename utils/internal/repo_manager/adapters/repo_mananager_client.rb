@@ -1,6 +1,6 @@
-#TODO: writing now just rest access; may want direct ruby api access if repo manager on same node
+r8_require("#{::R8::Config[:sys_root_path]}/repo_manager_client/lib/repo_manager_client")
 module DTK
-  class RepoManagerGitService < RepoManager
+  class RepoManagerRepoManagerClient < RepoManager
     def self.create(repo,branch,opts={})
       adapter_class.new(repo,branch,opts)
     end
@@ -8,9 +8,8 @@ module DTK
       adapter_class.get_repos()
     end
    private
-    r8_nested_require('git_service','rest')
     def self.adapter_class()
-      Rest
+      @adapter_class ||= DTK::RepoManagerClient.new(::R8::Config[:repo][:repo_manager_client][:server_rest_base_url])
     end
     def initialize(repo,branch,opts={})
       @branch = branch 

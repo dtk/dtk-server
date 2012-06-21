@@ -8,6 +8,10 @@ module XYZ
       rest_ok_response Implementation.list_from_workspace(model_handle())
     end
 
+    def rest__list_remote()
+      rest_ok_response Repo.list_remote(model_handle(:repo))
+    end
+
     def rest__update_library()
       workspace_impl_id = ret_non_null_request_params(:implementation_id)
       workspace_impl = id_handle(workspace_impl_id).create_object()

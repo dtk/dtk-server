@@ -18,6 +18,7 @@ module R8
  # R8::Config[:repo][:type] = "mock"
 #   R8::Config[:repo][:type] = "git_service"
    R8::Config[:repo][:git_service][:rest_base_url] = "http://ec2-50-19-63-33.compute-1.amazonaws.com:7000"
+  R8::Config[:repo][:remote][:rest_base_url] = "http://ec2-174-129-28-204.compute-1.amazonaws.com:7000"
 #  R8::Config[:benchmark] = %w{create_from_hash create_from_select} # get_objects_just_dataset} # :all
 #   R8::Config[:use_node_bindings] = true
 end

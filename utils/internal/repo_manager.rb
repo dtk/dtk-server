@@ -125,4 +125,12 @@ module XYZ
       Repo.get_all_repo_names(model_handle)
     end
   end
+
+  class RemoteRepoManager < RepoManager 
+    def self.load_and_return_adapter_class()
+      return @cached_adpater_class if @cached_adpater_class
+      adapter_name = "remote_repo"
+      @cached_adpater_class = DynamicLoader.load_and_return_adapter_class("repo_manager",adapter_name)
+    end
+  end
 end

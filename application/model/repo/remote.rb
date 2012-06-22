@@ -22,21 +22,10 @@ module DTK
       end
 
       def dtk_instance_rsa_pub_key()
-        return @dtk_instance_rsa_pub_key if @dtk_instance_rsa_pub_key
-        require 'facter' #TODO: make sure thread safe to do require here
-        unless facter_res = Facter.to_hash["sshrsakey"]
-          raise Error.new("no ssh public key set")
-        end
-        @dtk_instance_rsa_pub_key = (facter_res =~ /^ssh-rsa/ ? facter_res : "ssh-rsa #{facter_res}")
+        @dtk_instance_rsa_pub_key ||= AuxCommon.get_ssh_rsa_pub_key()
       end
-
       def dtk_instance_username()
-        return @dtk_instance_username if @dtk_instance_username
-        require 'facter' #TODO: make sure thread safe to do require here
-        unless mac = Facter.to_hash["macaddress"]
-          raise Error.new("cant find mac address2") 
-        end
-        @dtk_instance_username = "dtk-#{mac.gsub(/:/,'-')}"
+        @dtk_instance_username ||= "dtk-#{AuxCommon.get_macaddress().gsub(/:/,'-')}"
       end
     end
   end

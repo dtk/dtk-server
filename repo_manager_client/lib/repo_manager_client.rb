@@ -17,9 +17,12 @@ module DTK
       response_data["repos"]
     end
 
-    def add_user(username,rsa_pub_key)
+    def add_user(username,rsa_pub_key,opts={})
       route = "/rest/admin/add_user"
       body = {:username => username, :rsa_pub_key => rsa_pub_key}
+      [:noop_if_exists,:delete_if_exists].each do |opt_key|
+        body.merge!(opt_key => true) if opts[opt_key]
+      end
       post_rest_request_data(route,body,:raise_error => true)
     end
 

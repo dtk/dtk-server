@@ -14,6 +14,25 @@ module XYZ
         Model.create_from_row?(library_mh,ref,{:display_name => lib_name})
       end
 
+      def self.users_private_library(library_mh)
+        username = CurrentSession.new.get_user_object()[:username]
+        lib_name = users_private_library_name(username)
+        sp_hash = {
+          :cols => [:id,:display_name],
+          :filter => [:eq,:display_name,lib_name]
+        }
+        lib_rows = get_objs(library_mh,sp_hash)
+        if lib_rows.empty?
+          Log.error("There is no private library for user (#{username})")
+          nil
+        elsif lib_rows.size > 1
+          Log.error("Cannot determine private library for user (#{username})")
+          nil
+        else
+          lib_rows.first
+        end
+      end
+
       def create_public_library?(model_handle)
         ref = lib_name = public_library_name()
         Model.create_from_row?(model_handle,ref,{:display_name => lib_name})

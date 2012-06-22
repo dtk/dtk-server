@@ -10,7 +10,9 @@ module DTK
 
       def authorize_dtk_instance(remote_repo_name)
         username = dtk_instance_username()
+        rsa_pub_key = dtk_instance_rsa_pub_key()
         access_rights = "RW+"
+        client.add_user(username,rsa_pub_key)
         client.add_user_to_repo(username,remote_repo_name,access_rights)
       end
 
@@ -19,13 +21,13 @@ module DTK
         @client ||= RepoManagerClient.new(::R8::Config[:repo][:remote][:rest_base_url])
       end
 
-      def dtk_instance_public_key()
-        return dtk_instance_public_key if dtk_instance_public_key
+      def dtk_instance_rsa_pub_key()
+        return @dtk_instance_rsa_pub_key if @dtk_instance_rsa_pub_key
         require 'facter' #TODO: make sure thread safe to do require here
         unless facter_res = Facter.to_hash["sshrsakey"]
           raise Error.new("no ssh public key set")
         end
-        dtk_instance_public_key = (facter_res =~ /^ssh-rsa/ ? facter_res : "ssh-rsa #{facter_res}")
+        @dtk_instance_rsa_pub_key = (facter_res =~ /^ssh-rsa/ ? facter_res : "ssh-rsa #{facter_res}")
       end
 
       def dtk_instance_username()

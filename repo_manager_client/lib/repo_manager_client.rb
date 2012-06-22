@@ -17,6 +17,12 @@ module DTK
       response_data["repos"]
     end
 
+    def add_user(username,rsa_pub_key)
+      route = "/rest/admin/add_user"
+      body = {:username => username, :rsa_pub_key => rsa_pub_key}
+      post_rest_request_data(route,body,:raise_error => true)
+    end
+
     def add_user_to_repo(username,repo_name,access_rights="R")
       route = "/rest/admin/add_user_to_repo"
       body = {:repo_name => repo_name, :username => username, :access_rights => access_rights}
@@ -43,7 +49,7 @@ module DTK
       end
     end
 
-    DefaultTimeoutOpts = {:timeout => 1, :open_timeout => 0.5}
+    DefaultTimeoutOpts = {:timeout => 5, :open_timeout => 0.5}
     def get_rest_request_data(route,opts={})
       handle_error(opts) do 
         Common::Rest::ClientWrapper.get("#{@rest_base_url}#{route}",DefaultTimeoutOpts)

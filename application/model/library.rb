@@ -14,7 +14,7 @@ module XYZ
         Model.create_from_row?(library_mh,ref,{:display_name => lib_name})
       end
 
-      def self.users_private_library(library_mh)
+      def users_private_library(library_mh)
         username = CurrentSession.new.get_user_object()[:username]
         lib_name = users_private_library_name(username)
         sp_hash = {

@@ -14,7 +14,14 @@
       :foreign_key_rel_type=>:repo,
       :on_delete=>:set_null,
       :on_update=>:set_null
+    },
+    :remote_repo_id=>{ #non-null if this is synced with remote repo 
+      :type=>:bigint,
+      :foreign_key_rel_type=>:repo,
+      :on_delete=>:set_null,
+      :on_update=>:set_null
     }
+    #TODO: do we need remote_repo_branch?
   },
   :virtual_columns=>{
     :component_summary_info=>{

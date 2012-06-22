@@ -9,8 +9,9 @@ module XYZ
     end
 
     def rest__list_remote()
-      rest_ok_response Repo.list_remote(model_handle(:repo))
+      rest_ok_response RepoRemote.list_remote(model_handle(:repo))
     end
+
     def rest__import_remote()
       remote_repo_name = ret_non_null_request_params(:remote_repo_name)
       library_id = ret_request_params(:library_id) 
@@ -19,7 +20,7 @@ module XYZ
         raise Error.new("No library specified and no default can be determined")
       end
       new_library_impl_idh = Implementation.import_remote(model_handle,remote_repo_name,library_idh)
-      rest_ok_response {:implementation_id => new_library_impl_idh.get_id()}  
+      rest_ok_response :implementation_id => new_library_impl_idh.get_id()  
     end
 
     def rest__update_library()

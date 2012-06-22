@@ -1,7 +1,7 @@
-r8_nested_require('repo','remote')
 module XYZ
   class Repo < Model
-    extend RepoRemoteClassMixin
+    r8_nested_require('repo','remote')
+
     ###virtual columns
     def base_dir()
       self[:local_dir].gsub(/\/[^\/]+$/,"")

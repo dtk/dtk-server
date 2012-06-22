@@ -1,31 +1,42 @@
 r8_require("#{::R8::Config[:sys_root_path]}/repo_manager_client/lib/repo_manager_client")
 module DTK
-  module RepoRemoteClassMixin
-    def list_remote(repo_mh)
-      repos = client.list_repos()
-      repos.map{|r|{:display_name => r}}
-    end
-   private
-    def client()
-      RepoManagerClient.new(::R8::Config[:repo][:remote][:rest_base_url])
-    end
-
-    def self.public_key_for_repo()
-      return @public_key_for_repo if @public_key_for_repo
-      require 'facter'
-      unless facter_res = Facter.to_hash["sshrsakey"]
-        raise Error.new("no ssh public key set")
+ class RepoRemote < Repo
+    class << self
+      def list_remote(repo_mh)
+        remote_repo_names = client.list_repos()
+        #TODO: might also indicate if any of these are synced with remote repo
+        remote_repo_names.map{|name|{:display_name => name}}
       end
-      @public_key_for_repo = (facter_res =~ /^ssh-rsa/ ? facter_res : "ssh-rsa #{facter_res}")
-    end
 
-    def self.id_for_repo()
-      return @id_for_repo if @id_for_repo
-      require 'facter'
-      unless mac = Facter.to_hash["macaddress"]
-        raise Error.new("cant find mac address2") 
+      def authorize_dtk_instance(remote_repo_name)
+        username = dtk_instance_username()
+        access_rights = "RW+"
+        client.add_user_to_repo(username,remote_repo_name,access_rights)
       end
-      @id_for_repo = "dtk-#{mac.gsub(/:/,'-')}"
+
+     private
+      def client()
+        @client ||= RepoManagerClient.new(::R8::Config[:repo][:remote][:rest_base_url])
+      end
+
+      def dtk_instance_public_key()
+        return dtk_instance_public_key if dtk_instance_public_key
+        require 'facter' #TODO: make sure thread safe to do require here
+        unless facter_res = Facter.to_hash["sshrsakey"]
+          raise Error.new("no ssh public key set")
+        end
+        dtk_instance_public_key = (facter_res =~ /^ssh-rsa/ ? facter_res : "ssh-rsa #{facter_res}")
+      end
+
+      def dtk_instance_username()
+        return @dtk_instance_username if @dtk_instance_username
+        require 'facter' #TODO: make sure thread safe to do require here
+        unless mac = Facter.to_hash["macaddress"]
+          raise Error.new("cant find mac address2") 
+        end
+        @dtk_instance_username = "dtk-#{mac.gsub(/:/,'-')}"
+      end
     end
   end
 end
+

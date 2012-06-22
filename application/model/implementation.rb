@@ -9,7 +9,7 @@ module XYZ
     include ImplBranchNamesMixin
     include ImplCreateWorkspaceMixin
     include ImplPromoteModuleMixin
-    include ImplRemoteMixin
+    extend ImplRemoteClassMixin
 
     def self.list_from_library(impl_mh,opts={})
       library_idh = opts[:library_idh]

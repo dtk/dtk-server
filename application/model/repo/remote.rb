@@ -2,7 +2,7 @@ r8_require("#{::R8::Config[:sys_root_path]}/repo_manager_client/lib/repo_manager
 module DTK
  class RepoRemote < Repo
     class << self
-      def list_remote(repo_mh)
+      def list(repo_mh)
         remote_repo_names = client.list_repos()
         #TODO: might also indicate if any of these are synced with remote repo
         remote_repo_names.map{|name|{:display_name => name}}

@@ -1,37 +1,6 @@
 module XYZ
   class ImplementationController < Controller
-    def rest__list_from_library()
-      rest_ok_response Implementation.list_from_library(model_handle())
-    end
-
-    def rest__list_from_workspace()
-      rest_ok_response Implementation.list_from_workspace(model_handle())
-    end
-
-    def rest__list_remote()
-      rest_ok_response RepoRemote.list_remote(model_handle(:repo))
-    end
-
-    def rest__import()
-      remote_repo_name = ret_non_null_request_params(:remote_repo_name)
-      library_id = ret_request_params(:library_id) 
-      library_idh = (library_id && id_handle(library_id,:library)) || Library.users_private_library(model_handle(:library))
-      unless library_idh
-        raise Error.new("No library specified and no default can be determined")
-      end
-      new_library_impl_idh = Implementation.import(model_handle,remote_repo_name,library_idh)
-#      rest_ok_response :implementation_id => new_library_impl_idh.get_id()  
-      rest_ok_response
-    end
-
-    def rest__update_library()
-      workspace_impl_id = ret_non_null_request_params(:implementation_id)
-      workspace_impl = id_handle(workspace_impl_id).create_object()
-      workspace_impl.update_library_module_with_workspace()
-      rest_ok_response
-    end
-
-
+#TODO: see what to keep
 ###TODO: for testing
 
     def delete_module(module_name)

@@ -2,14 +2,12 @@ r8_nested_require('implementation','version')
 r8_nested_require('implementation','branch_names')
 r8_nested_require('implementation','create_workspace')
 r8_nested_require('implementation','promote_module')
-r8_nested_require('implementation','remote')
 module XYZ
   class Implementation < Model
     include ImplVersionMixin
     include ImplBranchNamesMixin
     include ImplCreateWorkspaceMixin
     include ImplPromoteModuleMixin
-    extend ImplRemoteClassMixin
 
     def self.list_from_library(impl_mh,opts={})
       library_idh = opts[:library_idh]

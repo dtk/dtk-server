@@ -7,11 +7,11 @@ module DTK::Client
     def list(parent)
       case parent
        when "library":
-         post rest_url("implementation/list_from_library")
+         post rest_url("component_module/list_from_library")
        when "workspace":
-         post rest_url("implementation/list_from_workspace")
+         post rest_url("component_module/list_from_workspace")
        when "remote":
-         post rest_url("implementation/list_remote")
+         post rest_url("component_module/list_remote")
        else 
          ResponseBadParams.new("module type" => parent)
       end
@@ -23,7 +23,7 @@ module DTK::Client
        :remote_repo_name => module_name
       }
       post_body.merge!(:library_id => library_id) if library_id
-      post rest_url("implementation/import"), post_body
+      post rest_url("component_module/import"), post_body
     end
 
     desc "update-library WORKSPACE-MODULE-ID", "Updates library module with workspace module"
@@ -31,7 +31,7 @@ module DTK::Client
       post_body = {
        :implementation_id => module_id
       }
-      post rest_url("implementation/update_library"), post_body
+      post rest_url("component_module/update_library"), post_body
     end
   end
 end

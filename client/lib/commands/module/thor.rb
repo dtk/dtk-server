@@ -20,7 +20,7 @@ module DTK::Client
     desc "import REMOTE-MODULE-NAME [library_id]", "Import remote module into library"
     def import(module_name,library_id=nil)
       post_body = {
-       :remote_repo_name => module_name
+       :remote_module_name => module_name
       }
       post_body.merge!(:library_id => library_id) if library_id
       post rest_url("component_module/import"), post_body

@@ -17,8 +17,7 @@ module XYZ
     def rest__import()
       remote_repo_name = ret_non_null_request_params(:remote_repo_name)
       library_id = ret_request_params(:library_id) 
-      #TODO: may replace with default library being public library; so more sharing by default
-      library_idh = (library_id && id_handle(library_id,:library)) || Library.users_private_library(model_handle(:library)).id_handle()
+      library_idh = (library_id && id_handle(library_id,:library)) || Library.get_public_library(model_handle(:library)).id_handle()
       unless library_idh
         raise Error.new("No library specified and no default can be determined")
       end

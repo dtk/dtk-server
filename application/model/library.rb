@@ -1,8 +1,5 @@
-r8_nested_require('library','import')
 module XYZ
   class Library < Model
-    include LibraryImportMixin
-
     class << self 
       def create_users_private_library?(model_handle)
         user_obj = CurrentSession.new.get_user_object()
@@ -12,25 +9,6 @@ module XYZ
         ref = users_private_library_ref(username)
         lib_name = users_private_library_name(username)
         Model.create_from_row?(library_mh,ref,{:display_name => lib_name})
-      end
-
-      def users_private_library(library_mh)
-        username = CurrentSession.new.get_user_object()[:username]
-        lib_name = users_private_library_name(username)
-        sp_hash = {
-          :cols => [:id,:display_name],
-          :filter => [:eq,:display_name,lib_name]
-        }
-        lib_rows = get_objs(library_mh,sp_hash)
-        if lib_rows.empty?
-          Log.error("There is no private library for user (#{username})")
-          nil
-        elsif lib_rows.size > 1
-          Log.error("Cannot determine private library for user (#{username})")
-          nil
-        else
-          lib_rows.first
-        end
       end
 
       def create_public_library?(model_handle)
@@ -46,6 +24,7 @@ module XYZ
         }
         get_obj(model_handle,sp_hash)
       end
+
       def get_public_library(model_handle)
         sp_hash = {
           :cols => [:id,:display_name,:group_id],
@@ -53,6 +32,7 @@ module XYZ
         }
         get_obj(model_handle,sp_hash)
       end
+
      private
       def users_private_library_name(username)
         "private"

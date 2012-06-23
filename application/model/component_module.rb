@@ -11,6 +11,7 @@ module XYZ
 
       #TODO: this might be done a priori
       RepoRemote.authorize_dtk_instance(remote_repo_name)
+      #create empty repo on local repo manager; add a remote to teh remote repo and do a pull from teh remote
       #TODO: create repo and implemntations 
       nil
     end

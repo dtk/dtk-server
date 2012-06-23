@@ -16,6 +16,18 @@ module XYZ
       nil
     end
 
+    def self.create_empty_repo(library_idh,module_name,config_agent_type,opts={})
+      repo_mh = library_idh.createMH(:repo)
+      auth_repo_users = RepoUser.authorized_users(library_idh.createMH(:repo_user))
+      repo_user_acls = auth_repo_users.map do |repo_username|
+        {
+          :repo_username => repo_username,
+          :access_rights => "RW+"
+        }
+      end
+      Repo.create_empty_repo(repo_mh,module_name,config_agent_type,repo_user_acls,opts)
+    end
+
     private
     def self.remote_already_imported?(library_idh,remote_repo_name)
       ret = nil

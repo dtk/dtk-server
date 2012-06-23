@@ -11,7 +11,7 @@ module XYZ
       get_objs(model_handle,:cols => [:repo_name]).map{|r|r[:repo_name]}
     end
 
-    def self.create(model_handle,module_name,config_agent_type,repo_user_acls,opts={})
+    def self.create_empty_repo(model_handle,module_name,config_agent_type,repo_user_acls,opts={})
       repo_name = repo_name(config_agent_type,module_name)
       repo_obj = create_repo_obj?(model_handle,repo_name)
       repo_idh = model_handle.createIDH(:id => repo_obj[:id])

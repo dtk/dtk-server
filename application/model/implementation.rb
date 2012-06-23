@@ -27,6 +27,7 @@ module XYZ
       get_objs(impl_mh,sp_hash)
     end
 
+    #TODO: deprecate for methods on ComponentModule
     #return [repo_obj,impl_obj]
     def self.create_library_repo_and_implementation(library_idh,module_name,config_agent_type,opts={})
       repo_obj = nil
@@ -42,7 +43,7 @@ module XYZ
           :access_rights => "RW+"
         }
       end
-      repo_obj = Repo.create(repo_mh,module_name,config_agent_type,repo_user_acls,opts)
+      repo_obj = Repo.create_empty_repo(repo_mh,module_name,config_agent_type,repo_user_acls,opts)
 
       impl_hash = {
         :display_name => module_name,

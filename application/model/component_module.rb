@@ -1,5 +1,5 @@
 module XYZ
-  class ComponentModule
+  class ComponentModule < Model
     class << self
       def import(library_idh,remote_repo_name)
         local_repo_name = remote_repo_name

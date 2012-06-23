@@ -14,6 +14,7 @@ module DTK
         access_rights = "RW+"
         client.add_user(username,rsa_pub_key,:noop_if_exists => true)
         client.add_user_to_repo(username,remote_repo_name,access_rights)
+        remote_repo_name
       end
 
      private

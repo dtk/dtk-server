@@ -1,11 +1,13 @@
 module DTK
   module ImplRemoteClassMixin
-    def import_remote(impl_mh,remote_repo_name,library_idh)
+    def import(impl_mh,remote_repo_name,library_idh)
       if remote_already_imported?(impl_mh,library_idh,remote_repo_name)
         raise Error.new("Cannot import remote repo (#{remote_repo_name}) which has been imported already")
       end
-      #TODO: this should be done a priori
+      #TODO: this might be done a priori
       RepoRemote.authorize_dtk_instance(remote_repo_name)
+      #TODO: create repo and implemntations 
+      nil
     end
 
    private

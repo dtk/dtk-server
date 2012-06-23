@@ -21,8 +21,8 @@ class RestController < Controller
       username,rsa_pub_key = ret_non_null_request_params(:username,:rsa_pub_key)
       noop_if_exists,delete_if_exists = ret_request_params(:noop_if_exists,:delete_if_exists)
       opts = Hash.new
-      opts.merge(:noop_if_exists => true) if  noop_if_exists
-      opts.merge(:delete_if_exists => true) if  delete_if_exists
+      opts.merge!(:noop_if_exists => true) if  noop_if_exists
+      opts.merge!(:delete_if_exists => true) if  delete_if_exists
 
       Admin.add_user(username,rsa_pub_key,opts)
       rest_ok_response :usename => username

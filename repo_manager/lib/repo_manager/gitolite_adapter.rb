@@ -182,6 +182,8 @@ module DTK::RepoManager; class GitoliteAdapter
             users.scan(/[^ ]+/)  do |user|
               ret << {:access_rights => access_rights, :repo_username => user}
             end
+          elsif l.empty?
+            #no op
           else
             raise Error.new("Parsing error: (#{l})")
           end

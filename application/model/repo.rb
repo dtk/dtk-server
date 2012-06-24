@@ -35,7 +35,7 @@ module XYZ
     def synchronize_with_remote_repo()
       update_object!(:remote_repo_name)
       #TODO: stub
-      pp Remote.repo_url_ssh_access(remote_repo_name)
+      pp Remote.repo_url_ssh_access(self[:remote_repo_name])
     end
 
    private    

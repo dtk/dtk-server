@@ -19,7 +19,7 @@ module DTK
 
       def repo_url_ssh_access(remote_repo_name)
         remote = ::R8::Config[:repo][:remote]
-        "#{remote[:git_user]}@#{remote[:host]}:#{remote_module_name}"
+        "#{remote[:git_user]}@#{remote[:host]}:#{remote_repo_name}"
       end
 
      private

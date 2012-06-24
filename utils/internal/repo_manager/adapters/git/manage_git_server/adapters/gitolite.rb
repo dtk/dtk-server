@@ -1,11 +1,6 @@
 module XYZ
   class ManageGitServerGitolite < ManageGitServer
     class << self
-      #this gets changed if for example we are able to do per branch read auth
-      def repo_name(username,config_agent_type,module_name)
-        "#{username}-#{config_agent_type}-#{module_name}"
-      end
-
       def create_server_repo(repo_obj,repo_user_acls,opts={})
         ret = repo_name = repo_obj[:repo_name]
         if repos_having_config_files().include?(repo_name)

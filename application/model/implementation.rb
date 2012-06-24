@@ -43,7 +43,7 @@ module XYZ
           :access_rights => "RW+"
         }
       end
-      repo_obj = Repo.create_empty_repo(repo_mh,module_name,config_agent_type,repo_user_acls,opts)
+      repo_obj = Repo.create_empty_repo(library_idh,module_name,config_agent_type,repo_user_acls,opts)
 
       impl_hash = {
         :display_name => module_name,

@@ -14,10 +14,6 @@ module XYZ
       Dir.chdir(@path){File.open(file_asset[:path]){|f|f.read}}
     end
 
-    def self.repo_name(username,config_agent_type,module_name)
-      "#{username}-#{config_agent_type}-#{module_name}"
-    end
-    
     def self.repo_url()
     end
     def self.repo_server_dns()

@@ -11,16 +11,23 @@ module XYZ
       get_objs(model_handle,:cols => [:repo_name]).map{|r|r[:repo_name]}
     end
 
-    def self.create_empty_repo(model_handle,module_name,config_agent_type,repo_user_acls,opts={})
-      repo_name = repo_name(config_agent_type,module_name)
+    def self.create_empty_repo(library_idh,module_name,config_agent_type,repo_user_acls,opts={})
+      #find repo name
+      public_lib = Library.get_public_library(library_idh.createMH())
+      if (public_lib && public_lib[:id]) == library_idh.get_id()
+        repo_name = public_repo_name(config_agent_type,module_name)
+      else
+        repo_name = private_user_repo_name(config_agent_type,module_name)
+      end 
 
       extra_attrs = Hash.new
       if opts[:remote_repo_name]
         extra_attrs.merge!(:remote_repo_name => opts[:remote_repo_name])
       end
 
-      repo_obj = create_repo_obj?(model_handle,repo_name,extra_attrs)
-      repo_idh = model_handle.createIDH(:id => repo_obj[:id])
+      repo_mh = library_idh.createMH(:repo)
+      repo_obj = create_repo_obj?(repo_mh,repo_name,extra_attrs)
+      repo_idh = repo_mh.createIDH(:id => repo_obj[:id])
       RepoUserAcl.modify(repo_idh,repo_user_acls)
       RepoManager.create_repo(repo_obj,repo_user_acls,opts) 
       repo_obj
@@ -40,9 +47,13 @@ module XYZ
     end
 
    private    
-    def self.repo_name(config_agent_type,module_name)
+
+    def self.private_user_repo_name(config_agent_type,module_name)
       username = CurrentSession.get_username()
-      RepoManager.repo_name(username,config_agent_type,module_name)
+      "#{username}-#{config_agent_type}-#{module_name}"
+    end
+    def self.public_repo_name(config_agent_type,module_name)
+      "public-#{config_agent_type}-#{module_name}"
     end
 
     def self.create_repo_obj?(model_handle,repo_name,extra_attrs={})

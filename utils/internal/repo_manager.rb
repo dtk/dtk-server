@@ -57,6 +57,17 @@ module XYZ
       end
     end
 
+
+    ### for dealing with actual repos
+    def self.synchronize_with_remote_repo(repo_name,remote_name,remote_url)
+      context = {:implementation => {:repo => repo_name, :branch => "master"}}
+      repo = get_repo(context)      
+      repo.add_remote(remote_name,remote_url)
+      repo.pull_changes(remote_name)
+      repo.push_changes()
+      repo_name
+    end
+
     ###### for repo admin functions, such as creating and deleting repositories
 
     def self.create_repo(repo_obj,repo_user_acls,opts={})

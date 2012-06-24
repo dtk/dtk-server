@@ -29,11 +29,12 @@ module DTK::RepoManager; class GitoliteAdapter
         ret
       end
 
-      def add_user_to_repo(username,repo_name,access_rights)
+      def set_user_rights_in_repo(username,repo_name,access_rights)
         ret = repo_name
         repo_user_acls = get_existing_repo_user_acls(repo_name)
         if match = repo_user_acls.find{|r|r[:repo_username] == username}
-          raise Error.new("User (#{username}) already has access rights to repo (#{repo_name}): #{match[:access_rights]}")
+          return ret if match[:access_rights] == access_rights
+          repo_user_acls.reject!{|r|r[:repo_username] == username}
         end
         
         augmented_repo_user_acls = repo_user_acls + [{:repo_username => username, :access_rights => access_rights}]

@@ -13,7 +13,7 @@ module DTK
         rsa_pub_key = dtk_instance_rsa_pub_key()
         access_rights = "RW+"
         client.add_user(username,rsa_pub_key,:noop_if_exists => true)
-        client.add_user_to_repo(username,remote_repo_name,access_rights)
+        client.set_user_rights_in_repo(username,remote_repo_name,access_rights)
         remote_repo_name
       end
 

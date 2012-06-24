@@ -33,9 +33,13 @@ module XYZ
     end
 
     def synchronize_with_remote_repo()
-      update_object!(:remote_repo_name)
-      #TODO: stub
-      pp Remote.repo_url_ssh_access(self[:remote_repo_name])
+      update_object!(:repo_name,:remote_repo_name)
+      remote_url = Remote.repo_url_ssh_access(self[:remote_repo_name])
+      remote_name = "remote"
+      context = {:implementation => {:repo => self[:repo_name], :branch => "master"}}
+      RepoManager.add_remote(remote_name,remote_url,context)
+      RepoManager.pull_changes(remote_name,context)
+      self[:remote_repo_name]
     end
 
    private    

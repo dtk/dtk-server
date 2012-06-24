@@ -19,7 +19,6 @@ module XYZ
       
       repo_obj.synchronize_with_remote_repo()
 
-
       nil
     end
 

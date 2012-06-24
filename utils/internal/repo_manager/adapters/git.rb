@@ -36,7 +36,6 @@ module XYZ
       end
     end
 
-
     def self.repo_server_dns()
       @git_dns ||= R8::Config[:repo][:git][:dns]
     end
@@ -53,6 +52,9 @@ module XYZ
       git_command__clone(remote_repo,@path)      
       @grit_repo = Grit::Repo.new(@path) 
       @index = @grit_repo.index #creates new object so use @index, not grit_repo
+      Dir.chdir(@path) do
+        git_command__commit("initial empty commit","--allow-empty")
+      end
     end
 
     def get_file_content(file_asset)
@@ -106,12 +108,18 @@ module XYZ
       end
     end
 
-    def push_changes()
-      git_command__push(@branch)
+    def add_remote(remote_name,remote_url)
+      git_command__remote_add(remote_name,remote_url)
     end
 
-    def pull_changes()
-      git_command__pull(@branch)
+    def push_changes(remote_name="origin")
+      git_command__push(@branch,remote_name)
+    end
+
+    def pull_changes(remote_name="origin")
+      checkout(@branch) do
+        git_command__pull(@branch,remote_name)
+      end
     end
 
     def push_implementation()
@@ -195,19 +203,23 @@ module XYZ
       git_command.rm(cmd_opts(),file_path)
       #took out because could not pass in command opts @grit_repo.remove(file_path)
     end
-    def git_command__commit(message)
-      @grit_repo.commit_index(message)
+    def git_command__commit(message,*array_opts)
+      git_command.commit({},'-m',message,*array_opts)
+    end
+
+    def git_command__remote_add(remote_name,remote_url)
+      git_command.remote(cmd_opts(),:add,remote_name,remote_url)
     end
 
     #TODO: see what other commands needs mutex and whetehr mutex across what boundaries
     Git_command__push_mutex = Mutex.new
-    def git_command__push(branch_name)
+    def git_command__push(branch_name,remote_name="origin")
       Git_command__push_mutex.synchronize do 
-        git_command.push(cmd_opts(),"origin", "#{branch_name}:refs/heads/#{branch_name}")
+        git_command.push(cmd_opts(),remote_name,"#{branch_name}:refs/heads/#{branch_name}")
       end
     end
-    def git_command__pull(branch_name)
-      git_command.pull(cmd_opts(),"origin",branch_name)
+    def git_command__pull(branch_name,remote_name="origin")
+      git_command.pull(cmd_opts(),remote_name,branch_name)
     end
 
     def git_command__merge(branch_to_merge_from)
